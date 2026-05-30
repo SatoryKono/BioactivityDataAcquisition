@@ -195,3 +195,33 @@ def load_str_collection(raw_value: object) -> set[str]:
     if not isinstance(raw_value, list):
         return set()
     return {str(item) for item in raw_value}
+
+
+def build_dq_details_summary(
+    *,
+    rule_ids: set[str],
+    dispositions: set[str],
+    report_paths: set[str],
+    violation_kinds: set[str],
+    cross_validation_rule_ids: set[str],
+    cross_validation_config_paths: set[str],
+    cross_validation_quarantine_policies: set[str],
+    cross_validation_replay_contracts: set[str],
+    occurrence_only_diagnostic_scopes: set[str],
+    has_signal: bool,
+    has_cross_validation_signal: bool,
+) -> DQDetailsSummary:
+    """Build one normalized DQ anchor summary from ledger aggregation state."""
+    return DQDetailsSummary(
+        rule_ids=rule_ids,
+        dispositions=dispositions,
+        report_paths=report_paths,
+        violation_kinds=violation_kinds,
+        cross_validation_rule_ids=cross_validation_rule_ids,
+        cross_validation_config_paths=cross_validation_config_paths,
+        cross_validation_quarantine_policies=cross_validation_quarantine_policies,
+        cross_validation_replay_contracts=cross_validation_replay_contracts,
+        occurrence_only_diagnostic_scopes=occurrence_only_diagnostic_scopes,
+        has_signal=has_signal,
+        has_cross_validation_signal=has_cross_validation_signal,
+    )

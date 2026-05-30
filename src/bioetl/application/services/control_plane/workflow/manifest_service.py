@@ -2,14 +2,10 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
-from dataclasses import dataclass, field
-from datetime import datetime
-from uuid import uuid4
+from dataclasses import dataclass
 
-from bioetl.application.services.control_plane.manifest_time_support import (
-    ManifestClockProtocol,
-    resolve_manifest_created_at,
+from bioetl.application.services.control_plane.manifest_service_scaffold import (
+    ManifestServiceScaffoldMixin,
 )
 from bioetl.application.services.control_plane.workflow.manifest_models import (
     WorkflowManifestCreateSpec,
@@ -36,17 +32,11 @@ _EXECUTION_FINGERPRINT_IGNORED_LAUNCH_KEYS = frozenset(
 )
 
 
-@dataclass(slots=True)
-class WorkflowManifestService:
+@dataclass(slots=True, kw_only=True)
+class WorkflowManifestService(ManifestServiceScaffoldMixin):
     """Create and persist immutable workflow manifests."""
 
     manifest_port: WorkflowManifestPort
-    clock: ManifestClockProtocol | None = None
-    created_at_factory: Callable[[], datetime] | None = None
-    schema_version: str = "1.0"
-    _manifest_id_factory: Callable[[], str] = field(
-        default_factory=lambda: lambda: str(uuid4())
-    )
 
     def create_manifest(self, request: WorkflowManifestCreateSpec) -> WorkflowManifest:
         """Build fingerprinted workflow manifest and persist it through the port."""
@@ -118,10 +108,4 @@ class WorkflowManifestService:
                 config=step.config if isinstance(step, TransformStepConfig) else None,
             )
             for step in config.steps
-        )
-
-    def _resolve_created_at(self) -> datetime:
-        return resolve_manifest_created_at(
-            clock=self.clock,
-            created_at_factory=self.created_at_factory,
         )

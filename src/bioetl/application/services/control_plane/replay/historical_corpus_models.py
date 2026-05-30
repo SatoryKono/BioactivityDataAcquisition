@@ -7,18 +7,15 @@ from dataclasses import dataclass
 from bioetl.application.services.control_plane.replay._historical_record_payload import (
     build_historical_run_identity_payload,
 )
+from bioetl.application.services.control_plane.replay.historical_identity_models import (
+    HistoricalReplayRunIdentity,
+)
 
 
 @dataclass(frozen=True, slots=True)
-class HistoricalReplayCertifiabilityRecord:
+class HistoricalReplayCertifiabilityRecord(HistoricalReplayRunIdentity):
     """One deterministic certifiability record for a retained manifest."""
 
-    manifest_id: str
-    run_id: str
-    pipeline_name: str
-    provider: str
-    entity: str
-    execution_context: str
     family: str | None
     certification_scope: str | None
     certification_status: str

@@ -80,6 +80,32 @@ def resolve_required_artifact_lineage_layers(
     return tuple(active_layer_names), tuple(missing_lineage_layers)
 
 
+def validate_manifest_persistence_requirements(
+    *,
+    yaml_config: object,
+    skip_gold: bool,
+    ledger_enabled: bool,
+    required_profile: str,
+    strict_exact_replay_supported: bool,
+) -> None:
+    """Validate manifest persistence requirements before manifest creation."""
+    _active_layers, missing_artifact_lineage_layers = (
+        resolve_required_artifact_lineage_layers(
+            yaml_config=yaml_config,
+            skip_gold=skip_gold,
+        )
+    )
+    validate_required_persistence_profile(
+        manifest_enabled=True,
+        ledger_enabled=ledger_enabled,
+        required_profile=required_profile,
+        execution_label="Pipeline execution",
+        exact_replay_execution_context_supported=strict_exact_replay_supported,
+        composite_resume_rich_replay_supported=True,
+        missing_artifact_lineage_layers=missing_artifact_lineage_layers,
+    )
+
+
 def validate_required_persistence_profile(
     *,
     manifest_enabled: bool,

@@ -22,9 +22,11 @@ from bioetl.composition.runtime_builders._run_manifest_publication_support impor
     create_manifest_record,
     create_manifest_store,
 )
+from bioetl.composition.runtime_builders._run_manifest_refs import (
+    RunManifestProvenanceBundle,
+)
 from bioetl.composition.runtime_builders._runner_control_plane_policy import (
-    resolve_required_artifact_lineage_layers,
-    validate_required_persistence_profile,
+    validate_manifest_persistence_requirements,
 )
 from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
 
@@ -38,11 +40,7 @@ if TYPE_CHECKING:
 def _create_control_plane_refs(
     *,
     manifest: object,
-    resolved_config_hash: str,
-    effective_config_hash: str,
-    source_fingerprint: str | None,
-    dq_contract_compatibility_hash: str,
-    effective_config_artifact_id: str,
+    provenance: RunManifestProvenanceBundle,
     contract_identity: _manifest_support.RunManifestContractIdentity,
     required_persistence_profile: str,
 ) -> _manifest_support.ManifestControlPlaneRefs:
@@ -57,11 +55,11 @@ def _create_control_plane_refs(
     return _manifest_support.create_control_plane_refs(
         manifest.manifest_id,
         manifest.execution_fingerprint,
-        resolved_config_hash,
-        effective_config_hash,
-        source_fingerprint,
-        dq_contract_compatibility_hash,
-        effective_config_artifact_id,
+        provenance.resolved_config_hash,
+        provenance.effective_config_hash,
+        provenance.source_fingerprint,
+        provenance.dq_contract_compatibility_hash,
+        provenance.effective_config_artifact_id,
         getattr(manifest, "replay_of_run_id", None),
         getattr(manifest, "replay_of_manifest_id", None),
         input_snapshot_fingerprint,
@@ -82,11 +80,7 @@ def create_run_manifest(
     ctx: PipelineRunContext,
     inputs: RunnerInputs,
     ledger_enabled: bool,
-    effective_config_artifact_id: str,
-    resolved_config_hash: str,
-    effective_config_hash: str,
-    source_fingerprint: str | None,
-    dq_contract_compatibility_hash: str,
+    provenance: RunManifestProvenanceBundle,
     reproducibility_context: object | None = None,
     contract_identity: _manifest_support.RunManifestContractIdentity | None = None,
 ) -> tuple[_manifest_support.ManifestControlPlaneRefs, RunLedgerService | None]:
@@ -99,7 +93,7 @@ def create_run_manifest(
         reproducibility_context=reproducibility_context,
         contract_identity=contract_identity,
     )
-    _validate_manifest_persistence_requirements(
+    validate_manifest_persistence_requirements(
         yaml_config=inputs.yaml_config,
         skip_gold=bool(getattr(ctx, "skip_gold", False)),
         ledger_enabled=ledger_enabled,
@@ -116,11 +110,7 @@ def create_run_manifest(
         reproducibility_context=manifest_context.reproducibility_context,
         run_type_value=run_type_value,
         execution_context_value=execution_context_value,
-        resolved_config_hash=resolved_config_hash,
-        effective_config_hash=effective_config_hash,
-        source_fingerprint=source_fingerprint,
-        dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-        effective_config_artifact_id=effective_config_artifact_id,
+        provenance=provenance,
         contract_identity=manifest_context.contract_identity,
     )
     return _publish_manifest_and_refs(
@@ -129,11 +119,7 @@ def create_run_manifest(
         ledger_enabled=ledger_enabled,
         manifest_context=manifest_context,
         manifest_create_request=manifest_create_request,
-        effective_config_artifact_id=effective_config_artifact_id,
-        resolved_config_hash=resolved_config_hash,
-        effective_config_hash=effective_config_hash,
-        source_fingerprint=source_fingerprint,
-        dq_contract_compatibility_hash=dq_contract_compatibility_hash,
+        provenance=provenance,
     )
 
 
@@ -144,11 +130,7 @@ def _publish_manifest_and_refs(
     ledger_enabled: bool,
     manifest_context: ResolvedManifestPublicationContext,
     manifest_create_request: object,
-    effective_config_artifact_id: str,
-    resolved_config_hash: str,
-    effective_config_hash: str,
-    source_fingerprint: str | None,
-    dq_contract_compatibility_hash: str,
+    provenance: RunManifestProvenanceBundle,
 ) -> tuple[_manifest_support.ManifestControlPlaneRefs, RunLedgerService | None]:
     """Persist the manifest record and translate it into runner control-plane refs."""
     manifest_store = create_manifest_store(inputs)
@@ -171,42 +153,13 @@ def _publish_manifest_and_refs(
     )
     control_plane_refs = _create_control_plane_refs(
         manifest=manifest,
-        resolved_config_hash=resolved_config_hash,
-        effective_config_hash=effective_config_hash,
-        source_fingerprint=source_fingerprint,
-        dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-        effective_config_artifact_id=effective_config_artifact_id,
+        provenance=provenance,
         contract_identity=manifest_context.contract_identity,
         required_persistence_profile=(
             manifest_context.reproducibility_context.required_persistence_profile
         ),
     )
     return control_plane_refs, ledger_service
-
-
-def _validate_manifest_persistence_requirements(
-    *,
-    yaml_config: object,
-    skip_gold: bool,
-    ledger_enabled: bool,
-    required_profile: str,
-    strict_exact_replay_supported: bool,
-) -> None:
-    _active_layers, missing_artifact_lineage_layers = (
-        resolve_required_artifact_lineage_layers(
-            yaml_config=yaml_config,
-            skip_gold=skip_gold,
-        )
-    )
-    validate_required_persistence_profile(
-        manifest_enabled=True,
-        ledger_enabled=ledger_enabled,
-        required_profile=required_profile,
-        execution_label="Pipeline execution",
-        exact_replay_execution_context_supported=strict_exact_replay_supported,
-        composite_resume_rich_replay_supported=True,
-        missing_artifact_lineage_layers=missing_artifact_lineage_layers,
-    )
 
 
 def _build_manifest_create_request(
@@ -218,11 +171,7 @@ def _build_manifest_create_request(
     reproducibility_context: object,
     run_type_value: str,
     execution_context_value: str,
-    resolved_config_hash: str,
-    effective_config_hash: str,
-    source_fingerprint: str | None,
-    dq_contract_compatibility_hash: str,
-    effective_config_artifact_id: str,
+    provenance: RunManifestProvenanceBundle,
     contract_identity: _manifest_support.RunManifestContractIdentity,
 ) -> object:
     return build_manifest_create_request(
@@ -235,14 +184,14 @@ def _build_manifest_create_request(
             run_type_value=run_type_value,
             execution_context_value=execution_context_value,
             config_hash=_manifest_support.legacy_config_hash_from_resolved_config_hash(
-                resolved_config_hash
+                provenance.resolved_config_hash
             ),
-            resolved_config_hash=resolved_config_hash,
-            effective_config_hash=effective_config_hash,
-            source_fingerprint=source_fingerprint,
+            resolved_config_hash=provenance.resolved_config_hash,
+            effective_config_hash=provenance.effective_config_hash,
+            source_fingerprint=provenance.source_fingerprint,
             contract_identity=contract_identity,
-            dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-            effective_config_artifact_id=effective_config_artifact_id,
+            dq_contract_compatibility_hash=provenance.dq_contract_compatibility_hash,
+            effective_config_artifact_id=provenance.effective_config_artifact_id,
         )
     )
 

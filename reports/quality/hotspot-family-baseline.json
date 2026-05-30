@@ -1,6 +1,6 @@
 {
   "summary": {
-    "snapshot_date": "2026-05-24",
+    "snapshot_date": "2026-05-30",
     "families": 5,
     "scorecard": "configs\\quality\\debt_scorecard.yaml",
     "budget_warnings": 9
@@ -17,7 +17,7 @@
       ],
       "duplication_clusters": 5,
       "files": 174,
-      "total_loc": 21598,
+      "total_loc": 21608,
       "files_ge_250_loc": 12,
       "helper_function_ratio": 0.376,
       "max_internal_fan_in": 14,
@@ -42,7 +42,7 @@
       ],
       "duplication_clusters": 0,
       "files": 44,
-      "total_loc": 5762,
+      "total_loc": 5758,
       "files_ge_250_loc": 3,
       "helper_function_ratio": 0.33,
       "max_internal_fan_in": 5,
@@ -89,7 +89,7 @@
       "path_prefixes": [
         "src/bioetl/application/services/control_plane/"
       ],
-      "duplication_clusters": 10,
+      "duplication_clusters": 8,
       "files": 66,
       "total_loc": 12998,
       "files_ge_250_loc": 22,

@@ -6,6 +6,9 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from bioetl.application.services.control_plane._run_manifest_diagnostics_helpers import (
+    build_dq_details_summary,
+)
 from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
     merge_ledger_input_snapshots_into_summary,
 )
@@ -186,26 +189,28 @@ def build_final_diagnostics_summary(
             type_counter=processed_ledger.type_counter,
             artifact_refs=processed_ledger.artifact_refs,
             lineage_fragment_ids=processed_ledger.lineage_fragment_ids,
-            dq_rule_ids=processed_ledger.dq_rule_ids,
-            dq_dispositions=processed_ledger.dq_dispositions,
-            dq_report_paths=processed_ledger.dq_report_paths,
-            dq_violation_kinds=processed_ledger.dq_violation_kinds,
-            cross_validation_rule_ids=processed_ledger.cross_validation_rule_ids,
-            cross_validation_config_paths=(
-                processed_ledger.cross_validation_config_paths
-            ),
-            cross_validation_quarantine_policies=(
-                processed_ledger.cross_validation_quarantine_policies
-            ),
-            cross_validation_replay_contracts=(
-                processed_ledger.cross_validation_replay_contracts
-            ),
-            occurrence_only_diagnostic_scopes=(
-                processed_ledger.occurrence_only_diagnostic_scopes
-            ),
-            dq_signal_present=processed_ledger.dq_signal_present,
-            cross_validation_signal_present=(
-                processed_ledger.cross_validation_signal_present
+            dq_details=build_dq_details_summary(
+                rule_ids=processed_ledger.dq_rule_ids,
+                dispositions=processed_ledger.dq_dispositions,
+                report_paths=processed_ledger.dq_report_paths,
+                violation_kinds=processed_ledger.dq_violation_kinds,
+                cross_validation_rule_ids=processed_ledger.cross_validation_rule_ids,
+                cross_validation_config_paths=(
+                    processed_ledger.cross_validation_config_paths
+                ),
+                cross_validation_quarantine_policies=(
+                    processed_ledger.cross_validation_quarantine_policies
+                ),
+                cross_validation_replay_contracts=(
+                    processed_ledger.cross_validation_replay_contracts
+                ),
+                occurrence_only_diagnostic_scopes=(
+                    processed_ledger.occurrence_only_diagnostic_scopes
+                ),
+                has_signal=processed_ledger.dq_signal_present,
+                has_cross_validation_signal=(
+                    processed_ledger.cross_validation_signal_present
+                ),
             ),
             missing_link_count=processed_ledger.missing_link_count,
             correlation_anchor_gaps=processed_ledger.correlation_anchor_gaps,

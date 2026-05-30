@@ -6,11 +6,24 @@ from types import SimpleNamespace
 from uuid import uuid4
 
 from bioetl.composition.runtime_builders import run_manifest_builder
+from bioetl.composition.runtime_builders._run_manifest_refs import (
+    RunManifestProvenanceBundle,
+)
 from bioetl.composition.runtime_builders.run_manifest_support import (
     RunManifestContractIdentity,
 )
 from bioetl.domain.models.metadata import InputSnapshotRef
 from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
+
+
+def _make_provenance_bundle() -> RunManifestProvenanceBundle:
+    return RunManifestProvenanceBundle(
+        effective_config_artifact_id="artifact-1",
+        resolved_config_hash="resolved-hash",
+        effective_config_hash="effective-hash",
+        source_fingerprint="source-fingerprint-1",
+        dq_contract_compatibility_hash="dq-hash",
+    )
 
 
 def _make_contract_identity() -> RunManifestContractIdentity:
@@ -54,11 +67,7 @@ def test_build_manifest_create_request_uses_named_contract_identity_fields(
         ),
         run_type_value="incremental",
         execution_context_value="isolated",
-        resolved_config_hash="resolved-hash",
-        effective_config_hash="effective-hash",
-        source_fingerprint="source-fingerprint-1",
-        dq_contract_compatibility_hash="dq-hash",
-        effective_config_artifact_id="artifact-1",
+        provenance=_make_provenance_bundle(),
         contract_identity=identity,
     )
 
@@ -111,11 +120,7 @@ def test_create_control_plane_refs_uses_named_contract_identity_fields() -> None
             replay_of_manifest_id="manifest-parent-1",
             source_refs=[SimpleNamespace(input_snapshots=[snapshot])],
         ),
-        resolved_config_hash="resolved-hash",
-        effective_config_hash="effective-hash",
-        source_fingerprint="source-fingerprint-1",
-        dq_contract_compatibility_hash="dq-hash",
-        effective_config_artifact_id="artifact-1",
+        provenance=_make_provenance_bundle(),
         contract_identity=identity,
         required_persistence_profile="replay_ready",
     )
@@ -165,11 +170,7 @@ def test_build_manifest_create_request_passes_through_reproducibility_context(
         reproducibility_context=reproducibility_context,
         run_type_value="incremental",
         execution_context_value="isolated",
-        resolved_config_hash="resolved-hash",
-        effective_config_hash="effective-hash",
-        source_fingerprint="source-fingerprint-1",
-        dq_contract_compatibility_hash="dq-hash",
-        effective_config_artifact_id="artifact-1",
+        provenance=_make_provenance_bundle(),
         contract_identity=_make_contract_identity(),
     )
 

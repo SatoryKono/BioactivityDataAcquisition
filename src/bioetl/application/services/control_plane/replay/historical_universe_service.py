@@ -14,6 +14,9 @@ from bioetl.application.services.control_plane.replay.historical_corpus_service 
     HistoricalReplayCertifiabilityInventory,
     HistoricalReplayCorpusService,
 )
+from bioetl.application.services.control_plane.replay.historical_identity_models import (
+    HistoricalReplayRunIdentity,
+)
 from bioetl.application.services.control_plane.replay.historical_universe_policy import (
     build_authoritative_truth_surface,
     build_durable_coverage_claim,
@@ -34,15 +37,9 @@ _CLOSED_CERTIFICATION_STATUSES = frozenset({"already_replayable", "already_certi
 
 
 @dataclass(frozen=True, slots=True)
-class HistoricalReplayUniverseExternalRecord:
+class HistoricalReplayUniverseExternalRecord(HistoricalReplayRunIdentity):
     """One authoritative non-local historical run record."""
 
-    manifest_id: str
-    run_id: str
-    pipeline_name: str
-    provider: str
-    entity: str
-    execution_context: str
     certification_status: str
     replay_occurrence_kind: str
     blocking_reasons: tuple[str, ...] = ()
