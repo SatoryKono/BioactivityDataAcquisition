@@ -23,7 +23,7 @@ from bioetl.composition.runtime_builders._run_manifest_creation_support import (
 from bioetl.composition.runtime_builders.cached_bronze_snapshot_support import (
     build_cached_bronze_input_snapshot_refs,
 )
-from bioetl.composition.runtime_builders._run_manifest_support import (
+from bioetl.composition.runtime_builders.run_manifest_support import (
     build_launch_context_snapshot,
     build_run_source_refs,
     resolve_contract_identity,
@@ -433,7 +433,7 @@ def test_build_run_source_refs_accepts_manifest_backed_snapshot_refs(
         immutable_uri="bronze://chembl/activity/manifest.jsonl.zst",
     )
     monkeypatch.setattr(
-        "bioetl.composition.runtime_builders._run_manifest_support.resolve_pipeline_input_snapshot_refs",
+        "bioetl.composition.runtime_builders.run_manifest_support.resolve_pipeline_input_snapshot_refs",
         lambda **_: (manifest_snapshot,),
     )
 
