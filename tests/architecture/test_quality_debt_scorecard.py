@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import date
 import importlib.util
+import json
 from pathlib import Path
 import sys
 from types import ModuleType
@@ -393,6 +394,56 @@ def test_debt_scorecard_declares_public_entrypoint_governance_kpis() -> None:
         assert isinstance(metric.get("rationale"), str) and metric["rationale"]
         assert metric.get("review_cadence") == "quarterly"
         assert isinstance(metric.get("review_policy"), str) and metric["review_policy"]
+
+
+def test_debt_scorecard_config_surface_ratchet_matches_baseline() -> None:
+    """Config-surface ratchet budgets must match the committed discrepancy baseline."""
+    scorecard = load_debt_scorecard()
+    ratchet = scorecard.get("config_surface_ratchet", {})
+    assert isinstance(ratchet, dict)
+    assert ratchet.get("mode") == "fail-fast"
+    assert ratchet.get("linked_issue") == "#4818"
+
+    baseline_path = ROOT / "reports/quality/config-discrepancy-baseline.json"
+    assert baseline_path.exists()
+    baseline_payload = json.loads(baseline_path.read_text(encoding="utf-8"))
+    assert isinstance(baseline_payload, dict)
+    baseline_metrics = baseline_payload.get("metrics")
+    assert isinstance(baseline_metrics, dict)
+
+    metrics_policy = ratchet.get("metrics", {})
+    assert isinstance(metrics_policy, dict)
+    for metric_name, baseline_count in baseline_metrics.items():
+        assert isinstance(baseline_count, int)
+        metric = metrics_policy.get(metric_name)
+        assert isinstance(metric, dict), (
+            f"config_surface_ratchet.metrics.{metric_name} must be declared"
+        )
+        assert metric.get("current_count") == baseline_count
+        assert metric.get("max_count") == baseline_count
+        assert isinstance(metric.get("owner"), str) and metric["owner"]
+        assert metric.get("linked_issue") == "#4818"
+        assert isinstance(metric.get("rationale"), str) and metric["rationale"]
+        assert isinstance(metric.get("ratchet_policy"), str) and metric["ratchet_policy"]
+
+    baseline_families = baseline_payload.get("families")
+    assert isinstance(baseline_families, dict)
+    families_policy = ratchet.get("families", {})
+    assert isinstance(families_policy, dict)
+    for family_name, family_metrics in baseline_families.items():
+        assert isinstance(family_metrics, dict)
+        family_policy = families_policy.get(family_name)
+        assert isinstance(family_policy, dict), (
+            f"config_surface_ratchet.families.{family_name} must be declared"
+        )
+        family_metrics_policy = family_policy.get("metrics", {})
+        assert isinstance(family_metrics_policy, dict)
+        for metric_name, baseline_count in family_metrics.items():
+            assert isinstance(baseline_count, int)
+            metric = family_metrics_policy.get(metric_name)
+            assert isinstance(metric, dict)
+            assert metric.get("current_count") == baseline_count
+            assert metric.get("max_count") == baseline_count
 
 
 def test_debt_scorecard_bronze_fixture_replay_metrics_match_sources() -> None:

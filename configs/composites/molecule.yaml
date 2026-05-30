@@ -33,13 +33,27 @@ composite:
     pubchem_compound:
       join_boundary:
         active_join_keys:
-          - inchi_key
-          - canonical_smiles
+        - inchi_key
+        - canonical_smiles
         retained_validation_anchors:
-          - standardized_inchi_key
-          - structure_parent_key
+        - standardized_inchi_key
+        - structure_parent_key
         activation_condition: seed pipelines emit matching normalized PubChem anchors
         rationale: PubChem normalized anchors are retained in composite output but not used as symmetric join keys until seed sources expose the same anchor family.
+
+    uniprot_idmapping:
+      join_boundary:
+        source_anchor: target_id
+        normalized_output_anchor: uniprot_accession
+        required_status: found
+        downstream_pipeline: uniprot_protein
+        rationale: UniProt accession joins are chained through normalized idmapping output and filtered to mapping_status='found'.
+
+  normalized_join_key_policy:
+    publication_identity:
+      primary_join_keys: []
+      fallback_join_keys: []
+      rationale: Non-publication composite; publication join policy not applicable.
 
   # ---------------------------------------------------------------------------
   # Seed Pipeline Configuration
@@ -49,10 +63,10 @@ composite:
   seed:
     pipeline: chembl_molecule
     output_keys:
-      - molecule_id         # Primary key
-      - inchi_key           # Join key 1 (IUPAC standard, preferred)
-      - canonical_smiles    # Join key 2 (fallback)
-      - pref_name           # For logging/debugging
+    - molecule_id           # Primary key
+    - inchi_key             # Join key 1 (IUPAC standard, preferred)
+    - canonical_smiles      # Join key 2 (fallback)
+    - pref_name             # For logging/debugging
     # Note: chembl_molecule uses flat_structure, so table is in path directly
     silver_table: silver/chembl/molecule
 
@@ -62,7 +76,6 @@ composite:
   # Dependencies run after seed but before enrichers to populate Silver tables.
   # No dependencies required for molecule pipeline.
   dependencies: []
-
   # ---------------------------------------------------------------------------
   # Enricher Pipelines
   # ---------------------------------------------------------------------------
@@ -70,14 +83,14 @@ composite:
   enrichers:
     # PubChem: Chemical properties and synonyms
     # OPTIONAL: Failure logged, composite continues (graceful degradation)
-    - pipeline: pubchem_compound
-      join_keys:
-        - inchi_key          # Primary join key (IUPAC standard) - uses seed field name
-        - canonical_smiles   # Fallback key (less reliable)
-      required: false        # Graceful degradation - seed data preserved on failure
-      filter_condition: "inchi_key IS NOT NULL"  # Only join records with structure
-      timeout_seconds: 3600
-      silver_table: silver/pubchem/compound
+  - pipeline: pubchem_compound
+    join_keys:
+    - inchi_key              # Primary join key (IUPAC standard) - uses seed field name
+    - canonical_smiles       # Fallback key (less reliable)
+    required: false          # Graceful degradation - seed data preserved on failure
+    filter_condition: "inchi_key IS NOT NULL"    # Only join records with structure
+    timeout_seconds: 3600
+    silver_table: silver/pubchem/compound
 
   # ---------------------------------------------------------------------------
   # Field Aliases (RF-NORM-01: Canonical Field Alias Registry)
@@ -137,11 +150,11 @@ composite:
       gold: data/output/gold/composite/molecule
     sort_by:
       silver:
-        - entity_id
-        - molecule_id
+      - entity_id
+      - molecule_id
       gold:
-        - entity_id
-        - molecule_id
+      - entity_id
+      - molecule_id
 
     # Field-level priority overrides
     # Maps field name to ordered list of source preferences
@@ -149,195 +162,399 @@ composite:
       # === Structural Identifiers (ChEMBL authoritative) ===
       # ChEMBL has curated structures from medicinal chemistry literature
       canonical_smiles:
-        - chembl           # ChEMBL structures are manually curated
-        - pubchem
+      - chembl             # ChEMBL structures are manually curated
+      - pubchem
       inchi_key:
-        - chembl           # ChEMBL InChIKey from standardized structures
-        - pubchem
+      - chembl             # ChEMBL InChIKey from standardized structures
+      - pubchem
       inchi:
-        - chembl
-        - pubchem
+      - chembl
+      - pubchem
       isomeric_smiles:
-        - pubchem          # PubChem provides isomeric SMILES
-        - chembl
+      - pubchem            # PubChem provides isomeric SMILES
+      - chembl
 
       # === Physicochemical Properties (PubChem more complete) ===
       # PubChem has computed descriptors for more compounds
       molecular_weight:
-        - pubchem          # PubChem has MW for all compounds
-        - chembl
+      - pubchem            # PubChem has MW for all compounds
+      - chembl
       molecular_formula:
-        - pubchem
-        - chembl
+      - pubchem
+      - chembl
       logp:
-        - pubchem          # PubChem uses XLogP3
-        - chembl           # ChEMBL uses ALogP
+      - pubchem            # PubChem uses XLogP3
+      - chembl             # ChEMBL uses ALogP
       logp_method:
-        - pubchem
-        - chembl
+      - pubchem
+      - chembl
       polar_surface_area:
-        - pubchem
-        - chembl
+      - pubchem
+      - chembl
       hba_count:
-        - pubchem
-        - chembl
+      - pubchem
+      - chembl
       hbd_count:
-        - pubchem
-        - chembl
+      - pubchem
+      - chembl
       rotatable_bond_count:
-        - pubchem
-        - chembl
+      - pubchem
+      - chembl
       heavy_atom_count:
-        - pubchem
-        - chembl
+      - pubchem
+      - chembl
       aromatic_ring_count:
-        - pubchem
-        - chembl
+      - pubchem
+      - chembl
 
       # === Names and Synonyms (merge from both) ===
       pref_name:
-        - chembl           # ChEMBL has curated preferred names
-        - pubchem
+      - chembl             # ChEMBL has curated preferred names
+      - pubchem
       iupac_name:
-        - pubchem          # PubChem has computed IUPAC names
-        - chembl
+      - pubchem            # PubChem has computed IUPAC names
+      - chembl
       synonyms:
-        - chembl           # Merge arrays from both
-        - pubchem
+      - chembl             # Merge arrays from both
+      - pubchem
 
       # === Clinical Data (ChEMBL only) ===
       # PubChem doesn't have clinical development data
       max_phase:
-        - chembl           # Clinical phase (0-4)
+      - chembl             # Clinical phase (0-4)
       first_approval:
-        - chembl           # FDA/EMA approval year
+      - chembl             # FDA/EMA approval year
       therapeutic_flag:
-        - chembl
+      - chembl
       withdrawn_flag:
-        - chembl
+      - chembl
       black_box_warning:
-        - chembl
+      - chembl
 
       # === Quality Metrics (ChEMBL) ===
       qed_weighted:
-        - chembl           # QED (Quantitative Estimate of Drug-likeness)
+      - chembl             # QED (Quantitative Estimate of Drug-likeness)
 
+      abstract:
+      - pubmed                   # PubMed has best abstracts
+      - openalex
+      - chembl
+      - semanticscholar            # Fallback (mapped from TLDR)
+
+            # === Citation Metrics ===
+      affiliation_list:
+      - pubmed                   # PubMed raw affiliations
+      - openalex
+      - semanticscholar
+      affiliation_structured:
+      - pubmed                   # PubMed has structured affiliation data with ROR/GRID
+      author_details:
+      - crossref                 # CrossRef-unique detailed author objects
+      author_h_indices:
+      - semanticscholar            # S2-unique h-index data
+
+            # === Affiliations ===
+            # Note: affiliation_structured (PubMed) preferred over affiliation_list
+            # PubMed affiliation_structured contains ROR/GRID identifiers
+      author_openalex_ids:
+      - openalex                   # OpenAlex-unique author identifiers
+
+      author_orcids:
+      - crossref                 # CrossRef has most complete ORCID data
+
+      - openalex
+      - semanticscholar
+      author_s2_ids:
+      - semanticscholar            # S2-unique author identifiers
+
+      cell_id:
+      - chembl.assay
+      chemicals:
+      - pubmed                   # PubMed-unique chemical substances
+
+      citation_contexts:
+      - semanticscholar            # S2-unique citation context sentences
+
+
+            # === Quality Indicators ===
+
+      citations_made:
+      - crossref                 # CrossRef has most complete reference data
+
+      - openalex
+      - pubmed
+      - semanticscholar
+      citations_received:
+      - crossref                 # CrossRef is citation authority
+
+      - openalex
+      - semanticscholar
+      databanks:
+      - pubmed                   # PubMed-unique databank accessions
+
+
+            # === Alternative Identifiers ===
+
+      dblp_id:
+      - semanticscholar            # S2-unique DBLP identifier
+
+      fwci:
+      - openalex                 # OpenAlex-unique FWCI metric
+
+
+            # === Funding ===
+
+      gene_symbols:
+      - pubmed                   # PubMed-unique gene symbols
+
+      grants:
+      - openalex                 # OpenAlex-unique grant/funding data
+
+
+            # === Chemicals & Genes (PubMed-specific) ===
+
+      influential_citation_count:
+      - semanticscholar            # S2-only field
+
+
+            # === Classification/Topics ===
+
+            # NOTE: subject_topics replaces deprecated concepts/topics per OpenAlex 2024 migration
+
+      institution_country_codes:
+      - openalex                 # OpenAlex institution country codes (ISO 2-letter)
+
+
+            # === References/Citations Context ===
+
+      institution_ids:
+      - openalex                 # OpenAlex institution IDs (e.g., I1234567890)
+
+      is_retracted:
+      - openalex                 # OpenAlex-unique retraction status (CRITICAL)
+
+      mag_id:
+      - openalex                 # OpenAlex MAG legacy ID
+
+
+        # -------------------------------------------------------------------------
+
+        # Column Ordering by Canonical Categories
+
+        # -------------------------------------------------------------------------
+
+        # Defines the order of columns in the merged output.
+
+        # Categories and field order follow the historical ordering artifact
+
+        # docs/04-reference/schemas/publication_field_order.csv.
+
+        # Canonical field names and aliases live in
+
+        # configs/entities/{provider}/publication.yaml and provider reference docs.
+
+        #
+
+        # The "system" group MUST be first: it captures persisted system columns
+
+        # (entity_id, content_hash, etc.) that would otherwise fall
+
+        # into the "remaining" bucket at the end of the output.
+
+      mid:
+      - pubmed                   # PubMed Manuscript ID
+
+      molecule_id:
+      - chembl.activity       # Activity FK is authoritative
+      organism:
+      - chembl    # ChEMBL organism name is authoritative
+
+    # -------------------------------------------------------------------------
+    # Column Ordering by Semantic Categories
+    # -------------------------------------------------------------------------
+    # Defines the order of columns in the merged output.
+    # The "system" group MUST be first: it captures ETL metadata columns
+    # that would otherwise fall into the "remaining" bucket at the end.
+      pii:
+      - pubmed                   # PubMed Publisher Item Identifier
+
+      primary_component_id:
+      - chembl    # Seed primary_component_id is authoritative
+      primary_topic:
+      - openalex                 # OpenAlex-unique field
+
+      publication_class:
+      - chembl
+      - pubmed
+      - openalex
+      - crossref
+      - semanticscholar
+
+            # === Author Metadata ===
+
+      publication_id:
+      - chembl.activity       # Activity document reference is primary
+
+      publication_subclass:
+      - chembl
+      - pubmed
+      - openalex
+      - crossref
+      - semanticscholar
+      publication_type_unified:
+      - chembl
+      - pubmed
+      - openalex
+      - crossref
+      - semanticscholar
+      publisher_id:
+      - pubmed                   # PubMed publisher-specific ID
+
+      references:
+      - crossref                 # CrossRef-unique cited references
+
+      subject_fields:
+      - semanticscholar            # S2-unique field
+
+      subject_keywords:
+      - crossref                 # CrossRef subjects -> subject_keywords
+
+      - openalex
+      - pubmed
+      - semanticscholar
+      subject_mesh:
+      - pubmed                   # PubMed MeSH is authoritative
+
+      - openalex                 # OpenAlex MeSH extraction (fallback)
+
+      subject_topics:
+      - openalex                 # OpenAlex hierarchical topics
+
+      target_id:
+      - chembl    # Seed is authoritative for PK
+      taxonomy_id:
+      - chembl    # ChEMBL taxonomy_id takes priority over UniProt
+      tissue_id:
+      - chembl.assay
+
+    # Field renaming for conflicts
+      title:
+      - chembl                   # ChEMBL title is authoritative
+
+      - crossref
+      - openalex
+    field_mappings: {}
     # -------------------------------------------------------------------------
     # Column Ordering by Canonical Categories
     # -------------------------------------------------------------------------
     column_groups:
       # === System / ETL metadata (MUST be first) ===
-      - name: system
-        fields:
-          - entity_id
-          - content_hash
-          - _source
-          - _index
-        pattern: "^_composite_|^_source_providers|^_enrichment_|^_lineage_"
-        provider_order: [chembl, pubchem]
-
+    - name: system
+      fields:
+      - entity_id
+      - content_hash
+      - _source
+      - _index
+      pattern: "^_composite_|^_source_providers|^_enrichment_|^_lineage_"
+      provider_order: [chembl, pubchem]
       # === Business identifiers ===
-      - name: identifiers
-        fields:
-          - molecule_id          # Canonical molecule id
-          - inchi_key            # Standard InChIKey (both ChEMBL and PubChem)
-          - standardized_inchi_key # PubChem standardized InChIKey validation anchor
-          - structure_parent_key # PubChem connectivity-level parent structure anchor
-          - inchi
-          - standard_inchi
-        provider_order: [chembl, pubchem]
-
+    - name: identifiers
+      fields:
+      - molecule_id              # Canonical molecule id
+      - inchi_key                # Standard InChIKey (both ChEMBL and PubChem)
+      - standardized_inchi_key     # PubChem standardized InChIKey validation anchor
+      - structure_parent_key     # PubChem connectivity-level parent structure anchor
+      - inchi
+      - standard_inchi
+      provider_order: [chembl, pubchem]
       # === Structure representations ===
-      - name: structure
-        fields:
-          - canonical_smiles
-          - isomeric_smiles
-          - helm_notation
-          - structure_type
-        provider_order: [chembl, pubchem]
-
+    - name: structure
+      fields:
+      - canonical_smiles
+      - isomeric_smiles
+      - helm_notation
+      - structure_type
+      provider_order: [chembl, pubchem]
       # === Physicochemical properties ===
-      - name: properties
-        fields:
-          - molecular_weight
-          - molecular_formula
-          - logp
-          - logp_method
-          - polar_surface_area
-          - hba_count
-          - hbd_count
-          - rotatable_bond_count
-          - heavy_atom_count
-          - aromatic_ring_count
-          - qed_weighted
-          - property_ro5_violations
-          - property_ro3_pass
-        provider_order: [chembl, pubchem]
-
+    - name: properties
+      fields:
+      - molecular_weight
+      - molecular_formula
+      - logp
+      - logp_method
+      - polar_surface_area
+      - hba_count
+      - hbd_count
+      - rotatable_bond_count
+      - heavy_atom_count
+      - aromatic_ring_count
+      - qed_weighted
+      - property_ro5_violations
+      - property_ro3_pass
+      provider_order: [chembl, pubchem]
       # === Names and synonyms ===
-      - name: names
-        fields:
-          - pref_name
-          - iupac_name
-          - molecule_synonyms
-        provider_order: [chembl, pubchem]
-
+    - name: names
+      fields:
+      - pref_name
+      - iupac_name
+      - molecule_synonyms
+      provider_order: [chembl, pubchem]
       # === Clinical and regulatory (ChEMBL-only) ===
-      - name: clinical
-        fields:
-          - max_phase
-          - first_approval
-          - therapeutic_flag
-          - black_box_warning
-          - withdrawn_flag
-          - oral
-          - parenteral
-          - topical
-          - first_in_class
-          - prodrug
-          - natural_product
-          - availability_type
-        provider_order: [chembl]
-
+    - name: clinical
+      fields:
+      - max_phase
+      - first_approval
+      - therapeutic_flag
+      - black_box_warning
+      - withdrawn_flag
+      - oral
+      - parenteral
+      - topical
+      - first_in_class
+      - prodrug
+      - natural_product
+      - availability_type
+      provider_order: [chembl]
       # === Molecular hierarchy (ChEMBL-only) ===
-      - name: hierarchy
-        fields:
-          - hierarchy_parent_chembl_id
-          - hierarchy_active_chembl_id
-          - hierarchy_child_chembl_id
-          - molecule_hierarchy
-        provider_order: [chembl]
-
+    - name: hierarchy
+      fields:
+      - hierarchy_parent_chembl_id
+      - hierarchy_active_chembl_id
+      - hierarchy_child_chembl_id
+      - molecule_hierarchy
+      provider_order: [chembl]
       # === Classification ===
-      - name: classification
-        fields:
-          - molecule_type
-          - atc_classifications
-          - chirality
-          - inorganic_flag
-          - polymer_flag
-          - dosed_ingredient
-        provider_order: [chembl]
-
+    - name: classification
+      fields:
+      - molecule_type
+      - atc_classifications
+      - chirality
+      - inorganic_flag
+      - polymer_flag
+      - dosed_ingredient
+      provider_order: [chembl]
       # === Cross-references ===
-      - name: xrefs
-        fields:
-          - cross_references
-        provider_order: [chembl, pubchem]
-
+    - name: xrefs
+      fields:
+      - cross_references
+      provider_order: [chembl, pubchem]
       # === USAN nomenclature (ChEMBL-only) ===
-      - name: usan
-        fields:
-          - usan_year
-          - usan_stem
-          - usan_substem
-          - usan_stem_definition
-        provider_order: [chembl]
-
-    # Note: output paths auto-computed per ADR-029 convention-based resolution
-    # silver: data/output/silver/composite/molecule (auto)
-    # gold: data/output/gold/composite/molecule (auto)
-
+    - name: usan
+      fields:
+      - usan_year
+      - usan_stem
+      - usan_substem
+      - usan_stem_definition
+      provider_order: [chembl]
+    exclude_fields: []
+  cross_validation:
+    enabled: false
+    warning_threshold: 1
+    error_threshold: 2
+    quarantine_threshold: 2
+    fuzzy_threshold: 0.8
+    numeric_tolerance: 0.10
+    enricher_pairings: []
   # ---------------------------------------------------------------------------
   # Data Quality Configuration
   # ---------------------------------------------------------------------------
@@ -349,6 +566,34 @@ composite:
     dq_config_file: ../quality/entities/composite/molecule.yaml
     # Per-enricher threshold overrides
     enricher_overrides:
+      uniprot_protein:
+        soft_fail_threshold: 0.99
+        hard_fail_threshold: 1.0
+
+      uniprot_idmapping:
+        soft_fail_threshold: 0.99
+        hard_fail_threshold: 1.0
+
+      semanticscholar_publication:
+        soft_fail_threshold: 0.99
+        hard_fail_threshold: 1.0
+
+      pubmed_publication:
+        soft_fail_threshold: 0.99
+        hard_fail_threshold: 1.0
+
+      chembl_tissue:
+        soft_fail_threshold: 0.99
+        hard_fail_threshold: 1.0
+
+      chembl_compound_record:
+        soft_fail_threshold: 0.99
+        hard_fail_threshold: 1.0
+
+      chembl_cell_line:
+        soft_fail_threshold: 0.99
+        hard_fail_threshold: 1.0
+
       # PubChem may have many records without InChIKey match
       pubchem_compound:
         soft_fail_threshold: 0.20
@@ -392,14 +637,34 @@ composite:
         _original_id: pubchem_original_id
 
     # Field-level source tracking for overlapping fields
+      crossref:
+        _lookup_method: crossref_lookup_method
+        _original_id: crossref_original_id
+      openalex:
+        _lookup_method: openalex_lookup_method
+        _original_id: openalex_original_id
+      pubmed:
+        _lookup_method: pubmed_lookup_method
+        _original_id: pubmed_original_id
+      semanticscholar:
+        _lookup_method: semanticscholar_lookup_method
+        _original_id: semanticscholar_original_id
+
+        # Field-level source tracking for overlapping fields
+        # These are fields that come from multiple providers
+      uniprot:
+        _lookup_method: uniprot_lookup_method
+        _original_id: uniprot_original_id
+
+    # Field-level source tracking (for fields from multiple providers)
     track_source_for_fields:
-      - canonical_smiles
-      - inchi_key
-      - molecular_weight
-      - logp
-      - polar_surface_area
-      - hba_count
-      - hbd_count
+    - canonical_smiles
+    - inchi_key
+    - molecular_weight
+    - logp
+    - polar_surface_area
+    - hba_count
+    - hbd_count
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)

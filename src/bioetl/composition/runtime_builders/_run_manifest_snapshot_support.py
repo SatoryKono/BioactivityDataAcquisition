@@ -8,6 +8,10 @@ from enum import Enum
 from typing import TYPE_CHECKING, cast
 from uuid import UUID
 
+from bioetl.composition.runtime_builders._runtime_launch_context_fields import (
+    build_runtime_launch_field_snapshot,
+)
+
 if TYPE_CHECKING:
     from _typeshed import DataclassInstance
 
@@ -101,20 +105,11 @@ def _build_base_snapshot(
     execution_context_value: str,
 ) -> dict[str, object]:
     """Build the base snapshot."""
-    return {
-        "pipeline_name": str(ctx.pipeline_name),
-        "run_type": run_type_value,
-        "resume": getattr(ctx, "resume", False),
-        "dry_run": getattr(ctx, "dry_run", False),
-        "limit": getattr(ctx, "limit", None),
-        "query": getattr(ctx, "query", None),
-        "start_offset": getattr(ctx, "start_offset", None),
-        "log_level": getattr(ctx, "log_level", "INFO"),
-        "ignore_yaml_filter": getattr(ctx, "ignore_yaml_filter", False),
-        "skip_gold": getattr(ctx, "skip_gold", False),
-        "exact_replay": getattr(ctx, "exact_replay", False),
-        "execution_context": execution_context_value,
-    }
+    return build_runtime_launch_field_snapshot(
+        ctx,
+        run_type_value=run_type_value,
+        execution_context_value=execution_context_value,
+    )
 
 
 def _determine_replay_support_boundary(execution_context_value: str) -> str:

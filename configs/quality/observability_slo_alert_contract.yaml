@@ -304,3 +304,19 @@ slo_contracts:
         severity: critical
         for: 15m
         runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+  observability_signal_completeness:
+    target: "Operator-facing runtime and DQ verdict telemetry must stay present whenever pipelines run or DQ monitoring is enabled"
+    metrics:
+      - bioetl_pipeline_runs_total
+      - bioetl_runtime_pipeline_run_type_universe
+      - bioetl_dq_monitor_enabled
+      - bioetl_dq_current_status
+    alerts:
+      - name: BioETLOperatorRuntimeUniverseMissing
+        severity: warning
+        for: 15m
+        runbook: docs/05-operations/runbooks/observability-checklist.md
+      - name: BioETLDQCurrentStatusMissing
+        severity: warning
+        for: 15m
+        runbook: docs/05-operations/runbooks/dq-failure-investigation.md

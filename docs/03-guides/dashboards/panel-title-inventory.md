@@ -90,8 +90,8 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-dq-v2.json | 151 | Gold Strict Validation Failures |
 | bioetl-dq-v2.json | 152 | Silver Filter Reject Accounting Mismatch |
 | bioetl-dq-v2.json | 153 | Data Quality Score Trend (Volume-weighted) |
-| bioetl-dq-v2.json | 154 | DQ Impact on Deliverability (Blocked Share) |
-| bioetl-dq-v2.json | 155 | DQ Impact on Deliverability Trend (Blocked Share %) |
+| bioetl-dq-v2.json | 154 | DQ Blocked Records in Range (Evidence) |
+| bioetl-dq-v2.json | 155 | DQ Threshold Events in Range Trend |
 | bioetl-overview-v2.json | 99 | Provenance |
 | bioetl-overview-v2.json | 214 | Status |
 | bioetl-overview-v2.json | 215 | First Action |
@@ -128,10 +128,11 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-provider-health-v2.json | 108 | Track Retries Exhausted by Provider/Operation |
 | bioetl-provider-health-v2.json | 109 | Track Retries Exhausted Trend by Provider/Operation |
 | bioetl-provider-health-v2.json | 110 | Inspect Adapter Request Latency by Endpoint (p95) |
-| bioetl-provider-health-v2.json | 111 | Inspect HTTP Errors by Method/Error Type |
+| bioetl-provider-health-v2.json | 111 | Inspect Rate Limit Errors by Method |
 | bioetl-provider-health-v2.json | 112 | Track Rate Limiter Wait by Provider (p95) |
 | bioetl-provider-health-v2.json | 113 | Monitor Minimum Rate Limiter Tokens Available |
 | bioetl-provider-health-v2.json | 114 | Monitor Current Provider Health Status |
+| bioetl-provider-health-v2.json | 115 | Inspect Network Timeout Errors by Method |
 | bioetl-provider-health-v2.json | 9002 | First Action |
 | bioetl-provider-health-v2.json | 9100 | GLOBAL Provider Scope |
 | bioetl-provider-health-v2.json | 9101 | Monitor GLOBAL Provider Severity Matrix |

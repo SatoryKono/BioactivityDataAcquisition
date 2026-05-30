@@ -58,7 +58,7 @@ BACKGROUND_SEVERITY_STAT_PANELS = {
 }
 SCALAR_TREND_TIMESERIES_PANELS = {
     ("bioetl-dq-v2.json", "Track: Data Quality Score Trend (Volume-weighted)"),
-    ("bioetl-dq-v2.json", "Track: DQ Impact on Deliverability Trend (Blocked Share %)"),
+    ("bioetl-dq-v2.json", "Track: DQ Threshold Events in Range Trend"),
     ("bioetl-overview-v2.json", "Runtime Blockers Trend"),
     ("bioetl-overview-v2.json", "DQ Status Trend"),
     ("bioetl-overview-v2.json", "Gold Lifecycle Trend"),

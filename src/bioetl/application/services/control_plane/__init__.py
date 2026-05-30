@@ -7,35 +7,11 @@ The package root remains the compatibility-preserving lazy export surface.
 
 from __future__ import annotations
 
-from importlib import import_module
+from bioetl.application.services.control_plane._lazy_export_facade import (
+    install_lazy_export_facade,
+)
 
-__all__ = [
-    "EffectiveConfigService",
-    "ForensicRunDiffResult",
-    "ForensicRunDiffService",
-    "HistoricalReplayCertificationResult",
-    "HistoricalReplayCertificationService",
-    "HistoricalReplaySnapshotCertification",
-    "RunLedgerService",
-    "RunManifestCreateSpec",
-    "RunManifestDiffEntry",
-    "RunManifestDiffResult",
-    "RunManifestInspectionResult",
-    "RunManifestInspectionService",
-    "RunManifestService",
-    "RunManifestVerifyResult",
-    "RunReplayBundleDescriptorRecord",
-    "WorkflowExecutionService",
-    "WorkflowInspectionResult",
-    "WorkflowInspectionService",
-    "WorkflowLedgerService",
-    "WorkflowManifestCreateSpec",
-    "WorkflowManifestService",
-    "build_diagnostics_summary",
-    "build_run_replay_bundle_descriptor",
-]
-
-_LAZY_ATTR_EXPORTS: dict[str, tuple[str, str]] = {
+_LAZY_ATTR_EXPORTS = {
     "EffectiveConfigService": (
         "bioetl.application.services.control_plane.effective_config.service",
         "EffectiveConfigService",
@@ -130,19 +106,6 @@ _LAZY_ATTR_EXPORTS: dict[str, tuple[str, str]] = {
     ),
 }
 
+install_lazy_export_facade(globals(), __name__, _LAZY_ATTR_EXPORTS)
 
-def __getattr__(name: str) -> object:
-    """Lazily expose control-plane services without importing the full family."""
-    try:
-        module_name, attr_name = _LAZY_ATTR_EXPORTS[name]
-    except KeyError as exc:  # pragma: no cover - standard attribute path
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}") from exc
-
-    value = getattr(import_module(module_name), attr_name)
-    globals()[name] = value
-    return value
-
-
-def __dir__() -> list[str]:
-    """Return stable exports for shell introspection and help()."""
-    return sorted(set(globals()) | set(__all__))
+__all__: list[str]

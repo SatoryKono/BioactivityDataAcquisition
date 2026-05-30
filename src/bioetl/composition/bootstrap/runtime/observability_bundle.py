@@ -15,16 +15,19 @@ from bioetl.composition.bootstrap.runtime.observability_assembly import (
     create_observability_bundle as _create_observability_bundle,
 )
 from bioetl.composition.bootstrap.runtime.observability_assembly import (
+    log_observability_initialized as _log_observability_initialized,
+)
+from bioetl.composition.bootstrap.runtime.observability_assembly import (
     run_observability_preflight as _run_observability_preflight,
 )
 from bioetl.composition.bootstrap.runtime.observability_assembly import (
     settings_control_plane as _settings_control_plane,
 )
+from bioetl.composition.bootstrap.runtime.observability_assembly import (
+    control_plane_settings as _control_plane_settings,
+)
 from bioetl.composition.observability import (
     ObservabilityBundle,
-)
-from bioetl.domain.control_plane.reproducibility_policy import (
-    DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
 )
 from bioetl.domain.ports import (
     AuditPort,
@@ -32,7 +35,7 @@ from bioetl.domain.ports import (
     MetricsPort,
     TracingPort,
 )
-from bioetl.domain.ports.noop import NoOpAudit, NoOpMetrics, NoOpTracing
+from bioetl.domain.ports.noop import NoOpAudit
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -217,117 +220,12 @@ def bootstrap_observability_bundle_impl(
     )
 
     _log_observability_initialized(
-        logger=components.logger,
-        metrics=components.metrics,
-        tracer=components.tracer,
-        audit=components.audit,
-        dq_monitor=components.dq_monitor,
+        components=components,
         control_plane=control_plane,
     )
 
     return bundle
 
 
-def _log_observability_initialized(
-    *,
-    logger: LoggerPort,
-    metrics: MetricsPort,
-    tracer: TracingPort,
-    audit: AuditPort,
-    dq_monitor: DQMonitorPort | None,
-    control_plane: object | None,
-) -> None:
-    """Emit structured bootstrap observability event.
-
-    Args:
-        logger: LoggerPort used to emit the initialization event.
-        metrics: MetricsPort whose type name is included in the event.
-        tracer: TracingPort whose type name is included in the event.
-        dq_monitor: Optional DQ monitor; presence is recorded in the event.
-    """
-    logger.info(
-        "observability_initialized",
-        stage="bootstrap",
-        logger_type=type(logger).__name__,
-        metrics_type=type(metrics).__name__,
-        tracer_type=type(tracer).__name__,
-        audit_type=type(audit).__name__,
-        audit_enabled=not isinstance(audit, NoOpAudit),
-        dq_monitor_enabled=dq_monitor is not None,
-        configured_required_persistence_profile=_control_plane_settings(
-            control_plane=control_plane
-        )[0],
-        run_manifest_enabled=_control_plane_settings(control_plane=control_plane)[1],
-        run_ledger_enabled=_control_plane_settings(control_plane=control_plane)[2],
-        preflight_status="passed",
-    )
-    pipeline_name = getattr(logger, "pipeline", None)
-    if not isinstance(pipeline_name, str) or not pipeline_name.strip():
-        pipeline_name = "unknown"
-    _set_component_runtime_gauge(
-        metrics=metrics,
-        pipeline_name=pipeline_name,
-        component="logger",
-        mode="noop" if logger.__class__.__name__ == "NoOpLogger" else "active",
-    )
-    _set_component_runtime_gauge(
-        metrics=metrics,
-        pipeline_name=pipeline_name,
-        component="metrics",
-        mode="noop" if isinstance(metrics, NoOpMetrics) else "active",
-    )
-    _set_component_runtime_gauge(
-        metrics=metrics,
-        pipeline_name=pipeline_name,
-        component="tracing",
-        mode="noop" if isinstance(tracer, NoOpTracing) else "active",
-    )
-    _set_component_runtime_gauge(
-        metrics=metrics,
-        pipeline_name=pipeline_name,
-        component="audit",
-        mode="noop" if isinstance(audit, NoOpAudit) else "active",
-    )
-    _set_component_runtime_gauge(
-        metrics=metrics,
-        pipeline_name=pipeline_name,
-        component="dq_monitor",
-        mode="disabled" if dq_monitor is None else "active",
-    )
-
-
-def _set_component_runtime_gauge(
-    *,
-    metrics: MetricsPort,
-    pipeline_name: str,
-    component: str,
-    mode: str,
-) -> None:
-    """Emit one normalized component runtime-status gauge."""
-    metrics.set_gauge(
-        "bioetl_observability_runtime_status",
-        1.0,
-        {
-            "pipeline": pipeline_name,
-            "component": component,
-            "mode": mode,
-        },
-    )
-
-
 def _audit_required(*, audit: AuditPort | None, audit_required: bool) -> bool:
     return audit_required and audit is not None and isinstance(audit, NoOpAudit)
-
-
-def _control_plane_settings(*, control_plane: object | None) -> tuple[str, bool, bool]:
-    required_profile = str(
-        getattr(
-            control_plane,
-            "required_persistence_profile",
-            DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
-        )
-        or DEFAULT_REQUIRED_PERSISTENCE_PROFILE
-    )
-    manifest_enabled = bool(getattr(control_plane, "run_manifest_enabled", True))
-    ledger_enabled = bool(getattr(control_plane, "run_ledger_enabled", True))
-    return required_profile, manifest_enabled, ledger_enabled

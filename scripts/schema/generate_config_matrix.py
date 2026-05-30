@@ -7,10 +7,14 @@ import argparse
 import csv
 import io
 import json
+import os
+from datetime import date
 from pathlib import Path
 from typing import Any
 
 import yaml
+
+DEFAULT_BASELINE_JSON = Path("reports/quality/config-discrepancy-baseline.json")
 
 
 def flatten_dict(d: dict[str, Any], parent_key: str = "") -> dict[str, Any]:
@@ -34,6 +38,54 @@ def load_config(path: Path) -> dict[str, Any]:
     return payload if isinstance(payload, dict) else {}
 
 
+def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
+    merged: dict[str, Any] = dict(base)
+    for key, value in override.items():
+        if (
+            key in merged
+            and isinstance(merged[key], dict)
+            and isinstance(value, dict)
+        ):
+            merged[key] = _deep_merge(merged[key], value)
+        else:
+            merged[key] = value
+    return merged
+
+
+def _load_pipeline_defaults() -> dict[str, Any]:
+    defaults_path = Path("configs/base/pipeline.yaml")
+    if not defaults_path.exists():
+        return {}
+    payload = load_config(defaults_path)
+    payload.pop("schema_version", None)
+    return payload
+
+
+def _entity_config_effective(path: Path) -> dict[str, Any]:
+    """Return entity YAML with pipeline section merged against base defaults."""
+    raw = load_config(path)
+    pipeline = raw.get("pipeline")
+    if not isinstance(pipeline, dict):
+        return raw
+    effective = dict(raw)
+    effective["pipeline"] = _deep_merge(_load_pipeline_defaults(), pipeline)
+    return effective
+
+
+def _family_metrics(configs: dict[str, dict[str, Any]]) -> dict[str, int]:
+    all_keys = sorted({key for values in configs.values() for key in values})
+    if configs:
+        common = set.intersection(*(set(values.keys()) for values in configs.values()))
+    else:
+        common = set()
+    partial = [key for key in all_keys if key not in common]
+    return {
+        "config_count": len(configs),
+        "unique_parameter_count": len(all_keys),
+        "inconsistent_parameter_count": len(partial),
+    }
+
+
 def _collect_configs() -> dict[str, dict[str, Any]]:
     configs: dict[str, dict[str, Any]] = {}
 
@@ -41,9 +93,14 @@ def _collect_configs() -> dict[str, dict[str, Any]]:
     for yaml_file in sorted(entities_dir.rglob("*.yaml")):
         if yaml_file.name.startswith("_"):
             continue
+        provider = yaml_file.relative_to(entities_dir).parts[0]
+        if provider == "composite":
+            # Composite runtime is governed by configs/composites/*.yaml; legacy
+            # configs/entities/composite/*.yaml stubs are out of scope here.
+            continue
         rel = yaml_file.relative_to(entities_dir)
         name = f"entity/{rel.parent.name}/{rel.stem}"
-        configs[name] = flatten_dict(load_config(yaml_file))
+        configs[name] = flatten_dict(_entity_config_effective(yaml_file))
 
     composites_dir = Path("configs/composites")
     for yaml_file in sorted(composites_dir.glob("*.yaml")):
@@ -53,6 +110,20 @@ def _collect_configs() -> dict[str, dict[str, Any]]:
         configs[name] = flatten_dict(load_config(yaml_file))
 
     return configs
+
+
+def _collect_family_configs() -> dict[str, dict[str, dict[str, Any]]]:
+    all_configs = _collect_configs()
+    families: dict[str, dict[str, dict[str, Any]]] = {
+        "entity_effective": {},
+        "composite_runtime": {},
+    }
+    for name, payload in all_configs.items():
+        if name.startswith("entity/"):
+            families["entity_effective"][name] = payload
+        elif name.startswith("composite/"):
+            families["composite_runtime"][name] = payload
+    return families
 
 
 def _sort_key(path: str) -> tuple[int, list[str]]:
@@ -84,6 +155,12 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         type=Path,
         default=Path("docs/config-discrepancies-report.md"),
         help="Markdown discrepancy report output path.",
+    )
+    parser.add_argument(
+        "--baseline-json-out",
+        type=Path,
+        default=DEFAULT_BASELINE_JSON,
+        help="JSON baseline output path for config-surface ratchet metrics.",
     )
     return parser.parse_args(argv)
 
@@ -160,21 +237,99 @@ def _artifact_matches(path: Path, expected: str) -> bool:
     return False
 
 
+def _live_baseline_metrics(
+    *,
+    config_count: int,
+    unique_parameter_count: int,
+    inconsistent_parameter_count: int,
+) -> dict[str, int]:
+    return {
+        "config_count": config_count,
+        "unique_parameter_count": unique_parameter_count,
+        "inconsistent_parameter_count": inconsistent_parameter_count,
+    }
+
+
+def _build_baseline_payload(
+    *,
+    snapshot_date: str,
+    metrics: dict[str, int],
+    families: dict[str, dict[str, int]],
+) -> dict[str, Any]:
+    return {
+        "snapshot_date": snapshot_date,
+        "metrics": metrics,
+        "families": families,
+    }
+
+
+def _canonical_baseline_json(payload: dict[str, Any]) -> str:
+    return json.dumps(payload, indent=2, sort_keys=True) + "\n"
+
+
+def _write_baseline_json(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    content = _canonical_baseline_json(payload)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(content, encoding="utf-8")
+    os.replace(tmp, path)
+
+
+def _baseline_metrics_match(path: Path, expected_metrics: dict[str, int]) -> bool:
+    if not path.exists():
+        print(f"[drift] missing: {path}")
+        return False
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    metrics = payload.get("metrics")
+    if metrics == expected_metrics:
+        return True
+    print(f"[drift] mismatch: {path}")
+    return False
+
+
+def _baseline_families_match(
+    path: Path,
+    expected_families: dict[str, dict[str, int]],
+) -> bool:
+    if not path.exists():
+        print(f"[drift] missing: {path}")
+        return False
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    families = payload.get("families")
+    if families == expected_families:
+        return True
+    print(f"[drift] mismatch families: {path}")
+    return False
+
+
 def main(argv: list[str] | None = None) -> int:
     """Generate or check CSV and Markdown comparison outputs."""
     args = _parse_args(argv)
     matrix_content, report_content, parameter_count, config_count, partial_count = (
         _build_artifact_contents()
     )
+    baseline_metrics = _live_baseline_metrics(
+        config_count=config_count,
+        unique_parameter_count=parameter_count,
+        inconsistent_parameter_count=partial_count,
+    )
+    family_payload = {
+        family_name: _family_metrics(family_configs)
+        for family_name, family_configs in _collect_family_configs().items()
+    }
     if args.check:
         ok = _artifact_matches(
             args.matrix_output,
             matrix_content,
         ) and _artifact_matches(args.report_output, report_content)
+        ok = ok and _baseline_metrics_match(args.baseline_json_out, baseline_metrics)
+        ok = ok and _baseline_families_match(args.baseline_json_out, family_payload)
         if ok:
             print("[ok] config matrix artifacts are up to date")
             return 0
-        print("[hint] run: python -m scripts.schema generate-config-matrix --update")
+        print(
+            "[hint] run: python -m scripts.schema generate-config-matrix --update"
+        )
         return 1
 
     _write_artifacts(
@@ -182,6 +337,14 @@ def main(argv: list[str] | None = None) -> int:
         report_path=args.report_output,
         matrix_content=matrix_content,
         report_content=report_content,
+    )
+    _write_baseline_json(
+        args.baseline_json_out,
+        _build_baseline_payload(
+            snapshot_date=date.today().isoformat(),
+            metrics=baseline_metrics,
+            families=family_payload,
+        ),
     )
     print(f"Matrix saved to {args.matrix_output}")
     print(f"Total parameters: {parameter_count}")
@@ -191,6 +354,7 @@ def main(argv: list[str] | None = None) -> int:
     print("=" * 80)
     print(f"Inconsistent parameters: {partial_count}")
     print(f"Discrepancy report saved to {args.report_output}")
+    print(f"Config-surface baseline saved to {args.baseline_json_out}")
     return 0
 
 

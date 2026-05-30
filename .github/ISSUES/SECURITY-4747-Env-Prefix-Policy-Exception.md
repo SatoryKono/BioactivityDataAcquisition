@@ -1,11 +1,11 @@
 # Security hygiene: resolve legacy env-var prefix xfail
 
-**Status**: active
+**Status**: completed_in_repo
 **Priority**: P2 (Medium)
 **Labels**: `security`, `testing`, `governance`
 **GitHub Issue**: [#4747](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4747)
-**Issue State**: open
-**Last synced**: 2026-05-29
+**Issue State**: closed
+**Last synced**: 2026-05-30
 
 ## Problem
 
@@ -35,3 +35,10 @@
 
 - `pytest tests/security/test_security.py` no longer contains undocumented `xfail`.
 - Любое оставшееся исключение имеет explicit justification и owner.
+
+## Completion Update (2026-05-30)
+
+- `tests/security/test_security.py::TestNoHardcodedSecrets::test_env_vars_use_correct_prefix`
+  passes on `src/bioetl/**` scan scope (no undocumented xfail on current main).
+- Non-`BIOETL_` env usage in `src/tools/neo4j_audit.py` remains outside the
+  production `src/bioetl` scan boundary and is governed as tooling-only surface.

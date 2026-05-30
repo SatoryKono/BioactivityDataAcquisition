@@ -9,6 +9,9 @@ import bioetl.composition.runtime_builders.run_manifest_support as _manifest_sup
 from bioetl.application.services.control_plane.effective_config.service import (
     create_effective_config_service,
 )
+from bioetl.composition.runtime_builders._manifest_publication_context_support import (
+    ensure_manifest_publication_identity,
+)
 from bioetl.composition.runtime_builders._effective_config_artifact_builder_support import (
     build_composite_runtime_overrides_snapshot,
     build_effective_config_source_refs,
@@ -16,17 +19,11 @@ from bioetl.composition.runtime_builders._effective_config_artifact_builder_supp
     control_plane_root,
     resolve_effective_config_entity,
 )
-from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
-    resolve_manifest_reproducibility_context,
-)
 from bioetl.composition.runtime_builders.run_manifest_support import (
     to_serializable_mapping as _to_serializable_mapping,
 )
 from bioetl.domain.control_plane.effective_config_artifact import (
     ConfigResolutionPolicy,
-)
-from bioetl.domain.control_plane.reproducibility_policy import (
-    STRICT_PERSISTENCE_PROFILES,
 )
 from bioetl.infrastructure.control_plane import FileEffectiveConfigArtifactStore
 
@@ -127,23 +124,14 @@ def create_and_persist_effective_config_artifact(
     contract_identity: _manifest_support.RunManifestContractIdentity | None = None,
 ) -> tuple[str, str, str, str, str]:
     """Create effective config artifact, persist it, and return provenance fields."""
-    if reproducibility_context is None:
-        contract_ref = f"{provider}.{entity}"
-        reproducibility_context = resolve_manifest_reproducibility_context(
-            ctx=ctx,
-            inputs=inputs,
-            provider=provider,
-            entity=entity,
-            contract_ref=contract_ref,
-        )
-    if contract_identity is None:
-        contract_identity = _manifest_support.resolve_contract_identity(
-            provider=provider,
-            entity=entity,
-            strict=bool(getattr(ctx, "exact_replay", False))
-            or reproducibility_context.required_persistence_profile
-            in STRICT_PERSISTENCE_PROFILES,
-        )
+    reproducibility_context, contract_identity = ensure_manifest_publication_identity(
+        ctx=ctx,
+        inputs=inputs,
+        provider=provider,
+        entity=entity,
+        reproducibility_context=reproducibility_context,
+        contract_identity=contract_identity,
+    )
     return _create_and_persist_effective_config_artifact_payload(
         pipeline_name=ctx.pipeline_name,
         pipeline_kind="standard",

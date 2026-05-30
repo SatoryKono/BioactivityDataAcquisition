@@ -64,20 +64,29 @@ def test_build_manifest_create_request_uses_named_contract_identity_fields(
 
     request_inputs = captured["request_inputs"]
     assert result is request_inputs
-    assert request_inputs.contract_ref == identity.contract_ref
-    assert request_inputs.contract_version == identity.contract_version
-    assert request_inputs.contract_schema_hash == identity.contract_schema_hash
-    assert request_inputs.dq_policy_ref == identity.dq_policy_ref
-    assert request_inputs.rule_bundle_version == identity.rule_bundle_version
+    assert request_inputs.contract_identity is identity
+    assert request_inputs.contract_identity.contract_ref == identity.contract_ref
+    assert request_inputs.contract_identity.contract_version == identity.contract_version
     assert (
-        request_inputs.normalization_profile_ref == identity.normalization_profile_ref
+        request_inputs.contract_identity.contract_schema_hash
+        == identity.contract_schema_hash
+    )
+    assert request_inputs.contract_identity.dq_policy_ref == identity.dq_policy_ref
+    assert (
+        request_inputs.contract_identity.rule_bundle_version
+        == identity.rule_bundle_version
     )
     assert (
-        request_inputs.normalization_profile_version
+        request_inputs.contract_identity.normalization_profile_ref
+        == identity.normalization_profile_ref
+    )
+    assert (
+        request_inputs.contract_identity.normalization_profile_version
         == identity.normalization_profile_version
     )
     assert (
-        request_inputs.normalization_profile_hash == identity.normalization_profile_hash
+        request_inputs.contract_identity.normalization_profile_hash
+        == identity.normalization_profile_hash
     )
     assert request_inputs.reproducibility_context.required_persistence_profile == (
         "replay_ready"
@@ -168,20 +177,18 @@ def test_build_manifest_create_request_passes_through_reproducibility_context(
     assert captured["reproducibility_context"] is reproducibility_context
 
 
-def test_resolve_manifest_context_uses_supplied_publication_context(
+def test_resolve_manifest_publication_context_uses_supplied_publication_context(
     monkeypatch,
 ) -> None:
     """Context resolution must reuse supplied publication inputs when provided."""
     monkeypatch.setattr(
-        run_manifest_builder,
-        "resolve_manifest_reproducibility_context",
+        "bioetl.composition.runtime_builders._manifest_publication_context_support.resolve_manifest_reproducibility_context",
         lambda **_: (_ for _ in ()).throw(
             AssertionError("reproducibility resolver should not run")
         ),
     )
     monkeypatch.setattr(
-        run_manifest_builder,
-        "_resolve_manifest_contract_identity",
+        "bioetl.composition.runtime_builders._manifest_publication_context_support._manifest_support.resolve_contract_identity",
         lambda **_: (_ for _ in ()).throw(
             AssertionError("contract identity resolver should not run")
         ),
@@ -192,7 +199,7 @@ def test_resolve_manifest_context_uses_supplied_publication_context(
         strict_exact_replay_supported=False,
     )
     contract_identity = _make_contract_identity()
-    result = run_manifest_builder._resolve_manifest_context(
+    result = run_manifest_builder.resolve_manifest_publication_context(
         ctx=SimpleNamespace(
             run_id=uuid4(),
             pipeline_name="custom_runtime_name",

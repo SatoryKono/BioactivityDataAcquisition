@@ -6,11 +6,9 @@ the full application-core graph during module initialization.
 
 from __future__ import annotations
 
-from importlib import import_module
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    pass
+from bioetl.application.core.wiring._lazy_export_facade import (
+    install_lazy_export_facade,
+)
 
 _PUBLIC_EXPORTS = {
     "BasePipeline": ("bioetl.application.core.base", "BasePipeline"),
@@ -37,18 +35,6 @@ _PUBLIC_EXPORTS = {
     "ShutdownSignal": ("bioetl.application.core.lifecycle", "ShutdownSignal"),
 }
 
-__all__ = list(_PUBLIC_EXPORTS)
+install_lazy_export_facade(globals(), __name__, _PUBLIC_EXPORTS)
 
-
-def __getattr__(name: str) -> object:
-    export = _PUBLIC_EXPORTS.get(name)
-    if export is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    module_name, attr_name = export
-    value = getattr(import_module(module_name), attr_name)
-    globals()[name] = value
-    return value
-
-
-def __dir__() -> list[str]:
-    return sorted(set(globals()) | set(__all__))
+__all__: list[str]

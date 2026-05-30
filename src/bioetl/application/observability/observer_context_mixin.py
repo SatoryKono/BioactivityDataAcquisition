@@ -181,6 +181,12 @@ class _ObserverContextManagerMixin(_ObserverEventMixinBase):
                 "status": status,
             },
         )
+        if status == "success":
+            self._metrics.increment_counter(
+                "bioetl_health_check_success_total",
+                1,
+                labels={"provider": self.provider_name},
+            )
 
     def _emit_pipeline_result_event(
         self,

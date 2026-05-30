@@ -14,13 +14,7 @@ SRC_ROOT = ROOT / "src" / "bioetl"
 
 EXPECTED_LAZY_EXPORT_FACADES = {
     "src/bioetl/application/core/wiring/__init__.py": "public_package_facade",
-    "src/bioetl/application/core/wiring/factory.py": "compatibility_facade",
-    "src/bioetl/application/core/wiring/registry.py": "compatibility_facade",
-    "src/bioetl/application/core/wiring/transformer.py": "compatibility_facade",
     "src/bioetl/application/pipelines/common/blocks.py": "dynamic_entrypoint",
-    "src/bioetl/application/services/control_plane/__init__.py": (
-        "public_package_facade"
-    ),
     "src/bioetl/composition/bootstrap/__init__.py": "public_package_facade",
     "src/bioetl/composition/bootstrap/cli/__init__.py": "public_package_facade",
     "src/bioetl/composition/bootstrap/runtime/__init__.py": ("public_package_facade"),

@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
-from bioetl.application.services.control_plane._run_manifest_snapshot_payloads import (
-    manifest_input_snapshot_trace_refs,
-)
 from bioetl.application.services.control_plane.historical_replay_certification import (
     LIVE_CAPTURE_SNAPSHOT_MATERIALIZED,
     MIXED_POST_MANIFEST_SNAPSHOT_MATERIALIZATION,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.nested_mapping import (
+    lookup_mapping_path,
 )
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.control_plane.run_ledger import INPUT_SNAPSHOT_PUBLISHED_EVENT
@@ -18,21 +18,12 @@ from bioetl.domain.normalization import (
 )
 
 
-def lookup_mapping_path(
-    mapping: Mapping[str, object],
-    *path: str,
-) -> object | None:
-    """Read one nested mapping path using only mapping-shaped objects."""
-    current: object = mapping
-    for component in path:
-        if not isinstance(current, Mapping):
-            return None
-        current = current.get(component)
-    return current
-
-
 def collect_input_snapshot_refs(manifest: RunManifest) -> list[dict[str, object]]:
     """Return deterministic flattened snapshot provenance extracted from source refs."""
+    from bioetl.application.services.control_plane.run_manifest_diagnostics_support import (
+        manifest_input_snapshot_trace_refs,
+    )
+
     return manifest_input_snapshot_trace_refs(manifest)
 
 

@@ -33,10 +33,18 @@ chembl,activity,columns,standard_relation,"[""=""]","[""=""]",duplicate,identica
 chembl,activity,columns,standard_units,"[""nM""]","[""nM""]",duplicate,identical rule in gold_filters - drop from silver
 chembl,activity,columns,assay_type,"[""B"", ""F""]","[""B"", ""F""]",duplicate,identical rule in gold_filters - drop from silver
 chembl,activity,columns,potential_duplicate,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+chembl,activity,columns,inorganic_flag,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+chembl,activity,columns,molecule_type,"[""Small molecule""]","[""Small molecule""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,activity,columns,publication_type,"[""journal-article""]","[""journal-article""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,activity,columns,relationship_type,"[""D""]","[""D""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,activity,columns,src_id,"[""1""]",,move_to_gold,no rule in gold_filters - move from silver
+chembl,activity,columns,structure_type,"[""MOL""]","[""MOL""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,activity,columns,target_type,"[""SINGLE PROTEIN""]","[""SINGLE PROTEIN""]",duplicate,identical rule in gold_filters - drop from silver
 chembl,activity,ranges,activity_id,"{""max"": 10000000000, ""min"": 1}",,move_to_gold,no rule in gold_filters - move from silver
 chembl,activity,ranges,standard_value,"{""include_min"": false, ""min"": 0}","{""include_min"": false, ""min"": 0}",duplicate,identical rule in gold_filters - drop from silver
 chembl,activity,ranges,pchembl_value,"{""max"": 10, ""min"": 3}",,move_to_gold,no rule in gold_filters - move from silver
-chembl,activity,ranges,publication_year,"{""max"": 2050, ""min"": 1950}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,activity,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+chembl,activity,ranges,confidence_score,"{""max"": 9, ""min"": 8}",,move_to_gold,no rule in gold_filters - move from silver
 chembl,assay,required_fields,assay_id,"""assay_id""",,keep_in_silver,structural rule stays in silver_filters
 chembl,assay,required_fields,assay_type,"""assay_type""","""assay_type""",keep_in_silver,also present in gold_filters (informational)
 chembl,assay,required_fields,assay_description,"""assay_description""","""assay_description""",keep_in_silver,also present in gold_filters (informational)
@@ -49,36 +57,197 @@ chembl,assay,required_fields,confidence_score,"""confidence_score""",,keep_in_si
 chembl,assay,columns,assay_type,"[""B"", ""F""]","[""B"", ""F""]",duplicate,identical rule in gold_filters - drop from silver
 chembl,assay,columns,relationship_type,"[""D""]","[""D""]",duplicate,identical rule in gold_filters - drop from silver
 chembl,assay,columns,src_id,"[""1""]",,move_to_gold,no rule in gold_filters - move from silver
+chembl,assay,columns,inorganic_flag,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+chembl,assay,columns,molecule_type,"[""Small molecule""]","[""Small molecule""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,assay,columns,potential_duplicate,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+chembl,assay,columns,publication_type,"[""journal-article""]","[""journal-article""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,assay,columns,standard_relation,"[""=""]","[""=""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,assay,columns,standard_type,"[""IC50"", ""Ki""]","[""IC50"", ""Ki""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,assay,columns,standard_units,"[""nM""]","[""nM""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,assay,columns,structure_type,"[""MOL""]","[""MOL""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,assay,columns,target_type,"[""SINGLE PROTEIN""]","[""SINGLE PROTEIN""]",duplicate,identical rule in gold_filters - drop from silver
 chembl,assay,ranges,confidence_score,"{""max"": 9, ""min"": 8}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,assay,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+chembl,assay,ranges,activity_id,"{""max"": 10000000000, ""min"": 1}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,assay,ranges,pchembl_value,"{""max"": 10, ""min"": 3}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,assay,ranges,standard_value,"{""include_min"": false, ""min"": 0}","{""include_min"": false, ""min"": 0}",duplicate,identical rule in gold_filters - drop from silver
 chembl,assay_parameters,required_fields,assay_id,"""assay_id""","""assay_id""",keep_in_silver,also present in gold_filters (informational)
 chembl,assay_parameters,required_fields,assay_param_id,"""assay_param_id""",,keep_in_silver,structural rule stays in silver_filters
 chembl,assay_parameters,required_fields,parameter_type,"""parameter_type""","""parameter_type""",keep_in_silver,also present in gold_filters (informational)
 chembl,assay_parameters,required_fields,type,"""type""",,keep_in_silver,structural rule stays in silver_filters
+chembl,assay_parameters,columns,assay_type,"[""B"", ""F""]","[""B"", ""F""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,assay_parameters,columns,inorganic_flag,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+chembl,assay_parameters,columns,molecule_type,"[""Small molecule""]","[""Small molecule""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,assay_parameters,columns,potential_duplicate,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+chembl,assay_parameters,columns,publication_type,"[""journal-article""]","[""journal-article""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,assay_parameters,columns,relationship_type,"[""D""]","[""D""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,assay_parameters,columns,src_id,"[""1""]",,move_to_gold,no rule in gold_filters - move from silver
+chembl,assay_parameters,columns,standard_relation,"[""=""]","[""=""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,assay_parameters,columns,standard_type,"[""IC50"", ""Ki""]","[""IC50"", ""Ki""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,assay_parameters,columns,standard_units,"[""nM""]","[""nM""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,assay_parameters,columns,structure_type,"[""MOL""]","[""MOL""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,assay_parameters,columns,target_type,"[""SINGLE PROTEIN""]","[""SINGLE PROTEIN""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,assay_parameters,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+chembl,assay_parameters,ranges,activity_id,"{""max"": 10000000000, ""min"": 1}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,assay_parameters,ranges,confidence_score,"{""max"": 9, ""min"": 8}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,assay_parameters,ranges,pchembl_value,"{""max"": 10, ""min"": 3}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,assay_parameters,ranges,standard_value,"{""include_min"": false, ""min"": 0}","{""include_min"": false, ""min"": 0}",duplicate,identical rule in gold_filters - drop from silver
 chembl,cell_line,required_fields,cell_id,"""cell_id""",,keep_in_silver,structural rule stays in silver_filters
 chembl,cell_line,required_fields,cell_name,"""cell_name""","""cell_name""",keep_in_silver,also present in gold_filters (informational)
+chembl,cell_line,columns,assay_type,"[""B"", ""F""]","[""B"", ""F""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,cell_line,columns,inorganic_flag,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+chembl,cell_line,columns,molecule_type,"[""Small molecule""]","[""Small molecule""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,cell_line,columns,potential_duplicate,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+chembl,cell_line,columns,publication_type,"[""journal-article""]","[""journal-article""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,cell_line,columns,relationship_type,"[""D""]","[""D""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,cell_line,columns,src_id,"[""1""]",,move_to_gold,no rule in gold_filters - move from silver
+chembl,cell_line,columns,standard_relation,"[""=""]","[""=""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,cell_line,columns,standard_type,"[""IC50"", ""Ki""]","[""IC50"", ""Ki""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,cell_line,columns,standard_units,"[""nM""]","[""nM""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,cell_line,columns,structure_type,"[""MOL""]","[""MOL""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,cell_line,columns,target_type,"[""SINGLE PROTEIN""]","[""SINGLE PROTEIN""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,cell_line,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+chembl,cell_line,ranges,activity_id,"{""max"": 10000000000, ""min"": 1}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,cell_line,ranges,confidence_score,"{""max"": 9, ""min"": 8}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,cell_line,ranges,pchembl_value,"{""max"": 10, ""min"": 3}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,cell_line,ranges,standard_value,"{""include_min"": false, ""min"": 0}","{""include_min"": false, ""min"": 0}",duplicate,identical rule in gold_filters - drop from silver
 chembl,compound_record,required_fields,molecule_id,"""molecule_id""","""molecule_id""",keep_in_silver,also present in gold_filters (informational)
 chembl,compound_record,required_fields,publication_id,"""publication_id""","""publication_id""",keep_in_silver,also present in gold_filters (informational)
 chembl,compound_record,required_fields,record_id,"""record_id""",,keep_in_silver,structural rule stays in silver_filters
+chembl,compound_record,columns,assay_type,"[""B"", ""F""]","[""B"", ""F""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,compound_record,columns,inorganic_flag,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+chembl,compound_record,columns,molecule_type,"[""Small molecule""]","[""Small molecule""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,compound_record,columns,potential_duplicate,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+chembl,compound_record,columns,publication_type,"[""journal-article""]","[""journal-article""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,compound_record,columns,relationship_type,"[""D""]","[""D""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,compound_record,columns,src_id,"[""1""]",,move_to_gold,no rule in gold_filters - move from silver
+chembl,compound_record,columns,standard_relation,"[""=""]","[""=""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,compound_record,columns,standard_type,"[""IC50"", ""Ki""]","[""IC50"", ""Ki""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,compound_record,columns,standard_units,"[""nM""]","[""nM""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,compound_record,columns,structure_type,"[""MOL""]","[""MOL""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,compound_record,columns,target_type,"[""SINGLE PROTEIN""]","[""SINGLE PROTEIN""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,compound_record,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+chembl,compound_record,ranges,activity_id,"{""max"": 10000000000, ""min"": 1}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,compound_record,ranges,confidence_score,"{""max"": 9, ""min"": 8}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,compound_record,ranges,pchembl_value,"{""max"": 10, ""min"": 3}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,compound_record,ranges,standard_value,"{""include_min"": false, ""min"": 0}","{""include_min"": false, ""min"": 0}",duplicate,identical rule in gold_filters - drop from silver
 chembl,molecule,required_fields,molecule_id,"""molecule_id""","""molecule_id""",keep_in_silver,also present in gold_filters (informational)
 chembl,molecule,required_fields,molecule_type,"""molecule_type""",,keep_in_silver,structural rule stays in silver_filters
 chembl,molecule,columns,molecule_type,"[""Small molecule""]","[""Small molecule""]",duplicate,identical rule in gold_filters - drop from silver
 chembl,molecule,columns,structure_type,"[""MOL""]","[""MOL""]",duplicate,identical rule in gold_filters - drop from silver
 chembl,molecule,columns,inorganic_flag,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+chembl,molecule,columns,assay_type,"[""B"", ""F""]","[""B"", ""F""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,molecule,columns,potential_duplicate,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+chembl,molecule,columns,publication_type,"[""journal-article""]","[""journal-article""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,molecule,columns,relationship_type,"[""D""]","[""D""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,molecule,columns,src_id,"[""1""]",,move_to_gold,no rule in gold_filters - move from silver
+chembl,molecule,columns,standard_relation,"[""=""]","[""=""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,molecule,columns,standard_type,"[""IC50"", ""Ki""]","[""IC50"", ""Ki""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,molecule,columns,standard_units,"[""nM""]","[""nM""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,molecule,columns,target_type,"[""SINGLE PROTEIN""]","[""SINGLE PROTEIN""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,molecule,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+chembl,molecule,ranges,activity_id,"{""max"": 10000000000, ""min"": 1}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,molecule,ranges,confidence_score,"{""max"": 9, ""min"": 8}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,molecule,ranges,pchembl_value,"{""max"": 10, ""min"": 3}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,molecule,ranges,standard_value,"{""include_min"": false, ""min"": 0}","{""include_min"": false, ""min"": 0}",duplicate,identical rule in gold_filters - drop from silver
 chembl,protein_class,required_fields,class_level,"""class_level""",,keep_in_silver,structural rule stays in silver_filters
 chembl,protein_class,required_fields,pref_name,"""pref_name""","""pref_name""",keep_in_silver,also present in gold_filters (informational)
 chembl,protein_class,required_fields,protein_class_id,"""protein_class_id""",,keep_in_silver,structural rule stays in silver_filters
+chembl,protein_class,columns,assay_type,"[""B"", ""F""]","[""B"", ""F""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,protein_class,columns,inorganic_flag,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+chembl,protein_class,columns,molecule_type,"[""Small molecule""]","[""Small molecule""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,protein_class,columns,potential_duplicate,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+chembl,protein_class,columns,publication_type,"[""journal-article""]","[""journal-article""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,protein_class,columns,relationship_type,"[""D""]","[""D""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,protein_class,columns,src_id,"[""1""]",,move_to_gold,no rule in gold_filters - move from silver
+chembl,protein_class,columns,standard_relation,"[""=""]","[""=""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,protein_class,columns,standard_type,"[""IC50"", ""Ki""]","[""IC50"", ""Ki""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,protein_class,columns,standard_units,"[""nM""]","[""nM""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,protein_class,columns,structure_type,"[""MOL""]","[""MOL""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,protein_class,columns,target_type,"[""SINGLE PROTEIN""]","[""SINGLE PROTEIN""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,protein_class,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+chembl,protein_class,ranges,activity_id,"{""max"": 10000000000, ""min"": 1}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,protein_class,ranges,confidence_score,"{""max"": 9, ""min"": 8}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,protein_class,ranges,pchembl_value,"{""max"": 10, ""min"": 3}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,protein_class,ranges,standard_value,"{""include_min"": false, ""min"": 0}","{""include_min"": false, ""min"": 0}",duplicate,identical rule in gold_filters - drop from silver
 chembl,publication,required_fields,publication_id,"""publication_id""","""publication_id""",keep_in_silver,also present in gold_filters (informational)
 chembl,publication,required_fields,publication_type,"""publication_type""","""publication_type""",keep_in_silver,also present in gold_filters (informational)
 chembl,publication,required_fields,title,"""title""","""title""",keep_in_silver,also present in gold_filters (informational)
 chembl,publication,columns,publication_type,"[""journal-article""]","[""journal-article""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,publication,columns,assay_type,"[""B"", ""F""]","[""B"", ""F""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,publication,columns,inorganic_flag,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+chembl,publication,columns,molecule_type,"[""Small molecule""]","[""Small molecule""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,publication,columns,potential_duplicate,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+chembl,publication,columns,relationship_type,"[""D""]","[""D""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,publication,columns,src_id,"[""1""]",,move_to_gold,no rule in gold_filters - move from silver
+chembl,publication,columns,standard_relation,"[""=""]","[""=""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,publication,columns,standard_type,"[""IC50"", ""Ki""]","[""IC50"", ""Ki""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,publication,columns,standard_units,"[""nM""]","[""nM""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,publication,columns,structure_type,"[""MOL""]","[""MOL""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,publication,columns,target_type,"[""SINGLE PROTEIN""]","[""SINGLE PROTEIN""]",duplicate,identical rule in gold_filters - drop from silver
 chembl,publication,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+chembl,publication,ranges,activity_id,"{""max"": 10000000000, ""min"": 1}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,publication,ranges,confidence_score,"{""max"": 9, ""min"": 8}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,publication,ranges,pchembl_value,"{""max"": 10, ""min"": 3}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,publication,ranges,standard_value,"{""include_min"": false, ""min"": 0}","{""include_min"": false, ""min"": 0}",duplicate,identical rule in gold_filters - drop from silver
 chembl,publication_similarity,required_fields,sim_id,"""sim_id""","""sim_id""",keep_in_silver,also present in gold_filters (informational)
 chembl,publication_similarity,required_fields,doc_1,"""doc_1""","""doc_1""",keep_in_silver,also present in gold_filters (informational)
 chembl,publication_similarity,required_fields,doc_2,"""doc_2""","""doc_2""",keep_in_silver,also present in gold_filters (informational)
+chembl,publication_similarity,columns,assay_type,"[""B"", ""F""]","[""B"", ""F""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,publication_similarity,columns,inorganic_flag,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+chembl,publication_similarity,columns,molecule_type,"[""Small molecule""]","[""Small molecule""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,publication_similarity,columns,potential_duplicate,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+chembl,publication_similarity,columns,publication_type,"[""journal-article""]","[""journal-article""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,publication_similarity,columns,relationship_type,"[""D""]","[""D""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,publication_similarity,columns,src_id,"[""1""]",,move_to_gold,no rule in gold_filters - move from silver
+chembl,publication_similarity,columns,standard_relation,"[""=""]","[""=""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,publication_similarity,columns,standard_type,"[""IC50"", ""Ki""]","[""IC50"", ""Ki""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,publication_similarity,columns,standard_units,"[""nM""]","[""nM""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,publication_similarity,columns,structure_type,"[""MOL""]","[""MOL""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,publication_similarity,columns,target_type,"[""SINGLE PROTEIN""]","[""SINGLE PROTEIN""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,publication_similarity,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+chembl,publication_similarity,ranges,activity_id,"{""max"": 10000000000, ""min"": 1}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,publication_similarity,ranges,confidence_score,"{""max"": 9, ""min"": 8}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,publication_similarity,ranges,pchembl_value,"{""max"": 10, ""min"": 3}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,publication_similarity,ranges,standard_value,"{""include_min"": false, ""min"": 0}","{""include_min"": false, ""min"": 0}",duplicate,identical rule in gold_filters - drop from silver
 chembl,publication_term,required_fields,publication_id,"""publication_id""","""publication_id""",keep_in_silver,also present in gold_filters (informational)
 chembl,publication_term,required_fields,term,"""term""","""term""",keep_in_silver,also present in gold_filters (informational)
 chembl,publication_term,required_fields,term_type,"""term_type""","""term_type""",keep_in_silver,also present in gold_filters (informational)
+chembl,publication_term,columns,assay_type,"[""B"", ""F""]","[""B"", ""F""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,publication_term,columns,inorganic_flag,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+chembl,publication_term,columns,molecule_type,"[""Small molecule""]","[""Small molecule""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,publication_term,columns,potential_duplicate,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+chembl,publication_term,columns,publication_type,"[""journal-article""]","[""journal-article""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,publication_term,columns,relationship_type,"[""D""]","[""D""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,publication_term,columns,src_id,"[""1""]",,move_to_gold,no rule in gold_filters - move from silver
+chembl,publication_term,columns,standard_relation,"[""=""]","[""=""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,publication_term,columns,standard_type,"[""IC50"", ""Ki""]","[""IC50"", ""Ki""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,publication_term,columns,standard_units,"[""nM""]","[""nM""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,publication_term,columns,structure_type,"[""MOL""]","[""MOL""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,publication_term,columns,target_type,"[""SINGLE PROTEIN""]","[""SINGLE PROTEIN""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,publication_term,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+chembl,publication_term,ranges,activity_id,"{""max"": 10000000000, ""min"": 1}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,publication_term,ranges,confidence_score,"{""max"": 9, ""min"": 8}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,publication_term,ranges,pchembl_value,"{""max"": 10, ""min"": 3}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,publication_term,ranges,standard_value,"{""include_min"": false, ""min"": 0}","{""include_min"": false, ""min"": 0}",duplicate,identical rule in gold_filters - drop from silver
 chembl,subcellular_fraction,required_fields,subcellular_fraction,"""subcellular_fraction""","""subcellular_fraction""",keep_in_silver,also present in gold_filters (informational)
+chembl,subcellular_fraction,columns,assay_type,"[""B"", ""F""]","[""B"", ""F""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,subcellular_fraction,columns,inorganic_flag,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+chembl,subcellular_fraction,columns,molecule_type,"[""Small molecule""]","[""Small molecule""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,subcellular_fraction,columns,potential_duplicate,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+chembl,subcellular_fraction,columns,publication_type,"[""journal-article""]","[""journal-article""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,subcellular_fraction,columns,relationship_type,"[""D""]","[""D""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,subcellular_fraction,columns,src_id,"[""1""]",,move_to_gold,no rule in gold_filters - move from silver
+chembl,subcellular_fraction,columns,standard_relation,"[""=""]","[""=""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,subcellular_fraction,columns,standard_type,"[""IC50"", ""Ki""]","[""IC50"", ""Ki""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,subcellular_fraction,columns,standard_units,"[""nM""]","[""nM""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,subcellular_fraction,columns,structure_type,"[""MOL""]","[""MOL""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,subcellular_fraction,columns,target_type,"[""SINGLE PROTEIN""]","[""SINGLE PROTEIN""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,subcellular_fraction,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+chembl,subcellular_fraction,ranges,activity_id,"{""max"": 10000000000, ""min"": 1}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,subcellular_fraction,ranges,confidence_score,"{""max"": 9, ""min"": 8}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,subcellular_fraction,ranges,pchembl_value,"{""max"": 10, ""min"": 3}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,subcellular_fraction,ranges,standard_value,"{""include_min"": false, ""min"": 0}","{""include_min"": false, ""min"": 0}",duplicate,identical rule in gold_filters - drop from silver
 chembl,target,required_fields,target_id,"""target_id""",,keep_in_silver,structural rule stays in silver_filters
 chembl,target,required_fields,pref_name,"""pref_name""","""pref_name""",keep_in_silver,also present in gold_filters (informational)
 chembl,target,required_fields,organism,"""organism""","""organism""",keep_in_silver,also present in gold_filters (informational)
@@ -92,20 +261,189 @@ chembl,target,required_fields,target_xref_go_function,"""target_xref_go_function
 chembl,target,required_fields,target_xref_go_process,"""target_xref_go_process""",,keep_in_silver,structural rule stays in silver_filters
 chembl,target,required_fields,target_xref_reactome_ids,"""target_xref_reactome_ids""",,keep_in_silver,structural rule stays in silver_filters
 chembl,target,columns,target_type,"[""SINGLE PROTEIN""]","[""SINGLE PROTEIN""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,target,columns,assay_type,"[""B"", ""F""]","[""B"", ""F""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,target,columns,inorganic_flag,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+chembl,target,columns,molecule_type,"[""Small molecule""]","[""Small molecule""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,target,columns,potential_duplicate,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+chembl,target,columns,publication_type,"[""journal-article""]","[""journal-article""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,target,columns,relationship_type,"[""D""]","[""D""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,target,columns,src_id,"[""1""]",,move_to_gold,no rule in gold_filters - move from silver
+chembl,target,columns,standard_relation,"[""=""]","[""=""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,target,columns,standard_type,"[""IC50"", ""Ki""]","[""IC50"", ""Ki""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,target,columns,standard_units,"[""nM""]","[""nM""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,target,columns,structure_type,"[""MOL""]","[""MOL""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,target,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+chembl,target,ranges,activity_id,"{""max"": 10000000000, ""min"": 1}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,target,ranges,confidence_score,"{""max"": 9, ""min"": 8}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,target,ranges,pchembl_value,"{""max"": 10, ""min"": 3}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,target,ranges,standard_value,"{""include_min"": false, ""min"": 0}","{""include_min"": false, ""min"": 0}",duplicate,identical rule in gold_filters - drop from silver
 chembl,target_component,required_fields,component_id,"""component_id""",,keep_in_silver,structural rule stays in silver_filters
 chembl,target_component,required_fields,organism,"""organism""",,keep_in_silver,structural rule stays in silver_filters
+chembl,target_component,columns,assay_type,"[""B"", ""F""]","[""B"", ""F""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,target_component,columns,inorganic_flag,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+chembl,target_component,columns,molecule_type,"[""Small molecule""]","[""Small molecule""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,target_component,columns,potential_duplicate,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+chembl,target_component,columns,publication_type,"[""journal-article""]","[""journal-article""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,target_component,columns,relationship_type,"[""D""]","[""D""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,target_component,columns,src_id,"[""1""]",,move_to_gold,no rule in gold_filters - move from silver
+chembl,target_component,columns,standard_relation,"[""=""]","[""=""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,target_component,columns,standard_type,"[""IC50"", ""Ki""]","[""IC50"", ""Ki""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,target_component,columns,standard_units,"[""nM""]","[""nM""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,target_component,columns,structure_type,"[""MOL""]","[""MOL""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,target_component,columns,target_type,"[""SINGLE PROTEIN""]","[""SINGLE PROTEIN""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,target_component,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+chembl,target_component,ranges,activity_id,"{""max"": 10000000000, ""min"": 1}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,target_component,ranges,confidence_score,"{""max"": 9, ""min"": 8}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,target_component,ranges,pchembl_value,"{""max"": 10, ""min"": 3}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,target_component,ranges,standard_value,"{""include_min"": false, ""min"": 0}","{""include_min"": false, ""min"": 0}",duplicate,identical rule in gold_filters - drop from silver
 chembl,tissue,required_fields,tissue_id,"""tissue_id""","""tissue_id""",keep_in_silver,also present in gold_filters (informational)
 chembl,tissue,required_fields,pref_name,"""pref_name""",,keep_in_silver,structural rule stays in silver_filters
+chembl,tissue,columns,assay_type,"[""B"", ""F""]","[""B"", ""F""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,tissue,columns,inorganic_flag,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+chembl,tissue,columns,molecule_type,"[""Small molecule""]","[""Small molecule""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,tissue,columns,potential_duplicate,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+chembl,tissue,columns,publication_type,"[""journal-article""]","[""journal-article""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,tissue,columns,relationship_type,"[""D""]","[""D""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,tissue,columns,src_id,"[""1""]",,move_to_gold,no rule in gold_filters - move from silver
+chembl,tissue,columns,standard_relation,"[""=""]","[""=""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,tissue,columns,standard_type,"[""IC50"", ""Ki""]","[""IC50"", ""Ki""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,tissue,columns,standard_units,"[""nM""]","[""nM""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,tissue,columns,structure_type,"[""MOL""]","[""MOL""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,tissue,columns,target_type,"[""SINGLE PROTEIN""]","[""SINGLE PROTEIN""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,tissue,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+chembl,tissue,ranges,activity_id,"{""max"": 10000000000, ""min"": 1}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,tissue,ranges,confidence_score,"{""max"": 9, ""min"": 8}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,tissue,ranges,pchembl_value,"{""max"": 10, ""min"": 3}",,move_to_gold,no rule in gold_filters - move from silver
+chembl,tissue,ranges,standard_value,"{""include_min"": false, ""min"": 0}","{""include_min"": false, ""min"": 0}",duplicate,identical rule in gold_filters - drop from silver
 crossref,publication,required_fields,doi,"""doi""","""doi""",keep_in_silver,also present in gold_filters (informational)
 crossref,publication,required_fields,title,"""title""","""title""",keep_in_silver,also present in gold_filters (informational)
+crossref,publication,columns,assay_type,"[""B"", ""F""]","[""B"", ""F""]",duplicate,identical rule in gold_filters - drop from silver
+crossref,publication,columns,inorganic_flag,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+crossref,publication,columns,molecule_type,"[""Small molecule""]","[""Small molecule""]",duplicate,identical rule in gold_filters - drop from silver
+crossref,publication,columns,potential_duplicate,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+crossref,publication,columns,publication_type,"[""journal-article""]","[""journal-article""]",duplicate,identical rule in gold_filters - drop from silver
+crossref,publication,columns,relationship_type,"[""D""]","[""D""]",duplicate,identical rule in gold_filters - drop from silver
+crossref,publication,columns,src_id,"[""1""]",,move_to_gold,no rule in gold_filters - move from silver
+crossref,publication,columns,standard_relation,"[""=""]","[""=""]",duplicate,identical rule in gold_filters - drop from silver
+crossref,publication,columns,standard_type,"[""IC50"", ""Ki""]","[""IC50"", ""Ki""]",duplicate,identical rule in gold_filters - drop from silver
+crossref,publication,columns,standard_units,"[""nM""]","[""nM""]",duplicate,identical rule in gold_filters - drop from silver
+crossref,publication,columns,structure_type,"[""MOL""]","[""MOL""]",duplicate,identical rule in gold_filters - drop from silver
+crossref,publication,columns,target_type,"[""SINGLE PROTEIN""]","[""SINGLE PROTEIN""]",duplicate,identical rule in gold_filters - drop from silver
+crossref,publication,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+crossref,publication,ranges,activity_id,"{""max"": 10000000000, ""min"": 1}",,move_to_gold,no rule in gold_filters - move from silver
+crossref,publication,ranges,confidence_score,"{""max"": 9, ""min"": 8}",,move_to_gold,no rule in gold_filters - move from silver
+crossref,publication,ranges,pchembl_value,"{""max"": 10, ""min"": 3}",,move_to_gold,no rule in gold_filters - move from silver
+crossref,publication,ranges,standard_value,"{""include_min"": false, ""min"": 0}","{""include_min"": false, ""min"": 0}",duplicate,identical rule in gold_filters - drop from silver
 openalex,publication,required_fields,openalex_id,"""openalex_id""","""openalex_id""",keep_in_silver,also present in gold_filters (informational)
 openalex,publication,required_fields,title,"""title""","""title""",keep_in_silver,also present in gold_filters (informational)
+openalex,publication,columns,assay_type,"[""B"", ""F""]","[""B"", ""F""]",duplicate,identical rule in gold_filters - drop from silver
+openalex,publication,columns,inorganic_flag,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+openalex,publication,columns,molecule_type,"[""Small molecule""]","[""Small molecule""]",duplicate,identical rule in gold_filters - drop from silver
+openalex,publication,columns,potential_duplicate,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+openalex,publication,columns,publication_type,"[""journal-article""]","[""journal-article""]",duplicate,identical rule in gold_filters - drop from silver
+openalex,publication,columns,relationship_type,"[""D""]","[""D""]",duplicate,identical rule in gold_filters - drop from silver
+openalex,publication,columns,src_id,"[""1""]",,move_to_gold,no rule in gold_filters - move from silver
+openalex,publication,columns,standard_relation,"[""=""]","[""=""]",duplicate,identical rule in gold_filters - drop from silver
+openalex,publication,columns,standard_type,"[""IC50"", ""Ki""]","[""IC50"", ""Ki""]",duplicate,identical rule in gold_filters - drop from silver
+openalex,publication,columns,standard_units,"[""nM""]","[""nM""]",duplicate,identical rule in gold_filters - drop from silver
+openalex,publication,columns,structure_type,"[""MOL""]","[""MOL""]",duplicate,identical rule in gold_filters - drop from silver
+openalex,publication,columns,target_type,"[""SINGLE PROTEIN""]","[""SINGLE PROTEIN""]",duplicate,identical rule in gold_filters - drop from silver
+openalex,publication,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+openalex,publication,ranges,activity_id,"{""max"": 10000000000, ""min"": 1}",,move_to_gold,no rule in gold_filters - move from silver
+openalex,publication,ranges,confidence_score,"{""max"": 9, ""min"": 8}",,move_to_gold,no rule in gold_filters - move from silver
+openalex,publication,ranges,pchembl_value,"{""max"": 10, ""min"": 3}",,move_to_gold,no rule in gold_filters - move from silver
+openalex,publication,ranges,standard_value,"{""include_min"": false, ""min"": 0}","{""include_min"": false, ""min"": 0}",duplicate,identical rule in gold_filters - drop from silver
 pubchem,compound,required_fields,molecule_id,"""molecule_id""","""molecule_id""",keep_in_silver,also present in gold_filters (informational)
+pubchem,compound,columns,assay_type,"[""B"", ""F""]","[""B"", ""F""]",duplicate,identical rule in gold_filters - drop from silver
+pubchem,compound,columns,inorganic_flag,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+pubchem,compound,columns,molecule_type,"[""Small molecule""]","[""Small molecule""]",duplicate,identical rule in gold_filters - drop from silver
+pubchem,compound,columns,potential_duplicate,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+pubchem,compound,columns,publication_type,"[""journal-article""]","[""journal-article""]",duplicate,identical rule in gold_filters - drop from silver
+pubchem,compound,columns,relationship_type,"[""D""]","[""D""]",duplicate,identical rule in gold_filters - drop from silver
+pubchem,compound,columns,src_id,"[""1""]",,move_to_gold,no rule in gold_filters - move from silver
+pubchem,compound,columns,standard_relation,"[""=""]","[""=""]",duplicate,identical rule in gold_filters - drop from silver
+pubchem,compound,columns,standard_type,"[""IC50"", ""Ki""]","[""IC50"", ""Ki""]",duplicate,identical rule in gold_filters - drop from silver
+pubchem,compound,columns,standard_units,"[""nM""]","[""nM""]",duplicate,identical rule in gold_filters - drop from silver
+pubchem,compound,columns,structure_type,"[""MOL""]","[""MOL""]",duplicate,identical rule in gold_filters - drop from silver
+pubchem,compound,columns,target_type,"[""SINGLE PROTEIN""]","[""SINGLE PROTEIN""]",duplicate,identical rule in gold_filters - drop from silver
+pubchem,compound,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+pubchem,compound,ranges,activity_id,"{""max"": 10000000000, ""min"": 1}",,move_to_gold,no rule in gold_filters - move from silver
+pubchem,compound,ranges,confidence_score,"{""max"": 9, ""min"": 8}",,move_to_gold,no rule in gold_filters - move from silver
+pubchem,compound,ranges,pchembl_value,"{""max"": 10, ""min"": 3}",,move_to_gold,no rule in gold_filters - move from silver
+pubchem,compound,ranges,standard_value,"{""include_min"": false, ""min"": 0}","{""include_min"": false, ""min"": 0}",duplicate,identical rule in gold_filters - drop from silver
 pubmed,publication,required_fields,pmid,"""pmid""","""pmid""",keep_in_silver,also present in gold_filters (informational)
 pubmed,publication,required_fields,title,"""title""","""title""",keep_in_silver,also present in gold_filters (informational)
+pubmed,publication,columns,assay_type,"[""B"", ""F""]","[""B"", ""F""]",duplicate,identical rule in gold_filters - drop from silver
+pubmed,publication,columns,inorganic_flag,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+pubmed,publication,columns,molecule_type,"[""Small molecule""]","[""Small molecule""]",duplicate,identical rule in gold_filters - drop from silver
+pubmed,publication,columns,potential_duplicate,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+pubmed,publication,columns,publication_type,"[""journal-article""]","[""journal-article""]",duplicate,identical rule in gold_filters - drop from silver
+pubmed,publication,columns,relationship_type,"[""D""]","[""D""]",duplicate,identical rule in gold_filters - drop from silver
+pubmed,publication,columns,src_id,"[""1""]",,move_to_gold,no rule in gold_filters - move from silver
+pubmed,publication,columns,standard_relation,"[""=""]","[""=""]",duplicate,identical rule in gold_filters - drop from silver
+pubmed,publication,columns,standard_type,"[""IC50"", ""Ki""]","[""IC50"", ""Ki""]",duplicate,identical rule in gold_filters - drop from silver
+pubmed,publication,columns,standard_units,"[""nM""]","[""nM""]",duplicate,identical rule in gold_filters - drop from silver
+pubmed,publication,columns,structure_type,"[""MOL""]","[""MOL""]",duplicate,identical rule in gold_filters - drop from silver
+pubmed,publication,columns,target_type,"[""SINGLE PROTEIN""]","[""SINGLE PROTEIN""]",duplicate,identical rule in gold_filters - drop from silver
+pubmed,publication,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+pubmed,publication,ranges,activity_id,"{""max"": 10000000000, ""min"": 1}",,move_to_gold,no rule in gold_filters - move from silver
+pubmed,publication,ranges,confidence_score,"{""max"": 9, ""min"": 8}",,move_to_gold,no rule in gold_filters - move from silver
+pubmed,publication,ranges,pchembl_value,"{""max"": 10, ""min"": 3}",,move_to_gold,no rule in gold_filters - move from silver
+pubmed,publication,ranges,standard_value,"{""include_min"": false, ""min"": 0}","{""include_min"": false, ""min"": 0}",duplicate,identical rule in gold_filters - drop from silver
 semanticscholar,publication,required_fields,paper_id,"""paper_id""","""paper_id""",keep_in_silver,also present in gold_filters (informational)
 semanticscholar,publication,required_fields,title,"""title""","""title""",keep_in_silver,also present in gold_filters (informational)
+semanticscholar,publication,columns,assay_type,"[""B"", ""F""]","[""B"", ""F""]",duplicate,identical rule in gold_filters - drop from silver
+semanticscholar,publication,columns,inorganic_flag,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+semanticscholar,publication,columns,molecule_type,"[""Small molecule""]","[""Small molecule""]",duplicate,identical rule in gold_filters - drop from silver
+semanticscholar,publication,columns,potential_duplicate,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+semanticscholar,publication,columns,publication_type,"[""journal-article""]","[""journal-article""]",duplicate,identical rule in gold_filters - drop from silver
+semanticscholar,publication,columns,relationship_type,"[""D""]","[""D""]",duplicate,identical rule in gold_filters - drop from silver
+semanticscholar,publication,columns,src_id,"[""1""]",,move_to_gold,no rule in gold_filters - move from silver
+semanticscholar,publication,columns,standard_relation,"[""=""]","[""=""]",duplicate,identical rule in gold_filters - drop from silver
+semanticscholar,publication,columns,standard_type,"[""IC50"", ""Ki""]","[""IC50"", ""Ki""]",duplicate,identical rule in gold_filters - drop from silver
+semanticscholar,publication,columns,standard_units,"[""nM""]","[""nM""]",duplicate,identical rule in gold_filters - drop from silver
+semanticscholar,publication,columns,structure_type,"[""MOL""]","[""MOL""]",duplicate,identical rule in gold_filters - drop from silver
+semanticscholar,publication,columns,target_type,"[""SINGLE PROTEIN""]","[""SINGLE PROTEIN""]",duplicate,identical rule in gold_filters - drop from silver
+semanticscholar,publication,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+semanticscholar,publication,ranges,activity_id,"{""max"": 10000000000, ""min"": 1}",,move_to_gold,no rule in gold_filters - move from silver
+semanticscholar,publication,ranges,confidence_score,"{""max"": 9, ""min"": 8}",,move_to_gold,no rule in gold_filters - move from silver
+semanticscholar,publication,ranges,pchembl_value,"{""max"": 10, ""min"": 3}",,move_to_gold,no rule in gold_filters - move from silver
+semanticscholar,publication,ranges,standard_value,"{""include_min"": false, ""min"": 0}","{""include_min"": false, ""min"": 0}",duplicate,identical rule in gold_filters - drop from silver
 uniprot,idmapping,required_fields,target_id,"""target_id""","""target_id""",keep_in_silver,also present in gold_filters (informational)
 uniprot,idmapping,required_fields,mapping_status,"""mapping_status""","""mapping_status""",keep_in_silver,also present in gold_filters (informational)
+uniprot,idmapping,columns,assay_type,"[""B"", ""F""]","[""B"", ""F""]",duplicate,identical rule in gold_filters - drop from silver
+uniprot,idmapping,columns,inorganic_flag,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+uniprot,idmapping,columns,molecule_type,"[""Small molecule""]","[""Small molecule""]",duplicate,identical rule in gold_filters - drop from silver
+uniprot,idmapping,columns,potential_duplicate,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+uniprot,idmapping,columns,publication_type,"[""journal-article""]","[""journal-article""]",duplicate,identical rule in gold_filters - drop from silver
+uniprot,idmapping,columns,relationship_type,"[""D""]","[""D""]",duplicate,identical rule in gold_filters - drop from silver
+uniprot,idmapping,columns,src_id,"[""1""]",,move_to_gold,no rule in gold_filters - move from silver
+uniprot,idmapping,columns,standard_relation,"[""=""]","[""=""]",duplicate,identical rule in gold_filters - drop from silver
+uniprot,idmapping,columns,standard_type,"[""IC50"", ""Ki""]","[""IC50"", ""Ki""]",duplicate,identical rule in gold_filters - drop from silver
+uniprot,idmapping,columns,standard_units,"[""nM""]","[""nM""]",duplicate,identical rule in gold_filters - drop from silver
+uniprot,idmapping,columns,structure_type,"[""MOL""]","[""MOL""]",duplicate,identical rule in gold_filters - drop from silver
+uniprot,idmapping,columns,target_type,"[""SINGLE PROTEIN""]","[""SINGLE PROTEIN""]",duplicate,identical rule in gold_filters - drop from silver
+uniprot,idmapping,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+uniprot,idmapping,ranges,activity_id,"{""max"": 10000000000, ""min"": 1}",,move_to_gold,no rule in gold_filters - move from silver
+uniprot,idmapping,ranges,confidence_score,"{""max"": 9, ""min"": 8}",,move_to_gold,no rule in gold_filters - move from silver
+uniprot,idmapping,ranges,pchembl_value,"{""max"": 10, ""min"": 3}",,move_to_gold,no rule in gold_filters - move from silver
+uniprot,idmapping,ranges,standard_value,"{""include_min"": false, ""min"": 0}","{""include_min"": false, ""min"": 0}",duplicate,identical rule in gold_filters - drop from silver
 uniprot,protein,required_fields,accession,"""accession""","""accession""",keep_in_silver,also present in gold_filters (informational)
 uniprot,protein,required_fields,organism_scientific,"""organism_scientific""","""organism_scientific""",keep_in_silver,also present in gold_filters (informational)
+uniprot,protein,columns,assay_type,"[""B"", ""F""]","[""B"", ""F""]",duplicate,identical rule in gold_filters - drop from silver
+uniprot,protein,columns,inorganic_flag,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+uniprot,protein,columns,molecule_type,"[""Small molecule""]","[""Small molecule""]",duplicate,identical rule in gold_filters - drop from silver
+uniprot,protein,columns,potential_duplicate,[0],[0],duplicate,identical rule in gold_filters - drop from silver
+uniprot,protein,columns,publication_type,"[""journal-article""]","[""journal-article""]",duplicate,identical rule in gold_filters - drop from silver
+uniprot,protein,columns,relationship_type,"[""D""]","[""D""]",duplicate,identical rule in gold_filters - drop from silver
+uniprot,protein,columns,src_id,"[""1""]",,move_to_gold,no rule in gold_filters - move from silver
+uniprot,protein,columns,standard_relation,"[""=""]","[""=""]",duplicate,identical rule in gold_filters - drop from silver
+uniprot,protein,columns,standard_type,"[""IC50"", ""Ki""]","[""IC50"", ""Ki""]",duplicate,identical rule in gold_filters - drop from silver
+uniprot,protein,columns,standard_units,"[""nM""]","[""nM""]",duplicate,identical rule in gold_filters - drop from silver
+uniprot,protein,columns,structure_type,"[""MOL""]","[""MOL""]",duplicate,identical rule in gold_filters - drop from silver
+uniprot,protein,columns,target_type,"[""SINGLE PROTEIN""]","[""SINGLE PROTEIN""]",duplicate,identical rule in gold_filters - drop from silver
+uniprot,protein,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+uniprot,protein,ranges,activity_id,"{""max"": 10000000000, ""min"": 1}",,move_to_gold,no rule in gold_filters - move from silver
+uniprot,protein,ranges,confidence_score,"{""max"": 9, ""min"": 8}",,move_to_gold,no rule in gold_filters - move from silver
+uniprot,protein,ranges,pchembl_value,"{""max"": 10, ""min"": 3}",,move_to_gold,no rule in gold_filters - move from silver
+uniprot,protein,ranges,standard_value,"{""include_min"": false, ""min"": 0}","{""include_min"": false, ""min"": 0}",duplicate,identical rule in gold_filters - drop from silver

@@ -66,14 +66,20 @@ def build_manifest_create_spec(
         resolved_config_hash=request_inputs.resolved_config_hash,
         effective_config_hash=request_inputs.effective_config_hash,
         source_fingerprint=request_inputs.source_fingerprint,
-        contract_ref=request_inputs.contract_ref,
-        contract_version=request_inputs.contract_version,
-        contract_schema_hash=request_inputs.contract_schema_hash,
-        dq_policy_ref=request_inputs.dq_policy_ref,
-        rule_bundle_version=request_inputs.rule_bundle_version,
-        normalization_profile_ref=request_inputs.normalization_profile_ref,
-        normalization_profile_version=request_inputs.normalization_profile_version,
-        normalization_profile_hash=request_inputs.normalization_profile_hash,
+        contract_ref=request_inputs.contract_identity.contract_ref,
+        contract_version=request_inputs.contract_identity.contract_version,
+        contract_schema_hash=request_inputs.contract_identity.contract_schema_hash,
+        dq_policy_ref=request_inputs.contract_identity.dq_policy_ref,
+        rule_bundle_version=request_inputs.contract_identity.rule_bundle_version,
+        normalization_profile_ref=(
+            request_inputs.contract_identity.normalization_profile_ref
+        ),
+        normalization_profile_version=(
+            request_inputs.contract_identity.normalization_profile_version
+        ),
+        normalization_profile_hash=(
+            request_inputs.contract_identity.normalization_profile_hash
+        ),
         dq_contract_compatibility_hash=request_inputs.dq_contract_compatibility_hash,
         effective_config_artifact_id=request_inputs.effective_config_artifact_id,
         replay_capability=replay_capability,

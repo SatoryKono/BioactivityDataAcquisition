@@ -4,33 +4,23 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.application.services.control_plane._run_manifest_diagnostics_persistence import (
-    build_lineage_closure_boundary,
-)
-from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_helpers import (
-    _collect_append_mode_semantic_sinks,
-    _resolve_exact_replay_support_boundary,
-    _resolve_replay_family_contract,
-)
-from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_state import (
-    _build_replay_state_projection,
-    _resolve_broader_historical_exact_replay_state,
-    _resolve_continuation_mode,
-    _resolve_exact_replay_blockers,
-    _resolve_historical_live_run_upgrade_state,
-    _resolve_replay_capability_reason,
-    _resolve_replay_mode,
-    _resolve_replay_occurrence_kind,
-)
-from bioetl.application.services.control_plane._run_manifest_replay_family_contract_payload import (
-    build_replay_family_contract_payload,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.helpers import (
+from bioetl.application.services.control_plane.manifest.diagnostics.base_summary_helpers import (
     _resolve_operator_replay_mode,
-    _resolve_source_posture,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.replay import (
     _resolve_manifest_replay_readiness_verdict,
+)
+from bioetl.application.services.control_plane.run_manifest_diagnostics_support import (
+    _build_replay_state_projection,
+    _collect_append_mode_semantic_sinks,
+    _resolve_continuation_mode,
+    _resolve_exact_replay_blockers,
+    _resolve_exact_replay_support_boundary,
+    _resolve_replay_capability_reason,
+    _resolve_replay_family_contract,
+    _resolve_replay_mode,
+    build_lineage_closure_boundary,
+    build_replay_family_contract_payload,
 )
 from bioetl.application.services.control_plane.run_manifest_replay_taxonomy import (
     build_replay_taxonomy_projection,
@@ -83,6 +73,11 @@ def _build_operator_replay_projection_inputs(
         continuation_mode=continuation_mode,
         policy_assessment=policy_assessment,
     ).value
+    replay_state_projection = _build_replay_state_projection(
+        manifest=manifest,
+        input_snapshots=input_snapshots,
+        policy_assessment=policy_assessment,
+    )
     return {
         "continuation_mode": continuation_mode,
         "exact_replay_blockers": exact_replay_blockers,
@@ -90,28 +85,9 @@ def _build_operator_replay_projection_inputs(
             manifest.replay_capability.value == "exact_replay_supported"
             and not exact_replay_blockers
         ),
-        "historical_live_run_upgrade_state": (
-            _resolve_historical_live_run_upgrade_state(
-                manifest=manifest,
-                input_snapshots=input_snapshots,
-                policy_assessment=policy_assessment,
-            )
-        ),
         "replay_mode": replay_mode,
-        "replay_occurrence_kind": _resolve_replay_occurrence_kind(
-            manifest=manifest,
-            input_snapshots=input_snapshots,
-            policy_assessment=policy_assessment,
-        ),
         "replay_readiness_verdict": replay_readiness_verdict,
-        "broader_historical_exact_replay_state": (
-            _resolve_broader_historical_exact_replay_state(
-                manifest=manifest,
-                input_snapshots=input_snapshots,
-                policy_assessment=policy_assessment,
-            )
-        ),
-        "source_posture": _resolve_source_posture(policy_assessment),
+        **replay_state_projection,
     }
 
 

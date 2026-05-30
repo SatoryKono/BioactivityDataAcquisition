@@ -5,6 +5,9 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import cast
 
+from bioetl.application.services.control_plane._run_manifest_execution_identity_support import (
+    build_contract_identity_anchor_fields,
+)
 from bioetl.application.services.control_plane._run_manifest_inspection_artifact_refs import (
     build_artifact_ref_semantic_diff,
 )
@@ -229,15 +232,10 @@ def _checkpoint_identity_payload(
     checkpoint_identity = {
         "required_persistence_profile": diagnostics.get("required_persistence_profile"),
         "execution_fingerprint": manifest.execution_fingerprint,
-        "effective_config_hash": code_provenance.effective_config_hash,
-        "effective_config_artifact_id": code_provenance.effective_config_artifact_id,
-        "contract_ref": code_provenance.contract_ref,
-        "contract_version": code_provenance.contract_version,
-        "normalization_profile_ref": code_provenance.normalization_profile_ref,
-        "normalization_profile_version": (
-            code_provenance.normalization_profile_version
+        **build_contract_identity_anchor_fields(
+            code_provenance,
+            include_effective_config_hash=True,
         ),
-        "normalization_profile_hash": code_provenance.normalization_profile_hash,
         "input_snapshot_identity_fingerprint": diagnostics.get(
             "input_snapshot_identity_fingerprint"
         ),

@@ -1,0 +1,38 @@
+version: 1
+policy_scope: dashboard_promql_scope_allowlist
+# Metrics referenced in pipeline-summary dashboards that legitimately lack run_type.
+metrics_without_run_type_label:
+  - bioetl_phase_duration_seconds
+  - bioetl_postrun_phase_duration_seconds
+  - bioetl_memory_pressure_state
+  - bioetl_errors_total
+  - bioetl_pipeline_stage_expected
+  - bioetl_data_freshness_seconds
+  - bioetl_dq_validation_score
+  - bioetl_dq_validation_record_count
+  - bioetl_dq_monitor_enabled
+  - bioetl_control_plane_reads_total
+  - bioetl_control_plane_manifest_writes_total
+  - bioetl_control_plane_ledger_appends_total
+  - bioetl_checkpoint_operator_operations_total
+  - bioetl_checkpoint_operator_duration_seconds
+  - bioetl_adapter_request_duration_seconds
+  - bioetl_adapter_requests_total
+  - bioetl_http_request_duration_seconds
+  - bioetl_http_request_errors_total
+  - bioetl_rate_limiter_wait_seconds
+  - bioetl_rate_limiter_tokens_available
+  - bioetl_health_check_latency_seconds
+  - bioetl_health_check_failures_total
+  - bioetl_health_check_success_total
+  - bioetl_health_check_degraded_total
+  - bioetl_provider_health_status
+  - bioetl_workflow_runs_total
+  - bioetl_workflow_step_events_total
+  - bioetl_l1_workflow_global_status
+  - bioetl_runtime_pipeline_run_type_universe
+pipeline_summary_dashboards:
+  - bioetl-control-plane-v1.json
+  - bioetl-runtime.json
+  - bioetl-dq-v2.json
+  - bioetl-overview-v2.json

@@ -2,416 +2,603 @@ version: 1.0.0
 provider: chembl
 entity: molecule
 pipeline:
-    pipeline_name: chembl_molecule
-    provider: chembl
-    entity_type: molecule
-    description: Extract molecules/compounds from ChEMBL API
-    business_primary_keys:
-        - molecule_id
-    field_policy:
-        therapeutic_flag:
-            boolean_true_values:
-                - 'true'
-                - therapeutic
-            boolean_false_values:
-                - 'false'
-                - non_therapeutic
+  pipeline_name: chembl_molecule
+  provider: chembl
+  entity_type: molecule
+  description: Extract molecules/compounds from ChEMBL API
+  business_primary_keys:
+  - molecule_id
+  batch_size: 1000
+  checkpoint_interval: 1000
+  field_policy:
+    therapeutic_flag:
+      boolean_true_values:
+      - 'true'
+      - therapeutic
+      boolean_false_values:
+      - 'false'
+      - non_therapeutic
 
-    sink:
-        silver:
-            partition_by:
-                - molecule_type
-        gold:
-            mode: scd2
-            idempotency_contract: scd2
-            scd_config:
-                valid_from_col: _valid_from
-                valid_to_col: _valid_to
-                current_flag_col: _is_current
-                version_col: _version
-schema:
-    content_hash:
-        include: []
-        exclude: []
-    column_groups:
-        -   name: system
-            fields:
-                - entity_id
-                - content_hash
-                - _run_id
-                - _run_type
-                - _source_batch_id
-                - _ingestion_ts
-                - _index
-        -   name: business
-            fields:
-                - molecule_id
-                - pref_name
-                - max_phase
-                - structure_type
-                - molecule_type
-                - first_approval
-                - therapeutic_flag
-                - oral
-                - parenteral
-                - topical
-                - black_box_warning
-                - natural_product
-                - first_in_class
-                - prodrug
-                - inorganic_flag
-                - polymer_flag
-                - withdrawn_flag
-                - chirality
-                - dosed_ingredient
-                - availability_type
-                - usan_year
-                - usan_stem
-                - usan_substem
-                - usan_stem_definition
-                - helm_notation
-                - molecule_species
-                - hierarchy_parent_chembl_id
-                - hierarchy_active_chembl_id
-                - hierarchy_child_chembl_id
-                - logp
-                - logp_method
-                - mw_freebase
-                - molecular_weight
-                - hba_count
-                - hbd_count
-                - polar_surface_area
-                - rotatable_bond_count
-                - ro5_violation_count
-                - heavy_atom_count
-                - aromatic_ring_count
-                - qed_score
-                - molecular_formula
-                - ro3_pass
-                - canonical_smiles
-                - standard_inchi
-                - inchi_key
-                - molecule_hierarchy
-                - molecule_properties
-                - molecule_structures
-                - molecule_synonyms
-                - cross_references
-                - atc_classifications
-        -   name: dq
-            pattern: ^_dq_
+  sink:
     silver:
-        include_groups:
-            - system
-            - business
-            - dq
-        exclude_fields: []
-        alias_policy: preserve
+      partition_by:
+      - molecule_type
     gold:
-        include_groups:
-            - system
-            - business
-        exclude_fields:
-            - _dq_*
-            - _source_batch_id
-            - _index
-        alias_policy: canonical
+      mode: scd2
+      idempotency_contract: scd2
+      scd_config:
+        valid_from_col: _valid_from
+        valid_to_col: _valid_to
+        current_flag_col: _is_current
+        version_col: _version
+  source:
+    api_key: ${BIOETL_OPENALEX_API_KEY}
+    email: ${BIOETL_OPENALEX_EMAIL}
+    api:
+      base_url: https://rest.uniprot.org
+      from_db: ChEMBL
+      to_db: UniProtKB
+
+  page_size_override: 1000
+schema:
+  field_aliases:
+    reference_count: citations_made
+    affiliations: affiliation_list
+    citation_count: citations_received
+    keywords: subject_keywords
+    mesh_terms: subject_mesh
+    pages: page_range
+    source_type: publication_type
+    fields_of_study: subject_fields
+    journal_abbrev: journal_name_short
+    journal_title: journal_name
+    short_container_title: journal_name_short
+    structured_affiliations: affiliation_structured
+    subjects: subject_keywords
+    topics: subject_topics
+  content_hash:
+    include: []
+    exclude: []
+  column_groups:
+  - name: system
+    fields:
+    - entity_id
+    - content_hash
+    - _run_id
+    - _run_type
+    - _source_batch_id
+    - _ingestion_ts
+    - _index
+  - name: business
+    fields:
+    - molecule_id
+    - pref_name
+    - max_phase
+    - structure_type
+    - molecule_type
+    - first_approval
+    - therapeutic_flag
+    - oral
+    - parenteral
+    - topical
+    - black_box_warning
+    - natural_product
+    - first_in_class
+    - prodrug
+    - inorganic_flag
+    - polymer_flag
+    - withdrawn_flag
+    - chirality
+    - dosed_ingredient
+    - availability_type
+    - usan_year
+    - usan_stem
+    - usan_substem
+    - usan_stem_definition
+    - helm_notation
+    - molecule_species
+    - hierarchy_parent_chembl_id
+    - hierarchy_active_chembl_id
+    - hierarchy_child_chembl_id
+    - logp
+    - logp_method
+    - mw_freebase
+    - molecular_weight
+    - hba_count
+    - hbd_count
+    - polar_surface_area
+    - rotatable_bond_count
+    - ro5_violation_count
+    - heavy_atom_count
+    - aromatic_ring_count
+    - qed_score
+    - molecular_formula
+    - ro3_pass
+    - canonical_smiles
+    - standard_inchi
+    - inchi_key
+    - molecule_hierarchy
+    - molecule_properties
+    - molecule_structures
+    - molecule_synonyms
+    - cross_references
+    - atc_classifications
+  - name: dq
+    pattern: ^_dq_
+  silver:
+    include_groups:
+    - system
+    - business
+    - dq
+    exclude_fields: []
+    alias_policy: preserve
+  gold:
+    include_groups:
+    - system
+    - business
+    exclude_fields:
+    - _dq_*
+    - _source_batch_id
+    - _index
+    alias_policy: canonical
 quality:
-    version: 1.1.0
-    provider: chembl
-    entity: molecule
-    entity_field_validations:
-        -   field: molecule_id
-            type: required
-            nullable: false
-            error_message: Molecule ChEMBL ID is required
-        -   field: molecular_weight
-            type: range
-            min: 100
-            max: 1000
-            nullable: true
-            error_message: Molecular weight must be between 10 and 10000 Da
-        -   field: logp
-            type: range
-            min: -10
-            max: 20
-            nullable: true
-            error_message: ALogP value out of expected range
-        -   field: molecule_type
-            type: enum
-            allowed:
-                - Small molecule
-                - Inorganic small molecule
-                - Polymeric small molecule
-                - Protein
-                - Antibody
-                - Antibody drug conjugate
-                - Oligosaccharide
-                - Oligonucleotide
-                - Cell
-                - Enzyme
-                - Unknown
-                - Unclassified
-            nullable: true
-        -   field: structure_type
-            type: enum
-            allowed:
-                - MOL
-                - SEQ
-                - NONE
-                - BOTH
-            nullable: true
-        -   field: ro3_pass
-            type: enum
-            allowed:
-                - Y
-                - N
-            nullable: true
-            error_message: ro3_pass must be Y or N when present
-        -   field: max_phase
-            type: enum
-            allowed:
-                - -1
-                - 0
-                - 0.5
-                - 1
-                - 2
-                - 3
-                - 4
-            nullable: true
-            error_message: max_phase must be one of the declared ChEMBL phase codes when present
-        -   field: availability_type
-            type: enum
-            allowed:
-                - -2
-                - -1
-                - 0
-                - 1
-                - 2
-            nullable: true
-            error_message: availability_type must be one of the reviewed ChEMBL molecule provider codes when present
-        -   field: chirality
-            type: enum
-            allowed:
-                - -1
-                - 0
-                - 1
-                - 2
-            nullable: true
-            error_message: chirality must be one of the reviewed ChEMBL molecule provider codes when present
-        -   field: canonical_smiles
-            type: custom
-            validator: smiles_validator
-            nullable: true
-        -   field: inchi_key
-            type: pattern
-            pattern: ^[A-Z]{14}-[A-Z]{10}-[A-Z]$
-            nullable: true
-            error_message: inchi_key must be a canonical uppercase InChIKey when present
-        -   field: black_box_warning
-            type: enum
-            allowed:
-                - 0
-                - 1
-            nullable: true
-            error_message: black_box_warning must be 0 or 1 when present
-        -   field: dosed_ingredient
-            type: enum
-            allowed:
-                - 0
-                - 1
-            nullable: true
-            error_message: dosed_ingredient must be 0 or 1 when present
-        -   field: polymer_flag
-            type: enum
-            allowed:
-                - 0
-                - 1
-            nullable: true
-            error_message: polymer_flag must be 0 or 1 when present
-        -   field: natural_product
-            type: enum
-            allowed:
-                - -1
-                - 0
-                - 1
-            nullable: true
-            error_message: natural_product must be one of the reviewed flag-like provider codes when present
-        -   field: first_in_class
-            type: enum
-            allowed:
-                - -1
-                - 0
-                - 1
-            nullable: true
-            error_message: first_in_class must be one of the reviewed flag-like provider codes when present
-        -   field: prodrug
-            type: enum
-            allowed:
-                - -1
-                - 0
-                - 1
-            nullable: true
-            error_message: prodrug must be one of the reviewed flag-like provider codes when present
-        -   field: inorganic_flag
-            type: enum
-            allowed:
-                - -1
-                - 0
-                - 1
-            nullable: true
-            error_message: inorganic_flag must be one of the reviewed flag-like provider codes when present
-        -   field: hba_count
-            type: range
-            min: 0
-            max: 50
-            nullable: true
-        -   field: hbd_count
-            type: range
-            min: 0
-            max: 30
-            nullable: true
-        -   field: polar_surface_area
-            type: range
-            min: 0
-            max: 1000
-            nullable: true
-    entity_cross_field_validations:
-        -   name: structure_completeness
-            fields:
-                - canonical_smiles
-                - standard_inchi
-                - inchi_key
-            condition: any_present
-            error_message: At least one structure identifier required
-    entity_conditional_validations: []
-    key_nullability:
-        -   field: molecule_id
-            key_type: merge
-            nullable: false
-        -   field: molecule_type
-            key_type: partition
-            nullable: false
+  metadata:
+    assay_parameter_type_policy:
+      scope: raw_plus_canonical_controlled_vocabulary
+      description: RAW-PLUS-CANONICAL ChEMBL assay-parameter typing policy. The pipeline preserves the provider-native type lexeme in type_raw for reviewability while parameter_type stores the canonical controlled-vocabulary value used by Silver/Gold semantics and DQ governance.
+      field_semantics:
+        type_raw: Preserve the raw/provider-native assay-parameter type token as trimmed text for review and drift analysis.
+        type: Published reviewed Silver alias for the canonical normalized assay-parameter type surface used by downstream Silver/Gold consumers and governance reporting.
+        parameter_type: Store the canonical assay-parameter type vocabulary value used for normalized Silver/Gold behavior; unknown provider lexemes are preserved as reviewed uppercase canonical candidates rather than rejected at profile time.
+        standard_type: Store the canonical strict standard_type surface governed by the shared ChEMBL assay-parameter universe and DQ policy.
+    publication_type_policy:
+      scope: source_specific
+      description: SOURCE-SPECIFIC ChEMBL publication typing policy. This pipeline accepts only the reviewed ChEMBL-native subset and maps it into the broader global publication taxonomy defined in configs/enums/chembl.yaml without redefining that global cross-provider taxonomy.
+      field_semantics:
+        publication_type_raw: Preserve the raw/native ChEMBL publication type token for traceability and provider-specific review.
+        publication_type: Store the canonical publication type mapped into the global taxonomy for normalized Silver/Gold behavior.
+    # Source-specific DQ policy:
+    # - publication_type uses a ChEMBL-only allowed subset and does not redefine
+    #   the global taxonomy in configs/enums/chembl.yaml.
+    # - publication_type_raw preserves the provider-native token for traceability.
+    # - publication_type stores the canonical mapped type used by this pipeline.
+    subcellular_fraction_policy:
+      scope: raw_plus_canonical_derived_vocabulary
+      description: RAW-PLUS-CANONICAL ChEMBL subcellular-fraction policy. The pipeline preserves the source lexeme in subcellular_fraction_raw while subcellular_fraction stores the normalized derived vocabulary used by Silver/Gold contracts. Unknown source lexemes remain reviewable rather than being fail-closed into a strict enum.
+      field_semantics:
+        subcellular_fraction_raw: Preserve the raw/source ChEMBL subcellular-fraction label as trimmed text for traceability and synonym review.
+        subcellular_fraction: Store the canonical normalized subcellular-fraction label used for downstream Silver/Gold semantics; unknown reviewed labels are preserved after canonical text normalization instead of being discarded.
+  version: 1.1.0
+  provider: chembl
+  entity: molecule
+  entity_field_validations:
+  - field: molecule_id
+    type: required
+    nullable: false
+    error_message: Molecule ChEMBL ID is required
+  - field: molecular_weight
+    type: range
+    min: 100
+    max: 1000
+    nullable: true
+    error_message: Molecular weight must be between 10 and 10000 Da
+  - field: logp
+    type: range
+    min: -10
+    max: 20
+    nullable: true
+    error_message: ALogP value out of expected range
+  - field: molecule_type
+    type: enum
+    allowed:
+    - Small molecule
+    - Inorganic small molecule
+    - Polymeric small molecule
+    - Protein
+    - Antibody
+    - Antibody drug conjugate
+    - Oligosaccharide
+    - Oligonucleotide
+    - Cell
+    - Enzyme
+    - Unknown
+    - Unclassified
+    nullable: true
+  - field: structure_type
+    type: enum
+    allowed:
+    - MOL
+    - SEQ
+    - NONE
+    - BOTH
+    nullable: true
+  - field: ro3_pass
+    type: enum
+    allowed:
+    - Y
+    - N
+    nullable: true
+    error_message: ro3_pass must be Y or N when present
+  - field: max_phase
+    type: enum
+    allowed:
+    - -1
+    - 0
+    - 0.5
+    - 1
+    - 2
+    - 3
+    - 4
+    nullable: true
+    error_message: max_phase must be one of the declared ChEMBL phase codes when present
+  - field: availability_type
+    type: enum
+    allowed:
+    - -2
+    - -1
+    - 0
+    - 1
+    - 2
+    nullable: true
+    error_message: availability_type must be one of the reviewed ChEMBL molecule provider codes when present
+  - field: chirality
+    type: enum
+    allowed:
+    - -1
+    - 0
+    - 1
+    - 2
+    nullable: true
+    error_message: chirality must be one of the reviewed ChEMBL molecule provider codes when present
+  - field: canonical_smiles
+    type: custom
+    validator: smiles_validator
+    nullable: true
+  - field: inchi_key
+    type: pattern
+    pattern: ^[A-Z]{14}-[A-Z]{10}-[A-Z]$
+    nullable: true
+    error_message: inchi_key must be a canonical uppercase InChIKey when present
+  - field: black_box_warning
+    type: enum
+    allowed:
+    - 0
+    - 1
+    nullable: true
+    error_message: black_box_warning must be 0 or 1 when present
+  - field: dosed_ingredient
+    type: enum
+    allowed:
+    - 0
+    - 1
+    nullable: true
+    error_message: dosed_ingredient must be 0 or 1 when present
+  - field: polymer_flag
+    type: enum
+    allowed:
+    - 0
+    - 1
+    nullable: true
+    error_message: polymer_flag must be 0 or 1 when present
+  - field: natural_product
+    type: enum
+    allowed:
+    - -1
+    - 0
+    - 1
+    nullable: true
+    error_message: natural_product must be one of the reviewed flag-like provider codes when present
+  - field: first_in_class
+    type: enum
+    allowed:
+    - -1
+    - 0
+    - 1
+    nullable: true
+    error_message: first_in_class must be one of the reviewed flag-like provider codes when present
+  - field: prodrug
+    type: enum
+    allowed:
+    - -1
+    - 0
+    - 1
+    nullable: true
+    error_message: prodrug must be one of the reviewed flag-like provider codes when present
+  - field: inorganic_flag
+    type: enum
+    allowed:
+    - -1
+    - 0
+    - 1
+    nullable: true
+    error_message: inorganic_flag must be one of the reviewed flag-like provider codes when present
+  - field: hba_count
+    type: range
+    min: 0
+    max: 50
+    nullable: true
+  - field: hbd_count
+    type: range
+    min: 0
+    max: 30
+    nullable: true
+  - field: polar_surface_area
+    type: range
+    min: 0
+    max: 1000
+    nullable: true
+  entity_cross_field_validations:
+  - name: structure_completeness
+    fields:
+    - canonical_smiles
+    - standard_inchi
+    - inchi_key
+    condition: any_present
+    error_message: At least one structure identifier required
+  entity_conditional_validations: []
+  key_nullability:
+  - field: molecule_id
+    key_type: merge
+    nullable: false
+  - field: molecule_type
+    key_type: partition
+    nullable: false
+  thresholds:
+    soft_fail: 0.3
+    hard_fail: 0.8
 filters:
-    version: 1.0.0
-    provider: chembl
-    entity: molecule
-    input_filter:
-        enabled: false
-        source_path: data/input/molecule.csv
-        column_name: molecule_chembl_id
-        filter_field: molecule_id
-        batch_size: 20
-    extraction_params:
-        molecule_type: Small molecule
-        structure_type: MOL
-        inorganic_flag: 0
-    silver_filters:
-        columns:
-            molecule_type:
-                - Small molecule
-            structure_type:
-                - MOL
-            inorganic_flag:
-                - 0
-        required_fields:
-            - molecule_id
-            - molecule_type
-    gold_filters:
-        columns:
-            molecule_type:
-                - Small molecule
-            structure_type:
-                - MOL
-            inorganic_flag:
-                - 0
-        required_fields:
-            - molecule_id
+  version: 1.0.0
+  provider: chembl
+  entity: molecule
+  input_filter:
+    enabled: false
+    source_path: data/input/molecule.csv
+    column_name: molecule_chembl_id
+    filter_field: molecule_id
+    batch_size: 20
+    checkpoint_interval: 1000
+    fallback_column: title
+  extraction_params:
+    molecule_type: Small molecule
+    structure_type: MOL
+    inorganic_flag: 0
+    assay_type__in: B,F
+    doc_type: PUBLICATION
+    year__gte: 1950
+    year__lte: 2050
+    confidence_score__gte: 8
+    data_validity_comment__isnull: true
+    organism__isnull: false
+    pchembl_value__isnull: false
+    potential_duplicate: 0
+    relationship_type: D
+    src_id: 1
+    standard_flag: 1
+    standard_relation: '='
+    standard_type__in: IC50,Ki
+    standard_units: nM
+    target_chembl_id__isnull: false
+    target_tax_id__isnull: false
+    target_type: SINGLE PROTEIN
+    tax_id__isnull: false
+  silver_filters:
+    ranges:
+      publication_year:
+        min: 1950
+        max: 2050
+      activity_id:
+        min: 1
+        max: 10000000000
+      confidence_score:
+        min: 8
+        max: 9
+      pchembl_value:
+        min: 3
+        max: 10
+      standard_value:
+        min: 0
+        include_min: false
+    columns:
+      molecule_type:
+      - Small molecule
+      structure_type:
+      - MOL
+      inorganic_flag:
+      - 0
+      assay_type:
+      - B
+      - F
+      potential_duplicate:
+      - 0
+      publication_type:
+      - journal-article
+      relationship_type:
+      - D
+      src_id:
+      - '1'
+      standard_relation:
+      - '='
+      standard_type:
+      - IC50
+      - Ki
+      standard_units:
+      - nM
+      target_type:
+      - SINGLE PROTEIN
+    exclude_if_present: []
+    required_fields:
+    - molecule_id
+    - molecule_type
+  gold_filters:
+    list_contains:
+      component_types:
+        values:
+        - PROTEIN
+        mode: all
+    list_lengths:
+      component_accessions:
+        min: 1
+        max: 1
+      component_ids:
+        min: 1
+    ranges:
+      publication_year:
+        min: 1950
+        max: 2050
+      max_tani:
+        min: 0.5
+        include_min: true
+      standard_value:
+        min: 0
+        include_min: false
+    columns:
+      molecule_type:
+      - Small molecule
+      structure_type:
+      - MOL
+      inorganic_flag:
+      - 0
+      assay_type:
+      - B
+      - F
+      assay_strain:
+        operator: is_empty
+      assay_test_type:
+        operator: not_in
+        values:
+        - In vivo
+        - Ex vivo
+      bao_format:
+        operator: not_in
+        values:
+        - BAO_0000218
+      component_type:
+      - PROTEIN
+      confidence_score:
+      - 8
+      - 9
+      downgraded:
+      - '0'
+      potential_duplicate:
+      - 0
+      publication_type:
+      - journal-article
+      relationship_type:
+      - D
+      reviewed:
+      - true
+      standard_relation:
+      - '='
+      standard_type:
+      - IC50
+      - Ki
+      standard_units:
+      - nM
+      target_type:
+      - SINGLE PROTEIN
+      term_type:
+      - MESH_HEADING
+      - MESH_QUALIFIER
+      - KEYWORD
+    exclude_if_present: []
+    required_fields:
+    - molecule_id
+  metadata:
+    publication_filter_policy:
+      scope: source_specific
+      description: SOURCE-SPECIFIC ChEMBL publication filter policy. Silver and Gold filters intentionally constrain this pipeline to the reviewed ChEMBL publication subset and do not redefine the global publication taxonomy.
+    # Source-specific filter policy:
+    # - Silver and Gold are intentionally scoped to journal-article for the
+    #   current ChEMBL publication pipeline.
+    # - This is pipeline scope, not global publication type truth.
 contracts:
-    primary_key:
-        - molecule_id
-    merge_keys:
-        - molecule_id
-    hash_include: []
+  primary_key:
+  - molecule_id
+  merge_keys:
+  - molecule_id
+  hash_include: []
+  hash_exclude: []
+  hash_datetime_policy: v1_date
 hash_policy:
-    provider: chembl
-    entity: molecule
-    contract:
-        version: 1.0.0
-        migration_note: 'Explicit config-level hash contract for the normalized ChEMBL molecule Silver surface.'
-    hash_policy:
-        algorithm: sha256
-        canonicalization: provider + canonical_json_dumps(normalized_record)
-        include_fields:
-            - molecule_id
-            - pref_name
-            - max_phase
-            - structure_type
-            - molecule_type
-            - first_approval
-            - therapeutic_flag
-            - oral
-            - parenteral
-            - topical
-            - black_box_warning
-            - natural_product
-            - first_in_class
-            - prodrug
-            - inorganic_flag
-            - polymer_flag
-            - withdrawn_flag
-            - chirality
-            - dosed_ingredient
-            - availability_type
-            - usan_year
-            - usan_stem
-            - usan_substem
-            - usan_stem_definition
-            - helm_notation
-            - molecule_species
-            - hierarchy_parent_chembl_id
-            - hierarchy_active_chembl_id
-            - hierarchy_child_chembl_id
-            - logp
-            - logp_method
-            - mw_freebase
-            - molecular_weight
-            - hba_count
-            - hbd_count
-            - polar_surface_area
-            - rotatable_bond_count
-            - ro5_violation_count
-            - heavy_atom_count
-            - aromatic_ring_count
-            - qed_score
-            - molecular_formula
-            - ro3_pass
-            - canonical_smiles
-            - standard_inchi
-            - inchi_key
-            - molecule_hierarchy
-            - molecule_properties
-            - molecule_structures
-            - molecule_synonyms
-            - cross_references
-            - atc_classifications
-        exclude_fields:
-            - _ingestion_ts
-            - _run_id
-            - _run_type
-            - _dq_warn
-            - _dq_error
-            - _source_batch_id
-            - _index
-        exclude_patterns:
-            - ^_dq_
-        normalization:
-            trim_strings: true
-            round_floats:
-                enabled: true
-                precision: 10
-            dates:
-                enabled: true
-                format: YYYY-MM-DD
-            null_handling:
-                nan_to_null: true
-                inf_to_null: true
+  provider: chembl
+  entity: molecule
+  contract:
+    version: 1.0.0
+    migration_note: 'Explicit config-level hash contract for the normalized ChEMBL molecule Silver surface.'
+  hash_policy:
+    algorithm: sha256
+    canonicalization: provider + canonical_json_dumps(normalized_record)
+    include_fields:
+    - molecule_id
+    - pref_name
+    - max_phase
+    - structure_type
+    - molecule_type
+    - first_approval
+    - therapeutic_flag
+    - oral
+    - parenteral
+    - topical
+    - black_box_warning
+    - natural_product
+    - first_in_class
+    - prodrug
+    - inorganic_flag
+    - polymer_flag
+    - withdrawn_flag
+    - chirality
+    - dosed_ingredient
+    - availability_type
+    - usan_year
+    - usan_stem
+    - usan_substem
+    - usan_stem_definition
+    - helm_notation
+    - molecule_species
+    - hierarchy_parent_chembl_id
+    - hierarchy_active_chembl_id
+    - hierarchy_child_chembl_id
+    - logp
+    - logp_method
+    - mw_freebase
+    - molecular_weight
+    - hba_count
+    - hbd_count
+    - polar_surface_area
+    - rotatable_bond_count
+    - ro5_violation_count
+    - heavy_atom_count
+    - aromatic_ring_count
+    - qed_score
+    - molecular_formula
+    - ro3_pass
+    - canonical_smiles
+    - standard_inchi
+    - inchi_key
+    - molecule_hierarchy
+    - molecule_properties
+    - molecule_structures
+    - molecule_synonyms
+    - cross_references
+    - atc_classifications
+    exclude_fields:
+    - _ingestion_ts
+    - _run_id
+    - _run_type
+    - _dq_warn
+    - _dq_error
+    - _source_batch_id
+    - _index
+    exclude_patterns:
+    - ^_dq_
+    normalization:
+      trim_strings: true
+      round_floats:
+        enabled: true
+        precision: 10
+      dates:
+        enabled: true
+        format: YYYY-MM-DD
+      null_handling:
+        nan_to_null: true
+        inf_to_null: true

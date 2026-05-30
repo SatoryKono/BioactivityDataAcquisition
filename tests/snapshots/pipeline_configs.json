@@ -325,11 +325,137 @@
           "values": [
             0
           ]
+        },
+        {
+          "column": "assay_strain",
+          "operator": "is_empty",
+          "values": null
+        },
+        {
+          "column": "assay_test_type",
+          "operator": "not_in",
+          "values": [
+            "Ex vivo",
+            "In vivo"
+          ]
+        },
+        {
+          "column": "bao_format",
+          "operator": "not_in",
+          "values": [
+            "BAO_0000218"
+          ]
+        },
+        {
+          "column": "component_type",
+          "operator": "in",
+          "values": [
+            "PROTEIN"
+          ]
+        },
+        {
+          "column": "confidence_score",
+          "operator": "in",
+          "values": [
+            8,
+            9
+          ]
+        },
+        {
+          "column": "downgraded",
+          "operator": "in",
+          "values": [
+            "0"
+          ]
+        },
+        {
+          "column": "inorganic_flag",
+          "operator": "in",
+          "values": [
+            0
+          ]
+        },
+        {
+          "column": "molecule_type",
+          "operator": "in",
+          "values": [
+            "Small molecule"
+          ]
+        },
+        {
+          "column": "publication_type",
+          "operator": "in",
+          "values": [
+            "journal-article"
+          ]
+        },
+        {
+          "column": "relationship_type",
+          "operator": "in",
+          "values": [
+            "D"
+          ]
+        },
+        {
+          "column": "reviewed",
+          "operator": "in",
+          "values": [
+            true
+          ]
+        },
+        {
+          "column": "structure_type",
+          "operator": "in",
+          "values": [
+            "MOL"
+          ]
+        },
+        {
+          "column": "target_type",
+          "operator": "in",
+          "values": [
+            "SINGLE PROTEIN"
+          ]
+        },
+        {
+          "column": "term_type",
+          "operator": "in",
+          "values": [
+            "KEYWORD",
+            "MESH_HEADING",
+            "MESH_QUALIFIER"
+          ]
+        },
+        {
+          "column": "src_id",
+          "operator": "in",
+          "values": [
+            "1"
+          ]
         }
       ],
       "exclude_if_present": [],
-      "list_contains_filters": [],
-      "list_length_filters": [],
+      "list_contains_filters": [
+        {
+          "column": "component_types",
+          "mode": "all",
+          "values": [
+            "PROTEIN"
+          ]
+        }
+      ],
+      "list_length_filters": [
+        {
+          "column": "component_accessions",
+          "max_length": 1,
+          "min_length": 1
+        },
+        {
+          "column": "component_ids",
+          "max_length": null,
+          "min_length": 1
+        }
+      ],
       "range_filters": [
         {
           "column": "standard_value",
@@ -337,6 +463,20 @@
           "include_min": false,
           "max_value": null,
           "min_value": 0.0
+        },
+        {
+          "column": "publication_year",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 2050.0,
+          "min_value": 1950.0
+        },
+        {
+          "column": "max_tani",
+          "include_max": true,
+          "include_min": true,
+          "max_value": null,
+          "min_value": 0.5
         },
         {
           "column": "activity_id",
@@ -353,11 +493,11 @@
           "min_value": 3.0
         },
         {
-          "column": "publication_year",
+          "column": "confidence_score",
           "include_max": true,
           "include_min": true,
-          "max_value": 2050.0,
-          "min_value": 1950.0
+          "max_value": 9.0,
+          "min_value": 8.0
         }
       ],
       "required_fields": [
@@ -435,7 +575,7 @@
     "transform_version": null
   },
   "chembl_molecule": {
-    "batch_size": 100,
+    "batch_size": 1000,
     "checkpoint_interval": 1000,
     "column_groups": [
       {
@@ -727,12 +867,197 @@
           "values": [
             0
           ]
+        },
+        {
+          "column": "assay_type",
+          "operator": "in",
+          "values": [
+            "B",
+            "F"
+          ]
+        },
+        {
+          "column": "assay_strain",
+          "operator": "is_empty",
+          "values": null
+        },
+        {
+          "column": "assay_test_type",
+          "operator": "not_in",
+          "values": [
+            "Ex vivo",
+            "In vivo"
+          ]
+        },
+        {
+          "column": "bao_format",
+          "operator": "not_in",
+          "values": [
+            "BAO_0000218"
+          ]
+        },
+        {
+          "column": "component_type",
+          "operator": "in",
+          "values": [
+            "PROTEIN"
+          ]
+        },
+        {
+          "column": "confidence_score",
+          "operator": "in",
+          "values": [
+            8,
+            9
+          ]
+        },
+        {
+          "column": "downgraded",
+          "operator": "in",
+          "values": [
+            "0"
+          ]
+        },
+        {
+          "column": "potential_duplicate",
+          "operator": "in",
+          "values": [
+            0
+          ]
+        },
+        {
+          "column": "publication_type",
+          "operator": "in",
+          "values": [
+            "journal-article"
+          ]
+        },
+        {
+          "column": "relationship_type",
+          "operator": "in",
+          "values": [
+            "D"
+          ]
+        },
+        {
+          "column": "reviewed",
+          "operator": "in",
+          "values": [
+            true
+          ]
+        },
+        {
+          "column": "standard_relation",
+          "operator": "in",
+          "values": [
+            "="
+          ]
+        },
+        {
+          "column": "standard_type",
+          "operator": "in",
+          "values": [
+            "IC50",
+            "Ki"
+          ]
+        },
+        {
+          "column": "standard_units",
+          "operator": "in",
+          "values": [
+            "nM"
+          ]
+        },
+        {
+          "column": "target_type",
+          "operator": "in",
+          "values": [
+            "SINGLE PROTEIN"
+          ]
+        },
+        {
+          "column": "term_type",
+          "operator": "in",
+          "values": [
+            "KEYWORD",
+            "MESH_HEADING",
+            "MESH_QUALIFIER"
+          ]
+        },
+        {
+          "column": "src_id",
+          "operator": "in",
+          "values": [
+            "1"
+          ]
         }
       ],
       "exclude_if_present": [],
-      "list_contains_filters": [],
-      "list_length_filters": [],
-      "range_filters": [],
+      "list_contains_filters": [
+        {
+          "column": "component_types",
+          "mode": "all",
+          "values": [
+            "PROTEIN"
+          ]
+        }
+      ],
+      "list_length_filters": [
+        {
+          "column": "component_accessions",
+          "max_length": 1,
+          "min_length": 1
+        },
+        {
+          "column": "component_ids",
+          "max_length": null,
+          "min_length": 1
+        }
+      ],
+      "range_filters": [
+        {
+          "column": "publication_year",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 2050.0,
+          "min_value": 1950.0
+        },
+        {
+          "column": "max_tani",
+          "include_max": true,
+          "include_min": true,
+          "max_value": null,
+          "min_value": 0.5
+        },
+        {
+          "column": "standard_value",
+          "include_max": true,
+          "include_min": false,
+          "max_value": null,
+          "min_value": 0.0
+        },
+        {
+          "column": "activity_id",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 10000000000.0,
+          "min_value": 1.0
+        },
+        {
+          "column": "confidence_score",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 9.0,
+          "min_value": 8.0
+        },
+        {
+          "column": "pchembl_value",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 10.0,
+          "min_value": 3.0
+        }
+      ],
       "required_fields": [
         "molecule_id"
       ]
@@ -777,7 +1102,7 @@
     "transform_version": null
   },
   "chembl_publication_term": {
-    "batch_size": 100,
+    "batch_size": 1000,
     "checkpoint_interval": 1000,
     "column_groups": [
       {
@@ -936,7 +1261,22 @@
       "strictness_mode": "moderate"
     },
     "entity_type": "publication_term",
-    "field_policy": [],
+    "field_policy": [
+      {
+        "boolean_false_values": [
+          "false",
+          "non_therapeutic"
+        ],
+        "boolean_true_values": [
+          "true",
+          "therapeutic"
+        ],
+        "coercion_policy": null,
+        "empty_as_missing": null,
+        "field": "therapeutic_flag",
+        "optional": null
+      }
+    ],
     "fields": [],
     "gold_filters": {
       "column_filters": [
@@ -948,12 +1288,209 @@
             "MESH_HEADING",
             "MESH_QUALIFIER"
           ]
+        },
+        {
+          "column": "assay_type",
+          "operator": "in",
+          "values": [
+            "B",
+            "F"
+          ]
+        },
+        {
+          "column": "assay_strain",
+          "operator": "is_empty",
+          "values": null
+        },
+        {
+          "column": "assay_test_type",
+          "operator": "not_in",
+          "values": [
+            "Ex vivo",
+            "In vivo"
+          ]
+        },
+        {
+          "column": "bao_format",
+          "operator": "not_in",
+          "values": [
+            "BAO_0000218"
+          ]
+        },
+        {
+          "column": "component_type",
+          "operator": "in",
+          "values": [
+            "PROTEIN"
+          ]
+        },
+        {
+          "column": "confidence_score",
+          "operator": "in",
+          "values": [
+            8,
+            9
+          ]
+        },
+        {
+          "column": "downgraded",
+          "operator": "in",
+          "values": [
+            "0"
+          ]
+        },
+        {
+          "column": "inorganic_flag",
+          "operator": "in",
+          "values": [
+            0
+          ]
+        },
+        {
+          "column": "molecule_type",
+          "operator": "in",
+          "values": [
+            "Small molecule"
+          ]
+        },
+        {
+          "column": "potential_duplicate",
+          "operator": "in",
+          "values": [
+            0
+          ]
+        },
+        {
+          "column": "publication_type",
+          "operator": "in",
+          "values": [
+            "journal-article"
+          ]
+        },
+        {
+          "column": "relationship_type",
+          "operator": "in",
+          "values": [
+            "D"
+          ]
+        },
+        {
+          "column": "reviewed",
+          "operator": "in",
+          "values": [
+            true
+          ]
+        },
+        {
+          "column": "standard_relation",
+          "operator": "in",
+          "values": [
+            "="
+          ]
+        },
+        {
+          "column": "standard_type",
+          "operator": "in",
+          "values": [
+            "IC50",
+            "Ki"
+          ]
+        },
+        {
+          "column": "standard_units",
+          "operator": "in",
+          "values": [
+            "nM"
+          ]
+        },
+        {
+          "column": "structure_type",
+          "operator": "in",
+          "values": [
+            "MOL"
+          ]
+        },
+        {
+          "column": "target_type",
+          "operator": "in",
+          "values": [
+            "SINGLE PROTEIN"
+          ]
+        },
+        {
+          "column": "src_id",
+          "operator": "in",
+          "values": [
+            "1"
+          ]
         }
       ],
       "exclude_if_present": [],
-      "list_contains_filters": [],
-      "list_length_filters": [],
-      "range_filters": [],
+      "list_contains_filters": [
+        {
+          "column": "component_types",
+          "mode": "all",
+          "values": [
+            "PROTEIN"
+          ]
+        }
+      ],
+      "list_length_filters": [
+        {
+          "column": "component_accessions",
+          "max_length": 1,
+          "min_length": 1
+        },
+        {
+          "column": "component_ids",
+          "max_length": null,
+          "min_length": 1
+        }
+      ],
+      "range_filters": [
+        {
+          "column": "publication_year",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 2050.0,
+          "min_value": 1950.0
+        },
+        {
+          "column": "max_tani",
+          "include_max": true,
+          "include_min": true,
+          "max_value": null,
+          "min_value": 0.5
+        },
+        {
+          "column": "standard_value",
+          "include_max": true,
+          "include_min": false,
+          "max_value": null,
+          "min_value": 0.0
+        },
+        {
+          "column": "activity_id",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 10000000000.0,
+          "min_value": 1.0
+        },
+        {
+          "column": "confidence_score",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 9.0,
+          "min_value": 8.0
+        },
+        {
+          "column": "pchembl_value",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 10.0,
+          "min_value": 3.0
+        }
+      ],
       "required_fields": [
         "publication_id",
         "term",
@@ -1007,7 +1544,7 @@
     "transform_version": null
   },
   "crossref_publication": {
-    "batch_size": 100,
+    "batch_size": 1000,
     "checkpoint_interval": 1000,
     "column_groups": [
       {
@@ -1583,7 +2120,7 @@
         "alias_policy": null,
         "column_groups": null,
         "columns": null,
-        "exclude_fields": null,
+        "exclude_fields": [],
         "include_groups": [
           "system",
           "identifiers",
@@ -1630,13 +2167,192 @@
       "strictness_mode": "moderate"
     },
     "entity_type": "publication",
-    "field_policy": [],
+    "field_policy": [
+      {
+        "boolean_false_values": [
+          "false",
+          "non_therapeutic"
+        ],
+        "boolean_true_values": [
+          "true",
+          "therapeutic"
+        ],
+        "coercion_policy": null,
+        "empty_as_missing": null,
+        "field": "therapeutic_flag",
+        "optional": null
+      }
+    ],
     "fields": [],
     "gold_filters": {
-      "column_filters": [],
+      "column_filters": [
+        {
+          "column": "assay_type",
+          "operator": "in",
+          "values": [
+            "B",
+            "F"
+          ]
+        },
+        {
+          "column": "assay_strain",
+          "operator": "is_empty",
+          "values": null
+        },
+        {
+          "column": "assay_test_type",
+          "operator": "not_in",
+          "values": [
+            "Ex vivo",
+            "In vivo"
+          ]
+        },
+        {
+          "column": "bao_format",
+          "operator": "not_in",
+          "values": [
+            "BAO_0000218"
+          ]
+        },
+        {
+          "column": "component_type",
+          "operator": "in",
+          "values": [
+            "PROTEIN"
+          ]
+        },
+        {
+          "column": "confidence_score",
+          "operator": "in",
+          "values": [
+            8,
+            9
+          ]
+        },
+        {
+          "column": "downgraded",
+          "operator": "in",
+          "values": [
+            "0"
+          ]
+        },
+        {
+          "column": "inorganic_flag",
+          "operator": "in",
+          "values": [
+            0
+          ]
+        },
+        {
+          "column": "molecule_type",
+          "operator": "in",
+          "values": [
+            "Small molecule"
+          ]
+        },
+        {
+          "column": "potential_duplicate",
+          "operator": "in",
+          "values": [
+            0
+          ]
+        },
+        {
+          "column": "publication_type",
+          "operator": "in",
+          "values": [
+            "journal-article"
+          ]
+        },
+        {
+          "column": "relationship_type",
+          "operator": "in",
+          "values": [
+            "D"
+          ]
+        },
+        {
+          "column": "reviewed",
+          "operator": "in",
+          "values": [
+            true
+          ]
+        },
+        {
+          "column": "standard_relation",
+          "operator": "in",
+          "values": [
+            "="
+          ]
+        },
+        {
+          "column": "standard_type",
+          "operator": "in",
+          "values": [
+            "IC50",
+            "Ki"
+          ]
+        },
+        {
+          "column": "standard_units",
+          "operator": "in",
+          "values": [
+            "nM"
+          ]
+        },
+        {
+          "column": "structure_type",
+          "operator": "in",
+          "values": [
+            "MOL"
+          ]
+        },
+        {
+          "column": "target_type",
+          "operator": "in",
+          "values": [
+            "SINGLE PROTEIN"
+          ]
+        },
+        {
+          "column": "term_type",
+          "operator": "in",
+          "values": [
+            "KEYWORD",
+            "MESH_HEADING",
+            "MESH_QUALIFIER"
+          ]
+        },
+        {
+          "column": "src_id",
+          "operator": "in",
+          "values": [
+            "1"
+          ]
+        }
+      ],
       "exclude_if_present": [],
-      "list_contains_filters": [],
-      "list_length_filters": [],
+      "list_contains_filters": [
+        {
+          "column": "component_types",
+          "mode": "all",
+          "values": [
+            "PROTEIN"
+          ]
+        }
+      ],
+      "list_length_filters": [
+        {
+          "column": "component_accessions",
+          "max_length": 1,
+          "min_length": 1
+        },
+        {
+          "column": "component_ids",
+          "max_length": null,
+          "min_length": 1
+        }
+      ],
       "range_filters": [
         {
           "column": "publication_year",
@@ -1644,6 +2360,41 @@
           "include_min": true,
           "max_value": 2050.0,
           "min_value": 1950.0
+        },
+        {
+          "column": "max_tani",
+          "include_max": true,
+          "include_min": true,
+          "max_value": null,
+          "min_value": 0.5
+        },
+        {
+          "column": "standard_value",
+          "include_max": true,
+          "include_min": false,
+          "max_value": null,
+          "min_value": 0.0
+        },
+        {
+          "column": "activity_id",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 10000000000.0,
+          "min_value": 1.0
+        },
+        {
+          "column": "confidence_score",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 9.0,
+          "min_value": 8.0
+        },
+        {
+          "column": "pchembl_value",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 10.0,
+          "min_value": 3.0
         }
       ],
       "required_fields": [
@@ -1691,7 +2442,7 @@
     "transform_version": null
   },
   "openalex_publication": {
-    "batch_size": 100,
+    "batch_size": 1000,
     "checkpoint_interval": 1000,
     "column_groups": [
       {
@@ -2356,7 +3107,7 @@
         "alias_policy": null,
         "column_groups": null,
         "columns": null,
-        "exclude_fields": null,
+        "exclude_fields": [],
         "include_groups": [
           "system",
           "identifiers",
@@ -2406,13 +3157,192 @@
       "strictness_mode": "moderate"
     },
     "entity_type": "publication",
-    "field_policy": [],
+    "field_policy": [
+      {
+        "boolean_false_values": [
+          "false",
+          "non_therapeutic"
+        ],
+        "boolean_true_values": [
+          "true",
+          "therapeutic"
+        ],
+        "coercion_policy": null,
+        "empty_as_missing": null,
+        "field": "therapeutic_flag",
+        "optional": null
+      }
+    ],
     "fields": [],
     "gold_filters": {
-      "column_filters": [],
+      "column_filters": [
+        {
+          "column": "assay_type",
+          "operator": "in",
+          "values": [
+            "B",
+            "F"
+          ]
+        },
+        {
+          "column": "assay_strain",
+          "operator": "is_empty",
+          "values": null
+        },
+        {
+          "column": "assay_test_type",
+          "operator": "not_in",
+          "values": [
+            "Ex vivo",
+            "In vivo"
+          ]
+        },
+        {
+          "column": "bao_format",
+          "operator": "not_in",
+          "values": [
+            "BAO_0000218"
+          ]
+        },
+        {
+          "column": "component_type",
+          "operator": "in",
+          "values": [
+            "PROTEIN"
+          ]
+        },
+        {
+          "column": "confidence_score",
+          "operator": "in",
+          "values": [
+            8,
+            9
+          ]
+        },
+        {
+          "column": "downgraded",
+          "operator": "in",
+          "values": [
+            "0"
+          ]
+        },
+        {
+          "column": "inorganic_flag",
+          "operator": "in",
+          "values": [
+            0
+          ]
+        },
+        {
+          "column": "molecule_type",
+          "operator": "in",
+          "values": [
+            "Small molecule"
+          ]
+        },
+        {
+          "column": "potential_duplicate",
+          "operator": "in",
+          "values": [
+            0
+          ]
+        },
+        {
+          "column": "publication_type",
+          "operator": "in",
+          "values": [
+            "journal-article"
+          ]
+        },
+        {
+          "column": "relationship_type",
+          "operator": "in",
+          "values": [
+            "D"
+          ]
+        },
+        {
+          "column": "reviewed",
+          "operator": "in",
+          "values": [
+            true
+          ]
+        },
+        {
+          "column": "standard_relation",
+          "operator": "in",
+          "values": [
+            "="
+          ]
+        },
+        {
+          "column": "standard_type",
+          "operator": "in",
+          "values": [
+            "IC50",
+            "Ki"
+          ]
+        },
+        {
+          "column": "standard_units",
+          "operator": "in",
+          "values": [
+            "nM"
+          ]
+        },
+        {
+          "column": "structure_type",
+          "operator": "in",
+          "values": [
+            "MOL"
+          ]
+        },
+        {
+          "column": "target_type",
+          "operator": "in",
+          "values": [
+            "SINGLE PROTEIN"
+          ]
+        },
+        {
+          "column": "term_type",
+          "operator": "in",
+          "values": [
+            "KEYWORD",
+            "MESH_HEADING",
+            "MESH_QUALIFIER"
+          ]
+        },
+        {
+          "column": "src_id",
+          "operator": "in",
+          "values": [
+            "1"
+          ]
+        }
+      ],
       "exclude_if_present": [],
-      "list_contains_filters": [],
-      "list_length_filters": [],
+      "list_contains_filters": [
+        {
+          "column": "component_types",
+          "mode": "all",
+          "values": [
+            "PROTEIN"
+          ]
+        }
+      ],
+      "list_length_filters": [
+        {
+          "column": "component_accessions",
+          "max_length": 1,
+          "min_length": 1
+        },
+        {
+          "column": "component_ids",
+          "max_length": null,
+          "min_length": 1
+        }
+      ],
       "range_filters": [
         {
           "column": "publication_year",
@@ -2420,6 +3350,41 @@
           "include_min": true,
           "max_value": 2050.0,
           "min_value": 1950.0
+        },
+        {
+          "column": "max_tani",
+          "include_max": true,
+          "include_min": true,
+          "max_value": null,
+          "min_value": 0.5
+        },
+        {
+          "column": "standard_value",
+          "include_max": true,
+          "include_min": false,
+          "max_value": null,
+          "min_value": 0.0
+        },
+        {
+          "column": "activity_id",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 10000000000.0,
+          "min_value": 1.0
+        },
+        {
+          "column": "confidence_score",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 9.0,
+          "min_value": 8.0
+        },
+        {
+          "column": "pchembl_value",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 10.0,
+          "min_value": 3.0
         }
       ],
       "required_fields": [
@@ -2467,7 +3432,7 @@
     "transform_version": null
   },
   "pubchem_compound": {
-    "batch_size": 100,
+    "batch_size": 1000,
     "checkpoint_interval": 1000,
     "column_groups": [
       {
@@ -2712,14 +3677,236 @@
       "strictness_mode": "moderate"
     },
     "entity_type": "compound",
-    "field_policy": [],
+    "field_policy": [
+      {
+        "boolean_false_values": [
+          "false",
+          "non_therapeutic"
+        ],
+        "boolean_true_values": [
+          "true",
+          "therapeutic"
+        ],
+        "coercion_policy": null,
+        "empty_as_missing": null,
+        "field": "therapeutic_flag",
+        "optional": null
+      }
+    ],
     "fields": [],
     "gold_filters": {
-      "column_filters": [],
+      "column_filters": [
+        {
+          "column": "assay_type",
+          "operator": "in",
+          "values": [
+            "B",
+            "F"
+          ]
+        },
+        {
+          "column": "assay_strain",
+          "operator": "is_empty",
+          "values": null
+        },
+        {
+          "column": "assay_test_type",
+          "operator": "not_in",
+          "values": [
+            "Ex vivo",
+            "In vivo"
+          ]
+        },
+        {
+          "column": "bao_format",
+          "operator": "not_in",
+          "values": [
+            "BAO_0000218"
+          ]
+        },
+        {
+          "column": "component_type",
+          "operator": "in",
+          "values": [
+            "PROTEIN"
+          ]
+        },
+        {
+          "column": "confidence_score",
+          "operator": "in",
+          "values": [
+            8,
+            9
+          ]
+        },
+        {
+          "column": "downgraded",
+          "operator": "in",
+          "values": [
+            "0"
+          ]
+        },
+        {
+          "column": "inorganic_flag",
+          "operator": "in",
+          "values": [
+            0
+          ]
+        },
+        {
+          "column": "molecule_type",
+          "operator": "in",
+          "values": [
+            "Small molecule"
+          ]
+        },
+        {
+          "column": "potential_duplicate",
+          "operator": "in",
+          "values": [
+            0
+          ]
+        },
+        {
+          "column": "publication_type",
+          "operator": "in",
+          "values": [
+            "journal-article"
+          ]
+        },
+        {
+          "column": "relationship_type",
+          "operator": "in",
+          "values": [
+            "D"
+          ]
+        },
+        {
+          "column": "reviewed",
+          "operator": "in",
+          "values": [
+            true
+          ]
+        },
+        {
+          "column": "standard_relation",
+          "operator": "in",
+          "values": [
+            "="
+          ]
+        },
+        {
+          "column": "standard_type",
+          "operator": "in",
+          "values": [
+            "IC50",
+            "Ki"
+          ]
+        },
+        {
+          "column": "standard_units",
+          "operator": "in",
+          "values": [
+            "nM"
+          ]
+        },
+        {
+          "column": "structure_type",
+          "operator": "in",
+          "values": [
+            "MOL"
+          ]
+        },
+        {
+          "column": "target_type",
+          "operator": "in",
+          "values": [
+            "SINGLE PROTEIN"
+          ]
+        },
+        {
+          "column": "term_type",
+          "operator": "in",
+          "values": [
+            "KEYWORD",
+            "MESH_HEADING",
+            "MESH_QUALIFIER"
+          ]
+        },
+        {
+          "column": "src_id",
+          "operator": "in",
+          "values": [
+            "1"
+          ]
+        }
+      ],
       "exclude_if_present": [],
-      "list_contains_filters": [],
-      "list_length_filters": [],
-      "range_filters": [],
+      "list_contains_filters": [
+        {
+          "column": "component_types",
+          "mode": "all",
+          "values": [
+            "PROTEIN"
+          ]
+        }
+      ],
+      "list_length_filters": [
+        {
+          "column": "component_accessions",
+          "max_length": 1,
+          "min_length": 1
+        },
+        {
+          "column": "component_ids",
+          "max_length": null,
+          "min_length": 1
+        }
+      ],
+      "range_filters": [
+        {
+          "column": "publication_year",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 2050.0,
+          "min_value": 1950.0
+        },
+        {
+          "column": "max_tani",
+          "include_max": true,
+          "include_min": true,
+          "max_value": null,
+          "min_value": 0.5
+        },
+        {
+          "column": "standard_value",
+          "include_max": true,
+          "include_min": false,
+          "max_value": null,
+          "min_value": 0.0
+        },
+        {
+          "column": "activity_id",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 10000000000.0,
+          "min_value": 1.0
+        },
+        {
+          "column": "confidence_score",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 9.0,
+          "min_value": 8.0
+        },
+        {
+          "column": "pchembl_value",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 10.0,
+          "min_value": 3.0
+        }
+      ],
       "required_fields": [
         "molecule_id",
         "molecular_formula"
@@ -2764,7 +3951,7 @@
     "transform_version": null
   },
   "pubmed_publication": {
-    "batch_size": 100,
+    "batch_size": 1000,
     "checkpoint_interval": 1000,
     "column_groups": [
       {
@@ -3389,7 +4576,7 @@
         "alias_policy": null,
         "column_groups": null,
         "columns": null,
-        "exclude_fields": null,
+        "exclude_fields": [],
         "include_groups": [
           "system",
           "identifiers",
@@ -3437,13 +4624,192 @@
       "strictness_mode": "moderate"
     },
     "entity_type": "publication",
-    "field_policy": [],
+    "field_policy": [
+      {
+        "boolean_false_values": [
+          "false",
+          "non_therapeutic"
+        ],
+        "boolean_true_values": [
+          "true",
+          "therapeutic"
+        ],
+        "coercion_policy": null,
+        "empty_as_missing": null,
+        "field": "therapeutic_flag",
+        "optional": null
+      }
+    ],
     "fields": [],
     "gold_filters": {
-      "column_filters": [],
+      "column_filters": [
+        {
+          "column": "assay_type",
+          "operator": "in",
+          "values": [
+            "B",
+            "F"
+          ]
+        },
+        {
+          "column": "assay_strain",
+          "operator": "is_empty",
+          "values": null
+        },
+        {
+          "column": "assay_test_type",
+          "operator": "not_in",
+          "values": [
+            "Ex vivo",
+            "In vivo"
+          ]
+        },
+        {
+          "column": "bao_format",
+          "operator": "not_in",
+          "values": [
+            "BAO_0000218"
+          ]
+        },
+        {
+          "column": "component_type",
+          "operator": "in",
+          "values": [
+            "PROTEIN"
+          ]
+        },
+        {
+          "column": "confidence_score",
+          "operator": "in",
+          "values": [
+            8,
+            9
+          ]
+        },
+        {
+          "column": "downgraded",
+          "operator": "in",
+          "values": [
+            "0"
+          ]
+        },
+        {
+          "column": "inorganic_flag",
+          "operator": "in",
+          "values": [
+            0
+          ]
+        },
+        {
+          "column": "molecule_type",
+          "operator": "in",
+          "values": [
+            "Small molecule"
+          ]
+        },
+        {
+          "column": "potential_duplicate",
+          "operator": "in",
+          "values": [
+            0
+          ]
+        },
+        {
+          "column": "publication_type",
+          "operator": "in",
+          "values": [
+            "journal-article"
+          ]
+        },
+        {
+          "column": "relationship_type",
+          "operator": "in",
+          "values": [
+            "D"
+          ]
+        },
+        {
+          "column": "reviewed",
+          "operator": "in",
+          "values": [
+            true
+          ]
+        },
+        {
+          "column": "standard_relation",
+          "operator": "in",
+          "values": [
+            "="
+          ]
+        },
+        {
+          "column": "standard_type",
+          "operator": "in",
+          "values": [
+            "IC50",
+            "Ki"
+          ]
+        },
+        {
+          "column": "standard_units",
+          "operator": "in",
+          "values": [
+            "nM"
+          ]
+        },
+        {
+          "column": "structure_type",
+          "operator": "in",
+          "values": [
+            "MOL"
+          ]
+        },
+        {
+          "column": "target_type",
+          "operator": "in",
+          "values": [
+            "SINGLE PROTEIN"
+          ]
+        },
+        {
+          "column": "term_type",
+          "operator": "in",
+          "values": [
+            "KEYWORD",
+            "MESH_HEADING",
+            "MESH_QUALIFIER"
+          ]
+        },
+        {
+          "column": "src_id",
+          "operator": "in",
+          "values": [
+            "1"
+          ]
+        }
+      ],
       "exclude_if_present": [],
-      "list_contains_filters": [],
-      "list_length_filters": [],
+      "list_contains_filters": [
+        {
+          "column": "component_types",
+          "mode": "all",
+          "values": [
+            "PROTEIN"
+          ]
+        }
+      ],
+      "list_length_filters": [
+        {
+          "column": "component_accessions",
+          "max_length": 1,
+          "min_length": 1
+        },
+        {
+          "column": "component_ids",
+          "max_length": null,
+          "min_length": 1
+        }
+      ],
       "range_filters": [
         {
           "column": "publication_year",
@@ -3451,6 +4817,41 @@
           "include_min": true,
           "max_value": 2050.0,
           "min_value": 1950.0
+        },
+        {
+          "column": "max_tani",
+          "include_max": true,
+          "include_min": true,
+          "max_value": null,
+          "min_value": 0.5
+        },
+        {
+          "column": "standard_value",
+          "include_max": true,
+          "include_min": false,
+          "max_value": null,
+          "min_value": 0.0
+        },
+        {
+          "column": "activity_id",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 10000000000.0,
+          "min_value": 1.0
+        },
+        {
+          "column": "confidence_score",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 9.0,
+          "min_value": 8.0
+        },
+        {
+          "column": "pchembl_value",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 10.0,
+          "min_value": 3.0
         }
       ],
       "required_fields": [
@@ -3498,7 +4899,7 @@
     "transform_version": null
   },
   "semanticscholar_publication": {
-    "batch_size": 100,
+    "batch_size": 1000,
     "checkpoint_interval": 1000,
     "column_groups": [
       {
@@ -4029,7 +5430,7 @@
         "alias_policy": null,
         "column_groups": null,
         "columns": null,
-        "exclude_fields": null,
+        "exclude_fields": [],
         "include_groups": [
           "system",
           "identifiers",
@@ -4074,13 +5475,192 @@
       "strictness_mode": "moderate"
     },
     "entity_type": "publication",
-    "field_policy": [],
+    "field_policy": [
+      {
+        "boolean_false_values": [
+          "false",
+          "non_therapeutic"
+        ],
+        "boolean_true_values": [
+          "true",
+          "therapeutic"
+        ],
+        "coercion_policy": null,
+        "empty_as_missing": null,
+        "field": "therapeutic_flag",
+        "optional": null
+      }
+    ],
     "fields": [],
     "gold_filters": {
-      "column_filters": [],
+      "column_filters": [
+        {
+          "column": "assay_type",
+          "operator": "in",
+          "values": [
+            "B",
+            "F"
+          ]
+        },
+        {
+          "column": "assay_strain",
+          "operator": "is_empty",
+          "values": null
+        },
+        {
+          "column": "assay_test_type",
+          "operator": "not_in",
+          "values": [
+            "Ex vivo",
+            "In vivo"
+          ]
+        },
+        {
+          "column": "bao_format",
+          "operator": "not_in",
+          "values": [
+            "BAO_0000218"
+          ]
+        },
+        {
+          "column": "component_type",
+          "operator": "in",
+          "values": [
+            "PROTEIN"
+          ]
+        },
+        {
+          "column": "confidence_score",
+          "operator": "in",
+          "values": [
+            8,
+            9
+          ]
+        },
+        {
+          "column": "downgraded",
+          "operator": "in",
+          "values": [
+            "0"
+          ]
+        },
+        {
+          "column": "inorganic_flag",
+          "operator": "in",
+          "values": [
+            0
+          ]
+        },
+        {
+          "column": "molecule_type",
+          "operator": "in",
+          "values": [
+            "Small molecule"
+          ]
+        },
+        {
+          "column": "potential_duplicate",
+          "operator": "in",
+          "values": [
+            0
+          ]
+        },
+        {
+          "column": "publication_type",
+          "operator": "in",
+          "values": [
+            "journal-article"
+          ]
+        },
+        {
+          "column": "relationship_type",
+          "operator": "in",
+          "values": [
+            "D"
+          ]
+        },
+        {
+          "column": "reviewed",
+          "operator": "in",
+          "values": [
+            true
+          ]
+        },
+        {
+          "column": "standard_relation",
+          "operator": "in",
+          "values": [
+            "="
+          ]
+        },
+        {
+          "column": "standard_type",
+          "operator": "in",
+          "values": [
+            "IC50",
+            "Ki"
+          ]
+        },
+        {
+          "column": "standard_units",
+          "operator": "in",
+          "values": [
+            "nM"
+          ]
+        },
+        {
+          "column": "structure_type",
+          "operator": "in",
+          "values": [
+            "MOL"
+          ]
+        },
+        {
+          "column": "target_type",
+          "operator": "in",
+          "values": [
+            "SINGLE PROTEIN"
+          ]
+        },
+        {
+          "column": "term_type",
+          "operator": "in",
+          "values": [
+            "KEYWORD",
+            "MESH_HEADING",
+            "MESH_QUALIFIER"
+          ]
+        },
+        {
+          "column": "src_id",
+          "operator": "in",
+          "values": [
+            "1"
+          ]
+        }
+      ],
       "exclude_if_present": [],
-      "list_contains_filters": [],
-      "list_length_filters": [],
+      "list_contains_filters": [
+        {
+          "column": "component_types",
+          "mode": "all",
+          "values": [
+            "PROTEIN"
+          ]
+        }
+      ],
+      "list_length_filters": [
+        {
+          "column": "component_accessions",
+          "max_length": 1,
+          "min_length": 1
+        },
+        {
+          "column": "component_ids",
+          "max_length": null,
+          "min_length": 1
+        }
+      ],
       "range_filters": [
         {
           "column": "publication_year",
@@ -4088,6 +5668,41 @@
           "include_min": true,
           "max_value": 2050.0,
           "min_value": 1950.0
+        },
+        {
+          "column": "max_tani",
+          "include_max": true,
+          "include_min": true,
+          "max_value": null,
+          "min_value": 0.5
+        },
+        {
+          "column": "standard_value",
+          "include_max": true,
+          "include_min": false,
+          "max_value": null,
+          "min_value": 0.0
+        },
+        {
+          "column": "activity_id",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 10000000000.0,
+          "min_value": 1.0
+        },
+        {
+          "column": "confidence_score",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 9.0,
+          "min_value": 8.0
+        },
+        {
+          "column": "pchembl_value",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 10.0,
+          "min_value": 3.0
         }
       ],
       "required_fields": [
@@ -4135,7 +5750,7 @@
     "transform_version": null
   },
   "uniprot_idmapping": {
-    "batch_size": 100,
+    "batch_size": 1000,
     "checkpoint_interval": 1000,
     "column_groups": [
       {
@@ -4312,14 +5927,236 @@
       "strictness_mode": "moderate"
     },
     "entity_type": "idmapping",
-    "field_policy": [],
+    "field_policy": [
+      {
+        "boolean_false_values": [
+          "false",
+          "non_therapeutic"
+        ],
+        "boolean_true_values": [
+          "true",
+          "therapeutic"
+        ],
+        "coercion_policy": null,
+        "empty_as_missing": null,
+        "field": "therapeutic_flag",
+        "optional": null
+      }
+    ],
     "fields": [],
     "gold_filters": {
-      "column_filters": [],
+      "column_filters": [
+        {
+          "column": "assay_type",
+          "operator": "in",
+          "values": [
+            "B",
+            "F"
+          ]
+        },
+        {
+          "column": "assay_strain",
+          "operator": "is_empty",
+          "values": null
+        },
+        {
+          "column": "assay_test_type",
+          "operator": "not_in",
+          "values": [
+            "Ex vivo",
+            "In vivo"
+          ]
+        },
+        {
+          "column": "bao_format",
+          "operator": "not_in",
+          "values": [
+            "BAO_0000218"
+          ]
+        },
+        {
+          "column": "component_type",
+          "operator": "in",
+          "values": [
+            "PROTEIN"
+          ]
+        },
+        {
+          "column": "confidence_score",
+          "operator": "in",
+          "values": [
+            8,
+            9
+          ]
+        },
+        {
+          "column": "downgraded",
+          "operator": "in",
+          "values": [
+            "0"
+          ]
+        },
+        {
+          "column": "inorganic_flag",
+          "operator": "in",
+          "values": [
+            0
+          ]
+        },
+        {
+          "column": "molecule_type",
+          "operator": "in",
+          "values": [
+            "Small molecule"
+          ]
+        },
+        {
+          "column": "potential_duplicate",
+          "operator": "in",
+          "values": [
+            0
+          ]
+        },
+        {
+          "column": "publication_type",
+          "operator": "in",
+          "values": [
+            "journal-article"
+          ]
+        },
+        {
+          "column": "relationship_type",
+          "operator": "in",
+          "values": [
+            "D"
+          ]
+        },
+        {
+          "column": "reviewed",
+          "operator": "in",
+          "values": [
+            true
+          ]
+        },
+        {
+          "column": "standard_relation",
+          "operator": "in",
+          "values": [
+            "="
+          ]
+        },
+        {
+          "column": "standard_type",
+          "operator": "in",
+          "values": [
+            "IC50",
+            "Ki"
+          ]
+        },
+        {
+          "column": "standard_units",
+          "operator": "in",
+          "values": [
+            "nM"
+          ]
+        },
+        {
+          "column": "structure_type",
+          "operator": "in",
+          "values": [
+            "MOL"
+          ]
+        },
+        {
+          "column": "target_type",
+          "operator": "in",
+          "values": [
+            "SINGLE PROTEIN"
+          ]
+        },
+        {
+          "column": "term_type",
+          "operator": "in",
+          "values": [
+            "KEYWORD",
+            "MESH_HEADING",
+            "MESH_QUALIFIER"
+          ]
+        },
+        {
+          "column": "src_id",
+          "operator": "in",
+          "values": [
+            "1"
+          ]
+        }
+      ],
       "exclude_if_present": [],
-      "list_contains_filters": [],
-      "list_length_filters": [],
-      "range_filters": [],
+      "list_contains_filters": [
+        {
+          "column": "component_types",
+          "mode": "all",
+          "values": [
+            "PROTEIN"
+          ]
+        }
+      ],
+      "list_length_filters": [
+        {
+          "column": "component_accessions",
+          "max_length": 1,
+          "min_length": 1
+        },
+        {
+          "column": "component_ids",
+          "max_length": null,
+          "min_length": 1
+        }
+      ],
+      "range_filters": [
+        {
+          "column": "publication_year",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 2050.0,
+          "min_value": 1950.0
+        },
+        {
+          "column": "max_tani",
+          "include_max": true,
+          "include_min": true,
+          "max_value": null,
+          "min_value": 0.5
+        },
+        {
+          "column": "standard_value",
+          "include_max": true,
+          "include_min": false,
+          "max_value": null,
+          "min_value": 0.0
+        },
+        {
+          "column": "activity_id",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 10000000000.0,
+          "min_value": 1.0
+        },
+        {
+          "column": "confidence_score",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 9.0,
+          "min_value": 8.0
+        },
+        {
+          "column": "pchembl_value",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 10.0,
+          "min_value": 3.0
+        }
+      ],
       "required_fields": [
         "target_id",
         "mapping_status"
@@ -4365,7 +6202,7 @@
     "transform_version": null
   },
   "uniprot_protein": {
-    "batch_size": 100,
+    "batch_size": 1000,
     "checkpoint_interval": 1000,
     "column_groups": [
       {
@@ -4698,7 +6535,22 @@
       "strictness_mode": "moderate"
     },
     "entity_type": "protein",
-    "field_policy": [],
+    "field_policy": [
+      {
+        "boolean_false_values": [
+          "false",
+          "non_therapeutic"
+        ],
+        "boolean_true_values": [
+          "true",
+          "therapeutic"
+        ],
+        "coercion_policy": null,
+        "empty_as_missing": null,
+        "field": "therapeutic_flag",
+        "optional": null
+      }
+    ],
     "fields": [],
     "gold_filters": {
       "column_filters": [
@@ -4708,12 +6560,211 @@
           "values": [
             true
           ]
+        },
+        {
+          "column": "assay_type",
+          "operator": "in",
+          "values": [
+            "B",
+            "F"
+          ]
+        },
+        {
+          "column": "assay_strain",
+          "operator": "is_empty",
+          "values": null
+        },
+        {
+          "column": "assay_test_type",
+          "operator": "not_in",
+          "values": [
+            "Ex vivo",
+            "In vivo"
+          ]
+        },
+        {
+          "column": "bao_format",
+          "operator": "not_in",
+          "values": [
+            "BAO_0000218"
+          ]
+        },
+        {
+          "column": "component_type",
+          "operator": "in",
+          "values": [
+            "PROTEIN"
+          ]
+        },
+        {
+          "column": "confidence_score",
+          "operator": "in",
+          "values": [
+            8,
+            9
+          ]
+        },
+        {
+          "column": "downgraded",
+          "operator": "in",
+          "values": [
+            "0"
+          ]
+        },
+        {
+          "column": "inorganic_flag",
+          "operator": "in",
+          "values": [
+            0
+          ]
+        },
+        {
+          "column": "molecule_type",
+          "operator": "in",
+          "values": [
+            "Small molecule"
+          ]
+        },
+        {
+          "column": "potential_duplicate",
+          "operator": "in",
+          "values": [
+            0
+          ]
+        },
+        {
+          "column": "publication_type",
+          "operator": "in",
+          "values": [
+            "journal-article"
+          ]
+        },
+        {
+          "column": "relationship_type",
+          "operator": "in",
+          "values": [
+            "D"
+          ]
+        },
+        {
+          "column": "standard_relation",
+          "operator": "in",
+          "values": [
+            "="
+          ]
+        },
+        {
+          "column": "standard_type",
+          "operator": "in",
+          "values": [
+            "IC50",
+            "Ki"
+          ]
+        },
+        {
+          "column": "standard_units",
+          "operator": "in",
+          "values": [
+            "nM"
+          ]
+        },
+        {
+          "column": "structure_type",
+          "operator": "in",
+          "values": [
+            "MOL"
+          ]
+        },
+        {
+          "column": "target_type",
+          "operator": "in",
+          "values": [
+            "SINGLE PROTEIN"
+          ]
+        },
+        {
+          "column": "term_type",
+          "operator": "in",
+          "values": [
+            "KEYWORD",
+            "MESH_HEADING",
+            "MESH_QUALIFIER"
+          ]
+        },
+        {
+          "column": "src_id",
+          "operator": "in",
+          "values": [
+            "1"
+          ]
         }
       ],
       "exclude_if_present": [],
-      "list_contains_filters": [],
-      "list_length_filters": [],
-      "range_filters": [],
+      "list_contains_filters": [
+        {
+          "column": "component_types",
+          "mode": "all",
+          "values": [
+            "PROTEIN"
+          ]
+        }
+      ],
+      "list_length_filters": [
+        {
+          "column": "component_accessions",
+          "max_length": 1,
+          "min_length": 1
+        },
+        {
+          "column": "component_ids",
+          "max_length": null,
+          "min_length": 1
+        }
+      ],
+      "range_filters": [
+        {
+          "column": "publication_year",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 2050.0,
+          "min_value": 1950.0
+        },
+        {
+          "column": "max_tani",
+          "include_max": true,
+          "include_min": true,
+          "max_value": null,
+          "min_value": 0.5
+        },
+        {
+          "column": "standard_value",
+          "include_max": true,
+          "include_min": false,
+          "max_value": null,
+          "min_value": 0.0
+        },
+        {
+          "column": "activity_id",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 10000000000.0,
+          "min_value": 1.0
+        },
+        {
+          "column": "confidence_score",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 9.0,
+          "min_value": 8.0
+        },
+        {
+          "column": "pchembl_value",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 10.0,
+          "min_value": 3.0
+        }
+      ],
       "required_fields": [
         "accession",
         "entry_name",

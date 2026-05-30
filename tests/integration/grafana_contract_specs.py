@@ -38,7 +38,8 @@ SUMMARY_ZERO_FALLBACK_EXPECTATIONS = {
         "Monitor Degraded Checks (Selected Range)": "or vector(0)",
         "Track Provider Failure Rate (Selected Range)": "or vector(0)",
         "Track Health Checks Total (Selected Range)": "or vector(0)",
-        "Inspect HTTP Errors by Method/Error Type": "or vector(0)",
+        "Inspect Rate Limit Errors by Method": "or vector(0)",
+        "Inspect Network Timeout Errors by Method": "or vector(0)",
     },
     "bioetl-dq-v2.json": {
         "Track: Records Quarantined in Range": "or vector(0)",

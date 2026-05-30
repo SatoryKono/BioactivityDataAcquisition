@@ -32,6 +32,7 @@ Commands:
     report-vcr-metadata  Generate/check canonical VCR metadata catalog
     report-provider-contract-drift  Generate provider contract drift diagnostics from replay cassettes
     report-compatibility-importer-census Generate deterministic importer census for sanctioned seams and twin modules
+    report-pipeline-config-contract-ownership-map Generate/check pipeline-config-contract ownership traces
     report-module-coverage Generate/check module-level coverage inventory
     report-dead-code-inventory Generate repo-local static dead-code review inventory
     report-pubchem-property-vocab Extract observed PubChem property-URN vocabulary
@@ -86,6 +87,7 @@ COMMAND_MODULES: dict[str, str] = {
     "report-vcr-metadata": "scripts.engineering.qa.report_vcr_metadata_catalog",
     "report-provider-contract-drift": "scripts.engineering.qa.report_provider_contract_drift",
     "report-compatibility-importer-census": "scripts.engineering.qa.report_compatibility_importer_census",
+    "report-pipeline-config-contract-ownership-map": "scripts.engineering.qa.report_pipeline_config_contract_ownership",
     "report-module-coverage": "scripts.engineering.qa.report_module_coverage_inventory",
     "report-dead-code-inventory": "scripts.engineering.qa.report_dead_code_inventory",
     "report-pubchem-property-vocab": "scripts.engineering.qa.extract_pubchem_property_vocab",
@@ -103,6 +105,9 @@ COMMAND_MODULES: dict[str, str] = {
     "check-dashboard-visual-semantics": "scripts.engineering.qa.check_dashboard_visual_semantics",
     "report-dashboard-inventory": "scripts.engineering.qa.report_dashboard_inventory",
     "report-dashboard-query-duplicates": "scripts.engineering.qa.report_dashboard_query_duplicates",
+    "report-dashboard-panel-audit-matrix": (
+        "scripts.engineering.qa.report_dashboard_panel_audit_matrix"
+    ),
 }
 COMMAND_SPECS = {
     name: module_command(module) for name, module in COMMAND_MODULES.items()

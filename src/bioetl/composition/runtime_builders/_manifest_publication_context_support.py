@@ -1,0 +1,124 @@
+"""Shared manifest publication context resolution for runtime builders."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+import bioetl.composition.runtime_builders.run_manifest_support as _manifest_support
+from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
+    resolve_manifest_reproducibility_context,
+)
+from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
+    RunManifestContractIdentity,
+)
+from bioetl.domain.control_plane.reproducibility_policy import (
+    STRICT_PERSISTENCE_PROFILES,
+)
+
+if TYPE_CHECKING:
+    from bioetl.composition.runtime_builders.inputs_resolver import RunnerInputs
+    from bioetl.domain.context import PipelineRunContext
+
+
+@dataclass(frozen=True, slots=True)
+class ResolvedManifestPublicationContext:
+    """Provider, entity, reproducibility, and contract identity for one run."""
+
+    provider: str
+    entity: str
+    reproducibility_context: object
+    contract_identity: RunManifestContractIdentity
+
+
+def contract_identity_requires_strict_resolution(
+    *,
+    exact_replay_requested: bool,
+    required_persistence_profile: str,
+) -> bool:
+    """Return whether contract identity must be resolved in strict mode."""
+    return (
+        exact_replay_requested
+        or required_persistence_profile in STRICT_PERSISTENCE_PROFILES
+    )
+
+
+def resolve_manifest_publication_context(
+    *,
+    ctx: PipelineRunContext,
+    inputs: RunnerInputs,
+    reproducibility_context: object | None = None,
+    contract_identity: RunManifestContractIdentity | None = None,
+) -> ResolvedManifestPublicationContext:
+    """Resolve provider, reproducibility context, and contract identity."""
+    provider, entity = _manifest_support.resolve_provider_entity(
+        pipeline_name=ctx.pipeline_name,
+        yaml_config=inputs.yaml_config,
+    )
+    contract_ref = f"{provider}.{entity}"
+    if reproducibility_context is None:
+        reproducibility_context = resolve_manifest_reproducibility_context(
+            ctx=ctx,
+            inputs=inputs,
+            provider=provider,
+            entity=entity,
+            contract_ref=contract_ref,
+        )
+    if contract_identity is None:
+        contract_identity = _manifest_support.resolve_contract_identity(
+            provider=provider,
+            entity=entity,
+            strict=contract_identity_requires_strict_resolution(
+                exact_replay_requested=bool(getattr(ctx, "exact_replay", False)),
+                required_persistence_profile=(
+                    reproducibility_context.required_persistence_profile
+                ),
+            ),
+        )
+    return ResolvedManifestPublicationContext(
+        provider=provider,
+        entity=entity,
+        reproducibility_context=reproducibility_context,
+        contract_identity=contract_identity,
+    )
+
+
+def ensure_manifest_publication_identity(
+    *,
+    ctx: PipelineRunContext,
+    inputs: RunnerInputs,
+    provider: str,
+    entity: str,
+    reproducibility_context: object | None = None,
+    contract_identity: RunManifestContractIdentity | None = None,
+) -> tuple[object, RunManifestContractIdentity]:
+    """Fill missing reproducibility context and contract identity for one run."""
+    contract_ref = f"{provider}.{entity}"
+    if reproducibility_context is None:
+        reproducibility_context = resolve_manifest_reproducibility_context(
+            ctx=ctx,
+            inputs=inputs,
+            provider=provider,
+            entity=entity,
+            contract_ref=contract_ref,
+        )
+    if contract_identity is None:
+        contract_identity = _manifest_support.resolve_contract_identity(
+            provider=provider,
+            entity=entity,
+            strict=contract_identity_requires_strict_resolution(
+                exact_replay_requested=bool(getattr(ctx, "exact_replay", False)),
+                required_persistence_profile=(
+                    reproducibility_context.required_persistence_profile
+                ),
+            ),
+        )
+    return reproducibility_context, contract_identity
+
+
+__all__ = [
+    "ResolvedManifestPublicationContext",
+    "contract_identity_requires_strict_resolution",
+    "ensure_manifest_publication_identity",
+    "resolve_manifest_publication_context",
+]

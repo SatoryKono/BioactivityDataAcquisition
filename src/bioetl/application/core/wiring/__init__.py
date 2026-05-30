@@ -85,81 +85,22 @@ if TYPE_CHECKING:
         build_structural_policy,
     )
 
-_EXPORT_GROUPS = {
-    "bioetl.application.core.wiring.factory": (
-        "BasePipeline",
-        "BatchExecutor",
-        "CheckpointRuntimeService",
-        "LockRuntimeService",
-        "PipelineRunner",
-        "PipelineRunnerDependencies",
-        "PipelineService",
-        "PostrunService",
-        "PreflightService",
-        "ShutdownSignal",
-    ),
-    "bioetl.application.core.wiring.registry": (
-        "ActivityTransformer",
-        "AssayParametersTransformer",
-        "AssayTransformer",
-        "CellLineTransformer",
-        "CompoundRecordTransformer",
-        "CrossRefPublicationTransformer",
-        "GenericPipeline",
-        "IDMappingTransformer",
-        "MoleculeTransformer",
-        "OpenAlexPublicationTransformer",
-        "ProteinClassTransformer",
-        "PubChemCompoundTransformer",
-        "PubMedPublicationTransformer",
-        "PublicationSimilarityTransformer",
-        "PublicationTermTransformer",
-        "PublicationTransformer",
-        "SemanticScholarPublicationTransformer",
-        "SubcellularFractionTransformer",
-        "TargetComponentTransformer",
-        "TargetTransformer",
-        "TissueTransformer",
-        "UniProtProteinTransformer",
-    ),
-    "bioetl.application.core.wiring.runtime": (
-        "BatchCheckpointRecoveryService",
-        "BatchExecutionFSM",
-        "BatchExecutionLifecycleService",
-        "BatchExecutionRunService",
-        "BatchExecutionStateService",
-        "BatchExecutorDependencies",
-        "BatchExtractionLoopService",
-        "BatchMemoryManagerService",
-        "BatchMetricsRecorderService",
-        "BatchProcessingComponents",
-        "BatchProcessingService",
-        "BatchProcessingSupportService",
-        "BatchProgressService",
-        "BatchTracingManagerService",
-        "BatchTransformer",
-        "BatchWriter",
-        "BatchWriterOptions",
-        "ContentHashPolicyByVersion",
-        "ContentHashVersionPolicy",
-        "GoldFilterCallback",
-        "GoldTransformCallback",
-        "PipelineStorageProtocol",
-        "QuarantineRuntimeService",
-        "RecordNormalizationProcessor",
-        "RecordProcessor",
-        "RecordProcessorConfig",
-        "TransformCallback",
-    ),
-    "bioetl.application.core.wiring.transformer": (
-        "BaseTransformer",
-        "DefaultContractPolicy",
-        "NoOpStructuralPolicy",
-        "StructuralPolicyProtocol",
-        "TransformerDependencyContext",
-        "build_structural_policy",
-    ),
-}
+_WIRING_SUBMODULES = (
+    "bioetl.application.core.wiring.factory",
+    "bioetl.application.core.wiring.registry",
+    "bioetl.application.core.wiring.runtime",
+    "bioetl.application.core.wiring.transformer",
+)
+
+
+def _build_export_groups() -> dict[str, tuple[str, ...]]:
+    return {
+        module_name: tuple(import_module(module_name).__all__)
+        for module_name in _WIRING_SUBMODULES
+    }
+
+
+_EXPORT_GROUPS = _build_export_groups()
 
 _EXPORT_MODULES = {
     export_name: module_name

@@ -347,8 +347,11 @@ tracing-backed log hygiene живёт в collapsed row
   дают compact supporting context до перехода к full-width historical evidence.
 - **Track Range Evidence: Bronze -> Silver -> Gold**: полноширинный
   selected-range flow panel ниже current-context row.
-- **Monitor: Silver Validation Failures / Gold Strict Validation Failures / DQ Impact on Deliverability**:
-  контроль hard-failure и operator impact surfaces ниже first-screen band.
+- **Monitor: Silver Validation Failures / Gold Strict Validation Failures / Track: DQ Blocked Records in Range (Evidence) / Track: DQ Threshold Events in Range Trend**:
+  контроль hard-failure и operator impact surfaces ниже first-screen band. Blocked-record
+  и threshold-event панели показывают absolute evidence + domain threshold counters, а
+  severity-вердикт остаётся за `Monitor DQ Current Status` / `Monitor DQ Threshold State`
+  (без UI-side ratio math).
 - **Anomalies / DQ p95 / Data Freshness**: детальные DQ-сигналы. `Worst Data
   Freshness Lag (seconds)` теперь показывает самый stale entity в выбранном
   scope через `max(time() - bioetl_data_freshness_seconds)`, а

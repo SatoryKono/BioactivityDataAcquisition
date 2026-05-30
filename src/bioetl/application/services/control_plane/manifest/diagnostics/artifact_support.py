@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane._run_manifest_artifact_payloads import (
-    ARTIFACT_TRACE_ORDERED_KEYS,
-)
 from bioetl.domain.control_plane import RunManifest
 
 
@@ -30,6 +27,10 @@ def build_trace_artifact_ref(
     artifact_ref: dict[str, object],
 ) -> dict[str, object]:
     """Return the concrete produced-artifact shape used by replay trace output."""
+    from bioetl.application.services.control_plane.run_manifest_diagnostics_support import (
+        ARTIFACT_TRACE_ORDERED_KEYS,
+    )
+
     return {
         key: artifact_ref[key]
         for key in ARTIFACT_TRACE_ORDERED_KEYS

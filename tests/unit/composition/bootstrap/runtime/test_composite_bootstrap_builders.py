@@ -41,7 +41,7 @@ def test_bootstrap_runtime_basics_forwards_injected_runtime_dependencies() -> No
     lock = MagicMock()
 
     with patch(
-        "bioetl.composition.bootstrap.runtime.composite_bootstrap_builders._bootstrap_runtime_basics_impl"
+        "bioetl.composition.bootstrap.runtime.composite_bootstrap_builders.bootstrap_runtime_basics"
     ) as mock_runtime_basics:
         mock_runtime_basics.return_value = SimpleNamespace(
             run_id="rid-123",

@@ -821,13 +821,10 @@ def test_create_and_persist_effective_config_artifact_uses_supplied_publication_
         _fake_payload,
     )
     monkeypatch.setattr(
-        "bioetl.composition.runtime_builders.effective_config_artifact_builder.resolve_manifest_reproducibility_context",
-        lambda **_: (_ for _ in ()).throw(AssertionError("resolver should not run")),
-    )
-    monkeypatch.setattr(
-        "bioetl.composition.runtime_builders.effective_config_artifact_builder._manifest_support.resolve_contract_identity",
-        lambda **_: (_ for _ in ()).throw(
-            AssertionError("identity resolver should not run")
+        "bioetl.composition.runtime_builders.effective_config_artifact_builder.ensure_manifest_publication_identity",
+        lambda **kwargs: (
+            kwargs["reproducibility_context"],
+            kwargs["contract_identity"],
         ),
     )
 

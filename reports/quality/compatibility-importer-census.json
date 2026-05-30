@@ -9,9 +9,9 @@
     "removed_compatibility_surfaces_with_src_importers": 0,
     "removed_compatibility_surfaces_with_test_importers": 0,
     "removed_compatibility_surfaces_still_present": 0,
-    "twin_pair_count": 15,
-    "twin_pairs_with_private_src_importers": 15,
-    "twin_pairs_without_public_src_importers": 1,
+    "twin_pair_count": 14,
+    "twin_pairs_with_private_src_importers": 14,
+    "twin_pairs_without_public_src_importers": 0,
     "tracked_twin_family_count": 3,
     "config_root_symbol_count": 3,
     "config_root_src_importer_count": 0,
@@ -260,7 +260,6 @@
         "src/bioetl/composition/bootstrap/runtime/_dependency_runner_support.py",
         "src/bioetl/composition/bootstrap/runtime/_runner_assembly_support.py",
         "src/bioetl/composition/bootstrap/runtime/composite.py",
-        "src/bioetl/composition/bootstrap/runtime/composite_bootstrap_builders.py",
         "src/bioetl/composition/bootstrap/runtime/composite_control_plane_builder.py",
         "src/bioetl/composition/bootstrap/runtime/composite_execution_support_builder.py",
         "src/bioetl/composition/bootstrap/runtime/composite_filter_extraction_service.py",
@@ -319,7 +318,7 @@
         "tests/unit/domain/composite/test_data_schema_config.py",
         "tests/unit/infrastructure/schemas/test_composite_config_invariants_source_of_truth.py"
       ],
-      "src_importer_count": 80,
+      "src_importer_count": 79,
       "test_importer_count": 34
     },
     {
@@ -816,7 +815,7 @@
       "public_module": "bioetl.application.core.data_source_mixins",
       "public_src_importer_count": 3,
       "public_test_importer_count": 0,
-      "private_src_importer_count": 2,
+      "private_src_importer_count": 3,
       "private_test_importer_count": 1,
       "public_src_importers": [
         "src/bioetl/application/core/data_sources/filtered.py",
@@ -825,6 +824,7 @@
       ],
       "private_src_importers": [
         "src/bioetl/application/core/_filtered_data_source_fetch_support.py",
+        "src/bioetl/application/core/_filtered_data_source_mixins.py",
         "src/bioetl/application/core/data_source_mixins.py"
       ]
     },
@@ -952,20 +952,6 @@
         "src/bioetl/application/core/batch_execution/lifecycle.py",
         "src/bioetl/application/core/batch_execution/run_service.py",
         "src/bioetl/application/core/batch_execution/state_service.py"
-      ]
-    },
-    {
-      "private_path": "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_checkpoint_projection.py",
-      "public_path": "src/bioetl/application/services/control_plane/run_manifest_diagnostics_checkpoint_projection.py",
-      "private_module": "bioetl.application.services.control_plane._run_manifest_diagnostics_checkpoint_projection",
-      "public_module": "bioetl.application.services.control_plane.run_manifest_diagnostics_checkpoint_projection",
-      "public_src_importer_count": 0,
-      "public_test_importer_count": 0,
-      "private_src_importer_count": 1,
-      "private_test_importer_count": 1,
-      "public_src_importers": [],
-      "private_src_importers": [
-        "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_main_helpers.py"
       ]
     },
     {

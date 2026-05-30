@@ -4,6 +4,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from bioetl.application.services.control_plane.replay._historical_record_payload import (
+    build_historical_run_identity_payload,
+)
+
 
 @dataclass(frozen=True, slots=True)
 class HistoricalReplayCertifiabilityRecord:
@@ -26,28 +30,28 @@ class HistoricalReplayCertifiabilityRecord:
 
     def to_dict(self) -> dict[str, object]:
         """Return one JSON-safe inventory row."""
-        return {
-            "manifest_id": self.manifest_id,
-            "run_id": self.run_id,
-            "pipeline_name": self.pipeline_name,
-            "provider": self.provider,
-            "entity": self.entity,
-            "execution_context": self.execution_context,
-            "family": self.family,
-            "certification_scope": self.certification_scope,
-            "certification_status": self.certification_status,
-            "replay_occurrence_kind": self.replay_occurrence_kind,
-            "broader_historical_exact_replay_policy": (
+        return build_historical_run_identity_payload(
+            manifest_id=self.manifest_id,
+            run_id=self.run_id,
+            pipeline_name=self.pipeline_name,
+            provider=self.provider,
+            entity=self.entity,
+            execution_context=self.execution_context,
+            certification_status=self.certification_status,
+            replay_occurrence_kind=self.replay_occurrence_kind,
+            blocking_reasons=self.blocking_reasons,
+            family=self.family,
+            certification_scope=self.certification_scope,
+            broader_historical_exact_replay_policy=(
                 self.broader_historical_exact_replay_policy
             ),
-            "broader_historical_exact_replay_boundary": (
+            broader_historical_exact_replay_boundary=(
                 self.broader_historical_exact_replay_boundary
             ),
-            "broader_historical_exact_replay_state": (
+            broader_historical_exact_replay_state=(
                 self.broader_historical_exact_replay_state
             ),
-            "blocking_reasons": list(self.blocking_reasons),
-        }
+        )
 
 
 @dataclass(frozen=True, slots=True)

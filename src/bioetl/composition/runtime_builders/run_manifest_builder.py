@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import bioetl.composition.runtime_builders.run_manifest_support as _manifest_support
 from bioetl.application.services.control_plane.ledger.service import (
     RunLedgerService,
 )
-from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
-    resolve_manifest_reproducibility_context,
+from bioetl.composition.runtime_builders._manifest_publication_context_support import (
+    ResolvedManifestPublicationContext,
+    resolve_manifest_publication_context,
 )
 from bioetl.composition.runtime_builders._run_manifest_creation_support import (
     _RunManifestCreateRequestInputs,
@@ -26,9 +26,6 @@ from bioetl.composition.runtime_builders._runner_control_plane_policy import (
     resolve_required_artifact_lineage_layers,
     validate_required_persistence_profile,
 )
-from bioetl.domain.control_plane.reproducibility_policy import (
-    STRICT_PERSISTENCE_PROFILES,
-)
 from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
 
 if TYPE_CHECKING:
@@ -36,51 +33,6 @@ if TYPE_CHECKING:
         RunnerInputs,
     )
     from bioetl.domain.context import PipelineRunContext
-
-
-@dataclass(frozen=True, slots=True)
-class _ResolvedManifestContext:
-    provider: str
-    entity: str
-    contract_identity: _manifest_support.RunManifestContractIdentity
-    reproducibility_context: object
-
-
-def _resolve_manifest_context(
-    *,
-    ctx: PipelineRunContext,
-    inputs: RunnerInputs,
-    reproducibility_context: object | None = None,
-    contract_identity: _manifest_support.RunManifestContractIdentity | None = None,
-) -> _ResolvedManifestContext:
-    """Resolve manifest family, contract identity, and reproducibility context."""
-    provider, entity = _manifest_support.resolve_provider_entity(
-        pipeline_name=ctx.pipeline_name,
-        yaml_config=inputs.yaml_config,
-    )
-    contract_ref = f"{provider}.{entity}"
-    if reproducibility_context is None:
-        reproducibility_context = resolve_manifest_reproducibility_context(
-            ctx=ctx,
-            inputs=inputs,
-            provider=provider,
-            entity=entity,
-            contract_ref=contract_ref,
-        )
-    return _ResolvedManifestContext(
-        provider=provider,
-        entity=entity,
-        contract_identity=contract_identity
-        or _resolve_manifest_contract_identity(
-            provider=provider,
-            entity=entity,
-            required_persistence_profile=(
-                reproducibility_context.required_persistence_profile
-            ),
-            exact_replay_requested=bool(getattr(ctx, "exact_replay", False)),
-        ),
-        reproducibility_context=reproducibility_context,
-    )
 
 
 def _create_control_plane_refs(
@@ -141,7 +93,7 @@ def create_run_manifest(
     run_type_value, execution_context_value = (
         _manifest_support.resolve_run_context_values(ctx)
     )
-    manifest_context = _resolve_manifest_context(
+    manifest_context = resolve_manifest_publication_context(
         ctx=ctx,
         inputs=inputs,
         reproducibility_context=reproducibility_context,
@@ -190,7 +142,7 @@ def _publish_manifest_and_refs(
     ctx: PipelineRunContext,
     inputs: RunnerInputs,
     ledger_enabled: bool,
-    manifest_context: _ResolvedManifestContext,
+    manifest_context: ResolvedManifestPublicationContext,
     manifest_create_request: object,
     effective_config_artifact_id: str,
     resolved_config_hash: str,
@@ -230,21 +182,6 @@ def _publish_manifest_and_refs(
         ),
     )
     return control_plane_refs, ledger_service
-
-
-def _resolve_manifest_contract_identity(
-    *,
-    provider: str,
-    entity: str,
-    required_persistence_profile: str,
-    exact_replay_requested: bool,
-) -> _manifest_support.RunManifestContractIdentity:
-    return _manifest_support.resolve_contract_identity(
-        provider=provider,
-        entity=entity,
-        strict=exact_replay_requested
-        or required_persistence_profile in STRICT_PERSISTENCE_PROFILES,
-    )
 
 
 def _validate_manifest_persistence_requirements(
@@ -303,14 +240,7 @@ def _build_manifest_create_request(
             resolved_config_hash=resolved_config_hash,
             effective_config_hash=effective_config_hash,
             source_fingerprint=source_fingerprint,
-            contract_ref=contract_identity.contract_ref,
-            contract_version=contract_identity.contract_version,
-            contract_schema_hash=contract_identity.contract_schema_hash,
-            dq_policy_ref=contract_identity.dq_policy_ref,
-            rule_bundle_version=contract_identity.rule_bundle_version,
-            normalization_profile_ref=contract_identity.normalization_profile_ref,
-            normalization_profile_version=contract_identity.normalization_profile_version,
-            normalization_profile_hash=contract_identity.normalization_profile_hash,
+            contract_identity=contract_identity,
             dq_contract_compatibility_hash=dq_contract_compatibility_hash,
             effective_config_artifact_id=effective_config_artifact_id,
         )

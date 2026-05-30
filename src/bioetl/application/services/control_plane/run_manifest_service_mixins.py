@@ -6,6 +6,9 @@ from collections.abc import Callable
 from datetime import datetime
 from typing import TYPE_CHECKING, cast
 
+from bioetl.application.services.control_plane._run_manifest_execution_identity_support import (
+    build_execution_identity_payload_from_code_provenance,
+)
 from bioetl.application.services.control_plane._run_manifest_snapshot_payloads import (
     source_refs_payload,
 )
@@ -16,10 +19,7 @@ from bioetl.domain.control_plane import (
     RunManifest,
     RunSourceRef,
 )
-from bioetl.domain.normalization import (
-    build_execution_identity_payload,
-    compute_input_snapshot_identity_fingerprint,
-)
+from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
 from bioetl.domain.types import RunType
 
 if TYPE_CHECKING:
@@ -251,36 +251,19 @@ class RunManifestPayloadMixin:
             for source_ref in request.source_refs
             for snapshot in source_ref.input_snapshots
         ]
-        return cast(
-            dict[str, object],
-            build_execution_identity_payload(
-                pipeline_name=request.pipeline_name,
-                run_type=run_type.value,
-                pipeline_version=code_provenance.pipeline_version,
-                git_commit=code_provenance.git_commit,
-                dependency_lock_hash=code_provenance.dependency_lock_hash,
-                effective_config_hash=code_provenance.effective_config_hash,
-                dq_contract_compatibility_hash=(
-                    code_provenance.dq_contract_compatibility_hash
-                ),
-                contract_ref=code_provenance.contract_ref,
-                contract_version=code_provenance.contract_version,
-                normalization_profile_ref=code_provenance.normalization_profile_ref,
-                normalization_profile_version=(
-                    code_provenance.normalization_profile_version
-                ),
-                normalization_profile_hash=code_provenance.normalization_profile_hash,
-                effective_config_artifact_id=code_provenance.effective_config_artifact_id,
-                exact_replay=bool(request.launch_context.get("exact_replay")),
-                input_snapshot_fingerprint=(
-                    compute_input_snapshot_identity_fingerprint(snapshots)
-                ),
-                silver_filter_compatibility_mode=str(
-                    request.runtime_config.get(
-                        "silver_filter_compatibility_mode",
-                        "structural_only_auto_promote",
-                    )
-                ),
+        return build_execution_identity_payload_from_code_provenance(
+            pipeline_name=request.pipeline_name,
+            run_type=run_type.value,
+            code_provenance=code_provenance,
+            exact_replay=bool(request.launch_context.get("exact_replay")),
+            input_snapshot_fingerprint=compute_input_snapshot_identity_fingerprint(
+                snapshots
+            ),
+            silver_filter_compatibility_mode=str(
+                request.runtime_config.get(
+                    "silver_filter_compatibility_mode",
+                    "structural_only_auto_promote",
+                )
             ),
         )
 

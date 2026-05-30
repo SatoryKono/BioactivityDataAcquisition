@@ -1,5 +1,6 @@
 {
   "alerted_metrics": [
+    "bioetl_adapter_requests_total",
     "bioetl_checkpoint_compatibility_events_total",
     "bioetl_checkpoint_load_events_total",
     "bioetl_checkpoint_operator_operations_total",
@@ -67,6 +68,7 @@
     "bioetl_bronze_bytes_written_total",
     "bioetl_bronze_records_written_total",
     "bioetl_bronze_write_duration_seconds",
+    "bioetl_checkpoint_age_seconds",
     "bioetl_checkpoint_compatibility_events_total",
     "bioetl_checkpoint_load_events_total",
     "bioetl_checkpoint_operator_duration_seconds",
@@ -673,6 +675,9 @@
       "docs/03-guides/metrics-monitoring.md",
       "grafana/README.md"
     ],
+    "bioetl_checkpoint_age_seconds": [
+      "grafana/dashboards/bioetl-control-plane-v1.json"
+    ],
     "bioetl_checkpoint_compatibility_events_total": [
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
@@ -1053,7 +1058,8 @@
     "bioetl_phase_duration_seconds": [
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
-      "grafana/README.md"
+      "grafana/README.md",
+      "grafana/dashboards/bioetl-runtime.json"
     ],
     "bioetl_pipeline_duration_seconds": [
       "docs/02-architecture/decisions/ADR-017-observability-architecture.md",
@@ -1075,7 +1081,8 @@
       "docs/05-operations/sli-slo-baseline.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-overview-v2.json",
-      "grafana/dashboards/bioetl-runtime.json"
+      "grafana/dashboards/bioetl-runtime.json",
+      "grafana/dashboards/bioetl-workflow-overview.json"
     ],
     "bioetl_pipeline_stage_expected": [
       "docs/03-guides/dashboards/variable-reference.md",
@@ -1876,6 +1883,9 @@
   "registry_only_metrics": [],
   "ruled_without_runtime": [],
   "rules_mentions": {
+    "bioetl_adapter_requests_total": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
     "bioetl_checkpoint_compatibility_events_total": [
       "grafana/prometheus-rules/bioetl_control_plane_current_status.yml",
       "grafana/prometheus-rules/bioetl_observability.yml"
@@ -2786,6 +2796,7 @@
       "src/bioetl/application/observability/observer_health_mixin.py"
     ],
     "bioetl_health_check_success_total": [
+      "src/bioetl/application/observability/observer_context_mixin.py",
       "src/bioetl/infrastructure/adapters/_health_check_observability.py"
     ],
     "bioetl_http_request_duration_seconds": [
@@ -2836,7 +2847,7 @@
       "src/bioetl/application/observability/observer_event_mixin.py"
     ],
     "bioetl_observability_runtime_status": [
-      "src/bioetl/composition/bootstrap/runtime/observability_bundle.py"
+      "src/bioetl/composition/bootstrap/runtime/observability_assembly.py"
     ],
     "bioetl_output_artifact_publication_events_total": [
       "src/bioetl/application/observability/pipeline_metrics.py",

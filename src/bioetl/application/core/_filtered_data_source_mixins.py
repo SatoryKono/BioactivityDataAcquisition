@@ -8,6 +8,9 @@ from bioetl.application.core import (
     _filtered_data_source_fetch_support as fetch_support,
 )
 from bioetl.application.core import _filtered_data_source_support as lifecycle_support
+from bioetl.application.core._data_source_mixins import (
+    _WrappedAdapterHealthDelegationMixin,
+)
 from bioetl.application.core._fetch_forwarding import forward_fetch_records
 from bioetl.domain.types import JsonDict
 
@@ -18,8 +21,6 @@ if TYPE_CHECKING:
     from bioetl.application.core._filtered_data_source_support import (
         _FilteredDataSourceState as _FilteredDataSourceStateBase,
     )
-    from bioetl.domain.ports import HealthCheckResult
-    from bioetl.domain.types import HealthStatus
 else:
 
     class _FilteredDataSourceStateBase:
@@ -52,7 +53,10 @@ class _FilteredDataSourceLifecycleMixin(_FilteredDataSourceStateMixin):
         await self._data_source.__aexit__(exc_type, exc_val, exc_tb)
 
 
-class _FilteredDataSourceFetchMixin(_FilteredDataSourceStateMixin):
+class _FilteredDataSourceFetchMixin(
+    _FilteredDataSourceStateMixin,
+    _WrappedAdapterHealthDelegationMixin,
+):
     """Fetch and filtering behavior for FilteredDataSource."""
 
     def _matches_valid_combination(
@@ -132,24 +136,3 @@ class _FilteredDataSourceFetchMixin(_FilteredDataSourceStateMixin):
             filter_field=filter_field,
             offset=offset,
         )
-
-    async def health_check(self) -> HealthStatus:
-        """Delegate health check to wrapped adapter."""
-        return await self._data_source.health_check()
-
-    async def check_health(self) -> HealthCheckResult:
-        """Delegate enhanced health checks when available, else synthesize one."""
-        from bioetl.domain.ports import HealthCheckResult
-
-        check_health = getattr(self._data_source, "check_health", None)
-        if check_health is not None and callable(check_health):
-            return await check_health()
-        return HealthCheckResult(
-            status=await self._data_source.health_check(),
-            latency_ms=0.0,
-            provider=self.provider_name,
-        )
-
-    async def aclose(self) -> None:
-        """Delegate close to wrapped adapter."""
-        await self._data_source.aclose()

@@ -26,27 +26,71 @@
 composite:
   name: composite_assay
   version: "1.0.0"
+  normalized_anchor_policy:
+    pubchem_compound:
+      join_boundary:
+        active_join_keys:
+        - inchi_key
+        - canonical_smiles
+        retained_validation_anchors:
+        - standardized_inchi_key
+        - structure_parent_key
+        activation_condition: seed pipelines emit matching normalized PubChem anchors
+        rationale: PubChem normalized anchors are retained in composite output but not used as symmetric join keys until seed sources expose the same anchor family.
 
+    uniprot_idmapping:
+      join_boundary:
+        source_anchor: target_id
+        normalized_output_anchor: uniprot_accession
+        required_status: found
+        downstream_pipeline: uniprot_protein
+        rationale: UniProt accession joins are chained through normalized idmapping output and filtered to mapping_status='found'.
+
+  normalized_join_key_policy:
+    publication_identity:
+      primary_join_keys: []
+      fallback_join_keys: []
+      rationale: Non-publication composite; publication join policy not applicable.
+  field_aliases:
+    hba_count:
+      chembl: hba_count
+      pubchem: h_bond_acceptor_count
   # ---------------------------------------------------------------------------
   # Seed Pipeline Configuration
   # ---------------------------------------------------------------------------
+    hbd_count:
+      chembl: hbd_count
+      pubchem: h_bond_donor_count
+    logp:
+      chembl: logp
+      pubchem: xlogp
+    polar_surface_area:
+      chembl: polar_surface_area
+      pubchem: tpsa
+    standard_inchi:
+      chembl: standard_inchi
+      pubchem: inchi
+
+  # ---------------------------------------------------------------------------
+  # Merge Configuration
+  # ---------------------------------------------------------------------------
+  # Defines how enriched data is combined into the final output.
   seed:
     pipeline: chembl_assay
     output_keys:
-      - assay_id            # Primary key
-      - cell_id             # FK for cell_line enrichment (nullable)
-      - tissue_id           # FK for tissue enrichment (nullable)
-      - target_id           # FK to target (for context)
-      - publication_id      # FK to publication (for context)
-      - assay_type          # Classification
-      - assay_description   # For logging/debugging
+    - assay_id              # Primary key
+    - cell_id               # FK for cell_line enrichment (nullable)
+    - tissue_id             # FK for tissue enrichment (nullable)
+    - target_id             # FK to target (for context)
+    - publication_id        # FK to publication (for context)
+    - assay_type            # Classification
+    - assay_description     # For logging/debugging
     silver_table: silver/chembl/assay
 
   # ---------------------------------------------------------------------------
   # Dependencies (none - enrichers read from pre-populated Silver)
   # ---------------------------------------------------------------------------
   dependencies: []
-
   # ---------------------------------------------------------------------------
   # Enricher Pipelines (parallel execution)
   # ---------------------------------------------------------------------------
@@ -54,24 +98,24 @@ composite:
     # ChEMBL Cell Line: cell context metadata
     # Provides: cell_name, cell_description, cell_source_organism, etc.
     # Cardinality: one_to_one (each assay FK points to at most one cell line)
-    - pipeline: chembl_cell_line
-      join_keys:
-        - cell_id              # Direct FK match
-      required: false          # Many assays lack cell line (~70%)
-      filter_condition: "cell_id IS NOT NULL"
-      timeout_seconds: 300
-      silver_table: silver/chembl/cell_line
+  - pipeline: chembl_cell_line
+    join_keys:
+    - cell_id                  # Direct FK match
+    required: false            # Many assays lack cell line (~70%)
+    filter_condition: "cell_id IS NOT NULL"
+    timeout_seconds: 300
+    silver_table: silver/chembl/cell_line
 
     # ChEMBL Tissue: tissue context metadata
     # Provides: pref_name (tissue_name), uberon_id, bto_id, efo_id, etc.
     # Cardinality: one_to_one (each assay FK points to at most one tissue)
-    - pipeline: chembl_tissue
-      join_keys:
-        - tissue_id            # Direct FK match
-      required: false          # Many assays lack tissue (~70%)
-      filter_condition: "tissue_id IS NOT NULL"
-      timeout_seconds: 300
-      silver_table: silver/chembl/tissue
+  - pipeline: chembl_tissue
+    join_keys:
+    - tissue_id                # Direct FK match
+    required: false            # Many assays lack tissue (~70%)
+    filter_condition: "tissue_id IS NOT NULL"
+    timeout_seconds: 300
+    silver_table: silver/chembl/tissue
 
   # ---------------------------------------------------------------------------
   # Merge Configuration
@@ -87,21 +131,297 @@ composite:
       gold: data/output/gold/composite/assay
     sort_by:
       silver:
-        - entity_id
-        - assay_id
+      - entity_id
+      - assay_id
       gold:
-        - entity_id
-        - assay_id
+      - entity_id
+      - assay_id
 
     # Field-level priority overrides
     field_priorities:
       # FKs from seed are authoritative (prevent enricher overwrite)
       cell_id:
-        - chembl.assay
+      - chembl.assay
       tissue_id:
-        - chembl.assay
+      - chembl.assay
 
     # Field renaming for conflicts
+      abstract:
+      - pubmed                   # PubMed has best abstracts
+      - openalex
+      - chembl
+      - semanticscholar            # Fallback (mapped from TLDR)
+
+            # === Citation Metrics ===
+      affiliation_list:
+      - pubmed                   # PubMed raw affiliations
+      - openalex
+      - semanticscholar
+      affiliation_structured:
+      - pubmed                   # PubMed has structured affiliation data with ROR/GRID
+      aromatic_ring_count:
+      - pubchem
+      - chembl
+
+      # === Names and Synonyms (merge from both) ===
+      author_details:
+      - crossref                 # CrossRef-unique detailed author objects
+      author_h_indices:
+      - semanticscholar            # S2-unique h-index data
+
+            # === Affiliations ===
+            # Note: affiliation_structured (PubMed) preferred over affiliation_list
+            # PubMed affiliation_structured contains ROR/GRID identifiers
+      author_openalex_ids:
+      - openalex                   # OpenAlex-unique author identifiers
+
+      author_orcids:
+      - crossref                 # CrossRef has most complete ORCID data
+
+      - openalex
+      - semanticscholar
+      author_s2_ids:
+      - semanticscholar            # S2-unique author identifiers
+
+      black_box_warning:
+      - chembl
+
+      # === Quality Metrics (ChEMBL) ===
+      canonical_smiles:
+      - chembl             # ChEMBL structures are manually curated
+      - pubchem
+      chemicals:
+      - pubmed                   # PubMed-unique chemical substances
+
+      citation_contexts:
+      - semanticscholar            # S2-unique citation context sentences
+
+
+            # === Quality Indicators ===
+
+      citations_made:
+      - crossref                 # CrossRef has most complete reference data
+
+      - openalex
+      - pubmed
+      - semanticscholar
+      citations_received:
+      - crossref                 # CrossRef is citation authority
+
+      - openalex
+      - semanticscholar
+      databanks:
+      - pubmed                   # PubMed-unique databank accessions
+
+
+            # === Alternative Identifiers ===
+
+      dblp_id:
+      - semanticscholar            # S2-unique DBLP identifier
+
+      first_approval:
+      - chembl             # FDA/EMA approval year
+      fwci:
+      - openalex                 # OpenAlex-unique FWCI metric
+
+
+            # === Funding ===
+
+      gene_symbols:
+      - pubmed                   # PubMed-unique gene symbols
+
+      grants:
+      - openalex                 # OpenAlex-unique grant/funding data
+
+
+            # === Chemicals & Genes (PubMed-specific) ===
+
+      hba_count:
+      - pubchem
+      - chembl
+      hbd_count:
+      - pubchem
+      - chembl
+      heavy_atom_count:
+      - pubchem
+      - chembl
+      inchi:
+      - chembl
+      - pubchem
+      inchi_key:
+      - chembl             # ChEMBL InChIKey from standardized structures
+      - pubchem
+      influential_citation_count:
+      - semanticscholar            # S2-only field
+
+
+            # === Classification/Topics ===
+
+            # NOTE: subject_topics replaces deprecated concepts/topics per OpenAlex 2024 migration
+
+      institution_country_codes:
+      - openalex                 # OpenAlex institution country codes (ISO 2-letter)
+
+
+            # === References/Citations Context ===
+
+      institution_ids:
+      - openalex                 # OpenAlex institution IDs (e.g., I1234567890)
+
+      is_retracted:
+      - openalex                 # OpenAlex-unique retraction status (CRITICAL)
+
+      isomeric_smiles:
+      - pubchem            # PubChem provides isomeric SMILES
+      - chembl
+
+      # === Physicochemical Properties (PubChem more complete) ===
+      # PubChem has computed descriptors for more compounds
+      iupac_name:
+      - pubchem            # PubChem has computed IUPAC names
+      - chembl
+      logp:
+      - pubchem            # PubChem uses XLogP3
+      - chembl             # ChEMBL uses ALogP
+      logp_method:
+      - pubchem
+      - chembl
+      mag_id:
+      - openalex                 # OpenAlex MAG legacy ID
+
+
+        # -------------------------------------------------------------------------
+
+        # Column Ordering by Canonical Categories
+
+        # -------------------------------------------------------------------------
+
+        # Defines the order of columns in the merged output.
+
+        # Categories and field order follow the historical ordering artifact
+
+        # docs/04-reference/schemas/publication_field_order.csv.
+
+        # Canonical field names and aliases live in
+
+        # configs/entities/{provider}/publication.yaml and provider reference docs.
+
+        #
+
+        # The "system" group MUST be first: it captures persisted system columns
+
+        # (entity_id, content_hash, etc.) that would otherwise fall
+
+        # into the "remaining" bucket at the end of the output.
+
+      max_phase:
+      - chembl             # Clinical phase (0-4)
+      mid:
+      - pubmed                   # PubMed Manuscript ID
+
+      molecular_formula:
+      - pubchem
+      - chembl
+      molecular_weight:
+      - pubchem            # PubChem has MW for all compounds
+      - chembl
+      molecule_id:
+      - chembl.activity       # Activity FK is authoritative
+      organism:
+      - chembl    # ChEMBL organism name is authoritative
+
+    # -------------------------------------------------------------------------
+    # Column Ordering by Semantic Categories
+    # -------------------------------------------------------------------------
+    # Defines the order of columns in the merged output.
+    # The "system" group MUST be first: it captures ETL metadata columns
+    # that would otherwise fall into the "remaining" bucket at the end.
+      pii:
+      - pubmed                   # PubMed Publisher Item Identifier
+
+      polar_surface_area:
+      - pubchem
+      - chembl
+      pref_name:
+      - chembl             # ChEMBL has curated preferred names
+      - pubchem
+      primary_component_id:
+      - chembl    # Seed primary_component_id is authoritative
+      primary_topic:
+      - openalex                 # OpenAlex-unique field
+
+      publication_class:
+      - chembl
+      - pubmed
+      - openalex
+      - crossref
+      - semanticscholar
+
+            # === Author Metadata ===
+
+      publication_id:
+      - chembl.activity       # Activity document reference is primary
+
+      publication_subclass:
+      - chembl
+      - pubmed
+      - openalex
+      - crossref
+      - semanticscholar
+      publication_type_unified:
+      - chembl
+      - pubmed
+      - openalex
+      - crossref
+      - semanticscholar
+      publisher_id:
+      - pubmed                   # PubMed publisher-specific ID
+
+      qed_weighted:
+      - chembl             # QED (Quantitative Estimate of Drug-likeness)
+
+      references:
+      - crossref                 # CrossRef-unique cited references
+
+      rotatable_bond_count:
+      - pubchem
+      - chembl
+      subject_fields:
+      - semanticscholar            # S2-unique field
+
+      subject_keywords:
+      - crossref                 # CrossRef subjects -> subject_keywords
+
+      - openalex
+      - pubmed
+      - semanticscholar
+      subject_mesh:
+      - pubmed                   # PubMed MeSH is authoritative
+
+      - openalex                 # OpenAlex MeSH extraction (fallback)
+
+      subject_topics:
+      - openalex                 # OpenAlex hierarchical topics
+
+      synonyms:
+      - chembl             # Merge arrays from both
+      - pubchem
+
+      # === Clinical Data (ChEMBL only) ===
+      # PubChem doesn't have clinical development data
+      target_id:
+      - chembl    # Seed is authoritative for PK
+      taxonomy_id:
+      - chembl    # ChEMBL taxonomy_id takes priority over UniProt
+      therapeutic_flag:
+      - chembl
+      title:
+      - chembl                   # ChEMBL title is authoritative
+
+      - crossref
+      - openalex
+      withdrawn_flag:
+      - chembl
     field_mappings:
       # cell_line.efo_id conflicts with tissue.efo_id
       "chembl.cell_line.efo_id": "cell_efo_id"
@@ -115,120 +435,118 @@ composite:
     # Column ordering by semantic categories
     column_groups:
       # === System / ETL metadata (MUST be first) ===
-      - name: system
-        fields:
-          - entity_id
-          - content_hash
-          - _source
-          - _index
-          - _lookup_method
-          - _original_id
-        pattern: "^_composite_|^_source_providers|^_enrichment_|^_lineage_|^_dq_"
-        provider_order: [chembl]
-
+    - name: system
+      fields:
+      - entity_id
+      - content_hash
+      - _source
+      - _index
+      - _lookup_method
+      - _original_id
+      pattern: "^_composite_|^_source_providers|^_enrichment_|^_lineage_|^_dq_"
+      provider_order: [chembl]
       # === Business identifiers ===
-      - name: identifiers
-        fields:
-          - assay_id
-          - cell_id
-          - tissue_id
-          - target_id
-          - publication_id
-          - src_id
-          - src_assay_id
-          - aidx
-        provider_order: [chembl]
-
+    - name: identifiers
+      fields:
+      - assay_id
+      - cell_id
+      - tissue_id
+      - target_id
+      - publication_id
+      - src_id
+      - src_assay_id
+      - aidx
+      provider_order: [chembl]
       # === Assay classification ===
-      - name: classification
-        fields:
-          - assay_type
-          - assay_category
-          - assay_test_type
-          - assay_group
-          - assay_pref_name
-          - relationship_type
-          - relationship_description
-          - confidence_score
-          - confidence_description
-        provider_order: [chembl]
-
+    - name: classification
+      fields:
+      - assay_type
+      - assay_category
+      - assay_test_type
+      - assay_group
+      - assay_pref_name
+      - relationship_type
+      - relationship_description
+      - confidence_score
+      - confidence_description
+      provider_order: [chembl]
       # === Biological context (from seed) ===
-      - name: biological_context
-        fields:
-          - assay_organism
-          - assay_taxonomy_id
-          - assay_strain
-          - assay_tissue
-          - assay_cell_type
-          - assay_subcellular_fraction
-        provider_order: [chembl]
-
+    - name: biological_context
+      fields:
+      - assay_organism
+      - assay_taxonomy_id
+      - assay_strain
+      - assay_tissue
+      - assay_cell_type
+      - assay_subcellular_fraction
+      provider_order: [chembl]
       # === Assay description ===
-      - name: description
-        fields:
-          - assay_description
-          - confidence_score
-        provider_order: [chembl]
-
+    - name: description
+      fields:
+      - assay_description
+      - confidence_score
+      provider_order: [chembl]
       # === BAO ontology ===
-      - name: ontology
-        fields:
-          - bao_format
-          - bao_label
-        provider_order: [chembl]
-
+    - name: ontology
+      fields:
+      - bao_format
+      - bao_label
+      provider_order: [chembl]
       # === Cell line metadata (from enricher) ===
-      - name: cell_line
-        fields:
-          - cell_name
-          - cell_description
-          - cell_type
-          - cell_source_tissue
-          - cell_source_organism
-          - cell_source_taxonomy_id
-          - cellosaurus_id
-          - clo_id
-          - cl_lincs_id
-          - cell_efo_id
-        provider_order: [chembl]
-
+    - name: cell_line
+      fields:
+      - cell_name
+      - cell_description
+      - cell_type
+      - cell_source_tissue
+      - cell_source_organism
+      - cell_source_taxonomy_id
+      - cellosaurus_id
+      - clo_id
+      - cl_lincs_id
+      - cell_efo_id
+      provider_order: [chembl]
       # === Tissue metadata (from enricher) ===
-      - name: tissue
-        fields:
-          - tissue_pref_name
-          - tissue_uberon_id
-          - tissue_bto_id
-          - tissue_caloha_id
-          - tissue_efo_id
-        provider_order: [chembl]
-
+    - name: tissue
+      fields:
+      - tissue_pref_name
+      - tissue_uberon_id
+      - tissue_bto_id
+      - tissue_caloha_id
+      - tissue_efo_id
+      provider_order: [chembl]
       # === Variant data ===
-      - name: variant
-        fields:
-          - variant_accession
-          - variant_isoform
-          - variant_mutation
-          - variant_organism
-          - variant_sequence
-          - variant_taxonomy_id
-          - variant_sequence_json
-        provider_order: [chembl]
-
+    - name: variant
+      fields:
+      - variant_accession
+      - variant_isoform
+      - variant_mutation
+      - variant_organism
+      - variant_sequence
+      - variant_taxonomy_id
+      - variant_sequence_json
+      provider_order: [chembl]
       # === Complex JSON fields ===
-      - name: complex
-        fields:
-          - assay_classifications
-          - assay_parameters
-        provider_order: [chembl]
-
+    - name: complex
+      fields:
+      - assay_classifications
+      - assay_parameters
+      provider_order: [chembl]
     # Fields to exclude from merged output
     exclude_fields:
       # Exclude cell_line PK (already have FK in seed)
-      - chembl.cell_line.cell_id
+    - chembl.cell_line.cell_id
       # Exclude tissue PK (already have FK in seed)
-      - chembl.tissue.tissue_id
+    - chembl.tissue.tissue_id
 
+  cross_validation:
+    enabled: false
+    warning_threshold: 1
+    error_threshold: 2
+    quarantine_threshold: 2
+    fuzzy_threshold: 0.8
+    numeric_tolerance: 0.10
+    enricher_pairings: []
   # ---------------------------------------------------------------------------
   # Data Quality Configuration
   # ---------------------------------------------------------------------------
@@ -240,6 +558,30 @@ composite:
     dq_config_file: ../quality/entities/composite/assay.yaml
     # Per-enricher threshold overrides (lenient - many nulls expected)
     enricher_overrides:
+      uniprot_protein:
+        soft_fail_threshold: 0.99
+        hard_fail_threshold: 1.0
+
+      uniprot_idmapping:
+        soft_fail_threshold: 0.99
+        hard_fail_threshold: 1.0
+
+      semanticscholar_publication:
+        soft_fail_threshold: 0.99
+        hard_fail_threshold: 1.0
+
+      pubmed_publication:
+        soft_fail_threshold: 0.99
+        hard_fail_threshold: 1.0
+
+      pubchem_compound:
+        soft_fail_threshold: 0.99
+        hard_fail_threshold: 1.0
+
+      chembl_compound_record:
+        soft_fail_threshold: 0.99
+        hard_fail_threshold: 1.0
+
       chembl_cell_line:
         soft_fail_threshold: 0.70   # ~70% assays lack cell line
         hard_fail_threshold: 0.95
@@ -272,9 +614,34 @@ composite:
         _original_id: chembl_original_id
 
     # Field-level source tracking for overlapping fields
+      crossref:
+        _lookup_method: crossref_lookup_method
+        _original_id: crossref_original_id
+      openalex:
+        _lookup_method: openalex_lookup_method
+        _original_id: openalex_original_id
+      pubchem:
+        _lookup_method: pubchem_lookup_method
+        _original_id: pubchem_original_id
+
+    # Field-level source tracking for overlapping fields
+      pubmed:
+        _lookup_method: pubmed_lookup_method
+        _original_id: pubmed_original_id
+      semanticscholar:
+        _lookup_method: semanticscholar_lookup_method
+        _original_id: semanticscholar_original_id
+
+        # Field-level source tracking for overlapping fields
+        # These are fields that come from multiple providers
+      uniprot:
+        _lookup_method: uniprot_lookup_method
+        _original_id: uniprot_original_id
+
+    # Field-level source tracking (for fields from multiple providers)
     track_source_for_fields:
-      - cell_chembl_id     # FK from seed vs enricher match
-      - tissue_chembl_id   # FK from seed vs enricher match
+    - cell_chembl_id       # FK from seed vs enricher match
+    - tissue_chembl_id     # FK from seed vs enricher match
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
