@@ -51,9 +51,10 @@ ______________________________________________________________________
 > `docs/05-operations/01-monitoring-guide.md`.
 >
 > Для reproducible dashboard evidence shipped ops-tooling now exposes:
-> `python -m scripts.ops rerender-grafana` for screenshots. It tries the
-> Grafana render API first and automatically falls back to the repo-local
-> Playwright renderer when the render API fails or times out.
+> `python -m scripts.ops rerender-grafana` for screenshots. It renders from
+> repo-local dashboard JSON, uses explicit Grafana auth for render-sensitive
+> probes, and automatically falls back to the repo-local Playwright renderer
+> when the render API fails or times out.
 > Playwright mode additionally requires the local `playwright` npm dependency,
 > downloaded browser runtime, and the usual headless Chromium shared libraries
 > (`libnspr4`, `libnss3`, `libasound2`, etc.) on the host.
@@ -81,10 +82,11 @@ ______________________________________________________________________
 > `python -m scripts.ops audit-live-grafana` remains the reviewed live
 > datasource/frame audit for semantically sensitive panels.
 > `python -m scripts.ops check-grafana-audit-preflight` is the fast readiness
-> gate for full dashboard audits: it verifies Grafana, Prometheus, canonical
-> Quarantine Explorer health probes (`/health/live` before `/health`), and
-> whether local screenshot artifacts are missing or stale relative to shipped
-> dashboard JSON.
+> gate for full dashboard audits: it verifies Grafana, explicit
+> `frontend/settings` render auth, Prometheus, Playwright browser/runtime
+> availability, canonical Quarantine Explorer health probes (`/health/live`
+> before `/health`), and whether local screenshot artifacts are missing or
+> stale relative to shipped dashboard JSON.
 > `python -m scripts.ops run-grafana-audit-cycle` is the canonical full audit
 > workflow: service preflight, reviewed live discovery of filled dashboards,
 > screenshot refresh for that filled-dashboard subset, screenshot freshness
@@ -1113,6 +1115,9 @@ plugin state.
 передаётся в Quarantine API как backend `dimension=run_id`; он и
 `$payload_hash` остаются Explorer-only forensic filters и не должны протекать в
 Prometheus labels, summary dashboards или cross-dashboard handoffs.
+Shared `workflow` / `run_id` shell ownership остаётся у origin dashboards; the
+Explorer itself stays pipeline/run_type forensic even when one
+`$quarantine_run_id` is selected.
 
 **Важно:** это не Prometheus dashboard для row-level таблиц.
 `1-4` dashboards остаются Prometheus summary/bounded-breakdown поверхностями;
@@ -2259,8 +2264,8 @@ ______________________________________________________________________
 | 2. Runtime                | `bioetl-runtime`                | 2            | 34 / 4        | 30s     | 12h        | Prometheus + Quarantine Explorer identity + optional Loki/Tempo links | L2 runtime triage: blockers, latency, backlog, handoffs |
 | 3. Provider Health        | `bioetl-provider-health-v2`     | 6            | 28 / 1        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Provider latency, health, retries, failure ratios |
 | 4. Data Quality           | `bioetl-dq-v2`                  | 4            | 33 / 2        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | DQ score, quarantine, freshness, validation failures |
-| 5. Workflow               | `bioetl-workflow-overview`      | 2            | 13 / 1        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Selected-range workflow run and step evidence with `First Action` in the shared shell; exact `run_id` only populates the local ID card while collapsed diagnostics keep deeper workflow detail |
-| Silver Reject Explorer | `bioetl-silver-reject-explorer` | 1001         | 11 / 0        | 1m      | 24h        | Quarantine Explorer API | Record-level browsing and action handoff for Silver rejects |
+| 5. Workflow               | `bioetl-workflow-overview`      | 2            | 13 / 1        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Selected-range workflow run and step evidence with explicit scope badges in the shared shell; exact `run_id` only populates the local ID card while collapsed diagnostics keep deeper workflow detail |
+| Silver Reject Explorer | `bioetl-silver-reject-explorer` | 1001         | 11 / 0        | 1m      | 24h        | Quarantine Explorer API | Record-level browsing and action handoff for Silver rejects; forensic-only pipeline/run_type surface, not a shared workflow/run_id shell |
 
 ______________________________________________________________________
 

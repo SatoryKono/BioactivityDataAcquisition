@@ -123,10 +123,10 @@ class TestGoldSchemaContracts:
         )
 
     @pytest.mark.parametrize("schema_name", sorted(REQUIRED_SCHEMAS))
-    def test_schema_version_is_1_0_0(
+    def test_schema_version_matches_filename(
         self, contracts_path: Path, schema_name: str
     ) -> None:
-        """Gold v1.0 schemas MUST have version 1.0.0."""
+        """Gold schema payload version must align with the versioned filename."""
         schema_path = contracts_path / schema_name
 
         if not schema_path.exists():
@@ -136,10 +136,12 @@ class TestGoldSchemaContracts:
             schema = json.load(f)
 
         version = schema.get("$version")
+        filename_version = schema_name.split("_v", maxsplit=1)[1].removesuffix(".json")
+        expected_version = f"{filename_version}.0"
 
-        assert version == "1.0.0", (
+        assert version == expected_version, (
             f"{schema_name} has incorrect version: {version}. "
-            f"Expected: 1.0.0 for v1.0 schema files."
+            f"Expected: {expected_version} for {schema_name}."
         )
 
     @pytest.mark.parametrize("schema_name", sorted(REQUIRED_SCHEMAS))

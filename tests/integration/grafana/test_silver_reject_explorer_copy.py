@@ -29,3 +29,20 @@ def test_filtered_records_table_has_explicit_empty_and_failure_copy() -> None:
         == "No rejected records for current filters."
     )
     assert "Backend/query failure copy:" in panel["description"]
+
+
+def test_scope_banner_explains_origin_dashboard_ownership() -> None:
+    dashboard = json.loads(
+        Path("grafana/dashboards/bioetl-silver-reject-explorer.json").read_text(
+            encoding="utf-8"
+        )
+    )
+
+    panel = next((p for p in dashboard["panels"] if p.get("id") == 1), None)
+
+    assert panel is not None
+    content = str(panel.get("options", {}).get("content", "")).lower()
+    description = str(panel.get("description", "")).lower()
+    assert "origin dashboards own shared workflow/run_id shell context" in content
+    assert "never owns shared workflow or run_id selectors" in content
+    assert "stays pipeline/run_type forensic" in description
