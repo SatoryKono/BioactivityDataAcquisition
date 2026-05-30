@@ -18,10 +18,10 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_summary
     _FinalSummaryRequest,
     _RuntimeViewsRequest,
 )
-from bioetl.application.services.control_plane.run_manifest_diagnostics_snapshot_support import (
+from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
     merge_ledger_input_snapshots_into_summary,
 )
-from bioetl.application.services.control_plane.run_manifest_diagnostics_source_refs import (
+from bioetl.application.services.control_plane.manifest.diagnostics.source_refs import (
     _attach_rich_composite_replay_support,
 )
 from bioetl.application.services.control_plane.run_manifest_reproducibility_scoring import (
