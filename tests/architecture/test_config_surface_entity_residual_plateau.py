@@ -8,9 +8,9 @@ from typing import Any
 
 import yaml
 
+from scripts.engineering.qa.config_surface_governance import INTENTIONAL_PREFIXES
 from scripts.engineering.qa.report_config_surface_backlog import (
     BACKLOG_PATH,
-    INTENTIONAL_PREFIXES,
     build_backlog,
 )
 from scripts.schema.generate_config_matrix import (
@@ -75,9 +75,10 @@ def test_entity_residual_backlog_matches_live_metrics_and_scorecard() -> None:
     ]
 
     assert backlog["entity_effective"]["partial_key_count"] == live_entity[
-        "inconsistent_parameter_count"
+        "raw_inconsistent_parameter_count"
     ]
     assert baseline_entity == live_entity
+    assert live_entity["inconsistent_parameter_count"] == 0
     assert (
         scorecard_entity["inconsistent_parameter_count"]["current_count"]
         == live_entity["inconsistent_parameter_count"]

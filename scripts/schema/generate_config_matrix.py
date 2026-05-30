@@ -14,6 +14,8 @@ from typing import Any
 
 import yaml
 
+from scripts.engineering.qa.config_surface_governance import is_sanctioned_partial_key
+
 DEFAULT_BASELINE_JSON = Path("reports/quality/config-discrepancy-baseline.json")
 
 
@@ -72,17 +74,24 @@ def _entity_config_effective(path: Path) -> dict[str, Any]:
     return effective
 
 
-def _family_metrics(configs: dict[str, dict[str, Any]]) -> dict[str, int]:
+def _partial_keys(configs: dict[str, dict[str, Any]]) -> list[str]:
     all_keys = sorted({key for values in configs.values() for key in values})
-    if configs:
-        common = set.intersection(*(set(values.keys()) for values in configs.values()))
-    else:
-        common = set()
-    partial = [key for key in all_keys if key not in common]
+    if not configs:
+        return []
+    common = set.intersection(*(set(values.keys()) for values in configs.values()))
+    return [key for key in all_keys if key not in common]
+
+
+def _family_metrics(configs: dict[str, dict[str, Any]]) -> dict[str, int]:
+    partial = _partial_keys(configs)
+    actionable_partial = [key for key in partial if not is_sanctioned_partial_key(key)]
+    all_keys = sorted({key for values in configs.values() for key in values})
     return {
         "config_count": len(configs),
         "unique_parameter_count": len(all_keys),
-        "inconsistent_parameter_count": len(partial),
+        "inconsistent_parameter_count": len(actionable_partial),
+        "sanctioned_partial_parameter_count": len(partial) - len(actionable_partial),
+        "raw_inconsistent_parameter_count": len(partial),
     }
 
 
@@ -243,10 +252,26 @@ def _live_baseline_metrics(
     unique_parameter_count: int,
     inconsistent_parameter_count: int,
 ) -> dict[str, int]:
+    """Return ratchet metrics; inconsistent count is family-scoped actionable sum."""
+    families = _collect_family_configs()
+    family_actionable = sum(
+        _family_metrics(family_configs)["inconsistent_parameter_count"]
+        for family_configs in families.values()
+    )
+    family_sanctioned = sum(
+        _family_metrics(family_configs)["sanctioned_partial_parameter_count"]
+        for family_configs in families.values()
+    )
+    family_raw = sum(
+        _family_metrics(family_configs)["raw_inconsistent_parameter_count"]
+        for family_configs in families.values()
+    )
     return {
         "config_count": config_count,
         "unique_parameter_count": unique_parameter_count,
-        "inconsistent_parameter_count": inconsistent_parameter_count,
+        "inconsistent_parameter_count": family_actionable,
+        "sanctioned_partial_parameter_count": family_sanctioned,
+        "raw_inconsistent_parameter_count": family_raw,
     }
 
 

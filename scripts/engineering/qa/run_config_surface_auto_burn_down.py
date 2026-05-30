@@ -201,7 +201,13 @@ def _update_scorecard() -> None:
             count=1,
         )
 
-    for name in ("config_count", "unique_parameter_count", "inconsistent_parameter_count"):
+    for name in (
+        "config_count",
+        "unique_parameter_count",
+        "inconsistent_parameter_count",
+        "sanctioned_partial_parameter_count",
+        "raw_inconsistent_parameter_count",
+    ):
         value = int(metrics[name])
         text = _replace_metric(text, name, value)
 
@@ -213,7 +219,13 @@ def _update_scorecard() -> None:
             continue
         block = match.group(0)
         updated = block
-        for name in ("config_count", "unique_parameter_count", "inconsistent_parameter_count"):
+        for name in (
+            "config_count",
+            "unique_parameter_count",
+            "inconsistent_parameter_count",
+            "sanctioned_partial_parameter_count",
+            "raw_inconsistent_parameter_count",
+        ):
             value = int(family_metrics[name])
             updated = _replace_metric(updated, name, value)
         text = text.replace(block, updated, 1)

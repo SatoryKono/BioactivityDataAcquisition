@@ -15,29 +15,16 @@ ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from scripts.engineering.qa.config_surface_governance import (  # noqa: E402
+    INTENTIONAL_PREFIXES,
+    is_sanctioned_partial_key,
+)
 from scripts.schema.generate_config_matrix import (  # noqa: E402
     _collect_family_configs,
     _family_metrics,
 )
 
 BACKLOG_PATH = ROOT / "reports/quality/config-surface-backlog.json"
-
-INTENTIONAL_PREFIXES: tuple[str, ...] = (
-    "hash_policy",
-    "hash_policy.",
-    "filters.extraction_params.",
-    "filters.gold_filters.columns.",
-    "filters.gold_filters.list_contains.",
-    "filters.gold_filters.list_lengths.",
-    "filters.gold_filters.ranges.",
-    "filters.silver_filters.columns.",
-    "filters.silver_filters.ranges.",
-    "pipeline.page_size_override",
-    "pipeline.field_policy.therapeutic_flag",
-    "pipeline.source.",
-    "quality.thresholds",
-    "composite.",
-)
 
 CATEGORY_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("hash_policy_chembl_only", ("hash_policy.",)),
@@ -110,10 +97,7 @@ def build_backlog() -> dict[str, Any]:
             "configs": _configs_with_key(entity, key),
         }
         by_category[category].append(entry)
-        if not any(
-            key == prefix or key.startswith(f"{prefix}.") or key.startswith(prefix)
-            for prefix in INTENTIONAL_PREFIXES
-        ):
+        if not is_sanctioned_partial_key(key):
             actionable_keys.append(key)
 
     return {
