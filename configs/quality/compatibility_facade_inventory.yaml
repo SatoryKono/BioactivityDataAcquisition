@@ -10,121 +10,121 @@ tracked_docstring_prefixes:
 - Storage compatibility-only facade
 transition_debt:
 - path: src/bioetl/application/services/control_plane/run_manifest_diagnostics_base.py
-  compatibility_role: Compatibility shim for moved manifest diagnostics base helpers during ownership-package extraction.
+  compatibility_role: Compatibility shim for moved base wrappers.
   canonical_target: bioetl.application.services.control_plane.manifest.diagnostics.base
   status: compat-shim
   owner: bioetl.application.services.control_plane
   introduced_in: 2026-05 compatibility surface cleanup
   review_date: '2026-09-30'
-  external_breaking_change_required: false
+  external_breaking_change_required: true
   internal_callers_zero: false
   allowed_call_sites: '`src`: only `bioetl.application.services.control_plane` and manifest callers may import this shim until deprecation review.'
   migration_path: Migrate all direct imports to `bioetl.application.services.control_plane.manifest.diagnostics.base` and keep this shim only for transition compatibility.
   exit_criteria: No first-party `src` imports of `run_manifest_diagnostics_base` remain, except those added during this compatibility transition issue.
 - path: src/bioetl/application/services/control_plane/run_manifest_diagnostics_base_helpers.py
-  compatibility_role: Compatibility shim for moved manifest diagnostics base helper utilities during ownership-package extraction.
+  compatibility_role: Compatibility shim for moved base-helper wrappers.
   canonical_target: bioetl.application.services.control_plane.manifest.diagnostics.helpers
   status: compat-shim
   owner: bioetl.application.services.control_plane
   introduced_in: 2026-05 compatibility surface cleanup
   review_date: '2026-09-30'
-  external_breaking_change_required: false
+  external_breaking_change_required: true
   internal_callers_zero: false
   allowed_call_sites: '`src`: only `bioetl.application.services.control_plane` and manifest callers may import this shim until deprecation review.'
   migration_path: Migrate all direct imports to `bioetl.application.services.control_plane.manifest.diagnostics.helpers` and keep this shim only for transition compatibility.
   exit_criteria: No first-party `src` imports of `run_manifest_diagnostics_base_helpers` remain, except those added during this compatibility transition issue.
 - path: src/bioetl/application/services/control_plane/run_manifest_diagnostics_checkpoint_projection.py
-  compatibility_role: Compatibility shim for moved manifest diagnostics checkpoint-projection helpers during ownership-package extraction.
+  compatibility_role: Compatibility shim for moved checkpoint-projection wrappers.
   canonical_target: bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_projection
   status: compat-shim
   owner: bioetl.application.services.control_plane
   introduced_in: 2026-05 compatibility surface cleanup
   review_date: '2026-09-30'
-  external_breaking_change_required: false
+  external_breaking_change_required: true
   internal_callers_zero: false
   allowed_call_sites: '`src`: only `bioetl.application.services.control_plane` and manifest callers may import this shim until deprecation review.'
   migration_path: Migrate all direct imports to `bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_projection` and keep this shim only for transition compatibility.
   exit_criteria: No first-party `src` imports of `run_manifest_diagnostics_checkpoint_projection` remain, except those added during this compatibility transition issue.
 - path: src/bioetl/application/services/control_plane/_run_manifest_diagnostics_checkpoint_projection.py
-  compatibility_role: Compatibility shim for moved manifest diagnostics checkpoint-projection helpers during ownership-package extraction.
+  compatibility_role: Compatibility shim for moved checkpoint-projection wrappers.
   canonical_target: bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_projection
   status: compat-shim
   owner: bioetl.application.services.control_plane
   introduced_in: 2026-05 compatibility surface cleanup
   review_date: '2026-09-30'
-  external_breaking_change_required: false
+  external_breaking_change_required: true
   internal_callers_zero: false
   allowed_call_sites: '`src`: only `bioetl.application.services.control_plane` and manifest callers may import this shim until deprecation review.'
   migration_path: Migrate all direct imports to `bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_projection` and keep this shim only for transition compatibility.
   exit_criteria: No first-party `src` imports of `_run_manifest_diagnostics_checkpoint_projection` remain, except those added during this compatibility transition issue.
 - path: src/bioetl/application/services/control_plane/run_manifest_diagnostics_finalization.py
-  compatibility_role: Compatibility shim for moved manifest diagnostics finalization helpers during ownership-package extraction.
+  compatibility_role: Compatibility shim for moved finalization wrappers.
   canonical_target: bioetl.application.services.control_plane.manifest.diagnostics.finalization
   status: compat-shim
   owner: bioetl.application.services.control_plane
   introduced_in: 2026-05 compatibility surface cleanup
   review_date: '2026-09-30'
-  external_breaking_change_required: false
+  external_breaking_change_required: true
   internal_callers_zero: false
   allowed_call_sites: '`src`: only `bioetl.application.services.control_plane` and manifest callers may import this shim until deprecation review.'
   migration_path: Migrate all direct imports to `bioetl.application.services.control_plane.manifest.diagnostics.finalization` and keep this shim only for transition compatibility.
   exit_criteria: No first-party `src` imports of `run_manifest_diagnostics_finalization` remain, except those added during this compatibility transition issue.
 - path: src/bioetl/application/services/control_plane/run_manifest_diagnostics_replay.py
-  compatibility_role: Compatibility shim for moved manifest diagnostics replay helpers during ownership-package extraction.
+  compatibility_role: Compatibility shim for moved replay wrappers.
   canonical_target: bioetl.application.services.control_plane.manifest.diagnostics.replay
   status: compat-shim
   owner: bioetl.application.services.control_plane
   introduced_in: 2026-05 compatibility surface cleanup
   review_date: '2026-09-30'
-  external_breaking_change_required: false
+  external_breaking_change_required: true
   internal_callers_zero: false
   allowed_call_sites: '`src`: only `bioetl.application.services.control_plane` and manifest callers may import this shim until deprecation review.'
   migration_path: Migrate all direct imports to `bioetl.application.services.control_plane.manifest.diagnostics.replay` and keep this shim only for transition compatibility.
   exit_criteria: No first-party `src` imports of `run_manifest_diagnostics_replay` remain, except those added during this compatibility transition issue.
 - path: src/bioetl/application/services/control_plane/run_manifest_diagnostics_replay_projection.py
-  compatibility_role: Compatibility shim for moved manifest diagnostics replay projection helpers during ownership-package extraction.
+  compatibility_role: Compatibility shim for moved replay-projection wrappers.
   canonical_target: bioetl.application.services.control_plane.manifest.diagnostics.replay_projection
   status: compat-shim
   owner: bioetl.application.services.control_plane
   introduced_in: 2026-05 compatibility surface cleanup
   review_date: '2026-09-30'
-  external_breaking_change_required: false
+  external_breaking_change_required: true
   internal_callers_zero: false
   allowed_call_sites: '`src`: only `bioetl.application.services.control_plane` and manifest callers may import this shim until deprecation review.'
   migration_path: Migrate all direct imports to `bioetl.application.services.control_plane.manifest.diagnostics.replay_projection` and keep this shim only for transition compatibility.
   exit_criteria: No first-party `src` imports of `run_manifest_diagnostics_replay_projection` remain, except those added during this compatibility transition issue.
 - path: src/bioetl/application/services/control_plane/run_manifest_diagnostics_snapshot_support.py
-  compatibility_role: Compatibility shim for moved manifest diagnostics snapshot-support helpers during ownership-package extraction.
+  compatibility_role: Compatibility shim for moved snapshot-support wrappers.
   canonical_target: bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support
   status: compat-shim
   owner: bioetl.application.services.control_plane
   introduced_in: 2026-05 compatibility surface cleanup
   review_date: '2026-09-30'
-  external_breaking_change_required: false
+  external_breaking_change_required: true
   internal_callers_zero: false
   allowed_call_sites: '`src`: only `bioetl.application.services.control_plane` and manifest callers may import this shim until deprecation review.'
   migration_path: Migrate all direct imports to `bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support` and keep this shim only for transition compatibility.
   exit_criteria: No first-party `src` imports of `run_manifest_diagnostics_snapshot_support` remain, except those added during this compatibility transition issue.
 - path: src/bioetl/application/services/control_plane/run_manifest_diagnostics_source_refs.py
-  compatibility_role: Compatibility shim for moved manifest diagnostics source-ref helpers during ownership-package extraction.
+  compatibility_role: Compatibility shim for moved source-reference wrappers.
   canonical_target: bioetl.application.services.control_plane.manifest.diagnostics.source_refs
   status: compat-shim
   owner: bioetl.application.services.control_plane
   introduced_in: 2026-05 compatibility surface cleanup
   review_date: '2026-09-30'
-  external_breaking_change_required: false
+  external_breaking_change_required: true
   internal_callers_zero: false
   allowed_call_sites: '`src`: only `bioetl.application.services.control_plane` and manifest callers may import this shim until deprecation review.'
   migration_path: Migrate all direct imports to `bioetl.application.services.control_plane.manifest.diagnostics.source_refs` and keep this shim only for transition compatibility.
   exit_criteria: No first-party `src` imports of `run_manifest_diagnostics_source_refs` remain, except those added during this compatibility transition issue.
 - path: src/bioetl/application/services/control_plane/run_manifest_diagnostics_artifact_support.py
-  compatibility_role: Compatibility shim for moved manifest diagnostics artifact-support helpers during ownership-package extraction.
+  compatibility_role: Compatibility shim for moved artifact-support wrappers.
   canonical_target: bioetl.application.services.control_plane.manifest.diagnostics.artifact_support
   status: compat-shim
   owner: bioetl.application.services.control_plane
   introduced_in: 2026-05 compatibility surface cleanup
   review_date: '2026-09-30'
-  external_breaking_change_required: false
+  external_breaking_change_required: true
   internal_callers_zero: false
   allowed_call_sites: '`src`: only `bioetl.application.services.control_plane` and manifest callers may import this shim until deprecation review.'
   migration_path: Migrate all direct imports to `bioetl.application.services.control_plane.manifest.diagnostics.artifact_support` and keep this shim only for transition compatibility.

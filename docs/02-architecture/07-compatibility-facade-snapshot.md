@@ -16,7 +16,7 @@
 - Unexpected docstring-tracked modules: `0`
 - Missing allowlisted measured-only modules: `0`
 - First-party src imports targeting measured-only modules: `0`
-- Curated rows requiring external breaking change process: `14`
+- Curated rows requiring external breaking change process: `24`
 - Curated rows marked internal-callers-zero: `0`
 - First-party src imports targeting internal-callers-zero rows: `0`
 - Ratchet violations: `0`
@@ -60,16 +60,16 @@
 
 ## Curated Row Governance Metadata
 
-- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_base.py` — external breaking change required: `false`, internal callers zero: `false`
-- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_base_helpers.py` — external breaking change required: `false`, internal callers zero: `false`
-- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_checkpoint_projection.py` — external breaking change required: `false`, internal callers zero: `false`
-- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_checkpoint_projection.py` — external breaking change required: `false`, internal callers zero: `false`
-- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_finalization.py` — external breaking change required: `false`, internal callers zero: `false`
-- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_replay.py` — external breaking change required: `false`, internal callers zero: `false`
-- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_replay_projection.py` — external breaking change required: `false`, internal callers zero: `false`
-- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_snapshot_support.py` — external breaking change required: `false`, internal callers zero: `false`
-- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_source_refs.py` — external breaking change required: `false`, internal callers zero: `false`
-- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_artifact_support.py` — external breaking change required: `false`, internal callers zero: `false`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_base.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_base_helpers.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_checkpoint_projection.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_checkpoint_projection.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_finalization.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_replay.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_replay_projection.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_snapshot_support.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_source_refs.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics_artifact_support.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/interfaces/cli/commands/run.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/interfaces/cli/commands/run_all.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/interfaces/cli/commands/run_composite.py` — external breaking change required: `true`, internal callers zero: `false`

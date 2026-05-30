@@ -148,7 +148,11 @@ def _source_fingerprint(src_root: Path) -> str:
         rel_path = py_file.relative_to(src_root).as_posix()
         digest.update(rel_path.encode("utf-8"))
         digest.update(b"\0")
-        digest.update(hashlib.sha256(py_file.read_bytes()).digest())
+        try:
+            digest.update(hashlib.sha256(py_file.read_bytes()).digest())
+        except (OSError, PermissionError):
+            # Skip files that can't be read (locked, permission issues, etc.)
+            continue
         digest.update(b"\0")
     return digest.hexdigest()
 
@@ -279,7 +283,11 @@ def collect_dependency_snapshot(src_root: Path) -> DependencySnapshot:
 
     for source_module, source_file in _iter_modules(src_root):
         rel_path = source_file.relative_to(src_root).as_posix()
-        source_bytes = source_file.read_bytes()
+        try:
+            source_bytes = source_file.read_bytes()
+        except (OSError, PermissionError):
+            # Skip files that can't be read (locked, permission issues, etc.)
+            continue
         source_digest.update(rel_path.encode("utf-8"))
         source_digest.update(b"\0")
         source_digest.update(hashlib.sha256(source_bytes).digest())
