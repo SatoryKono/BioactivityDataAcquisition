@@ -267,6 +267,34 @@ class TestChemblMoleculeSchema:
 class TestChemblTargetSchema:
     """Tests for CHEMBL_TARGET_SCHEMA."""
 
+    _EXPECTED_BUSINESS_FIELDS = [
+        "target_id",
+        "target_type",
+        "pref_name",
+        "taxonomy_id",
+        "organism",
+        "organism_class",
+        "species_group_flag",
+        "target_description",
+        "target_protein_synonyms",
+        "target_gene_synonyms",
+        "target_ec_numbers",
+        "target_xref_pdb_ids",
+        "target_xref_go_component",
+        "target_xref_go_function",
+        "target_xref_go_process",
+        "target_xref_reactome_ids",
+        "primary_component_id",
+        "component_accessions",
+        "component_descriptions",
+        "component_ids",
+        "component_types",
+        "component_relationships",
+        "target_components",
+        "cross_references",
+        "target_component_synonyms",
+    ]
+
     def test_has_primary_key(self):
         """Verify primary key field exists."""
         assert "target_id" in CHEMBL_TARGET_SCHEMA.names
@@ -309,6 +337,16 @@ class TestChemblTargetSchema:
         ):
             assert field_name in CHEMBL_TARGET_SCHEMA.names
             assert CHEMBL_TARGET_SCHEMA.field(field_name).type == pa.string()
+
+    def test_business_field_order_matches_reviewed_contract(self):
+        """Target Silver business columns should stay in the reviewed manual order."""
+        system_prefix_count = 7
+        dq_suffix_count = 2
+        assert CHEMBL_TARGET_SCHEMA.names[system_prefix_count:-dq_suffix_count] == (
+            self._EXPECTED_BUSINESS_FIELDS
+        )
+        assert "downgraded" not in CHEMBL_TARGET_SCHEMA.names
+        assert "pipeline_stages" not in CHEMBL_TARGET_SCHEMA.names
 
 
 class TestChemblDocumentSchema:

@@ -26,7 +26,6 @@ DEFAULT_CHEMBL_POLICY_REGISTRY_DATA = ChemblPolicyRegistryData(
                 "chembl_molecule.withdrawn_flag",
                 "chembl_publication.is_oa",
                 "chembl_target.species_group_flag",
-                "chembl_target.downgraded",
             ),
         ),
     ),

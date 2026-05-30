@@ -81,7 +81,7 @@
     "checks": [
       {
         "name": "str_matches",
-        "regex": "^BTO[_:]\\d+$"
+        "regex": "^BTO_\\d+$"
       }
     ],
     "coerce": false,
@@ -160,7 +160,7 @@
     "checks": [
       {
         "name": "str_matches",
-        "regex": "^EFO[_:]\\d+$"
+        "regex": "^EFO_\\d+$"
       }
     ],
     "coerce": false,
@@ -248,7 +248,7 @@
     "checks": [
       {
         "name": "str_matches",
-        "regex": "^UBERON[_:]\\d+$"
+        "regex": "^UBERON_\\d+$"
       }
     ],
     "coerce": false,

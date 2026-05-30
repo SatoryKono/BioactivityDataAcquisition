@@ -116,7 +116,7 @@ def test_build_current_member_facts_exposes_composite_inherited_field_types() ->
     assert facts[("composite_molecule", "hba_count")]["field_type"] == "int64"
     assert facts[("composite_molecule", "logp")]["field_type"] == "double"
     assert facts[("composite_publication", "year")]["field_type"] == "int64"
-    assert facts[("composite_target", "downgraded")]["field_type"] == "bool"
+    assert facts[("composite_target", "target_description")]["field_type"] == "string"
 
 
 def test_build_current_member_facts_exposes_composite_authority_shim_types() -> None:

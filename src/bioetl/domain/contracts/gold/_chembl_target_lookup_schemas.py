@@ -17,20 +17,15 @@ class ChEMBLTargetGoldSchema(StrictGoldContractSchema):
     entity_id: Series[str] = pa.Field(nullable=False)
     content_hash: Series[str] = pa.Field(nullable=False)
     target_id: Series[str] = pa.Field(nullable=False)
-    pref_name: Series[str] = pa.Field(nullable=True)
     target_type: Series[str] = pa.Field(nullable=True)
-    organism: Series[str] = pa.Field(nullable=True)
+    pref_name: Series[str] = pa.Field(nullable=True)
     taxonomy_id: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # Standardized name
+    organism: Series[str] = pa.Field(nullable=True)
     organism_class: Series[str] = pa.Field(nullable=True)
     species_group_flag: Series[bool] = pa.Field(nullable=True)
     description: Series[str] = pa.Field(nullable=True)
-    downgraded: Series[bool] = pa.Field(nullable=True, coerce=True)
-    pipeline_stages: Series[str] = pa.Field(nullable=True)
-    target_components: Series[str] = pa.Field(nullable=True)
-    cross_references: Series[str] = pa.Field(nullable=True)
-    target_component_synonyms: Series[str] = pa.Field(nullable=True)
     target_protein_synonyms: Series[str] = pa.Field(nullable=True)
     target_gene_synonyms: Series[str] = pa.Field(nullable=True)
     target_ec_numbers: Series[str] = pa.Field(nullable=True)
@@ -39,14 +34,17 @@ class ChEMBLTargetGoldSchema(StrictGoldContractSchema):
     target_xref_go_function: Series[str] = pa.Field(nullable=True)
     target_xref_go_process: Series[str] = pa.Field(nullable=True)
     target_xref_reactome_ids: Series[str] = pa.Field(nullable=True)
-    component_accessions: Series[str] = pa.Field(nullable=True)  # list[str]
     primary_component_id: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # int → float (nullable)
+    component_accessions: Series[str] = pa.Field(nullable=True)  # list[str]
+    component_descriptions: Series[str] = pa.Field(nullable=True)
     component_ids: Series[str] = pa.Field(nullable=True)  # list[int]
     component_types: Series[str] = pa.Field(nullable=True)  # list[str]
-    component_descriptions: Series[str] = pa.Field(nullable=True)
     component_relationships: Series[str] = pa.Field(nullable=True)  # list[str]
+    target_components: Series[str] = pa.Field(nullable=True)
+    cross_references: Series[str] = pa.Field(nullable=True)
+    target_component_synonyms: Series[str] = pa.Field(nullable=True)
 
 
 class ChEMBLTargetComponentGoldSchema(StrictGoldContractSchema):

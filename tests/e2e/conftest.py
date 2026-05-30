@@ -265,6 +265,13 @@ def e2e_environment():
     except ImportError:
         pass  # Pandera may not have this submodule in all versions
 
+    # Mock geopandas import to prevent pandera from attempting filesystem stat
+    # operations during dtype checking in concurrent threads on Windows.
+    # This prevents hangs in is_geopandas_dtype() when validating schemas.
+    import sys
+    if "geopandas" not in sys.modules:
+        sys.modules["geopandas"] = None  # type: ignore[assignment]
+
     # Register all pipelines (required for bootstrap_pipeline_runner to work)
     from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 

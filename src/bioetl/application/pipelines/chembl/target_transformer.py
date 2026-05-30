@@ -138,30 +138,18 @@ class TargetTransformer(BaseChemblTransformer):
         return {
             # Primary identifier
             "target_id": str(primary_id),
-            # Primary component ID (for target_component enricher join)
-            "primary_component_id": primary_component_id,
             # Core metadata
-            "pref_name": record.get("pref_name"),
             "target_type": record.get("target_type"),
-            "organism": organism_name,
+            "pref_name": record.get("pref_name"),
             # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
             "taxonomy_id": taxonomy_id,
+            "organism": organism_name,
             # Shared domain normalization owns deterministic cellularity derivation.
             "organism_class": record.get("organism_class"),
             "species_group_flag": record.get("species_group_flag"),
             "target_description": record.get("target_description")
             or record.get("description"),
-            # Keep provider raw value here; shared bool coercion lives in the
-            # domain normalization profile and must preserve null semantics.
-            "downgraded": record.get("downgraded"),
-            "pipeline_stages": self.serialize_json(record.get("pipeline_stages")),
-            # Complex fields (JSON serialized)
-            "target_components": self.serialize_json(target_components),
-            "target_component_synonyms": self._aggregate_synonyms(target_components),
             **projected_synonyms,
-            "cross_references": self.serialize_json(component_xrefs)
-            if component_xrefs
-            else None,
             "target_xref_pdb_ids": xref_projection["target_xref_pdb_ids"],
             "target_xref_go_component": xref_projection[
                 "target_xref_go_component"
@@ -173,8 +161,16 @@ class TargetTransformer(BaseChemblTransformer):
                 "target_xref_go_process"
             ],
             "target_xref_reactome_ids": xref_projection["target_xref_reactome_ids"],
+            # Primary component ID (for target_component enricher join)
+            "primary_component_id": primary_component_id,
             # Flattened components
             **serialized_flattened_components,
+            # Complex fields (JSON serialized)
+            "target_components": self.serialize_json(target_components),
+            "cross_references": self.serialize_json(component_xrefs)
+            if component_xrefs
+            else None,
+            "target_component_synonyms": self._aggregate_synonyms(target_components),
         }
 
     def _postprocess_pre_silver_record(

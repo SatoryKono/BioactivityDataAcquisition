@@ -269,27 +269,27 @@ entries:
 
   chembl.target:
     identity:
-      contract_version: "1.0.0"
+      contract_version: "2.0.0"
       compatibility_level: "major"
-      schema_hash: "878cd0c7deb8779c487a73969340f57440fb1c9ea95f63d7a46dcfdd5dcf6427"
+      schema_hash: "89e905a362dd5fdde7d50b8b5f31a2338147a5583687aa989f94175cc21da1db"
       dq_policy_ref: "chembl.dq.v1"
       rule_bundle_version: "dq-rules.v1.0"
       normalization_profile_ref: "chembl.target"
       normalization_profile_version: "1.0.0"
-      normalization_profile_hash: "5b3e9556135901731f106f507c72f8e933f1b24f7689c65108ee17da2908cc56"
+      normalization_profile_hash: "8cf9569af565159935a48588ed1612c134d4efd684a5577ce3042a8cfbe37c6f"
     status: "active"
     source_path: "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py"
     published_artifacts:
-      - "../../docs/04-reference/contracts/gold/chembl_target_v1.0.json"
-    supported_versions: ["1.0.0"]
+      - "../../docs/04-reference/contracts/gold/chembl_target_v2.0.json"
+    supported_versions: ["1.0.0", "2.0.0"]
     migration_guides: {}
-    last_updated: "2026-05-29T00:00:00Z"
+    last_updated: "2026-05-30T00:00:00Z"
     owners: ["chembl-team"]
     dq_policy_ref: "chembl.dq.v1"
     rule_bundle_version: "dq-rules.v1.0"
     normalization_profile_ref: "chembl.target"
     normalization_profile_version: "1.0.0"
-    normalization_profile_hash: "5b3e9556135901731f106f507c72f8e933f1b24f7689c65108ee17da2908cc56"
+    normalization_profile_hash: "8cf9569af565159935a48588ed1612c134d4efd684a5577ce3042a8cfbe37c6f"
 
   chembl.target_component:
     identity:

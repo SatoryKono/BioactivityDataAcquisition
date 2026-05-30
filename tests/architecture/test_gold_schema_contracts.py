@@ -29,7 +29,7 @@ REQUIRED_SCHEMAS = (
     "chembl_molecule_v1.0.json",
     "chembl_protein_class_v1.0.json",
     "chembl_subcellular_fraction_v1.0.json",
-    "chembl_target_v1.0.json",
+    "chembl_target_v2.0.json",
     "chembl_target_component_v1.0.json",
     "chembl_tissue_v1.0.json",
     "composite_molecule_v1.0.json",

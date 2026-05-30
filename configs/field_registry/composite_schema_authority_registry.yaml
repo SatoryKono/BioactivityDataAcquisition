@@ -40,7 +40,7 @@ authorities:
     evidence_paths:
       - src/bioetl/domain/contracts/gold/composite_bioassay.py
       - docs/04-reference/contracts/gold/composite_activity_v1.0.json
-      - docs/04-reference/contracts/gold/chembl_target_v1.0.json
+      - docs/04-reference/contracts/gold/chembl_target_v2.0.json
       - docs/04-reference/contracts/gold/chembl_target_component_v1.0.json
       - docs/04-reference/contracts/gold/uniprot_idmapping_v1.0.json
       - docs/04-reference/contracts/gold/uniprot_protein_v1.0.json

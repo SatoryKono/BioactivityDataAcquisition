@@ -205,7 +205,6 @@ CHEMBL_PSEUDO_NULL_FIELDS = MappingProxyType(
                 "cross_references",
                 "organism",
                 "organism_class",
-                "pipeline_stages",
                 "pref_name",
                 "primary_component_id",
                 "target_component_synonyms",

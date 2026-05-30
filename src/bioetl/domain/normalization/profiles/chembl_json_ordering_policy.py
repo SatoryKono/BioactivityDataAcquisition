@@ -165,12 +165,6 @@ CHEMBL_JSON_ORDERING_POLICY: tuple[ChemblJsonOrderingPolicy, ...] = (
     ),
     ChemblJsonOrderingPolicy(
         pipeline_name="chembl_target",
-        field_name="pipeline_stages",
-        order_semantics="order_sensitive",
-        rationale="Pipeline stages are ordered process metadata.",
-    ),
-    ChemblJsonOrderingPolicy(
-        pipeline_name="chembl_target",
         field_name="target_component_synonyms",
         order_semantics="order_sensitive",
         rationale=COMPONENT_PARALLEL_ARRAYS_KEEP_ALIGNMENT,
@@ -222,7 +216,7 @@ def _compute_policy_hash() -> str:
     return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
 
 
-CHEMBL_JSON_ORDERING_POLICY_VERSION = "2026.05.12"
+CHEMBL_JSON_ORDERING_POLICY_VERSION = "2026.05.30"
 CHEMBL_JSON_ORDERING_POLICY_HASH = _compute_policy_hash()
 
 

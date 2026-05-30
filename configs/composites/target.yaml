@@ -230,7 +230,6 @@ composite:
         fields:
           - pref_name
           - target_description
-          - downgraded
         provider_order: [chembl]
 
       # === Component data (pre-flattened from ChEMBL API) ===
@@ -298,12 +297,6 @@ composite:
           - sequence_length
           - sequence_mass
         provider_order: [uniprot]
-
-      # === Cross-references and pipeline stages ===
-      - name: references
-        fields:
-          - pipeline_stages
-        provider_order: [chembl]
 
     # Fields excluded from merged output (Silver + Gold)
     exclude_fields:

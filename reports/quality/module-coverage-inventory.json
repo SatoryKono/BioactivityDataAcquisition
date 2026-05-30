@@ -3123,7 +3123,7 @@
       "missing_lines": 34,
       "module": "bioetl.application.pipelines.chembl.target_transformer",
       "path": "src/bioetl/application/pipelines/chembl/target_transformer.py",
-      "source_lines": 207
+      "source_lines": 203
     },
     {
       "coverage_percent": 61.11,
@@ -9483,7 +9483,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.contracts.gold._chembl_target_lookup_schemas",
       "path": "src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
-      "source_lines": 169
+      "source_lines": 167
     },
     {
       "coverage_percent": 100.0,
@@ -10043,7 +10043,7 @@
       "missing_lines": 24,
       "module": "bioetl.domain.entities.chembl_structures_foundation",
       "path": "src/bioetl/domain/entities/chembl_structures_foundation.py",
-      "source_lines": 160
+      "source_lines": 158
     },
     {
       "coverage_percent": 77.12,
@@ -11153,7 +11153,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.normalization.profiles._chembl_policy_registry_defaults",
       "path": "src/bioetl/domain/normalization/profiles/_chembl_policy_registry_defaults.py",
-      "source_lines": 266
+      "source_lines": 265
     },
     {
       "coverage_percent": 100.0,
@@ -11413,7 +11413,7 @@
       "missing_lines": 3,
       "module": "bioetl.domain.normalization.profiles.chembl_json_ordering_policy",
       "path": "src/bioetl/domain/normalization/profiles/chembl_json_ordering_policy.py",
-      "source_lines": 265
+      "source_lines": 259
     },
     {
       "coverage_percent": 100.0,
@@ -11463,7 +11463,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.normalization.profiles.chembl_pseudo_nulls",
       "path": "src/bioetl/domain/normalization/profiles/chembl_pseudo_nulls.py",
-      "source_lines": 246
+      "source_lines": 245
     },
     {
       "coverage_percent": 100.0,
@@ -12603,7 +12603,7 @@
       "missing_lines": 20,
       "module": "bioetl.domain.schemas.chembl.target",
       "path": "src/bioetl/domain/schemas/chembl/target.py",
-      "source_lines": 194
+      "source_lines": 143
     },
     {
       "coverage_percent": 100.0,
@@ -17173,7 +17173,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.schemas.silver_chembl_core",
       "path": "src/bioetl/infrastructure/schemas/silver_chembl_core.py",
-      "source_lines": 365
+      "source_lines": 363
     },
     {
       "coverage_percent": 100.0,
@@ -19508,7 +19508,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-05-30",
-  "source_tree_sha256": "f3c7364a529e68de3ab290263061d914abb70fda5f532e1ca9d6da8c145db570",
+  "source_tree_sha256": "851c8f716d57ccc7f9f93140b9dd6c127ceb8dfeea00411f989a46e11dee3f21",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

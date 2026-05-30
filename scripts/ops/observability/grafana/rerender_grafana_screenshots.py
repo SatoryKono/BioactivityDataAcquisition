@@ -12,11 +12,14 @@ from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, cast
+from urllib import parse
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 DEFAULT_BASE_URL = "http://localhost:3000"
+DEFAULT_USERNAME = "admin"
+DEFAULT_PASSWORD = "changeme"
 DEFAULT_OUTPUT_DIR = Path("reports/observability/grafana/screenshots")
 DEFAULT_WIDTH = 1600
 DEFAULT_HEIGHT = 2200
@@ -28,6 +31,7 @@ class RenderConfig:
     base_url: str
     username: str
     password: str
+    service_account_token: str
     output_dir: Path
     width: int
     height: int
@@ -53,16 +57,60 @@ def _auth_header(username: str, password: str) -> str:
     return f"Basic {token}"
 
 
-def _request_json(url: str, *, auth_header: str, timeout_seconds: float) -> object:
-    request = Request(url, headers={"Authorization": auth_header})
+def _auth_headers(config: RenderConfig) -> dict[str, str]:
+    headers = {"Accept": "application/json"}
+    if config.service_account_token:
+        headers["Authorization"] = f"Bearer {config.service_account_token}"
+    else:
+        headers["Authorization"] = _auth_header(config.username, config.password)
+    return headers
+
+
+def _request_json(url: str, *, headers: dict[str, str], timeout_seconds: float) -> object:
+    request = Request(url, headers=headers)
     with urlopen(request, timeout=timeout_seconds) as response:
         return json.loads(response.read().decode("utf-8"))
 
 
-def _download_binary(url: str, *, auth_header: str, timeout_seconds: float) -> bytes:
-    request = Request(url, headers={"Authorization": auth_header})
+def _download_binary(
+    url: str, *, headers: dict[str, str], timeout_seconds: float
+) -> bytes:
+    request = Request(url, headers=headers)
     with urlopen(request, timeout=timeout_seconds) as response:
         return response.read()
+
+
+def _grafana_slugify(title: str) -> str:
+    return parse.quote(
+        "-".join(
+            chunk
+            for chunk in "".join(
+                char.lower() if char.isalnum() else "-"
+                for char in title.strip()
+            ).split("-")
+            if chunk
+        )
+        or "dashboard",
+        safe="",
+    )
+
+
+def _dashboard_dir() -> Path:
+    return Path(__file__).resolve().parents[4] / "grafana" / "dashboards"
+
+
+def _describe_grafana_auth_failure(config: RenderConfig) -> str:
+    auth_mode = (
+        "service-account token"
+        if config.service_account_token
+        else f"basic auth for {config.username!r}"
+    )
+    return (
+        "Grafana auth failed for dashboard rendering. Verify GRAFANA_BASE_URL and "
+        f"the configured {auth_mode}. If the live instance uses different local "
+        "credentials, reload repo env via scripts/ops/support/load_repo_env.sh or "
+        "pass --username/--password explicitly."
+    )
 
 
 def _render_failure_hint(config: RenderConfig) -> str:
@@ -70,8 +118,16 @@ def _render_failure_hint(config: RenderConfig) -> str:
     try:
         payload = _request_json(
             settings_url,
-            auth_header=_auth_header(config.username, config.password),
+            headers=_auth_headers(config),
             timeout_seconds=config.timeout_seconds,
+        )
+    except HTTPError as exc:
+        if exc.code in {401, 403}:
+            return _describe_grafana_auth_failure(config)
+        return (
+            "Grafana render API failed while probing frontend settings. Verify "
+            "grafana-image-renderer health and, if needed, use the Playwright "
+            "fallback after installing project-local playwright dependencies."
         )
     except (HTTPError, URLError, json.JSONDecodeError, RuntimeError):
         return (
@@ -110,13 +166,21 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
     )
     parser.add_argument(
         "--username",
-        default=_read_env("GRAFANA_USERNAME", "admin"),
+        default=_read_env("GRAFANA_USERNAME", DEFAULT_USERNAME),
         help="Grafana username. Defaults to GRAFANA_USERNAME or admin.",
     )
     parser.add_argument(
         "--password",
-        default=_read_env("GRAFANA_PASSWORD", "admin"),
-        help="Grafana password. Defaults to GRAFANA_PASSWORD or admin.",
+        default=_read_env("GRAFANA_PASSWORD", DEFAULT_PASSWORD),
+        help="Grafana password. Defaults to GRAFANA_PASSWORD or changeme.",
+    )
+    parser.add_argument(
+        "--service-account-token",
+        default=_read_env("GRAFANA_SERVICE_ACCOUNT_TOKEN", ""),
+        help=(
+            "Optional Grafana service-account token. When set, render/auth probes "
+            "use Bearer auth instead of username/password."
+        ),
     )
     parser.add_argument(
         "--output-dir",
@@ -153,6 +217,7 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
         base_url=args.base_url.rstrip("/"),
         username=args.username,
         password=args.password,
+        service_account_token=args.service_account_token,
         output_dir=args.output_dir,
         width=args.width,
         height=args.height,
@@ -163,30 +228,24 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
 
 
 def _load_dashboards(config: RenderConfig) -> list[DashboardRecord]:
-    search_url = f"{config.base_url}/api/search?type=dash-db"
-    payload = _request_json(
-        search_url,
-        auth_header=_auth_header(config.username, config.password),
-        timeout_seconds=config.timeout_seconds,
-    )
-    if not isinstance(payload, list):
-        raise RuntimeError("Grafana search API returned unexpected payload")
-
     items: list[DashboardRecord] = []
-    for item in cast(list[object], payload):
-        if not isinstance(item, dict):
-            continue
-        uid = item.get("uid")
-        url = item.get("url")
-        title = item.get("title")
-        if not isinstance(uid, str) or not isinstance(url, str):
+    for dashboard_path in sorted(_dashboard_dir().glob("*.json")):
+        try:
+            payload = json.loads(dashboard_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise RuntimeError(
+                f"Could not read local dashboard definition {dashboard_path}: {exc}"
+            ) from exc
+        uid = payload.get("uid")
+        title = payload.get("title")
+        if not isinstance(uid, str) or not uid.strip():
             continue
         if config.selected_uids and uid not in config.selected_uids:
             continue
         items.append(
             DashboardRecord(
                 uid=uid,
-                url=url,
+                url=f"/d/{uid}/{_grafana_slugify(title if isinstance(title, str) else uid)}",
                 title=title if isinstance(title, str) else uid,
             )
         )
@@ -207,7 +266,7 @@ def _render_dashboard(record: DashboardRecord, config: RenderConfig) -> Path:
     target.write_bytes(
         _download_binary(
             render_url,
-            auth_header=_auth_header(config.username, config.password),
+            headers=_auth_headers(config),
             timeout_seconds=config.timeout_seconds,
         )
     )
@@ -271,6 +330,8 @@ def _playwright_env(config: RenderConfig) -> dict[str, str]:
     env["GRAFANA_BASE_URL"] = config.base_url
     env["GRAFANA_USERNAME"] = config.username
     env["GRAFANA_PASSWORD"] = config.password
+    if config.service_account_token:
+        env["GRAFANA_SERVICE_ACCOUNT_TOKEN"] = config.service_account_token
     env["GRAFANA_SCREENSHOT_OUTPUT_DIR"] = str(config.output_dir)
     env["GRAFANA_SCREENSHOT_TIMEOUT_MS"] = str(int(config.timeout_seconds * 1000))
     env["GRAFANA_SCREENSHOT_CAPTURE_TIMEOUT_MS"] = str(
@@ -305,6 +366,46 @@ def _run_playwright_fallback(config: RenderConfig) -> int:
         print(f"Playwright fallback failed to launch: {exc}")
         return 1
     return result.returncode
+
+
+def check_playwright_runtime() -> tuple[bool, str]:
+    node_path = _resolve_node_executable()
+    if node_path is None:
+        return (
+            False,
+            "Node.js is unavailable; Playwright fallback cannot launch browser capture.",
+        )
+    try:
+        result = subprocess.run(
+            [
+                node_path,
+                "-e",
+                (
+                    "const { chromium } = require('playwright');"
+                    "process.stdout.write(chromium.executablePath());"
+                ),
+            ],
+            check=False,
+            cwd=str(_repo_root()),
+            capture_output=True,
+            text=True,
+        )
+    except OSError as exc:
+        return False, f"Playwright runtime probe failed to launch Node.js: {exc}"
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout or "").strip()
+        if not detail:
+            detail = f"exit={result.returncode}"
+        return False, f"Playwright runtime probe failed: {detail}"
+    executable = result.stdout.strip()
+    if not executable:
+        return False, "Playwright runtime probe returned an empty Chromium path."
+    if not Path(executable).exists():
+        return (
+            False,
+            f"Playwright browser executable is missing: {executable}. Run `npx playwright install`.",
+        )
+    return True, f"Playwright Chromium available at {executable}"
 
 
 def _render_via_api(config: RenderConfig) -> None:

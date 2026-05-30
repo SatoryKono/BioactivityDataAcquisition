@@ -7,7 +7,7 @@ function parseArgs(argv) {
   const config = {
     baseUrl: process.env.GRAFANA_BASE_URL || "http://localhost:3000",
     username: process.env.GRAFANA_USERNAME || "admin",
-    password: process.env.GRAFANA_PASSWORD || "admin",
+    password: process.env.GRAFANA_PASSWORD || "changeme",
     outputDir: path.resolve(
       process.env.GRAFANA_SCREENSHOT_OUTPUT_DIR ||
         path.join("reports", "observability", "grafana", "screenshots"),

@@ -121,3 +121,5 @@ async def test_chembl_target_projects_derived_synonym_fields(e2e_data_dir: Path)
         assert record["target_ec_numbers"] is not None
         assert isinstance(record["target_component_synonyms"], str)
         assert "target_xref_iuphar_ids" not in record
+        assert "downgraded" not in record
+        assert "pipeline_stages" not in record

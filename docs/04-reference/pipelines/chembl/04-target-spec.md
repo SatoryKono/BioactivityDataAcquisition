@@ -36,7 +36,7 @@ Current specification summary:
 | Artifact             | Link                                                                                     |
 | -------------------- | ---------------------------------------------------------------------------------------- |
 | Provider reference   | [target.md](../../providers/chembl/target.md)                                            |
-| Gold contract export | [chembl_target_v1.0.json](../../contracts/gold/chembl_target_v1.0.json)                  |
+| Gold contract export | [chembl_target_v2.0.json](../../contracts/gold/chembl_target_v2.0.json)                  |
 | Gold schemas index   | [gold-schemas.md](../../contracts/gold-schemas.md)                                       |
 | Versioning policy    | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
 
@@ -46,5 +46,5 @@ Current specification summary:
 | ----------------------------- | ------ | ---------------------------------------------------------------------------------------- |
 | Metadata                      | Pass   | YAML header contains `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
 | Canonical source traceability | Pass   | Page delegates current contract to the linked canonical source and active config surface |
-| Contract linkage              | Pass   | [chembl_target_v1.0.json](../../contracts/gold/chembl_target_v1.0.json)                  |
+| Contract linkage              | Pass   | [chembl_target_v2.0.json](../../contracts/gold/chembl_target_v2.0.json)                  |
 | Published-page role           | Pass   | Canonical compact summary is explicitly bounded by current canonical sources             |

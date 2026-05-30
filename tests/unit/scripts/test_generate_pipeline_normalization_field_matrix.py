@@ -607,8 +607,8 @@ def test_build_field_matrix_rows_marks_composite_join_keys_and_inherited_fields(
     composite_year = _row(rows, "composite_publication", "year")
     assert composite_year["field_type"] == "int64"
 
-    composite_target_downgraded = _row(rows, "composite_target", "downgraded")
-    assert composite_target_downgraded["field_type"] == "bool"
+    composite_target_description = _row(rows, "composite_target", "target_description")
+    assert composite_target_description["field_type"] == "string"
 
     composite_activity_taxonomy_id = _row(rows, "composite_activity", "taxonomy_id")
     assert composite_activity_taxonomy_id["field_type"] == "int64"
