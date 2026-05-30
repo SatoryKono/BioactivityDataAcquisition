@@ -141,8 +141,11 @@ def test_active_standard_provider_surface_has_dq_config_and_published_artifact(
     """Active provider surfaces must resolve DQ config and published Gold artifact."""
     registry = FileContractRegistryStore(_REGISTRY_PATH).load()
     entry = registry.entries[contract_ref]
+    contract_version = entry.identity.contract_version
+    version_suffix = ".".join(contract_version.split(".")[:2])
     expected_artifact = (
-        f"../../docs/04-reference/contracts/gold/{pipeline_name}_v1.0.json"
+        f"../../docs/04-reference/contracts/gold/"
+        f"{pipeline_name}_v{version_suffix}.json"
     )
 
     dq_config = DQContractConfigLoader(_CONFIGS_ROOT).load_dq_config_for_pipeline(
@@ -153,7 +156,7 @@ def test_active_standard_provider_surface_has_dq_config_and_published_artifact(
     assert dq_config.contract_version == entry.identity.contract_version
     assert dq_config.rule_bundle_version == entry.identity.rule_bundle_version
     assert expected_artifact in entry.published_artifacts
-    assert (_GOLD_CONTRACTS_ROOT / f"{pipeline_name}_v1.0.json").exists()
+    assert (_GOLD_CONTRACTS_ROOT / f"{pipeline_name}_v{version_suffix}.json").exists()
 
 
 @pytest.mark.integration
