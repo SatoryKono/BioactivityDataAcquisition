@@ -260,7 +260,7 @@ class TestValidateOwner:
     def test_placeholder_tbd(self) -> None:
         """Placeholder 'tbd' owner should add error."""
         errors: list[str] = []
-        _validate_owner("prefix", {"owner": "2"}, errors)
+        _validate_owner("prefix", {"owner": "tbd"}, errors)
         assert any("placeholder" in e for e in errors)
 
     def test_placeholder_unknown(self) -> None:
