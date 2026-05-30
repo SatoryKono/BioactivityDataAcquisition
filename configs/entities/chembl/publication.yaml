@@ -432,14 +432,10 @@ filters:
     - publication_type
     - title
   gold_filters:
-        # Source-specific filter: ChEMBL Gold dataset restricted to journal-article
-
-
-
-        # for canonical publication scope. This is NOT a global publication type constraint.
-
-
-
+    list_contains: {}
+    list_lengths: {}
+    # Source-specific filter: ChEMBL Gold dataset restricted to journal-article
+    # for canonical publication scope. This is NOT a global publication type constraint.
     columns:
       publication_type:
       - journal-article
@@ -452,8 +448,6 @@ filters:
     - publication_id
     - publication_type
     - title
-    list_contains: {}
-    list_lengths: {}
 contracts:
   primary_key:
   - publication_id

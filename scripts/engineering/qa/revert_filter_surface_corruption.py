@@ -17,7 +17,16 @@ GOLD_COLUMNS_ALLOWLIST: dict[str, frozenset[str]] = {
     "chembl/activity": frozenset(
         {"standard_type", "standard_units", "standard_relation", "assay_type", "potential_duplicate"}
     ),
-    "chembl/assay": frozenset({"assay_type", "confidence_score", "downgraded", "reviewed"}),
+    "chembl/assay": frozenset(
+        {
+            "assay_type",
+            "confidence_score",
+            "assay_test_type",
+            "assay_strain",
+            "bao_format",
+            "src_id",
+        }
+    ),
     "chembl/molecule": frozenset({"inorganic_flag", "molecule_type", "structure_type", "potential_duplicate"}),
     "chembl/publication": frozenset({"publication_type"}),
     "chembl/target": frozenset({"target_type"}),
@@ -44,7 +53,7 @@ SILVER_RANGES_ALLOWLIST: dict[str, frozenset[str]] = {
 GOLD_RANGES_ALLOWLIST: dict[str, frozenset[str]] = {
     "chembl/activity": frozenset({"standard_value", "publication_year"}),
     "chembl/assay": frozenset(),
-    "chembl/molecule": frozenset({"publication_year"}),
+    "chembl/molecule": frozenset(),
     "chembl/publication": frozenset({"publication_year"}),
     "chembl/publication_similarity": frozenset({"max_tani", "publication_year"}),
     "chembl/target": frozenset({"publication_year"}),
@@ -111,9 +120,11 @@ def _clean_filters(data: dict[str, Any], rel_key: str) -> bool:
                 gold["columns"] = {}
         ranges = gold.get("ranges")
         if isinstance(ranges, dict):
-            allowed_ranges = GOLD_RANGES_ALLOWLIST.get(rel_key, frozenset({"publication_year"}))
+            allowed_ranges = GOLD_RANGES_ALLOWLIST.get(rel_key, frozenset())
             if _prune_mapping(ranges, allowed_ranges):
                 changed = True
+            if not ranges and "ranges" in gold:
+                gold["ranges"] = {}
         list_lengths = gold.get("list_lengths")
         if isinstance(list_lengths, dict):
             allowed_lengths = GOLD_LIST_LENGTHS_ALLOWLIST.get(rel_key, frozenset())

@@ -39,6 +39,32 @@ services:
       retries: 3
       start_period: 10s
 
+  quarantine-explorer:
+    build:
+      context: .
+      dockerfile: Dockerfile.bioetl
+    container_name: bioetl-quarantine-explorer
+    command: ["quarantine", "serve", "--host", "0.0.0.0", "--port", "8081"]
+    ports:
+      - "8081:8081"
+    environment:
+      - BIOETL_PROMETHEUS_URL=http://prometheus:9090
+    volumes:
+      - ./data:/app/data
+      - ./reports:/app/reports
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8081/health/live', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - monitoring
+    restart: unless-stopped
+
   loki:
     image: grafana/loki:3.7.0
     container_name: bioetl-loki
@@ -119,6 +145,8 @@ services:
       prometheus:
         condition: service_healthy
       pushgateway:
+        condition: service_healthy
+      quarantine-explorer:
         condition: service_healthy
       renderer:
         condition: service_started

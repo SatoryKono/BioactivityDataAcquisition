@@ -285,10 +285,7 @@ filters:
     - cell_name
     list_contains: {}
     list_lengths: {}
-    ranges:
-      publication_year:
-        min: 1950
-        max: 2050
+    ranges: {}
   metadata:
     publication_filter_policy:
       scope: source_specific
