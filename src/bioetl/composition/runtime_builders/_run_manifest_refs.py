@@ -6,12 +6,14 @@ import os
 import tempfile
 from contextlib import suppress
 from dataclasses import dataclass
-from pathlib import Path
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, Protocol
 
 from bioetl.domain.control_plane import RunArtifactRef
+from bioetl.domain.normalization import normalize_runtime_anchor_payload
 
 if TYPE_CHECKING:
+    from _typeshed import DataclassInstance
+
     from bioetl.domain.context import PipelineRunContext
     from bioetl.infrastructure.config.settings_api import Settings
 
@@ -147,6 +149,132 @@ class ManifestControlPlaneRefs:
     normalization_profile_version: str | None = None
     normalization_profile_hash: str | None = None
     required_persistence_profile: str | None = None
+
+
+_CONTROL_PLANE_CONTEXT_UPDATE_FIELDS: tuple[str, ...] = (
+    "execution_fingerprint",
+    "config_hash",
+    "resolved_config_hash",
+    "effective_config_hash",
+    "source_fingerprint",
+    "dq_contract_compatibility_hash",
+    "effective_config_artifact_id",
+    "replay_of_run_id",
+    "replay_of_manifest_id",
+    "input_snapshot_fingerprint",
+    "contract_ref",
+    "contract_version",
+    "contract_schema_hash",
+    "dq_policy_ref",
+    "rule_bundle_version",
+    "normalization_profile_ref",
+    "normalization_profile_version",
+    "normalization_profile_hash",
+)
+
+
+class _MutableManifestContext(Protocol):
+    manifest_id: str | None
+
+
+def iter_optional_control_plane_updates(
+    *,
+    execution_fingerprint: str | None = None,
+    config_hash: str | None = None,
+    resolved_config_hash: str | None = None,
+    effective_config_hash: str | None = None,
+    source_fingerprint: str | None = None,
+    dq_contract_compatibility_hash: str | None = None,
+    effective_config_artifact_id: str | None = None,
+    replay_of_run_id: str | None = None,
+    replay_of_manifest_id: str | None = None,
+    input_snapshot_fingerprint: str | None = None,
+    contract_ref: str | None = None,
+    contract_version: str | None = None,
+    contract_schema_hash: str | None = None,
+    dq_policy_ref: str | None = None,
+    rule_bundle_version: str | None = None,
+    normalization_profile_ref: str | None = None,
+    normalization_profile_version: str | None = None,
+    normalization_profile_hash: str | None = None,
+) -> tuple[tuple[str, str], ...]:
+    """Return non-empty control-plane context updates for runner attachment."""
+    values = normalize_runtime_anchor_payload(
+        {
+            "execution_fingerprint": execution_fingerprint,
+            "config_hash": config_hash,
+            "resolved_config_hash": resolved_config_hash,
+            "effective_config_hash": effective_config_hash,
+            "source_fingerprint": source_fingerprint,
+            "dq_contract_compatibility_hash": dq_contract_compatibility_hash,
+            "effective_config_artifact_id": effective_config_artifact_id,
+            "replay_of_run_id": replay_of_run_id,
+            "replay_of_manifest_id": replay_of_manifest_id,
+            "input_snapshot_fingerprint": input_snapshot_fingerprint,
+            "contract_ref": contract_ref,
+            "contract_version": contract_version,
+            "contract_schema_hash": contract_schema_hash,
+            "dq_policy_ref": dq_policy_ref,
+            "rule_bundle_version": rule_bundle_version,
+            "normalization_profile_ref": normalization_profile_ref,
+            "normalization_profile_version": normalization_profile_version,
+            "normalization_profile_hash": normalization_profile_hash,
+        }
+    )
+    return tuple(
+        (field_name, field_value)
+        for field_name, field_value in values.items()
+        if field_value is not None
+    )
+
+
+def extract_optional_updates_from_refs(
+    control_plane_refs: ManifestControlPlaneRefs,
+) -> tuple[tuple[str, str], ...]:
+    """Extract optional control-plane updates from manifest refs."""
+    return tuple(
+        (field_name, field_value)
+        for field_name in _CONTROL_PLANE_CONTEXT_UPDATE_FIELDS
+        if (field_value := getattr(control_plane_refs, field_name)) is not None
+    )
+
+
+def build_dataclass_manifest_updates(
+    ctx: PipelineRunContext,
+    manifest_id: str,
+    *,
+    optional_updates: tuple[tuple[str, str], ...],
+) -> dict[str, object]:
+    """Build dataclass replace() kwargs for manifest attachment."""
+    updates: dict[str, object] = {"manifest_id": manifest_id}
+    for field_name, field_value in optional_updates:
+        if hasattr(ctx, field_name):
+            updates[field_name] = field_value
+    return updates
+
+
+def apply_manifest_updates_to_mutable_context(
+    ctx: _MutableManifestContext,
+    manifest_id: str,
+    *,
+    optional_updates: tuple[tuple[str, str], ...],
+) -> _MutableManifestContext:
+    """Mutate a legacy mutable context with manifest/control-plane anchors."""
+    ctx.manifest_id = manifest_id
+    for field_name, field_value in optional_updates:
+        setattr(ctx, field_name, field_value)
+    return ctx
+
+
+@dataclass(frozen=True, slots=True)
+class RunManifestProvenanceBundle:
+    """Effective-config provenance bundle passed into manifest creation."""
+
+    effective_config_artifact_id: str
+    resolved_config_hash: str
+    effective_config_hash: str
+    source_fingerprint: str | None
+    dq_contract_compatibility_hash: str
 
 
 def resolve_run_context_values(

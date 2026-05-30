@@ -17,6 +17,9 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_persist
     build_next_steps,
     build_persistence_profile,
 )
+from bioetl.application.services.control_plane._run_manifest_diagnostics_helpers import (
+    DQDetailsSummary,
+)
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_helpers import (
     _is_composite_execution_context,
 )
@@ -42,17 +45,7 @@ class _FinalSummaryRequest:
     type_counter: Counter[str]
     artifact_refs: list[dict[str, object]]
     lineage_fragment_ids: set[str]
-    dq_rule_ids: set[str]
-    dq_dispositions: set[str]
-    dq_report_paths: set[str]
-    dq_violation_kinds: set[str]
-    cross_validation_rule_ids: set[str]
-    cross_validation_config_paths: set[str]
-    cross_validation_quarantine_policies: set[str]
-    cross_validation_replay_contracts: set[str]
-    occurrence_only_diagnostic_scopes: set[str]
-    dq_signal_present: bool
-    cross_validation_signal_present: bool
+    dq_details: DQDetailsSummary
     missing_link_count: int
     correlation_anchor_gaps: dict[str, int]
     resume_diagnostics: dict[str, object] | None
@@ -135,7 +128,7 @@ def _build_identity_graph(
         "produced_artifact_trace": produced_artifact_trace,
         "artifact_refs": request.artifact_refs,
         "occurrence_only_diagnostics": sorted(
-            request.occurrence_only_diagnostic_scopes
+            request.dq_details["occurrence_only_diagnostic_scopes"]
         ),
         "resume_diagnostics": request.resume_diagnostics,
         "total_events": len(request.ledger_entries),
@@ -232,24 +225,30 @@ def _build_final_summary_updates(
         "published_artifact_count": len(request.artifact_refs),
         "lineage_fragment_ids": sorted(request.lineage_fragment_ids),
         "missing_artifact_links": request.missing_link_count,
-        "dq_rule_ids": sorted(request.dq_rule_ids),
-        "dq_dispositions": sorted(request.dq_dispositions),
-        "dq_report_paths": sorted(request.dq_report_paths),
-        "dq_violation_kinds": sorted(request.dq_violation_kinds),
-        "cross_validation_rule_ids": sorted(request.cross_validation_rule_ids),
-        "cross_validation_config_paths": sorted(request.cross_validation_config_paths),
+        "dq_rule_ids": sorted(request.dq_details["rule_ids"]),
+        "dq_dispositions": sorted(request.dq_details["dispositions"]),
+        "dq_report_paths": sorted(request.dq_details["report_paths"]),
+        "dq_violation_kinds": sorted(request.dq_details["violation_kinds"]),
+        "cross_validation_rule_ids": sorted(
+            request.dq_details["cross_validation_rule_ids"]
+        ),
+        "cross_validation_config_paths": sorted(
+            request.dq_details["cross_validation_config_paths"]
+        ),
         "cross_validation_quarantine_policy": _resolve_policy_value(
-            request.cross_validation_quarantine_policies
+            request.dq_details["cross_validation_quarantine_policies"]
         ),
         "cross_validation_quarantine_replay_contract": _resolve_policy_value(
-            request.cross_validation_replay_contracts
+            request.dq_details["cross_validation_replay_contracts"]
         ),
         "occurrence_only_diagnostics": sorted(
-            request.occurrence_only_diagnostic_scopes
+            request.dq_details["occurrence_only_diagnostic_scopes"]
         ),
         "resume_diagnostics": request.resume_diagnostics,
         "composite_dossier_projection": composite_dossier_projection,
-        "cross_validation_signal_present": request.cross_validation_signal_present,
+        "cross_validation_signal_present": request.dq_details[
+            "has_cross_validation_signal"
+        ],
         "correlation_anchor_gaps": request.correlation_anchor_gaps,
         "identity_graph_complete": (
             request.missing_link_count == 0
@@ -291,8 +290,10 @@ def _build_final_summary(
             lineage_fragment_ids=request.lineage_fragment_ids,
             missing_link_count=request.missing_link_count,
             latest_status=request.ledger_entries[-1].status,
-            dq_signal_present=request.dq_signal_present,
-            cross_validation_signal_present=request.cross_validation_signal_present,
+            dq_signal_present=request.dq_details["has_signal"],
+            cross_validation_signal_present=request.dq_details[
+                "has_cross_validation_signal"
+            ],
         )
     )
     composite_dossier_projection = build_composite_dossier_projection(

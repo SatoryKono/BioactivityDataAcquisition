@@ -3,16 +3,13 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass, field
-from datetime import datetime
-from uuid import uuid4
+from dataclasses import dataclass
 
 from bioetl.application.services.control_plane.manifest.models import (
     RunManifestCreateSpec,
 )
-from bioetl.application.services.control_plane.manifest_time_support import (
-    ManifestClockProtocol,
-    resolve_manifest_created_at,
+from bioetl.application.services.control_plane.manifest_service_scaffold import (
+    ManifestServiceScaffoldMixin,
 )
 from bioetl.application.services.control_plane.run_manifest_service_mixins import (
     RunManifestHydrationMixin,
@@ -35,20 +32,15 @@ __all__ = [
 ]
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, kw_only=True)
 class RunManifestService(
+    ManifestServiceScaffoldMixin,
     RunManifestHydrationMixin,
     RunManifestPayloadMixin,
 ):
     """Create and persist immutable run manifests."""
 
     manifest_port: RunManifestPort
-    clock: ManifestClockProtocol | None = None
-    created_at_factory: Callable[[], datetime] | None = None
-    schema_version: str = "1.0"
-    _manifest_id_factory: Callable[[], str] = field(
-        default_factory=lambda: lambda: str(uuid4())
-    )
 
     def _normalize_run_type(self, run_type: RunType | str) -> RunType:
         """Return the normalized runtime run type enum."""
@@ -78,13 +70,6 @@ class RunManifestService(
             normalization_profile_hash=request.normalization_profile_hash,
             dq_contract_compatibility_hash=request.dq_contract_compatibility_hash,
             effective_config_artifact_id=request.effective_config_artifact_id,
-        )
-
-    def _resolve_created_at(self) -> datetime:
-        """Resolve manifest creation time through the configured seam."""
-        return resolve_manifest_created_at(
-            clock=self.clock,
-            created_at_factory=self.created_at_factory,
         )
 
     def create_manifest(self, request: RunManifestCreateSpec) -> RunManifest:
