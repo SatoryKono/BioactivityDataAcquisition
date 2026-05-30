@@ -327,12 +327,17 @@ def git_tracked_files(
             "git ls-files scan failed with exit code "
             f"{result.returncode}: {result.stderr}"
         )
-    files = tuple(
-        root / rel_path
-        for rel_path in result.stdout.splitlines()
-        if not suffixes or rel_path.endswith(suffixes)
-    )
-    return files
+    files: list[Path] = []
+    for rel_path in result.stdout.splitlines():
+        if suffixes and not rel_path.endswith(suffixes):
+            continue
+        path = root / rel_path
+        try:
+            if path.is_file():
+                files.append(path)
+        except OSError:
+            continue
+    return tuple(files)
 
 
 __all__ = ["GitGrepMatch", "git_grep_fixed", "git_tracked_files"]

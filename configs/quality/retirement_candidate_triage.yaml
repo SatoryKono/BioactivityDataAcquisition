@@ -114,6 +114,46 @@ repo_wide_zero_import_classification:
     linked_issue: '#4541'
     rationale: Manifest diagnostics identity helpers remain the canonical owner module
       behind control-plane diagnostics assembly.
+  - module_path: src/bioetl/application/services/control_plane/run_manifest_diagnostics_checkpoint_projection.py
+    module_name: bioetl.application.services.control_plane.run_manifest_diagnostics_checkpoint_projection
+    disposition: retain_compat_shim
+    reviewed_on: '2026-05-30'
+    review_by: '2026-08-30'
+    linked_issue: '#4706'
+    rationale: Compatibility shim remains as the sanctioned transition surface for
+      manifest diagnostics checkpoint projection imports.
+  - module_path: src/bioetl/application/services/control_plane/run_manifest_diagnostics_finalization.py
+    module_name: bioetl.application.services.control_plane.run_manifest_diagnostics_finalization
+    disposition: retain_compat_shim
+    reviewed_on: '2026-05-30'
+    review_by: '2026-08-30'
+    linked_issue: '#4706'
+    rationale: Compatibility shim remains as the sanctioned transition surface for
+      manifest diagnostics finalization imports.
+  - module_path: src/bioetl/application/services/control_plane/run_manifest_diagnostics_replay.py
+    module_name: bioetl.application.services.control_plane.run_manifest_diagnostics_replay
+    disposition: retain_compat_shim
+    reviewed_on: '2026-05-30'
+    review_by: '2026-08-30'
+    linked_issue: '#4706'
+    rationale: Compatibility shim remains as the sanctioned transition surface for
+      manifest diagnostics replay imports.
+  - module_path: src/bioetl/application/services/control_plane/run_manifest_diagnostics_replay_projection.py
+    module_name: bioetl.application.services.control_plane.run_manifest_diagnostics_replay_projection
+    disposition: retain_compat_shim
+    reviewed_on: '2026-05-30'
+    review_by: '2026-08-30'
+    linked_issue: '#4706'
+    rationale: Compatibility shim remains as the sanctioned transition surface for
+      manifest diagnostics replay projection imports.
+  - module_path: src/bioetl/application/services/control_plane/run_manifest_diagnostics_source_refs.py
+    module_name: bioetl.application.services.control_plane.run_manifest_diagnostics_source_refs
+    disposition: retain_compat_shim
+    reviewed_on: '2026-05-30'
+    review_by: '2026-08-30'
+    linked_issue: '#4706'
+    rationale: Compatibility shim remains as the sanctioned transition surface for
+      manifest diagnostics source reference imports.
   - module_path: src/bioetl/composition/bootstrap/cli/adr.py
     module_name: bioetl.composition.bootstrap.cli.adr
     disposition: retain_dynamic_entrypoint

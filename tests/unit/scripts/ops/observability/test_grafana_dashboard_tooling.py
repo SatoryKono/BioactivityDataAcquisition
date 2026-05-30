@@ -191,6 +191,31 @@ def test_check_playwright_runtime_missing_module_points_to_bootstrap(
     assert "devDependencies" in detail
 
 
+def test_check_playwright_runtime_missing_shared_libs_points_to_system_packages(
+    monkeypatch: Any,
+) -> None:
+    monkeypatch.setattr(
+        rerender_subject, "_resolve_node_executable", lambda: "/usr/bin/node"
+    )
+
+    class _Result:
+        returncode = 1
+        stdout = ""
+        stderr = "chrome-headless-shell: error while loading shared libraries: libnspr4.so: cannot open shared object file"
+
+    monkeypatch.setattr(
+        rerender_subject.subprocess,
+        "run",
+        lambda *args, **kwargs: _Result(),
+    )
+
+    ok, detail = rerender_subject.check_playwright_runtime()
+
+    assert ok is False
+    assert "libnspr4" in detail
+    assert "shared libraries" in detail
+
+
 def test_rerender_builds_playwright_env(tmp_path: Path) -> None:
     config = rerender_subject.RenderConfig(
         base_url="http://localhost:3000",
@@ -214,6 +239,29 @@ def test_rerender_builds_playwright_env(tmp_path: Path) -> None:
     assert env["GRAFANA_SCREENSHOT_TIMEOUT_MS"] == "45000"
     assert env["GRAFANA_SCREENSHOT_CAPTURE_TIMEOUT_MS"] == "180000"
     assert env["GRAFANA_SCREENSHOT_UIDS"] == "bioetl-control-plane-v1"
+
+
+def test_rerender_builds_playwright_env_with_sidecar_node_modules(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    monkeypatch.setenv("BIOETL_PLAYWRIGHT_NODE_MODULES", "/tmp/bioetl-tools/runtime/node_modules")
+    config = rerender_subject.RenderConfig(
+        base_url="http://localhost:3000",
+        username="admin",
+        password="changeme",
+        service_account_token="",
+        output_dir=tmp_path,
+        width=1600,
+        height=2200,
+        timeout_seconds=45.0,
+        selected_uids=(),
+        fallback="auto",
+    )
+
+    env = rerender_subject._playwright_env(config)
+
+    assert env["BIOETL_PLAYWRIGHT_NODE_MODULES"] == "/tmp/bioetl-tools/runtime/node_modules"
+    assert env["NODE_PATH"].startswith("/tmp/bioetl-tools/runtime/node_modules")
 
 
 def test_rerender_builds_playwright_env_with_service_account_token(
@@ -252,6 +300,8 @@ def test_screenshot_runtime_setup_scripts_keep_bootstrap_contract() -> None:
 
     assert "npm ci --include=dev" in shell_script
     assert "npm_config_production=false" in shell_script
+    assert "BIOETL_PLAYWRIGHT_NODE_MODULES" in shell_script
+    assert "playwright-runtime" in shell_script
     assert "ci --include=dev --no-bin-links" in powershell_script
     assert 'NPM_CONFIG_PRODUCTION = "false"' in powershell_script
 
