@@ -139,8 +139,9 @@ def build_backlog() -> dict[str, Any]:
         },
         "notes": [
             "actionable_partial_key_count excludes keys under INTENTIONAL_PREFIXES.",
-            "hash_policy on non-ChEMBL entities requires ADR/design review before alignment.",
+            "hash_policy is common across all 21 entity configs after Stream B design review.",
             "composite_runtime family is at zero inconsistent keys as of Stream B plateau.",
+            "Residual entity drift is entity-specific filters/extraction_params/pipeline overrides only.",
         ],
     }
 

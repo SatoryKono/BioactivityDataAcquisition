@@ -211,6 +211,7 @@ tracked_suite_inventory:
     - tests/integration/config/test_generic_field_ownership.py
     - tests/integration/config/test_gold_nullable_numeric_compatibility.py
     - tests/integration/config/test_non_chembl_contract_registry_coverage.py
+    - tests/integration/config/test_non_chembl_hash_policy_alignment.py
     - tests/integration/config/test_ontology_unit_semantics.py
     - tests/integration/config/test_pipeline_data_storage_contracts.py
     - tests/integration/config/test_pubchem_enum_parity.py
@@ -260,9 +261,9 @@ tracked_suite_inventory:
     external_validation_surfaces:
     - tests/integration/validation/test_external_verification.py
     reproducibility_surfaces:
+    - tests/integration/composite_resume/test_reproducibility_composite_resume_gate.py
     - tests/integration/determinism/test_reproducibility_determinism_gate.py
     - tests/integration/idempotency/test_reproducibility_idempotency_gate.py
-    - tests/integration/composite_resume/test_reproducibility_composite_resume_gate.py
   e2e:
     provider_runs:
       chembl_activity: tests/e2e/test_chembl_activity_e2e.py

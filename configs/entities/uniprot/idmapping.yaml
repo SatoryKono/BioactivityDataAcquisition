@@ -245,3 +245,51 @@ contracts:
   hash_include: []
   hash_exclude: []
   hash_datetime_policy: v1_date
+hash_policy:
+  provider: uniprot
+  entity: idmapping
+  contract:
+    version: 1.0.0
+    migration_note: Explicit config-level hash contract aligned with normalization profile uniprot.idmapping.
+  hash_policy:
+    algorithm: sha256
+    canonicalization: provider + canonical_json_dumps(normalized_record)
+    include_fields:
+    - all_mappings
+    - annotation_score
+    - gene_primary
+    - mapping_status
+    - organism_common
+    - organism_scientific
+    - protein_name
+    - reviewed
+    - sequence_length
+    - sequence_mass
+    - target_id
+    - taxonomy_id
+    - uniprot_accession
+    - uniprot_entry_name
+    exclude_fields:
+    - _dq_error
+    - _dq_warn
+    - _index
+    - _ingestion_ts
+    - _lookup_method
+    - _original_id
+    - _run_id
+    - _run_type
+    - _source
+    - _source_batch_id
+    exclude_patterns:
+    - ^_dq_
+    normalization:
+      trim_strings: true
+      round_floats:
+        enabled: true
+        precision: 10
+      dates:
+        enabled: true
+        format: YYYY-MM-DD
+      null_handling:
+        nan_to_null: true
+        inf_to_null: true

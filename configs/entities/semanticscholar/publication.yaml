@@ -389,3 +389,87 @@ contracts:
   hash_include: []
   hash_exclude: []
   hash_datetime_policy: v1_date
+hash_policy:
+  provider: semanticscholar
+  entity: publication
+  contract:
+    version: 1.0.0
+    migration_note: Explicit config-level hash contract aligned with normalization profile semanticscholar.publication.
+  hash_policy:
+    algorithm: sha256
+    canonicalization: provider + canonical_json_dumps(normalized_record)
+    include_fields:
+    - abstract
+    - affiliation_list
+    - author_h_indices
+    - author_h_indices_canonical_json
+    - author_h_indices_raw_json
+    - author_keys
+    - author_orcids
+    - author_s2_ids
+    - authors
+    - citation_contexts
+    - citation_contexts_canonical_json
+    - citation_contexts_raw_json
+    - citations_made
+    - citations_received
+    - corpus_id
+    - dblp_id
+    - doi
+    - influential_citation_count
+    - is_oa
+    - issn
+    - issn_list
+    - issue
+    - journal
+    - language
+    - oa_status
+    - open_access_url
+    - page_first
+    - page_last
+    - page_range
+    - paper_id
+    - pmc_id
+    - pmid
+    - publication_class
+    - publication_date
+    - publication_doi
+    - publication_pmc_id
+    - publication_pmid
+    - publication_subclass
+    - publication_type
+    - publication_type_unified
+    - publication_types
+    - publication_types_canonical_json
+    - publication_year
+    - subject_fields
+    - subject_fields_canonical_json
+    - title
+    - tldr
+    - volume
+    exclude_fields:
+    - _dq_error
+    - _dq_warn
+    - _index
+    - _ingestion_ts
+    - _lookup_method
+    - _original_id
+    - _run_id
+    - _run_type
+    - _source
+    - _source_batch_id
+    - publication_types_raw_json
+    - subject_fields_raw_json
+    exclude_patterns:
+    - ^_dq_
+    normalization:
+      trim_strings: true
+      round_floats:
+        enabled: true
+        precision: 10
+      dates:
+        enabled: true
+        format: YYYY-MM-DD
+      null_handling:
+        nan_to_null: true
+        inf_to_null: true

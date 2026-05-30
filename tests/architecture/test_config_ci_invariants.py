@@ -743,6 +743,23 @@ class TestExtractionParamsAllowlist:
                 )
         assert not violations, "\n".join(violations)
 
+    def test_non_allowlisted_entities_keep_extraction_params_empty(self) -> None:
+        """Entities without an allowlist must not carry server-side extraction params."""
+        violations: list[str] = []
+        for path in sorted(ENTITIES_DIR.glob("*/*.yaml")):
+            rel_key = f"{path.parent.name}/{path.stem}"
+            if rel_key in EXTRACTION_PARAM_ALLOWLIST:
+                continue
+            filters = _load_yaml(path).get("filters")
+            if not isinstance(filters, dict):
+                continue
+            extraction = filters.get("extraction_params")
+            if isinstance(extraction, dict) and extraction:
+                violations.append(
+                    f"{path.relative_to(PROJECT_ROOT)}: extraction_params={sorted(extraction)}"
+                )
+        assert not violations, "\n".join(violations)
+
 
 # ---------------------------------------------------------------------------
 # INV-CFG-008: effective_optional_v1 must match current config surface
@@ -1008,6 +1025,20 @@ class TestContractHashExcludeInvariants:
     }
     _LEGACY_EXCLUDES: set[str] = {"_dq_errors", "_dq_status"}
 
+    @staticmethod
+    def _root_hash_policy_exclude_fields(data: dict[str, Any]) -> set[str]:
+        """Return explicit hash_policy exclude_fields when root hash_policy is present."""
+        root = data.get("hash_policy")
+        if not isinstance(root, dict):
+            return set()
+        nested = root.get("hash_policy")
+        if not isinstance(nested, dict):
+            return set()
+        exclude_fields = nested.get("exclude_fields")
+        if not isinstance(exclude_fields, list):
+            return set()
+        return {str(item) for item in exclude_fields}
+
     def test_base_contract_defaults_hash_exclude(self) -> None:
         """Base contract defaults must be canonical and META_FIELDS-aligned."""
         base_path = CONFIGS_DIR / "base" / "pipeline.yaml"
@@ -1041,7 +1072,7 @@ class TestContractHashExcludeInvariants:
 
     @pytest.mark.parametrize("config_path", _collect_pipeline_configs(), ids=_rel)
     def test_entity_contract_hash_exclude(self, config_path: Path) -> None:
-        """Each entity's effective hash_exclude must be canonical and META_FIELDS-aligned."""
+        """Each entity's effective hash_exclude must be canonical and policy-aligned."""
         data = _load_yaml(config_path)
         provider = str(data.get("provider", "")).strip()
         entity = str(data.get("entity", "")).strip()
@@ -1056,6 +1087,8 @@ class TestContractHashExcludeInvariants:
         missing = self._REQUIRED_EXCLUDES - exclude_set
         legacy = self._LEGACY_EXCLUDES & exclude_set
         non_meta = exclude_set - META_FIELDS
+        allowed_non_meta = self._root_hash_policy_exclude_fields(data) - META_FIELDS
+        unexpected_non_meta = non_meta - allowed_non_meta
 
         assert not missing, (
             f"{_rel(config_path)}: contracts.hash_exclude missing {sorted(missing)}"
@@ -1064,9 +1097,9 @@ class TestContractHashExcludeInvariants:
             f"{_rel(config_path)}: contracts.hash_exclude uses legacy keys "
             f"{sorted(legacy)}"
         )
-        assert not non_meta, (
+        assert not unexpected_non_meta, (
             f"{_rel(config_path)}: contracts.hash_exclude has non-meta keys "
-            f"{sorted(non_meta)} (expected subset of META_FIELDS)"
+            f"{sorted(unexpected_non_meta)} (expected META_FIELDS or hash_policy.exclude_fields)"
         )
 
 

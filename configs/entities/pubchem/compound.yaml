@@ -297,3 +297,85 @@ contracts:
   hash_include: []
   hash_exclude: []
   hash_datetime_policy: v1_date
+hash_policy:
+  provider: pubchem
+  entity: compound
+  contract:
+    version: 1.0.0
+    migration_note: Explicit config-level hash contract aligned with normalization profile pubchem.compound.
+  hash_policy:
+    algorithm: sha256
+    canonicalization: provider + canonical_json_dumps(normalized_record)
+    include_fields:
+    - atom_stereo_count
+    - bond_stereo_count
+    - canonical_smiles
+    - charge
+    - chemical_standardization_policy_version
+    - chemical_standardization_status
+    - chemical_standardization_warnings
+    - complexity
+    - conformer_count_3d
+    - conformer_rmsd_3d
+    - covalent_unit_count
+    - defined_atom_stereo_count
+    - defined_bond_stereo_count
+    - effective_rotor_count_3d
+    - exact_mass
+    - feature_acceptor_count_3d
+    - feature_anion_count_3d
+    - feature_cation_count_3d
+    - feature_count_3d
+    - feature_donor_count_3d
+    - feature_hydrophobe_count_3d
+    - feature_ring_count_3d
+    - h_bond_acceptor_count
+    - h_bond_donor_count
+    - heavy_atom_count
+    - inchi
+    - inchi_key
+    - isomeric_smiles
+    - isotope_atom_count
+    - iupac_name
+    - molecular_formula
+    - molecular_weight
+    - molecule_id
+    - monoisotopic_mass
+    - rotatable_bond_count
+    - standardized_canonical_smiles
+    - standardized_inchi
+    - standardized_inchi_key
+    - standardized_isomeric_smiles
+    - structure_parent_key
+    - tpsa
+    - undefined_atom_stereo_count
+    - undefined_bond_stereo_count
+    - volume_3d
+    - x_steric_quadrupole_3d
+    - xlogp
+    - y_steric_quadrupole_3d
+    - z_steric_quadrupole_3d
+    exclude_fields:
+    - _dq_error
+    - _dq_warn
+    - _index
+    - _ingestion_ts
+    - _lookup_method
+    - _original_id
+    - _run_id
+    - _run_type
+    - _source
+    - _source_batch_id
+    exclude_patterns:
+    - ^_dq_
+    normalization:
+      trim_strings: true
+      round_floats:
+        enabled: true
+        precision: 10
+      dates:
+        enabled: true
+        format: YYYY-MM-DD
+      null_handling:
+        nan_to_null: true
+        inf_to_null: true

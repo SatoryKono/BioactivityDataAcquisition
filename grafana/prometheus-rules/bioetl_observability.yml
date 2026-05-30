@@ -816,16 +816,6 @@ groups:
           description: "Pushgateway is not reachable for instance={{ $labels.instance }}."
           runbook: "docs/05-operations/runbooks/observability-checklist.md"
 
-      - alert: BioETLQuarantineExplorerUnavailable
-        expr: up{job="quarantine-explorer"} == 0
-        for: 2m
-        labels:
-          severity: critical
-        annotations:
-          summary: "Quarantine Explorer API is unavailable"
-          description: "Prometheus could not scrape the Quarantine Explorer endpoint on :8081. Dashboard panels (ID, Processed Records, Silver Reject Explorer) will show no data."
-          runbook: "docs/05-operations/runbooks/observability-checklist.md"
-
   - name: bioetl_pipeline_runtime_observability
     rules:
       - alert: BioETLPipelinePreflightDataSourceFailed
