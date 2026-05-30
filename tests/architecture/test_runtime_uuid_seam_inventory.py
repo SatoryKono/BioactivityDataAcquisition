@@ -13,35 +13,68 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG_PATH = ROOT / "configs/quality/runtime_uuid_seams.yaml"
 SCAN_ROOTS = ("src/bioetl/application", "src/bioetl/composition")
+UUID4_SCAN_TIMEOUT_SECONDS = 10
 
 pytestmark = pytest.mark.architecture
 
 
-def _tracked_python_files() -> list[Path]:
-    import shutil
-
-    git_cmd = shutil.which("git") or "git"
+def _uuid4_candidate_files() -> tuple[Path, ...]:
+    """Prefilter candidate files so Windows/WSL runs do not parse every module."""
     try:
         result = subprocess.run(
-            [git_cmd, "ls-files", *SCAN_ROOTS],
+            [
+                "rg",
+                "--files-with-matches",
+                "-F",
+                "uuid4",
+                *SCAN_ROOTS,
+            ],
             cwd=ROOT,
-            check=True,
+            check=False,
             capture_output=True,
             text=True,
+            timeout=UUID4_SCAN_TIMEOUT_SECONDS,
         )
-        return [
-            ROOT / line for line in result.stdout.splitlines() if line.endswith(".py")
-        ]
-    except (OSError, subprocess.CalledProcessError):
-        files: list[Path] = []
-        for scan_root in SCAN_ROOTS:
-            files.extend((ROOT / scan_root).rglob("*.py"))
-        return sorted(path for path in files if path.is_file())
+    except (OSError, subprocess.TimeoutExpired):
+        pass
+    else:
+        if result.returncode == 0:
+            return tuple(
+                ROOT / line for line in result.stdout.splitlines() if line.endswith(".py")
+            )
+        if result.returncode == 1:
+            return ()
+
+    try:
+        import shutil
+
+        git_cmd = shutil.which("git") or "git"
+        result = subprocess.run(
+            [git_cmd, "grep", "-l", "uuid4", "--", *SCAN_ROOTS],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=UUID4_SCAN_TIMEOUT_SECONDS,
+        )
+        if result.returncode == 0:
+            return tuple(
+                ROOT / line for line in result.stdout.splitlines() if line.endswith(".py")
+            )
+        if result.returncode == 1:
+            return ()
+    except (OSError, subprocess.TimeoutExpired):
+        pass
+
+    files: list[Path] = []
+    for scan_root in SCAN_ROOTS:
+        files.extend((ROOT / scan_root).rglob("*.py"))
+    return tuple(sorted(path for path in files if path.is_file()))
 
 
 def _uuid4_seams() -> set[tuple[str, int, str]]:
     seams: set[tuple[str, int, str]] = set()
-    for path in _tracked_python_files():
+    for path in _uuid4_candidate_files():
         tree = ast.parse(path.read_text(encoding="utf-8"))
         rel_path = path.relative_to(ROOT).as_posix()
         for node in ast.walk(tree):

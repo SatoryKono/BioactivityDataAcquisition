@@ -4,16 +4,16 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.application.services.control_plane._run_manifest_diagnostics_checkpoint_projection import (
+from bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_projection import (
     build_checkpoint_anchor_projection as _build_checkpoint_anchor_projection,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_checkpoint_projection import (
+from bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_projection import (
     build_current_checkpoint_anchor_payload as _build_current_checkpoint_anchor_payload,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_checkpoint_projection import (
+from bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_projection import (
     build_resume_anchor_comparison as _build_resume_anchor_comparison,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_checkpoint_projection import (
+from bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_projection import (
     resolve_resume_identity_maps as _resolve_resume_identity_maps,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_helpers import (
@@ -27,34 +27,34 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_summary
 from bioetl.application.services.control_plane._run_manifest_replay_family_contract_payload import (
     build_replay_family_contract_payload as _build_replay_family_contract_payload,
 )
-from bioetl.application.services.control_plane.run_manifest_diagnostics_artifact_support import (
+from bioetl.application.services.control_plane.manifest.diagnostics.artifact_support import (
     build_produced_artifact_trace as _build_produced_artifact_trace,
 )
-from bioetl.application.services.control_plane.run_manifest_diagnostics_base_helpers import (
+from bioetl.application.services.control_plane.manifest.diagnostics.helpers import (
     _build_code_provenance_state,
     _build_planned_artifact_refs,
     _resolve_operator_replay_mode,
     _resolve_snapshot_status,
 )
-from bioetl.application.services.control_plane.run_manifest_diagnostics_replay import (
+from bioetl.application.services.control_plane.manifest.diagnostics.replay import (
     _assess_manifest_reproducibility_policy,
     _build_replay_parentage,
     _build_resume_contract,
 )
-from bioetl.application.services.control_plane.run_manifest_diagnostics_replay_projection import (
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_projection import (
     _build_operator_replay_projection,
     _build_replay_projection_bundle,
 )
-from bioetl.application.services.control_plane.run_manifest_diagnostics_snapshot_support import (
+from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
     collect_input_snapshot_content_hashes as _collect_input_snapshot_content_hashes,
 )
-from bioetl.application.services.control_plane.run_manifest_diagnostics_snapshot_support import (
+from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
     collect_input_snapshot_ids as _collect_input_snapshot_ids,
 )
-from bioetl.application.services.control_plane.run_manifest_diagnostics_snapshot_support import (
+from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
     collect_input_snapshot_refs as _collect_input_snapshot_refs,
 )
-from bioetl.application.services.control_plane.run_manifest_diagnostics_snapshot_support import (
+from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
     compute_input_snapshot_identity_fingerprint as _compute_input_snapshot_identity_fingerprint,
 )
 from bioetl.domain.control_plane import RunManifest

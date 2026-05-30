@@ -21,7 +21,11 @@
 | [#4818](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4818) | open | configs/contracts drift: `31`/`448` |
 | [#4819](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4819) | closed | closeout evidence: zero `alias_emitters` |
 | [#4820](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4820) | open | dead-code triage: `19` entries (`uncertain` 0) |
-| [#4821](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4821) | open | migration_supported alias windows: no entries in registry |
+| [#4821](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4821) | closed | migration_supported alias windows closed (registry has no active migration aliases) |
+| [#4825](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4825) | open | dependency map: pipeline ↔ contract ↔ config owner traces |
+| [#4826](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4826) | open | compatibility test-file debt ownership migration |
+| [#4827](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4827) | open | twin-module import no-growth gates |
+| [#4828](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4828) | closed | config compatibility shape burn-down to zero migration aliases |
 
 ## TL;DR (до 10)
 

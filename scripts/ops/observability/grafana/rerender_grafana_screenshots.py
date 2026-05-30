@@ -339,6 +339,15 @@ def _playwright_env(config: RenderConfig) -> dict[str, str]:
     )
     if config.selected_uids:
         env["GRAFANA_SCREENSHOT_UIDS"] = ",".join(config.selected_uids)
+    extra_node_modules = os.getenv("BIOETL_PLAYWRIGHT_NODE_MODULES", "").strip()
+    if extra_node_modules:
+        env["BIOETL_PLAYWRIGHT_NODE_MODULES"] = extra_node_modules
+        current_node_path = env.get("NODE_PATH", "").strip()
+        env["NODE_PATH"] = (
+            f"{extra_node_modules}{os.pathsep}{current_node_path}"
+            if current_node_path
+            else extra_node_modules
+        )
     return env
 
 
@@ -385,6 +394,14 @@ def _playwright_runtime_failure_detail(raw_detail: str) -> str:
             "Playwright Chromium browser runtime is missing. "
             f"{setup_hint} Original probe error: {detail}"
         )
+    if "error while loading shared libraries" in detail:
+        return (
+            "Playwright could resolve Chromium but the host is missing required "
+            "shared libraries such as libnspr4/libnss3/libasound2. "
+            "Install the standard headless Chromium runtime packages, then rerun "
+            "the setup script. Original probe error: "
+            f"{detail}"
+        )
     return f"Playwright runtime probe failed: {detail}"
 
 
@@ -396,19 +413,36 @@ def check_playwright_runtime() -> tuple[bool, str]:
             "Node.js is unavailable; Playwright fallback cannot launch browser capture.",
         )
     try:
+        env = os.environ.copy()
+        extra_node_modules = os.getenv("BIOETL_PLAYWRIGHT_NODE_MODULES", "").strip()
+        if extra_node_modules:
+            current_node_path = env.get("NODE_PATH", "").strip()
+            env["NODE_PATH"] = (
+                f"{extra_node_modules}{os.pathsep}{current_node_path}"
+                if current_node_path
+                else extra_node_modules
+            )
         result = subprocess.run(
             [
                 node_path,
                 "-e",
                 (
                     "const { chromium } = require('playwright');"
-                    "process.stdout.write(chromium.executablePath());"
+                    "(async () => {"
+                    " const browser = await chromium.launch({ headless: true });"
+                    " process.stdout.write(chromium.executablePath());"
+                    " await browser.close();"
+                    "})().catch((error) => {"
+                    " console.error(String(error && error.message ? error.message : error));"
+                    " process.exit(1);"
+                    "});"
                 ),
             ],
             check=False,
             cwd=str(_repo_root()),
             capture_output=True,
             text=True,
+            env=env,
         )
     except OSError as exc:
         return False, f"Playwright runtime probe failed to launch Node.js: {exc}"

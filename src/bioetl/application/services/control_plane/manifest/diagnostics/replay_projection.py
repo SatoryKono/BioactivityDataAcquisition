@@ -4,9 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.application.services.control_plane import (
-    run_manifest_diagnostics_replay as run_manifest_diagnostics_replay,
-)
 from bioetl.application.services.control_plane._run_manifest_diagnostics_persistence import (
     build_lineage_closure_boundary,
 )
@@ -28,11 +25,11 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_
 from bioetl.application.services.control_plane._run_manifest_replay_family_contract_payload import (
     build_replay_family_contract_payload,
 )
-from bioetl.application.services.control_plane.run_manifest_diagnostics_base_helpers import (
+from bioetl.application.services.control_plane.manifest.diagnostics.helpers import (
     _resolve_operator_replay_mode,
     _resolve_source_posture,
 )
-from bioetl.application.services.control_plane.run_manifest_diagnostics_replay import (
+from bioetl.application.services.control_plane.manifest.diagnostics.replay import (
     _resolve_manifest_replay_readiness_verdict,
 )
 from bioetl.application.services.control_plane.run_manifest_replay_taxonomy import (
