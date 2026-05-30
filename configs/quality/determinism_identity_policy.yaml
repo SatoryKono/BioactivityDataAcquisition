@@ -38,8 +38,8 @@ allowed_occurrence_identity_generators:
   semantic_classification: occurrence-only
   replay_semantics: excluded_from_execution_fingerprint
   rationale: Pipeline runner service run_id is an execution occurrence identifier;
-    replay and content semantics remain anchored by manifest fingerprints and
-    input snapshot fingerprints.
+    replay and content semantics remain anchored by manifest fingerprints and input
+    snapshot fingerprints.
   issue: '#4472'
 - path: src/bioetl/application/services/control_plane/manifest/service.py
   symbol: RunManifestService._manifest_id_factory
@@ -47,8 +47,8 @@ allowed_occurrence_identity_generators:
   identity_field: manifest_id
   semantic_classification: occurrence-only
   replay_semantics: excluded_from_execution_fingerprint
-  rationale: Run manifest IDs identify persisted control-plane occurrences;
-    execution_fingerprint and effective-config hashes carry semantic replay identity.
+  rationale: Run manifest IDs identify persisted control-plane occurrences; execution_fingerprint
+    and effective-config hashes carry semantic replay identity.
   issue: '#4472'
 - path: src/bioetl/application/services/control_plane/ledger/service.py
   symbol: RunLedgerService._entry_id_factory
@@ -56,8 +56,8 @@ allowed_occurrence_identity_generators:
   identity_field: ledger_entry_id
   semantic_classification: occurrence-only
   replay_semantics: excluded_from_execution_fingerprint
-  rationale: Run ledger entry IDs are append-only event occurrence identifiers;
-    ledger idempotency and semantic event payloads remain separate.
+  rationale: Run ledger entry IDs are append-only event occurrence identifiers; ledger
+    idempotency and semantic event payloads remain separate.
   issue: '#4472'
 - path: src/bioetl/application/services/control_plane/workflow/manifest_service.py
   symbol: WorkflowManifestService._manifest_id_factory
@@ -65,8 +65,8 @@ allowed_occurrence_identity_generators:
   identity_field: workflow_manifest_id
   semantic_classification: occurrence-only
   replay_semantics: excluded_from_execution_fingerprint
-  rationale: Workflow manifest IDs identify persisted workflow occurrences while
-    compute_execution_fingerprint carries the semantic workflow identity.
+  rationale: Workflow manifest IDs identify persisted workflow occurrences while compute_execution_fingerprint
+    carries the semantic workflow identity.
   issue: '#4472'
 - path: src/bioetl/application/services/control_plane/workflow/ledger_service.py
   symbol: WorkflowLedgerService._entry_id_factory
@@ -83,8 +83,8 @@ allowed_occurrence_identity_generators:
   identity_field: workflow_run_id
   semantic_classification: occurrence-only
   replay_semantics: excluded_from_execution_fingerprint
-  rationale: Workflow run IDs identify execution occurrences; workflow manifest
-    fingerprints define replay semantics.
+  rationale: Workflow run IDs identify execution occurrences; workflow manifest fingerprints
+    define replay semantics.
   issue: '#4472'
 - path: src/bioetl/application/composite/runner_pkg/runner_runtime_helpers.py
   symbol: initialize_runner_runtime_state
@@ -92,8 +92,8 @@ allowed_occurrence_identity_generators:
   identity_field: composite_run_id
   semantic_classification: occurrence-only
   replay_semantics: excluded_from_execution_fingerprint
-  rationale: Composite runner IDs identify mutable runtime occurrences and are
-    excluded from semantic composite dependency and replay identity.
+  rationale: Composite runner IDs identify mutable runtime occurrences and are excluded
+    from semantic composite dependency and replay identity.
   issue: '#4472'
 - path: src/bioetl/composition/bootstrap/runtime/_runner_assembly_support.py
   symbol: resolve_effective_run_id
@@ -110,8 +110,8 @@ allowed_occurrence_identity_generators:
   identity_field: RunID
   semantic_classification: occurrence-only
   replay_semantics: excluded_from_execution_fingerprint
-  rationale: CLI/runtime PipelineRunContext run_id is an occurrence identifier;
-    exact replay uses explicit replay selectors and input snapshot fingerprints.
+  rationale: CLI/runtime PipelineRunContext run_id is an occurrence identifier; exact
+    replay uses explicit replay selectors and input snapshot fingerprints.
   issue: '#4472'
 - path: src/bioetl/composition/bootstrap/runtime/runner.py
   symbol: bootstrap_pipeline_runner_service
@@ -128,8 +128,8 @@ allowed_occurrence_identity_generators:
   identity_field: log_correlation_run_id
   semantic_classification: occurrence-only
   replay_semantics: excluded_from_execution_fingerprint
-  rationale: Logger fallback run IDs are correlation-only observability IDs and
-    must not enter replay fingerprints.
+  rationale: Logger fallback run IDs are correlation-only observability IDs and must
+    not enter replay fingerprints.
   issue: '#4472'
 - path: src/bioetl/composition/bootstrap/cli/storage.py
   symbol: _create_cli_preview_run_context
@@ -137,8 +137,8 @@ allowed_occurrence_identity_generators:
   identity_field: cli_preview_run_id
   semantic_classification: occurrence-only
   replay_semantics: excluded_from_execution_fingerprint
-  rationale: CLI preview storage contexts use occurrence-only IDs for local
-    operator actions and not for semantic replay identity.
+  rationale: CLI preview storage contexts use occurrence-only IDs for local operator
+    actions and not for semantic replay identity.
   issue: '#4472'
 - path: src/bioetl/composition/observability_api.py
   symbol: _build_metrics_gateway_logger
@@ -146,8 +146,8 @@ allowed_occurrence_identity_generators:
   identity_field: metrics_gateway_correlation_run_id
   semantic_classification: occurrence-only
   replay_semantics: excluded_from_execution_fingerprint
-  rationale: Metrics gateway helper fallback IDs are observability correlation
-    identifiers shared by push/delete operations and not semantic execution identity.
+  rationale: Metrics gateway helper fallback IDs are observability correlation identifiers
+    shared by push/delete operations and not semantic execution identity.
   issue: '#4569'
 legacy_config_hash_policy:
   field: config_hash
@@ -159,10 +159,9 @@ legacy_config_hash_policy:
   - execution_fingerprint
   - resolved_config_hash
   - effective_config_hash
-  rationale: Legacy config_hash is retained for older manifest and sidecar
-    consumers; new replay comparisons must use execution_fingerprint plus the
-    explicit resolved/effective config hashes and must not promote config_hash to
-    a primary semantic anchor.
+  rationale: Legacy config_hash is retained for older manifest and sidecar consumers;
+    new replay comparisons must use execution_fingerprint plus the explicit resolved/effective
+    config hashes and must not promote config_hash to a primary semantic anchor.
   issue: '#4467'
   reviewed_outcome: keep_compatibility_alias_but_block_new_semantics
 content_hash_datetime_policy:
@@ -185,26 +184,26 @@ content_hash_datetime_policy:
   - Versioned hash policy must be recorded before changing defaults.
   - META_FIELDS and underscore-prefixed runtime fields remain excluded.
   datetime_hash_backfill_plan:
-    issue: "#4587"
+    issue: '#4587'
     owner: architecture-governance
     status: deterministic_default_switched
     default_switch_target: v2_datetime_utc
-    default_switch_gate: Active default is v2_datetime_utc; historical v1_date
-      hashes remain readable only through explicit compatibility metadata and
-      date-only entity config declarations.
+    default_switch_gate: Active default is v2_datetime_utc; historical v1_date hashes
+      remain readable only through explicit compatibility metadata and date-only entity
+      config declarations.
     phases:
     - id: inventory
-      exit_criteria: Enumerate fields whose source values can carry sub-day
-        timestamp semantics and classify date-only sources separately.
+      exit_criteria: Enumerate fields whose source values can carry sub-day timestamp
+        semantics and classify date-only sources separately.
     - id: dual_write
-      exit_criteria: Persist v1_date and v2_datetime_utc evidence side by side
-        for migrated entities without rewriting historical content_hash values.
+      exit_criteria: Persist v1_date and v2_datetime_utc evidence side by side for
+        migrated entities without rewriting historical content_hash values.
     - id: backfill
-      exit_criteria: Generate reviewed mapping from historical v1_date hashes to
-        v2_datetime_utc hashes for timestamp-sensitive entities.
+      exit_criteria: Generate reviewed mapping from historical v1_date hashes to v2_datetime_utc
+        hashes for timestamp-sensitive entities.
     - id: ratchet
-      exit_criteria: Keep active_policy at v2_datetime_utc and fail if date-only
-        compatibility use is not declared in entity config metadata.
+      exit_criteria: Keep active_policy at v2_datetime_utc and fail if date-only compatibility
+        use is not declared in entity config metadata.
   timestamp_sensitive_entity_inventory:
   - provider: uniprot
     entity: protein
@@ -214,14 +213,128 @@ content_hash_datetime_policy:
     - sequence_modified
     configured_policy: v2_datetime_utc
     status: migrated
-    rationale: UniProt revision timestamps participate in business identity and
-      must distinguish same-day changes when represented as datetime values.
+    rationale: UniProt revision timestamps participate in business identity and must
+      distinguish same-day changes when represented as datetime values.
   date_only_entity_inventory:
+  - provider: chembl
+    entity: activity
+    configured_policy: v1_date
+    status: documented_date_only
+    rationale: Legacy v1_date hash datetime compatibility retained for chembl.activity
+      until migration to v2_datetime_utc.
+  - provider: chembl
+    entity: assay
+    configured_policy: v1_date
+    status: documented_date_only
+    rationale: Legacy v1_date hash datetime compatibility retained for chembl.assay
+      until migration to v2_datetime_utc.
+  - provider: chembl
+    entity: assay_parameters
+    configured_policy: v1_date
+    status: documented_date_only
+    rationale: Legacy v1_date hash datetime compatibility retained for chembl.assay_parameters
+      until migration to v2_datetime_utc.
+  - provider: chembl
+    entity: cell_line
+    configured_policy: v1_date
+    status: documented_date_only
+    rationale: Legacy v1_date hash datetime compatibility retained for chembl.cell_line
+      until migration to v2_datetime_utc.
+  - provider: chembl
+    entity: compound_record
+    configured_policy: v1_date
+    status: documented_date_only
+    rationale: Legacy v1_date hash datetime compatibility retained for chembl.compound_record
+      until migration to v2_datetime_utc.
+  - provider: chembl
+    entity: molecule
+    configured_policy: v1_date
+    status: documented_date_only
+    rationale: Legacy v1_date hash datetime compatibility retained for chembl.molecule
+      until migration to v2_datetime_utc.
+  - provider: chembl
+    entity: protein_class
+    configured_policy: v1_date
+    status: documented_date_only
+    rationale: Legacy v1_date hash datetime compatibility retained for chembl.protein_class
+      until migration to v2_datetime_utc.
   - provider: chembl
     entity: publication
     fields:
     - creation_date
     configured_policy: v1_date
     status: documented_date_only
-    rationale: ChEMBL publication creation_date is a source date, not a
-      sub-day timestamp identity.
+    rationale: ChEMBL publication creation_date is a source date, not a sub-day timestamp
+      identity.
+  - provider: chembl
+    entity: publication_similarity
+    configured_policy: v1_date
+    status: documented_date_only
+    rationale: Legacy v1_date hash datetime compatibility retained for chembl.publication_similarity
+      until migration to v2_datetime_utc.
+  - provider: chembl
+    entity: publication_term
+    configured_policy: v1_date
+    status: documented_date_only
+    rationale: Legacy v1_date hash datetime compatibility retained for chembl.publication_term
+      until migration to v2_datetime_utc.
+  - provider: chembl
+    entity: subcellular_fraction
+    configured_policy: v1_date
+    status: documented_date_only
+    rationale: Legacy v1_date hash datetime compatibility retained for chembl.subcellular_fraction
+      until migration to v2_datetime_utc.
+  - provider: chembl
+    entity: target
+    configured_policy: v1_date
+    status: documented_date_only
+    rationale: Legacy v1_date hash datetime compatibility retained for chembl.target
+      until migration to v2_datetime_utc.
+  - provider: chembl
+    entity: target_component
+    configured_policy: v1_date
+    status: documented_date_only
+    rationale: Legacy v1_date hash datetime compatibility retained for chembl.target_component
+      until migration to v2_datetime_utc.
+  - provider: chembl
+    entity: tissue
+    configured_policy: v1_date
+    status: documented_date_only
+    rationale: Legacy v1_date hash datetime compatibility retained for chembl.tissue
+      until migration to v2_datetime_utc.
+  - provider: crossref
+    entity: publication
+    configured_policy: v1_date
+    status: documented_date_only
+    rationale: Legacy v1_date hash datetime compatibility retained for crossref.publication
+      until migration to v2_datetime_utc.
+  - provider: openalex
+    entity: publication
+    configured_policy: v1_date
+    status: documented_date_only
+    rationale: Legacy v1_date hash datetime compatibility retained for openalex.publication
+      until migration to v2_datetime_utc.
+  - provider: pubchem
+    entity: compound
+    configured_policy: v1_date
+    status: documented_date_only
+    rationale: Legacy v1_date hash datetime compatibility retained for pubchem.compound
+      until migration to v2_datetime_utc.
+  - provider: pubmed
+    entity: publication
+    configured_policy: v1_date
+    status: documented_date_only
+    rationale: Legacy v1_date hash datetime compatibility retained for pubmed.publication
+      until migration to v2_datetime_utc.
+  - provider: semanticscholar
+    entity: publication
+    configured_policy: v1_date
+    status: documented_date_only
+    rationale: Legacy v1_date hash datetime compatibility retained for semanticscholar.publication
+      until migration to v2_datetime_utc.
+  - provider: uniprot
+    entity: idmapping
+    configured_policy: v1_date
+    status: documented_date_only
+    rationale: Legacy v1_date hash datetime compatibility retained for uniprot.idmapping
+      until migration to v2_datetime_utc.

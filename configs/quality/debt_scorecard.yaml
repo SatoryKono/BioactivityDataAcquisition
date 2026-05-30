@@ -223,8 +223,8 @@ config_surface_ratchet:
       ratchet_policy: Non-growth fail-fast unless a reviewed pipeline addition updates
         the budget.
     unique_parameter_count:
-      current_count: 511
-      max_count: 511
+      current_count: 505
+      max_count: 505
       owner: '@bioetl-config'
       linked_issue: '#4818'
       rationale: Flattened parameter vocabulary must not expand silently across the
@@ -232,8 +232,8 @@ config_surface_ratchet:
       ratchet_policy: Non-growth fail-fast unless a reviewed schema expansion updates
         the budget.
     inconsistent_parameter_count:
-      current_count: 511
-      max_count: 511
+      current_count: 505
+      max_count: 505
       owner: '@bioetl-config'
       linked_issue: '#4818'
       rationale: Parameters absent from one or more configs are the Stream B burn-down
@@ -251,13 +251,13 @@ config_surface_ratchet:
           rationale: Effective entity pipeline surface after base defaults merge.
           ratchet_policy: Non-growth fail-fast for governed entity configs.
         unique_parameter_count:
-          current_count: 312
-          max_count: 312
+          current_count: 306
+          max_count: 306
           rationale: Effective flattened vocabulary for entity configs only.
           ratchet_policy: Non-growth fail-fast unless reviewed schema expansion updates budget.
         inconsistent_parameter_count:
-          current_count: 33
-          max_count: 33
+          current_count: 117
+          max_count: 117
           rationale: Primary Stream B burn-down target for entity config alignment.
           ratchet_policy: Ratchet downward as entity configs converge on shared keys.
     composite_runtime:
@@ -275,8 +275,8 @@ config_surface_ratchet:
           rationale: Flattened vocabulary for composite runtime configs only.
           ratchet_policy: Non-growth fail-fast unless composite schema expansion updates budget.
         inconsistent_parameter_count:
-          current_count: 50
-          max_count: 50
+          current_count: 0
+          max_count: 0
           rationale: Composite-family burn-down target separate from entity surface.
           ratchet_policy: Ratchet downward as composite configs converge on shared keys.
 registry_groups:

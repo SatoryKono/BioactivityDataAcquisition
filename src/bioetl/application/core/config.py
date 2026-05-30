@@ -6,13 +6,22 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.record_processor_config import (
-    __all__ as _RECORD_PROCESSOR_CONFIG_EXPORTS,
+    ContentHashPolicyByVersion,
+    ContentHashPolicyGroup,
+    ContentHashVersionPolicy,
+    RecordProcessorConfig,
 )
 
 if TYPE_CHECKING:
     from bioetl.domain.types import RunType
 
-__all__ = [*_RECORD_PROCESSOR_CONFIG_EXPORTS, "LockConfig"]
+__all__ = [
+    "ContentHashPolicyByVersion",
+    "ContentHashPolicyGroup",
+    "ContentHashVersionPolicy",
+    "RecordProcessorConfig",
+    "LockConfig",
+]
 
 
 @dataclass(frozen=True, slots=True)

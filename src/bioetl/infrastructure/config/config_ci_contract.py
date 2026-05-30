@@ -172,10 +172,41 @@ REQUIRED_ENTITY_SECTIONS: Final[frozenset[str]] = frozenset(
     {"pipeline", "schema", "quality", "filters", "contracts"}
 )
 
+# Entity-specific server-side extraction params (ADR-028 §3).
+# Keys copied across configs by auto burn-down break VCR replay for unrelated pipelines.
+EXTRACTION_PARAM_ALLOWLIST: Final[dict[str, frozenset[str]]] = {
+    "chembl/activity": frozenset(
+        {
+            "assay_type__in",
+            "data_validity_comment__isnull",
+            "pchembl_value__isnull",
+            "potential_duplicate",
+            "standard_flag",
+            "standard_relation",
+            "standard_type__in",
+            "standard_units",
+            "target_tax_id__isnull",
+        }
+    ),
+    "chembl/assay": frozenset(
+        {
+            "assay_type__in",
+            "confidence_score__gte",
+            "relationship_type",
+            "target_chembl_id__isnull",
+        }
+    ),
+    "chembl/molecule": frozenset({"inorganic_flag", "molecule_type", "structure_type"}),
+    "chembl/target": frozenset({"organism__isnull", "target_type", "tax_id__isnull"}),
+    "chembl/publication": frozenset({"doc_type", "year__gte", "year__lte"}),
+    "chembl/publication_term": frozenset({"doc_type", "year__gte", "year__lte"}),
+}
+
 __all__ = [
     "COMPOSITE_ALLOWED_KEYS",
     "CONTRACT_ALLOWED_KEYS",
     "ENTITY_ALLOWED_KEYS",
+    "EXTRACTION_PARAM_ALLOWLIST",
     "FILTER_ALLOWED_KEYS",
     "LEGACY_ENTITY_NAMES",
     "LEGACY_PATH_FRAGMENTS",

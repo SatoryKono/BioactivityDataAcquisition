@@ -36,6 +36,7 @@ from bioetl.infrastructure.config.config_ci_contract import (
     PROVIDER_AUTH_REQUIREMENTS,
     QUALITY_ALLOWED_KEYS,
     REQUIRED_ENTITY_SECTIONS,
+    EXTRACTION_PARAM_ALLOWLIST,
     RETIRED_PIPELINE_KEYS,
     TRANSITIONAL_PIPELINE_KEYS,
     VALID_LOADING_STRATEGIES,
@@ -713,6 +714,34 @@ class TestGoldFilterFieldShape:
 
         assert "assay_description" in required_fields
         assert "description" not in required_fields
+
+
+# ---------------------------------------------------------------------------
+# INV-CFG-007C: extraction_params stay entity-scoped (no cross-pipeline bleed)
+# ---------------------------------------------------------------------------
+class TestExtractionParamsAllowlist:
+    """INV-CFG-007C: filters.extraction_params must not leak across entities."""
+
+    def test_entity_extraction_params_match_allowlist(self) -> None:
+        violations: list[str] = []
+        for path in sorted(ENTITIES_DIR.glob("*/*.yaml")):
+            rel_key = f"{path.parent.name}/{path.stem}"
+            allowed = EXTRACTION_PARAM_ALLOWLIST.get(rel_key)
+            if allowed is None:
+                continue
+            filters = _load_yaml(path).get("filters")
+            if not isinstance(filters, dict):
+                continue
+            extraction = filters.get("extraction_params")
+            if not isinstance(extraction, dict) or not extraction:
+                continue
+            extra = sorted(set(extraction) - allowed)
+            if extra:
+                violations.append(
+                    f"{path.relative_to(PROJECT_ROOT)}: unexpected extraction_params "
+                    f"{extra}; allowed={sorted(allowed)}"
+                )
+        assert not violations, "\n".join(violations)
 
 
 # ---------------------------------------------------------------------------

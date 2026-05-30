@@ -68,7 +68,28 @@
 composite:
   name: composite_publication
   version: "1.1.0"
-  normalized_anchor_policy: {}
+  normalized_anchor_policy:
+    pubchem_compound:
+      join_boundary:
+        active_join_keys:
+          - inchi_key
+          - canonical_smiles
+        retained_validation_anchors:
+          - standardized_inchi_key
+          - structure_parent_key
+        activation_condition: seed pipelines emit matching normalized PubChem anchors
+        rationale: PubChem normalized anchors are retained in composite output but not used as symmetric join keys until
+          seed sources expose the same anchor family.
+
+    uniprot_idmapping:
+      join_boundary:
+        source_anchor: target_id
+        normalized_output_anchor: uniprot_accession
+        required_status: found
+        downstream_pipeline: uniprot_protein
+        rationale: UniProt accession joins are chained through normalized idmapping output and filtered to 
+          mapping_status='found'.
+
   field_aliases:
     hba_count:
       chembl: hba_count
@@ -97,11 +118,12 @@ composite:
   normalized_join_key_policy:
     publication_identity:
       primary_join_keys:
-      - doi
-      - pmid
+        - doi
+        - pmid
       fallback_join_keys:
-      - title
-      rationale: DOI and PMID are canonical identifier joins; title is a canonical-cleaned, case-preserving fallback only when identifier joins are unavailable.
+        - title
+      rationale: DOI and PMID are canonical identifier joins; title is a canonical-cleaned, case-preserving fallback 
+        only when identifier joins are unavailable.
 
     # ---------------------------------------------------------------------------
 
@@ -116,15 +138,15 @@ composite:
   seed:
     pipeline: chembl_publication
     output_keys:
-    - publication_id                 # ChEMBL document ID (primary key)
+      - publication_id               # ChEMBL document ID (primary key)
 
-    - doi                            # Digital Object Identifier
+      - doi                          # Digital Object Identifier
 
-    - pmid                           # PubMed ID
+      - pmid                         # PubMed ID
 
-    - pmc_id                         # PubMed Central ID
+      - pmc_id                       # PubMed Central ID
 
-    - title                          # Publication title (for fallback joins)
+      - title                        # Publication title (for fallback joins)
 
         # Note: chembl_publication uses flat_structure, so table is in path directly
 
@@ -170,63 +192,63 @@ composite:
 
         # REQUIRED: Primary source for citation data (needs doi)
 
-  - pipeline: crossref_publication
-    join_keys:
-    - doi                           # Primary join key
+    - pipeline: crossref_publication
+      join_keys:
+        - doi                       # Primary join key
 
-    - title
-    required: false            # Optional - seed may not have DOIs
+        - title
+      required: false          # Optional - seed may not have DOIs
 
-    filter_condition: "doi IS NOT NULL"
-    timeout_seconds: 3600
-    silver_table: silver/crossref/publication
+      filter_condition: "doi IS NOT NULL"
+      timeout_seconds: 3600
+      silver_table: silver/crossref/publication
 
         # OpenAlex: Academic topics and institutions
 
         # OPTIONAL: Failure logged, composite continues
 
-  - pipeline: openalex_publication
-    join_keys:
-    - doi                           # Primary key
+    - pipeline: openalex_publication
+      join_keys:
+        - doi                       # Primary key
 
-    - title                         # Fallback key if doi not found
+        - title                     # Fallback key if doi not found
 
-    required: false            # Optional - needs doi or pmid
+      required: false          # Optional - needs doi or pmid
 
-    filter_condition: "doi IS NOT NULL OR pmid IS NOT NULL"
-    timeout_seconds: 3600
-    silver_table: silver/openalex/publication
+      filter_condition: "doi IS NOT NULL OR pmid IS NOT NULL"
+      timeout_seconds: 3600
+      silver_table: silver/openalex/publication
 
         # PubMed: MeSH terms and medical metadata
 
         # OPTIONAL: Only processes records with pmid
 
-  - pipeline: pubmed_publication
-    join_keys:
-    - pmid                             # PubMed-specific identifier
+    - pipeline: pubmed_publication
+      join_keys:
+        - pmid                         # PubMed-specific identifier
 
-    - doi
-    required: false            # Optional - only for records with pmid
+        - doi
+      required: false          # Optional - only for records with pmid
 
-    filter_condition: "pmid IS NOT NULL"
-    timeout_seconds: 3600
-    silver_table: silver/pubmed/publication
+      filter_condition: "pmid IS NOT NULL"
+      timeout_seconds: 3600
+      silver_table: silver/pubmed/publication
 
         # Semantic Scholar: AI/ML embeddings and TLDR (mapped to abstract)
 
         # OPTIONAL: Higher rate limits, ok to skip
 
-  - pipeline: semanticscholar_publication
-    join_keys:
-    - doi
-    - title
-    required: false            # Optional - high rate limits, ok to skip
+    - pipeline: semanticscholar_publication
+      join_keys:
+        - doi
+        - title
+      required: false          # Optional - high rate limits, ok to skip
 
-    filter_condition: "doi IS NOT NULL OR title IS NOT NULL"
-    timeout_seconds: 7200
+      filter_condition: "doi IS NOT NULL OR title IS NOT NULL"
+      timeout_seconds: 7200
             #fallback_strategy: skip  # Skip on failure (high rate limits)
 
-    silver_table: silver/semanticscholar/publication
+      silver_table: silver/semanticscholar/publication
 
     # ---------------------------------------------------------------------------
 
@@ -253,7 +275,14 @@ composite:
 
     preserve_all_sources: true
 
-    field_mappings: {}
+    field_mappings:
+      "chembl.cell_line.efo_id": "cell_efo_id"
+      "chembl.tissue.efo_id": "tissue_efo_id"
+      "chembl.tissue.pref_name": "tissue_pref_name"
+      "chembl.tissue.uberon_id": "tissue_uberon_id"
+      "chembl.tissue.bto_id": "tissue_bto_id"
+      "chembl.tissue.caloha_id": "tissue_caloha_id"
+      "chembl.target_component.description": "component_description"
         # CV-validated enricher fields to exclude from output.
 
         # These fields are redundant: seed_priority means seed values always win,
@@ -265,67 +294,67 @@ composite:
     exclude_fields:
             # crossref (7)
 
-    - "crossref.publication.doi"
-    - "crossref.publication.title"
-    - "crossref.publication.volume"
-    - "crossref.publication.issue"
-    - "crossref.publication.page_first"
-    - "crossref.publication.page_last"
-    - "crossref.publication.publication_year"
+      - "crossref.publication.doi"
+      - "crossref.publication.title"
+      - "crossref.publication.volume"
+      - "crossref.publication.issue"
+      - "crossref.publication.page_first"
+      - "crossref.publication.page_last"
+      - "crossref.publication.publication_year"
             # openalex (8)
 
-    - "openalex.publication.doi"
-    - "openalex.publication.pmid"
-    - "openalex.publication.title"
-    - "openalex.publication.volume"
-    - "openalex.publication.issue"
-    - "openalex.publication.page_first"
-    - "openalex.publication.page_last"
-    - "openalex.publication.publication_year"
+      - "openalex.publication.doi"
+      - "openalex.publication.pmid"
+      - "openalex.publication.title"
+      - "openalex.publication.volume"
+      - "openalex.publication.issue"
+      - "openalex.publication.page_first"
+      - "openalex.publication.page_last"
+      - "openalex.publication.publication_year"
             # pubmed (8)
 
-    - "pubmed.publication.doi"
-    - "pubmed.publication.pmid"
-    - "pubmed.publication.title"
-    - "pubmed.publication.volume"
-    - "pubmed.publication.issue"
-    - "pubmed.publication.page_first"
-    - "pubmed.publication.page_last"
-    - "pubmed.publication.publication_year"
+      - "pubmed.publication.doi"
+      - "pubmed.publication.pmid"
+      - "pubmed.publication.title"
+      - "pubmed.publication.volume"
+      - "pubmed.publication.issue"
+      - "pubmed.publication.page_first"
+      - "pubmed.publication.page_last"
+      - "pubmed.publication.publication_year"
             # semanticscholar (8)
 
-    - "semanticscholar.publication.doi"
-    - "semanticscholar.publication.pmid"
-    - "semanticscholar.publication.title"
-    - "semanticscholar.publication.volume"
-    - "semanticscholar.publication.issue"
-    - "semanticscholar.publication.page_first"
-    - "semanticscholar.publication.page_last"
-    - "semanticscholar.publication.publication_year"
+      - "semanticscholar.publication.doi"
+      - "semanticscholar.publication.pmid"
+      - "semanticscholar.publication.title"
+      - "semanticscholar.publication.volume"
+      - "semanticscholar.publication.issue"
+      - "semanticscholar.publication.page_first"
+      - "semanticscholar.publication.page_last"
+      - "semanticscholar.publication.publication_year"
             # Additional low-value / redundant fields
 
-    - "chembl.publication.affiliation_list"
-    - "chembl.publication.author_orcids"
-    - "chembl.publication.citations_made"
-    - "chembl.publication.citations_received"
-    - "chembl.publication.is_oa"
-    - "chembl.publication.language"
-    - "chembl.publication.pmc_id"
-    - "chembl.publication.publication_date"
-    - "crossref.publication.abstract"
-    - "crossref.publication.affiliation_list"
-    - "crossref.publication.author_orcids"
-    - "crossref.publication.content_domain_domains"
-    - "crossref.publication.pmc_id"
-    - "crossref.publication.pmid"
-    - "openalex.publication.grants"
-    - "openalex.publication.pmc_id"
-    - "semanticscholar.publication.dblp_id"
-    - "semanticscholar.publication.affiliation_list"
-    - "semanticscholar.publication.author_orcids"
-    - "semanticscholar.publication.citation_contexts"
-    - "semanticscholar.publication.influential_citation_count"
-    - "semanticscholar.publication.pmc_id"
+      - "chembl.publication.affiliation_list"
+      - "chembl.publication.author_orcids"
+      - "chembl.publication.citations_made"
+      - "chembl.publication.citations_received"
+      - "chembl.publication.is_oa"
+      - "chembl.publication.language"
+      - "chembl.publication.pmc_id"
+      - "chembl.publication.publication_date"
+      - "crossref.publication.abstract"
+      - "crossref.publication.affiliation_list"
+      - "crossref.publication.author_orcids"
+      - "crossref.publication.content_domain_domains"
+      - "crossref.publication.pmc_id"
+      - "crossref.publication.pmid"
+      - "openalex.publication.grants"
+      - "openalex.publication.pmc_id"
+      - "semanticscholar.publication.dblp_id"
+      - "semanticscholar.publication.affiliation_list"
+      - "semanticscholar.publication.author_orcids"
+      - "semanticscholar.publication.citation_contexts"
+      - "semanticscholar.publication.influential_citation_count"
+      - "semanticscholar.publication.pmc_id"
         # Output paths for merged data
 
     output:
@@ -333,11 +362,11 @@ composite:
       gold: data/output/gold/composite/publication
     sort_by:
       silver:
-      - entity_id
-      - publication_id
+        - entity_id
+        - publication_id
       gold:
-      - entity_id
-      - publication_id
+        - entity_id
+        - publication_id
 
         # Field-level priority overrides (when using explicit_rules)
 
@@ -347,33 +376,33 @@ composite:
             # === Core Content ===
 
       title:
-      - chembl                   # ChEMBL title is authoritative
+        - chembl                 # ChEMBL title is authoritative
 
-      - crossref
-      - openalex
+        - crossref
+        - openalex
       abstract:
-      - pubmed                   # PubMed has best abstracts
+        - pubmed                 # PubMed has best abstracts
 
-      - openalex
-      - chembl
-      - semanticscholar            # Fallback (mapped from TLDR)
+        - openalex
+        - chembl
+        - semanticscholar          # Fallback (mapped from TLDR)
 
 
             # === Citation Metrics ===
 
       citations_received:
-      - crossref                 # CrossRef is citation authority
+        - crossref               # CrossRef is citation authority
 
-      - openalex
-      - semanticscholar
+        - openalex
+        - semanticscholar
       citations_made:
-      - crossref                 # CrossRef has most complete reference data
+        - crossref               # CrossRef has most complete reference data
 
-      - openalex
-      - pubmed
-      - semanticscholar
+        - openalex
+        - pubmed
+        - semanticscholar
       influential_citation_count:
-      - semanticscholar            # S2-only field
+        - semanticscholar          # S2-only field
 
 
             # === Classification/Topics ===
@@ -381,62 +410,62 @@ composite:
             # NOTE: subject_topics replaces deprecated concepts/topics per OpenAlex 2024 migration
 
       subject_topics:
-      - openalex                 # OpenAlex hierarchical topics
+        - openalex               # OpenAlex hierarchical topics
 
       primary_topic:
-      - openalex                 # OpenAlex-unique field
+        - openalex               # OpenAlex-unique field
 
       subject_keywords:
-      - crossref                 # CrossRef subjects -> subject_keywords
+        - crossref               # CrossRef subjects -> subject_keywords
 
-      - openalex
-      - pubmed
-      - semanticscholar
+        - openalex
+        - pubmed
+        - semanticscholar
       subject_mesh:
-      - pubmed                   # PubMed MeSH is authoritative
+        - pubmed                 # PubMed MeSH is authoritative
 
-      - openalex                 # OpenAlex MeSH extraction (fallback)
+        - openalex               # OpenAlex MeSH extraction (fallback)
 
       subject_fields:
-      - semanticscholar            # S2-unique field
+        - semanticscholar          # S2-unique field
 
       publication_type_unified:
-      - chembl
-      - pubmed
-      - openalex
-      - crossref
-      - semanticscholar
+        - chembl
+        - pubmed
+        - openalex
+        - crossref
+        - semanticscholar
       publication_subclass:
-      - chembl
-      - pubmed
-      - openalex
-      - crossref
-      - semanticscholar
+        - chembl
+        - pubmed
+        - openalex
+        - crossref
+        - semanticscholar
       publication_class:
-      - chembl
-      - pubmed
-      - openalex
-      - crossref
-      - semanticscholar
+        - chembl
+        - pubmed
+        - openalex
+        - crossref
+        - semanticscholar
 
             # === Author Metadata ===
 
       author_orcids:
-      - crossref                 # CrossRef has most complete ORCID data
+        - crossref               # CrossRef has most complete ORCID data
 
-      - openalex
-      - semanticscholar
+        - openalex
+        - semanticscholar
       author_details:
-      - crossref                 # CrossRef-unique detailed author objects
+        - crossref               # CrossRef-unique detailed author objects
 
       author_s2_ids:
-      - semanticscholar            # S2-unique author identifiers
+        - semanticscholar          # S2-unique author identifiers
 
       author_openalex_ids:
-      - openalex                   # OpenAlex-unique author identifiers
+        - openalex                 # OpenAlex-unique author identifiers
 
       author_h_indices:
-      - semanticscholar            # S2-unique h-index data
+        - semanticscholar          # S2-unique h-index data
 
 
             # === Affiliations ===
@@ -446,72 +475,72 @@ composite:
             # PubMed affiliation_structured contains ROR/GRID identifiers
 
       affiliation_structured:
-      - pubmed                   # PubMed has structured affiliation data with ROR/GRID
+        - pubmed                 # PubMed has structured affiliation data with ROR/GRID
 
       affiliation_list:
-      - pubmed                   # PubMed raw affiliations
+        - pubmed                 # PubMed raw affiliations
 
-      - openalex
-      - semanticscholar
+        - openalex
+        - semanticscholar
       institution_ids:
-      - openalex                 # OpenAlex institution IDs (e.g., I1234567890)
+        - openalex               # OpenAlex institution IDs (e.g., I1234567890)
 
       institution_country_codes:
-      - openalex                 # OpenAlex institution country codes (ISO 2-letter)
+        - openalex               # OpenAlex institution country codes (ISO 2-letter)
 
 
             # === References/Citations Context ===
 
       references:
-      - crossref                 # CrossRef-unique cited references
+        - crossref               # CrossRef-unique cited references
 
       citation_contexts:
-      - semanticscholar            # S2-unique citation context sentences
+        - semanticscholar          # S2-unique citation context sentences
 
 
             # === Quality Indicators ===
 
       is_retracted:
-      - openalex                 # OpenAlex-unique retraction status (CRITICAL)
+        - openalex               # OpenAlex-unique retraction status (CRITICAL)
 
       fwci:
-      - openalex                 # OpenAlex-unique FWCI metric
+        - openalex               # OpenAlex-unique FWCI metric
 
 
             # === Funding ===
 
       grants:
-      - openalex                 # OpenAlex-unique grant/funding data
+        - openalex               # OpenAlex-unique grant/funding data
 
 
             # === Chemicals & Genes (PubMed-specific) ===
 
       chemicals:
-      - pubmed                   # PubMed-unique chemical substances
+        - pubmed                 # PubMed-unique chemical substances
 
       gene_symbols:
-      - pubmed                   # PubMed-unique gene symbols
+        - pubmed                 # PubMed-unique gene symbols
 
       databanks:
-      - pubmed                   # PubMed-unique databank accessions
+        - pubmed                 # PubMed-unique databank accessions
 
 
             # === Alternative Identifiers ===
 
       pii:
-      - pubmed                   # PubMed Publisher Item Identifier
+        - pubmed                 # PubMed Publisher Item Identifier
 
       mid:
-      - pubmed                   # PubMed Manuscript ID
+        - pubmed                 # PubMed Manuscript ID
 
       publisher_id:
-      - pubmed                   # PubMed publisher-specific ID
+        - pubmed                 # PubMed publisher-specific ID
 
       dblp_id:
-      - semanticscholar            # S2-unique DBLP identifier
+        - semanticscholar          # S2-unique DBLP identifier
 
       mag_id:
-      - openalex                 # OpenAlex MAG legacy ID
+        - openalex               # OpenAlex MAG legacy ID
 
 
         # -------------------------------------------------------------------------
@@ -539,164 +568,259 @@ composite:
         # into the "remaining" bucket at the end of the output.
 
       aromatic_ring_count:
-      - pubchem
-      - chembl
+        - pubchem
+        - chembl
 
       # === Names and Synonyms (merge from both) ===
 
+      black_box_warning:
+        - chembl
+
+      # === Quality Metrics (ChEMBL) ===
+      canonical_smiles:
+        - chembl           # ChEMBL structures are manually curated
+        - pubchem
+      cell_id:
+        - chembl.assay
+      first_approval:
+        - chembl           # FDA/EMA approval year
+      hba_count:
+        - pubchem
+        - chembl
+      hbd_count:
+        - pubchem
+        - chembl
+      heavy_atom_count:
+        - pubchem
+        - chembl
+      inchi:
+        - chembl
+        - pubchem
+      inchi_key:
+        - chembl           # ChEMBL InChIKey from standardized structures
+        - pubchem
+      isomeric_smiles:
+        - pubchem          # PubChem provides isomeric SMILES
+        - chembl
+
+      # === Physicochemical Properties (PubChem more complete) ===
+      # PubChem has computed descriptors for more compounds
+      iupac_name:
+        - pubchem          # PubChem has computed IUPAC names
+        - chembl
+      logp:
+        - pubchem          # PubChem uses XLogP3
+        - chembl           # ChEMBL uses ALogP
+      logp_method:
+        - pubchem
+        - chembl
+      max_phase:
+        - chembl           # Clinical phase (0-4)
+      molecular_formula:
+        - pubchem
+        - chembl
+      molecular_weight:
+        - pubchem          # PubChem has MW for all compounds
+        - chembl
+      molecule_id:
+        - chembl.activity     # Activity FK is authoritative
+      organism:
+        - chembl  # ChEMBL organism name is authoritative
+
+    # -------------------------------------------------------------------------
+    # Column Ordering by Semantic Categories
+    # -------------------------------------------------------------------------
+    # Defines the order of columns in the merged output.
+    # The "system" group MUST be first: it captures ETL metadata columns
+    # that would otherwise fall into the "remaining" bucket at the end.
+      polar_surface_area:
+        - pubchem
+        - chembl
+      pref_name:
+        - chembl           # ChEMBL has curated preferred names
+        - pubchem
+      primary_component_id:
+        - chembl  # Seed primary_component_id is authoritative
+      publication_id:
+        - chembl.activity     # Activity document reference is primary
+
+      qed_weighted:
+        - chembl           # QED (Quantitative Estimate of Drug-likeness)
+
+      rotatable_bond_count:
+        - pubchem
+        - chembl
+      synonyms:
+        - chembl           # Merge arrays from both
+        - pubchem
+
+      # === Clinical Data (ChEMBL only) ===
+      # PubChem doesn't have clinical development data
+      target_id:
+        - chembl  # Seed is authoritative for PK
+      taxonomy_id:
+        - chembl  # ChEMBL taxonomy_id takes priority over UniProt
+      therapeutic_flag:
+        - chembl
+      tissue_id:
+        - chembl.assay
+
+    # Field renaming for conflicts
+      withdrawn_flag:
+        - chembl
     column_groups:
             # === System / ETL metadata (MUST be first) ===
 
-    - name: system
-      fields:
-      - entity_id
-      - content_hash
-      - _source
-      - _index
-      - _lookup_method
-      - _original_id
-      pattern: "^_composite_|^_source_providers|^_enrichment_|^_lineage_"
-      provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
+      - name: system
+        fields:
+          - entity_id
+          - content_hash
+          - _source
+          - _index
+          - _lookup_method
+          - _original_id
+        pattern: "^_composite_|^_source_providers|^_enrichment_|^_lineage_"
+        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
             # === Provider identifiers ===
 
-    - name: provider_ids
-      fields:
-      - alternative_id
-      - chembl_release
-      - corpus_id
-      - dblp_id
-      - mag_id
-      - nlm_unique_id
-      - openalex_id
-      - paper_id
-      - pmc_id
-      - pmid
-      - publication_id
-      - src_id
-      provider_order: [semanticscholar, openalex, pubmed, chembl, crossref]
+      - name: provider_ids
+        fields:
+          - alternative_id
+          - chembl_release
+          - corpus_id
+          - dblp_id
+          - mag_id
+          - nlm_unique_id
+          - openalex_id
+          - paper_id
+          - pmc_id
+          - pmid
+          - publication_id
+          - src_id
+        provider_order: [semanticscholar, openalex, pubmed, chembl, crossref]
             # === Journal / Venue information ===
 
-    - name: journal
-      fields:
-      - abstract
-      - abstract_structured
-      - doi
-      - issn
-      - issn_electronic
-      - issn_list
-      - issn_print
-      - issue
-      - journal
-      - journal_iso_abbrev
-      - journal_issn_type
-      - journal_name_short
-      - publisher
-      - title
-      - venue
-      - volume
-      provider_order: [pubmed, semanticscholar, chembl, crossref, openalex]
+      - name: journal
+        fields:
+          - abstract
+          - abstract_structured
+          - doi
+          - issn
+          - issn_electronic
+          - issn_list
+          - issn_print
+          - issue
+          - journal
+          - journal_iso_abbrev
+          - journal_issn_type
+          - journal_name_short
+          - publisher
+          - title
+          - venue
+          - volume
+        provider_order: [pubmed, semanticscholar, chembl, crossref, openalex]
             # === Pagination ===
 
-    - name: pagination
-      fields:
-      - medline_pgn
-      - page_first
-      - page_last
-      - page_range
-      provider_order: [pubmed, chembl, crossref, openalex, semanticscholar]
+      - name: pagination
+        fields:
+          - medline_pgn
+          - page_first
+          - page_last
+          - page_range
+        provider_order: [pubmed, chembl, crossref, openalex, semanticscholar]
             # === Authors ===
 
-    - name: authors
-      fields:
-      - author_count
-      - author_details
-      - author_h_indices
-      - author_openalex_ids
-      - author_orcids
-      - author_s2_ids
-      - authors
-      - authors_with_affiliations
-      provider_order: [pubmed, semanticscholar, openalex, chembl, crossref]
+      - name: authors
+        fields:
+          - author_count
+          - author_details
+          - author_h_indices
+          - author_openalex_ids
+          - author_orcids
+          - author_s2_ids
+          - authors
+          - authors_with_affiliations
+        provider_order: [pubmed, semanticscholar, openalex, chembl, crossref]
             # === Affiliations ===
 
-    - name: affiliations
-      fields:
-      - affiliation_list
-      - affiliation_structured
-      - institution_country_codes
-      - institution_ids
-      - ror_ids
-      - country
-      provider_order: [pubmed, openalex, semanticscholar, chembl, crossref]
+      - name: affiliations
+        fields:
+          - affiliation_list
+          - affiliation_structured
+          - institution_country_codes
+          - institution_ids
+          - ror_ids
+          - country
+        provider_order: [pubmed, openalex, semanticscholar, chembl, crossref]
             # === Date ===
 
-    - name: date
-      fields:
-      - creation_date
-      - date_completed
-      - date_revised
-      - pub_date
-      - pub_day
-      - pub_month
-      - publication_date
-      - publication_year
-      - year
-      provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
+      - name: date
+        fields:
+          - creation_date
+          - date_completed
+          - date_revised
+          - pub_date
+          - pub_day
+          - pub_month
+          - publication_date
+          - publication_year
+          - year
+        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
             # === Subjects / Topics ===
 
-    - name: subjects
-      fields:
-      - keyword_count
-      - mesh_heading_count
-      - primary_topic
-      - subject_fields
-      - subject_keywords
-      - subject_mesh
-      - subject_topics
-      - tldr
-      provider_order: [pubmed, openalex, semanticscholar, crossref, chembl]
+      - name: subjects
+        fields:
+          - keyword_count
+          - mesh_heading_count
+          - primary_topic
+          - subject_fields
+          - subject_keywords
+          - subject_mesh
+          - subject_topics
+          - tldr
+        provider_order: [pubmed, openalex, semanticscholar, crossref, chembl]
             # === Biomedical (NEW) ===
 
-    - name: biomedical
-      fields:
-      - chemicals
-      - chemical_count
-      - gene_symbols
-      - databanks
-      - grants
-      - grant_count
-      provider_order: [pubmed, openalex, chembl]
+      - name: biomedical
+        fields:
+          - chemicals
+          - chemical_count
+          - gene_symbols
+          - databanks
+          - grants
+          - grant_count
+        provider_order: [pubmed, openalex, chembl]
             # === Citations / Metrics ===
 
-    - name: citations
-      fields:
-      - citation_contexts
-      - citation_subset
-      - citations_made
-      - citations_received
-      - fwci
-      - influential_citation_count
-      - references
-      provider_order: [semanticscholar, crossref, openalex, pubmed, chembl]
+      - name: citations
+        fields:
+          - citation_contexts
+          - citation_subset
+          - citations_made
+          - citations_received
+          - fwci
+          - influential_citation_count
+          - references
+        provider_order: [semanticscholar, crossref, openalex, pubmed, chembl]
             # === Document type and status ===
 
-    - name: doc_type
-      fields:
-      - content_domain_crossmark_restriction
-      - content_domain_domains
-      - is_oa
-      - is_retracted
-      - language
-      - license_url
-      - oa_status
-      - open_access_url
-      - publication_class
-      - publication_status
-      - publication_subclass
-      - publication_type
-      - publication_type_unified
-      - publication_types
-      provider_order: [semanticscholar, pubmed, chembl, crossref, openalex]
+      - name: doc_type
+        fields:
+          - content_domain_crossmark_restriction
+          - content_domain_domains
+          - is_oa
+          - is_retracted
+          - language
+          - license_url
+          - oa_status
+          - open_access_url
+          - publication_class
+          - publication_status
+          - publication_subclass
+          - publication_type
+          - publication_type_unified
+          - publication_types
+        provider_order: [semanticscholar, pubmed, chembl, crossref, openalex]
         # Note: output paths auto-computed per ADR-029 convention-based resolution
 
         # silver: data/output/silver/composite/publication (auto)
@@ -732,54 +856,54 @@ composite:
     enricher_pairings:
             # CrossRef: 8 paired fields
 
-    - enricher_pipeline: crossref_publication
-      fields:
-      - {field: doi, method: exact}
-      - {field: title, method: fuzzy, threshold: 0.8}
-      - {field: volume, method: exact}
-      - {field: issue, method: exact}
-      - {field: page_first, method: exact}
-      - {field: page_last, method: exact}
-      - {field: publication_year, method: exact}
-      - {field: citations_received, method: numeric_tolerance, threshold: 0.10}
+      - enricher_pipeline: crossref_publication
+        fields:
+          - {field: doi, method: exact}
+          - {field: title, method: fuzzy, threshold: 0.8}
+          - {field: volume, method: exact}
+          - {field: issue, method: exact}
+          - {field: page_first, method: exact}
+          - {field: page_last, method: exact}
+          - {field: publication_year, method: exact}
+          - {field: citations_received, method: numeric_tolerance, threshold: 0.10}
             # OpenAlex: 9 paired fields
 
-    - enricher_pipeline: openalex_publication
-      fields:
-      - {field: doi, method: exact}
-      - {field: pmid, method: exact}
-      - {field: title, method: fuzzy, threshold: 0.8}
-      - {field: volume, method: exact}
-      - {field: issue, method: exact}
-      - {field: page_first, method: exact}
-      - {field: page_last, method: exact}
-      - {field: publication_year, method: exact}
-      - {field: citations_received, method: numeric_tolerance, threshold: 0.10}
+      - enricher_pipeline: openalex_publication
+        fields:
+          - {field: doi, method: exact}
+          - {field: pmid, method: exact}
+          - {field: title, method: fuzzy, threshold: 0.8}
+          - {field: volume, method: exact}
+          - {field: issue, method: exact}
+          - {field: page_first, method: exact}
+          - {field: page_last, method: exact}
+          - {field: publication_year, method: exact}
+          - {field: citations_received, method: numeric_tolerance, threshold: 0.10}
             # PubMed: 8 paired fields (no citations_received)
 
-    - enricher_pipeline: pubmed_publication
-      fields:
-      - {field: doi, method: exact}
-      - {field: pmid, method: exact}
-      - {field: title, method: fuzzy, threshold: 0.8}
-      - {field: volume, method: exact}
-      - {field: issue, method: exact}
-      - {field: page_first, method: exact}
-      - {field: page_last, method: exact}
-      - {field: publication_year, method: exact}
+      - enricher_pipeline: pubmed_publication
+        fields:
+          - {field: doi, method: exact}
+          - {field: pmid, method: exact}
+          - {field: title, method: fuzzy, threshold: 0.8}
+          - {field: volume, method: exact}
+          - {field: issue, method: exact}
+          - {field: page_first, method: exact}
+          - {field: page_last, method: exact}
+          - {field: publication_year, method: exact}
             # SemanticScholar: 9 paired fields
 
-    - enricher_pipeline: semanticscholar_publication
-      fields:
-      - {field: doi, method: exact}
-      - {field: pmid, method: exact}
-      - {field: title, method: fuzzy, threshold: 0.8}
-      - {field: volume, method: exact}
-      - {field: issue, method: exact}
-      - {field: page_first, method: exact}
-      - {field: page_last, method: exact}
-      - {field: publication_year, method: exact}
-      - {field: citations_received, method: numeric_tolerance, threshold: 0.10}
+      - enricher_pipeline: semanticscholar_publication
+        fields:
+          - {field: doi, method: exact}
+          - {field: pmid, method: exact}
+          - {field: title, method: fuzzy, threshold: 0.8}
+          - {field: volume, method: exact}
+          - {field: issue, method: exact}
+          - {field: page_first, method: exact}
+          - {field: page_last, method: exact}
+          - {field: publication_year, method: exact}
+          - {field: citations_received, method: numeric_tolerance, threshold: 0.10}
   # ---------------------------------------------------------------------------
   # Data Quality Configuration
   # ---------------------------------------------------------------------------
@@ -863,16 +987,16 @@ composite:
         _original_id: uniprot_original_id
     # Field-level source tracking for overlapping fields
     track_source_for_fields:
-    - title
-    - abstract
-    - citations_received
-    - citations_made
-    - subject_mesh
-    - affiliation_list
-    - author_orcids
-    - is_oa
-    - oa_status
-    - subject_keywords
+      - title
+      - abstract
+      - citations_received
+      - citations_made
+      - subject_mesh
+      - affiliation_list
+      - author_orcids
+      - is_oa
+      - oa_status
+      - subject_keywords
 
 # -----------------------------------------------------------------------------
 

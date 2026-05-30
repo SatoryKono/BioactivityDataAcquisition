@@ -17,7 +17,23 @@ from ruamel.yaml import YAML
 ROOT = Path(__file__).resolve().parents[3]
 SCORECARD = ROOT / "configs/quality/debt_scorecard.yaml"
 BASELINE = ROOT / "reports/quality/config-discrepancy-baseline.json"
-EXCLUDED_CONFIGS = frozenset({"composite/publication"})
+EXCLUDED_CONFIGS: frozenset[str] = frozenset()
+
+# Keys that must not be copied across configs (provider/entity-specific runtime).
+DENY_KEY_PREFIXES: tuple[str, ...] = (
+    "hash_policy",
+    "pipeline.source",
+    "pipeline.page_size_override",
+    "pipeline.field_policy.therapeutic_flag",
+    "filters.extraction_params",
+    "filters.gold_filters.columns",
+    "filters.gold_filters.list_contains",
+    "filters.gold_filters.list_lengths",
+    "filters.gold_filters.ranges.max_tani",
+    "filters.gold_filters.ranges.standard_value",
+    "filters.silver_filters.columns",
+    "filters.silver_filters.ranges",
+)
 
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -31,7 +47,8 @@ def _yaml_rt() -> YAML:
     yaml = YAML()
     yaml.preserve_quotes = True
     yaml.default_flow_style = False
-    yaml.width = 4096
+    yaml.width = 120
+    yaml.indent(mapping=2, sequence=4, offset=2)
     return yaml
 
 
@@ -75,6 +92,12 @@ def _ensure_set(data: dict[str, Any], parts: list[str], value: Any) -> bool:
         cur[leaf] = copy.deepcopy(value)
         return True
     return False
+
+
+def _should_skip_key(key: str) -> bool:
+    if key.startswith("hash_policy"):
+        return False
+    return any(key == prefix or key.startswith(f"{prefix}.") for prefix in DENY_KEY_PREFIXES)
 
 
 def _should_skip_config(config_name: str, key: str) -> bool:
@@ -139,6 +162,11 @@ def _atomic_write(path: Path, yaml: YAML, data: dict[str, Any]) -> None:
     buffer = io.StringIO()
     yaml.dump(data, buffer)
     payload = buffer.getvalue()
+    payload = re.sub(
+        r"(soft_fail_threshold: [^\n]+)\s+(hard_fail_threshold:)",
+        r"\1\n        \2",
+        payload,
+    )
     tmp = path.with_suffix(f"{path.suffix}.tmp")
     tmp.write_text(payload, encoding="utf-8")
     try:
@@ -204,9 +232,11 @@ def run(max_phases: int = 200_000) -> None:
         touched = 0
         selected: tuple[str, str] | None = None
 
-        for family_name in ("entity_effective", "composite_runtime"):
+        for family_name in ("composite_runtime",):
             ranked = _partial_keys(families[family_name])
             for _present, key in ranked:
+                if _should_skip_key(key):
+                    continue
                 count = _align_key(families[family_name], key, yaml)
                 if count:
                     touched = count
