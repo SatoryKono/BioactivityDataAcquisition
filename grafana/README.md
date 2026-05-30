@@ -60,6 +60,10 @@ ______________________________________________________________________
 > (`libnspr4`, `libnss3`, `libasound2`, etc.) on the host.
 > To bootstrap that runtime on a fresh host, use
 > `bash scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh`.
+> The bootstrap now forces repo-local devDependency installation
+> (`npm ci --include=dev` when `package-lock.json` is present, with production
+> flags disabled) before downloading Chromium, so audit hosts do not silently
+> skip the `playwright` package under production-like npm defaults.
 > On Windows PowerShell use
 > `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1`.
 > The PowerShell bootstrap now downloads a portable Node.js LTS toolchain

@@ -46,3 +46,21 @@ def test_scope_banner_explains_origin_dashboard_ownership() -> None:
     assert "origin dashboards own shared workflow/run_id shell context" in content
     assert "never owns shared workflow or run_id selectors" in content
     assert "stays pipeline/run_type forensic" in description
+
+
+def test_first_action_copy_keeps_zero_result_and_unknown_states_distinct() -> None:
+    dashboard = json.loads(
+        Path("grafana/dashboards/bioetl-silver-reject-explorer.json").read_text(
+            encoding="utf-8"
+        )
+    )
+
+    panel = next((p for p in dashboard["panels"] if p.get("id") == 10), None)
+
+    assert panel is not None
+    content = str(panel.get("options", {}).get("content", "")).lower()
+    description = str(panel.get("description", "")).lower()
+    assert "zero-reject workflow run is an intentional empty explorer state" in content
+    assert "zero matching rows for the active filters is an empty result" in content
+    assert "bronze_records=0 are unknown or error states" in content
+    assert "0 vs no data" in description

@@ -140,14 +140,28 @@ try_install_system_libs() {
 
 install_node_dependencies() {
   log "Installing repo-local Node dependencies..."
+  local npm_command=(npm install --include=dev --no-bin-links)
+  if [[ -f "${REPO_ROOT}/package-lock.json" ]]; then
+    npm_command=(npm ci --include=dev --no-bin-links)
+  fi
   (
     cd "${REPO_ROOT}"
-    NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE}" npm install --no-bin-links
+    NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE}" \
+    NPM_CONFIG_INCLUDE=dev \
+    NPM_CONFIG_PRODUCTION=false \
+    npm_config_production=false \
+    NODE_ENV=development \
+      "${npm_command[@]}"
   )
 }
 
 install_playwright_browser() {
   log "Installing Playwright Chromium runtime into ${PLAYWRIGHT_BROWSERS_PATH}..."
+  if [[ ! -f "${REPO_ROOT}/node_modules/playwright/cli.js" ]]; then
+    log "Playwright CLI is missing after dependency install."
+    log "Ensure repo-local devDependencies were installed before browser bootstrap."
+    return 1
+  fi
   (
     cd "${REPO_ROOT}"
     PLAYWRIGHT_BROWSERS_PATH="${PLAYWRIGHT_BROWSERS_PATH}" \

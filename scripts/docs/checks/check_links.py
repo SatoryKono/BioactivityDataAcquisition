@@ -120,7 +120,7 @@ SKIP_DIRS = frozenset(
     }
 )
 
-GOLD_CONTRACT_RE = re.compile(r"`([\w]+_v1\.0\.json)`")
+GOLD_CONTRACT_RE = re.compile(r"`([\w]+_v\d+\.\d+\.json)`")
 CHEMBL_PROVIDER_LINK_RE = re.compile(r"\(chembl/([a-z0-9-]+)\.md\)")
 
 DRIFT_SKIP_DIRS = frozenset({"99-archive", "reports", "plans", "skills"})
