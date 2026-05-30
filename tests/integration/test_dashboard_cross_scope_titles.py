@@ -1,5 +1,6 @@
 """Integration tests for cross-scope marker contract - required titles by transition."""
 
+import json
 from pathlib import Path
 
 import pytest
@@ -93,3 +94,35 @@ def test_cross_scope_links_have_required_tooltip_tokens():
                     f"{dashboard_path.name}: link {link.get('title')} has scope-related tooltip "
                     f"but doesn't mention 'reset scope' or 'context mapping', got '{tooltip}'"
                 )
+
+
+def test_workflow_dashboard_provenance_banner_makes_scope_split_explicit() -> None:
+    dashboard = json.loads(
+        Path("grafana/dashboards/bioetl-workflow-overview.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    panel = next((item for item in dashboard["panels"] if item.get("id") == 9400), None)
+
+    assert panel is not None
+    content = str(panel.get("options", {}).get("content", ""))
+    description = str(panel.get("description", ""))
+    assert "Exact run: ID card only" in content
+    assert "Evidence below: selected-range workflow scope" in content
+    assert "Run ID only fills the local ID card" in content
+    assert "run_id is local control-plane identity context only" in description
+
+
+def test_workflow_status_panel_repeats_selected_range_contract() -> None:
+    dashboard = json.loads(
+        Path("grafana/dashboards/bioetl-workflow-overview.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    panel = next((item for item in dashboard["panels"] if item.get("id") == 9401), None)
+
+    assert panel is not None
+    description = str(panel.get("description", ""))
+    assert "Selected-range workflow evidence status" in description
+    assert "not exact-run evidence" in description
+    assert "run_id remains local ID-only identity context" in description

@@ -166,6 +166,31 @@ def test_check_playwright_runtime_reports_missing_node(monkeypatch: Any) -> None
     assert "Node.js is unavailable" in detail
 
 
+def test_check_playwright_runtime_missing_module_points_to_bootstrap(
+    monkeypatch: Any,
+) -> None:
+    monkeypatch.setattr(
+        rerender_subject, "_resolve_node_executable", lambda: "/usr/bin/node"
+    )
+
+    class _Result:
+        returncode = 1
+        stdout = ""
+        stderr = "Error: Cannot find module 'playwright'"
+
+    monkeypatch.setattr(
+        rerender_subject.subprocess,
+        "run",
+        lambda *args, **kwargs: _Result(),
+    )
+
+    ok, detail = rerender_subject.check_playwright_runtime()
+
+    assert ok is False
+    assert "setup_grafana_screenshot_runtime.sh" in detail
+    assert "devDependencies" in detail
+
+
 def test_rerender_builds_playwright_env(tmp_path: Path) -> None:
     config = rerender_subject.RenderConfig(
         base_url="http://localhost:3000",
@@ -224,6 +249,11 @@ def test_screenshot_runtime_setup_scripts_keep_bootstrap_contract() -> None:
         assert "bioetl-control-plane-v1" in content
         assert "rerender-grafana" in content
         assert "Playwright" in content
+
+    assert "npm ci --include=dev" in shell_script
+    assert "npm_config_production=false" in shell_script
+    assert "ci --include=dev --no-bin-links" in powershell_script
+    assert 'NPM_CONFIG_PRODUCTION = "false"' in powershell_script
 
     for package_name in ("libnspr4", "libnss3", "libasound2"):
         assert package_name in shell_script

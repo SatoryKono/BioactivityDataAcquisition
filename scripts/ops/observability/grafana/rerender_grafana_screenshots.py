@@ -368,6 +368,26 @@ def _run_playwright_fallback(config: RenderConfig) -> int:
     return result.returncode
 
 
+def _playwright_runtime_failure_detail(raw_detail: str) -> str:
+    detail = raw_detail.strip() or "unknown Playwright runtime failure"
+    setup_hint = (
+        "Run `bash scripts/ops/observability/grafana/"
+        "setup_grafana_screenshot_runtime.sh` to install repo-local "
+        "Playwright devDependencies and Chromium runtime."
+    )
+    if "Cannot find module 'playwright'" in detail:
+        return (
+            "Playwright npm package is missing from repo-local node_modules. "
+            f"{setup_hint} Original probe error: {detail}"
+        )
+    if "Executable doesn't exist" in detail or "browser executable is missing" in detail:
+        return (
+            "Playwright Chromium browser runtime is missing. "
+            f"{setup_hint} Original probe error: {detail}"
+        )
+    return f"Playwright runtime probe failed: {detail}"
+
+
 def check_playwright_runtime() -> tuple[bool, str]:
     node_path = _resolve_node_executable()
     if node_path is None:
@@ -396,14 +416,18 @@ def check_playwright_runtime() -> tuple[bool, str]:
         detail = (result.stderr or result.stdout or "").strip()
         if not detail:
             detail = f"exit={result.returncode}"
-        return False, f"Playwright runtime probe failed: {detail}"
+        return False, _playwright_runtime_failure_detail(detail)
     executable = result.stdout.strip()
     if not executable:
         return False, "Playwright runtime probe returned an empty Chromium path."
     if not Path(executable).exists():
         return (
             False,
-            f"Playwright browser executable is missing: {executable}. Run `npx playwright install`.",
+            "Playwright browser executable is missing: "
+            f"{executable}. Run `bash scripts/ops/observability/grafana/"
+            "setup_grafana_screenshot_runtime.sh` or "
+            "`PLAYWRIGHT_BROWSERS_PATH=... node node_modules/playwright/cli.js "
+            "install chromium`.",
         )
     return True, f"Playwright Chromium available at {executable}"
 

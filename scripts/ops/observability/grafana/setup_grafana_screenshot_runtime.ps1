@@ -173,10 +173,22 @@ Push-Location $RepoRoot
 try {
     Invoke-Step -Label "Installing repo-local Node dependencies..." -Action {
         $env:NPM_CONFIG_CACHE = $NpmCache
-        & $NodeToolchain.NpmCmd install --no-bin-links
+        $env:NPM_CONFIG_INCLUDE = "dev"
+        $env:NPM_CONFIG_PRODUCTION = "false"
+        $env:npm_config_production = "false"
+        $env:NODE_ENV = "development"
+        if (Test-Path -LiteralPath (Join-Path $RepoRoot "package-lock.json")) {
+            & $NodeToolchain.NpmCmd ci --include=dev --no-bin-links
+        }
+        else {
+            & $NodeToolchain.NpmCmd install --include=dev --no-bin-links
+        }
     }
 
     Invoke-Step -Label "Installing Playwright Chromium runtime into $PlaywrightBrowsersPath..." -Action {
+        if (-not (Test-Path -LiteralPath (Join-Path $RepoRoot "node_modules/playwright/cli.js"))) {
+            throw "Playwright CLI is missing after dependency install. Ensure repo-local devDependencies were installed before browser bootstrap."
+        }
         $env:PLAYWRIGHT_BROWSERS_PATH = $PlaywrightBrowsersPath
         & $NodeToolchain.NodeExe node_modules/playwright/cli.js install chromium
     }

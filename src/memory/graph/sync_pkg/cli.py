@@ -6,20 +6,12 @@ import argparse
 import json
 from pathlib import Path
 
+from memory.graph.sync_pkg import _core
 from memory.graph.sync_pkg._core import (
     GraphSnapshot,
     JsonValue,
     SnapshotSelection,
     SyncApplyOptions,
-    _critical_analysis_audit_issues,
-    _filtered_snapshot,
-    _write_export,
-    _write_json,
-    apply_normalization_evidence_only,
-    build_audit_report,
-    build_fast_analysis_audit_report,
-    build_snapshot,
-    sync_snapshot,
 )
 
 from memory.graph.sync_pkg._core import DEFAULT_BATCH_SIZE
@@ -252,7 +244,7 @@ def _export_snapshot_if_requested(
 ) -> None:
     if export_path is None:
         return
-    _write_export(export_path, snapshot)
+    _core._write_export(export_path, snapshot)
     print(f"Exported graph snapshot to {export_path}")
 
 
@@ -265,7 +257,7 @@ def _sync_snapshot_if_requested(
     if not args.apply:
         return
 
-    sync_snapshot(
+    _core.sync_snapshot(
         snapshot,
         root,
         args.http_uri,
@@ -278,10 +270,10 @@ def _sync_snapshot_if_requested(
         selection=selection,
     )
     if not selection.targeted_mode():
-        post_apply_report = build_fast_analysis_audit_report(
+        post_apply_report = _core.build_fast_analysis_audit_report(
             snapshot, root, args.http_uri
         )
-        critical_issues = _critical_analysis_audit_issues(post_apply_report)
+        critical_issues = _core._critical_analysis_audit_issues(post_apply_report)
         if critical_issues:
             raise RuntimeError(
                 "Post-apply audit failed for critical analysis groups: "
@@ -297,8 +289,8 @@ def _report_payload(
     report_fast: bool,
 ) -> dict[str, JsonValue]:
     if report_fast:
-        return build_fast_analysis_audit_report(snapshot, root, http_uri)
-    return build_audit_report(snapshot, root, http_uri)
+        return _core.build_fast_analysis_audit_report(snapshot, root, http_uri)
+    return _core.build_audit_report(snapshot, root, http_uri)
 
 
 def _write_report_if_requested(
@@ -311,7 +303,7 @@ def _write_report_if_requested(
     if report_path is None:
         return
     report = _report_payload(snapshot, root, http_uri, report_fast)
-    _write_json(report_path, report)
+    _core._write_json(report_path, report)
     print(f"Exported audit report to {report_path}")
 
 
@@ -331,7 +323,7 @@ def _snapshot_operation_count(args: argparse.Namespace) -> int:
 
 def _run_apply_normalization_evidence_only(args: argparse.Namespace) -> int:
     """Execute normalization-evidence-only mode and return the CLI exit code."""
-    summary = apply_normalization_evidence_only(
+    summary = _core.apply_normalization_evidence_only(
         args.root.resolve(),
         args.http_uri,
         batch_size=args.batch_size,
@@ -344,7 +336,7 @@ def _run_snapshot_cli(args: argparse.Namespace) -> int:
     """Execute the standard snapshot/sync CLI flow and return the exit code."""
     root = args.root.resolve()
     selection = _selection_from_args(args)
-    snapshot = _filtered_snapshot(build_snapshot(root), selection=selection)
+    snapshot = _core._filtered_snapshot(_core.build_snapshot(root), selection=selection)
     _print_snapshot_stats(snapshot)
     _export_snapshot_if_requested(snapshot, args.export)
     _sync_snapshot_if_requested(args, snapshot, root, selection)
@@ -368,4 +360,3 @@ def main(argv: list[str] | None = None) -> int:
 
 
 __all__ = [name for name in globals() if not name.startswith("__")]
-

@@ -1,12 +1,27 @@
 # Drive BioETL technical debt to zero
 
-**Status**: proposed
+**Status**: in_progress
 **Priority**: P0
 **Labels**: `architecture`, `tech-debt`, `governance`, `epic`
 **GitHub Issue**: [#4811](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4811)
 **Issue State**: open
 **Task ID**: `tech-debt-zero-001`
 **Last synced**: 2026-05-30
+
+## Текущие статусы issue (GitHub)
+
+| Issue | State | Ключевой сигнал |
+| --- | --- | --- |
+| [#4812](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4812) | open | runtime_builders duplicate clusters: `11` |
+| [#4813](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4813) | open | application/core duplicates: `8` |
+| [#4814](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4814) | open | bootstrap/runtime duplicates: `5` |
+| [#4815](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4815) | open | control_plane duplicate clusters: `15` |
+| [#4816](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4816) | open | ratchet families: `4` (`private` 1/0/1/3, `public` 7/12/11/2) |
+| [#4817](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4817) | open | compatibility_test_file_max: `56` |
+| [#4818](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4818) | open | configs/contracts drift: `31`/`448` |
+| [#4819](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4819) | closed | closeout evidence: zero `alias_emitters` |
+| [#4820](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4820) | open | dead-code triage: `19` entries (`uncertain` 0) |
+| [#4821](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4821) | open | migration_supported alias windows: no entries in registry |
 
 ## TL;DR (до 10)
 
@@ -15,7 +30,7 @@
 3. Удалённые legacy-совместимые модули зафиксированы и подтверждены как несуществующие + без импортов (`source_importers=0`, `test_importers=0`) в `reports/quality/compatibility-importer-census.md`.
 4. В конфигурационной/контрактной области зафиксирован высокий drift: `31` конфигов, `448` уникальных параметров с разночтениями (`docs/config-discrepancies-report.md:3-31`).
 5. `config_compatibility_registry` и `compatibility_facade_inventory` действуют, но зафиксированы постоянные и временные compatibility debt с no-growth политиками (`configs/quality/config_compatibility_registry.yaml`, `configs/quality/compatibility_facade_inventory.yaml`, `configs/quality/compatibility_twin_module_ratchet.yaml`).
-6. Наличие compatibility-слоя для наблюдаемости подтверждено: `alias_emitters.checkpoint_saved_at_epoch_seconds` в `reports/observability/runtime_cardinality_inventory.json:53-60`.
+6. Compatibility-слой для наблюдаемости очищен по алиасу `checkpoint_saved_at_epoch_seconds`: `alias_emitters` и `compatibility_alias_candidates` теперь пусты в `reports/observability/runtime_cardinality_inventory.json`.
 7. DQ/idempotency риски формально контролируются: проверка sink idempotency и контрактов в `tests/architecture/test_pipeline_config_idempotency_contract.py` и `configs/quality/determinism_identity_policy.yaml`.
 8. Test-debt контролируется, но есть оставшийся целевой бюджет совместимости: `compatibility_test_file_max=56` (`configs/quality/test_governance_audit.yaml:60-67`).
 9. Runtime/CLI split технически соблюдается тестами (`tests/architecture/test_bootstrap_layer_boundaries.py:23-77`), но это не убирает дублирование runtime/CLI фасадов и owner-контуров (`tests/architecture/test_bootstrap_layer_boundaries.py:172-210`).
