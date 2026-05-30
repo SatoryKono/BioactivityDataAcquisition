@@ -223,8 +223,8 @@ config_surface_ratchet:
       ratchet_policy: Non-growth fail-fast unless a reviewed pipeline addition updates
         the budget.
     unique_parameter_count:
-      current_count: 506
-      max_count: 506
+      current_count: 508
+      max_count: 508
       owner: '@bioetl-config'
       linked_issue: '#4818'
       rationale: Flattened parameter vocabulary must not expand silently across the
@@ -232,8 +232,8 @@ config_surface_ratchet:
       ratchet_policy: Non-growth fail-fast unless a reviewed schema expansion updates
         the budget.
     inconsistent_parameter_count:
-      current_count: 506
-      max_count: 506
+      current_count: 508
+      max_count: 508
       owner: '@bioetl-config'
       linked_issue: '#4818'
       rationale: Parameters absent from one or more configs are the Stream B burn-down
@@ -251,15 +251,18 @@ config_surface_ratchet:
           rationale: Effective entity pipeline surface after base defaults merge.
           ratchet_policy: Non-growth fail-fast for governed entity configs.
         unique_parameter_count:
-          current_count: 307
-          max_count: 307
+          current_count: 309
+          max_count: 309
           rationale: Effective flattened vocabulary for entity configs only.
           ratchet_policy: Non-growth fail-fast unless reviewed schema expansion updates budget.
         inconsistent_parameter_count:
-          current_count: 118
-          max_count: 118
-          rationale: Primary Stream B burn-down target for entity config alignment.
-          ratchet_policy: Ratchet downward as entity configs converge on shared keys.
+          current_count: 97
+          max_count: 97
+          rationale: Residual entity drift is intentional-only after Stream B plateau
+            (entity-specific filters/extraction_params/overrides). Actionable partial=0
+            per reports/quality/config-surface-backlog.json.
+          ratchet_policy: Ratchet downward only when entity-specific differences are
+            retired via reviewed contract changes; non-growth fail-fast otherwise.
     composite_runtime:
       linked_issue: '#4768'
       owner: '@bioetl-config'

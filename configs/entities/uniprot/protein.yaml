@@ -437,3 +437,129 @@ contracts:
   hash_include: []
   hash_exclude: []
   hash_datetime_policy: v2_datetime_utc
+hash_policy:
+  provider: uniprot
+  entity: protein
+  contract:
+    version: 1.0.0
+    migration_note: Explicit config-level hash contract aligned with normalization profile uniprot.protein.
+  hash_policy:
+    algorithm: sha256
+    canonicalization: provider + canonical_json_dumps(normalized_record)
+    include_fields:
+    - accession
+    - acetylation
+    - active_sites
+    - activity_regulation
+    - alternative_products
+    - alternative_products_canonical_json
+    - annotation_score
+    - binding_sites
+    - biophysicochemical_properties
+    - biophysicochemical_properties_canonical_json
+    - catalytic_activity
+    - caution
+    - cellular_component
+    - chembl_ids
+    - cofactors
+    - cofactors_canonical_json
+    - cross_reference_count
+    - disease_involvement
+    - disulfide_bond
+    - domains
+    - drugbank_ids
+    - entry_created
+    - entry_modified
+    - entry_name
+    - entry_type
+    - entry_version
+    - feature_count
+    - features_canonical_json
+    - features_json
+    - flag
+    - function_comment
+    - gene_orf_names
+    - gene_primary
+    - gene_synonyms
+    - genus
+    - glycosylation
+    - go_terms
+    - guidetopharmacology_ids
+    - induction
+    - interpro_xrefs
+    - intramembrane
+    - isoform_count
+    - isoform_ids
+    - isoform_names
+    - isoform_synonyms
+    - keyword_count
+    - keywords
+    - lineage
+    - lipidation
+    - modified_residue
+    - molecular_function
+    - organism_common
+    - organism_scientific
+    - pathway
+    - pdb_xrefs
+    - pfam_xrefs
+    - pharmaceutical_use
+    - phosphorylation
+    - phylum
+    - propeptide
+    - protein_alternative_names
+    - protein_ec_numbers
+    - protein_existence
+    - protein_name
+    - protein_short_names
+    - publication_count
+    - reaction_ec_numbers
+    - reactions
+    - reactions_canonical_json
+    - reactome_xrefs
+    - reviewed
+    - secondary_accessions
+    - sequence
+    - sequence_checksum
+    - sequence_length
+    - sequence_mass
+    - sequence_modified
+    - signal_peptide
+    - similarity_comment
+    - subcellular_location
+    - subunit
+    - superkingdom
+    - taxonomy_id
+    - tissue_specificity
+    - topology
+    - transmembrane
+    - ubiquitination
+    exclude_fields:
+    - _dq_error
+    - _dq_warn
+    - _index
+    - _ingestion_ts
+    - _lookup_method
+    - _original_id
+    - _run_id
+    - _run_type
+    - _source
+    - _source_batch_id
+    - alternative_products_raw_json
+    - biophysicochemical_properties_raw_json
+    - cofactors_raw_json
+    - features_raw_json
+    - reactions_raw_json
+    exclude_patterns:
+    - ^_dq_
+    normalization:
+      trim_strings: true
+      round_floats:
+        enabled: true
+        precision: 10
+      dates:
+        enabled: true
+        format: YYYY-MM-DD
+      null_handling:
+        nan_to_null: true
+        inf_to_null: true

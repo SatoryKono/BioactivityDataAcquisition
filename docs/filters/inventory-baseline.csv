@@ -48,32 +48,32 @@ chembl,assay,required_fields,relationship_type,"""relationship_type""",,keep_in_
 chembl,assay,required_fields,confidence_score,"""confidence_score""",,keep_in_silver,structural rule stays in silver_filters
 chembl,assay,columns,assay_type,"[""B"", ""F""]","[""B"", ""F""]",duplicate,identical rule in gold_filters - drop from silver
 chembl,assay,columns,relationship_type,"[""D""]",,move_to_gold,no rule in gold_filters - move from silver
-chembl,assay,columns,src_id,"[""1""]",,move_to_gold,no rule in gold_filters - move from silver
+chembl,assay,columns,src_id,"[""1""]","[""1""]",duplicate,identical rule in gold_filters - drop from silver
 chembl,assay,ranges,confidence_score,"{""max"": 9, ""min"": 8}",,move_to_gold,no rule in gold_filters - move from silver
-chembl,assay,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+chembl,assay,ranges,publication_year,"{""max"": 2050, ""min"": 1950}",,move_to_gold,no rule in gold_filters - move from silver
 chembl,assay_parameters,required_fields,assay_id,"""assay_id""","""assay_id""",keep_in_silver,also present in gold_filters (informational)
 chembl,assay_parameters,required_fields,assay_param_id,"""assay_param_id""",,keep_in_silver,structural rule stays in silver_filters
 chembl,assay_parameters,required_fields,parameter_type,"""parameter_type""","""parameter_type""",keep_in_silver,also present in gold_filters (informational)
 chembl,assay_parameters,required_fields,type,"""type""",,keep_in_silver,structural rule stays in silver_filters
-chembl,assay_parameters,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+chembl,assay_parameters,ranges,publication_year,"{""max"": 2050, ""min"": 1950}",,move_to_gold,no rule in gold_filters - move from silver
 chembl,cell_line,required_fields,cell_id,"""cell_id""",,keep_in_silver,structural rule stays in silver_filters
 chembl,cell_line,required_fields,cell_name,"""cell_name""","""cell_name""",keep_in_silver,also present in gold_filters (informational)
-chembl,cell_line,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+chembl,cell_line,ranges,publication_year,"{""max"": 2050, ""min"": 1950}",,move_to_gold,no rule in gold_filters - move from silver
 chembl,compound_record,required_fields,molecule_id,"""molecule_id""","""molecule_id""",keep_in_silver,also present in gold_filters (informational)
 chembl,compound_record,required_fields,publication_id,"""publication_id""","""publication_id""",keep_in_silver,also present in gold_filters (informational)
 chembl,compound_record,required_fields,record_id,"""record_id""",,keep_in_silver,structural rule stays in silver_filters
-chembl,compound_record,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+chembl,compound_record,ranges,publication_year,"{""max"": 2050, ""min"": 1950}",,move_to_gold,no rule in gold_filters - move from silver
 chembl,molecule,required_fields,molecule_id,"""molecule_id""","""molecule_id""",keep_in_silver,also present in gold_filters (informational)
 chembl,molecule,required_fields,molecule_type,"""molecule_type""",,keep_in_silver,structural rule stays in silver_filters
 chembl,molecule,columns,molecule_type,"[""Small molecule""]","[""Small molecule""]",duplicate,identical rule in gold_filters - drop from silver
 chembl,molecule,columns,structure_type,"[""MOL""]","[""MOL""]",duplicate,identical rule in gold_filters - drop from silver
 chembl,molecule,columns,inorganic_flag,[0],[0],duplicate,identical rule in gold_filters - drop from silver
 chembl,molecule,columns,potential_duplicate,[0],[0],duplicate,identical rule in gold_filters - drop from silver
-chembl,molecule,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+chembl,molecule,ranges,publication_year,"{""max"": 2050, ""min"": 1950}",,move_to_gold,no rule in gold_filters - move from silver
 chembl,protein_class,required_fields,class_level,"""class_level""",,keep_in_silver,structural rule stays in silver_filters
 chembl,protein_class,required_fields,pref_name,"""pref_name""","""pref_name""",keep_in_silver,also present in gold_filters (informational)
 chembl,protein_class,required_fields,protein_class_id,"""protein_class_id""",,keep_in_silver,structural rule stays in silver_filters
-chembl,protein_class,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+chembl,protein_class,ranges,publication_year,"{""max"": 2050, ""min"": 1950}",,move_to_gold,no rule in gold_filters - move from silver
 chembl,publication,required_fields,publication_id,"""publication_id""","""publication_id""",keep_in_silver,also present in gold_filters (informational)
 chembl,publication,required_fields,publication_type,"""publication_type""","""publication_type""",keep_in_silver,also present in gold_filters (informational)
 chembl,publication,required_fields,title,"""title""","""title""",keep_in_silver,also present in gold_filters (informational)
@@ -86,9 +86,10 @@ chembl,publication_similarity,ranges,publication_year,"{""max"": 2050, ""min"": 
 chembl,publication_term,required_fields,publication_id,"""publication_id""","""publication_id""",keep_in_silver,also present in gold_filters (informational)
 chembl,publication_term,required_fields,term,"""term""","""term""",keep_in_silver,also present in gold_filters (informational)
 chembl,publication_term,required_fields,term_type,"""term_type""","""term_type""",keep_in_silver,also present in gold_filters (informational)
-chembl,publication_term,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+chembl,publication_term,columns,term_type,"[""KEYWORD"", ""MESH_HEADING"", ""MESH_QUALIFIER""]","[""KEYWORD"", ""MESH_HEADING"", ""MESH_QUALIFIER""]",duplicate,identical rule in gold_filters - drop from silver
+chembl,publication_term,ranges,publication_year,"{""max"": 2050, ""min"": 1950}",,move_to_gold,no rule in gold_filters - move from silver
 chembl,subcellular_fraction,required_fields,subcellular_fraction,"""subcellular_fraction""","""subcellular_fraction""",keep_in_silver,also present in gold_filters (informational)
-chembl,subcellular_fraction,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+chembl,subcellular_fraction,ranges,publication_year,"{""max"": 2050, ""min"": 1950}",,move_to_gold,no rule in gold_filters - move from silver
 chembl,target,required_fields,target_id,"""target_id""",,keep_in_silver,structural rule stays in silver_filters
 chembl,target,required_fields,pref_name,"""pref_name""","""pref_name""",keep_in_silver,also present in gold_filters (informational)
 chembl,target,required_fields,organism,"""organism""","""organism""",keep_in_silver,also present in gold_filters (informational)
@@ -108,24 +109,24 @@ chembl,target_component,required_fields,organism,"""organism""",,keep_in_silver,
 chembl,target_component,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
 chembl,tissue,required_fields,tissue_id,"""tissue_id""","""tissue_id""",keep_in_silver,also present in gold_filters (informational)
 chembl,tissue,required_fields,pref_name,"""pref_name""",,keep_in_silver,structural rule stays in silver_filters
-chembl,tissue,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+chembl,tissue,ranges,publication_year,"{""max"": 2050, ""min"": 1950}",,move_to_gold,no rule in gold_filters - move from silver
 crossref,publication,required_fields,doi,"""doi""","""doi""",keep_in_silver,also present in gold_filters (informational)
 crossref,publication,required_fields,title,"""title""","""title""",keep_in_silver,also present in gold_filters (informational)
-crossref,publication,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+crossref,publication,ranges,publication_year,"{""max"": 2050, ""min"": 1950}",,move_to_gold,no rule in gold_filters - move from silver
 openalex,publication,required_fields,openalex_id,"""openalex_id""","""openalex_id""",keep_in_silver,also present in gold_filters (informational)
 openalex,publication,required_fields,title,"""title""","""title""",keep_in_silver,also present in gold_filters (informational)
-openalex,publication,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+openalex,publication,ranges,publication_year,"{""max"": 2050, ""min"": 1950}",,move_to_gold,no rule in gold_filters - move from silver
 pubchem,compound,required_fields,molecule_id,"""molecule_id""","""molecule_id""",keep_in_silver,also present in gold_filters (informational)
-pubchem,compound,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+pubchem,compound,ranges,publication_year,"{""max"": 2050, ""min"": 1950}",,move_to_gold,no rule in gold_filters - move from silver
 pubmed,publication,required_fields,pmid,"""pmid""","""pmid""",keep_in_silver,also present in gold_filters (informational)
 pubmed,publication,required_fields,title,"""title""","""title""",keep_in_silver,also present in gold_filters (informational)
-pubmed,publication,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+pubmed,publication,ranges,publication_year,"{""max"": 2050, ""min"": 1950}",,move_to_gold,no rule in gold_filters - move from silver
 semanticscholar,publication,required_fields,paper_id,"""paper_id""","""paper_id""",keep_in_silver,also present in gold_filters (informational)
 semanticscholar,publication,required_fields,title,"""title""","""title""",keep_in_silver,also present in gold_filters (informational)
-semanticscholar,publication,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+semanticscholar,publication,ranges,publication_year,"{""max"": 2050, ""min"": 1950}",,move_to_gold,no rule in gold_filters - move from silver
 uniprot,idmapping,required_fields,target_id,"""target_id""","""target_id""",keep_in_silver,also present in gold_filters (informational)
 uniprot,idmapping,required_fields,mapping_status,"""mapping_status""","""mapping_status""",keep_in_silver,also present in gold_filters (informational)
-uniprot,idmapping,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+uniprot,idmapping,ranges,publication_year,"{""max"": 2050, ""min"": 1950}",,move_to_gold,no rule in gold_filters - move from silver
 uniprot,protein,required_fields,accession,"""accession""","""accession""",keep_in_silver,also present in gold_filters (informational)
 uniprot,protein,required_fields,organism_scientific,"""organism_scientific""","""organism_scientific""",keep_in_silver,also present in gold_filters (informational)
-uniprot,protein,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
+uniprot,protein,ranges,publication_year,"{""max"": 2050, ""min"": 1950}",,move_to_gold,no rule in gold_filters - move from silver

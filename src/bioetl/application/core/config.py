@@ -19,8 +19,8 @@ __all__ = [
     "ContentHashPolicyByVersion",
     "ContentHashPolicyGroup",
     "ContentHashVersionPolicy",
-    "RecordProcessorConfig",
     "LockConfig",
+    "RecordProcessorConfig",
 ]
 
 

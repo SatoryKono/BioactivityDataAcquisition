@@ -371,3 +371,84 @@ contracts:
   hash_include: []
   hash_exclude: []
   hash_datetime_policy: v1_date
+hash_policy:
+  provider: crossref
+  entity: publication
+  contract:
+    version: 1.0.0
+    migration_note: Explicit config-level hash contract aligned with normalization profile crossref.publication.
+  hash_policy:
+    algorithm: sha256
+    canonicalization: provider + canonical_json_dumps(normalized_record)
+    include_fields:
+    - abstract
+    - affiliation_list
+    - alternative_id
+    - author_details
+    - author_details_canonical_json
+    - author_keys
+    - author_orcids
+    - authors
+    - citations_made
+    - citations_received
+    - content_domain_crossmark_restriction
+    - content_domain_domains
+    - doi
+    - is_oa
+    - issn
+    - issn_electronic
+    - issn_list
+    - issn_print
+    - issue
+    - journal
+    - journal_name_short
+    - language
+    - license_url
+    - page_first
+    - page_last
+    - pmc_id
+    - pmid
+    - publication_class
+    - publication_date
+    - publication_doi
+    - publication_pmc_id
+    - publication_pmid
+    - publication_subclass
+    - publication_type
+    - publication_type_unified
+    - publication_year
+    - published
+    - published_online
+    - published_print
+    - publisher
+    - references
+    - references_canonical_json
+    - subject_keywords
+    - title
+    - volume
+    exclude_fields:
+    - _dq_error
+    - _dq_warn
+    - _index
+    - _ingestion_ts
+    - _lookup_method
+    - _original_id
+    - _run_id
+    - _run_type
+    - _source
+    - _source_batch_id
+    - author_details_raw_json
+    - references_raw_json
+    exclude_patterns:
+    - ^_dq_
+    normalization:
+      trim_strings: true
+      round_floats:
+        enabled: true
+        precision: 10
+      dates:
+        enabled: true
+        format: YYYY-MM-DD
+      null_handling:
+        nan_to_null: true
+        inf_to_null: true

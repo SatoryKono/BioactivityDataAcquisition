@@ -5,10 +5,10 @@
     "entities_total": 26,
     "entities_with_silver_filters": 21,
     "entities_with_gold_filters": 21,
-    "rules_total": 130,
+    "rules_total": 131,
     "keep_in_silver": 91,
-    "move_to_gold": 5,
-    "duplicate": 34,
+    "move_to_gold": 20,
+    "duplicate": 20,
     "conflict": 0
   },
   "entities": [
@@ -536,9 +536,9 @@
           "rule_type": "columns",
           "field": "src_id",
           "silver_value": "[\"1\"]",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
+          "gold_value": "[\"1\"]",
+          "action": "duplicate",
+          "notes": "identical rule in gold_filters - drop from silver"
         },
         {
           "provider": "chembl",
@@ -556,9 +556,9 @@
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
-          "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
+          "gold_value": "",
+          "action": "move_to_gold",
+          "notes": "no rule in gold_filters - move from silver"
         }
       ]
     },
@@ -570,8 +570,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 4,
-        "move_to_gold": 0,
-        "duplicate": 1,
+        "move_to_gold": 1,
+        "duplicate": 0,
         "conflict": 0
       },
       "rules": [
@@ -621,9 +621,9 @@
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
-          "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
+          "gold_value": "",
+          "action": "move_to_gold",
+          "notes": "no rule in gold_filters - move from silver"
         }
       ]
     },
@@ -635,8 +635,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 2,
-        "move_to_gold": 0,
-        "duplicate": 1,
+        "move_to_gold": 1,
+        "duplicate": 0,
         "conflict": 0
       },
       "rules": [
@@ -666,9 +666,9 @@
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
-          "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
+          "gold_value": "",
+          "action": "move_to_gold",
+          "notes": "no rule in gold_filters - move from silver"
         }
       ]
     },
@@ -680,8 +680,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 3,
-        "move_to_gold": 0,
-        "duplicate": 1,
+        "move_to_gold": 1,
+        "duplicate": 0,
         "conflict": 0
       },
       "rules": [
@@ -721,9 +721,9 @@
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
-          "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
+          "gold_value": "",
+          "action": "move_to_gold",
+          "notes": "no rule in gold_filters - move from silver"
         }
       ]
     },
@@ -735,8 +735,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 2,
-        "move_to_gold": 0,
-        "duplicate": 5,
+        "move_to_gold": 1,
+        "duplicate": 4,
         "conflict": 0
       },
       "rules": [
@@ -806,9 +806,9 @@
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
-          "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
+          "gold_value": "",
+          "action": "move_to_gold",
+          "notes": "no rule in gold_filters - move from silver"
         }
       ]
     },
@@ -820,8 +820,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 3,
-        "move_to_gold": 0,
-        "duplicate": 1,
+        "move_to_gold": 1,
+        "duplicate": 0,
         "conflict": 0
       },
       "rules": [
@@ -861,9 +861,9 @@
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
-          "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
+          "gold_value": "",
+          "action": "move_to_gold",
+          "notes": "no rule in gold_filters - move from silver"
         }
       ]
     },
@@ -995,7 +995,7 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 3,
-        "move_to_gold": 0,
+        "move_to_gold": 1,
         "duplicate": 1,
         "conflict": 0
       },
@@ -1033,12 +1033,22 @@
         {
           "provider": "chembl",
           "entity": "publication_term",
+          "rule_type": "columns",
+          "field": "term_type",
+          "silver_value": "[\"KEYWORD\", \"MESH_HEADING\", \"MESH_QUALIFIER\"]",
+          "gold_value": "[\"KEYWORD\", \"MESH_HEADING\", \"MESH_QUALIFIER\"]",
+          "action": "duplicate",
+          "notes": "identical rule in gold_filters - drop from silver"
+        },
+        {
+          "provider": "chembl",
+          "entity": "publication_term",
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
-          "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
+          "gold_value": "",
+          "action": "move_to_gold",
+          "notes": "no rule in gold_filters - move from silver"
         }
       ]
     },
@@ -1050,8 +1060,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 1,
-        "move_to_gold": 0,
-        "duplicate": 1,
+        "move_to_gold": 1,
+        "duplicate": 0,
         "conflict": 0
       },
       "rules": [
@@ -1071,9 +1081,9 @@
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
-          "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
+          "gold_value": "",
+          "action": "move_to_gold",
+          "notes": "no rule in gold_filters - move from silver"
         }
       ]
     },
@@ -1285,8 +1295,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 2,
-        "move_to_gold": 0,
-        "duplicate": 1,
+        "move_to_gold": 1,
+        "duplicate": 0,
         "conflict": 0
       },
       "rules": [
@@ -1316,9 +1326,9 @@
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
-          "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
+          "gold_value": "",
+          "action": "move_to_gold",
+          "notes": "no rule in gold_filters - move from silver"
         }
       ]
     },
@@ -1400,8 +1410,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 2,
-        "move_to_gold": 0,
-        "duplicate": 1,
+        "move_to_gold": 1,
+        "duplicate": 0,
         "conflict": 0
       },
       "rules": [
@@ -1431,9 +1441,9 @@
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
-          "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
+          "gold_value": "",
+          "action": "move_to_gold",
+          "notes": "no rule in gold_filters - move from silver"
         }
       ]
     },
@@ -1445,8 +1455,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 2,
-        "move_to_gold": 0,
-        "duplicate": 1,
+        "move_to_gold": 1,
+        "duplicate": 0,
         "conflict": 0
       },
       "rules": [
@@ -1476,9 +1486,9 @@
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
-          "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
+          "gold_value": "",
+          "action": "move_to_gold",
+          "notes": "no rule in gold_filters - move from silver"
         }
       ]
     },
@@ -1490,8 +1500,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 1,
-        "move_to_gold": 0,
-        "duplicate": 1,
+        "move_to_gold": 1,
+        "duplicate": 0,
         "conflict": 0
       },
       "rules": [
@@ -1511,9 +1521,9 @@
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
-          "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
+          "gold_value": "",
+          "action": "move_to_gold",
+          "notes": "no rule in gold_filters - move from silver"
         }
       ]
     },
@@ -1525,8 +1535,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 2,
-        "move_to_gold": 0,
-        "duplicate": 1,
+        "move_to_gold": 1,
+        "duplicate": 0,
         "conflict": 0
       },
       "rules": [
@@ -1556,9 +1566,9 @@
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
-          "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
+          "gold_value": "",
+          "action": "move_to_gold",
+          "notes": "no rule in gold_filters - move from silver"
         }
       ]
     },
@@ -1570,8 +1580,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 2,
-        "move_to_gold": 0,
-        "duplicate": 1,
+        "move_to_gold": 1,
+        "duplicate": 0,
         "conflict": 0
       },
       "rules": [
@@ -1601,9 +1611,9 @@
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
-          "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
+          "gold_value": "",
+          "action": "move_to_gold",
+          "notes": "no rule in gold_filters - move from silver"
         }
       ]
     },
@@ -1615,8 +1625,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 2,
-        "move_to_gold": 0,
-        "duplicate": 1,
+        "move_to_gold": 1,
+        "duplicate": 0,
         "conflict": 0
       },
       "rules": [
@@ -1646,9 +1656,9 @@
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
-          "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
+          "gold_value": "",
+          "action": "move_to_gold",
+          "notes": "no rule in gold_filters - move from silver"
         }
       ]
     },
@@ -1660,8 +1670,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 2,
-        "move_to_gold": 0,
-        "duplicate": 1,
+        "move_to_gold": 1,
+        "duplicate": 0,
         "conflict": 0
       },
       "rules": [
@@ -1691,9 +1701,9 @@
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
-          "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
+          "gold_value": "",
+          "action": "move_to_gold",
+          "notes": "no rule in gold_filters - move from silver"
         }
       ]
     }

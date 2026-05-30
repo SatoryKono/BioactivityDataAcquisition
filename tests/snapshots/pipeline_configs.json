@@ -954,7 +954,17 @@
     "field_policy": [],
     "fields": [],
     "gold_filters": {
-      "column_filters": [],
+      "column_filters": [
+        {
+          "column": "term_type",
+          "operator": "in",
+          "values": [
+            "KEYWORD",
+            "MESH_HEADING",
+            "MESH_QUALIFIER"
+          ]
+        }
+      ],
       "exclude_if_present": [],
       "list_contains_filters": [],
       "list_length_filters": [],

@@ -514,6 +514,9 @@ pipelines:
         - term_type
         join_safety:
         - publication_id
+      columns:
+        business_only:
+        - term_type
       ranges:
         business_only:
         - publication_year

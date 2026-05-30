@@ -390,3 +390,101 @@ contracts:
   hash_include: []
   hash_exclude: []
   hash_datetime_policy: v1_date
+hash_policy:
+  provider: pubmed
+  entity: publication
+  contract:
+    version: 1.0.0
+    migration_note: Explicit config-level hash contract aligned with normalization profile pubmed.publication.
+  hash_policy:
+    algorithm: sha256
+    canonicalization: provider + canonical_json_dumps(normalized_record)
+    include_fields:
+    - abstract
+    - abstract_structured
+    - affiliation_list
+    - affiliation_structured
+    - affiliation_structured_canonical_json
+    - author_count
+    - author_keys
+    - author_orcids
+    - authors
+    - authors_with_affiliations
+    - authors_with_affiliations_canonical_json
+    - authors_with_affiliations_raw_json
+    - chemical_count
+    - chemicals
+    - citation_subset
+    - citations_made
+    - citations_received
+    - country
+    - databanks
+    - date_completed
+    - date_revised
+    - doi
+    - gene_symbols
+    - grant_count
+    - is_oa
+    - issn
+    - issn_list
+    - issue
+    - journal
+    - journal_iso_abbrev
+    - journal_issn_type
+    - journal_name_short
+    - keyword_count
+    - language
+    - medline_pgn
+    - mesh_heading_count
+    - mid
+    - nlm_unique_id
+    - page_first
+    - page_last
+    - page_range
+    - pii
+    - pmc_id
+    - pmid
+    - pub_date
+    - pub_day
+    - pub_month
+    - publication_class
+    - publication_date
+    - publication_doi
+    - publication_pmc_id
+    - publication_pmid
+    - publication_status
+    - publication_subclass
+    - publication_type
+    - publication_type_unified
+    - publication_types
+    - publication_year
+    - publisher_id
+    - subject_keywords
+    - subject_mesh
+    - title
+    - volume
+    exclude_fields:
+    - _dq_error
+    - _dq_warn
+    - _index
+    - _ingestion_ts
+    - _lookup_method
+    - _original_id
+    - _run_id
+    - _run_type
+    - _source
+    - _source_batch_id
+    - affiliation_structured_raw_json
+    exclude_patterns:
+    - ^_dq_
+    normalization:
+      trim_strings: true
+      round_floats:
+        enabled: true
+        precision: 10
+      dates:
+        enabled: true
+        format: YYYY-MM-DD
+      null_handling:
+        nan_to_null: true
+        inf_to_null: true

@@ -424,3 +424,86 @@ contracts:
   hash_include: []
   hash_exclude: []
   hash_datetime_policy: v1_date
+hash_policy:
+  provider: openalex
+  entity: publication
+  contract:
+    version: 1.0.0
+    migration_note: Explicit config-level hash contract aligned with normalization profile openalex.publication.
+  hash_policy:
+    algorithm: sha256
+    canonicalization: provider + canonical_json_dumps(normalized_record)
+    include_fields:
+    - abstract
+    - affiliation_list
+    - author_keys
+    - author_openalex_ids
+    - author_orcids
+    - authors
+    - citations_made
+    - citations_received
+    - doi
+    - fwci
+    - grants
+    - grants_canonical_json
+    - institution_country_codes
+    - institution_ids
+    - is_oa
+    - is_retracted
+    - issn
+    - issn_list
+    - issue
+    - journal
+    - language
+    - mag_id
+    - oa_status
+    - openalex_id
+    - page_first
+    - page_last
+    - pmc_id
+    - pmid
+    - primary_topic
+    - primary_topic_canonical_json
+    - primary_topic_raw_json
+    - publication_class
+    - publication_date
+    - publication_doi
+    - publication_pmc_id
+    - publication_pmid
+    - publication_subclass
+    - publication_type
+    - publication_type_unified
+    - publication_year
+    - publisher
+    - ror_ids
+    - subject_keywords
+    - subject_mesh
+    - subject_topics
+    - title
+    - type_crossref
+    - volume
+    exclude_fields:
+    - _dq_error
+    - _dq_warn
+    - _index
+    - _ingestion_ts
+    - _lookup_method
+    - _original_id
+    - _run_id
+    - _run_type
+    - _source
+    - _source_batch_id
+    - grants_raw_json
+    exclude_patterns:
+    - ^_dq_
+    normalization:
+      trim_strings: true
+      round_floats:
+        enabled: true
+        precision: 10
+      dates:
+        enabled: true
+        format: YYYY-MM-DD
+      null_handling:
+        nan_to_null: true
+        inf_to_null: true
