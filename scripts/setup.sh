@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# scripts/ops/setup.sh —  скрипт настройки окружения BioETL
+# scripts/setup.sh —  скрипт настройки окружения BioETL
 #
 # Использование:
-#   ./scripts/ops/setup.sh              # Полная настройка
-#   ./scripts/ops/setup.sh --quick      # Быстрая установка (без линтеров/тестов)
-#   ./scripts/ops/setup.sh --skip-tests # Запуск линтеров без тестов
-#   ./scripts/ops/setup.sh --force      # Пересоздание .venv
+#   ./scripts/setup.sh              # Полная настройка
+#   ./scripts/setup.sh --quick      # Быстрая установка (без линтеров/тестов)
+#   ./scripts/setup.sh --skip-tests # Запуск линтеров без тестов
+#   ./scripts/setup.sh --force      # Пересоздание .venv
 # ==============================================================================
 
 set -e

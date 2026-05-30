@@ -49,8 +49,6 @@ def main(args: list[str] | None = None) -> int:
 
         globals_dict = runpy.run_path(str(script), run_name="__main__")
 
-        # If the script has a main function, we should try to return its result if it doesn't sys.exit
-        # But runpy executes it immediately if it has an if __name__ == "__main__" block
         return 0
     except SystemExit as e:
         return e.code if isinstance(e.code, int) else 0

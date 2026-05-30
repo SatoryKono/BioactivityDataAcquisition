@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-28T22:49:10.888096+00:00",
+  "generated_at": "2026-05-28T21:50:15.279353+00:00",
   "summary": {
     "total_scripts": 403,
     "status_counts": {
@@ -11066,7 +11066,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 229,
+          "line": 227,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/audit_live_grafana_panels.py\","
         }
@@ -11087,7 +11087,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 406,
+          "line": 407,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/check_grafana_dashboard_audit_preflight.py\","
         }
@@ -11137,7 +11137,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 571,
+          "line": 574,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/run_grafana_dashboard_audit_cycle.py\","
         }
@@ -11537,14 +11537,6 @@
           "text": "- `scripts/ops/runtime/wsl/wsl_proxy.py` - HTTP proxy bridge"
         }
       ]
-    },
-    {
-      "path": "scripts/ops/setup.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
     },
     {
       "path": "scripts/ops/support/load_repo_env.sh",
@@ -12208,6 +12200,14 @@
           "text": "\"validate-unified-configs\": \"scripts.schema.validate_unified_configs\","
         }
       ]
+    },
+    {
+      "path": "scripts/setup.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/shutdown.ps1",
