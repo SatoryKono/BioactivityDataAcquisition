@@ -41,6 +41,7 @@ def test_rerender_config_uses_env_defaults(monkeypatch: Any, tmp_path: Path) -> 
     monkeypatch.setenv("GRAFANA_BASE_URL", "http://grafana.local:3000")
     monkeypatch.setenv("GRAFANA_USERNAME", "viewer")
     monkeypatch.setenv("GRAFANA_PASSWORD", "secret")
+    monkeypatch.setenv("GRAFANA_SERVICE_ACCOUNT_TOKEN", "grafana-token")
 
     config = rerender_subject._parse_args(
         ["--output-dir", str(tmp_path), "--uids", "bioetl-dq-v2"]
@@ -49,6 +50,7 @@ def test_rerender_config_uses_env_defaults(monkeypatch: Any, tmp_path: Path) -> 
     assert config.base_url == "http://grafana.local:3000"
     assert config.username == "viewer"
     assert config.password == "secret"
+    assert config.service_account_token == "grafana-token"
     assert config.output_dir == tmp_path
     assert config.selected_uids == ("bioetl-dq-v2",)
     assert config.fallback == "auto"
@@ -187,6 +189,27 @@ def test_rerender_builds_playwright_env(tmp_path: Path) -> None:
     assert env["GRAFANA_SCREENSHOT_TIMEOUT_MS"] == "45000"
     assert env["GRAFANA_SCREENSHOT_CAPTURE_TIMEOUT_MS"] == "180000"
     assert env["GRAFANA_SCREENSHOT_UIDS"] == "bioetl-control-plane-v1"
+
+
+def test_rerender_builds_playwright_env_with_service_account_token(
+    tmp_path: Path,
+) -> None:
+    config = rerender_subject.RenderConfig(
+        base_url="http://localhost:3000",
+        username="admin",
+        password="changeme",
+        service_account_token="token-123",
+        output_dir=tmp_path,
+        width=1600,
+        height=2200,
+        timeout_seconds=45.0,
+        selected_uids=(),
+        fallback="auto",
+    )
+
+    env = rerender_subject._playwright_env(config)
+
+    assert env["GRAFANA_SERVICE_ACCOUNT_TOKEN"] == "token-123"
 
 
 def test_screenshot_runtime_setup_scripts_keep_bootstrap_contract() -> None:

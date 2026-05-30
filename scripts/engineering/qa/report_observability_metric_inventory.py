@@ -809,6 +809,7 @@ def _metric_names_for_call(
             string_bindings=string_bindings,
             attribute_bindings=attribute_bindings,
             metric_bindings=metric_bindings,
+            call_method_name=method_name,
         ),
     )
 

@@ -6,8 +6,6 @@ organism,S2.2,YES,EMPTY,target_transformer.py:174,chembl.py:458,target.py:46,che
 taxonomy_id,S2.3,YES,EMPTY,target_transformer.py:176,chembl.py:459,target.py:53,chembl.py:568,number,true,false,RENAME:tax_id->taxonomy_id
 species_group_flag,S2.3,YES,EMPTY,target_transformer.py:177,chembl.py:460,target.py:60,chembl.py:571,boolean,true,false,OK
 description,S2.4,YES,EMPTY,target_transformer.py:178,chembl.py:463,target.py:65,chembl.py:572,string,true,false,RENAME:target_description->description
-downgraded,S2.4,YES,EMPTY,target_transformer.py:180,chembl.py:464,target.py:72,chembl.py:573,boolean,true,false,OK
-pipeline_stages,S2.5,YES,EMPTY,target_transformer.py:181,chembl.py:469,MISSING,chembl.py:574,string,true,false,OK
 target_components,S2.5,YES,EMPTY,target_transformer.py:183,chembl.py:489,target.py:78,chembl.py:575,string,true,false,OK
 cross_references,S2.5,YES,EMPTY,target_transformer.py:185,chembl.py:495,target.py:84,chembl.py:576,string,true,false,OK
 target_component_synonyms,S2.5,YES,EMPTY,target_transformer.py:184,chembl.py:492,target.py:81,chembl.py:577,string,true,false,OK

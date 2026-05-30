@@ -1,8 +1,6 @@
 """Leaf runtime builders used by composition factories and bootstrap wrappers."""
 
 from __future__ import annotations
-
-from importlib import import_module
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -55,21 +53,6 @@ else:
         return _build_pipeline_runner_impl(*args, **kwargs)
 
 
-def __getattr__(name: str) -> object:
-    """Resolve compatibility submodule aliases lazily at package access time."""
-    if name == "input_snapshot_resolution":
-        return import_module(
-            "bioetl.composition.runtime_builders.input_snapshot_resolution"
-        )
-    if name == "_input_snapshot_resolution":
-        return import_module(
-            "bioetl.composition.runtime_builders.input_snapshot_resolution"
-        )
-    raise AttributeError(name)
-
-
 __all__ = [
-    "_input_snapshot_resolution",
     "build_pipeline_runner",
-    "input_snapshot_resolution",
 ]

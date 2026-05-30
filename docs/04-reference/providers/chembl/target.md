@@ -94,9 +94,8 @@ Silver schema.
 - `primary_component_id` из первого элемента `component_ids`
 - `taxonomy_id` как нормализованную форму входного `tax_id`
 - `organism_class` как hash-governed profile-owned derived field из `organism` + `taxonomy_id`
-- `description` из `target_description` или fallback `description`
-- `downgraded` как bool-нормализацию входного значения
-- `target_components`, `target_component_synonyms`, `cross_references`, `pipeline_stages` как JSON-строки
+- `target_description` в Silver и `description` в Gold из `target_description` или fallback `description`
+- `target_components`, `target_component_synonyms`, `cross_references` как JSON-строки
 - `target_protein_synonyms`, `target_gene_synonyms`, `target_ec_numbers` как pipe-delimited derived-поля с sentinel `unknown`
 - `target_xref_pdb_ids`, `target_xref_go_component`, `target_xref_go_function`, `target_xref_go_process`, `target_xref_reactome_ids` как pipe-delimited xref-derived поля с sentinel `unknown`
 

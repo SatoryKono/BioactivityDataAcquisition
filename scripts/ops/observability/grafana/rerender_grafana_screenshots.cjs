@@ -8,6 +8,7 @@ function parseArgs(argv) {
     baseUrl: process.env.GRAFANA_BASE_URL || "http://localhost:3000",
     username: process.env.GRAFANA_USERNAME || "admin",
     password: process.env.GRAFANA_PASSWORD || "changeme",
+    serviceAccountToken: process.env.GRAFANA_SERVICE_ACCOUNT_TOKEN || "",
     outputDir: path.resolve(
       process.env.GRAFANA_SCREENSHOT_OUTPUT_DIR ||
         path.join("reports", "observability", "grafana", "screenshots"),
@@ -101,6 +102,17 @@ async function createAuthenticatedApiContext() {
 }
 
 async function createBrowserContext(browser) {
+  if (CONFIG.serviceAccountToken) {
+    return {
+      context: await browser.newContext({
+        viewport: CONFIG.viewport,
+        extraHTTPHeaders: {
+          Authorization: `Bearer ${CONFIG.serviceAccountToken}`,
+        },
+      }),
+      api: null,
+    };
+  }
   let api = null;
   try {
     api = await createAuthenticatedApiContext();
