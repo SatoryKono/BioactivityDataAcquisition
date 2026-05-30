@@ -51,6 +51,10 @@ Minimum expectation:
    contracts, configs, and workflows.
 1. Edit runtime source first, then sync docs mirrors when behavior or
    contributor guidance changed.
+1. After changes under `src/bioetl/**/*.py`, refresh
+   `reports/quality/module-coverage-inventory.json` field `source_tree_sha256`
+   via `python _refresh_module_coverage_inventory.py` and run the architecture
+   hash guard when feasible.
 1. Report checks run, skipped checks, and mirror-sync status explicitly.
 
 ## Guardrails

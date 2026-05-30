@@ -72,6 +72,24 @@ Operational rule:
 - в завершении задачи явно укажи debt outcome: `improved`, `unchanged` или
   `worsened`.
 
+### Module Coverage Inventory Hash
+
+Если задача меняет любой файл под `src/bioetl/**/*.py` (добавление, удаление,
+переименование или правка содержимого), перед closeout **MUST** обновить digest
+в committed artifact `reports/quality/module-coverage-inventory.json`:
+
+- поле: `source_tree_sha256`
+- команда (только hash, без нового `coverage.xml`):
+  `python _refresh_module_coverage_inventory.py`
+- проверка:
+  `pytest tests/architecture/test_module_coverage_inventory.py::test_module_coverage_inventory_source_tree_hash_is_current`
+- полная перегенерация inventory (когда изменились coverage-метрики) — через
+  lane `coverage-verify` / `python -m scripts.engineering.qa report-module-coverage`
+- на cloud-synced checkout (например Google Drive) дождись синхронизации перед
+  расчётом hash, иначе digest может «плавать» между прогонами
+
+Подробности: `../policy/POST_CHANGE_VALIDATION.md` (раздел **Code and tests**).
+
 ### DI False-Positive Guardrail
 
 Не помечай как `AP-001` следующие случаи:

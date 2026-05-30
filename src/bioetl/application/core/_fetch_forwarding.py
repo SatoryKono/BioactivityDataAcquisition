@@ -55,3 +55,26 @@ async def forward_fetch_records(
     )
     async for record in iterator:
         yield record
+
+
+def forward_bound_fetch_records(
+    fetch_records: Callable[..., AsyncIterator[JsonDict]],
+    bound_instance: object,
+    *,
+    entity_type: str,
+    limit: int | None = None,
+    query: str | None = None,
+    filter_ids: list[str] | None | object = _UNSET_FETCH_ARG,
+    filter_field: str | None | object = _UNSET_FETCH_ARG,
+    offset: int | None = None,
+) -> AsyncIterator[JsonDict]:
+    """Forward fetch arguments into a bound fetch_records helper."""
+    return forward_fetch_records(
+        lambda **kwargs: fetch_records(bound_instance, **kwargs),
+        entity_type=entity_type,
+        limit=limit,
+        query=query,
+        filter_ids=filter_ids,
+        filter_field=filter_field,
+        offset=offset,
+    )

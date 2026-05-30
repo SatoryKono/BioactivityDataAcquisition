@@ -274,10 +274,7 @@ filters:
     required_fields:
     - cell_id
     - cell_name
-    ranges:
-      publication_year:
-        min: 1950
-        max: 2050
+    ranges: {}
   gold_filters:
     columns: {}
     exclude_if_present: []

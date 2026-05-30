@@ -50,6 +50,21 @@ configs, docs, contracts, prompts, diagrams, and runtime instruction surfaces.
 - include golden, architecture, contract, and regression tests when the touched
   surface can affect them
 - run targeted unit/integration/architecture tests appropriate to the change
+- when any file under `src/bioetl/**/*.py` is added, removed, renamed, or
+  content-changed, refresh the committed module-coverage inventory digest before
+  closeout:
+  - artifact: `reports/quality/module-coverage-inventory.json`
+  - field: `source_tree_sha256` (SHA-256 over all `src/bioetl/**/*.py` paths and
+    contents)
+  - hash-only refresh (no new `coverage.xml` required):
+    `python _refresh_module_coverage_inventory.py`
+  - full inventory regen (coverage rows changed): run the `coverage-verify`
+    generator from `scripts/engineering/qa/report_module_coverage_inventory.py`
+    against `reports/coverage/coverage.xml`
+  - verify:
+    `pytest tests/architecture/test_module_coverage_inventory.py::test_module_coverage_inventory_source_tree_hash_is_current`
+  - on cloud-synced checkouts (for example Google Drive), wait for sync to finish
+    before computing or verifying the hash to avoid transient drift
 
 ### Configs and contracts
 

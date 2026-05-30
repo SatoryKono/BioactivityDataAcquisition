@@ -269,26 +269,6 @@ class _PreSilverRecordAdapterMixin:
 
     entity_class: type[object]
 
-    def _build_entity_backed_silver_record(
-        self,
-        *,
-        entity_class: type[object],
-        context: PipelineContext,
-        entity_id: str,
-        content_hash: str,
-        index: int,
-        business_data: JsonDict,
-    ) -> SilverRecord:
-        entity = self._create_entity(
-            entity_class,
-            context,
-            entity_id=entity_id,
-            content_hash=content_hash,
-            index=index,
-            **business_data,
-        )
-        return cast("SilverRecord", self.entity_to_silver_record(entity))
-
     def _build_pre_silver_record(
         self,
         context: PipelineContext,
@@ -297,14 +277,15 @@ class _PreSilverRecordAdapterMixin:
         index: int,
         business_data: JsonDict,
     ) -> SilverRecord:
-        silver_record = self._build_entity_backed_silver_record(
-            entity_class=self.entity_class,
-            context=context,
+        entity = self._create_entity(
+            self.entity_class,
+            context,
             entity_id=entity_id,
             content_hash=content_hash,
             index=index,
-            business_data=business_data,
+            **business_data,
         )
+        silver_record = cast("SilverRecord", self.entity_to_silver_record(entity))
         return self._postprocess_pre_silver_record(
             silver_record,
             business_data=business_data,

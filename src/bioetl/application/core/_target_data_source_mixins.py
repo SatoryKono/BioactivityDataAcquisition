@@ -12,6 +12,9 @@ __all__ = [
 
 from typing import TYPE_CHECKING, Protocol, TypeVar, cast
 
+from bioetl.application.core._data_source_fetch_delegates import (
+    delegate_wrapped_data_source_fetch,
+)
 from bioetl.application.core._target_data_source_fetch_support import (
     ensure_filterable_data_source,
     yield_target_or_delegate_records,
@@ -68,7 +71,7 @@ class _TargetEntityFetchDelegationMixin:
                 offset,
             )
 
-        return _yield_wrapped_fetch_records(
+        return delegate_wrapped_data_source_fetch(
             self._data_source,
             entity_type=entity_type,
             limit=limit,

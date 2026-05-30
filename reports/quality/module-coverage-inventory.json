@@ -1156,6 +1156,16 @@
       "source_lines": 184
     },
     {
+      "coverage_percent": null,
+      "coverage_status": "unmeasured",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
+      "module": "bioetl.application.core._data_source_fetch_delegates",
+      "path": "src/bioetl/application/core/_data_source_fetch_delegates.py",
+      "source_lines": 65
+    },
+    {
       "coverage_percent": 56.41,
       "coverage_status": "partially_covered",
       "covered_lines": 22,
@@ -19698,29 +19708,33 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-05-30",
-  "source_tree_sha256": "ad25a3834914a8fc3b72c618c56a771a8e3a386eabc669b68f00fca22290bba1",
+  "source_tree_sha256": "682f9d4d98f77c5ab941c2514ec7ac9d6dfcab741c0c7298f61d378128332638",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
       "application_core": {
-        "allowlisted_unmeasured_module_count": 0,
-        "allowlisted_unmeasured_modules": [],
+        "allowlisted_unmeasured_module_count": 1,
+        "allowlisted_unmeasured_modules": [
+          "src/bioetl/application/core/_data_source_fetch_delegates.py"
+        ],
         "coverage_percent_avg": 53.31,
         "coverage_percent_min": 0.0,
         "covered_line_percent": 43.75,
         "covered_module_count": 158,
         "measured_module_count": 174,
-        "measured_percent": 100.0,
-        "module_count": 174,
+        "measured_percent": 99.43,
+        "module_count": 175,
         "status_counts": {
           "fully_covered": 39,
           "partially_covered": 119,
-          "uncovered": 16
+          "uncovered": 16,
+          "unmeasured": 1
         },
         "threshold_status": "pass",
         "thresholds": {
           "allowlisted_unmeasured_paths": [
             "src/bioetl/application/core/_batch_processing_metrics_support.py",
+            "src/bioetl/application/core/_data_source_fetch_delegates.py",
             "src/bioetl/application/core/pipeline_aux_service_protocols.py",
             "src/bioetl/application/core/pipeline_observability_service_protocols.py",
             "src/bioetl/application/core/pipeline_runtime_service_protocols.py",
@@ -19733,7 +19747,7 @@
         },
         "unexpected_unmeasured_module_count": 0,
         "unexpected_unmeasured_modules": [],
-        "unmeasured_module_count": 0
+        "unmeasured_module_count": 1
       },
       "application_services_control_plane": {
         "allowlisted_unmeasured_module_count": 2,
@@ -19924,18 +19938,23 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 1969,
+    "source_module_count": 1970,
     "status_counts": {
       "fully_covered": 469,
       "partially_covered": 1179,
       "uncovered": 315,
-      "unmeasured": 6
+      "unmeasured": 7
     },
-    "unmeasured_module_count": 6,
+    "unmeasured_module_count": 7,
     "unmeasured_modules": [
       {
         "module": "bioetl.__main__",
         "path": "src/bioetl/__main__.py",
+        "reason": "coverage_xml_has_no_class_entry"
+      },
+      {
+        "module": "bioetl.application.core._data_source_fetch_delegates",
+        "path": "src/bioetl/application/core/_data_source_fetch_delegates.py",
         "reason": "coverage_xml_has_no_class_entry"
       },
       {

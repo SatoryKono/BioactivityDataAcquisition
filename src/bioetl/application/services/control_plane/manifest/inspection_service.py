@@ -39,11 +39,13 @@ from bioetl.domain.ports import (
     RunManifestPort,
 )
 
-from bioetl.application.services.control_plane.manifest import inspection_models
-
 __all__ = [
-    *inspection_models.__all__,
+    "RunManifestDiffEntry",
+    "RunManifestDiffResult",
+    "RunManifestInspectionCorruptionError",
+    "RunManifestInspectionResult",
     "RunManifestInspectionService",
+    "RunManifestVerifyResult",
 ]
 
 

@@ -506,7 +506,7 @@ hotspot_family_ratchets:
       files_ge_250_loc: 7
       max_internal_fan_in: 11
     metrics:
-      duplication_clusters: 7
+      duplication_clusters: 4
       files: 37
       total_loc: 5736
       files_ge_250_loc: 7
@@ -515,9 +515,9 @@ hotspot_family_ratchets:
       max_internal_fan_in_module: bioetl.composition.runtime_builders.inputs_resolver
     trend:
       status: reduced_2026-05-30_issue_4552
-      next_action: 2026-05-30 consolidates manifest publication-context resolution,
-        launch-context field extraction, and contract-identity request wiring,
-        reducing composition/runtime_builders duplicate clusters from 11 down to 7.
+      next_action: 2026-05-30 consolidates manifest refs helpers, provenance bundle,
+        and persistence validation into shared modules, reducing composition/runtime_builders
+        duplicate clusters from 7 down to 4.
 oversized_source_module_inventory:
   linked_issue: '#4679'
   split_on_touch: true
@@ -564,6 +564,7 @@ hotspot_family_coverage_thresholds:
       min_covered_line_percent: 0.0
       allowlisted_unmeasured_paths:
       - src/bioetl/application/core/_batch_processing_metrics_support.py
+      - src/bioetl/application/core/_data_source_fetch_delegates.py
       - src/bioetl/application/core/pipeline_aux_service_protocols.py
       - src/bioetl/application/core/pipeline_observability_service_protocols.py
       - src/bioetl/application/core/pipeline_runtime_service_protocols.py

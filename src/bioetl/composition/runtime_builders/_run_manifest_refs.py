@@ -6,13 +6,13 @@ import os
 import tempfile
 from contextlib import suppress
 from dataclasses import dataclass
+from pathlib import Path
 from typing import TYPE_CHECKING, Literal, Protocol
 
 from bioetl.domain.control_plane import RunArtifactRef
 from bioetl.domain.normalization import normalize_runtime_anchor_payload
 
 if TYPE_CHECKING:
-    from _typeshed import DataclassInstance
 
     from bioetl.domain.context import PipelineRunContext
     from bioetl.infrastructure.config.settings_api import Settings
@@ -235,7 +235,7 @@ def extract_optional_updates_from_refs(
     return tuple(
         (field_name, field_value)
         for field_name in _CONTROL_PLANE_CONTEXT_UPDATE_FIELDS
-        if (field_value := getattr(control_plane_refs, field_name)) is not None
+        if (field_value := getattr(control_plane_refs, field_name, None)) is not None
     )
 
 
