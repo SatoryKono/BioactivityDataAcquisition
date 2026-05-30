@@ -23,7 +23,7 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_
 from bioetl.application.services.control_plane._run_manifest_identity_graph_builder import (
     RunManifestIdentityGraphAssembler,
 )
-from bioetl.application.services.control_plane.run_manifest_diagnostics_artifact_support import (
+from bioetl.application.services.control_plane.manifest.diagnostics.artifact_support import (
     apply_artifact_publication_closure_policy,
     build_produced_artifact_trace,
     sorted_text_items,

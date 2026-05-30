@@ -54,13 +54,13 @@ def test_create_run_manifest_with_effective_config_uses_yaml_provider_entity(
     )
     monkeypatch.setattr(
         control_plane,
-        "resolve_manifest_reproducibility_context",
-        lambda **_: reproducibility_context,
-    )
-    monkeypatch.setattr(
-        control_plane._manifest_support,
-        "resolve_contract_identity",
-        lambda **_: contract_identity,
+        "resolve_manifest_publication_context",
+        lambda **_: SimpleNamespace(
+            provider="chembl",
+            entity="activity",
+            reproducibility_context=reproducibility_context,
+            contract_identity=contract_identity,
+        ),
     )
     monkeypatch.setattr(
         control_plane,
@@ -111,13 +111,13 @@ def test_create_run_manifest_with_effective_config_reuses_publication_context(
 
     monkeypatch.setattr(
         control_plane,
-        "resolve_manifest_reproducibility_context",
-        lambda **_: reproducibility_context,
-    )
-    monkeypatch.setattr(
-        control_plane._manifest_support,
-        "resolve_contract_identity",
-        lambda **_: contract_identity,
+        "resolve_manifest_publication_context",
+        lambda **_: SimpleNamespace(
+            provider="chembl",
+            entity="activity",
+            reproducibility_context=reproducibility_context,
+            contract_identity=contract_identity,
+        ),
     )
 
     def _fake_create_and_persist_effective_config_artifact(**kwargs: object):

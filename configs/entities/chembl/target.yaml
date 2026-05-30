@@ -2,28 +2,62 @@ version: 1.0.0
 provider: chembl
 entity: target
 pipeline:
-    pipeline_name: chembl_target
-    provider: chembl
-    entity_type: target
-    description: Extract biological targets from ChEMBL API
-    business_primary_keys:
-        - target_id
-    batch_size: 1000
+  pipeline_name: chembl_target
+  provider: chembl
+  entity_type: target
+  description: Extract biological targets from ChEMBL API
+  field_policy:
+    therapeutic_flag:
+      boolean_true_values:
+      - 'true'
+      - therapeutic
+      boolean_false_values:
+      - 'false'
+      - non_therapeutic
 
-    sink:
-        silver:
-            partition_by:
-                - target_type
-        gold:
-            enabled: true
-            mode: scd2
-            idempotency_contract: scd2
-            scd_config:
-                valid_from_col: _valid_from
-                valid_to_col: _valid_to
-                current_flag_col: _is_current
-                version_col: _version
+  business_primary_keys:
+  - target_id
+  batch_size: 1000
+  checkpoint_interval: 1000
+
+  sink:
+    silver:
+      partition_by:
+      - target_type
+    gold:
+      enabled: true
+      mode: scd2
+      idempotency_contract: scd2
+      scd_config:
+        valid_from_col: _valid_from
+        valid_to_col: _valid_to
+        current_flag_col: _is_current
+        version_col: _version
+  source:
+    api_key: ${BIOETL_OPENALEX_API_KEY}
+    email: ${BIOETL_OPENALEX_EMAIL}
+    api:
+      base_url: https://rest.uniprot.org
+      from_db: ChEMBL
+      to_db: UniProtKB
+
+  page_size_override: 1000
 schema:
+  field_aliases:
+    reference_count: citations_made
+    affiliations: affiliation_list
+    citation_count: citations_received
+    keywords: subject_keywords
+    mesh_terms: subject_mesh
+    pages: page_range
+    source_type: publication_type
+    fields_of_study: subject_fields
+    journal_abbrev: journal_name_short
+    journal_title: journal_name
+    short_container_title: journal_name_short
+    structured_affiliations: affiliation_structured
+    subjects: subject_keywords
+    topics: subject_topics
   content_hash:
     include: []
     exclude: []
@@ -83,237 +117,395 @@ schema:
     - _index
     alias_policy: canonical
 quality:
-    version: 1.1.0
-    provider: chembl
-    entity: target
-    entity_field_validations:
-        -   field: target_id
-            type: required
-            nullable: false
-            error_message: Target ChEMBL ID is required
-        -   field: target_type
-            type: enum
-            allowed:
-                - SINGLE PROTEIN
-                - PROTEIN FAMILY
-                - PROTEIN COMPLEX
-                - PROTEIN COMPLEX GROUP
-                - SELECTIVITY GROUP
-                - CHIMERIC PROTEIN
-                - CELL-LINE
-                - TISSUE
-                - ORGANISM
-                - MACROMOLECULE
-                - SMALL MOLECULE
-                - LIPID
-                - METAL
-                - UNKNOWN
-            nullable: true
-            error_message: Invalid target_type value
-        -   field: organism
-            type: custom
-            validator: validate_target_organism_supported_name
-            nullable: true
-            error_message: organism must remain a supported ChEMBL target organism label when present
-        -   field: taxonomy_id
-            type: range
-            min: 1
-            max: 10000000
-            nullable: true
-        -   field: organism_class
-            type: enum
-            allowed:
-                - acellular
-                - unicellular
-                - multicellular
-            nullable: true
-            error_message: organism_class must match the reviewed cellularity taxonomy when present
-        -   field: component_types
-            type: custom
-            validator: validate_target_component_types_json_vocab
-            nullable: true
-            error_message: component_types must be a canonical JSON array of allowed target component types when present
-        -   field: component_relationships
-            type: custom
-            validator: validate_target_component_relationships_json_vocab
-            nullable: true
-            error_message: component_relationships must be a canonical JSON array of allowed target component relationships when present
-        -   field: cross_references
-            type: custom
-            validator: validate_target_xref_src_db_json_vocab
-            nullable: true
-            error_message: cross_references must be canonical JSON with governed xref_src_db source namespaces when present
-        -   field: target_xref_pdb_ids
-            type: not_null
-            nullable: false
-            error_message: target_xref_pdb_ids must emit a normalized pipe string or unknown sentinel
-        -   field: target_xref_go_component
-            type: not_null
-            nullable: false
-            error_message: target_xref_go_component must emit a normalized pipe string or unknown sentinel
-        -   field: target_xref_go_function
-            type: not_null
-            nullable: false
-            error_message: target_xref_go_function must emit a normalized pipe string or unknown sentinel
-        -   field: target_xref_go_process
-            type: not_null
-            nullable: false
-            error_message: target_xref_go_process must emit a normalized pipe string or unknown sentinel
-        -   field: target_xref_reactome_ids
-            type: not_null
-            nullable: false
-            error_message: target_xref_reactome_ids must emit a normalized pipe string or unknown sentinel
-        -   field: target_protein_synonyms
-            type: not_null
-            nullable: false
-            error_message: target_protein_synonyms must emit a normalized pipe string or unknown sentinel
-        -   field: target_gene_synonyms
-            type: not_null
-            nullable: false
-            error_message: target_gene_synonyms must emit a normalized pipe string or unknown sentinel
-        -   field: target_ec_numbers
-            type: not_null
-            nullable: false
-            error_message: target_ec_numbers must emit a normalized pipe string or unknown sentinel
-    entity_cross_field_validations:
-        -   name: target_identifiable
-            fields:
-                - target_id
-                - pref_name
-            condition: all_present
-            error_message: Target must have ID and preferred name
-        -   name: component_ids_require_component_types
-            fields:
-                - component_ids
-                - component_types
-            condition: conditional_required
-            trigger_field: component_ids
-            required_field: component_types
-            error_message: component_types must be populated when component_ids are present
-        -   name: component_ids_require_component_relationships
-            fields:
-                - component_ids
-                - component_relationships
-            condition: conditional_required
-            trigger_field: component_ids
-            required_field: component_relationships
-            error_message: component_relationships must be populated when component_ids are present
-    entity_conditional_validations: []
-    key_nullability:
-        -   field: target_id
-            key_type: merge
-            nullable: false
-        -   field: target_type
-            key_type: partition
-            nullable: false
+  metadata:
+    assay_parameter_type_policy:
+      scope: raw_plus_canonical_controlled_vocabulary
+      description: RAW-PLUS-CANONICAL ChEMBL assay-parameter typing policy. The pipeline preserves the provider-native type lexeme in type_raw for reviewability while parameter_type stores the canonical controlled-vocabulary value used by Silver/Gold semantics and DQ governance.
+      field_semantics:
+        type_raw: Preserve the raw/provider-native assay-parameter type token as trimmed text for review and drift analysis.
+        type: Published reviewed Silver alias for the canonical normalized assay-parameter type surface used by downstream Silver/Gold consumers and governance reporting.
+        parameter_type: Store the canonical assay-parameter type vocabulary value used for normalized Silver/Gold behavior; unknown provider lexemes are preserved as reviewed uppercase canonical candidates rather than rejected at profile time.
+        standard_type: Store the canonical strict standard_type surface governed by the shared ChEMBL assay-parameter universe and DQ policy.
+    publication_type_policy:
+      scope: source_specific
+      description: SOURCE-SPECIFIC ChEMBL publication typing policy. This pipeline accepts only the reviewed ChEMBL-native subset and maps it into the broader global publication taxonomy defined in configs/enums/chembl.yaml without redefining that global cross-provider taxonomy.
+      field_semantics:
+        publication_type_raw: Preserve the raw/native ChEMBL publication type token for traceability and provider-specific review.
+        publication_type: Store the canonical publication type mapped into the global taxonomy for normalized Silver/Gold behavior.
+    # Source-specific DQ policy:
+    # - publication_type uses a ChEMBL-only allowed subset and does not redefine
+    #   the global taxonomy in configs/enums/chembl.yaml.
+    # - publication_type_raw preserves the provider-native token for traceability.
+    # - publication_type stores the canonical mapped type used by this pipeline.
+    subcellular_fraction_policy:
+      scope: raw_plus_canonical_derived_vocabulary
+      description: RAW-PLUS-CANONICAL ChEMBL subcellular-fraction policy. The pipeline preserves the source lexeme in subcellular_fraction_raw while subcellular_fraction stores the normalized derived vocabulary used by Silver/Gold contracts. Unknown source lexemes remain reviewable rather than being fail-closed into a strict enum.
+      field_semantics:
+        subcellular_fraction_raw: Preserve the raw/source ChEMBL subcellular-fraction label as trimmed text for traceability and synonym review.
+        subcellular_fraction: Store the canonical normalized subcellular-fraction label used for downstream Silver/Gold semantics; unknown reviewed labels are preserved after canonical text normalization instead of being discarded.
+  version: 1.1.0
+  provider: chembl
+  entity: target
+  entity_field_validations:
+  - field: target_id
+    type: required
+    nullable: false
+    error_message: Target ChEMBL ID is required
+  - field: target_type
+    type: enum
+    allowed:
+    - SINGLE PROTEIN
+    - PROTEIN FAMILY
+    - PROTEIN COMPLEX
+    - PROTEIN COMPLEX GROUP
+    - SELECTIVITY GROUP
+    - CHIMERIC PROTEIN
+    - CELL-LINE
+    - TISSUE
+    - ORGANISM
+    - MACROMOLECULE
+    - SMALL MOLECULE
+    - LIPID
+    - METAL
+    - UNKNOWN
+    nullable: true
+    error_message: Invalid target_type value
+  - field: organism
+    type: custom
+    validator: validate_target_organism_supported_name
+    nullable: true
+    error_message: organism must remain a supported ChEMBL target organism label when present
+  - field: taxonomy_id
+    type: range
+    min: 1
+    max: 10000000
+    nullable: true
+  - field: organism_class
+    type: enum
+    allowed:
+    - acellular
+    - unicellular
+    - multicellular
+    nullable: true
+    error_message: organism_class must match the reviewed cellularity taxonomy when present
+  - field: component_types
+    type: custom
+    validator: validate_target_component_types_json_vocab
+    nullable: true
+    error_message: component_types must be a canonical JSON array of allowed target component types when present
+  - field: component_relationships
+    type: custom
+    validator: validate_target_component_relationships_json_vocab
+    nullable: true
+    error_message: component_relationships must be a canonical JSON array of allowed target component relationships when present
+  - field: cross_references
+    type: custom
+    validator: validate_target_xref_src_db_json_vocab
+    nullable: true
+    error_message: cross_references must be canonical JSON with governed xref_src_db source namespaces when present
+  - field: target_xref_pdb_ids
+    type: not_null
+    nullable: false
+    error_message: target_xref_pdb_ids must emit a normalized pipe string or unknown sentinel
+  - field: target_xref_go_component
+    type: not_null
+    nullable: false
+    error_message: target_xref_go_component must emit a normalized pipe string or unknown sentinel
+  - field: target_xref_go_function
+    type: not_null
+    nullable: false
+    error_message: target_xref_go_function must emit a normalized pipe string or unknown sentinel
+  - field: target_xref_go_process
+    type: not_null
+    nullable: false
+    error_message: target_xref_go_process must emit a normalized pipe string or unknown sentinel
+  - field: target_xref_reactome_ids
+    type: not_null
+    nullable: false
+    error_message: target_xref_reactome_ids must emit a normalized pipe string or unknown sentinel
+  - field: target_protein_synonyms
+    type: not_null
+    nullable: false
+    error_message: target_protein_synonyms must emit a normalized pipe string or unknown sentinel
+  - field: target_gene_synonyms
+    type: not_null
+    nullable: false
+    error_message: target_gene_synonyms must emit a normalized pipe string or unknown sentinel
+  - field: target_ec_numbers
+    type: not_null
+    nullable: false
+    error_message: target_ec_numbers must emit a normalized pipe string or unknown sentinel
+  entity_cross_field_validations:
+  - name: target_identifiable
+    fields:
+    - target_id
+    - pref_name
+    condition: all_present
+    error_message: Target must have ID and preferred name
+  - name: component_ids_require_component_types
+    fields:
+    - component_ids
+    - component_types
+    condition: conditional_required
+    trigger_field: component_ids
+    required_field: component_types
+    error_message: component_types must be populated when component_ids are present
+  - name: component_ids_require_component_relationships
+    fields:
+    - component_ids
+    - component_relationships
+    condition: conditional_required
+    trigger_field: component_ids
+    required_field: component_relationships
+    error_message: component_relationships must be populated when component_ids are present
+  entity_conditional_validations: []
+  key_nullability:
+  - field: target_id
+    key_type: merge
+    nullable: false
+  - field: target_type
+    key_type: partition
+    nullable: false
+  thresholds:
+    soft_fail: 0.3
+    hard_fail: 0.8
 filters:
-    version: 1.0.0
-    provider: chembl
-    entity: target
-    input_filter:
-        enabled: false
-        source_path: data/input/target.csv
-        column_name: target_chembl_id
-        filter_field: target_id
-        batch_size: 20
-    extraction_params:
-        target_type: SINGLE PROTEIN
-        organism__isnull: false
-        tax_id__isnull: false
-    silver_filters:
-        columns:
-            target_type:
-                - SINGLE PROTEIN
-        required_fields:
-            - target_id
-            - pref_name
-            - organism
-            - target_type
-            - target_protein_synonyms
-            - target_gene_synonyms
-            - target_ec_numbers
-            - target_xref_pdb_ids
-            - target_xref_go_component
-            - target_xref_go_function
-            - target_xref_go_process
-            - target_xref_reactome_ids
-    gold_filters:
-        columns:
-            target_type:
-                - SINGLE PROTEIN
-        list_lengths:
-            component_accessions:
-                min: 1
-                max: 1
-            component_ids:
-                min: 1
-        list_contains:
-            component_types:
-                values:
-                    - PROTEIN
-                mode: all
-        required_fields:
-            - pref_name
-            - organism
+  version: 1.0.0
+  provider: chembl
+  entity: target
+  input_filter:
+    enabled: false
+    source_path: data/input/target.csv
+    column_name: target_chembl_id
+    filter_field: target_id
+    batch_size: 20
+    checkpoint_interval: 1000
+    fallback_column: title
+  extraction_params:
+    target_type: SINGLE PROTEIN
+    organism__isnull: false
+    tax_id__isnull: false
+    assay_type__in: B,F
+    doc_type: PUBLICATION
+    year__gte: 1950
+    year__lte: 2050
+    confidence_score__gte: 8
+    data_validity_comment__isnull: true
+    inorganic_flag: 0
+    molecule_type: Small molecule
+    pchembl_value__isnull: false
+    potential_duplicate: 0
+    relationship_type: D
+    src_id: 1
+    standard_flag: 1
+    standard_relation: '='
+    standard_type__in: IC50,Ki
+    standard_units: nM
+    structure_type: MOL
+    target_chembl_id__isnull: false
+    target_tax_id__isnull: false
+  silver_filters:
+    ranges:
+      publication_year:
+        min: 1950
+        max: 2050
+      activity_id:
+        min: 1
+        max: 10000000000
+      confidence_score:
+        min: 8
+        max: 9
+      pchembl_value:
+        min: 3
+        max: 10
+      standard_value:
+        min: 0
+        include_min: false
+    columns:
+      target_type:
+      - SINGLE PROTEIN
+      assay_type:
+      - B
+      - F
+      inorganic_flag:
+      - 0
+      molecule_type:
+      - Small molecule
+      potential_duplicate:
+      - 0
+      publication_type:
+      - journal-article
+      relationship_type:
+      - D
+      src_id:
+      - '1'
+      standard_relation:
+      - '='
+      standard_type:
+      - IC50
+      - Ki
+      standard_units:
+      - nM
+      structure_type:
+      - MOL
+    required_fields:
+    - target_id
+    - pref_name
+    - organism
+    - target_type
+    - target_protein_synonyms
+    - target_gene_synonyms
+    - target_ec_numbers
+    - target_xref_pdb_ids
+    - target_xref_go_component
+    - target_xref_go_function
+    - target_xref_go_process
+    - target_xref_reactome_ids
+    exclude_if_present: []
+  gold_filters:
+    ranges:
+      publication_year:
+        min: 1950
+        max: 2050
+      max_tani:
+        min: 0.5
+        include_min: true
+      standard_value:
+        min: 0
+        include_min: false
+    columns:
+      target_type:
+      - SINGLE PROTEIN
+      assay_type:
+      - B
+      - F
+      assay_strain:
+        operator: is_empty
+      assay_test_type:
+        operator: not_in
+        values:
+        - In vivo
+        - Ex vivo
+      bao_format:
+        operator: not_in
+        values:
+        - BAO_0000218
+      component_type:
+      - PROTEIN
+      confidence_score:
+      - 8
+      - 9
+      downgraded:
+      - '0'
+      inorganic_flag:
+      - 0
+      molecule_type:
+      - Small molecule
+      potential_duplicate:
+      - 0
+      publication_type:
+      - journal-article
+      relationship_type:
+      - D
+      reviewed:
+      - true
+      standard_relation:
+      - '='
+      standard_type:
+      - IC50
+      - Ki
+      standard_units:
+      - nM
+      structure_type:
+      - MOL
+      term_type:
+      - MESH_HEADING
+      - MESH_QUALIFIER
+      - KEYWORD
+    list_lengths:
+      component_accessions:
+        min: 1
+        max: 1
+      component_ids:
+        min: 1
+    list_contains:
+      component_types:
+        values:
+        - PROTEIN
+        mode: all
+    exclude_if_present: []
+    required_fields:
+    - pref_name
+    - organism
+  metadata:
+    publication_filter_policy:
+      scope: source_specific
+      description: SOURCE-SPECIFIC ChEMBL publication filter policy. Silver and Gold filters intentionally constrain this pipeline to the reviewed ChEMBL publication subset and do not redefine the global publication taxonomy.
+    # Source-specific filter policy:
+    # - Silver and Gold are intentionally scoped to journal-article for the
+    #   current ChEMBL publication pipeline.
+    # - This is pipeline scope, not global publication type truth.
 contracts:
-    primary_key:
-        - target_id
-    merge_keys:
-        - target_id
-    hash_include: []
+  primary_key:
+  - target_id
+  merge_keys:
+  - target_id
+  hash_include: []
+  hash_exclude: []
+  hash_datetime_policy: v1_date
 hash_policy:
-    provider: chembl
-    entity: target
-    contract:
-        version: 2.0.0
-        migration_note: 'Explicit config-level hash contract for the normalized ChEMBL target Silver surface.'
-    hash_policy:
-        algorithm: sha256
-        canonicalization: provider + canonical_json_dumps(normalized_record)
-        include_fields:
-            - target_id
-            - target_type
-            - pref_name
-            - taxonomy_id
-            - organism
-            - organism_class
-            - species_group_flag
-            - target_description
-            - target_protein_synonyms
-            - target_gene_synonyms
-            - target_ec_numbers
-            - target_xref_pdb_ids
-            - target_xref_go_component
-            - target_xref_go_function
-            - target_xref_go_process
-            - target_xref_reactome_ids
-            - primary_component_id
-            - component_accessions
-            - component_descriptions
-            - component_ids
-            - component_types
-            - component_relationships
-            - target_components
-            - cross_references
-            - target_component_synonyms
-        exclude_fields:
-            - _ingestion_ts
-            - _run_id
-            - _run_type
-            - _dq_warn
-            - _dq_error
-            - _source_batch_id
-            - _index
-        exclude_patterns:
-            - ^_dq_
-        normalization:
-            trim_strings: true
-            round_floats:
-                enabled: true
-                precision: 10
-            dates:
-                enabled: true
-                format: YYYY-MM-DD
-            null_handling:
-                nan_to_null: true
-                inf_to_null: true
+  provider: chembl
+  entity: target
+  contract:
+    version: 2.0.0
+    migration_note: 'Explicit config-level hash contract for the normalized ChEMBL target Silver surface.'
+  hash_policy:
+    algorithm: sha256
+    canonicalization: provider + canonical_json_dumps(normalized_record)
+    include_fields:
+    - target_id
+    - target_type
+    - pref_name
+    - taxonomy_id
+    - organism
+    - organism_class
+    - species_group_flag
+    - target_description
+    - target_protein_synonyms
+    - target_gene_synonyms
+    - target_ec_numbers
+    - target_xref_pdb_ids
+    - target_xref_go_component
+    - target_xref_go_function
+    - target_xref_go_process
+    - target_xref_reactome_ids
+    - primary_component_id
+    - component_accessions
+    - component_descriptions
+    - component_ids
+    - component_types
+    - component_relationships
+    - target_components
+    - cross_references
+    - target_component_synonyms
+    exclude_fields:
+    - _ingestion_ts
+    - _run_id
+    - _run_type
+    - _dq_warn
+    - _dq_error
+    - _source_batch_id
+    - _index
+    exclude_patterns:
+    - ^_dq_
+    normalization:
+      trim_strings: true
+      round_floats:
+        enabled: true
+        precision: 10
+      dates:
+        enabled: true
+        format: YYYY-MM-DD
+      null_handling:
+        nan_to_null: true
+        inf_to_null: true

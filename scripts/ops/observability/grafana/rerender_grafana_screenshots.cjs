@@ -32,6 +32,7 @@ function parseArgs(argv) {
         .map((item) => item.trim())
         .filter(Boolean),
     ),
+    scopeQuery: process.env.GRAFANA_SCREENSHOT_SCOPE_QUERY || "",
   };
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
@@ -58,6 +59,9 @@ function parseArgs(argv) {
       config.selectedUids = new Set(
         next.split(",").map((item) => item.trim()).filter(Boolean),
       );
+      index += 1;
+    } else if (arg === "--scope-query" && next) {
+      config.scopeQuery = next;
       index += 1;
     }
   }
@@ -237,8 +241,18 @@ async function expandCollapsedRows(page, dashboard, index, total) {
   await page.waitForTimeout(CONFIG.settleMs);
 }
 
+function dashboardRenderUrl(dashboard) {
+  const params = new URLSearchParams({ orgId: "1" });
+  if (CONFIG.scopeQuery) {
+    for (const [key, value] of new URLSearchParams(CONFIG.scopeQuery)) {
+      params.set(key, value);
+    }
+  }
+  return `${CONFIG.baseUrl}${dashboard.url}?${params.toString()}`;
+}
+
 async function renderDashboard(page, dashboard, index, total) {
-  const target = `${CONFIG.baseUrl}${dashboard.url}?orgId=1`;
+  const target = dashboardRenderUrl(dashboard);
   console.log(`[${index}/${total}] loading ${dashboard.uid} ...`);
   console.log(`[${index}/${total}] goto ${dashboard.uid} -> ${target}`);
   await page.goto(target, {
@@ -292,6 +306,7 @@ async function writeManifest(dashboards) {
     generated_at: new Date().toISOString(),
     engine: "playwright",
     base_url: CONFIG.baseUrl,
+    scope_query: CONFIG.scopeQuery,
     timeout_ms: CONFIG.timeoutMs,
     capture_timeout_ms: CONFIG.captureTimeoutMs,
     dashboards,

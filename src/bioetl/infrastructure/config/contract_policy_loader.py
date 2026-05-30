@@ -73,6 +73,14 @@ def _merge_contract_sections(
 ) -> dict[str, object]:
     """Merge base defaults and entity contract config, including nested rollout."""
     merged = {**base_defaults, **contracts_section}
+    if _is_empty_hash_shim(contracts_section.get("hash_exclude")):
+        base_exclude = base_defaults.get("hash_exclude")
+        if isinstance(base_exclude, list):
+            merged["hash_exclude"] = list(base_exclude)
+    if _is_empty_hash_shim(contracts_section.get("hash_include")):
+        base_include = base_defaults.get("hash_include")
+        if isinstance(base_include, list):
+            merged["hash_include"] = list(base_include)
     base_rollout = base_defaults.get("rollout")
     entity_rollout = contracts_section.get("rollout")
     if isinstance(base_rollout, dict) or isinstance(entity_rollout, dict):
@@ -81,6 +89,29 @@ def _merge_contract_sections(
             **(entity_rollout if isinstance(entity_rollout, dict) else {}),
         }
     return merged
+
+
+def _apply_root_hash_policy_contract_overrides(
+    merged: dict[str, object],
+    unified_raw: JsonDict,
+) -> dict[str, object]:
+    """Overlay contract hash fields from root hash_policy when contracts use empty shims."""
+    root_hash_policy = unified_raw.get("hash_policy")
+    if not isinstance(root_hash_policy, dict):
+        return merged
+
+    nested = root_hash_policy.get("hash_policy")
+    if not isinstance(nested, dict):
+        return merged
+
+    normalized = dict(merged)
+    exclude_fields = nested.get("exclude_fields")
+    if isinstance(exclude_fields, list) and exclude_fields:
+        normalized["hash_exclude"] = [str(item) for item in exclude_fields]
+    include_fields = nested.get("include_fields")
+    if isinstance(include_fields, list) and include_fields:
+        normalized["hash_include"] = [str(item) for item in include_fields]
+    return normalized
 
 
 def _default_contract_identity(
@@ -167,7 +198,10 @@ def load_pipeline_contract_policy(provider: str, entity: str) -> PipelineContrac
             f"Contract policy section 'contracts' not found in {unified_entity_path}"
         )
 
-    raw = _merge_contract_sections(base_defaults, contracts_section)
+    raw = _apply_root_hash_policy_contract_overrides(
+        _merge_contract_sections(base_defaults, contracts_section),
+        unified_raw,
+    )
     normalized = _apply_rollout_defaults(
         raw,
         provider=provider,

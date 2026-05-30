@@ -350,7 +350,12 @@ def test_rerender_playwright_fallback_streams_output_from_repo_root(
     result = rerender_subject._run_playwright_fallback(config)
 
     assert result == 0
-    assert captured["command"] == ["/usr/bin/node", str(script_path)]
+    assert captured["command"] == [
+        "/usr/bin/node",
+        str(script_path),
+        "--scope-query",
+        "from=now-12h&to=now&timezone=UTC",
+    ]
     assert captured["kwargs"]["check"] is False
     assert captured["kwargs"]["cwd"] == str(tmp_path)
     assert "capture_output" not in captured["kwargs"]

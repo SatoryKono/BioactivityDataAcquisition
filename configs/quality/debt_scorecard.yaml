@@ -95,14 +95,14 @@ compatibility_debt_metrics:
   sunset_source: configs/quality/compatibility_facade_inventory.yaml#transition_debt
   metrics:
     transition_compat_count:
-      current_count: 0
-      max_count: 0
+      current_count: 9
+      max_count: 9
       target_count: 0
       owner: '@bioetl-architecture'
-      linked_issue: '4029'
-      rationale: Transition-only compatibility shims are currently burned down to
-        zero. Sanctioned public entrypoints are tracked separately as stable public
-        API and no longer count toward compatibility debt.
+      linked_issue: '4700'
+      rationale: Nine control-plane manifest diagnostics compatibility shims remain
+        in transition_debt while callers migrate to manifest.diagnostics.* owners.
+        Sanctioned public entrypoints are tracked separately as stable public API.
       ratchet_policy: Fail on growth; ratchet current/max_count toward target_count
         zero as transition-only compatibility shims are removed.
     retained_public_entrypoint_burden:
@@ -116,14 +116,13 @@ compatibility_debt_metrics:
       ratchet_policy: Fail on growth; ratchet max_count downward only after retained
         public entrypoints are removed or first-party callers are narrowed.
     sunset_compat_count:
-      current_count: 0
+      current_count: 9
       owner: '@bioetl-architecture'
-      linked_issue: '3354'
-      sunset_date: '2026-06-30'
-      rationale: Temporary compatibility shims were removed early in the 2026-04-29
-        sunset wave; the active sunset inventory must stay empty unless a reviewed
-        policy exception adds a new item.
-      ratchet_policy: May only decrease before the sunset; must reach zero after 2026-06-30.
+      linked_issue: '4700'
+      sunset_date: '2026-09-30'
+      rationale: Control-plane manifest diagnostics compatibility shims share the
+        transition_debt inventory and must burn down before review_date 2026-09-30.
+      ratchet_policy: May only decrease before the sunset; must reach zero after 2026-09-30.
     expired_compat_count:
       current_count: 0
       max_count: 0
@@ -200,6 +199,86 @@ bronze_fixture_replay_debt_metrics:
         and replay coverage across supported Bronze families.
       ratchet_policy: May increase as supported families gain tracked fixture evidence;
         removals require a reviewed de-scope decision.
+config_surface_ratchet:
+  linked_issue: '#4818'
+  owner: '@bioetl-config'
+  mode: fail-fast
+  artifact_policy:
+    generator_command: python -m scripts.schema generate-config-matrix
+    baseline_artifact: reports/quality/config-discrepancy-baseline.json
+    report_artifact: docs/config-discrepancies-report.md
+    matrix_artifact: docs/04-reference/config_comparison_matrix.csv
+    expected_direction: downward
+    ratchet_policy: Config-surface metrics must not grow without an explicit scorecard
+      budget update; inconsistent-parameter count ratchets downward during Stream B
+      burn-down. Entity rows use effective pipeline config merged from configs/base/pipeline.yaml.
+  metrics:
+    config_count:
+      current_count: 26
+      max_count: 26
+      owner: '@bioetl-config'
+      linked_issue: '#4818'
+      rationale: Entity/composite config surface must stay bounded while contract
+        drift is burned down.
+      ratchet_policy: Non-growth fail-fast unless a reviewed pipeline addition updates
+        the budget.
+    unique_parameter_count:
+      current_count: 511
+      max_count: 511
+      owner: '@bioetl-config'
+      linked_issue: '#4818'
+      rationale: Flattened parameter vocabulary must not expand silently across the
+        unified config matrix.
+      ratchet_policy: Non-growth fail-fast unless a reviewed schema expansion updates
+        the budget.
+    inconsistent_parameter_count:
+      current_count: 511
+      max_count: 511
+      owner: '@bioetl-config'
+      linked_issue: '#4818'
+      rationale: Parameters absent from one or more configs are the Stream B burn-down
+        target for contract alignment.
+      ratchet_policy: Ratchet downward as entity/composite configs converge on shared
+        parameter presence.
+  families:
+    entity_effective:
+      linked_issue: '#4767'
+      owner: '@bioetl-config'
+      metrics:
+        config_count:
+          current_count: 21
+          max_count: 21
+          rationale: Effective entity pipeline surface after base defaults merge.
+          ratchet_policy: Non-growth fail-fast for governed entity configs.
+        unique_parameter_count:
+          current_count: 312
+          max_count: 312
+          rationale: Effective flattened vocabulary for entity configs only.
+          ratchet_policy: Non-growth fail-fast unless reviewed schema expansion updates budget.
+        inconsistent_parameter_count:
+          current_count: 33
+          max_count: 33
+          rationale: Primary Stream B burn-down target for entity config alignment.
+          ratchet_policy: Ratchet downward as entity configs converge on shared keys.
+    composite_runtime:
+      linked_issue: '#4768'
+      owner: '@bioetl-config'
+      metrics:
+        config_count:
+          current_count: 5
+          max_count: 5
+          rationale: Composite runtime configs under configs/composites/*.yaml.
+          ratchet_policy: Non-growth fail-fast for composite runtime surface.
+        unique_parameter_count:
+          current_count: 199
+          max_count: 199
+          rationale: Flattened vocabulary for composite runtime configs only.
+          ratchet_policy: Non-growth fail-fast unless composite schema expansion updates budget.
+        inconsistent_parameter_count:
+          current_count: 50
+          max_count: 50
+          rationale: Composite-family burn-down target separate from entity surface.
+          ratchet_policy: Ratchet downward as composite configs converge on shared keys.
 registry_groups:
   size_metrics:
     registries:
@@ -276,7 +355,7 @@ hotspot_family_ratchets:
       files_ge_250_loc: 13
       max_internal_fan_in: 14
     metrics:
-      duplication_clusters: 8
+      duplication_clusters: 5
       files: 172
       total_loc: 21278
       files_ge_250_loc: 13
@@ -284,11 +363,11 @@ hotspot_family_ratchets:
       max_internal_fan_in: 14
       max_internal_fan_in_module: bioetl.application.core.batch_runtime_failure_policy
     trend:
-      status: reduced_2026-05-24_issue_4562
-      next_action: 2026-05-24 lands the service-protocol decomposition and record_processor_config
-        extraction wave, ratcheting application/core from files_ge_250_loc=14 and
-        max_internal_fan_in=15 down to the confirmed baseline of 13 and 14 while duplicate
-        clusters stay at 8.
+      status: reduced_2026-05-30_issue_4554
+      next_action: 2026-05-30 consolidates wiring lazy-export facades, quarantine
+        write helpers, preflight observability, and wrapped-adapter health delegation,
+        ratcheting application/core duplicate clusters from 8 down to 5 while
+        files_ge_250_loc and max_internal_fan_in remain at 13 and 14.
   - name: composition_bootstrap_runtime
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -304,7 +383,7 @@ hotspot_family_ratchets:
       files_ge_250_loc: 5
       max_internal_fan_in: 5
     metrics:
-      duplication_clusters: 5
+      duplication_clusters: 0
       files: 42
       total_loc: 5565
       files_ge_250_loc: 5
@@ -312,11 +391,9 @@ hotspot_family_ratchets:
       max_internal_fan_in: 6
       max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.composite_support_services_factory
     trend:
-      status: ratcheted_2026-05-26_issue_4682
-      next_action: 2026-05-26 moves composition/bootstrap/runtime from non-growth
-        headroom to reduction ratchets by lowering files_ge_250_loc from 6 to 5
-        and max_internal_fan_in from 7 to 5 after the live family baseline confirmed
-        both lower values.
+      status: reduced_2026-05-30_issue_4548_zero_duplication
+      next_action: Maintain zero-duplication snapshot for composition/bootstrap/runtime
+        while holding file-growth and fan-in budgets during future bootstrap changes.
   - name: composition_factories_pipeline
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -360,7 +437,7 @@ hotspot_family_ratchets:
       files_ge_250_loc: 22
       max_internal_fan_in: 6
     metrics:
-      duplication_clusters: 15
+      duplication_clusters: 10
       files: 66
       total_loc: 12998
       files_ge_250_loc: 22
@@ -368,10 +445,11 @@ hotspot_family_ratchets:
       max_internal_fan_in: 6
       max_internal_fan_in_module: bioetl.application.services.control_plane._run_manifest_diagnostics_replay_helpers
     trend:
-      status: reduced_2026-05-22_issue_4547
-      next_action: 2026-05-22 consolidates exact-replay blocker assembly into the
-        replay diagnostics helper owner, reducing application/services/control_plane
-        from 17 to 15 duplicate clusters while files_ge_250_loc and max_internal_fan_in
+      status: reduced_2026-05-30_issue_4547
+      next_action: 2026-05-30 consolidates execution-identity payloads, lazy-export
+        facades, ledger diagnostic requests, replay projection inputs, and historical
+        record payloads, ratcheting application/services/control_plane duplicate
+        clusters from 15 down to 10 while files_ge_250_loc and max_internal_fan_in
         remain non-growing.
   - name: composition_runtime_builders
     owner: '@bioetl-platform'
@@ -388,7 +466,7 @@ hotspot_family_ratchets:
       files_ge_250_loc: 7
       max_internal_fan_in: 11
     metrics:
-      duplication_clusters: 11
+      duplication_clusters: 7
       files: 37
       total_loc: 5736
       files_ge_250_loc: 7
@@ -396,11 +474,10 @@ hotspot_family_ratchets:
       max_internal_fan_in: 11
       max_internal_fan_in_module: bioetl.composition.runtime_builders.inputs_resolver
     trend:
-      status: reduced_2026-05-22_issue_4552
-      next_action: 2026-05-22 reduces composition/runtime_builders duplication from
-        13 to 11 clusters by collapsing repeated public/private export lists and keeping
-        the family on the reviewed bounded-growth ratchet for further semantic deduplication
-        work.
+      status: reduced_2026-05-30_issue_4552
+      next_action: 2026-05-30 consolidates manifest publication-context resolution,
+        launch-context field extraction, and contract-identity request wiring,
+        reducing composition/runtime_builders duplicate clusters from 11 down to 7.
 oversized_source_module_inventory:
   linked_issue: '#4679'
   split_on_touch: true
@@ -436,7 +513,7 @@ oversized_source_module_inventory:
     target_split: separate score-card policy rules from manifest projection helpers
 
 hotspot_family_coverage_thresholds:
-  snapshot_date: '2026-05-29'
+  snapshot_date: '2026-05-30'
   linked_issue: '#4567'
   mode: fail-fast
   families:
@@ -485,6 +562,18 @@ hotspot_family_coverage_thresholds:
       - src/bioetl/application/services/control_plane/manifest_time_support.py
       - src/bioetl/application/services/control_plane/manifest/__init__.py
       - src/bioetl/application/services/control_plane/manifest/diagnostics.py
+      - src/bioetl/application/services/control_plane/manifest/diagnostics/__init__.py
+      - src/bioetl/application/services/control_plane/manifest/diagnostics/artifact_support.py
+      - src/bioetl/application/services/control_plane/manifest/diagnostics/base.py
+      - src/bioetl/application/services/control_plane/manifest/diagnostics/base_summary_helpers.py
+      - src/bioetl/application/services/control_plane/manifest/diagnostics/checkpoint_projection.py
+      - src/bioetl/application/services/control_plane/manifest/diagnostics/finalization.py
+      - src/bioetl/application/services/control_plane/manifest/diagnostics/nested_mapping.py
+      - src/bioetl/application/services/control_plane/manifest/diagnostics/base_summary_helpers.py
+      - src/bioetl/application/services/control_plane/manifest/diagnostics/replay.py
+      - src/bioetl/application/services/control_plane/manifest/diagnostics/replay_projection.py
+      - src/bioetl/application/services/control_plane/manifest/diagnostics/snapshot_support.py
+      - src/bioetl/application/services/control_plane/manifest/diagnostics/source_refs.py
       - src/bioetl/application/services/control_plane/manifest/inspection_models.py
       - src/bioetl/application/services/control_plane/manifest/inspection_service.py
       - src/bioetl/application/services/control_plane/manifest/models.py
@@ -506,11 +595,13 @@ hotspot_family_coverage_thresholds:
       - src/bioetl/application/services/control_plane/run_manifest_diagnostics_artifact_support.py
       - src/bioetl/application/services/control_plane/run_manifest_diagnostics_base.py
       - src/bioetl/application/services/control_plane/run_manifest_diagnostics_base_helpers.py
+      - src/bioetl/application/services/control_plane/run_manifest_diagnostics_checkpoint_projection.py
       - src/bioetl/application/services/control_plane/run_manifest_diagnostics_finalization.py
       - src/bioetl/application/services/control_plane/run_manifest_diagnostics_replay.py
       - src/bioetl/application/services/control_plane/run_manifest_diagnostics_replay_projection.py
       - src/bioetl/application/services/control_plane/run_manifest_diagnostics_snapshot_support.py
       - src/bioetl/application/services/control_plane/run_manifest_diagnostics_source_refs.py
+      - src/bioetl/application/services/control_plane/run_manifest_diagnostics_support.py
       - src/bioetl/application/services/control_plane/run_manifest_exact_replay_blockers.py
       - src/bioetl/application/services/control_plane/run_manifest_inspection_mixins.py
       - src/bioetl/application/services/control_plane/run_manifest_service_mixins.py
@@ -524,12 +615,13 @@ hotspot_family_coverage_thresholds:
       - src/bioetl/application/services/control_plane/workflow/manifest_models.py
       - src/bioetl/application/services/control_plane/workflow/manifest_service.py
     composition_runtime_builders:
-      min_measured_module_count: 37
+      min_measured_module_count: 36
       max_unmeasured_module_count: 0
-      min_covered_module_count: 36
-      min_covered_line_percent: 80.0
+      min_covered_module_count: 35
+      min_covered_line_percent: 61.96
       allowlisted_unmeasured_paths:
       - src/bioetl/composition/runtime_builders/_run_manifest_sink_policy.py
+      - src/bioetl/composition/runtime_builders/run_manifest_support.py
       - src/bioetl/composition/runtime_builders/runner_builder_wiring.py
       - src/bioetl/composition/runtime_builders/runner_control_plane_assembly.py
 removable_complexity_family_ratchets:

@@ -38,6 +38,11 @@ class RenderConfig:
     timeout_seconds: float
     selected_uids: tuple[str, ...]
     fallback: str
+    workflow: str = ""
+    pipeline: str = ""
+    run_type: str = ""
+    run_id: str = ""
+    range_hours: int = 12
 
 
 @dataclass(frozen=True)
@@ -212,6 +217,11 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
             "browser path, 'none' disables fallback."
         ),
     )
+    parser.add_argument("--var-workflow", default="")
+    parser.add_argument("--var-pipeline", default="")
+    parser.add_argument("--var-run-type", default="")
+    parser.add_argument("--var-run-id", default="")
+    parser.add_argument("--range-hours", type=int, default=12)
     args = parser.parse_args(argv)
     return RenderConfig(
         base_url=args.base_url.rstrip("/"),
@@ -224,6 +234,11 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
         timeout_seconds=args.timeout_seconds,
         selected_uids=tuple(str(uid) for uid in args.uids),
         fallback=args.fallback,
+        workflow=str(args.var_workflow).strip(),
+        pipeline=str(args.var_pipeline).strip(),
+        run_type=str(args.var_run_type).strip(),
+        run_id=str(args.var_run_id).strip(),
+        range_hours=max(int(args.range_hours), 1),
     )
 
 
@@ -252,6 +267,23 @@ def _load_dashboards(config: RenderConfig) -> list[DashboardRecord]:
     return sorted(items, key=lambda item: item.uid)
 
 
+def _scope_query_params(config: RenderConfig) -> dict[str, str]:
+    params: dict[str, str] = {
+        "from": f"now-{config.range_hours}h",
+        "to": "now",
+        "timezone": "UTC",
+    }
+    if config.workflow:
+        params["var-workflow"] = config.workflow
+    if config.pipeline:
+        params["var-pipeline"] = config.pipeline
+    if config.run_type:
+        params["var-run_type"] = config.run_type
+    if config.run_id:
+        params["var-run_id"] = config.run_id
+    return params
+
+
 def _render_dashboard(record: DashboardRecord, config: RenderConfig) -> Path:
     render_path = "/render" + record.url
     query = urlencode(
@@ -259,6 +291,7 @@ def _render_dashboard(record: DashboardRecord, config: RenderConfig) -> Path:
             "width": config.width,
             "height": config.height,
             "tz": "UTC",
+            **_scope_query_params(config),
         }
     )
     render_url = f"{config.base_url}{render_path}?{query}"
@@ -339,6 +372,9 @@ def _playwright_env(config: RenderConfig) -> dict[str, str]:
     )
     if config.selected_uids:
         env["GRAFANA_SCREENSHOT_UIDS"] = ",".join(config.selected_uids)
+    scope_query = urlencode(_scope_query_params(config))
+    if scope_query:
+        env["GRAFANA_SCREENSHOT_SCOPE_QUERY"] = scope_query
     extra_node_modules = os.getenv("BIOETL_PLAYWRIGHT_NODE_MODULES", "").strip()
     if extra_node_modules:
         env["BIOETL_PLAYWRIGHT_NODE_MODULES"] = extra_node_modules
@@ -364,6 +400,9 @@ def _run_playwright_fallback(config: RenderConfig) -> int:
         )
         return 1
     node_command = [node_path, str(script_path)]
+    scope_query = urlencode(_scope_query_params(config))
+    if scope_query:
+        node_command.extend(["--scope-query", scope_query])
     try:
         result = subprocess.run(
             node_command,

@@ -24,6 +24,7 @@ from bioetl.composition.runtime_builders.cached_bronze_snapshot_support import (
     build_cached_bronze_input_snapshot_refs,
 )
 from bioetl.composition.runtime_builders.run_manifest_support import (
+    RunManifestContractIdentity,
     build_launch_context_snapshot,
     build_run_source_refs,
     resolve_contract_identity,
@@ -199,14 +200,16 @@ def test_build_manifest_create_request_uses_supplied_reproducibility_context(
             resolved_config_hash="resolved-hash",
             effective_config_hash="effective-hash",
             source_fingerprint="source-fingerprint-1",
-            contract_ref="chembl.activity",
-            contract_version="1.2.3",
-            contract_schema_hash="schema-deadbeef",
-            dq_policy_ref="chembl.activity.policy",
-            rule_bundle_version="2026.04",
-            normalization_profile_ref="chembl.activity.norm",
-            normalization_profile_version="1.0.0",
-            normalization_profile_hash="f" * 64,
+            contract_identity=RunManifestContractIdentity(
+                contract_ref="chembl.activity",
+                contract_version="1.2.3",
+                contract_schema_hash="schema-deadbeef",
+                dq_policy_ref="chembl.activity.policy",
+                rule_bundle_version="2026.04",
+                normalization_profile_ref="chembl.activity.norm",
+                normalization_profile_version="1.0.0",
+                normalization_profile_hash="f" * 64,
+            ),
             dq_contract_compatibility_hash="dq-hash",
             effective_config_artifact_id="artifact-1",
         )

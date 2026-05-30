@@ -69,6 +69,8 @@ class AuditCycleConfig:
     observability_backend_port: int
     pipeline: str
     run_type: str
+    workflow: str
+    run_id: str
     range_hours: int
 
 
@@ -143,6 +145,8 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--pipeline", default=DEFAULT_PIPELINE)
     parser.add_argument("--run-type", default=DEFAULT_RUN_TYPE)
+    parser.add_argument("--workflow", default=live_audit.DEFAULT_WORKFLOW)
+    parser.add_argument("--run-id", default=live_audit.DEFAULT_RUN_ID)
     parser.add_argument("--range-hours", type=int, default=DEFAULT_RANGE_HOURS)
     return parser
 
@@ -164,6 +168,8 @@ def _parse_args(argv: list[str] | None) -> AuditCycleConfig:
         observability_backend_port=args.observability_backend_port,
         pipeline=args.pipeline,
         run_type=args.run_type,
+        workflow=args.workflow,
+        run_id=args.run_id,
         range_hours=args.range_hours,
     )
 
@@ -212,6 +218,16 @@ def _run_rerender(config: AuditCycleConfig, *, screenshot_uids: tuple[str, ...])
         str(config.render_timeout_seconds),
         "--fallback",
         "auto",
+        "--var-workflow",
+        config.workflow,
+        "--var-pipeline",
+        config.pipeline,
+        "--var-run-type",
+        config.run_type,
+        "--var-run-id",
+        config.run_id,
+        "--range-hours",
+        str(config.range_hours),
     ]
     if screenshot_uids:
         argv.extend(["--uids", *screenshot_uids])
@@ -350,7 +366,7 @@ def _start_managed_observability_backend(
 def _ensure_backend(config: AuditCycleConfig) -> BackendEnsureOutcome:
     required_probe_paths = (
         "/ops/control-plane/checkpoint-freshness?"
-        f"pipeline={config.pipeline}&run_type={config.run_type}&run_id=-",
+        f"pipeline={config.pipeline}&run_type={config.run_type}&run_id={config.run_id}",
     )
     if config.ensure_observability_backend and config.refresh_observability_backend:
         refreshed = drop_listening_backend_on_port(config.observability_backend_port)
@@ -419,7 +435,7 @@ def _ensure_backend(config: AuditCycleConfig) -> BackendEnsureOutcome:
         port=fallback_port,
         required_probe_paths=(
             "/ops/control-plane/checkpoint-freshness?"
-            f"pipeline={config.pipeline}&run_type={config.run_type}&run_id=-",
+            f"pipeline={config.pipeline}&run_type={config.run_type}&run_id={config.run_id}",
         ),
     )
     if fallback_result.backend_available:
@@ -460,10 +476,14 @@ def _run_live_audit(config: AuditCycleConfig, *, app_base_url: str) -> int:
             config.grafana_username,
             "--grafana-password",
             config.grafana_password,
+            "--workflow",
+            config.workflow,
             "--pipeline",
             config.pipeline,
             "--run-type",
             config.run_type,
+            "--run-id",
+            config.run_id,
             "--range-hours",
             str(config.range_hours),
         ]
@@ -519,10 +539,10 @@ def _discover_filled_dashboard_uids(
                 grafana_base_url=config.grafana_base_url,
                 grafana_username=config.grafana_username,
                 grafana_password=config.grafana_password,
-                workflow=live_audit.DEFAULT_WORKFLOW,
+                workflow=config.workflow,
                 pipeline=config.pipeline,
                 run_type=config.run_type,
-                run_id=live_audit.DEFAULT_RUN_ID,
+                run_id=config.run_id,
                 range_hours=config.range_hours,
                 output_path=live_audit.DEFAULT_OUTPUT_PATH,
             )

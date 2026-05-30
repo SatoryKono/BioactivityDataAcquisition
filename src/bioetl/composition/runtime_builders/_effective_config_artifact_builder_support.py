@@ -22,6 +22,9 @@ from bioetl.composition.runtime_builders._silver_filter_compatibility_support im
     current_silver_filter_compatibility_mode,
     current_silver_filter_compatibility_snapshot,
 )
+from bioetl.composition.runtime_builders._runtime_launch_context_fields import (
+    build_runtime_launch_field_snapshot,
+)
 from bioetl.composition.runtime_builders.run_manifest_support import (
     to_serializable_mapping as _to_serializable_mapping,
 )
@@ -174,45 +177,31 @@ def build_runtime_overrides_snapshot(
 ) -> dict[str, object]:
     """Convert launch context options into runtime-override snapshot shape."""
     run_type_value, execution_context_value = resolve_run_context_values(ctx)
-    cli_overrides = {
-        "run_type": run_type_value,
-        "resume": getattr(ctx, "resume", False),
-        "dry_run": getattr(ctx, "dry_run", False),
-        "limit": getattr(ctx, "limit", None),
-        "query": getattr(ctx, "query", None),
-        "start_offset": getattr(ctx, "start_offset", None),
-        "log_level": getattr(ctx, "log_level", "INFO"),
-        "ignore_yaml_filter": getattr(ctx, "ignore_yaml_filter", False),
-        "skip_gold": getattr(ctx, "skip_gold", False),
-        "exact_replay": getattr(ctx, "exact_replay", False),
-        "required_persistence_profile": getattr(
-            ctx, "required_persistence_profile", None
-        ),
-        "input_filter": _to_serializable_mapping(getattr(ctx, "input_filter", None)),
-        "cached_bronze": _to_serializable_mapping(getattr(ctx, "cached_bronze", None)),
-        "vacuum": _to_serializable_mapping(getattr(ctx, "vacuum", None)),
-        "replay_of_run_id": getattr(ctx, "replay_of_run_id", None),
-        "replay_of_manifest_id": getattr(ctx, "replay_of_manifest_id", None),
-        "silver_filter_compatibility_mode": current_silver_filter_compatibility_mode(),
-    }
+    cli_overrides = build_runtime_launch_field_snapshot(
+        ctx,
+        run_type_value=run_type_value,
+    )
+    cli_overrides.update(
+        {
+            "required_persistence_profile": getattr(
+                ctx, "required_persistence_profile", None
+            ),
+            "input_filter": _to_serializable_mapping(getattr(ctx, "input_filter", None)),
+            "cached_bronze": _to_serializable_mapping(getattr(ctx, "cached_bronze", None)),
+            "vacuum": _to_serializable_mapping(getattr(ctx, "vacuum", None)),
+            "replay_of_run_id": getattr(ctx, "replay_of_run_id", None),
+            "replay_of_manifest_id": getattr(ctx, "replay_of_manifest_id", None),
+            "silver_filter_compatibility_mode": current_silver_filter_compatibility_mode(),
+        }
+    )
     silver_filter_compatibility = current_silver_filter_compatibility_snapshot()
-    return {
-        "cli": cli_overrides,
-        "env": {
-            "execution_environment": _build_execution_environment_snapshot(settings)
-        },
-        "runtime": {
-            "pipeline_name": str(getattr(ctx, "pipeline_name", "unknown")),
-            "run_type": run_type_value,
-            "resume": getattr(ctx, "resume", False),
-            "dry_run": getattr(ctx, "dry_run", False),
-            "limit": getattr(ctx, "limit", None),
-            "query": getattr(ctx, "query", None),
-            "start_offset": getattr(ctx, "start_offset", None),
-            "log_level": getattr(ctx, "log_level", "INFO"),
-            "ignore_yaml_filter": getattr(ctx, "ignore_yaml_filter", False),
-            "skip_gold": getattr(ctx, "skip_gold", False),
-            "execution_context": execution_context_value,
+    runtime_fields = build_runtime_launch_field_snapshot(
+        ctx,
+        run_type_value=run_type_value,
+        execution_context_value=execution_context_value,
+    )
+    runtime_fields.update(
+        {
             "required_persistence_profile": getattr(
                 ctx, "required_persistence_profile", None
             ),
@@ -226,7 +215,14 @@ def build_runtime_overrides_snapshot(
             "settings_snapshot": build_execution_settings_snapshot(settings),
             "silver_filter_compatibility": silver_filter_compatibility,
             "silver_filter_compatibility_mode": silver_filter_compatibility["mode"],
+        }
+    )
+    return {
+        "cli": cli_overrides,
+        "env": {
+            "execution_environment": _build_execution_environment_snapshot(settings)
         },
+        "runtime": runtime_fields,
     }
 
 

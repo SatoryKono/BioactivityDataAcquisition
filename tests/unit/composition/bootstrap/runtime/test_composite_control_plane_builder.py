@@ -12,6 +12,9 @@ from unittest.mock import patch
 import pytest
 
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
+from bioetl.composition.bootstrap.runtime._composite_control_plane_builder_support import (
+    CompositeControlPlaneConfigArtifacts,
+)
 from bioetl.composition.bootstrap.runtime.composite_control_plane_builder import (
     _build_composite_manifest_create_request,
     _normalize_object,
@@ -137,22 +140,24 @@ def test_build_composite_manifest_create_request_wires_control_plane_payloads() 
             config=config,
             runtime=runtime,
             infra_context=infra_context,
-            resolved_config_hash=_VALID_SHA256_A,
-            effective_config_hash=_VALID_SHA256_B,
-            source_fingerprint=_VALID_SHA256_D,
-            dq_contract_compatibility_hash=_VALID_SHA256_C,
-            effective_config_artifact_id="eca-123",
-            contract_ref="composite.publication",
-            contract_version="1.0.0",
-            contract_schema_hash=_VALID_SHA256_E,
-            dq_policy_ref="composite.dq.v1",
-            rule_bundle_version="dq-rules.v1.0",
-            normalization_profile_ref="composite.publication",
-            normalization_profile_version="2026.05",
-            normalization_profile_hash=_VALID_SHA256_F,
-            pipeline_version="1.1.0",
-            entity="publication",
-            required_persistence_profile="replay_ready",
+            config_artifacts=CompositeControlPlaneConfigArtifacts(
+                effective_config_artifact_id="eca-123",
+                resolved_config_hash=_VALID_SHA256_A,
+                effective_config_hash=_VALID_SHA256_B,
+                source_fingerprint=_VALID_SHA256_D,
+                dq_contract_compatibility_hash=_VALID_SHA256_C,
+                contract_ref="composite.publication",
+                contract_entity="publication",
+                contract_version="1.0.0",
+                contract_schema_hash=_VALID_SHA256_E,
+                dq_policy_ref="composite.dq.v1",
+                rule_bundle_version="dq-rules.v1.0",
+                normalization_profile_ref="composite.publication",
+                normalization_profile_version="2026.05",
+                normalization_profile_hash=_VALID_SHA256_F,
+                pipeline_version="1.1.0",
+                effective_required_profile="replay_ready",
+            ),
         )
 
     assert str(request.run_id) == _VALID_RUN_ID

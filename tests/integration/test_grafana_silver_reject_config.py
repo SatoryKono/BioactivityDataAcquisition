@@ -177,7 +177,7 @@ def test_dq_validation_diagnostics_groups_failures_then_runtime_then_trends() ->
     assert nested["Track: Anomalies Detected"].get("gridPos", {}).get("y") == 56
     assert nested["Track: DQ Check Duration (p95)"].get("gridPos", {}).get("y") == 56
     assert (
-        nested["Track: DQ Impact on Deliverability Trend (Blocked Share %)"]
+        nested["Track: DQ Threshold Events in Range Trend"]
         .get("gridPos", {})
         .get("y")
         == 65

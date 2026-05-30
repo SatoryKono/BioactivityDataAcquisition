@@ -2,14 +2,15 @@
 
 from __future__ import annotations
 
+from bioetl.application.services.control_plane._run_manifest_execution_identity_support import (
+    build_contract_identity_anchor_fields,
+    build_execution_identity_payload_from_code_provenance,
+)
 from bioetl.application.services.control_plane.run_manifest_replay_taxonomy import (
     resolve_replay_taxonomy_projection,
 )
 from bioetl.domain.control_plane import RunCodeProvenance, RunManifest
-from bioetl.domain.normalization import (
-    build_execution_identity_payload,
-    compute_execution_identity_fingerprint,
-)
+from bioetl.domain.normalization import compute_execution_identity_fingerprint
 
 
 class RunManifestIdentityGraphAssembler:
@@ -92,24 +93,10 @@ class RunManifestIdentityGraphAssembler:
     ) -> dict[str, object]:
         code_provenance = manifest.code_provenance
         snapshot_fingerprint = diagnostics.get("input_snapshot_identity_fingerprint")
-        payload = build_execution_identity_payload(
+        payload = build_execution_identity_payload_from_code_provenance(
             pipeline_name=manifest.pipeline_name,
             run_type=manifest.run_type.value,
-            pipeline_version=code_provenance.pipeline_version,
-            git_commit=code_provenance.git_commit,
-            dependency_lock_hash=code_provenance.dependency_lock_hash,
-            effective_config_hash=code_provenance.effective_config_hash,
-            dq_contract_compatibility_hash=(
-                code_provenance.dq_contract_compatibility_hash
-            ),
-            contract_ref=code_provenance.contract_ref,
-            contract_version=code_provenance.contract_version,
-            normalization_profile_ref=code_provenance.normalization_profile_ref,
-            normalization_profile_version=(
-                code_provenance.normalization_profile_version
-            ),
-            normalization_profile_hash=code_provenance.normalization_profile_hash,
-            effective_config_artifact_id=code_provenance.effective_config_artifact_id,
+            code_provenance=code_provenance,
             exact_replay=bool(manifest.launch_context.get("exact_replay")),
             input_snapshot_fingerprint=(
                 snapshot_fingerprint if isinstance(snapshot_fingerprint, str) else None
@@ -229,20 +216,11 @@ def _build_degraded_runtime_anchor_payload(
 ) -> dict[str, object]:
     code_provenance = manifest.code_provenance
     return {
-        key: value
-        for key, value in {
-            "manifest_id": manifest.manifest_id,
-            "effective_config_hash": code_provenance.effective_config_hash,
-            "contract_ref": code_provenance.contract_ref,
-            "contract_version": code_provenance.contract_version,
-            "normalization_profile_ref": code_provenance.normalization_profile_ref,
-            "normalization_profile_version": (
-                code_provenance.normalization_profile_version
-            ),
-            "normalization_profile_hash": code_provenance.normalization_profile_hash,
-            "effective_config_artifact_id": code_provenance.effective_config_artifact_id,
-        }.items()
-        if value is not None
+        "manifest_id": manifest.manifest_id,
+        **build_contract_identity_anchor_fields(
+            code_provenance,
+            include_effective_config_hash=True,
+        ),
     }
 
 

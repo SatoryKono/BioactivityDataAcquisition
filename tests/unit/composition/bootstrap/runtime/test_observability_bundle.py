@@ -480,18 +480,24 @@ class TestBootstrapObservabilityBundleImpl:
         )
 
     def test_emits_noop_logger_runtime_status_gauge(self) -> None:
+        from bioetl.composition.bootstrap.runtime.observability_assembly import (
+            log_observability_initialized,
+        )
         from bioetl.composition.bootstrap.runtime.observability_bundle import (
-            _log_observability_initialized,
+            _ObservabilityComponents,
         )
 
         metrics = MagicMock()
-
-        _log_observability_initialized(
+        components = _ObservabilityComponents(
             logger=NoOpLogger(),
-            metrics=metrics,
             tracer=NoOpTracing(),
+            metrics=metrics,
             audit=NoOpAudit(),
             dq_monitor=None,
+        )
+
+        log_observability_initialized(
+            components=components,
             control_plane=None,
         )
 

@@ -103,7 +103,7 @@
       "description": "Unified context/provenance banner for 3. Provider Health. Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Workflow is context/evidence unless documented otherwise; run_id is local control-plane identity context only. Provider health is owned by provider-status telemetry, while ID and Processed Records below are bounded pipeline-context evidence only.",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:10px 14px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);line-height:1.45;\"><div style=\"font-size:18px;font-weight:700;\">Which provider is degraded or failing, and why?</div><div style=\"margin-top:6px;font-size:12px;opacity:0.85;\">Provider health verdict comes from provider-status telemetry. The shared ID and Processed Records cards below stay bounded to pipeline context and do not prove current provider health.</div></div>"
+        "content": "<div style=\"padding:10px 14px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);line-height:1.45;\"><div style=\"font-size:18px;font-weight:700;\">Which provider is degraded or failing, and why?</div><div style=\"margin-top:6px;font-size:12px;opacity:0.85;\"><strong>Provider-global selected-range:</strong> adapter latency and HTTP error panels aggregate by provider and do not filter by run_id/run_type in PromQL. For backfill-specific stage latency or exact-run identity, open <strong>2. Runtime</strong> or <strong>0. Control Plane</strong> with preserved scope.</div></div>"
       }
     },
     {
@@ -120,7 +120,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Selected-range provider-first severity for the selected provider. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. This panel now uses the active Grafana time selector to find the most severe observed provider status inside the chosen window; if no provider-current-status samples exist in that window, the verdict remains UNKNOWN. UNKNOWN here usually means a provider telemetry gap in the selected range, not proof that the provider is healthy or failing; inspect Monitor Provider Telemetry Freshness and Review Raw Provider Health Enum before inferring provider state. Pipeline/run_type/workflow are secondary context only; ID and Processed Records are bounded pipeline-context evidence, and run_id is local control-plane identity context that does not filter Prometheus.",
+      "description": "Selected-range provider-first severity for the selected provider. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Uses bioetl_provider_current_status and bioetl_provider_range_operational_ok inside the active Grafana time range (default Last 12 hours). Operational OK is projected when health-check or adapter request counters show successful provider activity without failures or HTTP errors in range; it does not prove the currently selected pipeline run succeeded, but it prevents UNKNOWN after successful provider operations in range. If both series are absent, UNKNOWN remains fail-closed; inspect Monitor Provider Telemetry Freshness and Review Raw Provider Health Enum. Pipeline/run_type/workflow are secondary context only; run_id does not filter Prometheus.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -224,7 +224,7 @@
       },
       "targets": [
         {
-          "expr": "max(max_over_time(bioetl_provider_current_status{provider=~\"$provider\"}[${__range_s}s]))",
+          "expr": "max(max_over_time(bioetl_provider_current_status{provider=~\"$provider\"}[${__range_s}s]), max_over_time(bioetl_provider_range_operational_ok{provider=~\"$provider\"}[${__range_s}s]))",
           "refId": "A"
         }
       ]
@@ -1155,7 +1155,7 @@
       "pluginVersion": "10.4.0",
       "targets": [
         {
-          "expr": "((count(count_over_time(bioetl_provider_current_status[${__range_s}s])) > bool 0) * 0) or (absent(count_over_time(bioetl_provider_current_status[${__range_s}s])) * 1)",
+          "expr": "(((count(count_over_time(bioetl_provider_current_status{provider=~\"$provider\"}[${__range_s}s])) > bool 0) or (count(count_over_time(bioetl_provider_range_operational_ok{provider=~\"$provider\"}[${__range_s}s])) > bool 0)) * 0) or ((absent(count_over_time(bioetl_provider_current_status{provider=~\"$provider\"}[${__range_s}s])) and absent(count_over_time(bioetl_provider_range_operational_ok{provider=~\"$provider\"}[${__range_s}s]))) * 1)",
           "format": "time_series",
           "instant": true,
           "legendFormat": "Provider current-status freshness",
@@ -2102,7 +2102,21 @@
               }
             ]
           },
-          "unit": "s"
+          "unit": "s",
+          "links": [
+            {
+              "targetBlank": false,
+              "title": "Open 2. Runtime",
+              "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+              "includeVars": false
+            },
+            {
+              "targetBlank": false,
+              "title": "Open 0. Control Plane",
+              "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+              "includeVars": false
+            }
+          ]
         },
         "overrides": []
       },
@@ -2135,7 +2149,7 @@
       ],
       "title": "Inspect Adapter Request Latency by Endpoint (p95)",
       "type": "timeseries",
-      "description": "Selected-range evidence: p95 adapter request latency by endpoint for the selected provider scope. No data remains diagnostic and means no endpoint latency samples in range. The provider degraded-rule surface fires at p95 > 5s; lower bands here are earlier-warning inspect thresholds."
+      "description": "Selected-range evidence: p95 adapter request latency by endpoint for the selected provider scope. Provider-global selected-range only; for backfill-specific stage latency open 2. Runtime with preserved pipeline/run_type/run_id scope. No data remains diagnostic and means no endpoint latency samples in range."
     },
     {
       "datasource": {
@@ -2210,14 +2224,88 @@
       },
       "targets": [
         {
-          "expr": "round(sum by (provider, method, error_type) (increase(bioetl_http_request_errors_total{provider=~\"$provider\"}[$__interval])) or vector(0))",
+          "expr": "round(sum by (provider, method, error_type) (increase(bioetl_http_request_errors_total{provider=~\"$provider\", error_type=~\"(?i).*(rate.?limit|429|thrott).*\"}[$__interval])) or vector(0))",
           "legendFormat": "{{ provider }} {{ method }} {{ error_type }}",
           "refId": "A"
         }
       ],
-      "title": "Inspect HTTP Errors by Method/Error Type",
+      "title": "Inspect Rate Limit Errors by Method",
       "type": "timeseries",
-      "description": "Selected-range evidence: HTTP error volume grouped by provider, method, and error_type for the active Grafana interval."
+      "description": "Selected-range rate-limit pressure from HTTP errors where error_type indicates throttling/rate-limit classes. Use alongside Monitor Rate Limiter Wait p95 for provider-global scope."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "Errors",
+            "axisPlacement": "auto",
+            "drawStyle": "bars",
+            "fillOpacity": 50,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 12,
+        "x": 0,
+        "y": 85
+      },
+      "id": 115,
+      "options": {
+        "legend": {
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "expr": "round(sum by (provider, method, error_type) (increase(bioetl_http_request_errors_total{provider=~\"$provider\", error_type=~\"(?i).*(timeout|timed.?out|network).*\"}[$__interval])) or vector(0))",
+          "legendFormat": "{{ provider }} {{ method }} {{ error_type }}",
+          "refId": "A"
+        }
+      ],
+      "title": "Inspect Network Timeout Errors by Method",
+      "type": "timeseries",
+      "description": "Selected-range network/timeout failures separated from rate-limit pressure. Provider-global scope; correlate with Runtime stage errors when pipeline handoff context is set."
     },
     {
       "datasource": {
@@ -2278,7 +2366,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 85
+        "y": 99
       },
       "id": 112,
       "options": {
@@ -2354,7 +2442,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 85
+        "y": 99
       },
       "id": 113,
       "options": {
@@ -2429,7 +2517,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 93
+        "y": 107
       },
       "id": 31,
       "options": {
@@ -2504,7 +2592,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 93
+        "y": 107
       },
       "id": 32,
       "options": {

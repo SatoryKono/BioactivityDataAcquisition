@@ -265,7 +265,7 @@ oversized_test_module_inventory:
       source: tests/integration/test_grafana_config.py
       source_lines_after_split: 1403
       extracted_surface: tests/integration/test_grafana_surface_contracts.py
-      extracted_surface_lines: 705
+      extracted_surface_lines: 706
       owner: observability-dashboards
     - issue_ref: "#4506"
       source: tests/unit/composition/runtime_builders/test_runner_builder_profiles.py
@@ -775,6 +775,7 @@ remediation_closeout:
     decision: closeable
     evidence:
     - tests/architecture/test_observability_metric_governance.py
+    - tests/architecture/test_observability_dashboard_contracts.py
     - reports/observability/runtime_cardinality_inventory.json
     closeout: Observability cardinality evidence has an explicit freshness test and regeneration command.
   - issue: '#4206'

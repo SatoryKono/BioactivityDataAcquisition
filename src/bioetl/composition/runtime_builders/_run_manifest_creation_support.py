@@ -22,6 +22,9 @@ from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
 from bioetl.composition.runtime_builders._run_manifest_create_spec_support import (
     build_manifest_create_spec as _assemble_manifest_create_spec,
 )
+from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
+    RunManifestContractIdentity,
+)
 from bioetl.domain.control_plane import ReplayCapability
 from bioetl.domain.control_plane.reproducibility_policy import (
     DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
@@ -47,14 +50,7 @@ class _RunManifestCreateRequestInputs:
     resolved_config_hash: str
     effective_config_hash: str
     source_fingerprint: str | None
-    contract_ref: str
-    contract_version: str | None
-    contract_schema_hash: str | None
-    dq_policy_ref: str | None
-    rule_bundle_version: str | None
-    normalization_profile_ref: str | None
-    normalization_profile_version: str | None
-    normalization_profile_hash: str | None
+    contract_identity: RunManifestContractIdentity
     dq_contract_compatibility_hash: str
     effective_config_artifact_id: str
 

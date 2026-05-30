@@ -1483,18 +1483,13 @@ def test_dq_selected_range_evidence_panels_use_neutral_thresholds() -> None:
     assert "does not prove the current dq verdict" in gold_description
 
 
-def test_dq_blocked_share_panels_use_percentunit_domain_and_policy_thresholds() -> None:
-    """Blocked-share panels must share the same 0..1/percentunit DQ policy semantics."""
+def test_dq_blocked_record_evidence_panels_use_neutral_thresholds() -> None:
+    """Blocked-record evidence panels must not reapply entity YAML ratio thresholds in Grafana."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     expected_panels = {
-        "Monitor: DQ Impact on Deliverability (Blocked Share)",
-        "Track: DQ Impact on Deliverability Trend (Blocked Share %)",
+        "Track: DQ Blocked Records in Range (Evidence)",
+        "Track: DQ Threshold Events in Range Trend",
     }
-    expected_threshold_steps = [
-        {"color": "green", "value": None},
-        {"color": "orange", "value": 0.05},
-        {"color": "red", "value": 0.2},
-    ]
 
     panels = {
         panel.get("title"): panel
@@ -1502,42 +1497,35 @@ def test_dq_blocked_share_panels_use_percentunit_domain_and_policy_thresholds() 
         if panel.get("title") in expected_panels
     }
     assert set(panels) == expected_panels, (
-        "DQ dashboard must expose both blocked-share summary and trend panels"
+        "DQ dashboard must expose blocked-record evidence and threshold-event trend panels"
     )
 
     for panel_title, panel in panels.items():
         defaults = panel.get("fieldConfig", {}).get("defaults", {})
-        assert defaults.get("unit") == "percentunit", (
-            f"Panel '{panel_title}' must use percentunit for ratio semantics"
+        steps = defaults.get("thresholds", {}).get("steps", [])
+        assert all(step.get("value") not in {0.05, 0.2} for step in steps), (
+            f"Panel '{panel_title}' must not hardcode entity soft/hard fail thresholds"
         )
-        assert defaults.get("min") == 0, f"Panel '{panel_title}' must use min=0"
-        assert defaults.get("max") == 1, f"Panel '{panel_title}' must use max=1"
-        assert (
-            defaults.get("thresholds", {}).get("steps") == expected_threshold_steps
-        ), f"Panel '{panel_title}' must use DQ policy thresholds (warn=0.05, crit=0.20)"
+        if panel_title.startswith("Track: DQ Blocked Records"):
+            assert defaults.get("unit") == "short", (
+                f"Panel '{panel_title}' must use absolute record counts"
+            )
         expressions = [
             target.get("expr", "")
             for target in panel.get("targets", [])
             if isinstance(target.get("expr"), str)
         ]
-        assert any(
-            'stage="bronze"' in expr and "bioetl_records_processed_total" in expr
-            for expr in expressions
-        ), (
-            f"Panel '{panel_title}' must use Bronze input as the blocked-share denominator"
-        )
-        assert any(
-            "bioetl_dq_records_quarantined_total" in expr for expr in expressions
-        ), (
-            f"Panel '{panel_title}' must include quarantined records in blocked-share impact"
-        )
-        assert all(
-            'stage=~"raw|validated|enriched|filtered_out|deduplicated|final"'
-            not in expr
-            for expr in expressions
-        ), (
-            f"Panel '{panel_title}' must not use legacy/unconfirmed stage regex in the denominator"
-        )
+        if panel_title.startswith("Track: DQ Blocked Records"):
+            assert any(
+                "bioetl_dq_records_quarantined_total" in expr for expr in expressions
+            ), f"Panel '{panel_title}' must include quarantined records"
+            assert "/ clamp_min(" not in "".join(expressions), (
+                f"Panel '{panel_title}' must not compute blocked-share ratios in PromQL"
+            )
+        if panel_title.startswith("Track: DQ Threshold Events"):
+            assert any(
+                "bioetl_dq_soft_threshold_exceeded" in expr for expr in expressions
+            ), f"Panel '{panel_title}' must use domain threshold counters"
 
 
 def test_dq_freshness_lag_panel_uses_time_domain_thresholds() -> None:

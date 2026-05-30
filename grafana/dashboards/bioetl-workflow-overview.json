@@ -749,7 +749,7 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 6,
+        "w": 5,
         "x": 0,
         "y": 17
       },
@@ -813,8 +813,8 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 6,
-        "x": 6,
+        "w": 5,
+        "x": 5,
         "y": 17
       },
       "id": 3,
@@ -867,6 +867,84 @@
               },
               {
                 "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 20,
+        "y": 17
+      },
+      "id": 9410,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "dataLinks": [
+          {
+            "targetBlank": false,
+            "title": "Open 2. Runtime",
+            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context&var-run_type=$run_type_context&var-stage=unknown&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+            "includeVars": false
+          },
+          {
+            "targetBlank": false,
+            "title": "Open 0. Control Plane",
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context&var-run_type=$run_type_context&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+            "includeVars": false
+          }
+        ]
+      },
+      "targets": [
+        {
+          "expr": "round(sum(max_over_time(bioetl_pipeline_runs_total{pipeline=~\"$pipeline_context\",run_type=~\"$run_type_context\",status=\"failed\"}[$__range]))) or vector(0)",
+          "refId": "A"
+        }
+      ],
+      "title": "Failed Entity Pipeline Runs / Range",
+      "type": "stat",
+      "description": "Selected-range terminal pipeline-run failures for the hidden single-pipeline handoff context. This aligns workflow evidence with entity pipeline runs and avoids inferring COMPLETED from the last successful stage alone. Non-zero counts require Runtime stage blockers or Control Plane terminal-run/replay evidence before retry."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
                 "value": 3
               }
             ]
@@ -877,8 +955,8 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 6,
-        "x": 12,
+        "w": 5,
+        "x": 10,
         "y": 17
       },
       "id": 6,
@@ -941,8 +1019,8 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 6,
-        "x": 18,
+        "w": 5,
+        "x": 15,
         "y": 17
       },
       "id": 7,

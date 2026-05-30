@@ -4,7 +4,7 @@ This registry provides a comprehensive index of all Architecture Decision Record
 with metadata, status, and relationships.
 
 **Total ADRs**: 48
-**Last Updated**: 2026-05-26
+**Last Updated**: 2026-05-30
 
 ## 📊 Status Summary
 

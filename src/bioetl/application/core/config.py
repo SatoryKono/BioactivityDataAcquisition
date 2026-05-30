@@ -2,29 +2,17 @@
 
 from __future__ import annotations
 
-__all__ = [
-    "ContentHashPolicyByVersion",
-    "ContentHashPolicyGroup",
-    "ContentHashVersionPolicy",
-    "GoldSchemaPolicyByVersion",
-    "LockConfig",
-    "RecordProcessorConfig",
-]
-
-
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.record_processor_config import (
-    ContentHashPolicyByVersion,
-    ContentHashPolicyGroup,
-    ContentHashVersionPolicy,
-    GoldSchemaPolicyByVersion,
-    RecordProcessorConfig,
+    __all__ as _RECORD_PROCESSOR_CONFIG_EXPORTS,
 )
 
 if TYPE_CHECKING:
     from bioetl.domain.types import RunType
+
+__all__ = [*_RECORD_PROCESSOR_CONFIG_EXPORTS, "LockConfig"]
 
 
 @dataclass(frozen=True, slots=True)

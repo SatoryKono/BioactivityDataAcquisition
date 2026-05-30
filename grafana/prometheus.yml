@@ -24,6 +24,13 @@ scrape_configs:
       - targets: ['host.docker.internal:8000']
     metrics_path: /metrics
 
+  # Quarantine Explorer (bioetl quarantine serve). Exposes /metrics when enabled;
+  # up{} is derived from scrape success on /health/live when metrics_path is unset.
+  - job_name: 'quarantine-explorer'
+    metrics_path: /health/live
+    static_configs:
+      - targets: ['host.docker.internal:8081']
+
   - job_name: 'prometheus'
     static_configs:
       - targets: ['prometheus:9090']

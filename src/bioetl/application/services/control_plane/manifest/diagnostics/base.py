@@ -4,6 +4,16 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from bioetl.application.services.control_plane.manifest.diagnostics.artifact_support import (
+    build_produced_artifact_trace as _build_produced_artifact_trace,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.base_summary_helpers import (
+    _build_code_provenance_state,
+    _build_effective_config_diagnostics,
+    _build_planned_artifact_refs,
+    _resolve_operator_replay_mode,
+    _resolve_snapshot_status,
+)
 from bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_projection import (
     build_checkpoint_anchor_projection as _build_checkpoint_anchor_projection,
 )
@@ -15,26 +25,6 @@ from bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_p
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_projection import (
     resolve_resume_identity_maps as _resolve_resume_identity_maps,
-)
-from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_helpers import (
-    _collect_append_mode_semantic_sinks,
-    _resolve_exact_replay_support_boundary,
-    _resolve_replay_family_contract,
-)
-from bioetl.application.services.control_plane._run_manifest_diagnostics_summary import (
-    _build_exact_replay_anchors,
-)
-from bioetl.application.services.control_plane._run_manifest_replay_family_contract_payload import (
-    build_replay_family_contract_payload as _build_replay_family_contract_payload,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.artifact_support import (
-    build_produced_artifact_trace as _build_produced_artifact_trace,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.helpers import (
-    _build_code_provenance_state,
-    _build_planned_artifact_refs,
-    _resolve_operator_replay_mode,
-    _resolve_snapshot_status,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.replay import (
     _assess_manifest_reproducibility_policy,
@@ -56,6 +46,15 @@ from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_sup
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
     compute_input_snapshot_identity_fingerprint as _compute_input_snapshot_identity_fingerprint,
+)
+from bioetl.application.services.control_plane.run_manifest_diagnostics_support import (
+    _build_exact_replay_anchors,
+    _collect_append_mode_semantic_sinks,
+    _resolve_exact_replay_support_boundary,
+    _resolve_replay_family_contract,
+)
+from bioetl.application.services.control_plane.run_manifest_diagnostics_support import (
+    build_replay_family_contract_payload as _build_replay_family_contract_payload,
 )
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
@@ -348,35 +347,6 @@ def _attach_base_summary_artifact_defaults(
     )
     summary["identity_graph_complete"] = None
     return summary
-
-
-def _build_effective_config_diagnostics(
-    summary: dict[str, object],
-) -> dict[str, object]:
-    return {
-        "semantic": {
-            "legacy_config_hash": summary.get("config_hash"),
-            "legacy_config_hash_alias_of": "resolved_config_hash",
-            "effective_config_artifact_id": summary.get("effective_config_artifact_id"),
-            "resolved_config_hash": summary.get("resolved_config_hash"),
-            "effective_config_hash": summary.get("effective_config_hash"),
-            "source_fingerprint": summary.get("source_fingerprint"),
-            "config_hash_compatibility_anchor": summary.get("config_hash"),
-            "config_hash_legacy_alias_of": "resolved_config_hash",
-        },
-        "occurrence": {
-            "run_id": summary.get("run_id"),
-            "manifest_id": summary.get("manifest_id"),
-            "manifest_created_at": summary.get("manifest_created_at"),
-        },
-        "diff_policy": {
-            "semantic_anchor": "effective_config_hash",
-            "occurrence_fields": ["run_id", "manifest_id", "manifest_created_at"],
-            "config_hash_policy": ("deprecated_legacy_alias_for_resolved_config_hash"),
-            "legacy_config_hash_display_only": True,
-            "legacy_config_hash_replay_identity_anchor": False,
-        },
-    }
 
 
 __all__ = [

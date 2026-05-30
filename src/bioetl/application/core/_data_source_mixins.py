@@ -58,7 +58,32 @@ class _SourceMetadataDelegationMixin:
         return None
 
 
-class _WrappedDataSourceDelegationMixin:
+class _WrappedAdapterHealthDelegationMixin:
+    """Health and shutdown delegation for wrapped data source adapters."""
+
+    async def health_check(self: _HasWrappedDataSource) -> HealthStatus:
+        """Delegate health checks to the wrapped data source."""
+        return await self._data_source.health_check()
+
+    async def check_health(self: _HasWrappedDataSource) -> HealthCheckResult:
+        """Delegate enhanced health checks when available, else synthesize one."""
+        from bioetl.domain.ports import HealthCheckResult
+
+        check_health = getattr(self._data_source, "check_health", None)
+        if check_health is not None and callable(check_health):
+            return await check_health()
+        return HealthCheckResult(
+            status=await self._data_source.health_check(),
+            latency_ms=0.0,
+            provider=self.provider_name,
+        )
+
+    async def aclose(self: _HasWrappedDataSource) -> None:
+        """Delegate resource shutdown to the wrapped data source."""
+        await self._data_source.aclose()
+
+
+class _WrappedDataSourceDelegationMixin(_WrappedAdapterHealthDelegationMixin):
     """Common lifecycle and health delegation for wrapped data sources."""
 
     @property
@@ -84,24 +109,3 @@ class _WrappedDataSourceDelegationMixin:
     ) -> None:
         """Delegate async context teardown to the wrapped data source."""
         await self._data_source.__aexit__(exc_type, exc_val, exc_tb)
-
-    async def health_check(self: _HasWrappedDataSource) -> HealthStatus:
-        """Delegate health checks to the wrapped data source."""
-        return await self._data_source.health_check()
-
-    async def check_health(self: _HasWrappedDataSource) -> HealthCheckResult:
-        """Delegate enhanced health checks when available, else synthesize one."""
-        from bioetl.domain.ports import HealthCheckResult
-
-        check_health = getattr(self._data_source, "check_health", None)
-        if check_health is not None and callable(check_health):
-            return await check_health()
-        return HealthCheckResult(
-            status=await self._data_source.health_check(),
-            latency_ms=0.0,
-            provider=self.provider_name,
-        )
-
-    async def aclose(self: _HasWrappedDataSource) -> None:
-        """Delegate resource shutdown to the wrapped data source."""
-        await self._data_source.aclose()

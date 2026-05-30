@@ -16,7 +16,7 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_
     _resolve_exact_replay_supported_reason,
     _resolve_reproducibility_profile,
 )
-from bioetl.application.services.control_plane.run_manifest_diagnostics_base_helpers import (
+from bioetl.application.services.control_plane.manifest.diagnostics.base_summary_helpers import (
     _resolve_source_posture,
 )
 from bioetl.domain.control_plane import ReplayCapability, RunManifest

@@ -5,11 +5,12 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Protocol
+from typing import Protocol, cast
 
 from bioetl.application.services.control_plane._run_ledger_diagnostic_support import (
-    _RunLedgerDiagnosticRequest,
+    _RunLedgerCorrelationFieldsProtocol,
     build_run_ledger_diagnostic_details,
+    build_run_ledger_diagnostic_request,
 )
 from bioetl.application.services.control_plane.ledger_identity_support import (
     build_ledger_idempotency_key,
@@ -17,6 +18,7 @@ from bioetl.application.services.control_plane.ledger_identity_support import (
 from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.control_plane.run_ledger import infer_ledger_event_family
 from bioetl.domain.normalization import normalize_run_ledger_payload
+from bioetl.domain.types import RunID
 
 _IDEMPOTENCY_KEY_FIELDS = (
     "manifest_id",
@@ -51,22 +53,10 @@ class RunLedgerEntryRequest:
     details: dict[str, object] | None = None
 
 
-class _RunLedgerServiceEntryProtocol(Protocol):
+class _RunLedgerServiceEntryProtocol(_RunLedgerCorrelationFieldsProtocol, Protocol):
     ledger_port: _RunLedgerPortProtocol
     manifest_id: str
     run_id: object
-    pipeline_name: str | None
-    provider: str | None
-    entity: str | None
-    run_type: str | None
-    resolved_config_hash: str | None
-    effective_config_hash: str | None
-    contract_ref: str | None
-    contract_version: str | None
-    dq_policy_ref: str | None
-    rule_bundle_version: str | None
-    dq_contract_compatibility_hash: str | None
-    effective_config_artifact_id: str | None
     composite_run_id: str | None
     _entry_id_factory: Callable[[], str]
     _occurred_at_factory: Callable[[], datetime]
@@ -109,25 +99,12 @@ def append_run_ledger_entry(
             "lineage_fragment_id": request.lineage_fragment_id,
             "metrics_snapshot": request.metrics_snapshot,
             "details": build_run_ledger_diagnostic_details(
-                _RunLedgerDiagnosticRequest(
+                build_run_ledger_diagnostic_request(
+                    service,
                     event_type=request.event_type,
                     event_family=event_family,
                     manifest_id=service.manifest_id,
-                    run_id=service.run_id,
-                    pipeline_name=service.pipeline_name,
-                    provider=service.provider,
-                    entity=service.entity,
-                    run_type=service.run_type,
-                    resolved_config_hash=service.resolved_config_hash,
-                    effective_config_hash=service.effective_config_hash,
-                    contract_ref=service.contract_ref,
-                    contract_version=service.contract_version,
-                    dq_policy_ref=service.dq_policy_ref,
-                    rule_bundle_version=service.rule_bundle_version,
-                    dq_contract_compatibility_hash=(
-                        service.dq_contract_compatibility_hash
-                    ),
-                    effective_config_artifact_id=service.effective_config_artifact_id,
+                    run_id=cast(RunID, service.run_id),
                     composite_run_id=service.composite_run_id,
                     status=request.status,
                     stage=request.stage,

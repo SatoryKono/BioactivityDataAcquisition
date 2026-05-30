@@ -87,6 +87,9 @@ jobs:
       - name: Check dashboard inventory parity
         run: uv run python -m scripts.engineering.qa report-dashboard-inventory --check --json
 
+      - name: Check dashboard panel audit matrix parity
+        run: uv run python -m scripts.engineering.qa report-dashboard-panel-audit-matrix --check
+
   validate-mkdocs:
     needs: docs-governance
     runs-on: ubuntu-latest

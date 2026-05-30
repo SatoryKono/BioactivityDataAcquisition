@@ -91,6 +91,24 @@ tests:
               description: Pushgateway is not reachable for instance=pushgateway:9091.
               runbook: docs/05-operations/runbooks/observability-checklist.md
 
+  - name: quarantine-explorer-unavailable
+    interval: 1m
+    input_series:
+      - series: 'up{job="quarantine-explorer",instance="host.docker.internal:8081"}'
+        values: '0 0 0 0 0 0 0'
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: BioETLQuarantineExplorerUnavailable
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              job: quarantine-explorer
+              instance: host.docker.internal:8081
+            exp_annotations:
+              summary: Quarantine Explorer API is unavailable
+              description: Prometheus could not scrape the Quarantine Explorer endpoint on :8081. Dashboard panels (ID, Processed Records, Silver Reject Explorer) will show no data.
+              runbook: docs/05-operations/runbooks/observability-checklist.md
+
   - name: memory-pressure-active
     interval: 1m
     input_series:
@@ -295,6 +313,22 @@ tests:
         exp_samples:
           - labels: '{provider="chembl"}'
             value: 1
+
+  - name: provider-range-operational-ok-from-adapter-activity
+    interval: 1m
+    input_series:
+      - series: 'bioetl_adapter_requests_total{provider="chembl"}'
+        values: '0+1x20'
+      - series: 'bioetl_health_check_failures_total{provider="chembl"}'
+        values: '0+0x20'
+      - series: 'bioetl_http_request_errors_total{provider="chembl"}'
+        values: '0+0x20'
+    promql_expr_test:
+      - expr: bioetl_provider_range_operational_ok{provider="chembl"}
+        eval_time: 16m
+        exp_samples:
+          - labels: '{provider="chembl"}'
+            value: 0
 
   - name: provider-current-cause-projects-raw-health-status
     interval: 1m
@@ -720,3 +754,31 @@ tests:
       - expr: bioetl_l1_gold_lifecycle_status{pipeline="chembl_assay",run_type="backfill",lifecycle_state="pending_no_recent_gold"}
         eval_time: 19m
         exp_samples: []
+
+  - name: operator-runtime-universe-missing
+    interval: 1m
+    input_series:
+      - series: 'bioetl_pipeline_runs_total{pipeline="chembl_target",run_type="backfill",status="success"}'
+        values: '0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15'
+    alert_rule_test:
+      - eval_time: 16m
+        alertname: BioETLOperatorRuntimeUniverseMissing
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+            exp_annotations:
+              summary: "Runtime operator universe telemetry is missing"
+
+  - name: dq-current-status-missing
+    interval: 1m
+    input_series:
+      - series: 'bioetl_dq_monitor_enabled{pipeline="chembl_target"}'
+        values: '1+0x20'
+    alert_rule_test:
+      - eval_time: 16m
+        alertname: BioETLDQCurrentStatusMissing
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+            exp_annotations:
+              summary: "DQ current-status recording rule is missing"

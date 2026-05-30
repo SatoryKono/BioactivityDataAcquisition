@@ -212,7 +212,7 @@
     ],
     "enrichers": [],
     "merge": {
-      "column_group_count": 11,
+      "column_group_count": 10,
       "conflict_resolution": "seed_priority",
       "output_gold_path": "data/output/gold/composite/target",
       "output_silver_path": "data/output/silver/composite/target",

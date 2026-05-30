@@ -1116,7 +1116,7 @@
         "y": 7
       },
       "options": {
-        "content": "<div style=\"padding:0.45rem 0.65rem;line-height:1.5\"><strong>CRIT:</strong> inspect DQ reasons first; if <strong>filtered_out=0</strong>, check <strong>Quarantined</strong>, <strong>Silver Validation Failures</strong>, and <strong>Blocked Share</strong> before assuming the incident is a reject-path issue. <strong>WARN:</strong> open Silver Reject Explorer. <strong>Scope:</strong> status above is pipeline-wide; <strong>$run_type</strong> and stage filters shape only selected-range evidence below. <strong>invalid_record_policy</strong> visibility absent = UNKNOWN.</div>",
+        "content": "<div style=\"padding:0.45rem 0.65rem;line-height:1.5\"><strong>CRIT:</strong> inspect DQ reasons first; if <strong>filtered_out=0</strong>, check <strong>Quarantined</strong>, <strong>Silver Validation Failures</strong>, and <strong>Blocked Records</strong> before assuming the incident is a reject-path issue. <strong>WARN:</strong> open Silver Reject Explorer. <strong>Scope:</strong> status above is pipeline-wide; <strong>$run_type</strong> and stage filters shape only selected-range evidence below. <strong>invalid_record_policy</strong> visibility absent = UNKNOWN.</div>",
         "mode": "html"
       },
       "description": "Operator CTA for first-pass DQ triage. It explains what to do for CRIT versus WARN states, clarifies that the answer row above is pipeline-wide current state while run_type and stage mainly shape selected-range evidence, and explicitly distinguishes reject-path evidence from quarantine/validation blockers when filtered_out remains zero.",
@@ -1493,10 +1493,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
-        "w": 8,
-        "x": 0,
-        "y": 31
+        "h": 7,
+        "w": 6,
+        "x": 18,
+        "y": 24
       },
       "id": 6,
       "options": {
@@ -1663,10 +1663,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 7,
-        "w": 6,
-        "x": 12,
-        "y": 24
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 31
       },
       "id": 8,
       "options": {
@@ -1703,33 +1703,23 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Selected-range deliverability impact. Numerator = Silver filter rejects plus DQ quarantine records; denominator = Bronze input for the same pipeline/run_type window. 0 means no blocked records were observed in the selected window, not that DQ metrics are globally healthy. A value of 100% is possible with filtered_out=0 when all records were quarantined instead of rejected by filters.",
+      "description": "Selected-range blocked-record evidence only. Counts Silver filter rejects plus DQ quarantine records for the pipeline/run_type window without applying entity YAML thresholds in Grafana. Read alongside the adjacent Track: Source Records in Range (Bronze) panel for the denominator/magnitude context, and rely on Monitor DQ Current Status / Monitor DQ Threshold State (bioetl_dq_current_* recording rules) for the soft/hard severity verdict instead of the absolute count. 0 means no blocked records were observed in the selected window.",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
-          "decimals": 2,
-          "max": 1,
-          "min": 0,
+          "decimals": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "gray",
                 "value": null
-              },
-              {
-                "color": "orange",
-                "value": 0.05
-              },
-              {
-                "color": "red",
-                "value": 0.2
               }
             ]
           },
-          "unit": "percentunit",
+          "unit": "short",
           "mappings": [
             {
               "type": "special",
@@ -1784,13 +1774,13 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "(((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0)) + (sum(max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))) / clamp_min((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}[$__range])) or vector(0)), 1))",
-          "legendFormat": "blocked share",
+          "expr": "round((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0)) + (sum(max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0)))",
+          "legendFormat": "blocked records",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Monitor: DQ Impact on Deliverability (Blocked Share)",
+      "title": "Track: DQ Blocked Records in Range (Evidence)",
       "type": "stat"
     },
     {
@@ -2752,33 +2742,23 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range trend of deliverability impact. Numerator = Silver filter rejects plus DQ quarantine records; denominator = Bronze input for the same pipeline/run_type window. Use sustained elevation as DQ pressure evidence and sudden spikes as incident evidence.",
+          "description": "Selected-range trend of domain-emitted DQ threshold events. Uses bioetl_dq_soft_threshold_exceeded and hard_fail validation counters only; Grafana does not recompute entity YAML thresholds here.",
           "fieldConfig": {
             "defaults": {
               "color": {
-                "mode": "thresholds"
+                "mode": "palette-classic"
               },
-              "decimals": 2,
-              "max": 1,
-              "min": 0,
+              "decimals": 0,
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
                     "color": "green",
                     "value": null
-                  },
-                  {
-                    "color": "orange",
-                    "value": 0.05
-                  },
-                  {
-                    "color": "red",
-                    "value": 0.2
                   }
                 ]
               },
-              "unit": "percentunit",
+              "unit": "short",
               "mappings": [
                 {
                   "type": "special",
@@ -2819,13 +2799,13 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "(((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__interval])) or vector(0)) + (sum(max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval])) or vector(0))) / clamp_min((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}[$__interval])) or vector(0)), 1))",
-              "legendFormat": "blocked share",
+              "expr": "round((sum(increase(bioetl_dq_soft_threshold_exceeded{pipeline=~\"$pipeline\"}[$__interval])) or vector(0)) + (sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__interval])) or vector(0)))",
+              "legendFormat": "threshold events",
               "range": true,
               "refId": "A"
             }
           ],
-          "title": "Track: DQ Impact on Deliverability Trend (Blocked Share %)",
+          "title": "Track: DQ Threshold Events in Range Trend",
           "type": "timeseries"
         },
         {

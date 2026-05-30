@@ -32,6 +32,22 @@ ACCEPTED_RUNTIME_SCCS: dict[frozenset[str], dict[str, str]] = {
             "removes the split data/default ownership seam."
         ),
     },
+    frozenset(
+        {
+            "bioetl.application.services.control_plane._run_manifest_diagnostics_summary",
+            "bioetl.application.services.control_plane.manifest.diagnostics.artifact_support",
+            "bioetl.application.services.control_plane.run_manifest_diagnostics_support",
+        }
+    ): {
+        "owner": "application.services.control_plane",
+        "review_date": "2026-09-30",
+        "linked_issue": "#4818",
+        "rationale": (
+            "Run-manifest diagnostics helpers share artifact-support imports in a "
+            "reviewed same-layer cycle until diagnostics summary extraction is "
+            "flattened into a single support module."
+        ),
+    },
 }
 FORBIDDEN_RUNTIME_SCCS: tuple[frozenset[str], ...] = (
     frozenset(
