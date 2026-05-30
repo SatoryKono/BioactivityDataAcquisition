@@ -54,7 +54,6 @@ _SKIPPED_PATH_PREFIXES = (
     "docs/02-architecture/diagrams/foundation/svg/",
     "docs/02-architecture/diagrams/views/png/",
     "docs/02-architecture/diagrams/views/svg/",
-    "docs/02-architecture/diagrams/descriptions/legacy/",
     "src/memory/",
     "scripts/archive/",
 )
