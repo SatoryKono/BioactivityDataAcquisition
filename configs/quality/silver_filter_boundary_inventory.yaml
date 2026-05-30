@@ -26,19 +26,11 @@ pipelines:
         - standard_units
         columns:
         - assay_type
-        - inorganic_flag
-        - molecule_type
         - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
         - standard_relation
         - standard_type
         - standard_units
-        - structure_type
-        - target_type
         ranges:
-        - confidence_score
         - pchembl_value
         - publication_year
         - standard_value
@@ -84,55 +76,47 @@ pipelines:
     filters:
       required_fields:
         structural:
+        - _state
         - activity_id
-        - record_id
-        - src_id
-        - canonical_smiles
+        - activity_relation
+        - activity_value
         - bao_endpoint
         - bao_format
         - bao_label
-        - activity_relation
-        - activity_value
-        - units
-        - standard_value
+        - canonical_smiles
+        - record_id
+        - src_id
         - standard_flag
+        - standard_value
+        - units
         - uo_units
-        - _state
         join_safety:
-        - molecule_id
-        - assay_id
-        - target_id
-        - publication_id
-        - target_organism
         - assay_description
+        - assay_id
+        - molecule_id
+        - publication_id
+        - target_id
+        - target_organism
         business_only:
+        - assay_type
+        - journal
+        - pchembl_value
+        - potential_duplicate
+        - publication_year
+        - standard_relation
         - standard_type
         - standard_units
-        - pchembl_value
-        - journal
-        - publication_year
-        - assay_type
-        - potential_duplicate
-        - standard_relation
       columns:
         business_only:
         - assay_type
-        - inorganic_flag
-        - molecule_type
         - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
         - standard_relation
         - standard_type
         - standard_units
-        - structure_type
-        - target_type
       ranges:
         structural:
         - activity_id
         business_only:
-        - confidence_score
         - pchembl_value
         - publication_year
         - standard_value
@@ -155,23 +139,11 @@ pipelines:
         - relationship_type
         columns:
         - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
         - relationship_type
         - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
         ranges:
-        - activity_id
         - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
       shadow_metrics:
         current_rejections:
           metric: bioetl_silver_filter_rejections_total
@@ -211,38 +183,26 @@ pipelines:
     filters:
       required_fields:
         structural:
-        - assay_id
         - assay_description
+        - assay_id
         - bao_format
         join_safety:
-        - target_id
         - publication_id
+        - target_id
         business_only:
         - assay_type
         - assay_type_description
-        - relationship_type
         - confidence_score
+        - relationship_type
       columns:
         business_only:
         - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
         - relationship_type
         - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
       ranges:
         business_only:
-        - activity_id
         - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
   chembl_assay_parameters:
     downstream_role: standalone
     downstream_pipelines: []
@@ -253,27 +213,9 @@ pipelines:
         - assay_param_id
         - parameter_type
         - type
-      columns:
-        business_only:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
       ranges:
         business_only:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
     business_only_migration:
       state: candidate_for_gold
   chembl_cell_line:
@@ -285,51 +227,16 @@ pipelines:
         structural:
         - cell_id
         - cell_name
-      columns:
-        business_only:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
       ranges:
         business_only:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
     business_only_migration:
       state: blocked_by_downstream_composite
       blocked_by: *id005
     shadow_analysis:
       candidate_business_rules:
-        columns:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
         ranges:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
       shadow_metrics: &id008
         current_rejections:
           metric: bioetl_silver_filter_rejections_total
@@ -377,51 +284,16 @@ pipelines:
         join_safety:
         - molecule_id
         - publication_id
-      columns:
-        business_only:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
       ranges:
         business_only:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
     business_only_migration:
       state: blocked_by_downstream_composite
       blocked_by: *id007
     shadow_analysis:
       candidate_business_rules:
-        columns:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
         ranges:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
       shadow_metrics: *id008
       composite_impact_checks:
       - composite_pipeline: composite_activity
@@ -457,24 +329,12 @@ pipelines:
         required_fields:
         - molecule_type
         columns:
-        - assay_type
         - inorganic_flag
         - molecule_type
         - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
         - structure_type
-        - target_type
         ranges:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
       shadow_metrics:
         current_rejections:
           metric: bioetl_silver_filter_rejections_total
@@ -517,25 +377,13 @@ pipelines:
         - molecule_type
       columns:
         business_only:
-        - assay_type
         - inorganic_flag
         - molecule_type
         - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
         - structure_type
-        - target_type
       ranges:
         business_only:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
   chembl_protein_class:
     downstream_role: composite_dependency
     downstream_pipelines: &id012
@@ -543,54 +391,19 @@ pipelines:
     filters:
       required_fields:
         structural:
-        - protein_class_id
         - class_level
         - pref_name
-      columns:
-        business_only:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
+        - protein_class_id
       ranges:
         business_only:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
     business_only_migration:
       state: blocked_by_downstream_composite
       blocked_by: *id012
     shadow_analysis:
       candidate_business_rules:
-        columns:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
         ranges:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
       shadow_metrics: *id008
       composite_impact_checks:
       - composite_pipeline: composite_target
@@ -623,24 +436,9 @@ pipelines:
         required_fields:
         - publication_type
         columns:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
         - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
         ranges:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
       shadow_metrics:
         current_rejections:
           metric: bioetl_silver_filter_rejections_total
@@ -687,25 +485,10 @@ pipelines:
         - publication_type
       columns:
         business_only:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
         - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
       ranges:
         business_only:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
   chembl_publication_similarity:
     downstream_role: standalone
     downstream_pipelines: []
@@ -716,27 +499,9 @@ pipelines:
         join_safety:
         - doc_1
         - doc_2
-      columns:
-        business_only:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
       ranges:
         business_only:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
     business_only_migration:
       state: candidate_for_gold
   chembl_publication_term:
@@ -744,32 +509,14 @@ pipelines:
     downstream_pipelines: []
     filters:
       required_fields:
-        join_safety:
-        - publication_id
         derived_child:
         - term
         - term_type
-      columns:
-        business_only:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
+        join_safety:
+        - publication_id
       ranges:
         business_only:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
     business_only_migration:
       state: candidate_for_gold
   chembl_subcellular_fraction:
@@ -779,27 +526,9 @@ pipelines:
       required_fields:
         derived_child:
         - subcellular_fraction
-      columns:
-        business_only:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
       ranges:
         business_only:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
     business_only_migration:
       state: candidate_for_gold
   chembl_target:
@@ -814,24 +543,9 @@ pipelines:
         required_fields:
         - target_type
         columns:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
         - target_type
         ranges:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
       shadow_metrics:
         current_rejections:
           metric: bioetl_silver_filter_rejections_total
@@ -869,40 +583,25 @@ pipelines:
     filters:
       required_fields:
         structural:
-        - target_id
-        - pref_name
         - organism
-        - target_protein_synonyms
-        - target_gene_synonyms
+        - pref_name
         - target_ec_numbers
-        - target_xref_pdb_ids
+        - target_gene_synonyms
+        - target_id
+        - target_protein_synonyms
         - target_xref_go_component
         - target_xref_go_function
         - target_xref_go_process
+        - target_xref_pdb_ids
         - target_xref_reactome_ids
         business_only:
         - target_type
       columns:
         business_only:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
         - target_type
       ranges:
         business_only:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
   chembl_target_component:
     downstream_role: composite_dependency
     downstream_pipelines: &id018
@@ -912,51 +611,16 @@ pipelines:
         structural:
         - component_id
         - organism
-      columns:
-        business_only:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
       ranges:
         business_only:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
     business_only_migration:
       state: blocked_by_downstream_composite
       blocked_by: *id018
     shadow_analysis:
       candidate_business_rules:
-        columns:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
         ranges:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
       shadow_metrics: *id008
       composite_impact_checks:
       - composite_pipeline: composite_target
@@ -984,53 +648,18 @@ pipelines:
     filters:
       required_fields:
         structural:
-        - tissue_id
         - pref_name
-      columns:
-        business_only:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
+        - tissue_id
       ranges:
         business_only:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
     business_only_migration:
       state: blocked_by_downstream_composite
       blocked_by: *id020
     shadow_analysis:
       candidate_business_rules:
-        columns:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
         ranges:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
       shadow_metrics: *id008
       composite_impact_checks:
       - composite_pipeline: composite_assay
@@ -1063,51 +692,16 @@ pipelines:
         - doi
         join_safety:
         - title
-      columns:
-        business_only:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
       ranges:
         business_only:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
     business_only_migration:
       state: blocked_by_downstream_composite
       blocked_by: *id022
     shadow_analysis:
       candidate_business_rules:
-        columns:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
         ranges:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
       shadow_metrics: *id008
       composite_impact_checks:
       - composite_pipeline: composite_publication
@@ -1140,51 +734,16 @@ pipelines:
         - openalex_id
         join_safety:
         - title
-      columns:
-        business_only:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
       ranges:
         business_only:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
     business_only_migration:
       state: blocked_by_downstream_composite
       blocked_by: *id024
     shadow_analysis:
       candidate_business_rules:
-        columns:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
         ranges:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
       shadow_metrics: *id008
       composite_impact_checks:
       - composite_pipeline: composite_publication
@@ -1215,51 +774,16 @@ pipelines:
       required_fields:
         structural:
         - molecule_id
-      columns:
-        business_only:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
       ranges:
         business_only:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
     business_only_migration:
       state: blocked_by_downstream_composite
       blocked_by: *id026
     shadow_analysis:
       candidate_business_rules:
-        columns:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
         ranges:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
       shadow_metrics: *id008
       composite_impact_checks:
       - composite_pipeline: composite_molecule
@@ -1290,51 +814,16 @@ pipelines:
         - pmid
         join_safety:
         - title
-      columns:
-        business_only:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
       ranges:
         business_only:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
     business_only_migration:
       state: blocked_by_downstream_composite
       blocked_by: *id028
     shadow_analysis:
       candidate_business_rules:
-        columns:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
         ranges:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
       shadow_metrics: *id008
       composite_impact_checks:
       - composite_pipeline: composite_publication
@@ -1367,51 +856,16 @@ pipelines:
         - paper_id
         join_safety:
         - title
-      columns:
-        business_only:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
       ranges:
         business_only:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
     business_only_migration:
       state: blocked_by_downstream_composite
       blocked_by: *id030
     shadow_analysis:
       candidate_business_rules:
-        columns:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
         ranges:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
       shadow_metrics: *id008
       composite_impact_checks:
       - composite_pipeline: composite_publication
@@ -1444,51 +898,16 @@ pipelines:
         - mapping_status
         join_safety:
         - target_id
-      columns:
-        business_only:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
       ranges:
         business_only:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
     business_only_migration:
       state: blocked_by_downstream_composite
       blocked_by: *id032
     shadow_analysis:
       candidate_business_rules:
-        columns:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
         ranges:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
       shadow_metrics: *id008
       composite_impact_checks:
       - composite_pipeline: composite_target
@@ -1518,51 +937,16 @@ pipelines:
         structural:
         - accession
         - organism_scientific
-      columns:
-        business_only:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
       ranges:
         business_only:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
     business_only_migration:
       state: blocked_by_downstream_composite
       blocked_by: *id034
     shadow_analysis:
       candidate_business_rules:
-        columns:
-        - assay_type
-        - inorganic_flag
-        - molecule_type
-        - potential_duplicate
-        - publication_type
-        - relationship_type
-        - src_id
-        - standard_relation
-        - standard_type
-        - standard_units
-        - structure_type
-        - target_type
         ranges:
-        - activity_id
-        - confidence_score
-        - pchembl_value
         - publication_year
-        - standard_value
       shadow_metrics: *id008
       composite_impact_checks:
       - composite_pipeline: composite_target

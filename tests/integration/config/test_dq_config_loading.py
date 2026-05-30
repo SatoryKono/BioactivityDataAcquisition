@@ -247,6 +247,7 @@ class TestPipelineConfigLoaderWithDQResolution:
             "assay_strain": None,
             "bao_format": "BAO_0000357",
             "src_id": "1",
+            "publication_year": 2020,
         }
 
         assert gold_filters.should_include(allowed_record) is True

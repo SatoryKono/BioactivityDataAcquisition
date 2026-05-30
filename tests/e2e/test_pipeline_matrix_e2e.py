@@ -35,6 +35,7 @@ from .conftest import (
     assert_bronze_metadata_files_exist,
     assert_run_manifest_exists,
     assert_silver_table_has_records,
+    build_e2e_skip_reason,
     create_test_context,
     is_external_healthcheck_playback_failure,
     run_pipeline_or_skip_transient,

@@ -443,7 +443,14 @@ composite:
 
       - crossref
       - openalex
-    field_mappings: {}
+    field_mappings:
+      "chembl.cell_line.efo_id": "cell_efo_id"
+      "chembl.tissue.efo_id": "tissue_efo_id"
+      "chembl.tissue.pref_name": "tissue_pref_name"
+      "chembl.tissue.uberon_id": "tissue_uberon_id"
+      "chembl.tissue.bto_id": "tissue_bto_id"
+      "chembl.tissue.caloha_id": "tissue_caloha_id"
+      "chembl.target_component.description": "component_description"
     # -------------------------------------------------------------------------
     # Column Ordering by Canonical Categories
     # -------------------------------------------------------------------------

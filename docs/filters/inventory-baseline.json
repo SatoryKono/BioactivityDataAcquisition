@@ -5,10 +5,10 @@
     "entities_total": 26,
     "entities_with_silver_filters": 21,
     "entities_with_gold_filters": 21,
-    "rules_total": 448,
+    "rules_total": 130,
     "keep_in_silver": 91,
-    "move_to_gold": 84,
-    "duplicate": 273,
+    "move_to_gold": 5,
+    "duplicate": 34,
     "conflict": 0
   },
   "entities": [
@@ -20,8 +20,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 29,
-        "move_to_gold": 4,
-        "duplicate": 13,
+        "move_to_gold": 2,
+        "duplicate": 7,
         "conflict": 0
       },
       "rules": [
@@ -368,76 +368,6 @@
         {
           "provider": "chembl",
           "entity": "activity",
-          "rule_type": "columns",
-          "field": "inorganic_flag",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "activity",
-          "rule_type": "columns",
-          "field": "molecule_type",
-          "silver_value": "[\"Small molecule\"]",
-          "gold_value": "[\"Small molecule\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "activity",
-          "rule_type": "columns",
-          "field": "publication_type",
-          "silver_value": "[\"journal-article\"]",
-          "gold_value": "[\"journal-article\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "activity",
-          "rule_type": "columns",
-          "field": "relationship_type",
-          "silver_value": "[\"D\"]",
-          "gold_value": "[\"D\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "activity",
-          "rule_type": "columns",
-          "field": "src_id",
-          "silver_value": "[\"1\"]",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "activity",
-          "rule_type": "columns",
-          "field": "structure_type",
-          "silver_value": "[\"MOL\"]",
-          "gold_value": "[\"MOL\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "activity",
-          "rule_type": "columns",
-          "field": "target_type",
-          "silver_value": "[\"SINGLE PROTEIN\"]",
-          "gold_value": "[\"SINGLE PROTEIN\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "activity",
           "rule_type": "ranges",
           "field": "activity_id",
           "silver_value": "{\"max\": 10000000000, \"min\": 1}",
@@ -474,16 +404,6 @@
           "gold_value": "{\"max\": 2050, \"min\": 1950}",
           "action": "duplicate",
           "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "activity",
-          "rule_type": "ranges",
-          "field": "confidence_score",
-          "silver_value": "{\"max\": 9, \"min\": 8}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
         }
       ]
     },
@@ -495,8 +415,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 9,
-        "move_to_gold": 4,
-        "duplicate": 13,
+        "move_to_gold": 3,
+        "duplicate": 2,
         "conflict": 0
       },
       "rules": [
@@ -606,9 +526,9 @@
           "rule_type": "columns",
           "field": "relationship_type",
           "silver_value": "[\"D\"]",
-          "gold_value": "[\"D\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
+          "gold_value": "",
+          "action": "move_to_gold",
+          "notes": "no rule in gold_filters - move from silver"
         },
         {
           "provider": "chembl",
@@ -619,96 +539,6 @@
           "gold_value": "",
           "action": "move_to_gold",
           "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "assay",
-          "rule_type": "columns",
-          "field": "inorganic_flag",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "assay",
-          "rule_type": "columns",
-          "field": "molecule_type",
-          "silver_value": "[\"Small molecule\"]",
-          "gold_value": "[\"Small molecule\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "assay",
-          "rule_type": "columns",
-          "field": "potential_duplicate",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "assay",
-          "rule_type": "columns",
-          "field": "publication_type",
-          "silver_value": "[\"journal-article\"]",
-          "gold_value": "[\"journal-article\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "assay",
-          "rule_type": "columns",
-          "field": "standard_relation",
-          "silver_value": "[\"=\"]",
-          "gold_value": "[\"=\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "assay",
-          "rule_type": "columns",
-          "field": "standard_type",
-          "silver_value": "[\"IC50\", \"Ki\"]",
-          "gold_value": "[\"IC50\", \"Ki\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "assay",
-          "rule_type": "columns",
-          "field": "standard_units",
-          "silver_value": "[\"nM\"]",
-          "gold_value": "[\"nM\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "assay",
-          "rule_type": "columns",
-          "field": "structure_type",
-          "silver_value": "[\"MOL\"]",
-          "gold_value": "[\"MOL\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "assay",
-          "rule_type": "columns",
-          "field": "target_type",
-          "silver_value": "[\"SINGLE PROTEIN\"]",
-          "gold_value": "[\"SINGLE PROTEIN\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
         },
         {
           "provider": "chembl",
@@ -729,36 +559,6 @@
           "gold_value": "{\"max\": 2050, \"min\": 1950}",
           "action": "duplicate",
           "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "assay",
-          "rule_type": "ranges",
-          "field": "activity_id",
-          "silver_value": "{\"max\": 10000000000, \"min\": 1}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "assay",
-          "rule_type": "ranges",
-          "field": "pchembl_value",
-          "silver_value": "{\"max\": 10, \"min\": 3}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "assay",
-          "rule_type": "ranges",
-          "field": "standard_value",
-          "silver_value": "{\"include_min\": false, \"min\": 0}",
-          "gold_value": "{\"include_min\": false, \"min\": 0}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
         }
       ]
     },
@@ -770,8 +570,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 4,
-        "move_to_gold": 4,
-        "duplicate": 13,
+        "move_to_gold": 0,
+        "duplicate": 1,
         "conflict": 0
       },
       "rules": [
@@ -818,170 +618,10 @@
         {
           "provider": "chembl",
           "entity": "assay_parameters",
-          "rule_type": "columns",
-          "field": "assay_type",
-          "silver_value": "[\"B\", \"F\"]",
-          "gold_value": "[\"B\", \"F\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "assay_parameters",
-          "rule_type": "columns",
-          "field": "inorganic_flag",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "assay_parameters",
-          "rule_type": "columns",
-          "field": "molecule_type",
-          "silver_value": "[\"Small molecule\"]",
-          "gold_value": "[\"Small molecule\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "assay_parameters",
-          "rule_type": "columns",
-          "field": "potential_duplicate",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "assay_parameters",
-          "rule_type": "columns",
-          "field": "publication_type",
-          "silver_value": "[\"journal-article\"]",
-          "gold_value": "[\"journal-article\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "assay_parameters",
-          "rule_type": "columns",
-          "field": "relationship_type",
-          "silver_value": "[\"D\"]",
-          "gold_value": "[\"D\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "assay_parameters",
-          "rule_type": "columns",
-          "field": "src_id",
-          "silver_value": "[\"1\"]",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "assay_parameters",
-          "rule_type": "columns",
-          "field": "standard_relation",
-          "silver_value": "[\"=\"]",
-          "gold_value": "[\"=\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "assay_parameters",
-          "rule_type": "columns",
-          "field": "standard_type",
-          "silver_value": "[\"IC50\", \"Ki\"]",
-          "gold_value": "[\"IC50\", \"Ki\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "assay_parameters",
-          "rule_type": "columns",
-          "field": "standard_units",
-          "silver_value": "[\"nM\"]",
-          "gold_value": "[\"nM\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "assay_parameters",
-          "rule_type": "columns",
-          "field": "structure_type",
-          "silver_value": "[\"MOL\"]",
-          "gold_value": "[\"MOL\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "assay_parameters",
-          "rule_type": "columns",
-          "field": "target_type",
-          "silver_value": "[\"SINGLE PROTEIN\"]",
-          "gold_value": "[\"SINGLE PROTEIN\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "assay_parameters",
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
           "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "assay_parameters",
-          "rule_type": "ranges",
-          "field": "activity_id",
-          "silver_value": "{\"max\": 10000000000, \"min\": 1}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "assay_parameters",
-          "rule_type": "ranges",
-          "field": "confidence_score",
-          "silver_value": "{\"max\": 9, \"min\": 8}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "assay_parameters",
-          "rule_type": "ranges",
-          "field": "pchembl_value",
-          "silver_value": "{\"max\": 10, \"min\": 3}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "assay_parameters",
-          "rule_type": "ranges",
-          "field": "standard_value",
-          "silver_value": "{\"include_min\": false, \"min\": 0}",
-          "gold_value": "{\"include_min\": false, \"min\": 0}",
           "action": "duplicate",
           "notes": "identical rule in gold_filters - drop from silver"
         }
@@ -995,8 +635,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 2,
-        "move_to_gold": 4,
-        "duplicate": 13,
+        "move_to_gold": 0,
+        "duplicate": 1,
         "conflict": 0
       },
       "rules": [
@@ -1023,170 +663,10 @@
         {
           "provider": "chembl",
           "entity": "cell_line",
-          "rule_type": "columns",
-          "field": "assay_type",
-          "silver_value": "[\"B\", \"F\"]",
-          "gold_value": "[\"B\", \"F\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "cell_line",
-          "rule_type": "columns",
-          "field": "inorganic_flag",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "cell_line",
-          "rule_type": "columns",
-          "field": "molecule_type",
-          "silver_value": "[\"Small molecule\"]",
-          "gold_value": "[\"Small molecule\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "cell_line",
-          "rule_type": "columns",
-          "field": "potential_duplicate",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "cell_line",
-          "rule_type": "columns",
-          "field": "publication_type",
-          "silver_value": "[\"journal-article\"]",
-          "gold_value": "[\"journal-article\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "cell_line",
-          "rule_type": "columns",
-          "field": "relationship_type",
-          "silver_value": "[\"D\"]",
-          "gold_value": "[\"D\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "cell_line",
-          "rule_type": "columns",
-          "field": "src_id",
-          "silver_value": "[\"1\"]",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "cell_line",
-          "rule_type": "columns",
-          "field": "standard_relation",
-          "silver_value": "[\"=\"]",
-          "gold_value": "[\"=\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "cell_line",
-          "rule_type": "columns",
-          "field": "standard_type",
-          "silver_value": "[\"IC50\", \"Ki\"]",
-          "gold_value": "[\"IC50\", \"Ki\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "cell_line",
-          "rule_type": "columns",
-          "field": "standard_units",
-          "silver_value": "[\"nM\"]",
-          "gold_value": "[\"nM\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "cell_line",
-          "rule_type": "columns",
-          "field": "structure_type",
-          "silver_value": "[\"MOL\"]",
-          "gold_value": "[\"MOL\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "cell_line",
-          "rule_type": "columns",
-          "field": "target_type",
-          "silver_value": "[\"SINGLE PROTEIN\"]",
-          "gold_value": "[\"SINGLE PROTEIN\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "cell_line",
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
           "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "cell_line",
-          "rule_type": "ranges",
-          "field": "activity_id",
-          "silver_value": "{\"max\": 10000000000, \"min\": 1}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "cell_line",
-          "rule_type": "ranges",
-          "field": "confidence_score",
-          "silver_value": "{\"max\": 9, \"min\": 8}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "cell_line",
-          "rule_type": "ranges",
-          "field": "pchembl_value",
-          "silver_value": "{\"max\": 10, \"min\": 3}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "cell_line",
-          "rule_type": "ranges",
-          "field": "standard_value",
-          "silver_value": "{\"include_min\": false, \"min\": 0}",
-          "gold_value": "{\"include_min\": false, \"min\": 0}",
           "action": "duplicate",
           "notes": "identical rule in gold_filters - drop from silver"
         }
@@ -1200,8 +680,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 3,
-        "move_to_gold": 4,
-        "duplicate": 13,
+        "move_to_gold": 0,
+        "duplicate": 1,
         "conflict": 0
       },
       "rules": [
@@ -1238,170 +718,10 @@
         {
           "provider": "chembl",
           "entity": "compound_record",
-          "rule_type": "columns",
-          "field": "assay_type",
-          "silver_value": "[\"B\", \"F\"]",
-          "gold_value": "[\"B\", \"F\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "compound_record",
-          "rule_type": "columns",
-          "field": "inorganic_flag",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "compound_record",
-          "rule_type": "columns",
-          "field": "molecule_type",
-          "silver_value": "[\"Small molecule\"]",
-          "gold_value": "[\"Small molecule\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "compound_record",
-          "rule_type": "columns",
-          "field": "potential_duplicate",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "compound_record",
-          "rule_type": "columns",
-          "field": "publication_type",
-          "silver_value": "[\"journal-article\"]",
-          "gold_value": "[\"journal-article\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "compound_record",
-          "rule_type": "columns",
-          "field": "relationship_type",
-          "silver_value": "[\"D\"]",
-          "gold_value": "[\"D\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "compound_record",
-          "rule_type": "columns",
-          "field": "src_id",
-          "silver_value": "[\"1\"]",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "compound_record",
-          "rule_type": "columns",
-          "field": "standard_relation",
-          "silver_value": "[\"=\"]",
-          "gold_value": "[\"=\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "compound_record",
-          "rule_type": "columns",
-          "field": "standard_type",
-          "silver_value": "[\"IC50\", \"Ki\"]",
-          "gold_value": "[\"IC50\", \"Ki\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "compound_record",
-          "rule_type": "columns",
-          "field": "standard_units",
-          "silver_value": "[\"nM\"]",
-          "gold_value": "[\"nM\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "compound_record",
-          "rule_type": "columns",
-          "field": "structure_type",
-          "silver_value": "[\"MOL\"]",
-          "gold_value": "[\"MOL\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "compound_record",
-          "rule_type": "columns",
-          "field": "target_type",
-          "silver_value": "[\"SINGLE PROTEIN\"]",
-          "gold_value": "[\"SINGLE PROTEIN\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "compound_record",
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
           "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "compound_record",
-          "rule_type": "ranges",
-          "field": "activity_id",
-          "silver_value": "{\"max\": 10000000000, \"min\": 1}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "compound_record",
-          "rule_type": "ranges",
-          "field": "confidence_score",
-          "silver_value": "{\"max\": 9, \"min\": 8}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "compound_record",
-          "rule_type": "ranges",
-          "field": "pchembl_value",
-          "silver_value": "{\"max\": 10, \"min\": 3}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "compound_record",
-          "rule_type": "ranges",
-          "field": "standard_value",
-          "silver_value": "{\"include_min\": false, \"min\": 0}",
-          "gold_value": "{\"include_min\": false, \"min\": 0}",
           "action": "duplicate",
           "notes": "identical rule in gold_filters - drop from silver"
         }
@@ -1415,8 +735,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 2,
-        "move_to_gold": 4,
-        "duplicate": 13,
+        "move_to_gold": 0,
+        "duplicate": 5,
         "conflict": 0
       },
       "rules": [
@@ -1474,89 +794,9 @@
           "provider": "chembl",
           "entity": "molecule",
           "rule_type": "columns",
-          "field": "assay_type",
-          "silver_value": "[\"B\", \"F\"]",
-          "gold_value": "[\"B\", \"F\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "molecule",
-          "rule_type": "columns",
           "field": "potential_duplicate",
           "silver_value": "[0]",
           "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "molecule",
-          "rule_type": "columns",
-          "field": "publication_type",
-          "silver_value": "[\"journal-article\"]",
-          "gold_value": "[\"journal-article\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "molecule",
-          "rule_type": "columns",
-          "field": "relationship_type",
-          "silver_value": "[\"D\"]",
-          "gold_value": "[\"D\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "molecule",
-          "rule_type": "columns",
-          "field": "src_id",
-          "silver_value": "[\"1\"]",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "molecule",
-          "rule_type": "columns",
-          "field": "standard_relation",
-          "silver_value": "[\"=\"]",
-          "gold_value": "[\"=\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "molecule",
-          "rule_type": "columns",
-          "field": "standard_type",
-          "silver_value": "[\"IC50\", \"Ki\"]",
-          "gold_value": "[\"IC50\", \"Ki\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "molecule",
-          "rule_type": "columns",
-          "field": "standard_units",
-          "silver_value": "[\"nM\"]",
-          "gold_value": "[\"nM\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "molecule",
-          "rule_type": "columns",
-          "field": "target_type",
-          "silver_value": "[\"SINGLE PROTEIN\"]",
-          "gold_value": "[\"SINGLE PROTEIN\"]",
           "action": "duplicate",
           "notes": "identical rule in gold_filters - drop from silver"
         },
@@ -1567,46 +807,6 @@
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
           "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "molecule",
-          "rule_type": "ranges",
-          "field": "activity_id",
-          "silver_value": "{\"max\": 10000000000, \"min\": 1}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "molecule",
-          "rule_type": "ranges",
-          "field": "confidence_score",
-          "silver_value": "{\"max\": 9, \"min\": 8}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "molecule",
-          "rule_type": "ranges",
-          "field": "pchembl_value",
-          "silver_value": "{\"max\": 10, \"min\": 3}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "molecule",
-          "rule_type": "ranges",
-          "field": "standard_value",
-          "silver_value": "{\"include_min\": false, \"min\": 0}",
-          "gold_value": "{\"include_min\": false, \"min\": 0}",
           "action": "duplicate",
           "notes": "identical rule in gold_filters - drop from silver"
         }
@@ -1620,8 +820,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 3,
-        "move_to_gold": 4,
-        "duplicate": 13,
+        "move_to_gold": 0,
+        "duplicate": 1,
         "conflict": 0
       },
       "rules": [
@@ -1658,170 +858,10 @@
         {
           "provider": "chembl",
           "entity": "protein_class",
-          "rule_type": "columns",
-          "field": "assay_type",
-          "silver_value": "[\"B\", \"F\"]",
-          "gold_value": "[\"B\", \"F\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "protein_class",
-          "rule_type": "columns",
-          "field": "inorganic_flag",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "protein_class",
-          "rule_type": "columns",
-          "field": "molecule_type",
-          "silver_value": "[\"Small molecule\"]",
-          "gold_value": "[\"Small molecule\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "protein_class",
-          "rule_type": "columns",
-          "field": "potential_duplicate",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "protein_class",
-          "rule_type": "columns",
-          "field": "publication_type",
-          "silver_value": "[\"journal-article\"]",
-          "gold_value": "[\"journal-article\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "protein_class",
-          "rule_type": "columns",
-          "field": "relationship_type",
-          "silver_value": "[\"D\"]",
-          "gold_value": "[\"D\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "protein_class",
-          "rule_type": "columns",
-          "field": "src_id",
-          "silver_value": "[\"1\"]",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "protein_class",
-          "rule_type": "columns",
-          "field": "standard_relation",
-          "silver_value": "[\"=\"]",
-          "gold_value": "[\"=\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "protein_class",
-          "rule_type": "columns",
-          "field": "standard_type",
-          "silver_value": "[\"IC50\", \"Ki\"]",
-          "gold_value": "[\"IC50\", \"Ki\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "protein_class",
-          "rule_type": "columns",
-          "field": "standard_units",
-          "silver_value": "[\"nM\"]",
-          "gold_value": "[\"nM\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "protein_class",
-          "rule_type": "columns",
-          "field": "structure_type",
-          "silver_value": "[\"MOL\"]",
-          "gold_value": "[\"MOL\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "protein_class",
-          "rule_type": "columns",
-          "field": "target_type",
-          "silver_value": "[\"SINGLE PROTEIN\"]",
-          "gold_value": "[\"SINGLE PROTEIN\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "protein_class",
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
           "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "protein_class",
-          "rule_type": "ranges",
-          "field": "activity_id",
-          "silver_value": "{\"max\": 10000000000, \"min\": 1}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "protein_class",
-          "rule_type": "ranges",
-          "field": "confidence_score",
-          "silver_value": "{\"max\": 9, \"min\": 8}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "protein_class",
-          "rule_type": "ranges",
-          "field": "pchembl_value",
-          "silver_value": "{\"max\": 10, \"min\": 3}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "protein_class",
-          "rule_type": "ranges",
-          "field": "standard_value",
-          "silver_value": "{\"include_min\": false, \"min\": 0}",
-          "gold_value": "{\"include_min\": false, \"min\": 0}",
           "action": "duplicate",
           "notes": "identical rule in gold_filters - drop from silver"
         }
@@ -1835,8 +875,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 3,
-        "move_to_gold": 4,
-        "duplicate": 13,
+        "move_to_gold": 0,
+        "duplicate": 2,
         "conflict": 0
       },
       "rules": [
@@ -1883,160 +923,10 @@
         {
           "provider": "chembl",
           "entity": "publication",
-          "rule_type": "columns",
-          "field": "assay_type",
-          "silver_value": "[\"B\", \"F\"]",
-          "gold_value": "[\"B\", \"F\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "inorganic_flag",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "molecule_type",
-          "silver_value": "[\"Small molecule\"]",
-          "gold_value": "[\"Small molecule\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "potential_duplicate",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "relationship_type",
-          "silver_value": "[\"D\"]",
-          "gold_value": "[\"D\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "src_id",
-          "silver_value": "[\"1\"]",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "standard_relation",
-          "silver_value": "[\"=\"]",
-          "gold_value": "[\"=\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "standard_type",
-          "silver_value": "[\"IC50\", \"Ki\"]",
-          "gold_value": "[\"IC50\", \"Ki\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "standard_units",
-          "silver_value": "[\"nM\"]",
-          "gold_value": "[\"nM\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "structure_type",
-          "silver_value": "[\"MOL\"]",
-          "gold_value": "[\"MOL\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "target_type",
-          "silver_value": "[\"SINGLE PROTEIN\"]",
-          "gold_value": "[\"SINGLE PROTEIN\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication",
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
           "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication",
-          "rule_type": "ranges",
-          "field": "activity_id",
-          "silver_value": "{\"max\": 10000000000, \"min\": 1}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication",
-          "rule_type": "ranges",
-          "field": "confidence_score",
-          "silver_value": "{\"max\": 9, \"min\": 8}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication",
-          "rule_type": "ranges",
-          "field": "pchembl_value",
-          "silver_value": "{\"max\": 10, \"min\": 3}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication",
-          "rule_type": "ranges",
-          "field": "standard_value",
-          "silver_value": "{\"include_min\": false, \"min\": 0}",
-          "gold_value": "{\"include_min\": false, \"min\": 0}",
           "action": "duplicate",
           "notes": "identical rule in gold_filters - drop from silver"
         }
@@ -2050,8 +940,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 3,
-        "move_to_gold": 4,
-        "duplicate": 13,
+        "move_to_gold": 0,
+        "duplicate": 1,
         "conflict": 0
       },
       "rules": [
@@ -2088,170 +978,10 @@
         {
           "provider": "chembl",
           "entity": "publication_similarity",
-          "rule_type": "columns",
-          "field": "assay_type",
-          "silver_value": "[\"B\", \"F\"]",
-          "gold_value": "[\"B\", \"F\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_similarity",
-          "rule_type": "columns",
-          "field": "inorganic_flag",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_similarity",
-          "rule_type": "columns",
-          "field": "molecule_type",
-          "silver_value": "[\"Small molecule\"]",
-          "gold_value": "[\"Small molecule\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_similarity",
-          "rule_type": "columns",
-          "field": "potential_duplicate",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_similarity",
-          "rule_type": "columns",
-          "field": "publication_type",
-          "silver_value": "[\"journal-article\"]",
-          "gold_value": "[\"journal-article\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_similarity",
-          "rule_type": "columns",
-          "field": "relationship_type",
-          "silver_value": "[\"D\"]",
-          "gold_value": "[\"D\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_similarity",
-          "rule_type": "columns",
-          "field": "src_id",
-          "silver_value": "[\"1\"]",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_similarity",
-          "rule_type": "columns",
-          "field": "standard_relation",
-          "silver_value": "[\"=\"]",
-          "gold_value": "[\"=\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_similarity",
-          "rule_type": "columns",
-          "field": "standard_type",
-          "silver_value": "[\"IC50\", \"Ki\"]",
-          "gold_value": "[\"IC50\", \"Ki\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_similarity",
-          "rule_type": "columns",
-          "field": "standard_units",
-          "silver_value": "[\"nM\"]",
-          "gold_value": "[\"nM\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_similarity",
-          "rule_type": "columns",
-          "field": "structure_type",
-          "silver_value": "[\"MOL\"]",
-          "gold_value": "[\"MOL\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_similarity",
-          "rule_type": "columns",
-          "field": "target_type",
-          "silver_value": "[\"SINGLE PROTEIN\"]",
-          "gold_value": "[\"SINGLE PROTEIN\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_similarity",
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
           "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_similarity",
-          "rule_type": "ranges",
-          "field": "activity_id",
-          "silver_value": "{\"max\": 10000000000, \"min\": 1}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_similarity",
-          "rule_type": "ranges",
-          "field": "confidence_score",
-          "silver_value": "{\"max\": 9, \"min\": 8}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_similarity",
-          "rule_type": "ranges",
-          "field": "pchembl_value",
-          "silver_value": "{\"max\": 10, \"min\": 3}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_similarity",
-          "rule_type": "ranges",
-          "field": "standard_value",
-          "silver_value": "{\"include_min\": false, \"min\": 0}",
-          "gold_value": "{\"include_min\": false, \"min\": 0}",
           "action": "duplicate",
           "notes": "identical rule in gold_filters - drop from silver"
         }
@@ -2265,8 +995,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 3,
-        "move_to_gold": 4,
-        "duplicate": 13,
+        "move_to_gold": 0,
+        "duplicate": 1,
         "conflict": 0
       },
       "rules": [
@@ -2303,170 +1033,10 @@
         {
           "provider": "chembl",
           "entity": "publication_term",
-          "rule_type": "columns",
-          "field": "assay_type",
-          "silver_value": "[\"B\", \"F\"]",
-          "gold_value": "[\"B\", \"F\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_term",
-          "rule_type": "columns",
-          "field": "inorganic_flag",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_term",
-          "rule_type": "columns",
-          "field": "molecule_type",
-          "silver_value": "[\"Small molecule\"]",
-          "gold_value": "[\"Small molecule\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_term",
-          "rule_type": "columns",
-          "field": "potential_duplicate",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_term",
-          "rule_type": "columns",
-          "field": "publication_type",
-          "silver_value": "[\"journal-article\"]",
-          "gold_value": "[\"journal-article\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_term",
-          "rule_type": "columns",
-          "field": "relationship_type",
-          "silver_value": "[\"D\"]",
-          "gold_value": "[\"D\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_term",
-          "rule_type": "columns",
-          "field": "src_id",
-          "silver_value": "[\"1\"]",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_term",
-          "rule_type": "columns",
-          "field": "standard_relation",
-          "silver_value": "[\"=\"]",
-          "gold_value": "[\"=\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_term",
-          "rule_type": "columns",
-          "field": "standard_type",
-          "silver_value": "[\"IC50\", \"Ki\"]",
-          "gold_value": "[\"IC50\", \"Ki\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_term",
-          "rule_type": "columns",
-          "field": "standard_units",
-          "silver_value": "[\"nM\"]",
-          "gold_value": "[\"nM\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_term",
-          "rule_type": "columns",
-          "field": "structure_type",
-          "silver_value": "[\"MOL\"]",
-          "gold_value": "[\"MOL\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_term",
-          "rule_type": "columns",
-          "field": "target_type",
-          "silver_value": "[\"SINGLE PROTEIN\"]",
-          "gold_value": "[\"SINGLE PROTEIN\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_term",
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
           "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_term",
-          "rule_type": "ranges",
-          "field": "activity_id",
-          "silver_value": "{\"max\": 10000000000, \"min\": 1}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_term",
-          "rule_type": "ranges",
-          "field": "confidence_score",
-          "silver_value": "{\"max\": 9, \"min\": 8}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_term",
-          "rule_type": "ranges",
-          "field": "pchembl_value",
-          "silver_value": "{\"max\": 10, \"min\": 3}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "publication_term",
-          "rule_type": "ranges",
-          "field": "standard_value",
-          "silver_value": "{\"include_min\": false, \"min\": 0}",
-          "gold_value": "{\"include_min\": false, \"min\": 0}",
           "action": "duplicate",
           "notes": "identical rule in gold_filters - drop from silver"
         }
@@ -2480,8 +1050,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 1,
-        "move_to_gold": 4,
-        "duplicate": 13,
+        "move_to_gold": 0,
+        "duplicate": 1,
         "conflict": 0
       },
       "rules": [
@@ -2498,170 +1068,10 @@
         {
           "provider": "chembl",
           "entity": "subcellular_fraction",
-          "rule_type": "columns",
-          "field": "assay_type",
-          "silver_value": "[\"B\", \"F\"]",
-          "gold_value": "[\"B\", \"F\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "subcellular_fraction",
-          "rule_type": "columns",
-          "field": "inorganic_flag",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "subcellular_fraction",
-          "rule_type": "columns",
-          "field": "molecule_type",
-          "silver_value": "[\"Small molecule\"]",
-          "gold_value": "[\"Small molecule\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "subcellular_fraction",
-          "rule_type": "columns",
-          "field": "potential_duplicate",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "subcellular_fraction",
-          "rule_type": "columns",
-          "field": "publication_type",
-          "silver_value": "[\"journal-article\"]",
-          "gold_value": "[\"journal-article\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "subcellular_fraction",
-          "rule_type": "columns",
-          "field": "relationship_type",
-          "silver_value": "[\"D\"]",
-          "gold_value": "[\"D\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "subcellular_fraction",
-          "rule_type": "columns",
-          "field": "src_id",
-          "silver_value": "[\"1\"]",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "subcellular_fraction",
-          "rule_type": "columns",
-          "field": "standard_relation",
-          "silver_value": "[\"=\"]",
-          "gold_value": "[\"=\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "subcellular_fraction",
-          "rule_type": "columns",
-          "field": "standard_type",
-          "silver_value": "[\"IC50\", \"Ki\"]",
-          "gold_value": "[\"IC50\", \"Ki\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "subcellular_fraction",
-          "rule_type": "columns",
-          "field": "standard_units",
-          "silver_value": "[\"nM\"]",
-          "gold_value": "[\"nM\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "subcellular_fraction",
-          "rule_type": "columns",
-          "field": "structure_type",
-          "silver_value": "[\"MOL\"]",
-          "gold_value": "[\"MOL\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "subcellular_fraction",
-          "rule_type": "columns",
-          "field": "target_type",
-          "silver_value": "[\"SINGLE PROTEIN\"]",
-          "gold_value": "[\"SINGLE PROTEIN\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "subcellular_fraction",
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
           "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "subcellular_fraction",
-          "rule_type": "ranges",
-          "field": "activity_id",
-          "silver_value": "{\"max\": 10000000000, \"min\": 1}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "subcellular_fraction",
-          "rule_type": "ranges",
-          "field": "confidence_score",
-          "silver_value": "{\"max\": 9, \"min\": 8}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "subcellular_fraction",
-          "rule_type": "ranges",
-          "field": "pchembl_value",
-          "silver_value": "{\"max\": 10, \"min\": 3}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "subcellular_fraction",
-          "rule_type": "ranges",
-          "field": "standard_value",
-          "silver_value": "{\"include_min\": false, \"min\": 0}",
-          "gold_value": "{\"include_min\": false, \"min\": 0}",
           "action": "duplicate",
           "notes": "identical rule in gold_filters - drop from silver"
         }
@@ -2675,8 +1085,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 12,
-        "move_to_gold": 4,
-        "duplicate": 13,
+        "move_to_gold": 0,
+        "duplicate": 2,
         "conflict": 0
       },
       "rules": [
@@ -2813,160 +1223,10 @@
         {
           "provider": "chembl",
           "entity": "target",
-          "rule_type": "columns",
-          "field": "assay_type",
-          "silver_value": "[\"B\", \"F\"]",
-          "gold_value": "[\"B\", \"F\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target",
-          "rule_type": "columns",
-          "field": "inorganic_flag",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target",
-          "rule_type": "columns",
-          "field": "molecule_type",
-          "silver_value": "[\"Small molecule\"]",
-          "gold_value": "[\"Small molecule\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target",
-          "rule_type": "columns",
-          "field": "potential_duplicate",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target",
-          "rule_type": "columns",
-          "field": "publication_type",
-          "silver_value": "[\"journal-article\"]",
-          "gold_value": "[\"journal-article\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target",
-          "rule_type": "columns",
-          "field": "relationship_type",
-          "silver_value": "[\"D\"]",
-          "gold_value": "[\"D\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target",
-          "rule_type": "columns",
-          "field": "src_id",
-          "silver_value": "[\"1\"]",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target",
-          "rule_type": "columns",
-          "field": "standard_relation",
-          "silver_value": "[\"=\"]",
-          "gold_value": "[\"=\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target",
-          "rule_type": "columns",
-          "field": "standard_type",
-          "silver_value": "[\"IC50\", \"Ki\"]",
-          "gold_value": "[\"IC50\", \"Ki\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target",
-          "rule_type": "columns",
-          "field": "standard_units",
-          "silver_value": "[\"nM\"]",
-          "gold_value": "[\"nM\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target",
-          "rule_type": "columns",
-          "field": "structure_type",
-          "silver_value": "[\"MOL\"]",
-          "gold_value": "[\"MOL\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target",
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
           "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target",
-          "rule_type": "ranges",
-          "field": "activity_id",
-          "silver_value": "{\"max\": 10000000000, \"min\": 1}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target",
-          "rule_type": "ranges",
-          "field": "confidence_score",
-          "silver_value": "{\"max\": 9, \"min\": 8}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target",
-          "rule_type": "ranges",
-          "field": "pchembl_value",
-          "silver_value": "{\"max\": 10, \"min\": 3}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target",
-          "rule_type": "ranges",
-          "field": "standard_value",
-          "silver_value": "{\"include_min\": false, \"min\": 0}",
-          "gold_value": "{\"include_min\": false, \"min\": 0}",
           "action": "duplicate",
           "notes": "identical rule in gold_filters - drop from silver"
         }
@@ -2980,8 +1240,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 2,
-        "move_to_gold": 4,
-        "duplicate": 13,
+        "move_to_gold": 0,
+        "duplicate": 1,
         "conflict": 0
       },
       "rules": [
@@ -3008,170 +1268,10 @@
         {
           "provider": "chembl",
           "entity": "target_component",
-          "rule_type": "columns",
-          "field": "assay_type",
-          "silver_value": "[\"B\", \"F\"]",
-          "gold_value": "[\"B\", \"F\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target_component",
-          "rule_type": "columns",
-          "field": "inorganic_flag",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target_component",
-          "rule_type": "columns",
-          "field": "molecule_type",
-          "silver_value": "[\"Small molecule\"]",
-          "gold_value": "[\"Small molecule\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target_component",
-          "rule_type": "columns",
-          "field": "potential_duplicate",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target_component",
-          "rule_type": "columns",
-          "field": "publication_type",
-          "silver_value": "[\"journal-article\"]",
-          "gold_value": "[\"journal-article\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target_component",
-          "rule_type": "columns",
-          "field": "relationship_type",
-          "silver_value": "[\"D\"]",
-          "gold_value": "[\"D\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target_component",
-          "rule_type": "columns",
-          "field": "src_id",
-          "silver_value": "[\"1\"]",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target_component",
-          "rule_type": "columns",
-          "field": "standard_relation",
-          "silver_value": "[\"=\"]",
-          "gold_value": "[\"=\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target_component",
-          "rule_type": "columns",
-          "field": "standard_type",
-          "silver_value": "[\"IC50\", \"Ki\"]",
-          "gold_value": "[\"IC50\", \"Ki\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target_component",
-          "rule_type": "columns",
-          "field": "standard_units",
-          "silver_value": "[\"nM\"]",
-          "gold_value": "[\"nM\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target_component",
-          "rule_type": "columns",
-          "field": "structure_type",
-          "silver_value": "[\"MOL\"]",
-          "gold_value": "[\"MOL\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target_component",
-          "rule_type": "columns",
-          "field": "target_type",
-          "silver_value": "[\"SINGLE PROTEIN\"]",
-          "gold_value": "[\"SINGLE PROTEIN\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target_component",
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
           "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target_component",
-          "rule_type": "ranges",
-          "field": "activity_id",
-          "silver_value": "{\"max\": 10000000000, \"min\": 1}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target_component",
-          "rule_type": "ranges",
-          "field": "confidence_score",
-          "silver_value": "{\"max\": 9, \"min\": 8}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target_component",
-          "rule_type": "ranges",
-          "field": "pchembl_value",
-          "silver_value": "{\"max\": 10, \"min\": 3}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target_component",
-          "rule_type": "ranges",
-          "field": "standard_value",
-          "silver_value": "{\"include_min\": false, \"min\": 0}",
-          "gold_value": "{\"include_min\": false, \"min\": 0}",
           "action": "duplicate",
           "notes": "identical rule in gold_filters - drop from silver"
         }
@@ -3185,8 +1285,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 2,
-        "move_to_gold": 4,
-        "duplicate": 13,
+        "move_to_gold": 0,
+        "duplicate": 1,
         "conflict": 0
       },
       "rules": [
@@ -3213,170 +1313,10 @@
         {
           "provider": "chembl",
           "entity": "tissue",
-          "rule_type": "columns",
-          "field": "assay_type",
-          "silver_value": "[\"B\", \"F\"]",
-          "gold_value": "[\"B\", \"F\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "tissue",
-          "rule_type": "columns",
-          "field": "inorganic_flag",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "tissue",
-          "rule_type": "columns",
-          "field": "molecule_type",
-          "silver_value": "[\"Small molecule\"]",
-          "gold_value": "[\"Small molecule\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "tissue",
-          "rule_type": "columns",
-          "field": "potential_duplicate",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "tissue",
-          "rule_type": "columns",
-          "field": "publication_type",
-          "silver_value": "[\"journal-article\"]",
-          "gold_value": "[\"journal-article\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "tissue",
-          "rule_type": "columns",
-          "field": "relationship_type",
-          "silver_value": "[\"D\"]",
-          "gold_value": "[\"D\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "tissue",
-          "rule_type": "columns",
-          "field": "src_id",
-          "silver_value": "[\"1\"]",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "tissue",
-          "rule_type": "columns",
-          "field": "standard_relation",
-          "silver_value": "[\"=\"]",
-          "gold_value": "[\"=\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "tissue",
-          "rule_type": "columns",
-          "field": "standard_type",
-          "silver_value": "[\"IC50\", \"Ki\"]",
-          "gold_value": "[\"IC50\", \"Ki\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "tissue",
-          "rule_type": "columns",
-          "field": "standard_units",
-          "silver_value": "[\"nM\"]",
-          "gold_value": "[\"nM\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "tissue",
-          "rule_type": "columns",
-          "field": "structure_type",
-          "silver_value": "[\"MOL\"]",
-          "gold_value": "[\"MOL\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "tissue",
-          "rule_type": "columns",
-          "field": "target_type",
-          "silver_value": "[\"SINGLE PROTEIN\"]",
-          "gold_value": "[\"SINGLE PROTEIN\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "tissue",
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
           "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "tissue",
-          "rule_type": "ranges",
-          "field": "activity_id",
-          "silver_value": "{\"max\": 10000000000, \"min\": 1}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "tissue",
-          "rule_type": "ranges",
-          "field": "confidence_score",
-          "silver_value": "{\"max\": 9, \"min\": 8}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "tissue",
-          "rule_type": "ranges",
-          "field": "pchembl_value",
-          "silver_value": "{\"max\": 10, \"min\": 3}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "tissue",
-          "rule_type": "ranges",
-          "field": "standard_value",
-          "silver_value": "{\"include_min\": false, \"min\": 0}",
-          "gold_value": "{\"include_min\": false, \"min\": 0}",
           "action": "duplicate",
           "notes": "identical rule in gold_filters - drop from silver"
         }
@@ -3460,8 +1400,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 2,
-        "move_to_gold": 4,
-        "duplicate": 13,
+        "move_to_gold": 0,
+        "duplicate": 1,
         "conflict": 0
       },
       "rules": [
@@ -3488,170 +1428,10 @@
         {
           "provider": "crossref",
           "entity": "publication",
-          "rule_type": "columns",
-          "field": "assay_type",
-          "silver_value": "[\"B\", \"F\"]",
-          "gold_value": "[\"B\", \"F\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "crossref",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "inorganic_flag",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "crossref",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "molecule_type",
-          "silver_value": "[\"Small molecule\"]",
-          "gold_value": "[\"Small molecule\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "crossref",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "potential_duplicate",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "crossref",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "publication_type",
-          "silver_value": "[\"journal-article\"]",
-          "gold_value": "[\"journal-article\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "crossref",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "relationship_type",
-          "silver_value": "[\"D\"]",
-          "gold_value": "[\"D\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "crossref",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "src_id",
-          "silver_value": "[\"1\"]",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "crossref",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "standard_relation",
-          "silver_value": "[\"=\"]",
-          "gold_value": "[\"=\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "crossref",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "standard_type",
-          "silver_value": "[\"IC50\", \"Ki\"]",
-          "gold_value": "[\"IC50\", \"Ki\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "crossref",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "standard_units",
-          "silver_value": "[\"nM\"]",
-          "gold_value": "[\"nM\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "crossref",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "structure_type",
-          "silver_value": "[\"MOL\"]",
-          "gold_value": "[\"MOL\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "crossref",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "target_type",
-          "silver_value": "[\"SINGLE PROTEIN\"]",
-          "gold_value": "[\"SINGLE PROTEIN\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "crossref",
-          "entity": "publication",
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
           "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "crossref",
-          "entity": "publication",
-          "rule_type": "ranges",
-          "field": "activity_id",
-          "silver_value": "{\"max\": 10000000000, \"min\": 1}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "crossref",
-          "entity": "publication",
-          "rule_type": "ranges",
-          "field": "confidence_score",
-          "silver_value": "{\"max\": 9, \"min\": 8}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "crossref",
-          "entity": "publication",
-          "rule_type": "ranges",
-          "field": "pchembl_value",
-          "silver_value": "{\"max\": 10, \"min\": 3}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "crossref",
-          "entity": "publication",
-          "rule_type": "ranges",
-          "field": "standard_value",
-          "silver_value": "{\"include_min\": false, \"min\": 0}",
-          "gold_value": "{\"include_min\": false, \"min\": 0}",
           "action": "duplicate",
           "notes": "identical rule in gold_filters - drop from silver"
         }
@@ -3665,8 +1445,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 2,
-        "move_to_gold": 4,
-        "duplicate": 13,
+        "move_to_gold": 0,
+        "duplicate": 1,
         "conflict": 0
       },
       "rules": [
@@ -3693,170 +1473,10 @@
         {
           "provider": "openalex",
           "entity": "publication",
-          "rule_type": "columns",
-          "field": "assay_type",
-          "silver_value": "[\"B\", \"F\"]",
-          "gold_value": "[\"B\", \"F\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "openalex",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "inorganic_flag",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "openalex",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "molecule_type",
-          "silver_value": "[\"Small molecule\"]",
-          "gold_value": "[\"Small molecule\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "openalex",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "potential_duplicate",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "openalex",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "publication_type",
-          "silver_value": "[\"journal-article\"]",
-          "gold_value": "[\"journal-article\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "openalex",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "relationship_type",
-          "silver_value": "[\"D\"]",
-          "gold_value": "[\"D\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "openalex",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "src_id",
-          "silver_value": "[\"1\"]",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "openalex",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "standard_relation",
-          "silver_value": "[\"=\"]",
-          "gold_value": "[\"=\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "openalex",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "standard_type",
-          "silver_value": "[\"IC50\", \"Ki\"]",
-          "gold_value": "[\"IC50\", \"Ki\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "openalex",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "standard_units",
-          "silver_value": "[\"nM\"]",
-          "gold_value": "[\"nM\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "openalex",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "structure_type",
-          "silver_value": "[\"MOL\"]",
-          "gold_value": "[\"MOL\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "openalex",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "target_type",
-          "silver_value": "[\"SINGLE PROTEIN\"]",
-          "gold_value": "[\"SINGLE PROTEIN\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "openalex",
-          "entity": "publication",
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
           "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "openalex",
-          "entity": "publication",
-          "rule_type": "ranges",
-          "field": "activity_id",
-          "silver_value": "{\"max\": 10000000000, \"min\": 1}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "openalex",
-          "entity": "publication",
-          "rule_type": "ranges",
-          "field": "confidence_score",
-          "silver_value": "{\"max\": 9, \"min\": 8}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "openalex",
-          "entity": "publication",
-          "rule_type": "ranges",
-          "field": "pchembl_value",
-          "silver_value": "{\"max\": 10, \"min\": 3}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "openalex",
-          "entity": "publication",
-          "rule_type": "ranges",
-          "field": "standard_value",
-          "silver_value": "{\"include_min\": false, \"min\": 0}",
-          "gold_value": "{\"include_min\": false, \"min\": 0}",
           "action": "duplicate",
           "notes": "identical rule in gold_filters - drop from silver"
         }
@@ -3870,8 +1490,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 1,
-        "move_to_gold": 4,
-        "duplicate": 13,
+        "move_to_gold": 0,
+        "duplicate": 1,
         "conflict": 0
       },
       "rules": [
@@ -3888,170 +1508,10 @@
         {
           "provider": "pubchem",
           "entity": "compound",
-          "rule_type": "columns",
-          "field": "assay_type",
-          "silver_value": "[\"B\", \"F\"]",
-          "gold_value": "[\"B\", \"F\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "pubchem",
-          "entity": "compound",
-          "rule_type": "columns",
-          "field": "inorganic_flag",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "pubchem",
-          "entity": "compound",
-          "rule_type": "columns",
-          "field": "molecule_type",
-          "silver_value": "[\"Small molecule\"]",
-          "gold_value": "[\"Small molecule\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "pubchem",
-          "entity": "compound",
-          "rule_type": "columns",
-          "field": "potential_duplicate",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "pubchem",
-          "entity": "compound",
-          "rule_type": "columns",
-          "field": "publication_type",
-          "silver_value": "[\"journal-article\"]",
-          "gold_value": "[\"journal-article\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "pubchem",
-          "entity": "compound",
-          "rule_type": "columns",
-          "field": "relationship_type",
-          "silver_value": "[\"D\"]",
-          "gold_value": "[\"D\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "pubchem",
-          "entity": "compound",
-          "rule_type": "columns",
-          "field": "src_id",
-          "silver_value": "[\"1\"]",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "pubchem",
-          "entity": "compound",
-          "rule_type": "columns",
-          "field": "standard_relation",
-          "silver_value": "[\"=\"]",
-          "gold_value": "[\"=\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "pubchem",
-          "entity": "compound",
-          "rule_type": "columns",
-          "field": "standard_type",
-          "silver_value": "[\"IC50\", \"Ki\"]",
-          "gold_value": "[\"IC50\", \"Ki\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "pubchem",
-          "entity": "compound",
-          "rule_type": "columns",
-          "field": "standard_units",
-          "silver_value": "[\"nM\"]",
-          "gold_value": "[\"nM\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "pubchem",
-          "entity": "compound",
-          "rule_type": "columns",
-          "field": "structure_type",
-          "silver_value": "[\"MOL\"]",
-          "gold_value": "[\"MOL\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "pubchem",
-          "entity": "compound",
-          "rule_type": "columns",
-          "field": "target_type",
-          "silver_value": "[\"SINGLE PROTEIN\"]",
-          "gold_value": "[\"SINGLE PROTEIN\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "pubchem",
-          "entity": "compound",
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
           "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "pubchem",
-          "entity": "compound",
-          "rule_type": "ranges",
-          "field": "activity_id",
-          "silver_value": "{\"max\": 10000000000, \"min\": 1}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "pubchem",
-          "entity": "compound",
-          "rule_type": "ranges",
-          "field": "confidence_score",
-          "silver_value": "{\"max\": 9, \"min\": 8}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "pubchem",
-          "entity": "compound",
-          "rule_type": "ranges",
-          "field": "pchembl_value",
-          "silver_value": "{\"max\": 10, \"min\": 3}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "pubchem",
-          "entity": "compound",
-          "rule_type": "ranges",
-          "field": "standard_value",
-          "silver_value": "{\"include_min\": false, \"min\": 0}",
-          "gold_value": "{\"include_min\": false, \"min\": 0}",
           "action": "duplicate",
           "notes": "identical rule in gold_filters - drop from silver"
         }
@@ -4065,8 +1525,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 2,
-        "move_to_gold": 4,
-        "duplicate": 13,
+        "move_to_gold": 0,
+        "duplicate": 1,
         "conflict": 0
       },
       "rules": [
@@ -4093,170 +1553,10 @@
         {
           "provider": "pubmed",
           "entity": "publication",
-          "rule_type": "columns",
-          "field": "assay_type",
-          "silver_value": "[\"B\", \"F\"]",
-          "gold_value": "[\"B\", \"F\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "pubmed",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "inorganic_flag",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "pubmed",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "molecule_type",
-          "silver_value": "[\"Small molecule\"]",
-          "gold_value": "[\"Small molecule\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "pubmed",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "potential_duplicate",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "pubmed",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "publication_type",
-          "silver_value": "[\"journal-article\"]",
-          "gold_value": "[\"journal-article\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "pubmed",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "relationship_type",
-          "silver_value": "[\"D\"]",
-          "gold_value": "[\"D\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "pubmed",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "src_id",
-          "silver_value": "[\"1\"]",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "pubmed",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "standard_relation",
-          "silver_value": "[\"=\"]",
-          "gold_value": "[\"=\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "pubmed",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "standard_type",
-          "silver_value": "[\"IC50\", \"Ki\"]",
-          "gold_value": "[\"IC50\", \"Ki\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "pubmed",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "standard_units",
-          "silver_value": "[\"nM\"]",
-          "gold_value": "[\"nM\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "pubmed",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "structure_type",
-          "silver_value": "[\"MOL\"]",
-          "gold_value": "[\"MOL\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "pubmed",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "target_type",
-          "silver_value": "[\"SINGLE PROTEIN\"]",
-          "gold_value": "[\"SINGLE PROTEIN\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "pubmed",
-          "entity": "publication",
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
           "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "pubmed",
-          "entity": "publication",
-          "rule_type": "ranges",
-          "field": "activity_id",
-          "silver_value": "{\"max\": 10000000000, \"min\": 1}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "pubmed",
-          "entity": "publication",
-          "rule_type": "ranges",
-          "field": "confidence_score",
-          "silver_value": "{\"max\": 9, \"min\": 8}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "pubmed",
-          "entity": "publication",
-          "rule_type": "ranges",
-          "field": "pchembl_value",
-          "silver_value": "{\"max\": 10, \"min\": 3}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "pubmed",
-          "entity": "publication",
-          "rule_type": "ranges",
-          "field": "standard_value",
-          "silver_value": "{\"include_min\": false, \"min\": 0}",
-          "gold_value": "{\"include_min\": false, \"min\": 0}",
           "action": "duplicate",
           "notes": "identical rule in gold_filters - drop from silver"
         }
@@ -4270,8 +1570,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 2,
-        "move_to_gold": 4,
-        "duplicate": 13,
+        "move_to_gold": 0,
+        "duplicate": 1,
         "conflict": 0
       },
       "rules": [
@@ -4298,170 +1598,10 @@
         {
           "provider": "semanticscholar",
           "entity": "publication",
-          "rule_type": "columns",
-          "field": "assay_type",
-          "silver_value": "[\"B\", \"F\"]",
-          "gold_value": "[\"B\", \"F\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "semanticscholar",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "inorganic_flag",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "semanticscholar",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "molecule_type",
-          "silver_value": "[\"Small molecule\"]",
-          "gold_value": "[\"Small molecule\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "semanticscholar",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "potential_duplicate",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "semanticscholar",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "publication_type",
-          "silver_value": "[\"journal-article\"]",
-          "gold_value": "[\"journal-article\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "semanticscholar",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "relationship_type",
-          "silver_value": "[\"D\"]",
-          "gold_value": "[\"D\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "semanticscholar",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "src_id",
-          "silver_value": "[\"1\"]",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "semanticscholar",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "standard_relation",
-          "silver_value": "[\"=\"]",
-          "gold_value": "[\"=\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "semanticscholar",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "standard_type",
-          "silver_value": "[\"IC50\", \"Ki\"]",
-          "gold_value": "[\"IC50\", \"Ki\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "semanticscholar",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "standard_units",
-          "silver_value": "[\"nM\"]",
-          "gold_value": "[\"nM\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "semanticscholar",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "structure_type",
-          "silver_value": "[\"MOL\"]",
-          "gold_value": "[\"MOL\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "semanticscholar",
-          "entity": "publication",
-          "rule_type": "columns",
-          "field": "target_type",
-          "silver_value": "[\"SINGLE PROTEIN\"]",
-          "gold_value": "[\"SINGLE PROTEIN\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "semanticscholar",
-          "entity": "publication",
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
           "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "semanticscholar",
-          "entity": "publication",
-          "rule_type": "ranges",
-          "field": "activity_id",
-          "silver_value": "{\"max\": 10000000000, \"min\": 1}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "semanticscholar",
-          "entity": "publication",
-          "rule_type": "ranges",
-          "field": "confidence_score",
-          "silver_value": "{\"max\": 9, \"min\": 8}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "semanticscholar",
-          "entity": "publication",
-          "rule_type": "ranges",
-          "field": "pchembl_value",
-          "silver_value": "{\"max\": 10, \"min\": 3}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "semanticscholar",
-          "entity": "publication",
-          "rule_type": "ranges",
-          "field": "standard_value",
-          "silver_value": "{\"include_min\": false, \"min\": 0}",
-          "gold_value": "{\"include_min\": false, \"min\": 0}",
           "action": "duplicate",
           "notes": "identical rule in gold_filters - drop from silver"
         }
@@ -4475,8 +1615,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 2,
-        "move_to_gold": 4,
-        "duplicate": 13,
+        "move_to_gold": 0,
+        "duplicate": 1,
         "conflict": 0
       },
       "rules": [
@@ -4503,170 +1643,10 @@
         {
           "provider": "uniprot",
           "entity": "idmapping",
-          "rule_type": "columns",
-          "field": "assay_type",
-          "silver_value": "[\"B\", \"F\"]",
-          "gold_value": "[\"B\", \"F\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "idmapping",
-          "rule_type": "columns",
-          "field": "inorganic_flag",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "idmapping",
-          "rule_type": "columns",
-          "field": "molecule_type",
-          "silver_value": "[\"Small molecule\"]",
-          "gold_value": "[\"Small molecule\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "idmapping",
-          "rule_type": "columns",
-          "field": "potential_duplicate",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "idmapping",
-          "rule_type": "columns",
-          "field": "publication_type",
-          "silver_value": "[\"journal-article\"]",
-          "gold_value": "[\"journal-article\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "idmapping",
-          "rule_type": "columns",
-          "field": "relationship_type",
-          "silver_value": "[\"D\"]",
-          "gold_value": "[\"D\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "idmapping",
-          "rule_type": "columns",
-          "field": "src_id",
-          "silver_value": "[\"1\"]",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "idmapping",
-          "rule_type": "columns",
-          "field": "standard_relation",
-          "silver_value": "[\"=\"]",
-          "gold_value": "[\"=\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "idmapping",
-          "rule_type": "columns",
-          "field": "standard_type",
-          "silver_value": "[\"IC50\", \"Ki\"]",
-          "gold_value": "[\"IC50\", \"Ki\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "idmapping",
-          "rule_type": "columns",
-          "field": "standard_units",
-          "silver_value": "[\"nM\"]",
-          "gold_value": "[\"nM\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "idmapping",
-          "rule_type": "columns",
-          "field": "structure_type",
-          "silver_value": "[\"MOL\"]",
-          "gold_value": "[\"MOL\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "idmapping",
-          "rule_type": "columns",
-          "field": "target_type",
-          "silver_value": "[\"SINGLE PROTEIN\"]",
-          "gold_value": "[\"SINGLE PROTEIN\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "idmapping",
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
           "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "idmapping",
-          "rule_type": "ranges",
-          "field": "activity_id",
-          "silver_value": "{\"max\": 10000000000, \"min\": 1}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "idmapping",
-          "rule_type": "ranges",
-          "field": "confidence_score",
-          "silver_value": "{\"max\": 9, \"min\": 8}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "idmapping",
-          "rule_type": "ranges",
-          "field": "pchembl_value",
-          "silver_value": "{\"max\": 10, \"min\": 3}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "idmapping",
-          "rule_type": "ranges",
-          "field": "standard_value",
-          "silver_value": "{\"include_min\": false, \"min\": 0}",
-          "gold_value": "{\"include_min\": false, \"min\": 0}",
           "action": "duplicate",
           "notes": "identical rule in gold_filters - drop from silver"
         }
@@ -4680,8 +1660,8 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 2,
-        "move_to_gold": 4,
-        "duplicate": 13,
+        "move_to_gold": 0,
+        "duplicate": 1,
         "conflict": 0
       },
       "rules": [
@@ -4708,170 +1688,10 @@
         {
           "provider": "uniprot",
           "entity": "protein",
-          "rule_type": "columns",
-          "field": "assay_type",
-          "silver_value": "[\"B\", \"F\"]",
-          "gold_value": "[\"B\", \"F\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "protein",
-          "rule_type": "columns",
-          "field": "inorganic_flag",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "protein",
-          "rule_type": "columns",
-          "field": "molecule_type",
-          "silver_value": "[\"Small molecule\"]",
-          "gold_value": "[\"Small molecule\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "protein",
-          "rule_type": "columns",
-          "field": "potential_duplicate",
-          "silver_value": "[0]",
-          "gold_value": "[0]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "protein",
-          "rule_type": "columns",
-          "field": "publication_type",
-          "silver_value": "[\"journal-article\"]",
-          "gold_value": "[\"journal-article\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "protein",
-          "rule_type": "columns",
-          "field": "relationship_type",
-          "silver_value": "[\"D\"]",
-          "gold_value": "[\"D\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "protein",
-          "rule_type": "columns",
-          "field": "src_id",
-          "silver_value": "[\"1\"]",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "protein",
-          "rule_type": "columns",
-          "field": "standard_relation",
-          "silver_value": "[\"=\"]",
-          "gold_value": "[\"=\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "protein",
-          "rule_type": "columns",
-          "field": "standard_type",
-          "silver_value": "[\"IC50\", \"Ki\"]",
-          "gold_value": "[\"IC50\", \"Ki\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "protein",
-          "rule_type": "columns",
-          "field": "standard_units",
-          "silver_value": "[\"nM\"]",
-          "gold_value": "[\"nM\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "protein",
-          "rule_type": "columns",
-          "field": "structure_type",
-          "silver_value": "[\"MOL\"]",
-          "gold_value": "[\"MOL\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "protein",
-          "rule_type": "columns",
-          "field": "target_type",
-          "silver_value": "[\"SINGLE PROTEIN\"]",
-          "gold_value": "[\"SINGLE PROTEIN\"]",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "protein",
           "rule_type": "ranges",
           "field": "publication_year",
           "silver_value": "{\"max\": 2050, \"min\": 1950}",
           "gold_value": "{\"max\": 2050, \"min\": 1950}",
-          "action": "duplicate",
-          "notes": "identical rule in gold_filters - drop from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "protein",
-          "rule_type": "ranges",
-          "field": "activity_id",
-          "silver_value": "{\"max\": 10000000000, \"min\": 1}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "protein",
-          "rule_type": "ranges",
-          "field": "confidence_score",
-          "silver_value": "{\"max\": 9, \"min\": 8}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "protein",
-          "rule_type": "ranges",
-          "field": "pchembl_value",
-          "silver_value": "{\"max\": 10, \"min\": 3}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "uniprot",
-          "entity": "protein",
-          "rule_type": "ranges",
-          "field": "standard_value",
-          "silver_value": "{\"include_min\": false, \"min\": 0}",
-          "gold_value": "{\"include_min\": false, \"min\": 0}",
           "action": "duplicate",
           "notes": "identical rule in gold_filters - drop from silver"
         }

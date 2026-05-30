@@ -421,16 +421,25 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
         assert "not current live run state" in status_description
         assert "not exact-run evidence" in status_description
         assert "run_id remains local id-only identity context" in status_description
+    elif dashboard_name == "bioetl-provider-health-v2.json":
+        assert any("${__range_s}" in expr for expr in status_expressions)
+        assert any(
+            "bioetl_provider_current_status" in expr for expr in status_expressions
+        )
+        assert any(
+            "bioetl_provider_range_operational_ok" in expr
+            for expr in status_expressions
+        )
+        assert "selected-range" in status_description
+        assert "fail-closed" in status_description
+        assert "monitor provider telemetry freshness" in status_description
+        assert "review raw provider health enum" in status_description
+        assert "secondary context only" in status_description
     else:
         assert all("$__range" not in expr for expr in status_expressions)
         assert "current" in status_description
     assert "0=ok" in status_description
     assert "null=unknown" in status_description
-    if dashboard_name == "bioetl-provider-health-v2.json":
-        assert "telemetry gap" in status_description
-        assert "monitor provider telemetry freshness" in status_description
-        assert "review raw provider health enum" in status_description
-        assert "pipeline-context evidence" in status_description
 
     identity = panels["ID"]
     identity_description = str(identity.get("description", "")).lower()
@@ -1206,10 +1215,16 @@ def test_provider_telemetry_freshness_marks_missing_current_status_as_warn() -> 
     assert len(expressions) == 1
     expression = expressions[0]
     assert (
-        "count_over_time(bioetl_provider_current_status[${__range_s}s])" in expression
+        "count_over_time(bioetl_provider_current_status{provider=~\"$provider\"}"
+        in expression
+    )
+    assert "bioetl_provider_range_operational_ok{provider=~\"$provider\"}" in expression
+    assert (
+        "absent(count_over_time(bioetl_provider_current_status{provider=~\"$provider\"}"
+        in expression
     )
     assert (
-        "absent(count_over_time(bioetl_provider_current_status[${__range_s}s]))"
+        "absent(count_over_time(bioetl_provider_range_operational_ok{provider=~\"$provider\"}"
         in expression
     )
     assert "or vector(0)" not in expression
