@@ -862,7 +862,7 @@ def guard_bootstrap_pipeline_runner_for_e2e(
     from bioetl.composition.bootstrap.runtime import pipeline as runtime_pipeline
     from bioetl.composition.runtime_builders import (
         input_snapshot_resolution,
-        _run_manifest_support,
+        run_manifest_support,
     )
 
     # Register before monkeypatch so teardown runs after monkeypatch undo (LIFO).
@@ -889,7 +889,7 @@ def guard_bootstrap_pipeline_runner_for_e2e(
         monkeypatch.setattr(module, "bootstrap_pipeline_runner", guarded_bootstrap)
 
     original_resolve_input_snapshots = (
-        _run_manifest_support.resolve_pipeline_input_snapshot_refs
+        run_manifest_support.resolve_pipeline_input_snapshot_refs
     )
     has_vcr_marker = request.node.get_closest_marker("vcr") is not None
     fallback_snapshot_refs = (
@@ -907,7 +907,7 @@ def guard_bootstrap_pipeline_runner_for_e2e(
         return fallback_snapshot_refs
 
     monkeypatch.setattr(
-        "bioetl.composition.runtime_builders._run_manifest_support.resolve_pipeline_input_snapshot_refs",
+        "bioetl.composition.runtime_builders.run_manifest_support.resolve_pipeline_input_snapshot_refs",
         _resolve_pipeline_input_snapshot_refs_with_vcr_fallback,
     )
     monkeypatch.setattr(

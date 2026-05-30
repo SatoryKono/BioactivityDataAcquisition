@@ -1,18 +1,18 @@
 {
   "summary": {
-    "scanned_modules": 1948,
-    "total_internal_imports": 7699,
+    "scanned_modules": 1958,
+    "total_internal_imports": 7718,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "60c6c2b9d601990aba41a080b39c344d8d7fed6b464d3369b73c5d4e00cd5690"
+    "source_fingerprint": "3a1694648629fcfba63c8e6375c3435f8f62ea2a663d8c7052b360797e7dad6d"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1320,
+      "imports": 1329,
       "allowed": true
     },
     {
@@ -30,19 +30,19 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 689,
+      "imports": 694,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 445,
+      "imports": 449,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 341,
+      "imports": 342,
       "allowed": true
     },
     {
@@ -235,8 +235,18 @@
       "imports": 28
     },
     {
+      "source": "composition.runtime_builders",
+      "target": "domain.control_plane",
+      "imports": 28
+    },
+    {
       "source": "application.composite",
       "target": "domain.exceptions",
+      "imports": 27
+    },
+    {
+      "source": "composition.runtime_builders",
+      "target": "domain.context",
       "imports": 27
     },
     {
@@ -251,22 +261,12 @@
     },
     {
       "source": "composition.runtime_builders",
-      "target": "domain.context",
+      "target": "infrastructure.config",
       "imports": 26
     },
     {
       "source": "composition.bootstrap",
       "target": "domain.composite",
-      "imports": 25
-    },
-    {
-      "source": "composition.runtime_builders",
-      "target": "domain.control_plane",
-      "imports": 25
-    },
-    {
-      "source": "composition.runtime_builders",
-      "target": "infrastructure.config",
       "imports": 25
     },
     {

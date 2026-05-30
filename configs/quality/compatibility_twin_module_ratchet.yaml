@@ -16,18 +16,6 @@ families:
       issue #4485. The public budget now reflects the canonicalized importer
       count, while private import growth is limited to the public re-export
       module only.
-  - family_id: composition.runtime_builders.run_manifest_support
-    owner: bioetl.composition.runtime_builders
-    public_module: bioetl.composition.runtime_builders.run_manifest_support
-    private_module: bioetl.composition.runtime_builders._run_manifest_support
-    canonical_first_party_module: bioetl.composition.runtime_builders.run_manifest_support
-    max_public_src_importers: 12
-    max_private_src_importers: 0
-    rationale: >-
-      Issue #4485 collapsed first-party runtime-builder imports onto the public
-      `run_manifest_support` seam. The public budget now reflects the
-      canonicalized importer count, and private first-party imports are now
-      fully eliminated.
   - family_id: domain.normalization.profiles.chembl_policy_registry
     owner: bioetl.domain.normalization.profiles
     public_module: bioetl.domain.normalization.profiles.chembl_policy_registry

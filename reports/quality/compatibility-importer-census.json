@@ -10,9 +10,9 @@
     "removed_compatibility_surfaces_with_test_importers": 0,
     "removed_compatibility_surfaces_still_present": 0,
     "twin_pair_count": 15,
-    "twin_pairs_with_private_src_importers": 14,
-    "twin_pairs_without_public_src_importers": 0,
-    "tracked_twin_family_count": 4,
+    "twin_pairs_with_private_src_importers": 15,
+    "twin_pairs_without_public_src_importers": 1,
+    "tracked_twin_family_count": 3,
     "config_root_symbol_count": 3,
     "config_root_src_importer_count": 0,
     "retained_public_export_facade_count": 4,
@@ -955,6 +955,20 @@
       ]
     },
     {
+      "private_path": "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_checkpoint_projection.py",
+      "public_path": "src/bioetl/application/services/control_plane/run_manifest_diagnostics_checkpoint_projection.py",
+      "private_module": "bioetl.application.services.control_plane._run_manifest_diagnostics_checkpoint_projection",
+      "public_module": "bioetl.application.services.control_plane.run_manifest_diagnostics_checkpoint_projection",
+      "public_src_importer_count": 0,
+      "public_test_importer_count": 0,
+      "private_src_importer_count": 1,
+      "private_test_importer_count": 1,
+      "public_src_importers": [],
+      "private_src_importers": [
+        "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_main_helpers.py"
+      ]
+    },
+    {
       "private_path": "src/bioetl/composition/factories/storage/_audit.py",
       "public_path": "src/bioetl/composition/factories/storage/audit.py",
       "private_module": "bioetl.composition.factories.storage._audit",
@@ -989,31 +1003,6 @@
         "src/bioetl/composition/factories/storage/_helpers.py",
         "src/bioetl/composition/factories/storage/resilience.py"
       ]
-    },
-    {
-      "private_path": "src/bioetl/composition/runtime_builders/_run_manifest_support.py",
-      "public_path": "src/bioetl/composition/runtime_builders/run_manifest_support.py",
-      "private_module": "bioetl.composition.runtime_builders._run_manifest_support",
-      "public_module": "bioetl.composition.runtime_builders.run_manifest_support",
-      "public_src_importer_count": 12,
-      "public_test_importer_count": 5,
-      "private_src_importer_count": 0,
-      "private_test_importer_count": 2,
-      "public_src_importers": [
-        "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_payloads.py",
-        "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_support.py",
-        "src/bioetl/composition/bootstrap/runtime/composite_control_plane_builder.py",
-        "src/bioetl/composition/factories/pipeline/run_context_factory.py",
-        "src/bioetl/composition/runtime_builders/_effective_config_artifact_builder_support.py",
-        "src/bioetl/composition/runtime_builders/_run_manifest_builder_policy.py",
-        "src/bioetl/composition/runtime_builders/_run_manifest_create_spec_support.py",
-        "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py",
-        "src/bioetl/composition/runtime_builders/_run_manifest_publication_support.py",
-        "src/bioetl/composition/runtime_builders/control_plane.py",
-        "src/bioetl/composition/runtime_builders/effective_config_artifact_builder.py",
-        "src/bioetl/composition/runtime_builders/run_manifest_builder.py"
-      ],
-      "private_src_importers": []
     },
     {
       "private_path": "src/bioetl/domain/normalization/profiles/_chembl_policy_registry.py",
@@ -1119,33 +1108,6 @@
       "current_private_src_importers": [
         "src/bioetl/application/core/span_helpers.py"
       ]
-    },
-    {
-      "family_id": "composition.runtime_builders.run_manifest_support",
-      "owner": "bioetl.composition.runtime_builders",
-      "public_module": "bioetl.composition.runtime_builders.run_manifest_support",
-      "private_module": "bioetl.composition.runtime_builders._run_manifest_support",
-      "canonical_first_party_module": "bioetl.composition.runtime_builders.run_manifest_support",
-      "max_public_src_importers": 12,
-      "max_private_src_importers": 0,
-      "rationale": "Issue #4485 collapsed first-party runtime-builder imports onto the public `run_manifest_support` seam. The public budget now reflects the canonicalized importer count, and private first-party imports are now fully eliminated.",
-      "current_public_src_importer_count": 12,
-      "current_private_src_importer_count": 0,
-      "current_public_src_importers": [
-        "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_payloads.py",
-        "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_support.py",
-        "src/bioetl/composition/bootstrap/runtime/composite_control_plane_builder.py",
-        "src/bioetl/composition/factories/pipeline/run_context_factory.py",
-        "src/bioetl/composition/runtime_builders/_effective_config_artifact_builder_support.py",
-        "src/bioetl/composition/runtime_builders/_run_manifest_builder_policy.py",
-        "src/bioetl/composition/runtime_builders/_run_manifest_create_spec_support.py",
-        "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py",
-        "src/bioetl/composition/runtime_builders/_run_manifest_publication_support.py",
-        "src/bioetl/composition/runtime_builders/control_plane.py",
-        "src/bioetl/composition/runtime_builders/effective_config_artifact_builder.py",
-        "src/bioetl/composition/runtime_builders/run_manifest_builder.py"
-      ],
-      "current_private_src_importers": []
     },
     {
       "family_id": "domain.normalization.profiles.chembl_policy_registry",
