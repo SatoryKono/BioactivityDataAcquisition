@@ -3966,6 +3966,16 @@
       "source_lines": 230
     },
     {
+      "coverage_percent": null,
+      "coverage_status": "unmeasured",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
+      "module": "bioetl.application.services._quarantine_service_filtered_helpers",
+      "path": "src/bioetl/application/services/_quarantine_service_filtered_helpers.py",
+      "source_lines": 333
+    },
+    {
       "coverage_percent": 19.0,
       "coverage_status": "partially_covered",
       "covered_lines": 19,
@@ -3973,7 +3983,7 @@
       "missing_lines": 81,
       "module": "bioetl.application.services._quarantine_service_filtered_mixin",
       "path": "src/bioetl/application/services/_quarantine_service_filtered_mixin.py",
-      "source_lines": 613
+      "source_lines": 335
     },
     {
       "coverage_percent": 31.43,
@@ -19497,8 +19507,8 @@
     }
   ],
   "schema_version": 1,
-  "snapshot_date": "2026-05-29",
-  "source_tree_sha256": "a871dce614b093e9c6465bc6f3d30fa247f5ce983305550041f7f412edb2ab9a",
+  "snapshot_date": "2026-05-30",
+  "source_tree_sha256": "f3c7364a529e68de3ab290263061d914abb70fda5f532e1ca9d6da8c145db570",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -19750,14 +19760,14 @@
         "unmeasured_module_count": 1
       }
     },
-    "source_module_count": 1949,
+    "source_module_count": 1950,
     "status_counts": {
       "fully_covered": 585,
       "partially_covered": 1057,
       "uncovered": 245,
-      "unmeasured": 62
+      "unmeasured": 63
     },
-    "unmeasured_module_count": 62,
+    "unmeasured_module_count": 63,
     "unmeasured_modules": [
       {
         "module": "bioetl.__main__",
@@ -19782,6 +19792,11 @@
       {
         "module": "bioetl.application.pipelines.common.publication_transformer_records",
         "path": "src/bioetl/application/pipelines/common/publication_transformer_records.py",
+        "reason": "coverage_xml_has_no_class_entry"
+      },
+      {
+        "module": "bioetl.application.services._quarantine_service_filtered_helpers",
+        "path": "src/bioetl/application/services/_quarantine_service_filtered_helpers.py",
         "reason": "coverage_xml_has_no_class_entry"
       },
       {

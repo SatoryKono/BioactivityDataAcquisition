@@ -137,6 +137,23 @@ def test_rerender_builds_playwright_env(tmp_path: Path) -> None:
     assert env["GRAFANA_SCREENSHOT_UIDS"] == "bioetl-control-plane-v1"
 
 
+def test_screenshot_runtime_setup_scripts_keep_bootstrap_contract() -> None:
+    shell_script = Path(
+        "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh"
+    ).read_text(encoding="utf-8")
+    powershell_script = Path(
+        "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1"
+    ).read_text(encoding="utf-8")
+
+    for content in (shell_script, powershell_script):
+        assert "bioetl-control-plane-v1" in content
+        assert "rerender-grafana" in content
+        assert "Playwright" in content
+
+    for package_name in ("libnspr4", "libnss3", "libasound2"):
+        assert package_name in shell_script
+
+
 def test_rerender_playwright_fallback_streams_output_from_repo_root(
     monkeypatch: Any, tmp_path: Path
 ) -> None:
