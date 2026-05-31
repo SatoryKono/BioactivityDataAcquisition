@@ -86,12 +86,12 @@ if TYPE_CHECKING:
         PolarSurfaceArea,
         RotatableBondCount,
     )
-    from bioetl.domain.value_objects.publications import DOI, PubMedId
     from bioetl.domain.value_objects.protein_class_hierarchy import (
         ProteinClassHierarchy,
-        ProteinClassLevel,
         ProteinClassificationResolutionError,
+        ProteinClassLevel,
     )
+    from bioetl.domain.value_objects.publications import DOI, PubMedId
     from bioetl.domain.value_objects.taxonomy_id import TaxonomyId, validate_taxonomy_id
 
 _MODULE_ACADEMIC_IDS = "bioetl.domain.value_objects.academic_ids"
@@ -104,9 +104,7 @@ _MODULE_DQ_RESULT = "bioetl.domain.value_objects.dq_result"
 _MODULE_IDENTIFIERS = "bioetl.domain.value_objects.identifiers"
 _MODULE_MOLECULAR_DESCRIPTORS = "bioetl.domain.value_objects.molecular_descriptors"
 _MODULE_PUBLICATIONS = "bioetl.domain.value_objects.publications"
-_MODULE_PROTEIN_CLASS_HIERARCHY = (
-    "bioetl.domain.value_objects.protein_class_hierarchy"
-)
+_MODULE_PROTEIN_CLASS_HIERARCHY = "bioetl.domain.value_objects.protein_class_hierarchy"
 _MODULE_TAXONOMY_ID = "bioetl.domain.value_objects.taxonomy_id"
 
 _LAZY_ATTRIBUTE_EXPORTS: dict[str, tuple[str, str]] = {
@@ -229,12 +227,12 @@ __all__ = [
     "OpenAlexId",
     "PChemblValue",
     "PolarSurfaceArea",
-    "PubChemCid",
-    "PubMedId",
-    "PublicationYear",
     "ProteinClassHierarchy",
     "ProteinClassLevel",
     "ProteinClassificationResolutionError",
+    "PubChemCid",
+    "PubMedId",
+    "PublicationYear",
     "RelationOperator",
     "RotatableBondCount",
     "SemanticScholarId",

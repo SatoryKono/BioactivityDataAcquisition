@@ -31,3 +31,13 @@ if __name__ == "__main__":
         sys.stderr.write(f"ERROR: canonical script not found: {script}\n")
         raise SystemExit(2)
     runpy.run_path(str(script), run_name="__main__")
+
+def main() -> int:
+    script = _canonical_script()
+    if not script.exists():
+        sys.stderr.write(f"ERROR: canonical script not found: {script}\n")
+        return 2
+    import runpy
+    sys.argv[0] = str(script)
+    runpy.run_path(str(script), run_name="__main__")
+    return 0
