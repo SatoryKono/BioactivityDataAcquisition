@@ -35,10 +35,13 @@ ______________________________________________________________________
 `v3` больше нельзя использовать как current-state blueprint без поправок.
 На `2026-05-31` подтверждены следующие изменения:
 
-- active tech-debt program queue сократилась с `39` до `29` open GitHub issue;
+- active tech-debt program queue сократилась с `39` до `21` open GitHub issue;
 - `Stream D` и `Stream E` больше не активны:
   `#4266`, `#4268`, `#4276`, `#4292`, `#4293`, `#4294`, `#4295`, `#4296`,
   `#4316`, `#4747` закрыты на GitHub `2026-05-30`;
+- `Stream B` тоже частично закрылся после `v4` snapshot:
+  `#4764`, `#4765`, `#4766`, `#4767`, `#4769`, `#4770`, `#4771`, `#4772`
+  закрыты на GitHub `2026-05-31`; в active queue остался только `#4768`;
 - локальные Week 0 evidence-gap claims из `v3` устарели:
   `docs/reports/evidence/project-test-health/metadata.yaml`,
   `reports/quality/compatibility-importer-census.md`,
@@ -61,7 +64,8 @@ reopen или repo evidence снова сломается.
 
 | Area | v3 claim | v4 verified state | Source |
 | --- | --- | --- | --- |
-| Active queue | `39` open issue across Streams A-E | `29` open issue across Streams A-C | GitHub REST API, 2026-05-31 |
+| Active queue | `39` open issue across Streams A-E | `21` open issue across Streams A-C with Stream B reduced to `#4768` only | GitHub REST API issue checks, 2026-05-31 |
+| Stream B | `9` open remediation issues | `1` open (`#4768`); `#4764/#4765/#4766/#4767/#4769/#4770/#4771/#4772` closed `2026-05-31` | GitHub REST API issues `#4764-#4772` |
 | Stream D | `9` open divergence issues | `0` open; all 9 closed `2026-05-30` | GitHub REST API issues `#4266/#4268/#4276/#4292-#4296/#4316` |
 | Stream E | `#4747` active | `#4747` closed `2026-05-30T11:36:50Z` | GitHub REST API issue `#4747` |
 | Week 0 evidence restore | `3` required files absent | required evidence files already present locally | working tree verification |
@@ -115,16 +119,10 @@ Repo-wide open issues on `2026-05-31`: `100`.
 `Blueprint v4` intentionally scopes only the active tech-debt eradication
 program queue:
 
-- `29` open issues total
-- labels inside this scoped queue:
-  - `architecture`: `20`
-  - `technical-debt`: `17`
-  - `tech-debt`: `12`
-  - `compatibility`: `11`
-  - `P1`: `8`
-  - `P0`: `6`
-  - `P2`: `4`
-  - `config`: `4`
+- `21` open issues total
+- the old `v4` label pivot is stale after the `2026-05-31` Stream B closeout;
+  recompute label counts from GitHub before using them for scheduling or
+  dashboards
 
 ### Stream A — active (`12` open)
 
@@ -150,13 +148,18 @@ Closed Stream A sub-tasks already off the active queue:
 - `#4821` closed `2026-05-30`
 - `#4828` closed `2026-05-30`
 
-### Stream B — active (`9` open)
+### Stream B — residual (`1` open)
+
+Active:
+
+- `#4768` strict Gold validation + composite waiver policy
+
+Closed on `2026-05-31` and no longer part of the active queue:
 
 - `#4764` umbrella program
 - `#4765` YAML parse gate for `contracts/chembl/activity.yaml`
 - `#4766` CLI health composition seam
 - `#4767` contract coverage matrix + Gold parity
-- `#4768` strict Gold validation + composite waiver policy
 - `#4769` release-critical Bronze fixture gaps
 - `#4770` compatibility usage graph + no-new-shim gate
 - `#4771` low-risk shim removal batch
@@ -211,8 +214,8 @@ This is no longer an evidence-restore week. It is now a reconciliation week:
 Exit:
 
 - no local plan still treats `#4814` as closed;
-- no current plan still treats Stream D/E as active;
-- active queue explicitly equals the `29` open issues above.
+- no current plan still treats closed Stream B, D, or E issues as active;
+- active queue explicitly equals the `21` open issues above.
 
 ### Weeks 1-3 — Stream A core (P0)
 
@@ -232,15 +235,14 @@ Notes:
 
 Priority order:
 
-1. `#4765`
-2. `#4766`
-3. `#4767`
-4. `#4768`
-5. `#4769`
+1. `#4768`
 
 Notes:
 
-- `#4767` remains the prerequisite for Stream A `#4818`.
+- `#4764`, `#4765`, `#4766`, `#4767`, `#4769`, `#4770`, `#4771`, `#4772`
+  are already closed on GitHub `2026-05-31` and should not stay in the active
+  critical path.
+- completed `#4767` outputs still feed Stream A `#4818`.
 - ChEMBL target `v2.0` must remain under ADR-036 migration discipline.
 
 ### Weeks 5-7 — Stream A residual
@@ -274,19 +276,18 @@ Ordering rule:
 
 - do not start `#4700` / `#4610` before Stream A `#4815` lands.
 
-### Week 9 — Stream B residual
+### Week 9 — Stream B follow-through
 
-- `#4770`
-- `#4771`
-- `#4772`
-
-This wave is no longer paired with Stream E because `#4747` is already closed.
+- verify `#4768` closeout evidence and align the local plan surface with the
+  eventual GitHub issue state
+- keep former residual items `#4770/#4771/#4772` in watch mode only unless a
+  GitHub reopen occurs
 
 ### Week 10 — closeout
 
 Closeout target is no longer “39 -> 0”; it is:
 
-- active program queue `29 -> 0`;
+- active program queue `21 -> 0`;
 - no reopened Stream D/E regressions;
 - no stale local mirror contradicting GitHub state.
 
@@ -299,20 +300,20 @@ Closeout target is no longer “39 -> 0”; it is:
    cleanliness, and targeted architecture suites.
 3. Start implementation backlog with:
    - Stream A `#4812`
-   - Stream B `#4765`
+   - Stream B `#4768`
 
 ### Next
 
 1. Stream A `#4813` and `#4814`
-2. Stream B `#4766` and `#4767`
+2. Stream A `#4815` and Stream B `#4768`
 3. Stream C prep only after `#4815`
 
 ### Blocked by internal sequencing
 
 - `#4815` blocks `#4700` and `#4610`
-- `#4767` blocks `#4818`
-- Stream A residual ratchets block `#4770/#4771/#4772` from becoming stable
-  enforcement
+- completed `#4767` evidence remains the prerequisite input for `#4818`
+- no new Stream B residual work should reopen `#4770/#4771/#4772` without a
+  fresh GitHub state change
 
 ## Validation Commands (v4)
 
