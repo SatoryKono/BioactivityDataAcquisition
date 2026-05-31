@@ -8,6 +8,7 @@ from typing import Protocol, cast
 from bioetl.application.services.control_plane.manifest.diagnostics import (
     build_diagnostics_summary,
 )
+from bioetl.application.services.control_plane.manifest import inspection_models
 from bioetl.application.services.control_plane.manifest.inspection_models import (
     RunManifestDiffEntry,
     RunManifestDiffResult,
@@ -39,14 +40,7 @@ from bioetl.domain.ports import (
     RunManifestPort,
 )
 
-__all__ = [
-    "RunManifestDiffEntry",
-    "RunManifestDiffResult",
-    "RunManifestInspectionCorruptionError",
-    "RunManifestInspectionResult",
-    "RunManifestInspectionService",
-    "RunManifestVerifyResult",
-]
+__all__ = [*inspection_models.__all__, "RunManifestInspectionService"]
 
 
 class _HistoricalReplayUniverseReportLoader(Protocol):

@@ -71,7 +71,9 @@ schema:
     - target_xref_go_component
     - target_xref_go_function
     - target_xref_go_process
+    - target_xref_hgnc_ids
     - target_xref_reactome_ids
+    - target_xref_uniprot_ids
     - primary_component_id
     - component_accessions
     - component_descriptions
@@ -239,10 +241,18 @@ quality:
     type: not_null
     nullable: false
     error_message: target_xref_go_process must emit a normalized pipe string or unknown sentinel
+  - field: target_xref_hgnc_ids
+    type: not_null
+    nullable: false
+    error_message: target_xref_hgnc_ids must emit a normalized pipe string or unknown sentinel
   - field: target_xref_reactome_ids
     type: not_null
     nullable: false
     error_message: target_xref_reactome_ids must emit a normalized pipe string or unknown sentinel
+  - field: target_xref_uniprot_ids
+    type: not_null
+    nullable: false
+    error_message: target_xref_uniprot_ids must emit a normalized pipe string or unknown sentinel
   - field: target_protein_synonyms
     type: not_null
     nullable: false
@@ -322,7 +332,9 @@ filters:
     - target_xref_go_component
     - target_xref_go_function
     - target_xref_go_process
+    - target_xref_hgnc_ids
     - target_xref_reactome_ids
+    - target_xref_uniprot_ids
     exclude_if_present: []
   gold_filters:
     ranges:
@@ -405,7 +417,9 @@ hash_policy:
     - target_xref_go_component
     - target_xref_go_function
     - target_xref_go_process
+    - target_xref_hgnc_ids
     - target_xref_reactome_ids
+    - target_xref_uniprot_ids
     - primary_component_id
     - component_accessions
     - component_descriptions

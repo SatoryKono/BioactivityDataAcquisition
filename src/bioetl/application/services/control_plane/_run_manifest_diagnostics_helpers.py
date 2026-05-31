@@ -225,3 +225,33 @@ def build_dq_details_summary(
         has_signal=has_signal,
         has_cross_validation_signal=has_cross_validation_signal,
     )
+
+
+def build_dq_details_summary_kwargs(
+    *,
+    rule_ids: set[str],
+    dispositions: set[str],
+    report_paths: set[str],
+    violation_kinds: set[str],
+    cross_validation_rule_ids: set[str],
+    cross_validation_config_paths: set[str],
+    cross_validation_quarantine_policies: set[str],
+    cross_validation_replay_contracts: set[str],
+    occurrence_only_diagnostic_scopes: set[str],
+    has_signal: bool,
+    has_cross_validation_signal: bool,
+) -> dict[str, object]:
+    """Return reusable kwargs payload for DQ detail summary construction."""
+    return {
+        "rule_ids": rule_ids,
+        "dispositions": dispositions,
+        "report_paths": report_paths,
+        "violation_kinds": violation_kinds,
+        "cross_validation_rule_ids": cross_validation_rule_ids,
+        "cross_validation_config_paths": cross_validation_config_paths,
+        "cross_validation_quarantine_policies": cross_validation_quarantine_policies,
+        "cross_validation_replay_contracts": cross_validation_replay_contracts,
+        "occurrence_only_diagnostic_scopes": occurrence_only_diagnostic_scopes,
+        "has_signal": has_signal,
+        "has_cross_validation_signal": has_cross_validation_signal,
+    }

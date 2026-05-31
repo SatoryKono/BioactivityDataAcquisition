@@ -74,7 +74,9 @@ class Target(BaseEntity):
     target_xref_go_component: str | None = None
     target_xref_go_function: str | None = None
     target_xref_go_process: str | None = None
+    target_xref_hgnc_ids: str | None = None
     target_xref_reactome_ids: str | None = None
+    target_xref_uniprot_ids: str | None = None
     cross_references: str | None = None
     component_accessions: list[str] | None = None
     primary_component_id: int | None = None

@@ -1830,12 +1830,22 @@
           "dtype": "str",
           "nullable": true
         },
+        "target_xref_hgnc_ids": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "target_xref_pdb_ids": {
           "description": "",
           "dtype": "str",
           "nullable": true
         },
         "target_xref_reactome_ids": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_xref_uniprot_ids": {
           "description": "",
           "dtype": "str",
           "nullable": true

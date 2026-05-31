@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+from bioetl.application.services.control_plane.replay.historical_identity_models import (
+    HistoricalReplayRunIdentity,
+    build_historical_identity_core_payload,
+)
+
 
 def build_historical_run_identity_payload(
     *,
@@ -32,4 +37,57 @@ def build_historical_run_identity_payload(
     return payload
 
 
-__all__ = ["build_historical_run_identity_payload"]
+def build_historical_certification_payload(
+    *,
+    certification_status: str,
+    replay_occurrence_kind: str,
+    blocking_reasons: tuple[str, ...] = (),
+) -> dict[str, object]:
+    """Return common certification fields shared by historical replay rows."""
+    return {
+        "certification_status": certification_status,
+        "replay_occurrence_kind": replay_occurrence_kind,
+        "blocking_reasons": blocking_reasons,
+    }
+
+
+def build_historical_certified_identity_payload(
+    identity: HistoricalReplayRunIdentity,
+    *,
+    certification_status: str,
+    replay_occurrence_kind: str,
+    blocking_reasons: tuple[str, ...] = (),
+    **extra_fields: object,
+) -> dict[str, object]:
+    """Return one JSON-safe historical replay row with shared identity anchors."""
+    return build_historical_run_identity_payload(
+        **build_historical_identity_core_payload(identity),
+        **build_historical_certification_payload(
+            certification_status=certification_status,
+            replay_occurrence_kind=replay_occurrence_kind,
+            blocking_reasons=blocking_reasons,
+        ),
+        **extra_fields,
+    )
+
+
+def build_historical_certified_identity_payload_from_record(
+    record: object,
+    **extra_fields: object,
+) -> dict[str, object]:
+    """Build one historical replay row from a record exposing certification fields."""
+    return build_historical_certified_identity_payload(
+        record,
+        certification_status=str(getattr(record, "certification_status")),
+        replay_occurrence_kind=str(getattr(record, "replay_occurrence_kind")),
+        blocking_reasons=tuple(getattr(record, "blocking_reasons", ())),
+        **extra_fields,
+    )
+
+
+__all__ = [
+    "build_historical_certified_identity_payload",
+    "build_historical_certified_identity_payload_from_record",
+    "build_historical_certification_payload",
+    "build_historical_run_identity_payload",
+]

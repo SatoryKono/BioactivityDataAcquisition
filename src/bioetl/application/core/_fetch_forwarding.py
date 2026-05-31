@@ -34,7 +34,6 @@ def build_forwarded_fetch_kwargs(
 
 async def forward_fetch_records(
     fetch_fn: Callable[..., AsyncIterator[JsonDict]],
-    *,
     entity_type: str,
     limit: int | None = None,
     query: str | None = None,
@@ -60,7 +59,6 @@ async def forward_fetch_records(
 def forward_bound_fetch_records[RecordT](
     fetch_records: Callable[..., AsyncIterator[RecordT]],
     bound_instance: object,
-    *,
     entity_type: str,
     limit: int | None = None,
     query: str | None = None,
@@ -90,7 +88,6 @@ def forward_bound_fetch_records[RecordT](
 def delegate_bound_fetch_records[RecordT](
     fetch_records: Callable[..., AsyncIterator[RecordT]],
     bound_instance: object,
-    *,
     entity_type: str,
     limit: int | None = None,
     query: str | None = None,

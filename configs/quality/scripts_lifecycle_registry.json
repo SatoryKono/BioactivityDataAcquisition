@@ -122,6 +122,66 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as a bounded manual test-governance report utility while testing guidance still references the direct script path; promote it into the canonical scripts.engineering.qa surface or retire it after the broader test-governance workflow is consolidated."
     },
+    "scripts/engineering/qa/apply_universal_entity_filter_stubs.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded manual config-remediation utility for historical entity filter burn-down waves; do not extend it unless the config-surface cleanup program is formally reactivated and governed through a canonical QA workflow."
+    },
+    "scripts/engineering/qa/config_surface_governance.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the shared config-surface governance helper while canonical matrix generation and adjacent backlog scripts still import its sanctioned partial-key policy; fold it into a broader schema/governance helper only if those surfaces consolidate."
+    },
+    "scripts/engineering/qa/report_config_surface_backlog.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded historical backlog-report utility for the Stream B config-surface burn-down; either route it through a governed reporting workflow or retire it once the burn-down campaign is formally closed."
+    },
+    "scripts/engineering/qa/report_dashboard_promql_scope.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded manual observability audit report utility while dashboard PromQL scope reviews remain episodic; promote it into the canonical dashboard-audit workflow or retire it after those checks are fully absorbed by governed reports/tests."
+    },
+    "scripts/engineering/qa/revert_config_surface_corruption.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded rollback utility for historical config-surface corruption incidents caused by earlier auto burn-down attempts; do not reuse it outside reviewed repair operations."
+    },
+    "scripts/engineering/qa/revert_extraction_params_corruption.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded rollback utility for historical extraction_params corruption introduced by auto burn-down experiments; retire it if the remediation campaign no longer requires manual repair fallbacks."
+    },
+    "scripts/engineering/qa/revert_filter_surface_corruption.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded rollback utility for historical filter-surface corruption introduced by automated config edits; retire it if the reviewed burn-down recovery toolbox is no longer needed."
+    },
+    "scripts/engineering/qa/run_config_surface_auto_burn_down.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded historical automation script for iterative config-surface burn-down waves; do not re-expose it as an active workflow without fresh governance, dry-run safety, and reviewed rollback coverage."
+    },
+    "scripts/engineering/qa/run_config_surface_burn_down_phases.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded historical phased burn-down utility for surgical config text edits; do not extend it unless the config-surface remediation program is restarted under a governed workflow."
+    },
+    "scripts/engineering/qa/scaffold_non_chembl_hash_policy.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded historical scaffolding utility for non-ChEMBL hash_policy rollout; retire it once active normalization/hash-policy governance no longer needs one-off bootstrap helpers."
+    },
     "scripts/engineering/common/repo_paths.py": {
       "owner": "@bioetl-platform",
       "decision": "internal_helper_orphan",
@@ -247,6 +307,12 @@
       "decision": "legacy_manual_utility",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded legacy Linux bootstrap helper for Grafana screenshot runtime while screenshot orchestration remains primarily governed elsewhere; retire once screenshot bootstrap flows are formalized under a canonical Linux runbook."
+    },
+    "scripts/ops/observability/grafana/start_quarantine_explorer.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the Windows-side compatibility launcher for the canonical scripts.ops ensure-quarantine-explorer command while Grafana local audit flows may still need a direct PowerShell entrypoint; retire it once Windows-specific observability launch wrappers are fully consolidated."
     },
     "scripts/ops/maintenance/git/delete-stale-branches.sh": {
       "owner": "@bioetl-platform",

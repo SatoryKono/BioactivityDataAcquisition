@@ -43,6 +43,23 @@ class _ReplayProjectionBundle:
     exact_replay_eligible: bool
 
 
+def _build_replay_projection_context_kwargs(
+    manifest: RunManifest,
+    input_snapshots: list[dict[str, object]],
+    requested_exact_replay: bool,
+    resume_requested: bool,
+    policy_assessment: ReproducibilityPolicyAssessment,
+) -> dict[str, object]:
+    """Return shared replay-projection context kwargs."""
+    return {
+        "manifest": manifest,
+        "input_snapshots": input_snapshots,
+        "requested_exact_replay": requested_exact_replay,
+        "resume_requested": resume_requested,
+        "policy_assessment": policy_assessment,
+    }
+
+
 def _build_operator_replay_projection_inputs(
     *,
     manifest: RunManifest,
@@ -166,20 +183,15 @@ def _build_operator_replay_projection(
 ) -> dict[str, object]:
     """Return canonical operator-facing replay projection fields."""
     replay_family_contract = _resolve_replay_family_contract(manifest)
+    replay_projection_context = _build_replay_projection_context_kwargs(
+        manifest, input_snapshots, requested_exact_replay, resume_requested, policy_assessment
+    )
     replay_inputs = _build_operator_replay_projection_inputs(
-        manifest=manifest,
-        input_snapshots=input_snapshots,
-        requested_exact_replay=requested_exact_replay,
-        resume_requested=resume_requested,
-        policy_assessment=policy_assessment,
+        **replay_projection_context
     )
     return build_replay_taxonomy_projection(
         **_build_operator_replay_projection_payload(
-            manifest=manifest,
-            input_snapshots=input_snapshots,
-            requested_exact_replay=requested_exact_replay,
-            resume_requested=resume_requested,
-            policy_assessment=policy_assessment,
+            **replay_projection_context,
             replay_family_contract=replay_family_contract,
             replay_inputs=replay_inputs,
         )
@@ -218,11 +230,13 @@ def _build_replay_projection_bundle(
 ) -> _ReplayProjectionBundle:
     """Assemble the canonical replay projection bundle for diagnostics callers."""
     operator_projection = _build_operator_replay_projection(
-        manifest=manifest,
-        input_snapshots=input_snapshots,
-        requested_exact_replay=requested_exact_replay,
-        resume_requested=resume_requested,
-        policy_assessment=policy_assessment,
+        **_build_replay_projection_context_kwargs(
+            manifest,
+            input_snapshots,
+            requested_exact_replay,
+            resume_requested,
+            policy_assessment,
+        )
     )
     replay_state_projection = _build_replay_state_projection(
         manifest=manifest,

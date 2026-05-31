@@ -20,7 +20,9 @@ class XrefHelper:
         "target_xref_go_component",
         "target_xref_go_function",
         "target_xref_go_process",
+        "target_xref_hgnc_ids",
         "target_xref_reactome_ids",
+        "target_xref_uniprot_ids",
     )
 
     _XREF_SOURCE_TO_PROJECTION: ClassVar[dict[str, tuple[str, str]]] = {
@@ -32,6 +34,8 @@ class XrefHelper:
         "GO_FUNCTION": ("target_xref_go_function", "xref_name"),
         "GOPROCESS": ("target_xref_go_process", "xref_name"),
         "GO_PROCESS": ("target_xref_go_process", "xref_name"),
+        "HGNC": ("target_xref_hgnc_ids", "xref_id"),
+        "UNIPROT": ("target_xref_uniprot_ids", "xref_id"),
         "REACTOME": ("target_xref_reactome_ids", "xref_id"),
     }
 

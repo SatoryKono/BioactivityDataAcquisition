@@ -10,7 +10,7 @@ compatibility_reduction_plan:
   - keep_hash_policy_split_until_backfill
   - v2_default_active_with_explicit_v1_date_compatibility
   occurrence_identity_budget:
-    max_allowed_call_sites: 14
+    max_allowed_call_sites: 13
     ratchet_policy: No new uuid4-based occurrence identity generators may be added
       without explicit policy review and test evidence.
   replay_hash_policy_budget:
@@ -41,14 +41,15 @@ allowed_occurrence_identity_generators:
     replay and content semantics remain anchored by manifest fingerprints and input
     snapshot fingerprints.
   issue: '#4472'
-- path: src/bioetl/application/services/control_plane/manifest/service.py
-  symbol: RunManifestService._manifest_id_factory
+- path: src/bioetl/application/services/control_plane/manifest_service_scaffold.py
+  symbol: ManifestServiceScaffoldMixin._manifest_id_factory
   generator: uuid4
   identity_field: manifest_id
   semantic_classification: occurrence-only
   replay_semantics: excluded_from_execution_fingerprint
-  rationale: Run manifest IDs identify persisted control-plane occurrences; execution_fingerprint
-    and effective-config hashes carry semantic replay identity.
+  rationale: Shared manifest scaffold IDs identify persisted run/workflow control-plane
+    occurrences; execution_fingerprint and workflow fingerprints carry semantic replay
+    identity.
   issue: '#4472'
 - path: src/bioetl/application/services/control_plane/ledger/service.py
   symbol: RunLedgerService._entry_id_factory
@@ -58,15 +59,6 @@ allowed_occurrence_identity_generators:
   replay_semantics: excluded_from_execution_fingerprint
   rationale: Run ledger entry IDs are append-only event occurrence identifiers; ledger
     idempotency and semantic event payloads remain separate.
-  issue: '#4472'
-- path: src/bioetl/application/services/control_plane/workflow/manifest_service.py
-  symbol: WorkflowManifestService._manifest_id_factory
-  generator: uuid4
-  identity_field: workflow_manifest_id
-  semantic_classification: occurrence-only
-  replay_semantics: excluded_from_execution_fingerprint
-  rationale: Workflow manifest IDs identify persisted workflow occurrences while compute_execution_fingerprint
-    carries the semantic workflow identity.
   issue: '#4472'
 - path: src/bioetl/application/services/control_plane/workflow/ledger_service.py
   symbol: WorkflowLedgerService._entry_id_factory

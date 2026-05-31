@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from bioetl.application.services.control_plane.replay import historical_corpus_models
 from bioetl.application.services.control_plane.replay.bundle_descriptor_service import (
     RunReplayBundleDescriptorRecord,
     build_run_replay_bundle_descriptor,
@@ -37,11 +38,7 @@ from bioetl.application.services.control_plane.replay.historical_universe_servic
 )
 
 __all__ = [
-    "HistoricalReplayBulkCertificationRecord",
-    "HistoricalReplayBulkCertificationResult",
-    "HistoricalReplayBulkCertificationSpec",
-    "HistoricalReplayCertifiabilityInventory",
-    "HistoricalReplayCertifiabilityRecord",
+    *historical_corpus_models.__all__,
     "HistoricalReplayCertificationResult",
     "HistoricalReplayCertificationService",
     "HistoricalReplayClosureReportRecord",

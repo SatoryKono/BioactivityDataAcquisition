@@ -8,7 +8,7 @@ from datetime import UTC, datetime
 
 from bioetl.application.runtime_clock import RuntimeClockService
 from bioetl.application.services.control_plane.replay._historical_record_payload import (
-    build_historical_run_identity_payload,
+    build_historical_certified_identity_payload_from_record,
 )
 from bioetl.application.services.control_plane.replay.historical_corpus_service import (
     HistoricalReplayCertifiabilityInventory,
@@ -48,16 +48,8 @@ class HistoricalReplayUniverseExternalRecord(HistoricalReplayRunIdentity):
     source_pack_ref: str | None = None
 
     def to_dict(self) -> dict[str, object]:
-        return build_historical_run_identity_payload(
-            manifest_id=self.manifest_id,
-            run_id=self.run_id,
-            pipeline_name=self.pipeline_name,
-            provider=self.provider,
-            entity=self.entity,
-            execution_context=self.execution_context,
-            certification_status=self.certification_status,
-            replay_occurrence_kind=self.replay_occurrence_kind,
-            blocking_reasons=self.blocking_reasons,
+        return build_historical_certified_identity_payload_from_record(
+            self,
             evidence_residency=self.evidence_residency,
             durable_evidence_coverage=self.durable_evidence_coverage,
             source_pack_ref=self.source_pack_ref,
@@ -77,16 +69,8 @@ class HistoricalReplayUniverseRecord(HistoricalReplayRunIdentity):
     source_pack_ref: str | None = None
 
     def to_dict(self) -> dict[str, object]:
-        return build_historical_run_identity_payload(
-            manifest_id=self.manifest_id,
-            run_id=self.run_id,
-            pipeline_name=self.pipeline_name,
-            provider=self.provider,
-            entity=self.entity,
-            execution_context=self.execution_context,
-            certification_status=self.certification_status,
-            replay_occurrence_kind=self.replay_occurrence_kind,
-            blocking_reasons=self.blocking_reasons,
+        return build_historical_certified_identity_payload_from_record(
+            self,
             universe_origin=self.universe_origin,
             evidence_residency=self.evidence_residency,
             durable_evidence_coverage=self.durable_evidence_coverage,

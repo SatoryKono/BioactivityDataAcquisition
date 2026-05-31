@@ -147,7 +147,23 @@
       "nullable": true,
       "description": ""
     },
+    "target_xref_hgnc_ids": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "target_xref_reactome_ids": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_xref_uniprot_ids": {
       "type": [
         "string",
         "null"
@@ -239,6 +255,6 @@
   "normalization_profile": {
     "ref": "chembl.target",
     "version": "1.0.0",
-    "hash": "8cf9569af565159935a48588ed1612c134d4efd684a5577ce3042a8cfbe37c6f"
+    "hash": "746da0091c51435886d320b4582aae8f0b1701abf37885a045183d4bb125ff5c"
   }
 }

@@ -33,7 +33,9 @@ class ChEMBLTargetGoldSchema(StrictGoldContractSchema):
     target_xref_go_component: Series[str] = pa.Field(nullable=True)
     target_xref_go_function: Series[str] = pa.Field(nullable=True)
     target_xref_go_process: Series[str] = pa.Field(nullable=True)
+    target_xref_hgnc_ids: Series[str] = pa.Field(nullable=True)
     target_xref_reactome_ids: Series[str] = pa.Field(nullable=True)
+    target_xref_uniprot_ids: Series[str] = pa.Field(nullable=True)
     primary_component_id: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # int → float (nullable)

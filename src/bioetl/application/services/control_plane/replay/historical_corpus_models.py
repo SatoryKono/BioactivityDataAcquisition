@@ -5,11 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from bioetl.application.services.control_plane.replay._historical_record_payload import (
-    build_historical_run_identity_payload,
+    build_historical_certified_identity_payload_from_record,
 )
-from bioetl.application.services.control_plane.replay.historical_identity_models import (
-    HistoricalReplayRunIdentity,
-)
+from bioetl.application.services.control_plane.replay.historical_identity_models import HistoricalReplayRunIdentity
 
 
 @dataclass(frozen=True, slots=True)
@@ -27,16 +25,8 @@ class HistoricalReplayCertifiabilityRecord(HistoricalReplayRunIdentity):
 
     def to_dict(self) -> dict[str, object]:
         """Return one JSON-safe inventory row."""
-        return build_historical_run_identity_payload(
-            manifest_id=self.manifest_id,
-            run_id=self.run_id,
-            pipeline_name=self.pipeline_name,
-            provider=self.provider,
-            entity=self.entity,
-            execution_context=self.execution_context,
-            certification_status=self.certification_status,
-            replay_occurrence_kind=self.replay_occurrence_kind,
-            blocking_reasons=self.blocking_reasons,
+        return build_historical_certified_identity_payload_from_record(
+            self,
             family=self.family,
             certification_scope=self.certification_scope,
             broader_historical_exact_replay_policy=(

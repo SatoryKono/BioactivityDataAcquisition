@@ -87,6 +87,13 @@ _SPECIAL_RULE_COMPONENTS = {
             "text field with pipe-delimited list semantics."
         ),
     ),
+    "target_xref_hgnc_ids": (
+        normalize_profile_text,
+        (
+            "Canonicalize derived HGNC target xref IDs as a text field with "
+            "pipe-delimited list semantics."
+        ),
+    ),
     "target_xref_pdb_ids": (
         normalize_profile_text,
         (
@@ -99,6 +106,13 @@ _SPECIAL_RULE_COMPONENTS = {
         (
             "Canonicalize derived Reactome target xref IDs as a JSON "
             "list-like text field with pipe-delimited list semantics (json)."
+        ),
+    ),
+    "target_xref_uniprot_ids": (
+        normalize_profile_text,
+        (
+            "Canonicalize derived UniProt target xref IDs as a text field with "
+            "pipe-delimited list semantics."
         ),
     ),
     "organism": (

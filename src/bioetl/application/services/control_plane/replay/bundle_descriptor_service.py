@@ -5,9 +5,6 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass
 
-from bioetl.application.services.control_plane._run_manifest_execution_identity_support import (
-    build_code_provenance_dict,
-)
 from bioetl.application.services.control_plane.manifest.inspection_models import (
     RunManifestInspectionResult,
 )
@@ -43,6 +40,49 @@ def _string_list(value: object) -> list[str]:
 def _optional_string(value: object) -> str | None:
     """Return a string payload when present."""
     return None if value is None else str(value)
+
+
+def _build_code_provenance_dict(code_provenance: object) -> dict[str, object]:
+    """Return the replay bundle's code-provenance mapping."""
+    payload: dict[str, object] = {
+        "pipeline_version": getattr(code_provenance, "pipeline_version", None),
+        "git_commit": getattr(code_provenance, "git_commit", None),
+        "dependency_lock_hash": getattr(code_provenance, "dependency_lock_hash", None),
+        "config_hash": getattr(code_provenance, "config_hash", None),
+        "resolved_config_hash": getattr(code_provenance, "resolved_config_hash", None),
+        "effective_config_hash": getattr(code_provenance, "effective_config_hash", None),
+        "effective_config_artifact_id": getattr(
+            code_provenance,
+            "effective_config_artifact_id",
+            None,
+        ),
+        "contract_ref": getattr(code_provenance, "contract_ref", None),
+        "contract_version": getattr(code_provenance, "contract_version", None),
+        "contract_schema_hash": getattr(code_provenance, "contract_schema_hash", None),
+        "dq_policy_ref": getattr(code_provenance, "dq_policy_ref", None),
+        "rule_bundle_version": getattr(code_provenance, "rule_bundle_version", None),
+        "normalization_profile_ref": getattr(
+            code_provenance,
+            "normalization_profile_ref",
+            None,
+        ),
+        "normalization_profile_version": getattr(
+            code_provenance,
+            "normalization_profile_version",
+            None,
+        ),
+        "normalization_profile_hash": getattr(
+            code_provenance,
+            "normalization_profile_hash",
+            None,
+        ),
+        "dq_contract_compatibility_hash": getattr(
+            code_provenance,
+            "dq_contract_compatibility_hash",
+            None,
+        ),
+    }
+    return {key: value for key, value in payload.items() if value is not None}
 
 
 @dataclass(frozen=True, slots=True)
@@ -120,7 +160,7 @@ def _build_code_provenance_bundle(
     result: RunManifestInspectionResult,
 ) -> dict[str, object]:
     """Build code-provenance replay bundle data."""
-    return build_code_provenance_dict(result.manifest.code_provenance)
+    return _build_code_provenance_dict(result.manifest.code_provenance)
 
 
 def _build_replay_claims_bundle(

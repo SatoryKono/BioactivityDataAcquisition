@@ -160,7 +160,9 @@ class TargetTransformer(BaseChemblTransformer):
             "target_xref_go_process": xref_projection[
                 "target_xref_go_process"
             ],
+            "target_xref_hgnc_ids": xref_projection["target_xref_hgnc_ids"],
             "target_xref_reactome_ids": xref_projection["target_xref_reactome_ids"],
+            "target_xref_uniprot_ids": xref_projection["target_xref_uniprot_ids"],
             # Primary component ID (for target_component enricher join)
             "primary_component_id": primary_component_id,
             # Flattened components

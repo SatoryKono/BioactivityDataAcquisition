@@ -1,4 +1,4 @@
-"""Runtime coverage for thin composition-layer public facades."""
+"""Runtime coverage for thin composition-layer public runtime API re-exports."""
 
 from __future__ import annotations
 

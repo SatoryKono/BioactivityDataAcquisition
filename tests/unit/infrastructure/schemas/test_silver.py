@@ -283,7 +283,9 @@ class TestChemblTargetSchema:
         "target_xref_go_component",
         "target_xref_go_function",
         "target_xref_go_process",
+        "target_xref_hgnc_ids",
         "target_xref_reactome_ids",
+        "target_xref_uniprot_ids",
         "primary_component_id",
         "component_accessions",
         "component_descriptions",
@@ -333,7 +335,9 @@ class TestChemblTargetSchema:
             "target_xref_go_component",
             "target_xref_go_function",
             "target_xref_go_process",
+            "target_xref_hgnc_ids",
             "target_xref_reactome_ids",
+            "target_xref_uniprot_ids",
         ):
             assert field_name in CHEMBL_TARGET_SCHEMA.names
             assert CHEMBL_TARGET_SCHEMA.field(field_name).type == pa.string()
