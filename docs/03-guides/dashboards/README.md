@@ -104,7 +104,10 @@ drill down first? The first screen materializes provenance/scope, `Status`,
 summaries (`Control Plane`, `Runtime`, `Data Quality`, `Provider`,
 `Data Validation`) plus selected workflow context. Historical evidence remains
 below the current answer rows, and diagnostics routing lives under the collapsed
-`Diagnostics & Docs (Logs / Traces / Raw Metrics)` row.
+`Diagnostics & Docs (Logs / Traces / Raw Metrics)` row. Actual firing/pending
+alert state is exposed in the collapsed `Alert/SLO Triage` row via Prometheus
+`ALERTS`; this is presentation-only triage and does not duplicate alert-rule
+business logic in dashboard queries.
 
 `bioetl-control-plane-v1` is the `0. Control Plane` surface. It
 starts with answer-first trust cards for replay safety state, checkpoint

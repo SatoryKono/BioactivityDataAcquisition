@@ -240,6 +240,12 @@ tracing-backed log hygiene живёт в collapsed row
   только когда selected runtime universe или GLOBAL provider current-status
   telemetry подтверждает scope; отсутствующий scope остаётся `UNKNOWN`.
 
+- **Alert/SLO triage surface**:
+  `1. Overview` includes collapsed `Alert/SLO Triage` with
+  `Triage Alert State`. This panel reads Prometheus `ALERTS` for firing and
+  pending alert state, preserving the alert-rule source of truth instead of
+  re-encoding alert thresholds in dashboard queries.
+
 - **Logs/traces row**:
   `Warnings`, `GLOBAL Unstructured Logs`, `Top Warning Events by Message / Range`,
   `GLOBAL Log Hygiene Trend`

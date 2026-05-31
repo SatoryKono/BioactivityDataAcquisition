@@ -440,6 +440,22 @@ def test_dashboard_recording_rule_queries_are_backed_by_shipped_rules_config() -
     )
 
 
+def test_overview_exposes_actual_alert_state_triage_surface() -> None:
+    """Overview should include a dashboard-as-code alert-state triage surface."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    panels = {panel.get("id"): panel for panel in get_dashboard_panels(dashboard)}
+
+    alert_panel = panels.get(9601)
+
+    assert alert_panel is not None
+    assert alert_panel["title"] == "Triage Alert State"
+    expressions = [
+        target.get("expr", "") for target in alert_panel.get("targets", [])
+    ]
+    assert any("ALERTS" in expr for expr in expressions)
+    assert any('alertstate=~"firing|pending"' in expr for expr in expressions)
+
+
 @pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
 def test_dashboard_has_required_variables(dashboard_path):
     """Check dashboard variables match the current contract."""

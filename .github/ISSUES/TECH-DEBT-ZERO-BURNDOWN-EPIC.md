@@ -20,7 +20,7 @@
 | [#4817](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4817) | closed | `compatibility_test_file_max` closeout recorded on GitHub |
 | [#4818](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4818) | closed | config-contract drift closeout recorded; release invariants green |
 | [#4819](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4819) | closed | observability alias closeout: zero `alias_emitters` |
-| [#4820](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4820) | open | dead-code triage backlog: `19` entries |
+| [#4820](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4820) | closed | dead-code inventory governance closeout verified; zero untriaged repo-wide candidates |
 | [#4821](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4821) | closed | migration-supported alias windows closed |
 | [#4825](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4825) | closed | owner-trace dependency artifact closed on GitHub |
 | [#4826](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4826) | closed | compatibility test-file debt ownership closeout recorded |
@@ -42,8 +42,7 @@
 
 Остаточная очередь после closeout wave:
 
-1. `#4820` dead-code ownership closeout
-2. epic `#4811` final closure after the remaining open technical-debt queue is exhausted
+1. epic `#4811` final closure after the remaining open technical-debt queue is exhausted
 
 ## Evidence Anchors
 
@@ -65,7 +64,8 @@
 Epic [#4811](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4811)
 закрывается только когда:
 
-- remaining open sub-issue `#4820` закрыт на GitHub;
+- remaining open technical-debt queue outside the already closed Stream A
+  sub-issues is exhausted;
 - no-growth governance stays green for twin families and sanctioned facades;
 - duplicate baseline remains at `0` for the closed P0 wave;
 - no new non-sanctioned technical debt is introduced into the tracked surfaces.

@@ -92,7 +92,10 @@ ______________________________________________________________________
 > because long dashboards such as `0. Control Plane` may finish loading well
 > before Playwright finishes writing the final PNG.
 > `python -m scripts.ops audit-live-grafana` remains the reviewed live
-> datasource/frame audit for semantically sensitive panels.
+> datasource/frame audit. It now starts from the curated semantically sensitive
+> checks and then expands coverage from shipped dashboard JSON so every
+> executable Prometheus, HTTP, Loki, and Tempo handoff target gets an evidence
+> row or an explicit blocked/expected-empty classification.
 > `python -m scripts.ops check-grafana-audit-preflight` is the fast readiness
 > gate for full dashboard audits: it verifies Grafana, explicit
 > `frontend/settings` render auth, Prometheus, Playwright browser/runtime
@@ -997,6 +1000,7 @@ ______________________________________________________________________
 | 9010 | Historical Failures | Table | `sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{status="failed",...}[$__range]))`                         | Selected-range historical failure evidence only; zero matching rows is not proof of current OK; handoff `Open Runtime`.                                                          |
 | 9011 | Recent Terminal Runs | Table | `sum by (pipeline, status) (increase(bioetl_pipeline_runs_total{status!="success",...}[$__range]))`                          | Selected-range non-success terminal-run evidence only; no terminal rows is not proof of current OK; handoffs `Open Control Plane` and `Open Runtime`.                            |
 | 9012/9021 | Diagnostics & Docs (Logs / Traces / Raw Metrics) / Diagnostics Navigation | Row/Text | n/a                                                                                                       | Collapsed diagnostics row is populated again with raw-metric routing guidance and dashboard navigation pointers.                                                                |
+| 9600/9601 | Alert/SLO Triage / Triage Alert State | Row/Table | `ALERTS{alertstate=~"firing|pending"}` | Collapsed alert-state triage surface backed by Prometheus `ALERTS`; shows firing/pending alert state without reimplementing alert rules in dashboard queries. |
 
 **Используемые метрики:** `bioetl_pipeline_runs_total`, `bioetl_records_processed_total`,
 `bioetl_stage_backlog_records`, `bioetl_stage_lag_seconds`,
