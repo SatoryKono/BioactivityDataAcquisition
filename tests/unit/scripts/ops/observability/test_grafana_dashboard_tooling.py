@@ -651,6 +651,49 @@ def test_live_audit_effective_specs_include_generated_loki_and_tempo_coverage() 
     assert len(specs) > len(audit_subject.REVIEWED_PANEL_SPECS)
 
 
+def test_live_audit_isolates_non_required_panel_execution_failures(
+    monkeypatch: Any,
+) -> None:
+    spec = audit_subject.PanelAuditSpec(
+        dashboard_uid="bioetl-runtime",
+        panel_id=250,
+        title="Inspect Warning Logs",
+        source_kind="loki",
+        semantic_kind="loki_query",
+        target_ref_id="A",
+        required=False,
+    )
+    config = audit_subject.AuditConfig(
+        prometheus_base_url="http://localhost:9090",
+        app_base_url="http://localhost:8081",
+        loki_base_url="http://localhost:3100",
+        tempo_base_url="http://localhost:3200",
+        grafana_base_url="http://localhost:3000",
+        grafana_username="admin",
+        grafana_password="changeme",
+        workflow="chembl_target",
+        pipeline="chembl_target",
+        run_type="backfill",
+        run_id="run-123",
+        range_hours=24,
+        output_path=Path("reports/observability/grafana/live-panel-audit.json"),
+    )
+
+    monkeypatch.setattr(audit_subject, "effective_panel_specs", lambda: (spec,))
+    monkeypatch.setattr(audit_subject, "_find_panel", lambda _spec: {})
+    monkeypatch.setattr(
+        audit_subject,
+        "_audit_loki_panel",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(OSError("timed out")),
+    )
+
+    results = audit_subject.run_audit(config)
+
+    assert len(results) == 1
+    assert results[0].status == "ok"
+    assert results[0].classification == "blocked_unavailable"
+
+
 def test_live_audit_normalizes_docker_gateway_to_localhost() -> None:
     assert (
         audit_subject._normalize_host_access_url("http://host.docker.internal:8081")
