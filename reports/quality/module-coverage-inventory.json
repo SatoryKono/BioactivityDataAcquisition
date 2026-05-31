@@ -18733,7 +18733,7 @@
       "missing_lines": 138,
       "module": "bioetl.interfaces.cli.commands.health",
       "path": "src/bioetl/interfaces/cli/commands/health.py",
-      "source_lines": 422
+      "source_lines": 418
     },
     {
       "coverage_percent": 0.0,
@@ -19688,7 +19688,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-05-31",
-  "source_tree_sha256": "9b3edb28208773b0ca2d26e511958e99d77ec27b869a0661b1c8fcdf6033a5ec",
+  "source_tree_sha256": "05de8df5cb8168bee29e9b56d76ce46ef05606b964a3d7a02789fa445a5f8a57",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
