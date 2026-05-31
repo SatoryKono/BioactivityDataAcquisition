@@ -43,6 +43,12 @@ def _manifest_index_path(base_path: Path, manifest_id: str) -> Path:
     return base_path / ".history" / "by_manifest" / f"{manifest_id}.json"
 
 
+def _history_path_from_manifest_index(base_path: Path, history_path: str) -> Path:
+    """Resolve history paths written on either Windows or POSIX hosts."""
+    normalized = history_path.replace("\\", "/")
+    return base_path.joinpath(*normalized.split("/"))
+
+
 def _extract_manifest_id(metadata: JsonDict) -> str | None:
     manifest_id = metadata.get("manifest_id")
     if manifest_id is None and isinstance(metadata.get("run_context"), dict):
@@ -369,7 +375,10 @@ class LocalCheckpointAdapter:
         history_path = index.get("history_path") if isinstance(index, dict) else None
         if not isinstance(history_path, str) or not history_path:
             return None
-        full_history_path = self.base_path / history_path
+        full_history_path = _history_path_from_manifest_index(
+            self.base_path,
+            history_path,
+        )
         if not full_history_path.exists():
             return None
         return _load_checkpoint_tuple(full_history_path)
