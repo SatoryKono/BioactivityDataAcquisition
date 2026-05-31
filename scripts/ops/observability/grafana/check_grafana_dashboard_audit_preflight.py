@@ -7,9 +7,9 @@ import argparse
 import json
 import os
 import sys
+from collections.abc import Iterable
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Iterable
 from urllib import error, request
 
 if __package__ in {None, ""}:
@@ -97,14 +97,14 @@ def _check_grafana_render_auth(
         fallback="auto",
     )
     try:
-        rerender_screenshots._request_json(  # noqa: SLF001
+        rerender_screenshots._request_json(
             f"{config.base_url}/api/frontend/settings",
-            headers=rerender_screenshots._auth_headers(config),  # noqa: SLF001
+            headers=rerender_screenshots._auth_headers(config),
             timeout_seconds=timeout_seconds,
         )
     except error.HTTPError as exc:
         detail = (
-            rerender_screenshots._describe_grafana_auth_failure(config)  # noqa: SLF001
+            rerender_screenshots._describe_grafana_auth_failure(config)
             if exc.code in {401, 403}
             else f"{config.base_url}/api/frontend/settings returned HTTP {exc.code}"
         )
@@ -277,10 +277,12 @@ def run_checks(
     ]
 
     try:
-        resolved_app_base_url = live_audit._resolve_app_base_url(  # noqa: SLF001
+        resolved_app_base_url = live_audit._resolve_app_base_url(
             live_audit.AuditConfig(
                 prometheus_base_url=prometheus_base_url.rstrip("/"),
                 app_base_url=app_base_url.rstrip("/"),
+                loki_base_url=live_audit.DEFAULT_LOKI_BASE_URL,
+                tempo_base_url=live_audit.DEFAULT_TEMPO_BASE_URL,
                 grafana_base_url=grafana_base_url.rstrip("/"),
                 grafana_username=grafana_username,
                 grafana_password=grafana_password,

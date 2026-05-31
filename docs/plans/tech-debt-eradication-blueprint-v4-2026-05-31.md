@@ -35,7 +35,7 @@ ______________________________________________________________________
 `v3` больше нельзя использовать как current-state blueprint без поправок.
 На `2026-05-31` подтверждены следующие изменения:
 
-- active tech-debt program queue сократилась с `39` до `6` open GitHub issue;
+- active tech-debt program queue сократилась с `39` до `5` open GitHub issue;
 - `Stream D` и `Stream E` больше не активны:
   `#4266`, `#4268`, `#4276`, `#4292`, `#4293`, `#4294`, `#4295`, `#4296`,
   `#4316`, `#4747` закрыты на GitHub `2026-05-30`;
@@ -45,8 +45,8 @@ ______________________________________________________________________
   policy closeout verification;
 - `Stream A` тоже почти полностью закрыт:
   `#4812`, `#4813`, `#4814`, `#4815`, `#4816`, `#4817`, `#4818`, `#4825`,
-  `#4826`, `#4827` закрыты на GitHub `2026-05-31`; в active queue внутри
-  tech-debt epic остались только `#4811` и `#4820`;
+  `#4826`, `#4827`, `#4820` закрыты на GitHub `2026-05-31`; в active queue
+  внутри tech-debt epic остался только `#4811`;
 - локальные Week 0 evidence-gap claims из `v3` устарели:
   `docs/reports/evidence/project-test-health/metadata.yaml`,
   `reports/quality/compatibility-importer-census.md`,
@@ -69,9 +69,9 @@ reopen или repo evidence снова сломается.
 
 | Area | v3 claim | v4 verified state | Source |
 | --- | --- | --- | --- |
-| Active queue | `39` open issue across Streams A-E | `6` open issue across Streams A and C after Stream A/B closeout waves | GitHub REST API issue checks, 2026-05-31 |
+| Active queue | `39` open issue across Streams A-E | `5` open issue across Streams A and C after Stream A/B closeout waves | GitHub REST API issue checks, 2026-05-31 |
 | Stream B | `9` open remediation issues | `0` open; `#4764-#4772` all closed by `2026-05-31` | GitHub REST API issues `#4764-#4772` |
-| Stream A | `12` open issues in the active epic wave | `2` open (`#4811`, `#4820`); the rest of `#4812-#4828` is closed | GitHub REST API issues `#4811-#4828` |
+| Stream A | `12` open issues in the active epic wave | `1` open (`#4811`); the rest of `#4812-#4828` is closed | GitHub REST API issues `#4811-#4828` |
 | Stream D | `9` open divergence issues | `0` open; all 9 closed `2026-05-30` | GitHub REST API issues `#4266/#4268/#4276/#4292-#4296/#4316` |
 | Stream E | `#4747` active | `#4747` closed `2026-05-30T11:36:50Z` | GitHub REST API issue `#4747` |
 | Week 0 evidence restore | `3` required files absent | required evidence files already present locally | working tree verification |
@@ -125,16 +125,14 @@ Repo-wide open issues on `2026-05-31`: `100`.
 `Blueprint v4` intentionally scopes only the active tech-debt eradication
 program queue:
 
-- `6` open issues total
+- `5` open issues total
 - the old `v4` label pivot is stale after the `2026-05-31` Stream A/B closeout waves;
   recompute label counts from GitHub before using them for scheduling or
   dashboards
 
-### Stream A — residual (`2` open)
+### Stream A — residual (`1` open)
 
 - epic: `#4811`
-- P2:
-  - `#4820` dead-code catalog ownership
 
 Closed Stream A sub-tasks already off the active queue:
 
@@ -146,6 +144,7 @@ Closed Stream A sub-tasks already off the active queue:
 - `#4817` closed `2026-05-31`
 - `#4818` closed `2026-05-31`
 - `#4819` closed `2026-05-30`
+- `#4820` closed `2026-05-31`
 - `#4821` closed `2026-05-30`
 - `#4825` closed `2026-05-31`
 - `#4826` closed `2026-05-31`
@@ -219,7 +218,7 @@ Exit:
 
 - no local plan still contradicts the current GitHub state for Stream A/B closeouts;
 - no current plan still treats closed Stream A, B, D, or E issues as active;
-- active queue explicitly equals the `6` open issues above.
+- active queue explicitly equals the `5` open issues above.
 
 ### Weeks 1-3 — Stream A core (P0)
 
@@ -241,13 +240,11 @@ Notes:
 
 ### Weeks 5-7 — Stream A residual
 
-- `#4820`
-
 Notes:
 
-- `#4816`, `#4817`, `#4818`, `#4825`, `#4826`, `#4827` are closed on GitHub
-  `2026-05-31`.
-- residual Stream A work is now concentrated in `#4820` plus epic closeout.
+- `#4816`, `#4817`, `#4818`, `#4820`, `#4825`, `#4826`, `#4827` are closed on
+  GitHub `2026-05-31`.
+- residual Stream A work is now reduced to epic `#4811` closeout only.
 
 ### Weeks 6-8 — Stream C
 
@@ -270,7 +267,7 @@ Ordering rule:
 
 Closeout target is no longer “39 -> 0”; it is:
 
-- active program queue `6 -> 0`;
+- active program queue `5 -> 0`;
 - no reopened Stream D/E regressions;
 - no stale local mirror contradicting GitHub state.
 
@@ -282,18 +279,18 @@ Closeout target is no longer “39 -> 0”; it is:
 2. Run baseline governance checks for config matrix, debt scorecard, root
    cleanliness, and targeted architecture suites.
 3. Start implementation backlog with:
-   - Stream A `#4820`
+   - Stream C `#4700`
 
 ### Next
 
-1. Stream A `#4820`
-2. Stream C `#4700` and `#4701`
-3. Stream C `#4705`, then epic `#4811` closeout prep
+1. Stream C `#4700` and `#4701`
+2. Stream C `#4705`
+3. Stream C `#4610`, then epic `#4811` closeout prep
 
 ### Blocked by internal sequencing
 
-- `#4820` is the only remaining open Stream A sub-issue before epic `#4811`
-  can move toward closeout
+- epic `#4811` can only close after the remaining open Stream C queue is
+  exhausted
 - `#4700`, `#4701`, `#4705`, and `#4610` still define the active Stream C path
 - no new closed-stream work should reopen `#4764-#4772` or closed Stream A
   sub-issues without a fresh GitHub state change

@@ -27,6 +27,7 @@ from scripts.ops.observability.grafana import (
 from scripts.ops.observability.grafana import (
     rerender_grafana_screenshots as rerender,
 )
+
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
     DEFAULT_HEALTH_SERVER_PORT,
     DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PATHS_READY_TIMEOUT_SECONDS,
@@ -93,13 +94,13 @@ def _build_parser() -> argparse.ArgumentParser:
         "--grafana-username",
         default=preflight._read_env(
             "GRAFANA_USERNAME", preflight.DEFAULT_GRAFANA_USERNAME
-        ),  # noqa: SLF001
+        ),
     )
     parser.add_argument(
         "--grafana-password",
         default=preflight._read_env(
             "GRAFANA_PASSWORD", preflight.DEFAULT_GRAFANA_PASSWORD
-        ),  # noqa: SLF001
+        ),
     )
     parser.add_argument("--prometheus-base-url", default=DEFAULT_PROMETHEUS_BASE_URL)
     parser.add_argument("--app-base-url", default=DEFAULT_APP_BASE_URL)
@@ -537,6 +538,8 @@ def _discover_filled_dashboard_uids(
             live_audit.AuditConfig(
                 prometheus_base_url=config.prometheus_base_url,
                 app_base_url=app_base_url,
+                loki_base_url=live_audit.DEFAULT_LOKI_BASE_URL,
+                tempo_base_url=live_audit.DEFAULT_TEMPO_BASE_URL,
                 grafana_base_url=config.grafana_base_url,
                 grafana_username=config.grafana_username,
                 grafana_password=config.grafana_password,

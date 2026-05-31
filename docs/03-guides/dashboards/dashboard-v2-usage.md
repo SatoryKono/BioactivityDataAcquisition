@@ -144,6 +144,9 @@ dashboard-specific `Status` or `First Action` route.
    the L0 question: what is broken/degraded, what exact control-plane identity
    is selected or resolved, and where to open drilldown first. `OK` requires
    recent activity; missing current evidence remains `UNKNOWN`, not green zero.
+   Firing/pending alert state is available below fold in collapsed
+   `Alert/SLO Triage`; it reads Prometheus `ALERTS` and is an incident triage
+   surface, not a replacement for the shipped Prometheus alert rules.
 1. `bioetl-runtime`, first-screen answer area (без скролла):
    `Provenance`, `Status`, `ID`, `Processed Records`, then
    `Runtime Status`, `Runtime Blockers` и

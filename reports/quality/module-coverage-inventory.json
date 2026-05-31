@@ -15633,7 +15633,7 @@
       "missing_lines": 163,
       "module": "bioetl.infrastructure.checkpoint.local_checkpoint",
       "path": "src/bioetl/infrastructure/checkpoint/local_checkpoint.py",
-      "source_lines": 399
+      "source_lines": 408
     },
     {
       "coverage_percent": 0.0,
@@ -19598,7 +19598,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-05-31",
-  "source_tree_sha256": "0b0d464e45eae94e3ba4562654cf4e981fb50258f001b597b318624a7d7823c0",
+  "source_tree_sha256": "a79f062b69e30276c5eadbc152155b9814ce6b622c9f04683d2204af0d817581",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

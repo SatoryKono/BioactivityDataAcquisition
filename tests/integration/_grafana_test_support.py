@@ -44,6 +44,7 @@ def get_all_valid_metric_names() -> set[str]:
     from bioetl.infrastructure.observability import metrics
 
     all_valid_names: set[str] = set()
+    all_valid_names.add("ALERTS")
 
     for item_name in dir(metrics):
         item = getattr(metrics, item_name)
@@ -166,6 +167,7 @@ def _register_recording_rule_label_sets(
 def get_metric_label_sets() -> dict[str, frozenset[str]]:
     """Return the effective label set for shipped metrics and recording rules."""
     label_sets: dict[str, frozenset[str]] = {
+        "ALERTS": frozenset({"alertname", "alertstate", "severity"}),
         "up": frozenset({"job", "instance"}),
     }
 
