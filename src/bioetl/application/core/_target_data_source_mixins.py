@@ -6,8 +6,6 @@ __all__ = [
     "_FallbackFilterableTargetFetchMixin",
     "_FilterableTargetDelegationMixin",
     "_TargetEntityFetchDelegationMixin",
-    "_yield_plain_wrapped_fetch_records",
-    "_yield_wrapped_fetch_records",
 ]
 
 from typing import TYPE_CHECKING, Protocol, TypeVar, cast
@@ -16,12 +14,7 @@ from bioetl.application.core._target_data_source_fetch_support import (
     ensure_filterable_data_source,
     yield_target_or_delegate_records,
     yield_target_records_from_fallback_fetch,
-)
-from bioetl.application.core._target_data_source_fetch_support import (
-    yield_plain_wrapped_fetch_records as _yield_plain_wrapped_fetch_records,
-)
-from bioetl.application.core._target_data_source_fetch_support import (
-    yield_wrapped_fetch_records as _yield_wrapped_fetch_records,
+    yield_wrapped_fetch_records,
 )
 from bioetl.domain.ports import FilterableDataSourcePort
 
@@ -59,23 +52,25 @@ class _TargetEntityFetchDelegationMixin:
         offset: int | None = None,
     ) -> AsyncIterator[RecordT]:
         """Fetch derived target records or delegate to the wrapped adapter."""
-        if entity_type == self.TARGET_ENTITY_TYPE:
-            return self._fetch_target_records(
+        return yield_target_or_delegate_records(
+            entity_type=entity_type,
+            target_entity_type=self.TARGET_ENTITY_TYPE,
+            target_factory=lambda: self._fetch_target_records(
                 limit,
                 query,
                 filter_ids,
                 filter_field,
                 offset,
-            )
-
-        return _yield_wrapped_fetch_records(
-            self._data_source,
-            entity_type=entity_type,
-            limit=limit,
-            query=query,
-            filter_ids=filter_ids,
-            filter_field=filter_field,
-            offset=offset,
+            ),
+            delegate_factory=lambda: yield_wrapped_fetch_records(
+                self._data_source,
+                entity_type=entity_type,
+                limit=limit,
+                query=query,
+                filter_ids=filter_ids,
+                filter_field=filter_field,
+                offset=offset,
+            ),
         )
 
 
