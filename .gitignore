@@ -106,6 +106,10 @@ log_test.txt
 !/reports/quality/dead-code-inventory.json
 !/reports/quality/dead-code-inventory.md
 !/reports/quality/module-coverage-inventory.json
+!/reports/quality/pipeline-config-contract-ownership-map.json
+!/reports/quality/pipeline-config-contract-ownership-map.md
+!/reports/quality/contract-coverage-matrix.json
+!/reports/quality/contract-coverage-matrix.md
 !/reports/observability/
 /reports/observability/*
 !/reports/observability/runtime_cardinality_inventory.json

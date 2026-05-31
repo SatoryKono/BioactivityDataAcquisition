@@ -19,6 +19,7 @@ DEFAULT_JSON_OUTPUT = (
 DEFAULT_MD_OUTPUT = (
     PROJECT_ROOT / "reports" / "quality" / "pipeline-config-contract-ownership-map.md"
 )
+CONTRACT_REGISTRY_PATH = PROJECT_ROOT / "configs" / "base" / "contract_registry.yaml"
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
@@ -69,9 +70,103 @@ def _gold_runtime_enabled(pipeline: dict[str, Any]) -> bool:
     return bool(enabled)
 
 
-def _collect_entity_rows() -> list[dict[str, str | bool]]:
-    rows: list[dict[str, str | bool]] = []
+def _repo_relative_registry_path(raw_path: object) -> str:
+    if not isinstance(raw_path, str) or not raw_path:
+        return ""
+    candidate = Path(raw_path)
+    resolved = (
+        candidate.resolve()
+        if candidate.is_absolute()
+        else (CONTRACT_REGISTRY_PATH.parent / candidate).resolve()
+    )
+    try:
+        return resolved.relative_to(PROJECT_ROOT).as_posix()
+    except ValueError:
+        return resolved.as_posix()
+
+
+def _first_published_artifact(registry_entry: dict[str, Any] | None) -> str:
+    if registry_entry is None:
+        return ""
+    artifacts = registry_entry.get("published_artifacts")
+    if not isinstance(artifacts, list) or not artifacts:
+        return ""
+    return _repo_relative_registry_path(artifacts[0])
+
+
+def _gold_schema_title(published_artifact_path: str) -> str:
+    if not published_artifact_path:
+        return ""
+    artifact_path = PROJECT_ROOT / published_artifact_path
+    if not artifact_path.is_file():
+        return ""
+    payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+    title = payload.get("title") if isinstance(payload, dict) else None
+    return title if isinstance(title, str) else ""
+
+
+def _registry_contract_version(registry_entry: dict[str, Any] | None) -> str:
+    if registry_entry is None:
+        return ""
+    identity = registry_entry.get("identity")
+    if not isinstance(identity, dict):
+        return ""
+    version = identity.get("contract_version")
+    return version if isinstance(version, str) else ""
+
+
+def _coverage_status(
+    *,
+    gold_enabled: bool,
+    registry_entry: dict[str, Any] | None,
+    contract_config_path: str,
+    published_artifact_path: str,
+    registry_source_path: str,
+    gold_schema_title: str,
+) -> str:
+    if not gold_enabled:
+        return "excluded_non_gold"
+    if registry_entry is None:
+        return "missing_registry_entry"
+    if registry_entry.get("status") != "active":
+        return "registry_not_active"
+    required_paths = (contract_config_path, published_artifact_path, registry_source_path)
+    if not all(required_paths):
+        return "missing_governance_path"
+    if not all((PROJECT_ROOT / path).is_file() for path in required_paths):
+        return "missing_governance_file"
+    if not gold_schema_title:
+        return "missing_gold_schema_title"
+    return "covered"
+
+
+def _load_registry_entries() -> dict[str, dict[str, Any]]:
+    payload = _load_yaml(CONTRACT_REGISTRY_PATH)
+    entries = payload.get("entries")
+    if not isinstance(entries, dict):
+        return {}
+    return {
+        str(contract_ref): entry
+        for contract_ref, entry in entries.items()
+        if isinstance(entry, dict)
+    }
+
+
+def _gold_exclusion_reason(pipeline: dict[str, Any]) -> str:
+    sink = pipeline.get("sink")
+    if not isinstance(sink, dict):
+        return ""
+    gold = sink.get("gold")
+    if not isinstance(gold, dict):
+        return ""
+    reason = gold.get("exclusion_reason")
+    return reason if isinstance(reason, str) else ""
+
+
+def _collect_entity_rows() -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
     entities_root = PROJECT_ROOT / "configs" / "entities"
+    registry_entries = _load_registry_entries()
     for config_path in sorted(entities_root.glob("*/*.yaml")):
         payload = _load_yaml(config_path)
         provider = str(payload.get("provider") or config_path.parent.name)
@@ -88,20 +183,43 @@ def _collect_entity_rows() -> list[dict[str, str | bool]]:
         composite_runtime_config = (
             PROJECT_ROOT / "configs" / "composites" / f"{entity}.yaml"
         )
-        row: dict[str, str | bool] = {
+        registry_entry = registry_entries.get(contract_ref)
+        registry_source_path = _repo_relative_registry_path(
+            registry_entry.get("source_path") if registry_entry is not None else ""
+        )
+        published_artifact_path = _first_published_artifact(registry_entry)
+        gold_schema_title = _gold_schema_title(published_artifact_path)
+        contract_config_path = (
+            contract_config.relative_to(PROJECT_ROOT).as_posix()
+            if contract_config.exists()
+            else ""
+        )
+        row: dict[str, Any] = {
             "pipeline_name": pipeline_name,
             "provider": provider,
             "entity": entity,
             "contract_ref": contract_ref,
             "config_path": config_path.relative_to(PROJECT_ROOT).as_posix(),
-            "contract_config_path": (
-                contract_config.relative_to(PROJECT_ROOT).as_posix()
-                if contract_config.exists()
-                else ""
+            "contract_config_path": contract_config_path,
+            "registry_status": (
+                str(registry_entry.get("status")) if registry_entry is not None else ""
             ),
+            "registry_contract_version": _registry_contract_version(registry_entry),
+            "registry_source_path": registry_source_path,
+            "published_artifact_path": published_artifact_path,
+            "gold_schema_title": gold_schema_title,
             "pipeline_code_owner": _pipeline_owner(provider, entity, pipeline_name),
             "gold_enabled": gold_enabled,
+            "gold_exclusion_reason": _gold_exclusion_reason(pipeline),
         }
+        row["coverage_status"] = _coverage_status(
+            gold_enabled=gold_enabled,
+            registry_entry=registry_entry,
+            contract_config_path=contract_config_path,
+            published_artifact_path=published_artifact_path,
+            registry_source_path=registry_source_path,
+            gold_schema_title=gold_schema_title,
+        )
         if provider == "composite":
             row["composite_runtime_config_path"] = (
                 composite_runtime_config.relative_to(PROJECT_ROOT).as_posix()
@@ -119,13 +237,17 @@ def _render_markdown(rows: list[dict[str, str | bool]]) -> str:
         f"- snapshot_date: {date.today().isoformat()}",
         f"- row_count: {len(rows)}",
         "",
-        "| pipeline_name | contract_ref | config_path | contract_config_path | pipeline_code_owner | gold_enabled |",
-        "| --- | --- | --- | --- | --- | ---: |",
+        "| pipeline_name | contract_ref | config_path | registry_status | "
+        "contract_config_path | published_artifact_path | gold_schema_title | "
+        "pipeline_code_owner | gold_enabled | coverage_status |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | ---: | --- |",
     ]
     for row in rows:
         lines.append(
             "| `{pipeline_name}` | `{contract_ref}` | `{config_path}` | "
-            "`{contract_config_path}` | `{pipeline_code_owner}` | {gold_enabled} |".format(
+            "`{registry_status}` | `{contract_config_path}` | "
+            "`{published_artifact_path}` | `{gold_schema_title}` | "
+            "`{pipeline_code_owner}` | {gold_enabled} | `{coverage_status}` |".format(
                 **row
             )
         )
@@ -135,9 +257,20 @@ def _render_markdown(rows: list[dict[str, str | bool]]) -> str:
 
 def build_payload() -> dict[str, Any]:
     rows = _collect_entity_rows()
+    explicit_exclusions = [
+        {
+            "pipeline_name": row["pipeline_name"],
+            "contract_ref": row["contract_ref"],
+            "config_path": row["config_path"],
+            "reason": row["gold_exclusion_reason"],
+        }
+        for row in rows
+        if not row["gold_enabled"]
+    ]
     return {
         "snapshot_date": date.today().isoformat(),
         "row_count": len(rows),
+        "explicit_exclusions": explicit_exclusions,
         "rows": rows,
     }
 

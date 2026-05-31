@@ -14,16 +14,24 @@ from bioetl.composition.bootstrap.assembly.health_server import (
 )
 from bioetl.composition.bootstrap.assembly.checkpoint import (
     bootstrap_checkpoint_adapter,
+    bootstrap_quarantine_adapter,
 )
-from bioetl.composition.bootstrap.cli.noop import create_noop_logger
+from bioetl.composition.bootstrap.cli.noop import (
+    create_noop_logger,
+    create_noop_metrics,
+    create_noop_tracing,
+)
 from bioetl.composition.runtime_builders.config_access import get_settings
+from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
     from bioetl.application.services.health_service import HealthService
+    from bioetl.application.services.quarantine_service import QuarantineService
 
 __all__ = [
     "HealthServerDependencies",
     "bootstrap_health_server_dependencies",
+    "bootstrap_health_server_quarantine_service",
     "bootstrap_health_service",
 ]
 
@@ -57,6 +65,20 @@ def bootstrap_health_service() -> HealthService:
     return create_health_service(
         logger=noop_logger,
         settings=settings,
+    )
+
+
+def bootstrap_health_server_quarantine_service() -> QuarantineService:
+    """Build quarantine explorer storage without manifest-service fan-out."""
+    from bioetl.application.services.quarantine_service import QuarantineService
+
+    return QuarantineService(
+        quarantine_port=bootstrap_quarantine_adapter(),
+        logger=create_noop_logger(),
+        clock=SystemClock(),
+        metrics=create_noop_metrics(),
+        tracer=create_noop_tracing(),
+        run_manifest_service=None,
     )
 
 
