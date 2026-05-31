@@ -72,6 +72,12 @@ Gold-слой содержит **бизнес-готовые данные** с:
 - Gold sidecars сохраняют `dq_report_path` и schema metadata (`contract_path`, `version`, `validation`);
 - единый contract-driven DQ provenance c глобальными `contract_version` и `rule_id` для всех DQ artefacts пока не является завершённым runtime contract и не должен предполагаться downstream tooling.
 
+Отдельно фиксируем policy boundary для `#4768`:
+
+- `strict_dq_validation` в `configs/contracts/**/*.yaml` остаётся DQ-only флагом и не управляет Gold runtime strictness;
+- canonical Gold strictness для composite outputs обеспечивается registered Pandera Gold schema и merged Gold write path;
+- любые composite-специфические исключения по этой границе должны быть явно заведены в `configs/quality/composite_gold_strictness_waivers.yaml` с owner, rationale, linked issue, approved_on и expires_on.
+
 ### Snapshot governance
 
 Published JSON contracts в `docs/04-reference/contracts/gold/*.json` остаются
