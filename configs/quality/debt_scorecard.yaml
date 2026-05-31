@@ -95,13 +95,13 @@ compatibility_debt_metrics:
   sunset_source: configs/quality/compatibility_facade_inventory.yaml#transition_debt
   metrics:
     transition_compat_count:
-      current_count: 9
-      max_count: 9
+      current_count: 0
+      max_count: 0
       target_count: 0
       owner: '@bioetl-architecture'
       linked_issue: '4700'
-      rationale: Nine control-plane manifest diagnostics compatibility shims remain
-        in transition_debt while callers migrate to manifest.diagnostics.* owners.
+      rationale: Stream C post-sunset shim removal cleared all control-plane manifest
+        diagnostics transition_debt entries; callers use manifest.diagnostics.* owners.
         Sanctioned public entrypoints are tracked separately as stable public API.
       ratchet_policy: Fail on growth; ratchet current/max_count toward target_count
         zero as transition-only compatibility shims are removed.
@@ -116,12 +116,14 @@ compatibility_debt_metrics:
       ratchet_policy: Fail on growth; ratchet max_count downward only after retained
         public entrypoints are removed or first-party callers are narrowed.
     sunset_compat_count:
-      current_count: 9
+      current_count: 0
+      max_count: 0
+      target_count: 0
       owner: '@bioetl-architecture'
       linked_issue: '4700'
       sunset_date: '2026-09-30'
-      rationale: Control-plane manifest diagnostics compatibility shims share the
-        transition_debt inventory and must burn down before review_date 2026-09-30.
+      rationale: Control-plane run_manifest_diagnostics_* compatibility shims were
+        removed in Stream C; transition_debt inventory is empty.
       ratchet_policy: May only decrease before the sunset; must reach zero after 2026-09-30.
     expired_compat_count:
       current_count: 0
@@ -635,15 +637,6 @@ hotspot_family_coverage_thresholds:
       - src/bioetl/application/services/control_plane/run_ledger_core_events.py
       - src/bioetl/application/services/control_plane/run_ledger_entry_support.py
       - src/bioetl/application/services/control_plane/run_ledger_rich_events.py
-      - src/bioetl/application/services/control_plane/run_manifest_diagnostics_artifact_support.py
-      - src/bioetl/application/services/control_plane/run_manifest_diagnostics_base.py
-      - src/bioetl/application/services/control_plane/run_manifest_diagnostics_base_helpers.py
-      - src/bioetl/application/services/control_plane/run_manifest_diagnostics_checkpoint_projection.py
-      - src/bioetl/application/services/control_plane/run_manifest_diagnostics_finalization.py
-      - src/bioetl/application/services/control_plane/run_manifest_diagnostics_replay.py
-      - src/bioetl/application/services/control_plane/run_manifest_diagnostics_replay_projection.py
-      - src/bioetl/application/services/control_plane/run_manifest_diagnostics_snapshot_support.py
-      - src/bioetl/application/services/control_plane/run_manifest_diagnostics_source_refs.py
       - src/bioetl/application/services/control_plane/run_manifest_diagnostics_support.py
       - src/bioetl/application/services/control_plane/run_manifest_exact_replay_blockers.py
       - src/bioetl/application/services/control_plane/run_manifest_inspection_mixins.py
@@ -790,6 +783,20 @@ expiry_decomposition_targets:
   max_entries_expiring_in_quarter: 29
 - quarter: 2026-Q2
   max_entries_expiring_in_quarter: 1
+test_governance_debt_metrics:
+  inventory_source: configs/quality/test_governance_audit.yaml
+  owner: '@bioetl-architecture'
+  linked_issue: '#4817'
+  metrics:
+    compatibility_test_file_count:
+      current_count: 56
+      max_count: 56
+      target_count: 54
+      ratchet_policy: Downward ratchet only; decrease max_count to 54 once the live
+        compatibility test inventory is at or below 54 files.
+      rationale: Stream G ratchet review on 2026-05-31 confirmed live inventory remains
+        56; burn-down to target 54 stays blocked until two inventoried compatibility
+        surfaces are retired or reclassified.
 program_done_criteria:
   deadline_quarter: 2027-Q1
   max_total_exemptions: 0

@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Removed control-plane `run_manifest_diagnostics_*` compatibility shims (Stream C post-sunset):** Deleted nine thin re-export wrappers under `bioetl.application.services.control_plane`; import `bioetl.application.services.control_plane.manifest.diagnostics.*` instead (`base`, `base_summary_helpers`, `checkpoint_projection`, `finalization`, `replay`, `replay_projection`, `snapshot_support`, `source_refs`, `artifact_support`).
+
 - **Claude runtime path migration (`.claude/*` -> `ai/claude/*`)**: Canonical Claude runtime tree now lives under `ai/claude/`; architecture tests, CI workflows, engineering scripts, and runtime/docs links were updated. Legacy `.claude/` compatibility layer has been removed after stabilization.
 
 - **Normalization governance closure for ChEMBL and publication types (#3033, #3035, #3036, #3038, #3040):** ChEMBL assay-parameter canonicalization now lives in the shipped profile, ChEMBL assay structured JSON/code-label semantics have focused tests, publication providers preserve raw publication-type values while deriving taxonomy-backed classification fields, and observed-value fixtures now guard representative ChEMBL enum/unit-like fields offline.

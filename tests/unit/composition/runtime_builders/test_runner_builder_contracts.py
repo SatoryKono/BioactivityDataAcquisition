@@ -128,8 +128,10 @@ def test_runner_builder_wiring_applies_legacy_overrides_without_mutating_base() 
 
     resolved = runner_builder_wiring.resolve_runner_builder_wiring(
         base,
-        create_registry_fn=create_registry,
-        load_pipeline_config_fn=load_pipeline_config,
+        legacy_overrides=runner_builder_wiring.LegacyRunnerBuilderOverrides(
+            create_registry_fn=create_registry,
+            load_pipeline_config_fn=load_pipeline_config,
+        ),
     )
 
     assert resolved is not base
@@ -145,19 +147,8 @@ def test_build_pipeline_runner_override_surface_is_capped() -> None:
     legacy_override_names = {name for name in params if name.endswith("_fn")}
 
     assert "wiring" in params
-    assert legacy_override_names == {
-        "create_registry_fn",
-        "ensure_providers_loaded_fn",
-        "register_all_pipelines_fn",
-        "get_settings_fn",
-        "load_pipeline_config_fn",
-        "load_source_config_fn",
-        "build_observability_bundle_fn",
-        "assemble_vacuum_settings_fn",
-        "assemble_runtime_config_fn",
-        "assemble_filter_config_fn",
-        "assemble_cached_bronze_context_fn",
-    }
+    assert "legacy_overrides" in params
+    assert legacy_override_names == set()
 
 
 def test_runner_input_wiring_applies_legacy_overrides_without_mutating_base() -> None:

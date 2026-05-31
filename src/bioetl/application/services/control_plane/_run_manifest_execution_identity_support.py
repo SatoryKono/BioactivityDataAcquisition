@@ -64,7 +64,38 @@ def build_contract_identity_anchor_fields(
     return {key: value for key, value in payload.items() if value is not None}
 
 
+def build_code_provenance_dict(
+    code_provenance: RunCodeProvenance,
+    *,
+    include_execution_anchors: bool = False,
+) -> dict[str, object]:
+    """Return a canonical code-provenance mapping for manifest/replay surfaces."""
+    payload: dict[str, object] = {
+        "pipeline_version": code_provenance.pipeline_version,
+        "git_commit": code_provenance.git_commit,
+        "dependency_lock_hash": code_provenance.dependency_lock_hash,
+        "config_hash": code_provenance.config_hash,
+        "resolved_config_hash": code_provenance.resolved_config_hash,
+        "effective_config_hash": code_provenance.effective_config_hash,
+        "effective_config_artifact_id": code_provenance.effective_config_artifact_id,
+        "contract_ref": code_provenance.contract_ref,
+        "contract_version": code_provenance.contract_version,
+        "contract_schema_hash": code_provenance.contract_schema_hash,
+        "dq_policy_ref": code_provenance.dq_policy_ref,
+        "rule_bundle_version": code_provenance.rule_bundle_version,
+        "normalization_profile_ref": code_provenance.normalization_profile_ref,
+        "normalization_profile_version": code_provenance.normalization_profile_version,
+        "normalization_profile_hash": code_provenance.normalization_profile_hash,
+        "dq_contract_compatibility_hash": code_provenance.dq_contract_compatibility_hash,
+    }
+    if include_execution_anchors:
+        payload["source_revision_state"] = code_provenance.source_revision_state
+        payload["source_fingerprint"] = code_provenance.source_fingerprint
+    return {key: value for key, value in payload.items() if value is not None}
+
+
 __all__ = [
+    "build_code_provenance_dict",
     "build_contract_identity_anchor_fields",
     "build_execution_identity_payload_from_code_provenance",
 ]

@@ -9,6 +9,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal, Protocol
 
+from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
+    CONTRACT_IDENTITY_FIELD_NAMES,
+)
 from bioetl.domain.control_plane import RunArtifactRef
 from bioetl.domain.normalization import normalize_runtime_anchor_payload
 
@@ -151,7 +154,7 @@ class ManifestControlPlaneRefs:
     required_persistence_profile: str | None = None
 
 
-_CONTROL_PLANE_CONTEXT_UPDATE_FIELDS: tuple[str, ...] = (
+_BASE_CONTROL_PLANE_CONTEXT_UPDATE_FIELDS: tuple[str, ...] = (
     "execution_fingerprint",
     "config_hash",
     "resolved_config_hash",
@@ -162,14 +165,10 @@ _CONTROL_PLANE_CONTEXT_UPDATE_FIELDS: tuple[str, ...] = (
     "replay_of_run_id",
     "replay_of_manifest_id",
     "input_snapshot_fingerprint",
-    "contract_ref",
-    "contract_version",
-    "contract_schema_hash",
-    "dq_policy_ref",
-    "rule_bundle_version",
-    "normalization_profile_ref",
-    "normalization_profile_version",
-    "normalization_profile_hash",
+)
+
+_CONTROL_PLANE_CONTEXT_UPDATE_FIELDS: tuple[str, ...] = (
+    _BASE_CONTROL_PLANE_CONTEXT_UPDATE_FIELDS + CONTRACT_IDENTITY_FIELD_NAMES
 )
 
 

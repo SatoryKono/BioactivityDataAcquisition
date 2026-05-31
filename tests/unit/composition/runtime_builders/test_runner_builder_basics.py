@@ -4,6 +4,7 @@ from __future__ import annotations
 
 # ruff: noqa: F403,F405
 from bioetl.composition.runtime_builders.runner_builder_wiring import (
+    LegacyRunnerBuilderOverrides,
     resolve_runner_factory_wiring,
 )
 
@@ -160,17 +161,19 @@ def test_build_pipeline_runner_wires_dependencies(tmp_path: Path) -> None:
         result = runner_builder.build_pipeline_runner(
             context,
             registry=fake_registry,
-            ensure_providers_loaded_fn=lambda: calls.setdefault("providers", True),
-            register_all_pipelines_fn=lambda registry=None: calls.setdefault(
-                "pipelines_registry", registry
+            legacy_overrides=LegacyRunnerBuilderOverrides(
+                ensure_providers_loaded_fn=lambda: calls.setdefault("providers", True),
+                register_all_pipelines_fn=lambda registry=None: calls.setdefault(
+                    "pipelines_registry", registry
+                ),
+                get_settings_fn=get_settings_fn,
+                load_pipeline_config_fn=load_pipeline_config_fn,
+                build_observability_bundle_fn=build_observability_bundle_fn,
+                assemble_vacuum_settings_fn=assemble_vacuum_settings_fn,
+                assemble_runtime_config_fn=assemble_runtime_config_fn,
+                assemble_filter_config_fn=assemble_filter_config_fn,
+                assemble_cached_bronze_context_fn=assemble_cached_bronze_context_fn,
             ),
-            get_settings_fn=get_settings_fn,
-            load_pipeline_config_fn=load_pipeline_config_fn,
-            build_observability_bundle_fn=build_observability_bundle_fn,
-            assemble_vacuum_settings_fn=assemble_vacuum_settings_fn,
-            assemble_runtime_config_fn=assemble_runtime_config_fn,
-            assemble_filter_config_fn=assemble_filter_config_fn,
-            assemble_cached_bronze_context_fn=assemble_cached_bronze_context_fn,
         )
 
     assert result == "runner-instance"
@@ -310,11 +313,13 @@ def test_build_pipeline_runner_uses_canonical_subservices_with_observability_sea
         result = runner_builder.build_pipeline_runner(
             context,
             registry=fake_registry,
-            ensure_providers_loaded_fn=lambda: None,
-            register_all_pipelines_fn=lambda registry=None: None,
-            get_settings_fn=lambda: _build_settings(),
-            load_pipeline_config_fn=lambda _: MagicMock(),
-            build_observability_bundle_fn=build_observability_bundle_fn,
+            legacy_overrides=LegacyRunnerBuilderOverrides(
+                ensure_providers_loaded_fn=lambda: None,
+                register_all_pipelines_fn=lambda registry=None: None,
+                get_settings_fn=lambda: _build_settings(),
+                load_pipeline_config_fn=lambda _: MagicMock(),
+                build_observability_bundle_fn=build_observability_bundle_fn,
+            ),
         )
 
     assert result == "runner-instance"

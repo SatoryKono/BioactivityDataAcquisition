@@ -68,6 +68,25 @@ class RunnerBuilderWiring:
     inputs: RunnerInputWiring = field(default_factory=RunnerInputWiring)
 
 
+@dataclass(frozen=True, slots=True)
+class LegacyRunnerBuilderOverrides:
+    """Legacy keyword overrides retained for focused tests and migration."""
+
+    create_registry_fn: Callable[[], PipelineRegistry] | None = None
+    ensure_providers_loaded_fn: Callable[[], None] | None = None
+    register_all_pipelines_fn: Callable[..., None] | None = None
+    get_settings_fn: Callable[[], Settings] | None = None
+    load_pipeline_config_fn: Callable[[str], PipelineYamlConfig] | None = None
+    load_source_config_fn: Callable[..., object] | None = None
+    build_observability_bundle_fn: Callable[..., ObservabilityBundle] | None = None
+    assemble_vacuum_settings_fn: Callable[..., ResolvedVacuumSettings] | None = None
+    assemble_runtime_config_fn: Callable[..., RuntimeConfig] | None = None
+    assemble_filter_config_fn: Callable[..., InputFilterConfig | None] | None = None
+    assemble_cached_bronze_context_fn: Callable[
+        [PipelineRunContext], CachedBronzeContext
+    ] | None = None
+
+
 def resolve_runner_factory_wiring(
     wiring: RunnerFactoryWiring | None = None,
     *,
@@ -92,39 +111,27 @@ def resolve_runner_builder_wiring(
     *,
     factory_wiring: RunnerFactoryWiring | None = None,
     input_wiring: RunnerInputWiring | None = None,
-    create_registry_fn: Callable[[], PipelineRegistry] | None = None,
-    ensure_providers_loaded_fn: Callable[[], None] | None = None,
-    register_all_pipelines_fn: Callable[..., None] | None = None,
-    get_settings_fn: Callable[[], Settings] | None = None,
-    load_pipeline_config_fn: Callable[[str], PipelineYamlConfig] | None = None,
-    load_source_config_fn: Callable[..., object] | None = None,
-    build_observability_bundle_fn: Callable[..., ObservabilityBundle] | None = None,
-    assemble_vacuum_settings_fn: Callable[..., ResolvedVacuumSettings] | None = None,
-    assemble_runtime_config_fn: Callable[..., RuntimeConfig] | None = None,
-    assemble_filter_config_fn: Callable[..., InputFilterConfig | None] | None = None,
-    assemble_cached_bronze_context_fn: Callable[
-        [PipelineRunContext], CachedBronzeContext
-    ]
-    | None = None,
+    legacy_overrides: LegacyRunnerBuilderOverrides | None = None,
 ) -> RunnerBuilderWiring:
     """Return aggregate runner wiring with legacy keyword overrides applied."""
     resolved = wiring or RunnerBuilderWiring()
+    overrides = legacy_overrides or LegacyRunnerBuilderOverrides()
     resolved_factory = resolve_runner_factory_wiring(
         factory_wiring or resolved.factory,
-        create_registry_fn=create_registry_fn,
-        ensure_providers_loaded_fn=ensure_providers_loaded_fn,
-        register_all_pipelines_fn=register_all_pipelines_fn,
+        create_registry_fn=overrides.create_registry_fn,
+        ensure_providers_loaded_fn=overrides.ensure_providers_loaded_fn,
+        register_all_pipelines_fn=overrides.register_all_pipelines_fn,
     )
     resolved_inputs = resolve_runner_input_wiring(
         input_wiring or resolved.inputs,
-        get_settings_fn=get_settings_fn,
-        load_pipeline_config_fn=load_pipeline_config_fn,
-        load_source_config_fn=load_source_config_fn,
-        build_observability_bundle_fn=build_observability_bundle_fn,
-        assemble_vacuum_settings_fn=assemble_vacuum_settings_fn,
-        assemble_runtime_config_fn=assemble_runtime_config_fn,
-        assemble_filter_config_fn=assemble_filter_config_fn,
-        assemble_cached_bronze_context_fn=assemble_cached_bronze_context_fn,
+        get_settings_fn=overrides.get_settings_fn,
+        load_pipeline_config_fn=overrides.load_pipeline_config_fn,
+        load_source_config_fn=overrides.load_source_config_fn,
+        build_observability_bundle_fn=overrides.build_observability_bundle_fn,
+        assemble_vacuum_settings_fn=overrides.assemble_vacuum_settings_fn,
+        assemble_runtime_config_fn=overrides.assemble_runtime_config_fn,
+        assemble_filter_config_fn=overrides.assemble_filter_config_fn,
+        assemble_cached_bronze_context_fn=overrides.assemble_cached_bronze_context_fn,
     )
     if resolved_factory is resolved.factory and resolved_inputs is resolved.inputs:
         return resolved
@@ -169,6 +176,7 @@ def resolve_runner_input_wiring(
 
 
 __all__ = [
+    "LegacyRunnerBuilderOverrides",
     "RunnerBuilderWiring",
     "RunnerFactoryWiring",
     "RunnerInputWiring",

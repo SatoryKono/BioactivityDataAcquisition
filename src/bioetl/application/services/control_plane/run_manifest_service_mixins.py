@@ -7,6 +7,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.services.control_plane._run_manifest_execution_identity_support import (
+    build_code_provenance_dict,
     build_execution_identity_payload_from_code_provenance,
 )
 from bioetl.application.services.control_plane._run_manifest_snapshot_payloads import (
@@ -287,28 +288,10 @@ class RunManifestPayloadMixin:
             "replay_of_run_id": request.replay_of_run_id,
             "replay_of_manifest_id": request.replay_of_manifest_id,
             "replay_capability": request.replay_capability.value,
-            "code_provenance": {
-                "pipeline_version": code_provenance.pipeline_version,
-                "git_commit": code_provenance.git_commit,
-                "source_revision_state": code_provenance.source_revision_state,
-                "dependency_lock_hash": code_provenance.dependency_lock_hash,
-                "config_hash": code_provenance.config_hash,
-                "resolved_config_hash": code_provenance.resolved_config_hash,
-                "effective_config_hash": code_provenance.effective_config_hash,
-                "source_fingerprint": code_provenance.source_fingerprint,
-                "contract_ref": code_provenance.contract_ref,
-                "contract_version": code_provenance.contract_version,
-                "contract_schema_hash": code_provenance.contract_schema_hash,
-                "dq_policy_ref": code_provenance.dq_policy_ref,
-                "rule_bundle_version": code_provenance.rule_bundle_version,
-                "normalization_profile_ref": code_provenance.normalization_profile_ref,
-                "normalization_profile_version": (
-                    code_provenance.normalization_profile_version
-                ),
-                "normalization_profile_hash": code_provenance.normalization_profile_hash,
-                "dq_contract_compatibility_hash": code_provenance.dq_contract_compatibility_hash,
-                "effective_config_artifact_id": code_provenance.effective_config_artifact_id,
-            },
+            "code_provenance": build_code_provenance_dict(
+                code_provenance,
+                include_execution_anchors=True,
+            ),
             "source_refs": source_refs_payload(request.source_refs),
             "planned_artifacts": [
                 {"layer": item.layer, "path": item.path}

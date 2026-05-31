@@ -166,6 +166,35 @@ def test_static_test_governance_report_stays_within_committed_budgets() -> None:
 
 
 @pytest.mark.architecture
+def test_compatibility_test_file_max_follows_stream_g_downward_ratchet() -> None:
+    """#4817: compatibility_test_file_max may only ratchet down to the live inventory."""
+    payload = _load_yaml(CONFIG_PATH)
+    report = collect_test_governance_report(ROOT)
+    budgets = cast(YamlMap, payload["budgets"])
+    ratchet = cast(YamlMap, payload["budget_ratchet"])
+
+    live_count = int(report["compatibility_test_files"])
+    budget_max = int(budgets["compatibility_test_file_max"])
+    target_count = 54
+
+    owner_notes = cast(list[YamlMap], ratchet.get("stream_g_owner_notes", []))
+    issue_notes = [note for note in owner_notes if note.get("issue") == "#4817"]
+    assert issue_notes, "Stream G owner note for #4817 must be recorded"
+
+    assert live_count <= budget_max
+    if live_count <= target_count:
+        assert budget_max == target_count, (
+            "compatibility_test_file_max must ratchet down to 54 when live inventory "
+            f"is at or below target; live={live_count}, budget={budget_max}"
+        )
+    else:
+        assert budget_max == live_count, (
+            "compatibility_test_file_max must pin to the live inventory while count "
+            f"exceeds target 54; live={live_count}, budget={budget_max}"
+        )
+
+
+@pytest.mark.architecture
 def test_test_governance_budgets_are_explicit_no_growth_ratchets() -> None:
     payload = _load_yaml(CONFIG_PATH)
     budgets = cast(YamlMap, payload["budgets"])
