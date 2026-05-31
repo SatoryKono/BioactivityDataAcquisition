@@ -6,6 +6,7 @@ using local filesystem storage with atomic writes.
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from uuid import uuid4
 
@@ -208,6 +209,36 @@ class TestLocalCheckpointSaveLoad:
         loaded_run_id, loaded_metadata = result
         assert loaded_run_id == run_id
         assert loaded_metadata["offset"] == 3
+
+    @pytest.mark.asyncio
+    async def test_load_for_manifest_id_supports_windows_history_index_paths(
+        self, checkpoint: LocalCheckpointAdapter, run_id: RunID
+    ) -> None:
+        """Manifest index lookup should read legacy Windows-style history paths."""
+        await checkpoint.save(
+            "pipeline",
+            run_id,
+            {"manifest_id": "manifest-windows-path", "offset": 4},
+        )
+        index_path = (
+            checkpoint.base_path
+            / ".history"
+            / "by_manifest"
+            / "manifest-windows-path.json"
+        )
+        index_payload = json.loads(index_path.read_text(encoding="utf-8"))
+        index_payload["history_path"] = str(index_payload["history_path"]).replace(
+            "/",
+            "\\",
+        )
+        index_path.write_text(json.dumps(index_payload), encoding="utf-8")
+
+        result = await checkpoint.load_for_manifest_id("manifest-windows-path")
+
+        assert result is not None
+        loaded_run_id, loaded_metadata = result
+        assert loaded_run_id == run_id
+        assert loaded_metadata["offset"] == 4
 
     @pytest.mark.asyncio
     async def test_load_latest_for_pipeline_reads_latest_history_across_runs(

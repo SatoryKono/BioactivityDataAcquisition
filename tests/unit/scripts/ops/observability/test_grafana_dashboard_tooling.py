@@ -525,6 +525,8 @@ def test_live_audit_treats_checkpoint_freshness_unknown_as_valid_unknown_state(
     config = audit_subject.AuditConfig(
         prometheus_base_url="http://localhost:9090",
         app_base_url="http://localhost:8081",
+        loki_base_url="http://localhost:3100",
+        tempo_base_url="http://localhost:3200",
         grafana_base_url="http://localhost:3000",
         grafana_username="admin",
         grafana_password="changeme",
@@ -596,6 +598,8 @@ def test_live_audit_parse_args_uses_grafana_env_defaults(
     )
 
     assert config.app_base_url == "http://localhost:8081"
+    assert config.loki_base_url == "http://localhost:3100"
+    assert config.tempo_base_url == "http://localhost:3200"
     assert config.grafana_base_url == "http://grafana.local:3000"
     assert config.grafana_username == "viewer"
     assert config.grafana_password == "secret"
@@ -607,6 +611,8 @@ def test_live_audit_substitutes_workflow_and_run_id_tokens() -> None:
     config = audit_subject.AuditConfig(
         prometheus_base_url="http://localhost:9090",
         app_base_url="http://localhost:8081",
+        loki_base_url="http://localhost:3100",
+        tempo_base_url="http://localhost:3200",
         grafana_base_url="http://localhost:3000",
         grafana_username="admin",
         grafana_password="changeme",
@@ -630,6 +636,21 @@ def test_live_audit_substitutes_workflow_and_run_id_tokens() -> None:
     assert "run_id=run-123" in rendered
 
 
+def test_live_audit_effective_specs_include_generated_loki_and_tempo_coverage() -> None:
+    specs = audit_subject.effective_panel_specs()
+    keys = {
+        (spec.dashboard_uid, spec.panel_id, spec.source_kind, spec.target_ref_id)
+        for spec in specs
+    }
+
+    assert ("bioetl-runtime", 250, "loki", "A") in keys
+    assert any(
+        spec.source_kind == "tempo" and spec.dashboard_uid == "bioetl-runtime"
+        for spec in specs
+    )
+    assert len(specs) > len(audit_subject.REVIEWED_PANEL_SPECS)
+
+
 def test_live_audit_normalizes_docker_gateway_to_localhost() -> None:
     assert (
         audit_subject._normalize_host_access_url("http://host.docker.internal:8081")
@@ -643,6 +664,8 @@ def test_live_audit_resolves_http_backend_from_datasource_candidates(
     config = audit_subject.AuditConfig(
         prometheus_base_url="http://localhost:9090",
         app_base_url="http://localhost:8081",
+        loki_base_url="http://localhost:3100",
+        tempo_base_url="http://localhost:3200",
         grafana_base_url="http://localhost:3000",
         grafana_username="admin",
         grafana_password="changeme",
@@ -1487,6 +1510,8 @@ def test_live_audit_writes_report(monkeypatch: Any, tmp_path: Path) -> None:
     config = audit_subject.AuditConfig(
         prometheus_base_url="http://localhost:9090",
         app_base_url="http://localhost:8081",
+        loki_base_url="http://localhost:3100",
+        tempo_base_url="http://localhost:3200",
         grafana_base_url="http://localhost:3000",
         grafana_username="admin",
         grafana_password="changeme",

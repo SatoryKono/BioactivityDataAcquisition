@@ -17,6 +17,8 @@ from urllib.request import Request, urlopen
 DEFAULT_PROMETHEUS_BASE_URL = "http://localhost:9090"
 DEFAULT_APP_BASE_URL = "http://localhost:8081"
 DEFAULT_GRAFANA_BASE_URL = "http://localhost:3000"
+DEFAULT_LOKI_BASE_URL = "http://localhost:3100"
+DEFAULT_TEMPO_BASE_URL = "http://localhost:3200"
 DEFAULT_GRAFANA_USERNAME = "admin"
 DEFAULT_GRAFANA_PASSWORD = "changeme"
 DEFAULT_HTTP_DATASOURCE_NAME = "Quarantine Explorer"
@@ -35,14 +37,27 @@ class PanelAuditSpec:
     dashboard_uid: str
     panel_id: int
     title: str
-    source_kind: Literal["prometheus", "http"]
-    semantic_kind: Literal["derived_status", "freshness", "http_summary", "http_table"]
+    source_kind: Literal["prometheus", "http", "loki", "tempo"]
+    semantic_kind: Literal[
+        "derived_status",
+        "freshness",
+        "http_endpoint",
+        "http_summary",
+        "http_table",
+        "loki_query",
+        "prometheus_query",
+        "tempo_handoff",
+    ]
+    target_ref_id: str | None = None
+    required: bool = True
 
 
 @dataclass(frozen=True)
 class AuditConfig:
     prometheus_base_url: str
     app_base_url: str
+    loki_base_url: str
+    tempo_base_url: str
     grafana_base_url: str
     grafana_username: str
     grafana_password: str
@@ -65,6 +80,7 @@ class AuditResult:
     classification: str
     detail: str
     query_preview: str
+    target_ref_id: str | None = None
 
 
 REVIEWED_PANEL_SPECS: tuple[PanelAuditSpec, ...] = (
@@ -197,6 +213,16 @@ def _parse_args(argv: list[str] | None) -> AuditConfig:
         help="Health/ops HTTP base URL used by dashboard backend datasources.",
     )
     parser.add_argument(
+        "--loki-base-url",
+        default=DEFAULT_LOKI_BASE_URL,
+        help="Loki HTTP API base URL used for LogQL panel smoke validation.",
+    )
+    parser.add_argument(
+        "--tempo-base-url",
+        default=DEFAULT_TEMPO_BASE_URL,
+        help="Tempo HTTP API base URL used for trace handoff smoke validation.",
+    )
+    parser.add_argument(
         "--grafana-base-url",
         default=_read_env("GRAFANA_BASE_URL", DEFAULT_GRAFANA_BASE_URL),
         help="Grafana base URL used to discover shipped HTTP datasource URLs.",
@@ -221,6 +247,8 @@ def _parse_args(argv: list[str] | None) -> AuditConfig:
     return AuditConfig(
         prometheus_base_url=args.prometheus_base_url.rstrip("/"),
         app_base_url=args.app_base_url.rstrip("/"),
+        loki_base_url=args.loki_base_url.rstrip("/"),
+        tempo_base_url=args.tempo_base_url.rstrip("/"),
         grafana_base_url=args.grafana_base_url.rstrip("/"),
         grafana_username=args.grafana_username,
         grafana_password=args.grafana_password,
@@ -259,6 +287,131 @@ def _find_panel(spec: PanelAuditSpec) -> dict[str, Any]:
     raise LookupError(f"Panel not found: {spec.dashboard_uid}#{spec.panel_id}")
 
 
+def _datasource_name(panel: dict[str, Any], target: dict[str, Any]) -> str:
+    datasource = target.get("datasource") or panel.get("datasource") or ""
+    if isinstance(datasource, dict):
+        return str(
+            datasource.get("type")
+            or datasource.get("uid")
+            or datasource.get("name")
+            or ""
+        )
+    return str(datasource)
+
+
+def _target_ref_id(target: dict[str, Any]) -> str | None:
+    ref_id = target.get("refId")
+    if isinstance(ref_id, str) and ref_id:
+        return ref_id
+    return None
+
+
+def _infer_http_semantic_kind(url: str) -> str:
+    if "checkpoint-freshness" in url:
+        return "freshness"
+    if "identity-table" in url or "processed-records" in url:
+        return "http_table"
+    if "filtered-stats" in url:
+        return "http_summary"
+    return "http_endpoint"
+
+
+def _discover_dashboard_panel_specs() -> tuple[PanelAuditSpec, ...]:
+    specs: list[PanelAuditSpec] = []
+    for path in sorted(_DASHBOARD_DIR.glob("*.json")):
+        dashboard = json.loads(path.read_text(encoding="utf-8"))
+        dashboard_uid = str(dashboard.get("uid") or path.stem)
+        for panel in _iter_panels(cast(list[dict[str, Any]], dashboard.get("panels", []))):
+            panel_id = panel.get("id")
+            if not isinstance(panel_id, int):
+                continue
+            title = str(panel.get("title") or f"panel-{panel_id}")
+            for target in cast(list[dict[str, Any]], panel.get("targets", [])):
+                ref_id = _target_ref_id(target)
+                url = target.get("url")
+                if isinstance(url, str) and url:
+                    specs.append(
+                        PanelAuditSpec(
+                            dashboard_uid=dashboard_uid,
+                            panel_id=panel_id,
+                            title=title,
+                            source_kind="http",
+                            semantic_kind=cast(
+                                Literal[
+                                    "freshness",
+                                    "http_endpoint",
+                                    "http_summary",
+                                    "http_table",
+                                ],
+                                _infer_http_semantic_kind(url),
+                            ),
+                            target_ref_id=ref_id,
+                            required=False,
+                        )
+                    )
+                    continue
+                expr = target.get("expr")
+                if not isinstance(expr, str) or not expr.strip():
+                    continue
+                datasource_name = _datasource_name(panel, target).lower()
+                if "loki" in datasource_name:
+                    specs.append(
+                        PanelAuditSpec(
+                            dashboard_uid=dashboard_uid,
+                            panel_id=panel_id,
+                            title=title,
+                            source_kind="loki",
+                            semantic_kind="loki_query",
+                            target_ref_id=ref_id,
+                            required=False,
+                        )
+                    )
+                else:
+                    specs.append(
+                        PanelAuditSpec(
+                            dashboard_uid=dashboard_uid,
+                            panel_id=panel_id,
+                            title=title,
+                            source_kind="prometheus",
+                            semantic_kind="prometheus_query",
+                            target_ref_id=ref_id,
+                            required=False,
+                        )
+                    )
+            for link in cast(list[dict[str, Any]], panel.get("links", [])):
+                link_url = str(link.get("url") or "")
+                if "exploretraces-app" not in link_url and "var-ds=tempo" not in link_url:
+                    continue
+                specs.append(
+                    PanelAuditSpec(
+                        dashboard_uid=dashboard_uid,
+                        panel_id=panel_id,
+                        title=f"{title} :: {link.get('title') or 'Tempo handoff'}",
+                        source_kind="tempo",
+                        semantic_kind="tempo_handoff",
+                        target_ref_id=str(link.get("title") or "tempo"),
+                        required=False,
+                    )
+                )
+    return tuple(specs)
+
+
+def effective_panel_specs() -> tuple[PanelAuditSpec, ...]:
+    """Return curated required specs plus generated coverage for all executable panels."""
+    specs: list[PanelAuditSpec] = list(REVIEWED_PANEL_SPECS)
+    covered = {
+        (spec.dashboard_uid, spec.panel_id, spec.source_kind, spec.target_ref_id)
+        for spec in specs
+    }
+    for spec in _discover_dashboard_panel_specs():
+        key = (spec.dashboard_uid, spec.panel_id, spec.source_kind, spec.target_ref_id)
+        if key in covered:
+            continue
+        specs.append(spec)
+        covered.add(key)
+    return tuple(specs)
+
+
 def _time_window(config: AuditConfig) -> tuple[str, str]:
     end = datetime.now(tz=UTC)
     start = end - timedelta(hours=config.range_hours)
@@ -280,8 +433,32 @@ def _substitute_dashboard_tokens(template: str, config: AuditConfig) -> str:
         "${pipeline:queryparam}": quote(config.pipeline, safe=""),
         "${run_type:queryparam}": quote(config.run_type, safe=""),
         "${run_id:queryparam}": quote(config.run_id, safe=""),
+        "${workflow:regex}": config.workflow,
+        "${pipeline:regex}": config.pipeline,
+        "${run_type:regex}": config.run_type,
+        "${run_id:regex}": config.run_id,
         "${pipeline:csv}": config.pipeline,
         "${run_type:csv}": config.run_type,
+        "$provider": "chembl",
+        "${provider}": "chembl",
+        "${provider:regex}": "chembl",
+        "$adapter": "chembl",
+        "${adapter}": "chembl",
+        "${adapter:regex}": "chembl",
+        "$stage": ".*",
+        "${stage}": ".*",
+        "${stage:regex}": ".*",
+        "$status": ".*",
+        "${status}": ".*",
+        "${status:regex}": ".*",
+        "$provider_hint": "chembl",
+        "${provider_hint}": "chembl",
+        "${provider_hint:regex}": "chembl",
+        "$__range": f"{config.range_hours}h",
+        "${__range}": f"{config.range_hours}h",
+        "${__range_s}": str(config.range_hours * 3600),
+        "$__interval": "5m",
+        "${__interval}": "5m",
         "${reason_code:csv}": "",
         "${field:csv}": "",
         "${quarantine_run_id}": "",
@@ -298,6 +475,11 @@ def _substitute_dashboard_tokens(template: str, config: AuditConfig) -> str:
 def _fetch_json(url: str) -> object:
     with urlopen(url, timeout=30) as response:
         return json.loads(response.read().decode("utf-8"))
+
+
+def _fetch_text(url: str) -> str:
+    with urlopen(url, timeout=30) as response:
+        return response.read().decode("utf-8")
 
 
 def _request_json(url: str, *, auth_header: str, timeout_seconds: float) -> object:
@@ -496,20 +678,62 @@ def _classify_http_freshness_payload(payload: object) -> tuple[str, str]:
     return ("nonzero_result", "Checkpoint freshness payload returned non-zero age")
 
 
+def _classify_loki_payload(payload: object) -> tuple[str, str]:
+    if not isinstance(payload, dict):
+        return ("invalid_shape", "Loki payload is not a JSON object")
+    if payload.get("status") != "success":
+        return ("query_error", f"Loki status={payload.get('status')!r}")
+    data = payload.get("data")
+    if not isinstance(data, dict):
+        return ("invalid_shape", "Loki payload missing data object")
+    result = data.get("result")
+    if not isinstance(result, list):
+        return ("invalid_shape", "Loki result must be a list")
+    if not result:
+        return (
+            "expected_empty",
+            "Loki returned no streams for the scoped query; this is valid for sparse local runs",
+        )
+    return ("nonempty_result", "Loki returned scoped log evidence")
+
+
+def _classify_tempo_search_payload(payload: object) -> tuple[str, str]:
+    if not isinstance(payload, dict):
+        return ("invalid_shape", "Tempo search payload is not a JSON object")
+    traces = payload.get("traces")
+    if not isinstance(traces, list):
+        return ("invalid_shape", "Tempo search payload missing traces list")
+    if not traces:
+        return (
+            "expected_empty",
+            "Tempo returned no traces; NoOpTracing or sparse local trace ingestion is valid",
+        )
+    return ("nonempty_result", "Tempo returned trace search evidence")
+
+
+def _select_target(
+    panel: dict[str, Any],
+    spec: PanelAuditSpec,
+    *,
+    field: str,
+) -> dict[str, Any] | None:
+    targets = cast(list[dict[str, Any]], panel.get("targets", []))
+    for target in targets:
+        if spec.target_ref_id is not None and _target_ref_id(target) != spec.target_ref_id:
+            continue
+        value = target.get(field)
+        if isinstance(value, str) and value:
+            return target
+    return None
+
+
 def _audit_prometheus_panel(
     spec: PanelAuditSpec,
     panel: dict[str, Any],
     config: AuditConfig,
 ) -> AuditResult:
-    targets = cast(list[dict[str, Any]], panel.get("targets", []))
-    expr = next(
-        (
-            target.get("expr", "")
-            for target in targets
-            if isinstance(target.get("expr"), str) and target.get("expr")
-        ),
-        "",
-    )
+    target = _select_target(panel, spec, field="expr")
+    expr = str(target.get("expr") or "") if target is not None else ""
     if not expr:
         return AuditResult(
             dashboard_uid=spec.dashboard_uid,
@@ -521,6 +745,7 @@ def _audit_prometheus_panel(
             classification="missing_query",
             detail="Panel has no Prometheus expr target",
             query_preview="",
+            target_ref_id=spec.target_ref_id,
         )
     rendered_expr = _substitute_dashboard_tokens(expr, config)
     query_url = f"{config.prometheus_base_url}/api/v1/query?" + urlencode(
@@ -531,7 +756,11 @@ def _audit_prometheus_panel(
     status = "ok"
     if classification in {"invalid_shape", "query_error"}:
         status = "error"
-    elif classification == "empty_result" and spec.semantic_kind == "freshness":
+    elif (
+        classification == "empty_result"
+        and spec.semantic_kind == "freshness"
+        and spec.required
+    ):
         status = "error"
     return AuditResult(
         dashboard_uid=spec.dashboard_uid,
@@ -543,6 +772,7 @@ def _audit_prometheus_panel(
         classification=classification,
         detail=detail,
         query_preview=rendered_expr[:400],
+        target_ref_id=spec.target_ref_id,
     )
 
 
@@ -553,15 +783,8 @@ def _audit_http_panel(
     *,
     app_base_url: str,
 ) -> AuditResult:
-    targets = cast(list[dict[str, Any]], panel.get("targets", []))
-    url_template = next(
-        (
-            target.get("url", "")
-            for target in targets
-            if isinstance(target.get("url"), str) and target.get("url")
-        ),
-        "",
-    )
+    target = _select_target(panel, spec, field="url")
+    url_template = str(target.get("url") or "") if target is not None else ""
     if not url_template:
         return AuditResult(
             dashboard_uid=spec.dashboard_uid,
@@ -573,6 +796,7 @@ def _audit_http_panel(
             classification="missing_url",
             detail="Panel has no backend URL target",
             query_preview="",
+            target_ref_id=spec.target_ref_id,
         )
     rendered_url = _substitute_dashboard_tokens(url_template, config)
     payload = _fetch_json(f"{app_base_url}{rendered_url}")
@@ -599,17 +823,107 @@ def _audit_http_panel(
         classification=classification,
         detail=f"{detail}; app_base_url={app_base_url}",
         query_preview=rendered_url,
+        target_ref_id=spec.target_ref_id,
+    )
+
+
+def _audit_loki_panel(
+    spec: PanelAuditSpec,
+    panel: dict[str, Any],
+    config: AuditConfig,
+) -> AuditResult:
+    target = _select_target(panel, spec, field="expr")
+    expr = str(target.get("expr") or "") if target is not None else ""
+    if not expr:
+        return AuditResult(
+            dashboard_uid=spec.dashboard_uid,
+            panel_id=spec.panel_id,
+            title=spec.title,
+            source_kind=spec.source_kind,
+            semantic_kind=spec.semantic_kind,
+            status="error" if spec.required else "ok",
+            classification="missing_query",
+            detail="Panel has no Loki expr target",
+            query_preview="",
+            target_ref_id=spec.target_ref_id,
+        )
+    rendered_expr = _substitute_dashboard_tokens(expr, config)
+    query_url = f"{config.loki_base_url}/loki/api/v1/query?" + urlencode(
+        {"query": rendered_expr}
+    )
+    try:
+        payload = _fetch_json(query_url)
+    except (HTTPError, URLError, OSError, json.JSONDecodeError) as exc:
+        return AuditResult(
+            dashboard_uid=spec.dashboard_uid,
+            panel_id=spec.panel_id,
+            title=spec.title,
+            source_kind=spec.source_kind,
+            semantic_kind=spec.semantic_kind,
+            status="error" if spec.required else "ok",
+            classification="blocked_unavailable",
+            detail=f"Loki query could not be executed: {exc}",
+            query_preview=rendered_expr[:400],
+            target_ref_id=spec.target_ref_id,
+        )
+    classification, detail = _classify_loki_payload(payload)
+    status = "error" if classification in {"invalid_shape", "query_error"} else "ok"
+    return AuditResult(
+        dashboard_uid=spec.dashboard_uid,
+        panel_id=spec.panel_id,
+        title=spec.title,
+        source_kind=spec.source_kind,
+        semantic_kind=spec.semantic_kind,
+        status=status,
+        classification=classification,
+        detail=detail,
+        query_preview=rendered_expr[:400],
+        target_ref_id=spec.target_ref_id,
+    )
+
+
+def _audit_tempo_handoff(spec: PanelAuditSpec, config: AuditConfig) -> AuditResult:
+    search_url = f"{config.tempo_base_url}/api/search?" + urlencode({"limit": "1"})
+    try:
+        _fetch_text(f"{config.tempo_base_url}/ready")
+        payload = _fetch_json(search_url)
+    except (HTTPError, URLError, OSError, json.JSONDecodeError) as exc:
+        return AuditResult(
+            dashboard_uid=spec.dashboard_uid,
+            panel_id=spec.panel_id,
+            title=spec.title,
+            source_kind=spec.source_kind,
+            semantic_kind=spec.semantic_kind,
+            status="error" if spec.required else "ok",
+            classification="blocked_unavailable",
+            detail=f"Tempo handoff could not be smoke-validated: {exc}",
+            query_preview=search_url,
+            target_ref_id=spec.target_ref_id,
+        )
+    classification, detail = _classify_tempo_search_payload(payload)
+    status = "error" if classification in {"invalid_shape", "query_error"} else "ok"
+    return AuditResult(
+        dashboard_uid=spec.dashboard_uid,
+        panel_id=spec.panel_id,
+        title=spec.title,
+        source_kind=spec.source_kind,
+        semantic_kind=spec.semantic_kind,
+        status=status,
+        classification=classification,
+        detail=detail,
+        query_preview=search_url,
+        target_ref_id=spec.target_ref_id,
     )
 
 
 def run_audit(config: AuditConfig) -> list[AuditResult]:
     results: list[AuditResult] = []
     resolved_app_base_url: str | None = None
-    for spec in REVIEWED_PANEL_SPECS:
+    for spec in effective_panel_specs():
         panel = _find_panel(spec)
         if spec.source_kind == "prometheus":
             results.append(_audit_prometheus_panel(spec, panel, config))
-        else:
+        elif spec.source_kind == "http":
             if resolved_app_base_url is None:
                 resolved_app_base_url = _resolve_app_base_url(config)
             results.append(
@@ -620,6 +934,10 @@ def run_audit(config: AuditConfig) -> list[AuditResult]:
                     app_base_url=resolved_app_base_url,
                 )
             )
+        elif spec.source_kind == "loki":
+            results.append(_audit_loki_panel(spec, panel, config))
+        else:
+            results.append(_audit_tempo_handoff(spec, config))
     return results
 
 
@@ -630,6 +948,8 @@ def _write_report(config: AuditConfig, results: list[AuditResult]) -> None:
         "config": {
             "prometheus_base_url": config.prometheus_base_url,
             "app_base_url": config.app_base_url,
+            "loki_base_url": config.loki_base_url,
+            "tempo_base_url": config.tempo_base_url,
             "grafana_base_url": config.grafana_base_url,
             "workflow": config.workflow,
             "pipeline": config.pipeline,
@@ -637,7 +957,7 @@ def _write_report(config: AuditConfig, results: list[AuditResult]) -> None:
             "run_id": config.run_id,
             "range_hours": config.range_hours,
         },
-        "panel_specs": [asdict(spec) for spec in REVIEWED_PANEL_SPECS],
+        "panel_specs": [asdict(spec) for spec in effective_panel_specs()],
         "results": [asdict(result) for result in results],
     }
     config.output_path.write_text(
