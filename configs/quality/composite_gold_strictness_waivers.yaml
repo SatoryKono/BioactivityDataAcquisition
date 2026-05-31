@@ -1,0 +1,67 @@
+schema_version: "1.0"
+policy:
+  scope: "composite_gold_contracts"
+  rationale: >
+    Composite contract strict_dq_validation remains a DQ-only policy flag.
+    Gold strictness for composite outputs is enforced by the registered Pandera
+    Gold schema plus the merged Gold write path, not by contract-YAML
+    strict_dq_validation defaults.
+  required_fields:
+    - contract_ref
+    - owner
+    - rationale
+    - approved_on
+    - expires_on
+    - linked_issue
+    - enforcement_context
+waivers:
+  - contract_ref: "composite.activity"
+    owner: "@bioetl-composite"
+    rationale: >
+      Composite activity keeps strict_dq_validation=false because DQ contract
+      strictness is independent from Gold strict schema enforcement. Composite
+      Gold writes still fail closed on missing or non-strict schemas.
+    approved_on: "2026-05-31"
+    expires_on: "2026-09-30"
+    linked_issue: "#4768"
+    enforcement_context: "composite_merged_gold_write"
+  - contract_ref: "composite.assay"
+    owner: "@bioetl-composite"
+    rationale: >
+      Composite assay keeps strict_dq_validation=false because DQ contract
+      strictness is independent from Gold strict schema enforcement. Composite
+      Gold writes still fail closed on missing or non-strict schemas.
+    approved_on: "2026-05-31"
+    expires_on: "2026-09-30"
+    linked_issue: "#4768"
+    enforcement_context: "composite_merged_gold_write"
+  - contract_ref: "composite.molecule"
+    owner: "@bioetl-composite"
+    rationale: >
+      Composite molecule keeps strict_dq_validation=false because DQ contract
+      strictness is independent from Gold strict schema enforcement. Composite
+      Gold writes still fail closed on missing or non-strict schemas.
+    approved_on: "2026-05-31"
+    expires_on: "2026-09-30"
+    linked_issue: "#4768"
+    enforcement_context: "composite_merged_gold_write"
+  - contract_ref: "composite.publication"
+    owner: "@bioetl-composite"
+    rationale: >
+      Composite publication keeps strict_dq_validation=false because DQ
+      contract strictness is independent from Gold strict schema enforcement.
+      Composite Gold writes still fail closed on missing or non-strict schemas.
+    approved_on: "2026-05-31"
+    expires_on: "2026-09-30"
+    linked_issue: "#4768"
+    enforcement_context: "composite_merged_gold_write"
+  - contract_ref: "composite.target"
+    owner: "@bioetl-composite"
+    rationale: >
+      Composite target keeps strict_dq_validation=false because DQ contract
+      strictness is independent from Gold strict schema enforcement. Composite
+      Gold writes still fail closed on missing or non-strict schemas.
+    approved_on: "2026-05-31"
+    expires_on: "2026-09-30"
+    linked_issue: "#4768"
+    enforcement_context: "composite_merged_gold_write"
