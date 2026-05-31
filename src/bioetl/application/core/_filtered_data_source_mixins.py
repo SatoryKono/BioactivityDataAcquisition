@@ -11,7 +11,7 @@ from bioetl.application.core import _filtered_data_source_support as lifecycle_s
 from bioetl.application.core._data_source_mixins import (
     _WrappedAdapterHealthDelegationMixin,
 )
-from bioetl.application.core._fetch_forwarding import forward_bound_fetch_records
+from bioetl.application.core._fetch_forwarding import delegate_bound_fetch_records
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
@@ -127,7 +127,7 @@ class _FilteredDataSourceFetchMixin(
             filter_field: Ignored; filtering is driven by internal config filter_field.
             offset: Optional pagination offset passed through to the adapter.
         """
-        return forward_bound_fetch_records(
+        return delegate_bound_fetch_records(
             fetch_support.fetch_records,
             self,
             entity_type=entity_type,

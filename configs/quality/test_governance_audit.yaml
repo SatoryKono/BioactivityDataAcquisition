@@ -69,7 +69,15 @@ budget_ratchet:
   linked_issue: '#4685'
   mode: fail-fast-no-growth
   expected_direction: downward
-  refreshed_on: '2026-05-29'
+  refreshed_on: '2026-05-31'
+  stream_g_owner_notes:
+  - issue: '#4817'
+    owner: architecture-governance
+    status: blocked_at_56
+    note: Stream G ratchet review on 2026-05-31 confirmed live compatibility
+      inventory count remains 56; compatibility_test_file_max stays pinned at 56
+      until two tracked compatibility surfaces are retired or reclassified and the
+      live count reaches 54 or below.
   touch_policy: Refactors touching test families must reduce the applicable budget
     or keep it flat with an explicit owner rationale; increasing a debt budget requires
     a separate governance review.

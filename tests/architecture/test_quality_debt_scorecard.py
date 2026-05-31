@@ -30,6 +30,9 @@ from bioetl.infrastructure.quality import (
     validate_debt_scorecard,
     validate_scorecard_registry_sync,
 )
+from scripts.engineering.qa.report_test_governance_audit import (
+    collect_test_governance_report,
+)
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -526,6 +529,43 @@ def test_transition_compatibility_budget_tracks_active_debt_and_zero_target() ->
     assert transition_metric.get("max_count") == transition_metric.get("current_count")
     assert "Fail on growth" in str(transition_metric.get("ratchet_policy"))
     assert "target_count" in str(transition_metric.get("ratchet_policy"))
+
+
+def test_debt_scorecard_declares_test_governance_debt_kpis() -> None:
+    """Stream G compatibility test burn-down KPIs must track live inventory counts."""
+    scorecard = load_debt_scorecard()
+    governance = scorecard.get("test_governance_debt_metrics", {})
+    assert isinstance(governance, dict)
+    assert governance.get("linked_issue") == "#4817"
+    assert (
+        governance.get("inventory_source")
+        == "configs/quality/test_governance_audit.yaml"
+    )
+
+    audit_payload = yaml.safe_load(
+        (ROOT / "configs" / "quality" / "test_governance_audit.yaml").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert isinstance(audit_payload, dict)
+    budgets = audit_payload.get("budgets", {})
+    assert isinstance(budgets, dict)
+
+    report = collect_test_governance_report(ROOT)
+    live_count = int(report["compatibility_test_files"])
+    budget_max = int(budgets["compatibility_test_file_max"])
+
+    metrics = governance.get("metrics", {})
+    assert isinstance(metrics, dict)
+    metric = metrics.get("compatibility_test_file_count")
+    assert isinstance(metric, dict)
+    assert metric.get("current_count") == live_count
+    assert metric.get("max_count") == budget_max
+    assert metric.get("target_count") == 54
+    assert live_count <= budget_max
+    assert governance.get("owner") == "@bioetl-architecture"
+    assert isinstance(metric.get("ratchet_policy"), str) and metric["ratchet_policy"]
+    assert isinstance(metric.get("rationale"), str) and metric["rationale"]
 
 
 def test_debt_scorecard_enforces_budget_only_temporary_windows() -> None:

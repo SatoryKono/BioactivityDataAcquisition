@@ -34,24 +34,7 @@ def ensure_filterable_data_source(
     return data_source
 
 
-def build_wrapped_fetch_kwargs(
-    *,
-    entity_type: str,
-    limit: int | None = None,
-    query: str | None = None,
-    filter_ids: list[str] | None | object = _UNSET_FETCH_ARG,
-    filter_field: str | None | object = _UNSET_FETCH_ARG,
-    offset: int | None = None,
-) -> dict[str, object | None]:
-    """Build canonical kwargs for wrapped data-source fetch delegation."""
-    return build_forwarded_fetch_kwargs(
-        entity_type=entity_type,
-        limit=limit,
-        query=query,
-        filter_ids=filter_ids,
-        filter_field=filter_field,
-        offset=offset,
-    )
+build_wrapped_fetch_kwargs = build_forwarded_fetch_kwargs
 
 
 async def yield_wrapped_fetch_records(

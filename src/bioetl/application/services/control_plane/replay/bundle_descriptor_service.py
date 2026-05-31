@@ -5,6 +5,9 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass
 
+from bioetl.application.services.control_plane._run_manifest_execution_identity_support import (
+    build_code_provenance_dict,
+)
 from bioetl.application.services.control_plane.manifest.inspection_models import (
     RunManifestInspectionResult,
 )
@@ -117,27 +120,7 @@ def _build_code_provenance_bundle(
     result: RunManifestInspectionResult,
 ) -> dict[str, object]:
     """Build code-provenance replay bundle data."""
-    code_provenance = result.manifest.code_provenance
-    return {
-        "pipeline_version": code_provenance.pipeline_version,
-        "git_commit": code_provenance.git_commit,
-        "dependency_lock_hash": code_provenance.dependency_lock_hash,
-        "config_hash": code_provenance.config_hash,
-        "resolved_config_hash": code_provenance.resolved_config_hash,
-        "effective_config_hash": code_provenance.effective_config_hash,
-        "effective_config_artifact_id": code_provenance.effective_config_artifact_id,
-        "contract_ref": code_provenance.contract_ref,
-        "contract_version": code_provenance.contract_version,
-        "contract_schema_hash": code_provenance.contract_schema_hash,
-        "dq_policy_ref": code_provenance.dq_policy_ref,
-        "rule_bundle_version": code_provenance.rule_bundle_version,
-        "normalization_profile_ref": code_provenance.normalization_profile_ref,
-        "normalization_profile_version": code_provenance.normalization_profile_version,
-        "normalization_profile_hash": code_provenance.normalization_profile_hash,
-        "dq_contract_compatibility_hash": (
-            code_provenance.dq_contract_compatibility_hash
-        ),
-    }
+    return build_code_provenance_dict(result.manifest.code_provenance)
 
 
 def _build_replay_claims_bundle(

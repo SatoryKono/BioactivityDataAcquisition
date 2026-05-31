@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from pathlib import Path
 
 from bioetl.infrastructure.config.contract_registry_loader import (
@@ -24,6 +24,11 @@ class RunManifestContractIdentity:
     normalization_profile_ref: str | None
     normalization_profile_version: str | None
     normalization_profile_hash: str | None
+
+
+CONTRACT_IDENTITY_FIELD_NAMES: tuple[str, ...] = tuple(
+    field.name for field in fields(RunManifestContractIdentity)
+)
 
 
 def resolve_contract_identity(
@@ -79,15 +84,7 @@ def _validate_complete_contract_identity(
     missing = [
         name
         for name, value in zip(
-            (
-                "contract_version",
-                "contract_schema_hash",
-                "dq_policy_ref",
-                "rule_bundle_version",
-                "normalization_profile_ref",
-                "normalization_profile_version",
-                "normalization_profile_hash",
-            ),
+            CONTRACT_IDENTITY_FIELD_NAMES[1:],
             fields,
             strict=True,
         )

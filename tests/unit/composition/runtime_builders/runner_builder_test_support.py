@@ -16,6 +16,9 @@ from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.runtime_builders import inputs_resolver
 from bioetl.composition.runtime_builders import runner_builder
 from bioetl.composition.runtime_builders import runner_control_plane_assembly
+from bioetl.composition.runtime_builders.runner_builder_wiring import (
+    LegacyRunnerBuilderOverrides,
+)
 from bioetl.composition.runtime_builders._runner_builder_orchestration import (
     attach_runner_control_plane_collaborators,
 )
@@ -261,28 +264,29 @@ def _call_build_pipeline_runner(
     resolved_pipeline_config = (
         pipeline_config if pipeline_config is not None else _build_pipeline_config()
     )
-    kwargs: dict[str, object] = {
-        "ensure_providers_loaded_fn": ensure_providers_loaded_fn
+    legacy_overrides = LegacyRunnerBuilderOverrides(
+        create_registry_fn=create_registry_fn,
+        ensure_providers_loaded_fn=ensure_providers_loaded_fn
         if ensure_providers_loaded_fn is not None
         else (lambda: None),
-        "register_all_pipelines_fn": register_all_pipelines_fn
+        register_all_pipelines_fn=register_all_pipelines_fn
         if register_all_pipelines_fn is not None
         else (lambda registry=None: None),
-        "get_settings_fn": lambda: resolved_settings,
-        "load_pipeline_config_fn": lambda _: resolved_pipeline_config,
-        "build_observability_bundle_fn": build_observability_bundle_fn
+        get_settings_fn=lambda: resolved_settings,
+        load_pipeline_config_fn=lambda _: resolved_pipeline_config,
+        build_observability_bundle_fn=build_observability_bundle_fn
         if build_observability_bundle_fn is not None
         else _default_build_observability_bundle_fn,
-        "assemble_vacuum_settings_fn": assemble_vacuum_settings_fn
+        assemble_vacuum_settings_fn=assemble_vacuum_settings_fn
         if assemble_vacuum_settings_fn is not None
         else (lambda **_: None),
-        "assemble_runtime_config_fn": assemble_runtime_config_fn
+        assemble_runtime_config_fn=assemble_runtime_config_fn
         if assemble_runtime_config_fn is not None
         else (lambda **_: _runtime_config_stub()),
-        "assemble_filter_config_fn": assemble_filter_config_fn
+        assemble_filter_config_fn=assemble_filter_config_fn
         if assemble_filter_config_fn is not None
         else (lambda **_: None),
-        "assemble_cached_bronze_context_fn": assemble_cached_bronze_context_fn
+        assemble_cached_bronze_context_fn=assemble_cached_bronze_context_fn
         if assemble_cached_bronze_context_fn is not None
         else (
             lambda _: _ensure_default_cached_bronze_fixture(
@@ -290,11 +294,10 @@ def _call_build_pipeline_runner(
                 pipeline_config=resolved_pipeline_config,
             )
         ),
-    }
+    )
+    kwargs: dict[str, object] = {"legacy_overrides": legacy_overrides}
     if registry is not None:
         kwargs["registry"] = registry
-    if create_registry_fn is not None:
-        kwargs["create_registry_fn"] = create_registry_fn
     with _clean_provenance_context_if_unpatched():
         return runner_builder.build_pipeline_runner(
             context if context is not None else _build_context(),

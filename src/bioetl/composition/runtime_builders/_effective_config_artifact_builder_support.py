@@ -11,9 +11,6 @@ from bioetl.composition.runtime_builders._effective_config_graph_support import 
     build_effective_config_candidate_paths,
 )
 from bioetl.composition.runtime_builders._run_manifest_refs import (
-    control_plane_root as _shared_control_plane_root,
-)
-from bioetl.composition.runtime_builders._run_manifest_refs import (
     resolve_data_root_mode,
     resolve_run_context_values,
 )
@@ -325,7 +322,3 @@ def resolve_effective_config_entity(provider: str, entity: str) -> str:
         return entity.removeprefix("composite_")
     return entity
 
-
-def control_plane_root(settings: Settings, leaf: str) -> Path:
-    """Return the canonical control-plane output root for one leaf namespace."""
-    return _shared_control_plane_root(settings, leaf)

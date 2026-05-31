@@ -12,11 +12,11 @@ from bioetl.application.services.control_plane.effective_config.service import (
 from bioetl.composition.runtime_builders._manifest_publication_context_support import (
     ensure_manifest_publication_identity,
 )
+from bioetl.composition.runtime_builders._run_manifest_refs import control_plane_root
 from bioetl.composition.runtime_builders._effective_config_artifact_builder_support import (
     build_composite_runtime_overrides_snapshot,
     build_effective_config_source_refs,
     build_runtime_overrides_snapshot,
-    control_plane_root,
     resolve_effective_config_entity,
 )
 from bioetl.composition.runtime_builders.run_manifest_support import (

@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 from collections.abc import AsyncIterator, Callable
+from typing import TypeVar
 
 from bioetl.domain.types import JsonDict
+
+RecordT = TypeVar("RecordT")
 
 _UNSET_FETCH_ARG = object()
 
@@ -71,6 +74,30 @@ def forward_bound_fetch_records(
     """Forward fetch arguments into a bound fetch_records helper."""
     return forward_fetch_records(
         lambda **kwargs: fetch_records(bound_instance, **kwargs),
+        entity_type=entity_type,
+        limit=limit,
+        query=query,
+        filter_ids=filter_ids,
+        filter_field=filter_field,
+        offset=offset,
+    )
+
+
+def delegate_bound_fetch_records(
+    fetch_records: Callable[..., AsyncIterator[RecordT]],
+    bound_instance: object,
+    *,
+    entity_type: str,
+    limit: int | None = None,
+    query: str | None = None,
+    filter_ids: list[str] | None | object = _UNSET_FETCH_ARG,
+    filter_field: str | None | object = _UNSET_FETCH_ARG,
+    offset: int | None = None,
+) -> AsyncIterator[RecordT]:
+    """Delegate fetch through a canonical bound fetch_records helper."""
+    return forward_bound_fetch_records(
+        fetch_records,
+        bound_instance,
         entity_type=entity_type,
         limit=limit,
         query=query,

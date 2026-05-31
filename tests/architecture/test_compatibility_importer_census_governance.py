@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -58,6 +59,182 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
     return payload
+
+
+def _module_to_src_path(module_name: str) -> str:
+    relative = "/".join(module_name.split(".")[1:])
+    return f"src/bioetl/{relative}.py"
+
+
+def _git_command(repo_root: Path, *args: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        ["git", *args],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+
+def _resolve_merge_base(repo_root: Path) -> str | None:
+    for ref in ("origin/main", "main"):
+        if _git_command(repo_root, "rev-parse", "--verify", ref).returncode != 0:
+            continue
+        merge = _git_command(repo_root, "merge-base", "HEAD", ref)
+        if merge.returncode == 0:
+            return merge.stdout.strip() or None
+    return None
+
+
+def _collect_changed_repo_paths(repo_root: Path) -> set[str]:
+    changed: set[str] = set()
+    merge_base = _resolve_merge_base(repo_root)
+    if merge_base is not None:
+        diff = _git_command(repo_root, "diff", "--name-only", merge_base, "HEAD")
+        if diff.returncode == 0:
+            changed.update(
+                line.strip() for line in diff.stdout.splitlines() if line.strip()
+            )
+    for args in (
+        ("diff", "--name-only", "HEAD"),
+        ("diff", "--name-only", "--cached", "HEAD"),
+    ):
+        diff = _git_command(repo_root, *args)
+        if diff.returncode == 0:
+            changed.update(
+                line.strip() for line in diff.stdout.splitlines() if line.strip()
+            )
+    return changed
+
+
+def _family_touch_surface(
+    family_row: dict[str, Any],
+    *,
+    importer_source: dict[str, Any] | None = None,
+) -> set[str]:
+    """Resolve touch_policy categories to concrete repo paths for a twin family."""
+    source = importer_source if importer_source is not None else family_row
+    surface = {
+        _module_to_src_path(str(family_row["public_module"])),
+        _module_to_src_path(str(family_row["private_module"])),
+    }
+    for key in ("current_public_src_importers", "current_private_src_importers"):
+        importers = source.get(key)
+        if isinstance(importers, list):
+            surface.update(str(path) for path in importers)
+    return surface
+
+
+def _ratchet_family_budgets(ratchet_payload: dict[str, Any]) -> dict[str, dict[str, int]]:
+    families = ratchet_payload.get("families")
+    assert isinstance(families, list)
+    budgets: dict[str, dict[str, int]] = {}
+    for row in families:
+        if not isinstance(row, dict):
+            continue
+        family_id = str(row["family_id"])
+        budgets[family_id] = {
+            "max_public_src_importers": int(row["max_public_src_importers"]),
+            "max_private_src_importers": int(row["max_private_src_importers"]),
+        }
+    return budgets
+
+
+@pytest.mark.architecture
+def test_tracked_twin_family_ratchet_declares_touch_no_growth_policy() -> None:
+    """Twin-family ratchet metadata must declare the touch-based no-growth gate."""
+    inventory = _load_yaml(TWIN_RATCHET)
+    touch_policy = inventory.get("touch_policy")
+    assert isinstance(touch_policy, dict)
+    assert touch_policy.get("linked_issue") == "#4827"
+    assert touch_policy.get("mode") == "fail-fast-no-growth-on-touch"
+    assert touch_policy.get("baseline_artifact") == (
+        "reports/quality/compatibility-importer-census.json"
+    )
+    assert touch_policy.get("expected_direction") == "downward"
+    assert set(touch_policy.get("touch_surface", [])) == {
+        "twin_module_paths",
+        "tracked_src_importers",
+    }
+    assert str(touch_policy.get("rationale", "")).strip()
+
+
+@pytest.mark.architecture
+def test_touched_twin_family_files_do_not_grow_private_imports() -> None:
+    """Touched twin-family surfaces must not grow private-module imports past baseline."""
+    changed_paths = _collect_changed_repo_paths(ROOT)
+    if not changed_paths:
+        return
+
+    baseline_payload = json.loads(REPORT_JSON.read_text(encoding="utf-8"))
+    baseline_rows = baseline_payload["tracked_twin_families"]
+    assert isinstance(baseline_rows, list)
+    ratchet_budgets = _ratchet_family_budgets(_load_yaml(TWIN_RATCHET))
+
+    live_payload = build_compatibility_importer_census(
+        ROOT,
+        snapshot_date=str(baseline_payload["snapshot_date"]),
+    )
+    live_rows = {
+        str(row["family_id"]): row
+        for row in live_payload["tracked_twin_families"]
+        if isinstance(row, dict)
+    }
+
+    violations: list[str] = []
+    for baseline_row in baseline_rows:
+        if not isinstance(baseline_row, dict):
+            continue
+        family_id = str(baseline_row["family_id"])
+        live_row = live_rows[family_id]
+        touch_surface = _family_touch_surface(
+            baseline_row,
+            importer_source=live_row,
+        )
+        if not touch_surface.intersection(changed_paths):
+            continue
+
+        baseline_private_importers = {
+            str(path)
+            for path in baseline_row.get("current_private_src_importers", [])
+        }
+        live_private_importers = {
+            str(path) for path in live_row.get("current_private_src_importers", [])
+        }
+        baseline_count = int(baseline_row["current_private_src_importer_count"])
+        live_count = int(live_row["current_private_src_importer_count"])
+        max_private = ratchet_budgets[family_id]["max_private_src_importers"]
+
+        new_private_importers = sorted(live_private_importers - baseline_private_importers)
+        if live_count > max_private:
+            violations.append(
+                (
+                    f"{family_id}: private src importers {live_count} exceed ratchet "
+                    f"budget {max_private} after touching "
+                    f"{sorted(touch_surface & changed_paths)}"
+                )
+            )
+            continue
+        if live_count > baseline_count:
+            violations.append(
+                (
+                    f"{family_id}: private src importers grew from {baseline_count} to "
+                    f"{live_count} after touching "
+                    f"{sorted(touch_surface & changed_paths)}; refresh the census "
+                    "baseline only with an explicit ratchet review"
+                )
+            )
+            continue
+        if new_private_importers:
+            violations.append(
+                f"{family_id}: new private-module importers detected after touch: "
+                f"{new_private_importers}"
+            )
+
+    assert not violations, (
+        "Twin-family touch gate blocked private import growth:\n"
+        + "\n".join(f"  - {item}" for item in violations)
+    )
 
 
 @pytest.mark.architecture

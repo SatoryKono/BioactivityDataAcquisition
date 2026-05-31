@@ -3,6 +3,10 @@
 from __future__ import annotations
 
 # ruff: noqa: F403,F405
+from bioetl.composition.runtime_builders.runner_builder_wiring import (
+    LegacyRunnerBuilderOverrides,
+)
+
 from tests.unit.composition.runtime_builders.runner_builder_test_support import *  # noqa: F403,F405
 
 
@@ -38,44 +42,46 @@ def test_build_pipeline_runner_rejects_exact_replay_without_materialized_cached_
         runner_builder.build_pipeline_runner(
             context,
             registry=fake_registry,
-            ensure_providers_loaded_fn=lambda: None,
-            register_all_pipelines_fn=lambda registry=None: None,
-            get_settings_fn=lambda: SimpleNamespace(
-                data_dir=str(tmp_path),
-                pipeline=SimpleNamespace(heartbeat_interval=30),
-                test_mode=False,
-            ),
-            load_pipeline_config_fn=lambda _: SimpleNamespace(
-                provider="chembl",
-                entity_type="activity",
-                version="2.0.0",
-                maintenance=SimpleNamespace(
-                    auto_vacuum=False,
-                    vacuum_retention_days=7,
+            legacy_overrides=LegacyRunnerBuilderOverrides(
+                ensure_providers_loaded_fn=lambda: None,
+                register_all_pipelines_fn=lambda registry=None: None,
+                get_settings_fn=lambda: SimpleNamespace(
+                    data_dir=str(tmp_path),
+                    pipeline=SimpleNamespace(heartbeat_interval=30),
+                    test_mode=False,
                 ),
-                input_filter=SimpleNamespace(),
-                business_primary_keys=["activity_id"],
-                technical_primary_key="entity_id",
-                sink={
-                    "bronze": SimpleNamespace(enabled=True, save_metadata=True),
-                    "silver": SimpleNamespace(enabled=True, save_metadata=True),
-                    "gold": SimpleNamespace(enabled=True, save_metadata=True),
-                },
-            ),
-            build_observability_bundle_fn=lambda **_: _namespace_observability(
-                SimpleNamespace(info=lambda *_, **__: None),
-            ),
-            assemble_vacuum_settings_fn=lambda **_: "vacuum",
-            assemble_runtime_config_fn=lambda **_: SimpleNamespace(
-                run_type="incremental",
-                limit=25,
-                exact_replay=True,
-            ),
-            assemble_filter_config_fn=lambda **_: None,
-            assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(
-                enabled=True,
-                bronze_path=str(empty_bronze_root),
-                bronze_date="2026-01-01",
+                load_pipeline_config_fn=lambda _: SimpleNamespace(
+                    provider="chembl",
+                    entity_type="activity",
+                    version="2.0.0",
+                    maintenance=SimpleNamespace(
+                        auto_vacuum=False,
+                        vacuum_retention_days=7,
+                    ),
+                    input_filter=SimpleNamespace(),
+                    business_primary_keys=["activity_id"],
+                    technical_primary_key="entity_id",
+                    sink={
+                        "bronze": SimpleNamespace(enabled=True, save_metadata=True),
+                        "silver": SimpleNamespace(enabled=True, save_metadata=True),
+                        "gold": SimpleNamespace(enabled=True, save_metadata=True),
+                    },
+                ),
+                build_observability_bundle_fn=lambda **_: _namespace_observability(
+                    SimpleNamespace(info=lambda *_, **__: None),
+                ),
+                assemble_vacuum_settings_fn=lambda **_: "vacuum",
+                assemble_runtime_config_fn=lambda **_: SimpleNamespace(
+                    run_type="incremental",
+                    limit=25,
+                    exact_replay=True,
+                ),
+                assemble_filter_config_fn=lambda **_: None,
+                assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(
+                    enabled=True,
+                    bronze_path=str(empty_bronze_root),
+                    bronze_date="2026-01-01",
+                ),
             ),
         )
 
@@ -123,36 +129,38 @@ def test_build_pipeline_runner_keeps_snapshot_backed_execution_identity_stable_a
             runner_builder.build_pipeline_runner(
                 _build_context(),
                 registry=fake_registry,
-                ensure_providers_loaded_fn=lambda: None,
-                register_all_pipelines_fn=lambda registry=None: None,
-                get_settings_fn=lambda: SimpleNamespace(
-                    data_dir=str(tmp_path),
-                    pipeline=SimpleNamespace(heartbeat_interval=30),
-                    test_mode=False,
-                ),
-                load_pipeline_config_fn=lambda _: SimpleNamespace(
-                    provider="chembl",
-                    entity_type="activity",
-                    version="2.0.0",
-                    maintenance={"retain_days": 7},
-                    input_filter=SimpleNamespace(),
-                    business_primary_keys=["activity_id"],
-                    technical_primary_key="entity_id",
-                ),
-                build_observability_bundle_fn=lambda **_: _namespace_observability(
-                    SimpleNamespace(info=lambda *_, **__: None),
-                ),
-                assemble_vacuum_settings_fn=lambda **_: "vacuum",
-                assemble_runtime_config_fn=lambda **_: SimpleNamespace(
-                    run_type="incremental",
-                    limit=100,
-                    exact_replay=True,
-                ),
-                assemble_filter_config_fn=lambda **_: None,
-                assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(
-                    enabled=True,
-                    bronze_path=str(bronze_root),
-                    bronze_date="2026-01-01",
+                legacy_overrides=LegacyRunnerBuilderOverrides(
+                    ensure_providers_loaded_fn=lambda: None,
+                    register_all_pipelines_fn=lambda registry=None: None,
+                    get_settings_fn=lambda: SimpleNamespace(
+                        data_dir=str(tmp_path),
+                        pipeline=SimpleNamespace(heartbeat_interval=30),
+                        test_mode=False,
+                    ),
+                    load_pipeline_config_fn=lambda _: SimpleNamespace(
+                        provider="chembl",
+                        entity_type="activity",
+                        version="2.0.0",
+                        maintenance={"retain_days": 7},
+                        input_filter=SimpleNamespace(),
+                        business_primary_keys=["activity_id"],
+                        technical_primary_key="entity_id",
+                    ),
+                    build_observability_bundle_fn=lambda **_: _namespace_observability(
+                        SimpleNamespace(info=lambda *_, **__: None),
+                    ),
+                    assemble_vacuum_settings_fn=lambda **_: "vacuum",
+                    assemble_runtime_config_fn=lambda **_: SimpleNamespace(
+                        run_type="incremental",
+                        limit=100,
+                        exact_replay=True,
+                    ),
+                    assemble_filter_config_fn=lambda **_: None,
+                    assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(
+                        enabled=True,
+                        bronze_path=str(bronze_root),
+                        bronze_date="2026-01-01",
+                    ),
                 ),
             )
         manifest_id = fake_factory.kwargs["manifest_id"]
@@ -1024,63 +1032,65 @@ def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
         runner_builder.build_pipeline_runner(
             context,
             registry=fake_registry,
-            ensure_providers_loaded_fn=lambda: None,
-            register_all_pipelines_fn=lambda registry=None: None,
-            get_settings_fn=lambda: SimpleNamespace(
-                data_dir=str(tmp_path),
-                pipeline=SimpleNamespace(
-                    heartbeat_interval=30,
-                    control_plane=SimpleNamespace(
-                        required_persistence_profile="degraded_observable",
-                        checkpoint_compatibility_policy="hard_fail",
-                        run_manifest_enabled=True,
-                        run_ledger_enabled=True,
-                    ),
-                ),
-                test_mode=False,
-            ),
-            load_pipeline_config_fn=lambda _: SimpleNamespace(
-                provider="chembl",
-                entity_type="activity",
-                version="2.0.0",
-                maintenance=None,
-                input_filter=SimpleNamespace(),
-                business_primary_keys=["activity_id"],
-                technical_primary_key="entity_id",
-                sink={
-                    "bronze": SimpleNamespace(enabled=True, save_metadata=True),
-                    "silver": SimpleNamespace(enabled=True, save_metadata=True),
-                    "gold": SimpleNamespace(enabled=True, save_metadata=True),
-                },
-            ),
-            build_observability_bundle_fn=lambda **_: _namespace_observability(
-                SimpleNamespace(info=lambda *_, **__: None),
-            ),
-            assemble_vacuum_settings_fn=lambda **_: None,
-            assemble_runtime_config_fn=lambda **_: SimpleNamespace(
-                run_type="incremental"
-            ),
-            assemble_filter_config_fn=lambda **_: None,
-            assemble_cached_bronze_context_fn=lambda _: (
-                _ensure_default_cached_bronze_fixture(
-                    settings=SimpleNamespace(
-                        data_dir=str(tmp_path),
-                        pipeline=SimpleNamespace(
-                            heartbeat_interval=30,
-                            control_plane=SimpleNamespace(
-                                required_persistence_profile="degraded_observable",
-                                checkpoint_compatibility_policy="hard_fail",
-                                run_manifest_enabled=True,
-                                run_ledger_enabled=True,
-                            ),
+            legacy_overrides=LegacyRunnerBuilderOverrides(
+                ensure_providers_loaded_fn=lambda: None,
+                register_all_pipelines_fn=lambda registry=None: None,
+                get_settings_fn=lambda: SimpleNamespace(
+                    data_dir=str(tmp_path),
+                    pipeline=SimpleNamespace(
+                        heartbeat_interval=30,
+                        control_plane=SimpleNamespace(
+                            required_persistence_profile="degraded_observable",
+                            checkpoint_compatibility_policy="hard_fail",
+                            run_manifest_enabled=True,
+                            run_ledger_enabled=True,
                         ),
-                        test_mode=False,
                     ),
-                    pipeline_config=SimpleNamespace(
-                        provider="chembl",
-                        entity_type="activity",
-                    ),
-                )
+                    test_mode=False,
+                ),
+                load_pipeline_config_fn=lambda _: SimpleNamespace(
+                    provider="chembl",
+                    entity_type="activity",
+                    version="2.0.0",
+                    maintenance=None,
+                    input_filter=SimpleNamespace(),
+                    business_primary_keys=["activity_id"],
+                    technical_primary_key="entity_id",
+                    sink={
+                        "bronze": SimpleNamespace(enabled=True, save_metadata=True),
+                        "silver": SimpleNamespace(enabled=True, save_metadata=True),
+                        "gold": SimpleNamespace(enabled=True, save_metadata=True),
+                    },
+                ),
+                build_observability_bundle_fn=lambda **_: _namespace_observability(
+                    SimpleNamespace(info=lambda *_, **__: None),
+                ),
+                assemble_vacuum_settings_fn=lambda **_: None,
+                assemble_runtime_config_fn=lambda **_: SimpleNamespace(
+                    run_type="incremental"
+                ),
+                assemble_filter_config_fn=lambda **_: None,
+                assemble_cached_bronze_context_fn=lambda _: (
+                    _ensure_default_cached_bronze_fixture(
+                        settings=SimpleNamespace(
+                            data_dir=str(tmp_path),
+                            pipeline=SimpleNamespace(
+                                heartbeat_interval=30,
+                                control_plane=SimpleNamespace(
+                                    required_persistence_profile="degraded_observable",
+                                    checkpoint_compatibility_policy="hard_fail",
+                                    run_manifest_enabled=True,
+                                    run_ledger_enabled=True,
+                                ),
+                            ),
+                            test_mode=False,
+                        ),
+                        pipeline_config=SimpleNamespace(
+                            provider="chembl",
+                            entity_type="activity",
+                        ),
+                    )
+                ),
             ),
         )
 
