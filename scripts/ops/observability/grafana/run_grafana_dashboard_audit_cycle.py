@@ -84,7 +84,8 @@ def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
             "Run the canonical Grafana dashboard audit cycle: service preflight, "
-            "screenshot refresh, screenshot freshness re-check, then live panel audit."
+            "Playwright expanded-row screenshot refresh, screenshot freshness "
+            "re-check, then live panel audit."
         )
     )
     parser.add_argument("--grafana-base-url", default=DEFAULT_GRAFANA_BASE_URL)

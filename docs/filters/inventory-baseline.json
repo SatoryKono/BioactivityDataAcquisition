@@ -5,9 +5,9 @@
     "entities_total": 26,
     "entities_with_silver_filters": 21,
     "entities_with_gold_filters": 21,
-    "rules_total": 131,
+    "rules_total": 129,
     "keep_in_silver": 91,
-    "move_to_gold": 20,
+    "move_to_gold": 18,
     "duplicate": 20,
     "conflict": 0
   },
@@ -635,7 +635,7 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 2,
-        "move_to_gold": 1,
+        "move_to_gold": 0,
         "duplicate": 0,
         "conflict": 0
       },
@@ -659,16 +659,6 @@
           "gold_value": "\"cell_name\"",
           "action": "keep_in_silver",
           "notes": "also present in gold_filters (informational)"
-        },
-        {
-          "provider": "chembl",
-          "entity": "cell_line",
-          "rule_type": "ranges",
-          "field": "publication_year",
-          "silver_value": "{\"max\": 2050, \"min\": 1950}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
         }
       ]
     },
@@ -680,7 +670,7 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 3,
-        "move_to_gold": 1,
+        "move_to_gold": 0,
         "duplicate": 0,
         "conflict": 0
       },
@@ -714,16 +704,6 @@
           "gold_value": "",
           "action": "keep_in_silver",
           "notes": "structural rule stays in silver_filters"
-        },
-        {
-          "provider": "chembl",
-          "entity": "compound_record",
-          "rule_type": "ranges",
-          "field": "publication_year",
-          "silver_value": "{\"max\": 2050, \"min\": 1950}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
         }
       ]
     },

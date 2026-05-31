@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-31T13:03:40.260798+00:00",
+  "generated_at": "2026-05-31T13:37:04.489435+00:00",
   "summary": {
     "total_scripts": 419,
     "status_counts": {
@@ -11472,7 +11472,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 875,
+          "line": 891,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/run_grafana_dashboard_audit_cycle.py\","
         }
@@ -12139,7 +12139,7 @@
       "references": [
         {
           "path": "scripts/schema/README.md",
-          "line": 25,
+          "line": 26,
           "source_group": "scripts",
           "text": "| `audit-optionality`          | `scripts/schema/audit_effective_optionality.py`                        | Audit or validate `effective_optional_v1` derived from current config surface          |"
         },
@@ -12172,9 +12172,9 @@
         },
         {
           "path": "scripts/schema/README.md",
-          "line": 23,
+          "line": 24,
           "source_group": "scripts",
-          "text": "| `check-invariants`           | `scripts/schema/check_config_invariants.py`                            | Validate config CI invariants (naming, schemas, auth, keys)                            |"
+          "text": "| `check-invariants`           | `scripts/schema/check_config_invariants.py`                            | Validate config CI invariants and YAML parse safety (naming, schemas, auth, keys)      |"
         },
         {
           "path": "scripts/schema/__main__.py",
@@ -12193,7 +12193,7 @@
       "references": [
         {
           "path": "scripts/schema/README.md",
-          "line": 24,
+          "line": 25,
           "source_group": "scripts",
           "text": "| `check-required-fields`      | `scripts/schema/check_required_filter_fields.py`                       | Validate `silver_filters.required_fields` cover explicit YAML required/not-null fields |"
         },
@@ -12238,7 +12238,7 @@
         },
         {
           "path": "scripts/schema/README.md",
-          "line": 37,
+          "line": 38,
           "source_group": "scripts",
           "text": "| `analyze-gaps`               | `scripts/schema/config_gap_analysis.py`                                | Config gap analysis between configs and code                                           |"
         },
@@ -12259,7 +12259,7 @@
       "references": [
         {
           "path": "scripts/schema/README.md",
-          "line": 31,
+          "line": 32,
           "source_group": "scripts",
           "text": "| `generate-config-matrix`     | `scripts/schema/generate_config_matrix.py`                             | Canonical entity/composite config comparison matrix generator                          |"
         },
@@ -12310,7 +12310,7 @@
         },
         {
           "path": "scripts/schema/README.md",
-          "line": 30,
+          "line": 31,
           "source_group": "scripts",
           "text": "| `generate-contracts`         | `scripts/schema/generate_contracts.py`                                 | Generate contracts                                                                     |"
         },
@@ -12337,7 +12337,7 @@
       "references": [
         {
           "path": "scripts/schema/README.md",
-          "line": 33,
+          "line": 34,
           "source_group": "scripts",
           "text": "| `generate-field-diagnostics` | `scripts/schema/generate_field_level_diagnostics.py`                   | Generate field-level schema drift diagnostics CSV                                      |"
         },
@@ -12358,7 +12358,7 @@
       "references": [
         {
           "path": "scripts/schema/README.md",
-          "line": 34,
+          "line": 35,
           "source_group": "scripts",
           "text": "| `generate-field-spec`        | `scripts/schema/generate_field_transformation_spec.py`                 | Generate deterministic per-field transformation specification CSV                      |"
         },
@@ -12379,7 +12379,7 @@
       "references": [
         {
           "path": "scripts/schema/README.md",
-          "line": 27,
+          "line": 28,
           "source_group": "scripts",
           "text": "| `generate-pipeline`          | `scripts/schema/generate_pipeline_schema.py`                           | Generate pipeline JSON schema                                                          |"
         },
@@ -12400,7 +12400,7 @@
       "references": [
         {
           "path": "scripts/schema/README.md",
-          "line": 29,
+          "line": 30,
           "source_group": "scripts",
           "text": "| `generate-pubtype`           | `scripts/schema/generate_publication_type_classification_artifacts.py` | Generate publication type classification artifacts                                     |"
         },
@@ -12451,7 +12451,7 @@
         },
         {
           "path": "scripts/schema/README.md",
-          "line": 28,
+          "line": 29,
           "source_group": "scripts",
           "text": "| `generate-artifacts`         | `scripts/schema/generate_schema_artifacts.py`                          | Generate schema artifacts                                                              |"
         },
@@ -12484,7 +12484,7 @@
       "references": [
         {
           "path": "scripts/schema/README.md",
-          "line": 32,
+          "line": 33,
           "source_group": "scripts",
           "text": "| `generate-unified-map`       | `scripts/schema/generate_unified_schema_map.py`                        | Generate unified Bronze→Silver→Gold schema map CSV                                     |"
         },
@@ -12505,7 +12505,7 @@
       "references": [
         {
           "path": "scripts/schema/README.md",
-          "line": 26,
+          "line": 27,
           "source_group": "scripts",
           "text": "| `check-config-paths`         | `scripts/schema/lint_config_paths.py`                                  | Check for legacy dq/filter config path references                                      |"
         },
@@ -12556,19 +12556,19 @@
         },
         {
           "path": "scripts/schema/README.md",
-          "line": 16,
+          "line": 17,
           "source_group": "scripts",
           "text": "- `scripts/schema/validate_pipeline_configs.py` is the canonical validator for `validate-configs`."
         },
         {
           "path": "scripts/schema/README.md",
-          "line": 17,
+          "line": 18,
           "source_group": "scripts",
           "text": "- `docs/00-project/ai/agents/scripts/py-config-bot-2.py` is a compatibility wrapper only; runtime behavior must be updated in `scripts/schema/validate_pipeline_configs.py` first."
         },
         {
           "path": "scripts/schema/README.md",
-          "line": 35,
+          "line": 36,
           "source_group": "scripts",
           "text": "| `validate-configs`           | `scripts/schema/validate_pipeline_configs.py`                          | Validate unified pipeline YAML configs against JSON Schema                             |"
         }
@@ -12583,7 +12583,7 @@
       "references": [
         {
           "path": "scripts/schema/README.md",
-          "line": 36,
+          "line": 37,
           "source_group": "scripts",
           "text": "| `validate-unified-configs`   | `scripts/schema/validate_unified_configs.py`                           | Canonical structural unified-config validator retained for compatibility use cases     |"
         },

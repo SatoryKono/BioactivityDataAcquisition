@@ -13,6 +13,7 @@ python -m scripts.schema <command> [args...]
 
 - Shared config-governance constants live in `src/bioetl/infrastructure/config/config_ci_contract.py`.
 - `scripts/schema/check_config_invariants.py` and [test_config_ci_invariants.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/architecture/test_config_ci_invariants.py) import the same active/retired/transitional contract from that module.
+- `check-invariants` is also the fail-fast YAML parse gate for all `configs/**/*.yaml` governance surfaces, including `configs/contracts/**/*.yaml`.
 - `scripts/schema/validate_pipeline_configs.py` is the canonical validator for `validate-configs`.
 - `docs/00-project/ai/agents/scripts/py-config-bot-2.py` is a compatibility wrapper only; runtime behavior must be updated in `scripts/schema/validate_pipeline_configs.py` first.
 
@@ -20,7 +21,7 @@ python -m scripts.schema <command> [args...]
 
 | Command                      | Script                                                                 | Description                                                                            |
 | ---------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `check-invariants`           | `scripts/schema/check_config_invariants.py`                            | Validate config CI invariants (naming, schemas, auth, keys)                            |
+| `check-invariants`           | `scripts/schema/check_config_invariants.py`                            | Validate config CI invariants and YAML parse safety (naming, schemas, auth, keys)      |
 | `check-required-fields`      | `scripts/schema/check_required_filter_fields.py`                       | Validate `silver_filters.required_fields` cover explicit YAML required/not-null fields |
 | `audit-optionality`          | `scripts/schema/audit_effective_optionality.py`                        | Audit or validate `effective_optional_v1` derived from current config surface          |
 | `check-config-paths`         | `scripts/schema/lint_config_paths.py`                                  | Check for legacy dq/filter config path references                                      |
@@ -40,7 +41,7 @@ python -m scripts.schema <command> [args...]
 
 | Command                      | When                                                                                                                                               | Trigger                                         |
 | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
-| `check-invariants`           | After modifying any YAML config under `configs/`; validates naming, entity sections, auth, unknown keys                                            | Pre-commit hook (on config changes)             |
+| `check-invariants`           | After modifying any YAML config under `configs/`; validates parse safety, naming, entity sections, auth, unknown keys                              | Pre-commit hook (on config changes)             |
 | `check-required-fields`      | After modifying entity YAML quality/filter sections; ensures explicit required/not-null YAML fields are listed in `silver_filters.required_fields` | CI/config regression gate                       |
 | `audit-optionality`          | After changing config semantics or structural policy; audits and validates how `effective_optional_v1` resolves from current YAML/config signals   | CI/config regression gate, local contract audit |
 | `check-config-paths`         | After modifying configs, source code, or docs; detects legacy `dq/`/`filter/` path references                                                      | Pre-commit hook                                 |

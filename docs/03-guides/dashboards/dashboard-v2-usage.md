@@ -28,6 +28,17 @@ Human-readable selector references:
 - `docs/03-guides/dashboards/variable-reference.md`
 - `docs/03-guides/dashboards/selector-architecture.md`
 
+Detached audit backend contract:
+- HTTP-backed panels (`ID`, `Processed Records`, checkpoint freshness, Silver
+  Reject Explorer summaries) are served by `bioetl quarantine serve`, usually
+  on `http://127.0.0.1:8081`.
+- That backend reads Prometheus through `BIOETL_PROMETHEUS_URL` when set.
+  Configure the URL reachable from the backend process: host/WSL runs usually
+  use `http://127.0.0.1:9090`, while Docker-adjacent backends may need
+  `http://host.docker.internal:9090`. Do not assume `localhost:9090` is
+  universally correct when Grafana, Prometheus, and the backend run in mixed
+  network namespaces.
+
 ## Какие дашборды использовать
 
 | Dashboard                 | UID                             | Для чего                                                                                   |
@@ -177,11 +188,18 @@ dashboard-specific `Status` or `First Action` route.
    отвечают на вопрос «какой provider degraded/failing и почему». Panel `id=114`
    (`Review Raw Provider Health Enum`) остаётся raw source enum
    (`0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`) ниже first screen как evidence.
-   `Monitor Provider Telemetry Freshness` отделяет empty severity matrix от
-   telemetry gap: если current-status samples нет в активном Grafana range, это
-   не healthy state. Shared `ID` и `Processed Records` cards на том же first
-   screen остаются bounded pipeline-context evidence и не доказывают current
-   provider health. `Inspect Provider Top Causes` может оставаться
+  `Monitor Provider Telemetry Freshness` отделяет empty severity matrix от
+  telemetry gap: если в активном Grafana range нет ни
+  `bioetl_provider_current_status`, ни
+  `bioetl_provider_range_operational_ok`, это не healthy state.
+  `bioetl_provider_range_operational_ok` является 12h operational-evidence
+  projection: successful provider activity in range can move `Status` to `OK`
+  without claiming that the selected pipeline run succeeded. Provider Health
+  remains provider-first; `$workflow/$pipeline/$run_type/$run_id` are shared
+  shell context for HTTP identity/accounting cards, and `$run_id` must not be
+  introduced into Provider Health PromQL. Shared `ID` и `Processed Records` cards на том же first
+  screen остаются bounded pipeline-context evidence и не доказывают current
+  provider health. `Inspect Provider Top Causes` может оставаться
    непустой даже при `GLOBAL severity = OK`, потому что canonical cause
    projection включает early-warning provider signals независимо от
    current-status projection; это diagnostic lead, а не самостоятельное
@@ -452,6 +470,9 @@ Variable handoff policy for dashboard links remains strict and bounded:
   missing `bioetl_provider_current_status` samples in the active Grafana time range mean telemetry
   gap, not proof that providers are healthy. Raw status stays fail-closed
   `UNKNOWN`, если provider universe существует, а raw status sample отсутствует.
+  Operational OK over the default 12h range is backed by
+  `bioetl_provider_range_operational_ok`; it is provider activity evidence
+  only and never adds `$run_id` to provider PromQL.
   
   **First 2 clicks (L1):**
   1. Click #1: открыть `bioetl-provider-health-v2`, проверить `Monitor GLOBAL Provider Severity Matrix` (`id=9101`), `Inspect Critical Providers` (`id=9102`), `Inspect Provider Top Causes` (`id=9103`) и `Monitor Provider Telemetry Freshness` (`id=9104`).
@@ -627,6 +648,17 @@ Variable handoff policy for dashboard links remains strict and bounded:
   and copy-friendly full values through `/ops/control-plane/identity-evidence`;
   checkpoint age vs RPO, replay duplicate detection, and richer semantic drift
   classification remain limitation notes instead of fake PromQL.
+- `control-plane.Monitor: Checkpoint Freshness Lag (seconds)` is the canonical
+  exact-run checkpoint freshness read path through
+  `/ops/control-plane/checkpoint-freshness`. For
+  `run_id=b51986c6-870b-4457-aa70-baedac2710ad`, the local manifest
+  `3c803630-4652-40d0-8f8d-f26b2fb1bdd9`, terminal success ledger evidence,
+  and immutable checkpoint history under `data/output/checkpoints/.history`
+  classify panel `892` as checkpoint evidence present. Future audits should
+  mark exact-run checkpoint gaps as `Expected Empty` only when manifest/ledger
+  evidence exists but immutable checkpoint history for that exact run is absent;
+  if checkpoint history exists and panel `892` still returns `UNKNOWN`, that is
+  a product defect in the freshness read path.
 - `dq.id=5`: red `<0.8`, yellow `>=0.8`, green `>=0.9`
 - `dq.id=8`: yellow `>=3600s`, red `>=21600s`; gauge now shows the worst stale entity in scope, not the freshest timestamp
 - `overview.id=111`: yellow `>=1`, red `>=5`

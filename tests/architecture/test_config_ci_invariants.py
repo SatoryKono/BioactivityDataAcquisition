@@ -650,6 +650,31 @@ class TestConfigContractSourceOfTruth:
         assert invariant_script.PROVIDER_AUTH_REQUIREMENTS is PROVIDER_AUTH_REQUIREMENTS
         assert invariant_script.VALID_LOADING_STRATEGIES is VALID_LOADING_STRATEGIES
 
+    def test_check_config_invariants_parse_gate_includes_contract_yaml(self) -> None:
+        """The fail-fast YAML parse gate must include contract config surfaces."""
+        paths = set(invariant_script._config_governance_yaml_paths())
+        assert CONFIGS_DIR / "contracts" / "chembl" / "activity.yaml" in paths
+
+    def test_check_config_invariants_reports_malformed_yaml(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        tmp_path: Path,
+    ) -> None:
+        """Malformed config YAML should fail before downstream config loaders run."""
+        broken = tmp_path / "broken.yaml"
+        broken.write_text("key: [\n", encoding="utf-8")
+        monkeypatch.setattr(
+            invariant_script,
+            "_config_governance_yaml_paths",
+            lambda: [broken],
+        )
+
+        errors = invariant_script.check_inv_000(verbose=False)
+
+        assert len(errors) == 1
+        assert "INV-CFG-000" in errors[0]
+        assert "YAML parse error" in errors[0]
+
     def test_retired_pipeline_keys_are_not_part_of_active_ci_contract(self) -> None:
         """Retired keys must stay rejected by the active CI contract."""
         overlap = RETIRED_PIPELINE_KEYS & PIPELINE_ALLOWED_KEYS

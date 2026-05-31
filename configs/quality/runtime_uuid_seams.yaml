@@ -24,8 +24,8 @@ seams:
     replay_critical: false
     owner: control-plane
     migration_policy: inject deterministic event_id_factory for replay-critical ledger fixtures or migrations.
-  - path: src/bioetl/application/services/control_plane/manifest/service.py
-    line: 50
+  - path: src/bioetl/application/services/control_plane/manifest_service_scaffold.py
+    line: 26
     kind: call
     symbol: uuid4
     layer: application
@@ -51,15 +51,6 @@ seams:
     replay_critical: false
     owner: workflow-control-plane
     migration_policy: inject deterministic event_id_factory for replay-critical workflow ledgers.
-  - path: src/bioetl/application/services/control_plane/workflow/manifest_service.py
-    line: 48
-    kind: call
-    symbol: uuid4
-    layer: application
-    classification: injectable_workflow_manifest_id_factory_default
-    replay_critical: false
-    owner: workflow-control-plane
-    migration_policy: inject deterministic manifest_id_factory for replay-critical workflow manifests.
   - path: src/bioetl/application/services/execution/pipeline_runner_service.py
     line: 145
     kind: call

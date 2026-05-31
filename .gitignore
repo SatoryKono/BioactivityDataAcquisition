@@ -101,6 +101,10 @@ log_test.txt
 !/reports/quality/hotspot-family-baseline.json
 !/reports/quality/hotspot-family-baseline.md
 !/reports/quality/compatibility-importer-census.json
+!/reports/quality/compatibility-importer-census.md
+!/reports/quality/config-discrepancy-baseline.json
+!/reports/quality/dead-code-inventory.json
+!/reports/quality/dead-code-inventory.md
 !/reports/quality/module-coverage-inventory.json
 !/reports/observability/
 /reports/observability/*
