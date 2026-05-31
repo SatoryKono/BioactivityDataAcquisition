@@ -67,6 +67,10 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
         "CHEMBL_TARGET_COMPONENT_PROFILE",
         "CHEMBL_TARGET_COMPONENT_SCHEMA_FIELDS",
     ),
+    "bioetl.domain.normalization.profiles.chembl_target_protein_classification": (
+        "CHEMBL_TARGET_PROTEIN_CLASSIFICATION_PROFILE",
+        "CHEMBL_TARGET_PROTEIN_CLASSIFICATION_SCHEMA_FIELDS",
+    ),
     "bioetl.domain.normalization.profiles.chembl_tissue": (
         "CHEMBL_TISSUE_PROFILE",
         "CHEMBL_TISSUE_SCHEMA_FIELDS",

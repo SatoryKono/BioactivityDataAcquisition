@@ -31,7 +31,7 @@
 
 1. Базовая архитектурная инвариантность на уровне слоёв подтверждена: `Layer policy violations = 0`.
 2. P0 duplicate wave `#4812/#4813/#4814/#4815` закрыта на GitHub `2026-05-31`; targeted duplication baseline now reports `0` clusters across `application/core`, `composition/bootstrap/runtime`, `application/services/control_plane`, and `composition/runtime_builders`.
-3. Compatibility surface остаётся санкционированным, но не закрытым: `14` retained entrypoints, `22` removed compatibility surfaces with `0` remaining first-party importers, `14` twin pairs, `3` tracked twin families.
+3. Compatibility surface остаётся санкционированным, но не закрытым: `14` retained entrypoints, `23` removed compatibility surfaces with `0` remaining first-party importers, `14` twin pairs, `3` tracked twin families.
 4. Infrastructure config root facade сохраняет `0` first-party src importers for `Settings`, `get_settings`, and `load_pipeline_contract_policy`.
 5. Contract governance improved: active contract coverage matrix reports `26/26` Gold-enabled entity surfaces covered.
 6. Config drift по-прежнему остаётся residual governance topic: current discrepancy report shows `26` configs and `508` unique parameters.

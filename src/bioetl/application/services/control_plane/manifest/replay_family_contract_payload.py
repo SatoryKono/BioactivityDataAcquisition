@@ -1,4 +1,4 @@
-"""Shared replay-family contract payload assembly for diagnostics surfaces."""
+"""Replay-family contract payload assembly owned by the manifest seam."""
 
 from __future__ import annotations
 

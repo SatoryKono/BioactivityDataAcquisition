@@ -16,13 +16,9 @@ from bioetl.interfaces.cli.commands.domains.health.rendering import (
     build_health_server_info_lines,
     render_health_results_json,
 )
-from bioetl.interfaces.cli.commands.domains.health.server_integration import (
-    DEFAULT_HEALTH_SERVER_PORT,
-)
+from bioetl.interfaces.cli.commands.domains.health.server_integration import DEFAULT_HEALTH_SERVER_PORT
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,
-)
-from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     handle_cli_failure as handle_cli_execution_failure,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
@@ -30,12 +26,10 @@ from bioetl.interfaces.cli.exit_codes import ExitCode
 if TYPE_CHECKING:
     from bioetl.application.services.health_service import HealthService
     from bioetl.application.services.quarantine_service import QuarantineService
-    from bioetl.composition.health_api import (
-        HealthServerDependenciesProtocol,
+    from bioetl.composition.bootstrap.cli.health import (
+        HealthServerDependencies as HealthServerDependenciesProtocol,
     )
-    from bioetl.composition.health_api import (
-        RuntimeSettingsProtocol as Settings,
-    )
+    from bioetl.composition.runtime_builders.config_access import Settings
     from bioetl.domain.ports import LoggerPort
     from bioetl.interfaces.cli.commands.domains.quarantine.support import (
         _QuarantineRuntimeService,
@@ -66,7 +60,7 @@ def get_health_server_dependencies() -> HealthServerDependenciesProtocol:
 
 def get_quarantine_service() -> QuarantineService:
     """Load quarantine service through composition on demand."""
-    from bioetl.composition.health_api import get_quarantine_service as _impl
+    from bioetl.composition.services_api import get_quarantine_service as _impl
 
     return _impl()
 
@@ -82,14 +76,18 @@ def get_health_server_quarantine_service() -> QuarantineService:
 
 def get_quarantine_runtime_service(pipeline: str) -> _QuarantineRuntimeService:
     """Load quarantine runtime service through the health composition seam."""
-    from bioetl.composition.health_api import get_quarantine_runtime_service as _impl
+    from bioetl.composition.resources_api import (
+        get_quarantine_runtime_service as _impl,
+    )
 
     return cast("_QuarantineRuntimeService", _impl(pipeline))
 
 
 def get_settings() -> Settings:
     """Load runtime settings through composition on demand."""
-    from bioetl.composition.health_api import get_runtime_settings as _impl
+    from bioetl.composition.runtime_builders.config_access import (
+        get_settings as _impl,
+    )
 
     return cast("Settings", _impl())
 
@@ -414,7 +412,6 @@ def health_check(provider: tuple[str, ...], output_json: bool) -> None:
     if results is None:
         return
     _render_health_results(results, output_json=output_json)
-
 
 COMMANDS = (health_server_command,)
 

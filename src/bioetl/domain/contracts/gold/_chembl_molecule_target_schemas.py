@@ -10,6 +10,7 @@ from bioetl.domain.contracts.gold._chembl_target_lookup_schemas import (
     ChEMBLSubcellularFractionGoldSchema,
     ChEMBLTargetComponentGoldSchema,
     ChEMBLTargetGoldSchema,
+    ChEMBLTargetProteinClassificationGoldSchema,
     ChEMBLTissueGoldSchema,
 )
 
@@ -19,5 +20,6 @@ __all__ = [
     "ChEMBLSubcellularFractionGoldSchema",
     "ChEMBLTargetComponentGoldSchema",
     "ChEMBLTargetGoldSchema",
+    "ChEMBLTargetProteinClassificationGoldSchema",
     "ChEMBLTissueGoldSchema",
 ]

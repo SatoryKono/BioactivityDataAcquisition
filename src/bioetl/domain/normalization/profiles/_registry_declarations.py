@@ -44,6 +44,9 @@ from bioetl.domain.normalization.profiles.chembl_target import (
 from bioetl.domain.normalization.profiles.chembl_target_component import (
     CHEMBL_TARGET_COMPONENT_PROFILE,
 )
+from bioetl.domain.normalization.profiles.chembl_target_protein_classification import (
+    CHEMBL_TARGET_PROTEIN_CLASSIFICATION_PROFILE,
+)
 from bioetl.domain.normalization.profiles.chembl_tissue import (
     CHEMBL_TISSUE_PROFILE,
 )
@@ -158,6 +161,12 @@ NORMALIZATION_PROFILE_DECLARATIONS: tuple[NormalizationProfileDeclaration, ...] 
         entity_type="target_component",
         profile=CHEMBL_TARGET_COMPONENT_PROFILE,
         module_path="src/bioetl/domain/normalization/profiles/chembl_target_component.py",
+    ),
+    NormalizationProfileDeclaration(
+        provider="chembl",
+        entity_type="target_protein_classification",
+        profile=CHEMBL_TARGET_PROTEIN_CLASSIFICATION_PROFILE,
+        module_path="src/bioetl/domain/normalization/profiles/chembl_target_protein_classification.py",
     ),
     NormalizationProfileDeclaration(
         provider="chembl",

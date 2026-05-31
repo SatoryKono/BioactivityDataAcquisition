@@ -3,9 +3,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from bioetl.domain.entities.base import BaseEntity
 from bioetl.domain.entities.publication_base import PublicationEntityBase
+
+if TYPE_CHECKING:
+    from bioetl.domain.value_objects.protein_class_hierarchy import (
+        ProteinClassHierarchy,
+    )
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -84,6 +90,7 @@ class Target(BaseEntity):
     component_types: list[str] | None = None
     component_relationships: list[str] | None = None
     component_descriptions: list[str] | None = None
+    protein_classifications: tuple[ProteinClassHierarchy, ...] = ()
 
     def _validate_invariants(self) -> None:
         if not self.target_id:

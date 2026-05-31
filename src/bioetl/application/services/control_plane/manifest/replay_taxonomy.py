@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from copy import deepcopy
 
-from bioetl.application.services.control_plane._run_manifest_replay_taxonomy_fields import (
+from bioetl.application.services.control_plane.manifest.replay_taxonomy_fields import (
     LIST_DEFAULTS,
     REPLAY_TAXONOMY_FIELDS,
 )
@@ -59,7 +59,7 @@ def build_replay_taxonomy_projection(
             "post_capture_replayable_parent_boundary": (
                 post_capture_replayable_parent_boundary
             ),
-            "historical_live_run_upgrade_policy": (historical_live_run_upgrade_policy),
+            "historical_live_run_upgrade_policy": historical_live_run_upgrade_policy,
             "historical_live_run_upgrade_boundary": (
                 historical_live_run_upgrade_boundary
             ),
@@ -79,7 +79,7 @@ def build_replay_taxonomy_projection(
             "historical_live_run_upgrade_state": historical_live_run_upgrade_state,
             "replay_occurrence_kind": replay_occurrence_kind,
             "source_posture": source_posture,
-            "input_snapshot_missing_source_refs": (input_snapshot_missing_source_refs),
+            "input_snapshot_missing_source_refs": input_snapshot_missing_source_refs,
             "replay_capability_reason": replay_capability_reason,
             "replay_mode": replay_mode,
             "continuation_mode": continuation_mode,
@@ -98,7 +98,7 @@ def build_replay_taxonomy_projection(
 
 
 def resolve_replay_taxonomy_projection(
-    primary: Mapping[str, object] | None,
+    primary: Mapping[str, object] | None = None,
     *,
     fallback: Mapping[str, object] | None = None,
     defaults: Mapping[str, object] | None = None,

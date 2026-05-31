@@ -6,7 +6,7 @@ from bioetl.application.services.control_plane.manifest.execution_identity_suppo
     build_contract_identity_anchor_fields,
     build_execution_identity_payload_from_code_provenance,
 )
-from bioetl.application.services.control_plane.run_manifest_replay_taxonomy import (
+from bioetl.application.services.control_plane.manifest.replay_taxonomy import (
     resolve_replay_taxonomy_projection,
 )
 from bioetl.domain.control_plane import RunCodeProvenance, RunManifest

@@ -38,6 +38,7 @@ REMOVED_COMPATIBILITY_MODULES = {
     "bioetl.application.services.control_plane.replay_bundle_descriptor_service",
     "bioetl.application.services.control_plane.run_manifest_diagnostics",
     "bioetl.application.services.control_plane.run_manifest_inspection_service",
+    "bioetl.application.services.control_plane.run_manifest_replay_taxonomy",
     "bioetl.application.services.control_plane.workflow_execution_preparation",
     "bioetl.application.services.control_plane.workflow_execution_recording",
     "bioetl.application.services.control_plane.workflow_execution_service",

@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from bioetl.application.services.control_plane.manifest.inspection_models import (
     RunManifestInspectionResult,
 )
-from bioetl.application.services.control_plane.run_manifest_replay_taxonomy import (
+from bioetl.application.services.control_plane.manifest.replay_taxonomy import (
     resolve_replay_taxonomy_projection,
 )
 

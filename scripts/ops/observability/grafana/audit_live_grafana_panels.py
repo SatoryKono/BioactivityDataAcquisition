@@ -655,6 +655,18 @@ def _classify_http_table_payload(payload: object) -> tuple[str, str]:
     return ("nonempty_table", "HTTP table payload returned rows")
 
 
+def _classify_http_endpoint_payload(payload: object) -> tuple[str, str]:
+    if isinstance(payload, dict):
+        if not payload:
+            return ("expected_empty", "HTTP endpoint returned an empty object")
+        return ("nonempty_result", "HTTP endpoint returned a JSON object")
+    if isinstance(payload, list):
+        if not payload:
+            return ("expected_empty", "HTTP endpoint returned an empty list")
+        return ("nonempty_result", "HTTP endpoint returned JSON rows")
+    return ("invalid_shape", "HTTP endpoint did not return a JSON object or list")
+
+
 def _classify_http_freshness_payload(payload: object) -> tuple[str, str]:
     if not isinstance(payload, dict):
         return ("invalid_shape", "HTTP payload is not a JSON object")
@@ -810,9 +822,12 @@ def _audit_http_panel(
         status = (
             "error" if classification in {"invalid_shape", "empty_result"} else "ok"
         )
-    else:
+    elif spec.semantic_kind == "http_summary":
         classification, detail = _classify_http_payload(payload)
-        status = "ok" if classification != "invalid_shape" else "error"
+        status = "error" if classification == "invalid_shape" and spec.required else "ok"
+    else:
+        classification, detail = _classify_http_endpoint_payload(payload)
+        status = "error" if classification == "invalid_shape" and spec.required else "ok"
     return AuditResult(
         dashboard_uid=spec.dashboard_uid,
         panel_id=spec.panel_id,

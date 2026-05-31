@@ -5,7 +5,7 @@
   "config_root_facade_source": "configs/quality/infrastructure_config_root_facade_inventory.yaml",
   "summary": {
     "retained_entrypoint_count": 14,
-    "removed_compatibility_surface_count": 22,
+    "removed_compatibility_surface_count": 23,
     "removed_compatibility_surfaces_with_src_importers": 0,
     "removed_compatibility_surfaces_with_test_importers": 0,
     "removed_compatibility_surfaces_still_present": 0,
@@ -156,14 +156,12 @@
       "status": "public-entrypoint",
       "canonical_target": "bioetl.composition.health_api",
       "owner": "bioetl.composition",
-      "src_importers": [
-        "src/bioetl/interfaces/cli/commands/health.py"
-      ],
+      "src_importers": [],
       "test_importers": [
         "tests/unit/composition/test_canonical_module_paths.py",
         "tests/unit/composition/test_health_api.py"
       ],
-      "src_importer_count": 1,
+      "src_importer_count": 0,
       "test_importer_count": 2
     },
     {
@@ -172,13 +170,11 @@
       "status": "public-entrypoint",
       "canonical_target": "bioetl.composition.maintenance_api",
       "owner": "bioetl.composition",
-      "src_importers": [
-        "src/bioetl/interfaces/cli/commands/maintenance.py"
-      ],
+      "src_importers": [],
       "test_importers": [
         "tests/unit/composition/test_canonical_module_paths.py"
       ],
-      "src_importer_count": 1,
+      "src_importer_count": 0,
       "test_importer_count": 1
     },
     {
@@ -669,6 +665,19 @@
       "path": "src/bioetl/application/services/control_plane/run_manifest_inspection_service.py",
       "module_name": "bioetl.application.services.control_plane.run_manifest_inspection_service",
       "canonical_target": "bioetl.application.services.control_plane.manifest.inspection_service",
+      "owner": "bioetl.application.services.control_plane.manifest",
+      "path_exists": false,
+      "src_importers": [],
+      "test_importers": [],
+      "src_importer_count": 0,
+      "test_importer_count": 0
+    },
+    {
+      "issue_id": "4700",
+      "surface_id": "run_manifest_replay_taxonomy",
+      "path": "src/bioetl/application/services/control_plane/run_manifest_replay_taxonomy.py",
+      "module_name": "bioetl.application.services.control_plane.run_manifest_replay_taxonomy",
+      "canonical_target": "bioetl.application.services.control_plane.manifest.replay_taxonomy",
       "owner": "bioetl.application.services.control_plane.manifest",
       "path_exists": false,
       "src_importers": [],
