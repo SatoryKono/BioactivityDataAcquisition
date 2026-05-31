@@ -192,6 +192,21 @@ async def handle_control_plane_identity_table(
     assert host._run_manifest_port is not None
     scope = resolve_control_plane_identity_scope(host, query)
     checkpoint_metadata: dict[str, object] | None = None
+    if host._checkpoint_port is not None:
+        target_pipeline = (
+            scope.resolved_manifest.pipeline_name
+            if scope.resolved_manifest is not None
+            else scope.requested_pipeline
+        )
+        checkpoint_tuple, _, _, aggregate_scope_unknown = (
+            await load_checkpoint_freshness_evidence(
+                host,
+                scope=scope,
+                target_pipeline=target_pipeline,
+            )
+        )
+        if not aggregate_scope_unknown and checkpoint_tuple is not None:
+            _, checkpoint_metadata = checkpoint_tuple
 
     await host._send_payload_response(
         writer,
