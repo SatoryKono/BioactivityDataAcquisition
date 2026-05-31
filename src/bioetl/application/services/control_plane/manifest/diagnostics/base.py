@@ -32,7 +32,6 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay impor
     _build_resume_contract,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_projection import (
-    _build_operator_replay_projection,
     _build_replay_projection_bundle,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
@@ -50,10 +49,7 @@ from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_sup
 from bioetl.application.services.control_plane.run_manifest_diagnostics_support import (
     _build_exact_replay_anchors,
     _collect_append_mode_semantic_sinks,
-    _resolve_exact_replay_support_boundary,
     _resolve_replay_family_contract,
-)
-from bioetl.application.services.control_plane.run_manifest_diagnostics_support import (
     build_replay_family_contract_payload as _build_replay_family_contract_payload,
 )
 from bioetl.domain.control_plane import RunManifest
@@ -96,13 +92,17 @@ def _resolve_base_summary_replay_context(
         resume_requested=resume_requested,
         replay_family_contract=replay_family_contract,
     )
-    operator_replay_projection = _build_operator_replay_projection(
+    replay_projection_bundle = _build_replay_projection_bundle(
         manifest=manifest,
         input_snapshots=input_snapshots,
         requested_exact_replay=requested_exact_replay,
         resume_requested=resume_requested,
         policy_assessment=policy_assessment,
+        replay_family_contract_payload=_build_replay_family_contract_payload(
+            replay_family_contract
+        ),
     )
+    operator_replay_projection = replay_projection_bundle.operator_projection
     return _BaseSummaryReplayContext(
         requested_exact_replay=requested_exact_replay,
         resume_requested=resume_requested,
@@ -119,7 +119,9 @@ def _resolve_base_summary_replay_context(
             operator_replay_projection["replay_resume_rebuild_verdict"]
         ),
         replay_next_action=str(operator_replay_projection["replay_next_action"]),
-        exact_replay_support_boundary=_resolve_exact_replay_support_boundary(manifest),
+        exact_replay_support_boundary=str(
+            operator_replay_projection["exact_replay_support_boundary"]
+        ),
         exact_replay_blockers=list(operator_replay_projection["exact_replay_blockers"]),
         resume_contract=_build_resume_contract(
             manifest=manifest,

@@ -77,21 +77,21 @@ class HistoricalReplayUniverseRecord(HistoricalReplayRunIdentity):
     source_pack_ref: str | None = None
 
     def to_dict(self) -> dict[str, object]:
-        return {
-            "manifest_id": self.manifest_id,
-            "run_id": self.run_id,
-            "pipeline_name": self.pipeline_name,
-            "provider": self.provider,
-            "entity": self.entity,
-            "execution_context": self.execution_context,
-            "certification_status": self.certification_status,
-            "replay_occurrence_kind": self.replay_occurrence_kind,
-            "blocking_reasons": list(self.blocking_reasons),
-            "universe_origin": self.universe_origin,
-            "evidence_residency": self.evidence_residency,
-            "durable_evidence_coverage": self.durable_evidence_coverage,
-            "source_pack_ref": self.source_pack_ref,
-        }
+        return build_historical_run_identity_payload(
+            manifest_id=self.manifest_id,
+            run_id=self.run_id,
+            pipeline_name=self.pipeline_name,
+            provider=self.provider,
+            entity=self.entity,
+            execution_context=self.execution_context,
+            certification_status=self.certification_status,
+            replay_occurrence_kind=self.replay_occurrence_kind,
+            blocking_reasons=self.blocking_reasons,
+            universe_origin=self.universe_origin,
+            evidence_residency=self.evidence_residency,
+            durable_evidence_coverage=self.durable_evidence_coverage,
+            source_pack_ref=self.source_pack_ref,
+        )
 
 
 @dataclass(frozen=True, slots=True)
