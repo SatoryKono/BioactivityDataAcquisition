@@ -129,6 +129,15 @@ routes:
       - reports/quality/contract-registry-diagnostics.json
     notes: Contract registry diagnostics must not be emitted to repository root.
 
+  - id: pipeline-config-contract-ownership-quality-baseline
+    generator: scripts/engineering/qa/report_pipeline_config_contract_ownership.py
+    output_kind: working_report
+    commit_policy: tracked_quality_baseline
+    outputs:
+      - reports/quality/pipeline-config-contract-ownership-map.json
+      - reports/quality/pipeline-config-contract-ownership-map.md
+    notes: Gold-enabled entity config to registry, contract YAML, published JSON, and Gold schema parity matrix.
+
   - id: contract-identity-diagnostics-quality-report
     generator: scripts/engineering/ci/validate_contract_identity.py
     output_kind: working_report

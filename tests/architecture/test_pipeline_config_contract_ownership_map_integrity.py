@@ -14,9 +14,14 @@ JSON_ARTIFACT = (
 )
 
 
-def _load_rows() -> list[dict[str, object]]:
+def _load_payload() -> dict[str, object]:
     payload = json.loads(JSON_ARTIFACT.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
+    return payload
+
+
+def _load_rows() -> list[dict[str, object]]:
+    payload = _load_payload()
     rows = payload.get("rows")
     assert isinstance(rows, list)
     normalized: list[dict[str, object]] = []
@@ -39,7 +44,13 @@ def test_pipeline_config_contract_ownership_map_rows_reference_existing_artifact
         pipeline_name = row.get("pipeline_name")
         assert isinstance(pipeline_name, str)
 
-        for field in ("config_path", "contract_config_path", "pipeline_code_owner"):
+        for field in (
+            "config_path",
+            "contract_config_path",
+            "pipeline_code_owner",
+            "published_artifact_path",
+            "registry_source_path",
+        ):
             rel_path = row.get(field)
             if not isinstance(rel_path, str) or not rel_path:
                 violations.append(f"{pipeline_name}: missing {field}")
@@ -58,6 +69,50 @@ def test_pipeline_config_contract_ownership_map_rows_reference_existing_artifact
                 violations.append(
                     f"{pipeline_name}: missing composite runtime config {composite_path}"
                 )
+
+    assert not violations, "\n".join(violations)
+
+
+@pytest.mark.architecture
+def test_pipeline_config_contract_ownership_map_has_full_gold_coverage() -> None:
+    """Gold-enabled rows must link config, registry, contract YAML, JSON, and schema."""
+    payload = _load_payload()
+    explicit_exclusions = payload.get("explicit_exclusions")
+    assert isinstance(explicit_exclusions, list)
+
+    violations: list[str] = []
+    for row in _load_rows():
+        pipeline_name = row.get("pipeline_name")
+        contract_ref = row.get("contract_ref")
+        gold_enabled = row.get("gold_enabled")
+        coverage_status = row.get("coverage_status")
+        registry_status = row.get("registry_status")
+        gold_schema_title = row.get("gold_schema_title")
+        registry_contract_version = row.get("registry_contract_version")
+
+        if gold_enabled is False:
+            reason = row.get("gold_exclusion_reason")
+            if not isinstance(reason, str) or not reason:
+                violations.append(
+                    f"{pipeline_name}: non-Gold exclusions require an explicit reason"
+                )
+            continue
+
+        if coverage_status != "covered":
+            violations.append(
+                f"{pipeline_name}: coverage_status={coverage_status!r} "
+                f"for {contract_ref!r}"
+            )
+        if registry_status != "active":
+            violations.append(
+                f"{pipeline_name}: registry_status={registry_status!r}"
+            )
+        if not isinstance(registry_contract_version, str) or not registry_contract_version:
+            violations.append(f"{pipeline_name}: missing registry_contract_version")
+        if not isinstance(gold_schema_title, str) or not gold_schema_title.endswith(
+            " Contract"
+        ):
+            violations.append(f"{pipeline_name}: missing Gold schema title")
 
     assert not violations, "\n".join(violations)
 

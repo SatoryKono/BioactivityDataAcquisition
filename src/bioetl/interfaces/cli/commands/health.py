@@ -71,6 +71,15 @@ def get_quarantine_service() -> QuarantineService:
     return _impl()
 
 
+def get_health_server_quarantine_service() -> QuarantineService:
+    """Load read-only quarantine service for health listener endpoints."""
+    from bioetl.composition.bootstrap.cli.health import (
+        bootstrap_health_server_quarantine_service,
+    )
+
+    return bootstrap_health_server_quarantine_service()
+
+
 def get_quarantine_runtime_service(pipeline: str) -> _QuarantineRuntimeService:
     """Load quarantine runtime service through the health composition seam."""
     from bioetl.composition.health_api import get_quarantine_runtime_service as _impl
@@ -187,7 +196,7 @@ async def _run_health_server(host: str, port: int) -> None:
     _start_health_observability()
     quarantine_service: QuarantineService | None = None
     try:
-        quarantine_service = get_quarantine_service()
+        quarantine_service = get_health_server_quarantine_service()
     except CLI_ENTRYPOINT_TYPED_ERRORS:
         # Why: Health probes must stay available even when quarantine storage
         # setup fails; explorer endpoints remain disabled in that case.

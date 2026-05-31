@@ -5,8 +5,8 @@ Tests bootstrap functions for HealthService and health server dependencies.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Mapping
 from unittest.mock import MagicMock, patch
 
 import pytest

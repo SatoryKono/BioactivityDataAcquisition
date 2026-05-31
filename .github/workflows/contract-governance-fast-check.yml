@@ -9,19 +9,33 @@ on:
     paths:
       - 'configs/base/contract_registry.yaml'
       - 'configs/contracts/**'
+      - 'configs/entities/**'
       - 'src/bioetl/domain/**/*contract*'
+      - 'reports/quality/contract-coverage-matrix.json'
+      - 'reports/quality/pipeline-config-contract-ownership-map.json'
+      - 'scripts/engineering/qa/report_contract_coverage_matrix.py'
+      - 'scripts/engineering/qa/report_pipeline_config_contract_ownership.py'
       - 'scripts/engineering/ci/validate_contract_*.py'
       - 'scripts/engineering/ci/validate_registry_dq_refs.py'
       - 'scripts/engineering/ci/validate_schema_classifier_gate.py'
+      - 'tests/architecture/test_contract_coverage_matrix_*.py'
+      - 'tests/architecture/test_pipeline_config_contract_ownership_map_*.py'
       - '.github/workflows/contract-governance-*.yml'
   pull_request:
     paths:
       - 'configs/base/contract_registry.yaml'
       - 'configs/contracts/**'
+      - 'configs/entities/**'
       - 'src/bioetl/domain/**/*contract*'
+      - 'reports/quality/contract-coverage-matrix.json'
+      - 'reports/quality/pipeline-config-contract-ownership-map.json'
+      - 'scripts/engineering/qa/report_contract_coverage_matrix.py'
+      - 'scripts/engineering/qa/report_pipeline_config_contract_ownership.py'
       - 'scripts/engineering/ci/validate_contract_*.py'
       - 'scripts/engineering/ci/validate_registry_dq_refs.py'
       - 'scripts/engineering/ci/validate_schema_classifier_gate.py'
+      - 'tests/architecture/test_contract_coverage_matrix_*.py'
+      - 'tests/architecture/test_pipeline_config_contract_ownership_map_*.py'
       - '.github/workflows/contract-governance-*.yml'
 
 env:
@@ -87,6 +101,38 @@ jobs:
             echo "registry_consistency_verdict=failed" >> $GITHUB_OUTPUT
           fi
 
+      - name: Run pipeline config contract ownership matrix check
+        id: ownership-map-check
+        run: |
+          echo "::group::Pipeline Config Contract Ownership Matrix"
+          set +e
+          uv run python -m scripts.engineering.qa report-pipeline-config-contract-ownership-map --check
+          OWNERSHIP_EXIT_CODE=$?
+          set -e
+          echo "::endgroup::"
+
+          if [ $OWNERSHIP_EXIT_CODE -eq 0 ]; then
+            echo "ownership_matrix_verdict=passed" >> $GITHUB_OUTPUT
+          else
+            echo "ownership_matrix_verdict=failed" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run contract coverage matrix check
+        id: coverage-matrix-check
+        run: |
+          echo "::group::Contract Coverage Matrix"
+          set +e
+          uv run python -m scripts.engineering.qa report-contract-coverage-matrix --check
+          COVERAGE_EXIT_CODE=$?
+          set -e
+          echo "::endgroup::"
+
+          if [ $COVERAGE_EXIT_CODE -eq 0 ]; then
+            echo "coverage_matrix_verdict=passed" >> $GITHUB_OUTPUT
+          else
+            echo "coverage_matrix_verdict=failed" >> $GITHUB_OUTPUT
+          fi
+
       - name: Run schema classifier governance gate
         id: classifier-check
         run: |
@@ -139,6 +185,14 @@ jobs:
             FAILED_CHECKS=$((FAILED_CHECKS + 1))
           fi
 
+          if [ "${{ steps.ownership-map-check.outputs.ownership_matrix_verdict }}" = "failed" ]; then
+            FAILED_CHECKS=$((FAILED_CHECKS + 1))
+          fi
+
+          if [ "${{ steps.coverage-matrix-check.outputs.coverage_matrix_verdict }}" = "failed" ]; then
+            FAILED_CHECKS=$((FAILED_CHECKS + 1))
+          fi
+
           if [ "${{ steps.classifier-check.outputs.classifier_verdict }}" = "failed" ]; then
             FAILED_CHECKS=$((FAILED_CHECKS + 1))
           fi
@@ -166,6 +220,8 @@ jobs:
           echo "::notice title=Contract Governance Fast Check::${{ steps.enforcement.outputs.enforcement_message }}"
           echo "Contract Identity: ${{ steps.identity-check.outputs.contract_identity_verdict }}"
           echo "Registry Consistency: ${{ steps.registry-check.outputs.registry_consistency_verdict }}"
+          echo "Ownership Matrix: ${{ steps.ownership-map-check.outputs.ownership_matrix_verdict }}"
+          echo "Coverage Matrix: ${{ steps.coverage-matrix-check.outputs.coverage_matrix_verdict }}"
           echo "Schema Classifier Gate: ${{ steps.classifier-check.outputs.classifier_verdict }}"
           echo "Registry↔DQ Refs: ${{ steps.registry-dq-check.outputs.registry_dq_verdict }}"
           echo "Failed Checks: ${{ steps.enforcement.outputs.failed_checks }}"
@@ -180,6 +236,8 @@ jobs:
             reports/quality/contract-registry-diagnostics.json
             reports/quality/contract-schema-classifier-diagnostics.json
             reports/quality/contract-registry-dq-diagnostics.json
+            reports/quality/contract-coverage-matrix.json
+            reports/quality/pipeline-config-contract-ownership-map.json
           retention-days: 30
 
       - name: Add to CI summary
@@ -192,6 +250,8 @@ jobs:
           ### Results
           - **Contract Identity**: ${{ steps.identity-check.outputs.contract_identity_verdict }}
           - **Registry Consistency**: ${{ steps.registry-check.outputs.registry_consistency_verdict }}
+          - **Ownership Matrix**: ${{ steps.ownership-map-check.outputs.ownership_matrix_verdict }}
+          - **Coverage Matrix**: ${{ steps.coverage-matrix-check.outputs.coverage_matrix_verdict }}
           - **Schema Classifier Gate**: ${{ steps.classifier-check.outputs.classifier_verdict }}
           - **Registry↔DQ Refs**: ${{ steps.registry-dq-check.outputs.registry_dq_verdict }}
           - **Failed Checks**: ${{ steps.enforcement.outputs.failed_checks }}
