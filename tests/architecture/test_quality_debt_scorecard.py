@@ -536,7 +536,7 @@ def test_debt_scorecard_declares_test_governance_debt_kpis() -> None:
     scorecard = load_debt_scorecard()
     governance = scorecard.get("test_governance_debt_metrics", {})
     assert isinstance(governance, dict)
-    assert governance.get("linked_issue") == "#4817"
+    assert governance.get("linked_issue") == "#4826"
     assert (
         governance.get("inventory_source")
         == "configs/quality/test_governance_audit.yaml"
@@ -561,7 +561,7 @@ def test_debt_scorecard_declares_test_governance_debt_kpis() -> None:
     assert isinstance(metric, dict)
     assert metric.get("current_count") == live_count
     assert metric.get("max_count") == budget_max
-    assert metric.get("target_count") == 54
+    assert metric.get("target_count") == 53
     assert live_count <= budget_max
     assert governance.get("owner") == "@bioetl-architecture"
     assert isinstance(metric.get("ratchet_policy"), str) and metric["ratchet_policy"]

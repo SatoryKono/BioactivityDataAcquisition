@@ -8,6 +8,7 @@ from bioetl.interfaces.http.control_plane_identity.extractors import (
     composite_run_identity,
     input_snapshot_fingerprint,
     input_snapshots,
+    normalize_checkpoint_metadata_payload,
 )
 from bioetl.interfaces.http.control_plane_identity.formatting import (
     format_full_value,
@@ -17,11 +18,19 @@ from bioetl.interfaces.http.control_plane_identity.formatting import (
 from bioetl.interfaces.http.control_plane_identity.specs import CHECKPOINT_ANCHORS
 
 
-def build_checkpoint_compare(manifest: RunManifest | None) -> dict[str, object]:
+def build_checkpoint_compare(
+    manifest: RunManifest | None,
+    *,
+    checkpoint_metadata: dict[str, object] | None = None,
+) -> dict[str, object]:
     if manifest is None:
         return {"status": "UNKNOWN", "rows": []}
     current = current_checkpoint_anchors(manifest)
-    checkpoint = checkpoint_anchor_payload(manifest)
+    checkpoint = (
+        normalize_checkpoint_metadata_payload(checkpoint_metadata)
+        if checkpoint_metadata is not None
+        else checkpoint_anchor_payload(manifest)
+    )
     if not checkpoint:
         return {
             "status": "MISSING",

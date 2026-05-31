@@ -4,14 +4,21 @@ from __future__ import annotations
 
 import asyncio
 import json
+from datetime import UTC, datetime
+from uuid import uuid4
 
 import pytest
 
+from bioetl.domain.control_plane import RunLedgerEntry
+from bioetl.domain.control_plane.run_ledger import ARTIFACT_PUBLISHED_EVENT
+from bioetl.domain.types import RunID
 from bioetl.interfaces.http import processed_records_table as processed_records_module
 from bioetl.interfaces.http.health_server import HealthServer
 from bioetl.interfaces.http.processed_records_table import (
     build_processed_records_table_payload,
+    build_processed_records_table_payload_from_ledger,
 )
+from tests.helpers.control_plane import InMemoryRunLedgerStore
 
 
 class TestProcessedRecordsTable:
@@ -217,6 +224,54 @@ class TestProcessedRecordsTable:
         assert all("No data" in str(row["value"]) for row in payload["rows"])
         assert all("No data" in str(row["percintage"]) for row in payload["rows"])
 
+    def test_exact_run_payload_uses_run_ledger_artifacts_as_source_of_truth(
+        self,
+    ) -> None:
+        """Exact-run Processed Records should not contradict published artifacts."""
+        run_id = RunID(uuid4())
+        occurred_at = datetime(2026, 5, 29, 17, 37, tzinfo=UTC)
+        payload = build_processed_records_table_payload_from_ledger(
+            pipeline="chembl_target",
+            run_type="backfill",
+            ledger_entries=(
+                RunLedgerEntry(
+                    entry_id="finished",
+                    manifest_id="manifest-chembl-target",
+                    run_id=run_id,
+                    event_type="run_finished",
+                    occurred_at=occurred_at,
+                    status="success",
+                    metrics_snapshot={
+                        "records_bronze": 1000,
+                        "records_silver": 993,
+                        "records_gold": 993,
+                        "records_quarantined": 7,
+                        "records_filtered_out": 0,
+                        "records_gold_excluded_by_contract": 0,
+                    },
+                ),
+                RunLedgerEntry(
+                    entry_id="gold-artifact",
+                    manifest_id="manifest-chembl-target",
+                    run_id=run_id,
+                    event_type=ARTIFACT_PUBLISHED_EVENT,
+                    occurred_at=occurred_at,
+                    stage="gold",
+                    status="published",
+                    details={"stage": "gold", "record_count": 993},
+                ),
+            ),
+        )
+
+        rows = {row["parameter"]: row for row in payload["rows"]}
+        assert rows["07 gold_written_records"]["value"] == (
+            "07 gold_written_records|  993"
+        )
+        assert rows["08 gold_excluded_by_contract_records"]["value"] == (
+            "08 gold_excluded_by_contract_records|    0"
+        )
+        assert rows["07 gold_written_records"]["row_status"] == ""
+
     @pytest.mark.asyncio
     async def test_observability_processed_records_endpoint_returns_rows(
         self, monkeypatch: pytest.MonkeyPatch
@@ -246,7 +301,7 @@ class TestProcessedRecordsTable:
             status_code, _, body = await self._send_request(
                 port,
                 "/ops/observability/processed-records?"
-                "pipeline=chembl_activity&run_type=backfill",
+                "pipeline=chembl_activity&run_type=backfill&run_id=-",
             )
         finally:
             await server.stop()
@@ -274,4 +329,64 @@ class TestProcessedRecordsTable:
         )
         assert rows["11 gold_deduplicated_records"]["value"] == (
             "11 gold_deduplicated_records|     0"
+        )
+
+    @pytest.mark.asyncio
+    async def test_observability_processed_records_endpoint_prefers_exact_run_ledger(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Exact run_id scopes should use RunLedger instead of current Prometheus rows."""
+        run_id = RunID(uuid4())
+        ledger_store = InMemoryRunLedgerStore()
+        ledger_store.append(
+            RunLedgerEntry(
+                entry_id="finished",
+                manifest_id="manifest-exact",
+                run_id=run_id,
+                event_type="run_finished",
+                occurred_at=datetime(2026, 5, 29, 17, 37, tzinfo=UTC),
+                status="success",
+                metrics_snapshot={
+                    "records_bronze": 1000,
+                    "records_silver": 993,
+                    "records_gold": 993,
+                    "records_quarantined": 7,
+                    "records_filtered_out": 0,
+                    "records_gold_excluded_by_contract": 0,
+                },
+            )
+        )
+
+        def fail_fetch(**_: object) -> dict[str, float | None]:
+            raise AssertionError("exact run_id must not query Prometheus")
+
+        monkeypatch.setattr(
+            processed_records_module, "fetch_processed_record_values", fail_fetch
+        )
+        server = HealthServer(
+            host="127.0.0.1",
+            port=0,
+            prometheus_base_url="http://prometheus.example",
+            run_ledger_port=ledger_store,
+        )
+        await server.start()
+        try:
+            port = self._get_server_port(server)
+            status_code, _, body = await self._send_request(
+                port,
+                "/ops/observability/processed-records?"
+                f"pipeline=chembl_target&run_type=backfill&run_id={run_id}",
+            )
+        finally:
+            await server.stop()
+
+        assert status_code == 200
+        data = json.loads(body)
+        rows = {row["parameter"]: row for row in data["rows"]}
+        assert rows["07 gold_written_records"]["value"] == (
+            "07 gold_written_records|  993"
+        )
+        assert rows["08 gold_excluded_by_contract_records"]["value"] == (
+            "08 gold_excluded_by_contract_records|    0"
         )

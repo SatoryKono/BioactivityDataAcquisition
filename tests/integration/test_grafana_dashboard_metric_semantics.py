@@ -435,6 +435,7 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
         assert "monitor provider telemetry freshness" in status_description
         assert "review raw provider health enum" in status_description
         assert "secondary context only" in status_description
+        assert not any("), max_over_time" in expr for expr in status_expressions)
     else:
         assert all("$__range" not in expr for expr in status_expressions)
         assert "current" in status_description
@@ -471,7 +472,7 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
     assert processed_target.get("url_options", {}).get("method") == "GET"
     assert processed_target.get("url") == (
         "/ops/observability/processed-records?"
-        "pipeline=${pipeline}&run_type=${run_type:csv}"
+        "pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
     )
     assert "accounting" in processed_description
     assert "evidence" in processed_description
@@ -772,7 +773,9 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
             "Inspect DQ Alert Conditions": "bioetl_runtime_alert_condition_dq_soft_threshold_15m",
             "Inspect Control-plane Alert Conditions": "bioetl_runtime_alert_condition_manifest_write_failed_15m",
             "Inspect Provider Alert Conditions": "bioetl_runtime_alert_condition_provider_failure_rate_high_15m",
-            "Inspect GLOBAL Provider Alert Conditions": "bioetl_runtime_alert_condition_provider_adapter_latency_high_30m",
+            "Inspect GLOBAL Provider Alert Conditions": (
+                "bioetl_runtime_alert_condition_provider_adapter_latency_high_30m"
+            ),
             "Track GLOBAL Shutdown Initiated by Reason / Interval": "round(",
             "Track GLOBAL Shutdown Completed by Reason / Interval": "round(",
         },
@@ -1693,14 +1696,15 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
         "type": "json",
         "url": (
             "/ops/observability/processed-records?"
-            "pipeline=${pipeline}&run_type=${run_type:csv}"
+            "pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
         ),
         "url_options": {"data": "", "method": "GET"},
         "expr": "",
     }
 
     processed_json = json.dumps(processed, sort_keys=True)
-    assert "run_id" not in processed_json
+    assert 'run_id="' not in processed_json
+    assert "run_id=~" not in processed_json
     assert "$__range" not in processed_json
     assert "or vector(0)" not in processed_json
     assert "__zero" not in processed_json

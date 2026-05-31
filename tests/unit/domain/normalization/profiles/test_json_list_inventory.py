@@ -27,7 +27,13 @@ def _requires_structured_classification(field_name: str) -> bool:
 
 def _is_structured_field_classified(rule: FieldRule) -> bool:
     notes = (rule.notes or "").lower()
-    return rule.set_like or "json" in notes or "ontology" in notes
+    return (
+        rule.set_like
+        or "json" in notes
+        or "ontology" in notes
+        or "list-like" in notes
+        or "pipe-delimited list" in notes
+    )
 
 
 def test_json_list_like_profile_fields_are_explicitly_classified() -> None:

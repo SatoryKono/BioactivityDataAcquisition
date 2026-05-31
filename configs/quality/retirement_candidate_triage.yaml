@@ -114,6 +114,22 @@ repo_wide_zero_import_classification:
     linked_issue: '#4541'
     rationale: Manifest diagnostics identity helpers remain the canonical owner module
       behind control-plane diagnostics assembly.
+  - module_path: src/bioetl/application/services/control_plane/run_manifest_inspection_models.py
+    module_name: bioetl.application.services.control_plane.run_manifest_inspection_models
+    disposition: retain_compat_shim
+    reviewed_on: '2026-05-31'
+    review_by: '2026-08-29'
+    linked_issue: '#4541'
+    rationale: Compatibility shim retains the legacy public import seam for run-manifest
+      inspection result models after ownership moved to `bioetl.application.services.control_plane.manifest.inspection_models`.
+  - module_path: src/bioetl/application/services/control_plane/run_manifest_models.py
+    module_name: bioetl.application.services.control_plane.run_manifest_models
+    disposition: retain_compat_shim
+    reviewed_on: '2026-05-31'
+    review_by: '2026-08-29'
+    linked_issue: '#4541'
+    rationale: Compatibility shim retains the legacy public import seam for run-manifest
+      create-spec models after ownership moved to `bioetl.application.services.control_plane.manifest.models`.
   - module_path: src/bioetl/composition/bootstrap/cli/adr.py
     module_name: bioetl.composition.bootstrap.cli.adr
     disposition: retain_dynamic_entrypoint

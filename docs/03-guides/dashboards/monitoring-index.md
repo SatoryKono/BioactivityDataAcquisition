@@ -41,10 +41,11 @@ Primary dashboards `0..5` share the Overview-derived context shell
 HTTP identity context, is preserved between primary dashboards, and must not
 become a Prometheus label.
 `Processed Records` is the shared compact Bronze/Silver/Gold stage/outcome
-accounting table from `/ops/observability/processed-records`, backed by
-`bioetl_processed_records_*` recording rules with `value` and formatted
-`percintage` columns, including zero-valued outcome rows and not acting as a
-`$__range` throughput summary.
+accounting table from `/ops/observability/processed-records`. Exact `$run_id`
+scopes resolve from RunLedger artifact/metrics evidence; aggregate scopes are
+backed by `bioetl_processed_records_*` recording rules with `value` and
+formatted `percintage` columns, including zero-valued outcome rows and not
+acting as a `$__range` throughput summary.
 
 For `0. Control Plane`, exact identity graph evidence is available in the
 collapsed `Identity evidence and remaining replay-safety signals` row. Those

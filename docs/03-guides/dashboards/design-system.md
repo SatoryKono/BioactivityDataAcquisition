@@ -230,6 +230,8 @@ Normative rules:
   accounting series do not count as zero.
 - `Processed Records` current reconciliation MUST NOT use `$__range`,
   `or vector(0)`, or `run_id`/manifest/raw payload labels in Prometheus.
+  Exact-run HTTP reads MAY pass `$run_id` to resolve rows from RunLedger source
+  of truth; that selector must not become a Prometheus label.
 - Provider Health keeps `$provider` as the primary current-status selector even
   though the shared shell also exposes `$pipeline` and `$run_type`.
 - Workflow keeps `$status`, `$step_status`, and `$step_kind` as workflow-local

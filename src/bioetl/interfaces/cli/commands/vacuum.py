@@ -43,15 +43,19 @@ _VACUUM_ALL_INTERRUPTED_MESSAGE = "Maintenance vacuum-all interrupted by user (C
 
 
 def get_lifecycle_service() -> MedallionLifecycleService:
-    """Load the lifecycle service through composition on demand."""
-    from bioetl.composition.maintenance_api import get_lifecycle_service as _impl
+    """Load the lifecycle service through the maintenance command seam."""
+    from bioetl.interfaces.cli.commands.maintenance import (
+        get_lifecycle_service as _impl,
+    )
 
     return _impl()
 
 
 def get_vacuum_service() -> VacuumService:
-    """Load the vacuum service through composition on demand."""
-    from bioetl.composition.maintenance_api import get_vacuum_service as _impl
+    """Load the vacuum service through the maintenance command seam."""
+    from bioetl.interfaces.cli.commands.maintenance import (
+        get_vacuum_service as _impl,
+    )
 
     return _impl()
 

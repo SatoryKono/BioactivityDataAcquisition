@@ -628,6 +628,7 @@ class TestHealthServerControlPlaneSelector:
             run_id_1,
             {
                 "manifest_id": "manifest-1",
+                "execution_fingerprint": "fingerprint-1",
                 "checkpoint_saved_at_epoch_seconds": (
                     now - timedelta(hours=1)
                 ).timestamp(),
@@ -1001,7 +1002,7 @@ class TestHealthServerControlPlaneSelector:
         )
         assert rows["Resume|Dry run|Cached Bronze"] == "No | No | No"
         assert rows["Replay [Capability.Mode]"] == "Yes [Supported.Backfill]"
-        assert rows["Checkpoint [Anchors]"] == "OK"
+        assert rows["Checkpoint [Anchors]"] == "PARTIAL"
         assert rows["Identity Health [Gaps]"] == "Complete [0 gaps]"
 
     @pytest.mark.asyncio(loop_scope="module")
@@ -1105,6 +1106,7 @@ class TestHealthServerControlPlaneSelector:
         assert rows["Execution [Type|Context|Git]"] == (
             "incremental | isolated | git=abc1234"
         )
+        assert rows["Checkpoint [Anchors]"] == "OK"
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_table_supports_all_pipeline_with_selected_run_id(

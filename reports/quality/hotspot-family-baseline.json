@@ -66,9 +66,9 @@
       ],
       "duplication_clusters": 0,
       "files": 31,
-      "total_loc": 4510,
+      "total_loc": 4517,
       "files_ge_250_loc": 4,
-      "helper_function_ratio": 0.47,
+      "helper_function_ratio": 0.474,
       "max_internal_fan_in": 4,
       "max_internal_fan_in_module": "bioetl.composition.factories.pipeline.construction_types",
       "bounded_growth_budgets": {

@@ -1,4 +1,4 @@
-"""Shared input-snapshot payload builders for run-manifest services."""
+"""Canonical input-snapshot payload builders owned by the manifest package."""
 
 from __future__ import annotations
 
@@ -8,7 +8,6 @@ from bioetl.domain.control_plane import RunInputSnapshotRef, RunManifest, RunSou
 
 
 def serialize_snapshot_captured_at(value: datetime | None) -> str | None:
-    """Return the stable diagnostics representation for snapshot timestamps."""
     return value.isoformat() if value is not None else None
 
 
@@ -17,7 +16,6 @@ def input_snapshot_payload(
     *,
     serialize_captured_at: bool,
 ) -> dict[str, object]:
-    """Return the canonical primitive payload for one input snapshot."""
     captured_at: datetime | str | None = snapshot.captured_at
     if serialize_captured_at:
         captured_at = serialize_snapshot_captured_at(snapshot.captured_at)
@@ -37,7 +35,6 @@ def input_snapshot_payload(
 
 
 def source_ref_payload(source_ref: RunSourceRef) -> dict[str, object]:
-    """Return the manifest payload shape for one source reference."""
     return {
         "provider": source_ref.provider,
         "entity": source_ref.entity,
@@ -53,14 +50,12 @@ def source_ref_payload(source_ref: RunSourceRef) -> dict[str, object]:
 def source_refs_payload(
     source_refs: tuple[RunSourceRef, ...],
 ) -> list[dict[str, object]]:
-    """Return the manifest payload shape for all source references."""
     return [source_ref_payload(source_ref) for source_ref in source_refs]
 
 
 def manifest_input_snapshot_trace_refs(
     manifest: RunManifest,
 ) -> list[dict[str, object]]:
-    """Return deterministic flattened snapshot provenance from manifest source refs."""
     refs: list[dict[str, object]] = []
     for source_ref in manifest.source_refs:
         for snapshot in source_ref.input_snapshots:

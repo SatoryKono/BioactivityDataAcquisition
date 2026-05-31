@@ -191,6 +191,22 @@ async def handle_control_plane_identity_table(
     """Handle control-plane-backed identity rows for Overview v3."""
     assert host._run_manifest_port is not None
     scope = resolve_control_plane_identity_scope(host, query)
+    checkpoint_metadata: dict[str, object] | None = None
+    target_pipeline = (
+        scope.resolved_manifest.pipeline_name
+        if scope.resolved_manifest is not None
+        else scope.requested_pipeline
+    )
+    if host._checkpoint_port is not None:
+        checkpoint_tuple, _, _, aggregate_scope_unknown = (
+            await load_checkpoint_freshness_evidence(
+                host,
+                scope=scope,
+                target_pipeline=target_pipeline,
+            )
+        )
+        if not aggregate_scope_unknown and checkpoint_tuple is not None:
+            _, checkpoint_metadata = checkpoint_tuple
 
     await host._send_payload_response(
         writer,
@@ -202,6 +218,7 @@ async def handle_control_plane_identity_table(
             selected_run_id=scope.selected_run_id,
             selected_run_types=scope.selected_run_types,
             resolved_via=scope.resolved_via,
+            checkpoint_metadata=checkpoint_metadata,
         ),
     )
 

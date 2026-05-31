@@ -1,8 +1,8 @@
-"""Identity graph assembly for run-manifest inspection output."""
+"""Canonical identity graph assembly for run-manifest inspection output."""
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane._run_manifest_execution_identity_support import (
+from bioetl.application.services.control_plane.manifest.execution_identity_support import (
     build_contract_identity_anchor_fields,
     build_execution_identity_payload_from_code_provenance,
 )

@@ -2941,7 +2941,7 @@
           "root_selector": "rows",
           "source": "url",
           "type": "json",
-          "url": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}",
+          "url": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
           "url_options": {
             "data": "",
             "method": "GET"

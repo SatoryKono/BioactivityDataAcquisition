@@ -58,7 +58,7 @@ def _read_env(name: str, default: str) -> str:
 
 
 def _auth_header(username: str, password: str) -> str:
-    token = base64.b64encode(f"{username}:{password}".encode("utf-8")).decode("ascii")
+    token = base64.b64encode(f"{username}:{password}".encode()).decode("ascii")
     return f"Basic {token}"
 
 
@@ -134,7 +134,7 @@ def _render_failure_hint(config: RenderConfig) -> str:
             "grafana-image-renderer health and, if needed, use the Playwright "
             "fallback after installing project-local playwright dependencies."
         )
-    except (HTTPError, URLError, json.JSONDecodeError, RuntimeError):
+    except (URLError, json.JSONDecodeError, RuntimeError):
         return (
             "Grafana render API failed. Verify grafana-image-renderer health and, "
             "if needed, use the Playwright fallback after installing project-local "
@@ -314,9 +314,17 @@ def _write_manifest(
     manifest = {
         "generated_at": datetime.now(tz=UTC).isoformat(),
         "base_url": config.base_url,
+        "engine": "grafana-render-api",
         "width": config.width,
         "height": config.height,
         "selected_uids": list(config.selected_uids),
+        "scope": {
+            "workflow": config.workflow,
+            "pipeline": config.pipeline,
+            "run_type": config.run_type,
+            "run_id": config.run_id,
+            "range_hours": config.range_hours,
+        },
         "dashboards": [
             {
                 **asdict(record),

@@ -70,12 +70,14 @@ Grafana dashboards в BioETL.
 - Shared `Provenance` / `Status` / `ID` / `Processed Records` panels use ids
   `9400..9403` on primary dashboards outside Overview. `Status` is
   role-specific; `Processed Records` is current compact Bronze/Silver/Gold
-  stage/outcome accounting evidence from `/ops/observability/processed-records`,
-  backed by `bioetl_processed_records_*` recording rules with `value` and
-  formatted `percintage` columns. It includes zero-valued outcome rows and
-  intentionally omits status, accounted subtotal, and delta rows; it never
-  introduces `run_id` Prometheus labels and never replaces the
-  dashboard-specific `Status` / `First Action` decision path.
+  stage/outcome accounting evidence from `/ops/observability/processed-records`.
+  When `$run_id` is selected, the HTTP endpoint resolves exact-run rows from
+  RunLedger artifact/metrics evidence; otherwise it falls back to
+  `bioetl_processed_records_*` recording rules with `value` and formatted
+  `percintage` columns. It includes zero-valued outcome rows and intentionally
+  omits status, accounted subtotal, and delta rows; it never introduces
+  `run_id` Prometheus labels and never replaces the dashboard-specific
+  `Status` / `First Action` decision path.
 
 Если правка меняет эту модель, синхронизируй docs в том же change set.
 

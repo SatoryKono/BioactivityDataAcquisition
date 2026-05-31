@@ -44,8 +44,8 @@ _CLEANUP_PREVIEW_INTERRUPTED_MESSAGE = (
 
 
 def get_bronze_cleanup_service() -> BronzeCleanupService:
-    """Load the bronze cleanup service through composition on demand."""
-    from bioetl.composition.maintenance_api import (
+    """Load the bronze cleanup service through the maintenance command seam."""
+    from bioetl.interfaces.cli.commands.maintenance import (
         get_bronze_cleanup_service as _impl,
     )
 
@@ -53,8 +53,8 @@ def get_bronze_cleanup_service() -> BronzeCleanupService:
 
 
 async def preview_pipeline_cleanup(pipeline: str) -> CleanupPreview:
-    """Preview pipeline cleanup scope through composition on demand."""
-    from bioetl.composition.maintenance_api import preview_cleanup as _impl
+    """Preview pipeline cleanup scope through the maintenance command seam."""
+    from bioetl.interfaces.cli.commands.maintenance import preview_cleanup as _impl
 
     impl = cast("Callable[[str], Awaitable[CleanupPreview]]", _impl)
     return await impl(pipeline)

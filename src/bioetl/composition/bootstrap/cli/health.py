@@ -8,18 +8,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.composition.bootstrap.assembly.health_service import (
+from bioetl.composition.bootstrap.assembly.health_server import (
     HealthServerDependencies,
     create_health_server_dependencies,
-    create_health_service,
 )
 from bioetl.composition.bootstrap.assembly.checkpoint import (
     bootstrap_checkpoint_adapter,
 )
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
-from bioetl.composition.bootstrap.cli.run_manifest import (
-    bootstrap_run_manifest_service,
-)
 from bioetl.composition.runtime_builders.config_access import get_settings
 
 if TYPE_CHECKING:
@@ -30,6 +26,15 @@ __all__ = [
     "bootstrap_health_server_dependencies",
     "bootstrap_health_service",
 ]
+
+
+def create_health_service(*args: object, **kwargs: object) -> HealthService:
+    """Delegate health-service assembly lazily to avoid server startup fan-out."""
+    from bioetl.composition.bootstrap.assembly.health_service import (
+        create_health_service as _create_health_service,
+    )
+
+    return _create_health_service(*args, **kwargs)
 
 
 def bootstrap_health_service() -> HealthService:
@@ -60,7 +65,7 @@ def bootstrap_health_server_dependencies() -> HealthServerDependencies:
 
     Creates and wires up:
     - PrometheusMetrics for observability
-    - ProviderHealthMonitor for health state tracking
+    - a read-only health monitor for provider status endpoints
 
     The actual HealthServer is created in the interfaces layer
     to maintain proper layer separation (composition cannot import interfaces).
@@ -76,5 +81,4 @@ def bootstrap_health_server_dependencies() -> HealthServerDependencies:
     """
     return create_health_server_dependencies(
         checkpoint_port_factory=bootstrap_checkpoint_adapter,
-        run_manifest_service_factory=bootstrap_run_manifest_service,
     )

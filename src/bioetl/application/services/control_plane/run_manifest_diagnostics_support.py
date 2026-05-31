@@ -57,7 +57,7 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_summary
 from bioetl.application.services.control_plane._run_manifest_replay_family_contract_payload import (
     build_replay_family_contract_payload,
 )
-from bioetl.application.services.control_plane._run_manifest_snapshot_payloads import (
+from bioetl.application.services.control_plane.manifest.snapshot_payloads import (
     input_snapshot_payload,
     manifest_input_snapshot_trace_refs,
     serialize_snapshot_captured_at,

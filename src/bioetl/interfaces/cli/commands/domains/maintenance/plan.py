@@ -29,8 +29,8 @@ _NONE_LINE = "  none"
 
 
 def get_contract_migration_service() -> ContractMigrationService:
-    """Load the contract migration service through composition on demand."""
-    from bioetl.composition.maintenance_api import (
+    """Load the contract migration service through the maintenance command seam."""
+    from bioetl.interfaces.cli.commands.maintenance import (
         get_contract_migration_service as _impl,
     )
 

@@ -167,7 +167,7 @@ def test_static_test_governance_report_stays_within_committed_budgets() -> None:
 
 @pytest.mark.architecture
 def test_compatibility_test_file_max_follows_stream_g_downward_ratchet() -> None:
-    """#4817: compatibility_test_file_max may only ratchet down to the live inventory."""
+    """#4826: compatibility_test_file_max may only ratchet down to the live inventory."""
     payload = _load_yaml(CONFIG_PATH)
     report = collect_test_governance_report(ROOT)
     budgets = cast(YamlMap, payload["budgets"])
@@ -175,16 +175,16 @@ def test_compatibility_test_file_max_follows_stream_g_downward_ratchet() -> None
 
     live_count = int(report["compatibility_test_files"])
     budget_max = int(budgets["compatibility_test_file_max"])
-    target_count = 54
+    target_count = 53
 
     owner_notes = cast(list[YamlMap], ratchet.get("stream_g_owner_notes", []))
-    issue_notes = [note for note in owner_notes if note.get("issue") == "#4817"]
-    assert issue_notes, "Stream G owner note for #4817 must be recorded"
+    issue_notes = [note for note in owner_notes if note.get("issue") == "#4826"]
+    assert issue_notes, "Stream G owner note for #4826 must be recorded"
 
     assert live_count <= budget_max
     if live_count <= target_count:
         assert budget_max == target_count, (
-            "compatibility_test_file_max must ratchet down to 54 when live inventory "
+            "compatibility_test_file_max must ratchet down to 53 when live inventory "
             f"is at or below target; live={live_count}, budget={budget_max}"
         )
     else:

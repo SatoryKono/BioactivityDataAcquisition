@@ -236,6 +236,7 @@ ______________________________________________________________________
 | **Content Hash** | SHA256 hash for record deduplication       | `sha256(provider + canonical-json)`  | `checksum`, `version-id`      |
 | **Run ID**       | UUID identifying a pipeline run            | `UUID`                               | `execution-id`, `job-id`      |
 | **Batch ID**     | UUID identifying a batch within a run      | `UUID`                               | `chunk-id`                    |
+| **HGNC ID**      | HUGO Gene Nomenclature Committee identifier retained from ChEMBL target cross-references | `HGNC:6008` or provider-supplied numeric token | `gene-symbol`, `hgnc-symbol` |
 
 ### Canonical Semantic Field Clusters
 

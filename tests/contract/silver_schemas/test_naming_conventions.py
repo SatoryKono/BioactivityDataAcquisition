@@ -84,6 +84,7 @@ class TestFieldNaming:
         - issn: international standard serial number
         - ec: enzyme commission
         - go: gene ontology
+        - hgnc: HUGO Gene Nomenclature Committee
         - pdb: protein data bank
         - molecule_id: compound identifier (PubChem)
         - bao: BioAssay Ontology
@@ -104,6 +105,7 @@ class TestFieldNaming:
             "issn",
             "ec",
             "go",
+            "hgnc",
             "pdb",
             "molecule_id",
             "bao",

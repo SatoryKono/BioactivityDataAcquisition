@@ -5,7 +5,7 @@ Tests for NewType definitions and TypeAlias exports.
 
 from __future__ import annotations
 
-from uuid import UUID, uuid4
+from uuid import UUID
 
 import pytest
 
@@ -17,14 +17,16 @@ from bioetl.domain.types.identifiers import (
     SilverRecord,
 )
 
+RUN_ID_VALUE = UUID("00000000-0000-4000-8000-000000000001")
+BATCH_ID_VALUE = UUID("00000000-0000-4000-8000-000000000002")
+
 
 @pytest.mark.unit
 class TestNewTypeIdentifiers:
     """Tests for NewType-based identifiers."""
 
     def test_run_id_wraps_uuid(self) -> None:
-        uid = uuid4()
-        run_id = RunID(uid)
+        run_id = RunID(RUN_ID_VALUE)
         assert isinstance(run_id, UUID)
 
     def test_entity_id_wraps_str(self) -> None:
@@ -37,8 +39,7 @@ class TestNewTypeIdentifiers:
         assert isinstance(ch, str)
 
     def test_batch_id_wraps_uuid(self) -> None:
-        uid = uuid4()
-        bid = BatchID(uid)
+        bid = BatchID(BATCH_ID_VALUE)
         assert isinstance(bid, UUID)
 
 

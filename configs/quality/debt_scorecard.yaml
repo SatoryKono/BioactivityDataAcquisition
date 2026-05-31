@@ -786,16 +786,16 @@ expiry_decomposition_targets:
 test_governance_debt_metrics:
   inventory_source: configs/quality/test_governance_audit.yaml
   owner: '@bioetl-architecture'
-  linked_issue: '#4817'
+  linked_issue: '#4826'
   metrics:
     compatibility_test_file_count:
-      current_count: 54
-      max_count: 54
-      target_count: 54
-      ratchet_policy: Downward ratchet only; keep max_count at 54 unless a future
+      current_count: 53
+      max_count: 53
+      target_count: 53
+      ratchet_policy: Downward ratchet only; keep max_count at 53 unless a future
         owner-approved reduction lowers the live compatibility test inventory.
-      rationale: Stream G ratchet review on 2026-05-31 reclassified two public runtime
-        API re-export tests out of compatibility filename inventory, lowering the
+      rationale: TDX-012 review on 2026-05-31 reclassified the lazy export public
+        API inventory test out of compatibility filename inventory, lowering the
         live count to the target threshold.
 program_done_criteria:
   deadline_quarter: 2027-Q1
