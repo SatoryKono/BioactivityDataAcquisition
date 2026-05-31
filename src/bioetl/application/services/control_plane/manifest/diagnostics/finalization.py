@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane._run_manifest_diagnostics_helpers import (
+    DQDetailsSummary,
     build_dq_details_summary,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
@@ -30,7 +31,6 @@ from bioetl.application.services.control_plane.run_manifest_reproducibility_scor
 if TYPE_CHECKING:
     from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 
-
 @dataclass(frozen=True, slots=True)
 class _LedgerEnrichedSummary:
     """Base summary after ledger-derived enrichment has been applied."""
@@ -46,17 +46,7 @@ class _ProcessedLedgerDiagnostics:
     type_counter: object
     artifact_refs: object
     lineage_fragment_ids: object
-    dq_rule_ids: object
-    dq_dispositions: object
-    dq_report_paths: object
-    dq_violation_kinds: object
-    cross_validation_rule_ids: object
-    cross_validation_config_paths: object
-    cross_validation_quarantine_policies: object
-    cross_validation_replay_contracts: object
-    occurrence_only_diagnostic_scopes: object
-    dq_signal_present: bool
-    cross_validation_signal_present: bool
+    dq_details: DQDetailsSummary
     missing_link_count: int
     correlation_anchor_gaps: object
     resume_diagnostics: object
@@ -148,17 +138,23 @@ def _process_ledger_diagnostics(
         type_counter=type_counter,
         artifact_refs=artifact_refs,
         lineage_fragment_ids=lineage_fragment_ids,
-        dq_rule_ids=dq_rule_ids,
-        dq_dispositions=dq_dispositions,
-        dq_report_paths=dq_report_paths,
-        dq_violation_kinds=dq_violation_kinds,
-        cross_validation_rule_ids=cross_validation_rule_ids,
-        cross_validation_config_paths=cross_validation_config_paths,
-        cross_validation_quarantine_policies=cross_validation_quarantine_policies,
-        cross_validation_replay_contracts=cross_validation_replay_contracts,
-        occurrence_only_diagnostic_scopes=occurrence_only_diagnostic_scopes,
-        dq_signal_present=dq_signal_present,
-        cross_validation_signal_present=cross_validation_signal_present,
+        dq_details=build_dq_details_summary(
+            rule_ids=dq_rule_ids,
+            dispositions=dq_dispositions,
+            report_paths=dq_report_paths,
+            violation_kinds=dq_violation_kinds,
+            cross_validation_rule_ids=cross_validation_rule_ids,
+            cross_validation_config_paths=cross_validation_config_paths,
+            cross_validation_quarantine_policies=(
+                cross_validation_quarantine_policies
+            ),
+            cross_validation_replay_contracts=cross_validation_replay_contracts,
+            occurrence_only_diagnostic_scopes=(
+                occurrence_only_diagnostic_scopes
+            ),
+            has_signal=dq_signal_present,
+            has_cross_validation_signal=cross_validation_signal_present,
+        ),
         missing_link_count=missing_link_count,
         correlation_anchor_gaps=correlation_anchor_gaps,
         resume_diagnostics=resume_diagnostics,
@@ -189,29 +185,7 @@ def build_final_diagnostics_summary(
             type_counter=processed_ledger.type_counter,
             artifact_refs=processed_ledger.artifact_refs,
             lineage_fragment_ids=processed_ledger.lineage_fragment_ids,
-            dq_details=build_dq_details_summary(
-                rule_ids=processed_ledger.dq_rule_ids,
-                dispositions=processed_ledger.dq_dispositions,
-                report_paths=processed_ledger.dq_report_paths,
-                violation_kinds=processed_ledger.dq_violation_kinds,
-                cross_validation_rule_ids=processed_ledger.cross_validation_rule_ids,
-                cross_validation_config_paths=(
-                    processed_ledger.cross_validation_config_paths
-                ),
-                cross_validation_quarantine_policies=(
-                    processed_ledger.cross_validation_quarantine_policies
-                ),
-                cross_validation_replay_contracts=(
-                    processed_ledger.cross_validation_replay_contracts
-                ),
-                occurrence_only_diagnostic_scopes=(
-                    processed_ledger.occurrence_only_diagnostic_scopes
-                ),
-                has_signal=processed_ledger.dq_signal_present,
-                has_cross_validation_signal=(
-                    processed_ledger.cross_validation_signal_present
-                ),
-            ),
+            dq_details=processed_ledger.dq_details,
             missing_link_count=processed_ledger.missing_link_count,
             correlation_anchor_gaps=processed_ledger.correlation_anchor_gaps,
             resume_diagnostics=processed_ledger.resume_diagnostics,

@@ -595,8 +595,10 @@ pipelines:
         - target_xref_go_component
         - target_xref_go_function
         - target_xref_go_process
+        - target_xref_hgnc_ids
         - target_xref_pdb_ids
         - target_xref_reactome_ids
+        - target_xref_uniprot_ids
         business_only:
         - target_type
       columns:

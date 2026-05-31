@@ -285,6 +285,29 @@ class TestChemblSchemas:
 
         TargetSchema.validate(pd.DataFrame([record]))
 
+    def test_target_schema_accepts_derived_xref_fields(
+        self,
+        base_etl_fields: dict[str, object],
+    ) -> None:
+        """Target schema should include derived target xref projections."""
+        record = {
+            **base_etl_fields,
+            "target_id": "CHEMBL1862",
+            "target_type": "SINGLE PROTEIN",
+            "pref_name": "Cyclooxygenase-2",
+            "organism": "Homo sapiens",
+            "species_group_flag": False,
+            "target_xref_pdb_ids": "1ABC",
+            "target_xref_go_component": "plasma membrane",
+            "target_xref_go_function": "dopamine receptor activity",
+            "target_xref_go_process": "dopamine receptor signaling pathway",
+            "target_xref_hgnc_ids": "HGNC:6008",
+            "target_xref_reactome_ids": "R-HSA-5673001",
+            "target_xref_uniprot_ids": "P01589",
+        }
+
+        TargetSchema.validate(pd.DataFrame([record]))
+
     @pytest.mark.parametrize(
         ("field_name", "invalid_value"),
         [

@@ -22,6 +22,9 @@ from bioetl.composition.runtime_builders._effective_config_artifact_builder_supp
 from bioetl.composition.runtime_builders._effective_config_artifact_builder_support import (
     build_runtime_overrides_snapshot as _build_runtime_overrides_snapshot,
 )
+from bioetl.composition.runtime_builders._manifest_publication_context_support import (
+    ResolvedManifestPublicationContext,
+)
 from bioetl.composition.runtime_builders.effective_config_artifact_builder import (
     create_and_persist_composite_effective_config_artifact,
     create_and_persist_effective_config_artifact,
@@ -821,10 +824,12 @@ def test_create_and_persist_effective_config_artifact_uses_supplied_publication_
         _fake_payload,
     )
     monkeypatch.setattr(
-        "bioetl.composition.runtime_builders.effective_config_artifact_builder.ensure_manifest_publication_identity",
-        lambda **kwargs: (
-            kwargs["reproducibility_context"],
-            kwargs["contract_identity"],
+        "bioetl.composition.runtime_builders.effective_config_artifact_builder.resolve_manifest_publication_context",
+        lambda *args: ResolvedManifestPublicationContext(
+            provider="chembl",
+            entity="activity",
+            reproducibility_context=args[2],
+            contract_identity=args[3],
         ),
     )
 

@@ -10,6 +10,8 @@ from bioetl.application.services.control_plane.ledger.service import (
 )
 from bioetl.composition.runtime_builders._manifest_publication_context_support import (
     ResolvedManifestPublicationContext,
+    build_manifest_publication_identity_kwargs,
+    resolve_manifest_publication_identity,
     resolve_manifest_publication_context,
 )
 from bioetl.composition.runtime_builders._run_manifest_creation_support import (
@@ -88,10 +90,7 @@ def create_run_manifest(
         _manifest_support.resolve_run_context_values(ctx)
     )
     manifest_context = resolve_manifest_publication_context(
-        ctx=ctx,
-        inputs=inputs,
-        reproducibility_context=reproducibility_context,
-        contract_identity=contract_identity,
+        ctx, inputs, reproducibility_context, contract_identity
     )
     validate_manifest_persistence_requirements(
         yaml_config=inputs.yaml_config,
@@ -174,13 +173,14 @@ def _build_manifest_create_request(
     provenance: RunManifestProvenanceBundle,
     contract_identity: _manifest_support.RunManifestContractIdentity,
 ) -> object:
+    reproducibility_context, contract_identity = resolve_manifest_publication_identity(
+        ctx, inputs, provider, entity, reproducibility_context, contract_identity
+    )
     return build_manifest_create_request(
         _RunManifestCreateRequestInputs(
-            ctx=ctx,
-            inputs=inputs,
-            provider=provider,
-            entity=entity,
-            reproducibility_context=reproducibility_context,
+            **build_manifest_publication_identity_kwargs(
+                ctx, inputs, provider, entity, reproducibility_context
+            ),
             run_type_value=run_type_value,
             execution_context_value=execution_context_value,
             config_hash=_manifest_support.legacy_config_hash_from_resolved_config_hash(

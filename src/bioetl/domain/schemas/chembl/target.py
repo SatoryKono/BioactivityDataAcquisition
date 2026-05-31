@@ -97,9 +97,17 @@ class TargetSchema(ETLRecordSchema):
         nullable=True,
         description="Pipe-delimited GO biological process xref names or unknown.",
     )
+    target_xref_hgnc_ids: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Pipe-delimited HGNC xref IDs or unknown.",
+    )
     target_xref_reactome_ids: Series[str] | None = pa.Field(
         nullable=True,
         description="Pipe-delimited Reactome xref IDs or unknown.",
+    )
+    target_xref_uniprot_ids: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Pipe-delimited UniProt xref IDs or unknown.",
     )
 
     # === Flattened Component Fields (JSON Arrays) ===

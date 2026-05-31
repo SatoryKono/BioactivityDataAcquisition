@@ -15,11 +15,11 @@
       "path_prefixes": [
         "src/bioetl/application/core/"
       ],
-      "duplication_clusters": null,
+      "duplication_clusters": 0,
       "files": 174,
-      "total_loc": 21643,
+      "total_loc": 21607,
       "files_ge_250_loc": 12,
-      "helper_function_ratio": 0.374,
+      "helper_function_ratio": 0.375,
       "max_internal_fan_in": 14,
       "max_internal_fan_in_module": "bioetl.application.core.batch_runtime_failure_policy",
       "bounded_growth_budgets": {
@@ -40,7 +40,7 @@
       "path_prefixes": [
         "src/bioetl/composition/bootstrap/runtime/"
       ],
-      "duplication_clusters": null,
+      "duplication_clusters": 0,
       "files": 44,
       "total_loc": 5758,
       "files_ge_250_loc": 3,
@@ -64,7 +64,7 @@
       "path_prefixes": [
         "src/bioetl/composition/factories/pipeline/"
       ],
-      "duplication_clusters": null,
+      "duplication_clusters": 0,
       "files": 31,
       "total_loc": 4510,
       "files_ge_250_loc": 4,

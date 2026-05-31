@@ -8,6 +8,7 @@ __all__ = [
     "_TargetEntityFetchDelegationMixin",
 ]
 
+from functools import partial
 from typing import TYPE_CHECKING, Protocol, TypeVar, cast
 
 from bioetl.application.core._target_data_source_fetch_support import (
@@ -55,21 +56,11 @@ class _TargetEntityFetchDelegationMixin:
         return yield_target_or_delegate_records(
             entity_type=entity_type,
             target_entity_type=self.TARGET_ENTITY_TYPE,
-            target_factory=lambda: self._fetch_target_records(
-                limit,
-                query,
-                filter_ids,
-                filter_field,
-                offset,
+            target_factory=partial(
+                self._fetch_target_records, limit, query, filter_ids, filter_field, offset
             ),
             delegate_factory=lambda: yield_wrapped_fetch_records(
-                self._data_source,
-                entity_type=entity_type,
-                limit=limit,
-                query=query,
-                filter_ids=filter_ids,
-                filter_field=filter_field,
-                offset=offset,
+                self._data_source, entity_type, limit, query, filter_ids, filter_field, offset
             ),
         )
 

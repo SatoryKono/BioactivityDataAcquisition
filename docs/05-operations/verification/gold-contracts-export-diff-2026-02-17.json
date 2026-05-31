@@ -137,43 +137,15 @@
     "chembl_target": {
       "file": "docs/04-reference/contracts/gold/chembl_target_v2.0.json",
       "contract_version": "2.0.0",
-      "status": "created",
+      "status": "updated",
       "diff": {
         "added_properties": [
-          "_dq_error",
-          "_dq_warn",
-          "_index",
-          "component_accessions",
-          "component_descriptions",
-          "component_ids",
-          "component_relationships",
-          "component_types",
-          "content_hash",
-          "cross_references",
-          "description",
-          "entity_id",
-          "organism",
-          "organism_class",
-          "pref_name",
-          "primary_component_id",
-          "species_group_flag",
-          "target_component_synonyms",
-          "target_components",
-          "target_ec_numbers",
-          "target_gene_synonyms",
-          "target_id",
-          "target_protein_synonyms",
-          "target_type",
-          "target_xref_go_component",
-          "target_xref_go_function",
-          "target_xref_go_process",
-          "target_xref_pdb_ids",
-          "target_xref_reactome_ids",
-          "taxonomy_id"
+          "target_xref_hgnc_ids",
+          "target_xref_uniprot_ids"
         ],
         "removed_properties": [],
         "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "chembl_tissue": {

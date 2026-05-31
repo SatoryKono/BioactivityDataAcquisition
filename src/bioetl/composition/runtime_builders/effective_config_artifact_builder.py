@@ -11,6 +11,8 @@ from bioetl.application.services.control_plane.effective_config.service import (
 )
 from bioetl.composition.runtime_builders._manifest_publication_context_support import (
     ensure_manifest_publication_identity,
+    resolve_manifest_publication_context,
+    resolve_manifest_publication_identity,
 )
 from bioetl.composition.runtime_builders._run_manifest_refs import control_plane_root
 from bioetl.composition.runtime_builders._effective_config_artifact_builder_support import (
@@ -124,14 +126,11 @@ def create_and_persist_effective_config_artifact(
     contract_identity: _manifest_support.RunManifestContractIdentity | None = None,
 ) -> tuple[str, str, str, str, str]:
     """Create effective config artifact, persist it, and return provenance fields."""
-    reproducibility_context, contract_identity = ensure_manifest_publication_identity(
-        ctx=ctx,
-        inputs=inputs,
-        provider=provider,
-        entity=entity,
-        reproducibility_context=reproducibility_context,
-        contract_identity=contract_identity,
+    manifest_context = resolve_manifest_publication_context(
+        ctx, inputs, reproducibility_context, contract_identity
     )
+    reproducibility_context = manifest_context.reproducibility_context
+    contract_identity = manifest_context.contract_identity
     return _create_and_persist_effective_config_artifact_payload(
         pipeline_name=ctx.pipeline_name,
         pipeline_kind="standard",
@@ -203,3 +202,12 @@ def create_and_persist_composite_effective_config_artifact(
         logger=logger,
         run_id=run_id,
     )
+
+
+__all__ = [
+    "create_and_persist_composite_effective_config_artifact",
+    "create_and_persist_effective_config_artifact",
+    "ensure_manifest_publication_identity",
+    "resolve_manifest_publication_context",
+    "resolve_manifest_publication_identity",
+]

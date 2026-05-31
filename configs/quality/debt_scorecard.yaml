@@ -789,14 +789,14 @@ test_governance_debt_metrics:
   linked_issue: '#4817'
   metrics:
     compatibility_test_file_count:
-      current_count: 56
-      max_count: 56
+      current_count: 54
+      max_count: 54
       target_count: 54
-      ratchet_policy: Downward ratchet only; decrease max_count to 54 once the live
-        compatibility test inventory is at or below 54 files.
-      rationale: Stream G ratchet review on 2026-05-31 confirmed live inventory remains
-        56; burn-down to target 54 stays blocked until two inventoried compatibility
-        surfaces are retired or reclassified.
+      ratchet_policy: Downward ratchet only; keep max_count at 54 unless a future
+        owner-approved reduction lowers the live compatibility test inventory.
+      rationale: Stream G ratchet review on 2026-05-31 reclassified two public runtime
+        API re-export tests out of compatibility filename inventory, lowering the
+        live count to the target threshold.
 program_done_criteria:
   deadline_quarter: 2027-Q1
   max_total_exemptions: 0

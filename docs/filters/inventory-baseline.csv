@@ -99,7 +99,9 @@ chembl,target,required_fields,target_xref_pdb_ids,"""target_xref_pdb_ids""",,kee
 chembl,target,required_fields,target_xref_go_component,"""target_xref_go_component""",,keep_in_silver,structural rule stays in silver_filters
 chembl,target,required_fields,target_xref_go_function,"""target_xref_go_function""",,keep_in_silver,structural rule stays in silver_filters
 chembl,target,required_fields,target_xref_go_process,"""target_xref_go_process""",,keep_in_silver,structural rule stays in silver_filters
+chembl,target,required_fields,target_xref_hgnc_ids,"""target_xref_hgnc_ids""",,keep_in_silver,structural rule stays in silver_filters
 chembl,target,required_fields,target_xref_reactome_ids,"""target_xref_reactome_ids""",,keep_in_silver,structural rule stays in silver_filters
+chembl,target,required_fields,target_xref_uniprot_ids,"""target_xref_uniprot_ids""",,keep_in_silver,structural rule stays in silver_filters
 chembl,target,columns,target_type,"[""SINGLE PROTEIN""]","[""SINGLE PROTEIN""]",duplicate,identical rule in gold_filters - drop from silver
 chembl,target,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
 chembl,target_component,required_fields,component_id,"""component_id""",,keep_in_silver,structural rule stays in silver_filters

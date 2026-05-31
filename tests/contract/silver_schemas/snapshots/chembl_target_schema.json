@@ -313,6 +313,15 @@
     "required": false,
     "unique": false
   },
+  "target_xref_hgnc_ids": {
+    "checks": [],
+    "coerce": false,
+    "description": "Pipe-delimited HGNC xref IDs or unknown.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "target_xref_pdb_ids": {
     "checks": [],
     "coerce": false,
@@ -326,6 +335,15 @@
     "checks": [],
     "coerce": false,
     "description": "Pipe-delimited Reactome xref IDs or unknown.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "target_xref_uniprot_ids": {
+    "checks": [],
+    "coerce": false,
+    "description": "Pipe-delimited UniProt xref IDs or unknown.",
     "dtype": "str",
     "nullable": true,
     "required": false,

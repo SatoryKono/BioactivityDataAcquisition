@@ -5,8 +5,8 @@
     "entities_total": 26,
     "entities_with_silver_filters": 21,
     "entities_with_gold_filters": 21,
-    "rules_total": 129,
-    "keep_in_silver": 91,
+    "rules_total": 131,
+    "keep_in_silver": 93,
     "move_to_gold": 18,
     "duplicate": 20,
     "conflict": 0
@@ -1074,7 +1074,7 @@
       "has_silver_filters": true,
       "has_gold_filters": true,
       "counts_by_action": {
-        "keep_in_silver": 12,
+        "keep_in_silver": 14,
         "move_to_gold": 0,
         "duplicate": 2,
         "conflict": 0
@@ -1194,8 +1194,28 @@
           "provider": "chembl",
           "entity": "target",
           "rule_type": "required_fields",
+          "field": "target_xref_hgnc_ids",
+          "silver_value": "\"target_xref_hgnc_ids\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target",
+          "rule_type": "required_fields",
           "field": "target_xref_reactome_ids",
           "silver_value": "\"target_xref_reactome_ids\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target",
+          "rule_type": "required_fields",
+          "field": "target_xref_uniprot_ids",
+          "silver_value": "\"target_xref_uniprot_ids\"",
           "gold_value": "",
           "action": "keep_in_silver",
           "notes": "structural rule stays in silver_filters"

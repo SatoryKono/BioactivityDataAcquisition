@@ -11,6 +11,7 @@ from bioetl.application.services.control_plane.replay.historical_certification_s
     HistoricalReplayCertificationResult,
     HistoricalReplayCertificationService,
 )
+from bioetl.application.services.control_plane.replay import historical_corpus_models
 from bioetl.application.services.control_plane.replay.historical_corpus_models import (
     HistoricalReplayBulkCertificationRecord,
     HistoricalReplayBulkCertificationResult,
@@ -30,14 +31,7 @@ from bioetl.domain.control_plane.reproducibility_profiles import (
 )
 from bioetl.domain.ports import RunLedgerPort, RunManifestPort
 
-__all__ = [
-    "HistoricalReplayBulkCertificationRecord",
-    "HistoricalReplayBulkCertificationResult",
-    "HistoricalReplayBulkCertificationSpec",
-    "HistoricalReplayCertifiabilityInventory",
-    "HistoricalReplayCertifiabilityRecord",
-    "HistoricalReplayCorpusService",
-]
+__all__ = [*historical_corpus_models.__all__, "HistoricalReplayCorpusService"]
 
 
 @dataclass(slots=True)

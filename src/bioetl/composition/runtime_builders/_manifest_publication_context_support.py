@@ -44,7 +44,6 @@ def contract_identity_requires_strict_resolution(
 
 
 def resolve_manifest_publication_context(
-    *,
     ctx: PipelineRunContext,
     inputs: RunnerInputs,
     reproducibility_context: object | None = None,
@@ -116,9 +115,45 @@ def ensure_manifest_publication_identity(
     return reproducibility_context, contract_identity
 
 
+def build_manifest_publication_identity_kwargs(
+    ctx: PipelineRunContext,
+    inputs: RunnerInputs,
+    provider: str,
+    entity: str,
+    reproducibility_context: object | None = None,
+) -> dict[str, object]:
+    """Return the shared identity-resolution kwargs used by manifest builders."""
+    return {
+        "ctx": ctx,
+        "inputs": inputs,
+        "provider": provider,
+        "entity": entity,
+        "reproducibility_context": reproducibility_context,
+    }
+
+
+def resolve_manifest_publication_identity(
+    ctx: PipelineRunContext,
+    inputs: RunnerInputs,
+    provider: str,
+    entity: str,
+    reproducibility_context: object | None = None,
+    contract_identity: RunManifestContractIdentity | None = None,
+) -> tuple[object, RunManifestContractIdentity]:
+    """Resolve missing manifest publication identity inputs in one call."""
+    return ensure_manifest_publication_identity(
+        **build_manifest_publication_identity_kwargs(
+            ctx, inputs, provider, entity, reproducibility_context
+        ),
+        contract_identity=contract_identity,
+    )
+
+
 __all__ = [
+    "build_manifest_publication_identity_kwargs",
     "ResolvedManifestPublicationContext",
     "contract_identity_requires_strict_resolution",
     "ensure_manifest_publication_identity",
+    "resolve_manifest_publication_identity",
     "resolve_manifest_publication_context",
 ]

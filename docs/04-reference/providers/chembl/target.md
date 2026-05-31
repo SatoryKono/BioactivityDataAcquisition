@@ -97,7 +97,7 @@ Silver schema.
 - `target_description` в Silver и `description` в Gold из `target_description` или fallback `description`
 - `target_components`, `target_component_synonyms`, `cross_references` как JSON-строки
 - `target_protein_synonyms`, `target_gene_synonyms`, `target_ec_numbers` как pipe-delimited derived-поля с sentinel `unknown`
-- `target_xref_pdb_ids`, `target_xref_go_component`, `target_xref_go_function`, `target_xref_go_process`, `target_xref_reactome_ids` как pipe-delimited xref-derived поля с sentinel `unknown`
+- `target_xref_pdb_ids`, `target_xref_go_component`, `target_xref_go_function`, `target_xref_go_process`, `target_xref_hgnc_ids`, `target_xref_reactome_ids`, `target_xref_uniprot_ids` как pipe-delimited xref-derived поля с sentinel `unknown`
 
 ### 3.4. Derived synonym projection
 

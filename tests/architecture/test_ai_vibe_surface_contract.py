@@ -1,5 +1,10 @@
 from pathlib import Path
 
+import pytest
+
+
+pytestmark = pytest.mark.architecture
+
 
 def test_vibe_readme_prefers_top_level_ai_surface() -> None:
     root = Path(__file__).resolve().parents[2]

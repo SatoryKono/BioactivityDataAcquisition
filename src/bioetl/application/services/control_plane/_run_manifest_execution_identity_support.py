@@ -46,6 +46,7 @@ def build_contract_identity_anchor_fields(
     *,
     include_effective_config_hash: bool = False,
     include_effective_config_artifact_id: bool = True,
+    include_null_values: bool = False,
 ) -> dict[str, object]:
     """Return non-empty contract and normalization anchor fields."""
     payload: dict[str, object] = {
@@ -61,6 +62,8 @@ def build_contract_identity_anchor_fields(
         payload["effective_config_artifact_id"] = (
             code_provenance.effective_config_artifact_id
         )
+    if include_null_values:
+        return payload
     return {key: value for key, value in payload.items() if value is not None}
 
 

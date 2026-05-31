@@ -1,4 +1,4 @@
-"""Tests for public application-core runtime facades and re-export seams."""
+"""Tests for public application-core runtime API re-export seams."""
 
 from __future__ import annotations
 
