@@ -45,12 +45,10 @@ def _should_fsync_control_plane_writes() -> bool:
     if os.name != "nt":
         return True
     settings = get_settings()
-    if not settings.test_mode:
-        return True
     # Windows test runs commonly execute from cloud-synced worktrees where
     # fsync() can stall long enough to defeat reproducibility gates. Keep
     # production durability semantics unchanged and relax only test-mode writes.
-    return False
+    return not settings.test_mode
 
 
 def _flush_file_descriptor(file_descriptor: int) -> None:

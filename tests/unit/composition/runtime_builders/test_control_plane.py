@@ -6,6 +6,9 @@ from types import SimpleNamespace
 from uuid import uuid4
 
 from bioetl.composition.runtime_builders import control_plane
+from bioetl.composition.runtime_builders._run_manifest_refs import (
+    RunManifestProvenanceBundle,
+)
 from bioetl.composition.runtime_builders.run_manifest_support import (
     RunManifestContractIdentity,
 )
@@ -45,6 +48,7 @@ def test_create_run_manifest_with_effective_config_uses_yaml_provider_entity(
     def _fake_create_run_manifest(**kwargs: object):
         captured["manifest_provider"] = kwargs["inputs"].yaml_config.provider
         captured["manifest_entity"] = kwargs["inputs"].yaml_config.entity_type
+        captured["provenance"] = kwargs["provenance"]
         return ("control-plane-refs", None)
 
     monkeypatch.setattr(
@@ -87,6 +91,13 @@ def test_create_run_manifest_with_effective_config_uses_yaml_provider_entity(
     assert captured["entity"] == "activity"
     assert captured["manifest_provider"] == "chembl"
     assert captured["manifest_entity"] == "activity"
+    assert captured["provenance"] == RunManifestProvenanceBundle(
+        effective_config_artifact_id="artifact-1",
+        resolved_config_hash="resolved-hash",
+        effective_config_hash="effective-hash",
+        source_fingerprint="source-hash",
+        dq_contract_compatibility_hash="dq-hash",
+    )
 
 
 def test_create_run_manifest_with_effective_config_reuses_publication_context(

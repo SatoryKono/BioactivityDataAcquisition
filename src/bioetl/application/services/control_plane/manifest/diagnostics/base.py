@@ -50,6 +50,8 @@ from bioetl.application.services.control_plane.run_manifest_diagnostics_support 
     _build_exact_replay_anchors,
     _collect_append_mode_semantic_sinks,
     _resolve_replay_family_contract,
+)
+from bioetl.application.services.control_plane.run_manifest_diagnostics_support import (
     build_replay_family_contract_payload as _build_replay_family_contract_payload,
 )
 from bioetl.domain.control_plane import RunManifest

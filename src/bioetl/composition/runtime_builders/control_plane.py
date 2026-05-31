@@ -9,11 +9,11 @@ from bioetl.composition.runtime_builders._manifest_publication_context_support i
     resolve_manifest_publication_context,
 )
 from bioetl.composition.runtime_builders._run_manifest_refs import (
-    RunManifestProvenanceBundle,
     apply_manifest_updates_to_mutable_context,
+    build_run_manifest_provenance_bundle,
     build_dataclass_manifest_updates,
     extract_optional_updates_from_refs,
-    iter_optional_control_plane_updates,
+    iter_optional_control_plane_updates_from_mapping,
 )
 from bioetl.composition.runtime_builders.effective_config_artifact_builder import (
     create_and_persist_effective_config_artifact,
@@ -68,25 +68,8 @@ def attach_manifest_id(
             raise TypeError(
                 "attach_manifest_id requires either manifest_id or control_plane_refs"
             )
-        optional_updates = iter_optional_control_plane_updates(
-            execution_fingerprint=execution_fingerprint,
-            config_hash=config_hash,
-            resolved_config_hash=resolved_config_hash,
-            effective_config_hash=effective_config_hash,
-            source_fingerprint=source_fingerprint,
-            dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-            effective_config_artifact_id=effective_config_artifact_id,
-            replay_of_run_id=replay_of_run_id,
-            replay_of_manifest_id=replay_of_manifest_id,
-            input_snapshot_fingerprint=input_snapshot_fingerprint,
-            contract_ref=contract_ref,
-            contract_version=contract_version,
-            contract_schema_hash=contract_schema_hash,
-            dq_policy_ref=dq_policy_ref,
-            rule_bundle_version=rule_bundle_version,
-            normalization_profile_ref=normalization_profile_ref,
-            normalization_profile_version=normalization_profile_version,
-            normalization_profile_hash=normalization_profile_hash,
+        optional_updates = iter_optional_control_plane_updates_from_mapping(
+            locals()
         )
     if is_dataclass(ctx):
         return cast(
@@ -123,31 +106,21 @@ def create_run_manifest_with_effective_config(
         ctx=ctx,
         inputs=inputs,
     )
-    (
-        effective_config_artifact_id,
-        resolved_config_hash,
-        effective_config_hash,
-        source_fingerprint,
-        dq_contract_compatibility_hash,
-    ) = create_and_persist_effective_config_artifact(
-        ctx=ctx,
-        inputs=inputs,
-        provider=publication_context.provider,
-        entity=publication_context.entity,
-        reproducibility_context=publication_context.reproducibility_context,
-        contract_identity=publication_context.contract_identity,
+    provenance = build_run_manifest_provenance_bundle(
+        create_and_persist_effective_config_artifact(
+            ctx=ctx,
+            inputs=inputs,
+            provider=publication_context.provider,
+            entity=publication_context.entity,
+            reproducibility_context=publication_context.reproducibility_context,
+            contract_identity=publication_context.contract_identity,
+        )
     )
     return create_run_manifest(
         ctx=ctx,
         inputs=inputs,
         ledger_enabled=ledger_enabled,
-        provenance=RunManifestProvenanceBundle(
-            effective_config_artifact_id=effective_config_artifact_id,
-            resolved_config_hash=resolved_config_hash,
-            effective_config_hash=effective_config_hash,
-            source_fingerprint=source_fingerprint,
-            dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-        ),
+        provenance=provenance,
         reproducibility_context=publication_context.reproducibility_context,
         contract_identity=publication_context.contract_identity,
     )

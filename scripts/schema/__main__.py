@@ -6,7 +6,7 @@ Usage:
     python -m scripts.schema --help
 
 Commands:
-    check-invariants       Validate config CI invariants (naming, schemas, auth, keys)
+    check-invariants       Validate config CI invariants and YAML parse safety
     check-required-fields  Validate silver required_fields cover YAML requiredness
     audit-optionality      Audit/check effective_optional_v1 resolved from config surface
     check-config-paths     Check for legacy dq/filter config path references

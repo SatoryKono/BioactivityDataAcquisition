@@ -2,6 +2,7 @@
 """Pre-commit hook: validate CI invariants for configs/** directory.
 
 Checks:
+  INV-CFG-000  All config governance YAML parses cleanly
   INV-CFG-001  No legacy naming (document->publication, dq/->quality/, filter/->filters/)
   INV-CFG-002  Unified entity sections exist and provider/entity declarations are consistent
   INV-CFG-003  loading_strategy is null or 'full_scan_only'
@@ -46,6 +47,7 @@ from bioetl.infrastructure.config.config_ci_contract import (
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 CONFIGS_DIR = PROJECT_ROOT / "configs"
+CONTRACTS_DIR = CONFIGS_DIR / "contracts"
 ENTITIES_DIR = CONFIGS_DIR / "entities"
 COMPOSITES_DIR = CONFIGS_DIR / "composites"
 PROVIDERS_DIR = CONFIGS_DIR / "providers"
@@ -58,7 +60,10 @@ def _load_yaml(path: Path) -> dict[str, Any]:
 
 
 def _rel(path: Path) -> str:
-    return str(path.relative_to(PROJECT_ROOT))
+    try:
+        return str(path.relative_to(PROJECT_ROOT))
+    except ValueError:
+        return str(path)
 
 
 def _deep_string_search(obj: Any, fragment: str) -> bool:
@@ -93,6 +98,23 @@ def _composite_configs() -> list[Path]:
 
 def _all_config_paths() -> list[Path]:
     return [*_entity_configs(), *_provider_configs(), *_composite_configs()]
+
+
+def _config_governance_yaml_paths() -> list[Path]:
+    return sorted(p for p in CONFIGS_DIR.rglob(YAML_GLOB) if p.is_file())
+
+
+def check_inv_000(verbose: bool) -> list[str]:
+    """INV-CFG-000: all config governance YAML files must parse cleanly."""
+    errors: list[str] = []
+    for path in _config_governance_yaml_paths():
+        try:
+            yaml.safe_load(path.read_text(encoding="utf-8"))
+        except yaml.YAMLError as exc:
+            errors.append(f"INV-CFG-000 {_rel(path)}: YAML parse error: {exc}")
+    if verbose and not errors:
+        sys.stdout.write("  INV-CFG-000: PASS (config governance YAML parses)\n")
+    return errors
 
 
 def _provider_declared_pairs(
@@ -367,8 +389,12 @@ def main() -> int:
     args = parser.parse_args()
 
     all_errors: list[str] = []
-    for check_fn in CHECK_FUNCTIONS:
-        all_errors.extend(check_fn(args.verbose))
+    parse_errors = check_inv_000(args.verbose)
+    if parse_errors:
+        all_errors.extend(parse_errors)
+    else:
+        for check_fn in CHECK_FUNCTIONS:
+            all_errors.extend(check_fn(args.verbose))
 
     if all_errors:
         sys.stderr.write(f"\n{len(all_errors)} config invariant violation(s):\n")

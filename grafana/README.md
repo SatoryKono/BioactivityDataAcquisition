@@ -82,6 +82,11 @@ ______________________________________________________________________
 > toolchain when `node` is not present in the current PowerShell `PATH`.
 > The Playwright screenshot renderer expands collapsed dashboard rows before
 > capture so batch evidence reflects the fully opened operator surface.
+> Grafana Render API screenshots remain valid render/semantic evidence, but
+> they do not expand collapsed diagnostic rows; a full-surface UX audit must
+> have `expanded-row-capture: ok` in
+> `python -m scripts.ops check-grafana-audit-preflight` and use the Playwright
+> screenshot path.
 > Full-page capture now uses a separate screenshot budget
 > (`GRAFANA_SCREENSHOT_CAPTURE_TIMEOUT_MS`, default `max(page_timeout, 180000)`),
 > because long dashboards such as `0. Control Plane` may finish loading well
@@ -114,6 +119,12 @@ ______________________________________________________________________
 > `bioetl quarantine serve` backend on port `8081` before the first preflight,
 > so `Quarantine Explorer`-backed panels can be validated without a separate
 > manual backend bootstrap step.
+> The detached backend reads Prometheus through `BIOETL_PROMETHEUS_URL` when
+> set. Use the URL that is reachable from the backend process, not from the
+> Grafana container: host/WSL backends usually use `http://127.0.0.1:9090`,
+> while Docker-adjacent backends may need `http://host.docker.internal:9090`.
+> `localhost:9090` is therefore only correct for topologies where Prometheus is
+> actually bound on the same network namespace as `bioetl quarantine serve`.
 
 ## 1. Архитектура мониторинга
 
@@ -800,6 +811,11 @@ The local health server resolves `/ops/observability/processed-records` against
 Prometheus via `BIOETL_PROMETHEUS_URL` when set. Without an explicit setting it
 tries `http://localhost:9090`, then the Docker-local fallbacks
 `http://prometheus:9090` and `http://host.docker.internal:9090`.
+For detached dashboard audits this is a backend reachability contract, not a
+Grafana datasource contract: set `BIOETL_PROMETHEUS_URL` to the Prometheus URL
+reachable by the `bioetl quarantine serve` process that owns HTTP panels such
+as `ID`, `Processed Records`, and checkpoint freshness. In mixed Docker plus
+host/WSL setups, prefer an explicit value over assuming `localhost:9090`.
 
 ### 6.1 `$pipeline`
 
@@ -860,7 +876,18 @@ tries `http://localhost:9090`, then the Docker-local fallbacks
   presence. When that endpoint returns `status=UNKNOWN` with `age_seconds=null`,
   the panel is behaving as designed: the stack has no persisted checkpoint
   evidence for the selected scope yet, which is a no-evidence state rather than
-  a broken datasource. GLOBAL
+  a broken datasource. For exact run
+  `b51986c6-870b-4457-aa70-baedac2710ad`, local evidence includes manifest
+  `3c803630-4652-40d0-8f8d-f26b2fb1bdd9`, terminal success ledger evidence,
+  and immutable checkpoint history under
+  `data/output/checkpoints/.history/by_manifest/3c803630-4652-40d0-8f8d-f26b2fb1bdd9.json`;
+  current panel `892` is therefore classified as checkpoint evidence present,
+  not `Expected Empty` and not a current product defect. Future audits should
+  classify an exact-run checkpoint gap as `Expected Empty` only when both the
+  run manifest/ledger exist and immutable checkpoint history is absent for that
+  run; if checkpoint history exists and panel `892` still returns
+  `UNKNOWN`/`MISSING`, classify it as a product defect in the checkpoint
+  freshness read path. GLOBAL
   read-path и checkpoint-operator panels не несут pipeline/run_type labels,
   поэтому не фильтруются по этим переменным.
 
@@ -1165,7 +1192,7 @@ first screen.
 | 9101 | Monitor GLOBAL Provider Severity Matrix        | Table          | `bioetl_provider_current_status`                                                                                     | Current provider severity: `0=OK`, `1=DEGRADED`, `2=FAILING`, `null=UNKNOWN`; derived summary semantics, не фильтруется по pipeline. Raw `bioetl_provider_health_status` uses a different contract: `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`. |
 | 9102 | Inspect Critical Providers                     | Table          | `bioetl_provider_current_status >= 1`                                                                                | Только providers с current `DEGRADED`/`FAILING`; missing current-status telemetry остаётся в `Monitor GLOBAL Provider Severity Matrix` как `UNKNOWN`. Panel exposes direct provider incident runbook handoff. |
 | 9103 | Inspect Provider Top Causes                    | Table          | `topk(5, bioetl_provider_current_cause > 0)`                                                                         | Current cause chips: raw health status, failure rate, retry exhaustion, latency, HTTP errors, rate-limit pressure. This panel can stay non-empty while `Monitor GLOBAL Provider Severity Matrix` still reads `0 (OK)` because cause projection includes early-warning provider signals independent of current-status projection. Empty table means no active provider causes are currently above zero; if severity is still non-OK, treat that as an explainability gap. Panel exposes direct provider incident runbook handoff. |
-| 9104 | Monitor Provider Telemetry Freshness           | Stat           | `((count(count_over_time(bioetl_provider_current_status[15m])) > bool 0) * 0) or absent(...) * 1`                    | First-screen trust marker: `0=OK`, `1=WARN`, `null=UNKNOWN`. Missing current-status samples in the active Grafana range mean telemetry gap, not proof that providers are healthy; treat `Status=UNKNOWN` as missing provider telemetry until raw enum or selected-range evidence proves otherwise. |
+| 9104 | Monitor Provider Telemetry Freshness           | Stat           | `((count(count_over_time(bioetl_provider_current_status[15m])) > bool 0) or (count(count_over_time(bioetl_provider_range_operational_ok[15m])) > bool 0)) * 0 or absent(...) * 1` | First-screen 12h operational-evidence trust marker: `0=OK`, `1=WARN`, `null=UNKNOWN`. Missing both `bioetl_provider_current_status` and `bioetl_provider_range_operational_ok` samples in the active Grafana range means telemetry gap, not proof that providers are healthy; treat `Status=UNKNOWN` as missing provider telemetry until raw enum or selected-range evidence proves otherwise. |
 | 9002 | First Action                                   | Text           | n/a                                                                                                                  | CTA block sits on the same first-screen row as `ID` and `Processed Records`, using the rightmost shared-shell slot (`w=8`, `h=6`). Review the GLOBAL severity matrix, inspect critical providers, or inspect provider top causes before leaving the dashboard. Shared `ID` and `Processed Records` stay bounded pipeline-context evidence and do not prove current provider health. |
 | 1   | Track Health Check Latency by Provider (p95)    | Timeseries     | `histogram_quantile(0.95, sum by (le, provider) (increase(...[$__interval])))`                                       | Selected-range evidence: p95 latency trend по выбранным providers; `No data` сохраняется как diagnostic gap, не маскируется в `0s`. |
 | 114 | Review Raw Provider Health Enum                | Table          | `max by (provider) (bioetl_provider_health_status{provider=~"$provider"}) or ((bioetl_provider_health_check_provider_universe_15m{provider=~"$provider"} * 0) / (bioetl_provider_health_check_provider_universe_15m{provider=~"$provider"} * 0))` | Текущий raw status по provider с mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`; если provider universe существует без raw status sample, panel остаётся `UNKNOWN`. Use it as supporting evidence when `Status=UNKNOWN` or when first-screen severity and top causes disagree. |

@@ -135,6 +135,47 @@ def _check_playwright_runtime() -> PreflightCheck:
     )
 
 
+def _check_expanded_row_capture(playwright_check: PreflightCheck) -> PreflightCheck:
+    """Report whether the full-audit screenshot path can expand collapsed rows."""
+    script_path = (
+        Path(__file__).resolve().parent / "rerender_grafana_screenshots.cjs"
+    )
+    if playwright_check.status != "ok":
+        return PreflightCheck(
+            name="expanded-row-capture",
+            status="error",
+            detail=(
+                "Playwright expanded-row capture is unavailable because "
+                f"{playwright_check.name} failed: {playwright_check.detail}"
+            ),
+        )
+    try:
+        script = script_path.read_text(encoding="utf-8")
+    except OSError as exc:
+        return PreflightCheck(
+            name="expanded-row-capture",
+            status="error",
+            detail=f"Playwright renderer script is not readable: {exc}",
+        )
+    if "expandCollapsedRows" not in script or "collapsedRowTitles" not in script:
+        return PreflightCheck(
+            name="expanded-row-capture",
+            status="error",
+            detail=(
+                "Playwright renderer does not advertise collapsed-row expansion; "
+                "Render API-only evidence is not full-surface UX evidence."
+            ),
+        )
+    return PreflightCheck(
+        name="expanded-row-capture",
+        status="ok",
+        detail=(
+            "Playwright renderer can expand collapsed dashboard rows before "
+            "full-page screenshot capture."
+        ),
+    )
+
+
 def _expected_dashboard_screenshot_pairs(
     screenshot_dir: Path,
     *,
@@ -213,6 +254,7 @@ def run_checks(
     include_screenshot_check: bool = True,
     screenshot_uids: tuple[str, ...] = (),
 ) -> list[PreflightCheck]:
+    playwright_check = _check_playwright_runtime()
     checks = [
         _check_http_json(
             name="grafana",
@@ -230,7 +272,8 @@ def run_checks(
             url=f"{prometheus_base_url.rstrip('/')}/api/v1/status/runtimeinfo",
             timeout_seconds=timeout_seconds,
         ),
-        _check_playwright_runtime(),
+        playwright_check,
+        _check_expanded_row_capture(playwright_check),
     ]
 
     try:
@@ -280,8 +323,9 @@ def run_checks(
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
-            "Check whether Grafana, Prometheus, Quarantine Explorer, and local "
-            "screenshot artifacts are ready for a full dashboard audit."
+            "Check whether Grafana, Prometheus, Quarantine Explorer, Playwright "
+            "expanded-row capture, and local screenshot artifacts are ready for "
+            "a full dashboard audit."
         )
     )
     parser.add_argument(

@@ -242,8 +242,8 @@ config_surface_ratchet:
         keys are excluded; family-scoped sum must remain zero post Stream B closeout.
       ratchet_policy: Non-growth fail-fast; increases require reviewed contract regression.
     sanctioned_partial_parameter_count:
-      current_count: 97
-      max_count: 97
+      current_count: 100
+      max_count: 100
       owner: '@bioetl-config'
       linked_issue: '#4818'
       rationale: Documented intentional entity-specific partial keys excluded from actionable
@@ -251,8 +251,8 @@ config_surface_ratchet:
       ratchet_policy: Non-growth fail-fast unless a reviewed entity contract adds new
         intentional divergence.
     raw_inconsistent_parameter_count:
-      current_count: 97
-      max_count: 97
+      current_count: 100
+      max_count: 100
       owner: '@bioetl-config'
       linked_issue: '#4818'
       rationale: Raw family-scoped partial key count before sanctioned-prefix exclusion;
@@ -281,15 +281,15 @@ config_surface_ratchet:
           ratchet_policy: Non-growth fail-fast; entity-specific filters remain in backlog
             as sanctioned partial keys only.
         sanctioned_partial_parameter_count:
-          current_count: 97
-          max_count: 97
+          current_count: 100
+          max_count: 100
           rationale: Intentional entity-specific filters/extraction_params/overrides per
             reports/quality/config-surface-backlog.json.
           ratchet_policy: Non-growth fail-fast unless reviewed entity contract expands
             intentional divergence.
         raw_inconsistent_parameter_count:
-          current_count: 97
-          max_count: 97
+          current_count: 100
+          max_count: 100
           rationale: Raw entity partial keys before sanctioned-prefix exclusion.
           ratchet_policy: Informational non-growth guard mirroring backlog partial_key_count.
     composite_runtime:

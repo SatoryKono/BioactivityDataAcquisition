@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import os
 import tempfile
+from collections.abc import Mapping
 from contextlib import suppress
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal, Protocol
+from typing import TYPE_CHECKING, Literal, Protocol, cast
 
 from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
     CONTRACT_IDENTITY_FIELD_NAMES,
@@ -227,6 +228,18 @@ def iter_optional_control_plane_updates(
     )
 
 
+def iter_optional_control_plane_updates_from_mapping(
+    values: Mapping[str, object],
+) -> tuple[tuple[str, str], ...]:
+    """Project optional control-plane fields from a broader candidate mapping."""
+    return iter_optional_control_plane_updates(
+        **{
+            field_name: cast(str | None, values.get(field_name))
+            for field_name in _CONTROL_PLANE_CONTEXT_UPDATE_FIELDS
+        }
+    )
+
+
 def extract_optional_updates_from_refs(
     control_plane_refs: ManifestControlPlaneRefs,
 ) -> tuple[tuple[str, str], ...]:
@@ -274,6 +287,26 @@ class RunManifestProvenanceBundle:
     effective_config_hash: str
     source_fingerprint: str | None
     dq_contract_compatibility_hash: str
+
+
+def build_run_manifest_provenance_bundle(
+    artifact_result: tuple[str, str, str, str | None, str],
+) -> RunManifestProvenanceBundle:
+    """Convert one persisted effective-config result tuple into manifest provenance."""
+    (
+        effective_config_artifact_id,
+        resolved_config_hash,
+        effective_config_hash,
+        source_fingerprint,
+        dq_contract_compatibility_hash,
+    ) = artifact_result
+    return RunManifestProvenanceBundle(
+        effective_config_artifact_id=effective_config_artifact_id,
+        resolved_config_hash=resolved_config_hash,
+        effective_config_hash=effective_config_hash,
+        source_fingerprint=source_fingerprint,
+        dq_contract_compatibility_hash=dq_contract_compatibility_hash,
+    )
 
 
 def resolve_run_context_values(

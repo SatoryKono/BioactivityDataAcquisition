@@ -689,6 +689,20 @@ def test_grafana_audit_preflight_playwright_runtime_surfaces_probe_detail(
     assert "browser executable is missing" in result.detail
 
 
+def test_grafana_audit_preflight_expanded_row_capture_requires_playwright() -> None:
+    result = preflight_subject._check_expanded_row_capture(
+        preflight_subject.PreflightCheck(
+            name="playwright-runtime",
+            status="error",
+            detail="missing browser runtime",
+        )
+    )
+
+    assert result.name == "expanded-row-capture"
+    assert result.status == "error"
+    assert "missing browser runtime" in result.detail
+
+
 def test_grafana_audit_cycle_parser_exposes_backend_boolean_flag() -> None:
     parser = cycle_subject._build_parser()
 
@@ -787,6 +801,7 @@ def test_grafana_audit_preflight_run_checks_collects_ok_results(
         "grafana-render-auth",
         "prometheus",
         "playwright-runtime",
+        "expanded-row-capture",
         "quarantine-explorer",
         "screenshots",
     ]
@@ -863,6 +878,7 @@ def test_grafana_audit_preflight_can_skip_screenshot_check(
         "grafana-render-auth",
         "prometheus",
         "playwright-runtime",
+        "expanded-row-capture",
         "quarantine-explorer",
     ]
     assert called is False

@@ -52,6 +52,12 @@ ______________________________________________________________________
   `payload_hash` запрещены в Prometheus label filtering and generic
   cross-dashboard links. `bioetl-overview-v2` exposes control-plane-backed
   `run_id=-` for its local `ID` panel.
+- Provider Health is provider-first even though it exposes the shared
+  `$workflow/$pipeline/$run_type/$run_id` shell. `$run_id` remains HTTP identity
+  context for shared `ID`/`Processed Records` surfaces only; Provider Health
+  PromQL must not add a `run_id` label. The 12h UNKNOWN-vs-OK contract uses
+  provider telemetry: `bioetl_provider_current_status` plus
+  `bioetl_provider_range_operational_ok` in the active Grafana range.
 
 ## UID → Variables (inventory parity reference)
 

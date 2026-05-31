@@ -1,0 +1,26 @@
+{
+  "families": {
+    "composite_runtime": {
+      "config_count": 5,
+      "inconsistent_parameter_count": 0,
+      "raw_inconsistent_parameter_count": 0,
+      "sanctioned_partial_parameter_count": 0,
+      "unique_parameter_count": 199
+    },
+    "entity_effective": {
+      "config_count": 21,
+      "inconsistent_parameter_count": 0,
+      "raw_inconsistent_parameter_count": 100,
+      "sanctioned_partial_parameter_count": 100,
+      "unique_parameter_count": 309
+    }
+  },
+  "metrics": {
+    "config_count": 26,
+    "inconsistent_parameter_count": 0,
+    "raw_inconsistent_parameter_count": 100,
+    "sanctioned_partial_parameter_count": 100,
+    "unique_parameter_count": 508
+  },
+  "snapshot_date": "2026-05-31"
+}
