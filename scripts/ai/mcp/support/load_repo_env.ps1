@@ -2,12 +2,68 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+function Normalize-BioetlRepoEnvAliases {
+    if (-not $env:GITHUB_PERSONAL_ACCESS_TOKEN -and $env:GITHUB_TOKEN) {
+        $env:GITHUB_PERSONAL_ACCESS_TOKEN = $env:GITHUB_TOKEN
+    }
+    if (-not $env:GITHUB_TOKEN -and $env:GITHUB_PERSONAL_ACCESS_TOKEN) {
+        $env:GITHUB_TOKEN = $env:GITHUB_PERSONAL_ACCESS_TOKEN
+    }
+
+    if (-not $env:SONARQUBE_TOKEN -and $env:SONAR_TOKEN) {
+        $env:SONARQUBE_TOKEN = $env:SONAR_TOKEN
+    }
+    if (-not $env:SONAR_TOKEN -and $env:SONARQUBE_TOKEN) {
+        $env:SONAR_TOKEN = $env:SONARQUBE_TOKEN
+    }
+    if (-not $env:SONARQUBE_ORG -and $env:SONAR_ORG) {
+        $env:SONARQUBE_ORG = $env:SONAR_ORG
+    }
+    if (-not $env:SONARQUBE_URL -and $env:SONAR_HOST_URL) {
+        $env:SONARQUBE_URL = $env:SONAR_HOST_URL
+    }
+
+    if (-not $env:NEEDLE_API_KEY -and $env:NEEDLE_TOKEN) {
+        $env:NEEDLE_API_KEY = $env:NEEDLE_TOKEN
+    }
+
+    if (-not $env:BRAVE_API_KEY -and $env:BRAVE_SEARCH_API_KEY) {
+        $env:BRAVE_API_KEY = $env:BRAVE_SEARCH_API_KEY
+    }
+
+    if (-not $env:HUB_PAT_TOKEN) {
+        if ($env:DOCKERHUB_PAT) {
+            $env:HUB_PAT_TOKEN = $env:DOCKERHUB_PAT
+        } elseif ($env:DOCKERHUB_TOKEN) {
+            $env:HUB_PAT_TOKEN = $env:DOCKERHUB_TOKEN
+        }
+    }
+    if (-not $env:DOCKERHUB_USERNAME -and $env:DOCKER_USERNAME) {
+        $env:DOCKERHUB_USERNAME = $env:DOCKER_USERNAME
+    }
+
+    if (-not $env:GRAFANA_SERVICE_ACCOUNT_TOKEN) {
+        if ($env:GRAFANA_TOKEN) {
+            $env:GRAFANA_SERVICE_ACCOUNT_TOKEN = $env:GRAFANA_TOKEN
+        } elseif ($env:GRAFANA_API_KEY) {
+            $env:GRAFANA_SERVICE_ACCOUNT_TOKEN = $env:GRAFANA_API_KEY
+        }
+    }
+    if (-not $env:GRAFANA_USERNAME -and $env:GF_SECURITY_ADMIN_USER) {
+        $env:GRAFANA_USERNAME = $env:GF_SECURITY_ADMIN_USER
+    }
+    if (-not $env:GRAFANA_PASSWORD -and $env:GF_SECURITY_ADMIN_PASSWORD) {
+        $env:GRAFANA_PASSWORD = $env:GF_SECURITY_ADMIN_PASSWORD
+    }
+}
+
 function Import-BioetlRepoEnv {
     param(
         [string]$RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "../../../..")).Path
     )
 
     if ($env:BIOETL_REPO_ENV_LOADED -eq "1") {
+        Normalize-BioetlRepoEnvAliases
         return
     }
 
@@ -24,6 +80,7 @@ function Import-BioetlRepoEnv {
 
     if (-not (Test-Path $envFile) -and -not (Test-Path $envLocalFile)) {
         $env:BIOETL_REPO_ENV_LOADED = "1"
+        Normalize-BioetlRepoEnvAliases
         return
     }
 
@@ -76,4 +133,5 @@ function Import-BioetlRepoEnv {
     }
 
     $env:BIOETL_REPO_ENV_LOADED = "1"
+    Normalize-BioetlRepoEnvAliases
 }
