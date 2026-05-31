@@ -22,6 +22,7 @@ def build_control_plane_identity_payload(
     selected_run_id: str | None,
     selected_run_types: tuple[str, ...],
     resolved_via: str,
+    checkpoint_metadata: dict[str, object] | None = None,
 ) -> dict[str, object]:
     """Build the Grafana identity-table payload for one control-plane scope."""
     return {
@@ -34,6 +35,7 @@ def build_control_plane_identity_payload(
             resolved_manifest=resolved_manifest,
             selected_pipelines=selected_pipelines,
             selected_run_id=selected_run_id,
+            checkpoint_metadata=checkpoint_metadata,
         ),
     }
 
@@ -44,6 +46,7 @@ def _build_identity_rows(
     resolved_manifest: object | None,
     selected_pipelines: tuple[str, ...],
     selected_run_id: str | None,
+    checkpoint_metadata: dict[str, object] | None,
 ) -> list[dict[str, str]]:
     manifest_unavailable = (
         "select one concrete pipeline or exact run_id"
@@ -53,7 +56,7 @@ def _build_identity_rows(
     manifest = (
         cast(RunManifest, resolved_manifest) if resolved_manifest is not None else None
     )
-    values = _anchor_values(manifest)
+    values = _anchor_values(manifest, checkpoint_metadata=checkpoint_metadata)
     rows = [
         _identity_row(
             "Run ID [Pipeline]",
@@ -117,10 +120,20 @@ def _build_identity_rows(
     return rows
 
 
-def _anchor_values(manifest: RunManifest | None) -> dict[str, object | None]:
+def _anchor_values(
+    manifest: RunManifest | None,
+    *,
+    checkpoint_metadata: dict[str, object] | None = None,
+) -> dict[str, object | None]:
     if manifest is None:
         return {}
-    checkpoint_status = str(build_checkpoint_compare(manifest).get("status") or "")
+    checkpoint_status = str(
+        build_checkpoint_compare(
+            manifest,
+            checkpoint_metadata=checkpoint_metadata,
+        ).get("status")
+        or ""
+    )
     return build_anchor_values(
         manifest,
         ledger_entries=(),

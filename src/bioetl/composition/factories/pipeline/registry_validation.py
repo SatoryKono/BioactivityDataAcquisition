@@ -28,13 +28,20 @@ def _iter_entity_files(configs_root: Path) -> list[Path]:
     return [
         path
         for path in sorted(entities_dir.rglob("*.yaml"))
-        if not path.name.startswith("_")
+        if not path.name.startswith("_") and not _is_legacy_composite_entity_stub(path)
     ]
 
 
 def _load_yaml_mapping(path: Path) -> dict[str, object]:
     payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     return payload if isinstance(payload, dict) else {}
+
+
+def _is_legacy_composite_entity_stub(config_path: Path) -> bool:
+    """Return True for historical composite stubs under configs/entities."""
+    payload = _load_yaml_mapping(config_path)
+    provider = str(payload.get("provider") or config_path.parent.name)
+    return provider.strip().lower() == "composite"
 
 
 def _pipeline_name(provider: str, entity: str) -> str:

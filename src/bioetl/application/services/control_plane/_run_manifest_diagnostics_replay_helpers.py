@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from bioetl.application.services.control_plane.historical_replay_certification import (
+from bioetl.application.services.control_plane.replay.historical_certification import (
     HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED,
     HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED,
     LIVE_CAPTURE_SNAPSHOT_MATERIALIZED,

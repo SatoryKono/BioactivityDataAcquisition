@@ -37,6 +37,9 @@ if TYPE_CHECKING:
         RuntimeSettingsProtocol as Settings,
     )
     from bioetl.domain.ports import LoggerPort
+    from bioetl.interfaces.cli.commands.domains.quarantine.support import (
+        _QuarantineRuntimeService,
+    )
 
 _HEALTH_SERVER_DOMAIN_ERROR_TITLE = "Health server failed with domain error"
 _HEALTH_SERVER_UNEXPECTED_ERROR_TITLE = "Unexpected error in health server command"
@@ -66,6 +69,13 @@ def get_quarantine_service() -> QuarantineService:
     from bioetl.composition.health_api import get_quarantine_service as _impl
 
     return _impl()
+
+
+def get_quarantine_runtime_service(pipeline: str) -> _QuarantineRuntimeService:
+    """Load quarantine runtime service through the health composition seam."""
+    from bioetl.composition.health_api import get_quarantine_runtime_service as _impl
+
+    return cast("_QuarantineRuntimeService", _impl(pipeline))
 
 
 def get_settings() -> Settings:

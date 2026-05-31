@@ -5,7 +5,7 @@ import pytest
 from bioetl.application.services._observability_workflow_checkpoint_support import (
     _replay_context,
 )
-from bioetl.application.services.control_plane._run_manifest_identity_graph_builder import (
+from bioetl.application.services.control_plane.manifest.identity_graph_builder import (
     RunManifestIdentityGraphAssembler,
 )
 from bioetl.application.services.control_plane.run_manifest_replay_taxonomy import (

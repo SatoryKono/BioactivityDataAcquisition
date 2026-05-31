@@ -700,7 +700,7 @@
           "root_selector": "rows",
           "source": "url",
           "type": "json",
-          "url": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}",
+          "url": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
           "url_options": {
             "data": "",
             "method": "GET"
@@ -1685,7 +1685,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Shows each active runtime blocker recording rule with its current value for the selected pipeline/run_type where the source metric exposes run_type. Empty table means no active blockers only when Runtime Status and Runtime Telemetry Gap are not UNKNOWN.",
+          "description": "Shows each active runtime blocker recording rule with its current value for the selected pipeline/run_type where the source metric exposes run_type. Expected Empty classification: an empty table is valid only when Runtime Status is OK and Runtime Telemetry Gap is not UNKNOWN; otherwise it is a telemetry/selector gap that must be investigated.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1713,7 +1713,7 @@
                 ]
               },
               "unit": "short",
-              "noValue": "No active blockers"
+              "noValue": "No active blockers when Runtime Status is OK"
             },
             "overrides": []
           },

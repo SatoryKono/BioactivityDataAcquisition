@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from bioetl.application.services.control_plane._run_manifest_artifact_payloads import (
     build_artifact_ref_from_ledger_entry,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_helpers import (
+from bioetl.application.services.control_plane.manifest.diagnostics.helpers import (
     extract_dq_details,
     update_correlation_anchor_gaps,
 )

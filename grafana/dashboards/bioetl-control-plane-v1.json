@@ -687,7 +687,7 @@
           "root_selector": "rows",
           "source": "url",
           "type": "json",
-          "url": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}",
+          "url": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
           "url_options": {
             "data": "",
             "method": "GET"
@@ -2188,7 +2188,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range GLOBAL checkpoint operator/admin latency quantiles. Not filtered by $pipeline or $run_type. Alerts: BioETLCheckpointOperatorLatencyHigh.",
+          "description": "Selected-range GLOBAL checkpoint operator/admin latency quantiles. Not filtered by $pipeline or $run_type. Expected Empty classification: No data is valid when no checkpoint operator/admin duration samples were emitted in the selected range; it is not a pipeline success signal. If checkpoint freshness or replay safety is degraded while this panel is empty, treat the result as telemetry gap and inspect checkpoint freshness/history. Alerts: BioETLCheckpointOperatorLatencyHigh.",
           "fieldConfig": {
             "defaults": {
               "color": {

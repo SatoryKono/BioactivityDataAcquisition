@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from bioetl.application.services.control_plane._run_manifest_diagnostics_helpers import (
+from bioetl.application.services.control_plane.manifest.diagnostics.helpers import (
     extract_diagnostic_context,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_helpers import (

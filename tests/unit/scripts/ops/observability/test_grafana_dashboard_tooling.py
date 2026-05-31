@@ -157,6 +157,52 @@ def test_rerender_failure_hint_explains_grafana_auth_drift(
     assert "scripts/ops/support/load_repo_env.sh" in hint
 
 
+def test_rerender_manifest_records_engine_and_run_scope(tmp_path: Path) -> None:
+    config = rerender_subject.RenderConfig(
+        base_url="http://localhost:3000",
+        username="admin",
+        password="changeme",
+        service_account_token="",
+        output_dir=tmp_path,
+        width=1600,
+        height=2200,
+        timeout_seconds=30.0,
+        selected_uids=("bioetl-control-plane-v1",),
+        fallback="none",
+        workflow="chembl_target",
+        pipeline="chembl_target",
+        run_type="backfill",
+        run_id="b51986c6-870b-4457-aa70-baedac2710ad",
+        range_hours=12,
+    )
+    screenshot = tmp_path / "bioetl-control-plane-v1.png"
+    screenshot.write_bytes(b"png")
+
+    rerender_subject._write_manifest(
+        config,
+        rendered=[
+            (
+                rerender_subject.DashboardRecord(
+                    uid="bioetl-control-plane-v1",
+                    url="/d/bioetl-control-plane-v1/0-control-plane",
+                    title="0. Control Plane",
+                ),
+                screenshot,
+            )
+        ],
+    )
+
+    manifest = json.loads((tmp_path / "render-manifest.json").read_text())
+    assert manifest["engine"] == "grafana-render-api"
+    assert manifest["scope"] == {
+        "workflow": "chembl_target",
+        "pipeline": "chembl_target",
+        "run_type": "backfill",
+        "run_id": "b51986c6-870b-4457-aa70-baedac2710ad",
+        "range_hours": 12,
+    }
+
+
 def test_check_playwright_runtime_reports_missing_node(monkeypatch: Any) -> None:
     monkeypatch.setattr(rerender_subject, "_resolve_node_executable", lambda: None)
 
@@ -201,7 +247,10 @@ def test_check_playwright_runtime_missing_shared_libs_points_to_system_packages(
     class _Result:
         returncode = 1
         stdout = ""
-        stderr = "chrome-headless-shell: error while loading shared libraries: libnspr4.so: cannot open shared object file"
+        stderr = (
+            "chrome-headless-shell: error while loading shared libraries: "
+            "libnspr4.so: cannot open shared object file"
+        )
 
     monkeypatch.setattr(
         rerender_subject.subprocess,

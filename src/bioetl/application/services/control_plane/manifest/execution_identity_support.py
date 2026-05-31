@@ -1,4 +1,4 @@
-"""Shared execution-identity payload helpers for run-manifest surfaces."""
+"""Canonical execution-identity payload helpers owned by the manifest package."""
 
 from __future__ import annotations
 
@@ -17,7 +17,6 @@ def build_execution_identity_payload_from_code_provenance(
     input_snapshot_fingerprint: str | None,
     silver_filter_compatibility_mode: str,
 ) -> dict[str, object]:
-    """Build the canonical execution-identity payload from code provenance."""
     return cast(
         dict[str, object],
         build_execution_identity_payload(
@@ -48,7 +47,6 @@ def build_contract_identity_anchor_fields(
     include_effective_config_artifact_id: bool = True,
     include_null_values: bool = False,
 ) -> dict[str, object]:
-    """Return non-empty contract and normalization anchor fields."""
     payload: dict[str, object] = {
         "contract_ref": code_provenance.contract_ref,
         "contract_version": code_provenance.contract_version,
@@ -72,7 +70,6 @@ def build_code_provenance_dict(
     *,
     include_execution_anchors: bool = False,
 ) -> dict[str, object]:
-    """Return a canonical code-provenance mapping for manifest/replay surfaces."""
     payload: dict[str, object] = {
         "pipeline_version": code_provenance.pipeline_version,
         "git_commit": code_provenance.git_commit,

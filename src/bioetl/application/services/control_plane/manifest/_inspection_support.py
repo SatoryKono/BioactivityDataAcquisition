@@ -1,16 +1,18 @@
-"""Internal mixins for run-manifest inspection helpers."""
+"""Private inspection helpers owned by the manifest inspection package surface."""
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.control_plane._run_manifest_identity_graph_builder import (
+from bioetl.application.services.control_plane.manifest.identity_graph_builder import (
     RunManifestIdentityGraphAssembler,
 )
 from bioetl.domain.control_plane import RunManifest
 
 if TYPE_CHECKING:
-    from .run_manifest_inspection_models import RunManifestDiffEntry
+    from bioetl.application.services.control_plane.manifest.inspection_models import (
+        RunManifestDiffEntry,
+    )
 
 _OCCURRENCE_ONLY_DIFF_FIELDS = frozenset({"manifest_id", "run_id", "created_at"})
 
@@ -23,7 +25,6 @@ class RunManifestInspectionIdentityGraphMixin:
         manifest: RunManifest,
         diagnostics: dict[str, object],
     ) -> dict[str, object]:
-        """Return one operator-facing run identity graph payload."""
         return RunManifestIdentityGraphAssembler.build(manifest, diagnostics)
 
 
@@ -37,7 +38,6 @@ class RunManifestInspectionDiffClassificationMixin:
         right_manifest: RunManifest,
         differences: tuple[RunManifestDiffEntry, ...],
     ) -> dict[str, object]:
-        """Classify a manifest diff into occurrence-only vs semantic drift."""
         diff_fields = tuple(entry.field for entry in differences)
         if not diff_fields:
             return {
@@ -88,7 +88,6 @@ class RunManifestInspectionDiffClassificationMixin:
         non_occurrence_fields: tuple[str, ...],
         replay_relationship: str,
     ) -> dict[str, object]:
-        """Return the diff payload for semantic-equivalent manifest pairs."""
         if not non_occurrence_fields:
             return {
                 "classification": "occurrence_only",
@@ -115,7 +114,6 @@ class RunManifestInspectionDiffClassificationMixin:
         manifest: RunManifest,
         other: RunManifest,
     ) -> bool:
-        """Return whether one manifest explicitly replays the other."""
         return (
             manifest.replay_of_manifest_id == other.manifest_id
             or manifest.replay_of_run_id == str(other.run_id)
@@ -127,7 +125,6 @@ class RunManifestInspectionDiffClassificationMixin:
         left_manifest: RunManifest,
         right_manifest: RunManifest,
     ) -> str:
-        """Classify explicit replay ancestry separately from semantic equality."""
         left_replays_right = (
             RunManifestInspectionDiffClassificationMixin._manifest_replays_other(
                 manifest=left_manifest,

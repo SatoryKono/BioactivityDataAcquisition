@@ -1,4 +1,4 @@
-"""Support collaborators for historical replay certification workflows."""
+"""Private support collaborators for historical replay certification workflows."""
 
 from __future__ import annotations
 
@@ -17,8 +17,6 @@ from bioetl.domain.types import RunID
 
 
 class HistoricalReplayCertificationProtocol(Protocol):
-    """Structural type for snapshot certifications."""
-
     provider: str
     entity: str
     pipeline_name: str
@@ -29,8 +27,6 @@ class HistoricalReplayCertificationProtocol(Protocol):
 
 @dataclass(frozen=True, slots=True)
 class HistoricalReplayCertificationResult:
-    """Bounded result of one historical replay certification workflow."""
-
     manifest_id: str
     run_id: str
     certification_scope: str
@@ -41,8 +37,6 @@ class HistoricalReplayCertificationResult:
 
 @dataclass(frozen=True, slots=True)
 class HistoricalReplayCertificationResultAssembler:
-    """Assemble bounded certification results from manifest diagnostics."""
-
     ledger_port: RunLedgerPort
 
     def build(
@@ -75,8 +69,6 @@ class HistoricalReplayCertificationResultAssembler:
 
 @dataclass(frozen=True, slots=True)
 class HistoricalReplayCertificationValidator:
-    """Validate source/composite certification preconditions."""
-
     manifest_port: RunManifestPort
     ledger_port: RunLedgerPort
 
@@ -260,34 +252,23 @@ class HistoricalReplayCertificationValidator:
         upstream_manifest: RunManifest,
     ) -> None:
         upstream_run_id = str(certification.upstream_run_id or "").strip()
-        upstream_summary = build_diagnostics_summary(
-            upstream_manifest,
-            tuple(self.ledger_port.list_entries(upstream_manifest.manifest_id)),
-        )
-        if str(upstream_summary.get("run_id") or "") != upstream_run_id:
+        if upstream_run_id != str(upstream_manifest.run_id):
             raise ValueError(
-                "Composite certification upstream run_id does not match manifest"
+                "Composite certification upstream_run_id does not match the persisted upstream manifest"
             )
 
     def _validate_upstream_certification_state(
         self,
         upstream_manifest: RunManifest,
     ) -> None:
-        upstream_summary = build_diagnostics_summary(
+        diagnostics = build_diagnostics_summary(
             upstream_manifest,
             tuple(self.ledger_port.list_entries(upstream_manifest.manifest_id)),
         )
-        valid_states = {
-            "within_launch_time_snapshot_boundary",
-            "within_post_capture_parent_boundary",
-            "historical_source_replay_certified",
-        }
-        if (
-            str(upstream_summary.get("broader_historical_exact_replay_state") or "")
-            not in valid_states
-        ):
+        state = str(diagnostics.get("broader_historical_exact_replay_state") or "")
+        if state != "historical_source_replay_certified":
             raise ValueError(
-                "Composite certification requires certified or snapshot-backed upstream lineage"
+                "Composite certification requires upstream historical_source_replay_certified lineage"
             )
 
     @staticmethod
@@ -295,39 +276,23 @@ class HistoricalReplayCertificationValidator:
         manifest: RunManifest,
         certification: HistoricalReplayCertificationProtocol,
     ) -> list[str]:
-        return sorted(
-            {
-                str(ref.query or "").strip()
-                for ref in manifest.source_refs
-                if _source_ref_matches_certification(ref, certification)
-            }
-        )
-
-
-def _source_ref_matches_certification(
-    ref: object,
-    certification: HistoricalReplayCertificationProtocol,
-) -> bool:
-    return (
-        str(getattr(ref, "provider", "") or "").strip() == certification.provider
-        and str(getattr(ref, "entity", "") or "").strip() == certification.entity
-        and str(getattr(ref, "pipeline_name", "") or "").strip()
-        == certification.pipeline_name
-        and str(getattr(ref, "query", "") or "").strip()
-    )
+        matching_queries = [
+            ref.query
+            for ref in manifest.source_refs
+            if ref.provider == certification.provider
+            and ref.entity == certification.entity
+            and ref.pipeline_name == certification.pipeline_name
+            and ref.query
+        ]
+        return sorted({query for query in matching_queries if query is not None})
 
 
 def _source_key(
     *,
-    provider: object,
-    entity: object,
-    pipeline_name: object,
-    query: object,
+    provider: str,
+    entity: str,
+    pipeline_name: str,
+    query: str | None,
 ) -> tuple[str, str, str, str | None]:
-    query_text = str(query or "").strip()
-    return (
-        str(provider or "").strip(),
-        str(entity or "").strip(),
-        str(pipeline_name or "").strip(),
-        query_text or None,
-    )
+    normalized_query = str(query).strip() or None if query is not None else None
+    return (provider, entity, pipeline_name, normalized_query)

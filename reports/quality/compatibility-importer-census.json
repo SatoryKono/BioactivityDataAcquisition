@@ -1,5 +1,5 @@
 {
-  "snapshot_date": "2026-05-30",
+  "snapshot_date": "2026-05-31",
   "inventory_source": "configs/quality/compatibility_facade_inventory.yaml",
   "twin_ratchet_source": "configs/quality/compatibility_twin_module_ratchet.yaml",
   "config_root_facade_source": "configs/quality/infrastructure_config_root_facade_inventory.yaml",
@@ -77,13 +77,15 @@
       "canonical_target": "bioetl.interfaces.cli.commands.health",
       "owner": "bioetl.interfaces.cli.commands",
       "src_importers": [
+        "src/bioetl/interfaces/cli/commands/diagnostics.py",
         "src/bioetl/interfaces/cli/commands/domains/health/command.py",
+        "src/bioetl/interfaces/cli/commands/domains/health/server_integration.py",
         "src/bioetl/interfaces/cli/commands/quarantine.py"
       ],
       "test_importers": [
         "tests/unit/interfaces/cli/commands/test_health.py"
       ],
-      "src_importer_count": 2,
+      "src_importer_count": 4,
       "test_importer_count": 1
     },
     {
@@ -122,10 +124,15 @@
       "canonical_target": "bioetl.interfaces.cli.commands.maintenance",
       "owner": "bioetl.interfaces.cli.commands",
       "src_importers": [
-        "src/bioetl/interfaces/cli/commands/domains/maintenance/command.py"
+        "src/bioetl/interfaces/cli/commands/archive.py",
+        "src/bioetl/interfaces/cli/commands/cleanup.py",
+        "src/bioetl/interfaces/cli/commands/domains/maintenance/command.py",
+        "src/bioetl/interfaces/cli/commands/domains/maintenance/plan.py",
+        "src/bioetl/interfaces/cli/commands/domains/run/support.py",
+        "src/bioetl/interfaces/cli/commands/vacuum.py"
       ],
       "test_importers": [],
-      "src_importer_count": 1,
+      "src_importer_count": 6,
       "test_importer_count": 0
     },
     {
@@ -150,16 +157,13 @@
       "canonical_target": "bioetl.composition.health_api",
       "owner": "bioetl.composition",
       "src_importers": [
-        "src/bioetl/interfaces/cli/commands/diagnostics.py",
-        "src/bioetl/interfaces/cli/commands/domains/health/server_integration.py",
-        "src/bioetl/interfaces/cli/commands/health.py",
-        "src/bioetl/interfaces/cli/commands/quarantine.py"
+        "src/bioetl/interfaces/cli/commands/health.py"
       ],
       "test_importers": [
         "tests/unit/composition/test_canonical_module_paths.py",
         "tests/unit/composition/test_health_api.py"
       ],
-      "src_importer_count": 4,
+      "src_importer_count": 1,
       "test_importer_count": 2
     },
     {
@@ -169,16 +173,12 @@
       "canonical_target": "bioetl.composition.maintenance_api",
       "owner": "bioetl.composition",
       "src_importers": [
-        "src/bioetl/interfaces/cli/commands/archive.py",
-        "src/bioetl/interfaces/cli/commands/cleanup.py",
-        "src/bioetl/interfaces/cli/commands/domains/maintenance/plan.py",
-        "src/bioetl/interfaces/cli/commands/domains/run/support.py",
-        "src/bioetl/interfaces/cli/commands/vacuum.py"
+        "src/bioetl/interfaces/cli/commands/maintenance.py"
       ],
       "test_importers": [
         "tests/unit/composition/test_canonical_module_paths.py"
       ],
-      "src_importer_count": 5,
+      "src_importer_count": 1,
       "test_importer_count": 1
     },
     {

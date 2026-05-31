@@ -49,8 +49,9 @@ async def health_server_context(
         yield None
         return
 
-    # Import here to avoid circular imports and keep interfaces layer clean
-    from bioetl.composition.health_api import (
+    # Import here to avoid circular imports and centralize facade access in the
+    # public CLI owner module.
+    from bioetl.interfaces.cli.commands.health import (
         get_health_server_dependencies,
         get_quarantine_service,
     )

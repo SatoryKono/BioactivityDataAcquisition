@@ -94,8 +94,10 @@ def get_metrics_operator_profile() -> MetricsOperatorProfile:
 
 
 def get_quarantine_runtime_service(pipeline: str) -> _QuarantineRuntimeService:
-    """Load the quarantine manager through composition on demand."""
-    from bioetl.composition.health_api import get_quarantine_runtime_service as _impl
+    """Load the quarantine runtime service through the health command seam."""
+    from bioetl.interfaces.cli.commands.health import (
+        get_quarantine_runtime_service as _impl,
+    )
 
     return cast(_QuarantineRuntimeService, _impl(pipeline))
 

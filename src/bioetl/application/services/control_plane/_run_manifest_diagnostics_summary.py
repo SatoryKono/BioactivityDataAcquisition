@@ -9,7 +9,7 @@ from typing import cast
 from bioetl.application.services.control_plane._run_manifest_diagnostics_composite import (
     build_composite_dossier_projection,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_helpers import (
+from bioetl.application.services.control_plane.manifest.diagnostics.helpers import (
     DQDetailsSummary,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_ledger import (
@@ -23,7 +23,7 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_persist
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_helpers import (
     _is_composite_execution_context,
 )
-from bioetl.application.services.control_plane._run_manifest_identity_graph_builder import (
+from bioetl.application.services.control_plane.manifest.identity_graph_builder import (
     RunManifestIdentityGraphAssembler,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.artifact_support import (

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-31T14:01:39.679800+00:00",
+  "generated_at": "2026-05-31T15:21:07.387719+00:00",
   "summary": {
     "total_scripts": 419,
     "status_counts": {
@@ -8515,13 +8515,13 @@
         },
         {
           "path": "docs/00-project/glossary.md",
-          "line": 548,
+          "line": 549,
           "source_group": "docs",
           "text": "A terminology linter is available at `scripts/engineering/qa/lint_terminology.py`:"
         },
         {
           "path": "docs/00-project/glossary.md",
-          "line": 552,
+          "line": 553,
           "source_group": "docs",
           "text": "python scripts/engineering/qa/lint_terminology.py src/bioetl/"
         },
@@ -11385,7 +11385,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 407,
+          "line": 456,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/audit_live_grafana_panels.py\","
         }
@@ -11406,7 +11406,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 628,
+          "line": 677,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/check_grafana_dashboard_audit_preflight.py\","
         }
@@ -11471,7 +11471,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 891,
+          "line": 940,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/run_grafana_dashboard_audit_cycle.py\","
         }
@@ -11492,7 +11492,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 293,
+          "line": 342,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1\""
         }
@@ -11507,25 +11507,25 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 423,
+          "line": 431,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` to install repo-local \""
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 501,
+          "line": 509,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` or \""
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 190,
+          "line": 236,
           "source_group": "tests",
           "text": "assert \"setup_grafana_screenshot_runtime.sh\" in detail"
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 290,
+          "line": 339,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh\""
         }

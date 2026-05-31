@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+import pytest
+
 from scripts.engineering.qa.report_hotspot_family_baseline import (
     _budget_warnings_for_family,
     _merge_reviewed_baseline_metrics,
     _resolve_snapshot_date,
 )
+
+pytestmark = pytest.mark.unit
 
 
 def test_resolve_snapshot_date_prefers_reviewed_scorecard_snapshot() -> None:

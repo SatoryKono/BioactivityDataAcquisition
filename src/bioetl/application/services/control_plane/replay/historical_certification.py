@@ -1,4 +1,4 @@
-"""Shared constants for bounded historical replay certification."""
+"""Canonical historical replay certification constants."""
 
 from __future__ import annotations
 

@@ -10,6 +10,6 @@
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- | --- |
 | `application_core` | 174 | 21607 | 12 | 0.375 | 0 | 14 | `bioetl.application.core.batch_runtime_failure_policy` | `files_ge_250_loc=13, max_internal_fan_in=14` | `near_budget:files_ge_250_loc=12/13, at_budget:max_internal_fan_in=14/14` |
 | `composition_bootstrap_runtime` | 44 | 5758 | 3 | 0.330 | 0 | 5 | `bioetl.composition.bootstrap.runtime.composite_support_service_bundles` | `files_ge_250_loc=5, max_internal_fan_in=5` | `at_budget:max_internal_fan_in=5/5` |
-| `composition_factories_pipeline` | 31 | 4510 | 4 | 0.470 | 0 | 4 | `bioetl.composition.factories.pipeline.construction_types` | `files_ge_250_loc=4, max_internal_fan_in=4` | `at_budget:files_ge_250_loc=4/4, at_budget:max_internal_fan_in=4/4` |
+| `composition_factories_pipeline` | 31 | 4517 | 4 | 0.474 | 0 | 4 | `bioetl.composition.factories.pipeline.construction_types` | `files_ge_250_loc=4, max_internal_fan_in=4` | `at_budget:files_ge_250_loc=4/4, at_budget:max_internal_fan_in=4/4` |
 | `application_services_control_plane` | 66 | 12998 | 22 | 0.496 | 8 | 6 | `bioetl.application.services.control_plane._run_manifest_diagnostics_replay_helpers` | `files_ge_250_loc=22, max_internal_fan_in=6` | `at_budget:files_ge_250_loc=22/22, at_budget:max_internal_fan_in=6/6` |
 | `composition_runtime_builders` | 37 | 5736 | 7 | 0.502 | 4 | 11 | `bioetl.composition.runtime_builders.inputs_resolver` | `files_ge_250_loc=7, max_internal_fan_in=11` | `at_budget:files_ge_250_loc=7/7, at_budget:max_internal_fan_in=11/11` |

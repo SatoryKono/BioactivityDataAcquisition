@@ -149,3 +149,40 @@ def test_validate_registry_manifest_reports_drift_and_missing_bindings(
         "orphan_entity.yaml -> crossref_orphan_entity" in error for error in errors
     )
     assert any("missing contracts section" in error for error in errors)
+
+
+def test_validate_registry_manifest_ignores_legacy_composite_entity_stubs(
+    tmp_path: Path,
+) -> None:
+    configs_root = tmp_path / "configs"
+    _write_provider_config(configs_root, "crossref")
+    _write_entity_config(configs_root, provider="crossref", entity="publication")
+    _write_yaml(
+        configs_root / "entities" / "composite" / "activity.yaml",
+        {
+            "version": "1.0.0",
+            "provider": "composite",
+            "entity": "activity",
+            "pipeline": {
+                "pipeline_name": "composite_activity",
+                "provider": "composite",
+                "entity_type": "activity",
+                "business_primary_keys": ["entity_id"],
+            },
+            "quality": {},
+            "status": "active",
+        },
+    )
+
+    errors = validate_registry_manifest(
+        configs_root=configs_root,
+        pipeline_configs=(
+            _registry_entry(
+                pipeline_name="crossref_publication",
+                provider="crossref",
+                entity="publication",
+            ),
+        ),
+    )
+
+    assert errors == []

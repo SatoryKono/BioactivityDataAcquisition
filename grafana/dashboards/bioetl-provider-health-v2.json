@@ -224,7 +224,7 @@
       },
       "targets": [
         {
-          "expr": "max(max_over_time(bioetl_provider_current_status{provider=~\"$provider\"}[${__range_s}s]), max_over_time(bioetl_provider_range_operational_ok{provider=~\"$provider\"}[${__range_s}s]))",
+          "expr": "max(max_over_time(bioetl_provider_current_status{provider=~\"$provider\"}[${__range_s}s]) or max_over_time(bioetl_provider_range_operational_ok{provider=~\"$provider\"}[${__range_s}s]))",
           "refId": "A"
         }
       ]
@@ -712,7 +712,7 @@
           "root_selector": "rows",
           "source": "url",
           "type": "json",
-          "url": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}",
+          "url": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
           "url_options": {
             "data": "",
             "method": "GET"

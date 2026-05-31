@@ -15,11 +15,12 @@
   "summary": {
     "triaged_entry_count": 19,
     "triaged_entries_below_min_importers": 0,
-    "repo_wide_zero_import_candidate_count": 43,
-    "repo_wide_classified_zero_import_candidate_count": 43,
+    "repo_wide_zero_import_candidate_count": 45,
+    "repo_wide_classified_zero_import_candidate_count": 45,
     "repo_wide_untriaged_zero_import_candidate_count": 0,
     "repo_wide_disposition_counts": {
       "retain_canonical_owner_module": 28,
+      "retain_compat_shim": 2,
       "retain_dynamic_entrypoint": 10,
       "retain_module_entrypoint": 1,
       "retain_public_facade": 4
@@ -366,6 +367,32 @@
       "review_by": "2026-08-20",
       "linked_issue": "#4541",
       "rationale": "Manifest diagnostics identity helpers remain the canonical owner module behind control-plane diagnostics assembly."
+    },
+    {
+      "module_name": "bioetl.application.services.control_plane.run_manifest_inspection_models",
+      "path": "src/bioetl/application/services/control_plane/run_manifest_inspection_models.py",
+      "is_private_module": false,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "classification_status": "classified",
+      "disposition": "retain_compat_shim",
+      "reviewed_on": "2026-05-31",
+      "review_by": "2026-08-29",
+      "linked_issue": "#4541",
+      "rationale": "Compatibility shim retains the legacy public import seam for run-manifest inspection result models after ownership moved to `bioetl.application.services.control_plane.manifest.inspection_models`."
+    },
+    {
+      "module_name": "bioetl.application.services.control_plane.run_manifest_models",
+      "path": "src/bioetl/application/services/control_plane/run_manifest_models.py",
+      "is_private_module": false,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "classification_status": "classified",
+      "disposition": "retain_compat_shim",
+      "reviewed_on": "2026-05-31",
+      "review_by": "2026-08-29",
+      "linked_issue": "#4541",
+      "rationale": "Compatibility shim retains the legacy public import seam for run-manifest create-spec models after ownership moved to `bioetl.application.services.control_plane.manifest.models`."
     },
     {
       "module_name": "bioetl.composition.bootstrap.cli.adr",

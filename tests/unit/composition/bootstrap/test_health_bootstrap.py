@@ -5,6 +5,8 @@ Tests bootstrap functions for HealthService and health server dependencies.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+from typing import Mapping
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -17,15 +19,38 @@ from bioetl.composition.bootstrap.cli.health import (
 )
 from bioetl.domain.ports import (
     CheckpointPort,
+    HealthMonitorPort,
     MetricsPort,
     RunLedgerPort,
     RunManifestPort,
 )
-from bioetl.infrastructure.adapters.http.health_monitor import ProviderHealthMonitor
+from bioetl.domain.ports.health_check import HealthCheckResult, HealthStatePort
+from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 from bioetl.infrastructure.time import SystemClock
 from tests.helpers.control_plane import InMemoryRunLedgerStore, InMemoryRunManifestStore
+
+
+@dataclass(frozen=True, slots=True)
+class _FakeHealthMonitor:
+    metrics: MetricsPort
+
+    def update_from_health_check_result(
+        self,
+        result: HealthCheckResult,
+        logger: object | None = None,
+    ) -> HealthStatus:
+        return result.status
+
+    def record_success(self, provider: str) -> HealthStatus:
+        return HealthStatus.HEALTHY
+
+    def record_error(self, provider: str) -> HealthStatus:
+        return HealthStatus.DEGRADED
+
+    def get_all_states(self) -> Mapping[str, HealthStatePort]:
+        return {}
 
 
 @pytest.mark.unit
@@ -35,7 +60,7 @@ class TestHealthServerDependencies:
     def test_health_server_dependencies_is_frozen(self):
         """Test that HealthServerDependencies is immutable."""
         metrics = PrometheusMetrics()
-        monitor = ProviderHealthMonitor(metrics=metrics)
+        monitor = _FakeHealthMonitor(metrics=metrics)
         checkpoint_port = MagicMock()
         manifest_store = InMemoryRunManifestStore()
         ledger_store = InMemoryRunLedgerStore()
@@ -58,7 +83,7 @@ class TestHealthServerDependencies:
     def test_health_server_dependencies_stores_components(self):
         """Test that HealthServerDependencies stores components correctly."""
         metrics = PrometheusMetrics()
-        monitor = ProviderHealthMonitor(metrics=metrics)
+        monitor = _FakeHealthMonitor(metrics=metrics)
         checkpoint_port = MagicMock()
         manifest_store = InMemoryRunManifestStore()
         ledger_store = InMemoryRunLedgerStore()
@@ -143,10 +168,10 @@ class TestBootstrapHealthServerDependencies:
         assert isinstance(result.metrics, PrometheusMetrics)
 
     def test_bootstrap_creates_provider_health_monitor(self):
-        """Test that bootstrap_health_server_dependencies creates ProviderHealthMonitor."""
+        """Test that bootstrap_health_server_dependencies creates a health monitor."""
         result = bootstrap_health_server_dependencies()
 
-        assert isinstance(result.health_monitor, ProviderHealthMonitor)
+        assert isinstance(result.health_monitor, HealthMonitorPort)
 
     def test_bootstrap_wires_run_manifest_port(self):
         """Test that bootstrap_health_server_dependencies exposes a manifest catalog."""

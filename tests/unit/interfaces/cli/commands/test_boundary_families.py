@@ -82,7 +82,7 @@ COMMAND_DELEGATION_CASES: tuple[
     (
         "bioetl.interfaces.cli.commands.archive",
         "get_lifecycle_service",
-        "bioetl.composition.maintenance_api.get_lifecycle_service",
+        "bioetl.interfaces.cli.commands.maintenance.get_lifecycle_service",
         _no_args,
         object(),
         "identity",
@@ -202,7 +202,7 @@ COMMAND_DELEGATION_CASES: tuple[
     (
         "bioetl.interfaces.cli.commands.vacuum",
         "get_lifecycle_service",
-        "bioetl.composition.maintenance_api.get_lifecycle_service",
+        "bioetl.interfaces.cli.commands.maintenance.get_lifecycle_service",
         _no_args,
         object(),
         "identity",
@@ -210,7 +210,7 @@ COMMAND_DELEGATION_CASES: tuple[
     (
         "bioetl.interfaces.cli.commands.vacuum",
         "get_vacuum_service",
-        "bioetl.composition.maintenance_api.get_vacuum_service",
+        "bioetl.interfaces.cli.commands.maintenance.get_vacuum_service",
         _no_args,
         object(),
         "identity",

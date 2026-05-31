@@ -17,6 +17,8 @@ from bioetl.interfaces.cli.commands.domains.quarantine.support import (
 )
 from bioetl.interfaces.cli.commands.health import (
     DEFAULT_HEALTH_SERVER_PORT,
+    get_quarantine_runtime_service as get_health_quarantine_runtime_service,
+    get_quarantine_service as get_health_quarantine_service,
     run_health_server_command,
 )
 
@@ -24,10 +26,11 @@ SILVER_FILTER_ERROR_CODE = "FILTERED_OUT_SILVER"
 
 
 def get_quarantine_runtime_service(pipeline: str) -> _QuarantineRuntimeService:
-    """Load the quarantine runtime service through composition on demand."""
-    from bioetl.composition.health_api import get_quarantine_runtime_service as _impl
-
-    return cast(_QuarantineRuntimeService, _impl(pipeline))
+    """Load the quarantine runtime service through the health command seam."""
+    return cast(
+        _QuarantineRuntimeService,
+        get_health_quarantine_runtime_service(pipeline),
+    )
 
 
 def get_run_manifest_service() -> RunManifestInspectionServiceProtocol:
@@ -40,10 +43,8 @@ def get_run_manifest_service() -> RunManifestInspectionServiceProtocol:
 
 
 def get_quarantine_service() -> _QuarantineService:
-    """Load the quarantine service through composition on demand."""
-    from bioetl.composition.health_api import get_quarantine_service as _impl
-
-    return cast(_QuarantineService, _impl())
+    """Load the quarantine service through the health command seam."""
+    return cast(_QuarantineService, get_health_quarantine_service())
 
 
 @click.group()

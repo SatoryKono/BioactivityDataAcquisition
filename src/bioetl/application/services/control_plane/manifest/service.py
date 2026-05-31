@@ -7,12 +7,12 @@ from dataclasses import dataclass
 from bioetl.application.services.control_plane.manifest.models import (
     RunManifestCreateSpec,
 )
-from bioetl.application.services.control_plane.manifest_service_scaffold import (
-    ManifestServiceScaffoldMixin,
-)
-from bioetl.application.services.control_plane.run_manifest_service_mixins import (
+from bioetl.application.services.control_plane.manifest._service_support import (
     RunManifestHydrationMixin,
     RunManifestPayloadMixin,
+)
+from bioetl.application.services.control_plane.manifest_service_scaffold import (
+    ManifestServiceScaffoldMixin,
 )
 from bioetl.application.services.control_plane.run_manifest_validation import (
     validate_run_manifest_request,

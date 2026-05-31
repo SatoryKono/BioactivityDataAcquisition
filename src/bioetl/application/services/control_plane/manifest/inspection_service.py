@@ -9,6 +9,10 @@ from bioetl.application.services.control_plane.manifest.diagnostics import (
     build_diagnostics_summary,
 )
 from bioetl.application.services.control_plane.manifest import inspection_models
+from bioetl.application.services.control_plane.manifest._inspection_support import (
+    RunManifestInspectionDiffClassificationMixin,
+    RunManifestInspectionIdentityGraphMixin,
+)
 from bioetl.application.services.control_plane.manifest.inspection_models import (
     RunManifestDiffEntry,
     RunManifestDiffResult,
@@ -18,10 +22,6 @@ from bioetl.application.services.control_plane.manifest.inspection_models import
 )
 from bioetl.application.services.control_plane.run_manifest_inspection_helpers import (
     build_authoritative_replay_dossier,
-)
-from bioetl.application.services.control_plane.run_manifest_inspection_mixins import (
-    RunManifestInspectionDiffClassificationMixin,
-    RunManifestInspectionIdentityGraphMixin,
 )
 from bioetl.application.services.control_plane.run_manifest_inspection_verification import (
     build_cross_surface_replay_diff,

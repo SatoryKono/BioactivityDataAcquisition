@@ -1,4 +1,4 @@
-"""Owner inventory for module-level lazy export facades."""
+"""Owner inventory for module-level lazy export public API surfaces."""
 
 from __future__ import annotations
 
@@ -15,6 +15,9 @@ SRC_ROOT = ROOT / "src" / "bioetl"
 EXPECTED_LAZY_EXPORT_FACADES = {
     "src/bioetl/application/core/wiring/__init__.py": "public_package_facade",
     "src/bioetl/application/pipelines/common/blocks.py": "dynamic_entrypoint",
+    "src/bioetl/application/services/control_plane/replay/__init__.py": (
+        "public_package_facade"
+    ),
     "src/bioetl/composition/bootstrap/__init__.py": "public_package_facade",
     "src/bioetl/composition/bootstrap/cli/__init__.py": "public_package_facade",
     "src/bioetl/composition/bootstrap/runtime/__init__.py": ("public_package_facade"),
@@ -44,6 +47,7 @@ EXPECTED_LAZY_EXPORT_FACADES = {
         "compatibility_facade"
     ),
     "src/bioetl/infrastructure/config/__init__.py": "public_package_facade",
+    "src/bioetl/infrastructure/control_plane/__init__.py": "public_package_facade",
     "src/bioetl/infrastructure/export/__init__.py": "public_package_facade",
     "src/bioetl/infrastructure/observability/__init__.py": "public_package_facade",
     "src/bioetl/interfaces/cli/commands/__init__.py": "public_package_facade",
@@ -120,8 +124,8 @@ def _module_level_lazy_export_paths() -> set[str]:
 
 
 @pytest.mark.architecture
-def test_module_level_lazy_export_facades_are_owner_classified() -> None:
-    """New lazy export facades require an explicit owner classification."""
+def test_module_level_lazy_export_public_api_surfaces_are_owner_classified() -> None:
+    """New lazy export public API surfaces require an explicit owner classification."""
     actual_paths = _module_level_lazy_export_paths()
     expected_paths = set(EXPECTED_LAZY_EXPORT_FACADES)
 
@@ -136,7 +140,7 @@ def test_module_level_lazy_export_facades_are_owner_classified() -> None:
 
 
 @pytest.mark.architecture
-def test_lazy_export_facade_inventory_has_owner_test_coverage() -> None:
+def test_lazy_export_public_api_inventory_has_owner_test_coverage() -> None:
     """Compatibility-sensitive lazy export groups must have dedicated owner tests."""
     required_owner_tests = {
         "tests/architecture/test_compatibility_importer_census_governance.py",

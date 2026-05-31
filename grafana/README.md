@@ -793,7 +793,7 @@ Common context panels on primary dashboards outside Overview:
 | `Provenance` | `9400` | Visible question-only banner; selected context stays in the panel tooltip/description. |
 | `Status` | `9401` | Role-specific compact status; no Prometheus `$run_id` filtering. |
 | `ID` | `9402` | Quarantine Explorer HTTP identity table for `pipeline/run_type/run_id`. |
-| `Processed Records` | `9403` | Current Bronze -> Silver -> Gold accounting table from `/ops/observability/processed-records`, backed by `bioetl_processed_records_*` recording rules; zero-valued outcome rows remain visible and missing accounting series are UNKNOWN/no-data, not OK. |
+| `Processed Records` | `9403` | Current Bronze -> Silver -> Gold accounting table from `/ops/observability/processed-records`; exact `$run_id` scopes resolve from RunLedger evidence, while aggregate scopes use `bioetl_processed_records_*` recording rules; zero-valued outcome rows remain visible and missing accounting series are UNKNOWN/no-data, not OK. |
 
 `0. Control Plane` adds Control Plane-only identity evidence panels outside the
 shared shell. Panels `9404..9409` call
@@ -807,9 +807,10 @@ execution/config/contract hashes, input snapshot IDs, replay parentage,
 composite identity, lineage, and artifact refs; none of those values may be
 added as Prometheus labels.
 
-The local health server resolves `/ops/observability/processed-records` against
-Prometheus via `BIOETL_PROMETHEUS_URL` when set. Without an explicit setting it
-tries `http://localhost:9090`, then the Docker-local fallbacks
+The local health server resolves `/ops/observability/processed-records` from
+RunLedger when an exact `run_id` is provided. Without exact `run_id`, it falls
+back to Prometheus via `BIOETL_PROMETHEUS_URL` when set. Without an explicit
+setting it tries `http://localhost:9090`, then the Docker-local fallbacks
 `http://prometheus:9090` and `http://host.docker.internal:9090`.
 For detached dashboard audits this is a backend reachability contract, not a
 Grafana datasource contract: set `BIOETL_PROMETHEUS_URL` to the Prometheus URL
@@ -982,7 +983,7 @@ ______________________________________________________________________
 | 214 | Status                         | Stat       | `max(bioetl_l0_status{pipeline=~"$pipeline",run_type=~"$run_type"})`                                                         | `UNKNOWN`/`OK`/`WARN`/`CRIT`; null/no-series remain `UNKNOWN` via explicit null mapping. Panel-level links duplicate the canonical Runtime / Control Plane / Data Quality / Provider Health / Workflow handoff. |
 | 215 | First Action                  | Table      | `topk(1, bioetl_l0_next_action_route{pipeline=~"$pipeline",run_type=~"$run_type"} or label_replace(... vector(0) ...))`     | Shows `action_target`, `action_reason`, and `action_dashboard_uid`; invalid/missing selected scope falls back to `NO_ROUTE`. Routing priority remains Runtime > Control Plane > Gold Lifecycle > DQ > Provider > Workflow > Monitor. Runtime / Control Plane / DQ preserve scope; Provider Health fail-closes to `provider=unknown`; Workflow link explicitly resets scope. |
 | 9300 | ID                            | Table      | HTTP `/ops/control-plane/identity-table?...&run_id=${run_id}`                                                                | Compact two-column identity summary: run/manifest IDs, Provider.Entity version, contract schema, execution flags, replay capability/mode, checkpoint anchors, optional composite run, and identity health. Exact selected `run_id` wins; no Prometheus `run_id`. |
-| 9301 | Processed Records             | Table      | HTTP `/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}`                                  | Current compact Bronze/Silver/Gold accounting evidence. Shows all configured rows, including zero values, with space-grouped, left-padded, right-aligned `value` plus formatted `percintage`; Silver/Gold accounting deficits set red row backgrounds; reconciliation status, subtotal, and delta rows stay out of the compact table; no `$__range` and no Prometheus `run_id`. |
+| 9301 | Processed Records             | Table      | HTTP `/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}`                                  | Current compact Bronze/Silver/Gold accounting evidence. Exact `run_id` scopes read RunLedger artifact/metrics evidence; aggregate scopes use recording rules. Shows all configured rows, including zero values, with space-grouped, left-padded, right-aligned `value` plus formatted `percintage`; Silver/Gold accounting deficits set red row backgrounds; reconciliation status, subtotal, and delta rows stay out of the compact table; no `$__range` and no Prometheus `run_id`. |
 | 9002 | Inputs                        | Table      | `max by (input) (bioetl_l0_input_status_selected{pipeline=~"$pipeline",run_type=~"$run_type"})`                              | Compact L0 input summary: one worst-status row per operator input so the first screen fits without scroll while preserving selected-scope UNKNOWN rows.                       |
 | 9003 | Runtime                       | Table      | `max by (pipeline) (bioetl_l1_runtime_blocker_status{pipeline=~"$pipeline",run_type=~"$run_type"})`                         | Compact current runtime blocker summary: worst current status per pipeline across the selected run-type scope.                                                                  |
 | 9004 | Data Quality                  | Table      | `max by (pipeline) (bioetl_l1_dq_status{pipeline=~"$pipeline",run_type=~"$run_type"})`                                      | Compact selected-scope DQ summary: worst current status per pipeline across the selected run-type scope.                                                                        |
@@ -2324,7 +2325,7 @@ ______________________________________________________________________
 | 2. Runtime                | `bioetl-runtime`                | 2            | 34 / 4        | 30s     | 12h        | Prometheus + Quarantine Explorer identity + optional Loki/Tempo links | L2 runtime triage: blockers, latency, backlog, handoffs |
 | 3. Provider Health        | `bioetl-provider-health-v2`     | 6            | 28 / 1        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Provider latency, health, retries, failure ratios |
 | 4. Data Quality           | `bioetl-dq-v2`                  | 4            | 33 / 2        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | DQ score, quarantine, freshness, validation failures |
-| 5. Workflow               | `bioetl-workflow-overview`      | 2            | 13 / 1        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Selected-range workflow run and step evidence with explicit scope badges in the shared shell; exact `run_id` only populates the local ID card while collapsed diagnostics keep deeper workflow detail |
+| 5. Workflow               | `bioetl-workflow-overview`      | 2            | 13 / 1        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Selected-range workflow run and step evidence with explicit scope badges in the shared shell; exact `run_id` populates local HTTP identity/accounting cards while Prometheus panels stay selected-range workflow evidence |
 | Silver Reject Explorer | `bioetl-silver-reject-explorer` | 1001         | 11 / 0        | 1m      | 24h        | Quarantine Explorer API | Record-level browsing and action handoff for Silver rejects; forensic-only pipeline/run_type surface, not a shared workflow/run_id shell |
 
 ______________________________________________________________________

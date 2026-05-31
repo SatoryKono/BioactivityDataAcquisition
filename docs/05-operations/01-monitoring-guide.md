@@ -99,8 +99,9 @@ identity.
 Primary dashboards `0..5` now reuse the Overview-derived context shell:
 `workflow`, `pipeline`, `run_type`, and HTTP-backed `run_id`, plus common
 `Provenance`, `Status`, `ID`, and `Processed Records` panels. `run_id` remains
-local identity context only; do not use it as a Prometheus label or as a
-cross-dashboard filter.
+local HTTP identity context only; `Processed Records` may pass it to the local
+backend for RunLedger exact-run accounting, but do not use it as a Prometheus
+label or as a generic cross-dashboard filter.
 
 `0. Control Plane` keeps the compact shared `ID` panel backed by
 `/ops/control-plane/identity-table`. It is a two-column operator summary, not a

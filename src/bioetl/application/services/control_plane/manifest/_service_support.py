@@ -1,4 +1,4 @@
-"""Internal mixins for run-manifest payload and hydration helpers."""
+"""Private manifest-service support helpers owned by the manifest package."""
 
 from __future__ import annotations
 
@@ -6,11 +6,11 @@ from collections.abc import Callable
 from datetime import datetime
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.services.control_plane._run_manifest_execution_identity_support import (
+from bioetl.application.services.control_plane.manifest.execution_identity_support import (
     build_code_provenance_dict,
     build_execution_identity_payload_from_code_provenance,
 )
-from bioetl.application.services.control_plane._run_manifest_snapshot_payloads import (
+from bioetl.application.services.control_plane.manifest.snapshot_payloads import (
     source_refs_payload,
 )
 from bioetl.domain.control_plane import (
@@ -24,14 +24,15 @@ from bioetl.domain.normalization import compute_input_snapshot_identity_fingerpr
 from bioetl.domain.types import RunType
 
 if TYPE_CHECKING:
-    from .run_manifest_models import RunManifestCreateSpec
+    from bioetl.application.services.control_plane.manifest.models import (
+        RunManifestCreateSpec,
+    )
 
 
 def _optional_payload_string(
     payload: dict[str, object],
     key: str,
 ) -> str | None:
-    """Return a payload value as string when present."""
     value = payload.get(key)
     return None if value is None else str(value)
 
@@ -62,7 +63,6 @@ class RunManifestHydrationMixin:
         self,
         payload: dict[str, object],
     ) -> RunCodeProvenance:
-        """Rebuild typed code provenance from normalized payload data."""
         return RunCodeProvenance(
             pipeline_version=_optional_payload_string(payload, "pipeline_version"),
             git_commit=_optional_payload_string(payload, "git_commit"),
@@ -124,7 +124,6 @@ class RunManifestHydrationMixin:
         self,
         payload: list[object],
     ) -> tuple[RunSourceRef, ...]:
-        """Rebuild typed source references from normalized payload data."""
         return tuple(
             RunSourceRef(
                 provider=str(item["provider"]),
@@ -143,7 +142,6 @@ class RunManifestHydrationMixin:
         self,
         payload: list[object],
     ) -> tuple[RunInputSnapshotRef, ...]:
-        """Rebuild immutable input snapshot refs from normalized payload data."""
         return tuple(
             RunInputSnapshotRef(
                 snapshot_id=str(item["snapshot_id"]),
@@ -172,7 +170,6 @@ class RunManifestHydrationMixin:
         self,
         payload: list[object],
     ) -> tuple[RunArtifactRef, ...]:
-        """Rebuild typed planned artifacts from normalized payload data."""
         return tuple(
             RunArtifactRef(layer=str(item["layer"]), path=str(item["path"]))
             for item in payload
@@ -188,7 +185,6 @@ class RunManifestHydrationMixin:
         normalized_payload: dict[str, object],
         fingerprint: str,
     ) -> RunManifest:
-        """Build the final typed manifest from normalized primitive payload."""
         code_provenance_payload = cast(
             dict[str, object],
             normalized_payload["code_provenance"],
@@ -246,7 +242,6 @@ class RunManifestPayloadMixin:
         code_provenance: RunCodeProvenance,
         run_type: RunType,
     ) -> dict[str, object]:
-        """Build the canonical execution-identity payload shared across layers."""
         snapshots = [
             snapshot
             for source_ref in request.source_refs
@@ -275,7 +270,6 @@ class RunManifestPayloadMixin:
         code_provenance: RunCodeProvenance,
         run_type: RunType,
     ) -> dict[str, object]:
-        """Build the pre-fingerprint manifest payload in primitive form."""
         return {
             "schema_version": self.schema_version,
             "run_type": str(run_type.value),

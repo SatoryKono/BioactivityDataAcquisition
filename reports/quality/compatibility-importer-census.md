@@ -1,6 +1,6 @@
 # Compatibility Importer Census
 
-- snapshot_date: 2026-05-30
+- snapshot_date: 2026-05-31
 - retained_entrypoint_count: 14
 - removed_compatibility_surface_count: 22
 - removed_compatibility_surfaces_with_src_importers: 0
@@ -22,13 +22,13 @@
 | `src/bioetl/interfaces/cli/commands/run.py` | 1 | 2 |
 | `src/bioetl/interfaces/cli/commands/run_all.py` | 1 | 5 |
 | `src/bioetl/interfaces/cli/commands/run_composite.py` | 1 | 1 |
-| `src/bioetl/interfaces/cli/commands/health.py` | 2 | 1 |
+| `src/bioetl/interfaces/cli/commands/health.py` | 4 | 1 |
 | `src/bioetl/interfaces/cli/commands/diagnostics.py` | 1 | 2 |
 | `src/bioetl/interfaces/cli/commands/quarantine.py` | 1 | 0 |
-| `src/bioetl/interfaces/cli/commands/maintenance.py` | 1 | 0 |
+| `src/bioetl/interfaces/cli/commands/maintenance.py` | 6 | 0 |
 | `src/bioetl/composition/entrypoints.py` | 0 | 3 |
-| `src/bioetl/composition/health_api.py` | 4 | 2 |
-| `src/bioetl/composition/maintenance_api.py` | 5 | 1 |
+| `src/bioetl/composition/health_api.py` | 1 | 2 |
+| `src/bioetl/composition/maintenance_api.py` | 1 | 1 |
 | `src/bioetl/infrastructure/config/__init__.py` | 0 | 2 |
 | `src/bioetl/domain/composite/config.py` | 79 | 34 |
 | `src/bioetl/domain/value_objects/activity_values.py` | 7 | 1 |

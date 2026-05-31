@@ -10,6 +10,11 @@ from typing import Literal
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import urlopen
+from uuid import UUID
+
+from bioetl.domain.control_plane import RunLedgerEntry
+from bioetl.domain.control_plane.run_ledger import ARTIFACT_PUBLISHED_EVENT
+from bioetl.domain.types import RunID
 
 PROCESSED_RECORDS_TABLE_CONTRACT = "processed_records_table_v1"
 DEFAULT_PROMETHEUS_BASE_URL = "http://localhost:9090"
@@ -226,6 +231,98 @@ def build_processed_records_table_payload_from_prometheus(
     )
 
 
+def build_processed_records_table_payload_from_ledger(
+    *,
+    ledger_entries: tuple[RunLedgerEntry, ...],
+    pipeline: str,
+    run_type: str | None,
+) -> dict[str, object]:
+    """Build exact-run accounting rows from RunLedger source-of-truth entries."""
+    if not ledger_entries:
+        return build_processed_records_table_payload(
+            metric_values={spec.metric: None for spec in PROCESSED_RECORDS_ROW_SPECS},
+            pipeline=pipeline,
+            run_type=run_type,
+        )
+
+    metric_values = {spec.metric: 0 for spec in PROCESSED_RECORDS_ROW_SPECS}
+    latest_snapshot = _latest_metrics_snapshot(ledger_entries)
+    if latest_snapshot:
+        metric_values.update(
+            {
+                "bioetl_processed_records_bronze_current": latest_snapshot.get(
+                    "records_bronze",
+                    0,
+                ),
+                "bioetl_processed_records_silver_valid_current": latest_snapshot.get(
+                    "records_silver",
+                    0,
+                ),
+                "bioetl_processed_records_silver_quarantined_current": (
+                    latest_snapshot.get("records_quarantined", 0)
+                ),
+                "bioetl_processed_records_silver_filtered_out_current": (
+                    latest_snapshot.get("records_filtered_out", 0)
+                ),
+                "bioetl_processed_records_gold_written_current": latest_snapshot.get(
+                    "records_gold",
+                    0,
+                ),
+                "bioetl_processed_records_gold_excluded_by_contract_current": (
+                    latest_snapshot.get("records_gold_excluded_by_contract", 0)
+                ),
+            }
+        )
+
+    artifact_counts = _published_layer_artifact_counts(ledger_entries)
+    metric_values.update(
+        {
+            "bioetl_processed_records_bronze_current": artifact_counts.get(
+                "bronze",
+                metric_values["bioetl_processed_records_bronze_current"],
+            ),
+            "bioetl_processed_records_silver_valid_current": artifact_counts.get(
+                "silver",
+                metric_values["bioetl_processed_records_silver_valid_current"],
+            ),
+            "bioetl_processed_records_gold_written_current": artifact_counts.get(
+                "gold",
+                metric_values["bioetl_processed_records_gold_written_current"],
+            ),
+        }
+    )
+
+    return build_processed_records_table_payload(
+        metric_values=metric_values,
+        pipeline=pipeline,
+        run_type=run_type,
+    )
+
+
+def _latest_metrics_snapshot(
+    ledger_entries: tuple[RunLedgerEntry, ...],
+) -> dict[str, int] | None:
+    for entry in reversed(ledger_entries):
+        if entry.metrics_snapshot:
+            return dict(entry.metrics_snapshot)
+    return None
+
+
+def _published_layer_artifact_counts(
+    ledger_entries: tuple[RunLedgerEntry, ...],
+) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for entry in ledger_entries:
+        if entry.event_type != ARTIFACT_PUBLISHED_EVENT:
+            continue
+        details = entry.details if isinstance(entry.details, dict) else {}
+        stage = _optional_text(details.get("stage") or entry.stage)
+        record_count = _optional_int(details.get("record_count"))
+        if stage in {"bronze", "silver", "gold"} and record_count is not None:
+            counts[stage] = record_count
+    return counts
+
+
 def _processed_record_value_query(
     *,
     metric: str,
@@ -238,6 +335,20 @@ def _processed_record_value_query(
         f'round(sum({metric}{{pipeline=~"{pipeline_regex}",'
         f'run_type=~"{run_type_regex}"}}))'
     )
+
+
+def read_processed_records_run_id(raw: str | None) -> RunID | None:
+    """Return an exact RunID selector, treating dashboard placeholder tokens as empty."""
+    tokens = _selector_tokens(raw)
+    if len(tokens) != 1:
+        return None
+    token = tokens[0]
+    if token in {"-", "unknown"}:
+        return None
+    try:
+        return RunID(UUID(token))
+    except ValueError:
+        return None
 
 
 def _query_prometheus_scalar(*, prometheus_base_url: str, query: str) -> float | None:
@@ -341,6 +452,22 @@ def _as_float(value: float | int | None) -> float | None:
     return parsed
 
 
+def _optional_text(value: object | None) -> str | None:
+    if value is None:
+        return None
+    text = str(value).strip()
+    return text or None
+
+
+def _optional_int(value: object | None) -> int | None:
+    if isinstance(value, bool) or value is None:
+        return None
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
 def _sum_metric_values(
     metric_values: dict[str, float | int | None],
     metrics: tuple[str, ...],
@@ -415,6 +542,8 @@ __all__ = [
     "PROCESSED_RECORDS_ROW_SPECS",
     "PROCESSED_RECORDS_TABLE_CONTRACT",
     "build_processed_records_table_payload",
+    "build_processed_records_table_payload_from_ledger",
     "build_processed_records_table_payload_from_prometheus",
     "fetch_processed_record_values",
+    "read_processed_records_run_id",
 ]
