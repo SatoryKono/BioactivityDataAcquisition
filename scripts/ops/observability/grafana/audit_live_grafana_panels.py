@@ -921,23 +921,39 @@ def run_audit(config: AuditConfig) -> list[AuditResult]:
     resolved_app_base_url: str | None = None
     for spec in effective_panel_specs():
         panel = _find_panel(spec)
-        if spec.source_kind == "prometheus":
-            results.append(_audit_prometheus_panel(spec, panel, config))
-        elif spec.source_kind == "http":
-            if resolved_app_base_url is None:
-                resolved_app_base_url = _resolve_app_base_url(config)
+        try:
+            if spec.source_kind == "prometheus":
+                results.append(_audit_prometheus_panel(spec, panel, config))
+            elif spec.source_kind == "http":
+                if resolved_app_base_url is None:
+                    resolved_app_base_url = _resolve_app_base_url(config)
+                results.append(
+                    _audit_http_panel(
+                        spec,
+                        panel,
+                        config,
+                        app_base_url=resolved_app_base_url,
+                    )
+                )
+            elif spec.source_kind == "loki":
+                results.append(_audit_loki_panel(spec, panel, config))
+            else:
+                results.append(_audit_tempo_handoff(spec, config))
+        except (HTTPError, URLError, OSError, TimeoutError, json.JSONDecodeError) as exc:
             results.append(
-                _audit_http_panel(
-                    spec,
-                    panel,
-                    config,
-                    app_base_url=resolved_app_base_url,
+                AuditResult(
+                    dashboard_uid=spec.dashboard_uid,
+                    panel_id=spec.panel_id,
+                    title=spec.title,
+                    source_kind=spec.source_kind,
+                    semantic_kind=spec.semantic_kind,
+                    status="error" if spec.required else "ok",
+                    classification="blocked_unavailable",
+                    detail=f"Panel audit target could not be executed: {exc}",
+                    query_preview="",
+                    target_ref_id=spec.target_ref_id,
                 )
             )
-        elif spec.source_kind == "loki":
-            results.append(_audit_loki_panel(spec, panel, config))
-        else:
-            results.append(_audit_tempo_handoff(spec, config))
     return results
 
 
