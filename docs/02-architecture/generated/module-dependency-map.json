@@ -1,18 +1,18 @@
 {
   "summary": {
     "scanned_modules": 1967,
-    "total_internal_imports": 7731,
+    "total_internal_imports": 7719,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "7cd9535c4c0b1e7e00540773f1f3b7c9ba8716cc029ed63e5569692fc20d1417"
+    "source_fingerprint": "5470cebe3f48d6558fd2d077c40f036f6a34ffcb66a77463298fac090fe42477"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1347,
+      "imports": 1348,
       "allowed": true
     },
     {
@@ -30,19 +30,19 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 696,
+      "imports": 691,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 444,
+      "imports": 440,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 339,
+      "imports": 335,
       "allowed": true
     },
     {
@@ -255,11 +255,6 @@
       "imports": 26
     },
     {
-      "source": "composition.runtime_builders",
-      "target": "infrastructure.config",
-      "imports": 25
-    },
-    {
       "source": "composition.bootstrap",
       "target": "domain.composite",
       "imports": 24
@@ -272,6 +267,11 @@
     {
       "source": "composition.runtime_builders",
       "target": "domain.control_plane",
+      "imports": 23
+    },
+    {
+      "source": "composition.runtime_builders",
+      "target": "infrastructure.config",
       "imports": 23
     },
     {
@@ -380,14 +380,14 @@
       "imports": 13
     },
     {
-      "source": "composition.runtime_builders",
-      "target": "infrastructure.schemas",
-      "imports": 13
-    },
-    {
       "source": "interfaces.cli",
       "target": "composition.registry_api",
       "imports": 13
+    },
+    {
+      "source": "application.services",
+      "target": "domain.behavior",
+      "imports": 12
     }
   ],
   "violations": []
