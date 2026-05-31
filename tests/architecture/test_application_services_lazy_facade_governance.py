@@ -81,6 +81,9 @@ def _collect_imports_for_path(path: Path) -> tuple[str, set[str]] | None:
 
 
 def _candidate_python_paths(root: Path) -> tuple[Path, ...]:
+    if _should_prefer_python_scan(root):
+        return _candidate_python_paths_via_python_scan(root)
+
     rg_paths = _candidate_python_paths_via_rg(root)
     if rg_paths is not None:
         return rg_paths
@@ -91,6 +94,13 @@ def _candidate_python_paths(root: Path) -> tuple[Path, ...]:
 
     # Pure Python fallback for Windows when external commands hang
     return _candidate_python_paths_via_python_scan(root)
+
+
+def _should_prefer_python_scan(root: Path, *, os_name: str = os.name) -> bool:
+    """Avoid external repo scanners for Windows processes on WSL-mounted paths."""
+    if os_name != "nt":
+        return False
+    return root.as_posix().startswith("/mnt/")
 
 
 def _candidate_python_paths_via_rg(root: Path) -> tuple[Path, ...] | None:
@@ -421,6 +431,12 @@ def test_package_root_import_prefilter_ignores_submodule_imports() -> None:
     assert not _source_has_package_root_import_marker(
         "from bioetl.application.services.execution import RunExecutionRequest\n"
     )
+
+
+def test_windows_mnt_checkout_prefers_python_scan() -> None:
+    assert _should_prefer_python_scan(Path("/mnt/e/repo"), os_name="nt")
+    assert not _should_prefer_python_scan(Path("E:/repo"), os_name="nt")
+    assert not _should_prefer_python_scan(Path("/mnt/e/repo"), os_name="posix")
 
 
 def test_temp_output_cleanup_does_not_mask_windows_file_lock(

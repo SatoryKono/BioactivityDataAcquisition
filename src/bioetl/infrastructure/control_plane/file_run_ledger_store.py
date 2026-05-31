@@ -41,14 +41,16 @@ class _RunLedgerCorruptionError(ValueError):
 
 
 def _should_fsync_control_plane_writes() -> bool:
-    """Keep durable flushes unless Windows E2E explicitly relaxes them."""
+    """Keep durable flushes unless Windows test runs explicitly relax them."""
     if os.name != "nt":
         return True
     settings = get_settings()
     if not settings.test_mode:
         return True
-    required_profile = settings.pipeline.control_plane.required_persistence_profile
-    return required_profile != "degraded_observable"
+    # Windows test runs commonly execute from cloud-synced worktrees where
+    # fsync() can stall long enough to defeat reproducibility gates. Keep
+    # production durability semantics unchanged and relax only test-mode writes.
+    return False
 
 
 def _flush_file_descriptor(file_descriptor: int) -> None:

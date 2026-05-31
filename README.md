@@ -363,27 +363,35 @@ python scripts\ai\codex\setup_mcp.py
 What this script does:
 
 - Writes workspace MCP config for Copilot at `.vscode/mcp.json`.
-- Registers `memory`, `filesystem`, `sequential-thinking`, `fetch`, `pdf`, `github`, `docker`, `docker-docs`, `context7`, `paper-search`, `dockerhub`, `prometheus`, `grafana`, `brave-search`, `sonarqube`, `neo4j-cypher`, `neo4j-memory`, `needle`, and `openaiDeveloperDocs` in Codex CLI.
-- Uses Docker-backed wrappers for `docker`, `docker-docs`, `context7`, `paper-search`, `dockerhub`, `prometheus`, `grafana`, and `brave-search`.
-- Uses a repo-local `mcp-remote` wrapper for `needle`, loading bearer auth from `NEEDLE_API_KEY`.
+- Synchronizes `.mcp.json`, `.vscode/mcp.json`, `.codex/settings.json`, and the managed MCP block in `~/.codex/config.toml`.
+- Registers the current MCP set: `memory`, `filesystem`, `fetch`, `github`, `docker`, `context7`, `ast-grep`, `mcp-code-interpreter`, `prometheus`, `grafana`, `brave-search`, `sonarqube`, `neo4j-cypher`, `neo4j-memory`, `chembl`, `pubchem`, `pubmed`, `mermaid`, `biomoltechDocs`, `mintlify`, and `deepwiki`.
+- Uses repo-local wrappers for local and Docker-backed servers so auth and machine-local settings stay out of tracked MCP config files.
 - Uses local defaults when not overridden:
   - `PROMETHEUS_URL=http://host.docker.internal:9090`
   - `GRAFANA_URL=http://host.docker.internal:3000`
   - Grafana auth prefers `GRAFANA_SERVICE_ACCOUNT_TOKEN`; otherwise it can use `GRAFANA_USERNAME` / `GRAFANA_PASSWORD`.
-- Template variables for these MCP servers live in `.env.example`.
-- Does **not** store real tokens in repository files.
+- Repo wrappers auto-load local secrets from untracked `.env` before launch. Existing shell variables still win over `.env`, so ad-hoc session overrides continue to work.
+- Does **not** store real tokens in repository MCP files.
 
 Common MCP environment variables:
 
 ```bash
 GITHUB_PERSONAL_ACCESS_TOKEN=
+GITHUB_TOKEN=
 PROMETHEUS_URL=http://host.docker.internal:9090
+PROMETHEUS_TOKEN=
 GRAFANA_URL=http://host.docker.internal:3000
 GRAFANA_SERVICE_ACCOUNT_TOKEN=
+GRAFANA_TOKEN=
+GRAFANA_API_KEY=
 BRAVE_API_KEY=
+BRAVE_SEARCH_API_KEY=
+SONARQUBE_TOKEN=
+SONAR_TOKEN=
+SONARQUBE_ORG=
+SONARQUBE_URL=
 DOCKERHUB_USERNAME=
 HUB_PAT_TOKEN=
-NEEDLE_API_KEY=
 NEO4J_URI=bolt://localhost:7687
 NEO4J_USERNAME=
 NEO4J_PASSWORD=
@@ -393,10 +401,22 @@ NEO4J_AUTH_USERNAME=
 NEO4J_AUTH_PASSWORD=
 ```
 
-Before using GitHub MCP tools, prefer storing the token in the local untracked `.env` file:
+Before using tokenized MCP tools, prefer storing secrets in the local untracked `.env` file:
 
 ```bash
 GITHUB_PERSONAL_ACCESS_TOKEN="<your_pat>"
+BRAVE_API_KEY="<your_brave_key>"
+SONARQUBE_TOKEN="<your_sonar_token>"
+GRAFANA_SERVICE_ACCOUNT_TOKEN="<your_grafana_token>"
+```
+
+Accepted alias names are normalized by the wrappers. For example:
+
+```bash
+GITHUB_TOKEN="<your_pat>"
+BRAVE_SEARCH_API_KEY="<your_brave_key>"
+SONAR_TOKEN="<your_sonar_token>"
+GRAFANA_TOKEN="<your_grafana_token>"
 ```
 
 Shell export also works and overrides `.env` for the current session:

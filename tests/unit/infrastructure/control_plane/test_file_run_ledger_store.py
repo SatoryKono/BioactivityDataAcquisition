@@ -56,6 +56,20 @@ def test_should_skip_fsync_for_windows_e2e_degraded_observable(
     assert ledger_store_module._should_fsync_control_plane_writes() is False
 
 
+def test_should_skip_fsync_for_windows_test_mode_replay_ready(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("BIOETL_TEST_MODE", "true")
+    monkeypatch.setenv(
+        "BIOETL_PIPELINE__CONTROL_PLANE__REQUIRED_PERSISTENCE_PROFILE",
+        "replay_ready",
+    )
+    monkeypatch.setattr(ledger_store_module.os, "name", "nt", raising=False)
+    ledger_store_module.get_settings.cache_clear()
+
+    assert ledger_store_module._should_fsync_control_plane_writes() is False
+
+
 def test_file_store_round_trips_entries_by_manifest_and_run_id(tmp_path) -> None:
     run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))
     store = FileRunLedgerStore(base_path=tmp_path / "run_ledger")

@@ -19708,7 +19708,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-05-30",
-  "source_tree_sha256": "682f9d4d98f77c5ab941c2514ec7ac9d6dfcab741c0c7298f61d378128332638",
+  "source_tree_sha256": "8903b22a28e6a6d6e2818c33aeecadecc1c79e5e2072b62efd6a4482219b8f92",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
