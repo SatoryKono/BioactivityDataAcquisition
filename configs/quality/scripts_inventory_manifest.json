@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-31T16:03:54.611909+00:00",
+  "generated_at": "2026-05-31T17:53:18.033071+00:00",
   "summary": {
     "total_scripts": 420,
     "status_counts": {
@@ -7819,7 +7819,7 @@
       "references": [
         {
           "path": "docs/04-reference/contracts/gold-schemas.md",
-          "line": 110,
+          "line": 116,
           "source_group": "docs",
           "text": "`python3 scripts/engineering/qa/check_gold_nullable_numeric_compatibility.py --check`."
         },
@@ -11445,7 +11445,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 677,
+          "line": 743,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/check_grafana_dashboard_audit_preflight.py\","
         }
@@ -11510,7 +11510,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 940,
+          "line": 1006,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/run_grafana_dashboard_audit_cycle.py\","
         }

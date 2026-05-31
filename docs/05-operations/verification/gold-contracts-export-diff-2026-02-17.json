@@ -139,13 +139,47 @@
       "contract_version": "2.0.0",
       "status": "updated",
       "diff": {
-        "added_properties": [
-          "target_xref_hgnc_ids",
-          "target_xref_uniprot_ids"
-        ],
+        "added_properties": [],
         "removed_properties": [],
         "changed_properties": [],
         "required_changed": false
+      }
+    },
+    "chembl_target_protein_classification": {
+      "file": "docs/04-reference/contracts/gold/chembl_target_protein_classification_v1.0.json",
+      "contract_version": "1.0.0",
+      "status": "created",
+      "diff": {
+        "added_properties": [
+          "_dq_error",
+          "_dq_warn",
+          "_index",
+          "classification_status",
+          "component_id",
+          "content_hash",
+          "entity_id",
+          "hierarchy_index",
+          "l1_desc",
+          "l1_id",
+          "l1_name",
+          "l2_desc",
+          "l2_id",
+          "l2_name",
+          "l3_desc",
+          "l3_id",
+          "l3_name",
+          "l4_desc",
+          "l4_id",
+          "l4_name",
+          "l5_desc",
+          "l5_id",
+          "l5_name",
+          "leaf_id",
+          "target_id"
+        ],
+        "removed_properties": [],
+        "changed_properties": [],
+        "required_changed": true
       }
     },
     "chembl_tissue": {

@@ -2,7 +2,7 @@
 
 - snapshot_date: 2026-05-31
 - retained_entrypoint_count: 14
-- removed_compatibility_surface_count: 22
+- removed_compatibility_surface_count: 23
 - removed_compatibility_surfaces_with_src_importers: 0
 - removed_compatibility_surfaces_with_test_importers: 0
 - removed_compatibility_surfaces_still_present: 0
@@ -27,8 +27,8 @@
 | `src/bioetl/interfaces/cli/commands/quarantine.py` | 1 | 0 |
 | `src/bioetl/interfaces/cli/commands/maintenance.py` | 6 | 0 |
 | `src/bioetl/composition/entrypoints.py` | 0 | 3 |
-| `src/bioetl/composition/health_api.py` | 1 | 2 |
-| `src/bioetl/composition/maintenance_api.py` | 1 | 1 |
+| `src/bioetl/composition/health_api.py` | 0 | 2 |
+| `src/bioetl/composition/maintenance_api.py` | 0 | 1 |
 | `src/bioetl/infrastructure/config/__init__.py` | 0 | 2 |
 | `src/bioetl/domain/composite/config.py` | 79 | 34 |
 | `src/bioetl/domain/value_objects/activity_values.py` | 7 | 1 |
@@ -59,6 +59,7 @@
 | `bioetl.application.services.control_plane.replay_bundle_descriptor_service` | no | 0 | 0 | `bioetl.application.services.control_plane.replay.bundle_descriptor_service` |
 | `bioetl.application.services.control_plane.run_manifest_diagnostics` | no | 0 | 0 | `bioetl.application.services.control_plane.manifest.diagnostics` |
 | `bioetl.application.services.control_plane.run_manifest_inspection_service` | no | 0 | 0 | `bioetl.application.services.control_plane.manifest.inspection_service` |
+| `bioetl.application.services.control_plane.run_manifest_replay_taxonomy` | no | 0 | 0 | `bioetl.application.services.control_plane.manifest.replay_taxonomy` |
 | `bioetl.application.services.control_plane.workflow_execution_preparation` | no | 0 | 0 | `bioetl.application.services.control_plane.workflow.execution_preparation` |
 | `bioetl.application.services.control_plane.workflow_execution_recording` | no | 0 | 0 | `bioetl.application.services.control_plane.workflow.execution_recording` |
 | `bioetl.application.services.control_plane.workflow_execution_service` | no | 0 | 0 | `bioetl.application.services.control_plane.workflow.execution_service` |

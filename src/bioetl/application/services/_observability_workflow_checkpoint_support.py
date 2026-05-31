@@ -6,7 +6,7 @@ from bioetl.application.services.checkpoint_models import CheckpointInfo
 from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestInspectionResult,
 )
-from bioetl.application.services.control_plane.run_manifest_replay_taxonomy import (
+from bioetl.application.services.control_plane.manifest.replay_taxonomy import (
     resolve_replay_next_action,
     resolve_replay_resume_rebuild_verdict,
     resolve_replay_taxonomy_projection,

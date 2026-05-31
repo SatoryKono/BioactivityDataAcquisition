@@ -35,7 +35,7 @@ ______________________________________________________________________
 `v3` больше нельзя использовать как current-state blueprint без поправок.
 На `2026-05-31` подтверждены следующие изменения:
 
-- active tech-debt program queue сократилась с `39` до `5` open GitHub issue;
+- active tech-debt program queue сократилась с `39` до `4` open GitHub issue;
 - `Stream D` и `Stream E` больше не активны:
   `#4266`, `#4268`, `#4276`, `#4292`, `#4293`, `#4294`, `#4295`, `#4296`,
   `#4316`, `#4747` закрыты на GitHub `2026-05-30`;
@@ -69,7 +69,7 @@ reopen или repo evidence снова сломается.
 
 | Area | v3 claim | v4 verified state | Source |
 | --- | --- | --- | --- |
-| Active queue | `39` open issue across Streams A-E | `5` open issue across Streams A and C after Stream A/B closeout waves | GitHub REST API issue checks, 2026-05-31 |
+| Active queue | `39` open issue across Streams A-E | `4` open issue across Streams A and C after Stream A/B closeout waves | GitHub REST API issue checks, 2026-05-31 |
 | Stream B | `9` open remediation issues | `0` open; `#4764-#4772` all closed by `2026-05-31` | GitHub REST API issues `#4764-#4772` |
 | Stream A | `12` open issues in the active epic wave | `1` open (`#4811`); the rest of `#4812-#4828` is closed | GitHub REST API issues `#4811-#4828` |
 | Stream D | `9` open divergence issues | `0` open; all 9 closed `2026-05-30` | GitHub REST API issues `#4266/#4268/#4276/#4292-#4296/#4316` |
@@ -125,7 +125,7 @@ Repo-wide open issues on `2026-05-31`: `100`.
 `Blueprint v4` intentionally scopes only the active tech-debt eradication
 program queue:
 
-- `5` open issues total
+- `4` open issues total
 - the old `v4` label pivot is stale after the `2026-05-31` Stream A/B closeout waves;
   recompute label counts from GitHub before using them for scheduling or
   dashboards
@@ -165,15 +165,15 @@ Closed on `2026-05-31` and no longer part of the active queue:
 - `#4771` low-risk shim removal batch
 - `#4772` warnings-as-errors outside compatibility suites
 
-### Stream C — active (`4` open)
+### Stream C — active (`3` open)
 
 - `#4610` AR-002 control-plane decomposition
-- `#4700` collapse control-plane compatibility shims
 - `#4701` narrow composition/config facades
 - `#4705` debt governance unification
 
 Closed Stream C issues already off the active queue:
 
+- `#4700` closed `2026-05-31`
 - `#4702` closed `2026-05-31`
 - `#4703` closed `2026-05-31`
 - `#4704` closed `2026-05-31`
@@ -218,7 +218,7 @@ Exit:
 
 - no local plan still contradicts the current GitHub state for Stream A/B closeouts;
 - no current plan still treats closed Stream A, B, D, or E issues as active;
-- active queue explicitly equals the `5` open issues above.
+- active queue explicitly equals the `4` open issues above.
 
 ### Weeks 1-3 — Stream A core (P0)
 
@@ -248,15 +248,14 @@ Notes:
 
 ### Weeks 6-8 — Stream C
 
-- `#4700`
 - `#4701`
 - `#4705`
 - `#4610`
 
 Ordering rule:
 
-- `#4700` and `#4701` remain the practical entrypoint into the residual
-  control-plane wave.
+- `#4701` remains the practical entrypoint into the residual control-plane
+  wave.
 - `#4702/#4703/#4704/#4706` are already closed on GitHub `2026-05-31`.
 
 ### Week 9 — archived Stream B watch mode
@@ -267,7 +266,7 @@ Ordering rule:
 
 Closeout target is no longer “39 -> 0”; it is:
 
-- active program queue `5 -> 0`;
+- active program queue `4 -> 0`;
 - no reopened Stream D/E regressions;
 - no stale local mirror contradicting GitHub state.
 
@@ -279,11 +278,11 @@ Closeout target is no longer “39 -> 0”; it is:
 2. Run baseline governance checks for config matrix, debt scorecard, root
    cleanliness, and targeted architecture suites.
 3. Start implementation backlog with:
-   - Stream C `#4700`
+   - Stream C `#4701`
 
 ### Next
 
-1. Stream C `#4700` and `#4701`
+1. Stream C `#4701`
 2. Stream C `#4705`
 3. Stream C `#4610`, then epic `#4811` closeout prep
 
@@ -291,7 +290,7 @@ Closeout target is no longer “39 -> 0”; it is:
 
 - epic `#4811` can only close after the remaining open Stream C queue is
   exhausted
-- `#4700`, `#4701`, `#4705`, and `#4610` still define the active Stream C path
+- `#4701`, `#4705`, and `#4610` still define the active Stream C path
 - no new closed-stream work should reopen `#4764-#4772` or closed Stream A
   sub-issues without a fresh GitHub state change
 

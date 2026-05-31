@@ -592,7 +592,7 @@ hotspot_family_coverage_thresholds:
       - src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_alerts.py
       - src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_profile_support.py
       - src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_profiles.py
-      - src/bioetl/application/services/control_plane/_run_manifest_replay_family_contract_payload.py
+      - src/bioetl/application/services/control_plane/manifest/replay_family_contract_payload.py
       - src/bioetl/application/services/control_plane/effective_config_context.py
       - src/bioetl/application/services/control_plane/effective_config_support.py
       - src/bioetl/application/services/control_plane/effective_config/__init__.py

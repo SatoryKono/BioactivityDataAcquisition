@@ -3,12 +3,17 @@
 from __future__ import annotations
 
 import asyncio
-import math
 from typing import Protocol, cast
 
 from bioetl.domain.context import current_utc_time
 from bioetl.interfaces.http._health_server_checkpoint_lookup import (
     load_checkpoint_freshness_evidence,
+)
+from bioetl.interfaces.http._health_server_checkpoint_freshness_payloads import (
+    build_checkpoint_freshness_ok_payload,
+    build_checkpoint_freshness_unknown_payload,
+    extract_checkpoint_saved_at_epoch_seconds,
+    optional_text,
 )
 from bioetl.interfaces.http._health_server_control_plane_scope import (
     read_selected_run_id,
@@ -251,78 +256,11 @@ async def handle_control_plane_identity_evidence(
     )
 
 
-def _extract_checkpoint_saved_at_epoch_seconds(
-    metadata: dict[str, object],
-) -> float | None:
-    raw_value = metadata.get("checkpoint_saved_at_epoch_seconds")
-    if raw_value is None:
-        return None
-    try:
-        value = float(raw_value)
-    except (TypeError, ValueError):
-        return None
-    return value if math.isfinite(value) else None
-
-
-def _optional_text(value: object) -> str | None:
-    if value is None:
-        return None
-    normalized = str(value).strip()
-    return normalized or None
-
-
-def _build_checkpoint_freshness_unknown_payload(
-    *,
-    pipeline: str,
-    resolved_via: str,
-    detail: str,
-    evidence_source: str,
-    manifest_id: str | None = None,
-    checkpoint_run_id: str | None = None,
-) -> dict[str, object]:
-    return {
-        "pipeline": pipeline,
-        "resolved_via": resolved_via,
-        "manifest_id": manifest_id,
-        "checkpoint_run_id": checkpoint_run_id,
-        "evidence_source": evidence_source,
-        "checkpoint_present": checkpoint_run_id is not None,
-        "saved_at_epoch_seconds": None,
-        "age_seconds": None,
-        "status": "UNKNOWN",
-        "detail": detail,
-    }
-
-
-def _build_checkpoint_freshness_ok_payload(
-    *,
-    pipeline: str,
-    resolved_via: str,
-    manifest_id: str | None,
-    checkpoint_run_id: object,
-    evidence_source: str,
-    saved_at_epoch_seconds: float,
-    metadata: dict[str, object],
-) -> dict[str, object]:
-    payload_manifest_id = manifest_id
-    raw_manifest_id = _optional_text(metadata.get("manifest_id"))
-    if payload_manifest_id is None and raw_manifest_id is not None:
-        payload_manifest_id = raw_manifest_id
-    return {
-        "pipeline": pipeline,
-        "resolved_via": resolved_via,
-        "manifest_id": payload_manifest_id,
-        "checkpoint_run_id": str(checkpoint_run_id),
-        "evidence_source": evidence_source,
-        "checkpoint_present": True,
-        "saved_at_epoch_seconds": saved_at_epoch_seconds,
-        "age_seconds": max(
-            current_utc_time().timestamp() - saved_at_epoch_seconds,
-            0.0,
-        ),
-        "status": "OK",
-        "detail": "Persisted checkpoint freshness derived from checkpoint metadata.",
-    }
+def _resolved_scope_pipeline(scope: object) -> str:
+    resolved_manifest = getattr(scope, "resolved_manifest", None)
+    if resolved_manifest is not None:
+        return str(resolved_manifest.pipeline_name)
+    return str(getattr(scope, "requested_pipeline"))
 
 
 async def handle_control_plane_checkpoint_freshness(
@@ -336,7 +274,7 @@ async def handle_control_plane_checkpoint_freshness(
         await host._send_payload_response(
             writer,
             200,
-            _build_checkpoint_freshness_unknown_payload(
+            build_checkpoint_freshness_unknown_payload(
                 pipeline=host._read_required_param(query, "pipeline"),
                 resolved_via="checkpoint_port_unavailable",
                 detail="Checkpoint persistence port is unavailable in this backend.",
@@ -346,11 +284,7 @@ async def handle_control_plane_checkpoint_freshness(
         return
 
     scope = resolve_control_plane_identity_scope(host, query)
-    target_pipeline = (
-        scope.resolved_manifest.pipeline_name
-        if scope.resolved_manifest is not None
-        else scope.requested_pipeline
-    )
+    target_pipeline = _resolved_scope_pipeline(scope)
 
     (
         checkpoint_tuple,
@@ -366,7 +300,7 @@ async def handle_control_plane_checkpoint_freshness(
         await host._send_payload_response(
             writer,
             200,
-            _build_checkpoint_freshness_unknown_payload(
+            build_checkpoint_freshness_unknown_payload(
                 pipeline=target_pipeline,
                 resolved_via=scope.resolved_via,
                 detail=(
@@ -382,7 +316,7 @@ async def handle_control_plane_checkpoint_freshness(
         await host._send_payload_response(
             writer,
             200,
-            _build_checkpoint_freshness_unknown_payload(
+            build_checkpoint_freshness_unknown_payload(
                 pipeline=target_pipeline,
                 resolved_via=scope.resolved_via,
                 detail="No persisted checkpoint evidence was found for the current scope.",
@@ -393,12 +327,12 @@ async def handle_control_plane_checkpoint_freshness(
         return
 
     checkpoint_run_id, metadata = checkpoint_tuple
-    saved_at_epoch_seconds = _extract_checkpoint_saved_at_epoch_seconds(metadata)
+    saved_at_epoch_seconds = extract_checkpoint_saved_at_epoch_seconds(metadata)
     if saved_at_epoch_seconds is None:
         await host._send_payload_response(
             writer,
             200,
-            _build_checkpoint_freshness_unknown_payload(
+            build_checkpoint_freshness_unknown_payload(
                 pipeline=target_pipeline,
                 resolved_via=scope.resolved_via,
                 detail=(
@@ -406,7 +340,7 @@ async def handle_control_plane_checkpoint_freshness(
                     "checkpoint_saved_at_epoch_seconds."
                 ),
                 evidence_source=evidence_source,
-                manifest_id=manifest_id or _optional_text(metadata.get("manifest_id")),
+                manifest_id=manifest_id or optional_text(metadata.get("manifest_id")),
                 checkpoint_run_id=str(checkpoint_run_id),
             ),
         )
@@ -415,13 +349,14 @@ async def handle_control_plane_checkpoint_freshness(
     await host._send_payload_response(
         writer,
         200,
-        _build_checkpoint_freshness_ok_payload(
+        build_checkpoint_freshness_ok_payload(
             pipeline=target_pipeline,
             resolved_via=scope.resolved_via,
             manifest_id=manifest_id,
             checkpoint_run_id=checkpoint_run_id,
             evidence_source=evidence_source,
             saved_at_epoch_seconds=saved_at_epoch_seconds,
+            current_epoch_seconds=current_utc_time().timestamp(),
             metadata=metadata,
         ),
     )

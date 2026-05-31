@@ -133,6 +133,14 @@ REMOVED_COMPATIBILITY_SURFACES: tuple[dict[str, str], ...] = (
         "owner": "bioetl.application.services.control_plane.manifest",
     },
     {
+        "issue_id": "4700",
+        "surface_id": "run_manifest_replay_taxonomy",
+        "path": "src/bioetl/application/services/control_plane/run_manifest_replay_taxonomy.py",
+        "module_name": "bioetl.application.services.control_plane.run_manifest_replay_taxonomy",
+        "canonical_target": "bioetl.application.services.control_plane.manifest.replay_taxonomy",
+        "owner": "bioetl.application.services.control_plane.manifest",
+    },
+    {
         "issue_id": "4541",
         "surface_id": "workflow_execution_preparation",
         "path": "src/bioetl/application/services/control_plane/workflow_execution_preparation.py",

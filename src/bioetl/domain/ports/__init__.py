@@ -92,6 +92,7 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
         "IdentifierResolverStrategy",
         "PublicationMetadataStrategy",
     ),
+    "bioetl.domain.ports.protein_classification": ("ProteinClassificationPort",),
     "bioetl.domain.ports.quality": (
         "BronzeDQAnalyzerPort",
         "BronzeDQConfigPort",

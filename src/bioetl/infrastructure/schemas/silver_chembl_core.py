@@ -280,6 +280,37 @@ CHEMBL_TARGET_COMPONENT_SCHEMA = pa.schema(
     ]
 )
 
+# Schema for derived ChEMBL Target Protein Classification relation rows.
+CHEMBL_TARGET_PROTEIN_CLASSIFICATION_SCHEMA = pa.schema(
+    [
+        # === System prefix (MUST be first, per RULES.md §2.4) ===
+        *build_silver_system_prefix_fields(),
+        # === Business fields ===
+        pa.field("target_id", pa.string(), nullable=False),
+        pa.field("component_id", pa.int64()),
+        pa.field("hierarchy_index", pa.int64(), nullable=False),
+        pa.field("leaf_id", pa.int64()),
+        pa.field("l1_id", pa.int64()),
+        pa.field("l1_name", pa.string()),
+        pa.field("l1_desc", pa.string()),
+        pa.field("l2_id", pa.int64()),
+        pa.field("l2_name", pa.string()),
+        pa.field("l2_desc", pa.string()),
+        pa.field("l3_id", pa.int64()),
+        pa.field("l3_name", pa.string()),
+        pa.field("l3_desc", pa.string()),
+        pa.field("l4_id", pa.int64()),
+        pa.field("l4_name", pa.string()),
+        pa.field("l4_desc", pa.string()),
+        pa.field("l5_id", pa.int64()),
+        pa.field("l5_name", pa.string()),
+        pa.field("l5_desc", pa.string()),
+        pa.field("classification_status", pa.string(), nullable=False),
+        # === DQ_FIELDS_SUFFIX ===
+        *build_silver_dq_suffix_fields(),
+    ]
+)
+
 # Schema for ChEMBL Cell Line
 # See: https://www.ebi.ac.uk/chembl/api/data/cell_line
 CHEMBL_CELL_LINE_SCHEMA = pa.schema(

@@ -8,7 +8,7 @@ from bioetl.application.services._observability_workflow_checkpoint_support impo
 from bioetl.application.services.control_plane.manifest.identity_graph_builder import (
     RunManifestIdentityGraphAssembler,
 )
-from bioetl.application.services.control_plane.run_manifest_replay_taxonomy import (
+from bioetl.application.services.control_plane.manifest.replay_taxonomy import (
     resolve_replay_resume_rebuild_verdict,
 )
 from bioetl.application.services.control_plane.replay.bundle_descriptor_service import (

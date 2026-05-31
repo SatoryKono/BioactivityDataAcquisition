@@ -73,6 +73,36 @@ class ChEMBLTargetComponentGoldSchema(StrictGoldContractSchema):
     protein_classification_ids: Series[str] = pa.Field(nullable=True)  # list[int]
 
 
+class ChEMBLTargetProteinClassificationGoldSchema(StrictGoldContractSchema):
+    """Gold schema for ChEMBL target protein classification relation rows."""
+
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+    target_id: Series[str] = pa.Field(nullable=False)
+    component_id: Series[float] = pa.Field(nullable=True, ge=1, coerce=True)
+    hierarchy_index: Series[int] = pa.Field(nullable=False, ge=0)
+    leaf_id: Series[float] = pa.Field(nullable=True, ge=1, coerce=True)
+    l1_id: Series[float] = pa.Field(nullable=True, ge=1, coerce=True)
+    l1_name: Series[str] = pa.Field(nullable=True)
+    l1_desc: Series[str] = pa.Field(nullable=True)
+    l2_id: Series[float] = pa.Field(nullable=True, ge=1, coerce=True)
+    l2_name: Series[str] = pa.Field(nullable=True)
+    l2_desc: Series[str] = pa.Field(nullable=True)
+    l3_id: Series[float] = pa.Field(nullable=True, ge=1, coerce=True)
+    l3_name: Series[str] = pa.Field(nullable=True)
+    l3_desc: Series[str] = pa.Field(nullable=True)
+    l4_id: Series[float] = pa.Field(nullable=True, ge=1, coerce=True)
+    l4_name: Series[str] = pa.Field(nullable=True)
+    l4_desc: Series[str] = pa.Field(nullable=True)
+    l5_id: Series[float] = pa.Field(nullable=True, ge=1, coerce=True)
+    l5_name: Series[str] = pa.Field(nullable=True)
+    l5_desc: Series[str] = pa.Field(nullable=True)
+    classification_status: Series[str] = pa.Field(
+        nullable=False,
+        isin=["resolved", "missing_classification", "quarantined"],
+    )
+
+
 class ChEMBLTissueGoldSchema(StrictGoldContractSchema):
     """Gold schema for ChEMBL Tissue entity.
 
@@ -165,5 +195,6 @@ __all__ = [
     "ChEMBLSubcellularFractionGoldSchema",
     "ChEMBLTargetComponentGoldSchema",
     "ChEMBLTargetGoldSchema",
+    "ChEMBLTargetProteinClassificationGoldSchema",
     "ChEMBLTissueGoldSchema",
 ]
