@@ -50,12 +50,12 @@ class TestHealthServerCommand:
         assert "8081" in result.output  # default port
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")
-    @patch("bioetl.interfaces.cli.commands.health.get_quarantine_service")
+    @patch("bioetl.interfaces.cli.commands.health.get_health_server_quarantine_service")
     @patch("bioetl.interfaces.cli.commands.health.get_health_server_dependencies")
     def test_health_server_default_options(
         self,
         mock_get_deps: MagicMock,
-        mock_get_quarantine_service: MagicMock,
+        mock_get_health_server_quarantine_service: MagicMock,
         mock_server_cls: MagicMock,
         cli_runner: CliRunner,
     ) -> None:
@@ -63,7 +63,7 @@ class TestHealthServerCommand:
         # Setup mocks - mock dependencies and server class
         mock_deps = MagicMock()
         mock_get_deps.return_value = mock_deps
-        mock_get_quarantine_service.return_value = None
+        mock_get_health_server_quarantine_service.return_value = None
 
         mock_server_instance = MagicMock()
         mock_server_instance.start = AsyncMock()
@@ -82,19 +82,19 @@ class TestHealthServerCommand:
         assert result.exit_code == ExitCode.OK.value
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")
-    @patch("bioetl.interfaces.cli.commands.health.get_quarantine_service")
+    @patch("bioetl.interfaces.cli.commands.health.get_health_server_quarantine_service")
     @patch("bioetl.interfaces.cli.commands.health.get_health_server_dependencies")
     def test_health_server_custom_host_port(
         self,
         mock_get_deps: MagicMock,
-        mock_get_quarantine_service: MagicMock,
+        mock_get_health_server_quarantine_service: MagicMock,
         mock_server_cls: MagicMock,
         cli_runner: CliRunner,
     ) -> None:
         """Test health server with custom host and port."""
         mock_deps = MagicMock()
         mock_get_deps.return_value = mock_deps
-        mock_get_quarantine_service.return_value = None
+        mock_get_health_server_quarantine_service.return_value = None
 
         mock_server_instance = MagicMock()
         mock_server_instance.start = AsyncMock()
@@ -110,19 +110,19 @@ class TestHealthServerCommand:
         assert result.exit_code == ExitCode.OK.value
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")
-    @patch("bioetl.interfaces.cli.commands.health.get_quarantine_service")
+    @patch("bioetl.interfaces.cli.commands.health.get_health_server_quarantine_service")
     @patch("bioetl.interfaces.cli.commands.health.get_health_server_dependencies")
     def test_health_server_keyboard_interrupt(
         self,
         mock_get_deps: MagicMock,
-        mock_get_quarantine_service: MagicMock,
+        mock_get_health_server_quarantine_service: MagicMock,
         mock_server_cls: MagicMock,
         cli_runner: CliRunner,
     ) -> None:
         """Test health server graceful shutdown on Ctrl+C."""
         mock_deps = MagicMock()
         mock_get_deps.return_value = mock_deps
-        mock_get_quarantine_service.return_value = None
+        mock_get_health_server_quarantine_service.return_value = None
 
         mock_server_instance = MagicMock()
         mock_server_instance.start = AsyncMock()
@@ -629,12 +629,12 @@ class TestHealthServerAsyncExecution:
     """Test the actual async execution of health server."""
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")
-    @patch("bioetl.interfaces.cli.commands.health.get_quarantine_service")
+    @patch("bioetl.interfaces.cli.commands.health.get_health_server_quarantine_service")
     @patch("bioetl.interfaces.cli.commands.health.get_health_server_dependencies")
     def test_health_server_starts_and_stops(
         self,
         mock_get_deps: MagicMock,
-        mock_get_quarantine_service: MagicMock,
+        mock_get_health_server_quarantine_service: MagicMock,
         mock_server_cls: MagicMock,
         cli_runner: CliRunner,
     ) -> None:
@@ -642,7 +642,7 @@ class TestHealthServerAsyncExecution:
         mock_deps = MagicMock()
         mock_deps.checkpoint_port.aclose = AsyncMock()
         mock_get_deps.return_value = mock_deps
-        mock_get_quarantine_service.return_value = None
+        mock_get_health_server_quarantine_service.return_value = None
 
         mock_server = MagicMock()
         mock_server.start = AsyncMock()
@@ -669,12 +669,12 @@ class TestHealthServerAsyncExecution:
         assert "Health server stopped." in result.output
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")
-    @patch("bioetl.interfaces.cli.commands.health.get_quarantine_service")
+    @patch("bioetl.interfaces.cli.commands.health.get_health_server_quarantine_service")
     @patch("bioetl.interfaces.cli.commands.health.get_health_server_dependencies")
     def test_health_server_with_custom_options(
         self,
         mock_get_deps: MagicMock,
-        mock_get_quarantine_service: MagicMock,
+        mock_get_health_server_quarantine_service: MagicMock,
         mock_server_cls: MagicMock,
         cli_runner: CliRunner,
     ) -> None:
@@ -682,7 +682,7 @@ class TestHealthServerAsyncExecution:
         mock_deps = MagicMock()
         mock_deps.checkpoint_port.aclose = AsyncMock()
         mock_get_deps.return_value = mock_deps
-        mock_get_quarantine_service.return_value = None
+        mock_get_health_server_quarantine_service.return_value = None
 
         mock_server = MagicMock()
         mock_server.start = AsyncMock()
@@ -716,12 +716,12 @@ class TestHealthServerAsyncExecution:
         )
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")
-    @patch("bioetl.interfaces.cli.commands.health.get_quarantine_service")
+    @patch("bioetl.interfaces.cli.commands.health.get_health_server_quarantine_service")
     @patch("bioetl.interfaces.cli.commands.health.get_health_server_dependencies")
     def test_health_server_uses_composition_entrypoint(
         self,
         mock_get_deps: MagicMock,
-        mock_get_quarantine_service: MagicMock,
+        mock_get_health_server_quarantine_service: MagicMock,
         mock_server_cls: MagicMock,
         cli_runner: CliRunner,
     ) -> None:
@@ -729,7 +729,7 @@ class TestHealthServerAsyncExecution:
         mock_deps = MagicMock()
         mock_deps.checkpoint_port.aclose = AsyncMock()
         mock_get_deps.return_value = mock_deps
-        mock_get_quarantine_service.return_value = None
+        mock_get_health_server_quarantine_service.return_value = None
 
         mock_server = MagicMock()
         mock_server.start = AsyncMock()
