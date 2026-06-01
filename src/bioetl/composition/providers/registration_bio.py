@@ -35,6 +35,10 @@ from bioetl.composition.providers._registration_contracts import (
     build_http_provider_config_spec,
     resolve_provider_assembly_support,
 )
+from bioetl.composition.providers._chembl_target_protein_classification_data_source import (
+    TargetProteinClassificationDataSource,
+    TargetProteinClassificationEnrichedTargetDataSource,
+)
 from bioetl.domain.models.filter import ExtractionParams
 from bioetl.infrastructure.adapters.chembl import ChemblAdapter
 from bioetl.infrastructure.adapters.input import IDMappingCsvReaderAdapter
@@ -102,6 +106,12 @@ def _create_chembl_data_source(
         base_adapter = PublicationTermDataSource(base_adapter)
     if pipeline_config.entity_type == "subcellular_fraction":
         base_adapter = SubcellularFractionDataSource(base_adapter)
+    if pipeline_config.entity_type == "target":
+        base_adapter = TargetProteinClassificationEnrichedTargetDataSource(
+            base_adapter
+        )
+    if pipeline_config.entity_type == "target_protein_classification":
+        base_adapter = TargetProteinClassificationDataSource(base_adapter)
 
     return _wrap_with_filter(
         base_adapter, filter_config, logger, metrics, pipeline_name

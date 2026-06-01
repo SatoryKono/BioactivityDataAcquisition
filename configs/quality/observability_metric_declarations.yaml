@@ -29,6 +29,7 @@ recording_rule_metrics:
   - bioetl_l1_workflow_selected_status
   - bioetl_provider_current_status
   - bioetl_runtime_current_status
+  - bioetl_workflow_pipeline_verdict_status
 declared_label_contract_metrics:
   - bioetl_adapter_fallback_attempts_total
   - bioetl_adapter_fallback_hit_rate

@@ -33,7 +33,11 @@ Current specification summary:
   `chembl_target_protein_classification`.
 - `target_protein_class_id_L1..L5`, `target_protein_class_name_L1..L5`, and
   `target_protein_class_desc_L1..L5` are populated in standalone `chembl_target`
-  only when nested `target_components[].protein_classifications[]` are available.
+  from composition-owned ChEMBL data-source enrichment. The raw `/target`
+  payload usually lacks nested protein classification evidence, so the runtime
+  prepares relation-like rows from `/target_component` and
+  `/protein_classification` before `TargetTransformer` applies the shared
+  summary policy.
 - `composite_target` remains the canonical fully enriched target surface because
   it joins the dedicated `chembl_target_protein_classification` relation pipeline.
 - GO-derived columns use `xref_name`; `PDB`/`PDBe` and `Reactome` retain `xref_id`.

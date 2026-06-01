@@ -246,6 +246,7 @@ Canonical composite/runtime phase additions:
 | `bioetl_stage_lag_seconds`                     | Gauge     | `pipeline,run_type,stage`                   | bounded unresolved stage lag derived from run wall-clock anchor; `0` when no backlog is present                                                                               |
 | `bioetl_batch_lifecycle_events_total`          | Counter   | `pipeline,run_type,event,stage,status`      | bounded batch lifecycle events for `created`, `written`, `failed` across Bronze/Silver/Gold runtime projections                                                              |
 | `bioetl_batch_lifecycle_records_total`         | Counter   | `pipeline,run_type,event,stage,status`      | bounded record totals attached to the same batch lifecycle events                                                                                                             |
+| `bioetl_workflow_pipeline_verdict_status`      | Recording rule | `pipeline,run_type`                    | first-screen workflow dashboard pipeline verdict: `0=OK`, `1=WARN`, `2=CRIT`; failed pipeline-run increments in the 15m rule window override later success/completed increments |
 | `bioetl_composite_phase_records_total`         | Counter   | `pipeline,phase,outcome`                    | bounded composite-phase record counters for `seed`, `dependencies`, `enrichment`, and `merge`                                                                                |
 | `bioetl_composite_phase_errors_total`          | Counter   | `pipeline,phase,error_kind`                 | bounded composite-phase error counters for `failed`, `timeout`, and `record_error`                                                                                            |
 | `bioetl_composite_phase_loss_total`            | Counter   | `pipeline,phase,loss_kind`                  | bounded composite-phase loss counters for `unwritten`, `not_found`, `partially_enriched`, and `quarantined`                                                                  |
@@ -253,6 +254,14 @@ Canonical composite/runtime phase additions:
 | `bioetl_errors_total`                          | Counter   | `pipeline,stage,error_code`                 | taxonomy входа                                                                                                                                                                |
 | `bioetl_adapter_request_duration_seconds`      | Histogram | `provider,endpoint`                         | adapter request latency by provider endpoint                                                                                                                                  |
 | `bioetl_http_request_duration_seconds`         | Histogram | `provider,method,status`                    | HTTP latency                                                                                                                                                                  |
+
+BatchStatus aggregate is non-runtime observability source today: the domain
+aggregate states (`open`, `sealed`, `writing`, `committed`, `failed`) are
+validated in `bioetl.domain.aggregates.Batch`, but runtime batch processing emits
+typed lifecycle events and the bounded `bioetl_batch_lifecycle_*` projections
+instead of maintaining a live aggregate instance. Do not add a synthetic runtime
+batch-status gauge until the write path adopts the aggregate transitions as the
+source of truth.
 | `bioetl_http_request_errors_total`             | Counter   | `provider,method,error_type`                | HTTP errors                                                                                                                                                                   |
 | `bioetl_health_check_latency_seconds`          | Histogram | `provider`                                  | Canonical provider health-check latency metric family (seconds only)                                                                                                          |
 | `bioetl_data_source_retry_exhausted_total`     | Counter   | `provider,operation`                        | exhausted retries                                                                                                                                                             |

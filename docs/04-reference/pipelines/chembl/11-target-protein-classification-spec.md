@@ -27,8 +27,11 @@ Current canonical summary:
 - Business identity is governed by `target_id` and `hierarchy_index`.
 - Strict classification status values are governed by the active entity config and Gold contract.
 - Its deterministic target-level collapse policy is the canonical summary rule
-  reused by `composite_target` and by standalone `chembl_target` when nested
-  provider payloads already contain classification hierarchies.
+  reused by `composite_target` and by standalone `chembl_target`.
+- Standalone `chembl_target` does not rely on raw `/target` carrying nested
+  classification hierarchies; composition-owned ChEMBL data-source enrichment
+  prepares the same relation-like rows from `/target_component` and
+  `/protein_classification`.
 - Use the live entity config and contract export as the source of truth for current field, hash, and loading behavior.
 
 ## Contract References

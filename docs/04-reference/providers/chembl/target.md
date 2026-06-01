@@ -101,8 +101,9 @@ Silver schema.
   и downstream `composite_target`
 - `target_protein_class_id_L1..L5`, `target_protein_class_name_L1..L5`,
   `target_protein_class_desc_L1..L5` как target-level summary surface для
-  случаев, когда nested `target_components[].protein_classifications[]`
-  действительно присутствуют в raw payload
+  случаев, когда provider-side target data source смог дозагрузить
+  `target_component` + `protein_classification` evidence и подготовить
+  relation-like rows до `TargetTransformer`
 - `target_protein_synonyms`, `target_gene_synonyms`, `target_ec_numbers` как pipe-delimited derived-поля с sentinel `unknown`
 - `target_xref_pdb_ids`, `target_xref_go_component`, `target_xref_go_function`, `target_xref_go_process`, `target_xref_hgnc_ids`, `target_xref_reactome_ids`, `target_xref_uniprot_ids` как pipe-delimited xref-derived поля с sentinel `unknown`
 
@@ -147,9 +148,14 @@ Protein classification contract boundary:
   детерминированно джойнит `chembl_target_protein_classification` relation
   pipeline.
 - standalone `chembl_target` теперь переиспользует ту же summary policy, но
-  остаётся best-effort surface: основной `/target` payload ChEMBL обычно не
-  гарантирует наличие nested `protein_classifications`, поэтому эти поля могут
-  оставаться `null`.
+  получает classification evidence через composition-owned ChEMBL data-source
+  enrichment: основной `/target` payload ChEMBL обычно не содержит
+  `protein_classifications`, поэтому enrichment дозагружает
+  `/target_component` и `/protein_classification` и передаёт
+  `target_protein_classifications` rows в transformer.
+- Если provider enrichment не смог разрешить component/protein-class chain,
+  standalone `chembl_target` остаётся nullable/best-effort, а не делает hard
+  fail по отсутствующей classification evidence.
 
 Документация не фиксирует literal-формулу `entity_id`; identity/content hash
 вычисляются базовым ChEMBL transformer/runtime слоем.

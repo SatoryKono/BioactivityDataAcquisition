@@ -194,9 +194,15 @@ curl http://localhost:8000/metrics | grep bioetl_
 | `bioetl_stage_lag_seconds`         | Gauge     | pipeline, run_type, stage         | Текущий bounded lag для unresolved stage backlog |
 | `bioetl_batch_lifecycle_events_total` | Counter | pipeline, run_type, event, stage, status | Bounded batch lifecycle events for `created` / `written` / `failed` |
 | `bioetl_batch_lifecycle_records_total` | Counter | pipeline, run_type, event, stage, status | Record counts projected through the same bounded batch lifecycle labels |
+| `bioetl_workflow_pipeline_verdict_status` | Recording rule | pipeline, run_type | Workflow dashboard pipeline verdict: `0=OK`, `1=WARN`, `2=CRIT`; failed-run increments fail closed over later success |
 | `bioetl_errors_total`              | Counter   | pipeline, stage, error_code       | Количество ошибок       |
 | `bioetl_batch_size_records`        | Histogram | pipeline, stage                   | Размер батчей           |
 | `bioetl_pipeline_runs_total`       | Counter   | pipeline, run_type, status        | Количество запусков     |
+
+`BatchStatus` remains a domain aggregate invariant, not a runtime metric source:
+runtime observability must use `bioetl_batch_lifecycle_events_total` and
+`bioetl_batch_lifecycle_records_total` until the write path explicitly adopts
+the aggregate transitions.
 
 #### Processed Records Reconciliation Rules
 

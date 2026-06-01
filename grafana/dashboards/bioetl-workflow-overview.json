@@ -111,7 +111,7 @@
       "title": "Status",
       "gridPos": {
         "h": 4,
-        "w": 8,
+        "w": 4,
         "x": 16,
         "y": 3
       },
@@ -198,6 +198,117 @@
       "targets": [
         {
           "expr": "max(((round(sum(max_over_time(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=\"failed\"}[$__range]))) > bool 0) * 2) or ((round(sum(max_over_time(bioetl_workflow_step_events_total{workflow=~\"$workflow\",status=\"skipped\"}[$__range]))) > bool 0) * 1) or ((round(sum(max_over_time(bioetl_workflow_runs_total{workflow=~\"$workflow\",status!~\"success|failed\"}[$__range]))) > bool 0) * 1))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 9404,
+      "type": "stat",
+      "title": "Pipeline Status",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Fail-closed entity pipeline verdict for the hidden pipeline/run_type handoff context. Backed by bioetl_workflow_pipeline_verdict_status: 2=CRIT when any failed pipeline run increased in the 15m rule window, 1=WARN for non-success/non-failed run outcomes, 0=OK only when a success/completed run increased and no failure/non-success evidence exists, null=UNKNOWN when no pipeline telemetry exists. This panel intentionally avoids run_id Prometheus labels and links to Runtime / Control Plane for detailed evidence.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "OK",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "WARN",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "CRIT",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "noValue": "UNKNOWN",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value",
+        "dataLinks": [
+          {
+            "targetBlank": false,
+            "title": "Open 2. Runtime",
+            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context&var-run_type=$run_type_context&var-stage=unknown&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+            "includeVars": false
+          },
+          {
+            "targetBlank": false,
+            "title": "Open 0. Control Plane",
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context&var-run_type=$run_type_context&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+            "includeVars": false
+          }
+        ]
+      },
+      "targets": [
+        {
+          "expr": "max(bioetl_workflow_pipeline_verdict_status{pipeline=~\"$pipeline_context\",run_type=~\"$run_type_context\"})",
           "refId": "A"
         }
       ]

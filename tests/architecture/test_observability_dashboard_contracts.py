@@ -164,3 +164,42 @@ def test_workflow_overview_exposes_failed_pipeline_run_handoff() -> None:
     )
     titles = {str(panel.get("title", "")) for panel in _iter_panels(dashboard)}
     assert "Failed Entity Pipeline Runs / Range" in titles
+
+
+def test_workflow_overview_exposes_fail_closed_pipeline_status_verdict() -> None:
+    dashboard = json.loads(
+        (DASHBOARD_DIR / "bioetl-workflow-overview.json").read_text(encoding="utf-8")
+    )
+    panel = next(
+        (
+            item
+            for item in _iter_panels(dashboard)
+            if item.get("title") == "Pipeline Status"
+        ),
+        None,
+    )
+    assert panel is not None
+    assert panel.get("type") == "stat"
+    assert "bioetl_workflow_pipeline_verdict_status" in " ".join(
+        _panel_expressions(panel)
+    )
+    assert "run_id" not in " ".join(_panel_expressions(panel))
+    data_links = panel.get("options", {}).get("dataLinks", [])
+    link_titles = {str(link.get("title")) for link in data_links}
+    assert {"Open 2. Runtime", "Open 0. Control Plane"} <= link_titles
+
+
+def test_batch_status_aggregate_is_not_synthesized_as_runtime_metric() -> None:
+    forbidden_metric = "bioetl_" + "batch_status"
+    rules = (ROOT / "grafana" / "prometheus-rules" / "bioetl_observability.yml").read_text(
+        encoding="utf-8"
+    )
+    dashboards = "\n".join(
+        path.read_text(encoding="utf-8") for path in DASHBOARD_DIR.glob("*.json")
+    )
+    assert forbidden_metric not in rules
+    assert forbidden_metric not in dashboards
+    observability_contract = (ROOT / "docs" / "04-reference" / "contracts" / "observability.md").read_text(
+        encoding="utf-8"
+    )
+    assert "BatchStatus aggregate is non-runtime" in observability_contract

@@ -5,11 +5,11 @@
 
 ## Summary
 
-- Scanned modules: `1969`
-- Internal import edges (raw): `7770`
+- Scanned modules: `1970`
+- Internal import edges (raw): `7778`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
-- Cross-layer module-group edges (total): `330`
+- Cross-layer module-group edges (total): `333`
 - Cross-layer module-group edges (top 60): `60`
 
 ## Layer Dependency Graph
@@ -23,10 +23,10 @@ flowchart LR
     interfaces[interfaces]
     application -->|1354 OK| application
     application -->|1163 OK| domain
-    composition -->|289 OK| application
-    composition -->|694 OK| composition
-    composition -->|443 OK| domain
-    composition -->|338 OK| infrastructure
+    composition -->|292 OK| application
+    composition -->|695 OK| composition
+    composition -->|446 OK| domain
+    composition -->|339 OK| infrastructure
     domain -->|1243 OK| domain
     infrastructure -->|795 OK| domain
     infrastructure -->|973 OK| infrastructure
@@ -42,10 +42,10 @@ flowchart LR
 | ---------------- | ---------------- | ------: | ------- |
 | `application`    | `application`    |    1354 | allowed |
 | `application`    | `domain`         |    1163 | allowed |
-| `composition`    | `application`    |     289 | allowed |
-| `composition`    | `composition`    |     694 | allowed |
-| `composition`    | `domain`         |     443 | allowed |
-| `composition`    | `infrastructure` |     338 | allowed |
+| `composition`    | `application`    |     292 | allowed |
+| `composition`    | `composition`    |     695 | allowed |
+| `composition`    | `domain`         |     446 | allowed |
+| `composition`    | `infrastructure` |     339 | allowed |
 | `domain`         | `domain`         |    1243 | allowed |
 | `infrastructure` | `domain`         |     795 | allowed |
 | `infrastructure` | `infrastructure` |     973 | allowed |
@@ -97,8 +97,8 @@ flowchart LR
 | `composition.runtime_builders` | `infrastructure.config`         |      23 |
 | `composition.factories`        | `domain.schemas`                |      22 |
 | `composition.factories`        | `application.services`          |      21 |
+| `composition.providers`        | `infrastructure.adapters`       |      21 |
 | `composition._services`        | `application.services`          |      20 |
-| `composition.providers`        | `infrastructure.adapters`       |      20 |
 | `interfaces.cli`               | `composition.control_plane_api` |      20 |
 | `application.core`             | `domain.config`                 |      19 |
 | `application.pipelines`        | `domain.value_objects`          |      18 |

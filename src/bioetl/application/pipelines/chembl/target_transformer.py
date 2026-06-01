@@ -138,6 +138,7 @@ class TargetTransformer(BaseChemblTransformer):
         protein_classification_summary = _project_target_protein_class_summary(
             str(primary_id),
             target_components,
+            cast("object | None", record.get("target_protein_classifications")),
         )
 
         # Validate taxonomy_id using TaxonomyId Value Object
@@ -221,14 +222,17 @@ class TargetTransformer(BaseChemblTransformer):
         gold_record["description"] = description
         return gold_record
 
+
 def _project_target_protein_class_summary(
     target_id: str,
     components: list[JsonDict] | None,
+    relation_rows: object | None = None,
 ) -> dict[str, object]:
     """Project nested target payload classifications through the shared summary policy."""
     summary = summarize_target_protein_classification_rows(
         target_id,
-        _collect_target_protein_classification_rows(target_id, components),
+        _coerce_target_protein_classification_rows(relation_rows)
+        or _collect_target_protein_classification_rows(target_id, components),
     )
     return {
         "protein_classifications": summary.get("protein_classifications"),
@@ -264,6 +268,13 @@ def _collect_target_protein_classification_rows(
                 continue
             rows.append(classification_row)
     return rows
+
+
+def _coerce_target_protein_classification_rows(value: object | None) -> list[JsonDict]:
+    """Return pre-shaped relation rows injected by the ChEMBL target data source."""
+    if not isinstance(value, list):
+        return []
+    return [dict(item) for item in value if isinstance(item, Mapping)]
 
 
 def _normalize_target_protein_classification_row(

@@ -755,6 +755,44 @@ tests:
         eval_time: 19m
         exp_samples: []
 
+  - name: workflow-pipeline-verdict-fails-closed-after-intermediate-failure
+    interval: 1m
+    input_series:
+      - series: 'bioetl_pipeline_runs_total{pipeline="chembl",run_type="incremental",status="failed"}'
+        values: '0 1+0x20'
+      - series: 'bioetl_pipeline_runs_total{pipeline="chembl",run_type="incremental",status="success"}'
+        values: '0 0 1+0x19'
+    promql_expr_test:
+      - expr: bioetl_workflow_pipeline_verdict_status{pipeline="chembl",run_type="incremental"}
+        eval_time: 16m
+        exp_samples:
+          - labels: '{__name__="bioetl_workflow_pipeline_verdict_status",pipeline="chembl",run_type="incremental"}'
+            value: 2
+
+  - name: workflow-pipeline-verdict-ok-on-terminal-success-without-failure
+    interval: 1m
+    input_series:
+      - series: 'bioetl_pipeline_runs_total{pipeline="chembl",run_type="incremental",status="success"}'
+        values: '0 1+0x20'
+    promql_expr_test:
+      - expr: bioetl_workflow_pipeline_verdict_status{pipeline="chembl",run_type="incremental"}
+        eval_time: 16m
+        exp_samples:
+          - labels: '{__name__="bioetl_workflow_pipeline_verdict_status",pipeline="chembl",run_type="incremental"}'
+            value: 0
+
+  - name: workflow-pipeline-verdict-warns-on-non-success-terminal-or-active-status
+    interval: 1m
+    input_series:
+      - series: 'bioetl_pipeline_runs_total{pipeline="chembl",run_type="incremental",status="shutdown"}'
+        values: '0 1+0x20'
+    promql_expr_test:
+      - expr: bioetl_workflow_pipeline_verdict_status{pipeline="chembl",run_type="incremental"}
+        eval_time: 16m
+        exp_samples:
+          - labels: '{__name__="bioetl_workflow_pipeline_verdict_status",pipeline="chembl",run_type="incremental"}'
+            value: 1
+
   - name: operator-runtime-universe-missing
     interval: 1m
     input_series:

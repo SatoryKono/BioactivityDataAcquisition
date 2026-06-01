@@ -1,26 +1,27 @@
 ---
 id: chembl-target-field-order-20260601
-title: Fix ChemblTargetSchema reviewed field order drift
+title: Fix transformer snapshot registry drift
 task_id: chembl-target-field-order-20260601
-created_at: '2026-06-01T14:05:19Z'
+created_at: '2026-06-01T14:14:33Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- tests/unit/infrastructure/schemas/test_silver.py
-summary: Updated the Chembl target Silver schema unit test reviewed business-field
-  order to include shipped target_protein_class_L1-L5 fields already present in configs/entities/chembl/target.yaml
-  and CHEMBL_TARGET_SCHEMA; verified the failing targeted pytest now passes.
+- tests/unit/application/pipelines/__snapshots__/test_transformer_snapshots.ambr
+summary: Updated transformer snapshot registry keys to match renamed hashed test names
+  and refreshed the single TargetTransformer snapshot entry to include shipped target_protein_class_L1-L5
+  null fields; verified tests/unit/application/pipelines/test_transformer_snapshots.py
+  passes with 10 snapshots.
 ---
 
 # Episodic summary
 
 ## Task
 
-- Title: Fix ChemblTargetSchema reviewed field order drift
+- Title: Fix transformer snapshot registry drift
 
 ## Outcome
 
-- Updated the Chembl target Silver schema unit test reviewed business-field order to include shipped target_protein_class_L1-L5 fields already present in configs/entities/chembl/target.yaml and CHEMBL_TARGET_SCHEMA; verified the failing targeted pytest now passes.
+- Updated transformer snapshot registry keys to match renamed hashed test names and refreshed the single TargetTransformer snapshot entry to include shipped target_protein_class_L1-L5 null fields; verified tests/unit/application/pipelines/test_transformer_snapshots.py passes with 10 snapshots.
 
 ## Lessons learned
 

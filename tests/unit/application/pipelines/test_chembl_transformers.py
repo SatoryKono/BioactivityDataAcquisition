@@ -782,6 +782,44 @@ class TestTargetTransformer:
         assert result["target_protein_class_desc_L2"] == "Branch"
 
     @pytest.mark.asyncio
+    async def test_transform_prefers_prepared_target_protein_classification_rows(
+        self, transformer, mock_context
+    ):
+        """Enriched target data-source rows should feed the canonical summary policy."""
+        record = {
+            "target_id": "CHEMBL123",
+            "target_components": [{"component_id": 10}],
+            "target_protein_classifications": [
+                {
+                    "target_id": "CHEMBL123",
+                    "component_id": 10,
+                    "hierarchy_index": 0,
+                    "leaf_id": 1015,
+                    "classification_status": "resolved",
+                    "l1_id": 1,
+                    "l1_name": "Enzyme",
+                    "l1_desc": "Root",
+                    "l2_id": 2,
+                    "l2_name": "Kinase",
+                    "l2_desc": "Branch",
+                    "l3_id": 1015,
+                    "l3_name": "Serine/threonine kinase",
+                    "l3_desc": "Leaf",
+                }
+            ],
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["protein_classifications"] is not None
+        assert result["target_protein_class_id_L1"] == "1"
+        assert result["target_protein_class_name_L1"] == "Enzyme"
+        assert result["target_protein_class_desc_L1"] == "Root"
+        assert result["target_protein_class_id_L3"] == "1015"
+        assert result["target_protein_class_name_L3"] == "Serine/threonine kinase"
+
+    @pytest.mark.asyncio
     async def test_transform_collapses_multiple_classifications_to_multifunctional_l1(
         self, transformer, mock_context
     ):
