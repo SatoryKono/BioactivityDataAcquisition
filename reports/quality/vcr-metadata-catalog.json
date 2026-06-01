@@ -7,7 +7,7 @@
     "metadata_sidecar_count": 196,
     "provider_count": 8,
     "duplicate_scenario_stem_count": 0,
-    "direct_reachable_cassette_count": 123,
+    "direct_reachable_cassette_count": 125,
     "generated_reachable_cassette_count": 60,
     "metadata_review_required_cassette_count": 0,
     "unowned_cassette_count": 0
@@ -1359,9 +1359,9 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_fetch_filtered_with_fallback_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_reviewed",
+      "reachability_status": "direct_reference",
       "reachability_owner_paths": [
-        "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_fetch_filtered_with_fallback_meta.yaml"
+        "tests/integration/adapters/openalex/test_adapter.py"
       ]
     },
     {
@@ -1375,7 +1375,8 @@
       "reachability_status": "direct_reference",
       "reachability_owner_paths": [
         "tests/contract/_provider_contract_replay.py",
-        "tests/e2e/test_pipeline_matrix_e2e.py"
+        "tests/e2e/test_pipeline_matrix_e2e.py",
+        "tests/integration/adapters/openalex/test_adapter.py"
       ]
     },
     {
@@ -1388,7 +1389,8 @@
       "metadata_status": "managed_inventory",
       "reachability_status": "direct_reference",
       "reachability_owner_paths": [
-        "tests/contract/_provider_contract_replay.py"
+        "tests/contract/_provider_contract_replay.py",
+        "tests/integration/adapters/openalex/test_adapter.py"
       ]
     },
     {
@@ -1399,9 +1401,9 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_title_only_lookup_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_reviewed",
+      "reachability_status": "direct_reference",
       "reachability_owner_paths": [
-        "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_title_only_lookup_meta.yaml"
+        "tests/integration/adapters/openalex/test_adapter.py"
       ]
     },
     {

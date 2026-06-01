@@ -60,12 +60,9 @@ def _load_naming_audit_module() -> ModuleType:
     return module
 
 
-def _collect_class_names(src_root: Path) -> set[str]:
+def _collect_class_names(source_ast_cache: dict[Path, ast.AST]) -> set[str]:
     names: set[str] = set()
-    for py_file in src_root.rglob("*.py"):
-        if "__pycache__" in py_file.parts:
-            continue
-        tree = ast.parse(py_file.read_text(encoding="utf-8"), filename=str(py_file))
+    for tree in source_ast_cache.values():
         for node in ast.walk(tree):
             if isinstance(node, ast.ClassDef):
                 names.add(node.name)
@@ -130,10 +127,12 @@ def test_stable_pipeline_id_exceptions_match_active_entity_configs() -> None:
         assert raw["pipeline"]["pipeline_name"] == pipeline_name
 
 
-def test_stable_public_surface_symbols_exist_in_code() -> None:
+def test_stable_public_surface_symbols_exist_in_code(
+    source_ast_cache: dict[Path, ast.AST],
+) -> None:
     payload = _load_registry_payload()
     stable_public_surface = payload["stable_public_surface"]
-    class_names = _collect_class_names(REPO_ROOT / "src" / "bioetl")
+    class_names = _collect_class_names(source_ast_cache)
 
     for section_name in ("pipeline_classes", "transformers", "gold_schemas"):
         section = stable_public_surface.get(section_name)

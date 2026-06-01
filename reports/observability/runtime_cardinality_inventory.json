@@ -1200,7 +1200,8 @@
       "docs/03-guides/dashboards/dashboard-requirements-comprehensive.md",
       "docs/03-guides/dashboards/design-system.md",
       "grafana/README.md",
-      "grafana/dashboards/bioetl-runtime.json"
+      "grafana/dashboards/bioetl-runtime.json",
+      "grafana/dashboards/bioetl-workflow-overview.json"
     ],
     "bioetl_shutdown_completed": [
       "docs/03-guides/metrics-monitoring.md",
