@@ -20,13 +20,13 @@ families:
     public_module: bioetl.application.core.span_helpers
     private_module: bioetl.application.core._span_helpers
     canonical_first_party_module: bioetl.application.core.span_helpers
-    max_public_src_importers: 7
+    max_public_src_importers: 8
     max_private_src_importers: 1
     rationale: >-
       Private helper imports were collapsed into the public span-helper seam in
-      issue #4485. The public budget now reflects the canonicalized importer
-      count, while private import growth is limited to the public re-export
-      module only.
+      issue #4485. The private module now remains only as a backward-compatible
+      re-export, so the public budget includes that compatibility importer while
+      private import growth is limited to the re-export module only.
   - family_id: domain.normalization.profiles.chembl_policy_registry
     owner: bioetl.domain.normalization.profiles
     public_module: bioetl.domain.normalization.profiles.chembl_policy_registry

@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Scanned modules: `1972`
-- Internal import edges (raw): `7784`
+- Scanned modules: `1973`
+- Internal import edges (raw): `7786`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `333`
@@ -23,9 +23,9 @@ flowchart LR
     interfaces[interfaces]
     application -->|1354 OK| application
     application -->|1163 OK| domain
-    composition -->|292 OK| application
-    composition -->|698 OK| composition
-    composition -->|449 OK| domain
+    composition -->|290 OK| application
+    composition -->|699 OK| composition
+    composition -->|452 OK| domain
     composition -->|339 OK| infrastructure
     domain -->|1243 OK| domain
     infrastructure -->|795 OK| domain
@@ -42,9 +42,9 @@ flowchart LR
 | ---------------- | ---------------- | ------: | ------- |
 | `application`    | `application`    |    1354 | allowed |
 | `application`    | `domain`         |    1163 | allowed |
-| `composition`    | `application`    |     292 | allowed |
-| `composition`    | `composition`    |     698 | allowed |
-| `composition`    | `domain`         |     449 | allowed |
+| `composition`    | `application`    |     290 | allowed |
+| `composition`    | `composition`    |     699 | allowed |
+| `composition`    | `domain`         |     452 | allowed |
 | `composition`    | `infrastructure` |     339 | allowed |
 | `domain`         | `domain`         |    1243 | allowed |
 | `infrastructure` | `domain`         |     795 | allowed |
@@ -115,9 +115,9 @@ flowchart LR
 | `infrastructure.observability` | `domain.ports`                  |      15 |
 | `infrastructure.quality`       | `domain.types`                  |      15 |
 | `composition.factories`        | `domain.behavior`               |      14 |
+| `composition.providers`        | `domain.ports`                  |      14 |
 | `application.services`         | `domain.normalization`          |      13 |
 | `interfaces.cli`               | `composition.registry_api`      |      13 |
-| `application.services`         | `domain.behavior`               |      12 |
 
 ## Policy Violations
 

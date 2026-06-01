@@ -308,7 +308,7 @@
       },
       "targets": [
         {
-          "expr": "max(bioetl_workflow_pipeline_verdict_status{pipeline=~\"$pipeline_context\",run_type=~\"$run_type_context\"})",
+          "expr": "max(bioetl_workflow_pipeline_verdict_status{pipeline=~\"$pipeline_context\",run_type=~\"$run_type_context\"}) or max(bioetl_runtime_current_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
           "refId": "A"
         }
       ]

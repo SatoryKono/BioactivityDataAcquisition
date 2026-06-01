@@ -19,7 +19,7 @@ _MAX_READ_WORKERS = 16
 ACCEPTED_RUNTIME_SCCS: dict[frozenset[str], dict[str, str]] = {
     frozenset(
         {
-            "bioetl.domain.normalization.profiles._chembl_policy_registry_data",
+            "bioetl.domain.normalization.profiles.chembl_policy_registry_data",
             "bioetl.domain.normalization.profiles._chembl_policy_registry_defaults",
         }
     ): {
@@ -28,8 +28,9 @@ ACCEPTED_RUNTIME_SCCS: dict[frozenset[str], dict[str, str]] = {
         "linked_issue": "#4500",
         "rationale": (
             "ChEMBL normalization policy data/defaults remain in a reviewed "
-            "same-family cycle until the policy-registry twin module burn-down "
-            "removes the split data/default ownership seam."
+            "same-family cycle after the public policy-registry data module became "
+            "the canonical owner. The remaining default-data import cycle is "
+            "tracked separately from underscore twin import burn-down."
         ),
     },
     frozenset(

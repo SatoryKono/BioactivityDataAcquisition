@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.domain.normalization.profiles._chembl_policy_registry_data import (
+from bioetl.domain.normalization.profiles.chembl_policy_registry_data import (
     ChemblControlledVocabularyFamily,
     ChemblOntologyPolicyFamily,
     ChemblPolicyRegistryData,
