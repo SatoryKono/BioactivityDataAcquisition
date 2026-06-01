@@ -28,7 +28,7 @@
       },
       "id": 1000,
       "options": {
-        "content": "<div style=\"display:flex;gap:10px;flex-wrap:wrap;padding:10px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">1. Overview</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">3. Provider Health</a><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}&amp;var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">5. Workflow</a><span aria-current=\"page\" style=\"padding:5px 10px;color:#4b5563;text-decoration:none;border:1px solid #4b5563;border-radius:3px;background:rgba(75,85,99,0.18);cursor:default;\">Silver Reject Explorer</span><a href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&amp;to=${__to}&amp;query=%7Bjob%3D%22bioetl%22%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Logs</a><a href=\"/a/grafana-exploretraces-app/explore?actionView=search&amp;from=now-150m&amp;to=now&amp;var-ds=tempo&amp;var-groupBy=resource.service.name&amp;queryType=traceqlSearch&amp;query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D%20%22${run_type}%22%20%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Traces</a></div>",
+        "content": "<div style=\"display:flex;gap:10px;flex-wrap:wrap;padding:10px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=All\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=All\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">1. Overview</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=All\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}&amp;var-workflow=All&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">3. Provider Health</a><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=All\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}&amp;var-workflow=All&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">5. Workflow</a><span aria-current=\"page\" style=\"padding:5px 10px;color:#4b5563;text-decoration:none;border:1px solid #4b5563;border-radius:3px;background:rgba(75,85,99,0.18);cursor:default;\">Silver Reject Explorer</span><a href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&amp;to=${__to}&amp;query=%7Bjob%3D%22bioetl%22%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Logs</a><a href=\"/a/grafana-exploretraces-app/explore?actionView=search&amp;from=now-150m&amp;to=now&amp;var-ds=tempo&amp;var-groupBy=resource.service.name&amp;queryType=traceqlSearch&amp;query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D%20%22${run_type}%22%20%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Traces</a></div>",
         "mode": "html"
       },
       "title": "Review Dashboard Navigation",
@@ -37,39 +37,39 @@
       "links": [
         {
           "title": "0. Control Plane",
-          "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow",
+          "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=All",
           "targetBlank": false,
           "includeVars": false
         },
         {
           "title": "1. Overview",
-          "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow",
+          "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=All",
           "targetBlank": false,
           "includeVars": false
         },
         {
           "title": "2. Runtime",
-          "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}&var-workflow=$workflow",
+          "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}&var-workflow=All",
           "targetBlank": false,
           "includeVars": false
         },
         {
           "title": "3. Provider Health",
-          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type",
+          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}&var-workflow=All&var-pipeline=$pipeline&var-run_type=$run_type",
           "targetBlank": false,
           "includeVars": false,
           "tooltip": "Context mapping: provider=unknown, pipeline_context=$pipeline, adapter=unknown. Visible workflow/pipeline/run_type are preserved; provider remains fail-closed when unknown."
         },
         {
           "title": "4. Data Quality",
-          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}&var-workflow=$workflow",
+          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}&var-workflow=All",
           "targetBlank": false,
           "includeVars": false,
           "tooltip": "Open the Data Quality dashboard in the same tab."
         },
         {
           "title": "5. Workflow",
-          "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type",
+          "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}&var-workflow=All&var-pipeline=$pipeline&var-run_type=$run_type",
           "targetBlank": false,
           "includeVars": false,
           "tooltip": "Scoped handoff: passes workflow/pipeline/run_type context; Workflow owns its status and step filters."
@@ -99,12 +99,12 @@
       },
       "id": 1,
       "options": {
-        "content": "<div style='padding:0.7rem 0.85rem;text-align:center;line-height:1.45'><div style='display:flex;flex-wrap:wrap;justify-content:center;gap:0.5rem 1rem;font-size:1.05rem;font-weight:600'><span>Workflow: <strong>$workflow</strong></span><span>Pipeline: <strong>$pipeline</strong></span><span>Run Type: <strong>$run_type</strong></span><span>Reason: <strong>$reason_code</strong></span><span>Field: <strong>$field</strong></span><span>Reject Run ID: <strong>$quarantine_run_id</strong></span></div><div style='margin-top:0.35rem'><strong style='color:#ffb347'>default 24h forensic window</strong></div><div style='margin-top:0.3rem'><small>Select exactly one pipeline. This explorer is read-only and scoped to Silver FILTERED_OUT_SILVER rows. Workflow context is preserved as hidden shell context for navigation; quarantine_run_id remains the forensic row filter and must not become a Prometheus label. Quarantine Explorer is fail-closed and forensic filters like quarantine_run_id/payload_hash stay explorer-only. A zero-reject workflow run is an intentional empty explorer state only after the datasource responds and scope is confirmed.</small></div></div>",
+        "content": "<div style='padding:0.7rem 0.85rem;text-align:center;line-height:1.45'><div style='display:flex;flex-wrap:wrap;justify-content:center;gap:0.5rem 1rem;font-size:1.05rem;font-weight:600'><span>Pipeline: <strong>$pipeline</strong></span><span>Run Type: <strong>$run_type</strong></span><span>Reason: <strong>$reason_code</strong></span><span>Field: <strong>$field</strong></span><span>Reject Run ID: <strong>$quarantine_run_id</strong></span></div><div style='margin-top:0.35rem'><strong style='color:#ffb347'>default 24h forensic window</strong></div><div style='margin-top:0.3rem'><small>Origin dashboards own shared workflow/run_id shell context; this explorer never owns shared workflow or run_id selectors. Select exactly one pipeline. This explorer is read-only and scoped to Silver FILTERED_OUT_SILVER rows. quarantine_run_id remains the forensic row filter and must not become a Prometheus label. Quarantine Explorer is fail-closed and forensic filters like quarantine_run_id/payload_hash stay explorer-only. A zero-reject workflow run is an intentional empty explorer state only after the datasource responds and scope is confirmed.</small></div></div>",
         "mode": "html"
       },
       "title": "Inspect Explorer Scope",
       "type": "text",
-      "description": "Scope banner for the selected-range Silver reject explorer. This dashboard covers only Silver FILTERED_OUT_SILVER quarantine-backed rows; DQ quarantine, skipped records, warning/nullification, and Gold validation failures belong in Data Quality. Shared workflow shell context is preserved for navigation while the explorer stays pipeline/run_type/quarantine_run_id forensic. A zero-reject workflow run can legitimately produce 0 totals and empty record tables, but only after one concrete pipeline, a responding Quarantine Explorer, and a valid Bronze denominator are confirmed."
+      "description": "Scope banner for Silver Reject Explorer. Origin dashboards own shared workflow/run_id shell context; this explorer never owns shared workflow or run_id selectors and stays pipeline/run_type forensic. quarantine_run_id remains the forensic row filter and is not a Prometheus label."
     },
     {
       "datasource": "Quarantine Explorer",
@@ -179,13 +179,13 @@
       "links": [
         {
           "title": "Review total rejects",
-          "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?viewPanel=2&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-quarantine_run_id=$quarantine_run_id",
+          "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?viewPanel=2&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=All&var-quarantine_run_id=$quarantine_run_id",
           "targetBlank": false,
           "includeVars": false
         },
         {
           "title": "Review scoped summary",
-          "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?viewPanel=4&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-quarantine_run_id=$quarantine_run_id",
+          "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?viewPanel=4&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=All&var-quarantine_run_id=$quarantine_run_id",
           "targetBlank": false,
           "includeVars": false
         }
@@ -755,7 +755,7 @@
             {
               "targetBlank": false,
               "title": "Open same dashboard with this payload_hash",
-              "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${__data.fields.pipeline}&var-run_type=${__data.fields.run_type}&var-reason_code=${__data.fields.reason_code}&var-field=${__data.fields.field}&var-quarantine_run_id=${__data.fields.run_id}&var-payload_hash=${__data.fields.payload_hash}&${__url_time_range}&var-workflow=$workflow",
+              "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${__data.fields.pipeline}&var-run_type=${__data.fields.run_type}&var-reason_code=${__data.fields.reason_code}&var-field=${__data.fields.field}&var-quarantine_run_id=${__data.fields.run_id}&var-payload_hash=${__data.fields.payload_hash}&${__url_time_range}&var-workflow=All",
               "includeVars": false
             },
             {
@@ -863,23 +863,6 @@
   ],
   "templating": {
     "list": [
-      {
-        "current": {
-          "selected": false,
-          "text": "All",
-          "value": "$__all"
-        },
-        "hide": 2,
-        "includeAll": true,
-        "label": "Workflow",
-        "multi": false,
-        "name": "workflow",
-        "options": [],
-        "query": "",
-        "skipUrlSync": false,
-        "type": "textbox",
-        "description": "Hidden shared shell context preserved for cross-dashboard navigation; not used as a quarantine or Prometheus selector."
-      },
       {
         "allValue": null,
         "current": {

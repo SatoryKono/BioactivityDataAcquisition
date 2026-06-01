@@ -116,6 +116,55 @@ class TargetSchema(ETLRecordSchema):
         coerce=True,
         description="Primary component ID (first from list).",
     )
+    protein_classifications: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON string of aggregated component protein classifications.",
+    )
+    target_protein_class_id_L1: Series[str] | None = pa.Field(
+        nullable=True, description="L1 target protein class ID."
+    )
+    target_protein_class_name_L1: Series[str] | None = pa.Field(
+        nullable=True, description="L1 target protein class name."
+    )
+    target_protein_class_desc_L1: Series[str] | None = pa.Field(
+        nullable=True, description="L1 target protein class description."
+    )
+    target_protein_class_id_L2: Series[str] | None = pa.Field(
+        nullable=True, description="L2 target protein class ID."
+    )
+    target_protein_class_name_L2: Series[str] | None = pa.Field(
+        nullable=True, description="L2 target protein class name."
+    )
+    target_protein_class_desc_L2: Series[str] | None = pa.Field(
+        nullable=True, description="L2 target protein class description."
+    )
+    target_protein_class_id_L3: Series[str] | None = pa.Field(
+        nullable=True, description="L3 target protein class ID."
+    )
+    target_protein_class_name_L3: Series[str] | None = pa.Field(
+        nullable=True, description="L3 target protein class name."
+    )
+    target_protein_class_desc_L3: Series[str] | None = pa.Field(
+        nullable=True, description="L3 target protein class description."
+    )
+    target_protein_class_id_L4: Series[str] | None = pa.Field(
+        nullable=True, description="L4 target protein class ID."
+    )
+    target_protein_class_name_L4: Series[str] | None = pa.Field(
+        nullable=True, description="L4 target protein class name."
+    )
+    target_protein_class_desc_L4: Series[str] | None = pa.Field(
+        nullable=True, description="L4 target protein class description."
+    )
+    target_protein_class_id_L5: Series[str] | None = pa.Field(
+        nullable=True, description="L5 target protein class ID."
+    )
+    target_protein_class_name_L5: Series[str] | None = pa.Field(
+        nullable=True, description="L5 target protein class name."
+    )
+    target_protein_class_desc_L5: Series[str] | None = pa.Field(
+        nullable=True, description="L5 target protein class description."
+    )
     component_accessions: Series[str] | None = pa.Field(
         nullable=True, description="Canonical JSON array of component accessions."
     )
