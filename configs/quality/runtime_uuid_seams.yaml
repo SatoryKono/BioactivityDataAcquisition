@@ -24,7 +24,7 @@ seams:
     replay_critical: false
     owner: control-plane
     migration_policy: inject deterministic event_id_factory for replay-critical ledger fixtures or migrations.
-  - path: src/bioetl/application/services/control_plane/manifest_service_scaffold.py
+  - path: src/bioetl/application/services/control_plane/manifest/service_scaffold.py
     line: 42
     kind: call
     symbol: uuid4

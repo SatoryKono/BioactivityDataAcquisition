@@ -150,7 +150,7 @@
     "checks": [],
     "coerce": false,
     "description": "Level 1 protein classification ID.",
-    "dtype": "Int64",
+    "dtype": "str",
     "nullable": true,
     "required": false,
     "unique": false
@@ -177,7 +177,7 @@
     "checks": [],
     "coerce": false,
     "description": "Level 2 protein classification ID.",
-    "dtype": "Int64",
+    "dtype": "str",
     "nullable": true,
     "required": false,
     "unique": false
@@ -204,7 +204,7 @@
     "checks": [],
     "coerce": false,
     "description": "Level 3 protein classification ID.",
-    "dtype": "Int64",
+    "dtype": "str",
     "nullable": true,
     "required": false,
     "unique": false
@@ -231,7 +231,7 @@
     "checks": [],
     "coerce": false,
     "description": "Level 4 protein classification ID.",
-    "dtype": "Int64",
+    "dtype": "str",
     "nullable": true,
     "required": false,
     "unique": false
@@ -258,7 +258,7 @@
     "checks": [],
     "coerce": false,
     "description": "Level 5 protein classification ID.",
-    "dtype": "Int64",
+    "dtype": "str",
     "nullable": true,
     "required": false,
     "unique": false
@@ -276,7 +276,7 @@
     "checks": [],
     "coerce": false,
     "description": "Resolved leaf protein classification ID.",
-    "dtype": "Int64",
+    "dtype": "str",
     "nullable": true,
     "required": false,
     "unique": false

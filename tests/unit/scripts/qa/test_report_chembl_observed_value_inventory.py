@@ -16,7 +16,7 @@ def test_build_inventory_payload_covers_all_tracked_chembl_fixtures() -> None:
     payload = build_inventory_payload(max_examples=3)
 
     assert payload["source"] == "tracked_chembl_bronze_fixtures"
-    assert payload["fixtures_count"] == 14
+    assert payload["fixtures_count"] == 15
     assert payload["field_rows_count"] > 0
 
     fixture_keys = {fixture["fixture_key"] for fixture in payload["fixtures"]}
@@ -34,6 +34,7 @@ def test_build_inventory_payload_covers_all_tracked_chembl_fixtures() -> None:
         "chembl/subcellular_fraction",
         "chembl/target",
         "chembl/target_component",
+        "chembl/target_protein_classification",
         "chembl/tissue",
     }
 
@@ -115,7 +116,7 @@ def test_main_writes_and_check_validates_deterministic_outputs(tmp_path: Path) -
     )
 
     payload = json.loads(json_out.read_text(encoding="utf-8"))
-    assert payload["fixtures_count"] == 14
+    assert payload["fixtures_count"] == 15
     assert "pipeline_name,fixture_key,field_name" in csv_out.read_text(encoding="utf-8")
     assert "# ChEMBL Bronze Observed Value Inventory" in markdown_out.read_text(
         encoding="utf-8"

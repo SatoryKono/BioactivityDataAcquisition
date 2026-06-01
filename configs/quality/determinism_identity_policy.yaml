@@ -117,7 +117,7 @@ allowed_occurrence_identity_generators:
     replay and content semantics remain anchored by manifest fingerprints and input
     snapshot fingerprints.
   issue: '#4472'
-- path: src/bioetl/application/services/control_plane/manifest_service_scaffold.py
+- path: src/bioetl/application/services/control_plane/manifest/service_scaffold.py
   symbol: ManifestServiceScaffoldMixin._manifest_id_factory
   generator: uuid4
   identity_field: manifest_id

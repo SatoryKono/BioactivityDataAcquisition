@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 
-from bioetl.application.services.control_plane.historical_replay_closure_claims import (
+from bioetl.application.services.control_plane.replay.closure_claims import (
     build_narrowed_scope_global_claim,
     build_universal_scope_global_claim,
 )

@@ -429,7 +429,7 @@ single-step workflow wrapper named `configs/workflows/<pipeline_name>.yaml`.
 
 | Provider | Workflow wrappers |
 | --- | --- |
-| `chembl` | `chembl_activity`, `chembl_assay`, `chembl_assay_parameters`, `chembl_cell_line`, `chembl_compound_record`, `chembl_molecule`, `chembl_protein_class`, `chembl_publication`, `chembl_publication_similarity`, `chembl_publication_term`, `chembl_subcellular_fraction`, `chembl_target`, `chembl_target_component`, `chembl_tissue` |
+| `chembl` | `chembl_activity`, `chembl_assay`, `chembl_assay_parameters`, `chembl_cell_line`, `chembl_compound_record`, `chembl_molecule`, `chembl_protein_class`, `chembl_publication`, `chembl_publication_similarity`, `chembl_publication_term`, `chembl_subcellular_fraction`, `chembl_target`, `chembl_target_component`, `chembl_target_protein_classification`, `chembl_tissue` |
 | `crossref` | `crossref_publication` |
 | `openalex` | `openalex_publication` |
 | `pubchem` | `pubchem_compound` |

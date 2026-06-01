@@ -8,7 +8,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from bioetl.application.services.control_plane.manifest_service_scaffold import (
+from bioetl.application.services.control_plane.manifest.service_scaffold import (
     ManifestServiceScaffoldMixin,
 )
 from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP

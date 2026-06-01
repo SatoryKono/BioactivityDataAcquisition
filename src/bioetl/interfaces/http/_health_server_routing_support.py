@@ -6,14 +6,14 @@ import asyncio
 from typing import Protocol, cast
 
 from bioetl.domain.context import current_utc_time
-from bioetl.interfaces.http._health_server_checkpoint_lookup import (
-    load_checkpoint_freshness_evidence,
-)
 from bioetl.interfaces.http._health_server_checkpoint_freshness_payloads import (
     build_checkpoint_freshness_ok_payload,
     build_checkpoint_freshness_unknown_payload,
     extract_checkpoint_saved_at_epoch_seconds,
     optional_text,
+)
+from bioetl.interfaces.http._health_server_checkpoint_lookup import (
+    load_checkpoint_freshness_evidence,
 )
 from bioetl.interfaces.http._health_server_control_plane_scope import (
     read_selected_run_id,
@@ -260,7 +260,7 @@ def _resolved_scope_pipeline(scope: object) -> str:
     resolved_manifest = getattr(scope, "resolved_manifest", None)
     if resolved_manifest is not None:
         return str(resolved_manifest.pipeline_name)
-    return str(getattr(scope, "requested_pipeline"))
+    return str(scope.requested_pipeline)
 
 
 async def handle_control_plane_checkpoint_freshness(

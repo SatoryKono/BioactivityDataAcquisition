@@ -8,7 +8,7 @@
 **Task ID**: `tech-debt-zero-001`
 **Last synced**: 2026-06-01
 **Authoritative status source**: live GitHub issue state plus governed quality artifacts
-**Source command**: `curl -H "Authorization: Bearer ${GITHUB_TOKEN}" https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/issues/{4610,4811,4848,4849,4850,4851}`
+**Source command**: `curl -H "Authorization: Bearer ${GITHUB_TOKEN}" https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/issues/{4610,4811,4847,4848,4849,4850,4851}`
 **Stale-warning policy**: this file is a local mirror only. If GitHub state or governed debt budgets change, treat this file as stale until it is resynchronized. Do not use it as the sole execution authority.
 
 ## Mirror Contract
@@ -25,13 +25,16 @@
 
 ## Resynced Baseline
 
-1. P0 duplicate wave `#4812/#4813/#4814/#4815` is closed and governed at duplicate baseline `0`.
+1. P0 duplicate wave `#4812/#4813/#4814/#4815` is closed, but canonical duplication evidence is now explicitly split into:
+   - `application/core`, `composition/bootstrap/runtime`, `composition/factories/pipeline`, `composition/runtime_builders`: duplicate baseline `0`
+   - `application/services/control_plane`: `5` residual duplicate clusters in `reports/quality/hotspot-duplication-baseline.md`, governed as remaining refactor pressure under `#4610`
 2. Tracked twin families remain `3`; no-growth compatibility census is the active ratchet.
 3. Contract coverage matrix remains `26/26` Gold-enabled surfaces covered.
 4. `compatibility_test_file_max` is `53` in `configs/quality/test_governance_audit.yaml`; older local mirror values such as `56` are stale and must not return.
 5. Runtime cardinality governance now has an explicit CI review artifact/status path via `reports/observability/runtime_cardinality_review.json` in `quality-metrics-gate`.
 6. Deterministic identity policy now distinguishes semantic replay anchors from allowed operational correlation artifacts in `configs/quality/determinism_identity_policy.yaml`.
 7. Config discrepancy governance now publishes `0` actionable drift and `140` sanctioned partial variance parameters via `docs/config-discrepancies-report.md` and `reports/quality/config-discrepancy-baseline.json`.
+8. Specialized duplication artifacts `control-plane-duplication.*` and `runtime-builders-duplication.*` are synchronized with the canonical hotspot baseline and drift-guarded by `tests/architecture/test_duplication_report_governance.py`.
 
 ## Closed Stream A Sub-Issues
 
@@ -40,7 +43,7 @@
 | [#4812](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4812) | closed | `runtime_builders` duplicate baseline `0` |
 | [#4813](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4813) | closed | `application/core` duplicate baseline `0` |
 | [#4814](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4814) | closed | `composition/bootstrap/runtime` duplicate baseline `0` |
-| [#4815](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4815) | closed | `application/services/control_plane` duplicate baseline `0` |
+| [#4815](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4815) | closed | helper-duplicate wave closed; canonical hotspot baseline now shows `control_plane=5` residual clusters governed under `#4610` |
 | [#4816](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4816) | closed | tracked twin-family ratchet pinned at `3` |
 | [#4817](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4817) | closed | test-governance closeout recorded on GitHub |
 | [#4818](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4818) | closed | config-contract drift closeout recorded |

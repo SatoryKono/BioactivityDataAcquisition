@@ -14,10 +14,10 @@ ______________________________________________________________________
 # BioETL Tech Debt Eradication Blueprint v4
 
 Дата snapshot: `2026-05-31`
-Incremental resync: `2026-06-01` after `#4705`, `#4848`, `#4849`, `#4850`, and `#4851` closeout.
+Incremental resync: `2026-06-01` after `#4705`, `#4847`, `#4848`, `#4849`, `#4850`, and `#4851` closeout.
 
 **Authoritative status source**: live GitHub issue state plus governed quality artifacts.  
-**Source command**: `curl -H "Authorization: Bearer ${GITHUB_TOKEN}" https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/issues/{4610,4811,4848,4849,4850,4851}`  
+**Source command**: `curl -H "Authorization: Bearer ${GITHUB_TOKEN}" https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/issues/{4610,4811,4847,4848,4849,4850,4851}`  
 **Stale-warning policy**: this document is a local planning mirror. If GitHub issue state or governed debt budgets move, this file becomes stale until resynced. Do not use it as sole execution authority.
 
 ## Why This Mirror Still Exists
@@ -44,6 +44,10 @@ looking operationally current.
    - actionable inconsistent parameters: `0`
    - sanctioned partial variance parameters: `140`
    - canonical report: `docs/config-discrepancies-report.md`
+10. Canonical duplication evidence is synchronized across hotspot and specialized reports:
+   - `reports/quality/hotspot-duplication-baseline.md` now reports `total_duplicate_clusters=5`
+   - `src/bioetl/application/services/control_plane` carries the only live hotspot residual at `5`
+   - `control-plane-duplication.*` and `runtime-builders-duplication.*` are derived from the same ruleset and drift-guarded by architecture tests
 
 ## Closed Streams
 
@@ -54,7 +58,9 @@ Closed sub-issues: `#4812`, `#4813`, `#4814`, `#4815`, `#4816`, `#4817`,
 
 Governed outcome:
 
-- duplicate baseline for the former P0 wave is `0`;
+- duplicate evidence is reconciled across hotspot and specialized reports;
+- `application/core`, `composition/bootstrap/runtime`, `composition/factories/pipeline`, and `composition/runtime_builders` are at duplicate baseline `0`;
+- `application/services/control_plane` remains at `5` duplicate clusters in the canonical hotspot baseline and is now tracked as residual refactor pressure under `#4610`;
 - twin-family no-growth remains enforced;
 - config-contract drift closeout remains recorded on GitHub;
 - dead-code triage governance is materialized in `reports/quality/dead-code-inventory.md`.

@@ -135,7 +135,7 @@ def test_runtime_uuid4_inventory_documents_exact_replay_injection_seams() -> Non
         "src/bioetl/application/services/execution/pipeline_runner_service.py": (
             "require explicit run_id"
         ),
-        "src/bioetl/application/services/control_plane/manifest_service_scaffold.py": (
+        "src/bioetl/application/services/control_plane/manifest/service_scaffold.py": (
             "manifest_id_factory"
         ),
         "src/bioetl/application/services/control_plane/ledger/service.py": (

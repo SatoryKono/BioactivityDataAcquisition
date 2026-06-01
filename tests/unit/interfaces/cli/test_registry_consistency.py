@@ -58,6 +58,7 @@ class TestListPipelinesCommandSnapshot:
             "  - chembl_subcellular_fraction\n"
             "  - chembl_target\n"
             "  - chembl_target_component\n"
+            "  - chembl_target_protein_classification\n"
             "  - chembl_tissue\n"
             "  - crossref_publication\n"
             "  - openalex_publication\n"

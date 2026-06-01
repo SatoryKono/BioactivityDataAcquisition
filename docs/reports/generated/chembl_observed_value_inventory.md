@@ -2,8 +2,8 @@
 
 - source: `tracked_chembl_bronze_fixtures`
 - manifest_path: `configs/base/bronze_fixture_manifest.yaml`
-- fixtures_count: `14`
-- field_rows_count: `222`
+- fixtures_count: `15`
+- field_rows_count: `245`
 
 ## Fixture Summary
 
@@ -13,13 +13,14 @@
 - `chembl_cell_line` -> `11` fields from `tests/fixtures/bronze/chembl/cell_line/sample_ci_2026-04-29.jsonl`
 - `chembl_compound_record` -> `6` fields from `tests/fixtures/bronze/chembl/compound_record/sample_ci_2026-04-29.jsonl`
 - `chembl_molecule` -> `30` fields from `tests/fixtures/bronze/chembl/molecule/sample_ci_2026-03-25.jsonl`
-- `chembl_protein_class` -> `9` fields from `tests/fixtures/bronze/chembl/protein_class/sample_ci_2026-04-29.jsonl`
+- `chembl_protein_class` -> `10` fields from `tests/fixtures/bronze/chembl/protein_class/sample_ci_2026-04-29.jsonl`
 - `chembl_publication` -> `19` fields from `tests/fixtures/bronze/chembl/publication/sample_ci_2026-04-24.jsonl`
-- `chembl_publication_similarity` -> `4` fields from `tests/fixtures/bronze/chembl/publication_similarity/sample_ci_2026-04-30.jsonl`
+- `chembl_publication_similarity` -> `6` fields from `tests/fixtures/bronze/chembl/publication_similarity/sample_ci_2026-04-30.jsonl`
 - `chembl_publication_term` -> `19` fields from `tests/fixtures/bronze/chembl/publication_term/sample_ci_2026-04-30.jsonl`
 - `chembl_subcellular_fraction` -> `29` fields from `tests/fixtures/bronze/chembl/subcellular_fraction/sample_ci_2026-04-30.jsonl`
 - `chembl_target` -> `8` fields from `tests/fixtures/bronze/chembl/target/sample_ci_2026-04-24.jsonl`
 - `chembl_target_component` -> `12` fields from `tests/fixtures/bronze/chembl/target_component/sample_ci_2026-04-29.jsonl`
+- `chembl_target_protein_classification` -> `20` fields from `tests/fixtures/bronze/chembl/target_protein_classification/sample_ci_2026-06-01.jsonl`
 - `chembl_tissue` -> `6` fields from `tests/fixtures/bronze/chembl/tissue/sample_ci_2026-04-29.jsonl`
 
 ## Sample Field Rows

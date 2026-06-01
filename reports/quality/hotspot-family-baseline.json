@@ -1,6 +1,6 @@
 {
   "summary": {
-    "snapshot_date": "2026-05-30",
+    "snapshot_date": "2026-06-01",
     "families": 5,
     "scorecard": "configs/quality/debt_scorecard.yaml",
     "budget_warnings": 9

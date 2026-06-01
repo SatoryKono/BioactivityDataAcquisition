@@ -55,6 +55,7 @@ from bioetl.application.pipelines.chembl.pipeline_types import (
     ChEMBLSubcellularFractionPipeline,
     ChEMBLTargetComponentPipeline,
     ChEMBLTargetPipeline,
+    ChEMBLTargetProteinClassificationPipeline,
     ChEMBLTissuePipeline,
 )
 from bioetl.application.pipelines.chembl.protein_class_transformer import (
@@ -74,6 +75,9 @@ from bioetl.application.pipelines.chembl.subcellular_fraction_transformer import
 )
 from bioetl.application.pipelines.chembl.target_component_transformer import (
     TargetComponentTransformer,
+)
+from bioetl.application.pipelines.chembl.target_protein_classification_transformer import (
+    TargetProteinClassificationTransformer,
 )
 from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
 from bioetl.application.pipelines.chembl.tissue_transformer import TissueTransformer
@@ -97,6 +101,7 @@ __all__ = [
     "ChEMBLSubcellularFractionPipeline",
     "ChEMBLTargetComponentPipeline",
     "ChEMBLTargetPipeline",
+    "ChEMBLTargetProteinClassificationPipeline",
     "ChEMBLTissuePipeline",
     "CompoundRecordTransformer",
     "MoleculeTransformer",
@@ -106,6 +111,7 @@ __all__ = [
     "PublicationTransformer",
     "SubcellularFractionTransformer",
     "TargetComponentTransformer",
+    "TargetProteinClassificationTransformer",
     "TargetTransformer",
     "TissueTransformer",
 ]

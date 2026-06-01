@@ -69,6 +69,11 @@ Important distinction:
 
 - `report-hotspots` is for benchmark-backed performance hotspots.
 - `report-duplication-baseline` is for structural duplication visibility in `src/bioetl/composition` and `src/bioetl/application`.
+- `reports/quality/hotspot-duplication-baseline.{json,md}` is the canonical
+  multi-target duplication evidence surface. Specialized single-target artifacts
+  such as `control-plane-duplication.*` and `runtime-builders-duplication.*`
+  must be regenerated from the same command/ruleset and stay byte-for-byte
+  aligned with the matching hotspot-baseline target rows.
 - Source-tree size hotspots such as `>10 KB` files or `>350 LOC` files are a separate structural inventory and should be discussed as hotspot inventory, not as scorecard exemption debt.
 - `check-c901` remains the clean blocking baseline for complexity debt; file-size scorecard numbers refer to exemption registry state unless a policy explicitly says otherwise.
 

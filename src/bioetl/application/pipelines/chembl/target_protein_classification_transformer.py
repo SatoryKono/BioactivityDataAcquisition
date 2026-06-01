@@ -78,20 +78,20 @@ class TargetProteinClassificationTransformer(BaseChemblTransformer):
             "target_id": str(primary_id),
             "component_id": _optional_int(record.get("component_id")),
             "hierarchy_index": hierarchy_index,
-            "leaf_id": _optional_int(record.get("leaf_id")),
-            "l1_id": _optional_int(record.get("l1_id")),
+            "leaf_id": _optional_id_text(record.get("leaf_id")),
+            "l1_id": _optional_id_text(record.get("l1_id")),
             "l1_name": _optional_text(record.get("l1_name")),
             "l1_desc": _optional_text(record.get("l1_desc")),
-            "l2_id": _optional_int(record.get("l2_id")),
+            "l2_id": _optional_id_text(record.get("l2_id")),
             "l2_name": _optional_text(record.get("l2_name")),
             "l2_desc": _optional_text(record.get("l2_desc")),
-            "l3_id": _optional_int(record.get("l3_id")),
+            "l3_id": _optional_id_text(record.get("l3_id")),
             "l3_name": _optional_text(record.get("l3_name")),
             "l3_desc": _optional_text(record.get("l3_desc")),
-            "l4_id": _optional_int(record.get("l4_id")),
+            "l4_id": _optional_id_text(record.get("l4_id")),
             "l4_name": _optional_text(record.get("l4_name")),
             "l4_desc": _optional_text(record.get("l4_desc")),
-            "l5_id": _optional_int(record.get("l5_id")),
+            "l5_id": _optional_id_text(record.get("l5_id")),
             "l5_name": _optional_text(record.get("l5_name")),
             "l5_desc": _optional_text(record.get("l5_desc")),
             "classification_status": _classification_status(
@@ -143,3 +143,8 @@ def _optional_text(value: object) -> str | None:
         return None
     stripped = str(value).strip()
     return stripped or None
+
+
+def _optional_id_text(value: object) -> str | None:
+    coerced = _optional_int(value)
+    return str(coerced) if coerced is not None else None

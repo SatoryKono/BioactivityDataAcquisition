@@ -7,11 +7,11 @@ from dataclasses import dataclass
 from bioetl.application.services.control_plane.manifest.diagnostics import (
     build_diagnostics_summary,
 )
+from bioetl.application.services.control_plane.replay import historical_corpus_models
 from bioetl.application.services.control_plane.replay.historical_certification_service import (
     HistoricalReplayCertificationResult,
     HistoricalReplayCertificationService,
 )
-from bioetl.application.services.control_plane.replay import historical_corpus_models
 from bioetl.application.services.control_plane.replay.historical_corpus_models import (
     HistoricalReplayBulkCertificationRecord,
     HistoricalReplayBulkCertificationResult,

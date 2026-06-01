@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.application.services.control_plane.manifest_service_scaffold import (
+from bioetl.application.services.control_plane.manifest.service_scaffold import (
     ManifestServiceScaffoldMixin,
 )
 from bioetl.application.services.control_plane.workflow.manifest_models import (

@@ -21,6 +21,7 @@ __all__ = [
     "ChEMBLSubcellularFractionPipeline",
     "ChEMBLTargetComponentPipeline",
     "ChEMBLTargetPipeline",
+    "ChEMBLTargetProteinClassificationPipeline",
     "ChEMBLTissuePipeline",
 ]
 
@@ -89,6 +90,10 @@ class ChEMBLTargetPipeline(BasePipeline):
 
 class ChEMBLTargetComponentPipeline(BasePipeline):
     """Pipeline for ChEMBL target component data (protein sequences)."""
+
+
+class ChEMBLTargetProteinClassificationPipeline(BasePipeline):
+    """Pipeline for derived ChEMBL target-to-protein-classification relations."""
 
 
 class ChEMBLTissuePipeline(BasePipeline):

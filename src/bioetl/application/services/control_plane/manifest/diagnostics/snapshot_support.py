@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
+from bioetl.application.services.control_plane.manifest.diagnostics.nested_mapping import (
+    lookup_mapping_path,
+)
 from bioetl.application.services.control_plane.replay.historical_certification import (
     LIVE_CAPTURE_SNAPSHOT_MATERIALIZED,
     MIXED_POST_MANIFEST_SNAPSHOT_MATERIALIZATION,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.nested_mapping import (
-    lookup_mapping_path,
 )
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.control_plane.run_ledger import INPUT_SNAPSHOT_PUBLISHED_EVENT

@@ -135,6 +135,14 @@ def test_effective_config_context_helpers_are_not_flat_root_modules() -> None:
 def test_manifest_validation_implementation_is_not_flat_root_module() -> None:
     """Run-manifest validation implementation must live under manifest seam."""
     assert (CONTROL_PLANE_ROOT / "manifest" / "validation.py").is_file()
+    assert (CONTROL_PLANE_ROOT / "manifest" / "artifact_payloads.py").is_file()
+    assert (CONTROL_PLANE_ROOT / "manifest" / "service_scaffold.py").is_file()
+
+
+@pytest.mark.architecture
+def test_historical_replay_closure_claims_are_replay_owned() -> None:
+    """Historical replay closure claim helpers must live under replay seam."""
+    assert (CONTROL_PLANE_ROOT / "replay" / "closure_claims.py").is_file()
 
 
 @pytest.mark.architecture
@@ -150,3 +158,29 @@ def test_manifest_inspection_helpers_are_not_flat_root_modules() -> None:
     assert (
         CONTROL_PLANE_ROOT / "manifest" / "inspection_verification.py"
     ).is_file()
+
+
+@pytest.mark.architecture
+def test_manifest_diagnostics_helpers_are_owned_by_manifest_package() -> None:
+    """Run-manifest diagnostics implementations must live under manifest seam."""
+    owned_modules = {
+        "composite_projection.py",
+        "ledger_processing.py",
+        "main_helpers.py",
+        "persistence.py",
+        "persistence_alerts.py",
+        "persistence_profile_support.py",
+        "persistence_profiles.py",
+        "replay_helpers.py",
+        "replay_state.py",
+        "summary.py",
+    }
+    diagnostics_root = CONTROL_PLANE_ROOT / "manifest" / "diagnostics"
+
+    missing = [
+        module_name
+        for module_name in sorted(owned_modules)
+        if not (diagnostics_root / module_name).is_file()
+    ]
+
+    assert missing == []

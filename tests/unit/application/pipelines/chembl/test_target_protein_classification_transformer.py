@@ -60,7 +60,7 @@ async def test_transform_preserves_shaped_relation_row_identity(
     assert result["target_id"] == "CHEMBL123"
     assert result["hierarchy_index"] == 2
     assert result["component_id"] == 10
-    assert result["leaf_id"] == 148
+    assert result["leaf_id"] == "148"
     assert result["classification_status"] == "resolved"
 
 

@@ -7,7 +7,9 @@ from dataclasses import dataclass
 from bioetl.application.services.control_plane.replay._historical_record_payload import (
     build_historical_certified_identity_payload_from_record,
 )
-from bioetl.application.services.control_plane.replay.historical_identity_models import HistoricalReplayRunIdentity
+from bioetl.application.services.control_plane.replay.historical_identity_models import (
+    HistoricalReplayRunIdentity,
+)
 
 
 @dataclass(frozen=True, slots=True)

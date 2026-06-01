@@ -155,6 +155,11 @@ PIPELINE_CASES: tuple[PipelineE2ECase, ...] = (
             "TestChemblTargetComponentPipeline.test_chembl_target_component_happy_path",
         ),
     ),
+    PipelineE2ECase(
+        "chembl_target_protein_classification",
+        "chembl",
+        "target_protein_classification",
+    ),
     PipelineE2ECase("chembl_tissue", "chembl", "tissue"),
     PipelineE2ECase(
         "crossref_publication",
@@ -227,6 +232,7 @@ MATRIX_REPLAY_DEFERRED_PIPELINES: frozenset[str] = frozenset(
         "chembl_assay_parameters",
         "chembl_protein_class",
         "chembl_target_component",
+        "chembl_target_protein_classification",
         "composite_activity",
         "composite_assay",
         "composite_molecule",

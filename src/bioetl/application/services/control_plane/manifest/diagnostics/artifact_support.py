@@ -27,7 +27,7 @@ def build_trace_artifact_ref(
     artifact_ref: dict[str, object],
 ) -> dict[str, object]:
     """Return the concrete produced-artifact shape used by replay trace output."""
-    from bioetl.application.services.control_plane.run_manifest_diagnostics_support import (
+    from bioetl.application.services.control_plane.manifest.artifact_payloads import (
         ARTIFACT_TRACE_ORDERED_KEYS,
     )
 
