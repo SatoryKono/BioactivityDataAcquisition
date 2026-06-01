@@ -62,7 +62,7 @@ budgets:
   duplicate_test_names_max: 787
   duplicate_test_name_occurrences_max: 2552
   compatibility_test_file_max: 53
-  markerless_test_functions_max: 6380
+  markerless_test_functions_max: 5875
   uuid4_call_sites_max: 400
   date_today_call_sites_max: 0
 budget_ratchet:
@@ -96,6 +96,12 @@ budget_ratchet:
     status: markerless_ratcheted_to_6380
     note: Follow-up markerless burn-down on 2026-06-01 added explicit unit
       markers to ten already unit-scoped modules and ratcheted
+      markerless_test_functions_max to the live inventory.
+  - issue: markerless-followup-2-2026-06-01
+    owner: architecture-governance
+    status: markerless_ratcheted_to_5875
+    note: Second markerless burn-down on 2026-06-01 added explicit unit markers
+      to twelve already unit-scoped modules and ratcheted
       markerless_test_functions_max to the live inventory.
   touch_policy: Refactors touching test families must reduce the applicable budget
     or keep it flat with an explicit owner rationale; increasing a debt budget requires
