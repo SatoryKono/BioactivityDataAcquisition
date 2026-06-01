@@ -57,13 +57,13 @@ def _load_baseline_families() -> dict[str, dict[str, int]]:
 
 
 def _live_metrics() -> dict[str, int]:
-    _, _, unique_parameter_count, config_count, inconsistent_parameter_count = (
+    _, _, unique_parameter_count, config_count, raw_partial_count, _, _ = (
         _build_artifact_contents()
     )
     return _live_baseline_metrics(
         config_count=config_count,
         unique_parameter_count=unique_parameter_count,
-        _cross_family_raw_inconsistent=inconsistent_parameter_count,
+        _cross_family_raw_inconsistent=raw_partial_count,
     )
 
 
