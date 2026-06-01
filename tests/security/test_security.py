@@ -256,13 +256,6 @@ class TestNoHardcodedSecrets:
                     rel_path = py_file.relative_to(PROJECT_ROOT)
                     non_bioetl_env_vars.append(f"{rel_path}: {var_name}")
 
-        if non_bioetl_env_vars:
-            # Warning, not failure - some legacy vars may exist
-            pytest.xfail(
-                "Non-BIOETL env vars (consider migrating):\n"
-                + "\n".join(non_bioetl_env_vars)
-            )
-
         assert not non_bioetl_env_vars
 
 

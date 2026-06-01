@@ -321,7 +321,9 @@ def _discover_dashboard_panel_specs() -> tuple[PanelAuditSpec, ...]:
     for path in sorted(_DASHBOARD_DIR.glob("*.json")):
         dashboard = json.loads(path.read_text(encoding="utf-8"))
         dashboard_uid = str(dashboard.get("uid") or path.stem)
-        for panel in _iter_panels(cast(list[dict[str, Any]], dashboard.get("panels", []))):
+        for panel in _iter_panels(
+            cast(list[dict[str, Any]], dashboard.get("panels", []))
+        ):
             panel_id = panel.get("id")
             if not isinstance(panel_id, int):
                 continue
@@ -380,7 +382,10 @@ def _discover_dashboard_panel_specs() -> tuple[PanelAuditSpec, ...]:
                     )
             for link in cast(list[dict[str, Any]], panel.get("links", [])):
                 link_url = str(link.get("url") or "")
-                if "exploretraces-app" not in link_url and "var-ds=tempo" not in link_url:
+                if (
+                    "exploretraces-app" not in link_url
+                    and "var-ds=tempo" not in link_url
+                ):
                     continue
                 specs.append(
                     PanelAuditSpec(
@@ -459,6 +464,8 @@ def _substitute_dashboard_tokens(template: str, config: AuditConfig) -> str:
         "${__range_s}": str(config.range_hours * 3600),
         "$__interval": "5m",
         "${__interval}": "5m",
+        "$__rate_interval": "5m",
+        "${__rate_interval}": "5m",
         "${reason_code:csv}": "",
         "${field:csv}": "",
         "${quarantine_run_id}": "",
@@ -470,6 +477,13 @@ def _substitute_dashboard_tokens(template: str, config: AuditConfig) -> str:
     for token, value in replacements.items():
         rendered = rendered.replace(token, value)
     return rendered
+
+
+def _loki_query_range_bounds(config: AuditConfig) -> tuple[str, str]:
+    start_iso, end_iso = _time_window(config)
+    start = datetime.fromisoformat(start_iso).timestamp()
+    end = datetime.fromisoformat(end_iso).timestamp()
+    return (str(int(start * 1_000_000_000)), str(int(end * 1_000_000_000)))
 
 
 def _fetch_json(url: str) -> object:
@@ -731,7 +745,10 @@ def _select_target(
 ) -> dict[str, Any] | None:
     targets = cast(list[dict[str, Any]], panel.get("targets", []))
     for target in targets:
-        if spec.target_ref_id is not None and _target_ref_id(target) != spec.target_ref_id:
+        if (
+            spec.target_ref_id is not None
+            and _target_ref_id(target) != spec.target_ref_id
+        ):
             continue
         value = target.get(field)
         if isinstance(value, str) and value:
@@ -824,10 +841,14 @@ def _audit_http_panel(
         )
     elif spec.semantic_kind == "http_summary":
         classification, detail = _classify_http_payload(payload)
-        status = "error" if classification == "invalid_shape" and spec.required else "ok"
+        status = (
+            "error" if classification == "invalid_shape" and spec.required else "ok"
+        )
     else:
         classification, detail = _classify_http_endpoint_payload(payload)
-        status = "error" if classification == "invalid_shape" and spec.required else "ok"
+        status = (
+            "error" if classification == "invalid_shape" and spec.required else "ok"
+        )
     return AuditResult(
         dashboard_uid=spec.dashboard_uid,
         panel_id=spec.panel_id,
@@ -863,8 +884,14 @@ def _audit_loki_panel(
             target_ref_id=spec.target_ref_id,
         )
     rendered_expr = _substitute_dashboard_tokens(expr, config)
-    query_url = f"{config.loki_base_url}/loki/api/v1/query?" + urlencode(
-        {"query": rendered_expr}
+    start_ns, end_ns = _loki_query_range_bounds(config)
+    query_url = f"{config.loki_base_url}/loki/api/v1/query_range?" + urlencode(
+        {
+            "query": rendered_expr,
+            "start": start_ns,
+            "end": end_ns,
+            "limit": "100",
+        }
     )
     try:
         payload = _fetch_json(query_url)
@@ -891,7 +918,7 @@ def _audit_loki_panel(
         semantic_kind=spec.semantic_kind,
         status=status,
         classification=classification,
-        detail=detail,
+        detail=f"{detail}; endpoint=query_range; start={start_ns}; end={end_ns}",
         query_preview=rendered_expr[:400],
         target_ref_id=spec.target_ref_id,
     )
@@ -954,7 +981,13 @@ def run_audit(config: AuditConfig) -> list[AuditResult]:
                 results.append(_audit_loki_panel(spec, panel, config))
             else:
                 results.append(_audit_tempo_handoff(spec, config))
-        except (HTTPError, URLError, OSError, TimeoutError, json.JSONDecodeError) as exc:
+        except (
+            HTTPError,
+            URLError,
+            OSError,
+            TimeoutError,
+            json.JSONDecodeError,
+        ) as exc:
             results.append(
                 AuditResult(
                     dashboard_uid=spec.dashboard_uid,

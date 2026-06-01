@@ -1002,8 +1002,44 @@ class TestHealthServerControlPlaneSelector:
         )
         assert rows["Resume|Dry run|Cached Bronze"] == "No | No | No"
         assert rows["Replay [Capability.Mode]"] == "Yes [Supported.Backfill]"
-        assert rows["Checkpoint [Anchors]"] == "PARTIAL"
-        assert rows["Identity Health [Gaps]"] == "Complete [0 gaps]"
+        assert rows["Checkpoint [Anchors]"] == "OK"
+        assert rows["Identity Health [Gaps]"] == "Complete [6 gaps]"
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_identity_table_compact_health_matches_identity_evidence(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Compact ID panel health must not drift from identity-evidence summary."""
+        server, _manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+
+        table_status, _, table_body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/identity-table?pipeline=chembl_activity",
+        )
+        evidence_status, _, evidence_body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/identity-evidence?"
+            "pipeline=chembl_activity&view=overview",
+        )
+
+        assert table_status == 200
+        assert evidence_status == 200
+        table = json.loads(table_body)
+        evidence = json.loads(evidence_body)
+        rows = {item["parameter"]: item["value"] for item in table["rows"]}
+        summary = evidence["summary"]
+
+        assert rows["Checkpoint [Anchors]"] == summary["checkpoint_anchor_status"]
+        expected_status = (
+            "Complete" if summary["identity_graph_complete"] else "Incomplete"
+        )
+        assert rows["Identity Health [Gaps]"] == (
+            f"{expected_status} [{summary['identity_gap_count']} gaps]"
+        )
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_table_treats_all_run_type_as_unbounded_scope(
@@ -1106,7 +1142,7 @@ class TestHealthServerControlPlaneSelector:
         assert rows["Execution [Type|Context|Git]"] == (
             "incremental | isolated | git=abc1234"
         )
-        assert rows["Checkpoint [Anchors]"] == "OK"
+        assert rows["Checkpoint [Anchors]"] == "MISSING"
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_table_supports_all_pipeline_with_selected_run_id(

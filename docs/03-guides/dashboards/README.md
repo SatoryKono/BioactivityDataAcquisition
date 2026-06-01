@@ -40,6 +40,21 @@ ______________________________________________________________________
   `UNKNOWN`. Unstructured Loki hygiene renders parsed `.__error__`, not the
   template function form.
 
+Текущий reproducible render contract:
+
+- Full-surface dashboard audits must use the Playwright screenshot path from
+  `python -m scripts.ops rerender-grafana`, because that path expands collapsed
+  rows before full-page capture.
+- `python -m scripts.ops check-grafana-audit-preflight` must report
+  `expanded-row-capture: ok` before a full UX/render audit can claim collapsed
+  diagnostic rows were reviewed.
+- Grafana Render API screenshots remain acceptable for render/auth smoke
+  evidence, but they are not sufficient for the collapsed-row audit
+  acceptance criterion.
+- On Linux, `setup_grafana_screenshot_runtime.sh` is the canonical bootstrap
+  for repo-local Playwright plus the supported headless Chromium shared
+  library surface.
+
 Текущая навигационная модель:
 
 - `0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`,

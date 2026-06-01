@@ -23,6 +23,7 @@ def build_control_plane_identity_payload(
     selected_run_types: tuple[str, ...],
     resolved_via: str,
     checkpoint_metadata: dict[str, object] | None = None,
+    identity_evidence_summary: dict[str, object] | None = None,
 ) -> dict[str, object]:
     """Build the Grafana identity-table payload for one control-plane scope."""
     return {
@@ -36,6 +37,7 @@ def build_control_plane_identity_payload(
             selected_pipelines=selected_pipelines,
             selected_run_id=selected_run_id,
             checkpoint_metadata=checkpoint_metadata,
+            identity_evidence_summary=identity_evidence_summary,
         ),
     }
 
@@ -47,6 +49,7 @@ def _build_identity_rows(
     selected_pipelines: tuple[str, ...],
     selected_run_id: str | None,
     checkpoint_metadata: dict[str, object] | None,
+    identity_evidence_summary: dict[str, object] | None,
 ) -> list[dict[str, str]]:
     manifest_unavailable = (
         "select one concrete pipeline or exact run_id"
@@ -98,7 +101,7 @@ def _build_identity_rows(
         ),
         _identity_row(
             "Checkpoint [Anchors]",
-            values.get("checkpoint_anchor_status"),
+            _checkpoint_anchor_status(values, identity_evidence_summary),
             unavailable=manifest_unavailable,
         ),
     ]
@@ -113,7 +116,9 @@ def _build_identity_rows(
     rows.append(
         _identity_row(
             "Identity Health [Gaps]",
-            _identity_health(values) if manifest is not None else None,
+            _identity_health(values, identity_evidence_summary)
+            if manifest is not None
+            else None,
             unavailable=manifest_unavailable,
         )
     )
@@ -203,7 +208,31 @@ def _replay_summary(values: dict[str, object | None]) -> str | None:
     return f"{eligible} [{capability}.{mode}]"
 
 
-def _identity_health(values: dict[str, object | None]) -> str:
+def _checkpoint_anchor_status(
+    values: dict[str, object | None],
+    identity_evidence_summary: dict[str, object] | None,
+) -> object | None:
+    if identity_evidence_summary is not None:
+        summary_status = identity_evidence_summary.get("checkpoint_anchor_status")
+        if summary_status not in (None, ""):
+            return summary_status
+    return values.get("checkpoint_anchor_status")
+
+
+def _identity_health(
+    values: dict[str, object | None],
+    identity_evidence_summary: dict[str, object] | None,
+) -> str:
+    if identity_evidence_summary is not None:
+        gap_count = _int_or_zero(identity_evidence_summary.get("identity_gap_count"))
+        complete = identity_evidence_summary.get("identity_graph_complete")
+        if complete is True:
+            status = "Complete"
+        elif complete is False or gap_count:
+            status = "Incomplete"
+        else:
+            status = "Unknown"
+        return f"{status} [{gap_count} gaps]"
     gaps = values.get("correlation_anchor_gaps")
     gap_count = _gap_count(gaps)
     complete = values.get("identity_graph_complete")
@@ -214,6 +243,21 @@ def _identity_health(values: dict[str, object | None]) -> str:
     else:
         status = "Unknown"
     return f"{status} [{gap_count} gaps]"
+
+
+def _int_or_zero(value: object | None) -> int:
+    if isinstance(value, bool):
+        return 0
+    if isinstance(value, int):
+        return max(value, 0)
+    if isinstance(value, float):
+        return max(int(value), 0)
+    if isinstance(value, str):
+        try:
+            return max(int(value), 0)
+        except ValueError:
+            return 0
+    return 0
 
 
 def _payload_value(manifest: RunManifest, *keys: str) -> str | None:

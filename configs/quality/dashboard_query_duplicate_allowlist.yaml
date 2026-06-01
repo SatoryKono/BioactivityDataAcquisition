@@ -1,0 +1,42 @@
+version: 1
+owner: "@bioetl-observability"
+rationale: >
+  Dashboard query reuse is allowed only when the repeated expression is an
+  intentional shared operator view, not accidental copy/paste drift.
+exact_duplicates:
+  allowed_groups:
+    - id: dq-volume-weighted-score-shared-card
+      owner: "@bioetl-observability"
+      linked_issue: "#4876"
+      rationale: Same DQ score expression is intentionally reused for current card and trend context.
+      panel_refs:
+        - "bioetl-dq-v2.json :: Monitor: Data Quality Score (Volume-weighted)"
+        - "bioetl-dq-v2.json :: Track: Data Quality Score Trend (Volume-weighted)"
+    - id: control-plane-replay-safety-status
+      owner: "@bioetl-observability"
+      linked_issue: "#4876"
+      rationale: Control-plane replay safety is intentionally surfaced in both Status and Monitor panels.
+      panel_refs:
+        - "bioetl-control-plane-v1.json :: Monitor: Replay Safety State"
+        - "bioetl-control-plane-v1.json :: Status"
+    - id: dq-current-status-shared-card
+      owner: "@bioetl-observability"
+      linked_issue: "#4876"
+      rationale: DQ status expression is intentionally reused for top-level and diagnostic status cards.
+      panel_refs:
+        - "bioetl-dq-v2.json :: Monitor DQ Current Status"
+        - "bioetl-dq-v2.json :: Status"
+    - id: runtime-current-status-shared-card
+      owner: "@bioetl-observability"
+      linked_issue: "#4876"
+      rationale: Runtime status expression is intentionally reused for overview and runtime status cards.
+      panel_refs:
+        - "bioetl-runtime.json :: Runtime Status"
+        - "bioetl-runtime.json :: Status"
+near_duplicates:
+  max_count: 10
+  owner: "@bioetl-observability"
+  linked_issue: "#4876"
+  rationale: >
+    Current near-duplicate families are mostly intentional p50/p95/p99
+    histogram triplets and layer/status variants. Growth requires review.

@@ -14,7 +14,7 @@ ______________________________________________________________________
 # BioETL Tech Debt Eradication Blueprint v4
 
 Дата snapshot: `2026-05-31`
-Incremental resync: `2026-06-01` after `#4705`, `#4847`, `#4848`, `#4849`, `#4850`, and `#4851` closeout.
+Incremental resync: `2026-06-01` after `#4705`, `#4847`, `#4848`, `#4849`, `#4850`, `#4851`, `#4610`, and `#4811` closeout.
 
 **Authoritative status source**: live GitHub issue state plus governed quality artifacts.  
 **Source command**: `curl -H "Authorization: Bearer ${GITHUB_TOKEN}" https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/issues/{4610,4811,4847,4848,4849,4850,4851}`  
@@ -48,6 +48,7 @@ looking operationally current.
    - `reports/quality/hotspot-duplication-baseline.md` now reports `total_duplicate_clusters=5`
    - `src/bioetl/application/services/control_plane` carries the only live hotspot residual at `5`
    - `control-plane-duplication.*` and `runtime-builders-duplication.*` are derived from the same ruleset and drift-guarded by architecture tests
+11. Final live GitHub queue check on 2026-06-01 reports no open `technical-debt` issues and only the umbrella epic `#4811` under `tech-debt`; `#4610` is closed.
 
 ## Closed Streams
 
@@ -76,21 +77,17 @@ Governed outcome:
 - Bronze fixture-gap wave is archived;
 - compatibility usage graph / no-new-shim enforcement is no longer an active execution stream.
 
-### Stream D and Stream E
+### Stream C, Stream D, and Stream E
 
 Archived unless reopened on GitHub:
 
+- `#4610`
 - `#4266`, `#4268`, `#4276`, `#4292`, `#4293`, `#4294`, `#4295`, `#4296`, `#4316`
 - `#4747`
 
 ## Active Queue After This Resync
 
-The post-closeout target queue for the technical-debt program is now:
-
-1. [#4610](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4610)
-   `AR-002: Decompose control-plane application services into owned responsibility packages`
-2. [#4811](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4811)
-   `TECH-DEBT-ZERO-001: Drive technical debt to zero`
+The post-closeout target queue for the technical-debt program is empty.
 
 If GitHub still reports additional open `technical-debt` or `tech-debt`
 issues, GitHub wins and this mirror must be resynced again.

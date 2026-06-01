@@ -6,10 +6,14 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
+import yaml
+
 _DASHBOARDS_DIR = Path("grafana/dashboards")
+_DEFAULT_ALLOWLIST = Path("configs/quality/dashboard_query_duplicate_allowlist.yaml")
 _METRIC_RE = re.compile(r"\bbioetl_[a-z0-9_]+\b")
 _NUMBER_RE = re.compile(r"\b\d+(?:\.\d+)?\b")
 _STRING_RE = re.compile(r'"[^"]*"')
@@ -48,6 +52,16 @@ class NearDuplicateGroup:
     scope: str
     dashboards: tuple[str, ...]
     panel_refs: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class GovernanceViolation:
+    """One duplicate-query governance violation."""
+
+    kind: str
+    scope: str
+    panel_refs: tuple[str, ...]
+    message: str
 
 
 def _normalize_expression(expr: str) -> str:
@@ -236,12 +250,14 @@ def _build_payload(
     *,
     exact_duplicates: tuple[ExactDuplicateGroup, ...],
     near_duplicates: tuple[NearDuplicateGroup, ...],
+    violations: tuple[GovernanceViolation, ...] = (),
 ) -> dict[str, object]:
     """Build machine-readable report payload."""
     return {
         "summary": {
             "exact_duplicate_groups": len(exact_duplicates),
             "near_duplicate_groups": len(near_duplicates),
+            "governance_violations": len(violations),
             "cross_dashboard_exact_groups": sum(
                 1 for group in exact_duplicates if group.scope == "cross_dashboard"
             ),
@@ -251,7 +267,92 @@ def _build_payload(
         },
         "exact_duplicates": [asdict(group) for group in exact_duplicates],
         "near_duplicates": [asdict(group) for group in near_duplicates],
+        "violations": [asdict(violation) for violation in violations],
     }
+
+
+def _load_allowlist(path: Path) -> dict[str, object]:
+    if not path.exists():
+        return {}
+    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if payload is None:
+        return {}
+    if not isinstance(payload, dict):
+        raise ValueError(
+            f"Dashboard query duplicate allowlist must be a mapping: {path}"
+        )
+    return payload
+
+
+def _allowed_exact_panel_refs(policy: dict[str, object]) -> set[tuple[str, ...]]:
+    exact = policy.get("exact_duplicates")
+    if not isinstance(exact, dict):
+        return set()
+    groups = exact.get("allowed_groups")
+    if not isinstance(groups, list):
+        return set()
+    allowed: set[tuple[str, ...]] = set()
+    for item in groups:
+        if not isinstance(item, dict):
+            continue
+        panel_refs = item.get("panel_refs")
+        if not isinstance(panel_refs, list):
+            continue
+        refs = tuple(sorted(str(ref) for ref in panel_refs if str(ref).strip()))
+        if refs:
+            allowed.add(refs)
+    return allowed
+
+
+def _near_duplicate_max_count(policy: dict[str, object]) -> int | None:
+    near = policy.get("near_duplicates")
+    if not isinstance(near, dict):
+        return None
+    value = near.get("max_count")
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int) and value >= 0:
+        return value
+    return None
+
+
+def evaluate_governance(
+    *,
+    exact_duplicates: tuple[ExactDuplicateGroup, ...],
+    near_duplicates: tuple[NearDuplicateGroup, ...],
+    allowlist_path: Path = _DEFAULT_ALLOWLIST,
+) -> tuple[GovernanceViolation, ...]:
+    """Evaluate duplicate-query groups against the reviewed allowlist/budget."""
+    policy = _load_allowlist(allowlist_path)
+    allowed_exact_refs = _allowed_exact_panel_refs(policy)
+    near_max_count = _near_duplicate_max_count(policy)
+    violations: list[GovernanceViolation] = []
+
+    for group in exact_duplicates:
+        if tuple(sorted(group.panel_refs)) in allowed_exact_refs:
+            continue
+        violations.append(
+            GovernanceViolation(
+                kind="unreviewed_exact_duplicate",
+                scope=group.scope,
+                panel_refs=group.panel_refs,
+                message="Exact duplicate query group is not declared in allowlist",
+            )
+        )
+
+    if near_max_count is not None and len(near_duplicates) > near_max_count:
+        violations.append(
+            GovernanceViolation(
+                kind="near_duplicate_budget_exceeded",
+                scope="global",
+                panel_refs=(),
+                message=(
+                    "Near duplicate query groups exceed budget "
+                    f"({len(near_duplicates)} > {near_max_count})"
+                ),
+            )
+        )
+    return tuple(violations)
 
 
 def _render_markdown(
@@ -337,6 +438,17 @@ def main(argv: list[str] | None = None) -> int:
             "variants inside one panel (for example p50/p95/p99 triplets)."
         ),
     )
+    parser.add_argument(
+        "--allowlist",
+        type=Path,
+        default=_DEFAULT_ALLOWLIST,
+        help="Reviewed duplicate-query allowlist/budget YAML.",
+    )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Fail when live duplicate groups are not covered by allowlist/budget.",
+    )
     args = parser.parse_args(argv)
 
     query_uses = collect_panel_query_uses()
@@ -345,9 +457,19 @@ def main(argv: list[str] | None = None) -> int:
         query_uses,
         include_single_panel=args.include_single_panel_near,
     )
+    try:
+        violations = evaluate_governance(
+            exact_duplicates=exact_duplicates,
+            near_duplicates=near_duplicates,
+            allowlist_path=args.allowlist,
+        )
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
     payload = _build_payload(
         exact_duplicates=exact_duplicates,
         near_duplicates=near_duplicates,
+        violations=violations,
     )
     markdown = _render_markdown(
         exact_duplicates=exact_duplicates,
@@ -368,6 +490,14 @@ def main(argv: list[str] | None = None) -> int:
     if args.markdown_out is not None:
         args.markdown_out.write_text(markdown, encoding="utf-8")
 
+    if args.check and violations:
+        for violation in violations:
+            refs = ", ".join(violation.panel_refs) or "(global)"
+            print(
+                f"[FAIL] {violation.kind}: {violation.message}: {refs}",
+                file=sys.stderr,
+            )
+        return 1
     return 0
 
 

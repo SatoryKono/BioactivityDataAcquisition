@@ -266,10 +266,10 @@ retained_entrypoints:
   exit_criteria: The merge module remains the sanctioned public seam and all composition paths use collaborator bundles with
     only the canonical `order_service` ordering collaborator.
 measured_only_ratchet:
-  max_total_modules: 13
+  max_total_modules: 0
   scoped_limits:
   - path_prefix: src/bioetl/application/services/
-    max_modules: 13
+    max_modules: 0
   - path_prefix: src/bioetl/interfaces/cli/commands/
     max_modules: 0
 measured_only_review_workflow:
@@ -390,82 +390,4 @@ retained_entrypoint_burn_down_plan:
     rationale: Public composite merge module; retained while collaborator bundle API is canonical.
     completion_gate: Keep the sanctioned merge entrypoint stable and prevent first-party callers from bypassing the collaborator
       bundle/canonical merge surface.
-measured_only_modules:
-- path: src/bioetl/application/services/control_plane/_run_manifest_artifact_payloads.py
-  owner: bioetl.application.services.control_plane.manifest
-  reason: Root-private compatibility facade for legacy artifact payload helper imports after ownership moved to manifest.artifact_payloads.
-  review_date: '2026-09-30'
-  new_code_policy: no-new-first-party-imports
-  promotion_trigger: sanctioned-public-seam
-- path: src/bioetl/application/services/control_plane/_run_manifest_diagnostics_composite.py
-  owner: bioetl.application.services.control_plane.manifest.diagnostics
-  reason: Root-private compatibility facade for legacy diagnostics composite helper imports after ownership moved to manifest.diagnostics.composite_projection.
-  review_date: '2026-09-30'
-  new_code_policy: no-new-first-party-imports
-  promotion_trigger: sanctioned-public-seam
-- path: src/bioetl/application/services/control_plane/_run_manifest_diagnostics_ledger.py
-  owner: bioetl.application.services.control_plane.manifest.diagnostics
-  reason: Root-private compatibility facade for legacy diagnostics ledger helper imports after ownership moved to manifest.diagnostics.ledger_processing.
-  review_date: '2026-09-30'
-  new_code_policy: no-new-first-party-imports
-  promotion_trigger: sanctioned-public-seam
-- path: src/bioetl/application/services/control_plane/_run_manifest_diagnostics_main_helpers.py
-  owner: bioetl.application.services.control_plane.manifest.diagnostics
-  reason: Root-private compatibility facade for legacy diagnostics main helper imports after ownership moved to manifest.diagnostics.main_helpers.
-  review_date: '2026-09-30'
-  new_code_policy: no-new-first-party-imports
-  promotion_trigger: sanctioned-public-seam
-- path: src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence.py
-  owner: bioetl.application.services.control_plane.manifest.diagnostics
-  reason: Root-private compatibility facade for legacy diagnostics persistence imports after ownership moved to manifest.diagnostics.persistence.
-  review_date: '2026-09-30'
-  new_code_policy: no-new-first-party-imports
-  promotion_trigger: sanctioned-public-seam
-- path: src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_alerts.py
-  owner: bioetl.application.services.control_plane.manifest.diagnostics
-  reason: Root-private compatibility facade for legacy diagnostics persistence alert imports after ownership moved to manifest.diagnostics.persistence_alerts.
-  review_date: '2026-09-30'
-  new_code_policy: no-new-first-party-imports
-  promotion_trigger: sanctioned-public-seam
-- path: src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_profile_support.py
-  owner: bioetl.application.services.control_plane.manifest.diagnostics
-  reason: Root-private compatibility facade for legacy diagnostics persistence profile support imports after ownership moved to manifest.diagnostics.persistence_profile_support.
-  review_date: '2026-09-30'
-  new_code_policy: no-new-first-party-imports
-  promotion_trigger: sanctioned-public-seam
-- path: src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_profiles.py
-  owner: bioetl.application.services.control_plane.manifest.diagnostics
-  reason: Root-private compatibility facade for legacy diagnostics persistence profile imports after ownership moved to manifest.diagnostics.persistence_profiles.
-  review_date: '2026-09-30'
-  new_code_policy: no-new-first-party-imports
-  promotion_trigger: sanctioned-public-seam
-- path: src/bioetl/application/services/control_plane/_run_manifest_diagnostics_replay_helpers.py
-  owner: bioetl.application.services.control_plane.manifest.diagnostics
-  reason: Root-private compatibility facade for legacy diagnostics replay helper imports after ownership moved to manifest.diagnostics.replay_helpers.
-  review_date: '2026-09-30'
-  new_code_policy: no-new-first-party-imports
-  promotion_trigger: sanctioned-public-seam
-- path: src/bioetl/application/services/control_plane/_run_manifest_diagnostics_replay_state.py
-  owner: bioetl.application.services.control_plane.manifest.diagnostics
-  reason: Root-private compatibility facade for legacy diagnostics replay state imports after ownership moved to manifest.diagnostics.replay_state.
-  review_date: '2026-09-30'
-  new_code_policy: no-new-first-party-imports
-  promotion_trigger: sanctioned-public-seam
-- path: src/bioetl/application/services/control_plane/_run_manifest_diagnostics_summary.py
-  owner: bioetl.application.services.control_plane.manifest.diagnostics
-  reason: Root-private compatibility facade for legacy diagnostics summary imports after ownership moved to manifest.diagnostics.summary.
-  review_date: '2026-09-30'
-  new_code_policy: no-new-first-party-imports
-  promotion_trigger: sanctioned-public-seam
-- path: src/bioetl/application/services/control_plane/historical_replay_closure_claims.py
-  owner: bioetl.application.services.control_plane.replay
-  reason: Root compatibility facade for legacy historical replay closure claim imports after ownership moved to replay.closure_claims.
-  review_date: '2026-09-30'
-  new_code_policy: no-new-first-party-imports
-  promotion_trigger: sanctioned-public-seam
-- path: src/bioetl/application/services/control_plane/manifest_service_scaffold.py
-  owner: bioetl.application.services.control_plane.manifest
-  reason: Root compatibility facade for legacy manifest service scaffold imports after ownership moved to manifest.service_scaffold.
-  review_date: '2026-09-30'
-  new_code_policy: no-new-first-party-imports
-  promotion_trigger: sanctioned-public-seam
+measured_only_modules: []

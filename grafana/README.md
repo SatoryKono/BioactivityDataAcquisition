@@ -58,6 +58,10 @@ ______________________________________________________________________
 > Playwright mode additionally requires the local `playwright` npm dependency,
 > downloaded browser runtime, and the usual headless Chromium shared libraries
 > (`libnspr4`, `libnss3`, `libasound2`, etc.) on the host.
+> The Linux bootstrap checks the full supported Chromium library surface
+> (`libatk-bridge`, `libcups`, `libdrm`, `libgbm`, `libxkbcommon`, X11
+> compositing libs, and related NSS/NSPR/audio libs) before attempting capture,
+> and prints the corresponding apt package set when the host is incomplete.
 > To bootstrap that runtime on a fresh host, use
 > `bash scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh`.
 > The bootstrap now forces repo-local devDependency installation

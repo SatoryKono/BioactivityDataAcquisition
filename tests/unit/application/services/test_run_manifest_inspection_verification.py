@@ -6,7 +6,7 @@ from dataclasses import replace
 from pathlib import Path
 from uuid import uuid4
 
-from bioetl.application.services.control_plane.run_manifest_inspection_verification import (
+from bioetl.application.services.control_plane.manifest.inspection_verification import (
     build_effective_config_store_verification,
     json_equal,
     parse_run_id,
