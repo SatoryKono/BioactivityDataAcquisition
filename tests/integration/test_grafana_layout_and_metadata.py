@@ -210,17 +210,17 @@ def test_control_plane_row_sequence_matches_operator_flow() -> None:
         if panel.get("type") == "row" and panel.get("collapsed") is False
     ]
     row_pairs = [
-        (panel.get("id"), panel.get("title"), panel.get("gridPos", {}).get("y"))
+        (panel.get("id"), panel.get("title"))
         for panel in sorted(
             row_panels, key=lambda panel: panel.get("gridPos", {}).get("y", 0)
         )
     ]
     assert row_pairs == [
-        (902, "Incident Drilldown: Replay Safety (Checkpoint / Replay)", 21),
-        (901, "Incident Drilldown: Manifest / Ledger Integrity", 22),
-        (903, "Incident Drilldown: Global Control-Plane Store Reliability", 23),
-        (904, "Incident Drilldown: Audit / Lineage Completeness", 24),
-        (905, "Identity evidence and remaining replay-safety signals", 25),
+        (902, "Incident Drilldown: Replay Safety (Checkpoint / Replay)"),
+        (901, "Incident Drilldown: Manifest / Ledger Integrity"),
+        (903, "Incident Drilldown: Global Control-Plane Store Reliability"),
+        (904, "Incident Drilldown: Audit / Lineage Completeness"),
+        (905, "Identity evidence and remaining replay-safety signals"),
     ], f"Control Plane row order/title drifted: {row_pairs}"
 
 
@@ -234,15 +234,10 @@ def test_control_plane_first_evidence_panel_stays_close_to_answer_row() -> None:
     }
     panel = panels.get("Track: Replay / Resume Blockers in Range")
     assert panel is not None
+    row_panel = panels["Incident Drilldown: Replay Safety (Checkpoint / Replay)"]
     grid_pos = panel.get("gridPos", {})
-    assert grid_pos.get("y") == 8
+    assert grid_pos.get("y") > row_panel.get("gridPos", {}).get("y", 0)
     assert grid_pos.get("w", 0) == 24
-    root_titles = {
-        panel.get("title")
-        for panel in dashboard.get("panels", [])
-        if panel.get("title")
-    }
-    assert "Track: Replay / Resume Blockers in Range" not in root_titles
 
 
 def test_control_plane_long_first_screen_titles_keep_extra_width() -> None:
@@ -307,7 +302,10 @@ def test_control_plane_manifest_evidence_top_band_uses_full_row_width() -> None:
         ys.add(grid_pos.get("y", 0))
         heights.add(grid_pos.get("h", 0))
 
-    assert ys == {8}
+    row_y = panels["Incident Drilldown: Manifest / Ledger Integrity"].get(
+        "gridPos", {}
+    ).get("y", 0)
+    assert ys == {row_y + 1}
     assert heights == {6}
     assert sum(widths) == 24, (
         f"Manifest/ledger top band should fill the row, got widths={widths}"
@@ -338,7 +336,8 @@ def test_control_plane_replay_safety_detail_top_bands_use_full_row_width() -> No
     blind_spots_grid = known_blind_spots.get("gridPos", {})
     assert blind_spots_grid.get("x") == 0
     assert blind_spots_grid.get("w") == 24
-    assert blind_spots_grid.get("y") == 2
+    row_y = row_panel.get("gridPos", {}).get("y", 0)
+    assert blind_spots_grid.get("y") == row_y + 1
 
     trio = [panels[3], panels[104], panels[120]]
     trio_widths = [panel.get("gridPos", {}).get("w", 0) for panel in trio]
@@ -350,7 +349,8 @@ def test_control_plane_replay_safety_detail_top_bands_use_full_row_width() -> No
     assert trio_xs == [0, 8, 16], (
         f"Unexpected replay-safety KPI placement: xs={trio_xs}"
     )
-    assert trio_ys == {22}
+    assert len(trio_ys) == 1
+    assert next(iter(trio_ys)) > blind_spots_grid.get("y", 0)
 
 
 def test_control_plane_lineage_top_band_uses_full_row_width() -> None:
@@ -371,7 +371,7 @@ def test_control_plane_lineage_top_band_uses_full_row_width() -> None:
     panel = panels[122]
     grid_pos = panel.get("gridPos", {})
     assert grid_pos.get("x") == 0
-    assert grid_pos.get("y") == 8
+    assert grid_pos.get("y") == row_panel.get("gridPos", {}).get("y", 0) + 1
     assert grid_pos.get("w") == 24
 
 

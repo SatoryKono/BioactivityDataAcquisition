@@ -144,15 +144,16 @@ def test_dq_reject_row_orders_trust_then_causes_then_scope_distribution() -> Non
     assert expected_titles.issubset(nested)
     ordering = {
         title: (
-            nested[title].get("gridPos", {}).get("y", 999),
+            nested[title].get("gridPos", {}).get("y", 999)
+            - row.get("gridPos", {}).get("y", 0),
             nested[title].get("gridPos", {}).get("x", 999),
         )
         for title in expected_titles
     }
-    assert ordering["Monitor: Silver Filter Reject Accounting Mismatch"] == (32, 0)
-    assert ordering["Inspect: Top Silver Reject Reasons (Pareto)"] == (32, 8)
-    assert ordering["Inspect: Top Silver Reject Fields"] == (32, 16)
-    assert ordering["Inspect: Silver Filter Rejects by Pipeline"] == (40, 0)
+    assert ordering["Monitor: Silver Filter Reject Accounting Mismatch"] == (1, 0)
+    assert ordering["Inspect: Top Silver Reject Reasons (Pareto)"] == (1, 8)
+    assert ordering["Inspect: Top Silver Reject Fields"] == (1, 16)
+    assert ordering["Inspect: Silver Filter Rejects by Pipeline"] == (9, 0)
 
 
 def test_dq_validation_diagnostics_groups_failures_then_runtime_then_trends() -> None:
@@ -175,35 +176,45 @@ def test_dq_validation_diagnostics_groups_failures_then_runtime_then_trends() ->
             dashboard, "Validation Failures / Runtime Diagnostics / Trends"
         )
     }
-    assert nested["Inspect: Quarantine by Error Type"].get("gridPos", {}).get("y") == 48
+    row_y = row.get("gridPos", {}).get("y", 0)
     assert (
-        nested["Monitor: Silver Validation Failures"].get("gridPos", {}).get("y") == 48
+        nested["Inspect: Quarantine by Error Type"].get("gridPos", {}).get("y")
+        == row_y + 1
+    )
+    assert (
+        nested["Monitor: Silver Validation Failures"].get("gridPos", {}).get("y")
+        == row_y + 1
     )
     assert (
         nested["Monitor: Gold Strict Validation Failures"].get("gridPos", {}).get("y")
-        == 48
+        == row_y + 1
     )
-    assert nested["Track: Anomalies Detected"].get("gridPos", {}).get("y") == 56
-    assert nested["Track: DQ Check Duration (p95)"].get("gridPos", {}).get("y") == 56
+    assert (
+        nested["Track: Anomalies Detected"].get("gridPos", {}).get("y") == row_y + 9
+    )
+    assert (
+        nested["Track: DQ Check Duration (p95)"].get("gridPos", {}).get("y")
+        == row_y + 9
+    )
     assert (
         nested["Track: DQ Threshold Events in Range Trend"]
         .get("gridPos", {})
         .get("y")
-        == 65
+        == row_y + 18
     )
     assert (
         nested["Track: Data Quality Score Trend (Volume-weighted)"]
         .get("gridPos", {})
         .get("y")
-        == 65
+        == row_y + 18
     )
     assert (
         nested["Review: Lineage Handoff to Control Plane"].get("gridPos", {}).get("y")
-        == 65
+        == row_y + 18
     )
     assert (
         nested["Review: Aggregate Control-plane Handoff"].get("gridPos", {}).get("y")
-        == 73
+        == row_y + 26
     )
 
 
