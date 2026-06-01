@@ -137,6 +137,36 @@ def test_observability_metric_governance_declares_required_views_and_evidence_pa
     assert "--summary-out" in live_evidence["command"]
     assert "--fail-on-degraded-live-review" in live_evidence["command"]
 
+    local_fallback_evidence = runtime_cardinality_review["local_fallback_evidence"]
+    assert (
+        local_fallback_evidence["workflow"]
+        == ".github/workflows/tests.yml::governance-preflight"
+    )
+    assert (
+        local_fallback_evidence["artifact"]
+        == "reports/observability/runtime_cardinality_review_pr.json"
+    )
+    assert local_fallback_evidence["release_gate_allowed"] is False
+    assert "--allow-local-cardinality-fallback" in local_fallback_evidence["command"]
+
+
+@pytest.mark.architecture
+def test_tests_workflow_keeps_local_cardinality_fallback_out_of_release_gate() -> None:
+    workflow = (ROOT / ".github" / "workflows" / "tests.yml").read_text(
+        encoding="utf-8"
+    )
+
+    assert "--allow-local-cardinality-fallback" in workflow
+    assert workflow.index("--allow-local-cardinality-fallback") < workflow.index(
+        "Review observability runtime cardinality evidence"
+    )
+    release_gate = workflow.split(
+        "-   name: Review observability runtime cardinality evidence",
+        1,
+    )[1]
+    assert "--fail-on-degraded-live-review" in release_gate
+    assert "--allow-local-cardinality-fallback" not in release_gate
+
 
 @pytest.mark.architecture
 def test_runtime_cardinality_allowlist_entries_require_metadata() -> None:

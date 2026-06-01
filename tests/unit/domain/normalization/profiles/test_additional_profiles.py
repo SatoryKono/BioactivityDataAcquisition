@@ -59,6 +59,8 @@ from bioetl.domain.normalization.publication_structured_fields import (
 )
 from bioetl.domain.schemas.chembl.publication_term import PublicationTermSchema
 
+pytestmark = pytest.mark.unit
+
 _CHEMBL_PROFILES_BY_PIPELINE = {
     "chembl_activity": CHEMBL_ACTIVITY_PROFILE,
     "chembl_assay": CHEMBL_ASSAY_PROFILE,

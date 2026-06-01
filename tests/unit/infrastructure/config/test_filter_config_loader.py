@@ -17,6 +17,8 @@ import pytest
 from bioetl.domain.filtering import SilverFilterConfig
 from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def test_configs_root__infrastructure_config_test_filter_config_loader_22(

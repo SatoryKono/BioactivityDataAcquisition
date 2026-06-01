@@ -62,14 +62,14 @@ budgets:
   duplicate_test_names_max: 787
   duplicate_test_name_occurrences_max: 2552
   compatibility_test_file_max: 53
-  markerless_test_functions_max: 6972
+  markerless_test_functions_max: 6380
   uuid4_call_sites_max: 400
   date_today_call_sites_max: 0
 budget_ratchet:
   linked_issue: '#4685'
   mode: fail-fast-no-growth
   expected_direction: downward
-  refreshed_on: '2026-05-31'
+  refreshed_on: '2026-06-01'
   stream_g_owner_notes:
   - issue: '#4817'
     owner: architecture-governance
@@ -85,6 +85,18 @@ budget_ratchet:
       inventory test out of compatibility filename inventory; live compatibility
       inventory count is 53 and compatibility_test_file_max is ratcheted to the
       new target threshold.
+  - issue: '#4882'
+    owner: architecture-governance
+    status: markerless_ratcheted_to_6871
+    note: TDX closeout on 2026-06-01 added explicit unit markers to two
+      already unit-scoped modules and ratcheted markerless_test_functions_max
+      to the live inventory.
+  - issue: markerless-followup-2026-06-01
+    owner: architecture-governance
+    status: markerless_ratcheted_to_6380
+    note: Follow-up markerless burn-down on 2026-06-01 added explicit unit
+      markers to ten already unit-scoped modules and ratcheted
+      markerless_test_functions_max to the live inventory.
   touch_policy: Refactors touching test families must reduce the applicable budget
     or keep it flat with an explicit owner rationale; increasing a debt budget requires
     a separate governance review.

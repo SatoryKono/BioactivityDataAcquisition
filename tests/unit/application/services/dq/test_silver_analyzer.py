@@ -34,6 +34,8 @@ from bioetl.domain.value_objects.dq_report import (
     SilverDQCheckType,
 )
 
+pytestmark = pytest.mark.unit
+
 
 # ---------------------------------------------------------------------------
 # Fixtures

@@ -5143,7 +5143,7 @@
       "missing_lines": 2,
       "module": "bioetl.application.services.control_plane.replay",
       "path": "src/bioetl/application/services/control_plane/replay/__init__.py",
-      "source_lines": 117
+      "source_lines": 141
     },
     {
       "coverage_percent": 89.92,
@@ -19698,7 +19698,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-06-01",
-  "source_tree_sha256": "fec7b9ae9534c0daba2f2565989ed693104721149d822ac641fbdb5fe487ee8b",
+  "source_tree_sha256": "ae187f31c9e724a4fedcbf02f163615eed6bd67403075c1d7493e83b94f2ecf9",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

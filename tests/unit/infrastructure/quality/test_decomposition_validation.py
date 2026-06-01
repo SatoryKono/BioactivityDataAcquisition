@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.infrastructure.quality._decomposition_validation import (
     _collect_quarterly_registry_budgets,
     _parse_owner_allocations,
@@ -14,6 +16,8 @@ from bioetl.infrastructure.quality._decomposition_validation import (
     _validate_program_done_criteria_section,
     _validate_target_quarter,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class TestCollectQuarterlyRegistryBudgets:

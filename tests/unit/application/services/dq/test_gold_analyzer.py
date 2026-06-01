@@ -45,6 +45,8 @@ from bioetl.domain.value_objects.dq_report import (
     MedallionLayer,
 )
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def gold_analyzer() -> GoldDQAnalyzer:

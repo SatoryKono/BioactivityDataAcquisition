@@ -11,6 +11,8 @@ from bioetl.domain.value_objects._publication_field_group_types import (
     PublicationFieldGroup,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestPublicationFieldGroup:
     """Tests for PublicationFieldGroup enum."""

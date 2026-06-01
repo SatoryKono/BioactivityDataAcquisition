@@ -23,6 +23,8 @@ from bioetl.domain.composite.lineage import (
     _parse_timestamps,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestFieldSource:
     """Tests for FieldSource dataclass."""

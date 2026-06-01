@@ -34,6 +34,8 @@ from bioetl.composition.providers.loader import (
 )
 from bioetl.domain.types import HealthStatus
 
+pytestmark = pytest.mark.unit
+
 
 @dataclass
 class MockAdapter:

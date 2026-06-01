@@ -19,6 +19,8 @@ from bioetl.infrastructure.quality.scoring import (
     compute_integral_debt_score,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestComputeIntegralDebtScore:
     """Tests for compute_integral_debt_score."""

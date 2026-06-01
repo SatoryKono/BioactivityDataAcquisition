@@ -7,6 +7,8 @@ from __future__ import annotations
 
 import xml.etree.ElementTree as ET
 
+import pytest
+
 from bioetl.application.pipelines.pubmed.extractors.abstract import AbstractExtractor
 from bioetl.application.pipelines.pubmed.extractors.author import AuthorExtractor
 from bioetl.application.pipelines.pubmed.extractors.classification import (
@@ -17,6 +19,8 @@ from bioetl.application.pipelines.pubmed.extractors.identifier import (
     IdentifierExtractor,
 )
 from bioetl.application.pipelines.pubmed.xml_parser import get_int, get_text
+
+pytestmark = pytest.mark.unit
 
 
 class TestAbstractExtractorEdgeCases:

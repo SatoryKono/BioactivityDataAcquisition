@@ -21,6 +21,8 @@ from bioetl.infrastructure.adapters.http.health_monitor import (
     ProviderHealthState,
 )
 
+pytestmark = pytest.mark.unit
+
 if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.health_monitor import (
         ProviderHealthTracker,
