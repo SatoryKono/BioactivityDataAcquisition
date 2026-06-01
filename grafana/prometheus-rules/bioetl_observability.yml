@@ -403,6 +403,32 @@ groups:
       - record: bioetl_l1_workflow_global_status
         expr: max by (pipeline, run_type) (bioetl_l0_input_status_selected{input="workflow"})
 
+      - record: bioetl_workflow_pipeline_verdict_status
+        expr: >-
+          (
+            (sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{status="failed"}[15m])) > bool 0) * 2
+          )
+          or
+          (
+            (
+              (sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{status!~"success|completed|failed"}[15m])) > bool 0) * 1
+            )
+            unless on (pipeline, run_type)
+            (sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{status="failed"}[15m])) > bool 0)
+          )
+          or
+          (
+            (
+              (sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{status=~"success|completed"}[15m])) > bool 0) * 0
+            )
+            unless on (pipeline, run_type)
+            (
+              (sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{status="failed"}[15m])) > bool 0)
+              or
+              (sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{status!~"success|completed|failed"}[15m])) > bool 0)
+            )
+          )
+
       - record: bioetl_runtime_current_activity_15m
         expr: sum by (pipeline, run_type) (max_over_time(bioetl_pipeline_runs_total[15m])) > bool 0
 

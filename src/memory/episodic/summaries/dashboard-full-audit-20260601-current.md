@@ -2,16 +2,14 @@
 id: dashboard-full-audit-20260601-current
 title: Full BioETL dashboard audit for chembl_target backfill
 task_id: dashboard-full-audit-20260601-current
-created_at: '2026-06-01T13:30:18Z'
+created_at: '2026-06-01T14:23:31Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- reports/observability/grafana/dashboard_full_audit_20260601_chembl_target_backfill_current_run/dashboard_full_audit_report.md
-summary: Completed full BioETL Grafana dashboard audit for run b51986c6-870b-4457-aa70-baedac2710ad.
-  Inventory covered 7 shipped dashboards, render attempted and blocked by Grafana
-  HTTP 500 plus Playwright host libnspr4.so, live panel audit generated 217 panel/query
-  results, source truth checked against RunManifest/RunLedger/checkpoint endpoint,
-  and execution-ready findings/fix plan written under reports/observability/grafana/dashboard_full_audit_20260601_chembl_target_backfill_current_run.
+- reports/observability/grafana/dashboard_full_audit_20260601_chembl_target_backfill_renderapi_current/AUDIT_REPORT_RU.md
+summary: Completed full dashboard audit for run b51986c6-870b-4457-aa70-baedac2710ad
+  with Grafana Render API artifacts, 96h live panel audit, source-of-truth reconciliation,
+  panel audit CSV, findings CSV, and execution-ready fix plan.
 ---
 
 # Episodic summary
@@ -22,7 +20,7 @@ summary: Completed full BioETL Grafana dashboard audit for run b51986c6-870b-445
 
 ## Outcome
 
-- Completed full BioETL Grafana dashboard audit for run b51986c6-870b-4457-aa70-baedac2710ad. Inventory covered 7 shipped dashboards, render attempted and blocked by Grafana HTTP 500 plus Playwright host libnspr4.so, live panel audit generated 217 panel/query results, source truth checked against RunManifest/RunLedger/checkpoint endpoint, and execution-ready findings/fix plan written under reports/observability/grafana/dashboard_full_audit_20260601_chembl_target_backfill_current_run.
+- Completed full dashboard audit for run b51986c6-870b-4457-aa70-baedac2710ad with Grafana Render API artifacts, 96h live panel audit, source-of-truth reconciliation, panel audit CSV, findings CSV, and execution-ready fix plan.
 
 ## Lessons learned
 
