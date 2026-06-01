@@ -17,9 +17,9 @@ Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `do
 > `crossref/batch.py` больше не является крупным mixed-responsibility hotspot:
 > текущий файл — `24` LOC compatibility facade поверх split collaborators.
 > Дополнительно live architecture-metric exemption baseline сейчас содержит
-> `2` active file-size-limit exemptions и не содержит active class/god-object
+> `1` active file-size-limit exemptions и не содержит active class/god-object
 > exemptions. Поэтому текущий active debt posture лучше читать как
-> topology/ownership watchlist с bounded active file-size waiver inventory, а не как
+> topology/ownership watchlist без active waiver inventory, а не как
 > open-ended exemption baseline.
 > Для live prioritization используйте текущий roadmap и refreshed governance
 > summaries, а не только этот dated pack.
@@ -31,7 +31,6 @@ Source of truth: `configs/quality/architecture_metric_exemptions.yaml` and
 
 | Path | Owner | Expires | Removal Step |
 | ---- | ----- | ------- | ------------ |
-| `src/bioetl/composition/providers/_chembl_target_protein_classification_data_source.py` | @bioetl-platform | 2026-12-31 | Split target enrichment and relation-builder/hierarchy resolution into smaller composition helpers once the protein-classification surface stabilizes. |
 | `src/bioetl/interfaces/cli/commands/domains/health/observability_backend_runtime.py` | observability-dashboards | 2026-12-31 | Split module into smaller focused helpers once backend dashboard wiring is fully refactored. |
 
 ## Gate Status
@@ -63,7 +62,7 @@ Source of truth: `configs/quality/architecture_metric_exemptions.yaml` and
 1. The strongest historical reducible duplication hotspot in this pack was provider-registry resolution and provider-family registration assembly scaffolding, but the live repo now treats that area as a guarded compatibility/watchlist seam rather than an active duplication wave.
 1. Several apparent dead-code candidates are actually sanctioned compatibility surfaces, including `batch_execution_*` wrappers and `dependency_join_support.py`.
 1. Ownership debt is now concentrated in retained convenience seams and mirrored registry access as watchlist topology rather than waiver-backed cleanup, especially around `PipelineConfigLoader`, `registration.py`, and default `ProviderRegistry` access paths.
-1. Complexity debt is now more about preventing new hotspots while carrying a small bounded waiver inventory; some earlier hotspot candidates in this pack should now be read as historical trigger evidence rather than the live next split target.
+1. Complexity debt is now more about preventing new hotspots than carrying active waiver inventory; some earlier hotspot candidates in this pack should now be read as historical trigger evidence rather than the live next split target.
 1. Report/test disagreement is now mostly soft governance debt, not hard breakage: tests often enforce decoupling while some evidence interpretations age faster than the underlying code.
 
 ## Contradictions And Tensions
@@ -71,7 +70,7 @@ Source of truth: `configs/quality/architecture_metric_exemptions.yaml` and
 - `registration.py` is green under direct decoupling tests, and the live repo now treats that area as a guarded compatibility seam; older evidence language remains useful mostly as historical context for why the watchlist exists.
 - Dependency-map policy is clean, but hotspot evidence still shows strong concentration in a small number of large allowed seams, now led by CLI commands and storage rather than adapters.
 - Some thin wrappers look like duplication or dead code at first glance, but repo guardrails and evidence packs classify them as intentional compatibility infrastructure.
-- The repo now carries a small active architecture-metric exemption baseline; older “live hotspot” narratives in this pack still need explicit rebaseline notes rather than direct execution.
+- The repo now carries a zero active architecture-metric exemption baseline; older “live hotspot” narratives in this pack still need explicit rebaseline notes rather than direct execution.
 
 ## Remaining Gaps
 

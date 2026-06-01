@@ -686,6 +686,30 @@ def test_latency_p95_panels_preserve_no_data_state() -> None:
             "No replay drift samples",
         ),
         (
+            "bioetl-control-plane-v1.json",
+            "Track: GLOBAL Checkpoint Operator Latency p50/p95/p99",
+            "Expected Empty classification: No data is valid when no checkpoint operator/admin duration samples were emitted",
+            "No GLOBAL checkpoint operator latency samples in range. This is optional admin/operator telemetry, not pipeline success evidence.",
+        ),
+        (
+            "bioetl-control-plane-v1.json",
+            "Inspect: Missing Lineage Refs by Layer / Type",
+            "Use as lineage risk triage only; it does not prove complete artifact linkage by itself.",
+            "No missing-lineage reference samples in range. Empty means no sampled lineage-missing events or absent telemetry, not proof of full lineage closure.",
+        ),
+        (
+            "bioetl-control-plane-v1.json",
+            "Track: GLOBAL Audit Write Latency p50/p95/p99",
+            "No data means no latency samples, not zero latency.",
+            "No GLOBAL audit write latency samples in range. Empty means no audit writes were timed or audit telemetry is absent, not zero latency.",
+        ),
+        (
+            "bioetl-control-plane-v1.json",
+            "Track: GLOBAL Audit Query Latency p50/p95/p99",
+            "No data means no latency samples, not zero latency.",
+            "No GLOBAL audit query latency samples in range. Empty means no audit queries were timed or audit telemetry is absent, not zero latency.",
+        ),
+        (
             "bioetl-dq-v2.json",
             "Track: DQ Check Duration (p95)",
             "No data means no DQ duration samples were observed in range or DQ timing telemetry is absent",

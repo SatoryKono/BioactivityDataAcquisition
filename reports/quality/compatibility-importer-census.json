@@ -826,14 +826,15 @@
       "public_path": "src/bioetl/application/core/data_source_mixins.py",
       "private_module": "bioetl.application.core._data_source_mixins",
       "public_module": "bioetl.application.core.data_source_mixins",
-      "public_src_importer_count": 3,
+      "public_src_importer_count": 4,
       "public_test_importer_count": 0,
       "private_src_importer_count": 3,
       "private_test_importer_count": 1,
       "public_src_importers": [
         "src/bioetl/application/core/data_sources/filtered.py",
         "src/bioetl/application/core/data_sources/publication_term.py",
-        "src/bioetl/application/core/data_sources/subcellular_fraction.py"
+        "src/bioetl/application/core/data_sources/subcellular_fraction.py",
+        "src/bioetl/composition/providers/_chembl_target_protein_classification_data_source.py"
       ],
       "private_src_importers": [
         "src/bioetl/application/core/_filtered_data_source_fetch_support.py",
@@ -932,7 +933,7 @@
       "public_path": "src/bioetl/application/core/target_data_source_mixins.py",
       "private_module": "bioetl.application.core._target_data_source_mixins",
       "public_module": "bioetl.application.core.target_data_source_mixins",
-      "public_src_importer_count": 4,
+      "public_src_importer_count": 5,
       "public_test_importer_count": 0,
       "private_src_importer_count": 1,
       "private_test_importer_count": 0,
@@ -940,7 +941,8 @@
         "src/bioetl/application/core/_data_source_mixins.py",
         "src/bioetl/application/core/data_sources/publication_term.py",
         "src/bioetl/application/core/data_sources/subcellular_fraction.py",
-        "src/bioetl/application/core/publication_term_filtering_mixin.py"
+        "src/bioetl/application/core/publication_term_filtering_mixin.py",
+        "src/bioetl/composition/providers/_chembl_target_protein_classification_data_source.py"
       ],
       "private_src_importers": [
         "src/bioetl/application/core/target_data_source_mixins.py"

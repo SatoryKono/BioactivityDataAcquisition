@@ -98,6 +98,33 @@ def test_rerender_load_dashboards_filters_and_sorts(
     ]
 
 
+def test_rerender_scope_maps_run_id_to_silver_reject_explorer_run_filter(
+    tmp_path: Path,
+) -> None:
+    config = rerender_subject.RenderConfig(
+        base_url="http://localhost:3000",
+        username="admin",
+        password="changeme",
+        service_account_token="",
+        output_dir=tmp_path,
+        width=1600,
+        height=2200,
+        timeout_seconds=30.0,
+        selected_uids=(),
+        fallback="auto",
+        workflow="chembl_target",
+        pipeline="chembl_target",
+        run_type="backfill",
+        run_id="run-123",
+        range_hours=96,
+    )
+
+    params = rerender_subject._scope_query_params(config)
+
+    assert params["var-run_id"] == "run-123"
+    assert params["var-quarantine_run_id"] == "run-123"
+
+
 def test_rerender_failure_hint_includes_frontend_renderer_state(
     monkeypatch: Any, tmp_path: Path
 ) -> None:
@@ -1208,13 +1235,20 @@ def test_grafana_audit_cycle_runs_preflight_rerender_and_live_audit(
     assert [name for name, _argv in calls] == [
         "preflight",
         "rerender",
+        "rerender",
         "preflight",
         "audit",
     ]
     assert "--skip-screenshot-check" in calls[0][1]
-    assert "--skip-screenshot-check" not in calls[2][1]
+    assert "--skip-screenshot-check" not in calls[3][1]
     assert "--uids" in calls[1][1]
-    assert "--screenshot-uids" in calls[2][1]
+    assert "--fallback" in calls[1][1]
+    assert calls[1][1][calls[1][1].index("--fallback") + 1] == "none"
+    assert "--fallback" in calls[2][1]
+    assert calls[2][1][calls[2][1].index("--fallback") + 1] == "playwright"
+    assert any("render-api" in item for item in calls[1][1])
+    assert str(tmp_path) in calls[2][1]
+    assert "--screenshot-uids" in calls[3][1]
     assert "http://127.0.0.1:8081" in calls[0][1]
     assert "http://127.0.0.1:8081" in calls[3][1]
 
@@ -1411,6 +1445,7 @@ def test_grafana_audit_cycle_uses_cached_filled_dashboards_after_timeout(
     assert [name for name, _argv in calls] == [
         "preflight",
         "rerender",
+        "rerender",
         "preflight",
         "audit",
     ]
@@ -1520,8 +1555,8 @@ def test_grafana_audit_cycle_retries_backend_on_fallback_port(
     assert result == 0
     assert ensured_ports == [8081, 18081]
     assert "http://127.0.0.1:18081" in calls[0][1]
-    assert "http://127.0.0.1:18081" in calls[2][1]
     assert "http://127.0.0.1:18081" in calls[3][1]
+    assert "http://127.0.0.1:18081" in calls[4][1]
 
 
 def test_grafana_audit_cycle_reuses_existing_backend_when_fallback_start_fails(
@@ -1580,12 +1615,13 @@ def test_grafana_audit_cycle_reuses_existing_backend_when_fallback_start_fails(
     assert [name for name, _argv in calls] == [
         "preflight",
         "rerender",
+        "rerender",
         "preflight",
         "audit",
     ]
     assert "http://127.0.0.1:8081" in calls[0][1]
-    assert "http://127.0.0.1:8081" in calls[2][1]
     assert "http://127.0.0.1:8081" in calls[3][1]
+    assert "http://127.0.0.1:8081" in calls[4][1]
 
 
 def test_grafana_audit_cycle_uses_managed_backend_when_detached_backend_fails(
@@ -1650,6 +1686,7 @@ def test_grafana_audit_cycle_uses_managed_backend_when_detached_backend_fails(
     assert result == 0
     assert [name for name, _argv in calls] == [
         "preflight",
+        "rerender",
         "rerender",
         "preflight",
         "audit",
