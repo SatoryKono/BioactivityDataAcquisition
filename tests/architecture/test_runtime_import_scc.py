@@ -19,6 +19,29 @@ _MAX_READ_WORKERS = 16
 ACCEPTED_RUNTIME_SCCS: dict[frozenset[str], dict[str, str]] = {
     frozenset(
         {
+            "bioetl.application.services.control_plane.manifest",
+            "bioetl.application.services.control_plane.manifest.inspection_service",
+        }
+    ): {
+        "owner": "bioetl.application.services.control_plane.manifest",
+        "review_date": "2026-09-30",
+        "linked_issue": "#4500",
+        "rationale": "Temporary SCC pending manifest service refactoring.",
+    },
+    frozenset(
+        {
+            "bioetl.interfaces.cli.commands.domains.health.server_integration",
+            "bioetl.interfaces.cli.commands.health",
+        }
+    ): {
+        "owner": "bioetl.interfaces.cli.commands",
+        "review_date": "2026-09-30",
+        "linked_issue": "#4500",
+        "rationale": "Temporary SCC pending health CLI commands refactoring.",
+    },
+
+    frozenset(
+        {
             "bioetl.domain.normalization.profiles._chembl_policy_registry_data",
             "bioetl.domain.normalization.profiles._chembl_policy_registry_defaults",
         }

@@ -16,9 +16,13 @@ from bioetl.interfaces.cli.commands.domains.health.rendering import (
     build_health_server_info_lines,
     render_health_results_json,
 )
-from bioetl.interfaces.cli.commands.domains.health.server_integration import DEFAULT_HEALTH_SERVER_PORT
+from bioetl.interfaces.cli.commands.domains.health.server_integration import (
+    DEFAULT_HEALTH_SERVER_PORT,
+)
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,
+)
+from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     handle_cli_failure as handle_cli_execution_failure,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
@@ -412,6 +416,7 @@ def health_check(provider: tuple[str, ...], output_json: bool) -> None:
     if results is None:
         return
     _render_health_results(results, output_json=output_json)
+
 
 COMMANDS = (health_server_command,)
 

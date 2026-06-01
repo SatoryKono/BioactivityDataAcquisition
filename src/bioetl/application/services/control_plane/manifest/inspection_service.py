@@ -5,13 +5,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol, cast
 
-from bioetl.application.services.control_plane.manifest.diagnostics import (
-    build_diagnostics_summary,
-)
 from bioetl.application.services.control_plane.manifest import inspection_models
 from bioetl.application.services.control_plane.manifest._inspection_support import (
     RunManifestInspectionDiffClassificationMixin,
     RunManifestInspectionIdentityGraphMixin,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics import (
+    build_diagnostics_summary,
 )
 from bioetl.application.services.control_plane.manifest.inspection_models import (
     RunManifestDiffEntry,

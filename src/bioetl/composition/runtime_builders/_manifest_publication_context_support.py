@@ -150,10 +150,10 @@ def resolve_manifest_publication_identity(
 
 
 __all__ = [
-    "build_manifest_publication_identity_kwargs",
     "ResolvedManifestPublicationContext",
+    "build_manifest_publication_identity_kwargs",
     "contract_identity_requires_strict_resolution",
     "ensure_manifest_publication_identity",
-    "resolve_manifest_publication_identity",
     "resolve_manifest_publication_context",
+    "resolve_manifest_publication_identity",
 ]

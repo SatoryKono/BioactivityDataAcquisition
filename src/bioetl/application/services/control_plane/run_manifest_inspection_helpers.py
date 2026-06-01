@@ -5,11 +5,11 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import cast
 
-from bioetl.application.services.control_plane.manifest.execution_identity_support import (
-    build_contract_identity_anchor_fields,
-)
 from bioetl.application.services.control_plane._run_manifest_inspection_artifact_refs import (
     build_artifact_ref_semantic_diff,
+)
+from bioetl.application.services.control_plane.manifest.execution_identity_support import (
+    build_contract_identity_anchor_fields,
 )
 from bioetl.domain.control_plane import RunManifest
 

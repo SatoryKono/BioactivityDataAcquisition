@@ -2,16 +2,16 @@
 
 from __future__ import annotations
 
+import json
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from functools import lru_cache
-import json
 
 from bioetl.domain.ports.protein_classification import ProteinClassificationPort
 from bioetl.domain.value_objects.protein_class_hierarchy import (
     ProteinClassHierarchy,
-    ProteinClassLevel,
     ProteinClassificationResolutionError,
+    ProteinClassLevel,
 )
 
 __all__ = [
@@ -57,17 +57,13 @@ class ChEMBLProteinClassificationGraph(ProteinClassificationPort):
         """Build a deterministic graph adapter from existing Silver rows."""
         nodes = {
             node.protein_class_id: node
-            for node in (
-                _node_from_row(row)
-                for row in protein_class_rows
-            )
+            for node in (_node_from_row(row) for row in protein_class_rows)
             if node is not None
         }
         component_leaf_ids = {
             component_id: leaf_ids
             for component_id, leaf_ids in (
-                _component_leaf_ids_from_row(row)
-                for row in target_component_rows
+                _component_leaf_ids_from_row(row) for row in target_component_rows
             )
             if component_id is not None
         }
@@ -86,7 +82,7 @@ class ChEMBLProteinClassificationGraph(ProteinClassificationPort):
         hierarchies = [self._hierarchy_for_leaf_id(leaf_id) for leaf_id in leaf_ids]
         return tuple(sorted(hierarchies, key=lambda hierarchy: hierarchy.leaf_id))
 
-    @lru_cache(maxsize=8192)
+    @lru_cache(maxsize=8192)  # noqa: B019
     def _hierarchy_for_leaf_id(self, leaf_id: int) -> ProteinClassHierarchy:
         resolved_leaf_id = self._resolve_replacement(leaf_id)
         levels = self._walk_levels(resolved_leaf_id)
