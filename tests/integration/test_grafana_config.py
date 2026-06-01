@@ -1270,7 +1270,7 @@ def test_workflow_pipeline_status_falls_back_to_runtime_current_status() -> None
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Range Pipeline Status"
+            if item.get("title") == "Pipeline Status"
         ),
         None,
     )

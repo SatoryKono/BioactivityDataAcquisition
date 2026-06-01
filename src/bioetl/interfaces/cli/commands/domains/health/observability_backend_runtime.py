@@ -23,6 +23,11 @@ from bioetl.interfaces.cli.commands.domains.health.observability_backend_process
     python_executable_to_tuple,
     start_detached_quarantine_backend,
 )
+from bioetl.interfaces.cli.commands.domains.health.observability_backend_failure_details import (
+    _build_startup_failure_detail,
+    _describe_required_probe_failure,
+    _read_backend_startup_log_excerpt,
+)
 from bioetl.interfaces.cli.commands.domains.health.server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
 )
@@ -206,80 +211,6 @@ def _reuse_observability_backend_if_ready(
             f"could not be restarted on port {port}."
         ),
     )
-
-
-def _read_backend_startup_log_excerpt(
-    log_path: Path,
-    *,
-    max_lines: int = 8,
-    max_chars: int = 1200,
-) -> str | None:
-    try:
-        content = log_path.read_text(encoding="utf-8", errors="replace")
-    except OSError:
-        return None
-    nonempty_lines = [line.strip() for line in content.splitlines() if line.strip()]
-    if not nonempty_lines:
-        return None
-    excerpt = " || ".join(nonempty_lines[-max_lines:])
-    if len(excerpt) > max_chars:
-        excerpt = f"...{excerpt[-max_chars:]}"
-    return excerpt
-
-
-def _build_startup_failure_detail(
-    log_path: Path,
-    *,
-    process: subprocess.Popen[bytes] | None = None,
-) -> str:
-    details: list[str] = [f"Startup log: {log_path}."]
-    if process is not None and hasattr(process, "poll"):
-        exit_code = process.poll()
-        if isinstance(exit_code, int):
-            details.append(f"Exit code: {exit_code}.")
-    excerpt = _read_backend_startup_log_excerpt(log_path)
-    if excerpt:
-        details.append(f"Tail: {excerpt}")
-    return " ".join(details)
-
-
-def _describe_required_probe_failure(
-    health_url: str,
-    *,
-    required_probe_paths: tuple[str, ...],
-    timeout_seconds: float = 1.0,
-    urlopen_fn: Callable[..., object] = urlopen,
-) -> str | None:
-    if not required_probe_paths:
-        return None
-    base_url = _build_backend_base_url(health_url)
-    raw_path = required_probe_paths[0]
-    path = raw_path if raw_path.startswith("/") else f"/{raw_path}"
-    probe_url = f"{base_url}{path}"
-    try:
-        with urlopen_fn(probe_url, timeout=timeout_seconds) as response:
-            status = int(getattr(response, "status", 200))
-            if status < 400:
-                return None
-            return f"Capability probe {probe_url} returned HTTP {status}."
-    except HTTPError as exc:
-        body_excerpt = ""
-        try:
-            raw_body = exc.read().decode("utf-8", errors="replace").strip()
-        except OSError:
-            raw_body = ""
-        if raw_body:
-            body_excerpt = f" body={raw_body[:400]!r}"
-        return (
-            f"Capability probe {probe_url} returned HTTP {exc.code} {exc.reason}."
-            f"{body_excerpt}"
-        )
-    except URLError as exc:
-        return f"Capability probe {probe_url} failed: {exc.reason}."
-    except OSError as exc:
-        return f"Capability probe {probe_url} failed: {exc}."
-    except ValueError as exc:
-        return f"Capability probe {probe_url} failed: {exc}."
 
 
 def _start_observability_backend_detached(

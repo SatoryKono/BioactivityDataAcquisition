@@ -341,7 +341,7 @@ oversized_test_module_inventory:
   completed_splits:
     - issue_ref: "#4505"
       source: tests/integration/test_grafana_config.py
-      source_lines_after_split: 1443
+      source_lines_after_split: 1454
       extracted_surface: tests/integration/test_grafana_surface_contracts.py
       extracted_surface_lines: 711
       owner: observability-dashboards
@@ -837,6 +837,9 @@ repo_backed_unit_test_exceptions:
   - path: tests/unit/scripts/ops/test_neo4j_memory_mcp_adapter.py
     target_lane: repo-backed-unit
     protected_surface: scripts/ai/mcp/{neo4j_memory_mcp_adapter.py,mcp_neo4j_memory_wrapper.sh}
+  - path: tests/unit/scripts/ops/observability/test_grafana_dashboard_tooling.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/ops/{__main__.py,observability/grafana/**}
   - path: tests/unit/scripts/test_apply_entity_naming_rename_plan.py
     target_lane: repo-backed-unit
     protected_surface: src/tools/apply_entity_naming_rename_plan.py

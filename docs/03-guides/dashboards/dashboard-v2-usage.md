@@ -79,9 +79,9 @@ Detached audit backend contract:
 - `bioetl-workflow-overview`: `$workflow`, `$pipeline`, `$run_type`,
   `$run_id`, `$status`, `$step_status`, `$step_kind`, hidden
   `$pipeline_context`, `$run_type_context`, `$provider_context`
-- `bioetl-silver-reject-explorer`: hidden `$workflow` navigation shell plus
-  `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$quarantine_run_id`,
-  `$payload_hash`
+- `bioetl-silver-reject-explorer`: bounded forensic `$pipeline`, `$run_type`,
+  `$reason_code`, `$field`, `$quarantine_run_id`, `$payload_hash`; it does not
+  own the shared `$workflow` / `$run_id` shell
 - `bioetl-alerts-slo`: `$workflow`, `$pipeline`, `$run_type`
 - `bioetl-overview-v2` intentionally ships with `Workflow=All`,
   `Pipeline=All`, `Run Type=All`, and `Run ID=-` как default entry scope.

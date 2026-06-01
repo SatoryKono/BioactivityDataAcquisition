@@ -97,9 +97,10 @@ ______________________________________________________________________
 - human-readable mirrors: `variable-reference.md` и `selector-architecture.md`
 - shipped dashboards используют unified selector taxonomy by dashboard family,
   а не один flat universal selector list
-- cross-dashboard handoffs явно передают общий `workflow/pipeline/run_type`
-  shell через `var-*`; primary `run_id` additionally preserves exact HTTP
-  identity between dashboards that expose that selector.
+- cross-dashboard handoffs явно передают только target-scoped `var-*`
+  parameters; primary dashboard links preserve the shared
+  `workflow/pipeline/run_type` shell and primary `run_id` only between
+  dashboards that expose that selector.
 
 ## First-screen policy header
 
@@ -172,11 +173,11 @@ healthy provider state.
 `run_id` selectors. Pipeline/run_type remain the canonical current-status
 Prometheus scope; `workflow` is evidence context, and `run_id` is a
 control-plane-backed identity selector preserved for HTTP `ID`/details panels.
-`Silver Reject Explorer` preserves hidden shared `workflow` shell context for
-navigation continuity and uses `quarantine_run_id` for its forensic row
-selector. Primary dashboard `run_id` is mapped into `quarantine_run_id` only by
-explicit inbound handoff links; links out of the Explorer do not export primary
-`run_id`.
+`Silver Reject Explorer` does not own the shared `workflow/run_id` shell. It
+uses bounded forensic `pipeline/run_type/reason_code/field/quarantine_run_id`
+and `payload_hash` selectors. Generic primary-dashboard handoffs do not map
+primary `run_id` into `quarantine_run_id`; explicit record/payload drilldowns
+may use forensic selectors only when the source surface owns that evidence.
 
 ## KPI ownership (canonical vs mirrors)
 

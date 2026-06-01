@@ -1,18 +1,18 @@
 {
   "summary": {
-    "scanned_modules": 1973,
-    "total_internal_imports": 7788,
+    "scanned_modules": 1971,
+    "total_internal_imports": 7778,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
-    "cross_layer_group_edges_total": 333,
+    "cross_layer_group_edges_total": 334,
     "violations": 0,
-    "source_fingerprint": "1b5455b4de902923bd39c22e6053de03dbf78c06164b026aa46ee3aef23ad0c5"
+    "source_fingerprint": "74ba6f71a71839426cda3fdfd6866fdcc2ec6fa209726e16047a961dd2cf1400"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1356,
+      "imports": 1353,
       "allowed": true
     },
     {
@@ -30,19 +30,19 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 699,
+      "imports": 696,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 451,
+      "imports": 446,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 339,
+      "imports": 340,
       "allowed": true
     },
     {
@@ -380,14 +380,14 @@
       "imports": 13
     },
     {
-      "source": "composition.providers",
-      "target": "domain.ports",
-      "imports": 13
-    },
-    {
       "source": "interfaces.cli",
       "target": "composition.registry_api",
       "imports": 13
+    },
+    {
+      "source": "application.services",
+      "target": "domain.behavior",
+      "imports": 12
     }
   ],
   "violations": []

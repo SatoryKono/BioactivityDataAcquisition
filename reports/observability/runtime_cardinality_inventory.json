@@ -1176,6 +1176,7 @@
       "docs/05-operations/runbooks/publication-validation-runbook.md",
       "docs/05-operations/sli-slo-baseline.md",
       "grafana/README.md",
+      "grafana/dashboards/bioetl-alerts-slo.json",
       "grafana/dashboards/bioetl-dq-v2.json",
       "grafana/dashboards/bioetl-overview-v2.json",
       "grafana/dashboards/bioetl-provider-health-v2.json",
