@@ -96,9 +96,9 @@
 
 | Family | Canonical first-party module | Current public src | Current private src | Max public src | Max private src |
 | --- | --- | ---: | ---: | ---: | ---: |
-| `application.core.span_helpers` | `bioetl.application.core.span_helpers` | 8 | 0 | 8 | 1 |
-| `domain.normalization.profiles.chembl_policy_registry` | `bioetl.domain.normalization.profiles.chembl_policy_registry` | 12 | 0 | 11 | 1 |
-| `domain.normalization.profiles.chembl_policy_registry_data` | `bioetl.domain.normalization.profiles.chembl_policy_registry_data` | 5 | 0 | 2 | 3 |
+| `application.core.span_helpers` | `bioetl.application.core.span_helpers` | 8 | 0 | 8 | 0 |
+| `domain.normalization.profiles.chembl_policy_registry` | `bioetl.domain.normalization.profiles.chembl_policy_registry` | 12 | 0 | 12 | 0 |
+| `domain.normalization.profiles.chembl_policy_registry_data` | `bioetl.domain.normalization.profiles.chembl_policy_registry_data` | 5 | 0 | 5 | 0 |
 
 ## Infrastructure Config Root Facade
 
