@@ -18,6 +18,8 @@ from bioetl.domain.schemas.semanticscholar.publication import (
     SemanticScholarPublicationSchema,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestPaperIdValidation:
     """Tests for paper_id field validation."""

@@ -103,7 +103,7 @@
       "description": "Unified context/provenance banner for 3. Provider Health. Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Workflow is context/evidence unless documented otherwise; run_id is local control-plane identity context only. Provider health is owned by provider-status telemetry, while ID and Processed Records below are bounded pipeline-context evidence only.",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:10px 14px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);line-height:1.45;\"><div style=\"font-size:18px;font-weight:700;\">Which provider is degraded or failing, and why?</div><div style=\"margin-top:6px;font-size:12px;opacity:0.85;\"><strong>Provider-global selected-range:</strong> adapter latency and HTTP error panels aggregate by provider and do not filter by run_id/run_type in PromQL. For backfill-specific stage latency or exact-run identity, open <strong>2. Runtime</strong> or <strong>0. Control Plane</strong> with preserved scope.</div></div>"
+        "content": "<div style=\"padding:10px 14px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);line-height:1.45;\"><div style=\"font-size:18px;font-weight:700;\">Which provider is degraded or failing, and why?<br><strong>Global provider posture is shown separately from selected provider context.</strong></div><div style=\"margin-top:6px;font-size:12px;opacity:0.85;\"><strong>Provider-global selected-range:</strong> adapter latency and HTTP error panels aggregate by provider and do not filter by run_id/run_type in PromQL. For backfill-specific stage latency or exact-run identity, open <strong>2. Runtime</strong> or <strong>0. Control Plane</strong> with preserved scope.</div></div>"
       }
     },
     {
@@ -120,7 +120,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Selected-range provider-first severity for the selected provider. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Uses bioetl_provider_current_status and bioetl_provider_range_operational_ok inside the active Grafana time range (default Last 12 hours). Operational OK is projected when health-check or adapter request counters show successful provider activity without failures or HTTP errors in range; it does not prove the currently selected pipeline run succeeded, but it prevents UNKNOWN after successful provider operations in range. If both series are absent, UNKNOWN remains fail-closed; inspect Monitor Provider Telemetry Freshness and Review Raw Provider Health Enum. Pipeline/run_type/workflow are secondary context only; run_id does not filter Prometheus.",
+      "description": "Selected-range provider-first severity for the selected provider. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Uses bioetl_provider_current_status and bioetl_provider_range_operational_ok inside the active Grafana time range (default Last 12 hours). Operational OK is projected when health-check or adapter request counters show successful provider activity without failures or HTTP errors in range; it does not prove the currently selected pipeline run succeeded, but it prevents UNKNOWN after successful provider operations in range. If both series are absent, UNKNOWN remains fail-closed; inspect Monitor Provider Telemetry Freshness and Review Raw Provider Health Enum. Pipeline/run_type/workflow are secondary context only; run_id does not filter Prometheus. This compact Status is selected-provider scope; GLOBAL Provider Severity Matrix and Critical Providers are global fleet posture and may disagree by design. Do not compare the selected-provider OK card to a GLOBAL WARN/CRIT panel without reading the scope labels.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -240,7 +240,7 @@
         "y": 7
       },
       "datasource": "Quarantine Explorer",
-      "description": "Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. This card is bounded pipeline/run context evidence only and does not prove current provider health.",
+      "description": "Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. This card is bounded pipeline/run context evidence only and does not prove current provider health. No data/datasource errors on this HTTP-backed card mean the Quarantine Explorer/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -250,7 +250,20 @@
             },
             "inspect": false
           },
-          "unit": "none"
+          "unit": "none",
+          "noValue": "No identity rows. Check Quarantine Explorer/control-plane backend health (/health/live) and selected pipeline/run_id before treating this as no selected run.",
+          "links": [
+            {
+              "title": "Check Quarantine Explorer health",
+              "url": "http://localhost:8081/health/live",
+              "targetBlank": true
+            },
+            {
+              "title": "Open monitoring backend setup docs",
+              "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
+              "targetBlank": true
+            }
+          ]
         },
         "overrides": []
       },
@@ -308,7 +321,7 @@
         "y": 7
       },
       "datasource": "Quarantine Explorer",
-      "description": "Current stage/outcome accounting evidence for the shared pipeline/run_type context. Provider remains the primary health selector; this table is bounded pipeline/run_type accounting evidence and does not prove current provider health by itself. Missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status, Monitor Provider Telemetry Freshness, and detailed recording rules for verdict/delta triage.",
+      "description": "Current stage/outcome accounting evidence for the shared pipeline/run_type context. Provider remains the primary health selector; this table is bounded pipeline/run_type accounting evidence and does not prove current provider health by itself. Missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status, Monitor Provider Telemetry Freshness, and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the Quarantine Explorer/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -319,7 +332,20 @@
             "inspect": false
           },
           "decimals": 0,
-          "unit": "none"
+          "unit": "none",
+          "noValue": "No processed-record rows. Check Quarantine Explorer backend health and selector scope; backend unavailable is not a valid zero-record state.",
+          "links": [
+            {
+              "title": "Check Quarantine Explorer health",
+              "url": "http://localhost:8081/health/live",
+              "targetBlank": true
+            },
+            {
+              "title": "Open monitoring backend setup docs",
+              "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
+              "targetBlank": true
+            }
+          ]
         },
         "overrides": [
           {
@@ -746,7 +772,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Provider severity mapping: 0=OK, 1=DEGRADED, 2=FAILING; null/NaN=UNKNOWN. This matrix now uses the active Grafana time selector and shows the most severe observed provider-current-status sample for each provider inside that window. Raw provider health status remains panel id=114 with 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY. This matrix intentionally stays GLOBAL and does not filter by pipeline.",
+      "description": "Provider severity mapping: 0=OK, 1=DEGRADED, 2=FAILING; null/NaN=UNKNOWN. This matrix now uses the active Grafana time selector and shows the most severe observed provider-current-status sample for each provider inside that window. Raw provider health status remains panel id=114 with 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY. This matrix intentionally stays GLOBAL and does not filter by pipeline. Scope: GLOBAL provider fleet posture; intentionally not filtered by run_id, pipeline, run_type, or selected provider unless the panel title says selected provider.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -867,7 +893,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Only providers observed as DEGRADED or FAILING inside the active Grafana time range. Empty table means no provider exceeded OK in the selected window; providers with missing current-status telemetry remain visible as UNKNOWN in the GLOBAL severity matrix.",
+      "description": "Only providers observed as DEGRADED or FAILING inside the active Grafana time range. Empty table means no provider exceeded OK in the selected window; providers with missing current-status telemetry remain visible as UNKNOWN in the GLOBAL severity matrix. Scope: GLOBAL provider fleet posture; intentionally not filtered by run_id, pipeline, run_type, or selected provider unless the panel title says selected provider.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -957,7 +983,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Top provider causes from canonical cause recording rules over the active Grafana time range: raw status, failure rate, retry exhaustion, latency, HTTP errors, or rate-limit pressure. This panel can surface early-warning provider causes even while the GLOBAL severity matrix still reads OK, because the cause projection is evaluated independently from the current-status projection. Empty table means no canonical provider cause rose above zero for any provider in the selected window. If the GLOBAL severity matrix is non-OK while this table stays empty, treat that as a provider explainability gap and inspect the raw status matrix plus optional rate-limit/circuit-breaker evidence before leaving the dashboard.",
+      "description": "Top provider causes from canonical cause recording rules over the active Grafana time range: raw status, failure rate, retry exhaustion, latency, HTTP errors, or rate-limit pressure. This panel can surface early-warning provider causes even while the GLOBAL severity matrix still reads OK, because the cause projection is evaluated independently from the current-status projection. Empty table means no canonical provider cause rose above zero for any provider in the selected window. If the GLOBAL severity matrix is non-OK while this table stays empty, treat that as a provider explainability gap and inspect the raw status matrix plus optional rate-limit/circuit-breaker evidence before leaving the dashboard. Scope: GLOBAL provider fleet posture; intentionally not filtered by run_id, pipeline, run_type, or selected provider unless the panel title says selected provider.",
       "fieldConfig": {
         "defaults": {
           "color": {

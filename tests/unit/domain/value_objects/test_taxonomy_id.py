@@ -9,6 +9,8 @@ import pytest
 
 from bioetl.domain.value_objects.taxonomy_id import TaxonomyId, validate_taxonomy_id
 
+pytestmark = pytest.mark.unit
+
 
 class TestTaxonomyId:
     """Tests for TaxonomyId Value Object."""

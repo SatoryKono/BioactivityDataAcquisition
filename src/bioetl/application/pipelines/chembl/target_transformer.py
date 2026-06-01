@@ -39,6 +39,11 @@ _PROTEIN_CLASSIFICATION_ID_KEYS = (
     "protein_classification_id",
     "protein_class_id",
 )
+_TARGET_PROTEIN_CLASS_SUMMARY_FIELDS = tuple(
+    f"target_protein_class_{kind}_L{level}"
+    for kind in ("id", "name", "desc")
+    for level in range(1, 6)
+)
 
 
 class TargetTransformer(BaseChemblTransformer):
@@ -172,6 +177,7 @@ class TargetTransformer(BaseChemblTransformer):
             # Primary component ID (for target_component enricher join)
             "primary_component_id": primary_component_id,
             "protein_classifications": protein_classifications,
+            **dict.fromkeys(_TARGET_PROTEIN_CLASS_SUMMARY_FIELDS),
             # Flattened components
             **serialized_flattened_components,
             # Complex fields (JSON serialized)

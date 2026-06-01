@@ -47,6 +47,10 @@ scopes resolve from RunLedger artifact/metrics evidence; aggregate scopes are
 backed by `bioetl_processed_records_*` recording rules with `value` and
 formatted `percintage` columns, including zero-valued outcome rows and not
 acting as a `$__range` throughput summary.
+The shared `ID` and `Processed Records` cards are HTTP-backed. Their empty
+state must be interpreted only after the Quarantine Explorer/control-plane
+backend responds on `/health/live`; backend-down, invalid scope, and true
+zero/absent run are distinct operator states.
 
 For `0. Control Plane`, exact identity graph evidence is available in the
 expanded `Identity evidence and remaining replay-safety signals` row. Those

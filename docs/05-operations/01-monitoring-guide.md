@@ -102,6 +102,11 @@ Primary dashboards `0..5` now reuse the Overview-derived context shell:
 local HTTP identity context only; `Processed Records` may pass it to the local
 backend for RunLedger exact-run accounting, but do not use it as a Prometheus
 label or as a generic cross-dashboard filter.
+If `ID` or `Processed Records` is empty, verify the Quarantine Explorer /
+control-plane backend health (`/health/live`) before interpreting the card as
+an absent run, expected empty scope, or zero processed records. The shipped
+cards include no-value copy and backend-health links so backend-down is not
+visually equivalent to valid zero evidence.
 
 `0. Control Plane` keeps the compact shared `ID` panel backed by
 `/ops/control-plane/identity-table`. It is a two-column operator summary, not a

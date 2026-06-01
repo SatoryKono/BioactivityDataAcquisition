@@ -187,6 +187,126 @@
       "nullable": true,
       "description": ""
     },
+    "target_protein_class_id_L1": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_protein_class_name_L1": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_protein_class_desc_L1": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_protein_class_id_L2": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_protein_class_name_L2": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_protein_class_desc_L2": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_protein_class_id_L3": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_protein_class_name_L3": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_protein_class_desc_L3": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_protein_class_id_L4": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_protein_class_name_L4": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_protein_class_desc_L4": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_protein_class_id_L5": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_protein_class_name_L5": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_protein_class_desc_L5": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "component_accessions": {
       "type": [
         "string",
@@ -263,6 +383,6 @@
   "normalization_profile": {
     "ref": "chembl.target",
     "version": "1.0.0",
-    "hash": "0a8e07a188e376ddd2156a70551cd3c431be4b4bdf7b0cea4957deff6c16abc3"
+    "hash": "58cb8a4334e1ec4eb4ecd61fd368b62f1362678b4a9bc7b558389b72994d7279"
   }
 }

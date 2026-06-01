@@ -2477,7 +2477,7 @@
         "x": 0,
         "y": 7
       },
-      "description": "Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels.",
+      "description": "Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. No data/datasource errors on this HTTP-backed card mean the Quarantine Explorer/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty.",
       "datasource": "Quarantine Explorer",
       "fieldConfig": {
         "defaults": {
@@ -2488,7 +2488,20 @@
             },
             "inspect": false
           },
-          "unit": "none"
+          "unit": "none",
+          "noValue": "No identity rows. Check Quarantine Explorer/control-plane backend health (/health/live) and selected pipeline/run_id before treating this as no selected run.",
+          "links": [
+            {
+              "title": "Check Quarantine Explorer health",
+              "url": "http://localhost:8081/health/live",
+              "targetBlank": true
+            },
+            {
+              "title": "Open monitoring backend setup docs",
+              "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
+              "targetBlank": true
+            }
+          ]
         },
         "overrides": []
       },
@@ -2545,7 +2558,7 @@
         "x": 10,
         "y": 7
       },
-      "description": "Current stage/outcome accounting evidence for the selected pipeline/run_type scope. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage.",
+      "description": "Current stage/outcome accounting evidence for the selected pipeline/run_type scope. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the Quarantine Explorer/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty.",
       "datasource": "Quarantine Explorer",
       "fieldConfig": {
         "defaults": {
@@ -2557,7 +2570,20 @@
             "inspect": false
           },
           "decimals": 0,
-          "unit": "none"
+          "unit": "none",
+          "noValue": "No processed-record rows. Check Quarantine Explorer backend health and selector scope; backend unavailable is not a valid zero-record state.",
+          "links": [
+            {
+              "title": "Check Quarantine Explorer health",
+              "url": "http://localhost:8081/health/live",
+              "targetBlank": true
+            },
+            {
+              "title": "Open monitoring backend setup docs",
+              "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
+              "targetBlank": true
+            }
+          ]
         },
         "overrides": [
           {

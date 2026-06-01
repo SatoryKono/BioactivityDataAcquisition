@@ -60,6 +60,8 @@ class MergePostJoinWorkflowContext(Protocol):
 
     def _drop_excluded_fields(self, df: pl.DataFrame) -> pl.DataFrame: ...
 
+    def _apply_field_mappings(self, df: pl.DataFrame) -> pl.DataFrame: ...
+
     def _count_enriched_records(
         self,
         df: pl.DataFrame,
@@ -109,6 +111,7 @@ def finalize_merged_dataframe(
         enrichers=enrichers,
         seed_pipeline=effective_seed_pipeline,
     )
+    merged_df = host._apply_field_mappings(merged_df)
     merged_df = host._add_lineage(
         df=merged_df,
         enrichment_results=enrichment_results,

@@ -272,6 +272,141 @@
     "required": true,
     "unique": false
   },
+  "target_protein_class_desc_L1": {
+    "checks": [],
+    "coerce": false,
+    "description": "L1 target protein class description.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "target_protein_class_desc_L2": {
+    "checks": [],
+    "coerce": false,
+    "description": "L2 target protein class description.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "target_protein_class_desc_L3": {
+    "checks": [],
+    "coerce": false,
+    "description": "L3 target protein class description.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "target_protein_class_desc_L4": {
+    "checks": [],
+    "coerce": false,
+    "description": "L4 target protein class description.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "target_protein_class_desc_L5": {
+    "checks": [],
+    "coerce": false,
+    "description": "L5 target protein class description.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "target_protein_class_id_L1": {
+    "checks": [],
+    "coerce": false,
+    "description": "L1 target protein class ID.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "target_protein_class_id_L2": {
+    "checks": [],
+    "coerce": false,
+    "description": "L2 target protein class ID.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "target_protein_class_id_L3": {
+    "checks": [],
+    "coerce": false,
+    "description": "L3 target protein class ID.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "target_protein_class_id_L4": {
+    "checks": [],
+    "coerce": false,
+    "description": "L4 target protein class ID.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "target_protein_class_id_L5": {
+    "checks": [],
+    "coerce": false,
+    "description": "L5 target protein class ID.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "target_protein_class_name_L1": {
+    "checks": [],
+    "coerce": false,
+    "description": "L1 target protein class name.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "target_protein_class_name_L2": {
+    "checks": [],
+    "coerce": false,
+    "description": "L2 target protein class name.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "target_protein_class_name_L3": {
+    "checks": [],
+    "coerce": false,
+    "description": "L3 target protein class name.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "target_protein_class_name_L4": {
+    "checks": [],
+    "coerce": false,
+    "description": "L4 target protein class name.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "target_protein_class_name_L5": {
+    "checks": [],
+    "coerce": false,
+    "description": "L5 target protein class name.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "target_protein_synonyms": {
     "checks": [],
     "coerce": false,

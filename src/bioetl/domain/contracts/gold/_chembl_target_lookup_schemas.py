@@ -40,6 +40,21 @@ class ChEMBLTargetGoldSchema(StrictGoldContractSchema):
         nullable=True, coerce=True
     )  # int → float (nullable)
     protein_classifications: Series[str] = pa.Field(nullable=True)
+    target_protein_class_id_L1: Series[str] = pa.Field(nullable=True)
+    target_protein_class_name_L1: Series[str] = pa.Field(nullable=True)
+    target_protein_class_desc_L1: Series[str] = pa.Field(nullable=True)
+    target_protein_class_id_L2: Series[str] = pa.Field(nullable=True)
+    target_protein_class_name_L2: Series[str] = pa.Field(nullable=True)
+    target_protein_class_desc_L2: Series[str] = pa.Field(nullable=True)
+    target_protein_class_id_L3: Series[str] = pa.Field(nullable=True)
+    target_protein_class_name_L3: Series[str] = pa.Field(nullable=True)
+    target_protein_class_desc_L3: Series[str] = pa.Field(nullable=True)
+    target_protein_class_id_L4: Series[str] = pa.Field(nullable=True)
+    target_protein_class_name_L4: Series[str] = pa.Field(nullable=True)
+    target_protein_class_desc_L4: Series[str] = pa.Field(nullable=True)
+    target_protein_class_id_L5: Series[str] = pa.Field(nullable=True)
+    target_protein_class_name_L5: Series[str] = pa.Field(nullable=True)
+    target_protein_class_desc_L5: Series[str] = pa.Field(nullable=True)
     component_accessions: Series[str] = pa.Field(nullable=True)  # list[str]
     component_descriptions: Series[str] = pa.Field(nullable=True)
     component_ids: Series[str] = pa.Field(nullable=True)  # list[int]

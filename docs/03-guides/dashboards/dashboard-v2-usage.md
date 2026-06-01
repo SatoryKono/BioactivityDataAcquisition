@@ -32,6 +32,11 @@ Detached audit backend contract:
 - HTTP-backed panels (`ID`, `Processed Records`, checkpoint freshness, Silver
   Reject Explorer summaries) are served by `bioetl quarantine serve`, usually
   on `http://127.0.0.1:8081`.
+- The shared above-the-fold `ID` and `Processed Records` cards on primary
+  dashboards now carry explicit no-value copy plus a Quarantine Explorer health
+  link. Generic Grafana `No data` on those cards is never acceptance evidence:
+  check `/health/live`, selector scope, and backend datasource errors before
+  declaring an exact run absent or a zero-record state valid.
 - That backend reads Prometheus through `BIOETL_PROMETHEUS_URL` when set.
   Configure the URL reachable from the backend process: host/WSL runs usually
   use `http://127.0.0.1:9090`, while Docker-adjacent backends may need
@@ -138,6 +143,9 @@ column. If Silver accounted rows sum below `bronze [total]`, visible Silver
 rows get a red row background; if Gold accounted rows sum below `silver [valid]`,
 visible Gold rows get a red row background. It does not replace the
 dashboard-specific `Status` or `First Action` route.
+If this table is empty, distinguish backend unavailable, no selected run/scope,
+and true zero accounting rows before acting: the card links the Quarantine
+Explorer health probe and monitoring setup docs for that reason.
 
 1. `bioetl-overview-v2`, first screen (no scroll):
    `Provenance`, `Status`, `First Action`, `ID`, and `Processed Records` answer
@@ -201,9 +209,12 @@ dashboard-specific `Status` or `First Action` route.
   without claiming that the selected pipeline run succeeded. Provider Health
   remains provider-first; `$workflow/$pipeline/$run_type/$run_id` are shared
   shell context for HTTP identity/accounting cards, and `$run_id` must not be
-  introduced into Provider Health PromQL. Shared `ID` и `Processed Records` cards на том же first
-  screen остаются bounded pipeline-context evidence и не доказывают current
-  provider health. `Inspect Provider Top Causes` может оставаться
+  introduced into Provider Health PromQL. `Status` is selected-provider scope;
+  `Monitor GLOBAL Provider Severity Matrix`, `Inspect Critical Providers`, and
+  `Inspect Provider Top Causes` are GLOBAL fleet posture and may disagree by
+  design. Shared `ID` и `Processed Records` cards на том же first screen
+  остаются bounded pipeline-context evidence и не доказывают current provider
+  health. `Inspect Provider Top Causes` может оставаться
    непустой даже при `GLOBAL severity = OK`, потому что canonical cause
    projection включает early-warning provider signals независимо от
    current-status projection; это diagnostic lead, а не самостоятельное

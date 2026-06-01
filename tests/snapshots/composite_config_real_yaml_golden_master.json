@@ -196,6 +196,16 @@
           "target_id"
         ],
         "key_source": null,
+        "pipeline": "chembl_target_protein_classification",
+        "required": false
+      },
+      {
+        "filter_field": null,
+        "filter_fields": null,
+        "join_keys": [
+          "target_id"
+        ],
+        "key_source": null,
         "pipeline": "uniprot_idmapping",
         "required": false
       },
@@ -212,7 +222,7 @@
     ],
     "enrichers": [],
     "merge": {
-      "column_group_count": 10,
+      "column_group_count": 11,
       "conflict_resolution": "seed_priority",
       "output_gold_path": "data/output/gold/composite/target",
       "output_silver_path": "data/output/silver/composite/target",
@@ -227,6 +237,6 @@
       "target_type"
     ],
     "seed_pipeline": "chembl_target",
-    "version": "1.2.0"
+    "version": "1.3.0"
   }
 }

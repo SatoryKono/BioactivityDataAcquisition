@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.infrastructure.quality._baseline_validation import (
     _is_valid_rollout_section_key,
     _validate_baseline_section,
@@ -9,6 +11,8 @@ from bioetl.infrastructure.quality._baseline_validation import (
     _validate_registry_group_entry,
     _validate_registry_groups_section,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class TestValidateBaselineSection:

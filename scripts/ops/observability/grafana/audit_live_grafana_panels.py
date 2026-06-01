@@ -28,6 +28,7 @@ DEFAULT_PIPELINE = "chembl_target"
 DEFAULT_RUN_TYPE = "incremental"
 DEFAULT_RUN_ID = "-"
 DEFAULT_RANGE_HOURS = 24
+DEFAULT_REQUEST_TIMEOUT_SECONDS = 5.0
 _HEALTH_PROBE_PATHS: tuple[str, ...] = ("/health/live", "/health")
 _DASHBOARD_DIR = Path("grafana/dashboards")
 
@@ -67,6 +68,7 @@ class AuditConfig:
     run_id: str
     range_hours: int
     output_path: Path
+    request_timeout_seconds: float = DEFAULT_REQUEST_TIMEOUT_SECONDS
 
 
 @dataclass(frozen=True)
@@ -242,6 +244,15 @@ def _parse_args(argv: list[str] | None) -> AuditConfig:
     parser.add_argument("--run-type", default=DEFAULT_RUN_TYPE)
     parser.add_argument("--run-id", default=DEFAULT_RUN_ID)
     parser.add_argument("--range-hours", type=int, default=DEFAULT_RANGE_HOURS)
+    parser.add_argument(
+        "--request-timeout-seconds",
+        type=float,
+        default=DEFAULT_REQUEST_TIMEOUT_SECONDS,
+        help=(
+            "Per-request timeout for Prometheus, Grafana datasource discovery, "
+            "Quarantine Explorer, Loki, and Tempo probes."
+        ),
+    )
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT_PATH)
     args = parser.parse_args(argv)
     return AuditConfig(
@@ -258,6 +269,7 @@ def _parse_args(argv: list[str] | None) -> AuditConfig:
         run_id=args.run_id,
         range_hours=args.range_hours,
         output_path=args.output,
+        request_timeout_seconds=max(float(args.request_timeout_seconds), 0.1),
     )
 
 
@@ -486,13 +498,13 @@ def _loki_query_range_bounds(config: AuditConfig) -> tuple[str, str]:
     return (str(int(start * 1_000_000_000)), str(int(end * 1_000_000_000)))
 
 
-def _fetch_json(url: str) -> object:
-    with urlopen(url, timeout=30) as response:
+def _fetch_json(url: str, *, timeout_seconds: float) -> object:
+    with urlopen(url, timeout=timeout_seconds) as response:
         return json.loads(response.read().decode("utf-8"))
 
 
-def _fetch_text(url: str) -> str:
-    with urlopen(url, timeout=30) as response:
+def _fetch_text(url: str, *, timeout_seconds: float) -> str:
+    with urlopen(url, timeout=timeout_seconds) as response:
         return response.read().decode("utf-8")
 
 
@@ -525,7 +537,7 @@ def _discover_http_datasource_url(
     payload = _request_json(
         url,
         auth_header=_auth_header(config.grafana_username, config.grafana_password),
-        timeout_seconds=30,
+        timeout_seconds=config.request_timeout_seconds,
     )
     if not isinstance(payload, dict):
         return None
@@ -557,10 +569,15 @@ def _candidate_app_base_urls(config: AuditConfig) -> tuple[str, ...]:
     return tuple(deduped)
 
 
-def _probe_app_health(candidate_base_url: str) -> tuple[str, object] | None:
+def _probe_app_health(
+    candidate_base_url: str, *, timeout_seconds: float
+) -> tuple[str, object] | None:
     for path in _HEALTH_PROBE_PATHS:
         try:
-            payload = _fetch_json(f"{candidate_base_url}{path}")
+            payload = _fetch_json(
+                f"{candidate_base_url}{path}",
+                timeout_seconds=timeout_seconds,
+            )
         except (HTTPError, URLError, OSError, json.JSONDecodeError):
             continue
         return (path, payload)
@@ -570,7 +587,10 @@ def _probe_app_health(candidate_base_url: str) -> tuple[str, object] | None:
 def _resolve_app_base_url(config: AuditConfig) -> str:
     attempted: list[str] = []
     for candidate in _candidate_app_base_urls(config):
-        probe = _probe_app_health(candidate)
+        probe = _probe_app_health(
+            candidate,
+            timeout_seconds=config.request_timeout_seconds,
+        )
         if probe is None:
             attempted.extend(f"{candidate}{path}" for path in _HEALTH_PROBE_PATHS)
             continue
@@ -780,7 +800,7 @@ def _audit_prometheus_panel(
     query_url = f"{config.prometheus_base_url}/api/v1/query?" + urlencode(
         {"query": rendered_expr}
     )
-    payload = _fetch_json(query_url)
+    payload = _fetch_json(query_url, timeout_seconds=config.request_timeout_seconds)
     classification, detail = _classify_prometheus_payload(payload)
     status = "ok"
     if classification in {"invalid_shape", "query_error"}:
@@ -828,7 +848,10 @@ def _audit_http_panel(
             target_ref_id=spec.target_ref_id,
         )
     rendered_url = _substitute_dashboard_tokens(url_template, config)
-    payload = _fetch_json(f"{app_base_url}{rendered_url}")
+    payload = _fetch_json(
+        f"{app_base_url}{rendered_url}",
+        timeout_seconds=config.request_timeout_seconds,
+    )
     if spec.semantic_kind == "freshness":
         classification, detail = _classify_http_freshness_payload(payload)
         status = (
@@ -894,7 +917,10 @@ def _audit_loki_panel(
         }
     )
     try:
-        payload = _fetch_json(query_url)
+        payload = _fetch_json(
+            query_url,
+            timeout_seconds=config.request_timeout_seconds,
+        )
     except (HTTPError, URLError, OSError, json.JSONDecodeError) as exc:
         return AuditResult(
             dashboard_uid=spec.dashboard_uid,
@@ -927,8 +953,14 @@ def _audit_loki_panel(
 def _audit_tempo_handoff(spec: PanelAuditSpec, config: AuditConfig) -> AuditResult:
     search_url = f"{config.tempo_base_url}/api/search?" + urlencode({"limit": "1"})
     try:
-        _fetch_text(f"{config.tempo_base_url}/ready")
-        payload = _fetch_json(search_url)
+        _fetch_text(
+            f"{config.tempo_base_url}/ready",
+            timeout_seconds=config.request_timeout_seconds,
+        )
+        payload = _fetch_json(
+            search_url,
+            timeout_seconds=config.request_timeout_seconds,
+        )
     except (HTTPError, URLError, OSError, json.JSONDecodeError) as exc:
         return AuditResult(
             dashboard_uid=spec.dashboard_uid,
@@ -958,17 +990,65 @@ def _audit_tempo_handoff(spec: PanelAuditSpec, config: AuditConfig) -> AuditResu
     )
 
 
+def _blocked_http_backend_result(
+    spec: PanelAuditSpec,
+    *,
+    detail: str,
+) -> AuditResult:
+    return AuditResult(
+        dashboard_uid=spec.dashboard_uid,
+        panel_id=spec.panel_id,
+        title=spec.title,
+        source_kind=spec.source_kind,
+        semantic_kind=spec.semantic_kind,
+        status="error" if spec.required else "ok",
+        classification="blocked_backend_unavailable",
+        detail=detail,
+        query_preview="",
+        target_ref_id=spec.target_ref_id,
+    )
+
+
 def run_audit(config: AuditConfig) -> list[AuditResult]:
     results: list[AuditResult] = []
     resolved_app_base_url: str | None = None
+    app_resolution_error: str | None = None
     for spec in effective_panel_specs():
         panel = _find_panel(spec)
         try:
             if spec.source_kind == "prometheus":
                 results.append(_audit_prometheus_panel(spec, panel, config))
             elif spec.source_kind == "http":
+                if app_resolution_error is not None:
+                    results.append(
+                        _blocked_http_backend_result(
+                            spec,
+                            detail=app_resolution_error,
+                        )
+                    )
+                    continue
                 if resolved_app_base_url is None:
-                    resolved_app_base_url = _resolve_app_base_url(config)
+                    try:
+                        resolved_app_base_url = _resolve_app_base_url(config)
+                    except (
+                        HTTPError,
+                        URLError,
+                        OSError,
+                        TimeoutError,
+                        json.JSONDecodeError,
+                    ) as exc:
+                        app_resolution_error = (
+                            "Quarantine Explorer backend could not be resolved; "
+                            "all HTTP-backed panel checks are blocked instead of "
+                            f"being retried per panel: {exc}"
+                        )
+                        results.append(
+                            _blocked_http_backend_result(
+                                spec,
+                                detail=app_resolution_error,
+                            )
+                        )
+                        continue
                 results.append(
                     _audit_http_panel(
                         spec,
@@ -1020,6 +1100,7 @@ def _write_report(config: AuditConfig, results: list[AuditResult]) -> None:
             "run_type": config.run_type,
             "run_id": config.run_id,
             "range_hours": config.range_hours,
+            "request_timeout_seconds": config.request_timeout_seconds,
         },
         "panel_specs": [asdict(spec) for spec in effective_panel_specs()],
         "results": [asdict(result) for result in results],
