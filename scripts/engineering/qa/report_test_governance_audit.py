@@ -46,6 +46,29 @@ PYTEST_ASSERTION_HELPERS = {
     "pytest.raises",
     "pytest.warns",
 }
+NO_EXCEPTION_CONTRACT_NAME_TOKENS = (
+    "accepts",
+    "accepted",
+    "allows",
+    "allowed",
+    "all_stages",
+    "callable",
+    "can_be",
+    "creation",
+    "defaults",
+    "does_not_raise",
+    "imports",
+    "no_error",
+    "no_op",
+    "noop",
+    "null_allowed",
+    "optional",
+    "preserves",
+    "valid",
+    "with_stage",
+    "without",
+    "works",
+)
 BUDGET_TO_METRIC = {
     "refined_assertless_max": "refined_assertless_tests",
     "duplicate_test_names_max": "duplicate_test_names",
@@ -246,20 +269,7 @@ def _classify_assertless_candidate(
         arg.arg for arg in function.args.args
     }:
         return "benchmark_or_performance"
-    if any(
-        token in lower_name
-        for token in (
-            "noop",
-            "no_op",
-            "does_not_raise",
-            "no_error",
-            "smoke",
-            "skip",
-            "skips",
-            "close",
-            "aclose",
-        )
-    ):
+    if any(token in lower_name for token in NO_EXCEPTION_CONTRACT_NAME_TOKENS):
         return "intentional_no_exception_contract"
     if visitor.helper_assertion_calls:
         return "helper_asserted"
@@ -279,6 +289,7 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
     parse_errors: list[dict[str, str]] = []
 
     total_functions = 0
+    assertless_total_candidates = 0
     refined_assertless_tests = 0
     markerless_test_functions = 0
     uuid4_call_sites = 0
@@ -307,13 +318,15 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
             date_today_call_sites += visitor.date_today_call_sites
 
             if not visitor.has_assertion_signal:
-                refined_assertless_tests += 1
+                assertless_total_candidates += 1
                 category = _classify_assertless_candidate(
                     relative_path=relative,
                     function=function,
                     visitor=visitor,
                 )
                 assertless_category_counts[category] += 1
+                if category == "weak_no_value":
+                    refined_assertless_tests += 1
                 assertless_candidates.append(
                     {
                         "path": relative,
@@ -357,6 +370,7 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
         "root": root.as_posix(),
         "total_test_files": len(test_files),
         "total_test_functions": total_functions,
+        "assertless_total_candidates": assertless_total_candidates,
         "refined_assertless_tests": refined_assertless_tests,
         "assertless_category_counts": {
             category: assertless_category_counts.get(category, 0)
