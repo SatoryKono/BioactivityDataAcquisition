@@ -56,8 +56,8 @@ delegate detailed behavior to the linked provider reference and active config.
 | 9   | `chembl_compound_record`        | ChEMBL           | compound-record        | [Spec](chembl/09-compound-record-spec.md)        |
 | 10  | `chembl_target_component`       | ChEMBL           | target-component       | [Spec](chembl/10-target-component-spec.md)       |
 | 11  | `chembl_target_protein_classification` | ChEMBL           | target-protein-classification | [Spec](chembl/11-target-protein-classification-spec.md) |
-| 12  | `chembl_publication_term`       | ChEMBL           | publication-term       | [Spec](chembl/12-publication-term-spec.md)       |
-| 13  | `chembl_publication_similarity` | ChEMBL           | publication-similarity | [Spec](chembl/13-publication-similarity-spec.md) |
+| 12  | `chembl_publication_term`       | ChEMBL           | publication-term       | [Spec](chembl/11-publication-term-spec.md)       |
+| 13  | `chembl_publication_similarity` | ChEMBL           | publication-similarity | [Spec](chembl/12-publication-similarity-spec.md) |
 | 14  | `chembl_subcellular_fraction`   | ChEMBL           | subcellular-fraction   | [Spec](chembl/14-subcellular-fraction-spec.md)   |
 | 15  | `chembl_tissue`                 | ChEMBL           | tissue                 | [Spec](chembl/15-tissue-spec.md)                 |
 | 16  | `uniprot_protein`               | UniProt          | protein                | [Spec](uniprot/01-protein-spec.md)               |
