@@ -6,18 +6,18 @@ this module instead of ``control_plane._*`` private modules (RF-011.2).
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane._run_manifest_artifact_payloads import (
+from bioetl.application.services.control_plane.manifest.artifact_payloads import (
     ARTIFACT_DETAIL_KEYS,
     ARTIFACT_TRACE_ORDERED_KEYS,
     build_artifact_ref_from_ledger_entry,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_ledger import (
+from bioetl.application.services.control_plane.manifest.diagnostics.ledger_processing import (
     _process_ledger_entries,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_main_helpers import (
+from bioetl.application.services.control_plane.manifest.diagnostics.main_helpers import (
     _build_unified_reproducibility_diagnostics,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_persistence import (
+from bioetl.application.services.control_plane.manifest.diagnostics.persistence import (
     build_alert_signals,
     build_lineage_closure_boundary,
     build_next_steps,
@@ -26,7 +26,7 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_persist
     missing_replay_ready_requirements,
     resolve_required_profile_requirements,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_helpers import (
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_helpers import (
     _build_replay_parentage,
     _collect_append_mode_semantic_sinks,
     _is_composite_execution_context,
@@ -37,7 +37,7 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_
     _resolve_requested_checkpoint_compatibility_policy,
     _resolve_required_persistence_profile,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_state import (
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_state import (
     _build_replay_state_projection,
     _resolve_broader_historical_exact_replay_state,
     _resolve_continuation_mode,
@@ -47,7 +47,7 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_
     _resolve_replay_mode,
     _resolve_replay_occurrence_kind,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_summary import (
+from bioetl.application.services.control_plane.manifest.diagnostics.summary import (
     _build_exact_replay_anchors,
     _build_final_summary,
     _build_runtime_views,

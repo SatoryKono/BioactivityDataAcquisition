@@ -1,9 +1,9 @@
 {
   "summary": {
-    "snapshot_date": "2026-05-30",
+    "snapshot_date": "2026-06-01",
     "targets": 5,
-    "total_duplicate_clusters": 0,
-    "total_raw_duplicate_clusters": 0,
+    "total_duplicate_clusters": 5,
+    "total_raw_duplicate_clusters": 5,
     "total_excluded_duplicate_clusters": 0
   },
   "normalization": {
@@ -11,9 +11,9 @@
   },
   "trend": {
     "status": "compared_to_previous",
-    "snapshot_date": "2026-05-30",
-    "previous_snapshot_date": "2026-05-31",
-    "total_duplicate_cluster_delta": -8,
+    "snapshot_date": "2026-06-01",
+    "previous_snapshot_date": "2026-05-30",
+    "total_duplicate_cluster_delta": 5,
     "targets": [
       {
         "target": "src/bioetl/application/core",
@@ -35,15 +35,15 @@
       },
       {
         "target": "src/bioetl/application/services/control_plane",
-        "current_duplicate_count": 0,
-        "previous_duplicate_count": 7,
-        "delta_duplicate_count": -7
+        "current_duplicate_count": 5,
+        "previous_duplicate_count": 0,
+        "delta_duplicate_count": 5
       },
       {
         "target": "src/bioetl/composition/runtime_builders",
         "current_duplicate_count": 0,
-        "previous_duplicate_count": 1,
-        "delta_duplicate_count": -1
+        "previous_duplicate_count": 0,
+        "delta_duplicate_count": 0
       }
     ]
   },
@@ -77,12 +77,129 @@
     },
     {
       "target": "src/bioetl/application/services/control_plane",
-      "returncode": 0,
-      "duplicate_count": 0,
-      "raw_duplicate_count": 0,
+      "returncode": 8,
+      "duplicate_count": 5,
+      "raw_duplicate_count": 5,
       "excluded_duplicate_count": 0,
-      "top_pairs": [],
-      "clusters": []
+      "top_pairs": [
+        {
+          "modules": [
+            "bioetl.application.services.control_plane.ledger.entry_support",
+            "bioetl.application.services.control_plane.run_ledger_entry_support"
+          ],
+          "duplicate_clusters": 1
+        },
+        {
+          "modules": [
+            "bioetl.application.services.control_plane.ledger.entry_support",
+            "bioetl.application.services.control_plane.workflow.ledger_service"
+          ],
+          "duplicate_clusters": 1
+        },
+        {
+          "modules": [
+            "bioetl.application.services.control_plane.ledger.rich_events",
+            "bioetl.application.services.control_plane.run_ledger_rich_events"
+          ],
+          "duplicate_clusters": 1
+        },
+        {
+          "modules": [
+            "bioetl.application.services.control_plane.manifest.inspection_verification",
+            "bioetl.application.services.control_plane.run_manifest_inspection_verification"
+          ],
+          "duplicate_clusters": 1
+        },
+        {
+          "modules": [
+            "bioetl.application.services.control_plane.replay.__init__",
+            "bioetl.application.services.control_plane.replay.historical_corpus_models"
+          ],
+          "duplicate_clusters": 1
+        }
+      ],
+      "clusters": [
+        {
+          "path": "src/bioetl/application/services/control_plane/workflow/__init__.py",
+          "line": 1,
+          "modules": [
+            {
+              "module": "bioetl.application.services.control_plane.ledger.entry_support",
+              "start_line": 65,
+              "end_line": 79
+            },
+            {
+              "module": "bioetl.application.services.control_plane.workflow.ledger_service",
+              "start_line": 45,
+              "end_line": 57
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/application/services/control_plane/workflow/__init__.py",
+          "line": 1,
+          "modules": [
+            {
+              "module": "bioetl.application.services.control_plane.manifest.inspection_verification",
+              "start_line": 19,
+              "end_line": 29
+            },
+            {
+              "module": "bioetl.application.services.control_plane.run_manifest_inspection_verification",
+              "start_line": 13,
+              "end_line": 21
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/application/services/control_plane/workflow/__init__.py",
+          "line": 1,
+          "modules": [
+            {
+              "module": "bioetl.application.services.control_plane.ledger.entry_support",
+              "start_line": 156,
+              "end_line": 163
+            },
+            {
+              "module": "bioetl.application.services.control_plane.run_ledger_entry_support",
+              "start_line": 12,
+              "end_line": 19
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/application/services/control_plane/workflow/__init__.py",
+          "line": 1,
+          "modules": [
+            {
+              "module": "bioetl.application.services.control_plane.replay.__init__",
+              "start_line": 100,
+              "end_line": 108
+            },
+            {
+              "module": "bioetl.application.services.control_plane.replay.historical_corpus_models",
+              "start_line": 179,
+              "end_line": 188
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/application/services/control_plane/workflow/__init__.py",
+          "line": 1,
+          "modules": [
+            {
+              "module": "bioetl.application.services.control_plane.ledger.rich_events",
+              "start_line": 15,
+              "end_line": 23
+            },
+            {
+              "module": "bioetl.application.services.control_plane.run_ledger_rich_events",
+              "start_line": 11,
+              "end_line": 17
+            }
+          ]
+        }
+      ]
     },
     {
       "target": "src/bioetl/composition/runtime_builders",

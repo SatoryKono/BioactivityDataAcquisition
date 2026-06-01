@@ -372,7 +372,7 @@ hotspot_budgets:
     class_size: 1
     god_object: 1
 hotspot_family_ratchets:
-  snapshot_date: '2026-05-30'
+  snapshot_date: '2026-06-01'
   mode: fail-fast
   artifact_policy:
     duplication_command: uv run python -m scripts.engineering.qa report-duplication-baseline
@@ -382,7 +382,7 @@ hotspot_family_ratchets:
       --md-out reports/quality/hotspot-duplication-baseline.md --history-jsonl reports/quality/hotspot-duplication-history.jsonl
     baseline_artifact: reports/quality/hotspot-duplication-baseline.json
     history_artifact: reports/quality/hotspot-duplication-history.jsonl
-    latest_reviewed_snapshot: '2026-05-30'
+    latest_reviewed_snapshot: '2026-06-01'
     confirming_clean_snapshots_required: 2
     expected_direction: downward
     ratchet_policy: Keep the hotspot layer report-only at the repo level; enforce

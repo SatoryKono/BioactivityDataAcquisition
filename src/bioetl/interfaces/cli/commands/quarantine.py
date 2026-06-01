@@ -17,9 +17,13 @@ from bioetl.interfaces.cli.commands.domains.quarantine.support import (
 )
 from bioetl.interfaces.cli.commands.health import (
     DEFAULT_HEALTH_SERVER_PORT,
-    get_quarantine_runtime_service as get_health_quarantine_runtime_service,
-    get_quarantine_service as get_health_quarantine_service,
     run_health_server_command,
+)
+from bioetl.interfaces.cli.commands.health import (
+    get_quarantine_runtime_service as get_health_quarantine_runtime_service,
+)
+from bioetl.interfaces.cli.commands.health import (
+    get_quarantine_service as get_health_quarantine_service,
 )
 
 SILVER_FILTER_ERROR_CODE = "FILTERED_OUT_SILVER"

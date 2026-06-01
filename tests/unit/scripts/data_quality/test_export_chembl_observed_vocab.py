@@ -18,7 +18,7 @@ def test_build_inventory_payload_scans_all_tracked_chembl_pipelines() -> None:
     payload = build_inventory_payload()
 
     assert payload["source"] == "tracked_chembl_bronze_fixtures"
-    assert len(payload["pipelines_scanned"]) == 14
+    assert len(payload["pipelines_scanned"]) == 15
     assert payload["governed_fields_count"] > 0
     assert payload["governed_fields_with_observations_count"] > 0
     assert payload["rows_count"] > 0

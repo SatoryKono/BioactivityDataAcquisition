@@ -11,11 +11,11 @@ from bioetl.application.services.control_plane.manifest._service_support import 
 from bioetl.application.services.control_plane.manifest.models import (
     RunManifestCreateSpec,
 )
+from bioetl.application.services.control_plane.manifest.service_scaffold import (
+    ManifestServiceScaffoldMixin,
+)
 from bioetl.application.services.control_plane.manifest.validation import (
     validate_run_manifest_request,
-)
-from bioetl.application.services.control_plane.manifest_service_scaffold import (
-    ManifestServiceScaffoldMixin,
 )
 from bioetl.domain.control_plane import RunCodeProvenance, RunManifest
 from bioetl.domain.normalization import (

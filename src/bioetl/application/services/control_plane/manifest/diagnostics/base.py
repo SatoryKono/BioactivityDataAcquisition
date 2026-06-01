@@ -32,8 +32,8 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay impor
     _build_resume_contract,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_projection import (
-    _build_replay_projection_context_kwargs,
     _build_replay_projection_bundle,
+    _build_replay_projection_context_kwargs,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
     collect_input_snapshot_content_hashes as _collect_input_snapshot_content_hashes,

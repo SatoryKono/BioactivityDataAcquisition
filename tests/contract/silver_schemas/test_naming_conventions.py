@@ -415,6 +415,7 @@ class TestCrossProviderNaming:
             "chembl_publication": "publication_id",
             "chembl_publication_term": "publication_id",
             "chembl_target": "target_id",
+            "chembl_target_protein_classification": "target_id",
             "chembl_protein_class": "protein_class_id",
             "chembl_publication_similarity": "sim_id",
             "chembl_tissue": "tissue_id",

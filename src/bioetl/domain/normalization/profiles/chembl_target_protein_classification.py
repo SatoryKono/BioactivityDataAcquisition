@@ -38,12 +38,6 @@ _INT_FIELDS = frozenset(
     {
         "component_id",
         "hierarchy_index",
-        "leaf_id",
-        "l1_id",
-        "l2_id",
-        "l3_id",
-        "l4_id",
-        "l5_id",
     }
 )
 _TITLE_FIELDS = frozenset(

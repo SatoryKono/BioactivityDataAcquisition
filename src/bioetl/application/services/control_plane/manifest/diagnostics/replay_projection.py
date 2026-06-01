@@ -10,6 +10,11 @@ from bioetl.application.services.control_plane.manifest.diagnostics.base_summary
 from bioetl.application.services.control_plane.manifest.diagnostics.replay import (
     _resolve_manifest_replay_readiness_verdict,
 )
+from bioetl.application.services.control_plane.manifest.replay_taxonomy import (
+    build_replay_taxonomy_projection,
+    resolve_replay_next_action,
+    resolve_replay_resume_rebuild_verdict,
+)
 from bioetl.application.services.control_plane.run_manifest_diagnostics_support import (
     _build_replay_state_projection,
     _collect_append_mode_semantic_sinks,
@@ -21,11 +26,6 @@ from bioetl.application.services.control_plane.run_manifest_diagnostics_support 
     _resolve_replay_mode,
     build_lineage_closure_boundary,
     build_replay_family_contract_payload,
-)
-from bioetl.application.services.control_plane.manifest.replay_taxonomy import (
-    build_replay_taxonomy_projection,
-    resolve_replay_next_action,
-    resolve_replay_resume_rebuild_verdict,
 )
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (

@@ -1,5 +1,5 @@
 {
-  "field_rows_count": 222,
+  "field_rows_count": 245,
   "fixtures": [
     {
       "field_count": 11,
@@ -73,14 +73,15 @@
       ]
     },
     {
-      "field_count": 9,
+      "field_count": 10,
       "fixture_key": "chembl/protein_class",
       "fixture_path": "tests/fixtures/bronze/chembl/protein_class/sample_ci_2026-04-29.jsonl",
       "pipeline_name": "chembl_protein_class",
       "records": 20,
-      "tracked_fixture_count": 1,
+      "tracked_fixture_count": 2,
       "tracked_fixture_paths": [
-        "tests/fixtures/bronze/chembl/protein_class/sample_ci_2026-04-29.jsonl"
+        "tests/fixtures/bronze/chembl/protein_class/sample_ci_2026-04-29.jsonl",
+        "tests/fixtures/bronze/chembl/protein_class/sample_edge_flags_2026-05-19.jsonl"
       ]
     },
     {
@@ -95,14 +96,15 @@
       ]
     },
     {
-      "field_count": 4,
+      "field_count": 6,
       "fixture_key": "chembl/publication_similarity",
       "fixture_path": "tests/fixtures/bronze/chembl/publication_similarity/sample_ci_2026-04-30.jsonl",
       "pipeline_name": "chembl_publication_similarity",
       "records": 20,
-      "tracked_fixture_count": 1,
+      "tracked_fixture_count": 2,
       "tracked_fixture_paths": [
-        "tests/fixtures/bronze/chembl/publication_similarity/sample_ci_2026-04-30.jsonl"
+        "tests/fixtures/bronze/chembl/publication_similarity/sample_ci_2026-04-30.jsonl",
+        "tests/fixtures/bronze/chembl/publication_similarity/sample_edge_reference_ids_2026-05-19.jsonl"
       ]
     },
     {
@@ -151,6 +153,17 @@
       ]
     },
     {
+      "field_count": 20,
+      "fixture_key": "chembl/target_protein_classification",
+      "fixture_path": "tests/fixtures/bronze/chembl/target_protein_classification/sample_ci_2026-06-01.jsonl",
+      "pipeline_name": "chembl_target_protein_classification",
+      "records": 20,
+      "tracked_fixture_count": 1,
+      "tracked_fixture_paths": [
+        "tests/fixtures/bronze/chembl/target_protein_classification/sample_ci_2026-06-01.jsonl"
+      ]
+    },
+    {
       "field_count": 6,
       "fixture_key": "chembl/tissue",
       "fixture_path": "tests/fixtures/bronze/chembl/tissue/sample_ci_2026-04-29.jsonl",
@@ -164,7 +177,7 @@
       ]
     }
   ],
-  "fixtures_count": 14,
+  "fixtures_count": 15,
   "manifest_path": "configs/base/bronze_fixture_manifest.yaml",
   "rows": [
     {
@@ -1713,27 +1726,27 @@
       "pipeline_name": "chembl_molecule"
     },
     {
-      "distinct_count": 5,
+      "distinct_count": 6,
       "field_name": "class_level",
       "fixture_key": "chembl/protein_class",
-      "fixture_path": "tests/fixtures/bronze/chembl/protein_class/sample_ci_2026-04-29.jsonl",
-      "non_null_count": 20,
+      "fixture_path": "tests/fixtures/bronze/chembl/protein_class/sample_ci_2026-04-29.jsonl | tests/fixtures/bronze/chembl/protein_class/sample_edge_flags_2026-05-19.jsonl",
+      "non_null_count": 22,
       "null_count": 0,
       "observed_examples": [
         "0",
         "1",
         "2",
         "3",
-        "5"
+        "4"
       ],
       "pipeline_name": "chembl_protein_class"
     },
     {
-      "distinct_count": 11,
+      "distinct_count": 13,
       "field_name": "definition",
       "fixture_key": "chembl/protein_class",
-      "fixture_path": "tests/fixtures/bronze/chembl/protein_class/sample_ci_2026-04-29.jsonl",
-      "non_null_count": 11,
+      "fixture_path": "tests/fixtures/bronze/chembl/protein_class/sample_ci_2026-04-29.jsonl | tests/fixtures/bronze/chembl/protein_class/sample_edge_flags_2026-05-19.jsonl",
+      "non_null_count": 13,
       "null_count": 9,
       "observed_examples": [
         "A carboxypeptidase that catalyzes the release of a C-terminal amino acid with a broad specificity. It also plays a role in the LYSOSOMES by protecting BETA-GALACTOSIDASE and NEURAMINIDASE from degradation. It was formerly classified as EC 3.4.12.1 and EC 3.4.21.13. [MESH:D043402]",
@@ -1745,59 +1758,72 @@
       "pipeline_name": "chembl_protein_class"
     },
     {
-      "distinct_count": 6,
+      "distinct_count": 2,
+      "field_name": "downgraded",
+      "fixture_key": "chembl/protein_class",
+      "fixture_path": "tests/fixtures/bronze/chembl/protein_class/sample_ci_2026-04-29.jsonl | tests/fixtures/bronze/chembl/protein_class/sample_edge_flags_2026-05-19.jsonl",
+      "non_null_count": 2,
+      "null_count": 0,
+      "observed_examples": [
+        "0",
+        "1"
+      ],
+      "pipeline_name": "chembl_protein_class"
+    },
+    {
+      "distinct_count": 7,
       "field_name": "parent_id",
       "fixture_key": "chembl/protein_class",
-      "fixture_path": "tests/fixtures/bronze/chembl/protein_class/sample_ci_2026-04-29.jsonl",
-      "non_null_count": 19,
+      "fixture_path": "tests/fixtures/bronze/chembl/protein_class/sample_ci_2026-04-29.jsonl | tests/fixtures/bronze/chembl/protein_class/sample_edge_flags_2026-05-19.jsonl",
+      "non_null_count": 21,
       "null_count": 1,
       "observed_examples": [
         "0",
         "1",
+        "100",
         "1031",
-        "1119",
-        "1120"
+        "1119"
       ],
       "pipeline_name": "chembl_protein_class"
     },
     {
-      "distinct_count": 20,
+      "distinct_count": 22,
       "field_name": "pref_name",
       "fixture_key": "chembl/protein_class",
-      "fixture_path": "tests/fixtures/bronze/chembl/protein_class/sample_ci_2026-04-29.jsonl",
-      "non_null_count": 20,
+      "fixture_path": "tests/fixtures/bronze/chembl/protein_class/sample_ci_2026-04-29.jsonl | tests/fixtures/bronze/chembl/protein_class/sample_edge_flags_2026-05-19.jsonl",
+      "non_null_count": 22,
       "null_count": 0,
       "observed_examples": [
         "Adhesion",
         "Cytochrome P450 CAM family",
+        "Deprecated family",
         "Enzyme",
-        "Kinase",
-        "Membrane receptor"
+        "Kinase"
       ],
       "pipeline_name": "chembl_protein_class"
     },
     {
-      "distinct_count": 20,
+      "distinct_count": 22,
       "field_name": "protein_class_desc",
       "fixture_key": "chembl/protein_class",
-      "fixture_path": "tests/fixtures/bronze/chembl/protein_class/sample_ci_2026-04-29.jsonl",
-      "non_null_count": 20,
+      "fixture_path": "tests/fixtures/bronze/chembl/protein_class/sample_ci_2026-04-29.jsonl | tests/fixtures/bronze/chembl/protein_class/sample_edge_flags_2026-05-19.jsonl",
+      "non_null_count": 22,
       "null_count": 0,
       "observed_examples": [
         "adhesion",
         "cytosolic other",
+        "deprecated family",
         "enzyme",
-        "enzyme  cytochrome p450  cyp_cam",
-        "enzyme  kinase"
+        "enzyme  cytochrome p450  cyp_cam"
       ],
       "pipeline_name": "chembl_protein_class"
     },
     {
-      "distinct_count": 20,
+      "distinct_count": 22,
       "field_name": "protein_class_id",
       "fixture_key": "chembl/protein_class",
-      "fixture_path": "tests/fixtures/bronze/chembl/protein_class/sample_ci_2026-04-29.jsonl",
-      "non_null_count": 20,
+      "fixture_path": "tests/fixtures/bronze/chembl/protein_class/sample_ci_2026-04-29.jsonl | tests/fixtures/bronze/chembl/protein_class/sample_edge_flags_2026-05-19.jsonl",
+      "non_null_count": 22,
       "null_count": 0,
       "observed_examples": [
         "0",
@@ -1809,28 +1835,30 @@
       "pipeline_name": "chembl_protein_class"
     },
     {
-      "distinct_count": 0,
+      "distinct_count": 1,
       "field_name": "replaced_by",
       "fixture_key": "chembl/protein_class",
-      "fixture_path": "tests/fixtures/bronze/chembl/protein_class/sample_ci_2026-04-29.jsonl",
-      "non_null_count": 0,
-      "null_count": 20,
-      "observed_examples": [],
+      "fixture_path": "tests/fixtures/bronze/chembl/protein_class/sample_ci_2026-04-29.jsonl | tests/fixtures/bronze/chembl/protein_class/sample_edge_flags_2026-05-19.jsonl",
+      "non_null_count": 1,
+      "null_count": 21,
+      "observed_examples": [
+        "910010"
+      ],
       "pipeline_name": "chembl_protein_class"
     },
     {
-      "distinct_count": 20,
+      "distinct_count": 22,
       "field_name": "short_name",
       "fixture_key": "chembl/protein_class",
-      "fixture_path": "tests/fixtures/bronze/chembl/protein_class/sample_ci_2026-04-29.jsonl",
-      "non_null_count": 20,
+      "fixture_path": "tests/fixtures/bronze/chembl/protein_class/sample_ci_2026-04-29.jsonl | tests/fixtures/bronze/chembl/protein_class/sample_edge_flags_2026-05-19.jsonl",
+      "non_null_count": 22,
       "null_count": 0,
       "observed_examples": [
         "Adhesion",
         "CYP_CAM",
         "Cytosolic other",
-        "Enzyme",
-        "Kinase"
+        "Deprecated",
+        "Enzyme"
       ],
       "pipeline_name": "chembl_protein_class"
     },
@@ -1838,8 +1866,8 @@
       "distinct_count": 10,
       "field_name": "sort_order",
       "fixture_key": "chembl/protein_class",
-      "fixture_path": "tests/fixtures/bronze/chembl/protein_class/sample_ci_2026-04-29.jsonl",
-      "non_null_count": 10,
+      "fixture_path": "tests/fixtures/bronze/chembl/protein_class/sample_ci_2026-04-29.jsonl | tests/fixtures/bronze/chembl/protein_class/sample_edge_flags_2026-05-19.jsonl",
+      "non_null_count": 12,
       "null_count": 10,
       "observed_examples": [
         "1",
@@ -2115,25 +2143,26 @@
       "pipeline_name": "chembl_publication"
     },
     {
-      "distinct_count": 3,
+      "distinct_count": 4,
       "field_name": "document_1_chembl_id",
       "fixture_key": "chembl/publication_similarity",
-      "fixture_path": "tests/fixtures/bronze/chembl/publication_similarity/sample_ci_2026-04-30.jsonl",
-      "non_null_count": 20,
+      "fixture_path": "tests/fixtures/bronze/chembl/publication_similarity/sample_ci_2026-04-30.jsonl | tests/fixtures/bronze/chembl/publication_similarity/sample_edge_reference_ids_2026-05-19.jsonl",
+      "non_null_count": 22,
       "null_count": 0,
       "observed_examples": [
         "CHEMBL1139453",
         "CHEMBL1139454",
-        "CHEMBL1148466"
+        "CHEMBL1148466",
+        "CHEMBL2100001"
       ],
       "pipeline_name": "chembl_publication_similarity"
     },
     {
-      "distinct_count": 20,
+      "distinct_count": 21,
       "field_name": "document_2_chembl_id",
       "fixture_key": "chembl/publication_similarity",
-      "fixture_path": "tests/fixtures/bronze/chembl/publication_similarity/sample_ci_2026-04-30.jsonl",
-      "non_null_count": 20,
+      "fixture_path": "tests/fixtures/bronze/chembl/publication_similarity/sample_ci_2026-04-30.jsonl | tests/fixtures/bronze/chembl/publication_similarity/sample_edge_reference_ids_2026-05-19.jsonl",
+      "non_null_count": 22,
       "null_count": 0,
       "observed_examples": [
         "CHEMBL1130672",
@@ -2145,29 +2174,59 @@
       "pipeline_name": "chembl_publication_similarity"
     },
     {
-      "distinct_count": 3,
+      "distinct_count": 5,
       "field_name": "mol_tani",
       "fixture_key": "chembl/publication_similarity",
-      "fixture_path": "tests/fixtures/bronze/chembl/publication_similarity/sample_ci_2026-04-30.jsonl",
-      "non_null_count": 20,
+      "fixture_path": "tests/fixtures/bronze/chembl/publication_similarity/sample_ci_2026-04-30.jsonl | tests/fixtures/bronze/chembl/publication_similarity/sample_edge_reference_ids_2026-05-19.jsonl",
+      "non_null_count": 22,
       "null_count": 0,
       "observed_examples": [
         "0.0",
         "0.05",
-        "0.07"
+        "0.07",
+        "0.4",
+        "0.62"
       ],
       "pipeline_name": "chembl_publication_similarity"
     },
     {
-      "distinct_count": 3,
-      "field_name": "tid_tani",
+      "distinct_count": 2,
+      "field_name": "pubmed_id1",
       "fixture_key": "chembl/publication_similarity",
-      "fixture_path": "tests/fixtures/bronze/chembl/publication_similarity/sample_ci_2026-04-30.jsonl",
-      "non_null_count": 20,
+      "fixture_path": "tests/fixtures/bronze/chembl/publication_similarity/sample_ci_2026-04-30.jsonl | tests/fixtures/bronze/chembl/publication_similarity/sample_edge_reference_ids_2026-05-19.jsonl",
+      "non_null_count": 2,
       "null_count": 0,
       "observed_examples": [
+        "12345678",
+        "14695814"
+      ],
+      "pipeline_name": "chembl_publication_similarity"
+    },
+    {
+      "distinct_count": 2,
+      "field_name": "pubmed_id2",
+      "fixture_key": "chembl/publication_similarity",
+      "fixture_path": "tests/fixtures/bronze/chembl/publication_similarity/sample_ci_2026-04-30.jsonl | tests/fixtures/bronze/chembl/publication_similarity/sample_edge_reference_ids_2026-05-19.jsonl",
+      "non_null_count": 2,
+      "null_count": 0,
+      "observed_examples": [
+        "14695826",
+        "87654321"
+      ],
+      "pipeline_name": "chembl_publication_similarity"
+    },
+    {
+      "distinct_count": 5,
+      "field_name": "tid_tani",
+      "fixture_key": "chembl/publication_similarity",
+      "fixture_path": "tests/fixtures/bronze/chembl/publication_similarity/sample_ci_2026-04-30.jsonl | tests/fixtures/bronze/chembl/publication_similarity/sample_edge_reference_ids_2026-05-19.jsonl",
+      "non_null_count": 22,
+      "null_count": 0,
+      "observed_examples": [
+        "0.7",
         "0.75",
         "0.8",
+        "0.91",
         "1.0"
       ],
       "pipeline_name": "chembl_publication_similarity"
@@ -3108,6 +3167,284 @@
         "9606"
       ],
       "pipeline_name": "chembl_target_component"
+    },
+    {
+      "distinct_count": 3,
+      "field_name": "classification_status",
+      "fixture_key": "chembl/target_protein_classification",
+      "fixture_path": "tests/fixtures/bronze/chembl/target_protein_classification/sample_ci_2026-06-01.jsonl",
+      "non_null_count": 20,
+      "null_count": 0,
+      "observed_examples": [
+        "missing_classification",
+        "quarantined",
+        "resolved"
+      ],
+      "pipeline_name": "chembl_target_protein_classification"
+    },
+    {
+      "distinct_count": 19,
+      "field_name": "component_id",
+      "fixture_key": "chembl/target_protein_classification",
+      "fixture_path": "tests/fixtures/bronze/chembl/target_protein_classification/sample_ci_2026-06-01.jsonl",
+      "non_null_count": 19,
+      "null_count": 1,
+      "observed_examples": [
+        "10",
+        "11",
+        "12",
+        "13",
+        "14"
+      ],
+      "pipeline_name": "chembl_target_protein_classification"
+    },
+    {
+      "distinct_count": 1,
+      "field_name": "hierarchy_index",
+      "fixture_key": "chembl/target_protein_classification",
+      "fixture_path": "tests/fixtures/bronze/chembl/target_protein_classification/sample_ci_2026-06-01.jsonl",
+      "non_null_count": 20,
+      "null_count": 0,
+      "observed_examples": [
+        "0"
+      ],
+      "pipeline_name": "chembl_target_protein_classification"
+    },
+    {
+      "distinct_count": 11,
+      "field_name": "l1_desc",
+      "fixture_key": "chembl/target_protein_classification",
+      "fixture_path": "tests/fixtures/bronze/chembl/target_protein_classification/sample_ci_2026-06-01.jsonl",
+      "non_null_count": 18,
+      "null_count": 2,
+      "observed_examples": [
+        "Catalytic protein",
+        "Cell adhesion protein",
+        "Chromatin regulatory protein",
+        "DNA-binding regulator",
+        "Extracellular signaling protein"
+      ],
+      "pipeline_name": "chembl_target_protein_classification"
+    },
+    {
+      "distinct_count": 11,
+      "field_name": "l1_id",
+      "fixture_key": "chembl/target_protein_classification",
+      "fixture_path": "tests/fixtures/bronze/chembl/target_protein_classification/sample_ci_2026-06-01.jsonl",
+      "non_null_count": 18,
+      "null_count": 2,
+      "observed_examples": [
+        "1",
+        "10",
+        "11",
+        "2",
+        "3"
+      ],
+      "pipeline_name": "chembl_target_protein_classification"
+    },
+    {
+      "distinct_count": 11,
+      "field_name": "l1_name",
+      "fixture_key": "chembl/target_protein_classification",
+      "fixture_path": "tests/fixtures/bronze/chembl/target_protein_classification/sample_ci_2026-06-01.jsonl",
+      "non_null_count": 18,
+      "null_count": 2,
+      "observed_examples": [
+        "Adhesion protein",
+        "Chaperone",
+        "Enzyme",
+        "Epigenetic regulator",
+        "Membrane receptor"
+      ],
+      "pipeline_name": "chembl_target_protein_classification"
+    },
+    {
+      "distinct_count": 17,
+      "field_name": "l2_desc",
+      "fixture_key": "chembl/target_protein_classification",
+      "fixture_path": "tests/fixtures/bronze/chembl/target_protein_classification/sample_ci_2026-06-01.jsonl",
+      "non_null_count": 18,
+      "null_count": 2,
+      "observed_examples": [
+        "ATP-binding cassette transporter",
+        "Cytokine family",
+        "Cytoskeleton family",
+        "G protein-coupled receptor",
+        "HSP family"
+      ],
+      "pipeline_name": "chembl_target_protein_classification"
+    },
+    {
+      "distinct_count": 17,
+      "field_name": "l2_id",
+      "fixture_key": "chembl/target_protein_classification",
+      "fixture_path": "tests/fixtures/bronze/chembl/target_protein_classification/sample_ci_2026-06-01.jsonl",
+      "non_null_count": 18,
+      "null_count": 2,
+      "observed_examples": [
+        "101",
+        "111",
+        "12",
+        "121",
+        "21"
+      ],
+      "pipeline_name": "chembl_target_protein_classification"
+    },
+    {
+      "distinct_count": 17,
+      "field_name": "l2_name",
+      "fixture_key": "chembl/target_protein_classification",
+      "fixture_path": "tests/fixtures/bronze/chembl/target_protein_classification/sample_ci_2026-06-01.jsonl",
+      "non_null_count": 18,
+      "null_count": 2,
+      "observed_examples": [
+        "ABC transporter",
+        "Adaptor protein",
+        "Cytokine",
+        "Cytoskeletal protein",
+        "GPCR"
+      ],
+      "pipeline_name": "chembl_target_protein_classification"
+    },
+    {
+      "distinct_count": 18,
+      "field_name": "l3_desc",
+      "fixture_key": "chembl/target_protein_classification",
+      "fixture_path": "tests/fixtures/bronze/chembl/target_protein_classification/sample_ci_2026-06-01.jsonl",
+      "non_null_count": 18,
+      "null_count": 2,
+      "observed_examples": [
+        "Aminergic GPCR family",
+        "Aspartic protease class",
+        "CYP family",
+        "Cys-loop ligand-gated ion channel",
+        "Drug efflux transporter"
+      ],
+      "pipeline_name": "chembl_target_protein_classification"
+    },
+    {
+      "distinct_count": 18,
+      "field_name": "l3_id",
+      "fixture_key": "chembl/target_protein_classification",
+      "fixture_path": "tests/fixtures/bronze/chembl/target_protein_classification/sample_ci_2026-06-01.jsonl",
+      "non_null_count": 18,
+      "null_count": 2,
+      "observed_examples": [
+        "1015",
+        "1020",
+        "1121",
+        "117",
+        "1222"
+      ],
+      "pipeline_name": "chembl_target_protein_classification"
+    },
+    {
+      "distinct_count": 18,
+      "field_name": "l3_name",
+      "fixture_key": "chembl/target_protein_classification",
+      "fixture_path": "tests/fixtures/bronze/chembl/target_protein_classification/sample_ci_2026-06-01.jsonl",
+      "non_null_count": 18,
+      "null_count": 2,
+      "observed_examples": [
+        "Aminergic receptor",
+        "Aspartic protease",
+        "Cys-loop receptor",
+        "Cytochrome P450",
+        "EGFR family"
+      ],
+      "pipeline_name": "chembl_target_protein_classification"
+    },
+    {
+      "distinct_count": 0,
+      "field_name": "l4_desc",
+      "fixture_key": "chembl/target_protein_classification",
+      "fixture_path": "tests/fixtures/bronze/chembl/target_protein_classification/sample_ci_2026-06-01.jsonl",
+      "non_null_count": 0,
+      "null_count": 20,
+      "observed_examples": [],
+      "pipeline_name": "chembl_target_protein_classification"
+    },
+    {
+      "distinct_count": 0,
+      "field_name": "l4_id",
+      "fixture_key": "chembl/target_protein_classification",
+      "fixture_path": "tests/fixtures/bronze/chembl/target_protein_classification/sample_ci_2026-06-01.jsonl",
+      "non_null_count": 0,
+      "null_count": 20,
+      "observed_examples": [],
+      "pipeline_name": "chembl_target_protein_classification"
+    },
+    {
+      "distinct_count": 0,
+      "field_name": "l4_name",
+      "fixture_key": "chembl/target_protein_classification",
+      "fixture_path": "tests/fixtures/bronze/chembl/target_protein_classification/sample_ci_2026-06-01.jsonl",
+      "non_null_count": 0,
+      "null_count": 20,
+      "observed_examples": [],
+      "pipeline_name": "chembl_target_protein_classification"
+    },
+    {
+      "distinct_count": 0,
+      "field_name": "l5_desc",
+      "fixture_key": "chembl/target_protein_classification",
+      "fixture_path": "tests/fixtures/bronze/chembl/target_protein_classification/sample_ci_2026-06-01.jsonl",
+      "non_null_count": 0,
+      "null_count": 20,
+      "observed_examples": [],
+      "pipeline_name": "chembl_target_protein_classification"
+    },
+    {
+      "distinct_count": 0,
+      "field_name": "l5_id",
+      "fixture_key": "chembl/target_protein_classification",
+      "fixture_path": "tests/fixtures/bronze/chembl/target_protein_classification/sample_ci_2026-06-01.jsonl",
+      "non_null_count": 0,
+      "null_count": 20,
+      "observed_examples": [],
+      "pipeline_name": "chembl_target_protein_classification"
+    },
+    {
+      "distinct_count": 0,
+      "field_name": "l5_name",
+      "fixture_key": "chembl/target_protein_classification",
+      "fixture_path": "tests/fixtures/bronze/chembl/target_protein_classification/sample_ci_2026-06-01.jsonl",
+      "non_null_count": 0,
+      "null_count": 20,
+      "observed_examples": [],
+      "pipeline_name": "chembl_target_protein_classification"
+    },
+    {
+      "distinct_count": 18,
+      "field_name": "leaf_id",
+      "fixture_key": "chembl/target_protein_classification",
+      "fixture_path": "tests/fixtures/bronze/chembl/target_protein_classification/sample_ci_2026-06-01.jsonl",
+      "non_null_count": 18,
+      "null_count": 2,
+      "observed_examples": [
+        "1015",
+        "1020",
+        "1121",
+        "117",
+        "1222"
+      ],
+      "pipeline_name": "chembl_target_protein_classification"
+    },
+    {
+      "distinct_count": 20,
+      "field_name": "target_id",
+      "fixture_key": "chembl/target_protein_classification",
+      "fixture_path": "tests/fixtures/bronze/chembl/target_protein_classification/sample_ci_2026-06-01.jsonl",
+      "non_null_count": 20,
+      "null_count": 0,
+      "observed_examples": [
+        "CHEMBL1001",
+        "CHEMBL1002",
+        "CHEMBL1003",
+        "CHEMBL1004",
+        "CHEMBL1005"
+      ],
+      "pipeline_name": "chembl_target_protein_classification"
     },
     {
       "distinct_count": 18,

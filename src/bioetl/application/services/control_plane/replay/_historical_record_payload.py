@@ -78,16 +78,16 @@ def build_historical_certified_identity_payload_from_record(
     """Build one historical replay row from a record exposing certification fields."""
     return build_historical_certified_identity_payload(
         record,
-        certification_status=str(getattr(record, "certification_status")),
-        replay_occurrence_kind=str(getattr(record, "replay_occurrence_kind")),
+        certification_status=str(record.certification_status),
+        replay_occurrence_kind=str(record.replay_occurrence_kind),
         blocking_reasons=tuple(getattr(record, "blocking_reasons", ())),
         **extra_fields,
     )
 
 
 __all__ = [
+    "build_historical_certification_payload",
     "build_historical_certified_identity_payload",
     "build_historical_certified_identity_payload_from_record",
-    "build_historical_certification_payload",
     "build_historical_run_identity_payload",
 ]
