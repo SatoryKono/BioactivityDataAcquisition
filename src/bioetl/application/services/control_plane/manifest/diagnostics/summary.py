@@ -28,7 +28,7 @@ from bioetl.application.services.control_plane.manifest.diagnostics.persistence 
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_helpers import (
     _is_composite_execution_context,
 )
-from bioetl.application.services.control_plane.manifest.identity_graph_builder import (
+from bioetl.application.services.control_plane.manifest.identity_graph_assembly import (
     RunManifestIdentityGraphAssembler,
 )
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
