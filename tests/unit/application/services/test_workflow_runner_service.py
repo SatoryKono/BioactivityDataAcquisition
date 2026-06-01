@@ -130,7 +130,7 @@ class _SelectiveFailingPipelineRunner:
 
 @dataclass
 class _RecordingTransformService:
-    calls: list[tuple[str, tuple[str, ...]]] = field(default_factory=list)
+    calls: list[tuple[str, tuple[str, ...], bool]] = field(default_factory=list)
 
     async def run_step(
         self,
@@ -140,12 +140,13 @@ class _RecordingTransformService:
         upstream_outputs: dict[str, object] | None = None,
         context_labels: dict[str, str] | None = None,
         completed_fingerprints: dict[str, str] | None = None,
+        dry_run: bool = False,
         destructive_commit_callback: object | None = None,
     ) -> WorkflowTransformExecutionResult:
         del workflow_name, context_labels, completed_fingerprints
         del destructive_commit_callback
         upstream_outputs = upstream_outputs or {}
-        self.calls.append((step.step_id, tuple(sorted(upstream_outputs))))
+        self.calls.append((step.step_id, tuple(sorted(upstream_outputs)), dry_run))
         return WorkflowTransformExecutionResult(
             step_id=step.step_id,
             transform_name=step.transform_name,
@@ -381,22 +382,30 @@ async def test_workflow_runner_executes_chembl_baseline_in_dependency_order() ->
         "chembl_publication",
     ]
     assert transform_service.calls == [
-        ("reconcile_assay_target_orphans", ("run_chembl_publication",)),
-        ("reconcile_assay_publication_orphans", ("reconcile_assay_target_orphans",)),
+        (
+            "reconcile_assay_target_orphans",
+            ("run_chembl_assay", "run_chembl_target"),
+            False,
+        ),
+        (
+            "reconcile_assay_publication_orphans",
+            ("reconcile_assay_target_orphans", "run_chembl_publication"),
+            False,
+        ),
     ]
     assert [event[:3] for event in events] == [
         ("started", "run_chembl_assay", "chembl_assay"),
         ("completed", "run_chembl_assay", "success"),
         ("started", "run_chembl_target", "chembl_target"),
         ("completed", "run_chembl_target", "success"),
-        ("started", "run_chembl_publication", "chembl_publication"),
-        ("completed", "run_chembl_publication", "success"),
         (
             "started",
             "reconcile_assay_target_orphans",
             "reconcile_foreign_keys",
         ),
         ("completed", "reconcile_assay_target_orphans", "success"),
+        ("started", "run_chembl_publication", "chembl_publication"),
+        ("completed", "run_chembl_publication", "success"),
         (
             "started",
             "reconcile_assay_publication_orphans",
@@ -404,7 +413,7 @@ async def test_workflow_runner_executes_chembl_baseline_in_dependency_order() ->
         ),
         ("completed", "reconcile_assay_publication_orphans", "success"),
     ]
-    assert all(isinstance(events[index][3], str) for index in (6, 8))
+    assert all(isinstance(events[index][3], str) for index in (4, 8))
 
 
 @pytest.mark.asyncio
@@ -436,6 +445,37 @@ async def test_workflow_runner_skips_chembl_baseline_reconciliation_after_failur
         "chembl_assay",
         "chembl_target",
     ]
+
+
+@pytest.mark.asyncio
+async def test_workflow_runner_forwards_workflow_level_dry_run_to_transforms() -> None:
+    metrics = _RecordingMetrics()
+    transform_service = _RecordingTransformService()
+    service = WorkflowRunnerService(
+        pipeline_runner=_PipelineRunner(),  # type: ignore[arg-type]
+        transform_service=transform_service,  # type: ignore[arg-type]
+        metrics=metrics,
+    )
+    config = WorkflowConfig(
+        name="repair_workflow",
+        defaults=WorkflowRunOptionsConfig(dry_run=True),
+        steps=(
+            WorkflowStepConfig(
+                step_id="extract",
+                pipeline_name="chembl_activity",
+            ),
+            TransformStepConfig(
+                step_id="repair",
+                transform_name="reconcile_foreign_keys",
+                depends_on=("extract",),
+            ),
+        ),
+    )
+
+    result = await service.run_workflow(config)
+
+    assert result.status == "success"
+    assert transform_service.calls == [("repair", ("extract",), True)]
 
 
 @pytest.mark.asyncio

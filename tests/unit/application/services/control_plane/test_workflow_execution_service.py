@@ -155,6 +155,7 @@ class _FakeLockPort(LockPort):
 @dataclass
 class _FakeWorkflowRunner:
     received_completed_step_ids: frozenset[str] | None = None
+    received_completed_transform_fingerprints: dict[str, str] | None = None
 
     async def run_workflow(
         self,
@@ -166,8 +167,13 @@ class _FakeWorkflowRunner:
         step_completed_callback: object | None = None,
         transform_commit_callback: object | None = None,
     ) -> WorkflowRunExecutionResult:
-        del completed_transform_fingerprints, transform_commit_callback
+        del transform_commit_callback
         self.received_completed_step_ids = completed_step_ids
+        self.received_completed_transform_fingerprints = (
+            None
+            if completed_transform_fingerprints is None
+            else dict(completed_transform_fingerprints)
+        )
         if step_started_callback is not None:
             for step in config.steps:
                 step_started_callback(step, fingerprint=None)
@@ -636,6 +642,91 @@ async def test_workflow_execution_service_requires_explicit_repair_after_ambiguo
 
     with pytest.raises(RuntimeError, match="explicit --repair-steps or --force-steps"):
         await resume_service.run_workflow(_build_transform_config(), resume_last=True)
+
+
+@pytest.mark.asyncio
+async def test_workflow_execution_service_allows_explicit_repair_resume_after_ambiguous_commit() -> (
+    None
+):
+    manifest_port = _InMemoryWorkflowManifestPort()
+    ledger_port = _InMemoryWorkflowLedgerPort()
+    state_port = _InMemoryWorkflowStatePort()
+    lock_port = _FakeLockPort()
+
+    manifest = WorkflowManifestService(
+        manifest_port=manifest_port,
+        created_at_factory=lambda: FIXED_TEST_TIME,
+        _manifest_id_factory=lambda: "workflow-manifest-crash",
+    ).create_manifest(
+        request=type(
+            "_Request",
+            (),
+            {
+                "workflow_run_id": RunID(UUID("00000000-0000-0000-0000-000000000333")),
+                "config": _build_transform_config(),
+                "launch_context": {},
+                "resumed_from_manifest_id": None,
+            },
+        )()
+    )
+    state_port.save(
+        WorkflowExecutionState(
+            workflow_run_id=manifest.workflow_run_id,
+            manifest_id=manifest.manifest_id,
+            workflow_name=manifest.workflow_name,
+            execution_fingerprint=manifest.execution_fingerprint,
+            status="failed",
+            started_at=FIXED_TEST_TIME,
+            updated_at=FIXED_TEST_TIME,
+            completed_at=FIXED_TEST_TIME,
+            selected_step_ids=manifest.selected_step_ids,
+            steps=(
+                WorkflowStepState(
+                    step_id="reconcile_assay_target_orphans",
+                    step_kind="transform",
+                    status="failed",
+                    error_type="RuntimeError",
+                    error_message="simulated crash after commit",
+                ),
+            ),
+            completed_transform_fingerprints={
+                "reconcile_assay_target_orphans": "transform-fingerprint-1"
+            },
+            repair_required=True,
+            repair_hint=(
+                "Workflow resume requires explicit --repair-steps or --force-steps"
+            ),
+            ambiguous_step_ids=("reconcile_assay_target_orphans",),
+            last_error_type="RuntimeError",
+            last_error_message="simulated crash after commit",
+        )
+    )
+    fake_runner = _FakeWorkflowRunner()
+    service = WorkflowExecutionService(
+        workflow_runner=fake_runner,  # type: ignore[arg-type]
+        manifest_service=WorkflowManifestService(
+            manifest_port=manifest_port,
+            created_at_factory=lambda: FIXED_TEST_TIME,
+            _manifest_id_factory=lambda: "workflow-manifest-resume",
+        ),
+        workflow_ledger_port=ledger_port,
+        workflow_ledger_factory=_create_workflow_ledger_service,
+        workflow_state_port=state_port,
+        workflow_lock_port=lock_port,
+        now_factory=lambda: FIXED_TEST_TIME,
+        run_id_factory=lambda: RunID(UUID("00000000-0000-0000-0000-000000000444")),
+    )
+
+    result = await service.run_workflow(
+        _build_transform_config(),
+        resume_last=True,
+        repair_steps=("reconcile_assay_target_orphans",),
+    )
+
+    assert result.status == "success"
+    assert result.resumed is True
+    assert fake_runner.received_completed_step_ids == frozenset()
+    assert fake_runner.received_completed_transform_fingerprints == {}
 
 
 @pytest.mark.asyncio

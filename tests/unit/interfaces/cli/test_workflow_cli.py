@@ -13,6 +13,9 @@ from bioetl.application.services.workflow_runner_service import (
     WorkflowRunExecutionResult,
     WorkflowStepExecutionResult,
 )
+from bioetl.application.services.workflow_transform_service import (
+    WorkflowTransformExecutionResult,
+)
 from bioetl.interfaces.cli.main import cli
 
 
@@ -93,6 +96,35 @@ def test_workflow_status_is_bounded_and_step_oriented(
     assert "history: unavailable" in result.output
     assert "chembl_activity_ingest [pipeline]" in result.output
     assert "summarize_core_extracts [transform]" in result.output
+
+
+def test_workflow_status_renders_chembl_baseline_topology_without_history(
+    cli_runner: CliRunner,
+    monkeypatch: Any,
+) -> None:
+    import bioetl.interfaces.cli.commands.workflow as workflow_cmd
+
+    class _NoHistoryInspectionService:
+        def inspect_latest(self, _name: str) -> None:
+            return None
+
+    monkeypatch.setattr(
+        workflow_cmd,
+        "get_workflow_inspection_service",
+        lambda: _NoHistoryInspectionService(),
+        raising=True,
+    )
+
+    result = cli_runner.invoke(cli, ["workflow", "status", "chembl_baseline"])
+
+    assert result.exit_code == 0
+    assert "Workflow Status / chembl_baseline" in result.output
+    assert "run_chembl_assay [pipeline]" in result.output
+    assert "reconcile_assay_target_orphans [transform]" in result.output
+    assert (
+        "reconcile_assay_target_orphans [transform] transform=reconcile_foreign_keys "
+        "depends_on=run_chembl_assay, run_chembl_target"
+    ) in result.output
 
 
 def test_workflow_run_dry_run_smoke_uses_canonical_example_without_network(
@@ -288,6 +320,48 @@ def test_workflow_run_accepts_pipeline_style_runtime_overrides(
     )
 
 
+def test_workflow_run_forwards_baseline_resume_repair_steps(
+    cli_runner: CliRunner,
+    monkeypatch: Any,
+    tmp_path: Path,
+) -> None:
+    import bioetl.interfaces.cli.commands.workflow as workflow_cmd
+
+    fake_service = _FakeWorkflowRunnerService()
+    cached_bronze_path = tmp_path / "bronze"
+    cached_bronze_path.mkdir()
+    monkeypatch.setattr(
+        workflow_cmd,
+        "get_workflow_execution_service",
+        lambda registry=None: fake_service,
+        raising=True,
+    )
+
+    result = cli_runner.invoke(
+        cli,
+        [
+            "workflow",
+            "run",
+            "chembl_baseline",
+            "--resume-last",
+            "--repair-steps",
+            "reconcile_assay_target_orphans",
+            "--required-persistence-profile",
+            "degraded_observable",
+            "--use-cached-bronze",
+            "--cached-bronze-path",
+            str(cached_bronze_path),
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert fake_service.received_kwargs is not None
+    assert fake_service.received_kwargs["resume_last"] is True
+    assert fake_service.received_kwargs["repair_steps"] == (
+        "reconcile_assay_target_orphans",
+    )
+
+
 def test_workflow_run_forwards_occurrence_pinned_resume_selectors(
     cli_runner: CliRunner,
     monkeypatch: Any,
@@ -408,6 +482,73 @@ def test_workflow_run_starts_metrics_server_and_publishes_metrics(
             },
         }
     ]
+
+
+def test_workflow_run_reports_blocked_destructive_dry_run_step(
+    cli_runner: CliRunner,
+    monkeypatch: Any,
+    tmp_path: Path,
+) -> None:
+    import bioetl.interfaces.cli.commands.workflow as workflow_cmd
+
+    class _PreviewWorkflowExecutionService:
+        async def run_workflow(
+            self,
+            config: object,
+            **_: object,
+        ) -> WorkflowRunExecutionResult:
+            return WorkflowRunExecutionResult(
+                workflow_name=getattr(config, "name", "chembl_baseline"),
+                status="success",
+                steps=(
+                    WorkflowStepExecutionResult(
+                        step_id="reconcile_assay_target_orphans",
+                        step_kind="transform",
+                        status="success",
+                        payload=WorkflowTransformExecutionResult(
+                            step_id="reconcile_assay_target_orphans",
+                            transform_name="reconcile_foreign_keys",
+                            status="success",
+                            fingerprint="fingerprint-preview",
+                            output={
+                                "dry_run": True,
+                                "would_mutate": True,
+                                "mutated": False,
+                            },
+                        ),
+                    ),
+                ),
+                workflow_run_id="00000000-0000-0000-0000-000000000333",
+                manifest_id="manifest-333",
+                execution_fingerprint="fingerprint-333",
+            )
+
+    cached_bronze_path = tmp_path / "bronze"
+    cached_bronze_path.mkdir()
+    monkeypatch.setattr(
+        workflow_cmd,
+        "get_workflow_execution_service",
+        lambda registry=None: _PreviewWorkflowExecutionService(),
+        raising=True,
+    )
+
+    result = cli_runner.invoke(
+        cli,
+        [
+            "workflow",
+            "run",
+            "chembl_baseline",
+            "--dry-run",
+            "--required-persistence-profile",
+            "degraded_observable",
+            "--use-cached-bronze",
+            "--cached-bronze-path",
+            str(cached_bronze_path),
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert "dry-run blocked destructive mutation" in result.output
 
 
 def test_workflow_run_omits_pipeline_grouping_for_multi_pipeline_workflow(

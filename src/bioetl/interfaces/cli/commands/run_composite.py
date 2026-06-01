@@ -43,6 +43,7 @@ from bioetl.interfaces.cli.commands.domains.health.metrics_server_integration im
     ensure_metrics_server_started,
 )
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
+    build_observability_backend_required_probe_paths,
     ensure_observability_backend_started,
     should_disable_transient_health_server,
 )
@@ -318,6 +319,7 @@ def run_composite(**options: object) -> None:
     backend_result = ensure_observability_backend_started(
         enabled=cli_input.ensure_observability_backend,
         port=cli_input.observability_backend_port,
+        required_probe_paths=build_observability_backend_required_probe_paths(),
     )
     if should_disable_transient_health_server(
         health_server_enabled=cli_input.health_server,

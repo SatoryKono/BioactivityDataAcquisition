@@ -1535,7 +1535,7 @@ curl -u admin:<password> http://localhost:3000/api/frontend/settings
 UV_CACHE_DIR=.cache/uv uv run python -m scripts.ops rerender-grafana \
   --uids bioetl-overview-v2 \
   --fallback none \
-  --timeout-seconds 60 \
+  --timeout-seconds 90 \
   --output-dir /tmp/bioetl-grafana-render-smoke
 
 # После изменения compose обязательно пересоздать оба сервиса:
@@ -1546,7 +1546,9 @@ docker compose -f docker-compose.monitoring.yml up -d --force-recreate renderer 
 `/render/...` всё ещё возвращает `500`, проверьте `docker logs
 bioetl-grafana-renderer` и target `grafana-image-renderer` в Prometheus. Для
 полного UX-аудита допускается Playwright fallback, но server-side Render API
-остаётся отдельным smoke gate.
+остаётся отдельным smoke gate. Для полного набора shipped dashboards используйте
+не менее `--timeout-seconds 90`: тяжелые dashboard pages могут превышать
+короткие smoke-test таймауты при полностью рабочем renderer sidecar.
 
 **Причина 4: Метрики отключены в приложении.**
 

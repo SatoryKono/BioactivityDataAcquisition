@@ -16,6 +16,7 @@ from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime
     _build_detached_backend_popen_kwargs,
     _build_detached_backend_env,
     _build_observability_backend_probe_urls,
+    build_observability_backend_required_probe_paths,
     build_detached_backend_log_path,
     build_observability_backend_health_url,
     probe_observability_backend_required_paths,
@@ -41,6 +42,18 @@ def test_build_observability_backend_probe_urls_prefers_liveness_first() -> None
     assert _build_observability_backend_probe_urls("http://127.0.0.1:8081/health") == (
         "http://127.0.0.1:8081/health/live",
         "http://127.0.0.1:8081/health",
+    )
+
+
+def test_build_observability_backend_required_probe_paths_adds_catalog_and_pipelines() -> (
+    None
+):
+    assert build_observability_backend_required_probe_paths(
+        pipelines=("chembl_target", "chembl_activity", "chembl_target"),
+    ) == (
+        "/ops/control-plane/filter-options?dimension=pipeline&response_shape=list",
+        "/ops/control-plane/checkpoint-freshness?pipeline=chembl_activity",
+        "/ops/control-plane/checkpoint-freshness?pipeline=chembl_target",
     )
 
 

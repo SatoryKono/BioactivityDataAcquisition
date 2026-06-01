@@ -7,7 +7,7 @@ from uuid import UUID
 
 import click
 
-from bioetl.domain.workflow import WorkflowConfig
+from bioetl.domain.workflow import WorkflowConfig, WorkflowStepConfig
 from bioetl.interfaces.cli.commands._workflow_run_support import (
     _execute_workflow_and_publish_metrics,
     _handle_workflow_result,
@@ -27,6 +27,7 @@ from bioetl.interfaces.cli.commands.domains.health.metrics_server_integration im
     ensure_metrics_server_started,
 )
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
+    build_observability_backend_required_probe_paths,
     ensure_observability_backend_started,
 )
 from bioetl.interfaces.cli.commands.domains.health.server_integration import (
@@ -82,6 +83,15 @@ def get_workflow_inspection_service() -> WorkflowInspectionService:
     return _impl()
 
 
+def _workflow_pipeline_probe_paths(config: WorkflowConfig) -> tuple[str, ...]:
+    pipelines = tuple(
+        step.pipeline_name
+        for step in config.steps
+        if isinstance(step, WorkflowStepConfig)
+    )
+    return build_observability_backend_required_probe_paths(pipelines=pipelines)
+
+
 @click.group()
 def workflow() -> None:
     """Run and inspect declarative workflows."""
@@ -89,7 +99,14 @@ def workflow() -> None:
 
 @workflow.command("run")
 @click.argument("name")
-@click.option("--dry-run", is_flag=True, help="Enable dry-run for pipeline steps")
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help=(
+        "Enable workflow dry-run. Pipeline steps run in dry-run mode and "
+        "destructive transform steps switch to preview/no-op semantics."
+    ),
+)
 @click.option(
     "--only-steps",
     help="Comma-separated subset of step IDs to execute with required dependencies",
@@ -316,6 +333,7 @@ def run_workflow_command(
     ensure_observability_backend_started(
         enabled=ensure_observability_backend,
         port=observability_backend_port,
+        required_probe_paths=_workflow_pipeline_probe_paths(config),
     )
     result = _execute_workflow_and_publish_metrics(
         get_workflow_execution_service_fn=get_workflow_execution_service,

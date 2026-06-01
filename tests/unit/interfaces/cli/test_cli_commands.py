@@ -1585,7 +1585,14 @@ def test_run_command_with_cli_policy_wires_registry_and_cli_seams() -> None:
         run_module._run_command_with_cli_policy(ctx, cli_input)
 
     mock_resolve_registry.assert_called_once_with(ctx)
-    mock_ensure_backend.assert_called_once_with(enabled=True, port=8081)
+    mock_ensure_backend.assert_called_once_with(
+        enabled=True,
+        port=8081,
+        required_probe_paths=(
+            "/ops/control-plane/filter-options?dimension=pipeline&response_shape=list",
+            "/ops/control-plane/checkpoint-freshness?pipeline=chembl_activity",
+        ),
+    )
     mock_disable_transient.assert_called_once()
     assert mock_run_command_flow.call_count == 1
     kwargs = mock_run_command_flow.call_args.kwargs
@@ -1662,7 +1669,14 @@ def test_run_command_with_cli_policy_disables_transient_health_server_on_live_ba
     ):
         run_module._run_command_with_cli_policy(ctx, cli_input)
 
-    mock_ensure_backend.assert_called_once_with(enabled=True, port=8081)
+    mock_ensure_backend.assert_called_once_with(
+        enabled=True,
+        port=8081,
+        required_probe_paths=(
+            "/ops/control-plane/filter-options?dimension=pipeline&response_shape=list",
+            "/ops/control-plane/checkpoint-freshness?pipeline=chembl_activity",
+        ),
+    )
     mock_disable_transient.assert_called_once_with(
         health_server_enabled=True,
         health_port=8081,
@@ -1813,6 +1827,82 @@ def test_run_all_with_cli_policy_wires_registry_and_cli_seams() -> None:
     assert kwargs["summary_presenter"] is run_all_module._echo_batch_summary
     assert kwargs["determine_exit_code"] is determine_batch_exit_code
     assert kwargs["exit_func"] is run_all_module.exit_with_code
+
+
+@pytest.mark.unit
+def test_run_all_callback_ensures_observability_backend_with_catalog_probe() -> None:
+    from bioetl.interfaces.cli.commands import run_all as run_all_module
+    from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
+        ObservabilityBackendEnsureResult,
+    )
+    from bioetl.interfaces.cli.commands.domains.run_all.command_policy import (
+        RunAllCommandInput,
+    )
+
+    ctx = MagicMock(name="click_context")
+    cli_input = RunAllCommandInput(
+        source="chembl",
+        run_type="incremental",
+        limit=None,
+        dry_run=False,
+        yes=True,
+        list_only=False,
+        debug=False,
+        health_server=True,
+        health_port=8081,
+    )
+    backend_result = ObservabilityBackendEnsureResult(
+        status="reused",
+        health_url="http://127.0.0.1:8081/health",
+    )
+
+    with (
+        patch.object(
+            run_all_module,
+            "_build_run_all_command_input_from_options",
+            return_value=cli_input,
+        ),
+        patch.object(
+            run_all_module,
+            "ensure_observability_backend_started",
+            return_value=backend_result,
+        ) as mock_ensure_backend,
+        patch.object(
+            run_all_module,
+            "should_disable_transient_health_server",
+            return_value=False,
+        ) as mock_disable_transient,
+        patch.object(run_all_module, "dispatch_cli_callback") as mock_dispatch,
+    ):
+        run_all_module._run_all_callback(
+            ctx,
+            source="chembl",
+            run_type="incremental",
+            limit=None,
+            dry_run=False,
+            yes=True,
+            list_only=False,
+            debug=False,
+            health_server=True,
+            health_port=8081,
+            ensure_observability_backend=True,
+            observability_backend_port=8081,
+        )
+
+    mock_ensure_backend.assert_called_once_with(
+        enabled=True,
+        port=8081,
+        required_probe_paths=(
+            "/ops/control-plane/filter-options?dimension=pipeline&response_shape=list",
+        ),
+    )
+    mock_disable_transient.assert_called_once_with(
+        health_server_enabled=True,
+        health_port=8081,
+        observability_backend_port=8081,
+        backend_result=backend_result,
+    )
+    mock_dispatch.assert_called_once()
 
 
 # =============================================================================

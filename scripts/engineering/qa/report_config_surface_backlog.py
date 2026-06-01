@@ -15,7 +15,9 @@ ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.engineering.qa.config_surface_governance import is_sanctioned_partial_key
+from scripts.engineering.qa.config_surface_governance import (  # noqa: E402
+    is_sanctioned_partial_key,
+)
 from scripts.schema.generate_config_matrix import (  # noqa: E402
     _collect_family_configs,
     _family_metrics,
@@ -42,6 +44,49 @@ CATEGORY_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("quality_thresholds", ("quality.thresholds",)),
     ("composite_runtime_only", ("composite.",)),
 )
+
+CATEGORY_GOVERNANCE: dict[str, dict[str, str]] = {
+    "extraction_params_entity_specific": {
+        "owner": "@bioetl-config",
+        "decision": "retain_entity_specific",
+        "rationale": "Extraction filters encode provider/entity source API semantics.",
+    },
+    "filter_metadata_entity_specific": {
+        "owner": "@bioetl-config",
+        "decision": "retain_entity_specific",
+        "rationale": "Filter metadata documents entity-specific extraction policy.",
+    },
+    "gold_filter_entity_specific": {
+        "owner": "@bioetl-contracts",
+        "decision": "retain_contract_specific",
+        "rationale": "Gold filters track entity contract and DQ semantics.",
+    },
+    "pipeline_overrides": {
+        "owner": "@bioetl-application",
+        "decision": "retain_pipeline_specific",
+        "rationale": "Pipeline overrides represent runtime behavior differences.",
+    },
+    "quality_metadata_entity_specific": {
+        "owner": "@bioetl-dq",
+        "decision": "retain_entity_specific",
+        "rationale": "Quality metadata varies by entity data-quality posture.",
+    },
+    "quality_thresholds": {
+        "owner": "@bioetl-dq",
+        "decision": "retain_entity_specific",
+        "rationale": "DQ thresholds are entity-specific validation policy.",
+    },
+    "schema_field_aliases_entity_specific": {
+        "owner": "@bioetl-contracts",
+        "decision": "retain_contract_specific",
+        "rationale": "Field aliases map provider-specific source names into contracts.",
+    },
+    "silver_filter_entity_specific": {
+        "owner": "@bioetl-contracts",
+        "decision": "retain_contract_specific",
+        "rationale": "Silver filters track entity contract normalization semantics.",
+    },
+}
 
 
 def _partial_keys(family_configs: dict[str, dict[str, str]]) -> list[tuple[int, str]]:
@@ -115,6 +160,14 @@ def build_backlog() -> dict[str, Any]:
             "actionable_partial_key_count": len(actionable_keys),
             "categories": {
                 category: {
+                    **CATEGORY_GOVERNANCE.get(
+                        category,
+                        {
+                            "owner": "@bioetl-architecture",
+                            "decision": "review_required",
+                            "rationale": "Unrecognized partial-key category.",
+                        },
+                    ),
                     "key_count": len(entries),
                     "keys": entries,
                 }
@@ -125,7 +178,8 @@ def build_backlog() -> dict[str, Any]:
             "actionable_partial_key_count excludes keys under INTENTIONAL_PREFIXES.",
             "hash_policy is common across all 22 entity configs after Stream B design review.",
             "composite_runtime family is at zero inconsistent keys as of Stream B plateau.",
-            "Residual entity drift is limited to intentional entity-specific filters, metadata policy blocks, schema field-alias surfaces, and pipeline overrides.",
+            "Residual entity drift is limited to intentional entity-specific filters, "
+            "metadata policy blocks, schema field-alias surfaces, and pipeline overrides.",
         ],
     }
 

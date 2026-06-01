@@ -9,9 +9,16 @@ review_history:
   reviewed_on: '2026-06-01'
   owner: '@bioetl-application'
   outcome: held_flat_partial_application_gate
-  rationale: Domain and application_control_plane mutation gates remain enforced; broad
-    application stays staged until a stable application-layer baseline and bounded
-    shard runtime are captured.
+  rationale: Domain, application_control_plane, and one narrow application-service
+    mutation gate remain enforced; broad application stays staged until a stable
+    application-layer baseline and bounded shard runtime are captured.
+- issue: '#4958'
+  reviewed_on: '2026-06-01'
+  owner: '@bioetl-application'
+  outcome: promoted_export_manifest_application_slice
+  rationale: Export-manifest behavior has focused unit coverage and a bounded
+    mutation target, so it can move from the broad staged application backlog into
+    enforced partial CI without weakening existing domain/control-plane gates.
 entries:
 - target: domain
   status: enforced
@@ -42,6 +49,23 @@ entries:
   artifact_paths:
   - src/bioetl/application/services/control_plane
   - tests/unit/application/services/control_plane
+  - .github/workflows/mutation-testing.yml
+- target: application_export_manifests
+  status: enforced
+  owner: "@bioetl-application"
+  min_score: 60
+  paths_to_mutate: src/bioetl/application/services/export_manifests.py
+  tests_dir: tests/unit/application/services/
+  promotion_basis: bounded_application_service_slice
+  issue: '#4958'
+  last_reviewed: '2026-06-01'
+  current_evidence_paths:
+  - configs/quality/test_matrix.yaml
+  - .github/workflows/mutation-testing.yml
+  - tests/architecture/test_mutation_testing_rollout.py
+  artifact_paths:
+  - src/bioetl/application/services/export_manifests.py
+  - tests/unit/application/services/test_export_manifests.py
   - .github/workflows/mutation-testing.yml
 - target: application
   status: staged

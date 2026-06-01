@@ -104,7 +104,18 @@ def test_entity_residual_partial_keys_are_intentional_only() -> None:
         block["key_count"] for block in categories.values()
     )
 
-    for block in categories.values():
+    for category, block in categories.items():
+        assert isinstance(block.get("owner"), str) and block["owner"].startswith("@"), (
+            f"Residual config category must declare an owner: {category}"
+        )
+        assert block.get("decision") in {
+            "retain_contract_specific",
+            "retain_entity_specific",
+            "retain_pipeline_specific",
+        }, f"Residual config category must declare a bounded decision: {category}"
+        assert isinstance(block.get("rationale"), str) and block["rationale"].strip(), (
+            f"Residual config category must declare rationale: {category}"
+        )
         for entry in block["keys"]:
             key = entry["key"]
             assert any(

@@ -18,6 +18,14 @@ def _require_non_empty_str(value: str, field_name: str) -> None:
         raise ValueError(f"{field_name} cannot be empty")
 
 
+def _require_optional_str(value: str | None, field_name: str) -> None:
+    """Validate optional string-like fields when present."""
+    if value is None:
+        return
+    if not value.strip():
+        raise ValueError(f"{field_name} cannot be empty")
+
+
 def _require_non_empty_primary_keys(primary_keys: tuple[str, ...]) -> None:
     """Validate that primary_keys is non-empty."""
     if not primary_keys:
@@ -96,6 +104,8 @@ class ForeignKeyReconciliationRequest:
     source_keys: tuple[str, ...] | None = None
     reference_keys: tuple[str, ...] | None = None
     nulls_equal: bool = False
+    dry_run: bool = False
+    workflow_name: str | None = None
 
     def __post_init__(self) -> None:
         _require_non_empty_str(self.source_table, "source_table")
@@ -110,6 +120,7 @@ class ForeignKeyReconciliationRequest:
             source_key=self.source_key,
             reference_key=self.reference_key,
         )
+        _require_optional_str(self.workflow_name, "workflow_name")
 
     @property
     def effective_source_keys(self) -> tuple[str, ...]:
@@ -139,6 +150,8 @@ class ForeignKeyReconciliationResult:
     retained_rows: int
     orphan_rows_deleted: int
     mutated: bool
+    dry_run: bool = False
+    would_mutate: bool = False
 
 
 @runtime_checkable

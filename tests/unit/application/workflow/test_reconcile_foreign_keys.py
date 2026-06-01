@@ -38,6 +38,8 @@ class _RecordingPort:
             retained_rows=2,
             orphan_rows_deleted=1,
             mutated=True,
+            dry_run=request.dry_run,
+            would_mutate=False,
         )
 
 
@@ -65,6 +67,7 @@ def test_build_request_supports_composite_keys_and_null_policy() -> None:
     assert request.effective_source_keys == ("target_id", "target_type")
     assert request.effective_reference_keys == ("target_id", "target_type")
     assert request.nulls_equal is True
+    assert request.dry_run is False
 
 
 @pytest.mark.asyncio
@@ -104,4 +107,69 @@ async def test_executor_returns_serializable_metadata_only() -> None:
         "retained_rows": 2,
         "orphan_rows_deleted": 1,
         "mutated": True,
+        "dry_run": False,
+        "would_mutate": False,
     }
+
+
+@pytest.mark.asyncio
+async def test_executor_passes_workflow_dry_run_to_reconciliation_request() -> None:
+    port = _RecordingPort()
+    executor = build_reconcile_foreign_keys_executor(port)
+    spec = WorkflowTransformSpec.from_step(
+        TransformStepConfig(
+            step_id="reconcile_assay_target_orphans",
+            transform_name="reconcile_foreign_keys",
+            config={
+                "source_table": "chembl_assay",
+                "reference_table": "chembl_target",
+                "source_key": "target_id",
+                "reference_key": "target_id",
+                "primary_keys": ["assay_id"],
+                "action": "delete_orphans",
+            },
+        )
+    )
+
+    payload = await executor(
+        spec,
+        upstream_outputs={},
+        runtime_context=type("_RuntimeContext", (), {"dry_run": True})(),
+    )
+
+    assert port.request is not None
+    assert port.request.dry_run is True
+    assert payload["dry_run"] is True
+    assert payload["would_mutate"] is False
+
+
+@pytest.mark.asyncio
+async def test_executor_passes_workflow_name_to_request() -> None:
+    port = _RecordingPort()
+    executor = build_reconcile_foreign_keys_executor(port)
+    spec = WorkflowTransformSpec.from_step(
+        TransformStepConfig(
+            step_id="reconcile_assay_target_orphans",
+            transform_name="reconcile_foreign_keys",
+            config={
+                "source_table": "chembl_assay",
+                "reference_table": "chembl_target",
+                "source_key": "target_id",
+                "reference_key": "target_id",
+                "primary_keys": ["assay_id"],
+                "action": "delete_orphans",
+            },
+        )
+    )
+
+    await executor(
+        spec,
+        upstream_outputs={},
+        runtime_context=type("_RuntimeContext", (), {
+            "dry_run": False,
+            "workflow_name": "chembl_baseline",
+        })(),
+    )
+
+    assert port.request is not None
+    assert port.request.workflow_name == "chembl_baseline"

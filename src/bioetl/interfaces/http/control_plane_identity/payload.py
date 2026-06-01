@@ -136,15 +136,15 @@ def build_anchor_rows(
         for spec in ANCHOR_SPECS
     ]
     graph_gap_rows = identity_graph_gap_rows(rows)
-    row_gap_count = len(graph_gap_rows)
-    row_gap_names = [str(row["name"]) for row in graph_gap_rows]
+    graph_gap_count = len(graph_gap_rows)
+    graph_gap_names = [str(row["name"]) for row in graph_gap_rows]
     diagnostic_gap_count = gap_count_from_mapping(values.get("correlation_anchor_gaps"))
     diagnostic_complete = values.get("identity_graph_complete")
-    gap_count = row_gap_count + diagnostic_gap_count
+    gap_count = graph_gap_count + diagnostic_gap_count
     graph_complete = gap_count == 0 and diagnostic_complete is not False
     graph_status = "complete"
     if not graph_complete:
-        gap_names = ", ".join(row_gap_names[:6])
+        gap_names = ", ".join(graph_gap_names[:6])
         graph_status = f"incomplete ({gap_count} gaps"
         if gap_names:
             graph_status = f"{graph_status}: {gap_names}"
@@ -211,7 +211,11 @@ def build_anchor_row(
         "drilldown_label": drilldown_target.label,
         "missing_severity": domain_status,
         "ui_status": rendered_ui_status,
-        "identity_gap": is_identity_gap(domain_status),
+        "identity_gap": (
+            False
+            if spec.name == "identity_graph_complete"
+            else is_identity_gap(domain_status)
+        ),
         "present": present,
         "status": rendered_ui_status,
     }
@@ -225,7 +229,7 @@ def build_summary(
     checkpoint_status: str,
     resolved_via: str,
 ) -> dict[str, object]:
-    gap_rows = [row for row in anchors if row["identity_gap"] is True]
+    gap_rows = identity_evidence_gap_rows(anchors)
     graph_gap_rows = identity_graph_gap_rows(anchors)
     diagnostic_gap_count = gap_count_from_mapping(values.get("correlation_anchor_gaps"))
     critical = any(row["ui_status"] == "CRIT" for row in gap_rows)
@@ -241,7 +245,8 @@ def build_summary(
             and values.get("identity_graph_complete") is not False
             and manifest is not None
         ),
-        "identity_gap_count": len(gap_rows) + diagnostic_gap_count,
+        "identity_gap_count": len(graph_gap_rows) + diagnostic_gap_count,
+        "evidence_gap_count": len(gap_rows) + diagnostic_gap_count,
         "correlation_anchor_gaps": values.get("correlation_anchor_gaps") or {},
         "exact_replay_blockers": values.get("exact_replay_blockers") or [],
         "checkpoint_anchor_status": checkpoint_status,
@@ -258,7 +263,19 @@ def identity_graph_gap_rows(
         row
         for row in anchors
         if row["identity_gap"] is True
+        and row["name"] != "identity_graph_complete"
         and (row["priority"] == "P0" or row["missing_severity"] == "FAILING")
+    ]
+
+
+def identity_evidence_gap_rows(
+    anchors: list[dict[str, object]],
+) -> list[dict[str, object]]:
+    """Return actionable evidence gaps without counting the summary row itself."""
+    return [
+        row
+        for row in anchors
+        if row["identity_gap"] is True and row["name"] != "identity_graph_complete"
     ]
 
 
@@ -269,7 +286,7 @@ def build_identity_diagnostics(
     checkpoint_status: str,
 ) -> dict[str, object]:
     """Return top-level diagnostics for dashboard and runbook consumers."""
-    gap_rows = [row for row in anchors if row["identity_gap"] is True]
+    gap_rows = identity_evidence_gap_rows(anchors)
     return {
         "identity_gap_names": [str(row["name"]) for row in gap_rows],
         "identity_gap_count": len(gap_rows)

@@ -1005,7 +1005,7 @@ class TestHealthServerControlPlaneSelector:
         assert rows["Resume|Dry run|Cached Bronze"] == "No | No | No"
         assert rows["Replay [Capability.Mode]"] == "Yes [Supported.Backfill]"
         assert rows["Checkpoint [Anchors]"] == "PARTIAL"
-        assert rows["Identity Health [Gaps]"] == "Incomplete [8 gaps]"
+        assert rows["Identity Health [Gaps]"] == "Incomplete [1 gaps]"
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_table_compact_health_matches_identity_evidence(

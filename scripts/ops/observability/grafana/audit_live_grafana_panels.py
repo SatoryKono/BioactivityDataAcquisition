@@ -43,6 +43,7 @@ class PanelAuditSpec:
         "derived_status",
         "freshness",
         "http_endpoint",
+        "http_records",
         "http_summary",
         "http_table",
         "loki_query",
@@ -323,6 +324,8 @@ def _infer_http_semantic_kind(url: str) -> str:
         return "freshness"
     if "identity-table" in url or "processed-records" in url:
         return "http_table"
+    if "filtered-records" in url:
+        return "http_records"
     if "filtered-stats" in url:
         return "http_summary"
     return "http_endpoint"
@@ -354,6 +357,7 @@ def _discover_dashboard_panel_specs() -> tuple[PanelAuditSpec, ...]:
                                 Literal[
                                     "freshness",
                                     "http_endpoint",
+                                    "http_records",
                                     "http_summary",
                                     "http_table",
                                 ],
@@ -794,6 +798,25 @@ def _classify_http_endpoint_payload(payload: object) -> tuple[str, str]:
     return ("invalid_shape", "HTTP endpoint did not return a JSON object or list")
 
 
+def _classify_http_records_payload(payload: object) -> tuple[str, str]:
+    if not isinstance(payload, dict):
+        return ("invalid_shape", "HTTP records payload is not a JSON object")
+    items = payload.get("items")
+    total = payload.get("total")
+    if not isinstance(items, list):
+        return ("invalid_shape", "HTTP records payload missing items list")
+    if not isinstance(total, int):
+        return ("invalid_shape", "HTTP records payload missing integer total")
+    if total == 0 and not items:
+        return ("zero_result", "HTTP records payload returned zero rows")
+    if total > 0 and items:
+        return ("nonempty_result", "HTTP records payload returned rows")
+    return (
+        "invalid_shape",
+        "HTTP records payload total/items disagree",
+    )
+
+
 def _classify_http_freshness_payload(payload: object) -> tuple[str, str]:
     if not isinstance(payload, dict):
         return ("invalid_shape", "HTTP payload is not a JSON object")
@@ -958,6 +981,11 @@ def _audit_http_panel(
         )
     elif spec.semantic_kind == "http_summary":
         classification, detail = _classify_http_payload(payload)
+        status = (
+            "error" if classification == "invalid_shape" and spec.required else "ok"
+        )
+    elif spec.semantic_kind == "http_records":
+        classification, detail = _classify_http_records_payload(payload)
         status = (
             "error" if classification == "invalid_shape" and spec.required else "ok"
         )

@@ -165,7 +165,7 @@ def test_load_workflow_config_preserves_composite_reconciliation_keys(
 
 
 @pytest.mark.unit
-def test_chembl_baseline_workflow_config_is_sequential_and_uses_logical_tables() -> (
+def test_chembl_baseline_workflow_config_declares_dependency_minimal_reconciliation_edges() -> (
     None
 ):
     config = load_workflow_config("chembl_baseline", config_dir=WORKFLOW_CONFIG_DIR)
@@ -174,14 +174,14 @@ def test_chembl_baseline_workflow_config_is_sequential_and_uses_logical_tables()
     assert config.topological_step_ids == (
         "run_chembl_assay",
         "run_chembl_target",
-        "run_chembl_publication",
         "reconcile_assay_target_orphans",
+        "run_chembl_publication",
         "reconcile_assay_publication_orphans",
     )
 
     reconcile_target = config.get_step("reconcile_assay_target_orphans")
     assert isinstance(reconcile_target, TransformStepConfig)
-    assert reconcile_target.depends_on == ("run_chembl_publication",)
+    assert reconcile_target.depends_on == ("run_chembl_assay", "run_chembl_target")
     assert reconcile_target.config == {
         "source_table": "chembl_assay",
         "reference_table": "chembl_target",
@@ -194,7 +194,10 @@ def test_chembl_baseline_workflow_config_is_sequential_and_uses_logical_tables()
 
     reconcile_publication = config.get_step("reconcile_assay_publication_orphans")
     assert isinstance(reconcile_publication, TransformStepConfig)
-    assert reconcile_publication.depends_on == ("reconcile_assay_target_orphans",)
+    assert reconcile_publication.depends_on == (
+        "reconcile_assay_target_orphans",
+        "run_chembl_publication",
+    )
     assert reconcile_publication.config == {
         "source_table": "chembl_assay",
         "reference_table": "chembl_publication",
@@ -267,6 +270,14 @@ def test_single_pipeline_workflow_wrappers_load_and_match_identity() -> None:
     for pipeline_name, _config_path in _non_composite_pipeline_inventory():
         config = load_workflow_config(pipeline_name, config_dir=WORKFLOW_CONFIG_DIR)
         assert config.name == pipeline_name
+        if pipeline_name == "chembl_target_protein_classification":
+            assert tuple(step.step_id for step in config.steps) == (
+                "run_chembl_target",
+                "run_chembl_target_component",
+                "run_chembl_protein_class",
+                "run_chembl_target_protein_classification",
+            )
+            continue
         assert len(config.steps) == 1
         step = config.steps[0]
         assert isinstance(step, WorkflowStepConfig)
@@ -285,7 +296,7 @@ def test_all_shipped_workflow_configs_load_successfully() -> None:
 @pytest.mark.unit
 def test_provider_pack_workflows_are_additive_multi_step_configs() -> None:
     expected_steps = {
-        "chembl_reference_pack": 9,
+        "chembl_reference_pack": 10,
         "publication_provider_pack": 4,
         "uniprot_support_pack": 2,
     }

@@ -84,6 +84,7 @@ def get_workflow_runner_service(
     from bioetl.composition.bootstrap.cli.noop import create_noop_logger
     from bioetl.composition.factories.services.port_factories import create_metrics
     from bioetl.infrastructure.storage.silver_writer import SilverWriter
+    from bioetl.infrastructure.quarantine import UnifiedQuarantineAdapter
     from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation import (
         SilverForeignKeyReconciliationAdapter,
     )
@@ -100,12 +101,17 @@ def get_workflow_runner_service(
         component="workflow_reconciliation",
         adapter="SilverForeignKeyReconciliationAdapter",
     )
+    reconciliation_quarantine = UnifiedQuarantineAdapter(
+        base_path=str(settings.quarantine_path),
+    )
     transform_registry = register_builtin_workflow_transforms(
         WorkflowTransformRegistry(),
         foreign_key_reconciliation_port=SilverForeignKeyReconciliationAdapter(
             silver_writer=transform_storage,
             logger=reconciliation_logger,
             metrics=metrics,
+            quarantine=reconciliation_quarantine,
+            quarantine_pipeline_name="workflow_transforms",
         ),
     )
     pipeline_runner_factory = (

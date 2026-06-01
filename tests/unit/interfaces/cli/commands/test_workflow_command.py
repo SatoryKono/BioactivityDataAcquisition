@@ -7,6 +7,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
+from bioetl.domain.workflow import WorkflowConfig, WorkflowStepConfig
 from bioetl.interfaces.cli import cli
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
     ObservabilityBackendEnsureResult,
@@ -33,7 +34,15 @@ def test_workflow_run_help_includes_observability_backend_options(
 def test_workflow_run_ensures_observability_backend_before_execution(
     cli_runner: CliRunner,
 ) -> None:
-    config = MagicMock()
+    config = WorkflowConfig(
+        name="chembl_publication",
+        steps=(
+            WorkflowStepConfig(
+                step_id="run_chembl_publication",
+                pipeline_name="chembl_publication",
+            ),
+        ),
+    )
     result_payload = MagicMock(status="success")
 
     with (
@@ -67,5 +76,12 @@ def test_workflow_run_ensures_observability_backend_before_execution(
         )
 
     assert result.exit_code == 0
-    ensure_backend.assert_called_once_with(enabled=True, port=8081)
+    ensure_backend.assert_called_once_with(
+        enabled=True,
+        port=8081,
+        required_probe_paths=(
+            "/ops/control-plane/filter-options?dimension=pipeline&response_shape=list",
+            "/ops/control-plane/checkpoint-freshness?pipeline=chembl_publication",
+        ),
+    )
     execute_workflow.assert_called_once()

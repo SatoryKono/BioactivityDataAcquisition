@@ -5,9 +5,9 @@
 - last_reviewed: 2026-06-01
 - next_review_by: 2026-08-30
 - review_cycle_days: 90
-- triaged_entry_count: 19
-- repo_wide_zero_import_candidate_count: 47
-- repo_wide_classified_zero_import_candidate_count: 47
+- triaged_entry_count: 18
+- repo_wide_zero_import_candidate_count: 53
+- repo_wide_classified_zero_import_candidate_count: 53
 - repo_wide_untriaged_zero_import_candidate_count: 0
 - note: zero static importer count is a review signal, not automatic removal proof
 - guardrail: Zero static importer count is a review signal only; removals must still verify public entrypoints and dynamic/plugin import paths.
@@ -17,7 +17,6 @@
 | Entry | Disposition | src importers | Verification |
 | --- | --- | ---: | --- |
 | `cached_bronze_support_active` | `retain_active` | 1 | `satisfied` |
-| `circuit_breaker_contract_active` | `retain_active` | 1 | `satisfied` |
 | `error_handling_support_active` | `retain_active` | 1 | `satisfied` |
 | `health_check_observability_active` | `retain_active` | 1 | `satisfied` |
 | `health_check_policy_active` | `retain_active` | 1 | `satisfied` |
@@ -41,11 +40,17 @@
 | Module | Disposition | Path |
 | --- | --- | --- |
 | `bioetl.__main__` | `retain_module_entrypoint` | `src/bioetl/__main__.py` |
+| `bioetl.application.core._filtered_data_source_mixins` | `retain_compat_shim` | `src/bioetl/application/core/_filtered_data_source_mixins.py` |
+| `bioetl.application.core._idmapping_fetch_support` | `retain_compat_shim` | `src/bioetl/application/core/_idmapping_fetch_support.py` |
+| `bioetl.application.core._idmapping_lifecycle_support` | `retain_compat_shim` | `src/bioetl/application/core/_idmapping_lifecycle_support.py` |
 | `bioetl.application.core._span_helpers` | `retain_compat_shim` | `src/bioetl/application/core/_span_helpers.py` |
+| `bioetl.application.core._subcellular_fraction_support` | `retain_compat_shim` | `src/bioetl/application/core/_subcellular_fraction_support.py` |
+| `bioetl.application.core._target_data_source_mixins` | `retain_compat_shim` | `src/bioetl/application/core/_target_data_source_mixins.py` |
 | `bioetl.application.core.batch_execution_lifecycle` | `retain_public_facade` | `src/bioetl/application/core/batch_execution_lifecycle.py` |
 | `bioetl.application.core.batch_execution_run_service` | `retain_public_facade` | `src/bioetl/application/core/batch_execution_run_service.py` |
 | `bioetl.application.core.batch_execution_state_service` | `retain_public_facade` | `src/bioetl/application/core/batch_execution_state_service.py` |
 | `bioetl.application.core.pipeline_service_protocols` | `retain_public_facade` | `src/bioetl/application/core/pipeline_service_protocols.py` |
+| `bioetl.application.core.batch_execution._contracts` | `retain_compat_shim` | `src/bioetl/application/core/batch_execution/_contracts.py` |
 | `bioetl.application.pipelines.common.blocks` | `retain_dynamic_entrypoint` | `src/bioetl/application/pipelines/common/blocks.py` |
 | `bioetl.application.pipelines.common.publication_strategies` | `retain_canonical_owner_module` | `src/bioetl/application/pipelines/common/publication_strategies.py` |
 | `bioetl.application.pipelines.pubmed.strategies` | `retain_canonical_owner_module` | `src/bioetl/application/pipelines/pubmed/strategies.py` |

@@ -384,6 +384,37 @@ class TestRunCompositeAsync:
 class TestRunCompositeCommand:
     """Test the run-composite CLI command."""
 
+    def test_run_composite_ensures_observability_backend_with_catalog_probe(
+        self, cli_runner: CliRunner
+    ) -> None:
+        backend_result = ObservabilityBackendEnsureResult(
+            status="reused",
+            health_url="http://127.0.0.1:8081/health",
+        )
+        with (
+            patch(
+                "bioetl.interfaces.cli.commands.run_composite.ensure_observability_backend_started",
+                return_value=backend_result,
+            ) as mock_ensure_backend,
+            patch(
+                "bioetl.interfaces.cli.commands.run_composite.should_disable_transient_health_server",
+                return_value=False,
+            ),
+            mock_asyncio_run(return_value=(True, None)),
+        ):
+            result = cli_runner.invoke(
+                cli, ["run-composite", "--composite", "publication"]
+            )
+
+        assert result.exit_code == ExitCode.OK.value
+        mock_ensure_backend.assert_called_once_with(
+            enabled=True,
+            port=8081,
+            required_probe_paths=(
+                "/ops/control-plane/filter-options?dimension=pipeline&response_shape=list",
+            ),
+        )
+
     def test_run_composite_command__successful_execution__9a97129e(self, cli_runner: CliRunner) -> None:
         """Test successful composite pipeline execution via CLI."""
         with mock_asyncio_run(return_value=(True, None)):

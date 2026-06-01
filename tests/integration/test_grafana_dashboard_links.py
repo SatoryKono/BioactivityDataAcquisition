@@ -1,7 +1,9 @@
 """Integration tests for Grafana dashboard links and drilldown handoffs."""
 
+from html import unescape
 from pathlib import Path
 import re
+from urllib.parse import parse_qsl, urlsplit
 import yaml
 
 import pytest
@@ -122,6 +124,16 @@ _REQUIRED_PANEL_LINKS_BY_UID = _NAV_LINK_CONTRACT["required_panel_links_by_uid"]
 _CROSS_SCOPE_MARKER_CONTRACT = _NAV_LINK_CONTRACT["cross_scope_marker_contract"]
 _PRESERVED_IDENTITY_HANDOFF = _NAV_LINK_CONTRACT["preserved_identity_handoff"]
 _KPI_OWNERSHIP = _NAV_LINK_CONTRACT["kpi_ownership"]
+_PRIMARY_DASHBOARD_UIDS = frozenset(
+    {
+        "bioetl-control-plane-v1",
+        "bioetl-overview-v2",
+        "bioetl-runtime",
+        "bioetl-provider-health-v2",
+        "bioetl-dq-v2",
+        "bioetl-workflow-overview",
+    }
+)
 
 
 def _extract_required_time_tokens(section: str) -> tuple[str, ...]:
@@ -1351,6 +1363,93 @@ def test_navigation_panel_html_links_open_in_same_window() -> None:
         assert 'target="_blank"' not in content, (
             f"{dashboard_path.name} navigation panel must open links in the same window"
         )
+
+
+def test_navigation_panel_html_bus_preserves_primary_identity_handoff() -> None:
+    """Visible id=1000 HTML bus must preserve the same primary vars as panel.links."""
+    required_vars = {"workflow", "pipeline", "run_type", "run_id"}
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+        source_uid = dashboard.get("uid")
+        assert isinstance(source_uid, str), (
+            f"{dashboard_path.name} must declare string uid"
+        )
+        if source_uid not in _PRIMARY_DASHBOARD_UIDS:
+            continue
+        panel = next(
+            (item for item in dashboard.get("panels", []) if item.get("id") == 1000),
+            None,
+        )
+        assert panel is not None, (
+            f"{dashboard_path.name} must define navigation panel id=1000"
+        )
+        content = str((panel.get("options") or {}).get("content", ""))
+        hrefs = [
+            unescape(match)
+            for match in re.findall(r'href="([^"]+)"', content)
+            if match.startswith("/d/")
+        ]
+        assert hrefs, f"{dashboard_path.name} navigation HTML bus must expose links"
+        for href in hrefs:
+            target_uid = _extract_dashboard_uid(href)
+            if (
+                target_uid not in _PRIMARY_DASHBOARD_UIDS
+                or target_uid == source_uid
+            ):
+                continue
+            query_vars = {
+                key[4:]: value
+                for key, value in parse_qsl(
+                    urlsplit(href).query,
+                    keep_blank_values=True,
+                )
+                if key.startswith("var-")
+            }
+            missing = required_vars - set(query_vars)
+            assert not missing, (
+                f"{dashboard_path.name} visible navigation link to {target_uid} "
+                f"must preserve {sorted(required_vars)}; missing {sorted(missing)}: {href}"
+            )
+
+
+def test_navigation_panel_html_bus_keeps_silver_explorer_forensic_boundary() -> None:
+    """Visible links into Silver Reject Explorer must not receive shared run scope."""
+    allowed_vars = {
+        "pipeline",
+        "run_type",
+        "reason_code",
+        "field",
+        "quarantine_run_id",
+        "payload_hash",
+    }
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+        panel = next(
+            (item for item in dashboard.get("panels", []) if item.get("id") == 1000),
+            None,
+        )
+        assert panel is not None, (
+            f"{dashboard_path.name} must define navigation panel id=1000"
+        )
+        content = str((panel.get("options") or {}).get("content", ""))
+        for href in [
+            unescape(match)
+            for match in re.findall(r'href="([^"]+)"', content)
+            if match.startswith("/d/bioetl-silver-reject-explorer/")
+        ]:
+            query_vars = {
+                key[4:]: value
+                for key, value in parse_qsl(
+                    urlsplit(href).query,
+                    keep_blank_values=True,
+                )
+                if key.startswith("var-")
+            }
+            unexpected = set(query_vars) - allowed_vars
+            assert not unexpected, (
+                f"{dashboard_path.name} visible navigation link to Silver Reject "
+                f"Explorer leaks unsupported vars {sorted(unexpected)}: {href}"
+            )
 
 
 def test_navigation_panel_renders_full_visual_bus_with_disabled_current_item() -> None:

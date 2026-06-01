@@ -480,6 +480,30 @@ workflow that runs:
 It keeps the destructive reconciliation phase after the core pipeline phase and
 uses logical table names only.
 
+The shipped dependency edges are intentionally minimal and reflect actual
+transform inputs rather than incidental linear ordering:
+
+- `reconcile_assay_target_orphans` depends on `run_chembl_assay` and
+  `run_chembl_target`;
+- `reconcile_assay_publication_orphans` depends on
+  `reconcile_assay_target_orphans` and `run_chembl_publication`.
+
+This means the workflow no longer encodes a false dependency from target orphan
+cleanup to publication ingestion. In execution terms,
+`reconcile_assay_target_orphans` may run as soon as assay and target inputs are
+ready, before `run_chembl_publication`, because publication data is not part of
+that transform's input contract.
+
+Workflow-level `--dry-run` now applies to both step families:
+
+- pipeline steps inherit dry-run through workflow defaults and CLI overrides;
+- destructive transform steps switch to preview/no-op semantics and report when
+  a mutation would have happened.
+
+For the built-in `reconcile_foreign_keys` transform this means dry-run shows the
+orphan count and `would_mutate=true` without clearing or rewriting the Silver
+table.
+
 The built-in reconciliation transform accepts either single keys or composite
 key tuples through `source_keys` / `reference_keys`. Null handling is explicit
 via `nulls_equal`; the default remains `false`, so null-key rows are treated as

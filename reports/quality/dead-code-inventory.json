@@ -13,14 +13,14 @@
     "guardrail_note": "Zero static importer count is a review signal only; removals must still verify public entrypoints and dynamic/plugin import paths."
   },
   "summary": {
-    "triaged_entry_count": 19,
+    "triaged_entry_count": 18,
     "triaged_entries_below_min_importers": 0,
-    "repo_wide_zero_import_candidate_count": 47,
-    "repo_wide_classified_zero_import_candidate_count": 47,
+    "repo_wide_zero_import_candidate_count": 53,
+    "repo_wide_classified_zero_import_candidate_count": 53,
     "repo_wide_untriaged_zero_import_candidate_count": 0,
     "repo_wide_disposition_counts": {
       "retain_canonical_owner_module": 29,
-      "retain_compat_shim": 3,
+      "retain_compat_shim": 9,
       "retain_dynamic_entrypoint": 10,
       "retain_module_entrypoint": 1,
       "retain_public_facade": 4
@@ -35,17 +35,6 @@
       "module_name": "bioetl.infrastructure.adapters._cached_bronze_support",
       "src_importer_count": 1,
       "test_importer_count": 2,
-      "min_src_importers": 1,
-      "verification_status": "satisfied"
-    },
-    {
-      "family": "adapter_layer",
-      "entry_id": "circuit_breaker_contract_active",
-      "disposition": "retain_active",
-      "module_path": "src/bioetl/infrastructure/adapters/_circuit_breaker_contract.py",
-      "module_name": "bioetl.infrastructure.adapters._circuit_breaker_contract",
-      "src_importer_count": 1,
-      "test_importer_count": 1,
       "min_src_importers": 1,
       "verification_status": "satisfied"
     },
@@ -252,6 +241,45 @@
       "rationale": "Module entrypoint for `python -m bioetl`; static import scans stay at zero because the interpreter dispatches the module directly."
     },
     {
+      "module_name": "bioetl.application.core._filtered_data_source_mixins",
+      "path": "src/bioetl/application/core/_filtered_data_source_mixins.py",
+      "is_private_module": true,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "classification_status": "classified",
+      "disposition": "retain_compat_shim",
+      "reviewed_on": "2026-06-01",
+      "review_by": "2026-08-30",
+      "linked_issue": "#4953",
+      "rationale": "Private filtered data-source mixin shim has zero first-party importers after callers moved to bioetl.application.core.filtered_data_source_mixins; retain only as a backward-compatible no-growth import surface until the next compatibility facade retirement review."
+    },
+    {
+      "module_name": "bioetl.application.core._idmapping_fetch_support",
+      "path": "src/bioetl/application/core/_idmapping_fetch_support.py",
+      "is_private_module": true,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "classification_status": "classified",
+      "disposition": "retain_compat_shim",
+      "reviewed_on": "2026-06-01",
+      "review_by": "2026-08-30",
+      "linked_issue": "#4953",
+      "rationale": "Private ID-mapping fetch-support shim has zero first-party importers after callers moved to bioetl.application.core.idmapping_fetch_support; retain only as a backward-compatible no-growth import surface until the next compatibility facade retirement review."
+    },
+    {
+      "module_name": "bioetl.application.core._idmapping_lifecycle_support",
+      "path": "src/bioetl/application/core/_idmapping_lifecycle_support.py",
+      "is_private_module": true,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "classification_status": "classified",
+      "disposition": "retain_compat_shim",
+      "reviewed_on": "2026-06-01",
+      "review_by": "2026-08-30",
+      "linked_issue": "#4953",
+      "rationale": "Private ID-mapping lifecycle shim has zero first-party importers after callers moved to bioetl.application.core.idmapping_lifecycle_support; retain only as a backward-compatible no-growth import surface until the next compatibility facade retirement review."
+    },
+    {
       "module_name": "bioetl.application.core._span_helpers",
       "path": "src/bioetl/application/core/_span_helpers.py",
       "is_private_module": true,
@@ -263,6 +291,32 @@
       "review_by": "2026-08-30",
       "linked_issue": "#4923",
       "rationale": "Private span-helper shim has zero first-party importers after issue 4923 ratcheted callers to bioetl.application.core.span_helpers; retain only as a backward-compatible no-growth import surface until the next compatibility facade retirement review."
+    },
+    {
+      "module_name": "bioetl.application.core._subcellular_fraction_support",
+      "path": "src/bioetl/application/core/_subcellular_fraction_support.py",
+      "is_private_module": true,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "classification_status": "classified",
+      "disposition": "retain_compat_shim",
+      "reviewed_on": "2026-06-01",
+      "review_by": "2026-08-30",
+      "linked_issue": "#4953",
+      "rationale": "Private subcellular-fraction support shim has zero first-party importers after callers moved to bioetl.application.core.subcellular_fraction_support; retain only as a backward-compatible no-growth import surface until the next compatibility facade retirement review."
+    },
+    {
+      "module_name": "bioetl.application.core._target_data_source_mixins",
+      "path": "src/bioetl/application/core/_target_data_source_mixins.py",
+      "is_private_module": true,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "classification_status": "classified",
+      "disposition": "retain_compat_shim",
+      "reviewed_on": "2026-06-01",
+      "review_by": "2026-08-30",
+      "linked_issue": "#4953",
+      "rationale": "Private target data-source mixin shim has zero first-party importers after callers moved to bioetl.application.core.target_data_source_mixins; retain only as a backward-compatible no-growth import surface until the next compatibility facade retirement review."
     },
     {
       "module_name": "bioetl.application.core.batch_execution_lifecycle",
@@ -315,6 +369,19 @@
       "review_by": "2026-08-20",
       "linked_issue": "#4541",
       "rationale": "Aggregate pipeline-service protocol facade retained as the sanctioned import seam over narrower runtime, observability, and auxiliary protocol modules."
+    },
+    {
+      "module_name": "bioetl.application.core.batch_execution._contracts",
+      "path": "src/bioetl/application/core/batch_execution/_contracts.py",
+      "is_private_module": true,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "classification_status": "classified",
+      "disposition": "retain_compat_shim",
+      "reviewed_on": "2026-06-01",
+      "review_by": "2026-08-30",
+      "linked_issue": "#4953",
+      "rationale": "Private batch-execution contract shim has zero first-party importers after callers moved to bioetl.application.core.batch_execution.contracts; retain only as a backward-compatible no-growth import surface until the next compatibility facade retirement review."
     },
     {
       "module_name": "bioetl.application.pipelines.common.blocks",

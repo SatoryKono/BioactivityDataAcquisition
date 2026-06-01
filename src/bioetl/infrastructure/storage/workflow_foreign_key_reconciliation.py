@@ -4,16 +4,20 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from math import isnan
+from uuid import uuid4
 
 import pyarrow as pa
 
+from bioetl.domain.context import current_utc_time
 from bioetl.domain.ports import (
     ForeignKeyReconciliationPort,
     ForeignKeyReconciliationRequest,
     ForeignKeyReconciliationResult,
     LoggerPort,
     MetricsPort,
+    QuarantinePort,
 )
+from bioetl.domain.types import BatchID
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 __all__ = ["SilverForeignKeyReconciliationAdapter"]
@@ -24,6 +28,9 @@ _RECONCILIATION_ROWS_RETAINED_TOTAL = (
     "bioetl_workflow_reconciliation_rows_retained_total"
 )
 _RECONCILIATION_ROWS_DELETED_TOTAL = "bioetl_workflow_reconciliation_rows_deleted_total"
+_FOREIGN_KEY_ORPHAN_ERROR_CODE = "FILTERED_OUT_SILVER"
+_FOREIGN_KEY_ORPHAN_QUARANTINE_CATEGORY = "foreign_key_reconciliation"
+_FOREIGN_KEY_ORPHAN_PIPELINE_DEFAULT = "workflow_transforms"
 
 
 @dataclass(slots=True)
@@ -33,6 +40,8 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
     silver_writer: SilverWriter
     logger: LoggerPort
     metrics: MetricsPort | None = None
+    quarantine: QuarantinePort | None = None
+    quarantine_pipeline_name: str | None = None
 
     async def reconcile_foreign_keys(
         self,
@@ -55,12 +64,13 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
 
         source_rows = await self._read_source_rows(request)
         if source_rows is None:
-            return self._build_reconciliation_result(
+            return _build_reconciliation_result(
                 request,
                 scanned_rows=0,
                 retained_rows=0,
                 orphan_rows_deleted=0,
                 mutated=False,
+                would_mutate=False,
             )
 
         if not source_rows:
@@ -71,12 +81,13 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
                 source_table=request.source_table,
                 reference_table=request.reference_table,
             )
-            return self._build_reconciliation_result(
+            return _build_reconciliation_result(
                 request,
                 scanned_rows=0,
                 retained_rows=0,
                 orphan_rows_deleted=0,
                 mutated=False,
+                would_mutate=False,
             )
 
         reference_rows = await self._read_reference_rows(request)
@@ -145,33 +156,15 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
         source_rows: list[dict[str, object]],
         reference_rows: list[dict[str, object]],
     ) -> ForeignKeyReconciliationResult:
-        reference_values = {
-            key
-            for row in reference_rows
-            if (
-                key := _normalize_row_key(
-                    row,
-                    request.effective_reference_keys,
-                    nulls_equal=request.nulls_equal,
-                )
-            )
-            is not None
-        }
-        retained_rows: list[dict[str, object]] = []
-        orphan_rows_deleted = 0
-        for row in source_rows:
-            source_key = _normalize_row_key(
-                row,
-                request.effective_source_keys,
-                nulls_equal=request.nulls_equal,
-            )
-            if source_key is not None and source_key in reference_values:
-                retained_rows.append(row)
-                continue
-            orphan_rows_deleted += 1
-
         scanned_rows = len(source_rows)
+        reference_values = _reference_value_set(request, reference_rows)
+        retained_rows, orphan_rows = _partition_source_rows(
+            request,
+            source_rows=source_rows,
+            reference_values=reference_values,
+        )
         retained_rows_count = len(retained_rows)
+        orphan_rows_deleted = len(orphan_rows)
         self._record_metrics(
             scanned=scanned_rows,
             retained=retained_rows_count,
@@ -179,34 +172,28 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
         )
 
         if orphan_rows_deleted == 0:
-            self._log(
-                "info",
-                "workflow foreign-key reconciliation completed without mutation",
-                source_table=request.source_table,
-                reference_table=request.reference_table,
-                scanned_rows=scanned_rows,
-                retained_rows=retained_rows_count,
-                orphan_rows_deleted=orphan_rows_deleted,
-            )
-            return self._build_reconciliation_result(
+            return _complete_without_mutation(
+                self,
                 request,
                 scanned_rows=scanned_rows,
                 retained_rows=retained_rows_count,
                 orphan_rows_deleted=0,
-                mutated=False,
             )
 
-        self.silver_writer.clear(request.source_table, dry_run=False)
-        if retained_rows:
-            source_schema = pa.Table.from_pylist(retained_rows).schema
-            await self.silver_writer.write_silver(
-                table_name=request.source_table,
-                records=retained_rows,
-                primary_keys=list(request.primary_keys),
-                schema=source_schema,
-                mode="merge",
+        if request.dry_run:
+            return _complete_dry_run(
+                self,
+                request,
+                scanned_rows=scanned_rows,
+                retained_rows=retained_rows_count,
+                orphan_rows_deleted=orphan_rows_deleted,
             )
 
+        await self._apply_reconciliation_mutation(
+            request,
+            retained_rows=retained_rows,
+            orphan_rows=orphan_rows,
+        )
         self._log(
             "info",
             "workflow foreign-key reconciliation completed with mutation",
@@ -216,34 +203,206 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
             retained_rows=retained_rows_count,
             orphan_rows_deleted=orphan_rows_deleted,
         )
-        return self._build_reconciliation_result(
+        return _build_reconciliation_result(
             request,
             scanned_rows=scanned_rows,
             retained_rows=retained_rows_count,
             orphan_rows_deleted=orphan_rows_deleted,
             mutated=True,
+            would_mutate=False,
         )
 
-    def _build_reconciliation_result(
+    async def _apply_reconciliation_mutation(
         self,
         request: ForeignKeyReconciliationRequest,
         *,
-        scanned_rows: int,
-        retained_rows: int,
-        orphan_rows_deleted: int,
-        mutated: bool,
-    ) -> ForeignKeyReconciliationResult:
-        return ForeignKeyReconciliationResult(
-            source_table=request.source_table,
-            reference_table=request.reference_table,
-            source_key=request.source_key,
-            reference_key=request.reference_key,
-            action=request.action,
-            scanned_rows=scanned_rows,
-            retained_rows=retained_rows,
-            orphan_rows_deleted=orphan_rows_deleted,
-            mutated=mutated,
+        retained_rows: list[dict[str, object]],
+        orphan_rows: list[dict[str, object]],
+    ) -> None:
+        if orphan_rows:
+            await self._quarantine_orphan_rows(request, orphan_rows=orphan_rows)
+
+        self.silver_writer.clear(request.source_table, dry_run=False)
+        if not retained_rows:
+            return
+
+        source_schema = pa.Table.from_pylist(retained_rows).schema
+        await self.silver_writer.write_silver(
+            table_name=request.source_table,
+            records=retained_rows,
+            primary_keys=list(request.primary_keys),
+            schema=source_schema,
+            mode="merge",
         )
+
+    async def _quarantine_orphan_rows(
+        self,
+        request: ForeignKeyReconciliationRequest,
+        *,
+        orphan_rows: list[dict[str, object]],
+    ) -> None:
+        if self.quarantine is None or not orphan_rows:
+            return
+
+        batch_id = BatchID(uuid4())
+        source_table = request.source_table
+        reference_table = request.reference_table
+        pipeline_name = (
+            request.workflow_name
+            if request.workflow_name
+            else (self.quarantine_pipeline_name or _FOREIGN_KEY_ORPHAN_PIPELINE_DEFAULT)
+        )
+        reason = (
+            "Foreign key reconciliation orphan: "
+            f"{source_table}.{request.source_key} has no matching row "
+            f"in {reference_table}.{request.reference_key}"
+        )
+        quarantine_rows: list[dict[str, object]] = []
+        for row in orphan_rows:
+            metadata = {
+                "error_details": {"message": reason},
+                "classification": "filter_rejection",
+                "quarantine_category": _FOREIGN_KEY_ORPHAN_QUARANTINE_CATEGORY,
+                "source_table": source_table,
+                "reference_table": reference_table,
+            }
+            quarantine_rows.append(
+                {
+                    "pipeline": pipeline_name,
+                    "error_code": _FOREIGN_KEY_ORPHAN_ERROR_CODE,
+                    "payload": row,
+                    "bronze_batch_id": batch_id,
+                    "run_id": None,
+                    "metadata": metadata,
+                    "ingestion_ts": current_utc_time(),
+                }
+            )
+
+        await self.quarantine.write_many(quarantine_rows)
+
+
+def _build_reconciliation_result(
+    request: ForeignKeyReconciliationRequest,
+    *,
+    scanned_rows: int,
+    retained_rows: int,
+    orphan_rows_deleted: int,
+    mutated: bool,
+    would_mutate: bool,
+) -> ForeignKeyReconciliationResult:
+    return ForeignKeyReconciliationResult(
+        source_table=request.source_table,
+        reference_table=request.reference_table,
+        source_key=request.source_key,
+        reference_key=request.reference_key,
+        action=request.action,
+        scanned_rows=scanned_rows,
+        retained_rows=retained_rows,
+        orphan_rows_deleted=orphan_rows_deleted,
+        mutated=mutated,
+        dry_run=request.dry_run,
+        would_mutate=would_mutate,
+    )
+
+
+def _reference_value_set(
+    request: ForeignKeyReconciliationRequest,
+    reference_rows: list[dict[str, object]],
+) -> set[tuple[object, ...]]:
+    return {
+        key
+        for row in reference_rows
+        if (
+            key := _normalize_row_key(
+                row,
+                request.effective_reference_keys,
+                nulls_equal=request.nulls_equal,
+            )
+        )
+        is not None
+    }
+
+
+def _partition_source_rows(
+    request: ForeignKeyReconciliationRequest,
+    *,
+    source_rows: list[dict[str, object]],
+    reference_values: set[tuple[object, ...]],
+) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
+    retained_rows: list[dict[str, object]] = []
+    orphan_rows: list[dict[str, object]] = []
+    for row in source_rows:
+        source_key = _normalize_row_key(
+            row,
+            request.effective_source_keys,
+            nulls_equal=request.nulls_equal,
+        )
+        if source_key is not None and source_key in reference_values:
+            retained_rows.append(row)
+            continue
+        orphan_rows.append(row)
+    return retained_rows, orphan_rows
+
+
+def _complete_without_mutation(
+    adapter: SilverForeignKeyReconciliationAdapter,
+    request: ForeignKeyReconciliationRequest,
+    *,
+    scanned_rows: int,
+    retained_rows: int,
+    orphan_rows_deleted: int,
+) -> ForeignKeyReconciliationResult:
+    adapter._log(
+        "info",
+        "workflow foreign-key reconciliation completed without mutation",
+        source_table=request.source_table,
+        reference_table=request.reference_table,
+        scanned_rows=scanned_rows,
+        retained_rows=retained_rows,
+        orphan_rows_deleted=orphan_rows_deleted,
+    )
+    return _build_reconciliation_result(
+        request,
+        scanned_rows=scanned_rows,
+        retained_rows=retained_rows,
+        orphan_rows_deleted=orphan_rows_deleted,
+        mutated=False,
+        would_mutate=False,
+    )
+
+
+def _complete_dry_run(
+    adapter: SilverForeignKeyReconciliationAdapter,
+    request: ForeignKeyReconciliationRequest,
+    *,
+    scanned_rows: int,
+    retained_rows: int,
+    orphan_rows_deleted: int,
+) -> ForeignKeyReconciliationResult:
+    adapter._log(
+        "info",
+        "workflow foreign-key reconciliation skipped quarantine in dry-run preview",
+        source_table=request.source_table,
+        reference_table=request.reference_table,
+        orphan_rows=orphan_rows_deleted,
+    )
+    adapter._log(
+        "warning",
+        "workflow foreign-key reconciliation dry-run blocked mutation",
+        source_table=request.source_table,
+        reference_table=request.reference_table,
+        scanned_rows=scanned_rows,
+        retained_rows=retained_rows,
+        orphan_rows_deleted=orphan_rows_deleted,
+    )
+    return _build_reconciliation_result(
+        request,
+        scanned_rows=scanned_rows,
+        retained_rows=retained_rows,
+        orphan_rows_deleted=orphan_rows_deleted,
+        mutated=False,
+        would_mutate=True,
+    )
 
 
 def _normalize_row_key(

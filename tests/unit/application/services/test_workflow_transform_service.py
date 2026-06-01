@@ -216,3 +216,41 @@ async def test_transform_step_emits_destructive_commit_callback() -> None:
     assert len(commits) == 1
     assert commits[0].step_id == "repair_orphans"
     assert commits[0].details["orphan_rows_deleted"] == 3
+
+
+@pytest.mark.asyncio
+async def test_transform_step_passes_dry_run_into_runtime_context() -> None:
+    metrics = _RecordingMetrics()
+    registry = WorkflowTransformRegistry()
+
+    def _preview(
+        spec: WorkflowTransformSpec,
+        _upstream: dict[str, Any],
+        runtime_context: object,
+    ) -> object:
+        return {
+            "fingerprint": spec.fingerprint,
+            "dry_run": getattr(runtime_context, "dry_run", None),
+        }
+
+    registry.register("reconcile_foreign_keys", _preview)
+    service = WorkflowTransformService(
+        registry=registry,
+        metrics=metrics,
+        monotonic=iter([3.0, 3.2]).__next__,
+    )
+
+    result = await service.run_step(
+        workflow_name="activity_workflow",
+        step=TransformStepConfig(
+            step_id="repair_orphans",
+            transform_name="reconcile_foreign_keys",
+        ),
+        dry_run=True,
+    )
+
+    assert result.status == "success"
+    assert result.output == {
+        "fingerprint": result.fingerprint,
+        "dry_run": True,
+    }

@@ -142,6 +142,18 @@ pipelines before the reconciliation phase:
 - `reconcile_assay_target_orphans`
 - `reconcile_assay_publication_orphans`
 
+Its reconciliation edges are intentionally input-driven:
+
+- `reconcile_assay_target_orphans` depends on `run_chembl_assay` and
+  `run_chembl_target`;
+- `reconcile_assay_publication_orphans` depends on
+  `reconcile_assay_target_orphans` and `run_chembl_publication`.
+
+This removes a false dependency from target orphan cleanup to publication
+ingestion. In practice `reconcile_assay_target_orphans` can run as soon as
+assay and target inputs are complete, because publication data is not part of
+that transform's input contract.
+
 When reviewing this workflow, keep the reconciliation config on logical table
 names only:
 
@@ -158,6 +170,25 @@ The reconciliation transform also accepts composite keys via paired
 `source_keys` / `reference_keys` lists. Keep both lists aligned and set
 `nulls_equal` explicitly when a workflow should treat null-key rows as valid
 matches rather than orphans.
+
+### 8. Workflow dry-run for destructive transforms
+
+Use workflow dry-run when an operator wants preview evidence without allowing
+destructive mutation:
+
+```bash
+bioetl workflow run chembl_baseline --dry-run --only-steps reconcile_assay_target_orphans
+```
+
+Under this mode:
+
+- pipeline steps still receive normal dry-run semantics;
+- destructive transforms such as `reconcile_foreign_keys` switch to preview/no-op mode;
+- CLI output explicitly marks blocked destructive mutation when the transform
+  would have deleted orphan rows.
+
+If a dry-run preview shows a needed mutation, rerun without `--dry-run` only
+after the operator has confirmed the intended recovery path.
 
 ## Direct Artifact Checks
 

@@ -11,6 +11,11 @@ review_history:
     owner: architecture-governance
     outcome: held_flat_with_zero_replay_critical_seams
     rationale: Runtime UUID seam count remains 14 and replay-critical UUID seam count remains 0; exact replay paths must inject deterministic factories or explicit IDs before producing replay artifacts.
+  - issue: "#4951"
+    reviewed_on: "2026-06-01"
+    owner: architecture-governance
+    outcome: deterministic_factory_enforcement_confirmed
+    rationale: Application and composition UUID seams remain classified, replay-critical random identity stays at zero, and exact replay requirements are documented per seam through explicit factory or run_id injection policy.
 seams:
   - path: src/bioetl/application/composite/runner_pkg/runner_runtime_helpers.py
     line: 143
