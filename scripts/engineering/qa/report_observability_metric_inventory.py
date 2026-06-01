@@ -23,7 +23,7 @@ import subprocess
 import sys
 import tempfile
 from collections import defaultdict
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Final
 from urllib.error import HTTPError, URLError
@@ -1498,7 +1498,7 @@ def _build_runtime_cardinality_review_summary(
     live_threshold_violations: list[str] = []
 
     summary: RuntimeCardinalityReviewSummary = {
-        "generated_at": datetime.now(timezone.utc)
+        "generated_at": datetime.now(UTC)
         .replace(microsecond=0)
         .isoformat()
         .replace("+00:00", "Z"),

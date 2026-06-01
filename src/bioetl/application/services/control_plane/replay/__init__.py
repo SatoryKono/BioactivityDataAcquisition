@@ -100,7 +100,27 @@ _PUBLIC_EXPORTS = {
     ),
 }
 
-__all__ = list(_PUBLIC_EXPORTS)
+__all__ = [
+    "HistoricalReplayBulkCertificationRecord",
+    "HistoricalReplayBulkCertificationResult",
+    "HistoricalReplayBulkCertificationSpec",
+    "HistoricalReplayCertifiabilityInventory",
+    "HistoricalReplayCertifiabilityRecord",
+    "HistoricalReplayCertificationResult",
+    "HistoricalReplayCertificationService",
+    "HistoricalReplayClosureReportRecord",
+    "HistoricalReplayClosureService",
+    "HistoricalReplayCorpusService",
+    "HistoricalReplayResidualDispositionRecord",
+    "HistoricalReplaySnapshotCertification",
+    "HistoricalReplayUniverseClosureReportRecord",
+    "HistoricalReplayUniverseExternalRecord",
+    "HistoricalReplayUniverseInventorySnapshot",
+    "HistoricalReplayUniverseRecord",
+    "HistoricalReplayUniverseService",
+    "RunReplayBundleDescriptorRecord",
+    "build_run_replay_bundle_descriptor",
+]
 
 
 def __getattr__(name: str) -> object:
