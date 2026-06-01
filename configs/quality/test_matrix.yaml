@@ -589,7 +589,7 @@ property_test_boundaries:
 mutation_testing:
   enabled: true
   workflow_present: true
-  ci_gate_mode: partial  # Domain and curated application-control-plane scope enforced; broad application target staged
+  ci_gate_mode: partial  # Domain and curated application slices enforced; broad application target staged
   governance_ledger_location: configs/quality/mutation_testing_rollout_ledger.yaml
   tool: mutmut
   targets:
@@ -601,6 +601,11 @@ mutation_testing:
     application_control_plane:
       paths_to_mutate: src/bioetl/application/services/control_plane/
       tests_dir: tests/unit/application/services/control_plane/
+      min_score: 60
+      enforced: true
+    application_export_manifests:
+      paths_to_mutate: src/bioetl/application/services/export_manifests.py
+      tests_dir: tests/unit/application/services/
       min_score: 60
       enforced: true
     application:

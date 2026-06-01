@@ -205,7 +205,7 @@
     {
       "id": 9404,
       "type": "stat",
-      "title": "Range Pipeline Status",
+      "title": "Pipeline Status",
       "gridPos": {
         "h": 5,
         "w": 4,

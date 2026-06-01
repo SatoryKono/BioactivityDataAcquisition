@@ -59,9 +59,31 @@ def _build_request(spec: WorkflowTransformSpec) -> ForeignKeyReconciliationReque
     config = spec.config or {}
     source_table = _required_str(config, "source_table")
     reference_table = _required_str(config, "reference_table")
+    _require_delete_orphans_action(config)
+    primary_keys = _required_primary_keys(config)
+    source_key, reference_key, source_keys, reference_keys = _resolve_reference_keys(
+        config
+    )
+    return ForeignKeyReconciliationRequest(
+        source_table=source_table,
+        reference_table=reference_table,
+        source_key=source_key,
+        reference_key=reference_key,
+        primary_keys=primary_keys,
+        action="delete_orphans",
+        source_keys=source_keys,
+        reference_keys=reference_keys,
+        nulls_equal=bool(config.get("nulls_equal", False)),
+    )
+
+
+def _require_delete_orphans_action(config: Mapping[str, object]) -> None:
     action = _required_str(config, "action")
     if action != "delete_orphans":
         raise ValueError("reconcile_foreign_keys supports only action=delete_orphans")
+
+
+def _required_primary_keys(config: Mapping[str, object]) -> tuple[str, ...]:
     raw_primary_keys = config.get("primary_keys")
     if not isinstance(raw_primary_keys, list) or not raw_primary_keys:
         raise ValueError(
@@ -74,35 +96,32 @@ def _build_request(spec: WorkflowTransformSpec) -> ForeignKeyReconciliationReque
         raise ValueError(
             "reconcile_foreign_keys requires at least one non-empty primary key"
         )
+    return primary_keys
+
+
+def _resolve_reference_keys(
+    config: Mapping[str, object],
+) -> tuple[str, str, tuple[str, ...] | None, tuple[str, ...] | None]:
     source_keys = _optional_key_tuple(config, "source_keys")
     reference_keys = _optional_key_tuple(config, "reference_keys")
     if source_keys is None and reference_keys is None:
-        source_key = _required_str(config, "source_key")
-        reference_key = _required_str(config, "reference_key")
-    else:
-        if source_keys is None or reference_keys is None:
-            raise ValueError(
-                "reconcile_foreign_keys requires source_keys and reference_keys "
-                "together"
-            )
-        if len(source_keys) != len(reference_keys):
-            raise ValueError(
-                "reconcile_foreign_keys requires source_keys and reference_keys "
-                "to have the same length"
-            )
-        source_key = source_keys[0]
-        reference_key = reference_keys[0]
-    return ForeignKeyReconciliationRequest(
-        source_table=source_table,
-        reference_table=reference_table,
-        source_key=source_key,
-        reference_key=reference_key,
-        primary_keys=primary_keys,
-        action="delete_orphans",
-        source_keys=source_keys,
-        reference_keys=reference_keys,
-        nulls_equal=bool(config.get("nulls_equal", False)),
-    )
+        return (
+            _required_str(config, "source_key"),
+            _required_str(config, "reference_key"),
+            None,
+            None,
+        )
+    if source_keys is None or reference_keys is None:
+        raise ValueError(
+            "reconcile_foreign_keys requires source_keys and reference_keys "
+            "together"
+        )
+    if len(source_keys) != len(reference_keys):
+        raise ValueError(
+            "reconcile_foreign_keys requires source_keys and reference_keys "
+            "to have the same length"
+        )
+    return source_keys[0], reference_keys[0], source_keys, reference_keys
 
 
 def _required_str(config: Mapping[str, object], key: str) -> str:

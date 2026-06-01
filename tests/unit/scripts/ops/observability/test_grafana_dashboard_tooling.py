@@ -23,7 +23,7 @@ from scripts.ops.observability.grafana import (
 )
 from tests.helpers import assert_router_python_command
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.repo_backed
 
 
 def _backend_result(
@@ -1047,7 +1047,7 @@ def test_workflow_status_titles_make_selected_range_scope_visible() -> None:
     titles = {panel.get("id"): panel.get("title") for panel in dashboard["panels"]}
 
     assert titles[9401] == "Status"
-    assert titles[9404] == "Range Pipeline Status"
+    assert titles[9404] == "Pipeline Status"
 
 
 def test_live_audit_isolates_non_required_panel_execution_failures(

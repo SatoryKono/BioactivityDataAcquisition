@@ -99,12 +99,12 @@
       },
       "id": 1,
       "options": {
-        "content": "<div style='padding:0.7rem 0.85rem;text-align:center;line-height:1.45'><div style='display:flex;flex-wrap:wrap;justify-content:center;gap:0.5rem 1rem;font-size:1.05rem;font-weight:600'><span>Pipeline: <strong>$pipeline</strong></span><span>Run Type: <strong>$run_type</strong></span><span>Reason: <strong>$reason_code</strong></span><span>Field: <strong>$field</strong></span><span>Reject Run ID: <strong>$quarantine_run_id</strong></span></div><div style='margin-top:0.35rem'><strong style='color:#ffb347'>default 24h forensic window</strong></div><div style='margin-top:0.3rem'><small>Origin dashboards own shared workflow/run_id shell context; this explorer never owns shared workflow or run_id selectors. Select exactly one pipeline. This explorer is read-only and scoped to Silver FILTERED_OUT_SILVER rows. quarantine_run_id remains the forensic row filter and must not become a Prometheus label. Quarantine Explorer is fail-closed and forensic filters like quarantine_run_id/payload_hash stay explorer-only. A zero-reject workflow run is an intentional empty explorer state only after the datasource responds and scope is confirmed.</small></div></div>",
+        "content": "<div style='padding:0.7rem 0.85rem;text-align:center;line-height:1.45'><div style='display:flex;flex-wrap:wrap;justify-content:center;gap:0.5rem 1rem;font-size:1.05rem;font-weight:600'><span>Pipeline: <strong>$pipeline</strong></span><span>Run Type: <strong>$run_type</strong></span><span>Reason: <strong>$reason_code</strong></span><span>Field: <strong>$field</strong></span><span>Reject Run ID: <strong>$quarantine_run_id</strong></span></div><div style='margin-top:0.35rem'><strong style='color:#ffb347'>default 24h forensic window</strong></div><div style='margin-top:0.3rem'><small>Origin dashboards own shared workflow/run_id shell context; this explorer never owns shared workflow or run_id selectors. Select exactly one pipeline. This explorer is read-only and scoped to Silver FILTERED_OUT_SILVER rows. quarantine_run_id remains the forensic row filter and must not become a Prometheus label. Quarantine Explorer is fail-closed and forensic filters like quarantine_run_id/payload_hash stay explorer-only. A zero-reject workflow run is an intentional empty explorer state only after the datasource responds, scope is confirmed, and the bronze denominator is non-zero.</small></div></div>",
         "mode": "html"
       },
       "title": "Inspect Explorer Scope",
       "type": "text",
-      "description": "Scope banner for Silver Reject Explorer. Origin dashboards own shared workflow/run_id shell context; this explorer never owns shared workflow or run_id selectors and stays pipeline/run_type forensic. quarantine_run_id remains the forensic row filter and is not a Prometheus label."
+      "description": "Scope banner for Silver Reject Explorer. Origin dashboards own shared workflow/run_id shell context; this explorer never owns shared workflow or run_id selectors and stays pipeline/run_type forensic. quarantine_run_id remains the forensic row filter and is not a Prometheus label. Zero-reject workflow interpretation also requires a non-zero bronze denominator."
     },
     {
       "datasource": "Quarantine Explorer",
@@ -179,13 +179,13 @@
       "links": [
         {
           "title": "Review total rejects",
-          "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?viewPanel=2&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=All&var-quarantine_run_id=$quarantine_run_id",
+          "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?viewPanel=2&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-quarantine_run_id=$quarantine_run_id",
           "targetBlank": false,
           "includeVars": false
         },
         {
           "title": "Review scoped summary",
-          "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?viewPanel=4&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=All&var-quarantine_run_id=$quarantine_run_id",
+          "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?viewPanel=4&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-quarantine_run_id=$quarantine_run_id",
           "targetBlank": false,
           "includeVars": false
         }
@@ -755,7 +755,7 @@
             {
               "targetBlank": false,
               "title": "Open same dashboard with this payload_hash",
-              "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${__data.fields.pipeline}&var-run_type=${__data.fields.run_type}&var-reason_code=${__data.fields.reason_code}&var-field=${__data.fields.field}&var-quarantine_run_id=${__data.fields.run_id}&var-payload_hash=${__data.fields.payload_hash}&${__url_time_range}&var-workflow=All",
+              "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${__data.fields.pipeline}&var-run_type=${__data.fields.run_type}&var-reason_code=${__data.fields.reason_code}&var-field=${__data.fields.field}&var-quarantine_run_id=${__data.fields.run_id}&var-payload_hash=${__data.fields.payload_hash}&${__url_time_range}",
               "includeVars": false
             },
             {

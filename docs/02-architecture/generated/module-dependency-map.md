@@ -5,11 +5,11 @@
 
 ## Summary
 
-- Scanned modules: `1973`
-- Internal import edges (raw): `7788`
+- Scanned modules: `1971`
+- Internal import edges (raw): `7778`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
-- Cross-layer module-group edges (total): `333`
+- Cross-layer module-group edges (total): `334`
 - Cross-layer module-group edges (top 60): `60`
 
 ## Layer Dependency Graph
@@ -21,12 +21,12 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1356 OK| application
+    application -->|1353 OK| application
     application -->|1163 OK| domain
     composition -->|290 OK| application
-    composition -->|699 OK| composition
-    composition -->|451 OK| domain
-    composition -->|339 OK| infrastructure
+    composition -->|696 OK| composition
+    composition -->|446 OK| domain
+    composition -->|340 OK| infrastructure
     domain -->|1243 OK| domain
     infrastructure -->|795 OK| domain
     infrastructure -->|973 OK| infrastructure
@@ -40,12 +40,12 @@ flowchart LR
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1356 | allowed |
+| `application`    | `application`    |    1353 | allowed |
 | `application`    | `domain`         |    1163 | allowed |
 | `composition`    | `application`    |     290 | allowed |
-| `composition`    | `composition`    |     699 | allowed |
-| `composition`    | `domain`         |     451 | allowed |
-| `composition`    | `infrastructure` |     339 | allowed |
+| `composition`    | `composition`    |     696 | allowed |
+| `composition`    | `domain`         |     446 | allowed |
+| `composition`    | `infrastructure` |     340 | allowed |
 | `domain`         | `domain`         |    1243 | allowed |
 | `infrastructure` | `domain`         |     795 | allowed |
 | `infrastructure` | `infrastructure` |     973 | allowed |
@@ -116,8 +116,8 @@ flowchart LR
 | `infrastructure.quality`       | `domain.types`                  |      15 |
 | `composition.factories`        | `domain.behavior`               |      14 |
 | `application.services`         | `domain.normalization`          |      13 |
-| `composition.providers`        | `domain.ports`                  |      13 |
 | `interfaces.cli`               | `composition.registry_api`      |      13 |
+| `application.services`         | `domain.behavior`               |      12 |
 
 ## Policy Violations
 
