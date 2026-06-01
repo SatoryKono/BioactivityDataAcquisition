@@ -16,7 +16,8 @@ GOLD_SNAPSHOT_REGISTRY_PATH = (
 )
 DEFAULT_CONTRACT_VERSION = "1.0.0"
 ENTITY_CONTRACT_VERSIONS: dict[str, str] = {
-    "chembl_target": "2.0.0",
+    "chembl_target": "3.0.0",
+    "chembl_target_protein_classification": "2.0.0",
 }
 _ALLOWED_TYPE_NAMES = frozenset({"bool", "float64", "int64", "str"})
 

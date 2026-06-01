@@ -62,7 +62,6 @@ def test_resolver_deduplicates_and_sorts_multiple_classifications() -> None:
     )
 
     assert [row.leaf_id for row in result.rows] == [2, 3, 5]
-    assert [row.hierarchy_index for row in result.rows] == [0, 1, 2]
     assert result.rows[2].component_id == 10
     assert result.has_quarantine is False
 

@@ -1693,7 +1693,7 @@
       "strict": true
     },
     "chembl_target": {
-      "contract_version": "2.0.0",
+      "contract_version": "3.0.0",
       "fields": {
         "_dq_error": {
           "description": "Hard data-quality error flag.",
@@ -1775,11 +1775,6 @@
           "dtype": "float64",
           "nullable": true
         },
-        "protein_classifications": {
-          "description": "",
-          "dtype": "str",
-          "nullable": true
-        },
         "species_group_flag": {
           "description": "",
           "dtype": "bool",
@@ -1809,81 +1804,6 @@
           "description": "",
           "dtype": "str",
           "nullable": false
-        },
-        "target_protein_class_desc_L1": {
-          "description": "",
-          "dtype": "str",
-          "nullable": true
-        },
-        "target_protein_class_desc_L2": {
-          "description": "",
-          "dtype": "str",
-          "nullable": true
-        },
-        "target_protein_class_desc_L3": {
-          "description": "",
-          "dtype": "str",
-          "nullable": true
-        },
-        "target_protein_class_desc_L4": {
-          "description": "",
-          "dtype": "str",
-          "nullable": true
-        },
-        "target_protein_class_desc_L5": {
-          "description": "",
-          "dtype": "str",
-          "nullable": true
-        },
-        "target_protein_class_id_L1": {
-          "description": "",
-          "dtype": "str",
-          "nullable": true
-        },
-        "target_protein_class_id_L2": {
-          "description": "",
-          "dtype": "str",
-          "nullable": true
-        },
-        "target_protein_class_id_L3": {
-          "description": "",
-          "dtype": "str",
-          "nullable": true
-        },
-        "target_protein_class_id_L4": {
-          "description": "",
-          "dtype": "str",
-          "nullable": true
-        },
-        "target_protein_class_id_L5": {
-          "description": "",
-          "dtype": "str",
-          "nullable": true
-        },
-        "target_protein_class_name_L1": {
-          "description": "",
-          "dtype": "str",
-          "nullable": true
-        },
-        "target_protein_class_name_L2": {
-          "description": "",
-          "dtype": "str",
-          "nullable": true
-        },
-        "target_protein_class_name_L3": {
-          "description": "",
-          "dtype": "str",
-          "nullable": true
-        },
-        "target_protein_class_name_L4": {
-          "description": "",
-          "dtype": "str",
-          "nullable": true
-        },
-        "target_protein_class_name_L5": {
-          "description": "",
-          "dtype": "str",
-          "nullable": true
         },
         "target_protein_synonyms": {
           "description": "",
@@ -1936,7 +1856,7 @@
           "nullable": true
         }
       },
-      "published_contract_path": "docs/04-reference/contracts/gold/chembl_target_v2.0.json",
+      "published_contract_path": "docs/04-reference/contracts/gold/chembl_target_v3.0.json",
       "schema_class": "ChEMBLTargetGoldSchema",
       "strict": true
     },
@@ -2029,7 +1949,7 @@
       "strict": true
     },
     "chembl_target_protein_classification": {
-      "contract_version": "1.0.0",
+      "contract_version": "2.0.0",
       "fields": {
         "_dq_error": {
           "description": "Hard data-quality error flag.",
@@ -2064,11 +1984,6 @@
         "entity_id": {
           "description": "",
           "dtype": "str",
-          "nullable": false
-        },
-        "hierarchy_index": {
-          "description": "",
-          "dtype": "int64",
           "nullable": false
         },
         "l1_desc": {
@@ -2157,7 +2072,7 @@
           "nullable": false
         }
       },
-      "published_contract_path": "docs/04-reference/contracts/gold/chembl_target_protein_classification_v1.0.json",
+      "published_contract_path": "docs/04-reference/contracts/gold/chembl_target_protein_classification_v2.0.json",
       "schema_class": "ChEMBLTargetProteinClassificationGoldSchema",
       "strict": true
     },

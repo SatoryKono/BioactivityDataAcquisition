@@ -28,14 +28,13 @@ def target_id_from_record(record: Mapping[str, object]) -> str | None:
 def component_ids_from_target_record(record: Mapping[str, object]) -> tuple[int, ...]:
     """Extract unique component IDs from a target record."""
     raw_components = record.get("target_components")
-    if not isinstance(raw_components, list):
-        return ()
-    component_ids = [
-        component_id
-        for item in raw_components
-        if isinstance(item, Mapping)
-        if (component_id := coerce_positive_int(item.get("component_id"))) is not None
-    ]
+    component_ids = list(
+        _component_ids_from_target_components_value(raw_components)
+    )
+    component_ids.extend(_component_ids_from_component_ids_value(record.get("component_ids")))
+    primary_component_id = coerce_positive_int(record.get("primary_component_id"))
+    if primary_component_id is not None:
+        component_ids.append(primary_component_id)
     return tuple(dict.fromkeys(component_ids))
 
 
@@ -138,3 +137,42 @@ def coerce_text(value: object) -> str | None:
 def canonical_json(value: Any) -> str:
     """Serialize a deterministic JSON payload for graph lookup helpers."""
     return json.dumps(value, sort_keys=True, separators=(",", ":"))
+
+
+def _component_ids_from_target_components_value(value: object) -> tuple[int, ...]:
+    loaded = _load_json_if_needed(value)
+    if not isinstance(loaded, list):
+        return ()
+    component_ids = [
+        component_id
+        for item in loaded
+        if isinstance(item, Mapping)
+        if (component_id := coerce_positive_int(item.get("component_id"))) is not None
+    ]
+    return tuple(dict.fromkeys(component_ids))
+
+
+def _component_ids_from_component_ids_value(value: object) -> tuple[int, ...]:
+    loaded = _load_json_if_needed(value)
+    if not isinstance(loaded, Iterable) or isinstance(loaded, (str, bytes)):
+        return ()
+    component_ids = [
+        component_id
+        for item in loaded
+        if (component_id := coerce_positive_int(item)) is not None
+    ]
+    return tuple(dict.fromkeys(component_ids))
+
+
+def _load_json_if_needed(value: object) -> object:
+    if not isinstance(value, str):
+        return value
+    stripped = value.strip()
+    if not stripped:
+        return None
+    try:
+        return json.loads(stripped)
+    except json.JSONDecodeError as exc:
+        raise ProteinClassificationResolutionError(
+            "target component identifiers must be canonical JSON"
+        ) from exc

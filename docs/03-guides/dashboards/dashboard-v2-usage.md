@@ -79,7 +79,10 @@ Detached audit backend contract:
 - `bioetl-workflow-overview`: `$workflow`, `$pipeline`, `$run_type`,
   `$run_id`, `$status`, `$step_status`, `$step_kind`, hidden
   `$pipeline_context`, `$run_type_context`, `$provider_context`
-- `bioetl-silver-reject-explorer`: `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$quarantine_run_id`, `$payload_hash`
+- `bioetl-silver-reject-explorer`: hidden `$workflow` navigation shell plus
+  `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$quarantine_run_id`,
+  `$payload_hash`
+- `bioetl-alerts-slo`: `$workflow`, `$pipeline`, `$run_type`
 - `bioetl-overview-v2` intentionally ships with `Workflow=All`,
   `Pipeline=All`, `Run Type=All`, and `Run ID=-` как default entry scope.
 - Primary dashboards `0..5` now expose the shared context shell
@@ -103,11 +106,12 @@ Detached audit backend contract:
   single-select, потому что quarantine API fail-closed требует явный
   `pipeline` параметр.
 - Переменная `execution` не используется; `$quarantine_run_id` и
-  `$payload_hash` остаются только в `bioetl-silver-reject-explorer`, а
-  `$run_id` в primary dashboards `0..5` сохраняется между primary dashboards
-  как HTTP-backed identity context для `ID`/details panels и не становится
-  Prometheus label. Generic links в `Silver Reject Explorer` не маппят его в
-  `$quarantine_run_id`.
+  `$payload_hash` остаются только в `bioetl-silver-reject-explorer`.
+  `$run_id` в primary dashboards `0..5` сохраняется как HTTP-backed identity
+  context для `ID`/details panels и не становится Prometheus label. Handoffs
+  into `Silver Reject Explorer` additionally pass `$run_id` into
+  `$quarantine_run_id` so exact-run forensic review keeps the selected run
+  scope; generic handoffs out of the explorer do not export primary `$run_id`.
 
 ## Что смотреть в первую очередь
 

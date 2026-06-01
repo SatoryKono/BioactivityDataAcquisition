@@ -39,7 +39,6 @@ class TargetProteinClassificationRecord:
     """Gold-facing target protein classification relation row."""
 
     target_id: str
-    hierarchy_index: int
     classification_status: str
     component_id: int | None = None
     leaf_id: int | None = None
@@ -64,7 +63,6 @@ class TargetProteinClassificationRecord:
         """Build a sentinel row for targets without classification evidence."""
         return cls(
             target_id=target_id,
-            hierarchy_index=0,
             classification_status=_STATUS_MISSING,
         )
 
@@ -76,7 +74,6 @@ class TargetProteinClassificationRecord:
         """Build a sentinel row for targets whose classification failed DQ."""
         return cls(
             target_id=target_id,
-            hierarchy_index=0,
             classification_status=_STATUS_QUARANTINED,
         )
 
@@ -85,7 +82,6 @@ class TargetProteinClassificationRecord:
         cls,
         *,
         target_id: str,
-        hierarchy_index: int,
         component_id: int,
         hierarchy: ProteinClassHierarchy,
     ) -> TargetProteinClassificationRecord:
@@ -94,7 +90,6 @@ class TargetProteinClassificationRecord:
         return cls(
             target_id=target_id,
             component_id=component_id,
-            hierarchy_index=hierarchy_index,
             leaf_id=hierarchy.leaf_id,
             classification_status=_STATUS_RESOLVED,
             l1_id=levels[0].id,
@@ -118,8 +113,8 @@ class TargetProteinClassificationRecord:
         """Return a plain dictionary suitable for DataFrame/Gold publication."""
         return {
             "target_id": self.target_id,
+            "classification_status": self.classification_status,
             "component_id": self.component_id,
-            "hierarchy_index": self.hierarchy_index,
             "leaf_id": self.leaf_id,
             "l1_id": self.l1_id,
             "l1_name": self.l1_name,
@@ -136,7 +131,6 @@ class TargetProteinClassificationRecord:
             "l5_id": self.l5_id,
             "l5_name": self.l5_name,
             "l5_desc": self.l5_desc,
-            "classification_status": self.classification_status,
         }
 
 
@@ -286,13 +280,10 @@ def _resolved_resolution(
     rows = tuple(
         TargetProteinClassificationRecord.resolved(
             target_id=target_id,
-            hierarchy_index=index,
             component_id=component_id,
             hierarchy=hierarchy,
         )
-        for index, (_leaf_id, (component_id, hierarchy)) in enumerate(
-            sorted(by_leaf_id.items())
-        )
+        for _leaf_id, (component_id, hierarchy) in sorted(by_leaf_id.items())
     )
     return ProteinClassificationResolutionResult(
         target_id=target_id,

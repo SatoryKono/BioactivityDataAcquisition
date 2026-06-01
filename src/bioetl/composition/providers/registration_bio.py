@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.data_sources.idmapping import IDMappingDataSource
@@ -36,8 +37,7 @@ from bioetl.composition.providers._registration_contracts import (
     resolve_provider_assembly_support,
 )
 from bioetl.composition.providers._chembl_target_protein_classification_data_source import (
-    TargetProteinClassificationDataSource,
-    TargetProteinClassificationEnrichedTargetDataSource,
+    TargetProteinClassificationSnapshotDataSource,
 )
 from bioetl.domain.models.filter import ExtractionParams
 from bioetl.infrastructure.adapters.chembl import ChemblAdapter
@@ -48,6 +48,7 @@ from bioetl.infrastructure.adapters.uniprot.constants import UNIPROT_API_BASE
 from bioetl.infrastructure.adapters.uniprot.idmapping_client import (
     UniProtIDMappingClient,
 )
+from bioetl.infrastructure.storage.delta_reader import DeltaReader
 
 if TYPE_CHECKING:
     from bioetl.composition.bootstrap_contexts import RateLimitContext
@@ -75,6 +76,21 @@ def _create_chembl_data_source(
     For document_term entity type, wraps the adapter with PublicationTermDataSource
     to extract terms from publication records (derived entity pattern).
     """
+    if pipeline_config.entity_type == "target_protein_classification":
+        return _wrap_with_filter(
+            TargetProteinClassificationSnapshotDataSource(
+                delta_reader=DeltaReader(
+                    base_path=Path(settings.data_dir) / "output",
+                    logger=logger,
+                ),
+                logger=logger,
+            ),
+            filter_config,
+            logger,
+            metrics,
+            pipeline_name,
+        )
+
     support = resolve_provider_assembly_support(assembly_support)
     http_client = support.create_http_client("chembl", settings, metrics=metrics)
 
@@ -106,12 +122,6 @@ def _create_chembl_data_source(
         base_adapter = PublicationTermDataSource(base_adapter)
     if pipeline_config.entity_type == "subcellular_fraction":
         base_adapter = SubcellularFractionDataSource(base_adapter)
-    if pipeline_config.entity_type == "target":
-        base_adapter = TargetProteinClassificationEnrichedTargetDataSource(
-            base_adapter
-        )
-    if pipeline_config.entity_type == "target_protein_classification":
-        base_adapter = TargetProteinClassificationDataSource(base_adapter)
 
     return _wrap_with_filter(
         base_adapter, filter_config, logger, metrics, pipeline_name

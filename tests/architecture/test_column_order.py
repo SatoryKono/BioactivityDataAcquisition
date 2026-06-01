@@ -44,8 +44,8 @@ CUSTOM_ORDER_SCHEMAS = frozenset(
 CUSTOM_BUSINESS_FIELD_ORDER = {
     "CHEMBL_TARGET_PROTEIN_CLASSIFICATION_SCHEMA": [
         "target_id",
+        "classification_status",
         "component_id",
-        "hierarchy_index",
         "leaf_id",
         "l1_id",
         "l1_name",
@@ -62,7 +62,6 @@ CUSTOM_BUSINESS_FIELD_ORDER = {
         "l5_id",
         "l5_name",
         "l5_desc",
-        "classification_status",
     ]
 }
 

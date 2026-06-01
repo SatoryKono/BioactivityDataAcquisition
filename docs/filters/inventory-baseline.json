@@ -5,8 +5,8 @@
     "entities_total": 27,
     "entities_with_silver_filters": 22,
     "entities_with_gold_filters": 22,
-    "rules_total": 133,
-    "keep_in_silver": 96,
+    "rules_total": 132,
+    "keep_in_silver": 95,
     "move_to_gold": 18,
     "duplicate": 19,
     "conflict": 0
@@ -1284,7 +1284,7 @@
       "has_silver_filters": true,
       "has_gold_filters": true,
       "counts_by_action": {
-        "keep_in_silver": 3,
+        "keep_in_silver": 2,
         "move_to_gold": 0,
         "duplicate": 0,
         "conflict": 0
@@ -1299,16 +1299,6 @@
           "gold_value": "\"target_id\"",
           "action": "keep_in_silver",
           "notes": "also present in gold_filters (informational)"
-        },
-        {
-          "provider": "chembl",
-          "entity": "target_protein_classification",
-          "rule_type": "required_fields",
-          "field": "hierarchy_index",
-          "silver_value": "\"hierarchy_index\"",
-          "gold_value": "",
-          "action": "keep_in_silver",
-          "notes": "structural rule stays in silver_filters"
         },
         {
           "provider": "chembl",

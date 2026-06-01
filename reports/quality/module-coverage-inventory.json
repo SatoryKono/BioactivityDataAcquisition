@@ -3153,7 +3153,7 @@
       "missing_lines": null,
       "module": "bioetl.application.pipelines.chembl.target_protein_classification_summary",
       "path": "src/bioetl/application/pipelines/chembl/target_protein_classification_summary.py",
-      "source_lines": 216
+      "source_lines": 206
     },
     {
       "coverage_percent": 33.9,
@@ -3163,7 +3163,7 @@
       "missing_lines": 39,
       "module": "bioetl.application.pipelines.chembl.target_protein_classification_transformer",
       "path": "src/bioetl/application/pipelines/chembl/target_protein_classification_transformer.py",
-      "source_lines": 150
+      "source_lines": 143
     },
     {
       "coverage_percent": 25.83,
@@ -3173,7 +3173,7 @@
       "missing_lines": 89,
       "module": "bioetl.application.pipelines.chembl.target_transformer",
       "path": "src/bioetl/application/pipelines/chembl/target_transformer.py",
-      "source_lines": 388
+      "source_lines": 200
     },
     {
       "coverage_percent": 81.25,
@@ -4403,7 +4403,7 @@
       "missing_lines": 104,
       "module": "bioetl.application.services.protein_classification_resolution",
       "path": "src/bioetl/application/services/protein_classification_resolution.py",
-      "source_lines": 324
+      "source_lines": 315
     },
     {
       "coverage_percent": 63.16,
@@ -7693,7 +7693,7 @@
       "missing_lines": null,
       "module": "bioetl.composition.providers._chembl_target_protein_classification_data_source",
       "path": "src/bioetl/composition/providers/_chembl_target_protein_classification_data_source.py",
-      "source_lines": 218
+      "source_lines": 328
     },
     {
       "coverage_percent": null,
@@ -7703,17 +7703,7 @@
       "missing_lines": null,
       "module": "bioetl.composition.providers._chembl_target_protein_classification_helpers",
       "path": "src/bioetl/composition/providers/_chembl_target_protein_classification_helpers.py",
-      "source_lines": 140
-    },
-    {
-      "coverage_percent": null,
-      "coverage_status": "unmeasured",
-      "covered_lines": null,
-      "executable_lines": null,
-      "missing_lines": null,
-      "module": "bioetl.composition.providers._chembl_target_protein_classification_relation_builder",
-      "path": "src/bioetl/composition/providers/_chembl_target_protein_classification_relation_builder.py",
-      "source_lines": 289
+      "source_lines": 178
     },
     {
       "coverage_percent": 42.86,
@@ -7893,7 +7883,7 @@
       "missing_lines": 41,
       "module": "bioetl.composition.providers.registration_bio",
       "path": "src/bioetl/composition/providers/registration_bio.py",
-      "source_lines": 333
+      "source_lines": 343
     },
     {
       "coverage_percent": 66.67,
@@ -9663,7 +9653,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.contracts.gold._chembl_target_lookup_schemas",
       "path": "src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
-      "source_lines": 216
+      "source_lines": 199
     },
     {
       "coverage_percent": 100.0,
@@ -10223,7 +10213,7 @@
       "missing_lines": 30,
       "module": "bioetl.domain.entities.chembl_structures_foundation",
       "path": "src/bioetl/domain/entities/chembl_structures_foundation.py",
-      "source_lines": 214
+      "source_lines": 203
     },
     {
       "coverage_percent": 77.12,
@@ -11713,7 +11703,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.normalization.profiles.chembl_target_protein_classification",
       "path": "src/bioetl/domain/normalization/profiles/chembl_target_protein_classification.py",
-      "source_lines": 68
+      "source_lines": 67
     },
     {
       "coverage_percent": 100.0,
@@ -12803,7 +12793,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.schemas.chembl.target",
       "path": "src/bioetl/domain/schemas/chembl/target.py",
-      "source_lines": 204
+      "source_lines": 151
     },
     {
       "coverage_percent": 100.0,
@@ -12823,7 +12813,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.schemas.chembl.target_protein_classification",
       "path": "src/bioetl/domain/schemas/chembl/target_protein_classification.py",
-      "source_lines": 87
+      "source_lines": 81
     },
     {
       "coverage_percent": 100.0,
@@ -17403,7 +17393,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.schemas.silver_chembl_core",
       "path": "src/bioetl/infrastructure/schemas/silver_chembl_core.py",
-      "source_lines": 411
+      "source_lines": 394
     },
     {
       "coverage_percent": 100.0,
@@ -19758,7 +19748,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-06-01",
-  "source_tree_sha256": "94b0e6e26d464cb14c1c83c7f0acc1b9e7d830f0b420427c33016a90fac45b20",
+  "source_tree_sha256": "6f4387293494836051b821b707f93f54926f22c7a36d0b3dff3757facf22c2ac",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -19973,14 +19963,14 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 1975,
+    "source_module_count": 1974,
     "status_counts": {
       "fully_covered": 493,
       "partially_covered": 1153,
       "uncovered": 318,
-      "unmeasured": 11
+      "unmeasured": 10
     },
-    "unmeasured_module_count": 11,
+    "unmeasured_module_count": 10,
     "unmeasured_modules": [
       {
         "module": "bioetl.__main__",
@@ -20010,11 +20000,6 @@
       {
         "module": "bioetl.composition.providers._chembl_target_protein_classification_helpers",
         "path": "src/bioetl/composition/providers/_chembl_target_protein_classification_helpers.py",
-        "reason": "coverage_xml_has_no_class_entry"
-      },
-      {
-        "module": "bioetl.composition.providers._chembl_target_protein_classification_relation_builder",
-        "path": "src/bioetl/composition/providers/_chembl_target_protein_classification_relation_builder.py",
         "reason": "coverage_xml_has_no_class_entry"
       },
       {

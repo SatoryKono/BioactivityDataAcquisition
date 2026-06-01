@@ -295,8 +295,8 @@ class ComponentHelper:
             and descriptions.
 
         Note:
-            protein_classifications are projected separately because enriched
-            target payloads may carry component classification sidecars.
+            target-level protein classification summary is published by the
+            derived relation/composite surfaces, not the base target pipeline.
 
         """
         if not components or not isinstance(components, list):

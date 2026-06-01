@@ -52,7 +52,7 @@ class TargetProteinClassificationTransformer(BaseChemblTransformer):
         record: BronzeRecord,
         index: int,
     ) -> SilverRecord | None:
-        """Build a stable Silver row keyed by target_id + hierarchy_index."""
+        """Build a stable Silver row keyed by target_id + status + component/leaf."""
         business_data = self._extract_business_data(
             record,
             self._resolve_primary_id(record),
@@ -70,14 +70,12 @@ class TargetProteinClassificationTransformer(BaseChemblTransformer):
         primary_id: PrimaryId,
     ) -> JsonDict:
         """Extract shaped target protein-classification relation fields."""
-        hierarchy_index = _required_non_negative_int(
-            record.get("hierarchy_index"),
-            field_name="hierarchy_index",
-        )
         return {
             "target_id": str(primary_id),
+            "classification_status": _classification_status(
+                record.get("classification_status")
+            ),
             "component_id": _optional_int(record.get("component_id")),
-            "hierarchy_index": hierarchy_index,
             "leaf_id": _optional_id_text(record.get("leaf_id")),
             "l1_id": _optional_id_text(record.get("l1_id")),
             "l1_name": _optional_text(record.get("l1_name")),
@@ -94,14 +92,17 @@ class TargetProteinClassificationTransformer(BaseChemblTransformer):
             "l5_id": _optional_id_text(record.get("l5_id")),
             "l5_name": _optional_text(record.get("l5_name")),
             "l5_desc": _optional_text(record.get("l5_desc")),
-            "classification_status": _classification_status(
-                record.get("classification_status")
-            ),
         }
 
 
 def _target_classification_entity_id(record: JsonDict) -> str:
-    return f"{record['target_id']}:{record['hierarchy_index']}"
+    target_id = str(record["target_id"])
+    status = str(record["classification_status"])
+    component_id = _optional_int(record.get("component_id"))
+    leaf_id = _optional_int(record.get("leaf_id"))
+    if status == "resolved" and component_id is not None and leaf_id is not None:
+        return f"{target_id}:{component_id}:{leaf_id}"
+    return f"{target_id}:{status}"
 
 
 def _classification_status(value: object) -> str:
@@ -111,14 +112,6 @@ def _classification_status(value: object) -> str:
     if normalized not in _CLASSIFICATION_STATUS_VALUES:
         raise ValueError(f"Invalid classification_status: {normalized}")
     return normalized
-
-
-def _required_non_negative_int(value: object, *, field_name: str) -> int:
-    coerced = _optional_int(value)
-    if coerced is None or coerced < 0:
-        raise ValueError(f"{field_name} must be a non-negative integer")
-    return coerced
-
 
 def _optional_int(value: object) -> int | None:
     if value is None or isinstance(value, bool):

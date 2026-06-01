@@ -46,7 +46,6 @@ async def test_transform_preserves_shaped_relation_row_identity(
     record = {
         "target_id": "CHEMBL123",
         "component_id": "10",
-        "hierarchy_index": "2",
         "leaf_id": "148",
         "l1_id": "1",
         "l1_name": "Membrane receptor",
@@ -56,9 +55,8 @@ async def test_transform_preserves_shaped_relation_row_identity(
     result = await transformer.transform(mock_context, record, index=0)
 
     assert result is not None
-    assert result["entity_id"] == "CHEMBL123:2"
+    assert result["entity_id"] == "CHEMBL123:10:148"
     assert result["target_id"] == "CHEMBL123"
-    assert result["hierarchy_index"] == 2
     assert result["component_id"] == 10
     assert result["leaf_id"] == "148"
     assert result["classification_status"] == "resolved"
@@ -71,10 +69,10 @@ async def test_transform_defaults_missing_status_to_missing_classification(
 ) -> None:
     result = await transformer.transform(
         mock_context,
-        {"target_id": "CHEMBL123", "hierarchy_index": 0},
+        {"target_id": "CHEMBL123"},
         index=0,
     )
 
     assert result is not None
-    assert result["entity_id"] == "CHEMBL123:0"
+    assert result["entity_id"] == "CHEMBL123:missing_classification"
     assert result["classification_status"] == "missing_classification"

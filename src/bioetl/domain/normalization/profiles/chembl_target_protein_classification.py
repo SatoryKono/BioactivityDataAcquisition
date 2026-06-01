@@ -37,7 +37,6 @@ _META_FIELDS = frozenset(
 _INT_FIELDS = frozenset(
     {
         "component_id",
-        "hierarchy_index",
     }
 )
 _TITLE_FIELDS = frozenset(

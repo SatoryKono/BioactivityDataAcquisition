@@ -123,20 +123,6 @@
     "required": true,
     "unique": false
   },
-  "hierarchy_index": {
-    "checks": [
-      {
-        "name": "greater_than_or_equal_to",
-        "type": "ge"
-      }
-    ],
-    "coerce": false,
-    "description": "Deterministic per-target hierarchy ordinal.",
-    "dtype": "int64",
-    "nullable": false,
-    "required": true,
-    "unique": false
-  },
   "l1_desc": {
     "checks": [],
     "coerce": false,

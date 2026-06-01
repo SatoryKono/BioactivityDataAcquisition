@@ -174,7 +174,7 @@ def _extract_link_vars(url: str) -> set[str]:
 
 
 def _extract_link_var_values(url: str) -> dict[str, str]:
-    return {name: value for name, value in _LINK_VAR_VALUE_RE.findall(url)}
+    return dict(_LINK_VAR_VALUE_RE.findall(url))
 
 
 def _is_logs_drilldown_url(url: str) -> bool:
@@ -1046,6 +1046,7 @@ def test_dashboard_titles_match_home_dashboard_navigation_names() -> None:
         "bioetl-provider-health-v2": "3. Provider Health",
         "bioetl-dq-v2": "4. Data Quality",
         "bioetl-workflow-overview": "5. Workflow",
+        "bioetl-alerts-slo": "6. Alerts & SLO",
         "bioetl-silver-reject-explorer": "Silver Reject Explorer",
     }
 
@@ -1361,6 +1362,7 @@ def test_navigation_panel_renders_full_visual_bus_with_disabled_current_item() -
         "bioetl-provider-health-v2": "3. Provider Health",
         "bioetl-dq-v2": "4. Data Quality",
         "bioetl-workflow-overview": "5. Workflow",
+        "bioetl-alerts-slo": "6. Alerts & SLO",
         "bioetl-silver-reject-explorer": "Silver Reject Explorer",
     }
     base_visual_titles = (

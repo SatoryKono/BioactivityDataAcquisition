@@ -20,6 +20,13 @@ workflow:
       step_id: run_chembl_protein_class
       pipeline_name: chembl_protein_class
     - kind: pipeline
+      step_id: run_chembl_target_protein_classification
+      pipeline_name: chembl_target_protein_classification
+      depends_on:
+        - run_chembl_target
+        - run_chembl_target_component
+        - run_chembl_protein_class
+    - kind: pipeline
       step_id: run_chembl_tissue
       pipeline_name: chembl_tissue
     - kind: pipeline

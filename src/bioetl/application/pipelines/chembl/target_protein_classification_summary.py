@@ -109,13 +109,12 @@ def _deduplicate_resolved_rows(
 
 
 def _classification_sort_key(row: Mapping[str, object]) -> tuple[int, int, int]:
-    hierarchy_index = _nonnegative_int_or_none(row.get("hierarchy_index"))
     leaf_id = _positive_int_or_none(row.get("leaf_id"))
     component_id = _positive_int_or_none(row.get("component_id"))
     return (
-        hierarchy_index if hierarchy_index is not None else 10**12,
         leaf_id if leaf_id is not None else 10**12,
         component_id if component_id is not None else 10**12,
+        0 if _is_resolved(row) else 1,
     )
 
 
@@ -156,7 +155,6 @@ def _serialize_classifications(rows: list[dict[str, object]]) -> str:
 
 def _classification_payload(row: Mapping[str, object]) -> dict[str, object]:
     payload: dict[str, object] = {
-        "hierarchy_index": _nonnegative_int_or_none(row.get("hierarchy_index")),
         "component_id": _positive_int_or_none(row.get("component_id")),
         "leaf_id": _positive_int_or_none(row.get("leaf_id")),
         "classification_status": _RESOLVED_STATUS,
@@ -187,14 +185,6 @@ def _positive_int_or_none(value: object) -> int | None:
     if normalized is None:
         return None
     return normalized if normalized > 0 else None
-
-
-def _nonnegative_int_or_none(value: object) -> int | None:
-    normalized = _int_or_none(value)
-    if normalized is None:
-        return None
-    return normalized if normalized >= 0 else None
-
 
 def _int_or_none(value: object) -> int | None:
     if value is None or isinstance(value, bool):

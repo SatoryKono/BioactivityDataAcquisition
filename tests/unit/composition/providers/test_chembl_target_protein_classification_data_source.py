@@ -1,161 +1,100 @@
-"""Tests for ChEMBL target protein-classification data-source wrappers."""
+"""Tests for snapshot-backed target protein classification data source."""
 
 from __future__ import annotations
 
-from collections.abc import AsyncIterator
-from typing import Any
+from unittest.mock import MagicMock
 
+import pyarrow as pa
 import pytest
 
 from bioetl.composition.providers._chembl_target_protein_classification_data_source import (
-    TargetProteinClassificationDataSource,
-    TargetProteinClassificationEnrichedTargetDataSource,
+    TargetProteinClassificationSnapshotDataSource,
 )
-from bioetl.domain.types import JsonDict
+from bioetl.domain.types import HealthStatus
 
 
 pytestmark = pytest.mark.unit
 
 
-class _FakeChEMBLDataSource:
-    provider_name = "chembl"
-
+class _FakeDeltaReader:
     def __init__(self) -> None:
-        self.rows: dict[str, list[JsonDict]] = {
-            "target": [
+        self.tables = {
+            "chembl.target": pa.table(
                 {
-                    "target_chembl_id": "CHEMBL_T1",
-                    "target_components": [{"component_id": 10}],
+                    "target_id": ["CHEMBL_T1", "CHEMBL_T2"],
+                    "component_ids": ['[10]', '[]'],
+                    "primary_component_id": [10, None],
+                    "target_components": ['[{"component_id":10}]', "[]"],
                 }
-            ],
-            "target_component": [
+            ),
+            "chembl.target_component": pa.table(
                 {
-                    "component_id": 10,
-                    "protein_classifications": [{"protein_classification_id": 3}],
-                    "targets": [{"target_chembl_id": "CHEMBL_T1"}],
+                    "component_id": [10],
+                    "protein_classification_ids": ["[3]"],
+                    "protein_classifications": ['[{"protein_classification_id":3}]'],
                 }
-            ],
-            "protein_class": [
+            ),
+            "chembl.protein_class": pa.table(
                 {
-                    "protein_class_id": 1,
-                    "parent_id": 0,
-                    "class_level": 1,
-                    "pref_name": "Enzyme",
-                    "protein_class_desc": "Root",
-                },
-                {
-                    "protein_class_id": 2,
-                    "parent_id": 1,
-                    "class_level": 2,
-                    "pref_name": "Kinase",
-                    "protein_class_desc": "Branch",
-                },
-                {
-                    "protein_class_id": 3,
-                    "parent_id": 2,
-                    "class_level": 3,
-                    "pref_name": "Serine/threonine kinase",
-                    "protein_class_desc": "Leaf",
-                },
-            ],
+                    "protein_class_id": [1, 2, 3],
+                    "parent_id": [None, 1, 2],
+                    "class_level": [1, 2, 3],
+                    "pref_name": ["Enzyme", "Kinase", "Serine/threonine kinase"],
+                    "protein_class_desc": ["Root", "Branch", "Leaf"],
+                    "replaced_by": [None, None, None],
+                }
+            ),
         }
 
-    async def __aenter__(self) -> _FakeChEMBLDataSource:
-        return self
+    async def read_table(
+        self,
+        table_path: str,
+        columns: list[str] | None = None,
+        limit: int | None = None,
+    ) -> pa.Table:
+        table = self.tables[table_path]
+        if columns is not None:
+            table = table.select(columns)
+        if limit is not None:
+            table = table.slice(0, limit)
+        return table
 
-    async def __aexit__(self, *_args: object) -> None:
-        return None
+    async def table_exists(self, table_path: str) -> bool:
+        return table_path in self.tables
+
+    async def get_schema(self, table_path: str) -> object:
+        return self.tables[table_path].schema
+
+    async def get_row_count(self, table_path: str) -> int:
+        return self.tables[table_path].num_rows
 
     async def aclose(self) -> None:
         return None
 
-    async def health_check(self) -> str:
-        return "healthy"
 
-    def fetch(
-        self,
-        entity_type: str,
-        limit: int | None = None,
-        query: str | None = None,
-        filter_ids: list[str] | None = None,
-        filter_field: str | None = None,
-        offset: int | None = None,
-    ) -> AsyncIterator[JsonDict]:
-        _ = query, offset
-        return self._yield_rows(entity_type, filter_ids, filter_field, limit)
-
-    def fetch_filtered(
-        self,
-        entity_type: str,
-        filter_ids: list[str],
-        filter_field: str,
-        limit: int | None = None,
-    ) -> AsyncIterator[JsonDict]:
-        return self._yield_rows(entity_type, filter_ids, filter_field, limit)
-
-    def fetch_multi_filtered(
-        self,
-        entity_type: str,
-        filters: dict[str, list[str]],
-        limit: int | None = None,
-    ) -> AsyncIterator[JsonDict]:
-        _ = filters
-        return self._yield_rows(entity_type, None, None, limit)
-
-    def fetch_filtered_with_fallback(
-        self,
-        entity_type: str,
-        filter_ids: list[str],
-        filter_field: str,
-        fallback_mapping: dict[str, str],
-        limit: int | None = None,
-    ) -> AsyncIterator[JsonDict]:
-        _ = fallback_mapping
-        return self._yield_rows(entity_type, filter_ids, filter_field, limit)
-
-    async def _yield_rows(
-        self,
-        entity_type: str,
-        filter_ids: list[str] | None,
-        filter_field: str | None,
-        limit: int | None,
-    ) -> AsyncIterator[JsonDict]:
-        emitted = 0
-        for row in self.rows[entity_type]:
-            if not _matches(row, filter_ids, filter_field):
-                continue
-            yield dict(row)
-            emitted += 1
-            if limit is not None and emitted >= limit:
-                return
-
-
-def _matches(
-    row: dict[str, Any],
-    filter_ids: list[str] | None,
-    filter_field: str | None,
-) -> bool:
-    if not filter_ids or filter_field is None:
-        return True
-    values = {str(value) for value in filter_ids}
-    return str(row.get(filter_field)) in values
+@pytest.fixture
+def data_source() -> TargetProteinClassificationSnapshotDataSource:
+    logger = MagicMock()
+    return TargetProteinClassificationSnapshotDataSource(
+        delta_reader=_FakeDeltaReader(),
+        logger=logger,
+    )
 
 
 @pytest.mark.asyncio
-async def test_target_data_source_injects_prepared_relation_rows() -> None:
-    data_source = TargetProteinClassificationEnrichedTargetDataSource(
-        _FakeChEMBLDataSource()
-    )
+async def test_relation_data_source_derives_rows_from_local_snapshot_tables(
+    data_source: TargetProteinClassificationSnapshotDataSource,
+) -> None:
+    rows = [
+        row
+        async for row in data_source.fetch("target_protein_classification", limit=10)
+    ]
 
-    rows = [row async for row in data_source.fetch("target", limit=1)]
-
-    assert len(rows) == 1
-    relation_rows = rows[0]["target_protein_classifications"]
-    assert relation_rows == [
+    assert rows == [
         {
             "target_id": "CHEMBL_T1",
+            "classification_status": "resolved",
             "component_id": 10,
-            "hierarchy_index": 0,
             "leaf_id": 3,
             "l1_id": 1,
             "l1_name": "Enzyme",
@@ -172,24 +111,71 @@ async def test_target_data_source_injects_prepared_relation_rows() -> None:
             "l5_id": None,
             "l5_name": None,
             "l5_desc": None,
-            "classification_status": "resolved",
-        }
+        },
+        {
+            "target_id": "CHEMBL_T2",
+            "classification_status": "missing_classification",
+            "component_id": None,
+            "leaf_id": None,
+            "l1_id": None,
+            "l1_name": None,
+            "l1_desc": None,
+            "l2_id": None,
+            "l2_name": None,
+            "l2_desc": None,
+            "l3_id": None,
+            "l3_name": None,
+            "l3_desc": None,
+            "l4_id": None,
+            "l4_name": None,
+            "l4_desc": None,
+            "l5_id": None,
+            "l5_name": None,
+            "l5_desc": None,
+        },
     ]
 
 
 @pytest.mark.asyncio
-async def test_relation_data_source_derives_rows_from_target_components() -> None:
-    data_source = TargetProteinClassificationDataSource(_FakeChEMBLDataSource())
-
+async def test_relation_data_source_supports_target_filtering(
+    data_source: TargetProteinClassificationSnapshotDataSource,
+) -> None:
     rows = [
         row
-        async for row in data_source.fetch("target_protein_classification", limit=10)
+        async for row in data_source.fetch_filtered(
+            "target_protein_classification",
+            filter_ids=["CHEMBL_T1"],
+            filter_field="target_id",
+            limit=10,
+        )
+    ]
+
+    assert len(rows) == 1
+    assert rows[0]["target_id"] == "CHEMBL_T1"
+    assert rows[0]["classification_status"] == "resolved"
+
+
+@pytest.mark.asyncio
+async def test_relation_data_source_supports_component_filtering(
+    data_source: TargetProteinClassificationSnapshotDataSource,
+) -> None:
+    rows = [
+        row
+        async for row in data_source.fetch_filtered(
+            "target_protein_classification",
+            filter_ids=["10"],
+            filter_field="component_id",
+            limit=10,
+        )
     ]
 
     assert len(rows) == 1
     assert rows[0]["target_id"] == "CHEMBL_T1"
     assert rows[0]["component_id"] == 10
-    assert rows[0]["leaf_id"] == 3
-    assert rows[0]["l1_name"] == "Enzyme"
-    assert rows[0]["l2_name"] == "Kinase"
-    assert rows[0]["l3_name"] == "Serine/threonine kinase"
+
+
+@pytest.mark.asyncio
+async def test_relation_data_source_health_check_requires_snapshot_tables(
+    data_source: TargetProteinClassificationSnapshotDataSource,
+) -> None:
+    assert await data_source.health_check() == HealthStatus.HEALTHY

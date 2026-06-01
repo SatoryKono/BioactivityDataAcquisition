@@ -96,14 +96,6 @@ Silver schema.
 - `organism_class` как hash-governed profile-owned derived field из `organism` + `taxonomy_id`
 - `target_description` в Silver и `description` в Gold из `target_description` или fallback `description`
 - `target_components`, `target_component_synonyms`, `cross_references` как JSON-строки
-- `protein_classifications` как canonical JSON-строку с той же deterministic
-  summary policy, что и у relation pipeline `chembl_target_protein_classification`
-  и downstream `composite_target`
-- `target_protein_class_id_L1..L5`, `target_protein_class_name_L1..L5`,
-  `target_protein_class_desc_L1..L5` как target-level summary surface для
-  случаев, когда provider-side target data source смог дозагрузить
-  `target_component` + `protein_classification` evidence и подготовить
-  relation-like rows до `TargetTransformer`
 - `target_protein_synonyms`, `target_gene_synonyms`, `target_ec_numbers` как pipe-delimited derived-поля с sentinel `unknown`
 - `target_xref_pdb_ids`, `target_xref_go_component`, `target_xref_go_function`, `target_xref_go_process`, `target_xref_hgnc_ids`, `target_xref_reactome_ids`, `target_xref_uniprot_ids` как pipe-delimited xref-derived поля с sentinel `unknown`
 
@@ -143,19 +135,12 @@ the shared registry `configs/vocab/chembl_reference_sources.yaml`; malformed JSO
 
 Protein classification contract boundary:
 
-- `composite_target` остаётся canonical fully enriched surface для
-  `protein_classifications` и `target_protein_class_*` полей, потому что
-  детерминированно джойнит `chembl_target_protein_classification` relation
-  pipeline.
-- standalone `chembl_target` теперь переиспользует ту же summary policy, но
-  получает classification evidence через composition-owned ChEMBL data-source
-  enrichment: основной `/target` payload ChEMBL обычно не содержит
-  `protein_classifications`, поэтому enrichment дозагружает
-  `/target_component` и `/protein_classification` и передаёт
-  `target_protein_classifications` rows в transformer.
-- Если provider enrichment не смог разрешить component/protein-class chain,
-  standalone `chembl_target` остаётся nullable/best-effort, а не делает hard
-  fail по отсутствующей classification evidence.
+- standalone `chembl_target` больше не публикует `protein_classifications` и
+  `target_protein_class_*` summary-поля.
+- authoritative relation surface для target-level classification —
+  `chembl_target_protein_classification`.
+- flattened `protein_classifications` и `target_protein_class_*` поля
+  публикуются только downstream projection-слоем `composite_target`.
 
 Документация не фиксирует literal-формулу `entity_id`; identity/content hash
 вычисляются базовым ChEMBL transformer/runtime слоем.
@@ -205,7 +190,7 @@ ______________________________________________________________________
 
 | Артефакт             | Ссылка                                                                                   |
 | -------------------- | ---------------------------------------------------------------------------------------- |
-| Gold contract export | [chembl_target_v2.0.json](../../contracts/gold/chembl_target_v2.0.json)                  |
+| Gold contract export | [chembl_target_v3.0.json](../../contracts/gold/chembl_target_v3.0.json)                  |
 | Gold schemas index   | [gold-schemas.md](../../contracts/gold-schemas.md)                                       |
 | Versioning policy    | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
 
@@ -215,7 +200,7 @@ ______________________________________________________________________
 | ----------------- | ------ | ----------------------------------------------------------------------------------------------------------- |
 | Metadata          | Pass   | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified`                    |
 | Runtime alignment | Pass   | Config/schema/transformer paths задокументированы в разделах `Конфигурация`, `Валидация`, `Связанные файлы` |
-| Contract linkage  | Pass   | [chembl_target_v2.0.json](../../contracts/gold/chembl_target_v2.0.json)                                     |
+| Contract linkage  | Pass   | [chembl_target_v3.0.json](../../contracts/gold/chembl_target_v3.0.json)                                     |
 | API governance    | Pass   | См. [API Compliance](#api-compliance)                                                                       |
 
 ## API Compliance

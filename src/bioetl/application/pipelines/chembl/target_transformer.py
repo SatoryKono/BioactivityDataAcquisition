@@ -7,7 +7,6 @@ from __future__ import annotations
 
 __all__ = ["TargetTransformer"]
 
-from collections.abc import Mapping
 from typing import TYPE_CHECKING, ClassVar, cast
 
 from bioetl.application.core.dict_transformers import (

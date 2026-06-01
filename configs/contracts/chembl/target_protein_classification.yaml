@@ -2,7 +2,7 @@
 # Aligned with configs/base/contract_registry.yaml identity tuple.
 
 contract_ref: "chembl.target_protein_classification"
-contract_version: "1.0.0"
+contract_version: "2.0.0"
 dq_policy_ref: "chembl.dq.v1"
 rule_bundle_version: "dq-rules.v1.0"
 default_disposition_policy: "quarantine"

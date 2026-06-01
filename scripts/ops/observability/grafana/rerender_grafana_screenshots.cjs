@@ -243,10 +243,13 @@ async function expandCollapsedRows(page, dashboard, index, total) {
 
 async function countRenderedPanels(page) {
   const selectors = [
+    '[data-testid^="data-testid Panel header"]',
+    '[data-testid*="Panel header"]',
     '[data-testid="data-testid Panel header"]',
     '[data-testid="Panel header"]',
     '[data-testid$="Panel header"]',
     '[aria-label="Panel header"]',
+    '[data-viz-panel-key^="panel-"]',
     '[data-panelid]',
     '.panel-title',
   ];

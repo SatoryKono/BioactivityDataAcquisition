@@ -59,7 +59,10 @@ ______________________________________________________________________
 Текущая навигационная модель:
 
 - `0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`,
-  `4. Data Quality`, `5. Workflow` образуют единую top-level шину.
+  `4. Data Quality`, `5. Workflow` образуют единую primary top-level шину.
+  `6. Alerts & SLO` is a first-class alert-state dashboard backed by
+  Prometheus `ALERTS`; it is an alert/SLO triage surface, not a duplicate
+  alert-rule engine.
 - На каждой странице navigation panel `id=1000` визуально показывает полный bus `0..5`; текущий dashboard рендерится как disabled dark-gray item, а machine-readable `panel.links` сохраняют omit-self contract.
 - Каноническая shipped surface этой шины — text navigation panel `id=1000`;
   root `dashboard.links[]` не обязаны дублировать те же handoff в header row
@@ -169,8 +172,11 @@ healthy provider state.
 `run_id` selectors. Pipeline/run_type remain the canonical current-status
 Prometheus scope; `workflow` is evidence context, and `run_id` is a
 control-plane-backed identity selector preserved for HTTP `ID`/details panels.
-`Silver Reject Explorer` uses `quarantine_run_id` for its forensic run selector
-so it cannot collide with the Control Plane `run_id` shell.
+`Silver Reject Explorer` preserves hidden shared `workflow` shell context for
+navigation continuity and uses `quarantine_run_id` for its forensic row
+selector. Primary dashboard `run_id` is mapped into `quarantine_run_id` only by
+explicit inbound handoff links; links out of the Explorer do not export primary
+`run_id`.
 
 ## KPI ownership (canonical vs mirrors)
 
