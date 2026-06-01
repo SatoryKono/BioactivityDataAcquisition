@@ -10,9 +10,9 @@
 - Sanctioned public entrypoint rows: `14`
 - Retained review entrypoints: `0`
 - Permanent public entrypoints: `14`
-- Measured tracked modules: `27`
-- Measured-only modules outside curated inventory: `13`
-- Discovered docstring-tracked modules: `13`
+- Measured tracked modules: `14`
+- Measured-only modules outside curated inventory: `0`
+- Discovered docstring-tracked modules: `0`
 - Unexpected docstring-tracked modules: `0`
 - Missing allowlisted measured-only modules: `0`
 - First-party src imports targeting measured-only modules: `0`
@@ -34,19 +34,6 @@
 ## Expected Measured Registry
 
 - `src/bioetl/application/composite/merger.py`
-- `src/bioetl/application/services/control_plane/_run_manifest_artifact_payloads.py`
-- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_composite.py`
-- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_ledger.py`
-- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_main_helpers.py`
-- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence.py`
-- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_alerts.py`
-- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_profile_support.py`
-- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_profiles.py`
-- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_replay_helpers.py`
-- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_replay_state.py`
-- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_summary.py`
-- `src/bioetl/application/services/control_plane/historical_replay_closure_claims.py`
-- `src/bioetl/application/services/control_plane/manifest_service_scaffold.py`
 - `src/bioetl/composition/entrypoints.py`
 - `src/bioetl/composition/health_api.py`
 - `src/bioetl/composition/maintenance_api.py`
@@ -80,30 +67,18 @@
 
 ## Measured-Only Allowlist
 
-- `src/bioetl/application/services/control_plane/_run_manifest_artifact_payloads.py` — owner: `bioetl.application.services.control_plane.manifest`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Root-private compatibility facade for legacy artifact payload helper imports after ownership moved to manifest.artifact_payloads.
-- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_composite.py` — owner: `bioetl.application.services.control_plane.manifest.diagnostics`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Root-private compatibility facade for legacy diagnostics composite helper imports after ownership moved to manifest.diagnostics.composite_projection.
-- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_ledger.py` — owner: `bioetl.application.services.control_plane.manifest.diagnostics`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Root-private compatibility facade for legacy diagnostics ledger helper imports after ownership moved to manifest.diagnostics.ledger_processing.
-- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_main_helpers.py` — owner: `bioetl.application.services.control_plane.manifest.diagnostics`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Root-private compatibility facade for legacy diagnostics main helper imports after ownership moved to manifest.diagnostics.main_helpers.
-- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence.py` — owner: `bioetl.application.services.control_plane.manifest.diagnostics`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Root-private compatibility facade for legacy diagnostics persistence imports after ownership moved to manifest.diagnostics.persistence.
-- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_alerts.py` — owner: `bioetl.application.services.control_plane.manifest.diagnostics`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Root-private compatibility facade for legacy diagnostics persistence alert imports after ownership moved to manifest.diagnostics.persistence_alerts.
-- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_profile_support.py` — owner: `bioetl.application.services.control_plane.manifest.diagnostics`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Root-private compatibility facade for legacy diagnostics persistence profile support imports after ownership moved to manifest.diagnostics.persistence_profile_support.
-- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_profiles.py` — owner: `bioetl.application.services.control_plane.manifest.diagnostics`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Root-private compatibility facade for legacy diagnostics persistence profile imports after ownership moved to manifest.diagnostics.persistence_profiles.
-- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_replay_helpers.py` — owner: `bioetl.application.services.control_plane.manifest.diagnostics`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Root-private compatibility facade for legacy diagnostics replay helper imports after ownership moved to manifest.diagnostics.replay_helpers.
-- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_replay_state.py` — owner: `bioetl.application.services.control_plane.manifest.diagnostics`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Root-private compatibility facade for legacy diagnostics replay state imports after ownership moved to manifest.diagnostics.replay_state.
-- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_summary.py` — owner: `bioetl.application.services.control_plane.manifest.diagnostics`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Root-private compatibility facade for legacy diagnostics summary imports after ownership moved to manifest.diagnostics.summary.
-- `src/bioetl/application/services/control_plane/historical_replay_closure_claims.py` — owner: `bioetl.application.services.control_plane.replay`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Root compatibility facade for legacy historical replay closure claim imports after ownership moved to replay.closure_claims.
-- `src/bioetl/application/services/control_plane/manifest_service_scaffold.py` — owner: `bioetl.application.services.control_plane.manifest`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Root compatibility facade for legacy manifest service scaffold imports after ownership moved to manifest.service_scaffold.
+- None.
 
 ## Measured-Only Ratchet
 
-- Max measured-only modules: `13`
-- `src/bioetl/application/services/` <= `13` measured-only modules
+- Max measured-only modules: `0`
+- `src/bioetl/application/services/` <= `0` measured-only modules
 - `src/bioetl/interfaces/cli/commands/` <= `0` measured-only modules
 
 ### Live Ratchet Counts
 
-- Total measured-only modules: `13`
-- `src/bioetl/application/services/` currently has `13` modules
+- Total measured-only modules: `0`
+- `src/bioetl/application/services/` currently has `0` modules
 - `src/bioetl/interfaces/cli/commands/` currently has `0` modules
 
 ### Ratchet Violations
@@ -128,19 +103,7 @@
 
 ### Discovered Docstring-Tracked Modules
 
-- `src/bioetl/application/services/control_plane/_run_manifest_artifact_payloads.py`
-- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_composite.py`
-- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_ledger.py`
-- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_main_helpers.py`
-- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence.py`
-- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_alerts.py`
-- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_profile_support.py`
-- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_profiles.py`
-- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_replay_helpers.py`
-- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_replay_state.py`
-- `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_summary.py`
-- `src/bioetl/application/services/control_plane/historical_replay_closure_claims.py`
-- `src/bioetl/application/services/control_plane/manifest_service_scaffold.py`
+- None.
 
 ### Unexpected Docstring-Tracked Modules
 

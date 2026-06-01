@@ -84,7 +84,7 @@ def test_refactored_hotspot_module_line_budgets_hold() -> None:
     module_budgets = {
         "src/bioetl/composition/runtime_builders/runner_builder.py": 200,
         "src/bioetl/composition/runtime_builders/runner_control_plane_assembly.py": 180,
-        "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_replay_helpers.py": 360,
+        "src/bioetl/application/services/control_plane/manifest/diagnostics/replay_helpers.py": 360,
         "src/bioetl/application/services/control_plane/run_manifest_exact_replay_blockers.py": 120,
         "src/bioetl/application/composite/runner_pkg/runner_execution_orchestrator.py": 220,
     }

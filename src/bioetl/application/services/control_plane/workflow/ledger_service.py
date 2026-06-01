@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-import json
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from datetime import datetime
-from hashlib import sha256
 from uuid import uuid4
 
+from bioetl.application.services.control_plane.ledger.idempotency import (
+    build_control_plane_idempotency_key,
+)
 from bioetl.domain.context import current_utc_time
 from bioetl.domain.control_plane import WorkflowLedgerEntry, WorkflowManifest
 from bioetl.domain.control_plane.workflow_ledger import (
@@ -43,16 +44,10 @@ _IDEMPOTENCY_KEY_FIELDS = (
 
 
 def _build_workflow_ledger_idempotency_key(payload: Mapping[str, object]) -> str:
-    semantic_payload = {
-        field_name: payload.get(field_name) for field_name in _IDEMPOTENCY_KEY_FIELDS
-    }
-    serialized = json.dumps(
-        semantic_payload,
-        sort_keys=True,
-        separators=(",", ":"),
-        ensure_ascii=True,
+    return build_control_plane_idempotency_key(
+        payload,
+        fields=_IDEMPOTENCY_KEY_FIELDS,
     )
-    return f"sha256:{sha256(serialized.encode('utf-8')).hexdigest()}"
 
 
 @dataclass(slots=True)

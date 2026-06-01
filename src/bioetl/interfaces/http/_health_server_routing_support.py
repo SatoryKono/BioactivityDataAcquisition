@@ -203,15 +203,34 @@ async def handle_control_plane_identity_table(
             if scope.resolved_manifest is not None
             else scope.requested_pipeline
         )
-        checkpoint_tuple, _, _, aggregate_scope_unknown = (
-            await load_checkpoint_freshness_evidence(
-                host,
-                scope=scope,
-                target_pipeline=target_pipeline,
-            )
+        (
+            checkpoint_tuple,
+            _,
+            _,
+            aggregate_scope_unknown,
+        ) = await load_checkpoint_freshness_evidence(
+            host,
+            scope=scope,
+            target_pipeline=target_pipeline,
         )
         if not aggregate_scope_unknown and checkpoint_tuple is not None:
             _, checkpoint_metadata = checkpoint_tuple
+
+    identity_evidence_summary = build_control_plane_identity_evidence_payload(
+        requested_pipeline=scope.requested_pipeline,
+        resolved_manifest=scope.resolved_manifest,
+        selected_pipelines=scope.selected_pipelines,
+        selected_run_id=scope.selected_run_id,
+        selected_run_types=scope.selected_run_types,
+        resolved_via=scope.resolved_via,
+        ledger_port=host._run_ledger_port,
+        view="overview",
+    ).get("summary")
+    summary = (
+        identity_evidence_summary
+        if isinstance(identity_evidence_summary, dict)
+        else None
+    )
 
     await host._send_payload_response(
         writer,
@@ -224,6 +243,7 @@ async def handle_control_plane_identity_table(
             selected_run_types=scope.selected_run_types,
             resolved_via=scope.resolved_via,
             checkpoint_metadata=checkpoint_metadata,
+            identity_evidence_summary=summary,
         ),
     )
 

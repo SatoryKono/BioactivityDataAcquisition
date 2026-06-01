@@ -36,7 +36,18 @@ REQUIRED_LIBS=(
   libnspr4.so
   libnss3.so
   libnssutil3.so
+  libsmime3.so
   libasound.so.2
+  libatk-bridge-2.0.so.0
+  libatk-1.0.so.0
+  libcups.so.2
+  libdrm.so.2
+  libgbm.so.1
+  libXcomposite.so.1
+  libXdamage.so.1
+  libXfixes.so.3
+  libxkbcommon.so.0
+  libXrandr.so.2
 )
 
 usage() {
@@ -120,7 +131,15 @@ collect_missing_libs() {
 }
 
 print_install_hint() {
+  local missing_libs="${1:-}"
   log "Missing shared libraries prevent Playwright Chromium from launching."
+  if [[ -n "${missing_libs}" ]]; then
+    log "Missing libraries detected by ldconfig:"
+    while IFS= read -r lib; do
+      [[ -n "${lib}" ]] && log "  - ${lib}"
+    done <<<"${missing_libs}"
+    log ""
+  fi
   log "Install the standard headless Chromium runtime packages with:"
   log ""
   log "  sudo apt-get update -qq"
@@ -265,16 +284,16 @@ main() {
       if [[ "${ATTEMPT_SYSTEM_INSTALL}" -eq 1 ]]; then
         log "Attempting to install missing system libraries..."
         try_install_system_libs || {
-          print_install_hint
+          print_install_hint "${missing_libs_text}"
           exit 1
         }
         missing_libs_text="$(collect_missing_libs || true)"
         if [[ -n "${missing_libs_text}" ]]; then
-          print_install_hint
+          print_install_hint "${missing_libs_text}"
           exit 1
         fi
       else
-        print_install_hint
+        print_install_hint "${missing_libs_text}"
         exit 1
       fi
     fi

@@ -29,7 +29,9 @@ ACTIVE_SURFACES = (
     / "application"
     / "services"
     / "control_plane"
-    / "_run_manifest_diagnostics_replay_helpers.py",
+    / "manifest"
+    / "diagnostics"
+    / "replay_helpers.py",
     ROOT
     / "src"
     / "bioetl"

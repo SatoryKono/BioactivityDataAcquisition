@@ -6,8 +6,8 @@
 - next_review_by: 2026-08-30
 - review_cycle_days: 90
 - triaged_entry_count: 19
-- repo_wide_zero_import_candidate_count: 64
-- repo_wide_classified_zero_import_candidate_count: 64
+- repo_wide_zero_import_candidate_count: 44
+- repo_wide_classified_zero_import_candidate_count: 44
 - repo_wide_untriaged_zero_import_candidate_count: 0
 - note: zero static importer count is a review signal, not automatic removal proof
 - guardrail: Zero static importer count is a review signal only; removals must still verify public entrypoints and dynamic/plugin import paths.
@@ -49,27 +49,7 @@
 | `bioetl.application.pipelines.common.publication_strategies` | `retain_canonical_owner_module` | `src/bioetl/application/pipelines/common/publication_strategies.py` |
 | `bioetl.application.pipelines.pubmed.strategies` | `retain_canonical_owner_module` | `src/bioetl/application/pipelines/pubmed/strategies.py` |
 | `bioetl.application.services._checkpoint_compatibility_runtime_core` | `retain_canonical_owner_module` | `src/bioetl/application/services/_checkpoint_compatibility_runtime_core.py` |
-| `bioetl.application.services.control_plane._run_manifest_artifact_payloads` | `retain_compat_shim` | `src/bioetl/application/services/control_plane/_run_manifest_artifact_payloads.py` |
-| `bioetl.application.services.control_plane._run_manifest_diagnostics_composite` | `retain_compat_shim` | `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_composite.py` |
 | `bioetl.application.services.control_plane._run_manifest_diagnostics_identity` | `retain_canonical_owner_module` | `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_identity.py` |
-| `bioetl.application.services.control_plane._run_manifest_diagnostics_ledger` | `retain_compat_shim` | `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_ledger.py` |
-| `bioetl.application.services.control_plane._run_manifest_diagnostics_main_helpers` | `retain_compat_shim` | `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_main_helpers.py` |
-| `bioetl.application.services.control_plane._run_manifest_diagnostics_persistence` | `retain_compat_shim` | `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence.py` |
-| `bioetl.application.services.control_plane._run_manifest_diagnostics_persistence_alerts` | `retain_compat_shim` | `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_alerts.py` |
-| `bioetl.application.services.control_plane._run_manifest_diagnostics_persistence_profile_support` | `retain_compat_shim` | `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_profile_support.py` |
-| `bioetl.application.services.control_plane._run_manifest_diagnostics_persistence_profiles` | `retain_compat_shim` | `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_profiles.py` |
-| `bioetl.application.services.control_plane._run_manifest_diagnostics_replay_helpers` | `retain_compat_shim` | `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_replay_helpers.py` |
-| `bioetl.application.services.control_plane._run_manifest_diagnostics_replay_state` | `retain_compat_shim` | `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_replay_state.py` |
-| `bioetl.application.services.control_plane._run_manifest_diagnostics_summary` | `retain_compat_shim` | `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_summary.py` |
-| `bioetl.application.services.control_plane.effective_config_context` | `retain_compat_shim` | `src/bioetl/application/services/control_plane/effective_config_context.py` |
-| `bioetl.application.services.control_plane.historical_replay_closure_claims` | `retain_compat_shim` | `src/bioetl/application/services/control_plane/historical_replay_closure_claims.py` |
-| `bioetl.application.services.control_plane.manifest_service_scaffold` | `retain_compat_shim` | `src/bioetl/application/services/control_plane/manifest_service_scaffold.py` |
-| `bioetl.application.services.control_plane.run_ledger_core_events` | `retain_compat_shim` | `src/bioetl/application/services/control_plane/run_ledger_core_events.py` |
-| `bioetl.application.services.control_plane.run_ledger_rich_events` | `retain_compat_shim` | `src/bioetl/application/services/control_plane/run_ledger_rich_events.py` |
-| `bioetl.application.services.control_plane.run_manifest_inspection_helpers` | `retain_compat_shim` | `src/bioetl/application/services/control_plane/run_manifest_inspection_helpers.py` |
-| `bioetl.application.services.control_plane.run_manifest_inspection_models` | `retain_compat_shim` | `src/bioetl/application/services/control_plane/run_manifest_inspection_models.py` |
-| `bioetl.application.services.control_plane.run_manifest_models` | `retain_compat_shim` | `src/bioetl/application/services/control_plane/run_manifest_models.py` |
-| `bioetl.application.services.control_plane.run_manifest_validation` | `retain_compat_shim` | `src/bioetl/application/services/control_plane/run_manifest_validation.py` |
 | `bioetl.composition.bootstrap.cli.adr` | `retain_dynamic_entrypoint` | `src/bioetl/composition/bootstrap/cli/adr.py` |
 | `bioetl.composition.bootstrap.cli.control_plane_lifecycle` | `retain_dynamic_entrypoint` | `src/bioetl/composition/bootstrap/cli/control_plane_lifecycle.py` |
 | `bioetl.domain.behavior._dq_serializer_html._renderers` | `retain_canonical_owner_module` | `src/bioetl/domain/behavior/_dq_serializer_html/_renderers.py` |

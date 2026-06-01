@@ -293,7 +293,9 @@ def test_rerender_builds_playwright_env(tmp_path: Path) -> None:
 def test_rerender_builds_playwright_env_with_sidecar_node_modules(
     monkeypatch: Any, tmp_path: Path
 ) -> None:
-    monkeypatch.setenv("BIOETL_PLAYWRIGHT_NODE_MODULES", "/tmp/bioetl-tools/runtime/node_modules")
+    monkeypatch.setenv(
+        "BIOETL_PLAYWRIGHT_NODE_MODULES", "/tmp/bioetl-tools/runtime/node_modules"
+    )
     config = rerender_subject.RenderConfig(
         base_url="http://localhost:3000",
         username="admin",
@@ -309,7 +311,10 @@ def test_rerender_builds_playwright_env_with_sidecar_node_modules(
 
     env = rerender_subject._playwright_env(config)
 
-    assert env["BIOETL_PLAYWRIGHT_NODE_MODULES"] == "/tmp/bioetl-tools/runtime/node_modules"
+    assert (
+        env["BIOETL_PLAYWRIGHT_NODE_MODULES"]
+        == "/tmp/bioetl-tools/runtime/node_modules"
+    )
     assert env["NODE_PATH"].startswith("/tmp/bioetl-tools/runtime/node_modules")
 
 
@@ -354,8 +359,10 @@ def test_screenshot_runtime_setup_scripts_keep_bootstrap_contract() -> None:
     assert "ci --include=dev --no-bin-links" in powershell_script
     assert 'NPM_CONFIG_PRODUCTION = "false"' in powershell_script
 
-    for package_name in ("libnspr4", "libnss3", "libasound2"):
+    for package_name in ("libnspr4", "libnss3", "libasound2", "libxkbcommon0"):
         assert package_name in shell_script
+    for library_name in ("libatk-bridge-2.0.so.0", "libXrandr.so.2"):
+        assert library_name in shell_script
 
 
 def test_rerender_playwright_fallback_streams_output_from_repo_root(
@@ -634,6 +641,79 @@ def test_live_audit_substitutes_workflow_and_run_id_tokens() -> None:
     assert "pipeline=chembl_target" in rendered
     assert "run_type=backfill" in rendered
     assert "run_id=run-123" in rendered
+
+
+def test_live_audit_substitutes_grafana_rate_interval() -> None:
+    config = audit_subject.AuditConfig(
+        prometheus_base_url="http://localhost:9090",
+        app_base_url="http://localhost:8081",
+        loki_base_url="http://localhost:3100",
+        tempo_base_url="http://localhost:3200",
+        grafana_base_url="http://localhost:3000",
+        grafana_username="admin",
+        grafana_password="changeme",
+        workflow="chembl_target",
+        pipeline="chembl_target",
+        run_type="backfill",
+        run_id="run-123",
+        range_hours=24,
+        output_path=Path("reports/observability/grafana/live-panel-audit.json"),
+    )
+
+    rendered = audit_subject._substitute_dashboard_tokens(
+        "rate(metric_bucket[$__rate_interval]) "
+        "or rate(metric_bucket[${__rate_interval}])",
+        config,
+    )
+
+    assert "$__rate_interval" not in rendered
+    assert "${__rate_interval}" not in rendered
+    assert rendered == "rate(metric_bucket[5m]) or rate(metric_bucket[5m])"
+
+
+def test_live_audit_loki_panel_uses_query_range(monkeypatch: Any) -> None:
+    config = audit_subject.AuditConfig(
+        prometheus_base_url="http://localhost:9090",
+        app_base_url="http://localhost:8081",
+        loki_base_url="http://localhost:3100",
+        tempo_base_url="http://localhost:3200",
+        grafana_base_url="http://localhost:3000",
+        grafana_username="admin",
+        grafana_password="changeme",
+        workflow="chembl_target",
+        pipeline="chembl_target",
+        run_type="backfill",
+        run_id="run-123",
+        range_hours=24,
+        output_path=Path("reports/observability/grafana/live-panel-audit.json"),
+    )
+    spec = audit_subject.PanelAuditSpec(
+        dashboard_uid="bioetl-runtime",
+        panel_id=250,
+        title="Inspect Warning Logs",
+        source_kind="loki",
+        semantic_kind="loki_query",
+        target_ref_id="A",
+        required=False,
+    )
+    panel = {"targets": [{"refId": "A", "expr": '{job="bioetl"}'}]}
+    captured: dict[str, str] = {}
+
+    def fake_fetch_json(url: str) -> object:
+        captured["url"] = url
+        return {"status": "success", "data": {"result": []}}
+
+    monkeypatch.setattr(audit_subject, "_fetch_json", fake_fetch_json)
+
+    result = audit_subject._audit_loki_panel(spec, panel, config)
+
+    assert "/loki/api/v1/query_range?" in captured["url"]
+    assert "start=" in captured["url"]
+    assert "end=" in captured["url"]
+    assert "limit=100" in captured["url"]
+    assert result.status == "ok"
+    assert result.classification == "expected_empty"
+    assert "endpoint=query_range" in result.detail
 
 
 def test_live_audit_effective_specs_include_generated_loki_and_tempo_coverage() -> None:
