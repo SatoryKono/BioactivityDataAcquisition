@@ -7,17 +7,17 @@ from __future__ import annotations
 
 __all__ = ["TargetTransformer"]
 
-from dataclasses import replace
 from collections.abc import Mapping
+from dataclasses import replace
 from typing import TYPE_CHECKING, ClassVar, cast
 
-from bioetl.application.core.normalization_rules import NormalizationRulesPolicy
-from bioetl.application.core.record_normalization_processor import (
-    RecordNormalizationProcessor,
-)
 from bioetl.application.core.dict_transformers import (
     aggregate_nested_lists,
     extract_list_field,
+)
+from bioetl.application.core.normalization_rules import NormalizationRulesPolicy
+from bioetl.application.core.record_normalization_processor import (
+    RecordNormalizationProcessor,
 )
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
