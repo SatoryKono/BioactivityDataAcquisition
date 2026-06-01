@@ -1179,7 +1179,7 @@
       "description": "First operator handoff for selected-range workflow evidence on this dashboard. It explicitly preserves the selected-range-only interpretation that used to live in Workflow Scope: this surface does not provide current live run state. Continue in `2. Runtime` for stage/runtime blockers, `4. Data Quality` for validation, quarantine, dependency, filtered-out, or transform-side rejects, `3. Provider Health` for upstream provider incidents, `0. Control Plane` for replay/resume and ledger evidence, or `1. Overview` for L0 prioritization. This panel intentionally does not claim stage, run_id, dependency, enricher, merge, cross-validation, or gold-write proof from `bioetl_workflow_*` metrics; those dimensions require downstream surfaces. It occupies the shared-shell CTA slot beside `ID` and `Processed Records` and remains the one justified panel-level CTA exception on this dashboard."
     },
     {
-      "collapsed": true,
+      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -1293,7 +1293,7 @@
           "description": "Shows p95 step duration in seconds for the selected time range, filtered by `Workflow`, `Step Kind`, and `Step Status`. This is historical range evidence, not a current in-flight duration gauge. `No data` means no matching step events were observed for the selected filters or the histogram series is absent. Use this panel to spot which bounded step kind slowed down before handing off to `2. Runtime` for stage-level latency diagnostics."
         }
       ],
-      "title": "Step Diagnostics (collapsed)",
+      "title": "Step Diagnostics",
       "type": "row"
     }
   ],

@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "L2 diagnostic runtime triage dashboard: where pipeline runtime loses time, fails, accumulates backlog, or raises warning/error conditions. Prometheus-first answer row first; logs/traces stay in a collapsed drilldown row for the optional tracing profile. Retry-vs-failure and batch-size distribution remain blocked pending bounded runtime instrumentation, so the dashboard only uses shipped metric families and recording rules.",
+  "description": "L2 diagnostic runtime triage dashboard: where pipeline runtime loses time, fails, accumulates backlog, or raises warning/error conditions. Prometheus-first answer row first; logs/traces stay in a below-fold drilldown row for the optional tracing profile. Retry-vs-failure and batch-size distribution remain blocked pending bounded runtime instrumentation, so the dashboard only uses shipped metric families and recording rules.",
   "editable": true,
   "graphTooltip": 1,
   "id": null,
@@ -1308,7 +1308,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Worst observed stage lag across stages over the last 15m for selected pipeline/run_type. This intentionally ignores the stage variable to surface the worst blocker. Thresholds align with the shipped alert rule: >=300s is WARN, >=900s is CRIT/dashboard escalation. No data is UNKNOWN/missing lag telemetry; 0 is only valid when the metric is scraped and no lag is present. Next action: expand Track Stage Backlog Trend and logs.",
+      "description": "Worst observed stage lag across stages over the last 15m for selected pipeline/run_type. This intentionally ignores the stage variable to surface the worst blocker. Thresholds align with the shipped alert rule: >=300s is WARN, >=900s is CRIT/dashboard escalation. No data is UNKNOWN/missing lag telemetry; 0 is only valid when the metric is scraped and no lag is present. Next action: inspect Track Stage Backlog Trend and logs.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1431,8 +1431,8 @@
     {
       "id": 252,
       "type": "row",
-      "title": "Detect (collapsed)",
-      "collapsed": true,
+      "title": "Detect",
+      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -1838,8 +1838,8 @@
     {
       "id": 253,
       "type": "row",
-      "title": "Localize (collapsed)",
-      "collapsed": true,
+      "title": "Localize",
+      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -2165,8 +2165,8 @@
     {
       "id": 254,
       "type": "row",
-      "title": "Escalate (collapsed)",
-      "collapsed": true,
+      "title": "Escalate",
+      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -3101,7 +3101,7 @@
       "id": 255,
       "type": "row",
       "title": "Tracing-only Log Hygiene (requires optional tracing profile)",
-      "collapsed": true,
+      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,

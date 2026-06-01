@@ -1164,7 +1164,7 @@
       "description": "Operator handoff text for the selected pipeline/run_type and selected time range. Use it after checking Replay Safety State and Inspect: Telemetry Missing. It links to the replay/checkpoint diagnostic row; manifest/run identity still requires run manifest inspection outside Prometheus."
     },
     {
-      "collapsed": true,
+      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -1187,7 +1187,7 @@
           },
           "title": "Inspect: Known Blind Spots",
           "type": "text",
-          "description": "Compact replay-safety blind-spot summary for the selected pipeline/run_type/time range. This is a limitation note, not a healthy signal: the dashboard cannot prove these invariants from current Prometheus metrics. Checkpoint freshness is no longer a blind spot because the first-screen checkpoint-lag panel is now backed by bounded freshness telemetry. The later Replay-Safety Signal Gaps note is the detailed companion; keep both collapsed until physical merge/removal is scheduled.",
+          "description": "Compact replay-safety blind-spot summary for the selected pipeline/run_type/time range. This is a limitation note, not a healthy signal: the dashboard cannot prove these invariants from current Prometheus metrics. Checkpoint freshness is no longer a blind spot because the first-screen checkpoint-lag panel is now backed by bounded freshness telemetry. The later Replay-Safety Signal Gaps note is the detailed companion; both rows are visible by default for auditability until physical merge/removal is scheduled.",
           "fieldConfig": {
             "defaults": {
               "links": [
@@ -2266,7 +2266,7 @@
       "type": "row"
     },
     {
-      "collapsed": true,
+      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -2797,7 +2797,7 @@
       "type": "row"
     },
     {
-      "collapsed": true,
+      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -3122,7 +3122,7 @@
       "type": "row"
     },
     {
-      "collapsed": true,
+      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -3696,7 +3696,7 @@
       "type": "row"
     },
     {
-      "collapsed": true,
+      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
