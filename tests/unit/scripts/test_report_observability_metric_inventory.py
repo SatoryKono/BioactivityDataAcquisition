@@ -11,6 +11,8 @@ import pytest
 
 from scripts.engineering.qa import report_observability_metric_inventory as inventory
 
+pytestmark = pytest.mark.unit
+
 
 def test_hidden_windows_subprocess_kwargs_hide_console() -> None:
     startupinfo = SimpleNamespace(dwFlags=0, wShowWindow=5)
@@ -1331,6 +1333,35 @@ def test_build_runtime_cardinality_review_summary_degrades_without_prometheus_su
     assert summary["prometheus_base_url_source"] == "unconfigured"
     assert summary["live_observed_series"] == {}
     assert summary["query_errors"] == {}
+
+
+def test_build_runtime_cardinality_review_summary_uses_local_fallback_for_pr_gate(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv(inventory._PROMETHEUS_BASE_URL_ENV_VAR, raising=False)
+    monkeypatch.setattr(
+        inventory,
+        "_load_runtime_cardinality_thresholds",
+        lambda _repo_root: {"bioetl_hotspot_total": 42},
+    )
+
+    summary = inventory._build_runtime_cardinality_review_summary(
+        {
+            "runtime_cardinality_reviewed": ["bioetl_hotspot_total"],
+            "runtime_cardinality_review_required": [],
+            "runtime_cardinality_threshold_violations": [],
+            "runtime_cardinality_observed_series": {"bioetl_hotspot_total": 12},
+        },
+        repo_root=tmp_path,
+        prometheus_base_url=None,
+        allow_local_cardinality_fallback=True,
+    )
+
+    assert summary["status"] == "passed"
+    assert summary["mode"] == "local_cardinality_fallback"
+    assert summary["local_observed_series"] == {"bioetl_hotspot_total": 12}
+    assert summary["local_threshold_violations"] == []
 
 
 def test_build_runtime_cardinality_review_summary_passes_with_live_prometheus_review(

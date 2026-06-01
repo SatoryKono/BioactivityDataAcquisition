@@ -58,6 +58,20 @@ runtime_cardinality_review:
       Pre-release quality CI must emit an explicit passed, failed, or degraded
       runtime-cardinality review artifact, and release gates fail on degraded
       live evidence so unavailable Prometheus review cannot silently pass.
+  local_fallback_evidence:
+    workflow: .github/workflows/tests.yml::governance-preflight
+    artifact: reports/observability/runtime_cardinality_review_pr.json
+    command: >
+      python -m scripts.engineering.qa.report_observability_metric_inventory
+      --check
+      --json
+      --review-json-out reports/observability/runtime_cardinality_review_pr.json
+      --allow-local-cardinality-fallback
+    release_gate_allowed: false
+    rationale: >
+      Pull-request and local governance gates can use deterministic repo-local
+      observed-series evidence when Prometheus is unavailable. Release gates must
+      keep fail-on-degraded live review enabled without the fallback flag.
 unused_signal_policy:
   rationale: >
     Registered metrics without runtime emission are treated as unused declared

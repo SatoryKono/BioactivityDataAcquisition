@@ -24,6 +24,8 @@ from bioetl.infrastructure.schemas.pipeline_config import (
     FieldValidationConfig,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestThresholdsConfig:
     """Tests for ThresholdsConfig validation."""

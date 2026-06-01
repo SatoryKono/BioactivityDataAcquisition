@@ -1469,11 +1469,38 @@ def _query_prometheus_scalar(
 RuntimeCardinalityReviewSummary = dict[str, object]
 
 
+def _local_observed_series_counts(report: MetricInventoryReport) -> dict[str, int]:
+    raw_local_observed_series = report.get("runtime_cardinality_observed_series", {})
+    if not isinstance(raw_local_observed_series, dict):
+        return {}
+    counts: dict[str, int] = {}
+    for metric_name, raw_value in raw_local_observed_series.items():
+        if not isinstance(metric_name, str):
+            continue
+        if isinstance(raw_value, int):
+            counts[metric_name] = raw_value
+            continue
+        if not isinstance(raw_value, list):
+            continue
+        for row in raw_value:
+            if not isinstance(row, str):
+                continue
+            prefix = "observed_series_count="
+            if row.startswith(prefix):
+                try:
+                    counts[metric_name] = int(row.removeprefix(prefix))
+                except ValueError:
+                    pass
+                break
+    return counts
+
+
 def _build_runtime_cardinality_review_summary(
     report: MetricInventoryReport,
     *,
     repo_root: Path,
     prometheus_base_url: str | None,
+    allow_local_cardinality_fallback: bool = False,
 ) -> RuntimeCardinalityReviewSummary:
     reviewed_metrics = sorted(
         str(metric_name)
@@ -1496,6 +1523,8 @@ def _build_runtime_cardinality_review_summary(
     query_errors: dict[str, str] = {}
     degraded_reasons: list[str] = []
     live_threshold_violations: list[str] = []
+    local_observed_series = _local_observed_series_counts(report)
+    local_threshold_violations: list[str] = []
 
     summary: RuntimeCardinalityReviewSummary = {
         "generated_at": datetime.now(UTC)
@@ -1515,6 +1544,7 @@ def _build_runtime_cardinality_review_summary(
         "prometheus_base_url_source": url_source,
         "prometheus_url_env_var": _PROMETHEUS_BASE_URL_ENV_VAR,
         "prometheus_token_env_var": _PROMETHEUS_BEARER_TOKEN_ENV_VAR,
+        "local_cardinality_fallback_allowed": allow_local_cardinality_fallback,
         "reviewed_metrics": reviewed_metrics,
         "review_required_metrics": review_required,
         "static_threshold_violations": static_threshold_violations,
@@ -1523,6 +1553,12 @@ def _build_runtime_cardinality_review_summary(
             for metric_name in reviewed_metrics
             if metric_name in thresholds
         },
+        "local_observed_series": {
+            metric_name: local_observed_series[metric_name]
+            for metric_name in reviewed_metrics
+            if metric_name in local_observed_series
+        },
+        "local_threshold_violations": local_threshold_violations,
         "live_observed_series": query_results,
         "live_threshold_violations": live_threshold_violations,
         "degraded_reasons": degraded_reasons,
@@ -1543,6 +1579,30 @@ def _build_runtime_cardinality_review_summary(
         )
 
     if resolved_base_url is None:
+        if allow_local_cardinality_fallback and not missing_thresholds:
+            missing_local_observations = [
+                metric_name
+                for metric_name in reviewed_metrics
+                if metric_name not in local_observed_series
+            ]
+            if not missing_local_observations:
+                summary["mode"] = "local_cardinality_fallback"
+                for metric_name in reviewed_metrics:
+                    approved_max_series = thresholds[metric_name]
+                    observed_series_count = local_observed_series[metric_name]
+                    if observed_series_count > approved_max_series:
+                        local_threshold_violations.append(
+                            f"{metric_name} "
+                            f"observed_series_count={observed_series_count} "
+                            f"approved_max_series={approved_max_series}"
+                        )
+                if local_threshold_violations or static_threshold_violations:
+                    summary["status"] = "failed"
+                return summary
+            degraded_reasons.append(
+                "missing local cardinality observations for reviewed metrics: "
+                + ", ".join(missing_local_observations)
+            )
         summary["status"] = "degraded"
         degraded_reasons.append(
             f"missing {_PROMETHEUS_BASE_URL_ENV_VAR}; falling back to static cardinality evidence only"
@@ -1807,6 +1867,16 @@ def _build_parser() -> argparse.ArgumentParser:
             "Fail when the runtime-cardinality live review is degraded. "
             "Release gates should enable this so missing Prometheus evidence "
             "does not silently pass."
+        ),
+    )
+    parser.add_argument(
+        "--allow-local-cardinality-fallback",
+        action="store_true",
+        help=(
+            "Allow PR/local gates to satisfy runtime-cardinality review from "
+            "deterministic repo-local observed-series evidence when Prometheus is "
+            "unconfigured. Release gates should keep using "
+            "--fail-on-degraded-live-review without this flag."
         ),
     )
     return parser
@@ -2107,6 +2177,7 @@ def main(argv: list[str] | None = None) -> int:
         report,
         repo_root=args.repo_root,
         prometheus_base_url=args.prometheus_base_url,
+        allow_local_cardinality_fallback=args.allow_local_cardinality_fallback,
     )
     _write_runtime_cardinality_review_summary(
         review_summary,

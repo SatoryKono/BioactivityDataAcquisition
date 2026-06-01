@@ -27,6 +27,8 @@ from bioetl.domain.exceptions.infrastructure import (
 from bioetl.domain.exceptions.base import CriticalError, RecoverableError
 from bioetl.domain.types import ErrorType
 
+pytestmark = pytest.mark.unit
+
 
 class TestStorageError:
     """Tests for base StorageError."""

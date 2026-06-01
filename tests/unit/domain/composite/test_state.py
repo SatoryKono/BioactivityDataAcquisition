@@ -15,6 +15,8 @@ from bioetl.domain.composite.state import (
 )
 from bioetl.domain.exceptions import InvalidStateError
 
+pytestmark = pytest.mark.unit
+
 
 class TestCompositePipelineStateEnum:
     """Tests for CompositePipelineState enum values."""

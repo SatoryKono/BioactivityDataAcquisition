@@ -15,6 +15,8 @@ from bioetl.domain.value_objects import (
     PubChemCid,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestCompoundSource:
     """Tests for CompoundSource enum."""

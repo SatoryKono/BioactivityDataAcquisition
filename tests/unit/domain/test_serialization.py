@@ -21,6 +21,8 @@ from bioetl.domain.serialization import (
     serialize_to_json_canonical,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestSerializeToJson:
     """Tests for serialize_to_json function."""

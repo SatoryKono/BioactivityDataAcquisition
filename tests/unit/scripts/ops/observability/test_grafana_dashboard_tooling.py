@@ -8,6 +8,8 @@ from typing import Any
 from unittest.mock import MagicMock
 from urllib.error import HTTPError, URLError
 
+import pytest
+
 from scripts.ops import __main__ as ops_router
 from scripts.ops.observability.grafana import audit_live_grafana_panels as audit_subject
 from scripts.ops.observability.grafana import (
@@ -20,6 +22,8 @@ from scripts.ops.observability.grafana import (
     rerender_grafana_screenshots as rerender_subject,
 )
 from tests.helpers import assert_router_python_command
+
+pytestmark = pytest.mark.unit
 
 
 def _backend_result(

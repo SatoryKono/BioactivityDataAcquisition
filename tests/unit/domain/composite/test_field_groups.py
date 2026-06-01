@@ -17,6 +17,8 @@ from bioetl.domain.composite.field_groups import (
     build_field_group_registry,
 )
 
+pytestmark = pytest.mark.unit
+
 
 # ============================================================
 # FieldMapping Tests

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from contextlib import redirect_stderr, redirect_stdout
 import io
+import json
 from pathlib import Path
 import runpy
 import sys
@@ -100,6 +101,51 @@ def test_dependency_map_drift_check_passes_current_repo(
         f"stdout:\n{stdout.getvalue()}\n"
         f"stderr:\n{stderr.getvalue()}\n"
     )
+
+
+def test_dependency_map_check_explains_source_fingerprint_only_drift(
+    tmp_path,
+    capsys,
+) -> None:
+    script_globals = runpy.run_path(
+        "scripts/engineering/qa/generate_architecture_dependency_map.py",
+        run_name="bioetl_architecture_dependency_map_test",
+    )
+    check_file_sync = script_globals["_check_file_sync"]
+    artifact_path = tmp_path / "module-dependency-map.json"
+    actual = {
+        "summary": {
+            "scanned_modules": 1,
+            "total_internal_imports": 0,
+            "layer_edges": 0,
+            "cross_layer_group_edges": 0,
+            "cross_layer_group_edges_total": 0,
+            "violations": 0,
+            "source_fingerprint": "old",
+        },
+        "layer_edges": [],
+        "cross_layer_group_edges": [],
+        "violations": [],
+    }
+    expected = {
+        **actual,
+        "summary": {
+            **actual["summary"],
+            "source_fingerprint": "new",
+        },
+    }
+    artifact_path.write_text(json.dumps(actual, indent=2) + "\n", encoding="utf-8")
+
+    assert not check_file_sync(
+        artifact_path,
+        json.dumps(expected, indent=2) + "\n",
+    )
+
+    stdout = capsys.readouterr().out
+    assert "source fingerprint mismatch" in stdout
+    assert "actual='old'" in stdout
+    assert "expected='new'" in stdout
+    assert "topology content matches" in stdout
 
 
 def test_dependency_map_generated_markdown_uses_canonical_generator_path() -> None:

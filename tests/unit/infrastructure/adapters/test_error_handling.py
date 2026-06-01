@@ -24,6 +24,8 @@ from bioetl.infrastructure.adapters.error_handling import (
     ErrorCategory,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestErrorCategory:
     """Tests for ErrorCategory enum."""

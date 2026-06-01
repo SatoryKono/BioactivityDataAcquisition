@@ -258,9 +258,11 @@ Normative rules:
 - Forensic explorer surfaces are exempt from Prometheus-style symmetry, but
   they still MUST keep scope semantics and first action above row-level detail.
 
-## 4.3) Visibility tiers and expanded-row policy (обязательно)
+## 4.3) Visibility tiers and collapse policy (обязательно)
 
-Every shipped dashboard should classify panels into one of four tiers:
+Every shipped dashboard should classify panels into one of four tiers. Expanded
+rows stay open by default unless a dashboard-specific contract explicitly
+documents another collapse policy:
 
 - `Tier 1`: always-visible answer surface
 - `Tier 2`: always-visible supporting current context

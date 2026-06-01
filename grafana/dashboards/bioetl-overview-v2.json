@@ -2458,7 +2458,7 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 67
+        "y": 51
       },
       "options": {
         "content": "<div style=\"padding:0.4rem 0.6rem;line-height:1.6\">Raw metric starting points for this dashboard are<br><strong>System Status:</strong> <code>bioetl_l0_status{pipeline=~&quot;chembl_assay&quot;,run_type=~&quot;incremental&quot;}</code>,<br><strong>First Action route:</strong> <code>bioetl_l0_next_action_route{pipeline=~&quot;chembl_assay&quot;,run_type=~&quot;incremental&quot;}</code>,<br><strong>Input Status:</strong> <code>bioetl_l0_input_status_selected{pipeline=~&quot;chembl_assay&quot;,run_type=~&quot;incremental&quot;}</code>.<br>Exact blocker reasons live in the Control Plane, Runtime, Data Quality, Provider Health, and Workflow dashboards.<br>Historical evidence stays in the row above.</div>",
@@ -2988,7 +2988,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 71
+        "y": 55
       }
     },
     {
@@ -2999,7 +2999,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 72
+        "y": 56
       },
       "datasource": {
         "type": "prometheus",

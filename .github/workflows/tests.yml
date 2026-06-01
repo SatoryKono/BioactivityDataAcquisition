@@ -236,6 +236,9 @@ jobs:
             -   name: Validate scripts catalog governance policy
                 run: uv run python -m scripts.engineering.repo check-catalog --catalog scripts/engineering/repo/catalog.yaml
 
+            -   name: Test governance closeout preflight (VCR/LFS fail-fast)
+                run: uv run python scripts/engineering/qa/check_test_audit_preflight.py --strict
+
             -   name: Validate deterministic Neo4j memory ontology invariants
                 run: uv run python -m scripts.engineering.ci neo4j-memory
 
@@ -252,7 +255,12 @@ jobs:
                 run: uv run python -m scripts.engineering.qa validate-dq-consistency
 
             -   name: Observability metric inventory drift gate
-                run: uv run python -m scripts.engineering.qa report-observability-metric-inventory --check --json
+                run: |
+                    uv run python -m scripts.engineering.qa report-observability-metric-inventory \
+                      --check \
+                      --json \
+                      --review-json-out reports/observability/runtime_cardinality_review_pr.json \
+                      --allow-local-cardinality-fallback
 
             -   name: Dashboard navigation contract sync gate
                 run: |

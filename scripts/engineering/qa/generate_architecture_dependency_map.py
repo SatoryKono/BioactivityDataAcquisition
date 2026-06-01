@@ -500,16 +500,72 @@ def _write_text(path: Path, content: str) -> None:
     safe_path.write_text(content, encoding="utf-8")
 
 
+def _display_path(path: Path) -> str:
+    try:
+        return path.relative_to(PROJECT_ROOT).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
+def _json_summary_field(payload: str, field_name: str) -> object | None:
+    try:
+        decoded = json.loads(payload)
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(decoded, dict):
+        return None
+    summary = decoded.get("summary")
+    if not isinstance(summary, dict):
+        return None
+    return summary.get(field_name)
+
+
+def _without_source_fingerprint(payload: str) -> object | None:
+    try:
+        decoded = json.loads(payload)
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(decoded, dict):
+        return None
+    summary = decoded.get("summary")
+    if isinstance(summary, dict):
+        summary = dict(summary)
+        summary.pop("source_fingerprint", None)
+        decoded = dict(decoded)
+        decoded["summary"] = summary
+    return decoded
+
+
+def _print_json_drift_details(path: Path, *, actual: str, expected: str) -> None:
+    actual_fingerprint = _json_summary_field(actual, "source_fingerprint")
+    expected_fingerprint = _json_summary_field(expected, "source_fingerprint")
+    display_path = _display_path(path)
+    if actual_fingerprint != expected_fingerprint:
+        print(
+            "[drift] source fingerprint mismatch: "
+            f"{display_path} actual={actual_fingerprint!r} "
+            f"expected={expected_fingerprint!r}"
+        )
+        if _without_source_fingerprint(actual) == _without_source_fingerprint(expected):
+            print(
+                "[drift] topology content matches after removing "
+                "summary.source_fingerprint; rerun --update to bind the artifact "
+                "to the current src/ tree"
+            )
+
+
 def _check_file_sync(path: Path, expected: str) -> bool:
     if not path.exists():
-        print(f"[drift] missing file: {path.relative_to(PROJECT_ROOT)}")
+        print(f"[drift] missing file: {_display_path(path)}")
         return False
     actual = path.read_text(encoding="utf-8")
     if path.suffix == ".md":
         _, actual = _split_frontmatter(actual)
     if actual == expected:
         return True
-    print(f"[drift] mismatch: {path.relative_to(PROJECT_ROOT)}")
+    print(f"[drift] mismatch: {_display_path(path)}")
+    if path.suffix == ".json":
+        _print_json_drift_details(path, actual=actual, expected=expected)
     return False
 
 

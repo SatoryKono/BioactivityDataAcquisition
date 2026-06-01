@@ -22,6 +22,8 @@ from bioetl.domain.value_objects.dq_metrics_calculations import (
     make_hashable,
 )
 
+pytestmark = pytest.mark.unit
+
 
 # ===========================================================================
 # filter_non_null

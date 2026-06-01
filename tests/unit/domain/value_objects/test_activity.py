@@ -13,6 +13,8 @@ from bioetl.domain.value_objects import (
     RelationOperator,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestRelationOperator:
     """Tests for RelationOperator enum."""

@@ -166,6 +166,21 @@ def test_static_test_governance_report_stays_within_committed_budgets() -> None:
 
 
 @pytest.mark.architecture
+def test_tests_workflow_runs_strict_test_audit_preflight_before_governance_closeout() -> (
+    None
+):
+    workflow = (ROOT / ".github" / "workflows" / "tests.yml").read_text(
+        encoding="utf-8"
+    )
+    command = "scripts/engineering/qa/check_test_audit_preflight.py --strict"
+
+    assert command in workflow
+    assert workflow.index(command) < workflow.index(
+        "Observability metric inventory drift gate"
+    )
+
+
+@pytest.mark.architecture
 def test_compatibility_test_file_max_follows_stream_g_downward_ratchet() -> None:
     """#4826: compatibility_test_file_max may only ratchet down to the live inventory."""
     payload = _load_yaml(CONFIG_PATH)

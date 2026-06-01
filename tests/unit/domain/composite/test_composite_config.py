@@ -26,6 +26,8 @@ from bioetl.domain.composite.strategy import (
     MergeStrategy,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestSeedConfig:
     """Tests for SeedConfig."""

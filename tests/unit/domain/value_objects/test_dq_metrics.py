@@ -16,6 +16,8 @@ from bioetl.domain.value_objects.dq_metrics import (
     _extract_numeric_values,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestColumnStats:
     """Tests for ColumnStats Value Object."""

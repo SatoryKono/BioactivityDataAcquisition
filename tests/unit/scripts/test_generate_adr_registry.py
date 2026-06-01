@@ -64,3 +64,13 @@ def test_extract_adr_metadata_recovers_decision_date_from_table_when_header_is_p
     assert metadata is not None
     assert metadata.status == "accepted"
     assert metadata.decision_date == "2026-02-06"
+
+
+def test_adr_033_explicitly_retires_silver_cross_field_runtime_executor() -> None:
+    """ADR-033 must not leave the Silver cross-field executor as ambiguous debt."""
+    adr_text = Path(
+        "docs/02-architecture/decisions/ADR-033-publication-validation-strategy.md"
+    ).read_text(encoding="utf-8")
+
+    assert "Level 2 Silver runtime executor is explicitly retired" in adr_text
+    assert "must not be treated as an active implementation gap" in adr_text
