@@ -200,7 +200,7 @@ bronze_fixture_replay_debt_metrics:
       ratchet_policy: Ratchet downward as derived/specialized surfaces gain factual
         provider-backed tracked samples.
     tracked_bronze_fixture_count:
-      current_count: 21
+      current_count: 22
       owner: '@bioetl-data-platform'
       rationale: Tracked CI samples are the first-class evidence signal for determinism
         and replay coverage across supported Bronze families.
@@ -801,8 +801,8 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless a reviewed triage recalibration
         updates the tracked debt budget intentionally.
     repo_wide_zero_import_candidate_count:
-      current_count: 51
-      max_count: 51
+      current_count: 64
+      max_count: 64
       linked_issue: '#4541'
       owner: '@bioetl-architecture'
       rationale: Repo-wide zero-import candidates remain a governed review surface
@@ -810,8 +810,8 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless a reviewed dead-code inventory refresh
         updates the classified candidate set intentionally.
     repo_wide_classified_zero_import_candidate_count:
-      current_count: 50
-      max_count: 50
+      current_count: 64
+      max_count: 64
       linked_issue: '#4541'
       owner: '@bioetl-architecture'
       rationale: Every repo-wide zero-import candidate must stay covered by an explicit
@@ -819,8 +819,8 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless the repo-wide classification ledger
         is intentionally rebaselined during review.
     repo_wide_untriaged_zero_import_candidate_count:
-      current_count: 1
-      max_count: 1
+      current_count: 0
+      max_count: 0
       linked_issue: '#4541'
       owner: '@bioetl-architecture'
       rationale: Untriaged repo-wide zero-import candidates are not allowed to persist

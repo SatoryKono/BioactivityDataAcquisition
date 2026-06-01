@@ -1,12 +1,12 @@
 {
   "summary": {
     "scanned_modules": 1988,
-    "total_internal_imports": 7774,
+    "total_internal_imports": 7775,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "d2bbf8422fc637f57d4ea14330fa780dc61284d7143ffd576226f79a91be3e51"
+    "source_fingerprint": "9d731239e54f89755477242435bcf0962f72e833caccd7f452a099a331250487"
   },
   "layer_edges": [
     {
@@ -42,7 +42,7 @@
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 339,
+      "imports": 338,
       "allowed": true
     },
     {
@@ -84,7 +84,7 @@
     {
       "source": "interfaces",
       "target": "interfaces",
-      "imports": 269,
+      "imports": 271,
       "allowed": true
     }
   ],
@@ -260,11 +260,6 @@
       "imports": 24
     },
     {
-      "source": "composition.runtime_builders",
-      "target": "infrastructure.config",
-      "imports": 24
-    },
-    {
       "source": "infrastructure.config",
       "target": "domain.types",
       "imports": 24
@@ -272,6 +267,11 @@
     {
       "source": "composition.runtime_builders",
       "target": "domain.control_plane",
+      "imports": 23
+    },
+    {
+      "source": "composition.runtime_builders",
+      "target": "infrastructure.config",
       "imports": 23
     },
     {

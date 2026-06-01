@@ -6,6 +6,13 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol, cast
 
+from bioetl.composition.runtime_builders._run_manifest_data_roots import (
+    DataRootMode as DataRootMode,
+    build_planned_artifacts as build_planned_artifacts,
+    control_plane_root as control_plane_root,
+    is_explicit_data_root_configured as is_explicit_data_root_configured,
+    resolve_data_root_mode as resolve_data_root_mode,
+)
 from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
     CONTRACT_IDENTITY_FIELD_NAMES,
 )

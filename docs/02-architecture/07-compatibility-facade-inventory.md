@@ -202,7 +202,12 @@ operational; do not copy generated snapshot counters back into it by hand.
 Measured-only modules are tracked by docstring-prefix measurement and the YAML allowlist, but they
 are not curated ledger rows by default.
 
-Current cycle status: the measured-only allowlist is empty, so any new measured-only module is an immediate ratchet regression until it is explicitly reviewed.
+Current cycle status: the measured-only allowlist contains the reviewed
+control-plane ownership facades introduced during #4610. They are not
+sanctioned public entrypoints and new first-party `src` imports must continue to
+target the owned `manifest/`, `manifest/diagnostics/`, and `replay/` modules.
+Any additional measured-only module beyond the YAML ratchet is an immediate
+regression until explicitly reviewed.
 
 - A module may remain measured-only while it is still an unsanctioned compatibility helper and new
   first-party imports are not being added.
