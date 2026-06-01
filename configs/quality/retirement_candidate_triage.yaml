@@ -42,6 +42,17 @@ repo_wide_zero_import_classification:
     linked_issue: '#4541'
     rationale: Module entrypoint for `python -m bioetl`; static import scans stay
       at zero because the interpreter dispatches the module directly.
+  - module_path: src/bioetl/application/core/_span_helpers.py
+    module_name: bioetl.application.core._span_helpers
+    disposition: retain_compat_shim
+    reviewed_on: '2026-06-01'
+    review_by: '2026-08-30'
+    linked_issue: '#4923'
+    rationale: Private span-helper shim has zero first-party importers after issue
+      4923
+      ratcheted callers to bioetl.application.core.span_helpers; retain only as a
+      backward-compatible no-growth import surface until the next compatibility
+      facade retirement review.
   - module_path: src/bioetl/application/core/batch_execution_lifecycle.py
     module_name: bioetl.application.core.batch_execution_lifecycle
     disposition: retain_public_facade
@@ -154,6 +165,26 @@ repo_wide_zero_import_classification:
     linked_issue: '#4541'
     rationale: PubChem standardization catalog remains the canonical normalization
       vocabulary owner module for runtime/domain access.
+  - module_path: src/bioetl/domain/normalization/profiles/_chembl_policy_registry.py
+    module_name: bioetl.domain.normalization.profiles._chembl_policy_registry
+    disposition: retain_compat_shim
+    reviewed_on: '2026-06-01'
+    review_by: '2026-08-30'
+    linked_issue: '#4923'
+    rationale: Private ChEMBL policy-registry shim has zero first-party importers
+      after callers moved to bioetl.domain.normalization.profiles.chembl_policy_registry;
+      retain as a backward-compatible no-growth import surface until compatibility
+      facade retirement.
+  - module_path: src/bioetl/domain/normalization/profiles/_chembl_policy_registry_data.py
+    module_name: bioetl.domain.normalization.profiles._chembl_policy_registry_data
+    disposition: retain_compat_shim
+    reviewed_on: '2026-06-01'
+    review_by: '2026-08-30'
+    linked_issue: '#4923'
+    rationale: Private ChEMBL policy-registry data shim has zero first-party importers
+      after callers moved to bioetl.domain.normalization.profiles.chembl_policy_registry_data;
+      retain as a backward-compatible no-growth import surface until compatibility
+      facade retirement.
   - module_path: src/bioetl/domain/ports/data_normalization.py
     module_name: bioetl.domain.ports.data_normalization
     disposition: retain_canonical_owner_module

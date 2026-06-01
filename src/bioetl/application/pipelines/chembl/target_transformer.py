@@ -7,9 +7,14 @@ from __future__ import annotations
 
 __all__ = ["TargetTransformer"]
 
+from dataclasses import replace
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, ClassVar, cast
 
+from bioetl.application.core.normalization_rules import NormalizationRulesPolicy
+from bioetl.application.core.record_normalization_processor import (
+    RecordNormalizationProcessor,
+)
 from bioetl.application.core.dict_transformers import (
     aggregate_nested_lists,
     extract_list_field,
@@ -46,6 +51,13 @@ _TARGET_PROTEIN_CLASS_SUMMARY_FIELDS = tuple(
     for kind in ("id", "name", "desc")
     for level in range(1, 6)
 )
+_MULTIFUNCTIONAL_TARGET_EMPTY_NAME_FIELDS = frozenset(
+    {
+        "target_protein_class_name_L3",
+        "target_protein_class_name_L4",
+        "target_protein_class_name_L5",
+    }
+)
 
 
 class TargetTransformer(BaseChemblTransformer):
@@ -54,6 +66,19 @@ class TargetTransformer(BaseChemblTransformer):
     entity_class = Target
     primary_id_field = "target_id"
     _PROVIDER_ALIASES: ClassVar[dict[str, str]] = {"target_id": "target_chembl_id"}
+
+    def _build_record_normalizer(self) -> RecordNormalizationProcessor:
+        """Preserve multifunctional summary empty-string markers for L3-L5 names."""
+        rule_set = replace(
+            NormalizationRulesPolicy(),
+            passthrough_fields=NormalizationRulesPolicy().passthrough_fields
+            | _MULTIFUNCTIONAL_TARGET_EMPTY_NAME_FIELDS
+        )
+        return RecordNormalizationProcessor(
+            provider=self.provider,
+            entity_type=self.entity_type,
+            rule_set=rule_set,
+        )
 
     def _prepare_record(
         self,

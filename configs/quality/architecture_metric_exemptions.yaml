@@ -1,6 +1,12 @@
 schema_version: 1
 policy:
   default_gate_mode: block
+  review_history:
+    - issue: "#4929"
+      reviewed_on: "2026-06-01"
+      owner: architecture-governance
+      outcome: held_flat_no_new_exemptions
+      rationale: Active metric exemptions are already reduced to two intentional exceptions; both are owner-scoped, expiry-bound, and must be retired before 2026-12-31 rather than extended.
   owner_diversification_sync:
     source: configs/quality/debt_scorecard.yaml#governance.owner_diversification
     starts_quarter: 2026-Q2

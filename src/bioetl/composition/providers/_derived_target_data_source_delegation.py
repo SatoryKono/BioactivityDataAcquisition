@@ -6,8 +6,7 @@ from collections.abc import AsyncIterator
 from types import TracebackType
 from typing import cast
 
-from bioetl.domain.ports import DataSourcePort, FilterableDataSourcePort
-from bioetl.domain.ports.health_check import HealthCheckResult
+from bioetl.domain.ports import DataSourcePort, FilterableDataSourcePort, HealthCheckResult
 from bioetl.domain.types import HealthStatus, JsonDict
 
 

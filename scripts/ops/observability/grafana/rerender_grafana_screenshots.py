@@ -24,6 +24,13 @@ DEFAULT_OUTPUT_DIR = Path("reports/observability/grafana/screenshots")
 DEFAULT_WIDTH = 1600
 DEFAULT_HEIGHT = 2200
 DEFAULT_TIMEOUT_SECONDS = 120.0
+DEFAULT_TOOL_PLAYWRIGHT_NODE_MODULES = Path(
+    "/tmp/bioetl-tools/playwright-runtime/node_modules"
+)
+DEFAULT_TOOL_PLAYWRIGHT_BROWSERS = Path("/tmp/playwright-browsers")
+LOCAL_PLAYWRIGHT_LIB_DIR = Path(
+    ".cache/grafana-screenshot-runtime/root/usr/lib/x86_64-linux-gnu"
+)
 
 
 @dataclass(frozen=True)
@@ -352,6 +359,68 @@ def _repo_root() -> Path:
     return Path(__file__).resolve().parents[4]
 
 
+def _path_has_playwright_package(path: Path) -> bool:
+    return (path / "playwright" / "package.json").exists()
+
+
+def _default_playwright_node_modules() -> str:
+    configured = os.getenv("BIOETL_PLAYWRIGHT_NODE_MODULES", "").strip()
+    if configured:
+        return configured
+    repo_node_modules = _repo_root() / "node_modules"
+    if _path_has_playwright_package(repo_node_modules):
+        return str(repo_node_modules)
+    if _path_has_playwright_package(DEFAULT_TOOL_PLAYWRIGHT_NODE_MODULES):
+        return str(DEFAULT_TOOL_PLAYWRIGHT_NODE_MODULES)
+    return ""
+
+
+def _default_playwright_browsers_path() -> str:
+    configured = os.getenv("PLAYWRIGHT_BROWSERS_PATH", "").strip()
+    if configured:
+        return configured
+    if DEFAULT_TOOL_PLAYWRIGHT_BROWSERS.exists():
+        return str(DEFAULT_TOOL_PLAYWRIGHT_BROWSERS)
+    return ""
+
+
+def _default_playwright_library_path() -> str:
+    configured = os.getenv("BIOETL_PLAYWRIGHT_LIBRARY_PATH", "").strip()
+    if configured:
+        return configured
+    candidate = _repo_root() / LOCAL_PLAYWRIGHT_LIB_DIR
+    if candidate.exists():
+        return str(candidate)
+    return ""
+
+
+def _prepend_path_env(env: dict[str, str], name: str, value: str) -> None:
+    if not value:
+        return
+    current_value = env.get(name, "").strip()
+    paths = [item for item in current_value.split(os.pathsep) if item]
+    if value not in paths:
+        env[name] = (
+            f"{value}{os.pathsep}{current_value}" if current_value else value
+        )
+
+
+def _apply_playwright_runtime_env(env: dict[str, str]) -> None:
+    extra_node_modules = _default_playwright_node_modules()
+    if extra_node_modules:
+        env["BIOETL_PLAYWRIGHT_NODE_MODULES"] = extra_node_modules
+        _prepend_path_env(env, "NODE_PATH", extra_node_modules)
+
+    browsers_path = _default_playwright_browsers_path()
+    if browsers_path:
+        env["PLAYWRIGHT_BROWSERS_PATH"] = browsers_path
+
+    library_path = _default_playwright_library_path()
+    if library_path:
+        env["BIOETL_PLAYWRIGHT_LIBRARY_PATH"] = library_path
+        _prepend_path_env(env, "LD_LIBRARY_PATH", library_path)
+
+
 def _resolve_node_executable() -> str | None:
     direct = shutil.which("node")
     if direct:
@@ -388,15 +457,7 @@ def _playwright_env(config: RenderConfig) -> dict[str, str]:
     scope_query = urlencode(_scope_query_params(config))
     if scope_query:
         env["GRAFANA_SCREENSHOT_SCOPE_QUERY"] = scope_query
-    extra_node_modules = os.getenv("BIOETL_PLAYWRIGHT_NODE_MODULES", "").strip()
-    if extra_node_modules:
-        env["BIOETL_PLAYWRIGHT_NODE_MODULES"] = extra_node_modules
-        current_node_path = env.get("NODE_PATH", "").strip()
-        env["NODE_PATH"] = (
-            f"{extra_node_modules}{os.pathsep}{current_node_path}"
-            if current_node_path
-            else extra_node_modules
-        )
+    _apply_playwright_runtime_env(env)
     return env
 
 
@@ -466,14 +527,7 @@ def check_playwright_runtime() -> tuple[bool, str]:
         )
     try:
         env = os.environ.copy()
-        extra_node_modules = os.getenv("BIOETL_PLAYWRIGHT_NODE_MODULES", "").strip()
-        if extra_node_modules:
-            current_node_path = env.get("NODE_PATH", "").strip()
-            env["NODE_PATH"] = (
-                f"{extra_node_modules}{os.pathsep}{current_node_path}"
-                if current_node_path
-                else extra_node_modules
-            )
+        _apply_playwright_runtime_env(env)
         result = subprocess.run(
             [
                 node_path,

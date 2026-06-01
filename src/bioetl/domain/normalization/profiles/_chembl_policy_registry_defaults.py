@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
+from bioetl.domain.normalization.profiles._chembl_policy_registry_reference_identifier_rows import (
+    CHEMBL_REFERENCE_IDENTIFIER_FAMILY_ROWS,
+)
 from bioetl.domain.normalization.profiles.chembl_policy_registry_data import (
     ChemblControlledVocabularyFamily,
     ChemblOntologyPolicyFamily,
     ChemblPolicyRegistryData,
     ChemblReferenceIdentifierFamily,
     ChemblStrictScalarFamily,
-)
-from bioetl.domain.normalization.profiles._chembl_policy_registry_reference_identifier_rows import (
-    CHEMBL_REFERENCE_IDENTIFIER_FAMILY_ROWS,
 )
 
 DEFAULT_CHEMBL_POLICY_REGISTRY_DATA = ChemblPolicyRegistryData(

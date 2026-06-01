@@ -2,16 +2,17 @@
 id: fix-compatibility-importer-census-drift
 title: Fix compatibility importer census drift
 task_id: fix-compatibility-importer-census-drift
-created_at: '2026-06-01T15:02:40Z'
+created_at: '2026-06-01T15:22:21Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - <add-source-ref>
-summary: Removed new composition provider dependency on application core compatibility
-  twin public facades by adding a local composition-owned target protein classification
-  data-source wrapper mixin. Regenerated compatibility importer census reports and
-  module coverage inventory. Verified importer census governance, wrapper unit tests,
-  ruff, private-module import architecture, and module coverage hash guard.
+summary: 'Closed compatibility importer census drift by keeping the target protein-classification
+  provider on composition-local delegation instead of application-core compatibility
+  twin facades, syncing compatibility importer census reports to the current #4923
+  twin-ratchet policy, and refreshing module coverage inventory. Verified census governance,
+  wrapper unit coverage, private-module boundary, ruff, module coverage hash guard,
+  and artifact checks.'
 ---
 
 # Episodic summary
@@ -22,7 +23,7 @@ summary: Removed new composition provider dependency on application core compati
 
 ## Outcome
 
-- Removed new composition provider dependency on application core compatibility twin public facades by adding a local composition-owned target protein classification data-source wrapper mixin. Regenerated compatibility importer census reports and module coverage inventory. Verified importer census governance, wrapper unit tests, ruff, private-module import architecture, and module coverage hash guard.
+- Closed compatibility importer census drift by keeping the target protein-classification provider on composition-local delegation instead of application-core compatibility twin facades, syncing compatibility importer census reports to the current #4923 twin-ratchet policy, and refreshing module coverage inventory. Verified census governance, wrapper unit coverage, private-module boundary, ruff, module coverage hash guard, and artifact checks.
 
 ## Lessons learned
 

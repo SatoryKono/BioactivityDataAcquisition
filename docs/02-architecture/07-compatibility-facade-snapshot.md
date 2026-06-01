@@ -10,9 +10,9 @@
 - Sanctioned public entrypoint rows: `14`
 - Retained review entrypoints: `0`
 - Permanent public entrypoints: `14`
-- Measured tracked modules: `14`
-- Measured-only modules outside curated inventory: `0`
-- Discovered docstring-tracked modules: `0`
+- Measured tracked modules: `17`
+- Measured-only modules outside curated inventory: `3`
+- Discovered docstring-tracked modules: `3`
 - Unexpected docstring-tracked modules: `0`
 - Missing allowlisted measured-only modules: `0`
 - First-party src imports targeting measured-only modules: `0`
@@ -34,10 +34,13 @@
 ## Expected Measured Registry
 
 - `src/bioetl/application/composite/merger.py`
+- `src/bioetl/application/core/_span_helpers.py`
 - `src/bioetl/composition/entrypoints.py`
 - `src/bioetl/composition/health_api.py`
 - `src/bioetl/composition/maintenance_api.py`
 - `src/bioetl/domain/composite/config.py`
+- `src/bioetl/domain/normalization/profiles/_chembl_policy_registry.py`
+- `src/bioetl/domain/normalization/profiles/_chembl_policy_registry_data.py`
 - `src/bioetl/domain/value_objects/activity_values.py`
 - `src/bioetl/infrastructure/config/__init__.py`
 - `src/bioetl/interfaces/cli/commands/diagnostics.py`
@@ -67,18 +70,24 @@
 
 ## Measured-Only Allowlist
 
-- None.
+- `src/bioetl/application/core/_span_helpers.py` — owner: `bioetl.application.core`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Backward-compatible re-export facade retained as a measured-only shim for span helper imports during compatibility review.
+- `src/bioetl/domain/normalization/profiles/_chembl_policy_registry.py` — owner: `bioetl.domain.normalization.profiles`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Backward-compatible re-export facade retained as a measured-only shim for ChEMBL policy registry imports during compatibility review.
+- `src/bioetl/domain/normalization/profiles/_chembl_policy_registry_data.py` — owner: `bioetl.domain.normalization.profiles`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Backward-compatible re-export facade retained as a measured-only shim for ChEMBL policy registry payload imports during compatibility review.
 
 ## Measured-Only Ratchet
 
-- Max measured-only modules: `0`
+- Max measured-only modules: `3`
+- `src/bioetl/application/core/` <= `1` measured-only modules
 - `src/bioetl/application/services/` <= `0` measured-only modules
+- `src/bioetl/domain/normalization/profiles/` <= `2` measured-only modules
 - `src/bioetl/interfaces/cli/commands/` <= `0` measured-only modules
 
 ### Live Ratchet Counts
 
-- Total measured-only modules: `0`
+- Total measured-only modules: `3`
+- `src/bioetl/application/core/` currently has `1` modules
 - `src/bioetl/application/services/` currently has `0` modules
+- `src/bioetl/domain/normalization/profiles/` currently has `2` modules
 - `src/bioetl/interfaces/cli/commands/` currently has `0` modules
 
 ### Ratchet Violations
@@ -103,7 +112,9 @@
 
 ### Discovered Docstring-Tracked Modules
 
-- None.
+- `src/bioetl/application/core/_span_helpers.py`
+- `src/bioetl/domain/normalization/profiles/_chembl_policy_registry.py`
+- `src/bioetl/domain/normalization/profiles/_chembl_policy_registry_data.py`
 
 ### Unexpected Docstring-Tracked Modules
 

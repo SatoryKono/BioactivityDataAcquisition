@@ -42,18 +42,19 @@ def test_quarantine_explorer_backend_contract_is_documented() -> None:
     )
 
 
-def test_quarantine_explorer_compose_uses_host_gateway_backend() -> None:
-    """Grafana must resolve the Quarantine Explorer backend through host-gateway by default."""
+def test_quarantine_explorer_compose_uses_service_dns_backend() -> None:
+    """Grafana should resolve the in-compose Quarantine Explorer service by default."""
     monitoring = _load_monitoring_compose()
     grafana = monitoring["services"]["grafana"]
     root = yaml.safe_load(Path("docker-compose.yml").read_text(encoding="utf-8"))
     bioetl = root["services"]["bioetl"]
 
     assert (
-        "BIOETL_QUARANTINE_EXPLORER_URL=${BIOETL_QUARANTINE_EXPLORER_URL:-http://host.docker.internal:8081}"
+        "BIOETL_QUARANTINE_EXPLORER_URL=${BIOETL_QUARANTINE_EXPLORER_URL:-http://quarantine-explorer:8081}"
         in grafana["environment"]
     )
     assert "host.docker.internal:host-gateway" in grafana["extra_hosts"]
+    assert "quarantine-explorer" in monitoring["services"]
     assert bioetl["command"] == [
         "quarantine",
         "serve",
@@ -72,13 +73,13 @@ def test_grafana_compose_installs_infinity_plugin() -> None:
     assert "GF_INSTALL_PLUGINS=yesoreyeram-infinity-datasource" in content
 
 
-def test_quarantine_explorer_defaults_to_host_gateway_backend() -> None:
-    """Monitoring compose should route explorer traffic through host-gateway by default."""
+def test_quarantine_explorer_defaults_to_monitoring_service_backend() -> None:
+    """Monitoring compose should route explorer traffic through service DNS by default."""
     compose_path = Path("docker-compose.monitoring.yml")
     content = compose_path.read_text(encoding="utf-8")
     monitoring = _load_monitoring_compose()
     assert (
-        "BIOETL_QUARANTINE_EXPLORER_URL=${BIOETL_QUARANTINE_EXPLORER_URL:-http://host.docker.internal:8081}"
+        "BIOETL_QUARANTINE_EXPLORER_URL=${BIOETL_QUARANTINE_EXPLORER_URL:-http://quarantine-explorer:8081}"
         in content
     )
     assert monitoring["networks"]["monitoring"]["name"] == "bioetl-monitoring"

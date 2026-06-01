@@ -2,13 +2,14 @@
 id: dashboard-full-audit-20260601-current
 title: Full BioETL dashboard audit for chembl_target backfill
 task_id: dashboard-full-audit-20260601-current
-created_at: '2026-06-01T13:54:02Z'
+created_at: '2026-06-01T15:45:56Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- grafana
+- grafana/dashboards
 summary: Active task session context.
-query: BioETL Grafana dashboard audit render live panel audit chembl_target b51986c6-870b-4457-aa70-baedac2710ad
+query: Grafana dashboards BioETL full audit render collapsed variables run_id chembl_target
+  backfill ID Processed Records Quarantine Explorer
 ---
 
 # Session note
@@ -16,7 +17,7 @@ query: BioETL Grafana dashboard audit render live panel audit chembl_target b519
 ## Task
 
 - Title: Full BioETL dashboard audit for chembl_target backfill
-- Retrieval query: BioETL Grafana dashboard audit render live panel audit chembl_target b51986c6-870b-4457-aa70-baedac2710ad
+- Retrieval query: Grafana dashboards BioETL full audit render collapsed variables run_id chembl_target backfill ID Processed Records Quarantine Explorer
 
 ## Retrieved context
 

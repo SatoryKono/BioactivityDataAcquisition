@@ -4,6 +4,14 @@ source_of_truth:
   matrix_path: configs/quality/test_matrix.yaml
   matrix_rollout_path: mutation_testing
 backlog_reference: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/3410
+review_history:
+- issue: '#4930'
+  reviewed_on: '2026-06-01'
+  owner: '@bioetl-application'
+  outcome: held_flat_partial_application_gate
+  rationale: Domain and application_control_plane mutation gates remain enforced; broad
+    application stays staged until a stable application-layer baseline and bounded
+    shard runtime are captured.
 entries:
 - target: domain
   status: enforced

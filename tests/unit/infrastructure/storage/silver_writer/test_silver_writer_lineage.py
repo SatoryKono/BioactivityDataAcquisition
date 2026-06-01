@@ -321,7 +321,7 @@ class TestSilverWriterLineage:
             )
 
             # Should not raise with bronze_refs
-            await writer.write_silver(
+            result = await writer.write_silver(
                 table_name="test.table",
                 records=valid_records,
                 primary_keys=["entity_id"],
@@ -329,6 +329,7 @@ class TestSilverWriterLineage:
                 mode="merge",
                 bronze_refs=[bronze_result],
             )
+            assert result is None
 
     @pytest.mark.asyncio
     async def test_write_silver_metadata_includes_bronze_paths(

@@ -1147,6 +1147,40 @@ class TestHealthServerControlPlaneSelector:
         assert rows["Checkpoint [Anchors]"] == "OK"
 
     @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_identity_table_uses_run_id_index_for_exact_run(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Exact run_id reads must not scan every manifest before filling ID panels."""
+        server, manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+        selected_manifest = next(
+            manifest
+            for manifest in manifest_store.items.values()
+            if manifest.manifest_id == "manifest-1"
+        )
+
+        def fail_list_all() -> tuple[RunManifest, ...]:
+            raise AssertionError("exact run_id identity lookup must use get_by_run_id")
+
+        monkeypatch.setattr(manifest_store, "list_all", fail_list_all)
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/identity-table?"
+            f"pipeline=chembl_activity&run_id={selected_manifest.run_id}",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        rows = {item["parameter"]: item["value"] for item in data["rows"]}
+        assert data["resolved_via"] == "selected_run_id"
+        assert rows["Manifest ID [Control Plane]"] == "manifest-1"
+        assert rows["Run ID [Pipeline]"] == str(selected_manifest.run_id)
+
+    @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_table_supports_all_pipeline_with_selected_run_id(
         self,
         running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
