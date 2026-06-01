@@ -182,9 +182,14 @@ def _changed_paths_from_git_status(status_output: str) -> list[str]:
     paths: list[str] = []
     for raw_line in status_output.splitlines():
         line = raw_line.rstrip()
-        if len(line) < 4:
+        if len(line) < 3:
             continue
-        path = line[3:]
+        # Git status porcelain emits a two-character status plus an optional
+        # separator space before the path. Be tolerant if a leading space was
+        # already stripped from the first stdout line by higher-level
+        # normalization, so " M path" and "M path" both resolve to "path".
+        path = line[3:] if len(line) >= 4 and line[2] == " " else line[2:]
+        path = path.lstrip()
         if " -> " in path:
             path = path.rsplit(" -> ", maxsplit=1)[-1]
         paths.append(path)

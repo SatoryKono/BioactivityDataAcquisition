@@ -2179,7 +2179,7 @@
         "x": 0,
         "y": 43
       },
-      "collapsed": true,
+      "collapsed": false,
       "panels": [
         {
           "id": 9010,
@@ -2449,7 +2449,7 @@
         "x": 0,
         "y": 44
       },
-      "collapsed": true,
+      "collapsed": false,
       "panels": [
         {
           "description": "Operator note for raw metric starting points and cross-dashboard diagnostics handoffs; no datasource query is expected.",
@@ -2987,7 +2987,7 @@
       "id": 9600,
       "type": "row",
       "title": "Alert/SLO Triage",
-      "collapsed": true,
+      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,

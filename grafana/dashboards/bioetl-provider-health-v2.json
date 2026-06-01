@@ -1976,8 +1976,8 @@
       "description": "Selected-range evidence: retry exhaustion trend by provider and operation over the active Grafana interval. Rising non-zero series point to persistent retry-budget pressure."
     },
     {
-      "collapsed": true,
-      "description": "Expand only after selecting one provider or a bounded provider subset.",
+      "collapsed": false,
+      "description": "Detailed provider evidence intended for one provider or a bounded provider subset.",
       "gridPos": {
         "h": 1,
         "w": 24,

@@ -1951,7 +1951,7 @@
       "description": "Selected-range Silver reject count from the filtered_out path only. A zero here does not refute current CRIT because quarantine and Silver validation blockers are separate paths; use first-screen DQ reasons and the quarantine/validation panels before assuming the incident is filter-driven. The Explorer handoff preserves pipeline/run_type and time range so the operator can validate scoped totals before narrowing by reason_code or field."
     },
     {
-      "collapsed": true,
+      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -2302,11 +2302,11 @@
           "description": "Bounded schema-field summary for the selected range. Use the direct Silver Reject Explorer drilldown on each bar to open record-level detail already filtered by pipeline/run_type/field and then compare top reason signatures inside the explorer. No data means no bounded reject field samples were observed in range; the panel must not invent a synthetic field bucket."
         }
       ],
-      "title": "Reject / Pareto / Fields (collapsed)",
+      "title": "Reject / Pareto / Fields",
       "type": "row"
     },
     {
-      "collapsed": true,
+      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -2918,7 +2918,7 @@
           "type": "stat"
         }
       ],
-      "title": "Validation Failures / Runtime Diagnostics / Trends (collapsed)",
+      "title": "Validation Failures / Runtime Diagnostics / Trends",
       "type": "row"
     }
   ],
