@@ -28,7 +28,7 @@ from bioetl.domain.control_plane import (
     RunManifest,
     RunSourceRef,
 )
-from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
+pytestmark = pytest.mark.unit
 
 _VALID_RUN_ID = "12345678-1234-5678-1234-567812345678"
 _VALID_SHA256_A = "a" * 64

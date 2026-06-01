@@ -252,7 +252,7 @@ class TestConfigShowSettingsCommand:
         assert result.exit_code == 0
         assert "{" in result.output
 
-    def test_show_settings_masks_api_key(
+    def test_show_settings_command__masks_api_key__32864a70(
         self, cli_runner: CliRunner, mock_config_service: MagicMock
     ) -> None:
         """Test that api_key fields are masked in output."""
@@ -276,7 +276,7 @@ class TestConfigShowSettingsCommand:
 class TestConfigListPipelinesCommand:
     """Tests for config list-pipelines subcommand."""
 
-    def test_list_pipelines_success(
+    def test_list_pipelines_command__pipelines_success__7024e288(
         self, cli_runner: CliRunner, mock_config_service: MagicMock
     ) -> None:
         """Test list-pipelines outputs all registered pipelines."""

@@ -10,6 +10,8 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 def test_normalization_profile_exposes_hash_and_set_like_views() -> None:
     profile = NormalizationProfile(
         profile_name="test.entity",

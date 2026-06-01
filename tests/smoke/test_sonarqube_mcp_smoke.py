@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 import sys
 from pathlib import Path
 
@@ -8,6 +10,8 @@ from scripts.ai.mcp.sonarqube_mcp_smoke import (
     run_smoke_command,
 )
 
+
+pytestmark = pytest.mark.smoke
 
 def test_run_smoke_command_succeeds_against_ready_then_line_delimited_stub(
     tmp_path: Path,

@@ -57,7 +57,7 @@ class TestGoldRangeFilter:
         assert filter_obj.include_min is False
         assert filter_obj.include_max is False
 
-    def test_empty_column_raises_error(self) -> None:
+    def test_gold_range_filter__column_raises_error__0ebde9ac(self) -> None:
         """Test that empty column name raises ValueError."""
         with pytest.raises(ValueError, match="column name cannot be empty"):
             GoldRangeFilter(column="", min_value=0.0)
@@ -84,7 +84,7 @@ class TestGoldRangeFilter:
         )
         assert filter_obj.min_value == pytest.approx(0.0)
 
-    def test_immutability(self) -> None:
+    def test_gold_range_filter__immutability__bf216eb8(self) -> None:
         """Test that filter is immutable (frozen)."""
         filter_obj = GoldRangeFilter(column="value", min_value=0.0)
         with pytest.raises(AttributeError):

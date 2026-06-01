@@ -10,6 +10,8 @@ from pathlib import Path
 from types import ModuleType
 
 
+pytestmark = pytest.mark.architecture
+
 def _load_module() -> ModuleType:
     repo_root = Path(__file__).resolve().parents[2]
     module_path = repo_root / "scripts" / "diagrams" / "fix_mermaid_operators.py"

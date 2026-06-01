@@ -802,7 +802,7 @@ class TestPubMedTransformerDoiNormalization:
             ("10.1000/Test-DOI_123", "10.1000/test-doi_123"),
         ],
     )
-    async def test_doi_normalization_lowercase_and_strip(
+    async def test_doi_normalization__lowercase_and_strip__ce7643b5(
         self,
         transformer: PubMedPublicationTransformer,
         mock_context: PipelineContext,
@@ -819,7 +819,7 @@ class TestPubMedTransformerDoiNormalization:
         assert result["doi"] == expected
 
     @pytest.mark.asyncio
-    async def test_doi_normalization_none_handling(
+    async def test_doi_normalization__none_handling__f65d8f98(
         self,
         transformer: PubMedPublicationTransformer,
         mock_context: PipelineContext,
@@ -843,7 +843,7 @@ class TestPubMedTransformerDoiNormalization:
         assert result["doi"] is None
 
     @pytest.mark.asyncio
-    async def test_doi_normalization_affects_content_hash(
+    async def test_doi_normalization__affects_content_hash__5a01ead0(
         self,
         transformer: PubMedPublicationTransformer,
         mock_context: PipelineContext,
@@ -1893,7 +1893,7 @@ class TestExtractBusinessData:
         assert result["country"] == "United States"
         assert result["pmc_id"] == "PMC123456"
 
-    def test_extract_business_data_minimal(
+    def test_extract_business_data__data_minimal__8fd4cde7(
         self, _orphan_transformer: PubMedPublicationTransformer
     ) -> None:
         """Test extraction with minimal data (PMID only in article)."""

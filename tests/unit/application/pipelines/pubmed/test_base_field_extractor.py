@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import pytest
+
 import xml.etree.ElementTree as ET
 from typing import Any
 
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
 
+
+pytestmark = pytest.mark.unit
 
 class ConcreteExtractor(BaseFieldExtractor):
     """Concrete implementation for testing."""

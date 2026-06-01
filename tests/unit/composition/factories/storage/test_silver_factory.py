@@ -23,7 +23,7 @@ from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 class TestCreateSilverWriter:
     """Tests for create_silver_writer factory function."""
 
-    def test_requires_explicit_tracing(self) -> None:
+    def test_create_silver_writer__explicit_tracing__a701f8c3(self) -> None:
         """Silver writer factory requires composition-owned tracing resolution."""
         writer_cls = MagicMock()
 
@@ -47,7 +47,7 @@ class TestCreateSilverWriter:
 
         writer_cls.assert_not_called()
 
-    def test_creates_metadata_writer_when_save_metadata__test_create_silver_writer_factories_storage_test_silver_factory_50(
+    def test_writer_factories_storage_silver_factory_50__14670cbb(
         self,
     ) -> None:
         """Creates real MetadataWriter when config.save_metadata is True."""
@@ -77,7 +77,7 @@ class TestCreateSilverWriter:
         )
         assert call_kwargs["runtime_services"].lineage_store is not None
 
-    def test_uses_provided_tracing(self) -> None:
+    def test_create_silver_writer__provided_tracing__d586e81c(self) -> None:
         """Uses provided TracingPort instead of NoOpTracing."""
         writer_cls = MagicMock()
         tracer = MagicMock()
@@ -182,7 +182,7 @@ class TestCreateSilverWriter:
         # Writer is created - verify it passed through
         writer_cls.assert_called_once()
 
-    def test_passes_csv_exporter(self) -> None:
+    def test_create_silver_writer__passes_csv_exporter__962579f8(self) -> None:
         """csv_exporter is forwarded to writer constructor."""
         writer_cls = MagicMock()
         csv = MagicMock()
@@ -207,7 +207,7 @@ class TestCreateSilverWriter:
         call_kwargs = writer_cls.call_args[1]
         assert call_kwargs["runtime_services"].csv_exporter is csv
 
-    def test_passes_contract_rollout_policy(self) -> None:
+    def test_create_silver_writer__rollout_policy__e1efe723(self) -> None:
         """contract_rollout_policy is preserved in runtime services for dual-write."""
         writer_cls = MagicMock()
         rollout_policy = ContractRolloutPolicy(
@@ -240,7 +240,7 @@ class TestCreateSilverWriter:
         call_kwargs = writer_cls.call_args[1]
         assert call_kwargs["runtime_services"].contract_rollout_policy == rollout_policy
 
-    def test_passes_audit_port(self) -> None:
+    def test_create_silver_writer__passes_audit_port__eb91831f(self) -> None:
         """audit is forwarded into Silver runtime services explicitly."""
         writer_cls = MagicMock()
         audit = MagicMock()

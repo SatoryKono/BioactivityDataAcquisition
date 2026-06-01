@@ -107,7 +107,7 @@ class TestParseH1Title:
         text = "# First Title\n# Second Title"
         assert _parse_h1_title(text) == "First Title"
 
-    def test_strips_whitespace(self) -> None:
+    def test_service_parse_h1_title__strips_whitespace__f2d1d957(self) -> None:
         """Strips surrounding whitespace from title."""
         text = "#   Spaced Title   "
         assert _parse_h1_title(text) == "Spaced Title"

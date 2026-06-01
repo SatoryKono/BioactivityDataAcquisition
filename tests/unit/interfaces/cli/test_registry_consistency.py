@@ -8,6 +8,8 @@ from click.testing import CliRunner
 import pytest
 
 
+pytestmark = pytest.mark.unit
+
 _ANSI_ESCAPE_RE = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
 
 

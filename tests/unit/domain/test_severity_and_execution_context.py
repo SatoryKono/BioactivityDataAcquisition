@@ -16,6 +16,8 @@ from bioetl.domain.config import FieldValidation
 from bioetl.domain.types import ExecutionContext
 
 
+pytestmark = pytest.mark.unit
+
 class TestFieldValidationEffectiveSeverity:
     """Tests for FieldValidation.effective_severity()."""
 
@@ -68,7 +70,7 @@ class TestFieldValidationEffectiveSeverity:
         fv = FieldValidation(field="x", validation_type="required")
         assert fv.severity_enricher is None
 
-    def test_frozen_dataclass(self) -> None:
+    def test_effective_severity__frozen_dataclass__5c0e4a68(self) -> None:
         """FieldValidation is frozen (immutable)."""
         fv = FieldValidation(field="x", validation_type="required")
         with pytest.raises(AttributeError):
@@ -97,7 +99,7 @@ class TestExecutionContext:
         assert ExecutionContext.ISOLATED.is_enricher is False
         assert ExecutionContext.DEPENDENCY.is_enricher is False
 
-    def test_from_string(self) -> None:
+    def test_execution_context__from_string__49158376(self) -> None:
         """ExecutionContext can be constructed from string."""
         assert ExecutionContext("isolated") == ExecutionContext.ISOLATED
         assert ExecutionContext("enricher") == ExecutionContext.ENRICHER
@@ -163,7 +165,7 @@ class TestPipelineRunContextExecutionContext:
         )
         assert ctx.execution_context == ExecutionContext.ISOLATED
 
-    def test_enricher_execution_context(self) -> None:
+    def test_execution_context__execution_context__04fdcfb1(self) -> None:
         """PipelineRunContext can be created with ENRICHER context."""
         from uuid import uuid4
 

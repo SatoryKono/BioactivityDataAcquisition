@@ -11,6 +11,8 @@ from bioetl.domain.control_plane.run_manifest import RunCodeProvenance, RunManif
 from bioetl.domain.types import RunID, RunType
 
 
+pytestmark = pytest.mark.unit
+
 class TestRunCodeProvenanceDQIntegration:
     """Tests for RunCodeProvenance with DQ integration."""
 

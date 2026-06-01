@@ -58,7 +58,7 @@ class TestPublicationFieldGroup:
         assert PublicationFieldGroup.SYSTEM_METADATA.display_name == "System Metadata"
         assert PublicationFieldGroup.TRASH.display_name == "Trash (Excluded)"
 
-    def test_include_in_gold(self) -> None:
+    def test_field_group__include_in_gold__d92c61e0(self) -> None:
         """TRASH and SYSTEM_METADATA groups are excluded from Gold layer."""
         excluded = {
             PublicationFieldGroup.TRASH,
@@ -70,7 +70,7 @@ class TestPublicationFieldGroup:
             else:
                 assert group.include_in_gold
 
-    def test_gold_groups(self) -> None:
+    def test_field_group__gold_groups__b6ca2f8d(self) -> None:
         """gold_groups() returns all groups except TRASH and SYSTEM_METADATA."""
         gold_groups = PublicationFieldGroup.gold_groups()
         assert len(gold_groups) == 7
@@ -95,7 +95,7 @@ class TestPublicationFieldGroup:
         assert PublicationFieldGroup.SYSTEM_METADATA in excluded
         assert PublicationFieldGroup.TRASH in excluded
 
-    def test_from_string_valid(self) -> None:
+    def test_field_group__from_string_valid__6843a43a(self) -> None:
         """from_string() parses valid group names."""
         assert (
             PublicationFieldGroup.from_string("id_and_status")
@@ -116,7 +116,7 @@ class TestPublicationFieldGroup:
             == PublicationFieldGroup.ID_AND_STATUS
         )
 
-    def test_from_string_invalid(self) -> None:
+    def test_field_group__from_string_invalid__dfa6da05(self) -> None:
         """from_string() raises ValueError for invalid group names."""
         with pytest.raises(ValueError, match="Invalid field group"):
             PublicationFieldGroup.from_string("invalid_group")
@@ -293,7 +293,7 @@ class TestFieldToGroupMapping:
 class TestFieldGroupConfig:
     """Tests for FieldGroupConfig."""
 
-    def test_get_group_unqualified(self) -> None:
+    def test_field_group_config__group_unqualified__2556efcb(self) -> None:
         """get_group() works with unqualified field names."""
         config = FieldGroupConfig()
         assert config.get_group("title") == PublicationFieldGroup.BIBLIOGRAPHY
@@ -318,7 +318,7 @@ class TestFieldGroupConfig:
             == PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS
         )
 
-    def test_get_group_case_insensitive(self) -> None:
+    def test_field_group_config__case_insensitive__d9901f3d(self) -> None:
         """get_group() is case-insensitive."""
         config = FieldGroupConfig()
         assert config.get_group("TITLE") == PublicationFieldGroup.BIBLIOGRAPHY
@@ -328,7 +328,7 @@ class TestFieldGroupConfig:
             == PublicationFieldGroup.BIBLIOGRAPHY
         )
 
-    def test_get_group_unknown_field(self) -> None:
+    def test_field_group_config__group_unknown_field__544d7660(self) -> None:
         """get_group() returns default_group for unknown fields."""
         config = FieldGroupConfig()
         assert config.get_group("unknown_field") == PublicationFieldGroup.TRASH
@@ -342,7 +342,7 @@ class TestFieldGroupConfig:
         config = FieldGroupConfig(default_group=PublicationFieldGroup.ID_AND_STATUS)
         assert config.get_group("unknown_field") == PublicationFieldGroup.ID_AND_STATUS
 
-    def test_is_gold_field(self) -> None:
+    def test_field_group_config__is_gold_field__e3bd9b19(self) -> None:
         """is_gold_field() identifies Gold layer fields correctly."""
         config = FieldGroupConfig()
 
@@ -359,7 +359,7 @@ class TestFieldGroupConfig:
         assert config.is_gold_field("content_hash") is False
         assert config.is_gold_field("chembl.publication.content_hash") is False
 
-    def test_get_gold_columns(self) -> None:
+    def test_field_group_config__get_gold_columns__e00ce513(self) -> None:
         """get_gold_columns() filters to Gold layer fields."""
         config = FieldGroupConfig()
         columns = [
@@ -380,7 +380,7 @@ class TestFieldGroupConfig:
         assert "language" not in gold_columns
         assert len(gold_columns) == 4
 
-    def test_get_trash_columns(self) -> None:
+    def test_field_group_config__get_trash_columns__9494b6b4(self) -> None:
         """get_trash_columns() returns excluded columns."""
         config = FieldGroupConfig()
         columns = [
@@ -397,7 +397,7 @@ class TestFieldGroupConfig:
         assert "doi" not in trash_columns
         assert len(trash_columns) == 2
 
-    def test_get_columns_by_group(self) -> None:
+    def test_field_group_config__get_columns_by_group__2f80658a(self) -> None:
         """get_columns_by_group() filters by specific group."""
         config = FieldGroupConfig()
         columns = [
@@ -417,7 +417,7 @@ class TestFieldGroupConfig:
         assert "doi" not in biblio_columns  # ID_AND_STATUS
         assert "authors" not in biblio_columns  # AUTHOR_AND_AFFILIATIONS
 
-    def test_group_columns(self) -> None:
+    def test_field_group_config__group_columns__927fc8af(self) -> None:
         """group_columns() groups columns by semantic group."""
         config = FieldGroupConfig()
         columns = [
@@ -439,7 +439,7 @@ class TestFieldGroupConfig:
         assert PublicationFieldGroup.CITATIONS_AND_REFERENCE in grouped
         assert grouped[PublicationFieldGroup.CITATIONS_AND_REFERENCE] == []
 
-    def test_get_provider_rank_qualified(self) -> None:
+    def test_field_group_config__rank_qualified__3729bd8a(self) -> None:
         """get_provider_rank() extracts provider rank from qualified names."""
         config = FieldGroupConfig()
 
@@ -449,13 +449,13 @@ class TestFieldGroupConfig:
         assert config.get_provider_rank("pubmed.publication.title") == 3
         assert config.get_provider_rank("semanticscholar.publication.title") == 4
 
-    def test_get_provider_rank_unqualified(self) -> None:
+    def test_field_group_config__rank_unqualified__830be7eb(self) -> None:
         """get_provider_rank() returns -1 for unqualified columns (seed)."""
         config = FieldGroupConfig()
         assert config.get_provider_rank("title") == -1
         assert config.get_provider_rank("doi") == -1
 
-    def test_get_provider_rank_unknown_provider(self) -> None:
+    def test_field_group_config__unknown_provider__c907904c(self) -> None:
         """get_provider_rank() returns 999 for unknown providers."""
         config = FieldGroupConfig()
         assert config.get_provider_rank("unknown.publication.title") == 999
@@ -507,7 +507,7 @@ class TestFieldGroupConfig:
         assert sorted_cols[0] == "title"
         assert sorted_cols[1] == "chembl.publication.title"
 
-    def test_frozen(self) -> None:
+    def test_field_group_config__frozen__0af6554b(self) -> None:
         """FieldGroupConfig is immutable."""
         config = FieldGroupConfig()
         with pytest.raises(Exception):  # FrozenInstanceError

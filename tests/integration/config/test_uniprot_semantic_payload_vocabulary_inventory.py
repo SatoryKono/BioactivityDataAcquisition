@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 import yaml
@@ -9,6 +11,8 @@ import yaml
 from scripts.engineering.qa.extract_uniprot_semantic_payload_vocab import (
     extract_uniprot_semantic_payload_vocab,
 )
+
+pytestmark = pytest.mark.integration
 
 INVENTORY_PATH = Path("configs/vocab/uniprot_semantic_payloads.yaml")
 

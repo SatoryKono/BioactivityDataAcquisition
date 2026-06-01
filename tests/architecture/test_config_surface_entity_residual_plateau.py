@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 import json
 from pathlib import Path
 from typing import Any
@@ -17,6 +19,8 @@ from scripts.schema.generate_config_matrix import (
     _collect_family_configs,
     _family_metrics,
 )
+
+pytestmark = pytest.mark.architecture
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 BASELINE_PATH = PROJECT_ROOT / "reports/quality/config-discrepancy-baseline.json"

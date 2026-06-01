@@ -362,7 +362,7 @@ class TestWriteGoldMergedMetadata:
     """Tests for _write_gold_merged_metadata (lines 357-395)."""
 
     @pytest.mark.asyncio
-    async def test_empty_records_skips_write(self) -> None:
+    async def test_gold_merged_metadata__records_skips_write__a7dad364(self) -> None:
         """Line 369: empty records returns early."""
         mixin = _ConcreteGoldMixin()
         await mixin._write_gold_merged_metadata(

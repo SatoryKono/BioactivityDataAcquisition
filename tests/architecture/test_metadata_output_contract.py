@@ -6,6 +6,8 @@ output metadata pattern.
 
 from __future__ import annotations
 
+import pytest
+
 import types
 
 from bioetl.domain.models.metadata import (
@@ -18,6 +20,8 @@ from bioetl.domain.models.metadata import (
     SilverOutputExt,
 )
 
+
+pytestmark = pytest.mark.architecture
 
 def test_all_layer_metadata_have_base_output() -> None:
     """GIVEN layer metadata classes THEN all have BaseOutputMetadata output field."""

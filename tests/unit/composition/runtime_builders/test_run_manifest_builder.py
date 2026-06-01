@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from types import SimpleNamespace
 from uuid import uuid4
 
@@ -15,6 +17,8 @@ from bioetl.composition.runtime_builders.run_manifest_support import (
 from bioetl.domain.models.metadata import InputSnapshotRef
 from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
 
+
+pytestmark = pytest.mark.unit
 
 def _make_provenance_bundle() -> RunManifestProvenanceBundle:
     return RunManifestProvenanceBundle(

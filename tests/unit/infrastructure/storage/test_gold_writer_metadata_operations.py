@@ -57,7 +57,7 @@ class TestNormalizeDeltaVersionValue:
         """Non-digit strings should return None."""
         assert _normalize_delta_version_value("abc") is None
 
-    def test_none_input_returns_none(self) -> None:
+    def test_delta_version_value__input_returns_none__90a99230(self) -> None:
         """None input should return None."""
         assert _normalize_delta_version_value(None) is None
 

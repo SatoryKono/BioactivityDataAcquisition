@@ -31,7 +31,7 @@ class TestNormalizePubchemResults:
         data = [1, 2, 3]
         assert normalize_pubchem_results(data) == [1, 2, 3]
 
-    def test_empty_list(self) -> None:
+    def test_pubchem_results__empty_list__7af1c4bf(self) -> None:
         assert normalize_pubchem_results([]) == []
 
     def test_tuple_converted_to_list(self) -> None:

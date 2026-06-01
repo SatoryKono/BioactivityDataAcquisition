@@ -27,6 +27,8 @@ from memory.query import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 def test_query_catalog_returns_sources_view() -> None:
     payload = query_catalog("sources")
     assert payload["kind"] == "catalog"
@@ -71,7 +73,7 @@ def test_default_generated_memory_paths_fallback_to_legacy_artifacts(
     assert default_timeline_dir(memory_root) == legacy_events
 
 
-def test_emit_returns_nonzero_for_failed_payload(capsys) -> None:
+def test_memory_query_facade__for_failed_payload__87caa237(capsys) -> None:
     exit_code = _emit({"kind": "diagnostic", "ok": False}, as_json=True)
 
     assert exit_code == 1

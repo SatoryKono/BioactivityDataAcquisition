@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import pytest
+
 import ast
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 METRICS_BOOTSTRAP_PATH = Path(
     "src/bioetl/composition/bootstrap/runtime/metrics_bootstrap.py"

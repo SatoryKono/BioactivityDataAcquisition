@@ -24,7 +24,7 @@ from bioetl.infrastructure.config._base import (
 class TestPipelineSettings:
     """Tests for PipelineSettings class."""
 
-    def test_default_values(self) -> None:
+    def test_pipeline_settings__default_values__26ec6108(self) -> None:
         """Test default pipeline settings."""
         settings = PipelineSettings()
 
@@ -52,7 +52,7 @@ class TestPipelineSettings:
         assert settings.control_plane.checkpoint_compatibility_policy == "hard_fail"
         assert settings.control_plane.required_persistence_profile == "replay_ready"
 
-    def test_custom_values(self) -> None:
+    def test_pipeline_settings__custom_values__695415ca(self) -> None:
         """Test custom pipeline settings."""
         settings = PipelineSettings(
             batch_size=500,
@@ -222,7 +222,7 @@ class TestObservabilitySettings:
 class TestSettings:
     """Tests for main Settings class."""
 
-    def test_default_values(self, monkeypatch) -> None:
+    def test_settings_settings__default_values__171af853(self, monkeypatch) -> None:
         """Test default main settings."""
         # Clear BIOETL_ENV to test explicit values
         monkeypatch.delenv("BIOETL_ENV", raising=False)

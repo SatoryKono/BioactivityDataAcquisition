@@ -38,7 +38,7 @@ class TestMetricsServerAdapter:
 
         assert adapter._logger is None
 
-    def test_init_with_logger(self) -> None:
+    def test_metrics_server_adapter__init_with_logger__fb92b635(self) -> None:
         """Test adapter can be initialized with logger."""
         mock_logger = MagicMock()
         adapter = MetricsServerAdapter(logger=mock_logger)

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 import json
 from pathlib import Path
 
@@ -7,6 +9,8 @@ from scripts.engineering.qa.report_duplication_baseline import DuplicateCluster
 from scripts.engineering.qa.report_duplication_baseline import DuplicateModuleRef
 from scripts.engineering.qa.report_duplication_baseline import TargetDuplicationReport
 from scripts.engineering.qa.report_duplication_baseline import _render_markdown
+
+pytestmark = pytest.mark.architecture
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 HOTSPOT_BASELINE_JSON = (

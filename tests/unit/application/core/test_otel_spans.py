@@ -554,7 +554,7 @@ class TestPostrunServiceSpan:
         with pytest.raises(TypeError, match="requires explicit tracer injection"):
             self._build_postrun_service(tracer=None)
 
-    def test_tracer_stored_when_provided(self) -> None:
+    def test_postrun_service_span__stored_when_provided__a9cfe953(self) -> None:
         """Verify that an explicit tracer is stored as-is."""
         mock_tracer = _make_mock_tracer()
         service = self._build_postrun_service(tracer=mock_tracer)

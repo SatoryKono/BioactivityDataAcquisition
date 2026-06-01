@@ -27,11 +27,13 @@ from bioetl.domain.models.metadata import (
 )
 from tests.helpers.clock import FIXED_TEST_TIME
 
+pytestmark = pytest.mark.unit
+
 
 class TestBaseOutputMetadata:
     """Test base output metadata contract."""
 
-    def test_default_values(self) -> None:
+    def test_base_output_metadata__default_values__229a2993(self) -> None:
         """GIVEN no arguments WHEN creating BaseOutputMetadata THEN defaults applied."""
         output = BaseOutputMetadata()
 
@@ -118,7 +120,7 @@ class TestBaseOutputMetadata:
 class TestBronzeOutputExt:
     """Test Bronze-specific output extension."""
 
-    def test_default_values(self) -> None:
+    def test_bronze_output_ext__default_values__9f95bd09(self) -> None:
         """GIVEN no arguments WHEN creating BronzeOutputExt THEN defaults applied."""
         ext = BronzeOutputExt()
 
@@ -147,7 +149,7 @@ class TestBronzeOutputExt:
         assert ext.files[0].path == "batch_001.jsonl.zst"
         assert ext.files[1].record_count == 150
 
-    def test_custom_format(self) -> None:
+    def test_bronze_output_ext__custom_format__da649897(self) -> None:
         """GIVEN custom format WHEN creating BronzeOutputExt THEN format stored."""
         ext = BronzeOutputExt(format="jsonl", compression="gzip")
 
@@ -158,7 +160,7 @@ class TestBronzeOutputExt:
 class TestSilverOutputExt:
     """Test Silver-specific output extension."""
 
-    def test_default_values(self) -> None:
+    def test_silver_output_ext__default_values__8804504f(self) -> None:
         """GIVEN no arguments WHEN creating SilverOutputExt THEN defaults applied."""
         ext = SilverOutputExt()
 
@@ -184,7 +186,7 @@ class TestSilverOutputExt:
 class TestGoldOutputExt:
     """Test Gold-specific output extension."""
 
-    def test_default_values(self) -> None:
+    def test_output_gold_output_ext__default_values__79c21c7d(self) -> None:
         """GIVEN no arguments WHEN creating GoldOutputExt THEN defaults applied."""
         ext = GoldOutputExt()
 

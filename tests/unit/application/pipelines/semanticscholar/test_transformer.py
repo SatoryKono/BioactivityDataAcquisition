@@ -88,7 +88,7 @@ class TestSemanticScholarPublicationTransformer:
     """Tests for SemanticScholarPublicationTransformer."""
 
     @pytest.mark.asyncio
-    async def test_transform_full_record(
+    async def test_transformer__full_record__85701bce(
         self,
         transformer: SemanticScholarPublicationTransformer,
         mock_context: PipelineContext,
@@ -277,7 +277,7 @@ class TestSemanticScholarPublicationTransformer:
         assert result["doi"] is None
 
     @pytest.mark.asyncio
-    async def test_transform_minimal_record(
+    async def test_transformer__minimal_record__b5205a77(
         self,
         transformer: SemanticScholarPublicationTransformer,
         mock_context: PipelineContext,
@@ -299,7 +299,7 @@ class TestSemanticScholarPublicationTransformer:
         assert result["publication_year"] is None
 
     @pytest.mark.asyncio
-    async def test_transform_content_hash_generated(
+    async def test_transformer__hash_generated__acc4d344(
         self,
         transformer: SemanticScholarPublicationTransformer,
         mock_context: PipelineContext,
@@ -436,7 +436,7 @@ class TestSemanticScholarDoiNormalization:
             ("10.1000/Test-DOI_123", "10.1000/test-doi_123"),
         ],
     )
-    async def test_doi_normalization_lowercase_and_strip(
+    async def test_doi_normalization__lowercase_and_strip__d6eacace(
         self,
         transformer: SemanticScholarPublicationTransformer,
         mock_context: PipelineContext,
@@ -452,7 +452,7 @@ class TestSemanticScholarDoiNormalization:
         assert result["doi"] == expected
 
     @pytest.mark.asyncio
-    async def test_doi_normalization_none_handling(
+    async def test_doi_normalization__none_handling__fe0853eb(
         self,
         transformer: SemanticScholarPublicationTransformer,
         mock_context: PipelineContext,
@@ -466,7 +466,7 @@ class TestSemanticScholarDoiNormalization:
         assert result["doi"] is None
 
     @pytest.mark.asyncio
-    async def test_doi_normalization_affects_content_hash(
+    async def test_doi_normalization__affects_content_hash__b39022b2(
         self,
         transformer: SemanticScholarPublicationTransformer,
         mock_context: PipelineContext,
@@ -715,7 +715,7 @@ class TestSemanticScholarUnifiedPageFields:
         return instantiate_test_transformer(SemanticScholarPublicationTransformer)
 
     @pytest.mark.asyncio
-    async def test_unified_page_fields_in_transform(
+    async def test_unified_page_fields__fields_in_transform__718987be(
         self,
         transformer: SemanticScholarPublicationTransformer,
         mock_context: PipelineContext,

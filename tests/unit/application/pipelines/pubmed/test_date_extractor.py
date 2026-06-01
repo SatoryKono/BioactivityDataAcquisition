@@ -88,12 +88,12 @@ class TestFormatDate:
         result = DateExtractor.format_date("2023", "january", "01")
         assert result == "2023-01-01"
 
-    def test_year_month_only(self) -> None:
+    def test_extractor_format_date__year_month_only__28b81c08(self) -> None:
         """Test formatting with year and month only (end-of-period: day 30)."""
         result = DateExtractor.format_date("2023", "06", None)
         assert result == "2023-06-30"
 
-    def test_year_only(self) -> None:
+    def test_extractor_format_date__year_only__06face95(self) -> None:
         """Test formatting with year only (end-of-period: Dec 31)."""
         result = DateExtractor.format_date("2023", None, None)
         assert result == "2023-12-31"
@@ -274,7 +274,7 @@ class TestExtractArticleDate:
         result = DateExtractor.extract_article_date(article_xml, "Unknown")
         assert result is None
 
-    def test_none_article_returns_none(self) -> None:
+    def test_extract_article_date__article_returns_none__d70f6b70(self) -> None:
         """Test that None article returns None."""
         result = DateExtractor.extract_article_date(None, "Electronic")
         assert result is None

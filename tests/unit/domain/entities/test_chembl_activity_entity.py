@@ -22,7 +22,7 @@ BASE_KWARGS = {
 class TestAssay:
     """Tests for Assay domain entity."""
 
-    def test_valid_creation_minimal(self) -> None:
+    def test_activity_entity_assay__creation_minimal__c2e4ab6c(self) -> None:
         a = Assay(**BASE_KWARGS, assay_id="CHEMBL1000")
         assert a.assay_id == "CHEMBL1000"
         assert a.target_id is None
@@ -74,7 +74,7 @@ class TestAssay:
         assert a.variant_accession == "P00742"
         assert a.variant_mutation == "V600E"
 
-    def test_immutable(self) -> None:
+    def test_activity_entity_assay__immutable__4f37321e(self) -> None:
         a = Assay(**BASE_KWARGS, assay_id="CHEMBL1")
         with pytest.raises((AttributeError, TypeError)):
             a.assay_id = "other"  # type: ignore[misc]

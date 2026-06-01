@@ -19,6 +19,8 @@ from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.domain.types import HealthStatus
 
 
+pytestmark = pytest.mark.unit
+
 @pytest.fixture
 def mock_http_client():
     return Mock(spec=UnifiedHTTPClient)

@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 from bioetl.infrastructure.observability.prometheus_metric_registries import (
     REGISTERED_PROMETHEUS_METRIC_NAMES,
 )
+
+pytestmark = pytest.mark.architecture
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 OBSERVABILITY_MAP_BLOCK = (

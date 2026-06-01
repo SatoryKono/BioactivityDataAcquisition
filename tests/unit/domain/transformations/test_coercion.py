@@ -54,19 +54,19 @@ class TestSafeFloat:
 class TestSafeInt:
     """Tests for safe_int function."""
 
-    def test_int_input(self) -> None:
+    def test_coercion_safe_int__int_input__c9dca975(self) -> None:
         assert safe_int(42) == 42
 
-    def test_float_input(self) -> None:
+    def test_coercion_safe_int__float_input__def9b800(self) -> None:
         assert safe_int(42.9) == 42
 
-    def test_string_input(self) -> None:
+    def test_coercion_safe_int__string_input__bf388a02(self) -> None:
         assert safe_int("42") == 42
 
-    def test_string_with_whitespace(self) -> None:
+    def test_coercion_safe_int__with_whitespace__cda419d7(self) -> None:
         assert safe_int("  42  ") == 42
 
-    def test_none_returns_default(self) -> None:
+    def test_coercion_safe_int__none_returns_default__4d5aa279(self) -> None:
         assert safe_int(None) is None
 
     def test_bool_returns_default__test_safe_int_domain_transformations_test_coercion_72(
@@ -75,7 +75,7 @@ class TestSafeInt:
         assert safe_int(True) is None
         assert safe_int(False) is None
 
-    def test_invalid_string_returns_default(self) -> None:
+    def test_coercion_safe_int__returns_default__26270d42(self) -> None:
         assert safe_int("not_a_number") is None
 
     def test_nan_float_returns_default(self) -> None:
@@ -92,10 +92,10 @@ class TestSafeInt:
 class TestSafeStr:
     """Tests for safe_str function."""
 
-    def test_string_input(self) -> None:
+    def test_coercion_safe_str__string_input__e24f54b6(self) -> None:
         assert safe_str("hello") == "hello"
 
-    def test_int_input(self) -> None:
+    def test_coercion_safe_str__int_input__42ef2135(self) -> None:
         assert safe_str(42) == "42"
 
     def test_float_integer_input(self) -> None:
@@ -105,8 +105,8 @@ class TestSafeStr:
     def test_float_non_integer_input(self) -> None:
         assert safe_str(3.14) == "3.14"
 
-    def test_none_returns_default(self) -> None:
+    def test_coercion_safe_str__none_returns_default__573e725b(self) -> None:
         assert safe_str(None) is None
 
-    def test_none_with_custom_default(self) -> None:
+    def test_coercion_safe_str__with_custom_default__ffbf48e2(self) -> None:
         assert safe_str(None, default="N/A") == "N/A"

@@ -27,7 +27,7 @@ class TestBootstrapMetricsService:
 
         assert isinstance(result, MetricsService)
 
-    def test_wires_noop_logger(self) -> None:
+    def test_metrics_service__wires_noop_logger__e6658389(self) -> None:
         """bootstrap_metrics_service should wire a NoOpLogger."""
         result = bootstrap_metrics_service()
 
@@ -45,7 +45,7 @@ class TestBootstrapMetricsService:
 
         assert isinstance(result._server._logger, NoOpLogger)
 
-    def test_each_call_creates_new_instance(self) -> None:
+    def test_metrics_service__creates_new_instance__c1911644(self) -> None:
         """Each call should create a distinct MetricsService instance."""
         result1 = bootstrap_metrics_service()
         result2 = bootstrap_metrics_service()
@@ -59,7 +59,7 @@ class TestBootstrapMetricsService:
 
         assert result1._server is not result2._server
 
-    def test_wires_tracing_port(self) -> None:
+    def test_metrics_service__wires_tracing_port__5a712c50(self) -> None:
         """bootstrap_metrics_service should wire an explicit tracing port."""
         result = bootstrap_metrics_service()
 

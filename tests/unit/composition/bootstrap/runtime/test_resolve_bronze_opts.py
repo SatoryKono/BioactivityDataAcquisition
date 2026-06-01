@@ -6,11 +6,15 @@ in composite pipeline bootstrap.
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.application.composite.runner_pkg import CompositeRuntimeConfig
 from bioetl.composition.bootstrap.runtime.runner_factory_builder_service import (
     resolve_bronze_opts as _resolve_bronze_opts,
 )
 
+
+pytestmark = pytest.mark.unit
 
 class TestResolveBronzeOpts:
     """Test _resolve_bronze_opts tri-state resolution."""

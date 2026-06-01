@@ -154,13 +154,13 @@ class TestChEMBLPublicationPipeline:
             ),
         )
 
-    def test_pipeline_initialization(self, pipeline):
+    def test_l_publication_pipeline__initialization__447070d2(self, pipeline):
         """Test pipeline initializes correctly."""
         assert pipeline.provider == "chembl"
         assert pipeline._transformer is not None
 
     @pytest.mark.asyncio
-    async def test_transform_bronze_to_silver(self, pipeline):
+    async def test_l_publication_pipeline__bronze_to_silver__9ba864bb(self, pipeline):
         """Test transformation of document record."""
         record = {
             "publication_id": "CHEMBL789012",
@@ -176,7 +176,7 @@ class TestChEMBLPublicationPipeline:
         assert "_run_id" in result
 
     @pytest.mark.asyncio
-    async def test_transform_bronze_to_silver_missing_id(self, pipeline):
+    async def test_l_publication_pipeline__to_silver_missing_id__f172be02(self, pipeline):
         """Test transformation returns None for missing ID."""
         record = {"title": "Test Document"}
 
@@ -209,13 +209,13 @@ class TestChEMBLMoleculePipeline:
             ),
         )
 
-    def test_pipeline_initialization(self, pipeline):
+    def test_b_l_molecule_pipeline__initialization__04e9e507(self, pipeline):
         """Test pipeline initializes correctly."""
         assert pipeline.provider == "chembl"
         assert pipeline._transformer is not None
 
     @pytest.mark.asyncio
-    async def test_transform_bronze_to_silver(self, pipeline):
+    async def test_b_l_molecule_pipeline__bronze_to_silver__80683c68(self, pipeline):
         """Test transformation of molecule record."""
         record = {
             "molecule_chembl_id": "CHEMBL25",
@@ -230,7 +230,7 @@ class TestChEMBLMoleculePipeline:
         assert "_run_id" in result
 
     @pytest.mark.asyncio
-    async def test_transform_bronze_to_silver_missing_id(self, pipeline):
+    async def test_b_l_molecule_pipeline__to_silver_missing_id__1f76351e(self, pipeline):
         """Test transformation returns None for missing ID."""
         record = {"pref_name": "ASPIRIN"}
 
@@ -263,13 +263,13 @@ class TestChEMBLTargetPipeline:
             ),
         )
 
-    def test_pipeline_initialization(self, pipeline):
+    def test_m_b_l_target_pipeline__initialization__a251c649(self, pipeline):
         """Test pipeline initializes correctly."""
         assert pipeline.provider == "chembl"
         assert pipeline._transformer is not None
 
     @pytest.mark.asyncio
-    async def test_transform_bronze_to_silver(self, pipeline):
+    async def test_m_b_l_target_pipeline__bronze_to_silver__b4e98d52(self, pipeline):
         """Test transformation of target record."""
         record = {
             "target_chembl_id": "CHEMBL1862",
@@ -284,7 +284,7 @@ class TestChEMBLTargetPipeline:
         assert "_run_id" in result
 
     @pytest.mark.asyncio
-    async def test_transform_bronze_to_silver_missing_id(self, pipeline):
+    async def test_m_b_l_target_pipeline__to_silver_missing_id__c57d00f6(self, pipeline):
         """Test transformation returns None for missing ID."""
         record = {"pref_name": "COX-2"}
 

@@ -14,7 +14,7 @@ from bioetl.domain.config.memory import MemoryConfig
 class TestMemoryConfig:
     """Tests for MemoryConfig dataclass."""
 
-    def test_default_values(self) -> None:
+    def test_config_memory_config__default_values__6b574ef4(self) -> None:
         mc = MemoryConfig()
         assert mc.max_batch_memory_mb == 512
         assert mc.memory_pressure_threshold == pytest.approx(0.8)
@@ -22,7 +22,7 @@ class TestMemoryConfig:
         assert mc.check_interval_records == 100
         assert mc.enable_adaptive_sizing is True
 
-    def test_custom_values(self) -> None:
+    def test_config_memory_config__custom_values__45e8eea5(self) -> None:
         mc = MemoryConfig(
             max_batch_memory_mb=1024,
             memory_pressure_threshold=0.9,
@@ -34,12 +34,12 @@ class TestMemoryConfig:
         assert mc.memory_pressure_threshold == pytest.approx(0.9)
         assert mc.enable_adaptive_sizing is False
 
-    def test_immutable(self) -> None:
+    def test_config_memory_config__immutable__015e7914(self) -> None:
         mc = MemoryConfig()
         with pytest.raises(ValidationError, match="frozen"):
             mc.max_batch_memory_mb = 256  # type: ignore[misc]
 
-    def test_equality(self) -> None:
+    def test_config_memory_config__equality__008855ec(self) -> None:
         mc1 = MemoryConfig()
         mc2 = MemoryConfig()
         assert mc1 == mc2
@@ -49,7 +49,7 @@ class TestMemoryConfig:
         mc2 = MemoryConfig(max_batch_memory_mb=1024)
         assert mc1 != mc2
 
-    def test_hashable(self) -> None:
+    def test_config_memory_config__hashable__861a8d27(self) -> None:
         mc = MemoryConfig()
         assert hash(mc) == hash(MemoryConfig())
         s = {mc}

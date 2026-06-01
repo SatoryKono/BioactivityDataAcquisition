@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+import pytest
+
 import json
 from pathlib import Path
 
 import yaml
 
 from scripts.engineering.qa.generate_architecture_debt_tasks import main
+
+pytestmark = pytest.mark.unit
 
 SAMPLE_DOMAIN_MODULE = "src/bioetl/domain/sample.py"
 

@@ -1,5 +1,7 @@
 """Tests for ColumnOrder value objects."""
 
+import pytest
+
 from bioetl.domain.value_objects.column_order import (
     SemanticGroup,
     ColumnOrderConfig,
@@ -7,10 +9,12 @@ from bioetl.domain.value_objects.column_order import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 class TestSemanticGroup:
     """Tests for SemanticGroup enum."""
 
-    def test_ordering(self) -> None:
+    def test_order_semantic_group__ordering__daf50415(self) -> None:
         """Groups are ordered correctly."""
         assert SemanticGroup.SYSTEM < SemanticGroup.IDENTIFIERS
         assert SemanticGroup.IDENTIFIERS < SemanticGroup.TITLE
@@ -36,7 +40,7 @@ class TestColumnOrderConfig:
         assert config.get_group("pmid") == SemanticGroup.IDENTIFIERS
         assert config.get_group("publication_id") == SemanticGroup.IDENTIFIERS
 
-    def test_get_group_qualified_column(self) -> None:
+    def test_column_order_config__qualified_column__09123cee(self) -> None:
         """Qualified columns extract field correctly."""
         config = ColumnOrderConfig()
         assert config.get_group("chembl.publication.title") == SemanticGroup.TITLE
@@ -53,7 +57,7 @@ class TestColumnOrderConfig:
             config.get_group("chembl.publication.custom_field") == SemanticGroup.OTHER
         )
 
-    def test_get_group_case_insensitive(self) -> None:
+    def test_column_order_config__case_insensitive__460a2a74(self) -> None:
         """Field matching is case-insensitive."""
         config = ColumnOrderConfig()
         assert config.get_group("TITLE") == SemanticGroup.TITLE

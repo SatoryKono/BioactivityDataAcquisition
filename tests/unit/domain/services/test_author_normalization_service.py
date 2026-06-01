@@ -19,6 +19,8 @@ from bioetl.domain.behavior.author_normalization_service import (
     AuthorNormalizer,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestNormalizeAuthorList:
     """Tests for normalize_author_list method."""
@@ -134,7 +136,7 @@ class TestNormalizeAffiliations:
         """Create service instance."""
         return AuthorNormalizer()
 
-    def test_list_of_strings(self, service: AuthorNormalizer) -> None:
+    def test_normalize_affiliations__list_of_strings__966db24c(self, service: AuthorNormalizer) -> None:
         """Test normalization with list of affiliation strings."""
         affiliations = ["MIT", "Harvard University", "Stanford"]
         result = service.normalize_affiliations(affiliations)
@@ -158,7 +160,7 @@ class TestNormalizeAffiliations:
         assert "Harvard" in parsed
         assert "Stanford" in parsed
 
-    def test_whitespace_normalization(self, service: AuthorNormalizer) -> None:
+    def test_normalize_affiliations__normalization__760741bb(self, service: AuthorNormalizer) -> None:
         """Test that whitespace is normalized in affiliations."""
         affiliations = ["  MIT  ", "MIT", "  MIT"]
         result = service.normalize_affiliations(affiliations)
@@ -204,7 +206,7 @@ class TestNormalizeAffiliations:
         parsed = json.loads(result)
         assert len(parsed) == 2
 
-    def test_empty_inputs_return_none(self, service: AuthorNormalizer) -> None:
+    def test_normalize_affiliations__inputs_return_none__616cfda3(self, service: AuthorNormalizer) -> None:
         """Test that empty inputs return None."""
         assert service.normalize_affiliations(None) is None
         assert service.normalize_affiliations([]) is None
@@ -391,7 +393,7 @@ class TestNormalizeAuthorKeys:
     def service(self) -> AuthorNormalizer:
         return AuthorNormalizer()
 
-    def test_list_of_strings(self, service: AuthorNormalizer) -> None:
+    def test_normalize_author_keys__list_of_strings__f8d8e84c(self, service: AuthorNormalizer) -> None:
         """Test pipe-delimited output from list of name strings."""
         result = service.normalize_author_keys(["John Doe", "Jane Smith"])
         assert result == "Doe_J|Smith_J"
@@ -407,7 +409,7 @@ class TestNormalizeAuthorKeys:
         result = service.normalize_author_keys("Smith J; Doe JA; Zhou X")
         assert result == "Smith_J|Doe_J|Zhou_X"
 
-    def test_empty_returns_none(self, service: AuthorNormalizer) -> None:
+    def test_normalize_author_keys__empty_returns_none__5ee090a0(self, service: AuthorNormalizer) -> None:
         """Test that empty inputs return None."""
         assert service.normalize_author_keys(None) is None
         assert service.normalize_author_keys([]) is None

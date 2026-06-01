@@ -20,6 +20,8 @@ from bioetl.domain.control_plane.effective_config_artifact import (
 from bioetl.domain.types.dq_contracts import DQDisposition, DQPolicyRef
 
 
+pytestmark = pytest.mark.unit
+
 class TestConfigSourceRef:
     """Tests for ConfigSourceRef."""
 
@@ -170,7 +172,7 @@ class TestEffectiveExecutionConfig:
 class TestDQPolicySnapshot:
     """Tests for DQPolicySnapshot."""
 
-    def test_dq_policy_snapshot_creation(self) -> None:
+    def test_d_q_policy_snapshot__snapshot_creation__b98d7984(self) -> None:
         """Test DQPolicySnapshot creation."""
         snapshot = DQPolicySnapshot(
             contract_ref="chembl_molecule",

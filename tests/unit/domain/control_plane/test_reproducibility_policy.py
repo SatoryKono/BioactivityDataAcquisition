@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.domain.control_plane import (
     ReplayCapability,
     ReplayReadinessVerdict,
@@ -19,6 +21,8 @@ from bioetl.domain.control_plane.reproducibility_profiles import (
     published_reproducibility_family_inventory,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def _source_ref(
     *,

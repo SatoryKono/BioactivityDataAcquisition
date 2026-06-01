@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
-# ruff: noqa: F403,F405
-from tests.unit.composition.runtime_builders.runner_builder_test_support import *  # noqa: F403,F405
+import pytest
 
+# ruff: noqa: F403,F405
+from tests.unit.composition.runtime_builders.runner_builder_test_support import *
+
+
+pytestmark = pytest.mark.unit
 
 def test_strict_runner_collaborator_attachment_requires_run_ledger_service() -> None:
     with pytest.raises(RuntimeError, match="requires artifact publication closure"):

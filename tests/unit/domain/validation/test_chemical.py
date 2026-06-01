@@ -40,7 +40,7 @@ class TestValidateSmiles:
     def test_empty_string_returns_false(self) -> None:
         assert validate_smiles("") is False
 
-    def test_none_returns_false(self) -> None:
+    def test_validate_smiles__none_returns_false__37d37b68(self) -> None:
         assert validate_smiles(None) is False
 
     def test_whitespace_only_returns_false(self) -> None:
@@ -49,7 +49,7 @@ class TestValidateSmiles:
     def test_spaces_in_string_returns_false(self) -> None:
         assert validate_smiles("invalid smiles with spaces") is False
 
-    def test_strips_whitespace(self) -> None:
+    def test_validate_smiles__strips_whitespace__12b78e67(self) -> None:
         assert validate_smiles("  CCO  ") is True
 
 
@@ -67,12 +67,12 @@ class TestValidateMolecularWeight:
         assert result is not None
         assert result == pytest.approx(500.0)
 
-    def test_valid_string(self) -> None:
+    def test_molecular_weight__valid_string__5ea3df5c(self) -> None:
         result = validate_molecular_weight("250.5")
         assert result is not None
         assert abs(result - 250.5) < 1e-6
 
-    def test_none_returns_none(self) -> None:
+    def test_molecular_weight__none_returns_none__7dcbab84(self) -> None:
         assert validate_molecular_weight(None) is None
 
     def test_bool_returns_none(self) -> None:
@@ -109,7 +109,7 @@ class TestValidateMolecularWeight:
 class TestValidateInchiKey:
     """Tests for validate_inchi_key function."""
 
-    def test_valid_aspirin(self) -> None:
+    def test_validate_inchi_key__valid_aspirin__aa92290f(self) -> None:
         assert validate_inchi_key("BSYNRYMUTXBXSQ-UHFFFAOYSA-N") is True
 
     def test_valid_caffeine(self) -> None:
@@ -121,16 +121,16 @@ class TestValidateInchiKey:
     def test_invalid_format_returns_false(self) -> None:
         assert validate_inchi_key("invalid") is False
 
-    def test_none_returns_false(self) -> None:
+    def test_validate_inchi_key__none_returns_false__e8df3e38(self) -> None:
         assert validate_inchi_key(None) is False
 
-    def test_empty_string_returns_false(self) -> None:
+    def test_validate_inchi_key__string_returns_false__5d2cfb57(self) -> None:
         assert validate_inchi_key("") is False
 
     def test_too_short_returns_false(self) -> None:
         assert validate_inchi_key("ABCDEFGHIJKLMN-OPQRSTUVWX") is False
 
-    def test_strips_whitespace(self) -> None:
+    def test_validate_inchi_key__strips_whitespace__4c41bc41(self) -> None:
         assert validate_inchi_key("  BSYNRYMUTXBXSQ-UHFFFAOYSA-N  ") is True
 
     def test_regex_pattern_is_exported(self) -> None:

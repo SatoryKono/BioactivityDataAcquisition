@@ -8,9 +8,13 @@ internally.
 
 from __future__ import annotations
 
+import pytest
+
 import ast
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TARGETS: tuple[Path, ...] = (

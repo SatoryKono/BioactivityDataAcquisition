@@ -71,12 +71,12 @@ class TestUniProtIDMappingIntegration:
             logger=mock_logger,
         )
 
-    def test_provider_name(self, idmapping_client: Any) -> None:
+    def test_uni_prot_i_d_mapping__provider_name__11bdae69(self, idmapping_client: Any) -> None:
         """Adapter should have correct provider name."""
         assert idmapping_client.provider_name == "uniprot_idmapping"
 
     @pytest.mark.vcr
-    async def test_health_check(
+    async def test_uni_prot_i_d_mapping__health_check__62c365d6(
         self, uniprot_http_client: Any, mock_logger: MagicMock
     ) -> None:
         """Test UniProt ID Mapping health check probe.

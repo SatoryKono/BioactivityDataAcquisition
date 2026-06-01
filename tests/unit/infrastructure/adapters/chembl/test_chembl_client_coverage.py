@@ -18,6 +18,8 @@ from bioetl.domain.types import CircuitBreakerState
 from bioetl.infrastructure.adapters.chembl import ChemblAdapter
 
 
+pytestmark = pytest.mark.unit
+
 @pytest.fixture
 def mock_http_client():
     client = AsyncMock()
@@ -150,7 +152,7 @@ async def test_fetch_as_models_supports_newly_registered_chembl_dtos(
 
 
 @pytest.mark.asyncio
-async def test_get_entity_count(adapter, mock_http_client):
+async def test_chembl_client_coverage__get_entity_count__6ef0e846(adapter, mock_http_client):
     """Test getting total entity count."""
     mock_response = MagicMock()
     mock_response.json.return_value = {"page_meta": {"total_count": 12345}}

@@ -20,6 +20,8 @@ from bioetl.infrastructure.quality.exemptions_registry import (
     validate_exemptions_registry,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _write_registry(tmp_path: Path, content: dict[str, object]) -> Path:
     """Write registry YAML to a temp file."""
@@ -31,26 +33,26 @@ def _write_registry(tmp_path: Path, content: dict[str, object]) -> Path:
 class TestLoadExemptionsRegistry:
     """Tests for load_exemptions_registry."""
 
-    def test_loads_valid_yaml(self, tmp_path: Path) -> None:
+    def test_exemptions_registry__loads_valid_yaml__07d01eb7(self, tmp_path: Path) -> None:
         """Valid YAML mapping should be loaded as dict."""
         path = _write_registry(tmp_path, {"registries": {}})
         result = load_exemptions_registry(path)
         assert isinstance(result, dict)
         assert "registries" in result
 
-    def test_file_not_found_raises(self) -> None:
+    def test_exemptions_registry__not_found_raises__7ca99c65(self) -> None:
         """Non-existent file should raise FileNotFoundError."""
         with pytest.raises(FileNotFoundError):
             load_exemptions_registry("/nonexistent/registry.yaml")
 
-    def test_non_mapping_raises(self, tmp_path: Path) -> None:
+    def test_exemptions_registry__non_mapping_raises__b7cd6df7(self, tmp_path: Path) -> None:
         """Non-mapping YAML should raise ValueError."""
         registry_file = tmp_path / "registry.yaml"
         registry_file.write_text("- item1\n- item2\n", encoding="utf-8")
         with pytest.raises(ValueError, match="must be a mapping"):
             load_exemptions_registry(registry_file)
 
-    def test_empty_yaml_returns_empty_dict(self, tmp_path: Path) -> None:
+    def test_exemptions_registry__returns_empty_dict__5d86214b(self, tmp_path: Path) -> None:
         """Empty YAML returns empty dict (safe_load returns None -> {})."""
         registry_file = tmp_path / "registry.yaml"
         registry_file.write_text("", encoding="utf-8")

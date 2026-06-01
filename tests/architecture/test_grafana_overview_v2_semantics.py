@@ -1,6 +1,10 @@
+import pytest
+
 import json
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 def _panels(d):
     out = []

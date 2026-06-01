@@ -17,6 +17,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.architecture
+
 # Paths relative to project root
 COMPOSITION_DIR = Path("src/bioetl/composition")
 INFRASTRUCTURE_DIR = Path("src/bioetl/infrastructure")

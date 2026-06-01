@@ -19,6 +19,8 @@ from bioetl.application.core.lifecycle.shutdown import (
 from bioetl.domain.ports import LockPort
 from bioetl.domain.types import RunID
 
+pytestmark = pytest.mark.unit
+
 # Test UUID constant for consistent assertions
 TEST_RUN_ID: RunID = UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
 

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 import yaml
@@ -10,6 +12,8 @@ from scripts.engineering.qa.extract_pubchem_property_vocab import (
     extract_pubchem_property_vocab,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_extract_pubchem_property_vocab_matches_expected_fixture_subset() -> None:
     payload = extract_pubchem_property_vocab(

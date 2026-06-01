@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 import tempfile
 import yaml
 from pathlib import Path
@@ -11,6 +13,8 @@ from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.types.dq_contracts import DQDisposition, DQViolationKind
 from bioetl.domain.behavior.dq_policy_resolver import DQPolicyResolver
 
+
+pytestmark = pytest.mark.unit
 
 class TestDQConsistencyValidator:
     """Test DQ consistency validator functionality."""
@@ -149,7 +153,7 @@ class TestDQConsistencyValidator:
         assert len(validator.issues) == 1
         assert "invalid disposition value" in validator.issues[0]
 
-    def test_policy_hash_stability(self):
+    def test_consistency_validator__hash_stability__af1528ae(self):
         """Test that policy hash is stable for same configuration."""
         validator = DQConsistencyValidator()
 

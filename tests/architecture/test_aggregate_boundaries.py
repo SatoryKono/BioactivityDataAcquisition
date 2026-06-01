@@ -20,6 +20,8 @@ from pathlib import Path
 import pytest
 
 
+pytestmark = pytest.mark.architecture
+
 FORBIDDEN_AGGREGATE_TYPES = {"Batch", "PipelineRun", "QuarantineEntry"}
 ALLOWED_AGGREGATE_ID_TYPES = {"BatchID", "RunID", "EntityID", "ContentHash"}
 

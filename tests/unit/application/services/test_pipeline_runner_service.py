@@ -189,7 +189,7 @@ class TestRunOptions:
 class TestRunResult:
     """Test RunResult dataclass."""
 
-    def test_success_result(self):
+    def test_service_run_result__success_result__40da4499(self):
         """Test successful run result."""
         result = RunResult(
             status=PipelineRunResult.SUCCESS,

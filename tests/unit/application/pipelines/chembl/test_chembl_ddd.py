@@ -66,7 +66,7 @@ def context(chembl_pipeline) -> PipelineContext:
 
 
 @pytest.mark.asyncio
-async def test_transform_valid_record(chembl_pipeline, context):
+async def test_chembl_chembl_ddd__valid_record__639aa6d2(chembl_pipeline, context):
     """Verify that a valid record is correctly transformed."""
     record = {
         "activity_id": "100",

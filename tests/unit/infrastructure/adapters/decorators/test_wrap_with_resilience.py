@@ -24,6 +24,8 @@ from bioetl.infrastructure.adapters.decorators import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 class MockDataSource:
     """Mock data source for testing."""
 

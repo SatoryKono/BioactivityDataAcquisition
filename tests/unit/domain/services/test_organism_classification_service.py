@@ -123,10 +123,10 @@ class TestNormalizeName:
     def test_resolves_alias(self, service: OrganismClassifier) -> None:
         assert service.normalize_name("HIV") == "human immunodeficiency virus 1"
 
-    def test_none_input(self, service: OrganismClassifier) -> None:
+    def test_service_normalize_name__none_input__57cb8c05(self, service: OrganismClassifier) -> None:
         assert service.normalize_name(None) is None
 
-    def test_empty_input(self, service: OrganismClassifier) -> None:
+    def test_service_normalize_name__empty_input__146e4b0d(self, service: OrganismClassifier) -> None:
         assert service.normalize_name("") is None
 
 
@@ -160,7 +160,7 @@ class TestClassifyRecords:
         assert results[2][1].organism_class == CellularityType.ACELLULAR
         assert results[3][1].organism_class is None
 
-    def test_empty_input(self, service: OrganismClassifier) -> None:
+    def test_classify_records__empty_input__f0035c74(self, service: OrganismClassifier) -> None:
         assert service.classify_records([]) == []
 
 
@@ -201,7 +201,7 @@ class TestEnrichRecords:
         enriched = service.enrich_records(records)
         assert enriched[0]["extra"] == 42
 
-    def test_empty_input(self, service: OrganismClassifier) -> None:
+    def test_service_enrich_records__empty_input__e65fef77(self, service: OrganismClassifier) -> None:
         assert service.enrich_records([]) == []
 
 
@@ -288,7 +288,7 @@ class TestFilterByCellularity:
         )
         assert len(filtered) == 2
 
-    def test_empty_input(self, service: OrganismClassifier) -> None:
+    def test_filter_by_cellularity__empty_input__3697a12d(self, service: OrganismClassifier) -> None:
         assert service.filter_by_cellularity([]) == []
 
 

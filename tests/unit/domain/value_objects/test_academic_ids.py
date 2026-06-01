@@ -25,7 +25,7 @@ from bioetl.domain.value_objects.academic_ids import (
 class TestOpenAlexId:
     """Tests for OpenAlexId Value Object."""
 
-    def test_valid_creation(self) -> None:
+    def test_ids_open_alex_id__valid_creation__fb444fa1(self) -> None:
         """Test creation with valid OpenAlex ID."""
         oa_id = OpenAlexId("W2741809807")
         assert oa_id.value == "W2741809807"
@@ -35,7 +35,7 @@ class TestOpenAlexId:
         oa_id = OpenAlexId("w2741809807")
         assert oa_id.value == "W2741809807"
 
-    def test_strips_whitespace(self) -> None:
+    def test_ids_open_alex_id__strips_whitespace__a1ee53b2(self) -> None:
         """Test whitespace is stripped before validation."""
         oa_id = OpenAlexId("  W123456  ")
         assert oa_id.value == "W123456"
@@ -94,18 +94,18 @@ class TestOpenAlexId:
         """Test from_raw with invalid value returns None (not raise)."""
         assert OpenAlexId.from_raw("INVALID") is None
 
-    def test_immutability(self) -> None:
+    def test_ids_open_alex_id__immutability__49756b80(self) -> None:
         """Test OpenAlexId is immutable."""
         oa_id = OpenAlexId("W100")
         with pytest.raises(AttributeError, match="immutable"):
             oa_id._value = "W200"  # type: ignore[misc]
 
-    def test_equality(self) -> None:
+    def test_ids_open_alex_id__equality__59011197(self) -> None:
         """Test equality by value."""
         assert OpenAlexId("W100") == OpenAlexId("W100")
         assert OpenAlexId("W100") != OpenAlexId("W200")
 
-    def test_hash_consistency(self) -> None:
+    def test_ids_open_alex_id__hash_consistency__f02783b1(self) -> None:
         """Test hash is consistent with equality."""
         a = OpenAlexId("W100")
         b = OpenAlexId("w100")
@@ -128,7 +128,7 @@ class TestSemanticScholarId:
 
     VALID_ID = "649def34f8be52c8b66281af98ae884c09aef38b"  # 40-char hex
 
-    def test_valid_creation(self) -> None:
+    def test_semantic_scholar_id__valid_creation__5237d7eb(self) -> None:
         """Test creation with valid 40-char hex ID."""
         ss_id = SemanticScholarId(self.VALID_ID)
         assert ss_id.value == self.VALID_ID
@@ -139,7 +139,7 @@ class TestSemanticScholarId:
         ss_id = SemanticScholarId(upper_id)
         assert ss_id.value == self.VALID_ID
 
-    def test_strips_whitespace(self) -> None:
+    def test_semantic_scholar_id__strips_whitespace__5db8cb28(self) -> None:
         """Test leading/trailing whitespace is stripped."""
         ss_id = SemanticScholarId(f"  {self.VALID_ID}  ")
         assert ss_id.value == self.VALID_ID
@@ -160,27 +160,27 @@ class TestSemanticScholarId:
         with pytest.raises(ValueError, match="Invalid Semantic Scholar ID"):
             SemanticScholarId(non_hex)
 
-    def test_from_raw_valid(self) -> None:
+    def test_semantic_scholar_id__from_raw_valid__3f5a29c8(self) -> None:
         """Test from_raw with valid value."""
         ss_id = SemanticScholarId.from_raw(self.VALID_ID)
         assert ss_id is not None
         assert ss_id.value == self.VALID_ID
 
-    def test_from_raw_none_returns_none(self) -> None:
+    def test_semantic_scholar_id__none_returns_none__b0304ea6(self) -> None:
         """Test from_raw with None returns None."""
         assert SemanticScholarId.from_raw(None) is None
 
-    def test_from_raw_invalid_returns_none(self) -> None:
+    def test_semantic_scholar_id__invalid_returns_none__56362222(self) -> None:
         """Test from_raw with invalid value returns None."""
         assert SemanticScholarId.from_raw("tooshort") is None
 
-    def test_equality(self) -> None:
+    def test_semantic_scholar_id__equality__b05f91bc(self) -> None:
         """Test equality by value."""
         a = SemanticScholarId(self.VALID_ID)
         b = SemanticScholarId(self.VALID_ID.upper())
         assert a == b
 
-    def test_repr(self) -> None:
+    def test_semantic_scholar_id__repr__c105304c(self) -> None:
         """Test repr includes class name and value."""
         ss_id = SemanticScholarId(self.VALID_ID)
         assert "SemanticScholarId" in repr(ss_id)
@@ -214,7 +214,7 @@ class TestISSN:
         issn = ISSN("0378-5955")
         assert issn.compact == "03785955"
 
-    def test_empty_raises(self) -> None:
+    def test_academic_ids_i_s_s_n__empty_raises__a99d9693(self) -> None:
         """Test empty string raises ValueError."""
         with pytest.raises(ValueError, match="cannot be empty"):
             ISSN("")
@@ -224,36 +224,36 @@ class TestISSN:
         with pytest.raises(ValueError, match="Invalid ISSN"):
             ISSN("ABCD-1234")  # letters in first group are invalid
 
-    def test_wrong_length_raises(self) -> None:
+    def test_academic_ids_i_s_s_n__wrong_length_raises__344e0039(self) -> None:
         """Test string too short raises ValueError."""
         with pytest.raises(ValueError, match="Invalid ISSN"):
             ISSN("1234-56")
 
-    def test_from_raw_valid(self) -> None:
+    def test_academic_ids_i_s_s_n__from_raw_valid__75490c2a(self) -> None:
         """Test from_raw with valid ISSN."""
         issn = ISSN.from_raw("0378-5955")
         assert issn is not None
         assert issn.value == "0378-5955"
 
-    def test_from_raw_none_returns_none(self) -> None:
+    def test_academic_ids_i_s_s_n__none_returns_none__33e0e52e(self) -> None:
         """Test from_raw with None returns None."""
         assert ISSN.from_raw(None) is None
 
-    def test_from_raw_empty_returns_none(self) -> None:
+    def test_academic_ids_i_s_s_n__empty_returns_none__17b0f192(self) -> None:
         """Test from_raw with empty string returns None."""
         assert ISSN.from_raw("") is None
 
-    def test_from_raw_invalid_returns_none(self) -> None:
+    def test_academic_ids_i_s_s_n__invalid_returns_none__43b5a724(self) -> None:
         """Test from_raw with invalid format returns None."""
         assert ISSN.from_raw("not-an-issn") is None
 
-    def test_equality(self) -> None:
+    def test_academic_ids_i_s_s_n__equality__cbdb9a70(self) -> None:
         """Test equality: hyphenated vs no hyphen."""
         a = ISSN("0378-5955")
         b = ISSN("03785955")
         assert a == b
 
-    def test_immutability(self) -> None:
+    def test_academic_ids_i_s_s_n__immutability__6aaa74e5(self) -> None:
         """Test ISSN is immutable."""
         issn = ISSN("0378-5955")
         with pytest.raises(AttributeError, match="immutable"):
@@ -288,63 +288,63 @@ class TestORCID:
         orcid = ORCID("https://orcid.org/0000-0002-1825-0097")
         assert orcid.value == "0000-0002-1825-0097"
 
-    def test_url_property(self) -> None:
+    def test_academic_ids_o_r_c_i_d__url_property__fb96b3be(self) -> None:
         """Test url property returns full ORCID URL."""
         orcid = ORCID("0000-0002-1825-0097")
         assert orcid.url == "https://orcid.org/0000-0002-1825-0097"
 
-    def test_compact_property(self) -> None:
+    def test_academic_ids_o_r_c_i_d__compact_property__a5264040(self) -> None:
         """Test compact property removes all hyphens."""
         orcid = ORCID("0000-0002-1825-0097")
         assert orcid.compact == "0000000218250097"
 
-    def test_empty_raises(self) -> None:
+    def test_academic_ids_o_r_c_i_d__empty_raises__6f66a928(self) -> None:
         """Test empty string raises ValueError."""
         with pytest.raises(ValueError, match="cannot be empty"):
             ORCID("")
 
-    def test_invalid_format_raises(self) -> None:
+    def test_academic_ids_o_r_c_i_d__format_raises__4c6f334a(self) -> None:
         """Test invalid format raises ValueError."""
         with pytest.raises(ValueError, match="Invalid ORCID"):
             ORCID("1234-5678-9012")  # too short
 
-    def test_non_string_raises(self) -> None:
+    def test_academic_ids_o_r_c_i_d__non_string_raises__b43a809d(self) -> None:
         """Test non-string input raises ValueError."""
         with pytest.raises(ValueError, match="must be str"):
             ORCID(123)  # type: ignore[arg-type]
 
-    def test_from_raw_valid(self) -> None:
+    def test_academic_ids_o_r_c_i_d__from_raw_valid__e8cc239d(self) -> None:
         """Test from_raw with valid ORCID."""
         orcid = ORCID.from_raw("0000-0002-1825-0097")
         assert orcid is not None
         assert orcid.value == "0000-0002-1825-0097"
 
-    def test_from_raw_none_returns_none(self) -> None:
+    def test_academic_ids_o_r_c_i_d__none_returns_none__b4eb4430(self) -> None:
         """Test from_raw with None returns None."""
         assert ORCID.from_raw(None) is None
 
-    def test_from_raw_empty_returns_none(self) -> None:
+    def test_academic_ids_o_r_c_i_d__empty_returns_none__3ba402de(self) -> None:
         """Test from_raw with empty string returns None."""
         assert ORCID.from_raw("") is None
         assert ORCID.from_raw("   ") is None
 
-    def test_from_raw_invalid_returns_none(self) -> None:
+    def test_academic_ids_o_r_c_i_d__invalid_returns_none__c0fe887f(self) -> None:
         """Test from_raw with invalid format returns None."""
         assert ORCID.from_raw("not-an-orcid") is None
 
-    def test_equality(self) -> None:
+    def test_academic_ids_o_r_c_i_d__equality__7ef73984(self) -> None:
         """Test equality by value."""
         a = ORCID("0000-0002-1825-0097")
         b = ORCID("0000000218250097")
         assert a == b
 
-    def test_hash_consistency(self) -> None:
+    def test_academic_ids_o_r_c_i_d__hash_consistency__a5bce34d(self) -> None:
         """Test hash is consistent with equality."""
         a = ORCID("0000-0002-1825-0097")
         b = ORCID("0000000218250097")
         assert hash(a) == hash(b)
 
-    def test_can_be_used_in_set(self) -> None:
+    def test_academic_ids_o_r_c_i_d__can_be_used_in_set__023eb9d5(self) -> None:
         """Test ORCID can be used in a set."""
         orcids = {
             ORCID("0000-0002-1825-0097"),
@@ -353,7 +353,7 @@ class TestORCID:
         }
         assert len(orcids) == 2
 
-    def test_immutability(self) -> None:
+    def test_academic_ids_o_r_c_i_d__immutability__e150ebcb(self) -> None:
         """Test ORCID is immutable."""
         orcid = ORCID("0000-0002-1825-0097")
         with pytest.raises(AttributeError, match="immutable"):

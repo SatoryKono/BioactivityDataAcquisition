@@ -7,8 +7,12 @@ that intentionally defers fallback policy to runtime configuration.
 
 from __future__ import annotations
 
+import pytest
+
 import ast
 from pathlib import Path
+
+pytestmark = pytest.mark.architecture
 
 _CONFIG_DRIVEN_BUILDER_PATHS = {
     Path("bioetl/application/core/_batch_transformer_support.py"),

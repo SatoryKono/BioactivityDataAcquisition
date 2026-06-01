@@ -80,7 +80,7 @@ class TestPolicyViolationError:
 class TestLockLostError:
     """Tests for LockLostError exception."""
 
-    def test_basic_message(self) -> None:
+    def test_lock_lost_error__basic_message__8a31ffdd(self) -> None:
         """Test LockLostError with key only."""
         err = LockLostError("lock:chembl_activity")
         assert "lock:chembl_activity" in str(err)
@@ -104,7 +104,7 @@ class TestLockLostError:
 class TestLockAcquisitionError:
     """Tests for LockAcquisitionError exception."""
 
-    def test_basic_message(self) -> None:
+    def test_lock_acquisition_error__basic_message__41dd9865(self) -> None:
         """Test LockAcquisitionError with key only."""
         err = LockAcquisitionError("lock:chembl_activity")
         assert "lock:chembl_activity" in str(err)
@@ -164,7 +164,7 @@ class TestMergeConflictError:
 class TestAuthFailureError:
     """Tests for AuthFailureError exception."""
 
-    def test_basic_message(self) -> None:
+    def test_auth_failure_error__basic_message__e83763e8(self) -> None:
         """Test AuthFailureError with provider only."""
         err = AuthFailureError("uniprot")
         assert "uniprot" in str(err)
@@ -188,7 +188,7 @@ class TestAuthFailureError:
 class TestMetricsServerError:
     """Tests for MetricsServerError exception."""
 
-    def test_basic_message(self) -> None:
+    def test_metrics_server_error__basic_message__d98e9bbe(self) -> None:
         """Test MetricsServerError with required fields."""
         err = MetricsServerError(port=8000, reason="port_in_use")
         assert "8000" in str(err)
@@ -214,7 +214,7 @@ class TestMetricsServerError:
 class TestRunnerAlreadyExecutedError:
     """Tests for RunnerAlreadyExecutedError exception."""
 
-    def test_basic_message(self) -> None:
+    def test_already_executed_error__basic_message__5bf02b5e(self) -> None:
         """Test RunnerAlreadyExecutedError with required fields."""
         err = RunnerAlreadyExecutedError(
             runner_type="CompositePipelineRunner",

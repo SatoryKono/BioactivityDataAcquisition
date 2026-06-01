@@ -13,6 +13,8 @@ from bioetl.domain.ports.noop import NoOpTracing
 from bioetl.domain.types import BatchID
 
 
+pytestmark = pytest.mark.unit
+
 @pytest.fixture
 def mock_context() -> MagicMock:
     ctx = MagicMock()

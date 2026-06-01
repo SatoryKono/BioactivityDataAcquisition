@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 DOMAIN_IDENTITY_SURFACES = (
     Path("src/bioetl/domain/aggregates/events.py"),

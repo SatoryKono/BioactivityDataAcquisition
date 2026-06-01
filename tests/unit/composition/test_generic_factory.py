@@ -15,6 +15,8 @@ from bioetl.composition.providers import ProviderRegistry, ensure_providers_load
 from bioetl.composition.providers.provider_registry import create_provider_registry
 
 
+pytestmark = pytest.mark.unit
+
 @pytest.fixture
 def mock_settings():
     """Create mock settings."""

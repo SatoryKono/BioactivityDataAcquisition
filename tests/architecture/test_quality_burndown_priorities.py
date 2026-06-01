@@ -8,10 +8,14 @@ Ensures exemptions in the top burn-down registries remain "live":
 
 from __future__ import annotations
 
+import pytest
+
 import ast
 from pathlib import Path
 
 from bioetl.infrastructure.quality.exemptions_registry import load_exemptions_registry
+
+pytestmark = pytest.mark.architecture
 
 _SRC_ROOT = Path("src")
 _BIOETL_ROOT = _SRC_ROOT / "bioetl"

@@ -65,7 +65,7 @@ class TestFilterNonNull:
 class TestCalculateNullRate:
     """Tests for calculate_null_rate function."""
 
-    def test_no_nulls(self) -> None:
+    def test_calculate_null_rate__no_nulls__3ead4141(self) -> None:
         """Test zero null rate when no None values."""
         result = calculate_null_rate([1, 2, 3], 3)
         assert result == pytest.approx(0.0)
@@ -194,7 +194,7 @@ class TestIsValidNumeric:
         """Test None is rejected."""
         assert is_valid_numeric(None) is False
 
-    def test_zero_is_valid(self) -> None:
+    def test_is_valid_numeric__zero_is_valid__28c42282(self) -> None:
         """Test zero is valid."""
         assert is_valid_numeric(0) is True
 
@@ -226,7 +226,7 @@ class TestExtractNumericValues:
         result = extract_numeric_values([1.0, float("nan"), float("inf"), 2.0])
         assert result == [1.0, 2.0]
 
-    def test_empty_input(self) -> None:
+    def test_extract_numeric_values__empty_input__ba38f688(self) -> None:
         """Test empty list returns empty list."""
         assert extract_numeric_values([]) == []
 
@@ -292,11 +292,11 @@ class TestCollectAllColumns:
         result = collect_all_columns(records)
         assert result == {"a", "b", "c"}
 
-    def test_empty_records(self) -> None:
+    def test_collect_all_columns__empty_records__1207d403(self) -> None:
         """Test empty list of records returns empty set."""
         assert collect_all_columns([]) == set()
 
-    def test_single_record(self) -> None:
+    def test_collect_all_columns__single_record__a4c47357(self) -> None:
         """Test single record returns its keys."""
         result = collect_all_columns([{"x": 1, "y": 2}])
         assert result == {"x", "y"}
@@ -355,7 +355,7 @@ class TestComputeColumnStats:
 class TestComputeSingleColumnStats:
     """Tests for compute_single_column_stats function."""
 
-    def test_numeric_column(self) -> None:
+    def test_single_column_stats__numeric_column__6fb3099c(self) -> None:
         """Test numeric stats computed correctly."""
         records = [{"ic50": 100.0}, {"ic50": 200.0}, {"ic50": 300.0}]
         stats = compute_single_column_stats(records, "ic50")

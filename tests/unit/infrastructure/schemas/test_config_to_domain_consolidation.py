@@ -5,6 +5,8 @@ from __future__ import annotations
 import pytest
 
 
+pytestmark = pytest.mark.unit
+
 class TestConsolidationPattern:
     """Tests for to_domain mapping behavior on infrastructure schemas."""
 

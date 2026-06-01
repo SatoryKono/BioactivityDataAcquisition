@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 from scripts.generate_adr_registry import ADRRegistryGenerator
 
+
+pytestmark = pytest.mark.unit
 
 ADR_008_PATH = Path(
     "docs/02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md"

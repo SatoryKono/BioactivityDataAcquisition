@@ -6,10 +6,14 @@ consistent with the layer→subsystem mapping defined in debt_scorecard.yaml.
 
 from __future__ import annotations
 
+import pytest
+
 import re
 
 from bioetl.infrastructure.quality import load_debt_scorecard, load_exemptions_registry
 
+
+pytestmark = pytest.mark.architecture
 
 def _layer_from_path(path: str) -> str | None:
     """Extract the architectural layer from a source file path."""

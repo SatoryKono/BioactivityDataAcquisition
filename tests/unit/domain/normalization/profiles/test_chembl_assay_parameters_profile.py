@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.domain.normalization.profiles import (
     CHEMBL_ASSAY_PARAMETERS_PROFILE,
     CHEMBL_ASSAY_PARAMETERS_SCHEMA_FIELDS,
@@ -9,6 +11,8 @@ from bioetl.domain.normalization.profiles import (
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_json_string,
 )
+
+pytestmark = pytest.mark.unit
 
 CHEMBL_STANDARD_UNIT_ALIAS_CASES = (
     ("uM", "µM"),

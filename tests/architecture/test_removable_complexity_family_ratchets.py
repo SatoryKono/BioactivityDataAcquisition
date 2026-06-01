@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 import ast
 from pathlib import Path
 
@@ -12,6 +14,8 @@ from scripts.engineering.qa.hotspot_family_metrics import (
     count_internal_fan_in,
     iter_family_python_files,
 )
+
+pytestmark = pytest.mark.architecture
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SCORECARD_PATH = PROJECT_ROOT / "configs/quality/debt_scorecard.yaml"

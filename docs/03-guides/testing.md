@@ -142,6 +142,18 @@ budgets for assert-less candidates, duplicate test names, compatibility/legacy
 surface, marker/path drift, and deterministic-time/UUID call sites tracked in
 `configs/quality/test_governance_audit.yaml`.
 
+Test function names are globally governed, not only file-local. New and renamed
+tests must use descriptive, globally unique node IDs in the form
+`test_<subject>__<condition>__<expected_behavior>`. Include provider, entity,
+value-object, command, or service context in `<subject>` so the pytest node ID is
+searchable without opening the file. Avoid generic names such as
+`test_default_values`, `test_immutability`, `test_hash_consistency`,
+`test_valid_creation`, and `test_none_input` unless the name is already globally
+unique and retained only as historical compatibility during a rename batch.
+`report_test_governance_audit --duplicate-name-inventory-out <path>` writes the
+full duplicate-name inventory used to ratchet
+`duplicate_test_names_max` and `duplicate_test_name_occurrences_max` toward zero.
+
 Failure classifications are informational and come from
 `configs/quality/test_health_classifiers.yaml`; pytest exit codes and quality
 gates remain the blocking signals.

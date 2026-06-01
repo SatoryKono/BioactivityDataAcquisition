@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import pytest
+
 import json
 
 from bioetl.domain.normalization.json import serialize_json_canonical
 from bioetl.domain.normalization.profiles import resolve_normalization_profile
 from bioetl.domain.transformations.hashing import generate_content_hash
+
+pytestmark = pytest.mark.unit
 
 _CASE_PAYLOADS: dict[str, tuple[str, dict[str, object]]] = {
     "target_component_key_order_a": (

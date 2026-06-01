@@ -11,6 +11,8 @@ from bioetl.domain.mapping.publication_type_mapping import (
 from bioetl.domain.types import PublicationType
 
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # Mapping integrity
 # ---------------------------------------------------------------------------
@@ -49,7 +51,7 @@ class TestPublicationTypeMappingIntegrity:
 class TestNormalizePublicationType:
     """Test the normalize_publication_type function."""
 
-    def test_none_returns_none(self) -> None:
+    def test_publication_type__none_returns_none__27d0ae42(self) -> None:
         assert normalize_publication_type(None) is None
 
     def test_unknown_value_returns_lowercase(self) -> None:

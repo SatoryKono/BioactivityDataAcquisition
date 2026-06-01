@@ -16,6 +16,8 @@ from bioetl.domain.exceptions import ExternalServiceError
 from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 
 
+pytestmark = pytest.mark.unit
+
 @pytest.fixture(autouse=True)
 def reset_settings_cache():
     """Reset settings cache before each test."""

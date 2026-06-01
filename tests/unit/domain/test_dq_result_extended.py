@@ -12,10 +12,12 @@ from bioetl.domain.types.dq_contracts import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 class TestDQResultExtended:
     """Test extended DQResult with contract-based fields."""
 
-    def test_dq_result_with_rule_outcomes(self):
+    def test_d_q_result_extended__with_rule_outcomes__3c9e4d1c(self):
         """Test DQResult creation with rule outcomes."""
         policy_ref = DQPolicyRef("chembl_molecule", "1.0.0", "1.0.0")
 

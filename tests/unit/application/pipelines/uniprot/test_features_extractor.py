@@ -1,8 +1,12 @@
 """Unit tests for UniProt FeatureExtractor."""
 
+import pytest
+
 import json
 from bioetl.application.pipelines.uniprot.extractors.features import FeatureExtractor
 
+
+pytestmark = pytest.mark.unit
 
 class TestFeatureExtractor:
     """Tests for FeatureExtractor class."""
@@ -39,7 +43,7 @@ class TestFeatureExtractor:
         assert len(parsed) == 1
         assert parsed[0]["type"] == "Domain"
 
-    def test_extract_keywords(self):
+    def test_feature_extractor__extract_keywords__75228603(self):
         """Test keyword extraction."""
         keywords = [
             {"id": "KW-0001", "name": "Keyword 1", "category": "Biological process"},
@@ -53,7 +57,7 @@ class TestFeatureExtractor:
         assert parsed[0]["category"] == "Biological process"
         assert parsed[1]["name"] == "Keyword 2"
 
-    def test_extract_keywords_empty(self):
+    def test_feature_extractor__keywords_empty__e7d3da4d(self):
         """Test keyword extraction with empty list."""
         assert FeatureExtractor.extract_keywords([]) is None
         assert FeatureExtractor.extract_keywords(None) is None

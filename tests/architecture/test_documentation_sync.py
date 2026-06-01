@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+import pytest
+
 from collections import Counter
 import re
 from pathlib import Path
 
 import yaml
+
+pytestmark = pytest.mark.architecture
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DOCS_ROOT = PROJECT_ROOT / "docs"

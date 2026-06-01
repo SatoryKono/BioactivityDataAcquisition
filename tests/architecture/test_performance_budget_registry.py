@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import pytest
+
 import ast
 import json
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
 HOTSPOT_BUDGETS_PATH = ROOT / "tests" / "performance" / "hotspot_budgets.json"

@@ -114,7 +114,7 @@ class TestBatchRunResult:
         result = BatchRunResult(total=0, succeeded=0, failed=0)
         assert result.all_succeeded is False
 
-    def test_default_values(self):
+    def test_batch_run_result__default_values__f7340e15(self):
         """Test default values are initialized correctly."""
         result = BatchRunResult()
         assert result.total == 0
@@ -134,7 +134,7 @@ class TestBatchRunResult:
 class TestGetAvailableProviders:
     """Tests for get_available_providers function."""
 
-    def test_returns_unique_providers(self, mock_registry):
+    def test_available_providers__unique_providers__9bc8cfc0(self, mock_registry):
         """Test that unique providers are extracted from pipeline names."""
         providers = get_available_providers(registry=mock_registry)
         assert sorted(providers) == ["chembl", "pubchem", "uniprot"]
@@ -166,7 +166,7 @@ class TestFilterPipelinesByProvider:
         pipelines = filter_pipelines_by_provider("pubchem", registry=mock_registry)
         assert pipelines == ["pubchem_compound"]
 
-    def test_returns_empty_for_unknown_provider(self, mock_registry):
+    def test_pipelines_by_provider__for_unknown_provider__808b8446(self, mock_registry):
         """Test that empty list returned for unknown provider."""
         pipelines = filter_pipelines_by_provider("unknown", registry=mock_registry)
         assert pipelines == []
@@ -176,13 +176,13 @@ class TestFilterPipelinesByProvider:
 class TestValidateProvider:
     """Tests for validate_provider function."""
 
-    def test_valid_provider_returns_true(self, mock_registry):
+    def test_validate_provider__returns_true__b8bcb899(self, mock_registry):
         """Test that valid provider returns (True, None)."""
         is_valid, error = validate_provider("chembl", registry=mock_registry)
         assert is_valid is True
         assert error is None
 
-    def test_invalid_provider_returns_false(self, mock_registry):
+    def test_validate_provider__returns_false__732c6628(self, mock_registry):
         """Test that invalid provider returns (False, error_message)."""
         is_valid, error = validate_provider("invalid", registry=mock_registry)
         assert is_valid is False
@@ -354,7 +354,7 @@ class TestRunAllHelpers:
 class TestRunAllCommand:
     """Tests for run-all Click command."""
 
-    def test_run_all_help(self, cli_runner):
+    def test_run_all_command__run_all_help__8625aed8(self, cli_runner):
         """Test that run-all --help works."""
         result = cli_runner.invoke(cli, ["run-all", "--help"])
         assert result.exit_code == 0
@@ -364,7 +364,7 @@ class TestRunAllCommand:
         assert "--dry-run" in result.output
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
-    def test_run_all_requires_source(self, mock_register, cli_runner):
+    def test_run_all_command__all_requires_source__ec5a5820(self, mock_register, cli_runner):
         """Test that --source is required."""
         result = cli_runner.invoke(cli, ["run-all"])
         assert result.exit_code != 0

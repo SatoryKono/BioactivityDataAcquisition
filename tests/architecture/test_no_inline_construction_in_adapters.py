@@ -8,6 +8,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.architecture
+
 TARGET_ADAPTERS: dict[str, Path] = {
     "OpenAlexAdapter": Path("src/bioetl/infrastructure/adapters/openalex/client.py"),
     "CrossRefAdapter": Path("src/bioetl/infrastructure/adapters/crossref/client.py"),

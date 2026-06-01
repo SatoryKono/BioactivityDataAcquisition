@@ -16,6 +16,8 @@ from bioetl.domain.config.enum_loader import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 class FakeEnumLoader:
     """In-memory enum loader used to keep domain tests I/O-free."""
 

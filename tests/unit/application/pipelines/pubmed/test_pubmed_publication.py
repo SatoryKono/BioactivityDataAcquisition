@@ -68,7 +68,7 @@ def pipeline_context(mock_services):
 
 
 @pytest.mark.asyncio
-async def test_transform_bronze_to_silver(pipeline, pipeline_context):
+async def test_pubmed_publication__bronze_to_silver__ea1a4f16(pipeline, pipeline_context):
     """Test transformation of valid Bronze record to Silver record."""
     # XML structure matches real PubMed XML format
     xml_content = """

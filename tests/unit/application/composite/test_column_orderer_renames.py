@@ -1,11 +1,15 @@
 """Unit tests for ColumnOrderService rename functionality."""
 
+import pytest
+
 from bioetl.application.composite.column_service import (
     ColumnOrderService,
 )
 from bioetl.domain.composite.config import ColumnGroupConfig, LayerColumnConfig
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
+
+pytestmark = pytest.mark.unit
 
 class TestColumnOrderServiceRenames:
     """Test ColumnOrderService rename functionality."""

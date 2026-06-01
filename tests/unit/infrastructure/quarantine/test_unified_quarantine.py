@@ -427,7 +427,7 @@ class TestUnifiedQuarantineReplay:
 
         assert result == []
 
-    def test_replay_with_error_code_filter(self, quarantine, mock_delta_table):
+    def test_quarantine_replay__error_code_filter__5ee3514c(self, quarantine, mock_delta_table):
         """Test replay with error_code filter."""
         import pyarrow.compute as pc
 
@@ -753,7 +753,7 @@ class TestUnifiedQuarantineFilteredExplorer:
     """Tests for record-level filtered explorer methods."""
 
     @pytest.mark.asyncio
-    async def test_list_filtered_records(self, quarantine, mock_delta_table):
+    async def test_filtered_explorer__filtered_records__250ce62a(self, quarantine, mock_delta_table):
         """List endpoint should return paginated normalized rows."""
         mock_table = MagicMock()
         mock_arrow_table = MagicMock()
@@ -805,7 +805,7 @@ class TestUnifiedQuarantineFilteredExplorer:
         assert result["items"][0]["reason_code"] == "missing_required_field"
 
     @pytest.mark.asyncio
-    async def test_get_filtered_record_not_found(self, quarantine, mock_delta_table):
+    async def test_filtered_explorer__record_not_found__05a8d69a(self, quarantine, mock_delta_table):
         """Detail endpoint should return None when hash is unknown."""
         mock_table = MagicMock()
         mock_arrow_table = MagicMock()
@@ -821,7 +821,7 @@ class TestUnifiedQuarantineFilteredExplorer:
         assert result is None
 
     @pytest.mark.asyncio
-    async def test_get_filtered_filter_options(self, quarantine, mock_delta_table):
+    async def test_filtered_explorer__filter_options__a9948c56(self, quarantine, mock_delta_table):
         """Filter options endpoint should return distinct scoped values."""
         mock_table = MagicMock()
         mock_arrow_table = MagicMock()
@@ -1036,7 +1036,7 @@ class TestUnifiedQuarantineFilteredExplorer:
             await quarantine.get_filtered_filter_options(pipeline=None)
 
     @pytest.mark.asyncio
-    async def test_get_filtered_timeseries(self, quarantine, mock_delta_table):
+    async def test_filtered_explorer__filtered_timeseries__1be27eea(self, quarantine, mock_delta_table):
         """Timeseries endpoint should bucket reject rows by ingestion timestamp."""
         mock_table = MagicMock()
         mock_arrow_table = MagicMock()

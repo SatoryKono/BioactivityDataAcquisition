@@ -785,7 +785,7 @@ class TestStorageBundleAclose:
         await adapter.aclose()
 
     @pytest.mark.asyncio
-    async def test_aclose_is_idempotent(self):
+    async def test_storage_bundle_aclose__aclose_is_idempotent__79d48809(self):
         """Test aclose can be called multiple times."""
         adapter = StorageBundle(
             bronze_writer=MagicMock(),

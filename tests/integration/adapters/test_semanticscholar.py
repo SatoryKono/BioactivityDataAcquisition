@@ -104,14 +104,14 @@ class TestSemanticScholarAdapterIntegration:
     Use --vcr-record=new_episodes to record new cassettes.
     """
 
-    def test_provider_name(
+    def test_scholar_adapter__provider_name__dabf6e71(
         self, semanticscholar_adapter: SemanticScholarAdapter
     ) -> None:
         """Adapter should have correct provider name."""
         assert semanticscholar_adapter.provider_name == "semanticscholar"
 
     @pytest.mark.vcr
-    async def test_health_check(
+    async def test_scholar_adapter__health_check__1f0e0a8e(
         self,
         semanticscholar_adapter: SemanticScholarAdapter,
     ) -> None:
@@ -294,7 +294,7 @@ class TestSemanticScholarAdapterEdgeCases:
                 )
             )
 
-    async def test_fetch_with_limit(
+    async def test_adapter_edge_cases__fetch_with_limit__55032419(
         self,
         semanticscholar_adapter: SemanticScholarAdapter,
     ) -> None:

@@ -8,6 +8,8 @@ from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.types import RunType
 
 
+pytestmark = pytest.mark.unit
+
 class TestPipelineConfig:
     """Tests for PipelineConfig dataclass."""
 

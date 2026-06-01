@@ -7,8 +7,12 @@ All registrations and initializations should be explicit function calls,
 not import-time side effects.
 """
 
+import pytest
+
 import ast
 from pathlib import Path
+
+pytestmark = pytest.mark.architecture
 
 COMPOSITION_DIR = Path("src/bioetl/composition")
 

@@ -23,6 +23,8 @@ from bioetl.domain.control_plane.effective_config_artifact import (
 )
 from bioetl.domain.types.dq_contracts import DQDisposition
 
+pytestmark = pytest.mark.unit
+
 
 def _create_service_with_degraded_default() -> EffectiveConfigService:
     """Keep generic service tests focused on artifact mechanics, not strict runtime policy."""

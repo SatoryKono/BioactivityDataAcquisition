@@ -33,6 +33,8 @@ from bioetl.domain.ports import (
 )
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
+pytestmark = pytest.mark.architecture
+
 # =============================================================================
 # Constants & Rules
 # =============================================================================

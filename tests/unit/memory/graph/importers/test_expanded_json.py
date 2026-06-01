@@ -1,3 +1,5 @@
+import pytest
+
 from memory.graph.importers.expanded_json import (
     _explicit_path_refs,
     _extract_adr_lifecycle_field,
@@ -5,6 +7,8 @@ from memory.graph.importers.expanded_json import (
     _slugify,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_extract_adr_lifecycle_field_valid():
     assert _extract_adr_lifecycle_field("* supersedes:") == "supersedes"

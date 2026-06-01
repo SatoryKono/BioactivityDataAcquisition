@@ -134,7 +134,7 @@ async def _consume_async_iter(async_iter) -> list[object]:
 class TestPubChemAdapterProperties:
     """Unit-like tests for PubChemAdapter that do not require HTTP."""
 
-    def test_provider_name(self, pubchem_adapter: PubChemAdapter) -> None:
+    def test_adapter_properties__provider_name__2c584564(self, pubchem_adapter: PubChemAdapter) -> None:
         """Adapter should have correct provider name."""
         assert pubchem_adapter.provider_name == "pubchem"
 
@@ -542,7 +542,7 @@ class TestPubChemHealthCheck:
 class TestPubChemErrorCases:
     """Tests for error handling and edge cases."""
 
-    async def test_invalid_entity_type_raises(
+    async def test_pub_chem_error_cases__entity_type_raises__beeb4263(
         self, pubchem_adapter: PubChemAdapter
     ) -> None:
         """fetch() with unsupported entity type should raise ValueError."""

@@ -23,6 +23,8 @@ from bioetl.application.services.metrics_service import (
 from bioetl.domain.ports import MetricsServerRuntimeStatus
 from tests.helpers.clock import FixedClock
 
+pytestmark = pytest.mark.unit
+
 
 def _make_mock_tracer() -> MagicMock:
     """Create a tracing port mock with an inspectable span context."""
@@ -66,7 +68,7 @@ class TestMetricsServerError:
 class TestMetricsServerPort:
     """Tests for MetricsServerPort protocol."""
 
-    def test_protocol_is_runtime_checkable(self) -> None:
+    def test_metrics_server_port__is_runtime_checkable__7482a204(self) -> None:
         """Test MetricsServerPort is runtime checkable."""
 
         class MockServer:
@@ -184,7 +186,7 @@ class TestMetricsService:
             _server=mock_server,
         )
 
-    def test_start_success(
+    def test_metrics_service__start_success__a21e5a97(
         self, service: MetricsService, mock_server: MagicMock
     ) -> None:
         """Test successful server start."""

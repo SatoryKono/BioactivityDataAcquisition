@@ -20,6 +20,8 @@ from bioetl.domain.composite.cross_validation import (
     FieldComparisonSpec,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _make_config(
     *,

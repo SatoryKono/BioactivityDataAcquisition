@@ -95,11 +95,44 @@ def test_grafana_uses_remote_renderer_sidecar() -> None:
         "GF_RENDERING_SERVER_URL=http://renderer:8081/render" in grafana["environment"]
     )
     assert "GF_RENDERING_CALLBACK_URL=http://grafana:3000/" in grafana["environment"]
+    assert (
+        "GF_RENDERING_RENDERER_TOKEN=${GF_RENDERING_RENDERER_TOKEN:-bioetl-local-renderer-token}"
+        in grafana["environment"]
+    )
     assert grafana["entrypoint"] == [
         "/bin/sh",
         "/usr/local/bin/bioetl-bootstrap-grafana.sh",
     ]
-    assert renderer["image"] == "grafana/grafana-image-renderer:latest"
+    assert renderer["image"] == "grafana/grafana-image-renderer:5.0.0"
+    assert renderer["shm_size"] == "1gb"
+    assert (
+        "AUTH_TOKEN=${GF_RENDERING_RENDERER_TOKEN:-bioetl-local-renderer-token}"
+        in renderer["environment"]
+    )
+    assert (
+        "BROWSER_FLAGS=--no-sandbox,--disable-dev-shm-usage"
+        in renderer["environment"]
+    )
+    assert (
+        "GOMEMLIMIT=${GRAFANA_IMAGE_RENDERER_GOMEMLIMIT:-1GiB}"
+        in renderer["environment"]
+    )
+    assert not any(
+        item.startswith("RENDERING_ARGS=") for item in renderer["environment"]
+    )
+
+
+def test_prometheus_scrapes_remote_renderer_metrics() -> None:
+    """Renderer metrics must be observable when Grafana render API fails."""
+    prometheus = yaml.safe_load(
+        Path("grafana/prometheus.yml").read_text(encoding="utf-8")
+    )
+    jobs = {item["job_name"]: item for item in prometheus["scrape_configs"]}
+
+    renderer = jobs["grafana-image-renderer"]
+
+    assert renderer["metrics_path"] == "/metrics"
+    assert renderer["static_configs"] == [{"targets": ["renderer:8081"]}]
 
 
 def test_tracing_datasource_default_matches_optional_tracing_profile() -> None:

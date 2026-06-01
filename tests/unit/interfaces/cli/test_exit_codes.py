@@ -14,6 +14,8 @@ from bioetl.interfaces.cli.exit_codes import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 class TestExitCode:
     """Tests for ExitCode enum."""
 
@@ -123,7 +125,7 @@ class TestExceptionExitCodeMapping:
         exc = PipelineShutdownError("test")
         assert get_exit_code_for_exception(exc) == ExitCode.SIGINT
 
-    def test_unknown_exception_returns_fail(self) -> None:
+    def test_exit_code_mapping__returns_fail__41fd1627(self) -> None:
         """Unknown exceptions should return FAIL."""
 
         class UnknownError(Exception):

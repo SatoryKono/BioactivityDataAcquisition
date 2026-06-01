@@ -1,5 +1,9 @@
+import pytest
+
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 def test_repo_router_exposes_cleanup_branch_candidates_command() -> None:
     root = Path(__file__).resolve().parents[2]

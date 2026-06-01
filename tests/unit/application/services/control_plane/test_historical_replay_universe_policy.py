@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.application.services.control_plane.replay.historical_universe_policy import (
     build_authoritative_truth_surface,
     build_durable_coverage_claim,
@@ -13,6 +15,8 @@ from bioetl.application.services.control_plane.replay.historical_universe_servic
     HistoricalReplayUniverseRecord,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def _record(*, durable_evidence_coverage: bool) -> HistoricalReplayUniverseRecord:
     return HistoricalReplayUniverseRecord(

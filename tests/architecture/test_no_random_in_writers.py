@@ -11,6 +11,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.architecture
+
 # Path relative to project root
 STORAGE_DIR = Path("src/bioetl/infrastructure/storage")
 

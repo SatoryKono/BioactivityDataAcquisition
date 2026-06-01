@@ -15,6 +15,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.architecture
+
 INFRASTRUCTURE_DIR = Path("src/bioetl/infrastructure")
 
 # Allowed exemptions (should be empty for new code)

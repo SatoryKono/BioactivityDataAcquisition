@@ -16,6 +16,8 @@ from bioetl.domain.aggregates.pipeline_run import PipelineRun
 from bioetl.domain.types import RunID, RunType
 
 
+pytestmark = pytest.mark.unit
+
 @pytest.fixture
 def mock_clock() -> MagicMock:
     clock = MagicMock()

@@ -16,6 +16,8 @@ from bioetl.domain.types.validation_severity import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 class TestAggregationValidator:
     """Tests for AggregationValidator."""
 

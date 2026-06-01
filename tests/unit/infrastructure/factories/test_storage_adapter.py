@@ -132,7 +132,7 @@ class TestStorageBundleWriteBronze:
     """Tests for write_bronze method."""
 
     @pytest.mark.asyncio
-    async def test_write_bronze_delegates(
+    async def test_bundle_write_bronze__bronze_delegates__a36e4f9d(
         self,
         storage_adapter: StorageBundle,
         mock_bronze_writer: MagicMock,
@@ -173,7 +173,7 @@ class TestStorageBundleWriteSilver:
     """Tests for write_silver method."""
 
     @pytest.mark.asyncio
-    async def test_write_silver_delegates(
+    async def test_bundle_write_silver__silver_delegates__42f664ee(
         self,
         storage_adapter: StorageBundle,
         mock_silver_writer: MagicMock,
@@ -219,7 +219,7 @@ class TestStorageBundleWriteGold:
     """Tests for write_gold method."""
 
     @pytest.mark.asyncio
-    async def test_write_gold_delegates(
+    async def test_bundle_write_gold__write_gold_delegates__31f3e8f4(
         self,
         storage_adapter: StorageBundle,
         mock_gold_writer: MagicMock,
@@ -278,7 +278,7 @@ class TestStorageBundleWriteGold:
         assert call_kwargs["mode"] == "overwrite"
 
     @pytest.mark.asyncio
-    async def test_write_gold_passes_scd_config(
+    async def test_bundle_write_gold__passes_scd_config__c5facac6(
         self,
         storage_adapter: StorageBundle,
         mock_gold_writer: MagicMock,
@@ -305,13 +305,13 @@ class TestStorageBundleClose:
     """Tests for aclose method."""
 
     @pytest.mark.asyncio
-    async def test_aclose(self, storage_adapter: StorageBundle) -> None:
+    async def test_storage_bundle_close__aclose__a7cd7e53(self, storage_adapter: StorageBundle) -> None:
         """Test aclose completes without error."""
         # Should not raise
         await storage_adapter.aclose()
 
     @pytest.mark.asyncio
-    async def test_aclose_is_noop(self, storage_adapter: StorageBundle) -> None:
+    async def test_storage_bundle_close__aclose_is_noop__ee03f62b(self, storage_adapter: StorageBundle) -> None:
         """Test aclose is a no-op (writers don't need cleanup)."""
         # Can be called multiple times
         await storage_adapter.aclose()
@@ -433,7 +433,7 @@ class TestStorageBundleAdditionalPaths:
         mock_gold_writer.get_table_path.assert_called_once_with("chembl.activity")
 
     @pytest.mark.asyncio
-    async def test_read_silver_delegates(
+    async def test_additional_paths__silver_delegates__b95b603c(
         self, storage_adapter: StorageBundle, mock_silver_writer: MagicMock
     ) -> None:
         """read_silver should delegate to Silver writer."""
@@ -447,7 +447,7 @@ class TestStorageBundleAdditionalPaths:
         )
 
     @pytest.mark.asyncio
-    async def test_write_silver_merged_delegates(
+    async def test_additional_paths__merged_delegates__e5a001d2(
         self, storage_adapter: StorageBundle, mock_silver_writer: MagicMock
     ) -> None:
         """write_silver_merged should pass through optional parameters."""
@@ -492,7 +492,7 @@ class TestStorageBundleAdditionalPaths:
         gold_exporter.clear.assert_called_once_with("chembl.activity")
 
     @pytest.mark.asyncio
-    async def test_clear_delta_with_table_name__test_storage_bundle_additional_paths_infrastructure_factories_test_storage_adapter_495(
+    async def test_paths_factories_storage_adapter_495__4547ef4d(
         self,
         storage_adapter: StorageBundle,
         mock_silver_writer: MagicMock,
@@ -633,7 +633,7 @@ class TestStorageBundleAdditionalPaths:
         assert not gold_src.exists()
 
     @pytest.mark.asyncio
-    async def test_cleanup_bronze_delegates__test_storage_bundle_additional_paths_infrastructure_factories_test_storage_adapter_636(
+    async def test_paths_factories_storage_adapter_636__440ca562(
         self, storage_adapter: StorageBundle, mock_bronze_writer: MagicMock
     ) -> None:
         """cleanup_bronze should delegate to Bronze writer."""

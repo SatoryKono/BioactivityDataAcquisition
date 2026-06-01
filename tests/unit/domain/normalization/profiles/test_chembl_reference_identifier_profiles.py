@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.domain.normalization.profiles import (
     CHEMBL_ACTIVITY_PROFILE,
     CHEMBL_CELL_LINE_PROFILE,
@@ -11,6 +13,8 @@ from bioetl.domain.normalization.profiles import (
     CHEMBL_TARGET_PROFILE,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_chembl_activity_profile_uses_shared_reference_identifier_rules() -> None:
     assay_id_rule = CHEMBL_ACTIVITY_PROFILE.rule_for("assay_id")

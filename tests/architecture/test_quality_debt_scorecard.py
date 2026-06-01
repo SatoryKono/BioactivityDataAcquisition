@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from datetime import date
 import importlib.util
 import json
@@ -35,6 +37,8 @@ from scripts.engineering.qa.report_test_governance_audit import (
 )
 from scripts.engineering.qa.report_dead_code_inventory import build_dead_code_inventory
 
+
+pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
 POLICY_REVIEW_DATE = date(2026, 5, 15)

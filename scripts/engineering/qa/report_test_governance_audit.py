@@ -57,6 +57,62 @@ BUDGET_TO_METRIC = {
 }
 
 
+def _lane_from_test_path(relative_path: str) -> str:
+    parts = relative_path.split("/")
+    if len(parts) >= 2 and parts[0] == "tests":
+        return parts[1]
+    return "unknown"
+
+
+def _duplicate_location_classification(locations: list[str]) -> str:
+    files = [location.rsplit(":", maxsplit=1)[0] for location in locations]
+    unique_files = set(files)
+    if len(unique_files) == 1:
+        return "same_file"
+    if len(unique_files) == len(files):
+        return "cross_file"
+    return "mixed"
+
+
+def _build_duplicate_name_inventory(
+    duplicate_names: dict[str, list[str]],
+) -> tuple[list[dict[str, Any]], dict[str, int]]:
+    inventory: list[dict[str, Any]] = []
+    classification_counts: Counter[str] = Counter()
+
+    for name, locations in sorted(
+        duplicate_names.items(),
+        key=lambda item: (-len(item[1]), item[0]),
+    ):
+        classification = _duplicate_location_classification(locations)
+        classification_counts[classification] += 1
+        lane_counts = Counter(
+            _lane_from_test_path(location.rsplit(":", maxsplit=1)[0])
+            for location in locations
+        )
+        inventory.append(
+            {
+                "name": name,
+                "count": len(locations),
+                "classification": classification,
+                "lane_counts": dict(sorted(lane_counts.items())),
+                "locations": locations,
+                "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>",
+            }
+        )
+
+    summary = {
+        "total_duplicate_names": len(duplicate_names),
+        "duplicate_occurrences": sum(
+            len(locations) for locations in duplicate_names.values()
+        ),
+        "same_file_groups": classification_counts["same_file"],
+        "cross_file_groups": classification_counts["cross_file"],
+        "mixed_groups": classification_counts["mixed"],
+    }
+    return inventory, summary
+
+
 def _iter_test_files(root: Path) -> list[Path]:
     tests_root = root / "tests"
     return [
@@ -293,6 +349,9 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
             key=lambda item: (-len(item[1]), item[0]),
         )[:25]
     ]
+    duplicate_inventory, duplicate_inventory_summary = (
+        _build_duplicate_name_inventory(duplicate_names)
+    )
 
     return {
         "root": root.as_posix(),
@@ -310,6 +369,8 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
             len(locations) for locations in duplicate_names.values()
         ),
         "top_duplicate_test_names": top_duplicate_names,
+        "duplicate_test_name_inventory": duplicate_inventory,
+        "duplicate_test_name_inventory_summary": duplicate_inventory_summary,
         "compatibility_test_files": len(compatibility_files),
         "compatibility_files": compatibility_files,
         "compatibility_examples": compatibility_files[:25],
@@ -360,6 +421,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--root", type=Path, default=ROOT)
     parser.add_argument("--config", type=Path, default=ROOT / DEFAULT_CONFIG)
     parser.add_argument("--json-out", type=Path)
+    parser.add_argument(
+        "--duplicate-name-inventory-out",
+        type=Path,
+        help=(
+            "Write the full duplicate-test-name inventory as a deterministic "
+            "standalone JSON artifact."
+        ),
+    )
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args(argv)
 
@@ -380,6 +449,16 @@ def main(argv: list[str] | None = None) -> int:
         args.json_out.write_text(output + "\n", encoding="utf-8")
     else:
         print(output)
+    if args.duplicate_name_inventory_out:
+        duplicate_inventory_payload = {
+            "summary": report["duplicate_test_name_inventory_summary"],
+            "inventory": report["duplicate_test_name_inventory"],
+        }
+        args.duplicate_name_inventory_out.parent.mkdir(parents=True, exist_ok=True)
+        args.duplicate_name_inventory_out.write_text(
+            json.dumps(duplicate_inventory_payload, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
     return exit_code
 
 

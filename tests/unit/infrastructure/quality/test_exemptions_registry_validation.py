@@ -22,7 +22,7 @@ pytestmark = pytest.mark.unit
 class TestValidateRequiredFields:
     """Tests for _validate_required_fields."""
 
-    def test_all_fields_present(self) -> None:
+    def test_required_fields__all_fields_present__c4244628(self) -> None:
         """All required fields present should produce no errors."""
         errors: list[str] = []
         _validate_required_fields(
@@ -93,7 +93,7 @@ class TestNormalizeRequiredFields:
         assert result == ("owner", "reason", "expires_on", "removal_step")
         assert errors == []
 
-    def test_not_a_list(self) -> None:
+    def test_required_fields__not_a_list__86a4aea0(self) -> None:
         """Non-list should add error and return defaults."""
         errors: list[str] = []
         result = _normalize_required_fields("not_a_list", errors)
@@ -120,7 +120,7 @@ class TestNormalizeRequiredFields:
         assert "reason" in result
         assert len(errors) >= 2  # empty string and int
 
-    def test_whitespace_stripped(self) -> None:
+    def test_required_fields__whitespace_stripped__551404e1(self) -> None:
         """Items with whitespace should be stripped."""
         errors: list[str] = []
         result = _normalize_required_fields(["  owner  ", " reason "], errors)
@@ -131,7 +131,7 @@ class TestNormalizeRequiredFields:
 class TestGetPolicyRequiredFields:
     """Tests for get_policy_required_fields."""
 
-    def test_valid_policy(self) -> None:
+    def test_policy_required_fields__valid_policy__206f2266(self) -> None:
         """Valid policy with all required fields should return without errors."""
         raw = {
             "policy": {
@@ -153,7 +153,7 @@ class TestGetPolicyRequiredFields:
         assert "removal_step" in result
         assert errors == []
 
-    def test_policy_not_dict(self) -> None:
+    def test_policy_required_fields__policy_not_dict__ad2c8967(self) -> None:
         """Non-dict policy should add error and use defaults."""
         raw = {"policy": "invalid"}
         errors: list[str] = []
@@ -390,7 +390,7 @@ class TestValidateExemptionEntry:
             "removal_step": "refactor module",
         }
 
-    def test_valid_entry(self) -> None:
+    def test_exemption_entry__valid_entry__d7ecdfa3(self) -> None:
         """Valid entry should produce no errors."""
         errors: list[str] = []
         expired: list[str] = []
@@ -474,7 +474,7 @@ class TestValidateExemptionEntry:
         )
         assert any("entry must be mapping" in e for e in errors)
 
-    def test_expired_entry_tracked(self) -> None:
+    def test_exemption_entry__entry_tracked__7b62963d(self) -> None:
         """Entry with past expiry date should be tracked in expired_entries."""
         errors: list[str] = []
         expired: list[str] = []

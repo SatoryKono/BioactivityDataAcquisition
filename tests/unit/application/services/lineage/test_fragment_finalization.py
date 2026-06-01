@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from datetime import UTC, datetime
 from uuid import uuid4
 
@@ -20,6 +22,8 @@ from bioetl.domain.lineage import (
 from bioetl.domain.types import RunID, RunType
 from bioetl.domain.value_objects.run_context import RunContext
 
+
+pytestmark = pytest.mark.unit
 
 def _make_run_context() -> RunContext:
     return RunContext.create(

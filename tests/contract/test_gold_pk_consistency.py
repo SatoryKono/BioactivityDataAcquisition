@@ -9,13 +9,17 @@ import pytest
 import yaml
 
 from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
+from tests.contract._gold_schema_snapshot_registry import (
+    load_gold_schema_snapshot_registry,
+)
 from tests.contract.silver_schemas.conftest import (
     SILVER_SCHEMAS,
     extract_field_metadata,
 )
 
 ENTITIES_DIR = Path("configs/entities")
-GOLD_CONTRACTS_DIR = Path("docs/04-reference/contracts/gold")
+ROOT = Path(__file__).resolve().parents[2]
+GOLD_SCHEMA_SNAPSHOT_REGISTRY = load_gold_schema_snapshot_registry()
 
 
 @pytest.mark.contracts
@@ -30,7 +34,14 @@ class TestGoldPkConsistency:
         business_pks = list(config.business_primary_keys)
         technical_pk = config.technical_primary_key
 
-        contract_path = GOLD_CONTRACTS_DIR / f"{schema_name}_v1.0.json"
+        contract_entry = GOLD_SCHEMA_SNAPSHOT_REGISTRY["entities"].get(schema_name)
+        assert contract_entry is not None, (
+            f"Missing Gold schema snapshot registry entry for {schema_name}. "
+            "Add/update tests/fixtures/golden/gold/schema_registry.v1.json to keep "
+            "schema contract coverage complete."
+        )
+
+        contract_path = ROOT / contract_entry["published_contract_path"]
         assert contract_path.exists(), (
             f"Missing Gold contract for {schema_name}: {contract_path}. "
             "Add/update contract snapshot to keep schema contract coverage complete."

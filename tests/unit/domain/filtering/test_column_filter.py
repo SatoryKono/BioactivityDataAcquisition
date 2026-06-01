@@ -41,7 +41,7 @@ class TestFilterOperator:
 class TestGoldColumnFilterValidation:
     """Tests for GoldColumnFilter validation."""
 
-    def test_empty_column_raises(self) -> None:
+    def test_filter_validation__empty_column_raises__42a6f1b0(self) -> None:
         """Test that empty column name raises error."""
         with pytest.raises(ValueError, match="column name cannot be empty"):
             GoldColumnFilter(column="", values=frozenset(["a"]))

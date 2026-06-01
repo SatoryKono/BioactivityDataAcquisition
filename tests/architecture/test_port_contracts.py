@@ -18,6 +18,8 @@ from bioetl.domain import ports
 from bioetl.domain.value_objects.dq_anomaly import DQAnomaly
 
 
+pytestmark = pytest.mark.architecture
+
 def _ports_dir(src_dir: Path) -> Path:
     return src_dir / "bioetl" / "domain" / "ports"
 
@@ -186,7 +188,7 @@ class TestObservabilityPortLifecycle:
     ]
 
     @pytest.mark.parametrize("port_name", OBSERVABILITY_PORTS)
-    def test_observability_ports_have_close_method(self, port_name: str) -> None:
+    def test_port_lifecycle__have_close_method__3255114a(self, port_name: str) -> None:
         """Observability ports MUST have close() for resource cleanup."""
         port_class = getattr(ports, port_name)
 
@@ -369,7 +371,7 @@ class TestNarrowStoragePortContracts:
             f"StorageMaintenancePort MUST define {method_name}()"
         )
 
-    def test_storage_maintenance_port_has_preview_cleanup(self) -> None:
+    def test_storage_port_contracts__has_preview_cleanup__8d254aa5(self) -> None:
         """StorageMaintenancePort MUST have preview_cleanup for CLI dry-run mode."""
         assert hasattr(ports.StorageMaintenancePort, "preview_cleanup"), (
             "StorageMaintenancePort MUST define preview_cleanup() for CLI dry-run. "

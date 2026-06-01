@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from types import SimpleNamespace
 from typing import cast
 from unittest.mock import MagicMock, patch
@@ -14,6 +16,8 @@ from bioetl.composition.factories.services.pipeline_processing import (
     build_components_and_processing_service,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def _make_callbacks() -> PipelineCallbacksContext:
     return cast(

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from datetime import datetime, UTC
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -16,6 +18,8 @@ from bioetl.infrastructure.control_plane.file_run_manifest_store import (
 )
 from tests.helpers.deterministic_ids import deterministic_uuid_value
 
+
+pytestmark = pytest.mark.unit
 
 def _make_manifest(pipeline: str = "chembl_activity") -> RunManifest:
     now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)

@@ -23,6 +23,8 @@ from typing import Any
 import pytest
 import yaml
 
+pytestmark = pytest.mark.architecture
+
 DEBT_SCORECARD_YAML = Path("configs/quality/debt_scorecard.yaml")
 EXEMPTIONS_YAML = Path("configs/quality/architecture_metric_exemptions.yaml")
 

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 import json
 from pathlib import Path
 
@@ -17,6 +19,8 @@ from scripts.engineering.qa.check_semantic_governance_policy import (
     DEFAULT_REVIEW_REGISTRY,
     validate_semantic_governance_policy,
 )
+
+pytestmark = pytest.mark.integration
 
 COMPOSITE_AUTHORITY_REGISTRY = Path(
     "configs/field_registry/composite_schema_authority_registry.yaml"

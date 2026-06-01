@@ -71,12 +71,12 @@ class TestUniProtAdapterIntegration:
             ),
         )
 
-    def test_provider_name(self, uniprot_adapter: Any) -> None:
+    def test_uni_prot_adapter__provider_name__2ec88784(self, uniprot_adapter: Any) -> None:
         """Adapter should have correct provider name."""
         assert uniprot_adapter.provider_name == "uniprot"
 
     @pytest.mark.vcr
-    async def test_health_check(
+    async def test_uni_prot_adapter__health_check__8a60de40(
         self, uniprot_http_client: Any, mock_logger: MagicMock
     ) -> None:
         """Test UniProt health check probe.

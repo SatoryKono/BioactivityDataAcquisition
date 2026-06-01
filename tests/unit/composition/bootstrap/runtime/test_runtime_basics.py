@@ -65,7 +65,7 @@ class TestBootstrapRuntimeBasics:
         assert result.lock is lock
         assert result.clock is not None
 
-    def test_uses_provided_run_id(self) -> None:
+    def test_runtime_basics__uses_provided_run_id__fbc0f291(self) -> None:
         """When run_id is provided, it is used instead of generating a new one."""
         config = _make_config()
         provided_run_id = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
@@ -85,7 +85,7 @@ class TestBootstrapRuntimeBasics:
 
         assert result.run_id == provided_run_id
 
-    def test_generates_run_id_when_none(self) -> None:
+    def test_runtime_basics__run_id_when_none__0ad92364(self) -> None:
         """When run_id is None, uuid_factory is called to generate one."""
         uuid_factory = MagicMock(return_value=_FIXED_UUID)
 

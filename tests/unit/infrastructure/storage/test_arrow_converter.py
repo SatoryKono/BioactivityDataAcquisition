@@ -19,6 +19,8 @@ from bioetl.infrastructure.storage.delta.arrow_converter import (
     sort_arrow_table_by_primary_keys,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestArrowDataConverterSanitizeType:
     """Tests for type sanitization for Delta Lake compatibility."""

@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
-# ruff: noqa: F403,F405
-from tests.unit.application.core.normalization_test_support import *  # noqa: F403,F405
+import pytest
 
+# ruff: noqa: F403,F405
+from tests.unit.application.core.normalization_test_support import *
+
+
+pytestmark = pytest.mark.unit
 
 def test_profile_auto_resolves_for_chembl_activity() -> None:
     processor = build_normalization_processor(

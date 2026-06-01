@@ -61,7 +61,7 @@ class TestConvertWriteMode:
 class TestResolveLoadingStrategy:
     """Tests for resolve_loading_strategy function."""
 
-    def test_none_returns_none(self) -> None:
+    def test_loading_strategy__none_returns_none__b04fa147(self) -> None:
         """Test that None input returns None."""
         result = resolve_loading_strategy(None)
         assert result is None
@@ -78,7 +78,7 @@ class TestResolveLoadingStrategy:
         result = resolve_loading_strategy("full_scan_only")
         assert result == LoadingStrategy.FULL_SCAN_ONLY
 
-    def test_invalid_string_raises(self) -> None:
+    def test_loading_strategy__string_raises__2dcc559e(self) -> None:
         """Test that invalid string raises ValueError."""
         with pytest.raises(ValueError):
             resolve_loading_strategy("invalid_strategy")
@@ -112,7 +112,7 @@ class TestFreezeSequences:
         assert isinstance(obj.items, tuple)
         assert obj.items == ("x", "y")
 
-    def test_multiple_fields(self) -> None:
+    def test_freeze_sequences__multiple_fields__4d2879c7(self) -> None:
         """Test that multiple fields are all converted."""
 
         @dataclass

@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import pytest
+
 import json
 import os
 from pathlib import Path
 
 from tests.helpers import repo_root, run_repo_python
 
+
+pytestmark = pytest.mark.architecture
 
 EXPECTED_MCP_SERVERS = {
     "memory",

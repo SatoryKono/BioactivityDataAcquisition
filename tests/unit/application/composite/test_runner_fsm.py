@@ -34,6 +34,8 @@ from bioetl.domain.exceptions import RecoverableError
 from tests.helpers.deterministic_ids import deterministic_run_id
 from tests.unit.application.composite import runner_test_support as support
 
+pytestmark = pytest.mark.unit
+
 InMemoryCheckpointManager = support.InMemoryCheckpointManager
 create_checkpoint_manager = support.create_in_memory_checkpoint_manager
 
@@ -169,7 +171,7 @@ class TestFSMMergeStateTransitions:
     """Tests for FSM state transitions during merge phase."""
 
     @pytest.mark.asyncio
-    async def test_transitions_to_merging_before_merge(
+    async def test_state_transitions__merging_before_merge__46002fb5(
         self,
         mock_config: MagicMock,
         mock_logger: MagicMock,
@@ -1178,7 +1180,7 @@ class TestFSMCheckpointDeletion:
         )
 
     @pytest.mark.asyncio
-    async def test_checkpoint_delete_error_is_non_fatal__test_f_s_m_checkpoint_deletion_application_composite_test_runner_fsm_1181(
+    async def test_deletion_composite_runner_fsm_1181__f6276aba(
         self,
         mock_config: MagicMock,
         mock_logger: MagicMock,

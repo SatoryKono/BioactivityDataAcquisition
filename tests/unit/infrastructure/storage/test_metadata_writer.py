@@ -88,7 +88,7 @@ class TestMetadataWriter:
         assert completion_calls[-1].kwargs["final_reason"] == "success_after_retry"
 
     @pytest.mark.asyncio
-    async def test_aclose_is_idempotent(
+    async def test_writer_metadata_writer__aclose_is_idempotent__fcefbe68(
         self,
         metadata_writer: MetadataWriter,
     ) -> None:
@@ -215,7 +215,7 @@ class TestMetadataModels:
         assert data["runtime"]["run_type"] == "incremental"
         assert "started_at_utc" in data["runtime"]
 
-    def test_silver_metadata_serialization(
+    def test_writer_metadata_models__serialization__906c269c(
         self,
         silver_metadata: SilverMetadata,
     ) -> None:
@@ -228,7 +228,7 @@ class TestMetadataModels:
         assert "delta" in data
         assert "dq_summary" in data
 
-    def test_gold_metadata_serialization(
+    def test_writer_metadata_models__serialization__6554bbad(
         self,
         gold_metadata: GoldMetadata,
     ) -> None:

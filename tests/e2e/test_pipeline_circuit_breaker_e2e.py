@@ -32,7 +32,7 @@ from bioetl.infrastructure.adapters.http.circuit_breaker import (
 class TestCircuitBreakerStateTransitions:
     """Tests for circuit breaker state transitions."""
 
-    async def test_initial_state_is_closed(self):
+    async def test_state_transitions__state_is_closed__76c048e0(self):
         """E2E: Circuit breaker starts in CLOSED state."""
         cb = CircuitBreakerGuard(provider="test_provider")
 

@@ -116,7 +116,7 @@ class TestMaxUrlLengthResolution:
         cfg = _make_source_config(max_url_length=8000)
         assert cfg.max_url_length == 8000
 
-    def test_returns_none_when_not_set(self) -> None:
+    def test_url_length_resolution__none_when_not_set__f388103b(self) -> None:
         """Returns None when neither set."""
         cfg = _make_source_config()
         assert cfg.max_url_length is None

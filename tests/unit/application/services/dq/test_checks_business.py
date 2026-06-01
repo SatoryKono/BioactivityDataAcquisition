@@ -10,6 +10,8 @@ from bioetl.application.services.dq._checks_business import check_business_rules
 from bioetl.domain.value_objects.dq_report import DQCheckStatus
 
 
+pytestmark = pytest.mark.unit
+
 class TestCheckBusinessRulesDirect:
     """Direct ownership tests for ``check_business_rules``."""
 

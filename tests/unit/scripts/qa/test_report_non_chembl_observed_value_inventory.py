@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import pytest
+
 from scripts.engineering.qa import report_non_chembl_observed_value_inventory as report
 
+
+pytestmark = pytest.mark.unit
 
 def test_build_inventory_payload_covers_expected_non_chembl_sections() -> None:
     payload = report.build_inventory_payload()

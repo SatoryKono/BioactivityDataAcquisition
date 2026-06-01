@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import pytest
+
 from datetime import UTC, datetime
 from pathlib import Path
 
 from memory.notes import write_markdown_note
 from memory.tooling.review_curated import review_curated_notes
 
+
+pytestmark = pytest.mark.unit
 
 def _lesson_body() -> str:
     return (

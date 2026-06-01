@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -24,6 +26,8 @@ from bioetl.domain.normalization import (
 )
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 from bioetl.domain.types.execution_phase import ExecutionPhase
+
+pytestmark = pytest.mark.unit
 
 ROOT = Path(__file__).resolve().parents[4]
 POLICY_PATH = ROOT / "configs" / "quality" / "determinism_identity_policy.yaml"

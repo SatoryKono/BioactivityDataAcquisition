@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 import csv
 import io
 from pathlib import Path
@@ -29,6 +31,8 @@ from tests.helpers import (
     assert_written_core_artifacts_are_deterministic,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_build_field_matrix_rows_covers_schema_and_hash_policy() -> None:
     rows = build_field_matrix_rows()

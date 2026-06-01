@@ -17,6 +17,8 @@ from bioetl.infrastructure.config.pipeline_normalizers import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 def _schema_signature(config: Any) -> dict[str, Any]:
     dumped = config.model_dump(mode="json", exclude_none=True)
     data_schema = dumped.get("data_schema")

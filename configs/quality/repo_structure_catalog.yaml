@@ -100,6 +100,8 @@ plans:
       lifecycle: supporting_context
     - path: docs/plans/sonar-closeout-plan-2026-05-04.md
       lifecycle: supporting_context
+    - path: docs/plans/chembl-baseline-refactor-plan-2026-06-01.md
+      lifecycle: supporting_context
 
 src_sidecars:
   path_prefix: src/

@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 from scripts.engineering.qa.extract_publication_nested_vocab import (
     extract_publication_nested_vocab,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_extract_publication_nested_vocab_collects_expected_edge_values() -> None:
     payload = extract_publication_nested_vocab(

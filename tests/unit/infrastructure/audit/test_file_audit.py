@@ -435,7 +435,7 @@ class TestFileAuditAdapter:
             await adapter.log_write(sample_entry)
 
     @pytest.mark.asyncio
-    async def test_aclose_is_idempotent(
+    async def test_file_audit_adapter__aclose_is_idempotent__cb75761c(
         self, tmp_path: Path, noop_logger: NoOpLogger
     ) -> None:
         """Test aclose can be called multiple times."""

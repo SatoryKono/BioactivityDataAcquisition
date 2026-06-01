@@ -3,6 +3,10 @@
 from __future__ import annotations
 
 
+import pytest
+
+pytestmark = pytest.mark.unit
+
 def test_storage_factory_reexports_storage_factory() -> None:
     """Canonical storage_factory path should expose the legacy storage factory symbols."""
     from bioetl.composition.factories.storage.factory import StorageFactory

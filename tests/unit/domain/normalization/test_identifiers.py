@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any, cast
 
+import pytest
 
 from bioetl.domain.normalization.identifiers import (
     normalize_doi,
@@ -13,13 +14,15 @@ from bioetl.domain.normalization.identifiers import (
     strip_doi_prefix,
 )
 
+pytestmark = pytest.mark.unit
+
 LEGACY_HTTP_DOI = "http" + "://doi.org/10.1234/test"
 
 
 class TestStripDOIPrefix:
     """Test DOI prefix stripping."""
 
-    def test_strip_doi_prefix(self) -> None:
+    def test_strip_d_o_i_prefix__strip_doi_prefix__c34a1031(self) -> None:
         """Test stripping various DOI prefixes."""
         assert strip_doi_prefix("https://doi.org/10.1234/test") == "10.1234/test"
         assert strip_doi_prefix(LEGACY_HTTP_DOI) == "10.1234/test"

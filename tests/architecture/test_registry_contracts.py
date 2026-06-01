@@ -21,6 +21,8 @@ from bioetl.composition.registry_api import (
 from bioetl.domain.ports import PipelineFactoryPort
 
 
+pytestmark = pytest.mark.architecture
+
 class TestRegistryProtocol:
     """All registries must implement BaseRegistry protocol."""
 

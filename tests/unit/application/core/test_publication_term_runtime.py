@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.application.core.publication_term_runtime import (
     create_term_record,
     extract_terms_from_publication,
@@ -10,6 +12,8 @@ from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_create_term_record_trims_source_term_before_profile_normalization() -> None:
     record = create_term_record(

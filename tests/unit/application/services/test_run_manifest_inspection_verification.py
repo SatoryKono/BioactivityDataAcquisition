@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from dataclasses import replace
 from pathlib import Path
 from uuid import uuid4
@@ -21,6 +23,8 @@ from tests.unit.application.services.run_manifest_test_support import (
     build_default_source_refs,
     make_run_manifest,
 )
+
+pytestmark = pytest.mark.unit
 
 TEST_ROOT = Path(__file__).resolve().parents[3] / "fixtures"
 BRONZE_BATCH_URI = (TEST_ROOT / "bronze" / "batch_1.jsonl.zst").as_uri()

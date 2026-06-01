@@ -21,6 +21,8 @@ from bioetl.interfaces.http.processed_records_table import (
 from tests.helpers.control_plane import InMemoryRunLedgerStore
 
 
+pytestmark = pytest.mark.unit
+
 class TestProcessedRecordsTable:
     """Tests for formatted Processed Records dashboard payloads."""
 

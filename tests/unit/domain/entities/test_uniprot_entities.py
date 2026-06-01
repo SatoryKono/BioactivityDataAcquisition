@@ -22,7 +22,7 @@ BASE_KWARGS = {
 class TestUniprotTarget:
     """Tests for UniprotTarget domain entity."""
 
-    def test_valid_creation_minimal(self) -> None:
+    def test_uniprot_target__creation_minimal__c8a05a27(self) -> None:
         t = UniprotTarget(
             **BASE_KWARGS,
             accession="P00742",
@@ -33,7 +33,7 @@ class TestUniprotTarget:
         assert t.reviewed is False
         assert t.gene_primary is None
 
-    def test_valid_creation_full(self) -> None:
+    def test_uniprot_target__valid_creation_full__7b598b81(self) -> None:
         t = UniprotTarget(
             **BASE_KWARGS,
             accession="P00742",
@@ -86,7 +86,7 @@ class TestUniprotTarget:
         )
         assert t.annotation_score == score
 
-    def test_immutable(self) -> None:
+    def test_uniprot_target__immutable__b63630bb(self) -> None:
         t = UniprotTarget(**BASE_KWARGS, accession="P00742", entry_name="FA10")
         with pytest.raises((AttributeError, TypeError)):
             t.accession = "other"  # type: ignore[misc]
@@ -118,7 +118,7 @@ class TestIDMappingResult:
         assert r.uniprot_accession == "P00742"
         assert r.mapping_status == "found"
 
-    def test_empty_target_id_raises(self) -> None:
+    def test_i_d_mapping_result__target_id_raises__d4b6f3fa(self) -> None:
         with pytest.raises(ValueError, match="target_id is required"):
             IDMappingResult(
                 **BASE_KWARGS,
@@ -144,7 +144,7 @@ class TestIDMappingResult:
                 uniprot_accession=None,
             )
 
-    def test_invalid_annotation_score_raises(self) -> None:
+    def test_i_d_mapping_result__score_raises__9ad01236(self) -> None:
         with pytest.raises(ValueError, match="annotation_score must be 1-5"):
             IDMappingResult(
                 **BASE_KWARGS,
@@ -153,7 +153,7 @@ class TestIDMappingResult:
                 annotation_score=0,
             )
 
-    def test_invalid_sequence_length_raises(self) -> None:
+    def test_i_d_mapping_result__length_raises__fec02bec(self) -> None:
         with pytest.raises(ValueError, match="sequence_length must be positive"):
             IDMappingResult(
                 **BASE_KWARGS,

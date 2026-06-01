@@ -337,7 +337,7 @@ class TestCheckpointServiceAclose:
     """Test CheckpointService.aclose method."""
 
     @pytest.mark.asyncio
-    async def test_aclose(self, checkpoint_service, mock_checkpoint_port):
+    async def test_service_aclose__aclose__8851e674(self, checkpoint_service, mock_checkpoint_port):
         """Test closing the service."""
         await checkpoint_service.aclose()
 

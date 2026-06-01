@@ -28,14 +28,14 @@ class TestTokenBucket:
         assert bucket.available_tokens() == 10
 
     @pytest.mark.unit
-    def test_try_acquire_success(self) -> None:
+    def test_limiter_token_bucket__try_acquire_success__61fae624(self) -> None:
         """try_acquire should succeed when tokens available."""
         bucket = TokenBucketRateLimiter(rate=5.0, capacity=10)
         assert bucket.try_acquire(5) is True
         assert bucket.available_tokens() == 5
 
     @pytest.mark.unit
-    def test_try_acquire_failure(self) -> None:
+    def test_limiter_token_bucket__try_acquire_failure__b0020c37(self) -> None:
         """try_acquire should fail when insufficient tokens."""
         bucket = TokenBucketRateLimiter(rate=5.0, capacity=5)
         assert bucket.try_acquire(10) is False

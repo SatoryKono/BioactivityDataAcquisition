@@ -19,6 +19,8 @@ from bioetl.domain.lineage import (
 from bioetl.domain.models.metadata import BronzeMetadata
 
 
+pytestmark = pytest.mark.unit
+
 def _make_bronze_metadata() -> BronzeMetadata:
     metadata = build_bronze_metadata()
     metadata.runtime.run_id = "run-1"

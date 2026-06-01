@@ -12,6 +12,8 @@ from typing import Any
 import pytest
 import yaml
 
+pytestmark = pytest.mark.architecture
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 PUBLICATION_CONFIGS = (

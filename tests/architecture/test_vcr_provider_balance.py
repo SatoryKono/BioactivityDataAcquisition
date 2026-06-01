@@ -6,6 +6,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.architecture
+
 MIN_PROVIDER_CASSETTES = 20
 TARGET_PROVIDERS = ("openalex", "pubmed", "semanticscholar", "crossref")
 

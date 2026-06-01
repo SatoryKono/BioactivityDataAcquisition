@@ -37,7 +37,7 @@ class TestCollectQuarterlyRegistryBudgets:
             "2025-Q2": {"reg_a": 8, "reg_b": 3},
         }
 
-    def test_missing_quarterly_targets(self) -> None:
+    def test_registry_budgets__quarterly_targets__3de7646a(self) -> None:
         """Should return empty dict when quarterly_targets is missing."""
         result = _collect_quarterly_registry_budgets({})
         assert result == {}
@@ -47,7 +47,7 @@ class TestCollectQuarterlyRegistryBudgets:
         result = _collect_quarterly_registry_budgets({"quarterly_targets": "invalid"})
         assert result == {}
 
-    def test_skips_non_dict_items(self) -> None:
+    def test_registry_budgets__skips_non_dict_items__87e2d515(self) -> None:
         """Should skip non-dict items in the list."""
         raw = {
             "quarterly_targets": [
@@ -195,7 +195,7 @@ class TestValidateTargetQuarter:
         assert result is None
         assert any("quarter" in e for e in errors)
 
-    def test_invalid_format(self) -> None:
+    def test_target_quarter__invalid_format__98583dac(self) -> None:
         """Invalid quarter format should add error and return None."""
         errors: list[str] = []
         result = _validate_target_quarter(
@@ -368,7 +368,7 @@ class TestValidateOwnerDecompositionTargetsSection:
         )
         assert errors == []
 
-    def test_non_dict_items_skipped(self) -> None:
+    def test_targets_section__dict_items_skipped__29213c85(self) -> None:
         """Non-dict items should add error and be skipped."""
         raw = {"owner_decomposition_targets": ["not_a_dict"]}
         errors: list[str] = []
@@ -385,7 +385,7 @@ class TestValidateOwnerDecompositionTargetsSection:
 class TestValidateExpiryTargetQuarter:
     """Tests for _validate_expiry_target_quarter."""
 
-    def test_valid_quarter(self) -> None:
+    def test_expiry_target_quarter__valid_quarter__265dac57(self) -> None:
         """Valid quarter should return parsed tuple."""
         errors: list[str] = []
         seen: set[str] = set()
@@ -411,7 +411,7 @@ class TestValidateExpiryTargetQuarter:
         assert result is None
         assert any("expected string" in e for e in errors)
 
-    def test_invalid_format(self) -> None:
+    def test_expiry_target_quarter__invalid_format__5f74ed87(self) -> None:
         """Invalid quarter format should add error and return None."""
         errors: list[str] = []
         result = _validate_expiry_target_quarter(
@@ -452,7 +452,7 @@ class TestValidateExpiryDecompositionTargetsSection:
         _validate_expiry_decomposition_targets_section(raw, errors)
         assert errors == []
 
-    def test_missing_targets(self) -> None:
+    def test_targets_section__missing_targets__f176b7b3(self) -> None:
         """Missing targets should add error."""
         errors: list[str] = []
         _validate_expiry_decomposition_targets_section({}, errors)
@@ -507,7 +507,7 @@ class TestValidateBurndownRegistries:
         assert result == ["reg_a", "reg_b"]
         assert errors == []
 
-    def test_not_a_list(self) -> None:
+    def test_burndown_registries__not_a_list__92d3a685(self) -> None:
         """Non-list registries should add error and return empty list."""
         errors: list[str] = []
         result = _validate_burndown_registries(
@@ -518,7 +518,7 @@ class TestValidateBurndownRegistries:
         assert result == []
         assert any("expected non-empty list" in e for e in errors)
 
-    def test_empty_list(self) -> None:
+    def test_burndown_registries__empty_list__5f8902bd(self) -> None:
         """Empty list should add error and return empty list."""
         errors: list[str] = []
         result = _validate_burndown_registries(
@@ -584,7 +584,7 @@ class TestValidatePriorityRegistryBurndown:
         )
         assert errors == []
 
-    def test_governance_not_dict(self) -> None:
+    def test_registry_burndown__governance_not_dict__c1b5a683(self) -> None:
         """Non-dict governance should return without error."""
         raw = {"governance": "invalid"}
         errors: list[str] = []
@@ -663,7 +663,7 @@ class TestValidateProgramDoneCriteriaSection:
         _validate_program_done_criteria_section({}, errors)
         assert any("program_done_criteria" in e for e in errors)
 
-    def test_not_dict(self) -> None:
+    def test_done_criteria_section__not_dict__410f143c(self) -> None:
         """Non-dict section should add error."""
         errors: list[str] = []
         _validate_program_done_criteria_section(

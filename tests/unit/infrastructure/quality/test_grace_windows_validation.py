@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from datetime import date
 
+import pytest
+
 from bioetl.infrastructure.quality._grace_windows_validation import (
     _validate_allowances,
     _validate_grace_window_dates,
@@ -11,6 +13,8 @@ from bioetl.infrastructure.quality._grace_windows_validation import (
     _validate_grace_window_metadata,
     _validate_grace_windows_section,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class TestValidateAllowances:
@@ -32,7 +36,7 @@ class TestValidateAllowances:
         )
         assert errors == []
 
-    def test_not_dict(self) -> None:
+    def test_validate_allowances__not_dict__8f8661e5(self) -> None:
         """Non-dict allowances should add error."""
         errors: list[str] = []
         _validate_allowances(

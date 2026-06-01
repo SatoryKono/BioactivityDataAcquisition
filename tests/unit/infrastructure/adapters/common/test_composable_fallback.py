@@ -20,6 +20,8 @@ from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
 from tests.helpers.async_iterables import async_iterable
 
 
+pytestmark = pytest.mark.unit
+
 def _normalize_default(value: str) -> str:
     return value.strip().lower()
 

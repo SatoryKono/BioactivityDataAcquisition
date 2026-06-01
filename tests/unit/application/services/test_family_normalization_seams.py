@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from bioetl.application.services.control_plane import (
     RunLedgerService as RunLedgerServicePackage,
 )
@@ -49,6 +51,8 @@ from bioetl.application.services.lineage.metadata_coordinator import (
     MetadataCoordinator,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_legacy_control_plane_facades_point_to_canonical_package() -> None:
     assert RunManifestServicePackage is RunManifestService

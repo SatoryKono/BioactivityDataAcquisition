@@ -8,7 +8,6 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.core.base_transformer import FilteredOutError
 from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
@@ -46,7 +45,7 @@ class TestPubChemCompoundTransformer:
         )
 
     @pytest.mark.asyncio
-    async def test_transform_valid_record(self, transformer, mock_context):
+    async def test_compound_transformer__valid_record__a1346563(self, transformer, mock_context):
         """Test transformation of valid compound record with all fields."""
         record = {
             "molecule_id": 2244,
@@ -198,7 +197,7 @@ class TestPubChemCompoundTransformer:
         assert isinstance(result["molecule_id"], str)
 
     @pytest.mark.asyncio
-    async def test_transform_entity_id_format(self, transformer, mock_context):
+    async def test_compound_transformer__entity_id_format__18df995f(self, transformer, mock_context):
         """Test that entity_id follows expected format."""
         record = {
             "molecule_id": 2244,
@@ -231,7 +230,7 @@ class TestPubChemCompoundTransformer:
         assert result1["content_hash"] == result2["content_hash"]
 
     @pytest.mark.asyncio
-    async def test_transform_pre_silver_returns_staged_payload(
+    async def test_compound_transformer__staged_payload__58cb8c60(
         self, transformer, mock_context
     ):
         """Test staged PubChem path returns business data before hash finalization."""
@@ -296,7 +295,7 @@ class TestPubChemCompoundTransformer:
         ]
 
     @pytest.mark.asyncio
-    async def test_transform_matches_staged_finalization(
+    async def test_compound_transformer__staged_finalization__555ae1dc(
         self, transformer, mock_context
     ):
         """Legacy PubChem transform should match staged finalization."""
@@ -325,7 +324,7 @@ class TestPubChemCompoundTransformer:
         assert legacy_result["content_hash"] == staged_result["content_hash"]
 
     @pytest.mark.asyncio
-    async def test_transform_custom_provider(self, mock_context):
+    async def test_compound_transformer__custom_provider__95eb10d6(self, mock_context):
         """Test transformation with custom provider."""
         transformer = instantiate_test_transformer(
             PubChemCompoundTransformer,
@@ -357,7 +356,7 @@ class TestPubChemCompoundTransformer:
         mock_context.logger.warning.assert_called()
 
     @pytest.mark.asyncio
-    async def test_transform_lineage_fields_present(self, transformer, mock_context):
+    async def test_compound_transformer__fields_present__8b840789(self, transformer, mock_context):
         """Test that lineage fields are properly added to the result."""
         record = {
             "molecule_id": 2244,

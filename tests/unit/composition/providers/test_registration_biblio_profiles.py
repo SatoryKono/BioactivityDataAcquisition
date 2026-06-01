@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
@@ -12,6 +14,8 @@ from bioetl.composition.providers._registration_biblio_profiles import (
     _resolve_semanticscholar_request_profile,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def _pipeline_config(*, email: str = "", api_key: str = "") -> SimpleNamespace:
     return SimpleNamespace(source=SimpleNamespace(email=email, api_key=api_key))

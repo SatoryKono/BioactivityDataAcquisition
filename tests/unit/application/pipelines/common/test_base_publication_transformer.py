@@ -30,6 +30,8 @@ from bioetl.domain.entities.base import BaseEntity
 from bioetl.domain.types import RunID, RunType
 from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
+pytestmark = pytest.mark.unit
+
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
 
@@ -225,7 +227,7 @@ class TestBasePublicationTransformerBasics:
         assert "test-12345" in result["entity_id"]
 
     @pytest.mark.asyncio
-    async def test_transform_generates_content_hash(
+    async def test_transformer_basics__content_hash__c14317d2(
         self,
         transformer: StubPublicationTransformer,
         mock_context: PipelineContext,
@@ -239,7 +241,7 @@ class TestBasePublicationTransformerBasics:
         assert len(result["content_hash"]) == 64  # SHA256 hex
 
     @pytest.mark.asyncio
-    async def test_transform_pre_silver_returns_staged_payload(
+    async def test_transformer_basics__staged_payload__109d0b8b(
         self,
         transformer: StubPublicationTransformer,
         mock_context: PipelineContext,

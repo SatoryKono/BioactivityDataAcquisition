@@ -27,6 +27,8 @@ from typing import NamedTuple
 
 import pytest
 
+pytestmark = pytest.mark.architecture
+
 ADAPTERS_DIR = Path("src/bioetl/infrastructure/adapters")
 
 # Cross-cutting services that MUST use conditional instantiation in adapters.

@@ -33,7 +33,7 @@ def _make_valid_result(**overrides) -> BronzeWriteResult:
 class TestBronzeWriteResultCreation:
     """Tests for BronzeWriteResult construction."""
 
-    def test_valid_creation(self) -> None:
+    def test_write_result_creation__valid_creation__af018ff1(self) -> None:
         """Test creating a valid BronzeWriteResult."""
         result = _make_valid_result()
         assert result.record_count == 1000
@@ -51,7 +51,7 @@ class TestBronzeWriteResultCreation:
         result = _make_valid_result(compressed_size=0, uncompressed_size=0)
         assert result.compressed_size == 0
 
-    def test_is_frozen(self) -> None:
+    def test_write_result_creation__is_frozen__d211bd45(self) -> None:
         """Test that BronzeWriteResult is immutable."""
         result = _make_valid_result()
         with pytest.raises((AttributeError, TypeError)):

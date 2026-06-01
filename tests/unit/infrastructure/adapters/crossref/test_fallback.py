@@ -20,6 +20,8 @@ from bioetl.infrastructure.adapters.crossref.fallback import (
 )
 from tests.helpers.async_iterables import async_iterable, failing_async_iterable
 
+pytestmark = pytest.mark.unit
+
 # =============================================================================
 # titles_match Tests
 # =============================================================================
@@ -28,7 +30,7 @@ from tests.helpers.async_iterables import async_iterable, failing_async_iterable
 class TestTitlesMatch:
     """Tests for the titles_match function."""
 
-    def test_exact_match(self):
+    def test_fallback_titles_match__exact_match__74cc140c(self):
         """Test exact title match."""
         assert titles_match(
             "Crystal structure of rhodopsin",
@@ -42,7 +44,7 @@ class TestTitlesMatch:
             "crystal structure of rhodopsin",
         )
 
-    def test_whitespace_handling(self):
+    def test_fallback_titles_match__whitespace_handling__1f564cf5(self):
         """Test whitespace is stripped."""
         assert titles_match("  Crystal structure  ", "Crystal structure")
 

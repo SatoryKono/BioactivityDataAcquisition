@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 INTERNAL_DOCS_MODULES = (
     "scripts/docs/checks/check_docstrings.py",

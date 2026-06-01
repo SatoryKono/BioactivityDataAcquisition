@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from dataclasses import replace
 from datetime import UTC, datetime
 
@@ -25,6 +27,8 @@ from tests.unit.application.services.run_manifest_test_support import (
     make_run_manifest as _build_manifest,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def _make_source_manifest() -> RunManifest:
     return _build_manifest(

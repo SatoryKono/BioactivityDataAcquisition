@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from unittest.mock import MagicMock
 
 from bioetl.application.composite.dependency_progress_tracker import (
@@ -10,6 +12,8 @@ from bioetl.application.composite.dependency_progress_tracker import (
 from bioetl.domain.composite.config import DependencyConfig
 from bioetl.domain.composite.result import DependencyResult, DependencyStatus
 
+
+pytestmark = pytest.mark.unit
 
 def _make_logger() -> MagicMock:
     logger = MagicMock()

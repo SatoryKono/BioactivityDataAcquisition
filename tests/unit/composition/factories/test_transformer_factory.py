@@ -22,6 +22,8 @@ from bioetl.composition.factories.transformer_factory import (
     register_transformer_spec,
 )
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture(autouse=True)
 def clean_registry() -> Generator[None, None, None]:

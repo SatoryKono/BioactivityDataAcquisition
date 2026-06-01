@@ -13,6 +13,8 @@ import yaml
 
 from bioetl.domain.transformations import generate_content_hash
 
+pytestmark = pytest.mark.unit
+
 UPDATE_SNAPSHOTS = os.environ.get("UPDATE_SNAPSHOTS", "0") == "1"
 ROOT = Path(__file__).resolve().parents[4]
 FIXTURES_DIR = ROOT / "tests/fixtures/hash_policy"

@@ -16,6 +16,8 @@ from bioetl.application.composite.join_planner_helpers import parse_pipeline_nam
 from bioetl.domain.composite.config import EnricherConfig
 
 
+pytestmark = pytest.mark.unit
+
 @pytest.fixture
 def mock_logger() -> MagicMock:
     """Create a mock logger."""

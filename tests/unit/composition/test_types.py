@@ -7,6 +7,10 @@ all required composition layer types.
 from __future__ import annotations
 
 
+import pytest
+
+pytestmark = pytest.mark.unit
+
 class TestTypesModuleExports:
     """Tests for composition/types.py exports."""
 
@@ -22,7 +26,7 @@ class TestTypesModuleExports:
 
         assert PipelineDefinition is not None
 
-    def test_pipeline_registry_importable(self) -> None:
+    def test_types_module_exports__registry_importable__36385d83(self) -> None:
         """PipelineRegistry is importable from types."""
         from bioetl.composition.types import PipelineRegistry
 

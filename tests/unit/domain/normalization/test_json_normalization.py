@@ -15,6 +15,8 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 class TestCanonicalJsonSerializer:
     """Test canonical JSON serialization functions."""
 
@@ -63,19 +65,19 @@ class TestCanonicalizeJsonString:
         expected = '{"authors":["Bob","Alice"],"year":2023}'
         assert result == expected
 
-    def test_whitespace_handling(self) -> None:
+    def test_json_string__whitespace_handling__eea8db3c(self) -> None:
         """Test whitespace stripping."""
         input_json = '  {"data":["test"]}  '
         result = canonicalize_json_string(input_json)
         expected = '{"data":["test"]}'
         assert result == expected
 
-    def test_none_input(self) -> None:
+    def test_json_string__none_input__732a0fa4(self) -> None:
         """Test None input handling."""
         result = canonicalize_json_string(None)
         assert result is None
 
-    def test_empty_string(self) -> None:
+    def test_json_string__empty_string__d2e3bb08(self) -> None:
         """Test empty string handling."""
         result = canonicalize_json_string("   ")
         assert result is None

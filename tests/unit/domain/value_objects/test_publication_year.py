@@ -11,11 +11,11 @@ from bioetl.domain.value_objects import PublicationYear
 class TestPublicationYearValidation:
     """Tests for PublicationYear creation and validation."""
 
-    def test_valid_int_creation(self) -> None:
+    def test_year_validation__valid_int_creation__3c5ad67f(self) -> None:
         year = PublicationYear(2020)
         assert year.value == 2020
 
-    def test_valid_string_creation(self) -> None:
+    def test_year_validation__string_creation__480339cb(self) -> None:
         year = PublicationYear("2020")
         assert year.value == 2020
 
@@ -33,7 +33,7 @@ class TestPublicationYearValidation:
         year = PublicationYear("  2020  ")
         assert year.value == 2020
 
-    def test_bool_raises(self) -> None:
+    def test_year_validation__bool_raises__37ddc526(self) -> None:
         with pytest.raises(ValueError, match="must be int"):
             PublicationYear(True)  # type: ignore[arg-type]
 
@@ -45,7 +45,7 @@ class TestPublicationYearValidation:
         with pytest.raises(ValueError, match="outside valid range"):
             PublicationYear(2200)
 
-    def test_invalid_string_raises(self) -> None:
+    def test_year_validation__string_raises__740019a2(self) -> None:
         with pytest.raises(ValueError, match="Invalid publication year"):
             PublicationYear("not-a-year")
 
@@ -92,39 +92,39 @@ class TestPublicationYearFactoryAndEquality:
         assert result is not None
         assert result.value == 2020
 
-    def test_from_raw_string(self) -> None:
+    def test_factory_and_equality__from_raw_string__01694e12(self) -> None:
         result = PublicationYear.from_raw("2020")
         assert result is not None
         assert result.value == 2020
 
-    def test_from_raw_date_string(self) -> None:
+    def test_factory_and_equality__from_raw_date_string__205f7c03(self) -> None:
         result = PublicationYear.from_raw("2024-01-15")
         assert result is not None
         assert result.value == 2024
 
-    def test_from_raw_none(self) -> None:
+    def test_factory_and_equality__from_raw_none__d59a035e(self) -> None:
         assert PublicationYear.from_raw(None) is None
 
-    def test_from_raw_empty(self) -> None:
+    def test_factory_and_equality__from_raw_empty__3d3938ef(self) -> None:
         assert PublicationYear.from_raw("") is None
 
-    def test_from_raw_invalid(self) -> None:
+    def test_factory_and_equality__from_raw_invalid__1447028a(self) -> None:
         assert PublicationYear.from_raw("abc") is None
 
-    def test_from_raw_out_of_range(self) -> None:
+    def test_factory_and_equality__raw_out_of_range__8830ba16(self) -> None:
         assert PublicationYear.from_raw(1200) is None
 
-    def test_equality(self) -> None:
+    def test_factory_and_equality__equality__c1435a4d(self) -> None:
         y1 = PublicationYear(2020)
         y2 = PublicationYear(2020)
         assert y1 == y2
 
-    def test_inequality(self) -> None:
+    def test_factory_and_equality__inequality__6315694c(self) -> None:
         y1 = PublicationYear(2020)
         y2 = PublicationYear(2021)
         assert y1 != y2
 
-    def test_hash_equal(self) -> None:
+    def test_factory_and_equality__hash_equal__30591669(self) -> None:
         y1 = PublicationYear(2020)
         y2 = PublicationYear(2020)
         assert hash(y1) == hash(y2)

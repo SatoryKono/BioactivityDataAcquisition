@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 import yaml
 
+
+pytestmark = pytest.mark.architecture
 
 _CATALOG = Path("scripts/engineering/repo/catalog.yaml")
 _REQUIRED_TOP_LEVEL_DIRS = (

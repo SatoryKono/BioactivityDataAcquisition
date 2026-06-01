@@ -23,6 +23,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.architecture
+
 # Infrastructure/I/O libraries that should NOT be in the domain layer
 INFRASTRUCTURE_IMPORTS = {
     "httpx",

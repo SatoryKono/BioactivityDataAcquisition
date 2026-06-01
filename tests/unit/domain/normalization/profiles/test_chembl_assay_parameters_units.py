@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.domain.normalization.profiles import CHEMBL_ASSAY_PARAMETERS_PROFILE
 
+
+pytestmark = pytest.mark.unit
 
 def test_assay_parameters_unit_companion_policy_is_explicit_and_optional_bundle() -> (
     None

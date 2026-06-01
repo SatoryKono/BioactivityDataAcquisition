@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 from typing import Any
 
@@ -9,6 +11,8 @@ import yaml
 
 from bioetl.domain.normalization.chembl import normalize_standard_unit
 from bioetl.domain.normalization.rules import UNIT_MAPPING, normalize_unit
+
+pytestmark = pytest.mark.unit
 
 ACTIVITY_CONFIG_PATH = Path("configs/entities/chembl/activity.yaml")
 CHEMBL_STANDARD_UNIT_ALIAS_CASES = (

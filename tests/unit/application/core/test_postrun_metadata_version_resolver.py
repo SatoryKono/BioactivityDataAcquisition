@@ -138,7 +138,7 @@ class TestPostrunMetadataVersionResolverSuccess:
 class TestPostrunMetadataVersionResolverAllowlistedErrors:
     """Tests for warning_allowlist-based error handling."""
 
-    def test_allowlisted_error_returns_none_in_warning_mode__test_postrun_metadata_version_resolver_allowlisted_errors_application_core_test_postrun_metadata_version_resolver_141(
+    def test_core_postrun_metadata_version_resolver_141__a3cb225a(
         self,
         mock_logger: MagicMock,
         mock_runtime: MagicMock,
@@ -205,7 +205,7 @@ class TestPostrunMetadataVersionResolverAllowlistedErrors:
         assert call_kwargs.get("layer") == "silver"
         assert call_kwargs.get("table_path") == "/silver/path"
 
-    def test_allowlisted_error_raises_in_strict_mode__test_postrun_metadata_version_resolver_allowlisted_errors_application_core_test_postrun_metadata_version_resolver_208(
+    def test_core_postrun_metadata_version_resolver_208__5f1f6127(
         self,
         strict_resolver: PostrunMetadataVersionResolver,
         mock_storage: MagicMock,
@@ -285,7 +285,7 @@ class TestIsStrictValidationEnabled:
         )
         assert resolver._is_strict_validation_enabled() is True
 
-    def test_returns_false_when_attribute_missing(
+    def test_validation_enabled__attribute_missing__12bed4a9(
         self, mock_logger: MagicMock, mock_storage: MagicMock
     ) -> None:
         """Test returns False when runtime lacks strict_validation attr."""

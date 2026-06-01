@@ -1,5 +1,7 @@
 """Unit tests for preflight governance service."""
 
+import pytest
+
 from bioetl.domain.behavior.aggregation_validator import AggregationValidator
 from bioetl.domain.behavior.composite_validation_layer import (
     CompositeValidationConfig,
@@ -13,6 +15,8 @@ from bioetl.domain.behavior.preflight_governance import (
 )
 from bioetl.domain.types.validation_severity import ValidationSeverity
 
+
+pytestmark = pytest.mark.unit
 
 def _create_validation_service() -> CompositeValidator:
     return CompositeValidator(
@@ -28,7 +32,7 @@ def test_preflight_governance_service_creation():
     assert service.config.policy == GovernancePolicy.BLOCK_ON_BLOCKERS_ONLY
 
 
-def test_custom_config():
+def test_preflight_governance__custom_config__9377703c():
     """Test service with custom configuration."""
     config = PreflightGovernanceConfig(
         policy=GovernancePolicy.CI_STRICT,

@@ -20,6 +20,8 @@ from tests.helpers.clock import FixedClock
 from tests.helpers.deterministic_ids import deterministic_uuid
 from tests.helpers.synthetic_paths import synthetic_test_root
 
+pytestmark = pytest.mark.unit
+
 TEST_ROOT = synthetic_test_root("run-ledger-service")
 SILVER_ARTIFACT_PATH = str(TEST_ROOT / "output" / "silver" / "chembl" / "activity")
 SILVER_METADATA_PATH = str(Path(SILVER_ARTIFACT_PATH) / "_metadata.yaml")

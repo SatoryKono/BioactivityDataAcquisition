@@ -32,6 +32,8 @@ from bioetl.domain.composite.config import DependencyConfig
 from bioetl.domain.composite.result import DependencyResult, DependencyStatus
 from tests.helpers.clock import FixedClock
 
+pytestmark = pytest.mark.unit
+
 if TYPE_CHECKING:
     from bioetl.domain.ports import DeltaReaderPort, LoggerPort
 

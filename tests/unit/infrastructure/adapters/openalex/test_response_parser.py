@@ -3,11 +3,15 @@
 from __future__ import annotations
 
 
+import pytest
+
 from bioetl.infrastructure.adapters.openalex.response_parser import (
     parse_openalex_next_cursor,
     parse_openalex_results,
 )
 
+
+pytestmark = pytest.mark.unit
 
 class TestParseOpenAlexResults:
     """Tests for parse_openalex_results."""

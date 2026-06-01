@@ -47,7 +47,7 @@ class TestPubchemMolecule:
         )
         assert m.isomeric_smiles is not None
 
-    def test_empty_molecule_id_raises(self) -> None:
+    def test_pubchem_molecule__molecule_id_raises__fc40f478(self) -> None:
         with pytest.raises(ValueError, match="molecule_id is required"):
             PubchemMolecule(
                 **BASE_KWARGS,
@@ -70,7 +70,7 @@ class TestPubchemMolecule:
                 inchi_key="BSYNRYMUTXBXSQ-UHFFFAOYSA-N",
             )
 
-    def test_valid_creation_with_properties(self) -> None:
+    def test_pubchem_molecule__with_properties__39fdf423(self) -> None:
         m = PubchemMolecule(
             **BASE_KWARGS,
             molecule_id="2244",
@@ -98,7 +98,7 @@ class TestPubchemMolecule:
         )
         assert m.volume_3d == pytest.approx(150.5)
 
-    def test_immutable(self) -> None:
+    def test_pubchem_molecule__immutable__9c58717b(self) -> None:
         m = PubchemMolecule(
             **BASE_KWARGS,
             molecule_id="2244",

@@ -13,6 +13,8 @@ from bioetl.domain.types.execution_phase import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 def test_fsm_creation():
     """Test that FSM can be created."""
     fsm = CompositeFSM()
@@ -20,13 +22,13 @@ def test_fsm_creation():
     assert len(fsm.get_transition_history()) == 0
 
 
-def test_factory_function():
+def test_types_execution_phase__factory_function__e11e895c():
     """Test factory function."""
     fsm = create_composite_fsm()
     assert isinstance(fsm, CompositeFSM)
 
 
-def test_custom_config():
+def test_types_execution_phase__custom_config__97623568():
     """Test FSM with custom configuration."""
     config = ExecutionFSMConfig(
         strict_validation=False,
@@ -41,7 +43,7 @@ def test_custom_config():
     assert fsm.config.timeout_seconds == 300
 
 
-def test_initial_state():
+def test_types_execution_phase__initial_state__331e5a1c():
     """Test initial FSM state."""
     fsm = CompositeFSM()
     assert fsm.get_current_phase() == ExecutionPhase.NOT_STARTED

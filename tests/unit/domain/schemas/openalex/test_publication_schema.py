@@ -194,7 +194,7 @@ class TestOpenAlexPublicationSchema:
         validated = OpenAlexPublicationSchema.validate(df)
         assert pd.isna(validated["publication_year"].iloc[0])
 
-    def test_publication_date_format(self, valid_record: dict) -> None:
+    def test_publication_schema__date_format__a42f75ff(self, valid_record: dict) -> None:
         """Should validate publication_date format (YYYY-MM-DD)."""
         # Valid date
         valid_record["publication_date"] = "2024-05-15"

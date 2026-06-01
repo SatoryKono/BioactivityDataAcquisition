@@ -18,12 +18,12 @@ from bioetl.domain.config.base_provider import (
 class TestRateLimitConfig:
     """Tests for RateLimitConfig frozen dataclass."""
 
-    def test_default_values(self) -> None:
+    def test_rate_limit_config__default_values__b2d56f8c(self) -> None:
         config = RateLimitConfig()
         assert config.requests_per_second == pytest.approx(5.0)
         assert config.burst == 10
 
-    def test_custom_values(self) -> None:
+    def test_rate_limit_config__custom_values__9b863140(self) -> None:
         config = RateLimitConfig(requests_per_second=10.0, burst=20)
         assert config.requests_per_second == pytest.approx(10.0)
         assert config.burst == 20
@@ -40,7 +40,7 @@ class TestRateLimitConfig:
         with pytest.raises(ValueError, match="burst must be at least 1"):
             RateLimitConfig(burst=0)
 
-    def test_frozen(self) -> None:
+    def test_rate_limit_config__frozen__7bfda4eb(self) -> None:
         config = RateLimitConfig()
         with pytest.raises(AttributeError):
             config.burst = 20  # type: ignore[misc]
@@ -50,7 +50,7 @@ class TestRateLimitConfig:
 class TestBaseClientConfig:
     """Tests for BaseClientConfig frozen dataclass."""
 
-    def test_default_values(self) -> None:
+    def test_base_client_config__default_values__23e8f651(self) -> None:
         config = BaseClientConfig()
         assert config.base_url is None
         assert config.timeout == 30
@@ -78,13 +78,13 @@ class TestBaseClientConfig:
 class TestBaseProviderConfig:
     """Tests for BaseProviderConfig frozen dataclass."""
 
-    def test_default_values(self) -> None:
+    def test_base_provider_config__default_values__ab5c980e(self) -> None:
         config = BaseProviderConfig()
         assert config.batch_size == 100
         assert config.api_key is None
         assert config.timeout == 30  # inherited
 
-    def test_custom_values(self) -> None:
+    def test_base_provider_config__custom_values__68b20f45(self) -> None:
         config = BaseProviderConfig(
             base_url="https://www.ebi.ac.uk/chembl/api/data",
             batch_size=1000,
@@ -93,11 +93,11 @@ class TestBaseProviderConfig:
         assert config.batch_size == 1000
         assert config.api_key == "test-key"
 
-    def test_zero_batch_size_raises(self) -> None:
+    def test_base_provider_config__batch_size_raises__f7afa364(self) -> None:
         with pytest.raises(ValueError, match="batch_size must be positive"):
             BaseProviderConfig(batch_size=0)
 
-    def test_negative_batch_size_raises(self) -> None:
+    def test_base_provider_config__batch_size_raises__709900aa(self) -> None:
         with pytest.raises(ValueError, match="batch_size must be positive"):
             BaseProviderConfig(batch_size=-1)
 

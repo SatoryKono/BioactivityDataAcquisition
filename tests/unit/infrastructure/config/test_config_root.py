@@ -15,6 +15,8 @@ from bioetl.infrastructure.config.config_root import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 def test_resolve_configs_root_defaults_to_repo_configs_directory() -> None:
     repo_root = get_default_repo_root()
 

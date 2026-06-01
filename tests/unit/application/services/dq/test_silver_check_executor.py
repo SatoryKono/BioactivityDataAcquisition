@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from unittest.mock import MagicMock
 
 import polars as pl
@@ -20,6 +22,8 @@ from bioetl.domain.value_objects.dq_report import (
     UniquenessResult,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def _build_executor() -> tuple[SilverCheckExecutor, MagicMock, MagicMock]:
     statistics = MagicMock()

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
@@ -9,6 +11,8 @@ from bioetl.composition.bootstrap.composite_infrastructure_context import (
     CompositeInfrastructureContext,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_composite_infrastructure_context_exposes_bootstrap_primitives() -> None:
     settings = SimpleNamespace(data_dir="data")

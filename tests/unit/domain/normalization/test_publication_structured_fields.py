@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.domain.normalization.publication_structured_fields import (
     CollectionSemantics,
     FieldRepresentation,
@@ -15,6 +17,8 @@ from bioetl.domain.normalization.profiles import (
     PUBMED_PUBLICATION_PROFILE,
     SEMANTICSCHOLAR_PUBLICATION_PROFILE,
 )
+
+pytestmark = pytest.mark.unit
 
 _PUBLICATION_PROFILES = (
     CROSSREF_PUBLICATION_PROFILE,

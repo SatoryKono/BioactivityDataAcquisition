@@ -67,15 +67,6 @@ entries:
     rationale: Composite assay Gold publishes source-specific assay description and score without promoting generic names to global aliases.
 
   - surface: gold_json_property
-    path: docs/04-reference/contracts/gold/chembl_target_v1.0.json
-    context: properties
-    fields:
-      - description
-    owner: BioETL Team
-    semantic_role: chembl_target_descriptive_metadata
-    rationale: Historical ChEMBL target Gold v1 contract retains source-specific target description text and must not be treated as a generic cross-entity description alias.
-
-  - surface: gold_json_property
     path: docs/04-reference/contracts/gold/chembl_target_v2.0.json
     context: properties
     fields:

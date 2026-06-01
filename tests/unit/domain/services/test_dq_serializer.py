@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import pytest
+
 from dataclasses import dataclass
 from datetime import datetime, UTC
 from enum import Enum
 
 from bioetl.domain.behavior.dq_serializer import to_dict
 
+
+pytestmark = pytest.mark.unit
 
 class SampleStatus(Enum):
     """Тестовое перечисление для проверки Enum."""

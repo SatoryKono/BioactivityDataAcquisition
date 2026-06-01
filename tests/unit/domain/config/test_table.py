@@ -15,7 +15,7 @@ from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 class TestTableConfig:
     """Tests for TableConfig frozen dataclass."""
 
-    def test_table_config_default_values(self) -> None:
+    def test_table_table_config__default_values__0f8b8c87(self) -> None:
         config = TableConfig()
         assert config.primary_keys == ("entity_id",)
         assert config.silver_table is None
@@ -31,7 +31,7 @@ class TestTableConfig:
         config = TableConfig(primary_keys=("id", "version"))
         assert config.primary_keys == ("id", "version")
 
-    def test_list_to_tuple_conversion(self) -> None:
+    def test_table_table_config__to_tuple_conversion__160b1df7(self) -> None:
         config = TableConfig(primary_keys=["entity_id"])  # type: ignore[arg-type]
         assert isinstance(config.primary_keys, tuple)
 

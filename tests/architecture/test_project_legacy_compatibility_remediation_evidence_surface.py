@@ -10,6 +10,8 @@ import pytest
 import yaml
 
 
+pytestmark = pytest.mark.architecture
+
 ROOT = Path(__file__).resolve().parents[2]
 PACK_ROOT = (
     ROOT / "docs" / "reports" / "evidence" / "project-legacy-compatibility-remediation"

@@ -42,6 +42,8 @@ from tests.unit.application.services.run_manifest_test_support import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 _InMemoryRunLedgerStore = InMemoryRunLedgerStore
 ROOT = Path(__file__).resolve().parents[4]
 POLICY_PATH = ROOT / "configs" / "quality" / "determinism_identity_policy.yaml"

@@ -10,6 +10,8 @@ from bioetl.domain.behavior.activity_aggregator import (
 )
 from bioetl.domain.value_objects import Concentration, ConcentrationUnit
 
+pytestmark = pytest.mark.unit
+
 
 class TestActivityAggregatorBasic:
     """Basic tests for ActivityAggregator."""
@@ -275,7 +277,7 @@ class TestActivityAggregatorFilterAndAggregate:
 class TestAggregationMethodEnum:
     """Tests for AggregationMethod enum."""
 
-    def test_enum_values(self) -> None:
+    def test_method_enum__enum_values__75b309d5(self) -> None:
         """Test that enum has expected values."""
         assert AggregationMethod.MEAN.value == "mean"
         assert AggregationMethod.MEDIAN.value == "median"

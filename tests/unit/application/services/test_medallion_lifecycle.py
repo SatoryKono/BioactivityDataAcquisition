@@ -47,19 +47,19 @@ def lifecycle_service(mock_storage, mock_logger):
 class TestClearResult:
     """Test ClearResult dataclass."""
 
-    def test_total_cleared(self):
+    def test_lifecycle_clear_result__total_cleared__2ba9f9d9(self):
         """Test total_cleared property."""
         result = ClearResult(silver_cleared=5, gold_cleared=3, dry_run=False)
 
         assert result.total_cleared == 8
 
-    def test_total_cleared_with_zeros(self):
+    def test_lifecycle_clear_result__cleared_with_zeros__855be5e8(self):
         """Test total_cleared with zero values."""
         result = ClearResult(silver_cleared=0, gold_cleared=0, dry_run=False)
 
         assert result.total_cleared == 0
 
-    def test_dry_run_flag(self):
+    def test_lifecycle_clear_result__dry_run_flag__7f95a0b0(self):
         """Test dry_run flag is preserved."""
         result = ClearResult(silver_cleared=10, gold_cleared=5, dry_run=True)
 
@@ -344,7 +344,7 @@ class TestMedallionLifecycleServiceArchive:
         )
 
     @pytest.mark.asyncio
-    async def test_archive_with_remove_source(
+    async def test_service_archive__with_remove_source__4c00ef7d(
         self, lifecycle_service_with_archive, mock_storage_with_archive
     ):
         """archive() should pass remove_source flag."""

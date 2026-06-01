@@ -85,7 +85,7 @@ class TestOpenAlexPublicationTransformer:
     """Tests for OpenAlexPublicationTransformer."""
 
     @pytest.mark.asyncio
-    async def test_transform_basic_record(
+    async def test_transformer__basic_record__c27c8b6d(
         self,
         transformer: OpenAlexPublicationTransformer,
         pipeline_context: PipelineContext,
@@ -269,7 +269,7 @@ class TestOpenAlexPublicationTransformer:
         assert result["abstract"] is None
 
     @pytest.mark.asyncio
-    async def test_transform_generates_content_hash(
+    async def test_transformer__content_hash__4847b1a3(
         self,
         transformer: OpenAlexPublicationTransformer,
         pipeline_context: PipelineContext,
@@ -285,7 +285,7 @@ class TestOpenAlexPublicationTransformer:
         assert len(result["content_hash"]) == 64  # SHA256 hex
 
     @pytest.mark.asyncio
-    async def test_transform_generates_entity_id(
+    async def test_transformer__generates_entity_id__4cb30425(
         self,
         transformer: OpenAlexPublicationTransformer,
         pipeline_context: PipelineContext,
@@ -301,7 +301,7 @@ class TestOpenAlexPublicationTransformer:
         assert "openalex" in result["entity_id"]
 
     @pytest.mark.asyncio
-    async def test_transform_adds_lineage_fields(
+    async def test_transformer__adds_lineage_fields__9f092bf4(
         self,
         transformer: OpenAlexPublicationTransformer,
         pipeline_context: PipelineContext,

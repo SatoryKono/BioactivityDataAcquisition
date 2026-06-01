@@ -16,6 +16,8 @@ from bioetl.infrastructure.adapters.pubmed import PubMedAdapter
 from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 
 
+pytestmark = pytest.mark.unit
+
 @pytest.fixture
 def mock_http_client() -> AsyncMock:
     """Create mock HTTP client."""

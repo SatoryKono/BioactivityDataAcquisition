@@ -13,7 +13,7 @@ from bioetl.domain.resilience import RetryConfig
 class TestRetryConfig:
     """Tests for RetryConfig."""
 
-    def test_default_values(self) -> None:
+    def test_config_retry_config__default_values__0e25d664(self) -> None:
         """Test default configuration values."""
         config = RetryConfig()
         assert config.max_attempts == 3

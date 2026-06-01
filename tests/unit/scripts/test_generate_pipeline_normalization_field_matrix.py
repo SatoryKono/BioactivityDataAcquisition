@@ -1186,7 +1186,7 @@ def test_render_markdown_mentions_surface_scoped_coverage_kpis() -> None:
     assert "profile_semantics / shipped_profile_meta_passthrough_pct" in markdown
 
 
-def test_write_artifacts_is_deterministic(tmp_path: Path) -> None:
+def test_field_matrix__is_deterministic__61401586(tmp_path: Path) -> None:
     def _assert_semantic_payload(first_payload: object, second_payload: object) -> None:
         assert isinstance(first_payload, dict)
         assert isinstance(second_payload, dict)
@@ -1222,7 +1222,7 @@ def test_check_artifacts_detects_drift__unit_scripts_test_generate_pipeline_norm
     )
 
 
-def test_check_artifacts_returns_zero_for_fresh_outputs__unit_scripts_test_generate_pipeline_normalization_field_matrix_1223(
+def test_pipeline_normalization_field_matrix_1223__c8b0b2c2(
     tmp_path: Path,
 ) -> None:
     assert_check_artifacts_passes_for_fresh_outputs(
@@ -1289,7 +1289,7 @@ def test_csv_columns_include_non_chembl_inventory_evidence_fields() -> None:
     assert "observed_source" in CSV_COLUMNS
 
 
-def test_committed_artifacts_match_generator_output__unit_scripts_test_generate_pipeline_normalization_field_matrix_1288() -> (
+def test_pipeline_normalization_field_matrix_1288__e14ed559() -> (
     None
 ):
     assert check_artifacts(DEFAULT_OUT_DIR.resolve()) == 0

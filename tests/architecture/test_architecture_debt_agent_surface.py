@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
 CODEX_SKILL = ROOT / ".codex" / "skills" / "py-architecture-debt-bot" / "SKILL.md"

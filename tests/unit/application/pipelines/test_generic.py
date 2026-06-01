@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.pipelines.generic import GenericPipeline, __all__
 
+
+pytestmark = pytest.mark.unit
 
 def test_generic_pipeline_is_public_subclass_of_base_pipeline() -> None:
     assert issubclass(GenericPipeline, BasePipeline)

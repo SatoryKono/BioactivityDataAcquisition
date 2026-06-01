@@ -11,6 +11,8 @@ from pathlib import Path
 import pytest
 
 
+pytestmark = pytest.mark.architecture
+
 class TestFactoryValidatorEnforcement:
     """Validate composition factories don't reference NoOp validators."""
 

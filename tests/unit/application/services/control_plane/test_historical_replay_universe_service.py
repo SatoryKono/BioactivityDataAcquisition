@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from datetime import UTC, datetime
 
 from bioetl.application.services.control_plane.replay.historical_corpus_service import (
@@ -22,6 +24,8 @@ from tests.unit.application.services.run_manifest_test_support import (
     make_run_manifest as _build_manifest,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def _make_manifest() -> RunManifest:
     return _build_manifest(

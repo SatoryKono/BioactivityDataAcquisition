@@ -41,7 +41,7 @@ class TestInputFilterConfigCreation:
         assert config.filter_field == "molecule_id"
         assert config.batch_size == 50
 
-    def test_config_is_frozen(self):
+    def test_filter_config_creation__config_is_frozen__7b4fe037(self):
         """Test that config is immutable."""
         config = InputFilterConfig(enabled=False)
 

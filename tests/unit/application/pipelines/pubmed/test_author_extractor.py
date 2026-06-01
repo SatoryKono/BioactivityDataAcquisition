@@ -267,7 +267,7 @@ class TestExtractStructuredAffiliation:
         extractor = AuthorExtractor()
         assert extractor._extract_structured_affiliation(aff_info) is None
 
-    def test_extracts_email_from_affiliation_text(self) -> None:
+    def test_structured_affiliation__affiliation_text__284c653d(self) -> None:
         xml_str = (
             "<AffiliationInfo>"
             "<Affiliation>Some University. Electronic address: author@university.edu</Affiliation>"

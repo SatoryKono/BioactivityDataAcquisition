@@ -14,15 +14,17 @@ from bioetl.domain.config import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 class TestRateLimitConfig:
     """Tests for RateLimitConfig."""
 
-    def test_default_values(self) -> None:
+    def test_rate_limit_config__default_values__d2343cf4(self) -> None:
         config = RateLimitConfig()
         assert config.requests_per_second == pytest.approx(5.0)
         assert config.burst == 10
 
-    def test_custom_values(self) -> None:
+    def test_rate_limit_config__custom_values__517305cc(self) -> None:
         config = RateLimitConfig(requests_per_second=10.0, burst=20)
         assert config.requests_per_second == pytest.approx(10.0)
         assert config.burst == 20
@@ -39,7 +41,7 @@ class TestRateLimitConfig:
         with pytest.raises(ValueError, match="burst must be at least 1"):
             RateLimitConfig(burst=-5)
 
-    def test_immutability(self) -> None:
+    def test_rate_limit_config__immutability__9ec137ae(self) -> None:
         config = RateLimitConfig()
         with pytest.raises(AttributeError):
             config.requests_per_second = 100.0  # type: ignore[misc]
@@ -48,14 +50,14 @@ class TestRateLimitConfig:
 class TestBaseClientConfig:
     """Tests for BaseClientConfig."""
 
-    def test_default_values(self) -> None:
+    def test_base_client_config__default_values__6e736983(self) -> None:
         config = BaseClientConfig()
         assert config.base_url is None
         assert config.timeout == 30
         assert config.rate_limit.requests_per_second == pytest.approx(5.0)
         assert config.rate_limit.burst == 10
 
-    def test_custom_values(self) -> None:
+    def test_base_client_config__custom_values__465b4cf3(self) -> None:
         rate_limit = RateLimitConfig(requests_per_second=10.0, burst=5)
         config = BaseClientConfig(
             base_url="https://api.example.com",
@@ -72,7 +74,7 @@ class TestBaseClientConfig:
         with pytest.raises(ValueError, match="timeout must be positive"):
             BaseClientConfig(timeout=-10)
 
-    def test_immutability(self) -> None:
+    def test_base_client_config__immutability__4739c841(self) -> None:
         config = BaseClientConfig()
         with pytest.raises(AttributeError):
             config.timeout = 100  # type: ignore[misc]
@@ -81,7 +83,7 @@ class TestBaseClientConfig:
 class TestBaseProviderConfig:
     """Tests for BaseProviderConfig."""
 
-    def test_default_values(self) -> None:
+    def test_base_provider_config__default_values__0e5082dd(self) -> None:
         config = BaseProviderConfig()
         assert config.base_url is None
         assert config.timeout == 30
@@ -89,7 +91,7 @@ class TestBaseProviderConfig:
         assert config.batch_size == 100
         assert config.api_key is None
 
-    def test_custom_values(self) -> None:
+    def test_base_provider_config__custom_values__f0fca59e(self) -> None:
         rate_limit = RateLimitConfig(requests_per_second=20.0, burst=50)
         config = BaseProviderConfig(
             base_url="https://www.ebi.ac.uk/chembl/api/data",
@@ -114,7 +116,7 @@ class TestBaseProviderConfig:
         with pytest.raises(ValueError, match="timeout must be positive"):
             BaseProviderConfig(timeout=0)
 
-    def test_immutability(self) -> None:
+    def test_base_provider_config__immutability__811f72c7(self) -> None:
         config = BaseProviderConfig()
         with pytest.raises(AttributeError):
             config.batch_size = 500  # type: ignore[misc]

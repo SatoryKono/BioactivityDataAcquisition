@@ -90,12 +90,12 @@ class TestDeduplicateByPrimaryKeysImpl:
         result = _deduplicate_by_primary_keys_impl(records, [])
         assert len(result) == 2
 
-    def test_empty_records_returns_empty(self) -> None:
+    def test_by_primary_keys_impl__returns_empty__16137806(self) -> None:
         """Should return empty list for empty input."""
         result = _deduplicate_by_primary_keys_impl([], ["id"])
         assert result == []
 
-    def test_content_identity_fallback_uses_canonical_hash_identity_contract__test_deduplicate_by_primary_keys_impl_infrastructure_storage_test_silver_writer_validation_operations_98(
+    def test_silver_writer_validation_operations_98__a5678f94(
         self,
     ) -> None:
         """Batch dedup fallback must reuse the canonical hash-identity seam."""
@@ -259,7 +259,7 @@ class TestValidateRecords:
 class TestValidateSilverPandera:
     """Tests for Pandera schema validation of Silver records."""
 
-    def test_valid_records_pass(self) -> None:
+    def test_silver_pandera__valid_records_pass__2a5f9e41(self) -> None:
         """Should pass when validator returns valid result."""
         host = MagicMock()
         host._silver_validator.validate.return_value = MagicMock(valid=True)

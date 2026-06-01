@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 import yaml
 
+
+pytestmark = pytest.mark.architecture
 
 def _read(path: str) -> str:
     return Path(path).read_text(encoding="utf-8")

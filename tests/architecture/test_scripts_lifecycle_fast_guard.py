@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import pytest
+
 import json
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 def _project_root() -> Path:
     return Path(__file__).resolve().parents[2]

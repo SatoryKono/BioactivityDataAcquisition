@@ -15,6 +15,8 @@ from bioetl.domain.types.validation_severity import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 class TestCrossValidationValidator:
     """Tests for CrossValidationValidator."""
 
@@ -40,7 +42,7 @@ class TestCrossValidationValidator:
     # validate_cross_validation_config() tests
     # ==========================================================================
 
-    def test_validate_valid_config(
+    def test_validation_validator__valid_config__93a72da6(
         self,
         validator: CrossValidationValidator,
         source_names: list[str],
@@ -251,7 +253,7 @@ class TestCrossValidationValidator:
         # Should still be valid since it's just a warning
         assert result.is_valid()
 
-    def test_validate_multiple_issues(
+    def test_validation_validator__multiple_issues__81e4d29c(
         self, validator: CrossValidationValidator, source_names: list[str]
     ) -> None:
         """Test validation with multiple issues."""

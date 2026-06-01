@@ -24,6 +24,8 @@ from bioetl.domain.value_objects.dq_report import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 @pytest.fixture()
 def analyzer() -> GoldDQAnalyzer:
     return GoldDQAnalyzer()
@@ -115,7 +117,7 @@ class TestGoldAnalyzerStatisticalProfile:
         )
         assert "statistical_profile" in report.checks
 
-    def test_statistical_profile_no_baseline(
+    def test_statistical_profile__profile_no_baseline__01df7a3f(
         self, analyzer: GoldDQAnalyzer, sample_df: pl.DataFrame
     ) -> None:
         ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
@@ -157,7 +159,7 @@ class TestGoldAnalyzerAnomalyDetection:
         assert "anomaly_detection" in report.checks
         assert report.checks["anomaly_detection"]["cold_start_mode"] is True
 
-    def test_anomaly_detection_no_baseline__test_gold_analyzer_anomaly_detection_services_dq_test_gold_analyzer_extended_160(
+    def test_services_dq_gold_analyzer_extended_160__30f96434(
         self, analyzer: GoldDQAnalyzer, sample_df: pl.DataFrame
     ) -> None:
         ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)

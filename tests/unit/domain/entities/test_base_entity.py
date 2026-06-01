@@ -35,7 +35,7 @@ class HookValidatedEntity(BaseEntity):
 class TestBaseEntity:
     """Tests for BaseEntity system field invariants."""
 
-    def test_valid_creation(self) -> None:
+    def test_entity_base_entity__valid_creation__50b890e3(self) -> None:
         e = BaseEntity(**BASE_KWARGS)
         assert e.entity_id == "test:entity:001"
         assert e.content_hash == "sha256hash"
@@ -77,7 +77,7 @@ class TestBaseEntity:
         e = BaseEntity(**{**BASE_KWARGS, "_index": 999999})
         assert e._index == 999999
 
-    def test_immutable(self) -> None:
+    def test_entity_base_entity__immutable__6f528699(self) -> None:
         e = BaseEntity(**BASE_KWARGS)
         with pytest.raises((AttributeError, TypeError)):
             e.entity_id = "new_id"  # type: ignore[misc]

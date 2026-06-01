@@ -164,7 +164,7 @@ class TestActivityRecord:
 class TestAssayRecord:
     """Tests for AssayRecord Pydantic DTO."""
 
-    def test_valid_minimal_creation(self) -> None:
+    def test_dtos_assay_record__minimal_creation__60c825bb(self) -> None:
         """Test creation with only required field."""
         record = AssayRecord(assay_id="CHEMBL1000")
         assert record.assay_id == "CHEMBL1000"
@@ -172,7 +172,7 @@ class TestAssayRecord:
         assert record.assay_type is None
         assert record.confidence_score is None
 
-    def test_valid_full_creation(self) -> None:
+    def test_dtos_assay_record__valid_full_creation__387bb5e6(self) -> None:
         """Test creation with all core fields populated."""
         record = AssayRecord(
             assay_id="CHEMBL1000",
@@ -216,7 +216,7 @@ class TestAssayRecord:
         with pytest.raises(ValidationError):
             AssayRecord()  # type: ignore[call-arg]
 
-    def test_extra_field_forbidden(self) -> None:
+    def test_dtos_assay_record__field_forbidden__a1b30aef(self) -> None:
         """Test extra fields raise ValidationError."""
         with pytest.raises(ValidationError, match="Extra inputs are not permitted"):
             AssayRecord(
@@ -224,13 +224,13 @@ class TestAssayRecord:
                 extra_unknown_field="bad",  # type: ignore[call-arg]
             )
 
-    def test_frozen_immutability(self) -> None:
+    def test_dtos_assay_record__frozen_immutability__b5306517(self) -> None:
         """Test frozen model cannot be mutated."""
         record = AssayRecord(assay_id="CHEMBL1000")
         with pytest.raises(ValidationError):
             record.assay_id = "CHEMBL9999"  # type: ignore[misc]
 
-    def test_optional_fields_default_to_none(self) -> None:
+    def test_dtos_assay_record__default_to_none__80e40a02(self) -> None:
         """Test all optional fields default to None."""
         record = AssayRecord(assay_id="CHEMBL1000")
         assert record.target_id is None
@@ -248,7 +248,7 @@ class TestAssayRecord:
             record = AssayRecord(assay_id="CHEMBL1000", confidence_score=score)
             assert record.confidence_score == score
 
-    def test_model_dump(self) -> None:
+    def test_dtos_assay_record__model_dump__09b55208(self) -> None:
         """Test model_dump returns correct dict."""
         record = AssayRecord(
             assay_id="CHEMBL1000",

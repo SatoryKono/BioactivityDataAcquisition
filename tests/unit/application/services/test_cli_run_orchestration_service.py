@@ -21,6 +21,8 @@ from bioetl.application.services.execution.pipeline_runner_models import (
 )
 from tests.helpers.synthetic_paths import synthetic_test_root
 
+pytestmark = pytest.mark.unit
+
 TEST_ROOT = synthetic_test_root("cli-run-orchestration")
 CACHED_BRONZE_PATH = str(TEST_ROOT / "bronze")
 

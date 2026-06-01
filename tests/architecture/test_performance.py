@@ -1,7 +1,11 @@
 """Architecture test: Performance optimization enforcement."""
 
+import pytest
+
 import ast
 from pathlib import Path
+
+pytestmark = pytest.mark.architecture
 
 STORAGE_DIR = Path("src/bioetl/infrastructure/storage")
 BATCH_WRITER = Path("src/bioetl/application/core/batch_writer.py")

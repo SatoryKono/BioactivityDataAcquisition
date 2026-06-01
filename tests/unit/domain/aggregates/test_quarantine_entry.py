@@ -350,7 +350,7 @@ class TestQuarantineEntryEncapsulation:
         with pytest.raises(AttributeError):
             quarantine_entry.payload_hash = ContentHash("newhash")  # type: ignore
 
-    def test_metadata_returns_copy(self, quarantine_entry: QuarantineEntry) -> None:
+    def test_entry_encapsulation__returns_copy__3f32547b(self, quarantine_entry: QuarantineEntry) -> None:
         """Invariant: metadata returns a copy."""
         metadata = quarantine_entry.metadata
         metadata["new_key"] = "new_value"
@@ -416,13 +416,13 @@ class TestQuarantineEntryDomainEvents:
 class TestQuarantineStatus:
     """Tests for QuarantineStatus enum behavior."""
 
-    def test_terminal_statuses(self) -> None:
+    def test_quarantine_status__terminal_statuses__2200c9ea(self) -> None:
         """Terminal statuses should return True for is_terminal()."""
         assert QuarantineStatus.IGNORED.is_terminal()
         assert QuarantineStatus.REPROCESSED.is_terminal()
         assert QuarantineStatus.EXPIRED.is_terminal()
 
-    def test_non_terminal_statuses(self) -> None:
+    def test_quarantine_status__terminal_statuses__48a78d4b(self) -> None:
         """Non-terminal statuses should return False for is_terminal()."""
         assert not QuarantineStatus.NEW.is_terminal()
         assert not QuarantineStatus.UNDER_REVIEW.is_terminal()

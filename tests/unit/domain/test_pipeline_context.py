@@ -19,6 +19,8 @@ from bioetl.domain.context import (
 from bioetl.domain.types import BatchID, RunID, RunType
 from tests.helpers.clock import FIXED_TEST_TIME
 
+pytestmark = pytest.mark.unit
+
 CACHED_BRONZE_PATH = "test-output/bronze"
 
 

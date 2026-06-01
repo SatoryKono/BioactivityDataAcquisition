@@ -21,6 +21,8 @@ from bioetl.infrastructure.quality.debt_scorecard import (
 from bioetl.infrastructure.quality.inventory import ExemptionInventorySummary
 
 
+pytestmark = pytest.mark.unit
+
 def _make_inventory(
     total: int = 5,
     by_registry: dict[str, int] | None = None,
@@ -172,7 +174,7 @@ class TestProjectRoot:
 class TestResolveScorecardPath:
     """Tests for _resolve_scorecard_path."""
 
-    def test_none_returns_default(self) -> None:
+    def test_resolve_scorecard_path__none_returns_default__cf70a50b(self) -> None:
         """None should resolve to default debt_scorecard.yaml path."""
         result = _resolve_scorecard_path(None)
         assert result.name == "debt_scorecard.yaml"
@@ -396,7 +398,7 @@ class TestEvaluateDebtScorecard:
 class TestDebtScorecardResult:
     """Tests for DebtScorecardResult dataclass."""
 
-    def test_creation(self) -> None:
+    def test_debt_scorecard_result__creation__b9e3f6be(self) -> None:
         """Should be creatable with expected fields."""
         result = DebtScorecardResult(
             quarter="2025-Q1",
@@ -415,7 +417,7 @@ class TestDebtScorecardResult:
         assert result.integral_score == pytest.approx(85.5)
         assert result.active_grace_windows == ("RF-001",)
 
-    def test_frozen(self) -> None:
+    def test_debt_scorecard_result__frozen__9598bcd9(self) -> None:
         """Should be immutable."""
         result = DebtScorecardResult(
             quarter="2025-Q1",

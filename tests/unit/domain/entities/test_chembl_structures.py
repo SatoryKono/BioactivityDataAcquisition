@@ -20,7 +20,7 @@ BASE_KWARGS = {
 class TestDocumentTerm:
     """Tests for ChemblPublicationTerm entity."""
 
-    def test_valid_creation(self) -> None:
+    def test_document_term__valid_creation__77ef3848(self) -> None:
         from bioetl.domain.entities.chembl_structures import ChemblPublicationTerm
 
         dt = ChemblPublicationTerm(
@@ -47,7 +47,7 @@ class TestDocumentTerm:
         assert dt.mesh_id == "D001241"
         assert dt.qualifier == "pharmacology"
 
-    def test_empty_publication_id_raises(self) -> None:
+    def test_document_term__id_raises__78eeb187(self) -> None:
         from bioetl.domain.entities.chembl_structures import ChemblPublicationTerm
 
         with pytest.raises(ValueError, match="Document ChEMBL ID is required"):
@@ -106,7 +106,7 @@ class TestDocumentTerm:
         )
         assert dt.term_type == valid_type
 
-    def test_immutable(self) -> None:
+    def test_document_term__immutable__9341f838(self) -> None:
         from bioetl.domain.entities.chembl_structures import ChemblPublicationTerm
 
         dt = ChemblPublicationTerm(
@@ -123,7 +123,7 @@ class TestDocumentTerm:
 class TestTarget:
     """Tests for Target entity."""
 
-    def test_valid_creation_minimal(self) -> None:
+    def test_structures_target__creation_minimal__ec9ccc3f(self) -> None:
         from bioetl.domain.entities.chembl_structures import Target
 
         t = Target(**BASE_KWARGS, target_id="CHEMBL204")
@@ -131,7 +131,7 @@ class TestTarget:
         assert t.pref_name is None
         assert t.target_type is None
 
-    def test_valid_creation_full(self) -> None:
+    def test_structures_target__valid_creation_full__81316345(self) -> None:
         from bioetl.domain.entities.chembl_structures import Target
 
         t = Target(
@@ -158,7 +158,7 @@ class TestTarget:
 class TestMolecule:
     """Tests for Molecule entity."""
 
-    def test_valid_creation_minimal(self) -> None:
+    def test_structures_molecule__creation_minimal__72bce9ff(self) -> None:
         from bioetl.domain.entities.chembl_structures import Molecule
 
         m = Molecule(**BASE_KWARGS, molecule_id="CHEMBL25")
@@ -183,7 +183,7 @@ class TestMolecule:
         assert m.max_phase == 4
         assert m.molecular_weight == pytest.approx(180.16)
 
-    def test_empty_molecule_id_raises(self) -> None:
+    def test_structures_molecule__molecule_id_raises__7915f8f8(self) -> None:
         from bioetl.domain.entities.chembl_structures import Molecule
 
         with pytest.raises(ValueError, match="Molecule ChEMBL ID is required"):
@@ -213,7 +213,7 @@ class TestMolecule:
 class TestCellLine:
     """Tests for CellLine entity."""
 
-    def test_valid_creation(self) -> None:
+    def test_structures_cell_line__valid_creation__fc9d06eb(self) -> None:
         from bioetl.domain.entities.chembl_structures import CellLine
 
         cl = CellLine(
@@ -224,7 +224,7 @@ class TestCellLine:
         assert cl.cell_id == "CHEMBL3308391"
         assert cl.cell_name == "HeLa"
 
-    def test_valid_creation_full(self) -> None:
+    def test_structures_cell_line__valid_creation_full__0f12b21b(self) -> None:
         from bioetl.domain.entities.chembl_structures import CellLine
 
         cl = CellLine(
@@ -265,7 +265,7 @@ class TestCellLine:
 class TestDocumentSimilarity:
     """Tests for ChemblPublicationSimilarity entity."""
 
-    def test_valid_creation(self) -> None:
+    def test_document_similarity__valid_creation__30845894(self) -> None:
         from bioetl.domain.entities.chembl_structures import ChemblPublicationSimilarity
 
         ds = ChemblPublicationSimilarity(
@@ -320,7 +320,7 @@ class TestDocumentSimilarity:
 class TestProteinClassification:
     """Tests for ProteinClassification entity."""
 
-    def test_valid_creation(self) -> None:
+    def test_protein_classification__valid_creation__d53c3e72(self) -> None:
         from bioetl.domain.entities.chembl_structures import ProteinClassification
 
         pc = ProteinClassification(
@@ -386,7 +386,7 @@ class TestProteinClassification:
 class TestTargetComponent:
     """Tests for TargetComponent entity."""
 
-    def test_valid_creation(self) -> None:
+    def test_target_component__valid_creation__3361d517(self) -> None:
         from bioetl.domain.entities.chembl_structures import TargetComponent
 
         tc = TargetComponent(**BASE_KWARGS, component_id=12345)

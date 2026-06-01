@@ -13,6 +13,8 @@ from bioetl.domain.normalization.chembl import (
     normalize_uo_identifier,
 )
 
+pytestmark = pytest.mark.unit
+
 LEGACY_QUDT_UNIT_URI = "http" + "://www.openphacts.org/units/Nanomolar"
 
 

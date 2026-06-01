@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 ACTIVE_ORCHESTRATION_DOCS = (
     Path("docs/00-project/ai/agents/agents/ORCHESTRATION.md"),

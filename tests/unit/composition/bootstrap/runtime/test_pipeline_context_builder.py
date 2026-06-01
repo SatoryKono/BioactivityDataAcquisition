@@ -14,6 +14,8 @@ from bioetl.domain.types import ExecutionContext, RunType
 from tests.helpers.clock import FixedClock
 
 
+pytestmark = pytest.mark.unit
+
 def test_build_pipeline_context_uses_injected_clock() -> None:
     """Pipeline context creation should accept deterministic ClockPort input."""
     started_at = datetime(2026, 5, 24, 12, 30, tzinfo=UTC)

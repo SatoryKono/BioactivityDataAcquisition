@@ -69,6 +69,7 @@ This is now the only active execution/backlog document in `docs/plans/`.
 ### Retained Operational Context
 
 - [architecture-review-and-refactor-plan-2026-03-21.md](architecture-review-and-refactor-plan-2026-03-21.md)
+- [chembl-baseline-refactor-plan-2026-06-01.md](chembl-baseline-refactor-plan-2026-06-01.md)
 - [curated-memory-density-governance-plan-2026-04-21.md](curated-memory-density-governance-plan-2026-04-21.md)
 - [monitoring-observability-expansion-plan-2026-03-26.md](monitoring-observability-expansion-plan-2026-03-26.md)
 - [project-memory-layer-implementation-plan-2026-04-20.md](project-memory-layer-implementation-plan-2026-04-20.md)
@@ -101,6 +102,13 @@ active repo entrypoints in this workspace snapshot.
 The architecture review plan was refreshed on `2026-03-23` with the current
 integral score, updated category table, and RF-style roadmap. It remains a
 supporting assessment map, not a second active backlog.
+
+The ChemblBaseline refactor plan was added on `2026-06-01` as a bounded
+hardening roadmap for the shipped canonical workflow in
+`configs/workflows/chembl_baseline.yaml`. It treats the workflow as an existing
+production-like surface and scopes the next wave to dry-run safety, baseline
+CI smoke, DAG cleanup, Actions hardening, and optional future execution seams
+rather than re-implementing workflow orchestration from scratch.
 
 The curated memory density governance plan was added on `2026-04-21` as a
 bounded next-wave plan for keeping `src/memory/curated/` small, source-backed,

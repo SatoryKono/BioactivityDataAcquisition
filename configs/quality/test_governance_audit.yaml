@@ -46,6 +46,7 @@ issues:
   evidence_paths:
   - scripts/engineering/qa/report_test_governance_audit.py
   - tests/architecture/test_test_governance_audit.py
+  - reports/quality/test-duplicate-name-inventory.json
 - id: '4174'
   priority: P1
   title: tracing emission-level observability tests
@@ -59,18 +60,25 @@ issues:
   - tests/architecture/test_test_governance_audit.py
 budgets:
   refined_assertless_max: 499
-  duplicate_test_names_max: 787
-  duplicate_test_name_occurrences_max: 2552
+  duplicate_test_names_max: 0
+  duplicate_test_name_occurrences_max: 0
   compatibility_test_file_max: 53
-  markerless_test_functions_max: 5450
+  markerless_test_functions_max: 0
   uuid4_call_sites_max: 400
   date_today_call_sites_max: 0
 budget_ratchet:
-  linked_issue: '#4685'
+  linked_issue: '#4901'
   mode: fail-fast-no-growth
   expected_direction: downward
   refreshed_on: '2026-06-01'
   stream_g_owner_notes:
+  - issue: '#4901'
+    owner: test-governance
+    status: duplicate_test_names_zero_enforced
+    note: Duplicate test-name burn-down on 2026-06-01 renamed historical duplicate
+      test node IDs, exported the full duplicate-name inventory artifact, and
+      ratcheted duplicate_test_names_max / duplicate_test_name_occurrences_max
+      to zero.
   - issue: '#4817'
     owner: architecture-governance
     status: ratcheted_to_54
@@ -109,6 +117,30 @@ budget_ratchet:
     note: Third markerless burn-down on 2026-06-01 added explicit unit markers
       to twelve already unit-scoped modules and ratcheted
       markerless_test_functions_max to the live inventory.
+  - issue: markerless-followup-4-2026-06-01
+    owner: architecture-governance
+    status: markerless_ratcheted_to_5078
+    note: Fourth markerless burn-down on 2026-06-01 added explicit unit markers
+      to twelve already unit-scoped modules and ratcheted
+      markerless_test_functions_max to the live inventory.
+  - issue: markerless-followup-5-2026-06-01
+    owner: architecture-governance
+    status: markerless_ratcheted_to_4743
+    note: Fifth markerless burn-down on 2026-06-01 added explicit unit markers
+      to twelve already unit-scoped modules and ratcheted
+      markerless_test_functions_max to the live inventory.
+  - issue: markerless-followup-6-2026-06-01
+    owner: architecture-governance
+    status: markerless_ratcheted_to_4435
+    note: Sixth markerless burn-down on 2026-06-01 added explicit unit markers
+      to twelve already unit-scoped modules and ratcheted
+      markerless_test_functions_max to the live inventory.
+  - issue: markerless-zero-closeout-2026-06-01
+    owner: architecture-governance
+    status: markerless_ratcheted_to_0
+    note: Bulk markerless closeout on 2026-06-01 added explicit lane markers to
+      the remaining unit, architecture, integration, contract, security, and
+      smoke test modules and ratcheted markerless_test_functions_max to zero.
   touch_policy: Refactors touching test families must reduce the applicable budget
     or keep it flat with an explicit owner rationale; increasing a debt budget requires
     a separate governance review.
@@ -221,13 +253,13 @@ assertless_triage:
         calls.
       next_review: '2026-09-30'
     intentional_no_exception_contract:
-      count: 61
+      count: 56
       decision: retained-with-rationale
       rationale: No-op, close/aclose, smoke, or does-not-raise behavior is the contract
         under test.
       next_review: '2026-09-30'
     weak_no_value:
-      count: 424
+      count: 429
       decision: burn-down
       rationale: Candidates require assertion strengthening, merge, or removal when
         the owning module is edited.
@@ -241,29 +273,22 @@ assertless_triage:
     - tests/unit/application/core/
     - tests/unit/infrastructure/control_plane/
 duplicate_name_triage:
-  total_duplicate_names: 787
-  duplicate_occurrences: 2552
-  top_generic_names:
-  - name: test_default_values
-    count: 38
-    decision: rename-on-touch
-    preferred_pattern: test_<subject>_default_values
-  - name: test_immutability
-    count: 40
-    decision: rename-on-touch
-    preferred_pattern: test_<value_object>_is_immutable
-  - name: test_custom_values
-    count: 20
-    decision: rename-on-touch
-    preferred_pattern: test_<subject>_accepts_custom_values
-  - name: test_hash_consistency
-    count: 22
-    decision: rename-on-touch
-    preferred_pattern: test_<value_object>_hash_matches_equality_contract
-  - name: test_strips_whitespace
-    count: 22
-    decision: rename-on-touch
-    preferred_pattern: test_<parser>_strips_surrounding_whitespace
+  total_duplicate_names: 0
+  duplicate_occurrences: 0
+  top_generic_names: []
+  zero_enforcement:
+    issue_set:
+    - '#4894'
+    - '#4895'
+    - '#4896'
+    - '#4897'
+    - '#4898'
+    - '#4899'
+    - '#4900'
+    - '#4901'
+    artifact: reports/quality/test-duplicate-name-inventory.json
+    naming_contract: test_<subject>__<condition>__<expected_behavior>
+    decision: fail_fast_zero_duplicate_test_names
   fixture_builder_policy:
     consolidate_when: RunID, BatchID, PipelineRunContext, Bronze/Silver/Gold metadata,
       or checkpoint setup repeats across three or more tests in one module family.
@@ -303,13 +328,13 @@ oversized_test_module_inventory:
   completed_splits:
     - issue_ref: "#4505"
       source: tests/integration/test_grafana_config.py
-      source_lines_after_split: 1419
+      source_lines_after_split: 1425
       extracted_surface: tests/integration/test_grafana_surface_contracts.py
-      extracted_surface_lines: 706
+      extracted_surface_lines: 711
       owner: observability-dashboards
     - issue_ref: "#4506"
       source: tests/unit/composition/runtime_builders/test_runner_builder_profiles.py
-      source_lines_after_split: 1120
+      source_lines_after_split: 1124
       extracted_surface: tests/unit/composition/runtime_builders/test_runner_builder_contracts.py
       extracted_surface_lines: 166
       owner: composition-runtime

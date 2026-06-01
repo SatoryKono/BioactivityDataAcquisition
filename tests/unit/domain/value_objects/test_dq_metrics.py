@@ -22,7 +22,7 @@ pytestmark = pytest.mark.unit
 class TestColumnStats:
     """Tests for ColumnStats Value Object."""
 
-    def test_default_values(self) -> None:
+    def test_metrics_column_stats__default_values__90310116(self) -> None:
         """Test creation with default values."""
         stats = ColumnStats()
         assert stats.null_rate == pytest.approx(0.0)
@@ -62,7 +62,7 @@ class TestColumnStats:
         assert metrics.max == pytest.approx(10.0)
         assert metrics.mean == pytest.approx(5.0)
 
-    def test_immutability(self) -> None:
+    def test_metrics_column_stats__immutability__301727bf(self) -> None:
         """Test that ColumnStats is immutable."""
         stats = ColumnStats(null_rate=0.1)
         with pytest.raises(AttributeError):
@@ -72,7 +72,7 @@ class TestColumnStats:
 class TestSchemaDriftInfo:
     """Tests for SchemaDriftInfo Value Object."""
 
-    def test_default_values(self) -> None:
+    def test_schema_drift_info__default_values__ddd34dfd(self) -> None:
         """Test creation with default values."""
         drift = SchemaDriftInfo()
         assert drift.status == "info"
@@ -98,7 +98,7 @@ class TestSchemaDriftInfo:
         assert drift.missing_fields == ("old_field",)
         assert drift.has_drift is True
 
-    def test_list_to_tuple_conversion(self) -> None:
+    def test_schema_drift_info__to_tuple_conversion__758d8154(self) -> None:
         """Test that lists are converted to tuples for immutability."""
         drift = SchemaDriftInfo(
             status="info",
@@ -125,7 +125,7 @@ class TestSchemaDriftInfo:
         drift = SchemaDriftInfo(status="info")
         assert drift.has_drift is False
 
-    def test_immutability(self) -> None:
+    def test_schema_drift_info__immutability__a4b5863c(self) -> None:
         """Test that SchemaDriftInfo is immutable."""
         drift = SchemaDriftInfo(status="info")
         with pytest.raises(AttributeError):
@@ -135,7 +135,7 @@ class TestSchemaDriftInfo:
 class TestBatchDQMetrics:
     """Tests for BatchDQMetrics Value Object."""
 
-    def test_default_values(self) -> None:
+    def test_batch_d_q_metrics__default_values__c2d8fae8(self) -> None:
         """Test creation with default values."""
         metrics = BatchDQMetrics()
         assert metrics.total_records == 0
@@ -238,7 +238,7 @@ class TestBatchDQMetrics:
         summary = metrics.to_dq_summary()
         assert summary.schema_drift is None
 
-    def test_immutability(self) -> None:
+    def test_batch_d_q_metrics__immutability__0ba2d099(self) -> None:
         """Test that BatchDQMetrics is immutable."""
         metrics = BatchDQMetrics(total_records=100)
         with pytest.raises(AttributeError):
@@ -334,7 +334,7 @@ class TestBatchDQMetricsFromRecords:
 class TestComputeColumnStats:
     """Tests for _compute_column_stats helper function."""
 
-    def test_empty_records(self) -> None:
+    def test_compute_column_stats__empty_records__fc7213c0(self) -> None:
         """Test with empty records list."""
         result = _compute_column_stats([])
         assert result == {}
@@ -393,7 +393,7 @@ class TestComputeColumnStats:
 class TestExtractNumericValues:
     """Tests for _extract_numeric_values helper function."""
 
-    def test_empty_list(self) -> None:
+    def test_extract_numeric_values__empty_list__7f962c58(self) -> None:
         """Test with empty list."""
         assert _extract_numeric_values([]) == []
 
@@ -412,7 +412,7 @@ class TestExtractNumericValues:
         result = _extract_numeric_values([1, True, False, 2])
         assert result == pytest.approx([1.0, 2.0])
 
-    def test_nan_inf_excluded(self) -> None:
+    def test_extract_numeric_values__nan_inf_excluded__d40ad1da(self) -> None:
         """Test that NaN and Inf are excluded."""
         result = _extract_numeric_values([1, float("nan"), float("inf"), 2])
         assert result == pytest.approx([1.0, 2.0])

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.domain.normalization.profiles import resolve_normalization_profile
 from bioetl.domain.normalization.profiles.chembl_json_ordering_policy import (
     CHEMBL_JSON_ORDERING_POLICY_HASH,
@@ -10,6 +12,8 @@ from bioetl.domain.normalization.profiles.chembl_json_ordering_policy import (
     chembl_set_like_json_fields,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_chembl_json_ordering_policy_exposes_versioned_hash() -> None:
     assert CHEMBL_JSON_ORDERING_POLICY_VERSION == "2026.06.01"

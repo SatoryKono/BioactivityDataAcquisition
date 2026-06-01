@@ -12,6 +12,8 @@ from bioetl.domain.value_objects import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 class TestUnitConverter:
     """Tests for UnitConverter service."""
 

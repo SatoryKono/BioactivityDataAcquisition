@@ -7,6 +7,8 @@ import pytest
 import bioetl.interfaces.cli.commands as commands_package
 
 
+pytestmark = pytest.mark.unit
+
 def test_commands_package_exports_reviewed_public_command_whitelist() -> None:
     """Helper modules must not silently re-enter the package-root command map."""
     assert commands_package.__all__ == [
@@ -46,8 +48,9 @@ def test_commands_package_rejects_export_support_after_command_module_import() -
     """Importing the public export command must not re-expose helper submodules."""
     import bioetl.interfaces.cli.commands.export  # noqa: F401
 
+    missing_attribute = "export_support"
     with pytest.raises(AttributeError, match="export_support"):
-        getattr(commands_package, "export_support")
+        getattr(commands_package, missing_attribute)
 
 
 def test_commands_package_rejects_inspection_output_after_command_module_import() -> (
@@ -56,5 +59,6 @@ def test_commands_package_rejects_inspection_output_after_command_module_import(
     """Importing public diagnostics commands must not re-expose helper submodules."""
     import bioetl.interfaces.cli.commands.diagnostics  # noqa: F401
 
+    missing_attribute = "inspection_output"
     with pytest.raises(AttributeError, match="inspection_output"):
-        getattr(commands_package, "inspection_output")
+        getattr(commands_package, missing_attribute)

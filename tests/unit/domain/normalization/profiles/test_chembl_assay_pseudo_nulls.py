@@ -6,6 +6,8 @@ import pytest
 
 from bioetl.domain.normalization.profiles import CHEMBL_ASSAY_PROFILE
 
+pytestmark = pytest.mark.unit
+
 _PSEUDO_NULLS = ("N/A", "None", "-", ".", "<NULL>", "UNKNOWN")
 _DIRECT_NULL_FIELDS = (
     "assay_type_description",

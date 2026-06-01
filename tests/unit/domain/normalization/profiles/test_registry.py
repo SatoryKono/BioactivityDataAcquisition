@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.domain.normalization.profiles import (
     CHEMBL_ACTIVITY_PROFILE,
     CHEMBL_ASSAY_PROFILE,
@@ -29,6 +31,8 @@ from bioetl.domain.normalization.profiles.registry import (
     resolve_normalization_profile_module_path,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_registry_contains_canonical_chembl_activity_profile() -> None:
     assert (

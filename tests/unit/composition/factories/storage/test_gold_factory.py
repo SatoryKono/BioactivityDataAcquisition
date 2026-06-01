@@ -66,7 +66,7 @@ class TestCreateGoldWriter:
         )
         assert call_kwargs["runtime_services"].lineage_store is not None
 
-    def test_uses_provided_tracing(self) -> None:
+    def test_create_gold_writer__provided_tracing__9c1785aa(self) -> None:
         """Uses provided TracingPort instead of NoOpTracing."""
         writer_cls = MagicMock()
         tracer = MagicMock()
@@ -162,7 +162,7 @@ class TestCreateGoldWriter:
         call_kwargs = writer_cls.call_args[1]
         assert call_kwargs["runtime_services"].contract_rollout_policy == rollout_policy
 
-    def test_passes_audit_port(self) -> None:
+    def test_create_gold_writer__passes_audit_port__789d3218(self) -> None:
         """audit is forwarded into Gold runtime services explicitly."""
         writer_cls = MagicMock()
         audit = MagicMock()

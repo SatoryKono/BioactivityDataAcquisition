@@ -26,6 +26,8 @@ from bioetl.infrastructure.schemas.composite_config import (
     validate_composite_config_payload,
 )
 
+pytestmark = pytest.mark.unit
+
 SNAPSHOT_FILE = Path("tests/snapshots/composite_config_real_yaml_golden_master.json")
 COMPOSITE_CONFIG_DIR = Path("configs/composites")
 

@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import pytest
+
 import ast
 from pathlib import Path
+
+pytestmark = pytest.mark.architecture
 
 MAX_TEST_FILE_LOC = 2000
 MAX_TEST_FUNCTION_LOC = 200

@@ -13,13 +13,14 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.application.composite.runner_pkg import (
-    CompositePipelineRunner,
     CompositeRuntimeConfig,
 )
 from bioetl.domain.composite.result import EnrichmentResult
 from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.events import PipelineEvent
 from tests.unit.application.composite import runner_test_support as support
+
+pytestmark = pytest.mark.unit
 
 pytest_plugins = ("tests.unit.application.composite.fsm_test_support",)
 

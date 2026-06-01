@@ -55,7 +55,7 @@ class TestArchiveHelp:
 class TestArchiveCommand:
     """Tests for archive command happy and error paths."""
 
-    def test_archive_success(
+    def test_archive_command__archive_success__aa880529(
         self, cli_runner: CliRunner, mock_lifecycle_service: MagicMock
     ) -> None:
         """Test successful archive operation echoes file count and path."""

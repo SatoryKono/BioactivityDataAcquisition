@@ -11,13 +11,13 @@ from bioetl.domain.filtering.input_config import FilterColumn, InputFilterConfig
 class TestFilterColumn:
     """Tests for FilterColumn dataclass."""
 
-    def test_creation(self) -> None:
+    def test_config_filter_column__creation__92809f78(self) -> None:
         """Test creating a FilterColumn."""
         col = FilterColumn(column_name="chembl_id", filter_field="molecule_chembl_id")
         assert col.column_name == "chembl_id"
         assert col.filter_field == "molecule_chembl_id"
 
-    def test_is_frozen(self) -> None:
+    def test_config_filter_column__is_frozen__03db029d(self) -> None:
         """Test FilterColumn is immutable."""
         col = FilterColumn(column_name="id", filter_field="field")
         with pytest.raises((AttributeError, TypeError)):

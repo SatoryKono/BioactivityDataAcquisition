@@ -59,7 +59,7 @@ class TestExtractionParams:
         assert ep.to_query_dict() == {}
         assert ep.to_query_string() == ""
 
-    def test_frozen_immutability(self) -> None:
+    def test_extraction_params__frozen_immutability__4a0c0e3d(self) -> None:
         """GIVEN frozen ExtractionParams WHEN mutating params THEN raises error."""
         ep = ExtractionParams(params={"key": "value"})
 
@@ -99,7 +99,7 @@ class TestExtractionParams:
 
         assert ep.to_query_string() == ""
 
-    def test_equality(self) -> None:
+    def test_extraction_params__equality__b95388e9(self) -> None:
         """GIVEN two ExtractionParams with same params WHEN compared THEN equal."""
         ep1 = ExtractionParams(params={"key": "value"})
         ep2 = ExtractionParams(params={"key": "value"})

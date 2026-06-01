@@ -22,6 +22,8 @@ from bioetl.domain.value_objects.dq_report import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 @pytest.fixture
 def mock_logger() -> MagicMock:
     """Create mock logger."""

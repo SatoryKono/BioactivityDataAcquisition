@@ -15,6 +15,8 @@ from bioetl.domain.composite.result import (
     SeedResult,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestEnrichmentResult:
     """Tests for EnrichmentResult."""

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from types import SimpleNamespace
 
 from tests.benchmarks.conftest import (
@@ -13,6 +15,8 @@ from tests.conftest import (
     _selected_test_paths,
 )
 
+
+pytestmark = pytest.mark.architecture
 
 def _build_config(*args: str, markexpr: str = "not benchmark and not slow") -> object:
     return SimpleNamespace(
@@ -85,7 +89,7 @@ def test_benchmark_pytest_configure_registers_skip_fixture_when_plugin_is_disabl
     registrations: list[tuple[object, str]] = []
 
     class _PluginManager:
-        def hasplugin(self, name: str) -> bool:
+        def hasplugin(self, _name: str) -> bool:
             return False
 
         def register(self, plugin: object, name: str) -> None:

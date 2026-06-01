@@ -64,7 +64,7 @@ def adapter() -> PubChemAdapter:
         pool.shutdown(wait=False)
 
 
-def test_get_source_metadata_returns_collector_state_and_clears_requests(
+def test_request_metadata__and_clears_requests__dc74bc77(
     adapter: PubChemAdapter,
 ) -> None:
     """Metadata snapshot should reflect collector state and consume it."""
@@ -84,7 +84,7 @@ def test_get_source_metadata_returns_collector_state_and_clears_requests(
     assert adapter.request_count == 0
 
 
-def test_clear_request_collector_resets_request_count(adapter: PubChemAdapter) -> None:
+def test_request_metadata__resets_request_count__e4fdbe1a(adapter: PubChemAdapter) -> None:
     """Clearing the collector should drop accumulated request state."""
     adapter._request_collector.record_request(
         url=f"{PUBCHEM_API_BASE}/compound/cid/2244/JSON",

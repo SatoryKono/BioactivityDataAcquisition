@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from datetime import UTC
 from datetime import datetime
 from pathlib import Path
@@ -12,6 +14,8 @@ from bioetl.infrastructure.quality.architecture_debt_task_generation import (
     generate_architecture_debt_tasks_payload,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def _write_registry(path: Path, *, registries: dict[str, object]) -> None:
     payload = {

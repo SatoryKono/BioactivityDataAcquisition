@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 import shutil
 from pathlib import Path
 from typing import Any
@@ -23,6 +25,8 @@ from memory.validation import (
     validate_memory_scaffold,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def _copy_minimal_memory_scaffold(memory_root: Path) -> None:
     """Copy only contract resources needed by validator unit tests."""

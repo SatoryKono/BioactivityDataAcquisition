@@ -138,7 +138,7 @@ class TestCompoundId:
         with pytest.raises(ValueError):
             CompoundId.from_raw("123", "invalid_source")  # type: ignore[arg-type]
 
-    def test_immutability(self) -> None:
+    def test_ids_compound_id__immutability__0c7b4451(self) -> None:
         """Test CompoundId is immutable (frozen dataclass)."""
         molecule_id = CompoundId.from_chembl("CHEMBL25")
         with pytest.raises(Exception):  # FrozenInstanceError
@@ -156,19 +156,19 @@ class TestCompoundId:
         molecule_id2 = CompoundId.from_pubchem(25)
         assert molecule_id1 != molecule_id2
 
-    def test_inequality_different_values(self) -> None:
+    def test_ids_compound_id__different_values__529c60e0(self) -> None:
         """Test inequality for different values."""
         molecule_id1 = CompoundId.from_chembl("CHEMBL25")
         molecule_id2 = CompoundId.from_chembl("CHEMBL100")
         assert molecule_id1 != molecule_id2
 
-    def test_hash_consistency(self) -> None:
+    def test_ids_compound_id__hash_consistency__92046e7f(self) -> None:
         """Test hash is consistent with equality."""
         molecule_id1 = CompoundId.from_chembl("CHEMBL25")
         molecule_id2 = CompoundId.from_chembl("chembl25")
         assert hash(molecule_id1) == hash(molecule_id2)
 
-    def test_str(self) -> None:
+    def test_ids_compound_id__str__0cd1e1f3(self) -> None:
         """Test string representation includes source."""
         molecule_id = CompoundId.from_chembl("CHEMBL25")
         assert str(molecule_id) == "chembl:CHEMBL25"
@@ -176,7 +176,7 @@ class TestCompoundId:
         molecule_id2 = CompoundId.from_pubchem(2244)
         assert str(molecule_id2) == "pubchem:2244"
 
-    def test_can_be_used_in_set(self) -> None:
+    def test_ids_compound_id__can_be_used_in_set__8841568f(self) -> None:
         """Test CompoundId can be used in set."""
         ids = {
             CompoundId.from_chembl("CHEMBL25"),
@@ -185,7 +185,7 @@ class TestCompoundId:
         }
         assert len(ids) == 2
 
-    def test_can_be_used_as_dict_key(self) -> None:
+    def test_ids_compound_id__be_used_as_dict_key__73edd3a6(self) -> None:
         """Test CompoundId can be used as dict key."""
         d = {CompoundId.from_chembl("CHEMBL25"): "aspirin"}
         assert d[CompoundId.from_chembl("chembl25")] == "aspirin"
@@ -205,7 +205,7 @@ class TestAssayId:
         aid = AssayId("chembl829394")
         assert aid.value == "CHEMBL829394"
 
-    def test_strips_whitespace(self) -> None:
+    def test_compound_ids_assay_id__strips_whitespace__4d0614b8(self) -> None:
         """Test whitespace stripping."""
         aid = AssayId("  CHEMBL100  ")
         assert aid.value == "CHEMBL100"
@@ -222,27 +222,27 @@ class TestAssayId:
         assert isinstance(chembl, ChemblId)
         assert chembl.value == "CHEMBL100"
 
-    def test_from_string_valid(self) -> None:
+    def test_compound_ids_assay_id__from_string_valid__fa6ec8e3(self) -> None:
         """Test from_string with valid string."""
         aid = AssayId.from_string("CHEMBL100")
         assert aid is not None
         assert aid.value == "CHEMBL100"
 
-    def test_from_string_none(self) -> None:
+    def test_compound_ids_assay_id__from_string_none__201184af(self) -> None:
         """Test from_string with None returns None."""
         assert AssayId.from_string(None) is None
 
-    def test_from_string_empty(self) -> None:
+    def test_compound_ids_assay_id__from_string_empty__7c01fc3c(self) -> None:
         """Test from_string with empty string returns None."""
         assert AssayId.from_string("") is None
         assert AssayId.from_string("   ") is None
 
-    def test_invalid_format_raises(self) -> None:
+    def test_compound_ids_assay_id__format_raises__69eb63fc(self) -> None:
         """Test invalid format raises ValueError."""
         with pytest.raises(ValueError, match="Invalid ChEMBL ID"):
             AssayId("INVALID")
 
-    def test_empty_raises(self) -> None:
+    def test_compound_ids_assay_id__empty_raises__bd48bf04(self) -> None:
         """Test empty string raises ValueError."""
         with pytest.raises(ValueError, match="cannot be empty"):
             AssayId("")
@@ -252,36 +252,36 @@ class TestAssayId:
         with pytest.raises(ValueError, match="must be positive"):
             AssayId("CHEMBL0")
 
-    def test_immutability(self) -> None:
+    def test_compound_ids_assay_id__immutability__08519cbe(self) -> None:
         """Test AssayId is immutable."""
         aid = AssayId("CHEMBL100")
         with pytest.raises(AttributeError, match="immutable"):
             aid._value = "CHEMBL200"  # type: ignore[misc]
 
-    def test_equality_by_value(self) -> None:
+    def test_compound_ids_assay_id__equality_by_value__44b40d7a(self) -> None:
         """Test equality is based on value."""
         aid1 = AssayId("CHEMBL100")
         aid2 = AssayId("chembl100")
         assert aid1 == aid2
         assert aid1 is not aid2
 
-    def test_hash_consistency(self) -> None:
+    def test_compound_ids_assay_id__hash_consistency__a50fa5af(self) -> None:
         """Test hash is consistent with equality."""
         aid1 = AssayId("CHEMBL100")
         aid2 = AssayId("chembl100")
         assert hash(aid1) == hash(aid2)
 
-    def test_repr(self) -> None:
+    def test_compound_ids_assay_id__repr__a0dff019(self) -> None:
         """Test string representation."""
         aid = AssayId("CHEMBL100")
         assert repr(aid) == "AssayId('CHEMBL100')"
 
-    def test_str(self) -> None:
+    def test_compound_ids_assay_id__str__111f45b2(self) -> None:
         """Test string conversion."""
         aid = AssayId("CHEMBL100")
         assert str(aid) == "CHEMBL100"
 
-    def test_can_be_used_in_set(self) -> None:
+    def test_compound_ids_assay_id__can_be_used_in_set__9dd2c162(self) -> None:
         """Test AssayId can be used in set."""
         ids = {AssayId("CHEMBL100"), AssayId("CHEMBL100"), AssayId("CHEMBL200")}
         assert len(ids) == 2
@@ -292,7 +292,7 @@ class TestAssayId:
         aid2 = AssayId("CHEMBL200")
         assert aid1 != aid2
 
-    def test_inequality_with_different_types(self) -> None:
+    def test_compound_ids_assay_id__with_different_types__392c99ee(self) -> None:
         """Test inequality with different types."""
         aid = AssayId("CHEMBL100")
         assert aid != "CHEMBL100"

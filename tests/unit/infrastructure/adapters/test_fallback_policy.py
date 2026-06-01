@@ -20,6 +20,8 @@ from bioetl.infrastructure.adapters.uniprot.fallback_policy import (
 from tests.helpers.async_iterables import async_iterable
 
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # Helpers — async generator factories
 # ---------------------------------------------------------------------------

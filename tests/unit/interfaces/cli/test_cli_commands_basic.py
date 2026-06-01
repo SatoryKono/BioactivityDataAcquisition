@@ -18,6 +18,8 @@ from bioetl.composition.factories.pipeline.registry import register_all_pipeline
 from bioetl.interfaces.cli import cli, main
 from bioetl.interfaces.cli.exit_codes import ExitCode
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture(autouse=True)
 def ensure_registration():

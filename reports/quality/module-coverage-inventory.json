@@ -613,7 +613,7 @@
       "missing_lines": null,
       "module": "bioetl.application.composite.target_protein_classification_summary",
       "path": "src/bioetl/application/composite/target_protein_classification_summary.py",
-      "source_lines": 211
+      "source_lines": 19
     },
     {
       "coverage_percent": 100.0,
@@ -3146,6 +3146,16 @@
       "source_lines": 337
     },
     {
+      "coverage_percent": null,
+      "coverage_status": "unmeasured",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
+      "module": "bioetl.application.pipelines.chembl.target_protein_classification_summary",
+      "path": "src/bioetl/application/pipelines/chembl/target_protein_classification_summary.py",
+      "source_lines": 216
+    },
+    {
       "coverage_percent": 33.9,
       "coverage_status": "partially_covered",
       "covered_lines": 20,
@@ -3163,7 +3173,7 @@
       "missing_lines": 89,
       "module": "bioetl.application.pipelines.chembl.target_transformer",
       "path": "src/bioetl/application/pipelines/chembl/target_transformer.py",
-      "source_lines": 331
+      "source_lines": 352
     },
     {
       "coverage_percent": 81.25,
@@ -19708,7 +19718,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-06-01",
-  "source_tree_sha256": "4ac5e3708ac49423d6718e8cc3fa576f58baae74be862ff87f2035eb021ff80f",
+  "source_tree_sha256": "6647f071381ff8f9cd31468cf495785832e56aa6cc58dc41bdd0a7cade64c643",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -19923,14 +19933,14 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 1970,
+    "source_module_count": 1971,
     "status_counts": {
       "fully_covered": 493,
       "partially_covered": 1153,
       "uncovered": 318,
-      "unmeasured": 6
+      "unmeasured": 7
     },
-    "unmeasured_module_count": 6,
+    "unmeasured_module_count": 7,
     "unmeasured_modules": [
       {
         "module": "bioetl.__main__",
@@ -19940,6 +19950,11 @@
       {
         "module": "bioetl.application.composite.target_protein_classification_summary",
         "path": "src/bioetl/application/composite/target_protein_classification_summary.py",
+        "reason": "coverage_xml_has_no_class_entry"
+      },
+      {
+        "module": "bioetl.application.pipelines.chembl.target_protein_classification_summary",
+        "path": "src/bioetl/application/pipelines/chembl/target_protein_classification_summary.py",
         "reason": "coverage_xml_has_no_class_entry"
       },
       {

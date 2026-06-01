@@ -490,7 +490,7 @@ class TestMaskSecrets:
 class TestModuleExports:
     """Tests for module __all__ exports."""
 
-    def test_all_exports(self) -> None:
+    def test_config_module_exports__all_exports__562eaff9(self) -> None:
         """Test that __all__ contains expected items."""
         from bioetl.infrastructure.observability import logging_config
 

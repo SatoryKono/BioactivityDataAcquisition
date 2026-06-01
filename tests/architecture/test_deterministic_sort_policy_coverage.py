@@ -14,6 +14,8 @@ from bioetl.infrastructure.schemas.composite_config import (
     validate_composite_config_payload,
 )
 
+pytestmark = pytest.mark.architecture
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 ENTITIES_DIR = PROJECT_ROOT / "configs" / "entities"
 COMPOSITES_DIR = PROJECT_ROOT / "configs" / "composites"

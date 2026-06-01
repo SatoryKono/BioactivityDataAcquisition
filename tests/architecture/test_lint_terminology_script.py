@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import pytest
+
 import subprocess
 import sys
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 def test_lint_terminology_supports_check_without_paths() -> None:
     """CLI must allow --check with no positional paths."""

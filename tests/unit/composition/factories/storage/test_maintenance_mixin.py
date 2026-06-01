@@ -202,7 +202,7 @@ async def test_archive_silver_and_gold(tmp_path: Path) -> None:
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_archive_with_remove_source(tmp_path: Path) -> None:
+async def test_maintenance_mixin__with_remove_source__196328bd(tmp_path: Path) -> None:
     """archive removes source directories when remove_source=True."""
     silver_source = tmp_path / "silver_src"
     silver_source.mkdir()

@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import pytest
+
 import ast
 from dataclasses import dataclass
 from pathlib import Path
+
+pytestmark = pytest.mark.architecture
 
 MAX_EXPORTS_PER_PORTS_SUBMODULE = 22
 

@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.infrastructure.quality.debt_scorecard_validation import (
     validate_debt_scorecard_structure,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def _minimal_valid_scorecard() -> dict[str, object]:
     """Build a minimal valid scorecard for testing."""
@@ -117,7 +121,7 @@ def _minimal_valid_scorecard() -> dict[str, object]:
 class TestValidateDebtScorecardStructure:
     """Tests for validate_debt_scorecard_structure."""
 
-    def test_valid_scorecard_no_errors(self) -> None:
+    def test_scorecard_structure__scorecard_no_errors__0048c8a0(self) -> None:
         """A fully valid scorecard should produce no errors."""
         raw = _minimal_valid_scorecard()
         errors = validate_debt_scorecard_structure(raw)
@@ -144,7 +148,7 @@ class TestValidateDebtScorecardStructure:
         errors = validate_debt_scorecard_structure(raw)
         assert any("baseline" in e for e in errors)
 
-    def test_missing_registry_groups(self) -> None:
+    def test_scorecard_structure__registry_groups__0b4ae76f(self) -> None:
         """Missing registry_groups should return early with error."""
         raw = _minimal_valid_scorecard()
         del raw["registry_groups"]  # type: ignore[attr-defined]

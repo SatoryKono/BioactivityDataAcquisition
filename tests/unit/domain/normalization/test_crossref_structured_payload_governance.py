@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.domain.normalization.publication_structured_fields import (
     CollectionSemantics,
     FieldRepresentation,
     publication_structured_field_policy,
 )
+
+pytestmark = pytest.mark.unit
 
 _CROSSREF_PUBLICATION_CONFIG = {
     "author_details": {

@@ -13,6 +13,8 @@ import pytest
 from bioetl.domain.ports.noop import NoOpTracing
 
 
+pytestmark = pytest.mark.unit
+
 class TestNoOpTracingReExport:
     """Tests for NoOpTracing re-export from tracing module."""
 
@@ -215,7 +217,7 @@ class TestOpenTelemetryTracerSpanAdapter:
 class TestModuleAll:
     """Tests for __all__ exports."""
 
-    def test_all_exports(self) -> None:
+    def test_tracing_module_all__all_exports__de104c4e(self) -> None:
         """All expected items are in __all__."""
         from bioetl.infrastructure.observability import tracing
 

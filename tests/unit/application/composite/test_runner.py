@@ -47,6 +47,8 @@ from tests.unit.application.composite.runner_test_support import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 def create_runner(
     seed_runner: MockPipelineRunner | None = None,
     checkpoint_manager: AsyncMock | None = None,

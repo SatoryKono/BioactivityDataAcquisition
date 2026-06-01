@@ -11,6 +11,8 @@ from types import ModuleType
 import pytest
 
 
+pytestmark = pytest.mark.architecture
+
 def _load_module() -> ModuleType:
     repo_root = Path(__file__).resolve().parents[2]
     module_path = repo_root / "scripts" / "diagrams" / "run_diagram_nightly_suite.py"
@@ -76,7 +78,7 @@ def test_parse_long_label_count_detects_long_and_dense_labels() -> None:
     assert count >= 2
 
 
-def test_load_manifest_rejects_parent_traversal_entries(tmp_path: Path) -> None:
+def test_diagram_nightly_suite__traversal_entries__1ddc89ed(tmp_path: Path) -> None:
     module = _load_module()
     manifest = tmp_path / "nightly.manifest"
     manifest.write_text("../escape.mmd\n", encoding="utf-8")

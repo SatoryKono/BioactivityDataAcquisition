@@ -52,7 +52,7 @@ class TestCompositePipelineStateEnum:
         assert isinstance(state, str)
         assert state == "seed_running"
 
-    def test_from_string_valid(self):
+    def test_pipeline_state_enum__from_string_valid__17f2b39e(self):
         """from_string should parse valid state strings."""
         assert (
             CompositePipelineState.from_string("seed_running")
@@ -67,7 +67,7 @@ class TestCompositePipelineStateEnum:
             == CompositePipelineState.SEED_RUNNING
         )
 
-    def test_from_string_invalid_raises(self):
+    def test_pipeline_state_enum__invalid_raises__873bdba2(self):
         """from_string should raise ValueError for invalid strings."""
         with pytest.raises(ValueError, match="Invalid composite pipeline state"):
             CompositePipelineState.from_string("invalid_state")

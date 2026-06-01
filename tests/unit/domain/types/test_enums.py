@@ -25,7 +25,7 @@ from bioetl.domain.types.enums import (
 class TestRunType:
     """Tests for RunType enum."""
 
-    def test_values(self) -> None:
+    def test_types_enums_run_type__values__b65f512a(self) -> None:
         assert RunType.INCREMENTAL == "incremental"
         assert RunType.BACKFILL == "backfill"
         assert RunType.REBUILD == "rebuild"
@@ -44,7 +44,7 @@ class TestRunType:
 class TestHealthStatus:
     """Tests for HealthStatus enum."""
 
-    def test_values(self) -> None:
+    def test_enums_health_status__values__38264391(self) -> None:
         assert HealthStatus.HEALTHY == "HEALTHY"
         assert HealthStatus.DEGRADED == "DEGRADED"
         assert HealthStatus.UNHEALTHY == "UNHEALTHY"
@@ -59,12 +59,12 @@ class TestHealthStatus:
 class TestCircuitBreakerState:
     """Tests for CircuitBreakerState enum."""
 
-    def test_values(self) -> None:
+    def test_circuit_breaker_state__values__e81c9438(self) -> None:
         assert CircuitBreakerState.CLOSED == "CLOSED"
         assert CircuitBreakerState.OPEN == "OPEN"
         assert CircuitBreakerState.HALF_OPEN == "HALF_OPEN"
 
-    def test_to_metric_value(self) -> None:
+    def test_circuit_breaker_state__to_metric_value__2558ba54(self) -> None:
         assert CircuitBreakerState.CLOSED.to_metric_value() == 0
         assert CircuitBreakerState.HALF_OPEN.to_metric_value() == 1
         assert CircuitBreakerState.OPEN.to_metric_value() == 2
@@ -81,7 +81,7 @@ class TestErrorType:
         assert ErrorType.SCHEMA_EVOLUTION.is_critical() is True
         assert ErrorType.LOCK_LOST.is_critical() is True
 
-    def test_recoverable_errors(self) -> None:
+    def test_types_enums_error_type__recoverable_errors__07ded8a5(self) -> None:
         assert ErrorType.RATE_LIMIT.is_recoverable() is True
         assert ErrorType.TIMEOUT.is_recoverable() is True
         assert ErrorType.NETWORK_ERROR.is_recoverable() is True
@@ -110,7 +110,7 @@ class TestErrorType:
 class TestExecutionContext:
     """Tests for ExecutionContext enum."""
 
-    def test_values(self) -> None:
+    def test_execution_context__values__24172f66(self) -> None:
         assert ExecutionContext.ISOLATED == "isolated"
         assert ExecutionContext.ENRICHER == "enricher"
         assert ExecutionContext.DEPENDENCY == "dependency"
@@ -125,7 +125,7 @@ class TestExecutionContext:
 class TestDriftLevel:
     """Tests for DriftLevel enum."""
 
-    def test_values(self) -> None:
+    def test_enums_drift_level__values__a5c18cc9(self) -> None:
         assert DriftLevel.INFO == "INFO"
         assert DriftLevel.CRITICAL == "CRITICAL"
 
@@ -134,7 +134,7 @@ class TestDriftLevel:
 class TestCellularityType:
     """Tests for CellularityType enum."""
 
-    def test_values(self) -> None:
+    def test_enums_cellularity_type__values__12fe3a1d(self) -> None:
         assert CellularityType.ACELLULAR == "acellular"
         assert CellularityType.UNICELLULAR == "unicellular"
         assert CellularityType.MULTICELLULAR == "multicellular"
@@ -159,7 +159,7 @@ class TestPublicationType:
 class TestDataClassification:
     """Tests for DataClassification enum."""
 
-    def test_values(self) -> None:
+    def test_data_classification__values__878c2170(self) -> None:
         assert DataClassification.PUBLIC == "PUBLIC"
         assert DataClassification.INTERNAL == "INTERNAL"
         assert DataClassification.RESTRICTED == "RESTRICTED"
@@ -169,7 +169,7 @@ class TestDataClassification:
 class TestQuarantineRecordStatus:
     """Tests for QuarantineRecordStatus enum."""
 
-    def test_values(self) -> None:
+    def test_record_status__values__0c42662e(self) -> None:
         assert QuarantineRecordStatus.NEW == "NEW"
         assert QuarantineRecordStatus.IGNORED == "IGNORED"
         assert QuarantineRecordStatus.REPROCESSED == "REPROCESSED"

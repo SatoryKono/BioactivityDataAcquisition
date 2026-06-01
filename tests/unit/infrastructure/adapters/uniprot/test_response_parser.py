@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import pytest
+
 from unittest.mock import MagicMock
 
 from bioetl.infrastructure.adapters.uniprot.response_parser import (
     parse_uniprot_protein_response,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_parse_uniprot_protein_response_returns_records_and_cursor() -> None:
     response = MagicMock()

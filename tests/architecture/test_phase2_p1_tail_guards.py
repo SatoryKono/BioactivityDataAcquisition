@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import pytest
+
 import ast
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 CRITICAL_MODULES = ("src/bioetl/infrastructure/adapters/uniprot/idmapping_client.py",)
 ALLOWED_BROAD_EXCEPTION_POLICIES: dict[str, frozenset[str]] = {

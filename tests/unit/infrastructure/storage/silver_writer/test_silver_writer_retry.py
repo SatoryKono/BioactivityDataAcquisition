@@ -39,7 +39,7 @@ class TestSilverWriterVacuum:
 
     @pytest.mark.asyncio
     @patch("bioetl.infrastructure.storage.support.retention.DeltaTable")
-    async def test_vacuum_dry_run(self, mock_delta_table, noop_logger):
+    async def test_silver_writer_vacuum__vacuum_dry_run__b6419577(self, mock_delta_table, noop_logger):
         """Test vacuum dry run."""
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
@@ -664,7 +664,7 @@ class TestSilverWriterClear:
         result = writer.clear()
         assert result == 0
 
-    def test_get_table_path(self, noop_logger, tmp_path):
+    def test_silver_writer_clear__get_table_path__861add78(self, noop_logger, tmp_path):
         """Test get_table_path returns correct path."""
         from pathlib import Path
 

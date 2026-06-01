@@ -18,6 +18,8 @@ from bioetl.infrastructure.adapters.adapter_error_classifier import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 @pytest.fixture
 def classifier() -> AdapterErrorClassifier:
     logger = MagicMock()

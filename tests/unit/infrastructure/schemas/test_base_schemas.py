@@ -32,13 +32,13 @@ from bioetl.infrastructure.schemas.base_schemas import (
 class TestBaseDQThresholds:
     """Test BaseDQThresholds configuration."""
 
-    def test_default_values(self) -> None:
+    def test_base_d_q_thresholds__default_values__689ebf17(self) -> None:
         """Test default threshold values."""
         config = BaseDQThresholds()
         assert config.soft_fail_threshold == pytest.approx(0.05)
         assert config.hard_fail_threshold == pytest.approx(0.20)
 
-    def test_custom_values(self) -> None:
+    def test_base_d_q_thresholds__custom_values__0a1d5d71(self) -> None:
         """Test custom threshold values."""
         config = BaseDQThresholds(soft_fail_threshold=0.10, hard_fail_threshold=0.30)
         assert config.soft_fail_threshold == pytest.approx(0.10)
@@ -102,13 +102,13 @@ class TestBaseDQConfig:
 class TestBaseCircuitBreakerConfig:
     """Test BaseCircuitBreakerConfig configuration."""
 
-    def test_default_values(self) -> None:
+    def test_circuit_breaker_config__default_values__7f331e6e(self) -> None:
         """Test default circuit breaker values."""
         config = BaseCircuitBreakerConfig()
         assert config.failure_threshold == 5
         assert config.recovery_timeout == 300
 
-    def test_custom_values(self) -> None:
+    def test_circuit_breaker_config__custom_values__c0821b42(self) -> None:
         """Test custom circuit breaker values."""
         config = BaseCircuitBreakerConfig(failure_threshold=10, recovery_timeout=600)
         assert config.failure_threshold == 10
@@ -134,7 +134,7 @@ class TestBaseCircuitBreakerConfig:
         with pytest.raises(ValidationError):
             BaseCircuitBreakerConfig(recovery_timeout=3601)
 
-    def test_to_domain_conversion(self) -> None:
+    def test_circuit_breaker_config__to_domain_conversion__e51513e9(self) -> None:
         """Test conversion to domain object."""
         config = BaseCircuitBreakerConfig(failure_threshold=7, recovery_timeout=450)
         domain = config.to_domain()
@@ -146,13 +146,13 @@ class TestBaseCircuitBreakerConfig:
 class TestBaseRateLimitConfig:
     """Test BaseRateLimitConfig configuration."""
 
-    def test_default_values(self) -> None:
+    def test_base_rate_limit_config__default_values__d455a6d5(self) -> None:
         """Test default rate limit values."""
         config = BaseRateLimitConfig()
         assert config.requests_per_second == pytest.approx(5.0)
         assert config.burst == 10
 
-    def test_custom_values(self) -> None:
+    def test_base_rate_limit_config__custom_values__04df019f(self) -> None:
         """Test custom rate limit values."""
         config = BaseRateLimitConfig(requests_per_second=10.0, burst=20)
         assert config.requests_per_second == pytest.approx(10.0)
@@ -183,13 +183,13 @@ class TestBaseRateLimitConfig:
 class TestHttpClientConfig:
     """Test HttpClientConfig configuration."""
 
-    def test_default_values(self) -> None:
+    def test_http_client_config__default_values__43fcea13(self) -> None:
         """Test default client config values."""
         config = HttpClientConfig()
         assert config.timeout_sec == pytest.approx(30.0)
         assert config.max_retries == 3
 
-    def test_custom_values(self) -> None:
+    def test_http_client_config__custom_values__fadbdaef(self) -> None:
         """Test custom client config values."""
         config = HttpClientConfig(timeout_sec=60.0, max_retries=5)
         assert config.timeout_sec == pytest.approx(60.0)
@@ -220,14 +220,14 @@ class TestHttpClientConfig:
 class TestBaseApiConfig:
     """Test BaseApiConfig configuration."""
 
-    def test_default_values(self) -> None:
+    def test_base_api_config__default_values__8d6ab46e(self) -> None:
         """Test default API config values."""
         config = BaseApiConfig()
         assert config.base_url is None
         assert config.rate_limit is None
         assert config.timeout is None
 
-    def test_custom_values(self) -> None:
+    def test_base_api_config__custom_values__119ece0a(self) -> None:
         """Test custom API config values."""
         config = BaseApiConfig(
             base_url="https://api.example.com",
@@ -279,7 +279,7 @@ class TestBaseGoldColumnFilterTypedValues:
 class TestBaseCsvExportConfig:
     """Test BaseCsvExportConfig configuration."""
 
-    def test_default_values(self) -> None:
+    def test_base_csv_export_config__default_values__2987cb99(self) -> None:
         """Test default CSV export values."""
         config = BaseCsvExportConfig()
         assert config.enabled is False
@@ -288,7 +288,7 @@ class TestBaseCsvExportConfig:
         assert config.header is True
         assert config.encoding == "utf-8"
 
-    def test_custom_values(self) -> None:
+    def test_base_csv_export_config__custom_values__e289819a(self) -> None:
         """Test custom CSV export values."""
         config = BaseCsvExportConfig(
             enabled=True,
@@ -308,7 +308,7 @@ class TestBaseCsvExportConfig:
 class TestBaseInputFilterConfig:
     """Test BaseInputFilterConfig configuration."""
 
-    def test_default_values(self) -> None:
+    def test_input_filter_config__default_values__40273893(self) -> None:
         """Test default input filter values.
 
         Note: column_name and filter_field are None by default because
@@ -399,13 +399,13 @@ class TestBaseInputFilterConfig:
 class TestBaseMaintenanceConfig:
     """Test BaseMaintenanceConfig configuration."""
 
-    def test_default_values(self) -> None:
+    def test_maintenance_config__default_values__08dd2e1b(self) -> None:
         """Test default maintenance config values."""
         config = BaseMaintenanceConfig()
         assert config.auto_vacuum is False
         assert config.vacuum_retention_days == 7
 
-    def test_custom_values(self) -> None:
+    def test_maintenance_config__custom_values__e1231151(self) -> None:
         """Test custom maintenance config values."""
         config = BaseMaintenanceConfig(auto_vacuum=True, vacuum_retention_days=30)
         assert config.auto_vacuum is True
@@ -428,12 +428,12 @@ class TestBaseGoldColumnFilterConfig:
         config = BaseGoldColumnFilterConfig(values=["value1", "value2"])
         assert config.operator == "in"
 
-    def test_in_operator_requires_values(self) -> None:
+    def test_column_filter_config__requires_values__16b4bd8e(self) -> None:
         """Test 'in' operator requires values."""
         with pytest.raises(ValidationError):
             BaseGoldColumnFilterConfig(operator="in")
 
-    def test_not_in_operator_requires_values(self) -> None:
+    def test_column_filter_config__requires_values__037682a5(self) -> None:
         """Test 'not_in' operator requires values."""
         with pytest.raises(ValidationError):
             BaseGoldColumnFilterConfig(operator="not_in")
@@ -445,7 +445,7 @@ class TestBaseGoldColumnFilterConfig:
         with pytest.raises(ValidationError):
             BaseGoldColumnFilterConfig(operator="is_null", values=["x"])
 
-    def test_is_not_null_operator(self) -> None:
+    def test_column_filter_config__is_not_null_operator__27a7eac6(self) -> None:
         """Test 'is_not_null' operator."""
         config = BaseGoldColumnFilterConfig(operator="is_not_null")
         assert config.values is None
@@ -532,7 +532,7 @@ class TestBaseGoldFiltersConfig:
         assert config.list_contains["tags"].values == ["required"]
         assert config.list_contains["tags"].mode == "any"
 
-    def test_to_domain_conversion(self) -> None:
+    def test_gold_filters_config__to_domain_conversion__46c959dc(self) -> None:
         """Test conversion to domain object."""
         config = BaseGoldFiltersConfig(
             columns={"status": ["active"]},

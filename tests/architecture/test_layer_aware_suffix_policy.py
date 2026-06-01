@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import pytest
+
 import ast
 from datetime import date
 import importlib.util
 from pathlib import Path
 import sys
 from types import ModuleType
+
+pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPT_PATH = (

@@ -20,6 +20,8 @@ import pytest
 from bioetl.composition.registry_api import PipelineRegistry, create_registry
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 
+pytestmark = pytest.mark.architecture
+
 if TYPE_CHECKING:
     from bioetl.domain.ports import PipelineFactoryPort
 

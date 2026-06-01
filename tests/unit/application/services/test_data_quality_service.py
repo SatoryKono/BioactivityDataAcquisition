@@ -116,7 +116,7 @@ class TestDataQualityServiceThresholds:
     """Tests for threshold checking in DataQualityService."""
 
     @pytest.mark.asyncio
-    async def test_hard_threshold_exceeded_raises_error(
+    async def test_service_thresholds__raises_error__dfb2d548(
         self, mock_logger, mock_metrics, dq_config
     ):
         """Test that error rate exceeding hard threshold raises DataQualityThresholdError."""
@@ -848,7 +848,7 @@ class TestDataQualityServiceBaselineUpdates:
         ]
 
     @pytest.mark.asyncio
-    async def test_baseline_not_updated_on_critical_anomaly__test_data_quality_service_baseline_updates_application_services_test_data_quality_service_851(
+    async def test_updates_services_data_quality_service_851__b655d959(
         self, mock_logger, mock_metrics, dq_config
     ):
         """Test that baseline is not updated when critical anomaly detected."""

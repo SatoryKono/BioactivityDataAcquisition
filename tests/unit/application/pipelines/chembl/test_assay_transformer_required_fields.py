@@ -68,7 +68,7 @@ class TestAssayTransformerRequiredFields:
             ("confidence_score",),
         ),
     )
-    async def test_transform_uses_pipeline_config_to_quarantine_missing_contract_fields(
+    async def test_required_fields__missing_fields__9fe7cb24(
         self,
         mock_context: PipelineContext,
         missing_field: str,

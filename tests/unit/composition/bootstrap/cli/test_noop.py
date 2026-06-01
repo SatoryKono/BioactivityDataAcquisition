@@ -28,7 +28,7 @@ class TestCreateNoopLogger:
 
         assert isinstance(result, NoOpLogger)
 
-    def test_each_call_creates_new_instance(self) -> None:
+    def test_create_noop_logger__creates_new_instance__ccf6c94d(self) -> None:
         """Each call should create a distinct instance (no shared state)."""
         logger1 = create_noop_logger()
         logger2 = create_noop_logger()
@@ -67,7 +67,7 @@ class TestCreateNoopMetrics:
 
         assert isinstance(result, MetricsPort)
 
-    def test_each_call_creates_new_instance(self) -> None:
+    def test_create_noop_metrics__creates_new_instance__28c6c219(self) -> None:
         """Each call should create a distinct instance."""
         metrics1 = create_noop_metrics()
         metrics2 = create_noop_metrics()
@@ -102,7 +102,7 @@ class TestCreateNoopTracing:
 
         assert isinstance(result, TracingPort)
 
-    def test_each_call_creates_new_instance(self) -> None:
+    def test_create_noop_tracing__creates_new_instance__10d74add(self) -> None:
         """Each call should create a distinct instance."""
         tracing1 = create_noop_tracing()
         tracing2 = create_noop_tracing()

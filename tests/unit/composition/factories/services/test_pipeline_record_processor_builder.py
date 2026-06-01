@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 import tempfile
 from pathlib import Path
 from types import SimpleNamespace
@@ -14,6 +16,8 @@ from bioetl.composition.factories.services.pipeline_record_processor_builder imp
     build_record_processor_config_and_validator,
     create_record_processor_from_pipeline,
 )
+
+pytestmark = pytest.mark.unit
 
 TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-record-processor-builder-"))
 BRONZE_ROOT = str(TEST_ROOT / "bronze")

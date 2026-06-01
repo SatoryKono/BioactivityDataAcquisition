@@ -294,7 +294,7 @@ class TestTrackProcessedRecords:
         call_labels = mock_metrics.increment_counter.call_args[0][2]
         assert call_labels["run_type"] == "rebuild"
 
-    def test_no_op_when_metrics_none(
+    def test_processed_records__op_when_metrics_none__fda62443(
         self, recorder_no_metrics: BatchMetricsRecorderService
     ) -> None:
         """Test that track_processed_records is no-op when metrics is None."""
@@ -473,7 +473,7 @@ class TestTrackSilverFilterRejection:
             },
         )
 
-    def test_no_op_when_metrics_none(
+    def test_filter_rejection__op_when_metrics_none__a2073d7f(
         self, recorder_no_metrics: BatchMetricsRecorderService
     ) -> None:
         """Tracking should remain a no-op when metrics are disabled."""
@@ -550,7 +550,7 @@ class TestTrackDQValidationFailure:
         call_args = mock_metrics.increment_counter.call_args
         assert call_args.args[1] == 1
 
-    def test_no_op_when_metrics_none(
+    def test_d_q_validation_failure__op_when_metrics_none__93d0677a(
         self, recorder_no_metrics: BatchMetricsRecorderService
     ) -> None:
         """Test that track_dq_validation_failure is no-op when metrics is None."""
@@ -619,7 +619,7 @@ class TestTrackQuarantinedRecords:
             },
         )
 
-    def test_no_op_when_metrics_none(
+    def test_quarantined_records__op_when_metrics_none__a7a3626d(
         self, recorder_no_metrics: BatchMetricsRecorderService
     ) -> None:
         """Test that track_quarantined_records is no-op when metrics is None."""

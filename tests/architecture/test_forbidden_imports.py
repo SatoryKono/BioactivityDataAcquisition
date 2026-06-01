@@ -18,11 +18,15 @@ See CLAUDE.md §2.1 Matrix of Imports and §11 Anti-Patterns.
 
 from __future__ import annotations
 
+import pytest
+
 import ast
 import os
 import re
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 def _python_files(path: Path, *, skip_private: bool = False) -> list[Path]:
     files: list[Path] = []

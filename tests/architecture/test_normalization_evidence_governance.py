@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 from bioetl.domain.normalization.profiles.registry import (
     NORMALIZATION_PROFILE_REGISTRY,
 )
+
+pytestmark = pytest.mark.architecture
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 NORMALIZATION_PLAN_PATH = (

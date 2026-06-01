@@ -22,6 +22,8 @@ from tests.architecture.datetime_now_policy_support import (
     find_stale_datetime_exemptions,
 )
 
+pytestmark = pytest.mark.architecture
+
 # Path relative to project root
 INFRASTRUCTURE_DIR = Path("src/bioetl/infrastructure")
 
@@ -91,7 +93,7 @@ class TestNoDatetimeNowInInfrastructure:
             "See ADR-014."
         )
 
-    def test_allowed_paths_still_exist_and_are_unambiguous__test_no_datetime_now_in_infrastructure_tests_architecture_test_no_datetime_now_in_infrastructure_94(
+    def test_datetime_now_in_tests_no_datetime_now_in_94__5391b5b4(
         self, infrastructure_python_files: list[Path]
     ) -> None:
         """Verify that path-based exceptions still exist and avoid basename drift.
@@ -114,7 +116,7 @@ class TestNoDatetimeNowInInfrastructure:
             ),
         )
 
-    def test_allowed_paths_still_require_exception(
+    def test_now_in_infrastructure__require_exception__ba8fc9ec(
         self, infrastructure_python_files: list[Path]
     ) -> None:
         """Force removal of allowlist entries once datetime usage is refactored away."""

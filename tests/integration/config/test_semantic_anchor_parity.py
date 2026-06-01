@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 from scripts.engineering.qa.check_semantic_anchor_parity import (
@@ -9,6 +11,8 @@ from scripts.engineering.qa.check_semantic_anchor_parity import (
     validate_anchor_parity,
 )
 
+
+pytestmark = pytest.mark.integration
 
 def test_semantic_anchor_parity_gate_passes_current_repo() -> None:
     findings = validate_anchor_parity(Path("."))

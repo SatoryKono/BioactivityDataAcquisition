@@ -11,6 +11,8 @@ from bioetl.domain.behavior.normalization_service import (
 )
 from bioetl.domain.value_objects import Concentration, ConcentrationUnit
 
+pytestmark = pytest.mark.unit
+
 
 class TestBioactivityNormalizerBasic:
     """Basic tests for BioactivityNormalizer."""

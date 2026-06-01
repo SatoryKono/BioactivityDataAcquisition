@@ -31,19 +31,19 @@ def _make_mixin(**overrides: object) -> MergeOutputWriterMixin:
 class TestPathToTableName:
     """Test _path_to_table_name static method."""
 
-    def test_strips_silver_prefix(self) -> None:
+    def test_path_to_table_name__strips_silver_prefix__182015f9(self) -> None:
         assert (
             MergeOutputWriterMixin._path_to_table_name("silver/composite/pub")
             == "composite/pub"
         )
 
-    def test_strips_gold_prefix(self) -> None:
+    def test_path_to_table_name__strips_gold_prefix__fb4a3fb9(self) -> None:
         assert (
             MergeOutputWriterMixin._path_to_table_name("gold/pub_enriched")
             == "pub_enriched"
         )
 
-    def test_strips_bronze_prefix(self) -> None:
+    def test_path_to_table_name__strips_bronze_prefix__9d2945e2(self) -> None:
         assert MergeOutputWriterMixin._path_to_table_name("bronze/raw") == "raw"
 
     def test_handles_backslashes(self) -> None:

@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 import yaml
 
 from scripts.engineering.repo import check_root_hygiene_review_registry as module
 
+
+pytestmark = pytest.mark.unit
 
 def test_validate_baseline_requires_strict_audit_command() -> None:
     issues = module._validate_baseline(

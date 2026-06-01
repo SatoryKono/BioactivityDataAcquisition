@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 def test_tests_workflow_blocks_expired_exemptions() -> None:
     """Merge pipeline must block when expired exemptions are present."""

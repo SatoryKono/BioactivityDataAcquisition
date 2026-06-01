@@ -1,5 +1,7 @@
 """Unit tests for composite validation layer service."""
 
+import pytest
+
 from bioetl.domain.behavior.aggregation_validator import AggregationValidator
 from bioetl.domain.behavior.composite_validation_layer import (
     CompositeValidationConfig,
@@ -16,6 +18,8 @@ from bioetl.domain.types.validation_severity import (
     ValidationSeverity,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def _create_service() -> CompositeValidator:
     return CompositeValidator(
@@ -47,7 +51,7 @@ def test_composite_validation_service_uses_canonical_class() -> None:
     assert _create_service().__class__ is CompositeValidator
 
 
-def test_valid_composite_config():
+def test_validation_layer__composite_config__edd6e2c5():
     """Test validation of a valid composite configuration."""
     service = _create_service()
     config = CompositeValidationConfig(

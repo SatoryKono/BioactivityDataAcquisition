@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 import yaml
@@ -16,6 +18,8 @@ from bioetl.infrastructure.quality import (
     validate_exemptions_registry,
 )
 
+
+pytestmark = pytest.mark.architecture
 
 def test_exemption_registry_has_required_sections() -> None:
     raw = load_exemptions_registry()

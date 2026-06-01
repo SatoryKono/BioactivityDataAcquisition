@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
+import pytest
+
 # ruff: noqa: F403,F405
 from bioetl.composition.runtime_builders.runner_builder_wiring import (
     LegacyRunnerBuilderOverrides,
 )
 
-from tests.unit.composition.runtime_builders.runner_builder_test_support import *  # noqa: F403,F405
+from tests.unit.composition.runtime_builders.runner_builder_test_support import *
 
+
+pytestmark = pytest.mark.unit
 
 def test_build_pipeline_runner_rejects_exact_replay_without_materialized_cached_bronze_batches(
     tmp_path: Path,

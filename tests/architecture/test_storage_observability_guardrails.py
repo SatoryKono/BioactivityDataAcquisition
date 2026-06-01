@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import pytest
+
 import ast
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 FORBIDDEN_TRACING_DEFAULT_PATHS = (
     Path("src/bioetl/infrastructure/storage/bronze_writer.py"),

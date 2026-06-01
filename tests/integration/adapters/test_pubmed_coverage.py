@@ -90,7 +90,7 @@ async def test_fetch_filtered(pubmed_adapter: PubMedAdapter):
 
 
 @pytest.mark.integration
-async def test_fetch_filtered_with_fallback(pubmed_adapter: PubMedAdapter):
+async def test_pubmed_coverage__with_fallback__c05cba22(pubmed_adapter: PubMedAdapter):
     mock_xml = """<?xml version="1.0"?>
     <PubmedArticleSet>
         <PubmedArticle>

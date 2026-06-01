@@ -8,6 +8,8 @@ from typing import Any
 import pytest
 import yaml
 
+pytestmark = pytest.mark.architecture
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 COMPOSITES_DIR = PROJECT_ROOT / "configs" / "composites"
 COMPOSITE_QUALITY_DIR = PROJECT_ROOT / "configs" / "quality" / "entities" / "composite"
@@ -113,10 +115,10 @@ class TestCompositeDQExternalization:
             f"Composite DQ config must declare non-empty required_fields: {external_path}"
         )
         assert (
-            isinstance(field_validations, list)
-            and field_validations
-            or isinstance(cross_field_validations, list)
-            and cross_field_validations
+            (isinstance(field_validations, list)
+            and field_validations)
+            or (isinstance(cross_field_validations, list)
+            and cross_field_validations)
         ), (
             "Composite DQ config must declare field or cross-field validation "
             f"bundles: {external_path}"

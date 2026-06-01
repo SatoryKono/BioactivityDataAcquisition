@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.infrastructure.adapters.common.response_shapes import (
     extract_response_items,
     extract_response_mapping,
@@ -9,6 +11,8 @@ from bioetl.infrastructure.adapters.common.response_shapes import (
     normalize_response_items,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_normalize_response_items_supports_lists_and_tuples() -> None:
     assert normalize_response_items([1, 2]) == [1, 2]

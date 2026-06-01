@@ -16,6 +16,8 @@ from bioetl.interfaces.cli import cli
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from tests.unit.interfaces.cli.commands.conftest import mock_asyncio_run
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def cli_runner() -> CliRunner:

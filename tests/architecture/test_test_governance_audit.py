@@ -22,6 +22,9 @@ from scripts.engineering.qa.report_test_governance_audit import (
 
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG_PATH = ROOT / "configs" / "quality" / "test_governance_audit.yaml"
+DUPLICATE_NAME_INVENTORY_PATH = (
+    ROOT / "reports" / "quality" / "test-duplicate-name-inventory.json"
+)
 GOLD_REGISTRY_PATH = (
     ROOT / "tests" / "fixtures" / "golden" / "gold" / ("schema_registry.v1.json")
 )
@@ -215,7 +218,14 @@ def test_test_governance_budgets_are_explicit_no_growth_ratchets() -> None:
     budgets = cast(YamlMap, payload["budgets"])
     ratchet = cast(YamlMap, payload["budget_ratchet"])
 
-    assert ratchet["linked_issue"] in {"#4458", "#4488", "#4499", "#4549", "#4685"}
+    assert ratchet["linked_issue"] in {
+        "#4458",
+        "#4488",
+        "#4499",
+        "#4549",
+        "#4685",
+        "#4901",
+    }
     assert ratchet["mode"] == "fail-fast-no-growth"
     assert ratchet["expected_direction"] == "downward"
     assert cast(str, ratchet["touch_policy"]).strip()
@@ -296,6 +306,15 @@ def test_duplicate_name_triage_tracks_top_generic_names() -> None:
     }
     assert configured_top == report_top
     assert cast(YamlMap, triage["fixture_builder_policy"])["consolidate_when"]
+
+
+@pytest.mark.architecture
+def test_duplicate_name_inventory_artifact_matches_static_report() -> None:
+    payload = json.loads(DUPLICATE_NAME_INVENTORY_PATH.read_text(encoding="utf-8"))
+    report = collect_test_governance_report(ROOT)
+
+    assert payload["summary"] == report["duplicate_test_name_inventory_summary"]
+    assert payload["inventory"] == report["duplicate_test_name_inventory"]
 
 
 @pytest.mark.architecture

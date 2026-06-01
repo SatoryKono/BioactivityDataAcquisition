@@ -17,6 +17,8 @@ from bioetl.infrastructure.adapters.crossref import CrossRefAdapter
 from tests.helpers.adapter_runtime import build_http_adapter_runtime_bundle
 
 
+pytestmark = pytest.mark.unit
+
 @pytest.fixture
 def mock_http_client():
     """Fixture for mock HTTP client."""
@@ -74,7 +76,7 @@ def test_post_init_preserves_injected_crossref_runtime_collaborators(
     assert adapter._fetch_flow is fetch_flow
 
 
-def test_post_init_preserves_injected_base_collaborators(
+def test_crossref_client__base_collaborators__e6edb72e(
     mock_http_client, mock_logger
 ) -> None:
     """Dataclass adapter should delegate shared base initialization."""
@@ -188,7 +190,7 @@ async def test_fetch_by_doi_request_error(adapter, mock_http_client, mock_logger
 
 
 @pytest.mark.asyncio
-async def test_health_check_healthy(adapter, mock_http_client):
+async def test_crossref_client__health_check_healthy__089dc662(adapter, mock_http_client):
     """Test health_check returns HEALTHY on success."""
     mock_response = MagicMock()
     mock_response.status_code = 200

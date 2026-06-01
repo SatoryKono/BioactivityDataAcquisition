@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import pytest
+
 import json
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 DOCS_SHIMS = (
     "scripts/docs/check_doc_drift.py",

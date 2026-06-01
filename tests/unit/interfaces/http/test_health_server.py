@@ -5,17 +5,17 @@ from __future__ import annotations
 import asyncio
 import json
 from collections.abc import AsyncGenerator
-from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
 
 import pytest
 import pytest_asyncio
 
-from bioetl.domain.types import HealthStatus, RunType
+from bioetl.domain.types import HealthStatus
 from bioetl.interfaces.http.health_server import HealthServer
 from bioetl.interfaces.http.types import HealthResponse
 
+
+pytestmark = pytest.mark.unit
 
 class TestHealthResponse:
     """Tests for HealthResponse dataclass."""
@@ -255,7 +255,7 @@ class TestHealthServer:
         assert status == HealthStatus.UNHEALTHY
 
     @pytest.mark.asyncio
-    async def test_overall_status_degraded(
+    async def test_server_health_server__status_degraded__7b73d3f7(
         self, mock_health_monitor: MagicMock
     ) -> None:
         """Test that overall status is degraded when worst is degraded."""

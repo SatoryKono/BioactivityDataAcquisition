@@ -230,8 +230,8 @@ config_surface_ratchet:
       ratchet_policy: Non-growth fail-fast unless a reviewed pipeline addition updates
         the budget.
     unique_parameter_count:
-      current_count: 511
-      max_count: 511
+      current_count: 527
+      max_count: 527
       owner: '@bioetl-config'
       linked_issue: '#4818'
       rationale: Flattened parameter vocabulary must not expand silently across the
@@ -248,8 +248,8 @@ config_surface_ratchet:
         B closeout.
       ratchet_policy: Non-growth fail-fast; increases require reviewed contract regression.
     sanctioned_partial_parameter_count:
-      current_count: 106
-      max_count: 106
+      current_count: 122
+      max_count: 122
       owner: '@bioetl-config'
       linked_issue: '#4818'
       rationale: Documented intentional entity-specific partial keys excluded from
@@ -257,8 +257,8 @@ config_surface_ratchet:
       ratchet_policy: Non-growth fail-fast unless a reviewed entity contract adds
         new intentional divergence.
     raw_inconsistent_parameter_count:
-      current_count: 106
-      max_count: 106
+      current_count: 122
+      max_count: 122
       owner: '@bioetl-config'
       linked_issue: '#4818'
       rationale: Raw family-scoped partial key count before sanctioned-prefix exclusion;
@@ -309,8 +309,8 @@ config_surface_ratchet:
           rationale: Composite runtime configs under configs/composites/*.yaml.
           ratchet_policy: Non-growth fail-fast for composite runtime surface.
         unique_parameter_count:
-          current_count: 199
-          max_count: 199
+          current_count: 215
+          max_count: 215
           rationale: Flattened vocabulary for composite runtime configs only.
           ratchet_policy: Non-growth fail-fast unless composite schema expansion updates
             budget.
@@ -320,15 +320,18 @@ config_surface_ratchet:
           rationale: Composite-family actionable drift; Stream B burn-down complete.
           ratchet_policy: Non-growth fail-fast for composite runtime surface.
         sanctioned_partial_parameter_count:
-          current_count: 0
-          max_count: 0
-          rationale: No sanctioned composite partial keys remain.
-          ratchet_policy: Non-growth fail-fast.
+          current_count: 16
+          max_count: 16
+          rationale: Intentional composite-only target protein classification field
+            mappings on composite_target remain sanctioned variance.
+          ratchet_policy: Non-growth fail-fast unless reviewed composite contract expands
+            intentional divergence.
         raw_inconsistent_parameter_count:
-          current_count: 0
-          max_count: 0
-          rationale: Raw composite partial keys; aligned across all composite configs.
-          ratchet_policy: Non-growth fail-fast.
+          current_count: 16
+          max_count: 16
+          rationale: Raw composite partial keys currently mirror sanctioned target
+            protein classification field mappings.
+          ratchet_policy: Non-growth fail-fast unless governed composite vocabulary expands.
 registry_groups:
   size_metrics:
     registries:

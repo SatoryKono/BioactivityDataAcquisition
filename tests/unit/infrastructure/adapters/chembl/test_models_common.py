@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.infrastructure.adapters.chembl.models_common import (
     ChemblPublicationApiRecord,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_chembl_publication_api_record_normalizes_integer_pubmed_id() -> None:
     record = ChemblPublicationApiRecord(

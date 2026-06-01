@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 import yaml
 
 from scripts.engineering.diagnostics import audit_structure as module
 
+
+pytestmark = pytest.mark.unit
 
 def _write_governance_files(tmp_path: Path) -> None:
     allowlist_path = tmp_path / ".github" / "root-allowlist.txt"

@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import pytest
+
 import importlib
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 def test_build_site_router_targets_importable_backend() -> None:
     root = Path(__file__).resolve().parents[2]

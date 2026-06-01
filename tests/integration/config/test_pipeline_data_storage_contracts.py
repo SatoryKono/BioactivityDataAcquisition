@@ -7,6 +7,8 @@ from pathlib import Path
 import pytest
 import yaml
 
+pytestmark = pytest.mark.integration
+
 ROOT = Path(__file__).resolve().parents[3]
 
 # Unified pipeline configs live in configs/entities/{provider}/{entity}.yaml.

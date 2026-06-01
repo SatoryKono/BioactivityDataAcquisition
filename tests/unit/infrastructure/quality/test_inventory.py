@@ -16,10 +16,12 @@ from bioetl.infrastructure.quality.inventory import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 class TestExemptionInventorySummary:
     """Tests for ExemptionInventorySummary dataclass."""
 
-    def test_creation(self) -> None:
+    def test_inventory_summary__creation__852533c7(self) -> None:
         """Should be creatable with expected fields."""
         summary = ExemptionInventorySummary(
             total_exemptions=10,
@@ -32,7 +34,7 @@ class TestExemptionInventorySummary:
         assert summary.by_registry == {"reg_a": 10}
         assert summary.expired_entries == 2
 
-    def test_frozen(self) -> None:
+    def test_inventory_summary__frozen__a99f0110(self) -> None:
         """Should be immutable (frozen dataclass)."""
         summary = ExemptionInventorySummary(
             total_exemptions=0,
@@ -212,7 +214,7 @@ class TestBuildExemptionInventory:
         assert summary.total_exemptions == 1
         assert "reg_a" not in summary.by_registry
 
-    def test_skips_non_dict_entries(self) -> None:
+    def test_exemption_inventory__non_dict_entries__b9f4e8d8(self) -> None:
         """Non-dict exemption entries should be skipped."""
         raw = {
             "registries": {
@@ -240,7 +242,7 @@ class TestBuildExemptionInventory:
             with pytest.raises(ValueError, match="must be a mapping"):
                 build_exemption_inventory(today=date(2025, 6, 15))
 
-    def test_today_defaults_to_date_today(self) -> None:
+    def test_exemption_inventory__to_date_today__afda8355(self) -> None:
         """today=None should use date.today() without error."""
         raw: dict[str, object] = {"registries": {}}
         with patch(

@@ -168,7 +168,7 @@ class TestCrossRefExternalVerification:
 
         assert records == []
 
-    async def test_invalid_entity_type_raises(
+    async def test_external_verification__entity_type_raises__707474fc(
         self, crossref_adapter: CrossRefAdapter
     ) -> None:
         async with crossref_adapter._http_client:
@@ -253,7 +253,7 @@ class TestPubMedExternalVerification:
         assert records[0]["pmid"] == "35486828"
         assert records[0]["_lookup_method"] == "pmid"
 
-    async def test_invalid_entity_type_raises(
+    async def test_external_verification__entity_type_raises__fce8a4b4(
         self, pubmed_adapter: PubMedAdapter
     ) -> None:
         async with pubmed_adapter._http_client:
@@ -268,7 +268,7 @@ class TestPubMedExternalVerification:
 
 @pytest.mark.integration
 class TestOpenAlexExternalVerification:
-    async def test_doi_found(self, openalex_adapter: OpenAlexAdapter) -> None:
+    async def test_external_verification__doi_found__8d6a430a(self, openalex_adapter: OpenAlexAdapter) -> None:
         response_json = {
             "results": [
                 {
@@ -298,7 +298,7 @@ class TestOpenAlexExternalVerification:
         assert "W2148763428" in records[0]["id"]
         assert records[0]["_lookup_method"] == "doi"
 
-    async def test_doi_not_found(self, openalex_adapter: OpenAlexAdapter) -> None:
+    async def test_external_verification__doi_not_found__7e52825b(self, openalex_adapter: OpenAlexAdapter) -> None:
         with respx.mock(base_url=OPENALEX_API_BASE) as respx_mock:
             respx_mock.get("/works").mock(
                 return_value=Response(200, json={"results": [], "meta": {"count": 0}})
@@ -385,7 +385,7 @@ class TestSemanticScholarExternalVerification:
         assert len(records) == 1
         assert records[0]["_lookup_method"] == "title_fallback"
 
-    async def test_invalid_entity_type_raises(
+    async def test_external_verification__entity_type_raises__51508b9d(
         self, semanticscholar_adapter: SemanticScholarAdapter
     ) -> None:
         async with semanticscholar_adapter._http_client:

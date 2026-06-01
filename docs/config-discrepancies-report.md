@@ -1,10 +1,10 @@
 # Config Discrepancies Report
 
 Total configs: 27
-Total unique parameters: 511
+Total unique parameters: 527
 Actionable inconsistent parameters: 0
-Sanctioned partial variance parameters: 106
-Raw partial parameter count: 106
+Sanctioned partial variance parameters: 122
+Raw partial parameter count: 122
 
 ## Actionable Drift Parameters
 
@@ -123,6 +123,25 @@ These parameters are intentionally partial across governed config families and r
 - `quality.thresholds` (1/22): entity/uniprot/idmapping
 - `quality.thresholds.hard_fail` (1/22): entity/uniprot/idmapping
 - `quality.thresholds.soft_fail` (1/22): entity/uniprot/idmapping
+
+### composite_runtime
+
+- `composite.merge.field_mappings.chembl.target_protein_classification.protein_classifications` (1/5): composite/target
+- `composite.merge.field_mappings.chembl.target_protein_classification.target_protein_class_desc_L1` (1/5): composite/target
+- `composite.merge.field_mappings.chembl.target_protein_classification.target_protein_class_desc_L2` (1/5): composite/target
+- `composite.merge.field_mappings.chembl.target_protein_classification.target_protein_class_desc_L3` (1/5): composite/target
+- `composite.merge.field_mappings.chembl.target_protein_classification.target_protein_class_desc_L4` (1/5): composite/target
+- `composite.merge.field_mappings.chembl.target_protein_classification.target_protein_class_desc_L5` (1/5): composite/target
+- `composite.merge.field_mappings.chembl.target_protein_classification.target_protein_class_id_L1` (1/5): composite/target
+- `composite.merge.field_mappings.chembl.target_protein_classification.target_protein_class_id_L2` (1/5): composite/target
+- `composite.merge.field_mappings.chembl.target_protein_classification.target_protein_class_id_L3` (1/5): composite/target
+- `composite.merge.field_mappings.chembl.target_protein_classification.target_protein_class_id_L4` (1/5): composite/target
+- `composite.merge.field_mappings.chembl.target_protein_classification.target_protein_class_id_L5` (1/5): composite/target
+- `composite.merge.field_mappings.chembl.target_protein_classification.target_protein_class_name_L1` (1/5): composite/target
+- `composite.merge.field_mappings.chembl.target_protein_classification.target_protein_class_name_L2` (1/5): composite/target
+- `composite.merge.field_mappings.chembl.target_protein_classification.target_protein_class_name_L3` (1/5): composite/target
+- `composite.merge.field_mappings.chembl.target_protein_classification.target_protein_class_name_L4` (1/5): composite/target
+- `composite.merge.field_mappings.chembl.target_protein_classification.target_protein_class_name_L5` (1/5): composite/target
 
 ## Interpretation
 

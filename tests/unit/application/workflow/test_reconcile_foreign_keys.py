@@ -17,6 +17,8 @@ from bioetl.domain.ports.workflow_foreign_key_reconciliation import (
 from bioetl.domain.workflow import TransformStepConfig, WorkflowTransformSpec
 
 
+pytestmark = pytest.mark.unit
+
 @dataclass
 class _RecordingPort:
     request: ForeignKeyReconciliationRequest | None = None

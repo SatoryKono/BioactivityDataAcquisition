@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 import pandas as pd
 
 from bioetl.domain.schemas.validators import (
@@ -10,6 +12,8 @@ from bioetl.domain.schemas.validators import (
     rows_are_valid_json_object,
 )
 
+
+pytestmark = pytest.mark.unit
 
 class TestRowsAreValidJson:
     """Tests for rows_are_valid_json validator."""
@@ -62,7 +66,7 @@ class TestRowsAreValidJsonArray:
         assert isinstance(result, pd.Series)
         assert result.all()
 
-    def test_null_values_pass(self) -> None:
+    def test_are_valid_json_array__null_values_pass__5e6cb1af(self) -> None:
         """Should accept null/NaN values."""
         series = pd.Series([None, pd.NA, float("nan")])
         result = rows_are_valid_json_array(series)
@@ -80,13 +84,13 @@ class TestRowsAreValidJsonArray:
         result = rows_are_valid_json_array(series)
         assert not result.any()
 
-    def test_invalid_json_fails(self) -> None:
+    def test_are_valid_json_array__invalid_json_fails__b7be53f7(self) -> None:
         """Should reject invalid JSON."""
         series = pd.Series(["[unclosed", "not json"])
         result = rows_are_valid_json_array(series)
         assert not result.any()
 
-    def test_mixed_values(self) -> None:
+    def test_are_valid_json_array__mixed_values__c2d7876e(self) -> None:
         """Should handle mixed valid/invalid values."""
         series = pd.Series(['["valid"]', '{"object": 1}', None, "invalid"])
         result = rows_are_valid_json_array(series)
@@ -109,7 +113,7 @@ class TestRowsAreValidJsonObject:
         result = rows_are_valid_json_object(series)
         assert result.all()
 
-    def test_null_values_pass(self) -> None:
+    def test_are_valid_json_object__null_values_pass__de4b9c0d(self) -> None:
         """Should accept null/NaN values."""
         series = pd.Series([None, pd.NA, float("nan")])
         result = rows_are_valid_json_object(series)
@@ -121,19 +125,19 @@ class TestRowsAreValidJsonObject:
         result = rows_are_valid_json_object(series)
         assert not result.any()
 
-    def test_json_primitives_fail(self) -> None:
+    def test_are_valid_json_object__json_primitives_fail__dfc1ced5(self) -> None:
         """Should reject JSON primitives (not objects)."""
         series = pd.Series(['"string"', "123", "true", "null"])
         result = rows_are_valid_json_object(series)
         assert not result.any()
 
-    def test_invalid_json_fails(self) -> None:
+    def test_are_valid_json_object__invalid_json_fails__1d6d870d(self) -> None:
         """Should reject invalid JSON."""
         series = pd.Series(["{unclosed", "not json"])
         result = rows_are_valid_json_object(series)
         assert not result.any()
 
-    def test_mixed_values(self) -> None:
+    def test_are_valid_json_object__mixed_values__64166cb7(self) -> None:
         """Should handle mixed valid/invalid values."""
         series = pd.Series(['{"valid": 1}', '["array"]', None, "invalid"])
         result = rows_are_valid_json_object(series)

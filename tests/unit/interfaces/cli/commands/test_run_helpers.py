@@ -58,7 +58,7 @@ class TestResolveContextRegistry:
 class TestValidatePipelineName:
     """Tests for validate_pipeline_name Click callback."""
 
-    def test_valid_pipeline_returns_value(self, mock_registry: MagicMock) -> None:
+    def test_validate_pipeline_name__returns_value__472871f4(self, mock_registry: MagicMock) -> None:
         """Test that a valid pipeline name is returned unchanged."""
         with patch(
             "bioetl.interfaces.cli.registry_helpers.build_cli_registry",
@@ -84,7 +84,7 @@ class TestValidatePipelineName:
         assert result == "chembl_activity"
         assert click_context.obj is mock_registry
 
-    def test_invalid_pipeline_raises_bad_parameter(
+    def test_validate_pipeline_name__raises_bad_parameter__2cb0b886(
         self, mock_registry: MagicMock
     ) -> None:
         """Test that unknown pipeline raises click.BadParameter."""
@@ -115,7 +115,7 @@ class TestValidatePipelineName:
 class TestGetRunnerLogger:
     """Tests for get_runner_logger helper."""
 
-    def test_returns_logger_attribute(self) -> None:
+    def test_get_runner_logger__logger_attribute__8b2da8d0(self) -> None:
         """Test returns 'logger' attribute from runner."""
         mock_logger = MagicMock()
         runner = MagicMock()
@@ -135,7 +135,7 @@ class TestGetRunnerLogger:
         result = get_runner_logger(runner)
         assert result is mock_logger
 
-    def test_returns_none_when_no_logger(self) -> None:
+    def test_get_runner_logger__none_when_no_logger__724e0752(self) -> None:
         """Test returns None when runner has no logger attributes."""
         runner = MagicMock(spec=[])  # No attributes defined
 

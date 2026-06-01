@@ -11,6 +11,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.architecture
+
 # Path relative to project root
 CONTRACTS_DIR = Path("docs/04-reference/contracts/gold")
 

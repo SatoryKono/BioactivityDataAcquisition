@@ -57,12 +57,12 @@ class TestFieldValidation:
         assert isinstance(fv.allowed, tuple)
         assert fv.allowed == ("active", "inactive")
 
-    def test_effective_severity_default(self) -> None:
+    def test_field_validation__severity_default__3fa50b50(self) -> None:
         fv = FieldValidation(field="x", validation_type="required", severity="error")
         assert fv.effective_severity() == "error"
         assert fv.effective_severity(is_enricher=True) == "error"
 
-    def test_effective_severity_enricher_override(self) -> None:
+    def test_field_validation__enricher_override__a02ba514(self) -> None:
         fv = FieldValidation(
             field="x",
             validation_type="required",
@@ -72,7 +72,7 @@ class TestFieldValidation:
         assert fv.effective_severity(is_enricher=False) == "error"
         assert fv.effective_severity(is_enricher=True) == "warn"
 
-    def test_immutable(self) -> None:
+    def test_field_validation__immutable__ca2b7f07(self) -> None:
         fv = FieldValidation(field="x", validation_type="required")
         with pytest.raises((AttributeError, TypeError)):
             fv.field = "other"  # type: ignore[misc]
@@ -148,7 +148,7 @@ class TestCrossFieldValidation:
         )
         assert cfv.condition == condition
 
-    def test_immutable(self) -> None:
+    def test_cross_field_validation__immutable__08954ce2(self) -> None:
         cfv = CrossFieldValidation(name="t", fields=("a",), condition="all_present")
         with pytest.raises((AttributeError, TypeError)):
             cfv.name = "other"  # type: ignore[misc]
@@ -218,7 +218,7 @@ class TestConditionalValidation:
         )
         assert cv.condition_operator == op
 
-    def test_immutable(self) -> None:
+    def test_conditional_validation__immutable__9346e1cb(self) -> None:
         cv = ConditionalValidation(name="t", condition_field="f", condition_value="v")
         with pytest.raises((AttributeError, TypeError)):
             cv.name = "other"  # type: ignore[misc]

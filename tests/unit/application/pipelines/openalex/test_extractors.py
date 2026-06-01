@@ -99,7 +99,7 @@ class TestExtractAuthors:
         result = extract_authors(authorships)
         assert result == ["John Doe", "Jane Smith"]
 
-    def test_extract_authors_empty_list(self) -> None:
+    def test_extract_authors__authors_empty_list__041c982f(self) -> None:
         """Should return empty list for empty authorships."""
         result = extract_authors([])
         assert result == []
@@ -113,7 +113,7 @@ class TestExtractAuthors:
         result = extract_authors(authorships)
         assert result == ["Jane Smith"]
 
-    def test_extract_authors_with_whitespace(self) -> None:
+    def test_extract_authors__with_whitespace__cb1e7717(self) -> None:
         """Should strip whitespace from author names."""
         authorships = [
             {"author": {"display_name": "  John Doe  "}},
@@ -333,7 +333,7 @@ class TestExtractAffiliations:
         # Sorted
         assert result == ["Broad Institute", "Harvard University"]
 
-    def test_extract_affiliations_deduplication(self) -> None:
+    def test_extract_affiliations__deduplication__f05145e6(self) -> None:
         """Should deduplicate affiliations across authors."""
         authorships = [
             {
@@ -348,7 +348,7 @@ class TestExtractAffiliations:
         result = extract_affiliations(authorships)
         assert result == ["Harvard University"]
 
-    def test_extract_affiliations_empty(self) -> None:
+    def test_extract_affiliations__affiliations_empty__9736b4c8(self) -> None:
         """Should return empty list if no authorships."""
         result = extract_affiliations([])
         assert result == []
@@ -531,7 +531,7 @@ class TestExtractInstitutionCountryCodes:
 class TestExtractJournalInfo:
     """Tests for extract_journal_info function."""
 
-    def test_extract_journal_info_complete(self) -> None:
+    def test_extract_journal_info__info_complete__5ae2f7e8(self) -> None:
         """Should extract all journal fields."""
         primary_location = {
             "source": {
@@ -547,7 +547,7 @@ class TestExtractJournalInfo:
             "publisher": "Springer Nature",
         }
 
-    def test_extract_journal_info_partial(self) -> None:
+    def test_extract_journal_info__journal_info_partial__8f19d4c1(self) -> None:
         """Should handle missing fields gracefully."""
         primary_location = {
             "source": {

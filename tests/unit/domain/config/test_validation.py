@@ -50,11 +50,11 @@ class TestValidationConfig:
         with pytest.raises(ValueError, match="min_molecular_weight"):
             ValidationConfig(min_molecular_weight=10000.0, max_molecular_weight=10.0)
 
-    def test_invalid_pchembl_range_raises(self) -> None:
+    def test_validation_config__pchembl_range_raises__bfb4466b(self) -> None:
         with pytest.raises(ValueError, match="min_pchembl_value"):
             ValidationConfig(min_pchembl_value=15.0, max_pchembl_value=0.0)
 
-    def test_negative_precision_raises(self) -> None:
+    def test_validation_config__precision_raises__a8db7fce(self) -> None:
         with pytest.raises(ValueError, match="molecular_weight_precision"):
             ValidationConfig(molecular_weight_precision=-1)
 
@@ -62,7 +62,7 @@ class TestValidationConfig:
         assert DEFAULT_VALIDATION_CONFIG is not None
         assert isinstance(DEFAULT_VALIDATION_CONFIG, ValidationConfig)
 
-    def test_frozen(self) -> None:
+    def test_validation_config__frozen__06babd90(self) -> None:
         config = ValidationConfig()
         with pytest.raises(AttributeError):
             config.min_publication_year = 2000  # type: ignore[misc]
@@ -105,7 +105,7 @@ class TestFieldValidation:
         )
         assert fv.allowed == ("active", "inactive")
 
-    def test_list_to_tuple_conversion(self) -> None:
+    def test_field_validation__to_tuple_conversion__c80dac45(self) -> None:
         fv = FieldValidation(
             field="status",
             validation_type="enum",
@@ -142,7 +142,7 @@ class TestCrossFieldValidation:
         assert cfv.condition == "all_present"
         assert cfv.fields == ("field_a", "field_b")
 
-    def test_list_to_tuple_conversion(self) -> None:
+    def test_cross_field_validation__to_tuple_conversion__9f09a642(self) -> None:
         cfv = CrossFieldValidation(
             name="test",
             fields=["a", "b"],  # type: ignore[arg-type]
@@ -166,7 +166,7 @@ class TestCrossFieldValidation:
 class TestConditionalValidation:
     """Tests for ConditionalValidation frozen dataclass."""
 
-    def test_basic_creation(self) -> None:
+    def test_conditional_validation__basic_creation__00a374cd(self) -> None:
         cv = ConditionalValidation(
             name="activity_type_check",
             condition_field="type",
@@ -185,7 +185,7 @@ class TestConditionalValidation:
         assert cv.condition_operator == "in"
         assert cv.condition_value == ("active", "pending")
 
-    def test_list_to_tuple_conversion(self) -> None:
+    def test_conditional_validation__to_tuple_conversion__e6bd2320(self) -> None:
         cv = ConditionalValidation(
             name="check",
             condition_field="status",

@@ -61,7 +61,7 @@ def data_source(
 class TestIDMappingDataSourceInit:
     """Tests for IDMappingDataSource initialization."""
 
-    def test_initialization(self, data_source: IDMappingDataSource) -> None:
+    def test_data_source_init__initialization__c366614c(self, data_source: IDMappingDataSource) -> None:
         """Test default initialization."""
         assert data_source.provider_name == "uniprot_idmapping"
         assert data_source._input_path == "data/input/target.csv"
@@ -291,7 +291,7 @@ class TestIDMappingDataSourceHealthCheck:
     """Tests for health_check behavior."""
 
     @pytest.mark.asyncio
-    async def test_health_check_healthy(self, data_source: IDMappingDataSource) -> None:
+    async def test_source_health_check__health_check_healthy__37c42c53(self, data_source: IDMappingDataSource) -> None:
         """Test healthy status when source exists and API is healthy."""
         status = await data_source.health_check()
         assert status == HealthStatus.HEALTHY

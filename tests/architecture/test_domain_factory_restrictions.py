@@ -6,9 +6,13 @@ enforcing the 'factories only in composition' rule for specific services.
 
 from __future__ import annotations
 
+import pytest
+
 import ast
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 def test_no_factory_helpers_in_specific_domain_services(src_dir: Path) -> None:
     """Targeted check for forbidden factory helpers in domain services.

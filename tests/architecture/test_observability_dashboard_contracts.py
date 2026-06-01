@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import pytest
+
 import json
 import re
 from pathlib import Path
 
 import yaml
+
+pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
 DASHBOARD_DIR = ROOT / "grafana" / "dashboards"

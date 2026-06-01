@@ -34,6 +34,8 @@ from bioetl.domain.exceptions import (
 )
 from bioetl.domain.types import ErrorType
 
+pytestmark = pytest.mark.unit
+
 
 def _build_missing_required_field_error(
     field: str,

@@ -292,7 +292,7 @@ async def test_fetch_with_fallback_by_title(
 
 
 @pytest.mark.integration
-async def test_invalid_entity_type_raises(crossref_adapter: CrossRefAdapter) -> None:
+async def test_adapters_crossref__entity_type_raises__558fe683(crossref_adapter: CrossRefAdapter) -> None:
     """Test that invalid entity type raises ValueError."""
     with respx.mock(base_url=CROSSREF_API_BASE):
         with pytest.raises(ValueError, match="CrossRefAdapter supports"):

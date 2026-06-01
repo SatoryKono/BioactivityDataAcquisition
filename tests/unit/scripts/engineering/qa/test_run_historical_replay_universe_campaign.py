@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import pytest
+
 from types import SimpleNamespace
 
 from scripts.engineering.qa import run_historical_replay_universe_campaign as campaign
 
+
+pytestmark = pytest.mark.unit
 
 def test_required_universal_claim_uses_governed_full_corpus_gate() -> None:
     report = SimpleNamespace(

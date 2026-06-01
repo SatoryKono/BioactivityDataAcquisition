@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 import ast
 import importlib.util
 import re
@@ -7,6 +9,8 @@ from pathlib import Path
 import sys
 from types import ModuleType
 
+
+pytestmark = pytest.mark.architecture
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 

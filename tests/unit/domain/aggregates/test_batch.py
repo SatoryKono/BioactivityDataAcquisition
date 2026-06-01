@@ -23,6 +23,8 @@ from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.types import BatchID, ContentHash, EntityID, RunID
 from tests.helpers.deterministic_ids import deterministic_uuid_value
 
+pytestmark = pytest.mark.unit
+
 
 def _ts(offset_seconds: int = 0) -> datetime:
     """Return deterministic UTC timestamps for batch tests."""

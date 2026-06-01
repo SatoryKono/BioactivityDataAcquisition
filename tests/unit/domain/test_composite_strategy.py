@@ -62,7 +62,7 @@ class TestMergeStrategy:
 class TestConflictResolution:
     """Tests for ConflictResolution enum."""
 
-    def test_enum_values(self) -> None:
+    def test_conflict_resolution__enum_values__9ffc18ff(self) -> None:
         """Test that enum members have correct string values."""
         assert ConflictResolution.SEED_PRIORITY == "seed_priority"
         assert ConflictResolution.ENRICHER_PRIORITY == "enricher"
@@ -80,11 +80,11 @@ class TestConflictResolution:
         result = ConflictResolution.from_string("coalesce")
         assert result == ConflictResolution.COALESCE
 
-    def test_from_string_case_insensitive(self) -> None:
+    def test_conflict_resolution__case_insensitive__4ca69dcf(self) -> None:
         """Test from_string is case-insensitive."""
         assert ConflictResolution.from_string("COALESCE") == ConflictResolution.COALESCE
 
-    def test_from_string_invalid_raises(self) -> None:
+    def test_conflict_resolution__invalid_raises__0de274c3(self) -> None:
         """Test from_string raises ValueError for invalid values."""
         with pytest.raises(ValueError, match="Invalid conflict resolution"):
             ConflictResolution.from_string("wrong_value")
@@ -93,7 +93,7 @@ class TestConflictResolution:
         "value",
         ["seed_priority", "enricher", "latest", "explicit", "coalesce"],
     )
-    def test_from_string_roundtrip(self, value: str) -> None:
+    def test_conflict_resolution__string_roundtrip__133a1a41(self, value: str) -> None:
         """Test that from_string is inverse of .value."""
         resolution = ConflictResolution.from_string(value)
         assert resolution.value == value
@@ -103,7 +103,7 @@ class TestConflictResolution:
 class TestFallbackStrategy:
     """Tests for FallbackStrategy enum."""
 
-    def test_enum_values(self) -> None:
+    def test_fallback_strategy__enum_values__b423ef17(self) -> None:
         """Test that enum members have correct string values."""
         assert FallbackStrategy.SKIP == "skip"
         assert FallbackStrategy.USE_CACHED == "use_cached"
@@ -124,23 +124,23 @@ class TestFallbackStrategy:
         result = FallbackStrategy.from_string("fail")
         assert result == FallbackStrategy.FAIL
 
-    def test_from_string_case_insensitive(self) -> None:
+    def test_fallback_strategy__case_insensitive__dd252ac3(self) -> None:
         """Test from_string is case-insensitive."""
         assert FallbackStrategy.from_string("SKIP") == FallbackStrategy.SKIP
         assert FallbackStrategy.from_string("FAIL") == FallbackStrategy.FAIL
 
-    def test_from_string_invalid_raises(self) -> None:
+    def test_fallback_strategy__invalid_raises__d4e90d38(self) -> None:
         """Test from_string raises ValueError for invalid values."""
         with pytest.raises(ValueError, match="Invalid fallback strategy"):
             FallbackStrategy.from_string("invalid_fallback")
 
-    def test_from_string_error_includes_valid_values(self) -> None:
+    def test_fallback_strategy__valid_values__08f9cab1(self) -> None:
         """Test that error message includes valid options."""
         with pytest.raises(ValueError, match="Valid:"):
             FallbackStrategy.from_string("unknown")
 
     @pytest.mark.parametrize("value", ["skip", "use_cached", "fail"])
-    def test_from_string_roundtrip(self, value: str) -> None:
+    def test_fallback_strategy__string_roundtrip__d9160f5b(self, value: str) -> None:
         """Test that from_string is inverse of .value."""
         strategy = FallbackStrategy.from_string(value)
         assert strategy.value == value

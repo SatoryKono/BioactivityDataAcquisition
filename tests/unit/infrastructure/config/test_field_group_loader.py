@@ -14,6 +14,8 @@ from bioetl.infrastructure.config.field_group_loader import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 @pytest.fixture()
 def tmp_config(tmp_path: Path) -> Path:
     """Create a minimal valid field group config file."""
@@ -74,7 +76,7 @@ class TestLoadFieldGroups:
         assert registry.field_count == 3
         assert len(registry.groups) == 3
 
-    def test_provider_order(self, tmp_config: Path) -> None:
+    def test_load_field_groups__provider_order__bf716b98(self, tmp_config: Path) -> None:
         registry = load_field_groups(tmp_config)
         assert registry.provider_order == ("chembl", "crossref")
 
@@ -176,7 +178,7 @@ class TestLoadFieldGroups:
         registry = load_field_groups(path)
         assert len(registry.provider_order) == 5  # DEFAULT_PROVIDER_ORDER
 
-    def test_empty_groups(self, tmp_path: Path) -> None:
+    def test_load_field_groups__empty_groups__6bf4f46f(self, tmp_path: Path) -> None:
         config = {"groups": []}
         path = tmp_path / "empty.yaml"
         path.write_text(yaml.dump(config), encoding="utf-8")

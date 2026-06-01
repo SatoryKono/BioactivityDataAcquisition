@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 from typing import Any
 
@@ -43,6 +45,8 @@ from scripts.docs.generate_pipeline_normalization_field_matrix import (
     ENTITY_SILVER_SCHEMA_REGISTRY,
     build_field_matrix_rows,
 )
+
+pytestmark = pytest.mark.contracts
 
 FIXTURE_PATH = Path("tests/fixtures/normalization/non_chembl_observed_values.yaml")
 

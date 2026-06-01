@@ -27,6 +27,8 @@ from bioetl.domain.normalization import (
     validate_publication_year,
 )
 
+pytestmark = pytest.mark.unit
+
 LEGACY_HTTP_DOI = "http" + "://doi.org/10.1016/j.cell.2024"
 
 
@@ -109,7 +111,7 @@ class TestNormalizeDoi:
             (None, None),
         ],
     )
-    def test_normalize_doi(self, doi: str | None, expected: str | None) -> None:
+    def test_normalize_doi__normalize_doi__4b38378c(self, doi: str | None, expected: str | None) -> None:
         """Test DOI normalization."""
         assert normalize_doi(doi) == expected
 
@@ -246,7 +248,7 @@ class TestValidatePublicationYear:
 class TestParseDateField:
     """Tests for parse_date_field function."""
 
-    def test_valid_iso_date(self) -> None:
+    def test_parse_date_field__valid_iso_date__57e4a7ea(self) -> None:
         """Test parsing ISO date."""
         assert parse_date_field("2024-03-15") == date(2024, 3, 15)
 
@@ -254,7 +256,7 @@ class TestParseDateField:
         """Test parsing date with whitespace."""
         assert parse_date_field("  2024-03-15  ") == date(2024, 3, 15)
 
-    def test_custom_format(self) -> None:
+    def test_parse_date_field__custom_format__a9899635(self) -> None:
         """Test parsing with custom format."""
         assert parse_date_field("15/03/2024", "%d/%m/%Y") == date(2024, 3, 15)
 

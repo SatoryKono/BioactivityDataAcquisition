@@ -20,6 +20,8 @@ from types import SimpleNamespace
 import pytest
 
 
+pytestmark = pytest.mark.architecture
+
 ROOT = Path(__file__).resolve().parents[2]
 PACKAGE_ROOT_MODULE = "bioetl.application.services"
 _DIRECT_MODULE_IMPORT_SENTINEL = "<module>"

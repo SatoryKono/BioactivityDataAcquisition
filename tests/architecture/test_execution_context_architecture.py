@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import pytest
+
 import ast
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 CONTEXT_MODULE = Path("src/bioetl/domain/context.py")
 CONTROL_PLANE_MANIFEST_MODULE = Path("src/bioetl/domain/control_plane/run_manifest.py")

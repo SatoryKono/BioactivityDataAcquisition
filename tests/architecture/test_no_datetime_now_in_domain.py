@@ -20,6 +20,8 @@ from tests.architecture.datetime_now_policy_support import (
     find_stale_datetime_exemptions,
 )
 
+pytestmark = pytest.mark.architecture
+
 DOMAIN_DIR = Path("src/bioetl/domain")
 
 # Only the canonical pipeline context seam may create the current time internally.

@@ -4,9 +4,13 @@ Enforces that TransformerDependencyContext does not become a God Object
 service locator. Only shared technical collaborators are allowed.
 """
 
+import pytest
+
 import ast
 import inspect
 from pathlib import Path
+
+pytestmark = pytest.mark.architecture
 
 ALLOWED_FIELDS = {
     "tracer",

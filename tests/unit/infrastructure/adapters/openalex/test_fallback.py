@@ -18,6 +18,8 @@ from bioetl.infrastructure.adapters.openalex.fallback import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 @pytest.fixture
 def mock_logger() -> MagicMock:
     """Create a mock logger."""

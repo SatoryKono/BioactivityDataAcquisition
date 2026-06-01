@@ -18,11 +18,11 @@ from bioetl.domain.schemas.crossref.publication import PublicationEnrichedSchema
 class TestPmidBaseValidation:
     """Base validation tests for pmid."""
 
-    def test_pmid_valid(self, minimal_crossref_publication_df: pd.DataFrame) -> None:
+    def test_pmid_base_validation__pmid_valid__77c2c37c(self, minimal_crossref_publication_df: pd.DataFrame) -> None:
         """PASS: valid pmid value."""
         PublicationEnrichedSchema.validate(minimal_crossref_publication_df)
 
-    def test_pmid_null_allowed(
+    def test_pmid_base_validation__pmid_null_allowed__2b5883bc(
         self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: pmid is nullable."""
@@ -31,7 +31,7 @@ class TestPmidBaseValidation:
         PublicationEnrichedSchema.validate(df)
 
     @pytest.mark.parametrize("invalid_value", ["0", "-1", "abc", ""])
-    def test_pmid_invalid_format(
+    def test_pmid_base_validation__pmid_invalid_format__eb2cd0e0(
         self, minimal_crossref_publication_df: pd.DataFrame, invalid_value: Any
     ) -> None:
         """FAIL: pmid invalid format."""
@@ -45,7 +45,7 @@ class TestPmidBaseValidation:
 class TestDoiBaseValidation:
     """Base validation tests for doi."""
 
-    def test_doi_valid(self, minimal_crossref_publication_df: pd.DataFrame) -> None:
+    def test_doi_base_validation__doi_valid__f143cd01(self, minimal_crossref_publication_df: pd.DataFrame) -> None:
         """PASS: valid doi value."""
         PublicationEnrichedSchema.validate(minimal_crossref_publication_df)
 
@@ -61,7 +61,7 @@ class TestDoiBaseValidation:
     @pytest.mark.parametrize(
         "invalid_value", ["doi:10.1234", "10.123/x", "not-a-doi", ""]
     )
-    def test_doi_invalid_format(
+    def test_doi_base_validation__doi_invalid_format__5c6686aa(
         self, minimal_crossref_publication_df: pd.DataFrame, invalid_value: Any
     ) -> None:
         """FAIL: doi invalid format."""
@@ -75,11 +75,11 @@ class TestDoiBaseValidation:
 class TestPmcIdBaseValidation:
     """Base validation tests for pmc_id."""
 
-    def test_pmc_id_valid(self, minimal_crossref_publication_df: pd.DataFrame) -> None:
+    def test_case__0042f6ce3d(self, minimal_crossref_publication_df: pd.DataFrame) -> None:
         """PASS: valid pmc_id value."""
         PublicationEnrichedSchema.validate(minimal_crossref_publication_df)
 
-    def test_pmc_id_null_allowed(
+    def test_pmc_id_base_validation__pmc_id_null_allowed__0e894ea6(
         self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: pmc_id is nullable."""
@@ -88,7 +88,7 @@ class TestPmcIdBaseValidation:
         PublicationEnrichedSchema.validate(df)
 
     @pytest.mark.parametrize("invalid_value", ["pmc123", "PMC", "123", ""])
-    def test_pmc_id_invalid_format(
+    def test_pmc_id_base_validation__id_invalid_format__4cb006b3(
         self, minimal_crossref_publication_df: pd.DataFrame, invalid_value: Any
     ) -> None:
         """FAIL: pmc_id invalid format."""
@@ -102,7 +102,7 @@ class TestPmcIdBaseValidation:
 class TestTitleBaseValidation:
     """Base validation tests for title."""
 
-    def test_title_valid(self, minimal_crossref_publication_df: pd.DataFrame) -> None:
+    def test_title_base_validation__title_valid__9212699c(self, minimal_crossref_publication_df: pd.DataFrame) -> None:
         """PASS: valid title value."""
         PublicationEnrichedSchema.validate(minimal_crossref_publication_df)
 
@@ -119,13 +119,13 @@ class TestTitleBaseValidation:
 class TestAbstractBaseValidation:
     """Base validation tests for abstract."""
 
-    def test_abstract_valid(
+    def test_base_validation__abstract_valid__4860ff0b(
         self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid abstract value."""
         PublicationEnrichedSchema.validate(minimal_crossref_publication_df)
 
-    def test_abstract_null_allowed(
+    def test_base_validation__null_allowed__2f5cd8ef(
         self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: abstract is nullable."""
@@ -138,11 +138,11 @@ class TestAbstractBaseValidation:
 class TestAuthorsBaseValidation:
     """Base validation tests for authors."""
 
-    def test_authors_valid(self, minimal_crossref_publication_df: pd.DataFrame) -> None:
+    def test_base_validation__authors_valid__6cee2354(self, minimal_crossref_publication_df: pd.DataFrame) -> None:
         """PASS: valid authors value."""
         PublicationEnrichedSchema.validate(minimal_crossref_publication_df)
 
-    def test_authors_null_allowed(
+    def test_base_validation__authors_null_allowed__38793b37(
         self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: authors is nullable."""
@@ -155,13 +155,13 @@ class TestAuthorsBaseValidation:
 class TestAffiliationListBaseValidation:
     """Base validation tests for affiliation_list."""
 
-    def test_affiliation_list_valid(
+    def test_list_base_validation__list_valid__9c92cb01(
         self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid affiliation_list value."""
         PublicationEnrichedSchema.validate(minimal_crossref_publication_df)
 
-    def test_affiliation_list_null_allowed(
+    def test_list_base_validation__list_null_allowed__e86f294f(
         self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: affiliation_list is nullable."""
@@ -174,11 +174,11 @@ class TestAffiliationListBaseValidation:
 class TestJournalBaseValidation:
     """Base validation tests for journal."""
 
-    def test_journal_valid(self, minimal_crossref_publication_df: pd.DataFrame) -> None:
+    def test_base_validation__journal_valid__80012fa6(self, minimal_crossref_publication_df: pd.DataFrame) -> None:
         """PASS: valid journal value."""
         PublicationEnrichedSchema.validate(minimal_crossref_publication_df)
 
-    def test_journal_null_allowed(
+    def test_base_validation__journal_null_allowed__3aaca69c(
         self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: journal is nullable."""
@@ -191,13 +191,13 @@ class TestJournalBaseValidation:
 class TestPublicationYearBaseValidation:
     """Base validation tests for publication_year."""
 
-    def test_publication_year_valid(
+    def test_year_base_validation__year_valid__b293a80b(
         self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid publication_year value."""
         PublicationEnrichedSchema.validate(minimal_crossref_publication_df)
 
-    def test_publication_year_null_allowed(
+    def test_year_base_validation__year_null_allowed__8879dc14(
         self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: publication_year is nullable."""
@@ -210,13 +210,13 @@ class TestPublicationYearBaseValidation:
 class TestPublicationDateBaseValidation:
     """Base validation tests for publication_date."""
 
-    def test_publication_date_valid(
+    def test_date_base_validation__date_valid__57722f20(
         self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid publication_date value."""
         PublicationEnrichedSchema.validate(minimal_crossref_publication_df)
 
-    def test_publication_date_null_allowed(
+    def test_date_base_validation__date_null_allowed__4824cacf(
         self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: publication_date is nullable."""
@@ -229,7 +229,7 @@ class TestPublicationDateBaseValidation:
 class TestPublicationTypeBaseValidation:
     """Base validation tests for publication_type."""
 
-    def test_publication_type_valid(
+    def test_type_base_validation__type_valid__7540a4b6(
         self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid publication_type value."""
@@ -248,13 +248,13 @@ class TestPublicationTypeBaseValidation:
 class TestLanguageBaseValidation:
     """Base validation tests for language."""
 
-    def test_language_valid(
+    def test_base_validation__language_valid__560f049b(
         self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid language value."""
         PublicationEnrichedSchema.validate(minimal_crossref_publication_df)
 
-    def test_language_null_allowed(
+    def test_base_validation__null_allowed__6ade091e(
         self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: language is nullable."""
@@ -267,13 +267,13 @@ class TestLanguageBaseValidation:
 class TestPageFirstBaseValidation:
     """Base validation tests for page_first."""
 
-    def test_page_first_valid(
+    def test_first_base_validation__page_first_valid__5a1d2c3f(
         self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid page_first value."""
         PublicationEnrichedSchema.validate(minimal_crossref_publication_df)
 
-    def test_page_first_null_allowed(
+    def test_first_base_validation__first_null_allowed__15f166d6(
         self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: page_first is nullable."""
@@ -286,13 +286,13 @@ class TestPageFirstBaseValidation:
 class TestPageLastBaseValidation:
     """Base validation tests for page_last."""
 
-    def test_page_last_valid(
+    def test_last_base_validation__page_last_valid__8f5f57d4(
         self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid page_last value."""
         PublicationEnrichedSchema.validate(minimal_crossref_publication_df)
 
-    def test_page_last_null_allowed(
+    def test_last_base_validation__last_null_allowed__775aac60(
         self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: page_last is nullable."""
@@ -305,13 +305,13 @@ class TestPageLastBaseValidation:
 class TestCitationsReceivedBaseValidation:
     """Base validation tests for citations_received."""
 
-    def test_citations_received_valid(
+    def test_base_validation__received_valid__d1b39bb6(
         self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid citations_received value."""
         PublicationEnrichedSchema.validate(minimal_crossref_publication_df)
 
-    def test_citations_received_null_allowed(
+    def test_base_validation__null_allowed__a3da4984(
         self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: citations_received is nullable."""
@@ -324,13 +324,13 @@ class TestCitationsReceivedBaseValidation:
 class TestCitationsMadeBaseValidation:
     """Base validation tests for citations_made."""
 
-    def test_citations_made_valid(
+    def test_made_base_validation__citations_made_valid__6fdc3881(
         self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid citations_made value."""
         PublicationEnrichedSchema.validate(minimal_crossref_publication_df)
 
-    def test_citations_made_null_allowed(
+    def test_made_base_validation__made_null_allowed__6c01b756(
         self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: citations_made is nullable."""
@@ -343,11 +343,11 @@ class TestCitationsMadeBaseValidation:
 class TestIsOaBaseValidation:
     """Base validation tests for is_oa."""
 
-    def test_is_oa_valid(self, minimal_crossref_publication_df: pd.DataFrame) -> None:
+    def test_is_oa_base_validation__is_oa_valid__9f5fed37(self, minimal_crossref_publication_df: pd.DataFrame) -> None:
         """PASS: valid is_oa value."""
         PublicationEnrichedSchema.validate(minimal_crossref_publication_df)
 
-    def test_is_oa_null_allowed(
+    def test_is_oa_base_validation__is_oa_null_allowed__767efbf9(
         self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: is_oa is nullable."""
@@ -360,13 +360,13 @@ class TestIsOaBaseValidation:
 class TestLookupMethodBaseValidation:
     """Base validation tests for lookup_method."""
 
-    def test_lookup_method_valid(
+    def test_method_base_validation__lookup_method_valid__ffc108eb(
         self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid lookup_method value."""
         PublicationEnrichedSchema.validate(minimal_crossref_publication_df)
 
-    def test_lookup_method_null_allowed(
+    def test_method_base_validation__method_null_allowed__b6669165(
         self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: lookup_method is nullable."""
@@ -379,13 +379,13 @@ class TestLookupMethodBaseValidation:
 class TestOriginalIdBaseValidation:
     """Base validation tests for original_id."""
 
-    def test_original_id_valid(
+    def test_id_base_validation__original_id_valid__7243ffd9(
         self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid original_id value."""
         PublicationEnrichedSchema.validate(minimal_crossref_publication_df)
 
-    def test_original_id_null_allowed(
+    def test_id_base_validation__id_null_allowed__f0ece3cf(
         self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: original_id is nullable."""
@@ -398,11 +398,11 @@ class TestOriginalIdBaseValidation:
 class TestSourceBaseValidation:
     """Base validation tests for _source."""
 
-    def test__source_valid(self, minimal_crossref_publication_df: pd.DataFrame) -> None:
+    def test_case__1b0fd79195(self, minimal_crossref_publication_df: pd.DataFrame) -> None:
         """PASS: valid _source value."""
         PublicationEnrichedSchema.validate(minimal_crossref_publication_df)
 
-    def test__source_null_allowed(
+    def test_source_base_validation__source_null_allowed__6f70aca5(
         self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: _source is nullable."""

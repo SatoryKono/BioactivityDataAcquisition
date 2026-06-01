@@ -185,7 +185,7 @@ def postrun_service(
 class TestPostrunServiceInit:
     """Tests for PostrunService initialization."""
 
-    def test_initialization(
+    def test_postrun_service_init__initialization__8e8735b2(
         self,
         pipeline_config,
         runtime_config,

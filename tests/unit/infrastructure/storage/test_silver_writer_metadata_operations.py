@@ -78,7 +78,7 @@ class TestExecutePreparedSilverMetadataWriteOperation:
         )
 
     @pytest.mark.asyncio
-    async def test_emits_composite_source_selection_metrics_for_merged_write(
+    async def test_write_operation__for_merged_write__002932ef(
         self,
     ) -> None:
         host = AsyncMock()

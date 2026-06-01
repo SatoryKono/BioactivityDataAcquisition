@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 import json
 from pathlib import Path
 
@@ -14,6 +16,8 @@ from bioetl.domain.registry.semantic_fields import SemanticFieldRegistry
 from bioetl.infrastructure.config.semantic_field_registry_loader import (
     SemanticFieldRegistryLoader,
 )
+
+pytestmark = pytest.mark.integration
 
 GENERIC_LEXICAL_COLLISIONS = frozenset(
     {"type", "value", "score", "description", "relation", "source"}

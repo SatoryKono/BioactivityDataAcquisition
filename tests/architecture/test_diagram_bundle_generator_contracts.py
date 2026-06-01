@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import pytest
+
 import importlib.util
 import sys
 from pathlib import Path
 from types import ModuleType
 
+
+pytestmark = pytest.mark.architecture
 
 def _load_generate_all_bundles() -> ModuleType:
     repo_root = Path(__file__).resolve().parents[2]

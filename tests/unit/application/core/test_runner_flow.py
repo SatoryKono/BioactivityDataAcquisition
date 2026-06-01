@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import pytest
+
 from datetime import UTC, datetime
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 from bioetl.application.core import runner_flow
 
+
+pytestmark = pytest.mark.unit
 
 class _Host:
     def __init__(

@@ -115,7 +115,7 @@ class TestPubMedDateNormalization:
     """Integration tests for PubMed date normalization."""
 
     @pytest.mark.asyncio
-    async def test_publication_date_format(
+    async def test_med_date_normalization__date_format__5103afd1(
         self,
         transformer: PubMedPublicationTransformer,
         pipeline_context: PipelineContext,
@@ -133,7 +133,7 @@ class TestPubMedDateNormalization:
         )
 
     @pytest.mark.asyncio
-    async def test_all_date_fields_format__test_pub_med_date_normalization_integration_pipelines_test_pubmed_date_normalization_136(
+    async def test_pipelines_pubmed_date_normalization_136__98d0afcc(
         self,
         transformer: PubMedPublicationTransformer,
         pipeline_context: PipelineContext,
@@ -159,7 +159,7 @@ class TestPubMedDateNormalization:
                 )
 
     @pytest.mark.asyncio
-    async def test_partial_date_year_only_normalization(
+    async def test_med_date_normalization__only_normalization__f40aa689(
         self,
         transformer: PubMedPublicationTransformer,
         pipeline_context: PipelineContext,
@@ -176,7 +176,7 @@ class TestPubMedDateNormalization:
         )
 
     @pytest.mark.asyncio
-    async def test_partial_date_year_month_normalization(
+    async def test_med_date_normalization__month_normalization__c40dff7b(
         self,
         transformer: PubMedPublicationTransformer,
         pipeline_context: PipelineContext,

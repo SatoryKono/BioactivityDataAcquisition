@@ -14,6 +14,8 @@ from bioetl.infrastructure.adapters.pubmed import PubMedAdapter
 from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 
 
+pytestmark = pytest.mark.unit
+
 @pytest.fixture
 def mock_http_client():
     """Create a mock HTTP client."""
@@ -115,7 +117,7 @@ async def test_health_check_returns_unhealthy_on_auth_non_200(
 
 
 @pytest.mark.asyncio
-async def test_health_check_returns_degraded_on_slow_response(
+async def test_pubmed_pubmed_client__on_slow_response__3c82ad83(
     adapter, mock_http_client, mock_logger
 ):
     """Test _probe_health returns DEGRADED when response takes >5 seconds.
@@ -223,12 +225,12 @@ async def test_get_pmids_uses_injected_error_handler(adapter, mock_http_client) 
 # =============================================================================
 
 
-def test_provider_name(adapter):
+def test_pubmed_pubmed_client__provider_name__971b8628(adapter):
     """Test that provider_name is set correctly."""
     assert adapter.provider_name == "pubmed"
 
 
-def test_health_endpoint(adapter):
+def test_pubmed_pubmed_client__health_endpoint__37d580de(adapter):
     """Test that health endpoint is correct."""
     assert adapter._get_health_endpoint() == "/entrez/eutils/einfo.fcgi"
 

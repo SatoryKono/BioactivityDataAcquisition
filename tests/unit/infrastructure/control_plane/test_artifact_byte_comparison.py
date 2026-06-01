@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import pytest
+
 import json
 from pathlib import Path
 
 from bioetl.infrastructure.control_plane import FileArtifactByteComparisonAdapter
 
+
+pytestmark = pytest.mark.unit
 
 def _ref(path: Path) -> dict[str, object]:
     return {"artifact_path": str(path)}

@@ -6,6 +6,8 @@ from bioetl.application.pipelines.chembl.tissue_transformer import TissueTransfo
 from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
 
+pytestmark = pytest.mark.unit
+
 class TestTissueTransformer:
     """Tests for TissueTransformer."""
 
@@ -34,7 +36,7 @@ class TestTissueTransformer:
 
         assert transformer.entity_class is Tissue
 
-    def test_primary_id_field(self, transformer):
+    def test_tissue_transformer__primary_id_field__ed4f3328(self, transformer):
         """Test primary ID field is tissue_id."""
         assert transformer.primary_id_field == "tissue_id"
 

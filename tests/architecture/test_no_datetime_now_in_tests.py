@@ -23,6 +23,8 @@ from tests.architecture.datetime_now_policy_support import (
     find_stale_datetime_exemptions,
 )
 
+pytestmark = pytest.mark.architecture
+
 TESTS_DIR = Path("tests")
 
 # Paths relative to ``tests/`` that are allowed to use datetime.now().
@@ -94,7 +96,7 @@ class TestNoDatetimeNowInTests:
             relative_path_fn=_relative_test_path,
         )
 
-    def test_allowed_paths_still_require_exception(
+    def test_in_no_datetime_now_in__require_exception__1f79c9d6(
         self, test_python_files: list[Path]
     ) -> None:
         """Force removal of allowlist entries once datetime usage is refactored away."""

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
@@ -10,6 +12,8 @@ from bioetl.application.composite.join_key_normalization import (
 )
 from bioetl.application.composite.join_key_resolution import JoinKeyResolverService
 from bioetl.application.composite.join_planner_helpers import parse_pipeline_name
+
+pytestmark = pytest.mark.unit
 
 _LOWER_ALPHA = "abcdefghijklmnopqrstuvwxyz"
 _LOWER_ALNUM = f"{_LOWER_ALPHA}0123456789"

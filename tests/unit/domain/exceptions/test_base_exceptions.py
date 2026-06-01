@@ -19,6 +19,8 @@ from bioetl.domain.exceptions.base_exceptions import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 class TestBioETLDomainError:
     """Test base domain error class."""
 

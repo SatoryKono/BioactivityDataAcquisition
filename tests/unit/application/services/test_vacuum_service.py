@@ -267,7 +267,7 @@ class TestVacuumServiceAsync:
 
         mock_logger.error.assert_called_once()
 
-    async def test_vacuum_all_success(
+    async def test_vacuum_service_async__vacuum_all_success__0038a9bb(
         self,
         service: VacuumService,
         mock_lifecycle: MagicMock,

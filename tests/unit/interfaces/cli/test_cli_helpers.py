@@ -53,12 +53,12 @@ def mock_registry():
 class TestValidatePipelineName:
     """Tests for validate_pipeline_name callback."""
 
-    def test_valid_pipeline_returns_value(self, mock_registry):
+    def test_validate_pipeline_name__returns_value__58a09ff1(self, mock_registry):
         """Test that valid pipeline name is returned."""
         result = validate_pipeline_name(None, None, "chembl_activity")
         assert result == "chembl_activity"
 
-    def test_invalid_pipeline_raises_bad_parameter(self, mock_registry):
+    def test_validate_pipeline_name__raises_bad_parameter__6d32749f(self, mock_registry):
         """Test that invalid pipeline raises BadParameter."""
         with pytest.raises(click.BadParameter) as exc_info:
             validate_pipeline_name(None, None, "nonexistent_pipeline")
@@ -244,7 +244,7 @@ class TestCliCommands:
         assert result.exit_code == 0
         assert __version__ in result.output
 
-    def test_run_help(self, cli_runner):
+    def test_helpers_cli_commands__run_help__4b6a5f9c(self, cli_runner):
         """Test that run --help works."""
         result = cli_runner.invoke(cli, ["run", "--help"])
         assert result.exit_code == 0
@@ -255,7 +255,7 @@ class TestCliCommands:
         assert "--resume-manifest-id" in result.output
         assert "--limit" in result.output
 
-    def test_quarantine_help(self, cli_runner):
+    def test_helpers_cli_commands__quarantine_help__12df0561(self, cli_runner):
         """Test that quarantine --help works."""
         result = cli_runner.invoke(cli, ["quarantine", "--help"])
         assert result.exit_code == 0

@@ -10,6 +10,8 @@ from bioetl.domain.types import RunID, RunType
 from bioetl.domain.value_objects.run_context import RunContext
 
 
+pytestmark = pytest.mark.unit
+
 class TestRunContextDQIntegration:
     """Tests for RunContext with DQ integration."""
 

@@ -651,7 +651,7 @@ class TestDeleteMetricsFromGateway:
 class TestResetServerState:
     """Tests for reset_server_state function."""
 
-    def test_reset_allows_restart(self):
+    def test_reset_server_state__reset_allows_restart__3a8a6cbe(self):
         """Should allow starting server again after reset."""
         with patch(
             "bioetl.infrastructure.observability.server.start_http_server"
@@ -679,7 +679,7 @@ class TestResetServerState:
 class TestMetricsServerError:
     """Tests for MetricsServerError exception."""
 
-    def test_error_attributes(self):
+    def test_metrics_server_error__error_attributes__952560da(self):
         """Test MetricsServerError has correct attributes."""
         original = OSError("original")
         error = MetricsServerError(port=8000, reason="test", original_error=original)

@@ -21,14 +21,14 @@ class _OpenAlexMetadataHarness(OpenAlexAdapterHelpersMixin):
         self._request_collector = APIRequestCollector()
 
 
-def test_request_count_starts_at_zero() -> None:
+def test_request_metadata__count_starts_at_zero__d02de354() -> None:
     """New adapter instances should start with an empty request collector."""
     harness = _OpenAlexMetadataHarness()
 
     assert harness.request_count == 0
 
 
-def test_get_source_metadata_returns_collector_state_and_clears_requests() -> None:
+def test_request_metadata__and_clears_requests__30613064() -> None:
     """Metadata snapshot should reflect collector state and consume it."""
     harness = _OpenAlexMetadataHarness()
     harness._request_collector.record_request(
@@ -47,7 +47,7 @@ def test_get_source_metadata_returns_collector_state_and_clears_requests() -> No
     assert harness.request_count == 0
 
 
-def test_clear_request_collector_resets_request_count() -> None:
+def test_request_metadata__resets_request_count__4cea2c8c() -> None:
     """Clearing the collector should drop accumulated request state."""
     harness = _OpenAlexMetadataHarness()
     harness._request_collector.record_request(

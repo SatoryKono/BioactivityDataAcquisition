@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.domain.normalization.profiles.base import FieldRule
 from bioetl.domain.normalization.profiles.registry import NORMALIZATION_PROFILE_REGISTRY
+
+pytestmark = pytest.mark.unit
 
 _STRUCTURED_FIELD_SUFFIXES = ("_json", "_list", "_ids", "_references")
 _KNOWN_STRUCTURED_FIELDS = frozenset(

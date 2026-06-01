@@ -11,6 +11,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.architecture
+
 APPLICATION_DIR = Path("src/bioetl/application")
 DOMAIN_DIR = Path("src/bioetl/domain")
 INTERFACES_DIR = Path("src/bioetl/interfaces")

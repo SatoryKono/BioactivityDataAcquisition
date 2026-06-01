@@ -255,7 +255,7 @@ class TestAggregationFunction:
             == AggregationFunction.CONCAT_STR
         )
 
-    def test_from_string_invalid_raises(self):
+    def test_aggregation_function__invalid_raises__37340fa0(self):
         """Invalid string should raise ValueError."""
         with pytest.raises(ValueError, match="Invalid aggregation function"):
             AggregationFunction.from_string("invalid")
@@ -264,7 +264,7 @@ class TestAggregationFunction:
 class TestEnricherCardinality:
     """Tests for EnricherCardinality enum."""
 
-    def test_from_string_valid(self):
+    def test_enricher_cardinality__from_string_valid__a31d31d8(self):
         """Valid string should convert to enum."""
         assert (
             EnricherCardinality.from_string("one_to_one")
@@ -275,7 +275,7 @@ class TestEnricherCardinality:
             == EnricherCardinality.MANY_TO_ONE
         )
 
-    def test_from_string_invalid_raises(self):
+    def test_enricher_cardinality__invalid_raises__3a412f9b(self):
         """Invalid string should raise ValueError."""
         with pytest.raises(ValueError, match="Invalid cardinality"):
             EnricherCardinality.from_string("invalid")
@@ -366,7 +366,7 @@ class TestAggregationConfig:
                 ),
             )
 
-    def test_list_to_tuple_conversion(self):
+    def test_aggregation_config__to_tuple_conversion__f62f03e5(self):
         """List of fields should be converted to tuple."""
         config = AggregationConfig(
             group_by="id",

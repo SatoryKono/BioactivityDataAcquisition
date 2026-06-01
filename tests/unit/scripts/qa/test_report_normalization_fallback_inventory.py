@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 import json
 from pathlib import Path
 from typing import cast
@@ -14,6 +16,8 @@ from scripts.engineering.qa.report_normalization_fallback_inventory import (
     main,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_fallback_rows_are_empty_when_all_entity_pipelines_are_profiled() -> None:
     rows = _fallback_rows()

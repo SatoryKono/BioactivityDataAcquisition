@@ -111,7 +111,7 @@ class TestTableConfig:
         with pytest.raises(AttributeError):
             config.silver_table = "new_table"  # type: ignore[misc]
 
-    def test_equality(self) -> None:
+    def test_config_table_config__equality__7a7a757c(self) -> None:
         """Test equality between TableConfig instances."""
         config1 = TableConfig(primary_keys=["id"], silver_table="silver")
         config2 = TableConfig(primary_keys=["id"], silver_table="silver")
@@ -228,7 +228,7 @@ class TestValidationConfig:
         with pytest.raises(AttributeError):
             config.min_publication_year = 1500  # type: ignore[misc]
 
-    def test_equality(self) -> None:
+    def test_validation_config__equality__0aaa2e94(self) -> None:
         """Test equality between ValidationConfig instances."""
         config1 = ValidationConfig()
         config2 = ValidationConfig()
@@ -237,7 +237,7 @@ class TestValidationConfig:
         assert config1 == config2
         assert config1 != config3
 
-    def test_hashable(self) -> None:
+    def test_validation_config__hashable__cb205035(self) -> None:
         """Test that ValidationConfig is hashable."""
         config1 = ValidationConfig()
         config2 = ValidationConfig()

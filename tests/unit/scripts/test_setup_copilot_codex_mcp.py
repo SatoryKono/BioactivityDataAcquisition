@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import pytest
+
 import json
 import os
 from pathlib import Path
 
 from scripts.ai.codex import setup_mcp
 
+
+pytestmark = pytest.mark.unit
 
 def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> None:
     """Generated server paths should follow the requested workspace root."""

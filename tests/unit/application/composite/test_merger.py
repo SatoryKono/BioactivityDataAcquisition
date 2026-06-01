@@ -1126,7 +1126,7 @@ class TestCheckDuplicates:
         df = pl.DataFrame({"doi": ["a", "a", "b"], "val": [1, 2, 3]})
         assert deduplicator._check_duplicates(df, ["doi"]) is True
 
-    def test_empty_dataframe(self, deduplicator):
+    def test_check_duplicates__empty_dataframe__2378b52b(self, deduplicator):
         """Test returns False for empty DataFrame."""
         import polars as pl
 
@@ -1323,7 +1323,7 @@ class TestDeduplicateEnricher:
         row_a1 = result.filter((pl.col("doi") == "a") & (pl.col("pmid") == "1"))
         assert row_a1["val"][0] == "X|Y"
 
-    def test_empty_dataframe(self, deduplicator):
+    def test_deduplicate_enricher__empty_dataframe__11b05650(self, deduplicator):
         """Test empty DataFrame returns unchanged."""
         import polars as pl
 

@@ -15,6 +15,8 @@ from pathlib import Path
 import pytest
 import yaml
 
+pytestmark = pytest.mark.architecture
+
 # Publication-related entity types that require full_scan_only
 PUBLICATION_ENTITY_TYPES = {
     "publication",

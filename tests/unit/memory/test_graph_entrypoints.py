@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 import yaml
@@ -13,6 +15,8 @@ from memory.graph.sync_pkg import apply as graph_sync_apply
 from memory.graph.sync_pkg import snapshot as graph_sync_snapshot
 from memory.graph.sync_pkg import transport as graph_sync_transport
 
+
+pytestmark = pytest.mark.unit
 
 def test_graph_sync_facade_exposes_legacy_symbols() -> None:
     assert graph_sync.DEFAULT_INGEST_WAVE == "repo_sync_v1"

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.domain.composite.config import (
     CompositeConfig,
     DependencyConfig,
@@ -11,6 +13,8 @@ from bioetl.domain.composite.config import (
 )
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 
+
+pytestmark = pytest.mark.unit
 
 def _build_composite_config() -> CompositeConfig:
     return CompositeConfig(

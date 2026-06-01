@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 from bioetl.domain.composite import config as facade
@@ -22,6 +24,8 @@ from bioetl.domain.composite.config_models import (
 )
 from bioetl.domain.composite.config_models import SeedConfig as ModelsSeedConfig
 
+
+pytestmark = pytest.mark.unit
 
 def test_config_facade_keeps_model_reexports() -> None:
     assert facade.SeedConfig is ModelsSeedConfig

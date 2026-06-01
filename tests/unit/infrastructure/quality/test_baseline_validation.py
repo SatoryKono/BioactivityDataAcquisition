@@ -281,7 +281,7 @@ class TestValidateRegistryGroupsSection:
         assert result == {}
         assert any("registry_groups" in e for e in errors)
 
-    def test_not_dict(self) -> None:
+    def test_groups_section__not_dict__e45bb6c6(self) -> None:
         """Non-dict registry_groups should add error."""
         errors: list[str] = []
         result = _validate_registry_groups_section(

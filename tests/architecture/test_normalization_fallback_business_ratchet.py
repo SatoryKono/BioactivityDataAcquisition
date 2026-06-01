@@ -11,6 +11,8 @@ from scripts.engineering.qa.report_normalization_fallback_inventory import (
     _fallback_rows,
 )
 
+pytestmark = pytest.mark.architecture
+
 FALLBACK_BUSINESS_FIELD_BUDGET = 0
 
 # Derived from the reviewed post-#2789/#2791 baseline where explicit profile coverage

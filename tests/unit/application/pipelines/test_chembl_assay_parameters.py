@@ -217,7 +217,7 @@ class TestAssayParametersTransformer:
         }
 
     @pytest.mark.asyncio
-    async def test_transform_valid_record(
+    async def test_parameters_transformer__valid_record__2dc9241c(
         self,
         transformer: AssayParametersTransformer,
         mock_context,
@@ -342,7 +342,7 @@ class TestAssayParametersTransformer:
         assert result["text_value"] is None
 
     @pytest.mark.asyncio
-    async def test_transform_custom_provider(
+    async def test_parameters_transformer__custom_provider__60817433(
         self,
         mock_context,
     ) -> None:

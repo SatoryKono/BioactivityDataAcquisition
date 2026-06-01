@@ -40,6 +40,11 @@ scrape_configs:
       - targets: ['grafana:3000']
     metrics_path: /metrics
 
+  - job_name: 'grafana-image-renderer'
+    static_configs:
+      - targets: ['renderer:8081']
+    metrics_path: /metrics
+
   - job_name: 'pushgateway'
     honor_labels: true
     static_configs:

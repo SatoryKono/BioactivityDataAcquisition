@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from typing import Any, cast
 
 
@@ -13,6 +15,8 @@ from bioetl.domain.normalization.rules import (
     normalize_unit,
 )
 
+
+pytestmark = pytest.mark.unit
 
 class TestNormalizeCase:
     """Test case normalization functions."""
@@ -232,13 +236,13 @@ class TestNormalizeUnit:
         assert normalize_unit("unknown") == "unknown"
         assert normalize_unit("custom") == "custom"
 
-    def test_none_and_empty(self) -> None:
+    def test_rules_normalize__none_and_empty__8c186230(self) -> None:
         """Test None and empty handling."""
         assert normalize_unit(None) is None
         assert normalize_unit("") is None
         assert normalize_unit("   ") is None
 
-    def test_non_string(self) -> None:
+    def test_rules_normalize__non_string__915851b8(self) -> None:
         """Test non-string input handling."""
         assert normalize_unit(123) is None
         assert normalize_unit([]) is None

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 from scripts.engineering.qa.check_xwalk_missing_backlog import (
@@ -10,6 +12,8 @@ from scripts.engineering.qa.check_xwalk_missing_backlog import (
     validate_backlog,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def _write_xwalk(path: Path, body: str) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)

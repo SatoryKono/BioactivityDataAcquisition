@@ -21,6 +21,8 @@ from tests.helpers.transformer_dependencies import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 class ConcretePipeline(BasePipeline):
     async def transform_bronze_to_silver(
         self, _context: PipelineContext, record: dict, index: int = 0

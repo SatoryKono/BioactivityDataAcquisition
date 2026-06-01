@@ -44,7 +44,7 @@ def http_client(mock_rate_limiter, mock_circuit_breaker):
 class TestUnifiedHTTPClientInit:
     """Tests for UnifiedHTTPClient initialization."""
 
-    def test_init_with_defaults(self, mock_rate_limiter, mock_circuit_breaker):
+    def test_h_t_t_p_client_init__init_with_defaults__4a739e1a(self, mock_rate_limiter, mock_circuit_breaker):
         """Test initialization with default values."""
         client = UnifiedHTTPClient(
             rate_limiter=mock_rate_limiter,

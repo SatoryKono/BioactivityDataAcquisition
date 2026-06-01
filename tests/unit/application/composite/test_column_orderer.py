@@ -16,6 +16,8 @@ from bioetl.domain.value_objects.column_order import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 @pytest.fixture
 def mock_logger() -> MagicMock:
     """Create mock logger."""
@@ -125,7 +127,7 @@ class TestColumnOrderService:
 
         assert title_idx < crossref_idx
 
-    def test_empty_dataframe(self, orderer: ColumnOrderService) -> None:
+    def test_column_order_service__empty_dataframe__d7317264(self, orderer: ColumnOrderService) -> None:
         """Empty DataFrame returns empty DataFrame."""
         df = pl.DataFrame()
         result = orderer.order_columns(df)

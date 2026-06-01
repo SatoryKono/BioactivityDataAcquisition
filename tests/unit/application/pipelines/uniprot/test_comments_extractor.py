@@ -11,10 +11,12 @@ from bioetl.application.pipelines.uniprot.extractors.comments import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 class TestCommentExtractor:
     """Tests for CommentExtractor class."""
 
-    def test_extract_function_comment(self):
+    def test_comment_extractor__function_comment__3465819d(self):
         """Test extraction of FUNCTION comments."""
         comments = [
             {"commentType": "FUNCTION", "texts": [{"value": "Acts as a enzyme."}]}
@@ -25,7 +27,7 @@ class TestCommentExtractor:
         assert len(parsed) == 1
         assert parsed[0] == "Acts as a enzyme."
 
-    def test_extract_catalytic_activity(self):
+    def test_comment_extractor__catalytic_activity__db6e436b(self):
         """Test extraction of CATALYTIC ACTIVITY."""
         comments = [
             {
@@ -58,7 +60,7 @@ class TestCommentExtractor:
         assert "Cytoplasm" in parsed
         assert "Nucleus" in parsed
 
-    def test_extract_alternative_products(self):
+    def test_comment_extractor__alternative_products__f1e7521c(self):
         """Test extraction of ALTERNATIVE PRODUCTS."""
         comments = [
             {
@@ -130,7 +132,7 @@ class TestCommentExtractor:
         assert parsed["ph_dependence"] == ["Optimum pH is 7."]
         assert parsed["kinetic_parameters"]["km"][0]["value"] == pytest.approx(1.5)
 
-    def test_extract_induction(self):
+    def test_comment_extractor__extract_induction__abeb5687(self):
         """Test extraction of INDUCTION comments."""
         comments = [
             {"commentType": "INDUCTION", "texts": [{"value": "Induced by stress."}]}

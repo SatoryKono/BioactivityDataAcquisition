@@ -30,6 +30,8 @@ from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.decorators.retry import RetryingDataSourceDecorator
 
 
+pytestmark = pytest.mark.unit
+
 class MockDataSource:
     """Mock data source for testing decorators."""
 
@@ -150,7 +152,7 @@ def mock_metrics() -> MagicMock:
 class TestRetryingDataSourceDecoratorBasics:
     """Test basic delegation and property access."""
 
-    def test_provider_name_delegated(
+    def test_decorator_basics__name_delegated__85740a6a(
         self, mock_data_source: MockDataSource, retry_config: RetryConfig
     ) -> None:
         """Test that provider_name is delegated to wrapped data source."""
@@ -161,7 +163,7 @@ class TestRetryingDataSourceDecoratorBasics:
         assert decorator.provider_name == "test_provider"
 
     @pytest.mark.asyncio
-    async def test_context_manager_delegated__test_retrying_data_source_decorator_basics_adapters_decorators_test_retry_decorator_164(
+    async def test_adapters_decorators_retry_decorator_164__db0c222e(
         self, mock_data_source: MockDataSource, retry_config: RetryConfig
     ) -> None:
         """Test that context manager methods are delegated."""
@@ -173,7 +175,7 @@ class TestRetryingDataSourceDecoratorBasics:
             assert ds is decorator
 
     @pytest.mark.asyncio
-    async def test_aclose_delegated__test_retrying_data_source_decorator_basics_adapters_decorators_test_retry_decorator_176(
+    async def test_adapters_decorators_retry_decorator_176__4f14108c(
         self, mock_data_source: MockDataSource, retry_config: RetryConfig
     ) -> None:
         """Test that aclose is delegated."""

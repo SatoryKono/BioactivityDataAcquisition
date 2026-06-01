@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 import re
 
 from scripts.engineering.qa.report_duplication_baseline import _build_payload
@@ -16,6 +18,8 @@ from scripts.engineering.qa.report_duplication_baseline import DuplicateCluster
 from scripts.engineering.qa.report_duplication_baseline import DuplicateModuleRef
 from scripts.engineering.qa.report_duplication_baseline import TargetDuplicationReport
 
+
+pytestmark = pytest.mark.unit
 
 def test_parse_pylint_duplicate_output_extracts_clusters() -> None:
     stdout = """

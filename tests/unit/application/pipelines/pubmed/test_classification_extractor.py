@@ -12,6 +12,8 @@ import pytest
 from bioetl.application.pipelines.pubmed.extractors import ClassificationExtractor
 
 
+pytestmark = pytest.mark.unit
+
 class TestParseChemicals:
     """Tests for parse_chemicals method."""
 
@@ -393,7 +395,7 @@ class TestParseMeshTerms:
         terms = ClassificationExtractor.parse_mesh_terms(node)
         assert terms == []
 
-    def test_none_node_returns_empty(self) -> None:
+    def test_parse_mesh_terms__node_returns_empty__e9ada348(self) -> None:
         """Test that None node returns empty list."""
         terms = ClassificationExtractor.parse_mesh_terms(None)
         assert terms == []

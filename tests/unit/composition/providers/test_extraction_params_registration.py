@@ -19,6 +19,8 @@ from bioetl.composition.providers._config_helpers import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------

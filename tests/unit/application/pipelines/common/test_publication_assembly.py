@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import pytest
+
 from typing import Any
 
 from bioetl.application.pipelines.common.publication_assembly import (
     normalize_publication_business_data,
 )
 
+
+pytestmark = pytest.mark.unit
 
 class _StubNormalizer:
     def __init__(self, normalized: dict[str, Any]) -> None:

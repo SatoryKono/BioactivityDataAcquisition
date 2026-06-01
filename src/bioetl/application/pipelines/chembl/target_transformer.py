@@ -25,6 +25,9 @@ from bioetl.application.pipelines.chembl.target_helpers import (
     SynonymHelper,
     XrefHelper,
 )
+from bioetl.application.pipelines.chembl.target_protein_classification_summary import (
+    summarize_target_protein_classification_rows,
+)
 from bioetl.domain.entities import Target
 from bioetl.domain.types import GoldRecord, JsonDict
 from bioetl.domain.value_objects.taxonomy_id import TaxonomyId
@@ -33,7 +36,6 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import BronzeRecord, PrimaryId, SilverRecord
 
-_MULTIFUNCTIONAL_TARGET_L1_NAME = "Multifunctional target"
 _PROTEIN_CLASSIFICATION_ID_KEYS = (
     "leaf_id",
     "protein_classification_id",
@@ -133,8 +135,9 @@ class TargetTransformer(BaseChemblTransformer):
         )
         component_xrefs = XrefHelper.collect_component_xrefs(target_components)
         xref_projection = XrefHelper.project_component_xrefs(component_xrefs)
-        protein_classifications = self._project_protein_classifications(
-            target_components
+        protein_classification_summary = _project_target_protein_class_summary(
+            str(primary_id),
+            target_components,
         )
 
         # Validate taxonomy_id using TaxonomyId Value Object
@@ -176,8 +179,7 @@ class TargetTransformer(BaseChemblTransformer):
             "target_xref_uniprot_ids": xref_projection["target_xref_uniprot_ids"],
             # Primary component ID (for target_component enricher join)
             "primary_component_id": primary_component_id,
-            "protein_classifications": protein_classifications,
-            **dict.fromkeys(_TARGET_PROTEIN_CLASS_SUMMARY_FIELDS),
+            **protein_classification_summary,
             # Flattened components
             **serialized_flattened_components,
             # Complex fields (JSON serialized)
@@ -204,9 +206,8 @@ class TargetTransformer(BaseChemblTransformer):
             description = business_data.get("description")
         silver_record.pop("description", None)
         silver_record["target_description"] = description
-        silver_record["protein_classifications"] = business_data.get(
-            "protein_classifications"
-        )
+        for field in ("protein_classifications", *_TARGET_PROTEIN_CLASS_SUMMARY_FIELDS):
+            silver_record[field] = business_data.get(field)
         return silver_record
 
     def transform_for_gold(
@@ -220,55 +221,59 @@ class TargetTransformer(BaseChemblTransformer):
         gold_record["description"] = description
         return gold_record
 
-    def _project_protein_classifications(
-        self,
-        components: list[JsonDict] | None,
-    ) -> str | None:
-        """Project component protein classifications into target-level JSON."""
-        classifications = _collect_protein_classifications(components)
-        if not classifications:
-            return None
-        if len(classifications) == 1:
-            return self.serialize_json_list(classifications)
-        return self.serialize_json_list(
-            [
-                {
-                    "classification_status": "resolved",
-                    "l1_name": _MULTIFUNCTIONAL_TARGET_L1_NAME,
-                    "source_classifications": classifications,
-                    "source_hierarchy_count": len(classifications),
-                    "source_leaf_ids": [
-                        classification["leaf_id"]
-                        for classification in classifications
-                    ],
-                }
-            ]
-        )
+def _project_target_protein_class_summary(
+    target_id: str,
+    components: list[JsonDict] | None,
+) -> dict[str, object]:
+    """Project nested target payload classifications through the shared summary policy."""
+    summary = summarize_target_protein_classification_rows(
+        target_id,
+        _collect_target_protein_classification_rows(target_id, components),
+    )
+    return {
+        "protein_classifications": summary.get("protein_classifications"),
+        **{
+            field: summary.get(field)
+            for field in _TARGET_PROTEIN_CLASS_SUMMARY_FIELDS
+        },
+    }
 
 
-def _collect_protein_classifications(
+def _collect_target_protein_classification_rows(
+    target_id: str,
     components: list[JsonDict] | None,
 ) -> list[JsonDict]:
-    """Collect unique component classification payloads in leaf-id order."""
+    """Collect deterministic relation-like rows from nested component payloads."""
     if not components:
         return []
 
-    by_leaf_id: dict[int, JsonDict] = {}
+    rows: list[JsonDict] = []
     for component in components:
+        component_id = _coerce_positive_int(component.get("component_id"))
         raw_classifications = component.get("protein_classifications")
         if not isinstance(raw_classifications, list):
             continue
-        for raw_classification in raw_classifications:
-            classification = _normalize_protein_classification(raw_classification)
-            if classification is None:
+        for hierarchy_index, raw_classification in enumerate(raw_classifications):
+            classification_row = _normalize_target_protein_classification_row(
+                target_id=target_id,
+                component_id=component_id,
+                hierarchy_index=hierarchy_index,
+                value=raw_classification,
+            )
+            if classification_row is None:
                 continue
-            leaf_id = cast("int", classification["leaf_id"])
-            by_leaf_id.setdefault(leaf_id, classification)
-    return [by_leaf_id[leaf_id] for leaf_id in sorted(by_leaf_id)]
+            rows.append(classification_row)
+    return rows
 
 
-def _normalize_protein_classification(value: object) -> JsonDict | None:
-    """Normalize one protein classification item for deterministic JSON output."""
+def _normalize_target_protein_classification_row(
+    *,
+    target_id: str,
+    component_id: int | None,
+    hierarchy_index: int,
+    value: object,
+) -> JsonDict | None:
+    """Normalize one nested classification item into a relation-like row."""
     if not isinstance(value, Mapping):
         return None
     leaf_id = _protein_classification_leaf_id(value)
@@ -276,13 +281,22 @@ def _normalize_protein_classification(value: object) -> JsonDict | None:
         return None
 
     classification: JsonDict = {
-        str(key): item
-        for key, item in value.items()
-        if item is not None and str(key).strip()
+        "target_id": target_id,
+        "component_id": component_id,
+        "hierarchy_index": hierarchy_index,
+        "leaf_id": leaf_id,
+        "classification_status": "resolved",
     }
-    classification["classification_status"] = "resolved"
-    classification["leaf_id"] = leaf_id
-    classification.setdefault("protein_classification_id", leaf_id)
+    for level in range(1, 6):
+        classification[f"l{level}_id"] = _coerce_positive_int(
+            value.get(f"l{level}_id")
+        )
+        classification[f"l{level}_name"] = _coerce_text(
+            value.get(f"l{level}_name")
+        )
+        classification[f"l{level}_desc"] = _coerce_text(
+            value.get(f"l{level}_desc")
+        )
     return classification
 
 
@@ -329,3 +343,10 @@ def _coerce_positive_int_from_str(value: str) -> int | None:
     except ValueError:
         return None
     return _positive_int_or_none(coerced)
+
+
+def _coerce_text(value: object) -> str | None:
+    if value is None:
+        return None
+    text = str(value).strip()
+    return text if text else None

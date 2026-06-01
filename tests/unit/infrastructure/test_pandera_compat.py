@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+import pytest
+
 import importlib
 import sys
 import typing
 from types import ModuleType
 
+
+pytestmark = pytest.mark.unit
 
 def _get_origin_stub(_tp) -> None:
     return None

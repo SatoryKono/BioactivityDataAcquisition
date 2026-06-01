@@ -14,6 +14,8 @@ from bioetl.application.services.export_manifests import (
 from bioetl.domain.ports import ExportFileFingerprint
 
 
+pytestmark = pytest.mark.unit
+
 class _FixedClock:
     def now(self) -> datetime:
         return datetime(2026, 5, 1, 2, 3, 4, 987654, tzinfo=UTC)

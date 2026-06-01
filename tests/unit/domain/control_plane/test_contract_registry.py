@@ -21,6 +21,8 @@ from bioetl.domain.types.contract_identity import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 def _ts() -> str:
     """Return one deterministic fixture timestamp."""
     return "2024-01-01T00:00:00+00:00"

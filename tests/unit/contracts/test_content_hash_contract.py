@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from datetime import datetime
 
 from bioetl.domain.behavior import EntityIdentityGenerator
@@ -13,6 +15,8 @@ from bioetl.domain.normalization.profiles import (
 )
 from bioetl.domain.transformations import generate_content_hash
 
+
+pytestmark = pytest.mark.unit
 
 def test_content_hash_normalization_contract() -> None:
     """Hash MUST be stable across normalization-equivalent values."""
@@ -205,11 +209,18 @@ def test_uniprot_raw_json_sidecars_are_excluded_from_semantic_hash() -> None:
         "accession": "P12345",
         "alternative_products": '[{"id":"P12345-2","name":"Isoform 2"}]',
         "alternative_products_canonical_json": '[{"id":"P12345-2","name":"Isoform 2"}]',
-        "alternative_products_raw_json": '[{"commentType":"ALTERNATIVE PRODUCTS","isoforms":[{"isoformIds":[{"value":"P12345-2"}]}]}]',
+        "alternative_products_raw_json": (
+            '[{"commentType":"ALTERNATIVE PRODUCTS",'
+            '"isoforms":[{"isoformIds":[{"value":"P12345-2"}]}]}]'
+        ),
     }
     record_b = {
         **record_a,
-        "alternative_products_raw_json": '[{"commentType":"ALTERNATIVE PRODUCTS","note":"provider-order-changed","isoforms":[{"isoformIds":[{"value":"P12345-2"}]}]}]',
+        "alternative_products_raw_json": (
+            '[{"commentType":"ALTERNATIVE PRODUCTS",'
+            '"note":"provider-order-changed",'
+            '"isoforms":[{"isoformIds":[{"value":"P12345-2"}]}]}]'
+        ),
     }
 
     assert generate_content_hash(

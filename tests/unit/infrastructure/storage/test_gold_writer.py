@@ -111,7 +111,7 @@ class TestGoldWriterWriteModeEnum:
         assert GoldWriteMode.APPEND.value == "append"
         assert GoldWriteMode.SCD2.value == "scd2"
 
-    def test_gold_write_mode_from_string(self):
+    def test_writer_write_mode_enum__mode_from_string__b46af47f(self):
         """Test creating GoldWriteMode from string."""
         from bioetl.infrastructure.storage.gold_writer import GoldWriteMode
 
@@ -621,7 +621,7 @@ class TestGoldWriterWriteSimple:
         assert call_kwargs["table_or_uri"] == "s3://test-bucket/gold/test/table"
 
     @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
-    async def test_write_gold_append_mode(
+    async def test_writer_write_simple__gold_append_mode__27ea2dfd(
         self, mock_write_deltalake, gold_writer, valid_records, strict_schema
     ):
         """Test write_gold with append mode."""
@@ -993,7 +993,7 @@ class TestGoldWriterTypeSanitization:
         result = arrow_converter.sanitize_type_for_delta(large_list_type)
         assert result == pa.large_list(pa.string())
 
-    def test_sanitize_struct_with_null_field(self, arrow_converter):
+    def test_type_sanitization__with_null_field__a524374f(self, arrow_converter):
         """Test sanitization of struct with null field."""
 
         struct_type = pa.struct(

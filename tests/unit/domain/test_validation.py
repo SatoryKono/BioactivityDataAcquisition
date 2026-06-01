@@ -24,6 +24,8 @@ from bioetl.domain.validation import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 class TestValidateSmiles:
     """Tests for validate_smiles function."""
 
@@ -177,7 +179,7 @@ class TestValidatePublicationYear:
             (None, False),
         ],
     )
-    def test_validate_publication_year(
+    def test_publication_year__publication_year__4c15c71d(
         self, year: int | None, expected_warn: bool
     ) -> None:
         """Test validate_publication_year returns correct warning flag."""
@@ -379,7 +381,7 @@ class TestValidateNonEmptyString:
             ("test string", "test string"),
         ],
     )
-    def test_valid_string(self, value: str, expected: str) -> None:
+    def test_non_empty_string__valid_string__56593c57(self, value: str, expected: str) -> None:
         """Test valid strings are normalized and returned."""
         assert validate_non_empty_string(value) == expected
 
@@ -391,7 +393,7 @@ class TestValidateNonEmptyString:
             None,
         ],
     )
-    def test_empty_string(self, value: str | None) -> None:
+    def test_non_empty_string__empty_string__634b4163(self, value: str | None) -> None:
         """Test empty/whitespace strings return None."""
         assert validate_non_empty_string(value) is None
 

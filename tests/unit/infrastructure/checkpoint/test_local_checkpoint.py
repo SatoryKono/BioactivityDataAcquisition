@@ -67,7 +67,7 @@ class TestLocalCheckpointSaveLoad:
     """Tests for save and load operations."""
 
     @pytest.mark.asyncio
-    async def test_save_creates_file(
+    async def test_checkpoint_save_load__save_creates_file__a8badee1(
         self, checkpoint: LocalCheckpointAdapter, run_id: RunID
     ) -> None:
         """Save should create a checkpoint file."""
@@ -75,7 +75,7 @@ class TestLocalCheckpointSaveLoad:
         assert (checkpoint.base_path / "chembl_activity.json").exists()
 
     @pytest.mark.asyncio
-    async def test_save_and_load_roundtrip(
+    async def test_checkpoint_save_load__and_load_roundtrip__18ba1952(
         self, checkpoint: LocalCheckpointAdapter, run_id: RunID
     ) -> None:
         """Should be able to load a saved checkpoint."""
@@ -119,7 +119,7 @@ class TestLocalCheckpointSaveLoad:
         assert len(loaded_metadata) == 1
 
     @pytest.mark.asyncio
-    async def test_load_nonexistent_returns_none(
+    async def test_checkpoint_save_load__returns_none__6a39deff(
         self, checkpoint: LocalCheckpointAdapter
     ) -> None:
         """Load for nonexistent pipeline should return None."""
@@ -331,7 +331,7 @@ class TestLocalCheckpointListAll:
     """Tests for list_all operation."""
 
     @pytest.mark.asyncio
-    async def test_list_all_empty(self, checkpoint: LocalCheckpointAdapter) -> None:
+    async def test_checkpoint_list_all__list_all_empty__957695b8(self, checkpoint: LocalCheckpointAdapter) -> None:
         """Should return empty list when no checkpoints exist."""
         result = await checkpoint.list_all()
         assert result == []
@@ -392,7 +392,7 @@ class TestLocalCheckpointAclose:
     """Tests for aclose operation."""
 
     @pytest.mark.asyncio
-    async def test_aclose_is_noop(self, checkpoint: LocalCheckpointAdapter) -> None:
+    async def test_checkpoint_aclose__aclose_is_noop__94522a27(self, checkpoint: LocalCheckpointAdapter) -> None:
         """aclose should not raise and be a no-op."""
         await checkpoint.aclose()
 

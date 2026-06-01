@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 import scripts.check_entity_config_parity as parity_module
 
+
+pytestmark = pytest.mark.unit
 
 def _write_entity_config(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)

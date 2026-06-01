@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 from scripts.engineering.qa.py_review_orchestrator import (
@@ -7,6 +9,8 @@ from scripts.engineering.qa.py_review_orchestrator import (
     SectorResult,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_determine_subsectors_tracks_current_repo_layout(tmp_path: Path) -> None:
     for rel_path in (

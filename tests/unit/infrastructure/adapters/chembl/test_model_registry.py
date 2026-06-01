@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 import json
 from pathlib import Path
 
@@ -23,6 +25,8 @@ from bioetl.infrastructure.adapters.chembl.models_additional import (
     ChemblProteinClassApiRecord,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def _load_first_fixture_row(relative_path: str) -> dict[str, object]:
     path = Path(relative_path)

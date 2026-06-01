@@ -6,9 +6,13 @@ set of package-level re-export facades to omit the import.
 
 from __future__ import annotations
 
+import pytest
+
 import ast
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 ALLOWED_MISSING_FUTURE_IMPORTS = {
     "domain/entities/bioactivity/__init__.py",

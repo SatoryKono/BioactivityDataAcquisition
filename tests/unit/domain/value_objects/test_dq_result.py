@@ -66,7 +66,7 @@ class TestDQResult:
         assert result.has_critical is False
         assert result.check_duration_ms == pytest.approx(0.0)
 
-    def test_full_creation(self) -> None:
+    def test_dq_result_d_q_result__full_creation__9936ccd0(self) -> None:
         """Test creating DQResult with all fields."""
         result = DQResult(
             error_rate=0.10,
@@ -145,7 +145,7 @@ class TestDQResult:
         )
         assert result.anomalies_count == 0
 
-    def test_is_frozen(self) -> None:
+    def test_dq_result_d_q_result__is_frozen__beed387f(self) -> None:
         """Test DQResult is immutable (frozen dataclass)."""
         result = DQResult(
             error_rate=0.01,

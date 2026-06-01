@@ -20,12 +20,12 @@ class TestTaxonomyId:
         tid = TaxonomyId(9606)
         assert tid.value == 9606
 
-    def test_valid_string(self) -> None:
+    def test_id_taxonomy_id__valid_string__c7c56ccb(self) -> None:
         """Test creation from valid string."""
         tid = TaxonomyId("9606")
         assert tid.value == 9606
 
-    def test_string_with_whitespace(self) -> None:
+    def test_id_taxonomy_id__with_whitespace__c7c2bb7b(self) -> None:
         """Test whitespace is stripped before parsing."""
         tid = TaxonomyId("  9606  ")
         assert tid.value == 9606
@@ -54,12 +54,12 @@ class TestTaxonomyId:
         tid = TaxonomyId(1)
         assert tid.value == 1
 
-    def test_zero_raises(self) -> None:
+    def test_id_taxonomy_id__zero_raises__dbf7d0f3(self) -> None:
         """Test zero raises ValueError (must be >= 1)."""
         with pytest.raises(ValueError, match="must be >= 1"):
             TaxonomyId(0)
 
-    def test_negative_raises(self) -> None:
+    def test_id_taxonomy_id__negative_raises__ae56e3fd(self) -> None:
         """Test negative value raises ValueError."""
         with pytest.raises(ValueError, match="must be >= 1"):
             TaxonomyId(-1)
@@ -69,7 +69,7 @@ class TestTaxonomyId:
         with pytest.raises(ValueError, match="must be <"):
             TaxonomyId(10_000_000)
 
-    def test_bool_raises(self) -> None:
+    def test_id_taxonomy_id__bool_raises__ed69f171(self) -> None:
         """Test boolean input raises ValueError (bool is subclass of int)."""
         with pytest.raises(ValueError, match="bool"):
             TaxonomyId(True)  # type: ignore[arg-type]
@@ -79,7 +79,7 @@ class TestTaxonomyId:
         with pytest.raises(ValueError, match="Invalid TaxonomyId"):
             TaxonomyId("homo_sapiens")
 
-    def test_empty_string_raises(self) -> None:
+    def test_id_taxonomy_id__empty_string_raises__3bba2582(self) -> None:
         """Test empty string raises ValueError."""
         with pytest.raises(ValueError, match="cannot be empty"):
             TaxonomyId("")
@@ -90,13 +90,13 @@ class TestTaxonomyId:
         assert tid is not None
         assert tid.value == 9606
 
-    def test_from_raw_string(self) -> None:
+    def test_id_taxonomy_id__from_raw_string__34ea4765(self) -> None:
         """Test from_raw with string."""
         tid = TaxonomyId.from_raw("9606")
         assert tid is not None
         assert tid.value == 9606
 
-    def test_from_raw_none_returns_none(self) -> None:
+    def test_id_taxonomy_id__none_returns_none__9ab3c93c(self) -> None:
         """Test from_raw with None returns None."""
         assert TaxonomyId.from_raw(None) is None
 
@@ -124,35 +124,35 @@ class TestTaxonomyId:
         b = TaxonomyId("9606")
         assert a == b
 
-    def test_inequality(self) -> None:
+    def test_id_taxonomy_id__inequality__424cb181(self) -> None:
         """Test inequality for different taxonomy IDs."""
         a = TaxonomyId(9606)
         b = TaxonomyId(10090)
         assert a != b
 
-    def test_hash_consistency(self) -> None:
+    def test_id_taxonomy_id__hash_consistency__455ba34f(self) -> None:
         """Test hash is consistent with equality."""
         a = TaxonomyId(9606)
         b = TaxonomyId("9606")
         assert hash(a) == hash(b)
 
-    def test_can_be_used_in_set(self) -> None:
+    def test_id_taxonomy_id__can_be_used_in_set__1d163dbd(self) -> None:
         """Test TaxonomyId can be used in a set."""
         ids = {TaxonomyId(9606), TaxonomyId(9606), TaxonomyId(10090)}
         assert len(ids) == 2
 
-    def test_str_representation(self) -> None:
+    def test_id_taxonomy_id__str_representation__295768af(self) -> None:
         """Test str() returns string of the value."""
         tid = TaxonomyId(9606)
         assert str(tid) == "9606"
 
-    def test_repr(self) -> None:
+    def test_id_taxonomy_id__repr__30740efb(self) -> None:
         """Test repr includes class name."""
         tid = TaxonomyId(9606)
         assert "TaxonomyId" in repr(tid)
         assert "9606" in repr(tid)
 
-    def test_immutability(self) -> None:
+    def test_id_taxonomy_id__immutability__d375dd23(self) -> None:
         """Test TaxonomyId is immutable."""
         tid = TaxonomyId(9606)
         with pytest.raises(AttributeError, match="immutable"):
@@ -173,18 +173,18 @@ class TestValidateTaxonomyId:
         result = validate_taxonomy_id("9606")
         assert result == 9606
 
-    def test_none_returns_none(self) -> None:
+    def test_validate_taxonomy_id__none_returns_none__9dc97edb(self) -> None:
         """Test None input returns None."""
         assert validate_taxonomy_id(None) is None
 
-    def test_invalid_returns_none(self) -> None:
+    def test_validate_taxonomy_id__invalid_returns_none__80059cc7(self) -> None:
         """Test invalid input returns None."""
         assert validate_taxonomy_id("not_a_number") is None
 
-    def test_zero_returns_none(self) -> None:
+    def test_validate_taxonomy_id__zero_returns_none__37537572(self) -> None:
         """Test zero returns None (below minimum)."""
         assert validate_taxonomy_id(0) is None
 
-    def test_bool_returns_none(self) -> None:
+    def test_validate_taxonomy_id__bool_returns_none__57e2bea7(self) -> None:
         """Test bool input returns None."""
         assert validate_taxonomy_id(True) is None

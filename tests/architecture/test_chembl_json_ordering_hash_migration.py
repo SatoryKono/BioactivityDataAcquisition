@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.domain.normalization.profiles.chembl_json_ordering_policy import (
     CHEMBL_JSON_ORDERING_POLICY_HASH,
     CHEMBL_JSON_ORDERING_POLICY_VERSION,
 )
 
+
+pytestmark = pytest.mark.architecture
 
 def test_chembl_json_ordering_policy_changes_require_explicit_version_and_hash_review() -> (
     None

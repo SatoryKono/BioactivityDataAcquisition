@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 import yaml
@@ -11,6 +13,8 @@ from scripts.engineering.qa.check_ontology_unit_semantics import (
     validate_ontology_unit_semantics,
 )
 
+
+pytestmark = pytest.mark.integration
 
 def test_ontology_unit_semantics_gate_passes_current_repo() -> None:
     findings = validate_ontology_unit_semantics(repo_root=Path("."))

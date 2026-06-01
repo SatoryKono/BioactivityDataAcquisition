@@ -1,5 +1,7 @@
 """Test resolver helper functionality."""
 
+import pytest
+
 from unittest.mock import MagicMock
 
 import polars as pl
@@ -12,6 +14,8 @@ from bioetl.application.composite.join_key_normalization import (
     JOIN_KEY_NORMALIZATION_POLICIES,
 )
 
+
+pytestmark = pytest.mark.unit
 
 class TestResolverHelper:
     """Test ResolverHelper class functionality."""

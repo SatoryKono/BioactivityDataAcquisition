@@ -360,7 +360,7 @@ def runner(
 class TestPipelineRunnerInit:
     """Tests for PipelineRunner initialization."""
 
-    def test_initialization(
+    def test_pipeline_runner_init__initialization__a86bab03(
         self,
         pipeline_config,
         runtime_config,

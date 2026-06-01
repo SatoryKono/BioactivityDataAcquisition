@@ -10,6 +10,8 @@ from uuid import uuid4
 import pytest
 
 
+pytestmark = pytest.mark.unit
+
 def test_runtime_observability_import_does_not_load_heavy_adapters() -> None:
     """Importing the runtime entrypoint must keep optional adapters lazy."""
     module_name = "bioetl.composition.bootstrap.runtime.observability"

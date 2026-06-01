@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-30'
+  Last verified: '2026-06-01'
 
 ______________________________________________________________________
 
@@ -96,10 +96,13 @@ Silver schema.
 - `organism_class` как hash-governed profile-owned derived field из `organism` + `taxonomy_id`
 - `target_description` в Silver и `description` в Gold из `target_description` или fallback `description`
 - `target_components`, `target_component_synonyms`, `cross_references` как JSON-строки
-- `protein_classifications` как JSON-строку с детерминированной target-level
-  проекцией component classifications; при нескольких leaf-классификациях L1
-  схлопывается в `Multifunctional target`, а исходные варианты сохраняются в
-  `source_classifications`
+- `protein_classifications` как canonical JSON-строку с той же deterministic
+  summary policy, что и у relation pipeline `chembl_target_protein_classification`
+  и downstream `composite_target`
+- `target_protein_class_id_L1..L5`, `target_protein_class_name_L1..L5`,
+  `target_protein_class_desc_L1..L5` как target-level summary surface для
+  случаев, когда nested `target_components[].protein_classifications[]`
+  действительно присутствуют в raw payload
 - `target_protein_synonyms`, `target_gene_synonyms`, `target_ec_numbers` как pipe-delimited derived-поля с sentinel `unknown`
 - `target_xref_pdb_ids`, `target_xref_go_component`, `target_xref_go_function`, `target_xref_go_process`, `target_xref_hgnc_ids`, `target_xref_reactome_ids`, `target_xref_uniprot_ids` как pipe-delimited xref-derived поля с sentinel `unknown`
 
@@ -136,6 +139,17 @@ the shared registry `configs/vocab/chembl_reference_sources.yaml`; malformed JSO
 - transformer only extracts raw/provider-facing source fields;
 - domain normalization profile детерминированно вычисляет `organism_class`
   через shared organism-classification policy перед hash/DQ/contract checks.
+
+Protein classification contract boundary:
+
+- `composite_target` остаётся canonical fully enriched surface для
+  `protein_classifications` и `target_protein_class_*` полей, потому что
+  детерминированно джойнит `chembl_target_protein_classification` relation
+  pipeline.
+- standalone `chembl_target` теперь переиспользует ту же summary policy, но
+  остаётся best-effort surface: основной `/target` payload ChEMBL обычно не
+  гарантирует наличие nested `protein_classifications`, поэтому эти поля могут
+  оставаться `null`.
 
 Документация не фиксирует literal-формулу `entity_id`; identity/content hash
 вычисляются базовым ChEMBL transformer/runtime слоем.

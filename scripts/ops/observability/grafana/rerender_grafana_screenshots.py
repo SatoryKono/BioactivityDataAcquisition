@@ -151,8 +151,11 @@ def _render_failure_hint(config: RenderConfig) -> str:
         "Grafana render API failed. "
         f"frontend.settings rendererAvailable={renderer_available!r}, "
         f"rendererVersion={renderer_version!r}. "
-        "Verify grafana-image-renderer logs; if the render route still returns "
-        "500, use the Playwright fallback after installing project-local "
+        "Verify grafana-image-renderer logs plus docker-compose.monitoring.yml "
+        "remote renderer settings: GF_RENDERING_RENDERER_TOKEN must match "
+        "AUTH_TOKEN, browser flags must use BROWSER_FLAGS, and the renderer "
+        "image must be pinned. If the render route still returns 500, use the "
+        "Playwright fallback after installing project-local "
         "playwright dependencies."
     )
 
