@@ -553,6 +553,17 @@ def _normalize_host_access_url(url: str) -> str:
     ).rstrip("/")
 
 
+def _zero_bind_access_url(url: str) -> str | None:
+    parts = urlsplit(url)
+    if parts.hostname not in {"localhost", "127.0.0.1"}:
+        return None
+    port = f":{parts.port}" if parts.port is not None else ""
+    host = f"0.0.0.0{port}"
+    return urlunsplit(
+        (parts.scheme, host, parts.path, parts.query, parts.fragment)
+    ).rstrip("/")
+
+
 def _discover_http_datasource_url(
     config: AuditConfig,
     *,
@@ -589,6 +600,11 @@ def _candidate_app_base_urls(config: AuditConfig) -> tuple[str, ...]:
         normalized = _normalize_host_access_url(datasource_url)
         if normalized != datasource_url:
             candidates.append(normalized)
+
+    for candidate in tuple(candidates):
+        zero_bind_url = _zero_bind_access_url(candidate)
+        if zero_bind_url:
+            candidates.append(zero_bind_url)
 
     deduped: list[str] = []
     for candidate in candidates:

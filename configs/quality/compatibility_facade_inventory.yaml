@@ -266,10 +266,14 @@ retained_entrypoints:
   exit_criteria: The merge module remains the sanctioned public seam and all composition paths use collaborator bundles with
     only the canonical `order_service` ordering collaborator.
 measured_only_ratchet:
-  max_total_modules: 0
+  max_total_modules: 3
   scoped_limits:
+  - path_prefix: src/bioetl/application/core/
+    max_modules: 1
   - path_prefix: src/bioetl/application/services/
     max_modules: 0
+  - path_prefix: src/bioetl/domain/normalization/profiles/
+    max_modules: 2
   - path_prefix: src/bioetl/interfaces/cli/commands/
     max_modules: 0
 measured_only_review_workflow:
@@ -390,4 +394,22 @@ retained_entrypoint_burn_down_plan:
     rationale: Public composite merge module; retained while collaborator bundle API is canonical.
     completion_gate: Keep the sanctioned merge entrypoint stable and prevent first-party callers from bypassing the collaborator
       bundle/canonical merge surface.
-measured_only_modules: []
+measured_only_modules:
+- path: src/bioetl/application/core/_span_helpers.py
+  owner: bioetl.application.core
+  reason: Backward-compatible re-export facade retained as a measured-only shim for span helper imports during compatibility review.
+  review_date: '2026-09-30'
+  new_code_policy: no-new-first-party-imports
+  promotion_trigger: sanctioned-public-seam
+- path: src/bioetl/domain/normalization/profiles/_chembl_policy_registry.py
+  owner: bioetl.domain.normalization.profiles
+  reason: Backward-compatible re-export facade retained as a measured-only shim for ChEMBL policy registry imports during compatibility review.
+  review_date: '2026-09-30'
+  new_code_policy: no-new-first-party-imports
+  promotion_trigger: sanctioned-public-seam
+- path: src/bioetl/domain/normalization/profiles/_chembl_policy_registry_data.py
+  owner: bioetl.domain.normalization.profiles
+  reason: Backward-compatible re-export facade retained as a measured-only shim for ChEMBL policy registry payload imports during compatibility review.
+  review_date: '2026-09-30'
+  new_code_policy: no-new-first-party-imports
+  promotion_trigger: sanctioned-public-seam

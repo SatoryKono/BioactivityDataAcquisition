@@ -351,6 +351,47 @@ def test_rerender_builds_playwright_env_with_sidecar_node_modules(
     assert env["NODE_PATH"].startswith("/tmp/bioetl-tools/runtime/node_modules")
 
 
+def test_rerender_builds_playwright_env_with_default_sidecar_runtime(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    node_modules = tmp_path / "runtime" / "node_modules"
+    (node_modules / "playwright").mkdir(parents=True)
+    (node_modules / "playwright" / "package.json").write_text("{}", encoding="utf-8")
+    browsers = tmp_path / "browsers"
+    browsers.mkdir()
+    local_libs = tmp_path / ".cache" / "grafana-screenshot-runtime" / "root" / "usr" / "lib" / "x86_64-linux-gnu"
+    local_libs.mkdir(parents=True)
+    monkeypatch.delenv("BIOETL_PLAYWRIGHT_NODE_MODULES", raising=False)
+    monkeypatch.delenv("PLAYWRIGHT_BROWSERS_PATH", raising=False)
+    monkeypatch.delenv("BIOETL_PLAYWRIGHT_LIBRARY_PATH", raising=False)
+    monkeypatch.setattr(rerender_subject, "_repo_root", lambda: tmp_path)
+    monkeypatch.setattr(
+        rerender_subject, "DEFAULT_TOOL_PLAYWRIGHT_NODE_MODULES", node_modules
+    )
+    monkeypatch.setattr(rerender_subject, "DEFAULT_TOOL_PLAYWRIGHT_BROWSERS", browsers)
+
+    config = rerender_subject.RenderConfig(
+        base_url="http://localhost:3000",
+        username="admin",
+        password="changeme",
+        service_account_token="",
+        output_dir=tmp_path,
+        width=1600,
+        height=2200,
+        timeout_seconds=45.0,
+        selected_uids=(),
+        fallback="auto",
+    )
+
+    env = rerender_subject._playwright_env(config)
+
+    assert env["BIOETL_PLAYWRIGHT_NODE_MODULES"] == str(node_modules)
+    assert env["NODE_PATH"].startswith(str(node_modules))
+    assert env["PLAYWRIGHT_BROWSERS_PATH"] == str(browsers)
+    assert env["BIOETL_PLAYWRIGHT_LIBRARY_PATH"] == str(local_libs)
+    assert env["LD_LIBRARY_PATH"].startswith(str(local_libs))
+
+
 def test_rerender_builds_playwright_env_with_service_account_token(
     tmp_path: Path,
 ) -> None:
@@ -388,7 +429,9 @@ def test_screenshot_runtime_setup_scripts_keep_bootstrap_contract() -> None:
     assert "npm ci --include=dev" in shell_script
     assert "npm_config_production=false" in shell_script
     assert "BIOETL_PLAYWRIGHT_NODE_MODULES" in shell_script
+    assert "BIOETL_PLAYWRIGHT_LIBRARY_PATH" in shell_script
     assert "playwright-runtime" in shell_script
+    assert "libasound2t64" in shell_script
     assert "ci --include=dev --no-bin-links" in powershell_script
     assert 'NPM_CONFIG_PRODUCTION = "false"' in powershell_script
 
@@ -877,6 +920,18 @@ def test_live_audit_normalizes_docker_gateway_to_localhost() -> None:
     )
 
 
+def test_live_audit_adds_zero_bind_fallback_for_localhost() -> None:
+    assert (
+        audit_subject._zero_bind_access_url("http://localhost:8081")
+        == "http://0.0.0.0:8081"
+    )
+    assert (
+        audit_subject._zero_bind_access_url("http://127.0.0.1:8081")
+        == "http://0.0.0.0:8081"
+    )
+    assert audit_subject._zero_bind_access_url("http://example.test:8081") is None
+
+
 def test_live_audit_resolves_http_backend_from_datasource_candidates(
     monkeypatch: Any,
 ) -> None:
@@ -911,6 +966,42 @@ def test_live_audit_resolves_http_backend_from_datasource_candidates(
     monkeypatch.setattr(audit_subject, "_fetch_json", fake_fetch_json)
 
     assert audit_subject._resolve_app_base_url(config) == "http://localhost:8081"
+
+
+def test_live_audit_resolves_zero_bind_backend_when_localhost_is_unreachable(
+    monkeypatch: Any,
+) -> None:
+    config = audit_subject.AuditConfig(
+        prometheus_base_url="http://localhost:9090",
+        app_base_url="http://localhost:8081",
+        loki_base_url="http://localhost:3100",
+        tempo_base_url="http://localhost:3200",
+        grafana_base_url="http://localhost:3000",
+        grafana_username="admin",
+        grafana_password="changeme",
+        workflow="All",
+        pipeline="chembl_target",
+        run_type="incremental",
+        run_id="-",
+        range_hours=24,
+        output_path=Path("reports/observability/grafana/live-panel-audit.json"),
+    )
+
+    monkeypatch.setattr(
+        audit_subject,
+        "_discover_http_datasource_url",
+        lambda *_args, **_kwargs: None,
+    )
+
+    def fake_fetch_json(url: str, *, timeout_seconds: float) -> object:
+        assert timeout_seconds == config.request_timeout_seconds
+        if url == "http://0.0.0.0:8081/health/live":
+            return {"status": "ok"}
+        raise OSError(url)
+
+    monkeypatch.setattr(audit_subject, "_fetch_json", fake_fetch_json)
+
+    assert audit_subject._resolve_app_base_url(config) == "http://0.0.0.0:8081"
 
 
 def test_grafana_audit_preflight_router_exposes_command() -> None:

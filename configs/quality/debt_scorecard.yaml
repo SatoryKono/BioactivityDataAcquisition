@@ -210,6 +210,15 @@ config_surface_ratchet:
   linked_issue: '#4818'
   owner: '@bioetl-config'
   mode: fail-fast
+  review_history:
+    - issue: '#4927'
+      reviewed_on: '2026-06-01'
+      owner: '@bioetl-config'
+      outcome: held_flat_with_zero_actionable_drift
+      rationale: Sanctioned partial variance remains 122 because residual keys are
+        entity-specific extraction/filter policy or composite target-only protein
+        classification mappings; copying them across unrelated configs would create
+        false contract surface. Actionable inconsistent_parameter_count stays zero.
   artifact_policy:
     generator_command: python -m scripts.schema generate-config-matrix
     baseline_artifact: reports/quality/config-discrepancy-baseline.json
@@ -777,6 +786,15 @@ retirement_governance_metrics:
   owner: '@bioetl-architecture'
   linked_issue: '#4705'
   review_cadence: quarterly
+  review_history:
+    - issue: '#4928'
+      reviewed_on: '2026-06-01'
+      owner: '@bioetl-architecture'
+      outcome: held_flat_zero_untriaged
+      rationale: Repo-wide zero-import candidates remain fully classified with zero
+        untriaged candidates; issue 4923 added three zero-import compatibility shims
+        after private importer burn-down, and those are explicitly classified as
+        retained no-growth shims until compatibility retirement.
   review_policy: Review dead-code triage and repo-wide zero-import classifications
     together; growth in tracked retirement debt or any untriaged zero-import candidate
     requires an explicit reviewed rebaseline.
@@ -791,8 +809,8 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless a reviewed triage recalibration
         updates the tracked debt budget intentionally.
     repo_wide_zero_import_candidate_count:
-      current_count: 44
-      max_count: 44
+      current_count: 47
+      max_count: 47
       linked_issue: '#4541'
       owner: '@bioetl-architecture'
       rationale: Repo-wide zero-import candidates remain a governed review surface
@@ -800,8 +818,8 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless a reviewed dead-code inventory refresh
         updates the classified candidate set intentionally.
     repo_wide_classified_zero_import_candidate_count:
-      current_count: 44
-      max_count: 44
+      current_count: 47
+      max_count: 47
       linked_issue: '#4541'
       owner: '@bioetl-architecture'
       rationale: Every repo-wide zero-import candidate must stay covered by an explicit
@@ -866,20 +884,21 @@ expiry_decomposition_targets:
 test_governance_debt_metrics:
   inventory_source: configs/quality/test_governance_audit.yaml
   owner: '@bioetl-architecture'
-  linked_issue: '#4826'
+  linked_issue: '#4925'
   review_cadence: quarterly
   review_policy: Review static test-governance budgets whenever compatibility file
     inventory, assertion-strength debt, or deterministic test-seam counts change.
   metrics:
     compatibility_test_file_count:
-      current_count: 53
-      max_count: 53
-      target_count: 53
-      ratchet_policy: Downward ratchet only; keep max_count at 53 unless a future
+      current_count: 42
+      max_count: 42
+      target_count: 42
+      ratchet_policy: Downward ratchet only; keep max_count at 42 unless a future
         owner-approved reduction lowers the live compatibility test inventory.
-      rationale: TDX-012 review on 2026-05-31 reclassified the lazy export public
-        API inventory test out of compatibility filename inventory, lowering the live
-        count to the target threshold.
+      rationale: >-
+        Issue #4925 reclassified pure public-facade contract tests out of the
+        compatibility filename inventory; live compatibility debt count is now
+        limited to compat, legacy, deprecated, shim, and sunset surfaces.
 program_done_criteria:
   deadline_quarter: 2027-Q1
   max_total_exemptions: 0

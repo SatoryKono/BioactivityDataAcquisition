@@ -4,8 +4,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Protocol
+from uuid import UUID
 
 from bioetl.domain.control_plane import RunManifest
+from bioetl.domain.types import RunID
 from bioetl.interfaces.http.control_plane_selector_context import (
     RUN_ID_NO_SELECTION,
     UNKNOWN_SCOPE,
@@ -69,6 +71,21 @@ def resolve_control_plane_identity_scope(
             resolved_via="no_manifest_for_scope",
         )
 
+    if selected_run_id is not None:
+        resolved_manifest = _get_manifest_by_selected_run_id(
+            host._run_manifest_port,
+            selected_run_id,
+        )
+        if resolved_manifest is not None:
+            return _IdentityScope(
+                requested_pipeline=requested_pipeline,
+                selected_pipelines=selected_pipelines,
+                selected_run_types=selected_run_types,
+                selected_run_id=selected_run_id,
+                resolved_manifest=resolved_manifest,
+                resolved_via="selected_run_id",
+            )
+
     manifests = tuple(
         manifest
         for manifest in host._run_manifest_port.list_all()
@@ -102,6 +119,20 @@ def resolve_control_plane_identity_scope(
         resolved_manifest=resolved_manifest,
         resolved_via=resolved_via,
     )
+
+
+def _get_manifest_by_selected_run_id(
+    manifest_port: object,
+    selected_run_id: str,
+) -> RunManifest | None:
+    get_by_run_id = getattr(manifest_port, "get_by_run_id", None)
+    if not callable(get_by_run_id):
+        return None
+    try:
+        run_id = RunID(UUID(selected_run_id))
+    except ValueError:
+        return None
+    return get_by_run_id(run_id)
 
 
 def _is_unknown_pipeline_scope(

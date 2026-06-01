@@ -299,6 +299,7 @@ class TestTrackProcessedRecords:
     ) -> None:
         """Test that track_processed_records is no-op when metrics is None."""
         recorder_no_metrics.track_processed_records(stage="gold", count=50)
+        assert recorder_no_metrics._metrics is None
 
     def test_handles_quarantined_stage(
         self, recorder: BatchMetricsRecorderService, mock_metrics: MagicMock
@@ -480,6 +481,7 @@ class TestTrackSilverFilterRejection:
         recorder_no_metrics.track_silver_filter_rejection(
             {"reason_code": "required_field_missing"}
         )
+        assert recorder_no_metrics._metrics is None
 
     def test_increments_by_one(
         self, recorder: BatchMetricsRecorderService, mock_metrics: MagicMock
@@ -626,6 +628,7 @@ class TestTrackQuarantinedRecords:
         recorder_no_metrics.track_quarantined_records(
             error_type=ErrorType.MISSING_REQUIRED_FIELD, count=2
         )
+        assert recorder_no_metrics._metrics is None
 
     def test_uses_error_type_value_as_reason(
         self, recorder: BatchMetricsRecorderService, mock_metrics: MagicMock

@@ -10,6 +10,9 @@ UV_CACHE_DIR="${UV_CACHE_DIR:-/tmp/uv-cache}"
 BIOETL_TOOLS_DIR="${BIOETL_TOOLS_DIR:-/tmp/bioetl-tools}"
 PLAYWRIGHT_RUNTIME_ROOT="${PLAYWRIGHT_RUNTIME_ROOT:-${BIOETL_TOOLS_DIR}/playwright-runtime}"
 PLAYWRIGHT_NODE_MODULES_DIR="${PLAYWRIGHT_NODE_MODULES_DIR:-${PLAYWRIGHT_RUNTIME_ROOT}/node_modules}"
+LOCAL_SYSTEM_LIB_ROOT="${LOCAL_SYSTEM_LIB_ROOT:-${REPO_ROOT}/.cache/grafana-screenshot-runtime/root}"
+LOCAL_SYSTEM_DEB_DIR="${LOCAL_SYSTEM_DEB_DIR:-${REPO_ROOT}/.cache/grafana-screenshot-runtime/debs}"
+LOCAL_SYSTEM_LIB_DIR="${LOCAL_SYSTEM_LIB_DIR:-${LOCAL_SYSTEM_LIB_ROOT}/usr/lib/x86_64-linux-gnu}"
 
 ATTEMPT_SYSTEM_INSTALL=0
 RUN_SMOKE=0
@@ -19,7 +22,6 @@ PLAYWRIGHT_INSTALL_ROOT=""
 APT_PACKAGES=(
   libnspr4
   libnss3
-  libasound2
   libatk-bridge2.0-0
   libatk1.0-0
   libcups2
@@ -30,6 +32,10 @@ APT_PACKAGES=(
   libxfixes3
   libxkbcommon0
   libxrandr2
+)
+
+APT_PACKAGE_ALTERNATIVES=(
+  "libasound2|libasound2t64"
 )
 
 REQUIRED_LIBS=(
@@ -67,6 +73,10 @@ Environment:
   PLAYWRIGHT_BROWSERS_PATH  Browser download directory. Default: /tmp/playwright-browsers
   UV_CACHE_DIR              uv cache directory for smoke command. Default: /tmp/uv-cache
   BIOETL_TOOLS_DIR          Tool cache root. Default: /tmp/bioetl-tools
+  LOCAL_SYSTEM_LIB_ROOT     User-space extracted Chromium libs root.
+                            Default: .cache/grafana-screenshot-runtime/root
+  LOCAL_SYSTEM_DEB_DIR      User-space downloaded .deb cache.
+                            Default: .cache/grafana-screenshot-runtime/debs
   GRAFANA_BASE_URL          Optional smoke target. Default from rerender-grafana.
   GRAFANA_USERNAME          Optional smoke auth. Default from rerender-grafana.
   GRAFANA_PASSWORD          Optional smoke auth. Default from rerender-grafana.
@@ -112,7 +122,16 @@ ensure_dirs() {
     "${NPM_CONFIG_CACHE}" \
     "${PLAYWRIGHT_BROWSERS_PATH}" \
     "${UV_CACHE_DIR}" \
-    "${BIOETL_TOOLS_DIR}"
+    "${BIOETL_TOOLS_DIR}" \
+    "${LOCAL_SYSTEM_DEB_DIR}" \
+    "${LOCAL_SYSTEM_LIB_ROOT}"
+}
+
+local_lib_available() {
+  local lib="$1"
+  [[ -d "${LOCAL_SYSTEM_LIB_ROOT}" ]] || return 1
+  find "${LOCAL_SYSTEM_LIB_ROOT}" -type f -name "${lib}" -print -quit 2>/dev/null \
+    | grep -Fq "${lib}"
 }
 
 collect_missing_libs() {
@@ -123,7 +142,8 @@ collect_missing_libs() {
     return 0
   fi
   for lib in "${REQUIRED_LIBS[@]}"; do
-    if ! ldconfig -p 2>/dev/null | grep -Fq "${lib}"; then
+    if ! ldconfig -p 2>/dev/null | grep -Fq "${lib}" \
+      && ! local_lib_available "${lib}"; then
       missing+=("${lib}")
     fi
   done
@@ -143,8 +163,38 @@ print_install_hint() {
   log "Install the standard headless Chromium runtime packages with:"
   log ""
   log "  sudo apt-get update -qq"
-  log "  sudo apt-get install -y ${APT_PACKAGES[*]}"
+  log "  sudo apt-get install -y ${APT_PACKAGES[*]} libasound2"
   log ""
+  log "On Ubuntu 24.04, use libasound2t64 when libasound2 has no candidate."
+  log "Without sudo, this setup script can download and extract the missing"
+  log "runtime libraries into ${LOCAL_SYSTEM_LIB_ROOT}."
+  log ""
+}
+
+resolve_apt_package() {
+  local candidate
+  for candidate in "$@"; do
+    if apt-cache policy "${candidate}" 2>/dev/null | grep -Eq 'Candidate: [^(none)]'; then
+      printf '%s\n' "${candidate}"
+      return 0
+    fi
+  done
+  return 1
+}
+
+resolved_apt_packages() {
+  local packages=("${APT_PACKAGES[@]}")
+  local alternatives choice
+  for alternatives in "${APT_PACKAGE_ALTERNATIVES[@]}"; do
+    IFS='|' read -r -a choices <<<"${alternatives}"
+    choice="$(resolve_apt_package "${choices[@]}" || true)"
+    if [[ -n "${choice}" ]]; then
+      packages+=("${choice}")
+    else
+      packages+=("${choices[0]}")
+    fi
+  done
+  printf '%s\n' "${packages[@]}"
 }
 
 try_install_system_libs() {
@@ -154,16 +204,47 @@ try_install_system_libs() {
   fi
   if [[ "${EUID}" -eq 0 ]]; then
     apt-get update -qq
-    apt-get install -y "${APT_PACKAGES[@]}"
+    mapfile -t packages < <(resolved_apt_packages)
+    apt-get install -y "${packages[@]}"
     return 0
   fi
   if have_command sudo && sudo -n true >/dev/null 2>&1; then
     sudo apt-get update -qq
-    sudo apt-get install -y "${APT_PACKAGES[@]}"
+    mapfile -t packages < <(resolved_apt_packages)
+    sudo apt-get install -y "${packages[@]}"
     return 0
   fi
   log "Root/sudo is required to install system libraries automatically."
   return 1
+}
+
+try_install_local_libs() {
+  if ! have_command apt-get || ! have_command dpkg-deb || ! have_command apt-cache; then
+    log "apt-get, apt-cache, and dpkg-deb are required for user-space library extraction."
+    return 1
+  fi
+
+  mapfile -t packages < <(resolved_apt_packages)
+  log "Downloading Chromium runtime libraries into ${LOCAL_SYSTEM_DEB_DIR}..."
+  (
+    cd "${LOCAL_SYSTEM_DEB_DIR}"
+    apt-get download "${packages[@]}"
+  )
+
+  log "Extracting Chromium runtime libraries into ${LOCAL_SYSTEM_LIB_ROOT}..."
+  local deb
+  shopt -s nullglob
+  for deb in "${LOCAL_SYSTEM_DEB_DIR}"/*.deb; do
+    dpkg-deb -x "${deb}" "${LOCAL_SYSTEM_LIB_ROOT}"
+  done
+  shopt -u nullglob
+}
+
+export_local_lib_path() {
+  if [[ -d "${LOCAL_SYSTEM_LIB_DIR}" ]]; then
+    export BIOETL_PLAYWRIGHT_LIBRARY_PATH="${LOCAL_SYSTEM_LIB_DIR}"
+    export LD_LIBRARY_PATH="${LOCAL_SYSTEM_LIB_DIR}${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+  fi
 }
 
 playwright_version_spec() {
@@ -293,12 +374,22 @@ main() {
           exit 1
         fi
       else
-        print_install_hint "${missing_libs_text}"
-        exit 1
+        log "Attempting user-space Chromium library extraction..."
+        try_install_local_libs || {
+          print_install_hint "${missing_libs_text}"
+          exit 1
+        }
+        export_local_lib_path
+        missing_libs_text="$(collect_missing_libs || true)"
+        if [[ -n "${missing_libs_text}" ]]; then
+          print_install_hint "${missing_libs_text}"
+          exit 1
+        fi
       fi
     fi
   fi
 
+  export_local_lib_path
   install_node_dependencies
   install_playwright_browser
   run_browser_launch_smoke
@@ -310,8 +401,10 @@ main() {
   log ""
   log "Grafana screenshot runtime is ready."
   log "Playwright modules root: ${PLAYWRIGHT_INSTALL_ROOT}/node_modules"
+  log "Playwright browser root: ${PLAYWRIGHT_BROWSERS_PATH}"
+  log "Playwright local library path: ${LOCAL_SYSTEM_LIB_DIR}"
   log "Example command:"
-  log "  UV_CACHE_DIR=${UV_CACHE_DIR} PLAYWRIGHT_BROWSERS_PATH=${PLAYWRIGHT_BROWSERS_PATH} BIOETL_PLAYWRIGHT_NODE_MODULES=${PLAYWRIGHT_INSTALL_ROOT}/node_modules uv run python -m scripts.ops rerender-grafana --uids bioetl-control-plane-v1"
+  log "  UV_CACHE_DIR=${UV_CACHE_DIR} PLAYWRIGHT_BROWSERS_PATH=${PLAYWRIGHT_BROWSERS_PATH} BIOETL_PLAYWRIGHT_NODE_MODULES=${PLAYWRIGHT_INSTALL_ROOT}/node_modules BIOETL_PLAYWRIGHT_LIBRARY_PATH=${LOCAL_SYSTEM_LIB_DIR} uv run python -m scripts.ops rerender-grafana --uids bioetl-control-plane-v1 --fallback playwright"
 }
 
 main "$@"

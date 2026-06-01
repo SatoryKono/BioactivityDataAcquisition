@@ -57,7 +57,7 @@ class TestNoOpLogger:
     def test_info_with_no_kwargs(self) -> None:
         """info() should work with event-only call."""
         logger = NoOpLogger()
-        logger.info("bare event")
+        assert logger.info("bare event") is None
 
     def test_logger_no_op_logger__all_exports__d6092bd1(self) -> None:
         """__all__ should contain NoOpLogger."""

@@ -26,7 +26,7 @@ from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime
 )
 
 DEFAULT_IDENTITY_PROBE = (
-    "/ops/control-plane/identity-table?pipeline=chembl_target&run_type=backfill&run_id=-"
+    "/ops/control-plane/identity-table?pipeline=unknown&run_type=__all&run_id=-"
 )
 DEFAULT_PROCESSED_RECORDS_PROBE = (
     "/ops/observability/processed-records?pipeline=chembl_target&run_type=backfill"

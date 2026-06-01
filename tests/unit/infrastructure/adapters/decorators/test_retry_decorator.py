@@ -179,12 +179,13 @@ class TestRetryingDataSourceDecoratorBasics:
         self, mock_data_source: MockDataSource, retry_config: RetryConfig
     ) -> None:
         """Test that aclose is delegated."""
+        mock_data_source.aclose = MagicMock(return_value=asyncio.sleep(0))  # type: ignore[method-assign]
         decorator = RetryingDataSourceDecorator(
             data_source=mock_data_source,
             retry_config=retry_config,
         )
-        # Should not raise
         await decorator.aclose()
+        mock_data_source.aclose.assert_called_once_with()
 
 
 class TestRetryingDataSourceDecoratorFetch:

@@ -24,11 +24,13 @@ scrape_configs:
       - targets: ['host.docker.internal:8000']
     metrics_path: /metrics
 
-  # Quarantine Explorer (bioetl quarantine serve). Host-published :8081 via compose service or manual ensure.
+  # Quarantine Explorer (bioetl quarantine serve). Compose service DNS is the
+  # default monitoring-stack path; host-gateway may still be used by local
+  # overrides when the backend is started outside compose.
   - job_name: 'quarantine-explorer'
     metrics_path: /health/live
     static_configs:
-      - targets: ['host.docker.internal:8081']
+      - targets: ['quarantine-explorer:8081']
 
   - job_name: 'prometheus'
     static_configs:
