@@ -284,6 +284,8 @@ def _scope_query_params(config: RenderConfig) -> dict[str, str]:
         params["var-run_type"] = config.run_type
     if config.run_id:
         params["var-run_id"] = config.run_id
+        if config.run_id != "-":
+            params["var-quarantine_run_id"] = config.run_id
     return params
 
 

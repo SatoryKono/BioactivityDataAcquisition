@@ -47,12 +47,16 @@ def build_control_plane_identity_evidence_payload(
     selected_run_types: tuple[str, ...],
     resolved_via: str,
     ledger_port: LedgerEntryProvider | None,
+    checkpoint_metadata: dict[str, object] | None = None,
     view: str = "anchors",
     priority: str | None = None,
 ) -> dict[str, object]:
     """Build the dedicated Control Plane identity evidence payload."""
     ledger_entries = ledger_entries_for(resolved_manifest, ledger_port)
-    checkpoint_compare = build_checkpoint_compare(resolved_manifest)
+    checkpoint_compare = build_checkpoint_compare(
+        resolved_manifest,
+        checkpoint_metadata=checkpoint_metadata,
+    )
     values = build_anchor_values(
         resolved_manifest,
         ledger_entries=ledger_entries,

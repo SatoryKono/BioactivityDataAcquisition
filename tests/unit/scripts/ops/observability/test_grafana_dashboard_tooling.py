@@ -677,6 +677,68 @@ def test_live_audit_substitutes_grafana_rate_interval() -> None:
     assert rendered == "rate(metric_bucket[5m]) or rate(metric_bucket[5m])"
 
 
+def test_live_audit_substitutes_hidden_workflow_context_tokens() -> None:
+    config = audit_subject.AuditConfig(
+        prometheus_base_url="http://localhost:9090",
+        app_base_url="http://localhost:8081",
+        loki_base_url="http://localhost:3100",
+        tempo_base_url="http://localhost:3200",
+        grafana_base_url="http://localhost:3000",
+        grafana_username="admin",
+        grafana_password="changeme",
+        workflow="chembl_target",
+        pipeline="chembl_target",
+        run_type="backfill",
+        run_id="run-123",
+        range_hours=24,
+        output_path=Path("reports/observability/grafana/live-panel-audit.json"),
+    )
+
+    rendered = audit_subject._substitute_dashboard_tokens(
+        'metric{pipeline=~"$pipeline_context",run_type=~"$run_type_context",'
+        'provider=~"$provider_hint",step_kind=~"$step_kind",status=~"$step_status"}',
+        config,
+    )
+
+    assert "$pipeline_context" not in rendered
+    assert "$run_type_context" not in rendered
+    assert "$provider_hint" not in rendered
+    assert "$step_kind" not in rendered
+    assert "$step_status" not in rendered
+    assert 'pipeline=~"chembl_target"' in rendered
+    assert 'run_type=~"backfill"' in rendered
+    assert 'provider=~"chembl"' in rendered
+    assert 'step_kind=~".*"' in rendered
+    assert 'status=~".*"' in rendered
+
+
+def test_live_audit_scopes_silver_reject_explorer_to_target_run_id() -> None:
+    config = audit_subject.AuditConfig(
+        prometheus_base_url="http://localhost:9090",
+        app_base_url="http://localhost:8081",
+        loki_base_url="http://localhost:3100",
+        tempo_base_url="http://localhost:3200",
+        grafana_base_url="http://localhost:3000",
+        grafana_username="admin",
+        grafana_password="changeme",
+        workflow="chembl_target",
+        pipeline="chembl_target",
+        run_type="backfill",
+        run_id="run-123",
+        range_hours=24,
+        output_path=Path("reports/observability/grafana/live-panel-audit.json"),
+    )
+
+    rendered = audit_subject._substitute_dashboard_tokens(
+        "/ops/quarantine/filtered-stats?pipeline=${pipeline}"
+        "&run_id=${quarantine_run_id}&from=${__from:date:iso}",
+        config,
+    )
+
+    assert "run_id=run-123" in rendered
+    assert "${quarantine_run_id}" not in rendered
+
+
 def test_live_audit_loki_panel_uses_query_range(monkeypatch: Any) -> None:
     config = audit_subject.AuditConfig(
         prometheus_base_url="http://localhost:9090",

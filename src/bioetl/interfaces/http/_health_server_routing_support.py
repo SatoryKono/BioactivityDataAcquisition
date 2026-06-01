@@ -16,6 +16,7 @@ from bioetl.interfaces.http._health_server_checkpoint_lookup import (
     load_checkpoint_freshness_evidence,
 )
 from bioetl.interfaces.http._health_server_control_plane_scope import (
+    _IdentityScope,
     read_selected_run_id,
     resolve_control_plane_identity_scope,
 )
@@ -196,25 +197,7 @@ async def handle_control_plane_identity_table(
     """Handle control-plane-backed identity rows for Overview v3."""
     assert host._run_manifest_port is not None
     scope = resolve_control_plane_identity_scope(host, query)
-    checkpoint_metadata: dict[str, object] | None = None
-    if host._checkpoint_port is not None:
-        target_pipeline = (
-            scope.resolved_manifest.pipeline_name
-            if scope.resolved_manifest is not None
-            else scope.requested_pipeline
-        )
-        (
-            checkpoint_tuple,
-            _,
-            _,
-            aggregate_scope_unknown,
-        ) = await load_checkpoint_freshness_evidence(
-            host,
-            scope=scope,
-            target_pipeline=target_pipeline,
-        )
-        if not aggregate_scope_unknown and checkpoint_tuple is not None:
-            _, checkpoint_metadata = checkpoint_tuple
+    checkpoint_metadata = await _load_identity_checkpoint_metadata(host, scope)
 
     identity_evidence_summary = build_control_plane_identity_evidence_payload(
         requested_pipeline=scope.requested_pipeline,
@@ -224,6 +207,7 @@ async def handle_control_plane_identity_table(
         selected_run_types=scope.selected_run_types,
         resolved_via=scope.resolved_via,
         ledger_port=host._run_ledger_port,
+        checkpoint_metadata=checkpoint_metadata,
         view="overview",
     ).get("summary")
     summary = (
@@ -258,6 +242,7 @@ async def handle_control_plane_identity_evidence(
     scope = resolve_control_plane_identity_scope(host, query)
     view = host._read_optional_param(query, "view") or "anchors"
     priority = host._read_optional_param(query, "priority")
+    checkpoint_metadata = await _load_identity_checkpoint_metadata(host, scope)
 
     await host._send_payload_response(
         writer,
@@ -270,10 +255,38 @@ async def handle_control_plane_identity_evidence(
             selected_run_types=scope.selected_run_types,
             resolved_via=scope.resolved_via,
             ledger_port=host._run_ledger_port,
+            checkpoint_metadata=checkpoint_metadata,
             view=view,
             priority=priority,
         ),
     )
+
+
+async def _load_identity_checkpoint_metadata(
+    host: _HealthRoutingHost,
+    scope: _IdentityScope,
+) -> dict[str, object] | None:
+    if host._checkpoint_port is None:
+        return None
+    target_pipeline = (
+        scope.resolved_manifest.pipeline_name
+        if scope.resolved_manifest is not None
+        else scope.requested_pipeline
+    )
+    (
+        checkpoint_tuple,
+        _,
+        _,
+        aggregate_scope_unknown,
+    ) = await load_checkpoint_freshness_evidence(
+        host,
+        scope=scope,
+        target_pipeline=target_pipeline,
+    )
+    if aggregate_scope_unknown or checkpoint_tuple is None:
+        return None
+    _, checkpoint_metadata = checkpoint_tuple
+    return checkpoint_metadata
 
 
 def _resolved_scope_pipeline(scope: object) -> str:

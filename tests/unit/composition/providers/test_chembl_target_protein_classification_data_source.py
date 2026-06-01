@@ -38,7 +38,7 @@ class _FakeChEMBLDataSource:
             "protein_class": [
                 {
                     "protein_class_id": 1,
-                    "parent_id": None,
+                    "parent_id": 0,
                     "class_level": 1,
                     "pref_name": "Enzyme",
                     "protein_class_desc": "Root",
