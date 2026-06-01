@@ -7,6 +7,7 @@ import pytest
 from tests.integration._grafana_test_support import (
     get_dashboard_files,
     get_dashboard_panels,
+    get_row_child_panels,
     get_panel_expressions,
     load_dashboard,
 )
@@ -85,7 +86,7 @@ def test_dq_dashboard_surfaces_record_flow_invariant_metrics() -> None:
     assert not missing, f"DQ dashboard missing metrics: {missing}"
 
 
-def test_runtime_dashboard_keeps_loki_log_hygiene_in_collapsed_tracing_row() -> None:
+def test_runtime_dashboard_keeps_loki_log_hygiene_in_expanded_tracing_row() -> None:
     """Runtime should stay Prometheus-first when tracing datasources are disabled."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     row_panel = next(
@@ -101,12 +102,14 @@ def test_runtime_dashboard_keeps_loki_log_hygiene_in_collapsed_tracing_row() -> 
         "Runtime dashboard must group Loki-only panels under an explicit tracing row"
     )
     assert row_panel.get("type") == "row"
-    assert row_panel.get("collapsed") is True, (
-        "Tracing-only log hygiene row must stay collapsed by default"
+    assert row_panel.get("collapsed") is False, (
+        "Tracing-only log hygiene row must stay expanded by default"
     )
     nested_titles = {
         panel.get("title")
-        for panel in row_panel.get("panels", [])
+        for panel in get_row_child_panels(
+            dashboard, "Tracing-only Log Hygiene (requires optional tracing profile)"
+        )
         if isinstance(panel.get("title"), str)
     }
     assert nested_titles == {
@@ -184,9 +187,9 @@ def test_runtime_dashboard_describes_tracing_optional_mode() -> None:
         None,
     )
     assert tracing_row is not None, (
-        "Runtime dashboard must expose optional tracing diagnostics as a collapsed row"
+        "Runtime dashboard must expose optional tracing diagnostics as an expanded row"
     )
-    assert tracing_row.get("collapsed") is True
+    assert tracing_row.get("collapsed") is False
 
 
 def test_control_plane_dashboard_contains_checkpoint_and_replay_metrics() -> None:
@@ -578,7 +581,9 @@ def test_runtime_tracing_row_orders_log_hygiene_panels() -> None:
         None,
     )
     assert tracing_row is not None, "Runtime tracing row not found"
-    nested = tracing_row.get("panels", [])
+    nested = get_row_child_panels(
+        dashboard, "Tracing-only Log Hygiene (requires optional tracing profile)"
+    )
     titles = [panel.get("title") for panel in nested]
     expected_sequence = [
         "Inspect Warning Logs",

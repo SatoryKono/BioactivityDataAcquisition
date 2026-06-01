@@ -6,6 +6,7 @@ import pytest
 
 from tests.integration._grafana_test_support import (
     get_dashboard_panels,
+    get_row_child_panels,
     load_dashboard,
 )
 
@@ -125,12 +126,15 @@ def test_dq_reject_row_orders_trust_then_causes_then_scope_distribution() -> Non
             item
             for item in dashboard.get("panels", [])
             if item.get("type") == "row"
-            and item.get("title") == "Reject / Pareto / Fields (collapsed)"
+            and item.get("title") == "Reject / Pareto / Fields"
         ),
         None,
     )
     assert row is not None
-    nested = {panel.get("title"): panel for panel in row.get("panels", [])}
+    nested = {
+        panel.get("title"): panel
+        for panel in get_row_child_panels(dashboard, "Reject / Pareto / Fields")
+    }
     expected_titles = {
         "Monitor: Silver Filter Reject Accounting Mismatch",
         "Inspect: Top Silver Reject Reasons (Pareto)",
@@ -160,12 +164,17 @@ def test_dq_validation_diagnostics_groups_failures_then_runtime_then_trends() ->
             for item in dashboard.get("panels", [])
             if item.get("type") == "row"
             and item.get("title")
-            == "Validation Failures / Runtime Diagnostics / Trends (collapsed)"
+            == "Validation Failures / Runtime Diagnostics / Trends"
         ),
         None,
     )
     assert row is not None
-    nested = {panel.get("title"): panel for panel in row.get("panels", [])}
+    nested = {
+        panel.get("title"): panel
+        for panel in get_row_child_panels(
+            dashboard, "Validation Failures / Runtime Diagnostics / Trends"
+        )
+    }
     assert nested["Inspect: Quarantine by Error Type"].get("gridPos", {}).get("y") == 48
     assert (
         nested["Monitor: Silver Validation Failures"].get("gridPos", {}).get("y") == 48

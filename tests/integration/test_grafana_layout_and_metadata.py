@@ -9,6 +9,7 @@ import yaml
 from tests.integration._grafana_test_support import (
     get_dashboard_files,
     get_dashboard_panels,
+    get_row_child_panels,
     load_dashboard,
 )
 
@@ -91,21 +92,31 @@ def test_runtime_redundant_guidance_panels_stay_out_of_root_layout() -> None:
     assert "Inspect Runtime Scope" not in root_titles
     assert "Review Diagnostic Scope Note" not in root_titles
     assert "Review Incident Summary" not in root_titles
-    assert "Inspect Active Runtime Blocker Detail" not in root_titles
-
     detect_row = next(
         (
             panel
             for panel in dashboard.get("panels", [])
-            if panel.get("title") == "Detect (collapsed)"
+            if panel.get("title") == "Detect"
         ),
         None,
     )
     assert detect_row is not None, "Runtime dashboard must keep Detect row"
-    assert detect_row.get("collapsed") is True
+    assert detect_row.get("collapsed") is False
+    detail_panel = next(
+        (
+            panel
+            for panel in dashboard.get("panels", [])
+            if panel.get("title") == "Inspect Active Runtime Blocker Detail"
+        ),
+        None,
+    )
+    assert detail_panel is not None
+    assert detail_panel.get("gridPos", {}).get("y", 0) > detect_row.get(
+        "gridPos", {}
+    ).get("y", 0)
     detect_titles = {
         panel.get("title")
-        for panel in detect_row.get("panels", [])
+        for panel in get_row_child_panels(dashboard, "Detect")
         if isinstance(panel.get("title"), str)
     }
     assert "Inspect Active Runtime Blocker Detail" in detect_titles
@@ -159,7 +170,7 @@ def test_runtime_telemetry_gap_panel_keeps_readable_first_screen_width() -> None
 def test_control_plane_root_layout_keeps_range_evidence_and_rows_non_overlapping() -> (
     None
 ):
-    """Control Plane root layout must not overlap the selected-range blocker panel with collapsed incident rows."""
+    """Control Plane root layout must not overlap the selected-range blocker panel with diagnostic rows."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     root_panels = [
         panel
@@ -190,13 +201,13 @@ def test_control_plane_root_layout_keeps_range_evidence_and_rows_non_overlapping
     assert not overlaps, "Control Plane root panels overlap:\n" + "\n".join(overlaps)
 
 
-def test_control_plane_collapsed_row_sequence_matches_operator_flow() -> None:
-    """Control Plane collapsed rows preserve the operator flow order."""
+def test_control_plane_row_sequence_matches_operator_flow() -> None:
+    """Control Plane diagnostic rows preserve the operator flow order."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     row_panels = [
         panel
         for panel in dashboard.get("panels", [])
-        if panel.get("type") == "row" and panel.get("collapsed") is True
+        if panel.get("type") == "row" and panel.get("collapsed") is False
     ]
     row_pairs = [
         (panel.get("id"), panel.get("title"), panel.get("gridPos", {}).get("y"))
@@ -316,7 +327,12 @@ def test_control_plane_replay_safety_detail_top_bands_use_full_row_width() -> No
         and panel.get("title")
         == "Incident Drilldown: Replay Safety (Checkpoint / Replay)"
     )
-    panels = {panel.get("id"): panel for panel in row_panel.get("panels", [])}
+    panels = {
+        panel.get("id"): panel
+        for panel in get_row_child_panels(
+            dashboard, "Incident Drilldown: Replay Safety (Checkpoint / Replay)"
+        )
+    }
 
     known_blind_spots = panels[894]
     blind_spots_grid = known_blind_spots.get("gridPos", {})
@@ -346,7 +362,12 @@ def test_control_plane_lineage_top_band_uses_full_row_width() -> None:
         if panel.get("type") == "row"
         and panel.get("title") == "Incident Drilldown: Audit / Lineage Completeness"
     )
-    panels = {panel.get("id"): panel for panel in row_panel.get("panels", [])}
+    panels = {
+        panel.get("id"): panel
+        for panel in get_row_child_panels(
+            dashboard, "Incident Drilldown: Audit / Lineage Completeness"
+        )
+    }
     panel = panels[122]
     grid_pos = panel.get("gridPos", {})
     assert grid_pos.get("x") == 0
@@ -682,8 +703,8 @@ def test_dashboard_default_time_and_refresh_policy_by_uid_class() -> None:
         )
 
 
-def test_provider_health_selected_provider_detail_row_is_collapsed() -> None:
-    """Provider detail repeat row should be explicit and collapsed by default."""
+def test_provider_health_selected_provider_detail_row_is_expanded() -> None:
+    """Provider detail repeat row should be explicit and expanded by default."""
     dashboard = load_dashboard(
         Path("grafana/dashboards/bioetl-provider-health-v2.json")
     )
@@ -698,7 +719,7 @@ def test_provider_health_selected_provider_detail_row_is_collapsed() -> None:
         None,
     )
     assert detail_row is not None
-    assert detail_row.get("collapsed") is True
+    assert detail_row.get("collapsed") is False
 
     detail_panel = next(
         (

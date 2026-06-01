@@ -22,7 +22,7 @@ uv run python -m scripts.engineering.qa report-dashboard-inventory --check --jso
 
 ### 1.1 Dashboard Question (MUST)
 - [ ] Dashboard answers exactly one `ONE BIG QUESTION`
-- [ ] Secondary questions stay in supporting panels, collapsed rows, tabs, or drilldowns
+- [ ] Secondary questions stay in supporting panels, expanded below-fold rows, tabs, or drilldowns
 - [ ] Primary KPI/verdict is visible on the first screen without scroll
 
 ### 1.2 Scope / Provenance Block (MUST for operator dashboards)
@@ -208,16 +208,16 @@ For each panel:
 - [ ] **Tier 1** (always-visible answer surface): current status, verdict, first action, current causes
 - [ ] **Tier 2** (always-visible supporting context): KPI context, trust markers, bounded mirrors
 - [ ] **Tier 3** (below-fold evidence): selected-range evidence
-- [ ] **Tier 4** (collapsed diagnostics): tracing-only, raw, verbose, rare forensic breakdowns
-- [ ] Critical signal does NOT live exclusively inside a collapsed row
+- [ ] **Tier 4** (expanded diagnostics): tracing-only, raw, verbose, rare forensic breakdowns
+- [ ] Critical signal does NOT live exclusively inside a diagnostic row
 
 ### 5.5 GridPos Layout (MUST)
 - [ ] Top-level `gridPos` rectangles do NOT overlap
-- [ ] Navigation, scope, first-action, current-status, range evidence, collapsed rows occupy explicit non-overlapping bands
+- [ ] Navigation, scope, first-action, current-status, range evidence, expanded rows occupy explicit non-overlapping bands
 - [ ] No unexplained empty row gaps between adjacent bands (unless justified in audit/docs)
 
 ### 5.6 Collapsed Row Policy (MUST)
-- [ ] Tracing-only, raw, verbose, or not-required-for-first-pass-triage panels are collapsed
+- [ ] Tracing-only, raw, verbose, or not-required-for-first-pass-triage panels are expanded below fold
 - [ ] Collapsed rows have descriptive titles by incident scenario (e.g., `Incident Drilldown: ...`)
 
 ---

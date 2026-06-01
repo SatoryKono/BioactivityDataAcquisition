@@ -21,7 +21,7 @@ Use the linked dashboards and artifacts for deep setup, contracts, and extension
 | Question / symptom | Open first | Then use | Owner doc |
 | ------------------ | ---------- | -------- | --------- |
 | What is currently broken or degraded? | `bioetl-overview-v2` | `Status`, `First Action`, then `0. Control Plane`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow` | [Dashboard v2 Usage](dashboard-v2-usage.md) |
-| Is a Prometheus alert actually firing or pending? | `bioetl-overview-v2` | collapsed `Alert/SLO Triage` -> `Triage Alert State` | [Monitoring Guide](../../05-operations/01-monitoring-guide.md) |
+| Is a Prometheus alert actually firing or pending? | `bioetl-overview-v2` | expanded `Alert/SLO Triage` -> `Triage Alert State` | [Monitoring Guide](../../05-operations/01-monitoring-guide.md) |
 | Runtime latency, logs, memory, or alert-condition concern? | `bioetl-runtime` | `bioetl diagnostics guide`; [Observability Checklist](../../05-operations/runbooks/observability-checklist.md) | [Monitoring Guide](../../05-operations/01-monitoring-guide.md) |
 | Provider retries, slowness, or failures? | `bioetl-provider-health-v2` | `bioetl diagnostics health --json`; provider incident runbook | [Incident Response](../../05-operations/runbooks/incident-response.md) |
 | DQ/freshness/quarantine signal concern? | `bioetl-dq-v2` | `bioetl diagnostics quarantine --pipeline <pipeline>` | [DQ Failure Investigation](../../05-operations/runbooks/dq-failure-investigation.md) |
@@ -49,7 +49,7 @@ formatted `percintage` columns, including zero-valued outcome rows and not
 acting as a `$__range` throughput summary.
 
 For `0. Control Plane`, exact identity graph evidence is available in the
-collapsed `Identity evidence and remaining replay-safety signals` row. Those
+expanded `Identity evidence and remaining replay-safety signals` row. Those
 tables call `/ops/control-plane/identity-evidence` for P0/P1/P2 anchors,
 identity gaps, checkpoint anchor comparison, and copy-friendly full values;
 they are HTTP-backed forensic surfaces, not Prometheus label filters.

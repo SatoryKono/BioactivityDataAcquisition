@@ -49,8 +49,9 @@ Grafana dashboards в BioETL.
   `target="_blank"` in panel `id=1000` HTML.
 - Layout hierarchy follows the dashboard design system:
   `Tier 1` answer surface first, `Tier 2` current context second,
-  `Tier 3` selected-range evidence below fold, `Tier 4` collapsed diagnostics
-  only for secondary or noisy detail.
+  `Tier 3` selected-range evidence below fold, `Tier 4` diagnostic/detail rows
+  below fold. Row groups are shipped expanded by default so render/audit paths
+  do not hide secondary or noisy detail.
 - Primary dashboards `0..5` expose the shared operator context shell:
   `$workflow`, `$pipeline`, `$run_type`, `$run_id`, plus role-specific
   extensions. `run_id` remains HTTP-backed identity context for the `ID` panel,

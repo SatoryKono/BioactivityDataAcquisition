@@ -145,17 +145,17 @@
 - **Tier 1** (always-visible answer surface): current status, verdict, first action, current causes
 - **Tier 2** (always-visible supporting context): KPI context, trust markers, bounded mirrors
 - **Tier 3** (below-fold evidence): selected-range evidence
-- **Tier 4** (collapsed diagnostics): tracing-only, raw, verbose, rare forensic breakdowns
-- Критический сигнал НЕ живёт исключительно внутри collapsed row
+- **Tier 4** (expanded diagnostics): tracing-only, raw, verbose, rare forensic breakdowns below fold
+- Критический сигнал НЕ живёт исключительно внутри diagnostic row
 
 **GridPos layout (MUST):**
 - Top-level `gridPos` rectangles НЕ overlap
-- Navigation, scope, first-action, current-status, range evidence, collapsed rows занимают explicit non-overlapping bands
+- Navigation, scope, first-action, current-status, range evidence, expanded rows занимают explicit non-overlapping bands
 - Нет unexplained empty row gaps между adjacent bands (unless justified in audit/docs)
 
-**Collapsed row policy (MUST):**
-- Tracing-only, raw, verbose, или not-required-for-first-pass-triage panels collapsed
-- Collapsed rows имеют descriptive titles по incident scenario (например, `Incident Drilldown: ...`)
+**Expanded row policy (MUST):**
+- Tracing-only, raw, verbose, или not-required-for-first-pass-triage panels live in expanded below-fold rows
+- Expanded rows имеют descriptive titles по incident scenario (например, `Incident Drilldown: ...`)
 
 **Источник:** `design-system.md`, `dashboard-audit-checklist.md`
 
@@ -295,8 +295,8 @@ Canonical L0 answer-first hub using the frozen `1. Overview v3` layout as the ba
 ### First-screen структура
 - **Tier 1**: `Provenance`, `Status`, `First Action`, `ID`, `Processed Records`
 - **Tier 2**: `Control Plane`, `Runtime`, `Data Quality`, `Provider`, `Data Validation`, `Inputs`, `Workflow`
-- **Tier 3**: collapsed `L1 Historical Trends`, collapsed `Range Evidence`
-- **Tier 4**: collapsed `Diagnostics & Docs`
+- **Tier 3**: expanded `L1 Historical Trends`, expanded `Range Evidence`
+- **Tier 4**: expanded `Diagnostics & Docs`
 
 ### KPI ownership (canonical)
 - Status → canonical for `bioetl-overview-v2`, mirrors: `2. Runtime`, `0. Control Plane`, `5. Workflow`
@@ -340,9 +340,9 @@ L1/L2 replay/resume safety: manifest, ledger, checkpoint, replay, lineage, globa
 
 ### First-screen структура
 - **Tier 1**: `Monitor: Replay Safety State`, `Inspect: Checkpoint Freshness Gap`, `Monitor: Manifest / Ledger Integrity`, `Inspect: Telemetry Missing`
-- **Tier 2**: collapsed rows по incident-сценариям (Checkpoint/Replay, Manifest/Ledger, Global Control Plane, Audit/Lineage, Known Missing Signals)
+- **Tier 2**: expanded rows по incident-сценариям (Checkpoint/Replay, Manifest/Ledger, Global Control Plane, Audit/Lineage, Known Missing Signals)
 - **Tier 3**: selected-range evidence ниже
-- **Tier 4**: collapsed diagnostics
+- **Tier 4**: expanded diagnostics
 
 ### KPI ownership (canonical)
 - Replay Safety State → canonical for `bioetl-control-plane-v1`, mirrors: `1. Overview`, `2. Runtime`
@@ -354,7 +354,7 @@ L1/L2 replay/resume safety: manifest, ledger, checkpoint, replay, lineage, globa
 - First-screen current-status cards normalize `workflow_<pipeline>` back to entity pipeline
 - Replay/checkpoint panels route к `checkpoint-debugging.md`
 - Manifest/ledger evidence panels route к `run-manifest-inspection.md`
-- Known Blind Spots и terminal-event evidence ниже fold в collapsed incident rows, не в first-screen trust block
+- Known Blind Spots и terminal-event evidence ниже fold в expanded incident rows, не в first-screen trust block
 - `Identity evidence and remaining replay-safety signals` ниже fold использует `/ops/control-plane/identity-evidence` для overview/P1/P2 anchors, typed source/drilldown metadata, identity gaps, checkpoint compare и copy-friendly full values; remaining replay-safety note перечисляет только сигналы вне этого endpoint.
 - Starts с answer-first trust cards: replay safety state, checkpoint freshness gap, ledger/manifest consistency, telemetry presence
 
@@ -386,9 +386,9 @@ L2 diagnostic runtime triage: blockers, latency, backlog, error localization, ha
 ### First-screen структура
 - **Tier 1**: `First Action`, `Runtime Status`, `Runtime Telemetry Gap`, `Monitor Runtime Blockers`, `Runtime Blockers`
 - `Runtime Status` is an expanded mirror of compact shared-shell `Status`, not an independent second current-status signal.
-- **Tier 2**: collapsed rows по сценариям: `Backlog Trends`, `Durations`, `Shutdown Diagnostics`, `Tracing-only Log Hygiene`
+- **Tier 2**: expanded rows по сценариям: `Backlog Trends`, `Durations`, `Shutdown Diagnostics`, `Tracing-only Log Hygiene`
 - **Tier 3**: selected-range evidence ниже
-- **Tier 4**: collapsed tracing-only log hygiene
+- **Tier 4**: expanded tracing-only log hygiene
 
 ### KPI ownership (canonical mirrors)
 - Status → mirror (canonical: `bioetl-overview-v2`)
@@ -403,7 +403,7 @@ L2 diagnostic runtime triage: blockers, latency, backlog, error localization, ha
 
 ### Специфические требования
 - Prometheus-first в tracing-off режиме
-- Loki log-hygiene panels в collapsed row `Tracing-only Log Hygiene`
+- Loki log-hygiene panels в expanded row `Tracing-only Log Hygiene`
 - Runtime zero-count cards fail closed: selected pipeline/run_type cards anchor `0` to `bioetl_runtime_pipeline_run_type_universe`
 - GLOBAL provider handoff anchors `0` to `bioetl_provider_current_status`
 - Missing scope остаётся `UNKNOWN`, не synthetic OK
@@ -443,7 +443,7 @@ Incident triage по provider health: latency/failures/degraded/retries exhauste
 - **Tier 1**: `GLOBAL Provider Scope`, `Monitor GLOBAL Provider Severity Matrix`, `Inspect Critical Providers`, `Inspect Provider Top Causes`, `Monitor Provider Telemetry Freshness`, `First Action`
 - **Tier 2**: provider detail panels и runbook links ниже
 - **Tier 3**: selected-range evidence
-- **Tier 4**: collapsed diagnostics
+- **Tier 4**: expanded diagnostics
 
 ### KPI ownership (canonical)
 - Provider Health (aggregated) → canonical for `bioetl-provider-health-v2`, mirrors: `1. Overview`, `2. Runtime`
@@ -496,7 +496,7 @@ Incident triage по provider health: latency/failures/degraded/retries exhauste
 - `Monitor DQ Current Status` is an expanded mirror of compact shared-shell `Status`, not an independent second current-status signal.
 - **Tier 2**: compact current-context band: `Monitor: Data Quality Score (Volume-weighted)`, `Monitor: Worst-Entity DQ Score`, `Monitor: Worst Data Freshness Lag (seconds)`, `Track: Records Quarantined in Range`, `Track: Soft Threshold Exceeded in Range`, `Track: Silver Filter Rejects in Range`
 - **Tier 3**: полноширинный `Track Range Evidence: Bronze -> Silver -> Gold`
-- **Tier 4**: collapsed rows: `Reject / Pareto / Fields`, `Validation Failures / Runtime Diagnostics / Trends`
+- **Tier 4**: expanded rows: `Reject / Pareto / Fields`, `Validation Failures / Runtime Diagnostics / Trends`
 
 ### KPI ownership (canonical)
 - DQ Status (Silver Reject / quality posture) → canonical for `bioetl-dq-v2`, mirrors: `1. Overview`, `2. Runtime`
@@ -538,9 +538,9 @@ Selected-range declarative workflow run/step evidence and transform-step latency
 
 ### First-screen структура
 - **Tier 1**: `Failed Workflow Runs / Range`, `Failed Pipeline Steps / Range`, `Failed Transform Steps / Range`, `Skipped Step Events / Range`, `Workflow Run Outcomes / Range`, `First Action`
-- **Tier 2**: collapsed row `Step Diagnostics (collapsed)` с `Step Outcomes by Kind / Step Status / Range` и `Step Duration p95 by Kind / Step Status / Range`
+- **Tier 2**: expanded row `Step Diagnostics` с `Step Outcomes by Kind / Step Status / Range` и `Step Duration p95 by Kind / Step Status / Range`
 - **Tier 3**: selected-range evidence
-- **Tier 4**: collapsed diagnostics
+- **Tier 4**: expanded diagnostics
 
 ### KPI ownership (canonical mirrors)
 - Workflow → canonical for `bioetl-overview-v2`

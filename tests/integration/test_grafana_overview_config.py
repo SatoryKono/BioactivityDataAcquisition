@@ -10,6 +10,7 @@ import pytest
 from tests.integration._grafana_test_support import (
     get_dashboard_panels,
     get_panel_expressions,
+    get_row_child_panels,
     load_dashboard,
 )
 
@@ -383,7 +384,12 @@ def test_diagnostics_row_is_not_empty() -> None:
     )
 
     assert diagnostics_row.get("type") == "row"
-    child_titles = {child.get("title") for child in diagnostics_row.get("panels", [])}
+    child_titles = {
+        child.get("title")
+        for child in get_row_child_panels(
+            dashboard, "Diagnostics & Docs (Logs / Traces / Raw Metrics)"
+        )
+    }
     assert "Diagnostics Navigation" in child_titles
 
 

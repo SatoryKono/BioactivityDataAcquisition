@@ -34,6 +34,7 @@ __all__ = [
     "get_dashboard_prometheus_queries",
     "get_metric_label_sets",
     "get_panel_expressions",
+    "get_row_child_panels",
     "load_dashboard",
 ]
 
@@ -216,6 +217,24 @@ def get_dashboard_panels(dashboard: dict) -> list[dict]:
     for row in dashboard.get("rows", []):
         panels.extend(_walk_panels(row.get("panels", [])))
     return panels
+
+
+def get_row_child_panels(dashboard: dict, row_title: str) -> list[dict]:
+    """Return panels that belong to a row in nested or expanded Grafana JSON."""
+    panels = list(dashboard.get("panels", []))
+    for index, panel in enumerate(panels):
+        if panel.get("type") != "row" or panel.get("title") != row_title:
+            continue
+        nested = panel.get("panels")
+        if isinstance(nested, list) and nested:
+            return list(nested)
+        children: list[dict] = []
+        for candidate in panels[index + 1 :]:
+            if candidate.get("type") == "row":
+                break
+            children.append(candidate)
+        return children
+    return []
 
 
 def get_panel_expressions(dashboard: dict) -> list[str]:

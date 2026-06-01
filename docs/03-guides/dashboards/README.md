@@ -33,7 +33,7 @@ ______________________________________________________________________
 
 - Loki использует безопасный baseline `{job="bioetl"}`.
 - Tempo использует contextual TraceQL filters по текущему dashboard scope (`pipeline` или `provider`); runtime `run_type` не шиппится в TraceQL handoff из-за include-all selector semantics.
-- `bioetl-runtime` остаётся Prometheus-first в tracing-off режиме: Loki log-hygiene panels теперь живут в collapsed row `Tracing-only Log Hygiene`, а базовый triage path не требует Loki/Tempo datasource.
+- `bioetl-runtime` остаётся Prometheus-first в tracing-off режиме: Loki log-hygiene panels живут в expanded below-fold row `Tracing-only Log Hygiene`, а базовый triage path не требует Loki/Tempo datasource.
 - Runtime zero-count cards fail closed: selected pipeline/run_type cards anchor
   `0` to `bioetl_runtime_pipeline_run_type_universe`, GLOBAL provider handoff
   anchors `0` to `bioetl_provider_current_status`, and missing scope remains
@@ -43,13 +43,14 @@ ______________________________________________________________________
 Текущий reproducible render contract:
 
 - Full-surface dashboard audits must use the Playwright screenshot path from
-  `python -m scripts.ops rerender-grafana`, because that path expands collapsed
-  rows before full-page capture.
+  `python -m scripts.ops rerender-grafana`, because that path captures the
+  shipped expanded row surface and still protects against future collapsed-row
+  regressions.
 - `python -m scripts.ops check-grafana-audit-preflight` must report
-  `expanded-row-capture: ok` before a full UX/render audit can claim collapsed
-  diagnostic rows were reviewed.
+  `expanded-row-capture: ok` before a full UX/render audit can claim diagnostic
+  row groups were reviewed.
 - Grafana Render API screenshots remain acceptable for render/auth smoke
-  evidence, but they are not sufficient for the collapsed-row audit
+  evidence, but they are not sufficient for the full row-surface audit
   acceptance criterion.
 - On Linux, `setup_grafana_screenshot_runtime.sh` is the canonical bootstrap
   for repo-local Playwright plus the supported headless Chromium shared
@@ -118,9 +119,9 @@ drill down first? The first screen materializes provenance/scope, `Status`,
 `First Action`, `ID`, and `Processed Records`, then keeps current subsystem
 summaries (`Control Plane`, `Runtime`, `Data Quality`, `Provider`,
 `Data Validation`) plus selected workflow context. Historical evidence remains
-below the current answer rows, and diagnostics routing lives under the collapsed
+below the current answer rows, and diagnostics routing lives under the expanded
 `Diagnostics & Docs (Logs / Traces / Raw Metrics)` row. Actual firing/pending
-alert state is exposed in the collapsed `Alert/SLO Triage` row via Prometheus
+alert state is exposed in the expanded `Alert/SLO Triage` row via Prometheus
 `ALERTS`; this is presentation-only triage and does not duplicate alert-rule
 business logic in dashboard queries.
 
@@ -130,14 +131,14 @@ freshness gap, ledger/manifest consistency, and telemetry presence for the
 selected pipeline scope. Replay/checkpoint panels route to
 `checkpoint-debugging.md`, while manifest/ledger evidence panels route to
 `run-manifest-inspection.md`. **Known Blind Spots** and terminal-event
-evidence live below fold in collapsed incident rows, not in the first-screen
+evidence live below fold in expanded incident rows, not in the first-screen
 trust block.
 
 Control Plane keeps the shared compact `ID` shell panel (`9402`) backed by
 `/ops/control-plane/identity-table`. The shell panel is a two-column summary of
 run/manifest identity, Provider.Entity version, contract schema, execution
 flags, replay capability and mode, checkpoint anchors, optional composite run
-identity, and identity health. The deeper collapsed
+identity, and identity health. The deeper expanded
 `Identity evidence and remaining replay-safety signals` row uses
 `/ops/control-plane/identity-evidence` for P0/P1/P2 anchors, identity gaps,
 replay parentage, composite identity, checkpoint anchor comparison, and
@@ -159,7 +160,7 @@ current-status recording rules (`bioetl_runtime_current_status`,
 `bioetl_provider_current_status`, `bioetl_dq_current_status`) plus reason/cause
 tables before any selected-range evidence. Range counters, trends, raw tables,
 Silver reject breakdowns, logs, and traces stay below the first-screen answer
-row or in collapsed diagnostic rows. `bioetl-provider-health-v2` also exposes
+row or in expanded diagnostic rows. `bioetl-provider-health-v2` also exposes
 `Monitor Provider Telemetry Freshness` on the first screen so missing
 `bioetl_provider_current_status` samples are treated as telemetry gap, not
 healthy provider state.

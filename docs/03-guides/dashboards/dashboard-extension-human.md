@@ -60,7 +60,8 @@ ______________________________________________________________________
   `Tier 1` answer row,
   `Tier 2` current-context support,
   `Tier 3` selected-range evidence below fold,
-  `Tier 4` collapsed diagnostics только для secondary/noisy detail.
+  `Tier 4` diagnostic/detail rows below fold. Row-группы шиппятся expanded by
+  default, чтобы render/audit paths не скрывали secondary/noisy detail.
 
 ### Prometheus
 

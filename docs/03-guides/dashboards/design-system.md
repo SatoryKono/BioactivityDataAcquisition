@@ -146,7 +146,7 @@ timeseries without checking whether the panel compares multiple series.
 
 | Dashboard | First-screen responsibility | Current-status rules | Selected-range evidence | Drilldown / forensic surface |
 | --- | --- | --- | --- | --- |
-| `bioetl-overview-v2` | Что сейчас broken/degraded и куда идти дальше? | `bioetl_l0_status`, `bioetl_l0_next_action_route`, `bioetl_l0_input_status` | `L1 Historical Trends` row plus collapsed `Range Evidence` row | linked L1 dashboards |
+| `bioetl-overview-v2` | Что сейчас broken/degraded и куда идти дальше? | `bioetl_l0_status`, `bioetl_l0_next_action_route`, `bioetl_l0_input_status` | `L1 Historical Trends` row plus expanded `Range Evidence` row | linked L1 dashboards |
 | `bioetl-runtime` | Что прямо сейчас блокирует runtime execution? | `bioetl_runtime_current_status`, `bioetl_runtime_current_blocker_reason` | failed/no-record runs, stage lag/backlog trends, shutdown intervals | Runtime detail tables, Loki/Tempo handoff |
 | `bioetl-provider-health-v2` | Какой provider сейчас degraded/failing и почему? | `bioetl_provider_current_status`, `bioetl_provider_current_cause` | health-check counters, failure/degraded trends, latency/rate-limit history | provider detail panels and runbook links |
 | `bioetl-dq-v2` | Каково текущее DQ состояние и первое действие? | `bioetl_dq_current_status`, `bioetl_dq_current_reason` | Bronze→Silver→Gold range flow, reject counts/rates, validation histories | `bioetl-silver-reject-explorer`, DQ diagnostics |
@@ -177,7 +177,7 @@ Normative rules:
   matching rows or missing samples do not prove current `OK` unless the panel is
   explicitly a zero-valid event counter.
 - Top-level `gridPos` rectangles in a shipped dashboard MUST NOT overlap;
-  navigation, scope, first-action, current-status, range evidence, and collapsed
+  navigation, scope, first-action, current-status, range evidence, and expanded
   rows must occupy explicit non-overlapping grid bands.
 - Top-level root layout MUST NOT leave unexplained empty row gaps between
   adjacent bands; if a dashboard intentionally adds vertical breathing room, the
@@ -245,9 +245,9 @@ same answer-first reading order.
 
 | Dashboard role | Shipped dashboards | Above-the-fold responsibility | Lower bands |
 | --- | --- | --- | --- |
-| L0 answer-first hub | `bioetl-overview-v2` | current answer, next route, bounded mirrors | historical context, routing aids, collapsed diagnostics |
-| L1/L2 triage | `bioetl-runtime`, `bioetl-control-plane-v1`, `bioetl-provider-health-v2`, `bioetl-dq-v2` | current verdict, first action, causes, trust markers | selected-range evidence, collapsed diagnostics |
-| Selected-range operational evidence | `bioetl-workflow-overview` | selected-range operational verdict and immediate fallout | lower evidence bands, optional collapsed diagnostics |
+| L0 answer-first hub | `bioetl-overview-v2` | current answer, next route, bounded mirrors | historical context, routing aids, expanded diagnostics |
+| L1/L2 triage | `bioetl-runtime`, `bioetl-control-plane-v1`, `bioetl-provider-health-v2`, `bioetl-dq-v2` | current verdict, first action, causes, trust markers | selected-range evidence, expanded diagnostics |
+| Selected-range operational evidence | `bioetl-workflow-overview` | selected-range operational verdict and immediate fallout | lower evidence bands, optional expanded diagnostics |
 | Forensic explorer | `bioetl-silver-reject-explorer` | scope semantics, no-data guidance, bounded summary | row-level browsing, record details, forensic tables |
 
 Normative rules:
@@ -258,14 +258,14 @@ Normative rules:
 - Forensic explorer surfaces are exempt from Prometheus-style symmetry, but
   they still MUST keep scope semantics and first action above row-level detail.
 
-## 4.3) Visibility tiers and collapse policy (обязательно)
+## 4.3) Visibility tiers and expanded-row policy (обязательно)
 
 Every shipped dashboard should classify panels into one of four tiers:
 
 - `Tier 1`: always-visible answer surface
 - `Tier 2`: always-visible supporting current context
 - `Tier 3`: below-fold selected-range evidence
-- `Tier 4`: collapsed diagnostics, raw evidence, tracing-only detail, rare
+- `Tier 4`: expanded diagnostics, raw evidence, tracing-only detail, rare
   forensic breakdowns
 
 Normative rules:
@@ -276,10 +276,10 @@ Normative rules:
   support `Tier 1` rather than compete with it.
 - `Tier 3` belongs below the answer bands unless the dashboard role is itself
   selected-range evidence.
-- `Tier 4` SHOULD be collapsed when it is tracing-only, raw, verbose, or not
-  required for first-pass operator triage.
+- `Tier 4` SHOULD live below fold and be expanded by default when it is
+  tracing-only, raw, verbose, or not required for first-pass operator triage.
 - The only copy of a critical signal MUST NOT live exclusively inside a
-  collapsed row.
+  diagnostic row.
 
 ## 4.4) Datasource trust semantics (обязательно)
 
@@ -505,7 +505,7 @@ Implementation guardrails:
 
 - ровно один верхний triage-row с **3–5 KPI**;
 - в этом же ряду MUST быть **ровно одна** явная панель next-step/drilldown;
-- панели глубокой диагностики MUST быть вынесены в secondary collapsed rows с
+- панели глубокой диагностики MUST быть вынесены в secondary expanded rows с
   заголовками по incident-сценариям (`Incident Drilldown: ...`).
 
 Нельзя дублировать next-step call-to-action в нескольких L1 панелях одного
