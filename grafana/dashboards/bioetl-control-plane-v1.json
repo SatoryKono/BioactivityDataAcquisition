@@ -259,8 +259,7 @@
           "url_options": {
             "data": "",
             "method": "GET"
-          },
-          "expr": ""
+          }
         }
       ],
       "transformations": [
@@ -518,7 +517,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "percintage"
+              "options": "percentage"
             },
             "properties": [
               {
@@ -716,8 +715,7 @@
           "url_options": {
             "data": "",
             "method": "GET"
-          },
-          "expr": ""
+          }
         }
       ],
       "transformations": [
@@ -728,13 +726,13 @@
             "indexByName": {
               "parameter": 0,
               "value": 1,
-              "percintage": 2,
+              "percentage": 2,
               "row_status": 3
             },
             "renameByName": {
               "parameter": "parameter",
               "value": "value",
-              "percintage": "percintage",
+              "percentage": "percentage",
               "row_status": ""
             }
           }
@@ -928,8 +926,7 @@
           "url_options": {
             "data": "",
             "method": "GET"
-          },
-          "expr": ""
+          }
         }
       ],
       "transformations": [
@@ -3758,7 +3755,6 @@
       },
       "targets": [
         {
-          "expr": "",
           "format": "table",
           "parser": "backend",
           "refId": "A",
@@ -3846,7 +3842,6 @@
       },
       "targets": [
         {
-          "expr": "",
           "format": "table",
           "parser": "backend",
           "refId": "A",
@@ -3894,7 +3889,6 @@
       },
       "targets": [
         {
-          "expr": "",
           "format": "table",
           "parser": "backend",
           "refId": "A",
@@ -3950,7 +3944,6 @@
       },
       "targets": [
         {
-          "expr": "",
           "format": "table",
           "parser": "backend",
           "refId": "A",
@@ -3998,7 +3991,6 @@
       },
       "targets": [
         {
-          "expr": "",
           "format": "table",
           "parser": "backend",
           "refId": "A",
@@ -4046,7 +4038,6 @@
       },
       "targets": [
         {
-          "expr": "",
           "format": "table",
           "parser": "backend",
           "refId": "A",

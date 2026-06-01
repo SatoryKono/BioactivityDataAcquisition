@@ -2517,8 +2517,7 @@
           "url_options": {
             "data": "",
             "method": "GET"
-          },
-          "expr": ""
+          }
         }
       ],
       "options": {
@@ -2782,7 +2781,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "percintage"
+              "options": "percentage"
             },
             "properties": [
               {
@@ -2967,8 +2966,7 @@
           "url_options": {
             "data": "",
             "method": "GET"
-          },
-          "expr": ""
+          }
         }
       ],
       "options": {
@@ -2992,13 +2990,13 @@
             "indexByName": {
               "parameter": 0,
               "value": 1,
-              "percintage": 2,
+              "percentage": 2,
               "row_status": 3
             },
             "renameByName": {
               "parameter": "parameter",
               "value": "value",
-              "percintage": "percintage",
+              "percentage": "percentage",
               "row_status": ""
             }
           }

@@ -257,8 +257,7 @@
           "url_options": {
             "data": "",
             "method": "GET"
-          },
-          "expr": ""
+          }
         }
       ],
       "title": "Monitor Filtered Records Total",
@@ -338,8 +337,7 @@
           "url_options": {
             "data": "",
             "method": "GET"
-          },
-          "expr": ""
+          }
         }
       ],
       "title": "Track Reject Rate vs Bronze",
@@ -406,8 +404,7 @@
           "url_options": {
             "data": "",
             "method": "GET"
-          },
-          "expr": ""
+          }
         }
       ],
       "title": "Inspect Run Scope Summary",
@@ -640,8 +637,7 @@
           "url_options": {
             "data": "",
             "method": "GET"
-          },
-          "expr": ""
+          }
         }
       ],
       "title": "Inspect Top Reject Reasons",
@@ -688,8 +684,7 @@
           "url_options": {
             "data": "",
             "method": "GET"
-          },
-          "expr": ""
+          }
         }
       ],
       "title": "Inspect Top Reject Fields",
@@ -736,8 +731,7 @@
           "url_options": {
             "data": "",
             "method": "GET"
-          },
-          "expr": ""
+          }
         }
       ],
       "title": "Inspect Top Reason Signatures",
@@ -801,8 +795,7 @@
           "url_options": {
             "data": "",
             "method": "GET"
-          },
-          "expr": ""
+          }
         }
       ],
       "description": "Shows latest 100 Silver FILTERED_OUT_SILVER records for the selected pipeline/run_type/reason_code/field/quarantine_run_id scope, sorted by ingestion_ts descending. Columns include payload_hash, run_id, run_type, reason_code, rule_type, field, operator, expected/actual, dq_status, and reason when the backend provides them; raw payload is intentionally not shown in this list. Empty-state copy: No rejected records for current filters means zero matching rows only after the pipeline/filter scope is confirmed. Backend/query failure copy: If data source query fails, treat this as an error state and inspect Grafana query error details. Use payload_hash self-drilldown for one-record focus and CLI handoff for inspect/resolve actions; verify Bronze/run/batch lineage before replay decisions.",
@@ -842,8 +835,7 @@
           "url_options": {
             "data": "",
             "method": "GET"
-          },
-          "expr": ""
+          }
         }
       ],
       "description": "Selected-range one-record projection filtered by payload_hash plus the active pipeline/run_type/reason_code/field/quarantine_run_id scope. Blank payload_hash returns the latest matching record because this panel uses the safe list endpoint; set payload_hash from the table for exact focus. This view does not mutate payload and does not prove replay safety. If detail is empty, distinguish an excluded record or zero matching row from datasource failure before resolving; use run_id/Bronze linkage and Control Plane evidence for replay decisions.",
