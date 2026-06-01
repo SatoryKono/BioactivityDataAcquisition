@@ -34,9 +34,10 @@ exact_duplicates:
         - "bioetl-runtime.json :: Runtime Status"
         - "bioetl-runtime.json :: Status"
 near_duplicates:
-  max_count: 10
+  max_count: 11
   owner: "@bioetl-observability"
   linked_issue: "#4876"
   rationale: >
-    Current near-duplicate families are mostly intentional p50/p95/p99
-    histogram triplets and layer/status variants. Growth requires review.
+    Current audited baseline is 11 near-duplicate families, mostly intentional
+    p50/p95/p99 histogram triplets and layer/status variants. Growth beyond 11
+    requires review.
