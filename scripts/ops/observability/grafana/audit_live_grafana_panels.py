@@ -542,6 +542,46 @@ def _request_json(url: str, *, auth_header: str, timeout_seconds: float) -> obje
         return json.loads(response.read().decode("utf-8"))
 
 
+def _auth_header_for_url(url: str, config: AuditConfig) -> str | None:
+    parts = urlsplit(url)
+    if parts.username or parts.password:
+        return _auth_header(parts.username or "", parts.password or "")
+    grafana_base = config.grafana_base_url.rstrip("/")
+    if url.startswith(f"{grafana_base}/api/datasources/proxy/"):
+        return _auth_header(config.grafana_username, config.grafana_password)
+    return None
+
+
+def _strip_url_userinfo(url: str) -> str:
+    parts = urlsplit(url)
+    if not parts.username and not parts.password:
+        return url
+    hostname = parts.hostname or ""
+    if ":" in hostname and not hostname.startswith("["):
+        hostname = f"[{hostname}]"
+    port = f":{parts.port}" if parts.port is not None else ""
+    return urlunsplit(
+        (parts.scheme, f"{hostname}{port}", parts.path, parts.query, parts.fragment)
+    )
+
+
+def _fetch_json_with_optional_auth(
+    url: str,
+    *,
+    config: AuditConfig,
+    timeout_seconds: float,
+) -> object:
+    request_url = _strip_url_userinfo(url)
+    auth_header = _auth_header_for_url(url, config)
+    if auth_header:
+        return _request_json(
+            request_url,
+            auth_header=auth_header,
+            timeout_seconds=timeout_seconds,
+        )
+    return _fetch_json(request_url, timeout_seconds=timeout_seconds)
+
+
 def _normalize_host_access_url(url: str) -> str:
     parts = urlsplit(url)
     if parts.hostname != "host.docker.internal":
@@ -586,15 +626,22 @@ def _discover_http_datasource_url(
     return datasource_url.rstrip("/")
 
 
+def _grafana_http_datasource_proxy_url(config: AuditConfig) -> str:
+    return f"{config.grafana_base_url}/api/datasources/proxy/uid/quarantine-explorer"
+
+
 def _candidate_app_base_urls(config: AuditConfig) -> tuple[str, ...]:
     candidates: list[str] = [config.app_base_url.rstrip("/")]
     if config.app_base_url.rstrip("/") != DEFAULT_APP_BASE_URL:
+        if "/api/datasources/proxy/uid/" not in config.app_base_url:
+            candidates.append(_grafana_http_datasource_proxy_url(config))
         return tuple(candidates)
 
     try:
         datasource_url = _discover_http_datasource_url(config)
     except (HTTPError, URLError, OSError, json.JSONDecodeError):
         datasource_url = None
+    candidates.append(_grafana_http_datasource_proxy_url(config))
     if datasource_url:
         candidates.append(datasource_url)
         normalized = _normalize_host_access_url(datasource_url)
@@ -614,12 +661,13 @@ def _candidate_app_base_urls(config: AuditConfig) -> tuple[str, ...]:
 
 
 def _probe_app_health(
-    candidate_base_url: str, *, timeout_seconds: float
+    candidate_base_url: str, *, config: AuditConfig, timeout_seconds: float
 ) -> tuple[str, object] | None:
     for path in _HEALTH_PROBE_PATHS:
         try:
-            payload = _fetch_json(
+            payload = _fetch_json_with_optional_auth(
                 f"{candidate_base_url}{path}",
+                config=config,
                 timeout_seconds=timeout_seconds,
             )
         except (HTTPError, URLError, OSError, json.JSONDecodeError):
@@ -633,6 +681,7 @@ def _resolve_app_base_url(config: AuditConfig) -> str:
     for candidate in _candidate_app_base_urls(config):
         probe = _probe_app_health(
             candidate,
+            config=config,
             timeout_seconds=config.request_timeout_seconds,
         )
         if probe is None:
@@ -892,8 +941,9 @@ def _audit_http_panel(
             target_ref_id=spec.target_ref_id,
         )
     rendered_url = _substitute_dashboard_tokens(url_template, config)
-    payload = _fetch_json(
+    payload = _fetch_json_with_optional_auth(
         f"{app_base_url}{rendered_url}",
+        config=config,
         timeout_seconds=config.request_timeout_seconds,
     )
     if spec.semantic_kind == "freshness":

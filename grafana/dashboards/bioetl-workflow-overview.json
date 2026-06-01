@@ -111,7 +111,7 @@
       "title": "Status",
       "gridPos": {
         "h": 4,
-        "w": 4,
+        "w": 8,
         "x": 16,
         "y": 3
       },
@@ -207,10 +207,10 @@
       "type": "stat",
       "title": "Pipeline Status",
       "gridPos": {
-        "h": 4,
+        "h": 5,
         "w": 4,
         "x": 20,
-        "y": 3
+        "y": 17
       },
       "datasource": {
         "type": "prometheus",
@@ -1014,9 +1014,9 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 4,
-        "x": 20,
-        "y": 17
+        "w": 8,
+        "x": 0,
+        "y": 39
       },
       "id": 9410,
       "options": {
