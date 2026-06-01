@@ -178,13 +178,6 @@ suffix_boundary_rules:
         expires_on: "2026-12-31"
         removal_step: Rename module when Bronze metadata payload helpers move behind storage-owned role-neutral naming.
         reason: Existing storage metadata helper module with no public *Builder symbol; retained as reviewed naming debt.
-      - path: src/bioetl/application/services/control_plane/manifest/identity_graph_builder.py
-        issue: "#3722"
-        owner: "@bioetl-architecture"
-        expires_on: "2026-12-31"
-        removal_step: Rename module when identity graph assembly helpers are consolidated behind role-neutral service naming.
-        reason: Existing control plane helper module with no public *Builder symbol; retained as reviewed naming debt.
-
   - rule_id: composition_infrastructure_service_suffix
     description: >
       Composition and infrastructure layers must not expose new first-party

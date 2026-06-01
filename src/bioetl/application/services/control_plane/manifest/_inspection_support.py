@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.control_plane.manifest.identity_graph_builder import (
+from bioetl.application.services.control_plane.manifest.identity_graph_assembly import (
     RunManifestIdentityGraphAssembler,
 )
 from bioetl.domain.control_plane import RunManifest

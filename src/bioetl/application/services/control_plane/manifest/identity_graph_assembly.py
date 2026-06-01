@@ -1,4 +1,4 @@
-"""Canonical identity graph assembly for run-manifest inspection output."""
+"""Run-manifest identity graph assembly for inspection output."""
 
 from __future__ import annotations
 
