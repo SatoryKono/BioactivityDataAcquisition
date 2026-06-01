@@ -120,6 +120,7 @@ def test_pipeline_runtime_variables_use_runtime_universe() -> None:
     assert "bioetl_records_processed_total" not in pipeline_query
     assert "bioetl_records_processed_total" not in run_type_query
     assert "bioetl_pipeline_stage_expected" in stage_query
+    assert variables["provider_hint"].get("current", {}).get("value") == "chembl"
 
 
 def test_pipeline_runtime_keeps_record_level_forensic_variables_out() -> None:
@@ -441,6 +442,15 @@ def test_active_runtime_blocker_detail_panel_exists() -> None:
     )
     assert detail_panel["type"] == "table"
     targets = detail_panel.get("targets", [])
+    canonical_targets = [
+        target
+        for target in targets
+        if "bioetl_runtime_current_blocker_reason" in target.get("expr", "")
+    ]
+    assert canonical_targets, (
+        "Inspect Active Runtime Blocker Detail must include canonical "
+        "runtime blocker reason rows, not only derived alert-condition rows"
+    )
     blocker_names = set()
     for t in targets:
         expr = t.get("expr", "")

@@ -510,7 +510,11 @@ def _substitute_dashboard_tokens(template: str, config: AuditConfig) -> str:
         "${__to:date:iso}": quote(end_iso, safe=""),
     }
     rendered = template
-    for token, value in replacements.items():
+    for token, value in sorted(
+        replacements.items(),
+        key=lambda item: len(item[0]),
+        reverse=True,
+    ):
         rendered = rendered.replace(token, value)
     return rendered
 

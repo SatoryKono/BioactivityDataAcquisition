@@ -75,13 +75,13 @@
 
 | Public module | Public src | Private src |
 | --- | ---: | ---: |
-| `bioetl.application.core.data_source_mixins` | 3 | 3 |
+| `bioetl.application.core.data_source_mixins` | 4 | 3 |
 | `bioetl.application.core.filtered_data_source_mixins` | 1 | 1 |
 | `bioetl.application.core.idmapping_fetch_support` | 1 | 1 |
 | `bioetl.application.core.idmapping_lifecycle_support` | 1 | 1 |
 | `bioetl.application.core.span_helpers` | 7 | 1 |
 | `bioetl.application.core.subcellular_fraction_support` | 1 | 1 |
-| `bioetl.application.core.target_data_source_mixins` | 4 | 1 |
+| `bioetl.application.core.target_data_source_mixins` | 5 | 1 |
 | `bioetl.application.core.batch_execution.contracts` | 3 | 4 |
 | `bioetl.composition.factories.storage.audit` | 3 | 1 |
 | `bioetl.composition.factories.storage.resilience` | 2 | 2 |

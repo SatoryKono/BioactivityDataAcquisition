@@ -207,19 +207,15 @@ def _run_preflight(
 
 
 def _run_rerender(config: AuditCycleConfig, *, screenshot_uids: tuple[str, ...]) -> int:
-    argv = [
+    common_argv = [
         "--base-url",
         config.grafana_base_url,
         "--username",
         config.grafana_username,
         "--password",
         config.grafana_password,
-        "--output-dir",
-        str(config.screenshot_dir),
         "--timeout-seconds",
         str(config.render_timeout_seconds),
-        "--fallback",
-        "auto",
         "--var-workflow",
         config.workflow,
         "--var-pipeline",
@@ -232,8 +228,30 @@ def _run_rerender(config: AuditCycleConfig, *, screenshot_uids: tuple[str, ...])
         str(config.range_hours),
     ]
     if screenshot_uids:
-        argv.extend(["--uids", *screenshot_uids])
-    return rerender.main(argv)
+        common_argv.extend(["--uids", *screenshot_uids])
+
+    render_api_argv = [
+        *common_argv,
+        "--output-dir",
+        str(config.screenshot_dir / "render-api"),
+        "--fallback",
+        "none",
+    ]
+    render_api_status = rerender.main(render_api_argv)
+    if render_api_status != 0:
+        print(
+            "grafana-audit-cycle: Render API screenshot side-artifact failed; "
+            "continuing with canonical Playwright expanded-row capture."
+        )
+
+    playwright_argv = [
+        *common_argv,
+        "--output-dir",
+        str(config.screenshot_dir),
+        "--fallback",
+        "playwright",
+    ]
+    return rerender.main(playwright_argv)
 
 
 def _app_base_url_from_health_url(health_url: str) -> str:

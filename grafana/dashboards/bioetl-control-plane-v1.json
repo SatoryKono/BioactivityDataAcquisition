@@ -871,7 +871,6 @@
               }
             }
           ],
-          "noValue": "UNKNOWN",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1103,7 +1102,6 @@
               }
             }
           ],
-          "noValue": "UNKNOWN",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -2247,7 +2245,8 @@
               }
             ]
           },
-          "unit": "s"
+          "unit": "s",
+          "noValue": "No GLOBAL checkpoint operator latency samples in range. This is optional admin/operator telemetry, not pipeline success evidence."
         },
         "overrides": []
       },
@@ -3372,7 +3371,8 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "short",
+          "noValue": "No missing-lineage reference samples in range. Empty means no sampled lineage-missing events or absent telemetry, not proof of full lineage closure."
         },
         "overrides": []
       },
@@ -3542,7 +3542,8 @@
               }
             ]
           },
-          "unit": "s"
+          "unit": "s",
+          "noValue": "No GLOBAL audit write latency samples in range. Empty means no audit writes were timed or audit telemetry is absent, not zero latency."
         },
         "overrides": []
       },
@@ -3620,7 +3621,8 @@
               }
             ]
           },
-          "unit": "s"
+          "unit": "s",
+          "noValue": "No GLOBAL audit query latency samples in range. Empty means no audit queries were timed or audit telemetry is absent, not zero latency."
         },
         "overrides": []
       },
