@@ -1,4 +1,4 @@
-"""Compatibility wrapper for the shared ChEMBL target classification summary."""
+"""Shared ChEMBL target classification summary exports for composite joins."""
 
 from __future__ import annotations
 

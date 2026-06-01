@@ -157,11 +157,11 @@ def _node_from_row(
         return None
     return ProteinClassificationNode(
         protein_class_id=protein_class_id,
-        parent_id=_coerce_int(row.get("parent_id")),
+        parent_id=_coerce_positive_int(row.get("parent_id")),
         class_level=_coerce_int(row.get("class_level")),
         pref_name=_coerce_str(row.get("pref_name")),
         protein_class_desc=_coerce_str(row.get("protein_class_desc")),
-        replaced_by=_coerce_int(row.get("replaced_by")),
+        replaced_by=_coerce_positive_int(row.get("replaced_by")),
     )
 
 
@@ -250,6 +250,13 @@ def _coerce_int(value: object) -> int | None:
         except ValueError:
             return None
     return None
+
+
+def _coerce_positive_int(value: object) -> int | None:
+    int_value = _coerce_int(value)
+    if int_value is None or int_value < 1:
+        return None
+    return int_value
 
 
 def _coerce_str(value: object) -> str | None:

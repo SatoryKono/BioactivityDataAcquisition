@@ -1787,6 +1787,13 @@
       "pluginVersion": "10.4.0",
       "targets": [
         {
+          "expr": "topk(20, (bioetl_runtime_current_blocker_reason{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or (((bioetl_runtime_current_blocker_reason{run_type=~\"$run_type\"}) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")))",
+          "legendFormat": "{{pipeline}} / {{reason}} / {{severity}} / {{action_target}}",
+          "refId": "J",
+          "instant": true,
+          "format": "table"
+        },
+        {
           "expr": "label_replace((bioetl_runtime_alert_condition_pipeline_preflight_failed_15m{pipeline=~\"$pipeline\"} > 0) or (((bioetl_runtime_alert_condition_pipeline_preflight_failed_15m) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")), \"blocker\", \"preflight_failed\", \"\", \"\")",
           "legendFormat": "{{pipeline}} / {{blocker}}",
           "refId": "A",
@@ -3659,8 +3666,8 @@
         "allValue": null,
         "current": {
           "selected": true,
-          "text": "unknown",
-          "value": "unknown"
+          "text": "chembl",
+          "value": "chembl"
         },
         "datasource": {
           "type": "prometheus",

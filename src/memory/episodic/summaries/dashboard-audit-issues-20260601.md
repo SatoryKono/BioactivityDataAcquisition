@@ -2,14 +2,13 @@
 id: dashboard-audit-issues-20260601
 title: Create GitHub issues for BioETL dashboard audit findings
 task_id: dashboard-audit-issues-20260601
-created_at: '2026-06-01T11:19:26Z'
+created_at: '2026-06-01T14:30:21Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- reports/observability/grafana/dashboard_full_audit_20260601_chembl_target_backfill_expanded_current/github_issues/issue_manifest.json
-summary: Prepared seven GitHub issue payloads for dashboard audit findings; remote
-  creation is blocked because gh is unavailable and no GitHub token is present in
-  the environment.
+- reports/observability/grafana/dashboard_full_audit_20260601_chembl_target_backfill_renderapi_current/github_issues_created.json
+summary: 'Created GitHub issues #4916-#4922 for seven dashboard audit findings from
+  the 96h BioETL Grafana audit; saved issue mapping artifact under reports/observability/grafana/dashboard_full_audit_20260601_chembl_target_backfill_renderapi_current/github_issues_created.json.'
 ---
 
 # Episodic summary
@@ -20,7 +19,7 @@ summary: Prepared seven GitHub issue payloads for dashboard audit findings; remo
 
 ## Outcome
 
-- Prepared seven GitHub issue payloads for dashboard audit findings; remote creation is blocked because gh is unavailable and no GitHub token is present in the environment.
+- Created GitHub issues #4916-#4922 for seven dashboard audit findings from the 96h BioETL Grafana audit; saved issue mapping artifact under reports/observability/grafana/dashboard_full_audit_20260601_chembl_target_backfill_renderapi_current/github_issues_created.json.
 
 ## Lessons learned
 

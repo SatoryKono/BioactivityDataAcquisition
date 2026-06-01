@@ -14,6 +14,40 @@ from bioetl.infrastructure.adapters.chembl.protein_classification_graph import (
 
 pytestmark = pytest.mark.unit
 
+
+def test_graph_treats_chembl_root_parent_zero_as_absent_parent() -> None:
+    graph = ChEMBLProteinClassificationGraph.from_rows(
+        protein_class_rows=[
+            {
+                "protein_class_id": 1,
+                "parent_id": 0,
+                "class_level": 1,
+                "pref_name": "Enzyme",
+                "protein_class_desc": "Root",
+            },
+            {
+                "protein_class_id": 646,
+                "parent_id": 1,
+                "class_level": 2,
+                "pref_name": "Hydrolase",
+                "protein_class_desc": "enzyme hydrolase",
+            },
+        ],
+        target_component_rows=[
+            {
+                "component_id": 434,
+                "protein_classification_ids": "[646]",
+            }
+        ],
+    )
+
+    hierarchies = graph.get_component_classifications(434)
+
+    assert len(hierarchies) == 1
+    assert hierarchies[0].leaf_id == 646
+    assert hierarchies[0].level_ids == (1, 646, None, None, None)
+
+
 def test_graph_resolves_multiple_classifications_with_replaced_by_redirect() -> None:
     graph = ChEMBLProteinClassificationGraph.from_rows(
         protein_class_rows=[
