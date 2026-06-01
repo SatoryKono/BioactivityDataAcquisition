@@ -694,7 +694,7 @@ def test_latency_p95_panels_preserve_no_data_state() -> None:
         (
             "bioetl-control-plane-v1.json",
             "Inspect: Missing Lineage Refs by Layer / Type",
-            "Use as lineage risk triage only; it does not prove complete artifact linkage by itself.",
+            "Use as lineage risk triage only; it does not prove complete artifact identity graph or exact artifact refs.",
             "No missing-lineage reference samples in range. Empty means no sampled lineage-missing events or absent telemetry, not proof of full lineage closure.",
         ),
         (

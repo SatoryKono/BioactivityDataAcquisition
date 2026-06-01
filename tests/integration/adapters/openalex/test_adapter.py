@@ -21,11 +21,27 @@ from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimi
 from bioetl.infrastructure.adapters.openalex import OpenAlexAdapter
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
+from tests.helpers.vcr_config import resolve_cassette_name
 
 # VCR cassette directory
 CASSETTE_DIR = (
     Path(__file__).parent.parent.parent.parent / "fixtures" / "vcr" / "openalex"
 )
+
+_CASSETTE_NAME_OVERRIDES = {
+    "TestOpenAlexAdapterIntegration.test_open_alex_adapter__fetch_with_query__bac3ed40": (
+        "TestOpenAlexAdapterIntegration.test_fetch_with_query"
+    ),
+    "TestOpenAlexAdapterIntegration.test_open_alex_adapter__health_check__53273898": (
+        "TestOpenAlexAdapterIntegration.test_health_check"
+    ),
+    "TestOpenAlexAdapterIntegration.test_open_alex_adapter__with_fallback__5545fedd": (
+        "TestOpenAlexAdapterIntegration.test_fetch_filtered_with_fallback"
+    ),
+    "TestOpenAlexAdapterIntegration.test_open_alex_adapter__title_only_lookup__09c5b35c": (
+        "TestOpenAlexAdapterIntegration.test_title_only_lookup"
+    ),
+}
 
 
 @pytest.fixture(scope="module")
@@ -38,6 +54,24 @@ def vcr_config():
         "filter_query_parameters": ["mailto"],  # Don't record mailto
         "decode_compressed_response": True,
     }
+
+
+@pytest.fixture
+def vcr_cassette_name(request: pytest.FixtureRequest) -> str:
+    """Resolve renamed OpenAlex tests to their committed legacy cassette names."""
+    class_name = request.node.cls.__name__ if request.node.cls is not None else None
+    node_name = request.node.name
+    if class_name is not None:
+        qualified_name = f"{class_name}.{node_name}"
+        qualified_override = _CASSETTE_NAME_OVERRIDES.get(qualified_name)
+        if qualified_override is not None:
+            return qualified_override
+        return qualified_name
+    return resolve_cassette_name(
+        node_name=node_name,
+        class_name=class_name,
+        overrides=_CASSETTE_NAME_OVERRIDES,
+    )
 
 
 @pytest_asyncio.fixture

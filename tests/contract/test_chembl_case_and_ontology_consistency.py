@@ -17,7 +17,7 @@ from bioetl.domain.normalization.profiles import (
     CHEMBL_TARGET_PROFILE,
     CHEMBL_TISSUE_PROFILE,
 )
-from bioetl.domain.normalization.profiles._chembl_policy_registry import (
+from bioetl.domain.normalization.profiles.chembl_policy_registry import (
     CHEMBL_ONTOLOGY_POLICY_CONFIG,
     DEFAULT_CHEMBL_POLICY_REGISTRY_DATA,
 )

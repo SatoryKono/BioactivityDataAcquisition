@@ -894,7 +894,7 @@ def guard_bootstrap_pipeline_runner_for_e2e(
     has_vcr_marker = request.node.get_closest_marker("vcr") is not None
     fallback_snapshot_refs = (
         ()
-        if is_vcr_recording_mode() or not has_vcr_marker
+        if not has_vcr_marker
         else _build_vcr_cassette_input_snapshot_refs(request)
     )
 

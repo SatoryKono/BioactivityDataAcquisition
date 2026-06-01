@@ -9,7 +9,7 @@ from typing import Any
 import pytest
 import yaml
 
-from bioetl.domain.normalization.profiles._chembl_policy_registry import (
+from bioetl.domain.normalization.profiles.chembl_policy_registry import (
     CHEMBL_CONTROLLED_VOCAB_CONFIG,
     CHEMBL_ONTOLOGY_POLICY_CONFIG,
     CHEMBL_REFERENCE_IDENTIFIER_CONFIG,

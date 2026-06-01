@@ -1253,6 +1253,24 @@ def test_workflow_step_panels_apply_status_variable() -> None:
             )
 
 
+def test_workflow_pipeline_status_falls_back_to_runtime_current_status() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-workflow-overview.json"))
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == "Pipeline Status"
+        ),
+        None,
+    )
+    assert panel is not None
+    expr = panel["targets"][0]["expr"]
+    assert "bioetl_workflow_pipeline_verdict_status" in expr
+    assert "bioetl_runtime_current_status" in expr
+    assert 'pipeline=~"$pipeline"' in expr
+    assert 'run_type=~"$run_type"' in expr
+
+
 def test_workflow_dashboard_descriptions_explain_selected_range_limits() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-workflow-overview.json"))
 

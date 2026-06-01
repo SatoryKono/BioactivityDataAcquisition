@@ -1323,7 +1323,7 @@
       "missing_lines": 17,
       "module": "bioetl.application.core._span_helpers",
       "path": "src/bioetl/application/core/_span_helpers.py",
-      "source_lines": 101
+      "source_lines": 21
     },
     {
       "coverage_percent": 26.09,
@@ -2103,7 +2103,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.core.span_helpers",
       "path": "src/bioetl/application/core/span_helpers.py",
-      "source_lines": 21
+      "source_lines": 110
     },
     {
       "coverage_percent": 0.0,
@@ -7693,7 +7693,7 @@
       "missing_lines": null,
       "module": "bioetl.composition.providers._chembl_target_protein_classification_data_source",
       "path": "src/bioetl/composition/providers/_chembl_target_protein_classification_data_source.py",
-      "source_lines": 231
+      "source_lines": 218
     },
     {
       "coverage_percent": null,
@@ -7744,6 +7744,16 @@
       "module": "bioetl.composition.providers._default_registry",
       "path": "src/bioetl/composition/providers/_default_registry.py",
       "source_lines": 119
+    },
+    {
+      "coverage_percent": null,
+      "coverage_status": "unmeasured",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
+      "module": "bioetl.composition.providers._derived_target_data_source_delegation",
+      "path": "src/bioetl/composition/providers/_derived_target_data_source_delegation.py",
+      "source_lines": 245
     },
     {
       "coverage_percent": 86.36,
@@ -11303,7 +11313,7 @@
       "missing_lines": 3,
       "module": "bioetl.domain.normalization.profiles._chembl_policy_registry",
       "path": "src/bioetl/domain/normalization/profiles/_chembl_policy_registry.py",
-      "source_lines": 301
+      "source_lines": 45
     },
     {
       "coverage_percent": 100.0,
@@ -11313,7 +11323,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.normalization.profiles._chembl_policy_registry_data",
       "path": "src/bioetl/domain/normalization/profiles/_chembl_policy_registry_data.py",
-      "source_lines": 72
+      "source_lines": 21
     },
     {
       "coverage_percent": 100.0,
@@ -11603,7 +11613,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.normalization.profiles.chembl_policy_registry",
       "path": "src/bioetl/domain/normalization/profiles/chembl_policy_registry.py",
-      "source_lines": 33
+      "source_lines": 301
     },
     {
       "coverage_percent": 100.0,
@@ -11613,7 +11623,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.normalization.profiles.chembl_policy_registry_data",
       "path": "src/bioetl/domain/normalization/profiles/chembl_policy_registry_data.py",
-      "source_lines": 21
+      "source_lines": 72
     },
     {
       "coverage_percent": 100.0,
@@ -19748,7 +19758,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-06-01",
-  "source_tree_sha256": "4cb05812ed6e8c7a423438a7b8e7250f0650ddc2d0819c7a1f7267e1e1186b9f",
+  "source_tree_sha256": "4a9a8df36e1ca04ae7541317a6625dae72cda7c4dd03f28c3ee93219724c5a3d",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -19963,14 +19973,14 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 1974,
+    "source_module_count": 1975,
     "status_counts": {
       "fully_covered": 493,
       "partially_covered": 1153,
       "uncovered": 318,
-      "unmeasured": 10
+      "unmeasured": 11
     },
-    "unmeasured_module_count": 10,
+    "unmeasured_module_count": 11,
     "unmeasured_modules": [
       {
         "module": "bioetl.__main__",
@@ -20005,6 +20015,11 @@
       {
         "module": "bioetl.composition.providers._chembl_target_protein_classification_relation_builder",
         "path": "src/bioetl/composition/providers/_chembl_target_protein_classification_relation_builder.py",
+        "reason": "coverage_xml_has_no_class_entry"
+      },
+      {
+        "module": "bioetl.composition.providers._derived_target_data_source_delegation",
+        "path": "src/bioetl/composition/providers/_derived_target_data_source_delegation.py",
         "reason": "coverage_xml_has_no_class_entry"
       },
       {

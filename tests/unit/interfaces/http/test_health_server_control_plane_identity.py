@@ -1004,8 +1004,8 @@ class TestHealthServerControlPlaneSelector:
         )
         assert rows["Resume|Dry run|Cached Bronze"] == "No | No | No"
         assert rows["Replay [Capability.Mode]"] == "Yes [Supported.Backfill]"
-        assert rows["Checkpoint [Anchors]"] == "OK"
-        assert rows["Identity Health [Gaps]"] == "Complete [6 gaps]"
+        assert rows["Checkpoint [Anchors]"] == "PARTIAL"
+        assert rows["Identity Health [Gaps]"] == "Incomplete [8 gaps]"
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_table_compact_health_matches_identity_evidence(
@@ -1144,7 +1144,7 @@ class TestHealthServerControlPlaneSelector:
         assert rows["Execution [Type|Context|Git]"] == (
             "incremental | isolated | git=abc1234"
         )
-        assert rows["Checkpoint [Anchors]"] == "MISSING"
+        assert rows["Checkpoint [Anchors]"] == "OK"
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_table_supports_all_pipeline_with_selected_run_id(
@@ -1356,12 +1356,12 @@ class TestHealthServerControlPlaneSelector:
         )
         assert rows["contract_ref"]["value_full"] == "chembl.activity"
         assert rows["input_snapshot_count"]["value_full"] == "1"
-        assert rows["checkpoint_anchor_status"]["value_full"] == "OK"
-        assert rows["identity_graph_complete"]["value_full"] == "complete"
-        assert rows["identity_graph_complete"]["missing_severity"] == "OK"
-        assert data["summary"]["identity_graph_complete"] is True
+        assert rows["checkpoint_anchor_status"]["value_full"] == "PARTIAL"
+        assert rows["identity_graph_complete"]["value_full"].startswith("incomplete")
+        assert rows["identity_graph_complete"]["missing_severity"] == "DEGRADED"
+        assert data["summary"]["identity_graph_complete"] is False
         assert data["summary"]["correlation_anchor_gaps"] == {}
-        assert data["identity_diagnostics"]["checkpoint_anchor_status"] == "OK"
+        assert data["identity_diagnostics"]["checkpoint_anchor_status"] == "PARTIAL"
         assert rows["runtime_mode"]["copy"] is False
         assert rows["effective_config_hash"]["copy"] is True
         assert {item["priority"] for item in data["anchors"]} == {"P0", "P1", "P2"}
