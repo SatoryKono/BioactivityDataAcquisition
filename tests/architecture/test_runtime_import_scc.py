@@ -48,6 +48,52 @@ ACCEPTED_RUNTIME_SCCS: dict[frozenset[str], dict[str, str]] = {
             "flattened into a single support module."
         ),
     },
+    frozenset(
+        {
+            "bioetl.application.services.control_plane.manifest",
+            "bioetl.application.services.control_plane.manifest.inspection_service",
+        }
+    ): {
+        "owner": "application.services.control_plane",
+        "review_date": "2026-12-31",
+        "linked_issue": "#4820",
+        "rationale": (
+            "Package __init__.py re-exports from inspection_service.py, which imports "
+            "from other manifest submodules. This is a standard package seam pattern "
+            "for control plane manifest services."
+        ),
+    },
+    frozenset(
+        {
+            "bioetl.application.services.control_plane.ledger",
+            "bioetl.application.services.control_plane.ledger.service",
+        }
+    ): {
+        "owner": "application.services.control_plane",
+        "review_date": "2026-12-31",
+        "linked_issue": "#4820",
+        "rationale": (
+            "Package __init__.py re-exports from service.py, which imports from "
+            "other ledger submodules. This is a standard package seam pattern for "
+            "control plane ledger services."
+        ),
+    },
+    frozenset(
+        {
+            "bioetl.interfaces.cli.commands.domains.health.server_integration",
+            "bioetl.interfaces.cli.commands.health",
+        }
+    ): {
+        "owner": "interfaces.cli.commands",
+        "review_date": "2026-12-31",
+        "linked_issue": "#4820",
+        "rationale": (
+            "Health command module imports from domains.health.server_integration for "
+            "health server utilities. This is a standard CLI command organization pattern "
+            "where domain-specific health utilities are imported by the top-level health "
+            "command entrypoint."
+        ),
+    },
 }
 FORBIDDEN_RUNTIME_SCCS: tuple[frozenset[str], ...] = (
     frozenset(

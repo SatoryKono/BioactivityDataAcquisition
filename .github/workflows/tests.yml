@@ -459,12 +459,33 @@ jobs:
                       QUALITY_REPORT_OUTPUT="reports/quality/ci-quality-metrics.json" \
                       QUALITY_SUMMARY_OUT="$GITHUB_STEP_SUMMARY"
 
+            -   name: Review observability runtime cardinality evidence
+                env:
+                    BIOETL_OBSERVABILITY_PROMETHEUS_URL: ${{ vars.BIOETL_OBSERVABILITY_PROMETHEUS_URL }}
+                    BIOETL_OBSERVABILITY_PROMETHEUS_TOKEN: ${{ secrets.BIOETL_OBSERVABILITY_PROMETHEUS_TOKEN }}
+                run: |
+                    uv run python -m scripts.engineering.qa report-observability-metric-inventory \
+                      --check \
+                      --write-evidence reports/observability/runtime_cardinality_inventory.json \
+                      --review-json-out reports/observability/runtime_cardinality_review.json \
+                      --summary-out "$GITHUB_STEP_SUMMARY"
+
             -   name: Upload quality metrics artifact
                 if: always()
                 uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
                 with:
                     name: ci-quality-metrics
                     path: reports/quality/ci-quality-metrics.json
+
+            -   name: Upload observability review artifacts
+                if: always()
+                uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+                with:
+                    name: observability-runtime-cardinality-review
+                    path: |
+                        reports/observability/runtime_cardinality_inventory.json
+                        reports/observability/runtime_cardinality_review.json
+                    if-no-files-found: warn
 
     # Fast tests run first for quick feedback
     test-fast:

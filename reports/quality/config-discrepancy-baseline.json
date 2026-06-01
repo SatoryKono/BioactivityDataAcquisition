@@ -8,19 +8,19 @@
       "unique_parameter_count": 199
     },
     "entity_effective": {
-      "config_count": 21,
+      "config_count": 22,
       "inconsistent_parameter_count": 0,
-      "raw_inconsistent_parameter_count": 100,
-      "sanctioned_partial_parameter_count": 100,
-      "unique_parameter_count": 309
+      "raw_inconsistent_parameter_count": 140,
+      "sanctioned_partial_parameter_count": 140,
+      "unique_parameter_count": 312
     }
   },
   "metrics": {
-    "config_count": 26,
+    "config_count": 27,
     "inconsistent_parameter_count": 0,
-    "raw_inconsistent_parameter_count": 100,
-    "sanctioned_partial_parameter_count": 100,
-    "unique_parameter_count": 508
+    "raw_inconsistent_parameter_count": 140,
+    "sanctioned_partial_parameter_count": 140,
+    "unique_parameter_count": 511
   },
-  "snapshot_date": "2026-05-31"
+  "snapshot_date": "2026-06-01"
 }

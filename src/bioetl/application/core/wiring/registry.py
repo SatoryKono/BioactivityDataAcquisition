@@ -87,6 +87,10 @@ _PUBLIC_EXPORTS = {
         "bioetl.application.pipelines.chembl.target_component_transformer",
         "TargetComponentTransformer",
     ),
+    "TargetProteinClassificationTransformer": (
+        "bioetl.application.pipelines.chembl.target_protein_classification_transformer",
+        "TargetProteinClassificationTransformer",
+    ),
     "TargetTransformer": (
         "bioetl.application.pipelines.chembl.target_transformer",
         "TargetTransformer",

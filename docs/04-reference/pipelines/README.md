@@ -29,7 +29,7 @@ including composite pipelines.
 
 Current live config baseline on `main`:
 
-- `21` provider entity configs in `configs/entities/**`
+- `22` provider entity configs in `configs/entities/**`
 - `5` composite configs in `configs/composites/*.yaml`
 - `7` provider-level source configs in `configs/providers/*.yaml`
 
@@ -37,7 +37,7 @@ ______________________________________________________________________
 
 ## Pipeline Index
 
-### Provider Pipelines (21)
+### Provider Pipelines (22)
 
 The table below lists all currently configured provider pipelines. Some linked
 pages are deep current specs, while others are canonical compact summaries that
@@ -55,17 +55,18 @@ delegate detailed behavior to the linked provider reference and active config.
 | 8   | `chembl_assay_parameters`       | ChEMBL           | assay-parameters       | [Spec](chembl/08-assay-parameters-spec.md)       |
 | 9   | `chembl_compound_record`        | ChEMBL           | compound-record        | [Spec](chembl/09-compound-record-spec.md)        |
 | 10  | `chembl_target_component`       | ChEMBL           | target-component       | [Spec](chembl/10-target-component-spec.md)       |
-| 11  | `chembl_publication_term`       | ChEMBL           | publication-term       | [Spec](chembl/11-publication-term-spec.md)       |
-| 12  | `chembl_publication_similarity` | ChEMBL           | publication-similarity | [Spec](chembl/12-publication-similarity-spec.md) |
-| 13  | `chembl_subcellular_fraction`   | ChEMBL           | subcellular-fraction   | [Spec](chembl/14-subcellular-fraction-spec.md)   |
-| 14  | `chembl_tissue`                 | ChEMBL           | tissue                 | [Spec](chembl/15-tissue-spec.md)                 |
-| 15  | `uniprot_protein`               | UniProt          | protein                | [Spec](uniprot/01-protein-spec.md)               |
-| 16  | `uniprot_idmapping`             | UniProt          | idmapping              | [Spec](uniprot/02-idmapping-spec.md)             |
-| 17  | `pubchem_compound`              | PubChem          | compound               | [Spec](pubchem/01-compound-spec.md)              |
-| 18  | `pubmed_publication`            | PubMed           | publication            | [Spec](pubmed/01-publication-spec.md)            |
-| 19  | `crossref_publication`          | CrossRef         | publication            | [Spec](crossref/01-publication-spec.md)          |
-| 20  | `openalex_publication`          | OpenAlex         | publication            | [Spec](openalex/01-publication-spec.md)          |
-| 21  | `semanticscholar_publication`   | Semantic Scholar | publication            | [Spec](semanticscholar/01-publication-spec.md)   |
+| 11  | `chembl_target_protein_classification` | ChEMBL           | target-protein-classification | [Spec](chembl/11-target-protein-classification-spec.md) |
+| 12  | `chembl_publication_term`       | ChEMBL           | publication-term       | [Spec](chembl/12-publication-term-spec.md)       |
+| 13  | `chembl_publication_similarity` | ChEMBL           | publication-similarity | [Spec](chembl/13-publication-similarity-spec.md) |
+| 14  | `chembl_subcellular_fraction`   | ChEMBL           | subcellular-fraction   | [Spec](chembl/14-subcellular-fraction-spec.md)   |
+| 15  | `chembl_tissue`                 | ChEMBL           | tissue                 | [Spec](chembl/15-tissue-spec.md)                 |
+| 16  | `uniprot_protein`               | UniProt          | protein                | [Spec](uniprot/01-protein-spec.md)               |
+| 17  | `uniprot_idmapping`             | UniProt          | idmapping              | [Spec](uniprot/02-idmapping-spec.md)             |
+| 18  | `pubchem_compound`              | PubChem          | compound               | [Spec](pubchem/01-compound-spec.md)              |
+| 19  | `pubmed_publication`            | PubMed           | publication            | [Spec](pubmed/01-publication-spec.md)            |
+| 20  | `crossref_publication`          | CrossRef         | publication            | [Spec](crossref/01-publication-spec.md)          |
+| 21  | `openalex_publication`          | OpenAlex         | publication            | [Spec](openalex/01-publication-spec.md)          |
+| 22  | `semanticscholar_publication`   | Semantic Scholar | publication            | [Spec](semanticscholar/01-publication-spec.md)   |
 
 ### Composite Pipelines (5)
 
@@ -73,11 +74,11 @@ Composite pipeline pages document the current active composite pipeline specific
 
 | #   | Pipeline ID             | Provider  | Entity      | Spec                                     |
 | --- | ----------------------- | --------- | ----------- | ---------------------------------------- |
-| 22  | `composite_publication` | Composite | publication | [Spec](composite/01-publication-spec.md) |
-| 23  | `composite_molecule`    | Composite | molecule    | [Spec](composite/02-molecule-spec.md)    |
-| 24  | `composite_target`      | Composite | target      | [Spec](composite/03-target-spec.md)      |
-| 25  | `composite_activity`    | Composite | activity    | [Spec](composite/04-activity-spec.md)    |
-| 26  | `composite_assay`       | Composite | assay       | [Spec](composite/05-assay-spec.md)       |
+| 23  | `composite_publication` | Composite | publication | [Spec](composite/01-publication-spec.md) |
+| 24  | `composite_molecule`    | Composite | molecule    | [Spec](composite/02-molecule-spec.md)    |
+| 25  | `composite_target`      | Composite | target      | [Spec](composite/03-target-spec.md)      |
+| 26  | `composite_activity`    | Composite | activity    | [Spec](composite/04-activity-spec.md)    |
+| 27  | `composite_assay`       | Composite | assay       | [Spec](composite/05-assay-spec.md)       |
 
 ______________________________________________________________________
 
@@ -85,7 +86,7 @@ ______________________________________________________________________
 
 | Provider             | Pipelines | Rate Limit                 | Auth               |
 | -------------------- | --------- | -------------------------- | ------------------ |
-| **ChEMBL**           | 14        | 3 req/sec                  | Public             |
+| **ChEMBL**           | 15        | 3 req/sec                  | Public             |
 | **UniProt**          | 2         | 10 req/sec (100 with key)  | API Key (optional) |
 | **PubChem**          | 1         | 5 req/sec                  | Public             |
 | **PubMed**           | 1         | 3 req/sec (10 with key)    | API Key            |
@@ -160,6 +161,7 @@ Composite pipelines keep merge schema in `configs/composites/{entity}.yaml`
 | `configs/entities/chembl/subcellular_fraction.yaml`   | `schema` section in same file |
 | `configs/entities/chembl/target.yaml`                 | `schema` section in same file |
 | `configs/entities/chembl/target_component.yaml`       | `schema` section in same file |
+| `configs/entities/chembl/target_protein_classification.yaml` | `schema` section in same file |
 | `configs/entities/chembl/tissue.yaml`                 | `schema` section in same file |
 | `configs/entities/crossref/publication.yaml`          | `schema` section in same file |
 | `configs/entities/openalex/publication.yaml`          | `schema` section in same file |

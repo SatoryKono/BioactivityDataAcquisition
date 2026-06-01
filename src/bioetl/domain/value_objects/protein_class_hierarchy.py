@@ -24,10 +24,8 @@ class ProteinClassLevel:
     desc: str | None
 
     def __post_init__(self) -> None:
-        if self.id is not None and self.id < 1:
-            raise ValueError(f"protein class level id must be positive, got {self.id}")
-        if self.id is None and (self.name is not None or self.desc is not None):
-            raise ValueError("empty protein class levels must not carry name or desc")
+        _validate_level_id(self.id)
+        _validate_empty_level_payload(self.id, self.name, self.desc)
 
     @classmethod
     def empty(cls) -> ProteinClassLevel:
@@ -74,3 +72,24 @@ class ProteinClassHierarchy:
     def level_ids(self) -> tuple[int | None, ...]:
         """Return level identifiers for deterministic hashing/projection."""
         return tuple(level.id for level in self.levels)
+
+
+def _validate_level_id(level_id: int | None) -> None:
+    """Validate a non-empty protein classification level identifier."""
+    if level_id is not None and level_id < 1:
+        raise ValueError(f"protein class level id must be positive, got {level_id}")
+
+
+def _validate_empty_level_payload(
+    level_id: int | None,
+    name: str | None,
+    desc: str | None,
+) -> None:
+    """Ensure absent hierarchy levels do not carry descriptive payload."""
+    if level_id is None and _has_level_payload(name=name, desc=desc):
+        raise ValueError("empty protein class levels must not carry name or desc")
+
+
+def _has_level_payload(*, name: str | None, desc: str | None) -> bool:
+    """Return True when an optional hierarchy level carries display data."""
+    return name is not None or desc is not None

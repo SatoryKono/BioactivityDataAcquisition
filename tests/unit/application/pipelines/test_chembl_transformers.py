@@ -720,6 +720,123 @@ class TestTargetTransformer:
         assert result["target_ec_numbers"] == "unknown"
 
     @pytest.mark.asyncio
+    async def test_transform_projects_single_protein_classification_to_json(
+        self, transformer, mock_context
+    ):
+        """Single component classification should remain as target-level JSON."""
+        record = {
+            "target_id": "CHEMBL123",
+            "target_components": [
+                {
+                    "component_id": 10,
+                    "protein_classifications": [
+                        {
+                            "protein_classification_id": 1015,
+                            "l1_name": "Enzyme",
+                            "l2_name": "Protease",
+                        }
+                    ],
+                }
+            ],
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert isinstance(result["protein_classifications"], str)
+        import json
+
+        classifications = json.loads(result["protein_classifications"])
+        assert classifications == [
+            {
+                "classification_status": "resolved",
+                "l1_name": "Enzyme",
+                "l2_name": "Protease",
+                "leaf_id": 1015,
+                "protein_classification_id": 1015,
+            }
+        ]
+
+    @pytest.mark.asyncio
+    async def test_transform_collapses_multiple_classifications_to_multifunctional_l1(
+        self, transformer, mock_context
+    ):
+        """Multiple leaf classifications should emit a deterministic L1 summary."""
+        record = {
+            "target_id": "CHEMBL123",
+            "target_components": [
+                {
+                    "component_id": 10,
+                    "protein_classifications": [
+                        {
+                            "protein_classification_id": 148,
+                            "l1_name": "Membrane receptor",
+                        },
+                        {
+                            "protein_classification_id": 12,
+                            "l1_name": "Enzyme",
+                        },
+                    ],
+                },
+                {
+                    "component_id": 11,
+                    "protein_classifications": [
+                        {
+                            "protein_classification_id": 148,
+                            "l1_name": "duplicate ignored",
+                        }
+                    ],
+                },
+            ],
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        import json
+
+        classifications = json.loads(result["protein_classifications"])
+        assert classifications == [
+            {
+                "classification_status": "resolved",
+                "l1_name": "Multifunctional target",
+                "source_classifications": [
+                    {
+                        "classification_status": "resolved",
+                        "l1_name": "Enzyme",
+                        "leaf_id": 12,
+                        "protein_classification_id": 12,
+                    },
+                    {
+                        "classification_status": "resolved",
+                        "l1_name": "Membrane receptor",
+                        "leaf_id": 148,
+                        "protein_classification_id": 148,
+                    },
+                ],
+                "source_hierarchy_count": 2,
+                "source_leaf_ids": [12, 148],
+            }
+        ]
+
+    @pytest.mark.asyncio
+    async def test_transform_uses_null_for_missing_protein_classifications(
+        self, transformer, mock_context
+    ):
+        """Targets without classification payloads should emit null, not tuple."""
+        record = {
+            "target_id": "CHEMBL123",
+            "target_components": [
+                {"component_id": 10, "component_type": "PROTEIN"},
+            ],
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["protein_classifications"] is None
+
+    @pytest.mark.asyncio
     async def test_transform_projects_derived_component_synonyms(
         self, transformer, mock_context
     ):

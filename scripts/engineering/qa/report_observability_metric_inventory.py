@@ -23,9 +23,12 @@ import subprocess
 import sys
 import tempfile
 from collections import defaultdict
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Final
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
 
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 _SRC_ROOT = _REPO_ROOT / "src"
@@ -74,6 +77,11 @@ _METRIC_INVENTORY_CACHE: dict[str, dict[str, object]] = {}
 _TEXT_DISCOVERY_TIMEOUT_SECONDS: Final[float] = 20.0
 _METRIC_MENTION_GREP_TIMEOUT_SECONDS: Final[float] = 20.0
 _METRIC_MENTION_GREP_CHUNK_SIZE: Final[int] = 128
+_PROMETHEUS_QUERY_TIMEOUT_SECONDS: Final[float] = 5.0
+_PROMETHEUS_BASE_URL_ENV_VAR: Final[str] = "BIOETL_OBSERVABILITY_PROMETHEUS_URL"
+_PROMETHEUS_BEARER_TOKEN_ENV_VAR: Final[str] = (
+    "BIOETL_OBSERVABILITY_PROMETHEUS_TOKEN"
+)
 _RUNTIME_METRIC_METHODS = frozenset(
     {"increment_counter", "observe_histogram", "set_gauge"}
 )
@@ -474,7 +482,7 @@ def _normalize_mapping_lists(
 def _read_runtime_candidate_text(path: Path) -> str | None:
     try:
         text = path.read_text(encoding="utf-8")
-    except UnicodeDecodeError:
+    except (OSError, UnicodeDecodeError):
         return None
     if not any(marker in text for marker in _RUNTIME_SCAN_MARKERS):
         return None
@@ -1383,6 +1391,205 @@ def _runtime_cardinality_threshold_violations(
     return violations
 
 
+def _resolve_prometheus_base_url(explicit_base_url: str | None) -> tuple[str | None, str]:
+    if explicit_base_url and explicit_base_url.strip():
+        return explicit_base_url.strip().rstrip("/"), "cli"
+    env_base_url = os.getenv(_PROMETHEUS_BASE_URL_ENV_VAR, "").strip()
+    if env_base_url:
+        return env_base_url.rstrip("/"), "env"
+    return None, "unconfigured"
+
+
+def _prometheus_metric_family_matcher(metric_name: str) -> str:
+    escaped = re.escape(metric_name)
+    return f"^{escaped}(?:_bucket|_sum|_count|_created)?$"
+
+
+def _prometheus_cardinality_query(
+    metric_name: str,
+    *,
+    label_names: frozenset[str],
+) -> str:
+    selector = (
+        "{__name__=~"
+        + json.dumps(_prometheus_metric_family_matcher(metric_name))
+        + "}"
+    )
+    if label_names:
+        labels_expr = ", ".join(sorted(label_names))
+        return f"count(count by ({labels_expr}) ({selector}))"
+
+    ignored_labels = ["__name__"]
+    if metric_name in HISTOGRAMS:
+        ignored_labels.append("le")
+    ignored_expr = ", ".join(sorted(ignored_labels))
+    return f"count(count without ({ignored_expr}) ({selector}))"
+
+
+def _query_prometheus_scalar(
+    *,
+    prometheus_base_url: str,
+    query: str,
+    bearer_token: str,
+) -> int:
+    request = Request(
+        url=prometheus_base_url.rstrip("/") + "/api/v1/query?" + urlencode({"query": query}),
+        headers={"Accept": "application/json"},
+    )
+    if bearer_token:
+        request.add_header("Authorization", f"Bearer {bearer_token}")
+
+    try:
+        with urlopen(request, timeout=_PROMETHEUS_QUERY_TIMEOUT_SECONDS) as response:
+            payload = json.load(response)
+    except HTTPError as exc:  # pragma: no cover - exercised via mocked failure paths
+        raise RuntimeError(f"HTTP {exc.code}") from exc
+    except URLError as exc:  # pragma: no cover - exercised via mocked failure paths
+        raise RuntimeError(str(exc.reason)) from exc
+
+    if not isinstance(payload, dict) or payload.get("status") != "success":
+        raise RuntimeError("unexpected Prometheus API response")
+    data = payload.get("data")
+    if not isinstance(data, dict):
+        raise RuntimeError("missing Prometheus API data payload")
+
+    result_type = data.get("resultType")
+    result = data.get("result")
+    if result_type == "scalar" and isinstance(result, list) and len(result) == 2:
+        return int(float(result[1]))
+    if result_type == "vector" and isinstance(result, list) and len(result) == 1:
+        vector_item = result[0]
+        if isinstance(vector_item, dict):
+            value = vector_item.get("value")
+            if isinstance(value, list) and len(value) == 2:
+                return int(float(value[1]))
+    raise RuntimeError("Prometheus query did not return a single scalar result")
+
+
+RuntimeCardinalityReviewSummary = dict[str, object]
+
+
+def _build_runtime_cardinality_review_summary(
+    report: MetricInventoryReport,
+    *,
+    repo_root: Path,
+    prometheus_base_url: str | None,
+) -> RuntimeCardinalityReviewSummary:
+    reviewed_metrics = sorted(
+        str(metric_name)
+        for metric_name in report.get("runtime_cardinality_reviewed", [])
+        if isinstance(metric_name, str)
+    )
+    review_required = sorted(
+        str(metric_name)
+        for metric_name in report.get("runtime_cardinality_review_required", [])
+        if isinstance(metric_name, str)
+    )
+    static_threshold_violations = sorted(
+        str(row)
+        for row in report.get("runtime_cardinality_threshold_violations", [])
+        if isinstance(row, str)
+    )
+    thresholds = _load_runtime_cardinality_thresholds(repo_root)
+    resolved_base_url, url_source = _resolve_prometheus_base_url(prometheus_base_url)
+    query_results: dict[str, int] = {}
+    query_errors: dict[str, str] = {}
+    degraded_reasons: list[str] = []
+    live_threshold_violations: list[str] = []
+
+    summary: RuntimeCardinalityReviewSummary = {
+        "generated_at": datetime.now(timezone.utc)
+        .replace(microsecond=0)
+        .isoformat()
+        .replace("+00:00", "Z"),
+        "source_command": (
+            "python -m scripts.engineering.qa.report_observability_metric_inventory "
+            "--check --write-evidence reports/observability/runtime_cardinality_inventory.json "
+            "--review-json-out reports/observability/runtime_cardinality_review.json "
+            "--summary-out \"$GITHUB_STEP_SUMMARY\""
+        ),
+        "status": "passed",
+        "mode": "static_only",
+        "prometheus_base_url": resolved_base_url,
+        "prometheus_base_url_source": url_source,
+        "prometheus_url_env_var": _PROMETHEUS_BASE_URL_ENV_VAR,
+        "prometheus_token_env_var": _PROMETHEUS_BEARER_TOKEN_ENV_VAR,
+        "reviewed_metrics": reviewed_metrics,
+        "review_required_metrics": review_required,
+        "static_threshold_violations": static_threshold_violations,
+        "approved_thresholds": {
+            metric_name: thresholds[metric_name]
+            for metric_name in reviewed_metrics
+            if metric_name in thresholds
+        },
+        "live_observed_series": query_results,
+        "live_threshold_violations": live_threshold_violations,
+        "degraded_reasons": degraded_reasons,
+        "query_errors": query_errors,
+    }
+    if not reviewed_metrics:
+        summary["mode"] = "no_reviewed_metrics"
+        degraded_reasons.append("no reviewed runtime-cardinality metrics require live evidence")
+        return summary
+
+    missing_thresholds = [
+        metric_name for metric_name in reviewed_metrics if metric_name not in thresholds
+    ]
+    if missing_thresholds:
+        degraded_reasons.append(
+            "missing approved_max_series for reviewed metrics: "
+            + ", ".join(missing_thresholds)
+        )
+
+    if resolved_base_url is None:
+        summary["status"] = "degraded"
+        degraded_reasons.append(
+            f"missing {_PROMETHEUS_BASE_URL_ENV_VAR}; falling back to static cardinality evidence only"
+        )
+        return summary
+
+    bearer_token = os.getenv(_PROMETHEUS_BEARER_TOKEN_ENV_VAR, "").strip()
+    for metric_name in reviewed_metrics:
+        query = _prometheus_cardinality_query(
+            metric_name,
+            label_names=REGISTERED_PROMETHEUS_METRIC_LABELS.get(
+                metric_name,
+                frozenset(),
+            ),
+        )
+        try:
+            query_results[metric_name] = _query_prometheus_scalar(
+                prometheus_base_url=resolved_base_url,
+                query=query,
+                bearer_token=bearer_token,
+            )
+        except RuntimeError as exc:
+            query_errors[metric_name] = str(exc)
+
+    if query_errors or degraded_reasons:
+        summary["status"] = "degraded"
+        summary["mode"] = "live_review_unavailable"
+        if query_errors:
+            degraded_reasons.append(
+                "live Prometheus review failed for: "
+                + ", ".join(sorted(query_errors))
+            )
+        return summary
+
+    summary["mode"] = "live_review"
+    for metric_name, approved_max_series in sorted(thresholds.items()):
+        if metric_name not in query_results:
+            continue
+        observed_series_count = query_results[metric_name]
+        if observed_series_count > approved_max_series:
+            live_threshold_violations.append(
+                f"{metric_name} observed_series_count={observed_series_count} approved_max_series={approved_max_series}"
+            )
+    if live_threshold_violations:
+        summary["status"] = "failed"
+    return summary
+
+
 def collect_metric_inventory(
     repo_root: Path,
 ) -> dict[str, list[str] | dict[str, list[str]]]:
@@ -1574,6 +1781,23 @@ def _build_parser() -> argparse.ArgumentParser:
         "--write-evidence",
         type=Path,
         help="Write collected inventory JSON to a replayable evidence artifact path",
+    )
+    parser.add_argument(
+        "--review-json-out",
+        type=Path,
+        help="Write runtime cardinality live-review summary JSON to this path",
+    )
+    parser.add_argument(
+        "--summary-out",
+        type=Path,
+        help="Append a markdown runtime cardinality review summary to this path",
+    )
+    parser.add_argument(
+        "--prometheus-base-url",
+        help=(
+            "Prometheus HTTP API base URL for live runtime-cardinality review. "
+            f"Defaults to ${_PROMETHEUS_BASE_URL_ENV_VAR} when unset."
+        ),
     )
     return parser
 
@@ -1794,6 +2018,72 @@ def _emit_text_report(
     return 1
 
 
+def _write_runtime_cardinality_review_summary(
+    summary: RuntimeCardinalityReviewSummary,
+    *,
+    repo_root: Path,
+    output_path: Path | None,
+) -> None:
+    if output_path is None:
+        return
+    resolved_path = output_path if output_path.is_absolute() else repo_root / output_path
+    resolved_path.parent.mkdir(parents=True, exist_ok=True)
+    resolved_path.write_text(
+        json.dumps(summary, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
+def _render_runtime_cardinality_review_summary(
+    summary: RuntimeCardinalityReviewSummary,
+) -> str:
+    lines = [
+        "## Observability Runtime Cardinality Review",
+        "",
+        f"- Status: `{summary['status']}`",
+        f"- Mode: `{summary['mode']}`",
+        f"- Prometheus source: `{summary['prometheus_base_url_source']}`",
+        f"- Reviewed metrics: `{len(summary['reviewed_metrics'])}`",
+        f"- Review-required metrics: `{len(summary['review_required_metrics'])}`",
+    ]
+
+    degraded_reasons = summary.get("degraded_reasons", [])
+    if isinstance(degraded_reasons, list) and degraded_reasons:
+        lines.append("- Degraded reasons:")
+        lines.extend(f"  - `{reason}`" for reason in degraded_reasons)
+
+    live_threshold_violations = summary.get("live_threshold_violations", [])
+    if isinstance(live_threshold_violations, list) and live_threshold_violations:
+        lines.append("- Live threshold violations:")
+        lines.extend(f"  - `{row}`" for row in live_threshold_violations)
+
+    query_errors = summary.get("query_errors", {})
+    if isinstance(query_errors, dict) and query_errors:
+        lines.append("- Query errors:")
+        lines.extend(
+            f"  - `{metric_name}`: `{message}`"
+            for metric_name, message in sorted(query_errors.items())
+        )
+    return "\n".join(lines) + "\n"
+
+
+def _append_runtime_cardinality_review_summary(
+    summary: RuntimeCardinalityReviewSummary,
+    *,
+    repo_root: Path,
+    summary_out: Path | None,
+) -> None:
+    if summary_out is None:
+        return
+    resolved_path = summary_out if summary_out.is_absolute() else repo_root / summary_out
+    resolved_path.parent.mkdir(parents=True, exist_ok=True)
+    prefix = ""
+    if resolved_path.exists() and resolved_path.stat().st_size > 0:
+        prefix = "\n"
+    with resolved_path.open("a", encoding="utf-8") as handle:
+        handle.write(prefix + _render_runtime_cardinality_review_summary(summary))
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
@@ -1803,10 +2093,30 @@ def main(argv: list[str] | None = None) -> int:
         repo_root=args.repo_root,
         evidence_path=args.write_evidence,
     )
+    review_summary = _build_runtime_cardinality_review_summary(
+        report,
+        repo_root=args.repo_root,
+        prometheus_base_url=args.prometheus_base_url,
+    )
+    _write_runtime_cardinality_review_summary(
+        review_summary,
+        repo_root=args.repo_root,
+        output_path=args.review_json_out,
+    )
+    _append_runtime_cardinality_review_summary(
+        review_summary,
+        repo_root=args.repo_root,
+        summary_out=args.summary_out,
+    )
     violations = _metric_inventory_violations(report, args=args)
+    live_review_failed = review_summary["status"] == "failed"
     if args.json:
-        return _emit_json_report(report, violations=violations)
-    return _emit_text_report(report, violations=violations)
+        exit_code = _emit_json_report(report, violations=violations)
+    else:
+        exit_code = _emit_text_report(report, violations=violations)
+    if live_review_failed:
+        return 1
+    return exit_code
 
 
 if __name__ == "__main__":

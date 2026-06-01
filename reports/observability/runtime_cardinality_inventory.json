@@ -1115,6 +1115,7 @@
       "docs/03-guides/dashboards/dashboard-requirements-comprehensive.md",
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "docs/03-guides/dashboards/design-system.md",
+      "docs/03-guides/dashboards/variables-guide.md",
       "docs/05-operations/01-monitoring-guide.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-provider-health-v2.json",
@@ -1476,37 +1477,37 @@
       "src/bioetl/application/core/postrun/_service_support.py"
     ],
     "bioetl_processed_records_bronze_current": [
-      "src/bioetl/interfaces/http/processed_records_table.py"
+      "src/bioetl/interfaces/http/_processed_records_table_support.py"
     ],
     "bioetl_processed_records_gold_deduplicated_current": [
-      "src/bioetl/interfaces/http/processed_records_table.py"
+      "src/bioetl/interfaces/http/_processed_records_table_support.py"
     ],
     "bioetl_processed_records_gold_excluded_by_contract_current": [
-      "src/bioetl/interfaces/http/processed_records_table.py"
+      "src/bioetl/interfaces/http/_processed_records_table_support.py"
     ],
     "bioetl_processed_records_gold_quarantined_current": [
-      "src/bioetl/interfaces/http/processed_records_table.py"
+      "src/bioetl/interfaces/http/_processed_records_table_support.py"
     ],
     "bioetl_processed_records_gold_skipped_current": [
-      "src/bioetl/interfaces/http/processed_records_table.py"
+      "src/bioetl/interfaces/http/_processed_records_table_support.py"
     ],
     "bioetl_processed_records_gold_written_current": [
-      "src/bioetl/interfaces/http/processed_records_table.py"
+      "src/bioetl/interfaces/http/_processed_records_table_support.py"
     ],
     "bioetl_processed_records_silver_deduplicated_current": [
-      "src/bioetl/interfaces/http/processed_records_table.py"
+      "src/bioetl/interfaces/http/_processed_records_table_support.py"
     ],
     "bioetl_processed_records_silver_filtered_out_current": [
-      "src/bioetl/interfaces/http/processed_records_table.py"
+      "src/bioetl/interfaces/http/_processed_records_table_support.py"
     ],
     "bioetl_processed_records_silver_quarantined_current": [
-      "src/bioetl/interfaces/http/processed_records_table.py"
+      "src/bioetl/interfaces/http/_processed_records_table_support.py"
     ],
     "bioetl_processed_records_silver_skipped_current": [
-      "src/bioetl/interfaces/http/processed_records_table.py"
+      "src/bioetl/interfaces/http/_processed_records_table_support.py"
     ],
     "bioetl_processed_records_silver_valid_current": [
-      "src/bioetl/interfaces/http/processed_records_table.py"
+      "src/bioetl/interfaces/http/_processed_records_table_support.py"
     ]
   },
   "helper_backed_live_metrics": [

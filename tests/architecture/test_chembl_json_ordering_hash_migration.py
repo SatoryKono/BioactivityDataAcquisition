@@ -11,8 +11,8 @@ from bioetl.domain.normalization.profiles.chembl_json_ordering_policy import (
 def test_chembl_json_ordering_policy_changes_require_explicit_version_and_hash_review() -> (
     None
 ):
-    assert CHEMBL_JSON_ORDERING_POLICY_VERSION == "2026.05.30"
+    assert CHEMBL_JSON_ORDERING_POLICY_VERSION == "2026.06.01"
     assert (
         CHEMBL_JSON_ORDERING_POLICY_HASH
-        == "7ee2e7b8490c86411c9f124080b0e9346fe0596f0b41ecdd69553a9097afec1b"
+        == "0232382fa78a706b3f92ec77bc06ca4966826236e9dfcb142022c457138107f9"
     )

@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from unittest.mock import MagicMock
+
+import yaml
 
 from bioetl.application.core.lifecycle.checkpoint_runtime import (
     enrich_metadata_with_execution_identity,
@@ -21,6 +24,9 @@ from bioetl.domain.normalization import (
 )
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 from bioetl.domain.types.execution_phase import ExecutionPhase
+
+ROOT = Path(__file__).resolve().parents[4]
+POLICY_PATH = ROOT / "configs" / "quality" / "determinism_identity_policy.yaml"
 
 
 def _service() -> CheckpointCompatibilityService:
@@ -116,6 +122,43 @@ def test_checkpoint_metadata_emits_canonical_execution_identity_fingerprint() ->
     assert metadata.checkpoint_execution_identity_fingerprint() == (
         compute_execution_identity_fingerprint(expected_payload)
     )
+
+
+def test_checkpoint_execution_identity_payload_excludes_occurrence_only_identifiers() -> (
+    None
+):
+    metadata = _metadata(
+        pipeline_name="chembl_activity",
+        run_type="incremental",
+        pipeline_version="1.2.3",
+        git_commit="abcdef123",
+        effective_config_hash="a" * 64,
+        effective_config_artifact_id="artifact-42",
+        contract_ref="chembl.activity",
+        contract_version="2.0.0",
+        execution_fingerprint="fingerprint-checkpoint",
+        manifest_id="manifest-occurrence-only",
+        exact_replay=True,
+        input_snapshot_fingerprint="snapshot-face",
+    )
+    payload = metadata.checkpoint_execution_identity_payload()
+    policy = yaml.safe_load(POLICY_PATH.read_text(encoding="utf-8"))
+    assert isinstance(policy, dict)
+    artifact_contract = policy["artifact_identity_contract"]
+    assert isinstance(artifact_contract, dict)
+    semantic_anchors = artifact_contract["semantic_identity_anchors"]
+    assert isinstance(semantic_anchors, list)
+    checkpoint_contract = next(
+        entry
+        for entry in semantic_anchors
+        if isinstance(entry, dict)
+        and entry.get("artifact") == "runtime.checkpoint_execution_identity"
+    )
+    forbidden_fields = checkpoint_contract["forbidden_occurrence_identity_fields"]
+    assert isinstance(forbidden_fields, list)
+
+    for field in forbidden_fields:
+        assert field not in payload
 
 
 def test_enrich_metadata_with_execution_identity_backfills_canonical_resume_anchors() -> (

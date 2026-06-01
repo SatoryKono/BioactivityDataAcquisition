@@ -18,15 +18,15 @@ repo_wide_zero_import_review:
   check_command: python -m scripts.engineering.qa.report_dead_code_inventory --check
     --json-out reports/quality/dead-code-inventory.json --md-out reports/quality/dead-code-inventory.md
   max_untriaged_zero_import_candidates: 0
-  last_reviewed: '2026-05-22'
-  next_review_by: '2026-08-20'
+  last_reviewed: '2026-06-01'
+  next_review_by: '2026-08-30'
   rationale: Zero static import count is a review signal, not automatic removal proof.
     Keep repo-wide zero-import findings fully classified so dynamic entrypoints, sanctioned
     facades, and compatibility shims do not remain as implicit false positives in
     the dead-code budget.
 repo_wide_zero_import_classification:
   linked_issue: '#4541'
-  review_date: '2026-05-22'
+  review_date: '2026-06-01'
   allowed_dispositions:
   - retain_module_entrypoint
   - retain_dynamic_entrypoint
@@ -114,6 +114,30 @@ repo_wide_zero_import_classification:
     linked_issue: '#4541'
     rationale: Manifest diagnostics identity helpers remain the canonical owner module
       behind control-plane diagnostics assembly.
+  - module_path: src/bioetl/application/services/control_plane/effective_config_context.py
+    module_name: bioetl.application.services.control_plane.effective_config_context
+    disposition: retain_compat_shim
+    reviewed_on: '2026-06-01'
+    review_by: '2026-08-30'
+    linked_issue: '#4541'
+    rationale: Compatibility shim retains the legacy public import seam for effective-config
+      context helpers after ownership moved to `bioetl.application.services.control_plane.effective_config.context`.
+  - module_path: src/bioetl/application/services/control_plane/run_ledger_core_events.py
+    module_name: bioetl.application.services.control_plane.run_ledger_core_events
+    disposition: retain_compat_shim
+    reviewed_on: '2026-06-01'
+    review_by: '2026-08-30'
+    linked_issue: '#4541'
+    rationale: Compatibility shim retains the legacy public import seam for ledger
+      lifecycle event helpers after ownership moved to `bioetl.application.services.control_plane.ledger.core_events`.
+  - module_path: src/bioetl/application/services/control_plane/run_ledger_rich_events.py
+    module_name: bioetl.application.services.control_plane.run_ledger_rich_events
+    disposition: retain_compat_shim
+    reviewed_on: '2026-06-01'
+    review_by: '2026-08-30'
+    linked_issue: '#4541'
+    rationale: Compatibility shim retains the legacy public import seam for ledger-owned
+      rich event helpers after ownership moved to `bioetl.application.services.control_plane.ledger.rich_events`.
   - module_path: src/bioetl/application/services/control_plane/run_manifest_inspection_models.py
     module_name: bioetl.application.services.control_plane.run_manifest_inspection_models
     disposition: retain_compat_shim
@@ -130,6 +154,14 @@ repo_wide_zero_import_classification:
     linked_issue: '#4541'
     rationale: Compatibility shim retains the legacy public import seam for run-manifest
       create-spec models after ownership moved to `bioetl.application.services.control_plane.manifest.models`.
+  - module_path: src/bioetl/application/services/control_plane/run_manifest_validation.py
+    module_name: bioetl.application.services.control_plane.run_manifest_validation
+    disposition: retain_compat_shim
+    reviewed_on: '2026-06-01'
+    review_by: '2026-08-30'
+    linked_issue: '#4541'
+    rationale: Compatibility shim retains the legacy public import seam for manifest
+      validation helpers after ownership moved to `bioetl.application.services.control_plane.manifest.validation`.
   - module_path: src/bioetl/composition/bootstrap/cli/adr.py
     module_name: bioetl.composition.bootstrap.cli.adr
     disposition: retain_dynamic_entrypoint
@@ -234,6 +266,14 @@ repo_wide_zero_import_classification:
     linked_issue: '#4541'
     rationale: PII port definitions remain canonical domain protocol owners even when
       consumers import them through package-root exports.
+  - module_path: src/bioetl/domain/ports/protein_classification.py
+    module_name: bioetl.domain.ports.protein_classification
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-06-01'
+    review_by: '2026-08-30'
+    linked_issue: '#4541'
+    rationale: Protein-classification port definitions remain the canonical domain
+      protocol owner module even when consumers import them through package-root exports.
   - module_path: src/bioetl/domain/ports/publication_strategy.py
     module_name: bioetl.domain.ports.publication_strategy
     disposition: retain_canonical_owner_module

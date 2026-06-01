@@ -8,6 +8,7 @@ from bioetl.domain.entities.chembl_structures_foundation import (
     ChemblPublicationTerm,
     Target,
     TargetComponent,
+    TargetProteinClassification,
 )
 from bioetl.domain.entities.chembl_structures_molecules import (
     ChemblPublicationSimilarity,
@@ -24,4 +25,5 @@ __all__ = [
     "ProteinClassification",
     "Target",
     "TargetComponent",
+    "TargetProteinClassification",
 ]

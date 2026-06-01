@@ -12,11 +12,9 @@ CONTROL_PLANE_ROOT = (
 )
 
 APPROVED_FLAT_CONTROL_PLANE_MODULES = frozenset(
-    {
+        {
         "__init__.py",
-        "_effective_config_provenance_support.py",
         "_lazy_export_facade.py",
-        "_run_ledger_diagnostic_support.py",
         "_run_manifest_artifact_payloads.py",
         "_run_manifest_diagnostics_composite.py",
         "_run_manifest_diagnostics_identity.py",
@@ -29,7 +27,6 @@ APPROVED_FLAT_CONTROL_PLANE_MODULES = frozenset(
         "_run_manifest_diagnostics_replay_helpers.py",
         "_run_manifest_diagnostics_replay_state.py",
         "_run_manifest_diagnostics_summary.py",
-        "_run_manifest_inspection_artifact_refs.py",
         "effective_config_context.py",
         "effective_config_service.py",
         "effective_config_support.py",
@@ -108,4 +105,48 @@ def test_manifest_replay_payload_helpers_are_not_flat_root_modules() -> None:
     ).exists()
     assert (
         CONTROL_PLANE_ROOT / "manifest" / "replay_taxonomy_fields.py"
+    ).is_file()
+
+
+@pytest.mark.architecture
+def test_ledger_entry_support_implementation_is_not_flat_root_module() -> None:
+    """Ledger entry helpers must be implemented under the ledger seam."""
+    assert not (CONTROL_PLANE_ROOT / "_run_ledger_diagnostic_support.py").exists()
+    assert (CONTROL_PLANE_ROOT / "ledger" / "diagnostic_support.py").is_file()
+    assert (CONTROL_PLANE_ROOT / "ledger" / "entry_support.py").is_file()
+    assert (CONTROL_PLANE_ROOT / "ledger" / "core_events.py").is_file()
+    assert (CONTROL_PLANE_ROOT / "ledger" / "rich_events.py").is_file()
+
+
+@pytest.mark.architecture
+def test_effective_config_context_helpers_are_not_flat_root_modules() -> None:
+    """Effective-config context helpers must be implemented under its seam."""
+    assert not (
+        CONTROL_PLANE_ROOT / "_effective_config_provenance_support.py"
+    ).exists()
+    assert (CONTROL_PLANE_ROOT / "effective_config" / "context.py").is_file()
+    assert (
+        CONTROL_PLANE_ROOT / "effective_config" / "provenance_support.py"
+    ).is_file()
+    assert (CONTROL_PLANE_ROOT / "effective_config" / "support.py").is_file()
+
+
+@pytest.mark.architecture
+def test_manifest_validation_implementation_is_not_flat_root_module() -> None:
+    """Run-manifest validation implementation must live under manifest seam."""
+    assert (CONTROL_PLANE_ROOT / "manifest" / "validation.py").is_file()
+
+
+@pytest.mark.architecture
+def test_manifest_inspection_helpers_are_not_flat_root_modules() -> None:
+    """Run-manifest inspection helpers must be implemented under manifest seam."""
+    assert not (
+        CONTROL_PLANE_ROOT / "_run_manifest_inspection_artifact_refs.py"
+    ).exists()
+    assert (
+        CONTROL_PLANE_ROOT / "manifest" / "inspection_artifact_refs.py"
+    ).is_file()
+    assert (CONTROL_PLANE_ROOT / "manifest" / "inspection_helpers.py").is_file()
+    assert (
+        CONTROL_PLANE_ROOT / "manifest" / "inspection_verification.py"
     ).is_file()

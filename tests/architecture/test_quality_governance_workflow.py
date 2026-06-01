@@ -54,6 +54,27 @@ def test_tests_workflow_runs_ci_quality_integral_gate() -> None:
     assert 'QUALITY_SUMMARY_OUT="$GITHUB_STEP_SUMMARY"' in workflow
 
 
+def test_tests_workflow_runs_observability_cardinality_review_gate() -> None:
+    """Merge pipeline must emit explicit runtime-cardinality review evidence."""
+    workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")
+    assert "Review observability runtime cardinality evidence" in workflow
+    assert "report-observability-metric-inventory" in workflow
+    assert "reports/observability/runtime_cardinality_inventory.json" in workflow
+    assert "reports/observability/runtime_cardinality_review.json" in workflow
+    assert 'BIOETL_OBSERVABILITY_PROMETHEUS_URL' in workflow
+    assert 'BIOETL_OBSERVABILITY_PROMETHEUS_TOKEN' in workflow
+    assert 'GITHUB_STEP_SUMMARY' in workflow
+
+
+def test_tests_workflow_uploads_observability_cardinality_review_artifacts() -> None:
+    """Cardinality review JSON artifacts must be uploaded even on degraded runs."""
+    workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")
+    assert "Upload observability review artifacts" in workflow
+    assert "name: observability-runtime-cardinality-review" in workflow
+    assert "reports/observability/runtime_cardinality_inventory.json" in workflow
+    assert "reports/observability/runtime_cardinality_review.json" in workflow
+
+
 def test_tests_workflow_routes_coverage_xml_under_reports() -> None:
     """Coverage XML must be generated and uploaded from reports/coverage."""
     workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")

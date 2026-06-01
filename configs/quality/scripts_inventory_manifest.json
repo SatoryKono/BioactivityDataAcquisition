@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-31T17:53:18.033071+00:00",
+  "generated_at": "2026-06-01T06:18:01.900183+00:00",
   "summary": {
     "total_scripts": 420,
     "status_counts": {
@@ -5801,7 +5801,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
@@ -5812,6 +5812,12 @@
         {
           "path": "tests/architecture/test_compatibility_telemetry_reporting.py",
           "line": 28,
+          "source_group": "tests",
+          "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"_compatibility_telemetry.py\","
+        },
+        {
+          "path": "tests/architecture/test_debt_governance_telemetry_reporting.py",
+          "line": 33,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"_compatibility_telemetry.py\","
         }
@@ -6063,7 +6069,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 736,
+          "line": 757,
           "source_group": "ci",
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -7499,7 +7505,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 176,
+      "reference_count": 177,
       "references": [
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
@@ -8394,7 +8400,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 656,
+          "line": 677,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/qa/generate_hotspot_degradation_report.py \\"
         },
@@ -12360,7 +12366,7 @@
         },
         {
           "path": "tests/unit/contracts/test_contracts_exports.py",
-          "line": 149,
+          "line": 151,
           "source_group": "tests",
           "text": "# This method is used by generate_contracts.py"
         }

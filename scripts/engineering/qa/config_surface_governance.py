@@ -6,6 +6,7 @@ INTENTIONAL_PREFIXES: tuple[str, ...] = (
     "hash_policy",
     "hash_policy.",
     "filters.extraction_params.",
+    "filters.metadata.",
     "filters.gold_filters.columns.",
     "filters.gold_filters.list_contains.",
     "filters.gold_filters.list_lengths.",
@@ -15,7 +16,9 @@ INTENTIONAL_PREFIXES: tuple[str, ...] = (
     "pipeline.page_size_override",
     "pipeline.field_policy.therapeutic_flag",
     "pipeline.source.",
+    "quality.metadata.",
     "quality.thresholds",
+    "schema.field_aliases.",
     "composite.",
 )
 

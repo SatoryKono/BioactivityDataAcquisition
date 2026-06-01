@@ -1,12 +1,12 @@
 {
-  "snapshot_date": "2026-05-22",
+  "snapshot_date": "2026-06-01",
   "triage_source": "configs/quality/retirement_candidate_triage.yaml",
   "static_inventory_scope": "src/bioetl",
   "review_window": {
     "linked_issue": "#4541",
     "mode": "fail-fast-zero-untriaged",
-    "last_reviewed": "2026-05-22",
-    "next_review_by": "2026-08-20",
+    "last_reviewed": "2026-06-01",
+    "next_review_by": "2026-08-30",
     "review_cycle_days": 90,
     "max_untriaged_zero_import_candidates": 0,
     "snapshot_matches_last_reviewed": true,
@@ -15,12 +15,12 @@
   "summary": {
     "triaged_entry_count": 19,
     "triaged_entries_below_min_importers": 0,
-    "repo_wide_zero_import_candidate_count": 45,
-    "repo_wide_classified_zero_import_candidate_count": 45,
-    "repo_wide_untriaged_zero_import_candidate_count": 0,
+    "repo_wide_zero_import_candidate_count": 51,
+    "repo_wide_classified_zero_import_candidate_count": 50,
+    "repo_wide_untriaged_zero_import_candidate_count": 1,
     "repo_wide_disposition_counts": {
-      "retain_canonical_owner_module": 28,
-      "retain_compat_shim": 2,
+      "retain_canonical_owner_module": 29,
+      "retain_compat_shim": 6,
       "retain_dynamic_entrypoint": 10,
       "retain_module_entrypoint": 1,
       "retain_public_facade": 4
@@ -369,6 +369,53 @@
       "rationale": "Manifest diagnostics identity helpers remain the canonical owner module behind control-plane diagnostics assembly."
     },
     {
+      "module_name": "bioetl.application.services.control_plane.effective_config_context",
+      "path": "src/bioetl/application/services/control_plane/effective_config_context.py",
+      "is_private_module": false,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "classification_status": "classified",
+      "disposition": "retain_compat_shim",
+      "reviewed_on": "2026-06-01",
+      "review_by": "2026-08-30",
+      "linked_issue": "#4541",
+      "rationale": "Compatibility shim retains the legacy public import seam for effective-config context helpers after ownership moved to `bioetl.application.services.control_plane.effective_config.context`."
+    },
+    {
+      "module_name": "bioetl.application.services.control_plane.run_ledger_core_events",
+      "path": "src/bioetl/application/services/control_plane/run_ledger_core_events.py",
+      "is_private_module": false,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "classification_status": "classified",
+      "disposition": "retain_compat_shim",
+      "reviewed_on": "2026-06-01",
+      "review_by": "2026-08-30",
+      "linked_issue": "#4541",
+      "rationale": "Compatibility shim retains the legacy public import seam for ledger lifecycle event helpers after ownership moved to `bioetl.application.services.control_plane.ledger.core_events`."
+    },
+    {
+      "module_name": "bioetl.application.services.control_plane.run_ledger_rich_events",
+      "path": "src/bioetl/application/services/control_plane/run_ledger_rich_events.py",
+      "is_private_module": false,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "classification_status": "classified",
+      "disposition": "retain_compat_shim",
+      "reviewed_on": "2026-06-01",
+      "review_by": "2026-08-30",
+      "linked_issue": "#4541",
+      "rationale": "Compatibility shim retains the legacy public import seam for ledger-owned rich event helpers after ownership moved to `bioetl.application.services.control_plane.ledger.rich_events`."
+    },
+    {
+      "module_name": "bioetl.application.services.control_plane.run_manifest_inspection_helpers",
+      "path": "src/bioetl/application/services/control_plane/run_manifest_inspection_helpers.py",
+      "is_private_module": false,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "classification_status": "untriaged"
+    },
+    {
       "module_name": "bioetl.application.services.control_plane.run_manifest_inspection_models",
       "path": "src/bioetl/application/services/control_plane/run_manifest_inspection_models.py",
       "is_private_module": false,
@@ -393,6 +440,19 @@
       "review_by": "2026-08-29",
       "linked_issue": "#4541",
       "rationale": "Compatibility shim retains the legacy public import seam for run-manifest create-spec models after ownership moved to `bioetl.application.services.control_plane.manifest.models`."
+    },
+    {
+      "module_name": "bioetl.application.services.control_plane.run_manifest_validation",
+      "path": "src/bioetl/application/services/control_plane/run_manifest_validation.py",
+      "is_private_module": false,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "classification_status": "classified",
+      "disposition": "retain_compat_shim",
+      "reviewed_on": "2026-06-01",
+      "review_by": "2026-08-30",
+      "linked_issue": "#4541",
+      "rationale": "Compatibility shim retains the legacy public import seam for manifest validation helpers after ownership moved to `bioetl.application.services.control_plane.manifest.validation`."
     },
     {
       "module_name": "bioetl.composition.bootstrap.cli.adr",
@@ -562,6 +622,19 @@
       "review_by": "2026-08-20",
       "linked_issue": "#4541",
       "rationale": "PII port definitions remain canonical domain protocol owners even when consumers import them through package-root exports."
+    },
+    {
+      "module_name": "bioetl.domain.ports.protein_classification",
+      "path": "src/bioetl/domain/ports/protein_classification.py",
+      "is_private_module": false,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "classification_status": "classified",
+      "disposition": "retain_canonical_owner_module",
+      "reviewed_on": "2026-06-01",
+      "review_by": "2026-08-30",
+      "linked_issue": "#4541",
+      "rationale": "Protein-classification port definitions remain the canonical domain protocol owner module even when consumers import them through package-root exports."
     },
     {
       "module_name": "bioetl.domain.ports.publication_strategy",

@@ -295,8 +295,8 @@ class ComponentHelper:
             and descriptions.
 
         Note:
-            protein_classifications are NOT available in /target endpoint.
-            They are only available via /target_component endpoint.
+            protein_classifications are projected separately because enriched
+            target payloads may carry component classification sidecars.
 
         """
         if not components or not isinstance(components, list):

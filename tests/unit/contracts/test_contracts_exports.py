@@ -29,6 +29,7 @@ class TestContractsPackageExports:
             ChEMBLSubcellularFractionGoldSchema,
             ChEMBLTargetComponentGoldSchema,
             ChEMBLTargetGoldSchema,
+            ChEMBLTargetProteinClassificationGoldSchema,
             ChEMBLTissueGoldSchema,
         )
 
@@ -46,6 +47,7 @@ class TestContractsPackageExports:
         assert hasattr(ChEMBLSubcellularFractionGoldSchema, "validate")
         assert hasattr(ChEMBLTargetComponentGoldSchema, "validate")
         assert hasattr(ChEMBLTargetGoldSchema, "validate")
+        assert hasattr(ChEMBLTargetProteinClassificationGoldSchema, "validate")
         assert hasattr(ChEMBLTissueGoldSchema, "validate")
 
     def test_all_publication_schemas_exported(self):

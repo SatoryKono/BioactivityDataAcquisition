@@ -40,6 +40,7 @@ entities:
     - subcellular_fraction
     - target
     - target_component
+    - target_protein_classification
     - tissue
 entity_notes:
     activity:

@@ -1775,6 +1775,11 @@
           "dtype": "float64",
           "nullable": true
         },
+        "protein_classifications": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "species_group_flag": {
           "description": "",
           "dtype": "bool",
@@ -1946,6 +1951,139 @@
       },
       "published_contract_path": "docs/04-reference/contracts/gold/chembl_target_component_v1.0.json",
       "schema_class": "ChEMBLTargetComponentGoldSchema",
+      "strict": true
+    },
+    "chembl_target_protein_classification": {
+      "contract_version": "1.0.0",
+      "fields": {
+        "_dq_error": {
+          "description": "Hard data-quality error flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_dq_warn": {
+          "description": "Soft data-quality warning flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_index": {
+          "description": "",
+          "dtype": "int64",
+          "nullable": false
+        },
+        "classification_status": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "component_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "content_hash": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "entity_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "hierarchy_index": {
+          "description": "",
+          "dtype": "int64",
+          "nullable": false
+        },
+        "l1_desc": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "l1_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "l1_name": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "l2_desc": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "l2_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "l2_name": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "l3_desc": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "l3_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "l3_name": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "l4_desc": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "l4_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "l4_name": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "l5_desc": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "l5_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "l5_name": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "leaf_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "target_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        }
+      },
+      "published_contract_path": "docs/04-reference/contracts/gold/chembl_target_protein_classification_v1.0.json",
+      "schema_class": "ChEMBLTargetProteinClassificationGoldSchema",
       "strict": true
     },
     "chembl_tissue": {

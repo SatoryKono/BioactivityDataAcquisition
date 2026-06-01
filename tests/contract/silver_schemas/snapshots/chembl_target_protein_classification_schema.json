@@ -1,0 +1,293 @@
+{
+  "_dq_error": {
+    "checks": [],
+    "coerce": false,
+    "description": "Flag for data quality errors.",
+    "dtype": "bool",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_dq_warn": {
+    "checks": [],
+    "coerce": false,
+    "description": "Flag for data quality warnings.",
+    "dtype": "bool",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_index": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      }
+    ],
+    "coerce": false,
+    "description": "Sequential index of the record in the pipeline run.",
+    "dtype": "int64",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_ingestion_ts": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?([+-]\\d{2}:\\d{2}|Z)?$"
+      }
+    ],
+    "coerce": false,
+    "description": "Timestamp when the record was ingested (UTC, ISO 8601 format).",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_run_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Correlation ID for the pipeline run.",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_run_type": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Type of pipeline run.",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_source_batch_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Batch context ID from the source.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "classification_status": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Resolution status for this target classification row.",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "component_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Target component ID that supplied the classification.",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "content_hash": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^[a-f0-9]{64}$"
+      }
+    ],
+    "coerce": false,
+    "description": "SHA256 hash of canonical record representation (64 hex chars).",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "entity_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Unique business identifier for the entity.",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "hierarchy_index": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      }
+    ],
+    "coerce": false,
+    "description": "Deterministic per-target hierarchy ordinal.",
+    "dtype": "int64",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "l1_desc": {
+    "checks": [],
+    "coerce": false,
+    "description": "Level 1 protein classification description.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "l1_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Level 1 protein classification ID.",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "l1_name": {
+    "checks": [],
+    "coerce": false,
+    "description": "Level 1 protein classification name.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "l2_desc": {
+    "checks": [],
+    "coerce": false,
+    "description": "Level 2 protein classification description.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "l2_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Level 2 protein classification ID.",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "l2_name": {
+    "checks": [],
+    "coerce": false,
+    "description": "Level 2 protein classification name.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "l3_desc": {
+    "checks": [],
+    "coerce": false,
+    "description": "Level 3 protein classification description.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "l3_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Level 3 protein classification ID.",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "l3_name": {
+    "checks": [],
+    "coerce": false,
+    "description": "Level 3 protein classification name.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "l4_desc": {
+    "checks": [],
+    "coerce": false,
+    "description": "Level 4 protein classification description.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "l4_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Level 4 protein classification ID.",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "l4_name": {
+    "checks": [],
+    "coerce": false,
+    "description": "Level 4 protein classification name.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "l5_desc": {
+    "checks": [],
+    "coerce": false,
+    "description": "Level 5 protein classification description.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "l5_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Level 5 protein classification ID.",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "l5_name": {
+    "checks": [],
+    "coerce": false,
+    "description": "Level 5 protein classification name.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "leaf_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Resolved leaf protein classification ID.",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "target_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "ChEMBL target ID.",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  }
+}

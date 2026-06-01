@@ -70,21 +70,21 @@ _LAZY_MAINTENANCE_COMMANDS: dict[str, tuple[str, str, str]] = {
 
 def get_lifecycle_service() -> MedallionLifecycleService:
     """Load the lifecycle service through composition on demand."""
-    from bioetl.composition.resources_api import get_lifecycle_service as _impl
+    from bioetl.composition.maintenance_api import get_lifecycle_service as _impl
 
     return _impl()
 
 
 def get_vacuum_service() -> VacuumService:
     """Load the vacuum service through composition on demand."""
-    from bioetl.composition.services_api import get_vacuum_service as _impl
+    from bioetl.composition.maintenance_api import get_vacuum_service as _impl
 
     return _impl()
 
 
 def get_bronze_cleanup_service() -> BronzeCleanupService:
     """Load the bronze cleanup service through composition on demand."""
-    from bioetl.composition.services_api import (
+    from bioetl.composition.maintenance_api import (
         get_bronze_cleanup_service as _impl,
     )
 
@@ -93,7 +93,7 @@ def get_bronze_cleanup_service() -> BronzeCleanupService:
 
 def get_contract_migration_service() -> ContractMigrationService:
     """Load the contract migration service through composition on demand."""
-    from bioetl.composition.services_api import (
+    from bioetl.composition.maintenance_api import (
         get_contract_migration_service as _impl,
     )
 
@@ -102,7 +102,7 @@ def get_contract_migration_service() -> ContractMigrationService:
 
 async def preview_cleanup(pipeline: str) -> CleanupPreview:
     """Preview pipeline cleanup through the maintenance composition seam."""
-    from bioetl.composition.resources_api import preview_cleanup as _impl
+    from bioetl.composition.maintenance_api import preview_cleanup as _impl
 
     impl = cast("Callable[[str], Awaitable[CleanupPreview]]", _impl)
     return await impl(pipeline)

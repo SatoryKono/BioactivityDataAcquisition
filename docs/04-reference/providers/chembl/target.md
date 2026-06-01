@@ -96,6 +96,10 @@ Silver schema.
 - `organism_class` как hash-governed profile-owned derived field из `organism` + `taxonomy_id`
 - `target_description` в Silver и `description` в Gold из `target_description` или fallback `description`
 - `target_components`, `target_component_synonyms`, `cross_references` как JSON-строки
+- `protein_classifications` как JSON-строку с детерминированной target-level
+  проекцией component classifications; при нескольких leaf-классификациях L1
+  схлопывается в `Multifunctional target`, а исходные варианты сохраняются в
+  `source_classifications`
 - `target_protein_synonyms`, `target_gene_synonyms`, `target_ec_numbers` как pipe-delimited derived-поля с sentinel `unknown`
 - `target_xref_pdb_ids`, `target_xref_go_component`, `target_xref_go_function`, `target_xref_go_process`, `target_xref_hgnc_ids`, `target_xref_reactome_ids`, `target_xref_uniprot_ids` как pipe-delimited xref-derived поля с sentinel `unknown`
 

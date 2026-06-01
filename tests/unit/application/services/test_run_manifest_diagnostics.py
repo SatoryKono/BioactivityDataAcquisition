@@ -4,9 +4,11 @@ from __future__ import annotations
 
 from dataclasses import replace
 from datetime import UTC, datetime
+from pathlib import Path
 from uuid import uuid4
 
 import pytest
+import yaml
 
 from bioetl.application.services.control_plane import RunLedgerService
 from bioetl.application.services.control_plane.manifest.diagnostics import (
@@ -41,6 +43,8 @@ from tests.unit.application.services.run_manifest_test_support import (
 
 
 _InMemoryRunLedgerStore = InMemoryRunLedgerStore
+ROOT = Path(__file__).resolve().parents[4]
+POLICY_PATH = ROOT / "configs" / "quality" / "determinism_identity_policy.yaml"
 
 
 def _make_manifest() -> RunManifest:
@@ -1520,8 +1524,23 @@ def test_exact_replay_anchors_exclude_occurrence_only_identifiers() -> None:
     anchors = summary["exact_replay_anchors"]
     assert isinstance(anchors, dict)
     assert anchors["semantic_identity_anchor"] == "execution_fingerprint"
-    assert "manifest_id" not in anchors
-    assert "run_id" not in anchors
+    policy = yaml.safe_load(POLICY_PATH.read_text(encoding="utf-8"))
+    assert isinstance(policy, dict)
+    artifact_contract = policy["artifact_identity_contract"]
+    assert isinstance(artifact_contract, dict)
+    semantic_anchors = artifact_contract["semantic_identity_anchors"]
+    assert isinstance(semantic_anchors, list)
+    replay_contract = next(
+        entry
+        for entry in semantic_anchors
+        if isinstance(entry, dict)
+        and entry.get("artifact")
+        == "control_plane.run_manifest.exact_replay_anchors"
+    )
+    forbidden_fields = replay_contract["forbidden_occurrence_identity_fields"]
+    assert isinstance(forbidden_fields, list)
+    for field in forbidden_fields:
+        assert field not in anchors
     assert summary["produced_artifact_trace"]["manifest_id"] == manifest.manifest_id
 
 

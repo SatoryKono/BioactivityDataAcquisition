@@ -1,10 +1,10 @@
 {
-  "covered_gold_enabled_count": 26,
+  "covered_gold_enabled_count": 27,
   "excluded_count": 0,
   "exclusions": [],
-  "gold_enabled_count": 26,
+  "gold_enabled_count": 27,
   "missing_gold_enabled_count": 0,
-  "row_count": 26,
+  "row_count": 27,
   "rows": [
     {
       "config_path": "configs/entities/chembl/activity.yaml",
@@ -313,6 +313,30 @@
       "published_artifact_missing_paths": [],
       "published_artifact_paths": [
         "../../docs/04-reference/contracts/gold/chembl_target_component_v1.0.json"
+      ],
+      "registry_contract_version": "1.0.0",
+      "registry_entry_exists": true,
+      "registry_status": "active"
+    },
+    {
+      "config_path": "configs/entities/chembl/target_protein_classification.yaml",
+      "contract_ref": "chembl.target_protein_classification",
+      "contract_yaml_contract_ref": "chembl.target_protein_classification",
+      "contract_yaml_contract_version": "1.0.0",
+      "contract_yaml_exists": true,
+      "contract_yaml_path": "configs/contracts/chembl/target_protein_classification.yaml",
+      "entity": "target_protein_classification",
+      "exclusion_reason": "",
+      "gold_enabled": true,
+      "gold_schema_source_exists": true,
+      "gold_schema_source_path": "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
+      "missing_surfaces": [],
+      "parity_status": "covered",
+      "pipeline_name": "chembl_target_protein_classification",
+      "provider": "chembl",
+      "published_artifact_missing_paths": [],
+      "published_artifact_paths": [
+        "../../docs/04-reference/contracts/gold/chembl_target_protein_classification_v1.0.json"
       ],
       "registry_contract_version": "1.0.0",
       "registry_entry_exists": true,
@@ -631,5 +655,5 @@
       "registry_status": "active"
     }
   ],
-  "snapshot_date": "2026-05-31"
+  "snapshot_date": "2026-06-01"
 }

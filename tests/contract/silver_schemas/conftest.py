@@ -32,6 +32,9 @@ from bioetl.domain.schemas.chembl.subcellular_fraction import (
 )
 from bioetl.domain.schemas.chembl.target import TargetSchema
 from bioetl.domain.schemas.chembl.target_component import TargetComponentSchema
+from bioetl.domain.schemas.chembl.target_protein_classification import (
+    TargetProteinClassificationSchema,
+)
 from bioetl.domain.schemas.chembl.tissue import TissueSchema
 from bioetl.domain.schemas.pubchem.compound import PubchemMoleculeSchema
 from bioetl.domain.schemas.uniprot.protein import UniprotTargetSchema
@@ -63,6 +66,7 @@ SILVER_SCHEMAS = {
     "chembl_subcellular_fraction": SubcellularFractionSchema,
     "chembl_target": TargetSchema,
     "chembl_target_component": TargetComponentSchema,
+    "chembl_target_protein_classification": TargetProteinClassificationSchema,
     "chembl_tissue": TissueSchema,
     # PubChem
     "pubchem_compound": PubchemMoleculeSchema,

@@ -1,4 +1,4 @@
-"""Canonical DQ and diagnostic extraction helpers owned by manifest diagnostics."""
+"""Canonical DQ and diagnostic extraction support owned by manifest diagnostics."""
 
 from __future__ import annotations
 

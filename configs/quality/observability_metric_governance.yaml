@@ -38,6 +38,24 @@ runtime_cardinality_review:
     rationale: >
       Cardinality exceptions are reviewed through repo-local inventory plus a
       replayable evidence artifact that is generated during governance checks.
+  live_evidence:
+    workflow: .github/workflows/tests.yml::quality-metrics-gate
+    artifact: reports/observability/runtime_cardinality_review.json
+    summary_output: $GITHUB_STEP_SUMMARY
+    status_when_unavailable: degraded
+    fail_on_threshold_violation: true
+    prometheus_url_env_var: BIOETL_OBSERVABILITY_PROMETHEUS_URL
+    prometheus_token_env_var: BIOETL_OBSERVABILITY_PROMETHEUS_TOKEN
+    command: >
+      python -m scripts.engineering.qa.report_observability_metric_inventory
+      --check
+      --write-evidence reports/observability/runtime_cardinality_inventory.json
+      --review-json-out reports/observability/runtime_cardinality_review.json
+      --summary-out "$GITHUB_STEP_SUMMARY"
+    rationale: >
+      Pre-release quality CI must emit an explicit passed, failed, or degraded
+      runtime-cardinality review artifact so live evidence availability is
+      visible even when local-only static inventory checks stay green.
 unused_signal_policy:
   rationale: >
     Registered metrics without runtime emission are treated as unused declared

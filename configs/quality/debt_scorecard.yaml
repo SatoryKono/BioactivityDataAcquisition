@@ -93,6 +93,11 @@ governance:
 compatibility_debt_metrics:
   inventory_source: configs/quality/compatibility_facade_inventory.yaml
   sunset_source: configs/quality/compatibility_facade_inventory.yaml#transition_debt
+  owner: '@bioetl-architecture'
+  review_cadence: quarterly
+  review_policy: Review transition and sunset compatibility debt whenever the facade
+    inventory changes; permanent public entrypoints stay governed separately from
+    transition-only compatibility residue.
   metrics:
     transition_compat_count:
       current_count: 0
@@ -212,12 +217,12 @@ config_surface_ratchet:
     matrix_artifact: docs/04-reference/config_comparison_matrix.csv
     expected_direction: downward
     ratchet_policy: Config-surface metrics must not grow without an explicit scorecard
-      budget update; inconsistent-parameter count ratchets downward during Stream B
-      burn-down. Entity rows use effective pipeline config merged from configs/base/pipeline.yaml.
+      budget update; inconsistent-parameter count ratchets downward during Stream
+      B burn-down. Entity rows use effective pipeline config merged from configs/base/pipeline.yaml.
   metrics:
     config_count:
-      current_count: 26
-      max_count: 26
+      current_count: 27
+      max_count: 27
       owner: '@bioetl-config'
       linked_issue: '#4818'
       rationale: Entity/composite config surface must stay bounded while contract
@@ -225,8 +230,8 @@ config_surface_ratchet:
       ratchet_policy: Non-growth fail-fast unless a reviewed pipeline addition updates
         the budget.
     unique_parameter_count:
-      current_count: 508
-      max_count: 508
+      current_count: 511
+      max_count: 511
       owner: '@bioetl-config'
       linked_issue: '#4818'
       rationale: Flattened parameter vocabulary must not expand silently across the
@@ -238,21 +243,22 @@ config_surface_ratchet:
       max_count: 0
       owner: '@bioetl-config'
       linked_issue: '#4818'
-      rationale: Actionable config-surface drift after sanctioned entity-specific partial
-        keys are excluded; family-scoped sum must remain zero post Stream B closeout.
+      rationale: Actionable config-surface drift after sanctioned entity-specific
+        partial keys are excluded; family-scoped sum must remain zero post Stream
+        B closeout.
       ratchet_policy: Non-growth fail-fast; increases require reviewed contract regression.
     sanctioned_partial_parameter_count:
-      current_count: 100
-      max_count: 100
+      current_count: 140
+      max_count: 140
       owner: '@bioetl-config'
       linked_issue: '#4818'
-      rationale: Documented intentional entity-specific partial keys excluded from actionable
-        inconsistent count; tracked in config-surface-backlog.json.
-      ratchet_policy: Non-growth fail-fast unless a reviewed entity contract adds new
-        intentional divergence.
+      rationale: Documented intentional entity-specific partial keys excluded from
+        actionable inconsistent count; tracked in config-surface-backlog.json.
+      ratchet_policy: Non-growth fail-fast unless a reviewed entity contract adds
+        new intentional divergence.
     raw_inconsistent_parameter_count:
-      current_count: 100
-      max_count: 100
+      current_count: 140
+      max_count: 140
       owner: '@bioetl-config'
       linked_issue: '#4818'
       rationale: Raw family-scoped partial key count before sanctioned-prefix exclusion;
@@ -264,32 +270,33 @@ config_surface_ratchet:
       owner: '@bioetl-config'
       metrics:
         config_count:
-          current_count: 21
-          max_count: 21
+          current_count: 22
+          max_count: 22
           rationale: Effective entity pipeline surface after base defaults merge.
           ratchet_policy: Non-growth fail-fast for governed entity configs.
         unique_parameter_count:
-          current_count: 309
-          max_count: 309
+          current_count: 312
+          max_count: 312
           rationale: Effective flattened vocabulary for entity configs only.
-          ratchet_policy: Non-growth fail-fast unless reviewed schema expansion updates budget.
+          ratchet_policy: Non-growth fail-fast unless reviewed schema expansion updates
+            budget.
         inconsistent_parameter_count:
           current_count: 0
           max_count: 0
-          rationale: Entity actionable drift after sanctioned-prefix exclusion; Stream B
-            closeout target is zero.
-          ratchet_policy: Non-growth fail-fast; entity-specific filters remain in backlog
-            as sanctioned partial keys only.
+          rationale: Entity actionable drift after sanctioned-prefix exclusion; Stream
+            B closeout target is zero.
+          ratchet_policy: Non-growth fail-fast; entity-specific filters remain in
+            backlog as sanctioned partial keys only.
         sanctioned_partial_parameter_count:
-          current_count: 100
-          max_count: 100
-          rationale: Intentional entity-specific filters/extraction_params/overrides per
-            reports/quality/config-surface-backlog.json.
+          current_count: 140
+          max_count: 140
+          rationale: Intentional entity-specific filters/extraction_params/overrides
+            per reports/quality/config-surface-backlog.json.
           ratchet_policy: Non-growth fail-fast unless reviewed entity contract expands
             intentional divergence.
         raw_inconsistent_parameter_count:
-          current_count: 100
-          max_count: 100
+          current_count: 140
+          max_count: 140
           rationale: Raw entity partial keys before sanctioned-prefix exclusion.
           ratchet_policy: Informational non-growth guard mirroring backlog partial_key_count.
     composite_runtime:
@@ -305,7 +312,8 @@ config_surface_ratchet:
           current_count: 199
           max_count: 199
           rationale: Flattened vocabulary for composite runtime configs only.
-          ratchet_policy: Non-growth fail-fast unless composite schema expansion updates budget.
+          ratchet_policy: Non-growth fail-fast unless composite schema expansion updates
+            budget.
         inconsistent_parameter_count:
           current_count: 0
           max_count: 0
@@ -408,8 +416,8 @@ hotspot_family_ratchets:
       status: reduced_2026-05-30_issue_4554
       next_action: 2026-05-30 consolidates wiring lazy-export facades, quarantine
         write helpers, preflight observability, and wrapped-adapter health delegation,
-        ratcheting application/core duplicate clusters from 8 down to 5 while
-        files_ge_250_loc and max_internal_fan_in remain at 13 and 14.
+        ratcheting application/core duplicate clusters from 8 down to 5 while files_ge_250_loc
+        and max_internal_fan_in remain at 13 and 14.
   - name: composition_bootstrap_runtime
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -490,9 +498,8 @@ hotspot_family_ratchets:
       status: reduced_2026-05-30_issue_4547
       next_action: 2026-05-30 consolidates execution-identity payloads, lazy-export
         facades, ledger diagnostic requests, replay projection inputs, and historical
-        record payloads, ratcheting application/services/control_plane duplicate
-        clusters from 15 down to 10 while files_ge_250_loc and max_internal_fan_in
-        remain non-growing.
+        record payloads, ratcheting application/services/control_plane duplicate clusters
+        from 15 down to 10 while files_ge_250_loc and max_internal_fan_in remain non-growing.
   - name: composition_runtime_builders
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -528,7 +535,8 @@ oversized_source_module_inventory:
   - path: src/bioetl/application/pipelines/common/base_publication_transformer.py
     lines: 284
     owner: '@bioetl-application'
-    target_split: separate publication normalization, persistence shaping, and provenance helpers
+    target_split: separate publication normalization, persistence shaping, and provenance
+      helpers
   - path: src/bioetl/application/services/checkpoint_compatibility_service.py
     lines: 222
     owner: '@bioetl-control-plane'
@@ -536,7 +544,8 @@ oversized_source_module_inventory:
   - path: src/bioetl/infrastructure/config/_base.py
     lines: 478
     owner: '@bioetl-config'
-    target_split: separate config discovery, validation, and environment resolution helpers
+    target_split: separate config discovery, validation, and environment resolution
+      helpers
   - path: src/bioetl/application/services/lineage/metadata_lineage_node_builders.py
     lines: 477
     owner: '@bioetl-lineage'
@@ -553,7 +562,6 @@ oversized_source_module_inventory:
     lines: 456
     owner: '@bioetl-reproducibility'
     target_split: separate score-card policy rules from manifest projection helpers
-
 hotspot_family_coverage_thresholds:
   snapshot_date: '2026-05-30'
   linked_issue: '#4567'
@@ -592,36 +600,49 @@ hotspot_family_coverage_thresholds:
       - src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_alerts.py
       - src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_profile_support.py
       - src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_profiles.py
-      - src/bioetl/application/services/control_plane/manifest/replay_family_contract_payload.py
-      - src/bioetl/application/services/control_plane/effective_config_context.py
-      - src/bioetl/application/services/control_plane/effective_config_support.py
       - src/bioetl/application/services/control_plane/effective_config/__init__.py
+      - src/bioetl/application/services/control_plane/effective_config/context.py
+      - src/bioetl/application/services/control_plane/effective_config/provenance_support.py
       - src/bioetl/application/services/control_plane/effective_config/service.py
+      - src/bioetl/application/services/control_plane/effective_config/support.py
       - src/bioetl/application/services/control_plane/historical_replay_certification.py
       - src/bioetl/application/services/control_plane/historical_replay_certification_support.py
-      - src/bioetl/application/services/control_plane/ledger_identity_support.py
       - src/bioetl/application/services/control_plane/ledger/__init__.py
+      - src/bioetl/application/services/control_plane/ledger/core_events.py
+      - src/bioetl/application/services/control_plane/ledger/core_events.py
+      - src/bioetl/application/services/control_plane/ledger/diagnostic_support.py
+      - src/bioetl/application/services/control_plane/ledger/entry_support.py
+      - src/bioetl/application/services/control_plane/ledger/entry_support.py
+      - src/bioetl/application/services/control_plane/ledger/rich_events.py
+      - src/bioetl/application/services/control_plane/ledger/rich_events.py
       - src/bioetl/application/services/control_plane/ledger/service.py
-      - src/bioetl/application/services/control_plane/manifest_time_support.py
-      - src/bioetl/application/services/control_plane/manifest_service_scaffold.py
+      - src/bioetl/application/services/control_plane/ledger_identity_support.py
       - src/bioetl/application/services/control_plane/manifest/__init__.py
       - src/bioetl/application/services/control_plane/manifest/diagnostics.py
       - src/bioetl/application/services/control_plane/manifest/diagnostics/__init__.py
       - src/bioetl/application/services/control_plane/manifest/diagnostics/artifact_support.py
       - src/bioetl/application/services/control_plane/manifest/diagnostics/base.py
       - src/bioetl/application/services/control_plane/manifest/diagnostics/base_summary_helpers.py
+      - src/bioetl/application/services/control_plane/manifest/diagnostics/base_summary_helpers.py
       - src/bioetl/application/services/control_plane/manifest/diagnostics/checkpoint_projection.py
+      - src/bioetl/application/services/control_plane/manifest/diagnostics/dq_details.py
       - src/bioetl/application/services/control_plane/manifest/diagnostics/finalization.py
       - src/bioetl/application/services/control_plane/manifest/diagnostics/nested_mapping.py
-      - src/bioetl/application/services/control_plane/manifest/diagnostics/base_summary_helpers.py
       - src/bioetl/application/services/control_plane/manifest/diagnostics/replay.py
       - src/bioetl/application/services/control_plane/manifest/diagnostics/replay_projection.py
       - src/bioetl/application/services/control_plane/manifest/diagnostics/snapshot_support.py
       - src/bioetl/application/services/control_plane/manifest/diagnostics/source_refs.py
+      - src/bioetl/application/services/control_plane/manifest/inspection_artifact_refs.py
+      - src/bioetl/application/services/control_plane/manifest/inspection_helpers.py
       - src/bioetl/application/services/control_plane/manifest/inspection_models.py
       - src/bioetl/application/services/control_plane/manifest/inspection_service.py
+      - src/bioetl/application/services/control_plane/manifest/inspection_verification.py
       - src/bioetl/application/services/control_plane/manifest/models.py
+      - src/bioetl/application/services/control_plane/manifest/replay_family_contract_payload.py
       - src/bioetl/application/services/control_plane/manifest/service.py
+      - src/bioetl/application/services/control_plane/manifest/validation.py
+      - src/bioetl/application/services/control_plane/manifest_service_scaffold.py
+      - src/bioetl/application/services/control_plane/manifest_time_support.py
       - src/bioetl/application/services/control_plane/replay/__init__.py
       - src/bioetl/application/services/control_plane/replay/bundle_descriptor_service.py
       - src/bioetl/application/services/control_plane/replay/historical_certification_service.py
@@ -634,14 +655,12 @@ hotspot_family_coverage_thresholds:
       - src/bioetl/application/services/control_plane/replay/historical_identity_models.py
       - src/bioetl/application/services/control_plane/replay/historical_universe_policy.py
       - src/bioetl/application/services/control_plane/replay/historical_universe_service.py
-      - src/bioetl/application/services/control_plane/run_ledger_core_events.py
-      - src/bioetl/application/services/control_plane/run_ledger_entry_support.py
-      - src/bioetl/application/services/control_plane/run_ledger_rich_events.py
+      - src/bioetl/application/services/control_plane/replay_taxonomy.py
+      - src/bioetl/application/services/control_plane/replay_taxonomy_fields.py
       - src/bioetl/application/services/control_plane/run_manifest_diagnostics_support.py
       - src/bioetl/application/services/control_plane/run_manifest_exact_replay_blockers.py
       - src/bioetl/application/services/control_plane/run_manifest_inspection_mixins.py
       - src/bioetl/application/services/control_plane/run_manifest_service_mixins.py
-      - src/bioetl/application/services/control_plane/run_manifest_validation.py
       - src/bioetl/application/services/control_plane/workflow/__init__.py
       - src/bioetl/application/services/control_plane/workflow/execution_preparation.py
       - src/bioetl/application/services/control_plane/workflow/execution_recording.py
@@ -656,6 +675,7 @@ hotspot_family_coverage_thresholds:
       min_covered_module_count: 35
       min_covered_line_percent: 61.96
       allowlisted_unmeasured_paths:
+      - src/bioetl/composition/runtime_builders/_run_manifest_data_roots.py
       - src/bioetl/composition/runtime_builders/_run_manifest_sink_policy.py
       - src/bioetl/composition/runtime_builders/run_manifest_support.py
       - src/bioetl/composition/runtime_builders/runner_builder_wiring.py
@@ -736,6 +756,76 @@ neo4j_memory_calibration:
       expected_disposition: retain_active
     - module_path: src/bioetl/application/composite/runtime_wiring_api.py
       expected_disposition: retain_active
+runtime_uuid_governance_metrics:
+  inventory_source: configs/quality/runtime_uuid_seams.yaml
+  owner: '@bioetl-architecture'
+  linked_issue: '#4705'
+  review_cadence: quarterly
+  review_policy: Review the canonical seam inventory whenever uuid generation changes
+    in application/composition, and reject any replay-critical random identity seam
+    without an explicit reviewed migration path.
+  metrics:
+    runtime_uuid_seam_count:
+      current_count: 14
+      max_count: 14
+      linked_issue: '#4705'
+      owner: '@bioetl-architecture'
+      rationale: Runtime UUID seams are sanctioned only as reviewed non-replay-critical
+        identities; growth must stay explicit while deterministic identity debt is
+        burned down.
+      ratchet_policy: Non-growth fail-fast unless a reviewed scorecard update expands
+        the sanctioned seam inventory intentionally.
+    replay_critical_uuid_seam_count:
+      current_count: 0
+      max_count: 0
+      linked_issue: '#4705'
+      owner: '@bioetl-architecture'
+      rationale: Replay-critical identity paths must never rely on random UUID generation.
+      ratchet_policy: Zero-budget fail-fast metric.
+retirement_governance_metrics:
+  inventory_source: configs/quality/retirement_candidate_triage.yaml
+  owner: '@bioetl-architecture'
+  linked_issue: '#4705'
+  review_cadence: quarterly
+  review_policy: Review dead-code triage and repo-wide zero-import classifications
+    together; growth in tracked retirement debt or any untriaged zero-import candidate
+    requires an explicit reviewed rebaseline.
+  metrics:
+    triaged_entry_count:
+      current_count: 19
+      max_count: 19
+      linked_issue: '#4820'
+      owner: '@bioetl-architecture'
+      rationale: Reviewed retirement/dead-code entries are explicit governed residual
+        debt and must not grow silently after TDX-009 closeout.
+      ratchet_policy: Non-growth fail-fast unless a reviewed triage recalibration
+        updates the tracked debt budget intentionally.
+    repo_wide_zero_import_candidate_count:
+      current_count: 51
+      max_count: 51
+      linked_issue: '#4541'
+      owner: '@bioetl-architecture'
+      rationale: Repo-wide zero-import candidates remain a governed review surface
+        and must not grow without a reviewed classification refresh.
+      ratchet_policy: Non-growth fail-fast unless a reviewed dead-code inventory refresh
+        updates the classified candidate set intentionally.
+    repo_wide_classified_zero_import_candidate_count:
+      current_count: 50
+      max_count: 50
+      linked_issue: '#4541'
+      owner: '@bioetl-architecture'
+      rationale: Every repo-wide zero-import candidate must stay covered by an explicit
+        disposition ledger entry.
+      ratchet_policy: Non-growth fail-fast unless the repo-wide classification ledger
+        is intentionally rebaselined during review.
+    repo_wide_untriaged_zero_import_candidate_count:
+      current_count: 1
+      max_count: 1
+      linked_issue: '#4541'
+      owner: '@bioetl-architecture'
+      rationale: Untriaged repo-wide zero-import candidates are not allowed to persist
+        after review.
+      ratchet_policy: Zero-budget fail-fast metric.
 quarterly_targets:
 - quarter: 2026-Q1
   max_total_exemptions: 29
@@ -787,6 +877,9 @@ test_governance_debt_metrics:
   inventory_source: configs/quality/test_governance_audit.yaml
   owner: '@bioetl-architecture'
   linked_issue: '#4826'
+  review_cadence: quarterly
+  review_policy: Review static test-governance budgets whenever compatibility file
+    inventory, assertion-strength debt, or deterministic test-seam counts change.
   metrics:
     compatibility_test_file_count:
       current_count: 53
@@ -795,8 +888,8 @@ test_governance_debt_metrics:
       ratchet_policy: Downward ratchet only; keep max_count at 53 unless a future
         owner-approved reduction lowers the live compatibility test inventory.
       rationale: TDX-012 review on 2026-05-31 reclassified the lazy export public
-        API inventory test out of compatibility filename inventory, lowering the
-        live count to the target threshold.
+        API inventory test out of compatibility filename inventory, lowering the live
+        count to the target threshold.
 program_done_criteria:
   deadline_quarter: 2027-Q1
   max_total_exemptions: 0

@@ -462,6 +462,7 @@
     'organism_class': 'multicellular',
     'pref_name': 'Cyclooxygenase-2',
     'primary_component_id': 123.0,
+    'protein_classifications': None,
     'species_group_flag': None,
     'target_component_synonyms': None,
     'target_components': '{"accession":"P35354","component_id":123,"component_type":"PROTEIN","organism":"Homo sapiens","target_component_xrefs":[{"xref_id":"P35354","xref_src_db":"UniProt"}],"tax_id":9606}',

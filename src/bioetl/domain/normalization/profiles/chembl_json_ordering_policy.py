@@ -159,6 +159,15 @@ CHEMBL_JSON_ORDERING_POLICY: tuple[ChemblJsonOrderingPolicy, ...] = (
     ),
     ChemblJsonOrderingPolicy(
         pipeline_name="chembl_target",
+        field_name="protein_classifications",
+        order_semantics="order_sensitive",
+        rationale=(
+            "Target-level protein classification projection preserves "
+            "deterministic hierarchy evidence and multifunctional collapse."
+        ),
+    ),
+    ChemblJsonOrderingPolicy(
+        pipeline_name="chembl_target",
         field_name="cross_references",
         order_semantics="order_sensitive",
         rationale=REFERENCE_PAYLOADS_KEEP_PROVIDER_ORDER,
@@ -216,7 +225,7 @@ def _compute_policy_hash() -> str:
     return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
 
 
-CHEMBL_JSON_ORDERING_POLICY_VERSION = "2026.05.30"
+CHEMBL_JSON_ORDERING_POLICY_VERSION = "2026.06.01"
 CHEMBL_JSON_ORDERING_POLICY_HASH = _compute_policy_hash()
 
 

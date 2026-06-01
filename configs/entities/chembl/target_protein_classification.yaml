@@ -1,0 +1,209 @@
+version: 1.0.0
+provider: chembl
+entity: target_protein_classification
+pipeline:
+  pipeline_name: chembl_target_protein_classification
+  provider: chembl
+  entity_type: target_protein_classification
+  description: Derived ChEMBL target-to-protein-classification relation rows
+  field_policy: {}
+  business_primary_keys:
+  - target_id
+  - hierarchy_index
+  batch_size: 500
+  checkpoint_interval: 500
+
+  sink:
+    silver:
+      partition_by:
+      - classification_status
+    gold:
+      mode: scd2
+      idempotency_contract: scd2
+      scd_config:
+        valid_from_col: _valid_from
+        valid_to_col: _valid_to
+        current_flag_col: _is_current
+        version_col: _version
+schema:
+  field_aliases: {}
+  content_hash:
+    include: []
+    exclude: []
+  column_groups:
+  - name: system
+    fields:
+    - entity_id
+    - content_hash
+    - _run_id
+    - _run_type
+    - _source_batch_id
+    - _ingestion_ts
+    - _index
+  - name: business
+    fields:
+    - target_id
+    - component_id
+    - hierarchy_index
+    - leaf_id
+    - l1_id
+    - l1_name
+    - l1_desc
+    - l2_id
+    - l2_name
+    - l2_desc
+    - l3_id
+    - l3_name
+    - l3_desc
+    - l4_id
+    - l4_name
+    - l4_desc
+    - l5_id
+    - l5_name
+    - l5_desc
+    - classification_status
+  - name: dq
+    pattern: ^_dq_
+  silver:
+    include_groups:
+    - system
+    - business
+    - dq
+    exclude_fields: []
+    alias_policy: preserve
+  gold:
+    include_groups:
+    - system
+    - business
+    exclude_fields:
+    - _dq_*
+    - _source_batch_id
+    - _index
+    alias_policy: canonical
+quality:
+  metadata: {}
+  version: 1.0.0
+  provider: chembl
+  entity: target_protein_classification
+  entity_field_validations:
+  - field: target_id
+    type: required
+    nullable: false
+    error_message: target_id is required
+  - field: hierarchy_index
+    type: range
+    min: 0
+    nullable: false
+    error_message: hierarchy_index must be non-negative
+  - field: classification_status
+    type: enum
+    allowed:
+    - resolved
+    - missing_classification
+    - quarantined
+    nullable: false
+    error_message: classification_status must be a valid status
+  entity_cross_field_validations: []
+  entity_conditional_validations: []
+  key_nullability:
+  - field: target_id
+    key_type: merge
+    nullable: false
+  - field: hierarchy_index
+    key_type: merge
+    nullable: false
+  - field: classification_status
+    key_type: partition
+    nullable: false
+filters:
+  version: 1.0.0
+  provider: chembl
+  entity: target_protein_classification
+  input_filter:
+    enabled: false
+    source_path: data/input/target_protein_classification.csv
+    column_name: target_id
+    filter_field: target_id
+    batch_size: 1000
+    checkpoint_interval: 1000
+    fallback_column: target_id
+  extraction_params: {}
+  silver_filters:
+    ranges: {}
+    columns: {}
+    exclude_if_present: []
+    required_fields:
+    - target_id
+    - hierarchy_index
+    - classification_status
+  gold_filters:
+    list_contains: {}
+    list_lengths: {}
+    ranges: {}
+    columns: {}
+    required_fields:
+    - target_id
+    - classification_status
+    exclude_if_present: []
+  metadata: {}
+contracts:
+  primary_key:
+  - target_id
+  - hierarchy_index
+  merge_keys:
+  - target_id
+  - hierarchy_index
+  hash_include: []
+  hash_exclude: []
+  hash_datetime_policy: v1_date
+hash_policy:
+  provider: chembl
+  entity: target_protein_classification
+  contract:
+    version: 1.0.0
+    migration_note: 'Explicit config-level hash contract for the normalized ChEMBL target_protein_classification Silver surface.'
+  hash_policy:
+    algorithm: sha256
+    canonicalization: provider + canonical_json_dumps(normalized_record)
+    include_fields:
+    - target_id
+    - component_id
+    - hierarchy_index
+    - leaf_id
+    - l1_id
+    - l1_name
+    - l1_desc
+    - l2_id
+    - l2_name
+    - l2_desc
+    - l3_id
+    - l3_name
+    - l3_desc
+    - l4_id
+    - l4_name
+    - l4_desc
+    - l5_id
+    - l5_name
+    - l5_desc
+    - classification_status
+    exclude_fields:
+    - _ingestion_ts
+    - _run_id
+    - _run_type
+    - _dq_warn
+    - _dq_error
+    - _source_batch_id
+    - _index
+    exclude_patterns:
+    - ^_dq_
+    normalization:
+      trim_strings: true
+      round_floats:
+        enabled: true
+        precision: 10
+      dates:
+        enabled: true
+        format: YYYY-MM-DD
+      null_handling:
+        nan_to_null: true
+        inf_to_null: true

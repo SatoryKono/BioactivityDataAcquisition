@@ -1,4 +1,4 @@
-"""Private diagnostic/default helpers for :mod:`run_ledger_service`."""
+"""Diagnostic/default helpers owned by the run-ledger package."""
 
 from __future__ import annotations
 

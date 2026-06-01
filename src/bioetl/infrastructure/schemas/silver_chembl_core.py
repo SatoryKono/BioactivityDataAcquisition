@@ -242,6 +242,7 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         pa.field("target_xref_reactome_ids", pa.string()),
         pa.field("target_xref_uniprot_ids", pa.string()),
         pa.field("primary_component_id", pa.float64()),
+        pa.field("protein_classifications", pa.string()),
         pa.field("component_accessions", pa.string()),
         pa.field("component_descriptions", pa.string()),
         pa.field("component_ids", pa.string()),
@@ -250,8 +251,6 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         pa.field("target_components", pa.string()),
         pa.field("cross_references", pa.string()),
         pa.field("target_component_synonyms", pa.string()),
-        # Note: protein_classifications not available in /target endpoint
-        # Use /target_component endpoint instead (CHEMBL_TARGET_COMPONENT_SCHEMA)
         # === DQ_FIELDS_SUFFIX ===
         *build_silver_dq_suffix_fields(),
     ]
@@ -391,6 +390,7 @@ __all__ = [
     "CHEMBL_PUBLICATION_SCHEMA",
     "CHEMBL_SUBCELLULAR_FRACTION_SCHEMA",
     "CHEMBL_TARGET_COMPONENT_SCHEMA",
+    "CHEMBL_TARGET_PROTEIN_CLASSIFICATION_SCHEMA",
     "CHEMBL_TARGET_SCHEMA",
     "CHEMBL_TISSUE_SCHEMA",
 ]

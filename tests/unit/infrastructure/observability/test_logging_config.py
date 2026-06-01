@@ -9,6 +9,7 @@ from collections.abc import Generator
 import json
 import logging
 from pathlib import Path
+import sys
 from unittest.mock import patch
 
 import pytest
@@ -408,6 +409,53 @@ class TestTraceContextProcessor:
 
         assert result["trace_id"] == "bound-trace"
         assert result["span_id"] == "bound-span"
+
+    def test_trace_lookup_does_not_import_opentelemetry_when_unloaded(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Inactive tracing should not import OpenTelemetry from log hot paths."""
+        from bioetl.infrastructure.observability.logging_config import (
+            _get_current_trace_identifiers,
+        )
+
+        monkeypatch.delitem(sys.modules, "opentelemetry.trace", raising=False)
+        monkeypatch.delitem(sys.modules, "opentelemetry", raising=False)
+
+        with patch("builtins.__import__", side_effect=AssertionError("unexpected import")):
+            result = _get_current_trace_identifiers()
+
+        assert result is None
+
+    def test_trace_lookup_uses_loaded_opentelemetry_trace_module(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Loaded OpenTelemetry API should still provide trace correlation fields."""
+        from bioetl.infrastructure.observability.logging_config import (
+            _get_current_trace_identifiers,
+        )
+
+        class _FakeSpanContext:
+            trace_id = 0x123
+            span_id = 0x456
+            is_valid = True
+
+        class _FakeSpan:
+            def get_span_context(self) -> _FakeSpanContext:
+                return _FakeSpanContext()
+
+        class _FakeTraceModule:
+            @staticmethod
+            def get_current_span() -> _FakeSpan:
+                return _FakeSpan()
+
+        monkeypatch.setitem(sys.modules, "opentelemetry.trace", _FakeTraceModule())
+
+        assert _get_current_trace_identifiers() == (
+            "00000000000000000000000000000123",
+            "0000000000000456",
+        )
 
 
 @pytest.mark.unit

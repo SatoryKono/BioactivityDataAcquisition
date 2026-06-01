@@ -1,9 +1,9 @@
 # Contract Coverage Matrix
 
-- snapshot_date: 2026-05-31
-- row_count: 26
-- gold_enabled_count: 26
-- covered_gold_enabled_count: 26
+- snapshot_date: 2026-06-01
+- row_count: 27
+- gold_enabled_count: 27
+- covered_gold_enabled_count: 27
 - missing_gold_enabled_count: 0
 - excluded_count: 0
 
@@ -22,6 +22,7 @@
 | `chembl_subcellular_fraction` | `chembl.subcellular_fraction` | True | `covered` | `configs/contracts/chembl/subcellular_fraction.yaml` | `active` | - |
 | `chembl_target` | `chembl.target` | True | `covered` | `configs/contracts/chembl/target.yaml` | `active` | - |
 | `chembl_target_component` | `chembl.target_component` | True | `covered` | `configs/contracts/chembl/target_component.yaml` | `active` | - |
+| `chembl_target_protein_classification` | `chembl.target_protein_classification` | True | `covered` | `configs/contracts/chembl/target_protein_classification.yaml` | `active` | - |
 | `chembl_tissue` | `chembl.tissue` | True | `covered` | `configs/contracts/chembl/tissue.yaml` | `active` | - |
 | `composite_activity` | `composite.activity` | True | `covered` | `configs/contracts/composite/activity.yaml` | `active` | - |
 | `composite_assay` | `composite.assay` | True | `covered` | `configs/contracts/composite/assay.yaml` | `active` | - |
