@@ -143,6 +143,7 @@
 04-reference/internalextended/index.md
 04-reference/internalextended/internal-type-mappings.md
 04-reference/internalextended/provider-registration-internal.md
+04-reference/pipelines/chembl/11-target-protein-classification-spec.md
 04-reference/providers/publication-normalization.md
 04-reference/schemas/domain/chembl/observed-vocab-inventory.md
 04-reference/schemas/domain/chembl/ontology-governance.md
