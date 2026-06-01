@@ -107,7 +107,6 @@ chembl,target_component,required_fields,component_id,"""component_id""",,keep_in
 chembl,target_component,required_fields,organism,"""organism""",,keep_in_silver,structural rule stays in silver_filters
 chembl,target_component,ranges,publication_year,"{""max"": 2050, ""min"": 1950}","{""max"": 2050, ""min"": 1950}",duplicate,identical rule in gold_filters - drop from silver
 chembl,target_protein_classification,required_fields,target_id,"""target_id""","""target_id""",keep_in_silver,also present in gold_filters (informational)
-chembl,target_protein_classification,required_fields,hierarchy_index,"""hierarchy_index""",,keep_in_silver,structural rule stays in silver_filters
 chembl,target_protein_classification,required_fields,classification_status,"""classification_status""","""classification_status""",keep_in_silver,also present in gold_filters (informational)
 chembl,tissue,required_fields,tissue_id,"""tissue_id""","""tissue_id""",keep_in_silver,also present in gold_filters (informational)
 chembl,tissue,required_fields,pref_name,"""pref_name""",,keep_in_silver,structural rule stays in silver_filters

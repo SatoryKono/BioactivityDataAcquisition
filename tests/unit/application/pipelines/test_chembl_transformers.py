@@ -720,10 +720,10 @@ class TestTargetTransformer:
         assert result["target_ec_numbers"] == "unknown"
 
     @pytest.mark.asyncio
-    async def test_transform_projects_single_protein_classification_to_json(
+    async def test_transform_does_not_emit_target_level_protein_class_summary(
         self, transformer, mock_context
     ):
-        """Single classification should reuse the canonical target summary policy."""
+        """Target summary fields now belong to the relation/composite surfaces."""
         record = {
             "target_id": "CHEMBL123",
             "target_components": [
@@ -747,45 +747,15 @@ class TestTargetTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert isinstance(result["protein_classifications"], str)
-        import json
-
-        classifications = json.loads(result["protein_classifications"])
-        assert classifications == [
-            {
-                "hierarchy_index": 0,
-                "component_id": 10,
-                "leaf_id": 1015,
-                "classification_status": "resolved",
-                "l1_id": 1,
-                "l1_name": "Enzyme",
-                "l1_desc": "Root",
-                "l2_id": 2,
-                "l2_name": "Protease",
-                "l2_desc": "Branch",
-                "l3_id": None,
-                "l3_name": None,
-                "l3_desc": None,
-                "l4_id": None,
-                "l4_name": None,
-                "l4_desc": None,
-                "l5_id": None,
-                "l5_name": None,
-                "l5_desc": None,
-            }
-        ]
-        assert result["target_protein_class_id_L1"] == "1"
-        assert result["target_protein_class_name_L1"] == "Enzyme"
-        assert result["target_protein_class_desc_L1"] == "Root"
-        assert result["target_protein_class_id_L2"] == "2"
-        assert result["target_protein_class_name_L2"] == "Protease"
-        assert result["target_protein_class_desc_L2"] == "Branch"
+        assert "protein_classifications" not in result
+        assert "target_protein_class_id_L1" not in result
+        assert "target_protein_class_name_L1" not in result
 
     @pytest.mark.asyncio
-    async def test_transform_prefers_prepared_target_protein_classification_rows(
+    async def test_transform_ignores_prepared_target_protein_classification_rows(
         self, transformer, mock_context
     ):
-        """Enriched target data-source rows should feed the canonical summary policy."""
+        """Prepared relation rows no longer backfill the base target contract."""
         record = {
             "target_id": "CHEMBL123",
             "target_components": [{"component_id": 10}],
@@ -793,7 +763,6 @@ class TestTargetTransformer:
                 {
                     "target_id": "CHEMBL123",
                     "component_id": 10,
-                    "hierarchy_index": 0,
                     "leaf_id": 1015,
                     "classification_status": "resolved",
                     "l1_id": 1,
@@ -812,18 +781,15 @@ class TestTargetTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["protein_classifications"] is not None
-        assert result["target_protein_class_id_L1"] == "1"
-        assert result["target_protein_class_name_L1"] == "Enzyme"
-        assert result["target_protein_class_desc_L1"] == "Root"
-        assert result["target_protein_class_id_L3"] == "1015"
-        assert result["target_protein_class_name_L3"] == "Serine/threonine kinase"
+        assert "protein_classifications" not in result
+        assert "target_protein_class_id_L1" not in result
+        assert "target_protein_class_name_L3" not in result
 
     @pytest.mark.asyncio
-    async def test_transform_collapses_multiple_classifications_to_multifunctional_l1(
+    async def test_transform_leaves_multifunctional_projection_to_relation_summary(
         self, transformer, mock_context
     ):
-        """Multiple leaf classifications should emit canonical multifunctional summary."""
+        """Multifunctional resolution is no longer a responsibility of chembl_target."""
         record = {
             "target_id": "CHEMBL123",
             "target_components": [
@@ -861,63 +827,15 @@ class TestTargetTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        import json
-
-        classifications = json.loads(result["protein_classifications"])
-        assert classifications == [
-            {
-                "hierarchy_index": 1,
-                "component_id": 10,
-                "leaf_id": 12,
-                "classification_status": "resolved",
-                "l1_id": 1,
-                "l1_name": "Enzyme",
-                "l1_desc": None,
-                "l2_id": 2,
-                "l2_name": "Kinase",
-                "l2_desc": None,
-                "l3_id": None,
-                "l3_name": None,
-                "l3_desc": None,
-                "l4_id": None,
-                "l4_name": None,
-                "l4_desc": None,
-                "l5_id": None,
-                "l5_name": None,
-                "l5_desc": None,
-            },
-            {
-                "hierarchy_index": 0,
-                "component_id": 10,
-                "leaf_id": 148,
-                "classification_status": "resolved",
-                "l1_id": 3,
-                "l1_name": "Membrane receptor",
-                "l1_desc": None,
-                "l2_id": 7,
-                "l2_name": "Ion channel",
-                "l2_desc": None,
-                "l3_id": None,
-                "l3_name": None,
-                "l3_desc": None,
-                "l4_id": None,
-                "l4_name": None,
-                "l4_desc": None,
-                "l5_id": None,
-                "l5_name": None,
-                "l5_desc": None,
-            },
-        ]
-        assert result["target_protein_class_id_L1"] is None
-        assert result["target_protein_class_name_L1"] == "Multifunctional target"
-        assert result["target_protein_class_name_L2"] == "Multifunctional target"
-        assert result["target_protein_class_name_L3"] == ""
+        assert "protein_classifications" not in result
+        assert "target_protein_class_name_L1" not in result
+        assert "target_protein_class_name_L3" not in result
 
     @pytest.mark.asyncio
-    async def test_transform_uses_null_for_missing_protein_classifications(
+    async def test_transform_omits_protein_classification_summary_when_missing(
         self, transformer, mock_context
     ):
-        """Targets without classification payloads should emit null, not tuple."""
+        """Base target rows omit relation-owned fields when no classification exists."""
         record = {
             "target_id": "CHEMBL123",
             "target_components": [
@@ -928,9 +846,9 @@ class TestTargetTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["protein_classifications"] is None
-        assert result["target_protein_class_id_L1"] is None
-        assert result["target_protein_class_name_L1"] is None
+        assert "protein_classifications" not in result
+        assert "target_protein_class_id_L1" not in result
+        assert "target_protein_class_name_L1" not in result
 
     @pytest.mark.asyncio
     async def test_transform_projects_derived_component_synonyms(

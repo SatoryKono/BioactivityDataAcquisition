@@ -641,12 +641,12 @@ def _candidate_app_base_urls(config: AuditConfig) -> tuple[str, ...]:
         datasource_url = _discover_http_datasource_url(config)
     except (HTTPError, URLError, OSError, json.JSONDecodeError):
         datasource_url = None
-    candidates.append(_grafana_http_datasource_proxy_url(config))
     if datasource_url:
         candidates.append(datasource_url)
         normalized = _normalize_host_access_url(datasource_url)
         if normalized != datasource_url:
             candidates.append(normalized)
+    candidates.append(_grafana_http_datasource_proxy_url(config))
 
     for candidate in tuple(candidates):
         zero_bind_url = _zero_bind_access_url(candidate)

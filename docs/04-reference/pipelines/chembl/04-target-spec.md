@@ -28,18 +28,11 @@ Current specification summary:
 - Composite and downstream enrichment behavior is defined in the live entity config and current application code.
 - Derived projections now publish `target_protein_synonyms`, `target_gene_synonyms`, `target_ec_numbers`,
   and xref-derived fields `target_xref_pdb_ids`, `target_xref_go_component`, `target_xref_go_function`, `target_xref_go_process`, `target_xref_hgnc_ids`, `target_xref_reactome_ids`, `target_xref_uniprot_ids`.
-- `protein_classifications` is a canonical JSON string in the main `chembl.target`
-  Silver table and now reuses the same deterministic summary policy as
-  `chembl_target_protein_classification`.
-- `target_protein_class_id_L1..L5`, `target_protein_class_name_L1..L5`, and
-  `target_protein_class_desc_L1..L5` are populated in standalone `chembl_target`
-  from composition-owned ChEMBL data-source enrichment. The raw `/target`
-  payload usually lacks nested protein classification evidence, so the runtime
-  prepares relation-like rows from `/target_component` and
-  `/protein_classification` before `TargetTransformer` applies the shared
-  summary policy.
+- `chembl_target` no longer publishes `protein_classifications` or `target_protein_class_*` summary fields.
+- `chembl_target_protein_classification` is the authoritative target-level protein-class relation surface.
 - `composite_target` remains the canonical fully enriched target surface because
-  it joins the dedicated `chembl_target_protein_classification` relation pipeline.
+  it projects flattened protein-class summary only after joining the dedicated
+  `chembl_target_protein_classification` relation pipeline.
 - GO-derived columns use `xref_name`; `PDB`/`PDBe` and `Reactome` retain `xref_id`.
 - Missing derived buckets emit `unknown`; raw `target_component_synonyms` and `cross_references` stay forensic JSON.
 
@@ -48,7 +41,7 @@ Current specification summary:
 | Artifact             | Link                                                                                     |
 | -------------------- | ---------------------------------------------------------------------------------------- |
 | Provider reference   | [target.md](../../providers/chembl/target.md)                                            |
-| Gold contract export | [chembl_target_v2.0.json](../../contracts/gold/chembl_target_v2.0.json)                  |
+| Gold contract export | [chembl_target_v3.0.json](../../contracts/gold/chembl_target_v3.0.json)                  |
 | Gold schemas index   | [gold-schemas.md](../../contracts/gold-schemas.md)                                       |
 | Versioning policy    | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
 
@@ -58,5 +51,5 @@ Current specification summary:
 | ----------------------------- | ------ | ---------------------------------------------------------------------------------------- |
 | Metadata                      | Pass   | YAML header contains `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
 | Canonical source traceability | Pass   | Page delegates current contract to the linked canonical source and active config surface |
-| Contract linkage              | Pass   | [chembl_target_v2.0.json](../../contracts/gold/chembl_target_v2.0.json)                  |
+| Contract linkage              | Pass   | [chembl_target_v3.0.json](../../contracts/gold/chembl_target_v3.0.json)                  |
 | Published-page role           | Pass   | Canonical compact summary is explicitly bounded by current canonical sources             |

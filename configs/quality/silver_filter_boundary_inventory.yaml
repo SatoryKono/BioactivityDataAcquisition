@@ -653,7 +653,6 @@ pipelines:
       required_fields:
         structural:
         - classification_status
-        - hierarchy_index
         - target_id
   chembl_tissue:
     downstream_role: composite_enricher

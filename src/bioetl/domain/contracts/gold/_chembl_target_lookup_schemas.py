@@ -39,22 +39,6 @@ class ChEMBLTargetGoldSchema(StrictGoldContractSchema):
     primary_component_id: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # int → float (nullable)
-    protein_classifications: Series[str] = pa.Field(nullable=True)
-    target_protein_class_id_L1: Series[str] = pa.Field(nullable=True)
-    target_protein_class_name_L1: Series[str] = pa.Field(nullable=True)
-    target_protein_class_desc_L1: Series[str] = pa.Field(nullable=True)
-    target_protein_class_id_L2: Series[str] = pa.Field(nullable=True)
-    target_protein_class_name_L2: Series[str] = pa.Field(nullable=True)
-    target_protein_class_desc_L2: Series[str] = pa.Field(nullable=True)
-    target_protein_class_id_L3: Series[str] = pa.Field(nullable=True)
-    target_protein_class_name_L3: Series[str] = pa.Field(nullable=True)
-    target_protein_class_desc_L3: Series[str] = pa.Field(nullable=True)
-    target_protein_class_id_L4: Series[str] = pa.Field(nullable=True)
-    target_protein_class_name_L4: Series[str] = pa.Field(nullable=True)
-    target_protein_class_desc_L4: Series[str] = pa.Field(nullable=True)
-    target_protein_class_id_L5: Series[str] = pa.Field(nullable=True)
-    target_protein_class_name_L5: Series[str] = pa.Field(nullable=True)
-    target_protein_class_desc_L5: Series[str] = pa.Field(nullable=True)
     component_accessions: Series[str] = pa.Field(nullable=True)  # list[str]
     component_descriptions: Series[str] = pa.Field(nullable=True)
     component_ids: Series[str] = pa.Field(nullable=True)  # list[int]
@@ -95,8 +79,11 @@ class ChEMBLTargetProteinClassificationGoldSchema(StrictGoldContractSchema):
     entity_id: Series[str] = pa.Field(nullable=False)
     content_hash: Series[str] = pa.Field(nullable=False)
     target_id: Series[str] = pa.Field(nullable=False)
+    classification_status: Series[str] = pa.Field(
+        nullable=False,
+        isin=["resolved", "missing_classification", "quarantined"],
+    )
     component_id: Series[float] = pa.Field(nullable=True, ge=1, coerce=True)
-    hierarchy_index: Series[int] = pa.Field(nullable=False, ge=0)
     leaf_id: Series[float] = pa.Field(nullable=True, ge=1, coerce=True)
     l1_id: Series[float] = pa.Field(nullable=True, ge=1, coerce=True)
     l1_name: Series[str] = pa.Field(nullable=True)
@@ -113,10 +100,6 @@ class ChEMBLTargetProteinClassificationGoldSchema(StrictGoldContractSchema):
     l5_id: Series[float] = pa.Field(nullable=True, ge=1, coerce=True)
     l5_name: Series[str] = pa.Field(nullable=True)
     l5_desc: Series[str] = pa.Field(nullable=True)
-    classification_status: Series[str] = pa.Field(
-        nullable=False,
-        isin=["resolved", "missing_classification", "quarantined"],
-    )
 
 
 class ChEMBLTissueGoldSchema(StrictGoldContractSchema):

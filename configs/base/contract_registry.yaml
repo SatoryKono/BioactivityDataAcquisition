@@ -269,27 +269,27 @@ entries:
 
   chembl.target:
     identity:
-      contract_version: "2.0.0"
+      contract_version: "3.0.0"
       compatibility_level: "major"
       schema_hash: "89e905a362dd5fdde7d50b8b5f31a2338147a5583687aa989f94175cc21da1db"
       dq_policy_ref: "chembl.dq.v1"
       rule_bundle_version: "dq-rules.v1.0"
       normalization_profile_ref: "chembl.target"
       normalization_profile_version: "1.0.0"
-      normalization_profile_hash: "58cb8a4334e1ec4eb4ecd61fd368b62f1362678b4a9bc7b558389b72994d7279"
+      normalization_profile_hash: "746da0091c51435886d320b4582aae8f0b1701abf37885a045183d4bb125ff5c"
     status: "active"
     source_path: "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py"
     published_artifacts:
-      - "../../docs/04-reference/contracts/gold/chembl_target_v2.0.json"
-    supported_versions: ["1.0.0", "2.0.0"]
+      - "../../docs/04-reference/contracts/gold/chembl_target_v3.0.json"
+    supported_versions: ["1.0.0", "2.0.0", "3.0.0"]
     migration_guides: {}
-    last_updated: "2026-05-30T00:00:00Z"
+    last_updated: "2026-06-01T00:00:00Z"
     owners: ["chembl-team"]
     dq_policy_ref: "chembl.dq.v1"
     rule_bundle_version: "dq-rules.v1.0"
     normalization_profile_ref: "chembl.target"
     normalization_profile_version: "1.0.0"
-    normalization_profile_hash: "58cb8a4334e1ec4eb4ecd61fd368b62f1362678b4a9bc7b558389b72994d7279"
+    normalization_profile_hash: "746da0091c51435886d320b4582aae8f0b1701abf37885a045183d4bb125ff5c"
 
   chembl.target_component:
     identity:
@@ -317,19 +317,19 @@ entries:
 
   chembl.target_protein_classification:
     identity:
-      contract_version: "1.0.0"
+      contract_version: "2.0.0"
       compatibility_level: "major"
       schema_hash: "549c80a3aa3f69b0ac175321a30d026406a746d58b0608af5d2648dc9f0ab3da"
       dq_policy_ref: "chembl.dq.v1"
       rule_bundle_version: "dq-rules.v1.0"
       normalization_profile_ref: "chembl.target_protein_classification"
       normalization_profile_version: "1.0.0"
-      normalization_profile_hash: "914364630f4f88824c2902608d43bbc1c5184490d1dd666582d0185188bb2dee"
+      normalization_profile_hash: "6e5fb2e58445f27883ccb270d02c6177f52a6d756a44869eeb48d44970102bf8"
     status: "active"
     source_path: "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py"
     published_artifacts:
-      - "../../docs/04-reference/contracts/gold/chembl_target_protein_classification_v1.0.json"
-    supported_versions: ["1.0.0"]
+      - "../../docs/04-reference/contracts/gold/chembl_target_protein_classification_v2.0.json"
+    supported_versions: ["1.0.0", "2.0.0"]
     migration_guides: {}
     last_updated: "2026-06-01T00:00:00Z"
     owners: ["chembl-team"]
@@ -337,7 +337,7 @@ entries:
     rule_bundle_version: "dq-rules.v1.0"
     normalization_profile_ref: "chembl.target_protein_classification"
     normalization_profile_version: "1.0.0"
-    normalization_profile_hash: "914364630f4f88824c2902608d43bbc1c5184490d1dd666582d0185188bb2dee"
+    normalization_profile_hash: "6e5fb2e58445f27883ccb270d02c6177f52a6d756a44869eeb48d44970102bf8"
 
   chembl.tissue:
     identity:

@@ -63,7 +63,8 @@ Current canonical Overview baseline:
 - `bioetl-overview-v2` materializes the explicit header contract
 - it remains aggregate-first and routes exact run forensics to Control Plane /
   Silver Reject Explorer; its primary `run_id` selector feeds HTTP identity
-  panels and is not mapped to Silver `quarantine_run_id` by generic links
+  panels and is mapped to Silver `quarantine_run_id` only for explicit
+  explorer handoff, not for Prometheus labels or primary-dashboard queries
 
 ## If X symptom → open dashboard Y → panel Z
 

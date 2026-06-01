@@ -15,14 +15,14 @@ class TargetProteinClassificationSchema(ETLRecordSchema):
     """Derived target-to-protein-classification relation schema."""
 
     target_id: Series[str] = pa.Field(nullable=False, description="ChEMBL target ID.")
+    classification_status: Series[str] = pa.Field(
+        nullable=False,
+        isin=["resolved", "missing_classification", "quarantined"],
+        description="Resolution status for this target classification row.",
+    )
     component_id: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True,
         description="Target component ID that supplied the classification.",
-    )
-    hierarchy_index: Series[int] = pa.Field(
-        nullable=False,
-        ge=0,
-        description="Deterministic per-target hierarchy ordinal.",
     )
     leaf_id: Series[str] | None = pa.Field(
         nullable=True,
@@ -73,12 +73,6 @@ class TargetProteinClassificationSchema(ETLRecordSchema):
     l5_desc: Series[str] | None = pa.Field(
         nullable=True, description="Level 5 protein classification description."
     )
-    classification_status: Series[str] = pa.Field(
-        nullable=False,
-        isin=["resolved", "missing_classification", "quarantined"],
-        description="Resolution status for this target classification row.",
-    )
-
     class Config:
         """Pandera configuration."""
 

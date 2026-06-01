@@ -349,7 +349,6 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("target_xref_reactome_ids", pa.string()),
         ("target_xref_uniprot_ids", pa.string()),
         ("primary_component_id", pa.float64()),
-        ("protein_classifications", pa.string()),
         ("component_accessions", pa.string()),
         ("component_descriptions", pa.string()),
         ("component_ids", pa.string()),
@@ -378,8 +377,8 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
     "chembl_target_protein_classification": [
         *SILVER_CORE_FIELDS,
         ("target_id", pa.string()),
+        ("classification_status", pa.string()),
         ("component_id", pa.int64()),
-        ("hierarchy_index", pa.int64()),
         ("leaf_id", pa.int64()),
         ("l1_id", pa.int64()),
         ("l1_name", pa.string()),
@@ -396,7 +395,6 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("l5_id", pa.int64()),
         ("l5_name", pa.string()),
         ("l5_desc", pa.string()),
-        ("classification_status", pa.string()),
         *DQ_FIELDS,
     ],
     "chembl_protein_class": [

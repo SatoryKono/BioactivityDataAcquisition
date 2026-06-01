@@ -41,7 +41,7 @@ ______________________________________________________________________
 ______________________________________________________________________
 
 > Примечание: в репозитории сейчас поставляются Control Plane, Runtime,
-> Workflow, Silver Reject Explorer и `*-v2` dashboard surfaces.
+> Workflow, Silver Reject Explorer, Alerts/SLO и `*-v2` dashboard surfaces.
 > Исторические v1 surfaces ниже сведены к краткой archival note, без подробного operator walkthrough.
 >
 > Роль этого документа: setup/reference для monitoring stack.
@@ -197,7 +197,7 @@ ______________________________________________________________________
 │  ┌──────────────────────────────────────────────────────────┐    │
 │  │  Provisioning (автоматическая загрузка)                    │    │
 │  │  - Datasources: Prometheus + Quarantine Explorer          │    │
-│  │  - Dashboards: 7 JSON файлов (bioetl.yaml)               │    │
+│  │  - Dashboards: 8 JSON файлов (bioetl.yaml)               │    │
 │  │  - Обновление каждые 30 секунд                            │    │
 │  │  - allowUiUpdates: false для production dashboard-as-code  │    │
 │  └──────────────────────────────────────────────────────────┘    │
@@ -209,6 +209,7 @@ ______________________________________________________________________
 │  - 3. Provider Health (bioetl-provider-health-v2)                │
 │  - 4. Data Quality (bioetl-dq-v2)                                │
 │  - 5. Workflow (bioetl-workflow-overview)                        │
+│  - 6. Alerts & SLO (bioetl-alerts-slo)                           │
 │  - Silver Reject Explorer (bioetl-silver-reject-explorer)        │
 └──────────────────────────────────────────────────────────────────┘
 ```
@@ -1161,14 +1162,17 @@ The shipped Grafana bootstrap entrypoint also removes a stale local
 renderer mode is active, preventing restart loops caused by old persistent
 plugin state.
 
-**Фильтры:** `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$quarantine_run_id`, `$payload_hash` + стандартный Grafana time picker.
+**Фильтры:** hidden `$workflow` navigation shell plus `$pipeline`, `$run_type`,
+`$reason_code`, `$field`, `$quarantine_run_id`, `$payload_hash` + стандартный
+Grafana time picker.
 `$pipeline` здесь intentionally single-select/no-All. `$quarantine_run_id`
 передаётся в Quarantine API как backend `dimension=run_id`; он и
 `$payload_hash` остаются Explorer-only forensic filters и не должны протекать в
 Prometheus labels, summary dashboards или cross-dashboard handoffs.
-Shared `workflow` / `run_id` shell ownership остаётся у origin dashboards; the
-Explorer itself stays pipeline/run_type forensic even when one
-`$quarantine_run_id` is selected.
+Shared `workflow` shell context is preserved for navigation continuity; the
+Explorer itself stays pipeline/run_type/quarantine_run_id forensic. Primary
+dashboard `$run_id` may be mapped into `$quarantine_run_id` only by explicit
+inbound links; links out of the Explorer do not export primary `$run_id`.
 
 **Важно:** это не Prometheus dashboard для row-level таблиц.
 `1-4` dashboards остаются Prometheus summary/bounded-breakdown поверхностями;
@@ -2379,7 +2383,8 @@ ______________________________________________________________________
 | 3. Provider Health        | `bioetl-provider-health-v2`     | 6            | 28 / 1        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Provider latency, health, retries, failure ratios |
 | 4. Data Quality           | `bioetl-dq-v2`                  | 4            | 33 / 2        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | DQ score, quarantine, freshness, validation failures |
 | 5. Workflow               | `bioetl-workflow-overview`      | 2            | 13 / 1        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Selected-range workflow run and step evidence with explicit scope badges in the shared shell; exact `run_id` populates local HTTP identity/accounting cards while Prometheus panels stay selected-range workflow evidence |
-| Silver Reject Explorer | `bioetl-silver-reject-explorer` | 1001         | 11 / 0        | 1m      | 24h        | Quarantine Explorer API | Record-level browsing and action handoff for Silver rejects; forensic-only pipeline/run_type surface, not a shared workflow/run_id shell |
+| 6. Alerts & SLO           | `bioetl-alerts-slo`             | 1            | 7 / 0         | 30s     | 24h        | Prometheus `ALERTS` | First-class firing alert and SLO/SLA pressure triage surface; does not implement alert rules in dashboard queries |
+| Silver Reject Explorer | `bioetl-silver-reject-explorer` | 1001         | 11 / 0        | 1m      | 24h        | Quarantine Explorer API | Record-level browsing and action handoff for Silver rejects; hidden workflow shell plus forensic pipeline/run_type/quarantine_run_id scope |
 
 ______________________________________________________________________
 

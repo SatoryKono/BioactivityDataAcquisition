@@ -109,7 +109,7 @@ def test_apply_dependency_joins_summarizes_target_classification_dependency() ->
     dep_df = pl.DataFrame(
         {
             "target_id": ["CHEMBL1", "CHEMBL1"],
-            "hierarchy_index": [0, 1],
+            "component_id": [10, 11],
             "leaf_id": [100, 200],
             "l1_id": [1, 2],
             "l1_name": ["Enzyme", "Transporter"],

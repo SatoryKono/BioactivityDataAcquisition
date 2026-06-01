@@ -129,9 +129,12 @@ Prometheus labels.
 - **3. Provider Health**: `$workflow`, `$pipeline`, `$run_type`, `$run_id`,
   `$provider` visible; `$adapter` hidden detail-only for cross-scope
   circuit-breaker diagnostics
-- **Silver Reject Explorer**: `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$quarantine_run_id`, `$payload_hash`
+- **Silver Reject Explorer**: hidden `$workflow` navigation shell plus
+  `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$quarantine_run_id`,
+  `$payload_hash`
 - **5. Workflow**: `$workflow`, `$pipeline`, `$run_type`, `$run_id`,
   `$status`, `$step_status`, `$step_kind`
+- **6. Alerts & SLO**: `$workflow`, `$pipeline`, `$run_type`
 
 > **Важно**: shipped dashboards используют общий context shell plus
 > role-specific selectors, а не один flat universal query model.

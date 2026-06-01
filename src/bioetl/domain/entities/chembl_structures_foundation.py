@@ -84,22 +84,6 @@ class Target(BaseEntity):
     component_types: list[str] | None = None
     component_relationships: list[str] | None = None
     component_descriptions: list[str] | None = None
-    protein_classifications: str | None = None
-    target_protein_class_id_L1: str | None = None
-    target_protein_class_name_L1: str | None = None
-    target_protein_class_desc_L1: str | None = None
-    target_protein_class_id_L2: str | None = None
-    target_protein_class_name_L2: str | None = None
-    target_protein_class_desc_L2: str | None = None
-    target_protein_class_id_L3: str | None = None
-    target_protein_class_name_L3: str | None = None
-    target_protein_class_desc_L3: str | None = None
-    target_protein_class_id_L4: str | None = None
-    target_protein_class_name_L4: str | None = None
-    target_protein_class_desc_L4: str | None = None
-    target_protein_class_id_L5: str | None = None
-    target_protein_class_name_L5: str | None = None
-    target_protein_class_desc_L5: str | None = None
 
     def _validate_invariants(self) -> None:
         if not self.target_id:
@@ -132,7 +116,7 @@ class TargetProteinClassification(BaseEntity):
     """Represents a derived target-to-protein-classification relation row."""
 
     target_id: str
-    hierarchy_index: int
+    classification_status: str = "resolved"
     component_id: int | None = None
     leaf_id: int | None = None
     l1_id: int | None = None
@@ -150,19 +134,24 @@ class TargetProteinClassification(BaseEntity):
     l5_id: int | None = None
     l5_name: str | None = None
     l5_desc: str | None = None
-    classification_status: str = "resolved"
 
     def _validate_invariants(self) -> None:
         if not self.target_id:
             raise ValueError("Target ChEMBL ID is required")
-        if self.hierarchy_index < 0:
-            raise ValueError("Hierarchy index must be non-negative")
         if self.classification_status not in {
             "resolved",
             "missing_classification",
             "quarantined",
         }:
             raise ValueError("Invalid protein classification status")
+        if (
+            self.classification_status == "resolved"
+            and (self.component_id is None or self.leaf_id is None)
+        ):
+            raise ValueError(
+                "Resolved target protein classification rows require "
+                "component_id and leaf_id"
+            )
 
 
 @dataclass(frozen=True, kw_only=True)

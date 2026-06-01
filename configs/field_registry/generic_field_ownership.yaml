@@ -67,7 +67,7 @@ entries:
     rationale: Composite assay Gold publishes source-specific assay description and score without promoting generic names to global aliases.
 
   - surface: gold_json_property
-    path: docs/04-reference/contracts/gold/chembl_target_v2.0.json
+    path: docs/04-reference/contracts/gold/chembl_target_v3.0.json
     context: properties
     fields:
       - description

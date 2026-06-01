@@ -530,6 +530,13 @@ def _assert_silver_reject_explorer_variable_contract(
         f"Dashboard {dashboard_path.name} 'pipeline' must be single-select"
     )
 
+    workflow_var = variable_map.get("workflow")
+    assert workflow_var is not None, (
+        f"Dashboard {dashboard_path.name} must define hidden shared 'workflow' context"
+    )
+    assert workflow_var.get("type") == "textbox"
+    assert workflow_var.get("hide") == 2
+
     for variable_name in ("run_type", "reason_code", "field", "quarantine_run_id"):
         variable = variable_map.get(variable_name)
         assert variable is not None, (

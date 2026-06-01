@@ -47,6 +47,7 @@ NAVIGATION_CONTRACT_PATH = Path(
     "docs/03-guides/dashboards/contracts/navigation-links.yaml"
 )
 EXPECTED_VARS_BY_DASHBOARD = {
+    "bioetl-alerts-slo.json": {"workflow", "pipeline", "run_type"},
     "bioetl-overview-v2.json": {"workflow", "pipeline", "run_type", "run_id"},
     "bioetl-dq-v2.json": {"workflow", "pipeline", "run_type", "run_id", "stage"},
     "bioetl-runtime.json": {
@@ -85,6 +86,7 @@ EXPECTED_VARS_BY_DASHBOARD = {
         "step_kind",
     },
     "bioetl-silver-reject-explorer.json": {
+        "workflow",
         "pipeline",
         "run_type",
         "reason_code",
@@ -527,6 +529,16 @@ def test_variable_query_sources(dashboard_path):
 
     if dashboard_path.name == "bioetl-silver-reject-explorer.json":
         _assert_silver_reject_explorer_variable_contract(dashboard_path, variable_map)
+        return
+
+    if dashboard_path.name == "bioetl-alerts-slo.json":
+        assert variable_map["workflow"].get("type") == "textbox"
+        assert "bioetl_records_processed_total" in str(
+            variable_map["pipeline"].get("query", {})
+        )
+        assert "bioetl_records_processed_total" in str(
+            variable_map["run_type"].get("query", {})
+        )
         return
 
     if dashboard_path.name == "bioetl-workflow-overview.json":
@@ -1259,7 +1271,7 @@ def test_workflow_pipeline_status_falls_back_to_runtime_current_status() -> None
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Pipeline Status"
+            if item.get("title") == "Range Pipeline Status"
         ),
         None,
     )

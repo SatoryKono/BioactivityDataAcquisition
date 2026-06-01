@@ -447,7 +447,10 @@ def test_playwright_screenshot_script_uses_multiple_panel_readiness_selectors() 
     ).read_text(encoding="utf-8")
 
     assert "countRenderedPanels" in script
+    assert '[data-testid^="data-testid Panel header"]' in script
+    assert '[data-testid*="Panel header"]' in script
     assert '[data-testid=\"Panel header\"]' in script
+    assert '[data-viz-panel-key^="panel-"]' in script
     assert '[data-panelid]' in script
     assert "renderedPanelCount" in script
     assert "renderedPanelSelector" in script
@@ -882,6 +885,163 @@ def test_live_audit_effective_specs_include_generated_loki_and_tempo_coverage() 
     assert len(specs) > len(audit_subject.REVIEWED_PANEL_SPECS)
 
 
+def test_dashboard_json_has_no_backup_artifacts_in_active_dashboard_tree() -> None:
+    backup_files = sorted(Path("grafana/dashboards").glob("*.backup"))
+
+    assert backup_files == []
+
+
+def test_alerts_slo_dashboard_is_first_class_shipped_surface() -> None:
+    dashboard = json.loads(
+        Path("grafana/dashboards/bioetl-alerts-slo.json").read_text(encoding="utf-8")
+    )
+    variables = {
+        item.get("name") for item in dashboard.get("templating", {}).get("list", [])
+    }
+
+    assert dashboard["uid"] == "bioetl-alerts-slo"
+    assert dashboard["title"] == "6. Alerts & SLO"
+    assert {"workflow", "pipeline", "run_type"}.issubset(variables)
+    assert "run_id" not in variables
+    assert "ALERTS" in json.dumps(dashboard)
+
+
+def test_silver_reject_explorer_preserves_shared_shell_context() -> None:
+    dashboard = json.loads(
+        Path("grafana/dashboards/bioetl-silver-reject-explorer.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    variables = {
+        item.get("name") for item in dashboard.get("templating", {}).get("list", [])
+    }
+    serialized = json.dumps(dashboard)
+
+    assert {"workflow", "pipeline", "run_type"}.issubset(variables)
+    assert "run_id" not in variables
+    assert "var-workflow=All" not in serialized
+    assert "var-run_id=$run_id" not in serialized
+    assert "quarantine_run_id remains the forensic row filter" in serialized
+
+
+def test_silver_reject_explorer_links_receive_run_context() -> None:
+    for path in Path("grafana/dashboards").glob("*.json"):
+        dashboard = json.loads(path.read_text(encoding="utf-8"))
+
+        def walk(value: object) -> None:
+            if isinstance(value, dict):
+                for key, nested in value.items():
+                    if key == "uid":
+                        continue
+                    walk(nested)
+                return
+            if isinstance(value, list):
+                for nested in value:
+                    walk(nested)
+                return
+            if not isinstance(value, str):
+                return
+            if "bioetl-silver-reject-explorer" not in value or not value.startswith(
+                "/d/"
+            ):
+                return
+            assert "var-workflow=" in value
+            assert "var-run_id=" not in value
+            assert "var-quarantine_run_id=" in value
+
+        walk(dashboard)
+
+
+def test_runtime_log_hygiene_trend_uses_aggregated_loki_range_queries() -> None:
+    dashboard = json.loads(
+        Path("grafana/dashboards/bioetl-runtime.json").read_text(encoding="utf-8")
+    )
+    panel = next(panel for panel in dashboard["panels"] if panel.get("id") == 258)
+    expressions = {target["refId"]: target["expr"] for target in panel["targets"]}
+
+    assert expressions["A"].startswith("sum(count_over_time(")
+    assert expressions["B"].startswith("sum(count_over_time(")
+    assert "No data means" in panel["description"]
+
+
+def test_prometheus_dashboard_panels_do_not_filter_on_run_id_labels() -> None:
+    for path in Path("grafana/dashboards").glob("*.json"):
+        dashboard = json.loads(path.read_text(encoding="utf-8"))
+
+        def walk_panels(panels: list[dict[str, Any]]) -> list[dict[str, Any]]:
+            result: list[dict[str, Any]] = []
+            for panel in panels:
+                result.append(panel)
+                nested = panel.get("panels")
+                if isinstance(nested, list):
+                    result.extend(walk_panels(nested))
+            return result
+
+        for panel in walk_panels(dashboard.get("panels", [])):
+            for target in panel.get("targets", []) or []:
+                expr = target.get("expr")
+                if not isinstance(expr, str):
+                    continue
+                assert "run_id" not in expr, (
+                    f"{path}:{panel.get('id')} must keep run_id out of "
+                    "Prometheus/LogQL metric labels"
+                )
+
+
+def test_run_id_independent_metric_panels_disclose_scope() -> None:
+    scope_terms = (
+        "selected-range",
+        "global",
+        "current",
+        "range",
+        "not filtered",
+        "workflow",
+        "provider",
+        "pipeline",
+        "status",
+        "alert",
+        "slo",
+        "freshness",
+        "scope",
+        "selected",
+    )
+    missing_scope: list[str] = []
+    for path in Path("grafana/dashboards").glob("*.json"):
+        dashboard = json.loads(path.read_text(encoding="utf-8"))
+
+        def walk_panels(panels: list[dict[str, Any]]) -> list[dict[str, Any]]:
+            result: list[dict[str, Any]] = []
+            for panel in panels:
+                result.append(panel)
+                nested = panel.get("panels")
+                if isinstance(nested, list):
+                    result.extend(walk_panels(nested))
+            return result
+
+        for panel in walk_panels(dashboard.get("panels", [])):
+            for target in panel.get("targets", []) or []:
+                expr = target.get("expr")
+                if not isinstance(expr, str) or not expr.strip():
+                    continue
+                text = f"{panel.get('title', '')} {panel.get('description', '')}".lower()
+                if not any(term in text for term in scope_terms):
+                    missing_scope.append(f"{path}:{panel.get('id')}:{panel.get('title')}")
+
+    assert missing_scope == []
+
+
+def test_workflow_status_titles_make_selected_range_scope_visible() -> None:
+    dashboard = json.loads(
+        Path("grafana/dashboards/bioetl-workflow-overview.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    titles = {panel.get("id"): panel.get("title") for panel in dashboard["panels"]}
+
+    assert titles[9401] == "Range Workflow Status"
+    assert titles[9404] == "Range Pipeline Status"
+
+
 def test_live_audit_isolates_non_required_panel_execution_failures(
     monkeypatch: Any,
 ) -> None:
@@ -1105,6 +1265,11 @@ def test_live_audit_resolves_zero_bind_backend_when_localhost_is_unreachable(
         raise OSError(url)
 
     monkeypatch.setattr(audit_subject, "_fetch_json", fake_fetch_json)
+    monkeypatch.setattr(
+        audit_subject,
+        "_request_json",
+        lambda *args, **kwargs: (_ for _ in ()).throw(OSError("proxy down")),
+    )
 
     assert audit_subject._resolve_app_base_url(config) == "http://0.0.0.0:8081"
 

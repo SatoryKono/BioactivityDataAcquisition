@@ -18,7 +18,6 @@ def test_summary_copies_single_resolved_hierarchy_levels() -> None:
         {
             "target_id": ["CHEMBL1"],
             "component_id": [10],
-            "hierarchy_index": [0],
             "leaf_id": [231],
             "l1_id": [1],
             "l1_name": ["Enzyme"],
@@ -52,7 +51,6 @@ def test_summary_marks_multiple_leaf_ids_as_multifunctional() -> None:
         {
             "target_id": ["CHEMBL1", "CHEMBL1"],
             "component_id": [10, 11],
-            "hierarchy_index": [1, 0],
             "leaf_id": [300, 200],
             "l1_id": [3, 1],
             "l1_name": ["Transporter", "Enzyme"],
@@ -81,7 +79,6 @@ def test_summary_ignores_missing_and_quarantined_classifications() -> None:
     df = pl.DataFrame(
         {
             "target_id": ["CHEMBL1", "CHEMBL1"],
-            "hierarchy_index": [0, 1],
             "leaf_id": [None, 9],
             "classification_status": ["missing_classification", "quarantined"],
         }
@@ -100,8 +97,8 @@ def test_summary_deduplicates_leaf_ids_deterministically() -> None:
     df = pl.DataFrame(
         {
             "target_id": ["CHEMBL1", "CHEMBL1"],
-            "hierarchy_index": [1, 0],
             "leaf_id": [42, 42],
+            "component_id": [11, 10],
             "l1_id": [99, 1],
             "l1_name": ["Late", "First"],
             "classification_status": ["resolved", "resolved"],

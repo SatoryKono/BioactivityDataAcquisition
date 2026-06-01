@@ -1,4 +1,4 @@
-version: 1.0.0
+version: 2.0.0
 provider: chembl
 entity: target_protein_classification
 pipeline:
@@ -9,7 +9,9 @@ pipeline:
   field_policy: {}
   business_primary_keys:
   - target_id
-  - hierarchy_index
+  - classification_status
+  - component_id
+  - leaf_id
   batch_size: 500
   checkpoint_interval: 500
 
@@ -58,7 +60,6 @@ schema:
     fields:
     - target_id
     - component_id
-    - hierarchy_index
     - leaf_id
     - l1_id
     - l1_name
@@ -132,7 +133,7 @@ quality:
         subcellular_fraction: Store the canonical normalized subcellular-fraction label used for downstream Silver/Gold
           semantics; unknown reviewed labels are preserved after canonical text normalization instead of being
           discarded.
-  version: 1.0.0
+  version: 2.0.0
   provider: chembl
   entity: target_protein_classification
   entity_field_validations:
@@ -140,11 +141,6 @@ quality:
     type: required
     nullable: false
     error_message: target_id is required
-  - field: hierarchy_index
-    type: range
-    min: 0
-    nullable: false
-    error_message: hierarchy_index must be non-negative
   - field: classification_status
     type: enum
     allowed:
@@ -159,14 +155,20 @@ quality:
   - field: target_id
     key_type: merge
     nullable: false
-  - field: hierarchy_index
+  - field: classification_status
     key_type: merge
     nullable: false
+  - field: component_id
+    key_type: merge
+    nullable: true
+  - field: leaf_id
+    key_type: merge
+    nullable: true
   - field: classification_status
     key_type: partition
     nullable: false
 filters:
-  version: 1.0.0
+  version: 2.0.0
   provider: chembl
   entity: target_protein_classification
   input_filter:
@@ -184,7 +186,6 @@ filters:
     exclude_if_present: []
     required_fields:
     - target_id
-    - hierarchy_index
     - classification_status
   gold_filters:
     list_contains: {}
@@ -203,10 +204,14 @@ filters:
 contracts:
   primary_key:
   - target_id
-  - hierarchy_index
+  - classification_status
+  - component_id
+  - leaf_id
   merge_keys:
   - target_id
-  - hierarchy_index
+  - classification_status
+  - component_id
+  - leaf_id
   hash_include: []
   hash_exclude: []
   hash_datetime_policy: v1_date
@@ -214,15 +219,15 @@ hash_policy:
   provider: chembl
   entity: target_protein_classification
   contract:
-    version: 1.0.0
-    migration_note: 'Explicit config-level hash contract for the normalized ChEMBL target_protein_classification Silver surface.'
+    version: 2.0.0
+    migration_note: 'Stable relation-key contract after removing hierarchy_index from the normalized ChEMBL target_protein_classification Silver surface.'
   hash_policy:
     algorithm: sha256
     canonicalization: provider + canonical_json_dumps(normalized_record)
     include_fields:
     - target_id
+    - classification_status
     - component_id
-    - hierarchy_index
     - leaf_id
     - l1_id
     - l1_name
@@ -239,7 +244,6 @@ hash_policy:
     - l5_id
     - l5_name
     - l5_desc
-    - classification_status
     exclude_fields:
     - _ingestion_ts
     - _run_id
