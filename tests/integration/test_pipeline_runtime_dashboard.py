@@ -494,9 +494,9 @@ def test_runtime_row_sequence_is_fixed_detect_localize_escalate() -> None:
     ]
     row_pairs = [(panel.get("id"), panel.get("title")) for panel in row_panels]
     assert row_pairs[:3] == [
-        (252, "Detect (collapsed)"),
-        (253, "Localize (collapsed)"),
-        (254, "Escalate (collapsed)"),
+        (252, "Detect"),
+        (253, "Localize"),
+        (254, "Escalate"),
     ], f"Runtime row order/title drifted: {row_pairs}"
 
 

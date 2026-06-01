@@ -175,10 +175,10 @@ L0 дашборд для одного operator question: что сейчас bro
   ledger, checkpoint, lineage и `Silver Rejects + Rate`. Distribution
   pie panels, standalone vanity yield/rate gauges и composite source-selection
   detail не входят в L0 flow.
-- **Collapsed rows**: `Range Evidence` содержит
+- **Expanded rows**: `Range Evidence` содержит
   `Historical Failures`, `Recent Terminal Runs` и `Silver Rejects + Rate`;
   `Diagnostics & Docs` остаётся отдельной
-  collapsed navigation/support surface.
+  expanded navigation/support surface.
 - **Drilldown**: top-level шина содержит `0. Control Plane`, `2. Runtime`,
   `3. Provider Health`, `4. Data Quality`, `5. Workflow`, `Silver Reject Explorer`;
   ключевые current-status panels дублируют этот handoff через panel `dataLinks`.
@@ -195,7 +195,7 @@ L0 дашборд для одного operator question: что сейчас bro
 где pipeline runtime теряет время, падает, копит backlog или даёт
 warning/error conditions. Dashboard остаётся **Prometheus-first**:
 answer row, latency/localization и handoff-панели usable без Loki/Tempo, а
-tracing-backed log hygiene живёт в collapsed row
+tracing-backed log hygiene живёт в expanded row
 `Tracing-only Log Hygiene (requires optional tracing profile)`.
 
 - **Top answer area**:
@@ -216,7 +216,7 @@ tracing-backed log hygiene живёт в collapsed row
   `Monitor Worst Stage Lag`, `Monitor Failed Runs` и
   `Monitor Runtime Error Rate` остаются selected-range evidence; они не
   определяют current status.
-  `Inspect Active Runtime Blocker Detail` открывается как collapsed `Detect`
+  `Inspect Active Runtime Blocker Detail` открывается как expanded `Detect`
   drilldown, а не как отдельная first-screen guidance panel.
 
 - **Localization row**:
@@ -241,7 +241,7 @@ tracing-backed log hygiene живёт в collapsed row
   telemetry подтверждает scope; отсутствующий scope остаётся `UNKNOWN`.
 
 - **Alert/SLO triage surface**:
-  `1. Overview` includes collapsed `Alert/SLO Triage` with
+  `1. Overview` includes expanded `Alert/SLO Triage` with
   `Triage Alert State`. This panel reads Prometheus `ALERTS` for firing and
   pending alert state, preserving the alert-rule source of truth instead of
   re-encoding alert thresholds in dashboard queries.
@@ -249,7 +249,7 @@ tracing-backed log hygiene живёт в collapsed row
 - **Logs/traces row**:
   `Warnings`, `GLOBAL Unstructured Logs`, `Top Warning Events by Message / Range`,
   `GLOBAL Log Hygiene Trend`
-  остаются shipped, но спрятаны в collapsed tracing-only row. Если tracing
+  остаются shipped, но вынесены в expanded tracing-only row. Если tracing
   profile выключен, оператор всё равно получает usable runtime triage без Loki
   и Tempo. `Inspect GLOBAL Unstructured Logs` показывает parsed `.__error__`
   из Loki pipeline после `| json`; эти rows intentionally GLOBAL, потому что
@@ -428,10 +428,10 @@ step outcomes.
   healthy/running; live current state remains out of scope for this dashboard.
 - **Step Outcomes by Kind**: breakdown по bounded `step_kind/status` без
   `run_id` или `step_id` labels; panel now respects selected `$status` and
-  lives under collapsed row `Step Diagnostics (collapsed)`.
+  lives under expanded row `Step Diagnostics`.
 - **Step Duration p95**: latency по `bioetl_workflow_step_duration_seconds`;
-  panel now also respects selected `$status` and lives under collapsed row
-  `Step Diagnostics (collapsed)`.
+  panel now also respects selected `$status` and lives under expanded row
+  `Step Diagnostics`.
 - **First Screen**: keep run/step failure cards, `Workflow Run Outcomes / Range`,
   and `First Action` visible before expanding detailed step
   diagnostics.

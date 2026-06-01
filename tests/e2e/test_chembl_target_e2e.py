@@ -15,6 +15,7 @@ import pytest
 from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
 from .conftest import (
     assert_bronze_files_exist,
+    assert_run_manifest_exists,
     assert_silver_table_has_records,
     create_test_context,
     get_silver_records,
@@ -50,6 +51,25 @@ async def test_chembl_target_full_cycle(e2e_data_dir: Path):
         e2e_data_dir, "chembl_target", expected_min=1
     )
     assert silver_count <= 5
+
+    manifest_payload = assert_run_manifest_exists(e2e_data_dir, ctx.run_id)
+    source_refs = manifest_payload.get("source_refs")
+    assert isinstance(source_refs, list) and source_refs
+    snapshot_refs = [
+        snapshot
+        for source_ref in source_refs
+        if isinstance(source_ref, dict)
+        for snapshot in source_ref.get("input_snapshots", [])
+        if isinstance(snapshot, dict)
+    ]
+    assert snapshot_refs, "Expected immutable input snapshots for replay_ready runs"
+    assert any(
+        str(snapshot.get("snapshot_id", "")).startswith("sha256:")
+        and str(snapshot.get("immutable_uri", "")).endswith(
+            "test_chembl_target_full_cycle.yaml"
+        )
+        for snapshot in snapshot_refs
+    )
 
     # Assert - Schema validation
     records = get_silver_records(e2e_data_dir, "chembl_target")

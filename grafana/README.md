@@ -84,10 +84,10 @@ ______________________________________________________________________
 > `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1`.
 > That helper also reuses or auto-downloads the same portable Node.js LTS
 > toolchain when `node` is not present in the current PowerShell `PATH`.
-> The Playwright screenshot renderer expands collapsed dashboard rows before
-> capture so batch evidence reflects the fully opened operator surface.
+> Shipped dashboard rows are expanded by default; the Playwright screenshot
+> renderer captures that full row surface.
 > Grafana Render API screenshots remain valid render/semantic evidence, but
-> they do not expand collapsed diagnostic rows; a full-surface UX audit must
+> a full-surface UX audit must
 > have `expanded-row-capture: ok` in
 > `python -m scripts.ops check-grafana-audit-preflight` and use the Playwright
 > screenshot path.
@@ -1241,7 +1241,7 @@ ______________________________________________________________________
 где pipeline runtime теряет время, падает, копит backlog или даёт
 warning/error conditions. Dashboard остаётся **Prometheus-first**: first screen
 должен работать без Loki/Tempo, а tracing-backed log hygiene вынесен в
-collapsed row `Tracing-only Log Hygiene (requires optional tracing profile)`.
+expanded row `Tracing-only Log Hygiene (requires optional tracing profile)`.
 
 ### Контракт
 
@@ -1267,10 +1267,10 @@ collapsed row `Tracing-only Log Hygiene (requires optional tracing profile)`.
 
 Range and localization evidence (`Monitor Failed Runs`,
 `Monitor Runtime Error Rate`, latency, records by stage, logs/traces) lives
-below the current-cause row or inside collapsed rows. `Monitor Worst Stage Lag`
+below the current-cause row or inside expanded rows. `Monitor Worst Stage Lag`
 is colocated with the compact evidence row as a selected-range risk marker; it
 is not a current status input.
-`Inspect Active Runtime Blocker Detail` is a collapsed `Detect` drilldown, not
+`Inspect Active Runtime Blocker Detail` is an expanded `Detect` drilldown, not
 first-screen guidance. This evidence supports investigation but does not replace
 the canonical current status recording rule. `Monitor Runtime Error Rate`,
 `Monitor Runtime Blockers`, `Monitor Worst Stage Lag`, and
@@ -1328,7 +1328,7 @@ requires `bioetl_provider_current_status`. Missing anchor telemetry renders
 - `Inspect Warning Logs`, `Inspect GLOBAL Unstructured Logs`,
   `Inspect Top Warning Events by Event / Logger / Range`,
   `Track GLOBAL Log Hygiene Trend`
-  живут в collapsed tracing-only row и не ломают base runtime surface в
+  живут в expanded tracing-only row и не ломают base runtime surface в
   окружениях без Loki/Tempo
 - Loki handoff стартует с безопасного `{job="bioetl"}` entrypoint; warning
   panels parse JSON first, drop parser errors, then filter `pipeline` and

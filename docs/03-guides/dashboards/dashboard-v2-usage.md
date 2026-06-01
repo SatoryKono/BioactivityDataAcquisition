@@ -144,7 +144,7 @@ dashboard-specific `Status` or `First Action` route.
    the L0 question: what is broken/degraded, what exact control-plane identity
    is selected or resolved, and where to open drilldown first. `OK` requires
    recent activity; missing current evidence remains `UNKNOWN`, not green zero.
-   Firing/pending alert state is available below fold in collapsed
+   Firing/pending alert state is available below fold in expanded
    `Alert/SLO Triage`; it reads Prometheus `ALERTS` and is an incident triage
    surface, not a replacement for the shipped Prometheus alert rules.
 1. `bioetl-runtime`, first-screen answer area (без скролла):
@@ -164,7 +164,7 @@ dashboard-specific `Status` or `First Action` route.
    `Inspect: Telemetry Missing`, while `Silver Reject Explorer` relies on
    explicit no-data/backend-failure copy instead of a generic datasource-health
    stat tile.
-1. `bioetl-runtime`, collapsed row-группы по сценарию:
+1. `bioetl-runtime`, expanded row-группы по сценарию:
    `Detect`, `Localize`, `Escalate`, `Tracing-only Log Hygiene`. Открывайте
    ровно одну нужную группу после чтения answer row и selected-range KPI,
    чтобы сократить шум первого экрана.
@@ -183,7 +183,7 @@ dashboard-specific `Status` or `First Action` route.
   manifest/run identity remains in the shared `ID` panel, while deeper
   P0/P1/P2 anchors, replay parentage, composite identity, checkpoint
   current-vs-persisted anchor compare, identity gaps, and copy-friendly full
-  values live in the collapsed `Identity evidence and remaining replay-safety
+  values live in the expanded `Identity evidence and remaining replay-safety
   signals` row backed by `/ops/control-plane/identity-evidence`.
 1. `bioetl-provider-health-v2`, first-screen GLOBAL answer row:
    `GLOBAL Provider Scope`, `Monitor GLOBAL Provider Severity Matrix`,
@@ -240,7 +240,7 @@ dashboard-specific `Status` or `First Action` route.
    `Data Validation`, `Inputs`, и `Workflow` показывают current-only operator
    state с явным scope. Status tables use row-wide threshold coloring, а не
    только окраску ячейки `Status`. Compact historical trend/evidence panels
-   вынесены ниже первого экрана в `L1 Historical Trends` и collapsed
+   вынесены ниже первого экрана в `L1 Historical Trends` и expanded
    `Range Evidence`; они служат selected-range/L1 evidence и не определяют
    `Status` или `First Action`. `Diagnostics & Docs` содержит routing по
    logs/traces/raw metrics.
@@ -288,8 +288,8 @@ Panel-level dashboard handoffs и `First Action` dashboard CTAs намеренн
 - что сломано: `Status` + `Inputs` + L1 current cards;
 - куда идти дальше: `First Action` с `action_target/action_reason/action_dashboard_uid`;
 - какая execution identity выбрана: `ID`, backed by local control-plane manifests;
-- что было в окне времени: compact `L1 Historical Trends` и collapsed `Range Evidence`;
-- где искать сырые traces/logs/metrics: collapsed `Diagnostics & Docs`.
+- что было в окне времени: compact `L1 Historical Trends` и expanded `Range Evidence`;
+- где искать сырые traces/logs/metrics: expanded `Diagnostics & Docs`.
 
 Compact evidence ниже первого экрана:
 - `Runtime Blockers Trend` (`id=9018`): selected-range L1 runtime evidence over
@@ -324,14 +324,14 @@ Compact evidence ниже первого экрана:
   он показывает только compact handoff conditions.
 - Для current-state narrowing используйте `Inspect DQ Current Reasons`; для
   bounded cause summary используйте `Inspect: Top Silver Reject Reasons (Pareto)` и
-  `Inspect: Top Silver Reject Fields` в collapsed rows `bioetl-dq-v2`.
+  `Inspect: Top Silver Reject Fields` в expanded rows `bioetl-dq-v2`.
   `Inspect: Silver Filter Rejects by Pipeline` остаётся scope/distribution panel
   по stage-total `filtered_out`, а не reason drilldown.
 - Маршрут triage: **L1 summary -> L2 explorer**.
   1. **L1 summary:** начните с `4. Data Quality` (first-screen current status,
      threshold state, reasons, invalid-record-policy note), чтобы определить
      severity и первое действие.
-  1. **L1 cause narrowing:** раскройте collapsed rows `Reject / Pareto / Fields` и `Validation Failures / Runtime Diagnostics / Trends`. В reject row сначала проверьте trust guard `Monitor: Silver Filter Reject Accounting Mismatch`, затем `Inspect: Top Silver Reject Reasons (Pareto)` / `Inspect: Top Silver Reject Fields`, и только после этого переходите к pipeline distribution через `Inspect: Silver Filter Rejects by Pipeline`.
+  1. **L1 cause narrowing:** проверьте expanded rows `Reject / Pareto / Fields` и `Validation Failures / Runtime Diagnostics / Trends`. В reject row сначала проверьте trust guard `Monitor: Silver Filter Reject Accounting Mismatch`, затем `Inspect: Top Silver Reject Reasons (Pareto)` / `Inspect: Top Silver Reject Fields`, и только после этого переходите к pipeline distribution через `Inspect: Silver Filter Rejects by Pipeline`.
   1. **L2 explorer:** откройте `Silver Reject Explorer` через top-level link в `4. Data Quality` для record-level списка, выбора `reason_code/field/quarantine_run_id` и detail по `payload_hash`.
   1. **L2 no-data gate:** считайте `0` rejects нормой только когда `Review: First Action / No-Data Semantics` подтверждает конкретный pipeline, доступный Quarantine Explorer и ненулевой Bronze denominator; zero-reject workflow run is a valid empty explorer state only after those checks pass. Zero matching rows остаются empty-result состоянием, а plugin errors, unsupported filter chains, `unknown` pipeline или `bronze_records=0` остаются UNKNOWN/error.
   1. Используйте quarantine CLI для action-операций (`replay/resolve/purge`) и финального подтверждения remediation.
@@ -452,10 +452,10 @@ Variable handoff policy for dashboard links remains strict and bounded:
 
   **First 2 clicks (L1):**
   1. Click #1: открыть `bioetl-control-plane-v1`, проверить `Monitor: Replay Safety State` (`id=891`), `Inspect: Telemetry Missing` (`id=907`) и `Next Action: Replay Diagnostics` (`id=906`).
-  2. Click #2: перейти через top-level bus в `2. Runtime` (если есть активный blocker) или `4. Data Quality` (если blocker связан с downstream quality symptoms). На первом экране оставлены только current-status Trust KPI: `id=891..893`, `id=907` и единый CTA `id=906`; `Track: Replay / Resume Blockers in Range` (`id=130`) теперь живёт внутри первого collapsed replay/checkpoint row, а `Inspect: Terminal Run Events by Status in Range` (`id=908`) остаётся manifest/ledger range evidence.
-  Все остальные control-plane метрики перенесены в collapsed incident rows.
+  2. Click #2: перейти через top-level bus в `2. Runtime` (если есть активный blocker) или `4. Data Quality` (если blocker связан с downstream quality symptoms). На первом экране оставлены только current-status Trust KPI: `id=891..893`, `id=907` и единый CTA `id=906`; `Track: Replay / Resume Blockers in Range` (`id=130`) теперь живёт внутри первого expanded replay/checkpoint row, а `Inspect: Terminal Run Events by Status in Range` (`id=908`) остаётся manifest/ledger range evidence.
+  Все остальные control-plane метрики перенесены в expanded incident rows.
   Рекомендованный operator path: сначала проверить blocker cards, затем открыть
-  ровно один collapsed diagnostic row под конкретный incident-pattern.
+  ровно один expanded diagnostic row под конкретный incident-pattern.
   Порядок row-блоков стандартизирован по частоте инцидентов: `Checkpoint/Replay`
   -> `Manifest/Ledger` -> `Global Control Plane` -> `Audit/Lineage` ->
   `Known Missing Signals`. GLOBAL read-path panels не
@@ -531,8 +531,8 @@ Variable handoff policy for dashboard links remains strict and bounded:
 - `bioetl-workflow-overview`: first screen keeps `Failed Workflow Runs / Range`,
   `Failed Pipeline Steps / Range`, `Failed Transform Steps / Range`,
   `Skipped Step Events / Range`, `Workflow Run Outcomes / Range`, and
-  `First Action`; deeper step evidence now lives under collapsed
-  row `Step Diagnostics (collapsed)` with
+  `First Action`; deeper step evidence now lives under expanded
+  row `Step Diagnostics` with
   `Step Outcomes by Kind / Step Status / Range` and
   `Step Duration p95 by Kind / Step Status / Range`.
 - `bioetl-workflow-overview`: `First Action` is the only justified
@@ -647,7 +647,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
 - `control-plane latency p50/p95/p99`: histogram-backed panels сохраняют
   `No data` как diagnostic signal; отсутствие samples не превращается в `0s`.
 - `control-plane.Identity evidence and remaining replay-safety signals` is a
-  collapsed HTTP-backed forensic row. It exposes P0/P1/P2 identity anchors,
+  expanded HTTP-backed forensic row. It exposes P0/P1/P2 identity anchors,
   identity gaps, replay parentage, composite identity, checkpoint anchor compare,
   and copy-friendly full values through `/ops/control-plane/identity-evidence`;
   checkpoint age vs RPO, replay duplicate detection, and richer semantic drift

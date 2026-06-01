@@ -20,6 +20,7 @@ from tests.integration._grafana_test_support import (
     get_dashboard_files,
     get_dashboard_panels,
     get_dashboard_prometheus_queries,
+    get_row_child_panels,
     get_metric_label_sets,
     get_panel_expressions,
     load_dashboard,
@@ -203,7 +204,7 @@ def test_dashboard_is_valid_json(dashboard_path):
 
 @pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
 def test_dashboard_panel_ids_are_unique(dashboard_path: Path) -> None:
-    """Panel IDs must stay unique across root and collapsed-row panels."""
+    """Panel IDs must stay unique across root and row-nested panels."""
     dashboard = load_dashboard(dashboard_path)
     panel_refs = [
         (panel.get("id"), panel.get("title", "<untitled>"))
@@ -1302,7 +1303,7 @@ def test_workflow_dashboard_descriptions_explain_selected_range_limits() -> None
             )
 
 
-def test_workflow_dashboard_collapses_step_diagnostics_below_first_screen() -> None:
+def test_workflow_dashboard_expands_step_diagnostics_below_first_screen() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-workflow-overview.json"))
 
     panels = dashboard.get("panels", [])
@@ -1310,25 +1311,30 @@ def test_workflow_dashboard_collapses_step_diagnostics_below_first_screen() -> N
         (
             panel
             for panel in panels
-            if panel.get("title") == "Step Diagnostics (collapsed)"
+            if panel.get("title") == "Step Diagnostics"
         ),
         None,
     )
     assert row_panel is not None, "Workflow dashboard must expose step diagnostics row"
     assert row_panel.get("type") == "row"
-    assert row_panel.get("collapsed") is True
+    assert row_panel.get("collapsed") is False
 
     row_titles = {
         panel.get("title")
-        for panel in row_panel.get("panels", [])
+        for panel in get_row_child_panels(dashboard, "Step Diagnostics")
         if panel.get("title")
     }
     assert "Step Outcomes by Kind / Step Status / Range" in row_titles
     assert "Step Duration p95 by Kind / Step Status / Range" in row_titles
 
-    top_level_titles = {panel.get("title") for panel in panels if panel.get("title")}
-    assert "Step Outcomes by Kind / Step Status / Range" not in top_level_titles
-    assert "Step Duration p95 by Kind / Step Status / Range" not in top_level_titles
+    row_index = panels.index(row_panel)
+    child_indexes = {
+        panel.get("title"): index
+        for index, panel in enumerate(panels)
+        if panel.get("title") in row_titles
+    }
+    assert child_indexes["Step Outcomes by Kind / Step Status / Range"] > row_index
+    assert child_indexes["Step Duration p95 by Kind / Step Status / Range"] > row_index
 
     next_panel = next(
         (panel for panel in panels if panel.get("title") == "First Action"),

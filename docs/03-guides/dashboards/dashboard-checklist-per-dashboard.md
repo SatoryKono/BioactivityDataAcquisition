@@ -82,15 +82,15 @@
 - [ ] Tier 1 (always-visible answer surface): current status, verdict, first action, current causes
 - [ ] Tier 2 (always-visible supporting context): KPI context, trust markers, bounded mirrors
 - [ ] Tier 3 (below-fold evidence): selected-range evidence
-- [ ] Tier 4 (collapsed diagnostics): tracing-only, raw, verbose, rare forensic breakdowns
-- [ ] Критический сигнал НЕ живёт исключительно внутри collapsed row
+- [ ] Tier 4 (expanded diagnostics): tracing-only, raw, verbose, rare forensic breakdowns
+- [ ] Критический сигнал НЕ живёт исключительно внутри diagnostic row
 
 #### GridPos layout
 - [ ] Top-level `gridPos` rectangles НЕ overlap
 - [ ] Нет unexplained empty row gaps между adjacent bands (если не justified в audit/docs)
 
 #### Collapsed row policy
-- [ ] Tracing-only, raw, verbose, или not-required-for-first-pass-triage panels collapsed
+- [ ] Tracing-only, raw, verbose, или not-required-for-first-pass-triage panels expanded below fold
 - [ ] Collapsed rows имеют descriptive titles по incident scenario
 
 ### Данные и метрики
@@ -186,8 +186,8 @@
 ### First-screen структура
 - [ ] Tier 1 включает: System Status, First Action, L0 Inputs
 - [ ] Tier 2 включает: Runtime Blockers, DQ Status, Gold Lifecycle, Control Plane, Provider Global, Workflow Selected, Workflow Global
-- [ ] Tier 3 collapsed: Range Evidence (Historical / Recent History)
-- [ ] Tier 4 collapsed: Diagnostics & Docs (Logs / Traces / Raw Metrics)
+- [ ] Tier 3 expanded: Range Evidence (Historical / Recent History)
+- [ ] Tier 4 expanded: Diagnostics & Docs (Logs / Traces / Raw Metrics)
 
 ### KPI ownership
 - [ ] System Status canonical для `bioetl-overview-v2`
@@ -224,9 +224,9 @@
 
 ### First-screen структура
 - [ ] Tier 1 включает: Monitor: Replay Safety State, Inspect: Checkpoint Freshness Gap, Monitor: Manifest / Ledger Integrity, Inspect: Telemetry Missing
-- [ ] Tier 2 collapsed rows по incident-сценариям (Checkpoint/Replay, Manifest/Ledger, Global Control Plane, Audit/Lineage, Known Missing Signals)
+- [ ] Tier 2 expanded rows по incident-сценариям (Checkpoint/Replay, Manifest/Ledger, Global Control Plane, Audit/Lineage, Known Missing Signals)
 - [ ] Tier 3: selected-range evidence ниже
-- [ ] Tier 4 collapsed: diagnostics
+- [ ] Tier 4 expanded: diagnostics
 
 ### KPI ownership
 - [ ] Replay Safety State canonical для `bioetl-control-plane-v1`
@@ -239,7 +239,7 @@
 - [ ] First-screen current-status cards normalize `workflow_<pipeline>` back to entity pipeline
 - [ ] Replay/checkpoint panels route к `checkpoint-debugging.md`
 - [ ] Manifest/ledger evidence panels route к `run-manifest-inspection.md`
-- [ ] Known Blind Spots и terminal-event evidence ниже fold в collapsed incident rows
+- [ ] Known Blind Spots и terminal-event evidence ниже fold в expanded incident rows
 - [ ] `Identity evidence and remaining replay-safety signals` exposes P0/P1/P2 anchors through `/ops/control-plane/identity-evidence` without Prometheus ID labels
 - [ ] `Review: Remaining Replay-Safety Signals` lists only evidence still outside the identity endpoint
 - [ ] Starts с answer-first trust cards
@@ -276,9 +276,9 @@
 ### First-screen структура
 - [ ] Tier 1 включает: First Action, Runtime Status, Runtime Telemetry Gap, Monitor Runtime Blockers, Runtime Blockers
 - [ ] `Runtime Status` описан как mirror of shared-shell `Status`, not independent second signal
-- [ ] Tier 2 collapsed rows по сценариям: Backlog Trends, Durations, Shutdown Diagnostics, Tracing-only Log Hygiene
+- [ ] Tier 2 expanded rows по сценариям: Backlog Trends, Durations, Shutdown Diagnostics, Tracing-only Log Hygiene
 - [ ] Tier 3: selected-range evidence ниже
-- [ ] Tier 4 collapsed: tracing-only log hygiene
+- [ ] Tier 4 expanded: tracing-only log hygiene
 
 ### KPI ownership (mirrors)
 - [ ] System Status mirror (canonical: `bioetl-overview-v2`)
@@ -293,7 +293,7 @@
 
 ### Специфические требования
 - [ ] Prometheus-first в tracing-off режиме
-- [ ] Loki log-hygiene panels в collapsed row `Tracing-only Log Hygiene`
+- [ ] Loki log-hygiene panels в expanded row `Tracing-only Log Hygiene`
 - [ ] Runtime zero-count cards fail closed: selected pipeline/run_type cards anchor `0` to `bioetl_runtime_pipeline_run_type_universe`
 - [ ] GLOBAL provider handoff anchors `0` to `bioetl_provider_current_status`
 - [ ] Missing scope остаётся `UNKNOWN`, не synthetic OK
@@ -334,7 +334,7 @@
 - [ ] Tier 1 включает: GLOBAL Provider Scope, Monitor GLOBAL Provider Severity Matrix, Inspect Critical Providers, Inspect Provider Top Causes, First Action
 - [ ] Tier 2: provider detail panels и runbook links ниже
 - [ ] Tier 3: selected-range evidence
-- [ ] Tier 4 collapsed: diagnostics
+- [ ] Tier 4 expanded: diagnostics
 
 ### KPI ownership
 - [ ] Provider Health (aggregated) canonical для `bioetl-provider-health-v2`
@@ -388,7 +388,7 @@
 - [ ] `Monitor DQ Current Status` описан как mirror of shared-shell `Status`, not independent second signal
 - [ ] Tier 2 compact current-context band: Monitor: Data Quality Score (Volume-weighted), Monitor: Worst-Entity DQ Score, Monitor: Worst Data Freshness Lag (seconds), Track: Records Quarantined in Range, Track: Soft Threshold Exceeded in Range, Track: Silver Filter Rejects in Range
 - [ ] Tier 3: полноширинный Track Range Evidence: Bronze -> Silver -> Gold
-- [ ] Tier 4 collapsed rows: Reject / Pareto / Fields, Validation Failures / Runtime Diagnostics / Trends
+- [ ] Tier 4 expanded rows: Reject / Pareto / Fields, Validation Failures / Runtime Diagnostics / Trends
 
 ### KPI ownership
 - [ ] DQ Status (Silver Reject / quality posture) canonical для `bioetl-dq-v2`
@@ -433,9 +433,9 @@
 
 ### First-screen структура
 - [ ] Tier 1 включает: Failed Workflow Runs / Range, Failed Pipeline Steps / Range, Failed Transform Steps / Range, Skipped Step Events / Range, Workflow Run Outcomes / Range, First Action
-- [ ] Tier 2 collapsed row `Step Diagnostics (collapsed)` с Step Outcomes by Kind / Step Status / Range и Step Duration p95 by Kind / Step Status / Range
+- [ ] Tier 2 expanded row `Step Diagnostics` с Step Outcomes by Kind / Step Status / Range и Step Duration p95 by Kind / Step Status / Range
 - [ ] Tier 3: selected-range evidence
-- [ ] Tier 4 collapsed: diagnostics
+- [ ] Tier 4 expanded: diagnostics
 
 ### KPI ownership (mirrors)
 - [ ] Workflow Selected mirror (canonical: `bioetl-overview-v2`)
