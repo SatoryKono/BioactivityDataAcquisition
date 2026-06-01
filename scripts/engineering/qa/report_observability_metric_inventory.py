@@ -1506,7 +1506,8 @@ def _build_runtime_cardinality_review_summary(
             "python -m scripts.engineering.qa.report_observability_metric_inventory "
             "--check --write-evidence reports/observability/runtime_cardinality_inventory.json "
             "--review-json-out reports/observability/runtime_cardinality_review.json "
-            "--summary-out \"$GITHUB_STEP_SUMMARY\""
+            "--summary-out \"$GITHUB_STEP_SUMMARY\" "
+            "--fail-on-degraded-live-review"
         ),
         "status": "passed",
         "mode": "static_only",
@@ -1797,6 +1798,15 @@ def _build_parser() -> argparse.ArgumentParser:
         help=(
             "Prometheus HTTP API base URL for live runtime-cardinality review. "
             f"Defaults to ${_PROMETHEUS_BASE_URL_ENV_VAR} when unset."
+        ),
+    )
+    parser.add_argument(
+        "--fail-on-degraded-live-review",
+        action="store_true",
+        help=(
+            "Fail when the runtime-cardinality live review is degraded. "
+            "Release gates should enable this so missing Prometheus evidence "
+            "does not silently pass."
         ),
     )
     return parser
@@ -2110,11 +2120,14 @@ def main(argv: list[str] | None = None) -> int:
     )
     violations = _metric_inventory_violations(report, args=args)
     live_review_failed = review_summary["status"] == "failed"
+    live_review_degraded = (
+        args.fail_on_degraded_live_review and review_summary["status"] == "degraded"
+    )
     if args.json:
         exit_code = _emit_json_report(report, violations=violations)
     else:
         exit_code = _emit_text_report(report, violations=violations)
-    if live_review_failed:
+    if live_review_failed or live_review_degraded:
         return 1
     return exit_code
 

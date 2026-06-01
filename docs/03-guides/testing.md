@@ -128,9 +128,10 @@ python -m scripts.engineering.qa.report_test_governance_audit --check
 ```
 
 `check_test_audit_preflight --strict` treats missing or unhealthy `git-lfs`,
-failed or timed-out `git status`, unresolved git-lfs pointer files under
-`tests/fixtures/vcr/`, missing telemetry baseline, or a telemetry baseline
-without `Actual coverage:` as blockers for main-branch audit claims.
+failed or timed-out `git status`, dirty tracked/untracked VCR cassette paths,
+unresolved git-lfs pointer files under `tests/fixtures/vcr/`, missing telemetry
+baseline, or a telemetry baseline without `Actual coverage:` as blockers for
+main-branch audit claims.
 When `git-lfs` is missing, the preflight skips repository-status porcelain so
 the primary blocker remains the actionable `missing_git_lfs` diagnosis instead
 of an opaque `git-lfs filter-process` failure or a timeout in a partially

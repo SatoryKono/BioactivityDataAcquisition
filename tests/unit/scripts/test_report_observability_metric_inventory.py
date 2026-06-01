@@ -1531,3 +1531,79 @@ def test_main_writes_runtime_cardinality_review_artifacts_and_step_summary(
     assert "Observability Runtime Cardinality Review" in summary_path.read_text(
         encoding="utf-8"
     )
+
+
+@pytest.mark.unit
+def test_main_can_fail_fast_when_runtime_cardinality_review_degrades(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        inventory,
+        "collect_metric_inventory",
+        lambda _repo_root: {
+            "declared_metrics": ["bioetl_example_total"],
+            "emitted_metrics": ["bioetl_example_total"],
+            "dashboarded_metrics": [],
+            "alerted_metrics": [],
+            "unused_declared_metrics": [],
+            "emitted_without_declaration": [],
+            "dashboarded_without_declaration": [],
+            "alerted_without_declaration": [],
+            "dashboarded_without_emission": [],
+            "alerted_without_emission": [],
+            "runtime_cardinality_reviewed": ["bioetl_example_total"],
+            "runtime_cardinality_review_required": [],
+            "runtime_cardinality_threshold_violations": [],
+            "declared_risky_label_review_required": [],
+            "runtime_label_contract_violations": [],
+            "runtime_label_contract_unresolved": [],
+            "live_metrics": ["bioetl_example_total"],
+            "direct_live_metrics": ["bioetl_example_total"],
+            "helper_backed_live_metrics": [],
+            "registered_without_runtime": [],
+            "runtime_without_registry": [],
+            "registry_only_metrics": [],
+            "dead_metrics": [],
+            "documented_without_registry": [],
+            "rules_without_registry": [],
+            "documented_without_runtime": [],
+            "documented_only_metrics": [],
+            "ruled_without_runtime": [],
+            "compatibility_alias_candidates": [],
+            "runtime_emitters": {},
+            "helper_backed_emitters": {},
+            "docs_mentions": {},
+            "rules_mentions": {},
+            "alias_emitters": {},
+        },
+    )
+    monkeypatch.setattr(
+        inventory,
+        "_build_runtime_cardinality_review_summary",
+        lambda *_args, **_kwargs: {
+            "status": "degraded",
+            "mode": "static_only",
+            "prometheus_base_url_source": "unconfigured",
+            "reviewed_metrics": ["bioetl_example_total"],
+            "review_required_metrics": [],
+            "degraded_reasons": ["missing BIOETL_OBSERVABILITY_PROMETHEUS_URL"],
+            "live_threshold_violations": [],
+            "query_errors": {},
+        },
+    )
+
+    review_path = tmp_path / "review.json"
+
+    exit_code = inventory.main(
+        [
+            "--repo-root",
+            str(tmp_path),
+            "--review-json-out",
+            str(review_path),
+            "--fail-on-degraded-live-review",
+        ]
+    )
+
+    assert exit_code == 1
+    assert review_path.exists()

@@ -44,6 +44,7 @@ runtime_cardinality_review:
     summary_output: $GITHUB_STEP_SUMMARY
     status_when_unavailable: degraded
     fail_on_threshold_violation: true
+    fail_on_degraded_release_review: true
     prometheus_url_env_var: BIOETL_OBSERVABILITY_PROMETHEUS_URL
     prometheus_token_env_var: BIOETL_OBSERVABILITY_PROMETHEUS_TOKEN
     command: >
@@ -52,10 +53,11 @@ runtime_cardinality_review:
       --write-evidence reports/observability/runtime_cardinality_inventory.json
       --review-json-out reports/observability/runtime_cardinality_review.json
       --summary-out "$GITHUB_STEP_SUMMARY"
+      --fail-on-degraded-live-review
     rationale: >
       Pre-release quality CI must emit an explicit passed, failed, or degraded
-      runtime-cardinality review artifact so live evidence availability is
-      visible even when local-only static inventory checks stay green.
+      runtime-cardinality review artifact, and release gates fail on degraded
+      live evidence so unavailable Prometheus review cannot silently pass.
 unused_signal_policy:
   rationale: >
     Registered metrics without runtime emission are treated as unused declared

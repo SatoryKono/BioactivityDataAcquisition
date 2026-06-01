@@ -43,7 +43,7 @@ seams:
     owner: workflow-control-plane
     migration_policy: inject deterministic run_id_factory for replay-critical workflow execution tests.
   - path: src/bioetl/application/services/control_plane/workflow/ledger_service.py
-    line: 67
+    line: 62
     kind: call
     symbol: uuid4
     layer: application

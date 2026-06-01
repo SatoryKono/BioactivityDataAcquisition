@@ -127,6 +127,7 @@ def test_observability_metric_governance_declares_required_views_and_evidence_pa
     assert live_evidence["summary_output"] == "$GITHUB_STEP_SUMMARY"
     assert live_evidence["status_when_unavailable"] == "degraded"
     assert live_evidence["fail_on_threshold_violation"] is True
+    assert live_evidence["fail_on_degraded_release_review"] is True
     assert live_evidence["prometheus_url_env_var"] == "BIOETL_OBSERVABILITY_PROMETHEUS_URL"
     assert (
         live_evidence["prometheus_token_env_var"]
@@ -134,6 +135,7 @@ def test_observability_metric_governance_declares_required_views_and_evidence_pa
     )
     assert "--review-json-out" in live_evidence["command"]
     assert "--summary-out" in live_evidence["command"]
+    assert "--fail-on-degraded-live-review" in live_evidence["command"]
 
 
 @pytest.mark.architecture

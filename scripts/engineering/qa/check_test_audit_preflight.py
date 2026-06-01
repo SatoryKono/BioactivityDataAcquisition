@@ -27,6 +27,7 @@ STRICT_BLOCKER_IDS = (
     "missing_git_lfs",
     "git_lfs_unhealthy",
     "git_status_failed",
+    "dirty_vcr_worktree",
     "lfs_pointer_files_present",
     "missing_telemetry_baseline",
     "telemetry_baseline_without_coverage",
@@ -177,6 +178,19 @@ def _skipped_git_status_due_to_missing_lfs() -> dict[str, Any]:
     }
 
 
+def _changed_paths_from_git_status(status_output: str) -> list[str]:
+    paths: list[str] = []
+    for raw_line in status_output.splitlines():
+        line = raw_line.rstrip()
+        if len(line) < 4:
+            continue
+        path = line[3:]
+        if " -> " in path:
+            path = path.rsplit(" -> ", maxsplit=1)[-1]
+        paths.append(path)
+    return paths
+
+
 def _scan_lfs_pointer_files(root: Path) -> list[str]:
     vcr_root = root / VCR_FIXTURE_ROOT
     if not vcr_root.exists():
@@ -226,6 +240,20 @@ def collect_test_audit_preflight(
         if lfs_available
         else _skipped_git_status_due_to_missing_lfs()
     )
+    vcr_git_status = (
+        _git_value(
+            git_runner,
+            [
+                "status",
+                "--short",
+                "--untracked-files=all",
+                "--",
+                VCR_FIXTURE_ROOT.as_posix(),
+            ],
+        )
+        if lfs_available
+        else _skipped_git_status_due_to_missing_lfs()
+    )
     if using_default_runner and lfs_available and git_status["timed_out"]:
         fallback_status = _windows_git_status(root)
         if fallback_status is not None:
@@ -236,6 +264,11 @@ def collect_test_audit_preflight(
     baseline_text = baseline_path.read_text(encoding="utf-8") if baseline_exists else ""
     baseline_has_coverage = "Actual coverage:" in baseline_text
     lfs_pointer_files = _scan_lfs_pointer_files(root)
+    dirty_vcr_paths = (
+        _changed_paths_from_git_status(str(vcr_git_status["stdout"]))
+        if vcr_git_status["ok"]
+        else []
+    )
 
     blockers: list[dict[str, str]] = []
     if not lfs_path:
@@ -262,6 +295,28 @@ def collect_test_audit_preflight(
                 "id": "git_status_failed",
                 "message": (
                     git_status["stderr"] or git_status["stdout"] or "git status failed."
+                ),
+            }
+        )
+    if not vcr_git_status["ok"]:
+        blockers.append(
+            {
+                "id": "git_status_failed",
+                "message": (
+                    vcr_git_status["stderr"]
+                    or vcr_git_status["stdout"]
+                    or "git status failed for tests/fixtures/vcr."
+                ),
+            }
+        )
+    if dirty_vcr_paths:
+        blockers.append(
+            {
+                "id": "dirty_vcr_worktree",
+                "message": (
+                    f"Found {len(dirty_vcr_paths)} dirty VCR cassette path(s); "
+                    "commit, restore, or intentionally re-record them before "
+                    "treating VCR-backed audit evidence as reproducible."
                 ),
             }
         )
@@ -298,6 +353,7 @@ def collect_test_audit_preflight(
         "default_branch": default_branch,
         "default_commit": default_commit,
         "git_status": git_status,
+        "vcr_git_status": vcr_git_status,
         "git_lfs": {
             "available": bool(lfs_path),
             "path": lfs_path,
@@ -311,6 +367,10 @@ def collect_test_audit_preflight(
         "lfs_pointer_files": {
             "count": len(lfs_pointer_files),
             "examples": lfs_pointer_files[:20],
+        },
+        "dirty_vcr_worktree": {
+            "count": len(dirty_vcr_paths),
+            "examples": dirty_vcr_paths[:20],
         },
         "blockers": blockers,
     }

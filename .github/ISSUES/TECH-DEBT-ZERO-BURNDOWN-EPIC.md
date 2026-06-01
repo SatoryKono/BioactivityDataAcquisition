@@ -8,7 +8,7 @@
 **Task ID**: `tech-debt-zero-001`
 **Last synced**: 2026-06-01
 **Authoritative status source**: live GitHub issue state plus governed quality artifacts
-**Source command**: `curl -H "Authorization: Bearer ${GITHUB_TOKEN}" https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/issues/{4610,4811,4847,4848,4849,4850,4851}`
+**Source command**: `curl -H "Authorization: Bearer ${GITHUB_TOKEN}" https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/issues/{4861..4872}`
 **Stale-warning policy**: this file is a local mirror only. If GitHub state or governed debt budgets change, treat this file as stale until it is resynchronized. Do not use it as the sole execution authority.
 
 ## Mirror Contract
@@ -25,17 +25,15 @@
 
 ## Resynced Baseline
 
-1. P0 duplicate wave `#4812/#4813/#4814/#4815` is closed, but canonical duplication evidence is now explicitly split into:
-   - `application/core`, `composition/bootstrap/runtime`, `composition/factories/pipeline`, `composition/runtime_builders`: duplicate baseline `0`
-   - `application/services/control_plane`: `5` residual duplicate clusters in `reports/quality/hotspot-duplication-baseline.md`, governed as remaining refactor pressure under `#4610`
+1. P0 duplicate wave `#4812/#4813/#4814/#4815` is closed. The follow-up live owner for residual control-plane duplicates is `#4862`; the current regenerated duplicate baseline is `0` for all tracked families including `application/services/control_plane`.
 2. Tracked twin families remain `3`; no-growth compatibility census is the active ratchet.
 3. Contract coverage matrix remains `26/26` Gold-enabled surfaces covered.
 4. `compatibility_test_file_max` is `53` in `configs/quality/test_governance_audit.yaml`; older local mirror values such as `56` are stale and must not return.
 5. Runtime cardinality governance now has an explicit CI review artifact/status path via `reports/observability/runtime_cardinality_review.json` in `quality-metrics-gate`.
 6. Deterministic identity policy now distinguishes semantic replay anchors from allowed operational correlation artifacts in `configs/quality/determinism_identity_policy.yaml`.
-7. Config discrepancy governance now publishes `0` actionable drift and `140` sanctioned partial variance parameters via `docs/config-discrepancies-report.md` and `reports/quality/config-discrepancy-baseline.json`.
+7. Config discrepancy governance now publishes `0` actionable drift and `106` sanctioned partial variance parameters via `docs/config-discrepancies-report.md` and `reports/quality/config-discrepancy-baseline.json`.
 8. Specialized duplication artifacts `control-plane-duplication.*` and `runtime-builders-duplication.*` are synchronized with the canonical hotspot baseline and drift-guarded by `tests/architecture/test_duplication_report_governance.py`.
-9. Final live GitHub technical-debt queue check on 2026-06-01 returned no open `technical-debt` issues and only epic `#4811` under `tech-debt`; `#4610` is closed.
+9. Live GitHub technical-debt queue check on 2026-06-01 returned the active closeout wave `#4861` through `#4872`; `#4610` and `#4811` remain closed and must not be used as active owners.
 
 ## Closed Stream A Sub-Issues
 
@@ -44,7 +42,7 @@
 | [#4812](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4812) | closed | `runtime_builders` duplicate baseline `0` |
 | [#4813](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4813) | closed | `application/core` duplicate baseline `0` |
 | [#4814](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4814) | closed | `composition/bootstrap/runtime` duplicate baseline `0` |
-| [#4815](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4815) | closed | helper-duplicate wave closed; canonical hotspot baseline now shows `control_plane=5` residual clusters governed under `#4610` |
+| [#4815](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4815) | closed | helper-duplicate wave closed; follow-up residual owner is `#4862`, and regenerated hotspot evidence is `0` |
 | [#4816](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4816) | closed | tracked twin-family ratchet pinned at `3` |
 | [#4817](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4817) | closed | test-governance closeout recorded on GitHub |
 | [#4818](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4818) | closed | config-contract drift closeout recorded |
@@ -56,13 +54,23 @@
 | [#4827](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4827) | closed | importer no-growth enforcement closed |
 | [#4828](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4828) | closed | config compatibility alias burn-down reached zero |
 
-## Final Closeout Queue
+## Active Closeout Queue
 
-After the `#4610` closeout wave in this resync, epic `#4811` has no remaining open P0/P1/P2 child issues or technical-debt blockers.
+Live GitHub state on 2026-06-01 reintroduced the following technical-debt owners after the `#4610/#4811` closeout. GitHub remains authoritative until each issue is closed with evidence:
 
-Closed final blockers:
-
-1. [#4610](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4610) `AR-002: Decompose control-plane application services into owned responsibility packages`
-2. [#4811](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4811) final epic closeout
+| Issue | Owner surface | Required evidence |
+| --- | --- | --- |
+| [#4861](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4861) | governance mirrors | this mirror and the v4 blueprint match live GitHub state |
+| [#4862](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4862) | control-plane duplication | duplicate baseline `0` plus touched control-plane tests |
+| [#4863](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4863) | control-plane shims | dead-code inventory and importer census proof |
+| [#4864](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4864) | compatibility facades/twins | census no-growth and measured-only ratchet proof |
+| [#4865](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4865) | config partial variance | config matrix/check with sanctioned variance reduced to `106` |
+| [#4866](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4866) | composite Gold strictness | strict composite contracts and empty waiver registry |
+| [#4867](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4867) | security env-prefix policy | env-prefix test passes without xfail |
+| [#4868](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4868) | test-governance budgets | at least one live budget ratcheted downward |
+| [#4869](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4869) | replay identity guards | semantic anchors forbid occurrence fields |
+| [#4870](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4870) | observability release gate | degraded live review fails in release mode |
+| [#4871](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4871) | zero-import inventory | candidate count reduced and triage regenerated |
+| [#4872](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4872) | git-lfs/VCR preflight | missing LFS and dirty VCR states fail-fast |
 
 If GitHub later shows additional open technical-debt issues, GitHub wins and this mirror must be resynced again before execution continues.
