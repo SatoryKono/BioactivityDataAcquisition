@@ -1,22 +1,23 @@
 ---
 id: grafana-dashboard-contract-fix
-title: Fix failing Grafana integration tests by updating dashboard JSON contracts
+title: Fix Grafana dashboard first-screen contract failures
 task_id: grafana-dashboard-contract-fix
-created_at: '2026-05-04T05:35:20Z'
+created_at: '2026-06-01T16:20:37Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- <add-source-ref>
+- tests/integration/test_grafana_dashboard_first_screen_contract.py
 summary: Active task session context.
-query: Fix failing Grafana integration tests by updating dashboard JSON contracts
+query: grafana dashboard workflow overview control plane contract noValue common context
+  header panels
 ---
 
 # Session note
 
 ## Task
 
-- Title: Fix failing Grafana integration tests by updating dashboard JSON contracts
-- Retrieval query: Fix failing Grafana integration tests by updating dashboard JSON contracts
+- Title: Fix Grafana dashboard first-screen contract failures
+- Retrieval query: grafana dashboard workflow overview control plane contract noValue common context header panels
 
 ## Retrieved context
 

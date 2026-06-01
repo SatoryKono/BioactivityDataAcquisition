@@ -441,6 +441,18 @@ def test_screenshot_runtime_setup_scripts_keep_bootstrap_contract() -> None:
         assert library_name in shell_script
 
 
+def test_playwright_screenshot_script_uses_multiple_panel_readiness_selectors() -> None:
+    script = Path(
+        "scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs"
+    ).read_text(encoding="utf-8")
+
+    assert "countRenderedPanels" in script
+    assert '[data-testid=\"Panel header\"]' in script
+    assert '[data-panelid]' in script
+    assert "renderedPanelCount" in script
+    assert "renderedPanelSelector" in script
+
+
 def test_rerender_playwright_fallback_streams_output_from_repo_root(
     monkeypatch: Any, tmp_path: Path
 ) -> None:
@@ -966,6 +978,99 @@ def test_live_audit_resolves_http_backend_from_datasource_candidates(
     monkeypatch.setattr(audit_subject, "_fetch_json", fake_fetch_json)
 
     assert audit_subject._resolve_app_base_url(config) == "http://localhost:8081"
+
+
+def test_live_audit_resolves_http_backend_through_grafana_datasource_proxy(
+    monkeypatch: Any,
+) -> None:
+    config = audit_subject.AuditConfig(
+        prometheus_base_url="http://localhost:9090",
+        app_base_url="http://localhost:8081",
+        loki_base_url="http://localhost:3100",
+        tempo_base_url="http://localhost:3200",
+        grafana_base_url="http://localhost:3000",
+        grafana_username="admin",
+        grafana_password="changeme",
+        workflow="All",
+        pipeline="chembl_target",
+        run_type="incremental",
+        run_id="-",
+        range_hours=24,
+        output_path=Path("reports/observability/grafana/live-panel-audit.json"),
+    )
+    captured: dict[str, str] = {}
+
+    monkeypatch.setattr(
+        audit_subject,
+        "_discover_http_datasource_url",
+        lambda *_args, **_kwargs: None,
+    )
+
+    def fake_request_json(
+        url: str, *, auth_header: str, timeout_seconds: float
+    ) -> object:
+        captured["url"] = url
+        captured["auth_header"] = auth_header
+        assert timeout_seconds == config.request_timeout_seconds
+        return {"status": "ok"}
+
+    def fake_fetch_json(url: str, *, timeout_seconds: float) -> object:
+        raise OSError(url)
+
+    monkeypatch.setattr(audit_subject, "_request_json", fake_request_json)
+    monkeypatch.setattr(audit_subject, "_fetch_json", fake_fetch_json)
+
+    assert (
+        audit_subject._resolve_app_base_url(config)
+        == "http://localhost:3000/api/datasources/proxy/uid/quarantine-explorer"
+    )
+    assert captured["url"].endswith(
+        "/api/datasources/proxy/uid/quarantine-explorer/health/live"
+    )
+    assert captured["auth_header"].startswith("Basic ")
+
+
+def test_live_audit_strips_userinfo_before_authenticated_proxy_request(
+    monkeypatch: Any,
+) -> None:
+    config = audit_subject.AuditConfig(
+        prometheus_base_url="http://localhost:9090",
+        app_base_url="http://admin:changeme@localhost:3000/api/datasources/proxy/uid/quarantine-explorer",
+        loki_base_url="http://localhost:3100",
+        tempo_base_url="http://localhost:3200",
+        grafana_base_url="http://localhost:3000",
+        grafana_username="ignored",
+        grafana_password="ignored",
+        workflow="All",
+        pipeline="chembl_target",
+        run_type="incremental",
+        run_id="-",
+        range_hours=24,
+        output_path=Path("reports/observability/grafana/live-panel-audit.json"),
+    )
+    captured: dict[str, str] = {}
+
+    def fake_request_json(
+        url: str, *, auth_header: str, timeout_seconds: float
+    ) -> object:
+        captured["url"] = url
+        captured["auth_header"] = auth_header
+        return {"status": "ok"}
+
+    monkeypatch.setattr(audit_subject, "_request_json", fake_request_json)
+
+    payload = audit_subject._fetch_json_with_optional_auth(
+        f"{config.app_base_url}/health/live",
+        config=config,
+        timeout_seconds=5,
+    )
+
+    assert payload == {"status": "ok"}
+    assert captured["url"] == (
+        "http://localhost:3000/api/datasources/proxy/uid/"
+        "quarantine-explorer/health/live"
+    )
+    assert captured["auth_header"].startswith("Basic ")
 
 
 def test_live_audit_resolves_zero_bind_backend_when_localhost_is_unreachable(

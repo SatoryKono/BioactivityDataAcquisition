@@ -241,6 +241,24 @@ async function expandCollapsedRows(page, dashboard, index, total) {
   await page.waitForTimeout(CONFIG.settleMs);
 }
 
+async function countRenderedPanels(page) {
+  const selectors = [
+    '[data-testid="data-testid Panel header"]',
+    '[data-testid="Panel header"]',
+    '[data-testid$="Panel header"]',
+    '[aria-label="Panel header"]',
+    '[data-panelid]',
+    '.panel-title',
+  ];
+  for (const selector of selectors) {
+    const count = await page.locator(selector).count().catch(() => 0);
+    if (count > 0) {
+      return { selector, count };
+    }
+  }
+  return { selector: "", count: 0 };
+}
+
 function dashboardRenderUrl(dashboard) {
   const params = new URLSearchParams({ orgId: "1" });
   if (CONFIG.scopeQuery) {
@@ -282,9 +300,15 @@ async function renderDashboard(page, dashboard, index, total) {
   await page.waitForTimeout(CONFIG.settleMs);
   await expandCollapsedRows(page, dashboard, index, total);
 
-  const panels = page.locator("[data-testid=\"data-testid Panel header\"]");
-  if ((await panels.count()) === 0) {
+  const renderedPanelEvidence = await countRenderedPanels(page);
+  dashboard.renderedPanelCount = renderedPanelEvidence.count;
+  dashboard.renderedPanelSelector = renderedPanelEvidence.selector;
+  if (renderedPanelEvidence.count === 0) {
     console.warn(`warning: no panel headers detected for ${dashboard.uid}`);
+  } else {
+    console.log(
+      `[${index}/${total}] detected ${renderedPanelEvidence.count} rendered panel marker(s) for ${dashboard.uid} using ${renderedPanelEvidence.selector}`,
+    );
   }
 
   const filePath = path.join(CONFIG.outputDir, dashboard.file);

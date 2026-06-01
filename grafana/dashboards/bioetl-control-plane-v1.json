@@ -782,6 +782,7 @@
               }
             }
           ],
+          "noValue": "UNKNOWN",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1119,7 +1120,8 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "short",
+          "noValue": "UNKNOWN"
         },
         "overrides": []
       },
