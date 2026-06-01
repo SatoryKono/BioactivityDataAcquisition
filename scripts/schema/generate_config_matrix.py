@@ -95,6 +95,22 @@ def _family_metrics(configs: dict[str, dict[str, Any]]) -> dict[str, int]:
     }
 
 
+def _partition_partial_keys(partial: list[str]) -> tuple[list[str], list[str]]:
+    actionable = [key for key in partial if not is_sanctioned_partial_key(key)]
+    sanctioned = [key for key in partial if is_sanctioned_partial_key(key)]
+    return actionable, sanctioned
+
+
+def _parameter_presence_line(
+    key: str,
+    *,
+    configs: dict[str, dict[str, Any]],
+    total_configs: int,
+) -> str:
+    present_in = [cfg for cfg, data in configs.items() if key in data]
+    return f"- `{key}` ({len(present_in)}/{total_configs}): {', '.join(present_in)}"
+
+
 def _collect_configs() -> dict[str, dict[str, Any]]:
     configs: dict[str, dict[str, Any]] = {}
 
@@ -174,9 +190,10 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def _build_artifact_contents() -> tuple[str, str, int, int, int]:
+def _build_artifact_contents() -> tuple[str, str, int, int, int, int, int]:
     """Build matrix/report contents without writing files."""
     configs = _collect_configs()
+    family_configs = _collect_family_configs()
     all_keys = sorted(
         {key for values in configs.values() for key in values}, key=_sort_key
     )
@@ -187,7 +204,23 @@ def _build_artifact_contents() -> tuple[str, str, int, int, int]:
     else:
         common = set()
 
-    partial = [key for key in all_keys if key not in common]
+    family_breakdowns: list[
+        tuple[str, dict[str, dict[str, Any]], list[str], list[str]]
+    ] = []
+    for family_name, family_payload in family_configs.items():
+        family_partial = _partial_keys(family_payload)
+        actionable_partial, sanctioned_partial = _partition_partial_keys(family_partial)
+        family_breakdowns.append(
+            (
+                family_name,
+                family_payload,
+                actionable_partial,
+                sanctioned_partial,
+            )
+        )
+    actionable_count = sum(len(item[2]) for item in family_breakdowns)
+    sanctioned_count = sum(len(item[3]) for item in family_breakdowns)
+    family_raw_count = actionable_count + sanctioned_count
     matrix_handle = io.StringIO(newline="")
     writer = csv.writer(matrix_handle)
     writer.writerow(["Parameter Path", *config_names])
@@ -202,22 +235,73 @@ def _build_artifact_contents() -> tuple[str, str, int, int, int]:
         "",
         f"Total configs: {len(configs)}",
         f"Total unique parameters: {len(all_keys)}",
+        f"Actionable inconsistent parameters: {actionable_count}",
+        f"Sanctioned partial variance parameters: {sanctioned_count}",
+        f"Raw partial parameter count: {family_raw_count}",
         "",
-        "## Inconsistent Parameters",
+        "## Actionable Drift Parameters",
         "",
     ]
-    for key in partial:
-        present_in = [cfg for cfg, data in configs.items() if key in data]
-        report_lines.append(
-            f"- `{key}` ({len(present_in)}/{len(configs)}): {', '.join(present_in)}"
-        )
-    report_lines.append("")
+    if actionable_count:
+        for family_name, family_payload, actionable_partial, _ in family_breakdowns:
+            if not actionable_partial:
+                continue
+            report_lines.extend(["", f"### {family_name}", ""])
+            for key in actionable_partial:
+                report_lines.append(
+                    _parameter_presence_line(
+                        key,
+                        configs=family_payload,
+                        total_configs=len(family_payload),
+                    )
+                )
+    else:
+        report_lines.append("No unsanctioned config drift detected.")
+
+    report_lines.extend(
+        [
+            "",
+            "## Sanctioned Partial Variance Parameters",
+            "",
+            "These parameters are intentionally partial across governed config "
+            "families and remain tracked as sanctioned variance rather than "
+            "actionable drift.",
+            "",
+        ]
+    )
+    if sanctioned_count:
+        for family_name, family_payload, _, sanctioned_partial in family_breakdowns:
+            if not sanctioned_partial:
+                continue
+            report_lines.extend(["", f"### {family_name}", ""])
+            for key in sanctioned_partial:
+                report_lines.append(
+                    _parameter_presence_line(
+                        key,
+                        configs=family_payload,
+                        total_configs=len(family_payload),
+                    )
+                )
+    else:
+        report_lines.append("No sanctioned partial variance detected.")
+    report_lines.extend(
+        [
+            "",
+            "## Interpretation",
+            "",
+            "- CI should fail on actionable drift.",
+            "- Sanctioned partial variance remains inventory debt, not a merge blocker, "
+            "while its governance contract stays current.",
+        ]
+    )
     return (
         matrix_handle.getvalue(),
         "\n".join(report_lines),
         len(all_keys),
         len(configs),
-        len(partial),
+        family_raw_count,
+        actionable_count,
+        sanctioned_count,
     )
 
 
@@ -330,9 +414,15 @@ def _baseline_families_match(
 def main(argv: list[str] | None = None) -> int:
     """Generate or check CSV and Markdown comparison outputs."""
     args = _parse_args(argv)
-    matrix_content, report_content, parameter_count, config_count, partial_count = (
-        _build_artifact_contents()
-    )
+    (
+        matrix_content,
+        report_content,
+        parameter_count,
+        config_count,
+        partial_count,
+        actionable_count,
+        sanctioned_count,
+    ) = _build_artifact_contents()
     baseline_metrics = _live_baseline_metrics(
         config_count=config_count,
         unique_parameter_count=parameter_count,
@@ -377,7 +467,9 @@ def main(argv: list[str] | None = None) -> int:
     print("\n" + "=" * 80)
     print("PARAMETER PRESENCE SUMMARY")
     print("=" * 80)
-    print(f"Inconsistent parameters: {partial_count}")
+    print(f"Actionable inconsistent parameters: {actionable_count}")
+    print(f"Sanctioned partial variance parameters: {sanctioned_count}")
+    print(f"Raw partial parameter count: {partial_count}")
     print(f"Discrepancy report saved to {args.report_output}")
     print(f"Config-surface baseline saved to {args.baseline_json_out}")
     return 0

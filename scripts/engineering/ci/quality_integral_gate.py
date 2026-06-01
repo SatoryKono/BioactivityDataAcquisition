@@ -23,13 +23,13 @@ import yaml
 
 if __package__ in {None, ""}:
     from _compatibility_telemetry import (  # type: ignore[import-not-found]
-        collect_compatibility_surface_snapshot,
-        render_compatibility_surface_section,
+        collect_debt_governance_snapshot,
+        render_debt_governance_section,
     )
 else:
     from ._compatibility_telemetry import (
-        collect_compatibility_surface_snapshot,
-        render_compatibility_surface_section,
+        collect_debt_governance_snapshot,
+        render_debt_governance_section,
     )
 
 from bioetl.infrastructure.quality.debt_scorecard import (
@@ -117,6 +117,7 @@ class QualityGateOutputContext:
     ruff_violations: int
     coverage_percent: float | None
     compatibility_surface: object
+    debt_governance_surface: object
     test_health_payload: dict[str, object]
     bonus: float
     summary: object
@@ -905,6 +906,7 @@ def _quality_gate_output(payload: QualityGateOutputContext) -> dict[str, object]
             "coverage_verified": payload.coverage_percent is not None,
         },
         "compatibility_surface": payload.compatibility_surface.as_dict(),
+        "debt_governance_surface": payload.debt_governance_surface.as_dict(),
         "test_health": payload.test_health_payload,
         "integral_score": {
             "base": payload.summary.integral_score,
@@ -940,6 +942,7 @@ def _summary_lines(
     test_health_payload: dict[str, object],
     total_exemptions: int,
     compatibility_surface: object,
+    debt_governance_surface: object,
 ) -> list[str]:
     """Build compact markdown summary lines."""
     skip_classes_detail = test_health_payload["skip_classes_detail"]
@@ -975,9 +978,9 @@ def _summary_lines(
         f"- test_health_skip_classes: `{skip_classes_rendered}`",
         f"- staged_rollout_flags: `{staged_flags_rendered}`",
         f"- total_exemptions: `{total_exemptions}`",
-        render_compatibility_surface_section(
-            compatibility_surface,
-            heading="## Compatibility Surface Snapshot",
+        render_debt_governance_section(
+            debt_governance_surface,
+            heading="## Debt Governance Surface Snapshot",
         ),
     ]
 
@@ -1047,7 +1050,8 @@ def main() -> int:
         coverage_threshold_percent=args.coverage_threshold,
     )
     coverage_threshold = _require_float(ci_target, "coverage_threshold_percent")
-    compatibility_surface = collect_compatibility_surface_snapshot()
+    debt_governance_surface = collect_debt_governance_snapshot()
+    compatibility_surface = debt_governance_surface.compatibility_surface
     test_matrix = _load_yaml_mapping(test_matrix_path)
     test_health_taxonomy = _load_yaml_mapping(test_health_taxonomy_path)
 
@@ -1085,6 +1089,7 @@ def main() -> int:
             ruff_violations=ruff_violations,
             coverage_percent=coverage_percent,
             compatibility_surface=compatibility_surface,
+            debt_governance_surface=debt_governance_surface,
             test_health_payload=test_health_payload,
             bonus=bonus,
             summary=summary,
@@ -1109,6 +1114,7 @@ def main() -> int:
                 test_health_payload=test_health_payload,
                 total_exemptions=total_exemptions,
                 compatibility_surface=compatibility_surface,
+                debt_governance_surface=debt_governance_surface,
             ),
         )
 
@@ -1129,6 +1135,18 @@ def main() -> int:
         f"mixed={compatibility_surface.mixed_modules}; "
         f"retained={compatibility_surface.retained_entrypoints}; "
         f"public={compatibility_surface.public_entrypoints}"
+    )
+    print(
+        "[quality-integral-gate] "
+        "debt_governance="
+        f"uuid_seams={debt_governance_surface.runtime_uuid.runtime_uuid_seam_count}; "
+        "replay_critical_uuid="
+        f"{debt_governance_surface.runtime_uuid.replay_critical_uuid_seam_count}; "
+        f"triaged_dead_code={debt_governance_surface.retirement.triaged_entry_count}; "
+        "untriaged_zero_import="
+        f"{debt_governance_surface.retirement.repo_wide_untriaged_zero_import_candidate_count}; "
+        "compatibility_tests="
+        f"{debt_governance_surface.test_governance.compatibility_test_files}"
     )
     print(
         "[quality-integral-gate] "

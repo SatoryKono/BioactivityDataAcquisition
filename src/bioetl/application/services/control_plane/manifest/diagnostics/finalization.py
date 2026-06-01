@@ -6,7 +6,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.control_plane.manifest.diagnostics.helpers import (
+from bioetl.application.services.control_plane.manifest.diagnostics.dq_details import (
     DQDetailsSummary,
     build_dq_details_summary,
 )

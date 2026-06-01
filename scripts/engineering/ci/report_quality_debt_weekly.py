@@ -12,14 +12,16 @@ from pathlib import Path
 if __package__ in {None, ""}:
     from _compatibility_telemetry import (  # type: ignore[import-not-found]
         CompatibilitySurfaceSnapshot,
-        collect_compatibility_surface_snapshot,
-        render_compatibility_surface_section,
+        DebtGovernanceSnapshot,
+        collect_debt_governance_snapshot,
+        render_debt_governance_section,
     )
 else:
     from ._compatibility_telemetry import (
         CompatibilitySurfaceSnapshot,
-        collect_compatibility_surface_snapshot,
-        render_compatibility_surface_section,
+        DebtGovernanceSnapshot,
+        collect_debt_governance_snapshot,
+        render_debt_governance_section,
     )
 
 from bioetl.infrastructure.quality import (
@@ -45,6 +47,7 @@ class WeeklyDebtSnapshot:
     by_registry: dict[str, int]
     by_owner: dict[str, int]
     compatibility_surface: CompatibilitySurfaceSnapshot
+    debt_governance_surface: DebtGovernanceSnapshot
 
 
 def _parse_args() -> argparse.Namespace:
@@ -102,6 +105,7 @@ def _build_snapshot(
         today=today,
     )
     baseline_total = _baseline_total_debt(inventory.total_exemptions, scorecard)
+    debt_governance_surface = collect_debt_governance_snapshot()
     return WeeklyDebtSnapshot(
         generated_at_utc=datetime.now(UTC).isoformat(),
         quarter=evaluation.quarter,
@@ -114,7 +118,8 @@ def _build_snapshot(
         growth_violations=len(violations),
         by_registry=evaluation.by_registry,
         by_owner=evaluation.by_owner,
-        compatibility_surface=collect_compatibility_surface_snapshot(),
+        compatibility_surface=debt_governance_surface.compatibility_surface,
+        debt_governance_surface=debt_governance_surface,
     )
 
 
@@ -130,7 +135,7 @@ def _render_markdown(snapshot: WeeklyDebtSnapshot) -> str:
         f"- Quarter budget: `{snapshot.total_budget}`\n"
         f"- Integral debt score: `{snapshot.integral_score}`\n"
         f"- Growth violations: `{snapshot.growth_violations}`\n\n"
-        f"{_compatibility_section(snapshot, heading='## Compatibility Surface')}\n\n"
+        f"{_debt_governance_section(snapshot, heading='## Debt Governance Surface')}\n\n"
         "## By Registry\n\n"
         f"{_render_count_lines(snapshot.by_registry) or '- (none)'}\n\n"
         "## By Owner\n\n"
@@ -173,8 +178,16 @@ def _render_count_lines(counts: dict[str, int]) -> str:
 
 def _compatibility_section(snapshot: WeeklyDebtSnapshot, *, heading: str) -> str:
     """Render compatibility surface section for markdown outputs."""
-    return render_compatibility_surface_section(
-        snapshot.compatibility_surface,
+    return render_debt_governance_section(
+        snapshot.debt_governance_surface,
+        heading=heading,
+    )
+
+
+def _debt_governance_section(snapshot: WeeklyDebtSnapshot, *, heading: str) -> str:
+    """Render unified debt-governance section for markdown outputs."""
+    return render_debt_governance_section(
+        snapshot.debt_governance_surface,
         heading=heading,
     )
 
@@ -207,9 +220,9 @@ def _write_summary_append(path: Path, snapshot: WeeklyDebtSnapshot) -> None:
                     f"- expired_debt: `{snapshot.expired_debt}`",
                     f"- new_debt: `{snapshot.new_debt}`",
                     f"- quarter: `{snapshot.quarter}`",
-                    _compatibility_section(
+                    _debt_governance_section(
                         snapshot,
-                        heading="## Compatibility Surface Snapshot",
+                        heading="## Debt Governance Surface Snapshot",
                     ),
                 ]
             )

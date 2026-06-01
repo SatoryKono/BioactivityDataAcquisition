@@ -349,6 +349,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("target_xref_reactome_ids", pa.string()),
         ("target_xref_uniprot_ids", pa.string()),
         ("primary_component_id", pa.float64()),
+        ("protein_classifications", pa.string()),
         ("component_accessions", pa.string()),
         ("component_descriptions", pa.string()),
         ("component_ids", pa.string()),

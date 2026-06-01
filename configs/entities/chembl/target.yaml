@@ -75,6 +75,7 @@ schema:
     - target_xref_reactome_ids
     - target_xref_uniprot_ids
     - primary_component_id
+    - protein_classifications
     - component_accessions
     - component_descriptions
     - component_ids
@@ -313,10 +314,7 @@ filters:
     organism__isnull: false
     tax_id__isnull: false
   silver_filters:
-    ranges:
-      publication_year:
-        min: 1950
-        max: 2050
+    ranges: {}
     columns:
       target_type:
       - SINGLE PROTEIN
@@ -337,10 +335,7 @@ filters:
     - target_xref_uniprot_ids
     exclude_if_present: []
   gold_filters:
-    ranges:
-      publication_year:
-        min: 1950
-        max: 2050
+    ranges: {}
     columns:
       target_type:
       - SINGLE PROTEIN
@@ -360,21 +355,10 @@ filters:
     - pref_name
     - organism
   metadata:
-    publication_filter_policy:
+    target_filter_policy:
       scope: source_specific
-      description: SOURCE-SPECIFIC ChEMBL publication filter policy. Silver and Gold filters intentionally constrain 
-        this pipeline to the reviewed ChEMBL publication subset and do not redefine the global publication taxonomy.
-    # Source-specific filter policy:
-
-
-
-
-    # - Silver and Gold are intentionally scoped to journal-article for the
-
-
-
-
-    #   current ChEMBL publication pipeline.
+      description: SOURCE-SPECIFIC ChEMBL target filter policy. Silver and Gold filters intentionally constrain this
+        pipeline to reviewed single-protein target records and do not apply publication-specific fields.
 
 
 
@@ -421,6 +405,7 @@ hash_policy:
     - target_xref_reactome_ids
     - target_xref_uniprot_ids
     - primary_component_id
+    - protein_classifications
     - component_accessions
     - component_descriptions
     - component_ids

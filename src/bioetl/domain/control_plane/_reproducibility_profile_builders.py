@@ -27,6 +27,7 @@ _REGISTERED_SOURCE_FAMILIES = (
     "chembl.subcellular_fraction",
     "chembl.target",
     "chembl.target_component",
+    "chembl.target_protein_classification",
     "chembl.tissue",
     "crossref.publication",
     "openalex.publication",

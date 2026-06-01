@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import json
 
-from bioetl.application.services.control_plane.effective_config_context import (
+from bioetl.application.services.control_plane.effective_config.context import (
     build_effective_config_context,
 )
-from bioetl.application.services.control_plane.effective_config_support import (
+from bioetl.application.services.control_plane.effective_config.support import (
     build_effective_config_artifact_id,
     semantic_artifact_payload,
     serialize_artifact,

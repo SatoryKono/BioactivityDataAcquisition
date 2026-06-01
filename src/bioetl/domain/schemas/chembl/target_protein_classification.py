@@ -28,21 +28,51 @@ class TargetProteinClassificationSchema(ETLRecordSchema):
         nullable=True,
         description="Resolved leaf protein classification ID.",
     )
-    l1_id: Series[pd.Int64Dtype] | None = pa.Field(nullable=True)
-    l1_name: Series[str] | None = pa.Field(nullable=True)
-    l1_desc: Series[str] | None = pa.Field(nullable=True)
-    l2_id: Series[pd.Int64Dtype] | None = pa.Field(nullable=True)
-    l2_name: Series[str] | None = pa.Field(nullable=True)
-    l2_desc: Series[str] | None = pa.Field(nullable=True)
-    l3_id: Series[pd.Int64Dtype] | None = pa.Field(nullable=True)
-    l3_name: Series[str] | None = pa.Field(nullable=True)
-    l3_desc: Series[str] | None = pa.Field(nullable=True)
-    l4_id: Series[pd.Int64Dtype] | None = pa.Field(nullable=True)
-    l4_name: Series[str] | None = pa.Field(nullable=True)
-    l4_desc: Series[str] | None = pa.Field(nullable=True)
-    l5_id: Series[pd.Int64Dtype] | None = pa.Field(nullable=True)
-    l5_name: Series[str] | None = pa.Field(nullable=True)
-    l5_desc: Series[str] | None = pa.Field(nullable=True)
+    l1_id: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="Level 1 protein classification ID."
+    )
+    l1_name: Series[str] | None = pa.Field(
+        nullable=True, description="Level 1 protein classification name."
+    )
+    l1_desc: Series[str] | None = pa.Field(
+        nullable=True, description="Level 1 protein classification description."
+    )
+    l2_id: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="Level 2 protein classification ID."
+    )
+    l2_name: Series[str] | None = pa.Field(
+        nullable=True, description="Level 2 protein classification name."
+    )
+    l2_desc: Series[str] | None = pa.Field(
+        nullable=True, description="Level 2 protein classification description."
+    )
+    l3_id: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="Level 3 protein classification ID."
+    )
+    l3_name: Series[str] | None = pa.Field(
+        nullable=True, description="Level 3 protein classification name."
+    )
+    l3_desc: Series[str] | None = pa.Field(
+        nullable=True, description="Level 3 protein classification description."
+    )
+    l4_id: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="Level 4 protein classification ID."
+    )
+    l4_name: Series[str] | None = pa.Field(
+        nullable=True, description="Level 4 protein classification name."
+    )
+    l4_desc: Series[str] | None = pa.Field(
+        nullable=True, description="Level 4 protein classification description."
+    )
+    l5_id: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="Level 5 protein classification ID."
+    )
+    l5_name: Series[str] | None = pa.Field(
+        nullable=True, description="Level 5 protein classification name."
+    )
+    l5_desc: Series[str] | None = pa.Field(
+        nullable=True, description="Level 5 protein classification description."
+    )
     classification_status: Series[str] = pa.Field(
         nullable=False,
         isin=["resolved", "missing_classification", "quarantined"],

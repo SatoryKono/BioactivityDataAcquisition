@@ -512,6 +512,8 @@ entity_test_ownership:
     - tests/e2e/test_chembl_target_e2e.py
   chembl.target_component:
     - tests/integration/pipelines/test_chembl_target_component.py
+  chembl.target_protein_classification:
+    - tests/unit/application/pipelines/chembl/test_target_protein_classification_transformer.py
   chembl.tissue:
     - tests/unit/application/pipelines/chembl/test_tissue_transformer.py
   crossref.publication:

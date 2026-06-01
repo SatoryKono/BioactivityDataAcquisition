@@ -121,3 +121,41 @@ def test_runtime_uuid4_inventory_forbids_replay_critical_random_identity() -> No
         assert str(entry["classification"]).strip()
         assert str(entry["migration_policy"]).strip()
         assert entry["layer"] in {"application", "composition"}
+
+
+def test_runtime_uuid4_inventory_documents_exact_replay_injection_seams() -> None:
+    inventory = _load_inventory()
+    entries = cast(list[dict[str, Any]], inventory["seams"])
+    by_path = {
+        str(entry["path"]): str(entry["migration_policy"])
+        for entry in entries
+        if isinstance(entry, dict)
+    }
+    expected_requirements = {
+        "src/bioetl/application/services/execution/pipeline_runner_service.py": (
+            "require explicit run_id"
+        ),
+        "src/bioetl/application/services/control_plane/manifest_service_scaffold.py": (
+            "manifest_id_factory"
+        ),
+        "src/bioetl/application/services/control_plane/ledger/service.py": (
+            "event_id_factory"
+        ),
+        "src/bioetl/application/services/control_plane/workflow/execution_service.py": (
+            "run_id_factory"
+        ),
+        "src/bioetl/composition/bootstrap/runtime/_runner_assembly_support.py": (
+            "exact replay"
+        ),
+    }
+
+    missing: list[str] = []
+    for path, required_token in expected_requirements.items():
+        policy = by_path.get(path, "")
+        if required_token not in policy:
+            missing.append(f"{path} -> {required_token}")
+
+    assert not missing, (
+        "Exact replay/runtime UUID seams must document their explicit injection "
+        "migration path:\n" + "\n".join(missing)
+    )

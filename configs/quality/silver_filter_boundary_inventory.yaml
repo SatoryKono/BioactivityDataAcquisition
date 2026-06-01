@@ -646,6 +646,15 @@ pipelines:
       - composite_pipeline: composite_target
         check_type: gold_projection_delta
         fields: *id019
+  chembl_target_protein_classification:
+    downstream_role: standalone_derived
+    downstream_pipelines: []
+    filters:
+      required_fields:
+        structural:
+        - classification_status
+        - hierarchy_index
+        - target_id
   chembl_tissue:
     downstream_role: composite_enricher
     downstream_pipelines: &id020

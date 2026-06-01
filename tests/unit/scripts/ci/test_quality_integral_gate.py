@@ -2,12 +2,17 @@
 
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 from scripts.engineering.ci.quality_integral_gate import ArchitectureTestStats
+from scripts.engineering.ci.quality_integral_gate import QualityGateOutputContext
 from scripts.engineering.ci.quality_integral_gate import (
     TestHealthClassification as HealthClassification,
 )
 from scripts.engineering.ci.quality_integral_gate import _build_test_health_payload
 from scripts.engineering.ci.quality_integral_gate import _classify_test_health
+from scripts.engineering.ci.quality_integral_gate import _quality_gate_output
+from scripts.engineering.ci.quality_integral_gate import _summary_lines
 
 NETWORK_OPT_IN_GATE = "live_network_opt_in_gate"
 LIVE_API_GATE_MODE_NON_ALWAYS = "live_api_gate_mode_non_always"
@@ -337,3 +342,183 @@ def test_build_test_health_payload_uses_canonical_taxonomy() -> None:
             "definition": "Providers still outside live baseline enforcement.",
         },
     ]
+
+
+def test_quality_gate_output_and_summary_include_debt_governance_surface() -> None:
+    """Quality gate payloads should publish the unified debt-governance snapshot."""
+
+    class _FakeCompatibilitySurface:
+        def __init__(self) -> None:
+            self.curated_inventory_rows = 14
+            self.measured_tracked_modules = 14
+            self.measured_only_modules = 0
+            self.deprecated_warn_modules = 0
+            self.compat_shim_modules = 0
+            self.mixed_modules = 0
+            self.retained_entrypoints = 1
+            self.public_entrypoints = 13
+
+        def as_dict(self) -> dict[str, int]:
+            return {
+                "curated_inventory_rows": self.curated_inventory_rows,
+                "measured_tracked_modules": self.measured_tracked_modules,
+                "measured_only_modules": self.measured_only_modules,
+                "deprecated_warn_modules": self.deprecated_warn_modules,
+                "compat_shim_modules": self.compat_shim_modules,
+                "mixed_modules": self.mixed_modules,
+                "retained_entrypoints": self.retained_entrypoints,
+                "public_entrypoints": self.public_entrypoints,
+            }
+
+    class _FakeDebtGovernanceSurface:
+        def __init__(self) -> None:
+            self.compatibility_surface = _FakeCompatibilitySurface()
+            self.runtime_uuid = SimpleNamespace(
+                runtime_uuid_seam_count=14,
+                replay_critical_uuid_seam_count=0,
+            )
+            self.retirement = SimpleNamespace(
+                triaged_entry_count=19,
+                repo_wide_zero_import_candidate_count=45,
+                repo_wide_classified_zero_import_candidate_count=45,
+                repo_wide_untriaged_zero_import_candidate_count=0,
+            )
+            self.test_governance = SimpleNamespace(
+                compatibility_test_files=53,
+                refined_assertless_tests=499,
+                markerless_test_functions=6991,
+                duplicate_test_names=787,
+                duplicate_test_name_occurrences=869,
+                uuid4_call_sites=400,
+                date_today_call_sites=0,
+            )
+
+        def as_dict(self) -> dict[str, object]:
+            return {
+                "compatibility_surface": self.compatibility_surface.as_dict(),
+                "runtime_uuid": {
+                    "runtime_uuid_seam_count": self.runtime_uuid.runtime_uuid_seam_count,
+                    "replay_critical_uuid_seam_count": (
+                        self.runtime_uuid.replay_critical_uuid_seam_count
+                    ),
+                },
+                "retirement": {
+                    "triaged_entry_count": self.retirement.triaged_entry_count,
+                    "repo_wide_zero_import_candidate_count": (
+                        self.retirement.repo_wide_zero_import_candidate_count
+                    ),
+                    "repo_wide_classified_zero_import_candidate_count": (
+                        self.retirement.repo_wide_classified_zero_import_candidate_count
+                    ),
+                    "repo_wide_untriaged_zero_import_candidate_count": (
+                        self.retirement.repo_wide_untriaged_zero_import_candidate_count
+                    ),
+                },
+                "test_governance": {
+                    "compatibility_test_files": (
+                        self.test_governance.compatibility_test_files
+                    ),
+                    "refined_assertless_tests": (
+                        self.test_governance.refined_assertless_tests
+                    ),
+                    "markerless_test_functions": (
+                        self.test_governance.markerless_test_functions
+                    ),
+                    "duplicate_test_names": (
+                        self.test_governance.duplicate_test_names
+                    ),
+                    "duplicate_test_name_occurrences": (
+                        self.test_governance.duplicate_test_name_occurrences
+                    ),
+                    "uuid4_call_sites": self.test_governance.uuid4_call_sites,
+                    "date_today_call_sites": self.test_governance.date_today_call_sites,
+                },
+            }
+
+    compatibility_surface = _FakeCompatibilitySurface()
+    debt_governance_surface = _FakeDebtGovernanceSurface()
+    test_health_payload = {
+        "short_label": "Fully Exercised Green",
+        "definition": "No staged caveats remain.",
+        "merge_semantics": "blocking",
+        "merge_blocking_source": "ci_pass_fail_and_quality_gate",
+        "skip_classes_detail": [],
+    }
+    test_health = HealthClassification(
+        status="fully_exercised_green",
+        summary="All confidence lanes green.",
+        reasons=(),
+        architecture_skip_count=0,
+        architecture_skip_ratio=0.0,
+        live_contract_enforced_provider_count=3,
+        live_contract_pilot_provider_count=0,
+        live_contract_vcr_only_provider_count=0,
+        skip_classes=(),
+        staged_rollout_flags=(),
+    )
+
+    output = _quality_gate_output(
+        QualityGateOutputContext(
+            quarter="2026-Q2",
+            architecture_stats=ArchitectureTestStats(
+                tests=10,
+                failures=0,
+                errors=0,
+                skipped=0,
+                returncode=0,
+            ),
+            max_total_exemptions=12,
+            min_integral_score=70.0,
+                ci_target={
+                    "architecture_test_failures_max": 0,
+                    "total_exemptions_max": 12,
+                    "max_class_loc_max": 300,
+                    "domain_cc_gt5_exemptions_max": 0,
+                    "vcr_cassettes_min_per_provider": 20,
+                    "ruff_formatting_violations_max": 0,
+                    "coverage_threshold_percent": 85.0,
+                },
+            arch_failures=0,
+            total_exemptions=2,
+            max_class_loc=200,
+            domain_cc_exemptions=0,
+            min_provider_vcr=20,
+            provider_vcr_counts={"chembl": 20},
+            ruff_violations=0,
+            coverage_percent=90.0,
+            compatibility_surface=compatibility_surface,
+            debt_governance_surface=debt_governance_surface,
+            test_health_payload=test_health_payload,
+            bonus=5.0,
+            summary=SimpleNamespace(integral_score=72.0),
+            adjusted_integral_score=77.0,
+            gate_pass=True,
+            violations=[],
+        )
+    )
+
+    assert "debt_governance_surface" in output
+    assert (
+        output["debt_governance_surface"]["runtime_uuid"][
+            "runtime_uuid_seam_count"
+        ]
+        == 14
+    )
+
+    summary = _summary_lines(
+        quarter="2026-Q2",
+        adjusted_integral_score=77.0,
+        min_integral_score=70.0,
+        arch_failures=0,
+        test_health=test_health,
+        test_health_payload=test_health_payload,
+        total_exemptions=2,
+        compatibility_surface=compatibility_surface,
+        debt_governance_surface=debt_governance_surface,
+    )
+
+    rendered = "\n".join(summary)
+    assert "## Debt Governance Surface Snapshot" in rendered
+    assert "- runtime_uuid_seam_count: `14`" in rendered
+    assert "- triaged_entry_count: `19`" in rendered
+    assert "- compatibility_test_files: `53`" in rendered

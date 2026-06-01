@@ -195,6 +195,15 @@
     "required": false,
     "unique": false
   },
+  "protein_classifications": {
+    "checks": [],
+    "coerce": false,
+    "description": "JSON string of aggregated component protein classifications.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "species_group_flag": {
     "checks": [],
     "coerce": false,

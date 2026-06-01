@@ -118,6 +118,23 @@ def test_observability_metric_governance_declares_required_views_and_evidence_pa
     assert "report_observability_metric_inventory" in command
     assert "--write-evidence" in command
 
+    live_evidence = runtime_cardinality_review["live_evidence"]
+    assert live_evidence["workflow"] == ".github/workflows/tests.yml::quality-metrics-gate"
+    assert (
+        live_evidence["artifact"]
+        == "reports/observability/runtime_cardinality_review.json"
+    )
+    assert live_evidence["summary_output"] == "$GITHUB_STEP_SUMMARY"
+    assert live_evidence["status_when_unavailable"] == "degraded"
+    assert live_evidence["fail_on_threshold_violation"] is True
+    assert live_evidence["prometheus_url_env_var"] == "BIOETL_OBSERVABILITY_PROMETHEUS_URL"
+    assert (
+        live_evidence["prometheus_token_env_var"]
+        == "BIOETL_OBSERVABILITY_PROMETHEUS_TOKEN"
+    )
+    assert "--review-json-out" in live_evidence["command"]
+    assert "--summary-out" in live_evidence["command"]
+
 
 @pytest.mark.architecture
 def test_runtime_cardinality_allowlist_entries_require_metadata() -> None:

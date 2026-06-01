@@ -1,6 +1,6 @@
 {
   "explicit_exclusions": [],
-  "row_count": 26,
+  "row_count": 27,
   "rows": [
     {
       "config_path": "configs/entities/chembl/activity.yaml",
@@ -219,6 +219,23 @@
       "pipeline_name": "chembl_target_component",
       "provider": "chembl",
       "published_artifact_path": "docs/04-reference/contracts/gold/chembl_target_component_v1.0.json",
+      "registry_contract_version": "1.0.0",
+      "registry_source_path": "src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
+      "registry_status": "active"
+    },
+    {
+      "config_path": "configs/entities/chembl/target_protein_classification.yaml",
+      "contract_config_path": "configs/contracts/chembl/target_protein_classification.yaml",
+      "contract_ref": "chembl.target_protein_classification",
+      "coverage_status": "covered",
+      "entity": "target_protein_classification",
+      "gold_enabled": true,
+      "gold_exclusion_reason": "",
+      "gold_schema_title": "ChEMBLTargetProteinClassificationGoldSchema Contract",
+      "pipeline_code_owner": "src/bioetl/application/pipelines/chembl/target_protein_classification_transformer.py",
+      "pipeline_name": "chembl_target_protein_classification",
+      "provider": "chembl",
+      "published_artifact_path": "docs/04-reference/contracts/gold/chembl_target_protein_classification_v1.0.json",
       "registry_contract_version": "1.0.0",
       "registry_source_path": "src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
       "registry_status": "active"
@@ -450,5 +467,5 @@
       "registry_status": "active"
     }
   ],
-  "snapshot_date": "2026-05-31"
+  "snapshot_date": "2026-06-01"
 }

@@ -52,6 +52,7 @@ from bioetl.domain.entities.chembl_structures import (
     ProteinClassification,
     Target,
     TargetComponent,
+    TargetProteinClassification,
 )
 from bioetl.domain.entities.chembl_subcellular_fraction import SubcellularFraction
 from bioetl.domain.entities.chembl_tissue import Tissue
@@ -120,6 +121,7 @@ __all__ = [
     "Target",
     "TargetComponent",
     "TargetComponentRecord",
+    "TargetProteinClassification",
     "TargetRecord",
     "Tissue",
     "TissueRecord",

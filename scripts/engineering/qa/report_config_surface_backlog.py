@@ -26,8 +26,11 @@ BACKLOG_PATH = ROOT / "reports/quality/config-surface-backlog.json"
 CATEGORY_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("hash_policy_chembl_only", ("hash_policy.",)),
     ("extraction_params_entity_specific", ("filters.extraction_params.",)),
+    ("filter_metadata_entity_specific", ("filters.metadata.",)),
     ("gold_filter_entity_specific", ("filters.gold_filters.",)),
     ("silver_filter_entity_specific", ("filters.silver_filters.",)),
+    ("quality_metadata_entity_specific", ("quality.metadata.",)),
+    ("schema_field_aliases_entity_specific", ("schema.field_aliases.",)),
     (
         "pipeline_overrides",
         (
@@ -120,9 +123,9 @@ def build_backlog() -> dict[str, Any]:
         },
         "notes": [
             "actionable_partial_key_count excludes keys under INTENTIONAL_PREFIXES.",
-            "hash_policy is common across all 21 entity configs after Stream B design review.",
+            "hash_policy is common across all 22 entity configs after Stream B design review.",
             "composite_runtime family is at zero inconsistent keys as of Stream B plateau.",
-            "Residual entity drift is entity-specific filters/extraction_params/pipeline overrides only.",
+            "Residual entity drift is limited to intentional entity-specific filters, metadata policy blocks, schema field-alias surfaces, and pipeline overrides.",
         ],
     }
 

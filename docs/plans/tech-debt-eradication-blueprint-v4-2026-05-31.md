@@ -1,355 +1,121 @@
 ______________________________________________________________________
 
-Version: 4.0.0
-Status: active
-Class: plan
+Version: 4.1.0
+Status: local_mirror
+Class: mirror
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-31'
+  Last verified: '2026-06-01'
 
 ______________________________________________________________________
 
 # BioETL Tech Debt Eradication Blueprint v4
 
 Дата snapshot: `2026-05-31`
+Incremental resync: `2026-06-01` after `#4705`, `#4848`, `#4849`, `#4850`, and `#4851` closeout.
 
-Этот документ актуализирует внешний snapshot `v3 (2026-05-30)` по
-первичным источникам текущего репозитория и GitHub REST API.
+**Authoritative status source**: live GitHub issue state plus governed quality artifacts.  
+**Source command**: `curl -H "Authorization: Bearer ${GITHUB_TOKEN}" https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/issues/{4610,4811,4848,4849,4850,4851}`  
+**Stale-warning policy**: this document is a local planning mirror. If GitHub issue state or governed debt budgets move, this file becomes stale until resynced. Do not use it as sole execution authority.
 
-Источники верификации для `v4`:
+## Why This Mirror Still Exists
 
-- GitHub REST API `repos/SatoryKono/BioactivityDataAcquisition/issues/*`
-- `git show 768cfdfe a39e1d7 e427464`
-- `pyproject.toml`
-- `docs/02-architecture/decisions/README.md`
-- `reports/quality/compatibility-importer-census.md`
+This file remains useful as a compact execution snapshot, but it is no longer
+presented as the active authority for debt status. `#4850` closed the gap where
+local debt plans could drift from GitHub and quality budgets while still
+looking operationally current.
+
+## Resynced Program Facts
+
+1. Python runtime target remains `>=3.12`, with `3.13` supported.
+2. Workflow baseline is `35`.
+3. ADR registry baseline remains `48`; `ADR-003` and `ADR-008` stay `Superseded`.
+4. ChEMBL target contract `v2.0` remains live.
+5. Tracked twin families remain `3`.
+6. `compatibility_test_file_max` is `53` in `configs/quality/test_governance_audit.yaml`; older local mirror values like `56` are stale.
+7. Runtime cardinality governance now includes an explicit CI review summary/artifact path:
+   - inventory artifact: `reports/observability/runtime_cardinality_inventory.json`
+   - live/degraded review artifact: `reports/observability/runtime_cardinality_review.json`
+   - workflow owner surface: `.github/workflows/tests.yml::quality-metrics-gate`
+8. Deterministic identity governance now documents semantic replay anchors versus allowed operational correlation artifacts in `configs/quality/determinism_identity_policy.yaml`.
+9. Config discrepancy reporting is rebaselined to family-scoped semantics:
+   - actionable inconsistent parameters: `0`
+   - sanctioned partial variance parameters: `140`
+   - canonical report: `docs/config-discrepancies-report.md`
+
+## Closed Streams
+
+### Stream A
+
+Closed sub-issues: `#4812`, `#4813`, `#4814`, `#4815`, `#4816`, `#4817`,
+`#4818`, `#4819`, `#4820`, `#4821`, `#4825`, `#4826`, `#4827`, `#4828`.
+
+Governed outcome:
+
+- duplicate baseline for the former P0 wave is `0`;
+- twin-family no-growth remains enforced;
+- config-contract drift closeout remains recorded on GitHub;
+- dead-code triage governance is materialized in `reports/quality/dead-code-inventory.md`.
+
+### Stream B
+
+Closed issues: `#4764` through `#4772`.
+
+Governed outcome:
+
+- contract coverage matrix is materialized and green;
+- strict Gold validation and composite waiver policy are explicit;
+- Bronze fixture-gap wave is archived;
+- compatibility usage graph / no-new-shim enforcement is no longer an active execution stream.
+
+### Stream D and Stream E
+
+Archived unless reopened on GitHub:
+
+- `#4266`, `#4268`, `#4276`, `#4292`, `#4293`, `#4294`, `#4295`, `#4296`, `#4316`
+- `#4747`
+
+## Active Queue After This Resync
+
+The post-closeout target queue for the technical-debt program is now:
+
+1. [#4610](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4610)
+   `AR-002: Decompose control-plane application services into owned responsibility packages`
+2. [#4811](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/4811)
+   `TECH-DEBT-ZERO-001: Drive technical debt to zero`
+
+If GitHub still reports additional open `technical-debt` or `tech-debt`
+issues, GitHub wins and this mirror must be resynced again.
+
+## Governance Contract For Future Mirrors
+
+Every future local debt-planning mirror must include:
+
+1. generation timestamp;
+2. exact source command or source workflow;
+3. explicit stale-warning policy;
+4. explicit statement that live GitHub issue state overrides the mirror when they conflict;
+5. governed debt-budget anchors rather than copied freehand counts.
+
+## Evidence Anchors
+
 - `reports/quality/hotspot-duplication-baseline.md`
-- `docs/config-discrepancies-report.md`
+- `reports/quality/compatibility-importer-census.md`
+- `reports/quality/contract-coverage-matrix.md`
+- `reports/quality/dead-code-inventory.md`
+- `reports/observability/runtime_cardinality_inventory.json`
 - `configs/quality/compatibility_twin_module_ratchet.yaml`
 - `configs/quality/test_governance_audit.yaml`
-
-## Executive Summary
-
-`v3` больше нельзя использовать как current-state blueprint без поправок.
-На `2026-05-31` подтверждены следующие изменения:
-
-- active tech-debt program queue сократилась с `39` до `4` open GitHub issue;
-- `Stream D` и `Stream E` больше не активны:
-  `#4266`, `#4268`, `#4276`, `#4292`, `#4293`, `#4294`, `#4295`, `#4296`,
-  `#4316`, `#4747` закрыты на GitHub `2026-05-30`;
-- `Stream B` теперь полностью закрыт:
-  `#4764`, `#4765`, `#4766`, `#4767`, `#4769`, `#4770`, `#4771`, `#4772`
-  были закрыты на GitHub `2026-05-31`, а `#4768` закрыт тем же днём после
-  policy closeout verification;
-- `Stream A` тоже почти полностью закрыт:
-  `#4812`, `#4813`, `#4814`, `#4815`, `#4816`, `#4817`, `#4818`, `#4825`,
-  `#4826`, `#4827`, `#4820` закрыты на GitHub `2026-05-31`; в active queue
-  внутри tech-debt epic остался только `#4811`;
-- локальные Week 0 evidence-gap claims из `v3` устарели:
-  `docs/reports/evidence/project-test-health/metadata.yaml`,
-  `reports/quality/compatibility-importer-census.md`,
-  `docs/reports/evidence/project-legacy-compatibility-remediation/06-status/recovered-cross-synthesis-provenance-2026-05-21.yaml`,
-  `reports/quality/hotspot-duplication-baseline.md`,
-  `reports/quality/dead-code-inventory.md` уже присутствуют в working tree;
-- локальный `.github/ISSUES/TECH-DEBT-ZERO-BURNDOWN-EPIC.md` был stale на
-  момент раннего `v4` snapshot, но после текущей resync уже приведён к
-  актуальному GitHub state;
-- baseline changed:
-  workflows `35`, а не `33`;
-  tracked twin families `3`, а не `4`, потому что `_run_manifest_support`
-  уже выведен из twin-ratchet после `e427464`.
-
-Практический вывод: `v4` сводит активный план к потокам `A-C`; `D-E` переходят
-в archival/watch mode и возвращаются в execution только если GitHub issue
-reopen или repo evidence снова сломается.
-
-## Snapshot Reconciliation: v3 -> v4
-
-| Area | v3 claim | v4 verified state | Source |
-| --- | --- | --- | --- |
-| Active queue | `39` open issue across Streams A-E | `4` open issue across Streams A and C after Stream A/B closeout waves | GitHub REST API issue checks, 2026-05-31 |
-| Stream B | `9` open remediation issues | `0` open; `#4764-#4772` all closed by `2026-05-31` | GitHub REST API issues `#4764-#4772` |
-| Stream A | `12` open issues in the active epic wave | `1` open (`#4811`); the rest of `#4812-#4828` is closed | GitHub REST API issues `#4811-#4828` |
-| Stream D | `9` open divergence issues | `0` open; all 9 closed `2026-05-30` | GitHub REST API issues `#4266/#4268/#4276/#4292-#4296/#4316` |
-| Stream E | `#4747` active | `#4747` closed `2026-05-30T11:36:50Z` | GitHub REST API issue `#4747` |
-| Week 0 evidence restore | `3` required files absent | required evidence files already present locally | working tree verification |
-| Workflow baseline | `33` workflows | `35` workflow files under `.github/workflows/` | repo scan |
-| TDX-003 status | implicit closeout via local epic | `#4814` closed on GitHub `2026-05-31T13:55:53Z`; local epic mirror resynced | GitHub REST API issue `#4814` |
-| Twin-module ratchet | `4` tracked families incl. `run_manifest_support` | `3` tracked families; `run_manifest_support` family removed | `configs/quality/compatibility_twin_module_ratchet.yaml`, commit `e427464` |
-| Stream D divergence premise | local closed vs GH open for `#4276/#4292/#4296` | divergence resolved; local mirror now matches GH `closed` | local issue mirrors + GitHub REST API |
-
-## Verified Baseline (2026-05-31)
-
-### Repository
-
-- Python runtime target remains `>=3.12`; classifiers explicitly include
-  `3.12` and `3.13`.
-- Workflow count is `35`.
-- ADR registry contains `48` ADR markdown files.
-- `ADR-003` and `ADR-008` remain `Superseded`.
-
-### Contract / control-plane deltas that stay binding
-
-- ChEMBL target contract `v2.0` is live:
-  `docs/04-reference/contracts/gold/chembl_target_v2.0.json`.
-- Control-plane unify wave from `a39e1d7` is already on `main`; Stream C must
-  assume post-unify public owner modules as baseline.
-- `_run_manifest_support` was retired as a private twin in `e427464`; return of
-  a private `run_manifest_support` surface is a ratchet regression, not a valid
-  refactor option.
-
-### Current debt/evidence baselines
-
-- `reports/quality/compatibility-importer-census.md`
-  - retained entrypoints: `14`
-  - twin pairs: `14`
-  - tracked twin families: `3`
-  - config-root symbols: `3`
-- `reports/quality/hotspot-duplication-baseline.md`
-  - total duplicate clusters: `142`
-  - composition clusters: `38`
-  - application clusters: `104`
-- `docs/config-discrepancies-report.md`
-  - total configs: `26`
-  - total unique parameters: `508`
-- `configs/quality/test_governance_audit.yaml`
-  - `compatibility_test_file_max: 56`
-  - ratchet refreshed on `2026-05-31`
-
-## Active GitHub Queue (program scope only)
-
-Repo-wide open issues on `2026-05-31`: `100`.
-
-`Blueprint v4` intentionally scopes only the active tech-debt eradication
-program queue:
-
-- `4` open issues total
-- the old `v4` label pivot is stale after the `2026-05-31` Stream A/B closeout waves;
-  recompute label counts from GitHub before using them for scheduling or
-  dashboards
-
-### Stream A — residual (`1` open)
-
-- epic: `#4811`
-
-Closed Stream A sub-tasks already off the active queue:
-
-- `#4812` closed `2026-05-31`
-- `#4813` closed `2026-05-31`
-- `#4814` closed `2026-05-31`
-- `#4815` closed `2026-05-31`
-- `#4816` closed `2026-05-31`
-- `#4817` closed `2026-05-31`
-- `#4818` closed `2026-05-31`
-- `#4819` closed `2026-05-30`
-- `#4820` closed `2026-05-31`
-- `#4821` closed `2026-05-30`
-- `#4825` closed `2026-05-31`
-- `#4826` closed `2026-05-31`
-- `#4827` closed `2026-05-31`
-- `#4828` closed `2026-05-30`
-
-### Stream B — archived (`0` open)
-
-Closed on `2026-05-31` and no longer part of the active queue:
-
-- `#4764` umbrella program
-- `#4765` YAML parse gate for `contracts/chembl/activity.yaml`
-- `#4766` CLI health composition seam
-- `#4767` contract coverage matrix + Gold parity
-- `#4768` strict Gold validation + composite waiver policy
-- `#4769` release-critical Bronze fixture gaps
-- `#4770` compatibility usage graph + no-new-shim gate
-- `#4771` low-risk shim removal batch
-- `#4772` warnings-as-errors outside compatibility suites
-
-### Stream C — active (`3` open)
-
-- `#4610` AR-002 control-plane decomposition
-- `#4701` narrow composition/config facades
-- `#4705` debt governance unification
-
-Closed Stream C issues already off the active queue:
-
-- `#4700` closed `2026-05-31`
-- `#4702` closed `2026-05-31`
-- `#4703` closed `2026-05-31`
-- `#4704` closed `2026-05-31`
-- `#4706` closed `2026-05-31`
-
-### Stream D — archived unless reopened (`0` open)
-
-GitHub closed on `2026-05-30`:
-
-- `#4266`, `#4268`, `#4276`, `#4292`, `#4293`, `#4294`, `#4295`, `#4296`,
-  `#4316`
-
-Execution implication:
-
-- remove Stream D from active critical path;
-- keep only evidence-watch verification if these surfaces regress or GH issues
-  reopen.
-
-### Stream E — archived unless reopened (`0` open)
-
-- `#4747` closed on `2026-05-30`
-- local mirror `.github/ISSUES/SECURITY-4747-Env-Prefix-Policy-Exception.md`
-  already matches current GitHub state
-
-## Updated Roadmap
-
-### Week 0 — rebaseline and stale-mirror cleanup
-
-This is no longer an evidence-restore week. It is now a reconciliation week:
-
-1. Sync stale local planning surfaces with GitHub state:
-   - `.github/ISSUES/TECH-DEBT-ZERO-BURNDOWN-EPIC.md`
-   - any local plan/report still claiming Stream D/E are active
-2. Re-run baseline gates:
-   - config matrix
-   - root cleanliness
-   - debt scorecard
-   - targeted architecture/governance suite
-3. Lock the active execution queue to Streams `A-C`.
-
-Exit:
-
-- no local plan still contradicts the current GitHub state for Stream A/B closeouts;
-- no current plan still treats closed Stream A, B, D, or E issues as active;
-- active queue explicitly equals the `4` open issues above.
-
-### Weeks 1-3 — Stream A core (P0)
-
-Notes:
-
-- `#4812-#4815` are all closed on GitHub `2026-05-31`.
-- duplicate baseline for the former P0 wave is `0` across the tracked
-  families.
-
-### Weeks 3-5 — Stream B core
-
-Notes:
-
-- `#4764-#4772` are all closed on GitHub `2026-05-31`.
-- completed `#4767` outputs still feed Stream A `#4818`.
-- completed `#4768` leaves only archival/watch obligations for composite Gold
-  strictness policy.
-- ChEMBL target `v2.0` must remain under ADR-036 migration discipline.
-
-### Weeks 5-7 — Stream A residual
-
-Notes:
-
-- `#4816`, `#4817`, `#4818`, `#4820`, `#4825`, `#4826`, `#4827` are closed on
-  GitHub `2026-05-31`.
-- residual Stream A work is now reduced to epic `#4811` closeout only.
-
-### Weeks 6-8 — Stream C
-
-- `#4701`
-- `#4705`
-- `#4610`
-
-Ordering rule:
-
-- `#4701` remains the practical entrypoint into the residual control-plane
-  wave.
-- `#4702/#4703/#4704/#4706` are already closed on GitHub `2026-05-31`.
-
-### Week 9 — archived Stream B watch mode
-
-- keep `#4764-#4772` in watch mode only unless a GitHub reopen occurs
-
-### Week 10 — closeout
-
-Closeout target is no longer “39 -> 0”; it is:
-
-- active program queue `4 -> 0`;
-- no reopened Stream D/E regressions;
-- no stale local mirror contradicting GitHub state.
-
-## Current Execution Queue
-
-### Now
-
-1. Refresh local plan/mirror surfaces that still encode stale issue state.
-2. Run baseline governance checks for config matrix, debt scorecard, root
-   cleanliness, and targeted architecture suites.
-3. Start implementation backlog with:
-   - Stream C `#4701`
-
-### Next
-
-1. Stream C `#4701`
-2. Stream C `#4705`
-3. Stream C `#4610`, then epic `#4811` closeout prep
-
-### Blocked by internal sequencing
-
-- epic `#4811` can only close after the remaining open Stream C queue is
-  exhausted
-- `#4701`, `#4705`, and `#4610` still define the active Stream C path
-- no new closed-stream work should reopen `#4764-#4772` or closed Stream A
-  sub-issues without a fresh GitHub state change
-
-## Validation Commands (v4)
-
-Use GitHub REST API in this workspace because `gh` is not installed locally.
-
-```bash
-# Active queue snapshot
-python3 - <<'PY'
-import json, urllib.request
-url = "https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/issues?state=open&per_page=100"
-with urllib.request.urlopen(url) as r:
-    data = json.load(r)
-print(len(data))
-PY
-
-# Targeted issue states
-curl -fsSL https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/issues/4814
-curl -fsSL https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/issues/4747
-curl -fsSL https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/issues/4292
-
-# Baseline governance
-uv run python -m scripts.schema generate-config-matrix --check
-uv run python docs/00-project/ai/agents/scripts/architecture-techdebt-automation.py
-uv run python -m pytest tests/architecture/test_quality_debt_scorecard.py -q
-uv run python -m pytest tests/architecture/test_regression_metrics.py -q
-uv run python -m pytest \
-  tests/architecture/test_compatibility_importer_census_governance.py \
-  tests/architecture/test_compatibility_freeze_guards.py \
-  tests/architecture/test_bootstrap_layer_boundaries.py \
-  tests/architecture/test_pipeline_config_idempotency_contract.py -q
-
-# Root hygiene
-./.venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked
-uv run python -m scripts.engineering.repo check-cleanliness --strict-untracked --check-local-forbidden-outputs
-```
-
-## Rules For This v4 Wave
-
-- GitHub issue state is source of truth for execution status.
-- Local `.github/ISSUES/*.md` mirrors may lag and must be synchronized when they
-  contradict GitHub.
-- Do not spend execution budget on Stream D/E unless a GitHub reopen happens.
-- Do not treat `_run_manifest_support` as a valid private compatibility seam;
-  any return would be a regression.
-- Keep ADR-036, ADR-046, ADR-047, ADR-048 constraints unchanged.
-- Keep Python baseline `>=3.12`; do not backport the plan to older runtimes.
-
-## Definition Of Done For v4
-
-`v4` is complete only when all of the following hold:
-
-1. Active tech-debt eradication queue reaches `0` open issues across Streams
-   `A-C`.
-2. No Stream D/E issue has reopened without a documented new evidence pack.
-3. Local planning mirrors no longer contradict GitHub on issue open/closed
-   state.
-4. Twin-module ratchet remains at `3` tracked families with no growth.
-5. `compatibility_test_file_max` is reduced or kept flat with explicit owner
-   rationale.
-6. ChEMBL target `v2.0` remains green under contract/config/test validation.
+- `configs/quality/observability_metric_governance.yaml`
+- `tests/architecture/test_hotspot_duplication_family_ratchets.py`
+- `tests/architecture/test_compatibility_importer_census_governance.py`
+- `tests/architecture/test_contract_coverage_matrix_drift.py`
+- `tests/architecture/test_observability_metric_governance.py`
+
+## Next Actions
+
+1. Finish `#4610` with responsibility-owned control-plane decomposition.
+2. Re-verify the live tech-debt queue on GitHub.
+3. Close epic `#4811` only after the live queue is exhausted and no-governance-growth guards remain green.

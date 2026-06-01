@@ -86,12 +86,12 @@ if TYPE_CHECKING:
         PolarSurfaceArea,
         RotatableBondCount,
     )
-    from bioetl.domain.value_objects.publications import DOI, PubMedId
     from bioetl.domain.value_objects.protein_class_hierarchy import (
         ProteinClassHierarchy,
-        ProteinClassLevel,
         ProteinClassificationResolutionError,
+        ProteinClassLevel,
     )
+    from bioetl.domain.value_objects.publications import DOI, PubMedId
     from bioetl.domain.value_objects.taxonomy_id import TaxonomyId, validate_taxonomy_id
 
 _MODULE_ACADEMIC_IDS = "bioetl.domain.value_objects.academic_ids"
@@ -229,12 +229,12 @@ __all__ = [
     "OpenAlexId",
     "PChemblValue",
     "PolarSurfaceArea",
-    "PubChemCid",
-    "PubMedId",
-    "PublicationYear",
     "ProteinClassHierarchy",
     "ProteinClassLevel",
     "ProteinClassificationResolutionError",
+    "PubChemCid",
+    "PubMedId",
+    "PublicationYear",
     "RelationOperator",
     "RotatableBondCount",
     "SemanticScholarId",

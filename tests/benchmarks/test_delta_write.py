@@ -4,6 +4,7 @@ Measures Delta Lake write throughput with merge/append operations.
 """
 
 import asyncio
+import os
 import sys
 from dataclasses import replace
 from datetime import UTC, datetime
@@ -21,11 +22,20 @@ from bioetl.infrastructure.storage.delta.resilience import (
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 from tests.benchmarks.conftest import calculate_payload_size_mb
 
+_WINDOWS_PLATFORM = sys.platform == "win32" or os.name == "nt"
+
+# Delta-rs cold startup can exceed the production write budget on local Windows
+# filesystems and Windows-backed mounts. Keep benchmark safety windows separate
+# from runtime policy so these tests measure throughput rather than timeout
+# calibration.
+PYTEST_TIMEOUT = 360 if _WINDOWS_PLATFORM else 180
+DELTA_WRITE_TIMEOUT_SECONDS = 300.0 if _WINDOWS_PLATFORM else 150.0
+
 pytestmark = [
     pytest.mark.benchmark,
     pytest.mark.performance,
     pytest.mark.serial,
-    pytest.mark.timeout(120),
+    pytest.mark.timeout(PYTEST_TIMEOUT),
 ]
 
 
@@ -103,10 +113,7 @@ def _create_silver_writer(base_path: Path) -> SilverWriter:
         logger=FakeLogger(),
         merge_resilience_policy=replace(
             build_default_silver_merge_policy(),
-            # Benchmarks run inside pytest's outer timeout and should measure merge
-            # throughput rather than trip the production-facing 45s safety window
-            # on slower local Windows filesystems.
-            execution_timeout_seconds=90.0,
+            execution_timeout_seconds=DELTA_WRITE_TIMEOUT_SECONDS,
         ),
     )
 

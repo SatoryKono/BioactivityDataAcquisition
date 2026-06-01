@@ -15,6 +15,7 @@ from bioetl.application.core.wiring.registry import (
     PublicationTransformer,
     SubcellularFractionTransformer,
     TargetComponentTransformer,
+    TargetProteinClassificationTransformer,
     TargetTransformer,
     TissueTransformer,
 )
@@ -33,6 +34,7 @@ from bioetl.domain.contracts.gold import (
     ChEMBLSubcellularFractionGoldSchema,
     ChEMBLTargetComponentGoldSchema,
     ChEMBLTargetGoldSchema,
+    ChEMBLTargetProteinClassificationGoldSchema,
     ChEMBLTissueGoldSchema,
 )
 from bioetl.domain.schemas.chembl.activity import ActivitySchema
@@ -54,6 +56,9 @@ from bioetl.domain.schemas.chembl.subcellular_fraction import (
 )
 from bioetl.domain.schemas.chembl.target import TargetSchema
 from bioetl.domain.schemas.chembl.target_component import TargetComponentSchema
+from bioetl.domain.schemas.chembl.target_protein_classification import (
+    TargetProteinClassificationSchema,
+)
 from bioetl.domain.schemas.chembl.tissue import TissueSchema
 from bioetl.infrastructure.schemas.silver import (
     CHEMBL_ACTIVITY_SCHEMA,
@@ -68,6 +73,7 @@ from bioetl.infrastructure.schemas.silver import (
     CHEMBL_PUBLICATION_SCHEMA,
     CHEMBL_SUBCELLULAR_FRACTION_SCHEMA,
     CHEMBL_TARGET_COMPONENT_SCHEMA,
+    CHEMBL_TARGET_PROTEIN_CLASSIFICATION_SCHEMA,
     CHEMBL_TARGET_SCHEMA,
     CHEMBL_TISSUE_SCHEMA,
 )
@@ -171,6 +177,15 @@ CHEMBL_PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         silver_schema=CHEMBL_TARGET_COMPONENT_SCHEMA,
         gold_schema=ChEMBLTargetComponentGoldSchema,
         pandera_silver_schema=TargetComponentSchema,
+    ),
+    PipelineFactoryConfig(
+        pipeline_name="chembl_target_protein_classification",
+        provider="chembl",
+        entity_type="target_protein_classification",
+        transformer_class=TargetProteinClassificationTransformer,
+        silver_schema=CHEMBL_TARGET_PROTEIN_CLASSIFICATION_SCHEMA,
+        gold_schema=ChEMBLTargetProteinClassificationGoldSchema,
+        pandera_silver_schema=TargetProteinClassificationSchema,
     ),
     PipelineFactoryConfig(
         pipeline_name="chembl_protein_class",

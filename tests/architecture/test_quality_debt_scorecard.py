@@ -33,6 +33,7 @@ from bioetl.infrastructure.quality import (
 from scripts.engineering.qa.report_test_governance_audit import (
     collect_test_governance_report,
 )
+from scripts.engineering.qa.report_dead_code_inventory import build_dead_code_inventory
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -304,6 +305,11 @@ def test_debt_scorecard_declares_compatibility_debt_kpis() -> None:
         compatibility.get("sunset_source")
         == "configs/quality/compatibility_facade_inventory.yaml#transition_debt"
     )
+    assert compatibility.get("owner") == "@bioetl-architecture"
+    assert compatibility.get("review_cadence") == "quarterly"
+    assert isinstance(compatibility.get("review_policy"), str) and compatibility[
+        "review_policy"
+    ]
 
     metrics = compatibility.get("metrics", {})
     assert isinstance(metrics, dict)
@@ -397,6 +403,97 @@ def test_debt_scorecard_declares_public_entrypoint_governance_kpis() -> None:
         assert isinstance(metric.get("rationale"), str) and metric["rationale"]
         assert metric.get("review_cadence") == "quarterly"
         assert isinstance(metric.get("review_policy"), str) and metric["review_policy"]
+
+
+def test_debt_scorecard_declares_runtime_uuid_governance_kpis() -> None:
+    """Runtime UUID governance must track sanctioned seams and forbid replay drift."""
+    scorecard = load_debt_scorecard()
+    governance = scorecard.get("runtime_uuid_governance_metrics", {})
+    assert isinstance(governance, dict)
+    assert governance.get("inventory_source") == "configs/quality/runtime_uuid_seams.yaml"
+    assert governance.get("owner") == "@bioetl-architecture"
+    assert governance.get("linked_issue") == "#4705"
+    assert governance.get("review_cadence") == "quarterly"
+    assert isinstance(governance.get("review_policy"), str) and governance[
+        "review_policy"
+    ]
+
+    inventory_payload = yaml.safe_load(
+        (ROOT / "configs" / "quality" / "runtime_uuid_seams.yaml").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert isinstance(inventory_payload, dict)
+    seams = inventory_payload.get("seams", [])
+    assert isinstance(seams, list)
+
+    expected_counts = {
+        "runtime_uuid_seam_count": len(
+            [entry for entry in seams if isinstance(entry, dict)]
+        ),
+        "replay_critical_uuid_seam_count": sum(
+            1
+            for entry in seams
+            if isinstance(entry, dict) and entry.get("replay_critical")
+        ),
+    }
+
+    metrics = governance.get("metrics", {})
+    assert isinstance(metrics, dict)
+    for metric_name, expected_count in expected_counts.items():
+        metric = metrics.get(metric_name)
+        assert isinstance(metric, dict)
+        assert metric.get("current_count") == expected_count
+        assert metric.get("max_count") == expected_count
+        assert isinstance(metric.get("owner"), str) and metric["owner"]
+        assert isinstance(metric.get("linked_issue"), str) and metric["linked_issue"]
+        assert isinstance(metric.get("rationale"), str) and metric["rationale"]
+        assert isinstance(metric.get("ratchet_policy"), str) and metric["ratchet_policy"]
+
+
+def test_debt_scorecard_declares_retirement_governance_kpis() -> None:
+    """Retirement/dead-code governance must stay synchronized with live review debt."""
+    scorecard = load_debt_scorecard()
+    governance = scorecard.get("retirement_governance_metrics", {})
+    assert isinstance(governance, dict)
+    assert (
+        governance.get("inventory_source")
+        == "configs/quality/retirement_candidate_triage.yaml"
+    )
+    assert governance.get("owner") == "@bioetl-architecture"
+    assert governance.get("linked_issue") == "#4705"
+    assert governance.get("review_cadence") == "quarterly"
+    assert isinstance(governance.get("review_policy"), str) and governance[
+        "review_policy"
+    ]
+
+    inventory = build_dead_code_inventory(ROOT)
+    summary = inventory.get("summary", {})
+    assert isinstance(summary, dict)
+    expected_counts = {
+        "triaged_entry_count": int(summary["triaged_entry_count"]),
+        "repo_wide_zero_import_candidate_count": int(
+            summary["repo_wide_zero_import_candidate_count"]
+        ),
+        "repo_wide_classified_zero_import_candidate_count": int(
+            summary["repo_wide_classified_zero_import_candidate_count"]
+        ),
+        "repo_wide_untriaged_zero_import_candidate_count": int(
+            summary["repo_wide_untriaged_zero_import_candidate_count"]
+        ),
+    }
+
+    metrics = governance.get("metrics", {})
+    assert isinstance(metrics, dict)
+    for metric_name, expected_count in expected_counts.items():
+        metric = metrics.get(metric_name)
+        assert isinstance(metric, dict)
+        assert metric.get("current_count") == expected_count
+        assert metric.get("max_count") == expected_count
+        assert isinstance(metric.get("owner"), str) and metric["owner"]
+        assert isinstance(metric.get("linked_issue"), str) and metric["linked_issue"]
+        assert isinstance(metric.get("rationale"), str) and metric["rationale"]
+        assert isinstance(metric.get("ratchet_policy"), str) and metric["ratchet_policy"]
 
 
 def test_debt_scorecard_config_surface_ratchet_matches_baseline() -> None:
@@ -541,6 +638,10 @@ def test_debt_scorecard_declares_test_governance_debt_kpis() -> None:
         governance.get("inventory_source")
         == "configs/quality/test_governance_audit.yaml"
     )
+    assert governance.get("review_cadence") == "quarterly"
+    assert isinstance(governance.get("review_policy"), str) and governance[
+        "review_policy"
+    ]
 
     audit_payload = yaml.safe_load(
         (ROOT / "configs" / "quality" / "test_governance_audit.yaml").read_text(

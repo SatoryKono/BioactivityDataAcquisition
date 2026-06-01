@@ -276,7 +276,7 @@ entries:
       rule_bundle_version: "dq-rules.v1.0"
       normalization_profile_ref: "chembl.target"
       normalization_profile_version: "1.0.0"
-      normalization_profile_hash: "746da0091c51435886d320b4582aae8f0b1701abf37885a045183d4bb125ff5c"
+      normalization_profile_hash: "0a8e07a188e376ddd2156a70551cd3c431be4b4bdf7b0cea4957deff6c16abc3"
     status: "active"
     source_path: "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py"
     published_artifacts:
@@ -289,7 +289,7 @@ entries:
     rule_bundle_version: "dq-rules.v1.0"
     normalization_profile_ref: "chembl.target"
     normalization_profile_version: "1.0.0"
-    normalization_profile_hash: "746da0091c51435886d320b4582aae8f0b1701abf37885a045183d4bb125ff5c"
+    normalization_profile_hash: "0a8e07a188e376ddd2156a70551cd3c431be4b4bdf7b0cea4957deff6c16abc3"
 
   chembl.target_component:
     identity:
@@ -314,6 +314,30 @@ entries:
     normalization_profile_ref: "chembl.target_component"
     normalization_profile_version: "1.0.0"
     normalization_profile_hash: "8ee0e227e3cb30ba20c6ac92653e146ba74167f5ee0c7c17420bc51e706d05f4"
+
+  chembl.target_protein_classification:
+    identity:
+      contract_version: "1.0.0"
+      compatibility_level: "major"
+      schema_hash: "549c80a3aa3f69b0ac175321a30d026406a746d58b0608af5d2648dc9f0ab3da"
+      dq_policy_ref: "chembl.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+      normalization_profile_ref: "chembl.target_protein_classification"
+      normalization_profile_version: "1.0.0"
+      normalization_profile_hash: "de3560c2420dda5bb14438ae4ca7127c0d367a9eeacb866efbca54b0c22b5de1"
+    status: "active"
+    source_path: "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py"
+    published_artifacts:
+      - "../../docs/04-reference/contracts/gold/chembl_target_protein_classification_v1.0.json"
+    supported_versions: ["1.0.0"]
+    migration_guides: {}
+    last_updated: "2026-05-31T00:00:00Z"
+    owners: ["chembl-team"]
+    dq_policy_ref: "chembl.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+    normalization_profile_ref: "chembl.target_protein_classification"
+    normalization_profile_version: "1.0.0"
+    normalization_profile_hash: "de3560c2420dda5bb14438ae4ca7127c0d367a9eeacb866efbca54b0c22b5de1"
 
   chembl.tissue:
     identity:

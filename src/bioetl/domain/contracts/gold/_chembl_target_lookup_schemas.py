@@ -39,6 +39,7 @@ class ChEMBLTargetGoldSchema(StrictGoldContractSchema):
     primary_component_id: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # int → float (nullable)
+    protein_classifications: Series[str] = pa.Field(nullable=True)
     component_accessions: Series[str] = pa.Field(nullable=True)  # list[str]
     component_descriptions: Series[str] = pa.Field(nullable=True)
     component_ids: Series[str] = pa.Field(nullable=True)  # list[int]

@@ -3,15 +3,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
 
 from bioetl.domain.entities.base import BaseEntity
 from bioetl.domain.entities.publication_base import PublicationEntityBase
-
-if TYPE_CHECKING:
-    from bioetl.domain.value_objects.protein_class_hierarchy import (
-        ProteinClassHierarchy,
-    )
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -90,7 +84,7 @@ class Target(BaseEntity):
     component_types: list[str] | None = None
     component_relationships: list[str] | None = None
     component_descriptions: list[str] | None = None
-    protein_classifications: tuple[ProteinClassHierarchy, ...] = ()
+    protein_classifications: str | None = None
 
     def _validate_invariants(self) -> None:
         if not self.target_id:
@@ -116,6 +110,44 @@ class TargetComponent(BaseEntity):
     def _validate_invariants(self) -> None:
         if not self.component_id:
             raise ValueError("Component ID is required")
+
+
+@dataclass(frozen=True, kw_only=True)
+class TargetProteinClassification(BaseEntity):
+    """Represents a derived target-to-protein-classification relation row."""
+
+    target_id: str
+    hierarchy_index: int
+    component_id: int | None = None
+    leaf_id: int | None = None
+    l1_id: int | None = None
+    l1_name: str | None = None
+    l1_desc: str | None = None
+    l2_id: int | None = None
+    l2_name: str | None = None
+    l2_desc: str | None = None
+    l3_id: int | None = None
+    l3_name: str | None = None
+    l3_desc: str | None = None
+    l4_id: int | None = None
+    l4_name: str | None = None
+    l4_desc: str | None = None
+    l5_id: int | None = None
+    l5_name: str | None = None
+    l5_desc: str | None = None
+    classification_status: str = "resolved"
+
+    def _validate_invariants(self) -> None:
+        if not self.target_id:
+            raise ValueError("Target ChEMBL ID is required")
+        if self.hierarchy_index < 0:
+            raise ValueError("Hierarchy index must be non-negative")
+        if self.classification_status not in {
+            "resolved",
+            "missing_classification",
+            "quarantined",
+        }:
+            raise ValueError("Invalid protein classification status")
 
 
 @dataclass(frozen=True, kw_only=True)

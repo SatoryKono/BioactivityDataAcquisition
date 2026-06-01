@@ -27,8 +27,8 @@
 | `src/bioetl/interfaces/cli/commands/quarantine.py` | 1 | 0 |
 | `src/bioetl/interfaces/cli/commands/maintenance.py` | 6 | 0 |
 | `src/bioetl/composition/entrypoints.py` | 0 | 3 |
-| `src/bioetl/composition/health_api.py` | 0 | 2 |
-| `src/bioetl/composition/maintenance_api.py` | 0 | 1 |
+| `src/bioetl/composition/health_api.py` | 1 | 2 |
+| `src/bioetl/composition/maintenance_api.py` | 1 | 1 |
 | `src/bioetl/infrastructure/config/__init__.py` | 0 | 2 |
 | `src/bioetl/domain/composite/config.py` | 79 | 34 |
 | `src/bioetl/domain/value_objects/activity_values.py` | 7 | 1 |

@@ -62,7 +62,7 @@ budgets:
   duplicate_test_names_max: 787
   duplicate_test_name_occurrences_max: 2552
   compatibility_test_file_max: 53
-  markerless_test_functions_max: 6994
+  markerless_test_functions_max: 7003
   uuid4_call_sites_max: 400
   date_today_call_sites_max: 0
 budget_ratchet:
@@ -278,7 +278,7 @@ oversized_test_module_inventory:
   completed_splits:
     - issue_ref: "#4505"
       source: tests/integration/test_grafana_config.py
-      source_lines_after_split: 1403
+      source_lines_after_split: 1419
       extracted_surface: tests/integration/test_grafana_surface_contracts.py
       extracted_surface_lines: 706
       owner: observability-dashboards

@@ -7,7 +7,7 @@ from __future__ import annotations
 
 __all__ = ["TargetTransformer"]
 
-
+from collections.abc import Mapping
 from typing import TYPE_CHECKING, ClassVar, cast
 
 from bioetl.application.core.dict_transformers import (
@@ -32,6 +32,13 @@ from bioetl.domain.value_objects.taxonomy_id import TaxonomyId
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import BronzeRecord, PrimaryId, SilverRecord
+
+_MULTIFUNCTIONAL_TARGET_L1_NAME = "Multifunctional target"
+_PROTEIN_CLASSIFICATION_ID_KEYS = (
+    "leaf_id",
+    "protein_classification_id",
+    "protein_class_id",
+)
 
 
 class TargetTransformer(BaseChemblTransformer):
@@ -60,10 +67,6 @@ class TargetTransformer(BaseChemblTransformer):
         Returns:
             Dict with aggregated lists for accessions, IDs, types, relationships,
             and descriptions.
-
-        Note:
-            protein_classifications are NOT available in /target endpoint.
-            They are only available via /target_component endpoint.
 
         """
         return ComponentHelper.flatten_target_components(
@@ -125,6 +128,9 @@ class TargetTransformer(BaseChemblTransformer):
         )
         component_xrefs = XrefHelper.collect_component_xrefs(target_components)
         xref_projection = XrefHelper.project_component_xrefs(component_xrefs)
+        protein_classifications = self._project_protein_classifications(
+            target_components
+        )
 
         # Validate taxonomy_id using TaxonomyId Value Object
         raw_tax_id = record.get("tax_id")
@@ -165,6 +171,7 @@ class TargetTransformer(BaseChemblTransformer):
             "target_xref_uniprot_ids": xref_projection["target_xref_uniprot_ids"],
             # Primary component ID (for target_component enricher join)
             "primary_component_id": primary_component_id,
+            "protein_classifications": protein_classifications,
             # Flattened components
             **serialized_flattened_components,
             # Complex fields (JSON serialized)
@@ -191,6 +198,9 @@ class TargetTransformer(BaseChemblTransformer):
             description = business_data.get("description")
         silver_record.pop("description", None)
         silver_record["target_description"] = description
+        silver_record["protein_classifications"] = business_data.get(
+            "protein_classifications"
+        )
         return silver_record
 
     def transform_for_gold(
@@ -203,3 +213,113 @@ class TargetTransformer(BaseChemblTransformer):
         description = gold_record.pop("target_description", None)
         gold_record["description"] = description
         return gold_record
+
+    def _project_protein_classifications(
+        self,
+        components: list[JsonDict] | None,
+    ) -> str | None:
+        """Project component protein classifications into target-level JSON."""
+        classifications = _collect_protein_classifications(components)
+        if not classifications:
+            return None
+        if len(classifications) == 1:
+            return self.serialize_json_list(classifications)
+        return self.serialize_json_list(
+            [
+                {
+                    "classification_status": "resolved",
+                    "l1_name": _MULTIFUNCTIONAL_TARGET_L1_NAME,
+                    "source_classifications": classifications,
+                    "source_hierarchy_count": len(classifications),
+                    "source_leaf_ids": [
+                        classification["leaf_id"]
+                        for classification in classifications
+                    ],
+                }
+            ]
+        )
+
+
+def _collect_protein_classifications(
+    components: list[JsonDict] | None,
+) -> list[JsonDict]:
+    """Collect unique component classification payloads in leaf-id order."""
+    if not components:
+        return []
+
+    by_leaf_id: dict[int, JsonDict] = {}
+    for component in components:
+        raw_classifications = component.get("protein_classifications")
+        if not isinstance(raw_classifications, list):
+            continue
+        for raw_classification in raw_classifications:
+            classification = _normalize_protein_classification(raw_classification)
+            if classification is None:
+                continue
+            leaf_id = cast("int", classification["leaf_id"])
+            by_leaf_id.setdefault(leaf_id, classification)
+    return [by_leaf_id[leaf_id] for leaf_id in sorted(by_leaf_id)]
+
+
+def _normalize_protein_classification(value: object) -> JsonDict | None:
+    """Normalize one protein classification item for deterministic JSON output."""
+    if not isinstance(value, Mapping):
+        return None
+    leaf_id = _protein_classification_leaf_id(value)
+    if leaf_id is None:
+        return None
+
+    classification: JsonDict = {
+        str(key): item
+        for key, item in value.items()
+        if item is not None and str(key).strip()
+    }
+    classification["classification_status"] = "resolved"
+    classification["leaf_id"] = leaf_id
+    classification.setdefault("protein_classification_id", leaf_id)
+    return classification
+
+
+def _protein_classification_leaf_id(value: Mapping[object, object]) -> int | None:
+    """Extract a positive protein classification leaf ID from a raw item."""
+    for key in _PROTEIN_CLASSIFICATION_ID_KEYS:
+        leaf_id = _coerce_positive_int(value.get(key))
+        if leaf_id is not None:
+            return leaf_id
+    return None
+
+
+def _coerce_positive_int(value: object) -> int | None:
+    if value is None or isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        return _positive_int_or_none(value)
+    if isinstance(value, float):
+        return _coerce_positive_int_from_float(value)
+    if isinstance(value, str):
+        return _coerce_positive_int_from_str(value)
+    return None
+
+
+def _positive_int_or_none(value: int) -> int | None:
+    """Return positive integers unchanged, otherwise None."""
+    return value if value > 0 else None
+
+
+def _coerce_positive_int_from_float(value: float) -> int | None:
+    """Coerce integral positive floats to int."""
+    if not value.is_integer():
+        return None
+    return _positive_int_or_none(int(value))
+
+
+def _coerce_positive_int_from_str(value: str) -> int | None:
+    """Coerce positive integer strings to int."""
+    stripped = value.strip()
+    if not stripped:
+        return None
+    try:
+        coerced = int(stripped)
+    except ValueError:
+        return None
+    return _positive_int_or_none(coerced)

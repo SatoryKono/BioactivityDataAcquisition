@@ -25,9 +25,12 @@ SCORECARD_PATH = PROJECT_ROOT / "configs/quality/debt_scorecard.yaml"
 RESIDUAL_CATEGORIES = frozenset(
     {
         "extraction_params_entity_specific",
+        "filter_metadata_entity_specific",
         "gold_filter_entity_specific",
-        "silver_filter_entity_specific",
         "pipeline_overrides",
+        "quality_metadata_entity_specific",
+        "schema_field_aliases_entity_specific",
+        "silver_filter_entity_specific",
         "quality_thresholds",
     }
 )

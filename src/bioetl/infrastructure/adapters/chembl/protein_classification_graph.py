@@ -2,16 +2,15 @@
 
 from __future__ import annotations
 
+import json
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
-from functools import lru_cache
-import json
 
-from bioetl.domain.ports.protein_classification import ProteinClassificationPort
+from bioetl.domain.ports import ProteinClassificationPort
 from bioetl.domain.value_objects.protein_class_hierarchy import (
     ProteinClassHierarchy,
-    ProteinClassLevel,
     ProteinClassificationResolutionError,
+    ProteinClassLevel,
 )
 
 __all__ = [
@@ -46,6 +45,7 @@ class ChEMBLProteinClassificationGraph(ProteinClassificationPort):
             component_id: tuple(dict.fromkeys(leaf_ids))
             for component_id, leaf_ids in component_leaf_ids.items()
         }
+        self._hierarchy_cache: dict[int, ProteinClassHierarchy] = {}
 
     @classmethod
     def from_rows(
@@ -86,11 +86,13 @@ class ChEMBLProteinClassificationGraph(ProteinClassificationPort):
         hierarchies = [self._hierarchy_for_leaf_id(leaf_id) for leaf_id in leaf_ids]
         return tuple(sorted(hierarchies, key=lambda hierarchy: hierarchy.leaf_id))
 
-    @lru_cache(maxsize=8192)
     def _hierarchy_for_leaf_id(self, leaf_id: int) -> ProteinClassHierarchy:
+        cached = self._hierarchy_cache.get(leaf_id)
+        if cached is not None:
+            return cached
         resolved_leaf_id = self._resolve_replacement(leaf_id)
         levels = self._walk_levels(resolved_leaf_id)
-        return ProteinClassHierarchy(
+        hierarchy = ProteinClassHierarchy(
             l1=levels.get(1, ProteinClassLevel.empty()),
             l2=levels.get(2, ProteinClassLevel.empty()),
             l3=levels.get(3, ProteinClassLevel.empty()),
@@ -98,6 +100,8 @@ class ChEMBLProteinClassificationGraph(ProteinClassificationPort):
             l5=levels.get(5, ProteinClassLevel.empty()),
             leaf_id=resolved_leaf_id,
         )
+        self._hierarchy_cache[leaf_id] = hierarchy
+        return hierarchy
 
     def _resolve_replacement(self, leaf_id: int) -> int:
         current_id = leaf_id

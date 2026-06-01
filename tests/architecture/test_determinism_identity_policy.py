@@ -239,6 +239,41 @@ def test_determinism_identity_policy_has_expected_shape() -> None:
     }
     assert isinstance(hash_policy_budget.get("ratchet_policy"), str)
 
+    artifact_contract = payload.get("artifact_identity_contract")
+    assert isinstance(artifact_contract, dict)
+    operational_artifacts = artifact_contract.get("operational_correlation_artifacts")
+    semantic_anchors = artifact_contract.get("semantic_identity_anchors")
+    assert isinstance(operational_artifacts, list) and operational_artifacts
+    assert isinstance(semantic_anchors, list) and semantic_anchors
+
+    expected_semantic_artifacts = {
+        "control_plane.run_manifest.execution_fingerprint",
+        "control_plane.run_manifest.exact_replay_anchors",
+        "runtime.checkpoint_execution_identity",
+    }
+    seen_semantic_artifacts: set[str] = set()
+    for entry in operational_artifacts:
+        assert isinstance(entry, dict)
+        assert str(entry.get("artifact", "")).strip()
+        allowed_fields = entry.get("allowed_occurrence_identity_fields")
+        assert isinstance(allowed_fields, list) and allowed_fields
+        assert str(entry.get("rationale", "")).strip()
+
+    for entry in semantic_anchors:
+        assert isinstance(entry, dict)
+        artifact = str(entry.get("artifact", "")).strip()
+        assert artifact
+        seen_semantic_artifacts.add(artifact)
+        required_fields = entry.get("required_fields")
+        forbidden_fields = entry.get("forbidden_occurrence_identity_fields")
+        assert isinstance(required_fields, list) and required_fields
+        assert isinstance(forbidden_fields, list) and forbidden_fields
+        assert not set(required_fields) & set(forbidden_fields), (
+            "Semantic identity contract cannot require and forbid the same field: "
+            f"{artifact}"
+        )
+    assert expected_semantic_artifacts <= seen_semantic_artifacts
+
     datetime_policy = payload.get("content_hash_datetime_policy")
     assert isinstance(datetime_policy, dict)
     assert datetime_policy.get("active_policy") == "v2_datetime_utc"

@@ -33,7 +33,13 @@ _SPECIALIZED_CHEMBL_FIXTURE_CONTRACT_REFS = {
     "chembl.publication_term",
     "chembl.subcellular_fraction",
 }
-_ALLOWED_ACTIVE_REGISTRY_REFS_WITHOUT_ENTITY_CONFIG: frozenset[str] = frozenset()
+_ALLOWED_ACTIVE_REGISTRY_REFS_WITHOUT_ENTITY_CONFIG: frozenset[str] = frozenset(
+    {
+        # Derived Gold relation produced from chembl_target, chembl_target_component,
+        # and chembl_protein_class rather than a standalone provider endpoint.
+        "chembl.target_protein_classification",
+    }
+)
 
 
 def _active_standard_contract_refs() -> dict[str, str]:

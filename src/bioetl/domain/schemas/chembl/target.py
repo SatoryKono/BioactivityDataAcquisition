@@ -116,6 +116,10 @@ class TargetSchema(ETLRecordSchema):
         coerce=True,
         description="Primary component ID (first from list).",
     )
+    protein_classifications: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON string of aggregated component protein classifications.",
+    )
     component_accessions: Series[str] | None = pa.Field(
         nullable=True, description="Canonical JSON array of component accessions."
     )
@@ -135,6 +139,10 @@ class TargetSchema(ETLRecordSchema):
     # === Complex Fields (JSON Strings) ===
     target_components: Series[str] | None = pa.Field(
         nullable=True, description="JSON string of target components."
+    )
+    protein_classifications: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON string of aggregated component protein classifications.",
     )
     cross_references: Series[str] | None = pa.Field(
         nullable=True, description="JSON string of cross references."

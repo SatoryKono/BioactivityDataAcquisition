@@ -1,5 +1,5 @@
-version: 1.3.0
-updated_at: "2026-05-11"
+version: 1.4.0
+updated_at: "2026-06-01"
 fixtures:
   chembl/activity:
     fixture_kind: tracked_ci_sample
@@ -180,6 +180,17 @@ fixtures:
         owner: "data-platform"
         last_refresh: "2026-05-11"
         validation_status: valid
+  chembl/target_protein_classification:
+    fixture_kind: tracked_ci_sample
+    fixture_path: tests/fixtures/bronze/chembl/target_protein_classification/sample_ci_2026-06-01.jsonl
+    records: 20
+    provenance: "Bounded CI sample of shaped target-to-protein-classification relation rows derived from ChEMBL target_component and protein_class fixtures."
+    owner: "data-platform"
+    last_refresh: "2026-06-01"
+    validation_status: valid
+    source_entity: chembl/target_component
+    resolution_kind: deterministic_derived_relation_projection
+    extraction_contract: target_component_protein_classification_relation_rows
   chembl/tissue:
     fixture_kind: tracked_ci_sample
     fixture_path: tests/fixtures/bronze/chembl/tissue/sample_ci_2026-04-29.jsonl

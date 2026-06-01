@@ -23,6 +23,8 @@ from bioetl.infrastructure.schemas.silver import (
     UNIPROT_PROTEIN_SCHEMA,
 )
 
+pytestmark = pytest.mark.unit
+
 # Required system fields for all Silver schemas
 REQUIRED_SYSTEM_FIELDS = frozenset(
     {
@@ -287,6 +289,7 @@ class TestChemblTargetSchema:
         "target_xref_reactome_ids",
         "target_xref_uniprot_ids",
         "primary_component_id",
+        "protein_classifications",
         "component_accessions",
         "component_descriptions",
         "component_ids",
@@ -310,6 +313,7 @@ class TestChemblTargetSchema:
             "component_relationships",
             "component_descriptions",
             "component_ids",
+            "protein_classifications",
         ]
         for field_name in json_string_fields:
             assert field_name in CHEMBL_TARGET_SCHEMA.names

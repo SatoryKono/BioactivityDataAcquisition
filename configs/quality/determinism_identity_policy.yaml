@@ -21,6 +21,82 @@ compatibility_reduction_plan:
     - v2_datetime_utc
     ratchet_policy: Compatibility-only replay/hash aliases may stay only while they
       remain explicitly documented and outside semantic execution identity.
+artifact_identity_contract:
+  operational_correlation_artifacts:
+  - artifact: control_plane.run_manifest_occurrence_envelope
+    allowed_occurrence_identity_fields:
+    - manifest_id
+    - run_id
+    rationale: Persisted run manifests may retain occurrence lookup identifiers,
+      but those fields remain outside semantic replay anchors.
+  - artifact: control_plane.run_ledger_event_occurrence
+    allowed_occurrence_identity_fields:
+    - ledger_entry_id
+    - workflow_ledger_entry_id
+    rationale: Append-only ledger rows need per-event occurrence IDs for storage
+      and ordering only.
+  - artifact: workflow.execution_occurrence
+    allowed_occurrence_identity_fields:
+    - workflow_run_id
+    rationale: Workflow orchestration may publish per-occurrence run IDs while replay
+      semantics stay anchored by workflow manifests and fingerprints.
+  semantic_identity_anchors:
+  - artifact: control_plane.run_manifest.execution_fingerprint
+    required_fields:
+    - execution_fingerprint
+    - pipeline_name
+    - run_type
+    - effective_config_hash
+    - effective_config_artifact_id
+    forbidden_occurrence_identity_fields:
+    - manifest_id
+    - run_id
+    - ledger_entry_id
+    - workflow_ledger_entry_id
+    - workflow_run_id
+    - composite_run_id
+    - service_run_id
+    - log_correlation_run_id
+    - cli_preview_run_id
+    - metrics_gateway_correlation_run_id
+  - artifact: control_plane.run_manifest.exact_replay_anchors
+    required_fields:
+    - semantic_identity_anchor
+    - execution_fingerprint
+    - effective_config_hash
+    - effective_config_artifact_id
+    - input_snapshot_identity_fingerprint
+    forbidden_occurrence_identity_fields:
+    - manifest_id
+    - run_id
+    - ledger_entry_id
+    - workflow_ledger_entry_id
+    - workflow_run_id
+    - composite_run_id
+    - service_run_id
+    - log_correlation_run_id
+    - cli_preview_run_id
+    - metrics_gateway_correlation_run_id
+  - artifact: runtime.checkpoint_execution_identity
+    required_fields:
+    - pipeline_name
+    - run_type
+    - effective_config_hash
+    - effective_config_artifact_id
+    - contract_ref
+    - contract_version
+    - execution_fingerprint
+    forbidden_occurrence_identity_fields:
+    - manifest_id
+    - run_id
+    - ledger_entry_id
+    - workflow_ledger_entry_id
+    - workflow_run_id
+    - composite_run_id
+    - service_run_id
+    - log_correlation_run_id
+    - cli_preview_run_id
+    - metrics_gateway_correlation_run_id
 allowed_occurrence_identity_generators:
 - path: src/bioetl/composition/factories/batch_id_generator.py
   symbol: UuidBatchIdGenerator.create
@@ -287,6 +363,12 @@ content_hash_datetime_policy:
     configured_policy: v1_date
     status: documented_date_only
     rationale: Legacy v1_date hash datetime compatibility retained for chembl.target_component
+      until migration to v2_datetime_utc.
+  - provider: chembl
+    entity: target_protein_classification
+    configured_policy: v1_date
+    status: documented_date_only
+    rationale: Legacy v1_date hash datetime compatibility retained for chembl.target_protein_classification
       until migration to v2_datetime_utc.
   - provider: chembl
     entity: tissue

@@ -126,6 +126,9 @@ from bioetl.domain.schemas.chembl.subcellular_fraction import (
 )
 from bioetl.domain.schemas.chembl.target import TargetSchema
 from bioetl.domain.schemas.chembl.target_component import TargetComponentSchema
+from bioetl.domain.schemas.chembl.target_protein_classification import (
+    TargetProteinClassificationSchema,
+)
 from bioetl.domain.schemas.chembl.tissue import TissueSchema
 from bioetl.domain.schemas.crossref.publication import PublicationEnrichedSchema
 from bioetl.domain.schemas.openalex.publication import OpenAlexPublicationSchema
@@ -150,6 +153,7 @@ from bioetl.infrastructure.schemas.silver import (
     CHEMBL_PUBLICATION_SCHEMA,
     CHEMBL_SUBCELLULAR_FRACTION_SCHEMA,
     CHEMBL_TARGET_COMPONENT_SCHEMA,
+    CHEMBL_TARGET_PROTEIN_CLASSIFICATION_SCHEMA,
     CHEMBL_TARGET_SCHEMA,
     CHEMBL_TISSUE_SCHEMA,
     CROSSREF_PUBLICATION_SCHEMA,
@@ -265,6 +269,7 @@ ENTITY_SILVER_SCHEMA_REGISTRY: dict[str, Any] = {
     "chembl_subcellular_fraction": CHEMBL_SUBCELLULAR_FRACTION_SCHEMA,
     "chembl_target": CHEMBL_TARGET_SCHEMA,
     "chembl_target_component": CHEMBL_TARGET_COMPONENT_SCHEMA,
+    "chembl_target_protein_classification": CHEMBL_TARGET_PROTEIN_CLASSIFICATION_SCHEMA,
     "chembl_tissue": CHEMBL_TISSUE_SCHEMA,
     "crossref_publication": CROSSREF_PUBLICATION_SCHEMA,
     "openalex_publication": OPENALEX_PUBLICATION_SCHEMA,
@@ -289,6 +294,7 @@ ENTITY_DOMAIN_SCHEMA_REGISTRY: dict[str, Any] = {
     "chembl_subcellular_fraction": SubcellularFractionSchema,
     "chembl_target": TargetSchema,
     "chembl_target_component": TargetComponentSchema,
+    "chembl_target_protein_classification": TargetProteinClassificationSchema,
     "chembl_tissue": TissueSchema,
     "crossref_publication": PublicationEnrichedSchema,
     "openalex_publication": OpenAlexPublicationSchema,

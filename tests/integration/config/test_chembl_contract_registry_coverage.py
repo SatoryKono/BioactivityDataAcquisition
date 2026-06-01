@@ -89,6 +89,11 @@ _EXPECTED_CHEMBL_CONTRACT_SURFACE: dict[str, dict[str, str]] = {
         "artifact": "../../docs/04-reference/contracts/gold/chembl_target_component_v1.0.json",
         "contract_version": "1.0.0",
     },
+    "chembl.target_protein_classification": {
+        "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
+        "artifact": "../../docs/04-reference/contracts/gold/chembl_target_protein_classification_v1.0.json",
+        "contract_version": "1.0.0",
+    },
     "chembl.tissue": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
         "artifact": "../../docs/04-reference/contracts/gold/chembl_tissue_v1.0.json",

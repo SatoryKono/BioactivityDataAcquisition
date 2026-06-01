@@ -34,9 +34,35 @@ CUSTOM_ORDER_SCHEMAS = frozenset(
         "CHEMBL_DOCUMENT_TERM_SCHEMA",
         "CHEMBL_MOLECULE_SCHEMA",
         "CHEMBL_TARGET_SCHEMA",
+        "CHEMBL_TARGET_PROTEIN_CLASSIFICATION_SCHEMA",
         "PUBCHEM_COMPOUND_SCHEMA",
     }
 )
+
+CUSTOM_BUSINESS_FIELD_ORDER = {
+    "CHEMBL_TARGET_PROTEIN_CLASSIFICATION_SCHEMA": [
+        "target_id",
+        "component_id",
+        "hierarchy_index",
+        "leaf_id",
+        "l1_id",
+        "l1_name",
+        "l1_desc",
+        "l2_id",
+        "l2_name",
+        "l2_desc",
+        "l3_id",
+        "l3_name",
+        "l3_desc",
+        "l4_id",
+        "l4_name",
+        "l4_desc",
+        "l5_id",
+        "l5_name",
+        "l5_desc",
+        "classification_status",
+    ]
+}
 
 
 @cache
@@ -202,6 +228,15 @@ class TestSchemaColumnOrder:
         business_fields = [c for c in column_names if c not in ALL_SYSTEM_FIELDS]
 
         if schema_name in CUSTOM_ORDER_SCHEMAS:
+            custom_business_order = CUSTOM_BUSINESS_FIELD_ORDER.get(schema_name)
+            if custom_business_order is not None:
+                assert business_fields == custom_business_order, (
+                    f"{schema_name}: Business fields do not match approved semantic order.\n"
+                    f"Expected: {custom_business_order[:5]}...\n"
+                    f"Got: {business_fields[:5]}..."
+                )
+                return
+
             # Validate publication group fields appear in defined order
             pub_meta_in_schema = [
                 c for c in business_fields if c in PUBLICATION_METADATA_FIELDS
@@ -247,6 +282,16 @@ class TestSchemaColumnOrder:
         column_names = schema.names
 
         if schema_name in CUSTOM_ORDER_SCHEMAS:
+            custom_business_order = CUSTOM_BUSINESS_FIELD_ORDER.get(schema_name)
+            if custom_business_order is not None:
+                business_fields = [c for c in column_names if c not in ALL_SYSTEM_FIELDS]
+                assert business_fields == custom_business_order, (
+                    f"{schema_name}: Custom semantic business-field order violated.\n"
+                    f"Expected: {custom_business_order[:5]}...\n"
+                    f"Got: {business_fields[:5]}..."
+                )
+                return
+
             # Validate that publication group fields maintain their
             # internal relative order (even if interleaved with other fields)
             business_fields = [c for c in column_names if c not in ALL_SYSTEM_FIELDS]

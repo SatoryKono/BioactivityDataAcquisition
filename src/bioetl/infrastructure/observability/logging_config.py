@@ -141,9 +141,11 @@ def secret_filter_processor(
 
 def _get_current_trace_identifiers() -> tuple[str, str] | None:
     """Return current OTel trace/span identifiers when an active span exists."""
-    try:
-        from opentelemetry import trace as otel_trace
-    except ImportError:
+    otel_trace = sys.modules.get("opentelemetry.trace")
+    if otel_trace is None:
+        opentelemetry_module = sys.modules.get("opentelemetry")
+        otel_trace = getattr(opentelemetry_module, "trace", None)
+    if otel_trace is None:
         return None
 
     try:

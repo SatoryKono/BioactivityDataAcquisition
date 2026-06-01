@@ -28,6 +28,9 @@ Current specification summary:
 - Composite and downstream enrichment behavior is defined in the live entity config and current application code.
 - Derived projections now publish `target_protein_synonyms`, `target_gene_synonyms`, `target_ec_numbers`,
   and xref-derived fields `target_xref_pdb_ids`, `target_xref_go_component`, `target_xref_go_function`, `target_xref_go_process`, `target_xref_hgnc_ids`, `target_xref_reactome_ids`, `target_xref_uniprot_ids`.
+- `protein_classifications` is a canonical JSON string in the main `chembl.target`
+  Silver table; multiple leaf classifications collapse to L1 `Multifunctional target`
+  while preserving deterministic source evidence.
 - GO-derived columns use `xref_name`; `PDB`/`PDBe` and `Reactome` retain `xref_id`.
 - Missing derived buckets emit `unknown`; raw `target_component_synonyms` and `cross_references` stay forensic JSON.
 
