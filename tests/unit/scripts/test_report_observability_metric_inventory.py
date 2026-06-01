@@ -1410,7 +1410,7 @@ def test_query_prometheus_scalar_parses_vector_response(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     class FakeResponse:
-        def __enter__(self) -> "FakeResponse":
+        def __enter__(self) -> FakeResponse:
             return self
 
         def __exit__(self, exc_type, exc, tb) -> None:

@@ -788,8 +788,8 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless a reviewed triage recalibration
         updates the tracked debt budget intentionally.
     repo_wide_zero_import_candidate_count:
-      current_count: 64
-      max_count: 64
+      current_count: 44
+      max_count: 44
       linked_issue: '#4541'
       owner: '@bioetl-architecture'
       rationale: Repo-wide zero-import candidates remain a governed review surface
@@ -797,8 +797,8 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless a reviewed dead-code inventory refresh
         updates the classified candidate set intentionally.
     repo_wide_classified_zero_import_candidate_count:
-      current_count: 64
-      max_count: 64
+      current_count: 44
+      max_count: 44
       linked_issue: '#4541'
       owner: '@bioetl-architecture'
       rationale: Every repo-wide zero-import candidate must stay covered by an explicit
