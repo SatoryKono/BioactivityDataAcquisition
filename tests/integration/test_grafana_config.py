@@ -86,7 +86,6 @@ EXPECTED_VARS_BY_DASHBOARD = {
         "step_kind",
     },
     "bioetl-silver-reject-explorer.json": {
-        "workflow",
         "pipeline",
         "run_type",
         "reason_code",

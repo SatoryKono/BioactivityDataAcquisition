@@ -1162,17 +1162,17 @@ The shipped Grafana bootstrap entrypoint also removes a stale local
 renderer mode is active, preventing restart loops caused by old persistent
 plugin state.
 
-**Фильтры:** hidden `$workflow` navigation shell plus `$pipeline`, `$run_type`,
-`$reason_code`, `$field`, `$quarantine_run_id`, `$payload_hash` + стандартный
-Grafana time picker.
+**Фильтры:** `$pipeline`, `$run_type`, `$reason_code`, `$field`,
+`$quarantine_run_id`, `$payload_hash` + стандартный Grafana time picker.
 `$pipeline` здесь intentionally single-select/no-All. `$quarantine_run_id`
 передаётся в Quarantine API как backend `dimension=run_id`; он и
 `$payload_hash` остаются Explorer-only forensic filters и не должны протекать в
 Prometheus labels, summary dashboards или cross-dashboard handoffs.
-Shared `workflow` shell context is preserved for navigation continuity; the
-Explorer itself stays pipeline/run_type/quarantine_run_id forensic. Primary
-dashboard `$run_id` may be mapped into `$quarantine_run_id` only by explicit
-inbound links; links out of the Explorer do not export primary `$run_id`.
+The Explorer itself stays pipeline/run_type/quarantine_run_id forensic and
+does not own the shared workflow/run_id shell. Generic primary-dashboard
+handoffs do not map `$run_id` into `$quarantine_run_id`; only explicit
+record/payload drilldowns may use forensic selectors when the source owns that
+evidence.
 
 **Важно:** это не Prometheus dashboard для row-level таблиц.
 `1-4` dashboards остаются Prometheus summary/bounded-breakdown поверхностями;
@@ -2384,7 +2384,7 @@ ______________________________________________________________________
 | 4. Data Quality           | `bioetl-dq-v2`                  | 4            | 33 / 2        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | DQ score, quarantine, freshness, validation failures |
 | 5. Workflow               | `bioetl-workflow-overview`      | 2            | 13 / 1        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Selected-range workflow run and step evidence with explicit scope badges in the shared shell; exact `run_id` populates local HTTP identity/accounting cards while Prometheus panels stay selected-range workflow evidence |
 | 6. Alerts & SLO           | `bioetl-alerts-slo`             | 1            | 7 / 0         | 30s     | 24h        | Prometheus `ALERTS` | First-class firing alert and SLO/SLA pressure triage surface; does not implement alert rules in dashboard queries |
-| Silver Reject Explorer | `bioetl-silver-reject-explorer` | 1001         | 11 / 0        | 1m      | 24h        | Quarantine Explorer API | Record-level browsing and action handoff for Silver rejects; hidden workflow shell plus forensic pipeline/run_type/quarantine_run_id scope |
+| Silver Reject Explorer | `bioetl-silver-reject-explorer` | 1001         | 11 / 0        | 1m      | 24h        | Quarantine Explorer API | Record-level browsing and action handoff for Silver rejects; bounded forensic pipeline/run_type/reason/field/quarantine_run_id/payload_hash scope and no shared workflow/run_id shell ownership |
 
 ______________________________________________________________________
 

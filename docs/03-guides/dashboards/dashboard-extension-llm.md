@@ -89,11 +89,12 @@ Grafana dashboards в BioETL.
 - Не добавляй high-cardinality filters/labels в summary-panels без необходимости.
 - Для нового operator dashboard или first-screen redesign сохраняй contract:
   `ONE BIG QUESTION`, current scope, provenance summary и `First action`.
-- `Silver Reject Explorer` also carries hidden `workflow` / `run_id` shell
-  context for navigation continuity while `quarantine_run_id` remains the
-  forensic row filter. Links into the explorer MAY map primary `$run_id` into
-  `$quarantine_run_id` for exact-run reject review; links out of it MUST NOT
-  propagate `$quarantine_run_id` to primary dashboards.
+- `Silver Reject Explorer` does not own the shared `workflow` / `run_id`
+  context shell. It stays bounded to forensic `pipeline/run_type` plus
+  `reason_code`, `field`, `quarantine_run_id`, and `payload_hash` selectors.
+  Generic links into the explorer MUST NOT map primary `$run_id` into
+  `$quarantine_run_id`; explicit record/payload drilldowns may use forensic
+  selectors only when the source surface owns that evidence.
 - Для cross-dashboard links не полагайся на blanket `includeVars=true`:
   передавай только target-scoped `var-*` параметры. Для primary dashboards это
   общий `workflow/pipeline/run_type` shell плюс preserved `run_id`; для Silver

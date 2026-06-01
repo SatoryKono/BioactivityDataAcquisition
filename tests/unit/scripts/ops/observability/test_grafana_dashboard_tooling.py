@@ -906,7 +906,7 @@ def test_alerts_slo_dashboard_is_first_class_shipped_surface() -> None:
     assert "ALERTS" in json.dumps(dashboard)
 
 
-def test_silver_reject_explorer_preserves_shared_shell_context() -> None:
+def test_silver_reject_explorer_keeps_shared_shell_context_outside_forensic_scope() -> None:
     dashboard = json.loads(
         Path("grafana/dashboards/bioetl-silver-reject-explorer.json").read_text(
             encoding="utf-8"
@@ -917,15 +917,21 @@ def test_silver_reject_explorer_preserves_shared_shell_context() -> None:
     }
     serialized = json.dumps(dashboard)
 
-    assert {"workflow", "pipeline", "run_type"}.issubset(variables)
+    assert {"pipeline", "run_type"}.issubset(variables)
+    assert "workflow" not in variables
     assert "run_id" not in variables
-    assert "var-workflow=All" not in serialized
+    assert "var-workflow=$workflow" not in serialized
     assert "var-run_id=$run_id" not in serialized
+    assert "var-quarantine_run_id=$run_id" not in serialized
     assert "quarantine_run_id remains the forensic row filter" in serialized
 
 
-def test_silver_reject_explorer_links_receive_run_context() -> None:
+def test_silver_reject_explorer_generic_links_do_not_receive_primary_run_context() -> (
+    None
+):
     for path in Path("grafana/dashboards").glob("*.json"):
+        if path.name == "bioetl-silver-reject-explorer.json":
+            continue
         dashboard = json.loads(path.read_text(encoding="utf-8"))
 
         def walk(value: object) -> None:
@@ -945,9 +951,11 @@ def test_silver_reject_explorer_links_receive_run_context() -> None:
                 "/d/"
             ):
                 return
-            assert "var-workflow=" in value
+            assert "var-pipeline=" in value
+            assert "var-run_type=" in value
+            assert "var-workflow=" not in value
             assert "var-run_id=" not in value
-            assert "var-quarantine_run_id=" in value
+            assert "var-quarantine_run_id=$run_id" not in value
 
         walk(dashboard)
 
@@ -1038,7 +1046,7 @@ def test_workflow_status_titles_make_selected_range_scope_visible() -> None:
     )
     titles = {panel.get("id"): panel.get("title") for panel in dashboard["panels"]}
 
-    assert titles[9401] == "Range Workflow Status"
+    assert titles[9401] == "Status"
     assert titles[9404] == "Range Pipeline Status"
 
 

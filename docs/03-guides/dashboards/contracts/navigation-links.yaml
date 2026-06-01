@@ -111,7 +111,7 @@ required_link_vars_by_target_uid:
   bioetl-runtime: [workflow, pipeline, run_type]
   bioetl-dq-v2: [workflow, pipeline, run_type]
   bioetl-provider-health-v2: [workflow, pipeline, run_type, provider, pipeline_context]
-  bioetl-silver-reject-explorer: [workflow, pipeline, run_type, quarantine_run_id]
+  bioetl-silver-reject-explorer: [pipeline, run_type]
   bioetl-workflow-overview: [workflow, pipeline, run_type]
   bioetl-alerts-slo: [workflow, pipeline, run_type]
 allowed_dashboard_link_vars:
@@ -121,7 +121,7 @@ allowed_dashboard_link_vars:
   bioetl-provider-health-v2: [workflow, pipeline, run_type, run_id, provider, pipeline_context, adapter]
   bioetl-control-plane-v1: [workflow, pipeline, run_type, run_id]
   bioetl-workflow-overview: [workflow, pipeline, run_type, run_id, status, step_status, step_kind, pipeline_context, run_type_context, provider_context]
-  bioetl-silver-reject-explorer: [workflow, pipeline, run_type, reason_code, field, quarantine_run_id, payload_hash]
+  bioetl-silver-reject-explorer: [pipeline, run_type, reason_code, field, quarantine_run_id, payload_hash]
   bioetl-alerts-slo: [workflow, pipeline, run_type]
 forbidden_dashboard_link_vars_by_target_uid:
   bioetl-overview-v2: [quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
@@ -130,7 +130,7 @@ forbidden_dashboard_link_vars_by_target_uid:
   bioetl-dq-v2: [quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
   bioetl-provider-health-v2: [quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
   bioetl-workflow-overview: [quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
-  bioetl-silver-reject-explorer: [run_id, manifest_id, execution_fingerprint]
+  bioetl-silver-reject-explorer: [workflow, run_id, manifest_id, execution_fingerprint]
   bioetl-alerts-slo: [run_id, quarantine_run_id, payload_hash, manifest_id, execution_fingerprint]
 
 preserved_identity_handoff:
@@ -158,11 +158,12 @@ preserved_identity_handoff:
     Preserve exact primary Run ID when both source and target dashboards expose
     the primary control-plane `run_id` selector. The handoff keeps HTTP
     identity/details panels focused on the selected run; Prometheus status and
-    current-state panels remain pipeline/run_type scoped. Links into Silver
-    Reject Explorer may additionally map primary `run_id` to
-    `quarantine_run_id` for exact-run forensic reject review; links out of the
-    explorer and alert dashboard do not preserve primary `run_id` because those
-    dashboards do not own the primary identity selector.
+    current-state panels remain pipeline/run_type scoped. Generic links into
+    Silver Reject Explorer do not map primary `run_id` to `quarantine_run_id`;
+    exact reject filters are forensic-only selectors and require an explicit
+    record/payload drilldown. Links out of the explorer and alert dashboard do
+    not preserve primary `run_id` because those dashboards do not own the
+    primary identity selector.
 
 required_discoverable_inbound_paths: {}
 

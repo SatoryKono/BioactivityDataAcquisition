@@ -32,7 +32,7 @@
       },
       "id": 1000,
       "options": {
-        "content": "<div style=\"display:flex;gap:10px;flex-wrap:wrap;padding:10px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">1. Overview</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">3. Provider Health</a><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?var-workflow=$workflow&amp;${__url_time_range}&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">5. Workflow</a><a href=\"/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-quarantine_run_id=\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Silver Reject Explorer</a><a href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&amp;to=${__to}&amp;query=%7Bjob%3D%22bioetl%22%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Logs</a><a href=\"/a/grafana-exploretraces-app/explore?actionView=search&amp;from=now-150m&amp;to=now&amp;var-ds=tempo&amp;var-groupBy=resource.service.name&amp;queryType=traceqlSearch&amp;query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D%20%22${run_type}%22%20%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Traces</a><span aria-current=\"page\" style=\"padding:5px 10px;color:#4b5563;text-decoration:none;border:1px solid #4b5563;border-radius:3px;background:rgba(75,85,99,0.18);cursor:default;\">6. Alerts & SLO</span></div>",
+        "content": "<div style=\"display:flex;gap:10px;flex-wrap:wrap;padding:10px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">1. Overview</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">3. Provider Health</a><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">5. Workflow</a><a href=\"/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Silver Reject Explorer</a><a href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&amp;to=${__to}&amp;query=%7Bjob%3D%22bioetl%22%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Logs</a><a href=\"/a/grafana-exploretraces-app/explore?actionView=search&amp;from=now-150m&amp;to=now&amp;var-ds=tempo&amp;var-groupBy=resource.service.name&amp;queryType=traceqlSearch&amp;query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D%20%22${run_type}%22%20%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Traces</a><span aria-current=\"page\" style=\"padding:5px 10px;color:#4b5563;text-decoration:none;border:1px solid #4b5563;border-radius:3px;background:rgba(75,85,99,0.18);cursor:default;\">6. Alerts & SLO</span></div>",
         "mode": "html"
       },
       "pluginVersion": "12.2.0",
@@ -80,7 +80,7 @@
         },
         {
           "title": "Silver Reject Explorer",
-          "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-quarantine_run_id=",
+          "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
           "targetBlank": false,
           "includeVars": false,
           "tooltip": "Cross-scope handoff: bounded pipeline/run_type explorer scope. Reset scope: Silver Reject Explorer owns its own record-level filters. Opens in the same tab."
@@ -97,7 +97,8 @@
           "targetBlank": false,
           "tooltip": "Available only for traced runs. Enable tracing with --tracing or BIOETL_OBSERVABILITY__TRACING_ENABLED=true. Opens Traces Drilldown in the same tab with bounded pipeline/run_type TraceQL scope. NoOpTracing or tracing-off runs can legitimately be empty, so treat this as adjunct evidence rather than first-screen proof."
         }
-      ]
+      ],
+      "description": "Top navigation bus for the dashboard suite. Uses same-tab handoffs, preserves the current time range for dashboard-to-dashboard links, passes only target-scoped variables, and exposes Explore Logs plus Explore Traces as an optional tracing profile available only for traced runs."
     },
     {
       "datasource": null,
@@ -114,7 +115,8 @@
       },
       "pluginVersion": "12.2.0",
       "title": "Scope",
-      "type": "text"
+      "type": "text",
+      "description": "Scope banner for alert and SLO triage. Workflow, pipeline, and run_type are alert evidence scope only; this dashboard intentionally has no run_id selector."
     },
     {
       "datasource": {
@@ -184,13 +186,14 @@
       "pluginVersion": "12.2.0",
       "targets": [
         {
-          "expr": "clamp_max(sum(ALERTS{alertstate=\"firing\"}) or vector(0), 1)",
+          "expr": "clamp_max(sum(ALERTS{alertstate=\"firing\"}), 1)",
           "legendFormat": "firing alerts",
           "refId": "A"
         }
       ],
       "title": "Active Alert Status",
-      "type": "stat"
+      "type": "stat",
+      "description": "Fail-closed firing-alert status from ALERTS. Null/no data remains UNKNOWN because absence of the ALERTS series may mean alertmanager/Prometheus telemetry is unavailable, not zero active alerts."
     },
     {
       "datasource": {
@@ -255,7 +258,8 @@
         }
       ],
       "title": "Firing Alerts / Range",
-      "type": "stat"
+      "type": "stat",
+      "description": "Count of firing alerts in the selected range/scope. Zero fallback means no matching firing ALERTS series was observed; use Active Alert Status for fail-closed telemetry uncertainty."
     },
     {
       "datasource": {
@@ -320,7 +324,8 @@
         }
       ],
       "title": "Critical/Page Alerts",
-      "type": "stat"
+      "type": "stat",
+      "description": "Count of critical/page firing alerts in the selected alert scope. Zero fallback means no matching critical/page ALERTS series was observed for the current filters."
     },
     {
       "datasource": {
@@ -385,7 +390,8 @@
         }
       ],
       "title": "SLO/SLA Alert Pressure",
-      "type": "stat"
+      "type": "stat",
+      "description": "Count of SLO/SLA/burn-budget firing alerts in the selected alert scope. Zero fallback means no matching SLO/SLA alert series was observed for the current filters."
     },
     {
       "datasource": {
@@ -448,7 +454,8 @@
         }
       ],
       "title": "Firing Alert Details",
-      "type": "table"
+      "type": "table",
+      "description": "Raw firing alert label table for the selected alert scope. No data means no matching firing ALERTS series or an unavailable alert datasource; compare with Active Alert Status."
     }
   ],
   "refresh": "30s",
@@ -476,13 +483,14 @@
         "options": [],
         "query": "",
         "skipUrlSync": false,
-        "type": "textbox"
+        "type": "textbox",
+        "description": "Workflow context selector for alert and SLO triage. This dashboard does not own exact run_id identity."
       },
       {
         "current": {
           "selected": true,
-          "text": "All",
-          "value": "$__all"
+          "text": "unknown",
+          "value": "unknown"
         },
         "datasource": {
           "type": "prometheus",
@@ -490,7 +498,7 @@
         },
         "definition": "label_values(bioetl_records_processed_total, pipeline)",
         "hide": 0,
-        "includeAll": true,
+        "includeAll": false,
         "label": "Pipeline",
         "multi": false,
         "name": "pipeline",
@@ -503,7 +511,8 @@
         "regex": "",
         "skipUrlSync": false,
         "sort": 1,
-        "type": "query"
+        "type": "query",
+        "description": "Single-select pipeline scope for alert and SLO triage; defaults to unknown so alerts do not silently aggregate unrelated pipelines."
       },
       {
         "current": {
@@ -530,7 +539,8 @@
         "regex": "",
         "skipUrlSync": false,
         "sort": 1,
-        "type": "query"
+        "type": "query",
+        "description": "Run type context for alert and SLO triage. Include All is allowed as the shared run_type fallback."
       }
     ]
   },
