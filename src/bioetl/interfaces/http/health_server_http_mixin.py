@@ -31,6 +31,7 @@ class HealthServerHTTPMixin:
     _request_line_timeout_seconds: float = 5.0
     _header_line_timeout_seconds: float = 5.0
     _max_header_lines: int = 100
+    _writer_close_timeout_seconds: float = 1.0
 
     async def _handle_connection(
         self,
@@ -159,7 +160,19 @@ class HealthServerHTTPMixin:
         """
         try:
             writer.close()
-            await writer.wait_closed()
+            await asyncio.wait_for(
+                writer.wait_closed(),
+                timeout=self._writer_close_timeout_seconds,
+            )
+        except TimeoutError as close_error:
+            if self._logger:
+                self._logger.debug(
+                    "health_server_writer_close_failed",
+                    error=str(close_error),
+                    error_type=type(close_error).__name__,
+                    reason="writer_close_timeout",
+                    reason_code="HEALTH_WRITER_CLOSE_TIMEOUT",
+                )
         except self._writer_close_allowlist as close_error:
             if self._logger:
                 self._logger.debug(

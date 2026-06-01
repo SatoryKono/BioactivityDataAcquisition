@@ -99,6 +99,10 @@ Grafana dashboards в BioETL.
   передавай только target-scoped `var-*` параметры. Для primary dashboards это
   общий `workflow/pipeline/run_type` shell плюс preserved `run_id`; для Silver
   Explorer это bounded `pipeline/run_type`.
+- Visual HTML anchors in navigation panel `id=1000` and machine-readable
+  `panel.links` MUST preserve the same target-scoped variables. Operator clicks
+  on the visible bus are the primary handoff path, so do not update only
+  `panel.links` while leaving stale `options.content` URLs.
 - Не копируй forensic identifiers (`quarantine_run_id`, `payload_hash`) в
   Prometheus dashboards, summary panels или generic drilldowns. Shared `run_id`
   is allowed only as HTTP-backed identity context between primary dashboards.

@@ -321,4 +321,13 @@ def render_run_result(
         summary = f"  - {step.step_id} [{step.step_kind}] -> {step.status}"
         if step.error_type is not None:
             summary += f" ({step.error_type}: {step.error_message})"
+        payload = getattr(step, "payload", None)
+        output = getattr(payload, "output", None)
+        if (
+            step.step_kind == "transform"
+            and isinstance(output, dict)
+            and output.get("dry_run") is True
+            and output.get("would_mutate") is True
+        ):
+            summary += " (dry-run blocked destructive mutation)"
         echo_info(summary)

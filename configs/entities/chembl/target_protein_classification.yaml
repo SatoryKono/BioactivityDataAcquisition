@@ -8,10 +8,7 @@ pipeline:
   description: Derived ChEMBL target-to-protein-classification relation rows
   field_policy: {}
   business_primary_keys:
-  - target_id
-  - classification_status
-  - component_id
-  - leaf_id
+  - entity_id
   batch_size: 500
   checkpoint_interval: 500
 
@@ -152,18 +149,9 @@ quality:
   entity_cross_field_validations: []
   entity_conditional_validations: []
   key_nullability:
-  - field: target_id
+  - field: entity_id
     key_type: merge
     nullable: false
-  - field: classification_status
-    key_type: merge
-    nullable: false
-  - field: component_id
-    key_type: merge
-    nullable: true
-  - field: leaf_id
-    key_type: merge
-    nullable: true
   - field: classification_status
     key_type: partition
     nullable: false
@@ -203,15 +191,9 @@ filters:
         this pipeline to the reviewed ChEMBL publication subset and do not redefine the global publication taxonomy.
 contracts:
   primary_key:
-  - target_id
-  - classification_status
-  - component_id
-  - leaf_id
+  - entity_id
   merge_keys:
-  - target_id
-  - classification_status
-  - component_id
-  - leaf_id
+  - entity_id
   hash_include: []
   hash_exclude: []
   hash_datetime_policy: v1_date

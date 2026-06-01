@@ -68,6 +68,7 @@ class WorkflowTransformService:
         upstream_outputs: Mapping[str, object] | None = None,
         context_labels: Mapping[str, str] | None = None,
         completed_fingerprints: Mapping[str, str] | None = None,
+        dry_run: bool = False,
         destructive_commit_callback: (
             Callable[[WorkflowTransformDestructiveCommit], None] | None
         ) = None,
@@ -96,6 +97,8 @@ class WorkflowTransformService:
         try:
             executor = self.registry.get(step.transform_name)
             runtime_context = WorkflowTransformRuntimeContext(
+                dry_run=dry_run,
+                workflow_name=workflow_name,
                 destructive_commit_callback=destructive_commit_callback
             )
             output = _invoke_transform_executor(

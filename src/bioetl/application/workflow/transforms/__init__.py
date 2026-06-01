@@ -28,6 +28,8 @@ WorkflowTransformDestructiveCommit = WorkflowTransformDestructiveCommitSignal
 class WorkflowTransformRuntimeContext:
     """Optional runtime callbacks exposed to transform executors."""
 
+    dry_run: bool = False
+    workflow_name: str | None = None
     destructive_commit_callback: (
         Callable[[WorkflowTransformDestructiveCommit], None] | None
     ) = None

@@ -86,6 +86,7 @@ class WorkflowRunnerService:
         """Run a workflow config and stop on first failed step."""
         state = WorkflowExecutionState(step_results=[], step_outputs={})
         workflow_context_labels = config.workflow_context_labels
+        effective_dry_run = bool(config.defaults.dry_run)
 
         for step_id in config.topological_step_ids:
             step = config.get_step(step_id)
@@ -100,6 +101,7 @@ class WorkflowRunnerService:
                 completed_transform_fingerprints=completed_transform_fingerprints,
                 step_started_callback=step_started_callback,
                 transform_commit_callback=transform_commit_callback,
+                dry_run=effective_dry_run,
             )
             self._apply_step_transition(
                 state=state,
@@ -129,6 +131,7 @@ class WorkflowRunnerService:
         transform_commit_callback: (
             Callable[[WorkflowTransformDestructiveCommit], None] | None
         ),
+        dry_run: bool,
     ) -> ResolvedWorkflowStepTransitionRecord:
         """Resolve whether a step should run, resume-skip, or failure-skip."""
         policy = resolve_step_transition_policy(
@@ -167,6 +170,7 @@ class WorkflowRunnerService:
                 completed_transform_fingerprints=completed_transform_fingerprints,
                 step_started_callback=step_started_callback,
                 transform_commit_callback=transform_commit_callback,
+                dry_run=dry_run,
             ),
         )
 
@@ -204,6 +208,7 @@ class WorkflowRunnerService:
         transform_commit_callback: (
             Callable[[WorkflowTransformDestructiveCommit], None] | None
         ),
+        dry_run: bool,
     ) -> WorkflowStepExecutionResult:
         if isinstance(step, WorkflowStepConfig):
             return await self._run_pipeline_step(
@@ -220,6 +225,7 @@ class WorkflowRunnerService:
             completed_transform_fingerprints=completed_transform_fingerprints,
             step_started_callback=step_started_callback,
             transform_commit_callback=transform_commit_callback,
+            dry_run=dry_run,
         )
 
     async def _run_pipeline_step(
@@ -284,6 +290,7 @@ class WorkflowRunnerService:
         transform_commit_callback: (
             Callable[[WorkflowTransformDestructiveCommit], None] | None
         ),
+        dry_run: bool,
     ) -> WorkflowStepExecutionResult:
         spec = WorkflowTransformSpec.from_step(step)
         if step_started_callback is not None:
@@ -299,6 +306,7 @@ class WorkflowRunnerService:
             upstream_outputs=upstream_outputs,
             context_labels=workflow_context_labels,
             completed_fingerprints=completed_transform_fingerprints,
+            dry_run=dry_run,
             destructive_commit_callback=transform_commit_callback,
         )
         return step_result_from_transform_result(result)

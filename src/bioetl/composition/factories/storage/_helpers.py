@@ -28,7 +28,7 @@ from ._layer_writers import (
     create_gold_layer_writer_impl,
     create_silver_layer_writer_impl,
 )
-from ._resilience import (
+from .resilience import (
     create_silver_atomic_retry_policy,
     create_silver_merge_resilience_policy,
 )

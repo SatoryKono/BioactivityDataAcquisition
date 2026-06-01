@@ -30,12 +30,16 @@ class TestMutationTestingRollout:
         assert mutation["targets"]["domain"]["enforced"] is True
         assert mutation["targets"]["application_control_plane"]["min_score"] == 60
         assert mutation["targets"]["application_control_plane"]["enforced"] is True
+        assert mutation["targets"]["application_export_manifests"]["min_score"] == 60
+        assert mutation["targets"]["application_export_manifests"]["enforced"] is True
         assert mutation["targets"]["application"]["min_score"] == 60
         assert mutation["targets"]["application"]["enforced"] is False
 
         assert "paths_to_mutate: src/bioetl/domain/" in workflow
         assert "src/bioetl/application/services/control_plane/" in workflow
         assert "tests/unit/application/services/control_plane/" in workflow
+        assert "src/bioetl/application/services/export_manifests.py" in workflow
+        assert "tests/unit/application/services/" in workflow
         assert "MUTATION_SCORE_THRESHOLD" in workflow
         assert (
             "mutmut run --paths-to-mutate=src/bioetl/domain/ --tests-dir=tests/ || true"

@@ -247,6 +247,7 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         pa.field("component_ids", pa.string()),
         pa.field("component_types", pa.string()),
         pa.field("component_relationships", pa.string()),
+        pa.field("protein_classifications", pa.string()),
         pa.field("target_components", pa.string()),
         pa.field("cross_references", pa.string()),
         pa.field("target_component_synonyms", pa.string()),

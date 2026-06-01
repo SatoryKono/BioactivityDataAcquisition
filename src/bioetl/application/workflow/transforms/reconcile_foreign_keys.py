@@ -25,7 +25,19 @@ def build_reconcile_foreign_keys_executor(
         runtime_context: WorkflowTransformRuntimeContext | None = None,
     ) -> dict[str, object]:
         del upstream_outputs
-        request = _build_request(spec)
+        context_dry_run = (
+            False if runtime_context is None else getattr(runtime_context, "dry_run", False)
+        )
+        workflow_name = (
+            getattr(runtime_context, "workflow_name", None)
+            if runtime_context is not None
+            else None
+        )
+        request = _build_request(
+            spec,
+            dry_run=context_dry_run,
+            workflow_name=workflow_name,
+        )
         result = await reconciliation_port.reconcile_foreign_keys(request)
         payload = {
             "transform_name": spec.transform_name,
@@ -42,8 +54,17 @@ def build_reconcile_foreign_keys_executor(
             "retained_rows": result.retained_rows,
             "orphan_rows_deleted": result.orphan_rows_deleted,
             "mutated": result.mutated,
+            "dry_run": result.dry_run,
+            "would_mutate": result.would_mutate,
         }
-        if result.mutated and runtime_context is not None:
+        if result.dry_run and result.would_mutate:
+            payload["mutation_blocked_reason"] = "workflow_dry_run"
+        if (
+            result.mutated
+            and not result.dry_run
+            and runtime_context is not None
+            and hasattr(runtime_context, "record_destructive_commit")
+        ):
             runtime_context.record_destructive_commit(
                 step_id=spec.step_id,
                 transform_name=spec.transform_name,
@@ -55,7 +76,12 @@ def build_reconcile_foreign_keys_executor(
     return _executor
 
 
-def _build_request(spec: WorkflowTransformSpec) -> ForeignKeyReconciliationRequest:
+def _build_request(
+    spec: WorkflowTransformSpec,
+    *,
+    dry_run: bool = False,
+    workflow_name: str | None = None,
+) -> ForeignKeyReconciliationRequest:
     config = spec.config or {}
     source_table = _required_str(config, "source_table")
     reference_table = _required_str(config, "reference_table")
@@ -74,6 +100,8 @@ def _build_request(spec: WorkflowTransformSpec) -> ForeignKeyReconciliationReque
         source_keys=source_keys,
         reference_keys=reference_keys,
         nulls_equal=bool(config.get("nulls_equal", False)),
+        dry_run=dry_run,
+        workflow_name=workflow_name,
     )
 
 

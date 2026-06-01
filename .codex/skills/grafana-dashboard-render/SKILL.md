@@ -79,7 +79,7 @@ render work.
 Prefer the canonical Python renderer:
 
 ```bash
-uv run python -m scripts.ops rerender-grafana --timeout-seconds 30 --output-dir <dir>
+uv run python -m scripts.ops rerender-grafana --timeout-seconds 90 --output-dir <dir>
 ```
 
 Useful variants:
@@ -93,6 +93,9 @@ Guidance:
 
 - Use `--fallback none` when you need to prove the server-side Grafana render
   path works independently of Playwright.
+- Use at least `--timeout-seconds 90` for full-suite server-side renders. The
+  larger BioETL dashboards can exceed short smoke-test timeouts even when the
+  Render API is healthy.
 - Use default fallback behavior when you want a best-effort screenshot refresh
   and browser capture is acceptable.
 

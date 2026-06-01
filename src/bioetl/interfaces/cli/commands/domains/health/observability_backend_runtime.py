@@ -13,8 +13,16 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 from urllib.error import HTTPError, URLError
+from urllib.parse import quote
 from urllib.request import urlopen
 
+from bioetl.interfaces.cli.commands.domains.health.observability_backend_failure_details import (
+    _build_startup_failure_detail,
+    _describe_required_probe_failure,
+)
+from bioetl.interfaces.cli.commands.domains.health.observability_backend_failure_details import (
+    _read_backend_startup_log_excerpt as _read_backend_startup_log_excerpt,
+)
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_process import (
     _build_detached_backend_env,
     _build_detached_backend_popen_kwargs,
@@ -22,11 +30,6 @@ from bioetl.interfaces.cli.commands.domains.health.observability_backend_process
     drop_listening_backend_on_port,
     python_executable_to_tuple,
     start_detached_quarantine_backend,
-)
-from bioetl.interfaces.cli.commands.domains.health.observability_backend_failure_details import (
-    _build_startup_failure_detail,
-    _describe_required_probe_failure,
-    _read_backend_startup_log_excerpt,
 )
 from bioetl.interfaces.cli.commands.domains.health.server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
@@ -42,6 +45,9 @@ DEFAULT_OBSERVABILITY_BACKEND_READY_TIMEOUT_SECONDS = 20.0
 DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PATHS_READY_TIMEOUT_SECONDS = 60.0
 DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PROBE_TIMEOUT_SECONDS = 5.0
 DEFAULT_OBSERVABILITY_BACKEND_POLL_SECONDS = 0.25
+_SELECTOR_CATALOG_PROBE_PATH = (
+    "/ops/control-plane/filter-options?dimension=pipeline&response_shape=list"
+)
 
 _DETACHED_STATUS = frozenset({"reused", "started"})
 
@@ -69,6 +75,23 @@ def build_observability_backend_health_url(
 ) -> str:
     """Build the canonical backend health URL used for readiness probes."""
     return f"http://{host}:{port}/health"
+
+
+def build_observability_backend_required_probe_paths(
+    *,
+    pipelines: tuple[str, ...] = (),
+) -> tuple[str, ...]:
+    """Build capability probe paths that prove control-plane observability works."""
+    normalized_pipelines = tuple(
+        sorted({pipeline.strip() for pipeline in pipelines if pipeline.strip()})
+    )
+    paths = [_SELECTOR_CATALOG_PROBE_PATH]
+    for pipeline in normalized_pipelines:
+        encoded_pipeline = quote(pipeline, safe="_-.")
+        paths.append(
+            f"/ops/control-plane/checkpoint-freshness?pipeline={encoded_pipeline}"
+        )
+    return tuple(paths)
 
 
 def _build_observability_backend_probe_urls(health_url: str) -> tuple[str, ...]:
@@ -397,6 +420,7 @@ __all__ = [
     "_build_observability_backend_probe_urls",
     "build_detached_backend_log_path",
     "build_observability_backend_health_url",
+    "build_observability_backend_required_probe_paths",
     "ensure_observability_backend_started",
     "probe_observability_backend",
     "probe_observability_backend_required_paths",

@@ -1101,6 +1101,58 @@ class TestHealthServerErrorHandling:
         await server._close_writer(mock_writer)
 
     @pytest.mark.asyncio
+    async def test_close_writer_handles_wait_closed_timeout(self) -> None:
+        """Timed-out writer shutdown should not hang request teardown."""
+        mock_logger = MagicMock()
+        server = HealthServer(host="127.0.0.1", port=0, logger=mock_logger)
+        server._writer_close_timeout_seconds = 0.001
+
+        async def _never_close() -> None:
+            await asyncio.Event().wait()
+
+        mock_writer = MagicMock()
+        mock_writer.close = MagicMock()
+        mock_writer.wait_closed = AsyncMock(side_effect=_never_close)
+
+        await server._close_writer(mock_writer)
+
+        mock_logger.debug.assert_called_with(
+            "health_server_writer_close_failed",
+            error="",
+            error_type="TimeoutError",
+            reason="writer_close_timeout",
+            reason_code="HEALTH_WRITER_CLOSE_TIMEOUT",
+        )
+
+    @pytest.mark.asyncio
+    async def test_stop_handles_wait_closed_timeout(self) -> None:
+        """Timed-out server shutdown should not block fixture teardown."""
+        mock_logger = MagicMock()
+        server = HealthServer(host="127.0.0.1", port=0, logger=mock_logger)
+        server._server_close_timeout_seconds = 0.001
+
+        async def _never_close() -> None:
+            await asyncio.Event().wait()
+
+        mock_server = MagicMock()
+        mock_server.close = MagicMock()
+        mock_server.wait_closed = AsyncMock(side_effect=_never_close)
+        server._server = mock_server
+
+        await server.stop()
+
+        mock_server.close.assert_called_once_with()
+        assert server._server is None
+        mock_logger.warning.assert_called_with(
+            "health_server_shutdown_timeout",
+            host="127.0.0.1",
+            port=0,
+            error="",
+            reason_code="HEALTH_SERVER_SHUTDOWN_TIMEOUT",
+        )
+        mock_logger.info.assert_called_with("health_server_stopped")
+
+    @pytest.mark.asyncio
     async def test_parse_request_line_valid(self) -> None:
         """Test parsing valid request line."""
         server = HealthServer(host="127.0.0.1", port=0)

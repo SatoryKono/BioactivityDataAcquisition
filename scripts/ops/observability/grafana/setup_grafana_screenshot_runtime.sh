@@ -349,7 +349,7 @@ run_repo_smoke() {
     NODE_PATH="${PLAYWRIGHT_INSTALL_ROOT}/node_modules${NODE_PATH:+:${NODE_PATH}}" \
       uv run python -m scripts.ops rerender-grafana \
         --uids bioetl-control-plane-v1 \
-        --timeout-seconds 30 \
+        --timeout-seconds 90 \
         --fallback playwright
   )
 }

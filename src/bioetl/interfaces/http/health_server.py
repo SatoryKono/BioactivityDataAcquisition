@@ -34,6 +34,8 @@ class HealthServer(
 ):
     """Async HTTP server for health check endpoints."""
 
+    _server_close_timeout_seconds: float = 1.0
+
     def __init__(
         self,
         host: str = "127.0.0.1",
@@ -125,7 +127,20 @@ class HealthServer(
         if not self._server:
             return
         self._server.close()
-        await self._server.wait_closed()
+        try:
+            await asyncio.wait_for(
+                self._server.wait_closed(),
+                timeout=self._server_close_timeout_seconds,
+            )
+        except TimeoutError as exc:
+            if self._logger:
+                self._logger.warning(
+                    "health_server_shutdown_timeout",
+                    host=self.host,
+                    port=self.port,
+                    error=str(exc),
+                    reason_code="HEALTH_SERVER_SHUTDOWN_TIMEOUT",
+                )
         self._server = None
         if self._logger:
             self._logger.info("health_server_stopped")

@@ -490,9 +490,8 @@ hotspot_family_ratchets:
     linked_issue: '#4547'
     ratchet_stage: reviewed-baseline
     ratchet_scope: duplication-report-plus-bounded-growth
-    expected_action: Hold file-growth and fan-in at the reviewed baseline during control-plane
-      changes while duplication remains explicitly tracked from the reviewed baseline
-      until the family reaches a clean zero-duplication snapshot.
+    expected_action: Keep duplication clusters at zero while holding file-growth
+      and fan-in at the reviewed baseline during control-plane changes.
     path_prefixes:
     - src/bioetl/application/services/control_plane/
     bounded_growth_budgets:
@@ -507,20 +506,20 @@ hotspot_family_ratchets:
       max_internal_fan_in: 6
       max_internal_fan_in_module: bioetl.application.services.control_plane.manifest.diagnostics.replay_helpers
     trend:
-      status: reduced_2026-05-30_issue_4547
+      status: reviewed_baseline_2026-06-01_issue_4547
       next_action: 2026-05-30 consolidates execution-identity payloads, lazy-export
         facades, ledger diagnostic requests, replay projection inputs, and historical
-        record payloads, ratcheting application/services/control_plane duplicate clusters
-        from 15 down to 10 while files_ge_250_loc and max_internal_fan_in remain non-growing.
+        record payloads, ratcheting application/services/control_plane duplication
+        clusters to zero; 2026-06-01 records the clean snapshot as a reviewed-baseline
+        family while files_ge_250_loc and max_internal_fan_in remain non-growing.
   - name: composition_runtime_builders
     owner: '@bioetl-platform'
     linked_rf: RF-023
     linked_issue: '#4552'
     ratchet_stage: reviewed-baseline
     ratchet_scope: duplication-report-plus-bounded-growth
-    expected_action: Hold file-growth and fan-in at the reviewed baseline during runtime-builder
-      changes while duplication remains explicitly tracked from the reviewed baseline
-      until the family reaches a clean zero-duplication snapshot.
+    expected_action: Keep duplication clusters at zero while holding file-growth
+      and fan-in at the reviewed baseline during runtime-builder changes.
     path_prefixes:
     - src/bioetl/composition/runtime_builders/
     bounded_growth_budgets:
@@ -535,10 +534,11 @@ hotspot_family_ratchets:
       max_internal_fan_in: 11
       max_internal_fan_in_module: bioetl.composition.runtime_builders.inputs_resolver
     trend:
-      status: reduced_2026-05-30_issue_4552
+      status: reviewed_baseline_2026-06-01_issue_4552
       next_action: 2026-05-30 consolidates manifest refs helpers, provenance bundle,
         and persistence validation into shared modules, reducing composition/runtime_builders
-        duplicate clusters from 7 down to 4.
+        duplication clusters to zero; 2026-06-01 records the clean snapshot as a
+        reviewed-baseline family.
 oversized_source_module_inventory:
   linked_issue: '#4679'
   split_on_touch: true
@@ -728,8 +728,6 @@ neo4j_memory_calibration:
     candidates:
     - module_path: src/bioetl/infrastructure/adapters/_cached_bronze_support.py
       expected_disposition: retain_active
-    - module_path: src/bioetl/infrastructure/adapters/_circuit_breaker_contract.py
-      expected_disposition: retain_active
     - module_path: src/bioetl/infrastructure/adapters/_error_handling_support.py
       expected_disposition: retain_active
     - module_path: src/bioetl/infrastructure/adapters/_health_check_observability.py
@@ -795,13 +793,21 @@ retirement_governance_metrics:
         untriaged candidates; issue 4923 added three zero-import compatibility shims
         after private importer burn-down, and those are explicitly classified as
         retained no-growth shims until compatibility retirement.
+    - issue: '#4953'
+      reviewed_on: '2026-06-01'
+      owner: '@bioetl-architecture'
+      outcome: classified_residual_private_twin_shims
+      rationale: Issue 4950 moved first-party imports to canonical public modules,
+        creating six additional zero-import private compatibility shims; issue
+        4953 classifies them as retained no-growth shims with owner and review
+        expiry so the untriaged zero-import budget stays at zero.
   review_policy: Review dead-code triage and repo-wide zero-import classifications
     together; growth in tracked retirement debt or any untriaged zero-import candidate
     requires an explicit reviewed rebaseline.
   metrics:
     triaged_entry_count:
-      current_count: 19
-      max_count: 19
+      current_count: 18
+      max_count: 18
       linked_issue: '#4820'
       owner: '@bioetl-architecture'
       rationale: Reviewed retirement/dead-code entries are explicit governed residual
@@ -809,8 +815,8 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless a reviewed triage recalibration
         updates the tracked debt budget intentionally.
     repo_wide_zero_import_candidate_count:
-      current_count: 47
-      max_count: 47
+      current_count: 53
+      max_count: 53
       linked_issue: '#4541'
       owner: '@bioetl-architecture'
       rationale: Repo-wide zero-import candidates remain a governed review surface
@@ -818,8 +824,8 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless a reviewed dead-code inventory refresh
         updates the classified candidate set intentionally.
     repo_wide_classified_zero_import_candidate_count:
-      current_count: 47
-      max_count: 47
+      current_count: 53
+      max_count: 53
       linked_issue: '#4541'
       owner: '@bioetl-architecture'
       rationale: Every repo-wide zero-import candidate must stay covered by an explicit
