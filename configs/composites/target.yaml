@@ -9,8 +9,10 @@
 #   1. chembl_target_component: fetches component data using primary_component_id from seed
 #   2. chembl_protein_class: fetches protein classifications using
 #      protein_classification_id from target_component Silver table (chained dep)
-#   3. uniprot_idmapping: maps ChEMBL target IDs to UniProt accessions
-#   4. uniprot_protein: fetches detailed protein data using uniprot_accession
+#   3. chembl_target_protein_classification: deterministic target-level
+#      L1-L5 hierarchy summary from target classification relation rows
+#   4. uniprot_idmapping: maps ChEMBL target IDs to UniProt accessions
+#   5. uniprot_protein: fetches detailed protein data using uniprot_accession
 #      from idmapping Silver table (chained dep)
 #
 # Dependency chaining (key_source):
@@ -21,9 +23,9 @@
 # - uniprot_protein uses uniprot_accession from idmapping Silver table
 #   via key_source field (chained dependency)
 #
-# Version: 1.2.0
+# Version: 1.3.0
 # Reference: ADR-026 Composite Pipeline Pattern
-# Last Updated: 2026-02-03
+# Last Updated: 2026-06-01
 #
 # =============================================================================
 
@@ -32,7 +34,7 @@
 # -----------------------------------------------------------------------------
 composite:
   name: composite_target
-  version: "1.2.0"
+  version: "1.3.0"
   normalized_anchor_policy:
     uniprot_idmapping:
       join_boundary:
@@ -104,8 +106,10 @@ composite:
   # 1. chembl_target_component runs first (uses primary_component_id from seed)
   # 2. chembl_protein_class runs second (uses protein_classification_id from
   #    target_component Silver table via key_source)
-  # 3. uniprot_idmapping runs third (uses target_id from seed)
-  # 4. uniprot_protein runs fourth (uses uniprot_accession from idmapping
+  # 3. chembl_target_protein_classification runs third and is collapsed to
+  #    one deterministic target summary row before joining on target_id
+  # 4. uniprot_idmapping runs fourth (uses target_id from seed)
+  # 5. uniprot_protein runs fifth (uses uniprot_accession from idmapping
   #    Silver table via key_source - CHAINED)
   dependencies:
     # ChEMBL Target Component: detailed per-component data
@@ -132,6 +136,16 @@ composite:
     required: false
     timeout_seconds: 300
     silver_table: silver/chembl/protein_class
+
+    # ChEMBL Target Protein Classification: target-level L1-L5 hierarchy
+    # summary. The relation table is 1:N by target_id; application pre-join
+    # projection collapses it to exactly one deterministic row per target.
+  - pipeline: chembl_target_protein_classification
+    join_keys:
+    - target_id
+    required: false
+    timeout_seconds: 300
+    silver_table: silver/chembl/target_protein_classification
 
     # UniProt ID Mapping: maps canonical ChEMBL target IDs to canonical UniProt
     # accessions. The uniprot_idmapping normalization profile owns both anchor
@@ -205,6 +219,22 @@ composite:
       "chembl.tissue.bto_id": "tissue_bto_id"
       "chembl.tissue.caloha_id": "tissue_caloha_id"
       "chembl.target_component.description": "component_description"
+      "chembl.target_protein_classification.protein_classifications": "protein_classifications"
+      "chembl.target_protein_classification.target_protein_class_id_L1": "target_protein_class_id_L1"
+      "chembl.target_protein_classification.target_protein_class_name_L1": "target_protein_class_name_L1"
+      "chembl.target_protein_classification.target_protein_class_desc_L1": "target_protein_class_desc_L1"
+      "chembl.target_protein_classification.target_protein_class_id_L2": "target_protein_class_id_L2"
+      "chembl.target_protein_classification.target_protein_class_name_L2": "target_protein_class_name_L2"
+      "chembl.target_protein_classification.target_protein_class_desc_L2": "target_protein_class_desc_L2"
+      "chembl.target_protein_classification.target_protein_class_id_L3": "target_protein_class_id_L3"
+      "chembl.target_protein_classification.target_protein_class_name_L3": "target_protein_class_name_L3"
+      "chembl.target_protein_classification.target_protein_class_desc_L3": "target_protein_class_desc_L3"
+      "chembl.target_protein_classification.target_protein_class_id_L4": "target_protein_class_id_L4"
+      "chembl.target_protein_classification.target_protein_class_name_L4": "target_protein_class_name_L4"
+      "chembl.target_protein_classification.target_protein_class_desc_L4": "target_protein_class_desc_L4"
+      "chembl.target_protein_classification.target_protein_class_id_L5": "target_protein_class_id_L5"
+      "chembl.target_protein_classification.target_protein_class_name_L5": "target_protein_class_name_L5"
+      "chembl.target_protein_classification.target_protein_class_desc_L5": "target_protein_class_desc_L5"
 
     # Output paths for merged data
     output:
@@ -556,6 +586,26 @@ composite:
       - component_description
       - protein_classification_id
       - protein_classification_ids
+      provider_order: [chembl]
+      # === Target-level protein classification summary ===
+    - name: protein_classification_summary
+      fields:
+      - protein_classifications
+      - target_protein_class_id_L1
+      - target_protein_class_name_L1
+      - target_protein_class_desc_L1
+      - target_protein_class_id_L2
+      - target_protein_class_name_L2
+      - target_protein_class_desc_L2
+      - target_protein_class_id_L3
+      - target_protein_class_name_L3
+      - target_protein_class_desc_L3
+      - target_protein_class_id_L4
+      - target_protein_class_name_L4
+      - target_protein_class_desc_L4
+      - target_protein_class_id_L5
+      - target_protein_class_name_L5
+      - target_protein_class_desc_L5
       provider_order: [chembl]
       # === UniProt protein functional annotations ===
     - name: protein_function

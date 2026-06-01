@@ -20,6 +20,8 @@ from bioetl.domain.behavior.organism_classification_service import (
 )
 from bioetl.domain.types import CellularityType
 
+pytestmark = pytest.mark.unit
+
 
 # ---------------------------------------------------------------------------
 # Fixtures

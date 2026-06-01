@@ -12,6 +12,8 @@ from typing import Any
 import pytest
 import yaml
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture(scope="module")
 def chembl_yaml() -> dict[str, Any]:

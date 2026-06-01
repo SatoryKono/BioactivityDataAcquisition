@@ -17,6 +17,8 @@ import pytest
 
 from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture(scope="class")
 def test_configs_root(tmp_path_factory: pytest.TempPathFactory) -> Path:

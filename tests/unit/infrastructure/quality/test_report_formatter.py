@@ -5,6 +5,8 @@ from __future__ import annotations
 from collections import Counter
 from datetime import date
 
+import pytest
+
 from bioetl.infrastructure.quality.report_formatter import (
     _collect_allowances,
     _extract_growth_violation_section,
@@ -14,6 +16,8 @@ from bioetl.infrastructure.quality.report_formatter import (
     _resolve_rollout_mode_for_section,
     split_growth_violations_by_severity,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class TestIsActiveGraceWindow:

@@ -1520,6 +1520,10 @@ grep BIOETL_METRICS .env
 **Причина 5: пустые панели ID / Processed Records (HTTP, не Prometheus).**
 
 Панели **ID** и **Processed Records** на primary dashboards читают datasource `Quarantine Explorer` (`:8081`), а не RunManifest напрямую из Grafana.
+Shipped table cards now include explicit no-value copy and a health link:
+backend unavailable, invalid selector scope, absent exact run, and true zero
+processed records are different states. Treat generic `No data` as
+`UNKNOWN` until `/health/live` and the scoped endpoint respond.
 
 ```powershell
 # Windows: поднять или переиспользовать backend

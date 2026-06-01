@@ -26,6 +26,14 @@ CHEMBL_SCHEMAS = tuple(
         if schema_name.startswith("chembl_")
     )
 )
+TARGET_PROTEIN_CLASS_LEVEL_FIELD_PATTERN = re.compile(
+    r"^target_protein_class_(id|name|desc)_L[1-5]$"
+)
+
+
+def _is_allowed_target_protein_class_level_field(field: str) -> bool:
+    """Allow the published ChEMBL L1-L5 level suffix contract."""
+    return bool(TARGET_PROTEIN_CLASS_LEVEL_FIELD_PATTERN.match(field))
 
 
 @pytest.mark.contracts
@@ -43,7 +51,10 @@ class TestFieldNaming:
         snake_case_pattern = re.compile(r"^[a-z0-9_]+$")
 
         non_snake_case = [
-            field for field in fields.keys() if not snake_case_pattern.match(field)
+            field
+            for field in fields.keys()
+            if not snake_case_pattern.match(field)
+            and not _is_allowed_target_protein_class_level_field(field)
         ]
 
         if non_snake_case:
@@ -61,7 +72,10 @@ class TestFieldNaming:
 
         # Detect camelCase (contains uppercase letter not at start)
         camel_case_fields = [
-            field for field in fields.keys() if any(c.isupper() for c in field[1:])
+            field
+            for field in fields.keys()
+            if any(c.isupper() for c in field[1:])
+            and not _is_allowed_target_protein_class_level_field(field)
         ]
 
         if camel_case_fields:

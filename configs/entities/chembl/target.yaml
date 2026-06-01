@@ -76,6 +76,21 @@ schema:
     - target_xref_uniprot_ids
     - primary_component_id
     - protein_classifications
+    - target_protein_class_id_L1
+    - target_protein_class_name_L1
+    - target_protein_class_desc_L1
+    - target_protein_class_id_L2
+    - target_protein_class_name_L2
+    - target_protein_class_desc_L2
+    - target_protein_class_id_L3
+    - target_protein_class_name_L3
+    - target_protein_class_desc_L3
+    - target_protein_class_id_L4
+    - target_protein_class_name_L4
+    - target_protein_class_desc_L4
+    - target_protein_class_id_L5
+    - target_protein_class_name_L5
+    - target_protein_class_desc_L5
     - component_accessions
     - component_descriptions
     - component_ids
@@ -406,6 +421,21 @@ hash_policy:
     - target_xref_uniprot_ids
     - primary_component_id
     - protein_classifications
+    - target_protein_class_id_L1
+    - target_protein_class_name_L1
+    - target_protein_class_desc_L1
+    - target_protein_class_id_L2
+    - target_protein_class_name_L2
+    - target_protein_class_desc_L2
+    - target_protein_class_id_L3
+    - target_protein_class_name_L3
+    - target_protein_class_desc_L3
+    - target_protein_class_id_L4
+    - target_protein_class_name_L4
+    - target_protein_class_desc_L4
+    - target_protein_class_id_L5
+    - target_protein_class_name_L5
+    - target_protein_class_desc_L5
     - component_accessions
     - component_descriptions
     - component_ids

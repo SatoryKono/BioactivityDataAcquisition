@@ -703,7 +703,8 @@ def test_live_audit_loki_panel_uses_query_range(monkeypatch: Any) -> None:
     panel = {"targets": [{"refId": "A", "expr": '{job="bioetl"}'}]}
     captured: dict[str, str] = {}
 
-    def fake_fetch_json(url: str) -> object:
+    def fake_fetch_json(url: str, *, timeout_seconds: float) -> object:
+        assert timeout_seconds == config.request_timeout_seconds
         captured["url"] = url
         return {"status": "success", "data": {"result": []}}
 
@@ -810,7 +811,8 @@ def test_live_audit_resolves_http_backend_from_datasource_candidates(
         lambda *_args, **_kwargs: "http://host.docker.internal:8081",
     )
 
-    def fake_fetch_json(url: str) -> object:
+    def fake_fetch_json(url: str, *, timeout_seconds: float) -> object:
+        assert timeout_seconds == config.request_timeout_seconds
         if url == "http://localhost:8081/health/live":
             return {"status": "ok"}
         raise OSError(url)

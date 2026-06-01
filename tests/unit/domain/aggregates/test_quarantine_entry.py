@@ -23,6 +23,8 @@ from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.types import BatchID, ContentHash, RunID
 from tests.helpers.deterministic_ids import deterministic_uuid_value
 
+pytestmark = pytest.mark.unit
+
 
 def _ts(offset_seconds: int = 0) -> datetime:
     """Return deterministic UTC timestamps for quarantine tests."""
@@ -395,7 +397,7 @@ class TestQuarantineEntryDomainEvents:
         assert events[0].resolution == "ignored"
         assert events[0].occurred_at == _ts(10)
 
-    def test_collect_events_clears_event_list__test_quarantine_entry_domain_events_domain_aggregates_test_quarantine_entry_398(
+    def test_quarantine_entry_collect_events_clears_event_list(
         self, quarantine_entry: QuarantineEntry
     ) -> None:
         """collect_events() should clear internal list."""

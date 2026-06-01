@@ -93,6 +93,23 @@ class MergeMetricsRecorderMixin:
         )
         return df.drop(excluded)
 
+    def _apply_field_mappings(self, df: pl.DataFrame) -> pl.DataFrame:
+        """Apply configured source-to-canonical field mappings before projection."""
+        if not self._config.field_mappings:
+            return df
+
+        result = df
+        for source, target in self._config.field_mappings.items():
+            if source not in result.columns or source == target:
+                continue
+            if target in result.columns:
+                result = result.with_columns(
+                    pl.coalesce(pl.col(source), pl.col(target)).alias(target)
+                ).drop(source)
+                continue
+            result = result.rename({source: target})
+        return result
+
     def _count_enriched_records(
         self,
         df: pl.DataFrame,

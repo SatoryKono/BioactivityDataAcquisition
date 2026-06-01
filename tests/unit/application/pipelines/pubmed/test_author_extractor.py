@@ -24,6 +24,8 @@ import pytest
 
 from bioetl.application.pipelines.pubmed.extractors.author import AuthorExtractor
 
+pytestmark = pytest.mark.unit
+
 
 # ---------------------------------------------------------------------------
 # Helpers

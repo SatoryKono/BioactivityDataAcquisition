@@ -121,6 +121,48 @@ class TestDropExcludedFields:
 
 
 @pytest.mark.unit
+class TestApplyFieldMappings:
+    """Test configured source-to-canonical field mappings."""
+
+    def test_renames_qualified_source_column(self) -> None:
+        config = MagicMock()
+        config.field_mappings = {"chembl.target_component.description": "description"}
+        mixin = _make_mixin(_config=config)
+        df = pl.DataFrame({"chembl.target_component.description": ["component"]})
+
+        result = mixin._apply_field_mappings(df)
+
+        assert result.columns == ["description"]
+        assert result["description"].to_list() == ["component"]
+
+    def test_coalesces_mapped_source_over_existing_target(self) -> None:
+        config = MagicMock()
+        config.field_mappings = {
+            "chembl.target_protein_classification.protein_classifications": (
+                "protein_classifications"
+            )
+        }
+        mixin = _make_mixin(_config=config)
+        df = pl.DataFrame(
+            {
+                "protein_classifications": [None, "[{\"seed\":true}]"],
+                "chembl.target_protein_classification.protein_classifications": [
+                    "[{\"leaf_id\":1}]",
+                    None,
+                ],
+            }
+        )
+
+        result = mixin._apply_field_mappings(df)
+
+        assert result.columns == ["protein_classifications"]
+        assert result["protein_classifications"].to_list() == [
+            "[{\"leaf_id\":1}]",
+            "[{\"seed\":true}]",
+        ]
+
+
+@pytest.mark.unit
 class TestCountEnrichedRecords:
     """Test _count_enriched_records prefix-based counting."""
 

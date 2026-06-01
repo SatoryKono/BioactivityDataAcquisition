@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from datetime import date
 
+import pytest
+
 from bioetl.infrastructure.quality.exemptions_registry_validation import (
     _normalize_required_fields,
     _resolve_due_field,
@@ -13,6 +15,8 @@ from bioetl.infrastructure.quality.exemptions_registry_validation import (
     get_policy_required_fields,
     validate_exemption_entry,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class TestValidateRequiredFields:

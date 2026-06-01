@@ -28,6 +28,10 @@ from bioetl.application.composite.protocols import (
     JoinExecutorProtocol,
     JoinKeyResolverProtocol,
 )
+from bioetl.application.composite.target_protein_classification_summary import (
+    TARGET_PROTEIN_CLASSIFICATION_PIPELINE,
+    summarize_target_protein_classification_dependency,
+)
 
 if TYPE_CHECKING:
     import polars as pl
@@ -169,6 +173,8 @@ class DependencyJoinerService:
         dep_df = dependency_dfs.get(dep.pipeline)
         if dep_df is None:
             return merged_df
+        if dep.pipeline == TARGET_PROTEIN_CLASSIFICATION_PIPELINE:
+            dep_df = summarize_target_protein_classification_dependency(dep_df)
 
         return self._apply_resolved_dependency_join(
             merged_df=merged_df,

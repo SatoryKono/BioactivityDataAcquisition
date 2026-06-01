@@ -49,9 +49,17 @@ def _iter_canonical_schema_files() -> list[Path]:
     for yaml_path in sorted(CANONICAL_DIR.rglob("*.yaml")):
         if yaml_path.name.startswith("_"):
             continue
+        rel = yaml_path.relative_to(CANONICAL_DIR)
+        if len(rel.parts) < 2 or rel.parts[0] == "field_groups":
+            continue
+        if rel.parts[0] == "composite":
+            continue
         files.append(yaml_path)
     for yaml_path in sorted(COMPOSITES_DIR.rglob("*.yaml")):
         if yaml_path.name.startswith("_"):
+            continue
+        rel = yaml_path.relative_to(COMPOSITES_DIR)
+        if len(rel.parts) > 1:
             continue
         files.append(yaml_path)
     return files
@@ -59,32 +67,42 @@ def _iter_canonical_schema_files() -> list[Path]:
 
 def _load_entry(yaml_path: Path) -> CanonicalSchemaEntry:
     payload = yaml.safe_load(yaml_path.read_text(encoding="utf-8")) or {}
-    schema = payload.get("schema", {}) if isinstance(payload, dict) else {}
-    groups = schema.get("column_groups", []) if isinstance(schema, dict) else []
-
-    # Composite configs have column_groups under merge.column_groups
-    if not groups and isinstance(payload, dict):
-        merge = payload.get("merge", {}) if isinstance(payload, dict) else {}
-        groups = merge.get("column_groups", []) if isinstance(merge, dict) else []
+    payload_dict = payload if isinstance(payload, dict) else {}
 
     group_names: list[str] = []
+    if COMPOSITES_DIR in yaml_path.parents:
+        base_dir = COMPOSITES_DIR
+        rel = yaml_path.relative_to(base_dir)
+        provider = "composite"
+        yaml_path_value = f"composite/{rel.as_posix()}"
+
+        composite = payload_dict.get("composite", {})
+        composite_dict = composite if isinstance(composite, dict) else {}
+        schema = composite_dict.get("schema", {})
+        groups = schema.get("column_groups", []) if isinstance(schema, dict) else []
+        if not groups:
+            merge = composite_dict.get("merge", {})
+            groups = (
+                merge.get("column_groups", []) if isinstance(merge, dict) else []
+            )
+    else:
+        base_dir = CANONICAL_DIR
+        rel = yaml_path.relative_to(base_dir)
+        provider = rel.parts[0]
+        yaml_path_value = rel.as_posix()
+
+        schema = payload_dict.get("schema", {})
+        groups = schema.get("column_groups", []) if isinstance(schema, dict) else []
+
     for group in groups:
         if isinstance(group, dict) and "name" in group:
             group_names.append(str(group["name"]))
 
-    # Determine base directory for relative path calculation
-    if COMPOSITES_DIR in yaml_path.parents:
-        base_dir = COMPOSITES_DIR
-    else:
-        base_dir = CANONICAL_DIR
-
-    rel = yaml_path.relative_to(base_dir)
-    provider = rel.parts[0]
     entity = rel.stem
     return CanonicalSchemaEntry(
         provider=provider,
         entity=entity,
-        yaml_path=str(rel).replace("\\", "/"),
+        yaml_path=yaml_path_value,
         column_groups=tuple(group_names),
     )
 
@@ -238,9 +256,10 @@ def _expected_generated_contracts_snapshot() -> dict[str, str]:
 
     for schema_cls in schema_classes:
         entity = module._class_to_entity(schema_cls.__name__)
-        filename = module._filename_from_version(entity, module.CONTRACT_VERSION)
+        contract_version = module._contract_version_for_entity(entity)
+        filename = module._filename_from_version(entity, contract_version)
         output_path = GENERATED_CONTRACTS_DIR / filename
-        contract = module._build_contract(schema_cls, entity)
+        contract = module._build_contract(schema_cls, entity, contract_version)
         snapshot[output_path.relative_to(PROJECT_ROOT).as_posix()] = (
             json.dumps(contract, indent=2, ensure_ascii=False) + "\n"
         )

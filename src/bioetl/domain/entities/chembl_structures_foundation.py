@@ -85,6 +85,21 @@ class Target(BaseEntity):
     component_relationships: list[str] | None = None
     component_descriptions: list[str] | None = None
     protein_classifications: str | None = None
+    target_protein_class_id_L1: str | None = None
+    target_protein_class_name_L1: str | None = None
+    target_protein_class_desc_L1: str | None = None
+    target_protein_class_id_L2: str | None = None
+    target_protein_class_name_L2: str | None = None
+    target_protein_class_desc_L2: str | None = None
+    target_protein_class_id_L3: str | None = None
+    target_protein_class_name_L3: str | None = None
+    target_protein_class_desc_L3: str | None = None
+    target_protein_class_id_L4: str | None = None
+    target_protein_class_name_L4: str | None = None
+    target_protein_class_desc_L4: str | None = None
+    target_protein_class_id_L5: str | None = None
+    target_protein_class_name_L5: str | None = None
+    target_protein_class_desc_L5: str | None = None
 
     def _validate_invariants(self) -> None:
         if not self.target_id:

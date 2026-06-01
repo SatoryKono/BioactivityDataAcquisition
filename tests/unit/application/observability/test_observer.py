@@ -34,6 +34,8 @@ from bioetl.domain.runtime_observability_publication_contract import (
 from bioetl.domain.types import RunType
 from tests.helpers.clock import FixedClock
 
+pytestmark = pytest.mark.unit
+
 
 class PipelineObserver(_PipelineObserver):
     """Create observers with explicit deterministic clock ownership in tests."""

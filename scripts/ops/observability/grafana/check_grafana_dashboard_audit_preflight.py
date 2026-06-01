@@ -292,6 +292,7 @@ def run_checks(
                 run_id=live_audit.DEFAULT_RUN_ID,
                 range_hours=live_audit.DEFAULT_RANGE_HOURS,
                 output_path=live_audit.DEFAULT_OUTPUT_PATH,
+                request_timeout_seconds=timeout_seconds,
             )
         )
         checks.append(

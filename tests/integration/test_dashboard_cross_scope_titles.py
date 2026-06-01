@@ -126,3 +126,31 @@ def test_workflow_status_panel_repeats_selected_range_contract() -> None:
     assert "Selected-range workflow evidence status" in description
     assert "not exact-run evidence" in description
     assert "run_id remains local ID-only identity context" in description
+    target_expr = str(panel.get("targets", [{}])[0].get("expr", ""))
+    assert 'status="failed"' in target_expr
+    assert 'status="skipped"' in target_expr
+    assert 'status!~"success|failed"' in target_expr
+    assert "CRIT is driven only by the same failed workflow-run evidence" in description
+    assert "If those visible counters are zero" in description
+
+
+def test_provider_health_descriptions_separate_global_and_selected_scope() -> None:
+    dashboard = json.loads(
+        Path("grafana/dashboards/bioetl-provider-health-v2.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    panels = {panel.get("id"): panel for panel in dashboard["panels"]}
+
+    status_description = str(panels[9401].get("description", ""))
+    assert "selected-provider scope" in status_description
+    assert "GLOBAL Provider Severity Matrix" in status_description
+    assert "may disagree by design" in status_description
+
+    provenance_content = str(panels[9400].get("options", {}).get("content", ""))
+    assert "Global provider posture is shown separately" in provenance_content
+
+    for panel_id in (9101, 9102, 9103):
+        description = str(panels[panel_id].get("description", ""))
+        assert "Scope: GLOBAL provider fleet posture" in description
+        assert "intentionally not filtered by run_id" in description

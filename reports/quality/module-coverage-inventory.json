@@ -343,7 +343,7 @@
       "missing_lines": 31,
       "module": "bioetl.application.composite.dependency_joiner",
       "path": "src/bioetl/application/composite/dependency_joiner.py",
-      "source_lines": 294
+      "source_lines": 300
     },
     {
       "coverage_percent": 39.56,
@@ -533,7 +533,7 @@
       "missing_lines": 41,
       "module": "bioetl.application.composite.merger_metrics_mixin",
       "path": "src/bioetl/application/composite/merger_metrics_mixin.py",
-      "source_lines": 175
+      "source_lines": 192
     },
     {
       "coverage_percent": 66.2,
@@ -563,7 +563,7 @@
       "missing_lines": 17,
       "module": "bioetl.application.composite.merger_post_join",
       "path": "src/bioetl/application/composite/merger_post_join.py",
-      "source_lines": 222
+      "source_lines": 225
     },
     {
       "coverage_percent": 22.22,
@@ -604,6 +604,16 @@
       "module": "bioetl.application.composite.runtime_wiring_api",
       "path": "src/bioetl/application/composite/runtime_wiring_api.py",
       "source_lines": 104
+    },
+    {
+      "coverage_percent": null,
+      "coverage_status": "unmeasured",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
+      "module": "bioetl.application.composite.target_protein_classification_summary",
+      "path": "src/bioetl/application/composite/target_protein_classification_summary.py",
+      "source_lines": 211
     },
     {
       "coverage_percent": 100.0,
@@ -3153,7 +3163,7 @@
       "missing_lines": 89,
       "module": "bioetl.application.pipelines.chembl.target_transformer",
       "path": "src/bioetl/application/pipelines/chembl/target_transformer.py",
-      "source_lines": 325
+      "source_lines": 331
     },
     {
       "coverage_percent": 81.25,
@@ -9603,7 +9613,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.contracts.gold._chembl_target_lookup_schemas",
       "path": "src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
-      "source_lines": 201
+      "source_lines": 216
     },
     {
       "coverage_percent": 100.0,
@@ -9663,7 +9673,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.contracts.gold.composite_bioassay",
       "path": "src/bioetl/domain/contracts/gold/composite_bioassay.py",
-      "source_lines": 114
+      "source_lines": 163
     },
     {
       "coverage_percent": 100.0,
@@ -10163,7 +10173,7 @@
       "missing_lines": 30,
       "module": "bioetl.domain.entities.chembl_structures_foundation",
       "path": "src/bioetl/domain/entities/chembl_structures_foundation.py",
-      "source_lines": 199
+      "source_lines": 214
     },
     {
       "coverage_percent": 77.12,
@@ -12743,7 +12753,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.schemas.chembl.target",
       "path": "src/bioetl/domain/schemas/chembl/target.py",
-      "source_lines": 159
+      "source_lines": 204
     },
     {
       "coverage_percent": 100.0,
@@ -12853,7 +12863,7 @@
       "missing_lines": 11,
       "module": "bioetl.domain.schemas.generated.registry",
       "path": "src/bioetl/domain/schemas/generated/registry.py",
-      "source_lines": 293
+      "source_lines": 299
     },
     {
       "coverage_percent": 100.0,
@@ -17343,7 +17353,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.schemas.silver_chembl_core",
       "path": "src/bioetl/infrastructure/schemas/silver_chembl_core.py",
-      "source_lines": 396
+      "source_lines": 411
     },
     {
       "coverage_percent": 100.0,
@@ -19698,7 +19708,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-06-01",
-  "source_tree_sha256": "ae187f31c9e724a4fedcbf02f163615eed6bd67403075c1d7493e83b94f2ecf9",
+  "source_tree_sha256": "4ac5e3708ac49423d6718e8cc3fa576f58baae74be862ff87f2035eb021ff80f",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -19913,18 +19923,23 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 1969,
+    "source_module_count": 1970,
     "status_counts": {
       "fully_covered": 493,
       "partially_covered": 1153,
       "uncovered": 318,
-      "unmeasured": 5
+      "unmeasured": 6
     },
-    "unmeasured_module_count": 5,
+    "unmeasured_module_count": 6,
     "unmeasured_modules": [
       {
         "module": "bioetl.__main__",
         "path": "src/bioetl/__main__.py",
+        "reason": "coverage_xml_has_no_class_entry"
+      },
+      {
+        "module": "bioetl.application.composite.target_protein_classification_summary",
+        "path": "src/bioetl/application/composite/target_protein_classification_summary.py",
         "reason": "coverage_xml_has_no_class_entry"
       },
       {

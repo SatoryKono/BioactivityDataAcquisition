@@ -237,6 +237,7 @@ ______________________________________________________________________
 | **Run ID**       | UUID identifying a pipeline run            | `UUID`                               | `execution-id`, `job-id`      |
 | **Batch ID**     | UUID identifying a batch within a run      | `UUID`                               | `chunk-id`                    |
 | **HGNC ID**      | HUGO Gene Nomenclature Committee identifier retained from ChEMBL target cross-references | `HGNC:6008` or provider-supplied numeric token | `gene-symbol`, `hgnc-symbol` |
+| **Protein Class L1-L5** | ChEMBL target protein-classification hierarchy levels retained in published target contracts | `target_protein_class_id_L1` ... `target_protein_class_id_L5` | `L6`, free-form JSON hierarchy |
 
 ### Canonical Semantic Field Clusters
 

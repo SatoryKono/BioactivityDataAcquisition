@@ -15,6 +15,8 @@ from pandera.errors import SchemaError
 from bioetl.domain.schemas.openalex.publication import OpenAlexPublicationSchema
 from tests.helpers.clock import FIXED_TEST_TIME
 
+pytestmark = pytest.mark.unit
+
 # Pandera DataFrameModel has issues with Python 3.14+ due to function dispatch bug
 # See: https://github.com/unionai-oss/pandera/issues
 PANDERA_PYTHON314_SKIP = pytest.mark.skipif(
