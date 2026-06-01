@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -13,6 +14,8 @@ from scripts.data_quality.export_chembl_observed_vocab import (
     main,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_build_inventory_payload_scans_all_tracked_chembl_pipelines() -> None:
     payload = build_inventory_payload()
@@ -76,7 +79,16 @@ def test_missing_declared_fixture_path_fails_fast(
 ) -> None:
     missing_manifest = tmp_path / "manifest.yaml"
     missing_manifest.write_text(
-        "fixtures:\n  chembl/activity:\n    fixture_kind: tracked_ci_sample\n    fixture_path: tests/fixtures/bronze/chembl/activity/does_not_exist.jsonl\n",
+        "\n".join(
+            [
+                "fixtures:",
+                "  chembl/activity:",
+                "    fixture_kind: tracked_ci_sample",
+                "    fixture_path: tests/fixtures/bronze/chembl/activity/"
+                "does_not_exist.jsonl",
+                "",
+            ]
+        ),
         encoding="utf-8",
     )
 
@@ -84,5 +96,5 @@ def test_missing_declared_fixture_path_fails_fast(
 
     monkeypatch.setattr(module, "MANIFEST_PATH", missing_manifest)
 
-    with pytest.raises(FileNotFoundError, match="does_not_exist.jsonl"):
+    with pytest.raises(FileNotFoundError, match=re.escape("does_not_exist.jsonl")):
         module.build_inventory_payload()

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from datetime import UTC, datetime
 
 from bioetl.domain.aggregates.batch import Batch
@@ -9,6 +11,8 @@ from bioetl.domain.aggregates.events import BatchCreated
 from bioetl.domain.aggregates.quarantine_entry import QuarantineEntry
 from bioetl.domain.types import BatchID, RunID
 from tests.helpers.deterministic_ids import deterministic_uuid_value
+
+pytestmark = pytest.mark.unit
 
 _EXPECTED_GOLDEN = {
     "batch_create_batch_id": "3f700e91-4464-5a8d-95c0-379bce6e1a5d",

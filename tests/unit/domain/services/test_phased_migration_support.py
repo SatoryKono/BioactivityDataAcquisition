@@ -2,14 +2,17 @@
 
 from __future__ import annotations
 
-import pytest
 from unittest.mock import patch
+
+import pytest
 
 from bioetl.domain.behavior.phased_migration_support import (
     MigrationPhaseConfig,
     MigrationStatus,
     PhasedMigrationCoordinator,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class TestPhasedMigrationCoordinator:
@@ -293,7 +296,7 @@ class TestPhasedMigrationCoordinator:
     # Factory function test
     # ==========================================================================
 
-    def test_factory_function(self) -> None:
+    def test_migration_coordinator__factory_function__be3763f8(self) -> None:
         """Test the factory function."""
         service = create_phased_migration_support_service()
         assert isinstance(service, PhasedMigrationCoordinator)

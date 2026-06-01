@@ -100,7 +100,7 @@ class TestComputeGroupCounts:
         )
         assert result == {"group1": 5}
 
-    def test_empty_groups(self) -> None:
+    def test_compute_group_counts__empty_groups__9bf2db69(self) -> None:
         """Empty registry_groups should return empty dict."""
         result = _compute_group_counts(by_registry={"a": 1}, registry_groups={})
         assert result == {}
@@ -224,7 +224,7 @@ class TestOwnerAllocationsForQuarter:
         result = _owner_allocations_for_quarter(scorecard=scorecard, quarter="2025-Q1")
         assert result == {}
 
-    def test_skips_non_dict_items(self) -> None:
+    def test_for_quarter__skips_non_dict_items__b6fb17ed(self) -> None:
         """Should skip non-dict items in targets list."""
         scorecard = {
             "owner_decomposition_targets": [
@@ -352,7 +352,7 @@ class TestEvaluateOwnerDiversification:
         )
         assert violations == []
 
-    def test_governance_not_dict(self) -> None:
+    def test_owner_diversification__governance_not_dict__2a21416e(self) -> None:
         """No violation when governance is not a dict."""
         violations = _evaluate_owner_diversification(
             by_owner={"alice": 1},
@@ -361,7 +361,7 @@ class TestEvaluateOwnerDiversification:
         )
         assert violations == []
 
-    def test_policy_not_dict(self) -> None:
+    def test_owner_diversification__policy_not_dict__529b780f(self) -> None:
         """No violation when policy is not a dict."""
         violations = _evaluate_owner_diversification(
             by_owner={"alice": 1},
@@ -412,7 +412,7 @@ class TestEvaluateOwnerDiversification:
         )
         assert len(violations) == 1
 
-    def test_invalid_quarter_format(self) -> None:
+    def test_owner_diversification__quarter_format__6573e5ae(self) -> None:
         """Invalid quarter format should not cause errors."""
         scorecard = {
             "governance": {
@@ -440,7 +440,7 @@ class TestExpiryCap:
         }
         assert _expiry_cap_for_quarter(scorecard=scorecard, quarter="2025-Q1") == 5
 
-    def test_returns_none_for_no_match(self) -> None:
+    def test_scoring_expiry_cap__none_for_no_match__68f5b2c6(self) -> None:
         """Should return None when quarter doesn't match."""
         scorecard = {
             "expiry_decomposition_targets": [

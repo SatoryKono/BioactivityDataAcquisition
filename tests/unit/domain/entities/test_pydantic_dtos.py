@@ -10,7 +10,7 @@ from pydantic import ValidationError
 class TestCrossRefPublicationRecord:
     """Tests for CrossRef PublicationRecord DTO."""
 
-    def test_valid_creation(self) -> None:
+    def test_ref_publication_record__valid_creation__0c29ed22(self) -> None:
         from bioetl.domain.entities.crossref import PublicationRecord
 
         r = PublicationRecord(doi="10.1038/nature12373")
@@ -18,13 +18,13 @@ class TestCrossRefPublicationRecord:
         assert r.title is None
         assert r.issn == []
 
-    def test_extra_field_forbidden(self) -> None:
+    def test_ref_publication_record__field_forbidden__6ad22584(self) -> None:
         from bioetl.domain.entities.crossref import PublicationRecord
 
         with pytest.raises(ValidationError, match="Extra inputs are not permitted"):
             PublicationRecord(doi="10.1234/test", unknown_field="x")  # type: ignore[call-arg]
 
-    def test_frozen(self) -> None:
+    def test_ref_publication_record__frozen__fca41406(self) -> None:
         from bioetl.domain.entities.crossref import PublicationRecord
 
         r = PublicationRecord(doi="10.1234/test")
@@ -36,20 +36,20 @@ class TestCrossRefPublicationRecord:
 class TestPubchemMoleculeRecord:
     """Tests for PubChem PubchemMoleculeRecord DTO."""
 
-    def test_valid_creation(self) -> None:
+    def test_molecule_record__valid_creation__d3ebf740(self) -> None:
         from bioetl.domain.entities.pubchem import PubchemMoleculeRecord
 
         r = PubchemMoleculeRecord(molecule_id="2244")
         assert r.molecule_id == "2244"
         assert r.canonical_smiles is None
 
-    def test_extra_field_forbidden(self) -> None:
+    def test_molecule_record__field_forbidden__7cbb50dd(self) -> None:
         from bioetl.domain.entities.pubchem import PubchemMoleculeRecord
 
         with pytest.raises(ValidationError, match="Extra inputs are not permitted"):
             PubchemMoleculeRecord(molecule_id="2244", bad_field="x")  # type: ignore[call-arg]
 
-    def test_frozen(self) -> None:
+    def test_molecule_record__frozen__f5dce46f(self) -> None:
         from bioetl.domain.entities.pubchem import PubchemMoleculeRecord
 
         r = PubchemMoleculeRecord(molecule_id="2244")

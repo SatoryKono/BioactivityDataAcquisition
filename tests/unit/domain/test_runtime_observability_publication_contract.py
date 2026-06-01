@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.domain.runtime_observability_publication_contract import (
     CANONICAL_DOMAIN_EVENT_EMITTER,
     CANONICAL_LIFECYCLE_EMITTER,
@@ -9,6 +11,8 @@ from bioetl.domain.runtime_observability_publication_contract import (
     is_canonical_runtime_observability_emitter,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_contract_freezes_canonical_emitters() -> None:
     contract = get_runtime_observability_publication_contract()

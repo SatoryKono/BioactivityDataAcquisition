@@ -28,6 +28,8 @@ from bioetl.application.pipelines.pubmed.extractors.identifier import (
     IdentifierExtractor,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _make_article(
     *,

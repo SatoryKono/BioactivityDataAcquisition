@@ -20,7 +20,7 @@ from bioetl.domain.schemas.semanticscholar.publication import (
 class TestPmidBaseValidation:
     """Base validation tests for pmid."""
 
-    def test_pmid_valid(
+    def test_pmid_base_validation__pmid_valid__700a320d(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid pmid value."""
@@ -28,7 +28,7 @@ class TestPmidBaseValidation:
             minimal_semanticscholar_publication_df
         )
 
-    def test_pmid_null_allowed(
+    def test_pmid_base_validation__pmid_null_allowed__08ce86f4(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: pmid is nullable."""
@@ -37,7 +37,7 @@ class TestPmidBaseValidation:
         SemanticScholarPublicationSchema.validate(df)
 
     @pytest.mark.parametrize("invalid_value", ["-1", "abc", ""])
-    def test_pmid_invalid_format(
+    def test_pmid_base_validation__pmid_invalid_format__17bfbf82(
         self, minimal_semanticscholar_publication_df: pd.DataFrame, invalid_value: Any
     ) -> None:
         """FAIL: pmid invalid format."""
@@ -51,7 +51,7 @@ class TestPmidBaseValidation:
 class TestDoiBaseValidation:
     """Base validation tests for doi."""
 
-    def test_doi_valid(
+    def test_doi_base_validation__doi_valid__a30e1c20(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid doi value."""
@@ -59,7 +59,7 @@ class TestDoiBaseValidation:
             minimal_semanticscholar_publication_df
         )
 
-    def test_doi_null_allowed(
+    def test_doi_base_validation__doi_null_allowed__5ba82159(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: doi is nullable."""
@@ -70,7 +70,7 @@ class TestDoiBaseValidation:
     @pytest.mark.parametrize(
         "invalid_value", ["doi:10.1234", "10.123/x", "not-a-doi", ""]
     )
-    def test_doi_invalid_format(
+    def test_doi_base_validation__doi_invalid_format__1bdd4ed8(
         self, minimal_semanticscholar_publication_df: pd.DataFrame, invalid_value: Any
     ) -> None:
         """FAIL: doi invalid format."""
@@ -84,7 +84,7 @@ class TestDoiBaseValidation:
 class TestPmcIdBaseValidation:
     """Base validation tests for pmc_id."""
 
-    def test_pmc_id_valid(
+    def test_pmc_id_base_validation__pmc_id_valid__5ec7411f(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid pmc_id value."""
@@ -92,7 +92,7 @@ class TestPmcIdBaseValidation:
             minimal_semanticscholar_publication_df
         )
 
-    def test_pmc_id_null_allowed(
+    def test_pmc_id_base_validation__pmc_id_null_allowed__bdd6f1f5(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: pmc_id is nullable."""
@@ -101,7 +101,7 @@ class TestPmcIdBaseValidation:
         SemanticScholarPublicationSchema.validate(df)
 
     @pytest.mark.parametrize("invalid_value", ["pmc123", "PMC", "123", ""])
-    def test_pmc_id_invalid_format(
+    def test_pmc_id_base_validation__id_invalid_format__cb3cec42(
         self, minimal_semanticscholar_publication_df: pd.DataFrame, invalid_value: Any
     ) -> None:
         """FAIL: pmc_id invalid format."""
@@ -115,7 +115,7 @@ class TestPmcIdBaseValidation:
 class TestTitleBaseValidation:
     """Base validation tests for title."""
 
-    def test_title_valid(
+    def test_title_base_validation__title_valid__3c825b22(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid title value."""
@@ -123,7 +123,7 @@ class TestTitleBaseValidation:
             minimal_semanticscholar_publication_df
         )
 
-    def test_title_null_allowed(
+    def test_title_base_validation__title_null_allowed__4596e9c7(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: title is nullable."""
@@ -136,7 +136,7 @@ class TestTitleBaseValidation:
 class TestAbstractBaseValidation:
     """Base validation tests for abstract."""
 
-    def test_abstract_valid(
+    def test_base_validation__abstract_valid__3026d8ba(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid abstract value."""
@@ -144,7 +144,7 @@ class TestAbstractBaseValidation:
             minimal_semanticscholar_publication_df
         )
 
-    def test_abstract_null_allowed(
+    def test_base_validation__null_allowed__c89132cb(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: abstract is nullable."""
@@ -157,7 +157,7 @@ class TestAbstractBaseValidation:
 class TestAuthorsBaseValidation:
     """Base validation tests for authors."""
 
-    def test_authors_valid(
+    def test_base_validation__authors_valid__09fecf19(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid authors value."""
@@ -165,7 +165,7 @@ class TestAuthorsBaseValidation:
             minimal_semanticscholar_publication_df
         )
 
-    def test_authors_null_allowed(
+    def test_base_validation__authors_null_allowed__44cb58cc(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: authors is nullable."""
@@ -178,7 +178,7 @@ class TestAuthorsBaseValidation:
 class TestAffiliationListBaseValidation:
     """Base validation tests for affiliation_list."""
 
-    def test_affiliation_list_valid(
+    def test_list_base_validation__list_valid__9b735559(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid affiliation_list value."""
@@ -186,7 +186,7 @@ class TestAffiliationListBaseValidation:
             minimal_semanticscholar_publication_df
         )
 
-    def test_affiliation_list_null_allowed(
+    def test_list_base_validation__list_null_allowed__f7caea03(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: affiliation_list is nullable."""
@@ -199,7 +199,7 @@ class TestAffiliationListBaseValidation:
 class TestJournalBaseValidation:
     """Base validation tests for journal."""
 
-    def test_journal_valid(
+    def test_base_validation__journal_valid__fdbe05e5(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid journal value."""
@@ -207,7 +207,7 @@ class TestJournalBaseValidation:
             minimal_semanticscholar_publication_df
         )
 
-    def test_journal_null_allowed(
+    def test_base_validation__journal_null_allowed__61ac788f(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: journal is nullable."""
@@ -220,7 +220,7 @@ class TestJournalBaseValidation:
 class TestPublicationYearBaseValidation:
     """Base validation tests for publication_year."""
 
-    def test_publication_year_valid(
+    def test_year_base_validation__year_valid__bc6c9057(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid publication_year value."""
@@ -228,7 +228,7 @@ class TestPublicationYearBaseValidation:
             minimal_semanticscholar_publication_df
         )
 
-    def test_publication_year_null_allowed(
+    def test_year_base_validation__year_null_allowed__27880e52(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: publication_year is nullable."""
@@ -241,7 +241,7 @@ class TestPublicationYearBaseValidation:
 class TestPublicationDateBaseValidation:
     """Base validation tests for publication_date."""
 
-    def test_publication_date_valid(
+    def test_date_base_validation__date_valid__699c8fb3(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid publication_date value."""
@@ -249,7 +249,7 @@ class TestPublicationDateBaseValidation:
             minimal_semanticscholar_publication_df
         )
 
-    def test_publication_date_null_allowed(
+    def test_date_base_validation__date_null_allowed__f5a159cb(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: publication_date is nullable."""
@@ -262,7 +262,7 @@ class TestPublicationDateBaseValidation:
 class TestPublicationTypeBaseValidation:
     """Base validation tests for publication_type."""
 
-    def test_publication_type_valid(
+    def test_type_base_validation__type_valid__7ad2104f(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid publication_type value."""
@@ -270,7 +270,7 @@ class TestPublicationTypeBaseValidation:
             minimal_semanticscholar_publication_df
         )
 
-    def test_publication_type_null_allowed(
+    def test_type_base_validation__type_null_allowed__c9b934c4(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: publication_type is nullable."""
@@ -283,7 +283,7 @@ class TestPublicationTypeBaseValidation:
 class TestLanguageBaseValidation:
     """Base validation tests for language."""
 
-    def test_language_valid(
+    def test_base_validation__language_valid__716ea602(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid language value."""
@@ -291,7 +291,7 @@ class TestLanguageBaseValidation:
             minimal_semanticscholar_publication_df
         )
 
-    def test_language_null_allowed(
+    def test_base_validation__null_allowed__ba822ca3(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: language is nullable."""
@@ -304,7 +304,7 @@ class TestLanguageBaseValidation:
 class TestPageFirstBaseValidation:
     """Base validation tests for page_first."""
 
-    def test_page_first_valid(
+    def test_first_base_validation__page_first_valid__b2e94953(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid page_first value."""
@@ -312,7 +312,7 @@ class TestPageFirstBaseValidation:
             minimal_semanticscholar_publication_df
         )
 
-    def test_page_first_null_allowed(
+    def test_first_base_validation__first_null_allowed__4170b325(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: page_first is nullable."""
@@ -325,7 +325,7 @@ class TestPageFirstBaseValidation:
 class TestPageLastBaseValidation:
     """Base validation tests for page_last."""
 
-    def test_page_last_valid(
+    def test_last_base_validation__page_last_valid__2cfd55e6(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid page_last value."""
@@ -333,7 +333,7 @@ class TestPageLastBaseValidation:
             minimal_semanticscholar_publication_df
         )
 
-    def test_page_last_null_allowed(
+    def test_last_base_validation__last_null_allowed__e8dff6ab(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: page_last is nullable."""
@@ -346,7 +346,7 @@ class TestPageLastBaseValidation:
 class TestCitationsReceivedBaseValidation:
     """Base validation tests for citations_received."""
 
-    def test_citations_received_valid(
+    def test_base_validation__received_valid__9ba6c26f(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid citations_received value."""
@@ -354,7 +354,7 @@ class TestCitationsReceivedBaseValidation:
             minimal_semanticscholar_publication_df
         )
 
-    def test_citations_received_null_allowed(
+    def test_base_validation__null_allowed__21d6a4e2(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: citations_received is nullable."""
@@ -367,7 +367,7 @@ class TestCitationsReceivedBaseValidation:
 class TestCitationsMadeBaseValidation:
     """Base validation tests for citations_made."""
 
-    def test_citations_made_valid(
+    def test_made_base_validation__citations_made_valid__69b70d4d(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid citations_made value."""
@@ -375,7 +375,7 @@ class TestCitationsMadeBaseValidation:
             minimal_semanticscholar_publication_df
         )
 
-    def test_citations_made_null_allowed(
+    def test_made_base_validation__made_null_allowed__02d97dde(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: citations_made is nullable."""
@@ -388,7 +388,7 @@ class TestCitationsMadeBaseValidation:
 class TestIsOaBaseValidation:
     """Base validation tests for is_oa."""
 
-    def test_is_oa_valid(
+    def test_is_oa_base_validation__is_oa_valid__07113608(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid is_oa value."""
@@ -396,7 +396,7 @@ class TestIsOaBaseValidation:
             minimal_semanticscholar_publication_df
         )
 
-    def test_is_oa_null_allowed(
+    def test_is_oa_base_validation__is_oa_null_allowed__f88d84f5(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: is_oa is nullable."""
@@ -409,7 +409,7 @@ class TestIsOaBaseValidation:
 class TestLookupMethodBaseValidation:
     """Base validation tests for lookup_method."""
 
-    def test_lookup_method_valid(
+    def test_method_base_validation__lookup_method_valid__5bace48e(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid lookup_method value."""
@@ -417,7 +417,7 @@ class TestLookupMethodBaseValidation:
             minimal_semanticscholar_publication_df
         )
 
-    def test_lookup_method_null_allowed(
+    def test_method_base_validation__method_null_allowed__74840504(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: lookup_method is nullable."""
@@ -430,7 +430,7 @@ class TestLookupMethodBaseValidation:
 class TestOriginalIdBaseValidation:
     """Base validation tests for original_id."""
 
-    def test_original_id_valid(
+    def test_id_base_validation__original_id_valid__e12512c2(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid original_id value."""
@@ -438,7 +438,7 @@ class TestOriginalIdBaseValidation:
             minimal_semanticscholar_publication_df
         )
 
-    def test_original_id_null_allowed(
+    def test_id_base_validation__id_null_allowed__ed51fd14(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: original_id is nullable."""
@@ -451,7 +451,7 @@ class TestOriginalIdBaseValidation:
 class TestSourceBaseValidation:
     """Base validation tests for _source."""
 
-    def test__source_valid(
+    def test_source_base_validation__source_valid__3d94bde7(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid _source value."""
@@ -459,7 +459,7 @@ class TestSourceBaseValidation:
             minimal_semanticscholar_publication_df
         )
 
-    def test__source_null_allowed(
+    def test_source_base_validation__source_null_allowed__910440cc(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: _source is nullable."""
@@ -579,7 +579,7 @@ class TestTldrBaseValidation:
 class TestVolumeBaseValidation:
     """Base validation tests for volume."""
 
-    def test_volume_valid(
+    def test_volume_base_validation__volume_valid__19b9064a(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid volume value."""
@@ -587,7 +587,7 @@ class TestVolumeBaseValidation:
             minimal_semanticscholar_publication_df
         )
 
-    def test_volume_null_allowed(
+    def test_volume_base_validation__volume_null_allowed__f06d7e56(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: volume is nullable."""
@@ -600,7 +600,7 @@ class TestVolumeBaseValidation:
 class TestPageRangeBaseValidation:
     """Base validation tests for page_range."""
 
-    def test_page_range_valid(
+    def test_range_base_validation__page_range_valid__8633194b(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid page_range value."""
@@ -608,7 +608,7 @@ class TestPageRangeBaseValidation:
             minimal_semanticscholar_publication_df
         )
 
-    def test_page_range_null_allowed(
+    def test_range_base_validation__range_null_allowed__e4646ac3(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: page_range is nullable."""
@@ -663,7 +663,7 @@ class TestOpenAccessUrlBaseValidation:
 class TestOaStatusBaseValidation:
     """Base validation tests for oa_status."""
 
-    def test_oa_status_valid(
+    def test_status_base_validation__oa_status_valid__b321083d(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid oa_status value."""
@@ -671,7 +671,7 @@ class TestOaStatusBaseValidation:
             minimal_semanticscholar_publication_df
         )
 
-    def test_oa_status_null_allowed(
+    def test_status_base_validation__status_null_allowed__d89abc4b(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: oa_status is nullable."""
@@ -705,7 +705,7 @@ class TestSubjectFieldsBaseValidation:
 class TestPublicationTypesBaseValidation:
     """Base validation tests for publication_types."""
 
-    def test_publication_types_valid(
+    def test_types_base_validation__types_valid__6ac3a0aa(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid publication_types value."""
@@ -713,7 +713,7 @@ class TestPublicationTypesBaseValidation:
             minimal_semanticscholar_publication_df
         )
 
-    def test_publication_types_null_allowed(
+    def test_types_base_validation__types_null_allowed__8c792f04(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: publication_types is nullable."""

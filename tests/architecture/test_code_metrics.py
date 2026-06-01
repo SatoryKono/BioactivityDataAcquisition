@@ -18,6 +18,8 @@ from bioetl.infrastructure.quality import (
 )
 
 
+pytestmark = pytest.mark.architecture
+
 def _layer_path(src_dir: Path, layer: str) -> Path:
     return src_dir / "bioetl" / layer
 

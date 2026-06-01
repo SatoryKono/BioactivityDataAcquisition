@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 from scripts.ai import check_sonar_issues as sonar_check
 from scripts.ai import sonar_issue_processor as processor
+
+pytestmark = pytest.mark.unit
 
 SONAR_CONFIG_FILE = "sonar-project.properties"
 SONAR_URL = "https://sonarcloud.io"

@@ -1,9 +1,13 @@
 """Tests for logging helpers."""
 
+import pytest
+
 from unittest.mock import MagicMock
 
 from bioetl.infrastructure.observability.logging_helpers import log_debug, log_error
 
+
+pytestmark = pytest.mark.unit
 
 def test_log_error():
     """Test log_error function."""

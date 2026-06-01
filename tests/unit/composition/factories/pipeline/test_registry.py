@@ -14,6 +14,8 @@ from bioetl.composition.factories.pipeline.registry import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 @pytest.fixture(autouse=True)
 def ensure_registration():
     """Ensure pipeline factories are registered before tests."""

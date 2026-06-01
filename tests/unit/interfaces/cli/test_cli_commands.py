@@ -836,21 +836,21 @@ class TestFormatBytes:
         assert format_bytes(512) == "512 bytes"
         assert format_bytes(1023) == "1023 bytes"
 
-    def test_format_bytes_kb(self):
+    def test_commands_format_bytes__format_bytes_kb__b9152329(self):
         """Test format_bytes with kilobyte values."""
         from bioetl.interfaces.cli.formatters import format_bytes
 
         assert "KB" in format_bytes(1024)
         assert "KB" in format_bytes(1024 * 512)
 
-    def test_format_bytes_mb(self):
+    def test_commands_format_bytes__format_bytes_mb__77c959d0(self):
         """Test format_bytes with megabyte values."""
         from bioetl.interfaces.cli.formatters import format_bytes
 
         assert "MB" in format_bytes(1024 * 1024)
         assert "MB" in format_bytes(1024 * 1024 * 512)
 
-    def test_format_bytes_gb(self):
+    def test_commands_format_bytes__format_bytes_gb__32e830d1(self):
         """Test format_bytes with gigabyte values."""
         from bioetl.interfaces.cli.formatters import format_bytes
 
@@ -1124,7 +1124,7 @@ class TestArchiveCommand:
         assert "TARGET_PATH" in result.output
         assert "--remove-source" in result.output
 
-    def test_archive_success(self, cli_runner, mock_lifecycle_service):
+    def test_archive_command__archive_success__57687400(self, cli_runner, mock_lifecycle_service):
         """Test successful archive operation."""
         with patch(
             "bioetl.interfaces.cli.commands.archive.get_lifecycle_service",
@@ -1143,7 +1143,7 @@ class TestArchiveCommand:
             remove_source=False,
         )
 
-    def test_archive_with_remove_source(self, cli_runner, mock_lifecycle_service):
+    def test_archive_command__with_remove_source__11808f30(self, cli_runner, mock_lifecycle_service):
         """Test archive with --remove-source flag."""
         with patch(
             "bioetl.interfaces.cli.commands.archive.get_lifecycle_service",

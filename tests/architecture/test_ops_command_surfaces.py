@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 

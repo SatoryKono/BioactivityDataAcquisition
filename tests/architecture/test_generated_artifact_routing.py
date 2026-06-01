@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 from typing import Any
 
 import yaml
+
+pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
 ROUTING_PATH = ROOT / "configs" / "quality" / "generated_artifact_routing.yaml"

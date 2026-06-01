@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 def test_root_hygiene_workflow_runs_for_all_pr_and_push_changes() -> None:
     workflow = Path(".github/workflows/root-hygiene.yml").read_text(encoding="utf-8")

@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import pytest
+
 import pyarrow as pa
 
 from bioetl.infrastructure.storage.silver.delta_helpers import (
     build_replay_safe_rerun_contract,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_build_replay_safe_rerun_contract_is_machine_readable() -> None:
     """Silver merge rerun semantics should expose explicit external guards."""

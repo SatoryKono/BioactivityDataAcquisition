@@ -23,6 +23,8 @@ from bioetl.domain.resilience import RetryConfig
 from bioetl.infrastructure.adapters.http.client_retry_mixin import HTTPClientRetryMixin
 
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # Helpers — minimal concrete subclass that satisfies mixin dependencies
 # ---------------------------------------------------------------------------

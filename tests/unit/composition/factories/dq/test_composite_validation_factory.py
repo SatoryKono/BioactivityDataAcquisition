@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.composition.factories.dq import create_composite_validation_service
 from bioetl.domain.behavior.aggregation_validator import AggregationValidator
 from bioetl.domain.behavior.composite_validation_layer import CompositeValidator
 from bioetl.domain.behavior.cross_validation_validator import CrossValidationValidator
 from bioetl.domain.behavior.preflight_governance import PreflightGovernor
 
+
+pytestmark = pytest.mark.unit
 
 def test_create_composite_validation_service_returns_default_wiring() -> None:
     """Factory should assemble the default composite validation collaborators."""

@@ -15,6 +15,8 @@ from bioetl.infrastructure.config.source_normalizers.source import (
     normalize_source_config,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestSyncTimeoutAliases:
     """Tests for _sync_timeout_aliases."""
@@ -217,7 +219,7 @@ class TestNormalizeSourceConfig:
         with pytest.raises(ValueError, match="Retired source transport aliases"):
             normalize_source_config(raw)
 
-    def test_rejects_retired_provider_pagination_aliases(self) -> None:
+    def test_source_config__pagination_aliases__ba35d03b(self) -> None:
         """Retired provider pagination aliases should fail fast."""
         raw = {
             "source": {

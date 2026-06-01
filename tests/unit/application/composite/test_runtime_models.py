@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 import os
 from pathlib import Path
 
@@ -11,6 +13,8 @@ from bioetl.application.composite.runtime_models import (
     CompositeRuntimeConfig,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_runtime_models_exports_stable_symbols() -> None:
     """Stable runtime module should own the canonical orchestration models."""

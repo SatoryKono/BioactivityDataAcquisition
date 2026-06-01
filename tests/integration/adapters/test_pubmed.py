@@ -63,7 +63,7 @@ async def test_fetch_publications(pubmed_adapter: PubMedAdapter):
 
 
 @pytest.mark.integration
-async def test_health_check(pubmed_adapter: PubMedAdapter):
+async def test_adapters_pubmed__health_check__d03bddac(pubmed_adapter: PubMedAdapter):
     """Tests the health check for the PubMed API using einfo.fcgi."""
     mock_einfo_json = {
         "header": {"type": "einfo", "version": "0.3"},

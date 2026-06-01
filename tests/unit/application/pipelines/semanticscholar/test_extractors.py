@@ -133,7 +133,7 @@ class TestExtractAuthors:
 
         assert result == ["John Doe", "Jane Smith", "Bob Wilson"]
 
-    def test_extract_single_author(self) -> None:
+    def test_extract_authors__single_author__a9841583(self) -> None:
         """Test extracting single author."""
         authors = [{"authorId": "123", "name": "Single Author"}]
 
@@ -159,7 +159,7 @@ class TestExtractAuthors:
         result = extract_authors([])
         assert result == []
 
-    def test_extract_none(self) -> None:
+    def test_extract_authors__extract_none__a0d49a5a(self) -> None:
         """Test extracting from None."""
         result = extract_authors(None)
         assert result == []
@@ -231,7 +231,7 @@ class TestExtractAffiliations:
         result = extract_affiliations(authors)
         assert result == ["Univ A"]
 
-    def test_extract_affiliations_deduplication(self) -> None:
+    def test_extract_affiliations__deduplication__4e55f83b(self) -> None:
         """Should deduplicate affiliations."""
         authors = [
             {"name": "John", "affiliations": ["Univ A"]},
@@ -421,7 +421,7 @@ class TestExtractOpenAccessInfo:
         result = extract_open_access_info(True, oa_pdf)
         assert result["oa_status"] == "hybrid"
 
-    def test_unknown_status_returns_none(self) -> None:
+    def test_open_access_info__status_returns_none__949734fa(self) -> None:
         """Test that unknown OA status returns None."""
         oa_pdf = {"url": "https://example.com/paper.pdf", "status": "UNKNOWN"}
         result = extract_open_access_info(True, oa_pdf)
@@ -456,12 +456,12 @@ class TestExtractTldr:
 
         assert result == "This paper presents a novel approach to..."
 
-    def test_extract_none(self) -> None:
+    def test_extract_tldr__extract_none__f3449907(self) -> None:
         """Test extracting from None."""
         result = extract_tldr(None)
         assert result is None
 
-    def test_extract_empty_dict(self) -> None:
+    def test_extract_tldr__extract_empty_dict__8c0ff7c5(self) -> None:
         """Test extracting from empty dict."""
         result = extract_tldr({})
         assert result is None
@@ -573,7 +573,7 @@ class TestNormalizeOaStatus:
         """Test empty string returns None."""
         assert normalize_oa_status("") is None
 
-    def test_none_returns_none(self) -> None:
+    def test_normalize_oa_status__none_returns_none__6f2e95dd(self) -> None:
         """Test None returns None."""
         assert normalize_oa_status(None) is None
 
@@ -620,11 +620,11 @@ class TestExtractAuthorS2Ids:
         result = extract_author_s2_ids(authors)
         assert result == ["1234567890abcdef1234567890abcdef12345678"]
 
-    def test_empty_list(self) -> None:
+    def test_extract_author_s2_ids__empty_list__d807162a(self) -> None:
         """Test with empty list."""
         assert extract_author_s2_ids([]) == []
 
-    def test_none_input(self) -> None:
+    def test_extract_author_s2_ids__none_input__b601f4f3(self) -> None:
         """Test with None input."""
         assert extract_author_s2_ids(None) == []
 
@@ -666,15 +666,15 @@ class TestExtractAuthorOrcids:
         result = extract_author_orcids(authors)
         assert result == ["0000-0001-2345-6789", ""]
 
-    def test_empty_list(self) -> None:
+    def test_extract_author_orcids__empty_list__6e9b61d5(self) -> None:
         """Test with empty list."""
         assert extract_author_orcids([]) == []
 
-    def test_none_input(self) -> None:
+    def test_extract_author_orcids__none_input__1759f883(self) -> None:
         """Test with None input."""
         assert extract_author_orcids(None) == []
 
-    def test_strip_whitespace(self) -> None:
+    def test_extract_author_orcids__strip_whitespace__bbe2400c(self) -> None:
         """Test that ORCIDs are stripped of whitespace."""
         authors = [
             {"name": "John", "externalIds": {"ORCID": "  0000-0001-2345-6789  "}}
@@ -717,11 +717,11 @@ class TestExtractAuthorHIndices:
         result = extract_author_h_indices(authors)
         assert result == [None]
 
-    def test_empty_list(self) -> None:
+    def test_author_h_indices__empty_list__5b311abc(self) -> None:
         """Test with empty list."""
         assert extract_author_h_indices([]) == []
 
-    def test_none_input(self) -> None:
+    def test_author_h_indices__none_input__fabb019e(self) -> None:
         """Test with None input."""
         assert extract_author_h_indices(None) == []
 
@@ -788,15 +788,15 @@ class TestExtractCitationContexts:
         result = extract_citation_contexts(citations)
         assert result == ["Valid"]
 
-    def test_empty_list(self) -> None:
+    def test_citation_contexts__empty_list__2f0e3363(self) -> None:
         """Test with empty list."""
         assert extract_citation_contexts([]) == []
 
-    def test_none_input(self) -> None:
+    def test_citation_contexts__none_input__fc647235(self) -> None:
         """Test with None input."""
         assert extract_citation_contexts(None) == []
 
-    def test_strip_whitespace(self) -> None:
+    def test_citation_contexts__strip_whitespace__4e725ede(self) -> None:
         """Test that contexts are stripped of whitespace."""
         citations = [{"paperId": "abc", "contexts": ["  Trimmed context  "]}]
         result = extract_citation_contexts(citations)
@@ -838,11 +838,11 @@ class TestParseVolumeIssue:
         """Test '32:4' format."""
         assert parse_volume_issue("32:4") == ("32", "4")
 
-    def test_none_input(self) -> None:
+    def test_parse_volume_issue__none_input__0078931f(self) -> None:
         """Test with None input."""
         assert parse_volume_issue(None) == (None, None)
 
-    def test_empty_string(self) -> None:
+    def test_parse_volume_issue__empty_string__0e731ccb(self) -> None:
         """Test with empty string."""
         assert parse_volume_issue("") == (None, None)
 
@@ -911,15 +911,15 @@ class TestParsePageRange:
         """199-3 → (199, 203) - not (199, 193)."""
         assert parse_page_range("199-3") == ("199", "203")
 
-    def test_none_input(self) -> None:
+    def test_parse_page_range__none_input__17cdf064(self) -> None:
         """Test with None input."""
         assert parse_page_range(None) == (None, None)
 
-    def test_empty_string(self) -> None:
+    def test_parse_page_range__empty_string__d37f5191(self) -> None:
         """Test with empty string."""
         assert parse_page_range("") == (None, None)
 
-    def test_whitespace_only(self) -> None:
+    def test_parse_page_range__whitespace_only__c066e6c5(self) -> None:
         """Test with whitespace-only string."""
         assert parse_page_range("   ") == (None, None)
 
@@ -927,7 +927,7 @@ class TestParsePageRange:
         """1234-56 → (1234, 1256)."""
         assert parse_page_range("1234-56") == ("1234", "1256")
 
-    def test_real_world_example(self) -> None:
+    def test_parse_page_range__real_world_example__a6981d84(self) -> None:
         """Test real-world S2 data with newlines: '\\n  737-9\\n  '."""
         assert parse_page_range("\n          737-9\n        ") == ("737", "739")
 
@@ -993,7 +993,7 @@ class TestExtractJournalInfoIntegration:
         assert result["page_first"] is None
         assert result["page_last"] is None
 
-    def test_empty_journal(self) -> None:
+    def test_extract_journal_info__empty_journal__38bad73c(self) -> None:
         """Test with empty journal dict."""
         result = extract_journal_info({}, "Fallback Venue")
 

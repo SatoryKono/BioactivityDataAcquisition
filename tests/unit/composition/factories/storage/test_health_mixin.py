@@ -42,7 +42,7 @@ def _make_mixin(
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_aclose_is_noop() -> None:
+async def test_storage_health_mixin__aclose_is_noop__f3bfdf25() -> None:
     """aclose completes without error."""
     mixin = _make_mixin()
     await mixin.aclose()
@@ -82,7 +82,7 @@ async def test_aclose_skips_writers_without_explicit_audit() -> None:
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_health_check_healthy(tmp_path: Path) -> None:
+async def test_storage_health_mixin__health_check_healthy__8564ec00(tmp_path: Path) -> None:
     """health_check returns HEALTHY when all directories are writable."""
     bronze = tmp_path / "bronze"
     silver = tmp_path / "silver"

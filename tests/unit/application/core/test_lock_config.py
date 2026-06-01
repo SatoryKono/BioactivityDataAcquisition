@@ -3,9 +3,13 @@
 from __future__ import annotations
 
 
+import pytest
+
 from bioetl.application.core.config import LockConfig
 from bioetl.domain.types import RunType
 
+
+pytestmark = pytest.mark.unit
 
 class TestLockConfigAdaptiveTTL:
     """Verify TTL behaviour of LockConfig.for_pipeline."""

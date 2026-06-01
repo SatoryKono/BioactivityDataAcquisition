@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import pytest
+
 import ast
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 BASE_TRANSFORMER_PATH = Path("src/bioetl/application/core/base_transformer/base.py")
 DEPENDENCIES_MODULE_PATH = Path("src/bioetl/application/core/base_transformer/types.py")

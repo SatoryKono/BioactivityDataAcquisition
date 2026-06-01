@@ -56,7 +56,7 @@ class TestGoldListLengthFilter:
         with pytest.raises(ValueError, match="min_length or max_length"):
             GoldListLengthFilter(column="tags")
 
-    def test_immutability(self) -> None:
+    def test_list_length_filter__immutability__2de067c8(self) -> None:
         """Test that filter is immutable (frozen)."""
         filter_obj = GoldListLengthFilter(column="tags", min_length=1)
         with pytest.raises(AttributeError):
@@ -86,7 +86,7 @@ class TestGoldListContainsFilter:
         )
         assert filter_obj.mode == "any"
 
-    def test_empty_column_raises_error(self) -> None:
+    def test_list_contains_filter__column_raises_error__c5a69a58(self) -> None:
         """Test that empty column name raises ValueError."""
         with pytest.raises(ValueError, match="column name cannot be empty"):
             GoldListContainsFilter(column="", values=frozenset({"a"}))
@@ -105,7 +105,7 @@ class TestGoldListContainsFilter:
                 mode="invalid",
             )
 
-    def test_immutability(self) -> None:
+    def test_list_contains_filter__immutability__95acd01a(self) -> None:
         """Test that filter is immutable (frozen)."""
         filter_obj = GoldListContainsFilter(
             column="tags",

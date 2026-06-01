@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 import yaml
 
+
+pytestmark = pytest.mark.architecture
 
 def _load_taxonomy() -> dict[str, object]:
     path = Path("configs/quality/test_health_reporting.yaml")

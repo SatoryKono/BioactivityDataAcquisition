@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 import json
 from datetime import date, datetime
 from pathlib import Path
@@ -17,6 +19,8 @@ from memory.rag import indexing as rag_indexing
 from memory.rag.indexing import build_rag_manifests, write_rag_manifests
 from memory.rag.retrieval import filter_chunks, load_chunk_manifest
 
+
+pytestmark = pytest.mark.unit
 
 def test_split_markdown_sections_respects_headings() -> None:
     text = """---

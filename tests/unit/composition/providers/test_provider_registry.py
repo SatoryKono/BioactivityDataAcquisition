@@ -81,7 +81,7 @@ class TestProviderConfig:
         assert config.http_config.rate == pytest.approx(10.0)
         assert config.http_config.capacity == 20
 
-    def test_config_is_frozen(self):
+    def test_provider_config__config_is_frozen__261825d5(self):
         """Verify ProviderConfig is immutable."""
         config = ProviderConfig(adapter_class=MockAdapter)
 
@@ -112,7 +112,7 @@ class TestHttpConfig:
         assert config.capacity == 200
         assert config.rate_overrides == {"api_key": 150.0}
 
-    def test_config_is_frozen(self):
+    def test_registry_http_config__config_is_frozen__bc612ff7(self):
         """Verify HttpConfig is immutable."""
         config = HttpConfig()
 
@@ -163,7 +163,7 @@ class TestProviderRegistry:
         assert result.http_config is not None
         assert result.http_config.rate == pytest.approx(99.0)
 
-    def test_get_unknown_provider_raises(self):
+    def test_provider_registry__provider_raises__1f6bf3b6(self):
         """Verify getting unknown provider raises KeyError."""
         with pytest.raises(KeyError, match="Unknown provider"):
             ProviderRegistry.get("nonexistent")
@@ -176,7 +176,7 @@ class TestProviderRegistry:
         assert ProviderRegistry.is_registered("check_test") is True
         assert ProviderRegistry.is_registered("not_registered") is False
 
-    def test_list_providers(self):
+    def test_provider_registry__list_providers__4f97b222(self):
         """Verify list_providers returns sorted list."""
         ProviderRegistry.register(
             "beta_provider", ProviderConfig(adapter_class=MockAdapter)

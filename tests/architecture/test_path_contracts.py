@@ -6,6 +6,8 @@ and documented in ADR-025.
 
 from __future__ import annotations
 
+import pytest
+
 import re
 from pathlib import Path
 from unittest.mock import Mock
@@ -14,6 +16,8 @@ from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+pytestmark = pytest.mark.architecture
 
 ADR_PATH = Path("docs/02-architecture/decisions/ADR-025-pipeline-config-unification.md")
 

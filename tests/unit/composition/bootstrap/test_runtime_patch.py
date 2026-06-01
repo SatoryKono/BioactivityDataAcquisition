@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import pytest
+
 from unittest.mock import patch
 
 from bioetl.composition.bootstrap.runtime.compatibility import (
     apply_runtime_compatibility_patches,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_apply_runtime_compatibility_patches_delegates_to_pandera_compat() -> None:
     """Runtime compatibility entrypoint should delegate to the canonical compat shim."""

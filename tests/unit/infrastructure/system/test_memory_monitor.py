@@ -253,7 +253,7 @@ class TestGetRecommendedBatchSize:
         result = monitor.get_recommended_batch_size(500)
         assert result == 500
 
-    def test_reduces_batch_size_under_pressure(self) -> None:
+    def test_recommended_batch_size__size_under_pressure__d0cca135(self) -> None:
         """Batch size is reduced when memory is under pressure."""
         monitor = _make_monitor(threshold=0.7, min_batch=10)
         with patch.object(monitor, "get_memory_stats", return_value=_mock_stats(0.9)):
@@ -477,7 +477,7 @@ class TestCalculateMaxBatchSize:
         batch_large = monitor.calculate_max_batch_size(avg_record_size_bytes=4096)
         assert batch_small > batch_large
 
-    def test_respects_min_batch_size(self) -> None:
+    def test_max_batch_size__min_batch_size__59231ca1(self) -> None:
         """Result is never below min_batch_size."""
         monitor = _make_monitor(max_batch_memory_mb=1, min_batch=10)
         # Very large record size → calculated batch could be < min

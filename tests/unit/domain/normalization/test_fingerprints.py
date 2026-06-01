@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.domain.normalization import build_execution_identity_payload
 from bioetl.domain.normalization import compute_execution_identity_fingerprint
 from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
@@ -10,6 +12,8 @@ from bioetl.domain.normalization import normalize_contract_ref
 from bioetl.domain.normalization import normalize_contract_version
 from bioetl.domain.normalization import normalize_control_plane_sha256
 
+
+pytestmark = pytest.mark.unit
 
 def _build_payload() -> dict[str, str | None]:
     return build_execution_identity_payload(

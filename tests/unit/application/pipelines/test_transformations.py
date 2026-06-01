@@ -125,7 +125,7 @@ class TestPubChemCompoundPipeline:
 
 class TestUniProtProteinPipeline:
     @pytest.mark.asyncio
-    async def test_transform_bronze_to_silver_success(
+    async def test_prot_protein_pipeline__to_silver_success__a0089278(
         self, mock_context, mock_pipeline_base, mock_run_id, mock_runtime
     ):
         # Arrange

@@ -192,7 +192,7 @@ async def test_transform_full_record(transformer, pipeline_context, sample_publi
 
 
 @pytest.mark.asyncio
-async def test_transform_minimal_record(
+async def test_crossref_transformer__minimal_record__f1314a72(
     transformer, pipeline_context, minimal_publication
 ):
     """Test transforming minimal work record to SilverRecord."""
@@ -360,7 +360,7 @@ def test_extract_authors_with_only_given_name():
     assert authors == ["Madonna"]
 
 
-def test_extract_authors_empty_list():
+def test_crossref_transformer__authors_empty_list__01658860():
     """Test author extraction with empty author list."""
     publication = {"author": []}
     authors = extract_authors(publication)
@@ -473,7 +473,7 @@ def test_extract_business_data_subject_list(transformer):
 
 
 @pytest.mark.asyncio
-async def test_transform_generates_content_hash(transformer, pipeline_context):
+async def test_crossref_transformer__content_hash__f0915057(transformer, pipeline_context):
     """Test that transformation generates a content hash."""
     publication = {"DOI": "10.1234/test", "title": ["Test"]}
     result = await transformer.transform(pipeline_context, publication, index=0)
@@ -510,7 +510,7 @@ async def test_transform_different_content_different_hash(
 
 
 @pytest.mark.asyncio
-async def test_transform_entity_id_format(transformer, pipeline_context):
+async def test_crossref_transformer__entity_id_format__556c6824(transformer, pipeline_context):
     """Test that entity_id follows expected format."""
     publication = {"DOI": "10.1234/test", "title": ["Test"]}
     result = await transformer.transform(pipeline_context, publication, index=0)

@@ -94,7 +94,7 @@ def _env_var_refs(node: ast.AST) -> set[str]:
 
 
 @pytest.mark.architecture
-def test_relaxed_dq_env_is_not_session_autouse_global_mutation() -> None:
+def test_dq_fixture_policy__global_mutation__14c6d573() -> None:
     tree = _read_tree(INTEGRATION_CONFTEST)
     violating_fixtures: list[str] = []
     for node in tree.body:
@@ -113,7 +113,7 @@ def test_relaxed_dq_env_is_not_session_autouse_global_mutation() -> None:
 
 
 @pytest.mark.architecture
-def test_relaxed_dq_mode_is_exposed_only_via_explicit_named_fixtures() -> None:
+def test_dq_fixture_policy__named_fixtures__d3fbe63c() -> None:
     tree = _read_tree(INTEGRATION_CONFTEST)
 
     fixtures: dict[str, tuple[str | None, bool, set[str]]] = {}

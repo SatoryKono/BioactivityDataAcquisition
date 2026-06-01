@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 import yaml
 
+
+pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
 REGISTRY_PATH = ROOT / "configs" / "quality" / "root_hygiene_review_registry.yaml"

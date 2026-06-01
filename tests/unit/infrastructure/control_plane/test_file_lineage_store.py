@@ -21,6 +21,8 @@ from bioetl.infrastructure.control_plane import FileLineageStore
 from tests.helpers.deterministic_ids import deterministic_uuid_value
 
 
+pytestmark = pytest.mark.unit
+
 def test_file_store_round_trips_fragments_by_id_run_manifest_and_node(tmp_path) -> None:
     store = FileLineageStore(base_path=tmp_path / "lineage")
     run_id = RunID(deterministic_uuid_value("lineage_store.round_trip"))

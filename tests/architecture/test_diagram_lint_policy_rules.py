@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import pytest
+
 import importlib.util
 import sys
 from pathlib import Path
 from types import ModuleType
 
+
+pytestmark = pytest.mark.architecture
 
 def _load_lint_module() -> ModuleType:
     """Load scripts/diagrams/lint_diagrams.py for direct function testing."""

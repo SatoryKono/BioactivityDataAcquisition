@@ -31,7 +31,7 @@ class TestBuildCompoundNameEndpoint:
 
 @pytest.mark.unit
 class TestBuildSubstanceNameEndpoint:
-    def test_basic_query(self) -> None:
+    def test_name_endpoint__basic_query__622fd258(self) -> None:
         result = build_substance_name_endpoint("glucose")
         assert result == "/substance/name/glucose/JSON"
 
@@ -42,7 +42,7 @@ class TestBuildSubstanceNameEndpoint:
 
 @pytest.mark.unit
 class TestBuildAssayEndpoint:
-    def test_basic_query(self) -> None:
+    def test_build_assay_endpoint__basic_query__bb6c9d87(self) -> None:
         result = build_assay_endpoint("12345")
         assert result == "/assay/aid/12345/JSON"
 

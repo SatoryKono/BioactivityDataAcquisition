@@ -20,7 +20,7 @@ from bioetl.domain.value_objects.dq_report_results_core import (
 class TestSchemaSnapshotResult:
     """Tests for SchemaSnapshotResult."""
 
-    def test_list_to_tuple_conversion(self) -> None:
+    def test_schema_snapshot_result__to_tuple_conversion__b5e9325a(self) -> None:
         """Test that list fields are converted to tuples in __post_init__."""
         result = SchemaSnapshotResult(
             fields_detected=5,
@@ -38,7 +38,7 @@ class TestSchemaSnapshotResult:
 class TestEncodingValidationResult:
     """Tests for EncodingValidationResult."""
 
-    def test_list_to_tuple_conversion(self) -> None:
+    def test_validation_result__to_tuple_conversion__a82562fe(self) -> None:
         """Test that list fields are converted to tuples in __post_init__."""
         result = EncodingValidationResult(
             encoding_errors=2,
@@ -72,7 +72,7 @@ class TestUniquenessResult:
 class TestTypeConformanceResult:
     """Tests for TypeConformanceResult."""
 
-    def test_list_to_tuple_conversion(self) -> None:
+    def test_conformance_result__to_tuple_conversion__dd2d92b9(self) -> None:
         """Test that list fields are converted to tuples in __post_init__."""
         result = TypeConformanceResult(
             schema_version="1.0",
@@ -87,7 +87,7 @@ class TestTypeConformanceResult:
 class TestCategoricalDistribution:
     """Tests for CategoricalDistribution."""
 
-    def test_list_to_tuple_conversion(self) -> None:
+    def test_distribution__to_tuple_conversion__b20eb6d6(self) -> None:
         """Test that list fields are converted to tuples in __post_init__."""
         result = CategoricalDistribution(
             top_values=[{"val": "a", "count": 10}],  # type: ignore[arg-type]
@@ -101,7 +101,7 @@ class TestCategoricalDistribution:
 class TestSchemaDriftResult:
     """Tests for SchemaDriftResult."""
 
-    def test_list_to_tuple_conversion(self) -> None:
+    def test_schema_drift_result__to_tuple_conversion__5dc3e0b4(self) -> None:
         """Test that list fields are converted to tuples in __post_init__."""
         result = SchemaDriftResult(
             drift_level=DriftLevel.INFO,

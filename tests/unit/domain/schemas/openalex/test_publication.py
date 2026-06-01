@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.domain.schemas.common.publication_base import PublicationBaseSchema
 from bioetl.domain.schemas.openalex.publication import (
     OpenAlexPublicationSchema,
     __all__,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_openalex_publication_schema_extends_publication_base_schema() -> None:
     assert issubclass(OpenAlexPublicationSchema, PublicationBaseSchema)

@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import pytest
+
 import hashlib
 from pathlib import Path
 
 import yaml
 from tests.helpers import run_repo_python
+
+pytestmark = pytest.mark.architecture
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 CSV_PATH = PROJECT_ROOT / "configs" / "enums" / "publication_type_classification.csv"

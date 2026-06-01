@@ -25,7 +25,7 @@ from bioetl.infrastructure.storage.base_delta_writer import (
 class TestSerializeValue:
     """Test _serialize_value function."""
 
-    def test_none_value_returns_none(self) -> None:
+    def test_writer_serialize_value__value_returns_none__6458b76a(self) -> None:
         """Test that None value returns None."""
         assert _serialize_value(None, is_string_field=True) is None
         assert _serialize_value(None, is_string_field=False) is None
@@ -127,7 +127,7 @@ class TestBaseDeltaWriter:
             logger=mock_logger,
         )
 
-    def test_initialization(self, writer: BaseDeltaWriter, tmp_path: Path) -> None:
+    def test_base_delta_writer__initialization__57222f35(self, writer: BaseDeltaWriter, tmp_path: Path) -> None:
         """Test writer initialization."""
         assert writer.base_path == str(tmp_path)
         assert writer.logger is not None

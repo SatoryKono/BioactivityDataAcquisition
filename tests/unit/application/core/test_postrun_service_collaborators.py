@@ -11,6 +11,8 @@ from bioetl.application.core.postrun._service_collaborators import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 def test_resolve_postrun_collaborators_prefers_explicit_values() -> None:
     """Explicit collaborators should override service-container collaborators."""
     context = MagicMock()

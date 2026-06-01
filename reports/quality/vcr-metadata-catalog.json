@@ -7,7 +7,7 @@
     "metadata_sidecar_count": 196,
     "provider_count": 8,
     "duplicate_scenario_stem_count": 0,
-    "direct_reachable_cassette_count": 128,
+    "direct_reachable_cassette_count": 123,
     "generated_reachable_cassette_count": 60,
     "metadata_review_required_cassette_count": 0,
     "unowned_cassette_count": 0
@@ -361,8 +361,7 @@
       "metadata_status": "managed_inventory",
       "reachability_status": "direct_reference",
       "reachability_owner_paths": [
-        "tests/e2e/test_chembl_activity_e2e.py",
-        "tests/e2e/test_full_pipeline.py"
+        "tests/e2e/test_chembl_activity_e2e.py"
       ]
     },
     {
@@ -1360,9 +1359,9 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_fetch_filtered_with_fallback_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
-        "tests/integration/adapters/openalex/test_adapter.py"
+        "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_fetch_filtered_with_fallback_meta.yaml"
       ]
     },
     {
@@ -1376,8 +1375,7 @@
       "reachability_status": "direct_reference",
       "reachability_owner_paths": [
         "tests/contract/_provider_contract_replay.py",
-        "tests/e2e/test_pipeline_matrix_e2e.py",
-        "tests/integration/adapters/openalex/test_adapter.py"
+        "tests/e2e/test_pipeline_matrix_e2e.py"
       ]
     },
     {
@@ -1390,8 +1388,7 @@
       "metadata_status": "managed_inventory",
       "reachability_status": "direct_reference",
       "reachability_owner_paths": [
-        "tests/contract/_provider_contract_replay.py",
-        "tests/integration/adapters/openalex/test_adapter.py"
+        "tests/contract/_provider_contract_replay.py"
       ]
     },
     {
@@ -1402,9 +1399,9 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_title_only_lookup_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
-        "tests/integration/adapters/openalex/test_adapter.py"
+        "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_title_only_lookup_meta.yaml"
       ]
     },
     {
@@ -2073,11 +2070,9 @@
       "reachability_owner_paths": [
         "tests/contract/_provider_contract_replay.py",
         "tests/e2e/conftest.py",
-        "tests/integration/adapters/openalex/test_adapter.py",
         "tests/integration/adapters/test_chembl.py",
         "tests/integration/adapters/test_crossref.py",
         "tests/integration/adapters/test_pubchem.py",
-        "tests/integration/adapters/test_pubmed.py",
         "tests/integration/adapters/test_pubmed_edge_cases.py",
         "tests/integration/adapters/test_semanticscholar.py",
         "tests/integration/adapters/test_uniprot.py",
@@ -2085,8 +2080,6 @@
         "tests/integration/interfaces/test_cli_exit_code_matrix.py",
         "tests/unit/application/core/test_filtered_data_source.py",
         "tests/unit/application/core/test_idmapping_data_source.py",
-        "tests/unit/application/core/test_publication_term_data_source.py",
-        "tests/unit/application/core/test_subcellular_fraction_data_source.py",
         "tests/unit/composition/factories/storage/test_health_mixin.py",
         "tests/unit/composition/test_observability_contract.py",
         "tests/unit/domain/test_events.py",
@@ -2097,11 +2090,9 @@
         "tests/unit/infrastructure/adapters/openalex/test_adapter.py",
         "tests/unit/infrastructure/adapters/pubchem/test_adapter.py",
         "tests/unit/infrastructure/adapters/pubmed/test_pubmed_client.py",
-        "tests/unit/infrastructure/adapters/semanticscholar/test_adapter.py",
         "tests/unit/infrastructure/adapters/test_http_base.py",
         "tests/unit/infrastructure/adapters/test_sync_base.py",
         "tests/unit/infrastructure/adapters/uniprot/test_adapter.py",
-        "tests/unit/infrastructure/adapters/uniprot/test_idmapping_client.py",
         "tests/unit/infrastructure/config/test_source_normalizers.py",
         "tests/unit/infrastructure/factories/test_storage_adapter.py",
         "tests/unit/infrastructure/test_storage_factory.py",
@@ -2471,9 +2462,9 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_health_check_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
-        "tests/integration/adapters/test_semanticscholar.py"
+        "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_health_check_meta.yaml"
       ]
     },
     {
@@ -2591,9 +2582,9 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtAdapterIntegration.test_health_check_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
-        "tests/integration/adapters/test_uniprot.py"
+        "tests/fixtures/vcr/uniprot/TestUniProtAdapterIntegration.test_health_check_meta.yaml"
       ]
     },
     {
@@ -2630,9 +2621,9 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_health_check_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "direct_reference",
+      "reachability_status": "metadata_reviewed",
       "reachability_owner_paths": [
-        "tests/integration/adapters/test_uniprot_idmapping.py"
+        "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_health_check_meta.yaml"
       ]
     },
     {

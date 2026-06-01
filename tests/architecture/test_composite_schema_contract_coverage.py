@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 import yaml
@@ -10,6 +12,8 @@ from bioetl.infrastructure.config.composite_config_api import (
     DEFAULT_COMPOSITE_GOLD_SCHEMA_REGISTRY as COMPOSITE_GOLD_SCHEMA_REGISTRY,
 )
 from bioetl.domain.contracts.gold import composite as composite_contracts
+
+pytestmark = pytest.mark.architecture
 
 _FORBIDDEN_OCCURRENCE_FIELDS = frozenset(
     {

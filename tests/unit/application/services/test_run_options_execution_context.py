@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.application.services.execution.pipeline_runner_models import RunOptions
 
+
+pytestmark = pytest.mark.unit
 
 class TestRunOptionsSeverityContext:
     """Tests for RunOptions execution_context field."""

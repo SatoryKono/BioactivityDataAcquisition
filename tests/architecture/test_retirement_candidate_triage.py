@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 import ast
 from collections import Counter
 from datetime import date, timedelta
@@ -16,6 +18,8 @@ from scripts.engineering.qa.report_dead_code_inventory import (
     _render_markdown,
     build_dead_code_inventory,
 )
+
+pytestmark = pytest.mark.architecture
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 TRIAGE_PATH = PROJECT_ROOT / "configs/quality/retirement_candidate_triage.yaml"
@@ -288,7 +292,7 @@ def test_repo_wide_zero_import_classification_exactly_covers_candidates() -> Non
     actual_paths = {str(row["path"]) for row in zero_candidates}
 
     assert set(classified) == actual_paths
-    for path, entry in classified.items():
+    for _path, entry in classified.items():
         assert isinstance(entry.get("module_name"), str) and entry["module_name"]
         assert isinstance(entry.get("disposition"), str) and entry["disposition"]
         assert isinstance(entry.get("reviewed_on"), str) and entry["reviewed_on"]

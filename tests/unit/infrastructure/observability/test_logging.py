@@ -14,7 +14,7 @@ from bioetl.infrastructure.observability.logging import StructlogLogger, create_
 class TestStructlogLogger:
     """Tests for StructlogLogger adapter."""
 
-    def test_structlog_logger_implements_logger_port(self) -> None:
+    def test_structlog_logger__logger_port__1be605ac(self) -> None:
         """Test that StructlogLogger implements LoggerPort protocol."""
         run_id = uuid4()
         logger = create_logger(

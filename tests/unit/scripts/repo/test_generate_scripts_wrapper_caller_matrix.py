@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 from scripts.engineering.repo import generate_scripts_wrapper_caller_matrix as module
 
+
+pytestmark = pytest.mark.unit
 
 def test_render_report_lists_known_wrapper_candidates(
     tmp_path: Path, monkeypatch

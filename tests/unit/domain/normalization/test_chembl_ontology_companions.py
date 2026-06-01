@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.domain.normalization.chembl import (
     resolve_activity_ontology_companion_fields,
     resolve_obo_ontology_companion_field,
 )
+
+pytestmark = pytest.mark.unit
 
 LEGACY_QUDT_UNIT_URI = "http" + "://www.openphacts.org/units/Nanomolar"
 EXPECTED_BAO_ENDPOINT_IRI = "https://purl.obolibrary.org/obo/BAO_0000190"

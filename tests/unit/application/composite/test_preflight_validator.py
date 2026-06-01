@@ -33,6 +33,8 @@ from bioetl.domain.composite.config import (
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 from bioetl.infrastructure.config.composite_config_api import load_composite_config
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def mock_logger() -> MagicMock:
@@ -90,7 +92,7 @@ def basic_composite_config() -> CompositeConfig:
 class TestFieldInfo:
     """Tests for FieldInfo dataclass."""
 
-    def test_field_info_creation(self) -> None:
+    def test_validator_field_info__field_info_creation__80945999(self) -> None:
         """FieldInfo stores field metadata."""
         info = FieldInfo(
             name="title",
@@ -127,7 +129,7 @@ class TestValidationIssue:
         assert issue.issue_type == "unknown_source"
         assert issue.severity == "error"
 
-    def test_validation_issue_default_severity(self) -> None:
+    def test_validation_issue__default_severity__5ee9fc1c(self) -> None:
         """ValidationIssue defaults to error severity."""
         issue = ValidationIssue(
             field="title",
@@ -787,7 +789,7 @@ class TestValidateFieldPriority:
         assert len(errors) == 0
         assert resolved == "chembl"  # First source with field
 
-    def test_validate_field_priority_unknown_source(
+    def test_field_priority__unknown_source__a80e9752(
         self, validator: CompositePreflightValidationService
     ) -> None:
         """Unknown source in priorities returns error."""

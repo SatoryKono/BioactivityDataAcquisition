@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.interfaces.cli.commands.domains.diagnostics.command import (
     COMMANDS,
     diagnostics,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_diagnostics_group_exposes_expected_commands() -> None:
     """The diagnostics Click group should keep its canonical subcommand registry."""

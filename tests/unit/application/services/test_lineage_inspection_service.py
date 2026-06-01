@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from datetime import UTC, datetime
 from uuid import uuid4
 
@@ -22,6 +24,8 @@ from bioetl.domain.ports import LineageStorePort
 from bioetl.domain.types import RunID, RunType
 from tests.helpers.control_plane import InMemoryRunManifestStore
 
+
+pytestmark = pytest.mark.unit
 
 class _InMemoryLineageStore(LineageStorePort):
     def __init__(self) -> None:

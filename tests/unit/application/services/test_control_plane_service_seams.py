@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 from bioetl.application.services.control_plane import (
@@ -27,6 +29,8 @@ from bioetl.application.services.control_plane.workflow import (
     WorkflowExecutionService as WorkflowSeamExecutionService,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_control_plane_responsibility_facades_preserve_canonical_exports() -> None:
     """New responsibility seams must not fork existing service classes."""

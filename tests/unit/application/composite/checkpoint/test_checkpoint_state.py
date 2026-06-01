@@ -182,7 +182,7 @@ class TestWithSeedCompleted:
         updated = initial.with_seed_completed(seed, clock=_FIXED_CLOCK)
         assert updated.seed_result is seed
 
-    def test_sets_state_to_seed_completed(self) -> None:
+    def test_with_seed_completed__to_seed_completed__218d9968(self) -> None:
         """FSM state transitions to SEED_COMPLETED."""
         initial = CompositeCheckpointState(composite_name="c", run_id="r")
         updated = initial.with_seed_completed(_make_seed_result(), clock=_FIXED_CLOCK)
@@ -316,7 +316,7 @@ class TestWithEnricherCompleted:
         updated = initial.with_enricher_completed("crossref", er, clock=_FIXED_CLOCK)
         assert updated.enrichment_results["crossref"] is er
 
-    def test_sets_state_to_enriching(self) -> None:
+    def test_enricher_completed__state_to_enriching__88d7f35e(self) -> None:
         """FSM state transitions to ENRICHING."""
         initial = CompositeCheckpointState(composite_name="c", run_id="r")
         updated = initial.with_enricher_completed(
@@ -353,7 +353,7 @@ class TestWithEnricherCompleted:
         )
         assert updated.seed_completed is True
 
-    def test_original_state_not_mutated(self) -> None:
+    def test_enricher_completed__state_not_mutated__321520a5(self) -> None:
         """Original state is not changed after transition."""
         initial = CompositeCheckpointState(composite_name="c", run_id="r")
         _ = initial.with_enricher_completed(
@@ -379,7 +379,7 @@ class TestWithState:
         updated = initial.with_state(CompositePipelineState.MERGING, clock=_FIXED_CLOCK)
         assert updated.state == CompositePipelineState.MERGING
 
-    def test_preserves_all_other_fields(self) -> None:
+    def test_state_with_state__all_other_fields__36a56bb8(self) -> None:
         """with_state preserves seed_completed, enrichers, created_at, etc."""
         created = datetime(2024, 6, 1, tzinfo=UTC)
         enricher = _make_enrichment_result()
@@ -403,7 +403,7 @@ class TestWithState:
         assert updated.completed_enrichers == frozenset({"crossref"})
         assert updated.created_at == created
 
-    def test_sets_updated_at(self) -> None:
+    def test_state_with_state__sets_updated_at__9e0e80ba(self) -> None:
         """with_state sets a non-None updated_at."""
         initial = CompositeCheckpointState(composite_name="c", run_id="r")
         updated = initial.with_state(CompositePipelineState.FAILED, clock=_FIXED_CLOCK)

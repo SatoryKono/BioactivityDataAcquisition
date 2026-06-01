@@ -34,16 +34,16 @@ class TestValidateDoi:
     def test_invalid_format(self) -> None:
         assert validate_doi("invalid") is False
 
-    def test_none_returns_false(self) -> None:
+    def test_validate_doi__none_returns_false__f809f39a(self) -> None:
         assert validate_doi(None) is False
 
-    def test_empty_string_returns_false(self) -> None:
+    def test_validate_doi__string_returns_false__fd97bd0d(self) -> None:
         assert validate_doi("") is False
 
     def test_missing_prefix(self) -> None:
         assert validate_doi("1038/nature12373") is False
 
-    def test_strips_whitespace(self) -> None:
+    def test_validate_doi__strips_whitespace__3fe54263(self) -> None:
         assert validate_doi("  10.1038/nature12373  ") is True
 
     def test_doi_regex_pattern_exported(self) -> None:
@@ -54,7 +54,7 @@ class TestValidateDoi:
 class TestValidatePublicationYear:
     """Tests for validate_publication_year function."""
 
-    def test_valid_year(self) -> None:
+    def test_publication_year__valid_year__9a84d23a(self) -> None:
         year, is_warning = validate_publication_year(2020)
         assert year == 2020
         assert is_warning is False
@@ -84,7 +84,7 @@ class TestValidatePublicationYear:
         assert year == 2100
         assert is_warning is False
 
-    def test_custom_config(self) -> None:
+    def test_publication_year__custom_config__45de127a(self) -> None:
         config = ValidationConfig(min_publication_year=2000, max_publication_year=2025)
         year, is_warning = validate_publication_year(1999, config=config)
         assert year == 1999
@@ -95,7 +95,7 @@ class TestValidatePublicationYear:
 class TestValidateYearRange:
     """Tests for validate_year_range function."""
 
-    def test_valid_year(self) -> None:
+    def test_validate_year_range__valid_year__43b1de9b(self) -> None:
         assert validate_year_range(2024) is True
 
     def test_below_min(self) -> None:
@@ -104,7 +104,7 @@ class TestValidateYearRange:
     def test_above_max(self) -> None:
         assert validate_year_range(2051) is False
 
-    def test_none_returns_false(self) -> None:
+    def test_validate_year_range__none_returns_false__d9156483(self) -> None:
         assert validate_year_range(None) is False
 
     def test_min_boundary(self) -> None:

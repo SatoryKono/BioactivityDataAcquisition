@@ -99,7 +99,7 @@ class TestFieldMapping:
         assert fm.providers == ()
         assert fm.provider_count == 0
 
-    def test_list_to_tuple_conversion(self) -> None:
+    def test_groups_field_mapping__to_tuple_conversion__7f5ee31e(self) -> None:
         fm = FieldMapping(
             base_name="doi",
             provider_columns=["chembl.publication.doi"],  # type: ignore[arg-type]
@@ -115,7 +115,7 @@ class TestFieldMapping:
         fm = FieldMapping(base_name="unknown_field")
         assert fm.group == FieldGroupId.TRASH
 
-    def test_frozen(self) -> None:
+    def test_groups_field_mapping__frozen__c3aa795c(self) -> None:
         fm = FieldMapping(base_name="title", group=FieldGroupId.BIBLIOGRAPHY)
         with pytest.raises(AttributeError):
             fm.base_name = "other"  # type: ignore[misc]
@@ -129,7 +129,7 @@ class TestFieldMapping:
 class TestFieldGroupDefinition:
     """Tests for FieldGroupDefinition dataclass."""
 
-    def test_basic_creation(self) -> None:
+    def test_field_group_definition__basic_creation__cf5cf232(self) -> None:
         gd = FieldGroupDefinition(
             group_id=FieldGroupId.BIBLIOGRAPHY,
             display_name="Bibliography",
@@ -196,7 +196,7 @@ class TestFieldGroupDefinition:
         assert gd.base_field_names == ()
         assert gd.all_columns == ()
 
-    def test_list_to_tuple_conversion(self) -> None:
+    def test_field_group_definition__to_tuple_conversion__90fc8878(self) -> None:
         gd = FieldGroupDefinition(
             group_id=FieldGroupId.BIBLIOGRAPHY,
             display_name="Bibliography",
@@ -368,7 +368,7 @@ class TestFieldGroupRegistry:
         assert "chembl.publication.pmid" in id_cols
         assert "chembl.publication.title" not in id_cols
 
-    def test_get_ordered_columns(self) -> None:
+    def test_field_group_registry__get_ordered_columns__c06bdded(self) -> None:
         registry = _build_test_registry()
         columns = [
             "chembl.publication.title",
@@ -512,7 +512,7 @@ class TestFieldGroupId:
 
         assert FieldGroupId is PublicationFieldGroup
 
-    def test_enum_values(self) -> None:
+    def test_groups_field_group_id__enum_values__f411e47f(self) -> None:
         assert FieldGroupId.ID_AND_STATUS.value == "id_and_status"
         assert FieldGroupId.BIBLIOGRAPHY.value == "bibliography"
         assert FieldGroupId.TRASH.value == "trash"

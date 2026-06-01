@@ -5,11 +5,15 @@ These tests verify the standardized error logging utility.
 
 from __future__ import annotations
 
+import pytest
+
 import logging
 from unittest.mock import MagicMock
 
 from tests.helpers.adapter_error_logging import log_adapter_error
 
+
+pytestmark = pytest.mark.unit
 
 class TestLogAdapterError:
     """Tests for log_adapter_error function."""

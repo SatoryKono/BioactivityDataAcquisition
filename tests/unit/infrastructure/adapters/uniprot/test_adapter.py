@@ -17,6 +17,8 @@ from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
 from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 
 
+pytestmark = pytest.mark.unit
+
 async def _drain_async_iter(async_iter: AsyncIterator[object]) -> None:
     """Consume an async iterator until completion."""
     async for _ in async_iter:
@@ -172,7 +174,7 @@ async def test_fetch_sequences(uniprot_adapter, mock_fasta_response):
     assert "MKTLLLLAVVLLLGAAQA" in results[0]["sequence"]
 
 
-async def test_fetch_unsupported_entity(uniprot_adapter):
+async def test_uniprot_adapter__unsupported_entity__8c46e9d5(uniprot_adapter):
     """Test fetching unsupported entity raises ValueError."""
     async with uniprot_adapter:
         with pytest.raises(ValueError, match="Unsupported entity type"):
@@ -194,7 +196,7 @@ async def test_fetch_sequences_missing_query(uniprot_adapter):
 
 
 @respx.mock
-async def test_health_check_healthy(uniprot_adapter):
+async def test_uniprot_adapter__health_check_healthy__2aff5882(uniprot_adapter):
     """Test health check returns HEALTHY."""
     respx.get("https://rest.uniprot.org/uniprotkb/search").mock(
         return_value=Response(200)

@@ -119,7 +119,7 @@ class TestOpenAlexAdapterIntegration:
 
     @pytest.mark.asyncio
     @pytest.mark.vcr
-    async def test_fetch_with_query(self, adapter: OpenAlexAdapter) -> None:
+    async def test_open_alex_adapter__fetch_with_query__bac3ed40(self, adapter: OpenAlexAdapter) -> None:
         """Should fetch works by search query."""
         results = []
         async for work in adapter.fetch(
@@ -131,14 +131,14 @@ class TestOpenAlexAdapterIntegration:
 
     @pytest.mark.asyncio
     @pytest.mark.vcr
-    async def test_health_check(self, adapter: OpenAlexAdapter) -> None:
+    async def test_open_alex_adapter__health_check__53273898(self, adapter: OpenAlexAdapter) -> None:
         """Should return healthy status for working API."""
         status = await adapter.health_check()
         assert status in (HealthStatus.HEALTHY, HealthStatus.DEGRADED)
 
     @pytest.mark.asyncio
     @pytest.mark.vcr
-    async def test_fetch_filtered_with_fallback(self, adapter: OpenAlexAdapter) -> None:
+    async def test_open_alex_adapter__with_fallback__5545fedd(self, adapter: OpenAlexAdapter) -> None:
         """Should fallback to title search when DOI not found."""
         # Valid DOI and title for fallback
         dois = ["10.1038/s41586-020-2012-7"]
@@ -160,7 +160,7 @@ class TestOpenAlexAdapterIntegration:
 
     @pytest.mark.asyncio
     @pytest.mark.vcr
-    async def test_title_only_lookup(self, adapter: OpenAlexAdapter) -> None:
+    async def test_open_alex_adapter__title_only_lookup__09c5b35c(self, adapter: OpenAlexAdapter) -> None:
         """Should search by title when DOI is empty."""
         # Empty DOI with title for lookup
         dois = [""]

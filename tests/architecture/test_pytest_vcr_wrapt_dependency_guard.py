@@ -7,8 +7,12 @@ breakage and are not a supported fix path.
 
 from __future__ import annotations
 
+import pytest
+
 from importlib import import_module
 from pathlib import Path
+
+pytestmark = pytest.mark.architecture
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 

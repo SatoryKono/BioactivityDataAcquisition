@@ -11,6 +11,8 @@ import pytest
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 
+pytestmark = pytest.mark.unit
+
 class TestSilverWriteResult:
     """Tests for SilverWriteResult value object."""
 
@@ -50,7 +52,7 @@ class TestSilverWriteResult:
                 record_count=100,
             )
 
-    def test_negative_record_count_raises(self) -> None:
+    def test_silver_write_result__record_count_raises__e1423c88(self) -> None:
         """Test that negative record_count raises ValueError."""
         with pytest.raises(ValueError, match="record_count must be non-negative"):
             SilverWriteResult(
@@ -102,7 +104,7 @@ class TestSilverWriteResult:
 
         assert result.record_count == 0
 
-    def test_equality(self) -> None:
+    def test_silver_write_result__equality__62cd0f85(self) -> None:
         """Test that two SilverWriteResults with same values are equal."""
         result1 = SilverWriteResult(
             table_name="chembl.activity",

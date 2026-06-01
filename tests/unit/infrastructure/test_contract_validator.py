@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+import pytest
+
 import warnings
+
+pytestmark = pytest.mark.unit
 
 # Suppress Pandera deprecation warnings for cleaner test output
 warnings.filterwarnings("ignore", category=FutureWarning, module="pandera")
@@ -100,7 +104,7 @@ class TestContractAwareGoldValidator:
 class TestContractAwareSilverValidator:
     """Test contract-aware Silver validator."""
 
-    def test_initialization(self):
+    def test_aware_silver_validator__initialization__1f613ba2(self):
         """Test Silver validator initialization."""
         config = DQConfig(
             contract_ref="test_entity",
@@ -112,7 +116,7 @@ class TestContractAwareSilverValidator:
         assert validator.policy_ref is not None
         assert validator.policy_ref.contract_ref == "test_entity"
 
-    def test_policy_summary(self):
+    def test_aware_silver_validator__policy_summary__1fd8532d(self):
         """Test Silver validator policy summary."""
         config = DQConfig(
             contract_ref="chembl_assay",

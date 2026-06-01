@@ -39,7 +39,7 @@ def _make_hit(
 class TestLoggingDebugAdapter:
     """Tests for LoggingDebugAdapter."""
 
-    def test_satisfies_protocol(self) -> None:
+    def test_logging_debug_adapter__satisfies_protocol__c0728c91(self) -> None:
         adapter = LoggingDebugAdapter(logger=_make_logger())
         assert isinstance(adapter, PipelineDebugPort)
 
@@ -56,7 +56,7 @@ class TestLoggingDebugAdapter:
         assert adapter.is_breakpoint_enabled(StageBreakpoint.AFTER_BRONZE) is True
         assert adapter.is_breakpoint_enabled(StageBreakpoint.AFTER_SILVER) is False
 
-    def test_on_breakpoint_returns_continue(self) -> None:
+    def test_logging_debug_adapter__returns_continue__fecc9a32(self) -> None:
         adapter = LoggingDebugAdapter(logger=_make_logger())
         action = adapter.on_breakpoint(_make_hit())
         assert action == DebugAction.CONTINUE

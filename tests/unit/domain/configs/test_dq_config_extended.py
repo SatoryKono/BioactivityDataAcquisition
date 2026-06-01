@@ -16,7 +16,7 @@ from bioetl.domain.config.validation import (
 class TestDQReportConfig:
     """Tests for DQReportConfig dataclass."""
 
-    def test_default_values(self) -> None:
+    def test_d_q_report_config__default_values__dd3ea153(self) -> None:
         rc = DQReportConfig()
         assert rc.enabled is True
         assert rc.format == "json"
@@ -24,7 +24,7 @@ class TestDQReportConfig:
         assert rc.sample_size == 10
         assert rc.output_path is None
 
-    def test_custom_values(self) -> None:
+    def test_d_q_report_config__custom_values__7563d6e8(self) -> None:
         rc = DQReportConfig(
             enabled=False,
             format="yaml",
@@ -40,7 +40,7 @@ class TestDQReportConfig:
         rc = DQReportConfig(format=fmt)  # type: ignore[arg-type]
         assert rc.format == fmt
 
-    def test_immutable(self) -> None:
+    def test_d_q_report_config__immutable__d9c2b855(self) -> None:
         rc = DQReportConfig()
         with pytest.raises((AttributeError, TypeError)):
             rc.enabled = False  # type: ignore[misc]
@@ -61,7 +61,7 @@ class TestKeyNullabilityRule:
         assert rule.key_type == "partition"
         assert rule.nullable is True
 
-    def test_immutable(self) -> None:
+    def test_key_nullability_rule__immutable__57eba322(self) -> None:
         rule = KeyNullabilityRule(field="x", key_type="merge")
         with pytest.raises((AttributeError, TypeError)):
             rule.nullable = True  # type: ignore[misc]
@@ -71,7 +71,7 @@ class TestKeyNullabilityRule:
 class TestDQConfigExtended:
     """Extended tests for DQConfig with nested validation objects."""
 
-    def test_default_values(self) -> None:
+    def test_d_q_config_extended__default_values__b30b68aa(self) -> None:
         dq = DQConfig()
         assert dq.soft_fail_threshold == pytest.approx(0.05)
         assert dq.hard_fail_threshold == pytest.approx(0.20)
@@ -83,7 +83,7 @@ class TestDQConfigExtended:
         assert dq.key_nullability_rules == ()
         assert isinstance(dq.report, DQReportConfig)
 
-    def test_with_field_validations(self) -> None:
+    def test_d_q_config_extended__field_validations__6563f525(self) -> None:
         fv = FieldValidation(field="name", validation_type="required")
         dq = DQConfig(field_validations=(fv,))
         assert len(dq.field_validations) == 1
@@ -147,7 +147,7 @@ class TestDQConfigExtended:
         assert dq.report.format == "yaml"
         assert dq.report.sample_size == 20
 
-    def test_immutable(self) -> None:
+    def test_d_q_config_extended__immutable__9213e566(self) -> None:
         dq = DQConfig()
         with pytest.raises((AttributeError, TypeError)):
             dq.strict_validation = True  # type: ignore[misc]

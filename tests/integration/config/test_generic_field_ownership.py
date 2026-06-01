@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 import yaml
@@ -11,6 +13,8 @@ from scripts.engineering.qa.check_generic_field_ownership import (
     validate_generic_field_ownership,
 )
 
+
+pytestmark = pytest.mark.integration
 
 def test_generic_field_ownership_gate_passes_current_repo() -> None:
     findings = validate_generic_field_ownership(repo_root=Path("."))

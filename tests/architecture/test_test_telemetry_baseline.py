@@ -7,6 +7,8 @@ from pathlib import Path
 import pytest
 import yaml
 
+pytestmark = pytest.mark.architecture
+
 ROOT = Path(__file__).resolve().parents[2]
 BASELINE_YAML = ROOT / "configs" / "quality" / "test_telemetry_baseline.yaml"
 BASELINE_MD = ROOT / "docs" / "05-engineering" / "test-telemetry-baseline.md"

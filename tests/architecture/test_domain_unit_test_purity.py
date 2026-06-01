@@ -10,6 +10,8 @@ from pathlib import Path
 import pytest
 
 
+pytestmark = pytest.mark.architecture
+
 DISALLOWED_IMPORT_PREFIXES = (
     "bioetl.application",
     "bioetl.infrastructure",

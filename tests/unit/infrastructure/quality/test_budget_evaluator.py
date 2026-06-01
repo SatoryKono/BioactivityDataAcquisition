@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from datetime import date
 
 from bioetl.infrastructure.quality.budget_evaluator import (
@@ -13,6 +15,8 @@ from bioetl.infrastructure.quality.budget_evaluator import (
 )
 from bioetl.infrastructure.quality.inventory import ExemptionInventorySummary
 
+
+pytestmark = pytest.mark.unit
 
 def _make_inventory(
     total: int = 0,
@@ -45,7 +49,7 @@ class TestCurrentQuarterTarget:
         assert result is not None
         assert result["quarter"] == "2025-Q1"
 
-    def test_returns_none_when_no_match(self) -> None:
+    def test_current_quarter_target__none_when_no_match__367ca23a(self) -> None:
         """Should return None when no target for current quarter."""
         scorecard = {
             "quarterly_targets": [

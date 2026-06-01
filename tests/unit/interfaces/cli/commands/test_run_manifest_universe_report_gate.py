@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import pytest
+
 import importlib
 from types import SimpleNamespace
 
+
+pytestmark = pytest.mark.unit
 
 run_manifest_commands = importlib.import_module(
     "bioetl.interfaces.cli.commands.run_manifest"

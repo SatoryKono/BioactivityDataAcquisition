@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import pytest
+
 import ast
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 DOMAIN_FILE = Path("src/bioetl/domain/behavior/composite_validation_layer.py")
 COMPOSITION_FACTORY_FILE = Path(

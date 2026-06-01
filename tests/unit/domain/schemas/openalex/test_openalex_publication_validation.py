@@ -18,11 +18,11 @@ from bioetl.domain.schemas.openalex.publication import OpenAlexPublicationSchema
 class TestPmidBaseValidation:
     """Base validation tests for pmid."""
 
-    def test_pmid_valid(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
+    def test_pmid_base_validation__pmid_valid__7734822a(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
         """PASS: valid pmid value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
-    def test_pmid_null_allowed(
+    def test_pmid_base_validation__pmid_null_allowed__34f0c769(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: pmid is nullable."""
@@ -31,7 +31,7 @@ class TestPmidBaseValidation:
         OpenAlexPublicationSchema.validate(df)
 
     @pytest.mark.parametrize("invalid_value", ["-1", "abc", ""])
-    def test_pmid_invalid_format(
+    def test_pmid_base_validation__pmid_invalid_format__147db229(
         self, minimal_openalex_publication_df: pd.DataFrame, invalid_value: Any
     ) -> None:
         """FAIL: pmid invalid format."""
@@ -45,11 +45,11 @@ class TestPmidBaseValidation:
 class TestDoiBaseValidation:
     """Base validation tests for doi."""
 
-    def test_doi_valid(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
+    def test_doi_base_validation__doi_valid__570b4641(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
         """PASS: valid doi value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
-    def test_doi_null_allowed(
+    def test_doi_base_validation__doi_null_allowed__1c563d77(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: doi is nullable."""
@@ -60,7 +60,7 @@ class TestDoiBaseValidation:
     @pytest.mark.parametrize(
         "invalid_value", ["doi:10.1234", "10.123/x", "not-a-doi", ""]
     )
-    def test_doi_invalid_format(
+    def test_doi_base_validation__doi_invalid_format__5b2b9a34(
         self, minimal_openalex_publication_df: pd.DataFrame, invalid_value: Any
     ) -> None:
         """FAIL: doi invalid format."""
@@ -74,11 +74,11 @@ class TestDoiBaseValidation:
 class TestPmcIdBaseValidation:
     """Base validation tests for pmc_id."""
 
-    def test_pmc_id_valid(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
+    def test_case__cfcf9e0e12(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
         """PASS: valid pmc_id value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
-    def test_pmc_id_null_allowed(
+    def test_pmc_id_base_validation__pmc_id_null_allowed__e69600a9(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: pmc_id is nullable."""
@@ -87,7 +87,7 @@ class TestPmcIdBaseValidation:
         OpenAlexPublicationSchema.validate(df)
 
     @pytest.mark.parametrize("invalid_value", ["pmc123", "PMC", "123", ""])
-    def test_pmc_id_invalid_format(
+    def test_pmc_id_base_validation__id_invalid_format__d060aeb5(
         self, minimal_openalex_publication_df: pd.DataFrame, invalid_value: Any
     ) -> None:
         """FAIL: pmc_id invalid format."""
@@ -101,11 +101,11 @@ class TestPmcIdBaseValidation:
 class TestTitleBaseValidation:
     """Base validation tests for title."""
 
-    def test_title_valid(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
+    def test_title_base_validation__title_valid__f0480b60(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
         """PASS: valid title value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
-    def test_title_null_allowed(
+    def test_title_base_validation__title_null_allowed__a020dcb9(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: title is nullable."""
@@ -118,13 +118,13 @@ class TestTitleBaseValidation:
 class TestAbstractBaseValidation:
     """Base validation tests for abstract."""
 
-    def test_abstract_valid(
+    def test_base_validation__abstract_valid__1786737a(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid abstract value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
-    def test_abstract_null_allowed(
+    def test_base_validation__null_allowed__83f71059(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: abstract is nullable."""
@@ -137,11 +137,11 @@ class TestAbstractBaseValidation:
 class TestAuthorsBaseValidation:
     """Base validation tests for authors."""
 
-    def test_authors_valid(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
+    def test_base_validation__authors_valid__1b7708fb(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
         """PASS: valid authors value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
-    def test_authors_null_allowed(
+    def test_base_validation__authors_null_allowed__17e42ec1(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: authors is nullable."""
@@ -154,13 +154,13 @@ class TestAuthorsBaseValidation:
 class TestAffiliationListBaseValidation:
     """Base validation tests for affiliation_list."""
 
-    def test_affiliation_list_valid(
+    def test_list_base_validation__list_valid__9c4b3854(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid affiliation_list value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
-    def test_affiliation_list_null_allowed(
+    def test_list_base_validation__list_null_allowed__2f66c351(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: affiliation_list is nullable."""
@@ -173,11 +173,11 @@ class TestAffiliationListBaseValidation:
 class TestJournalBaseValidation:
     """Base validation tests for journal."""
 
-    def test_journal_valid(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
+    def test_base_validation__journal_valid__e11857a4(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
         """PASS: valid journal value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
-    def test_journal_null_allowed(
+    def test_base_validation__journal_null_allowed__30841956(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: journal is nullable."""
@@ -190,13 +190,13 @@ class TestJournalBaseValidation:
 class TestPublicationYearBaseValidation:
     """Base validation tests for publication_year."""
 
-    def test_publication_year_valid(
+    def test_year_base_validation__year_valid__02ecc258(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid publication_year value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
-    def test_publication_year_null_allowed(
+    def test_year_base_validation__year_null_allowed__00ab813b(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: publication_year is nullable."""
@@ -209,13 +209,13 @@ class TestPublicationYearBaseValidation:
 class TestPublicationDateBaseValidation:
     """Base validation tests for publication_date."""
 
-    def test_publication_date_valid(
+    def test_date_base_validation__date_valid__b60de007(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid publication_date value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
-    def test_publication_date_null_allowed(
+    def test_date_base_validation__date_null_allowed__a3b45b35(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: publication_date is nullable."""
@@ -228,13 +228,13 @@ class TestPublicationDateBaseValidation:
 class TestPublicationTypeBaseValidation:
     """Base validation tests for publication_type."""
 
-    def test_publication_type_valid(
+    def test_type_base_validation__type_valid__cc7a7392(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid publication_type value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
-    def test_publication_type_null_allowed(
+    def test_type_base_validation__type_null_allowed__b5c1169e(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: publication_type is nullable."""
@@ -247,13 +247,13 @@ class TestPublicationTypeBaseValidation:
 class TestLanguageBaseValidation:
     """Base validation tests for language."""
 
-    def test_language_valid(
+    def test_base_validation__language_valid__930b0ca0(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid language value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
-    def test_language_null_allowed(
+    def test_base_validation__null_allowed__d48d098f(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: language is nullable."""
@@ -266,13 +266,13 @@ class TestLanguageBaseValidation:
 class TestPageFirstBaseValidation:
     """Base validation tests for page_first."""
 
-    def test_page_first_valid(
+    def test_first_base_validation__page_first_valid__0fc772d6(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid page_first value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
-    def test_page_first_null_allowed(
+    def test_first_base_validation__first_null_allowed__801b7eb4(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: page_first is nullable."""
@@ -285,13 +285,13 @@ class TestPageFirstBaseValidation:
 class TestPageLastBaseValidation:
     """Base validation tests for page_last."""
 
-    def test_page_last_valid(
+    def test_last_base_validation__page_last_valid__1478a440(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid page_last value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
-    def test_page_last_null_allowed(
+    def test_last_base_validation__last_null_allowed__d68f2bd9(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: page_last is nullable."""
@@ -304,13 +304,13 @@ class TestPageLastBaseValidation:
 class TestCitationsReceivedBaseValidation:
     """Base validation tests for citations_received."""
 
-    def test_citations_received_valid(
+    def test_base_validation__received_valid__ec78fa2f(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid citations_received value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
-    def test_citations_received_null_allowed(
+    def test_base_validation__null_allowed__c9b96145(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: citations_received is nullable."""
@@ -323,13 +323,13 @@ class TestCitationsReceivedBaseValidation:
 class TestCitationsMadeBaseValidation:
     """Base validation tests for citations_made."""
 
-    def test_citations_made_valid(
+    def test_made_base_validation__citations_made_valid__e0ed6e09(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid citations_made value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
-    def test_citations_made_null_allowed(
+    def test_made_base_validation__made_null_allowed__5a5f2487(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: citations_made is nullable."""
@@ -342,11 +342,11 @@ class TestCitationsMadeBaseValidation:
 class TestIsOaBaseValidation:
     """Base validation tests for is_oa."""
 
-    def test_is_oa_valid(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
+    def test_is_oa_base_validation__is_oa_valid__9c9c5632(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
         """PASS: valid is_oa value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
-    def test_is_oa_null_allowed(
+    def test_is_oa_base_validation__is_oa_null_allowed__b03e1c4d(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: is_oa is nullable."""
@@ -359,13 +359,13 @@ class TestIsOaBaseValidation:
 class TestLookupMethodBaseValidation:
     """Base validation tests for lookup_method."""
 
-    def test_lookup_method_valid(
+    def test_method_base_validation__lookup_method_valid__dc1f61f0(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid lookup_method value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
-    def test_lookup_method_null_allowed(
+    def test_method_base_validation__method_null_allowed__ae4a964f(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: lookup_method is nullable."""
@@ -378,13 +378,13 @@ class TestLookupMethodBaseValidation:
 class TestOriginalIdBaseValidation:
     """Base validation tests for original_id."""
 
-    def test_original_id_valid(
+    def test_id_base_validation__original_id_valid__68e85e11(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid original_id value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
-    def test_original_id_null_allowed(
+    def test_id_base_validation__id_null_allowed__b2e9e81e(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: original_id is nullable."""
@@ -397,11 +397,11 @@ class TestOriginalIdBaseValidation:
 class TestSourceBaseValidation:
     """Base validation tests for _source."""
 
-    def test__source_valid(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
+    def test_case__bf98a63411(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
         """PASS: valid _source value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
-    def test__source_null_allowed(
+    def test_source_base_validation__source_null_allowed__33eee906(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: _source is nullable."""
@@ -444,11 +444,11 @@ class TestOpenalexIdBaseValidation:
 class TestIssnBaseValidation:
     """Base validation tests for issn."""
 
-    def test_issn_valid(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
+    def test_issn_base_validation__issn_valid__5625a23b(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
         """PASS: valid issn value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
-    def test_issn_null_allowed(
+    def test_issn_base_validation__issn_null_allowed__4c88c228(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: issn is nullable."""
@@ -456,7 +456,7 @@ class TestIssnBaseValidation:
         df["issn"] = None
         OpenAlexPublicationSchema.validate(df)
 
-    def test_issn_accepts_any_string(
+    def test_issn_base_validation__accepts_any_string__b5453d66(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: issn has no format validation in OpenAlex schema."""
@@ -469,13 +469,13 @@ class TestIssnBaseValidation:
 class TestPublisherBaseValidation:
     """Base validation tests for publisher."""
 
-    def test_publisher_valid(
+    def test_base_validation__publisher_valid__c6367a8e(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid publisher value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
-    def test_publisher_null_allowed(
+    def test_base_validation__null_allowed__0914d52c(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: publisher is nullable."""
@@ -507,11 +507,11 @@ class TestOaStatusBaseValidation:
 class TestVolumeBaseValidation:
     """Base validation tests for volume."""
 
-    def test_volume_valid(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
+    def test_case__675547e9dc(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
         """PASS: valid volume value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
-    def test_volume_null_allowed(
+    def test_volume_base_validation__volume_null_allowed__2b6917a6(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: volume is nullable."""
@@ -524,11 +524,11 @@ class TestVolumeBaseValidation:
 class TestIssueBaseValidation:
     """Base validation tests for issue."""
 
-    def test_issue_valid(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
+    def test_issue_base_validation__issue_valid__2621e055(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
         """PASS: valid issue value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
-    def test_issue_null_allowed(
+    def test_issue_base_validation__issue_null_allowed__08cd8c32(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: issue is nullable."""
@@ -651,13 +651,13 @@ class TestSubjectMeshBaseValidation:
 class TestSubjectKeywordsBaseValidation:
     """Base validation tests for subject_keywords."""
 
-    def test_subject_keywords_valid(
+    def test_base_validation__keywords_valid__66d3828c(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid subject_keywords value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
-    def test_subject_keywords_null_allowed(
+    def test_base_validation__null_allowed__8d218e85(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: subject_keywords is nullable."""

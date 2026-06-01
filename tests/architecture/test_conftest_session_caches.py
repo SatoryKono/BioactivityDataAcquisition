@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+import pytest
+
 import importlib.util
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 _CONFTEST_PATH = Path(__file__).with_name("conftest.py")
 _CONFTEST_SPEC = importlib.util.spec_from_file_location(

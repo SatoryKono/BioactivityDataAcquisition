@@ -39,7 +39,7 @@ class TestPipelineConfig:
         assert config.table.primary_keys == ("id",)  # Lists converted to tuples
         assert config.effective_silver_table == "test_silver"
 
-    def test_default_values(self) -> None:
+    def test_config_pipeline_config__default_values__192abce5(self) -> None:
         """Test default values for optional fields."""
         config = _make_config()
 
@@ -76,7 +76,7 @@ class TestPipelineConfig:
         assert config.fields == ("field1", "field2", "field3")
         assert isinstance(config.fields, tuple)
 
-    def test_lock_key_property(self) -> None:
+    def test_config_pipeline_config__lock_key_property__3543aeae(self) -> None:
         """Test lock_key property generation."""
         config = PipelineConfig(
             pipeline_name="chembl_activity",
@@ -87,7 +87,7 @@ class TestPipelineConfig:
 
         assert config.lock_key == "pipeline:chembl_activity"
 
-    def test_immutability(self) -> None:
+    def test_config_pipeline_config__immutability__653f8faf(self) -> None:
         """Test that PipelineConfig is frozen (immutable)."""
         config = _make_config()
 
@@ -96,17 +96,17 @@ class TestPipelineConfig:
 
     # Validation tests
 
-    def test_empty_pipeline_name_raises(self) -> None:
+    def test_config_pipeline_config__pipeline_name_raises__a9d3a71d(self) -> None:
         """Test that empty pipeline_name raises ValueError."""
         with pytest.raises(ValueError, match="pipeline_name cannot be empty"):
             _make_config(pipeline_name="")
 
-    def test_empty_provider_raises(self) -> None:
+    def test_config_pipeline_config__provider_raises__0fc734eb(self) -> None:
         """Test that empty provider raises ValueError."""
         with pytest.raises(ValueError, match="provider cannot be empty"):
             _make_config(provider="")
 
-    def test_empty_entity_type_raises(self) -> None:
+    def test_config_pipeline_config__entity_type_raises__4b6ca744(self) -> None:
         """Test that empty entity_type raises ValueError."""
         with pytest.raises(ValueError, match="entity_type cannot be empty"):
             _make_config(entity_type="")
@@ -131,7 +131,7 @@ class TestPipelineConfig:
         with pytest.raises(ValueError, match="checkpoint_interval must be positive"):
             _make_config(checkpoint_interval=-100)
 
-    def test_empty_primary_keys_raises(self) -> None:
+    def test_config_pipeline_config__primary_keys_raises__11f0dd52(self) -> None:
         """Test that empty primary_keys raises ValueError."""
         with pytest.raises(ValueError, match="primary_keys cannot be empty"):
             PipelineConfig(
@@ -141,7 +141,7 @@ class TestPipelineConfig:
                 table=TableConfig(primary_keys=[], silver_table="silver"),
             )
 
-    def test_multiple_primary_keys(self) -> None:
+    def test_config_pipeline_config__primary_keys__0d922dab(self) -> None:
         """Test configuration with multiple primary keys."""
         config = PipelineConfig(
             pipeline_name="test",
@@ -158,7 +158,7 @@ class TestPipelineConfig:
         assert "entity_id" in config.table.primary_keys
         assert "version" in config.table.primary_keys
 
-    def test_full_configuration(self) -> None:
+    def test_config_pipeline_config__full_configuration__c36ffbdd(self) -> None:
         """Test with all fields specified."""
         dq = DQConfig(soft_fail_threshold=0.02, hard_fail_threshold=0.10)
         config = PipelineConfig(
@@ -193,7 +193,7 @@ class TestPipelineConfig:
         assert config.dq.soft_fail_threshold == pytest.approx(0.02)
         assert config.lock_key == "pipeline:chembl_activity"
 
-    def test_equality(self) -> None:
+    def test_config_pipeline_config__equality__12fa1b38(self) -> None:
         """Test equality between PipelineConfig instances."""
         table = TableConfig(primary_keys=["id"], silver_table="silver")
         config1 = PipelineConfig(
@@ -218,7 +218,7 @@ class TestPipelineConfig:
         assert config1 == config2
         assert config1 != config3
 
-    def test_hashable_with_tuple(self) -> None:
+    def test_config_pipeline_config__hashable_with_tuple__87cc7809(self) -> None:
         """Test that PipelineConfig is hashable with tuple fields."""
         table = TableConfig(primary_keys=["id"], silver_table="silver")
         config1 = PipelineConfig(
@@ -241,7 +241,7 @@ class TestPipelineConfig:
         config_set = {config1, config2}
         assert len(config_set) == 1
 
-    def test_immutable_primary_keys(self) -> None:
+    def test_config_pipeline_config__primary_keys__5cf4f026(self) -> None:
         """Test that primary_keys tuple cannot be mutated."""
         config = PipelineConfig(
             pipeline_name="test",
@@ -281,7 +281,7 @@ class TestPipelineConfig:
         with pytest.raises(AttributeError):
             config.dq.soft_fail_threshold = 0.5  # type: ignore[misc]
 
-    def test_list_to_tuple_conversion(self) -> None:
+    def test_config_pipeline_config__to_tuple_conversion__247e3d50(self) -> None:
         """Test that incoming lists are converted to tuples."""
         config = PipelineConfig(
             pipeline_name="test",

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.domain.schemas.constants import ACTIVITY_ACTION_TYPES
 
 from bioetl.domain.normalization.profiles import (
@@ -12,6 +14,8 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_passthrough,
     normalize_profile_text,
 )
+
+pytestmark = pytest.mark.unit
 
 EXPECTED_BAO_ENDPOINT_IRI = "https://purl.obolibrary.org/obo/BAO_0000357"
 EXPECTED_QUDT_UNIT_IRI = "https://qudt.org/vocab/unit/MicroMOL-PER-L"

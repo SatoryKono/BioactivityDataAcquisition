@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 import yaml
@@ -12,6 +14,8 @@ from scripts.engineering.ci.validate_contract_registry import (
     _active_gold_surface_issues,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def _write_entity_config(
     repo_root: Path,

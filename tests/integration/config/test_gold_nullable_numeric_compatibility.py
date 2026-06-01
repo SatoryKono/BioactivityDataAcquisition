@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 from scripts.engineering.qa.check_gold_nullable_numeric_compatibility import (
@@ -9,6 +11,8 @@ from scripts.engineering.qa.check_gold_nullable_numeric_compatibility import (
     validate_nullable_numeric_compatibility,
 )
 
+
+pytestmark = pytest.mark.integration
 
 def test_gold_nullable_numeric_compatibility_gate_passes_current_repo() -> None:
     findings = validate_nullable_numeric_compatibility(Path("."))

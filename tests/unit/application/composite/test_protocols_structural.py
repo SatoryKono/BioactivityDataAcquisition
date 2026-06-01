@@ -73,7 +73,7 @@ class TestJoinExecutorProtocol:
     def test_has_get_polars_join_type(self) -> None:
         assert hasattr(JoinExecutorProtocol, "get_polars_join_type")
 
-    def test_is_runtime_checkable(self) -> None:
+    def test_join_executor_protocol__is_runtime_checkable__bec146d2(self) -> None:
         class _Impl:
             def execute_polars_join(
                 self, left_df, right_df, left_key, right_key, pipeline_name
@@ -104,7 +104,7 @@ class TestDependencyJoinerProtocol:
     def test_has_drop_system_columns(self) -> None:
         assert hasattr(DependencyJoinerProtocol, "drop_system_columns")
 
-    def test_is_runtime_checkable(self) -> None:
+    def test_joiner_protocol__is_runtime_checkable__e8453357(self) -> None:
         class _Impl:
             def apply_dependency_joins(
                 self, *, merged_df, dependency_dfs, dependencies, seed_pipeline=None

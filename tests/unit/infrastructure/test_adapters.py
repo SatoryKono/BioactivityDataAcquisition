@@ -60,7 +60,7 @@ class TestChemblAdapter:
 
         assert adapter.effective_batch_size == 500
 
-    def test_entity_mapping(self, mock_logger):
+    def test_chembl_adapter__entity_mapping__0f2693d8(self, mock_logger):
         """Test entity type to resource URL mapping."""
         from bioetl.infrastructure.adapters.chembl.entity_mapper import (
             ChemblEntityMapper,
@@ -71,7 +71,7 @@ class TestChemblAdapter:
         assert "molecule" in ChemblEntityMapper.get_resource_url("compound")
         assert "target" in ChemblEntityMapper.get_resource_url("target")
 
-    def test_invalid_entity_type(self, mock_logger):
+    def test_chembl_adapter__invalid_entity_type__8b39d83b(self, mock_logger):
         """Test error handling for invalid entity type."""
         from bioetl.infrastructure.adapters.chembl.entity_mapper import (
             ChemblEntityMapper,
@@ -379,7 +379,7 @@ class TestCircuitBreaker:
         assert cb.failure_threshold == 5
         assert cb.get_state().value == "CLOSED"
 
-    def test_initial_state_is_closed(self):
+    def test_circuit_breaker__state_is_closed__93e31d80(self):
         """Test circuit breaker starts in CLOSED state."""
         cb = CircuitBreakerGuard(provider="test")
 

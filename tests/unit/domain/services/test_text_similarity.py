@@ -10,13 +10,15 @@ import pytest
 from bioetl.domain.behavior.text_similarity import jaccard_similarity, normalize_text
 
 
+pytestmark = pytest.mark.unit
+
 class TestNormalizeText:
     """Tests for normalize_text function."""
 
     def test_lowercase(self) -> None:
         assert normalize_text("Hello World") == "hello world"
 
-    def test_strips_whitespace(self) -> None:
+    def test_normalize_text__strips_whitespace__3a692a52(self) -> None:
         assert normalize_text("  hello  ") == "hello"
 
     def test_collapses_internal_whitespace(self) -> None:
@@ -25,7 +27,7 @@ class TestNormalizeText:
     def test_removes_punctuation(self) -> None:
         assert normalize_text("hello, world!") == "hello world"
 
-    def test_empty_string(self) -> None:
+    def test_normalize_text__empty_string__8f7a205b(self) -> None:
         assert normalize_text("") == ""
 
     def test_only_punctuation(self) -> None:
@@ -55,7 +57,7 @@ class TestJaccardSimilarity:
         result = jaccard_similarity("hello world", "hello foo")
         assert result == pytest.approx(1 / 3, abs=0.01)
 
-    def test_case_insensitive(self) -> None:
+    def test_jaccard_similarity__case_insensitive__52061d12(self) -> None:
         assert jaccard_similarity("Hello World", "hello world") == pytest.approx(1.0)
 
     def test_punctuation_ignored(self) -> None:

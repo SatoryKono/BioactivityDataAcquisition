@@ -13,6 +13,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.architecture
+
 # Path relative to project root
 BRONZE_WRITER_PATH = Path("src/bioetl/infrastructure/storage/bronze_writer.py")
 

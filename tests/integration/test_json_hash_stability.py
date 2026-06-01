@@ -3,12 +3,16 @@
 from __future__ import annotations
 
 
+import pytest
+
 from bioetl.domain.normalization.profiles.chembl_assay import CHEMBL_ASSAY_PROFILE
 from bioetl.domain.normalization.json import (
     deserialize_json_value,
     serialize_json_canonical,
 )
 
+
+pytestmark = pytest.mark.integration
 
 class TestJsonHashStability:
     """Test that canonical JSON ensures stable content hashing."""

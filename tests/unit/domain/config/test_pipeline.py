@@ -36,27 +36,27 @@ class TestPipelineConfig:
         assert config.batch_size == 100
         assert config.checkpoint_interval == 1000
 
-    def test_empty_pipeline_name_raises(self) -> None:
+    def test_pipeline_config__pipeline_name_raises__cc7046e4(self) -> None:
         with pytest.raises(ValueError, match="pipeline_name cannot be empty"):
             _make_config(pipeline_name="")
 
-    def test_empty_provider_raises(self) -> None:
+    def test_pipeline_config__provider_raises__de1d5e92(self) -> None:
         with pytest.raises(ValueError, match="provider cannot be empty"):
             _make_config(provider="")
 
-    def test_empty_entity_type_raises(self) -> None:
+    def test_pipeline_config__entity_type_raises__45b27978(self) -> None:
         with pytest.raises(ValueError, match="entity_type cannot be empty"):
             _make_config(entity_type="")
 
-    def test_zero_batch_size_raises(self) -> None:
+    def test_pipeline_config__batch_size_raises__a6f2d4df(self) -> None:
         with pytest.raises(ValueError, match="batch_size must be positive"):
             _make_config(batch_size=0)
 
-    def test_zero_checkpoint_interval_raises(self) -> None:
+    def test_pipeline_config__interval_raises__536a13f2(self) -> None:
         with pytest.raises(ValueError, match="checkpoint_interval must be positive"):
             _make_config(checkpoint_interval=0)
 
-    def test_empty_primary_keys_raises(self) -> None:
+    def test_pipeline_config__primary_keys_raises__cb63270b(self) -> None:
         with pytest.raises(ValueError, match="primary_keys cannot be empty"):
             _make_config(table=TableConfig(primary_keys=()))
 
@@ -95,7 +95,7 @@ class TestPipelineConfig:
         assert isinstance(config.fields, tuple)
         assert config.fields == ("a", "b")
 
-    def test_loading_strategy_string_conversion(self) -> None:
+    def test_pipeline_config__string_conversion__58ad87a5(self) -> None:
         config = _make_config(loading_strategy="full_scan_only")
         assert config.loading_strategy == LoadingStrategy.FULL_SCAN_ONLY
 

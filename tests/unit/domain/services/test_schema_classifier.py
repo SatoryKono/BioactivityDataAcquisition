@@ -1,5 +1,7 @@
 """Tests for schema compatibility classifier."""
 
+import pytest
+
 import json
 
 
@@ -13,6 +15,8 @@ from bioetl.domain.types.schema_policy import (
     SchemaChangeType,
 )
 
+
+pytestmark = pytest.mark.unit
 
 class TestSchemaClassifier:
     """Test schema change classification."""

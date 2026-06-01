@@ -18,6 +18,8 @@ from bioetl.domain.registry.publication import (
     is_publication_entity,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestPublicationMapping:
     """Tests for PublicationMapping dataclass."""

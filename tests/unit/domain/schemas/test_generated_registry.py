@@ -19,7 +19,7 @@ class TestCanonicalSchemaRegistryEntry:
         assert CanonicalSchemaRegistryEntry is not None
         assert CANONICAL_SCHEMA_REGISTRY is not None
 
-    def test_registry_is_tuple(self) -> None:
+    def test_schema_registry_entry__registry_is_tuple__3043e502(self) -> None:
         """Test that CANONICAL_SCHEMA_REGISTRY is a tuple."""
         from bioetl.domain.schemas.generated import CANONICAL_SCHEMA_REGISTRY
 
@@ -45,7 +45,7 @@ class TestCanonicalSchemaRegistryEntry:
         assert isinstance(entry.yaml_path, str)
         assert isinstance(entry.column_groups, tuple)
 
-    def test_entry_creation(self) -> None:
+    def test_schema_registry_entry__entry_creation__6c4df3d1(self) -> None:
         """Test creating a CanonicalSchemaRegistryEntry directly."""
         from bioetl.domain.schemas.generated import CanonicalSchemaRegistryEntry
 
@@ -60,7 +60,7 @@ class TestCanonicalSchemaRegistryEntry:
         assert entry.yaml_path == "chembl/activity.yaml"
         assert entry.column_groups == ("system", "business", "dq")
 
-    def test_entry_is_frozen(self) -> None:
+    def test_schema_registry_entry__entry_is_frozen__b9f9ba6a(self) -> None:
         """Test that CanonicalSchemaRegistryEntry is immutable."""
         from bioetl.domain.schemas.generated import CanonicalSchemaRegistryEntry
 

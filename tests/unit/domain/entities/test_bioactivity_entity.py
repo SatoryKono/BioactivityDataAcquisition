@@ -22,17 +22,17 @@ BASE_KWARGS = {
 class TestBioactivityState:
     """Tests for BioactivityState enum."""
 
-    def test_state_values(self) -> None:
+    def test_bioactivity_state__state_values__2e16fddb(self) -> None:
         assert BioactivityState.RAW == "raw"
         assert BioactivityState.NORMALIZED == "normalized"
         assert BioactivityState.VALIDATED == "validated"
 
-    def test_is_ready_for_silver(self) -> None:
+    def test_bioactivity_state__is_ready_for_silver__1690c709(self) -> None:
         assert BioactivityState.RAW.is_ready_for_silver() is False
         assert BioactivityState.NORMALIZED.is_ready_for_silver() is True
         assert BioactivityState.VALIDATED.is_ready_for_silver() is True
 
-    def test_is_fully_validated(self) -> None:
+    def test_bioactivity_state__is_fully_validated__ebd2a07a(self) -> None:
         assert BioactivityState.RAW.is_fully_validated() is False
         assert BioactivityState.NORMALIZED.is_fully_validated() is False
         assert BioactivityState.VALIDATED.is_fully_validated() is True
@@ -159,7 +159,7 @@ class TestBioactivity:
         assert normalized.state == BioactivityState.NORMALIZED
         assert normalized.activity_id == b.activity_id
 
-    def test_immutable(self) -> None:
+    def test_entity_bioactivity__immutable__40c1e991(self) -> None:
         b = Bioactivity(
             **BASE_KWARGS,
             activity_id="ACT_001",

@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import pytest
+
 import json
 from pathlib import Path
 
 import yaml
+
+pytestmark = pytest.mark.architecture
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SCORECARD_PATH = PROJECT_ROOT / "configs/quality/debt_scorecard.yaml"

@@ -84,7 +84,7 @@ class TestGetQuarantineRuntimeService:
 class TestGetCheckpointRuntimeService:
     """Tests for get_checkpoint_runtime_service function."""
 
-    def test_calls_ensure_registrations_and_bootstrap(self) -> None:
+    def test_runtime_service__and_bootstrap__0792af84(self) -> None:
         """Test that get_checkpoint_runtime_service calls _ensure_registrations and bootstrap."""
         mock_runtime_service = MagicMock()
 
@@ -105,7 +105,7 @@ class TestGetCheckpointRuntimeService:
         mock_bootstrap.assert_called_once_with("chembl_activity")
         assert result is mock_runtime_service
 
-    def test_passes_pipeline_name_to_bootstrap(self) -> None:
+    def test_runtime_service__name_to_bootstrap__872020d5(self) -> None:
         """Test that pipeline name is forwarded to bootstrap function."""
         with (
             patch("bioetl.composition._resource_management._ensure_registrations"),
@@ -129,7 +129,7 @@ class TestGetCheckpointRuntimeService:
 class TestGetLifecycleService:
     """Tests for get_lifecycle_service function."""
 
-    def test_calls_ensure_registrations_and_bootstrap(self) -> None:
+    def test_get_lifecycle_service__and_bootstrap__736ed387(self) -> None:
         """Test that get_lifecycle_service calls _ensure_registrations and bootstrap."""
         mock_service = MagicMock()
 

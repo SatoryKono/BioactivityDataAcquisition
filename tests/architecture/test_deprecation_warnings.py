@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 import tomllib
+
+pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
 PYPROJECT = ROOT / "pyproject.toml"

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 import json
 from pathlib import Path
 
@@ -9,6 +11,8 @@ from scripts.engineering.qa import __main__ as qa_router
 from scripts.engineering.qa import report_dashboard_inventory as inventory
 from tests.helpers import run_main_in_process
 
+
+pytestmark = pytest.mark.unit
 
 def _write_json(path: Path, payload: dict) -> None:
     path.write_text(json.dumps(payload, indent=2), encoding="utf-8")

@@ -221,7 +221,7 @@ class TestCellLineTransformer:
         assert result["cell_source_taxonomy_id"] == 9606
 
     @pytest.mark.asyncio
-    async def test_transform_custom_provider(self, mock_context):
+    async def test_cell_line_transformer__custom_provider__1fa53ba3(self, mock_context):
         """Test transformation with custom provider."""
         transformer = CellLineTransformer(
             provider="custom_provider",

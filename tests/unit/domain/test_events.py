@@ -10,6 +10,8 @@ import pytest
 from bioetl.domain.events import PipelineEvent
 
 
+pytestmark = pytest.mark.unit
+
 class TestPipelineEventConstants:
     """Tests for PipelineEvent constants."""
 

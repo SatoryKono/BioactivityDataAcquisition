@@ -13,6 +13,8 @@ from bioetl.domain.types.checkpoint_metadata import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 class TestCheckpointMetadata:
     """Test CheckpointMetadata domain type."""
 

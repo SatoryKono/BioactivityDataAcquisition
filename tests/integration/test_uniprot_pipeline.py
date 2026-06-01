@@ -118,7 +118,7 @@ def mock_logger():
 class TestUniProtProteinPipelineTransform:
     """Тесты трансформации UniProt пайплайна."""
 
-    async def test_transform_bronze_to_silver_complete_record(
+    async def test_pipeline_transform__complete_record__78f6dc57(
         self,
         uniprot_config,
         uniprot_runtime,

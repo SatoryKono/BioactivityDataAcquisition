@@ -12,6 +12,8 @@ from bioetl.infrastructure.adapters.chembl.protein_classification_graph import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 def test_graph_resolves_multiple_classifications_with_replaced_by_redirect() -> None:
     graph = ChEMBLProteinClassificationGraph.from_rows(
         protein_class_rows=[

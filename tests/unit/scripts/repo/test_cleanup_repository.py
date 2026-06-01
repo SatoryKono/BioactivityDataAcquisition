@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 import json
 import os
 from pathlib import Path
@@ -10,6 +12,8 @@ import yaml
 
 from scripts.ops.support.repo import cleanup_repository as module
 
+
+pytestmark = pytest.mark.unit
 
 def _set_age_days(path: Path, *, days: int) -> None:
     age_seconds = days * 24 * 60 * 60

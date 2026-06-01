@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 import json
 
 from bioetl.domain.normalization.profiles.chembl_assay import CHEMBL_ASSAY_PROFILE
@@ -11,6 +13,8 @@ from bioetl.domain.schemas.constants import (
     RELATIONSHIP_TYPES,
 )
 
+
+pytestmark = pytest.mark.unit
 
 class TestChemblAssayEnumFields:
     """Test enum field normalization in ChemBL assay profile."""

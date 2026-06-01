@@ -14,6 +14,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.architecture
+
 DOMAIN_CONFIG_PATHS = [
     Path("src/bioetl/domain/config/table.py"),
     Path("src/bioetl/domain/config/pipeline.py"),

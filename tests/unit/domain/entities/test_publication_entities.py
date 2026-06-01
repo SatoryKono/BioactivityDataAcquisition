@@ -35,7 +35,7 @@ class HookValidatedPublication(PublicationEntityBase):
 class TestCrossRefPublicationEntity:
     """CrossRefPublicationEntity validation and immutability."""
 
-    def test_valid_creation_minimal(self) -> None:
+    def test_ref_publication_entity__creation_minimal__95f45062(self) -> None:
         from bioetl.domain.entities.crossref import CrossRefPublicationEntity
 
         entity = CrossRefPublicationEntity(
@@ -47,7 +47,7 @@ class TestCrossRefPublicationEntity:
         assert entity.issn == []
         assert entity.subject_keywords == []
 
-    def test_valid_creation_full(self) -> None:
+    def test_ref_publication_entity__valid_creation_full__a6b570e0(self) -> None:
         from bioetl.domain.entities.crossref import CrossRefPublicationEntity
 
         entity = CrossRefPublicationEntity(
@@ -76,7 +76,7 @@ class TestCrossRefPublicationEntity:
         with pytest.raises(ValueError, match="DOI is required"):
             CrossRefPublicationEntity(**BASE_KWARGS, doi="")
 
-    def test_immutable(self) -> None:
+    def test_ref_publication_entity__immutable__3f73c957(self) -> None:
         from bioetl.domain.entities.crossref import CrossRefPublicationEntity
 
         entity = CrossRefPublicationEntity(**BASE_KWARGS, doi="10.1234/test")
@@ -88,7 +88,7 @@ class TestCrossRefPublicationEntity:
 class TestOpenAlexPublicationEntity:
     """OpenAlexPublicationEntity validation and immutability."""
 
-    def test_valid_creation_minimal(self) -> None:
+    def test_publication_entity__creation_minimal__45a35b4b(self) -> None:
         from bioetl.domain.entities.openalex import OpenAlexPublicationEntity
 
         entity = OpenAlexPublicationEntity(
@@ -121,7 +121,7 @@ class TestOpenAlexPublicationEntity:
         with pytest.raises(ValueError, match="OpenAlex Publication ID is required"):
             OpenAlexPublicationEntity(**BASE_KWARGS, openalex_id="")
 
-    def test_immutable(self) -> None:
+    def test_publication_entity__immutable__709dd0b6(self) -> None:
         from bioetl.domain.entities.openalex import OpenAlexPublicationEntity
 
         entity = OpenAlexPublicationEntity(**BASE_KWARGS, openalex_id="W1")
@@ -133,7 +133,7 @@ class TestOpenAlexPublicationEntity:
 class TestSemanticScholarPublicationEntity:
     """SemanticScholarPublicationEntity validation and immutability."""
 
-    def test_valid_creation_minimal(self) -> None:
+    def test_publication_entity__creation_minimal__1b97c28d(self) -> None:
         from bioetl.domain.entities.semanticscholar import (
             SemanticScholarPublicationEntity,
         )
@@ -145,7 +145,7 @@ class TestSemanticScholarPublicationEntity:
         assert entity.paper_id == "a" * 40
         assert entity._source == "semanticscholar"
 
-    def test_valid_creation_full(self) -> None:
+    def test_publication_entity__valid_creation_full__778cffa9(self) -> None:
         from bioetl.domain.entities.semanticscholar import (
             SemanticScholarPublicationEntity,
         )
@@ -175,7 +175,7 @@ class TestSemanticScholarPublicationEntity:
 class TestPubMedPublicationEntity:
     """PubMedPublicationEntity validation and immutability."""
 
-    def test_valid_creation_minimal(self) -> None:
+    def test_med_publication_entity__creation_minimal__33278e4c(self) -> None:
         from bioetl.domain.entities.pubmed import PubMedPublicationEntity
 
         entity = PubMedPublicationEntity(
@@ -220,7 +220,7 @@ class TestPubMedPublicationEntity:
 class TestChemblPublication:
     """ChemblPublication validation and immutability."""
 
-    def test_valid_creation_minimal(self) -> None:
+    def test_chembl_publication__creation_minimal__c28a7e2e(self) -> None:
         from bioetl.domain.entities.chembl_structures import ChemblPublication
 
         entity = ChemblPublication(
@@ -229,7 +229,7 @@ class TestChemblPublication:
         )
         assert entity.publication_id == "CHEMBL1125145"
 
-    def test_valid_creation_full(self) -> None:
+    def test_chembl_publication__valid_creation_full__a68fa5d4(self) -> None:
         from bioetl.domain.entities.chembl_structures import ChemblPublication
 
         entity = ChemblPublication(
@@ -245,7 +245,7 @@ class TestChemblPublication:
         assert entity.volume == "10"
         assert entity.chembl_release == "CHEMBL_34"
 
-    def test_empty_publication_id_raises(self) -> None:
+    def test_chembl_publication__id_raises__3e658eef(self) -> None:
         from bioetl.domain.entities.chembl_structures import ChemblPublication
 
         with pytest.raises(ValueError, match="publication_id is required"):

@@ -10,10 +10,14 @@ Tests for get_text() and get_int() helper functions:
 
 from __future__ import annotations
 
+import pytest
+
 import xml.etree.ElementTree as ET
 
 from bioetl.application.pipelines.pubmed.xml_parser import get_int, get_text
 
+
+pytestmark = pytest.mark.unit
 
 class TestGetText:
     """Tests for get_text() function."""
@@ -26,7 +30,7 @@ class TestGetText:
         elem = ET.fromstring("<Title>  Hello World  </Title>")
         assert get_text(elem) == "Hello World"
 
-    def test_returns_none_for_none_element(self) -> None:
+    def test_xml_parser_get_text__for_none_element__a617ae70(self) -> None:
         assert get_text(None) is None
 
     def test_returns_none_for_empty_text(self) -> None:
@@ -64,10 +68,10 @@ class TestGetInt:
         elem = ET.fromstring("<Year>2024</Year>")
         assert get_int(elem) == 2024
 
-    def test_returns_none_for_none_element(self) -> None:
+    def test_xml_parser_get_int__for_none_element__6f02606c(self) -> None:
         assert get_int(None) is None
 
-    def test_returns_none_for_empty_text(self) -> None:
+    def test_xml_parser_get_int__none_for_empty_text__fb94b8ae(self) -> None:
         elem = ET.fromstring("<Year></Year>")
         assert get_int(elem) is None
 

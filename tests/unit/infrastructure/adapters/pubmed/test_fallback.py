@@ -12,6 +12,8 @@ import pytest
 from bioetl.infrastructure.adapters.pubmed.fallback import PubMedTitleFallbackHandler
 
 
+pytestmark = pytest.mark.unit
+
 @pytest.fixture
 def mock_logger() -> MagicMock:
     """Create a mock logger."""
@@ -329,7 +331,7 @@ class TestProcessMissingDois:
         mock_logger.debug.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_process_respects_limit(
+    async def test_process_missing_dois__respects_limit__87ae202e(
         self, handler: PubMedTitleFallbackHandler, mock_search_fn: AsyncMock
     ) -> None:
         """Should stop when limit is reached."""

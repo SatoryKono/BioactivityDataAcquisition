@@ -592,6 +592,13 @@ python -m scripts.ops check-observability-ports --json
   1. Если Grafana уходит в restart loop, проверьте `docker logs bioetl-grafana`:
      shipped bootstrap entrypoint удаляет stale local `grafana-image-renderer`
      plugin из persistent volume, когда включён remote renderer sidecar.
+  1. Если Grafana Render API (`/render/...`) возвращает `500`, пересоздайте
+     `renderer` и `grafana` из текущего `docker-compose.monitoring.yml`.
+     Repo-backed renderer config должен использовать pinned
+     `grafana/grafana-image-renderer:5.0.0`, matching
+     `GF_RENDERING_RENDERER_TOKEN` / `AUTH_TOKEN`, `BROWSER_FLAGS` вместо
+     legacy `RENDERING_ARGS`, `shm_size: 1gb` и Prometheus target
+     `grafana-image-renderer`.
 - **Дашборд пустой**:
   1. Проверьте, что пайплайн-процесс запущен и не завершился с ошибкой.
   1. Убедитесь, что пайплайн запущен с метриками (`BIOETL_METRICS_ENABLED=true`).

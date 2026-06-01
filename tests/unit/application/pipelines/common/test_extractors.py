@@ -10,6 +10,8 @@ import pytest
 from bioetl.application.pipelines.common.extractors import extract_author_names
 
 
+pytestmark = pytest.mark.unit
+
 class TestExtractAuthorNames:
     """Tests for extract_author_names function."""
 

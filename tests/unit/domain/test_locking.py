@@ -21,6 +21,8 @@ from bioetl.domain.locking import FencingToken, LockContext, LockNotHeldError
 from bioetl.domain.types import RunID
 
 
+pytestmark = pytest.mark.unit
+
 @pytest.fixture
 def mock_logger() -> MagicMock:
     """Create a mock logger."""
@@ -72,7 +74,7 @@ class TestFencingToken:
         assert token.owner_id == run_id
         assert token.issued_at == pytest.approx(100.0)
 
-    def test_immutability(self, run_id: RunID) -> None:
+    def test_locking_fencing_token__immutability__937636e8(self, run_id: RunID) -> None:
         """Test that FencingToken is immutable (frozen dataclass)."""
         token = FencingToken(
             sequence=1,
@@ -193,7 +195,7 @@ class TestLockContext:
         assert ctx.fencing_token is not None
         assert ctx.fencing_token.sequence == 5
 
-    def test_immutability(self, valid_lock_context: LockContext) -> None:
+    def test_locking_lock_context__immutability__038767c5(self, valid_lock_context: LockContext) -> None:
         """Test that LockContext is immutable (frozen dataclass)."""
         with pytest.raises(AttributeError):
             valid_lock_context.key = "modified"  # type: ignore[misc]
@@ -202,7 +204,7 @@ class TestLockContext:
 class TestLockNotHeldError:
     """Tests for LockNotHeldError exception."""
 
-    def test_error_message(self) -> None:
+    def test_lock_not_held_error__error_message__57fd8f31(self) -> None:
         """Test error message format."""
         error = LockNotHeldError("write_silver", "lock:chembl_activity")
 

@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import pytest
+
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 from bioetl.application.core.wiring.factory import PipelineRunnerDependencies
 from bioetl.composition.factories.pipeline import runner_constructor
 
+
+pytestmark = pytest.mark.unit
 
 def test_create_pipeline_runner_uses_grouped_dependency_bundle(monkeypatch) -> None:
     """Composition must call PipelineRunner with typed grouped dependencies."""

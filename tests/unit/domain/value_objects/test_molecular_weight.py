@@ -27,11 +27,11 @@ class TestMolecularWeightValidation:
         mw = MolecularWeight(180.15600000001)
         assert mw.value == pytest.approx(180.156)
 
-    def test_nan_raises(self) -> None:
+    def test_weight_validation__nan_raises__92998f5b(self) -> None:
         with pytest.raises(ValueError, match="NaN or Inf"):
             MolecularWeight(float("nan"))
 
-    def test_inf_raises(self) -> None:
+    def test_weight_validation__inf_raises__4b38f4cd(self) -> None:
         with pytest.raises(ValueError, match="NaN or Inf"):
             MolecularWeight(float("inf"))
 
@@ -47,7 +47,7 @@ class TestMolecularWeightValidation:
         with pytest.raises(ValueError, match="outside range"):
             MolecularWeight(15000.0)
 
-    def test_invalid_string_raises(self) -> None:
+    def test_weight_validation__string_raises__af3f3a2f(self) -> None:
         with pytest.raises(ValueError, match="Invalid molecular weight"):
             MolecularWeight("not-a-number")
 
@@ -86,33 +86,33 @@ class TestMolecularWeightFactoryAndEquality:
         assert result is not None
         assert result.value == pytest.approx(180.156)
 
-    def test_from_raw_string(self) -> None:
+    def test_factory_and_equality__from_raw_string__3809d030(self) -> None:
         result = MolecularWeight.from_raw("342.30")
         assert result is not None
 
-    def test_from_raw_none(self) -> None:
+    def test_factory_and_equality__from_raw_none__e3418fb7(self) -> None:
         assert MolecularWeight.from_raw(None) is None
 
-    def test_from_raw_empty_string(self) -> None:
+    def test_factory_and_equality__raw_empty_string__5f1c5100(self) -> None:
         assert MolecularWeight.from_raw("") is None
 
-    def test_from_raw_invalid(self) -> None:
+    def test_factory_and_equality__from_raw_invalid__b542e291(self) -> None:
         assert MolecularWeight.from_raw("abc") is None
 
     def test_from_raw_out_of_range(self) -> None:
         assert MolecularWeight.from_raw(1.0) is None
 
-    def test_equality(self) -> None:
+    def test_factory_and_equality__equality__1615451e(self) -> None:
         m1 = MolecularWeight(180.156)
         m2 = MolecularWeight(180.156)
         assert m1 == m2
 
-    def test_inequality(self) -> None:
+    def test_factory_and_equality__inequality__ad0d56ac(self) -> None:
         m1 = MolecularWeight(180.156)
         m2 = MolecularWeight(342.3)
         assert m1 != m2
 
-    def test_hash_equal(self) -> None:
+    def test_factory_and_equality__hash_equal__80f79caa(self) -> None:
         m1 = MolecularWeight(180.156)
         m2 = MolecularWeight(180.156)
         assert hash(m1) == hash(m2)

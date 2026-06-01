@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import pytest
+
 import json
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 def test_c901_governance_job_is_declared_in_workflow() -> None:
     """CI workflow must declare dedicated blocking C901 governance job."""

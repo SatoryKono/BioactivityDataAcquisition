@@ -13,6 +13,8 @@ from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime
 )
 
 
+pytestmark = pytest.mark.unit
+
 @pytest.fixture
 def cli_runner() -> CliRunner:
     return CliRunner()

@@ -15,6 +15,8 @@ from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
 from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 
 
+pytestmark = pytest.mark.unit
+
 async def _drain_async_iter(async_iter: AsyncIterator[object]) -> None:
     """Consume an async iterator until completion."""
     async for _ in async_iter:
@@ -63,7 +65,7 @@ async def test_probe_health_healthy(adapter, mock_http_client):
 
 
 @pytest.mark.asyncio
-async def test_probe_health_degraded(adapter, mock_http_client):
+async def test_client_coverage__health_degraded__874078aa(adapter, mock_http_client):
     """Test health probe returns HEALTHY on empty search (status 200)."""
 
     mock_response = MagicMock()

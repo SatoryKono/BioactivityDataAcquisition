@@ -17,6 +17,8 @@ from bioetl.infrastructure.storage.bronze.pipeline_helpers import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 class _HostStub:
     def __init__(self) -> None:
         self.base_path = Path("test-output/bronze")

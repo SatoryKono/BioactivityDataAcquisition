@@ -159,7 +159,7 @@ class TestIDMappingTransformer:
         assert len(result["content_hash"]) == 64  # SHA256 hex length
 
     @pytest.mark.asyncio
-    async def test_transform_pre_silver_returns_staged_payload(
+    async def test_d_mapping_transformer__staged_payload__1ec5934a(
         self, transformer, mock_context
     ):
         """Test staged ID mapping path returns business data before hash finalization."""
@@ -177,7 +177,7 @@ class TestIDMappingTransformer:
         assert "content_hash" not in result.business_data
 
     @pytest.mark.asyncio
-    async def test_transform_matches_staged_finalization(
+    async def test_d_mapping_transformer__staged_finalization__f166f7e5(
         self, transformer, mock_context
     ):
         """Legacy ID-mapping transform should match staged finalization."""
@@ -356,7 +356,7 @@ class TestIDMappingTransformer:
         assert result["_dq_warn"] is True
 
     @pytest.mark.asyncio
-    async def test_transform_custom_provider(self, mock_context):
+    async def test_d_mapping_transformer__custom_provider__1b444b2a(self, mock_context):
         """Test transformation with custom provider."""
         transformer = IDMappingTransformer(
             provider="custom_provider",

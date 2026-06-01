@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 import json
 import hashlib
 import os
@@ -16,6 +18,8 @@ from bioetl.domain.control_plane import (
 )
 from bioetl.infrastructure.control_plane import FileControlPlaneArtifactLifecycleStore
 
+
+pytestmark = pytest.mark.unit
 
 def _write_json(path: Path, payload: dict[str, object]) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)

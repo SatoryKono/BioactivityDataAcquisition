@@ -88,7 +88,7 @@ class TestFilterLoadResult:
         )
         assert result.has_duplicates is False
 
-    def test_immutability(self) -> None:
+    def test_filter_load_result__immutability__a49154af(self) -> None:
         """Test that result is immutable (frozen)."""
         result = FilterLoadResult(
             ids=("id1",),

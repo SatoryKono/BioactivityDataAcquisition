@@ -44,7 +44,7 @@ class _DummyLoader:
 
 
 @pytest.mark.unit
-def test_domain_config_resolver_uses_loader_and_mapper() -> None:
+def test_domain_config_resolver__loader_and_mapper__c9a388f6() -> None:
     yaml_config = _make_yaml_config()
     captured: dict[str, object] = {}
 

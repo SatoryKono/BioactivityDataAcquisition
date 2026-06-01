@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import pytest
+
 import ast
 from pathlib import Path
 
 import bioetl.domain.normalization as normalization
+
+pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = ROOT / "src" / "bioetl"

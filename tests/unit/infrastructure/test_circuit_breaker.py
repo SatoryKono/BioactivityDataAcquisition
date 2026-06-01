@@ -61,7 +61,7 @@ class TestCircuitBreaker:
         assert cb.get_trips_total() == 1
 
     @pytest.mark.unit
-    async def test_open_circuit_blocks_calls(self) -> None:
+    async def test_circuit_breaker__circuit_blocks_calls__99eae709(self) -> None:
         """Open circuit should block subsequent calls."""
         cb = CircuitBreakerGuard(
             provider="test", failure_threshold=2, recovery_timeout=10
@@ -90,7 +90,7 @@ class TestCircuitBreaker:
         assert exc_info.value.retry_after > 0
 
     @pytest.mark.unit
-    async def test_half_open_after_timeout(self) -> None:
+    async def test_circuit_breaker__open_after_timeout__a65a3037(self) -> None:
         """Circuit should transition to HALF_OPEN after recovery timeout."""
         cb = CircuitBreakerGuard(
             provider="test",
@@ -119,7 +119,7 @@ class TestCircuitBreaker:
         assert cb.get_state() == CircuitBreakerState.CLOSED
 
     @pytest.mark.unit
-    async def test_half_open_failure_reopens(self) -> None:
+    async def test_circuit_breaker__open_failure_reopens__8977ffde(self) -> None:
         """Failed probe request in HALF_OPEN should reopen circuit."""
         cb = CircuitBreakerGuard(
             provider="test",
@@ -151,7 +151,7 @@ class TestCircuitBreaker:
         assert cb.get_trips_total() == initial_trips + 1
 
     @pytest.mark.unit
-    async def test_success_resets_failure_count(self) -> None:
+    async def test_circuit_breaker__resets_failure_count__c81f5008(self) -> None:
         """Successful call should reset consecutive failure count."""
         cb = CircuitBreakerGuard(provider="test", failure_threshold=3)
 
@@ -181,7 +181,7 @@ class TestCircuitBreaker:
         assert cb.get_state() == CircuitBreakerState.CLOSED
 
     @pytest.mark.unit
-    def test_manual_reset(self) -> None:
+    def test_circuit_breaker__manual_reset__d53433d0(self) -> None:
         """Manual reset should restore CLOSED state."""
         cb = CircuitBreakerGuard(provider="test")
         cb.force_open()
@@ -191,7 +191,7 @@ class TestCircuitBreaker:
         assert cb.get_state() == CircuitBreakerState.CLOSED
 
     @pytest.mark.unit
-    def test_force_open(self) -> None:
+    def test_circuit_breaker__force_open__28b036d3(self) -> None:
         """force_open should open circuit and increment trips."""
         cb = CircuitBreakerGuard(provider="test")
         assert cb.get_trips_total() == 0

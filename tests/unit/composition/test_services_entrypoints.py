@@ -33,7 +33,7 @@ def _patch_services(*args: str, **kwargs: MagicMock):
 class TestGetCheckpointService:
     """Tests for get_checkpoint_service function."""
 
-    def test_calls_ensure_registrations_and_bootstrap(self) -> None:
+    def test_get_checkpoint_service__and_bootstrap__c510ca52(self) -> None:
         """Test that get_checkpoint_service calls _ensure_registrations and bootstrap."""
         mock_service = MagicMock(name="CheckpointService")
 
@@ -91,7 +91,7 @@ class TestGetQuarantineService:
 class TestGetBronzeCleanupService:
     """Tests for get_bronze_cleanup_service function."""
 
-    def test_calls_ensure_registrations_and_bootstrap(self) -> None:
+    def test_bronze_cleanup_service__and_bootstrap__60b9f1fb(self) -> None:
         """Test that get_bronze_cleanup_service calls _ensure_registrations and bootstrap."""
         mock_service = MagicMock(name="BronzeCleanupService")
 
@@ -120,7 +120,7 @@ class TestGetBronzeCleanupService:
 class TestGetVacuumService:
     """Tests for get_vacuum_service function."""
 
-    def test_calls_ensure_registrations_and_bootstrap(self) -> None:
+    def test_get_vacuum_service__and_bootstrap__a074c478(self) -> None:
         """Test that get_vacuum_service calls _ensure_registrations and bootstrap."""
         mock_service = MagicMock(name="VacuumService")
 
@@ -149,7 +149,7 @@ class TestGetVacuumService:
 class TestGetExportService:
     """Tests for get_export_service function."""
 
-    def test_calls_ensure_registrations_and_bootstrap(self) -> None:
+    def test_get_export_service__and_bootstrap__effadfdd(self) -> None:
         """Test that get_export_service calls _ensure_registrations and bootstrap."""
         mock_service = MagicMock(name="ExportService")
 
@@ -178,7 +178,7 @@ class TestGetExportService:
 class TestGetLockService:
     """Tests for get_lock_service function."""
 
-    def test_calls_ensure_registrations_and_bootstrap(self) -> None:
+    def test_get_lock_service__and_bootstrap__db289cf0(self) -> None:
         """Test that get_lock_service calls _ensure_registrations and bootstrap."""
         mock_service = MagicMock(name="LockService")
 
@@ -282,7 +282,7 @@ class TestCleanupBronze:
 class TestGetPipelineRunnerService:
     """Tests for get_pipeline_runner_service function."""
 
-    def test_calls_ensure_registrations_and_bootstrap(self) -> None:
+    def test_runner_service__and_bootstrap__9eb6ffb6(self) -> None:
         """Test that get_pipeline_runner_service calls _ensure_registrations and bootstrap."""
         mock_service = MagicMock(name="PipelineRunnerService")
 
@@ -336,7 +336,7 @@ class TestGetPipelineRunnerService:
 class TestGetConfigService:
     """Tests for get_config_service function."""
 
-    def test_calls_ensure_registrations_and_bootstrap(self) -> None:
+    def test_get_config_service__and_bootstrap__2f7acc18(self) -> None:
         """Test that get_config_service calls _ensure_registrations and bootstrap."""
         mock_service = MagicMock(name="ConfigService")
 
@@ -365,7 +365,7 @@ class TestGetConfigService:
 class TestGetHealthService:
     """Tests for get_health_service function."""
 
-    def test_calls_ensure_registrations_and_bootstrap(self) -> None:
+    def test_get_health_service__and_bootstrap__f5d64bb6(self) -> None:
         """Test that get_health_service calls _ensure_registrations and bootstrap."""
         mock_service = MagicMock(name="HealthService")
 
@@ -394,7 +394,7 @@ class TestGetHealthService:
 class TestGetHealthServerDependencies:
     """Tests for get_health_server_dependencies function."""
 
-    def test_bootstraps_without_registration_gate(self) -> None:
+    def test_server_dependencies__registration_gate__ab2e95af(self) -> None:
         """Health listener bootstrap must not block on pipeline registration."""
         mock_deps = MagicMock(name="HealthServerDependencies")
 
@@ -423,7 +423,7 @@ class TestGetHealthServerDependencies:
 class TestGetMetricsService:
     """Tests for get_metrics_service function."""
 
-    def test_calls_ensure_registrations_and_bootstrap(self) -> None:
+    def test_get_metrics_service__and_bootstrap__aefe34bf(self) -> None:
         """Test that get_metrics_service calls _ensure_registrations and bootstrap."""
         mock_service = MagicMock(name="MetricsService")
 
@@ -452,7 +452,7 @@ class TestGetMetricsService:
 class TestGetAdrService:
     """Tests for get_adr_service function."""
 
-    def test_calls_ensure_registrations_and_bootstrap(self) -> None:
+    def test_get_adr_service__and_bootstrap__eed8d980(self) -> None:
         """Test that get_adr_service calls _ensure_registrations and bootstrap."""
         mock_service = MagicMock(name="AdrServicePort")
 
@@ -481,7 +481,7 @@ class TestGetAdrService:
 class TestGetQuarantinePort:
     """Tests for get_quarantine_port function."""
 
-    def test_bootstraps_without_registration_gate(self) -> None:
+    def test_get_quarantine_port__registration_gate__0bc3dfab(self) -> None:
         """Shared quarantine storage must not depend on pipeline registration."""
         mock_port = MagicMock(name="QuarantinePort")
 

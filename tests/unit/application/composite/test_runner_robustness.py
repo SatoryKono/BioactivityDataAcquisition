@@ -27,6 +27,8 @@ from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.exceptions import RunnerAlreadyExecutedError
 from tests.unit.application.composite import runner_test_support as support
 
+pytestmark = pytest.mark.unit
+
 InMemoryCheckpointManager = support.InMemoryCheckpointManager
 create_checkpoint_manager = support.create_in_memory_checkpoint_manager
 
@@ -717,7 +719,7 @@ class TestRunnerAlreadyExecutedError:
         assert error.run_id == "test-run-123"
         assert error.final_state == "completed"
 
-    def test_error_message_format(self) -> None:
+    def test_already_executed_error__error_message_format__5186ee72(self) -> None:
         """Error message should be informative."""
         error = RunnerAlreadyExecutedError(
             runner_type="CompositePipelineRunner",

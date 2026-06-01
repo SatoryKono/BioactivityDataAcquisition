@@ -7,12 +7,16 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
+import pytest
+
 from bioetl.application.services.checkpoint_compatibility_service import (
     CheckpointCompatibilityService,
 )
 from bioetl.domain.types.checkpoint_metadata import (
     CheckpointMetadata,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class TestCheckpointCompatibilityService:

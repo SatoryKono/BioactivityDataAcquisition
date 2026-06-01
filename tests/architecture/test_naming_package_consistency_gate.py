@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 import importlib.util
 from pathlib import Path
 import sys
@@ -9,6 +11,8 @@ from types import ModuleType
 
 from tests.helpers import run_repo_python
 
+
+pytestmark = pytest.mark.architecture
 
 def _load_consistency_gate_module() -> ModuleType:
     repo_root = Path(__file__).resolve().parents[2]

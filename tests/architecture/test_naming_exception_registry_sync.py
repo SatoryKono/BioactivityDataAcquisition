@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 import ast
 import importlib.util
 from pathlib import Path
@@ -9,6 +11,8 @@ import sys
 from types import ModuleType
 
 import yaml
+
+pytestmark = pytest.mark.architecture
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 REGISTRY_PATH = REPO_ROOT / "configs" / "naming_exceptions.yaml"

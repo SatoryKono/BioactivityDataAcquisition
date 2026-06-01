@@ -18,7 +18,7 @@ from bioetl.domain.exceptions import PolicyViolationError
 class TestSilverWriteMode:
     """Tests for SilverWriteMode enum."""
 
-    def test_enum_values(self) -> None:
+    def test_silver_write_mode__enum_values__7c9ecbf9(self) -> None:
         """Test SilverWriteMode enum has correct string values."""
         assert SilverWriteMode.MERGE == "merge"
         assert SilverWriteMode.APPEND == "append"
@@ -39,12 +39,12 @@ class TestSilverWriteMode:
         result = SilverWriteMode.from_string("delete")
         assert result == SilverWriteMode.DELETE
 
-    def test_from_string_case_insensitive(self) -> None:
+    def test_silver_write_mode__case_insensitive__05548453(self) -> None:
         """Test from_string is case-insensitive."""
         assert SilverWriteMode.from_string("MERGE") == SilverWriteMode.MERGE
         assert SilverWriteMode.from_string("Append") == SilverWriteMode.APPEND
 
-    def test_from_string_invalid_raises_value_error(self) -> None:
+    def test_silver_write_mode__raises_value_error__10c235aa(self) -> None:
         """Test from_string raises ValueError for invalid values."""
         with pytest.raises(ValueError, match="Invalid Silver write mode"):
             SilverWriteMode.from_string("invalid_mode")
@@ -55,7 +55,7 @@ class TestSilverWriteMode:
             SilverWriteMode.from_string("bad_mode")
 
     @pytest.mark.parametrize("value", ["merge", "append", "delete"])
-    def test_from_string_roundtrip(self, value: str) -> None:
+    def test_silver_write_mode__string_roundtrip__6511b8d4(self, value: str) -> None:
         """Test that from_string is inverse of .value."""
         mode = SilverWriteMode.from_string(value)
         assert mode.value == value
@@ -65,13 +65,13 @@ class TestSilverWriteMode:
 class TestGoldWriteMode:
     """Tests for GoldWriteMode enum."""
 
-    def test_enum_values(self) -> None:
+    def test_modes_gold_write_mode__enum_values__6210496a(self) -> None:
         """Test GoldWriteMode enum has correct string values."""
         assert GoldWriteMode.APPEND == "append"
         assert GoldWriteMode.SCD2 == "scd2"
         assert GoldWriteMode.OVERWRITE == "overwrite"
 
-    def test_from_string_append(self) -> None:
+    def test_modes_gold_write_mode__from_string_append__30486eae(self) -> None:
         """Test converting 'append' string to GoldWriteMode."""
         result = GoldWriteMode.from_string("append")
         assert result == GoldWriteMode.APPEND
@@ -86,23 +86,23 @@ class TestGoldWriteMode:
         result = GoldWriteMode.from_string("overwrite")
         assert result == GoldWriteMode.OVERWRITE
 
-    def test_from_string_case_insensitive(self) -> None:
+    def test_modes_gold_write_mode__case_insensitive__aeee06b8(self) -> None:
         """Test from_string is case-insensitive."""
         assert GoldWriteMode.from_string("OVERWRITE") == GoldWriteMode.OVERWRITE
         assert GoldWriteMode.from_string("SCD2") == GoldWriteMode.SCD2
 
-    def test_from_string_invalid_raises_value_error(self) -> None:
+    def test_modes_gold_write_mode__raises_value_error__2ad4faf3(self) -> None:
         """Test from_string raises ValueError for invalid values."""
         with pytest.raises(ValueError, match="Invalid Gold write mode"):
             GoldWriteMode.from_string("invalid_mode")
 
-    def test_from_string_error_includes_valid_modes(self) -> None:
+    def test_modes_gold_write_mode__includes_valid_modes__55dfa4fa(self) -> None:
         """Test that error message includes valid modes."""
         with pytest.raises(ValueError, match="Valid modes"):
             GoldWriteMode.from_string("bad_mode")
 
     @pytest.mark.parametrize("value", ["append", "scd2", "overwrite"])
-    def test_from_string_roundtrip(self, value: str) -> None:
+    def test_modes_gold_write_mode__string_roundtrip__26c2895d(self, value: str) -> None:
         """Test that from_string is inverse of .value."""
         mode = GoldWriteMode.from_string(value)
         assert mode.value == value

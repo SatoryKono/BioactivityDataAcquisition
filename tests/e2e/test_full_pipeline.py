@@ -290,7 +290,7 @@ async def test_pipeline_resume_after_failure(
 @pytest.mark.slow
 @pytest.mark.vcr
 @pytest.mark.asyncio
-async def test_pipeline_idempotency(
+async def test_full_pipeline__pipeline_idempotency__e17c8c60(
     e2e_temp_storage,
     e2e_redis_client,
     e2e_minio_client,

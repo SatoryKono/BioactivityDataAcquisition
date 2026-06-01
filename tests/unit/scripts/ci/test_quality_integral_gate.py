@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from types import SimpleNamespace
 
 from scripts.engineering.ci.quality_integral_gate import ArchitectureTestStats
@@ -13,6 +15,8 @@ from scripts.engineering.ci.quality_integral_gate import _build_test_health_payl
 from scripts.engineering.ci.quality_integral_gate import _classify_test_health
 from scripts.engineering.ci.quality_integral_gate import _quality_gate_output
 from scripts.engineering.ci.quality_integral_gate import _summary_lines
+
+pytestmark = pytest.mark.unit
 
 NETWORK_OPT_IN_GATE = "live_network_opt_in_gate"
 LIVE_API_GATE_MODE_NON_ALWAYS = "live_api_gate_mode_non_always"

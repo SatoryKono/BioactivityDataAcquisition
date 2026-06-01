@@ -19,6 +19,8 @@ from bioetl.domain.composite.state import CompositePipelineState
 from tests.helpers.clock import fixed_test_clock
 
 
+pytestmark = pytest.mark.unit
+
 @dataclass
 class FakeEnricherConfig:
     """Fake enricher config for testing."""

@@ -22,6 +22,8 @@ from bioetl.domain.behavior.identity_service import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 _HASH_SAFE_TEXT = st.text(
     alphabet=st.characters(
         whitelist_categories=("Ll", "Lu", "Nd"),
@@ -319,7 +321,7 @@ class TestEntityIdGeneration:
         # Hash prefix should be 16 characters
         assert len(str(entity_id)) == len("chembl:") + 16
 
-    def test_entity_id_format(self) -> None:
+    def test_entity_id_generation__entity_id_format__1592b928(self) -> None:
         """Entity ID should have correct format."""
         service = EntityIdentityGenerator()
 

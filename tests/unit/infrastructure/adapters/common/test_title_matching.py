@@ -5,10 +5,14 @@ Tests for normalize_title and titles_match functions.
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.infrastructure.adapters.common.title_matching import (
     normalize_title,
     titles_match,
 )
+
+pytestmark = pytest.mark.unit
 
 
 # =============================================================================
@@ -23,7 +27,7 @@ class TestNormalizeTitle:
         """Test that titles are converted to lowercase."""
         assert normalize_title("Crystal Structure") == "crystal structure"
 
-    def test_whitespace_normalization(self):
+    def test_normalize_title__normalization__6c44bc4f(self):
         """Test that whitespace is normalized."""
         assert normalize_title("  Crystal   structure  ") == "crystal structure"
 
@@ -35,7 +39,7 @@ class TestNormalizeTitle:
         """Test that tabs are normalized to spaces."""
         assert normalize_title("Crystal\tstructure") == "crystal structure"
 
-    def test_empty_string(self):
+    def test_normalize_title__empty_string__89e80b3c(self):
         """Test empty string handling."""
         assert normalize_title("") == ""
 
@@ -251,7 +255,7 @@ class TestTitlesMatchEdgeCases:
             is True
         )
 
-    def test_unicode_handling(self):
+    def test_match_edge_cases__unicode_handling__5f839299(self):
         """Test unicode characters are handled correctly."""
         assert (
             titles_match(

@@ -15,6 +15,8 @@ from bioetl.infrastructure.config.source_normalizers.source import (
 )
 from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
+pytestmark = pytest.mark.unit
+
 SNAPSHOT_FILE = Path("tests/snapshots/source_config_legacy_normalization.json")
 
 

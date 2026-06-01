@@ -18,6 +18,8 @@ from bioetl.domain.control_plane import (
 )
 from bioetl.interfaces.cli.main import cli
 
+pytestmark = pytest.mark.unit
+
 CONTROL_PLANE_MANIFEST_PATH = "reports/control/run_manifest/manifest-old.json"
 
 

@@ -98,7 +98,7 @@ class TestGetProviderName:
     def test_unmapped_unified_field_returns_original(self) -> None:
         assert get_provider_name("chembl", "title") == "title"
 
-    def test_unknown_provider_returns_original(self) -> None:
+    def test_get_provider_name__returns_original__0733e419(self) -> None:
         assert get_provider_name("unknown", "publication_type") == "publication_type"  # type: ignore[arg-type]
 
 
@@ -120,7 +120,7 @@ class TestApplyFieldMapping:
         result = apply_field_mapping(record, "chembl")
         assert result == {"title": "Test", "abstract": "Abs"}
 
-    def test_empty_record(self) -> None:
+    def test_apply_field_mapping__empty_record__7ab29770(self) -> None:
         assert apply_field_mapping({}, "chembl") == {}
 
     def test_unknown_provider_returns_same_keys(self) -> None:

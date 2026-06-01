@@ -7,6 +7,8 @@ agree on ``rename_map`` and ``hash_exclude`` to avoid silent drift.
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 import yaml
@@ -14,6 +16,8 @@ import yaml
 from bioetl.application.core.base_transformer.contract_policy import (
     _DefaultContractPolicy,
 )
+
+pytestmark = pytest.mark.architecture
 
 _CONFIGS_ROOT = Path("configs")
 

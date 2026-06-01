@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 import json
 from pathlib import Path
 
@@ -11,6 +13,8 @@ from scripts.engineering.qa.report_chembl_observed_value_inventory import (
     main,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_build_inventory_payload_covers_all_tracked_chembl_fixtures() -> None:
     payload = build_inventory_payload(max_examples=3)

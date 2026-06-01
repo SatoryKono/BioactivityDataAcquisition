@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 import yaml
@@ -9,6 +11,8 @@ import yaml
 from scripts.engineering.qa.extract_pubchem_property_vocab import (
     extract_pubchem_property_vocab,
 )
+
+pytestmark = pytest.mark.integration
 
 INVENTORY_PATH = Path("configs/vocab/pubchem_property_urn.yaml")
 

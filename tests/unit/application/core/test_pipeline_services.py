@@ -61,7 +61,7 @@ class TestPipelineServicesInit:
         assert mock_services.metrics is not None
         assert mock_services.logger is not None
 
-    def test_is_frozen(self, mock_services):
+    def test_pipeline_services_init__is_frozen__88d304fd(self, mock_services):
         """Test that services cannot be modified after creation."""
         from dataclasses import FrozenInstanceError
 

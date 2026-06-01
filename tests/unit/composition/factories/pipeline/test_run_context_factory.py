@@ -17,6 +17,8 @@ from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.domain.types import RunID, RunType
 
 
+pytestmark = pytest.mark.unit
+
 def _runtime() -> RuntimeConfig:
     return RuntimeConfig(run_type=RunType.INCREMENTAL)
 

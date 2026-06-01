@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 import json
 from datetime import datetime
 from typing import Any
@@ -23,6 +25,8 @@ from bioetl.domain.control_plane.effective_config_artifact import (
 )
 from bioetl.domain.types.dq_contracts import DQDisposition, DQPolicyRef
 
+
+pytestmark = pytest.mark.unit
 
 class TestEffectiveConfigSerializer:
     """Tests for EffectiveConfigSerializer."""

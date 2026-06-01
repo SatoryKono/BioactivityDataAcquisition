@@ -92,7 +92,7 @@ class TestPublicationTermTransformer:
         assert humans_heading["mesh_id"] == "D006801"
         assert humans_heading["qualifier"] is None
 
-    def test_extract_keywords(self, transformer):
+    def test_term_transformer__extract_keywords__c78e6185(self, transformer):
         record = {
             "publication_id": "CHEMBL1135642",
             "keywords": ["aspirin", "anti-inflammatory", "COX inhibitor"],

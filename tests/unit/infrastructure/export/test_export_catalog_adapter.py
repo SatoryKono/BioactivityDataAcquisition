@@ -9,6 +9,8 @@ import pytest
 from bioetl.infrastructure.export import ExportCatalogAdapter
 
 
+pytestmark = pytest.mark.unit
+
 @pytest.fixture
 def adapter() -> ExportCatalogAdapter:
     return ExportCatalogAdapter()

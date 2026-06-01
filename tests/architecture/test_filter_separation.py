@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.domain.filtering import (
     BaseFilterConfig,
     GoldFilterConfig,
     SilverFilterConfig,
 )
 
+
+pytestmark = pytest.mark.architecture
 
 def test_silver_and_gold_are_not_subclasses_of_each_other() -> None:
     assert issubclass(SilverFilterConfig, GoldFilterConfig) is False

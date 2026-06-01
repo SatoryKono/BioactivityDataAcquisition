@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.application.services.protein_classification_resolution import (
     ResolveProteinClassificationUseCase,
 )
@@ -11,6 +13,8 @@ from bioetl.domain.value_objects.protein_class_hierarchy import (
     ProteinClassificationResolutionError,
 )
 
+
+pytestmark = pytest.mark.unit
 
 class _FakeClassificationPort:
     def __init__(

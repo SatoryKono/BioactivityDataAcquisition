@@ -86,7 +86,7 @@ class TestCreateCompositeRunnerService:
 
         assert result is not None
 
-    def test_generates_run_id_when_none(self) -> None:
+    def test_runner_service__run_id_when_none__9d8f5520(self) -> None:
         """When run_id is None a UUID is generated."""
         result = create_composite_runner_service(
             CompositeRunnerServiceInputs(

@@ -39,6 +39,8 @@ from bioetl.interfaces.cli.commands.domains.run.command_policy import (
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
 
+pytestmark = pytest.mark.unit
+
 CACHED_BRONZE_PATH = "test-output/bronze"
 
 
@@ -123,7 +125,7 @@ class TestHandleCliFailure:
                 reason_code="CLI_RUN_UNEXPECTED_ERROR",
             )
 
-    def test_keyboard_interrupt_exits_with_sigint(self) -> None:
+    def test_handle_cli_failure__exits_with_sigint__07ce972c(self) -> None:
         """KeyboardInterrupt delegates to execution_policy -> ExitCode.SIGINT."""
         with pytest.raises(SystemExit) as exc_info:
             handle_cli_failure(

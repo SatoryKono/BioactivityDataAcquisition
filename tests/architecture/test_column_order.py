@@ -22,6 +22,8 @@ from bioetl.domain.schemas.column_order import (
     canonical_column_order,
 )
 
+pytestmark = pytest.mark.architecture
+
 # Schemas with custom column order (not alphabetical business fields)
 # These use PUBLICATION_METADATA_FIELDS, PUBLICATION_CROSSREF_FIELDS ordering
 CUSTOM_ORDER_SCHEMAS = frozenset(

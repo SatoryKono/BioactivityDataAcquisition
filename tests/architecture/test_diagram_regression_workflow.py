@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 def test_docs_workflow_includes_quality_gates_step() -> None:
     workflow = Path(".github/workflows/docs.yml").read_text(encoding="utf-8")

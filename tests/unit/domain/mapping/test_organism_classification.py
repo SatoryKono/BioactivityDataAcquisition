@@ -12,13 +12,15 @@ from bioetl.domain.mapping.organism_classification import (
 from bioetl.domain.types import CellularityType
 
 
+pytestmark = pytest.mark.unit
+
 class TestNormalizeOrganismName:
     """Tests for organism name normalization."""
 
-    def test_none_returns_none(self) -> None:
+    def test_organism_name__none_returns_none__d06e6e68(self) -> None:
         assert normalize_organism_name(None) is None
 
-    def test_empty_string_returns_none(self) -> None:
+    def test_organism_name__string_returns_none__f8d002b1(self) -> None:
         assert normalize_organism_name("") is None
         assert normalize_organism_name("   ") is None
 

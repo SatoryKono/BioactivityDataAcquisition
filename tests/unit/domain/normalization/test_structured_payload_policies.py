@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.domain.normalization.structured_payload_policies import (
     StructuredPayloadCollectionSemantics,
     StructuredPayloadSemanticPolicy,
@@ -10,6 +12,8 @@ from bioetl.domain.normalization.structured_payload_policies import (
     structured_payload_policy,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_semantic_sensitive_payload_registry_declares_reviewed_policy_shapes() -> None:
     raw_sidecar_fields = {

@@ -15,6 +15,8 @@ from bioetl.application.services.dq._checks_basic import (
 from bioetl.domain.value_objects.dq_report import DQCheckStatus
 
 
+pytestmark = pytest.mark.unit
+
 class TestCheckRecordCountDirect:
     """Direct ownership tests for ``check_record_count``."""
 

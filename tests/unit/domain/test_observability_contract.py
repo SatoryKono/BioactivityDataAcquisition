@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.domain.observability_contract import (
     build_observability_contract_payload,
     enforce_observability_contract_context,
@@ -11,6 +13,8 @@ from bioetl.domain.observability_contract import (
     normalize_observability_pipeline_label,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_enforce_contract_ignores_legacy_keys_after_grace_period() -> None:
     context = enforce_observability_contract_context(

@@ -31,6 +31,8 @@ from bioetl.domain.config import PipelineConfig
 from bioetl.infrastructure.config._base import yaml_config_to_domain
 from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 
+pytestmark = pytest.mark.architecture
+
 # Path to store snapshots
 SNAPSHOT_DIR = Path("tests/snapshots")
 SNAPSHOT_FILE = SNAPSHOT_DIR / "pipeline_configs.json"

@@ -15,7 +15,7 @@ from bioetl.infrastructure.observability.unified_logger import UnifiedLogger
 class TestLoggerPortContract:
     """Bounded contract assertions for LoggerPort implementations."""
 
-    def test_noop_logger_implements_logger_port(self) -> None:
+    def test_port_logger_port__logger_port__75b85b16(self) -> None:
         assert isinstance(NoOpLogger(), LoggerPort)
 
     def test_bind_returns_logger_port_with_preserved_run_context(self) -> None:

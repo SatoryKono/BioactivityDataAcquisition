@@ -18,7 +18,7 @@ class TestInChIValidation:
         )
         assert inchi.value.startswith("InChI=")
 
-    def test_strips_whitespace(self) -> None:
+    def test_in_ch_i_validation__strips_whitespace__79f72bc5(self) -> None:
         """Test that whitespace is stripped."""
         inchi = InChI("  InChI=1S/C2H6/c1-2/h1-2H3  ")
         assert not inchi.value.startswith(" ")
@@ -49,13 +49,13 @@ class TestInChIValidation:
         with pytest.raises(ValueError, match="must start with 'InChI='"):
             InChI("inchi=1S/C2H6")
 
-    def test_equality(self) -> None:
+    def test_in_ch_i_validation__equality__c49e85c9(self) -> None:
         """Test equality of InChI values."""
         inchi1 = InChI("InChI=1S/C2H6/c1-2/h1-2H3")
         inchi2 = InChI("InChI=1S/C2H6/c1-2/h1-2H3")
         assert inchi1 == inchi2
 
-    def test_inequality(self) -> None:
+    def test_in_ch_i_validation__inequality__865506a7(self) -> None:
         """Test inequality of different InChI values."""
         inchi1 = InChI("InChI=1S/C2H6/c1-2/h1-2H3")
         inchi2 = InChI("InChI=1S/C3H8/c1-3-2/h3H2,1-2H3")
@@ -66,15 +66,15 @@ class TestInChIValidation:
 class TestInChIFromRaw:
     """Tests for InChI.from_raw() factory method."""
 
-    def test_none_returns_none(self) -> None:
+    def test_inchi_in_ch_i_from_raw__none_returns_none__e7aaaf19(self) -> None:
         """Test that None returns None."""
         assert InChI.from_raw(None) is None
 
-    def test_empty_string_returns_none(self) -> None:
+    def test_inchi_in_ch_i_from_raw__string_returns_none__7831e7d9(self) -> None:
         """Test that empty string returns None."""
         assert InChI.from_raw("") is None
 
-    def test_whitespace_only_returns_none(self) -> None:
+    def test_inchi_in_ch_i_from_raw__only_returns_none__42d9aa2b(self) -> None:
         """Test that whitespace-only string returns None."""
         assert InChI.from_raw("   ") is None
 

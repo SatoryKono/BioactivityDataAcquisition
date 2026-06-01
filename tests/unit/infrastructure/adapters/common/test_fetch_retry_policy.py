@@ -21,6 +21,8 @@ from bioetl.infrastructure.adapters.common.fetch_retry_policy import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 def _normalize_identity(value: str) -> str:
     return value
 

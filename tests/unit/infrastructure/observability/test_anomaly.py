@@ -147,7 +147,7 @@ class TestAnomalyDetector:
         result = detector.detect("metric", 100.0, timestamp=_FIXED_TIME)
         assert result is None
 
-    def test_detect_spike_anomaly(self, detector):
+    def test_anomaly_detector__detect_spike_anomaly__72db4688(self, detector):
         """Test detection of spike anomaly."""
         # Use values with some variance so stddev > 0
         detector.update_baseline("metric", [95.0, 100.0, 105.0, 98.0, 102.0])
@@ -157,7 +157,7 @@ class TestAnomalyDetector:
         assert result.anomaly_type == AnomalyType.SPIKE
         assert result.current_value == pytest.approx(500.0)
 
-    def test_detect_drop_anomaly(self, detector):
+    def test_anomaly_detector__detect_drop_anomaly__99299846(self, detector):
         """Test detection of drop anomaly."""
         # Use values with some variance so stddev > 0
         detector.update_baseline("metric", [95.0, 100.0, 105.0, 98.0, 102.0])
@@ -262,7 +262,7 @@ class TestAnomalyDetectorEdgeCases:
         except (ValueError, statistics.StatisticsError):
             pass  # Expected behavior
 
-    def test_single_value(self):
+    def test_detector_edge_cases__single_value__f9d640bf(self):
         """Test handling of single value."""
         detector = AnomalyDetector()
         try:
@@ -272,7 +272,7 @@ class TestAnomalyDetectorEdgeCases:
         except (ValueError, statistics.StatisticsError):
             pass  # Expected behavior
 
-    def test_negative_values(self):
+    def test_detector_edge_cases__negative_values__dbbcaee0(self):
         """Test handling of negative values."""
         detector = AnomalyDetector()
         detector.update_baseline("metric", [-100, -90, -110, -95, -105])

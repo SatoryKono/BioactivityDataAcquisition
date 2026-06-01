@@ -5,6 +5,8 @@ Tests the DQServicesFactory for creating DQ analyzers and report writers.
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -17,6 +19,8 @@ from bioetl.domain.ports import (
     SilverDQAnalyzerPort,
 )
 
+
+pytestmark = pytest.mark.unit
 
 class TestDQServicesFactory:
     """Tests for DQServicesFactory."""

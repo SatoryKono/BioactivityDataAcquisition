@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.application.core.normalization_fallbacks import (
     UNHANDLED_FALLBACK_NORMALIZATION,
     canonicalize_json_like_string,
@@ -15,6 +17,8 @@ from bioetl.application.core.normalization_fallbacks import (
 )
 from bioetl.application.core.normalization_rules import NormalizationRulesPolicy
 
+
+pytestmark = pytest.mark.unit
 
 def test_field_classifiers_cover_expected_fallback_cases() -> None:
     rules = NormalizationRulesPolicy()

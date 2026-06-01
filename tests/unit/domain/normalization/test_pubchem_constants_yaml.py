@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 import yaml
@@ -15,6 +17,8 @@ from bioetl.domain.pubchem_standardization_catalog import (
     PUBCHEM_CHEMICAL_STANDARDIZATION_STATUSES,
     PUBCHEM_STANDARDIZATION_ENUM_CATALOG,
 )
+
+pytestmark = pytest.mark.unit
 
 ENUM_PATH = Path("configs/enums/pubchem.yaml")
 

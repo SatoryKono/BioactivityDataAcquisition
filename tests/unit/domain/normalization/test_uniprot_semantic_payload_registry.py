@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.domain.normalization.structured_payload_policies import (
     structured_payload_policy,
 )
+
+pytestmark = pytest.mark.unit
 
 _REGISTRY = {
     "structured_payload_fields": [

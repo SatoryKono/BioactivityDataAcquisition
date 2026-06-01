@@ -9,6 +9,8 @@ from scripts.engineering.repo import __main__ as repo_router
 from tests.helpers import assert_router_python_command, repo_root, run_repo_python
 
 
+pytestmark = pytest.mark.architecture
+
 def test_scripts_inventory_manifest_exists_and_has_required_keys() -> None:
     """Inventory manifest must exist and keep a stable schema."""
     root = repo_root()

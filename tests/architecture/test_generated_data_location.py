@@ -6,6 +6,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.architecture
+
 # Temporary legacy allowlist; no new generated domain modules should be added.
 ALLOWED_GENERATED_DOMAIN_MODULES = {
     Path("mapping/generated/publication_type_classification_data.py"),

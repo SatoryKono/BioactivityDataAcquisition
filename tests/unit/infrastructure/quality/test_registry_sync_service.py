@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.infrastructure.quality.inventory import ExemptionInventorySummary
 from bioetl.infrastructure.quality.registry_sync_service import (
     _validate_registry_baselines,
@@ -10,6 +12,8 @@ from bioetl.infrastructure.quality.registry_sync_service import (
     validate_registry_sync,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def _make_inventory(
     total: int = 0,
@@ -175,7 +179,7 @@ class TestValidateTotalExemptions:
 class TestValidateRegistrySync:
     """Tests for validate_registry_sync."""
 
-    def test_valid_sync(self) -> None:
+    def test_validate_registry_sync__valid_sync__1adc4e8f(self) -> None:
         """Matching registries within baselines should produce no errors."""
         raw_registry = {
             "registries": {

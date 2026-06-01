@@ -163,7 +163,7 @@ class TestCreateFactory:
     @patch(
         "bioetl.composition.factories.pipeline.contract_validator._validate_contract_policy"
     )
-    def test_returns_generic_pipeline_factory(
+    def test_create_factory__pipeline_factory__829bdf23(
         self,
         mock_validate: MagicMock,
         mock_get_creator: MagicMock,

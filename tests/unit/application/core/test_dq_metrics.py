@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import pytest
+
 from unittest.mock import MagicMock
 
 from bioetl.application.core.batch_metrics import BatchMetricsRecorder
 from bioetl.domain.types import ErrorType
 
+
+pytestmark = pytest.mark.unit
 
 def test_batch_metrics_quarantined_tracking():
     """Test that track_quarantined_records increments the correct metric."""

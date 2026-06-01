@@ -353,7 +353,7 @@ class TestCheckPressure:
 class TestMaybeRecover:
     """Tests for BatchMemoryManagerService.maybe_recover."""
 
-    def test_returns_current_size_when_disabled(self):
+    def test_manager_maybe_recover__size_when_disabled__a14b9654(self):
         """Returns current_size unchanged when adaptive sizing is disabled."""
         manager = BatchMemoryManagerService(initial_batch_size=500)
         result = manager.maybe_recover(current_size=100)

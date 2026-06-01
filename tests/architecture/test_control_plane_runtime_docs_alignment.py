@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 from bioetl.domain.control_plane.run_ledger import (
@@ -9,6 +11,8 @@ from bioetl.domain.control_plane.run_ledger import (
     ORDINARY_RUN_LEDGER_STAGE_NAMES,
     RUN_LEDGER_BASELINE_EVENT_TYPES,
 )
+
+pytestmark = pytest.mark.architecture
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 

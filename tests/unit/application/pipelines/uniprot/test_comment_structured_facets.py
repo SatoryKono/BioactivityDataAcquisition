@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 import json
 
 from bioetl.application.pipelines.uniprot.extractors._comment_structured_facets import (
@@ -13,6 +15,8 @@ from bioetl.application.pipelines.uniprot.extractors._comment_structured_facets 
     _serialize_isoform_sections,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_extract_alternative_products_family_raw_collects_isoform_outputs() -> None:
     index = {

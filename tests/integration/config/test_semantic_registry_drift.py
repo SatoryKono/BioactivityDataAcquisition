@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 from scripts.engineering.qa.check_semantic_registry_drift import (
@@ -9,6 +11,8 @@ from scripts.engineering.qa.check_semantic_registry_drift import (
     validate_semantic_registry_drift,
 )
 
+
+pytestmark = pytest.mark.integration
 
 def test_semantic_registry_drift_gate_passes_current_repo() -> None:
     result = validate_semantic_registry_drift(Path("."))

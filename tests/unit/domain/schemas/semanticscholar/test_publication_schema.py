@@ -78,7 +78,7 @@ class TestPmidValidation:
 class TestPmcIdValidation:
     """Tests for PMCID field validation."""
 
-    def test_valid_pmc_id_format(self) -> None:
+    def test_pmc_id_validation__valid_pmc_id_format__e264e3a6(self) -> None:
         """Test valid PMCID with PMC prefix."""
         valid_pmc_id = "PMC1234567"
         pattern = r"^PMC\d+$"

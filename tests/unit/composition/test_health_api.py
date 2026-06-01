@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import pytest
+
 from unittest.mock import MagicMock, patch
 
 from bioetl.composition import health_api
 
+
+pytestmark = pytest.mark.unit
 
 def test_get_health_server_dependencies_delegates_to_services_seam() -> None:
     expected_dependencies = MagicMock(name="HealthServerDependencies")

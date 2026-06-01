@@ -16,6 +16,8 @@ from bioetl.infrastructure.quality.exemptions_registry_paths import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 class TestProjectRoot:
     """Tests for project_root."""
 
@@ -36,14 +38,14 @@ class TestProjectRoot:
 class TestResolveRegistryPath:
     """Tests for resolve_registry_path."""
 
-    def test_none_returns_default(self) -> None:
+    def test_resolve_registry_path__none_returns_default__a0165df2(self) -> None:
         """None input should return default path resolved against project root."""
         result = resolve_registry_path(None)
         assert isinstance(result, Path)
         # Should end with the default filename
         assert result.name == "architecture_metric_exemptions.yaml"
 
-    def test_absolute_path_returned_as_is__test_resolve_registry_path_infrastructure_quality_test_exemptions_registry_paths_46(
+    def test_path_quality_exemptions_registry_paths_46__b4ad9cfb(
         self,
     ) -> None:
         """Absolute path should be returned unchanged (resolved for platform)."""
@@ -89,7 +91,7 @@ class TestNormalizePathText:
         result = normalize_path_text("./src\\bioetl/module.py")
         assert result == "src/bioetl/module.py"
 
-    def test_empty_string(self) -> None:
+    def test_normalize_path_text__empty_string__1d6152b3(self) -> None:
         """Empty string should return empty string."""
         result = normalize_path_text("")
         assert result == ""

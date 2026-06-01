@@ -19,6 +19,8 @@ from bioetl.application.services.export_models import (
 )
 from bioetl.interfaces.cli import cli
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def cli_runner() -> CliRunner:
@@ -460,7 +462,7 @@ class TestExportToFile:
 class TestExportFailure:
     """Test export failure scenarios."""
 
-    def test_export_table_not_found(
+    def test_export_export_failure__table_not_found__f2287d08(
         self,
         cli_runner: CliRunner,
         mock_export_service: MagicMock,

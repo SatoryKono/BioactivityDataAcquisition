@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.application.pipelines.chembl.alias_policy import (
     CHEMBL_ALIAS_POLICY_VERSION,
     CHEMBL_BRONZE_PROVIDER_ALIASES,
@@ -12,6 +14,8 @@ from bioetl.application.pipelines.chembl.provider_aliases import (
     normalize_provider_aliases,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_normalize_provider_aliases_copies_provider_native_values() -> None:
     """Provider-native payload fields should populate canonical internal fields."""

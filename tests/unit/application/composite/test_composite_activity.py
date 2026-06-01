@@ -34,6 +34,8 @@ from bioetl.application.composite.key_extractor import KeyExtractorService
 from bioetl.domain.composite.config import DependencyConfig, SeedConfig
 from tests.helpers.clock import FixedClock
 
+pytestmark = pytest.mark.unit
+
 if TYPE_CHECKING:
     from bioetl.domain.ports import DeltaReaderPort, LoggerPort
 

@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+import pytest
+
 import pyarrow as pa
 
 from bioetl.infrastructure.storage.delta.schema_ops import (
     drop_nondeterministic_persisted_fields,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_drop_nondeterministic_persisted_fields_removes_runtime_provenance() -> None:
     table = pa.table(

@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 ACTIVE_RUNTIME_ORCHESTRATION_FILES = (
     Path(".codex/agents/ORCHESTRATION.md"),

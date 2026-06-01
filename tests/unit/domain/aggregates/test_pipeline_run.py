@@ -24,6 +24,8 @@ from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.types import RunID, RunType
 from tests.helpers.deterministic_ids import deterministic_uuid_value
 
+pytestmark = pytest.mark.unit
+
 
 def _ts(minutes: int = 0, seconds: int = 0) -> datetime:
     """Return a deterministic UTC timestamp for aggregate tests."""
@@ -309,7 +311,7 @@ class TestPipelineRunCompletionInvariants:
 class TestPipelineRunEncapsulation:
     """Tests for field encapsulation."""
 
-    def test_status_cannot_be_modified_externally(
+    def test_run_encapsulation__modified_externally__78a9c339(
         self, pipeline_run: PipelineRun
     ) -> None:
         """Invariant: status changes only through aggregate methods."""
@@ -342,7 +344,7 @@ class TestPipelineRunEncapsulation:
                 deterministic_uuid_value("unit.pipeline_run.mutability")
             )  # type: ignore
 
-    def test_metadata_returns_copy(self, run_id: RunID) -> None:
+    def test_run_encapsulation__returns_copy__3ad406d4(self, run_id: RunID) -> None:
         """Invariant: metadata returns a copy, not the original."""
         original_metadata = {"key": "value"}
         run = PipelineRun(

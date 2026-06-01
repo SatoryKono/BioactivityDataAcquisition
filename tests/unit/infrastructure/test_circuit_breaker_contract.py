@@ -15,6 +15,8 @@ from bioetl.infrastructure.adapters._circuit_breaker_contract import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 class TestCircuitBreakerContract:
     """State transition tests shared by both breaker implementations."""
 

@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import pytest
 
 from bioetl.application.pipelines.uniprot.extractors import TaxonomyExtractor
+
+pytestmark = pytest.mark.unit
 
 
 class TestExtractSuperkingdom:
@@ -37,11 +40,11 @@ class TestExtractSuperkingdom:
         lineage = ["Viruses", "Riboviria", "Orthornavirae"]
         assert TaxonomyExtractor.extract_superkingdom(lineage) == "Viruses"
 
-    def test_empty_list(self) -> None:
+    def test_extract_superkingdom__empty_list__6ffffd81(self) -> None:
         """Return None for empty lineage list."""
         assert TaxonomyExtractor.extract_superkingdom([]) is None
 
-    def test_none_input(self) -> None:
+    def test_extract_superkingdom__none_input__7609449c(self) -> None:
         """Return None for None input."""
         assert TaxonomyExtractor.extract_superkingdom(None) is None
 
@@ -53,7 +56,7 @@ class TestExtractSuperkingdom:
         """Return None for dict input."""
         assert TaxonomyExtractor.extract_superkingdom({"lineage": []}) is None
 
-    def test_whitespace_trimmed(self) -> None:
+    def test_extract_superkingdom__whitespace_trimmed__48097dba(self) -> None:
         """Trim whitespace from superkingdom value."""
         lineage = ["  Eukaryota  ", "Metazoa"]
         assert TaxonomyExtractor.extract_superkingdom(lineage) == "Eukaryota"
@@ -82,15 +85,15 @@ class TestExtractPhylum:
         lineage = ["Eukaryota"]
         assert TaxonomyExtractor.extract_phylum(lineage) is None
 
-    def test_empty_list(self) -> None:
+    def test_extract_phylum__empty_list__b6211165(self) -> None:
         """Return None for empty list."""
         assert TaxonomyExtractor.extract_phylum([]) is None
 
-    def test_none_input(self) -> None:
+    def test_extract_phylum__none_input__d2186d8c(self) -> None:
         """Return None for None input."""
         assert TaxonomyExtractor.extract_phylum(None) is None
 
-    def test_whitespace_trimmed(self) -> None:
+    def test_extract_phylum__whitespace_trimmed__a217b70e(self) -> None:
         """Trim whitespace from phylum value."""
         lineage = ["Eukaryota", "  Chordata  ", "Mammalia"]
         assert TaxonomyExtractor.extract_phylum(lineage) == "Chordata"
@@ -127,20 +130,20 @@ class TestExtractGenus:
         lineage = ["Eukaryota", "Species"]
         assert TaxonomyExtractor.extract_genus(lineage) == "Eukaryota"
 
-    def test_short_list_single_element(self) -> None:
+    def test_taxonomy_extract_genus__list_single_element__e2ef1c2a(self) -> None:
         """Return None for single-element list."""
         lineage = ["Eukaryota"]
         assert TaxonomyExtractor.extract_genus(lineage) is None
 
-    def test_empty_list(self) -> None:
+    def test_taxonomy_extract_genus__empty_list__e8802cea(self) -> None:
         """Return None for empty list."""
         assert TaxonomyExtractor.extract_genus([]) is None
 
-    def test_none_input(self) -> None:
+    def test_taxonomy_extract_genus__none_input__a13e486e(self) -> None:
         """Return None for None input."""
         assert TaxonomyExtractor.extract_genus(None) is None
 
-    def test_whitespace_trimmed(self) -> None:
+    def test_taxonomy_extract_genus__whitespace_trimmed__1892f987(self) -> None:
         """Trim whitespace from genus value."""
         lineage = ["Eukaryota", "  Hominidae  ", "Homo"]
         assert TaxonomyExtractor.extract_genus(lineage) == "Hominidae"
@@ -169,12 +172,12 @@ class TestExtractAll:
         assert result["phylum"] == "Chordata"
         assert result["genus"] == "Hominidae"
 
-    def test_none_input(self) -> None:
+    def test_taxonomy_extract_all__none_input__9b941f69(self) -> None:
         """Return dict with None values for None input."""
         result = TaxonomyExtractor.extract_all(None)
         assert result == {"superkingdom": None, "phylum": None, "genus": None}
 
-    def test_empty_list(self) -> None:
+    def test_taxonomy_extract_all__empty_list__1524285f(self) -> None:
         """Return dict with None values for empty list."""
         result = TaxonomyExtractor.extract_all([])
         assert result == {"superkingdom": None, "phylum": None, "genus": None}
@@ -187,7 +190,7 @@ class TestExtractAll:
         assert result["phylum"] is None
         assert result["genus"] is None
 
-    def test_two_elements(self) -> None:
+    def test_taxonomy_extract_all__two_elements__05559ec2(self) -> None:
         """Handle two-element list correctly."""
         lineage = ["Eukaryota", "Chordata"]
         result = TaxonomyExtractor.extract_all(lineage)

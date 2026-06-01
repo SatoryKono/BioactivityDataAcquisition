@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.infrastructure.serialization.encoders import StdLibJsonEncoder, __all__
 
+
+pytestmark = pytest.mark.unit
 
 def test_stdlib_json_encoder_round_trips_compact_json() -> None:
     encoder = StdLibJsonEncoder()

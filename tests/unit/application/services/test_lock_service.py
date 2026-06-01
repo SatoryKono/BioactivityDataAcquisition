@@ -113,7 +113,7 @@ class TestLockServiceReleaseLock:
         )
 
     @pytest.mark.asyncio
-    async def test_release_lock_success(self, lock_service, mock_lock_port):
+    async def test_service_release_lock__release_lock_success__f2bc3fe3(self, lock_service, mock_lock_port):
         """Test successfully releasing a lock."""
         owner_id = RunID(uuid4())
         mock_lock_port.release.return_value = True
@@ -191,7 +191,7 @@ class TestLockServiceAclose:
     """Test LockService.aclose method."""
 
     @pytest.mark.asyncio
-    async def test_aclose(self, lock_service, mock_lock_port):
+    async def test_lock_service_aclose__aclose__7008566b(self, lock_service, mock_lock_port):
         """Test closing the service."""
         await lock_service.aclose()
 

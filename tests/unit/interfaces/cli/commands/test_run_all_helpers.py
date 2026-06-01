@@ -383,7 +383,7 @@ class TestRecordPipelineFailure:
 class TestEchoBatchSummary:
     """Tests for echo_batch_summary helper."""
 
-    def test_dry_run_summary(self) -> None:
+    def test_echo_batch_summary__dry_run_summary__c80eabfc(self) -> None:
         """Test dry-run summary uses preview language."""
         batch = BatchRunResult(total=3, succeeded=0, failed=0, skipped=3)
         messages: list[str] = []

@@ -30,7 +30,7 @@ pytestmark = pytest.mark.unit
 class TestThresholdsConfig:
     """Tests for ThresholdsConfig validation."""
 
-    def test_default_values(self) -> None:
+    def test_thresholds_config__default_values__d770af11(self) -> None:
         """Default thresholds should be 0.05/0.20."""
         config = ThresholdsConfig()
         assert config.soft_fail == pytest.approx(0.05)
@@ -42,7 +42,7 @@ class TestThresholdsConfig:
         assert config.soft_fail == pytest.approx(0.03)
         assert config.hard_fail == pytest.approx(0.10)
 
-    def test_soft_must_be_less_than_hard(self) -> None:
+    def test_thresholds_config__be_less_than_hard__d2c5b480(self) -> None:
         """soft_fail >= hard_fail should raise ValidationError."""
         with pytest.raises(ValidationError, match=r"soft_fail.*must be < hard_fail"):
             ThresholdsConfig(soft_fail=0.20, hard_fail=0.10)
@@ -451,7 +451,7 @@ class TestFieldValidationConfig:
         assert fv.min == 0
         assert fv.max == 100
 
-    def test_pattern_validation(self) -> None:
+    def test_validation_config__pattern_validation__66b796f8(self) -> None:
         """Pattern validation with regex."""
         fv = FieldValidationConfig(
             field="id",
@@ -460,7 +460,7 @@ class TestFieldValidationConfig:
         )
         assert fv.pattern == r"^[A-Z]\d+$"
 
-    def test_enum_validation(self) -> None:
+    def test_validation_config__enum_validation__e8edaea3(self) -> None:
         """Enum validation with allowed values."""
         fv = FieldValidationConfig(
             field="status",

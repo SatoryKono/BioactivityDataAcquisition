@@ -11,6 +11,8 @@ from unittest.mock import MagicMock
 import pytest
 
 
+pytestmark = pytest.mark.unit
+
 def _load_fetch_multi_filter_mixin() -> type:
     module_path = (
         Path(__file__).resolve().parents[5]

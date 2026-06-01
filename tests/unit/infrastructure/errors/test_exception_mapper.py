@@ -13,6 +13,8 @@ from bioetl.infrastructure.errors.exception_mapper import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 def test_exception_mapper_maps_service_unavailable_to_retryable_disposition() -> None:
     mapper = DomainInfraExceptionMapper(logger=MagicMock())
 

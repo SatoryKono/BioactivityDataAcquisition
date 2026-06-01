@@ -117,20 +117,20 @@ ASSAY_WHITESPACE_FRACTION = {
 class TestSubcellularFractionDataSourceInit:
     """Tests for initialization."""
 
-    def test_initialization(self) -> None:
+    def test_data_source_init__initialization__3f7f56c5(self) -> None:
         source = MockDataSource()
         wrapper = SubcellularFractionDataSource(data_source=source)
 
         assert wrapper._data_source is source
         assert wrapper._seen_fractions == set()
 
-    def test_provider_name(self) -> None:
+    def test_data_source_init__provider_name__2327b433(self) -> None:
         source = MockDataSource()
         wrapper = SubcellularFractionDataSource(data_source=source)
 
         assert wrapper.provider_name == "chembl"
 
-    def test_entity_type_constants(self) -> None:
+    def test_data_source_init__type_constants__7a7562ff(self) -> None:
         assert SubcellularFractionDataSource.SOURCE_ENTITY_TYPE == "assay"
         assert (
             SubcellularFractionDataSource.TARGET_ENTITY_TYPE == "subcellular_fraction"
@@ -154,7 +154,7 @@ class TestSubcellularFractionDataSourceContextManager:
         assert wrapper._seen_fractions == set()
 
     @pytest.mark.asyncio
-    async def test_aexit_delegates__test_subcellular_fraction_data_source_context_manager_application_core_test_subcellular_fraction_data_source_157(
+    async def test_core_subcellular_fraction_data_source_157__6b38de5c(
         self,
     ) -> None:
         source = MockDataSource()
@@ -165,7 +165,7 @@ class TestSubcellularFractionDataSourceContextManager:
         source.__aexit__.assert_called_once_with(None, None, None)
 
     @pytest.mark.asyncio
-    async def test_context_manager_full_cycle(self) -> None:
+    async def test_source_context_manager__manager_full_cycle__a07ddc02(self) -> None:
         source = MockDataSource()
         wrapper = SubcellularFractionDataSource(data_source=source)
 
@@ -229,7 +229,7 @@ class TestSubcellularFractionDataSourceFetch:
         assert records[0]["assay_count"] == 2
 
     @pytest.mark.asyncio
-    async def test_fetch_with_limit(self) -> None:
+    async def test_data_source_fetch__fetch_with_limit__9e18668b(self) -> None:
         source = MockDataSource(assays=[ASSAY_WITH_FRACTION, ASSAY_WITH_FRACTION_2])
         wrapper = SubcellularFractionDataSource(data_source=source)
 
@@ -240,7 +240,7 @@ class TestSubcellularFractionDataSourceFetch:
         assert len(records) == 1
 
     @pytest.mark.asyncio
-    async def test_fetch_other_entity_delegates(self) -> None:
+    async def test_data_source_fetch__entity_delegates__af71f01b(self) -> None:
         source = MockDataSource(assays=[ASSAY_WITH_FRACTION])
         wrapper = SubcellularFractionDataSource(data_source=source)
 
@@ -252,7 +252,7 @@ class TestSubcellularFractionDataSourceFetch:
         assert records[0]["assay_id"] == "CHEMBL1000"
 
     @pytest.mark.asyncio
-    async def test_fetch_other_entity_forwards_offset(self) -> None:
+    async def test_data_source_fetch__forwards_offset__d735222b(self) -> None:
         source = MockDataSource(assays=[ASSAY_WITH_FRACTION])
         wrapper = SubcellularFractionDataSource(data_source=source)
 
@@ -357,7 +357,7 @@ class TestSubcellularFractionRecordFormat:
         assert all(c in "0123456789abcdef" for c in entity_id)
 
     @pytest.mark.asyncio
-    async def test_entity_id_deterministic(self) -> None:
+    async def test_fraction_record_format__id_deterministic__c635de20(self) -> None:
         source1 = MockDataSource(assays=[ASSAY_WITH_FRACTION])
         source2 = MockDataSource(assays=[ASSAY_WITH_FRACTION])
         wrapper1 = SubcellularFractionDataSource(data_source=source1)
@@ -412,7 +412,7 @@ class TestSubcellularFractionDataSourceDelegation:
     """Tests for delegation to wrapped data source."""
 
     @pytest.mark.asyncio
-    async def test_health_check_delegates(self) -> None:
+    async def test_data_source_delegation__check_delegates__6d410f41(self) -> None:
         source = MockDataSource()
         wrapper = SubcellularFractionDataSource(data_source=source)
 
@@ -422,7 +422,7 @@ class TestSubcellularFractionDataSourceDelegation:
         source.health_check.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_aclose_delegates(self) -> None:
+    async def test_data_source_delegation__aclose_delegates__553d7b1e(self) -> None:
         source = MockDataSource()
         wrapper = SubcellularFractionDataSource(data_source=source)
 
@@ -430,7 +430,7 @@ class TestSubcellularFractionDataSourceDelegation:
 
         source.aclose.assert_called_once()
 
-    def test_get_source_metadata_delegates(self) -> None:
+    def test_data_source_delegation__metadata_delegates__903ffb07(self) -> None:
         source = MockDataSource()
         source.get_source_metadata = MagicMock(return_value="metadata")
         wrapper = SubcellularFractionDataSource(data_source=source)
@@ -440,7 +440,7 @@ class TestSubcellularFractionDataSourceDelegation:
         assert result == "metadata"
         source.get_source_metadata.assert_called_once_with("v1")
 
-    def test_get_source_metadata_returns_none_when_not_supported(self) -> None:
+    def test_data_source_delegation__when_not_supported__c124f4b3(self) -> None:
         source = MockDataSource()
         wrapper = SubcellularFractionDataSource(data_source=source)
 
@@ -471,7 +471,7 @@ class TestSubcellularFractionFilterable:
         assert len(records) == 2
 
     @pytest.mark.asyncio
-    async def test_fetch_filtered_other_entity_delegates(self) -> None:
+    async def test_fraction_filterable__entity_delegates__6c501c31(self) -> None:
         source = MockFilterableDataSource(assays=[ASSAY_WITH_FRACTION])
         wrapper = SubcellularFractionDataSource(data_source=source)
 
@@ -487,7 +487,7 @@ class TestSubcellularFractionFilterable:
         assert records[0]["assay_id"] == "CHEMBL1000"
 
     @pytest.mark.asyncio
-    async def test_fetch_filtered_with_limit(self) -> None:
+    async def test_fraction_filterable__filtered_with_limit__f321b1f3(self) -> None:
         source = MockFilterableDataSource(
             assays=[ASSAY_WITH_FRACTION, ASSAY_WITH_FRACTION_2]
         )
@@ -554,7 +554,7 @@ class TestSubcellularFractionFilterable:
         assert len(records) == 2
 
     @pytest.mark.asyncio
-    async def test_fetch_multi_filtered_other_entity(self) -> None:
+    async def test_fraction_filterable__other_entity__25743dd3(self) -> None:
         source = MockFilterableDataSource(assays=[ASSAY_WITH_FRACTION])
         wrapper = SubcellularFractionDataSource(data_source=source)
 
@@ -568,7 +568,7 @@ class TestSubcellularFractionFilterable:
         assert len(records) == 1
 
     @pytest.mark.asyncio
-    async def test_fetch_multi_filtered_with_limit(self) -> None:
+    async def test_fraction_filterable__filtered_with_limit__7fcf6e78(self) -> None:
         source = MockFilterableDataSource(
             assays=[ASSAY_WITH_FRACTION, ASSAY_WITH_FRACTION_2]
         )
@@ -585,7 +585,7 @@ class TestSubcellularFractionFilterable:
         assert len(records) == 1
 
     @pytest.mark.asyncio
-    async def test_fetch_multi_filtered_raises_for_non_filterable(self) -> None:
+    async def test_fraction_filterable__for_non_filterable__f3cd7173(self) -> None:
         source = MockDataSource()
         wrapper = SubcellularFractionDataSource(data_source=source)
 
@@ -618,7 +618,7 @@ class TestSubcellularFractionFilterable:
         assert len(records) == 2
 
     @pytest.mark.asyncio
-    async def test_fetch_filtered_with_fallback_other_entity(self) -> None:
+    async def test_fraction_filterable__other_entity__1a403c3c(self) -> None:
         source = MockFilterableDataSource(assays=[ASSAY_WITH_FRACTION])
         wrapper = SubcellularFractionDataSource(data_source=source)
 
@@ -634,7 +634,7 @@ class TestSubcellularFractionFilterable:
         assert len(records) == 1
 
     @pytest.mark.asyncio
-    async def test_fetch_filtered_with_fallback_limit(self) -> None:
+    async def test_fraction_filterable__with_fallback_limit__bf6526ed(self) -> None:
         source = MockFilterableDataSource(
             assays=[ASSAY_WITH_FRACTION, ASSAY_WITH_FRACTION_2]
         )
@@ -701,7 +701,7 @@ class TestSubcellularFractionFilterable:
         assert source.fallback_calls[-1]["limit"] is None
 
     @pytest.mark.asyncio
-    async def test_fetch_filtered_with_fallback_raises_for_non_filterable(self) -> None:
+    async def test_fraction_filterable__for_non_filterable__00d6447a(self) -> None:
         source = MockDataSource()
         wrapper = SubcellularFractionDataSource(data_source=source)
 

@@ -9,6 +9,8 @@ import pytest
 from tests.helpers import repo_root, run_repo_command
 
 
+pytestmark = pytest.mark.architecture
+
 _BASH_DRY_RUN_UNSUPPORTED_ON_WINDOWS = pytest.mark.skipif(
     sys.platform.startswith("win"),
     reason="bash-based dry-run scripts are not reliable on native Windows shells",

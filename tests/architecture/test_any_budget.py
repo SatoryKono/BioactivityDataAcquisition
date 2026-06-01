@@ -17,8 +17,12 @@ ratcheted down as modules are hardened.  The threshold MUST NOT increase.
 
 from __future__ import annotations
 
+import pytest
+
 import re
 from pathlib import Path
+
+pytestmark = pytest.mark.architecture
 
 SRC = Path("src/bioetl")
 

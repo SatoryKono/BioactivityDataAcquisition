@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 import contextlib
 import importlib.util
 import json
@@ -11,6 +13,8 @@ from pathlib import Path
 
 import yaml
 
+
+pytestmark = pytest.mark.architecture
 
 def _project_root() -> Path:
     return Path(__file__).resolve().parents[2]

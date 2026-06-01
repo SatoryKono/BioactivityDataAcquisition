@@ -59,7 +59,7 @@ class TestNoOpLogger:
         logger = NoOpLogger()
         logger.info("bare event")
 
-    def test_all_exports(self) -> None:
+    def test_logger_no_op_logger__all_exports__d6092bd1(self) -> None:
         """__all__ should contain NoOpLogger."""
         from bioetl.infrastructure.observability import noop_logger
 

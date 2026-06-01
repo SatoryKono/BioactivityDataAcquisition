@@ -113,7 +113,7 @@ def mock_data_source_single_document():
 class TestPublicationTermDataSourceInit:
     """Tests for PublicationTermDataSource initialization."""
 
-    def test_initialization(self, mock_data_source):
+    def test_term_data_source_init__initialization__511cd4c1(self, mock_data_source):
         """Test PublicationTermDataSource initializes correctly."""
         wrapper = PublicationTermDataSource(data_source=mock_data_source)
 
@@ -157,7 +157,7 @@ class TestPublicationTermDataSourceContextManager:
         mock_data_source.__aexit__.assert_called_once_with(None, None, None)
 
     @pytest.mark.asyncio
-    async def test_context_manager_full_cycle(self, mock_data_source):
+    async def test_source_context_manager__manager_full_cycle__417c4145(self, mock_data_source):
         """Test using PublicationTermDataSource as async context manager."""
         wrapper = PublicationTermDataSource(data_source=mock_data_source)
 
@@ -458,7 +458,7 @@ class TestPublicationTermDataSourceDelegation:
     """Tests for method delegation to wrapped data source."""
 
     @pytest.mark.asyncio
-    async def test_health_check_delegates(self, mock_data_source):
+    async def test_data_source_delegation__check_delegates__9200ab24(self, mock_data_source):
         """Test health_check delegates to wrapped data source."""
         wrapper = PublicationTermDataSource(data_source=mock_data_source)
 
@@ -468,7 +468,7 @@ class TestPublicationTermDataSourceDelegation:
         mock_data_source.health_check.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_aclose_delegates(self, mock_data_source):
+    async def test_data_source_delegation__aclose_delegates__f42b46ca(self, mock_data_source):
         """Test aclose delegates to wrapped data source."""
         wrapper = PublicationTermDataSource(data_source=mock_data_source)
 
@@ -888,7 +888,7 @@ class TestPublicationTermFilterable:
 class TestPublicationTermGetSourceMetadata:
     """Tests for get_source_metadata delegation."""
 
-    def test_get_source_metadata_delegates(self):
+    def test_get_source_metadata__metadata_delegates__ee8764d0(self):
         """Test get_source_metadata delegates to wrapped adapter."""
         from unittest.mock import MagicMock
 
@@ -901,7 +901,7 @@ class TestPublicationTermGetSourceMetadata:
         assert result == "metadata"
         source.get_source_metadata.assert_called_once_with("v1")
 
-    def test_get_source_metadata_returns_none_when_not_supported(self):
+    def test_get_source_metadata__when_not_supported__3a35e4e6(self):
         """Test get_source_metadata returns None if wrapped doesn't support it."""
         source = MockDataSource()
         wrapper = PublicationTermDataSource(data_source=source)

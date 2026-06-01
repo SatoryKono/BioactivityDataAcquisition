@@ -1,7 +1,11 @@
 """Workflow contract checks for SonarCloud CI gating."""
 
+import pytest
+
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 def test_sonarcloud_workflow_avoids_secret_based_job_if() -> None:
     workflow = Path(".github/workflows/sonarcloud.yml").read_text(encoding="utf-8")

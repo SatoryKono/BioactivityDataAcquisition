@@ -17,6 +17,8 @@ from bioetl.domain.composite.result import (
 from bioetl.domain.composite.state import CompositePipelineState
 from tests.helpers.clock import FixedClock
 
+pytestmark = pytest.mark.unit
+
 
 _FIXED_CLOCK = FixedClock(datetime(2026, 5, 22, 12, 0, tzinfo=UTC))
 
@@ -308,7 +310,7 @@ class TestWithState:
         )
         assert updated.state == CompositePipelineState.FAILED
 
-    def test_updates_timestamp(self):
+    def test_checkpoint_with_state__updates_timestamp__2362969c(self):
         """with_state should update updated_at."""
         initial = CompositeCheckpointState(
             composite_name="test_composite",

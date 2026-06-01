@@ -7,6 +7,8 @@ import pytest
 from bioetl.domain.value_objects.base import ValueObject
 
 
+pytestmark = pytest.mark.unit
+
 class ConcreteValueObject(ValueObject[str]):
     """Concrete implementation for testing."""
 
@@ -22,7 +24,7 @@ class ConcreteValueObject(ValueObject[str]):
 class TestValueObject:
     """Tests for ValueObject base class."""
 
-    def test_creation(self) -> None:
+    def test_base_value_object__creation__2f52e931(self) -> None:
         """Test basic creation."""
         vo = ConcreteValueObject("test")
         assert vo.value == "TEST"
@@ -88,7 +90,7 @@ class TestValueObject:
         # but for simple strings it should work
         assert hash(vo1) != hash(vo2)
 
-    def test_can_be_used_in_set(self) -> None:
+    def test_base_value_object__can_be_used_in_set__4ff4ca82(self) -> None:
         """Test Value Objects can be used in sets."""
         s = {
             ConcreteValueObject("a"),
@@ -103,12 +105,12 @@ class TestValueObject:
         assert d[ConcreteValueObject("key")] == "value"
         assert d[ConcreteValueObject("  KEY  ")] == "value"  # Normalized
 
-    def test_repr(self) -> None:
+    def test_base_value_object__repr__e1b9a35b(self) -> None:
         """Test repr shows class name and value."""
         vo = ConcreteValueObject("test")
         assert repr(vo) == "ConcreteValueObject('TEST')"
 
-    def test_str(self) -> None:
+    def test_base_value_object__str__81477b4f(self) -> None:
         """Test str returns the string representation of value."""
         vo = ConcreteValueObject("test")
         assert str(vo) == "TEST"
@@ -128,7 +130,7 @@ class IntValueObject(ValueObject[int]):
 class TestValueObjectWithInt:
     """Tests for ValueObject with int type."""
 
-    def test_creation(self) -> None:
+    def test_value_object_with_int__creation__63607e2b(self) -> None:
         """Test basic creation with int."""
         vo = IntValueObject(42)
         assert vo.value == 42
@@ -138,7 +140,7 @@ class TestValueObjectWithInt:
         with pytest.raises(ValueError, match="non-negative"):
             IntValueObject(-1)
 
-    def test_equality(self) -> None:
+    def test_value_object_with_int__equality__717364c6(self) -> None:
         """Test equality for int values."""
         vo1 = IntValueObject(42)
         vo2 = IntValueObject(42)
@@ -150,7 +152,7 @@ class TestValueObjectWithInt:
         vo2 = IntValueObject(42)
         assert hash(vo1) == hash(vo2)
 
-    def test_str(self) -> None:
+    def test_value_object_with_int__str__851feeea(self) -> None:
         """Test str returns string representation of int."""
         vo = IntValueObject(42)
         assert str(vo) == "42"

@@ -97,7 +97,7 @@ class TestDQConfig:
         config = DQConfig(field_validations=(fv,))
         assert len(config.field_validations) == 1
 
-    def test_list_to_tuple_conversion(self) -> None:
+    def test_config_dq_d_q_config__to_tuple_conversion__397cadb5(self) -> None:
         fv = FieldValidation(field="entity_id", validation_type="required")
         config = DQConfig(field_validations=[fv])  # type: ignore[arg-type]
         assert isinstance(config.field_validations, tuple)

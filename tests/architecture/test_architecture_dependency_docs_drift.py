@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from contextlib import redirect_stderr, redirect_stdout
 import io
 import json
@@ -9,6 +11,8 @@ from pathlib import Path
 import runpy
 import sys
 
+
+pytestmark = pytest.mark.architecture
 
 def test_dependency_map_script_exists() -> None:
     script = Path("scripts/engineering/qa/generate_architecture_dependency_map.py")

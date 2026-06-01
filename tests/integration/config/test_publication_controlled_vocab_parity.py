@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 import yaml
@@ -15,6 +17,8 @@ from bioetl.domain.normalization.profiles import (
 from scripts.docs.matrix.generate_pipeline_normalization_matrix import (
     build_field_matrix_rows,
 )
+
+pytestmark = pytest.mark.integration
 
 _CONTROLLED = yaml.safe_load(
     Path("configs/vocab/publication_controlled.yaml").read_text(encoding="utf-8")

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import date
 
+import pytest
 
 from bioetl.infrastructure.quality._primitives import (
     _parse_iso_date,
@@ -14,11 +15,13 @@ from bioetl.infrastructure.quality._primitives import (
     _validate_non_negative_int,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestParseIsoDate:
     """Tests for _parse_iso_date."""
 
-    def test_valid_date(self) -> None:
+    def test_parse_iso_date__valid_date__f1e5c1bf(self) -> None:
         """Should parse valid ISO date."""
         result = _parse_iso_date("2025-06-15")
         assert result == date(2025, 6, 15)
@@ -27,12 +30,12 @@ class TestParseIsoDate:
         """Should return None for invalid date string."""
         assert _parse_iso_date("not-a-date") is None
 
-    def test_non_string_input(self) -> None:
+    def test_parse_iso_date__non_string_input__f2ac9d9f(self) -> None:
         """Should return None for non-string input."""
         assert _parse_iso_date(12345) is None
         assert _parse_iso_date(None) is None
 
-    def test_empty_string(self) -> None:
+    def test_parse_iso_date__empty_string__b14cf534(self) -> None:
         """Should return None for empty string."""
         assert _parse_iso_date("") is None
 
@@ -40,7 +43,7 @@ class TestParseIsoDate:
 class TestParseQuarterLabel:
     """Tests for _parse_quarter_label."""
 
-    def test_valid_quarter(self) -> None:
+    def test_parse_quarter_label__valid_quarter__bf31fe6c(self) -> None:
         """Should parse valid quarter labels."""
         assert _parse_quarter_label("2025-Q1") == (2025, 1)
         assert _parse_quarter_label("2025-Q4") == (2025, 4)
@@ -50,7 +53,7 @@ class TestParseQuarterLabel:
         """Should strip whitespace."""
         assert _parse_quarter_label("  2025-Q1  ") == (2025, 1)
 
-    def test_invalid_format(self) -> None:
+    def test_parse_quarter_label__invalid_format__98a525e5(self) -> None:
         """Should return None for invalid format."""
         assert _parse_quarter_label("Q1-2025") is None
         assert _parse_quarter_label("2025-Q5") is None
@@ -89,14 +92,14 @@ class TestQuarterLabel:
 class TestValidateNonNegativeInt:
     """Tests for _validate_non_negative_int."""
 
-    def test_valid_int(self) -> None:
+    def test_non_negative_int__valid_int__b462d8d0(self) -> None:
         """Should return value for valid non-negative int."""
         errors: list[str] = []
         result = _validate_non_negative_int(5, field_name="count", errors=errors)
         assert result == 5
         assert errors == []
 
-    def test_zero_is_valid(self) -> None:
+    def test_non_negative_int__zero_is_valid__9276072a(self) -> None:
         """Zero should be valid."""
         errors: list[str] = []
         result = _validate_non_negative_int(0, field_name="count", errors=errors)
@@ -119,7 +122,7 @@ class TestValidateNonNegativeInt:
         assert len(errors) == 1
         assert "expected int" in errors[0]
 
-    def test_none_value(self) -> None:
+    def test_non_negative_int__none_value__684b1c82(self) -> None:
         """None should add error and return None."""
         errors: list[str] = []
         result = _validate_non_negative_int(None, field_name="count", errors=errors)
@@ -144,13 +147,13 @@ class TestValidateGateMode:
         assert result == "block"
         assert errors == []
 
-    def test_case_insensitive(self) -> None:
+    def test_validate_gate_mode__case_insensitive__2dbc995d(self) -> None:
         """Should be case insensitive."""
         errors: list[str] = []
         result = _validate_gate_mode(value="WARN", field_name="gate", errors=errors)
         assert result == "warn"
 
-    def test_with_whitespace(self) -> None:
+    def test_validate_gate_mode__with_whitespace__9984d633(self) -> None:
         """Should strip whitespace."""
         errors: list[str] = []
         result = _validate_gate_mode(
@@ -165,7 +168,7 @@ class TestValidateGateMode:
         assert result is None
         assert len(errors) == 1
 
-    def test_non_string(self) -> None:
+    def test_validate_gate_mode__non_string__b693d7a2(self) -> None:
         """Should add error for non-string value."""
         errors: list[str] = []
         result = _validate_gate_mode(value=123, field_name="gate", errors=errors)
@@ -187,7 +190,7 @@ class TestValidateBudgetMapping:
         )
         assert errors == []
 
-    def test_not_dict(self) -> None:
+    def test_budget_mapping__not_dict__59637188(self) -> None:
         """Should add error for non-dict input."""
         errors: list[str] = []
         _validate_budget_mapping(

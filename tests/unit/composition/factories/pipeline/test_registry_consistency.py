@@ -15,6 +15,8 @@ from bioetl.composition.factories.pipeline.registry import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 @pytest.fixture
 def test_registry() -> PipelineRegistry:
     """Create an isolated registry for testing."""

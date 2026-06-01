@@ -29,6 +29,8 @@ from bioetl.infrastructure.adapters.pubchem.fetch_strategies import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 async def _consume_async(iterator: AsyncIterator[Any]) -> list[Any]:
     """Drain an async iterator and return collected items."""
     items: list[Any] = []
@@ -196,7 +198,7 @@ async def test_fetch_compound_by_query(pubchem_adapter, mock_pcp_compound):
         mock_get.assert_called_with("aspirin", "name")
 
 
-async def test_fetch_compound_with_limit(pubchem_adapter, mock_pcp_compound):
+async def test_pubchem_adapter__compound_with_limit__955a36b5(pubchem_adapter, mock_pcp_compound):
     """Test fetching compounds with limit."""
     with patch("pubchempy.get_compounds", return_value=[mock_pcp_compound]) as mock_get:
         results = []
@@ -259,7 +261,7 @@ async def test_fetch_assay_missing_query(pubchem_adapter):
         await _consume_async(pubchem_adapter.fetch("assay"))
 
 
-async def test_health_check_healthy(pubchem_adapter, mock_pcp_compound):
+async def test_pubchem_adapter__health_check_healthy__e40f8677(pubchem_adapter, mock_pcp_compound):
     """Test health check returns HEALTHY."""
     with patch("pubchempy.get_compounds", return_value=[mock_pcp_compound]):
         status = await pubchem_adapter.health_check()

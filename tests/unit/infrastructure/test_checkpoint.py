@@ -159,7 +159,7 @@ class TestLocalCheckpoint:
 
         assert result == []
 
-    async def test_aclose(self, tmp_path):
+    async def test_local_checkpoint__aclose__91c52df6(self, tmp_path):
         """Test aclose completes without error."""
         cp = LocalCheckpointAdapter(base_path=tmp_path)
         await cp.aclose()

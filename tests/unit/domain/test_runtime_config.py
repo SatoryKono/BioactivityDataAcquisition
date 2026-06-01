@@ -12,7 +12,7 @@ from bioetl.domain.types import RunType
 class TestRuntimeConfig:
     """Tests for RuntimeConfig dataclass."""
 
-    def test_default_values(self) -> None:
+    def test_config_runtime_config__default_values__edc0822f(self) -> None:
         """Test default values for optional fields."""
         config = RuntimeConfig(run_type=RunType.INCREMENTAL)
 
@@ -33,7 +33,7 @@ class TestRuntimeConfig:
         assert config.strict_gold_validation is True
         assert config.health_check_mode == "strict"
 
-    def test_custom_values(self) -> None:
+    def test_config_runtime_config__custom_values__c572811c(self) -> None:
         """Test custom configuration values."""
         config = RuntimeConfig(
             run_type=RunType.BACKFILL,
@@ -71,7 +71,7 @@ class TestRuntimeConfig:
         assert config.strict_gold_validation is True
         assert config.health_check_mode == "probe"
 
-    def test_immutability(self) -> None:
+    def test_config_runtime_config__immutability__d00ffda1(self) -> None:
         """Test that RuntimeConfig is frozen (immutable)."""
         config = RuntimeConfig(run_type=RunType.INCREMENTAL)
 
@@ -81,7 +81,7 @@ class TestRuntimeConfig:
         with pytest.raises(AttributeError):
             config.limit = 100  # type: ignore[misc]
 
-    def test_equality(self) -> None:
+    def test_config_runtime_config__equality__d2f93b6f(self) -> None:
         """Test equality between RuntimeConfig instances."""
         config1 = RuntimeConfig(run_type=RunType.INCREMENTAL, limit=100)
         config2 = RuntimeConfig(run_type=RunType.INCREMENTAL, limit=100)
@@ -90,7 +90,7 @@ class TestRuntimeConfig:
         assert config1 == config2
         assert config1 != config3
 
-    def test_hashable(self) -> None:
+    def test_config_runtime_config__hashable__ec581be6(self) -> None:
         """Test that RuntimeConfig is hashable."""
         config1 = RuntimeConfig(run_type=RunType.INCREMENTAL)
         config2 = RuntimeConfig(run_type=RunType.INCREMENTAL)

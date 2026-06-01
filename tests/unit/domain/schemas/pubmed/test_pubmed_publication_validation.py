@@ -18,7 +18,7 @@ from bioetl.domain.schemas.pubmed.publication import PubMedPublicationSchema
 class TestPmidBaseValidation:
     """Base validation tests for pmid."""
 
-    def test_pmid_valid(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
+    def test_pmid_base_validation__pmid_valid__ac5b8af9(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
         """PASS: valid pmid value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
@@ -30,7 +30,7 @@ class TestPmidBaseValidation:
             PubMedPublicationSchema.validate(df)
 
     @pytest.mark.parametrize("invalid_value", ["0", "-1", "abc", ""])
-    def test_pmid_invalid_format(
+    def test_pmid_base_validation__pmid_invalid_format__c59cffd7(
         self, minimal_pubmed_publication_df: pd.DataFrame, invalid_value: Any
     ) -> None:
         """FAIL: pmid invalid format."""
@@ -44,11 +44,11 @@ class TestPmidBaseValidation:
 class TestDoiBaseValidation:
     """Base validation tests for doi."""
 
-    def test_doi_valid(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
+    def test_doi_base_validation__doi_valid__1f769adf(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
         """PASS: valid doi value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
-    def test_doi_null_allowed(
+    def test_doi_base_validation__doi_null_allowed__30060bb5(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: doi is nullable."""
@@ -59,7 +59,7 @@ class TestDoiBaseValidation:
     @pytest.mark.parametrize(
         "invalid_value", ["doi:10.1234", "10.123/x", "not-a-doi", ""]
     )
-    def test_doi_invalid_format(
+    def test_doi_base_validation__doi_invalid_format__dca4d211(
         self, minimal_pubmed_publication_df: pd.DataFrame, invalid_value: Any
     ) -> None:
         """FAIL: doi invalid format."""
@@ -73,11 +73,11 @@ class TestDoiBaseValidation:
 class TestPmcIdBaseValidation:
     """Base validation tests for pmc_id."""
 
-    def test_pmc_id_valid(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
+    def test_pmc_id_base_validation__pmc_id_valid__cf387190(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
         """PASS: valid pmc_id value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
-    def test_pmc_id_null_allowed(
+    def test_pmc_id_base_validation__pmc_id_null_allowed__aba8ecb8(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: pmc_id is nullable."""
@@ -86,7 +86,7 @@ class TestPmcIdBaseValidation:
         PubMedPublicationSchema.validate(df)
 
     @pytest.mark.parametrize("invalid_value", ["pmc123", "PMC", "123", ""])
-    def test_pmc_id_invalid_format(
+    def test_pmc_id_base_validation__id_invalid_format__625d71b6(
         self, minimal_pubmed_publication_df: pd.DataFrame, invalid_value: Any
     ) -> None:
         """FAIL: pmc_id invalid format."""
@@ -100,11 +100,11 @@ class TestPmcIdBaseValidation:
 class TestTitleBaseValidation:
     """Base validation tests for title."""
 
-    def test_title_valid(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
+    def test_title_base_validation__title_valid__55d31543(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
         """PASS: valid title value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
-    def test_title_null_fails(
+    def test_title_base_validation__title_null_fails__7f8e50c6(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """FAIL: title is non-nullable in PubMed schema."""
@@ -118,11 +118,11 @@ class TestTitleBaseValidation:
 class TestAbstractBaseValidation:
     """Base validation tests for abstract."""
 
-    def test_abstract_valid(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
+    def test_base_validation__abstract_valid__1f46af1f(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
         """PASS: valid abstract value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
-    def test_abstract_null_allowed(
+    def test_base_validation__null_allowed__27d2ba8a(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: abstract is nullable."""
@@ -135,11 +135,11 @@ class TestAbstractBaseValidation:
 class TestAuthorsBaseValidation:
     """Base validation tests for authors."""
 
-    def test_authors_valid(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
+    def test_base_validation__authors_valid__e1fba3b0(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
         """PASS: valid authors value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
-    def test_authors_null_allowed(
+    def test_base_validation__authors_null_allowed__36c5b6e1(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: authors is nullable."""
@@ -152,13 +152,13 @@ class TestAuthorsBaseValidation:
 class TestAffiliationListBaseValidation:
     """Base validation tests for affiliation_list."""
 
-    def test_affiliation_list_valid(
+    def test_list_base_validation__list_valid__75a267e6(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid affiliation_list value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
-    def test_affiliation_list_null_allowed(
+    def test_list_base_validation__list_null_allowed__ea1161fb(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: affiliation_list is nullable."""
@@ -171,11 +171,11 @@ class TestAffiliationListBaseValidation:
 class TestJournalBaseValidation:
     """Base validation tests for journal."""
 
-    def test_journal_valid(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
+    def test_base_validation__journal_valid__bd36d3e4(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
         """PASS: valid journal value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
-    def test_journal_null_allowed(
+    def test_base_validation__journal_null_allowed__8309eae6(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: journal is nullable."""
@@ -188,13 +188,13 @@ class TestJournalBaseValidation:
 class TestPublicationYearBaseValidation:
     """Base validation tests for publication_year."""
 
-    def test_publication_year_valid(
+    def test_year_base_validation__year_valid__b3fc60b5(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid publication_year value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
-    def test_publication_year_null_allowed(
+    def test_year_base_validation__year_null_allowed__d6491317(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: publication_year is nullable."""
@@ -207,13 +207,13 @@ class TestPublicationYearBaseValidation:
 class TestPublicationDateBaseValidation:
     """Base validation tests for publication_date."""
 
-    def test_publication_date_valid(
+    def test_date_base_validation__date_valid__c53410f2(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid publication_date value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
-    def test_publication_date_null_allowed(
+    def test_date_base_validation__date_null_allowed__cd8c9572(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: publication_date is nullable."""
@@ -226,13 +226,13 @@ class TestPublicationDateBaseValidation:
 class TestPublicationTypeBaseValidation:
     """Base validation tests for publication_type."""
 
-    def test_publication_type_valid(
+    def test_type_base_validation__type_valid__56479027(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid publication_type value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
-    def test_publication_type_null_allowed(
+    def test_type_base_validation__type_null_allowed__e5fd4415(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: publication_type is nullable."""
@@ -245,11 +245,11 @@ class TestPublicationTypeBaseValidation:
 class TestLanguageBaseValidation:
     """Base validation tests for language."""
 
-    def test_language_valid(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
+    def test_base_validation__language_valid__69bf5c2c(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
         """PASS: valid language value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
-    def test_language_null_allowed(
+    def test_base_validation__null_allowed__ef9bc013(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: language is nullable."""
@@ -262,13 +262,13 @@ class TestLanguageBaseValidation:
 class TestPageFirstBaseValidation:
     """Base validation tests for page_first."""
 
-    def test_page_first_valid(
+    def test_first_base_validation__page_first_valid__5a6bc5f9(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid page_first value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
-    def test_page_first_null_allowed(
+    def test_first_base_validation__first_null_allowed__c5182f9d(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: page_first is nullable."""
@@ -281,11 +281,11 @@ class TestPageFirstBaseValidation:
 class TestPageLastBaseValidation:
     """Base validation tests for page_last."""
 
-    def test_page_last_valid(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
+    def test_last_base_validation__page_last_valid__025923ad(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
         """PASS: valid page_last value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
-    def test_page_last_null_allowed(
+    def test_last_base_validation__last_null_allowed__3985bf16(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: page_last is nullable."""
@@ -298,13 +298,13 @@ class TestPageLastBaseValidation:
 class TestCitationsReceivedBaseValidation:
     """Base validation tests for citations_received."""
 
-    def test_citations_received_valid(
+    def test_base_validation__received_valid__e0bedf67(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid citations_received value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
-    def test_citations_received_null_allowed(
+    def test_base_validation__null_allowed__ae01aa38(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: citations_received is nullable."""
@@ -317,13 +317,13 @@ class TestCitationsReceivedBaseValidation:
 class TestCitationsMadeBaseValidation:
     """Base validation tests for citations_made."""
 
-    def test_citations_made_valid(
+    def test_made_base_validation__citations_made_valid__e5a96731(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid citations_made value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
-    def test_citations_made_null_allowed(
+    def test_made_base_validation__made_null_allowed__417f0f4b(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: citations_made is nullable."""
@@ -336,11 +336,11 @@ class TestCitationsMadeBaseValidation:
 class TestIsOaBaseValidation:
     """Base validation tests for is_oa."""
 
-    def test_is_oa_valid(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
+    def test_is_oa_base_validation__is_oa_valid__07eafbc3(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
         """PASS: valid is_oa value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
-    def test_is_oa_null_allowed(
+    def test_is_oa_base_validation__is_oa_null_allowed__9322d77e(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: is_oa is nullable."""
@@ -353,13 +353,13 @@ class TestIsOaBaseValidation:
 class TestLookupMethodBaseValidation:
     """Base validation tests for lookup_method."""
 
-    def test_lookup_method_valid(
+    def test_method_base_validation__lookup_method_valid__87f15361(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid lookup_method value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
-    def test_lookup_method_null_allowed(
+    def test_method_base_validation__method_null_allowed__063eb503(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: lookup_method is nullable."""
@@ -372,13 +372,13 @@ class TestLookupMethodBaseValidation:
 class TestOriginalIdBaseValidation:
     """Base validation tests for original_id."""
 
-    def test_original_id_valid(
+    def test_id_base_validation__original_id_valid__1c0a817a(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid original_id value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
-    def test_original_id_null_allowed(
+    def test_id_base_validation__id_null_allowed__f6f6c5a8(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: original_id is nullable."""
@@ -391,11 +391,11 @@ class TestOriginalIdBaseValidation:
 class TestSourceBaseValidation:
     """Base validation tests for _source."""
 
-    def test__source_valid(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
+    def test_source_base_validation__source_valid__2912b1b8(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
         """PASS: valid _source value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
-    def test__source_null_allowed(
+    def test_source_base_validation__source_null_allowed__c856f10e(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: _source is nullable."""
@@ -480,13 +480,13 @@ class TestAbstractStructuredBaseValidation:
 class TestJournalNameShortBaseValidation:
     """Base validation tests for journal_name_short."""
 
-    def test_journal_name_short_valid(
+    def test_short_base_validation__name_short_valid__f50e3a58(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid journal_name_short value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
-    def test_journal_name_short_null_allowed(
+    def test_short_base_validation__short_null_allowed__d2f8ee24(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: journal_name_short is nullable."""
@@ -518,11 +518,11 @@ class TestJournalIsoAbbrevBaseValidation:
 class TestIssnBaseValidation:
     """Base validation tests for issn."""
 
-    def test_issn_valid(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
+    def test_issn_base_validation__issn_valid__b32b5930(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
         """PASS: valid issn value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
-    def test_issn_null_allowed(
+    def test_issn_base_validation__issn_null_allowed__e1a4a438(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: issn is nullable."""
@@ -862,13 +862,13 @@ class TestChemicalCountBaseValidation:
 class TestSubjectMeshBaseValidation:
     """Base validation tests for subject_mesh."""
 
-    def test_subject_mesh_valid(
+    def test_mesh_base_validation__subject_mesh_valid__0df3b6c1(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid subject_mesh value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
-    def test_subject_mesh_null_allowed(
+    def test_mesh_base_validation__mesh_null_allowed__7bb5fa77(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: subject_mesh is nullable."""
@@ -898,13 +898,13 @@ class TestChemicalsBaseValidation:
 class TestSubjectKeywordsBaseValidation:
     """Base validation tests for subject_keywords."""
 
-    def test_subject_keywords_valid(
+    def test_base_validation__keywords_valid__b02b7a75(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid subject_keywords value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
-    def test_subject_keywords_null_allowed(
+    def test_base_validation__null_allowed__2890d6af(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """SKIP: subject_keywords is nullable."""

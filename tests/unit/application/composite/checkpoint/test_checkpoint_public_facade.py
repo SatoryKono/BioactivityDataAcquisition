@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from datetime import UTC, datetime
 
 from bioetl.application.composite.checkpoint import (
@@ -14,6 +16,8 @@ from bioetl.application.composite.checkpoint import (
 from bioetl.domain.composite.state import CompositePipelineState
 from tests.helpers.clock import FixedClock
 
+
+pytestmark = pytest.mark.unit
 
 def test_public_facade_exports_anchor_context_helpers() -> None:
     anchors = create_expected_checkpoint_context(

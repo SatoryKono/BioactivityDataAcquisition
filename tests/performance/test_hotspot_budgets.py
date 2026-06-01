@@ -128,7 +128,7 @@ def _load_budgets() -> dict[str, HotspotBudget]:
     }
 
 
-def test_hotspot_budget_registry_matches_implemented_benchmarks() -> None:
+def test_hotspot_budgets__benchmarks__80a75db4() -> None:
     """Budget registry must track only the benchmark gates implemented here."""
     budgets = _load_budgets()
     assert set(budgets) == set(_IMPLEMENTED_BENCHMARK_KEYS)

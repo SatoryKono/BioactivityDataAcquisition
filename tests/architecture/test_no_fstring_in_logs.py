@@ -10,8 +10,12 @@ Use structlog pattern instead:
 
 from __future__ import annotations
 
+import pytest
+
 import ast
 from pathlib import Path
+
+pytestmark = pytest.mark.architecture
 
 # Files where f-string in docstrings is acceptable (documentation examples)
 ALLOWED_DOCSTRING_FILES: set[str] = {

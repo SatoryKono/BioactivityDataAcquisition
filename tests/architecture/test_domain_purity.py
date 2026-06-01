@@ -28,6 +28,8 @@ from bioetl.infrastructure.quality import (
 )
 
 
+pytestmark = pytest.mark.architecture
+
 def _dataclass_flags(node: ast.ClassDef) -> tuple[bool, bool]:
     is_dataclass = False
     is_frozen = False

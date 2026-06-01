@@ -190,7 +190,7 @@ class TestChemblActivitySchema:
         for field_name in le_fields:
             assert field_name in CHEMBL_ACTIVITY_SCHEMA.names
 
-    def test_field_count(self):
+    def test_chembl_activity_schema__field_count__272c87b5(self):
         """Verify expected number of fields."""
         # Should have approximately 60+ fields
         assert len(CHEMBL_ACTIVITY_SCHEMA) >= 50
@@ -199,11 +199,11 @@ class TestChemblActivitySchema:
 class TestChemblAssaySchema:
     """Tests for CHEMBL_ASSAY_SCHEMA."""
 
-    def test_has_primary_key(self):
+    def test_chembl_assay_schema__has_primary_key__cec41ba9(self):
         """Verify primary key field exists."""
         assert "assay_id" in CHEMBL_ASSAY_SCHEMA.names
 
-    def test_has_core_identifiers(self):
+    def test_chembl_assay_schema__has_core_identifiers__6ec00f20(self):
         """Verify core identifier fields exist."""
         expected = [
             "target_id",
@@ -236,7 +236,7 @@ class TestChemblAssaySchema:
 class TestChemblMoleculeSchema:
     """Tests for CHEMBL_MOLECULE_SCHEMA."""
 
-    def test_has_primary_key(self):
+    def test_chembl_molecule_schema__has_primary_key__999384bd(self):
         """Verify primary key field exists."""
         assert "molecule_id" in CHEMBL_MOLECULE_SCHEMA.names
 
@@ -290,6 +290,21 @@ class TestChemblTargetSchema:
         "target_xref_uniprot_ids",
         "primary_component_id",
         "protein_classifications",
+        "target_protein_class_id_L1",
+        "target_protein_class_name_L1",
+        "target_protein_class_desc_L1",
+        "target_protein_class_id_L2",
+        "target_protein_class_name_L2",
+        "target_protein_class_desc_L2",
+        "target_protein_class_id_L3",
+        "target_protein_class_name_L3",
+        "target_protein_class_desc_L3",
+        "target_protein_class_id_L4",
+        "target_protein_class_name_L4",
+        "target_protein_class_desc_L4",
+        "target_protein_class_id_L5",
+        "target_protein_class_name_L5",
+        "target_protein_class_desc_L5",
         "component_accessions",
         "component_descriptions",
         "component_ids",
@@ -300,7 +315,7 @@ class TestChemblTargetSchema:
         "target_component_synonyms",
     ]
 
-    def test_has_primary_key(self):
+    def test_chembl_target_schema__has_primary_key__d204562d(self):
         """Verify primary key field exists."""
         assert "target_id" in CHEMBL_TARGET_SCHEMA.names
 
@@ -360,7 +375,7 @@ class TestChemblTargetSchema:
 class TestChemblDocumentSchema:
     """Tests for CHEMBL_PUBLICATION_SCHEMA."""
 
-    def test_has_primary_key(self):
+    def test_chembl_document_schema__has_primary_key__5078150a(self):
         """Verify primary key field exists."""
         assert "publication_id" in CHEMBL_PUBLICATION_SCHEMA.names
 
@@ -380,7 +395,7 @@ class TestChemblDocumentSchema:
 class TestPubchemCompoundSchema:
     """Tests for PUBCHEM_COMPOUND_SCHEMA."""
 
-    def test_has_primary_key(self):
+    def test_compound_schema__has_primary_key__27b054d1(self):
         """Verify primary key field exists."""
         assert "molecule_id" in PUBCHEM_COMPOUND_SCHEMA.names
 
@@ -427,7 +442,7 @@ class TestPubchemCompoundSchema:
 class TestUniprotProteinSchema:
     """Tests for UNIPROT_PROTEIN_SCHEMA."""
 
-    def test_has_primary_key(self):
+    def test_uniprot_protein_schema__has_primary_key__1b673051(self):
         """Verify primary key field exists."""
         assert "accession" in UNIPROT_PROTEIN_SCHEMA.names
 
@@ -454,7 +469,7 @@ class TestUniprotProteinSchema:
 class TestPubmedPublicationSchema:
     """Tests for PUBMED_PUBLICATION_SCHEMA."""
 
-    def test_has_primary_key(self):
+    def test_publication_schema__has_primary_key__32057976(self):
         """Verify primary key field exists."""
         assert "pmid" in PUBMED_PUBLICATION_SCHEMA.names
 
@@ -837,7 +852,7 @@ class TestPublicationSchemaDQFields:
             (SEMANTICSCHOLAR_PUBLICATION_SCHEMA, "SemanticScholar Publication"),
         ],
     )
-    def test_schema_has_dq_fields(self, schema, name):
+    def test_schema_d_q_fields__schema_has_dq_fields__7efb86cd(self, schema, name):
         """All publication schemas must have _dq_warn and _dq_error fields."""
         field_names = {f.name for f in schema}
         missing = PUBLICATION_DQ_FIELDS - field_names
@@ -975,7 +990,7 @@ class TestPublicationSchemaUnifiedDateAndPageFields:
             (SEMANTICSCHOLAR_PUBLICATION_SCHEMA, "SemanticScholar Publication"),
         ],
     )
-    def test_schema_has_publication_date(self, schema, name):
+    def test_date_and_page_fields__has_publication_date__62378cb5(self, schema, name):
         """All publication schemas must have publication_date field."""
         field_names = {f.name for f in schema}
         assert "publication_date" in field_names, (
@@ -996,7 +1011,7 @@ class TestPublicationSchemaUnifiedDateAndPageFields:
             (SEMANTICSCHOLAR_PUBLICATION_SCHEMA, "SemanticScholar Publication"),
         ],
     )
-    def test_schema_has_page_fields(self, schema, name):
+    def test_date_and_page_fields__has_page_fields__85cc7d74(self, schema, name):
         """All publication schemas must have page_first and page_last fields."""
         field_names = {f.name for f in schema}
         page_fields = {"page_first", "page_last"}
@@ -1078,7 +1093,7 @@ class TestAllPublicationSchemas:
             ),
         ],
     )
-    def test_schema_has_primary_key(self, schema, name, primary_key):
+    def test_publication_schemas__has_primary_key__26981c8d(self, schema, name, primary_key):
         """Each publication schema must have its provider-specific primary key."""
         field_names = {f.name for f in schema}
         assert primary_key in field_names, f"{name} missing primary key: {primary_key}"

@@ -262,7 +262,7 @@ async def test_write_cv_quarantine_when_no_metrics_port_then_skips_metric_call()
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_write_cv_quarantine_prefers_cached_bronze_date_for_timestamp() -> None:
+async def test_observability_mixin__date_for_timestamp__2e494f6b() -> None:
     harness = _ObservabilityHarness()
     harness._runtime.cached_bronze_date = "2026-04-10"
     harness._quarantine_port = MagicMock()

@@ -22,6 +22,8 @@ from bioetl.interfaces.cli.commands.domains.run_all.support import (
 from bioetl.interfaces.cli.exit_codes import ExitCode
 
 
+pytestmark = pytest.mark.unit
+
 def _make_cli_input(**kwargs: object) -> RunAllCommandInput:
     defaults: dict[str, object] = {
         "source": "chembl",

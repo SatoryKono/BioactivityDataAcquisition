@@ -18,6 +18,8 @@ from bioetl.domain.locking import FencingToken
 from bioetl.domain.ports import LockPort
 from bioetl.domain.types import RunID, RunType
 
+pytestmark = pytest.mark.unit
+
 # Test UUID constant for consistent assertions
 TEST_RUN_ID: RunID = UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
 

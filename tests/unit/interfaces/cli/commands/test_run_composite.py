@@ -30,6 +30,8 @@ from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime
     ObservabilityBackendEnsureResult,
 )
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def cli_runner() -> CliRunner:
@@ -139,7 +141,7 @@ class TestValidateCompositeName:
 class TestRunCompositeHelp:
     """Test run-composite command help."""
 
-    def test_help_displays_options(self, cli_runner: CliRunner) -> None:
+    def test_run_composite_help__displays_options__6849e7c9(self, cli_runner: CliRunner) -> None:
         """Test that run-composite --help displays available options."""
         result = cli_runner.invoke(cli, ["run-composite", "--help"])
 
@@ -382,7 +384,7 @@ class TestRunCompositeAsync:
 class TestRunCompositeCommand:
     """Test the run-composite CLI command."""
 
-    def test_successful_execution(self, cli_runner: CliRunner) -> None:
+    def test_run_composite_command__successful_execution__9a97129e(self, cli_runner: CliRunner) -> None:
         """Test successful composite pipeline execution via CLI."""
         with mock_asyncio_run(return_value=(True, None)):
             result = cli_runner.invoke(
@@ -716,7 +718,7 @@ class TestRunCompositeAllOptionsOutput:
         assert "Resume mode" in result.output
         assert result.exit_code == ExitCode.OK.value
 
-    def test_failed_with_unknown_error(self, cli_runner: CliRunner) -> None:
+    def test_all_options_output__with_unknown_error__3e674da9(self, cli_runner: CliRunner) -> None:
         """Test failed execution with None error message."""
         with mock_asyncio_run(return_value=(False, None)):
             result = cli_runner.invoke(

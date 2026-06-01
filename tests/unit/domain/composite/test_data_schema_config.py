@@ -9,6 +9,8 @@ from bioetl.domain.composite.config import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 class TestLayerColumnConfig:
     """Test LayerColumnConfig validation and behavior."""
 
@@ -196,7 +198,7 @@ class TestDataSchemaConfig:
         assert config.should_include_group("gold", "identifiers") is True
         assert config.should_include_group("gold", "abstract") is False
 
-    def test_empty_config_allowed(self):
+    def test_data_schema_config__empty_config_allowed__3851e270(self):
         """Empty DataSchemaConfig is valid."""
         config = DataSchemaConfig()
         assert config.column_groups == ()

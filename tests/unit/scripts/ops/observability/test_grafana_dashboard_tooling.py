@@ -126,6 +126,8 @@ def test_rerender_failure_hint_includes_frontend_renderer_state(
 
     assert "rendererAvailable=True" in hint
     assert "rendererVersion='5.0.0'" in hint
+    assert "GF_RENDERING_RENDERER_TOKEN must match AUTH_TOKEN" in hint
+    assert "BROWSER_FLAGS" in hint
     assert "Playwright fallback" in hint
 
 

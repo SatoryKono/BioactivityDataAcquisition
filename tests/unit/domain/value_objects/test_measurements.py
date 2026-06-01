@@ -63,12 +63,12 @@ class TestConcentrationUnit:
         assert ConcentrationUnit.from_string("M") == ConcentrationUnit.MOLAR
         assert ConcentrationUnit.from_string("m") == ConcentrationUnit.MOLAR
 
-    def test_from_string_invalid_raises(self) -> None:
+    def test_concentration__invalid_raises__72b0ed87(self) -> None:
         """Test invalid unit string raises ValueError."""
         with pytest.raises(ValueError, match="Unknown concentration unit"):
             ConcentrationUnit.from_string("kg")
 
-    def test_from_string_strips_whitespace(self) -> None:
+    def test_concentration__strips_whitespace__d4687158(self) -> None:
         """Test whitespace is stripped."""
         assert ConcentrationUnit.from_string("  nM  ") == ConcentrationUnit.NANOMOLAR
 
@@ -76,7 +76,7 @@ class TestConcentrationUnit:
 class TestConcentration:
     """Tests for Concentration Value Object."""
 
-    def test_creation(self) -> None:
+    def test_concentration__creation__8baced23(self) -> None:
         """Test basic creation."""
         c = Concentration(value=100.0, unit=ConcentrationUnit.NANOMOLAR)
         assert c.value == pytest.approx(100.0)
@@ -92,7 +92,7 @@ class TestConcentration:
         with pytest.raises(ValueError, match="cannot be negative"):
             Concentration(value=-1.0, unit=ConcentrationUnit.NANOMOLAR)
 
-    def test_immutability(self) -> None:
+    def test_concentration__immutability__7b9c6891(self) -> None:
         """Test Concentration is immutable (frozen dataclass)."""
         c = Concentration(value=100.0, unit=ConcentrationUnit.NANOMOLAR)
         with pytest.raises(Exception):  # FrozenInstanceError
@@ -169,7 +169,7 @@ class TestConcentration:
         assert c.value == pytest.approx(1e-6)
         assert c.unit == ConcentrationUnit.MOLAR
 
-    def test_from_string_invalid_raises(self) -> None:
+    def test_concentration__invalid_raises__f10a7121(self) -> None:
         """Test invalid string raises ValueError."""
         with pytest.raises(ValueError, match="Cannot parse concentration"):
             Concentration.from_string("not a concentration")
@@ -184,13 +184,13 @@ class TestConcentration:
         c = Concentration(value=0.5, unit=ConcentrationUnit.MICROMOLAR)
         assert str(c) == "0.5 μM"
 
-    def test_equality(self) -> None:
+    def test_concentration__equality__8039bd70(self) -> None:
         """Test equality comparison."""
         c1 = Concentration(value=100.0, unit=ConcentrationUnit.NANOMOLAR)
         c2 = Concentration(value=100.0, unit=ConcentrationUnit.NANOMOLAR)
         assert c1 == c2
 
-    def test_inequality_different_values(self) -> None:
+    def test_concentration__different_values__0da3b7a1(self) -> None:
         """Test inequality for different values."""
         c1 = Concentration(value=100.0, unit=ConcentrationUnit.NANOMOLAR)
         c2 = Concentration(value=200.0, unit=ConcentrationUnit.NANOMOLAR)
@@ -203,7 +203,7 @@ class TestConcentration:
         # Different representations, so not equal
         assert c1 != c2
 
-    def test_hash(self) -> None:
+    def test_concentration__hash__22d62479(self) -> None:
         """Test hash is consistent with equality."""
         c1 = Concentration(value=100.0, unit=ConcentrationUnit.NANOMOLAR)
         c2 = Concentration(value=100.0, unit=ConcentrationUnit.NANOMOLAR)
@@ -257,7 +257,7 @@ class TestActivityType:
             ActivityType.from_string("% INHIBITION") == ActivityType.PERCENT_INHIBITION
         )
 
-    def test_from_string_invalid_raises(self) -> None:
+    def test_activity_type__invalid_raises__0247f8fa(self) -> None:
         """Test invalid type string raises ValueError."""
         with pytest.raises(ValueError, match="Unknown activity type"):
             ActivityType.from_string("UNKNOWN_TYPE")
@@ -284,12 +284,12 @@ class TestActivityType:
 class TestPChemblValue:
     """Tests for PChemblValue Value Object."""
 
-    def test_creation(self) -> None:
+    def test_p_chembl_value__creation__717e6346(self) -> None:
         """Test basic creation."""
         p = PChemblValue(value=6.5)
         assert p.value == pytest.approx(6.5)
 
-    def test_zero_is_valid(self) -> None:
+    def test_p_chembl_value__zero_is_valid__4bc1679c(self) -> None:
         """Test zero pChEMBL value is valid."""
         p = PChemblValue(value=0.0)
         assert p.value == pytest.approx(0.0)
@@ -299,7 +299,7 @@ class TestPChemblValue:
         p = PChemblValue(value=14.0)
         assert p.value == pytest.approx(14.0)
 
-    def test_negative_raises(self) -> None:
+    def test_p_chembl_value__negative_raises__2ed17162(self) -> None:
         """Test negative pChEMBL value raises ValueError."""
         with pytest.raises(ValueError, match="cannot be negative"):
             PChemblValue(value=-1.0)
@@ -309,13 +309,13 @@ class TestPChemblValue:
         with pytest.raises(ValueError, match="exceeds physical limit"):
             PChemblValue(value=15.0)
 
-    def test_immutability(self) -> None:
+    def test_p_chembl_value__immutability__df92a25e(self) -> None:
         """Test PChemblValue is immutable (frozen dataclass)."""
         p = PChemblValue(value=6.5)
         with pytest.raises(Exception):  # FrozenInstanceError
             p.value = 7.0  # type: ignore[misc]
 
-    def test_to_molar(self) -> None:
+    def test_p_chembl_value__to_molar__16e98606(self) -> None:
         """Test conversion to molar concentration."""
         p = PChemblValue(value=6.0)  # pChEMBL 6 = 1 μM
         assert p.to_molar() == pytest.approx(1e-6)
@@ -325,7 +325,7 @@ class TestPChemblValue:
         p = PChemblValue(value=9.0)  # pChEMBL 9 = 1 nM
         assert p.to_molar() == pytest.approx(1e-9)
 
-    def test_to_concentration(self) -> None:
+    def test_p_chembl_value__to_concentration__309eba67(self) -> None:
         """Test conversion to Concentration object."""
         p = PChemblValue(value=6.0)
         c = p.to_concentration(ConcentrationUnit.MICROMOLAR)
@@ -365,42 +365,42 @@ class TestPChemblValue:
         p = PChemblValue.from_concentration(c)
         assert p.value == pytest.approx(6.0)
 
-    def test_is_potent(self) -> None:
+    def test_p_chembl_value__is_potent__b7cbe8b7(self) -> None:
         """Test is_potent property."""
         assert PChemblValue(value=5.0).is_potent is True
         assert PChemblValue(value=4.9).is_potent is False
         assert PChemblValue(value=7.0).is_potent is True
 
-    def test_is_highly_potent(self) -> None:
+    def test_p_chembl_value__is_highly_potent__53d165f4(self) -> None:
         """Test is_highly_potent property."""
         assert PChemblValue(value=7.0).is_highly_potent is True
         assert PChemblValue(value=6.9).is_highly_potent is False
         assert PChemblValue(value=9.0).is_highly_potent is True
 
-    def test_str(self) -> None:
+    def test_p_chembl_value__str__b4844a0d(self) -> None:
         """Test string representation."""
         p = PChemblValue(value=6.543)
         assert str(p) == "6.54"
 
-    def test_equality(self) -> None:
+    def test_p_chembl_value__equality__9fee2a41(self) -> None:
         """Test equality comparison."""
         p1 = PChemblValue(value=6.5)
         p2 = PChemblValue(value=6.5)
         assert p1 == p2
 
-    def test_inequality(self) -> None:
+    def test_p_chembl_value__inequality__7eb6f0ac(self) -> None:
         """Test inequality comparison."""
         p1 = PChemblValue(value=6.5)
         p2 = PChemblValue(value=7.0)
         assert p1 != p2
 
-    def test_hash(self) -> None:
+    def test_p_chembl_value__hash__1dfebd72(self) -> None:
         """Test hash is consistent with equality."""
         p1 = PChemblValue(value=6.5)
         p2 = PChemblValue(value=6.5)
         assert hash(p1) == hash(p2)
 
-    def test_ordering(self) -> None:
+    def test_p_chembl_value__ordering__ed684335(self) -> None:
         """Test ordering comparison."""
         p1 = PChemblValue(value=6.0)
         p2 = PChemblValue(value=7.0)

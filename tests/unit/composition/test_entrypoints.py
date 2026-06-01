@@ -76,7 +76,7 @@ class TestRunOptions:
         assert options.vacuum_after_run is True
         assert options.vacuum_retention_days == 14
 
-    def test_frozen(self):
+    def test_run_options__frozen__44ca60cc(self):
         """Test RunOptions is immutable."""
         options = RunOptions()
         with pytest.raises(AttributeError):
@@ -183,7 +183,7 @@ class TestRunResult:
         """Test success_rate property."""
         assert sample_result.success_rate == pytest.approx(0.95)
 
-    def test_success_rate_zero_fetched(self):
+    def test_entrypoints_run_result__rate_zero_fetched__c8855e20(self):
         """Test success_rate with zero records fetched."""
         result = RunResult(
             status=PipelineRunResult.SUCCESS,
@@ -194,7 +194,7 @@ class TestRunResult:
         )
         assert result.success_rate == pytest.approx(1.0)  # No records = 100% success
 
-    def test_failed_result(self):
+    def test_entrypoints_run_result__failed_result__0e916511(self):
         """Test RunResult with FAILED status."""
         result = RunResult(
             status=PipelineRunResult.FAILED,
@@ -206,7 +206,7 @@ class TestRunResult:
         assert result.status == PipelineRunResult.FAILED
         assert result.error_message == "Connection timeout"
 
-    def test_shutdown_result(self):
+    def test_entrypoints_run_result__shutdown_result__c147353d(self):
         """Test RunResult with SHUTDOWN status."""
         result = RunResult(
             status=PipelineRunResult.SHUTDOWN,

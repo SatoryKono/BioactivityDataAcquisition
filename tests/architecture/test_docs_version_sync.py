@@ -17,6 +17,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.architecture
+
 # Паттерны для извлечения версии из RULES.md.
 # Legacy header example: *Версия: 5.10 (TTL/Heartbeat Values Correction), 2026-01-06*
 # Canonical frontmatter example: Version: 5.24.0

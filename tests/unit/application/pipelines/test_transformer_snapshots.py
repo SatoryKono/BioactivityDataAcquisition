@@ -182,7 +182,7 @@ class TestAssayTransformerSnapshot:
         }
 
     @pytest.mark.asyncio
-    async def test_transform_snapshot(
+    async def test_transformer_snapshot__transform_snapshot__fbfcd1bf(
         self,
         transformer: AssayTransformer,
         mock_context: PipelineContext,
@@ -230,7 +230,7 @@ class TestPublicationTransformerSnapshot:
         }
 
     @pytest.mark.asyncio
-    async def test_transform_snapshot(
+    async def test_transformer_snapshot__transform_snapshot__ff9bede9(
         self,
         transformer: PublicationTransformer,
         mock_context: PipelineContext,
@@ -286,7 +286,7 @@ class TestMoleculeTransformerSnapshot:
         }
 
     @pytest.mark.asyncio
-    async def test_transform_snapshot(
+    async def test_transformer_snapshot__transform_snapshot__d34802d1(
         self,
         transformer: MoleculeTransformer,
         mock_context: PipelineContext,
@@ -335,7 +335,7 @@ class TestTargetTransformerSnapshot:
         }
 
     @pytest.mark.asyncio
-    async def test_transform_snapshot(
+    async def test_transformer_snapshot__transform_snapshot__870408cb(
         self,
         transformer: TargetTransformer,
         mock_context: PipelineContext,
@@ -377,7 +377,7 @@ class TestTargetComponentTransformerSnapshot:
         }
 
     @pytest.mark.asyncio
-    async def test_transform_snapshot(
+    async def test_transformer_snapshot__transform_snapshot__953b7713(
         self,
         transformer: TargetComponentTransformer,
         mock_context: PipelineContext,
@@ -415,7 +415,7 @@ class TestPubChemCompoundTransformerSnapshot:
         }
 
     @pytest.mark.asyncio
-    async def test_transform_snapshot(
+    async def test_transformer_snapshot__transform_snapshot__0c38af1b(
         self,
         transformer: PubChemCompoundTransformer,
         mock_context: PipelineContext,
@@ -458,7 +458,7 @@ class TestUniProtProteinTransformerSnapshot:
         }
 
     @pytest.mark.asyncio
-    async def test_transform_snapshot(
+    async def test_transformer_snapshot__transform_snapshot__e82a89ae(
         self,
         transformer: UniProtProteinTransformer,
         mock_context: PipelineContext,

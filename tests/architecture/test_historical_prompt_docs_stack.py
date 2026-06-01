@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 HISTORICAL_PROMPT_FILES = (
     Path("docs/00-project/ai/prompts/documentation_diagrams_audit.md"),

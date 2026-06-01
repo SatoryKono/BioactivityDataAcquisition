@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from datetime import date
 
 from bioetl.infrastructure.quality._governance_validation import (
@@ -13,10 +15,12 @@ from bioetl.infrastructure.quality._governance_validation import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 class TestValidateReviewPolicy:
     """Tests for _validate_review_policy."""
 
-    def test_valid_policy(self) -> None:
+    def test_validate_review_policy__valid_policy__bad7babf(self) -> None:
         errors: list[str] = []
         _validate_review_policy(
             {
@@ -41,7 +45,7 @@ class TestValidateReviewPolicy:
         assert any("'classification'" in error for error in errors)
         assert any("'linked_rf'" in error for error in errors)
 
-    def test_missing_due_date_field(self) -> None:
+    def test_validate_review_policy__due_date_field__c9fb8292(self) -> None:
         errors: list[str] = []
         _validate_review_policy(
             {
@@ -56,7 +60,7 @@ class TestValidateReviewPolicy:
         )
         assert any("'expires_on'" in error for error in errors)
 
-    def test_whitespace_is_stripped(self) -> None:
+    def test_validate_review_policy__is_stripped__04bff0ba(self) -> None:
         errors: list[str] = []
         _validate_review_policy(
             {

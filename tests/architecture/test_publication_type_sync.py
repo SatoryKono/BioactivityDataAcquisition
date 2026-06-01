@@ -6,9 +6,13 @@ configs/enums/publication_type_classification.csv.
 
 from __future__ import annotations
 
+import pytest
+
 import csv
 import json
 from pathlib import Path
+
+pytestmark = pytest.mark.architecture
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[2]
 

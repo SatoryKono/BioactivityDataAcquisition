@@ -15,6 +15,8 @@ from bioetl.infrastructure.observability.prometheus_metrics import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 class TestPrometheusMetrics:
     def test_observe_histogram_success(self):
         """Test observing a value for a valid histogram."""

@@ -185,7 +185,7 @@ class TestBuildGoldMetadataPayload:
                 transform_steps=("normalize",),
             )
 
-    def test_raises_when_bundle_factory_missing(self) -> None:
+    def test_gold_metadata_payload__factory_missing__2b8d6890(self) -> None:
         coordinator = MagicMock(spec=["create_gold_metadata"])
         coordinator.create_gold_metadata = MagicMock(return_value=MagicMock())
 

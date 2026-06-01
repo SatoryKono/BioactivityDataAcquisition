@@ -268,7 +268,7 @@ class TestUniProtIDMappingClient:
         assert result["CHEMBL204"]["uniprot_accession"] == "P00742"
 
     @pytest.mark.asyncio
-    async def test_health_check_healthy(self, idmapping_client, mock_http_client):
+    async def test_i_d_mapping_client__health_check_healthy__882bedee(self, idmapping_client, mock_http_client):
         """Test health check returns HEALTHY."""
         # Mock successful health check
         health_response = MagicMock()
@@ -281,7 +281,7 @@ class TestUniProtIDMappingClient:
         assert status == HealthStatus.HEALTHY
 
     @pytest.mark.asyncio
-    async def test_health_check_degraded(self, idmapping_client, mock_http_client):
+    async def test_i_d_mapping_client__check_degraded__d80bb99a(self, idmapping_client, mock_http_client):
         """Test health check returns DEGRADED on non-200."""
         # Mock degraded health check
         health_response = MagicMock()
@@ -367,14 +367,14 @@ class TestUniProtIDMappingClient:
         results_call_url = get_calls[1][0][0]
         assert "/idmapping/uniprotkb/results/" in results_call_url
 
-    def test_repr(self, idmapping_client):
+    def test_i_d_mapping_client__repr__b3cb96ef(self, idmapping_client):
         """Test string representation."""
         repr_str = repr(idmapping_client)
 
         assert "UniProtIDMappingClient" in repr_str
         assert "rest.uniprot.org" in repr_str
 
-    def test_provider_name(self, idmapping_client):
+    def test_i_d_mapping_client__provider_name__543e9538(self, idmapping_client):
         """Test provider name attribute."""
         assert idmapping_client.provider_name == "uniprot_idmapping"
 
@@ -383,7 +383,7 @@ class TestUniProtIDMappingClient:
 class TestIDMappingJobError:
     """Tests for IDMappingJobError exception."""
 
-    def test_error_message(self):
+    def test_i_d_mapping_job_error__error_message__791afc94(self):
         """Test error message format."""
         error = IDMappingJobError("test-job-123", "Test error message")
 

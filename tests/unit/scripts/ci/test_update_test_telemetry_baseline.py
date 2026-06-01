@@ -18,6 +18,8 @@ from scripts.engineering.ci.update_test_telemetry_baseline import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 def test_read_coverage_percent_returns_percentage(tmp_path: Path) -> None:
     coverage_xml = tmp_path / "coverage.xml"
     coverage_xml.write_text(

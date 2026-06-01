@@ -8,6 +8,8 @@ import pytest
 from scripts.engineering.qa import test_health
 
 
+pytestmark = pytest.mark.unit
+
 def test_aggregate_junit_counts_failures_errors_and_skips(tmp_path: Path) -> None:
     junit = tmp_path / "lane.xml"
     junit.write_text(

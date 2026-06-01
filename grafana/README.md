@@ -543,6 +543,8 @@ curl -s http://localhost:8000/metrics | grep bioetl_
 | `BIOETL_OBSERVABILITY__METRICS_RETRY_COUNT`    | `3`                   | Количество попыток запуска (1-10)                       |
 | `BIOETL_OBSERVABILITY__METRICS_RETRY_DELAY`    | `1.0`                 | Задержка между попытками (0.1-10.0 с)                   |
 | `GF_SECURITY_ADMIN_PASSWORD`                   | `admin`               | Пароль администратора Grafana                           |
+| `GF_RENDERING_RENDERER_TOKEN`                  | `bioetl-local-renderer-token` | Shared token between Grafana `GF_RENDERING_RENDERER_TOKEN` and renderer `AUTH_TOKEN`; override locally for non-default stacks |
+| `GRAFANA_IMAGE_RENDERER_GOMEMLIMIT`            | `1GiB`                | Go memory soft limit for the remote image renderer      |
 | `BIOETL_ENABLE_TRACING_DATASOURCES`            | `auto`                | Авто-подключать Loki/Tempo datasource в Grafana provisioning по live reachability (`true`/`false` override доступны) |
 | `BIOETL_OBSERVABILITY__TRACING_ENABLED`        | `false`               | Включить OpenTelemetry spans и log-trace correlation    |
 | `BIOETL_OBSERVABILITY__DQ_MONITOR_ENABLED`     | `true`                | Включить DQ anomaly monitor для всех pipeline runs       |
@@ -1505,6 +1507,36 @@ make monitoring-up
 # Если нужен tracing-стек, поднимайте его так:
 make monitoring-tracing-up
 ```
+
+**Причина 3b: Grafana Render API отдаёт HTTP 500.**
+
+Server-side screenshots идут через remote `grafana-image-renderer` sidecar.
+Для Grafana Image Renderer 5.x repo compose использует pinned image
+`grafana/grafana-image-renderer:5.0.0`, explicit shared token
+(`GF_RENDERING_RENDERER_TOKEN` в Grafana и `AUTH_TOKEN` в renderer), актуальный
+`BROWSER_FLAGS=--no-sandbox,--disable-dev-shm-usage`, `shm_size: 1gb` и
+renderer metrics scrape target `grafana-image-renderer`.
+
+```bash
+# Проверить, что Grafana видит renderer
+curl -u admin:<password> http://localhost:3000/api/frontend/settings
+
+# Проверить server-side render path без Playwright fallback
+UV_CACHE_DIR=.cache/uv uv run python -m scripts.ops rerender-grafana \
+  --uids bioetl-overview-v2 \
+  --fallback none \
+  --timeout-seconds 60 \
+  --output-dir /tmp/bioetl-grafana-render-smoke
+
+# После изменения compose обязательно пересоздать оба сервиса:
+docker compose -f docker-compose.monitoring.yml up -d --force-recreate renderer grafana
+```
+
+Если `/api/frontend/settings` показывает `rendererAvailable=true`, но
+`/render/...` всё ещё возвращает `500`, проверьте `docker logs
+bioetl-grafana-renderer` и target `grafana-image-renderer` в Prometheus. Для
+полного UX-аудита допускается Playwright fallback, но server-side Render API
+остаётся отдельным smoke gate.
 
 **Причина 4: Метрики отключены в приложении.**
 

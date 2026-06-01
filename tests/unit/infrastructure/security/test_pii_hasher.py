@@ -17,6 +17,8 @@ from bioetl.domain.ports import PiiHasherPort
 from bioetl.domain.ports.noop import NoOpPiiHasher
 from bioetl.infrastructure.security.pii_hasher import SaltConfig, Sha256PiiHasher
 
+pytestmark = pytest.mark.unit
+
 
 class TestSaltConfig:
     """Tests for SaltConfig value object."""
@@ -193,7 +195,7 @@ class TestSha256PiiHasher:
         id2 = hasher.get_salt_id()
         assert id1 == id2
 
-    def test_from_env(self) -> None:
+    def test_sha256_pii_hasher__from_env__b0facfb5(self) -> None:
         """Test creating hasher from environment."""
         salt = "env_salt_" + "z" * 55
         with patch.dict(os.environ, {"BIOETL_PII_SALT_CURRENT": salt}):
@@ -209,28 +211,28 @@ class TestNoOpPiiHasher:
         """Create a NoOp hasher."""
         return NoOpPiiHasher()
 
-    def test_implements_port(self, hasher: NoOpPiiHasher) -> None:
+    def test_no_op_pii_hasher__implements_port__b7b822fb(self, hasher: NoOpPiiHasher) -> None:
         """Test that NoOpPiiHasher implements PiiHasherPort."""
         assert isinstance(hasher, PiiHasherPort)
 
-    def test_hash_value_returns_unchanged(self, hasher: NoOpPiiHasher) -> None:
+    def test_no_op_pii_hasher__returns_unchanged__5c18dba9(self, hasher: NoOpPiiHasher) -> None:
         """Test that value is returned unchanged."""
         assert hasher.hash_value("John Doe") == "John Doe"
 
-    def test_hash_value_none_returns_none(self, hasher: NoOpPiiHasher) -> None:
+    def test_no_op_pii_hasher__none_returns_none__ec2e2f93(self, hasher: NoOpPiiHasher) -> None:
         """Test that None returns None."""
         assert hasher.hash_value(None) is None
 
-    def test_hash_list_returns_unchanged(self, hasher: NoOpPiiHasher) -> None:
+    def test_no_op_pii_hasher__returns_unchanged__eab645ca(self, hasher: NoOpPiiHasher) -> None:
         """Test that list is returned unchanged."""
         values = ["Alice", "Bob"]
         assert hasher.hash_list(values) == values
 
-    def test_hash_list_none_returns_none(self, hasher: NoOpPiiHasher) -> None:
+    def test_no_op_pii_hasher__none_returns_none__6455eafe(self, hasher: NoOpPiiHasher) -> None:
         """Test that None returns None."""
         assert hasher.hash_list(None) is None
 
-    def test_get_salt_id(self, hasher: NoOpPiiHasher) -> None:
+    def test_no_op_pii_hasher__get_salt_id__fb899f11(self, hasher: NoOpPiiHasher) -> None:
         """Test that salt ID is 'noop'."""
         assert hasher.get_salt_id() == "noop"
 

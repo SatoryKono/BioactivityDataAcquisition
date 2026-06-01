@@ -23,6 +23,8 @@ from bioetl.infrastructure.adapters.common.deduplication import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 def test_deduplicate_preserving_order_keeps_first_occurrence() -> None:
     values = ["P1", "P2", "P1", "P3", "P2"]
 

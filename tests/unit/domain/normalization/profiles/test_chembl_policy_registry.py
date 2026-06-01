@@ -30,6 +30,8 @@ from bioetl.domain.normalization.profiles._chembl_policy_registry import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 def _load_yaml(path: str) -> dict[str, Any]:
     payload = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
     assert isinstance(payload, dict)

@@ -72,11 +72,11 @@ class TestTransformCallbackProtocol:
 class TestGoldFilterCallbackProtocol:
     """Tests for GoldFilterCallback protocol."""
 
-    def test_protocol_is_callable(self) -> None:
+    def test_callback_protocol__protocol_is_callable__9fbb9bc6(self) -> None:
         """GoldFilterCallback protocol is callable."""
         assert callable(GoldFilterCallback)
 
-    def test_implementation_satisfies_protocol(self) -> None:
+    def test_callback_protocol__satisfies_protocol__1f29bb32(self) -> None:
         """Implementation with correct signature satisfies protocol."""
 
         class ValidGoldFilterCallback:
@@ -103,11 +103,11 @@ class TestGoldFilterCallbackProtocol:
 class TestGoldTransformCallbackProtocol:
     """Tests for GoldTransformCallback protocol."""
 
-    def test_protocol_is_callable(self) -> None:
+    def test_callback_protocol__protocol_is_callable__712c25fb(self) -> None:
         """GoldTransformCallback protocol is callable."""
         assert callable(GoldTransformCallback)
 
-    def test_implementation_satisfies_protocol(self) -> None:
+    def test_callback_protocol__satisfies_protocol__86ea5cb9(self) -> None:
         """Implementation with correct signature satisfies protocol."""
 
         class ValidGoldTransformCallback:
@@ -138,7 +138,7 @@ class TestTransformerProtocol:
         transform_method = getattr(TransformerProtocol, "transform", None)
         assert transform_method
 
-    def test_implementation_satisfies_protocol(self) -> None:
+    def test_transformer_protocol__satisfies_protocol__92cd2381(self) -> None:
         """Implementation with correct signature satisfies protocol."""
 
         class ValidTransformer:

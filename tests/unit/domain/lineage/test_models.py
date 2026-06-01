@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from datetime import UTC, datetime
 
 from bioetl.domain.lineage import (
@@ -15,6 +17,8 @@ from bioetl.domain.lineage import (
 )
 from bioetl.domain.medallion import Layer
 
+
+pytestmark = pytest.mark.unit
 
 def test_dataset_ref_normalizes_layer_and_builds_node_ref() -> None:
     ref = DatasetRef(

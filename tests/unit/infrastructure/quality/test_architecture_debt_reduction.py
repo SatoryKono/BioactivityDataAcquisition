@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from datetime import UTC
 from datetime import datetime
 
@@ -9,6 +11,8 @@ from bioetl.infrastructure.quality.architecture_debt_reduction import (
     build_architecture_debt_execution_plan,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_build_execution_plan_classifies_and_orders_batches() -> None:
     payload = {

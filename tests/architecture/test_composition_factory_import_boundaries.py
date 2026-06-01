@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 def test_runner_factory_has_no_bootstrap_back_edge(src_dir: Path) -> None:
     """runner_factory must not depend on composition.bootstrap re-export layer."""

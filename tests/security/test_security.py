@@ -199,7 +199,7 @@ class TestNoHardcodedSecrets:
         """Verify source files exist."""
         assert len(source_contents) > 0, "No Python source files found"
 
-    def test_no_hardcoded_secrets(
+    def test_no_hardcoded_secrets__no_hardcoded_secrets__bd2bd2d3(
         self, source_contents: list[tuple[Path, str]]
     ) -> None:
         """Verify no hardcoded secrets in source code."""

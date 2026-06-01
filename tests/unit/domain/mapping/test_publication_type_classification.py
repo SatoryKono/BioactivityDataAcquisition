@@ -75,10 +75,10 @@ class TestOpenAlexClassification:
         assert entry.unified_type == expected_unified
         assert entry.class_code == expected_class
 
-    def test_unknown_type_returns_none(self) -> None:
+    def test_alex_classification__type_returns_none__17b407ed(self) -> None:
         assert classify_publication_type("openalex", raw_type="nonexistent") is None
 
-    def test_case_insensitive(self) -> None:
+    def test_alex_classification__case_insensitive__98d6b404(self) -> None:
         entry = classify_publication_type("openalex", raw_type="ARTICLE")
         assert entry is not None
         assert entry.unified_type == "Journal Article"
@@ -120,7 +120,7 @@ class TestCrossRefClassification:
             ("standard", "Standard", "REV"),
         ],
     )
-    def test_known_types(
+    def test_ref_classification__known_types__80ee854c(
         self, raw_type: str, expected_unified: str, expected_class: str
     ) -> None:
         entry = classify_publication_type("crossref", raw_type=raw_type)
@@ -128,7 +128,7 @@ class TestCrossRefClassification:
         assert entry.unified_type == expected_unified
         assert entry.class_code == expected_class
 
-    def test_unknown_type_returns_none(self) -> None:
+    def test_ref_classification__type_returns_none__ce77fb0c(self) -> None:
         assert classify_publication_type("crossref", raw_type="nonexistent") is None
 
 
@@ -156,12 +156,12 @@ class TestPubMedClassification:
             ("Comparative Study", "Comparative Study"),
         ],
     )
-    def test_known_types(self, raw_type: str, expected_unified: str) -> None:
+    def test_pub_med_classification__known_types__203a0fa1(self, raw_type: str, expected_unified: str) -> None:
         entry = classify_publication_type("pubmed", raw_type=raw_type)
         assert entry is not None
         assert entry.unified_type == expected_unified
 
-    def test_case_insensitive(self) -> None:
+    def test_pub_med_classification__case_insensitive__e2c0632b(self) -> None:
         entry = classify_publication_type("pubmed", raw_type="journal article")
         assert entry is not None
         assert entry.unified_type == "Journal Article"
@@ -186,7 +186,7 @@ class TestPubMedClassification:
         entry = classify_publication_type("pubmed", raw_types_list=types)
         assert entry is None
 
-    def test_empty_list(self) -> None:
+    def test_pub_med_classification__empty_list__c23d68e7(self) -> None:
         entry = classify_publication_type("pubmed", raw_types_list=[])
         assert entry is None
 
@@ -222,19 +222,19 @@ class TestSemanticScholarClassification:
             ("News", "News"),
         ],
     )
-    def test_known_types(self, raw_type: str, expected_unified: str) -> None:
+    def test_scholar_classification__known_types__5d6bfdf4(self, raw_type: str, expected_unified: str) -> None:
         entry = classify_publication_type("semanticscholar", raw_type=raw_type)
         assert entry is not None
         assert entry.unified_type == expected_unified
 
-    def test_multi_type_most_specific(self) -> None:
+    def test_scholar_classification__type_most_specific__b184f49b(self) -> None:
         """S2 multi-type: should return most specific."""
         types = ["JournalArticle", "ClinicalTrial"]
         entry = classify_publication_type("semanticscholar", raw_types_list=types)
         assert entry is not None
         assert entry.unified_type == "Clinical Trial"
 
-    def test_case_insensitive(self) -> None:
+    def test_scholar_classification__case_insensitive__924ebb64(self) -> None:
         entry = classify_publication_type("semanticscholar", raw_type="journalarticle")
         assert entry is not None
         assert entry.unified_type == "Journal Article"

@@ -133,7 +133,7 @@ class TestQuarantineInspect:
         assert result.exit_code == 0
         assert "No records found" in result.output
 
-    def test_inspect_with_records(
+    def test_quarantine_inspect__inspect_with_records__67bf37fb(
         self,
         cli_runner: CliRunner,
         mock_quarantine_runtime_service: MagicMock,
@@ -164,7 +164,7 @@ class TestQuarantineInspect:
         assert "VALIDATION_ERROR" in result.output
         assert "SCHEMA_MISMATCH" in result.output
 
-    def test_inspect_with_error_code_filter(
+    def test_quarantine_inspect__error_code_filter__4dcda885(
         self,
         cli_runner: CliRunner,
         mock_quarantine_runtime_service: MagicMock,
@@ -254,7 +254,7 @@ class TestQuarantineInspect:
         )
         assert result.exit_code == 0
 
-    def test_inspect_with_run_id_filter(
+    def test_quarantine_inspect__with_run_id_filter__461d1db2(
         self,
         cli_runner: CliRunner,
         mock_quarantine_runtime_service: MagicMock,
@@ -866,7 +866,7 @@ class TestQuarantineReplay:
             mock_records
         )
 
-    def test_replay_with_error_code_filter(
+    def test_quarantine_replay__error_code_filter__cc3d9929(
         self,
         cli_runner: CliRunner,
         mock_quarantine_service: MagicMock,

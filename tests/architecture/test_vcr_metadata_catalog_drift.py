@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import pytest
+
 import importlib.util
 import json
 import sys
 from pathlib import Path
 from typing import Any, Protocol, cast
 
+
+pytestmark = pytest.mark.architecture
 
 class CatalogModule(Protocol):
     """Typed surface for the catalog generator module."""

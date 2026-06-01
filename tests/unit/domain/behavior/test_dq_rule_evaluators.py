@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.domain.behavior._dq_rule_evaluators import _field_rule_violated
 from bioetl.domain.config.validation import FieldValidation
 
+
+pytestmark = pytest.mark.unit
 
 def test_target_component_types_json_vocab_custom_rule_accepts_canonical_json() -> None:
     rule = FieldValidation(

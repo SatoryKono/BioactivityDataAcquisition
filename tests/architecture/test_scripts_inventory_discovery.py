@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 import importlib.util
 import json
 import sys
@@ -9,6 +11,8 @@ from pathlib import Path
 
 from tests.helpers import repo_root, run_repo_python
 
+
+pytestmark = pytest.mark.architecture
 
 def _load_inventory_module():
     root = repo_root()

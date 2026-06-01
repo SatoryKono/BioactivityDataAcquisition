@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 from bioetl.domain.normalization.reference_ids import reference_identifier_families
+
+pytestmark = pytest.mark.architecture
 
 DOC_PATH = Path("docs/03-data-model/reference-identifier-families.md")
 

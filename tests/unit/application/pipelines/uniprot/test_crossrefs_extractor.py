@@ -1,13 +1,17 @@
 """Unit tests for UniProt CrossRefExtractor."""
 
+import pytest
+
 import json
 from bioetl.application.pipelines.uniprot.extractors.crossrefs import CrossRefExtractor
 
 
+pytestmark = pytest.mark.unit
+
 class TestCrossRefExtractor:
     """Tests for CrossRefExtractor class."""
 
-    def test_extract_go_terms(self):
+    def test_cross_ref_extractor__extract_go_terms__b116c64b(self):
         """Test extraction of GO terms."""
         xrefs = [
             {
@@ -40,7 +44,7 @@ class TestCrossRefExtractor:
         assert len(parsed) == 1
         assert parsed[0] == "DB00001"
 
-    def test_extract_pdb_xrefs(self):
+    def test_cross_ref_extractor__extract_pdb_xrefs__0c8ea5a8(self):
         """Test extraction of PDB xrefs."""
         xrefs = [
             {

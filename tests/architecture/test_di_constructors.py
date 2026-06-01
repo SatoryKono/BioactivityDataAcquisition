@@ -20,6 +20,8 @@ from typing import NamedTuple
 
 import pytest
 
+pytestmark = pytest.mark.architecture
+
 # Path relative to project root
 APPLICATION_DIR = Path("src/bioetl/application")
 

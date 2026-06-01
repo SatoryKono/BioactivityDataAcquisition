@@ -77,11 +77,11 @@ class TestIsActiveGraceWindow:
         }
         assert not _is_active_grace_window(window, today=date(2025, 6, 15))
 
-    def test_not_dict(self) -> None:
+    def test_is_active_grace_window__not_dict__46d5c5ef(self) -> None:
         """Non-dict window should not be active."""
         assert not _is_active_grace_window("invalid", today=date(2025, 6, 15))
 
-    def test_invalid_dates(self) -> None:
+    def test_is_active_grace_window__invalid_dates__c7d62eb3(self) -> None:
         """Window with invalid date strings should not be active."""
         window = {
             "approved": True,
@@ -402,7 +402,7 @@ class TestSplitGrowthViolationsBySeverity:
         assert len(blocking) == 1
         assert warning == []
 
-    def test_today_defaults_to_date_today(self) -> None:
+    def test_violations_by_severity__to_date_today__ada5acb6(self) -> None:
         """today=None should use date.today() without error."""
         blocking, warning = split_growth_violations_by_severity(
             violations=[],

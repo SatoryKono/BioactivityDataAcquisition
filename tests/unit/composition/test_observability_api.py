@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 import asyncio
 import sys
 from types import ModuleType
@@ -7,6 +9,8 @@ from unittest import mock
 
 from bioetl.composition import observability_api
 
+
+pytestmark = pytest.mark.unit
 
 def test_start_metrics_server_uses_metrics_service_start() -> None:
     metrics_service = mock.Mock()

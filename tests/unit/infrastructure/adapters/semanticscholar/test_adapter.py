@@ -18,6 +18,8 @@ from tests.helpers.adapter_runtime import (
     build_http_adapter_runtime_kwargs,
 )
 
+pytestmark = pytest.mark.unit
+
 LEGACY_HTTP_DOI = "http" + "://doi.org/10.1038/s41586-024-07487-w"
 
 
@@ -63,7 +65,7 @@ def adapter(
 class TestSemanticScholarAdapter:
     """Tests for SemanticScholarAdapter."""
 
-    def test_post_init_preserves_injected_base_collaborators(
+    def test_scholar_adapter__base_collaborators__767a5e2e(
         self,
         mock_http_client: MagicMock,
         mock_logger: MagicMock,
@@ -95,7 +97,7 @@ class TestSemanticScholarAdapter:
         assert adapter._adapter_metrics is adapter_metrics
         assert adapter._request_collector is request_collector
 
-    def test_provider_name(self, adapter: SemanticScholarAdapter) -> None:
+    def test_scholar_adapter__provider_name__cc77e4ec(self, adapter: SemanticScholarAdapter) -> None:
         """Test provider name is set correctly."""
         assert adapter.provider_name == "semanticscholar"
 
@@ -213,7 +215,7 @@ class TestFetchFiltered:
         assert len(results) == 2
 
     @pytest.mark.asyncio
-    async def test_fetch_filtered_respects_limit(
+    async def test_adapter_fetch_filtered__respects_limit__90302f40(
         self,
         adapter: SemanticScholarAdapter,
         mock_http_client: MagicMock,
@@ -325,7 +327,7 @@ class TestHealthCheck:
     """Tests for health check."""
 
     @pytest.mark.asyncio
-    async def test_health_check_healthy(
+    async def test_adapter_health_check__health_check_healthy__88d14468(
         self,
         adapter: SemanticScholarAdapter,
         mock_http_client: MagicMock,
@@ -340,7 +342,7 @@ class TestHealthCheck:
         assert status == HealthStatus.HEALTHY
 
     @pytest.mark.asyncio
-    async def test_health_check_unhealthy(
+    async def test_adapter_health_check__check_unhealthy__18013daa(
         self,
         adapter: SemanticScholarAdapter,
         mock_http_client: MagicMock,
@@ -353,7 +355,7 @@ class TestHealthCheck:
         assert status == HealthStatus.UNHEALTHY
 
     @pytest.mark.asyncio
-    async def test_health_check_degraded_on_slow_response(
+    async def test_adapter_health_check__on_slow_response__8a6f5d36(
         self,
         adapter: SemanticScholarAdapter,
         mock_http_client: MagicMock,
@@ -445,7 +447,7 @@ class TestFetch:
         mock_http_client.get_once.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_fetch_invalid_entity_type(
+    async def test_adapter_fetch__invalid_entity_type__31f77600(
         self,
         adapter: SemanticScholarAdapter,
     ) -> None:

@@ -145,6 +145,7 @@ PIPELINE_CASES: tuple[PipelineE2ECase, ...] = (
         "chembl_target",
         "chembl",
         "target",
+        smoke_limit=5,
         cassette_candidates=("test_chembl_target_full_cycle",),
     ),
     PipelineE2ECase(

@@ -579,7 +579,7 @@ class TestDispatchRequestByMode:
 class TestEmitMergeRetryTelemetry:
     """Tests for _emit_merge_retry_telemetry with metrics (line 275)."""
 
-    def test_emit_retry_telemetry_with_metrics(self) -> None:
+    def test_merge_retry_telemetry__with_metrics__a7cce5a5(self) -> None:
         """Line 275: metrics.increment_counter called when metrics is set."""
         metrics = MagicMock()
         mixin = _ConcreteDeltaMixin(metrics=metrics)

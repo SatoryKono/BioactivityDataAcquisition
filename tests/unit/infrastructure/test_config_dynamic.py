@@ -14,6 +14,8 @@ from bioetl.infrastructure.config.source_normalizers.source import (
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
+pytestmark = pytest.mark.unit
+
 load_pipeline_config_cached = load_pipeline_config
 
 

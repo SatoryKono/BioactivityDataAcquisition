@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import pytest
+
 import ast
 from pathlib import Path
+
+pytestmark = pytest.mark.unit
 
 PROFILE_DIR = Path("src/bioetl/domain/normalization/profiles")
 

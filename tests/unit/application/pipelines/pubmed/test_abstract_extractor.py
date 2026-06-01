@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import pytest
+
 import xml.etree.ElementTree as ET
 
 from bioetl.application.pipelines.pubmed.extractors.abstract import AbstractExtractor
 
+
+pytestmark = pytest.mark.unit
 
 class TestExtractAbstract:
     """Tests for extract_abstract method."""

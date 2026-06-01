@@ -11,16 +11,18 @@ from bioetl.domain.behavior.normalization_config import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 class TestConcentrationRangeConfig:
     """Tests for ConcentrationRangeConfig."""
 
-    def test_default_values(self) -> None:
+    def test_range_config__default_values__c2e091e4(self) -> None:
         """Test default configuration values."""
         config = ConcentrationRangeConfig()
         assert config.min_molar == pytest.approx(1e-15)
         assert config.max_molar == pytest.approx(1e-1)
 
-    def test_custom_values(self) -> None:
+    def test_range_config__custom_values__d60a56a4(self) -> None:
         """Test custom configuration values."""
         config = ConcentrationRangeConfig(min_molar=1e-12, max_molar=1e-3)
         assert config.min_molar == pytest.approx(1e-12)
@@ -45,7 +47,7 @@ class TestConcentrationRangeConfig:
 class TestPChemblRangeConfig:
     """Tests for PChemblRangeConfig."""
 
-    def test_default_values(self) -> None:
+    def test_p_chembl_range_config__default_values__83234e00(self) -> None:
         """Test default configuration values."""
         config = PChemblRangeConfig()
         assert config.min_value == pytest.approx(0.0)
@@ -63,7 +65,7 @@ class TestPChemblRangeConfig:
         with pytest.raises(ValueError, match="exceeds physical limit"):
             PChemblRangeConfig(max_value=16.0)
 
-    def test_invalid_range_raises(self) -> None:
+    def test_p_chembl_range_config__invalid_range_raises__44e0394d(self) -> None:
         """Test that min >= max raises ValueError."""
         with pytest.raises(ValueError, match="must be less than"):
             PChemblRangeConfig(min_value=10.0, max_value=5.0)
@@ -77,7 +79,7 @@ class TestPChemblRangeConfig:
 class TestNormalizationConfig:
     """Tests for NormalizationConfig."""
 
-    def test_default_values(self) -> None:
+    def test_normalization_config__default_values__2362b545(self) -> None:
         """Test default configuration values."""
         config = NormalizationConfig()
         assert config.default_output_unit == "nM"
@@ -86,7 +88,7 @@ class TestNormalizationConfig:
         assert config.potency_threshold == pytest.approx(5.0)
         assert config.high_potency_threshold == pytest.approx(7.0)
 
-    def test_custom_values(self) -> None:
+    def test_normalization_config__custom_values__b1658cd6(self) -> None:
         """Test custom configuration values."""
         config = NormalizationConfig(
             default_output_unit="µM",
@@ -116,7 +118,7 @@ class TestNormalizationConfig:
         with pytest.raises(ValueError, match="Invalid aggregation method"):
             NormalizationConfig(default_aggregation_method="invalid")  # type: ignore
 
-    def test_immutability(self) -> None:
+    def test_normalization_config__immutability__ee210bcc(self) -> None:
         """Test that config is immutable (frozen dataclass)."""
         config = NormalizationConfig()
         with pytest.raises(AttributeError):

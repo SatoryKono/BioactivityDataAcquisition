@@ -19,6 +19,8 @@ from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimi
 from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
 
 
+pytestmark = pytest.mark.unit
+
 class StubSyncAdapter(BaseSyncAdapter):
     """Concrete adapter for testing BaseSyncAdapter."""
 
@@ -161,7 +163,7 @@ class TestHealthCheckLogging:
         assert adapter.metrics is mock_metrics
         assert adapter._error_handler is dependency_context.error_handler
 
-    async def test_health_check_logs_warning_on_exception(
+    async def test_health_check_logging__warning_on_exception__dd4feee7(
         self,
         mock_logger: MagicMock,
         mock_metrics: MagicMock,
@@ -198,7 +200,7 @@ class TestHealthCheckLogging:
             HealthStatus.UNHEALTHY,
         )
 
-    async def test_health_check_increments_failure_metric_on_exception(
+    async def test_health_check_logging__metric_on_exception__356cd42d(
         self,
         mock_logger: MagicMock,
         mock_metrics: MagicMock,
@@ -228,7 +230,7 @@ class TestHealthCheckLogging:
         assert failure_call[0][1] == 1
         assert failure_call[0][2] == {"provider": "test_provider"}
 
-    async def test_health_check_logs_debug_and_increments_success_on_success(
+    async def test_health_check_logging__success_on_success__fd2d492f(
         self,
         mock_logger: MagicMock,
         mock_metrics: MagicMock,
@@ -269,7 +271,7 @@ class TestHealthCheckLogging:
 
         assert status == HealthStatus.HEALTHY
 
-    async def test_health_check_increments_degraded_metric_on_degraded_result(
+    async def test_health_check_logging__on_degraded_result__b40d6255(
         self,
         mock_logger: MagicMock,
         mock_metrics: MagicMock,
@@ -312,7 +314,7 @@ class TestHealthCheckLogging:
         mock_logger.warning.assert_called_once()
         assert status == HealthStatus.DEGRADED
 
-    async def test_health_check_records_latency_histogram(
+    async def test_health_check_logging__latency_histogram__17e8150a(
         self,
         mock_logger: MagicMock,
         mock_metrics: MagicMock,
@@ -340,7 +342,7 @@ class TestHealthCheckLogging:
         assert isinstance(call_args[0][1], float)  # latency value
         assert call_args[0][2] == {"provider": "test_provider"}
 
-    async def test_health_check_uses_noop_metrics_by_default(
+    async def test_health_check_logging__metrics_by_default__495d07d4(
         self,
         mock_logger: MagicMock,
         rate_limiter: TokenBucketRateLimiter,
@@ -367,7 +369,7 @@ class TestHealthCheckLogging:
             HealthStatus.UNHEALTHY,
         )
 
-    async def test_health_check_logs_correct_error_type(
+    async def test_health_check_logging__correct_error_type__89421ae1(
         self,
         mock_logger: MagicMock,
         mock_metrics: MagicMock,

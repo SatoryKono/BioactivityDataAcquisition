@@ -71,7 +71,7 @@ class TestUniProtProteinTransformer:
         return _build_transformer(provider="uniprot")
 
     @pytest.mark.asyncio
-    async def test_transform_valid_record(self, transformer, mock_context):
+    async def test_protein_transformer__valid_record__171472be(self, transformer, mock_context):
         """Test transformation of valid protein record with all fields."""
         record = {
             "primaryAccession": "P12345",
@@ -156,7 +156,7 @@ class TestUniProtProteinTransformer:
         assert result["protein_name"] is None
 
     @pytest.mark.asyncio
-    async def test_transform_with_minimal_valid_record(self, transformer, mock_context):
+    async def test_protein_transformer__minimal_valid_record__bd1f6645(self, transformer, mock_context):
         """Test transformation with minimal valid record (required fields only).
 
         Only accession and entry_name are required. protein_name is optional.
@@ -220,7 +220,7 @@ class TestUniProtProteinTransformer:
         assert "gene_names" not in result
 
     @pytest.mark.asyncio
-    async def test_transform_with_malformed_genes(self, transformer, mock_context):
+    async def test_protein_transformer__with_malformed_genes__2acfbb6e(self, transformer, mock_context):
         """Test transformation handles malformed genes structure gracefully."""
         record = {
             "primaryAccession": "P00003",
@@ -243,7 +243,7 @@ class TestUniProtProteinTransformer:
         assert "gene_names" not in result
 
     @pytest.mark.asyncio
-    async def test_transform_entity_id_format(self, transformer, mock_context):
+    async def test_protein_transformer__entity_id_format__9cc7dd12(self, transformer, mock_context):
         """Test that entity_id follows expected format."""
         record = {
             "primaryAccession": "P12345",
@@ -262,7 +262,7 @@ class TestUniProtProteinTransformer:
         assert "P12345" in result["entity_id"]
 
     @pytest.mark.asyncio
-    async def test_transform_content_hash_consistent(self, transformer, mock_context):
+    async def test_protein_transformer__hash_consistent__0ecaeaa4(self, transformer, mock_context):
         """Test that content_hash is generated and is consistent."""
         record = {
             "primaryAccession": "P12345",
@@ -282,7 +282,7 @@ class TestUniProtProteinTransformer:
         assert result1["content_hash"] == result2["content_hash"]
 
     @pytest.mark.asyncio
-    async def test_transform_pre_silver_returns_staged_payload(
+    async def test_protein_transformer__staged_payload__3a0f4ee3(
         self, transformer, mock_context
     ):
         """Test staged UniProt path returns business data before hash finalization."""
@@ -306,7 +306,7 @@ class TestUniProtProteinTransformer:
         assert "content_hash" not in result.business_data
 
     @pytest.mark.asyncio
-    async def test_transform_matches_staged_finalization(
+    async def test_protein_transformer__staged_finalization__e3b87098(
         self, transformer, mock_context
     ):
         """Legacy UniProt transform should match staged finalization."""
@@ -343,7 +343,7 @@ class TestUniProtProteinTransformer:
         assert legacy_result["content_hash"] == staged_result["content_hash"]
 
     @pytest.mark.asyncio
-    async def test_transform_custom_provider(self, mock_context):
+    async def test_protein_transformer__custom_provider__1d9fde26(self, mock_context):
         """Test transformation with custom provider."""
         transformer = _build_transformer(provider="custom_uniprot")
         record = {
@@ -375,7 +375,7 @@ class TestUniProtProteinTransformer:
         assert result is None
 
     @pytest.mark.asyncio
-    async def test_transform_lineage_fields_present(self, transformer, mock_context):
+    async def test_protein_transformer__fields_present__7bcb3469(self, transformer, mock_context):
         """Test that lineage fields are properly added to the result."""
         record = {
             "primaryAccession": "P12345",
@@ -919,7 +919,7 @@ class TestUniProtProteinTransformerExtendedFields:
         assert '"end":480' in result["features_json"]
 
     @pytest.mark.asyncio
-    async def test_extract_keywords(self, transformer, mock_context):
+    async def test_extended_fields__extract_keywords__07702d53(self, transformer, mock_context):
         """Test extraction of UniProt keywords."""
         record = {
             "primaryAccession": "P31749",
@@ -1620,7 +1620,7 @@ class TestParseUniprotDate:
         result = ExtractorHelper.parse_uniprot_date(None)
         assert result is None
 
-    def test_empty_string(self):
+    def test_parse_uniprot_date__empty_string__1281210c(self):
         """Test that empty string returns None."""
         from bioetl.application.pipelines.uniprot.extractors import ExtractorHelper
 

@@ -12,6 +12,8 @@ import pytest
 import yaml
 
 
+pytestmark = pytest.mark.architecture
+
 class TestSourceConfigFilesExist:
     """Verify that source configuration files exist for all providers."""
 
@@ -24,7 +26,7 @@ class TestSourceConfigFilesExist:
         "provider",
         ["chembl", "pubchem", "uniprot", "pubmed"],
     )
-    def test_source_config_exists(
+    def test_config_files_exist__source_config_exists__d188f2b9(
         self, provider_configs_dir: Path, provider: str
     ) -> None:
         """Each provider MUST have a source configuration file."""

@@ -4,6 +4,8 @@ import pytest
 from bioetl.domain.value_objects.column_qualifier import ColumnQualifier
 
 
+pytestmark = pytest.mark.unit
+
 class TestColumnQualifier:
     """Tests for ColumnQualifier."""
 
@@ -56,7 +58,7 @@ class TestColumnQualifier:
         q = ColumnQualifier("chembl", "publication", "DOI")
         assert q.is_join_key is True
 
-    def test_immutability(self) -> None:
+    def test_column_qualifier__immutability__d00b0839(self) -> None:
         """ColumnQualifier is immutable."""
         q = ColumnQualifier("chembl", "publication", "title")
         with pytest.raises(AttributeError):
@@ -76,7 +78,7 @@ class TestColumnQualifier:
         assert q.entity == "publication"
         assert q.field == "title"
 
-    def test_empty_provider_raises(self) -> None:
+    def test_column_qualifier__provider_raises__731aead8(self) -> None:
         """Empty provider raises ValueError."""
         with pytest.raises(ValueError, match="provider cannot be empty"):
             ColumnQualifier("", "publication", "title")

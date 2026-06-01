@@ -19,6 +19,8 @@ from scripts.docs.generate_pipeline_normalization_field_matrix import (
     build_surface_coverage_kpis,
 )
 
+pytestmark = pytest.mark.architecture
+
 SURFACE_COVERAGE_BUDGETS: dict[str, float] = {
     "entity_record": 100.0,
     "composite_join_key": 100.0,

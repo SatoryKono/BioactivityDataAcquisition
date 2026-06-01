@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 from scripts.engineering.qa.report_compatibility_importer_census import (
@@ -8,6 +10,8 @@ from scripts.engineering.qa.report_compatibility_importer_census import (
 )
 from scripts.engineering.qa.report_dead_code_inventory import build_dead_code_inventory
 
+
+pytestmark = pytest.mark.unit
 
 def _write(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)

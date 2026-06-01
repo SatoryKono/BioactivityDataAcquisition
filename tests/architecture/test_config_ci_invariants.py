@@ -52,6 +52,8 @@ from scripts.schema import check_config_invariants as invariant_script
 from scripts.schema import check_required_filter_fields as required_filter_script
 from scripts.schema.validate_pipeline_configs import _canonical_script
 
+pytestmark = pytest.mark.architecture
+
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------

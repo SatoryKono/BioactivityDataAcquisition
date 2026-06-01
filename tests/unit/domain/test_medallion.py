@@ -15,7 +15,7 @@ from bioetl.domain.types import RunType
 class TestClearPolicy:
     """Test ClearPolicy enum."""
 
-    def test_enum_values(self):
+    def test_medallion_clear_policy__enum_values__5c77c925(self):
         """Test ClearPolicy enum has correct string values."""
         assert ClearPolicy.NEVER.value == "never"
         assert ClearPolicy.SILVER_ONLY.value == "silver"
@@ -34,7 +34,7 @@ class TestMedallionPolicy:
         assert policy.vacuum_enabled is False
         assert policy.vacuum_retention_days == 7
 
-    def test_is_frozen(self):
+    def test_medallion_policy__is_frozen__9f83465b(self):
         """Test MedallionPolicy is immutable."""
         policy = MedallionPolicy()
 
@@ -113,7 +113,7 @@ class TestMedallionPolicyShouldClear:
 class TestLoadingStrategy:
     """Test LoadingStrategy enum (ADR-031)."""
 
-    def test_enum_values(self):
+    def test_loading_strategy__enum_values__68aeeb25(self):
         """Test LoadingStrategy enum has correct string values."""
         assert LoadingStrategy.FULL_SCAN_ONLY.value == "full_scan_only"
 
@@ -124,7 +124,7 @@ class TestLoadingStrategy:
             == LoadingStrategy.FULL_SCAN_ONLY
         )
 
-    def test_from_string_case_insensitive(self):
+    def test_loading_strategy__case_insensitive__dd820758(self):
         """Test from_string is case insensitive."""
         assert (
             LoadingStrategy.from_string("FULL_SCAN_ONLY")

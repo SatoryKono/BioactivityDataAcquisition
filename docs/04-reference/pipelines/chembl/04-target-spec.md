@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: Active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-23'
+  Last verified: '2026-06-01'
 
 ______________________________________________________________________
 
@@ -29,8 +29,13 @@ Current specification summary:
 - Derived projections now publish `target_protein_synonyms`, `target_gene_synonyms`, `target_ec_numbers`,
   and xref-derived fields `target_xref_pdb_ids`, `target_xref_go_component`, `target_xref_go_function`, `target_xref_go_process`, `target_xref_hgnc_ids`, `target_xref_reactome_ids`, `target_xref_uniprot_ids`.
 - `protein_classifications` is a canonical JSON string in the main `chembl.target`
-  Silver table; multiple leaf classifications collapse to L1 `Multifunctional target`
-  while preserving deterministic source evidence.
+  Silver table and now reuses the same deterministic summary policy as
+  `chembl_target_protein_classification`.
+- `target_protein_class_id_L1..L5`, `target_protein_class_name_L1..L5`, and
+  `target_protein_class_desc_L1..L5` are populated in standalone `chembl_target`
+  only when nested `target_components[].protein_classifications[]` are available.
+- `composite_target` remains the canonical fully enriched target surface because
+  it joins the dedicated `chembl_target_protein_classification` relation pipeline.
 - GO-derived columns use `xref_name`; `PDB`/`PDBe` and `Reactome` retain `xref_id`.
 - Missing derived buckets emit `unknown`; raw `target_component_synonyms` and `cross_references` stay forensic JSON.
 

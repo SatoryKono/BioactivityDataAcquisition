@@ -21,23 +21,25 @@ from bioetl.domain.composite.cross_validation import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 class TestComparisonMethod:
     """Tests for ComparisonMethod enum."""
 
-    def test_values(self):
+    def test_comparison_method__values__f25aeedf(self):
         assert ComparisonMethod.EXACT == "exact"
         assert ComparisonMethod.FUZZY == "fuzzy"
         assert ComparisonMethod.NUMERIC_TOLERANCE == "numeric_tolerance"
         assert ComparisonMethod.SKIP == "skip"
 
-    def test_is_str_enum(self):
+    def test_comparison_method__is_str_enum__ce3124f7(self):
         assert isinstance(ComparisonMethod.EXACT, str)
 
 
 class TestCrossValidationVerdict:
     """Tests for CrossValidationVerdict enum."""
 
-    def test_values(self):
+    def test_validation_verdict__values__00d56cec(self):
         assert CrossValidationVerdict.PASS == "pass"
         assert CrossValidationVerdict.WARNING == "warning"
         assert CrossValidationVerdict.ENRICHER_ERROR == "enricher_error"
@@ -88,7 +90,7 @@ class TestFieldComparisonSpec:
                 threshold=-0.1,
             )
 
-    def test_frozen(self):
+    def test_field_comparison_spec__frozen__599e03ff(self):
         spec = FieldComparisonSpec(field_name="doi", method=ComparisonMethod.EXACT)
         with pytest.raises(AttributeError):
             spec.field_name = "pmid"  # type: ignore[misc]
@@ -125,7 +127,7 @@ class TestEnricherFieldPairing:
         with pytest.raises(ValueError, match="enricher_pipeline cannot be empty"):
             EnricherFieldPairing(enricher_pipeline="", fields=fields)
 
-    def test_empty_fields_raises(self):
+    def test_enricher_field_pairing__empty_fields_raises__4c25b247(self):
         with pytest.raises(ValueError, match="must have at least one field"):
             EnricherFieldPairing(enricher_pipeline="crossref_publication", fields=())
 
@@ -186,7 +188,7 @@ class TestRecordCrossValidationResult:
 class TestEnricherCVStats:
     """Tests for EnricherCVStats dataclass."""
 
-    def test_defaults(self):
+    def test_enricher_c_v_stats__defaults__5741e501(self):
         stats = EnricherCVStats(enricher="crossref_publication")
         assert stats.total_records == 0
         assert stats.passed == 0
@@ -207,7 +209,7 @@ class TestEnricherCVStats:
 class TestCrossValidationStats:
     """Tests for CrossValidationStats dataclass."""
 
-    def test_defaults(self):
+    def test_cross_validation_stats__defaults__d00309c8(self):
         stats = CrossValidationStats()
         assert stats.total_records == 0
         assert stats.passed == 0

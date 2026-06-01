@@ -11,6 +11,8 @@ from bioetl.infrastructure.config.chembl_policy_registry_loader import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 class TestChemblPolicyRegistryLoader:
     """Tests for config-backed ChEMBL semantic-policy loading."""
 

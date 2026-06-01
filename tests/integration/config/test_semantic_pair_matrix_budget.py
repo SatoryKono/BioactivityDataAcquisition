@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 import csv
 from datetime import date
 import json
@@ -16,6 +18,8 @@ from scripts.engineering.qa.check_semantic_pair_matrix_budget import (
 from scripts.engineering.qa.check_semantic_registry_drift import (
     validate_semantic_registry_drift,
 )
+
+pytestmark = pytest.mark.integration
 
 PAIR_MATRIX_HEADERS = ",".join(
     [

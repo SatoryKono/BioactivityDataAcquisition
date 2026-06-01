@@ -140,7 +140,7 @@ class TestExtractListField:
         """Test that None input returns None."""
         assert extract_list_field(None, "id") is None
 
-    def test_empty_list_returns_none(self):
+    def test_extract_list_field__list_returns_none__08a483cc(self):
         """Test that empty list returns None."""
         assert extract_list_field([], "id") is None
 
@@ -206,11 +206,11 @@ class TestAggregateNestedLists:
 
         assert result == ["a", "b", "a", "c"]
 
-    def test_none_items_returns_none(self):
+    def test_aggregate_nested_lists__items_returns_none__86a97e92(self):
         """Test that None input returns None."""
         assert aggregate_nested_lists(None, "synonyms") is None
 
-    def test_empty_list_returns_none(self):
+    def test_aggregate_nested_lists__list_returns_none__97d6967f(self):
         """Test that empty list returns None."""
         assert aggregate_nested_lists([], "synonyms") is None
 
@@ -265,7 +265,7 @@ class TestNormalizeString:
         """Test that whitespace-only string returns None."""
         assert normalize_string("   ") is None
 
-    def test_none_returns_none(self):
+    def test_normalize_string__none_returns_none__9545bba9(self):
         """Test that None returns None."""
         assert normalize_string(None) is None
 
@@ -299,7 +299,7 @@ class TestParseDateField:
         """Test that invalid date returns None."""
         assert parse_date_field("invalid") is None
 
-    def test_none_returns_none(self):
+    def test_parse_date_field__none_returns_none__25e96006(self):
         """Test that None returns None."""
         assert parse_date_field(None) is None
 
@@ -355,7 +355,7 @@ class TestSafeExtract:
 
         assert safe_extract(record, "name") == "test"
 
-    def test_missing_key_returns_none(self):
+    def test_safe_extract__key_returns_none__f3ed0559(self):
         """Test missing key returns None by default."""
         record = {"name": "test"}
 
@@ -387,7 +387,7 @@ class TestSafeFloatReExport:
         """Test float conversion from string."""
         assert safe_float("3.14") == pytest.approx(3.14)
 
-    def test_none_returns_none(self):
+    def test_safe_float_re_export__none_returns_none__e1ed9bf3(self):
         """Test None returns None."""
         assert safe_float(None) is None
 
@@ -400,14 +400,14 @@ class TestSafeFloatReExport:
 class TestSafeIntReExport:
     """Tests for re-exported safe_int."""
 
-    def test_valid_string(self):
+    def test_safe_int_re_export__valid_string__6bc710f6(self):
         """Test int conversion from string."""
         assert safe_int("42") == 42
 
-    def test_none_returns_none(self):
+    def test_safe_int_re_export__none_returns_none__69aef675(self):
         """Test None returns None."""
         assert safe_int(None) is None
 
-    def test_invalid_returns_none(self):
+    def test_safe_int_re_export__invalid_returns_none__5c083246(self):
         """Test invalid input returns None."""
         assert safe_int("not a number") is None

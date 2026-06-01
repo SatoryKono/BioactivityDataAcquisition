@@ -16,21 +16,23 @@ from bioetl.interfaces.cli.commands.domains.composite.runtime import (
     parse_enrich_only,
 )
 
+pytestmark = pytest.mark.unit
+
 CACHED_BRONZE_PATH = "test-output/bronze"
 
 
 class TestParseEnrichOnly:
     """Tests for parse_enrich_only."""
 
-    def test_none_returns_none(self) -> None:
+    def test_parse_enrich_only__none_returns_none__1bab081f(self) -> None:
         """None input returns None."""
         assert parse_enrich_only(None) is None
 
-    def test_empty_string_returns_none(self) -> None:
+    def test_parse_enrich_only__string_returns_none__f1fe953f(self) -> None:
         """Empty string input returns None."""
         assert parse_enrich_only("") is None
 
-    def test_single_value(self) -> None:
+    def test_parse_enrich_only__single_value__3554e235(self) -> None:
         """Single enricher name returns single-element tuple."""
         result = parse_enrich_only("crossref")
         assert result == ("crossref",)

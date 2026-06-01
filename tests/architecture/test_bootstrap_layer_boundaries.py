@@ -13,9 +13,13 @@ See CLAUDE.md §2.1 Matrix of Imports.
 
 from __future__ import annotations
 
+import pytest
+
 import re
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 class TestBootstrapLayerBoundaries:
     """Tests for bootstrap package structure and import rules."""

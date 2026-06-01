@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 import yaml
@@ -9,6 +11,8 @@ from bioetl.composition.factories.pipeline.registry_validation import (
     validate_registry_manifest,
 )
 
+
+pytestmark = pytest.mark.unit
 
 class _DummyTransformer:
     def transform(self) -> None:  # pragma: no cover - signature marker only

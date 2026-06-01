@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 MIRROR_PATHS = (
     Path(".github/ISSUES/TECH-DEBT-ZERO-BURNDOWN-EPIC.md"),

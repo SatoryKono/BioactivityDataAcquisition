@@ -100,7 +100,7 @@ class TestServicesBuilderCreateBatchProcessingComponents:
     @patch(
         "bioetl.composition.factories.services.builder.create_batch_processing_components"
     )
-    def test_delegates_to_module_function__test_services_builder_create_batch_processing_components_factories_services_test_builder_unit_103(
+    def test_components_factories_services_builder_103__7afb2d2c(
         self, mock_create: MagicMock
     ) -> None:
         """Static method delegates to create_batch_processing_components."""
@@ -161,7 +161,7 @@ class TestServicesBuilderCreateBatchExecutorFromPipeline:
     @patch(
         "bioetl.composition.factories.services.builder.create_batch_executor_from_pipeline"
     )
-    def test_extracts_callbacks_and_delegates(
+    def test_executor_from_pipeline__and_delegates__bf3019d8(
         self,
         mock_create_be: MagicMock,
         mock_extract_cb: MagicMock,

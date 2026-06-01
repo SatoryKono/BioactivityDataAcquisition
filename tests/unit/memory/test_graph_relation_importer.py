@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 import json
 from pathlib import Path
 
@@ -18,6 +20,8 @@ from memory.graph.importers.expanded_json import (
     write_expanded_graph_relation_artifacts,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def _write_expanded_graph(path: Path) -> None:
     payload = {

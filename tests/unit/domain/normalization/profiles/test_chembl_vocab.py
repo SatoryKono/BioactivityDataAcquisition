@@ -16,6 +16,8 @@ from bioetl.domain.schemas.constants import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 def test_chembl_enum_returns_immutable_profile_vocabularies() -> None:
     assert chembl_enum("activity", "standard_type") == ACTIVITY_STANDARD_TYPES
     assert chembl_enum("activity", "assay_type") == ASSAY_TYPES

@@ -33,7 +33,7 @@ class SampleModel(BaseModel):
 class TestRecordValidationResult:
     """Test RecordValidationResult dataclass."""
 
-    def test_default_values(self) -> None:
+    def test_validation_result__default_values__120cfcf3(self) -> None:
         """Test default field values."""
         result = RecordValidationResult()
         assert result.record is None
@@ -73,7 +73,7 @@ class TestRecordValidationResult:
 class TestValidateRecord:
     """Test validate_record function."""
 
-    def test_successful_validation(self) -> None:
+    def test_validate_record__validation__865ac5f8(self) -> None:
         """Test successful record validation."""
         record: dict[str, Any] = {"id": "1", "name": "test", "value": 10}
         result = validate_record(record, SampleModel)
@@ -188,7 +188,7 @@ class TestValidateRecords:
         assert results[1].is_valid is False
         assert results[2].is_valid is True
 
-    def test_empty_records(self) -> None:
+    def test_validate_records__empty_records__e99fec9b(self) -> None:
         """Test validation of empty record list."""
         results = list(validate_records([], SampleModel))
         assert results == []

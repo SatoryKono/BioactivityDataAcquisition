@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 from scripts.engineering.qa.report_function_length_inventory import _build_payload
@@ -9,6 +11,8 @@ from scripts.engineering.qa.report_function_length_inventory import (
 )
 from scripts.engineering.qa.report_function_length_inventory import FunctionLengthEntry
 
+
+pytestmark = pytest.mark.unit
 
 def test_scan_near_threshold_functions_returns_sorted_entries(tmp_path: Path) -> None:
     source_root = tmp_path / "src"

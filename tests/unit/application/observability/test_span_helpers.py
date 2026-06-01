@@ -118,7 +118,7 @@ class TestTracedAsyncOperation:
     """Tests for async traced_async_operation context manager."""
 
     @pytest.mark.asyncio
-    async def test_creates_span_with_name_and_attributes__test_traced_async_operation_application_observability_test_span_helpers_121(
+    async def test_operation_observability_span_helpers_121__0a437a1e(
         self, mock_tracer
     ):
         """Test span is created with correct name and attributes."""
@@ -133,7 +133,7 @@ class TestTracedAsyncOperation:
         )
 
     @pytest.mark.asyncio
-    async def test_span_enter_and_exit_called(self, mock_tracer):
+    async def test_traced_async_operation__and_exit_called__940c3059(self, mock_tracer):
         """Test span __enter__ and __exit__ are called."""
         tracer, _, span = mock_tracer
 
@@ -144,7 +144,7 @@ class TestTracedAsyncOperation:
         span.__exit__.assert_called_once_with(None, None, None)
 
     @pytest.mark.asyncio
-    async def test_span_closed_on_exception(self, mock_tracer):
+    async def test_traced_async_operation__closed_on_exception__bcb1033f(self, mock_tracer):
         """Test span is closed even when exception occurs."""
         tracer, _, span = mock_tracer
 
@@ -155,7 +155,7 @@ class TestTracedAsyncOperation:
         span.__exit__.assert_called_once_with(None, None, None)
 
     @pytest.mark.asyncio
-    async def test_exception_recorded_on_span(self, mock_tracer):
+    async def test_traced_async_operation__recorded_on_span__0b8459ca(self, mock_tracer):
         """Test exception is recorded on span."""
         tracer, _, span = mock_tracer
 
@@ -168,7 +168,7 @@ class TestTracedAsyncOperation:
         span.record_exception.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_can_set_attributes_inside_context__test_traced_async_operation_application_observability_test_span_helpers_169(
+    async def test_operation_observability_span_helpers_169__24868df6(
         self, mock_tracer
     ):
         """Test attributes can be set inside async context."""

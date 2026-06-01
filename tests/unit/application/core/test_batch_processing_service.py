@@ -198,7 +198,7 @@ class TestBatchProcessingOutcome:
         with pytest.raises(AttributeError):
             output.quarantined_count = 1  # type: ignore[misc]
 
-    def test_fields_accessible(self):
+    def test_processing_outcome__fields_accessible__6e9a04c3(self):
         """All fields are accessible after construction."""
         batch_id = BatchID(uuid4())
         bronze = MagicMock()

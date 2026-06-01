@@ -30,7 +30,7 @@ BASE_KWARGS = {
 class TestSubcellularFraction:
     """Tests for SubcellularFraction entity."""
 
-    def test_valid_creation_minimal(self) -> None:
+    def test_subcellular_fraction__creation_minimal__42f8e0de(self) -> None:
         """Test creating SubcellularFraction with required fields."""
         sf = SubcellularFraction(
             **BASE_KWARGS,
@@ -40,7 +40,7 @@ class TestSubcellularFraction:
         assert sf.assay_count is None
         assert sf.example_assay_id is None
 
-    def test_valid_creation_full(self) -> None:
+    def test_subcellular_fraction__valid_creation_full__7f46aeb9(self) -> None:
         """Test creating SubcellularFraction with all fields."""
         sf = SubcellularFraction(
             **BASE_KWARGS,
@@ -86,7 +86,7 @@ class TestSubcellularFraction:
         )
         assert sf.assay_count == 0
 
-    def test_is_frozen(self) -> None:
+    def test_subcellular_fraction__is_frozen__04248875(self) -> None:
         """Test SubcellularFraction is immutable."""
         sf = SubcellularFraction(
             **BASE_KWARGS,
@@ -121,7 +121,7 @@ class TestSubcellularFraction:
 class TestCompoundRecord:
     """Tests for CompoundRecord entity."""
 
-    def test_valid_creation(self) -> None:
+    def test_compound_record__valid_creation__5f79004e(self) -> None:
         """Test creating a valid CompoundRecord."""
         cr = CompoundRecord(
             **BASE_KWARGS,
@@ -187,7 +187,7 @@ class TestCompoundRecord:
                 src_id=0,
             )
 
-    def test_empty_molecule_id_raises(self) -> None:
+    def test_compound_record__molecule_id_raises__b8d33ee2(self) -> None:
         """Test that empty molecule_id raises ValueError."""
         with pytest.raises(ValueError, match="molecule_id is required"):
             CompoundRecord(
@@ -209,7 +209,7 @@ class TestCompoundRecord:
                 src_id=1,
             )
 
-    def test_is_frozen(self) -> None:
+    def test_compound_record__is_frozen__791c0888(self) -> None:
         """Test CompoundRecord is immutable."""
         cr = CompoundRecord(
             **BASE_KWARGS,
@@ -231,7 +231,7 @@ class TestCompoundRecord:
 class TestAssayParameters:
     """Tests for AssayParameters entity."""
 
-    def test_valid_creation_minimal(self) -> None:
+    def test_assay_parameters__creation_minimal__ee6e2754(self) -> None:
         """Test creating AssayParameters with required fields only."""
         ap = AssayParameters(
             **BASE_KWARGS,
@@ -244,7 +244,7 @@ class TestAssayParameters:
         assert ap.value is None
         assert ap.units is None
 
-    def test_valid_creation_full(self) -> None:
+    def test_assay_parameters__valid_creation_full__e6ce72be(self) -> None:
         """Test creating AssayParameters with all fields."""
         ap = AssayParameters(
             **BASE_KWARGS,
@@ -293,7 +293,7 @@ class TestAssayParameters:
                 assay_id="INVALID123",
             )
 
-    def test_empty_assay_id_raises(self) -> None:
+    def test_assay_parameters__assay_id_raises__e07e408a(self) -> None:
         """Test that empty assay_id raises ValueError."""
         with pytest.raises(ValueError, match="Invalid assay_id"):
             AssayParameters(
@@ -302,7 +302,7 @@ class TestAssayParameters:
                 assay_id="",
             )
 
-    def test_has_numeric_value_with_value(self) -> None:
+    def test_assay_parameters__value_with_value__57ad974c(self) -> None:
         """Test has_numeric_value returns True when value is set."""
         ap = AssayParameters(
             **BASE_KWARGS,
@@ -312,7 +312,7 @@ class TestAssayParameters:
         )
         assert ap.has_numeric_value() is True
 
-    def test_has_numeric_value_with_standard_value(self) -> None:
+    def test_assay_parameters__with_standard_value__edc79494(self) -> None:
         """Test has_numeric_value returns True when standard_value is set."""
         ap = AssayParameters(
             **BASE_KWARGS,
@@ -331,7 +331,7 @@ class TestAssayParameters:
         )
         assert ap.has_numeric_value() is False
 
-    def test_has_text_value_with_text(self) -> None:
+    def test_assay_parameters__text_value_with_text__e467b6cd(self) -> None:
         """Test has_text_value returns True when text_value is set."""
         ap = AssayParameters(
             **BASE_KWARGS,
@@ -341,7 +341,7 @@ class TestAssayParameters:
         )
         assert ap.has_text_value() is True
 
-    def test_has_text_value_with_standard_text(self) -> None:
+    def test_assay_parameters__with_standard_text__9c5a4b99(self) -> None:
         """Test has_text_value returns True when standard_text_value is set."""
         ap = AssayParameters(
             **BASE_KWARGS,
@@ -360,7 +360,7 @@ class TestAssayParameters:
         )
         assert ap.has_text_value() is False
 
-    def test_get_comparable_value_prefers_standard(self) -> None:
+    def test_assay_parameters__prefers_standard__fa027b51(self) -> None:
         """Test get_comparable_value prefers standard over raw values."""
         ap = AssayParameters(
             **BASE_KWARGS,
@@ -375,7 +375,7 @@ class TestAssayParameters:
         assert val == pytest.approx(10000.0)
         assert units == "nM"
 
-    def test_get_comparable_value_falls_back_to_raw(self) -> None:
+    def test_assay_parameters__falls_back_to_raw__bd0e18f4(self) -> None:
         """Test get_comparable_value falls back to raw when standard is None."""
         ap = AssayParameters(
             **BASE_KWARGS,

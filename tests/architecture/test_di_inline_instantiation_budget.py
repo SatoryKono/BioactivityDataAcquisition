@@ -8,10 +8,14 @@ REQ-ARCH-DI-012:
 
 from __future__ import annotations
 
+import pytest
+
 import ast
 from pathlib import Path
 from typing import NamedTuple
 
+
+pytestmark = pytest.mark.architecture
 
 APPLICATION_DIR = Path("src/bioetl/application")
 EXCEPTION_MARKERS = ("EXC-002", "EXC-003")

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 from typing import Any
 
@@ -20,6 +22,8 @@ from scripts.data_quality.inventory_silver_filters_migration import (
     write_json,
     write_markdown,
 )
+
+pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
 INVENTORY_PATH = ROOT / "configs" / "quality" / "silver_filter_boundary_inventory.yaml"

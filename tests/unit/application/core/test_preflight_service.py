@@ -127,7 +127,7 @@ def preflight_service(pipeline_config, mock_context, mock_logger, mock_metrics):
 class TestPreflightServiceInit:
     """Tests for PreflightService initialization."""
 
-    def test_initialization(
+    def test_preflight_service_init__initialization__90ae4a47(
         self, pipeline_config, mock_context, mock_logger, mock_metrics
     ):
         """Test preflight service initializes correctly."""

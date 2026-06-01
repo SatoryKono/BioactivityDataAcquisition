@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.infrastructure.config.source_normalizers.source import (
     normalize_source_config,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_normalize_source_config_rejects_retired_transport_aliases() -> None:
     raw = {

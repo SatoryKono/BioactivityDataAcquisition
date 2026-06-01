@@ -16,6 +16,8 @@ from bioetl.domain.normalization.join_keys import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 def _iter_join_keys(value: object) -> set[str]:
     if isinstance(value, dict):
         keys = set(value.get("join_keys", ()) or ())
@@ -30,7 +32,7 @@ def _iter_join_keys(value: object) -> set[str]:
     return set()
 
 
-def test_normalize_join_key_text_applies_trim_and_lowercase_for_doi() -> None:
+def test_join_keys__lowercase_for_doi__f5da2aef() -> None:
     assert (
         normalize_join_key_text(" https://doi.org/10.1000/ABC ", key="doi")
         == "10.1000/abc"

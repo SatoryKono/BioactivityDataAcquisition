@@ -33,7 +33,15 @@ _ARCHITECTURE_CACHE_DIR = Path(
         str(Path(tempfile.gettempdir()) / "bioetl-architecture-cache"),
     )
 )
-_TEXT_CACHE_NAMES_WITHOUT_DISK = frozenset({"docs-text"})
+# Large mounted-worktree text caches are faster to rebuild in-memory once per
+# session than to re-stat and pickle under the global per-test timeout.
+_TEXT_CACHE_NAMES_WITHOUT_DISK = frozenset(
+    {
+        "docs-text",
+        "source-content",
+        "test-content",
+    }
+)
 
 
 def _list_python_files(root: Path) -> list[Path]:
@@ -265,7 +273,7 @@ def _parse_ast_cache_entry(item: tuple[Path, str]) -> tuple[Path, ast.Module | N
 
 def _read_ast_cache_entries(
     cached_text: dict[Path, str],
-    max_workers: int,
+    _max_workers: int,
 ) -> dict[Path, ast.Module]:
     """Parse cached text payloads into ASTs.
 
@@ -478,7 +486,7 @@ def config_yaml_cache(
 
 
 def _subprocess_cache_dependency_paths(
-    command: list[str],
+    _command: list[str],
     cwd: Path | None,
 ) -> list[Path]:
     """Resolve conservative cache dependencies for repo-wide scanner subprocesses."""

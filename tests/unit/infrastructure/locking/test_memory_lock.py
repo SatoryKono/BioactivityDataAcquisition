@@ -242,7 +242,7 @@ class TestMemoryLockTTL:
         await fast_ttl_lock.aclose()
 
     @pytest.mark.asyncio
-    async def test_heartbeat_extends_ttl(self, fast_ttl_lock, fake_monotonic):
+    async def test_lock_memory_lock_t_t_l__extends_ttl__6750e69a(self, fast_ttl_lock, fake_monotonic):
         """Test that heartbeat extends the lock TTL."""
         # Acquire lock with TTL
         await fast_ttl_lock.acquire(

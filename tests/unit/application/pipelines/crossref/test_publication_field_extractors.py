@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.application.pipelines.crossref._publication_field_extractors import (
     extract_content_domain,
     extract_dates,
@@ -12,6 +14,8 @@ from bioetl.application.pipelines.crossref._publication_field_extractors import 
     extract_published_date,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_extract_journal_and_pagination_fields() -> None:
     publication = {

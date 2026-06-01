@@ -207,7 +207,7 @@ class TestNoOpValidator:
         assert result.valid is True
         assert result.errors == []
 
-    def test_validate_empty_records_returns_valid(self):
+    def test_no_op_validator__returns_valid__8377b770(self):
         """Test that empty records also returns valid."""
         validator = NoOpValidator()
         result = validator.validate([])
@@ -225,14 +225,14 @@ class TestNoOpValidator:
 class TestPanderaGoldValidator:
     """Tests for PanderaGoldValidator."""
 
-    def test_validate_empty_records_returns_valid(self):
+    def test_pandera_gold_validator__returns_valid__0224987f(self):
         """Test that empty records list returns valid result."""
         validator = PanderaGoldValidator()
         result = validator.validate([])
         assert result.valid is True
         assert result.errors == []
 
-    def test_validate_without_schema_returns_valid(self):
+    def test_pandera_gold_validator__schema_returns_valid__694d357a(self):
         """Test that validation without schema returns valid (non-strict mode)."""
         validator = PanderaGoldValidator(schema=None, strict=False)
         records = [{"entity_id": "CHEMBL123", "value": 5.5}]
@@ -240,7 +240,7 @@ class TestPanderaGoldValidator:
         assert result.valid is True
         assert result.errors == []
 
-    def test_validate_without_schema_strict_mode_returns_invalid(self):
+    def test_pandera_gold_validator__mode_returns_invalid__da537abc(self):
         """Test that validation without schema in strict mode returns invalid."""
         validator = PanderaGoldValidator(schema=None, strict=True)
         records = [{"entity_id": "CHEMBL123", "value": 5.5}]
@@ -248,7 +248,7 @@ class TestPanderaGoldValidator:
         assert result.valid is False
         assert "Gold schema is required but not provided" in result.errors
 
-    def test_validate_with_schema_valid_records(self):
+    def test_pandera_gold_validator__schema_valid_records__d3f54fff(self):
         """Test validation passes for records matching schema."""
         import pandera as pa
 

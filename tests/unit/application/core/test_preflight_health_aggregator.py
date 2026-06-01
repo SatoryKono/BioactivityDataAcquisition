@@ -332,7 +332,7 @@ class TestHealthAggregatorPublicationBoundary:
     """_HealthAggregator must stay a pure report producer."""
 
     @pytest.mark.asyncio
-    async def test_check_all_does_not_emit_direct_metrics__test_health_aggregator_publication_boundary_application_core_test_preflight_health_aggregator_335(
+    async def test_core_preflight_health_aggregator_335__0745d0ac(
         self,
         health_aggregator: _HealthAggregator,
         mock_services: MagicMock,
@@ -342,7 +342,7 @@ class TestHealthAggregatorPublicationBoundary:
         assert isinstance(report, HealthReport)
 
     @pytest.mark.asyncio
-    async def test_check_all_does_not_emit_direct_logs__test_health_aggregator_publication_boundary_application_core_test_preflight_health_aggregator_345(
+    async def test_core_preflight_health_aggregator_345__95464cd8(
         self,
         health_aggregator: _HealthAggregator,
         mock_services: MagicMock,
@@ -355,7 +355,7 @@ class TestHealthAggregatorPublicationBoundary:
         mock_logger.error.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_report_preserves_enhanced_probe_metadata(
+    async def test_publication_boundary__probe_metadata__ad5a105f(
         self,
         mock_logger: MagicMock,
         mock_storage: MagicMock,

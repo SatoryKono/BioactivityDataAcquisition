@@ -8,6 +8,8 @@ from bioetl.domain.behavior.dq_policy_resolver import DQPolicyResolver
 from bioetl.domain.types.dq_contracts import DQDisposition, DQViolationKind
 
 
+pytestmark = pytest.mark.unit
+
 class TestDQPolicyResolverInitialization:
     """Test DQPolicyResolver initialization and basic functionality."""
 
@@ -79,7 +81,7 @@ class TestPolicyReferenceBuilding:
         assert policy_ref.rule_bundle_version == "1.0.0"
         assert policy_ref.policy_hash is not None
 
-    def test_policy_hash_stability(self):
+    def test_reference_building__hash_stability__16a21443(self):
         """Test that policy hash is stable for same configuration."""
         config1 = DQConfig(
             contract_ref="test",

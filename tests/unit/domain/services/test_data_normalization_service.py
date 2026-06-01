@@ -16,6 +16,8 @@ from bioetl.domain.behavior import (
 )
 from bioetl.domain.behavior._author_helpers import hash_author_name
 
+pytestmark = pytest.mark.unit
+
 
 class TestDefaultDataNormalizerInit:
     """Tests for service initialization."""
@@ -26,7 +28,7 @@ class TestDefaultDataNormalizerInit:
         assert service.config.min_publication_year == 1500
         assert service.config.max_publication_year == 2100
 
-    def test_custom_config(self) -> None:
+    def test_data_normalizer_init__custom_config__42074d1c(self) -> None:
         """Test service accepts custom config."""
         config = DataNormalizationConfig(min_publication_year=1900)
         service = DefaultDataNormalizer(config=config)
@@ -54,7 +56,7 @@ class TestNormalizeDoi:
             ("", None),
         ],
     )
-    def test_normalize_doi(self, doi: str | None, expected: str | None) -> None:
+    def test_service_normalize_doi__normalize_doi__47ffadec(self, doi: str | None, expected: str | None) -> None:
         """Test DOI normalization."""
         service = DefaultDataNormalizer()
         assert service.normalize_doi(doi) == expected
@@ -83,7 +85,7 @@ class TestNormalizePmid:
             (False, None),
         ],
     )
-    def test_normalize_pmid(self, pmid: str | int | None, expected: str | None) -> None:
+    def test_case__46f28ca67b(self, pmid: str | int | None, expected: str | None) -> None:
         """Test PMID normalization."""
         service = DefaultDataNormalizer()
         assert service.normalize_pmid(pmid) == expected
@@ -194,7 +196,7 @@ class TestStripHtmlTags:
             ("Line\nbreak", "Line break"),
         ],
     )
-    def test_strip_html_tags(self, text: str | None, expected: str | None) -> None:
+    def test_strip_html_tags__strip_html_tags__21abb511(self, text: str | None, expected: str | None) -> None:
         """Test HTML tag stripping with entity decoding."""
         service = DefaultDataNormalizer()
         assert service.strip_html_tags(text) == expected
@@ -241,7 +243,7 @@ class TestNormalizeString:
             (None, None),
         ],
     )
-    def test_normalize_string(self, value: str | None, expected: str | None) -> None:
+    def test_normalize_string__normalize_string__8f8709de(self, value: str | None, expected: str | None) -> None:
         """Test string normalization."""
         service = DefaultDataNormalizer()
         assert service.normalize_string(value) == expected
@@ -275,7 +277,7 @@ class TestParseAuthorsToList:
             ("   ", []),
         ],
     )
-    def test_parse_authors_to_list(
+    def test_parse_authors_to_list__authors_to_list__70075eba(
         self, input_authors: list[str] | str | None, expected: list[str]
     ) -> None:
         """Test parsing various author input formats."""
@@ -328,7 +330,7 @@ class TestNormalizePartialDate:
             ("2024-3", None),  # Invalid: month should be 2 digits
         ],
     )
-    def test_normalize_partial_date(
+    def test_normalize_partial_date__partial_date__55f1163e(
         self, date_str: str | None, expected: str | None
     ) -> None:
         """Test partial date normalization with end of period strategy."""
@@ -364,7 +366,7 @@ class TestFormatDateParts:
             ([[]], None),
         ],
     )
-    def test_format_date_parts(
+    def test_format_date_parts__format_date_parts__c0d27079(
         self, date_parts: list[list[int]] | None, expected: str | None
     ) -> None:
         """Test date-parts formatting with end-of-period normalization."""
@@ -375,14 +377,14 @@ class TestFormatDateParts:
 class TestDataNormalizationConfig:
     """Tests for DataNormalizationConfig."""
 
-    def test_default_values(self) -> None:
+    def test_normalization_config__default_values__49c396bf(self) -> None:
         """Test default configuration values."""
         config = DataNormalizationConfig()
         assert config.min_publication_year == 1500
         assert config.max_publication_year == 2100
         assert config.default_pii_salt == ""
 
-    def test_custom_values(self) -> None:
+    def test_normalization_config__custom_values__a3041936(self) -> None:
         """Test custom configuration values."""
         config = DataNormalizationConfig(
             min_publication_year=1900,
@@ -423,7 +425,7 @@ class TestHashPii:
     Per RULES.md §5.4: sha256(lowercase(value) + SALT)
     """
 
-    def test_hash_consistency(self) -> None:
+    def test_service_hash_pii__hash_consistency__ab63656c(self) -> None:
         """Test that same input produces same hash."""
         hash1 = hash_author_name("John Doe", "salt123")
         hash2 = hash_author_name("John Doe", "salt123")
@@ -448,7 +450,7 @@ class TestHashPii:
         hash_mixed = hash_author_name("John Doe", "salt")
         assert hash_lower == hash_upper == hash_mixed
 
-    def test_whitespace_normalization(self) -> None:
+    def test_service_hash_pii__normalization__5832f0b0(self) -> None:
         """Test that leading/trailing whitespace is stripped before hashing."""
         hash_clean = hash_author_name("john doe", "salt")
         hash_padded = hash_author_name("  john doe  ", "salt")

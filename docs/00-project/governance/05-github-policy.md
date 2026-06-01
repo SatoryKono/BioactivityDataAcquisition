@@ -255,6 +255,9 @@ File: `.github/dependabot.yml`
 ### Supply Chain Security
 
 - All GitHub Actions **MUST** be SHA-pinned (e.g., `actions/checkout@<sha>`)
+- `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the
+  pinned-action allowlist across `.github/workflows/**` and composite actions
+  under `.github/actions/**`.
 - Trivy scans Docker images for CRITICAL and HIGH vulnerabilities
 - `pip-audit --strict` checks all Python dependencies
 - `detect-secrets` prevents credential leaks in commits
@@ -371,6 +374,9 @@ permissions:
 | `security-events: write` | docker.yml (Trivy SARIF upload)                   |
 | `id-token: write`        | release.yml (trusted publishing)                  |
 | `issues: write`          | contract-tests.yml (auto-create issue on failure) |
+
+`contract-tests.yml` keeps `contents: read` as the workflow baseline and grants
+`issues: write` only to the live contract-test job that creates a failure issue.
 
 ### Concurrency
 

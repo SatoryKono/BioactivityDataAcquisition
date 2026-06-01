@@ -10,6 +10,8 @@ import pytest
 from bioetl.infrastructure.export import ExportWriterAdapter
 
 
+pytestmark = pytest.mark.unit
+
 @pytest.fixture
 def table() -> pa.Table:
     return pa.Table.from_pydict({"col1": ["a", "b"], "col2": [1, 2]})

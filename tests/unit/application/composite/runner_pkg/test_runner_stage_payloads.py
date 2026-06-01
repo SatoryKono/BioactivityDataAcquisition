@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.application.composite.runtime_models import CompositeExecutionContext
 from bioetl.application.composite.runner_pkg.runner_stage_payloads import (
     build_composite_run_completion_metrics,
@@ -21,6 +23,8 @@ from bioetl.domain.composite.result import (
     SeedResult,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_build_dependency_stage_details_returns_stable_payload() -> None:
     details = build_dependency_stage_details(["dep_b", "dep_a"])

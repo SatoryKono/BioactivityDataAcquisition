@@ -11,6 +11,8 @@ from bioetl.infrastructure.adapters.http._client_retry_models import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 class TestHTTPClientRetryRefactoring:
     """Test suite for refactored HTTP client retry logic."""
 

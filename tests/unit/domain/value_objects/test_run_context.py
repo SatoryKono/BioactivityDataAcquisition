@@ -24,7 +24,7 @@ def _now_utc() -> datetime:
 class TestRunContextCreation:
     """Tests for RunContext direct construction."""
 
-    def test_minimal_creation(self) -> None:
+    def test_run_context_creation__minimal_creation__f10895be(self) -> None:
         """Test creating RunContext with required fields only."""
         run_id = _make_run_id()
         started_at = _now_utc()
@@ -48,7 +48,7 @@ class TestRunContextCreation:
         assert ctx.git_commit is None
         assert ctx.config_hash is None
 
-    def test_full_creation(self) -> None:
+    def test_run_context_creation__full_creation__d85e8674(self) -> None:
         """Test creating RunContext with all optional fields."""
         run_id = _make_run_id()
         started_at = _now_utc()
@@ -71,7 +71,7 @@ class TestRunContextCreation:
         assert ctx.git_commit == "abc123def456"
         assert ctx.config_hash == "sha256:deadbeef"
 
-    def test_is_frozen(self) -> None:
+    def test_run_context_creation__is_frozen__93f767f4(self) -> None:
         """Test that RunContext is immutable (frozen dataclass)."""
         ctx = RunContext(
             run_id=_make_run_id(),
@@ -102,7 +102,7 @@ class TestRunContextValidation:
                 entity="activity",
             )
 
-    def test_empty_pipeline_name_raises(self) -> None:
+    def test_run_context_validation__pipeline_name_raises__0970ebe9(self) -> None:
         """Test that empty pipeline_name raises ValueError."""
         with pytest.raises(ValueError, match="pipeline_name cannot be empty"):
             RunContext(
@@ -114,7 +114,7 @@ class TestRunContextValidation:
                 entity="activity",
             )
 
-    def test_empty_provider_raises(self) -> None:
+    def test_run_context_validation__provider_raises__ef3431e4(self) -> None:
         """Test that empty provider raises ValueError."""
         with pytest.raises(ValueError, match="provider cannot be empty"):
             RunContext(
@@ -126,7 +126,7 @@ class TestRunContextValidation:
                 entity="activity",
             )
 
-    def test_empty_entity_raises(self) -> None:
+    def test_run_context_validation__empty_entity_raises__8e487248(self) -> None:
         """Test that empty entity raises ValueError."""
         with pytest.raises(ValueError, match="entity cannot be empty"):
             RunContext(

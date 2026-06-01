@@ -24,7 +24,7 @@ class _ConcreteMaintMixin(SilverWriterMaintenanceMixin):
         return self._base_path / name
 
 
-def test_clear_specific_table(noop_logger, tmp_path: Path) -> None:
+def test_writer_filesystem__clear_specific_table__81bdf630(noop_logger, tmp_path: Path) -> None:
     """Clear should remove the targeted Delta table directory."""
     table_path = tmp_path / "chembl" / "activity"
     delta_log = table_path / "_delta_log"

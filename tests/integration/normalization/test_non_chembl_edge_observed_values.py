@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import pytest
+
 import json
 from pathlib import Path
 
+
+pytestmark = pytest.mark.integration
 
 def _load_jsonl(path: str) -> list[dict[str, object]]:
     return [

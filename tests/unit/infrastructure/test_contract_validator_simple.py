@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.types.dq_contracts import DQDisposition, DQViolationKind
 from bioetl.infrastructure.validation.contract_validator import (
     ContractAwareGoldValidator,
 )
 
+
+pytestmark = pytest.mark.unit
 
 class TestContractAwareGoldValidatorSmoke:
     """Smoke tests focused on policy resolver behavior."""
@@ -59,7 +63,7 @@ class TestContractAwareGoldValidatorSmoke:
 class TestProvenanceInformationSimple:
     """Smoke tests for provenance on generated rule outcomes."""
 
-    def test_outcome_provenance(self) -> None:
+    def test_information_simple__outcome_provenance__2cd09380(self) -> None:
         """Outcomes should preserve contract provenance and config source path."""
         config = DQConfig(
             contract_ref="provenance_test",
@@ -89,7 +93,7 @@ class TestProvenanceInformationSimple:
 class TestDispositionResolutionSimple:
     """Smoke tests for default and mode-adjusted disposition resolution."""
 
-    def test_default_disposition_applied__test_disposition_resolution_simple_unit_infrastructure_test_contract_validator_simple_92(
+    def test_simple_contract_validator_simple_92__0a4cad1c(
         self,
     ) -> None:
         """Default disposition should apply when no override exists."""

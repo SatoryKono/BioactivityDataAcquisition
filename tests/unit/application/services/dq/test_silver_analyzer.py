@@ -217,7 +217,7 @@ class TestCheckNullRates:
         _, overall = analyzer._statistics.check_null_rates(df)
         assert overall == pytest.approx(0.5)
 
-    def test_empty_dataframe(self, analyzer: SilverDQAnalyzer) -> None:
+    def test_check_null_rates__empty_dataframe__55e582a2(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"a": pl.Series([], dtype=pl.Int64)})
         _results, overall = analyzer._statistics.check_null_rates(df)
         assert overall == pytest.approx(0.0)
@@ -485,7 +485,7 @@ class TestCheckKeyNullability:
         assert result["violations"][0]["field"] == "id"
         assert result["violations"][0]["null_count"] == 1
 
-    def test_missing_column_skipped(self, analyzer: SilverDQAnalyzer) -> None:
+    def test_check_key_nullability__column_skipped__15dce107(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"other": [1, 2, 3]})
         rules = [{"field": "id", "key_type": "merge", "nullable": False}]
         result = analyzer._threshold.check_key_nullability(df, rules)

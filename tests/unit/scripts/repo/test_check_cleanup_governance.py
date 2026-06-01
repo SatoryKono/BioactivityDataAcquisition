@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 import yaml
 
 from scripts.engineering.repo import check_cleanup_governance as module
 
+
+pytestmark = pytest.mark.unit
 
 def _write_config(tmp_path: Path, allowed_patterns: list[str] | None = None) -> None:
     config_path = tmp_path / module.CONFIG_PATH

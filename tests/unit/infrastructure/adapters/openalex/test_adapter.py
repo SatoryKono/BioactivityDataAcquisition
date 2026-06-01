@@ -26,6 +26,8 @@ from tests.helpers.adapter_runtime import (
     build_http_adapter_runtime_kwargs,
 )
 
+pytestmark = pytest.mark.unit
+
 LEGACY_HTTP_DOI = "http" + "://doi.org/10.1038/test"
 
 
@@ -89,7 +91,7 @@ class TestOpenAlexAdapter:
         assert adapter.api_key is None
         assert adapter.batch_size == 50  # Default
 
-    def test_post_init_preserves_injected_base_collaborators(
+    def test_open_alex_adapter__base_collaborators__521a1a6a(
         self, mock_http_client: MagicMock, logger: NoOpLogger
     ) -> None:
         """Dataclass adapter should delegate shared base initialization."""
@@ -298,7 +300,7 @@ class TestExtractDoiFromRecord:
         result = OpenAlexAdapter._extract_doi_from_record(record)
         assert result == "10.1016/j.test.2024"
 
-    def test_extract_doi_none(self) -> None:
+    def test_doi_from_record__extract_doi_none__6fef15cd(self) -> None:
         """Should return None for missing DOI."""
         record = {"doi": None}
         result = OpenAlexAdapter._extract_doi_from_record(record)
@@ -654,7 +656,7 @@ class TestHealthCheck:
     """Tests for health_check method."""
 
     @pytest.mark.asyncio
-    async def test_health_check_healthy(
+    async def test_adapter_health_check__health_check_healthy__e54148f5(
         self, adapter: OpenAlexAdapter, mock_http_client: MagicMock
     ) -> None:
         """Should return HEALTHY for successful response."""
@@ -667,7 +669,7 @@ class TestHealthCheck:
         assert result == HealthStatus.HEALTHY
 
     @pytest.mark.asyncio
-    async def test_health_check_degraded_on_transient_error(
+    async def test_adapter_health_check__on_transient_error__a98ca855(
         self, adapter: OpenAlexAdapter, mock_http_client: MagicMock
     ) -> None:
         """Should return DEGRADED for transient non-200 response."""
@@ -680,7 +682,7 @@ class TestHealthCheck:
         assert result == HealthStatus.DEGRADED
 
     @pytest.mark.asyncio
-    async def test_health_check_unhealthy_on_auth_error(
+    async def test_adapter_health_check__on_auth_error__339bf9b6(
         self, adapter: OpenAlexAdapter, mock_http_client: MagicMock
     ) -> None:
         """Should return UNHEALTHY for auth-related response codes."""

@@ -45,12 +45,12 @@ def adapter(mock_http_client: AsyncMock, mock_logger: MagicMock) -> PubMedAdapte
     )
 
 
-def test_request_count_starts_at_zero(adapter: PubMedAdapter) -> None:
+def test_request_metadata__count_starts_at_zero__ebe0eef7(adapter: PubMedAdapter) -> None:
     """New adapter instances should start with an empty request collector."""
     assert adapter.request_count == 0
 
 
-def test_get_source_metadata_returns_collector_state_and_clears_requests(
+def test_request_metadata__and_clears_requests__70bf0692(
     adapter: PubMedAdapter,
 ) -> None:
     """Metadata snapshot should reflect collector state and consume it."""
@@ -70,7 +70,7 @@ def test_get_source_metadata_returns_collector_state_and_clears_requests(
     assert adapter.request_count == 0
 
 
-def test_clear_request_collector_resets_request_count(adapter: PubMedAdapter) -> None:
+def test_request_metadata__resets_request_count__e1eb5603(adapter: PubMedAdapter) -> None:
     """Clearing the collector should drop accumulated request state."""
     adapter._request_collector.record_request(
         url=f"{ENTREZ_API_BASE}esearch.fcgi?db=pubmed&term=aspirin",

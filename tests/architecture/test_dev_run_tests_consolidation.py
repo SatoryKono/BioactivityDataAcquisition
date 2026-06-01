@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import pytest
+
 from tests.helpers import repo_root, run_repo_python
 
+
+pytestmark = pytest.mark.architecture
 
 SUPPORTED_DEV_TEST_WRAPPERS = {
     "scripts/engineering/dev/run_tests.sh": 'dirname "$0")/../../..',

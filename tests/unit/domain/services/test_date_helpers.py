@@ -18,7 +18,7 @@ class TestNormalizePartialDate:
         """Test that None input returns None."""
         assert normalize_partial_date(None) is None
 
-    def test_empty_string_returns_none(self) -> None:
+    def test_normalize_partial_date__string_returns_none__fdcfa2d7(self) -> None:
         """Test that empty string returns None."""
         assert normalize_partial_date("") is None
 
@@ -26,7 +26,7 @@ class TestNormalizePartialDate:
         """Test that whitespace-only string returns None."""
         assert normalize_partial_date("   ") is None
 
-    def test_full_date_unchanged(self) -> None:
+    def test_normalize_partial_date__full_date_unchanged__62e6b2a5(self) -> None:
         """Test that full YYYY-MM-DD date is returned unchanged."""
         assert normalize_partial_date("2024-03-15") == "2024-03-15"
 
@@ -92,11 +92,11 @@ class TestNormalizePartialDate:
 class TestFormatDateParts:
     """Tests for format_date_parts()."""
 
-    def test_none_input_returns_none(self) -> None:
+    def test_format_date_parts__input_returns_none__6eee72a5(self) -> None:
         """Test that None input returns None."""
         assert format_date_parts(None) is None
 
-    def test_empty_list_returns_none(self) -> None:
+    def test_format_date_parts__list_returns_none__007dd84e(self) -> None:
         """Test that empty list returns None."""
         assert format_date_parts([]) is None
 
@@ -155,7 +155,7 @@ class TestFormatDateParts:
             ([], None),
         ],
     )
-    def test_parametrized_cases(
+    def test_format_date_parts__parametrized_cases__86c75be0(
         self,
         date_parts: list[list[int]] | None,
         expected: str | None,

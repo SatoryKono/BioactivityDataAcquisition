@@ -12,6 +12,8 @@ from bioetl.domain.schemas.generated.registry import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 def test_generated_registry_exposes_entries_for_canonical_schema_inventory() -> None:
     assert CANONICAL_SCHEMA_REGISTRY
     assert all(

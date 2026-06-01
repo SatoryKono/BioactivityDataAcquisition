@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.infrastructure.adapters import pubmed as pubmed_pkg
 from bioetl.infrastructure.adapters.pubmed import models
 from bioetl.infrastructure.adapters.pubmed._search_models import (
@@ -9,6 +11,8 @@ from bioetl.infrastructure.adapters.pubmed._search_models import (
     PubMedSearchResult as SearchResultImpl,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_models_module_reexports_search_models() -> None:
     """Legacy models module should keep exposing search DTOs."""

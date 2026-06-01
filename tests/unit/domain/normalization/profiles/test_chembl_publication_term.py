@@ -8,6 +8,8 @@ from bioetl.domain.normalization.profiles import CHEMBL_PUBLICATION_TERM_PROFILE
 from bioetl.domain.schemas.constants import PUBLICATION_TERM_TYPES
 
 
+pytestmark = pytest.mark.unit
+
 @pytest.mark.parametrize(
     ("raw_value", "expected"),
     [

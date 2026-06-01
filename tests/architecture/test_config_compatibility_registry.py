@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import pytest
+
 from datetime import date
 from pathlib import Path
 from typing import Any
 
 import yaml
+
+pytestmark = pytest.mark.architecture
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 REGISTRY_PATH = (

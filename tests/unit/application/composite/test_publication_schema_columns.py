@@ -16,6 +16,8 @@ from bioetl.application.composite.column_service import ColumnOrderService
 from bioetl.domain.composite.config import ColumnGroupConfig
 
 
+pytestmark = pytest.mark.unit
+
 @pytest.fixture
 def publication_config() -> dict:
     """Load real publication composite config."""

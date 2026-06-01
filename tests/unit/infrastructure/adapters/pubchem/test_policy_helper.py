@@ -103,7 +103,7 @@ class TestIsValidInchikey:
         key3 = "BSY-RYM-XBX-UHFFFAOYSANNNN"
         assert len(key3) != 27 or is_valid_inchikey(key3) is False
 
-    def test_empty_string(self) -> None:
+    def test_is_valid_inchikey__empty_string__81a33ca5(self) -> None:
         assert is_valid_inchikey("") is False
 
 
@@ -124,7 +124,7 @@ class TestIterCidBatches:
         batches = list(iter_cid_batches(cids, batch_size=3))
         assert batches == [[10, 20, 30]]
 
-    def test_empty_list(self) -> None:
+    def test_iter_cid_batches__empty_list__746634d1(self) -> None:
         batches = list(iter_cid_batches([], batch_size=5))
         assert batches == []
 
@@ -166,7 +166,7 @@ class TestParseValidCids:
         assert result == []
         assert logger.warning.call_count == 2
 
-    def test_empty_list(self) -> None:
+    def test_parse_valid_cids__empty_list__4248ab8d(self) -> None:
         logger = MagicMock()
         result = parse_valid_cids([], logger=logger, provider_name="pc")
         assert result == []

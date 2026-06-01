@@ -21,18 +21,18 @@ from bioetl.domain.types_config_validation import ConfigValidationError
 class TestValidationResult:
     """Tests for ValidationResult frozen dataclass."""
 
-    def test_valid_result(self) -> None:
+    def test_validation_result__valid_result__142705b9(self) -> None:
         result = ValidationResult(valid=True)
         assert result.valid is True
         assert result.errors == []
 
-    def test_invalid_result_with_errors(self) -> None:
+    def test_validation_result__result_with_errors__599580a2(self) -> None:
         errors = ["field is required", "value out of range"]
         result = ValidationResult(valid=False, errors=errors)
         assert result.valid is False
         assert result.errors == errors
 
-    def test_frozen(self) -> None:
+    def test_validation_result__frozen__038a7a51(self) -> None:
         result = ValidationResult(valid=True)
         with pytest.raises(AttributeError):
             result.valid = False  # type: ignore[misc]

@@ -17,6 +17,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.architecture
+
 # Layers that should use LoggerPort in docstring examples
 CHECKED_DIRS = [
     Path("src/bioetl/application"),

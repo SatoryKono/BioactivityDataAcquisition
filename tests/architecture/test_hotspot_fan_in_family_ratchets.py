@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import pytest
+
 from scripts.engineering.qa.hotspot_family_metrics import (
     count_internal_fan_in,
     iter_family_python_files,
     load_scorecard,
 )
+
+pytestmark = pytest.mark.architecture
 
 _ENFORCED_RATCHET_STAGES = {"active", "reviewed-baseline"}
 

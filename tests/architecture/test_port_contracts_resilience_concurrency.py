@@ -13,6 +13,8 @@ import pytest
 
 from bioetl.domain.locking import FencingToken
 
+pytestmark = pytest.mark.architecture
+
 # ============================================================================
 # Error Condition Contract Tests
 # ============================================================================

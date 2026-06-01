@@ -88,7 +88,7 @@ async def test_write_gold_delegates() -> None:
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_write_bronze_passes_source_metadata() -> None:
+async def test_write_mixin_factory__source_metadata__69a0236a() -> None:
     """source_metadata is forwarded to bronze.write_bronze."""
     bronze = MagicMock()
     bronze.write_bronze = AsyncMock(return_value=MagicMock())

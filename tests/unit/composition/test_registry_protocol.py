@@ -10,6 +10,8 @@ import pytest
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 
 
+pytestmark = pytest.mark.unit
+
 class TestPipelineRegistryUnifiedAPI:
     """Test that PipelineRegistry has unified API methods."""
 

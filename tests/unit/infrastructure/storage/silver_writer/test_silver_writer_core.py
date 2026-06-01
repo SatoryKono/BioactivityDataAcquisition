@@ -19,14 +19,14 @@ SILVER_TABLE_PATH = str(TEST_ROOT / "silver" / "test" / "table")
 class TestSilverWriterInit:
     """Tests for SilverWriter initialization."""
 
-    def test_init_strips_trailing_slash(self, noop_logger):
+    def test_silver_writer_init__trailing_slash__73b7a51a(self, noop_logger):
         """Test that trailing slash is stripped from base_path."""
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         writer = SilverWriter(base_path="s3://bucket/path/", logger=noop_logger)
         assert writer.base_path == "s3://bucket/path"
 
-    def test_init_with_csv_exporter(self, noop_logger):
+    def test_silver_writer_init__with_csv_exporter__9233c03f(self, noop_logger):
         """Test initialization with CSV exporter."""
         from unittest.mock import MagicMock
 
@@ -40,7 +40,7 @@ class TestSilverWriterInit:
         )
         assert writer.csv_exporter is mock_exporter
 
-    def test_init_without_csv_exporter(self, noop_logger):
+    def test_silver_writer_init__without_csv_exporter__c9bf4a0d(self, noop_logger):
         """Test initialization without CSV exporter."""
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
@@ -705,7 +705,7 @@ class TestSilverWriterValidation:
         writer._write_single_target.assert_awaited_once()
 
     @pytest.mark.asyncio
-    async def test_write_silver_passes_explicit_runtime_provenance(self, noop_logger):
+    async def test_writer_validation__runtime_provenance__c516b986(self, noop_logger):
         """Public Silver write forwards provenance outside the row payload."""
         from datetime import UTC, datetime
         from unittest.mock import AsyncMock
@@ -815,7 +815,7 @@ class TestSilverWriterWriteModeEnum:
         assert SilverWriteMode.APPEND.value == "append"
         assert SilverWriteMode.DELETE.value == "delete"
 
-    def test_silver_write_mode_from_string(self):
+    def test_writer_write_mode_enum__mode_from_string__a1a1b7ae(self):
         """Test creating SilverWriteMode from string."""
         from bioetl.infrastructure.storage.silver_writer import SilverWriteMode
 

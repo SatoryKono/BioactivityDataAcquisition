@@ -20,6 +20,8 @@ from typing import TYPE_CHECKING
 import pytest
 import yaml
 
+pytestmark = pytest.mark.architecture
+
 if TYPE_CHECKING:
     from collections.abc import Iterator
 

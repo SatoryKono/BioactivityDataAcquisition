@@ -49,7 +49,7 @@ class TestSubcellularFractionTransformer:
     """Tests for SubcellularFractionTransformer."""
 
     @pytest.mark.asyncio
-    async def test_transform_valid_record(
+    async def test_fraction_transformer__valid_record__ef55e40c(
         self,
         transformer: SubcellularFractionTransformer,
         mock_context: PipelineContext,
@@ -160,7 +160,7 @@ class TestSubcellularFractionTransformer:
         assert result1["content_hash"] == result2["content_hash"]
 
     @pytest.mark.asyncio
-    async def test_entity_id_deterministic(
+    async def test_fraction_transformer__id_deterministic__2a7368f6(
         self,
         transformer: SubcellularFractionTransformer,
         mock_context: PipelineContext,

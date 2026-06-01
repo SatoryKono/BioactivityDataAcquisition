@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import pytest
+
 from typing import Protocol
 from typing import get_type_hints
 
 from bioetl.composition.factories.pipeline import construction_types
 
+
+pytestmark = pytest.mark.unit
 
 def test_pipeline_construction_protocols_expose_expected_public_contracts() -> None:
     """Construction protocol module should expose stable callable contracts."""

@@ -1,5 +1,7 @@
 """Tests for contract identity model."""
 
+import pytest
+
 from bioetl.domain.types.contract_identity import (
     CompatibilityLevel,
     ContractIdentity,
@@ -9,6 +11,8 @@ from bioetl.domain.types.contract_identity import (
 )
 from tests.helpers.clock import FIXED_TEST_TIME
 
+
+pytestmark = pytest.mark.unit
 
 def _utcnow_iso() -> str:
     """Return an aware UTC timestamp string for test fixtures."""

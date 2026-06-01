@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
 import pandera.pandas as pa
@@ -29,6 +31,8 @@ from scripts.docs.generate_pipeline_normalization_field_matrix import (
     ENTITY_SILVER_SCHEMA_REGISTRY,
     build_field_matrix_rows,
 )
+
+pytestmark = pytest.mark.architecture
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 INVENTORY_PATH = PROJECT_ROOT / "docs/03-data-model/json-field-typing-inventory.md"

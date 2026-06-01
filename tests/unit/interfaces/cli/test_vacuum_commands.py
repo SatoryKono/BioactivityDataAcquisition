@@ -80,7 +80,7 @@ def _create_vacuum_all_result(
 class TestVacuumCommand:
     """Tests for the vacuum command."""
 
-    def test_vacuum_help(self, cli_runner):
+    def test_vacuum_command__vacuum_help__73b0181b(self, cli_runner):
         """Test vacuum --help shows correct options."""
         result = cli_runner.invoke(cli, ["maintenance", "vacuum", "--help"])
 
@@ -89,7 +89,7 @@ class TestVacuumCommand:
         assert "--retention-days" in result.output
         assert "--dry-run" in result.output
 
-    def test_vacuum_success(self, cli_runner, mock_lifecycle_service):
+    def test_vacuum_command__vacuum_success__47371b34(self, cli_runner, mock_lifecycle_service):
         """Test successful vacuum operation."""
         with patch(
             "bioetl.interfaces.cli.commands.vacuum.get_lifecycle_service",
@@ -108,7 +108,7 @@ class TestVacuumCommand:
             dry_run=False,
         )
 
-    def test_vacuum_with_custom_retention(self, cli_runner, mock_lifecycle_service):
+    def test_vacuum_command__custom_retention__02c904ce(self, cli_runner, mock_lifecycle_service):
         """Test vacuum with custom retention days."""
         with patch(
             "bioetl.interfaces.cli.commands.vacuum.get_lifecycle_service",
@@ -125,7 +125,7 @@ class TestVacuumCommand:
             dry_run=False,
         )
 
-    def test_vacuum_dry_run(self, cli_runner, mock_lifecycle_service):
+    def test_vacuum_command__vacuum_dry_run__2913ed86(self, cli_runner, mock_lifecycle_service):
         """Test vacuum dry-run mode."""
         with patch(
             "bioetl.interfaces.cli.commands.vacuum.get_lifecycle_service",
@@ -168,7 +168,7 @@ class TestVacuumCommand:
 class TestVacuumAllCommand:
     """Tests for the vacuum-all command."""
 
-    def test_vacuum_all_help(self, cli_runner):
+    def test_vacuum_all_command__vacuum_all_help__4c45cb7d(self, cli_runner):
         """Test vacuum-all --help shows correct options."""
         result = cli_runner.invoke(cli, ["maintenance", "vacuum-all", "--help"])
 
@@ -177,7 +177,7 @@ class TestVacuumAllCommand:
         assert "--dry-run" in result.output
         assert "--layer" in result.output
 
-    def test_vacuum_all_success(self, cli_runner, mock_vacuum_service):
+    def test_vacuum_all_command__vacuum_all_success__e32d986c(self, cli_runner, mock_vacuum_service):
         """Test successful vacuum-all operation."""
         mock_vacuum_service.collect_tables.return_value = [
             ("chembl_activity", "silver"),
@@ -220,7 +220,7 @@ class TestVacuumAllCommand:
         assert result.exit_code == 0
         mock_vacuum_service.collect_tables.assert_called_once_with("silver")
 
-    def test_vacuum_all_dry_run(self, cli_runner, mock_vacuum_service):
+    def test_vacuum_all_command__vacuum_all_dry_run__8e4ee80b(self, cli_runner, mock_vacuum_service):
         """Test vacuum-all dry-run mode."""
         mock_vacuum_service.collect_tables.return_value = [
             ("chembl_activity", "silver"),
@@ -240,7 +240,7 @@ class TestVacuumAllCommand:
         assert "[DRY-RUN]" in result.output
         assert "Would" in result.output
 
-    def test_vacuum_all_no_tables(self, cli_runner, mock_vacuum_service):
+    def test_vacuum_all_command__vacuum_all_no_tables__3e63f89e(self, cli_runner, mock_vacuum_service):
         """Test vacuum-all with no tables to vacuum."""
         mock_vacuum_service.collect_tables.return_value = []
 
@@ -254,7 +254,7 @@ class TestVacuumAllCommand:
         assert "No tables found" in result.output
         mock_vacuum_service.vacuum_all.assert_not_called()
 
-    def test_vacuum_all_with_custom_retention(self, cli_runner, mock_vacuum_service):
+    def test_vacuum_all_command__custom_retention__10e1b7a0(self, cli_runner, mock_vacuum_service):
         """Test vacuum-all with custom retention days."""
         mock_vacuum_service.collect_tables.return_value = [
             ("chembl_activity", "silver"),
@@ -378,7 +378,7 @@ class TestVacuumFormatterOutput:
         assert "Failed tables:" in result.output
         assert "gold/table2" in result.output
 
-    def test_vacuum_all_dry_run_shows_would_remove(
+    def test_formatter_output__shows_would_remove__687a48c2(
         self, cli_runner, mock_vacuum_service
     ):
         """Test vacuum-all dry-run shows 'would remove' in output."""
@@ -486,7 +486,7 @@ class TestVacuumNegativeScenarios:
 class TestFormatterFunctions:
     """Direct tests for CLI formatter functions used by vacuum commands."""
 
-    def test_echo_vacuum_result_success(self, capsys):
+    def test_formatter_functions__result_success__cbfc8b31(self, capsys):
         """Test echo_vacuum_result formats successful result correctly."""
         from bioetl.interfaces.cli.formatters import echo_vacuum_result
 
@@ -497,7 +497,7 @@ class TestFormatterFunctions:
         assert "Vacuuming silver/test_table" in captured.out
         assert "Removed 42 files" in captured.out
 
-    def test_echo_vacuum_result_dry_run(self, capsys):
+    def test_formatter_functions__result_dry_run__e50f68cb(self, capsys):
         """Test echo_vacuum_result formats dry-run result correctly."""
         from bioetl.interfaces.cli.formatters import echo_vacuum_result
 
@@ -539,7 +539,7 @@ class TestFormatterFunctions:
         assert "Total:" in captured.out
         assert "15" in captured.out
 
-    def test_echo_vacuum_all_summary_with_failures(self, capsys):
+    def test_formatter_functions__with_failures__7b7bfe68(self, capsys):
         """Test echo_vacuum_all_summary shows failed tables."""
         from bioetl.interfaces.cli.formatters import echo_vacuum_all_summary
 
@@ -556,7 +556,7 @@ class TestFormatterFunctions:
         assert "Failed tables:" in captured.err
         assert "gold/t2" in captured.err
 
-    def test_echo_vacuum_all_summary_dry_run(self, capsys):
+    def test_formatter_functions__all_summary_dry_run__70fef12c(self, capsys):
         """Test echo_vacuum_all_summary formats dry-run summary correctly."""
         from bioetl.interfaces.cli.formatters import echo_vacuum_all_summary
 

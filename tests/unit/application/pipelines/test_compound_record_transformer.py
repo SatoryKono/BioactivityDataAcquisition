@@ -40,7 +40,7 @@ class TestCompoundRecordTransformer:
         )
 
     @pytest.mark.asyncio
-    async def test_transform_valid_record(self, transformer, mock_context):
+    async def test_record_transformer__valid_record__de53ac02(self, transformer, mock_context):
         """Test transformation of valid compound record."""
         record = {
             "record_id": 12345,
@@ -80,7 +80,7 @@ class TestCompoundRecordTransformer:
         assert result is None
 
     @pytest.mark.asyncio
-    async def test_transform_minimal_record(self, transformer, mock_context):
+    async def test_record_transformer__minimal_record__37ea52d0(self, transformer, mock_context):
         """Test transformation with only required fields."""
         record = {
             "record_id": 12345,
@@ -157,7 +157,7 @@ class TestCompoundRecordTransformer:
         assert result["src_compound_id"] is None
 
     @pytest.mark.asyncio
-    async def test_transform_with_null_values(self, transformer, mock_context):
+    async def test_record_transformer__with_null_values__2265c6dd(self, transformer, mock_context):
         """Test transformation handles None values correctly."""
         record = {
             "record_id": 12345,
@@ -193,7 +193,7 @@ class TestCompoundRecordTransformer:
         assert result["src_id"] == 1
 
     @pytest.mark.asyncio
-    async def test_transform_custom_provider(self, mock_context):
+    async def test_record_transformer__custom_provider__f1ba3a38(self, mock_context):
         """Test transformation with custom provider."""
         transformer = CompoundRecordTransformer(
             provider="custom_provider",
@@ -212,7 +212,7 @@ class TestCompoundRecordTransformer:
         assert "entity_id" in result
 
     @pytest.mark.asyncio
-    async def test_transform_generates_content_hash(self, transformer, mock_context):
+    async def test_record_transformer__content_hash__9c99529a(self, transformer, mock_context):
         """Test that content_hash is generated and is 64 hex characters."""
         record = {
             "record_id": 12345,
@@ -230,7 +230,7 @@ class TestCompoundRecordTransformer:
         int(result["content_hash"], 16)
 
     @pytest.mark.asyncio
-    async def test_transform_includes_lineage_fields(self, transformer, mock_context):
+    async def test_record_transformer__lineage_fields__17d8ebe0(self, transformer, mock_context):
         """Test that all lineage fields are present."""
         record = {
             "record_id": 12345,

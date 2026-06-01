@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from uuid import uuid4
@@ -19,6 +21,8 @@ from tests.unit.application.services.run_manifest_test_support import (
     make_run_manifest,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_forensic_diff_reports_semantic_and_artifact_evidence() -> None:
     manifest_store = InMemoryRunManifestStore()

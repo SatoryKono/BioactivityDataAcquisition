@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.application.core.entity_id import (
     compute_publication_term_entity_id,
     compute_subcellular_fraction_entity_id,
@@ -13,6 +15,8 @@ from bioetl.domain.normalization.profiles import (
     CHEMBL_SUBCELLULAR_FRACTION_PROFILE,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_subcellular_fraction_identity_matches_source_and_derived_profiles() -> None:
     """Assay-derived subcellular fraction IDs must use the same canonical value."""

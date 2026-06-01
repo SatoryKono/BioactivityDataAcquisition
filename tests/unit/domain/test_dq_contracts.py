@@ -13,6 +13,8 @@ from bioetl.domain.types.dq_contracts import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 class TestDQDisposition:
     """Test DQDisposition enum."""
 
@@ -61,7 +63,7 @@ class TestDQPolicyRef:
         assert policy_ref.rule_bundle_version == "2.1.0"
         assert policy_ref.policy_hash == "abc123"
 
-    def test_policy_ref_validation(self):
+    def test_d_q_policy_ref__ref_validation__f746d0a6(self):
         """Test validation of required fields."""
         with pytest.raises(ValueError, match="contract_ref cannot be empty"):
             DQPolicyRef("", "1.0.0", "1.0.0")
@@ -103,7 +105,7 @@ class TestDQRuleOutcome:
         assert outcome.affected_fields == ["id"]
         assert outcome.config_path == "configs/quality/chembl.yaml"
 
-    def test_rule_outcome_validation(self):
+    def test_d_q_rule_outcome__outcome_validation__bfc5d651(self):
         """Test validation of required fields."""
         with pytest.raises(ValueError, match="rule_id cannot be empty"):
             DQRuleOutcome(

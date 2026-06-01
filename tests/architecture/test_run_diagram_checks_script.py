@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 def _script_text() -> str:
     script_path = Path("scripts/diagrams/run_diagram_checks.sh")

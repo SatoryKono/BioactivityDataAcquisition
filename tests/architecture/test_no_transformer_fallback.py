@@ -16,6 +16,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.architecture
+
 # Paths relative to project root
 APPLICATION_DIR = Path("src/bioetl/application")
 PIPELINES_DIR = Path("src/bioetl/application/pipelines")

@@ -9,6 +9,8 @@ import pytest
 from scripts.engineering.repo import split_testing_roadmap_issue as module
 
 
+pytestmark = pytest.mark.unit
+
 def test_build_child_issue_templates_tracks_parent_issue() -> None:
     templates = module._build_child_issue_templates(2511)
 

@@ -7,10 +7,14 @@ I/O, dataframe libraries, and back-sliding to service-layer helpers.
 
 from __future__ import annotations
 
+import pytest
+
 import ast
 from pathlib import Path
 from collections.abc import Callable
 
+
+pytestmark = pytest.mark.architecture
 
 _NORMALIZATION_PACKAGE_PREFIX = "bioetl/domain/normalization/"
 _NORMALIZATION_COMPAT_MODULES: set[str] = set()

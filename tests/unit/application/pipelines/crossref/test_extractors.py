@@ -53,19 +53,19 @@ class TestExtractAuthors:
         result = extract_authors(publication)
         assert result == ["Madonna"]
 
-    def test_extract_authors_empty_list(self) -> None:
+    def test_extract_authors__authors_empty_list__5ffa2bb2(self) -> None:
         """Should return empty list for empty author list."""
         publication = {"author": []}
         result = extract_authors(publication)
         assert result == []
 
-    def test_extract_authors_missing_key(self) -> None:
+    def test_extract_authors__authors_missing_key__71ff2257(self) -> None:
         """Should return empty list when author key is missing."""
         publication = {}
         result = extract_authors(publication)
         assert result == []
 
-    def test_extract_authors_strips_whitespace(self) -> None:
+    def test_extract_authors__strips_whitespace__354d02da(self) -> None:
         """Should strip whitespace from author names."""
         publication = {"author": [{"given": "  John  ", "family": "  Doe  "}]}
         result = extract_authors(publication)
@@ -207,7 +207,7 @@ class TestExtractLicenseUrl:
         result = extract_license_url(publication)
         assert result == "https://license1.com"
 
-    def test_extract_license_url_empty_list(self) -> None:
+    def test_extract_license_url__url_empty_list__1c1eceff(self) -> None:
         """Should return None for empty license list."""
         publication = {"license": []}
         result = extract_license_url(publication)
@@ -497,7 +497,7 @@ class TestExtractPublishedDate:
         result = extract_published_date(record)
         assert result == "2023-12-31"
 
-    def test_empty_record(self) -> None:
+    def test_extract_published_date__empty_record__a7949e0f(self) -> None:
         """Should return None for empty record."""
         result = extract_published_date({})
         assert result is None
@@ -871,7 +871,7 @@ class TestExtractReferences:
         result = extract_references(publication)
         assert result[0]["issn"] == "0028-0836"
 
-    def test_strips_whitespace(self) -> None:
+    def test_extract_references__strips_whitespace__a25b8453(self) -> None:
         """Should strip whitespace from string fields."""
         publication = {
             "reference": [

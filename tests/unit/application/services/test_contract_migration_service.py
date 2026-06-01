@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from dataclasses import dataclass
 from unittest.mock import MagicMock
 
@@ -10,6 +12,8 @@ from bioetl.application.services.contract_migration_service import (
     ContractMigrationService,
 )
 
+
+pytestmark = pytest.mark.unit
 
 @dataclass(frozen=True, slots=True)
 class _Policy:

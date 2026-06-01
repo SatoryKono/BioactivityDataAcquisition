@@ -177,7 +177,7 @@ class TestConfidenceScore:
         with pytest.raises(ValueError):
             ConfidenceScore.from_value("abc")
 
-    def test_immutability(self) -> None:
+    def test_confidence_score__immutability__c898f4f3(self) -> None:
         """Test ConfidenceScore is immutable (frozen dataclass)."""
         score = ConfidenceScore(5)
         with pytest.raises(Exception):  # FrozenInstanceError
@@ -190,13 +190,13 @@ class TestConfidenceScore:
         assert score1 == score2
         assert score1 is not score2
 
-    def test_inequality(self) -> None:
+    def test_confidence_score__inequality__448a1bc3(self) -> None:
         """Test inequality for different values."""
         score1 = ConfidenceScore(5)
         score2 = ConfidenceScore(7)
         assert score1 != score2
 
-    def test_hash_consistency(self) -> None:
+    def test_confidence_score__hash_consistency__15797939(self) -> None:
         """Test hash is consistent with equality."""
         score1 = ConfidenceScore(7)
         score2 = ConfidenceScore(7)
@@ -209,7 +209,7 @@ class TestConfidenceScore:
         assert low < high
         assert high > low  # type: ignore[operator]
 
-    def test_can_be_used_in_set(self) -> None:
+    def test_confidence_score__can_be_used_in_set__85055f37(self) -> None:
         """Test ConfidenceScore can be used in set."""
         scores = {ConfidenceScore(5), ConfidenceScore(5), ConfidenceScore(7)}
         assert len(scores) == 2
@@ -308,7 +308,7 @@ class TestActivityValue:
         with pytest.raises(ValueError, match="Unknown concentration unit"):
             av.to_concentration()
 
-    def test_immutability(self) -> None:
+    def test_activity_value__immutability__11919306(self) -> None:
         """Test ActivityValue is immutable (frozen dataclass)."""
         av = ActivityValue(value=100.0, unit="nM")
         with pytest.raises(Exception):  # FrozenInstanceError
@@ -322,20 +322,20 @@ class TestActivityValue:
         assert av1 == av2
         assert av1 != av3
 
-    def test_hash_consistency(self) -> None:
+    def test_activity_value__hash_consistency__49aaab7a(self) -> None:
         """Test hash is consistent with equality."""
         av1 = ActivityValue(value=100.0, unit="nM")
         av2 = ActivityValue(value=100.0, unit="nM")
         assert hash(av1) == hash(av2)
 
-    def test_str(self) -> None:
+    def test_activity_value__str__92e5323e(self) -> None:
         """Test string representation."""
         av = ActivityValue(
             value=100.0, unit="nM", relation=RelationOperator.GREATER_THAN
         )
         assert str(av) == "> 100.0 nM"
 
-    def test_can_be_used_in_set(self) -> None:
+    def test_activity_value__can_be_used_in_set__9a376f90(self) -> None:
         """Test ActivityValue can be used in set."""
         values = {
             ActivityValue(value=100.0, unit="nM"),

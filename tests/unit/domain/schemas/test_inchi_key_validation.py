@@ -19,6 +19,8 @@ import pytest
 from bioetl.domain.validation import INCHI_KEY_REGEX_PATTERN
 
 
+pytestmark = pytest.mark.unit
+
 class TestInchiKeyRegexPattern:
     """Tests for INCHI_KEY_REGEX_PATTERN constant."""
 
@@ -86,13 +88,13 @@ class TestInchiKeyRegexPattern:
             f"InChI Key '{inchi_key}' should be {'valid' if is_valid else 'invalid'}"
         )
 
-    def test_pattern_is_string(self) -> None:
+    def test_key_regex_pattern__pattern_is_string__28402674(self) -> None:
         """Test INCHI_KEY_REGEX_PATTERN is exported as string for Pandera str_matches."""
         assert isinstance(INCHI_KEY_REGEX_PATTERN, str)
         assert INCHI_KEY_REGEX_PATTERN.startswith("^")
         assert INCHI_KEY_REGEX_PATTERN.endswith("$")
 
-    def test_pattern_components(self) -> None:
+    def test_key_regex_pattern__pattern_components__9e6037f3(self) -> None:
         """Test InChI Key regex pattern has correct components."""
         # Pattern should be: ^[A-Z]{14}-[A-Z]{10}-[A-Z]$
         assert "[A-Z]{14}" in INCHI_KEY_REGEX_PATTERN, (
@@ -175,7 +177,7 @@ class TestInchiKeySchemaIntegration:
         assert hasattr(compound, "INCHI_KEY_REGEX_PATTERN")
         assert compound.INCHI_KEY_REGEX_PATTERN == INCHI_KEY_REGEX_PATTERN
 
-    def test_all_schemas_use_consistent_pattern__test_inchi_key_schema_integration_domain_schemas_test_inchi_key_validation_178(
+    def test_key_schema_schemas_inchi_key_validation_178__e6c79636(
         self,
     ) -> None:
         """Test all molecule schemas use the same InChI Key pattern value."""

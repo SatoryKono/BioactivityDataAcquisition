@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import pytest
+
 import ast
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 POSTRUN_SERVICE_PATH = Path("src/bioetl/application/core/postrun/service.py")
 POSTRUN_COLLABORATORS_PATH = Path(

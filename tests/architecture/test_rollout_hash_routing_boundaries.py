@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import pytest
+
 import ast
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 def _runtime_imports(module_path: Path) -> list[str]:
     """Return runtime imports, excluding TYPE_CHECKING-only blocks."""

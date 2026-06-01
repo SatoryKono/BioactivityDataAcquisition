@@ -95,7 +95,7 @@ class TestBatchRunResult:
         result = BatchRunResult(total=0, succeeded=0, failed=0, skipped=0)
         assert result.all_succeeded is False
 
-    def test_default_values(self):
+    def test_batch_run_result__default_values__8e271d6c(self):
         """Test default values for BatchRunResult."""
         result = BatchRunResult()
         assert result.total == 0
@@ -514,7 +514,7 @@ class TestVacuumAllCommand:
         )
         return service
 
-    def test_vacuum_all_success(self, cli_runner, mock_vacuum_service):
+    def test_vacuum_all_command__vacuum_all_success__339b42b3(self, cli_runner, mock_vacuum_service):
         """Test successful vacuum-all execution."""
         with patch(
             "bioetl.interfaces.cli.commands.vacuum.get_vacuum_service",
@@ -525,7 +525,7 @@ class TestVacuumAllCommand:
         assert result.exit_code == 0
         mock_vacuum_service.collect_tables.assert_called_once_with("all")
 
-    def test_vacuum_all_dry_run(self, cli_runner, mock_vacuum_service):
+    def test_vacuum_all_command__vacuum_all_dry_run__02dc303f(self, cli_runner, mock_vacuum_service):
         """Test vacuum-all with --dry-run."""
         mock_vacuum_service.vacuum_all = AsyncMock(
             return_value=VacuumAllResult(
@@ -642,23 +642,23 @@ class TestVacuumAllCommand:
 class TestFormatBytes:
     """Tests for format_bytes formatter."""
 
-    def test_format_bytes_gb(self):
+    def test_format_bytes__format_bytes_gb__1f38e53b(self):
         """Test formatting gigabytes."""
         assert format_bytes(1024**3) == "1.00 GB"
         assert format_bytes(2 * 1024**3) == "2.00 GB"
         assert format_bytes(1536 * 1024**2) == "1.50 GB"
 
-    def test_format_bytes_mb(self):
+    def test_format_bytes__format_bytes_mb__8fefedc9(self):
         """Test formatting megabytes."""
         assert format_bytes(1024**2) == "1.00 MB"
         assert format_bytes(512 * 1024**2) == "512.00 MB"
 
-    def test_format_bytes_kb(self):
+    def test_format_bytes__format_bytes_kb__75acd4ef(self):
         """Test formatting kilobytes."""
         assert format_bytes(1024) == "1.00 KB"
         assert format_bytes(2048) == "2.00 KB"
 
-    def test_format_bytes_small(self):
+    def test_format_bytes__format_bytes_small__fa76e3e8(self):
         """Test formatting bytes under 1KB."""
         assert format_bytes(0) == "0 bytes"
         assert format_bytes(500) == "500 bytes"
@@ -669,7 +669,7 @@ class TestFormatBytes:
 class TestEchoFunctions:
     """Tests for echo_* formatter functions."""
 
-    def test_echo_info(self, cli_runner):
+    def test_echo_functions__echo_info__7d8435dc(self, cli_runner):
         """Test echo_info outputs to stdout."""
         result = cli_runner.invoke(
             click.command()(lambda: echo_info("Test message")), []
@@ -677,7 +677,7 @@ class TestEchoFunctions:
         assert "Test message" in result.output
         assert result.exit_code == 0
 
-    def test_echo_warning(self, cli_runner):
+    def test_echo_functions__echo_warning__3dc6a7f8(self, cli_runner):
         """Test echo_warning outputs with WARNING prefix."""
         result = cli_runner.invoke(
             click.command()(lambda: echo_warning("Test warning")), []
@@ -685,21 +685,21 @@ class TestEchoFunctions:
         assert "WARNING:" in result.output
         assert "Test warning" in result.output
 
-    def test_echo_error_with_detail(self, cli_runner):
+    def test_echo_functions__error_with_detail__2bc46930(self, cli_runner):
         """Test echo_error with detail outputs to stderr."""
         result = cli_runner.invoke(
             click.command()(lambda: echo_error("Error message", "Detail")), []
         )
         assert "Error message: Detail" in result.output
 
-    def test_echo_error_without_detail(self, cli_runner):
+    def test_echo_functions__error_without_detail__ae867a7d(self, cli_runner):
         """Test echo_error without detail."""
         result = cli_runner.invoke(
             click.command()(lambda: echo_error("Error only")), []
         )
         assert "Error only" in result.output
 
-    def test_echo_dry_run_prefix(self, cli_runner):
+    def test_echo_functions__echo_dry_run_prefix__5b07499e(self, cli_runner):
         """Test echo_dry_run_prefix adds [DRY-RUN] prefix."""
         result = cli_runner.invoke(
             click.command()(lambda: echo_dry_run_prefix("Would do something")), []
@@ -1003,7 +1003,7 @@ class TestVacuumCommand:
         assert result.exit_code != 0
         assert "Missing argument" in result.output or "TABLE" in result.output
 
-    def test_vacuum_success(self, cli_runner):
+    def test_vacuum_command__vacuum_success__483931ec(self, cli_runner):
         """Test successful vacuum of single table."""
         mock_lifecycle = MagicMock()
         mock_lifecycle.vacuum = AsyncMock(return_value=42)
@@ -1019,7 +1019,7 @@ class TestVacuumCommand:
         assert result.exit_code == 0
         assert "Removed 42 files" in result.output
 
-    def test_vacuum_dry_run(self, cli_runner):
+    def test_vacuum_command__vacuum_dry_run__e00332a7(self, cli_runner):
         """Test vacuum with --dry-run."""
         mock_lifecycle = MagicMock()
         mock_lifecycle.vacuum = AsyncMock(return_value=25)

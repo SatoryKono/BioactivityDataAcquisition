@@ -53,7 +53,7 @@ def _make_host() -> MagicMock:
 class TestMergePostJoinContext:
     """Test MergePostJoinContext dataclass."""
 
-    def test_fields_accessible(self) -> None:
+    def test_post_join_context__fields_accessible__9387ba1a(self) -> None:
         ctx = MergePostJoinContext(
             merged_df=pl.DataFrame(),
             records_merged=0,

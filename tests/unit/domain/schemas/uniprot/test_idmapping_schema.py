@@ -17,6 +17,8 @@ from bioetl.domain.schemas.uniprot.idmapping import (
     IDMappingSchema,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestTargetChemblIdValidation:
     """Tests for target_id field validation."""

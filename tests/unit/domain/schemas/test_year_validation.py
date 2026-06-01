@@ -16,6 +16,8 @@ from pandera.errors import SchemaError
 from bioetl.domain.validation import MAX_PUBLICATION_YEAR, MIN_PUBLICATION_YEAR
 from tests.helpers.clock import FIXED_TEST_TIME
 
+pytestmark = pytest.mark.unit
+
 # Pandera DataFrameModel has issues with Python 3.14+ due to function dispatch bug
 PANDERA_PYTHON314_SKIP = pytest.mark.skipif(
     sys.version_info >= (3, 14),
@@ -207,7 +209,7 @@ class TestSemanticScholarYearValidation:
             "citation_contexts_raw_json": None,
         }
 
-    def test_year_boundary_values(self, valid_record: dict) -> None:
+    def test_year_validation__year_boundary_values__a901993f(self, valid_record: dict) -> None:
         """Should accept year at boundaries."""
         from bioetl.domain.schemas.semanticscholar.publication import (
             SemanticScholarPublicationSchema,
@@ -219,7 +221,7 @@ class TestSemanticScholarYearValidation:
             validated = SemanticScholarPublicationSchema.validate(df)
             assert validated["publication_year"].iloc[0] == year
 
-    def test_year_outside_range_fails(self, valid_record: dict) -> None:
+    def test_year_validation__outside_range_fails__064d5b6b(self, valid_record: dict) -> None:
         """Should reject year outside valid range."""
         from bioetl.domain.schemas.semanticscholar.publication import (
             SemanticScholarPublicationSchema,
@@ -291,7 +293,7 @@ class TestChemblYearValidation:
             "creation_date": "2024-01-15",
         }
 
-    def test_year_boundary_values(self, valid_record: dict) -> None:
+    def test_chembl_year_validation__year_boundary_values__77cbdb51(self, valid_record: dict) -> None:
         """Should accept year at boundaries."""
         from bioetl.domain.schemas.chembl.publication import ChemblPublicationSchema
 
@@ -301,7 +303,7 @@ class TestChemblYearValidation:
             validated = ChemblPublicationSchema.validate(df)
             assert validated["publication_year"].iloc[0] == year
 
-    def test_year_outside_range_fails(self, valid_record: dict) -> None:
+    def test_chembl_year_validation__outside_range_fails__582656bc(self, valid_record: dict) -> None:
         """Should reject year outside valid range."""
         from bioetl.domain.schemas.chembl.publication import ChemblPublicationSchema
 
@@ -409,7 +411,7 @@ class TestPubMedYearValidation:
             "authors_with_affiliations_raw_json": None,
         }
 
-    def test_year_boundary_values(self, valid_record: dict) -> None:
+    def test_med_year_validation__year_boundary_values__5ab064f4(self, valid_record: dict) -> None:
         """Should accept year at boundaries."""
         from bioetl.domain.schemas.pubmed.publication import PubMedPublicationSchema
 
@@ -419,7 +421,7 @@ class TestPubMedYearValidation:
             validated = PubMedPublicationSchema.validate(df)
             assert validated["publication_year"].iloc[0] == year
 
-    def test_year_outside_range_fails(self, valid_record: dict) -> None:
+    def test_med_year_validation__outside_range_fails__36e1f2c4(self, valid_record: dict) -> None:
         """Should reject year outside valid range."""
         from bioetl.domain.schemas.pubmed.publication import PubMedPublicationSchema
 

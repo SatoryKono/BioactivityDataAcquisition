@@ -11,6 +11,8 @@ import pytest
 from tests.helpers import git_index_scan
 
 
+pytestmark = pytest.mark.unit
+
 def test_git_grep_fixed_retries_batched_pathspecs_before_filesystem_fallback(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

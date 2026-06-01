@@ -92,7 +92,7 @@ class TestInspectQuarantine:
             error_code=None,
         )
 
-    def test_domain_error_exits_with_fail(self) -> None:
+    def test_inspect_quarantine__exits_with_fail__7998d39a(self) -> None:
         """Test that BioETLError during inspect exits with FAIL code."""
         runtime_service = MagicMock()
         runtime_service.inspect = AsyncMock(side_effect=BioETLError("inspect error"))
@@ -197,7 +197,7 @@ class TestShowQuarantineStats:
             run_id="00000000-0000-0000-0000-000000000123",
         )
 
-    def test_domain_error_exits_with_fail(self) -> None:
+    def test_show_quarantine_stats__exits_with_fail__57982ce2(self) -> None:
         """Test that BioETLError during stats fetch exits with FAIL code."""
         runtime_service = MagicMock()
         runtime_service.get_stats = AsyncMock(side_effect=BioETLError("stats error"))
@@ -322,7 +322,7 @@ class TestPurgeQuarantine:
             pipeline="chembl_activity", older_than_days=30
         )
 
-    def test_domain_error_exits_with_fail(self) -> None:
+    def test_purge_quarantine__exits_with_fail__2533ae55(self) -> None:
         """Test that BioETLError during purge exits with FAIL code."""
         service = MagicMock()
         service.get_stats = AsyncMock(return_value={"total_count": 0})
@@ -375,7 +375,7 @@ class TestResolveQuarantineRecord:
 
         assert exc_info.value.code == ExitCode.FAIL
 
-    def test_domain_error_exits_with_fail(self) -> None:
+    def test_quarantine_record__exits_with_fail__7414e68f(self) -> None:
         """Test that BioETLError during resolve exits with FAIL code."""
         service = MagicMock()
         service.update_status = MagicMock(side_effect=BioETLError("update error"))

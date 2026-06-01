@@ -24,6 +24,8 @@ from bioetl.domain.composite.config_validators import (
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 
 
+pytestmark = pytest.mark.unit
+
 def _seed() -> SeedConfig:
     return SeedConfig(
         pipeline="chembl_publication",

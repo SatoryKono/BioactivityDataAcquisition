@@ -75,7 +75,7 @@ class TestAssayTransformer:
         )
 
     @pytest.mark.asyncio
-    async def test_transform_valid_record(self, transformer, mock_context):
+    async def test_assay_transformer__valid_record__506ed965(self, transformer, mock_context):
         """Test transformation of valid assay record."""
         record = _minimal_valid_assay_record()
 
@@ -250,7 +250,7 @@ class TestAssayTransformer:
         assert "content_hash" not in result.business_data
 
     @pytest.mark.asyncio
-    async def test_transform_custom_provider(self, mock_context):
+    async def test_assay_transformer__custom_provider__82f39279(self, mock_context):
         """Test transformation with custom provider."""
         transformer = AssayTransformer(
             provider="custom_provider",
@@ -276,7 +276,7 @@ class TestPublicationTransformer:
         )
 
     @pytest.mark.asyncio
-    async def test_transform_valid_record(self, transformer, mock_context):
+    async def test_transformer__valid_record__64865dfa(self, transformer, mock_context):
         """Test transformation of valid document record."""
         record = {
             "publication_id": "CHEMBL1234567",
@@ -426,7 +426,7 @@ class TestPublicationTransformer:
         assert "citations_received" not in result
 
     @pytest.mark.asyncio
-    async def test_transform_pre_silver_supports_legacy_document_id_fallback(
+    async def test_transformer__document_id_fallback__540d6faa(
         self, transformer, mock_context
     ):
         """Publication staged path should accept document_chembl_id fallback."""
@@ -456,7 +456,7 @@ class TestMoleculeTransformer:
         )
 
     @pytest.mark.asyncio
-    async def test_transform_valid_record(self, transformer, mock_context):
+    async def test_molecule_transformer__valid_record__8613ed54(self, transformer, mock_context):
         """Test transformation of valid molecule record."""
         record = {
             "molecule_id": "CHEMBL25",
@@ -647,7 +647,7 @@ class TestTargetTransformer:
         )
 
     @pytest.mark.asyncio
-    async def test_transform_valid_record(self, transformer, mock_context):
+    async def test_target_transformer__valid_record__1b7799a9(self, transformer, mock_context):
         """Test transformation of valid target record."""
         record = {
             "target_id": "CHEMBL1862",
@@ -723,7 +723,7 @@ class TestTargetTransformer:
     async def test_transform_projects_single_protein_classification_to_json(
         self, transformer, mock_context
     ):
-        """Single component classification should remain as target-level JSON."""
+        """Single classification should reuse the canonical target summary policy."""
         record = {
             "target_id": "CHEMBL123",
             "target_components": [
@@ -732,8 +732,12 @@ class TestTargetTransformer:
                     "protein_classifications": [
                         {
                             "protein_classification_id": 1015,
+                            "l1_id": 1,
                             "l1_name": "Enzyme",
+                            "l1_desc": "Root",
+                            "l2_id": 2,
                             "l2_name": "Protease",
+                            "l2_desc": "Branch",
                         }
                     ],
                 }
@@ -749,19 +753,39 @@ class TestTargetTransformer:
         classifications = json.loads(result["protein_classifications"])
         assert classifications == [
             {
-                "classification_status": "resolved",
-                "l1_name": "Enzyme",
-                "l2_name": "Protease",
+                "hierarchy_index": 0,
+                "component_id": 10,
                 "leaf_id": 1015,
-                "protein_classification_id": 1015,
+                "classification_status": "resolved",
+                "l1_id": 1,
+                "l1_name": "Enzyme",
+                "l1_desc": "Root",
+                "l2_id": 2,
+                "l2_name": "Protease",
+                "l2_desc": "Branch",
+                "l3_id": None,
+                "l3_name": None,
+                "l3_desc": None,
+                "l4_id": None,
+                "l4_name": None,
+                "l4_desc": None,
+                "l5_id": None,
+                "l5_name": None,
+                "l5_desc": None,
             }
         ]
+        assert result["target_protein_class_id_L1"] == "1"
+        assert result["target_protein_class_name_L1"] == "Enzyme"
+        assert result["target_protein_class_desc_L1"] == "Root"
+        assert result["target_protein_class_id_L2"] == "2"
+        assert result["target_protein_class_name_L2"] == "Protease"
+        assert result["target_protein_class_desc_L2"] == "Branch"
 
     @pytest.mark.asyncio
     async def test_transform_collapses_multiple_classifications_to_multifunctional_l1(
         self, transformer, mock_context
     ):
-        """Multiple leaf classifications should emit a deterministic L1 summary."""
+        """Multiple leaf classifications should emit canonical multifunctional summary."""
         record = {
             "target_id": "CHEMBL123",
             "target_components": [
@@ -770,11 +794,17 @@ class TestTargetTransformer:
                     "protein_classifications": [
                         {
                             "protein_classification_id": 148,
+                            "l1_id": 3,
                             "l1_name": "Membrane receptor",
+                            "l2_id": 7,
+                            "l2_name": "Ion channel",
                         },
                         {
                             "protein_classification_id": 12,
+                            "l1_id": 1,
                             "l1_name": "Enzyme",
+                            "l2_id": 2,
+                            "l2_name": "Kinase",
                         },
                     ],
                 },
@@ -798,26 +828,52 @@ class TestTargetTransformer:
         classifications = json.loads(result["protein_classifications"])
         assert classifications == [
             {
+                "hierarchy_index": 1,
+                "component_id": 10,
+                "leaf_id": 12,
                 "classification_status": "resolved",
-                "l1_name": "Multifunctional target",
-                "source_classifications": [
-                    {
-                        "classification_status": "resolved",
-                        "l1_name": "Enzyme",
-                        "leaf_id": 12,
-                        "protein_classification_id": 12,
-                    },
-                    {
-                        "classification_status": "resolved",
-                        "l1_name": "Membrane receptor",
-                        "leaf_id": 148,
-                        "protein_classification_id": 148,
-                    },
-                ],
-                "source_hierarchy_count": 2,
-                "source_leaf_ids": [12, 148],
-            }
+                "l1_id": 1,
+                "l1_name": "Enzyme",
+                "l1_desc": None,
+                "l2_id": 2,
+                "l2_name": "Kinase",
+                "l2_desc": None,
+                "l3_id": None,
+                "l3_name": None,
+                "l3_desc": None,
+                "l4_id": None,
+                "l4_name": None,
+                "l4_desc": None,
+                "l5_id": None,
+                "l5_name": None,
+                "l5_desc": None,
+            },
+            {
+                "hierarchy_index": 0,
+                "component_id": 10,
+                "leaf_id": 148,
+                "classification_status": "resolved",
+                "l1_id": 3,
+                "l1_name": "Membrane receptor",
+                "l1_desc": None,
+                "l2_id": 7,
+                "l2_name": "Ion channel",
+                "l2_desc": None,
+                "l3_id": None,
+                "l3_name": None,
+                "l3_desc": None,
+                "l4_id": None,
+                "l4_name": None,
+                "l4_desc": None,
+                "l5_id": None,
+                "l5_name": None,
+                "l5_desc": None,
+            },
         ]
+        assert result["target_protein_class_id_L1"] is None
+        assert result["target_protein_class_name_L1"] == "Multifunctional target"
+        assert result["target_protein_class_name_L2"] == "Multifunctional target"
+        assert result["target_protein_class_name_L3"] == ""
 
     @pytest.mark.asyncio
     async def test_transform_uses_null_for_missing_protein_classifications(
@@ -835,6 +891,8 @@ class TestTargetTransformer:
 
         assert result is not None
         assert result["protein_classifications"] is None
+        assert result["target_protein_class_id_L1"] is None
+        assert result["target_protein_class_name_L1"] is None
 
     @pytest.mark.asyncio
     async def test_transform_projects_derived_component_synonyms(
@@ -1411,7 +1469,7 @@ class TestTargetTransformer:
         assert result["cross_references"] is None
 
     @pytest.mark.asyncio
-    async def test_transform_custom_provider(self, mock_context):
+    async def test_target_transformer__custom_provider__03da38ad(self, mock_context):
         """Test transformation with custom provider."""
         transformer = TargetTransformer(
             provider="custom_target_provider",
@@ -1648,7 +1706,7 @@ class TestTargetComponentTransformer:
         )
 
     @pytest.mark.asyncio
-    async def test_transform_valid_record(self, transformer, mock_context):
+    async def test_component_transformer__valid_record__ff1e0627(self, transformer, mock_context):
         """Test transformation of valid target component record."""
         record = {
             "component_id": 123,
@@ -1683,7 +1741,7 @@ class TestTargetComponentTransformer:
         assert result is None
 
     @pytest.mark.asyncio
-    async def test_transform_with_json_fields(self, transformer, mock_context):
+    async def test_component_transformer__with_json_fields__cb5ce019(self, transformer, mock_context):
         """Test transformation handles complex JSON fields."""
         record = {
             "component_id": 123,

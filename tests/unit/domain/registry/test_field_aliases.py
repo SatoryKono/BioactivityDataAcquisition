@@ -16,6 +16,8 @@ from bioetl.domain.registry.field_aliases import (
 )
 
 
+pytestmark = pytest.mark.unit
+
 class TestFieldAlias:
     """Tests for FieldAlias dataclass."""
 
@@ -103,7 +105,7 @@ class TestMoleculeFieldAliases:
             ("standard_inchi", "pubchem", "inchi"),
         ],
     )
-    def test_provider_aliases(
+    def test_molecule_field_aliases__provider_aliases__07053c75(
         self, canonical: str, provider: str, expected: str
     ) -> None:
         """Provider aliases should map correctly."""

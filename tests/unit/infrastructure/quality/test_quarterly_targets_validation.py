@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.infrastructure.quality._quarterly_targets_validation import (
     _validate_quarter_target,
     _validate_quarterly_targets_section,
 )
 
+
+pytestmark = pytest.mark.unit
 
 class TestValidateQuarterTarget:
     """Tests for _validate_quarter_target."""
@@ -31,7 +35,7 @@ class TestValidateQuarterTarget:
         assert result[0] == (2025, 1)
         assert errors == []
 
-    def test_not_dict(self) -> None:
+    def test_quarter_target__not_dict__63dae542(self) -> None:
         """Non-dict target should add error and return None."""
         errors: list[str] = []
         result = _validate_quarter_target(
@@ -82,7 +86,7 @@ class TestValidateQuarterTarget:
         assert result is None
         assert any("non-negative" in e for e in errors)
 
-    def test_min_score_not_number(self) -> None:
+    def test_quarter_target__min_score_not_number__542fd816(self) -> None:
         """Non-number min_integral_score should add error and return None."""
         errors: list[str] = []
         result = _validate_quarter_target(
@@ -187,7 +191,7 @@ class TestValidateQuarterlyTargetsSection:
         )
         assert errors == []
 
-    def test_missing_quarterly_targets(self) -> None:
+    def test_targets_section__quarterly_targets__f7acef7b(self) -> None:
         """Missing quarterly_targets should add error."""
         errors: list[str] = []
         _validate_quarterly_targets_section(
@@ -198,7 +202,7 @@ class TestValidateQuarterlyTargetsSection:
         )
         assert any("quarterly_targets" in e for e in errors)
 
-    def test_not_a_list(self) -> None:
+    def test_targets_section__not_a_list__c40ae2c5(self) -> None:
         """Non-list quarterly_targets should add error."""
         errors: list[str] = []
         _validate_quarterly_targets_section(

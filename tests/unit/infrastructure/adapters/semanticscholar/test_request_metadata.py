@@ -54,12 +54,12 @@ def adapter(
     )
 
 
-def test_request_count_starts_at_zero(adapter: SemanticScholarAdapter) -> None:
+def test_request_metadata__count_starts_at_zero__d202a52a(adapter: SemanticScholarAdapter) -> None:
     """New adapter instances should start with an empty request collector."""
     assert adapter.request_count == 0
 
 
-def test_get_source_metadata_returns_collector_state_and_clears_requests(
+def test_request_metadata__and_clears_requests__408831e1(
     adapter: SemanticScholarAdapter,
 ) -> None:
     """Metadata snapshot should reflect collector state and consume it."""
@@ -79,7 +79,7 @@ def test_get_source_metadata_returns_collector_state_and_clears_requests(
     assert adapter.request_count == 0
 
 
-def test_clear_request_collector_resets_request_count(
+def test_request_metadata__resets_request_count__c1676188(
     adapter: SemanticScholarAdapter,
 ) -> None:
     """Clearing the collector should drop accumulated request state."""

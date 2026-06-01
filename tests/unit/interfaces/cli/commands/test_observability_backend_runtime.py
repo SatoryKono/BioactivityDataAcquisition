@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 import os
 from io import BytesIO
 from types import SimpleNamespace
@@ -25,6 +27,8 @@ from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime
     wait_for_observability_backend_ready,
 )
 
+
+pytestmark = pytest.mark.unit
 
 def test_build_observability_backend_health_url_uses_host_and_port() -> None:
     assert (

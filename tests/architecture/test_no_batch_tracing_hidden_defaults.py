@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import pytest
+
 import ast
 from pathlib import Path
 
+
+pytestmark = pytest.mark.architecture
 
 BATCH_TRACING_PATH = Path("src/bioetl/application/core/batch_tracing.py")
 RUNNER_PATH = Path("src/bioetl/application/core/runner.py")

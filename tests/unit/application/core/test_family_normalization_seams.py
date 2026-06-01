@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from bioetl.application.core.data_sources import (
     FilteredDataSource as FilteredDataSourcePackage,
 )
@@ -41,6 +43,8 @@ from bioetl.application.core.wiring import BaseTransformer as TransformerPackage
 from bioetl.application.core.wiring import GenericPipeline as RegistryPackage
 from bioetl.application.core.wiring import PipelineRunner as FactoryPackage
 
+
+pytestmark = pytest.mark.unit
 
 def test_legacy_wiring_facades_point_to_new_wiring_package() -> None:
     assert PipelineRunner is FactoryPackage

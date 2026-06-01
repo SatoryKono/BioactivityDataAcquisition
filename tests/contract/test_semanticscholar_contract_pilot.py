@@ -34,7 +34,7 @@ class TestSemanticScholarPilotContract:
         assert external_ids.get("DOI", "").lower() == STABLE_DOI.lower()
 
     @pytest.mark.asyncio
-    async def test_health_probe_shape(
+    async def test_semantic_scholar_pilot__health_probe_shape__ffa01178(
         self,
         semanticscholar_search_payload: JsonDict,
     ) -> None:
