@@ -326,6 +326,45 @@ def test_uuid4_identity_generators_are_policy_allowlisted() -> None:
 
 
 @pytest.mark.architecture
+def test_semantic_identity_anchors_forbid_all_occurrence_fields() -> None:
+    """Semantic replay anchors must explicitly reject every occurrence ID field."""
+    payload = _load_policy()
+    artifact_contract = payload["artifact_identity_contract"]
+    assert isinstance(artifact_contract, dict)
+    operational_artifacts = artifact_contract["operational_correlation_artifacts"]
+    semantic_anchors = artifact_contract["semantic_identity_anchors"]
+    assert isinstance(operational_artifacts, list)
+    assert isinstance(semantic_anchors, list)
+
+    occurrence_fields = {
+        str(field)
+        for artifact in operational_artifacts
+        if isinstance(artifact, dict)
+        for field in artifact.get("allowed_occurrence_identity_fields", [])
+    }
+    assert occurrence_fields
+
+    missing_forbidden_fields: list[str] = []
+    for anchor in semantic_anchors:
+        assert isinstance(anchor, dict)
+        artifact_name = str(anchor["artifact"])
+        forbidden_fields = {
+            str(field)
+            for field in anchor.get("forbidden_occurrence_identity_fields", [])
+        }
+        missing = sorted(occurrence_fields - forbidden_fields)
+        if missing:
+            missing_forbidden_fields.append(
+                f"{artifact_name}: {', '.join(missing)}"
+            )
+
+    assert not missing_forbidden_fields, (
+        "Semantic identity anchors must forbid all operational occurrence fields:\n"
+        + "\n".join(missing_forbidden_fields)
+    )
+
+
+@pytest.mark.architecture
 def test_policy_entries_still_match_source_files() -> None:
     """Policy entries must point to live files and live uuid4 call sites."""
     payload = _load_policy()

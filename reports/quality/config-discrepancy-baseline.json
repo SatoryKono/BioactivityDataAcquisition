@@ -10,16 +10,16 @@
     "entity_effective": {
       "config_count": 22,
       "inconsistent_parameter_count": 0,
-      "raw_inconsistent_parameter_count": 140,
-      "sanctioned_partial_parameter_count": 140,
+      "raw_inconsistent_parameter_count": 106,
+      "sanctioned_partial_parameter_count": 106,
       "unique_parameter_count": 312
     }
   },
   "metrics": {
     "config_count": 27,
     "inconsistent_parameter_count": 0,
-    "raw_inconsistent_parameter_count": 140,
-    "sanctioned_partial_parameter_count": 140,
+    "raw_inconsistent_parameter_count": 106,
+    "sanctioned_partial_parameter_count": 106,
     "unique_parameter_count": 511
   },
   "snapshot_date": "2026-06-01"

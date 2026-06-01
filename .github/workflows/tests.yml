@@ -468,7 +468,8 @@ jobs:
                       --check \
                       --write-evidence reports/observability/runtime_cardinality_inventory.json \
                       --review-json-out reports/observability/runtime_cardinality_review.json \
-                      --summary-out "$GITHUB_STEP_SUMMARY"
+                      --summary-out "$GITHUB_STEP_SUMMARY" \
+                      --fail-on-degraded-live-review
 
             -   name: Upload quality metrics artifact
                 if: always()

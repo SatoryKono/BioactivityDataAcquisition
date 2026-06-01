@@ -14,10 +14,10 @@ ______________________________________________________________________
 # BioETL Tech Debt Eradication Blueprint v4
 
 Дата snapshot: `2026-05-31`
-Incremental resync: `2026-06-01` after `#4705`, `#4847`, `#4848`, `#4849`, `#4850`, `#4851`, `#4610`, and `#4811` closeout.
+Incremental resync: `2026-06-01` after live GitHub reopened the closeout wave `#4861` through `#4872` on top of the closed `#4610/#4811` program.
 
 **Authoritative status source**: live GitHub issue state plus governed quality artifacts.  
-**Source command**: `curl -H "Authorization: Bearer ${GITHUB_TOKEN}" https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/issues/{4610,4811,4847,4848,4849,4850,4851}`  
+**Source command**: `curl -H "Authorization: Bearer ${GITHUB_TOKEN}" https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/issues/{4861..4872}`  
 **Stale-warning policy**: this document is a local planning mirror. If GitHub issue state or governed debt budgets move, this file becomes stale until resynced. Do not use it as sole execution authority.
 
 ## Why This Mirror Still Exists
@@ -42,13 +42,13 @@ looking operationally current.
 8. Deterministic identity governance now documents semantic replay anchors versus allowed operational correlation artifacts in `configs/quality/determinism_identity_policy.yaml`.
 9. Config discrepancy reporting is rebaselined to family-scoped semantics:
    - actionable inconsistent parameters: `0`
-   - sanctioned partial variance parameters: `140`
+   - sanctioned partial variance parameters: `106`
    - canonical report: `docs/config-discrepancies-report.md`
 10. Canonical duplication evidence is synchronized across hotspot and specialized reports:
-   - `reports/quality/hotspot-duplication-baseline.md` now reports `total_duplicate_clusters=5`
-   - `src/bioetl/application/services/control_plane` carries the only live hotspot residual at `5`
+   - `reports/quality/hotspot-duplication-baseline.md` now reports `total_duplicate_clusters=0`
+   - `src/bioetl/application/services/control_plane` is covered by the live owner issue `#4862` and currently reports `0`
    - `control-plane-duplication.*` and `runtime-builders-duplication.*` are derived from the same ruleset and drift-guarded by architecture tests
-11. Final live GitHub queue check on 2026-06-01 reports no open `technical-debt` issues and only the umbrella epic `#4811` under `tech-debt`; `#4610` is closed.
+11. Live GitHub queue check on 2026-06-01 reports `#4861` through `#4872` as the active technical-debt closeout wave; `#4610` and `#4811` remain closed and must not be treated as active owners.
 
 ## Closed Streams
 
@@ -61,7 +61,7 @@ Governed outcome:
 
 - duplicate evidence is reconciled across hotspot and specialized reports;
 - `application/core`, `composition/bootstrap/runtime`, `composition/factories/pipeline`, and `composition/runtime_builders` are at duplicate baseline `0`;
-- `application/services/control_plane` remains at `5` duplicate clusters in the canonical hotspot baseline and is now tracked as residual refactor pressure under `#4610`;
+- `application/services/control_plane` residual duplicates are tracked by `#4862` and the regenerated canonical hotspot baseline is `0`;
 - twin-family no-growth remains enforced;
 - config-contract drift closeout remains recorded on GitHub;
 - dead-code triage governance is materialized in `reports/quality/dead-code-inventory.md`.
@@ -87,7 +87,22 @@ Archived unless reopened on GitHub:
 
 ## Active Queue After This Resync
 
-The post-closeout target queue for the technical-debt program is empty.
+The post-closeout target queue is the live GitHub wave `#4861` through `#4872`:
+
+| Issue | Owner surface | Required evidence |
+| --- | --- | --- |
+| `#4861` | governance mirrors | local mirrors match live GitHub state |
+| `#4862` | control-plane duplication | duplicate baseline `0` and touched control-plane tests |
+| `#4863` | control-plane shims | dead-code inventory and importer proof |
+| `#4864` | compatibility facades/twins | census no-growth and ratchet proof |
+| `#4865` | config partial variance | config matrix/check with sanctioned variance reduced to `106` |
+| `#4866` | composite Gold strictness | strict composite contracts and no active waiver rows |
+| `#4867` | security env-prefix policy | env-prefix test passes without xfail |
+| `#4868` | test-governance budgets | at least one live budget ratcheted downward |
+| `#4869` | replay identity guards | semantic anchors forbid occurrence fields |
+| `#4870` | observability release gate | degraded live review fails where release mode requires live evidence |
+| `#4871` | zero-import inventory | candidate count reduced and triage regenerated |
+| `#4872` | git-lfs/VCR preflight | missing LFS and dirty VCR states fail-fast |
 
 If GitHub still reports additional open `technical-debt` or `tech-debt`
 issues, GitHub wins and this mirror must be resynced again.
@@ -119,6 +134,6 @@ Every future local debt-planning mirror must include:
 
 ## Next Actions
 
-1. Finish `#4610` with responsibility-owned control-plane decomposition.
+1. Finish and close `#4861` through `#4872` with evidence comments.
 2. Re-verify the live tech-debt queue on GitHub.
-3. Close epic `#4811` only after the live queue is exhausted and no-governance-growth guards remain green.
+3. Keep `#4610/#4811` closed unless GitHub reopens them explicitly.

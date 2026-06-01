@@ -64,6 +64,7 @@ def test_tests_workflow_runs_observability_cardinality_review_gate() -> None:
     assert 'BIOETL_OBSERVABILITY_PROMETHEUS_URL' in workflow
     assert 'BIOETL_OBSERVABILITY_PROMETHEUS_TOKEN' in workflow
     assert 'GITHUB_STEP_SUMMARY' in workflow
+    assert "--fail-on-degraded-live-review" in workflow
 
 
 def test_tests_workflow_uploads_observability_cardinality_review_artifacts() -> None:

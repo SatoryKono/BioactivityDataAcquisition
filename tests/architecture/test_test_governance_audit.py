@@ -568,6 +568,13 @@ def test_preflight_reports_unhealthy_git_lfs_as_strict_reproducibility_blocker()
                 "",
                 "",
             ),
+            (
+                "status",
+                "--short",
+                "--untracked-files=all",
+                "--",
+                "tests/fixtures/vcr",
+            ): subprocess.CompletedProcess(args, 0, "", ""),
         }
         result = values.get(tuple(args))
         if result is not None:
@@ -608,6 +615,13 @@ def test_preflight_reports_timed_out_git_status_as_strict_reproducibility_blocke
             ): "origin/main",
             ("rev-parse", "--short", "main"): "abc1234",
             ("lfs", "version"): "git-lfs/3.0.0",
+            (
+                "status",
+                "--short",
+                "--untracked-files=all",
+                "--",
+                "tests/fixtures/vcr",
+            ): "",
         }
         key = tuple(args)
         if key in values:
@@ -655,6 +669,13 @@ def test_preflight_reports_lfs_pointer_files_as_strict_reproducibility_blocker(
             ("rev-parse", "--short", "main"): "abc1234",
             ("lfs", "version"): "git-lfs/3.0.0",
             ("status", "--short", "--untracked-files=no"): "",
+            (
+                "status",
+                "--short",
+                "--untracked-files=all",
+                "--",
+                "tests/fixtures/vcr",
+            ): "",
         }
         key = tuple(args)
         if key in values:
@@ -670,6 +691,59 @@ def test_preflight_reports_lfs_pointer_files_as_strict_reproducibility_blocker(
     blocker_ids = {entry["id"] for entry in report["blockers"]}
     assert "lfs_pointer_files_present" in blocker_ids
     assert report["lfs_pointer_files"]["count"] == 1
+
+
+@pytest.mark.architecture
+def test_preflight_reports_dirty_vcr_worktree_as_strict_reproducibility_blocker(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path
+    telemetry = repo / "docs" / "05-engineering" / "test-telemetry-baseline.md"
+    telemetry.parent.mkdir(parents=True)
+    telemetry.write_text("Actual coverage: 92.81%\n", encoding="utf-8")
+
+    def fake_git_runner(args: list[str]) -> subprocess.CompletedProcess[str]:
+        values = {
+            ("branch", "--show-current"): "main",
+            ("rev-parse", "--short", "HEAD"): "abc1234",
+            (
+                "symbolic-ref",
+                "--quiet",
+                "--short",
+                "refs/remotes/origin/HEAD",
+            ): "origin/main",
+            ("rev-parse", "--short", "main"): "abc1234",
+            ("lfs", "version"): "git-lfs/3.0.0",
+            ("status", "--short", "--untracked-files=no"): "",
+            (
+                "status",
+                "--short",
+                "--untracked-files=all",
+                "--",
+                "tests/fixtures/vcr",
+            ): (
+                " M tests/fixtures/vcr/chembl/example.yaml\n"
+                "?? tests/fixtures/vcr/pubmed/new.yaml\n"
+            ),
+        }
+        key = tuple(args)
+        if key in values:
+            return subprocess.CompletedProcess(args, 0, values[key], "")
+        return subprocess.CompletedProcess(args, 1, "", f"unexpected git args: {args}")
+
+    report = collect_test_audit_preflight(
+        repo,
+        runner=fake_git_runner,
+        git_lfs_path="/usr/bin/git-lfs",
+    )
+
+    blocker_ids = {entry["id"] for entry in report["blockers"]}
+    assert "dirty_vcr_worktree" in blocker_ids
+    assert report["dirty_vcr_worktree"]["count"] == 2
+    assert report["dirty_vcr_worktree"]["examples"] == [
+        "tests/fixtures/vcr/chembl/example.yaml",
+        "tests/fixtures/vcr/pubmed/new.yaml",
+    ]
 
 
 @pytest.mark.architecture

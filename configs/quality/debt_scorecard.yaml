@@ -248,8 +248,8 @@ config_surface_ratchet:
         B closeout.
       ratchet_policy: Non-growth fail-fast; increases require reviewed contract regression.
     sanctioned_partial_parameter_count:
-      current_count: 140
-      max_count: 140
+      current_count: 106
+      max_count: 106
       owner: '@bioetl-config'
       linked_issue: '#4818'
       rationale: Documented intentional entity-specific partial keys excluded from
@@ -257,8 +257,8 @@ config_surface_ratchet:
       ratchet_policy: Non-growth fail-fast unless a reviewed entity contract adds
         new intentional divergence.
     raw_inconsistent_parameter_count:
-      current_count: 140
-      max_count: 140
+      current_count: 106
+      max_count: 106
       owner: '@bioetl-config'
       linked_issue: '#4818'
       rationale: Raw family-scoped partial key count before sanctioned-prefix exclusion;
@@ -288,15 +288,15 @@ config_surface_ratchet:
           ratchet_policy: Non-growth fail-fast; entity-specific filters remain in
             backlog as sanctioned partial keys only.
         sanctioned_partial_parameter_count:
-          current_count: 140
-          max_count: 140
+          current_count: 106
+          max_count: 106
           rationale: Intentional entity-specific filters/extraction_params/overrides
             per reports/quality/config-surface-backlog.json.
           ratchet_policy: Non-growth fail-fast unless reviewed entity contract expands
             intentional divergence.
         raw_inconsistent_parameter_count:
-          current_count: 140
-          max_count: 140
+          current_count: 106
+          max_count: 106
           rationale: Raw entity partial keys before sanctioned-prefix exclusion.
           ratchet_policy: Informational non-growth guard mirroring backlog partial_key_count.
     composite_runtime:
@@ -405,10 +405,10 @@ hotspot_family_ratchets:
       files_ge_250_loc: 13
       max_internal_fan_in: 14
     metrics:
-      duplication_clusters: 5
-      files: 172
-      total_loc: 21278
-      files_ge_250_loc: 13
+      duplication_clusters: 0
+      files: 174
+      total_loc: 21611
+      files_ge_250_loc: 12
       helper_function_ratio: 0.376
       max_internal_fan_in: 14
       max_internal_fan_in_module: bioetl.application.core.batch_runtime_failure_policy
@@ -434,9 +434,9 @@ hotspot_family_ratchets:
       max_internal_fan_in: 5
     metrics:
       duplication_clusters: 0
-      files: 42
-      total_loc: 5565
-      files_ge_250_loc: 5
+      files: 44
+      total_loc: 5758
+      files_ge_250_loc: 3
       helper_function_ratio: 0.351
       max_internal_fan_in: 6
       max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.composite_support_services_factory
@@ -487,13 +487,13 @@ hotspot_family_ratchets:
       files_ge_250_loc: 22
       max_internal_fan_in: 6
     metrics:
-      duplication_clusters: 8
-      files: 66
-      total_loc: 12998
-      files_ge_250_loc: 22
+      duplication_clusters: 0
+      files: 91
+      total_loc: 14332
+      files_ge_250_loc: 20
       helper_function_ratio: 0.496
       max_internal_fan_in: 6
-      max_internal_fan_in_module: bioetl.application.services.control_plane._run_manifest_diagnostics_replay_helpers
+      max_internal_fan_in_module: bioetl.application.services.control_plane.manifest.diagnostics.replay_helpers
     trend:
       status: reduced_2026-05-30_issue_4547
       next_action: 2026-05-30 consolidates execution-identity payloads, lazy-export
@@ -515,10 +515,10 @@ hotspot_family_ratchets:
       files_ge_250_loc: 7
       max_internal_fan_in: 11
     metrics:
-      duplication_clusters: 4
-      files: 37
-      total_loc: 5736
-      files_ge_250_loc: 7
+      duplication_clusters: 0
+      files: 40
+      total_loc: 6069
+      files_ge_250_loc: 5
       helper_function_ratio: 0.502
       max_internal_fan_in: 11
       max_internal_fan_in_module: bioetl.composition.runtime_builders.inputs_resolver
@@ -574,7 +574,6 @@ hotspot_family_coverage_thresholds:
       min_covered_line_percent: 0.0
       allowlisted_unmeasured_paths:
       - src/bioetl/application/core/_batch_processing_metrics_support.py
-      - src/bioetl/application/core/_data_source_fetch_delegates.py
       - src/bioetl/application/core/pipeline_aux_service_protocols.py
       - src/bioetl/application/core/pipeline_observability_service_protocols.py
       - src/bioetl/application/core/pipeline_runtime_service_protocols.py
@@ -597,28 +596,22 @@ hotspot_family_coverage_thresholds:
       min_covered_module_count: 36
       min_covered_line_percent: 73.0
       allowlisted_unmeasured_paths:
-      - src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_alerts.py
-      - src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_profile_support.py
-      - src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence_profiles.py
       - src/bioetl/application/services/control_plane/effective_config/__init__.py
       - src/bioetl/application/services/control_plane/effective_config/context.py
       - src/bioetl/application/services/control_plane/effective_config/provenance_support.py
       - src/bioetl/application/services/control_plane/effective_config/service.py
       - src/bioetl/application/services/control_plane/effective_config/support.py
-      - src/bioetl/application/services/control_plane/historical_replay_certification.py
-      - src/bioetl/application/services/control_plane/historical_replay_certification_support.py
       - src/bioetl/application/services/control_plane/ledger/__init__.py
       - src/bioetl/application/services/control_plane/ledger/core_events.py
       - src/bioetl/application/services/control_plane/ledger/core_events.py
       - src/bioetl/application/services/control_plane/ledger/diagnostic_support.py
       - src/bioetl/application/services/control_plane/ledger/entry_support.py
       - src/bioetl/application/services/control_plane/ledger/entry_support.py
+      - src/bioetl/application/services/control_plane/ledger/idempotency.py
       - src/bioetl/application/services/control_plane/ledger/rich_events.py
       - src/bioetl/application/services/control_plane/ledger/rich_events.py
       - src/bioetl/application/services/control_plane/ledger/service.py
-      - src/bioetl/application/services/control_plane/ledger_identity_support.py
       - src/bioetl/application/services/control_plane/manifest/__init__.py
-      - src/bioetl/application/services/control_plane/manifest/diagnostics.py
       - src/bioetl/application/services/control_plane/manifest/diagnostics/__init__.py
       - src/bioetl/application/services/control_plane/manifest/diagnostics/artifact_support.py
       - src/bioetl/application/services/control_plane/manifest/diagnostics/base.py
@@ -641,8 +634,6 @@ hotspot_family_coverage_thresholds:
       - src/bioetl/application/services/control_plane/manifest/replay_family_contract_payload.py
       - src/bioetl/application/services/control_plane/manifest/service.py
       - src/bioetl/application/services/control_plane/manifest/validation.py
-      - src/bioetl/application/services/control_plane/manifest_service_scaffold.py
-      - src/bioetl/application/services/control_plane/manifest_time_support.py
       - src/bioetl/application/services/control_plane/replay/__init__.py
       - src/bioetl/application/services/control_plane/replay/bundle_descriptor_service.py
       - src/bioetl/application/services/control_plane/replay/historical_certification_service.py
@@ -655,12 +646,8 @@ hotspot_family_coverage_thresholds:
       - src/bioetl/application/services/control_plane/replay/historical_identity_models.py
       - src/bioetl/application/services/control_plane/replay/historical_universe_policy.py
       - src/bioetl/application/services/control_plane/replay/historical_universe_service.py
-      - src/bioetl/application/services/control_plane/replay_taxonomy.py
-      - src/bioetl/application/services/control_plane/replay_taxonomy_fields.py
       - src/bioetl/application/services/control_plane/run_manifest_diagnostics_support.py
       - src/bioetl/application/services/control_plane/run_manifest_exact_replay_blockers.py
-      - src/bioetl/application/services/control_plane/run_manifest_inspection_mixins.py
-      - src/bioetl/application/services/control_plane/run_manifest_service_mixins.py
       - src/bioetl/application/services/control_plane/workflow/__init__.py
       - src/bioetl/application/services/control_plane/workflow/execution_preparation.py
       - src/bioetl/application/services/control_plane/workflow/execution_recording.py

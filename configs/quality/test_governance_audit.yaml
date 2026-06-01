@@ -154,6 +154,7 @@ preflight:
   - missing_git_lfs
   - git_lfs_unhealthy
   - git_status_failed
+  - dirty_vcr_worktree
   - lfs_pointer_files_present
   - missing_telemetry_baseline
   - telemetry_baseline_without_coverage
