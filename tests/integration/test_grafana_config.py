@@ -98,6 +98,7 @@ EXPECTED_VARS_BY_DASHBOARD = {
         "payload_hash",
     },
 }
+_OPTIONAL_LOCAL_PANEL_TYPES = {"bioetl-selectorshell-panel"}
 
 
 def _json_load_without_duplicate_keys(path: Path) -> dict:
@@ -226,6 +227,23 @@ def test_dashboard_panel_ids_are_unique(dashboard_path: Path) -> None:
     }
     assert not duplicates, (
         f"Dashboard {dashboard_path.name} has duplicate panel IDs: {duplicates}"
+    )
+
+
+@pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
+def test_shipped_dashboards_do_not_require_optional_local_plugins(
+    dashboard_path: Path,
+) -> None:
+    """Primary shipped dashboards must not depend on local unsigned pilot plugins."""
+    dashboard = load_dashboard(dashboard_path)
+    plugin_panels = [
+        f"id={panel.get('id', '<unknown>')} title={panel.get('title', '<untitled>')} type={panel.get('type')}"
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("type") in _OPTIONAL_LOCAL_PANEL_TYPES
+    ]
+    assert not plugin_panels, (
+        f"{dashboard_path.name} must not reference optional local plugin panels yet: "
+        f"{plugin_panels}"
     )
 
 

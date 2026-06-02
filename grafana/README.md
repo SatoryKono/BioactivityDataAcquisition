@@ -791,6 +791,11 @@ vars (`$workflow_context`, `$pipeline_context_exact`, `$run_type_context_exact`,
 `$provider_context_exact`) через
 `/ops/control-plane/filter-options?exact_run_only=1`, чтобы selected `run_id`
 мог сузить downstream handoff без переписывания видимых sibling selectors.
+Для local-only pilot rollout repo also ships an optional unsigned panel plugin
+under `grafana/plugins/bioetl-selectorshell-panel`; it can call
+`/ops/control-plane/selector-context` and write visible sibling selectors as one
+transaction, but shipped dashboard JSON does not depend on that plugin by
+default.
 
 ### 6.0 Shared context shell
 

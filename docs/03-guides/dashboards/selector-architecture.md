@@ -301,7 +301,9 @@ Native Grafana query variables can consume resolver option lists, but they
 cannot safely auto-write sibling visible selectors. Full bidirectional
 auto-selection requires a custom selector shell/plugin or another UI surface
 that calls `/ops/control-plane/selector-context` and writes all variables as one
-transaction.
+transaction. The repo now includes an optional local pilot panel plugin at
+`grafana/plugins/bioetl-selectorshell-panel` for that purpose, but primary
+dashboard JSON does not reference it by default yet.
 
 ## Future execution selector model
 
