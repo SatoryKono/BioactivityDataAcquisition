@@ -12,7 +12,8 @@ import asyncio
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
-from uuid import UUID, uuid4
+from uuid import UUID
+from tests.helpers.deterministic_ids import deterministic_uuid_string_from_callsite
 
 import polars as pl
 import pytest
@@ -156,7 +157,7 @@ def create_mock_checkpoint_manager(
     if initial_state is None:
         initial_state = CompositeCheckpointState(
             composite_name="test_composite",
-            run_id=str(uuid4()),
+            run_id=deterministic_uuid_string_from_callsite("test_runner_required_flag"),
             created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
     manager.load = AsyncMock(return_value=initial_state)
@@ -459,7 +460,7 @@ class TestRuntimeEnricherSelectionPolicy:
         runner = create_runner(runtime=CompositeRuntimeConfig(enrich_only=("pubmed",)))
         state = CompositeCheckpointState(
             composite_name="test_composite",
-            run_id=str(uuid4()),
+            run_id=deterministic_uuid_string_from_callsite("test_runner_required_flag"),
             created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 
@@ -472,7 +473,7 @@ class TestRuntimeEnricherSelectionPolicy:
         runner = create_runner(runtime=CompositeRuntimeConfig(force_enricher="pubmed"))
         state = CompositeCheckpointState(
             composite_name="test_composite",
-            run_id=str(uuid4()),
+            run_id=deterministic_uuid_string_from_callsite("test_runner_required_flag"),
             created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             completed_enrichers=frozenset({"pubmed"}),
         )
@@ -563,7 +564,7 @@ class TestRuntimeEnricherSelectionPolicy:
         runner = create_runner(runtime=CompositeRuntimeConfig(required_only=True))
         state = CompositeCheckpointState(
             composite_name="test_composite",
-            run_id=str(uuid4()),
+            run_id=deterministic_uuid_string_from_callsite("test_runner_required_flag"),
             created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
         context = runner._prepare_enrichment_run_context(state)
@@ -592,7 +593,7 @@ class TestRuntimeEnricherSelectionPolicy:
         runner._save_failed_enrichment_state = AsyncMock()  # type: ignore[method-assign]
         state = CompositeCheckpointState(
             composite_name="test_composite",
-            run_id=str(uuid4()),
+            run_id=deterministic_uuid_string_from_callsite("test_runner_required_flag"),
             created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 

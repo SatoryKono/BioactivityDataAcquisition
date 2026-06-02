@@ -16,7 +16,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
-from uuid import uuid4
+from uuid import NAMESPACE_URL, uuid5
 
 from bioetl.application.core.lifecycle.cleanup_service import CleanupStorageProtocol
 from bioetl.application.services.admin_runtime_api import CleanupService
@@ -70,10 +70,16 @@ if TYPE_CHECKING:
 
 def _create_cli_preview_run_context() -> RunContext:
     """Create explicit CLI-only preview run context for maintenance storage."""
+    started_at = current_utc_time()
     return RunContext(
-        run_id=RunID(uuid4()),
+        run_id=RunID(
+            uuid5(
+                NAMESPACE_URL,
+                f"bioetl:cli-storage-preview:{started_at.isoformat()}",
+            )
+        ),
         run_type=RunType.INCREMENTAL,
-        started_at=current_utc_time(),
+        started_at=started_at,
         pipeline_name="cli-storage-preview",
         provider="cli",
         entity="maintenance",

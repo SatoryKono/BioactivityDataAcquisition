@@ -177,6 +177,24 @@ def test_target_organism_custom_rule_accepts_classifiable_non_binomial_names() -
     )
 
 
+def test_target_organism_custom_rule_accepts_supported_chembl_target_organisms() -> None:
+    rule = FieldValidation(
+        field="organism",
+        validation_type="custom",
+        validator="validate_target_organism_supported_name",
+    )
+
+    supported_cases = (
+        {"organism": "Ascaris suum", "taxonomy_id": 6253},
+        {"organism": "Saccharomyces cerevisiae S288c", "taxonomy_id": 559292},
+        {"organism": "Penicillium chrysogenum", "taxonomy_id": 5076},
+        {"organism": "Caenorhabditis elegans", "taxonomy_id": 6239},
+    )
+
+    for record in supported_cases:
+        assert _field_rule_violated(record, rule) is False
+
+
 def test_target_organism_custom_rule_rejects_unclassifiable_non_binomial_name() -> None:
     rule = FieldValidation(
         field="organism",

@@ -114,22 +114,6 @@ repo_wide_zero_import_classification:
     linked_issue: '#4541'
     rationale: Manifest diagnostics identity helpers remain the canonical owner module
       behind control-plane diagnostics assembly.
-  - module_path: src/bioetl/composition/bootstrap/cli/adr.py
-    module_name: bioetl.composition.bootstrap.cli.adr
-    disposition: retain_dynamic_entrypoint
-    reviewed_on: '2026-05-22'
-    review_by: '2026-08-20'
-    linked_issue: '#4541'
-    rationale: CLI ADR bootstrap wiring is loaded through command/bootstrap registration
-      rather than direct static imports.
-  - module_path: src/bioetl/composition/bootstrap/cli/control_plane_lifecycle.py
-    module_name: bioetl.composition.bootstrap.cli.control_plane_lifecycle
-    disposition: retain_dynamic_entrypoint
-    reviewed_on: '2026-05-22'
-    review_by: '2026-08-20'
-    linked_issue: '#4541'
-    rationale: CLI control-plane lifecycle bootstrap wiring is loaded through command/bootstrap
-      registration rather than direct static imports.
   - module_path: src/bioetl/domain/behavior/_dq_serializer_html/_renderers.py
     module_name: bioetl.domain.behavior._dq_serializer_html._renderers
     disposition: retain_canonical_owner_module
@@ -267,22 +251,6 @@ repo_wide_zero_import_classification:
     linked_issue: '#4541'
     rationale: Quality transformations remain a canonical domain owner module behind
       package-root exports and strategy selection.
-  - module_path: src/bioetl/domain/types/gold_contracts.py
-    module_name: bioetl.domain.types.gold_contracts
-    disposition: retain_canonical_owner_module
-    reviewed_on: '2026-05-24'
-    review_by: '2026-08-20'
-    linked_issue: '#4541'
-    rationale: Gold contract type definitions remain canonical domain owner modules
-      even when imported through package-root type surfaces.
-  - module_path: src/bioetl/domain/types/gold_schema_policy.py
-    module_name: bioetl.domain.types.gold_schema_policy
-    disposition: retain_canonical_owner_module
-    reviewed_on: '2026-05-24'
-    review_by: '2026-08-20'
-    linked_issue: '#4541'
-    rationale: Gold schema policy type definitions remain canonical domain owner modules
-      even when imported through package-root type surfaces.
   - module_path: src/bioetl/infrastructure/export/export_catalog_adapter.py
     module_name: bioetl.infrastructure.export.export_catalog_adapter
     disposition: retain_canonical_owner_module

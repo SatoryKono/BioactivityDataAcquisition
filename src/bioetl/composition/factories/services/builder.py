@@ -113,11 +113,11 @@ class ServicesBuilder:
         ] = "soft_fail",
     ) -> CheckpointRuntimeService:
         return create_checkpoint_manager(
-            checkpoint_port=checkpoint_port,
-            logger=logger,
-            pipeline_name=pipeline_name,
-            run_id=run_id,
-            resume=resume,
+            checkpoint_port,
+            logger,
+            pipeline_name,
+            run_id,
+            resume,
             loading_strategy=loading_strategy,
             metrics=metrics,
             clock=clock,

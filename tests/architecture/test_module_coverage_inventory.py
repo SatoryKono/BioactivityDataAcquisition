@@ -8,10 +8,10 @@ from pathlib import Path
 import pytest
 
 from scripts.engineering.qa.report_module_coverage_inventory import (
+    _iter_source_modules,
     compute_source_tree_sha256,
     main as module_coverage_inventory_main,
 )
-from scripts.engineering.qa.file_discovery import discover_files
 from tests.architecture._test_matrix_policy_support import load_matrix
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -99,10 +99,8 @@ def test_module_coverage_inventory_is_committed_and_shape_is_stable() -> None:
 def test_module_coverage_inventory_covers_every_source_module() -> None:
     committed = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
     inventory_paths = {str(row["path"]) for row in committed["modules"]}
-    source_root = ROOT / "src" / "bioetl"
     expected_paths = {
-        f"src/bioetl/{relative_path}"
-        for relative_path in discover_files(str(source_root.resolve()), ".py")
+        path.relative_to(ROOT).as_posix() for path in _iter_source_modules(ROOT)
     }
 
     assert inventory_paths == expected_paths

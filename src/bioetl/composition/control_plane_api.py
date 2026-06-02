@@ -4,9 +4,55 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol
 
-from bioetl.composition._lazy_exports import install_lazy_exports
+from bioetl.composition._lazy_exports import install_cached_public_exports
 
 if TYPE_CHECKING:
+    from bioetl.application.core.lifecycle.checkpoint_manager import (
+        CheckpointRuntimeService,
+    )
+    from bioetl.application.services.audit_inspection_service import (
+        AuditInspectionService,
+    )
+    from bioetl.application.services.config_service import ConfigService
+    from bioetl.application.services.control_plane.forensic_diff_service import (
+        ForensicRunDiffService,
+    )
+    from bioetl.application.services.control_plane.manifest.inspection_service import (
+        RunManifestInspectionService,
+    )
+    from bioetl.application.services.control_plane.replay.historical_closure_service import (
+        HistoricalReplayClosureReport,
+        HistoricalReplayClosureService,
+    )
+    from bioetl.application.services.control_plane.replay.historical_corpus_service import (
+        HistoricalReplayCorpusService,
+    )
+    from bioetl.application.services.control_plane.replay.historical_universe_service import (
+        HistoricalReplayUniverseClosureReport,
+        HistoricalReplayUniverseService,
+    )
+    from bioetl.application.services.control_plane.workflow.execution_service import (
+        WorkflowExecutionService,
+    )
+    from bioetl.application.services.control_plane.workflow.inspection_service import (
+        WorkflowInspectionService,
+    )
+    from bioetl.application.services.export_service import ExportService
+    from bioetl.application.services.lineage.lineage_inspection_service import (
+        LineageInspectionService,
+    )
+    from bioetl.application.services.lock_service import LockService
+    from bioetl.application.services.workflow_runner_service import (
+        WorkflowRunnerService,
+    )
+    from bioetl.domain.control_plane import (
+        ControlPlaneArtifactLifecycleApplyResult,
+        ControlPlaneArtifactLifecyclePlan,
+        ControlPlaneArtifactLifecyclePolicy,
+    )
+    from bioetl.domain.workflow import WorkflowConfig
+
+    from bioetl.composition.registry_api import PipelineRegistry
 
     class ControlPlaneArtifactLifecycleStoreProtocol(Protocol):
         def plan(
@@ -92,9 +138,7 @@ __all__ = [
 _SERVICES_MODULE = "bioetl.composition._services"
 _WORKFLOW_SERVICES_MODULE = "bioetl.composition._workflow_services"
 _RESOURCE_MANAGEMENT_MODULE = "bioetl.composition._resource_management"
-_CLI_CONTROL_PLANE_LIFECYCLE_MODULE = (
-    "bioetl.composition.bootstrap.cli.control_plane_lifecycle"
-)
+_CLI_CONTROL_PLANE_LIFECYCLE_MODULE = "bioetl.composition.bootstrap.cli"
 _RUN_MANIFEST_BOOTSTRAP_MODULE = "bioetl.composition.bootstrap.cli.run_manifest"
 _PUBLIC_EXPORTS = {
     "bootstrap_control_plane_lifecycle_store": _CLI_CONTROL_PLANE_LIFECYCLE_MODULE,
@@ -116,10 +160,8 @@ _PUBLIC_EXPORTS = {
     "get_workflow_inspection_service": _WORKFLOW_SERVICES_MODULE,
     "load_workflow_config": _WORKFLOW_SERVICES_MODULE,
 }
-install_lazy_exports(
+install_cached_public_exports(
     module_globals=globals(),
     public_exports=_PUBLIC_EXPORTS,
     module_name=__name__,
-    explicit_exports=__all__,
-    cache=True,
 )

@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import pytest
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 from types import SimpleNamespace
-from uuid import uuid4
 
 from bioetl.composition.runtime_builders import control_plane
 from bioetl.composition.runtime_builders._run_manifest_refs import (
@@ -79,7 +79,7 @@ def test_create_run_manifest_with_effective_config_uses_yaml_provider_entity(
 
     ctx = SimpleNamespace(
         pipeline_name="custom_runtime_name",
-        run_id=uuid4(),
+        run_id=deterministic_uuid_from_callsite("test_control_plane"),
     )
     inputs = SimpleNamespace(
         yaml_config=SimpleNamespace(provider="chembl", entity_type="activity"),
@@ -165,7 +165,7 @@ def test_create_run_manifest_with_effective_config_reuses_publication_context(
 
     ctx = SimpleNamespace(
         pipeline_name="chembl_activity",
-        run_id=uuid4(),
+        run_id=deterministic_uuid_from_callsite("test_control_plane"),
         exact_replay=False,
     )
     inputs = SimpleNamespace(

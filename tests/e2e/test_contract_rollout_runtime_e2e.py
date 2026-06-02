@@ -6,8 +6,8 @@ from contextlib import ExitStack
 from copy import deepcopy
 from pathlib import Path
 from typing import TYPE_CHECKING
-from uuid import uuid4
 from unittest.mock import patch
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pyarrow as pa
 import pytest
@@ -89,11 +89,13 @@ async def _run_runtime_pipeline(
 ) -> None:
     from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
     from bioetl.domain.context import InputFilterContext, PipelineRunContext
-    from bioetl.domain.types import RunID, RunType
+    from bioetl.domain.types import RunType
 
     context = PipelineRunContext(
         pipeline_name=_PIPELINE_NAME,
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite(
+            "test_contract_rollout_runtime_e2e"
+        ),
         run_type=RunType.INCREMENTAL,
         resume=False,
         limit=limit,

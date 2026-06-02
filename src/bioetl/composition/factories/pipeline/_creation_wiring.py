@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol, cast
@@ -21,7 +22,6 @@ from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
 )
 from bioetl.composition.factories.pipeline.construction_types import (
-    EntityTypeExtractor,
     _SchemaBuilder,
 )
 from bioetl.composition.factories.pipeline.control_plane_artifacts import (
@@ -138,7 +138,7 @@ def _build_metadata_coordinator(
     inputs: _PipelineCreationInputs,
     yaml_config: PipelineYamlConfig,
     deps: _ServiceBundleDeps,
-    extract_entity_type: EntityTypeExtractor,
+    extract_entity_type: Callable[[str], str | None],
 ) -> MetadataCoordinator:
     """Build the metadata coordinator from the canonical run context factory."""
     from bioetl.composition.services.versioning import (
@@ -181,7 +181,7 @@ def _build_pipeline_transformer(
     inputs: _PipelineCreationInputs,
     yaml_config: PipelineYamlConfig,
     domain_config: PipelineConfig,
-    extract_entity_type: EntityTypeExtractor,
+    extract_entity_type: Callable[[str], str | None],
 ) -> BaseTransformer | None:
     """Build the runtime transformer while preserving the public factory seam."""
     from bioetl.infrastructure.config.contract_policy_loader import (
@@ -208,7 +208,7 @@ def _create_pipeline_with_services_impl(
     inputs: _PipelineCreationInputs,
     *,
     deps: _ServiceBundleDeps,
-    extract_entity_type: EntityTypeExtractor,
+    extract_entity_type: Callable[[str], str | None],
     build_pipeline_services_fn: _BuildPipelineServicesFn,
 ) -> BasePipeline:
     """Implement pipeline creation while keeping facade thin.

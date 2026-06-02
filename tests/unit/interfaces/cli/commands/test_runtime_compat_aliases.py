@@ -25,11 +25,6 @@ CLI_INTERNAL_WRAPPER_CASES = (
         ("health", "get_health_service", "get_health_server_dependencies"),
     ),
     (
-        "bioetl.interfaces.cli.commands.domains.maintenance.command",
-        "bioetl.interfaces.cli.commands.maintenance",
-        ("maintenance",),
-    ),
-    (
         "bioetl.interfaces.cli.commands.domains.quarantine.command",
         "bioetl.interfaces.cli.commands.quarantine",
         ("quarantine", "get_quarantine_runtime_service", "get_quarantine_service"),
@@ -88,6 +83,15 @@ def test_removed_run_command_wrapper_stays_absent() -> None:
     """Retired run-command wrapper must not return under the domains package."""
     with pytest.raises(ModuleNotFoundError):
         importlib.import_module("bioetl.interfaces.cli.commands.domains.run.command")
+
+
+@pytest.mark.unit
+def test_removed_maintenance_command_wrapper_stays_absent() -> None:
+    """Retired maintenance wrapper must not return under the domains package."""
+    with pytest.raises(ModuleNotFoundError):
+        importlib.import_module(
+            "bioetl.interfaces.cli.commands.domains.maintenance.command"
+        )
 
 
 @pytest.mark.unit

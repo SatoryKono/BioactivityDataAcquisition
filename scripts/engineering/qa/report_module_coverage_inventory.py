@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import time
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from datetime import date
@@ -21,6 +22,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_COVERAGE_XML = PROJECT_ROOT / "reports" / "coverage" / "coverage.xml"
 DEFAULT_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "module-coverage-inventory.json"
 SOURCE_ROOT = PROJECT_ROOT / "src" / "bioetl"
+MAX_SOURCE_TREE_STABILIZATION_ATTEMPTS = 8
+SOURCE_TREE_STABILIZATION_SLEEP_SECONDS = 0.1
 
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -64,8 +67,16 @@ def _read_source_module_snapshots(
     digest = hashlib.sha256()
     snapshots: list[_SourceModuleSnapshot] = []
     for path in source_paths:
+        if not path.exists():
+            continue
         relative = _repo_relative(path, repo_root)
-        raw_source = path.read_bytes()
+        try:
+            raw_source = path.read_bytes()
+        except FileNotFoundError:
+            # Shared-drive worktrees can briefly report a stale path as present and
+            # then fail on open a few milliseconds later. Skip the vanished file so
+            # the inventory reflects the readable source tree instead of flaking.
+            continue
         digest.update(relative.encode("utf-8"))
         digest.update(b"\0")
         digest.update(raw_source)
@@ -103,15 +114,57 @@ def _iter_source_modules(repo_root: Path) -> list[Path]:
     return [path for path in source_paths if path.exists()]
 
 
+def _read_stable_source_module_snapshots(
+    repo_root: Path,
+    *,
+    max_attempts: int = MAX_SOURCE_TREE_STABILIZATION_ATTEMPTS,
+) -> tuple[list[_SourceModuleSnapshot], str]:
+    """Retry source-tree reads and prefer the largest readable snapshot set."""
+    best_digest: str | None = None
+    best_paths: tuple[str, ...] = ()
+    best_snapshots: list[_SourceModuleSnapshot] | None = None
+    previous_digest: str | None = None
+    previous_paths: tuple[str, ...] | None = None
+
+    for attempt in range(max_attempts):
+        source_paths = _iter_source_modules(repo_root)
+        snapshots, digest = _read_source_module_snapshots(
+            source_paths,
+            repo_root,
+        )
+        repo_paths = tuple(snapshot.repo_path for snapshot in snapshots)
+        if best_snapshots is None or len(repo_paths) > len(best_paths):
+            best_digest = digest
+            best_paths = repo_paths
+            best_snapshots = snapshots
+        if (
+            digest == previous_digest
+            and repo_paths == previous_paths
+            and (
+                best_snapshots is None
+                or len(repo_paths) >= len(best_paths)
+            )
+        ):
+            best_digest = digest
+            best_paths = repo_paths
+            best_snapshots = snapshots
+        previous_digest = digest
+        previous_paths = repo_paths
+        if attempt + 1 < max_attempts:
+            time.sleep(SOURCE_TREE_STABILIZATION_SLEEP_SECONDS)
+
+    if best_snapshots is None or best_digest is None:
+        return [], hashlib.sha256().hexdigest()
+    return best_snapshots, best_digest
+
+
 def compute_source_tree_sha256(
     *,
     repo_root: Path = PROJECT_ROOT,
 ) -> str:
     """Return the committed source-tree digest without rebuilding full coverage rows."""
     repo_root = repo_root.resolve()
-    source_paths = _iter_source_modules(repo_root)
-    _, source_tree_sha256 = _read_source_module_snapshots(
-        source_paths,
+    _, source_tree_sha256 = _read_stable_source_module_snapshots(
         repo_root,
     )
     return source_tree_sha256
@@ -420,9 +473,7 @@ def build_module_coverage_inventory(
     coverage_xml = coverage_xml.resolve()
     coverage_xml_exists = coverage_xml.exists()
     coverage_by_path = _parse_coverage_xml(coverage_xml, repo_root=repo_root)
-    source_paths = _iter_source_modules(repo_root)
-    source_snapshots, source_tree_sha256 = _read_source_module_snapshots(
-        source_paths,
+    source_snapshots, source_tree_sha256 = _read_stable_source_module_snapshots(
         repo_root,
     )
     rows: list[dict[str, Any]] = []

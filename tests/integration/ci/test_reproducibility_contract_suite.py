@@ -8,7 +8,8 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock
-from uuid import UUID, uuid4
+from uuid import UUID
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 
@@ -204,7 +205,9 @@ def _make_manifest(
 def test_historical_replay_corpus_inventory_and_bulk_certification() -> None:
     source_manifest = _make_manifest(
         manifest_id="historical-source-manifest",
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite(
+            "test_reproducibility_contract_suite"
+        ),
         execution_fingerprint="historical-source-fingerprint",
         identity=_ManifestIdentity(
             pipeline_name="pubmed_publication",
@@ -216,7 +219,9 @@ def test_historical_replay_corpus_inventory_and_bulk_certification() -> None:
     )
     composite_manifest = _make_manifest(
         manifest_id="historical-composite-manifest",
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite(
+            "test_reproducibility_contract_suite"
+        ),
         execution_fingerprint="historical-composite-fingerprint",
         identity=_ManifestIdentity(
             pipeline_name="composite_publication",
@@ -646,7 +651,9 @@ def test_reproducibility_contract_bronze_bundle_has_canonical_artifact_identity(
 ):
     started_at = datetime(2025, 1, 1, tzinfo=UTC)
     context = RunContext.create(
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite(
+            "test_reproducibility_contract_suite"
+        ),
         run_type=RunType.INCREMENTAL,
         started_at=started_at,
         provider="chembl",
@@ -676,7 +683,9 @@ def test_reproducibility_contract_silver_bundle_keeps_sidecar_and_fragment_ident
 ):
     started_at = datetime(2025, 1, 1, tzinfo=UTC)
     context = RunContext.create(
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite(
+            "test_reproducibility_contract_suite"
+        ),
         run_type=RunType.INCREMENTAL,
         started_at=started_at,
         provider="chembl",
@@ -715,7 +724,9 @@ def test_reproducibility_contract_gold_bundle_keeps_sidecar_and_fragment_identit
 ):
     started_at = datetime(2025, 1, 1, tzinfo=UTC)
     context = RunContext.create(
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite(
+            "test_reproducibility_contract_suite"
+        ),
         run_type=RunType.INCREMENTAL,
         started_at=started_at,
         provider="chembl",
@@ -1254,7 +1265,7 @@ def test_reproducibility_contract_family_exact_replay_evidence_closure(
 ) -> None:
     """Every published supported family must expose replay evidence anchors."""
     provider, entity, pipeline_name = _family_context(family)
-    run_id = RunID(uuid4())
+    run_id = deterministic_run_uuid_from_callsite("test_reproducibility_contract_suite")
     input_snapshot = RunInputSnapshotRef(
         snapshot_id=f"{family}:snapshot-1",
         content_hash="content-hash-1",

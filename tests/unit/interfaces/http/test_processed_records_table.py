@@ -5,13 +5,12 @@ from __future__ import annotations
 import asyncio
 import json
 from datetime import UTC, datetime
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 
 from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.control_plane.run_ledger import ARTIFACT_PUBLISHED_EVENT
-from bioetl.domain.types import RunID
 from bioetl.interfaces.http import processed_records_table as processed_records_module
 from bioetl.interfaces.http.health_server import HealthServer
 from bioetl.interfaces.http.processed_records_table import (
@@ -231,7 +230,7 @@ class TestProcessedRecordsTable:
         self,
     ) -> None:
         """Exact-run Processed Records should not contradict published artifacts."""
-        run_id = RunID(uuid4())
+        run_id = deterministic_run_uuid_from_callsite("test_processed_records_table")
         occurred_at = datetime(2026, 5, 29, 17, 37, tzinfo=UTC)
         payload = build_processed_records_table_payload_from_ledger(
             pipeline="chembl_target",
@@ -340,7 +339,7 @@ class TestProcessedRecordsTable:
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         """Exact run_id scopes should use RunLedger instead of current Prometheus rows."""
-        run_id = RunID(uuid4())
+        run_id = deterministic_run_uuid_from_callsite("test_processed_records_table")
         ledger_store = InMemoryRunLedgerStore()
         ledger_store.append(
             RunLedgerEntry(

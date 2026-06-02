@@ -10,7 +10,7 @@ compatibility_reduction_plan:
   - keep_hash_policy_split_until_backfill
   - v2_default_active_with_explicit_v1_date_compatibility
   occurrence_identity_budget:
-    max_allowed_call_sites: 13
+    max_allowed_call_sites: 12
     ratchet_policy: No new uuid4-based occurrence identity generators may be added
       without explicit policy review and test evidence.
   replay_hash_policy_budget:
@@ -198,15 +198,6 @@ allowed_occurrence_identity_generators:
   replay_semantics: excluded_from_execution_fingerprint
   rationale: Logger fallback run IDs are correlation-only observability IDs and must
     not enter replay fingerprints.
-  issue: '#4472'
-- path: src/bioetl/composition/bootstrap/cli/storage.py
-  symbol: _create_cli_preview_run_context
-  generator: uuid4
-  identity_field: cli_preview_run_id
-  semantic_classification: occurrence-only
-  replay_semantics: excluded_from_execution_fingerprint
-  rationale: CLI preview storage contexts use occurrence-only IDs for local operator
-    actions and not for semantic replay identity.
   issue: '#4472'
 - path: src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py
   symbol: SilverForeignKeyReconciliationAdapter._quarantine_orphan_rows

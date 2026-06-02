@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
 from typing import cast
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 
@@ -18,7 +18,7 @@ from bioetl.composition.factories.pipeline.transformer_builder import (
     TransformerBuilder,
 )
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import RunType
 from bioetl.infrastructure.config.domain_config_resolver import (
     DomainConfigResolver,
 )
@@ -90,7 +90,9 @@ def test_run_context_factory_creates_expected_context() -> None:
     )
 
     context = factory.create(
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite(
+            "test_pipeline_factory_construction"
+        ),
         runtime=runtime,
         started_at=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
         yaml_config=yaml_config,

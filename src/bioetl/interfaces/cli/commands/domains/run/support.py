@@ -15,6 +15,9 @@ from typing import TYPE_CHECKING, cast
 import click
 
 from bioetl.domain.exceptions import BioETLError
+from bioetl.interfaces.cli.commands.domains.maintenance.service_access import (
+    preview_cleanup as preview_maintenance_cleanup,
+)
 
 __all__ = [
     "build_cli_registry",
@@ -62,18 +65,16 @@ def build_cli_registry() -> PipelineRegistry:
 
 
 def _resolve_populated_default_registry() -> PipelineRegistry | None:
-    """Return the shared default registry when it is already populated."""
-    from bioetl.composition.registry_api import get_default_registry
-
-    registry = get_default_registry()
-    return registry if registry.list_pipelines() else None
+    """Retired compatibility seam kept patchable for older CLI unit tests."""
+    return None
 
 
 async def preview_cleanup(pipeline: str) -> CleanupPreview:
     """Compatibility seam for cleanup preview patched by CLI dry-run tests."""
-    from bioetl.interfaces.cli.commands.maintenance import preview_cleanup as _impl
-
-    impl = cast("Callable[[str], Awaitable[CleanupPreview]]", _impl)
+    impl = cast(
+        "Callable[[str], Awaitable[CleanupPreview]]",
+        preview_maintenance_cleanup,
+    )
     return await impl(pipeline)
 
 

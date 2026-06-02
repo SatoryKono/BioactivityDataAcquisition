@@ -12,7 +12,6 @@ from __future__ import annotations
 
 __all__ = ["BasePipeline"]
 
-
 from abc import ABC
 from datetime import UTC, date, datetime
 from typing import TYPE_CHECKING, Self
@@ -136,10 +135,10 @@ class BasePipeline(ABC):  # noqa: B024
             logger=self._logger,
             started_at=started_at,
             replay_timestamp_anchor=replay_timestamp_anchor,
+            pipeline_name=config.pipeline_name,
+            workflow_id=runtime.workflow_id,
         )
         self._shutdown_signal = shutdown_signal
-
-    # --- Properties for accessing config (read-only) ---
 
     @property
     def config(self) -> PipelineConfig:

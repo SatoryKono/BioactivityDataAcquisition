@@ -5,7 +5,7 @@ Implements vacuum operations for Delta tables storage reclamation.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from importlib import import_module
 
 import click
 
@@ -19,12 +19,6 @@ from bioetl.interfaces.cli.formatters import (
     echo_vacuum_all_summary,
     echo_vacuum_result,
 )
-
-if TYPE_CHECKING:
-    from bioetl.application.services.medallion_lifecycle import (
-        MedallionLifecycleService,
-    )
-    from bioetl.application.services.vacuum_service import VacuumService
 
 __all__ = [
     "get_lifecycle_service",
@@ -42,22 +36,16 @@ _VACUUM_ALL_UNEXPECTED_ERROR_TITLE = "Unexpected error during maintenance vacuum
 _VACUUM_ALL_INTERRUPTED_MESSAGE = "Maintenance vacuum-all interrupted by user (Ctrl+C)"
 
 
-def get_lifecycle_service() -> MedallionLifecycleService:
-    """Load the lifecycle service through the maintenance command seam."""
-    from bioetl.interfaces.cli.commands.maintenance import (
-        get_lifecycle_service as _impl,
-    )
-
-    return _impl()
+def get_lifecycle_service() -> object:
+    """Load the lifecycle service through the retained maintenance public seam."""
+    maintenance = import_module("bioetl.interfaces.cli.commands.maintenance")
+    return maintenance.get_lifecycle_service()
 
 
-def get_vacuum_service() -> VacuumService:
-    """Load the vacuum service through the maintenance command seam."""
-    from bioetl.interfaces.cli.commands.maintenance import (
-        get_vacuum_service as _impl,
-    )
-
-    return _impl()
+def get_vacuum_service() -> object:
+    """Load the vacuum service through the retained maintenance public seam."""
+    maintenance = import_module("bioetl.interfaces.cli.commands.maintenance")
+    return maintenance.get_vacuum_service()
 
 
 def _maintenance_policy(

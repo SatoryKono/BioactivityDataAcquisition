@@ -72,5 +72,4 @@ install_lazy_exports(
     module_globals=globals(),
     public_exports=_PUBLIC_SYMBOL_TARGETS,
     module_name=__name__,
-    explicit_exports=__all__,
 )

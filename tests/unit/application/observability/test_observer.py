@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -89,7 +89,7 @@ def tracer_mock():
 
 @pytest.fixture
 def run_id():
-    return uuid4()
+    return deterministic_uuid_from_callsite("test_observer")
 
 
 def test_pipeline_observer_success(metrics_mock, logger_mock, run_id):

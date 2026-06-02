@@ -9,6 +9,7 @@ import asyncio
 from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import UUID
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -398,8 +399,6 @@ class TestShutdownWithCheckpointManager:
         mock_checkpoint = MagicMock()
         shutdown_signal = ShutdownSignal()
 
-        from uuid import uuid4
-
         from bioetl.application.core.config import LockConfig
 
         lock_config = LockConfig(
@@ -412,7 +411,7 @@ class TestShutdownWithCheckpointManager:
         )
         manager = LockRuntimeService(
             lock_port=mock_lock,
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("test_cli_shutdown_integration"),
             config=lock_config,
             logger=mock_logger,
             shutdown_signal=shutdown_signal,
@@ -454,8 +453,6 @@ class TestShutdownWithCheckpointManager:
         mock_logger = MagicMock()
         shutdown_signal = ShutdownSignal()
 
-        from uuid import uuid4
-
         from bioetl.application.core.config import LockConfig
 
         lock_config = LockConfig(
@@ -468,7 +465,7 @@ class TestShutdownWithCheckpointManager:
         )
         manager = LockRuntimeService(
             lock_port=mock_lock,
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("test_cli_shutdown_integration"),
             config=lock_config,
             logger=mock_logger,
             shutdown_signal=shutdown_signal,

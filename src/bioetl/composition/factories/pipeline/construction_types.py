@@ -4,17 +4,12 @@ from __future__ import annotations
 
 from typing import Protocol
 
+from bioetl.composition.factories.pipeline.entity_type_extractor import (
+    EntityTypeExtractor,
+)
 from bioetl.domain.config import DQConfig, PipelineConfig
 from bioetl.domain.ports import ContractPolicyProtocol
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
-
-
-class EntityTypeExtractor(Protocol):
-    """Callable contract for deriving entity type from pipeline name."""
-
-    def __call__(self, pipeline_name: str) -> str | None:
-        """Resolve entity type from pipeline name."""
-        ...
 
 
 class DomainConfigMapper(Protocol):
@@ -44,3 +39,11 @@ class _SchemaBuilder(Protocol):
     def to_schema(cls) -> object:
         """Materialize schema representation."""
         ...
+
+
+__all__ = [
+    "ContractPolicyLoader",
+    "DomainConfigMapper",
+    "EntityTypeExtractor",
+    "_SchemaBuilder",
+]

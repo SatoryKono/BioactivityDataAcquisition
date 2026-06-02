@@ -9,10 +9,7 @@ if TYPE_CHECKING:
         PipelineRunnerProtocol,
     )
     from bioetl.composition.runtime_builders.runner_builder_wiring import (
-        LegacyRunnerBuilderOverrides,
         RunnerBuilderWiring,
-        RunnerFactoryWiring,
-        RunnerInputWiring,
     )
     from bioetl.domain.context import PipelineRunContext
 
@@ -23,9 +20,6 @@ if TYPE_CHECKING:
         registry: PipelineRegistry | None = None,
         *,
         wiring: RunnerBuilderWiring | None = ...,
-        factory_wiring: RunnerFactoryWiring | None = ...,
-        input_wiring: RunnerInputWiring | None = ...,
-        legacy_overrides: LegacyRunnerBuilderOverrides | None = ...,
     ) -> PipelineRunnerProtocol: ...
 
 else:

@@ -69,6 +69,7 @@ class TestBuildComponentsAndProcessingService:
         )
         callbacks = _make_callbacks()
         components = MagicMock()
+        components.writer = SimpleNamespace(_debug_export_service=None)
         create_components = MagicMock(return_value=components)
         quarantine_manager = MagicMock()
         mock_quarantine_manager_cls.return_value = quarantine_manager
@@ -135,6 +136,7 @@ class TestBuildComponentsAndProcessingService:
             quarantine_manager=quarantine_manager,
             run_id=pipeline.context.run_id,
             domain_event_emitter=None,
+            debug_export_service=None,
         )
         mock_processing_service_cls.assert_called_once_with(
             services=pipeline.services,

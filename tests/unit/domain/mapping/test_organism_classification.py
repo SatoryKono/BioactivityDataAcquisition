@@ -73,7 +73,10 @@ class TestClassifyByTaxonomyId:
             (5888, CellularityType.UNICELLULAR),  # Paramecium
             (870730, CellularityType.UNICELLULAR),  # Ogataea (yeast)
             (5691, CellularityType.UNICELLULAR),  # T. brucei
+            (559292, CellularityType.UNICELLULAR),  # S. cerevisiae S288c
             # Multicellular — animals
+            (6239, CellularityType.MULTICELLULAR),  # C. elegans
+            (6253, CellularityType.MULTICELLULAR),  # Ascaris suum
             (9606, CellularityType.MULTICELLULAR),  # Homo sapiens
             (10090, CellularityType.MULTICELLULAR),  # Mus musculus
             (10116, CellularityType.MULTICELLULAR),  # Rattus norvegicus
@@ -86,6 +89,7 @@ class TestClassifyByTaxonomyId:
             (4577, CellularityType.MULTICELLULAR),  # Zea mays
             # Multicellular — filamentous fungi
             (5061, CellularityType.MULTICELLULAR),  # Aspergillus niger
+            (5076, CellularityType.MULTICELLULAR),  # Penicillium chrysogenum
             (64495, CellularityType.MULTICELLULAR),  # Rhizopus arrhizus
         ],
     )
@@ -130,6 +134,10 @@ class TestClassifyByOrganismName:
             ("Glycine max", CellularityType.MULTICELLULAR),
             ("Drosophila melanogaster", CellularityType.MULTICELLULAR),
             ("Aspergillus niger", CellularityType.MULTICELLULAR),
+            ("Ascaris suum", CellularityType.MULTICELLULAR),
+            ("Caenorhabditis elegans", CellularityType.MULTICELLULAR),
+            ("Penicillium chrysogenum", CellularityType.MULTICELLULAR),
+            ("Saccharomyces cerevisiae", CellularityType.UNICELLULAR),
             ("Escherichia coli", CellularityType.UNICELLULAR),
             ("Staphylococcus aureus", CellularityType.UNICELLULAR),
             ("Candida albicans", CellularityType.UNICELLULAR),
@@ -147,6 +155,11 @@ class TestClassifyByOrganismName:
 
     def test_strain_prefix_matching(self) -> None:
         result = classify_organism("Plasmodium falciparum 3D7", None)
+        assert result.organism_class == CellularityType.UNICELLULAR
+        assert result.source == "organism_name"
+
+    def test_supported_organism_strain_suffix_matching(self) -> None:
+        result = classify_organism("Saccharomyces cerevisiae S288c", None)
         assert result.organism_class == CellularityType.UNICELLULAR
         assert result.source == "organism_name"
 
@@ -221,6 +234,8 @@ class TestGenusFallback:
             ("Schistosoma mansoni", CellularityType.MULTICELLULAR),
             ("Arabidopsis thaliana", CellularityType.MULTICELLULAR),
             ("Chlamydomonas reinhardtii", CellularityType.UNICELLULAR),
+            ("Saccharomyces paradoxus", CellularityType.UNICELLULAR),
+            ("Penicillium rubens", CellularityType.MULTICELLULAR),
             ("Trichophyton", CellularityType.MULTICELLULAR),
         ],
     )

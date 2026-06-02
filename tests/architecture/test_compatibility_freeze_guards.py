@@ -99,6 +99,17 @@ QUARANTINE_COMMAND_INTERNAL_MODULE = (
 MAINTENANCE_COMMAND_INTERNAL_MODULE = (
     "bioetl.interfaces.cli.commands.domains.maintenance.command"
 )
+MAINTENANCE_COMMAND_INTERNAL_PATH = (
+    ROOT
+    / "src"
+    / "bioetl"
+    / "interfaces"
+    / "cli"
+    / "commands"
+    / "domains"
+    / "maintenance"
+    / "command.py"
+)
 ARCHIVE_COMMAND_INTERNAL_MODULE = (
     "bioetl.interfaces.cli.commands.domains.maintenance.archive"
 )
@@ -713,7 +724,6 @@ ALLOWED_COMPOSITION_REGISTRY_MODULE_SRC_FILES = frozenset(
     {
         ROOT / "src" / "bioetl" / "composition" / "__init__.py",
         ROOT / "src" / "bioetl" / "composition" / "registry_api.py",
-        ROOT / "src" / "bioetl" / "composition" / "registry_default.py",
     }
 )
 ALLOWED_COMPOSITION_REGISTRY_MODULE_TEST_FILES = frozenset({})
@@ -1643,6 +1653,14 @@ def test_checkpoint_compatibility_v2_surface_stays_removed_and_unimportable() ->
     assert not _find_importers(
         ROOT / "tests", REMOVED_CHECKPOINT_COMPATIBILITY_V2_MODULE
     )
+
+
+@pytest.mark.architecture
+def test_removed_maintenance_command_wrapper_stays_absent_and_unimportable() -> None:
+    """Retired maintenance wrapper must stay absent everywhere."""
+    assert not MAINTENANCE_COMMAND_INTERNAL_PATH.exists()
+    with pytest.raises(ModuleNotFoundError):
+        import_module(MAINTENANCE_COMMAND_INTERNAL_MODULE)
 
 
 @pytest.mark.architecture

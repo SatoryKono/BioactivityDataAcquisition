@@ -27,7 +27,8 @@ from dataclasses import replace
 from functools import cache
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
-from uuid import UUID, uuid4, uuid5
+from uuid import UUID, uuid5
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 from tests.helpers.clock import FIXED_TEST_TIME
@@ -634,7 +635,7 @@ def _resolve_e2e_run_id(
             filter_field=filter_field,
         )
         return _build_e2e_run_id(f"{run_id_seed}|{seed}")
-    return uuid4()
+    return deterministic_uuid_from_callsite("e2e.conftest")
 
 
 def build_e2e_run_context(

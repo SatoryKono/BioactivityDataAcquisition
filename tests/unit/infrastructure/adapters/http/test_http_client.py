@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock, patch
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import httpx
 import pytest
@@ -60,7 +60,7 @@ class TestUnifiedHTTPClientInit:
 
     def test_init_with_run_id(self, mock_rate_limiter, mock_circuit_breaker):
         """Test initialization with run_id."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_http_client")
         client = UnifiedHTTPClient(
             rate_limiter=mock_rate_limiter,
             circuit_breaker=mock_circuit_breaker,
@@ -110,7 +110,7 @@ class TestUnifiedHTTPClientContextManager:
         self, mock_rate_limiter, mock_circuit_breaker
     ):
         """Test __aenter__ sets correlation ID header when run_id provided."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_http_client")
         client = UnifiedHTTPClient(
             rate_limiter=mock_rate_limiter,
             circuit_breaker=mock_circuit_breaker,

@@ -11,6 +11,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Awaitable
 from typing import Any
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 
@@ -257,9 +258,8 @@ class TestMockImplementations:
     async def test_transformer_returns_silver_record(self, noop_logger) -> None:
         """Transformer implementation returns valid SilverRecord."""
         from datetime import UTC, datetime
-        from uuid import uuid4
 
-        from bioetl.domain.types import RunID, RunType
+        from bioetl.domain.types import RunType
 
         class MockTransformer:
             """Mock transformer for testing."""
@@ -281,7 +281,7 @@ class TestMockImplementations:
                 }
 
         context = PipelineContext.create(
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite("test_protocols"),
             run_type=RunType.INCREMENTAL,
             logger=noop_logger,
             started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
@@ -301,9 +301,8 @@ class TestMockImplementations:
     async def test_transformer_returns_none_for_invalid(self, noop_logger) -> None:
         """Transformer returns None for invalid records."""
         from datetime import UTC, datetime
-        from uuid import uuid4
 
-        from bioetl.domain.types import RunID, RunType
+        from bioetl.domain.types import RunType
 
         class MockTransformer:
             """Mock transformer that validates records."""
@@ -321,7 +320,7 @@ class TestMockImplementations:
                 return {"data": record["required_field"]}
 
         context = PipelineContext.create(
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite("test_protocols"),
             run_type=RunType.INCREMENTAL,
             logger=noop_logger,
             started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
@@ -340,12 +339,11 @@ class TestCallbackUsage:
     def test_filter_callback_usage(self, noop_logger) -> None:
         """Demonstrate filter callback usage."""
         from datetime import UTC, datetime
-        from uuid import uuid4
 
-        from bioetl.domain.types import RunID, RunType
+        from bioetl.domain.types import RunType
 
         context = PipelineContext.create(
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite("test_protocols"),
             run_type=RunType.INCREMENTAL,
             logger=noop_logger,
             started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
@@ -365,12 +363,11 @@ class TestCallbackUsage:
     def test_gold_transform_callback_usage(self, noop_logger) -> None:
         """Demonstrate gold transform callback usage."""
         from datetime import UTC, datetime
-        from uuid import uuid4
 
-        from bioetl.domain.types import RunID, RunType
+        from bioetl.domain.types import RunType
 
         context = PipelineContext.create(
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite("test_protocols"),
             run_type=RunType.INCREMENTAL,
             logger=noop_logger,
             started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),

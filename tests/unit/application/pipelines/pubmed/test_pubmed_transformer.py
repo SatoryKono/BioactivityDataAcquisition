@@ -10,7 +10,7 @@ from functools import cache
 import xml.etree.ElementTree as ET
 from typing import TYPE_CHECKING, Any
 from unittest.mock import MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -190,7 +190,7 @@ def _build_pipeline_context(mock_logger: MagicMock):
     """Create a PipelineContext without importing it during collection."""
     symbols = _pubmed_test_symbols()
     return symbols["PipelineContext"](
-        run_id=uuid4(),
+        run_id=deterministic_uuid_from_callsite("test_pubmed_transformer"),
         run_type=symbols["RunType"].INCREMENTAL,
         logger=mock_logger,
     )

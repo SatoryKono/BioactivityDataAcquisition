@@ -8,7 +8,10 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from uuid import uuid4
+from tests.helpers.deterministic_ids import (
+    deterministic_run_uuid_from_callsite,
+    deterministic_uuid_string_from_callsite,
+)
 
 import pytest
 
@@ -36,7 +39,7 @@ def checkpoint(checkpoint_dir: Path) -> LocalCheckpointAdapter:
 @pytest.fixture
 def run_id() -> RunID:
     """Create a test RunID."""
-    return RunID(uuid4())
+    return deterministic_run_uuid_from_callsite("test_local_checkpoint")
 
 
 class TestLocalCheckpointInit:
@@ -131,8 +134,8 @@ class TestLocalCheckpointSaveLoad:
         self, checkpoint: LocalCheckpointAdapter
     ) -> None:
         """Save should overwrite existing checkpoint."""
-        run_id1 = RunID(uuid4())
-        run_id2 = RunID(uuid4())
+        run_id1 = deterministic_run_uuid_from_callsite("test_local_checkpoint")
+        run_id2 = deterministic_run_uuid_from_callsite("test_local_checkpoint")
 
         await checkpoint.save("pipeline", run_id1, {"v": 1})
         await checkpoint.save("pipeline", run_id2, {"v": 2})
@@ -148,7 +151,7 @@ class TestLocalCheckpointSaveLoad:
         """Save should create parent directories if missing."""
         deep_path = tmp_path / "a" / "b" / "c"
         cp = LocalCheckpointAdapter(base_path=deep_path)
-        run_id = RunID(uuid4())
+        run_id = deterministic_run_uuid_from_callsite("test_local_checkpoint")
         await cp.save("test", run_id)
         assert (deep_path / "test.json").exists()
 
@@ -182,7 +185,7 @@ class TestLocalCheckpointSaveLoad:
         self, checkpoint: LocalCheckpointAdapter
     ) -> None:
         """Run-scoped history loads should return the latest saved evidence."""
-        run_id = RunID(uuid4())
+        run_id = deterministic_run_uuid_from_callsite("test_local_checkpoint")
 
         await checkpoint.save("pipeline", run_id, {"offset": 1})
         await checkpoint.save("pipeline", run_id, {"offset": 2})
@@ -245,8 +248,8 @@ class TestLocalCheckpointSaveLoad:
         self, checkpoint: LocalCheckpointAdapter
     ) -> None:
         """Pipeline-wide history fallback should return the newest immutable entry."""
-        run_id_1 = RunID(uuid4())
-        run_id_2 = RunID(uuid4())
+        run_id_1 = deterministic_run_uuid_from_callsite("test_local_checkpoint")
+        run_id_2 = deterministic_run_uuid_from_callsite("test_local_checkpoint")
 
         await checkpoint.save("chembl_target", run_id_1, {"offset": 1})
         await checkpoint.save("chembl_target", run_id_2, {"offset": 2})
@@ -268,7 +271,9 @@ class TestLocalCheckpointSaveLoad:
             serialize_to_json(
                 {
                     "pipeline": "legacy_pipeline",
-                    "run_id": str(uuid4()),
+                    "run_id": deterministic_uuid_string_from_callsite(
+                        "test_local_checkpoint"
+                    ),
                     "metadata": {"offset": 10},
                     "version": "2.0",
                 },
@@ -342,7 +347,9 @@ class TestLocalCheckpointListAll:
     async def test_list_all_multiple(self, checkpoint: LocalCheckpointAdapter) -> None:
         """Should list all pipelines with checkpoints."""
         for name in ["alpha", "beta", "gamma"]:
-            await checkpoint.save(name, RunID(uuid4()))
+            await checkpoint.save(
+                name, deterministic_run_uuid_from_callsite("test_local_checkpoint")
+            )
 
         result = await checkpoint.list_all()
         assert result == ["alpha", "beta", "gamma"]
@@ -351,7 +358,9 @@ class TestLocalCheckpointListAll:
     async def test_list_all_sorted(self, checkpoint: LocalCheckpointAdapter) -> None:
         """Results should be sorted alphabetically."""
         for name in ["zebra", "alpha", "middle"]:
-            await checkpoint.save(name, RunID(uuid4()))
+            await checkpoint.save(
+                name, deterministic_run_uuid_from_callsite("test_local_checkpoint")
+            )
 
         result = await checkpoint.list_all()
         assert result == ["alpha", "middle", "zebra"]

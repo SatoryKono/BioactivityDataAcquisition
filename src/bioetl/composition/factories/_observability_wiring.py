@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 
 from bioetl.composition.observability_resolution import resolve_metrics_port
@@ -100,6 +101,8 @@ def create_data_source_with_observability(
     shared_metrics: MetricsPort,
     pipeline_name: str,
     cached_bronze: CachedBronzeContext | None,
+    create_cached_bronze_data_source_fn: Callable[..., DataSourcePort] | None = None,
+    create_data_source_impl_fn: Callable[..., DataSourcePort] | None = None,
 ) -> DataSourcePort:
     """Create data source and emit cached-bronze observability logs.
 
@@ -116,8 +119,12 @@ def create_data_source_with_observability(
     Returns:
         DataSourcePort configured for live API or cached Bronze data.
     """
+    cached_bronze_factory = (
+        create_cached_bronze_data_source_fn or _create_cached_bronze_data_source
+    )
+    data_source_factory = create_data_source_impl_fn or _create_data_source
     if cached_bronze is not None and cached_bronze.enabled:
-        data_source = _create_cached_bronze_data_source(
+        data_source = cached_bronze_factory(
             settings=settings,
             pipeline_config=pipeline_config,
             logger=logger,
@@ -132,7 +139,7 @@ def create_data_source_with_observability(
         )
         return data_source
 
-    return _create_data_source(
+    return data_source_factory(
         create_data_source_fn=create_data_source_fn,
         settings=settings,
         pipeline_config=pipeline_config,

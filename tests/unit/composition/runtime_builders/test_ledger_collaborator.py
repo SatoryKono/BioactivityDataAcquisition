@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from types import SimpleNamespace
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 
@@ -13,7 +13,6 @@ from bioetl.composition.runtime_builders.ledger_collaborator import (
     attach_control_plane_collaborators,
 )
 from bioetl.domain.models.metadata import InputSnapshotRef
-from bioetl.domain.types import RunID
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 from tests.helpers.control_plane import InMemoryRunLedgerStore
@@ -37,7 +36,7 @@ async def test_artifact_recorder_publishes_bronze_input_snapshot_events(
     tmp_path,
 ) -> None:
     ledger_store = InMemoryRunLedgerStore()
-    run_id = RunID(uuid4())
+    run_id = deterministic_run_uuid_from_callsite("test_ledger_collaborator")
     ledger_service = RunLedgerService(
         ledger_port=ledger_store,
         manifest_id="manifest-1",

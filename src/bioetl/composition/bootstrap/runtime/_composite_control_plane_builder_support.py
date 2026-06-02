@@ -12,6 +12,7 @@ from bioetl.composition.runtime_builders.effective_config_artifact_builder impor
     create_and_persist_composite_effective_config_artifact,
 )
 from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
+    build_contract_identity_field_values,
     resolve_contract_identity,
 )
 from bioetl.domain.control_plane.reproducibility_policy import (
@@ -73,16 +74,16 @@ def _composite_contract_identity_field_values(
     normalization_profile_hash: str | None,
 ) -> dict[str, object]:
     """Return the shared contract-identity payload for manifest assembly."""
-    return {
-        "contract_ref": contract_ref,
-        "contract_version": contract_version,
-        "contract_schema_hash": contract_schema_hash,
-        "dq_policy_ref": dq_policy_ref,
-        "rule_bundle_version": rule_bundle_version,
-        "normalization_profile_ref": normalization_profile_ref,
-        "normalization_profile_version": normalization_profile_version,
-        "normalization_profile_hash": normalization_profile_hash,
-    }
+    return build_contract_identity_field_values(
+        contract_ref=contract_ref,
+        contract_version=contract_version,
+        contract_schema_hash=contract_schema_hash,
+        dq_policy_ref=dq_policy_ref,
+        rule_bundle_version=rule_bundle_version,
+        normalization_profile_ref=normalization_profile_ref,
+        normalization_profile_version=normalization_profile_version,
+        normalization_profile_hash=normalization_profile_hash,
+    )
 
 
 def _composite_manifest_contract_identity_kwargs(

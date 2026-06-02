@@ -15,7 +15,7 @@ from bioetl.application.composite.runtime_wiring_api import (
     create_seed_key_resolver,
     validate_join_key_normalization_policies,
 )
-from bioetl.composition.bootstrap.runtime.composite_support_service_bundles import (
+from bioetl.composition.bootstrap.runtime.composite_execution_support_bundle import (
     ExecutionSupportServicesBundle,
 )
 

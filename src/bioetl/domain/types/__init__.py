@@ -8,6 +8,25 @@ from __future__ import annotations
 
 from importlib import import_module
 
+from bioetl.domain.types.debug_export import (
+    DebugExportPack as DebugExportPack,
+)
+from bioetl.domain.types.debug_export import (
+    DebugExportResult as DebugExportResult,
+)
+from bioetl.domain.types.gold_contracts import (
+    GoldBusinessRuleSpec as GoldBusinessRuleSpec,
+)
+from bioetl.domain.types.gold_contracts import (
+    ScdConfig as ScdConfig,
+)
+from bioetl.domain.types.gold_schema_policy import (
+    GoldSchemaPolicyByVersion as GoldSchemaPolicyByVersion,
+)
+from bioetl.domain.types.gold_schema_policy import (
+    GoldSchemaVersionPolicy as GoldSchemaVersionPolicy,
+)
+
 _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
     "bioetl.domain.types.enums": (
         "CellularityType",
@@ -50,6 +69,10 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
         "SilverRecord",
     ),
     "bioetl.domain.types_config_validation": ("ConfigValidationError",),
+    "bioetl.domain.types.debug_export": (
+        "DebugExportPack",
+        "DebugExportResult",
+    ),
 }
 
 _EXPORT_MODULES = {

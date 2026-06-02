@@ -8,7 +8,7 @@ Note: Field extraction tests now use domain functions directly per REFACTOR-004.
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 
@@ -23,7 +23,7 @@ from bioetl.domain.mapping.publication_type_classification import (
     classify_publication_type,
 )
 from bioetl.domain.normalization import extract_first_string, normalize_doi
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import RunType
 from tests.helpers.transformer_dependencies import instantiate_test_transformer
 
 pytestmark = pytest.mark.usefixtures("publication_type_classification_data")
@@ -39,7 +39,7 @@ def transformer():
 def pipeline_context(noop_logger):
     """Create a minimal PipelineContext for testing."""
     return PipelineContext.create(
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite("test_crossref_transformer"),
         run_type=RunType.INCREMENTAL,
         logger=noop_logger,
         started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),

@@ -5,10 +5,12 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Protocol
 
-from bioetl.application.core._quarantine_support import (
-    QuarantineRuntimeDependencies,
+from bioetl.application.core._quarantine_request_builders import (
     build_dq_quarantine_request,
     build_filtered_quarantine_request,
+)
+from bioetl.application.core._quarantine_support import (
+    QuarantineRuntimeDependencies,
     build_quarantine_runtime_ports,
     persist_dq_quarantine_request,
     persist_dq_quarantine_requests,

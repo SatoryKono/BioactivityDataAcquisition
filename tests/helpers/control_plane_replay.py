@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 import yaml
@@ -270,7 +270,9 @@ def build_cached_fixture_run_context(
 ) -> PipelineRunContext:
     return PipelineRunContext(
         pipeline_name=pipeline_name,
-        run_id=RunID(uuid4()) if run_id is None else run_id,
+        run_id=deterministic_run_uuid_from_callsite("control_plane_replay")
+        if run_id is None
+        else run_id,
         run_type=RunType.INCREMENTAL,
         resume=False,
         limit=limit,

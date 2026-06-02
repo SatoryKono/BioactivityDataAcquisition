@@ -9,6 +9,8 @@ from __future__ import annotations
 from bioetl.composition.factories.pipeline.construction_types import (
     ContractPolicyLoader,
     DomainConfigMapper,
+)
+from bioetl.composition.factories.pipeline.entity_type_extractor import (
     EntityTypeExtractor,
 )
 from bioetl.composition.factories.pipeline.run_context_factory import (

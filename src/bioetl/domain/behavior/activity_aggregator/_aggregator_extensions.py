@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, Protocol, cast
 
-from bioetl.domain.value_objects.activity_values import Concentration, ConcentrationUnit
+from bioetl.domain.value_objects import Concentration, ConcentrationUnit
 
 from ._methods import AggregationMethod, _filter_values_by_range
 

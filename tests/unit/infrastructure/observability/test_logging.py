@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from uuid import uuid4
 
 import pytest
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 from bioetl.domain.ports import LoggerPort
 from bioetl.infrastructure.observability.logging import StructlogLogger, create_logger
@@ -16,7 +16,7 @@ class TestStructlogLogger:
 
     def test_structlog_logger__logger_port__1be605ac(self) -> None:
         """Test that StructlogLogger implements LoggerPort protocol."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_logging")
         logger = create_logger(
             pipeline="test_pipeline",
             run_id=run_id,
@@ -27,7 +27,7 @@ class TestStructlogLogger:
 
     def test_structlog_logger_is_structlog_logger_type(self) -> None:
         """Test that create_logger returns StructlogLogger instance."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_logging")
         logger = create_logger(
             pipeline="test_pipeline",
             run_id=run_id,
@@ -37,7 +37,7 @@ class TestStructlogLogger:
 
     def test_structlog_logger_bind_returns_self_type(self) -> None:
         """Test that bind() returns StructlogLogger, not BoundLogger."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_logging")
         logger = create_logger(
             pipeline="test_pipeline",
             run_id=run_id,
@@ -51,7 +51,7 @@ class TestStructlogLogger:
 
     def test_structlog_logger_all_methods(self) -> None:
         """Test that StructlogLogger has all LoggerPort methods."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_logging")
         logger = create_logger(
             pipeline="test_pipeline",
             run_id=run_id,
@@ -68,7 +68,7 @@ class TestStructlogLogger:
 
     def test_structlog_logger_ignores_event_kwarg_conflict(self) -> None:
         """Test that kwargs['event'] is sanitized before structlog call."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_logging")
         logger = create_logger(
             pipeline="test_pipeline",
             run_id=run_id,
@@ -83,7 +83,7 @@ class TestCreateLogger:
 
     def test_create_logger_returns_bound_logger(self):
         """Test that create_logger returns a bound logger."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_logging")
         logger = create_logger(
             pipeline="test_pipeline",
             run_id=run_id,
@@ -95,7 +95,7 @@ class TestCreateLogger:
 
     def test_create_logger_with_json_format(self):
         """Test create_logger with JSON format."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_logging")
         logger = create_logger(
             pipeline="test_pipeline",
             run_id=run_id,
@@ -106,7 +106,7 @@ class TestCreateLogger:
 
     def test_create_logger_with_console_format(self):
         """Test create_logger with console format."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_logging")
         logger = create_logger(
             pipeline="test_pipeline",
             run_id=run_id,
@@ -117,7 +117,7 @@ class TestCreateLogger:
 
     def test_create_logger_with_custom_log_level(self):
         """Test create_logger with custom log level."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_logging")
         logger = create_logger(
             pipeline="test_pipeline",
             run_id=run_id,
@@ -128,7 +128,7 @@ class TestCreateLogger:
 
     def test_logger_can_log_info(self):
         """Test that logger can log info messages."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_logging")
         logger = create_logger(
             pipeline="test_pipeline",
             run_id=run_id,
@@ -139,7 +139,7 @@ class TestCreateLogger:
 
     def test_logger_bound_to_pipeline_and_run_id(self):
         """Test that logger is bound to pipeline and run_id."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_logging")
         logger = create_logger(
             pipeline="my_pipeline",
             run_id=run_id,

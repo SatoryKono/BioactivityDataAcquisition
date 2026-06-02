@@ -10,7 +10,10 @@ from __future__ import annotations
 import asyncio
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import (
+    deterministic_batch_uuid_from_callsite,
+    deterministic_uuid_from_callsite,
+)
 
 import pytest
 
@@ -25,7 +28,7 @@ from bioetl.application.core.batch_processing_support import (
 from bioetl.application.core.batch_transformer import TransformResult
 from bioetl.domain.aggregates.events import BatchCreated, BatchFailed, BatchSealed
 from bioetl.domain.exceptions import BioETLError, SchemaViolationError
-from bioetl.domain.types import BatchID, BronzeRecord, RunType
+from bioetl.domain.types import BronzeRecord, RunType
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 
@@ -54,7 +57,7 @@ def _make_transform_result(
 @pytest.fixture
 def mock_context():
     ctx = MagicMock()
-    ctx.run_id = uuid4()
+    ctx.run_id = deterministic_uuid_from_callsite("test_batch_processing_service")
     ctx.run_type = RunType.INCREMENTAL
     ctx.started_at = datetime(2026, 1, 1, tzinfo=UTC)
     ctx.logger = MagicMock()
@@ -132,7 +135,11 @@ def mock_tracing():
 @pytest.fixture
 def mock_batch_id_factory():
     factory = MagicMock()
-    factory.create = MagicMock(return_value=BatchID(uuid4()))
+    factory.create = MagicMock(
+        return_value=deterministic_batch_uuid_from_callsite(
+            "test_batch_processing_service"
+        )
+    )
     return factory
 
 
@@ -186,7 +193,9 @@ class TestBatchProcessingOutcome:
 
     def test_is_frozen(self):
         """BatchProcessingOutcome instances are immutable."""
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite(
+            "test_batch_processing_service"
+        )
         output = BatchProcessingOutcome(
             batch_id=batch_id,
             bronze_result=MagicMock(),
@@ -200,7 +209,9 @@ class TestBatchProcessingOutcome:
 
     def test_processing_outcome__fields_accessible__6e9a04c3(self):
         """All fields are accessible after construction."""
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite(
+            "test_batch_processing_service"
+        )
         bronze = MagicMock()
         output = BatchProcessingOutcome(
             batch_id=batch_id,

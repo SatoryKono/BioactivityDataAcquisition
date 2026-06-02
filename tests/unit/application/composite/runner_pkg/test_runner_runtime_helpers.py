@@ -5,7 +5,7 @@ from __future__ import annotations
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, cast
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -122,7 +122,7 @@ async def test_run_with_managed_lock_starts_and_stops_heartbeat() -> None:
     lock_port.acquire.return_value = True
     lock_port.release = AsyncMock()
     heartbeat = SimpleNamespace(start=AsyncMock(), stop=AsyncMock())
-    owner_id = uuid4()
+    owner_id = deterministic_uuid_from_callsite("test_runner_runtime_helpers")
     run_while_locked = AsyncMock(return_value="ok")
 
     result = await run_with_managed_lock(
@@ -151,7 +151,7 @@ async def test_run_with_managed_lock_starts_and_stops_heartbeat() -> None:
 async def test_run_with_managed_lock_raises_when_lock_not_acquired() -> None:
     lock_port = AsyncMock()
     lock_port.acquire.return_value = False
-    owner_id = uuid4()
+    owner_id = deterministic_uuid_from_callsite("test_runner_runtime_helpers")
 
     with pytest.raises(LockAcquisitionError, match="lock:composite"):
         await run_with_managed_lock(

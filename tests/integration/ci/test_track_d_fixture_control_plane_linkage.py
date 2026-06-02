@@ -5,13 +5,12 @@ from __future__ import annotations
 import asyncio
 import json
 from pathlib import Path
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 
 from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
 from bioetl.composition.factories import _observability_wiring
-from bioetl.domain.types import RunID
 from bioetl.infrastructure.config._base import get_pipeline_config, get_settings
 from tests.helpers.control_plane_replay import (
     PROJECT_ROOT,
@@ -423,7 +422,9 @@ async def test_exact_replay_without_materialized_cached_bronze_batches_fails_clo
     get_settings.cache_clear()
     get_pipeline_config.cache_clear()
 
-    run_id = RunID(uuid4())
+    run_id = deterministic_run_uuid_from_callsite(
+        "test_track_d_fixture_control_plane_linkage"
+    )
     context = build_cached_fixture_run_context(
         pipeline_name=_PIPELINE_NAME,
         cached_bronze_path=cached_root,

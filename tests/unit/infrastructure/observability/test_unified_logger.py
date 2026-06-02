@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from unittest.mock import MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -23,7 +23,7 @@ class TestUnifiedLogger:
 
     def test_unified_logger_creation(self) -> None:
         """Test that UnifiedLogger can be created with required fields."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_unified_logger")
         logger = UnifiedLogger(
             pipeline="test_pipeline",
             run_id=run_id,
@@ -176,14 +176,14 @@ class TestCreateUnifiedLogger:
         """Test that factory returns UnifiedLogger instance."""
         logger = create_unified_logger(
             pipeline="test_pipeline",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("test_unified_logger"),
         )
 
         assert isinstance(logger, UnifiedLogger)
 
     def test_create_unified_logger_with_uuid(self) -> None:
         """Test that UUID run_id is converted to string."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_unified_logger")
         logger = create_unified_logger(
             pipeline="test_pipeline",
             run_id=run_id,

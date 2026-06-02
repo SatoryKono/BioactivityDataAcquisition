@@ -6,7 +6,7 @@ Tests the lock administrative service.
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 
@@ -14,7 +14,6 @@ from bioetl.application.services.lock_service import (
     LockInfo,
     LockService,
 )
-from bioetl.domain.types import RunID
 
 
 @pytest.fixture
@@ -71,7 +70,7 @@ class TestLockServiceCheckLock:
     @pytest.mark.asyncio
     async def test_check_lock_not_held(self, lock_service, mock_lock_port):
         """Test checking a lock that is not held."""
-        owner_id = RunID(uuid4())
+        owner_id = deterministic_run_uuid_from_callsite("test_lock_service")
         mock_lock_port.validate_owner.return_value = False
 
         result = await lock_service.check_lock("pipeline1", owner_id)
@@ -85,7 +84,7 @@ class TestLockServiceCheckLock:
     @pytest.mark.asyncio
     async def test_check_lock_held(self, lock_service, mock_lock_port):
         """Test checking a lock that is held."""
-        owner_id = RunID(uuid4())
+        owner_id = deterministic_run_uuid_from_callsite("test_lock_service")
         mock_lock_port.validate_owner.return_value = True
 
         result = await lock_service.check_lock("pipeline1", owner_id)
@@ -100,7 +99,7 @@ class TestLockServiceReleaseLock:
     @pytest.mark.asyncio
     async def test_release_lock_not_held(self, lock_service, mock_lock_port):
         """Test releasing a lock that is not held."""
-        owner_id = RunID(uuid4())
+        owner_id = deterministic_run_uuid_from_callsite("test_lock_service")
         mock_lock_port.release.return_value = False
 
         result = await lock_service.release_lock("pipeline1", owner_id)
@@ -117,7 +116,7 @@ class TestLockServiceReleaseLock:
         self, lock_service, mock_lock_port
     ):
         """Test successfully releasing a lock."""
-        owner_id = RunID(uuid4())
+        owner_id = deterministic_run_uuid_from_callsite("test_lock_service")
         mock_lock_port.release.return_value = True
 
         result = await lock_service.release_lock("pipeline1", owner_id)
@@ -127,7 +126,7 @@ class TestLockServiceReleaseLock:
     @pytest.mark.asyncio
     async def test_release_exclusive_lock(self, lock_service, mock_lock_port):
         """Test releasing an exclusive lock."""
-        owner_id = RunID(uuid4())
+        owner_id = deterministic_run_uuid_from_callsite("test_lock_service")
         mock_lock_port.release.return_value = True
 
         result = await lock_service.release_lock("pipeline1", owner_id, exclusive=True)
@@ -147,7 +146,7 @@ class TestLockServiceForceReleaseAll:
     @pytest.mark.asyncio
     async def test_force_release_all_none_held(self, lock_service, mock_lock_port):
         """Test force releasing when no locks are held."""
-        owner_id = RunID(uuid4())
+        owner_id = deterministic_run_uuid_from_callsite("test_lock_service")
         mock_lock_port.release.return_value = False
 
         result = await lock_service.force_release_all(
@@ -160,7 +159,7 @@ class TestLockServiceForceReleaseAll:
     @pytest.mark.asyncio
     async def test_force_release_all_some_held(self, lock_service, mock_lock_port):
         """Test force releasing when some locks are held."""
-        owner_id = RunID(uuid4())
+        owner_id = deterministic_run_uuid_from_callsite("test_lock_service")
         # First call (regular) succeeds for pipeline1 → exclusive not called
         # Second call (regular) fails for pipeline2 → try exclusive
         # Third call (exclusive) succeeds for pipeline2

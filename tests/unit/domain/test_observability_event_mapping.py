@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from typing import cast
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 
@@ -17,7 +17,7 @@ from bioetl.domain.aggregates.events import (
 from bioetl.domain.observability_event_mapping import (
     map_domain_event_to_observability_event,
 )
-from bioetl.domain.types import BatchID, RunID
+from bioetl.domain.types import BatchID
 
 
 pytestmark = pytest.mark.unit
@@ -26,7 +26,7 @@ pytestmark = pytest.mark.unit
 def test_pipeline_completed_maps_to_pipeline_finished_event() -> None:
     event = PipelineCompleted(
         occurred_at=datetime(2026, 4, 10, tzinfo=UTC),
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite("test_observability_event_mapping"),
         pipeline_name="chembl_activity",
         records_processed=42,
         duration_seconds=12.5,
@@ -46,7 +46,7 @@ def test_pipeline_completed_maps_to_pipeline_finished_event() -> None:
 def test_batch_written_maps_to_batch_family_event() -> None:
     event = BatchWritten(
         occurred_at=datetime(2026, 4, 10, tzinfo=UTC),
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite("test_observability_event_mapping"),
         batch_id=BatchID("batch-1"),
         layer="silver",
         record_count=10,
@@ -64,7 +64,7 @@ def test_batch_written_maps_to_batch_family_event() -> None:
 def test_quarantine_resolution_maps_to_postrun_hint() -> None:
     event = QuarantineEntryResolved(
         occurred_at=datetime(2026, 4, 10, tzinfo=UTC),
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite("test_observability_event_mapping"),
         entry_id="entry-1",
         resolution="ignored",
         resolved_by="operator",

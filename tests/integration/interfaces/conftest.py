@@ -9,7 +9,7 @@ import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from unittest.mock import patch
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -57,7 +57,7 @@ def cli_entrypoint():
 @pytest.fixture
 def run_id():
     """Generate a unique run ID for tests."""
-    return uuid4()
+    return deterministic_uuid_from_callsite("interfaces.conftest")
 
 
 @pytest.fixture

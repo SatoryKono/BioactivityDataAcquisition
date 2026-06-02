@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import json
 from collections.abc import Iterable
-from typing import TYPE_CHECKING
 
 import click
 
+from bioetl.interfaces.cli.commands.domains.maintenance.service_access import (
+    get_contract_migration_service,
+)
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CliBoundaryExecutionPolicy,
     run_sync_with_cli_failure_policy,
@@ -16,26 +18,9 @@ from bioetl.interfaces.cli.commands.domains.shared.inspection_output import (
     emit_inspection_payload,
 )
 
-if TYPE_CHECKING:
-    from collections.abc import Callable
-
-    from bioetl.application.services.contract_migration_service import (
-        ContractMigrationService,
-    )
-
 __all__ = ["get_contract_migration_service", "plan_command"]
 
 _NONE_LINE = "  none"
-
-
-def get_contract_migration_service() -> ContractMigrationService:
-    """Load the contract migration service through the maintenance command seam."""
-    from bioetl.interfaces.cli.commands.maintenance import (
-        get_contract_migration_service as _impl,
-    )
-
-    service_factory: Callable[[], ContractMigrationService] = _impl
-    return service_factory()
 
 
 def _format_scalar(value: object) -> str:

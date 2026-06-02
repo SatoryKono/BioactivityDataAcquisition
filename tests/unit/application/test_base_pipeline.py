@@ -110,6 +110,8 @@ def test_base_pipeline_initialization(mock_pipeline):
     assert mock_pipeline.context.run_id is not None
     assert mock_pipeline.context.logger is not None
     assert mock_pipeline.context.started_at == MISSING_RUNTIME_TIMESTAMP
+    assert mock_pipeline.context.pipeline_name == "test_pipeline"
+    assert mock_pipeline.context.workflow_id == "standalone"
 
 
 def test_base_pipeline_accepts_five_params():
@@ -309,6 +311,46 @@ def test_base_pipeline_preserves_explicit_started_at() -> None:
     )
 
     assert pipeline.context.started_at == started_at
+
+
+def test_base_pipeline_propagates_runtime_workflow_id_into_context() -> None:
+    """Workflow-aware runtime config should reach in-run pipeline context."""
+    config = PipelineConfig(
+        pipeline_name="chembl_target",
+        provider="test_provider",
+        entity_type="test_entity",
+        table=TableConfig(
+            primary_keys=["id"],
+            silver_table="test_provider.test_entity",
+        ),
+    )
+    runtime = RuntimeConfig(
+        run_type=RunType.INCREMENTAL,
+        workflow_id="chembl_target_workflow",
+    )
+    mock_logger = MagicMock()
+    mock_logger.bind = MagicMock(return_value=mock_logger)
+    services = PipelineService(
+        data_source=AsyncMock(),
+        storage=AsyncMock(),
+        lock=AsyncMock(),
+        checkpoint=AsyncMock(),
+        quarantine=AsyncMock(),
+        metrics=MagicMock(),
+        tracing=MagicMock(),
+        logger=mock_logger,
+    )
+
+    pipeline = ConcretePipeline.create(
+        run_id=_stable_run_id(6),
+        runtime=runtime,
+        services=services,
+        config=config,
+        shutdown_signal=ShutdownSignal(),
+    )
+
+    assert pipeline.context.pipeline_name == "chembl_target"
+    assert pipeline.context.workflow_id == "chembl_target_workflow"
 
 
 def test_exact_replay_pipeline_context_uses_deterministic_replay_anchor() -> None:

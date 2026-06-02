@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, cast
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -64,7 +64,7 @@ def test_build_current_checkpoint_metadata_includes_resume_anchors(tmp_path) -> 
     (bronze_root / "batch_0002.jsonl.zst").write_bytes(b'{"id":2}\n')
 
     run_context = RunContext.create(
-        run_id=uuid4(),
+        run_id=deterministic_uuid_from_callsite("test_checkpoint_metadata_helpers"),
         run_type=RunType.INCREMENTAL,
         started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         provider="chembl",
@@ -127,7 +127,7 @@ def test_checkpoint_metadata_execution_fingerprint_matches_manifest_contract(
     (bronze_root / "batch_0002.jsonl.zst").write_bytes(b'{"id":2}\n')
 
     run_context = RunContext.create(
-        run_id=uuid4(),
+        run_id=deterministic_uuid_from_callsite("test_checkpoint_metadata_helpers"),
         run_type=RunType.INCREMENTAL,
         started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         provider="chembl",
@@ -211,7 +211,7 @@ def test_build_current_checkpoint_metadata_prefers_manifest_snapshot_identity(
 ) -> None:
     """Checkpoint metadata should reuse persisted manifest snapshot refs first."""
     run_context = RunContext.create(
-        run_id=uuid4(),
+        run_id=deterministic_uuid_from_callsite("test_checkpoint_metadata_helpers"),
         run_type=RunType.INCREMENTAL,
         started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         provider="chembl",

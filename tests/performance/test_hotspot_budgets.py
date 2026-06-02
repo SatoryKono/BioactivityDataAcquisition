@@ -25,7 +25,10 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
-from uuid import uuid4
+from tests.helpers.deterministic_ids import (
+    deterministic_uuid_from_callsite,
+    deterministic_uuid_string_from_callsite,
+)
 
 import pyarrow as pa
 import pytest
@@ -372,7 +375,11 @@ def test_silver_prepare_arrow_data_budget(
 
     writer = SilverWriter(base_path=tmp_path / "silver_prepare", logger=NoOpLogger())
     schema = _build_silver_schema()
-    records = _build_silver_records(2000, run_id=str(uuid4()), batch_id=str(uuid4()))
+    records = _build_silver_records(
+        2000,
+        run_id=deterministic_uuid_string_from_callsite("test_hotspot_budgets"),
+        batch_id=deterministic_uuid_string_from_callsite("test_hotspot_budgets"),
+    )
 
     def op() -> None:
         writer._prepare_arrow_data(
@@ -406,9 +413,9 @@ def test_silver_write_append_budget(
     schema = _build_silver_schema()
 
     async def op() -> float:
-        run_id = str(uuid4())
-        batch_id = str(uuid4())
-        table_name = f"perf.append_{uuid4().hex[:12]}"
+        run_id = deterministic_uuid_string_from_callsite("test_hotspot_budgets")
+        batch_id = deterministic_uuid_string_from_callsite("test_hotspot_budgets")
+        table_name = f"perf.append_{deterministic_uuid_from_callsite('test_hotspot_budgets').hex[:12]}"
         records = _build_silver_records(600, run_id=run_id, batch_id=batch_id)
         started = time.perf_counter()
         await writer.write_silver(
@@ -460,9 +467,9 @@ def test_silver_write_merge_budget(
     schema = _build_silver_schema()
 
     async def op() -> float:
-        run_id = str(uuid4())
-        batch_id = str(uuid4())
-        table_name = f"perf.merge_{uuid4().hex[:12]}"
+        run_id = deterministic_uuid_string_from_callsite("test_hotspot_budgets")
+        batch_id = deterministic_uuid_string_from_callsite("test_hotspot_budgets")
+        table_name = f"perf.merge_{deterministic_uuid_from_callsite('test_hotspot_budgets').hex[:12]}"
         base_records, merge_records = _merge_payloads(run_id=run_id, batch_id=batch_id)
         await writer.write_silver(
             table_name=table_name,
@@ -578,7 +585,10 @@ def test_atomic_write_group_budget(
     payload = os.urandom(file_size)
 
     def op() -> float:
-        subdir = tmp_path / f"atomic_{uuid4().hex[:12]}"
+        subdir = (
+            tmp_path
+            / f"atomic_{deterministic_uuid_from_callsite('test_hotspot_budgets').hex[:12]}"
+        )
         group = AtomicWriteGroup()
         for i in range(file_count):
             group.add(subdir / f"file_{i:04d}.dat", payload)

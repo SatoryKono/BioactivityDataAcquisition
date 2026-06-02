@@ -10,6 +10,6 @@ def __getattr__(name: str) -> object:
     if name != "maintenance":
         raise AttributeError(name)
 
-    from bioetl.interfaces.cli.commands.domains.maintenance.command import maintenance
+    from bioetl.interfaces.cli.commands.maintenance import maintenance
 
     return maintenance

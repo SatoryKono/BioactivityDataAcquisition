@@ -6,8 +6,8 @@
 - next_review_by: 2026-08-31
 - review_cycle_days: 90
 - triaged_entry_count: 18
-- repo_wide_zero_import_candidate_count: 44
-- repo_wide_classified_zero_import_candidate_count: 44
+- repo_wide_zero_import_candidate_count: 40
+- repo_wide_classified_zero_import_candidate_count: 40
 - repo_wide_untriaged_zero_import_candidate_count: 0
 - note: zero static importer count is a review signal, not automatic removal proof
 - guardrail: Zero static importer count is a review signal only; removals must still verify public entrypoints and dynamic/plugin import paths.
@@ -33,7 +33,7 @@
 | `runner_support_runtime_active` | `retain_active` | 1 | `satisfied` |
 | `runner_support_types_active` | `retain_active` | 4 | `satisfied` |
 | `runtime_models_active` | `retain_active` | 39 | `satisfied` |
-| `runtime_wiring_api_active` | `retain_active` | 16 | `satisfied` |
+| `runtime_wiring_api_active` | `retain_active` | 18 | `satisfied` |
 
 ## Repo-wide Zero-import Candidates
 
@@ -49,8 +49,6 @@
 | `bioetl.application.pipelines.pubmed.strategies` | `retain_canonical_owner_module` | `src/bioetl/application/pipelines/pubmed/strategies.py` |
 | `bioetl.application.services._checkpoint_compatibility_runtime_core` | `retain_canonical_owner_module` | `src/bioetl/application/services/_checkpoint_compatibility_runtime_core.py` |
 | `bioetl.application.services.control_plane._run_manifest_diagnostics_identity` | `retain_canonical_owner_module` | `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_identity.py` |
-| `bioetl.composition.bootstrap.cli.adr` | `retain_dynamic_entrypoint` | `src/bioetl/composition/bootstrap/cli/adr.py` |
-| `bioetl.composition.bootstrap.cli.control_plane_lifecycle` | `retain_dynamic_entrypoint` | `src/bioetl/composition/bootstrap/cli/control_plane_lifecycle.py` |
 | `bioetl.domain.behavior._dq_serializer_html._renderers` | `retain_canonical_owner_module` | `src/bioetl/domain/behavior/_dq_serializer_html/_renderers.py` |
 | `bioetl.domain.entities.bioactivity._entity` | `retain_canonical_owner_module` | `src/bioetl/domain/entities/bioactivity/_entity.py` |
 | `bioetl.domain.normalization._pubchem_standardization_catalog` | `retain_canonical_owner_module` | `src/bioetl/domain/normalization/_pubchem_standardization_catalog.py` |
@@ -68,8 +66,6 @@
 | `bioetl.domain.ports.serialization` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/serialization.py` |
 | `bioetl.domain.transformations.drift` | `retain_canonical_owner_module` | `src/bioetl/domain/transformations/drift.py` |
 | `bioetl.domain.transformations.quality` | `retain_canonical_owner_module` | `src/bioetl/domain/transformations/quality.py` |
-| `bioetl.domain.types.gold_contracts` | `retain_canonical_owner_module` | `src/bioetl/domain/types/gold_contracts.py` |
-| `bioetl.domain.types.gold_schema_policy` | `retain_canonical_owner_module` | `src/bioetl/domain/types/gold_schema_policy.py` |
 | `bioetl.infrastructure.export.export_catalog_adapter` | `retain_canonical_owner_module` | `src/bioetl/infrastructure/export/export_catalog_adapter.py` |
 | `bioetl.infrastructure.export.export_writer_adapter` | `retain_canonical_owner_module` | `src/bioetl/infrastructure/export/export_writer_adapter.py` |
 | `bioetl.infrastructure.storage.bronze.metadata_builders` | `retain_canonical_owner_module` | `src/bioetl/infrastructure/storage/bronze/metadata_builders.py` |

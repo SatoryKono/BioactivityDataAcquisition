@@ -15,12 +15,12 @@
   "summary": {
     "triaged_entry_count": 18,
     "triaged_entries_below_min_importers": 0,
-    "repo_wide_zero_import_candidate_count": 44,
-    "repo_wide_classified_zero_import_candidate_count": 44,
+    "repo_wide_zero_import_candidate_count": 40,
+    "repo_wide_classified_zero_import_candidate_count": 40,
     "repo_wide_untriaged_zero_import_candidate_count": 0,
     "repo_wide_disposition_counts": {
-      "retain_canonical_owner_module": 29,
-      "retain_dynamic_entrypoint": 10,
+      "retain_canonical_owner_module": 27,
+      "retain_dynamic_entrypoint": 8,
       "retain_module_entrypoint": 1,
       "retain_public_facade": 4
     }
@@ -219,7 +219,7 @@
       "disposition": "retain_active",
       "module_path": "src/bioetl/application/composite/runtime_wiring_api.py",
       "module_name": "bioetl.application.composite.runtime_wiring_api",
-      "src_importer_count": 16,
+      "src_importer_count": 18,
       "test_importer_count": 4,
       "min_src_importers": 2,
       "verification_status": "satisfied"
@@ -355,32 +355,6 @@
       "review_by": "2026-08-20",
       "linked_issue": "#4541",
       "rationale": "Manifest diagnostics identity helpers remain the canonical owner module behind control-plane diagnostics assembly."
-    },
-    {
-      "module_name": "bioetl.composition.bootstrap.cli.adr",
-      "path": "src/bioetl/composition/bootstrap/cli/adr.py",
-      "is_private_module": false,
-      "src_importer_count": 0,
-      "test_importer_count": 0,
-      "classification_status": "classified",
-      "disposition": "retain_dynamic_entrypoint",
-      "reviewed_on": "2026-05-22",
-      "review_by": "2026-08-20",
-      "linked_issue": "#4541",
-      "rationale": "CLI ADR bootstrap wiring is loaded through command/bootstrap registration rather than direct static imports."
-    },
-    {
-      "module_name": "bioetl.composition.bootstrap.cli.control_plane_lifecycle",
-      "path": "src/bioetl/composition/bootstrap/cli/control_plane_lifecycle.py",
-      "is_private_module": false,
-      "src_importer_count": 0,
-      "test_importer_count": 0,
-      "classification_status": "classified",
-      "disposition": "retain_dynamic_entrypoint",
-      "reviewed_on": "2026-05-22",
-      "review_by": "2026-08-20",
-      "linked_issue": "#4541",
-      "rationale": "CLI control-plane lifecycle bootstrap wiring is loaded through command/bootstrap registration rather than direct static imports."
     },
     {
       "module_name": "bioetl.domain.behavior._dq_serializer_html._renderers",
@@ -602,32 +576,6 @@
       "review_by": "2026-08-20",
       "linked_issue": "#4541",
       "rationale": "Quality transformations remain a canonical domain owner module behind package-root exports and strategy selection."
-    },
-    {
-      "module_name": "bioetl.domain.types.gold_contracts",
-      "path": "src/bioetl/domain/types/gold_contracts.py",
-      "is_private_module": false,
-      "src_importer_count": 0,
-      "test_importer_count": 0,
-      "classification_status": "classified",
-      "disposition": "retain_canonical_owner_module",
-      "reviewed_on": "2026-05-24",
-      "review_by": "2026-08-20",
-      "linked_issue": "#4541",
-      "rationale": "Gold contract type definitions remain canonical domain owner modules even when imported through package-root type surfaces."
-    },
-    {
-      "module_name": "bioetl.domain.types.gold_schema_policy",
-      "path": "src/bioetl/domain/types/gold_schema_policy.py",
-      "is_private_module": false,
-      "src_importer_count": 0,
-      "test_importer_count": 0,
-      "classification_status": "classified",
-      "disposition": "retain_canonical_owner_module",
-      "reviewed_on": "2026-05-24",
-      "review_by": "2026-08-20",
-      "linked_issue": "#4541",
-      "rationale": "Gold schema policy type definitions remain canonical domain owner modules even when imported through package-root type surfaces."
     },
     {
       "module_name": "bioetl.infrastructure.export.export_catalog_adapter",

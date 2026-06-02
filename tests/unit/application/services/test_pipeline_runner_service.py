@@ -8,7 +8,10 @@ from __future__ import annotations
 import asyncio
 from datetime import UTC, datetime, timedelta
 from unittest.mock import ANY, AsyncMock, MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import (
+    deterministic_uuid_from_callsite,
+    deterministic_uuid_string_from_callsite,
+)
 
 import pytest
 
@@ -48,7 +51,9 @@ def mock_runner():
     runner = MagicMock()
     runner.run = AsyncMock()
     runner.shutdown_signal = None
-    runner.run_id = str(uuid4())
+    runner.run_id = deterministic_uuid_string_from_callsite(
+        "test_pipeline_runner_service"
+    )
     runner.manifest_id = "manifest-123"
     runner.execution_metrics = {
         "records_fetched": 100,
@@ -430,7 +435,7 @@ class TestPipelineRunnerServiceRun:
     @pytest.mark.asyncio
     async def test_run_with_run_id(self, service, mock_runner_factory):
         """Test run with explicit run_id."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_pipeline_runner_service")
 
         result = await service.run("test_pipeline", run_id=run_id)
 
@@ -458,7 +463,7 @@ class TestPipelineRunnerServiceRun:
         mock_runner_factory,
     ):
         """Exact replay may still execute when the caller pins run identity."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_pipeline_runner_service")
 
         result = await service.run(
             "test_pipeline",

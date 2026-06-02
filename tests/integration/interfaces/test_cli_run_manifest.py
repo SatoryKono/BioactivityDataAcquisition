@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from typing import Any
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 from click.testing import CliRunner
@@ -16,7 +16,7 @@ from bioetl.application.services.control_plane.manifest.inspection_service impor
     RunManifestVerifyResult,
 )
 from bioetl.domain.control_plane import RunCodeProvenance, RunManifest
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import RunType
 from bioetl.interfaces.cli.main import cli
 
 
@@ -26,7 +26,7 @@ pytestmark = pytest.mark.integration
 class _FakeRunManifestService:
     def __init__(self) -> None:
         created_at = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
-        self.run_id = RunID(uuid4())
+        self.run_id = deterministic_run_uuid_from_callsite("test_cli_run_manifest")
         self.manifest = RunManifest(
             manifest_id="manifest-integration",
             execution_fingerprint="fingerprint-integration",

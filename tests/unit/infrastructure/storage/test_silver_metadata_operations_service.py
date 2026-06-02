@@ -5,13 +5,13 @@ from __future__ import annotations
 import asyncio
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 
 from bioetl.application.services.lineage import MetadataCoordinator
 from bioetl.domain.medallion import SilverWriteMode
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import RunType
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.infrastructure.storage.silver.metadata_operations import (
@@ -28,7 +28,9 @@ def _metadata_coordinator(
 ) -> MetadataCoordinator:
     """Build a canonical Silver metadata coordinator with control-plane anchors."""
     context = RunContext.create(
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite(
+            "test_silver_metadata_operations_service"
+        ),
         run_type=RunType.INCREMENTAL,
         started_at=started_at or datetime(2025, 1, 15, 12, 0, tzinfo=UTC),
         provider="chembl",

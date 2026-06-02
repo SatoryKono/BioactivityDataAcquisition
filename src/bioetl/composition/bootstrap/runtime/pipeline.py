@@ -67,12 +67,19 @@ def bootstrap_pipeline_runner(
         load_pipeline_config_fn=load_pipeline_config_fn,
         resolve_configs_root_fn=resolve_configs_root,
     )
+    from bioetl.composition.runtime_builders.runner_builder_wiring import (
+        RunnerBuilderWiring,
+    )
+
+    wiring = RunnerBuilderWiring(
+        factory=phases.factory_wiring,
+        inputs=phases.input_wiring,
+    )
     return cast(
         "PipelineRunner",
         _build_pipeline_runner(
             ctx=ctx,
             registry=phases.registry,
-            factory_wiring=phases.factory_wiring,
-            input_wiring=phases.input_wiring,
+            wiring=wiring,
         ),
     )

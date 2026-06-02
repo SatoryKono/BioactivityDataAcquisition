@@ -10,8 +10,8 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
-from uuid import uuid4
 from unittest.mock import MagicMock
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 
@@ -24,7 +24,6 @@ from bioetl.domain.composite.result import SeedResult
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.exceptions import CheckpointConflictError, StorageError
-from bioetl.domain.types import RunID
 from tests.helpers.clock import FixedClock
 
 
@@ -191,7 +190,7 @@ def _make_run_ledger_entry(
     return RunLedgerEntry(
         entry_id=entry_id,
         manifest_id=manifest_id,
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite("test_checkpoint_service"),
         event_type=event_type,
         stage=stage,
         occurred_at=occurred_at or FIXED_CHECKPOINT_TIME,

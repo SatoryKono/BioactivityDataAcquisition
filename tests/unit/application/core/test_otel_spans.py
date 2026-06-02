@@ -18,7 +18,8 @@ from __future__ import annotations
 import asyncio
 from typing import Any, cast
 from unittest.mock import AsyncMock, MagicMock
-from uuid import UUID, uuid4
+from uuid import UUID
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 
@@ -126,7 +127,7 @@ class TestPipelineRunnerSpan:
         mock_logger.warning = MagicMock()
 
         context = PipelineContext(
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite("test_otel_spans"),
             run_type=RunType.INCREMENTAL,
             logger=mock_logger,
         )
@@ -341,7 +342,7 @@ class TestPostrunServiceSpan:
         mock_logger.debug = MagicMock()
 
         context = PipelineContext(
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite("test_otel_spans"),
             run_type=RunType.INCREMENTAL,
             logger=mock_logger,
         )
@@ -581,7 +582,7 @@ class TestRecordProcessorSpanRegression:
         )
 
         context = PipelineContext(
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite("test_otel_spans"),
             run_type=RunType.INCREMENTAL,
             logger=MagicMock(),
         )

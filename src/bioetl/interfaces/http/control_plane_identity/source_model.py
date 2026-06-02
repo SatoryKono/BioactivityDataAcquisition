@@ -60,9 +60,6 @@ SOURCE_MODEL_BY_NAME: dict[str, AnchorSourceModel] = {
     "identity_graph_complete": AnchorSourceModel(
         "identity_graph_diagnostics", "derived"
     ),
-    "config_hash": AnchorSourceModel(
-        "run_manifest_code_provenance_compatibility", "compatibility_alias"
-    ),
     "dq_policy_ref": AnchorSourceModel("contract_registry", "authoritative"),
     "rule_bundle_version": AnchorSourceModel("contract_registry", "authoritative"),
     "dq_contract_compatibility_hash": AnchorSourceModel(
@@ -171,11 +168,6 @@ DRILLDOWN_TARGET_BY_NAME: dict[str, DrilldownTarget] = {
     ),
     "identity_graph_complete": DrilldownTarget(
         "identity_gaps", "identity_graph.gaps", "Identity gaps table"
-    ),
-    "config_hash": DrilldownTarget(
-        "manifest_section",
-        "manifest.code_provenance.config_hash:{value}",
-        "Legacy config-hash compatibility value",
     ),
     "dq_policy_ref": DrilldownTarget(
         "contract_registry", "dq.policy:{value}", "DQ policy"

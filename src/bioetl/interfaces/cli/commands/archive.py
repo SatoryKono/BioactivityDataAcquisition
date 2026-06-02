@@ -5,34 +5,21 @@ Implements table archival to cold storage.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import click
 
+from bioetl.interfaces.cli.commands.domains.maintenance.service_access import (
+    get_lifecycle_service,
+)
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CliBoundaryExecutionPolicy,
     run_async_with_cli_failure_policy,
 )
 from bioetl.interfaces.cli.formatters import echo_info
 
-if TYPE_CHECKING:
-    from bioetl.application.services.medallion_lifecycle import (
-        MedallionLifecycleService,
-    )
-
 __all__ = [
     "archive_command",
     "get_lifecycle_service",
 ]
-
-
-def get_lifecycle_service() -> MedallionLifecycleService:
-    """Load the lifecycle service through the canonical maintenance API seam."""
-    from bioetl.composition.maintenance_api import get_lifecycle_service as _impl
-
-    return _impl()
-
-
 def _archive_policy(table: str) -> CliBoundaryExecutionPolicy:
     """Build the shared CLI boundary policy for archive commands."""
     return CliBoundaryExecutionPolicy(

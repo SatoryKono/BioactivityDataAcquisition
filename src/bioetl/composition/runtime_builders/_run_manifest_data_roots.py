@@ -17,6 +17,11 @@ if TYPE_CHECKING:
 DataRootMode = Literal["explicit", "repo_default", "private_cache", "tmp"]
 
 
+def _artifact_path_string(path: Path) -> str:
+    """Return portable artifact paths with normalized separators."""
+    return path.as_posix()
+
+
 def is_explicit_data_root_configured(settings: Settings) -> bool:
     """Return ``True`` when settings declare an explicit non-empty data root."""
     configured_root = getattr(settings, "data_dir", None)
@@ -52,13 +57,16 @@ def build_planned_artifacts(
     output_root = _resolve_data_root(settings) / "output"
     planned = [
         RunArtifactRef(
-            layer="bronze", path=str(output_root / "bronze" / provider / entity)
+            layer="bronze",
+            path=_artifact_path_string(output_root / "bronze" / provider / entity),
         ),
         RunArtifactRef(
-            layer="silver", path=str(output_root / "silver" / provider / entity)
+            layer="silver",
+            path=_artifact_path_string(output_root / "silver" / provider / entity),
         ),
         RunArtifactRef(
-            layer="gold", path=str(output_root / "gold" / provider / entity)
+            layer="gold",
+            path=_artifact_path_string(output_root / "gold" / provider / entity),
         ),
     ]
     if debug_export_root and run_id and pipeline_name:
@@ -68,7 +76,9 @@ def build_planned_artifacts(
         planned.append(
             RunArtifactRef(
                 layer="debug_export",
-                path=str(configured_root / workflow_id / pipeline_name / run_id),
+                path=_artifact_path_string(
+                    configured_root / workflow_id / pipeline_name / run_id
+                ),
             )
         )
     return tuple(planned)

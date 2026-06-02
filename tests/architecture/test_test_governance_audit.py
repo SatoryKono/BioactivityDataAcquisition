@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import re
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any, cast
 
@@ -24,6 +25,9 @@ ROOT = Path(__file__).resolve().parents[2]
 CONFIG_PATH = ROOT / "configs" / "quality" / "test_governance_audit.yaml"
 DUPLICATE_NAME_INVENTORY_PATH = (
     ROOT / "reports" / "quality" / "test-duplicate-name-inventory.json"
+)
+TEST_GOVERNANCE_ARTIFACT_PATH = (
+    ROOT / "reports" / "quality" / "test-governance-current.json"
 )
 GOLD_REGISTRY_PATH = (
     ROOT / "tests" / "fixtures" / "golden" / "gold" / ("schema_registry.v1.json")
@@ -184,6 +188,34 @@ def test_tests_workflow_runs_strict_test_audit_preflight_before_governance_close
 
 
 @pytest.mark.architecture
+def test_test_governance_artifacts_match_live_collector() -> None:
+    """Committed governance snapshots must fail fast on collector drift."""
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "scripts.engineering.qa.report_test_governance_audit",
+            "--check",
+            "--json-out",
+            str(TEST_GOVERNANCE_ARTIFACT_PATH),
+            "--duplicate-name-inventory-out",
+            str(DUPLICATE_NAME_INVENTORY_PATH),
+        ],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+
+    assert result.returncode == 0, (
+        "Committed test-governance artifacts drifted from live collector output.\n"
+        f"stdout:\n{result.stdout}\n"
+        f"stderr:\n{result.stderr}"
+    )
+
+
+@pytest.mark.architecture
 def test_compatibility_test_file_max_follows_stream_g_downward_ratchet() -> None:
     """#4925: compatibility_test_file_max may only ratchet down to live inventory."""
     payload = _load_yaml(CONFIG_PATH)
@@ -193,22 +225,22 @@ def test_compatibility_test_file_max_follows_stream_g_downward_ratchet() -> None
 
     live_count = int(report["compatibility_test_files"])
     budget_max = int(budgets["compatibility_test_file_max"])
-    target_count = 39
+    target_count = 38
 
     owner_notes = cast(list[YamlMap], ratchet.get("stream_g_owner_notes", []))
-    issue_notes = [note for note in owner_notes if note.get("issue") == "#4967"]
-    assert issue_notes, "Stream G owner note for #4967 must be recorded"
+    issue_notes = [note for note in owner_notes if note.get("issue") == "#5023"]
+    assert issue_notes, "Stream G owner note for #5023 must be recorded"
 
     assert live_count <= budget_max
     if live_count <= target_count:
         assert budget_max == target_count, (
-            "compatibility_test_file_max must ratchet down to 39 when live inventory "
+            "compatibility_test_file_max must ratchet down to 38 when live inventory "
             f"is at or below target; live={live_count}, budget={budget_max}"
         )
     else:
         assert budget_max == live_count, (
             "compatibility_test_file_max must pin to the live inventory while count "
-            f"exceeds target 39; live={live_count}, budget={budget_max}"
+            f"exceeds target 38; live={live_count}, budget={budget_max}"
         )
 
 

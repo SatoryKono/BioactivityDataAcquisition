@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 
@@ -168,13 +169,12 @@ class TestRunnerFactoryCreate:
     @pytest.fixture
     def mock_context(self):
         """Create a mock PipelineRunContext."""
-        from uuid import uuid4
 
-        from bioetl.domain.types import RunID, RunType
+        from bioetl.domain.types import RunType
 
         context = MagicMock()
         context.pipeline_name = "chembl_activity"
-        context.run_id = RunID(uuid4())
+        context.run_id = deterministic_run_uuid_from_callsite("test_runner_factory")
         context.run_type = RunType.INCREMENTAL
         return context
 

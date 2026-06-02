@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 
@@ -55,7 +55,7 @@ def test_control_plane_rollout_smoke_emits_artifacts_and_aggregate_metrics(
     tmp_path: Path,
 ) -> None:
     metrics = MagicMock(spec=MetricsPort)
-    run_id = RunID(uuid4())
+    run_id = deterministic_run_uuid_from_callsite("test_control_plane_rollout_smoke")
     manifest_store = FileRunManifestStore(
         base_path=tmp_path / "output" / "control" / "run_manifest",
         metrics=metrics,

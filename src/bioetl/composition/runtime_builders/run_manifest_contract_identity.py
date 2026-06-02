@@ -31,6 +31,30 @@ CONTRACT_IDENTITY_FIELD_NAMES: tuple[str, ...] = tuple(
 )
 
 
+def build_contract_identity_field_values(
+    *,
+    contract_ref: str,
+    contract_version: str | None,
+    contract_schema_hash: str | None,
+    dq_policy_ref: str | None,
+    rule_bundle_version: str | None,
+    normalization_profile_ref: str | None,
+    normalization_profile_version: str | None,
+    normalization_profile_hash: str | None,
+) -> dict[str, str | None]:
+    """Return the shared mapping shape for manifest contract identity fields."""
+    return {
+        "contract_ref": contract_ref,
+        "contract_version": contract_version,
+        "contract_schema_hash": contract_schema_hash,
+        "dq_policy_ref": dq_policy_ref,
+        "rule_bundle_version": rule_bundle_version,
+        "normalization_profile_ref": normalization_profile_ref,
+        "normalization_profile_version": normalization_profile_version,
+        "normalization_profile_hash": normalization_profile_hash,
+    }
+
+
 def resolve_contract_identity(
     *,
     provider: str,
@@ -65,11 +89,11 @@ def resolve_contract_identity(
         )
     fields = _extract_contract_identity_fields(entry)
     if strict:
-        _validate_complete_contract_identity(contract_ref, fields)
+        ensure_complete_contract_identity(contract_ref, fields)
     return RunManifestContractIdentity(contract_ref, *fields)
 
 
-def _validate_complete_contract_identity(
+def ensure_complete_contract_identity(
     contract_ref: str,
     fields: tuple[
         str | None,

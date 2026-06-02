@@ -15,7 +15,7 @@ from bioetl.domain.behavior.value_validator_rules import (
     normalize_unit_name,
     validate_percent_value,
 )
-from bioetl.domain.value_objects.activity_values import ActivityType
+from bioetl.domain.value_objects import ActivityType
 
 if TYPE_CHECKING:
     from bioetl.domain.behavior.normalization_config import NormalizationConfig

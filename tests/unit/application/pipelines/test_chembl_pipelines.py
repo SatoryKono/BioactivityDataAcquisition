@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -55,7 +55,7 @@ def runtime_config():
 @pytest.fixture
 def run_id() -> RunID:
     """Create a test run ID."""
-    return uuid4()
+    return deterministic_uuid_from_callsite("test_chembl_pipelines")
 
 
 def create_pipeline_config(

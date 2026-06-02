@@ -10,6 +10,7 @@ See CONSOLIDATED_REFACTORING_ANALYSIS.md P1.3 for rationale.
 from __future__ import annotations
 
 import inspect
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -75,10 +76,9 @@ class TestLockSafetyGuard:
     @pytest.mark.asyncio
     async def test_validate_owner_returns_true_when_holding_lock(self):
         """validate_owner returns True when run_id holds the lock."""
-        from uuid import uuid4
 
         lock = MemoryLock()
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_lock_safety_guard")
         key = "test:lock"
 
         # Acquire lock
@@ -95,11 +95,10 @@ class TestLockSafetyGuard:
     @pytest.mark.asyncio
     async def test_validate_owner_returns_false_when_not_holding_lock(self):
         """validate_owner returns False when run_id does not hold the lock."""
-        from uuid import uuid4
 
         lock = MemoryLock()
-        run_id_owner = uuid4()
-        run_id_other = uuid4()
+        run_id_owner = deterministic_uuid_from_callsite("test_lock_safety_guard")
+        run_id_other = deterministic_uuid_from_callsite("test_lock_safety_guard")
         key = "test:lock"
 
         # Acquire lock with owner
@@ -116,10 +115,9 @@ class TestLockSafetyGuard:
     @pytest.mark.asyncio
     async def test_validate_owner_returns_false_for_nonexistent_lock(self):
         """validate_owner returns False for non-existent lock key."""
-        from uuid import uuid4
 
         lock = MemoryLock()
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_lock_safety_guard")
 
         # Validate non-existent lock - should return False
         is_valid = await lock.validate_owner("nonexistent:key", run_id)
@@ -130,10 +128,9 @@ class TestLockSafetyGuard:
     @pytest.mark.asyncio
     async def test_validate_owner_returns_false_after_release(self):
         """validate_owner returns False after lock is released."""
-        from uuid import uuid4
 
         lock = MemoryLock()
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_lock_safety_guard")
         key = "test:lock"
 
         # Acquire and release lock
@@ -149,10 +146,9 @@ class TestLockSafetyGuard:
     @pytest.mark.asyncio
     async def test_validate_fencing_token_returns_true_when_holding_lock(self):
         """validate_fencing_token returns True when token matches holder."""
-        from uuid import uuid4
 
         lock = MemoryLock()
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_lock_safety_guard")
         key = "test:lock"
 
         token = await lock.acquire(key, run_id, ttl=60)
@@ -167,17 +163,16 @@ class TestLockSafetyGuard:
     @pytest.mark.asyncio
     async def test_validate_fencing_token_rejects_stale_token(self):
         """validate_fencing_token returns False for stale tokens."""
-        from uuid import uuid4
 
         lock = MemoryLock()
         key = "test:lock"
 
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_lock_safety_guard")
         stale_token = await lock.acquire(key, run_id, ttl=60)
         assert stale_token is not None
         await lock.release(key, run_id)
 
-        new_run = uuid4()
+        new_run = deterministic_uuid_from_callsite("test_lock_safety_guard")
         new_token = await lock.acquire(key, new_run, ttl=60)
         assert new_token is not None
 
@@ -207,10 +202,9 @@ class TestFencingTokenContract:
     @pytest.mark.asyncio
     async def test_memory_lock_acquire_returns_fencing_token(self):
         """MemoryLock.acquire() MUST return FencingToken on success."""
-        from uuid import uuid4
 
         lock = MemoryLock()
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_lock_safety_guard")
 
         token = await lock.acquire("test:key", run_id, ttl=60)
         assert isinstance(token, FencingToken), (
@@ -226,13 +220,12 @@ class TestFencingTokenContract:
     @pytest.mark.asyncio
     async def test_fencing_token_sequence_is_monotonic(self):
         """FencingToken sequence MUST increase across successive acquires."""
-        from uuid import uuid4
 
         lock = MemoryLock()
 
         tokens = []
         for _ in range(3):
-            run_id = uuid4()
+            run_id = deterministic_uuid_from_callsite("test_lock_safety_guard")
             token = await lock.acquire("test:key", run_id, ttl=60)
             assert token is not None
             tokens.append(token)

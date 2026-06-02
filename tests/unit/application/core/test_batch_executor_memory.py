@@ -5,7 +5,10 @@ from __future__ import annotations
 import asyncio
 from typing import cast
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import (
+    deterministic_batch_uuid_from_callsite,
+    deterministic_run_uuid_from_callsite,
+)
 
 import pytest
 
@@ -50,7 +53,6 @@ from bioetl.domain.ports.noop import NoOpTracing
 from bioetl.domain.types import (
     BatchID,
     GoldSchemaType,
-    RunID,
     RunType,
     ValidationResult,
 )
@@ -78,7 +80,7 @@ def mock_context():
     mock_logger = MagicMock()
     mock_logger.bind = MagicMock(return_value=mock_logger)
     return PipelineContext(
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite("test_batch_executor_memory"),
         run_type=RunType.INCREMENTAL,
         logger=mock_logger,
     )
@@ -266,7 +268,7 @@ class BatchExecutorUuidFactoryAdapter:
     """Default batch-id factory adapter mirroring production uuid4 behavior."""
 
     def create(self) -> BatchID:
-        return BatchID(uuid4())
+        return deterministic_batch_uuid_from_callsite("test_batch_executor_memory")
 
 
 class TestBatchExecutorMemory:

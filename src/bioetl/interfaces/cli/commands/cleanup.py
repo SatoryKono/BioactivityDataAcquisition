@@ -5,11 +5,14 @@ Implements Bronze layer cleanup per RULES.md retention policy.
 
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 import click
 
+from bioetl.interfaces.cli.commands.domains.maintenance.service_access import (
+    get_bronze_cleanup_service,
+    preview_cleanup,
+)
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CliBoundaryExecutionPolicy,
     run_async_with_cli_failure_policy,
@@ -23,7 +26,6 @@ from bioetl.interfaces.cli.formatters import (
 
 if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.cleanup_service import CleanupPreview
-    from bioetl.application.services.bronze_cleanup_service import BronzeCleanupService
 
 __all__ = [
     "bronze_cleanup_command",
@@ -43,21 +45,9 @@ _CLEANUP_PREVIEW_INTERRUPTED_MESSAGE = (
 )
 
 
-def get_bronze_cleanup_service() -> BronzeCleanupService:
-    """Load the bronze cleanup service through the maintenance command seam."""
-    from bioetl.interfaces.cli.commands.maintenance import (
-        get_bronze_cleanup_service as _impl,
-    )
-
-    return _impl()
-
-
 async def preview_pipeline_cleanup(pipeline: str) -> CleanupPreview:
     """Preview pipeline cleanup scope through the maintenance command seam."""
-    from bioetl.interfaces.cli.commands.maintenance import preview_cleanup as _impl
-
-    impl = cast("Callable[[str], Awaitable[CleanupPreview]]", _impl)
-    return await impl(pipeline)
+    return await preview_cleanup(pipeline)
 
 
 def _cleanup_policy(

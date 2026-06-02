@@ -7,7 +7,7 @@ import json
 from collections.abc import AsyncGenerator
 from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 import pytest_asyncio
@@ -116,9 +116,6 @@ def test_control_plane_identity_evidence_static_contract_is_frozen() -> None:
     assert (
         SOURCE_MODEL_BY_NAME["resolved_config_hash"].source_quality == "authoritative"
     )
-    assert SPEC_BY_NAME["config_hash"].priority == "P2"
-    assert SOURCE_MODEL_BY_NAME["config_hash"].source_quality == "compatibility_alias"
-
     forbidden_label_names = {
         "run_id",
         "manifest_id",
@@ -126,7 +123,6 @@ def test_control_plane_identity_evidence_static_contract_is_frozen() -> None:
         "effective_config_hash",
         "effective_config_artifact_id",
         "resolved_config_hash",
-        "config_hash",
         "contract_schema_hash",
         "dq_contract_compatibility_hash",
         "input_snapshot_identity_fingerprint",
@@ -151,7 +147,9 @@ def test_control_plane_identity_checkpoint_compare_classifies_partial() -> None:
         execution_fingerprint="fingerprint-partial",
         schema_version="1.0",
         created_at=datetime(2026, 5, 12, 8, 21, tzinfo=UTC),
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite(
+            "test_health_server_control_plane_identity"
+        ),
         run_type=RunType.REBUILD,
         pipeline_name="chembl_activity",
         provider="chembl",
@@ -189,7 +187,9 @@ def _identity_severity_manifest(*, exact_replay: bool = False) -> RunManifest:
         execution_fingerprint="fingerprint-severity",
         schema_version="1.0",
         created_at=datetime(2026, 5, 12, 8, 21, tzinfo=UTC),
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite(
+            "test_health_server_control_plane_identity"
+        ),
         run_type=RunType.REBUILD,
         pipeline_name="chembl_activity",
         provider="chembl",
@@ -273,7 +273,9 @@ def test_control_plane_identity_domain_severity_fails_exact_replay_missing_ancho
 def test_control_plane_identity_domain_severity_fails_terminal_missing_manifest() -> (
     None
 ):
-    run_id = RunID(uuid4())
+    run_id = deterministic_run_uuid_from_callsite(
+        "test_health_server_control_plane_identity"
+    )
     terminal_entry = RunLedgerEntry(
         entry_id="ledger-terminal",
         manifest_id="manifest-severity",
@@ -316,9 +318,15 @@ def test_control_plane_filter_options_narrows_manifest_catalog_before_ledger_rea
     manifest_store = InMemoryRunManifestStore()
     ledger_store = _CountingRunLedgerStore()
     created_at = datetime(2026, 5, 12, 8, 21, tzinfo=UTC)
-    run_id_1 = RunID(uuid4())
-    run_id_2 = RunID(uuid4())
-    run_id_3 = RunID(uuid4())
+    run_id_1 = deterministic_run_uuid_from_callsite(
+        "test_health_server_control_plane_identity"
+    )
+    run_id_2 = deterministic_run_uuid_from_callsite(
+        "test_health_server_control_plane_identity"
+    )
+    run_id_3 = deterministic_run_uuid_from_callsite(
+        "test_health_server_control_plane_identity"
+    )
 
     manifest_store.save(
         RunManifest(
@@ -400,7 +408,9 @@ def test_control_plane_filter_options_fail_close_when_scope_has_no_matching_mani
             execution_fingerprint="fingerprint-1",
             schema_version="1.0",
             created_at=created_at,
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite(
+                "test_health_server_control_plane_identity"
+            ),
             run_type=RunType.INCREMENTAL,
             pipeline_name="chembl_activity",
             provider="chembl",
@@ -417,7 +427,9 @@ def test_control_plane_filter_options_fail_close_when_scope_has_no_matching_mani
             execution_fingerprint="fingerprint-2",
             schema_version="1.0",
             created_at=created_at + timedelta(minutes=1),
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite(
+                "test_health_server_control_plane_identity"
+            ),
             run_type=RunType.INCREMENTAL,
             pipeline_name="pubchem_compound",
             provider="pubchem",
@@ -458,7 +470,9 @@ def test_control_plane_filter_options_exact_run_only_returns_fallback_without_se
             execution_fingerprint="fingerprint-1",
             schema_version="1.0",
             created_at=created_at,
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite(
+                "test_health_server_control_plane_identity"
+            ),
             run_type=RunType.INCREMENTAL,
             pipeline_name="chembl_activity",
             provider="chembl",
@@ -491,7 +505,9 @@ def test_control_plane_filter_options_exact_run_only_resolves_provider_for_selec
     manifest_store = InMemoryRunManifestStore()
     ledger_store = _CountingRunLedgerStore()
     created_at = datetime(2026, 5, 12, 8, 21, tzinfo=UTC)
-    run_id = RunID(uuid4())
+    run_id = deterministic_run_uuid_from_callsite(
+        "test_health_server_control_plane_identity"
+    )
 
     manifest_store.save(
         RunManifest(
@@ -516,7 +532,9 @@ def test_control_plane_filter_options_exact_run_only_resolves_provider_for_selec
             execution_fingerprint="fingerprint-2",
             schema_version="1.0",
             created_at=created_at + timedelta(minutes=1),
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite(
+                "test_health_server_control_plane_identity"
+            ),
             run_type=RunType.BACKFILL,
             pipeline_name="pubchem_compound",
             provider="pubchem",
@@ -568,10 +586,18 @@ class TestHealthServerControlPlaneSelector:
             base_path=tmp_path_factory.mktemp("control-plane-checkpoints")
         )
         created_at = datetime(2026, 5, 12, 8, 21, tzinfo=UTC)
-        run_id_1 = RunID(uuid4())
-        run_id_2 = RunID(uuid4())
-        run_id_3 = RunID(uuid4())
-        run_id_4 = RunID(uuid4())
+        run_id_1 = deterministic_run_uuid_from_callsite(
+            "test_health_server_control_plane_identity"
+        )
+        run_id_2 = deterministic_run_uuid_from_callsite(
+            "test_health_server_control_plane_identity"
+        )
+        run_id_3 = deterministic_run_uuid_from_callsite(
+            "test_health_server_control_plane_identity"
+        )
+        run_id_4 = deterministic_run_uuid_from_callsite(
+            "test_health_server_control_plane_identity"
+        )
         input_snapshot = RunInputSnapshotRef(
             snapshot_id="snapshot-chembl-activity-1",
             content_hash="hash-chembl-activity-1",
@@ -1631,8 +1657,6 @@ class TestHealthServerControlPlaneSelector:
         assert rows["effective_config_hash"]["source_quality"] == "authoritative"
         assert rows["resolved_config_hash"]["value_full"] == "feedface"
         assert rows["resolved_config_hash"]["source_quality"] == "authoritative"
-        assert rows["config_hash"]["source_quality"] == "compatibility_alias"
-        assert rows["config_hash"]["copy"] is False
         assert rows["effective_config_hash"]["drilldown_type"] == "effective_config"
         assert rows["effective_config_hash"]["drilldown_target"] == (
             "effective_config.hash:"
@@ -1800,7 +1824,9 @@ class TestHealthServerControlPlaneSelector:
         assert server._checkpoint_port is not None
         port = self._get_server_port(server)
         pipeline = "chembl_target"
-        run_id = RunID(uuid4())
+        run_id = deterministic_run_uuid_from_callsite(
+            "test_health_server_control_plane_identity"
+        )
         await server._checkpoint_port.save(
             pipeline,
             run_id,

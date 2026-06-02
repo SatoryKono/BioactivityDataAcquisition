@@ -52,6 +52,7 @@ __all__ = [
     "extract_contract_refs",
     "resolve_resolution_policy",
     "serialize_artifact",
+    "stable_hash",
     "validate_runtime_environment_provenance",
 ]
 

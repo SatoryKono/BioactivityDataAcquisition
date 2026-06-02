@@ -5,7 +5,7 @@ from __future__ import annotations
 import errno
 from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_string_from_callsite
 
 import pytest
 
@@ -260,7 +260,7 @@ class TestMetadataModels:
     def test_runtime_metadata_datetime_serialization(self) -> None:
         """Test datetime fields are serialized as ISO strings."""
         runtime = RuntimeMetadata(
-            run_id=str(uuid4()),
+            run_id=deterministic_uuid_string_from_callsite("test_metadata_writer"),
             run_type=RunTypeEnum.INCREMENTAL,
             started_at_utc=datetime(2025, 1, 15, 10, 0, 0, tzinfo=UTC),
             completed_at_utc=datetime(2025, 1, 15, 10, 5, 0, tzinfo=UTC),

@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import pytest
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 from datetime import UTC, datetime
-from uuid import uuid4
 
 from bioetl.application.services.lineage.lineage_inspection_service import (
     LineageInspectionService,
@@ -125,7 +125,7 @@ def test_show_fragment_semantic_lookup_is_explicit() -> None:
 
 def test_trace_returns_upstream_and_downstream_relations() -> None:
     store = _InMemoryLineageStore()
-    run_id = RunID(uuid4())
+    run_id = deterministic_run_uuid_from_callsite("test_lineage_inspection_service")
     silver_node = DatasetRef(
         layer="silver",
         logical_name="chembl.activity",
@@ -193,7 +193,7 @@ def test_trace_returns_upstream_and_downstream_relations() -> None:
 def test_explain_run_resolves_manifest_and_aggregates_outputs() -> None:
     store = _InMemoryLineageStore()
     manifest_store = _InMemoryRunManifestStore()
-    run_id = RunID(uuid4())
+    run_id = deterministic_run_uuid_from_callsite("test_lineage_inspection_service")
     manifest = _make_manifest(manifest_id="manifest-1", run_id=run_id)
     manifest_store.save(manifest)
     silver_node = DatasetRef(

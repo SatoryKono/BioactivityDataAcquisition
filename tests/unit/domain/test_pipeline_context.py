@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from unittest.mock import MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import (
+    deterministic_batch_uuid_from_callsite,
+    deterministic_uuid_from_callsite,
+)
 
 import pytest
 
@@ -16,7 +19,7 @@ from bioetl.domain.context import (
     PipelineRunContext,
     VacuumSettings,
 )
-from bioetl.domain.types import BatchID, RunID, RunType
+from bioetl.domain.types import RunID, RunType
 from tests.helpers.clock import FIXED_TEST_TIME
 
 pytestmark = pytest.mark.unit
@@ -38,7 +41,7 @@ class TestPipelineContext:
     @pytest.fixture
     def run_id(self) -> RunID:
         """Create a test RunID."""
-        return uuid4()
+        return deterministic_uuid_from_callsite("test_pipeline_context")
 
     @pytest.fixture
     def context(self, run_id: RunID, mock_logger: MagicMock) -> PipelineContext:
@@ -56,6 +59,7 @@ class TestPipelineContext:
         assert context.run_type == RunType.INCREMENTAL
         assert context.logger is not None
         assert context.replay_timestamp_anchor is None
+        assert context.workflow_id == "standalone"
 
     def test_context_is_frozen__test_pipeline_context_unit_domain_test_pipeline_context_58(
         self, context: PipelineContext
@@ -119,7 +123,7 @@ class TestPipelineContextStartedAt:
 
     def test_context_started_at_has_default(self) -> None:
         """Direct construction uses deterministic sentinel when omitted."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_pipeline_context")
         logger = MagicMock()
 
         ctx = PipelineContext(
@@ -132,7 +136,7 @@ class TestPipelineContextStartedAt:
 
     def test_context_started_at_explicit(self) -> None:
         """Context should accept explicit started_at value."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_pipeline_context")
         logger = MagicMock()
         explicit_time = datetime(2025, 1, 15, 12, 0, 0, tzinfo=UTC)
 
@@ -147,7 +151,7 @@ class TestPipelineContextStartedAt:
 
     def test_context_create_factory_explicit_replay_anchor(self) -> None:
         """create() should preserve an explicit deterministic replay timestamp."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_pipeline_context")
         logger = MagicMock()
         replay_anchor = datetime(2025, 6, 1, 0, 0, 0, tzinfo=UTC)
 
@@ -162,7 +166,7 @@ class TestPipelineContextStartedAt:
 
     def test_context_create_factory_auto_timestamp(self) -> None:
         """create() carries deterministic sentinel when caller omits started_at."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_pipeline_context")
         logger = MagicMock()
 
         ctx = PipelineContext.create(
@@ -175,7 +179,7 @@ class TestPipelineContextStartedAt:
 
     def test_context_create_factory_explicit_timestamp(self) -> None:
         """create() factory should use provided started_at."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_pipeline_context")
         logger = MagicMock()
         explicit_time = datetime(2025, 6, 1, 10, 30, 0, tzinfo=UTC)
 
@@ -190,7 +194,7 @@ class TestPipelineContextStartedAt:
 
     def test_bind_logger_preserves_started_at(self) -> None:
         """bind_logger should preserve started_at in new context."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_pipeline_context")
         logger = MagicMock()
         logger.bind.return_value = MagicMock()
         explicit_time = datetime(2025, 3, 20, 8, 0, 0, tzinfo=UTC)
@@ -207,7 +211,7 @@ class TestPipelineContextStartedAt:
 
     def test_bind_logger_preserves_replay_timestamp_anchor(self) -> None:
         """bind_logger must not lose deterministic replay anchors."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_pipeline_context")
         logger = MagicMock()
         logger.bind.return_value = MagicMock()
         replay_anchor = datetime(2025, 3, 20, 0, 0, 0, tzinfo=UTC)
@@ -223,16 +227,34 @@ class TestPipelineContextStartedAt:
 
         assert new_ctx.replay_timestamp_anchor == replay_anchor
 
+    def test_bind_logger_preserves_workflow_and_pipeline_identity(self) -> None:
+        """bind_logger should keep workflow/pipeline anchors for artifact routing."""
+        run_id = deterministic_uuid_from_callsite("test_pipeline_context")
+        logger = MagicMock()
+        logger.bind.return_value = MagicMock()
+        ctx = PipelineContext(
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            logger=logger,
+            pipeline_name="chembl_target",
+            workflow_id="chembl_baseline",
+        )
+
+        new_ctx = ctx.bind_logger(entity="test")
+
+        assert new_ctx.pipeline_name == "chembl_target"
+        assert new_ctx.workflow_id == "chembl_baseline"
+
     def test_with_source_batch_id_sets_batch_lineage(self) -> None:
         """with_source_batch_id should return a copy with batch lineage attached."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_pipeline_context")
         logger = MagicMock()
         ctx = PipelineContext(
             run_id=run_id,
             run_type=RunType.INCREMENTAL,
             logger=logger,
         )
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_pipeline_context")
 
         new_ctx = ctx.with_source_batch_id(batch_id)
 
@@ -240,12 +262,28 @@ class TestPipelineContextStartedAt:
         assert new_ctx.source_batch_id == batch_id
         assert ctx.source_batch_id is None
 
+    def test_with_source_batch_id_preserves_workflow_id(self) -> None:
+        """with_source_batch_id must not drop workflow routing anchors."""
+        run_id = deterministic_uuid_from_callsite("test_pipeline_context")
+        logger = MagicMock()
+        ctx = PipelineContext(
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            logger=logger,
+            workflow_id="chembl_baseline",
+        )
+        batch_id = deterministic_batch_uuid_from_callsite("test_pipeline_context")
+
+        new_ctx = ctx.with_source_batch_id(batch_id)
+
+        assert new_ctx.workflow_id == "chembl_baseline"
+
     def test_bind_logger_preserves_source_batch_id(self) -> None:
         """bind_logger should not drop active batch lineage."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_pipeline_context")
         logger = MagicMock()
         logger.bind.return_value = MagicMock()
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_pipeline_context")
         ctx = PipelineContext(
             run_id=run_id,
             run_type=RunType.INCREMENTAL,
@@ -263,7 +301,7 @@ class TestPipelineContextEquality:
 
     def test_contexts_with_same_values_are_equal(self) -> None:
         """Contexts with same values should be equal."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_pipeline_context")
         logger = MagicMock()
         started_at = FIXED_TEST_TIME
 
@@ -287,17 +325,21 @@ class TestPipelineContextEquality:
         logger = MagicMock()
 
         ctx1 = PipelineContext(
-            run_id=uuid4(), run_type=RunType.INCREMENTAL, logger=logger
+            run_id=deterministic_uuid_from_callsite("test_pipeline_context"),
+            run_type=RunType.INCREMENTAL,
+            logger=logger,
         )
         ctx2 = PipelineContext(
-            run_id=uuid4(), run_type=RunType.INCREMENTAL, logger=logger
+            run_id=deterministic_uuid_from_callsite("test_pipeline_context"),
+            run_type=RunType.INCREMENTAL,
+            logger=logger,
         )
 
         assert ctx1 != ctx2
 
     def test_contexts_with_different_run_type_not_equal(self) -> None:
         """Contexts with different run_type should not be equal."""
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_pipeline_context")
         logger = MagicMock()
 
         ctx1 = PipelineContext(
@@ -314,7 +356,7 @@ class TestRunContextValidationAndProperties:
     def test_pipeline_run_context_log_correlation_fields_without_manifest(self) -> None:
         ctx = PipelineRunContext(
             pipeline_name="chembl_activity",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("test_pipeline_context"),
             run_type=RunType.INCREMENTAL,
         )
 
@@ -327,7 +369,7 @@ class TestRunContextValidationAndProperties:
     def test_pipeline_run_context_log_correlation_fields_with_manifest(self) -> None:
         ctx = PipelineRunContext(
             pipeline_name="chembl_activity",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("test_pipeline_context"),
             run_type=RunType.INCREMENTAL,
             manifest_id="manifest-123",
         )
@@ -379,7 +421,7 @@ class TestRunContextValidationAndProperties:
             VacuumSettings(enabled=True, retention_days=0)
 
     def test_pipeline_run_context_properties(self) -> None:
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_pipeline_context")
         ctx = PipelineRunContext(
             pipeline_name="chembl_publication",
             run_id=run_id,
@@ -396,7 +438,7 @@ class TestRunContextValidationAndProperties:
     def test_pipeline_run_context_replay_parentage_fields(self) -> None:
         ctx = PipelineRunContext(
             pipeline_name="chembl_activity",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("test_pipeline_context"),
             run_type=RunType.INCREMENTAL,
             replay_of_run_id="run-parent",
             replay_of_manifest_id="manifest-parent",

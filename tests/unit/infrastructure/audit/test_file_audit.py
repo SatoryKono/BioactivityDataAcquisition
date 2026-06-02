@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 
@@ -96,7 +96,7 @@ class _RecordingTracing:
 @pytest.fixture
 def run_id() -> RunID:
     """Generate a unique run ID."""
-    return RunID(uuid4())
+    return deterministic_run_uuid_from_callsite("test_file_audit")
 
 
 @pytest.fixture
@@ -279,8 +279,8 @@ class TestFileAuditAdapter:
         adapter = FileAuditAdapter(tmp_path / "audit", noop_logger)
         timestamp = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
-        run_id_1 = RunID(uuid4())
-        run_id_2 = RunID(uuid4())
+        run_id_1 = deterministic_run_uuid_from_callsite("test_file_audit")
+        run_id_2 = deterministic_run_uuid_from_callsite("test_file_audit")
 
         # Write entries with different run_ids
         await adapter.log_write(

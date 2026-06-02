@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-02T09:13:37.047209+00:00",
+  "generated_at": "2026-06-02T11:21:52.888182+00:00",
   "summary": {
     "total_scripts": 424,
     "status_counts": {
-      "active": 372,
-      "supporting": 52
+      "active": 364,
+      "supporting": 60
     },
     "reference_group_coverage": {
       "agents": 4,
@@ -1187,7 +1187,7 @@
     {
       "path": "scripts/ai/gemini/gemini-interactive.sh",
       "type": "sh",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 8,
       "references": [
@@ -4593,13 +4593,13 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 366,
+          "line": 376,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.docs export-matrix-structural-contract --check"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 375,
+          "line": 385,
           "source_group": "ci",
           "text": "uv run python -m scripts.docs sync-matrix-structural-policy --check --input \"$workbook\" --output \"$workbook\""
         },
@@ -4620,7 +4620,7 @@
     {
       "path": "scripts/docs/_compat_shim.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
@@ -5805,13 +5805,13 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 243,
+          "line": 250,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.ci neo4j-memory"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 332,
+          "line": 342,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.ci neo4j-memory-live"
         },
@@ -6153,7 +6153,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 766,
+          "line": 776,
           "source_group": "ci",
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -7930,7 +7930,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 252,
+          "line": 262,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.qa check-naming-pkg --check"
         },
@@ -8218,7 +8218,7 @@
     {
       "path": "scripts/engineering/qa/check_test_audit_preflight.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -8230,7 +8230,7 @@
         },
         {
           "path": "tests/architecture/test_test_governance_audit.py",
-          "line": 178,
+          "line": 182,
           "source_group": "tests",
           "text": "command = \"scripts/engineering/qa/check_test_audit_preflight.py --strict\""
         }
@@ -8401,7 +8401,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 381,
+          "line": 391,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
@@ -8497,7 +8497,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 686,
+          "line": 696,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/qa/generate_hotspot_degradation_report.py \\"
         },
@@ -8995,7 +8995,7 @@
         },
         {
           "path": "tests/architecture/test_module_coverage_inventory.py",
-          "line": 213,
+          "line": 211,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_module_coverage_inventory.py\""
         }
@@ -10161,7 +10161,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 15,
       "references": [
         {
           "path": "docs/02-architecture/04-interfaces-layer.md",
@@ -11545,7 +11545,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 635,
+          "line": 627,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/audit_live_grafana_panels.py\","
         }
@@ -11571,8 +11571,8 @@
           "text": "\"scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py\""
         },
         {
-          "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 1415,
+          "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_audit_cycle.py",
+          "line": 48,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/check_grafana_dashboard_audit_preflight.py\","
         }
@@ -11636,8 +11636,8 @@
           "text": "\"observability/grafana/run_grafana_dashboard_audit_cycle.py\""
         },
         {
-          "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 1681,
+          "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_audit_cycle.py",
+          "line": 314,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/run_grafana_dashboard_audit_cycle.py\","
         }
@@ -11646,7 +11646,7 @@
     {
       "path": "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1",
       "type": "ps1",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -11658,7 +11658,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 502,
+          "line": 494,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1\""
         }
@@ -11667,7 +11667,7 @@
     {
       "path": "scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh",
       "type": "sh",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 6,
       "references": [
@@ -11697,13 +11697,13 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 323,
+          "line": 315,
           "source_group": "tests",
           "text": "assert \"setup_grafana_screenshot_runtime.sh\" in detail"
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 499,
+          "line": 491,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh\""
         }
@@ -12092,7 +12092,7 @@
     {
       "path": "scripts/ops/support/load_repo_env.sh",
       "type": "sh",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [
         "grafana-dashboard-render"
       ],
@@ -12118,7 +12118,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 190,
+          "line": 182,
           "source_group": "tests",
           "text": "assert \"scripts/ops/support/load_repo_env.sh\" in hint"
         }
@@ -12166,7 +12166,7 @@
     {
       "path": "scripts/ops/support/skills/check_ai_skills_layout.sh",
       "type": "sh",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 4,
       "references": [
@@ -12199,7 +12199,7 @@
     {
       "path": "scripts/ops/support/skills/check_skills_mirror.sh",
       "type": "sh",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 3,
       "references": [
@@ -12255,7 +12255,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 69,
+      "reference_count": 70,
       "references": [
         {
           "path": ".github/workflows/chembl-baseline-smoke.yml",
@@ -12277,33 +12277,33 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 354,
+          "line": 256,
+          "source_group": "ci",
+          "text": "run: uv run python -m scripts.schema generate-config-matrix --check"
+        },
+        {
+          "path": ".github/workflows/tests.yml",
+          "line": 364,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema validate-configs"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 357,
+          "line": 367,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema check-invariants"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 360,
+          "line": 370,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema check-required-fields --verbose"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 363,
+          "line": 373,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema audit-optionality --check"
-        },
-        {
-          "path": ".github/workflows/tests.yml",
-          "line": 378,
-          "source_group": "ci",
-          "text": "run: uv run python -m scripts.schema generate-pipeline --check"
         }
       ]
     },

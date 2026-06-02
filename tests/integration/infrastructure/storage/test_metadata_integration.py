@@ -7,7 +7,10 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import (
+    deterministic_run_uuid_from_callsite,
+    deterministic_uuid_string_from_callsite,
+)
 
 import pyarrow as pa
 import pytest
@@ -24,7 +27,6 @@ from bioetl.domain.models.metadata import (
 )
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
-from bioetl.domain.types import RunID
 from tests.unit.infrastructure.storage._lineage_fragment_helpers import (
     make_produced_artifact_fragment,
 )
@@ -229,8 +231,8 @@ def mock_metadata_coordinator() -> MockMetadataCoordinator:
 
 @pytest.fixture
 def sample_records() -> list[dict[str, Any]]:
-    run_id = str(uuid4())
-    batch_id = str(uuid4())
+    run_id = deterministic_uuid_string_from_callsite("test_metadata_integration")
+    batch_id = deterministic_uuid_string_from_callsite("test_metadata_integration")
     return [
         {
             "id": "record1",
@@ -415,7 +417,7 @@ class TestGoldWriterMetadataIntegration:
             primary_keys=["id"],
             mode="overwrite",
             ingestion_ts=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite("test_metadata_integration"),
         )
 
         assert len(mock_metadata_writer.gold_calls) == 1
@@ -453,7 +455,7 @@ class TestGoldWriterMetadataIntegration:
             primary_keys=["id"],
             mode="overwrite",
             ingestion_ts=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite("test_metadata_integration"),
         )
 
         metadata_file = tmp_path / "test" / "gold_table" / "_metadata.yaml"

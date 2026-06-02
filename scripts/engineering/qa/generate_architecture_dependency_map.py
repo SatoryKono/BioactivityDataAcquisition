@@ -17,6 +17,7 @@ import ast
 import hashlib
 import json
 import sys
+import time
 from collections import Counter
 from collections.abc import Iterable
 from dataclasses import asdict, dataclass
@@ -48,6 +49,8 @@ LAYER_IMPORT_MATRIX: dict[str, frozenset[str]] = {
 LAYER_ORDER = tuple(LAYER_IMPORT_MATRIX.keys())
 GROUP_EDGE_LIMIT = 60
 _FRONTMATTER_DELIMITER = "---"
+MAX_SOURCE_TREE_STABILIZATION_ATTEMPTS = 8
+SOURCE_TREE_STABILIZATION_SLEEP_SECONDS = 0.1
 
 
 def _render_markdown_table(
@@ -116,6 +119,15 @@ class DependencySnapshot:
     source_fingerprint: str
 
 
+@dataclass(frozen=True)
+class _SourceModuleSnapshot:
+    """Stable source snapshot used for fingerprinting and AST collection."""
+
+    module_name: str
+    relative_path: str
+    source_bytes: bytes
+
+
 def _module_name_from_path(path: Path, src_root: Path) -> str:
     rel = path.relative_to(src_root)
     parts = list(rel.parts)
@@ -137,24 +149,72 @@ def _iter_modules(src_root: Path) -> Iterable[tuple[str, Path]]:
         yield _module_name_from_path(py_file, src_root), py_file
 
 
-def _source_fingerprint(src_root: Path) -> str:
-    """Return one cheap content-adjacent fingerprint for source-tree drift checks."""
-    digest = hashlib.sha256()
-    for py_file in sorted(src_root.rglob("*.py")):
-        if py_file.name.endswith(".pyi"):
-            continue
-        if "__pycache__" in py_file.parts:
-            continue
-        rel_path = py_file.relative_to(src_root).as_posix()
-        digest.update(rel_path.encode("utf-8"))
-        digest.update(b"\0")
+def _read_source_module_snapshots_once(src_root: Path) -> list[_SourceModuleSnapshot]:
+    """Read one full source-tree snapshot, skipping transiently vanished files."""
+    snapshots: list[_SourceModuleSnapshot] = []
+    for module_name, py_file in _iter_modules(src_root):
         try:
-            digest.update(hashlib.sha256(py_file.read_bytes()).digest())
-        except (OSError, PermissionError):
-            # Skip files that can't be read (locked, permission issues, etc.)
+            source_bytes = py_file.read_bytes()
+        except FileNotFoundError:
             continue
+        except (OSError, PermissionError):
+            continue
+        snapshots.append(
+            _SourceModuleSnapshot(
+                module_name=module_name,
+                relative_path=py_file.relative_to(src_root).as_posix(),
+                source_bytes=source_bytes,
+            )
+        )
+    return snapshots
+
+
+def _snapshot_digest(snapshots: Iterable[_SourceModuleSnapshot]) -> str:
+    """Return a deterministic fingerprint for one source snapshot."""
+    digest = hashlib.sha256()
+    for snapshot in snapshots:
+        digest.update(snapshot.relative_path.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(hashlib.sha256(snapshot.source_bytes).digest())
         digest.update(b"\0")
     return digest.hexdigest()
+
+
+def _read_stable_source_module_snapshots(
+    src_root: Path,
+    *,
+    max_attempts: int = MAX_SOURCE_TREE_STABILIZATION_ATTEMPTS,
+) -> tuple[list[_SourceModuleSnapshot], str]:
+    """Retry shared-drive reads and prefer the largest stable readable snapshot."""
+    best_snapshots: list[_SourceModuleSnapshot] | None = None
+    best_digest: str | None = None
+    best_paths: tuple[str, ...] = ()
+    previous_paths: tuple[str, ...] | None = None
+    previous_digest: str | None = None
+
+    for attempt in range(max_attempts):
+        snapshots = _read_source_module_snapshots_once(src_root)
+        digest = _snapshot_digest(snapshots)
+        repo_paths = tuple(snapshot.relative_path for snapshot in snapshots)
+        if best_snapshots is None or len(repo_paths) > len(best_paths):
+            best_snapshots = snapshots
+            best_digest = digest
+            best_paths = repo_paths
+        if repo_paths == previous_paths and digest == previous_digest:
+            return snapshots, digest
+        previous_paths = repo_paths
+        previous_digest = digest
+        if attempt + 1 < max_attempts:
+            time.sleep(SOURCE_TREE_STABILIZATION_SLEEP_SECONDS)
+
+    assert best_snapshots is not None and best_digest is not None
+    return best_snapshots, best_digest
+
+
+def _source_fingerprint(src_root: Path) -> str:
+    """Return one cheap content-adjacent fingerprint for source-tree drift checks."""
+    _, digest = _read_stable_source_module_snapshots(src_root)
+    return digest
 
 
 def _layer_of(module_name: str) -> str | None:
@@ -276,34 +336,23 @@ def collect_dependency_snapshot(src_root: Path) -> DependencySnapshot:
     """Parse project imports and return aggregated dependency snapshot."""
     layer_counter: Counter[tuple[str, str]] = Counter()
     group_counter: Counter[tuple[str, str]] = Counter()
-    source_digest = hashlib.sha256()
+    snapshots, source_digest = _read_stable_source_module_snapshots(src_root)
 
     scanned_modules = 0
     total_internal_imports = 0
 
-    for source_module, source_file in _iter_modules(src_root):
-        rel_path = source_file.relative_to(src_root).as_posix()
-        try:
-            source_bytes = source_file.read_bytes()
-        except (OSError, PermissionError):
-            # Skip files that can't be read (locked, permission issues, etc.)
-            continue
-        source_digest.update(rel_path.encode("utf-8"))
-        source_digest.update(b"\0")
-        source_digest.update(hashlib.sha256(source_bytes).digest())
-        source_digest.update(b"\0")
-
-        source_layer = _layer_of(source_module)
-        source_group = _group_of(source_module)
+    for snapshot in snapshots:
+        source_layer = _layer_of(snapshot.module_name)
+        source_group = _group_of(snapshot.module_name)
         if source_layer is None or source_group is None:
             continue
 
         scanned_modules += 1
-        tree = _parsed_module_tree_from_source(source_bytes.decode("utf-8"))
+        tree = _parsed_module_tree_from_source(snapshot.source_bytes.decode("utf-8"))
         if tree is None:
             continue
 
-        for target_module in _extract_import_targets(tree, source_module):
+        for target_module in _extract_import_targets(tree, snapshot.module_name):
             total_internal_imports += _record_import_target(
                 target_module,
                 source_layer=source_layer,
@@ -342,7 +391,7 @@ def collect_dependency_snapshot(src_root: Path) -> DependencySnapshot:
         cross_layer_group_edges=group_edges,
         cross_layer_group_edges_total=group_edges_total,
         violations=violations,
-        source_fingerprint=source_digest.hexdigest(),
+        source_fingerprint=source_digest,
     )
 
 

@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from unittest.mock import MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -25,7 +25,7 @@ def mock_context():
     mock_logger.warning = MagicMock()
     mock_logger.debug = MagicMock()
     return PipelineContext(
-        run_id=uuid4(),
+        run_id=deterministic_uuid_from_callsite("test_chembl_assay_parameters"),
         run_type=RunType.INCREMENTAL,
         logger=mock_logger,
     )
@@ -49,7 +49,7 @@ class TestAssayParametersEntity:
             "type": "CONC",
             "entity_id": "chembl:12345",
             "content_hash": "a" * 64,
-            "run_id": uuid4(),
+            "run_id": deterministic_uuid_from_callsite("test_chembl_assay_parameters"),
             "run_type": RunType.INCREMENTAL,
             "ingestion_ts": MagicMock(),  # Mock datetime
             "_index": 0,

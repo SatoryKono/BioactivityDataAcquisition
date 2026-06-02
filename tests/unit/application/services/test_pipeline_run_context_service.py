@@ -3,7 +3,11 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from uuid import UUID, uuid4
+from uuid import UUID
+from tests.helpers.deterministic_ids import (
+    deterministic_run_uuid_from_callsite,
+    deterministic_uuid_string_from_callsite,
+)
 
 import pytest
 
@@ -65,7 +69,9 @@ class TestBuildContext:
 
         context = service.build_context(
             pipeline_name="chembl_publication",
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite(
+                "test_pipeline_run_context_service"
+            ),
             options=RunOptions(
                 run_type="backfill",
                 input_csv="ids.csv",
@@ -92,7 +98,9 @@ class TestBuildContext:
 
         context = service.build_context(
             pipeline_name="crossref_publication",
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite(
+                "test_pipeline_run_context_service"
+            ),
             options=RunOptions(
                 filter_ids=("10.1000/1", "10.1000/2"),
                 fallback_mapping={"10.1000/1": "PMID:1"},
@@ -116,7 +124,9 @@ class TestBuildContext:
 
         context = service.build_context(
             pipeline_name="pubmed_publication",
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite(
+                "test_pipeline_run_context_service"
+            ),
             options=RunOptions(),
             started_at=FIXED_STARTED_AT,
         )
@@ -132,7 +142,9 @@ class TestBuildContext:
 
         context = service.build_context(
             pipeline_name="chembl_activity",
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite(
+                "test_pipeline_run_context_service"
+            ),
             options=RunOptions(enable_tracing=True),
             started_at=FIXED_STARTED_AT,
         )
@@ -145,7 +157,9 @@ class TestBuildContext:
 
         context = service.build_context(
             pipeline_name="chembl_activity",
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite(
+                "test_pipeline_run_context_service"
+            ),
             options=RunOptions(
                 debug_export_enabled=True,
                 workflow_id="chembl_baseline",
@@ -176,7 +190,9 @@ class TestBuildContext:
 
         context = service.build_context(
             pipeline_name="chembl_activity",
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite(
+                "test_pipeline_run_context_service"
+            ),
             options=RunOptions(
                 use_cached_bronze=True,
                 cached_bronze_path="bronze/cache",
@@ -194,7 +210,9 @@ class TestBuildContext:
 
         context = service.build_context(
             pipeline_name="chembl_activity",
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite(
+                "test_pipeline_run_context_service"
+            ),
             options=RunOptions(
                 use_cached_bronze=True,
                 cached_bronze_path="bronze/cache",
@@ -220,7 +238,9 @@ class TestBuildContext:
         ):
             service.build_context(
                 pipeline_name="chembl_activity",
-                run_id=RunID(uuid4()),
+                run_id=deterministic_run_uuid_from_callsite(
+                    "test_pipeline_run_context_service"
+                ),
                 options=RunOptions(exact_replay=True),
                 started_at=FIXED_STARTED_AT,
             )
@@ -232,9 +252,13 @@ class TestBuildContext:
 
         context = service.build_context(
             pipeline_name="chembl_activity",
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite(
+                "test_pipeline_run_context_service"
+            ),
             options=RunOptions(
-                replay_of_run_id=str(uuid4()),
+                replay_of_run_id=deterministic_uuid_string_from_callsite(
+                    "test_pipeline_run_context_service"
+                ),
                 replay_of_manifest_id="manifest-parent",
                 exact_replay=True,
             ),

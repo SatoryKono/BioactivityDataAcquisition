@@ -239,11 +239,21 @@ jobs:
             -   name: Test governance closeout preflight (VCR/LFS fail-fast)
                 run: uv run python scripts/engineering/qa/check_test_audit_preflight.py --strict
 
+            -   name: Validate committed test-governance snapshots
+                run: |
+                    uv run python -m scripts.engineering.qa.report_test_governance_audit \
+                      --check \
+                      --json-out reports/quality/test-governance-current.json \
+                      --duplicate-name-inventory-out reports/quality/test-duplicate-name-inventory.json
+
             -   name: Validate deterministic Neo4j memory ontology invariants
                 run: uv run python -m scripts.engineering.ci neo4j-memory
 
             -   name: Validate hotspot-family baseline artifacts
-                run: uv run python -m scripts.engineering.qa report-family-baseline --active-only --check
+                run: uv run python -m scripts.engineering.qa report-family-baseline --check
+
+            -   name: Validate config discrepancy baseline artifacts
+                run: uv run python -m scripts.schema generate-config-matrix --check
 
             -   name: Validate xwalk missing backlog
                 run: uv run python -m scripts.engineering.qa check-xwalk-missing-backlog

@@ -9,11 +9,14 @@ import sys
 from collections.abc import Iterator
 from datetime import UTC, datetime
 from typing import Any
-from uuid import uuid4
 
 import pytest
 
 from tests.benchmarks.conftest import calculate_payload_size_mb
+from tests.helpers.deterministic_ids import (
+    deterministic_batch_uuid_from_callsite,
+    deterministic_run_uuid_from_callsite,
+)
 
 
 def _records_to_bytes_iterator(records: list[dict[str, Any]]) -> Iterator[bytes]:
@@ -56,7 +59,7 @@ class FakeLogger:
 @pytest.mark.benchmark(group="bronze")
 def test_bronze_write_small(benchmark, small_payload, bronze_output_dir):
     """Benchmark Bronze write with small payload (100 records)."""
-    from bioetl.domain.types import BatchID, RunID, RunType
+    from bioetl.domain.types import RunType
     from bioetl.infrastructure.storage.bronze_write_result_helpers import (
         is_bronze_write_result_persisted,
     )
@@ -66,8 +69,8 @@ def test_bronze_write_small(benchmark, small_payload, bronze_output_dir):
     metrics = FakeMetrics()
     writer = BronzeWriter(base_path=bronze_output_dir, logger=logger, metrics=metrics)
 
-    run_id = RunID(uuid4())
-    batch_id = BatchID(uuid4())
+    run_id = deterministic_run_uuid_from_callsite("test_bronze_write")
+    batch_id = deterministic_batch_uuid_from_callsite("test_bronze_write")
     now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
     async def write_batch():
@@ -101,7 +104,7 @@ def test_bronze_write_small(benchmark, small_payload, bronze_output_dir):
 @pytest.mark.benchmark(group="bronze")
 def test_bronze_write_medium(benchmark, medium_payload, bronze_output_dir):
     """Benchmark Bronze write with medium payload (1000 records)."""
-    from bioetl.domain.types import BatchID, RunID, RunType
+    from bioetl.domain.types import RunType
     from bioetl.infrastructure.storage.bronze_write_result_helpers import (
         is_bronze_write_result_persisted,
     )
@@ -111,8 +114,8 @@ def test_bronze_write_medium(benchmark, medium_payload, bronze_output_dir):
     metrics = FakeMetrics()
     writer = BronzeWriter(base_path=bronze_output_dir, logger=logger, metrics=metrics)
 
-    run_id = RunID(uuid4())
-    batch_id = BatchID(uuid4())
+    run_id = deterministic_run_uuid_from_callsite("test_bronze_write")
+    batch_id = deterministic_batch_uuid_from_callsite("test_bronze_write")
     now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
     async def write_batch():
@@ -144,7 +147,7 @@ def test_bronze_write_medium(benchmark, medium_payload, bronze_output_dir):
 @pytest.mark.benchmark(group="bronze")
 def test_bronze_write_large(benchmark, large_payload, bronze_output_dir):
     """Benchmark Bronze write with large payload (5000 records)."""
-    from bioetl.domain.types import BatchID, RunID, RunType
+    from bioetl.domain.types import RunType
     from bioetl.infrastructure.storage.bronze_write_result_helpers import (
         is_bronze_write_result_persisted,
     )
@@ -154,8 +157,8 @@ def test_bronze_write_large(benchmark, large_payload, bronze_output_dir):
     metrics = FakeMetrics()
     writer = BronzeWriter(base_path=bronze_output_dir, logger=logger, metrics=metrics)
 
-    run_id = RunID(uuid4())
-    batch_id = BatchID(uuid4())
+    run_id = deterministic_run_uuid_from_callsite("test_bronze_write")
+    batch_id = deterministic_batch_uuid_from_callsite("test_bronze_write")
     now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
     async def write_batch():

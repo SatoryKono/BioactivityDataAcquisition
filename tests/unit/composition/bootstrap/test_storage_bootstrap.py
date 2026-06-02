@@ -9,11 +9,13 @@ import tempfile
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
+from uuid import UUID
 
 import pytest
 
 from bioetl.application.services.lineage import MetadataCoordinator
 from bioetl.composition.bootstrap.cli.storage import (
+    _create_cli_preview_run_context,
     _create_table_collector,
     bootstrap_cli_storage_adapter,
     bootstrap_bronze_cleanup_service,
@@ -51,6 +53,14 @@ def _make_storage_settings(tmp_path: Path) -> SimpleNamespace:
 @pytest.mark.unit
 class TestBootstrapStorageBundle:
     """Test bootstrap_storage_adapter function."""
+
+    def test_preview_run_context_is_timestamp_seeded_but_uuid_shaped(self) -> None:
+        """Preview storage context should use a stable deterministic UUID seed."""
+        first = _create_cli_preview_run_context()
+        second = _create_cli_preview_run_context()
+
+        assert UUID(str(first.run_id))
+        assert first.run_id != second.run_id
 
     @patch("bioetl.composition.bootstrap.assembly.storage.get_settings")
     def test_returns_storage_adapter(self, mock_settings: MagicMock) -> None:

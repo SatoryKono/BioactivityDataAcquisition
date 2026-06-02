@@ -7,7 +7,8 @@ verifying correct DI wiring and UUID generation.
 from __future__ import annotations
 
 from unittest.mock import MagicMock
-from uuid import UUID, uuid4
+from uuid import UUID
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -65,7 +66,7 @@ class TestBootstrapLoggerPort:
 
     def test_uses_provided_run_id(self) -> None:
         """Should use the provided run_id, not generate a new one."""
-        provided_run_id = uuid4()
+        provided_run_id = deterministic_uuid_from_callsite("test_logger_bootstrap")
         captured_run_ids: list[UUID] = []
 
         def capture_factory(pipeline: str, run_id: UUID, log_level: str) -> LoggerPort:

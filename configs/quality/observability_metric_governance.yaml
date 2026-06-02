@@ -76,3 +76,18 @@ unused_signal_policy:
   rationale: >
     Registered metrics without runtime emission are treated as unused declared
     signals until an explicit allowlist or reactivation path says otherwise.
+event_signal_governance:
+  canonical_contract_module: src/bioetl/domain/runtime_observability_publication_contract.py
+  domain_mapping_module: src/bioetl/domain/observability_event_mapping.py
+  declared_events_field: declared_observability_events
+  emitted_events_field: emitted_observability_events
+  unused_declared_events_field: unused_declared_observability_events
+  emitted_without_contract_field: emitted_observability_events_without_contract
+  event_emitters_field: observability_event_emitters
+  domain_event_emitters_field: domain_event_emitters
+  canonical_emitters_field: canonical_runtime_observability_emitters
+  rationale: >
+    Runtime observability governance extends beyond Prometheus metric families:
+    lifecycle/domain-event publication must keep one canonical emitter contract,
+    a declared event vocabulary, and an explicit inventory of unused or
+    non-contracted event signals.

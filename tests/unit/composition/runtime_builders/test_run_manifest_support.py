@@ -8,7 +8,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import cast
 from unittest.mock import MagicMock, call
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 
@@ -39,7 +39,6 @@ from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
 from bioetl.composition.services.versioning import CodeRevisionProvenance
 from bioetl.domain.control_plane import ReplayCapability, RunInputSnapshotRef
 from bioetl.domain.context import PipelineRunContext
-from bioetl.domain.types import RunID
 from bioetl.infrastructure.config._base import Settings
 
 
@@ -74,7 +73,7 @@ def _make_manifest_request(
     replay_capability: ReplayCapability = ReplayCapability.REBUILD_ONLY,
 ) -> RunManifestCreateSpec:
     return RunManifestCreateSpec(
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite("test_run_manifest_support"),
         run_type="incremental",
         pipeline_name="chembl_activity",
         provider="chembl",
@@ -127,7 +126,7 @@ def test_build_manifest_create_request_uses_supplied_reproducibility_context(
     def _fake_assemble_manifest_create_spec(**kwargs: object):
         captured["assemble_request_inputs"] = kwargs["request_inputs"]
         return RunManifestCreateSpec(
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite("test_run_manifest_support"),
             run_type="incremental",
             pipeline_name="chembl_activity",
             provider="chembl",
@@ -246,10 +245,11 @@ def test_build_planned_artifacts_includes_debug_export_root_when_enabled() -> No
     debug_export = next(
         artifact for artifact in artifacts if artifact.layer == "debug_export"
     )
-    assert debug_export.path.endswith(
+    expected_suffix = Path(
         "artifacts/debug_exports/chembl_baseline/chembl_activity/"
         "00000000-0000-0000-0000-000000000123"
     )
+    assert Path(debug_export.path).as_posix().endswith(expected_suffix.as_posix())
 
 
 @pytest.mark.unit

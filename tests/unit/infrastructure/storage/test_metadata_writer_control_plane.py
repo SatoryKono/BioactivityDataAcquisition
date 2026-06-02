@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import MagicMock, patch
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_string_from_callsite
 
 import pytest
 
@@ -55,7 +55,9 @@ def _make_bronze_metadata() -> BronzeMetadata:
         version="1.1",
         layer=Layer.BRONZE,
         runtime=RuntimeMetadata(
-            run_id=str(uuid4()),
+            run_id=deterministic_uuid_string_from_callsite(
+                "test_metadata_writer_control_plane"
+            ),
             manifest_id="manifest-1",
             run_type=RunTypeEnum.INCREMENTAL,
             started_at_utc=datetime(2026, 3, 24, 10, 0, tzinfo=UTC),
@@ -103,7 +105,9 @@ def _make_silver_metadata() -> SilverMetadata:
         version="1.1",
         layer=Layer.SILVER,
         runtime=RuntimeMetadata(
-            run_id=str(uuid4()),
+            run_id=deterministic_uuid_string_from_callsite(
+                "test_metadata_writer_control_plane"
+            ),
             manifest_id="manifest-1",
             run_type=RunTypeEnum.INCREMENTAL,
             started_at_utc=datetime(2026, 3, 24, 10, 0, tzinfo=UTC),
@@ -142,7 +146,9 @@ def _make_gold_metadata() -> GoldMetadata:
         version="1.1",
         layer=Layer.GOLD,
         runtime=RuntimeMetadata(
-            run_id=str(uuid4()),
+            run_id=deterministic_uuid_string_from_callsite(
+                "test_metadata_writer_control_plane"
+            ),
             manifest_id="manifest-1",
             run_type=RunTypeEnum.INCREMENTAL,
             started_at_utc=datetime(2026, 3, 24, 10, 0, tzinfo=UTC),

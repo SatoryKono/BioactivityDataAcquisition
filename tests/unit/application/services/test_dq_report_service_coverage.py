@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
 from datetime import datetime, UTC
+from tests.helpers.deterministic_ids import deterministic_uuid_string_from_callsite
 
 import pytest
 
@@ -66,7 +66,9 @@ def service(
 @pytest.fixture
 def context():
     return DQReportContext(
-        run_id=str(uuid4()),
+        run_id=deterministic_uuid_string_from_callsite(
+            "test_dq_report_service_coverage"
+        ),
         pipeline_name="test_pipeline",
         timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         provider="test",

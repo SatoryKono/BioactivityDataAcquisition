@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.composition._lazy_exports import install_lazy_exports
+from bioetl.composition._lazy_exports import install_cached_public_exports
 
 if TYPE_CHECKING:
     from bioetl.composition._json_types import JsonDict
@@ -70,10 +70,8 @@ if TYPE_CHECKING:
     async def vacuum_table(table: str, options: VacuumOptions) -> int: ...
 
 
-install_lazy_exports(
+install_cached_public_exports(
     module_globals=globals(),
     public_exports=_PUBLIC_EXPORTS,
     module_name=__name__,
-    explicit_exports=__all__,
-    cache=True,
 )

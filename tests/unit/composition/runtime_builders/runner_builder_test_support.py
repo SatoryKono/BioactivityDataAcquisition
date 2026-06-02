@@ -6,13 +6,14 @@ from contextlib import nullcontext
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 
 from bioetl.composition.runtime_builders import _run_manifest_builder_policy
 from bioetl.composition.runtime_builders import runner_builder
 from bioetl.composition.runtime_builders.runner_builder_wiring import (
     LegacyRunnerBuilderOverrides,
+    resolve_runner_builder_wiring,
 )
 from bioetl.composition.services import versioning
 from bioetl.domain.ports import PipelineCreateRunnerRequest
@@ -127,7 +128,7 @@ def _clean_provenance_context_if_unpatched():
 def _build_context(**overrides: object) -> SimpleNamespace:
     values: dict[str, object] = {
         "pipeline_name": "chembl_activity",
-        "run_id": uuid4(),
+        "run_id": deterministic_uuid_from_callsite("runner_builder_test_support"),
         "log_level": "INFO",
         "vacuum": None,
         "run_type": "incremental",
@@ -287,7 +288,9 @@ def _call_build_pipeline_runner(
             )
         ),
     )
-    kwargs: dict[str, object] = {"legacy_overrides": legacy_overrides}
+    kwargs: dict[str, object] = {
+        "wiring": resolve_runner_builder_wiring(legacy_overrides=legacy_overrides)
+    }
     if registry is not None:
         kwargs["registry"] = registry
     with _clean_provenance_context_if_unpatched():

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import io
 import tempfile
 from copy import deepcopy
 from functools import lru_cache

@@ -35,7 +35,7 @@ runtime shape.
 Governance status for the two transition-heavy surfaces:
 
 - `bioetl.composition.registry` is currently a `mixed-module` (canonical instance API +
-  transitional shared default-registry compatibility).
+  narrow compatibility helper kept only for tests and public-facade coverage).
 - pipeline config loading is now canonical through `bioetl.infrastructure.config` and
   `bioetl.infrastructure.config.pipeline_config_api`; the historical
   `bioetl.infrastructure.config_loader` shim has been removed.
@@ -73,8 +73,8 @@ if registry.contains("chembl_activity"):
     factory = definition.factory
 ```
 
-Use `get_default_registry()` only when you intentionally need the shared
-composition-layer compatibility instance.
+Avoid `get_default_registry()` in production runtime/bootstrap code. It remains
+only as a compatibility helper for tests and narrow public-facade coverage.
 
 ```python
 from bioetl.composition.registry import get_default_registry
@@ -82,10 +82,10 @@ from bioetl.composition.registry import get_default_registry
 registry = get_default_registry()
 ```
 
-Canonical runtime/bootstrap assembly paths do not rely on that shared
-compatibility instance anymore. `bootstrap_pipeline_runner()`,
-`build_pipeline_runner()`, and `RunnerFactory` now create or receive an explicit
-runtime `PipelineRegistry` instance and pass it through the execution path.
+Canonical runtime/bootstrap assembly paths do not rely on that compatibility
+helper anymore. `bootstrap_pipeline_runner()`, `build_pipeline_runner()`, and
+`RunnerFactory` now create or receive an explicit runtime `PipelineRegistry`
+instance and pass it through the execution path.
 
 ### Legacy Aliases
 

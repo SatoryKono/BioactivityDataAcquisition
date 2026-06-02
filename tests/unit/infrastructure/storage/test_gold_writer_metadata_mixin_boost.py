@@ -10,7 +10,7 @@ from datetime import UTC, datetime
 from types import SimpleNamespace
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 
@@ -26,7 +26,7 @@ from tests.unit.infrastructure.storage._lineage_fragment_helpers import (
 
 
 def _make_run_id() -> RunID:
-    return RunID(uuid4())
+    return deterministic_run_uuid_from_callsite("test_gold_writer_metadata_mixin_boost")
 
 
 def _make_record(

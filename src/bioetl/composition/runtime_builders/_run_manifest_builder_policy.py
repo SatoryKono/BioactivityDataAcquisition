@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     from bioetl.application.services.control_plane.manifest.service import (
         RunManifestCreateSpec,
     )
-    from bioetl.composition.runtime_builders.inputs_resolver import RunnerInputs
+    from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
     from bioetl.domain.context import PipelineRunContext
 
 

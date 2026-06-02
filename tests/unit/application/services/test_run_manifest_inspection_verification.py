@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import pytest
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 from dataclasses import replace
 from pathlib import Path
-from uuid import uuid4
 
 from bioetl.application.services.control_plane.manifest.inspection_verification import (
     build_effective_config_store_verification,
@@ -134,8 +134,12 @@ def test_resolve_replay_verdict_prioritizes_semantic_drift() -> None:
 def test_build_effective_config_store_verification_tracks_occurrence_only_diff() -> (
     None
 ):
-    left_run_id = RunID(uuid4())
-    right_run_id = RunID(uuid4())
+    left_run_id = deterministic_run_uuid_from_callsite(
+        "test_run_manifest_inspection_verification"
+    )
+    right_run_id = deterministic_run_uuid_from_callsite(
+        "test_run_manifest_inspection_verification"
+    )
     left_manifest = _make_manifest(run_id=left_run_id, artifact_id="artifact-1")
     right_manifest = replace(left_manifest, run_id=right_run_id)
 
@@ -178,7 +182,9 @@ def test_build_effective_config_store_verification_tracks_occurrence_only_diff()
 
 
 def test_build_effective_config_store_verification_reports_missing_store() -> None:
-    run_id = RunID(uuid4())
+    run_id = deterministic_run_uuid_from_callsite(
+        "test_run_manifest_inspection_verification"
+    )
     manifest = _make_manifest(run_id=run_id, artifact_id="artifact-1")
 
     result = build_effective_config_store_verification(

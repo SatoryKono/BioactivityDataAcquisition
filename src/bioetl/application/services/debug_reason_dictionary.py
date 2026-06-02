@@ -1,5 +1,7 @@
 """Debug reason dictionary for audit pack exports."""
 
+from __future__ import annotations
+
 DEBUG_REASON_DICTIONARY: tuple[dict[str, str], ...] = (
     {
         "reason_code": "SCHEMA_REQUIRED_FIELD_MISSING",

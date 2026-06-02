@@ -5,14 +5,16 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
-from uuid import uuid4
+from tests.helpers.deterministic_ids import (
+    deterministic_run_uuid_from_callsite,
+    deterministic_uuid_from_callsite,
+)
 
 import pytest
 
 import bioetl.infrastructure.control_plane.file_run_ledger_store as run_ledger_store_module
 from bioetl.composition.runtime_builders import inputs_resolver
 from bioetl.application.services.control_plane import RunLedgerService
-from bioetl.domain.types import RunID
 from bioetl.infrastructure.control_plane import FileRunLedgerStore, FileRunManifestStore
 from tests.unit.application.services.run_manifest_test_support import (
     make_run_manifest,
@@ -25,7 +27,7 @@ pytestmark = pytest.mark.unit
 def _make_context(**overrides: object) -> SimpleNamespace:
     base = {
         "pipeline_name": "chembl_activity",
-        "run_id": uuid4(),
+        "run_id": deterministic_uuid_from_callsite("test_inputs_resolver"),
         "log_level": "INFO",
         "vacuum": SimpleNamespace(enabled=None, retention_days=7),
         "run_type": "incremental",
@@ -167,7 +169,7 @@ def test_prepare_runner_inputs_auto_resolves_cached_bronze_for_exact_replay_pare
     yaml_config = _make_yaml_config()
     parent_manifest = make_run_manifest(
         manifest_id="manifest-parent",
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite("test_inputs_resolver"),
         created_at=datetime(2026, 5, 8, 18, 0, tzinfo=UTC),
     )
     manifest_store = FileRunManifestStore(

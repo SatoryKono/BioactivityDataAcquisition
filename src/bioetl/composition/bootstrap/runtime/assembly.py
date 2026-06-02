@@ -7,7 +7,9 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
 from bioetl.composition.builders import FilterConfigBuilder
-from bioetl.composition.runtime_builders.inputs_resolver import ResolvedVacuumSettings
+from bioetl.composition.runtime_builders.inputs_runtime_models import (
+    ResolvedVacuumSettings,
+)
 from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.types import RunType
@@ -18,6 +20,7 @@ from bioetl.infrastructure.config.silver_filter_migration import (
 if TYPE_CHECKING:
     from bioetl.composition.registry_api import PipelineRegistry
     from bioetl.composition.runtime_builders.runner_builder_wiring import (
+        RunnerBuilderWiring,
         RunnerFactoryWiring,
         RunnerInputWiring,
     )
@@ -50,6 +53,18 @@ class RuntimeBootstrapPhases:
     configs_root: Path
     factory_wiring: RunnerFactoryWiring
     input_wiring: RunnerInputWiring
+
+    @property
+    def wiring(self) -> RunnerBuilderWiring:
+        """Return the canonical aggregate runner wiring bundle."""
+        from bioetl.composition.runtime_builders.runner_builder_wiring import (
+            RunnerBuilderWiring,
+        )
+
+        return RunnerBuilderWiring(
+            factory=self.factory_wiring,
+            inputs=self.input_wiring,
+        )
 
 
 def assemble_runtime_bootstrap_phases(
@@ -99,6 +114,7 @@ def assemble_runtime_config(
     debug_export_enabled: bool = False,
     debug_export_formats: tuple[str, ...] = (),
     debug_export_dir: str | None = None,
+    workflow_id: str = "standalone",
     health_check_mode: Literal["strict", "probe"] = "strict",
 ) -> RuntimeConfig:
     """Build ``RuntimeConfig`` from already-resolved runtime inputs."""
@@ -115,6 +131,7 @@ def assemble_runtime_config(
         debug_export_enabled=debug_export_enabled,
         debug_export_formats=debug_export_formats,
         debug_export_dir=debug_export_dir,
+        workflow_id=workflow_id,
         health_check_mode=health_check_mode,
         silver_filter_compatibility_mode=resolve_silver_filter_compatibility_mode(),
     )

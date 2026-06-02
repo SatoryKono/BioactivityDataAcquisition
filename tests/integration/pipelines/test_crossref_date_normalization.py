@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import re
 from typing import Any
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -55,7 +55,7 @@ def transformer() -> CrossRefPublicationTransformer:
 def pipeline_context() -> PipelineContext:
     """Create a minimal pipeline context for transformation."""
     return PipelineContext(
-        run_id=uuid4(),
+        run_id=deterministic_uuid_from_callsite("test_crossref_date_normalization"),
         run_type=RunType.INCREMENTAL,
         logger=build_test_logger(),
     )
@@ -316,7 +316,7 @@ class TestCrossRefVCRIntegration:
     def pipeline_context(self) -> PipelineContext:
         """Create pipeline context."""
         return PipelineContext(
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("test_crossref_date_normalization"),
             run_type=RunType.INCREMENTAL,
             logger=build_test_logger(),
         )

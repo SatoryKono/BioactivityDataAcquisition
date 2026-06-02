@@ -13,6 +13,9 @@ from bioetl.composition.bootstrap.runtime.pipeline import (
     bootstrap_pipeline_runner,
     build_runtime_bootstrap_phases,
 )
+from bioetl.composition.runtime_builders.runner_builder_wiring import (
+    RunnerBuilderWiring,
+)
 
 pytestmark = pytest.mark.repo_backed
 
@@ -80,8 +83,7 @@ class TestBootstrapPipelineRunner:
         mock_build_runner.assert_called_once_with(
             ctx=ctx,
             registry=effective_registry,
-            factory_wiring=factory_wiring,
-            input_wiring=input_wiring,
+            wiring=RunnerBuilderWiring(factory=factory_wiring, inputs=input_wiring),
         )
 
     def test_delegates_missing_registry_to_runtime_registry_phase(self) -> None:
@@ -205,6 +207,10 @@ def test_build_runtime_bootstrap_phases_returns_typed_payload() -> None:
     assert phases.configs_root == configs_root
     assert phases.factory_wiring is factory_wiring
     assert phases.input_wiring is input_wiring
+    assert phases.wiring == RunnerBuilderWiring(
+        factory=factory_wiring,
+        inputs=input_wiring,
+    )
     mock_compatibility.assert_called_once_with()
     mock_prepare_registry.assert_called_once_with(
         registry=registry,

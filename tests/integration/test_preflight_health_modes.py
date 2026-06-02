@@ -6,7 +6,7 @@ import asyncio
 from types import SimpleNamespace
 from typing import Literal
 from unittest.mock import MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -66,7 +66,7 @@ def _build_preflight_service(
         ),
     )
     context = PipelineContext(
-        run_id=uuid4(),
+        run_id=deterministic_uuid_from_callsite("test_preflight_health_modes"),
         run_type=RunType.INCREMENTAL,
         logger=logger,
     )

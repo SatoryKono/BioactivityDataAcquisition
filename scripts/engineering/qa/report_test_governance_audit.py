@@ -6,6 +6,7 @@ import argparse
 import ast
 import json
 import re
+import sys
 from collections import Counter, defaultdict
 from functools import cache
 from pathlib import Path
@@ -13,10 +14,15 @@ from typing import Any, cast
 
 import yaml
 
-from scripts.engineering.qa.file_discovery import discover_files
-
 ROOT = Path(__file__).resolve().parents[3]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.engineering.qa.file_discovery import discover_files  # noqa: E402
+
 DEFAULT_CONFIG = Path("configs/quality/test_governance_audit.yaml")
+DEFAULT_JSON_ARTIFACT = Path("reports/quality/test-governance-current.json")
+DEFAULT_DUPLICATE_NAME_ARTIFACT = Path("reports/quality/test-duplicate-name-inventory.json")
 TEST_FUNCTION_PREFIX = "test_"
 COMPATIBILITY_FILE_RE = re.compile(
     r"(compat|compatibility|legacy|deprecated|shim|sunset)",
@@ -450,6 +456,22 @@ def evaluate_budgets(
     return violations
 
 
+def _canonical_json(payload: dict[str, Any]) -> str:
+    return json.dumps(payload, indent=2, sort_keys=True) + "\n"
+
+
+def _check_json_artifact(path: Path, payload: dict[str, Any]) -> bool:
+    expected = _canonical_json(payload)
+    if not path.exists():
+        print(f"[drift] missing: {path}")
+        return False
+    actual = path.read_text(encoding="utf-8")
+    if actual == expected:
+        return True
+    print(f"[drift] mismatch: {path}")
+    return False
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Report static BioETL test-governance debt budgets.",
@@ -470,6 +492,16 @@ def main(argv: list[str] | None = None) -> int:
 
     report = collect_test_governance_report(args.root)
     payload: dict[str, Any] = {"report": report}
+    json_out = args.json_out
+    duplicate_name_inventory_out = args.duplicate_name_inventory_out
+    if args.check and json_out is None:
+        candidate = args.root / DEFAULT_JSON_ARTIFACT
+        if candidate.exists():
+            json_out = candidate
+    if args.check and duplicate_name_inventory_out is None:
+        candidate = args.root / DEFAULT_DUPLICATE_NAME_ARTIFACT
+        if candidate.exists():
+            duplicate_name_inventory_out = candidate
     exit_code = 0
 
     if args.config.exists():
@@ -479,20 +511,28 @@ def main(argv: list[str] | None = None) -> int:
         if args.check and violations:
             exit_code = 1
 
-    output = json.dumps(payload, indent=2, sort_keys=True)
-    if args.json_out:
-        args.json_out.parent.mkdir(parents=True, exist_ok=True)
-        args.json_out.write_text(output + "\n", encoding="utf-8")
+    duplicate_inventory_payload = {
+        "summary": report["duplicate_test_name_inventory_summary"],
+        "inventory": report["duplicate_test_name_inventory"],
+    }
+    output = _canonical_json(payload)
+    if args.check:
+        if json_out is not None and not _check_json_artifact(json_out, payload):
+            exit_code = 1
+        if duplicate_name_inventory_out is not None and not _check_json_artifact(
+            duplicate_name_inventory_out,
+            duplicate_inventory_payload,
+        ):
+            exit_code = 1
+    elif json_out:
+        json_out.parent.mkdir(parents=True, exist_ok=True)
+        json_out.write_text(output, encoding="utf-8")
     else:
         print(output)
-    if args.duplicate_name_inventory_out:
-        duplicate_inventory_payload = {
-            "summary": report["duplicate_test_name_inventory_summary"],
-            "inventory": report["duplicate_test_name_inventory"],
-        }
-        args.duplicate_name_inventory_out.parent.mkdir(parents=True, exist_ok=True)
-        args.duplicate_name_inventory_out.write_text(
-            json.dumps(duplicate_inventory_payload, indent=2, sort_keys=True) + "\n",
+    if duplicate_name_inventory_out and not args.check:
+        duplicate_name_inventory_out.parent.mkdir(parents=True, exist_ok=True)
+        duplicate_name_inventory_out.write_text(
+            _canonical_json(duplicate_inventory_payload),
             encoding="utf-8",
         )
     return exit_code

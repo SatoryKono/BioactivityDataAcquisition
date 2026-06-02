@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import sys
 from datetime import date
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pandas as pd
 import pytest
@@ -31,7 +31,7 @@ def base_etl_fields() -> dict:
     return {
         "entity_id": "test:entity:1",
         "content_hash": "a" * 64,
-        "_run_id": uuid4(),
+        "_run_id": deterministic_uuid_from_callsite("test_year_validation"),
         "_run_type": "incremental",
         "_source_batch_id": None,
         "_ingestion_ts": FIXED_TEST_TIME.isoformat(),

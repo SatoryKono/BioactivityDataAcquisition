@@ -11,7 +11,10 @@ from __future__ import annotations
 from importlib import import_module
 from typing import TYPE_CHECKING
 
+from bioetl.composition.lazy_exports import build_lazy_export_hooks
+
 if TYPE_CHECKING:
+    from bioetl.domain.ports import AdrServicePort
     from bioetl.composition.bootstrap.runtime.composite import (
         bootstrap_composite_runner,
         load_composite_config,
@@ -25,6 +28,7 @@ if TYPE_CHECKING:
         maybe_start_metrics_server,
     )
     from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
+    from bioetl.infrastructure.control_plane import FileControlPlaneArtifactLifecycleStore
     from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 
 _PUBLIC_EXPORTS = {
@@ -89,14 +93,17 @@ def __getattr__(name: str) -> object:
         module = import_module("bioetl.composition.bootstrap.runtime")
         globals()[name] = module
         return module
-    export = _PUBLIC_EXPORTS.get(name)
-    if export is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    module_name, attr_name = export
-    value = getattr(import_module(module_name), attr_name)
-    globals()[name] = value
-    return value
+    return _BOOTSTRAP_EXPORT_GETATTR(name)
 
 
 def __dir__() -> list[str]:
-    return sorted(set(globals()) | set(__all__))
+    return _BOOTSTRAP_EXPORT_DIR()
+
+
+_BOOTSTRAP_EXPORT_GETATTR, _BOOTSTRAP_EXPORT_DIR = build_lazy_export_hooks(
+    module_globals=globals(),
+    public_exports=_PUBLIC_EXPORTS,
+    module_name=__name__,
+    explicit_exports=__all__,
+    cache=True,
+)

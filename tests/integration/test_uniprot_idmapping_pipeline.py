@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
-from uuid import UUID, uuid4
+from uuid import UUID
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -126,7 +127,7 @@ class TestUniProtIDMappingPipelineTransform:
             config=idmapping_config,
             runtime=idmapping_runtime,
             services=mock_idmapping_services,
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("test_uniprot_idmapping_pipeline"),
             shutdown_signal=ShutdownSignal(),
             transformer=instantiate_test_transformer(
                 IDMappingTransformer,
@@ -136,7 +137,7 @@ class TestUniProtIDMappingPipelineTransform:
         )
 
         context = PipelineContext(
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("test_uniprot_idmapping_pipeline"),
             run_type=RunType.INCREMENTAL,
             logger=mock_idmapping_services.logger,
         )
@@ -172,7 +173,7 @@ class TestUniProtIDMappingPipelineTransform:
             config=idmapping_config,
             runtime=idmapping_runtime,
             services=mock_idmapping_services,
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("test_uniprot_idmapping_pipeline"),
             shutdown_signal=ShutdownSignal(),
             transformer=instantiate_test_transformer(
                 IDMappingTransformer,
@@ -182,7 +183,7 @@ class TestUniProtIDMappingPipelineTransform:
         )
 
         context = PipelineContext(
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("test_uniprot_idmapping_pipeline"),
             run_type=RunType.INCREMENTAL,
             logger=mock_idmapping_services.logger,
         )
@@ -214,7 +215,7 @@ class TestUniProtIDMappingPipelineTransform:
             config=idmapping_config,
             runtime=idmapping_runtime,
             services=mock_idmapping_services,
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("test_uniprot_idmapping_pipeline"),
             shutdown_signal=ShutdownSignal(),
             transformer=instantiate_test_transformer(
                 IDMappingTransformer,
@@ -224,7 +225,7 @@ class TestUniProtIDMappingPipelineTransform:
         )
 
         context = PipelineContext(
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("test_uniprot_idmapping_pipeline"),
             run_type=RunType.INCREMENTAL,
             logger=mock_idmapping_services.logger,
         )

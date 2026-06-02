@@ -15,18 +15,12 @@ from bioetl.composition.runtime_builders._run_manifest_data_roots import (
 )
 from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
     CONTRACT_IDENTITY_FIELD_NAMES,
+    build_contract_identity_field_values,
 )
 from bioetl.domain.normalization import normalize_runtime_anchor_payload
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
-
-
-def legacy_config_hash_from_resolved_config_hash(
-    resolved_config_hash: str | None,
-) -> str | None:
-    """Return the legacy manifest config-hash alias for older consumers."""
-    return resolved_config_hash
 
 
 @dataclass(frozen=True, slots=True)
@@ -111,14 +105,16 @@ def iter_optional_control_plane_updates(
             "replay_of_run_id": replay_of_run_id,
             "replay_of_manifest_id": replay_of_manifest_id,
             "input_snapshot_fingerprint": input_snapshot_fingerprint,
-            "contract_ref": contract_ref,
-            "contract_version": contract_version,
-            "contract_schema_hash": contract_schema_hash,
-            "dq_policy_ref": dq_policy_ref,
-            "rule_bundle_version": rule_bundle_version,
-            "normalization_profile_ref": normalization_profile_ref,
-            "normalization_profile_version": normalization_profile_version,
-            "normalization_profile_hash": normalization_profile_hash,
+            **build_contract_identity_field_values(
+                contract_ref=contract_ref,
+                contract_version=contract_version,
+                contract_schema_hash=contract_schema_hash,
+                dq_policy_ref=dq_policy_ref,
+                rule_bundle_version=rule_bundle_version,
+                normalization_profile_ref=normalization_profile_ref,
+                normalization_profile_version=normalization_profile_version,
+                normalization_profile_hash=normalization_profile_hash,
+            ),
         }
     )
     return tuple(
@@ -247,7 +243,7 @@ def create_control_plane_refs(
     return ManifestControlPlaneRefs(
         manifest_id=manifest_id,
         execution_fingerprint=execution_fingerprint,
-        config_hash=legacy_config_hash_from_resolved_config_hash(resolved_config_hash),
+        config_hash=resolved_config_hash,
         resolved_config_hash=resolved_config_hash,
         effective_config_hash=effective_config_hash,
         source_fingerprint=source_fingerprint,

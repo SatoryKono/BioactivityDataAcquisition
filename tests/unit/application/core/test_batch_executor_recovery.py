@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import pytest
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
@@ -107,7 +107,7 @@ class TestBatchExecutorRecoveryInvariants:
         mock_logger = MagicMock()
         mock_logger.bind = MagicMock(return_value=mock_logger)
         context = PipelineContext(
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("test_batch_executor_recovery"),
             run_type=RunType.INCREMENTAL,
             logger=mock_logger,
         )
@@ -160,7 +160,7 @@ class TestBatchExecutorRecoveryInvariants:
         executor_run2 = _create_batch_executor(
             services=services,
             context=PipelineContext(
-                run_id=uuid4(),
+                run_id=deterministic_uuid_from_callsite("test_batch_executor_recovery"),
                 run_type=RunType.INCREMENTAL,
                 logger=mock_logger,
             ),

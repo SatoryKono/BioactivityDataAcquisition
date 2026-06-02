@@ -16,7 +16,7 @@ from bioetl.composition.runtime_builders.inputs_runtime_assembly import (
     assemble_vacuum_settings,
 )
 from bioetl.composition.runtime_builders.inputs_resolver import prepare_runner_inputs
-from bioetl.composition.runtime_builders.inputs_resolver import (
+from bioetl.composition.runtime_builders.runner_inputs import (
     RunnerInputs as _RunnerInputs,
 )
 from bioetl.domain.config import RuntimeConfig

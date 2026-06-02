@@ -23,7 +23,7 @@ from bioetl.composition.runtime_builders.ledger_collaborator import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.composition.runtime_builders.inputs_resolver import (
+    from bioetl.composition.runtime_builders.runner_inputs import (
         RunnerInputs as _RunnerInputs,
     )
     from bioetl.domain.context import PipelineRunContext

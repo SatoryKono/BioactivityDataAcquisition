@@ -7,16 +7,14 @@ from uuid import UUID
 
 import click
 
-from bioetl.domain.workflow import WorkflowConfig, WorkflowStepConfig
+from bioetl.domain.workflow import WorkflowConfig
+from bioetl.interfaces.cli.commands import _workflow_command_runtime
 from bioetl.interfaces.cli.commands._workflow_run_support import (
-    _execute_workflow_and_publish_metrics,
-    _handle_workflow_result,
     _load_and_apply_workflow_config,
     _validate_run_workflow_options,
 )
 from bioetl.interfaces.cli.commands._workflow_support import (
     build_status_payload,
-    render_run_result,
     render_status_payload,
     select_workflow_steps,
 )
@@ -27,7 +25,6 @@ from bioetl.interfaces.cli.commands.domains.health.metrics_server_integration im
     ensure_metrics_server_started,
 )
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
-    build_observability_backend_required_probe_paths,
     ensure_observability_backend_started,
 )
 from bioetl.interfaces.cli.commands.domains.health.server_integration import (
@@ -49,19 +46,18 @@ if TYPE_CHECKING:
     from bioetl.composition.registry_api import PipelineRegistry
 
 __all__ = [
+    "ensure_observability_backend_started",
     "get_workflow_execution_service",
     "get_workflow_inspection_service",
     "load_workflow_config",
     "workflow",
 ]
 
-
 def load_workflow_config(name: str) -> WorkflowConfig:
     """Load one declarative workflow config through composition seams."""
     from bioetl.composition.control_plane_api import load_workflow_config as _impl
 
     return _impl(name)
-
 
 def get_workflow_execution_service(
     registry: PipelineRegistry | None = None,
@@ -73,7 +69,6 @@ def get_workflow_execution_service(
 
     return _impl(registry=registry)
 
-
 def get_workflow_inspection_service() -> WorkflowInspectionService:
     """Resolve workflow inspection through composition seams."""
     from bioetl.composition.control_plane_api import (
@@ -82,20 +77,50 @@ def get_workflow_inspection_service() -> WorkflowInspectionService:
 
     return _impl()
 
-
 def _workflow_pipeline_probe_paths(config: WorkflowConfig) -> tuple[str, ...]:
-    pipelines = tuple(
-        step.pipeline_name
-        for step in config.steps
-        if isinstance(step, WorkflowStepConfig)
-    )
-    return build_observability_backend_required_probe_paths(pipelines=pipelines)
+    return _workflow_command_runtime.workflow_pipeline_probe_paths(config)
 
+
+def _run_workflow_execution(
+    *,
+    config: WorkflowConfig,
+    registry: PipelineRegistry | None,
+    dry_run: bool,
+    only_steps: str | None,
+    resume_last: bool,
+    resume_manifest_id: str | None,
+    resume_run_id: UUID | None,
+    force_steps: str | None,
+    repair_steps: str | None,
+    incremental: bool,
+) -> None:
+    result = _workflow_command_runtime._execute_workflow_and_publish_metrics(
+        get_workflow_execution_service_fn=get_workflow_execution_service,
+        ensure_metrics_server_started_fn=ensure_metrics_server_started,
+        publish_metrics_safely_fn=publish_metrics_safely,
+        config=config,
+        registry=registry,
+        dry_run=dry_run,
+        only_steps=only_steps,
+        resume_last=resume_last,
+        resume_manifest_id=resume_manifest_id,
+        resume_run_id=resume_run_id,
+        force_steps=force_steps,
+        repair_steps=repair_steps,
+        incremental=incremental,
+    )
+    _workflow_command_runtime.render_run_result(
+        config,
+        result,
+        dry_run=dry_run,
+        only_steps=only_steps,
+        resume_last=resume_last,
+    )
+    _workflow_command_runtime._handle_workflow_result(result)
 
 @click.group()
 def workflow() -> None:
     """Run and inspect declarative workflows."""
-
 
 @workflow.command("run")
 @click.argument("name")
@@ -283,42 +308,20 @@ def workflow() -> None:
 )
 @click.pass_obj
 def run_workflow_command(
-    registry: PipelineRegistry | None,
-    name: str,
-    dry_run: bool,
-    only_steps: str | None,
-    run_type: str | None,
-    start_offset: int | None,
-    limit: int | None,
-    input_csv: str | None,
-    filter_column: str | None,
-    filter_field: str | None,
-    vacuum_after_run: bool | None,
-    vacuum_retention_days: int | None,
-    log_level: str | None,
-    ignore_yaml_filter: bool | None,
-    skip_gold: bool | None,
-    execution_context: str | None,
-    use_cached_bronze: bool | None,
-    cached_bronze_path: str | None,
-    cached_bronze_date: str | None,
-    exact_replay: bool | None,
-    required_persistence_profile: str | None,
-    replay_of_run_id: str | None,
-    replay_of_manifest_id: str | None,
-    enable_tracing: bool | None,
-    debug_export_enabled: bool | None,
-    debug_export_formats: tuple[str, ...],
-    debug_export_dir: str | None,
-    resume_last: bool,
-    resume_manifest_id: str | None,
-    resume_run_id: UUID | None,
-    force_steps: str | None,
-    repair_steps: str | None,
-    incremental: bool,
-    ensure_observability_backend: bool,
-    observability_backend_port: int,
+    registry: PipelineRegistry | None, name: str, dry_run: bool, only_steps: str | None,
+    run_type: str | None, start_offset: int | None, limit: int | None, input_csv: str | None,
+    filter_column: str | None, filter_field: str | None, vacuum_after_run: bool | None,
+    vacuum_retention_days: int | None, log_level: str | None, ignore_yaml_filter: bool | None,
+    skip_gold: bool | None, execution_context: str | None, use_cached_bronze: bool | None,
+    cached_bronze_path: str | None, cached_bronze_date: str | None, exact_replay: bool | None,
+    required_persistence_profile: str | None, replay_of_run_id: str | None,
+    replay_of_manifest_id: str | None, enable_tracing: bool | None,
+    debug_export_enabled: bool | None, debug_export_formats: tuple[str, ...],
+    debug_export_dir: str | None, resume_last: bool, resume_manifest_id: str | None,
+    resume_run_id: UUID | None, force_steps: str | None, repair_steps: str | None,
+    incremental: bool, ensure_observability_backend: bool, observability_backend_port: int,
 ) -> None:
+    # EXC-002: CLI command function with extensive parameter list; length acceptable for Click command
     """Execute one declarative workflow config sequentially."""
     _validate_run_workflow_options(
         incremental=incremental,
@@ -356,52 +359,12 @@ def run_workflow_command(
         debug_export_formats=debug_export_formats,
         debug_export_dir=debug_export_dir,
     )
-    _execute_workflow_with_backend(
-        config=config,
-        registry=registry,
-        dry_run=dry_run,
-        only_steps=only_steps,
-        resume_last=resume_last,
-        resume_manifest_id=resume_manifest_id,
-        resume_run_id=resume_run_id,
-        force_steps=force_steps,
-        repair_steps=repair_steps,
-        incremental=incremental,
-        ensure_observability_backend=ensure_observability_backend,
-        observability_backend_port=observability_backend_port,
-        get_workflow_execution_service_fn=get_workflow_execution_service,
-        ensure_metrics_server_started_fn=ensure_metrics_server_started,
-        publish_metrics_safely_fn=publish_metrics_safely,
-    )
-
-
-def _execute_workflow_with_backend(
-    *,
-    config: WorkflowConfig,
-    registry: PipelineRegistry | None,
-    dry_run: bool,
-    only_steps: str | None,
-    resume_last: bool,
-    resume_manifest_id: str | None,
-    resume_run_id: UUID | None,
-    force_steps: str | None,
-    repair_steps: str | None,
-    incremental: bool,
-    ensure_observability_backend: bool,
-    observability_backend_port: int,
-    get_workflow_execution_service_fn,
-    ensure_metrics_server_started_fn,
-    publish_metrics_safely_fn,
-) -> None:
-    ensure_observability_backend_started(
+    _workflow_command_runtime.ensure_observability_backend_started(
         enabled=ensure_observability_backend,
         port=observability_backend_port,
         required_probe_paths=_workflow_pipeline_probe_paths(config),
     )
-    result = _execute_workflow_and_publish_metrics(
-        get_workflow_execution_service_fn=get_workflow_execution_service_fn,
-        ensure_metrics_server_started_fn=ensure_metrics_server_started_fn,
-        publish_metrics_safely_fn=publish_metrics_safely_fn,
+    _run_workflow_execution(
         config=config,
         registry=registry,
         dry_run=dry_run,
@@ -413,16 +376,6 @@ def _execute_workflow_with_backend(
         repair_steps=repair_steps,
         incremental=incremental,
     )
-    render_run_result(
-        config,
-        result,
-        dry_run=dry_run,
-        only_steps=only_steps,
-        resume_last=resume_last,
-    )
-    _handle_workflow_result(result)
-
-
 @workflow.command("status")
 @click.argument("name")
 @click.option(
@@ -445,12 +398,10 @@ def workflow_status_command(
 ) -> None:
     """Show workflow status with durable execution details when available."""
     try:
-        config = load_workflow_config(name)
-        config = select_workflow_steps(config, only_steps)
+        config = select_workflow_steps(load_workflow_config(name), only_steps)
     except (FileNotFoundError, ValueError) as exc:
         echo_error("Workflow configuration error", str(exc))
         raise click.exceptions.Exit(ExitCode.CONFIG_ERROR) from exc
-
     inspection = (
         get_workflow_inspection_service().inspect_run_id(run_id)
         if run_id is not None
@@ -461,8 +412,4 @@ def workflow_status_command(
         only_steps=only_steps,
         inspection=inspection,
     )
-    emit_inspection_payload(
-        payload,
-        output_format,
-        text_renderer=render_status_payload,
-    )
+    emit_inspection_payload(payload, output_format, text_renderer=render_status_payload)

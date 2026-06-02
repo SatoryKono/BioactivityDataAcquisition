@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import asyncio
 from unittest.mock import AsyncMock, MagicMock
-from uuid import UUID, uuid4
+from uuid import UUID
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 
@@ -22,6 +23,7 @@ from bioetl.application.core.lifecycle.shutdown import (
     ShutdownSignal,
 )
 from bioetl.application.observability.observer import PipelineObserver
+from bioetl.application.services.debug_export_service import DebugExportResult
 from bioetl.application.services.medallion_lifecycle import (
     MedallionLifecycleService,
     PrepareResult,
@@ -121,7 +123,7 @@ def mock_services():
 def mock_context(mock_logger):
     """Create a mock pipeline context."""
     return PipelineContext(
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite("test_runner"),
         run_type=RunType.INCREMENTAL,
         logger=mock_logger,
     )
@@ -686,6 +688,31 @@ class TestPipelineRunnerRun:
         ledger_service.record_run_exception.assert_not_called()
         ledger_service.record_run_finished.assert_not_called()
         ledger_service.record_run_failed.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_run_publishes_debug_export_with_dataset_ref(self, runner) -> None:
+        """Debug export publication should carry a stable dataset_ref for the ledger."""
+        ledger_service = MagicMock(spec=RunLedgerService)
+        runner.attach_run_ledger_service(ledger_service)
+        runner._executor.finalize_debug_export = AsyncMock(
+            return_value=DebugExportResult(
+                root_path="artifacts/debug_exports/standalone/test_runner_pipeline/run-1",
+                manifest_path="artifacts/debug_exports/standalone/test_runner_pipeline/run-1/manifest.json",
+                debug_export_hash="hash-1",
+            )
+        )
+
+        await runner.run()
+
+        ledger_service.record_artifact_published.assert_called_once_with(
+            layer="debug_export",
+            artifact_path="artifacts/debug_exports/standalone/test_runner_pipeline/run-1",
+            dataset_ref=f"debug_export:{runner._config.pipeline_name}@{runner.run_id}",
+            details={
+                "manifest_path": "artifacts/debug_exports/standalone/test_runner_pipeline/run-1/manifest.json",
+                "debug_export_hash": "hash-1",
+            },
+        )
 
     @pytest.mark.asyncio
     async def test_run_calls_executor(

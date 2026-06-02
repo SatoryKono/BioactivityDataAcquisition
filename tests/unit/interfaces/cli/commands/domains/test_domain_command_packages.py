@@ -26,7 +26,7 @@ import pytest
         (
             "src/bioetl/interfaces/cli/commands/domains/maintenance/__init__.py",
             "maintenance",
-            "bioetl.interfaces.cli.commands.domains.maintenance.command",
+            "bioetl.interfaces.cli.commands.maintenance",
         ),
         (
             "src/bioetl/interfaces/cli/commands/domains/quarantine/__init__.py",

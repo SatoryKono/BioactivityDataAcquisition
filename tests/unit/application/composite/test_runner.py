@@ -8,7 +8,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 from unittest.mock import patch
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_string_from_callsite
 
 import pytest
 
@@ -67,7 +67,7 @@ def create_runner(
         runtime = CompositeRuntimeConfig()
     config = MockCompositeConfig()
     logger = create_mock_logger()
-    run_id = str(uuid4())
+    run_id = deterministic_uuid_string_from_callsite("test_runner")
 
     deps = CompositeRunnerDependencies(
         seed_runner_factory=seed_runner_factory(seed_runner),
@@ -459,7 +459,7 @@ class TestFSMSeedResume:
         # Create initial state with seed completed
         initial_state = CompositeCheckpointState(
             composite_name="test_composite",
-            run_id=str(uuid4()),
+            run_id=deterministic_uuid_string_from_callsite("test_runner"),
             state=CompositePipelineState.SEED_COMPLETED,
             seed_completed=True,
             seed_result=SeedResult(
@@ -490,7 +490,7 @@ class TestFSMSeedResume:
         """FSM state should remain SEED_COMPLETED when resuming."""
         initial_state = CompositeCheckpointState(
             composite_name="test_composite",
-            run_id=str(uuid4()),
+            run_id=deterministic_uuid_string_from_callsite("test_runner"),
             state=CompositePipelineState.SEED_COMPLETED,
             seed_completed=True,
             seed_result=SeedResult(
@@ -521,7 +521,7 @@ class TestFSMSeedResume:
         # Create initial state with seed_completed=True but wrong FSM state (old checkpoint format)
         initial_state = CompositeCheckpointState(
             composite_name="test_composite",
-            run_id=str(uuid4()),
+            run_id=deterministic_uuid_string_from_callsite("test_runner"),
             state=CompositePipelineState.NOT_STARTED,  # Inconsistent with seed_completed=True
             seed_completed=True,
             seed_result=SeedResult(
@@ -585,7 +585,7 @@ class TestFSMSeedResume:
         )
         state = CompositeCheckpointState(
             composite_name="test_composite",
-            run_id=str(uuid4()),
+            run_id=deterministic_uuid_string_from_callsite("test_runner"),
             state=CompositePipelineState.NOT_STARTED,
             seed_completed=True,
             seed_result=SeedResult(
@@ -615,7 +615,7 @@ class TestFSMSeedResume:
         config.enrichers = (MagicMock(),)
         failed_state = CompositeCheckpointState(
             composite_name="test_composite",
-            run_id=str(uuid4()),
+            run_id=deterministic_uuid_string_from_callsite("test_runner"),
             state=CompositePipelineState.FAILED,
             seed_completed=True,
             seed_result=SeedResult(
@@ -630,7 +630,7 @@ class TestFSMSeedResume:
         )
         checkpoint_manager = create_mock_checkpoint_manager(failed_state)
         logger = create_mock_logger()
-        run_id = str(uuid4())
+        run_id = deterministic_uuid_string_from_callsite("test_runner")
         deps = CompositeRunnerDependencies(
             seed_runner_factory=new_seed_runner_factory(),
             enricher_runner_factory=new_enricher_runner_factory(),
@@ -667,7 +667,7 @@ class TestFSMSeedResume:
         runner = create_runner()
         state = CompositeCheckpointState(
             composite_name="test_composite",
-            run_id=str(uuid4()),
+            run_id=deterministic_uuid_string_from_callsite("test_runner"),
             created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
         seed_result = SeedResult(

@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from bioetl.composition.bootstrap.composite_infrastructure_context import (
         CompositeInfrastructureContext,
     )
-    from bioetl.composition.bootstrap.runtime.composite_support_service_bundles import (
+    from bioetl.composition.bootstrap.runtime.composite_control_plane_bundle import (
         CompositeControlPlaneBundle,
     )
     from bioetl.domain.composite.config import CompositeConfig

@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import re
 from typing import Any
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -54,7 +54,7 @@ def transformer() -> PubMedPublicationTransformer:
 def pipeline_context() -> PipelineContext:
     """Create a minimal pipeline context for transformation."""
     return PipelineContext(
-        run_id=uuid4(),
+        run_id=deterministic_uuid_from_callsite("test_pubmed_date_normalization"),
         run_type=RunType.INCREMENTAL,
         logger=build_test_logger(),
     )

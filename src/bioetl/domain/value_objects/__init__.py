@@ -58,12 +58,11 @@ if TYPE_CHECKING:
         ConfidenceScore,
         RelationOperator,
     )
-    from bioetl.domain.value_objects.activity_values import (
-        ActivityType,
+    from bioetl.domain.value_objects.activity_concentration import (
         Concentration,
         ConcentrationUnit,
-        PChemblValue,
     )
+    from bioetl.domain.value_objects.activity_type import ActivityType
     from bioetl.domain.value_objects.base import ValueObject
     from bioetl.domain.value_objects.chemical import MolecularWeight, PublicationYear
     from bioetl.domain.value_objects.compound_ids import (
@@ -86,6 +85,9 @@ if TYPE_CHECKING:
         PolarSurfaceArea,
         RotatableBondCount,
     )
+    from bioetl.domain.value_objects.pchembl_value import (
+        PChemblValue,
+    )
     from bioetl.domain.value_objects.protein_class_hierarchy import (
         ProteinClassHierarchy,
         ProteinClassificationResolutionError,
@@ -96,13 +98,15 @@ if TYPE_CHECKING:
 
 _MODULE_ACADEMIC_IDS = "bioetl.domain.value_objects.academic_ids"
 _MODULE_ACTIVITY = "bioetl.domain.value_objects.activity"
-_MODULE_ACTIVITY_VALUES = "bioetl.domain.value_objects.activity_values"
+_MODULE_ACTIVITY_CONCENTRATION = "bioetl.domain.value_objects.activity_concentration"
+_MODULE_ACTIVITY_TYPE = "bioetl.domain.value_objects.activity_type"
 _MODULE_CHEMICAL = "bioetl.domain.value_objects.chemical"
 _MODULE_COMPOUND_IDS = "bioetl.domain.value_objects.compound_ids"
 _MODULE_DQ_ANOMALY = "bioetl.domain.value_objects.dq_anomaly"
 _MODULE_DQ_RESULT = "bioetl.domain.value_objects.dq_result"
 _MODULE_IDENTIFIERS = "bioetl.domain.value_objects.identifiers"
 _MODULE_MOLECULAR_DESCRIPTORS = "bioetl.domain.value_objects.molecular_descriptors"
+_MODULE_PCHEMBL_VALUE = "bioetl.domain.value_objects.pchembl_value"
 _MODULE_PUBLICATIONS = "bioetl.domain.value_objects.publications"
 _MODULE_PROTEIN_CLASS_HIERARCHY = "bioetl.domain.value_objects.protein_class_hierarchy"
 _MODULE_TAXONOMY_ID = "bioetl.domain.value_objects.taxonomy_id"
@@ -112,7 +116,7 @@ _LAZY_ATTRIBUTE_EXPORTS: dict[str, tuple[str, str]] = {
     "ISSN": (_MODULE_ACADEMIC_IDS, "ISSN"),
     "ORCID": (_MODULE_ACADEMIC_IDS, "ORCID"),
     "SMILES": (_MODULE_CHEMICAL, "SMILES"),
-    "ActivityType": (_MODULE_ACTIVITY_VALUES, "ActivityType"),
+    "ActivityType": (_MODULE_ACTIVITY_TYPE, "ActivityType"),
     "ActivityValue": (_MODULE_ACTIVITY, "ActivityValue"),
     "AssayId": (_MODULE_COMPOUND_IDS, "AssayId"),
     "ChemblId": (_MODULE_IDENTIFIERS, "ChemblId"),
@@ -122,11 +126,11 @@ _LAZY_ATTRIBUTE_EXPORTS: dict[str, tuple[str, str]] = {
         "CompoundSource",
     ),
     "Concentration": (
-        _MODULE_ACTIVITY_VALUES,
+        _MODULE_ACTIVITY_CONCENTRATION,
         "Concentration",
     ),
     "ConcentrationUnit": (
-        _MODULE_ACTIVITY_VALUES,
+        _MODULE_ACTIVITY_CONCENTRATION,
         "ConcentrationUnit",
     ),
     "ConfidenceScore": (_MODULE_ACTIVITY, "ConfidenceScore"),
@@ -156,7 +160,7 @@ _LAZY_ATTRIBUTE_EXPORTS: dict[str, tuple[str, str]] = {
         "MolecularWeight",
     ),
     "OpenAlexId": (_MODULE_ACADEMIC_IDS, "OpenAlexId"),
-    "PChemblValue": (_MODULE_ACTIVITY_VALUES, "PChemblValue"),
+    "PChemblValue": (_MODULE_PCHEMBL_VALUE, "PChemblValue"),
     "PolarSurfaceArea": (
         _MODULE_MOLECULAR_DESCRIPTORS,
         "PolarSurfaceArea",

@@ -7,7 +7,7 @@ import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 from click.testing import CliRunner
@@ -24,7 +24,7 @@ from bioetl.domain.control_plane import (
     RunLedgerEntry,
     RunManifest,
 )
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import RunType
 from bioetl.interfaces.cli.main import cli
 
 _SNAPSHOT_IDENTITY_FINGERPRINT = (
@@ -39,7 +39,7 @@ GOLD_DQ_REPORT_PATH = str(TEST_ROOT / "reports" / "gold_dq.json")
 
 class _FakeRunManifestService:
     def __init__(self) -> None:
-        run_id = RunID(uuid4())
+        run_id = deterministic_run_uuid_from_callsite("test_run_manifest_commands")
         self._run_id = run_id
         created_at = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         self._manifest = RunManifest(

@@ -70,11 +70,11 @@ class _RecordProcessorBuildRequest:
     content_hash_exclude_fields: frozenset[str]
     content_hash_policy_by_version: ContentHashPolicyByVersion | None
     gold_schema_policy_by_version: GoldSchemaPolicyByVersion | None
-    debug_export_config: DebugExportConfig | None
     record_processor_config_cls: type[RecordProcessorConfig]
     table_config_cls: type[TableConfig]
     gold_validator_factory: Callable[..., GoldValidatorPort]
     record_processor_cls: type[RecordProcessor]
+    debug_export_config: DebugExportConfig | None = None
 
 
 def create_record_processor_impl(

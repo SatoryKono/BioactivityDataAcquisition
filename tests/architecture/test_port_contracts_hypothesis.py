@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import asyncio
 from typing import Any
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 from hypothesis import given, settings
@@ -124,7 +124,7 @@ class TestLockPortProperties:
 
         async def test_cycle():
             lock = MemoryLock()
-            owner = uuid4()
+            owner = deterministic_uuid_from_callsite("test_port_contracts_hypothesis")
 
             try:
                 acquired = await lock.acquire(key, owner)
@@ -152,7 +152,7 @@ class TestLockPortProperties:
 
         async def test_heartbeat():
             lock = MemoryLock()
-            owner = uuid4()
+            owner = deterministic_uuid_from_callsite("test_port_contracts_hypothesis")
 
             try:
                 # Acquire with TTL
@@ -179,7 +179,10 @@ class TestLockPortProperties:
 
         async def test_independence():
             lock = MemoryLock()
-            owners = [uuid4() for _ in keys]
+            owners = [
+                deterministic_uuid_from_callsite("test_port_contracts_hypothesis")
+                for _ in keys
+            ]
 
             try:
                 # Acquire all locks
@@ -225,7 +228,9 @@ class TestCheckpointPortProperties:
         async def test_roundtrip():
             with tempfile.TemporaryDirectory() as tmp_dir:
                 checkpoint = LocalCheckpointAdapter(base_path=tmp_dir)
-                run_id = uuid4()
+                run_id = deterministic_uuid_from_callsite(
+                    "test_port_contracts_hypothesis"
+                )
 
                 try:
                     await checkpoint.save(pipeline, run_id, metadata)
@@ -262,7 +267,13 @@ class TestCheckpointPortProperties:
                 try:
                     # Save checkpoints for all pipelines
                     for pipeline in pipelines:
-                        await checkpoint.save(pipeline, uuid4(), {})
+                        await checkpoint.save(
+                            pipeline,
+                            deterministic_uuid_from_callsite(
+                                "test_port_contracts_hypothesis"
+                            ),
+                            {},
+                        )
 
                     # List should return all pipelines
                     listed = await checkpoint.list_all()
@@ -290,7 +301,13 @@ class TestCheckpointPortProperties:
 
                 try:
                     # Save and then delete
-                    await checkpoint.save(pipeline, uuid4(), {"test": "value"})
+                    await checkpoint.save(
+                        pipeline,
+                        deterministic_uuid_from_callsite(
+                            "test_port_contracts_hypothesis"
+                        ),
+                        {"test": "value"},
+                    )
                     await checkpoint.delete(pipeline)
 
                     # Load should return None

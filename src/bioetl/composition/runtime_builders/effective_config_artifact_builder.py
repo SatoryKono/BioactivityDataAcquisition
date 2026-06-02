@@ -30,9 +30,7 @@ from bioetl.domain.control_plane.effective_config_artifact import (
 from bioetl.infrastructure.control_plane import FileEffectiveConfigArtifactStore
 
 if TYPE_CHECKING:
-    from bioetl.composition.runtime_builders.inputs_resolver import (
-        RunnerInputs,
-    )
+    from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
     from bioetl.domain.context import PipelineRunContext
     from bioetl.domain.types import RunID
     from bioetl.infrastructure.config.settings_api import Settings

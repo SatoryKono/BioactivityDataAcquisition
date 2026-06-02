@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -51,7 +51,7 @@ def chembl_pipeline():
         logger=mock_logger,
     )
     config = get_pipeline_config("chembl_activity")
-    run_id = uuid4()
+    run_id = deterministic_uuid_from_callsite("test_chembl_activity_unit")
     # Create transformer with gold_filters from config
     transformer = ActivityTransformer(
         provider="chembl",

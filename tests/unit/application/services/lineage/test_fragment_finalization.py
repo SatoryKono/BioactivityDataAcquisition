@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import pytest
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 from datetime import UTC, datetime
-from uuid import uuid4
 
 from bioetl.application.services.lineage._fragment_finalization import (
     finalize_lineage_fragment,
@@ -19,7 +19,7 @@ from bioetl.domain.lineage import (
     LineageNodeRef,
     LineageNodeType,
 )
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import RunType
 from bioetl.domain.value_objects.run_context import RunContext
 
 
@@ -28,7 +28,7 @@ pytestmark = pytest.mark.unit
 
 def _make_run_context() -> RunContext:
     return RunContext.create(
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite("test_fragment_finalization"),
         run_type=RunType.INCREMENTAL,
         started_at=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
         provider="chembl",

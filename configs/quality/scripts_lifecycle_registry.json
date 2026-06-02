@@ -332,6 +332,30 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded manual GitHub issue update utility after removing the scripts.ops router command; prefer the governed issue lifecycle workflow or GitHub API client paths before re-exposing it as an active ops command."
     },
+    "scripts/ops/support/load_repo_env.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the shared repo-environment bootstrap helper consumed by local launcher scripts while `.env` loading remains centralized; fold it into a broader canonical shell bootstrap surface only if launcher setup paths are consolidated."
+    },
+    "scripts/ops/support/skills/check_ai_skills_layout.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a backward-compatible wrapper while the canonical Codex skills layout audit lives under scripts/ai/codex/check_skills_layout.sh; remove it once operator/docs callers migrate to the canonical path."
+    },
+    "scripts/ops/support/skills/check_skills_mirror.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a backward-compatible wrapper while the canonical Codex skills mirror audit lives under scripts/ai/codex/check_skills_mirror.sh; remove it once operator/docs callers migrate to the canonical path."
+    },
+    "scripts/ai/gemini/gemini-interactive.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a backward-compatible Gemini launcher while the canonical interactive entrypoint delegates through scripts/ai/gemini/run-gemini.sh; remove it once callers migrate to the canonical launcher surface."
+    },
     "src/tools/neo4j_audit.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",

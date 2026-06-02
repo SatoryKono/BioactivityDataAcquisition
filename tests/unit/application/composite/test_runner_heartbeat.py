@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import asyncio
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_string_from_callsite
 
 import pytest
 
@@ -60,7 +60,7 @@ def _make_runner(
 ) -> CompositePipelineRunner:
     from bioetl.application.composite.fsm_helper import FSMStateHelperService
 
-    run_id = str(uuid4())
+    run_id = deterministic_uuid_string_from_callsite("test_runner_heartbeat")
 
     class _SeedConfig:
         pipeline = "test_seed"
