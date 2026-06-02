@@ -7,9 +7,11 @@ import json
 from bioetl.application.services.control_plane.effective_config.context import (
     build_effective_config_context,
 )
+from bioetl.application.services.control_plane.effective_config.serialization import (
+    semantic_artifact_payload,
+)
 from bioetl.application.services.control_plane.effective_config.support import (
     build_effective_config_artifact_id,
-    semantic_artifact_payload,
     serialize_artifact,
     validate_runtime_environment_provenance,
 )

@@ -4,9 +4,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.composition._lazy_exports import lazy_export_dir, resolve_lazy_export
+from bioetl.composition._lazy_exports import install_lazy_exports
 
 if TYPE_CHECKING:
+
     async def cleanup_bronze(
         retention_days: int = 90,
         dry_run: bool = False,
@@ -64,6 +65,7 @@ if TYPE_CHECKING:
 
     def load_workflow_config(name: str) -> "WorkflowConfig": ...
 
+
 __all__ = [
     "cleanup_bronze",
     "get_adr_service",
@@ -117,22 +119,9 @@ _PUBLIC_EXPORTS = {
     "get_workflow_runner_service": "bioetl.composition.control_plane_api",
     "load_workflow_config": "bioetl.composition.control_plane_api",
 }
-
-
-def __getattr__(name: str) -> object:
-    """Resolve legacy services_api symbols through narrow public facades."""
-    return resolve_lazy_export(
-        module_globals=globals(),
-        public_exports=_PUBLIC_EXPORTS,
-        module_name=__name__,
-        name=name,
-    )
-
-
-def __dir__() -> list[str]:
-    """Expose lazy compatibility exports to introspection and wildcard imports."""
-    return lazy_export_dir(
-        module_globals=globals(),
-        public_exports=_PUBLIC_EXPORTS,
-        explicit_exports=__all__,
-    )
+install_lazy_exports(
+    module_globals=globals(),
+    public_exports=_PUBLIC_EXPORTS,
+    module_name=__name__,
+    explicit_exports=__all__,
+)

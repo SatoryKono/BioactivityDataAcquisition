@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol
 
-from bioetl.composition._lazy_exports import lazy_export_dir, resolve_lazy_export
+from bioetl.composition._lazy_exports import install_lazy_exports
 
 if TYPE_CHECKING:
     from bioetl.application.services.health_service import HealthService
@@ -82,15 +82,13 @@ class HealthServerDependenciesProtocol(Protocol):
     run_ledger_port: RunLedgerPort
 
 
-def __getattr__(name: str) -> object:
-    """Resolve health exports lazily to avoid CLI import fan-out."""
-    return resolve_lazy_export(
-        module_globals=globals(),
-        public_exports=_PUBLIC_EXPORTS,
-        module_name=__name__,
-        name=name,
-        cache=True,
-    )
+install_lazy_exports(
+    module_globals=globals(),
+    public_exports=_PUBLIC_EXPORTS,
+    module_name=__name__,
+    explicit_exports=__all__,
+    cache=True,
+)
 
 
 def get_runtime_settings() -> object:
@@ -119,12 +117,3 @@ def get_quarantine_service() -> object:
     from bioetl.composition._services import get_quarantine_service as _impl
 
     return _impl()
-
-
-def __dir__() -> list[str]:
-    """Expose lazy exports to introspection and wildcard imports."""
-    return lazy_export_dir(
-        module_globals=globals(),
-        public_exports=_PUBLIC_EXPORTS,
-        explicit_exports=__all__,
-    )

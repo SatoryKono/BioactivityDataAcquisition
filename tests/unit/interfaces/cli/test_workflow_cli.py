@@ -16,6 +16,9 @@ from bioetl.application.services.workflow_runner_service import (
 from bioetl.application.services.workflow_transform_service import (
     WorkflowTransformExecutionResult,
 )
+from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
+    ObservabilityBackendEnsureResult,
+)
 from bioetl.interfaces.cli.main import cli
 
 
@@ -63,6 +66,21 @@ class _FakeWorkflowRunnerService:
 @pytest.fixture
 def cli_runner() -> CliRunner:
     return CliRunner()
+
+
+@pytest.fixture(autouse=True)
+def _mock_workflow_observability_backend(monkeypatch: Any) -> None:
+    import bioetl.interfaces.cli.commands.workflow as workflow_cmd
+
+    monkeypatch.setattr(
+        workflow_cmd,
+        "ensure_observability_backend_started",
+        lambda **_: ObservabilityBackendEnsureResult(
+            status="started",
+            health_url="http://127.0.0.1:8081/health",
+        ),
+        raising=True,
+    )
 
 
 def test_workflow_help_lists_run_and_status(cli_runner: CliRunner) -> None:
@@ -238,6 +256,13 @@ def test_workflow_run_accepts_pipeline_style_runtime_overrides(
             "--replay-of-manifest-id",
             "manifest-parent-1",
             "--tracing",
+            "--debug-export",
+            "--debug-export-format",
+            "csv",
+            "--debug-export-format",
+            "xlsx",
+            "--debug-export-dir",
+            "artifacts/debug_exports",
         ],
     )
 
@@ -317,6 +342,19 @@ def test_workflow_run_accepts_pipeline_style_runtime_overrides(
     )
     assert all(
         getattr(step.run_options, "enable_tracing", None) is True
+        for step in pipeline_steps
+    )
+    assert all(
+        getattr(step.run_options, "debug_export_enabled", None) is True
+        for step in pipeline_steps
+    )
+    assert all(
+        getattr(step.run_options, "debug_export_formats", None) == ("csv", "xlsx")
+        for step in pipeline_steps
+    )
+    assert all(
+        getattr(step.run_options, "debug_export_dir", None)
+        == "artifacts/debug_exports"
         for step in pipeline_steps
     )
 

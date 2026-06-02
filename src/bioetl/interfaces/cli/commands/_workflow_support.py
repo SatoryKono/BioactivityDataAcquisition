@@ -92,6 +92,9 @@ def apply_cli_overrides(
     replay_of_run_id: str | None,
     replay_of_manifest_id: str | None,
     enable_tracing: bool | None,
+    debug_export_enabled: bool | None,
+    debug_export_formats: tuple[str, ...],
+    debug_export_dir: str | None,
 ) -> WorkflowConfig:
     """Apply CLI overrides to workflow defaults and pipeline steps."""
     override = WorkflowRunOptionsConfig(
@@ -116,6 +119,9 @@ def apply_cli_overrides(
         replay_of_run_id=replay_of_run_id,
         replay_of_manifest_id=replay_of_manifest_id,
         enable_tracing=enable_tracing,
+        debug_export_enabled=debug_export_enabled,
+        debug_export_formats=debug_export_formats or None,
+        debug_export_dir=debug_export_dir,
     )
     if not override.to_mapping():
         return config

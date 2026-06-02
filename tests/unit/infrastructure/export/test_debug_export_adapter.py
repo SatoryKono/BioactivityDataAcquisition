@@ -10,6 +10,8 @@ import pytest
 from bioetl.application.services.debug_export_service import DebugExportPack
 from bioetl.infrastructure.export.debug_export_adapter import DebugExportAdapter
 
+pytestmark = pytest.mark.unit
+
 
 def _build_pack(*, root: Path, created_at: datetime) -> DebugExportPack:
     run_id = "00000000-0000-0000-0000-000000000321"
@@ -76,8 +78,12 @@ def test_debug_export_adapter_writes_deterministic_hash_and_split_workbook(
     created_at_1 = datetime(2026, 6, 2, 10, 0, 0, tzinfo=UTC)
     created_at_2 = datetime(2026, 6, 2, 12, 0, 0, tzinfo=UTC)
 
-    result_1 = adapter.write_pack(pack=_build_pack(root=tmp_path, created_at=created_at_1))
-    result_2 = adapter.write_pack(pack=_build_pack(root=tmp_path, created_at=created_at_2))
+    result_1 = adapter.write_pack(
+        pack=_build_pack(root=tmp_path, created_at=created_at_1)
+    )
+    result_2 = adapter.write_pack(
+        pack=_build_pack(root=tmp_path, created_at=created_at_2)
+    )
 
     assert result_1.debug_export_hash == result_2.debug_export_hash
     root_path = Path(result_1.root_path)

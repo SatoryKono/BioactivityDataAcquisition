@@ -90,6 +90,9 @@ bioetl workflow status <NAME> [OPTIONS]
 | `--replay-of-run-id` | Explicit parent `run_id` for exact replay pipeline steps |
 | `--replay-of-manifest-id` | Explicit parent `manifest_id` for exact replay pipeline steps |
 | `--tracing/--no-tracing` | Override distributed tracing for pipeline steps |
+| `--debug-export/--no-debug-export` | Включить per-run debug audit pack для workflow pipeline steps |
+| `--debug-export-format csv|xlsx` | Repeatable override форматов debug-export pack |
+| `--debug-export-dir` | Override root directory для workflow debug-export pack |
 | `--resume-last` | Возобновить последний `failed` или `incomplete` workflow run с тем же execution fingerprint |
 | `--force-steps a,b` | Явно форсировать указанные шаги при resume вместо обычного skip поведения |
 | `--repair-steps a,b` | Явно пометить шаги как repair path для destructive ambiguity recovery |
@@ -122,7 +125,8 @@ bioetl workflow status <NAME> [OPTIONS]
   after the CLI process exits.
 - `workflow run` now accepts the same non-conflicting pipeline runtime
   overrides as `bioetl run`, such as `--limit`, CSV/filter options,
-  cache/replay options, vacuum overrides, tracing overrides, and
+  cache/replay options, vacuum overrides, tracing overrides, debug-export
+  overrides, and
   `--required-persistence-profile`.
 - `--required-persistence-profile degraded_observable` is still available as an
   explicit local diagnostic opt-down for non-`--exact-replay`, non-critical
@@ -144,6 +148,7 @@ bioetl workflow run chembl_activity --dry-run
 bioetl workflow run chembl_activity --limit 1000
 bioetl workflow run chembl_activity --input-csv data/filter-ids.csv --filter-column molecule_id --filter-field molecule_chembl_id
 bioetl workflow run chembl_activity --use-cached-bronze --exact-replay --replay-of-run-id parent-run-1 --replay-of-manifest-id manifest-parent-1
+bioetl workflow run chembl_baseline --log-level DEBUG --debug-export --debug-export-format csv --debug-export-format xlsx
 bioetl workflow status chembl_activity
 bioetl workflow run publication_provider_pack --dry-run
 bioetl workflow run chembl_baseline --dry-run

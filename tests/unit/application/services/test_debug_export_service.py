@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from uuid import uuid4
+from uuid import UUID
+
+import pytest
 
 from bioetl.application.services.debug_export_service import (
     DebugExportConfig,
@@ -10,22 +12,27 @@ from bioetl.application.services.debug_export_service import (
 )
 from bioetl.domain.types import ErrorType
 
+pytestmark = pytest.mark.unit
+
+_RUN_ID = UUID("00000000-0000-0000-0000-000000000101")
+_BATCH_ID = UUID("00000000-0000-0000-0000-000000000102")
+
 
 def test_debug_export_service_collects_success_and_failure_rows() -> None:
     service = DebugExportService(
         config=DebugExportConfig(enabled=True, formats=("csv",)),
-        run_id=uuid4(),
+        run_id=_RUN_ID,
         pipeline_id="chembl_activity",
         provider_id="chembl",
     )
 
-    raw_record = {"activity_id": "ACT-1", "value": "bad"}
+    raw_record = {"activity_id": "ACT-1", "value": "bad", "content_hash": "bronze-h1"}
     silver_record = {"activity_id": "ACT-1", "value": 1.0, "content_hash": "silver-h1"}
     gold_record = {"activity_id": "ACT-1", "value": 1.0, "content_hash": "gold-h1"}
 
     service.record_bronze_batch(
         records=[raw_record],
-        batch_id=uuid4(),
+        batch_id=_BATCH_ID,
         start_index=17,
     )
     service.record_transform_success(
@@ -36,14 +43,18 @@ def test_debug_export_service_collects_success_and_failure_rows() -> None:
         gold_excluded_by_contract=False,
     )
     service.record_filtered_out(
-        raw_record={"activity_id": "ACT-2"},
+        raw_record={"activity_id": "ACT-2", "content_hash": "bronze-h2"},
         record_index=18,
         reason="soft filter rejected record",
         details={"activity_id": "ACT-2"},
         policy="skip",
     )
     service.record_data_quality_failure(
-        raw_record={"activity_id": "ACT-3", "target_chembl_id": None},
+        raw_record={
+            "activity_id": "ACT-3",
+            "target_chembl_id": None,
+            "content_hash": "bronze-h3",
+        },
         record_index=19,
         error_type=ErrorType.SCHEMA_VIOLATION,
         error_details="Schema validation failed: missing target_chembl_id",

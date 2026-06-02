@@ -5,17 +5,22 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from bioetl.application.services._observability_workflow_execution import (
+    inspect_audit_run as inspect_audit_run_impl,
+)
+from bioetl.application.services._observability_workflow_execution import (
+    inspect_checkpoint_workflow as inspect_checkpoint_workflow_impl,
+)
+from bioetl.application.services._observability_workflow_execution import (
+    inspect_run_dossier as inspect_run_dossier_impl,
+)
+from bioetl.application.services._observability_workflow_models import (
+    AuditRunWorkflowResult,
+    CheckpointAuditWorkflowResult,
+    RunForensicDossierResult,
+)
 from bioetl.application.observability.span_helpers import traced_async_operation
 from bioetl.application.services._observability_workflow_support import (
-    build_checkpoint_compatibility_section,
-    build_next_steps,
-    build_status_section,
-    build_traceability_section,
-    classify_evidence_status,
-    resolve_checkpoint_for_run,
-    resolve_lineage_for_run,
-    resolve_pipeline_name,
-    resolve_quarantine_summary_for_run,
     resolve_run_manifest,
     trace_links_enabled,
 )
@@ -54,103 +59,6 @@ _TRACE_ATTR_OPERATION = "bioetl.operation"
 _TRACE_ATTR_SUCCESS = "bioetl.success"
 
 
-@dataclass(frozen=True, slots=True)
-class AuditRunWorkflowResult:
-    """Aggregate operator view for one run's audit context."""
-
-    run_id: str
-    audit: AuditInspectionResult
-    run_manifest: RunManifestInspectionResult | None = None
-
-    def to_dict(self) -> dict[str, object]:
-        """Return a JSON-safe representation for CLI or API responses."""
-        return {
-            "run_id": self.run_id,
-            "audit": self.audit.to_dict(),
-            "run_manifest": (
-                self.run_manifest.to_dict() if self.run_manifest is not None else None
-            ),
-        }
-
-
-@dataclass(frozen=True, slots=True)
-class CheckpointAuditWorkflowResult:
-    """Aggregate operator view for one checkpoint and related audit context."""
-
-    pipeline_name: str
-    checkpoint: CheckpointInfo | None
-    audit: AuditInspectionResult
-    run_manifest: RunManifestInspectionResult | None = None
-
-    def to_dict(self) -> dict[str, object]:
-        """Return a JSON-safe representation for CLI or API responses."""
-        return {
-            "pipeline_name": self.pipeline_name,
-            "checkpoint": (
-                {
-                    "pipeline_name": self.checkpoint.pipeline_name,
-                    "run_id": self.checkpoint.run_id,
-                    "metadata": self.checkpoint.metadata,
-                }
-                if self.checkpoint is not None
-                else None
-            ),
-            "audit": self.audit.to_dict(),
-            "run_manifest": (
-                self.run_manifest.to_dict() if self.run_manifest is not None else None
-            ),
-            "compatibility": build_checkpoint_compatibility_section(
-                checkpoint=self.checkpoint,
-                run_manifest=self.run_manifest,
-            ),
-        }
-
-
-@dataclass(frozen=True, slots=True)
-class RunForensicDossierResult:
-    """Bounded one-run dossier across observability and control-plane surfaces."""
-
-    run_id: str
-    pipeline_name: str | None
-    audit: AuditInspectionResult
-    run_manifest: RunManifestInspectionResult | None = None
-    checkpoint: CheckpointInfo | None = None
-    lineage: LineageRunExplanationResult | None = None
-    quarantine_summary: dict[str, object] | None = None
-    traceability: dict[str, object] | None = None
-    status: dict[str, object] | None = None
-    missing_evidence: tuple[str, ...] = ()
-    degraded_evidence: tuple[str, ...] = ()
-    next_steps: tuple[str, ...] = ()
-
-    def to_dict(self) -> dict[str, object]:
-        """Return a JSON-safe dossier payload for CLI or API responses."""
-        return {
-            "run_id": self.run_id,
-            "pipeline_name": self.pipeline_name,
-            "audit": self.audit.to_dict(),
-            "run_manifest": (
-                self.run_manifest.to_dict() if self.run_manifest is not None else None
-            ),
-            "checkpoint": (
-                {
-                    "pipeline_name": self.checkpoint.pipeline_name,
-                    "run_id": self.checkpoint.run_id,
-                    "metadata": self.checkpoint.metadata,
-                }
-                if self.checkpoint is not None
-                else None
-            ),
-            "lineage": self.lineage.to_dict() if self.lineage is not None else None,
-            "quarantine_summary": self.quarantine_summary,
-            "traceability": self.traceability,
-            "status": self.status,
-            "missing_evidence": list(self.missing_evidence),
-            "degraded_evidence": list(self.degraded_evidence),
-            "next_steps": list(self.next_steps),
-        }
-
-
 @dataclass(slots=True)
 class ObservabilityWorkflowService:
     """Compose audit, checkpoint, and run-manifest diagnostics workflows."""
@@ -171,7 +79,12 @@ class ObservabilityWorkflowService:
     ) -> AuditRunWorkflowResult:
         """Return audit entries and best-effort manifest context for one run."""
         if self.tracer is None:
-            return await self._inspect_audit_run_impl(run_id=run_id, limit=limit)
+            return await inspect_audit_run_impl(
+                audit_service=self.audit_service,
+                run_manifest_service=self.run_manifest_service,
+                run_id=run_id,
+                limit=limit,
+            )
         async with traced_async_operation(
             self.tracer,
             "diagnostics.inspect_audit_run",
@@ -184,7 +97,12 @@ class ObservabilityWorkflowService:
             },
             tracer_name=self.TRACER_NAME,
         ) as span:
-            result = await self._inspect_audit_run_impl(run_id=run_id, limit=limit)
+            result = await inspect_audit_run_impl(
+                audit_service=self.audit_service,
+                run_manifest_service=self.run_manifest_service,
+                run_id=run_id,
+                limit=limit,
+            )
             span.set_attribute(_TRACE_ATTR_SUCCESS, True)
             span.set_attribute(
                 _TRACE_ATTR_AUDIT_ENTRIES_COUNT, len(result.audit.entries)
@@ -194,21 +112,6 @@ class ObservabilityWorkflowService:
             )
             return result
 
-    async def _inspect_audit_run_impl(
-        self,
-        *,
-        run_id: str,
-        limit: int,
-    ) -> AuditRunWorkflowResult:
-        """Implement audit-run diagnostics without tracing concerns."""
-        audit = await self.audit_service.inspect_run(run_id, limit=limit)
-        run_manifest = resolve_run_manifest(self.run_manifest_service, run_id)
-        return AuditRunWorkflowResult(
-            run_id=run_id,
-            audit=audit,
-            run_manifest=run_manifest,
-        )
-
     async def inspect_run_dossier(
         self,
         run_id: str,
@@ -217,7 +120,13 @@ class ObservabilityWorkflowService:
     ) -> RunForensicDossierResult:
         """Return a one-run dossier across audit, control-plane, and triage seams."""
         if self.tracer is None:
-            return await self._inspect_run_dossier_impl(
+            return await inspect_run_dossier_impl(
+                audit_service=self.audit_service,
+                checkpoint_service=self.checkpoint_service,
+                run_manifest_service=self.run_manifest_service,
+                lineage_service=self.lineage_service,
+                quarantine_service=self.quarantine_service,
+                tracer=self.tracer,
                 run_id=run_id,
                 audit_limit=audit_limit,
             )
@@ -235,7 +144,13 @@ class ObservabilityWorkflowService:
             },
             tracer_name=self.TRACER_NAME,
         ) as span:
-            result = await self._inspect_run_dossier_impl(
+            result = await inspect_run_dossier_impl(
+                audit_service=self.audit_service,
+                checkpoint_service=self.checkpoint_service,
+                run_manifest_service=self.run_manifest_service,
+                lineage_service=self.lineage_service,
+                quarantine_service=self.quarantine_service,
+                tracer=self.tracer,
                 run_id=run_id,
                 audit_limit=audit_limit,
             )
@@ -251,72 +166,6 @@ class ObservabilityWorkflowService:
             )
             return result
 
-    async def _inspect_run_dossier_impl(
-        self,
-        *,
-        run_id: str,
-        audit_limit: int,
-        run_manifest: RunManifestInspectionResult | None = None,
-    ) -> RunForensicDossierResult:
-        """Implement dossier aggregation without tracing concerns."""
-        audit = await self.audit_service.inspect_run(run_id, limit=audit_limit)
-        if run_manifest is None:
-            run_manifest = resolve_run_manifest(self.run_manifest_service, run_id)
-        pipeline_name = resolve_pipeline_name(run_manifest)
-        checkpoint = await resolve_checkpoint_for_run(
-            checkpoint_service=self.checkpoint_service,
-            run_id=run_id,
-            pipeline_name=pipeline_name,
-        )
-        lineage = resolve_lineage_for_run(self.lineage_service, run_id)
-        quarantine_summary = await resolve_quarantine_summary_for_run(
-            quarantine_service=self.quarantine_service,
-            run_id=run_id,
-            pipeline_name=pipeline_name,
-            run_manifest=run_manifest,
-        )
-        traceability = build_traceability_section(
-            run_id=run_id,
-            run_manifest=run_manifest,
-            lineage=lineage,
-            audit=audit,
-            trace_links_enabled=trace_links_enabled(self.tracer),
-        )
-        missing_evidence, degraded_evidence = classify_evidence_status(
-            run_manifest=run_manifest,
-            checkpoint=checkpoint,
-            lineage=lineage,
-            quarantine_summary=quarantine_summary,
-            traceability=traceability,
-        )
-        next_steps = build_next_steps(
-            run_manifest=run_manifest,
-            missing_evidence=missing_evidence,
-            degraded_evidence=degraded_evidence,
-        )
-        status = build_status_section(
-            run_manifest=run_manifest,
-            checkpoint=checkpoint,
-            lineage=lineage,
-            quarantine_summary=quarantine_summary,
-            missing_evidence=missing_evidence,
-            degraded_evidence=degraded_evidence,
-        )
-        return RunForensicDossierResult(
-            run_id=run_id,
-            pipeline_name=pipeline_name,
-            audit=audit,
-            run_manifest=run_manifest,
-            checkpoint=checkpoint,
-            lineage=lineage,
-            quarantine_summary=quarantine_summary,
-            traceability=traceability,
-            status=status,
-            missing_evidence=missing_evidence,
-            degraded_evidence=degraded_evidence,
-            next_steps=next_steps,
-        )
-
     async def inspect_manifest_dossier(
         self,
         identifier: str,
@@ -327,7 +176,13 @@ class ObservabilityWorkflowService:
         if self.run_manifest_service is None:
             raise ValueError("run manifest service is required for manifest dossier")
         run_manifest = self.run_manifest_service.show(identifier)
-        return await self._inspect_run_dossier_impl(
+        return await inspect_run_dossier_impl(
+            audit_service=self.audit_service,
+            checkpoint_service=self.checkpoint_service,
+            run_manifest_service=self.run_manifest_service,
+            lineage_service=self.lineage_service,
+            quarantine_service=self.quarantine_service,
+            tracer=self.tracer,
             run_id=str(run_manifest.manifest.run_id),
             audit_limit=audit_limit,
             run_manifest=run_manifest,
@@ -347,7 +202,10 @@ class ObservabilityWorkflowService:
                 "checkpoint diagnostics accept either run_id or manifest_id, not both"
             )
         if self.tracer is None:
-            return await self._inspect_checkpoint_workflow_impl(
+            return await inspect_checkpoint_workflow_impl(
+                audit_service=self.audit_service,
+                checkpoint_service=self.checkpoint_service,
+                run_manifest_service=self.run_manifest_service,
                 pipeline_name=pipeline_name,
                 run_id=run_id,
                 manifest_id=manifest_id,
@@ -368,7 +226,10 @@ class ObservabilityWorkflowService:
             },
             tracer_name=self.TRACER_NAME,
         ) as span:
-            result = await self._inspect_checkpoint_workflow_impl(
+            result = await inspect_checkpoint_workflow_impl(
+                audit_service=self.audit_service,
+                checkpoint_service=self.checkpoint_service,
+                run_manifest_service=self.run_manifest_service,
                 pipeline_name=pipeline_name,
                 run_id=run_id,
                 manifest_id=manifest_id,
@@ -383,59 +244,3 @@ class ObservabilityWorkflowService:
                 "bioetl.has_run_manifest", result.run_manifest is not None
             )
             return result
-
-    async def _inspect_checkpoint_workflow_impl(
-        self,
-        *,
-        pipeline_name: str,
-        run_id: str | None,
-        manifest_id: str | None,
-        audit_limit: int,
-    ) -> CheckpointAuditWorkflowResult:
-        """Implement checkpoint diagnostics workflow without tracing concerns."""
-        if manifest_id is not None:
-            checkpoint = await self.checkpoint_service.get_checkpoint_for_manifest_id(
-                pipeline_name,
-                manifest_id,
-            )
-        elif run_id is not None:
-            checkpoint = await self.checkpoint_service.get_checkpoint_for_run(
-                pipeline_name,
-                run_id,
-            )
-        else:
-            checkpoint = await self.checkpoint_service.get_checkpoint(pipeline_name)
-        resolved_run_id = run_id or (
-            checkpoint.run_id if checkpoint is not None else None
-        )
-
-        if resolved_run_id is None:
-            audit = AuditInspectionResult(
-                query={
-                    "run_id": None,
-                    "pipeline_name": pipeline_name,
-                    "limit": audit_limit,
-                },
-                entries=(),
-            )
-            return CheckpointAuditWorkflowResult(
-                pipeline_name=pipeline_name,
-                checkpoint=checkpoint,
-                audit=audit,
-                run_manifest=None,
-            )
-
-        audit = await self.audit_service.inspect_run(
-            resolved_run_id,
-            limit=audit_limit,
-        )
-        run_manifest = resolve_run_manifest(
-            self.run_manifest_service,
-            resolved_run_id,
-        )
-        return CheckpointAuditWorkflowResult(
-            pipeline_name=pipeline_name,
-            checkpoint=checkpoint,
-            audit=audit,
-            run_manifest=run_manifest,
-        )

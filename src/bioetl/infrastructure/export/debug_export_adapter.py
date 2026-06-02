@@ -191,7 +191,10 @@ class DebugExportAdapter:
                 worksheet.append(headers)
                 for row in chunk:
                     worksheet.append(
-                        [self._normalize_csv_value(row.get(header)) for header in headers]
+                        [
+                            self._normalize_csv_value(row.get(header))
+                            for header in headers
+                        ]
                     )
                 worksheet.auto_filter.ref = worksheet.dimensions
         workbook.save(output_path)
@@ -223,9 +226,7 @@ class DebugExportAdapter:
     ) -> dict[str, object]:
         payload = path.read_bytes()
         relative_path = (
-            str(path.relative_to(root_path))
-            if root_path is not None
-            else str(path)
+            str(path.relative_to(root_path)) if root_path is not None else str(path)
         )
         result = {
             "path": relative_path,

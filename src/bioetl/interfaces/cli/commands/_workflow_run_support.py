@@ -125,6 +125,9 @@ def _load_and_apply_workflow_config(
     replay_of_run_id: str | None,
     replay_of_manifest_id: str | None,
     enable_tracing: bool | None,
+    debug_export_enabled: bool | None,
+    debug_export_formats: tuple[str, ...],
+    debug_export_dir: str | None,
 ) -> object:
     """Load workflow config and apply CLI overrides."""
     try:
@@ -153,6 +156,9 @@ def _load_and_apply_workflow_config(
             replay_of_run_id=replay_of_run_id,
             replay_of_manifest_id=replay_of_manifest_id,
             enable_tracing=enable_tracing,
+            debug_export_enabled=debug_export_enabled,
+            debug_export_formats=debug_export_formats,
+            debug_export_dir=debug_export_dir,
         )
         _validate_workflow_pipeline_replay_prerequisites(config)
         return config

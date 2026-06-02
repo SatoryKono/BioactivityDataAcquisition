@@ -83,9 +83,7 @@ def prepare_runner_inputs(
     load_source_config_fn: Callable[..., object] | None = None,
 ) -> RunnerInputs:
     source_config_loader = (
-        _load_source_config
-        if load_source_config_fn is None
-        else load_source_config_fn
+        _load_source_config if load_source_config_fn is None else load_source_config_fn
     )
     prepared = _prepare_runner_context(
         ctx=ctx,
