@@ -317,7 +317,7 @@ finally:
                                 │
                                 ▼
                     ChEMBLActivityPipeline
-                    (uses CHEMBL-ACTIVITY-CONFIG)
+                    (uses CHEMBL_ACTIVITY_CONFIG)
 ```
 
 ## References

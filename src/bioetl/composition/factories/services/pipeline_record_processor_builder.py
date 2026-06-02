@@ -10,6 +10,7 @@ from bioetl.application.core.wiring.runtime import (
     RecordProcessor,
     RecordProcessorConfig,
 )
+from bioetl.application.services.debug_export_service import DebugExportConfig
 from bioetl.composition.factories.services._builder_record_processor_support import (
     _RecordProcessorBuildRequest,
 )
@@ -35,6 +36,19 @@ if TYPE_CHECKING:
     from bioetl.domain.config import DQConfig
     from bioetl.domain.ports import GoldValidatorPort, TracingPort
     from bioetl.domain.types import GoldSchemaType
+
+
+def _build_debug_export_config(pipeline: BasePipeline) -> DebugExportConfig | None:
+    runtime = pipeline.runtime
+    if not getattr(runtime, "debug_export_enabled", False):
+        return None
+    formats = tuple(getattr(runtime, "debug_export_formats", ()) or ("csv", "xlsx"))
+    return DebugExportConfig(
+        enabled=True,
+        formats=formats,
+        output_dir=getattr(runtime, "debug_export_dir", None)
+        or "artifacts/debug_exports",
+    )
 
 
 def build_record_processor_config_and_validator(
@@ -87,6 +101,7 @@ def build_record_processor_config_and_validator(
         content_hash_exclude_fields=exclude_fields,
         content_hash_policy_by_version=hash_policy_by_version,
         gold_schema_policy_by_version=gold_schema_policy_by_version,
+        debug_export_config=_build_debug_export_config(pipeline),
     )
     gold_validator = gold_validator_factory(
         cast("pdr.DataFrameSchema | None", active_gold_schema),
@@ -149,6 +164,7 @@ def create_record_processor_from_pipeline(
             content_hash_exclude_fields=exclude_fields,
             content_hash_policy_by_version=hash_policy_by_version,
             gold_schema_policy_by_version=gold_schema_policy_by_version,
+            debug_export_config=_build_debug_export_config(pipeline),
             record_processor_config_cls=RecordProcessorConfig,
             table_config_cls=TableConfig,
             gold_validator_factory=ContractAwareGoldValidator,

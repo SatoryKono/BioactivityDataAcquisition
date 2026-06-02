@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-02T08:36:20.571078+00:00",
+  "generated_at": "2026-06-02T09:13:37.047209+00:00",
   "summary": {
     "total_scripts": 424,
     "status_counts": {
@@ -6731,7 +6731,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 33,
+      "reference_count": 34,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -6790,7 +6790,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 33,
+      "reference_count": 34,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -6906,7 +6906,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 49,
+      "reference_count": 50,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -6965,7 +6965,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 63,
+      "reference_count": 64,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -7208,7 +7208,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 27,
+      "reference_count": 28,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -7265,7 +7265,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 26,
+      "reference_count": 27,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -9798,13 +9798,25 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 5,
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
           "line": 258,
           "source_group": "docs",
           "text": "- `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the"
+        },
+        {
+          "path": "docs/03-guides/github-setup-plan.md",
+          "line": 631,
+          "source_group": "docs",
+          "text": "- Проверка через `check_github_actions_runtime_policy.py`"
+        },
+        {
+          "path": "docs/03-guides/github-setup-plan.md",
+          "line": 636,
+          "source_group": "docs",
+          "text": "uv run python scripts/engineering/repo/check_github_actions_runtime_policy.py"
         },
         {
           "path": "docs/05-operations/runbooks/incident-response.md",

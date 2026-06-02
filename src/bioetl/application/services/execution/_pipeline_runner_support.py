@@ -74,4 +74,6 @@ def build_pipeline_run_result(
         completed_at=outcome.completed_at,
         error_message=outcome.error_message,
         error_type=outcome.error_type,
+        debug_export_uri=getattr(runner, "debug_export_uri", None),
+        debug_export_hash=getattr(runner, "debug_export_hash", None),
     )

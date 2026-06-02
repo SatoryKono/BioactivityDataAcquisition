@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.normalization_rules import NormalizationRulesPolicy
+from bioetl.application.services.debug_export_service import DebugExportConfig
 from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.config import DQConfig, MemoryConfig, TableConfig
 from bioetl.domain.types import (
@@ -112,6 +113,7 @@ class RecordProcessorConfig:
     content_hash_exclude_fields: frozenset[str] = field(default_factory=frozenset)
     content_hash_policy_by_version: ContentHashPolicyByVersion | None = None
     gold_schema_policy_by_version: GoldSchemaPolicyByVersion | None = None
+    debug_export_config: DebugExportConfig | None = None
 
 
 __all__ = [

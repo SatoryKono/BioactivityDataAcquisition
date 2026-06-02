@@ -23,6 +23,7 @@ if TYPE_CHECKING:
         RecordProcessorConfig,
         TransformCallback,
     )
+    from bioetl.application.services.debug_export_service import DebugExportConfig
     from bioetl.domain.composite.config import ColumnGroupConfig, DataSchemaConfig
     from bioetl.domain.config import DQConfig
     from bioetl.domain.context import PipelineContext
@@ -69,6 +70,7 @@ class _RecordProcessorBuildRequest:
     content_hash_exclude_fields: frozenset[str]
     content_hash_policy_by_version: ContentHashPolicyByVersion | None
     gold_schema_policy_by_version: GoldSchemaPolicyByVersion | None
+    debug_export_config: DebugExportConfig | None
     record_processor_config_cls: type[RecordProcessorConfig]
     table_config_cls: type[TableConfig]
     gold_validator_factory: Callable[..., GoldValidatorPort]
@@ -109,6 +111,7 @@ def create_record_processor_impl(
         content_hash_exclude_fields=request.content_hash_exclude_fields,
         content_hash_policy_by_version=request.content_hash_policy_by_version,
         gold_schema_policy_by_version=request.gold_schema_policy_by_version,
+        debug_export_config=request.debug_export_config,
     )
     components = request.create_batch_processing_components_fn(
         services=request.services,

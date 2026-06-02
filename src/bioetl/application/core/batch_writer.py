@@ -22,6 +22,7 @@ if TYPE_CHECKING:
     from bioetl.application.composite.column_service import ColumnOrderService
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
     from bioetl.application.core.record_processor_config import RecordProcessorConfig
+    from bioetl.application.services.debug_export_service import DebugExportService
     from bioetl.domain.config import KeyNullabilityRule
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
@@ -100,6 +101,7 @@ class BatchWriterOptions:
     lock_validator: BatchWriterLockValidator | None = None
     data_schema_config: DataSchemaConfig | None = None
     column_orderer: ColumnOrderService | None = None
+    debug_export_service: DebugExportService | None = None
 
 
 def _resolve_batch_writer_constructor_options(
@@ -182,6 +184,7 @@ class BatchWriter(BatchWriterIOMixin, BatchWriterColumnsMixin, BatchWriterTracin
         self._batch_metrics = batch_metrics
         self._tracer = opts.tracer
         self._lock_validator = opts.lock_validator
+        self._debug_export_service = opts.debug_export_service
 
         self._provider = config.provider
         self._entity_type = config.entity_type

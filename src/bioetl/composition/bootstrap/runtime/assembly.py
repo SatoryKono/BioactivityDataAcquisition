@@ -96,6 +96,9 @@ def assemble_runtime_config(
     heartbeat_interval: int,
     vacuum: ResolvedVacuumSettings,
     skip_gold: bool = False,
+    debug_export_enabled: bool = False,
+    debug_export_formats: tuple[str, ...] = (),
+    debug_export_dir: str | None = None,
     health_check_mode: Literal["strict", "probe"] = "strict",
 ) -> RuntimeConfig:
     """Build ``RuntimeConfig`` from already-resolved runtime inputs."""
@@ -109,6 +112,9 @@ def assemble_runtime_config(
         vacuum_after_run=vacuum.enabled,
         vacuum_retention_days=vacuum.retention_days,
         skip_gold=skip_gold,
+        debug_export_enabled=debug_export_enabled,
+        debug_export_formats=debug_export_formats,
+        debug_export_dir=debug_export_dir,
         health_check_mode=health_check_mode,
         silver_filter_compatibility_mode=resolve_silver_filter_compatibility_mode(),
     )

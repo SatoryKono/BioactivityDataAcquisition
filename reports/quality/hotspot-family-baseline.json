@@ -17,9 +17,9 @@
       ],
       "duplication_clusters": 0,
       "files": 166,
-      "total_loc": 21510,
-      "files_ge_250_loc": 12,
-      "helper_function_ratio": 0.375,
+      "total_loc": 21660,
+      "files_ge_250_loc": 14,
+      "helper_function_ratio": 0.374,
       "max_internal_fan_in": 14,
       "max_internal_fan_in_module": "bioetl.application.core.batch_runtime_failure_policy",
       "bounded_growth_budgets": {
@@ -27,7 +27,7 @@
         "max_internal_fan_in": 14
       },
       "budget_warnings": [
-        "near_budget:files_ge_250_loc=12/13",
+        "at_budget:files_ge_250_loc=14/13",
         "at_budget:max_internal_fan_in=14/14"
       ]
     },
@@ -42,7 +42,7 @@
       ],
       "duplication_clusters": 0,
       "files": 46,
-      "total_loc": 5889,
+      "total_loc": 5898,
       "files_ge_250_loc": 3,
       "helper_function_ratio": 0.326,
       "max_internal_fan_in": 5,

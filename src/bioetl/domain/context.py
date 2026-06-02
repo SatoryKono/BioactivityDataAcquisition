@@ -242,6 +242,9 @@ class PipelineRunContext:
     ignore_yaml_filter: bool = False
     skip_gold: bool = False
     tracing_enabled_override: bool | None = None
+    debug_export_enabled: bool = False
+    debug_export_formats: tuple[str, ...] = ()
+    debug_export_dir: str | None = None
     execution_context: ExecutionContext = ExecutionContext.ISOLATED
 
     @property

@@ -243,6 +243,12 @@ class BatchWriterIOMixin:
 
         result = validator.validate(records)
         if not result.valid:
+            debug_export_service = getattr(self, "_debug_export_service", None)
+            if debug_export_service is not None:
+                debug_export_service.record_gold_validation_failure(
+                    records=records,
+                    errors=result.errors,
+                )
             raise SchemaViolationError("gold", result.errors)
 
     def _rebind_gold_validator_schema(

@@ -266,11 +266,11 @@ Types:
   ci/          - изменения CI/CD
 
 Examples:
-  feat/pubchem-compound-pipeline
-  fix/chembl-rate-limit-429
-  refactor/storage-clear-contract
-  docs/update-github-workflow
-  ci/add-performance-gates
+  feat/pubchem_compound_pipeline
+  fix/chembl_rate_limit_429
+  refactor/storage_clear_contract
+  docs/update_github_workflow
+  ci/add_performance_gates
 ```
 
 #### 4.2 Feature development workflow

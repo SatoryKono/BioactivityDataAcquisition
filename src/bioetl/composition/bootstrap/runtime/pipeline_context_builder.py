@@ -131,5 +131,8 @@ def build_pipeline_context(
         cached_bronze=cached_bronze,
         exact_replay=options.exact_replay,
         required_persistence_profile=options.required_persistence_profile,
+        debug_export_enabled=options.debug_export_enabled,
+        debug_export_formats=tuple(options.debug_export_formats or ()),
+        debug_export_dir=options.debug_export_dir,
         execution_context=ExecutionContext(options.execution_context),
     )

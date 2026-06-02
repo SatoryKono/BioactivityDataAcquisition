@@ -12,9 +12,9 @@ Reviewed extra compose files в корне (`docker-compose.alertmanager.yml`,
 stacks. Они не требуются для базового development/test runtime и не считаются
 canonical orchestration path under ADR-010.
 
-<!-- BIOETL-DOCKER-HELPER-ADR010-ADJUNCT -->
+<!-- BIOETL_DOCKER_HELPER_ADR010_ADJUNCT -->
 
-Governance anchor: `BIOETL-DOCKER-HELPER-ADR010-ADJUNCT`. Reviewed helper stack
+Governance anchor: `BIOETL_DOCKER_HELPER_ADR010_ADJUNCT`. Reviewed helper stack
 contract source: `configs/quality/docker_helper_contracts.yaml`. Redis, MinIO,
 SonarQube and Alertmanager helper compose files MUST remain optional
 local-only adjunct tooling and MUST NOT become application storage, locking, or

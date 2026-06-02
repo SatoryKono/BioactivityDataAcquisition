@@ -154,6 +154,9 @@ class CliRunOrchestrationService:
             exact_replay=request.exact_replay,
             required_persistence_profile=request.required_persistence_profile,
             enable_tracing=request.enable_tracing,
+            debug_export_enabled=request.debug_export_enabled,
+            debug_export_formats=request.debug_export_formats,
+            debug_export_dir=request.debug_export_dir,
         )
 
     def prepare_execution_request(

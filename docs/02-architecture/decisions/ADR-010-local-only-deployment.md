@@ -223,7 +223,7 @@ class Settings:
    если она используется как application runtime, storage, locking или
    orchestration path.
 1. Reviewed root-level helper compose files MAY remain only under
-   `BIOETL-DOCKER-HELPER-ADR010-ADJUNCT` governance and MUST NOT be used by
+   `BIOETL_DOCKER_HELPER_ADR010_ADJUNCT` governance and MUST NOT be used by
    application logic.
 1. Обновить переменные окружения application runtime (удалить AWS-*, REDIS-*).
 1. Переустановить зависимости: `pip install -e .[dev]`

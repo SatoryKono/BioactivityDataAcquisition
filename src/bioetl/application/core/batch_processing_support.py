@@ -46,6 +46,7 @@ if TYPE_CHECKING:
     from bioetl.application.observability.domain_event_emitter import (
         DomainEventEmitterProtocol,
     )
+    from bioetl.application.services.debug_export_service import DebugExportService
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
@@ -70,6 +71,7 @@ class BatchProcessingSupportService:
         quarantine_manager: QuarantineRuntimeService,
         run_id: RunID | None = None,
         domain_event_emitter: DomainEventEmitterProtocol | None = None,
+        debug_export_service: DebugExportService | None = None,
     ) -> None:
         self._services = services
         self._logger = logger
@@ -80,6 +82,7 @@ class BatchProcessingSupportService:
         self._quarantine_manager = quarantine_manager
         self._run_id = run_id
         self._domain_event_emitter = domain_event_emitter
+        self._debug_export_service = debug_export_service
 
     def get_source_metadata(self, query_string: str | None) -> SourceMetadata | None:
         return get_source_metadata(
@@ -93,6 +96,7 @@ class BatchProcessingSupportService:
         *,
         records: list[BronzeRecord],
         batch_id: BatchID,
+        start_index: int,
         ingestion_ts: datetime,
         source_metadata: SourceMetadata | None,
     ) -> object:
@@ -114,6 +118,13 @@ class BatchProcessingSupportService:
             self._batch_metrics,
             record_count=len(records),
         )
+        if self._debug_export_service is not None:
+            self._debug_export_service.record_bronze_batch(
+                records=records,
+                batch_id=batch_id,
+                start_index=start_index,
+                source_metadata=source_metadata,
+            )
         emit_batch_written(
             emitter=self._domain_event_emitter,
             run_id=self._run_id,

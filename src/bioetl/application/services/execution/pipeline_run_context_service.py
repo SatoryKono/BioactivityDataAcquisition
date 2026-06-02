@@ -101,6 +101,9 @@ class PipelineRunContextService:
                 == "degraded_observable"
             ),
             tracing_enabled_override=options.enable_tracing,
+            debug_export_enabled=options.debug_export_enabled,
+            debug_export_formats=tuple(options.debug_export_formats or ()),
+            debug_export_dir=options.debug_export_dir,
         )
 
     def _build_input_filter(self, options: RunOptions) -> InputFilterContext:

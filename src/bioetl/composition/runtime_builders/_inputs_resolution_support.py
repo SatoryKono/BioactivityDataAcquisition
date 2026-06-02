@@ -111,6 +111,9 @@ def assemble_runtime_config_impl(
         vacuum_after_run=vacuum_enabled,
         vacuum_retention_days=vacuum_retention_days,
         skip_gold=skip_gold,
+        debug_export_enabled=bool(getattr(ctx, "debug_export_enabled", False)),
+        debug_export_formats=tuple(getattr(ctx, "debug_export_formats", ())),
+        debug_export_dir=getattr(ctx, "debug_export_dir", None),
         health_check_mode=health_check_mode,
         silver_filter_compatibility_mode=resolve_silver_filter_compatibility_mode(),
     )
