@@ -6,7 +6,7 @@
 - removed_compatibility_surfaces_with_src_importers: 0
 - removed_compatibility_surfaces_with_test_importers: 0
 - removed_compatibility_surfaces_still_present: 0
-- twin_pair_count: 4
+- twin_pair_count: 0
 - tracked_twin_family_count: 0
 - config_root_symbol_count: 3
 - config_root_src_importer_count: 0
@@ -19,18 +19,18 @@
 
 | Path | src importers | test importers |
 | --- | ---: | ---: |
-| `src/bioetl/interfaces/cli/commands/run.py` | 1 | 2 |
+| `src/bioetl/interfaces/cli/commands/run.py` | 0 | 2 |
 | `src/bioetl/interfaces/cli/commands/run_all.py` | 1 | 5 |
 | `src/bioetl/interfaces/cli/commands/run_composite.py` | 1 | 1 |
 | `src/bioetl/interfaces/cli/commands/health.py` | 4 | 1 |
 | `src/bioetl/interfaces/cli/commands/diagnostics.py` | 1 | 2 |
 | `src/bioetl/interfaces/cli/commands/quarantine.py` | 1 | 0 |
-| `src/bioetl/interfaces/cli/commands/maintenance.py` | 6 | 0 |
+| `src/bioetl/interfaces/cli/commands/maintenance.py` | 5 | 0 |
 | `src/bioetl/composition/entrypoints.py` | 0 | 3 |
 | `src/bioetl/composition/health_api.py` | 1 | 2 |
-| `src/bioetl/composition/maintenance_api.py` | 1 | 1 |
+| `src/bioetl/composition/maintenance_api.py` | 2 | 1 |
 | `src/bioetl/infrastructure/config/__init__.py` | 0 | 2 |
-| `src/bioetl/domain/composite/config.py` | 79 | 34 |
+| `src/bioetl/domain/composite/config.py` | 81 | 34 |
 | `src/bioetl/domain/value_objects/activity_values.py` | 7 | 1 |
 | `src/bioetl/application/composite/merger.py` | 5 | 4 |
 
@@ -75,10 +75,6 @@
 
 | Public module | Public src | Private src |
 | --- | ---: | ---: |
-| `bioetl.composition.factories.storage.audit` | 4 | 0 |
-| `bioetl.composition.factories.storage.resilience` | 4 | 0 |
-| `bioetl.domain.value_objects.publication_field_group_types` | 3 | 0 |
-| `bioetl.infrastructure.adapters.circuit_breaker_contract` | 3 | 0 |
 
 ## Tracked Twin Family Ratchet
 

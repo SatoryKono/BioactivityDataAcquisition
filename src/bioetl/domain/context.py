@@ -245,6 +245,7 @@ class PipelineRunContext:
     debug_export_enabled: bool = False
     debug_export_formats: tuple[str, ...] = ()
     debug_export_dir: str | None = None
+    workflow_id: str = "standalone"
     execution_context: ExecutionContext = ExecutionContext.ISOLATED
 
     @property

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from time import perf_counter
 from typing import TYPE_CHECKING
 
@@ -240,9 +240,13 @@ class WorkflowRunnerService:
             step_started_callback(step, fingerprint=None)
         started = self.monotonic()
         try:
+            step_options = replace(
+                run_options_from_config(step.run_options),
+                workflow_id=workflow_name,
+            )
             result = await self.pipeline_runner.run(
                 step.pipeline_name,
-                options=run_options_from_config(step.run_options),
+                options=step_options,
             )
         except _WORKFLOW_STEP_FAILURES as exc:
             record_step_metrics(

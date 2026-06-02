@@ -93,10 +93,14 @@ def _module_name(source_path: Path, repo_root: Path) -> str:
 
 def _iter_source_modules(repo_root: Path) -> list[Path]:
     source_root = repo_root / "src" / "bioetl"
-    return [
+    source_paths = [
         source_root / relative_path
         for relative_path in discover_files(str(source_root.resolve()), ".py")
     ]
+    # Shared-drive worktrees can momentarily expose stale cached file lists while
+    # concurrent refactors/delete operations are in flight; ignore vanished paths
+    # so the inventory reflects the actual current source tree.
+    return [path for path in source_paths if path.exists()]
 
 
 def compute_source_tree_sha256(

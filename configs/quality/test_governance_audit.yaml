@@ -357,7 +357,7 @@ oversized_test_module_inventory:
       source: tests/unit/composition/runtime_builders/test_runner_builder_profiles.py
       source_lines_after_split: 1128
       extracted_surface: tests/unit/composition/runtime_builders/test_runner_builder_contracts.py
-      extracted_surface_lines: 166
+      extracted_surface_lines: 179
       owner: composition-runtime
     - issue_ref: "#4506"
       source: tests/unit/application/services/test_run_manifest_inspection_service.py

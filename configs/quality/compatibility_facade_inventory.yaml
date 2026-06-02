@@ -19,13 +19,12 @@ retained_entrypoints:
   review_date: '2026-09-30'
   external_breaking_change_required: true
   internal_callers_zero: false
-  allowed_call_sites: '`src`: use `bioetl.interfaces.cli.commands.run` as the public seam; `src/bioetl/interfaces/cli/commands/domains/run/__init__.py`
-    may re-export that public module for package compatibility only. `tests`: patch/import coverage may target `bioetl.interfaces.cli.commands.run`;
-    retired wrapper module `bioetl.interfaces.cli.commands.domains.run.command` must stay absent'
+  allowed_call_sites: '`src`: use `bioetl.interfaces.cli.commands.run` as the public seam. `tests`: patch/import coverage may target
+    `bioetl.interfaces.cli.commands.run`; retired wrapper module `bioetl.interfaces.cli.commands.domains.run.command` must stay absent'
   migration_path: Use `bioetl.interfaces.cli.commands.run` for public CLI wiring and patch targets; do not reintroduce `bioetl.interfaces.cli.commands.domains.run.command`
     as an internal owner wrapper.
-  exit_criteria: The top-level module remains the sanctioned public CLI patch/import seam, the domain package resolves directly
-    to that public module, and the retired `domains.run.command` wrapper stays absent.
+  exit_criteria: The top-level module remains the sanctioned public CLI patch/import seam and the retired `domains.run.command`
+    wrapper stays absent.
 - path: src/bioetl/interfaces/cli/commands/run_all.py
   compatibility_role: Permanent public run-all command seam over the split internal owner module `bioetl.interfaces.cli.commands.domains.run_all.command`.
   canonical_target: bioetl.interfaces.cli.commands.run_all

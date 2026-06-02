@@ -138,6 +138,23 @@ class TestBuildContext:
         )
 
         assert context.tracing_enabled_override is True
+        assert context.workflow_id == "standalone"
+
+    def test_build_context_propagates_workflow_id_for_debug_export_paths(self) -> None:
+        service = PipelineRunContextService()
+
+        context = service.build_context(
+            pipeline_name="chembl_activity",
+            run_id=RunID(uuid4()),
+            options=RunOptions(
+                debug_export_enabled=True,
+                workflow_id="chembl_baseline",
+            ),
+            started_at=FIXED_STARTED_AT,
+        )
+
+        assert context.debug_export_enabled is True
+        assert context.workflow_id == "chembl_baseline"
 
     @pytest.mark.unit
     def test_build_context_propagates_required_persistence_profile(self) -> None:

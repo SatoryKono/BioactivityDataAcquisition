@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from importlib import import_module
 from typing import TYPE_CHECKING
+
+from bioetl.composition._lazy_exports import lazy_export_dir, resolve_lazy_export
 
 _PIPELINE_EXECUTION_MODULE = "bioetl.composition._pipeline_execution"
 _PIPELINE_RUNNER_MODELS_MODULE = (
@@ -93,12 +94,18 @@ def push_metrics_to_gateway(
 
 def __getattr__(name: str) -> object:
     """Resolve execution-oriented public exports lazily."""
-    module_name = _PUBLIC_EXPORTS.get(name)
-    if module_name is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    return getattr(import_module(module_name), name)
+    return resolve_lazy_export(
+        module_globals=globals(),
+        public_exports=_PUBLIC_EXPORTS,
+        module_name=__name__,
+        name=name,
+    )
 
 
 def __dir__() -> list[str]:
     """Expose lazy re-exports to introspection and wildcard imports."""
-    return sorted(set(globals()) | set(__all__))
+    return lazy_export_dir(
+        module_globals=globals(),
+        public_exports=_PUBLIC_EXPORTS,
+        explicit_exports=__all__,
+    )

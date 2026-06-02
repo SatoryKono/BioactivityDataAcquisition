@@ -208,6 +208,7 @@ async def test_workflow_runner_executes_pipeline_then_transform() -> None:
     assert pipeline_runner.calls[0][1].required_persistence_profile == (
         "degraded_observable"
     )
+    assert pipeline_runner.calls[0][1].workflow_id == "activity_workflow"
     assert metrics.gauges[-1] == (
         "bioetl_workflow_current_status",
         0.0,
@@ -380,6 +381,10 @@ async def test_workflow_runner_executes_chembl_baseline_in_dependency_order() ->
         "chembl_target",
         "chembl_publication",
     ]
+    assert all(
+        options.workflow_id == "chembl_baseline"
+        for _pipeline_name, options in pipeline_runner.calls
+    )
     assert transform_service.calls == [
         (
             "reconcile_assay_target_orphans",
