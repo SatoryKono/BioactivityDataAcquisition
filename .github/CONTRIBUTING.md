@@ -116,6 +116,25 @@ them:
 These checks still reduce the risk of merging failing tests, lint errors, or
 secret leaks.
 
+`checks-complete` is intentionally non-skippable: `.github/workflows/import-linter.yml`
+must materialize on every PR and push, including docs-only or markdown-only
+changesets.
+
+### Import-linter local repro
+
+Canonical local command:
+
+```bash
+uv run lint-imports --config .importlinter
+```
+
+If `tests/architecture/test_layer_dependencies.py::test_import_linter_contracts`
+skips locally, treat that as a degraded local environment and install the full
+test capability set before trusting the result. Required CI exports
+`BIOETL_REQUIRE_TEST_CAPABILITIES=1`, so missing `lint-imports`,
+missing import-linter dependencies, or import-linter encoding/runtime failures
+must fail fast there instead of silently skipping.
+
 
 ### Dependency Preflight Triage
 

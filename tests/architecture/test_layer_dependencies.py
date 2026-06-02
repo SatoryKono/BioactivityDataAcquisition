@@ -138,6 +138,23 @@ def _import_linter_skip_reason(result: subprocess.CompletedProcess[str]) -> str 
     return None
 
 
+def _require_import_linter_capabilities() -> bool:
+    """Return whether capability drift must fail instead of skip.
+
+    Local/dev runs may still degrade when optional architecture-test dependencies
+    are missing. Required CI paths export ``BIOETL_REQUIRE_TEST_CAPABILITIES=1``
+    and must fail fast instead of silently skipping import-linter coverage.
+    """
+    return os.environ.get("BIOETL_REQUIRE_TEST_CAPABILITIES") == "1"
+
+
+def _handle_import_linter_capability_gap(message: str) -> None:
+    """Skip locally but fail fast when full test capabilities are required."""
+    if _require_import_linter_capabilities():
+        pytest.fail(message)
+    pytest.skip(message)
+
+
 def _mark_contentful_dirs(
     *,
     bioetl_path: Path,
@@ -625,11 +642,13 @@ def test_import_linter_contracts(project_root: Path, src_dir: Path) -> None:
     """
     importlinter_config = project_root / ".importlinter"
     if not importlinter_config.exists():
-        pytest.skip(".importlinter config not found")
+        _handle_import_linter_capability_gap(".importlinter config not found")
+        return
 
     lint_imports_cmd = _find_lint_imports_cmd(project_root)
     if lint_imports_cmd is None:
-        pytest.skip("lint-imports executable not found")
+        _handle_import_linter_capability_gap("lint-imports executable not found")
+        return
 
     # Override PYTHONPATH to ensure correct project is used
     env = os.environ.copy()
@@ -652,14 +671,16 @@ def test_import_linter_contracts(project_root: Path, src_dir: Path) -> None:
             env=env,
         )
     except PermissionError:
-        pytest.skip(
+        _handle_import_linter_capability_gap(
             "lint-imports executable exists but is not runnable in this environment"
         )
+        return
 
     if result.returncode != 0:
         skip_reason = _import_linter_skip_reason(result)
         if skip_reason is not None:
-            pytest.skip(skip_reason)
+            _handle_import_linter_capability_gap(skip_reason)
+            return
         # When output is empty (e.g. Windows console capture), run without capture for diagnostics
         out = result.stdout.strip() or result.stderr.strip() or "(no output captured)"
         pytest.fail(
