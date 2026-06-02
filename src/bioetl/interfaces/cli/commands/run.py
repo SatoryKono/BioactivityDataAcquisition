@@ -61,6 +61,9 @@ from bioetl.interfaces.cli.commands.domains.run.runtime_helpers import (
     build_run_pipeline_callable as _build_run_pipeline_callable_impl,
 )
 from bioetl.interfaces.cli.commands.domains.run.runtime_helpers import (
+    get_pipeline_runner_service as _get_pipeline_runner_service_impl,
+)
+from bioetl.interfaces.cli.commands.domains.run.runtime_helpers import (
     run_pipeline_async as _run_pipeline_async_impl,
 )
 from bioetl.interfaces.cli.commands.domains.run.runtime_helpers import (
@@ -137,17 +140,6 @@ def create_cli_run_orchestration_service() -> CliRunOrchestrationService:
     return _create_cli_run_orchestration_service_impl()
 
 
-def get_pipeline_runner_service(
-    registry: PipelineRegistry | None = None,
-) -> PipelineRunnerService:
-    """Resolve the pipeline runner service lazily for runtime helpers."""
-    from bioetl.composition.execution_api import (
-        get_pipeline_runner_service as _impl,
-    )
-
-    return cast("PipelineRunnerService", _impl(registry=registry))
-
-
 def _exit_with_code(code: int | str | None = None) -> NoReturn:
     """Typed wrapper around sys.exit for policy flow injection."""
     sys.exit(code)
@@ -192,6 +184,7 @@ def execute_run(
 _build_run_command_input = _build_run_command_input_impl
 _map_status_to_exit_code = map_status_to_exit_code
 _build_run_pipeline_callable = _build_run_pipeline_callable_impl
+get_pipeline_runner_service = _get_pipeline_runner_service_impl
 
 
 def _present_run_health_info(request: RunExecutionRequest) -> None:

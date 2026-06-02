@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
+from dataclasses import replace
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.composite.column_service import ColumnOrderService
@@ -76,7 +77,10 @@ def create_batch_processing_components(
     )
     debug_export_service = (
         DebugExportService(
-            config=config.debug_export_config,
+            config=replace(
+                config.debug_export_config,
+                workflow_id=getattr(context, "workflow_id", "standalone"),
+            ),
             run_id=context.run_id,
             pipeline_id=config.pipeline_name,
             provider_id=config.provider,

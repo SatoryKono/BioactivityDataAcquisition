@@ -66,9 +66,6 @@ EXPECTED_LAZY_EXPORT_FACADES = {
     "src/bioetl/interfaces/cli/commands/domains/quarantine/__init__.py": (
         "public_package_facade"
     ),
-    "src/bioetl/interfaces/cli/commands/domains/run/__init__.py": (
-        "public_package_facade"
-    ),
     "src/bioetl/interfaces/cli/commands/domains/run_all/__init__.py": (
         "public_package_facade"
     ),

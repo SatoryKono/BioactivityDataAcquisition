@@ -8,6 +8,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from bioetl.application.services.debug_export_service import DebugExportConfig
 from bioetl.application.core.wiring.runtime import BasePipeline
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
 from bioetl.composition.factories.services.pipeline_builder import (
@@ -130,6 +131,9 @@ class TestCreateBatchProcessingComponents:
     )
     @patch(
         "bioetl.composition.factories.services.pipeline_processing_components_builder.BatchWriter"
+    )
+    @patch(
+        "bioetl.composition.factories.services.pipeline_processing_components_builder.DebugExportService"
     )
     @patch(
         "bioetl.composition.factories.services.pipeline_processing_components_builder.BatchTransformer"
@@ -259,11 +263,13 @@ class TestCreateBatchProcessingComponents:
         self,
         mock_quarantine: MagicMock,
         mock_batch_metrics: MagicMock,
+        mock_debug_export_service: MagicMock,
         mock_batch_transformer: MagicMock,
         mock_batch_writer: MagicMock,
     ) -> None:
         mock_quarantine.return_value = MagicMock()
         mock_batch_metrics.return_value = MagicMock()
+        mock_debug_export_service.return_value = MagicMock()
         mock_batch_transformer.return_value = MagicMock()
         mock_batch_writer.return_value = MagicMock()
 
@@ -296,6 +302,69 @@ class TestCreateBatchProcessingComponents:
         options = mock_batch_writer.call_args.kwargs["options"]
         assert options.tracer is tracer
         assert options.lock_validator is lock_validator
+
+    @patch(
+        "bioetl.composition.factories.services.pipeline_processing_components_builder.BatchWriter"
+    )
+    @patch(
+        "bioetl.composition.factories.services.pipeline_processing_components_builder.DebugExportService"
+    )
+    @patch(
+        "bioetl.composition.factories.services.pipeline_processing_components_builder.BatchTransformer"
+    )
+    @patch(
+        "bioetl.composition.factories.services.pipeline_processing_components_builder.BatchMetricsRecorderService"
+    )
+    @patch(
+        "bioetl.composition.factories.services.pipeline_processing_components_builder.QuarantineRuntimeService"
+    )
+    def test_debug_export_service_uses_runtime_workflow_id(
+        self,
+        mock_quarantine: MagicMock,
+        mock_batch_metrics: MagicMock,
+        mock_batch_transformer: MagicMock,
+        mock_debug_export_service: MagicMock,
+        mock_batch_writer: MagicMock,
+    ) -> None:
+        mock_quarantine.return_value = MagicMock()
+        mock_batch_metrics.return_value = MagicMock()
+        mock_batch_transformer.return_value = MagicMock()
+        mock_batch_writer.return_value = MagicMock()
+        mock_debug_export_service.return_value = MagicMock()
+
+        context = MagicMock()
+        context.run_type.value = "incremental"
+        context.logger = MagicMock()
+        context.run_id = "run-1"
+        context.workflow_id = "chembl_baseline"
+
+        config = MagicMock()
+        config.provider = "chembl"
+        config.entity_type = "activity"
+        config.pipeline_name = "chembl_activity"
+        config.column_groups = ()
+        config.debug_export_config = DebugExportConfig(
+            enabled=True,
+            formats=("csv",),
+            output_dir="artifacts/debug_exports",
+            include_bom=False,
+            max_rows_per_sheet=1_048_576,
+            workflow_id="standalone",
+        )
+
+        create_batch_processing_components(
+            services=MagicMock(),
+            context=context,
+            config=config,
+            error_classifier=MagicMock(),
+            transform_callback=MagicMock(),
+            gold_filter_callback=MagicMock(),
+            gold_transform_callback=MagicMock(),
+            gold_validator=MagicMock(),
+        )
+
+        debug_config = mock_debug_export_service.call_args.kwargs["config"]
+        assert debug_config.workflow_id == "chembl_baseline"
 
 
 @pytest.mark.unit

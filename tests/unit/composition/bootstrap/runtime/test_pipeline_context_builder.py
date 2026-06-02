@@ -92,6 +92,21 @@ def test_build_pipeline_context_accepts_injected_run_id_factory() -> None:
     assert context.run_id == expected_run_id
 
 
+def test_build_pipeline_context_propagates_workflow_id() -> None:
+    """Workflow-owned runs must carry the workflow anchor into runtime context."""
+    context = build_pipeline_context(
+        "chembl_activity",
+        RunOptions(
+            debug_export_enabled=True,
+            workflow_id="chembl_baseline",
+        ),
+        run_id=uuid4(),
+        started_at=datetime(2026, 5, 24, 13, 30, tzinfo=UTC),
+    )
+
+    assert context.workflow_id == "chembl_baseline"
+
+
 def test_build_pipeline_context_requires_clock_when_started_at_missing() -> None:
     """Implicit system-time fallback must stay forbidden for replay-critical seams."""
     with pytest.raises(RuntimeError, match="ClockPort is required"):

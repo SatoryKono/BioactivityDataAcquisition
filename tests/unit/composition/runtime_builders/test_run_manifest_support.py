@@ -25,6 +25,7 @@ from bioetl.composition.runtime_builders.cached_bronze_snapshot_support import (
 )
 from bioetl.composition.runtime_builders.run_manifest_support import (
     RunManifestContractIdentity,
+    build_planned_artifacts,
     build_launch_context_snapshot,
     build_run_source_refs,
     resolve_contract_identity,
@@ -225,6 +226,29 @@ def test_build_manifest_create_request_uses_supplied_reproducibility_context(
     assert captured["launch_context_context"] is reproducibility_context
     assert captured["assemble_request_inputs"].source_fingerprint == (
         "source-fingerprint-1"
+    )
+
+
+@pytest.mark.unit
+def test_build_planned_artifacts_includes_debug_export_root_when_enabled() -> None:
+    settings = _make_settings(data_dir=Path("/tmp/bioetl-data"))
+
+    artifacts = build_planned_artifacts(
+        settings=settings,
+        provider="chembl",
+        entity="activity",
+        run_id="00000000-0000-0000-0000-000000000123",
+        pipeline_name="chembl_activity",
+        workflow_id="chembl_baseline",
+        debug_export_root="artifacts/debug_exports",
+    )
+
+    debug_export = next(
+        artifact for artifact in artifacts if artifact.layer == "debug_export"
+    )
+    assert debug_export.path.endswith(
+        "artifacts/debug_exports/chembl_baseline/chembl_activity/"
+        "00000000-0000-0000-0000-000000000123"
     )
 
 

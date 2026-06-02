@@ -34,11 +34,6 @@ import pytest
             "bioetl.interfaces.cli.commands.domains.quarantine.command",
         ),
         (
-            "src/bioetl/interfaces/cli/commands/domains/run/__init__.py",
-            "run",
-            "bioetl.interfaces.cli.commands.run",
-        ),
-        (
             "src/bioetl/interfaces/cli/commands/domains/run_all/__init__.py",
             "run_all",
             "bioetl.interfaces.cli.commands.domains.run_all.command",

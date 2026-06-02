@@ -134,5 +134,6 @@ def build_pipeline_context(
         debug_export_enabled=options.debug_export_enabled,
         debug_export_formats=tuple(options.debug_export_formats or ()),
         debug_export_dir=options.debug_export_dir,
+        workflow_id=options.workflow_id or "standalone",
         execution_context=ExecutionContext(options.execution_context),
     )

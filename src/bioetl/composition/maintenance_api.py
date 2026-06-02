@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from importlib import import_module
 from typing import TYPE_CHECKING
+
+from bioetl.composition._lazy_exports import lazy_export_dir, resolve_lazy_export
 
 __all__ = [
     "archive_table",
@@ -59,14 +60,19 @@ _PUBLIC_EXPORTS = {
 
 def __getattr__(name: str) -> object:
     """Resolve maintenance exports lazily to avoid CLI import fan-out."""
-    module_name = _PUBLIC_EXPORTS.get(name)
-    if module_name is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    value = getattr(import_module(module_name), name)
-    globals()[name] = value
-    return value
+    return resolve_lazy_export(
+        module_globals=globals(),
+        public_exports=_PUBLIC_EXPORTS,
+        module_name=__name__,
+        name=name,
+        cache=True,
+    )
 
 
 def __dir__() -> list[str]:
     """Expose lazy exports to introspection and wildcard imports."""
-    return sorted(set(globals()) | set(__all__))
+    return lazy_export_dir(
+        module_globals=globals(),
+        public_exports=_PUBLIC_EXPORTS,
+        explicit_exports=__all__,
+    )
