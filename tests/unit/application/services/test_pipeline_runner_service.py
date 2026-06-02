@@ -131,6 +131,7 @@ def service(
         clock=clock,
         _context_service=PipelineRunContextService(),
         _execution_service=PipelineRunExecutionService(clock=clock),
+        run_id_factory=lambda: UUID("00000000-0000-0000-0000-000000000101"),
     )
 
 
