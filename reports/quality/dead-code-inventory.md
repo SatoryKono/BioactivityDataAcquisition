@@ -6,8 +6,8 @@
 - next_review_by: 2026-08-30
 - review_cycle_days: 90
 - triaged_entry_count: 18
-- repo_wide_zero_import_candidate_count: 53
-- repo_wide_classified_zero_import_candidate_count: 53
+- repo_wide_zero_import_candidate_count: 48
+- repo_wide_classified_zero_import_candidate_count: 48
 - repo_wide_untriaged_zero_import_candidate_count: 0
 - note: zero static importer count is a review signal, not automatic removal proof
 - guardrail: Zero static importer count is a review signal only; removals must still verify public entrypoints and dynamic/plugin import paths.
@@ -40,12 +40,7 @@
 | Module | Disposition | Path |
 | --- | --- | --- |
 | `bioetl.__main__` | `retain_module_entrypoint` | `src/bioetl/__main__.py` |
-| `bioetl.application.core._filtered_data_source_mixins` | `retain_compat_shim` | `src/bioetl/application/core/_filtered_data_source_mixins.py` |
-| `bioetl.application.core._idmapping_fetch_support` | `retain_compat_shim` | `src/bioetl/application/core/_idmapping_fetch_support.py` |
-| `bioetl.application.core._idmapping_lifecycle_support` | `retain_compat_shim` | `src/bioetl/application/core/_idmapping_lifecycle_support.py` |
 | `bioetl.application.core._span_helpers` | `retain_compat_shim` | `src/bioetl/application/core/_span_helpers.py` |
-| `bioetl.application.core._subcellular_fraction_support` | `retain_compat_shim` | `src/bioetl/application/core/_subcellular_fraction_support.py` |
-| `bioetl.application.core._target_data_source_mixins` | `retain_compat_shim` | `src/bioetl/application/core/_target_data_source_mixins.py` |
 | `bioetl.application.core.batch_execution_lifecycle` | `retain_public_facade` | `src/bioetl/application/core/batch_execution_lifecycle.py` |
 | `bioetl.application.core.batch_execution_run_service` | `retain_public_facade` | `src/bioetl/application/core/batch_execution_run_service.py` |
 | `bioetl.application.core.batch_execution_state_service` | `retain_public_facade` | `src/bioetl/application/core/batch_execution_state_service.py` |

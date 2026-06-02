@@ -126,8 +126,10 @@ def _check_grafana_render_auth(
     )
 
 
-def _check_playwright_runtime() -> PreflightCheck:
-    ok, detail = rerender_screenshots.check_playwright_runtime()
+def _check_playwright_runtime(
+    timeout_seconds: float = DEFAULT_TIMEOUT_SECONDS,
+) -> PreflightCheck:
+    ok, detail = rerender_screenshots.check_playwright_runtime(timeout_seconds)
     return PreflightCheck(
         name="playwright-runtime",
         status="ok" if ok else "error",
@@ -137,9 +139,7 @@ def _check_playwright_runtime() -> PreflightCheck:
 
 def _check_expanded_row_capture(playwright_check: PreflightCheck) -> PreflightCheck:
     """Report whether the full-audit screenshot path can expand collapsed rows."""
-    script_path = (
-        Path(__file__).resolve().parent / "rerender_grafana_screenshots.cjs"
-    )
+    script_path = Path(__file__).resolve().parent / "rerender_grafana_screenshots.cjs"
     if playwright_check.status != "ok":
         return PreflightCheck(
             name="expanded-row-capture",
@@ -254,7 +254,7 @@ def run_checks(
     include_screenshot_check: bool = True,
     screenshot_uids: tuple[str, ...] = (),
 ) -> list[PreflightCheck]:
-    playwright_check = _check_playwright_runtime()
+    playwright_check = _check_playwright_runtime(timeout_seconds)
     checks = [
         _check_http_json(
             name="grafana",

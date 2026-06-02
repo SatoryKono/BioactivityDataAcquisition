@@ -18,6 +18,7 @@ from bioetl.domain.types import RunID
 RUN_ID_NO_SELECTION = "-"
 UNKNOWN_SCOPE = "unknown"
 ALL_SCOPE = "All"
+_ALL_SCOPE_TOKENS = frozenset({ALL_SCOPE, "$__all", "__all", "*"})
 SELECTOR_CONTEXT_CONTRACT = "control_plane_selector_context_v1"
 
 _TERMINAL_EVENT_TYPES = frozenset(
@@ -96,6 +97,8 @@ def build_selector_filter_options_payload(
     selected_run_types: tuple[str, ...] = (),
     selected_run_statuses: tuple[str, ...] = (),
     selected_run_id: str | None = None,
+    exact_run_only: bool = False,
+    fallback_value: str | None = None,
 ) -> dict[str, object]:
     """Build Grafana variable option responses from the selector catalog."""
     records = _build_selector_records(
@@ -107,6 +110,7 @@ def build_selector_filter_options_payload(
             ),
             selected_run_types=selected_run_types,
             selected_run_id=selected_run_id,
+            fail_open_when_empty=False,
         ),
         ledger_port,
     )
@@ -123,6 +127,9 @@ def build_selector_filter_options_payload(
     if dimension not in options:
         raise ValueError(f"Unsupported control-plane filter dimension: {dimension}")
     values = list(options[dimension])
+    if exact_run_only:
+        if selected_run_id is None or not values:
+            values = _exact_run_only_fallback_values(fallback_value)
     if dimension == "run_id":
         values = [RUN_ID_NO_SELECTION, *[value for value in values if value]]
     if response_shape == "list":
@@ -151,7 +158,7 @@ def _selected_pipeline_scope(
 ) -> tuple[str, ...]:
     if selected_pipelines:
         return selected_pipelines
-    if requested_pipeline in {None, ALL_SCOPE}:
+    if requested_pipeline is None or requested_pipeline.strip() in _ALL_SCOPE_TOKENS:
         return ()
     return (requested_pipeline,)
 
@@ -163,6 +170,7 @@ def _narrow_manifest_catalog(
     selected_pipelines: tuple[str, ...],
     selected_run_types: tuple[str, ...],
     selected_run_id: str | None,
+    fail_open_when_empty: bool = True,
 ) -> tuple[RunManifest, ...]:
     """Prune manifest candidates before ledger lookups for selector endpoints.
 
@@ -181,7 +189,9 @@ def _narrow_manifest_catalog(
             selected_run_id=selected_run_id,
         )
     )
-    return narrowed if narrowed else manifests
+    if narrowed or not fail_open_when_empty:
+        return narrowed
+    return manifests
 
 
 def _manifest_matches_scope(
@@ -354,6 +364,7 @@ def _options_payload(records: tuple[_SelectorRecord, ...]) -> dict[str, list[str
         "workflow": _latest_ordered_values(records, lambda record: (record.workflow,)),
         "pipeline": _latest_ordered_values(records, lambda record: (record.pipeline,)),
         "run_type": _latest_ordered_values(records, lambda record: (record.run_type,)),
+        "provider": _latest_ordered_values(records, lambda record: (record.provider,)),
         "run_id": _manifest_ordered_values(records, lambda record: record.run_id),
         "run_status": _latest_ordered_values(
             records,
@@ -399,3 +410,12 @@ def _manifest_ordered_values(
         if value and value not in values:
             values.append(value)
     return values
+
+
+def _exact_run_only_fallback_values(fallback_value: str | None) -> list[str]:
+    if fallback_value is None:
+        return []
+    value = fallback_value.strip()
+    if not value:
+        return []
+    return [value]

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-01T17:12:08.142628+00:00",
+  "generated_at": "2026-06-01T19:24:09.996708+00:00",
   "summary": {
     "total_scripts": 420,
     "status_counts": {
@@ -7505,7 +7505,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 177,
+      "reference_count": 178,
       "references": [
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
@@ -7539,7 +7539,13 @@
         },
         {
           "path": ".github/workflows/duplication-complexity.yml",
-          "line": 216,
+          "line": 192,
+          "source_group": "ci",
+          "text": "python -m scripts.engineering.qa report-duplication-baseline \\"
+        },
+        {
+          "path": ".github/workflows/duplication-complexity.yml",
+          "line": 225,
           "source_group": "ci",
           "text": "run: python -m scripts.engineering.qa check-constructor-args --warn-only"
         },
@@ -7548,12 +7554,6 @@
           "line": 138,
           "source_group": "ci",
           "text": "uv run python -m scripts.engineering.qa check-c901 \\"
-        },
-        {
-          "path": ".github/workflows/performance-nightly.yml",
-          "line": 43,
-          "source_group": "ci",
-          "text": "uv run python -m scripts.engineering.qa report-hotspots \\"
         }
       ]
     },
@@ -10087,13 +10087,13 @@
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 50,
+          "line": 55,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py`"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 56,
+          "line": 61,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py` — external breaking change required: `true`, internal callers zero: `false`"
         },
@@ -10399,7 +10399,7 @@
           "path": ".codex/skills/grafana-dashboard-render/SKILL.md",
           "line": 82,
           "source_group": "skills",
-          "text": "uv run python -m scripts.ops rerender-grafana --timeout-seconds 30 --output-dir <dir>"
+          "text": "uv run python -m scripts.ops rerender-grafana --timeout-seconds 90 --output-dir <dir>"
         },
         {
           "path": ".codex/skills/grafana-dashboard-render/SKILL.md",
@@ -10415,7 +10415,7 @@
         },
         {
           "path": ".codex/skills/grafana-dashboard-render/SKILL.md",
-          "line": 104,
+          "line": 107,
           "source_group": "skills",
           "text": "uv run python -m scripts.ops audit-live-grafana \\"
         }
@@ -11449,7 +11449,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 554,
+          "line": 635,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/audit_live_grafana_panels.py\","
         }
@@ -11476,7 +11476,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 1289,
+          "line": 1415,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/check_grafana_dashboard_audit_preflight.py\","
         }
@@ -11541,7 +11541,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 1552,
+          "line": 1681,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/run_grafana_dashboard_audit_cycle.py\","
         }
@@ -11562,7 +11562,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 421,
+          "line": 502,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1\""
         }
@@ -11583,13 +11583,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 497,
+          "line": 529,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` to install repo-local \""
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 568,
+          "line": 610,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` or \""
         },
@@ -11601,13 +11601,13 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 269,
+          "line": 323,
           "source_group": "tests",
           "text": "assert \"setup_grafana_screenshot_runtime.sh\" in detail"
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 418,
+          "line": 499,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh\""
         }
@@ -12004,7 +12004,7 @@
       "references": [
         {
           "path": ".codex/skills/grafana-dashboard-render/SKILL.md",
-          "line": 141,
+          "line": 144,
           "source_group": "skills",
           "text": "- Repo env bootstrap: `scripts/ops/support/load_repo_env.sh`"
         },
@@ -12016,7 +12016,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 123,
+          "line": 138,
           "source_group": "scripts",
           "text": "\"credentials, reload repo env via scripts/ops/support/load_repo_env.sh or \""
         },
@@ -12159,8 +12159,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 68,
+      "reference_count": 69,
       "references": [
+        {
+          "path": ".github/workflows/chembl-baseline-smoke.yml",
+          "line": 174,
+          "source_group": "ci",
+          "text": "uv run python -m scripts.schema validate-configs"
+        },
         {
           "path": ".github/workflows/quality-debt-weekly.yml",
           "line": 43,
@@ -12202,12 +12208,6 @@
           "line": 378,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema generate-pipeline --check"
-        },
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 180,
-          "source_group": "ci",
-          "text": "entry: python scripts/engineering/dev/run_project_python.py -m scripts.schema validate-configs"
         }
       ]
     },

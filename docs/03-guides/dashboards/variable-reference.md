@@ -54,8 +54,9 @@ Machine-readable selector SSOT:
   does not make current-status PromQL exact-run scoped.
 - Exact forensic identifiers (`$quarantine_run_id`, `$payload_hash`) in
   `bioetl-silver-reject-explorer` remain explorer-only narrowing filters.
-- Hidden context variables are allowed only when they preserve return-path or
-  detail-only scope, например `$pipeline_context` и `$adapter`.
+- Hidden context variables are allowed only when they preserve return-path,
+  exact-run handoff, or detail-only scope, например `$pipeline_context`,
+  `$workflow_context`, and `$adapter`.
 - Variable behavior is standardized by the shared operator context shell plus
   role-specific extensions, not by one flat universal query model.
 ## Common variables
@@ -80,9 +81,13 @@ Machine-readable selector SSOT:
 | `$quarantine_run_id` | `bioetl-silver-reject-explorer` | Single-select | Empty until selected | Explorer-only forensic selector backed by Quarantine API `dimension=run_id`; MUST NOT appear in Prometheus queries or generic cross-dashboard links. |
 | `$payload_hash` | `bioetl-silver-reject-explorer` | Visible textbox | Empty string | Forensic exact-record selector; visible only in the explorer and MUST NOT propagate into other dashboards. |
 | `$status` | `bioetl-workflow-overview` | Multi-select with Include All | `All` / `$__all` | Workflow run-status filter. |
+| `$workflow_context` | `bioetl-workflow-overview` | Hidden context var | `All` | Exact-run-aware workflow handoff selector. When `$run_id` is selected it resolves workflow identity from the local control-plane catalog; otherwise it falls back to the visible workflow selector text. |
 | `$pipeline_context` | `bioetl-workflow-overview` | Hidden context var | `unknown` | Preserves single-pipeline handoff scope for downstream dashboards; multi-pipeline workflows fail-close to `unknown`. |
+| `$pipeline_context_exact` | `bioetl-workflow-overview` | Hidden exact-run handoff var | `unknown` | Exact-run-aware pipeline handoff selector. It resolves pipeline from the selected `$run_id` when present, otherwise falls back to `$pipeline_context`. |
 | `$run_type_context` | `bioetl-workflow-overview` | Hidden context var | `All` | Preserves effective run_type for single-pipeline workflows; multi-pipeline workflows fail-close to `All`. |
+| `$run_type_context_exact` | `bioetl-workflow-overview` | Hidden exact-run handoff var | `All` | Exact-run-aware run_type handoff selector. It resolves run_type from the selected `$run_id` when present, otherwise falls back to `$run_type_context`. |
 | `$provider_context` | `bioetl-workflow-overview` | Hidden context var | `unknown` | Preserves inferred provider for downstream Provider Health handoff; multi-pipeline workflows fail-close to `unknown`. |
+| `$provider_context_exact` | `bioetl-workflow-overview` | Hidden exact-run handoff var | `unknown` | Exact-run-aware provider handoff selector. It resolves provider from the selected `$run_id` when present, otherwise falls back to `$provider_context`. |
 | `$step_status` | `bioetl-workflow-overview` | Multi-select with Include All | `All` / `$__all` | Workflow step-status filter for step evidence panels. |
 | `$step_kind` | `bioetl-workflow-overview` | Multi-select with Include All | `All` / `$__all` | Bounded step-kind filter, e.g. `pipeline`, `transform`. |
 
@@ -132,7 +137,8 @@ Machine-readable selector SSOT:
   - `$workflow`, `$pipeline`, `$run_type`, `$run_id` form the shared context shell
   - `$status`, `$step_status`, `$step_kind` are local to workflow evidence
   - `$pipeline`, `$run_type`, and `$run_id` are context/identity selectors, not live-run Prometheus filters
-  - `$pipeline_context`, `$run_type_context`, `$provider_context` are hidden handoff selectors derived from workflow metrics
+  - `$workflow_context`, `$pipeline_context_exact`, `$run_type_context_exact`, and `$provider_context_exact` are exact-run-aware hidden handoff selectors backed by `/ops/control-plane/filter-options?exact_run_only=1`
+  - `$pipeline_context`, `$run_type_context`, `$provider_context` remain workflow-metric-derived fallback handoff selectors
   - these variables MUST NOT be propagated into non-workflow dashboards
 
 ## Role-specific defaults
@@ -165,8 +171,11 @@ Machine-readable selector SSOT:
   `$status`, `$step_status`, and `$step_kind`.
 - Pipeline/run-type/run-id values are context and identity aids here; workflow
   Status is selected-range evidence rather than current live-run state.
-- Hidden `$pipeline_context`, `$run_type_context`, and `$provider_context`
-  preserve single-pipeline handoff scope for downstream dashboards.
+- Hidden `$workflow_context`, `$pipeline_context_exact`,
+  `$run_type_context_exact`, and `$provider_context_exact` preserve exact-run
+  handoff scope when `$run_id` is selected, while `$pipeline_context`,
+  `$run_type_context`, and `$provider_context` remain workflow-derived
+  fallbacks for multi-run scope.
 
 ### Explorer forensics
 

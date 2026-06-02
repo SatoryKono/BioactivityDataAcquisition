@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from unittest.mock import MagicMock
-from uuid import uuid4
+from uuid import UUID
 
 import pytest
 
@@ -17,6 +17,10 @@ from bioetl.domain.types import RunID, RunType
 
 
 pytestmark = pytest.mark.unit
+
+RUN_FIXTURE_ID = UUID("11111111-1111-4111-8111-111111111111")
+FAILED_RUN_ID = UUID("22222222-2222-4222-8222-222222222222")
+SHUTDOWN_RUN_ID = UUID("33333333-3333-4333-8333-333333333333")
 
 @pytest.fixture
 def mock_clock() -> MagicMock:
@@ -33,7 +37,7 @@ def service(mock_clock: MagicMock) -> PipelineRunLifecycleService:
 @pytest.fixture
 def run() -> PipelineRun:
     return PipelineRun(
-        run_id=RunID(uuid4()),
+        run_id=RunID(RUN_FIXTURE_ID),
         run_type=RunType.INCREMENTAL,
         pipeline_name="chembl_activity",
         manifest_id="manifest-1",
@@ -104,7 +108,7 @@ def test_fail_and_shutdown_helpers(
     service: PipelineRunLifecycleService,
 ) -> None:
     failed_run = PipelineRun(
-        run_id=RunID(uuid4()),
+        run_id=RunID(FAILED_RUN_ID),
         run_type=RunType.INCREMENTAL,
         pipeline_name="chembl_activity",
     )
@@ -113,7 +117,7 @@ def test_fail_and_shutdown_helpers(
     assert failed_run.status == PipelineRunState.FAILED
 
     shutdown_run = PipelineRun(
-        run_id=RunID(uuid4()),
+        run_id=RunID(SHUTDOWN_RUN_ID),
         run_type=RunType.INCREMENTAL,
         pipeline_name="chembl_activity",
     )

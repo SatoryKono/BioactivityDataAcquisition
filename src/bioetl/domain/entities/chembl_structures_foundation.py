@@ -7,6 +7,10 @@ from dataclasses import dataclass
 from bioetl.domain.entities.base import BaseEntity
 from bioetl.domain.entities.publication_base import PublicationEntityBase
 
+_VALID_TARGET_PROTEIN_CLASSIFICATION_STATUSES = frozenset(
+    {"resolved", "missing_classification", "quarantined"}
+)
+
 
 @dataclass(frozen=True, kw_only=True)
 class ChemblPublication(PublicationEntityBase):
@@ -138,20 +142,12 @@ class TargetProteinClassification(BaseEntity):
     def _validate_invariants(self) -> None:
         if not self.target_id:
             raise ValueError("Target ChEMBL ID is required")
-        if self.classification_status not in {
-            "resolved",
-            "missing_classification",
-            "quarantined",
-        }:
-            raise ValueError("Invalid protein classification status")
-        if (
-            self.classification_status == "resolved"
-            and (self.component_id is None or self.leaf_id is None)
-        ):
-            raise ValueError(
-                "Resolved target protein classification rows require "
-                "component_id and leaf_id"
-            )
+        _validate_target_protein_classification_status(self.classification_status)
+        _validate_target_protein_classification_resolution(
+            classification_status=self.classification_status,
+            component_id=self.component_id,
+            leaf_id=self.leaf_id,
+        )
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -201,3 +197,24 @@ __all__ = [
     "Target",
     "TargetComponent",
 ]
+
+
+def _validate_target_protein_classification_status(classification_status: str) -> None:
+    if classification_status not in _VALID_TARGET_PROTEIN_CLASSIFICATION_STATUSES:
+        raise ValueError("Invalid protein classification status")
+
+
+def _validate_target_protein_classification_resolution(
+    *,
+    classification_status: str,
+    component_id: int | None,
+    leaf_id: int | None,
+) -> None:
+    if classification_status != "resolved":
+        return
+    if component_id is not None and leaf_id is not None:
+        return
+    raise ValueError(
+        "Resolved target protein classification rows require "
+        "component_id and leaf_id"
+    )

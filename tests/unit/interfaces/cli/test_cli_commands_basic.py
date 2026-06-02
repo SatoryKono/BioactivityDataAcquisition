@@ -14,8 +14,10 @@ from bioetl.application.services.execution.pipeline_runner_models import (
     RunResult,
 )
 from bioetl.composition.registry_api import PipelineRegistry
-from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.interfaces.cli import cli, main
+from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
+    ObservabilityBackendEnsureResult,
+)
 from bioetl.interfaces.cli.exit_codes import ExitCode
 
 pytestmark = pytest.mark.unit
@@ -23,8 +25,36 @@ pytestmark = pytest.mark.unit
 
 @pytest.fixture(autouse=True)
 def ensure_registration():
-    """Ensure pipeline factories are registered before CLI tests."""
-    register_all_pipelines()
+    """Provide a lightweight registry seam for CLI unit tests."""
+    registry = PipelineRegistry()
+    registry.list_pipelines = MagicMock(return_value=["chembl_activity"])
+
+    with (
+        patch(
+            "bioetl.interfaces.cli.registry_helpers.build_cli_registry",
+            return_value=registry,
+        ),
+        patch(
+            "bioetl.interfaces.cli.commands.domains.run.support.build_cli_registry",
+            return_value=registry,
+        ),
+        patch(
+            "bioetl.interfaces.cli.commands.domains.run.support._resolve_populated_default_registry",
+            return_value=registry,
+        ),
+        patch(
+            "bioetl.interfaces.cli.commands.run.ensure_observability_backend_started",
+            return_value=ObservabilityBackendEnsureResult(
+                status="failed",
+                health_url="http://127.0.0.1:8081/health",
+            ),
+        ),
+        patch(
+            "bioetl.interfaces.cli.commands.run.publish_metrics_safely",
+            return_value=True,
+        ),
+    ):
+        yield
 
 
 @pytest.fixture

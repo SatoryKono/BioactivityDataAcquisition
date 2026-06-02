@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-"""Generate a report-only duplication baseline for composition/application seams.
+"""Generate duplication baseline and optional zero-ratchet checks.
 
 Runs pylint duplicate-code scans for the requested targets, captures a stable
 snapshot, and writes:
 - machine-readable JSON summary
 - markdown summary suitable for reviews and local artifacts
 
-This is intentionally report-only. It does not fail on detected duplication;
-it only fails when the underlying scan itself cannot be completed.
+By default this writes report artifacts and fails only when a scan cannot be
+completed. Release/CI gates can pass ``--max-duplicate-clusters`` to make the
+same deterministic scan fail fast on reviewed hotspot duplication growth.
 """
 
 from __future__ import annotations
@@ -388,6 +389,7 @@ def _render_markdown(
     *,
     exclude_module_patterns: tuple[str, ...] = (),
     trend_summary: dict[str, object] | None = None,
+    max_duplicate_clusters: int | None = None,
 ) -> str:
     """Render a compact markdown summary for review and local artifacts."""
     total = sum(r.duplicate_count for r in reports)
@@ -403,6 +405,7 @@ def _render_markdown(
         raw_total=raw_total,
         exclude_module_patterns=exclude_module_patterns,
         trend_summary=trend_summary,
+        max_duplicate_clusters=max_duplicate_clusters,
     )
     for report in reports:
         lines.append(f"| `{report.target}` | {report.duplicate_count} |")
@@ -423,15 +426,23 @@ def _markdown_summary_lines(
     raw_total: int,
     exclude_module_patterns: tuple[str, ...],
     trend_summary: dict[str, object] | None,
+    max_duplicate_clusters: int | None,
 ) -> list[str]:
     """Render top-of-report summary bullets and table header."""
+    mode = (
+        "fail-fast"
+        if max_duplicate_clusters is not None
+        else "report-only"
+    )
     lines = [
         "# Duplication Baseline Report",
         "",
-        "- mode: report-only",
+        f"- mode: {mode}",
         f"- targets: {len(reports)}",
         f"- total_duplicate_clusters: {total}",
     ]
+    if max_duplicate_clusters is not None:
+        lines.append(f"- max_duplicate_clusters: {max_duplicate_clusters}")
     if exclude_module_patterns:
         lines.extend(
             [
@@ -644,6 +655,15 @@ def _parse_args() -> argparse.Namespace:
         default=None,
         help="Optional snapshot date label (defaults to today in ISO format).",
     )
+    parser.add_argument(
+        "--max-duplicate-clusters",
+        type=int,
+        default=None,
+        help=(
+            "Fail when the normalized total duplicate cluster count exceeds this "
+            "budget. Omit for report-only artifact generation."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -704,6 +724,7 @@ def main() -> int:
             reports,
             exclude_module_patterns=tuple(args.exclude_module_pattern),
             trend_summary=trend_summary,
+            max_duplicate_clusters=args.max_duplicate_clusters,
         ),
     )
     if args.history_jsonl:
@@ -729,6 +750,12 @@ def main() -> int:
             "raw_duplicate_clusters="
             f"{report.raw_duplicate_count if report.raw_duplicate_count is not None else report.duplicate_count}"
         )
+    if args.max_duplicate_clusters is not None and total > args.max_duplicate_clusters:
+        print(
+            "[duplication-baseline] FAIL: duplicate cluster count exceeds budget: "
+            f"{total} > {args.max_duplicate_clusters}"
+        )
+        return 1
     return 0
 
 

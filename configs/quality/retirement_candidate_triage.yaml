@@ -53,56 +53,6 @@ repo_wide_zero_import_classification:
       ratcheted callers to bioetl.application.core.span_helpers; retain only as a
       backward-compatible no-growth import surface until the next compatibility
       facade retirement review.
-  - module_path: src/bioetl/application/core/_filtered_data_source_mixins.py
-    module_name: bioetl.application.core._filtered_data_source_mixins
-    disposition: retain_compat_shim
-    reviewed_on: '2026-06-01'
-    review_by: '2026-08-30'
-    linked_issue: '#4953'
-    rationale: Private filtered data-source mixin shim has zero first-party importers
-      after callers moved to bioetl.application.core.filtered_data_source_mixins;
-      retain only as a backward-compatible no-growth import surface until the
-      next compatibility facade retirement review.
-  - module_path: src/bioetl/application/core/_idmapping_fetch_support.py
-    module_name: bioetl.application.core._idmapping_fetch_support
-    disposition: retain_compat_shim
-    reviewed_on: '2026-06-01'
-    review_by: '2026-08-30'
-    linked_issue: '#4953'
-    rationale: Private ID-mapping fetch-support shim has zero first-party importers
-      after callers moved to bioetl.application.core.idmapping_fetch_support; retain
-      only as a backward-compatible no-growth import surface until the next
-      compatibility facade retirement review.
-  - module_path: src/bioetl/application/core/_idmapping_lifecycle_support.py
-    module_name: bioetl.application.core._idmapping_lifecycle_support
-    disposition: retain_compat_shim
-    reviewed_on: '2026-06-01'
-    review_by: '2026-08-30'
-    linked_issue: '#4953'
-    rationale: Private ID-mapping lifecycle shim has zero first-party importers
-      after callers moved to bioetl.application.core.idmapping_lifecycle_support;
-      retain only as a backward-compatible no-growth import surface until the
-      next compatibility facade retirement review.
-  - module_path: src/bioetl/application/core/_subcellular_fraction_support.py
-    module_name: bioetl.application.core._subcellular_fraction_support
-    disposition: retain_compat_shim
-    reviewed_on: '2026-06-01'
-    review_by: '2026-08-30'
-    linked_issue: '#4953'
-    rationale: Private subcellular-fraction support shim has zero first-party
-      importers after callers moved to bioetl.application.core.subcellular_fraction_support;
-      retain only as a backward-compatible no-growth import surface until the
-      next compatibility facade retirement review.
-  - module_path: src/bioetl/application/core/_target_data_source_mixins.py
-    module_name: bioetl.application.core._target_data_source_mixins
-    disposition: retain_compat_shim
-    reviewed_on: '2026-06-01'
-    review_by: '2026-08-30'
-    linked_issue: '#4953'
-    rationale: Private target data-source mixin shim has zero first-party importers
-      after callers moved to bioetl.application.core.target_data_source_mixins;
-      retain only as a backward-compatible no-growth import surface until the
-      next compatibility facade retirement review.
   - module_path: src/bioetl/application/core/batch_execution/_contracts.py
     module_name: bioetl.application.core.batch_execution._contracts
     disposition: retain_compat_shim

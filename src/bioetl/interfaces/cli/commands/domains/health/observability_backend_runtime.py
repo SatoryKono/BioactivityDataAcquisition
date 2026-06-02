@@ -1,20 +1,12 @@
-"""Runtime helpers for self-managed observability backend startup.
-
-The Grafana Quarantine Explorer datasource requires a long-lived HTTP backend
-that survives one-shot pipeline commands. These helpers probe the backend and
-start ``bioetl quarantine serve`` in detached mode when needed.
-"""
+"""Runtime helpers for self-managed observability backend startup."""
 
 from __future__ import annotations
 
 import subprocess
-import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
-from urllib.error import HTTPError, URLError
 from urllib.parse import quote
-from urllib.request import urlopen
 
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_failure_details import (
     _build_startup_failure_detail,
@@ -22,6 +14,17 @@ from bioetl.interfaces.cli.commands.domains.health.observability_backend_failure
 )
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_failure_details import (
     _read_backend_startup_log_excerpt as _read_backend_startup_log_excerpt,
+)
+from bioetl.interfaces.cli.commands.domains.health.observability_backend_probes import (
+    DEFAULT_OBSERVABILITY_BACKEND_POLL_SECONDS,
+    DEFAULT_OBSERVABILITY_BACKEND_READY_TIMEOUT_SECONDS,
+    DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PATHS_READY_TIMEOUT_SECONDS,
+    DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PROBE_TIMEOUT_SECONDS,
+    _build_observability_backend_probe_urls,
+    probe_observability_backend,
+    probe_observability_backend_required_paths,
+    wait_for_observability_backend_ready,
+    wait_for_observability_backend_required_paths_ready,
 )
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_process import (
     _build_detached_backend_env,
@@ -41,10 +44,6 @@ if TYPE_CHECKING:
 
 DEFAULT_OBSERVABILITY_BACKEND_PROBE_HOST = "127.0.0.1"
 DEFAULT_OBSERVABILITY_BACKEND_BIND_HOST = "0.0.0.0"
-DEFAULT_OBSERVABILITY_BACKEND_READY_TIMEOUT_SECONDS = 20.0
-DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PATHS_READY_TIMEOUT_SECONDS = 60.0
-DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PROBE_TIMEOUT_SECONDS = 5.0
-DEFAULT_OBSERVABILITY_BACKEND_POLL_SECONDS = 0.25
 _SELECTOR_CATALOG_PROBE_PATH = (
     "/ops/control-plane/filter-options?dimension=pipeline&response_shape=list"
 )
@@ -92,107 +91,6 @@ def build_observability_backend_required_probe_paths(
             f"/ops/control-plane/checkpoint-freshness?pipeline={encoded_pipeline}"
         )
     return tuple(paths)
-
-
-def _build_observability_backend_probe_urls(health_url: str) -> tuple[str, ...]:
-    """Return canonical readiness probe URLs for one backend base health URL."""
-    if health_url.endswith("/health"):
-        live_url = f"{health_url}/live"
-        return (live_url, health_url)
-    return (health_url,)
-
-
-def probe_observability_backend(
-    health_url: str,
-    *,
-    timeout_seconds: float = 1.0,
-    urlopen_fn: Callable[..., object] = urlopen,
-) -> bool:
-    """Return True when the observability backend responds successfully."""
-    for probe_url in _build_observability_backend_probe_urls(health_url):
-        try:
-            with urlopen_fn(probe_url, timeout=timeout_seconds) as response:
-                status = getattr(response, "status", 200)
-                if int(status) < 400:
-                    return True
-        except (HTTPError, URLError, OSError, ValueError):
-            continue
-    return False
-
-
-def _build_backend_base_url(health_url: str) -> str:
-    if health_url.endswith("/health"):
-        return health_url[: -len("/health")]
-    return health_url.rstrip("/")
-
-
-def probe_observability_backend_required_paths(
-    health_url: str,
-    *,
-    required_probe_paths: tuple[str, ...],
-    timeout_seconds: float = 1.0,
-    urlopen_fn: Callable[..., object] = urlopen,
-) -> bool:
-    """Return True when the backend exposes all required HTTP capability paths."""
-    if not required_probe_paths:
-        return True
-    base_url = _build_backend_base_url(health_url)
-    for raw_path in required_probe_paths:
-        path = raw_path if raw_path.startswith("/") else f"/{raw_path}"
-        try:
-            with urlopen_fn(f"{base_url}{path}", timeout=timeout_seconds) as response:
-                status = getattr(response, "status", 200)
-                if int(status) >= 400:
-                    return False
-        except (HTTPError, URLError, OSError, ValueError):
-            return False
-    return True
-
-
-def wait_for_observability_backend_ready(
-    health_url: str,
-    *,
-    timeout_seconds: float = DEFAULT_OBSERVABILITY_BACKEND_READY_TIMEOUT_SECONDS,
-    poll_seconds: float = DEFAULT_OBSERVABILITY_BACKEND_POLL_SECONDS,
-    probe_fn: Callable[..., bool] = probe_observability_backend,
-    sleep_fn: Callable[[float], None] = time.sleep,
-) -> bool:
-    """Poll the backend health URL until it responds or timeout expires."""
-    deadline = time.monotonic() + timeout_seconds
-    while time.monotonic() < deadline:
-        if probe_fn(health_url):
-            return True
-        sleep_fn(poll_seconds)
-    return probe_fn(health_url)
-
-
-def wait_for_observability_backend_required_paths_ready(
-    health_url: str,
-    *,
-    required_probe_paths: tuple[str, ...],
-    timeout_seconds: float = DEFAULT_OBSERVABILITY_BACKEND_READY_TIMEOUT_SECONDS,
-    probe_timeout_seconds: float = DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PROBE_TIMEOUT_SECONDS,
-    poll_seconds: float = DEFAULT_OBSERVABILITY_BACKEND_POLL_SECONDS,
-    required_probe_fn: Callable[..., bool] = probe_observability_backend_required_paths,
-    sleep_fn: Callable[[float], None] = time.sleep,
-) -> bool:
-    """Poll backend capability routes until they respond or timeout expires."""
-    if not required_probe_paths:
-        return True
-    deadline = time.monotonic() + timeout_seconds
-    while time.monotonic() < deadline:
-        if required_probe_fn(
-            health_url,
-            required_probe_paths=required_probe_paths,
-            timeout_seconds=probe_timeout_seconds,
-        ):
-            return True
-        sleep_fn(poll_seconds)
-    return required_probe_fn(
-        health_url,
-        required_probe_paths=required_probe_paths,
-        timeout_seconds=probe_timeout_seconds,
-    )
 
 
 def _reuse_observability_backend_if_ready(

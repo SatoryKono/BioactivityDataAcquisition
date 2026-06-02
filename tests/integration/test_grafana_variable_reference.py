@@ -38,9 +38,13 @@ def test_variable_reference_documents_all_shipped_dashboard_variables() -> None:
         "$quarantine_run_id",
         "$payload_hash",
         "$workflow",
+        "$workflow_context",
         "$status",
         "$run_type_context",
+        "$run_type_context_exact",
         "$provider_context",
+        "$provider_context_exact",
+        "$pipeline_context_exact",
         "$step_status",
         "$step_kind",
         "bioetl-overview-v2",
@@ -118,13 +122,17 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
     workflow = _variables("bioetl-workflow-overview.json")
     assert set(workflow) == {
         "workflow",
+        "workflow_context",
         "pipeline",
         "run_type",
         "run_id",
         "status",
         "pipeline_context",
+        "pipeline_context_exact",
         "run_type_context",
+        "run_type_context_exact",
         "provider_context",
+        "provider_context_exact",
         "step_status",
         "step_kind",
     }
@@ -140,12 +148,20 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
     assert workflow["run_id"].get("multi") is False
     assert workflow["run_id"].get("includeAll") is False
     assert workflow["run_id"].get("current", {}).get("value") == "-"
+    assert workflow["workflow_context"].get("hide") == 2
+    assert workflow["workflow_context"].get("current", {}).get("value") == "All"
     assert workflow["pipeline_context"].get("hide") == 2
     assert workflow["pipeline_context"].get("current", {}).get("value") == "unknown"
+    assert workflow["pipeline_context_exact"].get("hide") == 2
+    assert workflow["pipeline_context_exact"].get("current", {}).get("value") == "unknown"
     assert workflow["run_type_context"].get("hide") == 2
     assert workflow["run_type_context"].get("current", {}).get("value") == "All"
+    assert workflow["run_type_context_exact"].get("hide") == 2
+    assert workflow["run_type_context_exact"].get("current", {}).get("value") == "All"
     assert workflow["provider_context"].get("hide") == 2
     assert workflow["provider_context"].get("current", {}).get("value") == "unknown"
+    assert workflow["provider_context_exact"].get("hide") == 2
+    assert workflow["provider_context_exact"].get("current", {}).get("value") == "unknown"
 
     explorer = _variables("bioetl-silver-reject-explorer.json")
     assert explorer["quarantine_run_id"].get("multi") is False
@@ -158,9 +174,13 @@ def test_variable_reference_explains_role_specific_exceptions() -> None:
     text = _VARIABLE_REFERENCE.read_text(encoding="utf-8")
     required_tokens = {
         "`bioetl-workflow-overview` exposes the shared context shell",
+        "`$workflow_context` | `bioetl-workflow-overview` | Hidden context var",
         "`$pipeline_context` | `bioetl-workflow-overview` | Hidden context var",
+        "`$pipeline_context_exact` | `bioetl-workflow-overview` | Hidden exact-run handoff var",
         "`$run_type_context` | `bioetl-workflow-overview` | Hidden context var",
+        "`$run_type_context_exact` | `bioetl-workflow-overview` | Hidden exact-run handoff var",
         "`$provider_context` | `bioetl-workflow-overview` | Hidden context var",
+        "`$provider_context_exact` | `bioetl-workflow-overview` | Hidden exact-run handoff var",
         "`bioetl-silver-reject-explorer` requires single-select `$pipeline`",
         "`$quarantine_run_id` | `bioetl-silver-reject-explorer` | Single-select",
         "`$payload_hash` | `bioetl-silver-reject-explorer` | Visible textbox",

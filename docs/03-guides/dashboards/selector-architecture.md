@@ -172,12 +172,17 @@ future/local-catalog candidates.
 
 Currently shipped:
 
+- `workflow_context`
 - `pipeline_context`
+- `pipeline_context_exact`
+- `run_type_context`
+- `run_type_context_exact`
+- `provider_context`
+- `provider_context_exact`
 - `adapter`
 
 Future reserved:
 
-- `workflow_context`
 - `selected_run_id`
 - `selected_manifest_id`
 - `selected_started_at`
@@ -205,7 +210,10 @@ The current shipped selector model is:
   `provider`, hidden `pipeline_context`, hidden detail-only `adapter`, time range
 - `4. Data Quality`: `workflow`, `pipeline`, `run_type`, `run_id`, `stage`, time range
 - `5. Workflow`: `workflow`, `pipeline`, `run_type`, `run_id`, `status`,
-  `step_status`, `step_kind`, time range
+  `step_status`, `step_kind`, hidden `workflow_context`,
+  `pipeline_context`/`pipeline_context_exact`,
+  `run_type_context`/`run_type_context_exact`,
+  `provider_context`/`provider_context_exact`, time range
 - `Silver Reject Explorer`: `pipeline`, `run_type`, `reason_code`, `field`,
   `quarantine_run_id`, `payload_hash`, time range
 

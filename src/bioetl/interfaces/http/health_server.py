@@ -107,7 +107,7 @@ class HealthServer(
                 self._handle_connection,
                 self.host,
                 self.port,
-                reuse_address=True,
+                reuse_address=False,
             )
         except OSError as exc:
             if self._logger:

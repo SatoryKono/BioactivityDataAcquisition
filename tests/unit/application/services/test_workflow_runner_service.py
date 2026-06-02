@@ -5,7 +5,6 @@ from __future__ import annotations
 import asyncio
 from dataclasses import dataclass, field
 from pathlib import Path
-from uuid import uuid4
 
 import pytest
 
@@ -81,7 +80,7 @@ class _PipelineRunner:
         return RunResult(
             status=PipelineRunResult.SUCCESS,
             pipeline_name=pipeline_name,
-            run_id=str(uuid4()),
+            run_id="00000000-0000-0000-0000-000000000101",
             run_type="incremental",
             started_at=FIXED_TEST_TIME,
             completed_at=FIXED_TEST_TIME,
@@ -121,7 +120,7 @@ class _SelectiveFailingPipelineRunner:
         return RunResult(
             status=PipelineRunResult.SUCCESS,
             pipeline_name=pipeline_name,
-            run_id=str(uuid4()),
+            run_id="00000000-0000-0000-0000-000000000102",
             run_type="incremental",
             started_at=FIXED_TEST_TIME,
             completed_at=FIXED_TEST_TIME,

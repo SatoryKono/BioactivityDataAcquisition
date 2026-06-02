@@ -666,7 +666,7 @@ def test_debt_scorecard_declares_test_governance_debt_kpis() -> None:
     assert isinstance(metric, dict)
     assert metric.get("current_count") == live_count
     assert metric.get("max_count") == budget_max
-    assert metric.get("target_count") == 42
+    assert metric.get("target_count") == 41
     assert live_count <= budget_max
     assert governance.get("owner") == "@bioetl-architecture"
     assert isinstance(metric.get("ratchet_policy"), str) and metric["ratchet_policy"]

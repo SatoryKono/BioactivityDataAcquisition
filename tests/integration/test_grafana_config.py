@@ -75,13 +75,17 @@ EXPECTED_VARS_BY_DASHBOARD = {
     },
     "bioetl-workflow-overview.json": {
         "workflow",
+        "workflow_context",
         "pipeline",
         "run_type",
         "run_id",
         "status",
         "pipeline_context",
+        "pipeline_context_exact",
         "run_type_context",
+        "run_type_context_exact",
         "provider_context",
+        "provider_context_exact",
         "step_status",
         "step_kind",
     },
@@ -546,27 +550,87 @@ def test_variable_query_sources(dashboard_path):
         pipeline_query = variable_map["pipeline"].get("query", {})
         run_type_query = variable_map["run_type"].get("query", {})
         status_query = variable_map["status"].get("query", {})
+        workflow_context_query = variable_map["workflow_context"].get("query", {})
         pipeline_context_query = variable_map["pipeline_context"].get("query", {})
+        pipeline_context_exact_query = variable_map["pipeline_context_exact"].get(
+            "query", {}
+        )
         run_type_context_query = variable_map["run_type_context"].get("query", {})
+        run_type_context_exact_query = variable_map["run_type_context_exact"].get(
+            "query", {}
+        )
         provider_context_query = variable_map["provider_context"].get("query", {})
+        provider_context_exact_query = variable_map["provider_context_exact"].get(
+            "query", {}
+        )
         step_status_query = variable_map["step_status"].get("query", {})
         step_kind_query = variable_map["step_kind"].get("query", {})
         assert isinstance(workflow_query, dict)
         assert isinstance(pipeline_query, dict)
         assert isinstance(run_type_query, dict)
         assert isinstance(status_query, dict)
+        assert isinstance(workflow_context_query, dict)
         assert isinstance(pipeline_context_query, dict)
+        assert isinstance(pipeline_context_exact_query, dict)
         assert isinstance(run_type_context_query, dict)
+        assert isinstance(run_type_context_exact_query, dict)
         assert isinstance(provider_context_query, dict)
+        assert isinstance(provider_context_exact_query, dict)
         assert isinstance(step_status_query, dict)
         assert isinstance(step_kind_query, dict)
         assert "bioetl_workflow_runs_total" in workflow_query.get("query", "")
         assert "bioetl_records_processed_total" in pipeline_query.get("query", "")
         assert "bioetl_records_processed_total" in run_type_query.get("query", "")
         assert "bioetl_workflow_runs_total" in status_query.get("query", "")
+        assert workflow_context_query.get("queryType") == "infinity"
         assert "bioetl_workflow_runs_total" in pipeline_context_query.get("query", "")
+        pipeline_context_exact_infinity = pipeline_context_exact_query.get(
+            "infinityQuery", {}
+        )
         assert "bioetl_workflow_runs_total" in run_type_context_query.get("query", "")
+        run_type_context_exact_infinity = run_type_context_exact_query.get(
+            "infinityQuery", {}
+        )
         assert "bioetl_workflow_runs_total" in provider_context_query.get("query", "")
+        provider_context_exact_infinity = provider_context_exact_query.get(
+            "infinityQuery", {}
+        )
+        workflow_context_infinity = workflow_context_query.get("infinityQuery", {})
+        assert "/ops/control-plane/filter-options" in str(
+            workflow_context_infinity.get("url", "")
+        )
+        assert "dimension=workflow" in str(workflow_context_infinity.get("url", ""))
+        assert "exact_run_only=1" in str(workflow_context_infinity.get("url", ""))
+        assert "fallback_value=${workflow:text}" in str(
+            workflow_context_infinity.get("url", "")
+        )
+        assert "/ops/control-plane/filter-options" in str(
+            pipeline_context_exact_infinity.get("url", "")
+        )
+        assert "dimension=pipeline" in str(
+            pipeline_context_exact_infinity.get("url", "")
+        )
+        assert "exact_run_only=1" in str(
+            pipeline_context_exact_infinity.get("url", "")
+        )
+        assert "/ops/control-plane/filter-options" in str(
+            run_type_context_exact_infinity.get("url", "")
+        )
+        assert "dimension=run_type" in str(
+            run_type_context_exact_infinity.get("url", "")
+        )
+        assert "exact_run_only=1" in str(
+            run_type_context_exact_infinity.get("url", "")
+        )
+        assert "/ops/control-plane/filter-options" in str(
+            provider_context_exact_infinity.get("url", "")
+        )
+        assert "dimension=provider" in str(
+            provider_context_exact_infinity.get("url", "")
+        )
+        assert "exact_run_only=1" in str(
+            provider_context_exact_infinity.get("url", "")
+        )
         assert "bioetl_workflow_step_events_total" in step_status_query.get("query", "")
         assert "bioetl_workflow_step_events_total" in step_kind_query.get("query", "")
         return

@@ -169,3 +169,12 @@ def test_specialized_duplication_markdown_matches_json_payload() -> None:
             f"{artifact['name']} duplication markdown artifact is out of sync with "
             f"{artifact['json_path'].relative_to(PROJECT_ROOT)}."
         )
+
+
+def test_hotspot_duplication_baseline_is_clean_zero_ratchet() -> None:
+    payload = _load_json(HOTSPOT_BASELINE_JSON)
+    summary = payload.get("summary", {})
+    assert isinstance(summary, dict)
+
+    assert summary.get("total_duplicate_clusters") == 0
+    assert summary.get("total_raw_duplicate_clusters") == 0

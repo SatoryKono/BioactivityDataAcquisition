@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from uuid import UUID
 
 import pytest
 
@@ -11,6 +11,9 @@ from bioetl.application.services.audit_inspection_service import (
 )
 from bioetl.domain.ports import AuditEntry, AuditLayer, AuditOperation
 from bioetl.domain.types import RunID
+
+ENTRY_RUN_ID = UUID("44444444-4444-4444-8444-444444444444")
+QUERY_RUN_ID = UUID("55555555-5555-4555-8555-555555555555")
 
 
 @pytest.fixture
@@ -28,7 +31,7 @@ def service(mock_audit_port: MagicMock) -> AuditInspectionService:
 
 def _entry() -> AuditEntry:
     return AuditEntry(
-        run_id=RunID(uuid4()),
+        run_id=RunID(ENTRY_RUN_ID),
         timestamp=datetime(2026, 4, 10, 10, 0, 0),
         layer=AuditLayer.SILVER,
         table_name="chembl_activity",
@@ -43,14 +46,13 @@ async def test_inspect_run_queries_audit_port_with_parsed_run_id(
     service: AuditInspectionService,
     mock_audit_port: MagicMock,
 ) -> None:
-    run_uuid = uuid4()
     mock_audit_port.get_entries.return_value = [_entry()]
 
-    result = await service.inspect_run(str(run_uuid), limit=7)
+    result = await service.inspect_run(str(QUERY_RUN_ID), limit=7)
 
     assert len(result.entries) == 1
     mock_audit_port.get_entries.assert_awaited_once_with(
-        run_id=RunID(run_uuid),
+        run_id=RunID(QUERY_RUN_ID),
         layer=None,
         table_name=None,
         start_time=None,

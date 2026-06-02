@@ -234,6 +234,60 @@ def test_rerender_manifest_records_engine_and_run_scope(tmp_path: Path) -> None:
         "run_id": "b51986c6-870b-4457-aa70-baedac2710ad",
         "range_hours": 12,
     }
+    assert manifest["render_results"][0]["status"] == "rendered"
+    assert manifest["render_results"][0]["screenshot"] == (
+        "bioetl-control-plane-v1.png"
+    )
+
+
+def test_rerender_writes_partial_manifest_before_render_failure(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    records = [
+        rerender_subject.DashboardRecord(
+            uid="bioetl-ok",
+            url="/d/bioetl-ok/ok",
+            title="OK",
+        ),
+        rerender_subject.DashboardRecord(
+            uid="bioetl-fails",
+            url="/d/bioetl-fails/fails",
+            title="Fails",
+        ),
+    ]
+    monkeypatch.setattr(rerender_subject, "_load_dashboards", lambda _config: records)
+
+    def fake_render(
+        record: rerender_subject.DashboardRecord,
+        config: rerender_subject.RenderConfig,
+    ) -> Path:
+        if record.uid == "bioetl-fails":
+            raise OSError("renderer returned 500")
+        target = config.output_dir / f"{record.uid}.png"
+        target.write_bytes(b"png")
+        return target
+
+    monkeypatch.setattr(rerender_subject, "_render_dashboard", fake_render)
+    config = rerender_subject.RenderConfig(
+        base_url="http://localhost:3000",
+        username="admin",
+        password="changeme",
+        service_account_token="",
+        output_dir=tmp_path,
+        width=1600,
+        height=2200,
+        timeout_seconds=30.0,
+        selected_uids=(),
+        fallback="none",
+    )
+
+    with pytest.raises(rerender_subject.RenderApiFailure):
+        rerender_subject._render_via_api(config)
+
+    manifest = json.loads((tmp_path / "render-manifest.json").read_text())
+    statuses = {item["uid"]: item["status"] for item in manifest["render_results"]}
+    assert statuses == {"bioetl-ok": "rendered", "bioetl-fails": "error"}
+    assert "renderer returned 500" in manifest["render_results"][1]["error"]
 
 
 def test_check_playwright_runtime_reports_missing_node(monkeypatch: Any) -> None:
@@ -268,6 +322,25 @@ def test_check_playwright_runtime_missing_module_points_to_bootstrap(
     assert ok is False
     assert "setup_grafana_screenshot_runtime.sh" in detail
     assert "devDependencies" in detail
+
+
+def test_check_playwright_runtime_times_out_probe(monkeypatch: Any) -> None:
+    monkeypatch.setattr(
+        rerender_subject, "_resolve_node_executable", lambda: "/usr/bin/node"
+    )
+
+    def raise_timeout(*_args: object, **_kwargs: object) -> object:
+        raise rerender_subject.subprocess.TimeoutExpired(
+            cmd=["node", "-e", "..."],
+            timeout=1,
+        )
+
+    monkeypatch.setattr(rerender_subject.subprocess, "run", raise_timeout)
+
+    ok, detail = rerender_subject.check_playwright_runtime(timeout_seconds=1)
+
+    assert ok is False
+    assert "timed out" in detail
 
 
 def test_check_playwright_runtime_missing_shared_libs_points_to_system_packages(
@@ -359,7 +432,15 @@ def test_rerender_builds_playwright_env_with_default_sidecar_runtime(
     (node_modules / "playwright" / "package.json").write_text("{}", encoding="utf-8")
     browsers = tmp_path / "browsers"
     browsers.mkdir()
-    local_libs = tmp_path / ".cache" / "grafana-screenshot-runtime" / "root" / "usr" / "lib" / "x86_64-linux-gnu"
+    local_libs = (
+        tmp_path
+        / ".cache"
+        / "grafana-screenshot-runtime"
+        / "root"
+        / "usr"
+        / "lib"
+        / "x86_64-linux-gnu"
+    )
     local_libs.mkdir(parents=True)
     monkeypatch.delenv("BIOETL_PLAYWRIGHT_NODE_MODULES", raising=False)
     monkeypatch.delenv("PLAYWRIGHT_BROWSERS_PATH", raising=False)
@@ -449,9 +530,9 @@ def test_playwright_screenshot_script_uses_multiple_panel_readiness_selectors() 
     assert "countRenderedPanels" in script
     assert '[data-testid^="data-testid Panel header"]' in script
     assert '[data-testid*="Panel header"]' in script
-    assert '[data-testid=\"Panel header\"]' in script
+    assert '[data-testid="Panel header"]' in script
     assert '[data-viz-panel-key^="panel-"]' in script
-    assert '[data-panelid]' in script
+    assert "[data-panelid]" in script
     assert "renderedPanelCount" in script
     assert "renderedPanelSelector" in script
 
@@ -912,6 +993,18 @@ def test_live_audit_effective_specs_include_generated_loki_and_tempo_coverage() 
     assert len(specs) > len(audit_subject.REVIEWED_PANEL_SPECS)
 
 
+def test_live_audit_required_reviewed_specs_use_concrete_target_refs() -> None:
+    missing_refs = [
+        f"{spec.dashboard_uid}#{spec.panel_id}"
+        for spec in audit_subject.effective_panel_specs()
+        if spec.required
+        and spec.source_kind in {"http", "prometheus"}
+        and not spec.target_ref_id
+    ]
+
+    assert missing_refs == []
+
+
 def test_dashboard_json_has_no_backup_artifacts_in_active_dashboard_tree() -> None:
     backup_files = sorted(Path("grafana/dashboards").glob("*.backup"))
 
@@ -933,7 +1026,9 @@ def test_alerts_slo_dashboard_is_first_class_shipped_surface() -> None:
     assert "ALERTS" in json.dumps(dashboard)
 
 
-def test_silver_reject_explorer_keeps_shared_shell_context_outside_forensic_scope() -> None:
+def test_silver_reject_explorer_keeps_shared_shell_context_outside_forensic_scope() -> (
+    None
+):
     dashboard = json.loads(
         Path("grafana/dashboards/bioetl-silver-reject-explorer.json").read_text(
             encoding="utf-8"
@@ -1058,9 +1153,13 @@ def test_run_id_independent_metric_panels_disclose_scope() -> None:
                 expr = target.get("expr")
                 if not isinstance(expr, str) or not expr.strip():
                     continue
-                text = f"{panel.get('title', '')} {panel.get('description', '')}".lower()
+                text = (
+                    f"{panel.get('title', '')} {panel.get('description', '')}".lower()
+                )
                 if not any(term in text for term in scope_terms):
-                    missing_scope.append(f"{path}:{panel.get('id')}:{panel.get('title')}")
+                    missing_scope.append(
+                        f"{path}:{panel.get('id')}:{panel.get('title')}"
+                    )
 
     assert missing_scope == []
 
@@ -1367,7 +1466,10 @@ def test_grafana_audit_preflight_playwright_runtime_surfaces_probe_detail(
     monkeypatch.setattr(
         rerender_subject,
         "check_playwright_runtime",
-        lambda: (False, "Playwright browser executable is missing"),
+        lambda *_args, **_kwargs: (
+            False,
+            "Playwright browser executable is missing",
+        ),
     )
 
     result = preflight_subject._check_playwright_runtime()
@@ -1453,7 +1555,7 @@ def test_grafana_audit_preflight_run_checks_collects_ok_results(
     monkeypatch.setattr(
         preflight_subject,
         "_check_playwright_runtime",
-        lambda: preflight_subject.PreflightCheck(
+        lambda *_args, **_kwargs: preflight_subject.PreflightCheck(
             name="playwright-runtime",
             status="ok",
             detail="playwright ready",
@@ -1520,7 +1622,7 @@ def test_grafana_audit_preflight_can_skip_screenshot_check(
     monkeypatch.setattr(
         preflight_subject,
         "_check_playwright_runtime",
-        lambda: preflight_subject.PreflightCheck(
+        lambda *_args, **_kwargs: preflight_subject.PreflightCheck(
             name="playwright-runtime",
             status="ok",
             detail="playwright ready",

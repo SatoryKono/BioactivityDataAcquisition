@@ -6,7 +6,7 @@
 - removed_compatibility_surfaces_with_src_importers: 0
 - removed_compatibility_surfaces_with_test_importers: 0
 - removed_compatibility_surfaces_still_present: 0
-- twin_pair_count: 14
+- twin_pair_count: 8
 - tracked_twin_family_count: 3
 - config_root_symbol_count: 3
 - config_root_src_importer_count: 0
@@ -75,13 +75,7 @@
 
 | Public module | Public src | Private src |
 | --- | ---: | ---: |
-| `bioetl.application.core.data_source_mixins` | 6 | 0 |
-| `bioetl.application.core.filtered_data_source_mixins` | 2 | 0 |
-| `bioetl.application.core.idmapping_fetch_support` | 2 | 0 |
-| `bioetl.application.core.idmapping_lifecycle_support` | 2 | 0 |
 | `bioetl.application.core.span_helpers` | 8 | 0 |
-| `bioetl.application.core.subcellular_fraction_support` | 2 | 0 |
-| `bioetl.application.core.target_data_source_mixins` | 5 | 0 |
 | `bioetl.application.core.batch_execution.contracts` | 7 | 0 |
 | `bioetl.composition.factories.storage.audit` | 4 | 0 |
 | `bioetl.composition.factories.storage.resilience` | 4 | 0 |

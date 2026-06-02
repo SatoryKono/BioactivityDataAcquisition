@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
 
-def _find_listening_backend_pid_by_port(port: int) -> int | None:
+def _find_listening_backend_pids_by_port(port: int) -> tuple[int, ...]:
     if os.name == "nt":
         result = subprocess.run(
             ["netstat", "-ano", "-p", "tcp"],
@@ -28,6 +28,7 @@ def _find_listening_backend_pid_by_port(port: int) -> int | None:
             text=True,
         )
         suffix = f":{port}"
+        pids: set[int] = set()
         for line in result.stdout.splitlines():
             normalized = line.split()
             if len(normalized) < 5:
@@ -36,10 +37,10 @@ def _find_listening_backend_pid_by_port(port: int) -> int | None:
             if state.upper() != "LISTENING" or not local_address.endswith(suffix):
                 continue
             try:
-                return int(pid_text)
+                pids.add(int(pid_text))
             except ValueError:
                 continue
-        return None
+        return tuple(sorted(pids))
 
     result = subprocess.run(
         ["ss", "-ltnp"],
@@ -48,19 +49,23 @@ def _find_listening_backend_pid_by_port(port: int) -> int | None:
         text=True,
     )
     suffix = f":{port}"
+    pids: set[int] = set()
     for line in result.stdout.splitlines():
         if suffix not in line or "LISTEN" not in line:
             continue
         pid_marker = "pid="
-        if pid_marker not in line:
-            continue
-        remainder = line.split(pid_marker, maxsplit=1)[1]
-        pid_text = remainder.split(",", maxsplit=1)[0].split(")", maxsplit=1)[0]
-        try:
-            return int(pid_text)
-        except ValueError:
-            continue
-    return None
+        for remainder in line.split(pid_marker)[1:]:
+            pid_text = remainder.split(",", maxsplit=1)[0].split(")", maxsplit=1)[0]
+            try:
+                pids.add(int(pid_text))
+            except ValueError:
+                continue
+    return tuple(sorted(pids))
+
+
+def _find_listening_backend_pid_by_port(port: int) -> int | None:
+    pids = _find_listening_backend_pids_by_port(port)
+    return pids[0] if pids else None
 
 
 def drop_listening_backend_on_port(
@@ -69,25 +74,30 @@ def drop_listening_backend_on_port(
     sleep_fn: Callable[[float], None] = time.sleep,
 ) -> bool:
     """Terminate the current listener on one port so a fresh backend can bind."""
-    pid = _find_listening_backend_pid_by_port(port)
-    if pid is None:
+    pids = _find_listening_backend_pids_by_port(port)
+    if not pids:
         return True
-    try:
-        if os.name == "nt":
+    if os.name == "nt":
+        for pid in pids:
             result = subprocess.run(
                 ["taskkill", "/PID", str(pid), "/T", "/F"],
                 check=False,
                 capture_output=True,
                 text=True,
             )
-            if result.returncode != 0:
+            if result.returncode != 0 and pid in _find_listening_backend_pids_by_port(
+                port
+            ):
                 return False
-        else:
-            os.kill(pid, signal.SIGTERM)
-    except OSError:
-        return False
+    else:
+        for pid in pids:
+            try:
+                os.kill(pid, signal.SIGTERM)
+            except OSError:
+                if pid in _find_listening_backend_pids_by_port(port):
+                    return False
     sleep_fn(0.5)
-    return _find_listening_backend_pid_by_port(port) is None
+    return not _find_listening_backend_pids_by_port(port)
 
 
 def _build_detached_backend_popen_kwargs(

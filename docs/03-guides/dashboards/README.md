@@ -101,6 +101,10 @@ ______________________________________________________________________
   parameters; primary dashboard links preserve the shared
   `workflow/pipeline/run_type` shell and primary `run_id` only between
   dashboards that expose that selector.
+- `bioetl-workflow-overview` additionally ships hidden exact-run handoff vars
+  (`workflow_context`, `pipeline_context_exact`, `run_type_context_exact`,
+  `provider_context_exact`) so selected `run_id` can narrow downstream links
+  without changing the visible selector shell on the same dashboard.
 
 ## First-screen policy header
 

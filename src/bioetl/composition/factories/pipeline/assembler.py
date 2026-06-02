@@ -3,15 +3,10 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TypeVar
+from typing import TYPE_CHECKING, TypeVar
 
 import pyarrow as pa
 
-from bioetl.application.core.wiring.factory import BasePipeline, PipelineRunner
-from bioetl.application.core.wiring.transformer import (
-    BaseTransformer,
-    TransformerDependencyContext,
-)
 from bioetl.composition.bootstrap_contexts import DQConfigsContext
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
@@ -52,6 +47,18 @@ from bioetl.domain.ports import (
 )
 from bioetl.domain.types import GoldSchemaType
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+
+if TYPE_CHECKING:
+    from bioetl.application.core.wiring.factory import BasePipeline, PipelineRunner
+    from bioetl.application.core.wiring.transformer import (
+        BaseTransformer,
+        TransformerDependencyContext,
+    )
+else:
+    BasePipeline = object
+    PipelineRunner = object
+    BaseTransformer = object
+    TransformerDependencyContext = object
 
 get_data_source_creator = _rf014_get_data_source_creator
 build_factory_services = _rf014_build_factory_services

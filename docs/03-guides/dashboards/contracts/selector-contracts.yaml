@@ -29,12 +29,15 @@ selector_taxonomy:
     - execution_fingerprint
   context_hidden:
     shipped:
+      - workflow_context
       - pipeline_context
+      - pipeline_context_exact
       - run_type_context
+      - run_type_context_exact
       - provider_context
+      - provider_context_exact
       - adapter
     reserved_future:
-      - workflow_context
       - selected_run_id
       - selected_manifest_id
       - selected_started_at
@@ -158,15 +161,21 @@ dashboard_families:
       - step_status
       - step_kind
     hidden_context_selectors:
+      - workflow_context
       - pipeline_context
+      - pipeline_context_exact
       - run_type_context
+      - run_type_context_exact
       - provider_context
+      - provider_context_exact
     notes: |
       Workflow Overview is selected-range workflow evidence only. It does not
       use visible pipeline/run_type/run_id selectors as live execution filters,
       but the shared context shell can expose them for local identity/evidence
       context. It preserves hidden single-pipeline handoff context for
-      downstream operator dashboards.
+      downstream operator dashboards and ships exact-run-aware hidden handoff
+      vars so selected `run_id` can narrow downstream links without rewriting
+      the visible shell.
       Downstream dashboards remain entity-scoped at the UX layer even when
       some emitted series still require a temporary `workflow_<pipeline>` query
       alias during migration.
@@ -311,9 +320,13 @@ shipped_selector_registry:
       - step_status
       - step_kind
     hidden_context_selectors:
+      - workflow_context
       - pipeline_context
+      - pipeline_context_exact
       - run_type_context
+      - run_type_context_exact
       - provider_context
+      - provider_context_exact
     hidden_detail_selectors: []
     top_bar_order:
       - workflow
@@ -328,10 +341,14 @@ shipped_selector_registry:
       pipeline: prometheus_records_processed_total
       run_type: prometheus_records_processed_total
       run_id: control_plane_filter_options_api
-      status: prometheus_workflow_runs_total
+      workflow_context: control_plane_filter_options_api
       pipeline_context: prometheus_workflow_runs_total
+      pipeline_context_exact: control_plane_filter_options_api
       run_type_context: prometheus_workflow_runs_total
+      run_type_context_exact: control_plane_filter_options_api
       provider_context: prometheus_workflow_runs_total
+      provider_context_exact: control_plane_filter_options_api
+      status: prometheus_workflow_runs_total
       step_status: prometheus_workflow_step_events_total
       step_kind: prometheus_workflow_step_events_total
   bioetl-silver-reject-explorer:
@@ -413,9 +430,13 @@ ship_now_selector_contract_by_uid:
       - step_status
       - step_kind
     hidden_context_selectors:
+      - workflow_context
       - pipeline_context
+      - pipeline_context_exact
       - run_type_context
+      - run_type_context_exact
       - provider_context
+      - provider_context_exact
     time_range: grafana_builtin
   bioetl-silver-reject-explorer:
     visible_selectors:
@@ -429,14 +450,17 @@ ship_now_selector_contract_by_uid:
 
 hidden_handoff_contract:
   allowed_shipped_vars:
+    - workflow_context
     - pipeline_context
+    - pipeline_context_exact
     - run_type_context
+    - run_type_context_exact
     - provider_context
+    - provider_context_exact
     - provider_hint
   detail_only_shipped_vars:
     - adapter
   reserved_future_vars:
-    - workflow_context
     - selected_run_id
     - selected_manifest_id
     - selected_started_at
@@ -477,9 +501,12 @@ control_plane_selector_context_contract:
     context for the shared dashboard shell and HTTP-backed identity surfaces.
     Native Grafana query variables can consume its option lists, but they cannot
     safely auto-write sibling visible selector values without a custom selector
-    shell or plugin. Primary-dashboard links preserve selected `run_id` only as
-    HTTP identity context. Current-status PromQL remains selected-scope, not
-    exact run-id scoped.
+    shell or plugin. Workflow Overview MAY consume `exact_run_only=1`
+    filter-options helpers for hidden handoff vars so exact `run_id` can narrow
+    downstream dashboard links without rewriting the visible selector shell.
+    Primary-dashboard links preserve selected `run_id` only as HTTP identity
+    context. Current-status PromQL remains selected-scope, not exact run-id
+    scoped.
 
 run_catalog_future_contract:
   status: design_only_for_execution_filtering

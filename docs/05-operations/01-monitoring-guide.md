@@ -133,7 +133,10 @@ Prometheus labels.
   `$reason_code`, `$field`, `$quarantine_run_id`, `$payload_hash`; it does not
   own the shared `$workflow` / `$run_id` shell
 - **5. Workflow**: `$workflow`, `$pipeline`, `$run_type`, `$run_id`,
-  `$status`, `$step_status`, `$step_kind`
+  `$status`, `$step_status`, `$step_kind`, hidden
+  `$workflow_context`, `$pipeline_context`, `$pipeline_context_exact`,
+  `$run_type_context`, `$run_type_context_exact`, `$provider_context`,
+  `$provider_context_exact`
 - **6. Alerts & SLO**: `$workflow`, `$pipeline`, `$run_type`
 
 > **Важно**: shipped dashboards используют общий context shell plus
@@ -143,6 +146,10 @@ Prometheus labels.
 > `$workflow` остаётся single-select with Include All на primary dashboards,
 > включая `5. Workflow`, чтобы handoff сохранял один coherent workflow shell
 > value без потери aggregate `All` scope.
+> `5. Workflow` additionally ships hidden exact-run handoff vars backed by
+> `/ops/control-plane/filter-options?exact_run_only=1`; they narrow
+> dashboard-to-dashboard links when `$run_id` is selected but do not rewrite
+> visible sibling selectors.
 > `1. Overview` допускает `Workflow=All`, `Pipeline=All`, `Run Type=All` и
 > `Run ID=-` как shipped default entry scope. Pipeline-scoped L1 dashboards сохраняют scoped handoff через
 > `$pipeline`/`$run_type`, а `3. Provider Health` получает hidden

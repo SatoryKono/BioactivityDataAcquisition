@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
-import pytest
-
 import os
 from io import BytesIO
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 from urllib.error import HTTPError
 
+import bioetl.interfaces.cli.commands.domains.health.observability_backend_process as process_subject
 import bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime as runtime_subject
+import pytest
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
     ObservabilityBackendEnsureResult,
     _build_detached_backend_popen_kwargs,
@@ -434,6 +434,37 @@ def test_build_detached_backend_popen_kwargs_hides_windows_console() -> None:
     assert kwargs["startupinfo"] is startupinfo
     assert startupinfo.dwFlags == 0x00000001
     assert startupinfo.wShowWindow == 0
+
+
+def test_drop_listening_backend_on_port_terminates_all_windows_listeners(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    remaining_pid_sets = iter(((111, 222), ()))
+    taskkill_commands: list[list[str]] = []
+
+    def fake_find(_port: int) -> tuple[int, ...]:
+        return next(remaining_pid_sets)
+
+    def fake_run(command: list[str], **_kwargs: object) -> SimpleNamespace:
+        taskkill_commands.append(command)
+        return SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr(process_subject.os, "name", "nt")
+    monkeypatch.setattr(
+        process_subject,
+        "_find_listening_backend_pids_by_port",
+        fake_find,
+    )
+    monkeypatch.setattr(process_subject.subprocess, "run", fake_run)
+
+    assert process_subject.drop_listening_backend_on_port(
+        8081,
+        sleep_fn=lambda _seconds: None,
+    )
+    assert taskkill_commands == [
+        ["taskkill", "/PID", "111", "/T", "/F"],
+        ["taskkill", "/PID", "222", "/T", "/F"],
+    ]
 
 
 def test_build_detached_backend_env_prefixes_src_pythonpath() -> None:

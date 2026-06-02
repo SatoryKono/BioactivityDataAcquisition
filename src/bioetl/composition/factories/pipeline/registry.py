@@ -5,9 +5,8 @@ from __future__ import annotations
 import threading
 from importlib import import_module
 from types import MappingProxyType
-from typing import Protocol, cast
+from typing import TYPE_CHECKING, Protocol, cast
 
-from bioetl.application.core.wiring.registry import GenericPipeline
 from bioetl.composition.factories.pipeline.assembler import (
     GenericPipelineFactory,
 )
@@ -21,6 +20,9 @@ from bioetl.composition.factories.pipeline.registry_manifest import (
 )
 from bioetl.composition.registry_default import get_default_registry
 from bioetl.domain.ports import PipelineFactoryPort
+
+if TYPE_CHECKING:
+    from bioetl.application.core.wiring.registry import GenericPipeline
 
 _registry_module = import_module("bioetl.composition.registry")
 PipelineDefinition = _registry_module.PipelineDefinition
