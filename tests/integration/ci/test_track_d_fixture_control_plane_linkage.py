@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
@@ -316,8 +316,11 @@ async def test_tracked_fixture_strict_replay_uses_explicit_data_dir_for_control_
     assert settings_snapshot["settings"]["data_dir"] == str(data_dir)
     assert settings_snapshot["settings"]["data_root_mode"] == "explicit"
     assert effective_occurrence["run_id"] == str(run_id)
+    output_root = PurePosixPath((data_dir / "output").as_posix())
     assert all(
-        str(artifact["path"]).startswith(str(data_dir / "output"))
+        PurePosixPath(str(artifact["path"]).replace("\\", "/")).is_relative_to(
+            output_root
+        )
         for artifact in manifest_payload["planned_artifacts"]
     )
     assert (

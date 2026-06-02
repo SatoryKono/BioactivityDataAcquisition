@@ -143,7 +143,6 @@ pipelines:
         - src_id
         ranges:
         - confidence_score
-        - publication_year
       shadow_metrics:
         current_rejections:
           metric: bioetl_silver_filter_rejections_total
@@ -202,7 +201,6 @@ pipelines:
       ranges:
         business_only:
         - confidence_score
-        - publication_year
   chembl_assay_parameters:
     downstream_role: standalone
     downstream_pipelines: []

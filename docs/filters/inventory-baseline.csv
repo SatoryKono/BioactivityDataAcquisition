@@ -50,7 +50,6 @@ chembl,assay,columns,assay_type,"[""B"", ""F""]","[""B"", ""F""]",duplicate,iden
 chembl,assay,columns,relationship_type,"[""D""]",,move_to_gold,no rule in gold_filters - move from silver
 chembl,assay,columns,src_id,"[""1""]","[""1""]",duplicate,identical rule in gold_filters - drop from silver
 chembl,assay,ranges,confidence_score,"{""max"": 9, ""min"": 8}",,move_to_gold,no rule in gold_filters - move from silver
-chembl,assay,ranges,publication_year,"{""max"": 2050, ""min"": 1950}",,move_to_gold,no rule in gold_filters - move from silver
 chembl,assay_parameters,required_fields,assay_id,"""assay_id""","""assay_id""",keep_in_silver,also present in gold_filters (informational)
 chembl,assay_parameters,required_fields,assay_param_id,"""assay_param_id""",,keep_in_silver,structural rule stays in silver_filters
 chembl,assay_parameters,required_fields,parameter_type,"""parameter_type""","""parameter_type""",keep_in_silver,also present in gold_filters (informational)

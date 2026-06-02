@@ -149,3 +149,43 @@ def test_debug_export_service_serializes_datetime_source_metadata() -> None:
     pack = service.build_pack()
 
     assert "2026-06-02T10:13:06+00:00" in pack.tables["bronze_index"][0]["source_metadata"]
+
+
+def test_debug_export_service_preserves_semantic_gold_filter_diagnostics() -> None:
+    service = DebugExportService(
+        config=DebugExportConfig(enabled=True, formats=("csv",)),
+        run_id=_RUN_ID,
+        pipeline_id="chembl_assay",
+        provider_id="chembl",
+    )
+
+    service.record_transform_success(
+        raw_record={"assay_chembl_id": "CHEMBL1", "content_hash": "bronze-h1"},
+        record_index=316,
+        silver_record={
+            "entity_id": "chembl:CHEMBL1",
+            "bao_format": "BAO_0000218",
+            "content_hash": "silver-h1",
+        },
+        gold_record=None,
+        gold_excluded_by_contract=True,
+        gold_filter_details={
+            "include": False,
+            "reason_code": "column_filter_mismatch",
+            "rule_type": "column_filters",
+            "field": "bao_format",
+            "operator": "not_in",
+            "expected": ["BAO_0000218"],
+            "actual": "BAO_0000218",
+            "message": "Field 'bao_format' failed column filter not_in",
+        },
+    )
+
+    pack = service.build_pack(status="success")
+    row = pack.tables["gold_rejected"][0]
+
+    assert row["reason_code"] == "SEMANTIC_FILTER_EXCLUDED"
+    assert row["rule_id"] == "column_filters"
+    assert row["failed_field"] == "bao_format"
+    assert row["failed_value"] == "BAO_0000218"
+    assert row["expected_constraint"] == 'not_in ["BAO_0000218"]'

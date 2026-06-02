@@ -10,12 +10,15 @@ from bioetl.domain.types import BatchID, BronzeRecord, ErrorType, GoldRecord
 
 from .debug_export_helpers import (
     _base_row,
+    _extract_rejection_details_mapping,
+    _extract_rejection_diagnostics,
     _extract_rule_id,
     _infer_failed_field,
     _infer_reason_code,
     _jsonable_payload,
     _lineage_sort_key,
     _normalize_optional_text,
+    _normalize_text,
     _payload_hash,
     _primary_key,
     _record_payload,
@@ -95,7 +98,6 @@ class DebugExportCollector:
 
     def attach_manifest_id(self, manifest_id: str | None) -> None:
         self._manifest_id = manifest_id
-
     def record_bronze_batch(
         self,
         *,
@@ -144,6 +146,7 @@ class DebugExportCollector:
         silver_record: BronzeRecord,
         gold_record: BronzeRecord | None = None,
         gold_excluded_by_contract: bool = False,
+        gold_filter_details: object | None = None,
         created_at: datetime,
     ) -> None:
         raw_payload = _record_payload(raw_record)
@@ -184,6 +187,14 @@ class DebugExportCollector:
                 )
             )
         elif gold_excluded_by_contract:
+            detail_mapping = _extract_rejection_details_mapping(gold_filter_details)
+            failed_field, failed_value, expected_constraint = (
+                _extract_rejection_diagnostics(
+                    record=silver_payload,
+                    details=gold_filter_details,
+                    message="Gold semantic filter excluded the record.",
+                )
+            )
             self._gold_rejected_rows.append(
                 _base_row(
                     run_id=self._run_id,
@@ -198,10 +209,22 @@ class DebugExportCollector:
                     action="filter",
                     created_at=created_at,
                     reason_code="SEMANTIC_FILTER_EXCLUDED",
-                    reason_message="Gold semantic filter excluded the record.",
-                    rule_id="",
+                    reason_message=(
+                        (_normalize_text(detail_mapping.get("message")) or "")
+                        if detail_mapping is not None
+                        else ""
+                    )
+                    or "Gold semantic filter excluded the record.",
+                    rule_id=(
+                        _normalize_text(detail_mapping.get("rule_type"))
+                        or _normalize_text(detail_mapping.get("reason_code"))
+                        if detail_mapping is not None
+                        else ""
+                    ),
                     rule_layer="gold",
-                    failed_field="",
+                    failed_field=failed_field,
+                    failed_value=failed_value,
+                    expected_constraint=expected_constraint,
                 )
             )
 
