@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import (
+    deterministic_batch_uuid_from_callsite,
+    deterministic_uuid_from_callsite,
+)
 
 import pytest
 
@@ -11,7 +14,7 @@ from bioetl.application.core.batch_processing_support import (
     BatchProcessingSupportService,
 )
 from bioetl.application.core.batch_transformer import TransformResult
-from bioetl.domain.types import BatchID, RunType
+from bioetl.domain.types import RunType
 
 
 def _make_transform_result() -> TransformResult:
@@ -27,7 +30,7 @@ def _make_transform_result() -> TransformResult:
 @pytest.fixture
 def mock_context() -> MagicMock:
     context = MagicMock()
-    context.run_id = uuid4()
+    context.run_id = deterministic_uuid_from_callsite("test_batch_processing_support")
     context.run_type = RunType.INCREMENTAL
     return context
 
@@ -84,7 +87,9 @@ async def test_transform_and_track_metrics_records_gold_excluded_by_contract(
 
     result = await support.transform_and_track_metrics(
         records=[{"id": "1"}, {"id": "2"}],
-        batch_id=BatchID(uuid4()),
+        batch_id=deterministic_batch_uuid_from_callsite(
+            "test_batch_processing_support"
+        ),
         start_index=0,
     )
 

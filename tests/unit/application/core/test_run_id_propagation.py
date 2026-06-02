@@ -10,7 +10,10 @@ from __future__ import annotations
 
 import asyncio
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import (
+    deterministic_batch_uuid_from_callsite,
+    deterministic_uuid_from_callsite,
+)
 
 import pyarrow as pa
 import pytest
@@ -23,7 +26,7 @@ from bioetl.domain.config import DQConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.ports.noop import NoOpTracing
-from bioetl.domain.types import BatchID, RunID, RunType, ValidationResult
+from bioetl.domain.types import RunID, RunType, ValidationResult
 
 
 def _create_record_processor(
@@ -62,7 +65,7 @@ def _create_record_processor(
 @pytest.fixture
 def run_id() -> RunID:
     """Generate a unique run ID for testing."""
-    return uuid4()
+    return deterministic_uuid_from_callsite("test_run_id_propagation")
 
 
 @pytest.fixture
@@ -181,7 +184,7 @@ class TestRunIdPropagation:
 
         # Process a batch
         records = [{"id": 1, "value": "test"}]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_run_id_propagation")
 
         await processor.process_batch(records, batch_id)
 
@@ -247,7 +250,7 @@ class TestRunIdPropagation:
         # Process multiple batches
         for i in range(3):
             records = [{"id": i, "value": f"test_{i}"}]
-            batch_id = BatchID(uuid4())
+            batch_id = deterministic_batch_uuid_from_callsite("test_run_id_propagation")
             await processor.process_batch(records, batch_id)
 
         # Verify all Bronze calls have the same run_id
@@ -279,7 +282,7 @@ class TestRunIdPropagation:
             mock_storage.write_bronze.reset_mock()
             mock_storage.write_silver.reset_mock()
 
-            run_id = uuid4()
+            run_id = deterministic_uuid_from_callsite("test_run_id_propagation")
             context = PipelineContext(
                 run_id=run_id,
                 run_type=run_type,
@@ -317,7 +320,7 @@ class TestRunIdPropagation:
             )
 
             records = [{"id": 1, "value": "test"}]
-            batch_id = BatchID(uuid4())
+            batch_id = deterministic_batch_uuid_from_callsite("test_run_id_propagation")
 
             await processor.process_batch(records, batch_id)
 

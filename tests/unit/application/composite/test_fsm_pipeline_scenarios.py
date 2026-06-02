@@ -18,7 +18,7 @@ import asyncio
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_string_from_callsite
 
 import polars as pl
 import pytest
@@ -165,7 +165,9 @@ class FakeCheckpointManager:
         run_id: str | None = None,
     ) -> None:
         self._composite_name = composite_name
-        self._run_id = run_id or str(uuid4())
+        self._run_id = run_id or deterministic_uuid_string_from_callsite(
+            "test_fsm_pipeline_scenarios"
+        )
 
         if initial_state is None:
             initial_state = CompositeCheckpointState(
@@ -494,7 +496,7 @@ def create_test_runner(
     if lock is None:
         lock = FakeLockPort()
     if run_id is None:
-        run_id = str(uuid4())
+        run_id = deterministic_uuid_string_from_callsite("test_fsm_pipeline_scenarios")
     fsm_state_helper = FSMStateHelperService(
         config=config,
         logger=logger,
@@ -842,7 +844,9 @@ class TestResumePartialEnrichment:
         # Create checkpoint with crossref already completed
         initial_state = CompositeCheckpointState(
             composite_name="test_composite",
-            run_id=str(uuid4()),
+            run_id=deterministic_uuid_string_from_callsite(
+                "test_fsm_pipeline_scenarios"
+            ),
             state=CompositePipelineState.ENRICHING,
             seed_completed=True,
             seed_result=SeedResult(
@@ -909,7 +913,9 @@ class TestResumePartialEnrichment:
         # Create checkpoint with all enrichers completed but merge failed
         initial_state = CompositeCheckpointState(
             composite_name="test_composite",
-            run_id=str(uuid4()),
+            run_id=deterministic_uuid_string_from_callsite(
+                "test_fsm_pipeline_scenarios"
+            ),
             state=CompositePipelineState.FAILED,
             seed_completed=True,
             seed_result=SeedResult(

@@ -6,14 +6,14 @@ Tests lock release and check subcommands.
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock, patch
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_string_from_callsite
 
 import pytest
 from click.testing import CliRunner
 
 from bioetl.interfaces.cli import cli
 
-_VALID_UUID = str(uuid4())
+_VALID_UUID = deterministic_uuid_string_from_callsite("test_lock")
 _INVALID_UUID = "not-a-uuid"
 
 

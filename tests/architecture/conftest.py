@@ -17,7 +17,7 @@ from pathlib import Path
 import pickle
 import subprocess
 import tempfile
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 import yaml
@@ -156,7 +156,7 @@ def _store_disk_cache(
     signature = _cache_signature(paths)
     cache_path = _cache_file_path(cache_name, signature)
     temp_path = cache_path.with_name(
-        f"{cache_path.name}.{os.getpid()}.{uuid4().hex}.tmp"
+        f"{cache_path.name}.{os.getpid()}.{deterministic_uuid_from_callsite('architecture.conftest').hex}.tmp"
     )
 
     try:
@@ -571,7 +571,7 @@ def _store_subprocess_disk_cache(
     result: subprocess.CompletedProcess[str],
 ) -> None:
     temp_path = cache_path.with_name(
-        f"{cache_path.name}.{os.getpid()}.{uuid4().hex}.tmp"
+        f"{cache_path.name}.{os.getpid()}.{deterministic_uuid_from_callsite('architecture.conftest').hex}.tmp"
     )
     payload = {
         "command": command,

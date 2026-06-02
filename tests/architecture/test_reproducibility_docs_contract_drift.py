@@ -282,10 +282,10 @@ def test_run_manifest_config_hash_legacy_alias_contract_is_documented_and_wired(
     assert "`config_hash`" in runbook
     assert "legacy compatibility" in runbook
     assert "legacy_config_hash_from_resolved_config_hash" not in policy
-    assert "legacy_config_hash_from_resolved_config_hash" in builder
-    assert "legacy_config_hash_from_resolved_config_hash" in refs
-    assert "legacy_config_hash_from_resolved_config_hash" in composite_builder
-    assert "legacy_config_hash_from_resolved_config_hash" in run_context_factory
+    assert "legacy_config_hash_from_resolved_config_hash" not in builder
+    assert "legacy_config_hash_from_resolved_config_hash" not in refs
+    assert "legacy_config_hash_from_resolved_config_hash" not in composite_builder
+    assert "legacy_config_hash_from_resolved_config_hash" not in run_context_factory
 
 
 @pytest.mark.architecture

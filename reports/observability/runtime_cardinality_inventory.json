@@ -52,6 +52,10 @@
   "alerted_without_declaration": [],
   "alerted_without_emission": [],
   "alias_emitters": {},
+  "canonical_runtime_observability_emitters": [
+    "PipelineObserver.emit_domain_event",
+    "PipelineObserver.emit_event"
+  ],
   "compatibility_alias_candidates": [],
   "dashboarded_metrics": [
     "bioetl_adapter_batch_size",
@@ -415,6 +419,52 @@
     "bioetl_workflow_reconciliation_rows_deleted_total",
     "bioetl_workflow_reconciliation_rows_retained_total",
     "bioetl_workflow_reconciliation_rows_scanned_total",
+    "bioetl_workflow_runs_total",
+    "bioetl_workflow_step_duration_seconds",
+    "bioetl_workflow_step_events_total"
+  ],
+  "declared_observability_events": [
+    "artifact_published",
+    "batch_completed",
+    "batch_created",
+    "batch_failed",
+    "batch_sealed",
+    "batch_started",
+    "batch_written",
+    "checkpoint_finalize_completed",
+    "checkpoint_finalize_started",
+    "cleanup_completed",
+    "cleanup_started",
+    "dq_anomaly_detected",
+    "execute_pipeline_completed",
+    "execute_pipeline_started",
+    "execution_completed",
+    "execution_started",
+    "health_check_completed",
+    "health_check_summary_recorded",
+    "lifecycle_clear_completed",
+    "lifecycle_clear_started",
+    "pipeline_failed",
+    "pipeline_finished",
+    "pipeline_shutdown",
+    "pipeline_started",
+    "postrun_completed",
+    "postrun_started",
+    "preflight_completed",
+    "preflight_started",
+    "prepare_medallion_layers_completed",
+    "prepare_medallion_layers_started",
+    "quarantine_entry_created",
+    "quarantine_entry_resolved",
+    "record_quarantined",
+    "startup_completed",
+    "startup_started",
+    "vacuum_completed"
+  ],
+  "declared_risky_label_contract_reviewed": [
+    "bioetl_adapter_request_duration_seconds",
+    "bioetl_adapter_requests_total",
+    "bioetl_workflow_current_status",
     "bioetl_workflow_runs_total",
     "bioetl_workflow_step_duration_seconds",
     "bioetl_workflow_step_events_total"
@@ -1294,6 +1344,9 @@
   "documented_only_metrics": [],
   "documented_without_registry": [],
   "documented_without_runtime": [],
+  "domain_event_emitters": [
+    "src/bioetl/application/observability/observer_context_mixin.py"
+  ],
   "emitted_metrics": [
     "bioetl_adapter_batch_size",
     "bioetl_adapter_dropped_duplicates_total",
@@ -1462,6 +1515,33 @@
     "bioetl_workflow_step_duration_seconds",
     "bioetl_workflow_step_events_total"
   ],
+  "emitted_observability_events": [
+    "batch_created",
+    "batch_failed",
+    "batch_sealed",
+    "batch_written",
+    "checkpoint_finalize_completed",
+    "checkpoint_finalize_started",
+    "dq_anomaly_detected",
+    "execute_pipeline_completed",
+    "execute_pipeline_started",
+    "health_check_completed",
+    "health_check_summary_recorded",
+    "pipeline_failed",
+    "pipeline_finished",
+    "pipeline_shutdown",
+    "postrun_completed",
+    "postrun_started",
+    "preflight_completed",
+    "preflight_started",
+    "prepare_medallion_layers_completed",
+    "prepare_medallion_layers_started",
+    "quarantine_entry_created",
+    "quarantine_entry_resolved",
+    "record_quarantined",
+    "vacuum_completed"
+  ],
+  "emitted_observability_events_without_contract": [],
   "emitted_without_declaration": [],
   "helper_backed_emitters": {
     "bioetl_circuit_breaker_failure_total": [
@@ -1707,6 +1787,80 @@
     "bioetl_workflow_step_duration_seconds",
     "bioetl_workflow_step_events_total"
   ],
+  "observability_event_emitters": {
+    "batch_created": [
+      "src/bioetl/domain/observability_event_mapping.py"
+    ],
+    "batch_failed": [
+      "src/bioetl/domain/observability_event_mapping.py"
+    ],
+    "batch_sealed": [
+      "src/bioetl/domain/observability_event_mapping.py"
+    ],
+    "batch_written": [
+      "src/bioetl/domain/observability_event_mapping.py"
+    ],
+    "checkpoint_finalize_completed": [
+      "src/bioetl/application/observability/observer.py"
+    ],
+    "checkpoint_finalize_started": [
+      "src/bioetl/application/observability/observer.py"
+    ],
+    "dq_anomaly_detected": [
+      "src/bioetl/application/observability/observer_postrun_mixin.py"
+    ],
+    "execute_pipeline_completed": [
+      "src/bioetl/application/observability/observer.py"
+    ],
+    "execute_pipeline_started": [
+      "src/bioetl/application/observability/observer.py"
+    ],
+    "health_check_completed": [
+      "src/bioetl/application/observability/observer_health_mixin.py"
+    ],
+    "health_check_summary_recorded": [
+      "src/bioetl/application/observability/observer_health_mixin.py"
+    ],
+    "pipeline_failed": [
+      "src/bioetl/domain/observability_event_mapping.py"
+    ],
+    "pipeline_finished": [
+      "src/bioetl/domain/observability_event_mapping.py"
+    ],
+    "pipeline_shutdown": [
+      "src/bioetl/domain/observability_event_mapping.py"
+    ],
+    "postrun_completed": [
+      "src/bioetl/application/observability/observer.py"
+    ],
+    "postrun_started": [
+      "src/bioetl/application/observability/observer.py"
+    ],
+    "preflight_completed": [
+      "src/bioetl/application/observability/observer.py"
+    ],
+    "preflight_started": [
+      "src/bioetl/application/observability/observer.py"
+    ],
+    "prepare_medallion_layers_completed": [
+      "src/bioetl/application/observability/observer.py"
+    ],
+    "prepare_medallion_layers_started": [
+      "src/bioetl/application/observability/observer.py"
+    ],
+    "quarantine_entry_created": [
+      "src/bioetl/domain/observability_event_mapping.py"
+    ],
+    "quarantine_entry_resolved": [
+      "src/bioetl/domain/observability_event_mapping.py"
+    ],
+    "record_quarantined": [
+      "src/bioetl/domain/observability_event_mapping.py"
+    ],
+    "vacuum_completed": [
+      "src/bioetl/application/observability/observer_postrun_mixin.py"
+    ]
+  },
   "registered_metrics": [
     "bioetl_adapter_batch_size",
     "bioetl_adapter_dropped_duplicates_total",
@@ -2731,7 +2885,7 @@
       "src/bioetl/application/services/data_quality_service.py"
     ],
     "bioetl_dq_records_quarantined_total": [
-      "src/bioetl/application/core/_quarantine_support.py",
+      "src/bioetl/application/core/_quarantine_metrics_support.py",
       "src/bioetl/application/core/batch_metrics.py"
     ],
     "bioetl_dq_report_generated_total": [
@@ -2918,7 +3072,7 @@
       "src/bioetl/application/observability/pipeline_metrics.py"
     ],
     "bioetl_records_processed_total": [
-      "src/bioetl/application/core/_quarantine_support.py",
+      "src/bioetl/application/core/_quarantine_metrics_support.py",
       "src/bioetl/application/core/batch_metrics.py"
     ],
     "bioetl_replay_drift_events_total": [
@@ -3030,5 +3184,19 @@
   "runtime_label_contract_unresolved": [],
   "runtime_label_contract_violations": [],
   "runtime_without_registry": [],
-  "unused_declared_metrics": []
+  "unused_declared_metrics": [],
+  "unused_declared_observability_events": [
+    "artifact_published",
+    "batch_completed",
+    "batch_started",
+    "cleanup_completed",
+    "cleanup_started",
+    "execution_completed",
+    "execution_started",
+    "lifecycle_clear_completed",
+    "lifecycle_clear_started",
+    "pipeline_started",
+    "startup_completed",
+    "startup_started"
+  ]
 }

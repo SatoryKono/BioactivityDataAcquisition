@@ -9,7 +9,10 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import (
+    deterministic_batch_uuid_from_callsite,
+    deterministic_uuid_from_callsite,
+)
 
 import pytest
 
@@ -21,7 +24,6 @@ from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import BioETLError, SchemaViolationError
 from bioetl.domain.types import (
-    BatchID,
     GoldSchemaPolicyByVersion,
     GoldSchemaVersionPolicy,
     RunType,
@@ -48,7 +50,7 @@ def mock_context():
     mock_logger = MagicMock()
     mock_logger.bind = MagicMock(return_value=mock_logger)
     return PipelineContext(
-        run_id=uuid4(),
+        run_id=deterministic_uuid_from_callsite("test_batch_writer_io_mixin"),
         run_type=RunType.INCREMENTAL,
         logger=mock_logger,
     )
@@ -122,7 +124,7 @@ class TestBatchWriterIOMixinBronze:
     ):
         """Storage receives correct provider, entity, batch_id."""
         records = [{"id": "1", "val": 10}]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_batch_writer_io_mixin")
         ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         await batch_writer.write_bronze(records, batch_id, ts)
@@ -138,7 +140,7 @@ class TestBatchWriterIOMixinBronze:
     ):
         """Records are JSON-serialised and sorted before passing to storage."""
         records = [{"b": 2, "a": 1}, {"z": 3}]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_batch_writer_io_mixin")
         ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         await batch_writer.write_bronze(records, batch_id, ts)
@@ -151,7 +153,7 @@ class TestBatchWriterIOMixinBronze:
     ):
         """run_id and run_type from context are forwarded to storage."""
         records = [{"x": 1}]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_batch_writer_io_mixin")
         ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         await batch_writer.write_bronze(records, batch_id, ts)
@@ -165,7 +167,7 @@ class TestBatchWriterIOMixinBronze:
     ):
         """Optional source_metadata is forwarded to storage."""
         records = [{"id": "1"}]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_batch_writer_io_mixin")
         ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         meta = MagicMock()
 
@@ -183,7 +185,9 @@ class TestBatchWriterIOMixinBronze:
 
         with pytest.raises(BioETLError):
             await writer.write_bronze(
-                [{"id": "1"}], BatchID(uuid4()), datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
+                [{"id": "1"}],
+                deterministic_batch_uuid_from_callsite("test_batch_writer_io_mixin"),
+                datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             )
 
     async def test_write_bronze_reraises_runtime_error(
@@ -195,7 +199,9 @@ class TestBatchWriterIOMixinBronze:
 
         with pytest.raises(RuntimeError):
             await writer.write_bronze(
-                [{"id": "1"}], BatchID(uuid4()), datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
+                [{"id": "1"}],
+                deterministic_batch_uuid_from_callsite("test_batch_writer_io_mixin"),
+                datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             )
 
     async def test_write_bronze_returns_storage_result(
@@ -207,7 +213,9 @@ class TestBatchWriterIOMixinBronze:
         writer = _make_writer(mock_storage, mock_context, mock_gold_validator)
 
         result = await writer.write_bronze(
-            [{"id": "1"}], BatchID(uuid4()), datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
+            [{"id": "1"}],
+            deterministic_batch_uuid_from_callsite("test_batch_writer_io_mixin"),
+            datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 
         assert result is expected
@@ -227,7 +235,7 @@ class TestBatchWriterIOMixinSilver:
     ):
         """Runtime provenance is passed separately, not injected into records."""
         records = [{"entity_id": "1"}]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_batch_writer_io_mixin")
 
         await batch_writer.write_silver(records, batch_id, mock_context.started_at)
 
@@ -260,7 +268,9 @@ class TestBatchWriterIOMixinSilver:
         )
 
         await writer.write_silver(
-            [{"entity_id": "1"}], BatchID(uuid4()), mock_context.started_at
+            [{"entity_id": "1"}],
+            deterministic_batch_uuid_from_callsite("test_batch_writer_io_mixin"),
+            mock_context.started_at,
         )
 
         kwargs = mock_storage.write_silver.call_args[1]
@@ -279,7 +289,7 @@ class TestBatchWriterIOMixinSilver:
 
         await writer.write_silver(
             [{"entity_id": "1", "version": 2}],
-            BatchID(uuid4()),
+            deterministic_batch_uuid_from_callsite("test_batch_writer_io_mixin"),
             mock_context.started_at,
         )
 
@@ -319,7 +329,7 @@ class TestBatchWriterIOMixinSilver:
 
         await writer.write_silver(
             [{"old_name": "val"}],
-            BatchID(uuid4()),
+            deterministic_batch_uuid_from_callsite("test_batch_writer_io_mixin"),
             mock_context.started_at,
         )
 
@@ -338,7 +348,7 @@ class TestBatchWriterIOMixinSilver:
         with pytest.raises(OSError):
             await writer.write_silver(
                 [{"entity_id": "1"}],
-                BatchID(uuid4()),
+                deterministic_batch_uuid_from_callsite("test_batch_writer_io_mixin"),
                 mock_context.started_at,
             )
 
@@ -367,7 +377,7 @@ class TestBatchWriterIOMixinSilver:
 
         await writer.write_silver(
             [{"entity_id": "1", "value": 42}],
-            BatchID(uuid4()),
+            deterministic_batch_uuid_from_callsite("test_batch_writer_io_mixin"),
             mock_context.started_at,
         )
 
@@ -591,7 +601,7 @@ class TestBatchWriterIOMixinGold:
         replay_anchor = datetime(2026, 5, 16, 0, 0, tzinfo=UTC)
         occurrence_started_at = datetime(2026, 5, 19, 12, 30, tzinfo=UTC)
         context = PipelineContext.create(
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("test_batch_writer_io_mixin"),
             run_type=RunType.INCREMENTAL,
             logger=logger,
             started_at=occurrence_started_at,

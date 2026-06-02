@@ -160,7 +160,9 @@ def test_build_pipeline_runner_override_surface_is_capped() -> None:
     legacy_override_names = {name for name in params if name.endswith("_fn")}
 
     assert "wiring" in params
-    assert "legacy_overrides" in params
+    assert "legacy_overrides" not in params
+    assert "factory_wiring" not in params
+    assert "input_wiring" not in params
     assert legacy_override_names == set()
 
 

@@ -9,8 +9,8 @@
     "removed_compatibility_surfaces_with_src_importers": 0,
     "removed_compatibility_surfaces_with_test_importers": 0,
     "removed_compatibility_surfaces_still_present": 0,
-    "twin_pair_count": 0,
-    "twin_pairs_with_private_src_importers": 0,
+    "twin_pair_count": 1,
+    "twin_pairs_with_private_src_importers": 1,
     "twin_pairs_without_public_src_importers": 0,
     "tracked_twin_family_count": 0,
     "config_root_symbol_count": 3,
@@ -122,14 +122,10 @@
       "canonical_target": "bioetl.interfaces.cli.commands.maintenance",
       "owner": "bioetl.interfaces.cli.commands",
       "src_importers": [
-        "src/bioetl/interfaces/cli/commands/cleanup.py",
-        "src/bioetl/interfaces/cli/commands/domains/maintenance/command.py",
-        "src/bioetl/interfaces/cli/commands/domains/maintenance/plan.py",
-        "src/bioetl/interfaces/cli/commands/domains/run/support.py",
-        "src/bioetl/interfaces/cli/commands/vacuum.py"
+        "src/bioetl/interfaces/cli/commands/domains/maintenance/__init__.py"
       ],
       "test_importers": [],
-      "src_importer_count": 5,
+      "src_importer_count": 1,
       "test_importer_count": 0
     },
     {
@@ -154,13 +150,14 @@
       "canonical_target": "bioetl.composition.health_api",
       "owner": "bioetl.composition",
       "src_importers": [
+        "src/bioetl/composition/services_api.py",
         "src/bioetl/interfaces/cli/commands/health.py"
       ],
       "test_importers": [
         "tests/unit/composition/test_canonical_module_paths.py",
         "tests/unit/composition/test_health_api.py"
       ],
-      "src_importer_count": 1,
+      "src_importer_count": 2,
       "test_importer_count": 2
     },
     {
@@ -170,13 +167,12 @@
       "canonical_target": "bioetl.composition.maintenance_api",
       "owner": "bioetl.composition",
       "src_importers": [
-        "src/bioetl/interfaces/cli/commands/archive.py",
-        "src/bioetl/interfaces/cli/commands/maintenance.py"
+        "src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py"
       ],
       "test_importers": [
         "tests/unit/composition/test_canonical_module_paths.py"
       ],
-      "src_importer_count": 2,
+      "src_importer_count": 1,
       "test_importer_count": 1
     },
     {
@@ -327,19 +323,11 @@
       "status": "public-entrypoint",
       "canonical_target": "bioetl.domain.value_objects.activity_values",
       "owner": "bioetl.domain.value_objects",
-      "src_importers": [
-        "src/bioetl/domain/behavior/activity_aggregator/_aggregator_extensions.py",
-        "src/bioetl/domain/behavior/normalization_service.py",
-        "src/bioetl/domain/behavior/unit_converter.py",
-        "src/bioetl/domain/behavior/value_validator.py",
-        "src/bioetl/domain/behavior/value_validator_rules.py",
-        "src/bioetl/domain/value_objects/__init__.py",
-        "src/bioetl/domain/value_objects/activity_measurement.py"
-      ],
+      "src_importers": [],
       "test_importers": [
         "tests/unit/domain/value_objects/test_value_object_facade_reexports.py"
       ],
-      "src_importer_count": 7,
+      "src_importer_count": 0,
       "test_importer_count": 1
     },
     {
@@ -820,7 +808,32 @@
       "test_importer_count": 0
     }
   ],
-  "twin_pairs": [],
+  "twin_pairs": [
+    {
+      "private_path": "src/bioetl/composition/_lazy_exports.py",
+      "public_path": "src/bioetl/composition/lazy_exports.py",
+      "private_module": "bioetl.composition._lazy_exports",
+      "public_module": "bioetl.composition.lazy_exports",
+      "public_src_importer_count": 1,
+      "public_test_importer_count": 0,
+      "private_src_importer_count": 9,
+      "private_test_importer_count": 1,
+      "public_src_importers": [
+        "src/bioetl/composition/bootstrap/__init__.py"
+      ],
+      "private_src_importers": [
+        "src/bioetl/composition/control_plane_api.py",
+        "src/bioetl/composition/entrypoints.py",
+        "src/bioetl/composition/execution_api.py",
+        "src/bioetl/composition/health_api.py",
+        "src/bioetl/composition/lazy_exports.py",
+        "src/bioetl/composition/maintenance_api.py",
+        "src/bioetl/composition/registry_api.py",
+        "src/bioetl/composition/resources_api.py",
+        "src/bioetl/composition/services_api.py"
+      ]
+    }
+  ],
   "tracked_twin_families": [],
   "config_root_facade": {
     "target_module": "bioetl.infrastructure.config",

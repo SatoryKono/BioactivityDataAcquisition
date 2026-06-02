@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import json
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
 # ruff: noqa: F403,F405
 from bioetl.composition.runtime_builders.runner_builder_wiring import (
     LegacyRunnerBuilderOverrides,
+    resolve_runner_builder_wiring,
     resolve_runner_factory_wiring,
 )
 from bioetl.composition.runtime_builders import (
@@ -148,7 +150,7 @@ def test_build_pipeline_runner_wires_dependencies(tmp_path: Path) -> None:
 
     context = SimpleNamespace(
         pipeline_name="chembl_activity",
-        run_id=uuid4(),
+        run_id=deterministic_uuid_from_callsite("test_runner_builder_basics"),
         log_level="INFO",
         vacuum=None,
         run_type="incremental",
@@ -172,18 +174,24 @@ def test_build_pipeline_runner_wires_dependencies(tmp_path: Path) -> None:
         result = runner_builder.build_pipeline_runner(
             context,
             registry=fake_registry,
-            legacy_overrides=LegacyRunnerBuilderOverrides(
-                ensure_providers_loaded_fn=lambda: calls.setdefault("providers", True),
-                register_all_pipelines_fn=lambda registry=None: calls.setdefault(
-                    "pipelines_registry", registry
-                ),
-                get_settings_fn=get_settings_fn,
-                load_pipeline_config_fn=load_pipeline_config_fn,
-                build_observability_bundle_fn=build_observability_bundle_fn,
-                assemble_vacuum_settings_fn=assemble_vacuum_settings_fn,
-                assemble_runtime_config_fn=assemble_runtime_config_fn,
-                assemble_filter_config_fn=assemble_filter_config_fn,
-                assemble_cached_bronze_context_fn=assemble_cached_bronze_context_fn,
+            wiring=resolve_runner_builder_wiring(
+                legacy_overrides=LegacyRunnerBuilderOverrides(
+                    ensure_providers_loaded_fn=lambda: calls.setdefault(
+                        "providers", True
+                    ),
+                    register_all_pipelines_fn=lambda registry=None: calls.setdefault(
+                        "pipelines_registry", registry
+                    ),
+                    get_settings_fn=get_settings_fn,
+                    load_pipeline_config_fn=load_pipeline_config_fn,
+                    build_observability_bundle_fn=build_observability_bundle_fn,
+                    assemble_vacuum_settings_fn=assemble_vacuum_settings_fn,
+                    assemble_runtime_config_fn=assemble_runtime_config_fn,
+                    assemble_filter_config_fn=assemble_filter_config_fn,
+                    assemble_cached_bronze_context_fn=(
+                        assemble_cached_bronze_context_fn
+                    ),
+                )
             ),
         )
 
@@ -302,7 +310,7 @@ def test_build_pipeline_runner_uses_canonical_subservices_with_observability_sea
     )
     context = SimpleNamespace(
         pipeline_name="chembl_activity",
-        run_id=uuid4(),
+        run_id=deterministic_uuid_from_callsite("test_runner_builder_basics"),
         log_level="INFO",
     )
 
@@ -324,12 +332,14 @@ def test_build_pipeline_runner_uses_canonical_subservices_with_observability_sea
         result = runner_builder.build_pipeline_runner(
             context,
             registry=fake_registry,
-            legacy_overrides=LegacyRunnerBuilderOverrides(
-                ensure_providers_loaded_fn=lambda: None,
-                register_all_pipelines_fn=lambda registry=None: None,
-                get_settings_fn=lambda: _build_settings(),
-                load_pipeline_config_fn=lambda _: MagicMock(),
-                build_observability_bundle_fn=build_observability_bundle_fn,
+            wiring=resolve_runner_builder_wiring(
+                legacy_overrides=LegacyRunnerBuilderOverrides(
+                    ensure_providers_loaded_fn=lambda: None,
+                    register_all_pipelines_fn=lambda registry=None: None,
+                    get_settings_fn=lambda: _build_settings(),
+                    load_pipeline_config_fn=lambda _: MagicMock(),
+                    build_observability_bundle_fn=build_observability_bundle_fn,
+                )
             ),
         )
 

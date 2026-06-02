@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -56,7 +56,7 @@ def test_build_pipeline_context_accepts_explicit_started_at_without_clock() -> N
     context = build_pipeline_context(
         "chembl_activity",
         RunOptions(exact_replay=True, use_cached_bronze=True),
-        run_id=uuid4(),
+        run_id=deterministic_uuid_from_callsite("test_pipeline_context_builder"),
         started_at=started_at,
     )
 
@@ -80,7 +80,7 @@ def test_build_pipeline_context_requires_explicit_run_id_for_exact_replay() -> N
 
 def test_build_pipeline_context_accepts_injected_run_id_factory() -> None:
     """Replay callers may inject a deterministic occurrence-ID seam explicitly."""
-    expected_run_id = uuid4()
+    expected_run_id = deterministic_uuid_from_callsite("test_pipeline_context_builder")
 
     context = build_pipeline_context(
         "chembl_activity",
@@ -100,7 +100,7 @@ def test_build_pipeline_context_propagates_workflow_id() -> None:
             debug_export_enabled=True,
             workflow_id="chembl_baseline",
         ),
-        run_id=uuid4(),
+        run_id=deterministic_uuid_from_callsite("test_pipeline_context_builder"),
         started_at=datetime(2026, 5, 24, 13, 30, tzinfo=UTC),
     )
 

@@ -87,7 +87,6 @@ def _manifest_anchor_values(
         "replay_of_manifest_id": manifest.replay_of_manifest_id,
         "checkpoint_anchor_status": checkpoint_status,
         "composite_run_identity": composite_run_identity(manifest),
-        "config_hash": code.config_hash,
         "dq_policy_ref": code.dq_policy_ref,
         "rule_bundle_version": code.rule_bundle_version,
         "dq_contract_compatibility_hash": code.dq_contract_compatibility_hash,

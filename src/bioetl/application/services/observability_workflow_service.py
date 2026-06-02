@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from bioetl.application.observability.span_helpers import traced_async_operation
 from bioetl.application.services._observability_workflow_execution import (
     inspect_audit_run as inspect_audit_run_impl,
 )
@@ -19,28 +20,19 @@ from bioetl.application.services._observability_workflow_models import (
     CheckpointAuditWorkflowResult,
     RunForensicDossierResult,
 )
-from bioetl.application.observability.span_helpers import traced_async_operation
-from bioetl.application.services._observability_workflow_support import (
-    resolve_run_manifest,
-    trace_links_enabled,
-)
 from bioetl.application.services.audit_inspection_service import (
-    AuditInspectionResult,
     AuditInspectionService,
 )
 from bioetl.application.services.checkpoint_service import (
-    CheckpointInfo,
     CheckpointService,
 )
 from bioetl.application.services.control_plane.manifest.inspection_service import (
-    RunManifestInspectionResult,
     RunManifestInspectionService,
 )
 
 if TYPE_CHECKING:
     from bioetl.application.services.lineage.lineage_inspection_service import (
         LineageInspectionService,
-        LineageRunExplanationResult,
     )
     from bioetl.application.services.quarantine_service import QuarantineService
     from bioetl.domain.ports import TracingPort

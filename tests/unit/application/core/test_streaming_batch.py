@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import time
 from unittest.mock import MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_batch_uuid_from_callsite
 
 import pytest
 
@@ -21,7 +21,6 @@ from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.domain.config import MemoryConfig
 from bioetl.infrastructure.system.memory_monitor import MemoryMonitor
 from bioetl.domain.exceptions import DataQualityError
-from bioetl.domain.types import BatchID
 
 pytest_plugins = ("tests.unit.application.core.transformer_test_support",)
 
@@ -33,7 +32,7 @@ class TestTransformSingle:
     async def test_transform_single_success(self, batch_transformer):
         """Test successful single record transformation."""
         record = {"id": "1", "value": 10}
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_streaming_batch")
 
         result = await batch_transformer.transform_single(record, batch_id)
 
@@ -46,7 +45,7 @@ class TestTransformSingle:
     async def test_transform_single_filtered_from_gold(self, batch_transformer):
         """Test record that passes silver but not gold filter."""
         record = {"id": "2", "value": 3}  # value <= 5
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_streaming_batch")
 
         result = await batch_transformer.transform_single(record, batch_id)
 
@@ -90,7 +89,7 @@ class TestTransformSingle:
         )
 
         record = {"id": "bad", "value": 10}
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_streaming_batch")
 
         result = await transformer.transform_single(record, batch_id)
 
@@ -145,7 +144,9 @@ class TestTransformSingle:
             gold_transform_callback=gold_transform_callback,
         )
 
-        result = await transformer.transform_single({"id": "f"}, BatchID(uuid4()))
+        result = await transformer.transform_single(
+            {"id": "f"}, deterministic_batch_uuid_from_callsite("test_streaming_batch")
+        )
 
         assert result.silver_record is None
         assert result.gold_record is None
@@ -178,7 +179,7 @@ class TestTransformStream:
             {"id": "2", "value": 3},
             {"id": "3", "value": 8},
         ]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_streaming_batch")
 
         result = await batch_transformer.transform_stream(records, batch_id)
 
@@ -240,7 +241,7 @@ class TestTransformStream:
 
         await transformer.transform_stream(
             [{"id": str(i), "value": i} for i in range(12)],
-            BatchID(uuid4()),
+            deterministic_batch_uuid_from_callsite("test_streaming_batch"),
         )
         await marker_task
 
@@ -287,7 +288,7 @@ class TestTransformStream:
             {"id": "bad", "value": 5},
             {"id": "good2", "value": 8},
         ]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_streaming_batch")
 
         result = await transformer.transform_stream(records, batch_id)
 
@@ -348,7 +349,9 @@ class TestTransformStream:
             {"id": "good2", "value": 7},
         ]
 
-        result = await transformer.transform_stream(records, BatchID(uuid4()))
+        result = await transformer.transform_stream(
+            records, deterministic_batch_uuid_from_callsite("test_streaming_batch")
+        )
 
         assert len(result.silver_records) == 2
         assert len(result.gold_records) == 2
@@ -391,7 +394,7 @@ class TestStreamingBatchProcessor:
         )
 
         records = [{"id": str(i), "value": i} for i in range(10)]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_streaming_batch")
 
         chunks = []
         async for chunk in processor.process_in_chunks(records, batch_id, chunk_size=3):
@@ -414,7 +417,7 @@ class TestStreamingBatchProcessor:
         )
 
         records = [{"id": str(i), "value": i} for i in range(20)]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_streaming_batch")
 
         chunk_sizes = []
         async for chunk in processor.process_in_chunks(
@@ -434,7 +437,7 @@ class TestStreamingBatchProcessor:
         )
 
         records = [{"id": str(i), "value": i * 2} for i in range(5)]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_streaming_batch")
 
         chunks = []
         async for chunk in processor.process_in_chunks(records, batch_id, chunk_size=2):
@@ -513,7 +516,7 @@ class TestIntegration:
 
         # Create 1000 records
         records = [{"id": str(i), "value": i % 100} for i in range(1000)]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_streaming_batch")
 
         # Process in chunks
         processor = StreamingBatchProcessor(transformer=transformer)

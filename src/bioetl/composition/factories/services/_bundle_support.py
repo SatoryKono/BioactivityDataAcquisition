@@ -7,6 +7,9 @@ from dataclasses import dataclass
 
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.composition.factories.services.observability_api import (
+    create_data_source_with_observability,
+)
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
 )
@@ -70,28 +73,17 @@ def create_pipeline_data_source(
     create_data_source_impl_fn: Callable[..., DataSourcePort],
 ) -> DataSourcePort:
     """Resolve live-vs-cached data source construction for one pipeline run."""
-    if cached_bronze is not None and cached_bronze.enabled:
-        data_source = create_cached_bronze_data_source_fn(
-            settings=settings,
-            pipeline_config=pipeline_config,
-            logger=logger,
-            cached_bronze=cached_bronze,
-        )
-        logger.info(
-            "using_cached_bronze_mode",
-            pipeline=pipeline_name,
-            bronze_path=cached_bronze.bronze_path,
-            bronze_date=cached_bronze.bronze_date,
-        )
-        return data_source
-    return create_data_source_impl_fn(
+    return create_data_source_with_observability(
         create_data_source_fn=create_data_source_fn,
         settings=settings,
         pipeline_config=pipeline_config,
         logger=logger,
         filter_config=filter_config,
-        metrics=metrics,
+        shared_metrics=metrics,
         pipeline_name=pipeline_name,
+        cached_bronze=cached_bronze,
+        create_cached_bronze_data_source_fn=create_cached_bronze_data_source_fn,
+        create_data_source_impl_fn=create_data_source_impl_fn,
     )
 
 

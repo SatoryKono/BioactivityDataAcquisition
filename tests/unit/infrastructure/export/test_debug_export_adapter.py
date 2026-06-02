@@ -93,3 +93,27 @@ def test_debug_export_adapter_writes_deterministic_hash_and_split_workbook(
     workbook = openpyxl.load_workbook(root_path / "debug_export.xlsx", read_only=True)
     assert "silver_full_0001" in workbook.sheetnames
     assert "silver_full_0002" in workbook.sheetnames
+
+
+def test_debug_export_adapter_skips_xlsx_when_openpyxl_missing(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    adapter = DebugExportAdapter()
+
+    def _raise_missing(*args: object, **kwargs: object) -> None:
+        raise ModuleNotFoundError("No module named 'openpyxl'", name="openpyxl")
+
+    monkeypatch.setattr(adapter, "_write_xlsx", _raise_missing)
+
+    result = adapter.write_pack(
+        pack=_build_pack(
+            root=tmp_path,
+            created_at=datetime(2026, 6, 2, 10, 0, 0, tzinfo=UTC),
+        )
+    )
+
+    root_path = Path(result.root_path)
+    assert (root_path / "manifest.json").exists()
+    assert (root_path / "silver_full.csv").exists()
+    assert not (root_path / "debug_export.xlsx").exists()

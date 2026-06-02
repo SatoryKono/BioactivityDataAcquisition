@@ -38,12 +38,12 @@ from bioetl.domain.behavior.activity_aggregator import ActivityAggregator
 from bioetl.domain.behavior.normalization_config import NormalizationConfig
 from bioetl.domain.behavior.unit_converter import UnitConverter
 from bioetl.domain.behavior.value_validator import ValueValidator
-from bioetl.domain.value_objects.activity_values import PChemblValue
+from bioetl.domain.value_objects import PChemblValue
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-    from bioetl.domain.value_objects.activity_values import Concentration
+    from bioetl.domain.value_objects import Concentration
 
 __all__ = [
     "BioactivityNormalizer",

@@ -7,7 +7,7 @@ from importlib import import_module
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Protocol, cast
 
-from bioetl.composition.factories.pipeline.assembler import (
+from bioetl.composition.factories.pipeline._assembler_factory import (
     GenericPipelineFactory,
 )
 from bioetl.composition.factories.pipeline.contract_validator import create_factory
@@ -18,7 +18,6 @@ from bioetl.composition.factories.pipeline.registry_exports import (
 from bioetl.composition.factories.pipeline.registry_manifest import (
     PIPELINE_CONFIGS,
 )
-from bioetl.composition.registry_default import get_default_registry
 from bioetl.domain.ports import PipelineFactoryPort
 
 if TYPE_CHECKING:
@@ -105,6 +104,8 @@ def _register_default_registry_once(
     with registration_state._lock:
         if registration_state._registered:
             return
+        from bioetl.composition.registry_api import get_default_registry
+
         _register_factories_to(get_default_registry())
         registration_state._registered = True
 
@@ -203,7 +204,12 @@ def reset_registration(
         if registration_state is not None
         else _get_default_registration_state()
     )
-    target_registry = registry if registry is not None else get_default_registry()
+    if registry is None:
+        from bioetl.composition.registry_api import get_default_registry
+
+        target_registry = get_default_registry()
+    else:
+        target_registry = registry
     with state._lock:
         target_registry.clear()
         state._registered = False

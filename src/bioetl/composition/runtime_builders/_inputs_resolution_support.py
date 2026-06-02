@@ -114,6 +114,7 @@ def assemble_runtime_config_impl(
         debug_export_enabled=bool(getattr(ctx, "debug_export_enabled", False)),
         debug_export_formats=tuple(getattr(ctx, "debug_export_formats", ())),
         debug_export_dir=getattr(ctx, "debug_export_dir", None),
+        workflow_id=getattr(ctx, "workflow_id", "standalone"),
         health_check_mode=health_check_mode,
         silver_filter_compatibility_mode=resolve_silver_filter_compatibility_mode(),
     )

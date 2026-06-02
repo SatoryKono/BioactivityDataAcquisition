@@ -5,6 +5,7 @@ source_of_truth:
   test_matrix_path: configs/quality/test_matrix.yaml
   fixture_governance_ledger_path: configs/quality/fixture_governance_ledger.yaml
   ci_coverage_surface_matrix_path: configs/quality/ci_coverage_surface_matrix.yaml
+  test_skip_inventory_path: configs/quality/test_skip_inventory.yaml
   testing_guide_path: docs/03-guides/testing.md
 supported_scopes:
   integration:
@@ -194,7 +195,7 @@ tracked_suite_inventory:
       - tests/integration/test_prometheus_rules_config.py
     composite_config_and_merge:
     - tests/integration/composite/test_column_naming_integration.py
-    - tests/integration/composite/test_composite_config_backward_compatibility.py
+    - tests/integration/composite/test_composite_config_schema_contract.py
     - tests/integration/composite/test_molecule_pipeline.py
     config_and_storage_surfaces:
     - tests/integration/config/test_chembl_bronze_observed_value_inventory_snapshot.py

@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 import pytest
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from uuid import uuid4
 
 from bioetl.application.services.control_plane.forensic_diff_service import (
     ForensicRunDiffService,
 )
 from bioetl.domain.control_plane import RunLedgerEntry
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import RunType
 from bioetl.infrastructure.control_plane import FileArtifactByteComparisonAdapter
 from tests.helpers.control_plane import InMemoryRunLedgerStore, InMemoryRunManifestStore
 from tests.unit.application.services.run_manifest_test_support import (
@@ -28,8 +28,8 @@ pytestmark = pytest.mark.unit
 def test_forensic_diff_reports_semantic_and_artifact_evidence() -> None:
     manifest_store = InMemoryRunManifestStore()
     ledger_store = InMemoryRunLedgerStore()
-    left_run_id = RunID(uuid4())
-    right_run_id = RunID(uuid4())
+    left_run_id = deterministic_run_uuid_from_callsite("test_forensic_diff_service")
+    right_run_id = deterministic_run_uuid_from_callsite("test_forensic_diff_service")
     left = make_run_manifest(
         manifest_id="manifest-left",
         run_id=left_run_id,
@@ -83,8 +83,8 @@ def test_forensic_diff_reports_semantic_and_artifact_evidence() -> None:
 
 def test_forensic_diff_classifies_occurrence_only_drift() -> None:
     manifest_store = InMemoryRunManifestStore()
-    left_run_id = RunID(uuid4())
-    right_run_id = RunID(uuid4())
+    left_run_id = deterministic_run_uuid_from_callsite("test_forensic_diff_service")
+    right_run_id = deterministic_run_uuid_from_callsite("test_forensic_diff_service")
     manifest_store.save(
         make_run_manifest(
             manifest_id="manifest-left",
@@ -109,7 +109,7 @@ def test_forensic_diff_classifies_occurrence_only_drift() -> None:
 
 def test_forensic_diff_classifies_exact_match() -> None:
     manifest_store = InMemoryRunManifestStore()
-    run_id = RunID(uuid4())
+    run_id = deterministic_run_uuid_from_callsite("test_forensic_diff_service")
     manifest_store.save(
         make_run_manifest(
             manifest_id="manifest-left",
@@ -128,8 +128,8 @@ def test_forensic_diff_classifies_exact_match() -> None:
 
 def test_forensic_diff_classifies_missing_optional_evidence() -> None:
     manifest_store = InMemoryRunManifestStore()
-    left_run_id = RunID(uuid4())
-    right_run_id = RunID(uuid4())
+    left_run_id = deterministic_run_uuid_from_callsite("test_forensic_diff_service")
+    right_run_id = deterministic_run_uuid_from_callsite("test_forensic_diff_service")
     manifest_store.save(
         make_run_manifest(
             manifest_id="manifest-left",
@@ -163,7 +163,7 @@ def test_forensic_diff_classifies_missing_optional_evidence() -> None:
 def test_forensic_diff_reports_missing_sidecars_and_incomplete_trace() -> None:
     manifest_store = InMemoryRunManifestStore()
     ledger_store = InMemoryRunLedgerStore()
-    run_id = RunID(uuid4())
+    run_id = deterministic_run_uuid_from_callsite("test_forensic_diff_service")
     manifest_store.save(make_run_manifest(manifest_id="manifest-left", run_id=run_id))
     ledger_store.append(
         RunLedgerEntry(
@@ -197,7 +197,7 @@ def test_forensic_diff_reports_checkpoint_mismatch() -> None:
     manifest_store.save(
         make_run_manifest(
             manifest_id="manifest-left",
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite("test_forensic_diff_service"),
             execution_fingerprint="fingerprint-left",
             config_hash=VALID_CONFIG_HASH,
         )
@@ -205,7 +205,7 @@ def test_forensic_diff_reports_checkpoint_mismatch() -> None:
     manifest_store.save(
         make_run_manifest(
             manifest_id="manifest-right",
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite("test_forensic_diff_service"),
             execution_fingerprint="fingerprint-right",
             config_hash="c" * 64,
         )
@@ -224,7 +224,7 @@ def test_forensic_diff_reports_checkpoint_mismatch() -> None:
 
 def test_forensic_diff_marks_byte_equivalence_unavailable_without_port() -> None:
     manifest_store = InMemoryRunManifestStore()
-    run_id = RunID(uuid4())
+    run_id = deterministic_run_uuid_from_callsite("test_forensic_diff_service")
     manifest_store.save(make_run_manifest(manifest_id="manifest-left", run_id=run_id))
     service = ForensicRunDiffService(manifest_port=manifest_store)
 
@@ -240,8 +240,8 @@ def test_forensic_diff_marks_byte_equivalence_unavailable_without_port() -> None
 def test_forensic_diff_reports_byte_mismatch_when_artifacts_differ() -> None:
     manifest_store = InMemoryRunManifestStore()
     ledger_store = InMemoryRunLedgerStore()
-    left_run_id = RunID(uuid4())
-    right_run_id = RunID(uuid4())
+    left_run_id = deterministic_run_uuid_from_callsite("test_forensic_diff_service")
+    right_run_id = deterministic_run_uuid_from_callsite("test_forensic_diff_service")
     manifest_store.save(
         make_run_manifest(manifest_id="manifest-left", run_id=left_run_id)
     )
@@ -309,8 +309,8 @@ def test_forensic_diff_reports_occurrence_only_sidecar_drift_as_semantic_match()
 ):
     manifest_store = InMemoryRunManifestStore()
     ledger_store = InMemoryRunLedgerStore()
-    left_run_id = RunID(uuid4())
-    right_run_id = RunID(uuid4())
+    left_run_id = deterministic_run_uuid_from_callsite("test_forensic_diff_service")
+    right_run_id = deterministic_run_uuid_from_callsite("test_forensic_diff_service")
     manifest_store.save(
         make_run_manifest(manifest_id="manifest-left", run_id=left_run_id)
     )

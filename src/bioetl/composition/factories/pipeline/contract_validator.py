@@ -29,7 +29,9 @@ from bioetl.infrastructure.config.contract_policy_validation import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.composition.factories.pipeline.assembler import GenericPipelineFactory
+    from bioetl.composition.factories.pipeline._assembler_factory import (
+        GenericPipelineFactory,
+    )
 
 
 def _schema_columns(
@@ -75,7 +77,7 @@ def create_factory(
         Configured GenericPipelineFactory instance
     """
     _validate_contract_policy(config)
-    from bioetl.composition.factories.pipeline.assembler import (
+    from bioetl.composition.factories.pipeline._assembler_factory import (
         GenericPipelineFactory,
     )
 

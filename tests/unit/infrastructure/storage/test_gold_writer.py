@@ -8,6 +8,7 @@ from functools import cache
 from pathlib import Path
 from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock, patch
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pyarrow as pa
 import pytest
@@ -1150,9 +1151,7 @@ class TestGoldWriterAudit:
         self, gold_writer, valid_records, strict_schema, fixed_ingestion_ts
     ):
         """Test _post_write_gold consumes a named post-write context."""
-        from uuid import uuid4
 
-        from bioetl.domain.types import RunID
         from bioetl.infrastructure.storage.gold_writer import (
             GoldWriteMode,
             _GoldWritePostwriteContext,
@@ -1170,7 +1169,7 @@ class TestGoldWriterAudit:
             ),
             records=valid_records,
             ingestion_ts=fixed_ingestion_ts,
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite("test_gold_writer"),
             scd_config=None,
             silver_refs=None,
             schema=strict_schema,
@@ -1236,15 +1235,13 @@ class TestGoldWriterAudit:
     ):
         """Test _log_gold_audit logs correctly with valid data."""
         from unittest.mock import AsyncMock
-        from uuid import uuid4
 
         from bioetl.domain.medallion import GoldWriteMode
-        from bioetl.domain.types import RunID
 
         mock_audit = AsyncMock()
         gold_writer._audit = mock_audit
 
-        run_id = RunID(uuid4())
+        run_id = deterministic_run_uuid_from_callsite("test_gold_writer")
         await gold_writer._log_gold_audit(
             table_name="test.table",
             records=valid_records,
@@ -1267,16 +1264,14 @@ class TestGoldWriterAudit:
     ):
         """Test _log_gold_audit maps SCD2 mode to MERGE operation."""
         from unittest.mock import AsyncMock
-        from uuid import uuid4
 
         from bioetl.domain.medallion import GoldWriteMode
         from bioetl.domain.ports.audit import AuditOperation
-        from bioetl.domain.types import RunID
 
         mock_audit = AsyncMock()
         gold_writer._audit = mock_audit
 
-        run_id = RunID(uuid4())
+        run_id = deterministic_run_uuid_from_callsite("test_gold_writer")
         await gold_writer._log_gold_audit(
             table_name="test.table",
             records=valid_records,

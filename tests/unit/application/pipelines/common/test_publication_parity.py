@@ -11,7 +11,7 @@ import os
 from pathlib import Path
 from typing import Any, cast
 from unittest.mock import MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 
@@ -20,7 +20,7 @@ from bioetl.application.pipelines.crossref.transformer import (
 )
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import RunType
 from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
 pytestmark = pytest.mark.usefixtures("publication_type_classification_data")
@@ -116,7 +116,7 @@ def assert_snapshot_match(snapshot_name: str, actual_data: dict[str, Any]) -> No
 def mock_context() -> PipelineContext:
     mock_logger = MagicMock()
     return PipelineContext(
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite("test_publication_parity"),
         run_type=RunType.INCREMENTAL,
         logger=mock_logger,
     )

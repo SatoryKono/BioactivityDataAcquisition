@@ -17,6 +17,7 @@ import yaml
 from scripts.engineering.qa.config_surface_governance import is_sanctioned_partial_key
 
 DEFAULT_BASELINE_JSON = Path("reports/quality/config-discrepancy-baseline.json")
+SANCTIONED_DEFAULT_SCALAR = "<sanctioned-default>"
 
 
 def flatten_dict(d: dict[str, Any], parent_key: str = "") -> dict[str, Any]:
@@ -94,6 +95,51 @@ def _partial_keys(configs: dict[str, dict[str, Any]]) -> list[str]:
     return [key for key in all_keys if key not in common]
 
 
+def _sanctioned_placeholder(values: list[Any]) -> Any:
+    """Preserve coarse shape while collapsing sanctioned missing-vs-empty variance."""
+    if "(dict)" in values:
+        return "(dict)"
+    if "[]" in values:
+        return "[]"
+    if "null" in values:
+        return "null"
+    return SANCTIONED_DEFAULT_SCALAR
+
+
+def _normalize_sanctioned_family_presence(
+    configs: dict[str, dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    """Treat sanctioned optional shapes as present across a governed family.
+
+    This projection is for governance metrics only. It collapses structural
+    missing-vs-empty variance for keys already documented as sanctioned without
+    mutating the raw config comparison matrix.
+    """
+    sanctioned_keys = sorted(
+        {
+            key
+            for values in configs.values()
+            for key in values
+            if is_sanctioned_partial_key(key)
+        },
+        key=_sort_key,
+    )
+    placeholders = {
+        key: _sanctioned_placeholder(
+            [values[key] for values in configs.values() if key in values]
+        )
+        for key in sanctioned_keys
+    }
+
+    normalized: dict[str, dict[str, Any]] = {}
+    for name, payload in configs.items():
+        projected = dict(payload)
+        for key in sanctioned_keys:
+            projected.setdefault(key, placeholders[key])
+        normalized[name] = projected
+    return normalized
+
+
 def _family_metrics(configs: dict[str, dict[str, Any]]) -> dict[str, int]:
     partial = _partial_keys(configs)
     actionable_partial = [key for key in partial if not is_sanctioned_partial_key(key)]
@@ -160,7 +206,10 @@ def _collect_family_configs() -> dict[str, dict[str, dict[str, Any]]]:
             families["entity_effective"][name] = payload
         elif name.startswith("composite/"):
             families["composite_runtime"][name] = payload
-    return families
+    return {
+        family_name: _normalize_sanctioned_family_presence(family_payload)
+        for family_name, family_payload in families.items()
+    }
 
 
 def _sort_key(path: str) -> tuple[int, list[str]]:

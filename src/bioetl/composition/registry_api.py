@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from importlib import import_module
 from typing import TYPE_CHECKING
+
+from bioetl.composition._lazy_exports import install_lazy_exports
 
 if TYPE_CHECKING:
     pass
@@ -22,7 +23,7 @@ _PUBLIC_EXPORTS = {
         "create_registry",
     ),
     "get_default_registry": (
-        "bioetl.composition.registry_default",
+        "bioetl.composition.registry",
         "get_default_registry",
     ),
     "register_all_pipelines": (
@@ -32,17 +33,10 @@ _PUBLIC_EXPORTS = {
 }
 
 __all__ = list(_PUBLIC_EXPORTS)
-
-
-def __getattr__(name: str) -> object:
-    export = _PUBLIC_EXPORTS.get(name)
-    if export is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    module_name, attr_name = export
-    value = getattr(import_module(module_name), attr_name)
-    globals()[name] = value
-    return value
-
-
-def __dir__() -> list[str]:
-    return sorted(set(globals()) | set(__all__))
+install_lazy_exports(
+    module_globals=globals(),
+    public_exports=_PUBLIC_EXPORTS,
+    module_name=__name__,
+    explicit_exports=__all__,
+    cache=True,
+)

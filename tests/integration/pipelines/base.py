@@ -7,7 +7,7 @@ from pathlib import Path
 import os
 from typing import Any
 from unittest.mock import patch
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -251,7 +251,7 @@ class IntegrationPipelineTestCase:
 
     @pytest.fixture
     def run_id(self):
-        return uuid4()
+        return deterministic_uuid_from_callsite("base")
 
     def create_runner(
         self,

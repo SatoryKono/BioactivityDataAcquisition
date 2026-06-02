@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from pathlib import Path
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 
@@ -14,7 +14,7 @@ from bioetl.composition.runtime_builders.run_manifest_support import (
     RunManifestContractIdentity,
 )
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import RunType
 
 
 pytestmark = pytest.mark.unit
@@ -62,7 +62,7 @@ def test_run_context_factory_preserves_distinct_config_hash_surfaces() -> None:
     factory = _factory()
     runtime = _runtime()
     yaml_config = _yaml_config()
-    run_id = RunID(uuid4())
+    run_id = deterministic_run_uuid_from_callsite("test_run_context_factory")
     context = factory.create(
         run_id=run_id,
         runtime=runtime,
@@ -84,7 +84,7 @@ def test_run_context_factory_does_not_alias_missing_effective_hash() -> None:
     factory = _factory()
     runtime = _runtime()
     yaml_config = _yaml_config()
-    run_id = RunID(uuid4())
+    run_id = deterministic_run_uuid_from_callsite("test_run_context_factory")
     context = factory.create(
         run_id=run_id,
         runtime=runtime,
@@ -105,7 +105,7 @@ def test_run_context_factory_uses_explicit_started_at_anchor() -> None:
     started_at = datetime(2026, 4, 24, 12, 0, tzinfo=UTC)
     runtime = _runtime()
     yaml_config = _yaml_config()
-    run_id = RunID(uuid4())
+    run_id = deterministic_run_uuid_from_callsite("test_run_context_factory")
     factory = RunContextFactory(
         pipeline_name="chembl_activity",
         provider="chembl",
@@ -127,7 +127,7 @@ def test_run_context_factory_propagates_replay_parentage_and_snapshot_anchor() -
     """Replay parentage and input snapshot fingerprint must survive into RunContext."""
     factory = _factory()
     context = factory.create(
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite("test_run_context_factory"),
         runtime=RuntimeConfig(run_type=RunType.INCREMENTAL, exact_replay=True),
         started_at=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
         yaml_config=_yaml_config(),
@@ -169,7 +169,7 @@ entries:
 
     with pytest.raises(RuntimeError, match="complete contract identity"):
         factory.create(
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite("test_run_context_factory"),
             runtime=RuntimeConfig(
                 run_type=RunType.INCREMENTAL,
                 exact_replay=True,
@@ -199,7 +199,7 @@ def test_run_context_factory_allows_degraded_partial_contract_identity(
     )
 
     context = factory.create(
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite("test_run_context_factory"),
         runtime=_runtime(),
         started_at=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
         yaml_config=_yaml_config(),
@@ -229,7 +229,7 @@ def test_run_context_factory_maps_extended_contract_identity_fields() -> None:
     )
 
     context = factory.create(
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite("test_run_context_factory"),
         runtime=_runtime(),
         started_at=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
         yaml_config=_yaml_config(),
@@ -264,7 +264,7 @@ def test_run_context_factory_accepts_dataclass_contract_identity() -> None:
     )
 
     context = factory.create(
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite("test_run_context_factory"),
         runtime=_runtime(),
         started_at=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
         yaml_config=_yaml_config(),

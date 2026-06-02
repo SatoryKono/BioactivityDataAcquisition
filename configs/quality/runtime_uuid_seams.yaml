@@ -26,6 +26,11 @@ review_history:
     owner: architecture-governance
     outcome: replay_identity_fail_closed_enforced
     rationale: Exact replay application and composition seams now fail closed without explicit run_id or injected run_id_factory, while residual uuid4 seams remain classified as operational-only defaults or injectable factories.
+  - issue: "#4997"
+    reviewed_on: "2026-06-02"
+    owner: architecture-governance
+    outcome: cli_preview_uuid4_retired
+    rationale: CLI storage preview contexts now derive UUID-shaped occurrence IDs from explicit timestamp input via uuid5, reducing residual random-identity seams from 13 to 12 without widening replay semantics.
 deterministic_factory_evidence:
   issue: "#4968"
   required_policy: retained UUID seams must either accept explicit IDs or expose injectable factories in tests used for exact replay coverage.
@@ -97,15 +102,6 @@ seams:
     replay_critical: false
     owner: pipeline-runtime
     migration_policy: exact replay requires explicit run_id; fail closed and avoid generated IDs in deterministic contracts.
-  - path: src/bioetl/composition/bootstrap/cli/storage.py
-    line: 74
-    kind: call
-    symbol: uuid4
-    layer: composition
-    classification: cli_storage_smoke_run_id
-    replay_critical: false
-    owner: cli-storage
-    migration_policy: keep CLI smoke identifiers outside replay-critical artifacts.
   - path: src/bioetl/composition/bootstrap/runtime/_runner_assembly_support.py
     line: 84
     kind: call

@@ -1,73 +1,19 @@
-"""Dataclass bundles for composite runtime support assembly."""
+"""Facade exports for composite runtime support bundle types."""
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import TYPE_CHECKING
-
-from bioetl.domain.ports import PipelineControlPlaneArtifacts as ControlPlaneArtifacts
-
-if TYPE_CHECKING:
-    from bioetl.application.composite.runtime_wiring_api import (
-        CoalescePolicyService,
-        ColumnOrderService,
-        ColumnRenamer,
-        CompositeCheckpointService,
-        ConflictResolverService,
-        DependencyCoordinatorService,
-        EnricherAggregator,
-        EnricherDeduplicatorService,
-        EnrichmentCoordinatorService,
-        FSMStateHelperService,
-        JoinPlannerService,
-        KeyExtractorService,
-    )
-    from bioetl.application.services.control_plane.ledger.service import (
-        RunLedgerService,
-    )
-    from bioetl.application.services.dq_report_service import DQReportService
-    from bioetl.domain.ports import QuarantinePort
-
-
-@dataclass(slots=True)
-class ExecutionSupportServicesBundle:
-    """Execution-facing services shared across composite runtime phases."""
-
-    key_extractor: KeyExtractorService
-    dependency_coordinator: DependencyCoordinatorService
-    coordinator: EnrichmentCoordinatorService
-
-
-@dataclass(slots=True)
-class RuntimeManagementServicesBundle:
-    """Checkpoint, FSM, DQ, and quarantine services for runtime orchestration."""
-
-    checkpoint_manager: CompositeCheckpointService
-    dq_report_service: DQReportService
-    fsm_state_helper: FSMStateHelperService
-    quarantine_port: QuarantinePort | None
-
-
-@dataclass(frozen=True, slots=True)
-class CompositeControlPlaneBundle(ControlPlaneArtifacts):
-    """Optional control-plane artifacts materialized for one composite run."""
-
-    run_ledger_service: RunLedgerService | None = None
-    contract_ref: str | None = None
-    contract_version: str | None = None
-
-
-@dataclass(slots=True)
-class MergeDependenciesBundle:
-    """Merge-specific collaborators assembled in composition."""
-
-    deduplicator: EnricherDeduplicatorService
-    aggregator: EnricherAggregator
-    renamer: ColumnRenamer
-    order_service: ColumnOrderService
-    coalesce_policy: CoalescePolicyService
-    conflict_resolver: ConflictResolverService
-    join_planner: JoinPlannerService
+from bioetl.composition.bootstrap.runtime.composite_control_plane_bundle import (
+    CompositeControlPlaneBundle,
+)
+from bioetl.composition.bootstrap.runtime.composite_execution_support_bundle import (
+    ExecutionSupportServicesBundle,
+)
+from bioetl.composition.bootstrap.runtime.composite_merge_dependencies_bundle import (
+    MergeDependenciesBundle,
+)
+from bioetl.composition.bootstrap.runtime.composite_runtime_management_bundle import (
+    RuntimeManagementServicesBundle,
+)
 
 
 __all__ = [

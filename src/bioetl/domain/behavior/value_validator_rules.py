@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.domain.value_objects.activity_values import ActivityType
+from bioetl.domain.value_objects import ActivityType
 
 __all__ = [
     "DEFAULT_CONCENTRATION_RANGES",

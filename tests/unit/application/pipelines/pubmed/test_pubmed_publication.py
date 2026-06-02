@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from typing import cast
 from unittest.mock import MagicMock
-from uuid import UUID, uuid4
+from uuid import UUID
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -43,7 +44,7 @@ def mock_runtime():
 
 @pytest.fixture
 def pipeline(mock_config, mock_runtime, mock_services):
-    run_id = uuid4()
+    run_id = deterministic_uuid_from_callsite("test_pubmed_publication")
     transformer = instantiate_test_transformer(
         PubMedPublicationTransformer,
         provider="pubmed",

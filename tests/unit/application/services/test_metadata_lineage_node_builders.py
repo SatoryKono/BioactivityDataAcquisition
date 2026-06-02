@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from uuid import uuid4
+from tests.helpers.deterministic_ids import (
+    deterministic_batch_uuid_from_callsite,
+    deterministic_run_uuid_from_callsite,
+)
 
 import pytest
 
@@ -14,7 +17,7 @@ from bioetl.application.services.lineage.metadata_lineage_node_builders import (
 )
 from bioetl.domain.models.metadata import InputSnapshotRef, SourceMetadata
 from bioetl.domain.ports import BronzeMetadataInput
-from bioetl.domain.types import BatchID, RunID, RunType
+from bioetl.domain.types import RunType
 from bioetl.domain.value_objects.run_context import RunContext
 
 
@@ -23,7 +26,9 @@ pytestmark = pytest.mark.unit
 
 def _make_run_context() -> RunContext:
     return RunContext.create(
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite(
+            "test_metadata_lineage_node_builders"
+        ),
         run_type=RunType.INCREMENTAL,
         started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         provider="chembl",
@@ -61,7 +66,9 @@ def test_source_request_node_exposes_snapshot_identity() -> None:
     node = source_request_node(
         run_context=_make_run_context(),
         input_data=BronzeMetadataInput(
-            batch_id=BatchID(uuid4()),
+            batch_id=deterministic_batch_uuid_from_callsite(
+                "test_metadata_lineage_node_builders"
+            ),
             record_count=10,
             compressed_size=512,
             output_path="v1/chembl/activity/2026-04-09/batch.jsonl.zst",

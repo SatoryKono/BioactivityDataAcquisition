@@ -10,7 +10,6 @@ from dataclasses import replace
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
-from uuid import uuid4
 
 import pyarrow as pa
 import pytest
@@ -21,6 +20,10 @@ from bioetl.infrastructure.storage.delta.resilience import (
 )
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 from tests.benchmarks.conftest import calculate_payload_size_mb
+from tests.helpers.deterministic_ids import (
+    deterministic_uuid_from_callsite,
+    deterministic_uuid_string_from_callsite,
+)
 
 _WINDOWS_PLATFORM = sys.platform == "win32" or os.name == "nt"
 
@@ -84,7 +87,7 @@ def _prepare_records_for_delta(
 ) -> list[dict[str, Any]]:
     """Add required metadata fields to records."""
     now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
-    run_id = str(uuid4())
+    run_id = deterministic_uuid_string_from_callsite("test_delta_write")
     prepared = []
     for record in records:
         rec = {
@@ -96,7 +99,9 @@ def _prepare_records_for_delta(
             "standard_units": record.get("standard_units", ""),
             "pchembl_value": record.get("pchembl_value"),
             "canonical_smiles": record.get("canonical_smiles", ""),
-            "_content_hash": str(uuid4()),
+            "_content_hash": deterministic_uuid_string_from_callsite(
+                "test_delta_write"
+            ),
             "_run_id": run_id,
             "_run_type": "benchmark",
             "_source_batch_id": "benchmark_batch_0001",
@@ -125,7 +130,10 @@ def _append_round_setup(
     payload: list[dict[str, Any]],
 ) -> tuple[tuple[SilverWriter, str, list[dict[str, Any]], pa.Schema], dict[str, Any]]:
     """Prepare one isolated append round for pytest-benchmark pedantic mode."""
-    round_root = delta_output_dir / f"{table_prefix}_{uuid4().hex[:8]}"
+    round_root = (
+        delta_output_dir
+        / f"{table_prefix}_{deterministic_uuid_from_callsite('test_delta_write').hex[:8]}"
+    )
     round_root.mkdir(parents=True, exist_ok=True)
     writer = _create_silver_writer(round_root)
     return (
@@ -164,7 +172,10 @@ def _merge_round_setup(
     payload: list[dict[str, Any]],
 ) -> tuple[tuple[SilverWriter, str, list[dict[str, Any]], pa.Schema], dict[str, Any]]:
     """Prepare one isolated merge round with a seeded Delta table."""
-    round_root = delta_output_dir / f"benchmark_merge_{uuid4().hex[:8]}"
+    round_root = (
+        delta_output_dir
+        / f"benchmark_merge_{deterministic_uuid_from_callsite('test_delta_write').hex[:8]}"
+    )
     round_root.mkdir(parents=True, exist_ok=True)
     writer = _create_silver_writer(round_root)
     records = _prepare_records_for_delta(payload)

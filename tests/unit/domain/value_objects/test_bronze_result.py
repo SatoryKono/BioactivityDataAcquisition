@@ -2,16 +2,16 @@
 
 from __future__ import annotations
 
-from uuid import uuid4
 
 import pytest
+from tests.helpers.deterministic_ids import deterministic_batch_uuid_from_callsite
 
 from bioetl.domain.types import BatchID
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 
 
 def _make_batch_id() -> BatchID:
-    return BatchID(uuid4())
+    return deterministic_batch_uuid_from_callsite("test_bronze_result")
 
 
 def _make_valid_result(**overrides) -> BronzeWriteResult:

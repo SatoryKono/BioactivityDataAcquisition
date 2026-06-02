@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -131,7 +131,7 @@ def _create_pipeline_context(
     """Create a standard pipeline run context for bootstrap tests."""
     context_kwargs = {
         "pipeline_name": pipeline_name,
-        "run_id": uuid4(),
+        "run_id": deterministic_uuid_from_callsite("test_bootstrap_entrypoints"),
         "run_type": RunType.INCREMENTAL,
         "resume": False,
         "limit": limit,

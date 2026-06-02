@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_string_from_callsite
 
 import pytest
 
@@ -52,7 +52,7 @@ def _new_enricher_runner_factory():
 @pytest.fixture
 def test_run_id() -> str:
     """Generate a valid UUID for test run ID."""
-    return str(uuid4())
+    return deterministic_uuid_string_from_callsite("test_runner_robustness")
 
 
 @pytest.fixture

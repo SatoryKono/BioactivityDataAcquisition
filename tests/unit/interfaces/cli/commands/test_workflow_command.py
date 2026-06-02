@@ -55,18 +55,22 @@ def test_workflow_run_ensures_observability_backend_before_execution(
             return_value=config,
         ),
         patch(
-            "bioetl.interfaces.cli.commands.workflow.ensure_observability_backend_started",
+            "bioetl.interfaces.cli.commands._workflow_command_runtime.ensure_observability_backend_started",
             return_value=ObservabilityBackendEnsureResult(
                 status="started",
                 health_url="http://127.0.0.1:8081/health",
             ),
         ) as ensure_backend,
         patch(
-            "bioetl.interfaces.cli.commands.workflow._execute_workflow_and_publish_metrics",
+            "bioetl.interfaces.cli.commands._workflow_command_runtime._execute_workflow_and_publish_metrics",
             return_value=result_payload,
         ) as execute_workflow,
-        patch("bioetl.interfaces.cli.commands.workflow.render_run_result"),
-        patch("bioetl.interfaces.cli.commands.workflow._handle_workflow_result"),
+        patch(
+            "bioetl.interfaces.cli.commands._workflow_command_runtime.render_run_result"
+        ),
+        patch(
+            "bioetl.interfaces.cli.commands._workflow_command_runtime._handle_workflow_result"
+        ),
     ):
         result = cli_runner.invoke(
             cli,

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from unittest.mock import MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -23,7 +23,9 @@ def mock_context() -> PipelineContext:
     logger = MagicMock()
     logger.bind = MagicMock(return_value=logger)
     return PipelineContext(
-        run_id=uuid4(),
+        run_id=deterministic_uuid_from_callsite(
+            "test_target_protein_classification_transformer"
+        ),
         run_type=RunType.INCREMENTAL,
         logger=logger,
     )

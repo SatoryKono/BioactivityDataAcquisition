@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from typing import Any
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import json
 import pytest
@@ -17,7 +17,7 @@ from bioetl.application.pipelines.openalex.transformer import (
     OpenAlexPublicationTransformer,
 )
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import RunType
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from tests.helpers.transformer_dependencies import instantiate_test_transformer
 
@@ -35,7 +35,7 @@ def transformer() -> OpenAlexPublicationTransformer:
 def pipeline_context() -> PipelineContext:
     """Create a pipeline context for testing."""
     return PipelineContext(
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite("test_transformer"),
         run_type=RunType.INCREMENTAL,
         started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         logger=NoOpLogger(),

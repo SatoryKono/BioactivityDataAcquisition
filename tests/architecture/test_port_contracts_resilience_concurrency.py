@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -61,14 +62,18 @@ class TestLockPortErrorConditions:
     @pytest.mark.asyncio
     async def test_lock_heartbeat_non_existent_returns_false(self) -> None:
         """LockPort.heartbeat() MUST return False for non-existent locks."""
-        from uuid import uuid4
 
         from bioetl.infrastructure.locking.memory_lock import MemoryLock
 
         lock = MemoryLock()
 
         try:
-            result = await lock.heartbeat("non_existent_key", uuid4())
+            result = await lock.heartbeat(
+                "non_existent_key",
+                deterministic_uuid_from_callsite(
+                    "test_port_contracts_resilience_concurrency"
+                ),
+            )
             assert not result, (
                 "LockPort.heartbeat() MUST return False for non-existent locks"
             )
@@ -78,13 +83,16 @@ class TestLockPortErrorConditions:
     @pytest.mark.asyncio
     async def test_lock_heartbeat_wrong_owner_returns_false(self) -> None:
         """LockPort.heartbeat() MUST return False when owner does not match."""
-        from uuid import uuid4
 
         from bioetl.infrastructure.locking.memory_lock import MemoryLock
 
         lock = MemoryLock()
-        owner1 = uuid4()
-        owner2 = uuid4()
+        owner1 = deterministic_uuid_from_callsite(
+            "test_port_contracts_resilience_concurrency"
+        )
+        owner2 = deterministic_uuid_from_callsite(
+            "test_port_contracts_resilience_concurrency"
+        )
 
         try:
             await lock.acquire("test_key", owner1)
@@ -98,14 +106,18 @@ class TestLockPortErrorConditions:
     @pytest.mark.asyncio
     async def test_lock_validate_owner_non_existent_returns_false(self) -> None:
         """LockPort.validate_owner() MUST return False for non-existent locks."""
-        from uuid import uuid4
 
         from bioetl.infrastructure.locking.memory_lock import MemoryLock
 
         lock = MemoryLock()
 
         try:
-            result = await lock.validate_owner("non_existent_key", uuid4())
+            result = await lock.validate_owner(
+                "non_existent_key",
+                deterministic_uuid_from_callsite(
+                    "test_port_contracts_resilience_concurrency"
+                ),
+            )
             assert not result, (
                 "LockPort.validate_owner() MUST return False for non-existent locks"
             )
@@ -115,13 +127,16 @@ class TestLockPortErrorConditions:
     @pytest.mark.asyncio
     async def test_lock_acquire_timeout_returns_false(self) -> None:
         """LockPort.acquire() with wait=True MUST return False after timeout."""
-        from uuid import uuid4
 
         from bioetl.infrastructure.locking.memory_lock import MemoryLock
 
         lock = MemoryLock()
-        owner1 = uuid4()
-        owner2 = uuid4()
+        owner1 = deterministic_uuid_from_callsite(
+            "test_port_contracts_resilience_concurrency"
+        )
+        owner2 = deterministic_uuid_from_callsite(
+            "test_port_contracts_resilience_concurrency"
+        )
 
         try:
             # Owner1 acquires lock
@@ -349,13 +364,17 @@ class TestLockPortConcurrentAccess:
     async def test_concurrent_acquire_only_one_succeeds(self) -> None:
         """Only one concurrent acquire attempt MUST succeed for the same key."""
         import asyncio
-        from uuid import uuid4
 
         from bioetl.infrastructure.locking.memory_lock import MemoryLock
 
         lock = MemoryLock()
         num_contenders = 10
-        owners = [uuid4() for _ in range(num_contenders)]
+        owners = [
+            deterministic_uuid_from_callsite(
+                "test_port_contracts_resilience_concurrency"
+            )
+            for _ in range(num_contenders)
+        ]
         results: list[FencingToken | None] = []
 
         async def try_acquire(owner_id):
@@ -377,14 +396,18 @@ class TestLockPortConcurrentAccess:
     async def test_concurrent_operations_different_keys_independent(self) -> None:
         """Concurrent operations on different keys MUST be independent."""
         import asyncio
-        from uuid import uuid4
 
         from bioetl.infrastructure.locking.memory_lock import MemoryLock
 
         lock = MemoryLock()
         num_keys = 5
         keys = [f"key_{i}" for i in range(num_keys)]
-        owners = [uuid4() for _ in range(num_keys)]
+        owners = [
+            deterministic_uuid_from_callsite(
+                "test_port_contracts_resilience_concurrency"
+            )
+            for _ in range(num_keys)
+        ]
 
         async def acquire_and_release(key, owner):
             acquired = await lock.acquire(key, owner)
@@ -409,12 +432,13 @@ class TestLockPortConcurrentAccess:
     async def test_concurrent_heartbeat_from_owner_succeeds(self) -> None:
         """Concurrent heartbeat operations from owner MUST all succeed."""
         import asyncio
-        from uuid import uuid4
 
         from bioetl.infrastructure.locking.memory_lock import MemoryLock
 
         lock = MemoryLock()
-        owner = uuid4()
+        owner = deterministic_uuid_from_callsite(
+            "test_port_contracts_resilience_concurrency"
+        )
 
         try:
             await lock.acquire("test_key", owner, ttl=60)
@@ -447,7 +471,6 @@ class TestCheckpointPortConcurrentAccess:
     ) -> None:
         """Concurrent saves to different pipelines MUST all succeed."""
         import asyncio
-        from uuid import uuid4
 
         from bioetl.infrastructure.checkpoint.local_checkpoint import (
             LocalCheckpointAdapter,
@@ -458,7 +481,13 @@ class TestCheckpointPortConcurrentAccess:
         pipelines = [f"pipeline_{i}" for i in range(num_pipelines)]
 
         async def save_checkpoint(pipeline):
-            await checkpoint.save(pipeline, uuid4(), {"key": pipeline})
+            await checkpoint.save(
+                pipeline,
+                deterministic_uuid_from_callsite(
+                    "test_port_contracts_resilience_concurrency"
+                ),
+                {"key": pipeline},
+            )
             return True
 
         try:
@@ -481,14 +510,15 @@ class TestCheckpointPortConcurrentAccess:
     ) -> None:
         """Concurrent loads of the same checkpoint MUST return consistent data."""
         import asyncio
-        from uuid import uuid4
 
         from bioetl.infrastructure.checkpoint.local_checkpoint import (
             LocalCheckpointAdapter,
         )
 
         checkpoint = LocalCheckpointAdapter(base_path=tmp_path)
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite(
+            "test_port_contracts_resilience_concurrency"
+        )
         metadata = {"key": "value", "checkpoint_saved_at_epoch_seconds": 1770000000.0}
 
         try:

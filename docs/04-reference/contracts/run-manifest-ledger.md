@@ -856,8 +856,9 @@ lineage nodes MUST preserve those fields separately. Backward-compatible
 consumers MAY still read legacy `config_hash`, but manifest hydration and new
 control-plane write paths MUST NOT synthesize missing `resolved_config_hash` or
 `effective_config_hash` values from it. Control-plane identity evidence presents
-`resolved_config_hash` as first-class declarative provenance and keeps
-`config_hash` in the legacy compatibility details tier only.
+`resolved_config_hash` and `effective_config_hash` as the reviewed config
+provenance anchors; legacy `config_hash` remains a manifest compatibility field
+for older consumers and inspection flows, not an identity-evidence anchor.
 
 Datetime-sensitive content hashes use the reviewed `v2_datetime_utc` default.
 Historical `v1_date` hash compatibility is limited to explicitly documented

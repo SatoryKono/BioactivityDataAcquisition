@@ -17,7 +17,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import Any
 from unittest.mock import MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -54,7 +54,9 @@ def mock_context() -> PipelineContext:
     mock_logger.debug = MagicMock()
     mock_logger.info = MagicMock()
     return PipelineContext(
-        run_id=uuid4(),
+        run_id=deterministic_uuid_from_callsite(
+            "test_cross_provider_doi_normalization"
+        ),
         run_type=RunType.INCREMENTAL,
         started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         logger=mock_logger,

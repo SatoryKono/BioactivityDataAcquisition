@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from uuid import uuid4
 
 import pytest
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 from bioetl.domain.ports import (
     LoggerPort,
@@ -81,7 +81,9 @@ def test_metrics_adapters_reject_legacy_label_aliases(kind: str) -> None:
 @pytest.mark.unit
 def test_logger_adapters_share_same_contract_surface() -> None:
     """No-op and production logger adapters should support the same calls."""
-    production_logger = create_logger("test_pipeline", uuid4())
+    production_logger = create_logger(
+        "test_pipeline", deterministic_uuid_from_callsite("test_observability_parity")
+    )
     adapters: list[LoggerPort] = [NoOpLogger(), production_logger]
 
     for logger in adapters:

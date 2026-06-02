@@ -393,6 +393,7 @@ def test_create_record_processor_builds_dependencies(
             table_config_cls=mock_table_config,
             gold_validator_factory=mock_gold_validator,
             record_processor_cls=mock_record_processor,
+            debug_export_config=None,
         ),
     )
 
@@ -408,6 +409,10 @@ def test_create_record_processor_from_pipeline_delegates() -> None:
     pipeline = SimpleNamespace(
         services=MagicMock(),
         context=MagicMock(),
+        runtime=SimpleNamespace(
+            debug_export_enabled=False,
+            debug_export_formats=(),
+        ),
         config=SimpleNamespace(
             pipeline_name="chembl_activity",
             provider="chembl",

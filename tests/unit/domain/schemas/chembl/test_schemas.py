@@ -1,8 +1,7 @@
-from uuid import uuid4
-
 import pandas as pd
 import pytest
 from pandera.errors import SchemaError
+from tests.helpers.deterministic_ids import deterministic_uuid_string_from_callsite
 
 from bioetl.domain.schemas.chembl.activity import ActivitySchema
 from bioetl.domain.schemas.chembl.assay import AssaySchema
@@ -34,7 +33,7 @@ class TestChemblSchemas:
         return {
             "entity_id": "chembl:test:1",
             "content_hash": "a" * 64,
-            "_run_id": str(uuid4()),
+            "_run_id": deterministic_uuid_string_from_callsite("test_schemas"),
             "_run_type": "incremental",
             "_source_batch_id": None,
             "_ingestion_ts": FIXED_TEST_TIME.isoformat(),

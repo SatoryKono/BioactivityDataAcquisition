@@ -62,9 +62,9 @@ budgets:
   refined_assertless_max: 0
   duplicate_test_names_max: 0
   duplicate_test_name_occurrences_max: 0
-  compatibility_test_file_max: 39
+  compatibility_test_file_max: 38
   markerless_test_functions_max: 0
-  uuid4_call_sites_max: 400
+  uuid4_call_sites_max: 0
   date_today_call_sites_max: 0
 budget_ratchet:
   linked_issue: '#4901'
@@ -141,6 +141,13 @@ budget_ratchet:
     note: Bulk markerless closeout on 2026-06-01 added explicit lane markers to
       the remaining unit, architecture, integration, contract, security, and
       smoke test modules and ratcheted markerless_test_functions_max to zero.
+  - issue: '#5003'
+    owner: test-governance
+    status: uuid4_call_sites_ratcheted_to_0
+    note: Deterministic test identity burn-down on 2026-06-02 replaced incidental
+      raw uuid4 test identities with shared deterministic helpers across unit,
+      integration, architecture, benchmark, performance, e2e, and smoke surfaces;
+      uuid4_call_sites_max is now fail-fast zero.
   - issue: '#4924'
     owner: test-governance
     status: refined_assertless_ratcheted_to_0
@@ -161,6 +168,13 @@ budget_ratchet:
       they enforce explicit facade budgets and removed-symbol absence, not legacy
       path compatibility. The compatibility_test_file_max budget now pins to the
       reduced live inventory of 39.
+  - issue: '#5023'
+    owner: test-governance
+    status: compatibility_test_file_max_ratcheted_to_38
+    note: The composite config integration guard now uses a canonical strict-schema
+      contract filename because it enforces rejection of legacy payloads rather than
+      preserving backward compatibility behavior. The live compatibility inventory
+      drops to 38 and the budget ratchets down accordingly.
   touch_policy: Refactors touching test families must reduce the applicable budget
     or keep it flat with an explicit owner rationale; increasing a debt budget requires
     a separate governance review.
@@ -331,7 +345,7 @@ oversized_test_module_inventory:
   split_on_touch: true
   top_modules:
     - path: tests/integration/ci/test_reproducibility_contract_suite.py
-      lines: 1874
+      lines: 1885
       owner: reproducibility-contracts
       target_split: integration/ci reproducibility phases
     - path: tests/unit/application/services/test_metadata_coordinator.py
@@ -355,9 +369,9 @@ oversized_test_module_inventory:
       owner: observability-dashboards
     - issue_ref: "#4506"
       source: tests/unit/composition/runtime_builders/test_runner_builder_profiles.py
-      source_lines_after_split: 1128
+      source_lines_after_split: 1136
       extracted_surface: tests/unit/composition/runtime_builders/test_runner_builder_contracts.py
-      extracted_surface_lines: 179
+      extracted_surface_lines: 181
       owner: composition-runtime
     - issue_ref: "#4506"
       source: tests/unit/application/services/test_run_manifest_inspection_service.py
@@ -367,7 +381,7 @@ oversized_test_module_inventory:
       owner: application-services
 compatibility_test_inventory:
   review_cadence: quarterly
-  total_files: 39
+  total_files: 38
   default_review_date: '2026-09-30'
   entries:
   - path: tests/architecture/test_application_composite_compat_surface_usage.py
@@ -574,14 +588,6 @@ compatibility_test_inventory:
     decision: retained_compatibility_contract
     owner: architecture-governance
     protected_surface: architecture/silver writer compatibility retirement
-    policy_ref: '#4209'
-    review_date: '2026-09-30'
-    rationale: Tracked compatibility test surface; retained only while the referenced
-      public or migration contract remains supported.
-  - path: tests/integration/composite/test_composite_config_backward_compatibility.py
-    decision: retained_compatibility_contract
-    owner: integration-governance
-    protected_surface: integration/composite/composite config backward compatibility
     policy_ref: '#4209'
     review_date: '2026-09-30'
     rationale: Tracked compatibility test surface; retained only while the referenced

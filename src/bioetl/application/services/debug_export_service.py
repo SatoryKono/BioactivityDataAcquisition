@@ -5,14 +5,30 @@ from __future__ import annotations
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from datetime import datetime
+from inspect import isawaitable
 from pathlib import Path
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
 from uuid import UUID
 
-from bioetl.domain.types import BatchID, BronzeRecord, ErrorType, GoldRecord, RunID
+from bioetl.domain.types import (
+    BatchID,
+    BronzeRecord,
+    DebugExportPack,
+    DebugExportResult,
+    ErrorType,
+    GoldRecord,
+    RunID,
+)
 
-from .debug_export_collector import DebugExportCollector
-from .debug_export_helpers import _utc_now
+if TYPE_CHECKING:
+    from .debug_export_collector import DebugExportCollector
+
+from .debug_export_collector import (
+    DebugExportCollector,
+    build_dq_summary_rows,
+    get_sorted_lineage_rows,
+)
+from .debug_export_helpers import _jsonable_payload, _utc_now
 from .debug_reason_dictionary import DEBUG_REASON_DICTIONARY
 
 __all__ = [
@@ -20,7 +36,7 @@ __all__ = [
     "DebugExportPack",
     "DebugExportResult",
     "DebugExportService",
-    "DebugExportWriterPort",
+    "DebugExportWriterProtocol",
 ]
 
 
@@ -36,37 +52,43 @@ class DebugExportConfig:
     workflow_id: str = "standalone"
 
 
-@dataclass(frozen=True, slots=True)
-class DebugExportPack:
-    """Deterministic in-memory representation of one debug export run pack."""
-
-    run_id: str
-    pipeline_id: str
-    provider_id: str
-    workflow_id: str
-    manifest_id: str | None
-    status: str
-    output_root: str
-    formats: tuple[str, ...]
-    include_bom: bool
-    max_rows_per_sheet: int
-    created_at: datetime
-    tables: dict[str, tuple[dict[str, object], ...]]
-    reason_dictionary: tuple[dict[str, str], ...]
-
-
-@dataclass(frozen=True, slots=True)
-class DebugExportResult:
-    """Persisted debug export artifact metadata."""
-
-    root_path: str
-    manifest_path: str
-    debug_export_hash: str
-    file_paths: tuple[str, ...] = ()
+def create_debug_export_collector(
+    *,
+    run_id: str,
+    pipeline_id: str,
+    provider_id: str,
+    workflow_id: str,
+    manifest_id: str | None,
+) -> DebugExportCollector:
+    """Factory function to create DebugExportCollector."""
+    return DebugExportCollector(
+        run_id=run_id,
+        pipeline_id=pipeline_id,
+        provider_id=provider_id,
+        workflow_id=workflow_id,
+        manifest_id=manifest_id,
+    )
 
 
 @dataclass(frozen=True, slots=True)
-class DebugExportWriterPort(Protocol):
+class DebugExportCollectorBuilderProtocol(Protocol):
+    """Factory contract for constructing the collector dependency."""
+
+    def __call__(
+        self,
+        *,
+        run_id: str,
+        pipeline_id: str,
+        provider_id: str,
+        workflow_id: str,
+        manifest_id: str | None,
+    ) -> DebugExportCollector:
+        """Build one collector for the current run context."""
+        ...
+
+
+@dataclass(frozen=True, slots=True)
+class DebugExportWriterProtocol(Protocol):
     """Infrastructure writer contract for persisted debug export packs."""
 
     def write_pack(
@@ -89,7 +111,8 @@ class DebugExportService:
         pipeline_id: str,
         provider_id: str,
         manifest_id: str | None = None,
-        writer: DebugExportWriterPort | None = None,
+        writer: DebugExportWriterProtocol | None = None,
+        collector_factory: DebugExportCollectorBuilderProtocol = create_debug_export_collector,
         created_at_factory: Callable[[], datetime] = _utc_now,
     ) -> None:
         self._config = config
@@ -98,7 +121,7 @@ class DebugExportService:
         self._provider_id = provider_id
         self._writer = writer
         self._created_at_factory = created_at_factory
-        self._collector = DebugExportCollector(
+        self._collector = collector_factory(
             run_id=self._run_id,
             pipeline_id=self._pipeline_id,
             provider_id=self._provider_id,
@@ -149,6 +172,7 @@ class DebugExportService:
         record_index: int,
         silver_record: BronzeRecord,
         gold_record: BronzeRecord | None = None,
+        gold_excluded_by_contract: bool = False,
         created_at: datetime | None = None,
     ) -> None:
         if not self.enabled:
@@ -158,6 +182,7 @@ class DebugExportService:
             record_index=record_index,
             silver_record=silver_record,
             gold_record=gold_record,
+            gold_excluded_by_contract=gold_excluded_by_contract,
             created_at=created_at or self._created_at_factory(),
         )
 
@@ -182,6 +207,50 @@ class DebugExportService:
             created_at=created_at or self._created_at_factory(),
         )
 
+    def record_filtered_out(
+        self,
+        *,
+        raw_record: BronzeRecord,
+        record_index: int,
+        reason: str,
+        details: object | None,
+        policy: str | None,
+        created_at: datetime | None = None,
+    ) -> None:
+        if not self.enabled:
+            return
+        reason_message = (
+            reason if details is None else f"{reason}: {_jsonable_payload(details)}"
+        )
+        self._collector.record_transform_failure(
+            raw_record=raw_record,
+            record_index=record_index,
+            details=reason_message,
+            policy=policy,
+            created_at=created_at or self._created_at_factory(),
+        )
+
+    def record_data_quality_failure(
+        self,
+        *,
+        raw_record: BronzeRecord,
+        record_index: int,
+        error_type: ErrorType | None,
+        error_details: str,
+        policy: str | None,
+        created_at: datetime | None = None,
+    ) -> None:
+        if not self.enabled:
+            return
+        self._collector.record_transform_failure(
+            raw_record=raw_record,
+            record_index=record_index,
+            error_type=error_type,
+            details=error_details,
+            policy=policy,
+            created_at=created_at or self._created_at_factory(),
+        )
+
     def record_gold_filter(
         self,
         *,
@@ -196,6 +265,21 @@ class DebugExportService:
             records=records,
             reason_code=reason_code,
             reason_message=reason_message,
+            created_at=created_at or self._created_at_factory(),
+        )
+
+    def record_gold_validation_failure(
+        self,
+        *,
+        records: Sequence[GoldRecord],
+        errors: object,
+        created_at: datetime | None = None,
+    ) -> None:
+        if not self.enabled:
+            return
+        self._collector.record_gold_validation_failure(
+            records=records,
+            errors=errors,
             created_at=created_at or self._created_at_factory(),
         )
 
@@ -218,17 +302,24 @@ class DebugExportService:
             created_at=created_at or self._created_at_factory(),
         )
 
-    def build_pack(self) -> DebugExportPack:
+    def build_pack(self, *, status: str = "complete") -> DebugExportPack:
         """Build the in-memory audit pack from collected rows."""
         tables = {
-            "bronze": tuple(self._collector.bronze_rows),
-            "silver_full": tuple(self._collector.silver_full_rows),
-            "silver_rejected": tuple(self._collector.silver_rejected_rows),
-            "silver_quarantine": tuple(self._collector.silver_quarantine_rows),
-            "gold_full": tuple(self._collector.gold_full_rows),
-            "gold_rejected": tuple(self._collector.gold_rejected_rows),
-            "dq_summary": self._collector.build_dq_summary_rows(),
-            "lineage": self._collector.get_sorted_lineage_rows(),
+            "bronze_index": tuple(self._collector._bronze_rows),
+            "silver_full": tuple(self._collector._silver_full_rows),
+            "silver_rejected": tuple(self._collector._silver_rejected_rows),
+            "silver_quarantine": tuple(self._collector._silver_quarantine_rows),
+            "gold_full": tuple(self._collector._gold_full_rows),
+            "gold_rejected": tuple(self._collector._gold_rejected_rows),
+            "dq_summary": build_dq_summary_rows(
+                run_id=self._run_id,
+                workflow_id=self.workflow_id,
+                pipeline_id=self._pipeline_id,
+                silver_rejected_rows=self._collector._silver_rejected_rows,
+                silver_quarantine_rows=self._collector._silver_quarantine_rows,
+                gold_rejected_rows=self._collector._gold_rejected_rows,
+            ),
+            "lineage": get_sorted_lineage_rows(self._collector._lineage_rows),
             "reason_dictionary": DEBUG_REASON_DICTIONARY,
         }
         return DebugExportPack(
@@ -237,8 +328,8 @@ class DebugExportService:
             provider_id=self._provider_id,
             workflow_id=self.workflow_id,
             manifest_id=self._collector._manifest_id,
-            status="complete",
-            output_root=self.output_dir,
+            status=status,
+            output_root=self._debug_root or self.output_dir,
             formats=self._config.formats,
             include_bom=self._config.include_bom,
             max_rows_per_sheet=self._config.max_rows_per_sheet,
@@ -247,11 +338,25 @@ class DebugExportService:
             reason_dictionary=DEBUG_REASON_DICTIONARY,
         )
 
-    async def persist(self) -> DebugExportResult:
+    async def persist(self, *, status: str = "complete") -> DebugExportResult:
         """Persist the collected audit pack through the adapter."""
         if not self.enabled or self._writer is None:
             raise RuntimeError(
                 "Debug export is not enabled or writer is not configured"
             )
-        pack = self.build_pack()
-        return await self._writer.write_pack(pack=pack)
+        result = self._writer.write_pack(pack=self.build_pack(status=status))
+        if isawaitable(result):
+            return await result
+        return result
+
+    def finalize(
+        self,
+        *,
+        status: str,
+        manifest_id: str | None,
+    ) -> DebugExportResult | None:
+        """Persist the collected pack once the run reaches its terminal state."""
+        if not self.enabled or self._writer is None:
+            return None
+        self.attach_manifest_id(manifest_id)
+        return self._writer.write_pack(pack=self.build_pack(status=status))

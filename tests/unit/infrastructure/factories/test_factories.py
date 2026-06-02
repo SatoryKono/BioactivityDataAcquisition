@@ -4,12 +4,15 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import (
+    deterministic_batch_uuid_from_callsite,
+    deterministic_uuid_from_callsite,
+)
 
 import pyarrow as pa
 import pytest
 
-from bioetl.domain.types import BatchID, RunType
+from bioetl.domain.types import RunType
 
 
 @pytest.mark.unit
@@ -64,8 +67,8 @@ class TestStorageBundle:
         self, storage_adapter, mock_bronze_writer
     ):
         """Test write_bronze delegates to bronze writer."""
-        batch_id = uuid4()
-        run_id = uuid4()
+        batch_id = deterministic_uuid_from_callsite("test_factories")
+        run_id = deterministic_uuid_from_callsite("test_factories")
         run_type = RunType.INCREMENTAL
         records = iter([b"record1", b"record2"])
         # Fixed timestamp for deterministic tests (ADR-014)
@@ -88,8 +91,8 @@ class TestStorageBundle:
         self, storage_adapter, mock_silver_writer
     ):
         """Test write_silver delegates to silver writer."""
-        run_id = uuid4()
-        batch_id = BatchID(uuid4())
+        run_id = deterministic_uuid_from_callsite("test_factories")
+        batch_id = deterministic_batch_uuid_from_callsite("test_factories")
         ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         records = [

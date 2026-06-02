@@ -5,7 +5,7 @@ from __future__ import annotations
 import importlib
 import sys
 from unittest.mock import MagicMock, patch
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -52,7 +52,7 @@ class TestBootstrapLoggerPort:
         """bootstrap_logger should pass runtime metadata to UnifiedLogger."""
         from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger
 
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_observability_entrypoints")
         expected_logger = MagicMock()
         mock_unified_logger.return_value = expected_logger
 

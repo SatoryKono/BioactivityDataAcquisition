@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -27,12 +27,12 @@ def test_pipeline_run_context_exposes_required_log_correlation_fields() -> None:
     """PipelineRunContext must remain the SSOT for correlation-bound log fields."""
     ctx_without_manifest = PipelineRunContext(
         pipeline_name="chembl_activity",
-        run_id=uuid4(),
+        run_id=deterministic_uuid_from_callsite("test_logging_correlation_contract"),
         run_type=RunType.INCREMENTAL,
     )
     ctx_with_manifest = PipelineRunContext(
         pipeline_name="chembl_activity",
-        run_id=uuid4(),
+        run_id=deterministic_uuid_from_callsite("test_logging_correlation_contract"),
         run_type=RunType.INCREMENTAL,
         manifest_id="manifest-123",
     )

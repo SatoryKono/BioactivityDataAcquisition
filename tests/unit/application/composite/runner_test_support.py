@@ -6,7 +6,8 @@ import asyncio
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
-from uuid import UUID, uuid4
+from uuid import UUID
+from tests.helpers.deterministic_ids import deterministic_uuid_string_from_callsite
 
 import polars as pl
 
@@ -237,7 +238,7 @@ def create_mock_checkpoint_manager(
     if initial_state is None:
         initial_state = CompositeCheckpointState(
             composite_name="test_composite",
-            run_id=str(uuid4()),
+            run_id=deterministic_uuid_string_from_callsite("runner_test_support"),
             created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
     manager.load = AsyncMock(return_value=initial_state)
@@ -452,7 +453,7 @@ def create_mock_fsm_state_helper(
     return FSMStateHelperService(
         config=config or MockCompositeConfig(),
         logger=logger,
-        run_id=run_id or str(uuid4()),
+        run_id=run_id or deterministic_uuid_string_from_callsite("runner_test_support"),
     )
 
 
@@ -557,7 +558,9 @@ def create_runner_dependencies(
     """Create CompositeRunnerDependencies with reusable test defaults."""
     effective_logger = logger or create_mock_logger()
     effective_config = config or MockCompositeConfig()
-    effective_run_id = run_id or str(uuid4())
+    effective_run_id = run_id or deterministic_uuid_string_from_callsite(
+        "runner_test_support"
+    )
     return CompositeRunnerDependencies(
         seed_runner_factory=seed_runner_factory or new_seed_runner_factory(),
         enricher_runner_factory=(
@@ -594,7 +597,9 @@ def create_runner(
 ) -> CompositePipelineRunner:
     """Create CompositePipelineRunner with reusable dependency defaults."""
     effective_config = config or MockCompositeConfig()
-    effective_run_id = run_id or str(uuid4())
+    effective_run_id = run_id or deterministic_uuid_string_from_callsite(
+        "runner_test_support"
+    )
     effective_deps = deps or create_runner_dependencies(
         logger=logger,
         config=effective_config,

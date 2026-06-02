@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import asyncio
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import (
+    deterministic_batch_uuid_from_callsite,
+    deterministic_uuid_from_callsite,
+)
 
 import pytest
 
@@ -16,7 +19,7 @@ from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier, ErrorType
 from bioetl.domain.ports import MetricsPort
 from bioetl.domain.ports.noop import NoOpTracing
-from bioetl.domain.types import BatchID, RunType, ValidationResult
+from bioetl.domain.types import RunType, ValidationResult
 
 
 @pytest.fixture
@@ -50,7 +53,7 @@ def mock_context():
     mock_logger = MagicMock()
     mock_logger.bind = MagicMock(return_value=mock_logger)
     return PipelineContext(
-        run_id=uuid4(),
+        run_id=deterministic_uuid_from_callsite("test_record_processor_metrics"),
         run_type=RunType.INCREMENTAL,
         logger=mock_logger,
     )
@@ -134,7 +137,9 @@ class TestRecordProcessorMetrics:
     ):
         """Test that batch size histogram and counters are recorded with correct labels."""
         records = [{"id": 1}, {"id": 2}]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite(
+            "test_record_processor_metrics"
+        )
 
         await record_processor.process_batch(records, batch_id)
 
@@ -241,7 +246,9 @@ class TestRecordProcessorMetrics:
         )
 
         records = [{"id": 1}]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite(
+            "test_record_processor_metrics"
+        )
 
         await processor.process_batch(records, batch_id)
 

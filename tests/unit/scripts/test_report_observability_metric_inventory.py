@@ -958,6 +958,46 @@ def test_collect_metric_inventory_marks_allowlisted_risky_labels_reviewed(
     assert report["declared_risky_label_review_required"] == []
 
 
+def test_collect_metric_inventory_uses_declared_label_contracts_for_risky_labels(
+    tmp_path: Path,
+    monkeypatch: object,
+) -> None:
+    monkeypatch.setattr(
+        inventory,
+        "REGISTERED_PROMETHEUS_METRIC_NAMES",
+        frozenset({"bioetl_reviewed_total"}),
+    )
+    monkeypatch.setattr(
+        inventory,
+        "REGISTERED_PROMETHEUS_METRIC_LABELS",
+        {"bioetl_reviewed_total": frozenset({"pipeline", "table"})},
+    )
+
+    config_dir = tmp_path / "configs" / "quality"
+    config_dir.mkdir(parents=True)
+    (config_dir / "observability_metric_declarations.yaml").write_text(
+        "\n".join(
+            [
+                "version: 1",
+                "policy_scope: observability_metric_declarations",
+                "declared_label_contract_metrics:",
+                "  - bioetl_reviewed_total",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    report = inventory.collect_metric_inventory(tmp_path)
+
+    assert report["declared_risky_label_review_candidates"] == ["bioetl_reviewed_total"]
+    assert report["declared_risky_label_contract_reviewed"] == [
+        "bioetl_reviewed_total"
+    ]
+    assert report["declared_risky_label_reviewed"] == ["bioetl_reviewed_total"]
+    assert report["declared_risky_label_review_required"] == []
+
+
 def test_validate_metric_inventory_reports_unallowed_drift() -> None:
     report = {
         "registered_without_runtime": ["bioetl_allowed_total", "bioetl_dead_total"],

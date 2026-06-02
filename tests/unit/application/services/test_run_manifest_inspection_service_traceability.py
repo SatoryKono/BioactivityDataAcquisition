@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import pytest
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 from datetime import UTC, datetime
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestInspectionService,
@@ -103,7 +104,9 @@ def test_show_surfaces_supported_gold_trace_path_in_diagnostics() -> None:
 def test_show_surfaces_cross_validation_traceability_in_diagnostics() -> None:
     manifest_store = _InMemoryRunManifestStore()
     ledger_store = _InMemoryRunLedgerStore()
-    run_id = RunID(uuid4())
+    run_id = deterministic_run_uuid_from_callsite(
+        "test_run_manifest_inspection_service_traceability"
+    )
     manifest = _make_manifest(manifest_id="manifest-cv", run_id=run_id)
     manifest_store.save(manifest)
     ledger_store.append(

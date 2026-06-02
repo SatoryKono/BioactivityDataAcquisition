@@ -17,7 +17,7 @@ from bioetl.domain.control_plane.reproducibility_policy import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.composition.runtime_builders.inputs_resolver import RunnerInputs
+    from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
     from bioetl.domain.context import PipelineRunContext
 
 

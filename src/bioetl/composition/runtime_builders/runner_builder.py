@@ -24,7 +24,6 @@ from bioetl.composition.runtime_builders.ledger_collaborator import (
     PipelineRunnerProtocol,
 )
 from bioetl.composition.runtime_builders.runner_builder_wiring import (
-    LegacyRunnerBuilderOverrides,
     RunnerBuilderWiring,
     RunnerFactoryWiring,
     RunnerInputWiring,
@@ -43,7 +42,6 @@ if TYPE_CHECKING:
 
 
 __all__ = [
-    "LegacyRunnerBuilderOverrides",
     "PipelineRunnerProtocol",
     "RunnerBuilderWiring",
     "RunnerFactoryWiring",
@@ -62,45 +60,9 @@ def build_pipeline_runner(
     registry: PipelineRegistry | None = None,
     *,
     wiring: RunnerBuilderWiring | None = None,
-    factory_wiring: RunnerFactoryWiring | None = None,
-    input_wiring: RunnerInputWiring | None = None,
-    legacy_overrides: LegacyRunnerBuilderOverrides | None = None,
 ) -> PipelineRunnerProtocol:
-    """Assemble and return a fully configured ``PipelineRunner``.
-
-    ``wiring`` is the canonical composition seam. ``factory_wiring`` and
-    ``input_wiring`` are transitional typed sub-bundles. ``legacy_overrides``
-    retains focused-test and compatibility patch points while call sites migrate
-    to the aggregate bundle.
-    """
-    effective_legacy_overrides = legacy_overrides
-    if (
-        legacy_overrides is not None
-        and legacy_overrides.ensure_providers_loaded_fn is ensure_providers_loaded
-        and (wiring is not None or factory_wiring is not None)
-    ):
-        effective_legacy_overrides = LegacyRunnerBuilderOverrides(
-            create_registry_fn=legacy_overrides.create_registry_fn,
-            ensure_providers_loaded_fn=None,
-            register_all_pipelines_fn=legacy_overrides.register_all_pipelines_fn,
-            get_settings_fn=legacy_overrides.get_settings_fn,
-            load_pipeline_config_fn=legacy_overrides.load_pipeline_config_fn,
-            load_source_config_fn=legacy_overrides.load_source_config_fn,
-            build_observability_bundle_fn=legacy_overrides.build_observability_bundle_fn,
-            assemble_vacuum_settings_fn=legacy_overrides.assemble_vacuum_settings_fn,
-            assemble_runtime_config_fn=legacy_overrides.assemble_runtime_config_fn,
-            assemble_filter_config_fn=legacy_overrides.assemble_filter_config_fn,
-            assemble_cached_bronze_context_fn=(
-                legacy_overrides.assemble_cached_bronze_context_fn
-            ),
-        )
-
-    resolved_wiring = resolve_runner_builder_wiring(
-        wiring,
-        factory_wiring=factory_wiring,
-        input_wiring=input_wiring,
-        legacy_overrides=effective_legacy_overrides,
-    )
+    """Assemble and return a fully configured ``PipelineRunner``."""
+    resolved_wiring = resolve_runner_builder_wiring(wiring)
     factory_wiring = resolved_wiring.factory
     input_wiring = resolved_wiring.inputs
     factory_bootstrap = _bootstrap_runner_factory(

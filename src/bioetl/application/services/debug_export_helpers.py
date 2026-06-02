@@ -1,14 +1,14 @@
 """Helper functions for debug export service."""
 
+from __future__ import annotations
+
 from collections.abc import Mapping
-from datetime import UTC, datetime
-from typing import TYPE_CHECKING
+from datetime import UTC, date, datetime
+from pathlib import Path
+from uuid import UUID
 
 from bioetl.domain.behavior.identity_service import EntityIdentityGenerator
 from bioetl.domain.types import ErrorType
-
-if TYPE_CHECKING:
-    pass
 
 _SOURCE_ID_FIELDS = (
     "activity_id",
@@ -38,17 +38,46 @@ def _normalize_optional_text(value: object | None) -> str | None:
     return text or None
 
 
-def _safe_payload(record: Mapping[str, object] | None) -> dict[str, object]:
-    return {} if record is None else dict(record)
+def _record_payload(record: object | None) -> dict[str, object]:
+    if record is None:
+        return {}
+    if isinstance(record, Mapping):
+        return dict(record)
+    model_dump = getattr(record, "model_dump", None)
+    if callable(model_dump):
+        payload = model_dump()
+        if isinstance(payload, Mapping):
+            return dict(payload)
+    record_dict = getattr(record, "__dict__", None)
+    if isinstance(record_dict, Mapping):
+        return dict(record_dict)
+    return {}
 
 
-def _jsonable_payload(payload: Mapping[str, object] | None) -> str:
+def _safe_payload(record: object | None) -> dict[str, object]:
+    return _record_payload(record)
+
+
+def _jsonable_payload(payload: object | None) -> str:
     import json
 
-    return json.dumps(_safe_payload(payload), ensure_ascii=False, sort_keys=True)
+    return json.dumps(
+        _safe_payload(payload),
+        ensure_ascii=False,
+        sort_keys=True,
+        default=_json_default,
+    )
 
 
-def _primary_key(record: Mapping[str, object] | None) -> str:
+def _json_default(value: object) -> str:
+    if isinstance(value, datetime | date):
+        return value.isoformat()
+    if isinstance(value, Path | UUID):
+        return str(value)
+    return str(value)
+
+
+def _primary_key(record: object | None) -> str:
     payload = _safe_payload(record)
     entity_id = _normalize_optional_text(payload.get("entity_id"))
     if entity_id is not None:
@@ -57,7 +86,7 @@ def _primary_key(record: Mapping[str, object] | None) -> str:
     return source_id or ""
 
 
-def _source_record_id(record: Mapping[str, object] | None) -> str:
+def _source_record_id(record: object | None) -> str:
     payload = _safe_payload(record)
     for field_name in _SOURCE_ID_FIELDS:
         value = _normalize_optional_text(payload.get(field_name))
@@ -107,7 +136,7 @@ def _infer_reason_code(
 def _payload_hash(
     *,
     provider_id: str,
-    record: Mapping[str, object] | None,
+    record: object | None,
 ) -> str:
     payload = _safe_payload(record)
     if not payload:
@@ -116,7 +145,7 @@ def _payload_hash(
     if existing is not None:
         return existing
     generator = EntityIdentityGenerator()
-    return generator.generate_identity(payload, provider_id)
+    return generator.compute_content_hash(provider_id, payload)
 
 
 def _row_sort_key(row: Mapping[str, object]) -> tuple[int | None, str, str]:

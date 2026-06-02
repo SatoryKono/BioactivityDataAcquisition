@@ -27,11 +27,13 @@ from importlib import import_module
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from bioetl.domain.ports import AdrServicePort
     from bioetl.composition.bootstrap.cli.health import (
         HealthServerDependencies,
         bootstrap_health_server_dependencies,
         bootstrap_health_service,
     )
+    from bioetl.infrastructure.control_plane import FileControlPlaneArtifactLifecycleStore
 
 _CLI_HEALTH_MODULE = "bioetl.composition.bootstrap.cli.health"
 _CLI_CHECKPOINT_MODULE = "bioetl.composition.bootstrap.cli.checkpoint"
@@ -41,7 +43,6 @@ _CLI_NOOP_MODULE = "bioetl.composition.bootstrap.cli.noop"
 
 _CLI_EXPORT_MODULES = {
     "HealthServerDependencies": _CLI_HEALTH_MODULE,
-    "bootstrap_adr_service": "bioetl.composition.bootstrap.cli.adr",
     "bootstrap_audit_inspection_service": _CLI_CHECKPOINT_MODULE,
     "bootstrap_bronze_cleanup_service": _CLI_STORAGE_MODULE,
     "bootstrap_checkpoint_runtime_service": _CLI_CHECKPOINT_MODULE,
@@ -69,6 +70,36 @@ _CLI_EXPORT_MODULES = {
 }
 
 
+def bootstrap_adr_service() -> AdrServicePort:
+    """Bootstrap ADR service using the default filesystem-backed catalog."""
+    from typing import cast
+
+    from bioetl.infrastructure.adr.fs_adr_service import FilesystemAdrCatalog
+
+    service = FilesystemAdrCatalog()
+    return cast("AdrServicePort", service)
+
+
+def bootstrap_control_plane_lifecycle_store() -> FileControlPlaneArtifactLifecycleStore:
+    """Build the file-backed control-plane lifecycle store for CLI operations."""
+    from pathlib import Path
+
+    from bioetl.composition.runtime_builders.config_access import get_settings
+    from bioetl.domain.ports.noop import NoOpMetrics
+    from bioetl.infrastructure.control_plane import (
+        FileControlPlaneArtifactLifecycleStore,
+    )
+    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+
+    settings = get_settings()
+    output_root = Path(settings.data_dir) / "output"
+    return FileControlPlaneArtifactLifecycleStore(
+        base_path=output_root / "control",
+        logger=NoOpLogger(),
+        metrics=NoOpMetrics(),
+    )
+
+
 def __getattr__(name: str) -> object:
     """Load CLI bootstrap helpers on demand to avoid package import cycles."""
     module_name = _CLI_EXPORT_MODULES.get(name)
@@ -89,6 +120,7 @@ __all__ = [
     "bootstrap_cleanup_service",
     "bootstrap_config_service",
     "bootstrap_contract_migration_service",
+    "bootstrap_control_plane_lifecycle_store",
     "bootstrap_export_service",
     "bootstrap_forensic_run_diff_service",
     "bootstrap_health_server_dependencies",

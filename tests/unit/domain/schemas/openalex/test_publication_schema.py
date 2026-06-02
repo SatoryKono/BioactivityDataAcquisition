@@ -6,7 +6,7 @@ Tests the OpenAlexPublicationSchema validation.
 from __future__ import annotations
 
 import sys
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pandas as pd
 import pytest
@@ -31,7 +31,7 @@ def valid_record() -> dict:
     return {
         "entity_id": "openalex:publication:W2148763428",
         "content_hash": "a" * 64,  # SHA256 hex
-        "_run_id": uuid4(),
+        "_run_id": deterministic_uuid_from_callsite("test_publication_schema"),
         "_run_type": "incremental",
         "_source_batch_id": None,
         "_ingestion_ts": FIXED_TEST_TIME.isoformat(),

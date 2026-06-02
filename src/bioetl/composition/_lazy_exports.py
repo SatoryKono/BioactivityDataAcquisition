@@ -2,25 +2,35 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Mapping
+from collections.abc import Callable, Iterable, Mapping
 from importlib import import_module
-from typing import Callable
+
+type LazyExportTarget = str | tuple[str, str]
+
+
+def _resolve_export_target(
+    target: LazyExportTarget, export_name: str
+) -> tuple[str, str]:
+    if isinstance(target, tuple):
+        return target
+    return target, export_name
 
 
 def resolve_lazy_export(
     *,
     module_globals: dict[str, object],
-    public_exports: Mapping[str, str],
+    public_exports: Mapping[str, LazyExportTarget],
     module_name: str,
     name: str,
     cache: bool = False,
 ) -> object:
     """Resolve a lazy public export and optionally cache it in module globals."""
-    target_module = public_exports.get(name)
-    if target_module is None:
+    target = public_exports.get(name)
+    if target is None:
         raise AttributeError(f"module {module_name!r} has no attribute {name!r}")
 
-    value = getattr(import_module(target_module), name)
+    target_module, target_attr = _resolve_export_target(target, name)
+    value = getattr(import_module(target_module), target_attr)
     if cache:
         module_globals[name] = value
     return value
@@ -29,7 +39,7 @@ def resolve_lazy_export(
 def lazy_export_dir(
     *,
     module_globals: Mapping[str, object],
-    public_exports: Mapping[str, str],
+    public_exports: Mapping[str, LazyExportTarget],
     explicit_exports: Iterable[str],
 ) -> list[str]:
     """Return stable introspection results for lazy-export modules."""
@@ -39,7 +49,7 @@ def lazy_export_dir(
 def build_lazy_export_hooks(
     *,
     module_globals: dict[str, object],
-    public_exports: Mapping[str, str],
+    public_exports: Mapping[str, LazyExportTarget],
     module_name: str,
     explicit_exports: Iterable[str],
     cache: bool = False,
@@ -68,18 +78,34 @@ def build_lazy_export_hooks(
 def install_lazy_exports(
     *,
     module_globals: dict[str, object],
-    public_exports: Mapping[str, str],
+    public_exports: Mapping[str, LazyExportTarget],
     module_name: str,
-    explicit_exports: Iterable[str],
+    explicit_exports: Iterable[str] | None = None,
     cache: bool = False,
 ) -> None:
     """Install module-level lazy export hooks directly into module globals."""
+    resolved_exports = tuple(explicit_exports or public_exports.keys())
     module_getattr, module_dir = build_lazy_export_hooks(
         module_globals=module_globals,
         public_exports=public_exports,
         module_name=module_name,
-        explicit_exports=explicit_exports,
+        explicit_exports=resolved_exports,
         cache=cache,
     )
     module_globals["__getattr__"] = module_getattr
     module_globals["__dir__"] = module_dir
+
+
+def install_cached_public_exports(
+    *,
+    module_globals: dict[str, object],
+    public_exports: Mapping[str, LazyExportTarget],
+    module_name: str,
+) -> None:
+    """Install the canonical cached lazy-export pattern for public API facades."""
+    install_lazy_exports(
+        module_globals=module_globals,
+        public_exports=public_exports,
+        module_name=module_name,
+        cache=True,
+    )

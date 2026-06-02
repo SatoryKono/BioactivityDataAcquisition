@@ -14,7 +14,11 @@ from __future__ import annotations
 import asyncio
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
-from uuid import UUID, uuid4
+from uuid import UUID
+from tests.helpers.deterministic_ids import (
+    deterministic_uuid_from_callsite,
+    deterministic_uuid_string_from_callsite,
+)
 
 import pytest
 
@@ -347,7 +351,7 @@ class TestBuildPipelineContext:
         ctx = build_pipeline_context(
             "chembl_activity",
             options,
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("test_entrypoints"),
             clock=_FIXED_CONTEXT_CLOCK,
         )
 
@@ -359,14 +363,16 @@ class TestBuildPipelineContext:
     def test_context_allows_exact_replay_with_parentage_and_no_cached_bronze(self):
         """Legacy entrypoint may defer exact-replay cache resolution to control-plane evidence."""
         options = RunOptions(
-            replay_of_run_id=str(uuid4()),
+            replay_of_run_id=deterministic_uuid_string_from_callsite(
+                "test_entrypoints"
+            ),
             replay_of_manifest_id="manifest-parent",
             exact_replay=True,
         )
         ctx = build_pipeline_context(
             "chembl_activity",
             options,
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("test_entrypoints"),
             clock=_FIXED_CONTEXT_CLOCK,
         )
 
@@ -396,7 +402,7 @@ class TestBuildPipelineContext:
         """Legacy entrypoint must preserve explicit checkpoint occurrence selectors."""
         options = RunOptions(
             resume=True,
-            resume_run_id=str(uuid4()),
+            resume_run_id=deterministic_uuid_string_from_callsite("test_entrypoints"),
             resume_manifest_id="manifest-resume-anchor",
         )
         ctx = build_pipeline_context(
@@ -441,6 +447,22 @@ class TestCompositeBootstrapFacade:
             composition_entrypoints.load_composite_config is load_composite_config_impl
         )
 
+    def test_create_pipeline_runner_rejects_implicit_exact_replay_run_id(self) -> None:
+        """Exact replay must fail closed at the public entrypoint when run_id is absent."""
+        from bioetl.composition.entrypoints import create_pipeline_runner
+
+        options = RunOptions(
+            use_cached_bronze=True,
+            cached_bronze_path=CACHED_BRONZE_PATH,
+            exact_replay=True,
+        )
+
+        with pytest.raises(
+            ValueError,
+            match="exact replay requires explicit run_id or run_id_factory",
+        ):
+            create_pipeline_runner("chembl_activity", options)
+
 
 @pytest.mark.unit
 class TestRunPipelineIntegration:
@@ -454,7 +476,7 @@ class TestRunPipelineIntegration:
         """Create a mock PipelineRunner."""
         runner = MagicMock()
         runner.run = AsyncMock()
-        runner.run_id = str(uuid4())
+        runner.run_id = deterministic_uuid_string_from_callsite("test_entrypoints")
         runner.shutdown_signal = None
         runner.execution_metrics = {
             "records_fetched": 100,
@@ -731,13 +753,30 @@ class TestRunPipelineIntegration:
         )
 
     @pytest.mark.asyncio
+    async def test_run_pipeline_rejects_implicit_exact_replay_run_id(self) -> None:
+        """Exact replay must fail before bootstrap when no explicit occurrence ID exists."""
+        from bioetl.composition.entrypoints import run_pipeline
+
+        options = RunOptions(
+            use_cached_bronze=True,
+            cached_bronze_path=CACHED_BRONZE_PATH,
+            exact_replay=True,
+        )
+
+        with pytest.raises(
+            ValueError,
+            match="exact replay requires explicit run_id or run_id_factory",
+        ):
+            await run_pipeline("chembl_activity", options)
+
+    @pytest.mark.asyncio
     async def test_run_pipeline_preserves_context_run_id_even_if_runner_exposes_another(
         self, mock_runner
     ):
         """Entry-point result identity must come from the prepared execution context."""
         from bioetl.composition.entrypoints import run_pipeline
 
-        runner_run_id = str(uuid4())
+        runner_run_id = deterministic_uuid_string_from_callsite("test_entrypoints")
         mock_runner.run_id = runner_run_id
 
         with (

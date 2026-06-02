@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.composition._lazy_exports import install_lazy_exports
+from bioetl.composition._lazy_exports import install_cached_public_exports
 
 __all__ = [
     "archive_table",
@@ -56,10 +56,8 @@ _PUBLIC_EXPORTS = {
     "preview_cleanup": _RESOURCE_MANAGEMENT_MODULE,
     "vacuum_table": _RESOURCE_MANAGEMENT_MODULE,
 }
-install_lazy_exports(
+install_cached_public_exports(
     module_globals=globals(),
     public_exports=_PUBLIC_EXPORTS,
     module_name=__name__,
-    explicit_exports=__all__,
-    cache=True,
 )

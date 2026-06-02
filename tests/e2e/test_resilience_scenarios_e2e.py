@@ -13,11 +13,15 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
-from uuid import uuid4
+from tests.helpers.deterministic_ids import (
+    deterministic_run_uuid_from_callsite,
+    deterministic_uuid_from_callsite,
+    deterministic_uuid_string_from_callsite,
+)
 
 import pytest
 
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import RunType
 
 # ============================================================================
 # Memory Pressure Tests
@@ -100,7 +104,7 @@ async def test_lock_acquisition_and_release():
     lock = MemoryLock()
 
     key = "test_pipeline"
-    owner_id = str(uuid4())
+    owner_id = deterministic_uuid_string_from_callsite("test_resilience_scenarios_e2e")
 
     # Acquire lock
     acquired = await lock.acquire(
@@ -136,7 +140,7 @@ async def test_lock_heartbeat_extends_ttl():
     lock = MemoryLock()
 
     key = "test_pipeline"
-    owner_id = str(uuid4())
+    owner_id = deterministic_uuid_string_from_callsite("test_resilience_scenarios_e2e")
 
     # Acquire lock with short TTL
     await lock.acquire(key=key, owner_id=owner_id, ttl=2, wait=False)
@@ -167,8 +171,8 @@ async def test_lock_prevents_concurrent_access():
     lock = MemoryLock()
 
     key = "test_pipeline"
-    owner1 = str(uuid4())
-    owner2 = str(uuid4())
+    owner1 = deterministic_uuid_string_from_callsite("test_resilience_scenarios_e2e")
+    owner2 = deterministic_uuid_string_from_callsite("test_resilience_scenarios_e2e")
 
     # First owner acquires lock
     acquired1 = await lock.acquire(key=key, owner_id=owner1, ttl=60, wait=False)
@@ -396,7 +400,7 @@ async def test_bronze_writer_atomic_writes(e2e_data_dir: Path):
 
     # Setup lock - the key format must match what BronzeWriter expects
     lock = MemoryLock()
-    run_id = RunID(uuid4())
+    run_id = deterministic_run_uuid_from_callsite("test_resilience_scenarios_e2e")
     provider = "test"
     entity = "entity"
     lock_key = f"lock:{provider}_{entity}"
@@ -423,7 +427,7 @@ async def test_bronze_writer_atomic_writes(e2e_data_dir: Path):
         provider=provider,
         entity=entity,
         date=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
-        batch_id=uuid4(),
+        batch_id=deterministic_uuid_from_callsite("test_resilience_scenarios_e2e"),
         run_id=run_id,
         run_type=RunType.INCREMENTAL,
         ingestion_ts=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),

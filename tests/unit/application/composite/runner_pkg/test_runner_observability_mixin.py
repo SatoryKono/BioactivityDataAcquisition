@@ -11,7 +11,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -44,7 +44,9 @@ class _ObservabilityHarness(CompositeRunnerObservabilityMixin):
         )
         self._logger = MagicMock()
         self._run_id_str = "run-obs-test"
-        self._run_id = uuid4()
+        self._run_id = deterministic_uuid_from_callsite(
+            "test_runner_observability_mixin"
+        )
         self._runtime = SimpleNamespace(cached_bronze_date=None)
         self._started_at = datetime(2026, 4, 9, 12, 30, 0, tzinfo=UTC)
         self._dq_report_service = None

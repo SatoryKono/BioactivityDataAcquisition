@@ -7,9 +7,9 @@ without requiring I/O or DI.
 
 from __future__ import annotations
 
-from uuid import uuid4
 
 import pytest
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 from bioetl.composition.bootstrap.runtime.assembly import (
     ResolvedVacuumSettings as AssemblyVacuumSettings,
@@ -68,7 +68,7 @@ def base_context() -> PipelineRunContext:
     """Create base pipeline run context for tests."""
     return PipelineRunContext(
         pipeline_name="test_pipeline",
-        run_id=uuid4(),
+        run_id=deterministic_uuid_from_callsite("test_assembly"),
         run_type=RunType.INCREMENTAL,
     )
 
@@ -350,7 +350,7 @@ class TestAssembleFilterConfig:
         """Test that CLI input_filter overrides YAML config."""
         ctx = PipelineRunContext(
             pipeline_name="test_pipeline",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("test_assembly"),
             run_type=RunType.INCREMENTAL,
             input_filter=InputFilterContext.from_csv(
                 source_path="/cli/path/to/filter.csv",
@@ -374,7 +374,7 @@ class TestAssembleFilterConfig:
         """Test that ignore_yaml_filter flag disables YAML filter."""
         ctx = PipelineRunContext(
             pipeline_name="test_pipeline",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("test_assembly"),
             run_type=RunType.INCREMENTAL,
             ignore_yaml_filter=True,
         )
@@ -393,7 +393,7 @@ class TestAssembleFilterConfig:
         """Test that direct_filter_ids takes precedence over YAML."""
         ctx = PipelineRunContext(
             pipeline_name="test_pipeline",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("test_assembly"),
             run_type=RunType.INCREMENTAL,
             input_filter=InputFilterContext.from_ids(
                 filter_ids=("ID1", "ID2", "ID3"),
@@ -463,7 +463,7 @@ class TestAssemblyIntegration:
         """Test full assembly flow with CLI overrides."""
         ctx = PipelineRunContext(
             pipeline_name="test_pipeline",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("test_assembly"),
             run_type=RunType.BACKFILL,
             resume=True,
             limit=500,

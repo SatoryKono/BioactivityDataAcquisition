@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from functools import cache
 from unittest.mock import MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -46,7 +46,7 @@ def _build_pipeline_context(mock_logger: MagicMock):
     """Create a PipelineContext without importing runtime modules during collection."""
     symbols = _uniprot_test_symbols()
     return symbols["PipelineContext"](
-        run_id=uuid4(),
+        run_id=deterministic_uuid_from_callsite("test_uniprot_transformer"),
         run_type=symbols["RunType"].INCREMENTAL,
         logger=mock_logger,
     )

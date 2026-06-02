@@ -23,7 +23,7 @@ from bioetl.application.composite.runtime_wiring_api import (
     parse_pipeline_name,
     resolve_field_aliases_from_registry,
 )
-from bioetl.composition.bootstrap.runtime.composite_support_service_bundles import (
+from bioetl.composition.bootstrap.runtime.composite_merge_dependencies_bundle import (
     MergeDependenciesBundle,
 )
 from bioetl.composition.factories.services.polars_join_adapter import PolarsJoinBridge

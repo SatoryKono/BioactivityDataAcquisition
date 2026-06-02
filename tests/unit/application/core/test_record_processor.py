@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_batch_uuid_from_callsite
 
 import pytest
 
@@ -13,7 +13,7 @@ from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.domain.config import TableConfig
 from bioetl.domain.exceptions import DataQualityError, DataQualityThresholdError
 from bioetl.domain.ports import MetricsPort
-from bioetl.domain.types import BatchID, ValidationResult
+from bioetl.domain.types import ValidationResult
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.config._base import get_pipeline_config
 from tests.unit.application.core.record_processor_test_support import (
@@ -107,7 +107,7 @@ class TestRecordProcessorProcessBatch:
             {"id": "1", "value": 10},  # Goes to gold (value > 5)
             {"id": "2", "value": 3},  # Not in gold
         ]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_record_processor")
 
         result = await record_processor.process_batch(records, batch_id)
 
@@ -127,7 +127,7 @@ class TestRecordProcessorProcessBatch:
         This verifies the requirement: one run = one UUID everywhere.
         """
         records = [{"id": "1", "value": 10}]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_record_processor")
 
         await record_processor.process_batch(records, batch_id)
 
@@ -158,7 +158,7 @@ class TestRecordProcessorProcessBatch:
 
         await record_processor.process_batch(
             [{"id": "1", "value": 10}],
-            BatchID(uuid4()),
+            deterministic_batch_uuid_from_callsite("test_record_processor"),
         )
 
         gold_call_kwargs = mock_storage.write_gold.call_args.kwargs
@@ -170,7 +170,7 @@ class TestRecordProcessorProcessBatch:
             {"id": "1", "value": 1},
             {"id": "2", "value": 2},
         ]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_record_processor")
 
         result = await record_processor.process_batch(records, batch_id)
 
@@ -225,7 +225,10 @@ class TestRecordProcessorProcessBatch:
             gold_validator=mock_gold_validator,
         )
 
-        await processor.process_batch([{"id": "1"}], BatchID(uuid4()))
+        await processor.process_batch(
+            [{"id": "1"}],
+            deterministic_batch_uuid_from_callsite("test_record_processor"),
+        )
 
         silver_records = mock_services.storage.write_silver.call_args.kwargs["records"]
         normalized = silver_records[0]
@@ -290,7 +293,7 @@ class TestRecordProcessorProcessBatch:
                 {"id": "1", "doi": " HTTPS://doi.org/10.1000/ABC "},
                 {"id": "2", "doi": "10.1000/abc"},
             ],
-            BatchID(uuid4()),
+            deterministic_batch_uuid_from_callsite("test_record_processor"),
         )
 
         silver_records = mock_services.storage.write_silver.call_args.kwargs["records"]
@@ -334,7 +337,7 @@ class TestRecordProcessorProcessBatch:
             {"id": "good", "value": 10},
             {"id": "bad", "value": 5},  # Will fail transform
         ]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_record_processor")
 
         result = await processor.process_batch(records, batch_id)
 
@@ -375,7 +378,7 @@ class TestRecordProcessorProcessBatch:
         )
 
         records = [{"id": "test", "value": 5}]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_record_processor")
 
         with pytest.raises(LockLostError):
             await processor.process_batch(records, batch_id)
@@ -383,7 +386,7 @@ class TestRecordProcessorProcessBatch:
     async def test_process_batch_empty_records(self, record_processor, mock_storage):
         """Test process_batch with empty records list."""
         records = []
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_record_processor")
 
         result = await record_processor.process_batch(records, batch_id)
 
@@ -442,7 +445,9 @@ class TestRecordProcessorProcessBatch:
         ]
 
         with pytest.raises(DataQualityThresholdError):
-            await processor.process_batch(records, BatchID(uuid4()))
+            await processor.process_batch(
+                records, deterministic_batch_uuid_from_callsite("test_record_processor")
+            )
 
         get_pipeline_config.cache_clear()
 
@@ -494,7 +499,9 @@ class TestRecordProcessorProcessBatch:
             {"id": "bad", "value": 2},
         ]
 
-        result = await processor.process_batch(records, BatchID(uuid4()))
+        result = await processor.process_batch(
+            records, deterministic_batch_uuid_from_callsite("test_record_processor")
+        )
 
         assert result.bronze_count == 2
         assert result.silver_count == 1
@@ -555,7 +562,7 @@ class TestRecordProcessorTracing:
         self, traced_processor, mock_tracer
     ):
         """_start_span creates a tracing span with batch_id and record_count."""
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_record_processor")
         records = [{"id": "1", "value": 10}]
 
         await traced_processor.process_batch(records, batch_id)
@@ -568,7 +575,7 @@ class TestRecordProcessorTracing:
         self, traced_processor, mock_tracer
     ):
         """_execute_transform_with_span sets silver/gold/quarantine counts on span."""
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_record_processor")
         records = [{"id": "1", "value": 10}]
 
         await traced_processor.process_batch(records, batch_id)
@@ -581,7 +588,7 @@ class TestRecordProcessorTracing:
 
     async def test_span_end_called_on_success(self, traced_processor, mock_tracer):
         """Spans are properly closed (__exit__) on success."""
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_record_processor")
         records = [{"id": "1", "value": 10}]
 
         await traced_processor.process_batch(records, batch_id)
@@ -617,7 +624,7 @@ class TestRecordProcessorTracing:
             tracer=mock_tracer,
         )
 
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_record_processor")
         records = [{"id": "1", "value": 10}]
 
         with pytest.raises(RuntimeError, match="write failed"):
@@ -653,7 +660,7 @@ class TestRecordProcessorTracing:
             gold_validator=mock_gold_validator,
         )
 
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_record_processor")
         records = [{"id": "1", "value": 10}]
 
         with pytest.raises(RuntimeError, match="silver write failed"):

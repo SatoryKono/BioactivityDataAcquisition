@@ -5,7 +5,10 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
-from uuid import uuid4
+from tests.helpers.deterministic_ids import (
+    deterministic_batch_uuid_from_callsite,
+    deterministic_run_uuid_from_callsite,
+)
 
 import pyarrow as pa
 import pytest
@@ -15,7 +18,7 @@ from bioetl.composition.factories.storage.audit import create_audit_port
 from bioetl.composition.factories.storage.storage_factory import StorageFactory
 from bioetl.domain.ports import AuditLayer
 from bioetl.domain.ports.noop import NoOpMetrics
-from bioetl.domain.types import BatchID, RunID, RunType
+from bioetl.domain.types import RunType
 from bioetl.infrastructure.audit.file_audit import FileAuditAdapter
 
 pytestmark = pytest.mark.integration
@@ -79,8 +82,8 @@ async def test_storage_factory_wires_file_audit_across_medallion_writers(
     noop_logger: object,
 ) -> None:
     """Canonical storage wiring should emit Bronze/Silver/Gold audit entries."""
-    run_id = RunID(uuid4())
-    batch_id = BatchID(uuid4())
+    run_id = deterministic_run_uuid_from_callsite("test_storage_factory_audit")
+    batch_id = deterministic_batch_uuid_from_callsite("test_storage_factory_audit")
     audit_path = tmp_path / "audit"
     settings = _make_settings(tmp_path=tmp_path, audit_path=audit_path)
     metrics = NoOpMetrics(warn_on_use=False)

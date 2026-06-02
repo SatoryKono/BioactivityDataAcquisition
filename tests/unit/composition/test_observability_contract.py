@@ -14,7 +14,7 @@ from dataclasses import FrozenInstanceError
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -218,7 +218,7 @@ class TestBootstrapObservability:
 
         bundle = bootstrap_observability_bundle(
             pipeline="test_pipeline",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("test_observability_contract"),
             settings=settings,
         )
 
@@ -251,7 +251,7 @@ class TestBootstrapObservability:
 
         bootstrap_observability_bundle(
             pipeline="test_pipeline",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("test_observability_contract"),
             settings=settings,
         )
 
@@ -592,7 +592,7 @@ class TestObservabilityPreflightValidation:
 
         bootstrap_observability_bundle(
             pipeline="test_pipeline",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("test_observability_contract"),
             settings=settings,
         )
 

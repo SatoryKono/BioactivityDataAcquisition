@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, cast
 from bioetl.composition.pipeline_runner_request import (
     build_pipeline_create_runner_request,
 )
-from bioetl.composition.runtime_builders.inputs_resolver import (
+from bioetl.composition.runtime_builders.runner_inputs import (
     RunnerInputs as _RunnerInputs,
 )
 from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP

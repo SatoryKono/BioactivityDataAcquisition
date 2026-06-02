@@ -11,6 +11,7 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 from typing import get_type_hints
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -945,11 +946,13 @@ class TestLoggerImplementationContract:
         Ensures formal adapter replaces duck typing with explicit
         protocol implementation.
         """
-        from uuid import uuid4
 
         from bioetl.infrastructure.observability.logging import create_logger
 
-        logger = create_logger(pipeline="test", run_id=uuid4())
+        logger = create_logger(
+            pipeline="test",
+            run_id=deterministic_uuid_from_callsite("test_port_contracts"),
+        )
 
         assert isinstance(logger, ports.LoggerPort), (
             "StructlogLogger MUST implement LoggerPort protocol. "
@@ -962,11 +965,13 @@ class TestLoggerImplementationContract:
 
         This ensures type consistency across bound loggers.
         """
-        from uuid import uuid4
 
         from bioetl.infrastructure.observability.logging import create_logger
 
-        logger = create_logger(pipeline="test", run_id=uuid4())
+        logger = create_logger(
+            pipeline="test",
+            run_id=deterministic_uuid_from_callsite("test_port_contracts"),
+        )
         bound = logger.bind(extra_context="value")
 
         assert isinstance(bound, ports.LoggerPort), (

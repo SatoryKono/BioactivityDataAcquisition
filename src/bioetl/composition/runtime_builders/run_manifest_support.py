@@ -12,7 +12,6 @@ from bioetl.composition.runtime_builders._run_manifest_refs import (
     build_planned_artifacts,
     control_plane_root,
     create_control_plane_refs,
-    legacy_config_hash_from_resolved_config_hash,
     resolve_run_context_values,
 )
 from bioetl.composition.runtime_builders._run_manifest_sink_policy import (
@@ -51,7 +50,6 @@ __all__ = [
     "build_run_source_refs",
     "control_plane_root",
     "create_control_plane_refs",
-    "legacy_config_hash_from_resolved_config_hash",
     "normalize_snapshot",
     "resolve_contract_identity",
     "resolve_provider_entity",

@@ -3,7 +3,11 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from uuid import uuid4
+from tests.helpers.deterministic_ids import (
+    deterministic_batch_uuid_from_callsite,
+    deterministic_run_uuid_from_callsite,
+    deterministic_uuid_string_from_callsite,
+)
 
 import pytest
 
@@ -19,7 +23,7 @@ from bioetl.domain.ports import (
     GoldMetadataInput,
     SilverMetadataInput,
 )
-from bioetl.domain.types import BatchID, RunID, RunType
+from bioetl.domain.types import RunType
 from bioetl.domain.value_objects.run_context import RunContext
 
 
@@ -29,7 +33,9 @@ pytestmark = pytest.mark.unit
 @pytest.fixture
 def run_context() -> RunContext:
     return RunContext.create(
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite(
+            "test_metadata_coordinator_governance"
+        ),
         run_type=RunType.INCREMENTAL,
         started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         provider="chembl",
@@ -63,7 +69,9 @@ class TestGovernanceMetadata:
             ),
         )
         input_data = BronzeMetadataInput(
-            batch_id=BatchID(uuid4()),
+            batch_id=deterministic_batch_uuid_from_callsite(
+                "test_metadata_coordinator_governance"
+            ),
             record_count=100,
             compressed_size=5000,
             output_path="v1/chembl/activity/2024-01-15/batch.jsonl.zst",
@@ -87,7 +95,9 @@ class TestGovernanceMetadata:
         self, coordinator: MetadataCoordinator
     ) -> None:
         input_data = BronzeMetadataInput(
-            batch_id=BatchID(uuid4()),
+            batch_id=deterministic_batch_uuid_from_callsite(
+                "test_metadata_coordinator_governance"
+            ),
             record_count=100,
             compressed_size=5000,
             output_path="v1/chembl/activity/2024-01-15/batch.jsonl.zst",
@@ -115,7 +125,14 @@ class TestGovernanceMetadata:
         )
         input_data = SilverMetadataInput(
             table_path="/data/silver/chembl/activity",
-            records=[{"id": 1, "_source_batch_id": str(uuid4())}],
+            records=[
+                {
+                    "id": 1,
+                    "_source_batch_id": deterministic_uuid_string_from_callsite(
+                        "test_metadata_coordinator_governance"
+                    ),
+                }
+            ],
             primary_keys=["id"],
             mode=SilverWriteMode.MERGE,
             governance=governance,
@@ -164,7 +181,9 @@ class TestGovernanceMetadata:
 
     def test_gold_metadata_includes_rule_provenance(self) -> None:
         context = RunContext.create(
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite(
+                "test_metadata_coordinator_governance"
+            ),
             run_type=RunType.REBUILD,
             started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             provider="composite",
@@ -192,7 +211,9 @@ class TestGovernanceMetadata:
 
     def test_gold_metadata_surfaces_composite_cv_trace_in_dq_summary(self) -> None:
         context = RunContext.create(
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite(
+                "test_metadata_coordinator_governance"
+            ),
             run_type=RunType.REBUILD,
             started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             provider="composite",

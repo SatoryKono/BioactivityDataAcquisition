@@ -9,25 +9,25 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from bioetl.composition.runtime_builders._run_manifest_data_roots import (
-    control_plane_root,
-)
-from bioetl.composition.runtime_builders.config_access import get_settings
-from bioetl.domain.types import RunID
+from bioetl.domain.types import DebugExportResult, RunID
 from bioetl.infrastructure.control_plane import FileLineageStore
 from bioetl.infrastructure.storage.atomic import atomic_write_text
 
 if TYPE_CHECKING:
-    from bioetl.application.services.debug_export_service import (
-        DebugExportPack,
-        DebugExportResult,
-    )
+    from bioetl.domain.types import DebugExportPack
 
 __all__ = ["DebugExportAdapter"]
 
 
 class DebugExportAdapter:
     """Persist deterministic CSV/XLSX audit packs for debug export runs."""
+
+    def __init__(
+        self,
+        *,
+        lineage_store_path: str | None = None,
+    ) -> None:
+        self._lineage_store_path = lineage_store_path
 
     def write_pack(
         self,
@@ -55,14 +55,22 @@ class DebugExportAdapter:
             )
 
         workbook_path: Path | None = None
+        xlsx_skip_reason: str | None = None
         if "xlsx" in pack.formats:
-            workbook_path = root_path / "debug_export.xlsx"
-            self._write_xlsx(
-                workbook_path,
-                tables,
-                max_rows_per_sheet=pack.max_rows_per_sheet,
-            )
-            file_paths.append(str(workbook_path))
+            candidate_path = root_path / "debug_export.xlsx"
+            try:
+                self._write_xlsx(
+                    candidate_path,
+                    tables,
+                    max_rows_per_sheet=pack.max_rows_per_sheet,
+                )
+            except ModuleNotFoundError as exc:
+                if exc.name != "openpyxl":
+                    raise
+                xlsx_skip_reason = "openpyxl is not installed; CSV artifacts remain the source of truth"
+            else:
+                workbook_path = candidate_path
+                file_paths.append(str(workbook_path))
 
         debug_export_hash = self._compute_pack_hash(canonical_artifacts)
         manifest_path = root_path / "manifest.json"
@@ -75,6 +83,7 @@ class DebugExportAdapter:
             "status": pack.status,
             "created_at": pack.created_at.isoformat(),
             "debug_export_hash": debug_export_hash,
+            "xlsx_skip_reason": xlsx_skip_reason,
             "files": canonical_artifacts
             + (
                 [
@@ -246,15 +255,16 @@ class DebugExportAdapter:
         return hashlib.sha256(payload).hexdigest()
 
     def _load_lineage_rows(self, pack: DebugExportPack) -> list[dict[str, object]]:
+        if self._lineage_store_path is None:
+            return []
         try:
-            settings = get_settings()
-            store = FileLineageStore(base_path=control_plane_root(settings, "lineage"))
+            store = FileLineageStore(base_path=Path(self._lineage_store_path))
             fragments = (
                 store.list_by_manifest_id(pack.manifest_id)
                 if pack.manifest_id is not None
                 else store.list_by_run_id(RunID(UUID(pack.run_id)))
             )
-        except Exception:
+        except (OSError, TypeError, ValueError):
             return []
         rows: list[dict[str, object]] = []
         for fragment in fragments:

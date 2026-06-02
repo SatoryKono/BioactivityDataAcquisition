@@ -21,13 +21,17 @@ import time
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
-from uuid import uuid4
+from tests.helpers.deterministic_ids import (
+    deterministic_batch_uuid_from_callsite,
+    deterministic_run_uuid_from_callsite,
+    deterministic_uuid_string_from_callsite,
+)
 
 import pyarrow as pa
 import pytest
 
 from bioetl.domain.transformations import generate_content_hash
-from bioetl.domain.types import BatchID, RunID, RunType
+from bioetl.domain.types import RunType
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
@@ -148,8 +152,8 @@ class TestBatchingPerformance:
         with JSONL + zstd compression.
         """
         records = [generate_bronze_record_bytes(i) for i in range(1000)]
-        run_id = RunID(uuid4())
-        batch_id = BatchID(uuid4())
+        run_id = deterministic_run_uuid_from_callsite("test_batching_performance")
+        batch_id = deterministic_batch_uuid_from_callsite("test_batching_performance")
         now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         if sys.platform.startswith("win"):
@@ -183,8 +187,8 @@ class TestBatchingPerformance:
         Tests the Delta Lake write path including Arrow conversion,
         data validation, and ACID-compliant storage.
         """
-        run_id = str(uuid4())
-        batch_id = str(uuid4())
+        run_id = deterministic_uuid_string_from_callsite("test_batching_performance")
+        batch_id = deterministic_uuid_string_from_callsite("test_batching_performance")
         now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC).isoformat()
 
         records = []
@@ -245,8 +249,8 @@ class TestBatchingPerformance:
         Tests the data conversion from Python dicts to PyArrow tables
         which is a critical step in the Silver write path.
         """
-        run_id = str(uuid4())
-        batch_id = str(uuid4())
+        run_id = deterministic_uuid_string_from_callsite("test_batching_performance")
+        batch_id = deterministic_uuid_string_from_callsite("test_batching_performance")
         now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC).isoformat()
 
         records = []
@@ -320,8 +324,8 @@ class TestBatchingPerformance:
         records = [generate_bronze_record_bytes(i) for i in range(1000)]
         uncompressed_size = sum(len(r) for r in records)
 
-        run_id = RunID(uuid4())
-        batch_id = BatchID(uuid4())
+        run_id = deterministic_run_uuid_from_callsite("test_batching_performance")
+        batch_id = deterministic_batch_uuid_from_callsite("test_batching_performance")
         now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         if sys.platform.startswith("win"):
@@ -369,12 +373,14 @@ class TestScalabilityPerformance:
         Tests that 5000 records takes approximately 5x the time of 1000 records,
         indicating no unexpected O(n^2) behavior.
         """
-        run_id = RunID(uuid4())
+        run_id = deterministic_run_uuid_from_callsite("test_batching_performance")
         now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         # Benchmark 1000 records
         records_1k = [generate_bronze_record_bytes(i) for i in range(1000)]
-        batch_id_1k = BatchID(uuid4())
+        batch_id_1k = deterministic_batch_uuid_from_callsite(
+            "test_batching_performance"
+        )
 
         if sys.platform.startswith("win"):
             asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -396,7 +402,9 @@ class TestScalabilityPerformance:
 
         # Benchmark 5000 records
         records_5k = [generate_bronze_record_bytes(i) for i in range(5000)]
-        batch_id_5k = BatchID(uuid4())
+        batch_id_5k = deterministic_batch_uuid_from_callsite(
+            "test_batching_performance"
+        )
 
         if sys.platform.startswith("win"):
             asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())

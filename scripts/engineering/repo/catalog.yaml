@@ -57,7 +57,7 @@ lifecycle:
   - replacement
   - sunset_date
   enforce_known_registry_paths: true
-  active_script_count_max: 372
+  active_script_count_max: 364
   active_script_count_policy: fail-fast-no-growth
   active_script_count_owner: '@bioetl-platform'
   active_script_count_review_by: '2026-09-30'

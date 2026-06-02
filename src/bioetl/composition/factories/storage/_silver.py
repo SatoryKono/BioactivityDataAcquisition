@@ -128,7 +128,5 @@ def create_silver_writer(request: CreateSilverWriterRequest) -> SilverWriter:
         transform_steps=request.transform_steps,
         runtime_services=runtime_services,
         pipeline_name=request.pipeline_name,
-        # Keep legacy kwarg for constructor-call compatibility in tests and shims.
-        csv_exporter=request.csv_exporter,
         flat_structure=request.flat_structure,
     )

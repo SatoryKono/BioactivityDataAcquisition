@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from types import SimpleNamespace
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 
@@ -204,7 +204,9 @@ def _build_runner_inputs(
 def _build_pipeline_run_context() -> PipelineRunContext:
     return PipelineRunContext(
         pipeline_name="chembl_activity",
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite(
+            "test_effective_config_artifact_builder"
+        ),
         run_type=RunType.INCREMENTAL,
     )
 
@@ -639,7 +641,9 @@ def test_create_and_persist_effective_config_artifact_uses_effective_replay_prof
     inputs: RunnerInputs = _build_runner_inputs(settings, observability)
     ctx = PipelineRunContext(
         pipeline_name="chembl_activity",
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite(
+            "test_effective_config_artifact_builder"
+        ),
         run_type=RunType.INCREMENTAL,
         exact_replay=True,
     )
@@ -955,7 +959,9 @@ def test_create_and_persist_composite_effective_config_artifact_forwards_require
             ),
         ),
         logger=NoOpLogger(),
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite(
+            "test_effective_config_artifact_builder"
+        ),
     )
 
     assert result == (

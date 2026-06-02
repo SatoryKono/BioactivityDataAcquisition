@@ -11,6 +11,7 @@ Covers:
 from __future__ import annotations
 
 import pytest
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 from bioetl.domain.config import FieldValidation
 from bioetl.domain.types import ExecutionContext
@@ -154,28 +155,30 @@ class TestPipelineRunContextExecutionContext:
 
     def test_default_is_isolated(self) -> None:
         """PipelineRunContext defaults to ISOLATED execution context."""
-        from uuid import uuid4
 
         from bioetl.domain.context import PipelineRunContext
-        from bioetl.domain.types import RunID, RunType
+        from bioetl.domain.types import RunType
 
         ctx = PipelineRunContext(
             pipeline_name="test_pipeline",
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite(
+                "test_severity_and_execution_context"
+            ),
             run_type=RunType.INCREMENTAL,
         )
         assert ctx.execution_context == ExecutionContext.ISOLATED
 
     def test_execution_context__execution_context__04fdcfb1(self) -> None:
         """PipelineRunContext can be created with ENRICHER context."""
-        from uuid import uuid4
 
         from bioetl.domain.context import PipelineRunContext
-        from bioetl.domain.types import RunID, RunType
+        from bioetl.domain.types import RunType
 
         ctx = PipelineRunContext(
             pipeline_name="test_pipeline",
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite(
+                "test_severity_and_execution_context"
+            ),
             run_type=RunType.INCREMENTAL,
             execution_context=ExecutionContext.ENRICHER,
         )

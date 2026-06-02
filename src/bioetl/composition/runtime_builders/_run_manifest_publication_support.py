@@ -17,7 +17,7 @@ from bioetl.infrastructure.control_plane import FileRunManifestStore
 from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
-    from bioetl.composition.runtime_builders.inputs_resolver import RunnerInputs
+    from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
 
 
 def create_manifest_store(inputs: RunnerInputs) -> FileRunManifestStore:

@@ -12,7 +12,7 @@ from functools import cache
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from unittest.mock import MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 
@@ -27,7 +27,7 @@ from bioetl.composition.bootstrap.runtime.publication_vocab_init import (
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.entities.base import BaseEntity
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import RunType
 from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
 pytestmark = pytest.mark.unit
@@ -167,7 +167,9 @@ def mock_context() -> PipelineContext:
     mock_logger.bind = MagicMock(return_value=mock_logger)
 
     return PipelineContext(
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite(
+            "test_base_publication_transformer"
+        ),
         run_type=RunType.INCREMENTAL,
         started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         logger=mock_logger,
@@ -534,7 +536,9 @@ class TestPublicationVocabularyObservability:
         metrics = MagicMock()
         transformer = _create_stub_transformer(provider="crossref", metrics=metrics)
         context = PipelineContext(
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite(
+                "test_base_publication_transformer"
+            ),
             run_type=RunType.INCREMENTAL,
             started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             logger=MagicMock(),
@@ -561,7 +565,9 @@ class TestPublicationVocabularyObservability:
         metrics = MagicMock()
         transformer = _create_stub_transformer(provider="openalex", metrics=metrics)
         context = PipelineContext(
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite(
+                "test_base_publication_transformer"
+            ),
             run_type=RunType.INCREMENTAL,
             started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             logger=MagicMock(),
@@ -582,7 +588,9 @@ class TestPublicationVocabularyObservability:
         metrics = MagicMock()
         transformer = _create_stub_transformer(provider="openalex", metrics=metrics)
         context = PipelineContext(
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite(
+                "test_base_publication_transformer"
+            ),
             run_type=RunType.INCREMENTAL,
             started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             logger=MagicMock(),
@@ -607,7 +615,9 @@ class TestPublicationVocabularyObservability:
         metrics = MagicMock()
         transformer = _create_stub_transformer(provider="pubmed", metrics=metrics)
         context = PipelineContext(
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite(
+                "test_base_publication_transformer"
+            ),
             run_type=RunType.INCREMENTAL,
             started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             logger=MagicMock(),
@@ -631,7 +641,9 @@ class TestPublicationVocabularyObservability:
             metrics=metrics,
         )
         context = PipelineContext(
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite(
+                "test_base_publication_transformer"
+            ),
             run_type=RunType.INCREMENTAL,
             started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             logger=MagicMock(),

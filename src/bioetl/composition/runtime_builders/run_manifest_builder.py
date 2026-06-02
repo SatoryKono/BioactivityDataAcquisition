@@ -33,9 +33,7 @@ from bioetl.composition.runtime_builders._runner_control_plane_policy import (
 from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
 
 if TYPE_CHECKING:
-    from bioetl.composition.runtime_builders.inputs_resolver import (
-        RunnerInputs,
-    )
+    from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
     from bioetl.domain.context import PipelineRunContext
 
 
@@ -183,9 +181,7 @@ def _build_manifest_create_request(
             ),
             run_type_value=run_type_value,
             execution_context_value=execution_context_value,
-            config_hash=_manifest_support.legacy_config_hash_from_resolved_config_hash(
-                provenance.resolved_config_hash
-            ),
+            config_hash=provenance.resolved_config_hash,
             resolved_config_hash=provenance.resolved_config_hash,
             effective_config_hash=provenance.effective_config_hash,
             source_fingerprint=provenance.source_fingerprint,

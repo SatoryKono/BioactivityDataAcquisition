@@ -15,8 +15,10 @@ from bioetl.composition.bootstrap.assembly.checkpoint import (
 from bioetl.composition.bootstrap.composite_infrastructure_context import (
     CompositeInfrastructureContext,
 )
-from bioetl.composition.bootstrap.runtime.composite_support_service_bundles import (
+from bioetl.composition.bootstrap.runtime.composite_control_plane_bundle import (
     CompositeControlPlaneBundle,
+)
+from bioetl.composition.bootstrap.runtime.composite_runtime_management_bundle import (
     RuntimeManagementServicesBundle,
 )
 from bioetl.composition.services.versioning import compute_config_hash

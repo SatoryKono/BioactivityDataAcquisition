@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -42,7 +42,7 @@ def chembl_pipeline() -> ChEMBLActivityPipeline:
         tracing=MagicMock(),
         logger=logger,
     )
-    run_id = uuid4()
+    run_id = deterministic_uuid_from_callsite("test_activity_schema_gap")
     transformer = ActivityTransformer(
         provider="chembl", dependencies=build_test_transformer_dependencies()
     )
@@ -59,7 +59,7 @@ def chembl_pipeline() -> ChEMBLActivityPipeline:
 @pytest.fixture
 def context(chembl_pipeline) -> PipelineContext:
     return PipelineContext(
-        run_id=uuid4(),
+        run_id=deterministic_uuid_from_callsite("test_activity_schema_gap"),
         run_type=RunType.INCREMENTAL,
         logger=chembl_pipeline.logger,
     )

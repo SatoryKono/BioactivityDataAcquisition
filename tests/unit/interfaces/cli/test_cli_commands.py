@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from unittest.mock import AsyncMock, MagicMock, patch
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_string_from_callsite
 
 import pytest
 from click.testing import CliRunner
@@ -582,7 +582,7 @@ class TestLockReleaseCommand:
 
     def test_lock_release_success(self, cli_runner, mock_lock_service):
         """Test successful lock release."""
-        run_id = str(uuid4())
+        run_id = deterministic_uuid_string_from_callsite("test_cli_commands")
 
         with patch(
             "bioetl.interfaces.cli.commands.lock.get_lock_service",
@@ -607,7 +607,7 @@ class TestLockReleaseCommand:
     def test_lock_release_not_held(self, cli_runner, mock_lock_service):
         """Test lock release when lock is not held."""
         mock_lock_service.release_lock.return_value = False
-        run_id = str(uuid4())
+        run_id = deterministic_uuid_string_from_callsite("test_cli_commands")
 
         with patch(
             "bioetl.interfaces.cli.commands.lock.get_lock_service",
@@ -630,7 +630,7 @@ class TestLockReleaseCommand:
 
     def test_lock_release_with_exclusive(self, cli_runner, mock_lock_service):
         """Test lock release with exclusive flag."""
-        run_id = str(uuid4())
+        run_id = deterministic_uuid_string_from_callsite("test_cli_commands")
 
         with patch(
             "bioetl.interfaces.cli.commands.lock.get_lock_service",
@@ -690,7 +690,7 @@ class TestLockCheckCommand:
 
     def test_lock_check_held(self, cli_runner, mock_lock_service):
         """Test lock check when lock is held."""
-        run_id = str(uuid4())
+        run_id = deterministic_uuid_string_from_callsite("test_cli_commands")
 
         with patch(
             "bioetl.interfaces.cli.commands.lock.get_lock_service",
@@ -708,7 +708,7 @@ class TestLockCheckCommand:
     def test_lock_check_not_held(self, cli_runner, mock_lock_service):
         """Test lock check when lock is not held."""
         mock_lock_service.check_lock.return_value = False
-        run_id = str(uuid4())
+        run_id = deterministic_uuid_string_from_callsite("test_cli_commands")
 
         with patch(
             "bioetl.interfaces.cli.commands.lock.get_lock_service",

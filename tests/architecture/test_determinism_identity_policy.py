@@ -13,9 +13,6 @@ from pathlib import Path
 import pytest
 import yaml
 
-from bioetl.composition.runtime_builders._run_manifest_refs import (
-    legacy_config_hash_from_resolved_config_hash,
-)
 from bioetl.domain.normalization import build_execution_identity_payload
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -389,10 +386,6 @@ def test_legacy_config_hash_cannot_become_execution_identity_anchor() -> None:
     payload = _load_policy()
     legacy_policy = payload["legacy_config_hash_policy"]
     assert isinstance(legacy_policy, dict)
-
-    assert legacy_config_hash_from_resolved_config_hash("resolved-hash") == (
-        "resolved-hash"
-    )
 
     execution_identity_params = set(
         signature(build_execution_identity_payload).parameters

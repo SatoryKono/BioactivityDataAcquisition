@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from bioetl.domain.value_objects.activity_relation import RelationOperator
 
 if TYPE_CHECKING:
-    from bioetl.domain.value_objects.activity_values import Concentration
+    from bioetl.domain.value_objects.activity_concentration import Concentration
 
 __all__ = ["ActivityValue"]
 
@@ -52,7 +52,7 @@ class ActivityValue:
 
     def to_concentration(self) -> Concentration:
         """Convert to Concentration Value Object."""
-        from bioetl.domain.value_objects.activity_values import (
+        from bioetl.domain.value_objects.activity_concentration import (
             Concentration,
             ConcentrationUnit,
         )

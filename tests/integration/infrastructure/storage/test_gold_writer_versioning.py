@@ -6,7 +6,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import cast
 from unittest.mock import MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 from deltalake import DeltaTable
@@ -16,7 +16,6 @@ from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import (
     GoldSchemaPolicyByVersion,
     GoldSchemaVersionPolicy,
-    RunID,
 )
 from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 from bioetl.infrastructure.storage.gold.runtime_helpers import (
@@ -224,7 +223,7 @@ async def test_gold_writer_overwrite_is_idempotent_for_identical_records(
         records=records,
         schema=strict_schema,
         mode="overwrite",
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite("test_gold_writer_versioning"),
         ingestion_ts=datetime(2026, 5, 5, 12, 0, 0),
     )
     first_rows = _load_gold_rows(tmp_path / "gold", "chembl.activity")
@@ -234,7 +233,7 @@ async def test_gold_writer_overwrite_is_idempotent_for_identical_records(
         records=records,
         schema=strict_schema,
         mode="overwrite",
-        run_id=RunID(uuid4()),
+        run_id=deterministic_run_uuid_from_callsite("test_gold_writer_versioning"),
         ingestion_ts=datetime(2026, 5, 5, 12, 5, 0),
     )
     second_rows = _load_gold_rows(tmp_path / "gold", "chembl.activity")

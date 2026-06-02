@@ -7,6 +7,8 @@ import os
 from collections import defaultdict
 from uuid import UUID, uuid5
 
+from bioetl.domain.types import BatchID, RunID
+
 _TEST_ID_NAMESPACE = UUID("6e1d8d7c-7f1a-46f1-94fe-f4d3d8d8d4d1")
 _CALLSITE_ORDINALS: defaultdict[tuple[str, str, int], int] = defaultdict(int)
 
@@ -14,6 +16,11 @@ _CALLSITE_ORDINALS: defaultdict[tuple[str, str, int], int] = defaultdict(int)
 def deterministic_uuid(label: str) -> UUID:
     """Return a stable UUID for one logical test identity label."""
     return uuid5(_TEST_ID_NAMESPACE, label)
+
+
+def deterministic_uuid_string(label: str) -> str:
+    """Return a stable UUID string for one logical test identity label."""
+    return str(deterministic_uuid(label))
 
 
 def deterministic_uuid_from_callsite(namespace: str) -> UUID:
@@ -32,19 +39,54 @@ def deterministic_uuid_from_callsite(namespace: str) -> UUID:
     )
 
 
+def deterministic_uuid_string_from_callsite(namespace: str) -> str:
+    """Return a stable UUID string for one callsite-derived logical identity."""
+    return str(deterministic_uuid_from_callsite(namespace))
+
+
 def deterministic_run_id(label: str) -> str:
     """Return a stable run-id string."""
-    return str(deterministic_uuid(f"run:{label}"))
+    return deterministic_uuid_string(f"run:{label}")
+
+
+def deterministic_run_id_from_callsite(namespace: str) -> str:
+    """Return a stable run-id string derived from the active callsite."""
+    return deterministic_uuid_string_from_callsite(f"run:{namespace}")
 
 
 def deterministic_batch_id(label: str) -> str:
     """Return a stable batch-id string."""
-    return str(deterministic_uuid(f"batch:{label}"))
+    return deterministic_uuid_string(f"batch:{label}")
+
+
+def deterministic_batch_id_from_callsite(namespace: str) -> str:
+    """Return a stable batch-id string derived from the active callsite."""
+    return deterministic_uuid_string_from_callsite(f"batch:{namespace}")
 
 
 def deterministic_uuid_value(label: str) -> UUID:
     """Return a stable UUID value for tests that need UUID-typed identifiers."""
     return deterministic_uuid(label)
+
+
+def deterministic_run_uuid(label: str) -> RunID:
+    """Return a stable typed RunID value for one logical test identity label."""
+    return RunID(deterministic_uuid(f"run:{label}"))
+
+
+def deterministic_run_uuid_from_callsite(namespace: str) -> RunID:
+    """Return a stable typed RunID value derived from the active callsite."""
+    return RunID(deterministic_uuid_from_callsite(f"run:{namespace}"))
+
+
+def deterministic_batch_uuid(label: str) -> BatchID:
+    """Return a stable typed BatchID value for one logical test identity label."""
+    return BatchID(deterministic_uuid(f"batch:{label}"))
+
+
+def deterministic_batch_uuid_from_callsite(namespace: str) -> BatchID:
+    """Return a stable typed BatchID value derived from the active callsite."""
+    return BatchID(deterministic_uuid_from_callsite(f"batch:{namespace}"))
 
 
 def deterministic_table_name(prefix: str, label: str) -> str:

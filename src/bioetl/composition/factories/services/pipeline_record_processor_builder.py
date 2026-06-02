@@ -39,7 +39,9 @@ if TYPE_CHECKING:
 
 
 def _build_debug_export_config(pipeline: BasePipeline) -> DebugExportConfig | None:
-    runtime = pipeline.runtime
+    runtime = getattr(pipeline, "runtime", None)
+    if runtime is None:
+        return None
     if not getattr(runtime, "debug_export_enabled", False):
         return None
     formats = tuple(getattr(runtime, "debug_export_formats", ()) or ("csv", "xlsx"))

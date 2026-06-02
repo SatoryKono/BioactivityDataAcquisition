@@ -23,7 +23,10 @@ __all__ = [
     "PipelineFactoryPort",
     "PipelineRegistry",
     "create_registry",
+    "get_default_registry",
 ]
+
+_compat_default_registry: PipelineRegistry | None = None
 
 
 class PipelineDefinition(NamedTuple):
@@ -216,3 +219,18 @@ def create_registry() -> PipelineRegistry:
         A new empty PipelineRegistry instance.
     """
     return PipelineRegistry()
+
+
+def get_default_registry() -> PipelineRegistry:
+    """Return the retained compatibility registry instance.
+
+    Canonical runtime/bootstrap assembly should prefer explicit registries via
+    ``create_registry()`` and ``register_all_pipelines(registry=...)``. This
+    helper remains for compatibility-oriented tests and narrow public facade
+    coverage that still exercise the historical default-registry seam.
+    """
+    global _compat_default_registry
+    if _compat_default_registry is None:
+        _compat_default_registry = create_registry()
+        _compat_default_registry._bioetl_shared_default_registry = True
+    return _compat_default_registry

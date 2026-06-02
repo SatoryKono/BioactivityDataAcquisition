@@ -70,10 +70,10 @@ def cli_runner() -> CliRunner:
 
 @pytest.fixture(autouse=True)
 def _mock_workflow_observability_backend(monkeypatch: Any) -> None:
-    import bioetl.interfaces.cli.commands.workflow as workflow_cmd
+    import bioetl.interfaces.cli.commands._workflow_command_runtime as workflow_runtime
 
     monkeypatch.setattr(
-        workflow_cmd,
+        workflow_runtime,
         "ensure_observability_backend_started",
         lambda **_: ObservabilityBackendEnsureResult(
             status="started",
@@ -353,8 +353,7 @@ def test_workflow_run_accepts_pipeline_style_runtime_overrides(
         for step in pipeline_steps
     )
     assert all(
-        getattr(step.run_options, "debug_export_dir", None)
-        == "artifacts/debug_exports"
+        getattr(step.run_options, "debug_export_dir", None) == "artifacts/debug_exports"
         for step in pipeline_steps
     )
 

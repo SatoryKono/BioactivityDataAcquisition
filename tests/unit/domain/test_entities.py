@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from uuid import UUID, uuid4
+from uuid import UUID
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -270,7 +271,7 @@ class TestBioactivity:
         with pytest.raises(ValueError, match="activity_id"):
             Bioactivity.from_raw(
                 raw_data={"molecule_id": "CHEMBL1"},
-                run_id=uuid4(),
+                run_id=deterministic_uuid_from_callsite("test_entities"),
                 ingestion_ts=FIXED_TEST_TIME,
             )
 
@@ -279,7 +280,7 @@ class TestBioactivity:
         with pytest.raises(ValueError, match="molecule_id"):
             Bioactivity.from_raw(
                 raw_data={"activity_id": 123},
-                run_id=uuid4(),
+                run_id=deterministic_uuid_from_callsite("test_entities"),
                 ingestion_ts=FIXED_TEST_TIME,
             )
 

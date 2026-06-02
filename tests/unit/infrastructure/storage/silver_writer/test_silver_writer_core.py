@@ -6,6 +6,10 @@ import asyncio
 import tempfile
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
+from tests.helpers.deterministic_ids import (
+    deterministic_batch_uuid_from_callsite,
+    deterministic_run_uuid_from_callsite,
+)
 
 import pytest
 
@@ -175,11 +179,10 @@ class TestSilverWriterValidation:
     ) -> None:
         """Tracing helper should create span context and delegate pipeline execution."""
         from datetime import UTC, datetime
-        from uuid import uuid4
 
         import pyarrow as pa
 
-        from bioetl.domain.types import BatchID, RunID, RunType
+        from bioetl.domain.types import RunType
         from bioetl.infrastructure.storage.silver.pipeline_helpers import (
             _SilverWriteExecutionContext,
             _SilverWriteInvocation,
@@ -209,9 +212,11 @@ class TestSilverWriterValidation:
             column_order=None,
             bronze_refs=None,
             key_nullability_rules=None,
-            run_id=RunID(uuid4()),
+            run_id=deterministic_run_uuid_from_callsite("test_silver_writer_core"),
             run_type=RunType.INCREMENTAL,
-            source_batch_id=BatchID(uuid4()),
+            source_batch_id=deterministic_batch_uuid_from_callsite(
+                "test_silver_writer_core"
+            ),
             ingestion_ts=datetime.fromisoformat("2025-01-15T12:00:00+00:00"),
         )
 

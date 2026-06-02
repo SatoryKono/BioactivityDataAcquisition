@@ -678,7 +678,6 @@ class TestInterfacesBootstrapIsolation:
         """Interfaces must consume registry_api instead of registry internals."""
         forbidden_modules = {
             "bioetl.composition.registry",
-            "bioetl.composition.registry_default",
         }
         violations: list[str] = []
         for py_file in _python_files(_interfaces_path(src_dir)):

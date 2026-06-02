@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 
@@ -13,7 +13,7 @@ from tests.helpers.clock import FIXED_TEST_TIME
 
 
 def _make_run_id() -> RunID:
-    return RunID(uuid4())
+    return deterministic_run_uuid_from_callsite("test_run_context")
 
 
 def _now_utc() -> datetime:

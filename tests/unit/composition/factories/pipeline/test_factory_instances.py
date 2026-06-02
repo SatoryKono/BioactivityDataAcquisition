@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Generator
 from datetime import UTC, datetime
 from unittest.mock import ANY, MagicMock, patch
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -209,7 +209,7 @@ class TestChemblActivityFactory:
         chembl_activity_factory.pipeline_class = mock_pipeline_class
 
         runtime = RuntimeConfig(run_type=RunType.INCREMENTAL)
-        run_id = uuid4()
+        run_id = deterministic_uuid_from_callsite("test_factory_instances")
 
         result = chembl_activity_factory.create_with_services(
             build_create_pipeline_with_services_request(

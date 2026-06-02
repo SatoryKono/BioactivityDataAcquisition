@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 
@@ -25,7 +25,7 @@ def mock_logger() -> MagicMock:
 @pytest.fixture
 def run_id() -> RunID:
     """Create a test run ID."""
-    return RunID(uuid4())
+    return deterministic_run_uuid_from_callsite("test_lock_manager_get_context")
 
 
 @pytest.fixture

@@ -14,7 +14,10 @@ from __future__ import annotations
 
 import asyncio
 from unittest.mock import MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import (
+    deterministic_batch_uuid_from_callsite,
+    deterministic_uuid_from_callsite,
+)
 
 import pytest
 
@@ -32,7 +35,7 @@ from bioetl.domain.context import PipelineContext
 pytestmark = pytest.mark.unit
 from bioetl.domain.entities import Bioactivity
 from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
-from bioetl.domain.types import BatchID, RunType
+from bioetl.domain.types import RunType
 from tests.helpers.transformer_dependencies import (
     build_test_transformer_dependencies,
 )
@@ -73,7 +76,7 @@ def mock_context() -> PipelineContext:
     mock_logger.bind = MagicMock(return_value=mock_logger)
     mock_logger.warning = MagicMock()
     return PipelineContext(
-        run_id=uuid4(),
+        run_id=deterministic_uuid_from_callsite("test_base_transformer"),
         run_type=RunType.INCREMENTAL,
         logger=mock_logger,
     )
@@ -285,7 +288,7 @@ class TestCreateEntity:
         self, transformer: ConcreteTransformer, mock_context: PipelineContext
     ) -> None:
         """Entity lineage should inherit the active batch identifier from context."""
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_base_transformer")
 
         entity = transformer._create_entity(
             Bioactivity,

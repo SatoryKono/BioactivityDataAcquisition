@@ -76,6 +76,7 @@ class RuntimeConfig:
     debug_export_enabled: bool = False
     debug_export_formats: tuple[str, ...] = ()
     debug_export_dir: str | None = None
+    workflow_id: str = "standalone"
 
     # Manual start offset for crash recovery (overrides checkpoint)
     # When set, extraction starts from this offset instead of checkpoint.

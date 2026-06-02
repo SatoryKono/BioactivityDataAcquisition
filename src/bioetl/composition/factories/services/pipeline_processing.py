@@ -76,6 +76,11 @@ def build_components_and_processing_service(
         domain_event_emitter=domain_event_emitter,
         lock_validator=lock_validator,
     )
+    writer_debug_export_service = (
+        getattr(components.writer, "__dict__", {}).get("_debug_export_service")
+        if components.writer is not None
+        else None
+    )
     quarantine_manager = QuarantineRuntimeService(
         quarantine_port=pipeline.services.quarantine,
         pipeline_name=processor_config.pipeline_name,
@@ -94,7 +99,7 @@ def build_components_and_processing_service(
         quarantine_manager=quarantine_manager,
         run_id=pipeline.context.run_id,
         domain_event_emitter=domain_event_emitter,
-        debug_export_service=getattr(components.writer, "_debug_export_service", None),
+        debug_export_service=writer_debug_export_service,
     )
     batch_processing_service = BatchProcessingService(
         services=pipeline.services,

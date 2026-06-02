@@ -4,11 +4,10 @@ from __future__ import annotations
 
 from pathlib import Path
 from unittest.mock import patch
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_batch_uuid_from_callsite
 
 import pytest
 
-from bioetl.domain.types import BatchID
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.infrastructure.storage.bronze_write_result_helpers import (
     is_bronze_write_result_persisted,
@@ -19,7 +18,9 @@ pytestmark = pytest.mark.unit
 
 def _make_result(path: Path) -> BronzeWriteResult:
     return BronzeWriteResult(
-        batch_id=BatchID(uuid4()),
+        batch_id=deterministic_batch_uuid_from_callsite(
+            "test_bronze_write_result_helpers"
+        ),
         relative_path="chembl/activity/2024-01-15/batch_abc.jsonl.zst",
         absolute_path=str(path),
         record_count=1,

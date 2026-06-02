@@ -7,13 +7,15 @@ helpers extracted into BatchWriterTracingMixin.
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import (
+    deterministic_batch_uuid_from_callsite,
+    deterministic_uuid_from_callsite,
+)
 
 import pytest
 
 from bioetl.application.core.batch_writer_tracing_mixin import BatchWriterTracingMixin
 from bioetl.domain.locking import LockNotHeldError
-from bioetl.domain.types import BatchID
 
 
 # ---------------------------------------------------------------------------
@@ -95,7 +97,9 @@ class TestValidateLock:
         mock_logger = MagicMock()
         mock_context = MagicMock()
         mock_context.logger = mock_logger
-        mock_context.run_id = uuid4()
+        mock_context.run_id = deterministic_uuid_from_callsite(
+            "test_batch_writer_tracing_mixin"
+        )
 
         writer = _TracingWriter(lock_validator=validator, context=mock_context)
 
@@ -110,7 +114,9 @@ class TestValidateLock:
         mock_logger = MagicMock()
         mock_context = MagicMock()
         mock_context.logger = mock_logger
-        mock_context.run_id = uuid4()
+        mock_context.run_id = deterministic_uuid_from_callsite(
+            "test_batch_writer_tracing_mixin"
+        )
 
         writer = _TracingWriter(
             lock_validator=validator,
@@ -131,7 +137,9 @@ class TestValidateLock:
         """LockNotHeldError.expected_key contains provider_entity table name."""
         validator = AsyncMock(return_value=False)
         mock_context = MagicMock()
-        mock_context.run_id = uuid4()
+        mock_context.run_id = deterministic_uuid_from_callsite(
+            "test_batch_writer_tracing_mixin"
+        )
 
         writer = _TracingWriter(
             lock_validator=validator,
@@ -158,7 +166,12 @@ class TestStartSpan:
     def test_returns_none_when_no_tracer(self):
         """Returns None when _tracer is falsy."""
         writer = _TracingWriter(tracer=None)
-        result = writer._start_span("write_bronze", "bronze", 100, BatchID(uuid4()))
+        result = writer._start_span(
+            "write_bronze",
+            "bronze",
+            100,
+            deterministic_batch_uuid_from_callsite("test_batch_writer_tracing_mixin"),
+        )
 
         assert result is None
 
@@ -192,7 +205,9 @@ class TestStartSpan:
         """batch_id attribute is set when batch_id is given."""
         tracer, inner, _ = _make_tracer_mock()
         writer = _TracingWriter(tracer=tracer)
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite(
+            "test_batch_writer_tracing_mixin"
+        )
 
         writer._start_span("write_bronze", "bronze", 5, batch_id)
 
@@ -317,7 +332,9 @@ class TestLogAndTrackWriteError:
             batch_metrics=mock_metrics,
         )
 
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite(
+            "test_batch_writer_tracing_mixin"
+        )
         error = ValueError("bad schema")
 
         writer.log_and_track_write_error("silver", error, batch_id)
@@ -344,7 +361,9 @@ class TestLogAndTrackWriteError:
             batch_metrics=mock_metrics,
         )
 
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite(
+            "test_batch_writer_tracing_mixin"
+        )
         writer.log_and_track_write_error("gold", OSError("disk full"), batch_id)
 
         mock_metrics.track_error.assert_called_once()
@@ -366,7 +385,9 @@ class TestLogAndTrackWriteError:
         )
 
         writer.log_and_track_write_error(
-            "bronze", RuntimeError("crash"), BatchID(uuid4())
+            "bronze",
+            RuntimeError("crash"),
+            deterministic_batch_uuid_from_callsite("test_batch_writer_tracing_mixin"),
         )
 
         call_kwargs = mock_logger.error.call_args[1]
@@ -388,7 +409,13 @@ class TestLogAndTrackWriteError:
         )
 
         for exc in [ValueError("v"), TypeError("t"), OSError("o"), RuntimeError("r")]:
-            writer.log_and_track_write_error("silver", exc, BatchID(uuid4()))
+            writer.log_and_track_write_error(
+                "silver",
+                exc,
+                deterministic_batch_uuid_from_callsite(
+                    "test_batch_writer_tracing_mixin"
+                ),
+            )
 
         # Should have been called 4 times without raising
         assert mock_context.logger.error.call_count == 4

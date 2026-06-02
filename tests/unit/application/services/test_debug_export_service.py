@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
+from unittest.mock import Mock
 from uuid import UUID
 
 import pytest
 
 from bioetl.application.services.debug_export_service import (
     DebugExportConfig,
+    DebugExportResult,
     DebugExportService,
 )
 from bioetl.domain.types import ErrorType
@@ -77,3 +80,72 @@ def test_debug_export_service_collects_success_and_failure_rows() -> None:
         == "SCHEMA_REQUIRED_FIELD_MISSING"
     )
     assert len(pack.tables["dq_summary"]) == 2
+
+
+def test_debug_export_service_hashes_records_without_content_hash() -> None:
+    service = DebugExportService(
+        config=DebugExportConfig(enabled=True, formats=("csv",)),
+        run_id=_RUN_ID,
+        pipeline_id="chembl_target",
+        provider_id="chembl",
+    )
+
+    service.record_bronze_batch(
+        records=[{"target_chembl_id": "CHEMBL1", "pref_name": "EGFR"}],
+        batch_id=_BATCH_ID,
+        start_index=0,
+    )
+
+    pack = service.build_pack()
+
+    payload_hash = pack.tables["bronze_index"][0]["payload_hash"]
+    assert isinstance(payload_hash, str)
+    assert payload_hash
+
+
+def test_debug_export_service_finalize_persists_pack_with_manifest_id() -> None:
+    writer = Mock()
+    writer.write_pack.return_value = DebugExportResult(
+        root_path="artifacts/debug_exports/standalone/chembl_activity/run-1",
+        manifest_path="artifacts/debug_exports/standalone/chembl_activity/run-1/manifest.json",
+        debug_export_hash="hash-1",
+    )
+    service = DebugExportService(
+        config=DebugExportConfig(enabled=True, formats=("csv",)),
+        run_id=_RUN_ID,
+        pipeline_id="chembl_activity",
+        provider_id="chembl",
+        writer=writer,
+    )
+
+    result = service.finalize(status="failed", manifest_id="manifest-123")
+
+    assert result is not None
+    written_pack = writer.write_pack.call_args.kwargs["pack"]
+    assert written_pack.status == "failed"
+    assert written_pack.manifest_id == "manifest-123"
+    assert written_pack.tables["bronze_index"] == ()
+
+
+def test_debug_export_service_serializes_datetime_source_metadata() -> None:
+    service = DebugExportService(
+        config=DebugExportConfig(enabled=True, formats=("csv",)),
+        run_id=_RUN_ID,
+        pipeline_id="chembl_target",
+        provider_id="chembl",
+    )
+
+    source_metadata = {
+        "fetched_at": datetime(2026, 6, 2, 10, 13, 6, tzinfo=UTC),
+        "page": 1,
+    }
+    service.record_bronze_batch(
+        records=[{"target_chembl_id": "CHEMBL1", "pref_name": "EGFR"}],
+        batch_id=_BATCH_ID,
+        start_index=0,
+        source_metadata=source_metadata,
+    )
+
+    pack = service.build_pack()
+
+    assert "2026-06-02T10:13:06+00:00" in pack.tables["bronze_index"][0]["source_metadata"]

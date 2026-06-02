@@ -10,7 +10,7 @@ from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_string_from_callsite
 
 import pytest
 
@@ -69,7 +69,7 @@ def _retry_once_atomic_write_text(
 
 def _make_runtime() -> RuntimeMetadata:
     return RuntimeMetadata(
-        run_id=str(uuid4()),
+        run_id=deterministic_uuid_string_from_callsite("test_metadata_writer_boost"),
         run_type=RunTypeEnum.INCREMENTAL,
         started_at_utc=datetime(2025, 1, 15, 10, 0, 0, tzinfo=UTC),
         completed_at_utc=datetime(2025, 1, 15, 10, 5, 0, tzinfo=UTC),

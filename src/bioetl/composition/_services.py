@@ -67,8 +67,9 @@ if TYPE_CHECKING:
 _BOOTSTRAP_CHECKPOINT_EXPORT_MODULE = "bioetl.composition.bootstrap.cli.checkpoint"
 _BOOTSTRAP_RUN_MANIFEST_EXPORT_MODULE = "bioetl.composition.bootstrap.cli.run_manifest"
 _BOOTSTRAP_STORAGE_EXPORT_MODULE = "bioetl.composition.bootstrap.cli.storage"
+_BOOTSTRAP_CLI_MODULE = "bioetl.composition.bootstrap.cli"
 _BOOTSTRAP_EXPORT_MODULES: dict[str, str] = {
-    "bootstrap_adr_service": "bioetl.composition.bootstrap.cli.adr",
+    "bootstrap_adr_service": _BOOTSTRAP_CLI_MODULE,
     "bootstrap_audit_inspection_service": _BOOTSTRAP_CHECKPOINT_EXPORT_MODULE,
     "bootstrap_bronze_cleanup_service": _BOOTSTRAP_STORAGE_EXPORT_MODULE,
     "bootstrap_checkpoint_service": _BOOTSTRAP_CHECKPOINT_EXPORT_MODULE,
@@ -91,7 +92,6 @@ _BOOTSTRAP_EXPORT_MODULES: dict[str, str] = {
     "bootstrap_run_manifest_service": _BOOTSTRAP_CHECKPOINT_EXPORT_MODULE,
     "bootstrap_vacuum_service": _BOOTSTRAP_STORAGE_EXPORT_MODULE,
 }
-
 
 def resolve_bootstrap_attr(name: str) -> object:
     """Resolve one public bootstrap export lazily without invoking it."""

@@ -7,7 +7,7 @@ subcellular fractions from Assay records.
 from __future__ import annotations
 
 from unittest.mock import MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -30,7 +30,9 @@ def mock_context() -> PipelineContext:
     mock_logger.bind = MagicMock(return_value=mock_logger)
     mock_logger.warning = MagicMock()
     return PipelineContext(
-        run_id=uuid4(),
+        run_id=deterministic_uuid_from_callsite(
+            "test_subcellular_fraction_transformer"
+        ),
         run_type=RunType.INCREMENTAL,
         logger=mock_logger,
     )

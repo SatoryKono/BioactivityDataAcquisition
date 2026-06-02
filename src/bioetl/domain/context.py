@@ -85,9 +85,7 @@ def _validate_manifest_contract_alignment(
     manifest_id: str | None,
 ) -> list[str]:
     """Return manifest-level contract alignment issues."""
-    if manifest_id is None:
-        return []
-    if contract_identity.contract_ref:
+    if manifest_id is None or contract_identity.contract_ref:
         return []
     return ["Contract identity missing contract reference"]
 
@@ -108,7 +106,6 @@ def _validate_contract_identity_completeness(
         if not str(value or "").strip()
     ]
 
-
 @dataclass(frozen=True, slots=True)
 class PipelineContext:
     """In-run processing context for record, batch, and write execution paths."""
@@ -120,6 +117,7 @@ class PipelineContext:
     source_batch_id: BatchID | None = None
     replay_timestamp_anchor: datetime | None = None
     pipeline_name: str | None = None
+    workflow_id: str = "standalone"
 
     @classmethod
     def create(
@@ -131,6 +129,7 @@ class PipelineContext:
         source_batch_id: BatchID | None = None,
         replay_timestamp_anchor: datetime | None = None,
         pipeline_name: str | None = None,
+        workflow_id: str = "standalone",
     ) -> PipelineContext:
         """Create a new PipelineContext with explicit timestamp ownership.
 
@@ -157,8 +156,8 @@ class PipelineContext:
             source_batch_id=source_batch_id,
             replay_timestamp_anchor=replay_timestamp_anchor,
             pipeline_name=pipeline_name,
+            workflow_id=workflow_id,
         )
-
     def bind_logger(
         self,
         **kwargs: Any,  # Any: structlog-compatible key=value pairs
@@ -179,8 +178,9 @@ class PipelineContext:
             started_at=self.started_at,
             source_batch_id=self.source_batch_id,
             replay_timestamp_anchor=self.replay_timestamp_anchor,
+            pipeline_name=self.pipeline_name,
+            workflow_id=self.workflow_id,
         )
-
     def with_source_batch_id(self, source_batch_id: BatchID | None) -> PipelineContext:
         """Return a new context with batch lineage set for the active transform path."""
         return PipelineContext(
@@ -190,8 +190,9 @@ class PipelineContext:
             started_at=self.started_at,
             source_batch_id=source_batch_id,
             replay_timestamp_anchor=self.replay_timestamp_anchor,
+            pipeline_name=self.pipeline_name,
+            workflow_id=self.workflow_id,
         )
-
 
 @dataclass(frozen=True, slots=True)
 class PipelineRunContext:
@@ -252,18 +253,15 @@ class PipelineRunContext:
     def has_input_filter(self) -> bool:
         """Check if input filtering is enabled."""
         return bool(self.input_filter.enabled)
-
     @property
     def has_cached_bronze(self) -> bool:
         """Check if cached Bronze mode is enabled."""
         return bool(self.cached_bronze.enabled)
-
     @property
     def vacuum_enabled_override(self) -> bool | None:
         """Return the explicit vacuum override, if one was provided."""
         enabled = self.vacuum.enabled
         return None if enabled is None else bool(enabled)
-
     def log_correlation_fields(self) -> dict[str, str]:
         """Return the mandatory bound logging fields for one pipeline run.
 

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.composition.runtime_builders._runner_input_preparation import (
@@ -23,6 +22,7 @@ from bioetl.composition.runtime_builders.inputs_runtime_helpers import (
 from bioetl.composition.runtime_builders.inputs_runtime_models import (
     ResolvedVacuumSettings,
 )
+from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -38,16 +38,6 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import (
         PipelineYamlConfig,
     )
-
-
-@dataclass(frozen=True, slots=True)
-class RunnerInputs:
-    settings: Settings
-    yaml_config: PipelineYamlConfig
-    observability: ObservabilityBundle
-    runtime_config: RuntimeConfig
-    filter_config: InputFilterConfig | None
-    cached_bronze: CachedBronzeContext
 
 
 adjust_batch_size_for_filter = _runtime_assembly.adjust_batch_size_for_filter

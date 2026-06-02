@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import (
+    deterministic_batch_uuid_from_callsite,
+    deterministic_uuid_from_callsite,
+)
 
 import pytest
 
@@ -16,7 +19,7 @@ from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import SchemaViolationError
 from bioetl.domain.locking import LockNotHeldError
-from bioetl.domain.types import BatchID, RunType, ValidationResult
+from bioetl.domain.types import RunType, ValidationResult
 
 
 @pytest.fixture
@@ -35,7 +38,7 @@ def mock_context():
     mock_logger = MagicMock()
     mock_logger.bind = MagicMock(return_value=mock_logger)
     return PipelineContext(
-        run_id=uuid4(),
+        run_id=deterministic_uuid_from_callsite("test_batch_writer"),
         run_type=RunType.INCREMENTAL,
         logger=mock_logger,
     )
@@ -96,7 +99,7 @@ class TestBatchWriterBronze:
     async def test_write_bronze_serializes_to_json(self, batch_writer, mock_storage):
         """Test that records are serialized to JSON."""
         records = [{"id": "1", "value": 10}, {"id": "2", "value": 20}]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_batch_writer")
         ingestion_ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         await batch_writer.write_bronze(records, batch_id, ingestion_ts)
@@ -112,7 +115,7 @@ class TestBatchWriterBronze:
     ):
         """Test that run_id is passed to storage."""
         records = [{"id": "1", "value": 10}]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_batch_writer")
         ingestion_ts = mock_context.started_at
 
         await batch_writer.write_bronze(records, batch_id, ingestion_ts)
@@ -127,7 +130,7 @@ class TestBatchWriterBronze:
         """Test that records are sorted for deterministic output."""
         # Records in reverse order
         records = [{"z": "last", "a": "first"}, {"a": "first", "z": "last"}]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_batch_writer")
         ingestion_ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         await batch_writer.write_bronze(records, batch_id, ingestion_ts)
@@ -149,7 +152,7 @@ class TestBatchWriterSilver:
                 "value": 10,
             }
         ]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_batch_writer")
         ingestion_ts = mock_context.started_at
 
         await batch_writer.write_silver(records, batch_id, ingestion_ts)
@@ -192,7 +195,7 @@ class TestBatchWriterSilver:
         )
 
         records = [{"entity_id": "1", "value": 10}]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_batch_writer")
 
         await writer.write_silver(records, batch_id, mock_context.started_at)
 
@@ -300,7 +303,7 @@ class TestBatchWriterErrorLogging:
         self, batch_writer, mock_context, mock_batch_metrics
     ):
         """Test that errors are logged and tracked."""
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_batch_writer")
         error = ValueError("Test error")
 
         batch_writer.log_and_track_write_error("silver", error, batch_id)
@@ -364,7 +367,7 @@ class TestBatchWriterTracing:
     ):
         """Test that write_bronze creates a tracing span."""
         records = [{"id": "1", "value": 10}]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_batch_writer")
         ingestion_ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         await batch_writer_with_tracer.write_bronze(records, batch_id, ingestion_ts)
@@ -385,7 +388,7 @@ class TestBatchWriterTracing:
     ):
         """Test that write_silver creates a tracing span."""
         records = [{"entity_id": "1", "value": 10}]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_batch_writer")
         ingestion_ts = mock_context.started_at
 
         await batch_writer_with_tracer.write_silver(records, batch_id, ingestion_ts)
@@ -444,7 +447,7 @@ class TestBatchWriterTracing:
         )
 
         records = [{"id": "1"}]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_batch_writer")
 
         with pytest.raises(RuntimeError):
             await writer.write_bronze(
@@ -458,7 +461,7 @@ class TestBatchWriterTracing:
     async def test_no_span_without_tracer(self, batch_writer, mock_storage):
         """Test that no span is created when tracer is None."""
         records = [{"id": "1", "value": 10}]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_batch_writer")
         ingestion_ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         # batch_writer fixture doesn't have tracer, should work without errors
@@ -521,7 +524,7 @@ class TestBatchWriterLockValidation:
     ):
         """Test that write_bronze validates lock before writing."""
         records = [{"id": "1", "value": 10}]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_batch_writer")
         ingestion_ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         await batch_writer_with_lock.write_bronze(records, batch_id, ingestion_ts)
@@ -534,7 +537,7 @@ class TestBatchWriterLockValidation:
     ):
         """Test that write_silver validates lock before writing."""
         records = [{"entity_id": "1", "value": 10}]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_batch_writer")
         ingestion_ts = mock_context.started_at
 
         await batch_writer_with_lock.write_silver(records, batch_id, ingestion_ts)
@@ -582,7 +585,7 @@ class TestBatchWriterLockValidation:
         )
 
         records = [{"id": "1", "value": 10}]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_batch_writer")
         ingestion_ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         with pytest.raises(LockNotHeldError) as exc_info:
@@ -621,7 +624,7 @@ class TestBatchWriterLockValidation:
         )
 
         records = [{"entity_id": "1", "value": 10}]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_batch_writer")
         ingestion_ts = mock_context.started_at
 
         with pytest.raises(LockNotHeldError) as exc_info:
@@ -674,7 +677,7 @@ class TestBatchWriterLockValidation:
         with pytest.raises(LockNotHeldError):
             await writer.write_silver(
                 records,
-                BatchID(uuid4()),
+                deterministic_batch_uuid_from_callsite("test_batch_writer"),
                 mock_context.started_at,
             )
 
@@ -719,7 +722,7 @@ class TestBatchWriterLockValidation:
         with pytest.raises(LockNotHeldError):
             await writer.write_bronze(
                 records,
-                BatchID(uuid4()),
+                deterministic_batch_uuid_from_callsite("test_batch_writer"),
                 datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             )
 
@@ -810,7 +813,7 @@ class TestBatchWriterLockValidation:
         This supports test scenarios where lock validation is not needed.
         """
         records = [{"id": "1", "value": 10}]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_batch_writer")
         ingestion_ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         # batch_writer fixture doesn't have lock_validator
@@ -847,7 +850,7 @@ class TestBatchWriterLockValidation:
         )
 
         records = [{"id": "1", "value": 10}]
-        batch_id = BatchID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_batch_writer")
         ingestion_ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         with pytest.raises(LockNotHeldError):

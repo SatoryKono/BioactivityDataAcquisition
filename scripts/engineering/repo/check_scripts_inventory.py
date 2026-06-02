@@ -798,6 +798,12 @@ def _status_for(
     refs: list[RefEvidence],
     lifecycle_decisions: dict[str, str],
 ) -> str:
+    lifecycle_status = _status_from_lifecycle_decision(
+        lifecycle_decisions.get(script_rel)
+    )
+    if lifecycle_status == "supporting":
+        return lifecycle_status
+
     groups = {item.source_group for item in refs}
     legacy_status_sets = (
         LEGACY_MANUAL_OPS_SCRIPTS,
@@ -811,10 +817,6 @@ def _status_for(
         return "active" if groups & STRONG_ACTIVE_GROUPS else "legacy"
     if script_rel in ACTIVE_EXPLICIT_SCRIPTS:
         return "active"
-
-    lifecycle_status = _status_from_lifecycle_decision(
-        lifecycle_decisions.get(script_rel)
-    )
 
     if not refs:
         if lifecycle_status is not None:

@@ -35,6 +35,13 @@ _SRC_ROOT = _REPO_ROOT / "src"
 if str(_SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(_SRC_ROOT))
 
+from bioetl.domain.events import (  # noqa: E402
+    ORDINARY_PIPELINE_STAGE_NAMES,
+    PipelineEvent,
+)
+from bioetl.domain.runtime_observability_publication_contract import (  # noqa: E402
+    get_runtime_observability_publication_contract,
+)
 from bioetl.infrastructure.observability import (  # noqa: E402
     metrics_definitions as _metric_defs,
 )
@@ -140,6 +147,11 @@ _PROMETHEUS_ALIAS_SUFFIXES: Final[frozenset[str]] = frozenset(
         "_seconds",
         "_total",
     }
+)
+_RUNTIME_EVENT_SCAN_MARKERS: Final[tuple[str, ...]] = (
+    "emit_event(",
+    "emit_domain_event(",
+    "PipelineEvent.",
 )
 _NON_METRIC_ALIAS_PREFIXES: Final[tuple[str, ...]] = (
     "get_",
@@ -1305,6 +1317,103 @@ def _extract_rule_metric_names(groups: list[object]) -> list[str]:
     return sorted(metric_names)
 
 
+def _declared_pipeline_event_names() -> set[str]:
+    declared: set[str] = set()
+    for attribute_name in dir(PipelineEvent):
+        if not attribute_name.isupper():
+            continue
+        value = getattr(PipelineEvent, attribute_name, None)
+        if isinstance(value, str):
+            declared.add(value)
+    for stage_name in ORDINARY_PIPELINE_STAGE_NAMES:
+        declared.add(PipelineEvent.phase_started(stage_name))
+        declared.add(PipelineEvent.phase_completed(stage_name))
+    return declared
+
+
+def _resolve_observability_event_expr(node: ast.expr) -> set[str]:
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        return {node.value}
+    if (
+        isinstance(node, ast.Attribute)
+        and isinstance(node.value, ast.Name)
+        and node.value.id == "PipelineEvent"
+    ):
+        resolved = getattr(PipelineEvent, node.attr, None)
+        return {resolved} if isinstance(resolved, str) else set()
+    if (
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and isinstance(node.func.value, ast.Name)
+        and node.func.value.id == "PipelineEvent"
+        and node.func.attr in {"phase_started", "phase_completed"}
+    ):
+        resolver = (
+            PipelineEvent.phase_started
+            if node.func.attr == "phase_started"
+            else PipelineEvent.phase_completed
+        )
+        if (
+            node.args
+            and isinstance(node.args[0], ast.Constant)
+            and isinstance(node.args[0].value, str)
+        ):
+            return {resolver(node.args[0].value)}
+        return {resolver(stage_name) for stage_name in ORDINARY_PIPELINE_STAGE_NAMES}
+    return set()
+
+
+def _scan_domain_mapping_observability_events(
+    repo_root: Path,
+) -> tuple[set[str], dict[str, list[str]]]:
+    mapping_path = repo_root / "src/bioetl/domain/observability_event_mapping.py"
+    try:
+        tree = ast.parse(mapping_path.read_text(encoding="utf-8"))
+    except (OSError, SyntaxError, UnicodeDecodeError):
+        return set(), {}
+
+    event_names: set[str] = set()
+    emitters: dict[str, list[str]] = defaultdict(list)
+    relative_path = _as_repo_relative(mapping_path, repo_root)
+    for node in _call_nodes(tree):
+        if not isinstance(node.func, ast.Name) or node.func.id != "_build_envelope":
+            continue
+        for keyword in node.keywords:
+            if keyword.arg != "event_name" or keyword.value is None:
+                continue
+            for event_name in _resolve_observability_event_expr(keyword.value):
+                event_names.add(event_name)
+                emitters[event_name].append(relative_path)
+    return event_names, _normalize_mapping_lists(emitters)
+
+
+def _scan_runtime_observability_event_calls(
+    repo_root: Path,
+) -> tuple[dict[str, list[str]], list[str]]:
+    direct_emitters: dict[str, list[str]] = defaultdict(list)
+    domain_event_emitters: list[str] = []
+    for path in _iter_text_files(repo_root / _RUNTIME_SCAN_ROOT):
+        relative_path = _as_repo_relative(path, repo_root)
+        path_str = path.as_posix()
+        if "src/bioetl/infrastructure" in path_str:
+            continue
+        text = _read_runtime_candidate_text(path)
+        if text is None or not any(marker in text for marker in _RUNTIME_EVENT_SCAN_MARKERS):
+            continue
+        try:
+            tree = ast.parse(text)
+        except SyntaxError:
+            continue
+        for node in _call_nodes(tree):
+            method_name = _call_method_name(node)
+            if method_name == "emit_event" and node.args:
+                for event_name in _resolve_observability_event_expr(node.args[0]):
+                    direct_emitters[event_name].append(relative_path)
+            if method_name == "emit_domain_event":
+                domain_event_emitters.append(relative_path)
+    return _normalize_mapping_lists(direct_emitters), sorted(set(domain_event_emitters))
+
+
 def _load_runtime_cardinality_thresholds(repo_root: Path) -> dict[str, int]:
     """Load approved runtime-cardinality thresholds from governed allowlist."""
     allowlist_path = repo_root / _DEFAULT_DRIFT_ALLOWLIST
@@ -1691,6 +1800,31 @@ def collect_metric_inventory(
         _scan_rule_metric_mentions(repo_root),
         registered_metrics=declared_set,
     )
+    declared_pipeline_events = _declared_pipeline_event_names()
+    mapped_observability_events, mapped_event_emitters = (
+        _scan_domain_mapping_observability_events(repo_root)
+    )
+    direct_observability_event_emitters, domain_event_emitters = (
+        _scan_runtime_observability_event_calls(repo_root)
+    )
+    declared_observability_events = sorted(
+        declared_pipeline_events | mapped_observability_events
+    )
+    direct_emitted_observability_events = set(direct_observability_event_emitters)
+    emitted_observability_events = sorted(
+        direct_emitted_observability_events | mapped_observability_events
+    )
+    unused_declared_observability_events = sorted(
+        set(declared_observability_events) - set(emitted_observability_events)
+    )
+    emitted_observability_events_without_contract = sorted(
+        set(emitted_observability_events) - set(declared_observability_events)
+    )
+    observability_event_emitters = _combine_metric_emitters(
+        direct_observability_event_emitters,
+        mapped_event_emitters,
+    )
+    runtime_observability_contract = get_runtime_observability_publication_contract()
 
     registered_set = set(registered)
     direct_runtime_set = set(runtime_mentions)
@@ -1743,22 +1877,35 @@ def collect_metric_inventory(
         if metric_name in declared_set
         and bool(set(label_names) & _CARDINALITY_RISK_LABEL_NAMES)
     )
+    contract_bounded_risky_labels = (
+        set(declared_risky_label_candidates) & declared_label_contract_metrics
+    )
     reviewed_risky_labels = drift_allowlist.get(
         "declared_risky_label_review_required",
         set(),
     )
     declared_risky_label_reviewed = sorted(
-        set(declared_risky_label_candidates) & reviewed_risky_labels
+        (set(declared_risky_label_candidates) & reviewed_risky_labels)
+        | contract_bounded_risky_labels
     )
     declared_risky_label_review_required = [
         metric_name
         for metric_name in declared_risky_label_candidates
         if metric_name not in reviewed_risky_labels
+        and metric_name not in contract_bounded_risky_labels
     ]
 
     report: dict[str, list[str] | dict[str, list[str]]] = {
         "declared_metrics": registered,
         "emitted_metrics": sorted(registered_set & runtime_set),
+        "declared_observability_events": declared_observability_events,
+        "emitted_observability_events": emitted_observability_events,
+        "unused_declared_observability_events": (
+            unused_declared_observability_events
+        ),
+        "emitted_observability_events_without_contract": (
+            emitted_observability_events_without_contract
+        ),
         "dashboarded_metrics": sorted(docs_set & registered_set),
         "alerted_metrics": sorted(rules_set & registered_set),
         "unused_declared_metrics": sorted(registry_only_metrics),
@@ -1779,6 +1926,9 @@ def collect_metric_inventory(
             runtime_cardinality_threshold_violations
         ),
         "declared_risky_label_review_candidates": declared_risky_label_candidates,
+        "declared_risky_label_contract_reviewed": sorted(
+            contract_bounded_risky_labels
+        ),
         "declared_risky_label_reviewed": declared_risky_label_reviewed,
         "declared_risky_label_review_required": (declared_risky_label_review_required),
         "declared_label_contract_metrics": sorted(declared_label_contract_metrics),
@@ -1800,6 +1950,11 @@ def collect_metric_inventory(
         "compatibility_alias_candidates": sorted(alias_mentions),
         "runtime_emitters": runtime_mentions,
         "helper_backed_emitters": helper_backed_mentions,
+        "observability_event_emitters": observability_event_emitters,
+        "domain_event_emitters": domain_event_emitters,
+        "canonical_runtime_observability_emitters": sorted(
+            runtime_observability_contract.canonical_emitters
+        ),
         "docs_mentions": docs_mentions,
         "rules_mentions": rules_mentions,
         "alias_emitters": alias_mentions,
@@ -1999,6 +2154,10 @@ def _render_text(report: dict[str, list[str] | dict[str, list[str]]]) -> str:
     for key in (
         "declared_metrics",
         "emitted_metrics",
+        "declared_observability_events",
+        "emitted_observability_events",
+        "unused_declared_observability_events",
+        "emitted_observability_events_without_contract",
         "dashboarded_metrics",
         "alerted_metrics",
         "unused_declared_metrics",

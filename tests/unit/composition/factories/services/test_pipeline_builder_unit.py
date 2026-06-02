@@ -149,6 +149,7 @@ class TestCreateBatchProcessingComponents:
         mock_quarantine: MagicMock,
         mock_batch_metrics: MagicMock,
         mock_batch_transformer: MagicMock,
+        mock_debug_export_service: MagicMock,
         mock_batch_writer: MagicMock,
         mock_column_order_service: MagicMock,
     ) -> None:
@@ -196,6 +197,9 @@ class TestCreateBatchProcessingComponents:
         "bioetl.composition.factories.services.pipeline_processing_components_builder.BatchWriter"
     )
     @patch(
+        "bioetl.composition.factories.services.pipeline_processing_components_builder.DebugExportService"
+    )
+    @patch(
         "bioetl.composition.factories.services.pipeline_processing_components_builder.BatchTransformer"
     )
     @patch(
@@ -209,6 +213,7 @@ class TestCreateBatchProcessingComponents:
         mock_quarantine: MagicMock,
         mock_batch_metrics: MagicMock,
         mock_batch_transformer: MagicMock,
+        mock_debug_export_service: MagicMock,
         mock_batch_writer: MagicMock,
         mock_column_order_service: MagicMock,
     ) -> None:
@@ -249,6 +254,9 @@ class TestCreateBatchProcessingComponents:
 
     @patch(
         "bioetl.composition.factories.services.pipeline_processing_components_builder.BatchWriter"
+    )
+    @patch(
+        "bioetl.composition.factories.services.pipeline_processing_components_builder.DebugExportService"
     )
     @patch(
         "bioetl.composition.factories.services.pipeline_processing_components_builder.BatchTransformer"

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from dataclasses import replace
+from dataclasses import is_dataclass, replace
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.composite.column_service import ColumnOrderService
@@ -21,7 +21,10 @@ from bioetl.application.core.wiring.runtime import (
     RecordProcessorConfig,
     TransformCallback,
 )
-from bioetl.application.services.debug_export_service import DebugExportService
+from bioetl.application.services.debug_export_service import (
+    DebugExportConfig,
+    DebugExportService,
+)
 from bioetl.infrastructure.export.debug_export_adapter import DebugExportAdapter
 
 if TYPE_CHECKING:
@@ -75,10 +78,16 @@ def create_batch_processing_components(
         if config.normalization_enabled
         else None
     )
+    raw_debug_export_config = getattr(config, "debug_export_config", None)
+    debug_export_config = (
+        raw_debug_export_config
+        if isinstance(raw_debug_export_config, DebugExportConfig)
+        else None
+    )
     debug_export_service = (
         DebugExportService(
             config=replace(
-                config.debug_export_config,
+                debug_export_config,
                 workflow_id=getattr(context, "workflow_id", "standalone"),
             ),
             run_id=context.run_id,
@@ -86,7 +95,7 @@ def create_batch_processing_components(
             provider_id=config.provider,
             writer=DebugExportAdapter(),
         )
-        if config.debug_export_config is not None
+        if debug_export_config is not None and is_dataclass(debug_export_config)
         else None
     )
     transformer = BatchTransformer(

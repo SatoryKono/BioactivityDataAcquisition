@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock, patch
-from uuid import uuid4
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -144,17 +144,17 @@ class TestCliCheckpointListWithFake:
         # Add test checkpoints
         await checkpoint.save(
             pipeline="chembl_activity",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("test_cli_checkpoint_list"),
             metadata={"batch_count": 10, "last_offset": 1000},
         )
         await checkpoint.save(
             pipeline="chembl_molecule",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("test_cli_checkpoint_list"),
             metadata={"batch_count": 5, "last_offset": 500},
         )
         await checkpoint.save(
             pipeline="uniprot_protein",
-            run_id=uuid4(),
+            run_id=deterministic_uuid_from_callsite("test_cli_checkpoint_list"),
             metadata={"batch_count": 3, "last_offset": 300},
         )
 

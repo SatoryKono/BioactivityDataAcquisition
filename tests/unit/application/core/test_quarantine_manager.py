@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from tests.helpers.deterministic_ids import (
+    deterministic_batch_uuid_from_callsite,
+    deterministic_run_uuid_from_callsite,
+)
 
 import pytest
 
@@ -14,7 +17,7 @@ from bioetl.application.core.quarantine_manager import (
     QuarantineRuntimeService,
 )
 from bioetl.domain.aggregates.events import QuarantineEntryCreated, RecordQuarantined
-from bioetl.domain.types import BatchID, ErrorType, RunID
+from bioetl.domain.types import ErrorType
 
 
 @pytest.fixture
@@ -47,8 +50,8 @@ class TestQuarantineManagerBulkWrites:
             pipeline_name="chembl_activity",
             metrics=metrics,
         )
-        batch_id = BatchID(uuid4())
-        run_id = RunID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_quarantine_manager")
+        run_id = deterministic_run_uuid_from_callsite("test_quarantine_manager")
         ingestion_ts = datetime(2026, 3, 10, 12, 0, 0, tzinfo=UTC)
 
         await manager.quarantine_filtered_records(
@@ -88,8 +91,8 @@ class TestQuarantineManagerBulkWrites:
             pipeline_name="chembl_activity",
             metrics=metrics,
         )
-        batch_id = BatchID(uuid4())
-        run_id = RunID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_quarantine_manager")
+        run_id = deterministic_run_uuid_from_callsite("test_quarantine_manager")
         ingestion_ts = datetime(2026, 3, 10, 12, 0, 0, tzinfo=UTC)
 
         await manager.quarantine_filtered_record(
@@ -131,8 +134,8 @@ class TestQuarantineManagerBulkWrites:
             pipeline_name="chembl_activity",
             metrics=metrics,
         )
-        batch_id = BatchID(uuid4())
-        run_id = RunID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_quarantine_manager")
+        run_id = deterministic_run_uuid_from_callsite("test_quarantine_manager")
         ingestion_ts = datetime(2026, 3, 10, 12, 0, 0, tzinfo=UTC)
 
         await manager.quarantine_records(
@@ -178,8 +181,8 @@ class TestQuarantineManagerBulkWrites:
             pipeline_name="chembl_activity",
             metrics=metrics,
         )
-        batch_id = BatchID(uuid4())
-        run_id = RunID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_quarantine_manager")
+        run_id = deterministic_run_uuid_from_callsite("test_quarantine_manager")
         ingestion_ts = datetime(2026, 3, 10, 12, 0, 0, tzinfo=UTC)
 
         await manager.quarantine_record(
@@ -241,8 +244,8 @@ class TestQuarantineManagerBulkWrites:
             batch_metrics=batch_metrics,
             run_type="incremental",
         )
-        batch_id = BatchID(uuid4())
-        run_id = RunID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_quarantine_manager")
+        run_id = deterministic_run_uuid_from_callsite("test_quarantine_manager")
         ingestion_ts = datetime(2026, 3, 10, 12, 0, 0, tzinfo=UTC)
 
         await manager.quarantine_record(
@@ -287,8 +290,8 @@ class TestQuarantineManagerBulkWrites:
             metrics=metrics,
             domain_event_emitter=event_emitter,
         )
-        batch_id = BatchID(uuid4())
-        run_id = RunID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_quarantine_manager")
+        run_id = deterministic_run_uuid_from_callsite("test_quarantine_manager")
         ingestion_ts = datetime(2026, 3, 10, 12, 0, 0, tzinfo=UTC)
 
         await manager.quarantine_record(
@@ -322,8 +325,8 @@ class TestQuarantineManagerBulkWrites:
             metrics=metrics,
             domain_event_emitter=event_emitter,
         )
-        batch_id = BatchID(uuid4())
-        run_id = RunID(uuid4())
+        batch_id = deterministic_batch_uuid_from_callsite("test_quarantine_manager")
+        run_id = deterministic_run_uuid_from_callsite("test_quarantine_manager")
         ingestion_ts = datetime(2026, 3, 10, 12, 0, 0, tzinfo=UTC)
 
         await manager.quarantine_filtered_record(
@@ -354,7 +357,9 @@ class TestQuarantineManagerBulkWrites:
             metrics=metrics,
         )
         await manager.quarantine_records(
-            [], BatchID(uuid4()), ingestion_ts=datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
+            [],
+            deterministic_batch_uuid_from_callsite("test_quarantine_manager"),
+            ingestion_ts=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
         quarantine_port.write_many.assert_not_awaited()
 
@@ -371,7 +376,9 @@ class TestQuarantineManagerBulkWrites:
             metrics=metrics,
         )
         await manager.quarantine_filtered_records(
-            [], BatchID(uuid4()), ingestion_ts=datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
+            [],
+            deterministic_batch_uuid_from_callsite("test_quarantine_manager"),
+            ingestion_ts=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
         quarantine_port.write_many.assert_not_awaited()
 
@@ -389,7 +396,7 @@ class TestQuarantineManagerBulkWrites:
         await manager.quarantine_record(
             record={"id": "1"},
             error_type=ErrorType.INVALID_DATA,
-            batch_id=BatchID(uuid4()),
+            batch_id=deterministic_batch_uuid_from_callsite("test_quarantine_manager"),
             error_details="bad",
             ingestion_ts=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
@@ -416,7 +423,7 @@ class TestQuarantineManagerBulkWrites:
         ]
         await manager.quarantine_records(
             entries,
-            BatchID(uuid4()),
+            deterministic_batch_uuid_from_callsite("test_quarantine_manager"),
             ingestion_ts=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
         quarantine_port.write_many.assert_awaited_once()

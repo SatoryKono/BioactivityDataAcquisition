@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-import sys
-from dataclasses import replace
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 from deltalake import DeltaTable, write_deltalake
 
@@ -50,11 +48,6 @@ __all__ = ["SilverWriteMode", "SilverWriter", "_SilverWriteExecutionContext"]
 _DELTA_LAKE_REQUIREMENTS = (DeltaTable, write_deltalake)
 
 
-def _load_silver_writer_patch_module() -> object:
-    """Return this module so legacy tests can patch SilverWriter Delta symbols."""
-    return sys.modules[__name__]
-
-
 class SilverWriter(
     SilverWriterRuntimeFacade,
     BaseDeltaWriter,
@@ -89,82 +82,61 @@ class SilverWriter(
         flat_structure: bool = False,
         pipeline_name: str | None = None,
         runtime_request: SilverWriterRuntimeServicesRequest | None = None,
-        **runtime_dependencies: object,
+        csv_exporter: CsvExporterProtocol | None = None,
+        tracing: TracingPort | None = None,
+        write_policy: WriteModePolicy | None = None,
+        metrics: MetricsPort | None = None,
+        audit: AuditPort | None = None,
+        silver_validator: SilverValidatorPort | None = None,
+        metadata_writer: MetadataWriterPort | None = None,
+        metadata_coordinator: MetadataCoordinatorPort | None = None,
+        lineage_store: LineageStorePort | None = None,
+        dq_calculator: DQMetricsCalculator | None = None,
+        merge_resilience_policy: SilverMergeResiliencePolicy | None = None,
+        contract_rollout_policy: Any = None,
     ) -> None:
         """Initialize Silver writer."""
         self._pipeline_name = pipeline_name
 
-        if runtime_request is not None and runtime_dependencies:
-            unexpected_dependency = ", ".join(sorted(runtime_dependencies))
+        explicit_runtime_dependencies = {
+            "csv_exporter": csv_exporter,
+            "tracing": tracing,
+            "write_policy": write_policy,
+            "metrics": metrics,
+            "audit": audit,
+            "silver_validator": silver_validator,
+            "metadata_writer": metadata_writer,
+            "metadata_coordinator": metadata_coordinator,
+            "lineage_store": lineage_store,
+            "dq_calculator": dq_calculator,
+            "merge_resilience_policy": merge_resilience_policy,
+            "contract_rollout_policy": contract_rollout_policy,
+        }
+        conflicting_dependencies = sorted(
+            name for name, value in explicit_runtime_dependencies.items() if value is not None
+        )
+        if runtime_request is not None and conflicting_dependencies:
             raise TypeError(
-                "Cannot pass legacy runtime dependency kwargs when "
-                f"'runtime_request' is provided: {unexpected_dependency}"
+                "Cannot pass direct runtime dependency kwargs when "
+                f"'runtime_request' is provided: {', '.join(conflicting_dependencies)}"
             )
 
         if runtime_request is None:
             runtime_request = SilverWriterRuntimeServicesRequest(
-                csv_exporter=cast(
-                    CsvExporterProtocol | None,
-                    runtime_dependencies.pop("csv_exporter", None),
-                ),
-                tracing=cast(
-                    TracingPort | None,
-                    runtime_dependencies.pop("tracing", None),
-                ),
-                write_policy=cast(
-                    WriteModePolicy | None,
-                    runtime_dependencies.pop("write_policy", None),
-                ),
-                metrics=cast(
-                    MetricsPort | None, runtime_dependencies.pop("metrics", None)
-                ),
-                audit=cast(AuditPort | None, runtime_dependencies.pop("audit", None)),
-                logger=cast(
-                    LoggerPort | None, runtime_dependencies.pop("logger", None)
-                ),
-                silver_validator=cast(
-                    SilverValidatorPort | None,
-                    runtime_dependencies.pop("silver_validator", None),
-                ),
-                metadata_writer=cast(
-                    MetadataWriterPort | None,
-                    runtime_dependencies.pop("metadata_writer", None),
-                ),
-                metadata_coordinator=cast(
-                    MetadataCoordinatorPort | None,
-                    runtime_dependencies.pop("metadata_coordinator", None),
-                ),
-                lineage_store=cast(
-                    LineageStorePort | None,
-                    runtime_dependencies.pop("lineage_store", None),
-                ),
-                dq_calculator=cast(
-                    DQMetricsCalculator | None,
-                    runtime_dependencies.pop("dq_calculator", None),
-                ),
-                merge_resilience_policy=cast(
-                    SilverMergeResiliencePolicy | None,
-                    runtime_dependencies.pop("merge_resilience_policy", None),
-                ),
-                contract_rollout_policy=cast(  # Any: policy type is dynamic
-                    Any,  # Any: policy type is dynamic
-                    runtime_dependencies.pop("contract_rollout_policy", None),
-                ),
-                delta_module_loader=_load_silver_writer_patch_module,
+                csv_exporter=csv_exporter,
+                tracing=tracing,
+                write_policy=write_policy,
+                metrics=metrics,
+                audit=audit,
+                logger=logger,
+                silver_validator=silver_validator,
+                metadata_writer=metadata_writer,
+                metadata_coordinator=metadata_coordinator,
+                lineage_store=lineage_store,
+                dq_calculator=dq_calculator,
+                merge_resilience_policy=merge_resilience_policy,
+                contract_rollout_policy=contract_rollout_policy,
             )
-            if runtime_dependencies:
-                unexpected_dependency = ", ".join(sorted(runtime_dependencies))
-                raise TypeError(
-                    "Unexpected legacy runtime dependency kwargs: "
-                    f"{unexpected_dependency}"
-                )
-        else:
-            runtime_request = cast(SilverWriterRuntimeServicesRequest, runtime_request)
-            if runtime_request.delta_module_loader is None:
-                runtime_request = replace(
-                    runtime_request,
-                    delta_module_loader=_load_silver_writer_patch_module,
-                )
 
         super().__init__(base_path, logger, flat_structure=flat_structure)
         services = _resolve_runtime_services_for_writer(

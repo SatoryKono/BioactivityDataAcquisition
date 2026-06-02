@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import threading
+from functools import partial
 from importlib import import_module
 from typing import TYPE_CHECKING
 
@@ -191,28 +192,9 @@ class ProviderRegistry:
         config = self._get_registered_config(name)
         assert config is not None
         self._creator.require_data_source_creator(name=name, config=config)
-
-        def create_data_source_for_provider(
-            settings: ProviderSettingsProtocol,
-            pipeline_config: PipelineYamlConfig,
-            logger: LoggerPort,
-            filter_config: InputFilterConfig | None = None,
-            metrics: MetricsPort | None = None,
-            pipeline_name: str = "unknown",
-        ) -> DataSourcePort:
-            return self.create_data_source(
-                name=name,
-                settings=settings,
-                pipeline_config=pipeline_config,
-                logger=logger,
-                filter_config=filter_config,
-                metrics=metrics,
-                pipeline_name=pipeline_name,
-            )
-
         return self._creator.build_bound_creator(
             name=name,
-            create_data_source_fn=create_data_source_for_provider,
+            create_data_source_fn=partial(self.create_data_source, name=name),
         )
 
     @DefaultRegistryMethod
