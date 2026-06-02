@@ -6,9 +6,9 @@ execution-focused public surface.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
-from bioetl.composition._lazy_exports import lazy_export_dir, resolve_lazy_export
+from bioetl.composition._lazy_exports import install_lazy_exports
 
 if TYPE_CHECKING:
     from bioetl.composition.composite_api import (
@@ -68,24 +68,9 @@ _PUBLIC_SYMBOL_TARGETS: dict[str, str] = {
     "run_pipeline": _COMPOSITION_EXECUTION_API_MODULE,
     "start_metrics_server": "bioetl.composition.observability_api",
 }
-
-
-def __getattr__(
-    name: str,
-) -> Any:  # Any: lazy compatibility exports resolve to heterogeneous symbol types.
-    """Resolve public entrypoint symbols lazily."""
-    return resolve_lazy_export(
-        module_globals=globals(),
-        public_exports=_PUBLIC_SYMBOL_TARGETS,
-        module_name=__name__,
-        name=name,
-    )
-
-
-def __dir__() -> list[str]:
-    """Return stable introspection results for the explicit public surface."""
-    return lazy_export_dir(
-        module_globals=globals(),
-        public_exports=_PUBLIC_SYMBOL_TARGETS,
-        explicit_exports=__all__,
-    )
+install_lazy_exports(
+    module_globals=globals(),
+    public_exports=_PUBLIC_SYMBOL_TARGETS,
+    module_name=__name__,
+    explicit_exports=__all__,
+)

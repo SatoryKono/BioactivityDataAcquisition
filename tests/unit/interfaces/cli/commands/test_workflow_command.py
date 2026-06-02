@@ -30,6 +30,9 @@ def test_workflow_run_help_includes_observability_backend_options(
     assert result.exit_code == 0
     assert "--ensure-observability-backend" in result.output
     assert "--observability-backend-port" in result.output
+    assert "--debug-export / --no-debug-export" in result.output
+    assert "--debug-export-format" in result.output
+    assert "--debug-export-dir" in result.output
 
 
 def test_workflow_run_ensures_observability_backend_before_execution(

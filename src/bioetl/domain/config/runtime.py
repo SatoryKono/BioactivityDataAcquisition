@@ -158,8 +158,7 @@ class RuntimeConfig:
         invalid = [fmt for fmt in self.debug_export_formats if fmt not in valid_formats]
         if invalid:
             raise ValueError(
-                "debug_export_formats must contain only 'csv'/'xlsx', "
-                f"got {invalid!r}"
+                f"debug_export_formats must contain only 'csv'/'xlsx', got {invalid!r}"
             )
 
     @property

@@ -301,8 +301,7 @@ class PipelineRunContext:
         )
         issues.extend(
             _validate_manifest_contract_alignment(
-                contract_identity=self.contract_identity,
-                manifest_id=self.manifest_id,
+                contract_identity=self.contract_identity, manifest_id=self.manifest_id
             )
         )
         return issues

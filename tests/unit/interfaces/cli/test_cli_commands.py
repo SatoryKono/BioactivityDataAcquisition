@@ -1249,4 +1249,3 @@ class TestGetExitCodeForException:
         result = get_exit_code_for_exception(exc)
 
         assert result == ExitCode.FAIL
-

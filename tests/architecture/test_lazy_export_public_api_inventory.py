@@ -34,6 +34,7 @@ EXPECTED_LAZY_EXPORT_FACADES = {
     "src/bioetl/composition/providers/__init__.py": "public_package_facade",
     "src/bioetl/composition/registry_api.py": "public_facade",
     "src/bioetl/composition/resources_api.py": "public_facade",
+    "src/bioetl/composition/services_api.py": "compatibility_facade",
     "src/bioetl/domain/__init__.py": "public_package_facade",
     "src/bioetl/domain/behavior/__init__.py": "public_package_facade",
     "src/bioetl/domain/config/__init__.py": "public_package_facade",
@@ -84,10 +85,32 @@ ALLOWED_CLASSIFICATIONS = frozenset(
 def _has_module_level_getattr(path: Path) -> bool:
     tree = ast.parse(path.read_text(encoding="utf-8"))
     return any(
-        isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
-        and node.name == "__getattr__"
+        (
+            isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+            and node.name == "__getattr__"
+        )
+        or (
+            isinstance(node, ast.Assign)
+            and any(_assigns_module_getattr(target) for target in node.targets)
+        )
+        or _calls_install_lazy_exports(node)
         for node in tree.body
     )
+
+
+def _assigns_module_getattr(target: ast.expr) -> bool:
+    if isinstance(target, ast.Name):
+        return target.id == "__getattr__"
+    if isinstance(target, ast.Tuple):
+        return any(_assigns_module_getattr(element) for element in target.elts)
+    return False
+
+
+def _calls_install_lazy_exports(node: ast.stmt) -> bool:
+    if not isinstance(node, ast.Expr) or not isinstance(node.value, ast.Call):
+        return False
+    func = node.value.func
+    return isinstance(func, ast.Name) and func.id == "install_lazy_exports"
 
 
 def _module_level_lazy_export_paths() -> set[str]:
@@ -97,7 +120,7 @@ def _module_level_lazy_export_paths() -> set[str]:
             [
                 rg_path,
                 "--files-with-matches",
-                "def __getattr__",
+                "(__getattr__|install_lazy_exports)",
                 "src/bioetl",
                 "--glob",
                 "*.py",

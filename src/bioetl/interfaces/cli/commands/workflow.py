@@ -218,6 +218,26 @@ def workflow() -> None:
     help="Override distributed tracing for workflow pipeline steps",
 )
 @click.option(
+    "--debug-export/--no-debug-export",
+    "debug_export_enabled",
+    default=None,
+    help="Persist a per-run debug audit pack for workflow pipeline steps",
+)
+@click.option(
+    "--debug-export-format",
+    "debug_export_formats",
+    multiple=True,
+    type=click.Choice(["csv", "xlsx"]),
+    default=("csv", "xlsx"),
+    help="Repeatable debug-export formats for workflow pipeline steps",
+    show_default=True,
+)
+@click.option(
+    "--debug-export-dir",
+    type=click.Path(),
+    help="Override the debug-export root directory for workflow pipeline steps",
+)
+@click.option(
     "--resume-last",
     is_flag=True,
     help="Resume the latest incomplete or failed execution for this workflow",
@@ -287,6 +307,9 @@ def run_workflow_command(
     replay_of_run_id: str | None,
     replay_of_manifest_id: str | None,
     enable_tracing: bool | None,
+    debug_export_enabled: bool | None,
+    debug_export_formats: tuple[str, ...],
+    debug_export_dir: str | None,
     resume_last: bool,
     resume_manifest_id: str | None,
     resume_run_id: UUID | None,
@@ -329,16 +352,56 @@ def run_workflow_command(
         replay_of_run_id=replay_of_run_id,
         replay_of_manifest_id=replay_of_manifest_id,
         enable_tracing=enable_tracing,
+        debug_export_enabled=debug_export_enabled,
+        debug_export_formats=debug_export_formats,
+        debug_export_dir=debug_export_dir,
     )
+    _execute_workflow_with_backend(
+        config=config,
+        registry=registry,
+        dry_run=dry_run,
+        only_steps=only_steps,
+        resume_last=resume_last,
+        resume_manifest_id=resume_manifest_id,
+        resume_run_id=resume_run_id,
+        force_steps=force_steps,
+        repair_steps=repair_steps,
+        incremental=incremental,
+        ensure_observability_backend=ensure_observability_backend,
+        observability_backend_port=observability_backend_port,
+        get_workflow_execution_service_fn=get_workflow_execution_service,
+        ensure_metrics_server_started_fn=ensure_metrics_server_started,
+        publish_metrics_safely_fn=publish_metrics_safely,
+    )
+
+
+def _execute_workflow_with_backend(
+    *,
+    config: WorkflowConfig,
+    registry: PipelineRegistry | None,
+    dry_run: bool,
+    only_steps: str | None,
+    resume_last: bool,
+    resume_manifest_id: str | None,
+    resume_run_id: UUID | None,
+    force_steps: str | None,
+    repair_steps: str | None,
+    incremental: bool,
+    ensure_observability_backend: bool,
+    observability_backend_port: int,
+    get_workflow_execution_service_fn,
+    ensure_metrics_server_started_fn,
+    publish_metrics_safely_fn,
+) -> None:
     ensure_observability_backend_started(
         enabled=ensure_observability_backend,
         port=observability_backend_port,
         required_probe_paths=_workflow_pipeline_probe_paths(config),
     )
     result = _execute_workflow_and_publish_metrics(
-        get_workflow_execution_service_fn=get_workflow_execution_service,
-        ensure_metrics_server_started_fn=ensure_metrics_server_started,
-        publish_metrics_safely_fn=publish_metrics_safely,
+        get_workflow_execution_service_fn=get_workflow_execution_service_fn,
+        ensure_metrics_server_started_fn=ensure_metrics_server_started_fn,
+        publish_metrics_safely_fn=publish_metrics_safely_fn,
         config=config,
         registry=registry,
         dry_run=dry_run,

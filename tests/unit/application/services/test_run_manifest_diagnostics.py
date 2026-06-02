@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import replace
 from datetime import UTC, datetime
 from pathlib import Path
-from uuid import uuid4
+from uuid import UUID
 
 import pytest
 import yaml
@@ -47,13 +47,16 @@ pytestmark = pytest.mark.unit
 _InMemoryRunLedgerStore = InMemoryRunLedgerStore
 ROOT = Path(__file__).resolve().parents[4]
 POLICY_PATH = ROOT / "configs" / "quality" / "determinism_identity_policy.yaml"
+_MANIFEST_RUN_UUID = UUID("00000000-0000-0000-0000-000000000201")
+_DEPS_RUN_UUID = UUID("00000000-0000-0000-0000-000000000202")
+_DRIFTED_RUN_UUID = UUID("00000000-0000-0000-0000-000000000203")
 
 
 def _make_manifest() -> RunManifest:
     return _build_manifest(
         manifest_id="manifest-diagnostics",
         execution_fingerprint="fingerprint-diagnostics",
-        run_id=RunID(uuid4()),
+        run_id=RunID(_MANIFEST_RUN_UUID),
         created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
 
@@ -641,7 +644,7 @@ def test_build_diagnostics_summary_classifies_dependency_lock_provenance() -> No
     manifest = _build_manifest(
         manifest_id="manifest-deps",
         execution_fingerprint="fingerprint-deps",
-        run_id=RunID(uuid4()),
+        run_id=RunID(_DEPS_RUN_UUID),
         overrides=RunManifestOverrides(dependency_lock_hash="sha256:deps-present"),
     )
 
@@ -1497,7 +1500,7 @@ def test_replay_surfaces_ignore_occurrence_only_manifest_drift() -> None:
     drifted = replace(
         manifest,
         manifest_id="manifest-diagnostics-drifted",
-        run_id=RunID(uuid4()),
+        run_id=RunID(_DRIFTED_RUN_UUID),
         created_at=datetime(2026, 4, 13, 12, 0, tzinfo=UTC),
     )
 
