@@ -6,8 +6,8 @@
 - next_review_by: 2026-08-31
 - review_cycle_days: 90
 - triaged_entry_count: 18
-- repo_wide_zero_import_candidate_count: 40
-- repo_wide_classified_zero_import_candidate_count: 40
+- repo_wide_zero_import_candidate_count: 41
+- repo_wide_classified_zero_import_candidate_count: 41
 - repo_wide_untriaged_zero_import_candidate_count: 0
 - note: zero static importer count is a review signal, not automatic removal proof
 - guardrail: Zero static importer count is a review signal only; removals must still verify public entrypoints and dynamic/plugin import paths.
@@ -49,6 +49,7 @@
 | `bioetl.application.pipelines.pubmed.strategies` | `retain_canonical_owner_module` | `src/bioetl/application/pipelines/pubmed/strategies.py` |
 | `bioetl.application.services._checkpoint_compatibility_runtime_core` | `retain_canonical_owner_module` | `src/bioetl/application/services/_checkpoint_compatibility_runtime_core.py` |
 | `bioetl.application.services.control_plane._run_manifest_diagnostics_identity` | `retain_canonical_owner_module` | `src/bioetl/application/services/control_plane/_run_manifest_diagnostics_identity.py` |
+| `bioetl.composition.registry` | `retain_public_facade` | `src/bioetl/composition/registry.py` |
 | `bioetl.domain.behavior._dq_serializer_html._renderers` | `retain_canonical_owner_module` | `src/bioetl/domain/behavior/_dq_serializer_html/_renderers.py` |
 | `bioetl.domain.entities.bioactivity._entity` | `retain_canonical_owner_module` | `src/bioetl/domain/entities/bioactivity/_entity.py` |
 | `bioetl.domain.normalization._pubchem_standardization_catalog` | `retain_canonical_owner_module` | `src/bioetl/domain/normalization/_pubchem_standardization_catalog.py` |

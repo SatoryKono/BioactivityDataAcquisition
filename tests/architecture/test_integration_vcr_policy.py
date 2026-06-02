@@ -22,7 +22,6 @@ CONTRIBUTING_PATH = ROOT / ".github" / "CONTRIBUTING.md"
 VCR_TASKS_PATH = ROOT / "docs" / "05-operations" / "verification" / "vcr-test-tasks.md"
 CURATED_INTEGRATION_MARKER_FILES = (
     Path("tests/integration/composite/test_column_naming_integration.py"),
-    Path("tests/integration/composite/test_composite_config_backward_compatibility.py"),
     Path("tests/integration/infrastructure/storage/test_silver_writer.py"),
     Path("tests/integration/interfaces/test_cli_checkpoint_list.py"),
     Path("tests/integration/interfaces/test_cli_config_dq.py"),
