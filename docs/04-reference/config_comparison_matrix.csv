@@ -360,7 +360,7 @@ filters.silver_filters.columns.term_type,—,—,—,—,—,—,—,—,—,—
 filters.silver_filters.ranges.activity_id,—,—,—,—,—,(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 filters.silver_filters.ranges.confidence_score,—,—,—,—,—,—,(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 filters.silver_filters.ranges.pchembl_value,—,—,—,—,—,(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-filters.silver_filters.ranges.publication_year,—,—,—,—,—,(dict),(dict),(dict),—,—,(dict),(dict),(dict),(dict),(dict),(dict),—,(dict),—,(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict)
+filters.silver_filters.ranges.publication_year,—,—,—,—,—,(dict),—,(dict),—,—,(dict),(dict),(dict),(dict),(dict),(dict),—,(dict),—,(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict)
 filters.silver_filters.ranges.standard_value,—,—,—,—,—,(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 hash_policy.hash_policy.normalization.dates,—,—,—,—,—,(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict)
 hash_policy.hash_policy.normalization.null_handling,—,—,—,—,—,(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict)
@@ -484,8 +484,8 @@ filters.silver_filters.ranges.confidence_score.max,—,—,—,—,—,—,9,—
 filters.silver_filters.ranges.confidence_score.min,—,—,—,—,—,—,8,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 filters.silver_filters.ranges.pchembl_value.max,—,—,—,—,—,10,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 filters.silver_filters.ranges.pchembl_value.min,—,—,—,—,—,3,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-filters.silver_filters.ranges.publication_year.max,—,—,—,—,—,2050,2050,2050,—,—,2050,2050,2050,2050,2050,2050,—,2050,—,2050,2050,2050,2050,2050,2050,2050,2050
-filters.silver_filters.ranges.publication_year.min,—,—,—,—,—,1950,1950,1950,—,—,1950,1950,1950,1950,1950,1950,—,1950,—,1950,1950,1950,1950,1950,1950,1950,1950
+filters.silver_filters.ranges.publication_year.max,—,—,—,—,—,2050,—,2050,—,—,2050,2050,2050,2050,2050,2050,—,2050,—,2050,2050,2050,2050,2050,2050,2050,2050
+filters.silver_filters.ranges.publication_year.min,—,—,—,—,—,1950,—,1950,—,—,1950,1950,1950,1950,1950,1950,—,1950,—,1950,1950,1950,1950,1950,1950,1950,1950
 filters.silver_filters.ranges.standard_value.include_min,—,—,—,—,—,False,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 filters.silver_filters.ranges.standard_value.min,—,—,—,—,—,0,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 hash_policy.hash_policy.normalization.dates.enabled,—,—,—,—,—,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True

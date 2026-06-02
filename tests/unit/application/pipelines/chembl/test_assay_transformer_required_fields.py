@@ -110,3 +110,21 @@ class TestAssayTransformerRequiredFields:
         assert details["field"] == missing_field
         assert details["optional_sources"] == ["silver_required_fields"]
         assert details["silver_filter_shadow_reason_code"] == "required_field_missing"
+
+    def test_gold_filters__valid_record_without_publication_year__allowed(
+        self,
+    ) -> None:
+        """chembl_assay Gold filters must not require publication_year."""
+        loader = PipelineConfigLoader(Path("configs"))
+        yaml_config = loader.load_pipeline_config("chembl_assay")
+        domain_config = resolve_domain_pipeline_config(yaml_config)
+        record = {
+            **_valid_contract_record(),
+            "assay_description": "Binding assay",
+            "bao_format": "BAO_0000357",
+            "assay_strain": None,
+        }
+        record.pop("description", None)
+
+        assert domain_config.gold_filters is not None
+        assert domain_config.gold_filters.should_include(record)

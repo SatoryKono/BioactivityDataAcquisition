@@ -879,18 +879,18 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless a reviewed triage recalibration
         updates the tracked debt budget intentionally.
     repo_wide_zero_import_candidate_count:
-      current_count: 40
-      max_count: 40
+      current_count: 41
+      max_count: 41
       linked_issue: '#4541'
       owner: '@bioetl-architecture'
-      rationale: 'Repo-wide zero-import candidates remain a governed review surface and must not grow without a reviewed classification refresh; issue #5021 removed the shared default registry shim and ratcheted the sanctioned set down to 40.'
+      rationale: 'Repo-wide zero-import candidates remain a governed review surface and must not grow without a reviewed classification refresh; issue #5021 removed the shared default registry shim and ratcheted the sanctioned set down to 40. Updated to 41 after adding src/bioetl/composition/registry.py classification.'
       ratchet_policy: 'Non-growth fail-fast unless a reviewed dead-code inventory refresh updates the classified candidate set intentionally.'
     repo_wide_classified_zero_import_candidate_count:
-      current_count: 40
-      max_count: 40
+      current_count: 41
+      max_count: 41
       linked_issue: '#4541'
       owner: '@bioetl-architecture'
-      rationale: 'Every repo-wide zero-import candidate must stay covered by an explicit disposition ledger entry; issue #5021 reduced the fully classified governed inventory to 40.'
+      rationale: 'Every repo-wide zero-import candidate must stay covered by an explicit disposition ledger entry; issue #5021 reduced the fully classified governed inventory to 40. Updated to 41 after adding src/bioetl/composition/registry.py classification.'
       ratchet_policy: 'Non-growth fail-fast unless the repo-wide classification ledger is intentionally rebaselined during review.'
     repo_wide_untriaged_zero_import_candidate_count:
       current_count: 0

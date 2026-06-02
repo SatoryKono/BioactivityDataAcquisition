@@ -355,6 +355,14 @@ repo_wide_zero_import_classification:
     linked_issue: '#4541'
     rationale: Maintenance control-plane lifecycle command remains reachable through
       lazy CLI domain registration rather than direct static imports.
+  - module_path: src/bioetl/composition/registry.py
+    module_name: bioetl.composition.registry
+    disposition: retain_public_facade
+    reviewed_on: '2026-06-02'
+    review_by: '2026-08-31'
+    linked_issue: '#4541'
+    rationale: Registry module remains a public facade for pipeline registration
+      even when direct static imports are minimal due to lazy loading patterns.
 families:
 - name: adapter_layer
   owner: '@bioetl-platform'

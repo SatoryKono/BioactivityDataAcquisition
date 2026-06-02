@@ -705,6 +705,22 @@ filter_defaults:
 
         assert extraction_params.params["standard_type__in"] == "Ki"
 
+    def test_chembl_assay_gold_filters_do_not_promote_publication_year(
+        self,
+    ) -> None:
+        """chembl_assay should not inherit publication-year Gold filtering."""
+        loader = FilterConfigLoader(Path("configs"))
+
+        _, silver_filters, gold_filters, _ = loader.load("chembl", "assay")
+
+        assert {flt.column for flt in silver_filters.range_filters} == set()
+        assert "confidence_score" in {
+            flt.column for flt in gold_filters.range_filters
+        }
+        assert "publication_year" not in {
+            flt.column for flt in gold_filters.range_filters
+        }
+
 
 class TestAssayExtractionParamsLoading:
     """Tests for assay extraction_params loading via FilterConfigLoader."""

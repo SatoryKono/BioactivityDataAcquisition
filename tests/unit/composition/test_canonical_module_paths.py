@@ -69,7 +69,6 @@ def test_registry_api_reexports_canonical_registry_symbols() -> None:
         PipelineRegistry,
         create_registry,
     )
-    from bioetl.composition.registry import get_default_registry
 
     assert CanonicalPipelineDefinition is PipelineDefinition
     assert CanonicalPipelineRegistry is PipelineRegistry

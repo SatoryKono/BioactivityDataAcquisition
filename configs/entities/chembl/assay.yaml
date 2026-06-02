@@ -346,9 +346,6 @@ filters:
       confidence_score:
         min: 8
         max: 9
-      publication_year:
-        min: 1950
-        max: 2050
     exclude_if_present: []
     required_fields:
     - assay_id

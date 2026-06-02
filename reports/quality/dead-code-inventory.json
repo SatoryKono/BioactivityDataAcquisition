@@ -15,14 +15,14 @@
   "summary": {
     "triaged_entry_count": 18,
     "triaged_entries_below_min_importers": 0,
-    "repo_wide_zero_import_candidate_count": 40,
-    "repo_wide_classified_zero_import_candidate_count": 40,
+    "repo_wide_zero_import_candidate_count": 41,
+    "repo_wide_classified_zero_import_candidate_count": 41,
     "repo_wide_untriaged_zero_import_candidate_count": 0,
     "repo_wide_disposition_counts": {
       "retain_canonical_owner_module": 27,
       "retain_dynamic_entrypoint": 8,
       "retain_module_entrypoint": 1,
-      "retain_public_facade": 4
+      "retain_public_facade": 5
     }
   },
   "triaged_entries": [
@@ -355,6 +355,19 @@
       "review_by": "2026-08-20",
       "linked_issue": "#4541",
       "rationale": "Manifest diagnostics identity helpers remain the canonical owner module behind control-plane diagnostics assembly."
+    },
+    {
+      "module_name": "bioetl.composition.registry",
+      "path": "src/bioetl/composition/registry.py",
+      "is_private_module": false,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "classification_status": "classified",
+      "disposition": "retain_public_facade",
+      "reviewed_on": "2026-06-02",
+      "review_by": "2026-08-31",
+      "linked_issue": "#4541",
+      "rationale": "Registry module remains a public facade for pipeline registration even when direct static imports are minimal due to lazy loading patterns."
     },
     {
       "module_name": "bioetl.domain.behavior._dq_serializer_html._renderers",
