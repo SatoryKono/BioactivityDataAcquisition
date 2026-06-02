@@ -9,6 +9,7 @@ from uuid import UUID
 from bioetl.application.services.control_plane.ledger.service import (
     RunLedgerService,
 )
+from bioetl.composition.occurrence_identity import create_runtime_occurrence_id
 from bioetl.composition.runtime_builders.run_manifest_support import (
     control_plane_root as _shared_control_plane_root,
 )
@@ -66,6 +67,9 @@ def build_run_ledger_service(
         dq_contract_compatibility_hash=dq_contract_compatibility_hash or None,
         effective_config_artifact_id=effective_config_artifact_id or None,
         composite_run_id=infra_context.run_id,
+        _entry_id_factory=lambda: create_runtime_occurrence_id(
+            "composite_run_ledger_entry"
+        ),
     )
 
 

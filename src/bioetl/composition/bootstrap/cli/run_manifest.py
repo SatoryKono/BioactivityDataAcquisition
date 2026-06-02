@@ -25,6 +25,7 @@ from bioetl.application.services.control_plane.manifest.inspection_service impor
     RunManifestInspectionService,
 )
 from bioetl.composition.factories.services.port_factories import create_metrics
+from bioetl.composition.occurrence_identity import create_runtime_occurrence_id
 from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.infrastructure.control_plane import (
     FileArtifactByteComparisonAdapter,
@@ -116,6 +117,9 @@ def bootstrap_historical_replay_corpus_service() -> HistoricalReplayCorpusServic
         certification_service=HistoricalReplayCertificationService(
             manifest_port=manifest_store,
             ledger_port=ledger_store,
+            entry_id_factory=lambda: create_runtime_occurrence_id(
+                "historical_replay_certification_ledger_entry"
+            ),
         ),
     )
 
@@ -131,6 +135,9 @@ def bootstrap_historical_replay_closure_service() -> HistoricalReplayClosureServ
         certification_service=HistoricalReplayCertificationService(
             manifest_port=manifest_store,
             ledger_port=ledger_store,
+            entry_id_factory=lambda: create_runtime_occurrence_id(
+                "historical_replay_certification_ledger_entry"
+            ),
         ),
     )
     return HistoricalReplayClosureService(
@@ -149,6 +156,9 @@ def bootstrap_historical_replay_universe_service() -> HistoricalReplayUniverseSe
         certification_service=HistoricalReplayCertificationService(
             manifest_port=manifest_store,
             ledger_port=ledger_store,
+            entry_id_factory=lambda: create_runtime_occurrence_id(
+                "historical_replay_certification_ledger_entry"
+            ),
         ),
     )
     return HistoricalReplayUniverseService(

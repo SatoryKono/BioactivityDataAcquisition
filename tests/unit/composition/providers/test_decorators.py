@@ -66,7 +66,7 @@ class TestRegisterProviderClass:
             requires_http_client=True,
             requires_logger=True,
             rate_overrides=None,
-            custom_creator=None,
+            adapter_creator=None,
             default_kwargs={},
         )
 
@@ -85,7 +85,7 @@ class TestRegisterProviderClass:
                 requires_http_client=False,
                 requires_logger=False,
                 rate_overrides=None,
-                custom_creator=None,
+                adapter_creator=None,
                 default_kwargs={"batch_size": 100},
             )
 
@@ -106,7 +106,7 @@ class TestRegisterProviderClass:
             requires_http_client=True,
             requires_logger=True,
             rate_overrides={"api_key": 50.0},
-            custom_creator=None,
+            adapter_creator=None,
             default_kwargs={},
         )
 
@@ -126,7 +126,7 @@ class TestRegisterProviderClass:
             requires_http_client=False,
             requires_logger=True,
             rate_overrides=None,
-            custom_creator=None,
+            adapter_creator=None,
             default_kwargs={},
         )
 
@@ -148,7 +148,7 @@ class TestRegisterProviderClass:
             requires_http_client=False,
             requires_logger=False,
             rate_overrides=None,
-            custom_creator=None,
+            adapter_creator=None,
             default_kwargs={},
         )
 
@@ -165,33 +165,33 @@ class TestRegisterProviderClass:
             requires_http_client=False,
             requires_logger=False,
             rate_overrides=None,
-            custom_creator=None,
+            adapter_creator=None,
             default_kwargs={"batch_size": 100, "timeout": 30},
         )
 
         config = ProviderRegistry.get("kwargs_provider")
         assert config.default_kwargs == {"batch_size": 100, "timeout": 30}
 
-    def test_stores_custom_creator_in_config(self) -> None:
-        """custom_creator should be stored in ProviderConfig."""
+    def test_stores_adapter_creator_in_config(self) -> None:
+        """adapter_creator should be stored in ProviderConfig."""
 
         def custom(**_: Any) -> _FakeAdapter:
             return _create_fake_adapter()
 
         _register_provider_class(
             cls=_FakeAdapter,
-            name="custom_creator_provider",
+            name="adapter_creator_provider",
             http_rate=5.0,
             http_capacity=10,
             requires_http_client=True,
             requires_logger=True,
             rate_overrides=None,
-            custom_creator=custom,
+            adapter_creator=custom,
             default_kwargs={},
         )
 
-        config = ProviderRegistry.get("custom_creator_provider")
-        assert config.custom_creator is custom
+        config = ProviderRegistry.get("adapter_creator_provider")
+        assert config.adapter_creator is custom
 
     def test_empty_rate_overrides_stored_as_empty_dict(self) -> None:
         """rate_overrides=None should result in {} in HttpConfig."""
@@ -203,7 +203,7 @@ class TestRegisterProviderClass:
             requires_http_client=True,
             requires_logger=True,
             rate_overrides=None,
-            custom_creator=None,
+            adapter_creator=None,
             default_kwargs={},
         )
 
@@ -312,20 +312,20 @@ class TestRegisterProviderDecorator:
         config = ProviderRegistry.get("kwargs_decorator_provider")
         assert config.default_kwargs == {"batch_size": 500, "timeout": 60}
 
-    def test_decorator_with_custom_creator(self) -> None:
-        """custom_creator kwarg should be stored in config."""
+    def test_decorator_with_adapter_creator(self) -> None:
+        """adapter_creator kwarg should be stored in config."""
 
-        def custom_creator(**_: Any) -> _FakeAdapter:
+        def adapter_creator(**_: Any) -> _FakeAdapter:
             return _create_fake_adapter()
 
-        @register_provider("custom_creator_decorated", custom_creator=custom_creator)
+        @register_provider("adapter_creator_decorated", adapter_creator=adapter_creator)
         @dataclass
         class _CustomCreatorAdapter:
             http_client: Any = None
             logger: Any = None
 
-        config = ProviderRegistry.get("custom_creator_decorated")
-        assert config.custom_creator is custom_creator
+        config = ProviderRegistry.get("adapter_creator_decorated")
+        assert config.adapter_creator is adapter_creator
 
     def test_decorator_sets_provider_name_on_class(self) -> None:
         """__provider_name__ attribute should be set on decorated class."""

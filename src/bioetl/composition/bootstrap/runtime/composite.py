@@ -123,7 +123,7 @@ def _bootstrap_runtime_basics(
     run_id: str | None,
 ) -> CompositeInfrastructureContext:
     """Build base runtime dependencies shared across composite bootstrap."""
-    from uuid import UUID, uuid4
+    from uuid import UUID
 
     from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
     from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
@@ -136,6 +136,7 @@ def _bootstrap_runtime_basics(
         bootstrap_tracer,
     )
     from bioetl.composition.runtime_builders.config_access import get_settings
+    from bioetl.composition.occurrence_identity import create_runtime_occurrence_uuid
     from bioetl.infrastructure.locking.memory_lock import MemoryLock
 
     def _bootstrap_logger(
@@ -158,7 +159,7 @@ def _bootstrap_runtime_basics(
         tracer_bootstrapper=bootstrap_tracer,
         storage_bootstrapper=bootstrap_storage_adapter,
         lock_factory=MemoryLock,
-        uuid_factory=uuid4,
+        uuid_factory=lambda: create_runtime_occurrence_uuid("composite_basics"),
     )
 
 

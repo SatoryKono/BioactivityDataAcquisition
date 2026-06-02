@@ -14,6 +14,9 @@ from typing import TYPE_CHECKING
 from bioetl.domain.lineage import LineageGraphFragment
 from bioetl.domain.ports import LineageStorePort
 from bioetl.domain.types import RunID
+from bioetl.infrastructure.control_plane._durability import (
+    flush_control_plane_file_descriptor,
+)
 from bioetl.infrastructure.control_plane._read_metrics import (
     emit_control_plane_read_metrics,
 )
@@ -99,7 +102,7 @@ def _truncate_index_to_offset(path: Path, *, offset: int) -> None:
     file_descriptor = os.open(path, os.O_RDWR)
     try:
         os.ftruncate(file_descriptor, offset)
-        os.fsync(file_descriptor)
+        flush_control_plane_file_descriptor(file_descriptor)
     finally:
         os.close(file_descriptor)
 
@@ -117,13 +120,13 @@ def _append_jsonl_payload(path: Path, payload: bytes) -> int:
             if written <= 0:
                 raise OSError("Lineage index append produced an empty write")
             bytes_written += written
-        os.fsync(file_descriptor)
+        flush_control_plane_file_descriptor(file_descriptor)
         return checkpoint_size
     except OSError:
         if bytes_written > 0:
             try:
                 os.ftruncate(file_descriptor, checkpoint_size)
-                os.fsync(file_descriptor)
+                flush_control_plane_file_descriptor(file_descriptor)
             except OSError:
                 pass
         raise

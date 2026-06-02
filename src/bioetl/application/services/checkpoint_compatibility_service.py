@@ -18,6 +18,10 @@ from bioetl.application.services.checkpoint_compatibility_policy import (
     validate_required_checkpoint_anchors,
     validate_rule_bundle_compatibility,
 )
+from bioetl.application.services.checkpoint_compatibility_results import (
+    build_lenient_checkpoint_compatibility_result,
+    build_strict_checkpoint_compatibility_result,
+)
 from bioetl.domain.types.checkpoint_metadata import (
     CheckpointCompatibilityResult,
     CheckpointMetadata,
@@ -146,17 +150,13 @@ class CheckpointCompatibilityService:
             pipeline_name=self._pipeline_name,
             disposition=("strict_compatible" if compatible else "strict_incompatible"),
         )
-        if compatible:
-            return CheckpointCompatibilityResult.compatible_result()
-        return CheckpointCompatibilityResult.incompatible_result(
+        return build_strict_checkpoint_compatibility_result(
+            compatible=compatible,
             dq_compatible=dq_compatible,
             pipeline_compatible=pipeline_compatible,
-            execution_identity_compatible=(
-                execution_identity_compatible and required_anchor_compatible
-            ),
-            identity_continuity_proven=(
-                identity_continuity_proven and required_anchor_compatible
-            ),
+            execution_identity_compatible=execution_identity_compatible,
+            identity_continuity_proven=identity_continuity_proven,
+            required_anchor_compatible=required_anchor_compatible,
             messages=messages,
         )
 
@@ -194,11 +194,6 @@ class CheckpointCompatibilityService:
             else ()
         )
         messages = [*messages, *degraded_messages]
-        resume_verdict = (
-            "resume_only_degraded"
-            if degraded_messages
-            else ("resume_only" if compatible else "non_replayable")
-        )
         _log_lenient_result(self._logger, compatible=compatible, messages=messages)
         _emit_checkpoint_metric(
             self._metrics,
@@ -207,15 +202,14 @@ class CheckpointCompatibilityService:
                 "lenient_compatible" if compatible else "lenient_incompatible"
             ),
         )
-        return CheckpointCompatibilityResult(
+        return build_lenient_checkpoint_compatibility_result(
             compatible=compatible,
             dq_compatible=dq_compatible,
             pipeline_compatible=pipeline_compatible,
-            messages=messages,
             execution_identity_compatible=execution_identity_compatible,
             identity_continuity_proven=identity_continuity_proven,
-            resume_verdict=resume_verdict,
-            degraded_resume_reasons=degraded_messages,
+            messages=messages,
+            degraded_messages=degraded_messages,
         )
 
 

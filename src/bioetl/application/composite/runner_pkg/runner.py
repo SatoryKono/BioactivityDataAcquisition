@@ -100,8 +100,7 @@ class CompositePipelineRunner(
                 ``dry_run`` that control execution behaviour without changing
                 domain configuration.
             deps: Grouped collaborator services, ports, and factories.
-            run_id: Optional explicit run identifier; a UUID is generated
-                automatically when omitted.
+            run_id: Explicit run identifier supplied by the composition root.
         """
         self._config = config
         self._runtime = runtime

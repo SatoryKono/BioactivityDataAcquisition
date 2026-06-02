@@ -6,7 +6,6 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Protocol
-from uuid import uuid4
 
 from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP
 
@@ -31,6 +30,10 @@ def _resolve_manifest_created_at(
     return MISSING_RUNTIME_TIMESTAMP
 
 
+def _missing_manifest_id_factory() -> str:
+    raise RuntimeError("manifest_id_factory must be supplied by composition root")
+
+
 @dataclass(kw_only=True)
 class ManifestServiceScaffoldMixin:
     """Shared clock/id/schema fields for immutable manifest services."""
@@ -39,7 +42,7 @@ class ManifestServiceScaffoldMixin:
     created_at_factory: Callable[[], datetime] | None = None
     schema_version: str = "1.0"
     _manifest_id_factory: Callable[[], str] = field(
-        default_factory=lambda: lambda: str(uuid4())
+        default_factory=lambda: _missing_manifest_id_factory
     )
 
     def _resolve_created_at(self) -> datetime:

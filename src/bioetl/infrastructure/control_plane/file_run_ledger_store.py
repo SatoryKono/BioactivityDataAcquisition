@@ -19,7 +19,9 @@ from bioetl.domain.control_plane.run_ledger import (
 )
 from bioetl.domain.ports import RunLedgerPort
 from bioetl.domain.types import RunID
-from bioetl.infrastructure.config.settings_api import get_settings
+from bioetl.infrastructure.control_plane._durability import (
+    should_fsync_control_plane_writes,
+)
 from bioetl.infrastructure.control_plane._read_metrics import (
     emit_control_plane_read_metrics,
 )
@@ -42,13 +44,7 @@ class _RunLedgerCorruptionError(ValueError):
 
 def _should_fsync_control_plane_writes() -> bool:
     """Keep durable flushes unless Windows test runs explicitly relax them."""
-    if os.name != "nt":
-        return True
-    settings = get_settings()
-    # Windows test runs commonly execute from cloud-synced worktrees where
-    # fsync() can stall long enough to defeat reproducibility gates. Keep
-    # production durability semantics unchanged and relax only test-mode writes.
-    return not settings.test_mode
+    return should_fsync_control_plane_writes(os_name=os.name)
 
 
 def _flush_file_descriptor(file_descriptor: int) -> None:

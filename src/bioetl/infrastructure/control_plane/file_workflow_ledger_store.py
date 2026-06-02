@@ -11,6 +11,9 @@ from time import perf_counter
 from bioetl.domain.control_plane import WorkflowLedgerEntry
 from bioetl.domain.ports import WorkflowLedgerPort
 from bioetl.domain.types import RunID
+from bioetl.infrastructure.control_plane._durability import (
+    flush_control_plane_file_descriptor,
+)
 from bioetl.infrastructure.control_plane._read_metrics import (
     emit_control_plane_read_metrics,
 )
@@ -34,12 +37,12 @@ def _append_jsonl_payload(path: Path, payload: bytes) -> None:
             if written <= 0:
                 raise OSError("Workflow ledger append produced an empty write")
             bytes_written += written
-        os.fsync(file_descriptor)
+        flush_control_plane_file_descriptor(file_descriptor)
     except OSError:
         if bytes_written > 0:
             try:
                 os.ftruncate(file_descriptor, checkpoint_size)
-                os.fsync(file_descriptor)
+                flush_control_plane_file_descriptor(file_descriptor)
             except OSError:
                 pass
         raise

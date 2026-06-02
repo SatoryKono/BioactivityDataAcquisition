@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+from itertools import count
+
 import pytest
 
 from dataclasses import replace
@@ -25,6 +28,11 @@ from tests.unit.application.services.run_manifest_test_support import (
 
 
 pytestmark = pytest.mark.unit
+
+
+def _entry_id_factory(prefix: str = "entry-historical") -> Callable[[], str]:
+    sequence = count(1)
+    return lambda: f"{prefix}-{next(sequence)}"
 
 
 def _make_source_manifest() -> RunManifest:
@@ -90,6 +98,7 @@ def test_inventory_distinguishes_pending_and_certified_historical_records() -> N
         certification_service=HistoricalReplayCertificationService(
             manifest_port=manifest_store,
             ledger_port=ledger_store,
+            entry_id_factory=_entry_id_factory("entry-corpus-certification"),
         ),
     )
 
@@ -122,6 +131,7 @@ def test_bulk_certification_orders_source_before_composite_and_closes_inventory(
         certification_service=HistoricalReplayCertificationService(
             manifest_port=manifest_store,
             ledger_port=ledger_store,
+            entry_id_factory=_entry_id_factory("entry-corpus-closure"),
         ),
     )
 

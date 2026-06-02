@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections import Counter
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from datetime import datetime
 
 from bioetl.domain.types import BatchID, BronzeRecord, ErrorType, GoldRecord
@@ -70,6 +70,86 @@ def get_sorted_lineage_rows(
     return tuple(sorted(rows, key=_lineage_sort_key))
 
 
+def _source_metadata_attrs(source_metadata: object | None) -> dict[str, object]:
+    if isinstance(source_metadata, dict):
+        return dict(source_metadata)
+    if hasattr(source_metadata, "model_dump"):
+        return source_metadata.model_dump()
+    if hasattr(source_metadata, "__dict__"):
+        return source_metadata.__dict__
+    return {}
+
+
+def _resolve_debug_record_index(record: Mapping[str, object]) -> int | None:
+    existing = _normalize_optional_text(record.get("_debug_record_index"))
+    try:
+        return int(existing) if existing else None
+    except ValueError:
+        return None
+
+
+def _build_gold_rejected_row(
+    *,
+    run_id: str,
+    workflow_id: str,
+    pipeline_id: str,
+    provider_id: str,
+    record_index: int | None,
+    normalized_record: Mapping[str, object],
+    created_at: datetime,
+    action: str,
+    reason_code: str,
+    reason_message: str,
+    rule_id: str,
+    failed_field: str,
+) -> dict[str, object]:
+    return _base_row(
+        run_id=run_id,
+        workflow_id=workflow_id,
+        pipeline_id=pipeline_id,
+        provider_id=provider_id,
+        stage="gold",
+        record_index=record_index,
+        raw_record=normalized_record,
+        normalized_record=normalized_record,
+        status="rejected",
+        action=action,
+        created_at=created_at,
+        reason_code=reason_code,
+        reason_message=reason_message,
+        rule_id=rule_id,
+        rule_layer="gold",
+        failed_field=failed_field,
+    )
+
+
+def _build_lineage_row(
+    *,
+    run_id: str,
+    workflow_id: str,
+    pipeline_id: str,
+    provider_id: str,
+    fragment_id: str,
+    edge_type: str,
+    node_id: str,
+    raw_record: BronzeRecord,
+    created_at: datetime,
+) -> dict[str, object]:
+    return {
+        "run_id": run_id,
+        "workflow_id": workflow_id,
+        "pipeline_id": pipeline_id,
+        "provider_id": provider_id,
+        "fragment_id": fragment_id,
+        "edge_type": edge_type,
+        "node_id": node_id,
+        "primary_key": _primary_key(raw_record),
+        "payload_hash": _payload_hash(provider_id=provider_id, record=raw_record),
+        "source_record_id": _source_record_id(raw_record),
+        "created_at": created_at.isoformat(),
+    }
+
+
 class DebugExportCollector:
     """Collect and store audit rows for debug export."""
 
@@ -98,6 +178,7 @@ class DebugExportCollector:
 
     def attach_manifest_id(self, manifest_id: str | None) -> None:
         self._manifest_id = manifest_id
+
     def record_bronze_batch(
         self,
         *,
@@ -106,19 +187,7 @@ class DebugExportCollector:
         start_index: int,
         source_metadata: object | None = None,
     ) -> None:
-        source_attrs = (
-            dict(source_metadata)
-            if isinstance(source_metadata, dict)
-            else (
-                source_metadata.model_dump()
-                if hasattr(source_metadata, "model_dump")
-                else (
-                    source_metadata.__dict__
-                    if hasattr(source_metadata, "__dict__")
-                    else {}
-                )
-            )
-        )
+        source_attrs = _source_metadata_attrs(source_metadata)
         for offset, raw_record in enumerate(records):
             raw_payload = _record_payload(raw_record)
             row = _base_row(
@@ -235,6 +304,7 @@ class DebugExportCollector:
         record_index: int,
         error_type: ErrorType | None = None,
         details: str = "",
+        details_payload: object | None = None,
         policy: str | None = None,
         created_at: datetime,
     ) -> None:
@@ -245,7 +315,11 @@ class DebugExportCollector:
         rule_id = _extract_rule_id(details)
         rule_layer = "silver"
         raw_payload = _record_payload(raw_record)
-        failed_field = _infer_failed_field(raw_payload, details)
+        failed_field, failed_value, expected_constraint = _extract_rejection_diagnostics(
+            record=raw_payload,
+            details=details_payload,
+            message=details,
+        )
         target_rows = (
             self._silver_quarantine_rows
             if policy == "quarantine"
@@ -269,6 +343,8 @@ class DebugExportCollector:
                 rule_id=rule_id,
                 rule_layer=rule_layer,
                 failed_field=failed_field,
+                failed_value=failed_value,
+                expected_constraint=expected_constraint,
             )
         )
 
@@ -282,28 +358,20 @@ class DebugExportCollector:
     ) -> None:
         for record in records:
             normalized = _record_payload(record)
-            existing = _normalize_optional_text(normalized.get("_debug_record_index"))
-            try:
-                record_index = int(existing) if existing else None
-            except ValueError:
-                record_index = None
+            record_index = _resolve_debug_record_index(normalized)
             self._gold_rejected_rows.append(
-                _base_row(
+                _build_gold_rejected_row(
                     run_id=self._run_id,
                     workflow_id=self._workflow_id,
                     pipeline_id=self._pipeline_id,
                     provider_id=self._provider_id,
-                    stage="gold",
                     record_index=record_index,
-                    raw_record=normalized,
                     normalized_record=normalized,
-                    status="rejected",
                     action=reason_code,
                     created_at=created_at,
                     reason_code=reason_code,
                     reason_message=reason_message,
                     rule_id="",
-                    rule_layer="gold",
                     failed_field="",
                 )
             )
@@ -318,28 +386,20 @@ class DebugExportCollector:
         error_text = str(errors)
         for record in records:
             normalized = _record_payload(record)
-            existing = _normalize_optional_text(normalized.get("_debug_record_index"))
-            try:
-                record_index = int(existing) if existing else None
-            except ValueError:
-                record_index = None
+            record_index = _resolve_debug_record_index(normalized)
             self._gold_rejected_rows.append(
-                _base_row(
+                _build_gold_rejected_row(
                     run_id=self._run_id,
                     workflow_id=self._workflow_id,
                     pipeline_id=self._pipeline_id,
                     provider_id=self._provider_id,
-                    stage="gold",
                     record_index=record_index,
-                    raw_record=normalized,
                     normalized_record=normalized,
-                    status="rejected",
                     action="fail",
                     created_at=created_at,
                     reason_code="GOLD_CONTRACT_VIOLATION",
                     reason_message=error_text,
                     rule_id=_extract_rule_id(error_text),
-                    rule_layer="gold",
                     failed_field=_infer_failed_field(normalized, error_text),
                 )
             )
@@ -354,19 +414,15 @@ class DebugExportCollector:
         created_at: datetime,
     ) -> None:
         self._lineage_rows.append(
-            {
-                "run_id": self._run_id,
-                "workflow_id": self._workflow_id,
-                "pipeline_id": self._pipeline_id,
-                "provider_id": self._provider_id,
-                "fragment_id": fragment_id,
-                "edge_type": edge_type,
-                "node_id": node_id,
-                "primary_key": _primary_key(raw_record),
-                "payload_hash": _payload_hash(
-                    provider_id=self._provider_id, record=raw_record
-                ),
-                "source_record_id": _source_record_id(raw_record),
-                "created_at": created_at.isoformat(),
-            }
+            _build_lineage_row(
+                run_id=self._run_id,
+                workflow_id=self._workflow_id,
+                pipeline_id=self._pipeline_id,
+                provider_id=self._provider_id,
+                fragment_id=fragment_id,
+                edge_type=edge_type,
+                node_id=node_id,
+                raw_record=raw_record,
+                created_at=created_at,
+            )
         )

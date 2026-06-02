@@ -57,9 +57,9 @@ _REVIEWED_BASELINE_METRIC_KEYS = (
 def _display_path(path: Path) -> str:
     """Return a stable path label for repo-local and external output paths."""
     try:
-        return str(path.relative_to(PROJECT_ROOT))
+        return path.relative_to(PROJECT_ROOT).as_posix()
     except ValueError:
-        return str(path)
+        return path.as_posix()
 
 
 def _resolve_snapshot_date(scorecard: dict[str, object]) -> str:
@@ -81,7 +81,7 @@ def _build_json_payload(
         "summary": {
             "snapshot_date": snapshot_date,
             "families": len(enriched_metrics),
-            "scorecard": str(SCORECARD_PATH.relative_to(PROJECT_ROOT)),
+            "scorecard": SCORECARD_PATH.relative_to(PROJECT_ROOT).as_posix(),
             "budget_warnings": sum(
                 len(family.get("budget_warnings", []))
                 for family in enriched_metrics
@@ -211,7 +211,7 @@ def _render_markdown(
 
 def _write_text(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content, encoding="utf-8")
+    path.write_text(content, encoding="utf-8", newline="\n")
 
 
 def _check_file_sync(path: Path, expected: str) -> bool:

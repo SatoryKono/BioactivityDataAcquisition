@@ -31,6 +31,11 @@ review_history:
     owner: architecture-governance
     outcome: cli_preview_uuid4_retired
     rationale: CLI storage preview contexts now derive UUID-shaped occurrence IDs from explicit timestamp input via uuid5, reducing residual random-identity seams from 13 to 12 without widening replay semantics.
+  - issue: "#5032"
+    reviewed_on: "2026-06-02"
+    owner: architecture-governance
+    outcome: logger_fallback_uuid4_retired
+    rationale: Logger fallback correlation IDs now use deterministic process-local uuid5 occurrence IDs, reducing residual random-identity seams from 12 to 11 without adding replay-critical identity.
 deterministic_factory_evidence:
   issue: "#4968"
   required_policy: retained UUID seams must either accept explicit IDs or expose injectable factories in tests used for exact replay coverage.
@@ -120,15 +125,6 @@ seams:
     replay_critical: false
     owner: composite-runtime
     migration_policy: inject deterministic uuid_factory for harness-mode replay contracts.
-  - path: src/bioetl/composition/bootstrap/runtime/logger_bootstrap.py
-    line: 50
-    kind: call
-    symbol: uuid4
-    layer: composition
-    classification: logging_correlation_default_run_id
-    replay_critical: false
-    owner: observability
-    migration_policy: use caller-supplied run_id for replay logs that participate in golden artifacts.
   - path: src/bioetl/composition/bootstrap/runtime/pipeline_context_builder.py
     line: 92
     kind: call

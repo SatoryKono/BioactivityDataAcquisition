@@ -39,3 +39,17 @@ def test_oversized_source_module_inventory_tracks_current_top_modules() -> None:
         assert actual_lines <= max_lines
         assert cast(str, entry["owner"]).strip()
         assert cast(str, entry["target_split"]).strip()
+
+    for split in cast(list[YamlMap], inventory.get("completed_splits", [])):
+        source = ROOT / cast(str, split["source"])
+        extracted = ROOT / cast(str, split["extracted_surface"])
+        assert source.exists()
+        assert extracted.exists()
+        assert len(source.read_text(encoding="utf-8").splitlines()) == int(
+            split["source_lines_after_split"]
+        )
+        assert len(extracted.read_text(encoding="utf-8").splitlines()) == int(
+            split["extracted_surface_lines"]
+        )
+        assert cast(str, split["issue"]).strip()
+        assert cast(str, split["rationale"]).strip()

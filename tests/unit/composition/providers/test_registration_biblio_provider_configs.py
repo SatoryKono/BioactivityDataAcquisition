@@ -78,12 +78,12 @@ class TestGetBiblioProviderConfigs:
         configs = _get_biblio_provider_configs(assembly_support=MagicMock())
         crossref = configs["crossref"]
 
-        assert crossref.custom_creator is create_crossref_adapter
+        assert crossref.adapter_creator is create_crossref_adapter
         assert crossref.requires_http_client is True
         assert crossref.requires_logger is True
 
     @patch("bioetl.composition.providers._config_helpers._get_rate_limits_from_config")
-    def test_openalex_and_pubmed_use_composition_local_custom_creators(
+    def test_openalex_and_pubmed_use_composition_local_adapter_creators(
         self,
         mock_get_rate_limits: MagicMock,
     ) -> None:
@@ -96,9 +96,9 @@ class TestGetBiblioProviderConfigs:
 
         configs = _get_biblio_provider_configs(assembly_support=MagicMock())
 
-        assert configs["pubmed"].custom_creator is _create_pubmed_adapter_from_settings
+        assert configs["pubmed"].adapter_creator is _create_pubmed_adapter_from_settings
         assert (
-            configs["openalex"].custom_creator is _create_openalex_adapter_from_settings
+            configs["openalex"].adapter_creator is _create_openalex_adapter_from_settings
         )
 
     @patch("bioetl.composition.providers._config_helpers._get_rate_limits_from_config")

@@ -1,4 +1,4 @@
-"""Unit tests for checkpoint compatibility service.
+"""Unit tests for checkpoint resume policy service.
 
 Tests the CheckpointCompatibilityService for DQ contract validation.
 """

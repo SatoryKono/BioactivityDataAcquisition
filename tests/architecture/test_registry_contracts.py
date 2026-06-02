@@ -71,6 +71,32 @@ class TestRegistryProtocol:
             "ProviderRegistry MUST have create_adapter() method for DI"
         )
 
+    def test_provider_registry_uses_typed_adapter_creator_contract(
+        self,
+        src_dir: Path,
+    ) -> None:
+        """Provider registration must not reintroduce the legacy creator seam."""
+        providers_path = src_dir / "bioetl" / "composition" / "providers"
+        forbidden_patterns = (
+            "custom_creator",
+            "AdapterCreator = Callable",
+            "AdapterCreator,",
+        )
+        violations: list[str] = []
+
+        for py_file in providers_path.rglob("*.py"):
+            content = py_file.read_text(encoding="utf-8")
+            for pattern in forbidden_patterns:
+                if pattern in content:
+                    violations.append(f"{py_file.relative_to(src_dir)}: {pattern}")
+
+        assert not violations, (
+            "Provider registration must use AdapterCreatorProtocol and "
+            "ProviderConfig.adapter_creator instead of the legacy custom_creator "
+            "seam.\n"
+            + "\n".join(f"  - {item}" for item in violations)
+        )
+
     def test_datasource_factory_path_avoids_class_level_provider_registry_access(
         self,
         src_dir: Path,

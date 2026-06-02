@@ -14,7 +14,7 @@ from dataclasses import dataclass
 from types import TracebackType
 from typing import TYPE_CHECKING, Self
 
-from bioetl.application.core.pipeline_runtime_service_protocols import (
+from bioetl.application.core.pipeline_service_protocols import (
     PipelineStorageProtocol,
 )
 from bioetl.domain.ports import (

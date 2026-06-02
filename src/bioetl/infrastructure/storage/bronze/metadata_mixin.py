@@ -6,6 +6,10 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.domain.types import BatchID, JsonDict, RunID, RunType
+from bioetl.infrastructure.storage.bronze.metadata_builders import (
+    BronzeLineageMetadataRequest,
+    build_bronze_lineage_metadata,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import BronzeMetadata, SourceMetadata
@@ -36,12 +40,16 @@ class BronzeWriterMetadataMixin:
     ) -> dict[str, str]:
         """Build the baseline `.meta.json` payload without coordinator services."""
         return {
-            "run_id": str(run_id),
-            "run_type": run_type.value,
-            "ingestion_ts": effective_ts.isoformat(),
-            "provider": provider,
-            "entity": entity,
-            "batch_id": str(batch_id),
+            **build_bronze_lineage_metadata(
+                BronzeLineageMetadataRequest(
+                    run_id=run_id,
+                    run_type=run_type,
+                    effective_ts=effective_ts,
+                    provider=provider,
+                    entity=entity,
+                    batch_id=batch_id,
+                )
+            ),
             "sidecar_truth_boundary": "legacy_lineage_projection_non_authoritative",
             "authoritative_replay_artifacts": (
                 "run_manifest,lineage_fragment,layer_metadata,effective_config_artifact"

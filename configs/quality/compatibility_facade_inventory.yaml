@@ -356,8 +356,9 @@ retained_entrypoint_burn_down_plan:
     target_state: narrow_first_party_callers
     rationale: Public CLI command seam stays stable, but first-party maintenance helpers should import through owner-only
       `domains/maintenance/service_access.py` instead of the top-level patch seam.
-    completion_gate: Keep the top-level CLI command as the sanctioned patch/import seam while confining ordinary first-party
-      maintenance helper imports to the owner-only service-access module plus dedicated boundary coverage.
+    completion_gate: Keep the top-level CLI command as the sanctioned patch/import seam while confining its first-party
+      source importer budget to `src/bioetl/interfaces/cli/commands/domains/maintenance/__init__.py`; ordinary runtime
+      maintenance helper imports must use the owner-only service-access module plus dedicated boundary coverage.
   - path: src/bioetl/composition/entrypoints.py
     phase: enforce
     target_state: retain_as_stable_public_api
@@ -375,8 +376,9 @@ retained_entrypoint_burn_down_plan:
     target_state: narrow_first_party_callers
     rationale: Public composition maintenance facade stays stable, but ordinary first-party CLI/runtime callers should narrow
       to one owner seam instead of importing the facade broadly.
-    completion_gate: Keep the public maintenance facade stable while confining first-party runtime imports to the owner
-      maintenance service-access seam and preventing growth of ad hoc maintenance-api callers.
+    completion_gate: Keep the public maintenance facade stable while confining first-party runtime imports to
+      `src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py` and preventing growth of ad hoc
+      maintenance-api callers.
   - path: src/bioetl/infrastructure/config/__init__.py
     phase: enforce
     target_state: retain_as_stable_public_api

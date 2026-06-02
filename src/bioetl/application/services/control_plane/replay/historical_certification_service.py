@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 
 from bioetl.application.services.control_plane.replay._historical_certification_support import (
@@ -48,6 +49,7 @@ class HistoricalReplayCertificationService:
 
     manifest_port: RunManifestPort
     ledger_port: RunLedgerPort
+    entry_id_factory: Callable[[], str]
 
     def certify_historical_source_run(
         self,
@@ -67,6 +69,7 @@ class HistoricalReplayCertificationService:
         ledger_service = validator.build_ledger_service(
             manifest=manifest,
             ledger_port=self.ledger_port,
+            entry_id_factory=self.entry_id_factory,
         )
         for certification in certifications:
             normalized_query = validator.resolve_certification_query(
@@ -116,6 +119,7 @@ class HistoricalReplayCertificationService:
         ledger_service = validator.build_ledger_service(
             manifest=manifest,
             ledger_port=self.ledger_port,
+            entry_id_factory=self.entry_id_factory,
         )
         for certification in certifications:
             normalized_query = validator.resolve_certification_query(

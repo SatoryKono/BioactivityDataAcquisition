@@ -9,6 +9,7 @@ from unittest.mock import MagicMock, call
 
 import pytest
 
+import bioetl.infrastructure.control_plane._durability as durability
 import bioetl.infrastructure.control_plane.file_run_ledger_store as ledger_store_module
 from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.control_plane.run_ledger import (
@@ -37,7 +38,7 @@ def test_should_fsync_control_plane_writes_by_default(monkeypatch) -> None:
         raising=False,
     )
     monkeypatch.setattr(ledger_store_module.os, "name", "nt", raising=False)
-    ledger_store_module.get_settings.cache_clear()
+    durability.get_settings.cache_clear()
 
     assert ledger_store_module._should_fsync_control_plane_writes() is True
 
@@ -51,7 +52,7 @@ def test_should_skip_fsync_for_windows_e2e_degraded_observable(
         "degraded_observable",
     )
     monkeypatch.setattr(ledger_store_module.os, "name", "nt", raising=False)
-    ledger_store_module.get_settings.cache_clear()
+    durability.get_settings.cache_clear()
 
     assert ledger_store_module._should_fsync_control_plane_writes() is False
 
@@ -65,7 +66,7 @@ def test_should_skip_fsync_for_windows_test_mode_replay_ready(
         "replay_ready",
     )
     monkeypatch.setattr(ledger_store_module.os, "name", "nt", raising=False)
-    ledger_store_module.get_settings.cache_clear()
+    durability.get_settings.cache_clear()
 
     assert ledger_store_module._should_fsync_control_plane_writes() is False
 

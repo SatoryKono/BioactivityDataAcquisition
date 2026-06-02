@@ -66,7 +66,7 @@ class TestProviderConfig:
         assert config.http_config is None
         assert config.requires_http_client is True
         assert config.requires_logger is True
-        assert config.custom_creator is None
+        assert config.adapter_creator is None
         assert config.default_kwargs == {}
 
     def test_create_config_with_http(self):
@@ -359,16 +359,16 @@ class TestProviderRegistryAdapterCreation:
         assert adapter.http_client is None
         assert adapter.logger is mock_logger
 
-    def test_create_adapter_with_custom_creator(self):
+    def test_create_adapter_with_adapter_creator(self):
         """Verify adapter creation with custom creator function."""
         custom_adapter = MagicMock()
 
-        def custom_creator(**kwargs):
+        def adapter_creator(**kwargs):
             return custom_adapter
 
         config = ProviderConfig(
             adapter_class=MockAdapter,
-            custom_creator=custom_creator,
+            adapter_creator=adapter_creator,
         )
         ProviderRegistry.register("custom_test", config)
 
@@ -789,7 +789,7 @@ class TestRealProviderRegistration:
         assert ProviderRegistry.is_registered("pubmed")
 
         config = ProviderRegistry.get("pubmed")
-        assert config.custom_creator is not None
+        assert config.adapter_creator is not None
         assert config.http_config is not None
 
         # Rate should match configs/sources/pubmed.yaml
@@ -803,7 +803,7 @@ class TestRealProviderRegistration:
         assert ProviderRegistry.is_registered("crossref")
 
         config = ProviderRegistry.get("crossref")
-        assert config.custom_creator is not None
+        assert config.adapter_creator is not None
         assert config.http_config is not None
         assert config.data_source_creator is not None
 

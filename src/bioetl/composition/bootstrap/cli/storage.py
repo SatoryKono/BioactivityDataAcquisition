@@ -50,7 +50,8 @@ from bioetl.infrastructure.config.contract_registry_loader import (
     load_contract_registry_entries,
 )
 from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
-from bioetl.infrastructure.export import ExportCatalogAdapter, ExportWriterAdapter
+from bioetl.infrastructure.export.export_catalog_adapter import ExportCatalogAdapter
+from bioetl.infrastructure.export.export_writer_adapter import ExportWriterAdapter
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
 from bioetl.infrastructure.time import SystemClock
 

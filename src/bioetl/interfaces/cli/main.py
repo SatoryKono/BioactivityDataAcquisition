@@ -13,6 +13,9 @@ from click.core import Command, Context, Group
 from click.formatting import HelpFormatter
 
 from bioetl import __version__ as BIOETL_VERSION
+from bioetl.interfaces.cli.commands.config_dq import dq as dq_command
+from bioetl.interfaces.cli.commands.debug import debug as debug_command
+from bioetl.interfaces.cli.commands.lock import lock as lock_command
 from bioetl.interfaces.cli.registry_helpers import (
     _build_registered_registry,
     create_registry,
@@ -108,9 +111,22 @@ _LAZY_COMMAND_SPECS: dict[str, tuple[str, str, str]] = {
     ),
 }
 
+_EAGER_COMMANDS: dict[str, tuple[Command | Group, str]] = {
+    "dq": (dq_command, "Data quality configuration commands"),
+    "debug": (debug_command, "Run a pipeline with breakpoints"),
+    "lock": (lock_command, "Inspect and manage local runtime locks"),
+}
+
 
 def _load_cli_command(command_name: str) -> Command | Group | None:
     """Import a CLI command module only when the command is requested."""
+    eager_spec = _EAGER_COMMANDS.get(command_name)
+    if eager_spec is not None:
+        command, _help_text = eager_spec
+        if getattr(command, "name", command_name) != command_name:
+            command.name = command_name
+        return command
+
     spec = _LAZY_COMMAND_SPECS.get(command_name)
     if spec is None:
         return None
@@ -131,7 +147,7 @@ class _LazyCliGroup(Group):
 
     def list_commands(self, ctx: Context) -> list[str]:
         del ctx
-        return list(_LAZY_COMMAND_SPECS)
+        return [*_EAGER_COMMANDS, *_LAZY_COMMAND_SPECS]
 
     def get_command(
         self,
@@ -154,6 +170,8 @@ class _LazyCliGroup(Group):
     ) -> None:
         del ctx
         rows = [
+            (name, help_text) for name, (_command, help_text) in _EAGER_COMMANDS.items()
+        ] + [
             (name, help_text)
             for name, (_module_name, _attribute_name, help_text) in (
                 _LAZY_COMMAND_SPECS.items()

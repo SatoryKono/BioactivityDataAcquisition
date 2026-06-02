@@ -20,6 +20,7 @@ from bioetl.infrastructure.storage.silver.metadata_request_models import (
 
 __all__ = [
     "_PreparedSilverWriteFinalizationContext",
+    "_build_silver_write_result",
     "_finalize_silver_write_result",
     "_prepare_silver_write_finalization_context",
 ]
@@ -74,6 +75,21 @@ def _source_batch_ids(source_batch_id: object | None) -> list[str] | None:
     if source_batch_id is None:
         return None
     return [str(source_batch_id)]
+
+
+def _build_silver_write_result(
+    *,
+    table_name: str,
+    table_path: str,
+    version_after: int | None,
+    records_count: int,
+) -> SilverWriteResult | None:
+    """Build one Silver write result only when a Delta version is available."""
+    return (
+        None
+        if version_after is None
+        else SilverWriteResult(table_name, table_path, version_after, records_count)
+    )
 
 
 async def _prepare_silver_write_finalization_context(

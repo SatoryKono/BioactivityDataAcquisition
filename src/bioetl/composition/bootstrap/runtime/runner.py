@@ -7,8 +7,6 @@ from any orchestration layer (CLI, REST API, etc.).
 
 from __future__ import annotations
 
-from uuid import uuid4
-
 from bioetl.application.services.execution.pipeline_run_context_service import (
     PipelineRunContextService,
 )
@@ -25,6 +23,7 @@ from bioetl.composition.factories.pipeline.runner import (
     create_metrics_extractor,
     create_runner_factory,
 )
+from bioetl.composition.occurrence_identity import create_runtime_occurrence_run_id
 from bioetl.composition.registry_api import PipelineRegistry
 from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.infrastructure.time import SystemClock
@@ -53,7 +52,7 @@ def bootstrap_pipeline_runner_service(
         >>> result = await service.run("chembl_activity", options=options)
     """
     settings = get_settings()
-    service_run_id = uuid4()
+    service_run_id = create_runtime_occurrence_run_id("pipeline_runner_service")
     observability = bootstrap_observability_bundle(
         pipeline="pipeline_runner_service",
         run_id=service_run_id,
@@ -74,4 +73,5 @@ def bootstrap_pipeline_runner_service(
         clock=SystemClock(),
         _context_service=PipelineRunContextService(),
         _execution_service=PipelineRunExecutionService(clock=SystemClock()),
+        run_id_factory=lambda: create_runtime_occurrence_run_id("pipeline_run"),
     )

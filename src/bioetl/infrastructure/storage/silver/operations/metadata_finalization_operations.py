@@ -6,10 +6,6 @@ from collections.abc import Callable
 from typing import Protocol
 
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
-from bioetl.infrastructure.storage.silver.metadata_operations import (
-    _build_silver_write_result,
-    _prepare_silver_write_finalization_context,
-)
 from bioetl.infrastructure.storage.silver.metadata_request_models import (
     _coerce_silver_write_finalization_preparation_request,
     _coerce_silver_write_result_finalization_request,
@@ -17,6 +13,10 @@ from bioetl.infrastructure.storage.silver.metadata_request_models import (
     _SilverMetadataWriteRequest,
     _SilverWriteFinalizationPreparationRequest,
     _SilverWriteResultFinalizationRequest,
+)
+from bioetl.infrastructure.storage.silver.operations.metadata_finalization_support import (
+    _build_silver_write_result,
+    _prepare_silver_write_finalization_context,
 )
 
 

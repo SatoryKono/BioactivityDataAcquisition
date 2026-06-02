@@ -265,7 +265,7 @@ def _build_biblio_http_provider_specs(
             rate=pubmed.rate,
             capacity=pubmed.capacity,
             rate_overrides={"pubmed_api_key": 10.0},
-            custom_creator=_create_pubmed_adapter_from_settings,
+            adapter_creator=_create_pubmed_adapter_from_settings,
             data_source_creator=_create_pubmed_data_source,
         ),
         build_http_provider_config_spec(
@@ -273,7 +273,7 @@ def _build_biblio_http_provider_specs(
             adapter_class=CrossRefAdapter,
             rate=crossref.rate,
             capacity=crossref.capacity,
-            custom_creator=create_crossref_adapter,
+            adapter_creator=create_crossref_adapter,
             data_source_creator=_create_crossref_data_source,
         ),
         build_http_provider_config_spec(
@@ -281,7 +281,7 @@ def _build_biblio_http_provider_specs(
             adapter_class=OpenAlexAdapter,
             rate=openalex.rate,
             capacity=openalex.capacity,
-            custom_creator=_create_openalex_adapter_from_settings,
+            adapter_creator=_create_openalex_adapter_from_settings,
             data_source_creator=_create_openalex_data_source,
         ),
         build_http_provider_config_spec(

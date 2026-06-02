@@ -5,7 +5,6 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from datetime import datetime
-from uuid import uuid4
 
 from bioetl.application.services.control_plane.ledger.idempotency import (
     build_control_plane_idempotency_key,
@@ -43,6 +42,12 @@ _IDEMPOTENCY_KEY_FIELDS = (
 )
 
 
+def _missing_entry_id_factory() -> str:
+    raise RuntimeError(
+        "workflow ledger entry_id_factory must be supplied by composition root"
+    )
+
+
 def _build_workflow_ledger_idempotency_key(payload: Mapping[str, object]) -> str:
     return build_control_plane_idempotency_key(
         payload,
@@ -59,7 +64,7 @@ class WorkflowLedgerService:
     workflow_run_id: RunID
     workflow_name: str
     _entry_id_factory: Callable[[], str] = field(
-        default_factory=lambda: lambda: str(uuid4())
+        default_factory=lambda: _missing_entry_id_factory
     )
     _occurred_at_factory: Callable[[], datetime] = current_utc_time
 

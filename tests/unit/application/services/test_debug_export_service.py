@@ -189,3 +189,69 @@ def test_debug_export_service_preserves_semantic_gold_filter_diagnostics() -> No
     assert row["failed_field"] == "bao_format"
     assert row["failed_value"] == "BAO_0000218"
     assert row["expected_constraint"] == 'not_in ["BAO_0000218"]'
+
+
+def test_debug_export_service_preserves_structured_silver_rejected_diagnostics() -> None:
+    service = DebugExportService(
+        config=DebugExportConfig(enabled=True, formats=("csv",)),
+        run_id=_RUN_ID,
+        pipeline_id="chembl_assay",
+        provider_id="chembl",
+    )
+
+    service.record_filtered_out(
+        raw_record={
+            "assay_chembl_id": "CHEMBL42",
+            "assay_test_type": "In vivo",
+            "content_hash": "bronze-h42",
+        },
+        record_index=42,
+        reason="Gold-style semantic filter rejected the Silver record",
+        details={
+            "field": "assay_test_type",
+            "operator": "not_in",
+            "expected": ["In vivo", "Ex vivo"],
+            "actual": "In vivo",
+        },
+        policy="skip",
+    )
+
+    pack = service.build_pack(status="failed")
+    row = pack.tables["silver_rejected"][0]
+
+    assert row["failed_field"] == "assay_test_type"
+    assert row["failed_value"] == "In vivo"
+    assert row["expected_constraint"] == 'not_in ["In vivo", "Ex vivo"]'
+
+
+def test_debug_export_service_preserves_structured_silver_quarantine_diagnostics() -> None:
+    service = DebugExportService(
+        config=DebugExportConfig(enabled=True, formats=("csv",)),
+        run_id=_RUN_ID,
+        pipeline_id="chembl_activity",
+        provider_id="chembl",
+    )
+
+    service.record_data_quality_failure(
+        raw_record={
+            "activity_id": "ACT-77",
+            "target_chembl_id": None,
+            "content_hash": "bronze-h77",
+        },
+        record_index=77,
+        error_type=ErrorType.SCHEMA_VIOLATION,
+        error_details="Schema validation failed: target_chembl_id is required",
+        details_payload={
+            "field": "target_chembl_id",
+            "constraint": "non-empty",
+            "actual": None,
+        },
+        policy="quarantine",
+    )
+
+    pack = service.build_pack(status="failed")
+    row = pack.tables["silver_quarantine"][0]
+
+    assert row["failed_field"] == "target_chembl_id"
+    assert row["failed_value"] == "None"
+    assert row["expected_constraint"] == "non-empty"

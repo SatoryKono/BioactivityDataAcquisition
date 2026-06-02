@@ -48,6 +48,7 @@ from bioetl.composition.bootstrap.runtime._composite_control_plane_support impor
 from bioetl.composition.bootstrap.runtime.composite_control_plane_bundle import (
     CompositeControlPlaneBundle,
 )
+from bioetl.composition.occurrence_identity import create_runtime_occurrence_id
 from bioetl.composition.runtime_builders.runner_builder_support import (
     validate_required_persistence_profile,
 )
@@ -115,6 +116,9 @@ def _build_composite_control_plane_manifest(
     return RunManifestService(
         manifest_port=manifest_store,
         clock=SystemClock(),
+        _manifest_id_factory=lambda: create_runtime_occurrence_id(
+            "composite_run_manifest"
+        ),
     ).create_manifest(
         _build_composite_manifest_create_request(
             config=config,

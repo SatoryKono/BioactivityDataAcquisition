@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol, TypeVar, cast
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from bioetl.application.composite.lifecycle_observer_service import (
     CompositeLifecycleObserverService,
@@ -139,8 +139,10 @@ def bind_runner_dependencies(host: object, deps: CompositeRunnerDependencies) ->
 
 def initialize_runner_runtime_state(host: object, run_id: str | None) -> None:
     """Initialize mutable run lifecycle state on the runner host."""
+    if run_id is None:
+        raise ValueError("CompositePipelineRunner requires explicit run_id")
     runner_host = cast(_CompositeRunnerHostProtocol, host)
-    run_id_str = run_id or str(uuid4())
+    run_id_str = run_id
     runner_host._run_id_str = run_id_str
     runner_host._run_id = cast(RunID, UUID(run_id_str))
     runner_host._start_time = None

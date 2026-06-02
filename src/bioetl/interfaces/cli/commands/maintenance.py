@@ -10,6 +10,14 @@ from importlib import import_module
 
 import click
 
+from bioetl.interfaces.cli.commands.archive import archive_command
+from bioetl.interfaces.cli.commands.cleanup import (
+    bronze_cleanup_command,
+    cleanup_preview_command,
+)
+from bioetl.interfaces.cli.commands.domains.maintenance.control_plane_lifecycle import (
+    control_plane_lifecycle_command,
+)
 from bioetl.interfaces.cli.commands.domains.maintenance.service_access import (
     get_bronze_cleanup_service,
     get_contract_migration_service,
@@ -17,6 +25,7 @@ from bioetl.interfaces.cli.commands.domains.maintenance.service_access import (
     get_vacuum_service,
     preview_cleanup,
 )
+from bioetl.interfaces.cli.commands.vacuum import vacuum_all_command, vacuum_command
 
 __all__ = [
     "get_bronze_cleanup_service",
@@ -28,36 +37,6 @@ __all__ = [
 ]
 
 _LAZY_MAINTENANCE_COMMANDS: dict[str, tuple[str, str, str]] = {
-    "vacuum": (
-        "bioetl.interfaces.cli.commands.vacuum",
-        "vacuum_command",
-        "Vacuum one Delta table",
-    ),
-    "vacuum-all": (
-        "bioetl.interfaces.cli.commands.vacuum",
-        "vacuum_all_command",
-        "Vacuum multiple Delta tables",
-    ),
-    "archive": (
-        "bioetl.interfaces.cli.commands.archive",
-        "archive_command",
-        "Archive a Delta table",
-    ),
-    "bronze-cleanup": (
-        "bioetl.interfaces.cli.commands.cleanup",
-        "bronze_cleanup_command",
-        "Remove expired Bronze artifacts",
-    ),
-    "cleanup-preview": (
-        "bioetl.interfaces.cli.commands.cleanup",
-        "cleanup_preview_command",
-        "Preview pipeline cleanup scope",
-    ),
-    "control-plane-lifecycle": (
-        "bioetl.interfaces.cli.commands.domains.maintenance.control_plane_lifecycle",
-        "control_plane_lifecycle_command",
-        "Plan/apply control-plane artifact cleanup",
-    ),
     "plan": (
         "bioetl.interfaces.cli.commands.domains.maintenance.plan",
         "plan_command",
@@ -65,9 +44,31 @@ _LAZY_MAINTENANCE_COMMANDS: dict[str, tuple[str, str, str]] = {
     ),
 }
 
+_EAGER_MAINTENANCE_COMMANDS: dict[str, tuple[click.Command | click.Group, str]] = {
+    "archive": (archive_command, "Archive a Delta table"),
+    "bronze-cleanup": (bronze_cleanup_command, "Remove expired Bronze artifacts"),
+    "cleanup-preview": (
+        cleanup_preview_command,
+        "Preview pipeline cleanup scope",
+    ),
+    "control-plane-lifecycle": (
+        control_plane_lifecycle_command,
+        "Plan/apply control-plane artifact cleanup",
+    ),
+    "vacuum": (vacuum_command, "Vacuum one Delta table"),
+    "vacuum-all": (vacuum_all_command, "Vacuum multiple Delta tables"),
+}
+
 
 def _load_maintenance_command(name: str) -> click.Command | click.Group | None:
     """Import one maintenance subcommand only when it is requested."""
+    eager_spec = _EAGER_MAINTENANCE_COMMANDS.get(name)
+    if eager_spec is not None:
+        command, _help_text = eager_spec
+        if getattr(command, "name", name) != name:
+            command.name = name
+        return command
+
     spec = _LAZY_MAINTENANCE_COMMANDS.get(name)
     if spec is None:
         return None
@@ -87,7 +88,7 @@ class _LazyMaintenanceGroup(click.Group):
 
     def list_commands(self, ctx: click.Context) -> list[str]:
         del ctx
-        return list(_LAZY_MAINTENANCE_COMMANDS)
+        return [*_EAGER_MAINTENANCE_COMMANDS, *_LAZY_MAINTENANCE_COMMANDS]
 
     def get_command(
         self,
@@ -109,6 +110,9 @@ class _LazyMaintenanceGroup(click.Group):
     ) -> None:
         del ctx
         rows = [
+            (name, help_text)
+            for name, (_command, help_text) in _EAGER_MAINTENANCE_COMMANDS.items()
+        ] + [
             (name, help_text)
             for name, (_module_name, _attribute_name, help_text) in (
                 _LAZY_MAINTENANCE_COMMANDS.items()

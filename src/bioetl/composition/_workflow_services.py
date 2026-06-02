@@ -6,6 +6,10 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
+from bioetl.composition.occurrence_identity import (
+    create_runtime_occurrence_id,
+    create_runtime_occurrence_run_id,
+)
 from bioetl.composition.registry_api import PipelineRegistry
 from bioetl.composition.runtime_builders.config_access import get_settings
 
@@ -151,6 +155,9 @@ def _create_workflow_ledger_service(
         manifest_id=manifest.manifest_id,
         workflow_run_id=manifest.workflow_run_id,
         workflow_name=manifest.workflow_name,
+        _entry_id_factory=lambda: create_runtime_occurrence_id(
+            "workflow_ledger_entry"
+        ),
     )
 
 
@@ -193,6 +200,9 @@ def get_workflow_execution_service(
         manifest_service=WorkflowManifestService(
             manifest_port=manifest_store,
             clock=SystemClock(),
+            _manifest_id_factory=lambda: create_runtime_occurrence_id(
+                "workflow_manifest"
+            ),
         ),
         workflow_ledger_port=ledger_store,
         workflow_ledger_factory=_create_workflow_ledger_service,
@@ -200,6 +210,9 @@ def get_workflow_execution_service(
         workflow_lock_port=workflow_lock_port
         if workflow_lock_port is not None
         else cast("LockPort", _get_workflow_memory_lock()),
+        run_id_factory=lambda: create_runtime_occurrence_run_id(
+            "workflow_execution"
+        ),
     )
 
 

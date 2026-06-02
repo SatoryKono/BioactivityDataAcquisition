@@ -334,6 +334,41 @@ def test_removed_compatibility_surfaces_remain_absent_and_unimported() -> None:
 
 
 @pytest.mark.architecture
+def test_narrow_first_party_retained_entrypoints_do_not_gain_src_importers() -> None:
+    """Narrow-first-party retained seams must stay confined to owner import paths."""
+    payload = build_compatibility_importer_census(ROOT, snapshot_date="2026-06-02")
+    rows = {
+        str(row["path"]): row
+        for row in payload["retained_entrypoints"]
+        if isinstance(row, dict)
+    }
+    expected_src_importers = {
+        "src/bioetl/interfaces/cli/commands/maintenance.py": {
+            "src/bioetl/interfaces/cli/commands/domains/maintenance/__init__.py",
+        },
+        "src/bioetl/composition/maintenance_api.py": {
+            "src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py",
+        },
+        "src/bioetl/domain/value_objects/activity_values.py": set(),
+    }
+
+    violations: list[str] = []
+    for path, expected in expected_src_importers.items():
+        row = rows[path]
+        actual = set(row["src_importers"])
+        if actual != expected:
+            violations.append(
+                f"{path}: expected src importers {sorted(expected)}, "
+                f"got {sorted(actual)}"
+            )
+
+    assert not violations, (
+        "Narrow-first-party retained entrypoint importer budget drifted:\n"
+        + "\n".join(f"  - {item}" for item in violations)
+    )
+
+
+@pytest.mark.architecture
 def test_retained_public_export_facades_remain_unique_and_budgeted() -> None:
     """Retained public facades must keep one reviewed public-export resolution path."""
     payload = build_compatibility_importer_census(ROOT, snapshot_date="2026-05-21")

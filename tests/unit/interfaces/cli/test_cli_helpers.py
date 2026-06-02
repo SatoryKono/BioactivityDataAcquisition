@@ -32,12 +32,18 @@ def cli_runner() -> CliRunner:
 
 @pytest.fixture(autouse=True)
 def patch_observability_backend_ensure() -> None:
-    """Keep CLI helper unit tests from bootstrapping the detached backend."""
-    with patch(
-        "bioetl.interfaces.cli.commands.run.ensure_observability_backend_started",
-        return_value=ObservabilityBackendEnsureResult(
-            status="failed",
-            health_url="http://127.0.0.1:8081/health",
+    """Keep CLI helper unit tests from bootstrapping runtime observability."""
+    with (
+        patch(
+            "bioetl.interfaces.cli.commands.run.ensure_observability_backend_started",
+            return_value=ObservabilityBackendEnsureResult(
+                status="failed",
+                health_url="http://127.0.0.1:8081/health",
+            ),
+        ),
+        patch(
+            "bioetl.interfaces.cli.commands.run.publish_metrics_safely",
+            return_value=True,
         ),
     ):
         yield

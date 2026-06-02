@@ -24,7 +24,7 @@ from bioetl.application.core.runner_flow import (
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_executor import BatchExecutor
-    from bioetl.application.core.pipeline_observability_service_protocols import (
+    from bioetl.application.core.pipeline_service_protocols import (
         PipelineRunnerServicesProtocol,
     )
     from bioetl.application.core.postrun.service import PostrunService

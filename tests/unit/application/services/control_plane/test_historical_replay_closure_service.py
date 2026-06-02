@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+from itertools import count
+
 import pytest
 
 from dataclasses import replace
@@ -29,6 +32,11 @@ from tests.unit.application.services.run_manifest_test_support import (
 
 
 pytestmark = pytest.mark.unit
+
+
+def _entry_id_factory(prefix: str = "entry-historical") -> Callable[[], str]:
+    sequence = count(1)
+    return lambda: f"{prefix}-{next(sequence)}"
 
 
 def _make_source_manifest() -> RunManifest:
@@ -95,6 +103,7 @@ def test_closure_report_blocks_claim_without_explicit_residual_dispositions() ->
             certification_service=HistoricalReplayCertificationService(
                 manifest_port=manifest_store,
                 ledger_port=ledger_store,
+                entry_id_factory=_entry_id_factory("entry-closure-gap"),
             ),
         )
     )
@@ -123,6 +132,7 @@ def test_closure_report_supports_global_claim_after_bulk_certification() -> None
         certification_service=HistoricalReplayCertificationService(
             manifest_port=manifest_store,
             ledger_port=ledger_store,
+            entry_id_factory=_entry_id_factory("entry-closure-certification"),
         ),
     )
     closure_service = HistoricalReplayClosureService(corpus_service=corpus_service)
@@ -204,6 +214,7 @@ def test_closure_report_classifies_irrecoverable_legacy_subset() -> None:
             certification_service=HistoricalReplayCertificationService(
                 manifest_port=manifest_store,
                 ledger_port=ledger_store,
+                entry_id_factory=_entry_id_factory("entry-closure-residual"),
             ),
         )
     )
@@ -238,6 +249,7 @@ def test_closure_report_can_flip_claim_for_narrowed_certifiable_scope() -> None:
             certification_service=HistoricalReplayCertificationService(
                 manifest_port=manifest_store,
                 ledger_port=ledger_store,
+                entry_id_factory=_entry_id_factory("entry-closure-complete"),
             ),
         )
     )
