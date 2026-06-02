@@ -148,7 +148,9 @@ class TestPortRuntimeCheckable:
         ALL_PORT_PROTOCOLS,
         ids=lambda cls: cls.__name__,
     )
-    def test_port_runtime_checkable__is_runtime_checkable__0b67223e(self, protocol_cls: type) -> None:
+    def test_port_runtime_checkable__is_runtime_checkable__0b67223e(
+        self, protocol_cls: type
+    ) -> None:
         """Each protocol MUST be @runtime_checkable per TYPE-004."""
         assert hasattr(protocol_cls, "__protocol_attrs__") or hasattr(
             protocol_cls, "_is_runtime_protocol"

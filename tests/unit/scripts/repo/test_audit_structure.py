@@ -13,6 +13,7 @@ from scripts.engineering.diagnostics import audit_structure as module
 
 pytestmark = pytest.mark.unit
 
+
 def _write_governance_files(tmp_path: Path) -> None:
     allowlist_path = tmp_path / ".github" / "root-allowlist.txt"
     allowlist_path.parent.mkdir(parents=True)

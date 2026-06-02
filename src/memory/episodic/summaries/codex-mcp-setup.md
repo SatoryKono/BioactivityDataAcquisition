@@ -1,25 +1,25 @@
 ---
 id: codex-mcp-setup
-title: Configure MCP for Codex runtime
+title: Setup MCP for Codex
 task_id: codex-mcp-setup
-created_at: '2026-05-24T12:07:13Z'
+created_at: '2026-06-02T06:06:55Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- .mcp.json
-summary: Verified BioETL MCP workspace and global Codex MCP configuration are already
-  synchronized; no file changes were required.
+- scripts/ai/codex/setup_mcp.py
+summary: Synchronized workspace MCP files and ~/.codex/config.toml; validated JSON
+  surfaces and ensure-mcp check; skipped codex mcp list due documented hang.
 ---
 
 # Episodic summary
 
 ## Task
 
-- Title: Configure MCP for Codex runtime
+- Title: Setup MCP for Codex
 
 ## Outcome
 
-- Verified BioETL MCP workspace and global Codex MCP configuration are already synchronized; no file changes were required.
+- Synchronized workspace MCP files and ~/.codex/config.toml; validated JSON surfaces and ensure-mcp check; skipped codex mcp list due documented hang.
 
 ## Lessons learned
 

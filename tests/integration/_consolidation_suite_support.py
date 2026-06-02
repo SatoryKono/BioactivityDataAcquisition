@@ -27,7 +27,7 @@ def patch_quarantine_adapter_for_cached_fixture_replay(
 ) -> None:
     """Avoid quarantine-delta side effects during cached fixture replays."""
 
-    async def _write_many_without_delta(self, records):  # noqa: ANN001
+    async def _write_many_without_delta(self, records):
         stored = getattr(self, "_test_quarantine_records", [])
         stored.extend([self._normalize_record(record) for record in records])
         self._test_quarantine_records = stored

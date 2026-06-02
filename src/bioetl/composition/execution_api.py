@@ -6,30 +6,6 @@ from collections.abc import Mapping
 from importlib import import_module
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from datetime import datetime
-
-    from bioetl.application.services.execution.pipeline_runner_models import (
-        PipelineRunResult as PipelineRunResult,
-    )
-    from bioetl.application.services.execution.pipeline_runner_models import (
-        RunOptions as RunOptions,
-    )
-    from bioetl.application.services.execution.pipeline_runner_models import (
-        RunResult as RunResult,
-    )
-    from bioetl.application.services.execution.pipeline_runner_service import (
-        PipelineRunnerService as PipelineRunnerService,
-    )
-    from bioetl.composition._pipeline_execution import ArchiveOptions as ArchiveOptions
-    from bioetl.composition._pipeline_execution import VacuumOptions as VacuumOptions
-    from bioetl.composition.bootstrap.runtime.observability import (
-        maybe_start_metrics_server as maybe_start_metrics_server,
-    )
-    from bioetl.composition.registry_api import PipelineRegistry
-    from bioetl.domain.context import PipelineRunContext
-    from bioetl.domain.ports import ClockPort, ExecutionMetricsRunnerPort
-
 _PIPELINE_EXECUTION_MODULE = "bioetl.composition._pipeline_execution"
 _PIPELINE_RUNNER_MODELS_MODULE = (
     "bioetl.application.services.execution.pipeline_runner_models"
@@ -68,24 +44,26 @@ if TYPE_CHECKING:
 
     def build_pipeline_context(
         name: str,
-        options: RunOptions,
+        options: "RunOptions",
         *,
-        clock: ClockPort | None = None,
-        started_at: datetime | None = None,
-    ) -> PipelineRunContext: ...
+        run_id: "RunID | UUID | str | None" = None,
+        run_id_factory: "Callable[[], RunID | UUID | str] | None" = None,
+        clock: "ClockPort | None" = None,
+        started_at: "datetime | None" = None,
+    ) -> "PipelineRunContext": ...
 
     def create_pipeline_runner(
         name: str,
-        options: RunOptions,
-    ) -> ExecutionMetricsRunnerPort: ...
+        options: "RunOptions",
+    ) -> "ExecutionMetricsRunnerPort": ...
 
     def ensure_metrics_server_started() -> bool: ...
 
     def get_pipeline_runner_service(
-        registry: PipelineRegistry | None = None,
-    ) -> PipelineRunnerService: ...
+        registry: "PipelineRegistry | None" = None,
+    ) -> "PipelineRunnerService": ...
 
-    async def run_pipeline(name: str, options: RunOptions) -> RunResult: ...
+    async def run_pipeline(name: str, options: "RunOptions") -> "RunResult": ...
 
 
 def push_metrics_to_gateway(

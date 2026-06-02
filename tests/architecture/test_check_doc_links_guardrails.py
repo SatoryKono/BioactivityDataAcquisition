@@ -12,6 +12,7 @@ import pytest
 
 pytestmark = pytest.mark.architecture
 
+
 def _load_module() -> ModuleType:
     module = importlib.import_module("scripts.docs.checks.check_links")
     return importlib.reload(module)

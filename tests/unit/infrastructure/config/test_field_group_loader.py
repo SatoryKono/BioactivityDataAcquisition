@@ -16,6 +16,7 @@ from bioetl.infrastructure.config.field_group_loader import (
 
 pytestmark = pytest.mark.unit
 
+
 @pytest.fixture()
 def tmp_config(tmp_path: Path) -> Path:
     """Create a minimal valid field group config file."""
@@ -76,7 +77,9 @@ class TestLoadFieldGroups:
         assert registry.field_count == 3
         assert len(registry.groups) == 3
 
-    def test_load_field_groups__provider_order__bf716b98(self, tmp_config: Path) -> None:
+    def test_load_field_groups__provider_order__bf716b98(
+        self, tmp_config: Path
+    ) -> None:
         registry = load_field_groups(tmp_config)
         assert registry.provider_order == ("chembl", "crossref")
 
@@ -225,7 +228,7 @@ class TestLoadRealConfig:
         if not real_config_path.exists():
             pytest.skip("Real config not available")
 
-        from bioetl.domain.value_objects._publication_field_group_types import (
+        from bioetl.domain.value_objects.publication_field_group_types import (
             FIELD_TO_GROUP_MAPPING,
         )
 

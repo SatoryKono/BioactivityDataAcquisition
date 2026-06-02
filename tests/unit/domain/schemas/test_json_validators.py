@@ -15,6 +15,7 @@ from bioetl.domain.schemas.validators import (
 
 pytestmark = pytest.mark.unit
 
+
 class TestRowsAreValidJson:
     """Tests for rows_are_valid_json validator."""
 

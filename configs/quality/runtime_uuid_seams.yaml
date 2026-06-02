@@ -21,16 +21,24 @@ review_history:
     owner: architecture-governance
     outcome: deterministic_factory_evidence_confirmed
     rationale: Runtime UUID seam count fell from 14 to 13 after the obsolete observability smoke seam was removed, replay-critical random identity remains zero, and retained application/composition seams have targeted deterministic factory or explicit run_id coverage in the referenced guard tests.
+  - issue: "#4975"
+    reviewed_on: "2026-06-02"
+    owner: architecture-governance
+    outcome: replay_identity_fail_closed_enforced
+    rationale: Exact replay application and composition seams now fail closed without explicit run_id or injected run_id_factory, while residual uuid4 seams remain classified as operational-only defaults or injectable factories.
 deterministic_factory_evidence:
   issue: "#4968"
   required_policy: retained UUID seams must either accept explicit IDs or expose injectable factories in tests used for exact replay coverage.
   guard_tests:
+    - tests/unit/application/services/test_pipeline_runner_service.py
     - tests/unit/application/services/test_run_manifest_service.py
     - tests/unit/application/services/test_run_ledger_service.py
     - tests/unit/application/services/control_plane/test_workflow_execution_service.py
     - tests/unit/application/test_base_pipeline.py
+    - tests/unit/composition/test_entrypoints.py
     - tests/unit/composition/bootstrap/runtime/test_runtime_basics.py
     - tests/unit/composition/bootstrap/runtime/test_pipeline_context_builder.py
+    - tests/unit/composition/bootstrap/runtime/test_runner_assembly_bootstrap.py
     - tests/unit/composition/bootstrap/runtime/test_logger_bootstrap.py
     - tests/unit/composition/bootstrap/runtime/test_composite_bootstrap_builders.py
     - tests/unit/composition/factories/services/test_runtime_managers.py
@@ -81,14 +89,14 @@ seams:
     owner: workflow-control-plane
     migration_policy: inject deterministic event_id_factory for replay-critical workflow ledgers.
   - path: src/bioetl/application/services/execution/pipeline_runner_service.py
-    line: 145
+    line: 112
     kind: call
     symbol: uuid4
     layer: application
     classification: operational_runtime_default_run_id
     replay_critical: false
     owner: pipeline-runtime
-    migration_policy: require explicit run_id for exact replay and avoid generated IDs in deterministic contracts.
+    migration_policy: exact replay requires explicit run_id; fail closed and avoid generated IDs in deterministic contracts.
   - path: src/bioetl/composition/bootstrap/cli/storage.py
     line: 74
     kind: call
@@ -106,7 +114,7 @@ seams:
     classification: composition_default_run_id
     replay_critical: false
     owner: runtime-composition
-    migration_policy: exact replay must provide run_id before assembly.
+    migration_policy: control-plane-attached exact replay must provide run_id before assembly.
   - path: src/bioetl/composition/bootstrap/runtime/composite.py
     line: 161
     kind: factory
@@ -126,14 +134,14 @@ seams:
     owner: observability
     migration_policy: use caller-supplied run_id for replay logs that participate in golden artifacts.
   - path: src/bioetl/composition/bootstrap/runtime/pipeline_context_builder.py
-    line: 87
+    line: 92
     kind: call
     symbol: uuid4
     layer: composition
     classification: fallback_pipeline_context_run_id
     replay_critical: false
     owner: runtime-composition
-    migration_policy: exact replay must pass explicit run_id into pipeline context construction.
+    migration_policy: exact replay must pass explicit run_id or run_id_factory into pipeline context construction.
   - path: src/bioetl/composition/bootstrap/runtime/runner.py
     line: 56
     kind: call

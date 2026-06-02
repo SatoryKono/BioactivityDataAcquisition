@@ -305,13 +305,17 @@ class TestStorageBundleClose:
     """Tests for aclose method."""
 
     @pytest.mark.asyncio
-    async def test_storage_bundle_close__aclose__a7cd7e53(self, storage_adapter: StorageBundle) -> None:
+    async def test_storage_bundle_close__aclose__a7cd7e53(
+        self, storage_adapter: StorageBundle
+    ) -> None:
         """Test aclose completes without error."""
         # Should not raise
         await storage_adapter.aclose()
 
     @pytest.mark.asyncio
-    async def test_storage_bundle_close__aclose_is_noop__ee03f62b(self, storage_adapter: StorageBundle) -> None:
+    async def test_storage_bundle_close__aclose_is_noop__ee03f62b(
+        self, storage_adapter: StorageBundle
+    ) -> None:
         """Test aclose is a no-op (writers don't need cleanup)."""
         # Can be called multiple times
         await storage_adapter.aclose()

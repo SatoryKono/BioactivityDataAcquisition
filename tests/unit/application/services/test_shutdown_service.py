@@ -61,7 +61,9 @@ def shutdown_service(logger: MockLogger, metrics: MockMetrics) -> ShutdownServic
 class TestShutdownService:
     """Tests for ShutdownService class."""
 
-    def test_shutdown_service__initial_state__14a3ee1a(self, shutdown_service: ShutdownService):
+    def test_shutdown_service__initial_state__14a3ee1a(
+        self, shutdown_service: ShutdownService
+    ):
         """Test initial state is not shutting down."""
         assert shutdown_service.is_shutting_down() is False
         assert shutdown_service.reason == ShutdownReason.UNKNOWN

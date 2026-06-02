@@ -205,14 +205,14 @@ retained_entrypoints:
   introduced_in: legacy-pre-2026-05
   review_date: '2026-09-30'
   external_breaking_change_required: true
-  internal_callers_zero: false
-  allowed_call_sites: '`src`: use the package-root config facade only for reviewed convenience symbols and keep new imports
-    bounded by the dedicated root-facade inventory. `tests`: public package-root imports may appear in runtime/config contract
-    coverage, while deeper loader modules remain the owner path for focused implementation tests.'
-  migration_path: Use `bioetl.infrastructure.config` only for the sanctioned convenience exports and prefer owner loader modules
-    when no reviewed facade symbol is needed.
-  exit_criteria: The package-root convenience facade remains the sanctioned public import seam, its reviewed export budget
-    stays bounded, and symbol-level import growth remains governed by the dedicated root-facade inventory.
+  internal_callers_zero: true
+  allowed_call_sites: '`src`: ordinary first-party imports should prefer owner config modules; the package-root facade stays
+    reserved for reviewed convenience/contract coverage only. `tests`: public package-root imports may appear in runtime/config
+    contract coverage, while deeper loader modules remain the owner path for focused implementation tests.'
+  migration_path: Keep `bioetl.infrastructure.config` as the sanctioned external convenience seam, but route first-party runtime
+    code through owner modules whenever no reviewed package-root convenience symbol is explicitly required.
+  exit_criteria: The package-root convenience facade remains the sanctioned public import seam, first-party `src/` imports
+    stay at zero, and symbol-level import growth remains governed by the dedicated root-facade inventory.
   public_export_contract:
     max_public_exports: 18
     parse_dunder_getattr_string_branches: true
@@ -266,20 +266,20 @@ retained_entrypoints:
   exit_criteria: The merge module remains the sanctioned public seam and all composition paths use collaborator bundles with
     only the canonical `order_service` ordering collaborator.
 measured_only_ratchet:
-  max_total_modules: 8
+  max_total_modules: 0
   scoped_limits:
   - path_prefix: src/bioetl/application/core/
-    max_modules: 2
+    max_modules: 0
   - path_prefix: src/bioetl/application/services/
     max_modules: 0
   - path_prefix: src/bioetl/composition/factories/storage/
-    max_modules: 2
+    max_modules: 0
   - path_prefix: src/bioetl/domain/normalization/profiles/
-    max_modules: 2
+    max_modules: 0
   - path_prefix: src/bioetl/domain/value_objects/
-    max_modules: 1
+    max_modules: 0
   - path_prefix: src/bioetl/infrastructure/adapters/
-    max_modules: 1
+    max_modules: 0
   - path_prefix: src/bioetl/interfaces/cli/commands/
     max_modules: 0
 measured_only_review_workflow:
@@ -377,11 +377,11 @@ retained_entrypoint_burn_down_plan:
     completion_gate: Route first-party maintenance/archive/cleanup/vacuum call sites through the reviewed facade exports only
       and keep deeper composition owner modules as implementation details.
   - path: src/bioetl/infrastructure/config/__init__.py
-    phase: narrow-first-party-callers
-    target_state: narrow_first_party_callers
-    rationale: Public package-root facade remains, but first-party imports must continue migrating to canonical modules.
-    completion_gate: Hold the package-root facade as external convenience API while first-party `src/` imports continue ratcheting
-      downward through the dedicated root-facade inventory.
+    phase: enforce
+    target_state: retain_as_stable_public_api
+    rationale: Public package-root facade remains as a stable external convenience seam after first-party callers were eliminated.
+    completion_gate: Keep the package-root convenience facade stable, hold first-party `src/` imports at zero, and block regression
+      back to internal runtime usage through the dedicated root-facade inventory.
   - path: src/bioetl/domain/composite/config.py
     phase: enforce
     target_state: retain_as_stable_public_api
@@ -400,52 +400,4 @@ retained_entrypoint_burn_down_plan:
     rationale: Public composite merge module; retained while collaborator bundle API is canonical.
     completion_gate: Keep the sanctioned merge entrypoint stable and prevent first-party callers from bypassing the collaborator
       bundle/canonical merge surface.
-measured_only_modules:
-- path: src/bioetl/application/core/_span_helpers.py
-  owner: bioetl.application.core
-  reason: Backward-compatible re-export facade retained as a measured-only shim for span helper imports during compatibility review.
-  review_date: '2026-09-30'
-  new_code_policy: no-new-first-party-imports
-  promotion_trigger: sanctioned-public-seam
-- path: src/bioetl/application/core/batch_execution/_contracts.py
-  owner: bioetl.application.core.batch_execution
-  reason: Backward-compatible re-export facade retained as a measured-only shim for batch execution contracts imports during compatibility review.
-  review_date: '2026-09-30'
-  new_code_policy: no-new-first-party-imports
-  promotion_trigger: sanctioned-public-seam
-- path: src/bioetl/composition/factories/storage/_audit.py
-  owner: bioetl.composition.factories.storage
-  reason: Backward-compatible re-export facade retained as a measured-only shim for storage audit factory imports during compatibility review.
-  review_date: '2026-09-30'
-  new_code_policy: no-new-first-party-imports
-  promotion_trigger: sanctioned-public-seam
-- path: src/bioetl/composition/factories/storage/_resilience.py
-  owner: bioetl.composition.factories.storage
-  reason: Backward-compatible re-export facade retained as a measured-only shim for storage resilience factory imports during compatibility review.
-  review_date: '2026-09-30'
-  new_code_policy: no-new-first-party-imports
-  promotion_trigger: sanctioned-public-seam
-- path: src/bioetl/domain/normalization/profiles/_chembl_policy_registry.py
-  owner: bioetl.domain.normalization.profiles
-  reason: Backward-compatible re-export facade retained as a measured-only shim for ChEMBL policy registry imports during compatibility review.
-  review_date: '2026-09-30'
-  new_code_policy: no-new-first-party-imports
-  promotion_trigger: sanctioned-public-seam
-- path: src/bioetl/domain/normalization/profiles/_chembl_policy_registry_data.py
-  owner: bioetl.domain.normalization.profiles
-  reason: Backward-compatible re-export facade retained as a measured-only shim for ChEMBL policy registry payload imports during compatibility review.
-  review_date: '2026-09-30'
-  new_code_policy: no-new-first-party-imports
-  promotion_trigger: sanctioned-public-seam
-- path: src/bioetl/domain/value_objects/_publication_field_group_types.py
-  owner: bioetl.domain.value_objects
-  reason: Backward-compatible re-export facade retained as a measured-only shim for publication field-group type imports during compatibility review.
-  review_date: '2026-09-30'
-  new_code_policy: no-new-first-party-imports
-  promotion_trigger: sanctioned-public-seam
-- path: src/bioetl/infrastructure/adapters/_circuit_breaker_contract.py
-  owner: bioetl.infrastructure.adapters
-  reason: Backward-compatible re-export facade retained as a measured-only shim for circuit breaker contract imports during compatibility review.
-  review_date: '2026-09-30'
-  new_code_policy: no-new-first-party-imports
-  promotion_trigger: sanctioned-public-seam
+measured_only_modules: []

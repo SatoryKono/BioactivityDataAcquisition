@@ -13,6 +13,7 @@ from tests.helpers import assert_cli_succeeded, run_main_in_process
 
 pytestmark = pytest.mark.unit
 
+
 def test_docs_cli_generate_pipeline_normalization_matrix_help_smoke() -> None:
     spec = docs_router.COMMAND_SPECS["generate-pipeline-normalization-matrix"]
     assert spec.runner == "module"

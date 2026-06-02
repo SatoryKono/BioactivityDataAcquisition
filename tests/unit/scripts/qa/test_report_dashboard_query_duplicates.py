@@ -16,6 +16,7 @@ from tests.helpers.cli_process import assert_cli_succeeded, run_python_cli
 
 pytestmark = pytest.mark.unit
 
+
 def test_build_exact_duplicate_groups_collects_cross_panel_reuse() -> None:
     query_uses = (
         QueryUse(

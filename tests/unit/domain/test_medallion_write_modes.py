@@ -102,7 +102,9 @@ class TestGoldWriteMode:
             GoldWriteMode.from_string("bad_mode")
 
     @pytest.mark.parametrize("value", ["append", "scd2", "overwrite"])
-    def test_modes_gold_write_mode__string_roundtrip__26c2895d(self, value: str) -> None:
+    def test_modes_gold_write_mode__string_roundtrip__26c2895d(
+        self, value: str
+    ) -> None:
         """Test that from_string is inverse of .value."""
         mode = GoldWriteMode.from_string(value)
         assert mode.value == value

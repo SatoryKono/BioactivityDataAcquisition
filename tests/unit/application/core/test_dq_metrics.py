@@ -12,6 +12,7 @@ from bioetl.domain.types import ErrorType
 
 pytestmark = pytest.mark.unit
 
+
 def test_batch_metrics_quarantined_tracking():
     """Test that track_quarantined_records increments the correct metric."""
     mock_metrics = MagicMock()

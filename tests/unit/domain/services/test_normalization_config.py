@@ -13,6 +13,7 @@ from bioetl.domain.behavior.normalization_config import (
 
 pytestmark = pytest.mark.unit
 
+
 class TestConcentrationRangeConfig:
     """Tests for ConcentrationRangeConfig."""
 

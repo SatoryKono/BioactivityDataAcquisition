@@ -25,6 +25,7 @@ from bioetl.domain.value_objects.dq_report import (
 
 pytestmark = pytest.mark.unit
 
+
 def _build_executor() -> tuple[SilverCheckExecutor, MagicMock, MagicMock]:
     statistics = MagicMock()
     threshold_checker = MagicMock()

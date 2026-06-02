@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
+from uuid import uuid4
 
 from bioetl.application.runtime_timestamps import (
     capture_runtime_timing_anchor,
@@ -166,6 +167,7 @@ def create_pipeline_runner(
     run_context = build_pipeline_context(
         name,
         options,
+        run_id_factory=uuid4 if options.exact_replay else None,
         clock=SystemClock(),
     )
     return _create_pipeline_runner_from_context(run_context)
@@ -200,6 +202,7 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
     run_context = build_pipeline_context(
         name,
         options,
+        run_id_factory=uuid4 if options.exact_replay else None,
         clock=SystemClock(),
     )
     started_at, started_monotonic = capture_runtime_timing_anchor(

@@ -13,6 +13,7 @@ from bioetl.domain.types import RunID, RunType
 
 pytestmark = pytest.mark.unit
 
+
 def _make_manifest(
     *,
     launch_context: dict[str, object] | None = None,

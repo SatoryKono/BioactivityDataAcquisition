@@ -57,17 +57,13 @@ class ChEMBLProteinClassificationGraph(ProteinClassificationPort):
         """Build a deterministic graph adapter from existing Silver rows."""
         nodes = {
             node.protein_class_id: node
-            for node in (
-                _node_from_row(row)
-                for row in protein_class_rows
-            )
+            for node in (_node_from_row(row) for row in protein_class_rows)
             if node is not None
         }
         component_leaf_ids = {
             component_id: leaf_ids
             for component_id, leaf_ids in (
-                _component_leaf_ids_from_row(row)
-                for row in target_component_rows
+                _component_leaf_ids_from_row(row) for row in target_component_rows
             )
             if component_id is not None
         }

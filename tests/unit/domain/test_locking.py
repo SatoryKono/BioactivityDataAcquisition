@@ -23,6 +23,7 @@ from bioetl.domain.types import RunID
 
 pytestmark = pytest.mark.unit
 
+
 @pytest.fixture
 def mock_logger() -> MagicMock:
     """Create a mock logger."""
@@ -195,7 +196,9 @@ class TestLockContext:
         assert ctx.fencing_token is not None
         assert ctx.fencing_token.sequence == 5
 
-    def test_locking_lock_context__immutability__038767c5(self, valid_lock_context: LockContext) -> None:
+    def test_locking_lock_context__immutability__038767c5(
+        self, valid_lock_context: LockContext
+    ) -> None:
         """Test that LockContext is immutable (frozen dataclass)."""
         with pytest.raises(AttributeError):
             valid_lock_context.key = "modified"  # type: ignore[misc]

@@ -156,9 +156,7 @@ def test_specialized_duplication_markdown_matches_json_payload() -> None:
         expected_markdown = _render_markdown(
             [_single_report_from_payload(payload)],
             exclude_module_patterns=tuple(
-                pattern
-                for pattern in exclude_patterns
-                if isinstance(pattern, str)
+                pattern for pattern in exclude_patterns if isinstance(pattern, str)
             ),
             trend_summary=payload.get("trend")
             if isinstance(payload.get("trend"), dict)

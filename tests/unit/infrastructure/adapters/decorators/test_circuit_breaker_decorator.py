@@ -30,6 +30,7 @@ from bioetl.infrastructure.adapters.decorators.circuit_breaker import (
 
 pytestmark = pytest.mark.unit
 
+
 class MockDataSource:
     """Mock data source for testing decorators."""
 

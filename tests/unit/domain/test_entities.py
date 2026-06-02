@@ -1061,7 +1061,9 @@ class TestProteinClassification:
                 downgraded=2,
             )
 
-    def test_protein_classification__entity_is_frozen__7c6a49d1(self, base_entity_kwargs):
+    def test_protein_classification__entity_is_frozen__7c6a49d1(
+        self, base_entity_kwargs
+    ):
         """Test that ProteinClassification is immutable."""
         from bioetl.domain.entities import ProteinClassification
 

@@ -1076,7 +1076,9 @@ class TestAllPublicationSchemas:
             ),
         ],
     )
-    def test_publication_schemas__has_primary_key__26981c8d(self, schema, name, primary_key):
+    def test_publication_schemas__has_primary_key__26981c8d(
+        self, schema, name, primary_key
+    ):
         """Each publication schema must have its provider-specific primary key."""
         field_names = {f.name for f in schema}
         assert primary_key in field_names, f"{name} missing primary key: {primary_key}"

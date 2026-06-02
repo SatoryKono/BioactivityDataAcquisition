@@ -111,8 +111,7 @@ def test_grafana_uses_remote_renderer_sidecar() -> None:
         in renderer["environment"]
     )
     assert (
-        "BROWSER_FLAGS=--no-sandbox,--disable-dev-shm-usage"
-        in renderer["environment"]
+        "BROWSER_FLAGS=--no-sandbox,--disable-dev-shm-usage" in renderer["environment"]
     )
     assert (
         "GOMEMLIMIT=${GRAFANA_IMAGE_RENDERER_GOMEMLIMIT:-1GiB}"

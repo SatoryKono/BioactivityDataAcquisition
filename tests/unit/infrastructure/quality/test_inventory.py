@@ -18,6 +18,7 @@ from bioetl.infrastructure.quality.inventory import (
 
 pytestmark = pytest.mark.unit
 
+
 class TestExemptionInventorySummary:
     """Tests for ExemptionInventorySummary dataclass."""
 

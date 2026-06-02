@@ -176,7 +176,9 @@ class TestChEMBLPublicationPipeline:
         assert "_run_id" in result
 
     @pytest.mark.asyncio
-    async def test_l_publication_pipeline__to_silver_missing_id__f172be02(self, pipeline):
+    async def test_l_publication_pipeline__to_silver_missing_id__f172be02(
+        self, pipeline
+    ):
         """Test transformation returns None for missing ID."""
         record = {"title": "Test Document"}
 
@@ -230,7 +232,9 @@ class TestChEMBLMoleculePipeline:
         assert "_run_id" in result
 
     @pytest.mark.asyncio
-    async def test_b_l_molecule_pipeline__to_silver_missing_id__1f76351e(self, pipeline):
+    async def test_b_l_molecule_pipeline__to_silver_missing_id__1f76351e(
+        self, pipeline
+    ):
         """Test transformation returns None for missing ID."""
         record = {"pref_name": "ASPIRIN"}
 
@@ -284,7 +288,9 @@ class TestChEMBLTargetPipeline:
         assert "_run_id" in result
 
     @pytest.mark.asyncio
-    async def test_m_b_l_target_pipeline__to_silver_missing_id__c57d00f6(self, pipeline):
+    async def test_m_b_l_target_pipeline__to_silver_missing_id__c57d00f6(
+        self, pipeline
+    ):
         """Test transformation returns None for missing ID."""
         record = {"pref_name": "COX-2"}
 

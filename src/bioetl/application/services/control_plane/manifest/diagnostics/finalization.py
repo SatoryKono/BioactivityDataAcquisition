@@ -31,6 +31,7 @@ from bioetl.application.services.control_plane.run_manifest_reproducibility_scor
 if TYPE_CHECKING:
     from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 
+
 @dataclass(frozen=True, slots=True)
 class _LedgerEnrichedSummary:
     """Base summary after ledger-derived enrichment has been applied."""
@@ -145,13 +146,9 @@ def _process_ledger_diagnostics(
             violation_kinds=dq_violation_kinds,
             cross_validation_rule_ids=cross_validation_rule_ids,
             cross_validation_config_paths=cross_validation_config_paths,
-            cross_validation_quarantine_policies=(
-                cross_validation_quarantine_policies
-            ),
+            cross_validation_quarantine_policies=(cross_validation_quarantine_policies),
             cross_validation_replay_contracts=cross_validation_replay_contracts,
-            occurrence_only_diagnostic_scopes=(
-                occurrence_only_diagnostic_scopes
-            ),
+            occurrence_only_diagnostic_scopes=(occurrence_only_diagnostic_scopes),
             has_signal=dq_signal_present,
             has_cross_validation_signal=cross_validation_signal_present,
         ),

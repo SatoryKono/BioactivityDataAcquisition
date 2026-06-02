@@ -96,7 +96,11 @@ def _resolve_base_summary_replay_context(
         replay_family_contract=replay_family_contract,
     )
     replay_projection_context = _build_replay_projection_context_kwargs(
-        manifest, input_snapshots, requested_exact_replay, resume_requested, policy_assessment
+        manifest,
+        input_snapshots,
+        requested_exact_replay,
+        resume_requested,
+        policy_assessment,
     )
     replay_projection_bundle = _build_replay_projection_bundle(
         **replay_projection_context,

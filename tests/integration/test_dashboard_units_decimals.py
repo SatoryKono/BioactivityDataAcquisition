@@ -1,7 +1,5 @@
 """Integration tests for Grafana dashboard units and decimals consistency."""
 
-from pathlib import Path
-
 import pytest
 
 from tests.integration._grafana_test_support import (

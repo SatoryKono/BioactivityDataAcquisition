@@ -71,7 +71,9 @@ class TestUniProtIDMappingIntegration:
             logger=mock_logger,
         )
 
-    def test_uni_prot_i_d_mapping__provider_name__11bdae69(self, idmapping_client: Any) -> None:
+    def test_uni_prot_i_d_mapping__provider_name__11bdae69(
+        self, idmapping_client: Any
+    ) -> None:
         """Adapter should have correct provider name."""
         assert idmapping_client.provider_name == "uniprot_idmapping"
 

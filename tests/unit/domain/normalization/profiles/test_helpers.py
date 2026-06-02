@@ -24,6 +24,7 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_normalize_profile_text_trims_blank_to_none() -> None:
     assert normalize_profile_text("  x  ") == "x"
     assert normalize_profile_text("   ") is None

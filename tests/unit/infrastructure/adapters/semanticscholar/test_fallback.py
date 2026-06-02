@@ -99,7 +99,9 @@ class TestSemanticScholarTitleFallbackHandler:
         assert field_name == "found_paper_id"
         assert value == "abc123"
 
-    def test_title_fallback_handler__missing_id__73816fed(self, mock_logger, mock_http_client):
+    def test_title_fallback_handler__missing_id__73816fed(
+        self, mock_logger, mock_http_client
+    ):
         """Test result identifier with missing paper ID."""
         handler = SemanticScholarTitleFallbackHandler(
             http_client=mock_http_client,
@@ -112,7 +114,9 @@ class TestSemanticScholarTitleFallbackHandler:
         assert field_name == "found_paper_id"
         assert value == "unknown"
 
-    def test_title_fallback_handler__result_adds_metadata__3c1cb784(self, mock_logger, mock_http_client):
+    def test_title_fallback_handler__result_adds_metadata__3c1cb784(
+        self, mock_logger, mock_http_client
+    ):
         """Test that process_found_result adds lookup method metadata."""
         handler = SemanticScholarTitleFallbackHandler(
             http_client=mock_http_client,
@@ -181,7 +185,9 @@ class TestSemanticScholarTitleFallbackHandler:
         assert headers["x-api-key"] == "test-api-key"
 
     @pytest.mark.asyncio
-    async def test_title_fallback_handler__by_title_success__4f018c1f(self, mock_logger, mock_http_client):
+    async def test_title_fallback_handler__by_title_success__4f018c1f(
+        self, mock_logger, mock_http_client
+    ):
         """Test successful title search."""
         mock_http_client.get_once.return_value = create_mock_response(
             [{"paperId": "abc123", "title": "Crystal structure of rhodopsin"}]
@@ -312,7 +318,9 @@ class TestProcessMissingDois:
     """Tests for process_missing_dois method."""
 
     @pytest.mark.asyncio
-    async def test_process_missing_dois__missing_dois_success__8aeb7ab0(self, mock_logger, mock_http_client):
+    async def test_process_missing_dois__missing_dois_success__8aeb7ab0(
+        self, mock_logger, mock_http_client
+    ):
         """Test processing missing DOIs with successful fallback."""
         mock_http_client.get_once.return_value = create_mock_response(
             [{"paperId": "abc123", "title": "Crystal structure of rhodopsin"}]
@@ -378,7 +386,9 @@ class TestProcessTitleOnlyEntries:
     """Tests for process_title_only_entries method."""
 
     @pytest.mark.asyncio
-    async def test_title_only_entries__title_only_success__bc9abce2(self, mock_logger, mock_http_client):
+    async def test_title_only_entries__title_only_success__bc9abce2(
+        self, mock_logger, mock_http_client
+    ):
         """Test processing title-only entries with successful search."""
         mock_http_client.get_once.return_value = create_mock_response(
             [{"paperId": "abc123", "title": "Crystal structure of rhodopsin"}]
@@ -407,7 +417,9 @@ class TestProcessTitleOnlyEntries:
         assert results[0]["_lookup_method"] == "title_only"
 
     @pytest.mark.asyncio
-    async def test_title_only_entries__only_no_mapping__d30dbb1a(self, mock_logger, mock_http_client):
+    async def test_title_only_entries__only_no_mapping__d30dbb1a(
+        self, mock_logger, mock_http_client
+    ):
         """Test title-only processing with no title mapping."""
         handler = SemanticScholarTitleFallbackHandler(
             http_client=mock_http_client,

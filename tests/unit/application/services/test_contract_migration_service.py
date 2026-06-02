@@ -15,6 +15,7 @@ from bioetl.application.services.contract_migration_service import (
 
 pytestmark = pytest.mark.unit
 
+
 @dataclass(frozen=True, slots=True)
 class _Policy:
     contract_ref: str

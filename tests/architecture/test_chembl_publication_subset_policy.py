@@ -39,6 +39,20 @@ def chembl_publication_entity_config() -> dict[str, Any]:
         return yaml.safe_load(f)
 
 
+@pytest.fixture(scope="module")
+def _chembl_enum_config(chembl_enum_config: dict[str, Any]) -> dict[str, Any]:
+    """Backward-compatible alias for tests that still request the private name."""
+    return chembl_enum_config
+
+
+@pytest.fixture(scope="module")
+def _chembl_publication_entity_config(
+    chembl_publication_entity_config: dict[str, Any],
+) -> dict[str, Any]:
+    """Backward-compatible alias for tests that still request the private name."""
+    return chembl_publication_entity_config
+
+
 class TestGlobalPublicationTaxonomy:
     """Global publication type taxonomy must remain broad and cross-provider."""
 
@@ -87,7 +101,7 @@ class TestGlobalPublicationTaxonomy:
         )
 
     def test_global_taxonomy_documentation_exists(
-        self, chembl_enum_config: dict[str, Any]
+        self, _chembl_enum_config: dict[str, Any]
     ) -> None:
         """Global enum must document cross-provider scope."""
         # The YAML should have a comment section explaining global scope
@@ -324,7 +338,7 @@ class TestFilterSubsetGovernance:
 
     def test_filter_comments_document_source_specific_scope(
         self,
-        chembl_publication_entity_config: dict[str, Any],
+        _chembl_publication_entity_config: dict[str, Any],
     ) -> None:
         """Filter config YAML must have comments documenting source-specific scope."""
         yaml_path = Path("configs/entities/chembl/publication.yaml")

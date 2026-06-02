@@ -19,6 +19,7 @@ from bioetl.domain.workflow import TransformStepConfig, WorkflowTransformSpec
 
 pytestmark = pytest.mark.unit
 
+
 @dataclass
 class _RecordingPort:
     request: ForeignKeyReconciliationRequest | None = None
@@ -165,10 +166,14 @@ async def test_executor_passes_workflow_name_to_request() -> None:
     await executor(
         spec,
         upstream_outputs={},
-        runtime_context=type("_RuntimeContext", (), {
-            "dry_run": False,
-            "workflow_name": "chembl_baseline",
-        })(),
+        runtime_context=type(
+            "_RuntimeContext",
+            (),
+            {
+                "dry_run": False,
+                "workflow_name": "chembl_baseline",
+            },
+        )(),
     )
 
     assert port.request is not None

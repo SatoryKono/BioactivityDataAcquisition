@@ -14,6 +14,7 @@ from bioetl.domain.types.dq_contracts import DQDisposition, DQRuleProvenance
 
 pytestmark = pytest.mark.unit
 
+
 class TestSilverMetadataInputExtended:
     """Test extended SilverMetadataInput with DQ provenance."""
 

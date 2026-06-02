@@ -13,6 +13,7 @@ from bioetl.domain.contracts.gold._publication_common_schema import (
 
 pytestmark = pytest.mark.unit
 
+
 def _publication_gold_frame(**overrides: object) -> pd.DataFrame:
     record: dict[str, object] = {
         "entity_id": "publication:1",

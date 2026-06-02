@@ -14,6 +14,7 @@ from tests.helpers.clock import FIXED_TEST_TIME
 
 pytestmark = pytest.mark.unit
 
+
 def _utcnow_iso() -> str:
     """Return an aware UTC timestamp string for test fixtures."""
     return FIXED_TEST_TIME.isoformat()

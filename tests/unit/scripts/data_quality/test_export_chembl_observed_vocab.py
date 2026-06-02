@@ -17,6 +17,7 @@ from scripts.data_quality.export_chembl_observed_vocab import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_build_inventory_payload_scans_all_tracked_chembl_pipelines() -> None:
     payload = build_inventory_payload()
 

@@ -19,6 +19,7 @@ from bioetl.domain.value_objects.dq_report import DQCheckStatus
 
 pytestmark = pytest.mark.unit
 
+
 class TestStatisticalProfileExtended:
     """Extended tests for check_statistical_profile."""
 

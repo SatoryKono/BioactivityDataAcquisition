@@ -16,6 +16,7 @@ from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 
 pytestmark = pytest.mark.unit
 
+
 def _build_composite_config() -> CompositeConfig:
     return CompositeConfig(
         name="composite_publication",

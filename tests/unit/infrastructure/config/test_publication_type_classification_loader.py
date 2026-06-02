@@ -107,7 +107,9 @@ class TestPublicationTypeClassificationLoader:
         assert "journal article" in result.pubmed_row_index
         assert "journalarticle" in result.s2_row_index
 
-    def test_classification_loader__missing_file_raises__2379d0b1(self, tmp_path: Path) -> None:
+    def test_classification_loader__missing_file_raises__2379d0b1(
+        self, tmp_path: Path
+    ) -> None:
         """Should raise when asset file is missing."""
         loader = PublicationTypeClassificationLoader(tmp_path)
         with pytest.raises(FileNotFoundError):

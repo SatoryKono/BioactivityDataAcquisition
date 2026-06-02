@@ -18,7 +18,9 @@ from bioetl.domain.schemas.crossref.publication import PublicationEnrichedSchema
 class TestPmidBaseValidation:
     """Base validation tests for pmid."""
 
-    def test_pmid_base_validation__pmid_valid__77c2c37c(self, minimal_crossref_publication_df: pd.DataFrame) -> None:
+    def test_pmid_base_validation__pmid_valid__77c2c37c(
+        self, minimal_crossref_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid pmid value."""
         PublicationEnrichedSchema.validate(minimal_crossref_publication_df)
 
@@ -45,7 +47,9 @@ class TestPmidBaseValidation:
 class TestDoiBaseValidation:
     """Base validation tests for doi."""
 
-    def test_doi_base_validation__doi_valid__f143cd01(self, minimal_crossref_publication_df: pd.DataFrame) -> None:
+    def test_doi_base_validation__doi_valid__f143cd01(
+        self, minimal_crossref_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid doi value."""
         PublicationEnrichedSchema.validate(minimal_crossref_publication_df)
 
@@ -75,7 +79,9 @@ class TestDoiBaseValidation:
 class TestPmcIdBaseValidation:
     """Base validation tests for pmc_id."""
 
-    def test_case__0042f6ce3d(self, minimal_crossref_publication_df: pd.DataFrame) -> None:
+    def test_case__0042f6ce3d(
+        self, minimal_crossref_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid pmc_id value."""
         PublicationEnrichedSchema.validate(minimal_crossref_publication_df)
 
@@ -102,7 +108,9 @@ class TestPmcIdBaseValidation:
 class TestTitleBaseValidation:
     """Base validation tests for title."""
 
-    def test_title_base_validation__title_valid__9212699c(self, minimal_crossref_publication_df: pd.DataFrame) -> None:
+    def test_title_base_validation__title_valid__9212699c(
+        self, minimal_crossref_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid title value."""
         PublicationEnrichedSchema.validate(minimal_crossref_publication_df)
 
@@ -138,7 +146,9 @@ class TestAbstractBaseValidation:
 class TestAuthorsBaseValidation:
     """Base validation tests for authors."""
 
-    def test_base_validation__authors_valid__6cee2354(self, minimal_crossref_publication_df: pd.DataFrame) -> None:
+    def test_base_validation__authors_valid__6cee2354(
+        self, minimal_crossref_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid authors value."""
         PublicationEnrichedSchema.validate(minimal_crossref_publication_df)
 
@@ -174,7 +184,9 @@ class TestAffiliationListBaseValidation:
 class TestJournalBaseValidation:
     """Base validation tests for journal."""
 
-    def test_base_validation__journal_valid__80012fa6(self, minimal_crossref_publication_df: pd.DataFrame) -> None:
+    def test_base_validation__journal_valid__80012fa6(
+        self, minimal_crossref_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid journal value."""
         PublicationEnrichedSchema.validate(minimal_crossref_publication_df)
 
@@ -343,7 +355,9 @@ class TestCitationsMadeBaseValidation:
 class TestIsOaBaseValidation:
     """Base validation tests for is_oa."""
 
-    def test_is_oa_base_validation__is_oa_valid__9f5fed37(self, minimal_crossref_publication_df: pd.DataFrame) -> None:
+    def test_is_oa_base_validation__is_oa_valid__9f5fed37(
+        self, minimal_crossref_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid is_oa value."""
         PublicationEnrichedSchema.validate(minimal_crossref_publication_df)
 
@@ -398,7 +412,9 @@ class TestOriginalIdBaseValidation:
 class TestSourceBaseValidation:
     """Base validation tests for _source."""
 
-    def test_case__1b0fd79195(self, minimal_crossref_publication_df: pd.DataFrame) -> None:
+    def test_case__1b0fd79195(
+        self, minimal_crossref_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid _source value."""
         PublicationEnrichedSchema.validate(minimal_crossref_publication_df)
 

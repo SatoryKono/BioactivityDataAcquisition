@@ -9,6 +9,7 @@ from bioetl.infrastructure.observability.logging_helpers import log_debug, log_e
 
 pytestmark = pytest.mark.unit
 
+
 def test_log_error():
     """Test log_error function."""
     logger = MagicMock()

@@ -18,6 +18,7 @@ from bioetl.infrastructure.adapters.common.api_request_collector import (
 
 pytestmark = pytest.mark.unit
 
+
 class TestAPIRequestCollector:
     """Tests for APIRequestCollector initialization and basic operations."""
 

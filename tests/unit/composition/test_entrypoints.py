@@ -347,6 +347,7 @@ class TestBuildPipelineContext:
         ctx = build_pipeline_context(
             "chembl_activity",
             options,
+            run_id=uuid4(),
             clock=_FIXED_CONTEXT_CLOCK,
         )
 
@@ -365,12 +366,31 @@ class TestBuildPipelineContext:
         ctx = build_pipeline_context(
             "chembl_activity",
             options,
+            run_id=uuid4(),
             clock=_FIXED_CONTEXT_CLOCK,
         )
 
         assert ctx.exact_replay is True
         assert ctx.cached_bronze.enabled is False
         assert ctx.replay_of_manifest_id == "manifest-parent"
+
+    def test_context_requires_explicit_run_identity_for_exact_replay(self):
+        """Legacy entrypoint must not synthesize replay occurrence IDs implicitly."""
+        options = RunOptions(
+            use_cached_bronze=True,
+            cached_bronze_path=CACHED_BRONZE_PATH,
+            exact_replay=True,
+        )
+
+        with pytest.raises(
+            ValueError,
+            match="exact replay requires explicit run_id or run_id_factory",
+        ):
+            build_pipeline_context(
+                "chembl_activity",
+                options,
+                clock=_FIXED_CONTEXT_CLOCK,
+            )
 
     def test_context_propagates_occurrence_pinned_resume_selectors(self):
         """Legacy entrypoint must preserve explicit checkpoint occurrence selectors."""

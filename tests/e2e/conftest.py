@@ -34,7 +34,6 @@ from tests.helpers.clock import FIXED_TEST_TIME
 from tests.helpers.vcr_config import (
     build_cassette_dir,
     infer_provider_cassette_dir,
-    is_vcr_recording_mode,
     is_git_lfs_pointer,
     resolve_cassette_name,
     resolve_requested_cassette_path,
@@ -269,6 +268,7 @@ def e2e_environment():
     # operations during dtype checking in concurrent threads on Windows.
     # This prevents hangs in is_geopandas_dtype() when validating schemas.
     import sys
+
     if "geopandas" not in sys.modules:
         sys.modules["geopandas"] = None  # type: ignore[assignment]
 
@@ -893,9 +893,7 @@ def guard_bootstrap_pipeline_runner_for_e2e(
     )
     has_vcr_marker = request.node.get_closest_marker("vcr") is not None
     fallback_snapshot_refs = (
-        ()
-        if not has_vcr_marker
-        else _build_vcr_cassette_input_snapshot_refs(request)
+        () if not has_vcr_marker else _build_vcr_cassette_input_snapshot_refs(request)
     )
 
     def _resolve_pipeline_input_snapshot_refs_with_vcr_fallback(**kwargs: object):

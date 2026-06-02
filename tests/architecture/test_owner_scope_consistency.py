@@ -15,6 +15,7 @@ from bioetl.infrastructure.quality import load_debt_scorecard, load_exemptions_r
 
 pytestmark = pytest.mark.architecture
 
+
 def _layer_from_path(path: str) -> str | None:
     """Extract the architectural layer from a source file path."""
     match = re.search(r"src/bioetl/(\w+)", path)

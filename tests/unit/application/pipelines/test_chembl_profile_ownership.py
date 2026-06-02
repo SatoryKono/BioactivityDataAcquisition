@@ -9,6 +9,7 @@ from pathlib import Path
 
 pytestmark = pytest.mark.unit
 
+
 def test_pure_bao_and_organism_normalization_is_not_transformer_owned() -> None:
     transformer_dir = Path("src/bioetl/application/pipelines/chembl")
     transformer_sources = {

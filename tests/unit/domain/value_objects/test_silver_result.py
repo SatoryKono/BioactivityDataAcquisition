@@ -13,6 +13,7 @@ from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 pytestmark = pytest.mark.unit
 
+
 class TestSilverWriteResult:
     """Tests for SilverWriteResult value object."""
 

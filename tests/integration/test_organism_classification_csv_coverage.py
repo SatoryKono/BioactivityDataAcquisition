@@ -12,6 +12,7 @@ from bioetl.domain.mapping.organism_classification import classify_organism
 
 pytestmark = pytest.mark.integration
 
+
 def test_all_distinct_organisms_in_current_target_csv_resolve() -> None:
     """Current ChEMBL target CSV should remain classifiable by organism name."""
     path = Path("data/input/target.csv")

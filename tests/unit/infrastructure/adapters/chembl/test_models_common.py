@@ -11,6 +11,7 @@ from bioetl.infrastructure.adapters.chembl.models_common import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_chembl_publication_api_record_normalizes_integer_pubmed_id() -> None:
     record = ChemblPublicationApiRecord(
         document_chembl_id="CHEMBL_DOC_1",

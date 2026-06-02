@@ -14,6 +14,7 @@ import yaml
 
 pytestmark = pytest.mark.architecture
 
+
 class TestSourceConfigFilesExist:
     """Verify that source configuration files exist for all providers."""
 

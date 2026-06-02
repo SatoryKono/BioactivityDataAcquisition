@@ -9,7 +9,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.composition.factories.storage._audit import create_audit_port
+from bioetl.composition.factories.storage.audit import create_audit_port
 from bioetl.domain.ports.noop import NoOpAudit
 from bioetl.infrastructure.audit.file_audit import FileAuditAdapter
 

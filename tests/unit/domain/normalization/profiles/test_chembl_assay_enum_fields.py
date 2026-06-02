@@ -16,6 +16,7 @@ from bioetl.domain.schemas.constants import (
 
 pytestmark = pytest.mark.unit
 
+
 class TestChemblAssayEnumFields:
     """Test enum field normalization in ChemBL assay profile."""
 

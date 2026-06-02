@@ -30,6 +30,7 @@ from bioetl.infrastructure.serialization.encoders import (
 
 pytestmark = pytest.mark.unit
 
+
 class TestStdLibJsonEncoder:
     """Tests for StdLibJsonEncoder implementation."""
 
@@ -161,17 +162,23 @@ class TestOrjsonEncoder:
         """Create encoder instance."""
         return OrjsonEncoder()
 
-    def test_orjson_encoder__implements_protocol__baac10e2(self, encoder: OrjsonEncoder) -> None:
+    def test_orjson_encoder__implements_protocol__baac10e2(
+        self, encoder: OrjsonEncoder
+    ) -> None:
         """Encoder should implement JsonEncoderPort protocol."""
         assert isinstance(encoder, JsonEncoderPort)
 
-    def test_orjson_encoder__dumps_basic_dict__9a0ef611(self, encoder: OrjsonEncoder) -> None:
+    def test_orjson_encoder__dumps_basic_dict__9a0ef611(
+        self, encoder: OrjsonEncoder
+    ) -> None:
         """Should serialize basic dictionary."""
         data = {"name": "test", "value": 42}
         result = encoder.dumps(data)
         assert json.loads(result) == data
 
-    def test_orjson_encoder__dumps_sorted_keys__8504ec7b(self, encoder: OrjsonEncoder) -> None:
+    def test_orjson_encoder__dumps_sorted_keys__8504ec7b(
+        self, encoder: OrjsonEncoder
+    ) -> None:
         """Should output keys in sorted order by default."""
         data = {"z": 1, "a": 2, "m": 3}
         result = encoder.dumps(data)
@@ -180,7 +187,9 @@ class TestOrjsonEncoder:
         # Verify key order in output string
         assert result.index('"a"') < result.index('"m"') < result.index('"z"')
 
-    def test_orjson_encoder__dumps_compact_output__e799f2f8(self, encoder: OrjsonEncoder) -> None:
+    def test_orjson_encoder__dumps_compact_output__e799f2f8(
+        self, encoder: OrjsonEncoder
+    ) -> None:
         """Should produce compact output without extra whitespace."""
         data = {"key": "value", "nested": {"a": 1}}
         result = encoder.dumps(data)
@@ -188,14 +197,18 @@ class TestOrjsonEncoder:
         assert json.loads(result) == data
         # orjson produces compact output by default
 
-    def test_orjson_encoder__unicode_preserved__ad66f622(self, encoder: OrjsonEncoder) -> None:
+    def test_orjson_encoder__unicode_preserved__ad66f622(
+        self, encoder: OrjsonEncoder
+    ) -> None:
         """Should preserve Unicode characters by default."""
         data = {"name": "тест", "greek": "αβγ"}
         result = encoder.dumps(data)
         assert "тест" in result
         assert "αβγ" in result
 
-    def test_orjson_encoder__dumps_ensure_ascii__5452b8cf(self, encoder: OrjsonEncoder) -> None:
+    def test_orjson_encoder__dumps_ensure_ascii__5452b8cf(
+        self, encoder: OrjsonEncoder
+    ) -> None:
         """Should escape non-ASCII when ensure_ascii=True."""
         data = {"name": "тест"}
         result = encoder.dumps(data, ensure_ascii=True)
@@ -209,7 +222,9 @@ class TestOrjsonEncoder:
         result = encoder.dumps(data)
         assert json.loads(result) == data
 
-    def test_orjson_encoder__nested_structures__cb02c66d(self, encoder: OrjsonEncoder) -> None:
+    def test_orjson_encoder__nested_structures__cb02c66d(
+        self, encoder: OrjsonEncoder
+    ) -> None:
         """Should handle deeply nested structures."""
         data = {
             "level1": {
@@ -223,7 +238,9 @@ class TestOrjsonEncoder:
         result = encoder.dumps(data)
         assert json.loads(result) == data
 
-    def test_orjson_encoder__dumps_canonical__d1fe60cd(self, encoder: OrjsonEncoder) -> None:
+    def test_orjson_encoder__dumps_canonical__d1fe60cd(
+        self, encoder: OrjsonEncoder
+    ) -> None:
         """Canonical output should be ASCII-only."""
         data = {"z": "тест", "a": 1}
         result = encoder.dumps_canonical(data)
@@ -236,19 +253,25 @@ class TestOrjsonEncoder:
         # Keys should match
         assert set(parsed.keys()) == {"a", "z"}
 
-    def test_orjson_encoder__loads_string__fd8d9802(self, encoder: OrjsonEncoder) -> None:
+    def test_orjson_encoder__loads_string__fd8d9802(
+        self, encoder: OrjsonEncoder
+    ) -> None:
         """Should deserialize JSON string."""
         json_str = '{"key":"value"}'
         result = encoder.loads(json_str)
         assert result == {"key": "value"}
 
-    def test_orjson_encoder__loads_bytes__45099300(self, encoder: OrjsonEncoder) -> None:
+    def test_orjson_encoder__loads_bytes__45099300(
+        self, encoder: OrjsonEncoder
+    ) -> None:
         """Should deserialize JSON bytes."""
         json_bytes = b'{"key":"value"}'
         result = encoder.loads(json_bytes)
         assert result == {"key": "value"}
 
-    def test_orjson_encoder__raises_valueerror__c205d091(self, encoder: OrjsonEncoder) -> None:
+    def test_orjson_encoder__raises_valueerror__c205d091(
+        self, encoder: OrjsonEncoder
+    ) -> None:
         """Should raise ValueError for invalid JSON."""
         with pytest.raises(ValueError, match="Invalid JSON"):
             encoder.loads("not valid json")
@@ -389,7 +412,9 @@ class TestEdgeCases:
         """Should handle empty dictionary."""
         assert encoder.dumps({}) == "{}"
 
-    def test_encoders_edge_cases__empty_list__6f7854d9(self, encoder: JsonEncoderPort) -> None:
+    def test_encoders_edge_cases__empty_list__6f7854d9(
+        self, encoder: JsonEncoderPort
+    ) -> None:
         """Should handle empty list."""
         assert encoder.dumps([]) == "[]"
 
@@ -399,7 +424,9 @@ class TestEdgeCases:
         result = encoder.loads(encoder.dumps(data))
         assert result["big"] == 10**15
 
-    def test_encoders_edge_cases__special_characters__53a6a236(self, encoder: JsonEncoderPort) -> None:
+    def test_encoders_edge_cases__special_characters__53a6a236(
+        self, encoder: JsonEncoderPort
+    ) -> None:
         """Should handle special characters."""
         data = {"special": '\n\t\r"\\'}
         result = encoder.loads(encoder.dumps(data))

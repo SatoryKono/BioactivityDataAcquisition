@@ -75,7 +75,9 @@ class TestAssayTransformer:
         )
 
     @pytest.mark.asyncio
-    async def test_assay_transformer__valid_record__506ed965(self, transformer, mock_context):
+    async def test_assay_transformer__valid_record__506ed965(
+        self, transformer, mock_context
+    ):
         """Test transformation of valid assay record."""
         record = _minimal_valid_assay_record()
 
@@ -456,7 +458,9 @@ class TestMoleculeTransformer:
         )
 
     @pytest.mark.asyncio
-    async def test_molecule_transformer__valid_record__8613ed54(self, transformer, mock_context):
+    async def test_molecule_transformer__valid_record__8613ed54(
+        self, transformer, mock_context
+    ):
         """Test transformation of valid molecule record."""
         record = {
             "molecule_id": "CHEMBL25",
@@ -647,7 +651,9 @@ class TestTargetTransformer:
         )
 
     @pytest.mark.asyncio
-    async def test_target_transformer__valid_record__1b7799a9(self, transformer, mock_context):
+    async def test_target_transformer__valid_record__1b7799a9(
+        self, transformer, mock_context
+    ):
         """Test transformation of valid target record."""
         record = {
             "target_id": "CHEMBL1862",
@@ -1047,14 +1053,10 @@ class TestTargetTransformer:
             else "unknown"
         )
         assert result["target_xref_go_function"] == (
-            expected_value
-            if expected_field == "target_xref_go_function"
-            else "unknown"
+            expected_value if expected_field == "target_xref_go_function" else "unknown"
         )
         assert result["target_xref_go_process"] == (
-            expected_value
-            if expected_field == "target_xref_go_process"
-            else "unknown"
+            expected_value if expected_field == "target_xref_go_process" else "unknown"
         )
         assert result["target_xref_hgnc_ids"] == (
             expected_value if expected_field == "target_xref_hgnc_ids" else "unknown"
@@ -1065,9 +1067,7 @@ class TestTargetTransformer:
             else "unknown"
         )
         assert result["target_xref_uniprot_ids"] == (
-            expected_value
-            if expected_field == "target_xref_uniprot_ids"
-            else "unknown"
+            expected_value if expected_field == "target_xref_uniprot_ids" else "unknown"
         )
         if expected_field == "target_xref_hgnc_ids":
             assert "IL2RA" not in result["target_xref_hgnc_ids"]
@@ -1082,7 +1082,9 @@ class TestTargetTransformer:
         assert {source_db, "UnknownSource"} <= {str(v) for v in raw_sources}
 
     @pytest.mark.asyncio
-    async def test_transform_deduplicates_and_orders_target_xrefs(self, transformer, mock_context):
+    async def test_transform_deduplicates_and_orders_target_xrefs(
+        self, transformer, mock_context
+    ):
         """Projection should deduplicate projected values and preserve first-seen order."""
         record = {
             "target_id": "CHEMBL240",
@@ -1662,7 +1664,9 @@ class TestTargetComponentTransformer:
         )
 
     @pytest.mark.asyncio
-    async def test_component_transformer__valid_record__ff1e0627(self, transformer, mock_context):
+    async def test_component_transformer__valid_record__ff1e0627(
+        self, transformer, mock_context
+    ):
         """Test transformation of valid target component record."""
         record = {
             "component_id": 123,
@@ -1697,7 +1701,9 @@ class TestTargetComponentTransformer:
         assert result is None
 
     @pytest.mark.asyncio
-    async def test_component_transformer__with_json_fields__cb5ce019(self, transformer, mock_context):
+    async def test_component_transformer__with_json_fields__cb5ce019(
+        self, transformer, mock_context
+    ):
         """Test transformation handles complex JSON fields."""
         record = {
             "component_id": 123,

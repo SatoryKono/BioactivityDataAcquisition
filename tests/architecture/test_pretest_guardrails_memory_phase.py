@@ -11,6 +11,7 @@ import yaml
 
 pytestmark = pytest.mark.architecture
 
+
 def test_pretest_guardrails_script_runs_memory_phase() -> None:
     script = Path("scripts/engineering/dev/pretest_guardrails.sh").read_text(
         encoding="utf-8"

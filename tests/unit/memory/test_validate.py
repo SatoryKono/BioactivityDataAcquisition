@@ -28,6 +28,7 @@ from memory.validation import (
 
 pytestmark = pytest.mark.unit
 
+
 def _copy_minimal_memory_scaffold(memory_root: Path) -> None:
     """Copy only contract resources needed by validator unit tests."""
     for directory_name in ("policy", "catalog", "schemas"):

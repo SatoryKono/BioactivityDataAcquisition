@@ -15,6 +15,7 @@ from bioetl.domain.normalization.structured_payload_policies import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_semantic_sensitive_payload_registry_declares_reviewed_policy_shapes() -> None:
     raw_sidecar_fields = {
         ("crossref.publication", "author_details"),

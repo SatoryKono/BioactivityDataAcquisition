@@ -17,6 +17,7 @@ from bioetl.composition.providers._registration_biblio_profiles import (
 
 pytestmark = pytest.mark.unit
 
+
 def _pipeline_config(*, email: str = "", api_key: str = "") -> SimpleNamespace:
     return SimpleNamespace(source=SimpleNamespace(email=email, api_key=api_key))
 

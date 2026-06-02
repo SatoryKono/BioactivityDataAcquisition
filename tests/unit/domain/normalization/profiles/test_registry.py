@@ -34,6 +34,7 @@ from bioetl.domain.normalization.profiles.registry import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_registry_contains_canonical_chembl_activity_profile() -> None:
     assert (
         NORMALIZATION_PROFILE_REGISTRY[("chembl", "activity")]

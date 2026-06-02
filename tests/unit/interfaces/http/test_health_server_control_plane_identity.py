@@ -58,6 +58,7 @@ from tests.helpers.clock import fixed_test_clock
 
 pytestmark = pytest.mark.unit
 
+
 def test_control_plane_identity_evidence_static_contract_is_frozen() -> None:
     """The refactored identity evidence package must preserve the audit contract."""
     assert IDENTITY_EVIDENCE_CONTRACT == "control_plane_identity_evidence_v1"

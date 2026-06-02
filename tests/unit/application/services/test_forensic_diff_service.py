@@ -24,6 +24,7 @@ from tests.unit.application.services.run_manifest_test_support import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_forensic_diff_reports_semantic_and_artifact_evidence() -> None:
     manifest_store = InMemoryRunManifestStore()
     ledger_store = InMemoryRunLedgerStore()

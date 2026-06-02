@@ -17,6 +17,7 @@ from bioetl.domain.types import HealthStatus
 
 pytestmark = pytest.mark.unit
 
+
 class _WrappedAdapter:
     def __init__(self) -> None:
         self.calls: list[str | None] = []

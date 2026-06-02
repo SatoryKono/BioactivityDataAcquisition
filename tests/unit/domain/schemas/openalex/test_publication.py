@@ -13,6 +13,7 @@ from bioetl.domain.schemas.openalex.publication import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_openalex_publication_schema_extends_publication_base_schema() -> None:
     assert issubclass(OpenAlexPublicationSchema, PublicationBaseSchema)
 

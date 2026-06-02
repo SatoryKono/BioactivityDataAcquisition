@@ -12,6 +12,7 @@ from bioetl.domain.normalization.profiles.chembl_json_ordering_policy import (
 
 pytestmark = pytest.mark.architecture
 
+
 def test_chembl_json_ordering_policy_changes_require_explicit_version_and_hash_review() -> (
     None
 ):

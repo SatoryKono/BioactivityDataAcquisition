@@ -474,7 +474,9 @@ thresholds:
         with pytest.raises(Exception):  # Pydantic ValidationError
             loader.load("any", "any")
 
-    def test_q_config_loader_errors__order_raises__f0bc0d7b(self, tmp_path: Path) -> None:
+    def test_q_config_loader_errors__order_raises__f0bc0d7b(
+        self, tmp_path: Path
+    ) -> None:
         """soft_fail >= hard_fail should raise ValidationError."""
         base_root = tmp_path / "base"
         base_root.mkdir(parents=True)

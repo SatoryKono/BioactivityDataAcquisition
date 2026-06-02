@@ -21,7 +21,7 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(repo_root / "src"))
 
 from bioetl.domain.normalization.profiles import resolve_normalization_profile
-from bioetl.domain.normalization.profiles._chembl_policy_registry import (
+from bioetl.domain.normalization.profiles.chembl_policy_registry import (
     chembl_policy_surface,
 )
 from bioetl.domain.schemas._chembl_enum_catalog import CHEMBL_ENUM_CATALOG

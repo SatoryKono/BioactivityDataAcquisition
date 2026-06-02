@@ -1,6 +1,7 @@
 """ChEMBL live canary contract tests.
 
-Verifies that the public ChEMBL endpoints needed for provider maturity remain available with the expected minimal live shape.
+Verifies that the public ChEMBL endpoints needed for provider maturity remain
+available with the expected minimal live shape.
 
 See:
     - https://www.ebi.ac.uk/chembl/api/data/docs

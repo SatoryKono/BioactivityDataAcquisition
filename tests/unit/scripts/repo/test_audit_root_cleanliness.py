@@ -13,6 +13,7 @@ from scripts.engineering.repo import audit_root_cleanliness as module
 
 pytestmark = pytest.mark.unit
 
+
 def test_collect_tracked_policy_violations_rejects_root_status_markdown() -> None:
     violations = module._collect_tracked_policy_violations(
         ["README.md", "SYNC_COMPLETE.md"]

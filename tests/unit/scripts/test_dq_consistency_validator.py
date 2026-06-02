@@ -16,6 +16,7 @@ from bioetl.domain.behavior.dq_policy_resolver import DQPolicyResolver
 
 pytestmark = pytest.mark.unit
 
+
 class TestDQConsistencyValidator:
     """Test DQ consistency validator functionality."""
 

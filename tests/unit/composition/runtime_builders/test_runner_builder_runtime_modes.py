@@ -4,11 +4,18 @@ from __future__ import annotations
 
 import pytest
 
+from bioetl.composition.runtime_builders import (
+    attach_runner_control_plane_collaborators,
+    inputs_runtime_assembly,
+)
+from bioetl.composition.runtime_builders import inputs_resolver
+
 # ruff: noqa: F403,F405
 from tests.unit.composition.runtime_builders.runner_builder_test_support import *
 
 
 pytestmark = pytest.mark.unit
+
 
 def test_strict_runner_collaborator_attachment_requires_run_ledger_service() -> None:
     with pytest.raises(RuntimeError, match="requires artifact publication closure"):
@@ -130,7 +137,7 @@ def test_assemble_filter_config_passes_cli_overrides_when_enabled() -> None:
     sentinel = object()
 
     with patch.object(
-        inputs_resolver.FilterConfigBuilder, "build", return_value=sentinel
+        inputs_runtime_assembly.FilterConfigBuilder, "build", return_value=sentinel
     ) as mock_build:
         result = inputs_resolver.assemble_filter_config(
             yaml_filter=SimpleNamespace(),

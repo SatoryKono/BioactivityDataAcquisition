@@ -52,6 +52,7 @@ from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 pytestmark = pytest.mark.unit
 
+
 def test_build_effective_config_source_refs_persists_semantic_and_raw_source_hashes(
     tmp_path: Path,
 ) -> None:

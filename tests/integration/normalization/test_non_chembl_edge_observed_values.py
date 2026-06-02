@@ -10,6 +10,7 @@ from pathlib import Path
 
 pytestmark = pytest.mark.integration
 
+
 def _load_jsonl(path: str) -> list[dict[str, object]]:
     return [
         json.loads(line)

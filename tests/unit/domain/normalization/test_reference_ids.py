@@ -12,6 +12,7 @@ from bioetl.domain.normalization.reference_ids import (
 
 pytestmark = pytest.mark.unit
 
+
 def _legacy_transport_url(secure_url: str) -> str:
     return "http" + secure_url.removeprefix("https")
 

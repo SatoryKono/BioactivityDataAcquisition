@@ -71,7 +71,9 @@ class TestUniProtAdapterIntegration:
             ),
         )
 
-    def test_uni_prot_adapter__provider_name__2ec88784(self, uniprot_adapter: Any) -> None:
+    def test_uni_prot_adapter__provider_name__2ec88784(
+        self, uniprot_adapter: Any
+    ) -> None:
         """Adapter should have correct provider name."""
         assert uniprot_adapter.provider_name == "uniprot"
 

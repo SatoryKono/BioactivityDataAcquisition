@@ -14,6 +14,7 @@ from bioetl.domain.control_plane.config_source_hashing import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_canonical_yaml_hash_ignores_comments_and_key_order() -> None:
     first = b"""
     # formatting-only noise

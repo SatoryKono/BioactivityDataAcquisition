@@ -10,6 +10,7 @@ from types import ModuleType
 
 pytestmark = pytest.mark.unit
 
+
 def _get_origin_stub(_tp) -> None:
     return None
 

@@ -6,103 +6,64 @@ from importlib import import_module
 from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
-    from bioetl.application.core.lifecycle.checkpoint_manager import (
-        CheckpointRuntimeService,
-    )
-    from bioetl.application.services.audit_inspection_service import (
-        AuditInspectionService,
-    )
-    from bioetl.application.services.config_service import ConfigService
-    from bioetl.application.services.control_plane.forensic_diff_service import (
-        ForensicRunDiffService,
-    )
-    from bioetl.application.services.control_plane.replay.historical_closure_service import (
-        HistoricalReplayClosureReport,
-        HistoricalReplayClosureService,
-    )
-    from bioetl.application.services.control_plane.replay.historical_corpus_service import (
-        HistoricalReplayCorpusService,
-    )
-    from bioetl.application.services.control_plane.replay.historical_universe_service import (
-        HistoricalReplayUniverseClosureReport,
-        HistoricalReplayUniverseService,
-    )
-    from bioetl.application.services.control_plane.manifest.inspection_service import (
-        RunManifestInspectionService,
-    )
-    from bioetl.application.services.control_plane.workflow.execution_service import (
-        WorkflowExecutionService,
-    )
-    from bioetl.application.services.control_plane.workflow.inspection_service import (
-        WorkflowInspectionService,
-    )
-    from bioetl.application.services.export_service import ExportService
-    from bioetl.application.services.lineage.lineage_inspection_service import (
-        LineageInspectionService,
-    )
-    from bioetl.application.services.lock_service import LockService
-    from bioetl.composition.registry_api import PipelineRegistry
-    from bioetl.domain.control_plane import (
-        ControlPlaneArtifactLifecycleApplyResult,
-        ControlPlaneArtifactLifecyclePlan,
-        ControlPlaneArtifactLifecyclePolicy,
-    )
-    from bioetl.domain.workflow import WorkflowConfig
-
     class ControlPlaneArtifactLifecycleStoreProtocol(Protocol):
         def plan(
             self,
-            policy: ControlPlaneArtifactLifecyclePolicy,
+            policy: "ControlPlaneArtifactLifecyclePolicy",
             *,
             dry_run: bool,
-        ) -> ControlPlaneArtifactLifecyclePlan: ...
+        ) -> "ControlPlaneArtifactLifecyclePlan": ...
 
         def apply(
             self,
-            plan: ControlPlaneArtifactLifecyclePlan,
-        ) -> ControlPlaneArtifactLifecycleApplyResult: ...
+            plan: "ControlPlaneArtifactLifecyclePlan",
+        ) -> "ControlPlaneArtifactLifecycleApplyResult": ...
 
-    def get_adr_service() -> AuditInspectionService: ...
+    def get_adr_service() -> "AuditInspectionService": ...
 
     def bootstrap_control_plane_lifecycle_store() -> (
         ControlPlaneArtifactLifecycleStoreProtocol
     ): ...
 
-    def get_checkpoint_runtime_service(pipeline: str) -> CheckpointRuntimeService: ...
+    def get_checkpoint_runtime_service(pipeline: str) -> "CheckpointRuntimeService": ...
 
-    def get_config_service() -> ConfigService: ...
+    def get_config_service() -> "ConfigService": ...
 
-    def get_export_service() -> ExportService: ...
+    def get_export_service() -> "ExportService": ...
 
-    def get_forensic_run_diff_service() -> ForensicRunDiffService: ...
+    def get_forensic_run_diff_service() -> "ForensicRunDiffService": ...
 
-    def get_historical_replay_closure_service() -> HistoricalReplayClosureService: ...
+    def get_historical_replay_closure_service() -> "HistoricalReplayClosureService": ...
 
-    def get_historical_replay_corpus_service() -> HistoricalReplayCorpusService: ...
+    def get_historical_replay_corpus_service() -> "HistoricalReplayCorpusService": ...
 
-    def get_historical_replay_universe_service() -> HistoricalReplayUniverseService: ...
+    def get_historical_replay_universe_service() -> "HistoricalReplayUniverseService": ...
 
     def persist_historical_replay_closure_report(
-        report: HistoricalReplayClosureReport,
+        report: "HistoricalReplayClosureReport",
     ) -> object: ...
 
     def persist_historical_replay_universe_report(
-        report: HistoricalReplayUniverseClosureReport,
+        report: "HistoricalReplayUniverseClosureReport",
     ) -> object: ...
 
-    def get_lineage_service() -> LineageInspectionService: ...
+    def get_lineage_service() -> "LineageInspectionService": ...
 
-    def get_lock_service() -> LockService: ...
+    def get_lock_service() -> "LockService": ...
 
-    def get_run_manifest_service() -> RunManifestInspectionService: ...
+    def get_run_manifest_service() -> "RunManifestInspectionService": ...
 
     def get_workflow_execution_service(
-        registry: PipelineRegistry | None = None,
-    ) -> WorkflowExecutionService: ...
+        registry: "PipelineRegistry | None" = None,
+    ) -> "WorkflowExecutionService": ...
 
-    def get_workflow_inspection_service() -> WorkflowInspectionService: ...
+    def get_workflow_runner_service(
+        registry: "PipelineRegistry | None" = None,
+    ) -> "WorkflowRunnerService": ...
 
-    def load_workflow_config(name: str) -> WorkflowConfig: ...
+    def get_workflow_inspection_service() -> "WorkflowInspectionService": ...
+
+    def load_workflow_config(name: str) -> "WorkflowConfig": ...
 
 
 __all__ = [
@@ -120,6 +81,7 @@ __all__ = [
     "get_run_manifest_service",
     "get_workflow_execution_service",
     "get_workflow_inspection_service",
+    "get_workflow_runner_service",
     "load_workflow_config",
     "persist_historical_replay_closure_report",
     "persist_historical_replay_universe_report",
@@ -148,6 +110,7 @@ _PUBLIC_EXPORTS = {
     "persist_historical_replay_universe_report": _RUN_MANIFEST_BOOTSTRAP_MODULE,
     "get_run_manifest_service": _SERVICES_MODULE,
     "get_workflow_execution_service": _WORKFLOW_SERVICES_MODULE,
+    "get_workflow_runner_service": _WORKFLOW_SERVICES_MODULE,
     "get_workflow_inspection_service": _WORKFLOW_SERVICES_MODULE,
     "load_workflow_config": _WORKFLOW_SERVICES_MODULE,
 }

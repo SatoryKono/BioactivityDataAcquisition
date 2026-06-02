@@ -14,6 +14,7 @@ from bioetl.infrastructure.adapters.pubmed.fallback import PubMedTitleFallbackHa
 
 pytestmark = pytest.mark.unit
 
+
 @pytest.fixture
 def mock_logger() -> MagicMock:
     """Create a mock logger."""

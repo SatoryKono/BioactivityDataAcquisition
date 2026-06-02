@@ -16,6 +16,7 @@ from bioetl.domain.config import (
 
 pytestmark = pytest.mark.unit
 
+
 class TestRateLimitConfig:
     """Tests for RateLimitConfig."""
 

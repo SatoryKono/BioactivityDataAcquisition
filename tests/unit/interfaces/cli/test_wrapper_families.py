@@ -101,7 +101,7 @@ def test_cli_package_root_removed_create_pipeline_runner_export_fails_fast() -> 
     assert "create_pipeline_runner" not in module.__all__
     assert "create_pipeline_runner" not in dir(module)
     with pytest.raises(AttributeError):
-        getattr(module, "create_pipeline_runner")
+        module.create_pipeline_runner()
 
 
 @pytest.mark.unit
@@ -112,7 +112,7 @@ def test_cli_package_root_removed_validate_pipeline_name_export_fails_fast() -> 
     assert "validate_pipeline_name" not in module.__all__
     assert "validate_pipeline_name" not in dir(module)
     with pytest.raises(AttributeError):
-        getattr(module, "validate_pipeline_name")
+        module.validate_pipeline_name()
 
 
 @pytest.mark.unit

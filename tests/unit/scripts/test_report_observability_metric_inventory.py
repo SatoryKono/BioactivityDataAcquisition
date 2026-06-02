@@ -1448,9 +1448,7 @@ def test_query_prometheus_scalar_parses_vector_response(
             return None
 
         def read(self, *_args: object, **_kwargs: object) -> bytes:
-            return (
-                b'{"status":"success","data":{"resultType":"vector","result":[{"metric":{},"value":[0,"7"]}]}}'
-            )
+            return b'{"status":"success","data":{"resultType":"vector","result":[{"metric":{},"value":[0,"7"]}]}}'
 
     monkeypatch.setattr(inventory, "urlopen", lambda *_args, **_kwargs: FakeResponse())
 

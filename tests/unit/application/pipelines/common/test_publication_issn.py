@@ -11,6 +11,7 @@ from bioetl.application.pipelines.common.publication_issn import build_issn_fiel
 
 pytestmark = pytest.mark.unit
 
+
 def _serialize(values: Iterable[str] | None) -> str | None:
     if values is None:
         return None

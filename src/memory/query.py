@@ -857,10 +857,10 @@ def _score_timeline_exact_query(
         "source": 10,
     }
     score = 0
-    for field, weight in weights.items():
-        if lowered_query in fields[field]:
+    for field_name, weight in weights.items():
+        if lowered_query in fields[field_name]:
             score += weight
-            reasons.append(f"query:{field}")
+            reasons.append(f"query:{field_name}")
     return score
 
 

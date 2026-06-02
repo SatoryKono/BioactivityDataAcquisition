@@ -18,6 +18,7 @@ from bioetl.domain.registry.field_aliases import (
 
 pytestmark = pytest.mark.unit
 
+
 class TestFieldAlias:
     """Tests for FieldAlias dataclass."""
 

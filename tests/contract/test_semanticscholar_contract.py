@@ -1,6 +1,7 @@
 """Semantic Scholar live canary contract tests.
 
-Verifies the minimal live contract surface used for provider maturity decisions. Replay-schema assertions live in the snapshot-registry companion suite.
+Verifies the minimal live contract surface used for provider maturity decisions.
+Replay-schema assertions live in the snapshot-registry companion suite.
 """
 
 from __future__ import annotations

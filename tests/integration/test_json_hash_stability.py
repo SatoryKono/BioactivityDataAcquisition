@@ -14,6 +14,7 @@ from bioetl.domain.normalization.json import (
 
 pytestmark = pytest.mark.integration
 
+
 class TestJsonHashStability:
     """Test that canonical JSON ensures stable content hashing."""
 

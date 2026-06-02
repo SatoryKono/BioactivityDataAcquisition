@@ -113,7 +113,7 @@ class TestSilverWriterMergedMixin:
             }
         )
 
-        with pytest.raises(SchemaViolationError, match="test.table"):
+        with pytest.raises(SchemaViolationError, match=r"test\.table"):
             host._prepare_merged_silver_write(
                 request=_MergedSilverWriteRequest(
                     table_name="test.table",

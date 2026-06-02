@@ -31,6 +31,7 @@ from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime
 
 pytestmark = pytest.mark.unit
 
+
 def test_build_observability_backend_health_url_uses_host_and_port() -> None:
     assert (
         build_observability_backend_health_url(host="127.0.0.1", port=8081)

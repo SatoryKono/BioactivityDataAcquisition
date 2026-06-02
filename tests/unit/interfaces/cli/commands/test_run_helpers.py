@@ -58,7 +58,9 @@ class TestResolveContextRegistry:
 class TestValidatePipelineName:
     """Tests for validate_pipeline_name Click callback."""
 
-    def test_validate_pipeline_name__returns_value__472871f4(self, mock_registry: MagicMock) -> None:
+    def test_validate_pipeline_name__returns_value__472871f4(
+        self, mock_registry: MagicMock
+    ) -> None:
         """Test that a valid pipeline name is returned unchanged."""
         with patch(
             "bioetl.interfaces.cli.registry_helpers.build_cli_registry",

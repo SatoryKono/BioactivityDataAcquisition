@@ -18,7 +18,9 @@ from bioetl.domain.schemas.pubmed.publication import PubMedPublicationSchema
 class TestPmidBaseValidation:
     """Base validation tests for pmid."""
 
-    def test_pmid_base_validation__pmid_valid__ac5b8af9(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
+    def test_pmid_base_validation__pmid_valid__ac5b8af9(
+        self, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid pmid value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
@@ -44,7 +46,9 @@ class TestPmidBaseValidation:
 class TestDoiBaseValidation:
     """Base validation tests for doi."""
 
-    def test_doi_base_validation__doi_valid__1f769adf(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
+    def test_doi_base_validation__doi_valid__1f769adf(
+        self, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid doi value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
@@ -73,7 +77,9 @@ class TestDoiBaseValidation:
 class TestPmcIdBaseValidation:
     """Base validation tests for pmc_id."""
 
-    def test_pmc_id_base_validation__pmc_id_valid__cf387190(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
+    def test_pmc_id_base_validation__pmc_id_valid__cf387190(
+        self, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid pmc_id value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
@@ -100,7 +106,9 @@ class TestPmcIdBaseValidation:
 class TestTitleBaseValidation:
     """Base validation tests for title."""
 
-    def test_title_base_validation__title_valid__55d31543(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
+    def test_title_base_validation__title_valid__55d31543(
+        self, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid title value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
@@ -118,7 +126,9 @@ class TestTitleBaseValidation:
 class TestAbstractBaseValidation:
     """Base validation tests for abstract."""
 
-    def test_base_validation__abstract_valid__1f46af1f(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
+    def test_base_validation__abstract_valid__1f46af1f(
+        self, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid abstract value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
@@ -135,7 +145,9 @@ class TestAbstractBaseValidation:
 class TestAuthorsBaseValidation:
     """Base validation tests for authors."""
 
-    def test_base_validation__authors_valid__e1fba3b0(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
+    def test_base_validation__authors_valid__e1fba3b0(
+        self, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid authors value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
@@ -171,7 +183,9 @@ class TestAffiliationListBaseValidation:
 class TestJournalBaseValidation:
     """Base validation tests for journal."""
 
-    def test_base_validation__journal_valid__bd36d3e4(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
+    def test_base_validation__journal_valid__bd36d3e4(
+        self, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid journal value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
@@ -245,7 +259,9 @@ class TestPublicationTypeBaseValidation:
 class TestLanguageBaseValidation:
     """Base validation tests for language."""
 
-    def test_base_validation__language_valid__69bf5c2c(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
+    def test_base_validation__language_valid__69bf5c2c(
+        self, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid language value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
@@ -281,7 +297,9 @@ class TestPageFirstBaseValidation:
 class TestPageLastBaseValidation:
     """Base validation tests for page_last."""
 
-    def test_last_base_validation__page_last_valid__025923ad(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
+    def test_last_base_validation__page_last_valid__025923ad(
+        self, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid page_last value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
@@ -336,7 +354,9 @@ class TestCitationsMadeBaseValidation:
 class TestIsOaBaseValidation:
     """Base validation tests for is_oa."""
 
-    def test_is_oa_base_validation__is_oa_valid__07eafbc3(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
+    def test_is_oa_base_validation__is_oa_valid__07eafbc3(
+        self, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid is_oa value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
@@ -391,7 +411,9 @@ class TestOriginalIdBaseValidation:
 class TestSourceBaseValidation:
     """Base validation tests for _source."""
 
-    def test_source_base_validation__source_valid__2912b1b8(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
+    def test_source_base_validation__source_valid__2912b1b8(
+        self, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid _source value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
@@ -518,7 +540,9 @@ class TestJournalIsoAbbrevBaseValidation:
 class TestIssnBaseValidation:
     """Base validation tests for issn."""
 
-    def test_issn_base_validation__issn_valid__b32b5930(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
+    def test_issn_base_validation__issn_valid__b32b5930(
+        self, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid issn value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 

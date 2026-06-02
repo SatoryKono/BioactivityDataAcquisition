@@ -14,6 +14,7 @@ from bioetl.application.pipelines.pubmed.extractors import ClassificationExtract
 
 pytestmark = pytest.mark.unit
 
+
 class TestParseChemicals:
     """Tests for parse_chemicals method."""
 

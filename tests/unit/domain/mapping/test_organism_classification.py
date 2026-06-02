@@ -14,6 +14,7 @@ from bioetl.domain.types import CellularityType
 
 pytestmark = pytest.mark.unit
 
+
 class TestNormalizeOrganismName:
     """Tests for organism name normalization."""
 

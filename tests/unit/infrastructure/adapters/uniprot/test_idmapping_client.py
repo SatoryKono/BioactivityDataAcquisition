@@ -268,7 +268,9 @@ class TestUniProtIDMappingClient:
         assert result["CHEMBL204"]["uniprot_accession"] == "P00742"
 
     @pytest.mark.asyncio
-    async def test_i_d_mapping_client__health_check_healthy__882bedee(self, idmapping_client, mock_http_client):
+    async def test_i_d_mapping_client__health_check_healthy__882bedee(
+        self, idmapping_client, mock_http_client
+    ):
         """Test health check returns HEALTHY."""
         # Mock successful health check
         health_response = MagicMock()
@@ -281,7 +283,9 @@ class TestUniProtIDMappingClient:
         assert status == HealthStatus.HEALTHY
 
     @pytest.mark.asyncio
-    async def test_i_d_mapping_client__check_degraded__d80bb99a(self, idmapping_client, mock_http_client):
+    async def test_i_d_mapping_client__check_degraded__d80bb99a(
+        self, idmapping_client, mock_http_client
+    ):
         """Test health check returns DEGRADED on non-200."""
         # Mock degraded health check
         health_response = MagicMock()

@@ -28,7 +28,9 @@ def mock_logger() -> MagicMock:
 class TestCsvExporterInit:
     """Tests for CsvExporter initialization."""
 
-    def test_csv_exporter_init__init_with_defaults__8b2f7c42(self, tmp_path: Path, mock_logger: MagicMock) -> None:
+    def test_csv_exporter_init__init_with_defaults__8b2f7c42(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
         """Test initialization with default parameters."""
         exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
 
@@ -280,7 +282,9 @@ class TestCsvExporterExport:
 class TestCsvExporterClear:
     """Tests for CsvExporter.clear() method."""
 
-    def test_csv_exporter_clear__clear_specific_table__ffd56ab7(self, tmp_path: Path, mock_logger: MagicMock) -> None:
+    def test_csv_exporter_clear__clear_specific_table__ffd56ab7(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
         """Test clearing a specific table's CSV file."""
         exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
 

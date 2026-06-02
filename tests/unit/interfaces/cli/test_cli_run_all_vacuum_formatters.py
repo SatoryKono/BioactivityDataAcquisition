@@ -514,7 +514,9 @@ class TestVacuumAllCommand:
         )
         return service
 
-    def test_vacuum_all_command__vacuum_all_success__339b42b3(self, cli_runner, mock_vacuum_service):
+    def test_vacuum_all_command__vacuum_all_success__339b42b3(
+        self, cli_runner, mock_vacuum_service
+    ):
         """Test successful vacuum-all execution."""
         with patch(
             "bioetl.interfaces.cli.commands.vacuum.get_vacuum_service",
@@ -525,7 +527,9 @@ class TestVacuumAllCommand:
         assert result.exit_code == 0
         mock_vacuum_service.collect_tables.assert_called_once_with("all")
 
-    def test_vacuum_all_command__vacuum_all_dry_run__02dc303f(self, cli_runner, mock_vacuum_service):
+    def test_vacuum_all_command__vacuum_all_dry_run__02dc303f(
+        self, cli_runner, mock_vacuum_service
+    ):
         """Test vacuum-all with --dry-run."""
         mock_vacuum_service.vacuum_all = AsyncMock(
             return_value=VacuumAllResult(

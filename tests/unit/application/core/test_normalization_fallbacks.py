@@ -20,6 +20,7 @@ from bioetl.application.core.normalization_rules import NormalizationRulesPolicy
 
 pytestmark = pytest.mark.unit
 
+
 def test_field_classifiers_cover_expected_fallback_cases() -> None:
     rules = NormalizationRulesPolicy()
     assert is_doi_field("publication_doi", rule_set=rules) is True

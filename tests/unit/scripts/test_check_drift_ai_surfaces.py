@@ -11,6 +11,7 @@ from scripts.docs.checks import check_drift
 
 pytestmark = pytest.mark.unit
 
+
 def test_check_modules_allows_governed_tracing_attributes(
     monkeypatch, tmp_path: Path
 ) -> None:

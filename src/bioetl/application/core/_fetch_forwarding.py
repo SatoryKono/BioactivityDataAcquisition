@@ -67,6 +67,7 @@ def forward_bound_fetch_records[RecordT](
     offset: int | None = None,
 ) -> AsyncIterator[RecordT]:
     """Forward fetch arguments into a bound fetch_records helper."""
+
     async def _forward() -> AsyncIterator[RecordT]:
         iterator = fetch_records(
             bound_instance,

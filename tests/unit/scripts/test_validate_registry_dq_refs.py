@@ -11,6 +11,7 @@ from scripts.engineering.ci.validate_registry_dq_refs import _validate_entry
 
 pytestmark = pytest.mark.unit
 
+
 def test_validate_entry_reports_identity_mismatch(tmp_path: Path) -> None:
     """Mismatch between registry and DQ file should be blocking."""
     entry = {

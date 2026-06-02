@@ -11,6 +11,7 @@ from bioetl.domain.value_objects.column_order import (
 
 pytestmark = pytest.mark.unit
 
+
 class TestSemanticGroup:
     """Tests for SemanticGroup enum."""
 

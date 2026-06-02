@@ -97,7 +97,9 @@ def _ensure_set(data: dict[str, Any], parts: list[str], value: Any) -> bool:
 def _should_skip_key(key: str) -> bool:
     if key.startswith("hash_policy"):
         return False
-    return any(key == prefix or key.startswith(f"{prefix}.") for prefix in DENY_KEY_PREFIXES)
+    return any(
+        key == prefix or key.startswith(f"{prefix}.") for prefix in DENY_KEY_PREFIXES
+    )
 
 
 def _should_skip_config(config_name: str, key: str) -> bool:
@@ -110,7 +112,9 @@ def _partial_keys(family_configs: dict[str, dict[str, str]]) -> list[tuple[int, 
     all_keys = sorted({key for values in family_configs.values() for key in values})
     if not family_configs:
         return []
-    common = set.intersection(*(set(values.keys()) for values in family_configs.values()))
+    common = set.intersection(
+        *(set(values.keys()) for values in family_configs.values())
+    )
     partial = [key for key in all_keys if key not in common]
     ranked: list[tuple[int, str]] = []
     for key in partial:
@@ -133,7 +137,9 @@ def _align_key(family_configs: dict[str, dict[str, str]], key: str, yaml: YAML) 
     if not missing:
         return 0
 
-    reference_name = next(name for name in family_configs if key in family_configs[name])
+    reference_name = next(
+        name for name in family_configs if key in family_configs[name]
+    )
     parts = key.split(".")
     ref_data = yaml.load(_config_path(reference_name))
     try:
@@ -213,7 +219,9 @@ def _update_scorecard() -> None:
 
     for family_name in ("entity_effective", "composite_runtime"):
         family_metrics = families[family_name]
-        pattern = rf"({family_name}:.*?metrics:)(.*?)(?=\n    [a-z_]+:|^registry_groups:)"
+        pattern = (
+            rf"({family_name}:.*?metrics:)(.*?)(?=\n    [a-z_]+:|^registry_groups:)"
+        )
         match = re.search(pattern, text, re.S | re.M)
         if not match:
             continue
@@ -235,7 +243,9 @@ def _update_scorecard() -> None:
 
 def run(max_phases: int = 200_000, *, report_only: bool = False) -> None:
     if report_only:
-        from scripts.engineering.qa.report_config_surface_backlog import main as report_main
+        from scripts.engineering.qa.report_config_surface_backlog import (
+            main as report_main,
+        )
 
         report_main()
         return
@@ -269,8 +279,12 @@ def run(max_phases: int = 200_000, *, report_only: bool = False) -> None:
 
         _regenerate()
         payload = _load_baseline()
-        entity = int(payload["families"]["entity_effective"]["inconsistent_parameter_count"])
-        composite = int(payload["families"]["composite_runtime"]["inconsistent_parameter_count"])
+        entity = int(
+            payload["families"]["entity_effective"]["inconsistent_parameter_count"]
+        )
+        composite = int(
+            payload["families"]["composite_runtime"]["inconsistent_parameter_count"]
+        )
         print(
             f"Phase {phase:06d} {selected[0]} {selected[1]}: "
             f"touched={touched} entity={entity} composite={composite}"
@@ -278,8 +292,12 @@ def run(max_phases: int = 200_000, *, report_only: bool = False) -> None:
 
     _update_scorecard()
     payload = _load_baseline()
-    entity = int(payload["families"]["entity_effective"]["inconsistent_parameter_count"])
-    composite = int(payload["families"]["composite_runtime"]["inconsistent_parameter_count"])
+    entity = int(
+        payload["families"]["entity_effective"]["inconsistent_parameter_count"]
+    )
+    composite = int(
+        payload["families"]["composite_runtime"]["inconsistent_parameter_count"]
+    )
     print(
         f"FINAL entity={entity} composite={composite} "
         f"(delta entity={start_entity - entity}, composite={start_composite - composite})"

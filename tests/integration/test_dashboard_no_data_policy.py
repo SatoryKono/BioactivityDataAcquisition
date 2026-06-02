@@ -1,7 +1,5 @@
 """Integration tests for Grafana dashboard no-data/unknown policy."""
 
-from pathlib import Path
-
 import pytest
 
 from tests.integration._grafana_test_support import (
@@ -49,7 +47,8 @@ def test_status_panels_do_not_use_zero_fallback():
                 for target in targets:
                     expr = str(target.get("expr", ""))
                     assert "or vector(0)" not in expr, (
-                        f"{dashboard_path.name}:{title} should not use 'or vector(0)' - status panels must be fail-closed"
+                        f"{dashboard_path.name}:{title} should not use 'or vector(0)' - "
+                        f"status panels must be fail-closed"
                     )
 
 
@@ -76,7 +75,10 @@ def test_http_identity_cards_distinguish_backend_down_from_expected_empty() -> N
             links = defaults.get("links", [])
             assert "backend may be unavailable" in description
             assert "backend health" in no_value.lower()
-            assert "not a valid zero" in no_value.lower() or "no selected run" in no_value.lower()
+            assert (
+                "not a valid zero" in no_value.lower()
+                or "no selected run" in no_value.lower()
+            )
             assert any(
                 link.get("title") == "Check Quarantine Explorer health"
                 for link in links

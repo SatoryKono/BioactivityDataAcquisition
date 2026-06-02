@@ -84,6 +84,12 @@ def resolve_effective_run_id(run_id: str | None) -> str:
     return run_id or str(uuid4())
 
 
+def _requires_explicit_control_plane_run_id(
+    inputs: CompositeRunnerServiceInputs,
+) -> bool:
+    return inputs.manifest_id is not None or inputs.run_ledger_service is not None
+
+
 def build_composite_runner_dependencies(
     inputs: CompositeRunnerServiceInputs,
 ) -> CompositeRunnerDependencies:
@@ -172,6 +178,10 @@ def normalize_composite_runner_service_inputs(
             ),
         )
     if inputs.run_id is None:
+        if _requires_explicit_control_plane_run_id(inputs):
+            raise ValueError(
+                "Composite runner control-plane assembly requires explicit run_id"
+            )
         inputs = replace(inputs, run_id=resolve_effective_run_id(inputs.run_id))
     return inputs
 
@@ -188,7 +198,9 @@ def create_composite_runner_service_from_inputs(
     inputs: CompositeRunnerServiceInputs,
 ) -> CompositePipelineRunner:
     normalized_inputs = normalize_composite_runner_service_inputs(inputs)
-    effective_run_id = resolve_effective_run_id(normalized_inputs.run_id)
+    effective_run_id = normalized_inputs.run_id or resolve_effective_run_id(
+        normalized_inputs.run_id
+    )
     deps = build_composite_runner_dependencies(normalized_inputs)
     return CompositePipelineRunner(
         config=normalized_inputs.config,

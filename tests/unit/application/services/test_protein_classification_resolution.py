@@ -16,6 +16,7 @@ from bioetl.domain.value_objects.protein_class_hierarchy import (
 
 pytestmark = pytest.mark.unit
 
+
 class _FakeClassificationPort:
     def __init__(
         self,

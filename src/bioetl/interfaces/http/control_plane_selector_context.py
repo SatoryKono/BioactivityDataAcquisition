@@ -127,9 +127,8 @@ def build_selector_filter_options_payload(
     if dimension not in options:
         raise ValueError(f"Unsupported control-plane filter dimension: {dimension}")
     values = list(options[dimension])
-    if exact_run_only:
-        if selected_run_id is None or not values:
-            values = _exact_run_only_fallback_values(fallback_value)
+    if exact_run_only and (selected_run_id is None or not values):
+        values = _exact_run_only_fallback_values(fallback_value)
     if dimension == "run_id":
         values = [RUN_ID_NO_SELECTION, *[value for value in values if value]]
     if response_shape == "list":

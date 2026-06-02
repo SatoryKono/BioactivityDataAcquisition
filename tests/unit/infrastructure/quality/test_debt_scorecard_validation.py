@@ -11,6 +11,7 @@ from bioetl.infrastructure.quality.debt_scorecard_validation import (
 
 pytestmark = pytest.mark.unit
 
+
 def _minimal_valid_scorecard() -> dict[str, object]:
     """Build a minimal valid scorecard for testing."""
     return {

@@ -21,6 +21,7 @@ from bioetl.interfaces.cli.main import cli
 
 pytestmark = pytest.mark.unit
 
+
 @dataclass
 class _FakeWorkflowRunnerService:
     received_config: object | None = None

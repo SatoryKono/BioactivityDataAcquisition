@@ -33,7 +33,9 @@ def _write_registry(tmp_path: Path, content: dict[str, object]) -> Path:
 class TestLoadExemptionsRegistry:
     """Tests for load_exemptions_registry."""
 
-    def test_exemptions_registry__loads_valid_yaml__07d01eb7(self, tmp_path: Path) -> None:
+    def test_exemptions_registry__loads_valid_yaml__07d01eb7(
+        self, tmp_path: Path
+    ) -> None:
         """Valid YAML mapping should be loaded as dict."""
         path = _write_registry(tmp_path, {"registries": {}})
         result = load_exemptions_registry(path)
@@ -45,14 +47,18 @@ class TestLoadExemptionsRegistry:
         with pytest.raises(FileNotFoundError):
             load_exemptions_registry("/nonexistent/registry.yaml")
 
-    def test_exemptions_registry__non_mapping_raises__b7cd6df7(self, tmp_path: Path) -> None:
+    def test_exemptions_registry__non_mapping_raises__b7cd6df7(
+        self, tmp_path: Path
+    ) -> None:
         """Non-mapping YAML should raise ValueError."""
         registry_file = tmp_path / "registry.yaml"
         registry_file.write_text("- item1\n- item2\n", encoding="utf-8")
         with pytest.raises(ValueError, match="must be a mapping"):
             load_exemptions_registry(registry_file)
 
-    def test_exemptions_registry__returns_empty_dict__5d86214b(self, tmp_path: Path) -> None:
+    def test_exemptions_registry__returns_empty_dict__5d86214b(
+        self, tmp_path: Path
+    ) -> None:
         """Empty YAML returns empty dict (safe_load returns None -> {})."""
         registry_file = tmp_path / "registry.yaml"
         registry_file.write_text("", encoding="utf-8")

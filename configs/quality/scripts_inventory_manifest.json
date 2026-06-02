@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-01T19:24:09.996708+00:00",
+  "generated_at": "2026-06-02T08:36:20.571078+00:00",
   "summary": {
-    "total_scripts": 420,
+    "total_scripts": 424,
     "status_counts": {
-      "active": 368,
+      "active": 372,
       "supporting": 52
     },
     "reference_group_coverage": {
@@ -12,7 +12,7 @@
       "build": 3,
       "ci": 61,
       "docs": 147,
-      "scripts": 324,
+      "scripts": 328,
       "skills": 11,
       "tests": 168
     }
@@ -209,7 +209,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 129,
+          "line": 130,
           "source_group": "tests",
           "text": "assert (root / \"scripts\" / \"ai\" / \"codex\" / \"diagnose_wsl.bat\").exists()"
         }
@@ -248,7 +248,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 128,
+          "line": 129,
           "source_group": "tests",
           "text": "assert (root / \"scripts\" / \"ai\" / \"codex\" / \"diagnose_wsl.ps1\").exists()"
         }
@@ -299,13 +299,13 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 124,
+          "line": 125,
           "source_group": "tests",
           "text": "assert \"../ai/codex/diagnose_wsl.sh\" in ops_router"
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 127,
+          "line": 128,
           "source_group": "tests",
           "text": "assert (root / \"scripts\" / \"ai\" / \"codex\" / \"diagnose_wsl.sh\").exists()"
         }
@@ -2035,6 +2035,27 @@
       ]
     },
     {
+      "path": "scripts/ai/mcp/mcp_docker_docs_wrapper.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 76,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_docker_docs_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
+          "line": 76,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_docker_docs_wrapper.sh\""
+        }
+      ]
+    },
+    {
       "path": "scripts/ai/mcp/mcp_docker_wrapper.ps1",
       "type": "ps1",
       "status": "supporting",
@@ -2072,6 +2093,27 @@
           "line": 9,
           "source_group": "scripts",
           "text": "EXPECTED_DOCKER_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_docker_wrapper.sh\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_dockerhub_wrapper.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 94,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_dockerhub_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
+          "line": 94,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_dockerhub_wrapper.sh\""
         }
       ]
     },
@@ -2136,6 +2178,27 @@
           "line": 160,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_mermaid_wrapper.sh\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_needle_wrapper.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 136,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_needle_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
+          "line": 136,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_needle_wrapper.sh\""
         }
       ]
     },
@@ -2236,6 +2299,27 @@
           "line": 121,
           "source_group": "docs",
           "text": "│ scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh             │"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_paper_search_wrapper.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 88,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_paper_search_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
+          "line": 88,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_paper_search_wrapper.sh\""
         }
       ]
     },
@@ -2480,7 +2564,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 20,
+      "reference_count": 28,
       "references": [
         {
           "path": "scripts/ai/mcp/mcp_brave_search_wrapper.sh",
@@ -2519,13 +2603,13 @@
           "text": "source \"${script_dir}/support/docker_cli_resolver.sh\""
         },
         {
-          "path": "scripts/ai/mcp/mcp_docker_wrapper.sh",
+          "path": "scripts/ai/mcp/mcp_docker_docs_wrapper.sh",
           "line": 5,
           "source_group": "scripts",
           "text": "# shellcheck source=./support/docker_cli_resolver.sh"
         },
         {
-          "path": "scripts/ai/mcp/mcp_docker_wrapper.sh",
+          "path": "scripts/ai/mcp/mcp_docker_docs_wrapper.sh",
           "line": 6,
           "source_group": "scripts",
           "text": "source \"${script_dir}/support/docker_cli_resolver.sh\""
@@ -3542,7 +3626,7 @@
         },
         {
           "path": "tests/architecture/test_diagram_quality_budget_security.py",
-          "line": 18,
+          "line": 19,
           "source_group": "tests",
           "text": "repo_root / \"scripts\" / \"diagrams\" / \"enforce_diagram_quality_budget.py\""
         }
@@ -3587,7 +3671,7 @@
         },
         {
           "path": "tests/architecture/test_fix_mermaid_operators.py",
-          "line": 17,
+          "line": 18,
           "source_group": "tests",
           "text": "module_path = repo_root / \"scripts\" / \"diagrams\" / \"fix_mermaid_operators.py\""
         }
@@ -3677,7 +3761,7 @@
         },
         {
           "path": "tests/architecture/test_diagram_bundle_generator_contracts.py",
-          "line": 17,
+          "line": 18,
           "source_group": "tests",
           "text": "module_path = repo_root / \"scripts\" / \"diagrams\" / \"generate_all_bundles.py\""
         }
@@ -3716,13 +3800,13 @@
         },
         {
           "path": "tests/architecture/test_diagram_description_index_contracts.py",
-          "line": 17,
+          "line": 18,
           "source_group": "tests",
           "text": "module_path = repo_root / \"scripts\" / \"diagrams\" / \"generate_description_indexes.py\""
         },
         {
           "path": "tests/architecture/test_diagram_description_index_contracts.py",
-          "line": 82,
+          "line": 83,
           "source_group": "tests",
           "text": "assert \"generate_description_indexes.py\" in content"
         }
@@ -4258,7 +4342,7 @@
         },
         {
           "path": "tests/architecture/test_strip_svg_foreign_object.py",
-          "line": 18,
+          "line": 19,
           "source_group": "tests",
           "text": "module_path = repo_root / \"scripts\" / \"diagrams\" / \"strip_svg_foreign_object.py\""
         }
@@ -4324,7 +4408,7 @@
         },
         {
           "path": "tests/architecture/test_scripts_inventory_discovery.py",
-          "line": 38,
+          "line": 39,
           "source_group": "tests",
           "text": "svg2png_path = \"/\".join([\"scripts\", \"diagrams\", \"svg2png.mjs\"])"
         }
@@ -4381,7 +4465,7 @@
         },
         {
           "path": "tests/architecture/test_uniform_diagram_group_width.py",
-          "line": 16,
+          "line": 17,
           "source_group": "tests",
           "text": "\"\"\"Load scripts/diagrams/uniform_diagram_sizes.py as a module.\"\"\""
         }
@@ -4596,19 +4680,19 @@
         },
         {
           "path": "tests/architecture/test_docs_build_site_router.py",
-          "line": 16,
+          "line": 17,
           "source_group": "tests",
           "text": "shell_wrapper = (root / \"scripts\" / \"docs\" / \"build_docs_site.sh\").read_text("
         },
         {
           "path": "tests/unit/scripts/repo/test_generate_scripts_wrapper_caller_matrix.py",
-          "line": 20,
+          "line": 21,
           "source_group": "tests",
           "text": "test_file.write_text(\"scripts/docs/build_docs_site.sh\\n\", encoding=\"utf-8\")"
         },
         {
           "path": "tests/unit/scripts/repo/test_generate_scripts_wrapper_caller_matrix.py",
-          "line": 31,
+          "line": 32,
           "source_group": "tests",
           "text": "assert \"`scripts/docs/build_docs_site.sh`\" in report"
         }
@@ -6054,7 +6138,7 @@
         },
         {
           "path": "tests/architecture/test_quality_debt_weekly_workflow.py",
-          "line": 27,
+          "line": 28,
           "source_group": "tests",
           "text": "assert \"scripts/engineering/ci/report_quality_debt_weekly.py\" in workflow"
         }
@@ -7765,13 +7849,13 @@
         },
         {
           "path": "tests/architecture/test_scripts_inventory_discovery.py",
-          "line": 139,
+          "line": 140,
           "source_group": "tests",
           "text": "target = root / \"scripts\" / \"engineering\" / \"qa\" / \"check_docs_drift.py\""
         },
         {
           "path": "tests/architecture/test_scripts_inventory_discovery.py",
-          "line": 155,
+          "line": 156,
           "source_group": "tests",
           "text": "for item in refs[\"scripts/engineering/qa/check_docs_drift.py\"]"
         }
@@ -9943,7 +10027,7 @@
         },
         {
           "path": "tests/architecture/test_repo_cleanup_branch_router.py",
-          "line": 14,
+          "line": 15,
           "source_group": "tests",
           "text": "assert '\"cleanup-branch-candidates\": \"cleanup_branch_candidates.sh\"' in router"
         }
@@ -10087,13 +10171,13 @@
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 55,
+          "line": 47,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py`"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 61,
+          "line": 53,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py` — external breaking change required: `true`, internal callers zero: `false`"
         },
@@ -10266,19 +10350,19 @@
         },
         {
           "path": "tests/unit/memory/test_rag_indexing.py",
-          "line": 53,
+          "line": 54,
           "source_group": "tests",
           "text": "assert infer_source_type(Path(\"src/memory/query.py\")) == \"memory\""
         },
         {
           "path": "tests/unit/memory/test_rag_indexing.py",
-          "line": 68,
+          "line": 69,
           "source_group": "tests",
           "text": "assert infer_domain(Path(\"src/memory/query.py\")) == \"memory_subsystem\""
         },
         {
           "path": "tests/unit/memory/test_review_curated.py",
-          "line": 125,
+          "line": 126,
           "source_group": "tests",
           "text": "\"source_refs\": [\"src/memory/query.py\", \"src/memory/README.md\"],"
         }
@@ -10356,7 +10440,7 @@
         },
         {
           "path": "tests/unit/memory/test_graph_entrypoints.py",
-          "line": 46,
+          "line": 47,
           "source_group": "tests",
           "text": "assert sync_path.name == \"sync.py\""
         }
@@ -10864,7 +10948,7 @@
         },
         {
           "path": "tests/architecture/test_scripts_inventory_discovery.py",
-          "line": 63,
+          "line": 64,
           "source_group": "tests",
           "text": "r\"scripts\\codex-exec.bat\","
         }
@@ -11035,7 +11119,7 @@
         },
         {
           "path": "tests/architecture/test_scripts_inventory_discovery.py",
-          "line": 64,
+          "line": 65,
           "source_group": "tests",
           "text": "r\"scripts\\codex.bat\","
         }
@@ -11182,7 +11266,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 68,
+          "line": 69,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ops\" / \"launchers\" / \"codex\" / \"start-codex.bat\""
         }
@@ -11203,7 +11287,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 71,
+          "line": 72,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ops\" / \"launchers\" / \"codex\" / \"verify-setup.bat\""
         }
@@ -11242,7 +11326,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 74,
+          "line": 75,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ops\" / \"launchers\" / \"codex\" / \"verify-setup.ps1\""
         }
@@ -11422,7 +11506,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_check_published_observability_endpoints.py",
-          "line": 124,
+          "line": 125,
           "source_group": "tests",
           "text": "expected_target=\"observability/check_published_observability_endpoints.py\","
         }
@@ -11470,7 +11554,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 151,
+          "line": 152,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py\""
         },
@@ -11595,7 +11679,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 148,
+          "line": 149,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh\""
         },
@@ -12061,7 +12145,7 @@
         },
         {
           "path": "tests/architecture/test_root_hygiene_workflow.py",
-          "line": 49,
+          "line": 50,
           "source_group": "tests",
           "text": "assert \"cleanup_repository.py\" in workflow"
         }

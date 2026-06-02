@@ -34,7 +34,7 @@ async def _request_or_skip(
     """Execute request and skip on transient network/provider outages."""
     try:
         response = await client.request(method, url, **kwargs)
-    except (httpx.ConnectError, httpx.ConnectTimeout, httpx.ReadTimeout) as exc:
+    except httpx.TransportError as exc:
         pytest.skip(f"UniProt endpoint not reachable: {exc}")
 
     if response.status_code >= 500:

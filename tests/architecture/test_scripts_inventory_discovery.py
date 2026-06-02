@@ -14,6 +14,7 @@ from tests.helpers import repo_root, run_repo_python
 
 pytestmark = pytest.mark.architecture
 
+
 def _load_inventory_module():
     root = repo_root()
     module_path = (

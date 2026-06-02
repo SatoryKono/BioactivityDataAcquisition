@@ -22,6 +22,7 @@ from bioetl.application.services.control_plane.replay.historical_corpus_models i
 
 pytestmark = pytest.mark.unit
 
+
 def _record(
     *,
     manifest_id: str,

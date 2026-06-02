@@ -11,6 +11,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from bioetl.composition.runtime_builders import inputs_runtime_assembly
 from bioetl.composition.runtime_builders import inputs_resolver
 from bioetl.composition.runtime_builders import runner_builder
 from bioetl.composition.runtime_builders import runner_control_plane_assembly
@@ -74,6 +75,18 @@ def test_inputs_resolver_uses_explicit_resolved_vacuumsettings_name() -> None:
     assert not hasattr(inputs_resolver, "VacuumSettings")
 
 
+def test_inputs_resolver_public_surface_is_narrowed_to_reviewed_exports() -> None:
+    assert set(inputs_resolver.__all__) == {
+        "ResolvedVacuumSettings",
+        "RunnerInputs",
+        "prepare_runner_inputs",
+        "resolve_health_check_mode",
+    }
+    assert "assemble_runtime_config" not in inputs_resolver.__all__
+    assert "assemble_filter_config" not in inputs_resolver.__all__
+    assert "adjust_batch_size_for_filter" not in inputs_resolver.__all__
+
+
 def test_runner_input_assembly_lazy_resolves_default_observability_builder(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -97,10 +110,10 @@ def test_runner_input_assembly_lazy_resolves_default_observability_builder(
     )
 
     assert resolved[0] is build_observability_bundle
-    assert resolved[1] is inputs_resolver.assemble_vacuum_settings
-    assert resolved[2] is inputs_resolver.assemble_runtime_config
-    assert resolved[3] is inputs_resolver.assemble_filter_config
-    assert resolved[4] is inputs_resolver.assemble_cached_bronze_context
+    assert resolved[1] is inputs_runtime_assembly.assemble_vacuum_settings
+    assert resolved[2] is inputs_runtime_assembly.assemble_runtime_config
+    assert resolved[3] is inputs_runtime_assembly.assemble_filter_config
+    assert resolved[4] is inputs_runtime_assembly.assemble_cached_bronze_context
 
 
 def test_runner_builder_exposes_typed_wiring_bundles() -> None:

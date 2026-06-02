@@ -1,4 +1,4 @@
-"""Compatibility tests for runtime bootstrap thin facades.
+"""Public API tests for runtime bootstrap thin facades.
 
 These tests guard public signatures/import paths and monkeypatch patch-points
 while implementation details are decomposed into helper modules.

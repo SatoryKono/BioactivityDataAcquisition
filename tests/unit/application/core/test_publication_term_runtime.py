@@ -15,6 +15,7 @@ from bioetl.application.core.record_normalization_processor import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_create_term_record_trims_source_term_before_profile_normalization() -> None:
     record = create_term_record(
         publication_id="CHEMBL1",

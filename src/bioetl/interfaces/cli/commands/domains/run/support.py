@@ -63,7 +63,7 @@ def build_cli_registry() -> PipelineRegistry:
 
 def _resolve_populated_default_registry() -> PipelineRegistry | None:
     """Return the shared default registry when it is already populated."""
-    from bioetl.composition.registry_default import get_default_registry
+    from bioetl.composition.registry_api import get_default_registry
 
     registry = get_default_registry()
     return registry if registry.list_pipelines() else None
@@ -113,7 +113,11 @@ def validate_pipeline_name(
     registry = resolve_context_registry(click_context)
     if registry is None:
         registry = _resolve_populated_default_registry()
-        if click_context is not None and click_context.obj is None and registry is not None:
+        if (
+            click_context is not None
+            and click_context.obj is None
+            and registry is not None
+        ):
             click_context.obj = registry
     available = list(registry.list_pipelines()) if registry is not None else []
     if not available or value not in available:

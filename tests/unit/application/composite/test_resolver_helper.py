@@ -17,6 +17,7 @@ from bioetl.application.composite.join_key_normalization import (
 
 pytestmark = pytest.mark.unit
 
+
 class TestResolverHelper:
     """Test ResolverHelper class functionality."""
 

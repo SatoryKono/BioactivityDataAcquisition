@@ -14,6 +14,7 @@ from bioetl.domain.value_objects.protein_class_hierarchy import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_protein_class_hierarchy_is_immutable_and_exposes_level_ids() -> None:
     hierarchy = ProteinClassHierarchy(
         l1=ProteinClassLevel(id=1, name="Ion channel", desc="Root"),

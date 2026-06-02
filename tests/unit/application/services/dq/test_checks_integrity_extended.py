@@ -22,6 +22,7 @@ from bioetl.domain.value_objects.dq_report import DQCheckStatus
 
 pytestmark = pytest.mark.unit
 
+
 class TestCheckReferentialIntegrityExtended:
     """Extended tests for check_referential_integrity."""
 

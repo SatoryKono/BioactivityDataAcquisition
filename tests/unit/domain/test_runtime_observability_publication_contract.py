@@ -14,6 +14,7 @@ from bioetl.domain.runtime_observability_publication_contract import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_contract_freezes_canonical_emitters() -> None:
     contract = get_runtime_observability_publication_contract()
 

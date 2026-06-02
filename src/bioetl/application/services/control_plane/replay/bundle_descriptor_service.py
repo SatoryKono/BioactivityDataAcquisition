@@ -50,7 +50,9 @@ def _build_code_provenance_dict(code_provenance: object) -> dict[str, object]:
         "dependency_lock_hash": getattr(code_provenance, "dependency_lock_hash", None),
         "config_hash": getattr(code_provenance, "config_hash", None),
         "resolved_config_hash": getattr(code_provenance, "resolved_config_hash", None),
-        "effective_config_hash": getattr(code_provenance, "effective_config_hash", None),
+        "effective_config_hash": getattr(
+            code_provenance, "effective_config_hash", None
+        ),
         "effective_config_artifact_id": getattr(
             code_provenance,
             "effective_config_artifact_id",

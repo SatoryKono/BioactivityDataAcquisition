@@ -114,11 +114,8 @@ class TestCompositeDQExternalization:
         assert isinstance(required_fields, list) and required_fields, (
             f"Composite DQ config must declare non-empty required_fields: {external_path}"
         )
-        assert (
-            (isinstance(field_validations, list)
-            and field_validations)
-            or (isinstance(cross_field_validations, list)
-            and cross_field_validations)
+        assert (isinstance(field_validations, list) and field_validations) or (
+            isinstance(cross_field_validations, list) and cross_field_validations
         ), (
             "Composite DQ config must declare field or cross-field validation "
             f"bundles: {external_path}"

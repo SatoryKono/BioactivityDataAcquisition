@@ -1124,7 +1124,9 @@ class TestArchiveCommand:
         assert "TARGET_PATH" in result.output
         assert "--remove-source" in result.output
 
-    def test_archive_command__archive_success__57687400(self, cli_runner, mock_lifecycle_service):
+    def test_archive_command__archive_success__57687400(
+        self, cli_runner, mock_lifecycle_service
+    ):
         """Test successful archive operation."""
         with patch(
             "bioetl.interfaces.cli.commands.archive.get_lifecycle_service",
@@ -1143,7 +1145,9 @@ class TestArchiveCommand:
             remove_source=False,
         )
 
-    def test_archive_command__with_remove_source__11808f30(self, cli_runner, mock_lifecycle_service):
+    def test_archive_command__with_remove_source__11808f30(
+        self, cli_runner, mock_lifecycle_service
+    ):
         """Test archive with --remove-source flag."""
         with patch(
             "bioetl.interfaces.cli.commands.archive.get_lifecycle_service",

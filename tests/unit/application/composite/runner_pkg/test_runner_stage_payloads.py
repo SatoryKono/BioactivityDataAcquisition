@@ -26,6 +26,7 @@ from bioetl.domain.composite.result import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_build_dependency_stage_details_returns_stable_payload() -> None:
     details = build_dependency_stage_details(["dep_b", "dep_a"])
 

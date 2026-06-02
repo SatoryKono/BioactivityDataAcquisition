@@ -14,6 +14,9 @@ import pytest
 from click.testing import CliRunner
 
 from bioetl.interfaces.cli import cli, main
+from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
+    ObservabilityBackendEnsureResult,
+)
 from bioetl.interfaces.cli.commands.domains.run.support import (
     get_runner_logger,
     handle_destructive_run_confirmation,
@@ -25,6 +28,19 @@ from bioetl.interfaces.cli.commands.domains.run.support import (
 def cli_runner() -> CliRunner:
     """Create Click's CliRunner for testing CLI commands."""
     return CliRunner()
+
+
+@pytest.fixture(autouse=True)
+def patch_observability_backend_ensure() -> None:
+    """Keep CLI helper unit tests from bootstrapping the detached backend."""
+    with patch(
+        "bioetl.interfaces.cli.commands.run.ensure_observability_backend_started",
+        return_value=ObservabilityBackendEnsureResult(
+            status="failed",
+            health_url="http://127.0.0.1:8081/health",
+        ),
+    ):
+        yield
 
 
 @pytest.fixture
@@ -58,7 +74,9 @@ class TestValidatePipelineName:
         result = validate_pipeline_name(None, None, "chembl_activity")
         assert result == "chembl_activity"
 
-    def test_validate_pipeline_name__raises_bad_parameter__6d32749f(self, mock_registry):
+    def test_validate_pipeline_name__raises_bad_parameter__6d32749f(
+        self, mock_registry
+    ):
         """Test that invalid pipeline raises BadParameter."""
         with pytest.raises(click.BadParameter) as exc_info:
             validate_pipeline_name(None, None, "nonexistent_pipeline")

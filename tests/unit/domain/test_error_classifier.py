@@ -10,6 +10,7 @@ from bioetl.domain.types import ErrorType
 
 pytestmark = pytest.mark.unit
 
+
 class TestErrorClassifier:
     """Tests for the ErrorClassifier class."""
 

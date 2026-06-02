@@ -35,6 +35,7 @@ from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 
 pytestmark = pytest.mark.unit
 
+
 def _fake_atomic_write_text(
     path: object,
     content: object,

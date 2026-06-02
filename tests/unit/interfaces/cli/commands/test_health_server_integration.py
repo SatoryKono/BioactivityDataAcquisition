@@ -23,6 +23,7 @@ from bioetl.interfaces.cli.commands.domains.health.server_integration import (
 
 pytestmark = pytest.mark.unit
 
+
 @pytest.fixture
 def cli_runner() -> CliRunner:
     """Create a Click CLI runner for testing."""

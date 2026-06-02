@@ -103,11 +103,14 @@ async def _write_delete_impl(
     request: _DeltaWriteRequest,
 ) -> None:
     """Write data in delete mode (overwrite table)."""
-    policy = getattr(
-        host,
-        "_merge_resilience_policy",
-        DEFAULT_SILVER_MERGE_POLICY,
-    ) or DEFAULT_SILVER_MERGE_POLICY
+    policy = (
+        getattr(
+            host,
+            "_merge_resilience_policy",
+            DEFAULT_SILVER_MERGE_POLICY,
+        )
+        or DEFAULT_SILVER_MERGE_POLICY
+    )
     await _write_plain_delta_request(
         load_module=host._load_silver_writer_module,
         request=request,
@@ -122,11 +125,14 @@ async def _write_append_impl(
     request: _DeltaWriteRequest,
 ) -> None:
     """Write data in append mode."""
-    policy = getattr(
-        host,
-        "_merge_resilience_policy",
-        DEFAULT_SILVER_MERGE_POLICY,
-    ) or DEFAULT_SILVER_MERGE_POLICY
+    policy = (
+        getattr(
+            host,
+            "_merge_resilience_policy",
+            DEFAULT_SILVER_MERGE_POLICY,
+        )
+        or DEFAULT_SILVER_MERGE_POLICY
+    )
     await _write_plain_delta_request(
         load_module=host._load_silver_writer_module,
         request=request,

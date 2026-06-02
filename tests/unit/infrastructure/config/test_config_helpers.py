@@ -7,6 +7,7 @@ from bioetl.infrastructure.config.config_helpers import load_and_validate_config
 
 pytestmark = pytest.mark.unit
 
+
 def test_load_and_validate_config_success():
     """Test load_and_validate_config function with valid config."""
     # Mock the load_config function

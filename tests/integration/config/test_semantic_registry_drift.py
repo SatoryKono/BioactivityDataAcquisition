@@ -14,6 +14,7 @@ from scripts.engineering.qa.check_semantic_registry_drift import (
 
 pytestmark = pytest.mark.integration
 
+
 def test_semantic_registry_drift_gate_passes_current_repo() -> None:
     result = validate_semantic_registry_drift(Path("."))
 

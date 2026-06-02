@@ -23,6 +23,7 @@ from bioetl.domain.composite.cross_validation import (
 
 pytestmark = pytest.mark.unit
 
+
 class TestComparisonMethod:
     """Tests for ComparisonMethod enum."""
 

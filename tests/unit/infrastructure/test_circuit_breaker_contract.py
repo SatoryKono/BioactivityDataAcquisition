@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 
 from bioetl.domain.types import CircuitBreakerState
-from bioetl.infrastructure.adapters._circuit_breaker_contract import (
+from bioetl.infrastructure.adapters.circuit_breaker_contract import (
     CircuitBreakerSnapshot,
     CircuitBreakerTransitionEvent,
     evaluate_attempt,
@@ -16,6 +16,7 @@ from bioetl.infrastructure.adapters._circuit_breaker_contract import (
 
 
 pytestmark = pytest.mark.unit
+
 
 class TestCircuitBreakerContract:
     """State transition tests shared by both breaker implementations."""

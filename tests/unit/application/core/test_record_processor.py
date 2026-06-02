@@ -3,19 +3,14 @@
 from __future__ import annotations
 
 import asyncio
-from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
 import pytest
 
-from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.application.core.pipeline_services import PipelineService
-from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.domain.config import TableConfig
-from bioetl.domain.context import PipelineContext
-from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import DataQualityError, DataQualityThresholdError
 from bioetl.domain.ports import MetricsPort
 from bioetl.domain.types import BatchID, ValidationResult

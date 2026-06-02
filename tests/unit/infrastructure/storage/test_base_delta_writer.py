@@ -127,7 +127,9 @@ class TestBaseDeltaWriter:
             logger=mock_logger,
         )
 
-    def test_base_delta_writer__initialization__57222f35(self, writer: BaseDeltaWriter, tmp_path: Path) -> None:
+    def test_base_delta_writer__initialization__57222f35(
+        self, writer: BaseDeltaWriter, tmp_path: Path
+    ) -> None:
         """Test writer initialization."""
         assert writer.base_path == str(tmp_path)
         assert writer.logger is not None

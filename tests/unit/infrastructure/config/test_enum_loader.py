@@ -20,6 +20,7 @@ from bioetl.infrastructure.config.enum_loader_adapter import FileSystemEnumLoade
 
 pytestmark = pytest.mark.unit
 
+
 def test_filesystem_enum_loader_loads_non_chembl_provider(tmp_path) -> None:
     enum_path = tmp_path / "configs" / "enums"
     enum_path.mkdir(parents=True)

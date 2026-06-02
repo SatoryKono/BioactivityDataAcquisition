@@ -26,6 +26,7 @@ from tests.unit.application.services.run_manifest_test_support import (
 
 pytestmark = pytest.mark.unit
 
+
 def _make_source_manifest() -> RunManifest:
     return _build_manifest(
         manifest_id="historical-source-manifest",

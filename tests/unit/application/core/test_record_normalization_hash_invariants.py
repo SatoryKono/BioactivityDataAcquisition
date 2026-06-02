@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
+import json
+
 import pytest
+from hypothesis import HealthCheck, given, settings, strategies as st
 
 # ruff: noqa: F403,F405
 from tests.unit.application.core.normalization_test_support import *
 
 
 pytestmark = pytest.mark.unit
+
 
 def test_profile_auto_resolves_for_chembl_publication_similarity() -> None:
     processor = build_normalization_processor(

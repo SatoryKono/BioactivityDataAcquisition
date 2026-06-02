@@ -14,6 +14,7 @@ from scripts.engineering.qa.report_function_length_inventory import FunctionLeng
 
 pytestmark = pytest.mark.unit
 
+
 def test_scan_near_threshold_functions_returns_sorted_entries(tmp_path: Path) -> None:
     source_root = tmp_path / "src"
     source_root.mkdir()

@@ -114,7 +114,9 @@ def loader(test_configs_root: Path) -> FilterConfigLoader:
 class TestFilterConfigLoaderBasics:
     """Basic loading tests for FilterConfigLoader."""
 
-    def test_config_loader_basics__load_defaults_only__bd06f9fe(self, loader: FilterConfigLoader) -> None:
+    def test_config_loader_basics__load_defaults_only__bd06f9fe(
+        self, loader: FilterConfigLoader
+    ) -> None:
         """Load for unknown provider should use defaults."""
         input_filter, _, gold_filters, _ = loader.load(
             "unknown_provider", "unknown_entity"
@@ -125,7 +127,9 @@ class TestFilterConfigLoaderBasics:
         assert len(gold_filters.required_fields) == 0
         assert len(gold_filters.column_filters) == 0
 
-    def test_config_loader_basics__load_with_provider__3fa15b8c(self, loader: FilterConfigLoader) -> None:
+    def test_config_loader_basics__load_with_provider__3fa15b8c(
+        self, loader: FilterConfigLoader
+    ) -> None:
         """Load with provider should merge provider config."""
         input_filter, _, gold_filters, _ = loader.load(
             "test_provider", "unknown_entity"
@@ -137,7 +141,9 @@ class TestFilterConfigLoaderBasics:
         assert len(gold_filters.column_filters) == 1
         assert gold_filters.column_filters[0].column == "provider_column"
 
-    def test_config_loader_basics__load_full_hierarchy__b1dda80b(self, loader: FilterConfigLoader) -> None:
+    def test_config_loader_basics__load_full_hierarchy__b1dda80b(
+        self, loader: FilterConfigLoader
+    ) -> None:
         """Load with entity should merge all levels."""
         input_filter, _, gold_filters, _ = loader.load("test_provider", "test_entity")
 
@@ -230,7 +236,9 @@ filters:
         assert input_filter.batch_size == 77
         assert "provider_column" in {c.column for c in gold_filters.column_filters}
 
-    def test_config_loader_basics__unified_entity_file__11b5ab2f(self, tmp_path: Path) -> None:
+    def test_config_loader_basics__unified_entity_file__11b5ab2f(
+        self, tmp_path: Path
+    ) -> None:
         """Entity-level filters should load from configs/entities/{p}/{e}.yaml."""
         base_root = tmp_path / "base"
         base_root.mkdir(parents=True)
@@ -402,7 +410,9 @@ class TestFilterConfigLoaderCaching:
         assert config1 == config2
         assert len(loader._cache) == 1
 
-    def test_config_loader_caching__cache_with_overrides__57db8571(self, loader: FilterConfigLoader) -> None:
+    def test_config_loader_caching__cache_with_overrides__57db8571(
+        self, loader: FilterConfigLoader
+    ) -> None:
         """Configs with overrides should not be cached."""
         config1 = loader.load("test_provider", "test_entity")
         config2 = loader.load(
@@ -439,14 +449,18 @@ class TestFilterConfigLoaderCaching:
 class TestFilterConfigLoaderErrors:
     """Tests for error handling in FilterConfigLoader."""
 
-    def test_config_loader_errors__defaults_raises__cb6899ae(self, tmp_path: Path) -> None:
+    def test_config_loader_errors__defaults_raises__cb6899ae(
+        self, tmp_path: Path
+    ) -> None:
         """Missing filter_defaults in base pipeline should raise FileNotFoundError."""
         loader = FilterConfigLoader(tmp_path)
 
         with pytest.raises(FileNotFoundError, match="filter_defaults"):
             loader.load("any_provider", "any_entity")
 
-    def test_config_loader_errors__invalid_yaml_raises__df794bfa(self, tmp_path: Path) -> None:
+    def test_config_loader_errors__invalid_yaml_raises__df794bfa(
+        self, tmp_path: Path
+    ) -> None:
         """Invalid YAML should raise appropriate error."""
         base_root = tmp_path / "base"
         base_root.mkdir(parents=True)
@@ -467,7 +481,9 @@ input_filter:
 class TestFilterDeepMerge:
     """Tests for _deep_merge logic specific to filter configs."""
 
-    def test_filter_deep_merge__scalar_override__20d647f4(self, loader: FilterConfigLoader) -> None:
+    def test_filter_deep_merge__scalar_override__20d647f4(
+        self, loader: FilterConfigLoader
+    ) -> None:
         """Scalars should be overridden."""
         base = {"input_filter": {"batch_size": 100}}
         override = {"input_filter": {"batch_size": 50}}
@@ -476,7 +492,9 @@ class TestFilterDeepMerge:
 
         assert result["input_filter"]["batch_size"] == 50
 
-    def test_filter_deep_merge__nested_dict_merge__6fa42311(self, loader: FilterConfigLoader) -> None:
+    def test_filter_deep_merge__nested_dict_merge__6fa42311(
+        self, loader: FilterConfigLoader
+    ) -> None:
         """Nested dicts should be merged recursively."""
         base = {"gold_filters": {"columns": {"col1": ["a"]}}}
         override = {"gold_filters": {"columns": {"col2": ["b"]}}}
@@ -486,7 +504,9 @@ class TestFilterDeepMerge:
         assert result["gold_filters"]["columns"]["col1"] == ["a"]  # preserved
         assert result["gold_filters"]["columns"]["col2"] == ["b"]  # added
 
-    def test_filter_deep_merge__fields_concatenate__1159fc41(self, loader: FilterConfigLoader) -> None:
+    def test_filter_deep_merge__fields_concatenate__1159fc41(
+        self, loader: FilterConfigLoader
+    ) -> None:
         """required_fields should concatenate with deduplication."""
         base = {"gold_filters": {"required_fields": ["field_a", "field_b"]}}
         override = {"gold_filters": {"required_fields": ["field_b", "field_c"]}}
@@ -521,7 +541,9 @@ class TestFilterDeepMerge:
         # List is completely overridden
         assert result["gold_filters"]["columns"]["col"] == ["c", "d"]
 
-    def test_filter_deep_merge__original_unchanged__8c0bf5de(self, loader: FilterConfigLoader) -> None:
+    def test_filter_deep_merge__original_unchanged__8c0bf5de(
+        self, loader: FilterConfigLoader
+    ) -> None:
         """Original dicts should not be modified."""
         base = {"input_filter": {"batch_size": 100}}
         override = {"input_filter": {"batch_size": 50}}
@@ -543,7 +565,9 @@ class TestMergeStringLists:
 
         assert result == ["a", "b", "c", "d"]
 
-    def test_merge_string_lists__preserve_order__4fc3a46d(self, loader: FilterConfigLoader) -> None:
+    def test_merge_string_lists__preserve_order__4fc3a46d(
+        self, loader: FilterConfigLoader
+    ) -> None:
         """Order should be preserved (base items first)."""
         base = ["x", "y"]
         override = ["z"]

@@ -168,7 +168,9 @@ class TestExtractStructuralFields:
 
 @pytest.mark.unit
 class TestExtractPhysicochemicalFields:
-    def test_physicochemical_fields__all_fields_present__337cac23(self, full_compound: MagicMock) -> None:
+    def test_physicochemical_fields__all_fields_present__337cac23(
+        self, full_compound: MagicMock
+    ) -> None:
         result = _extract_physicochemical_fields(full_compound)
         assert result["molecular_formula"] == "C9H8O4"
         assert result["molecular_weight"] == pytest.approx(180.16)

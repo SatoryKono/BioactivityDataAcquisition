@@ -8,11 +8,11 @@ from pathlib import Path
 from typing import Any
 
 from memory.notes import (
+    NOTE_READ_TIMEOUT_SECONDS,
     extract_markdown_headings,
     normalize_text_key,
     parse_markdown_note,
     parse_markdown_note_metadata,
-    NOTE_READ_TIMEOUT_SECONDS,
 )
 from memory.resources import (
     CATALOG_DIR,

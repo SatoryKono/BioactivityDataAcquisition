@@ -7,6 +7,7 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+
 def test_fetch_strategies_import_path_is_stable() -> None:
     """Legacy import path should keep exporting PubChemFetchStrategies."""
     from bioetl.infrastructure.adapters.pubchem.fetch_strategies import (

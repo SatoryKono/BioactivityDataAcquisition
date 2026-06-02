@@ -40,7 +40,9 @@ def test_local_tech_debt_planning_mirrors_do_not_present_stale_active_status() -
     assert "**Status**: in_progress" not in epic.read_text(encoding="utf-8")
 
 
-def test_local_tech_debt_planning_mirrors_do_not_reintroduce_old_budget_claims() -> None:
+def test_local_tech_debt_planning_mirrors_do_not_reintroduce_old_budget_claims() -> (
+    None
+):
     for path in MIRROR_PATHS:
         content = path.read_text(encoding="utf-8")
         assert "compatibility_test_file_max: 56" not in content, (

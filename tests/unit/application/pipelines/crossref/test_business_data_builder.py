@@ -14,6 +14,7 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+
 def _load_business_data_builder_module() -> object:
     module_path = (
         Path(__file__).resolve().parents[5]

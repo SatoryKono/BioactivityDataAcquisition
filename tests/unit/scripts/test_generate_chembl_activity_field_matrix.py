@@ -34,6 +34,7 @@ from tests.helpers import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_build_field_matrix_rows_covers_schema_and_hash_policy() -> None:
     rows = build_field_matrix_rows()
 

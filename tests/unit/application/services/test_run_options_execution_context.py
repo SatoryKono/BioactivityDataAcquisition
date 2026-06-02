@@ -9,6 +9,7 @@ from bioetl.application.services.execution.pipeline_runner_models import RunOpti
 
 pytestmark = pytest.mark.unit
 
+
 class TestRunOptionsSeverityContext:
     """Tests for RunOptions execution_context field."""
 

@@ -14,7 +14,7 @@ from bioetl.application.services.control_plane.manifest.inspection_service impor
 )
 from bioetl.domain.control_plane import RunSourceRef
 from bioetl.domain.types import RunID, RunType
-from tests.unit.application.services.test_run_manifest_inspection_service import *  # noqa: F401,F403
+from tests.unit.application.services.test_run_manifest_inspection_service import *  # noqa: F403
 from tests.unit.application.services.test_run_manifest_inspection_service import (
     _InMemoryRunManifestStore,
     _make_manifest,

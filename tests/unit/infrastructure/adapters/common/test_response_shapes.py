@@ -14,6 +14,7 @@ from bioetl.infrastructure.adapters.common.response_shapes import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_normalize_response_items_supports_lists_and_tuples() -> None:
     assert normalize_response_items([1, 2]) == [1, 2]
     assert normalize_response_items((1, 2)) == [1, 2]

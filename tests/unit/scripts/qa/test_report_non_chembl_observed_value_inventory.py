@@ -9,6 +9,7 @@ from scripts.engineering.qa import report_non_chembl_observed_value_inventory as
 
 pytestmark = pytest.mark.unit
 
+
 def test_build_inventory_payload_covers_expected_non_chembl_sections() -> None:
     payload = report.build_inventory_payload()
     sections = payload["sections"]

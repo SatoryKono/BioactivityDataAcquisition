@@ -31,7 +31,7 @@ Method:
 
 ### Established facts
 
-- The ChEMBL family has one real shared normalization layer, not 14 unrelated implementations. The common seams are the ChEMBL policy registry, controlled vocabulary registry, ontology registry, reference-identifier registry, pseudo-null matrix, and JSON ordering/hash policy: `src/bioetl/domain/normalization/profiles/_chembl_policy_registry.py`, `configs/vocab/chembl_controlled.yaml`, `configs/vocab/chembl_ontology.yaml`, `configs/vocab/chembl_reference_identifiers.yaml`, `src/bioetl/domain/normalization/profiles/chembl_pseudo_nulls.py`, `src/bioetl/domain/normalization/profiles/chembl_json_ordering_policy.py`.
+- The ChEMBL family has one real shared normalization layer, not 14 unrelated implementations. The common seams are the ChEMBL policy registry, controlled vocabulary registry, ontology registry, reference-identifier registry, pseudo-null matrix, and JSON ordering/hash policy: `src/bioetl/domain/normalization/profiles/chembl_policy_registry.py`, `configs/vocab/chembl_controlled.yaml`, `configs/vocab/chembl_ontology.yaml`, `configs/vocab/chembl_reference_identifiers.yaml`, `src/bioetl/domain/normalization/profiles/chembl_pseudo_nulls.py`, `src/bioetl/domain/normalization/profiles/chembl_json_ordering_policy.py`.
 - All 14 pipelines are currently registered in the canonical pipeline manifest with Silver schema and Gold contract surfaces: `src/bioetl/composition/factories/pipeline/_registry_manifest_chembl.py`.
 - Fresh generated matrix on current code reports `828/828` explicit entity-record profile coverage and `100%` on the shipped meta/set-like/non-meta semantic invariants: `/tmp/chembl_norm_matrix_20260514/pipeline_normalization_field_matrix.csv` generated from `scripts/docs/generate_pipeline_normalization_field_matrix.py`.
 - Enum/catalog/DQ/hash/derived-vocabulary invariants are actively enforced by tests, not just documented:
@@ -68,7 +68,7 @@ Method:
 | Area | Pipeline | Artifact | Fact | Conclusion |
 | --- | --- | --- | --- | --- |
 | Registry completeness | all | `src/bioetl/composition/factories/pipeline/_registry_manifest_chembl.py` | 14 ChEMBL pipelines are registered with Silver schema and Gold contract classes | audit scope is structurally complete |
-| Shared policy layer | all | `src/bioetl/domain/normalization/profiles/_chembl_policy_registry.py` | semantic category, registry source, and invalid-value mode are centralized per field family | normalization logic is not primarily transformer-local |
+| Shared policy layer | all | `src/bioetl/domain/normalization/profiles/chembl_policy_registry.py` | semantic category, registry source, and invalid-value mode are centralized per field family | normalization logic is not primarily transformer-local |
 | Controlled vocabularies | activity/assay/assay_parameters/target/publication | `configs/vocab/chembl_controlled.yaml` | units, operators, assay categories, OA status, target component JSON vocab, subcellular fractions are registry-backed | common vocab semantics are explicit |
 | Ontology families | activity/assay/cell_line/tissue | `configs/vocab/chembl_ontology.yaml` | BAO/UO/QUDT/BTO/EFO/CLO/UBERON/Cellosaurus/CALOHA families are declared with accepted input forms and companion bundles | ontology handling is explicit, with some identifier-only exceptions |
 | Reference IDs | cross-family | `configs/vocab/chembl_reference_identifiers.yaml` | ChEMBL IDs, NCBI taxonomy IDs, UniProt accessions, DOI/PMID/PMCID, MeSH IDs are centralized | identifier canonicalization is shared, not ad hoc |
@@ -84,7 +84,7 @@ Method:
 
 - Pseudo-null collapse: `src/bioetl/domain/normalization/profiles/chembl_pseudo_nulls.py`
 - ChEMBL/reference identifier normalization: `configs/vocab/chembl_reference_identifiers.yaml`, `src/bioetl/domain/normalization/profiles/_chembl_reference_identifier_rules.py`
-- Boolean/flag families: `configs/vocab/chembl_controlled.yaml`, `src/bioetl/domain/normalization/profiles/_chembl_policy_registry_data.py`
+- Boolean/flag families: `configs/vocab/chembl_controlled.yaml`, `src/bioetl/domain/normalization/profiles/chembl_policy_registry_data.py`
 - Canonical hashing and structured JSON ordering: `src/bioetl/domain/transformations/hashing.py`, `src/bioetl/domain/normalization/profiles/chembl_json_ordering_policy.py`
 
 ### Subfamily rules
@@ -205,7 +205,7 @@ The rows below list all materially distinct enum-like families and the main cros
 
 1. Canonicalize `chembl_activity.bao_label` from sibling `bao_format`, mirroring `chembl_assay`.
    - Layer: domain normalization profile + ontology policy registry
-   - Target files: `src/bioetl/domain/normalization/profiles/chembl_activity.py`, `configs/vocab/chembl_ontology.yaml`, optionally `src/bioetl/domain/normalization/profiles/_chembl_policy_registry_data.py`
+   - Target files: `src/bioetl/domain/normalization/profiles/chembl_activity.py`, `configs/vocab/chembl_ontology.yaml`, optionally `src/bioetl/domain/normalization/profiles/chembl_policy_registry_data.py`
    - Input/output: noisy/free-text BAO label -> canonical identifier-backed label
    - Backward compatibility: additive at schema level, breaking at hash level
    - `content_hash` impact: yes, activity hashes will migrate for rows where label spelling differs but BAO ID is equivalent

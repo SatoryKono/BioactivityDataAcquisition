@@ -268,7 +268,9 @@ class TestPubMedExternalVerification:
 
 @pytest.mark.integration
 class TestOpenAlexExternalVerification:
-    async def test_external_verification__doi_found__8d6a430a(self, openalex_adapter: OpenAlexAdapter) -> None:
+    async def test_external_verification__doi_found__8d6a430a(
+        self, openalex_adapter: OpenAlexAdapter
+    ) -> None:
         response_json = {
             "results": [
                 {
@@ -298,7 +300,9 @@ class TestOpenAlexExternalVerification:
         assert "W2148763428" in records[0]["id"]
         assert records[0]["_lookup_method"] == "doi"
 
-    async def test_external_verification__doi_not_found__7e52825b(self, openalex_adapter: OpenAlexAdapter) -> None:
+    async def test_external_verification__doi_not_found__7e52825b(
+        self, openalex_adapter: OpenAlexAdapter
+    ) -> None:
         with respx.mock(base_url=OPENALEX_API_BASE) as respx_mock:
             respx_mock.get("/works").mock(
                 return_value=Response(200, json={"results": [], "meta": {"count": 0}})

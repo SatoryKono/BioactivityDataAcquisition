@@ -21,6 +21,7 @@ from tests.unit.application.services.run_manifest_test_support import (
 
 pytestmark = pytest.mark.unit
 
+
 def _make_context(**overrides: object) -> SimpleNamespace:
     base = {
         "pipeline_name": "chembl_activity",

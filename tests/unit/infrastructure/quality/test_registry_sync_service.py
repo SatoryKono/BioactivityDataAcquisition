@@ -15,6 +15,7 @@ from bioetl.infrastructure.quality.registry_sync_service import (
 
 pytestmark = pytest.mark.unit
 
+
 def _make_inventory(
     total: int = 0,
     by_registry: dict[str, int] | None = None,

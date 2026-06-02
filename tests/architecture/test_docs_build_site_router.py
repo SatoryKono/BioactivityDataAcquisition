@@ -10,6 +10,7 @@ from pathlib import Path
 
 pytestmark = pytest.mark.architecture
 
+
 def test_build_site_router_targets_importable_backend() -> None:
     root = Path(__file__).resolve().parents[2]
     router = (root / "scripts" / "docs" / "__main__.py").read_text(encoding="utf-8")

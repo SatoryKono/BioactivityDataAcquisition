@@ -17,6 +17,7 @@ from bioetl.infrastructure.quality._governance_validation import (
 
 pytestmark = pytest.mark.unit
 
+
 class TestValidateReviewPolicy:
     """Tests for _validate_review_policy."""
 

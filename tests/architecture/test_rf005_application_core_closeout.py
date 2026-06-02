@@ -17,13 +17,13 @@ BATCH_EXECUTION_SHARED_CONTRACT_USERS: dict[str, set[str]] = {
         "bioetl.application.core.batch_execution.contracts",
     },
     "src/bioetl/application/core/batch_execution/lifecycle.py": {
-        "bioetl.application.core.batch_execution._contracts",
+        "bioetl.application.core.batch_execution.contracts",
     },
     "src/bioetl/application/core/batch_execution/run_service.py": {
-        "bioetl.application.core.batch_execution._contracts",
+        "bioetl.application.core.batch_execution.contracts",
     },
     "src/bioetl/application/core/batch_execution/state_service.py": {
-        "bioetl.application.core.batch_execution._contracts",
+        "bioetl.application.core.batch_execution.contracts",
     },
 }
 

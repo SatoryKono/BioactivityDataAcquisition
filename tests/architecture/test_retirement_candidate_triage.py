@@ -131,7 +131,7 @@ def test_retirement_triage_entries_are_explicit_and_actionable() -> None:
     repo_wide = triage.get("repo_wide_zero_import_classification", {})
     assert isinstance(repo_wide, dict)
     assert repo_wide.get("linked_issue") == "#4541"
-    assert repo_wide.get("review_date") == "2026-06-01"
+    assert repo_wide.get("review_date") == "2026-06-02"
     assert set(repo_wide.get("allowed_dispositions", [])) == {
         "retain_module_entrypoint",
         "retain_dynamic_entrypoint",

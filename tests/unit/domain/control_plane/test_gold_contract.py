@@ -23,6 +23,7 @@ from bioetl.domain.types.contract_identity import (
 
 pytestmark = pytest.mark.unit
 
+
 def _make_identity(
     version: str = "1.2.3",
     *,

@@ -7,6 +7,7 @@ import bioetl.infrastructure.storage.metadata.metadata_helpers as metadata_helpe
 
 pytestmark = pytest.mark.unit
 
+
 def test_build_and_validate_metadata_success():
     """Test build_and_validate_metadata function with valid data."""
     key = "test_key"

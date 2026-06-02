@@ -150,8 +150,7 @@ def test_active_standard_provider_surface_has_dq_config_and_published_artifact(
     contract_version = entry.identity.contract_version
     version_suffix = ".".join(contract_version.split(".")[:2])
     expected_artifact = (
-        f"../../docs/04-reference/contracts/gold/"
-        f"{pipeline_name}_v{version_suffix}.json"
+        f"../../docs/04-reference/contracts/gold/{pipeline_name}_v{version_suffix}.json"
     )
 
     dq_config = DQContractConfigLoader(_CONFIGS_ROOT).load_dq_config_for_pipeline(

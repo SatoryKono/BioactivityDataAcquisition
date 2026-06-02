@@ -1392,10 +1392,7 @@ def test_navigation_panel_html_bus_preserves_primary_identity_handoff() -> None:
         assert hrefs, f"{dashboard_path.name} navigation HTML bus must expose links"
         for href in hrefs:
             target_uid = _extract_dashboard_uid(href)
-            if (
-                target_uid not in _PRIMARY_DASHBOARD_UIDS
-                or target_uid == source_uid
-            ):
+            if target_uid not in _PRIMARY_DASHBOARD_UIDS or target_uid == source_uid:
                 continue
             query_vars = {
                 key[4:]: value

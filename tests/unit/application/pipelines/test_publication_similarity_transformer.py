@@ -40,7 +40,9 @@ class TestPublicationSimilarityTransformer:
         )
 
     @pytest.mark.asyncio
-    async def test_similarity_transformer__valid_record__67a9eec6(self, transformer, mock_context):
+    async def test_similarity_transformer__valid_record__67a9eec6(
+        self, transformer, mock_context
+    ):
         """Test transformation of valid document similarity record."""
         record = {
             "sim_id": 1,
@@ -84,7 +86,9 @@ class TestPublicationSimilarityTransformer:
         assert result is None
 
     @pytest.mark.asyncio
-    async def test_similarity_transformer__minimal_record__d840cf75(self, transformer, mock_context):
+    async def test_similarity_transformer__minimal_record__d840cf75(
+        self, transformer, mock_context
+    ):
         """Test transformation with only required fields."""
         record = {
             "sim_id": 1,
@@ -225,7 +229,9 @@ class TestPublicationSimilarityTransformer:
         assert transformer.entity_class is ChemblPublicationSimilarity
 
     @pytest.mark.asyncio
-    async def test_similarity_transformer__content_hash__2ee7404d(self, transformer, mock_context):
+    async def test_similarity_transformer__content_hash__2ee7404d(
+        self, transformer, mock_context
+    ):
         """Test that content_hash is generated and is 64 hex characters."""
         record = {
             "sim_id": 1,
@@ -242,7 +248,9 @@ class TestPublicationSimilarityTransformer:
         int(result["content_hash"], 16)
 
     @pytest.mark.asyncio
-    async def test_similarity_transformer__lineage_fields__6a303349(self, transformer, mock_context):
+    async def test_similarity_transformer__lineage_fields__6a303349(
+        self, transformer, mock_context
+    ):
         """Test that all lineage fields are present."""
         record = {
             "sim_id": 1,
@@ -262,7 +270,9 @@ class TestPublicationSimilarityTransformer:
         assert result["_index"] == 0
 
     @pytest.mark.asyncio
-    async def test_similarity_transformer__custom_provider__d4c9be39(self, mock_context):
+    async def test_similarity_transformer__custom_provider__d4c9be39(
+        self, mock_context
+    ):
         """Test transformation with custom provider."""
         transformer = PublicationSimilarityTransformer(
             provider="custom_provider",

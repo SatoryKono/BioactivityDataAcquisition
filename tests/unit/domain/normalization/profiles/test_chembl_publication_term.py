@@ -10,6 +10,7 @@ from bioetl.domain.schemas.constants import PUBLICATION_TERM_TYPES
 
 pytestmark = pytest.mark.unit
 
+
 @pytest.mark.parametrize(
     ("raw_value", "expected"),
     [

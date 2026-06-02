@@ -16,6 +16,7 @@ from bioetl.infrastructure.observability.prometheus_metrics import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_workflow_metrics_are_registered() -> None:
     assert "bioetl_workflow_current_status" in GAUGES
     assert "bioetl_workflow_runs_total" in COUNTERS

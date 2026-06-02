@@ -57,7 +57,9 @@ class TestZScoreDetector:
         )
         assert result is None
 
-    def test_z_score_detector__detect_spike_anomaly__1980f176(self, detector: ZScoreDetector) -> None:
+    def test_z_score_detector__detect_spike_anomaly__1980f176(
+        self, detector: ZScoreDetector
+    ) -> None:
         """Test detection of spike (value above mean)."""
         baseline = [100.0, 110.0, 120.0, 130.0, 140.0]
         result = detector.detect(
@@ -73,7 +75,9 @@ class TestZScoreDetector:
         assert result.current_value == pytest.approx(300.0)
         assert "std deviations" in result.message
 
-    def test_z_score_detector__detect_drop_anomaly__285de3b0(self, detector: ZScoreDetector) -> None:
+    def test_z_score_detector__detect_drop_anomaly__285de3b0(
+        self, detector: ZScoreDetector
+    ) -> None:
         """Test detection of drop (value below mean)."""
         baseline = [100.0, 110.0, 120.0, 130.0, 140.0]
         result = detector.detect(
@@ -242,7 +246,9 @@ class TestZScoreEdgeCases:
         """Create a Z-score detector instance."""
         return ZScoreDetector()
 
-    def test_z_score_edge_cases__negative_values__cb79a620(self, detector: ZScoreDetector) -> None:
+    def test_z_score_edge_cases__negative_values__cb79a620(
+        self, detector: ZScoreDetector
+    ) -> None:
         """Test with negative baseline values."""
         baseline = [-100.0, -90.0, -80.0, -70.0, -60.0]
         result = detector.detect(

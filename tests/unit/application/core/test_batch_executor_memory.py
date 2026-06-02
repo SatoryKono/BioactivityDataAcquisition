@@ -58,6 +58,7 @@ from bioetl.domain.types import (
 
 pytestmark = pytest.mark.unit
 
+
 @pytest.fixture
 def mock_services():
     """Create mock pipeline services."""

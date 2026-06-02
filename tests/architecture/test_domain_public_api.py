@@ -14,6 +14,7 @@ from typing import get_type_hints
 
 pytestmark = pytest.mark.architecture
 
+
 def test_domain_all_is_complete() -> None:
     """Verify domain/__init__.py __all__ contains all public symbols.
 

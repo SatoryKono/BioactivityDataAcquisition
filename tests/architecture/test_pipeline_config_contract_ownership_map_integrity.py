@@ -32,7 +32,9 @@ def _load_rows() -> list[dict[str, object]]:
 
 
 @pytest.mark.architecture
-def test_pipeline_config_contract_ownership_map_rows_reference_existing_artifacts() -> None:
+def test_pipeline_config_contract_ownership_map_rows_reference_existing_artifacts() -> (
+    None
+):
     """Ownership map rows must point at committed config, contract, and code owners."""
     assert JSON_ARTIFACT.exists(), (
         "Missing pipeline-config-contract ownership map artifact; regenerate with "
@@ -56,7 +58,9 @@ def test_pipeline_config_contract_ownership_map_rows_reference_existing_artifact
                 violations.append(f"{pipeline_name}: missing {field}")
                 continue
             if not (PROJECT_ROOT / rel_path).is_file():
-                violations.append(f"{pipeline_name}: missing file for {field}={rel_path}")
+                violations.append(
+                    f"{pipeline_name}: missing file for {field}={rel_path}"
+                )
 
         provider = row.get("provider")
         if provider == "composite":
@@ -104,10 +108,11 @@ def test_pipeline_config_contract_ownership_map_has_full_gold_coverage() -> None
                 f"for {contract_ref!r}"
             )
         if registry_status != "active":
-            violations.append(
-                f"{pipeline_name}: registry_status={registry_status!r}"
-            )
-        if not isinstance(registry_contract_version, str) or not registry_contract_version:
+            violations.append(f"{pipeline_name}: registry_status={registry_status!r}")
+        if (
+            not isinstance(registry_contract_version, str)
+            or not registry_contract_version
+        ):
             violations.append(f"{pipeline_name}: missing registry_contract_version")
         if not isinstance(gold_schema_title, str) or not gold_schema_title.endswith(
             " Contract"
@@ -118,7 +123,9 @@ def test_pipeline_config_contract_ownership_map_has_full_gold_coverage() -> None
 
 
 @pytest.mark.architecture
-def test_pipeline_config_contract_ownership_map_contract_refs_match_contract_yaml() -> None:
+def test_pipeline_config_contract_ownership_map_contract_refs_match_contract_yaml() -> (
+    None
+):
     """Each ownership row contract_ref must match the committed contract YAML."""
     violations: list[str] = []
     for row in _load_rows():

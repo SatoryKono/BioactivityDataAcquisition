@@ -14,6 +14,7 @@ from tests.helpers import run_repo_python
 
 pytestmark = pytest.mark.architecture
 
+
 def _load_consistency_gate_module() -> ModuleType:
     repo_root = Path(__file__).resolve().parents[2]
     module_path = (

@@ -131,9 +131,13 @@ def scaffold_entity(provider: str, entity: str) -> bool:
     if not isinstance(contracts, dict):
         raise ValueError(f"Missing contracts section in {path}")
     if contracts.get("hash_include"):
-        raise ValueError(f"contracts.hash_include must be empty before hash_policy in {path}")
+        raise ValueError(
+            f"contracts.hash_include must be empty before hash_policy in {path}"
+        )
     if contracts.get("hash_exclude"):
-        raise ValueError(f"contracts.hash_exclude must be empty before hash_policy in {path}")
+        raise ValueError(
+            f"contracts.hash_exclude must be empty before hash_policy in {path}"
+        )
 
     include_fields = sorted(profile.hash_included_fields)
     if not include_fields:

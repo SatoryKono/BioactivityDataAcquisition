@@ -27,6 +27,7 @@ from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 pytestmark = pytest.mark.unit
 
+
 def test_file_store_round_trips_manifest_by_id_and_run_id(tmp_path) -> None:
     store = FileRunManifestStore(base_path=tmp_path / "run_manifest")
     run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))

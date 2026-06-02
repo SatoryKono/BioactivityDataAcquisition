@@ -8,6 +8,7 @@ from bioetl.application.pipelines.uniprot.extractors.crossrefs import CrossRefEx
 
 pytestmark = pytest.mark.unit
 
+
 class TestCrossRefExtractor:
     """Tests for CrossRefExtractor class."""
 

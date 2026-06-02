@@ -17,6 +17,7 @@ from bioetl.infrastructure.schemas.dq_report_config import BronzeDQReportConfig
 
 pytestmark = pytest.mark.unit
 
+
 class TestBronzeDQAnalyzer:
     """Tests for BronzeDQAnalyzer."""
 

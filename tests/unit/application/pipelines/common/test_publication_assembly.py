@@ -13,6 +13,7 @@ from bioetl.application.pipelines.common.publication_assembly import (
 
 pytestmark = pytest.mark.unit
 
+
 class _StubNormalizer:
     def __init__(self, normalized: dict[str, Any]) -> None:
         self.normalized = normalized

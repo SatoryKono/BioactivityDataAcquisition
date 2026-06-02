@@ -7,6 +7,7 @@ from tests.helpers.vcr_config import build_base_vcr_config, is_vcr_recording_mod
 
 pytestmark = pytest.mark.unit
 
+
 def test_is_vcr_recording_mode_uses_env(monkeypatch) -> None:
     monkeypatch.setenv("VCR_RECORD_MODE", "new_episodes")
     monkeypatch.setattr("sys.argv", ["pytest"])

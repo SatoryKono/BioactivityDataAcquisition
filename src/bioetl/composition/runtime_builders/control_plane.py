@@ -68,9 +68,7 @@ def attach_manifest_id(
             raise TypeError(
                 "attach_manifest_id requires either manifest_id or control_plane_refs"
             )
-        optional_updates = iter_optional_control_plane_updates_from_mapping(
-            locals()
-        )
+        optional_updates = iter_optional_control_plane_updates_from_mapping(locals())
     if is_dataclass(ctx):
         return cast(
             "PipelineRunContext",

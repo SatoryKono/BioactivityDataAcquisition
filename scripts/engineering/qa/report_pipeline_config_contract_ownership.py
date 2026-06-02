@@ -30,9 +30,7 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     return payload
 
 
-_COMPOSITE_PIPELINE_OWNER = (
-    "src/bioetl/application/composite/runner_pkg/runner.py"
-)
+_COMPOSITE_PIPELINE_OWNER = "src/bioetl/application/composite/runner_pkg/runner.py"
 _PIPELINE_OWNER_OVERRIDES: dict[tuple[str, str], str] = {
     ("uniprot", "idmapping"): (
         "src/bioetl/application/pipelines/uniprot/idmapping_transformer.py"
@@ -130,7 +128,11 @@ def _coverage_status(
         return "missing_registry_entry"
     if registry_entry.get("status") != "active":
         return "registry_not_active"
-    required_paths = (contract_config_path, published_artifact_path, registry_source_path)
+    required_paths = (
+        contract_config_path,
+        published_artifact_path,
+        registry_source_path,
+    )
     if not all(required_paths):
         return "missing_governance_path"
     if not all((PROJECT_ROOT / path).is_file() for path in required_paths):

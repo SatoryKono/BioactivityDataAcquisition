@@ -18,6 +18,7 @@ from bioetl.domain.normalization.join_keys import (
 
 pytestmark = pytest.mark.unit
 
+
 def _iter_join_keys(value: object) -> set[str]:
     if isinstance(value, dict):
         keys = set(value.get("join_keys", ()) or ())

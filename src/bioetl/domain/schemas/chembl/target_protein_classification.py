@@ -73,6 +73,7 @@ class TargetProteinClassificationSchema(ETLRecordSchema):
     l5_desc: Series[str] | None = pa.Field(
         nullable=True, description="Level 5 protein classification description."
     )
+
     class Config:
         """Pandera configuration."""
 

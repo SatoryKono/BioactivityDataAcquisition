@@ -10,6 +10,7 @@ from tests.unit.application.core.normalization_test_support import *
 
 pytestmark = pytest.mark.unit
 
+
 def test_profile_auto_resolves_for_chembl_activity() -> None:
     processor = build_normalization_processor(
         provider="chembl",

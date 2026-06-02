@@ -157,7 +157,9 @@ class TestPublicationTermDataSourceContextManager:
         mock_data_source.__aexit__.assert_called_once_with(None, None, None)
 
     @pytest.mark.asyncio
-    async def test_source_context_manager__manager_full_cycle__417c4145(self, mock_data_source):
+    async def test_source_context_manager__manager_full_cycle__417c4145(
+        self, mock_data_source
+    ):
         """Test using PublicationTermDataSource as async context manager."""
         wrapper = PublicationTermDataSource(data_source=mock_data_source)
 
@@ -458,7 +460,9 @@ class TestPublicationTermDataSourceDelegation:
     """Tests for method delegation to wrapped data source."""
 
     @pytest.mark.asyncio
-    async def test_data_source_delegation__check_delegates__9200ab24(self, mock_data_source):
+    async def test_data_source_delegation__check_delegates__9200ab24(
+        self, mock_data_source
+    ):
         """Test health_check delegates to wrapped data source."""
         wrapper = PublicationTermDataSource(data_source=mock_data_source)
 
@@ -468,7 +472,9 @@ class TestPublicationTermDataSourceDelegation:
         mock_data_source.health_check.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_data_source_delegation__aclose_delegates__f42b46ca(self, mock_data_source):
+    async def test_data_source_delegation__aclose_delegates__f42b46ca(
+        self, mock_data_source
+    ):
         """Test aclose delegates to wrapped data source."""
         wrapper = PublicationTermDataSource(data_source=mock_data_source)
 

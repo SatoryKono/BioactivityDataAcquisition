@@ -14,6 +14,7 @@ from bioetl.infrastructure.config.semantic_field_registry_loader import (
 
 pytestmark = pytest.mark.unit
 
+
 def _write_registry(tmp_path: Path, clusters: list[dict[str, object]]) -> None:
     registry_dir = tmp_path / "field_registry"
     registry_dir.mkdir(parents=True)

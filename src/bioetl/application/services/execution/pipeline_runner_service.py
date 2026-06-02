@@ -100,6 +100,18 @@ def _record_pipeline_audit_event(
     audit.log_event(event_name, event_data, timestamp=timestamp)
 
 
+def _resolve_effective_run_id(
+    *,
+    run_id: UUID | None,
+    options: RunOptions,
+) -> RunID:
+    if run_id is not None:
+        return cast(RunID, run_id)
+    if options.exact_replay:
+        raise ValueError("exact replay requires explicit run_id")
+    return cast(RunID, uuid4())
+
+
 @dataclass
 class PipelineRunnerService:
     """Interface-agnostic application service for pipeline execution."""
@@ -126,7 +138,8 @@ class PipelineRunnerService:
             pipeline_name: Registered pipeline identifier to execute.
             dry_run: If True, validate and plan but skip storage writes.
                 Overridden by options.dry_run if options is provided.
-            run_id: Optional explicit UUID for the run. Auto-generated if None.
+            run_id: Optional explicit UUID for the run. Required for exact replay
+                and auto-generated only for operational runtime paths.
             options: Optional RunOptions controlling run type, limit, filters, etc.
                 If None, a default RunOptions instance is created using dry_run.
 
@@ -142,7 +155,10 @@ class PipelineRunnerService:
         )
         effective_options = self._merge_options(options, dry_run)
         self._ensure_pipeline_exists(pipeline_name)
-        effective_run_id: RunID = cast(RunID, run_id or uuid4())
+        effective_run_id = _resolve_effective_run_id(
+            run_id=run_id,
+            options=effective_options,
+        )
         context = self._build_context(
             pipeline_name,
             effective_run_id,

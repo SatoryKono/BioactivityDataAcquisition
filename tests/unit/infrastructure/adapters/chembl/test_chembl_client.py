@@ -28,6 +28,7 @@ from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
 
 pytestmark = pytest.mark.unit
 
+
 async def _drain_async_iter(async_iter) -> None:
     """Consume an async iterator until completion."""
     async for _ in async_iter:
@@ -249,7 +250,9 @@ async def test_fetch_error(adapter, mock_http_client):
 
 
 @pytest.mark.asyncio
-async def test_chembl_chembl_client__health_check_healthy__c61c1001(adapter, mock_http_client):
+async def test_chembl_chembl_client__health_check_healthy__c61c1001(
+    adapter, mock_http_client
+):
     """Test healthy check."""
     mock_response = MagicMock()
     mock_response.status_code = 200
@@ -277,7 +280,9 @@ async def test_health_check_unhealthy(adapter, mock_http_client):
 
 
 @pytest.mark.asyncio
-async def test_chembl_chembl_client__get_entity_count__6d319d8b(adapter, mock_http_client):
+async def test_chembl_chembl_client__get_entity_count__6d319d8b(
+    adapter, mock_http_client
+):
     """Test getting entity count."""
     mock_response = MagicMock()
     mock_response.json.return_value = {"page_meta": {"total_count": 100}}

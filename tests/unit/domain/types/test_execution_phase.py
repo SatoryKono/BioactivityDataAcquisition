@@ -15,6 +15,7 @@ from bioetl.domain.types.execution_phase import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_fsm_creation():
     """Test that FSM can be created."""
     fsm = CompositeFSM()

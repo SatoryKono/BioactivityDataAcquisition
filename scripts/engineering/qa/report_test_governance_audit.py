@@ -384,8 +384,8 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
             key=lambda item: (-len(item[1]), item[0]),
         )[:25]
     ]
-    duplicate_inventory, duplicate_inventory_summary = (
-        _build_duplicate_name_inventory(duplicate_names)
+    duplicate_inventory, duplicate_inventory_summary = _build_duplicate_name_inventory(
+        duplicate_names
     )
 
     return {

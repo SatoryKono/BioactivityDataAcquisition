@@ -285,7 +285,9 @@ class TestSchemaColumnOrder:
         if schema_name in CUSTOM_ORDER_SCHEMAS:
             custom_business_order = CUSTOM_BUSINESS_FIELD_ORDER.get(schema_name)
             if custom_business_order is not None:
-                business_fields = [c for c in column_names if c not in ALL_SYSTEM_FIELDS]
+                business_fields = [
+                    c for c in column_names if c not in ALL_SYSTEM_FIELDS
+                ]
                 assert business_fields == custom_business_order, (
                     f"{schema_name}: Custom semantic business-field order violated.\n"
                     f"Expected: {custom_business_order[:5]}...\n"

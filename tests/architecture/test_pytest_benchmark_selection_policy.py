@@ -18,6 +18,7 @@ from tests.conftest import (
 
 pytestmark = pytest.mark.architecture
 
+
 def _build_config(*args: str, markexpr: str = "not benchmark and not slow") -> object:
     return SimpleNamespace(
         args=list(args),

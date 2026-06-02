@@ -152,7 +152,9 @@ class TestProteinClassTransformer:
         assert result is None
 
     @pytest.mark.asyncio
-    async def test_class_transformer__minimal_record__8008a5c1(self, transformer, mock_context):
+    async def test_class_transformer__minimal_record__8008a5c1(
+        self, transformer, mock_context
+    ):
         """Test transformation with only required fields."""
         record = {
             "protein_class_id": 1,
@@ -190,7 +192,9 @@ class TestProteinClassTransformer:
         assert result["class_level"] == 2
 
     @pytest.mark.asyncio
-    async def test_class_transformer__content_hash__b8ab6211(self, transformer, mock_context):
+    async def test_class_transformer__content_hash__b8ab6211(
+        self, transformer, mock_context
+    ):
         """Test that content_hash is generated and is 64 hex characters."""
         record = {
             "protein_class_id": 1,
@@ -206,7 +210,9 @@ class TestProteinClassTransformer:
         int(result["content_hash"], 16)
 
     @pytest.mark.asyncio
-    async def test_class_transformer__lineage_fields__c1f850bc(self, transformer, mock_context):
+    async def test_class_transformer__lineage_fields__c1f850bc(
+        self, transformer, mock_context
+    ):
         """Test that all lineage fields are present."""
         record = {
             "protein_class_id": 1,
@@ -225,7 +231,9 @@ class TestProteinClassTransformer:
         assert result["_index"] == 0
 
     @pytest.mark.asyncio
-    async def test_class_transformer__with_null_values__b3ce6491(self, transformer, mock_context):
+    async def test_class_transformer__with_null_values__b3ce6491(
+        self, transformer, mock_context
+    ):
         """Test transformation handles None values correctly."""
         record = {
             "protein_class_id": 1,

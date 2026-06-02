@@ -19,6 +19,7 @@ from bioetl.interfaces.cli.commands.domains.run.result_presenter import (
 
 pytestmark = pytest.mark.unit
 
+
 def _make_result(**kwargs: object) -> RunResult:
     """Build a RunResult with sensible defaults."""
     defaults: dict[str, object] = {

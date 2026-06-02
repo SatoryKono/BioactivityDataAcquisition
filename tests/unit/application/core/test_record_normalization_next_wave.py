@@ -10,6 +10,7 @@ from tests.unit.application.core.normalization_test_support import *
 
 pytestmark = pytest.mark.unit
 
+
 def test_pubchem_compound_profile_stabilizes_numeric_and_smiles_equivalence() -> None:
     processor = build_normalization_processor(
         provider="pubchem", entity_type="compound"

@@ -14,6 +14,7 @@ from bioetl.infrastructure.adapters.pubmed._search_models import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_models_module_reexports_search_models() -> None:
     """Legacy models module should keep exposing search DTOs."""
     assert models.PubMedSearchResponse is SearchResponseImpl

@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from uuid import UUID
 
 import pytest
 
@@ -22,6 +22,11 @@ from tests.helpers.transformer_dependencies import (
 
 
 pytestmark = pytest.mark.unit
+
+
+def _stable_run_id(seed: int) -> RunID:
+    return RunID(UUID(int=seed))
+
 
 class ConcretePipeline(BasePipeline):
     async def transform_bronze_to_silver(
@@ -81,7 +86,7 @@ def mock_pipeline(shutdown_signal: ShutdownSignal):
         tracing=MagicMock(),
         logger=mock_logger,
     )
-    run_id: RunID = uuid4()
+    run_id = _stable_run_id(1)
     # Inject mock transformer
     transformer = MockTransformer()
     pipeline = ConcretePipeline(
@@ -131,7 +136,7 @@ def test_base_pipeline_accepts_five_params():
         tracing=MagicMock(),
         logger=mock_logger,
     )
-    run_id: RunID = uuid4()
+    run_id = _stable_run_id(2)
     transformer = MockTransformer()
     shutdown_signal = ShutdownSignal()
 
@@ -205,7 +210,7 @@ def test_run_id_propagation_is_consistent():
     )
 
     # Create pipeline with explicit run_id (simulating CLI -> bootstrap -> pipeline flow)
-    expected_run_id: RunID = uuid4()
+    expected_run_id = _stable_run_id(3)
     pipeline = ConcretePipeline(
         config,
         runtime,
@@ -254,7 +259,7 @@ def test_base_pipeline_uses_injected_shutdown_signal():
         tracing=MagicMock(),
         logger=mock_logger,
     )
-    run_id: RunID = uuid4()
+    run_id = _stable_run_id(4)
     injected_signal = ShutdownSignal()
 
     pipeline = ConcretePipeline.create(
@@ -295,7 +300,7 @@ def test_base_pipeline_preserves_explicit_started_at() -> None:
     started_at = datetime(2026, 4, 27, 17, 7, 21, tzinfo=UTC)
 
     pipeline = ConcretePipeline.create(
-        run_id=uuid4(),
+        run_id=_stable_run_id(5),
         runtime=runtime,
         services=services,
         config=config,
@@ -339,7 +344,7 @@ def test_exact_replay_pipeline_context_uses_deterministic_replay_anchor() -> Non
         config,
         runtime,
         services,
-        uuid4(),
+        _stable_run_id(6),
         shutdown_signal=ShutdownSignal(),
     )
 

@@ -32,6 +32,7 @@ from bioetl.infrastructure.adapters.decorators.retry import RetryingDataSourceDe
 
 pytestmark = pytest.mark.unit
 
+
 class MockDataSource:
     """Mock data source for testing decorators."""
 

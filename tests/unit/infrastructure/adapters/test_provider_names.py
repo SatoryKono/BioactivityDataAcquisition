@@ -23,6 +23,7 @@ from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 
 pytestmark = pytest.mark.unit
 
+
 class TestAdapterProviderNames:
     """Test that adapters have correct provider names."""
 

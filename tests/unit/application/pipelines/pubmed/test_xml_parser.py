@@ -19,6 +19,7 @@ from bioetl.application.pipelines.pubmed.xml_parser import get_int, get_text
 
 pytestmark = pytest.mark.unit
 
+
 class TestGetText:
     """Tests for get_text() function."""
 

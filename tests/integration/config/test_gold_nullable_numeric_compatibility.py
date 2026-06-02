@@ -14,6 +14,7 @@ from scripts.engineering.qa.check_gold_nullable_numeric_compatibility import (
 
 pytestmark = pytest.mark.integration
 
+
 def test_gold_nullable_numeric_compatibility_gate_passes_current_repo() -> None:
     findings = validate_nullable_numeric_compatibility(Path("."))
 

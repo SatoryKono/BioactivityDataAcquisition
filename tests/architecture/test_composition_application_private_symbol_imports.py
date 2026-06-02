@@ -10,6 +10,7 @@ from pathlib import Path
 
 pytestmark = pytest.mark.architecture
 
+
 def _module_name_for_path(src_dir: Path, file_path: Path) -> str:
     rel_parts = file_path.relative_to(src_dir).with_suffix("").parts
     return ".".join(rel_parts)

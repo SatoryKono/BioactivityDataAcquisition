@@ -19,6 +19,7 @@ from tests.helpers.adapter_runtime import build_http_adapter_runtime_bundle
 
 pytestmark = pytest.mark.unit
 
+
 @pytest.fixture
 def mock_http_client():
     """Fixture for mock HTTP client."""
@@ -190,7 +191,9 @@ async def test_fetch_by_doi_request_error(adapter, mock_http_client, mock_logger
 
 
 @pytest.mark.asyncio
-async def test_crossref_client__health_check_healthy__089dc662(adapter, mock_http_client):
+async def test_crossref_client__health_check_healthy__089dc662(
+    adapter, mock_http_client
+):
     """Test health_check returns HEALTHY on success."""
     mock_response = MagicMock()
     mock_response.status_code = 200

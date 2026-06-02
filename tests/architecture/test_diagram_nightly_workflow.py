@@ -9,6 +9,7 @@ from pathlib import Path
 
 pytestmark = pytest.mark.architecture
 
+
 def test_nightly_workflow_exists_and_is_scheduled() -> None:
     workflow_path = Path(".github/workflows/diagram-nightly.yml")
     assert workflow_path.exists(), "diagram-nightly workflow file must exist"

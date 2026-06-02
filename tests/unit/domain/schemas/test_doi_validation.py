@@ -20,6 +20,7 @@ from bioetl.domain.validation import DOI_REGEX_PATTERN
 
 pytestmark = pytest.mark.unit
 
+
 class TestDoiRegexPattern:
     """Tests for DOI_REGEX_PATTERN constant."""
 
@@ -97,7 +98,9 @@ class TestDoiRegexEdgeCases:
         "registrant_length",
         [1, 2, 3],
     )
-    def test_doi_regex_edge_cases__registrant_rejected__bd44fbc9(self, registrant_length: int) -> None:
+    def test_doi_regex_edge_cases__registrant_rejected__bd44fbc9(
+        self, registrant_length: int
+    ) -> None:
         """Test that registrant codes with < 4 digits are rejected."""
         registrant = "1" * registrant_length
         doi = f"10.{registrant}/suffix"
@@ -107,7 +110,9 @@ class TestDoiRegexEdgeCases:
         "registrant_length",
         [4, 5, 6, 10, 20],
     )
-    def test_doi_regex_edge_cases__registrant_lengths__f2d0f297(self, registrant_length: int) -> None:
+    def test_doi_regex_edge_cases__registrant_lengths__f2d0f297(
+        self, registrant_length: int
+    ) -> None:
         """Test that registrant codes with >= 4 digits are accepted."""
         registrant = "1" * registrant_length
         doi = f"10.{registrant}/suffix"

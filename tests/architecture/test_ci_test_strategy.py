@@ -9,6 +9,7 @@ from pathlib import Path
 
 pytestmark = pytest.mark.architecture
 
+
 def _read_workflow(path: str) -> str:
     """Read workflow content as UTF-8 text."""
     return Path(path).read_text(encoding="utf-8")

@@ -156,7 +156,9 @@ class TestPubMedClassification:
             ("Comparative Study", "Comparative Study"),
         ],
     )
-    def test_pub_med_classification__known_types__203a0fa1(self, raw_type: str, expected_unified: str) -> None:
+    def test_pub_med_classification__known_types__203a0fa1(
+        self, raw_type: str, expected_unified: str
+    ) -> None:
         entry = classify_publication_type("pubmed", raw_type=raw_type)
         assert entry is not None
         assert entry.unified_type == expected_unified
@@ -222,7 +224,9 @@ class TestSemanticScholarClassification:
             ("News", "News"),
         ],
     )
-    def test_scholar_classification__known_types__5d6bfdf4(self, raw_type: str, expected_unified: str) -> None:
+    def test_scholar_classification__known_types__5d6bfdf4(
+        self, raw_type: str, expected_unified: str
+    ) -> None:
         entry = classify_publication_type("semanticscholar", raw_type=raw_type)
         assert entry is not None
         assert entry.unified_type == expected_unified

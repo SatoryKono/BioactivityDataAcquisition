@@ -113,6 +113,7 @@ def _classification_status(value: object) -> str:
         raise ValueError(f"Invalid classification_status: {normalized}")
     return normalized
 
+
 def _optional_int(value: object) -> int | None:
     if value is None or isinstance(value, bool):
         return None

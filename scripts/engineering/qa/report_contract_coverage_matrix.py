@@ -19,9 +19,7 @@ REGISTRY_PATH = CONFIGS_ROOT / "base" / "contract_registry.yaml"
 DEFAULT_JSON_OUTPUT = (
     PROJECT_ROOT / "reports" / "quality" / "contract-coverage-matrix.json"
 )
-DEFAULT_MD_OUTPUT = (
-    PROJECT_ROOT / "reports" / "quality" / "contract-coverage-matrix.md"
-)
+DEFAULT_MD_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "contract-coverage-matrix.md"
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
@@ -93,9 +91,7 @@ def _build_row(
     registry_entry = registry_entries.get(contract_ref)
     registry_entry_exists = registry_entry is not None
     registry_identity = (
-        registry_entry.get("identity", {})
-        if isinstance(registry_entry, dict)
-        else {}
+        registry_entry.get("identity", {}) if isinstance(registry_entry, dict) else {}
     )
     if not isinstance(registry_identity, dict):
         registry_identity = {}
@@ -105,7 +101,9 @@ def _build_row(
         if isinstance(registry_entry, dict)
         else ""
     )
-    source_exists = bool(source_path) and _resolve_registry_relative(source_path).is_file()
+    source_exists = (
+        bool(source_path) and _resolve_registry_relative(source_path).is_file()
+    )
 
     published_artifacts = (
         _string_list(registry_entry.get("published_artifacts"))
@@ -170,7 +168,9 @@ def _build_row(
         ),
         "registry_entry_exists": registry_entry_exists,
         "registry_status": (
-            str(registry_entry.get("status", "")) if isinstance(registry_entry, dict) else ""
+            str(registry_entry.get("status", ""))
+            if isinstance(registry_entry, dict)
+            else ""
         ),
         "registry_contract_version": (
             str(registry_contract_version)

@@ -19,7 +19,6 @@ from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
 from bioetl.domain.normalization import normalize_runtime_anchor_payload
 
 if TYPE_CHECKING:
-
     from bioetl.domain.context import PipelineRunContext
 
 

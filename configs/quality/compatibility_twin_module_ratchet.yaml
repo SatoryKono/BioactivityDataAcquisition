@@ -1,6 +1,6 @@
 version: 1
 policy_scope: sanctioned_twin_module_ratchet
-review_date: "2026-06-01"
+review_date: "2026-06-02"
 ratchet_mode: no_growth
 linked_issue: "#4744"
 touch_policy:
@@ -14,37 +14,4 @@ touch_policy:
   rationale: Refactors touching a tracked twin-family surface must not add
     private-module importers or grow private import counts beyond the committed
     census baseline without an explicit ratchet refresh.
-families:
-  - family_id: application.core.span_helpers
-    owner: bioetl.application.core
-    public_module: bioetl.application.core.span_helpers
-    private_module: bioetl.application.core._span_helpers
-    canonical_first_party_module: bioetl.application.core.span_helpers
-    max_public_src_importers: 8
-    max_private_src_importers: 0
-    rationale: >-
-      Issue #4923 promoted the public span-helper seam to canonical ownership.
-      The old private module remains a backward-compatible re-export wrapper,
-      but no first-party source module may import it.
-  - family_id: domain.normalization.profiles.chembl_policy_registry
-    owner: bioetl.domain.normalization.profiles
-    public_module: bioetl.domain.normalization.profiles.chembl_policy_registry
-    private_module: bioetl.domain.normalization.profiles._chembl_policy_registry
-    canonical_first_party_module: bioetl.domain.normalization.profiles.chembl_policy_registry
-    max_public_src_importers: 12
-    max_private_src_importers: 0
-    rationale: >-
-      Issue #4923 promoted the public ChEMBL policy registry seam to canonical
-      ownership. The old private module remains a backward-compatible re-export
-      wrapper, but no first-party source module may import it.
-  - family_id: domain.normalization.profiles.chembl_policy_registry_data
-    owner: bioetl.domain.normalization.profiles
-    public_module: bioetl.domain.normalization.profiles.chembl_policy_registry_data
-    private_module: bioetl.domain.normalization.profiles._chembl_policy_registry_data
-    canonical_first_party_module: bioetl.domain.normalization.profiles.chembl_policy_registry_data
-    max_public_src_importers: 5
-    max_private_src_importers: 0
-    rationale: >-
-      Issue #4923 promoted the public ChEMBL policy registry data seam to
-      canonical ownership. The old private module remains a backward-compatible
-      re-export wrapper, but no first-party source module may import it.
+families: []

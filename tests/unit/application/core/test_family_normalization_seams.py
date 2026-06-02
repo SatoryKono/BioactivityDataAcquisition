@@ -46,6 +46,7 @@ from bioetl.application.core.wiring import PipelineRunner as FactoryPackage
 
 pytestmark = pytest.mark.unit
 
+
 def test_legacy_wiring_facades_point_to_new_wiring_package() -> None:
     assert PipelineRunner is FactoryPackage
     assert BatchExecutionRunService is RuntimePackage

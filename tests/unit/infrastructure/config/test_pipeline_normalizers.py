@@ -13,6 +13,7 @@ from bioetl.infrastructure.config.pipeline_normalizers import (
 
 pytestmark = pytest.mark.unit
 
+
 class TestProjectSchemaFieldsIntoConfig:
     """Tests for _project_schema_fields_into_config."""
 

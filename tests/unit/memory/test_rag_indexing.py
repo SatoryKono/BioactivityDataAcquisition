@@ -22,6 +22,7 @@ from memory.rag.retrieval import filter_chunks, load_chunk_manifest
 
 pytestmark = pytest.mark.unit
 
+
 def test_split_markdown_sections_respects_headings() -> None:
     text = """---
 title: Demo

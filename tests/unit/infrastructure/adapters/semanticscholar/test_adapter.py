@@ -97,7 +97,9 @@ class TestSemanticScholarAdapter:
         assert adapter._adapter_metrics is adapter_metrics
         assert adapter._request_collector is request_collector
 
-    def test_scholar_adapter__provider_name__cc77e4ec(self, adapter: SemanticScholarAdapter) -> None:
+    def test_scholar_adapter__provider_name__cc77e4ec(
+        self, adapter: SemanticScholarAdapter
+    ) -> None:
         """Test provider name is set correctly."""
         assert adapter.provider_name == "semanticscholar"
 

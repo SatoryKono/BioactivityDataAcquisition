@@ -16,6 +16,7 @@ from bioetl.domain.composite.result import DependencyStatus
 
 pytestmark = pytest.mark.unit
 
+
 @pytest.fixture
 def mock_logger() -> MagicMock:
     """Create mock logger for result-service tests."""

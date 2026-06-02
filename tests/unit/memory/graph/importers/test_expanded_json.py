@@ -10,6 +10,7 @@ from memory.graph.importers.expanded_json import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_extract_adr_lifecycle_field_valid():
     assert _extract_adr_lifecycle_field("* supersedes:") == "supersedes"
     assert _extract_adr_lifecycle_field(" -  superseded by :") == "superseded by"

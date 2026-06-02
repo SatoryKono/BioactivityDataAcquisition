@@ -16,6 +16,7 @@ from bioetl.infrastructure.storage.gold_writer import GoldWriter
 
 pytestmark = pytest.mark.unit
 
+
 @pytest.fixture
 def gold_writer(noop_logger):
     return GoldWriter(base_path="s3://test-bucket/gold", logger=noop_logger)
@@ -51,7 +52,9 @@ async def test_write_gold_schema_not_strict(gold_writer, valid_records):
         await gold_writer.write_gold("test_table", valid_records, schema=schema)
 
 
-async def test_storage_gold_writer__validation_failure__eb6c952a(gold_writer, strict_schema):
+async def test_storage_gold_writer__validation_failure__eb6c952a(
+    gold_writer, strict_schema
+):
     """Test schema validation failure raises ValueError."""
     invalid_records = [{"id": "not_int", "value": 10.5}]
 

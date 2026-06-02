@@ -47,7 +47,9 @@ def test_contract_coverage_matrix_rows_cover_all_entity_configs() -> None:
 
 
 @pytest.mark.architecture
-def test_contract_coverage_matrix_gold_enabled_rows_have_full_governance_surfaces() -> None:
+def test_contract_coverage_matrix_gold_enabled_rows_have_full_governance_surfaces() -> (
+    None
+):
     """Gold-enabled rows must remain covered without hidden missing surfaces."""
     violations: list[str] = []
     for row in _load_rows():
@@ -90,7 +92,9 @@ def test_contract_coverage_matrix_exclusions_are_explicit() -> None:
 
 
 @pytest.mark.architecture
-def test_contract_coverage_matrix_covered_rows_reference_existing_governance_files() -> None:
+def test_contract_coverage_matrix_covered_rows_reference_existing_governance_files() -> (
+    None
+):
     """Covered rows must resolve their contract YAML, Gold source, and published artifacts."""
     violations: list[str] = []
     for row in _load_rows():
@@ -111,7 +115,10 @@ def test_contract_coverage_matrix_covered_rows_reference_existing_governance_fil
         if not isinstance(source_path, str) or not source_path:
             violations.append(f"{pipeline_name}: missing gold_schema_source_path")
         elif not (
-            (PROJECT_ROOT / "configs" / "base").joinpath(source_path).resolve().is_file()
+            (PROJECT_ROOT / "configs" / "base")
+            .joinpath(source_path)
+            .resolve()
+            .is_file()
         ):
             violations.append(
                 f"{pipeline_name}: missing Gold schema source file {source_path}"

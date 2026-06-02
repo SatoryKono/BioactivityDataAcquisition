@@ -7,6 +7,7 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+
 class TestFieldValidationConfigSeverityEnricher:
     """Tests for FieldValidationConfig Pydantic schema with severity_enricher."""
 

@@ -11,6 +11,7 @@ from scripts.engineering.ci.validate_schema_classifier_gate import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_major_transition_requires_major_bump_and_migration_key() -> None:
     """Major classification must fail without major bump and migration guide."""
     issues = _major_transition_issues(

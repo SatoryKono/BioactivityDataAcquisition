@@ -12,6 +12,7 @@ from types import ModuleType
 
 pytestmark = pytest.mark.architecture
 
+
 def _load_uniform_module() -> ModuleType:
     """Load scripts/diagrams/uniform_diagram_sizes.py as a module."""
     repo_root = Path(__file__).resolve().parents[2]

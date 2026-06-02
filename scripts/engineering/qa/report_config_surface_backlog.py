@@ -93,7 +93,9 @@ def _partial_keys(family_configs: dict[str, dict[str, str]]) -> list[tuple[int, 
     all_keys = sorted({key for values in family_configs.values() for key in values})
     if not family_configs:
         return []
-    common = set.intersection(*(set(values.keys()) for values in family_configs.values()))
+    common = set.intersection(
+        *(set(values.keys()) for values in family_configs.values())
+    )
     ranked: list[tuple[int, str]] = []
     for key in all_keys:
         if key in common:

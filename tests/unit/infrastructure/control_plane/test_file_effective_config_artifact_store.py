@@ -21,6 +21,7 @@ from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 pytestmark = pytest.mark.unit
 
+
 def test_file_store_round_trips_payload_by_id_and_run_id(tmp_path: Path) -> None:
     store = FileEffectiveConfigArtifactStore(base_path=tmp_path / "effective_config")
     run_id = RunID(deterministic_uuid_from_callsite("replay-sensitive"))

@@ -23,6 +23,7 @@ from tests.unit.application.services.test_run_manifest_inspection_service import
 
 pytestmark = pytest.mark.unit
 
+
 def test_show_surfaces_supported_gold_trace_path_in_diagnostics() -> None:
     manifest_store = _InMemoryRunManifestStore()
     ledger_store = _InMemoryRunLedgerStore()

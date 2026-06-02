@@ -18,6 +18,7 @@ from bioetl.infrastructure.schemas.pipeline_config import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_yaml_config_to_domain_mapping():
     """Test mapping from YAML schema to Domain config."""
     yaml_config = PipelineYamlConfig(

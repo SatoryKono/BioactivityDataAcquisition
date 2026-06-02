@@ -25,6 +25,7 @@ from bioetl.infrastructure.schemas.composite_config import (
 
 pytestmark = pytest.mark.unit
 
+
 def _base_payload() -> dict[str, object]:
     return {
         "name": "composite_publication",

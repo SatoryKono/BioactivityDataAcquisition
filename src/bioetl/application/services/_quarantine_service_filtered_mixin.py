@@ -18,6 +18,7 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.ports import LoggerPort, QuarantinePort
 
+
 class _FilteredQuarantineHost(Protocol):
     """Structural contract required by filtered quarantine explorer helpers."""
 

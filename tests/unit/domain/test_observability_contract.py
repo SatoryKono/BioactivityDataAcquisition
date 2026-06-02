@@ -16,6 +16,7 @@ from bioetl.domain.observability_contract import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_enforce_contract_ignores_legacy_keys_after_grace_period() -> None:
     context = enforce_observability_contract_context(
         event_name="contract_event",

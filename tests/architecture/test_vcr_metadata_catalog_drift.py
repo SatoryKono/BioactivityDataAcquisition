@@ -13,6 +13,7 @@ from typing import Any, Protocol, cast
 
 pytestmark = pytest.mark.architecture
 
+
 class CatalogModule(Protocol):
     """Typed surface for the catalog generator module."""
 

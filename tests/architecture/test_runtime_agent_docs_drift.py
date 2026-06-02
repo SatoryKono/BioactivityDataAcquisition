@@ -10,6 +10,7 @@ from types import ModuleType
 
 pytestmark = pytest.mark.architecture
 
+
 def _load_doc_drift_module() -> ModuleType:
     return importlib.import_module("scripts.docs.checks.check_drift")
 

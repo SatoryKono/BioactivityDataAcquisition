@@ -1,13 +1,13 @@
 # Compatibility Importer Census
 
-- snapshot_date: 2026-06-01
+- snapshot_date: 2026-06-02
 - retained_entrypoint_count: 14
 - removed_compatibility_surface_count: 23
 - removed_compatibility_surfaces_with_src_importers: 0
 - removed_compatibility_surfaces_with_test_importers: 0
 - removed_compatibility_surfaces_still_present: 0
-- twin_pair_count: 8
-- tracked_twin_family_count: 3
+- twin_pair_count: 4
+- tracked_twin_family_count: 0
 - config_root_symbol_count: 3
 - config_root_src_importer_count: 0
 - retained_public_export_facade_count: 4
@@ -75,12 +75,8 @@
 
 | Public module | Public src | Private src |
 | --- | ---: | ---: |
-| `bioetl.application.core.span_helpers` | 8 | 0 |
-| `bioetl.application.core.batch_execution.contracts` | 7 | 0 |
 | `bioetl.composition.factories.storage.audit` | 4 | 0 |
 | `bioetl.composition.factories.storage.resilience` | 4 | 0 |
-| `bioetl.domain.normalization.profiles.chembl_policy_registry` | 12 | 0 |
-| `bioetl.domain.normalization.profiles.chembl_policy_registry_data` | 5 | 0 |
 | `bioetl.domain.value_objects.publication_field_group_types` | 3 | 0 |
 | `bioetl.infrastructure.adapters.circuit_breaker_contract` | 3 | 0 |
 
@@ -90,9 +86,6 @@
 
 | Family | Canonical first-party module | Current public src | Current private src | Max public src | Max private src |
 | --- | --- | ---: | ---: | ---: | ---: |
-| `application.core.span_helpers` | `bioetl.application.core.span_helpers` | 8 | 0 | 8 | 0 |
-| `domain.normalization.profiles.chembl_policy_registry` | `bioetl.domain.normalization.profiles.chembl_policy_registry` | 12 | 0 | 12 | 0 |
-| `domain.normalization.profiles.chembl_policy_registry_data` | `bioetl.domain.normalization.profiles.chembl_policy_registry_data` | 5 | 0 | 5 | 0 |
 
 ## Infrastructure Config Root Facade
 

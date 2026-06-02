@@ -15,6 +15,7 @@ from bioetl.domain.ports.noop import NoOpTracing
 
 pytestmark = pytest.mark.unit
 
+
 class TestNoOpTracingReExport:
     """Tests for NoOpTracing re-export from tracing module."""
 

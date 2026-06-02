@@ -15,6 +15,7 @@ from tests.helpers.clock import FIXED_TEST_TIME
 
 pytestmark = pytest.mark.unit
 
+
 class TestMergedMetadataExplainer:
     """Tests for MergedMetadataExplainer."""
 

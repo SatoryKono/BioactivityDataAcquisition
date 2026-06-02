@@ -9,6 +9,7 @@ import json
 
 pytestmark = pytest.mark.unit
 
+
 class TestDeterministicBronzeWrite:
     """Tests for deterministic Bronze-layer serialization."""
 

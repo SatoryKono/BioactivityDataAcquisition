@@ -12,6 +12,7 @@ from tests.unit.application.composite.merge_test_support import build_merge_serv
 
 pytestmark = pytest.mark.unit
 
+
 @pytest.fixture
 def mock_logger() -> MagicMock:
     """Create mock logger."""

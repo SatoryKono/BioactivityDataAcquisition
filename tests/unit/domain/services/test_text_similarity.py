@@ -12,6 +12,7 @@ from bioetl.domain.behavior.text_similarity import jaccard_similarity, normalize
 
 pytestmark = pytest.mark.unit
 
+
 class TestNormalizeText:
     """Tests for normalize_text function."""
 

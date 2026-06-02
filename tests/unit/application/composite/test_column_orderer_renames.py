@@ -11,6 +11,7 @@ from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 pytestmark = pytest.mark.unit
 
+
 class TestColumnOrderServiceRenames:
     """Test ColumnOrderService rename functionality."""
 

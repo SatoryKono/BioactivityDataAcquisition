@@ -11,6 +11,7 @@ from scripts.engineering.diagnostics import cleanup_project as module
 
 pytestmark = pytest.mark.unit
 
+
 def test_find_cleanup_targets_skips_blocked_cleanup_zones(tmp_path: Path) -> None:
     (tmp_path / ".pytest_cache").mkdir()
     (tmp_path / "reports" / ".pytest_cache").mkdir(parents=True)

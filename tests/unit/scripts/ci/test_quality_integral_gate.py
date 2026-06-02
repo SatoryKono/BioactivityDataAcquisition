@@ -428,9 +428,7 @@ def test_quality_gate_output_and_summary_include_debt_governance_surface() -> No
                     "markerless_test_functions": (
                         self.test_governance.markerless_test_functions
                     ),
-                    "duplicate_test_names": (
-                        self.test_governance.duplicate_test_names
-                    ),
+                    "duplicate_test_names": (self.test_governance.duplicate_test_names),
                     "duplicate_test_name_occurrences": (
                         self.test_governance.duplicate_test_name_occurrences
                     ),
@@ -473,15 +471,15 @@ def test_quality_gate_output_and_summary_include_debt_governance_surface() -> No
             ),
             max_total_exemptions=12,
             min_integral_score=70.0,
-                ci_target={
-                    "architecture_test_failures_max": 0,
-                    "total_exemptions_max": 12,
-                    "max_class_loc_max": 300,
-                    "domain_cc_gt5_exemptions_max": 0,
-                    "vcr_cassettes_min_per_provider": 20,
-                    "ruff_formatting_violations_max": 0,
-                    "coverage_threshold_percent": 85.0,
-                },
+            ci_target={
+                "architecture_test_failures_max": 0,
+                "total_exemptions_max": 12,
+                "max_class_loc_max": 300,
+                "domain_cc_gt5_exemptions_max": 0,
+                "vcr_cassettes_min_per_provider": 20,
+                "ruff_formatting_violations_max": 0,
+                "coverage_threshold_percent": 85.0,
+            },
             arch_failures=0,
             total_exemptions=2,
             max_class_loc=200,
@@ -503,9 +501,7 @@ def test_quality_gate_output_and_summary_include_debt_governance_surface() -> No
 
     assert "debt_governance_surface" in output
     assert (
-        output["debt_governance_surface"]["runtime_uuid"][
-            "runtime_uuid_seam_count"
-        ]
+        output["debt_governance_surface"]["runtime_uuid"]["runtime_uuid_seam_count"]
         == 14
     )
 

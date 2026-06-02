@@ -22,7 +22,7 @@ class _FakeDeltaReader:
             "chembl.target": pa.table(
                 {
                     "target_id": ["CHEMBL_T1", "CHEMBL_T2"],
-                    "component_ids": ['[10]', '[]'],
+                    "component_ids": ["[10]", "[]"],
                     "primary_component_id": [10, None],
                     "target_components": ['[{"component_id":10}]', "[]"],
                 }

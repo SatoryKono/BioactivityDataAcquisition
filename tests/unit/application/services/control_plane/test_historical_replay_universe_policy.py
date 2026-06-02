@@ -18,6 +18,7 @@ from bioetl.application.services.control_plane.replay.historical_universe_servic
 
 pytestmark = pytest.mark.unit
 
+
 def _record(*, durable_evidence_coverage: bool) -> HistoricalReplayUniverseRecord:
     return HistoricalReplayUniverseRecord(
         manifest_id="archived-manifest",

@@ -9,6 +9,7 @@ from bioetl.domain.value_objects.base import ValueObject
 
 pytestmark = pytest.mark.unit
 
+
 class ConcreteValueObject(ValueObject[str]):
     """Concrete implementation for testing."""
 

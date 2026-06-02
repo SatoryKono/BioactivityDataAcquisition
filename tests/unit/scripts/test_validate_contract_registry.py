@@ -17,6 +17,7 @@ from scripts.engineering.ci.validate_contract_registry import (
 
 pytestmark = pytest.mark.unit
 
+
 def _write_entity_config(
     repo_root: Path,
     *,

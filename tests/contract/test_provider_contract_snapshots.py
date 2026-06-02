@@ -3,13 +3,12 @@
 from __future__ import annotations
 
 import pytest
-
-pytestmark = pytest.mark.no_api
-
 from tests.contract._provider_contract_drift import (
     assert_provider_snapshot_registry_shape,
     load_provider_contract_snapshot,
 )
+
+pytestmark = pytest.mark.no_api
 
 
 @pytest.mark.parametrize(

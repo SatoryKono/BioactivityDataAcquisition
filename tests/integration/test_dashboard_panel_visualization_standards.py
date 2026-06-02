@@ -1,7 +1,5 @@
 """Integration tests for Grafana dashboard panel-type visualization standards."""
 
-from pathlib import Path
-
 import pytest
 
 from tests.integration._grafana_test_support import (
@@ -29,7 +27,8 @@ def test_stat_panels_use_correct_color_mode():
                     # Trend stats should use colorMode=value, graphMode=area
                     if color_mode:
                         assert color_mode in ("value", "background"), (
-                            f"{dashboard_path.name}:{title} trend stat should use colorMode=value/background, got {color_mode}"
+                            f"{dashboard_path.name}:{title} trend stat should use "
+                            f"colorMode=value/background, got {color_mode}"
                         )
                     if graph_mode:
                         assert graph_mode in ("area", "none"), (
@@ -73,16 +72,17 @@ def test_timeseries_panels_use_correct_tooltip_mode():
                 options = panel.get("options", {})
                 tooltip = options.get("tooltip", {})
                 tooltip_mode = tooltip.get("mode")
-                tooltip_sort = tooltip.get("sort")
                 # Check for comparative timeseries (multiple series)
                 if "Compare" in title or "vs" in title:
                     if tooltip_mode:
                         assert tooltip_mode in ("multi", "single"), (
-                            f"{dashboard_path.name}:{title} comparative timeseries should use tooltip.mode=multi/single, got {tooltip_mode}"
+                            f"{dashboard_path.name}:{title} comparative timeseries should use "
+                            f"tooltip.mode=multi/single, got {tooltip_mode}"
                         )
                 # Check for scalar trend timeseries
                 if "Trend" in title:
                     if tooltip_mode:
                         assert tooltip_mode in ("single", "multi"), (
-                            f"{dashboard_path.name}:{title} trend timeseries should use tooltip.mode=single/multi, got {tooltip_mode}"
+                            f"{dashboard_path.name}:{title} trend timeseries should use "
+                            f"tooltip.mode=single/multi, got {tooltip_mode}"
                         )

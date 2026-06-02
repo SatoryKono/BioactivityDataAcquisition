@@ -12,6 +12,7 @@ from scripts.engineering.qa.py_review_orchestrator import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_determine_subsectors_tracks_current_repo_layout(tmp_path: Path) -> None:
     for rel_path in (
         "configs/entities",

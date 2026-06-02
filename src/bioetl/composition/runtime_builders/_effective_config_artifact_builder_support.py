@@ -183,8 +183,12 @@ def build_runtime_overrides_snapshot(
             "required_persistence_profile": getattr(
                 ctx, "required_persistence_profile", None
             ),
-            "input_filter": _to_serializable_mapping(getattr(ctx, "input_filter", None)),
-            "cached_bronze": _to_serializable_mapping(getattr(ctx, "cached_bronze", None)),
+            "input_filter": _to_serializable_mapping(
+                getattr(ctx, "input_filter", None)
+            ),
+            "cached_bronze": _to_serializable_mapping(
+                getattr(ctx, "cached_bronze", None)
+            ),
             "vacuum": _to_serializable_mapping(getattr(ctx, "vacuum", None)),
             "replay_of_run_id": getattr(ctx, "replay_of_run_id", None),
             "replay_of_manifest_id": getattr(ctx, "replay_of_manifest_id", None),
@@ -321,4 +325,3 @@ def resolve_effective_config_entity(provider: str, entity: str) -> str:
     if provider == "composite" and entity.startswith("composite_"):
         return entity.removeprefix("composite_")
     return entity
-

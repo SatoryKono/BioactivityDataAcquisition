@@ -8,15 +8,13 @@ from pathlib import Path
 
 from memory.graph.sync_pkg import _core
 from memory.graph.sync_pkg._core import (
+    DEFAULT_BATCH_SIZE,
+    DEFAULT_ROOT,
     GraphSnapshot,
     JsonValue,
     SnapshotSelection,
     SyncApplyOptions,
 )
-
-from memory.graph.sync_pkg._core import DEFAULT_BATCH_SIZE
-from memory.graph.sync_pkg._core import DEFAULT_ROOT
-
 
 CLI_FLAG_DEFINITIONS: tuple[tuple[str, dict[str, object]], ...] = (
     (
@@ -227,7 +225,9 @@ def _selection_from_args(args: argparse.Namespace) -> SnapshotSelection:
     )
 
 
-def _validate_cli_args(parser: argparse.ArgumentParser, args: argparse.Namespace) -> None:
+def _validate_cli_args(
+    parser: argparse.ArgumentParser, args: argparse.Namespace
+) -> None:
     if args.prune_stale and args.full_reset_managed_wave:
         parser.error(
             "--prune-stale and --full-reset-managed-wave cannot be used together"

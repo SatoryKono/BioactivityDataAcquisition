@@ -60,7 +60,9 @@ class TestStorageBundle:
         assert storage_adapter.silver == mock_silver_writer
         assert storage_adapter.gold == mock_gold_writer
 
-    async def test_storage_bundle__bronze_delegates__39d27287(self, storage_adapter, mock_bronze_writer):
+    async def test_storage_bundle__bronze_delegates__39d27287(
+        self, storage_adapter, mock_bronze_writer
+    ):
         """Test write_bronze delegates to bronze writer."""
         batch_id = uuid4()
         run_id = uuid4()
@@ -82,7 +84,9 @@ class TestStorageBundle:
 
         mock_bronze_writer.write_bronze.assert_called_once()
 
-    async def test_storage_bundle__silver_delegates__8ab8c449(self, storage_adapter, mock_silver_writer):
+    async def test_storage_bundle__silver_delegates__8ab8c449(
+        self, storage_adapter, mock_silver_writer
+    ):
         """Test write_silver delegates to silver writer."""
         run_id = uuid4()
         batch_id = BatchID(uuid4())
@@ -134,7 +138,9 @@ class TestStorageBundle:
             ingestion_ts=None,
         )
 
-    async def test_storage_bundle__write_gold_delegates__d9b86e8f(self, storage_adapter, mock_gold_writer):
+    async def test_storage_bundle__write_gold_delegates__d9b86e8f(
+        self, storage_adapter, mock_gold_writer
+    ):
         """Test write_gold delegates to gold writer."""
         from unittest.mock import MagicMock
 

@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from datetime import datetime
 from typing import cast
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from bioetl.application.runtime_timestamps import capture_runtime_timing_anchor
 from bioetl.application.services.execution.pipeline_runner_models import RunOptions
@@ -70,10 +71,33 @@ def _build_cached_bronze_context(options: RunOptions) -> CachedBronzeContext:
     return CachedBronzeContext.disabled()
 
 
+def _coerce_run_id(run_id: RunID | UUID | str) -> RunID:
+    if isinstance(run_id, UUID):
+        return cast(RunID, run_id)
+    return cast(RunID, UUID(str(run_id)))
+
+
+def _resolve_pipeline_run_id(
+    *,
+    options: RunOptions,
+    run_id: RunID | UUID | str | None,
+    run_id_factory: Callable[[], RunID | UUID | str] | None,
+) -> RunID:
+    if run_id is not None:
+        return _coerce_run_id(run_id)
+    if run_id_factory is not None:
+        return _coerce_run_id(run_id_factory())
+    if options.exact_replay:
+        raise ValueError("exact replay requires explicit run_id or run_id_factory")
+    return cast(RunID, uuid4())
+
+
 def build_pipeline_context(
     name: str,
     options: RunOptions,
     *,
+    run_id: RunID | UUID | str | None = None,
+    run_id_factory: Callable[[], RunID | UUID | str] | None = None,
     clock: ClockPort | None = None,
     started_at: datetime | None = None,
 ) -> PipelineRunContext:
@@ -82,9 +106,14 @@ def build_pipeline_context(
         clock=clock,
         started_at=started_at,
     )
+    cached_bronze = _build_cached_bronze_context(options)
     return PipelineRunContext(
         pipeline_name=name,
-        run_id=cast(RunID, uuid4()),
+        run_id=_resolve_pipeline_run_id(
+            options=options,
+            run_id=run_id,
+            run_id_factory=run_id_factory,
+        ),
         run_type=RunType(options.run_type),
         started_at=started_at,
         replay_of_run_id=options.replay_of_run_id,
@@ -99,7 +128,7 @@ def build_pipeline_context(
         log_level=options.log_level,
         ignore_yaml_filter=options.ignore_yaml_filter,
         skip_gold=options.skip_gold,
-        cached_bronze=_build_cached_bronze_context(options),
+        cached_bronze=cached_bronze,
         exact_replay=options.exact_replay,
         required_persistence_profile=options.required_persistence_profile,
         execution_context=ExecutionContext(options.execution_context),

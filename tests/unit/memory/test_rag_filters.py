@@ -12,6 +12,7 @@ from memory.rag.filters import _candidate_source_paths
 
 pytestmark = pytest.mark.unit
 
+
 def test_candidate_source_paths_avoids_path_is_file(
     monkeypatch, tmp_path: Path
 ) -> None:

@@ -13,6 +13,7 @@ from scripts.ai.mcp.sonarqube_mcp_smoke import (
 
 pytestmark = pytest.mark.smoke
 
+
 def test_run_smoke_command_succeeds_against_ready_then_line_delimited_stub(
     tmp_path: Path,
 ) -> None:

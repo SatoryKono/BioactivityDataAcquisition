@@ -13,6 +13,7 @@ from bioetl.application.pipelines.uniprot.extractors.comments import (
 
 pytestmark = pytest.mark.unit
 
+
 class TestCommentExtractor:
     """Tests for CommentExtractor class."""
 
