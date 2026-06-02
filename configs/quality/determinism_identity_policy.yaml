@@ -108,7 +108,7 @@ allowed_occurrence_identity_generators:
     replace this port-level implementation.
   issue: '#3407'
 - path: src/bioetl/application/services/execution/pipeline_runner_service.py
-  symbol: PipelineRunnerService.run
+  symbol: _resolve_effective_run_id
   generator: uuid4
   identity_field: RunID
   semantic_classification: occurrence-only
@@ -173,7 +173,7 @@ allowed_occurrence_identity_generators:
     callers do not inject an explicit run identifier.
   issue: '#4472'
 - path: src/bioetl/composition/bootstrap/runtime/pipeline_context_builder.py
-  symbol: build_pipeline_context
+  symbol: _resolve_pipeline_run_id
   generator: uuid4
   identity_field: RunID
   semantic_classification: occurrence-only
@@ -208,14 +208,15 @@ allowed_occurrence_identity_generators:
   rationale: CLI preview storage contexts use occurrence-only IDs for local operator
     actions and not for semantic replay identity.
   issue: '#4472'
-- path: src/bioetl/composition/observability_api.py
-  symbol: _build_metrics_gateway_logger
+- path: src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py
+  symbol: SilverForeignKeyReconciliationAdapter._quarantine_orphan_rows
   generator: uuid4
-  identity_field: metrics_gateway_correlation_run_id
+  identity_field: BatchID
   semantic_classification: occurrence-only
   replay_semantics: excluded_from_execution_fingerprint
-  rationale: Metrics gateway helper fallback IDs are observability correlation identifiers
-    shared by push/delete operations and not semantic execution identity.
+  rationale: Foreign-key orphan quarantine writes need a per-occurrence batch identifier
+    for operational grouping only; semantic replay identity remains anchored by the
+    source workflow run and reconciliation inputs.
   issue: '#4569'
 legacy_config_hash_policy:
   field: config_hash

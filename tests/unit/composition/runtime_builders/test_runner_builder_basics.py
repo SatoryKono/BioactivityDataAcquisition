@@ -11,7 +11,10 @@ from bioetl.composition.runtime_builders.runner_builder_wiring import (
     LegacyRunnerBuilderOverrides,
     resolve_runner_factory_wiring,
 )
-from bioetl.composition.runtime_builders import runner_control_plane_assembly
+from bioetl.composition.runtime_builders import (
+    inputs_resolver,
+    runner_control_plane_assembly,
+)
 
 from tests.unit.composition.runtime_builders.runner_builder_test_support import *
 

@@ -14,6 +14,9 @@ from bioetl.composition.runtime_builders._runner_input_preparation import (
 from bioetl.composition.runtime_builders import (
     inputs_runtime_assembly as _runtime_assembly,
 )
+from bioetl.composition.runtime_builders.config_access import (
+    load_source_config as _load_source_config,
+)
 from bioetl.composition.runtime_builders.inputs_runtime_helpers import (
     log_cached_bronze as _log_cached_bronze,
 )
@@ -79,6 +82,11 @@ def prepare_runner_inputs(
     ],
     load_source_config_fn: Callable[..., object] | None = None,
 ) -> RunnerInputs:
+    source_config_loader = (
+        _load_source_config
+        if load_source_config_fn is None
+        else load_source_config_fn
+    )
     prepared = _prepare_runner_context(
         ctx=ctx,
         get_settings_fn=get_settings_fn,
@@ -94,7 +102,7 @@ def prepare_runner_inputs(
         assemble_runtime_config_fn=assemble_runtime_config_fn,
         assemble_filter_config_fn=assemble_filter_config_fn,
         adjust_batch_size_for_filter_fn=adjust_batch_size_for_filter,
-        load_source_config_fn=load_source_config_fn,
+        load_source_config_fn=source_config_loader,
     )
     _log_cached_bronze(
         observability=prepared.observability,

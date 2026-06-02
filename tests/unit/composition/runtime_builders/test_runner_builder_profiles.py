@@ -10,7 +10,7 @@ import pytest
 from bioetl.composition.runtime_builders.runner_builder_wiring import (
     LegacyRunnerBuilderOverrides,
 )
-from bioetl.domain.ports import ObservabilityBundle
+from bioetl.composition.observability import ObservabilityBundle
 
 from tests.unit.composition.runtime_builders.runner_builder_test_support import *
 

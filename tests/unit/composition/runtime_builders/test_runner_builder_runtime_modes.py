@@ -5,10 +5,12 @@ from __future__ import annotations
 import pytest
 
 from bioetl.composition.runtime_builders import (
-    attach_runner_control_plane_collaborators,
     inputs_runtime_assembly,
 )
 from bioetl.composition.runtime_builders import inputs_resolver
+from bioetl.composition.runtime_builders._runner_builder_orchestration import (
+    attach_runner_control_plane_collaborators,
+)
 
 # ruff: noqa: F403,F405
 from tests.unit.composition.runtime_builders.runner_builder_test_support import *
