@@ -105,6 +105,10 @@ ______________________________________________________________________
   (`workflow_context`, `pipeline_context_exact`, `run_type_context_exact`,
   `provider_context_exact`) so selected `run_id` can narrow downstream links
   without changing the visible selector shell on the same dashboard.
+- For local development, the repo also contains an optional pilot plugin under
+  `grafana/plugins/bioetl-selectorshell-panel` that can auto-sync visible
+  `workflow/pipeline/run_type` from an exact `run_id`; shipped dashboards do
+  not require that unsigned plugin by default.
 
 ## First-screen policy header
 

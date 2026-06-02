@@ -504,6 +504,10 @@ control_plane_selector_context_contract:
     shell or plugin. Workflow Overview MAY consume `exact_run_only=1`
     filter-options helpers for hidden handoff vars so exact `run_id` can narrow
     downstream dashboard links without rewriting the visible selector shell.
+    The repo also ships an optional local pilot panel plugin at
+    `grafana/plugins/bioetl-selectorshell-panel` for same-dashboard visible
+    selector synchronization, but shipped dashboard JSON does not depend on
+    that unsigned plugin yet.
     Primary-dashboard links preserve selected `run_id` only as HTTP identity
     context. Current-status PromQL remains selected-scope, not exact run-id
     scoped.
