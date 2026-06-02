@@ -62,6 +62,7 @@ if TYPE_CHECKING:
     )
     from bioetl.application.core.record_processor_config import RecordProcessorConfig
     from bioetl.application.core.transformer_runtime.state import RecordTransformOutcome
+    from bioetl.application.services.debug_export_service import DebugExportService
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
     from bioetl.domain.types import BatchID
@@ -81,6 +82,7 @@ class BatchTransformer:
         gold_filter_callback: GoldFilterCallback,
         gold_transform_callback: GoldTransformCallback,
         normalization_processor: RecordNormalizationProcessor | None = None,
+        debug_export_service: DebugExportService | None = None,
     ) -> None:
         """Initialize batch transformer."""
         self._context = context
@@ -91,6 +93,7 @@ class BatchTransformer:
         self._transform = transform_callback
         self._gold_filter = gold_filter_callback
         self._gold_transform = gold_transform_callback
+        self._debug_export_service = debug_export_service
         self._normalization_processor = (
             normalization_processor
             if normalization_processor is not None
@@ -113,6 +116,7 @@ class BatchTransformer:
             gold_transform=self._gold_transform,
             dq_config=self._config.dq_config,
             normalization_processor=self._normalization_processor,
+            debug_export_service=self._debug_export_service,
             raw_record=raw_record,
             batch_id=batch_id,
             index=index,

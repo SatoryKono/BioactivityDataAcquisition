@@ -1,6 +1,6 @@
 schema_version: 1
 policy:
-  stable_anchor: BIOETL-DOCKER-HELPER-ADR010-ADJUNCT
+  stable_anchor: BIOETL_DOCKER_HELPER_ADR010_ADJUNCT
   adr: ADR-010
   status: optional_local_only_adjunct
   canonical_runtime: false

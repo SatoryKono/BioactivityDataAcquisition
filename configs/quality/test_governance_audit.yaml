@@ -355,7 +355,7 @@ oversized_test_module_inventory:
       owner: observability-dashboards
     - issue_ref: "#4506"
       source: tests/unit/composition/runtime_builders/test_runner_builder_profiles.py
-      source_lines_after_split: 1125
+      source_lines_after_split: 1128
       extracted_surface: tests/unit/composition/runtime_builders/test_runner_builder_contracts.py
       extracted_surface_lines: 166
       owner: composition-runtime

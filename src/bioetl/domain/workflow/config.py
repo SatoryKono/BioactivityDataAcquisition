@@ -59,6 +59,9 @@ class WorkflowRunOptionsConfig:
     exact_replay: bool | None = None
     required_persistence_profile: str | None = None
     enable_tracing: bool | None = None
+    debug_export_enabled: bool | None = None
+    debug_export_formats: tuple[str, ...] | None = None
+    debug_export_dir: str | None = None
 
     def merged_with(
         self, override: WorkflowRunOptionsConfig
@@ -143,6 +146,18 @@ class WorkflowRunOptionsConfig:
             enable_tracing=prefer_override(
                 self.enable_tracing,
                 override.enable_tracing,
+            ),
+            debug_export_enabled=prefer_override(
+                self.debug_export_enabled,
+                override.debug_export_enabled,
+            ),
+            debug_export_formats=prefer_override(
+                self.debug_export_formats,
+                override.debug_export_formats,
+            ),
+            debug_export_dir=prefer_override(
+                self.debug_export_dir,
+                override.debug_export_dir,
             ),
         )
 

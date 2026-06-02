@@ -73,6 +73,9 @@ class RuntimeConfig:
     # When True, Gold filter returns False for all records,
     # preventing individual Gold writes during composite execution
     skip_gold: bool = False
+    debug_export_enabled: bool = False
+    debug_export_formats: tuple[str, ...] = ()
+    debug_export_dir: str | None = None
 
     # Manual start offset for crash recovery (overrides checkpoint)
     # When set, extraction starts from this offset instead of checkpoint.
@@ -90,6 +93,7 @@ class RuntimeConfig:
         self._validate_health_check_mode()
         self._validate_replay_anchor_date()
         self._validate_silver_filter_compatibility_mode()
+        self._validate_debug_export_formats()
 
     def _validate_positive_values(self) -> None:
         """Validate that numeric fields have positive values."""
@@ -146,6 +150,16 @@ class RuntimeConfig:
                 "silver_filter_compatibility_mode must be "
                 "'structural_only_auto_promote', "
                 f"got {self.silver_filter_compatibility_mode!r}"
+            )
+
+    def _validate_debug_export_formats(self) -> None:
+        """Validate debug export format tokens."""
+        valid_formats = {"csv", "xlsx"}
+        invalid = [fmt for fmt in self.debug_export_formats if fmt not in valid_formats]
+        if invalid:
+            raise ValueError(
+                "debug_export_formats must contain only 'csv'/'xlsx', "
+                f"got {invalid!r}"
             )
 
     @property

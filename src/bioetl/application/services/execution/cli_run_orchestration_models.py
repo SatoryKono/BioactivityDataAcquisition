@@ -50,6 +50,9 @@ class CliRunOptionsSpec:
     exact_replay: bool = False
     required_persistence_profile: str | None = None
     enable_tracing: bool | None = None
+    debug_export_enabled: bool = False
+    debug_export_formats: tuple[str, ...] | None = None
+    debug_export_dir: str | None = None
 
 
 @dataclass(frozen=True, slots=True)

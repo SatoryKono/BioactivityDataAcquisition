@@ -31,6 +31,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.record_normalization_processor import (
         RecordNormalizationProcessor,
     )
+    from bioetl.application.services.debug_export_service import DebugExportService
     from bioetl.domain.config import DQConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
@@ -185,6 +186,7 @@ async def transform_record_attempt(
     gold_transform: GoldTransformCallback,
     dq_config: DQConfig | None,
     normalization_processor: RecordNormalizationProcessor | None,
+    debug_export_service: DebugExportService | None,
     raw_record: BronzeRecord,
     batch_id: BatchID,
     index: int,
@@ -206,6 +208,7 @@ async def transform_record_attempt(
             gold_filter=gold_filter,
             gold_transform=gold_transform,
             dq_config=dq_config,
+            debug_export_service=debug_export_service,
         )
     except FilteredOutError as error:
         return _handle_filtered_out_error(
@@ -213,6 +216,8 @@ async def transform_record_attempt(
             batch_metrics=batch_metrics,
             dq_config=dq_config,
             raw_record=raw_record,
+            debug_export_service=debug_export_service,
+            index=index,
         )
     except TRANSFORM_PROCESSING_ERRORS as error:
         return _handle_transform_processing_error(
@@ -224,6 +229,7 @@ async def transform_record_attempt(
             error_classifier=error_classifier,
             batch_metrics=batch_metrics,
             dq_config=dq_config,
+            debug_export_service=debug_export_service,
         )
 
 
@@ -237,6 +243,7 @@ async def _build_transform_success_outcome(
     gold_filter: GoldFilterCallback,
     gold_transform: GoldTransformCallback,
     dq_config: DQConfig | None,
+    debug_export_service: DebugExportService | None,
 ) -> RecordTransformOutcome:
     transformed = await _resolve_transform_result(transform(context, raw_record, index))
     finalized_record = _finalize_transformed_record(
@@ -257,6 +264,14 @@ async def _build_transform_success_outcome(
         gold_filter=gold_filter,
         gold_transform=gold_transform,
     )
+    if debug_export_service is not None:
+        debug_export_service.record_transform_success(
+            raw_record=raw_record,
+            record_index=index,
+            silver_record=finalized_record,
+            gold_record=gold_record,
+            gold_excluded_by_contract=gold_excluded_by_contract,
+        )
     return RecordTransformOutcome(
         silver_record=finalized_record,
         gold_record=gold_record,
@@ -281,10 +296,20 @@ def _handle_filtered_out_error(
     batch_metrics: BatchMetricsRecorderService,
     dq_config: DQConfig | None,
     raw_record: BronzeRecord,
+    debug_export_service: DebugExportService | None,
+    index: int,
 ) -> RecordTransformOutcome:
     batch_metrics.track_processed_records("filtered_out", 1)
     batch_metrics.track_silver_filter_rejection(error.details or None)
     policy = _resolve_invalid_record_policy(dq_config)
+    if debug_export_service is not None:
+        debug_export_service.record_filtered_out(
+            raw_record=raw_record,
+            record_index=index,
+            reason=str(error),
+            details=error.details or None,
+            policy=policy,
+        )
     if policy == "skip":
         return _empty_outcome()
     if policy == "fail":
@@ -310,6 +335,7 @@ def _handle_transform_processing_error(
     error_classifier: ErrorClassifier,
     batch_metrics: BatchMetricsRecorderService,
     dq_config: DQConfig | None,
+    debug_export_service: DebugExportService | None,
 ) -> RecordTransformOutcome:
     _log_transform_record_failure(
         context=context,
@@ -327,6 +353,8 @@ def _handle_transform_processing_error(
         batch_metrics=batch_metrics,
         dq_config=dq_config,
         raw_record=raw_record,
+        debug_export_service=debug_export_service,
+        index=index,
     )
 
 
@@ -337,9 +365,19 @@ def _handle_data_quality_transform_error(
     batch_metrics: BatchMetricsRecorderService,
     dq_config: DQConfig | None,
     raw_record: BronzeRecord,
+    debug_export_service: DebugExportService | None,
+    index: int,
 ) -> RecordTransformOutcome:
     batch_metrics.track_error("transform", error_type)
     policy = _resolve_invalid_record_policy(dq_config)
+    if debug_export_service is not None:
+        debug_export_service.record_data_quality_failure(
+            raw_record=raw_record,
+            record_index=index,
+            error_type=error_type,
+            error_details=str(error),
+            policy=policy,
+        )
     if policy == "fail":
         raise error
     if policy == "skip":

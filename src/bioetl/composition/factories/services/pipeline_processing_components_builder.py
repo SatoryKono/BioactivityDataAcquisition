@@ -20,6 +20,8 @@ from bioetl.application.core.wiring.runtime import (
     RecordProcessorConfig,
     TransformCallback,
 )
+from bioetl.application.services.debug_export_service import DebugExportService
+from bioetl.infrastructure.export.debug_export_adapter import DebugExportAdapter
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_writer import BatchWriteStorageProtocol
@@ -72,6 +74,17 @@ def create_batch_processing_components(
         if config.normalization_enabled
         else None
     )
+    debug_export_service = (
+        DebugExportService(
+            config=config.debug_export_config,
+            run_id=context.run_id,
+            pipeline_id=config.pipeline_name,
+            provider_id=config.provider,
+            writer=DebugExportAdapter(),
+        )
+        if config.debug_export_config is not None
+        else None
+    )
     transformer = BatchTransformer(
         context=context,
         config=config,
@@ -82,6 +95,7 @@ def create_batch_processing_components(
         gold_filter_callback=gold_filter_callback,
         gold_transform_callback=gold_transform_callback,
         normalization_processor=normalization_processor,
+        debug_export_service=debug_export_service,
     )
     column_orderer = (
         ColumnOrderService(context.logger, column_groups=config.column_groups)
@@ -99,6 +113,7 @@ def create_batch_processing_components(
             tracer=tracer,
             lock_validator=lock_validator,
             column_orderer=column_orderer,
+            debug_export_service=debug_export_service,
         ),
     )
     return BatchProcessingComponents(

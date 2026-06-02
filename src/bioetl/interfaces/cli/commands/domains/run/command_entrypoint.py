@@ -154,6 +154,37 @@ def _add_tracing_options() -> CommandDecorator:
     return decorator
 
 
+def _add_debug_export_options() -> CommandDecorator:
+    """Add debug export audit-pack options."""
+
+    def decorator(cmd: CommandCallback) -> CommandCallback:
+        cmd = click.option(
+            "--debug-export/--no-debug-export",
+            "debug_export_enabled",
+            default=False,
+            help="Persist a per-run debug audit pack with Bronze/Silver/Gold traces",
+            show_default=True,
+        )(cmd)
+        cmd = click.option(
+            "--debug-export-format",
+            "debug_export_formats",
+            multiple=True,
+            type=click.Choice(["csv", "xlsx"]),
+            default=("csv", "xlsx"),
+            help="Repeatable debug-export output formats",
+            show_default=True,
+        )(cmd)
+        cmd = click.option(
+            "--debug-export-dir",
+            type=click.Path(),
+            default=None,
+            help="Override the debug-export root directory",
+        )(cmd)
+        return cmd
+
+    return decorator
+
+
 def _add_cache_options() -> CommandDecorator:
     """Add Bronze cache options."""
 
@@ -250,6 +281,7 @@ def build_run_click_command(
     callback = _add_vacuum_options()(callback)
     callback = _add_debug_options(default_health_server_port)(callback)
     callback = _add_tracing_options()(callback)
+    callback = _add_debug_export_options()(callback)
     callback = _add_cache_options()(callback)
     callback = _add_replay_parentage_options()(callback)
     callback = _add_persistence_profile_options()(callback)

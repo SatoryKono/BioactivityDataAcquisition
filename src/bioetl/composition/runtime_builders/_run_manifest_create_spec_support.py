@@ -57,6 +57,14 @@ def build_manifest_create_spec(
             settings=inputs.settings,
             provider=request_inputs.provider,
             entity=request_inputs.entity,
+            run_id=str(ctx.run_id),
+            pipeline_name=ctx.pipeline_name,
+            workflow_id=str(getattr(ctx, "workflow_id", "standalone")),
+            debug_export_root=(
+                getattr(ctx, "debug_export_dir", None)
+                if bool(getattr(ctx, "debug_export_enabled", False))
+                else None
+            ),
         ),
         pipeline_version=get_pipeline_version(inputs.yaml_config),
         git_commit=code_revision.git_commit,

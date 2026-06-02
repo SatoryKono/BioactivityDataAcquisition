@@ -154,6 +154,11 @@ class BatchProcessingService:
         """Delegate source metadata retrieval through the support service."""
         return self._support.get_source_metadata(query_string)
 
+    @property
+    def debug_export_service(self) -> object | None:
+        """Expose the optional debug export collaborator to the executor."""
+        return getattr(self._support, "_debug_export_service", None)
+
     async def _process_batch_work(
         self,
         *,
@@ -168,6 +173,7 @@ class BatchProcessingService:
         bronze_result = await self._support.write_bronze_layer(
             records=records,
             batch_id=batch_id,
+            start_index=start_index,
             ingestion_ts=ingestion_ts,
             source_metadata=source_metadata,
         )

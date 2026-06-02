@@ -94,6 +94,7 @@ def build_components_and_processing_service(
         quarantine_manager=quarantine_manager,
         run_id=pipeline.context.run_id,
         domain_event_emitter=domain_event_emitter,
+        debug_export_service=getattr(components.writer, "_debug_export_service", None),
     )
     batch_processing_service = BatchProcessingService(
         services=pipeline.services,

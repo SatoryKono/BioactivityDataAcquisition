@@ -20,6 +20,7 @@ from bioetl.application.core.span_helpers import (
     build_pipeline_span_attributes,
     start_current_span,
 )
+from bioetl.application.services.debug_export_service import DebugExportResult
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
@@ -142,6 +143,22 @@ class PipelineRunner(PipelineRunnerSupportMixin):
         }
 
     @property
+    def debug_export_uri(self) -> str | None:
+        """Return the persisted debug export root when available."""
+        result = getattr(self._executor, "debug_export_result", None)
+        if not isinstance(result, DebugExportResult):
+            return None
+        return result.root_path
+
+    @property
+    def debug_export_hash(self) -> str | None:
+        """Return the persisted debug export hash when available."""
+        result = getattr(self._executor, "debug_export_result", None)
+        if not isinstance(result, DebugExportResult):
+            return None
+        return result.debug_export_hash
+
+    @property
     def execution_diagnostics(self) -> JsonDict:
         """Return bounded executor diagnostics for run-ledger projection."""
         diagnostics = getattr(self._executor, "execution_diagnostics", {})
@@ -171,18 +188,24 @@ class PipelineRunner(PipelineRunnerSupportMixin):
         - Handles tracer close errors without failing the pipeline
         """
         record_run_started(self)
+        debug_export_status = "success"
         try:
             shutdown_recorded = await self._run_pipeline_lifecycle()
         except PipelineShutdownError:
+            debug_export_status = "shutdown"
             self._record_terminal_shutdown()
             raise
         except _RUN_FAILURE_EXCEPTIONS as exc:
+            debug_export_status = "failed"
             record_run_failed(self, exc)
             raise
         else:
             if not shutdown_recorded:
                 self._record_successful_completion()
+            else:
+                debug_export_status = "shutdown"
         finally:
+            await self._finalize_debug_export(debug_export_status)
             await self._cleanup_after_run()
 
     async def _run_pipeline_lifecycle(self) -> bool:
@@ -199,3 +222,30 @@ class PipelineRunner(PipelineRunnerSupportMixin):
             finally:
                 self._observer.capture_execution_metrics(self.execution_metrics)
         return shutdown_recorded
+
+    async def _finalize_debug_export(self, status: str) -> None:
+        """Persist and publish debug export artifacts without failing the run."""
+        finalize = getattr(self._executor, "finalize_debug_export", None)
+        if not callable(finalize):
+            return
+        try:
+            result = await finalize(status=status, manifest_id=self.manifest_id)
+        except _RUN_FAILURE_EXCEPTIONS as error:
+            self._logger.warning(
+                "debug_export_finalize_failed",
+                error=str(error),
+                error_type=type(error).__name__,
+                run_id=str(self._context.run_id),
+            )
+            return
+        if not isinstance(result, DebugExportResult):
+            return
+        if self._run_ledger_service is not None:
+            self._run_ledger_service.record_artifact_published(
+                layer="debug_export",
+                artifact_path=result.root_path,
+                details={
+                    "manifest_path": result.manifest_path,
+                    "debug_export_hash": result.debug_export_hash,
+                },
+            )

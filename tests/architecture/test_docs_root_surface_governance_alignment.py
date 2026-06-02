@@ -118,7 +118,7 @@ def test_docker_helper_contract_schema_is_explicit_and_fail_closed() -> None:
         "stable_anchor",
         "status",
     }
-    assert policy["stable_anchor"] == "BIOETL-DOCKER-HELPER-ADR010-ADJUNCT"
+    assert policy["stable_anchor"] == "BIOETL_DOCKER_HELPER_ADR010_ADJUNCT"
     assert policy["adr"] == "ADR-010"
     assert policy["status"] == "optional_local_only_adjunct"
     assert policy["canonical_runtime"] is False

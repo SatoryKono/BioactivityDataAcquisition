@@ -5,6 +5,7 @@ from __future__ import annotations
 __all__ = ["BatchExecutor", "BatchResult"]
 
 
+import asyncio
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -136,6 +137,12 @@ class BatchExecutor(_BatchExecutorDQMixin):
         self._fsm = dependencies.fsm
         self._fsm_state = BatchExecutionState.IDLE
         self._batch_result_type = BatchResult
+        self._debug_export_service = getattr(
+            dependencies.processing_port,
+            "debug_export_service",
+            None,
+        )
+        self._debug_export_result = None
 
         self._resume_offset = 0
         self._query_string: str | None = None
@@ -209,6 +216,29 @@ class BatchExecutor(_BatchExecutorDQMixin):
         return self._execution_state_service.build_run_statistics(
             state=self,
         )
+
+    @property
+    def debug_export_result(self) -> object | None:
+        """Return the persisted debug export result when available."""
+        return self._debug_export_result
+
+    async def finalize_debug_export(
+        self,
+        *,
+        status: str,
+        manifest_id: str | None,
+    ) -> object | None:
+        """Persist the debug export audit pack once per run when enabled."""
+        if self._debug_export_service is None:
+            return None
+        if self._debug_export_result is not None:
+            return self._debug_export_result
+        self._debug_export_result = await asyncio.to_thread(
+            self._debug_export_service.finalize,
+            status=status,
+            manifest_id=manifest_id,
+        )
+        return self._debug_export_result
 
     @property
     def execution_diagnostics(self) -> JsonDict:

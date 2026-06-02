@@ -12,9 +12,9 @@ stacks для локальной диагностики или точечных 
 Они не входят в canonical helper flow и не являются обязательной частью
 Local-Only runtime.
 
-<!-- BIOETL-DOCKER-HELPER-ADR010-ADJUNCT -->
+<!-- BIOETL_DOCKER_HELPER_ADR010_ADJUNCT -->
 
-Governance anchor: `BIOETL-DOCKER-HELPER-ADR010-ADJUNCT`. Machine-readable
+Governance anchor: `BIOETL_DOCKER_HELPER_ADR010_ADJUNCT`. Machine-readable
 контракт reviewed helper stacks находится в
 `configs/quality/docker_helper_contracts.yaml`. Этот контракт закрепляет, что
 helper compose files остаются optional local-only adjunct tooling и MUST NOT

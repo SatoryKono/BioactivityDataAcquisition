@@ -208,7 +208,7 @@
       "disposition": "retain_active",
       "module_path": "src/bioetl/application/composite/runtime_models.py",
       "module_name": "bioetl.application.composite.runtime_models",
-      "src_importer_count": 38,
+      "src_importer_count": 39,
       "test_importer_count": 11,
       "min_src_importers": 3,
       "verification_status": "satisfied"
@@ -219,7 +219,7 @@
       "disposition": "retain_active",
       "module_path": "src/bioetl/application/composite/runtime_wiring_api.py",
       "module_name": "bioetl.application.composite.runtime_wiring_api",
-      "src_importer_count": 14,
+      "src_importer_count": 16,
       "test_importer_count": 4,
       "min_src_importers": 2,
       "verification_status": "satisfied"

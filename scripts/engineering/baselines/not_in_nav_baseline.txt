@@ -119,6 +119,9 @@
 03-guides/dashboards/selector-architecture.md
 03-guides/dashboards/variable-reference.md
 03-guides/development/mistral-vibe-wsl2-setup.md
+03-guides/github-quick-reference.md
+03-guides/github-setup-plan.md
+03-guides/github-workflow-diagrams.md
 03-guides/script-management/README.md
 03-guides/script-management/script-analysis-prompt.md
 04-reference/api/application/core.md
