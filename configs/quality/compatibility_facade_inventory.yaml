@@ -266,10 +266,10 @@ retained_entrypoints:
   exit_criteria: The merge module remains the sanctioned public seam and all composition paths use collaborator bundles with
     only the canonical `order_service` ordering collaborator.
 measured_only_ratchet:
-  max_total_modules: 14
+  max_total_modules: 8
   scoped_limits:
   - path_prefix: src/bioetl/application/core/
-    max_modules: 8
+    max_modules: 2
   - path_prefix: src/bioetl/application/services/
     max_modules: 0
   - path_prefix: src/bioetl/composition/factories/storage/
@@ -401,45 +401,9 @@ retained_entrypoint_burn_down_plan:
     completion_gate: Keep the sanctioned merge entrypoint stable and prevent first-party callers from bypassing the collaborator
       bundle/canonical merge surface.
 measured_only_modules:
-- path: src/bioetl/application/core/_data_source_mixins.py
-  owner: bioetl.application.core
-  reason: Backward-compatible re-export facade retained as a measured-only shim for data source mixin imports during compatibility review.
-  review_date: '2026-09-30'
-  new_code_policy: no-new-first-party-imports
-  promotion_trigger: sanctioned-public-seam
-- path: src/bioetl/application/core/_filtered_data_source_mixins.py
-  owner: bioetl.application.core
-  reason: Backward-compatible re-export facade retained as a measured-only shim for filtered data source mixin imports during compatibility review.
-  review_date: '2026-09-30'
-  new_code_policy: no-new-first-party-imports
-  promotion_trigger: sanctioned-public-seam
-- path: src/bioetl/application/core/_idmapping_fetch_support.py
-  owner: bioetl.application.core
-  reason: Backward-compatible re-export facade retained as a measured-only shim for ID mapping fetch helper imports during compatibility review.
-  review_date: '2026-09-30'
-  new_code_policy: no-new-first-party-imports
-  promotion_trigger: sanctioned-public-seam
-- path: src/bioetl/application/core/_idmapping_lifecycle_support.py
-  owner: bioetl.application.core
-  reason: Backward-compatible re-export facade retained as a measured-only shim for ID mapping lifecycle helper imports during compatibility review.
-  review_date: '2026-09-30'
-  new_code_policy: no-new-first-party-imports
-  promotion_trigger: sanctioned-public-seam
 - path: src/bioetl/application/core/_span_helpers.py
   owner: bioetl.application.core
   reason: Backward-compatible re-export facade retained as a measured-only shim for span helper imports during compatibility review.
-  review_date: '2026-09-30'
-  new_code_policy: no-new-first-party-imports
-  promotion_trigger: sanctioned-public-seam
-- path: src/bioetl/application/core/_subcellular_fraction_support.py
-  owner: bioetl.application.core
-  reason: Backward-compatible re-export facade retained as a measured-only shim for subcellular fraction helper imports during compatibility review.
-  review_date: '2026-09-30'
-  new_code_policy: no-new-first-party-imports
-  promotion_trigger: sanctioned-public-seam
-- path: src/bioetl/application/core/_target_data_source_mixins.py
-  owner: bioetl.application.core
-  reason: Backward-compatible re-export facade retained as a measured-only shim for target data source mixin imports during compatibility review.
   review_date: '2026-09-30'
   new_code_policy: no-new-first-party-imports
   promotion_trigger: sanctioned-public-seam

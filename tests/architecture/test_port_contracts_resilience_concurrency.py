@@ -33,13 +33,13 @@ class TestLockPortErrorConditions:
     @pytest.mark.asyncio
     async def test_lock_release_wrong_owner_returns_false(self) -> None:
         """LockPort.release() MUST return False when releasing lock not owned."""
-        from uuid import uuid4
+        from uuid import UUID
 
         from bioetl.infrastructure.locking.memory_lock import MemoryLock
 
         lock = MemoryLock()
-        owner1 = uuid4()
-        owner2 = uuid4()
+        owner1 = UUID("00000000-0000-0000-0000-000000000201")
+        owner2 = UUID("00000000-0000-0000-0000-000000000202")
 
         try:
             # Owner1 acquires lock

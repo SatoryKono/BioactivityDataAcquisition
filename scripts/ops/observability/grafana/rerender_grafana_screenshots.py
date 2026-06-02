@@ -59,6 +59,20 @@ class DashboardRecord:
     title: str
 
 
+@dataclass(frozen=True)
+class DashboardRenderResult:
+    uid: str
+    url: str
+    title: str
+    status: str
+    screenshot: str | None = None
+    error: str | None = None
+
+
+class RenderApiFailure(RuntimeError):
+    """Raised after writing a partial render manifest for failed dashboards."""
+
+
 def _read_env(name: str, default: str) -> str:
     value = os.getenv(name, "").strip()
     return value or default
@@ -78,7 +92,9 @@ def _auth_headers(config: RenderConfig) -> dict[str, str]:
     return headers
 
 
-def _request_json(url: str, *, headers: dict[str, str], timeout_seconds: float) -> object:
+def _request_json(
+    url: str, *, headers: dict[str, str], timeout_seconds: float
+) -> object:
     request = Request(url, headers=headers)
     with urlopen(request, timeout=timeout_seconds) as response:
         return json.loads(response.read().decode("utf-8"))
@@ -97,8 +113,7 @@ def _grafana_slugify(title: str) -> str:
         "-".join(
             chunk
             for chunk in "".join(
-                char.lower() if char.isalnum() else "-"
-                for char in title.strip()
+                char.lower() if char.isalnum() else "-" for char in title.strip()
             ).split("-")
             if chunk
         )
@@ -322,7 +337,18 @@ def _write_manifest(
     config: RenderConfig,
     *,
     rendered: list[tuple[DashboardRecord, Path]],
+    results: list[DashboardRenderResult] | None = None,
 ) -> None:
+    render_results = results or [
+        DashboardRenderResult(
+            uid=record.uid,
+            url=record.url,
+            title=record.title,
+            status="rendered",
+            screenshot=str(path.relative_to(config.output_dir)),
+        )
+        for record, path in rendered
+    ]
     manifest = {
         "generated_at": datetime.now(tz=UTC).isoformat(),
         "base_url": config.base_url,
@@ -344,6 +370,7 @@ def _write_manifest(
             }
             for record, path in rendered
         ],
+        "render_results": [asdict(result) for result in render_results],
     }
     (config.output_dir / "render-manifest.json").write_text(
         json.dumps(manifest, indent=2, sort_keys=True) + "\n",
@@ -400,9 +427,7 @@ def _prepend_path_env(env: dict[str, str], name: str, value: str) -> None:
     current_value = env.get(name, "").strip()
     paths = [item for item in current_value.split(os.pathsep) if item]
     if value not in paths:
-        env[name] = (
-            f"{value}{os.pathsep}{current_value}" if current_value else value
-        )
+        env[name] = f"{value}{os.pathsep}{current_value}" if current_value else value
 
 
 def _apply_playwright_runtime_env(env: dict[str, str]) -> None:
@@ -483,7 +508,14 @@ def _run_playwright_fallback(config: RenderConfig) -> int:
             check=False,
             cwd=str(_repo_root()),
             env=_playwright_env(config),
+            timeout=max(config.timeout_seconds + 30.0, 60.0),
         )
+    except subprocess.TimeoutExpired as exc:
+        print(
+            "Playwright fallback timed out after "
+            f"{exc.timeout:.0f}s while rendering selected dashboards."
+        )
+        return 1
     except OSError as exc:
         print(f"Playwright fallback failed to launch: {exc}")
         return 1
@@ -502,7 +534,10 @@ def _playwright_runtime_failure_detail(raw_detail: str) -> str:
             "Playwright npm package is missing from repo-local node_modules. "
             f"{setup_hint} Original probe error: {detail}"
         )
-    if "Executable doesn't exist" in detail or "browser executable is missing" in detail:
+    if (
+        "Executable doesn't exist" in detail
+        or "browser executable is missing" in detail
+    ):
         return (
             "Playwright Chromium browser runtime is missing. "
             f"{setup_hint} Original probe error: {detail}"
@@ -518,7 +553,7 @@ def _playwright_runtime_failure_detail(raw_detail: str) -> str:
     return f"Playwright runtime probe failed: {detail}"
 
 
-def check_playwright_runtime() -> tuple[bool, str]:
+def check_playwright_runtime(timeout_seconds: float = 30.0) -> tuple[bool, str]:
     node_path = _resolve_node_executable()
     if node_path is None:
         return (
@@ -549,6 +584,13 @@ def check_playwright_runtime() -> tuple[bool, str]:
             capture_output=True,
             text=True,
             env=env,
+            timeout=max(timeout_seconds, 1.0),
+        )
+    except subprocess.TimeoutExpired as exc:
+        return (
+            False,
+            "Playwright runtime probe timed out after "
+            f"{exc.timeout:.0f}s while launching Chromium.",
         )
     except OSError as exc:
         return False, f"Playwright runtime probe failed to launch Node.js: {exc}"
@@ -578,11 +620,48 @@ def _render_via_api(config: RenderConfig) -> None:
         raise RuntimeError("No dashboards matched the current render selection")
 
     rendered: list[tuple[DashboardRecord, Path]] = []
+    results: list[DashboardRenderResult] = []
+    failures: list[str] = []
     for record in dashboards:
-        target = _render_dashboard(record, config)
-        rendered.append((record, target))
-        print(f"rendered {record.uid} -> {target}")
-    _write_manifest(config, rendered=rendered)
+        try:
+            target = _render_dashboard(record, config)
+        except HTTPError as exc:
+            detail = f"HTTP {exc.code} {exc.reason}"
+        except URLError as exc:
+            detail = f"URL error: {exc.reason}"
+        except OSError as exc:
+            detail = f"Render request failed: {exc}"
+        else:
+            rendered.append((record, target))
+            results.append(
+                DashboardRenderResult(
+                    uid=record.uid,
+                    url=record.url,
+                    title=record.title,
+                    status="rendered",
+                    screenshot=str(target.relative_to(config.output_dir)),
+                )
+            )
+            print(f"rendered {record.uid} -> {target}")
+            continue
+
+        failures.append(f"{record.uid}: {detail}")
+        results.append(
+            DashboardRenderResult(
+                uid=record.uid,
+                url=record.url,
+                title=record.title,
+                status="error",
+                error=detail,
+            )
+        )
+        print(f"failed {record.uid}: {detail}")
+
+    _write_manifest(config, rendered=rendered, results=results)
+    if failures:
+        raise RenderApiFailure(
+            "Grafana Render API failed for dashboards: " + "; ".join(failures)
+        )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -593,6 +672,12 @@ def main(argv: list[str] | None = None) -> int:
         if config.fallback == "playwright":
             return _run_playwright_fallback(config)
         _render_via_api(config)
+    except RenderApiFailure as exc:
+        print(f"{exc}. {_render_failure_hint(config)}")
+        if config.fallback == "auto":
+            print("Falling back to Playwright screenshot capture.")
+            return _run_playwright_fallback(config)
+        return 1
     except HTTPError as exc:
         if exc.code == 500:
             print(

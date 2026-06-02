@@ -385,6 +385,163 @@ def test_control_plane_filter_options_narrows_manifest_catalog_before_ledger_rea
     assert ledger_store.lookup_run_ids == [str(run_id_1)]
 
 
+def test_control_plane_filter_options_fail_close_when_scope_has_no_matching_manifests() -> (
+    None
+):
+    """Zero-match variable scope must not fall back to the full manifest catalog."""
+    manifest_store = InMemoryRunManifestStore()
+    ledger_store = _CountingRunLedgerStore()
+    created_at = datetime(2026, 5, 12, 8, 21, tzinfo=UTC)
+
+    manifest_store.save(
+        RunManifest(
+            manifest_id="manifest-1",
+            execution_fingerprint="fingerprint-1",
+            schema_version="1.0",
+            created_at=created_at,
+            run_id=RunID(uuid4()),
+            run_type=RunType.INCREMENTAL,
+            pipeline_name="chembl_activity",
+            provider="chembl",
+            entity="activity",
+            launch_context={},
+            runtime_config={"run_type": "incremental"},
+            resolved_config={"pipeline_name": "chembl_activity"},
+            code_provenance=RunCodeProvenance(),
+        )
+    )
+    manifest_store.save(
+        RunManifest(
+            manifest_id="manifest-2",
+            execution_fingerprint="fingerprint-2",
+            schema_version="1.0",
+            created_at=created_at + timedelta(minutes=1),
+            run_id=RunID(uuid4()),
+            run_type=RunType.INCREMENTAL,
+            pipeline_name="pubchem_compound",
+            provider="pubchem",
+            entity="compound",
+            launch_context={},
+            runtime_config={"run_type": "incremental"},
+            resolved_config={"pipeline_name": "pubchem_compound"},
+            code_provenance=RunCodeProvenance(),
+        )
+    )
+
+    payload = build_selector_filter_options_payload(
+        manifests=manifest_store.list_all(),
+        ledger_port=ledger_store,
+        dimension="run_id",
+        response_shape="list",
+        requested_pipeline="chembl_activity",
+        selected_workflows=("pubchem_compound",),
+        selected_pipelines=("chembl_activity",),
+        selected_run_types=("incremental",),
+    )
+
+    assert payload == {"items": ["-"]}
+    assert ledger_store.lookup_run_ids == []
+
+
+def test_control_plane_filter_options_exact_run_only_returns_fallback_without_selected_run() -> (
+    None
+):
+    """Exact-run-only hidden selectors must fail closed to the provided fallback."""
+    manifest_store = InMemoryRunManifestStore()
+    ledger_store = _CountingRunLedgerStore()
+    created_at = datetime(2026, 5, 12, 8, 21, tzinfo=UTC)
+
+    manifest_store.save(
+        RunManifest(
+            manifest_id="manifest-1",
+            execution_fingerprint="fingerprint-1",
+            schema_version="1.0",
+            created_at=created_at,
+            run_id=RunID(uuid4()),
+            run_type=RunType.INCREMENTAL,
+            pipeline_name="chembl_activity",
+            provider="chembl",
+            entity="activity",
+            launch_context={"workflow_name": "chembl_target"},
+            runtime_config={"run_type": "incremental"},
+            resolved_config={"pipeline_name": "chembl_activity"},
+            code_provenance=RunCodeProvenance(),
+        )
+    )
+
+    payload = build_selector_filter_options_payload(
+        manifests=manifest_store.list_all(),
+        ledger_port=ledger_store,
+        dimension="workflow",
+        response_shape="list",
+        requested_pipeline=None,
+        exact_run_only=True,
+        fallback_value="chembl_target",
+    )
+
+    assert payload == {"items": ["chembl_target"]}
+    assert ledger_store.lookup_run_ids == [str(manifest_store.list_all()[0].run_id)]
+
+
+def test_control_plane_filter_options_exact_run_only_resolves_provider_for_selected_run() -> (
+    None
+):
+    """Exact-run-only hidden selectors should resolve one coherent tuple from run_id."""
+    manifest_store = InMemoryRunManifestStore()
+    ledger_store = _CountingRunLedgerStore()
+    created_at = datetime(2026, 5, 12, 8, 21, tzinfo=UTC)
+    run_id = RunID(uuid4())
+
+    manifest_store.save(
+        RunManifest(
+            manifest_id="manifest-1",
+            execution_fingerprint="fingerprint-1",
+            schema_version="1.0",
+            created_at=created_at,
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            pipeline_name="chembl_activity",
+            provider="chembl",
+            entity="activity",
+            launch_context={"workflow_name": "chembl_target"},
+            runtime_config={"run_type": "incremental"},
+            resolved_config={"pipeline_name": "chembl_activity"},
+            code_provenance=RunCodeProvenance(),
+        )
+    )
+    manifest_store.save(
+        RunManifest(
+            manifest_id="manifest-2",
+            execution_fingerprint="fingerprint-2",
+            schema_version="1.0",
+            created_at=created_at + timedelta(minutes=1),
+            run_id=RunID(uuid4()),
+            run_type=RunType.BACKFILL,
+            pipeline_name="pubchem_compound",
+            provider="pubchem",
+            entity="compound",
+            launch_context={"workflow_name": "pubchem_target"},
+            runtime_config={"run_type": "backfill"},
+            resolved_config={"pipeline_name": "pubchem_compound"},
+            code_provenance=RunCodeProvenance(),
+        )
+    )
+
+    payload = build_selector_filter_options_payload(
+        manifests=manifest_store.list_all(),
+        ledger_port=ledger_store,
+        dimension="provider",
+        response_shape="list",
+        requested_pipeline=None,
+        selected_run_id=str(run_id),
+        exact_run_only=True,
+        fallback_value="unknown",
+    )
+
+    assert payload == {"items": ["chembl"]}
+    assert ledger_store.lookup_run_ids == [str(run_id)]
+
+
 class TestHealthServerControlPlaneSelector:
     """Tests for /ops/control-plane/* selector helper endpoints."""
 
@@ -876,6 +1033,77 @@ class TestHealthServerControlPlaneSelector:
         assert data == {"items": ["-", *expected_run_ids]}
 
     @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_endpoint_fail_closes_run_id_options_for_zero_match_scope(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Workflow/pipeline/run_type combinations with no manifests must not leak global run IDs."""
+        server, _manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/filter-options?"
+            "dimension=run_id&response_shape=list"
+            "&workflow=pubchem_compound"
+            "&pipeline=chembl_activity"
+            "&run_type=incremental",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        assert data == {"items": ["-"]}
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_endpoint_exact_run_only_returns_fallback_without_selected_run(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Exact-run-only selector vars should stay fail-closed until one run_id is selected."""
+        server, _manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/filter-options?"
+            "dimension=workflow&response_shape=list"
+            "&exact_run_only=1&fallback_value=chembl_target",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        assert data == {"items": ["chembl_target"]}
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_endpoint_exact_run_only_resolves_provider_for_selected_run(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Exact run_id should drive provider-only hidden handoff vars."""
+        server, manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+        selected_manifest = next(
+            manifest
+            for manifest in manifest_store.list_all()
+            if manifest.manifest_id == "manifest-1"
+        )
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/filter-options?"
+            "dimension=provider&response_shape=list"
+            f"&run_id={selected_manifest.run_id}"
+            "&exact_run_only=true&fallback_value=unknown",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        assert data == {"items": ["chembl"]}
+
+    @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_selector_context_resolves_latest_terminal_run(
         self,
         running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
@@ -929,6 +1157,7 @@ class TestHealthServerControlPlaneSelector:
         assert status_code == 200
         data = json.loads(body)
         assert data["resolved_via"] == "selected_run_id"
+        assert data["selected"]["workflow"] == "chembl_activity"
         assert data["selected"]["pipeline"] == "chembl_activity"
         assert data["selected"]["run_type"] == "incremental"
         assert data["selected"]["run_id"] == str(selected_manifest.run_id)
@@ -972,6 +1201,26 @@ class TestHealthServerControlPlaneSelector:
         assert status_code == 200
         data = json.loads(body)
         assert data == {"items": ["chembl_activity"]}
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_filter_options_exposes_provider_dimension(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Selector catalog should expose provider for hidden exact-run handoffs."""
+        server, _manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/filter-options?"
+            "dimension=provider&response_shape=list&workflow=chembl_activity",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        assert data == {"items": ["chembl"]}
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_control_plane_identity_table_returns_latest_manifest_for_scope(

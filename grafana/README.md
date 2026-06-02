@@ -786,6 +786,11 @@ variables не умеют безопасно auto-write sibling selectors без
 Dashboard-to-dashboard links поэтому явно передают общий shell
 `workflow/pipeline/run_type`, preserved identity `run_id` для primary targets
 и target-specific bounded vars через `var-*`, без `includeVars=true`.
+`bioetl-workflow-overview` дополнительно использует hidden exact-run handoff
+vars (`$workflow_context`, `$pipeline_context_exact`, `$run_type_context_exact`,
+`$provider_context_exact`) через
+`/ops/control-plane/filter-options?exact_run_only=1`, чтобы selected `run_id`
+мог сузить downstream handoff без переписывания видимых sibling selectors.
 
 ### 6.0 Shared context shell
 

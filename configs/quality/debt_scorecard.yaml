@@ -219,6 +219,14 @@ config_surface_ratchet:
         entity-specific extraction/filter policy or composite target-only protein
         classification mappings; copying them across unrelated configs would create
         false contract surface. Actionable inconsistent_parameter_count stays zero.
+    - issue: '#4966'
+      reviewed_on: '2026-06-01'
+      owner: '@bioetl-config'
+      outcome: dq_defaults_effective_matrix_partial_variance_burn_down
+      rationale: Entity effective config rows now merge runtime DQ defaults from
+        configs/base/quality.yaml before drift classification. This removed the
+        quality_thresholds residual category, lowered sanctioned partial variance
+        from 122 to 119, and kept actionable inconsistent_parameter_count at zero.
   artifact_policy:
     generator_command: python -m scripts.schema generate-config-matrix
     baseline_artifact: reports/quality/config-discrepancy-baseline.json
@@ -227,7 +235,8 @@ config_surface_ratchet:
     expected_direction: downward
     ratchet_policy: Config-surface metrics must not grow without an explicit scorecard
       budget update; inconsistent-parameter count ratchets downward during Stream
-      B burn-down. Entity rows use effective pipeline config merged from configs/base/pipeline.yaml.
+      B burn-down. Entity rows use effective pipeline config merged from configs/base/pipeline.yaml
+      and configs/base/quality.yaml.
   metrics:
     config_count:
       current_count: 27
@@ -239,8 +248,8 @@ config_surface_ratchet:
       ratchet_policy: Non-growth fail-fast unless a reviewed pipeline addition updates
         the budget.
     unique_parameter_count:
-      current_count: 527
-      max_count: 527
+      current_count: 537
+      max_count: 537
       owner: '@bioetl-config'
       linked_issue: '#4818'
       rationale: Flattened parameter vocabulary must not expand silently across the
@@ -257,8 +266,8 @@ config_surface_ratchet:
         B closeout.
       ratchet_policy: Non-growth fail-fast; increases require reviewed contract regression.
     sanctioned_partial_parameter_count:
-      current_count: 122
-      max_count: 122
+      current_count: 119
+      max_count: 119
       owner: '@bioetl-config'
       linked_issue: '#4818'
       rationale: Documented intentional entity-specific partial keys excluded from
@@ -266,8 +275,8 @@ config_surface_ratchet:
       ratchet_policy: Non-growth fail-fast unless a reviewed entity contract adds
         new intentional divergence.
     raw_inconsistent_parameter_count:
-      current_count: 122
-      max_count: 122
+      current_count: 119
+      max_count: 119
       owner: '@bioetl-config'
       linked_issue: '#4818'
       rationale: Raw family-scoped partial key count before sanctioned-prefix exclusion;
@@ -284,8 +293,8 @@ config_surface_ratchet:
           rationale: Effective entity pipeline surface after base defaults merge.
           ratchet_policy: Non-growth fail-fast for governed entity configs.
         unique_parameter_count:
-          current_count: 312
-          max_count: 312
+          current_count: 322
+          max_count: 322
           rationale: Effective flattened vocabulary for entity configs only.
           ratchet_policy: Non-growth fail-fast unless reviewed schema expansion updates
             budget.
@@ -297,15 +306,15 @@ config_surface_ratchet:
           ratchet_policy: Non-growth fail-fast; entity-specific filters remain in
             backlog as sanctioned partial keys only.
         sanctioned_partial_parameter_count:
-          current_count: 106
-          max_count: 106
+          current_count: 103
+          max_count: 103
           rationale: Intentional entity-specific filters/extraction_params/overrides
             per reports/quality/config-surface-backlog.json.
           ratchet_policy: Non-growth fail-fast unless reviewed entity contract expands
             intentional divergence.
         raw_inconsistent_parameter_count:
-          current_count: 106
-          max_count: 106
+          current_count: 103
+          max_count: 103
           rationale: Raw entity partial keys before sanctioned-prefix exclusion.
           ratchet_policy: Informational non-growth guard mirroring backlog partial_key_count.
     composite_runtime:
@@ -392,15 +401,15 @@ hotspot_family_ratchets:
       src/bioetl/composition/factories/pipeline src/bioetl/application/services/control_plane
       src/bioetl/composition/runtime_builders --json-out reports/quality/hotspot-duplication-baseline.json
       --md-out reports/quality/hotspot-duplication-baseline.md --history-jsonl reports/quality/hotspot-duplication-history.jsonl
+      --max-duplicate-clusters 0
     baseline_artifact: reports/quality/hotspot-duplication-baseline.json
     history_artifact: reports/quality/hotspot-duplication-history.jsonl
     latest_reviewed_snapshot: '2026-06-01'
     confirming_clean_snapshots_required: 2
     expected_direction: downward
-    ratchet_policy: Keep the hotspot layer report-only at the repo level; enforce
-      family-level non-growth budgets for duplication, file-growth, and fan-in from
-      the reviewed scorecard baselines, then promote a family to zero-duplication
-      ratchet only after confirming clean snapshots.
+    ratchet_policy: Enforce a hotspot-level zero-duplication budget in CI after
+      the clean 2026-06-01 baseline; retain family-level non-growth budgets for
+      file-growth and fan-in from the reviewed scorecard baselines.
   families:
   - name: application_core
     owner: '@bioetl-architecture'
@@ -763,13 +772,14 @@ runtime_uuid_governance_metrics:
     without an explicit reviewed migration path.
   metrics:
     runtime_uuid_seam_count:
-      current_count: 14
-      max_count: 14
+      current_count: 13
+      max_count: 13
       linked_issue: '#4705'
       owner: '@bioetl-architecture'
-      rationale: Runtime UUID seams are sanctioned only as reviewed non-replay-critical
-        identities; growth must stay explicit while deterministic identity debt is
-        burned down.
+      rationale: >-
+        Runtime UUID seams are sanctioned only as reviewed non-replay-critical
+        identities; issue #4968 retired the obsolete observability smoke seam and
+        growth must stay explicit while deterministic identity debt is burned down.
       ratchet_policy: Non-growth fail-fast unless a reviewed scorecard update expands
         the sanctioned seam inventory intentionally.
     replay_critical_uuid_seam_count:
@@ -801,6 +811,14 @@ retirement_governance_metrics:
         creating six additional zero-import private compatibility shims; issue
         4953 classifies them as retained no-growth shims with owner and review
         expiry so the untriaged zero-import budget stays at zero.
+    - issue: '#4965'
+      reviewed_on: '2026-06-01'
+      owner: '@bioetl-architecture'
+      outcome: removed_zero_import_private_shim_batch
+      rationale: Issue 4963 removed the remaining zero-import private compatibility
+        shim batch after importer proof and issue 4965 re-ran the dead-code
+        inventory. Repo-wide zero-import candidates fell from 53 to 48 while
+        untriaged candidates remained at zero.
   review_policy: Review dead-code triage and repo-wide zero-import classifications
     together; growth in tracked retirement debt or any untriaged zero-import candidate
     requires an explicit reviewed rebaseline.
@@ -815,8 +833,8 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless a reviewed triage recalibration
         updates the tracked debt budget intentionally.
     repo_wide_zero_import_candidate_count:
-      current_count: 53
-      max_count: 53
+      current_count: 48
+      max_count: 48
       linked_issue: '#4541'
       owner: '@bioetl-architecture'
       rationale: Repo-wide zero-import candidates remain a governed review surface
@@ -824,8 +842,8 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless a reviewed dead-code inventory refresh
         updates the classified candidate set intentionally.
     repo_wide_classified_zero_import_candidate_count:
-      current_count: 53
-      max_count: 53
+      current_count: 48
+      max_count: 48
       linked_issue: '#4541'
       owner: '@bioetl-architecture'
       rationale: Every repo-wide zero-import candidate must stay covered by an explicit
@@ -896,14 +914,14 @@ test_governance_debt_metrics:
     inventory, assertion-strength debt, or deterministic test-seam counts change.
   metrics:
     compatibility_test_file_count:
-      current_count: 42
-      max_count: 42
-      target_count: 42
-      ratchet_policy: Downward ratchet only; keep max_count at 42 unless a future
+      current_count: 41
+      max_count: 41
+      target_count: 41
+      ratchet_policy: Downward ratchet only; keep max_count at 41 unless a future
         owner-approved reduction lowers the live compatibility test inventory.
       rationale: >-
-        Issue #4925 reclassified pure public-facade contract tests out of the
-        compatibility filename inventory; live compatibility debt count is now
+        Issues #4925 and #4967 reclassified pure public-facade and assertion-quality
+        checks out of the compatibility filename inventory; live compatibility debt count is now
         limited to compat, legacy, deprecated, shim, and sunset surfaces.
 program_done_criteria:
   deadline_quarter: 2027-Q1

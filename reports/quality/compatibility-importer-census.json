@@ -9,7 +9,7 @@
     "removed_compatibility_surfaces_with_src_importers": 0,
     "removed_compatibility_surfaces_with_test_importers": 0,
     "removed_compatibility_surfaces_still_present": 0,
-    "twin_pair_count": 14,
+    "twin_pair_count": 8,
     "twin_pairs_with_private_src_importers": 0,
     "twin_pairs_without_public_src_importers": 0,
     "tracked_twin_family_count": 3,
@@ -822,70 +822,6 @@
   ],
   "twin_pairs": [
     {
-      "private_path": "src/bioetl/application/core/_data_source_mixins.py",
-      "public_path": "src/bioetl/application/core/data_source_mixins.py",
-      "private_module": "bioetl.application.core._data_source_mixins",
-      "public_module": "bioetl.application.core.data_source_mixins",
-      "public_src_importer_count": 6,
-      "public_test_importer_count": 0,
-      "private_src_importer_count": 0,
-      "private_test_importer_count": 1,
-      "public_src_importers": [
-        "src/bioetl/application/core/_data_source_mixins.py",
-        "src/bioetl/application/core/_filtered_data_source_fetch_support.py",
-        "src/bioetl/application/core/data_sources/filtered.py",
-        "src/bioetl/application/core/data_sources/publication_term.py",
-        "src/bioetl/application/core/data_sources/subcellular_fraction.py",
-        "src/bioetl/application/core/filtered_data_source_mixins.py"
-      ],
-      "private_src_importers": []
-    },
-    {
-      "private_path": "src/bioetl/application/core/_filtered_data_source_mixins.py",
-      "public_path": "src/bioetl/application/core/filtered_data_source_mixins.py",
-      "private_module": "bioetl.application.core._filtered_data_source_mixins",
-      "public_module": "bioetl.application.core.filtered_data_source_mixins",
-      "public_src_importer_count": 2,
-      "public_test_importer_count": 0,
-      "private_src_importer_count": 0,
-      "private_test_importer_count": 0,
-      "public_src_importers": [
-        "src/bioetl/application/core/_filtered_data_source_mixins.py",
-        "src/bioetl/application/core/data_sources/filtered.py"
-      ],
-      "private_src_importers": []
-    },
-    {
-      "private_path": "src/bioetl/application/core/_idmapping_fetch_support.py",
-      "public_path": "src/bioetl/application/core/idmapping_fetch_support.py",
-      "private_module": "bioetl.application.core._idmapping_fetch_support",
-      "public_module": "bioetl.application.core.idmapping_fetch_support",
-      "public_src_importer_count": 2,
-      "public_test_importer_count": 0,
-      "private_src_importer_count": 0,
-      "private_test_importer_count": 0,
-      "public_src_importers": [
-        "src/bioetl/application/core/_idmapping_fetch_support.py",
-        "src/bioetl/application/core/data_sources/idmapping.py"
-      ],
-      "private_src_importers": []
-    },
-    {
-      "private_path": "src/bioetl/application/core/_idmapping_lifecycle_support.py",
-      "public_path": "src/bioetl/application/core/idmapping_lifecycle_support.py",
-      "private_module": "bioetl.application.core._idmapping_lifecycle_support",
-      "public_module": "bioetl.application.core.idmapping_lifecycle_support",
-      "public_src_importer_count": 2,
-      "public_test_importer_count": 0,
-      "private_src_importer_count": 0,
-      "private_test_importer_count": 0,
-      "public_src_importers": [
-        "src/bioetl/application/core/_idmapping_lifecycle_support.py",
-        "src/bioetl/application/core/data_sources/idmapping.py"
-      ],
-      "private_src_importers": []
-    },
-    {
       "private_path": "src/bioetl/application/core/_span_helpers.py",
       "public_path": "src/bioetl/application/core/span_helpers.py",
       "private_module": "bioetl.application.core._span_helpers",
@@ -903,39 +839,6 @@
         "src/bioetl/application/core/postrun/service.py",
         "src/bioetl/application/core/record_processor.py",
         "src/bioetl/application/core/runner.py"
-      ],
-      "private_src_importers": []
-    },
-    {
-      "private_path": "src/bioetl/application/core/_subcellular_fraction_support.py",
-      "public_path": "src/bioetl/application/core/subcellular_fraction_support.py",
-      "private_module": "bioetl.application.core._subcellular_fraction_support",
-      "public_module": "bioetl.application.core.subcellular_fraction_support",
-      "public_src_importer_count": 2,
-      "public_test_importer_count": 0,
-      "private_src_importer_count": 0,
-      "private_test_importer_count": 0,
-      "public_src_importers": [
-        "src/bioetl/application/core/_subcellular_fraction_support.py",
-        "src/bioetl/application/core/data_sources/subcellular_fraction.py"
-      ],
-      "private_src_importers": []
-    },
-    {
-      "private_path": "src/bioetl/application/core/_target_data_source_mixins.py",
-      "public_path": "src/bioetl/application/core/target_data_source_mixins.py",
-      "private_module": "bioetl.application.core._target_data_source_mixins",
-      "public_module": "bioetl.application.core.target_data_source_mixins",
-      "public_src_importer_count": 5,
-      "public_test_importer_count": 0,
-      "private_src_importer_count": 0,
-      "private_test_importer_count": 0,
-      "public_src_importers": [
-        "src/bioetl/application/core/_target_data_source_mixins.py",
-        "src/bioetl/application/core/data_source_mixins.py",
-        "src/bioetl/application/core/data_sources/publication_term.py",
-        "src/bioetl/application/core/data_sources/subcellular_fraction.py",
-        "src/bioetl/application/core/publication_term_filtering_mixin.py"
       ],
       "private_src_importers": []
     },

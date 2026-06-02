@@ -80,6 +80,21 @@ def test_render_markdown_includes_targets_and_interpretation_note() -> None:
     assert "`src/bioetl/application/foo.py:10`" in markdown
 
 
+def test_render_markdown_includes_fail_fast_budget_when_requested() -> None:
+    report = TargetDuplicationReport(
+        target="src/bioetl/application/services/control_plane",
+        returncode=0,
+        duplicate_count=0,
+        clusters=(),
+        raw_duplicate_count=0,
+    )
+
+    markdown = _render_markdown([report], max_duplicate_clusters=0)
+
+    assert "mode: fail-fast" in markdown
+    assert "max_duplicate_clusters: 0" in markdown
+
+
 def test_filter_clusters_by_module_patterns_excludes_normalized_modules() -> None:
     clusters = [
         DuplicateCluster(

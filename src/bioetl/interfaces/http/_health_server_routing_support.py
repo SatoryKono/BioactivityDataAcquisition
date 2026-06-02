@@ -150,6 +150,8 @@ async def handle_control_plane_filter_options(
     selected_run_statuses = host._read_scope_csv_param(query, "run_status")
     selected_run_id = read_selected_run_id(host, query)
     response_shape = host._read_optional_param(query, "response_shape") or "object"
+    exact_run_only = _read_truthy_query_param(query, "exact_run_only")
+    fallback_value = host._read_optional_param(query, "fallback_value")
 
     payload = build_selector_filter_options_payload(
         manifests=host._run_manifest_port.list_all(),
@@ -162,12 +164,21 @@ async def handle_control_plane_filter_options(
         selected_run_types=selected_run_types,
         selected_run_statuses=selected_run_statuses,
         selected_run_id=selected_run_id,
+        exact_run_only=exact_run_only,
+        fallback_value=fallback_value,
     )
     if response_shape != "list" and dimension == "run_id":
         payload["run_ids"] = [
             value for value in payload.get("items", []) if value != RUN_ID_NO_SELECTION
         ]
     await host._send_payload_response(writer, 200, payload)
+
+
+def _read_truthy_query_param(query: dict[str, str], name: str) -> bool:
+    value = query.get(name)
+    if value is None:
+        return False
+    return value.strip().lower() in {"1", "true", "yes"}
 
 
 async def handle_control_plane_selector_context(

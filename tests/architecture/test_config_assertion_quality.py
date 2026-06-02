@@ -1,4 +1,4 @@
-"""Ratchets for config/checkpoint compatibility test assertion quality."""
+"""Ratchets for config/checkpoint assertion quality."""
 
 from __future__ import annotations
 

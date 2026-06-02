@@ -126,6 +126,40 @@ def temp_env(storage_paths: dict[str, Path]):
             pass
 
 
+@pytest.fixture(autouse=True)
+def disable_detached_observability_backend_for_cli_integration_tests():
+    """Keep CLI integration tests free from detached backend side effects."""
+    from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
+        ObservabilityBackendEnsureResult,
+    )
+
+    disabled_result = ObservabilityBackendEnsureResult(
+        status="disabled",
+        health_url="http://127.0.0.1:8081/health",
+        message="Disabled for CLI integration tests.",
+    )
+
+    with (
+        patch(
+            "bioetl.interfaces.cli.commands.run.ensure_observability_backend_started",
+            return_value=disabled_result,
+        ),
+        patch(
+            "bioetl.interfaces.cli.commands.run_all.ensure_observability_backend_started",
+            return_value=disabled_result,
+        ),
+        patch(
+            "bioetl.interfaces.cli.commands.run_composite.ensure_observability_backend_started",
+            return_value=disabled_result,
+        ),
+        patch(
+            "bioetl.interfaces.cli.commands.workflow.ensure_observability_backend_started",
+            return_value=disabled_result,
+        ),
+    ):
+        yield
+
+
 def create_local_storage_context(
     storage_paths: dict[str, Path],
     config: PipelineYamlConfig,

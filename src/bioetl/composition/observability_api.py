@@ -11,7 +11,6 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING
 from urllib.parse import urlunsplit
-from uuid import uuid4
 
 from bioetl.domain.exceptions import MetricsServerError
 from bioetl.domain.ports import LoggerPort
@@ -157,9 +156,8 @@ def push_metrics_to_gateway(
     if grouping_key_extra:
         grouping_key.update(grouping_key_extra)
     metrics_service = get_metrics_service()
-    metrics_service.logger = logger or _build_metrics_gateway_logger(
-        pipeline=pipeline_name or "metrics_publication"
-    )
+    if logger is not None:
+        metrics_service.logger = logger
     result = metrics_service.push_to_gateway(
         gateway=gateway,
         run_label=run_label,
@@ -187,26 +185,14 @@ def delete_metrics_from_gateway(
     if run_type:
         grouping_key["run_type"] = run_type
     metrics_service = get_metrics_service()
-    metrics_service.logger = logger or _build_metrics_gateway_logger(
-        pipeline=pipeline_name or "metrics_cleanup"
-    )
+    if logger is not None:
+        metrics_service.logger = logger
     result = metrics_service.delete_from_gateway(
         gateway=gateway,
         run_label=run_label,
         grouping_key=grouping_key,
     )
     return bool(result.success)
-
-
-def _build_metrics_gateway_logger(*, pipeline: str) -> LoggerPort:
-    """Create the shared fallback logger for gateway helper operations."""
-    from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger
-
-    return bootstrap_logger(
-        pipeline=pipeline,
-        run_id=uuid4(),
-        log_level="INFO",
-    )
 
 
 def get_audit_service() -> AuditInspectionService:

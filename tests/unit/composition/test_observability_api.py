@@ -98,6 +98,25 @@ def test_push_metrics_to_gateway_uses_metrics_service_push() -> None:
     )
 
 
+def test_push_metrics_to_gateway_does_not_bootstrap_fallback_logger() -> None:
+    metrics_service = mock.Mock()
+    metrics_service.logger = mock.sentinel.logger
+    metrics_service.push_to_gateway.return_value = mock.Mock(success=True)
+
+    with mock.patch.object(
+        observability_api,
+        "get_metrics_service",
+        return_value=metrics_service,
+    ):
+        result = observability_api.push_metrics_to_gateway(
+            run_label="bioetl",
+            pipeline_name="chembl_activity",
+        )
+
+    assert result is True
+    assert metrics_service.logger is mock.sentinel.logger
+
+
 def test_delete_metrics_from_gateway_uses_metrics_service_delete() -> None:
     metrics_service = mock.Mock()
     metrics_service.delete_from_gateway.return_value = mock.Mock(success=True)
@@ -123,6 +142,25 @@ def test_delete_metrics_from_gateway_uses_metrics_service_delete() -> None:
             "run_type": "incremental",
         },
     )
+
+
+def test_delete_metrics_from_gateway_does_not_bootstrap_fallback_logger() -> None:
+    metrics_service = mock.Mock()
+    metrics_service.logger = mock.sentinel.logger
+    metrics_service.delete_from_gateway.return_value = mock.Mock(success=True)
+
+    with mock.patch.object(
+        observability_api,
+        "get_metrics_service",
+        return_value=metrics_service,
+    ):
+        result = observability_api.delete_metrics_from_gateway(
+            run_label="bioetl",
+            pipeline_name="chembl_activity",
+        )
+
+    assert result is True
+    assert metrics_service.logger is mock.sentinel.logger
 
 
 def test_get_audit_service_delegates_to_internal_services_owner() -> None:

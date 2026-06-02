@@ -5,9 +5,9 @@ from __future__ import annotations
 import asyncio
 import pytest
 
-from bioetl.application.core._data_source_mixins import (
-    _WrappedDataSourceDelegationMixin,
+from bioetl.application.core.data_source_mixins import (
     _SourceMetadataDelegationMixin,
+    _WrappedDataSourceDelegationMixin,
     _yield_plain_wrapped_fetch_records,
     _yield_wrapped_fetch_records,
 )

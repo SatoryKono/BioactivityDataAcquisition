@@ -1,10 +1,10 @@
 # Config Discrepancies Report
 
 Total configs: 27
-Total unique parameters: 527
+Total unique parameters: 537
 Actionable inconsistent parameters: 0
-Sanctioned partial variance parameters: 122
-Raw partial parameter count: 122
+Sanctioned partial variance parameters: 119
+Raw partial parameter count: 119
 
 ## Actionable Drift Parameters
 
@@ -120,9 +120,6 @@ These parameters are intentionally partial across governed config families and r
 - `pipeline.source.api.base_url` (2/22): entity/uniprot/idmapping, entity/uniprot/protein
 - `pipeline.source.api.from_db` (2/22): entity/uniprot/idmapping, entity/uniprot/protein
 - `pipeline.source.api.to_db` (2/22): entity/uniprot/idmapping, entity/uniprot/protein
-- `quality.thresholds` (1/22): entity/uniprot/idmapping
-- `quality.thresholds.hard_fail` (1/22): entity/uniprot/idmapping
-- `quality.thresholds.soft_fail` (1/22): entity/uniprot/idmapping
 
 ### composite_runtime
 

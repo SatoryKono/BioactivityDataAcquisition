@@ -419,14 +419,47 @@ def _discover_dashboard_panel_specs() -> tuple[PanelAuditSpec, ...]:
 
 def effective_panel_specs() -> tuple[PanelAuditSpec, ...]:
     """Return curated required specs plus generated coverage for all executable panels."""
-    specs: list[PanelAuditSpec] = list(REVIEWED_PANEL_SPECS)
+    discovered_specs = _discover_dashboard_panel_specs()
+    specs: list[PanelAuditSpec] = []
+    for reviewed_spec in REVIEWED_PANEL_SPECS:
+        if reviewed_spec.target_ref_id is not None:
+            specs.append(reviewed_spec)
+            continue
+        matching_targets = [
+            spec
+            for spec in discovered_specs
+            if spec.dashboard_uid == reviewed_spec.dashboard_uid
+            and spec.panel_id == reviewed_spec.panel_id
+            and spec.source_kind == reviewed_spec.source_kind
+        ]
+        if len(matching_targets) == 1 and matching_targets[0].target_ref_id:
+            specs.append(
+                PanelAuditSpec(
+                    dashboard_uid=reviewed_spec.dashboard_uid,
+                    panel_id=reviewed_spec.panel_id,
+                    title=reviewed_spec.title,
+                    source_kind=reviewed_spec.source_kind,
+                    semantic_kind=reviewed_spec.semantic_kind,
+                    target_ref_id=matching_targets[0].target_ref_id,
+                    required=reviewed_spec.required,
+                )
+            )
+            continue
+        specs.append(reviewed_spec)
+
     covered = {
         (spec.dashboard_uid, spec.panel_id, spec.source_kind, spec.target_ref_id)
         for spec in specs
     }
-    for spec in _discover_dashboard_panel_specs():
+    wildcard_covered = {
+        (spec.dashboard_uid, spec.panel_id, spec.source_kind)
+        for spec in specs
+        if spec.target_ref_id is None
+    }
+    for spec in discovered_specs:
         key = (spec.dashboard_uid, spec.panel_id, spec.source_kind, spec.target_ref_id)
-        if key in covered:
+        wildcard_key = (spec.dashboard_uid, spec.panel_id, spec.source_kind)
+        if key in covered or wildcard_key in wildcard_covered:
             continue
         specs.append(spec)
         covered.add(key)

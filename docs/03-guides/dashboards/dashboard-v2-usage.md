@@ -78,7 +78,9 @@ Detached audit backend contract:
   `$run_id`, `$provider`, hidden `$pipeline_context`, `$adapter`
 - `bioetl-workflow-overview`: `$workflow`, `$pipeline`, `$run_type`,
   `$run_id`, `$status`, `$step_status`, `$step_kind`, hidden
-  `$pipeline_context`, `$run_type_context`, `$provider_context`
+  `$workflow_context`, `$pipeline_context`, `$pipeline_context_exact`,
+  `$run_type_context`, `$run_type_context_exact`, `$provider_context`,
+  `$provider_context_exact`
 - `bioetl-silver-reject-explorer`: bounded forensic `$pipeline`, `$run_type`,
   `$reason_code`, `$field`, `$quarantine_run_id`, `$payload_hash`; it does not
   own the shared `$workflow` / `$run_id` shell
@@ -93,6 +95,11 @@ Detached audit backend contract:
   `$workflow/$pipeline/$run_type` context. `/ops/control-plane/selector-context`
   can resolve one coherent local selector tuple for selector-shell clients, but
   native Grafana variables do not auto-write sibling selector values.
+- `bioetl-workflow-overview` uses additional hidden
+  `$workflow_context/$pipeline_context_exact/$run_type_context_exact/$provider_context_exact`
+  variables backed by `/ops/control-plane/filter-options?exact_run_only=1` so
+  dashboard-to-dashboard links preserve exact run identity when `$run_id` is
+  selected without rewriting the visible selector shell.
 - Во всех non-Overview pipeline/provider dashboards `$pipeline` и `$provider`
   остаются single-select; если исходного контекста нет, используется explicit
   fallback `unknown`.

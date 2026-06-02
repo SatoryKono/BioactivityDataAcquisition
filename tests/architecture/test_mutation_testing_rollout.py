@@ -32,6 +32,8 @@ class TestMutationTestingRollout:
         assert mutation["targets"]["application_control_plane"]["enforced"] is True
         assert mutation["targets"]["application_export_manifests"]["min_score"] == 60
         assert mutation["targets"]["application_export_manifests"]["enforced"] is True
+        assert mutation["targets"]["application_workflow_runner"]["min_score"] == 60
+        assert mutation["targets"]["application_workflow_runner"]["enforced"] is True
         assert mutation["targets"]["application"]["min_score"] == 60
         assert mutation["targets"]["application"]["enforced"] is False
 
@@ -39,6 +41,7 @@ class TestMutationTestingRollout:
         assert "src/bioetl/application/services/control_plane/" in workflow
         assert "tests/unit/application/services/control_plane/" in workflow
         assert "src/bioetl/application/services/export_manifests.py" in workflow
+        assert "src/bioetl/application/services/workflow_runner_service.py" in workflow
         assert "tests/unit/application/services/" in workflow
         assert "MUTATION_SCORE_THRESHOLD" in workflow
         assert (

@@ -1891,8 +1891,8 @@ def test_navigation_dashboards_expose_silver_reject_explorer_handoff() -> None:
         },
         "bioetl-workflow-overview.json": {
             "url_tokens": (
-                "var-pipeline=$pipeline_context",
-                "var-run_type=$run_type_context",
+                "var-pipeline=$pipeline_context_exact",
+                "var-run_type=$run_type_context_exact",
             ),
             "tooltip_token": "Context mapping",
         },

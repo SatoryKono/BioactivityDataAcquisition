@@ -159,3 +159,21 @@ def test_runtime_uuid4_inventory_documents_exact_replay_injection_seams() -> Non
         "Exact replay/runtime UUID seams must document their explicit injection "
         "migration path:\n" + "\n".join(missing)
     )
+
+
+def test_runtime_uuid4_inventory_links_deterministic_factory_evidence() -> None:
+    inventory = _load_inventory()
+    history = cast(list[dict[str, Any]], inventory["review_history"])
+    current_review = [entry for entry in history if entry.get("issue") == "#4968"]
+    assert current_review, "Runtime UUID seam inventory must record #4968 review"
+    assert current_review[0]["outcome"] == "deterministic_factory_evidence_confirmed"
+
+    evidence = cast(dict[str, Any], inventory["deterministic_factory_evidence"])
+    guard_tests = cast(list[str], evidence["guard_tests"])
+    assert evidence["issue"] == "#4968"
+    assert guard_tests
+    missing = [path for path in guard_tests if not (ROOT / path).exists()]
+    assert not missing, (
+        "Runtime UUID deterministic factory evidence points at missing tests:\n"
+        + "\n".join(missing)
+    )

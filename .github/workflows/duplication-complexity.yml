@@ -37,7 +37,7 @@ jobs:
           python-version: "3.13"
 
       - name: Install Python tooling
-        run: python -m pip install radon==6.0.1 xenon==0.9.3
+        run: python -m pip install radon==6.0.1 xenon==0.9.3 pylint==3.3.4
 
       - name: Prepare report directory
         run: mkdir -p reports
@@ -186,6 +186,15 @@ jobs:
         run: |
           mkdir -p reports/jscpd
           npx jscpd@4.0.8 src tests --config .jscpd.json --threshold 5 --format python --reporters "console,html,json" --output reports/jscpd
+
+      - name: Enforce BioETL hotspot duplication zero ratchet
+        run: |
+          python -m scripts.engineering.qa report-duplication-baseline \
+            --targets src/bioetl/application/core src/bioetl/composition/bootstrap/runtime src/bioetl/composition/factories/pipeline src/bioetl/application/services/control_plane src/bioetl/composition/runtime_builders \
+            --json-out reports/quality/hotspot-duplication-baseline.json \
+            --md-out reports/quality/hotspot-duplication-baseline.md \
+            --max-duplicate-clusters 0 \
+            --timeout-seconds 120
 
       - name: Upload reports
         if: always()

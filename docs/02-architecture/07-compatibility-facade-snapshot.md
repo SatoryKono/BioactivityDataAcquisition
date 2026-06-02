@@ -10,9 +10,9 @@
 - Sanctioned public entrypoint rows: `14`
 - Retained review entrypoints: `0`
 - Permanent public entrypoints: `14`
-- Measured tracked modules: `28`
-- Measured-only modules outside curated inventory: `14`
-- Discovered docstring-tracked modules: `14`
+- Measured tracked modules: `22`
+- Measured-only modules outside curated inventory: `8`
+- Discovered docstring-tracked modules: `8`
 - Unexpected docstring-tracked modules: `0`
 - Missing allowlisted measured-only modules: `0`
 - First-party src imports targeting measured-only modules: `0`
@@ -34,13 +34,7 @@
 ## Expected Measured Registry
 
 - `src/bioetl/application/composite/merger.py`
-- `src/bioetl/application/core/_data_source_mixins.py`
-- `src/bioetl/application/core/_filtered_data_source_mixins.py`
-- `src/bioetl/application/core/_idmapping_fetch_support.py`
-- `src/bioetl/application/core/_idmapping_lifecycle_support.py`
 - `src/bioetl/application/core/_span_helpers.py`
-- `src/bioetl/application/core/_subcellular_fraction_support.py`
-- `src/bioetl/application/core/_target_data_source_mixins.py`
 - `src/bioetl/application/core/batch_execution/_contracts.py`
 - `src/bioetl/composition/entrypoints.py`
 - `src/bioetl/composition/factories/storage/_audit.py`
@@ -81,13 +75,7 @@
 
 ## Measured-Only Allowlist
 
-- `src/bioetl/application/core/_data_source_mixins.py` — owner: `bioetl.application.core`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Backward-compatible re-export facade retained as a measured-only shim for data source mixin imports during compatibility review.
-- `src/bioetl/application/core/_filtered_data_source_mixins.py` — owner: `bioetl.application.core`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Backward-compatible re-export facade retained as a measured-only shim for filtered data source mixin imports during compatibility review.
-- `src/bioetl/application/core/_idmapping_fetch_support.py` — owner: `bioetl.application.core`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Backward-compatible re-export facade retained as a measured-only shim for ID mapping fetch helper imports during compatibility review.
-- `src/bioetl/application/core/_idmapping_lifecycle_support.py` — owner: `bioetl.application.core`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Backward-compatible re-export facade retained as a measured-only shim for ID mapping lifecycle helper imports during compatibility review.
 - `src/bioetl/application/core/_span_helpers.py` — owner: `bioetl.application.core`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Backward-compatible re-export facade retained as a measured-only shim for span helper imports during compatibility review.
-- `src/bioetl/application/core/_subcellular_fraction_support.py` — owner: `bioetl.application.core`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Backward-compatible re-export facade retained as a measured-only shim for subcellular fraction helper imports during compatibility review.
-- `src/bioetl/application/core/_target_data_source_mixins.py` — owner: `bioetl.application.core`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Backward-compatible re-export facade retained as a measured-only shim for target data source mixin imports during compatibility review.
 - `src/bioetl/application/core/batch_execution/_contracts.py` — owner: `bioetl.application.core.batch_execution`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Backward-compatible re-export facade retained as a measured-only shim for batch execution contracts imports during compatibility review.
 - `src/bioetl/composition/factories/storage/_audit.py` — owner: `bioetl.composition.factories.storage`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Backward-compatible re-export facade retained as a measured-only shim for storage audit factory imports during compatibility review.
 - `src/bioetl/composition/factories/storage/_resilience.py` — owner: `bioetl.composition.factories.storage`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Backward-compatible re-export facade retained as a measured-only shim for storage resilience factory imports during compatibility review.
@@ -98,8 +86,8 @@
 
 ## Measured-Only Ratchet
 
-- Max measured-only modules: `14`
-- `src/bioetl/application/core/` <= `8` measured-only modules
+- Max measured-only modules: `8`
+- `src/bioetl/application/core/` <= `2` measured-only modules
 - `src/bioetl/application/services/` <= `0` measured-only modules
 - `src/bioetl/composition/factories/storage/` <= `2` measured-only modules
 - `src/bioetl/domain/normalization/profiles/` <= `2` measured-only modules
@@ -109,8 +97,8 @@
 
 ### Live Ratchet Counts
 
-- Total measured-only modules: `14`
-- `src/bioetl/application/core/` currently has `8` modules
+- Total measured-only modules: `8`
+- `src/bioetl/application/core/` currently has `2` modules
 - `src/bioetl/application/services/` currently has `0` modules
 - `src/bioetl/composition/factories/storage/` currently has `2` modules
 - `src/bioetl/domain/normalization/profiles/` currently has `2` modules
@@ -140,13 +128,7 @@
 
 ### Discovered Docstring-Tracked Modules
 
-- `src/bioetl/application/core/_data_source_mixins.py`
-- `src/bioetl/application/core/_filtered_data_source_mixins.py`
-- `src/bioetl/application/core/_idmapping_fetch_support.py`
-- `src/bioetl/application/core/_idmapping_lifecycle_support.py`
 - `src/bioetl/application/core/_span_helpers.py`
-- `src/bioetl/application/core/_subcellular_fraction_support.py`
-- `src/bioetl/application/core/_target_data_source_mixins.py`
 - `src/bioetl/application/core/batch_execution/_contracts.py`
 - `src/bioetl/composition/factories/storage/_audit.py`
 - `src/bioetl/composition/factories/storage/_resilience.py`

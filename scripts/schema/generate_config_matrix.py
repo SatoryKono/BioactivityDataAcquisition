@@ -63,14 +63,30 @@ def _load_pipeline_defaults() -> dict[str, Any]:
     return payload
 
 
+def _load_quality_defaults() -> dict[str, Any]:
+    defaults_path = Path("configs/base/quality.yaml")
+    if not defaults_path.exists():
+        return {}
+    payload = load_config(defaults_path)
+    payload.pop("version", None)
+    return payload
+
+
 def _entity_config_effective(path: Path) -> dict[str, Any]:
-    """Return entity YAML with pipeline section merged against base defaults."""
+    """Return entity YAML with runtime-applied defaults merged for governance."""
     raw = load_config(path)
-    pipeline = raw.get("pipeline")
-    if not isinstance(pipeline, dict):
-        return raw
     effective = dict(raw)
-    effective["pipeline"] = _deep_merge(_load_pipeline_defaults(), pipeline)
+    pipeline = raw.get("pipeline")
+    if isinstance(pipeline, dict):
+        effective["pipeline"] = _deep_merge(_load_pipeline_defaults(), pipeline)
+
+    quality = raw.get("quality")
+    quality_defaults = _load_quality_defaults()
+    if quality_defaults:
+        effective["quality"] = _deep_merge(
+            quality_defaults,
+            quality if isinstance(quality, dict) else {},
+        )
     return effective
 
 
