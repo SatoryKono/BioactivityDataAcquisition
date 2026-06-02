@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-02'
+  Last verified: '2026-06-02'
 
 ______________________________________________________________________
 
@@ -30,6 +30,10 @@ for published contracts, CLI surfaces, and specs.
 | Full local setup walkthrough       | [getting-started.md](getting-started.md)               |
 | Run and resume pipelines           | [running-pipelines.md](running-pipelines.md)           |
 | Understand the workflow object     | [workflows.md](workflows.md)                           |
+| GitHub setup and workflow          | [github-setup-plan.md](github-setup-plan.md)           |
+| GitHub quick reference             | [github-quick-reference.md](github-quick-reference.md) |
+| GitHub local workflow              | [github-local-workflow.md](github-local-workflow.md)   |
+| GitHub workflow diagrams           | [github-workflow-diagrams.md](github-workflow-diagrams.md) |
 | Verify docs and strict site build  | [docs-verification.md](docs-verification.md)           |
 | Understand pipeline lifecycle      | [pipeline-lifecycle.md](pipeline-lifecycle.md)         |
 | Configure pipelines                | [pipeline-configuration.md](pipeline-configuration.md) |
@@ -51,6 +55,15 @@ for published contracts, CLI surfaces, and specs.
   cached bronze, and control-plane inspection commands.
 - [Workflows](workflows.md): declarative workflow object model, step identity,
   DAG semantics, built-in transforms, and shipped workflow control-plane split.
+- [GitHub Setup Plan](github-setup-plan.md): comprehensive GitHub repository
+  setup guide covering local Git config, CI/CD workflows, branch strategy,
+  security, and release process.
+- [GitHub Quick Reference](github-quick-reference.md): one-page cheatsheet with
+  essential commands and procedures for daily GitHub workflow.
+- [GitHub Local Workflow](github-local-workflow.md): detailed local Git workflow,
+  branch management, sync strategy, and PR creation process.
+- [GitHub Workflow Diagrams](github-workflow-diagrams.md): visual Mermaid
+  diagrams for feature development, CI pipeline, PR lifecycle, and troubleshooting.
 - [Docs Verification](docs-verification.md): published docs checks, strict
   build flow, mixed-environment notes, and recurring documentation audit
   checklist.

@@ -227,6 +227,15 @@ config_surface_ratchet:
         configs/base/quality.yaml before drift classification. This removed the
         quality_thresholds residual category, lowered sanctioned partial variance
         from 122 to 119, and kept actionable inconsistent_parameter_count at zero.
+    - issue: '#4989'
+      reviewed_on: '2026-06-02'
+      owner: '@bioetl-config'
+      outcome: target_projection_schema_replaced_explicit_partial_field_mapping_set
+      rationale: Composite target now projects target protein classification aliases
+        through a typed schema contract instead of 16 explicit target-only field_mappings
+        keys. This lowered total sanctioned partial variance from 119 to 107, reduced
+        composite_runtime sanctioned partial variance from 16 to 4, and kept actionable
+        inconsistent_parameter_count at zero.
   artifact_policy:
     generator_command: python -m scripts.schema generate-config-matrix
     baseline_artifact: reports/quality/config-discrepancy-baseline.json
