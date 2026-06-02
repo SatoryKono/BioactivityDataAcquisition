@@ -2,13 +2,16 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from datetime import date, datetime
 from math import isnan
-from uuid import uuid4
+from uuid import UUID
 
 import pyarrow as pa
 
 from bioetl.domain.context import current_utc_time
+from bioetl.domain.deterministic_identity import deterministic_uuid
 from bioetl.domain.ports import (
     ForeignKeyReconciliationPort,
     ForeignKeyReconciliationRequest,
@@ -31,6 +34,43 @@ _RECONCILIATION_ROWS_DELETED_TOTAL = "bioetl_workflow_reconciliation_rows_delete
 _FOREIGN_KEY_ORPHAN_ERROR_CODE = "FILTERED_OUT_SILVER"
 _FOREIGN_KEY_ORPHAN_QUARANTINE_CATEGORY = "foreign_key_reconciliation"
 _FOREIGN_KEY_ORPHAN_PIPELINE_DEFAULT = "workflow_transforms"
+
+
+def _canonical_reconciliation_value(value: object) -> object:
+    if isinstance(value, float) and isnan(value):
+        return "NaN"
+    if isinstance(value, (date, datetime, UUID)):
+        return str(value)
+    if isinstance(value, Mapping):
+        return {
+            str(key): _canonical_reconciliation_value(nested)
+            for key, nested in sorted(value.items(), key=lambda item: str(item[0]))
+        }
+    if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
+        return [_canonical_reconciliation_value(nested) for nested in value]
+    return value
+
+
+def _build_quarantine_batch_id(
+    request: ForeignKeyReconciliationRequest,
+    *,
+    orphan_rows: list[dict[str, object]],
+) -> BatchID:
+    return BatchID(
+        deterministic_uuid(
+            "infrastructure.workflow_foreign_key_reconciliation.quarantine_batch",
+            {
+                "action": request.action,
+                "nulls_equal": request.nulls_equal,
+                "orphan_rows": _canonical_reconciliation_value(orphan_rows),
+                "reference_keys": list(request.effective_reference_keys),
+                "reference_table": request.reference_table,
+                "source_keys": list(request.effective_source_keys),
+                "source_table": request.source_table,
+                "workflow_name": request.workflow_name,
+            },
+        )
+    )
 
 
 @dataclass(slots=True)
@@ -244,7 +284,7 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
         if self.quarantine is None or not orphan_rows:
             return
 
-        batch_id = BatchID(uuid4())
+        batch_id = _build_quarantine_batch_id(request, orphan_rows=orphan_rows)
         source_table = request.source_table
         reference_table = request.reference_table
         pipeline_name = (
