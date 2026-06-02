@@ -19,6 +19,7 @@ from bioetl.domain.behavior.dq_rule_evaluator import (
     select_highest_priority_disposition,
 )
 from bioetl.domain.exceptions import DataQualityError
+from bioetl.domain.filtering import FilterDecision
 from bioetl.domain.types import BronzeRecord
 from bioetl.domain.types.dq_contracts import DQDisposition
 
@@ -93,15 +94,30 @@ def _build_gold_record(
     silver_record: dict[str, object],
     gold_filter: GoldFilterCallback,
     gold_transform: GoldTransformCallback,
-) -> tuple[dict[str, object] | None, bool]:
+) -> tuple[dict[str, object] | None, bool, object | None]:
     """Create a Gold record and report contract-based exclusion."""
     if not gold_filter(context, silver_record):
-        return None, True
+        return None, True, _resolve_gold_filter_details(gold_filter, silver_record)
     gold_record = cast(
         dict[str, object] | None,
         gold_transform(context, silver_record),
     )
-    return gold_record, False
+    return gold_record, False, None
+
+
+def _resolve_gold_filter_details(
+    gold_filter: GoldFilterCallback,
+    record: dict[str, object],
+) -> dict[str, object] | None:
+    owner = getattr(gold_filter, "__self__", None)
+    gold_filters = getattr(owner, "_gold_filters", None)
+    evaluate = getattr(gold_filters, "evaluate", None)
+    if not callable(evaluate):
+        return None
+    decision = evaluate(record)
+    if isinstance(decision, FilterDecision) and not decision.include:
+        return decision.to_dict()
+    return None
 
 
 def _resolve_invalid_record_policy(dq_config: DQConfig | None) -> str:
@@ -258,7 +274,7 @@ async def _build_transform_success_outcome(
         silver_record=finalized_record,
         dq_config=dq_config,
     )
-    gold_record, gold_excluded_by_contract = _build_gold_record(
+    gold_record, gold_excluded_by_contract, gold_filter_details = _build_gold_record(
         context=context,
         silver_record=finalized_record,
         gold_filter=gold_filter,
@@ -271,6 +287,7 @@ async def _build_transform_success_outcome(
             silver_record=finalized_record,
             gold_record=gold_record,
             gold_excluded_by_contract=gold_excluded_by_contract,
+            gold_filter_details=gold_filter_details,
         )
     return RecordTransformOutcome(
         silver_record=finalized_record,

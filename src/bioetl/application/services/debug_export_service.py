@@ -173,6 +173,7 @@ class DebugExportService:
         silver_record: BronzeRecord,
         gold_record: BronzeRecord | None = None,
         gold_excluded_by_contract: bool = False,
+        gold_filter_details: object | None = None,
         created_at: datetime | None = None,
     ) -> None:
         if not self.enabled:
@@ -183,6 +184,7 @@ class DebugExportService:
             silver_record=silver_record,
             gold_record=gold_record,
             gold_excluded_by_contract=gold_excluded_by_contract,
+            gold_filter_details=gold_filter_details,
             created_at=created_at or self._created_at_factory(),
         )
 

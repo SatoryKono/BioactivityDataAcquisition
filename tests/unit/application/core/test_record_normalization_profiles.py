@@ -2,7 +2,15 @@
 
 from __future__ import annotations
 
+from typing import cast
+from unittest.mock import MagicMock
+
 import pytest
+
+from bioetl.application.core.pre_silver_record import PreSilverRecord
+from bioetl.application.core.record_normalization_processor import (
+    NormalizationContractError,
+)
 
 # ruff: noqa: F403,F405
 from tests.unit.application.core.normalization_test_support import *

@@ -24,11 +24,7 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
-__all__ = [
-    "RuntimeBootstrapPhases",
-    "bootstrap_pipeline_runner",
-    "build_runtime_bootstrap_phases",
-]
+__all__ = ["RuntimeBootstrapPhases", "bootstrap_pipeline_runner", "build_runtime_bootstrap_phases"]
 
 
 def build_runtime_bootstrap_phases(
@@ -67,19 +63,12 @@ def bootstrap_pipeline_runner(
         load_pipeline_config_fn=load_pipeline_config_fn,
         resolve_configs_root_fn=resolve_configs_root,
     )
-    from bioetl.composition.runtime_builders.runner_builder_wiring import (
-        RunnerBuilderWiring,
-    )
+    from bioetl.composition.runtime_builders.runner_builder_wiring import RunnerBuilderWiring
 
     wiring = RunnerBuilderWiring(
         factory=phases.factory_wiring,
         inputs=phases.input_wiring,
     )
     return cast(
-        "PipelineRunner",
-        _build_pipeline_runner(
-            ctx=ctx,
-            registry=phases.registry,
-            wiring=wiring,
-        ),
+        "PipelineRunner", _build_pipeline_runner(ctx=ctx, registry=phases.registry, wiring=wiring)
     )

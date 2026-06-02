@@ -69,6 +69,17 @@ def _jsonable_payload(payload: object | None) -> str:
     )
 
 
+def _jsonable_value(value: object | None) -> str:
+    import json
+
+    return json.dumps(
+        value,
+        ensure_ascii=False,
+        sort_keys=True,
+        default=_json_default,
+    )
+
+
 def _json_default(value: object) -> str:
     if isinstance(value, datetime | date):
         return value.isoformat()
@@ -109,6 +120,81 @@ def _extract_rule_id(details: str) -> str:
     _, _, tail = details.partition("rules=[")
     value, _, _ = tail.partition("]")
     return value.strip()
+
+
+def _extract_rejection_details_mapping(
+    details: object | None,
+) -> dict[str, object] | None:
+    if details is None:
+        return None
+    if isinstance(details, Mapping):
+        return dict(details)
+    model_dump = getattr(details, "model_dump", None)
+    if callable(model_dump):
+        payload = model_dump()
+        if isinstance(payload, Mapping):
+            return dict(payload)
+    record_dict = getattr(details, "__dict__", None)
+    if isinstance(record_dict, Mapping):
+        return dict(record_dict)
+    return None
+
+
+def _extract_expected_constraint_from_details(details: Mapping[str, object]) -> str:
+    operator = _normalize_optional_text(details.get("operator"))
+    if "expected" in details:
+        expected = details.get("expected")
+        if expected is None:
+            expected_text = "None"
+        elif isinstance(expected, str | int | float | bool):
+            expected_text = str(expected)
+        else:
+            expected_text = _jsonable_value(expected)
+        if operator is None:
+            return expected_text
+        return f"{operator} {expected_text}".strip()
+
+    for key in ("constraint", "check"):
+        value = _normalize_optional_text(details.get(key))
+        if value is not None:
+            return value
+    return ""
+
+
+def _extract_rejection_diagnostics(
+    *,
+    record: Mapping[str, object],
+    details: object | None,
+    message: str,
+) -> tuple[str, str, str]:
+    detail_mapping = _extract_rejection_details_mapping(details)
+    if detail_mapping is None:
+        return _infer_failed_field(record, message), "", ""
+
+    failed_field = _normalize_optional_text(detail_mapping.get("field"))
+    if failed_field is None:
+        failed_field = _infer_failed_field(record, message)
+
+    failed_value = ""
+    if "actual" in detail_mapping:
+        actual = detail_mapping.get("actual")
+        if actual is None:
+            failed_value = "None"
+        elif isinstance(actual, str | int | float | bool):
+            failed_value = str(actual)
+        else:
+            failed_value = _jsonable_value(actual)
+    elif failed_field and failed_field in record:
+        actual = record.get(failed_field)
+        if actual is None:
+            failed_value = "None"
+        elif isinstance(actual, str | int | float | bool):
+            failed_value = str(actual)
+        else:
+            failed_value = _jsonable_value(actual)
+
+    expected_constraint = _extract_expected_constraint_from_details(detail_mapping)
+    return failed_field, failed_value, expected_constraint
 
 
 def _infer_reason_code(

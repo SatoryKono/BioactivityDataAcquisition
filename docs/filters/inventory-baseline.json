@@ -5,9 +5,9 @@
     "entities_total": 27,
     "entities_with_silver_filters": 22,
     "entities_with_gold_filters": 22,
-    "rules_total": 132,
+    "rules_total": 131,
     "keep_in_silver": 95,
-    "move_to_gold": 18,
+    "move_to_gold": 17,
     "duplicate": 19,
     "conflict": 0
   },
@@ -415,7 +415,7 @@
       "has_gold_filters": true,
       "counts_by_action": {
         "keep_in_silver": 9,
-        "move_to_gold": 3,
+        "move_to_gold": 2,
         "duplicate": 2,
         "conflict": 0
       },
@@ -546,16 +546,6 @@
           "rule_type": "ranges",
           "field": "confidence_score",
           "silver_value": "{\"max\": 9, \"min\": 8}",
-          "gold_value": "",
-          "action": "move_to_gold",
-          "notes": "no rule in gold_filters - move from silver"
-        },
-        {
-          "provider": "chembl",
-          "entity": "assay",
-          "rule_type": "ranges",
-          "field": "publication_year",
-          "silver_value": "{\"max\": 2050, \"min\": 1950}",
           "gold_value": "",
           "action": "move_to_gold",
           "notes": "no rule in gold_filters - move from silver"
