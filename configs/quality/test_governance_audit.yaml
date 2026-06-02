@@ -62,7 +62,7 @@ budgets:
   refined_assertless_max: 0
   duplicate_test_names_max: 0
   duplicate_test_name_occurrences_max: 0
-  compatibility_test_file_max: 38
+  compatibility_test_file_max: 37
   markerless_test_functions_max: 0
   uuid4_call_sites_max: 0
   date_today_call_sites_max: 0
@@ -175,6 +175,14 @@ budget_ratchet:
       contract filename because it enforces rejection of legacy payloads rather than
       preserving backward compatibility behavior. The live compatibility inventory
       drops to 38 and the budget ratchets down accordingly.
+  - issue: '#5034'
+    owner: test-governance
+    status: compatibility_test_file_max_ratcheted_to_37
+    note: Checkpoint resume policy unit tests now use canonical resume-policy
+      filenames instead of compatibility-oriented filenames. They exercise the
+      active replay/resume policy service and result assembly, not retained legacy
+      compatibility behavior, so the live compatibility filename inventory drops
+      to 37 and the budget ratchets down accordingly.
   touch_policy: Refactors touching test families must reduce the applicable budget
     or keep it flat with an explicit owner rationale; increasing a debt budget requires
     a separate governance review.
@@ -381,7 +389,7 @@ oversized_test_module_inventory:
       owner: application-services
 compatibility_test_inventory:
   review_cadence: quarterly
-  total_files: 38
+  total_files: 37
   default_review_date: '2026-09-30'
   entries:
   - path: tests/architecture/test_application_composite_compat_surface_usage.py
@@ -604,14 +612,6 @@ compatibility_test_inventory:
     decision: retained_compatibility_contract
     owner: integration-governance
     protected_surface: integration/config/gold nullable numeric compatibility
-    policy_ref: '#4209'
-    review_date: '2026-09-30'
-    rationale: Tracked compatibility test surface; retained only while the referenced
-      public or migration contract remains supported.
-  - path: tests/unit/application/services/test_checkpoint_compatibility_service.py
-    decision: retained_compatibility_contract
-    owner: test-governance
-    protected_surface: unit/application/services/checkpoint compatibility service
     policy_ref: '#4209'
     review_date: '2026-09-30'
     rationale: Tracked compatibility test surface; retained only while the referenced

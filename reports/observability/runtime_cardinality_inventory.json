@@ -424,30 +424,20 @@
     "bioetl_workflow_step_events_total"
   ],
   "declared_observability_events": [
-    "artifact_published",
-    "batch_completed",
     "batch_created",
     "batch_failed",
     "batch_sealed",
-    "batch_started",
     "batch_written",
     "checkpoint_finalize_completed",
     "checkpoint_finalize_started",
-    "cleanup_completed",
-    "cleanup_started",
     "dq_anomaly_detected",
     "execute_pipeline_completed",
     "execute_pipeline_started",
-    "execution_completed",
-    "execution_started",
     "health_check_completed",
     "health_check_summary_recorded",
-    "lifecycle_clear_completed",
-    "lifecycle_clear_started",
     "pipeline_failed",
     "pipeline_finished",
     "pipeline_shutdown",
-    "pipeline_started",
     "postrun_completed",
     "postrun_started",
     "preflight_completed",
@@ -457,8 +447,6 @@
     "quarantine_entry_created",
     "quarantine_entry_resolved",
     "record_quarantined",
-    "startup_completed",
-    "startup_started",
     "vacuum_completed"
   ],
   "declared_risky_label_contract_reviewed": [
@@ -2046,6 +2034,21 @@
   ],
   "registered_without_runtime": [],
   "registry_only_metrics": [],
+  "retired_declared_observability_events": [
+    "artifact_published",
+    "batch_completed",
+    "batch_started",
+    "cleanup_completed",
+    "cleanup_started",
+    "execution_completed",
+    "execution_started",
+    "lifecycle_clear_completed",
+    "lifecycle_clear_started",
+    "pipeline_started",
+    "startup_completed",
+    "startup_started"
+  ],
+  "retired_declared_observability_events_emitted": [],
   "ruled_without_runtime": [],
   "rules_mentions": {
     "bioetl_adapter_requests_total": [
@@ -3185,18 +3188,5 @@
   "runtime_label_contract_violations": [],
   "runtime_without_registry": [],
   "unused_declared_metrics": [],
-  "unused_declared_observability_events": [
-    "artifact_published",
-    "batch_completed",
-    "batch_started",
-    "cleanup_completed",
-    "cleanup_started",
-    "execution_completed",
-    "execution_started",
-    "lifecycle_clear_completed",
-    "lifecycle_clear_started",
-    "pipeline_started",
-    "startup_completed",
-    "startup_started"
-  ]
+  "unused_declared_observability_events": []
 }

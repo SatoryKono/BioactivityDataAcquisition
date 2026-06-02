@@ -20,7 +20,7 @@ from bioetl.domain.types import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.application.core.pipeline_runtime_service_protocols import (
+    from bioetl.application.core.pipeline_service_protocols import (
         PipelineHealthServicesProtocol,
     )
     from bioetl.application.observability.observer import PipelineObserver

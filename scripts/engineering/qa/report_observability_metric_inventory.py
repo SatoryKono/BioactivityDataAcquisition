@@ -74,6 +74,9 @@ _DEFAULT_DRIFT_ALLOWLIST = Path(
 _DEFAULT_DECLARED_METRIC_DEFINITIONS = Path(
     "configs/quality/observability_metric_declarations.yaml"
 )
+_DEFAULT_OBSERVABILITY_GOVERNANCE = Path(
+    "configs/quality/observability_metric_governance.yaml"
+)
 _RUNTIME_EXCLUDE_PARTS = (
     "src/bioetl/infrastructure/observability",
     "src/bioetl/domain",
@@ -1331,6 +1334,34 @@ def _declared_pipeline_event_names() -> set[str]:
     return declared
 
 
+def _load_retired_observability_event_names(repo_root: Path) -> set[str]:
+    path = repo_root / _DEFAULT_OBSERVABILITY_GOVERNANCE
+    if not path.exists():
+        return set()
+    try:
+        import yaml
+    except ImportError:
+        return set()
+    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        return set()
+    event_governance = payload.get("event_signal_governance", {})
+    if not isinstance(event_governance, dict):
+        return set()
+    retired_entries = event_governance.get("retired_declared_events", [])
+    if not isinstance(retired_entries, list):
+        return set()
+    retired: set[str] = set()
+    for entry in retired_entries:
+        if not isinstance(entry, dict):
+            continue
+        event_name = entry.get("event_name")
+        action = entry.get("action")
+        if isinstance(event_name, str) and action == "retire":
+            retired.add(event_name)
+    return retired
+
+
 def _resolve_observability_event_expr(node: ast.expr) -> set[str]:
     if isinstance(node, ast.Constant) and isinstance(node.value, str):
         return {node.value}
@@ -1807,12 +1838,22 @@ def collect_metric_inventory(
     direct_observability_event_emitters, domain_event_emitters = (
         _scan_runtime_observability_event_calls(repo_root)
     )
-    declared_observability_events = sorted(
+    raw_declared_observability_events = (
         declared_pipeline_events | mapped_observability_events
+    )
+    retired_declared_observability_events = sorted(
+        raw_declared_observability_events
+        & _load_retired_observability_event_names(repo_root)
+    )
+    declared_observability_events = sorted(
+        raw_declared_observability_events - set(retired_declared_observability_events)
     )
     direct_emitted_observability_events = set(direct_observability_event_emitters)
     emitted_observability_events = sorted(
         direct_emitted_observability_events | mapped_observability_events
+    )
+    retired_declared_observability_events_emitted = sorted(
+        set(retired_declared_observability_events) & set(emitted_observability_events)
     )
     unused_declared_observability_events = sorted(
         set(declared_observability_events) - set(emitted_observability_events)
@@ -1902,6 +1943,12 @@ def collect_metric_inventory(
         "emitted_observability_events": emitted_observability_events,
         "unused_declared_observability_events": (
             unused_declared_observability_events
+        ),
+        "retired_declared_observability_events": (
+            retired_declared_observability_events
+        ),
+        "retired_declared_observability_events_emitted": (
+            retired_declared_observability_events_emitted
         ),
         "emitted_observability_events_without_contract": (
             emitted_observability_events_without_contract
@@ -2157,6 +2204,8 @@ def _render_text(report: dict[str, list[str] | dict[str, list[str]]]) -> str:
         "declared_observability_events",
         "emitted_observability_events",
         "unused_declared_observability_events",
+        "retired_declared_observability_events",
+        "retired_declared_observability_events_emitted",
         "emitted_observability_events_without_contract",
         "dashboarded_metrics",
         "alerted_metrics",

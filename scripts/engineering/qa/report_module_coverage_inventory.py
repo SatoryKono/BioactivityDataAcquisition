@@ -22,7 +22,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_COVERAGE_XML = PROJECT_ROOT / "reports" / "coverage" / "coverage.xml"
 DEFAULT_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "module-coverage-inventory.json"
 SOURCE_ROOT = PROJECT_ROOT / "src" / "bioetl"
-MAX_SOURCE_TREE_STABILIZATION_ATTEMPTS = 8
+# Two passes are enough to confirm a stable snapshot while keeping the guard
+# under the per-test timeout budget on shared-drive worktrees.
+MAX_SOURCE_TREE_STABILIZATION_ATTEMPTS = 2
 SOURCE_TREE_STABILIZATION_SLEEP_SECONDS = 0.1
 
 

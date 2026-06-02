@@ -2,25 +2,22 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
+    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 __all__ = [
-    "AdapterCreator",
+    "AdapterCreatorProtocol",
     "DataSourceCreatorProtocol",
     "HttpConfig",
     "ProviderConfig",
     "ProviderSettingsProtocol",
 ]
-
-
-AdapterCreator = Callable[..., "DataSourcePort"]
 
 
 class SecretValueProviderProtocol(Protocol):
@@ -65,6 +62,20 @@ class ProviderSettingsProtocol(Protocol):
         ...
 
 
+class AdapterCreatorProtocol(Protocol):
+    """Protocol for typed composition-owned provider adapter creators."""
+
+    def __call__(
+        self,
+        http_client: UnifiedHTTPClient | None = None,
+        logger: LoggerPort | None = None,
+        settings: ProviderSettingsProtocol | None = None,
+        **kwargs: object,
+    ) -> DataSourcePort:
+        """Create a provider adapter using composition-injected dependencies."""
+        ...
+
+
 class DataSourceCreatorProtocol(Protocol):
     """Protocol for composition-side data source creator callables."""
 
@@ -99,5 +110,5 @@ class ProviderConfig:
     requires_http_client: bool = True
     requires_logger: bool = True
     default_kwargs: dict[str, object] = field(default_factory=dict)
-    custom_creator: AdapterCreator | None = None
+    adapter_creator: AdapterCreatorProtocol | None = None
     data_source_creator: DataSourceCreatorProtocol | None = None

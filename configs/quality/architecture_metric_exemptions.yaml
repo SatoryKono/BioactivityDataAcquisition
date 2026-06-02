@@ -6,7 +6,7 @@ policy:
       reviewed_on: "2026-06-01"
       owner: architecture-governance
       outcome: held_flat_no_new_exemptions
-      rationale: Active metric exemptions are already reduced to two intentional exceptions; both are owner-scoped, expiry-bound, and must be retired before 2026-12-31 rather than extended.
+      rationale: Active metric exemptions are reduced to zero; all registries remain present, empty, and governed by the scorecard no-growth policy.
   owner_diversification_sync:
     source: configs/quality/debt_scorecard.yaml#governance.owner_diversification
     starts_quarter: 2026-Q2

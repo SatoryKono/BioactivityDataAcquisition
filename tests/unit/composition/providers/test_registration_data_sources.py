@@ -224,7 +224,7 @@ class TestCrossRefAndOpenAlexCreators:
         assert mock_create_http_ds.call_args.kwargs["assembly_support"] is support
 
     @patch("bioetl.composition.providers.registration_biblio.OpenAlexAdapter")
-    def test_openalex_custom_creator_uses_settings_email_fallback(
+    def test_openalex_adapter_creator_uses_settings_email_fallback(
         self,
         mock_adapter_cls: MagicMock,
     ) -> None:
@@ -253,7 +253,7 @@ class TestCrossRefAndOpenAlexCreators:
         assert result is mock_adapter
 
     @patch("bioetl.composition.providers.registration_biblio.PubMedAdapter")
-    def test_pubmed_custom_creator_uses_settings_fallbacks(
+    def test_pubmed_adapter_creator_uses_settings_fallbacks(
         self,
         mock_adapter_cls: MagicMock,
     ) -> None:

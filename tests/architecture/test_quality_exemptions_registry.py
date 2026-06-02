@@ -80,6 +80,34 @@ def test_exemption_registry_policy_requires_tracking_classification_and_due_date
     )
 
 
+def test_exemption_registry_zero_state_review_text_is_not_stale() -> None:
+    """Empty exemption registries must not claim active exemptions remain."""
+    raw = load_exemptions_registry()
+    registries = raw.get("registries", {})
+    assert isinstance(registries, dict)
+    all_empty = all(
+        isinstance(entries, dict) and not entries for entries in registries.values()
+    )
+    if not all_empty:
+        return
+
+    policy = raw.get("policy", {})
+    assert isinstance(policy, dict)
+    review_history = policy.get("review_history", [])
+    assert isinstance(review_history, list)
+    rationale_text = " ".join(
+        str(item.get("rationale", ""))
+        for item in review_history
+        if isinstance(item, dict)
+    ).lower()
+    forbidden_fragments = (
+        "two intentional exceptions",
+        "active metric exemptions are already reduced to two",
+    )
+    assert not any(fragment in rationale_text for fragment in forbidden_fragments)
+    assert "zero" in rationale_text
+
+
 def test_exemption_registry_targets_are_live() -> None:
     """Path- and symbol-based exemptions must point to live source targets."""
     target_errors = validate_exemption_target_references()

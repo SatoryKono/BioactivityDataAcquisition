@@ -7,7 +7,7 @@ from functools import partial
 from typing import TYPE_CHECKING, Any, Protocol, cast
 
 from bioetl.composition.providers._models import (
-    AdapterCreator,
+    AdapterCreatorProtocol,
     DataSourceCreatorProtocol,
     HttpConfig,
     ProviderConfig,
@@ -90,7 +90,7 @@ class HttpProviderConfigSpec:
     capacity: int
     data_source_creator: SupportAwareDataSourceCreatorProtocol
     rate_overrides: dict[str, float] | None = None
-    custom_creator: AdapterCreator | None = None
+    adapter_creator: AdapterCreatorProtocol | None = None
 
 
 def build_http_provider_config_spec(
@@ -101,7 +101,7 @@ def build_http_provider_config_spec(
     capacity: int,
     data_source_creator: SupportAwareDataSourceCreatorProtocol,
     rate_overrides: dict[str, float] | None = None,
-    custom_creator: AdapterCreator | None = None,
+    adapter_creator: AdapterCreatorProtocol | None = None,
 ) -> HttpProviderConfigSpec:
     """Build one declarative HTTP provider spec from compact family inputs."""
     return HttpProviderConfigSpec(
@@ -111,7 +111,7 @@ def build_http_provider_config_spec(
         capacity=capacity,
         data_source_creator=data_source_creator,
         rate_overrides=rate_overrides,
-        custom_creator=custom_creator,
+        adapter_creator=adapter_creator,
     )
 
 
@@ -230,7 +230,7 @@ def build_data_source_provider_config(
     http_config: HttpConfig | None,
     requires_http_client: bool,
     requires_logger: bool = True,
-    custom_creator: AdapterCreator | None = None,
+    adapter_creator: AdapterCreatorProtocol | None = None,
     data_source_creator: DataSourceCreatorProtocol | None = None,
 ) -> ProviderConfig:
     """Build the canonical ProviderConfig shape for registry data-source entries."""
@@ -239,7 +239,7 @@ def build_data_source_provider_config(
         http_config=http_config,
         requires_http_client=requires_http_client,
         requires_logger=requires_logger,
-        custom_creator=custom_creator,
+        adapter_creator=adapter_creator,
         data_source_creator=data_source_creator,
     )
 
@@ -252,7 +252,7 @@ def build_http_provider_config(
     data_source_creator: SupportAwareDataSourceCreatorProtocol,
     assembly_support: ProviderAssemblySupport,
     rate_overrides: dict[str, float] | None = None,
-    custom_creator: AdapterCreator | None = None,
+    adapter_creator: AdapterCreatorProtocol | None = None,
 ) -> ProviderConfig:
     """Build the common HTTP-oriented ProviderConfig shape for registration."""
     return build_data_source_provider_config(
@@ -264,7 +264,7 @@ def build_http_provider_config(
         ),
         requires_http_client=True,
         requires_logger=True,
-        custom_creator=custom_creator,
+        adapter_creator=adapter_creator,
         data_source_creator=bind_provider_data_source_creator(
             data_source_creator,
             assembly_support=assembly_support,
@@ -284,7 +284,7 @@ def build_http_provider_config_map(
             rate=spec.rate,
             capacity=spec.capacity,
             rate_overrides=spec.rate_overrides,
-            custom_creator=spec.custom_creator,
+            adapter_creator=spec.adapter_creator,
             data_source_creator=spec.data_source_creator,
             assembly_support=assembly_support,
         )

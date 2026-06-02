@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
+from itertools import count
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock
@@ -103,6 +105,12 @@ from tests.unit.infrastructure.storage.test_metadata_writer_control_plane import
 
 
 pytestmark = pytest.mark.integration
+
+
+def _entry_id_factory(prefix: str = "entry-historical") -> Callable[[], str]:
+    sequence = count(1)
+    return lambda: f"{prefix}-{next(sequence)}"
+
 
 _VALID_CONFIG_HASH = "a" * 64
 _PUBLISHED_SUPPORTED_FAMILIES = tuple(published_supported_reproducibility_families())
@@ -251,6 +259,7 @@ def test_historical_replay_corpus_inventory_and_bulk_certification() -> None:
         certification_service=HistoricalReplayCertificationService(
             manifest_port=manifest_store,
             ledger_port=ledger_store,
+            entry_id_factory=_entry_id_factory("entry-corpus"),
         ),
     )
 
@@ -327,6 +336,7 @@ def test_reproducibility_contract_historical_source_certification_promotes_certi
     certification_service = HistoricalReplayCertificationService(
         manifest_port=manifest_store,
         ledger_port=ledger_store,
+        entry_id_factory=_entry_id_factory("entry-source-certification"),
     )
 
     result = certification_service.certify_historical_source_run(
@@ -447,6 +457,7 @@ def test_reproducibility_contract_historical_composite_certification_requires_ce
     certification_service = HistoricalReplayCertificationService(
         manifest_port=manifest_store,
         ledger_port=ledger_store,
+        entry_id_factory=_entry_id_factory("entry-composite-certification"),
     )
 
     certification_service.certify_historical_source_run(

@@ -165,6 +165,7 @@ def create_ledger_service(
     ctx: PipelineRunContext,
 ) -> RunLedgerService | None:
     """Build the optional run-ledger service for manifest publication."""
+    from bioetl.composition.occurrence_identity import create_runtime_occurrence_id
     from bioetl.infrastructure.control_plane import FileRunLedgerStore
 
     return RunLedgerService(
@@ -176,6 +177,7 @@ def create_ledger_service(
         ),
         manifest_id="pending",
         run_id=ctx.run_id,
+        _entry_id_factory=lambda: create_runtime_occurrence_id("run_ledger_entry"),
     )
 
 

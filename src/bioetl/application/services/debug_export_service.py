@@ -228,6 +228,7 @@ class DebugExportService:
             raw_record=raw_record,
             record_index=record_index,
             details=reason_message,
+            details_payload=details,
             policy=policy,
             created_at=created_at or self._created_at_factory(),
         )
@@ -239,6 +240,7 @@ class DebugExportService:
         record_index: int,
         error_type: ErrorType | None,
         error_details: str,
+        details_payload: object | None = None,
         policy: str | None,
         created_at: datetime | None = None,
     ) -> None:
@@ -249,6 +251,7 @@ class DebugExportService:
             record_index=record_index,
             error_type=error_type,
             details=error_details,
+            details_payload=details_payload,
             policy=policy,
             created_at=created_at or self._created_at_factory(),
         )

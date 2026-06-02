@@ -82,12 +82,77 @@ event_signal_governance:
   declared_events_field: declared_observability_events
   emitted_events_field: emitted_observability_events
   unused_declared_events_field: unused_declared_observability_events
+  retired_declared_events_field: retired_declared_observability_events
+  retired_declared_events_emitted_field: retired_declared_observability_events_emitted
   emitted_without_contract_field: emitted_observability_events_without_contract
   event_emitters_field: observability_event_emitters
   domain_event_emitters_field: domain_event_emitters
   canonical_emitters_field: canonical_runtime_observability_emitters
+  retired_declared_events:
+  - event_name: artifact_published
+    action: retire
+    owner: "@bioetl-observability"
+    reason: No canonical runtime emitter or dashboard/runbook consumer remains.
+    review_date: "2026-06-02"
+  - event_name: batch_completed
+    action: retire
+    owner: "@bioetl-observability"
+    reason: Replaced by typed batch domain-event observability projections.
+    review_date: "2026-06-02"
+  - event_name: batch_started
+    action: retire
+    owner: "@bioetl-observability"
+    reason: Replaced by typed batch domain-event observability projections.
+    review_date: "2026-06-02"
+  - event_name: cleanup_completed
+    action: retire
+    owner: "@bioetl-observability"
+    reason: Superseded by ordinary lifecycle phase events and final pipeline outcomes.
+    review_date: "2026-06-02"
+  - event_name: cleanup_started
+    action: retire
+    owner: "@bioetl-observability"
+    reason: Superseded by ordinary lifecycle phase events and final pipeline outcomes.
+    review_date: "2026-06-02"
+  - event_name: execution_completed
+    action: retire
+    owner: "@bioetl-observability"
+    reason: Superseded by execute_pipeline phase events and domain outcomes.
+    review_date: "2026-06-02"
+  - event_name: execution_started
+    action: retire
+    owner: "@bioetl-observability"
+    reason: Superseded by execute_pipeline phase events and domain outcomes.
+    review_date: "2026-06-02"
+  - event_name: lifecycle_clear_completed
+    action: retire
+    owner: "@bioetl-observability"
+    reason: Superseded by prepare_medallion_layers phase events.
+    review_date: "2026-06-02"
+  - event_name: lifecycle_clear_started
+    action: retire
+    owner: "@bioetl-observability"
+    reason: Superseded by prepare_medallion_layers phase events.
+    review_date: "2026-06-02"
+  - event_name: pipeline_started
+    action: retire
+    owner: "@bioetl-observability"
+    reason: Run start is represented by manifest/ledger lifecycle records.
+    review_date: "2026-06-02"
+  - event_name: startup_completed
+    action: retire
+    owner: "@bioetl-observability"
+    reason: Superseded by preflight and run manifest lifecycle records.
+    review_date: "2026-06-02"
+  - event_name: startup_started
+    action: retire
+    owner: "@bioetl-observability"
+    reason: Superseded by preflight and run manifest lifecycle records.
+    review_date: "2026-06-02"
   rationale: >
     Runtime observability governance extends beyond Prometheus metric families:
     lifecycle/domain-event publication must keep one canonical emitter contract,
     a declared event vocabulary, and an explicit inventory of unused or
-    non-contracted event signals.
+    non-contracted event signals. Retired declarations remain visible in
+    governance but are removed from the active declaration set and must not be
+    emitted again without explicit reactivation.

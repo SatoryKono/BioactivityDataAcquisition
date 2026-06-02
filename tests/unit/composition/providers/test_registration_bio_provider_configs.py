@@ -101,7 +101,7 @@ class TestGetBioProviderConfigs:
         assert pubchem.http_config is not None
         assert pubchem.http_config.rate == pytest.approx(5.0)
         assert pubchem.http_config.capacity == 10
-        assert pubchem.custom_creator is _create_pubchem_adapter
+        assert pubchem.adapter_creator is _create_pubchem_adapter
         assert pubchem.requires_http_client is False
         assert pubchem.requires_logger is True
 

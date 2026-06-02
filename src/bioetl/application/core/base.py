@@ -21,7 +21,7 @@ from bioetl.domain.context import PipelineContext
 
 if TYPE_CHECKING:
     from bioetl.application.core.base_transformer import BaseTransformer
-    from bioetl.application.core.pipeline_observability_service_protocols import (
+    from bioetl.application.core.pipeline_service_protocols import (
         PipelineLoggingServicesProtocol,
     )
     from bioetl.domain.config import PipelineConfig, RuntimeConfig

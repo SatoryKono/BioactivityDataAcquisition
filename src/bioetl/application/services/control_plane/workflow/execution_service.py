@@ -6,7 +6,6 @@ from collections.abc import Callable
 from dataclasses import dataclass, replace
 from datetime import datetime
 from functools import partial
-from uuid import uuid4
 
 from bioetl.application.services.control_plane.workflow.execution_preparation import (
     prepare_workflow_execution,
@@ -50,6 +49,10 @@ WorkflowLedgerFactory = Callable[
 ]
 
 
+def _missing_run_id_factory() -> RunID:
+    raise RuntimeError("workflow run_id_factory must be supplied by composition root")
+
+
 @dataclass(slots=True)
 class WorkflowExecutionService:
     """Orchestrate workflow execution around durable control-plane artifacts."""
@@ -61,7 +64,7 @@ class WorkflowExecutionService:
     workflow_state_port: WorkflowExecutionStatePort
     workflow_lock_port: LockPort
     now_factory: Callable[[], datetime] = current_utc_time
-    run_id_factory: Callable[[], RunID] = lambda: RunID(uuid4())
+    run_id_factory: Callable[[], RunID] = _missing_run_id_factory
 
     async def run_workflow(
         self,

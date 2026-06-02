@@ -95,8 +95,8 @@ def create_provider_adapter(
     **kwargs: object,
 ) -> DataSourcePort:
     """Create a provider adapter instance using the supplied registry config."""
-    if config.custom_creator is not None:
-        return config.custom_creator(
+    if config.adapter_creator is not None:
+        return config.adapter_creator(
             http_client=http_client,
             logger=logger,
             settings=settings,

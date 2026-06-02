@@ -8,7 +8,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, TypeVar
 
 from bioetl.composition.providers._models import (
-    AdapterCreator,
+    AdapterCreatorProtocol,
     HttpConfig,
     ProviderConfig,
 )
@@ -39,7 +39,7 @@ def _register_provider_class[T: "DataSourcePort"](
     requires_http_client: bool,
     requires_logger: bool,
     rate_overrides: dict[str, float] | None,
-    custom_creator: AdapterCreator | None,
+    adapter_creator: AdapterCreatorProtocol | None,
     default_kwargs: dict[str, object],
 ) -> None:
     """Register decorated adapter class in provider registry.
@@ -53,7 +53,7 @@ def _register_provider_class[T: "DataSourcePort"](
         requires_logger: If True, logger is injected at adapter creation.
         rate_overrides: Optional dict mapping settings attribute names to boosted
             rate limits when API keys are present.
-        custom_creator: Optional callable replacing the standard adapter creation
+        adapter_creator: Optional callable replacing the standard adapter creation
             logic for complex initialization.
         default_kwargs: Additional kwargs merged into the adapter constructor call.
     """
@@ -71,7 +71,7 @@ def _register_provider_class[T: "DataSourcePort"](
         requires_http_client=requires_http_client,
         requires_logger=requires_logger,
         default_kwargs=default_kwargs,
-        custom_creator=custom_creator,
+        adapter_creator=adapter_creator,
     )
     # Decorators remain the sanctioned import-time compatibility seam for
     # populating the lazy default registry.
@@ -87,7 +87,7 @@ def register_provider(
     requires_http_client: bool = True,
     requires_logger: bool = True,
     rate_overrides: dict[str, float] | None = None,
-    custom_creator: AdapterCreator | None = None,
+    adapter_creator: AdapterCreatorProtocol | None = None,
     **default_kwargs: object,
 ) -> Callable[[type[T]], type[T]]:
     """Decorator for registering a provider adapter class.
@@ -102,7 +102,7 @@ def register_provider(
             defaults to True.
         rate_overrides: Optional dict mapping settings attribute names to boosted
             rate limits when API keys are present; defaults to None.
-        custom_creator: Optional callable replacing standard adapter creation;
+        adapter_creator: Optional callable replacing standard adapter creation;
             defaults to None.
         **default_kwargs: Additional kwargs merged into the adapter constructor.
 
@@ -121,7 +121,7 @@ def register_provider(
             requires_http_client=requires_http_client,
             requires_logger=requires_logger,
             rate_overrides=rate_overrides,
-            custom_creator=custom_creator,
+            adapter_creator=adapter_creator,
             default_kwargs=dict(resolved_defaults),
         )
         return cls

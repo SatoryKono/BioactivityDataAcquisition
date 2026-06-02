@@ -444,10 +444,10 @@ hotspot_family_ratchets:
       max_internal_fan_in: 14
     metrics:
       duplication_clusters: 0
-      files: 174
-      total_loc: 21611
-      files_ge_250_loc: 12
-      helper_function_ratio: 0.376
+      files: 169
+      total_loc: 21732
+      files_ge_250_loc: 13
+      helper_function_ratio: 0.374
       max_internal_fan_in: 14
       max_internal_fan_in_module: bioetl.application.core.batch_runtime_failure_policy
     trend:
@@ -472,12 +472,12 @@ hotspot_family_ratchets:
       max_internal_fan_in: 5
     metrics:
       duplication_clusters: 0
-      files: 44
-      total_loc: 5758
+      files: 50
+      total_loc: 5956
       files_ge_250_loc: 3
-      helper_function_ratio: 0.351
-      max_internal_fan_in: 6
-      max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.composite_support_services_factory
+      helper_function_ratio: 0.324
+      max_internal_fan_in: 3
+      max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.observability
     trend:
       status: reduced_2026-05-30_issue_4548_zero_duplication
       next_action: Maintain zero-duplication snapshot for composition/bootstrap/runtime
@@ -498,12 +498,12 @@ hotspot_family_ratchets:
       max_internal_fan_in: 4
     metrics:
       duplication_clusters: 0
-      files: 31
-      total_loc: 4507
-      files_ge_250_loc: 4
-      helper_function_ratio: 0.47
-      max_internal_fan_in: 4
-      max_internal_fan_in_module: bioetl.composition.factories.pipeline.construction_types
+      files: 33
+      total_loc: 4568
+      files_ge_250_loc: 3
+      helper_function_ratio: 0.456
+      max_internal_fan_in: 3
+      max_internal_fan_in_module: bioetl.composition.factories.pipeline.registry_manifest
     trend:
       status: reduced_2026-05-21_issue_4477
       next_action: 2026-05-21 closes the remaining composition/factories/pipeline
@@ -576,7 +576,7 @@ oversized_source_module_inventory:
     target_split: separate publication normalization, persistence shaping, and provenance
       helpers
   - path: src/bioetl/application/services/checkpoint_compatibility_service.py
-    lines: 222
+    lines: 216
     owner: '@bioetl-control-plane'
     target_split: split checkpoint policy evaluation from diagnostic payload assembly
   - path: src/bioetl/infrastructure/config/_base.py
@@ -600,6 +600,14 @@ oversized_source_module_inventory:
     lines: 44
     owner: '@bioetl-reproducibility'
     target_split: separate score-card policy rules from manifest projection helpers
+  completed_splits:
+  - issue: '#5031'
+    source: src/bioetl/application/services/checkpoint_compatibility_service.py
+    extracted_surface: src/bioetl/application/services/checkpoint_compatibility_results.py
+    source_lines_after_split: 216
+    extracted_surface_lines: 67
+    rationale: Checkpoint policy orchestration remains in the service while diagnostic
+      result payload assembly moved to a focused helper module.
 hotspot_family_coverage_thresholds:
   snapshot_date: '2026-06-02'
   linked_issue: '#4567'
@@ -810,13 +818,13 @@ runtime_uuid_governance_metrics:
     without an explicit reviewed migration path.
   metrics:
     runtime_uuid_seam_count:
-      current_count: 12
-      max_count: 12
+      current_count: 11
+      max_count: 11
       linked_issue: '#4705'
       owner: '@bioetl-architecture'
       rationale: >-
         Runtime UUID seams are sanctioned only as reviewed non-replay-critical
-        identities; issue #4968 retired the obsolete observability smoke seam and
+        identities; issue #5032 retired the logger fallback random UUID seam and
         growth must stay explicit while deterministic identity debt is burned down.
       ratchet_policy: Non-growth fail-fast unless a reviewed scorecard update expands
         the sanctioned seam inventory intentionally.
@@ -879,18 +887,18 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless a reviewed triage recalibration
         updates the tracked debt budget intentionally.
     repo_wide_zero_import_candidate_count:
-      current_count: 41
-      max_count: 41
+      current_count: 14
+      max_count: 14
       linked_issue: '#4541'
       owner: '@bioetl-architecture'
-      rationale: 'Repo-wide zero-import candidates remain a governed review surface and must not grow without a reviewed classification refresh; issue #5021 removed the shared default registry shim and ratcheted the sanctioned set down to 40. Updated to 41 after adding src/bioetl/composition/registry.py classification.'
+      rationale: 'Repo-wide zero-import candidates now reflect the reviewed policy-bound residue plus the separately tracked composition registry facade. Issues #5041, #5042, and #5043 reduced the governed surface from 41 to 14 without changing the current domain.ports facade-only import policy.'
       ratchet_policy: 'Non-growth fail-fast unless a reviewed dead-code inventory refresh updates the classified candidate set intentionally.'
     repo_wide_classified_zero_import_candidate_count:
-      current_count: 41
-      max_count: 41
+      current_count: 14
+      max_count: 14
       linked_issue: '#4541'
       owner: '@bioetl-architecture'
-      rationale: 'Every repo-wide zero-import candidate must stay covered by an explicit disposition ledger entry; issue #5021 reduced the fully classified governed inventory to 40. Updated to 41 after adding src/bioetl/composition/registry.py classification.'
+      rationale: 'Every repo-wide zero-import candidate remains covered by an explicit disposition ledger entry. After issues #5041, #5042, and #5043, the only classified residue is src/bioetl/__main__.py, src/bioetl/composition/registry.py, and the 12 package-root-governed domain.ports owner modules.'
       ratchet_policy: 'Non-growth fail-fast unless the repo-wide classification ledger is intentionally rebaselined during review.'
     repo_wide_untriaged_zero_import_candidate_count:
       current_count: 0
@@ -956,16 +964,16 @@ test_governance_debt_metrics:
     inventory, assertion-strength debt, or deterministic test-seam counts change.
   metrics:
     compatibility_test_file_count:
-      current_count: 38
-      max_count: 38
-      target_count: 38
-      ratchet_policy: Downward ratchet only; keep max_count at 38 unless a future
+      current_count: 37
+      max_count: 37
+      target_count: 37
+      ratchet_policy: Downward ratchet only; keep max_count at 37 unless a future
         owner-approved reduction lowers the live compatibility test inventory.
       rationale: >-
-        Issues #4925, #4967, and #5023 reclassified pure public-facade and
-        strict-schema contract checks out of the compatibility filename inventory;
-        live compatibility debt count is now limited to compat, legacy,
-        deprecated, shim, and sunset surfaces.
+        Issues #4925, #4967, #5023, and #5034 reclassified pure public-facade,
+        strict-schema, and active checkpoint resume-policy checks out of the
+        compatibility filename inventory; live compatibility debt count is now
+        limited to compat, legacy, deprecated, shim, and sunset surfaces.
 program_done_criteria:
   deadline_quarter: 2027-Q1
   max_total_exemptions: 0

@@ -5,7 +5,6 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from datetime import datetime
-from uuid import uuid4
 
 from bioetl.application.services.control_plane.ledger import core_events, rich_events
 from bioetl.application.services.control_plane.ledger.entry_support import (
@@ -31,6 +30,10 @@ from bioetl.domain.types.dq_contracts import DQDisposition
 __all__ = ["RunLedgerService"]
 
 
+def _missing_entry_id_factory() -> str:
+    raise RuntimeError("ledger entry_id_factory must be supplied by composition root")
+
+
 @dataclass(slots=True)
 class RunLedgerService:
     """Append immutable control-plane lifecycle entries for one manifest."""
@@ -52,7 +55,7 @@ class RunLedgerService:
     effective_config_artifact_id: str | None = None
     composite_run_id: str | None = None
     _entry_id_factory: Callable[[], str] = field(
-        default_factory=lambda: lambda: str(uuid4())
+        default_factory=lambda: _missing_entry_id_factory
     )
     _occurred_at_factory: Callable[[], datetime] = current_utc_time
 

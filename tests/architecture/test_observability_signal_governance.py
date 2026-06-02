@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from datetime import date
 
 import pytest
 import yaml
@@ -14,6 +15,7 @@ GOVERNANCE_PATH = ROOT / "configs" / "quality" / "observability_metric_governanc
 EVIDENCE_PATH = (
     ROOT / "reports" / "observability" / "runtime_cardinality_inventory.json"
 )
+POLICY_REVIEW_DATE = date(2026, 5, 15)
 
 pytestmark = pytest.mark.architecture
 
@@ -37,6 +39,14 @@ def test_observability_governance_declares_event_signal_contracts() -> None:
         == "unused_declared_observability_events"
     )
     assert (
+        event_governance["retired_declared_events_field"]
+        == "retired_declared_observability_events"
+    )
+    assert (
+        event_governance["retired_declared_events_emitted_field"]
+        == "retired_declared_observability_events_emitted"
+    )
+    assert (
         event_governance["emitted_without_contract_field"]
         == "emitted_observability_events_without_contract"
     )
@@ -55,6 +65,8 @@ def test_runtime_observability_event_inventory_is_committed_and_sorted() -> None
         "declared_observability_events",
         "emitted_observability_events",
         "unused_declared_observability_events",
+        "retired_declared_observability_events",
+        "retired_declared_observability_events_emitted",
         "emitted_observability_events_without_contract",
         "domain_event_emitters",
         "canonical_runtime_observability_emitters",
@@ -71,3 +83,33 @@ def test_runtime_observability_event_inventory_is_committed_and_sorted() -> None
             assert isinstance(event_name, str) and event_name
             assert isinstance(emitters, list)
             assert emitters == sorted(emitters)
+
+
+def test_retired_observability_event_declarations_are_governed_and_inactive() -> None:
+    governance = yaml.safe_load(GOVERNANCE_PATH.read_text(encoding="utf-8"))
+    event_governance = governance["event_signal_governance"]
+    retired_entries = event_governance["retired_declared_events"]
+
+    assert isinstance(retired_entries, list)
+    retired_events: list[str] = []
+    for entry in retired_entries:
+        assert isinstance(entry, dict)
+        event_name = str(entry["event_name"])
+        owner = str(entry["owner"])
+        reason = str(entry["reason"])
+        review_date = str(entry["review_date"])
+
+        assert entry["action"] == "retire"
+        assert event_name
+        assert owner.startswith("@")
+        assert reason.strip()
+        assert date.fromisoformat(review_date) >= POLICY_REVIEW_DATE
+        retired_events.append(event_name)
+
+    assert retired_events == sorted(retired_events)
+    assert len(retired_events) == len(set(retired_events))
+
+    evidence = json.loads(EVIDENCE_PATH.read_text(encoding="utf-8"))
+    assert evidence["retired_declared_observability_events"] == retired_events
+    assert evidence["retired_declared_observability_events_emitted"] == []
+    assert evidence["unused_declared_observability_events"] == []

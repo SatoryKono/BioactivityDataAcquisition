@@ -559,6 +559,51 @@ def test_debt_scorecard_config_surface_ratchet_matches_baseline() -> None:
             assert metric.get("max_count") == baseline_count
 
 
+def test_debt_scorecard_hotspot_family_metrics_match_committed_baseline() -> None:
+    """Scorecard hotspot metrics must stay aligned with reviewed baseline artifacts."""
+    scorecard = load_debt_scorecard()
+    hotspot_policy = scorecard.get("hotspot_family_ratchets", {})
+    assert isinstance(hotspot_policy, dict)
+    families = hotspot_policy.get("families", [])
+    assert isinstance(families, list)
+
+    baseline_path = ROOT / "reports/quality/hotspot-family-baseline.json"
+    assert baseline_path.exists()
+    baseline_payload = json.loads(baseline_path.read_text(encoding="utf-8"))
+    assert isinstance(baseline_payload, dict)
+    baseline_rows = baseline_payload.get("families", [])
+    assert isinstance(baseline_rows, list)
+    baseline_by_name = {
+        row["name"]: row
+        for row in baseline_rows
+        if isinstance(row, dict) and isinstance(row.get("name"), str)
+    }
+
+    metric_names = (
+        "duplication_clusters",
+        "files",
+        "total_loc",
+        "files_ge_250_loc",
+        "helper_function_ratio",
+        "max_internal_fan_in",
+        "max_internal_fan_in_module",
+    )
+    for family in families:
+        assert isinstance(family, dict)
+        family_name = family.get("name")
+        assert isinstance(family_name, str)
+        assert family_name in baseline_by_name
+        metrics = family.get("metrics", {})
+        assert isinstance(metrics, dict), f"{family_name} missing metrics"
+        baseline = baseline_by_name[family_name]
+        for metric_name in metric_names:
+            assert metrics.get(metric_name) == baseline.get(metric_name), (
+                f"hotspot_family_ratchets metric drift for {family_name}."
+                f"{metric_name}: scorecard={metrics.get(metric_name)!r}, "
+                f"baseline={baseline.get(metric_name)!r}"
+            )
+
+
 def test_debt_scorecard_bronze_fixture_replay_metrics_match_sources() -> None:
     """Bronze fixture debt metrics must stay synchronized with canonical sources."""
     scorecard = load_debt_scorecard()
@@ -675,7 +720,7 @@ def test_debt_scorecard_declares_test_governance_debt_kpis() -> None:
     assert isinstance(metric, dict)
     assert metric.get("current_count") == live_count
     assert metric.get("max_count") == budget_max
-    assert metric.get("target_count") == 38
+    assert metric.get("target_count") == 37
     assert live_count <= budget_max
     assert governance.get("owner") == "@bioetl-architecture"
     assert isinstance(metric.get("ratchet_policy"), str) and metric["ratchet_policy"]

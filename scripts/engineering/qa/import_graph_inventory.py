@@ -141,6 +141,7 @@ def _collect_parsed_modules(repo_root_str: str) -> tuple[ParsedModule, ...]:
         for importer_module, py_file, source_text in _read_module_sources(
             _iter_python_modules(scan)
         ):
+            importer_is_package = py_file.name == "__init__.py"
             try:
                 tree = ast.parse(source_text)
             except SyntaxError:
@@ -151,6 +152,7 @@ def _collect_parsed_modules(repo_root_str: str) -> tuple[ParsedModule, ...]:
                 for target_module in _iter_candidate_import_targets(
                     existing_modules=existing_modules,
                     importer_module=importer_module,
+                    importer_is_package=importer_is_package,
                     node=node,
                 ):
                     candidate_targets.add(target_module)
@@ -162,6 +164,7 @@ def _collect_parsed_modules(repo_root_str: str) -> tuple[ParsedModule, ...]:
                 elif isinstance(node, ast.ImportFrom):
                     base_module = _resolve_relative_module(
                         importer_module=importer_module,
+                        importer_is_package=importer_is_package,
                         module=node.module,
                         level=node.level,
                     )
@@ -189,26 +192,32 @@ def _collect_parsed_modules(repo_root_str: str) -> tuple[ParsedModule, ...]:
 def _resolve_relative_module(
     *,
     importer_module: str,
+    importer_is_package: bool,
     module: str | None,
     level: int,
 ) -> str | None:
     if level == 0:
         return module
 
-    parent_parts = importer_module.split(".")[:-1]
-    if level > len(parent_parts):
+    base_parts = (
+        importer_module.split(".")
+        if importer_is_package
+        else importer_module.split(".")[:-1]
+    )
+    if level > len(base_parts):
         return None
 
-    base_parts = parent_parts[: len(parent_parts) - level + 1]
+    resolved_base_parts = base_parts[: len(base_parts) - level + 1]
     if module:
-        return ".".join([*base_parts, module])
-    return ".".join(base_parts)
+        return ".".join([*resolved_base_parts, module])
+    return ".".join(resolved_base_parts)
 
 
 def _iter_candidate_import_targets(
     *,
     existing_modules: frozenset[str],
     importer_module: str,
+    importer_is_package: bool,
     node: ast.AST,
 ) -> list[str]:
     if isinstance(node, ast.Import):
@@ -219,6 +228,7 @@ def _iter_candidate_import_targets(
 
     base_module = _resolve_relative_module(
         importer_module=importer_module,
+        importer_is_package=importer_is_package,
         module=node.module,
         level=node.level,
     )

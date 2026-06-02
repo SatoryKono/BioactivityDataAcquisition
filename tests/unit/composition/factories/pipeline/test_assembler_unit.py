@@ -117,16 +117,16 @@ class TestGenericPipelineFactory:
 
     def test_uses_custom_data_source_creator(self) -> None:
         """Explicit data_source_creator is used instead of resolved one."""
-        custom_creator = MagicMock()
+        explicit_data_source_creator = MagicMock()
         factory = GenericPipelineFactory(
             pipeline_name="chembl_activity",
             pipeline_class=MagicMock,
             provider="chembl",
             gold_schema=MagicMock(),
-            data_source_creator=custom_creator,
+            data_source_creator=explicit_data_source_creator,
         )
 
-        assert factory._create_data_source is custom_creator
+        assert factory._create_data_source is explicit_data_source_creator
 
     def test_create_transformer_delegates(self) -> None:
         """create_transformer delegates to create_transformer_instance helper."""

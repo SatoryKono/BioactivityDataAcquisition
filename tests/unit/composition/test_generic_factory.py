@@ -120,40 +120,40 @@ class TestGenericPipelineFactory:
         )
         assert factory.provider_registry is registry
 
-    def test_init_with_custom_creator(self):
+    def test_init_with_explicit_data_source_creator(self):
         """Test factory initialization with custom data source creator."""
         mock_pipeline_class = MagicMock()
-        custom_creator = MagicMock()
+        explicit_data_source_creator = MagicMock()
 
         factory = GenericPipelineFactory(
             pipeline_name="test_pipeline",
             pipeline_class=mock_pipeline_class,
             provider="custom",
             gold_schema=MagicMock(),
-            data_source_creator=custom_creator,
+            data_source_creator=explicit_data_source_creator,
         )
 
-        assert factory._create_data_source is custom_creator
+        assert factory._create_data_source is explicit_data_source_creator
 
     def test_create_data_source(self, mock_settings, mock_pipeline_config, mock_logger):
         """Test data source creation through factory."""
         mock_pipeline_class = MagicMock()
         mock_data_source = MagicMock()
-        custom_creator = MagicMock(return_value=mock_data_source)
+        explicit_data_source_creator = MagicMock(return_value=mock_data_source)
 
         factory = GenericPipelineFactory(
             pipeline_name="test_pipeline",
             pipeline_class=mock_pipeline_class,
             provider="custom",
             gold_schema=MagicMock(),
-            data_source_creator=custom_creator,
+            data_source_creator=explicit_data_source_creator,
         )
 
         result = factory.create_data_source(
             mock_settings, mock_pipeline_config, mock_logger
         )
 
-        custom_creator.assert_called_once_with(
+        explicit_data_source_creator.assert_called_once_with(
             mock_settings,
             mock_pipeline_config,
             mock_logger,
@@ -175,7 +175,7 @@ class TestGenericPipelineFactory:
         """Test services building."""
         mock_pipeline_class = MagicMock()
         mock_data_source = MagicMock()
-        custom_creator = MagicMock(return_value=mock_data_source)
+        explicit_data_source_creator = MagicMock(return_value=mock_data_source)
         mock_services = MagicMock()
         mock_services_factory.create_common_services.return_value = mock_services
         mock_load_config.return_value = mock_pipeline_config
@@ -185,7 +185,7 @@ class TestGenericPipelineFactory:
             pipeline_class=mock_pipeline_class,
             provider="custom",
             gold_schema=MagicMock(),
-            data_source_creator=custom_creator,
+            data_source_creator=explicit_data_source_creator,
         )
 
         result = factory.build_services(mock_settings, mock_logger, audit=MagicMock())

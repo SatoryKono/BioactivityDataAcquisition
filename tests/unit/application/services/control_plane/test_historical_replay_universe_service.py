@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+from itertools import count
+
 import pytest
 
 from datetime import UTC, datetime
@@ -28,6 +31,11 @@ from tests.unit.application.services.run_manifest_test_support import (
 pytestmark = pytest.mark.unit
 
 
+def _entry_id_factory(prefix: str = "entry-historical") -> Callable[[], str]:
+    sequence = count(1)
+    return lambda: f"{prefix}-{next(sequence)}"
+
+
 def _make_manifest() -> RunManifest:
     return _build_manifest(
         manifest_id="universe-source-manifest",
@@ -50,6 +58,7 @@ def test_universe_report_blocks_claim_when_external_archived_record_is_unresolve
             certification_service=HistoricalReplayCertificationService(
                 manifest_port=manifest_store,
                 ledger_port=ledger_store,
+                entry_id_factory=_entry_id_factory("entry-universe-gap"),
             ),
         )
     )
@@ -97,6 +106,7 @@ def test_universe_report_supports_claim_when_local_and_external_records_are_clos
             certification_service=HistoricalReplayCertificationService(
                 manifest_port=manifest_store,
                 ledger_port=ledger_store,
+                entry_id_factory=_entry_id_factory("entry-universe-closed"),
             ),
         )
     )

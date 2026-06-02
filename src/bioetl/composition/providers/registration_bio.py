@@ -322,7 +322,7 @@ def _build_bio_extra_provider_configs(
             http_config=HttpConfig(rate=pubchem.rate, capacity=pubchem.capacity),
             requires_http_client=False,
             requires_logger=True,
-            custom_creator=_create_pubchem_adapter,
+            adapter_creator=_create_pubchem_adapter,
             data_source_creator=_create_pubchem_data_source,
         ),
     }

@@ -5,7 +5,6 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING
-from uuid import uuid4
 
 from bioetl.application.composite.runner_pkg import CompositePipelineRunner
 from bioetl.application.composite.runtime_wiring_api import (
@@ -21,6 +20,7 @@ from bioetl.application.composite.runtime_wiring_api import (
 from bioetl.application.composite.runtime_wiring_api import (
     MergeService as _MergeService,
 )
+from bioetl.composition.occurrence_identity import create_runtime_occurrence_id
 from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
@@ -81,7 +81,7 @@ CompositeRunnerFactory = Callable[..., CompositePipelineRunner]
 
 
 def resolve_effective_run_id(run_id: str | None) -> str:
-    return run_id or str(uuid4())
+    return run_id or create_runtime_occurrence_id("composite_runner")
 
 
 def _requires_explicit_control_plane_run_id(

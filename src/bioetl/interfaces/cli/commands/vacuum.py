@@ -5,10 +5,9 @@ Implements vacuum operations for Delta tables storage reclamation.
 
 from __future__ import annotations
 
-from importlib import import_module
-
 import click
 
+from bioetl.interfaces.cli.commands.domains.maintenance import service_access
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CliBoundaryExecutionPolicy,
     run_async_with_cli_failure_policy,
@@ -37,15 +36,13 @@ _VACUUM_ALL_INTERRUPTED_MESSAGE = "Maintenance vacuum-all interrupted by user (C
 
 
 def get_lifecycle_service() -> object:
-    """Load the lifecycle service through the retained maintenance public seam."""
-    maintenance = import_module("bioetl.interfaces.cli.commands.maintenance")
-    return maintenance.get_lifecycle_service()
+    """Load the lifecycle service through the owner-only maintenance seam."""
+    return service_access.get_lifecycle_service()
 
 
 def get_vacuum_service() -> object:
-    """Load the vacuum service through the retained maintenance public seam."""
-    maintenance = import_module("bioetl.interfaces.cli.commands.maintenance")
-    return maintenance.get_vacuum_service()
+    """Load the vacuum service through the owner-only maintenance seam."""
+    return service_access.get_vacuum_service()
 
 
 def _maintenance_policy(

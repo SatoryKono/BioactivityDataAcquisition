@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Protocol, cast
 
@@ -152,6 +153,7 @@ class HistoricalReplayCertificationValidator:
         *,
         manifest: RunManifest,
         ledger_port: RunLedgerPort,
+        entry_id_factory: Callable[[], str],
     ) -> RunLedgerService:
         provenance = manifest.code_provenance
         return RunLedgerService(
@@ -170,6 +172,7 @@ class HistoricalReplayCertificationValidator:
             rule_bundle_version=provenance.rule_bundle_version,
             dq_contract_compatibility_hash=provenance.dq_contract_compatibility_hash,
             effective_config_artifact_id=provenance.effective_config_artifact_id,
+            _entry_id_factory=entry_id_factory,
         )
 
     @staticmethod

@@ -31,7 +31,7 @@ from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
-    from bioetl.application.core.pipeline_aux_service_protocols import (
+    from bioetl.application.core.pipeline_service_protocols import (
         PipelinePostrunServicesProtocol,
     )
     from bioetl.application.core.postrun.cleanup_orchestrator import (

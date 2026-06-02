@@ -298,3 +298,24 @@ def test_file_store_fails_closed_on_truncated_index_tail(tmp_path) -> None:
 
     with pytest.raises(ValueError, match="truncated tail line"):
         store.list_by_run_id(run_id)
+
+
+def test_append_jsonl_payload_uses_control_plane_flush_policy(
+    tmp_path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    flush_calls: list[int] = []
+
+    monkeypatch.setattr(
+        lineage_store_module,
+        "flush_control_plane_file_descriptor",
+        flush_calls.append,
+    )
+
+    checkpoint_offset = lineage_store_module._append_jsonl_payload(
+        tmp_path / "lineage" / "index.jsonl",
+        b'{"fragment_id":"fragment-1","key":"dataset-1"}\n',
+    )
+
+    assert checkpoint_offset == 0
+    assert len(flush_calls) == 1

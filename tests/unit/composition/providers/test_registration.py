@@ -558,7 +558,7 @@ def test_bind_provider_data_source_creator_captures_shared_support_instance() ->
 def test_build_http_provider_config_uses_canonical_http_provider_shape() -> None:
     """HTTP-oriented provider configs should be assembled through one shared path."""
     support = MagicMock(name="support")
-    custom_creator = MagicMock(name="custom_creator")
+    adapter_creator = MagicMock(name="adapter_creator")
 
     def _creator(settings, pipeline_config, logger, **kwargs):
         return kwargs["assembly_support"]
@@ -568,7 +568,7 @@ def test_build_http_provider_config_uses_canonical_http_provider_shape() -> None
         rate=7.5,
         capacity=15,
         rate_overrides={"api_key": 30.0},
-        custom_creator=custom_creator,
+        adapter_creator=adapter_creator,
         data_source_creator=_creator,
         assembly_support=support,
     )
@@ -579,7 +579,7 @@ def test_build_http_provider_config_uses_canonical_http_provider_shape() -> None
     assert config.http_config.rate_overrides == {"api_key": 30.0}
     assert config.requires_http_client is True
     assert config.requires_logger is True
-    assert config.custom_creator is custom_creator
+    assert config.adapter_creator is adapter_creator
     assert config.data_source_creator is not None
     assert config.data_source_creator(MagicMock(), MagicMock(), MagicMock()) is support
 
@@ -588,21 +588,21 @@ def test_build_http_provider_config_uses_canonical_http_provider_shape() -> None
 def test_build_data_source_provider_config_supports_non_http_special_case() -> None:
     """Non-HTTP provider entries should still use one canonical assembly helper."""
     creator = MagicMock(name="creator")
-    custom_creator = MagicMock(name="custom_creator")
+    adapter_creator = MagicMock(name="adapter_creator")
 
     config = build_data_source_provider_config(
         adapter_class=MagicMock(name="adapter_class"),
         http_config=None,
         requires_http_client=False,
         requires_logger=True,
-        custom_creator=custom_creator,
+        adapter_creator=adapter_creator,
         data_source_creator=creator,
     )
 
     assert config.http_config is None
     assert config.requires_http_client is False
     assert config.requires_logger is True
-    assert config.custom_creator is custom_creator
+    assert config.adapter_creator is adapter_creator
     assert config.data_source_creator is creator
 
 
@@ -610,7 +610,7 @@ def test_build_data_source_provider_config_supports_non_http_special_case() -> N
 def test_build_http_provider_config_map_builds_multiple_entries_from_manifest() -> None:
     """HTTP provider manifests should reuse one shared map-construction helper."""
     support = MagicMock(name="support")
-    custom_creator = MagicMock(name="custom_creator")
+    adapter_creator = MagicMock(name="adapter_creator")
 
     def _creator(settings, pipeline_config, logger, **kwargs):
         return kwargs["assembly_support"]
@@ -630,7 +630,7 @@ def test_build_http_provider_config_map_builds_multiple_entries_from_manifest() 
                 rate=7.5,
                 capacity=15,
                 rate_overrides={"api_key": 30.0},
-                custom_creator=custom_creator,
+                adapter_creator=adapter_creator,
                 data_source_creator=_creator,
             ),
         ),
@@ -643,7 +643,7 @@ def test_build_http_provider_config_map_builds_multiple_entries_from_manifest() 
     assert configs["beta"].http_config is not None
     assert configs["beta"].http_config.capacity == 15
     assert configs["beta"].http_config.rate_overrides == {"api_key": 30.0}
-    assert configs["beta"].custom_creator is custom_creator
+    assert configs["beta"].adapter_creator is adapter_creator
     assert configs["alpha"].data_source_creator is not None
     assert (
         configs["alpha"].data_source_creator(MagicMock(), MagicMock(), MagicMock())

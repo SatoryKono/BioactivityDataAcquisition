@@ -5,10 +5,11 @@ from __future__ import annotations
 from collections.abc import Callable
 from datetime import datetime
 from typing import cast
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from bioetl.application.runtime_timestamps import capture_runtime_timing_anchor
 from bioetl.application.services.execution.pipeline_runner_models import RunOptions
+from bioetl.composition.occurrence_identity import create_runtime_occurrence_run_id
 from bioetl.domain.context import (
     CachedBronzeContext,
     InputFilterContext,
@@ -89,7 +90,7 @@ def _resolve_pipeline_run_id(
         return _coerce_run_id(run_id_factory())
     if options.exact_replay:
         raise ValueError("exact replay requires explicit run_id or run_id_factory")
-    return cast(RunID, uuid4())
+    return create_runtime_occurrence_run_id("pipeline_context")
 
 
 def build_pipeline_context(

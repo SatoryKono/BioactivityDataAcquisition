@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from itertools import count
+from os import getpid
 from typing import TYPE_CHECKING
-from uuid import UUID, uuid4
+from uuid import NAMESPACE_OID, UUID, uuid5
 
 from bioetl.domain.ports import LoggerPort
 
@@ -15,6 +17,15 @@ if TYPE_CHECKING:
 __all__ = [
     "bootstrap_logger",
 ]
+
+
+_FALLBACK_LOG_RUN_ID_COUNTER = count()
+
+
+def _fallback_log_correlation_run_id() -> UUID:
+    """Return a deterministic process-local fallback log correlation ID."""
+    occurrence = next(_FALLBACK_LOG_RUN_ID_COUNTER)
+    return uuid5(NAMESPACE_OID, f"bioetl.logger_bootstrap:{getpid()}:{occurrence}")
 
 
 def _default_logger_factory(pipeline: str, run_id: UUID, log_level: str) -> LoggerPort:
@@ -39,7 +50,8 @@ def bootstrap_logger(
 
     Args:
         pipeline: Pipeline name used as a structured log field (e.g., 'chembl_activity').
-        run_id: Run UUID for log correlation; a new UUID is generated if None.
+        run_id: Run UUID for log correlation; a deterministic process-local
+            occurrence ID is generated if None.
         log_level: Minimum log level string (e.g., 'INFO', 'DEBUG').
         logger_factory: Optional factory callable for DI/testing; uses UnifiedLogger
             with JSON format when None.
@@ -47,6 +59,8 @@ def bootstrap_logger(
     Returns:
         Configured LoggerPort for structured pipeline logging.
     """
-    effective_run_id = run_id if run_id is not None else uuid4()
+    effective_run_id = (
+        run_id if run_id is not None else _fallback_log_correlation_run_id()
+    )
     factory = logger_factory or _default_logger_factory
     return factory(pipeline, effective_run_id, log_level)
