@@ -18,6 +18,7 @@ from bioetl.composition.runtime_builders.run_manifest_support import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_create_run_manifest_with_effective_config_uses_yaml_provider_entity(
     monkeypatch,
 ) -> None:

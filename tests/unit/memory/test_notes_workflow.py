@@ -19,6 +19,7 @@ from memory.tooling.promote_note import promote_note
 
 pytestmark = pytest.mark.unit
 
+
 def test_create_episodic_session_note(tmp_path: Path) -> None:
     path = create_note(
         note_kind="episodic-session",

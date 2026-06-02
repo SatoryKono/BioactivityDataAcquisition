@@ -10,6 +10,7 @@ from bioetl.domain.types.dq_contracts import DQDisposition, DQViolationKind
 
 pytestmark = pytest.mark.unit
 
+
 class TestDQPolicyResolverInitialization:
     """Test DQPolicyResolver initialization and basic functionality."""
 

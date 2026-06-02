@@ -200,9 +200,7 @@ def _refresh_replay_summary_update_snapshot_fields(
         if materialization_mode == "historical_source_snapshot_certified":
             updated["source_posture"] = "historical_source_replay_certified_envelope"
         elif materialization_mode == ("historical_composite_replay_envelope_certified"):
-            updated["source_posture"] = (
-                "historical_composite_replay_certified_envelope"
-            )
+            updated["source_posture"] = "historical_composite_replay_certified_envelope"
         elif materialization_mode == "live_capture_snapshot_materialized":
             updated["source_posture"] = "live_capture_snapshot_materialized"
     updated["input_snapshot_missing_source_refs"] = list(
@@ -267,4 +265,3 @@ def _refresh_replay_summary_from_materialized_snapshots(
 
 
 __all__ = ["build_diagnostics_summary"]
-

@@ -12,6 +12,7 @@ import pytest
 
 pytestmark = pytest.mark.architecture
 
+
 def _load_module() -> ModuleType:
     repo_root = Path(__file__).resolve().parents[2]
     module_path = repo_root / "scripts" / "diagrams" / "check_diagram_quality_gates.py"

@@ -23,6 +23,7 @@ from bioetl.infrastructure.quality.inventory import ExemptionInventorySummary
 
 pytestmark = pytest.mark.unit
 
+
 def _make_inventory(
     total: int = 5,
     by_registry: dict[str, int] | None = None,

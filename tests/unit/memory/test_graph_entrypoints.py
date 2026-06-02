@@ -18,6 +18,7 @@ from memory.graph.sync_pkg import transport as graph_sync_transport
 
 pytestmark = pytest.mark.unit
 
+
 def test_graph_sync_facade_exposes_legacy_symbols() -> None:
     assert graph_sync.DEFAULT_INGEST_WAVE == "repo_sync_v1"
     assert callable(graph_sync.build_snapshot)

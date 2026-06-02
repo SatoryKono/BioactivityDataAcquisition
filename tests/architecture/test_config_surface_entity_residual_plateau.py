@@ -77,13 +77,14 @@ def test_entity_residual_backlog_matches_live_metrics_and_scorecard() -> None:
 
     live_entity = _family_metrics(_collect_family_configs()["entity_effective"])
     baseline_entity = baseline["families"]["entity_effective"]
-    scorecard_entity = scorecard["config_surface_ratchet"]["families"]["entity_effective"][
-        "metrics"
-    ]
+    scorecard_entity = scorecard["config_surface_ratchet"]["families"][
+        "entity_effective"
+    ]["metrics"]
 
-    assert backlog["entity_effective"]["partial_key_count"] == live_entity[
-        "raw_inconsistent_parameter_count"
-    ]
+    assert (
+        backlog["entity_effective"]["partial_key_count"]
+        == live_entity["raw_inconsistent_parameter_count"]
+    )
     assert baseline_entity == live_entity
     assert live_entity["inconsistent_parameter_count"] == 0
     assert (
@@ -119,9 +120,7 @@ def test_entity_residual_partial_keys_are_intentional_only() -> None:
         for entry in block["keys"]:
             key = entry["key"]
             assert any(
-                key == prefix
-                or key.startswith(f"{prefix}.")
-                or key.startswith(prefix)
+                key == prefix or key.startswith(f"{prefix}.") or key.startswith(prefix)
                 for prefix in INTENTIONAL_PREFIXES
             ), f"Unexpected residual key outside intentional prefixes: {key}"
 

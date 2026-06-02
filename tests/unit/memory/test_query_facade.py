@@ -29,6 +29,7 @@ from memory.query import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_query_catalog_returns_sources_view() -> None:
     payload = query_catalog("sources")
     assert payload["kind"] == "catalog"

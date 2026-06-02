@@ -18,7 +18,7 @@
   [tests/integration/config/test_chembl_registry_fixture_contract_parity.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/integration/config/test_chembl_registry_fixture_contract_parity.py),
   [tests/integration/config/test_chembl_contract_registry_coverage.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/integration/config/test_chembl_contract_registry_coverage.py)).
 - Unified ChEMBL normalization layer существует и опирается на shared policy/enum/reference registries, а не на ad-hoc filesystem parsing внутри domain:
-  [\_chembl_policy_registry.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/profiles/_chembl_policy_registry.py),
+  [chembl_policy_registry.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/profiles/chembl_policy_registry.py),
   [\_chembl_vocab.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/profiles/_chembl_vocab.py),
   [\_chembl_reference_identifier_rules.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/profiles/_chembl_reference_identifier_rules.py),
   [configs/enums/chembl.yaml](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/configs/enums/chembl.yaml),
@@ -178,7 +178,7 @@ Pass. Bronze остаётся source-like; Silver normalizes governed fields; Go
 - [configs/enums/chembl.yaml](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/configs/enums/chembl.yaml)
 - [configs/vocab/chembl_controlled.yaml](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/configs/vocab/chembl_controlled.yaml)
 - [configs/vocab/chembl_ontology.yaml](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/configs/vocab/chembl_ontology.yaml)
-- [src/bioetl/domain/normalization/profiles/_chembl_policy_registry.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/profiles/_chembl_policy_registry.py)
+- [src/bioetl/domain/normalization/profiles/chembl_policy_registry.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/profiles/chembl_policy_registry.py)
 - [src/bioetl/domain/normalization/profiles/_chembl_vocab.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/profiles/_chembl_vocab.py)
 - [src/bioetl/domain/normalization/profiles/_chembl_reference_identifier_rules.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/profiles/_chembl_reference_identifier_rules.py)
 - [src/bioetl/domain/normalization/profiles/chembl_json_ordering_policy.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/profiles/chembl_json_ordering_policy.py)

@@ -31,6 +31,7 @@ from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 
 pytestmark = pytest.mark.architecture
 
+
 class TestDQContractImmutability:
     """Tests ensuring DQ contract types are properly immutable."""
 

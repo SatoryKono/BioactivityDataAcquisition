@@ -16,6 +16,7 @@ from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 
 pytestmark = pytest.mark.unit
 
+
 @pytest.fixture
 def mock_http_client():
     """Create a mock HTTP client."""

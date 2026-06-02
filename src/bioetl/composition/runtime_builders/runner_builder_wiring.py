@@ -15,7 +15,7 @@ from bioetl.composition.runtime_builders.config_access import (
     load_pipeline_config,
     load_source_config,
 )
-from bioetl.composition.runtime_builders.inputs_resolver import (
+from bioetl.composition.runtime_builders.inputs_runtime_assembly import (
     ResolvedVacuumSettings,
     assemble_cached_bronze_context,
     assemble_filter_config,
@@ -82,9 +82,9 @@ class LegacyRunnerBuilderOverrides:
     assemble_vacuum_settings_fn: Callable[..., ResolvedVacuumSettings] | None = None
     assemble_runtime_config_fn: Callable[..., RuntimeConfig] | None = None
     assemble_filter_config_fn: Callable[..., InputFilterConfig | None] | None = None
-    assemble_cached_bronze_context_fn: Callable[
-        [PipelineRunContext], CachedBronzeContext
-    ] | None = None
+    assemble_cached_bronze_context_fn: (
+        Callable[[PipelineRunContext], CachedBronzeContext] | None
+    ) = None
 
 
 def resolve_runner_factory_wiring(

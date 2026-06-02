@@ -16,6 +16,7 @@ from bioetl.interfaces.cli.exit_codes import (
 
 pytestmark = pytest.mark.unit
 
+
 class TestExitCode:
     """Tests for ExitCode enum."""
 

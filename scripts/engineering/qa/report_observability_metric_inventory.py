@@ -79,9 +79,7 @@ _METRIC_MENTION_GREP_TIMEOUT_SECONDS: Final[float] = 20.0
 _METRIC_MENTION_GREP_CHUNK_SIZE: Final[int] = 128
 _PROMETHEUS_QUERY_TIMEOUT_SECONDS: Final[float] = 5.0
 _PROMETHEUS_BASE_URL_ENV_VAR: Final[str] = "BIOETL_OBSERVABILITY_PROMETHEUS_URL"
-_PROMETHEUS_BEARER_TOKEN_ENV_VAR: Final[str] = (
-    "BIOETL_OBSERVABILITY_PROMETHEUS_TOKEN"
-)
+_PROMETHEUS_BEARER_TOKEN_ENV_VAR: Final[str] = "BIOETL_OBSERVABILITY_PROMETHEUS_TOKEN"
 _RUNTIME_METRIC_METHODS = frozenset(
     {"increment_counter", "observe_histogram", "set_gauge"}
 )
@@ -1391,7 +1389,9 @@ def _runtime_cardinality_threshold_violations(
     return violations
 
 
-def _resolve_prometheus_base_url(explicit_base_url: str | None) -> tuple[str | None, str]:
+def _resolve_prometheus_base_url(
+    explicit_base_url: str | None,
+) -> tuple[str | None, str]:
     if explicit_base_url and explicit_base_url.strip():
         return explicit_base_url.strip().rstrip("/"), "cli"
     env_base_url = os.getenv(_PROMETHEUS_BASE_URL_ENV_VAR, "").strip()
@@ -1411,9 +1411,7 @@ def _prometheus_cardinality_query(
     label_names: frozenset[str],
 ) -> str:
     selector = (
-        "{__name__=~"
-        + json.dumps(_prometheus_metric_family_matcher(metric_name))
-        + "}"
+        "{__name__=~" + json.dumps(_prometheus_metric_family_matcher(metric_name)) + "}"
     )
     if label_names:
         labels_expr = ", ".join(sorted(label_names))
@@ -1433,7 +1431,9 @@ def _query_prometheus_scalar(
     bearer_token: str,
 ) -> int:
     request = Request(
-        url=prometheus_base_url.rstrip("/") + "/api/v1/query?" + urlencode({"query": query}),
+        url=prometheus_base_url.rstrip("/")
+        + "/api/v1/query?"
+        + urlencode({"query": query}),
         headers={"Accept": "application/json"},
     )
     if bearer_token:
@@ -1535,7 +1535,7 @@ def _build_runtime_cardinality_review_summary(
             "python -m scripts.engineering.qa.report_observability_metric_inventory "
             "--check --write-evidence reports/observability/runtime_cardinality_inventory.json "
             "--review-json-out reports/observability/runtime_cardinality_review.json "
-            "--summary-out \"$GITHUB_STEP_SUMMARY\" "
+            '--summary-out "$GITHUB_STEP_SUMMARY" '
             "--fail-on-degraded-live-review"
         ),
         "status": "passed",
@@ -1566,7 +1566,9 @@ def _build_runtime_cardinality_review_summary(
     }
     if not reviewed_metrics:
         summary["mode"] = "no_reviewed_metrics"
-        degraded_reasons.append("no reviewed runtime-cardinality metrics require live evidence")
+        degraded_reasons.append(
+            "no reviewed runtime-cardinality metrics require live evidence"
+        )
         return summary
 
     missing_thresholds = [
@@ -1632,8 +1634,7 @@ def _build_runtime_cardinality_review_summary(
         summary["mode"] = "live_review_unavailable"
         if query_errors:
             degraded_reasons.append(
-                "live Prometheus review failed for: "
-                + ", ".join(sorted(query_errors))
+                "live Prometheus review failed for: " + ", ".join(sorted(query_errors))
             )
         return summary
 
@@ -2106,7 +2107,9 @@ def _write_runtime_cardinality_review_summary(
 ) -> None:
     if output_path is None:
         return
-    resolved_path = output_path if output_path.is_absolute() else repo_root / output_path
+    resolved_path = (
+        output_path if output_path.is_absolute() else repo_root / output_path
+    )
     resolved_path.parent.mkdir(parents=True, exist_ok=True)
     resolved_path.write_text(
         json.dumps(summary, indent=2, sort_keys=True) + "\n",
@@ -2155,7 +2158,9 @@ def _append_runtime_cardinality_review_summary(
 ) -> None:
     if summary_out is None:
         return
-    resolved_path = summary_out if summary_out.is_absolute() else repo_root / summary_out
+    resolved_path = (
+        summary_out if summary_out.is_absolute() else repo_root / summary_out
+    )
     resolved_path.parent.mkdir(parents=True, exist_ok=True)
     prefix = ""
     if resolved_path.exists() and resolved_path.stat().st_size > 0:

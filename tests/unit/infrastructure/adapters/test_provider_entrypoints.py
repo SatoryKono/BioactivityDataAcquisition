@@ -9,6 +9,7 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+
 def test_pubmed_package_root_reexports_canonical_adapter() -> None:
     """PubMed package root should expose canonical adapter objects."""
     package_module = import_module("bioetl.infrastructure.adapters.pubmed")

@@ -10,6 +10,7 @@ from bioetl.domain.behavior.composite_metadata_helpers import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_parse_literal_valid_json():
     assert _parse_literal('["a", "b"]') == ["a", "b"]
     assert _parse_literal('{"a": 1}') == {"a": 1}

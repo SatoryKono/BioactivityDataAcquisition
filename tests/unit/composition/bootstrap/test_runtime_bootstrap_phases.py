@@ -12,6 +12,7 @@ from bioetl.composition.bootstrap.runtime import pipeline_bootstrap_phases as ph
 
 pytestmark = pytest.mark.unit
 
+
 def test_prepare_runtime_registry_creates_and_populates_registry() -> None:
     """Bootstrap registry prep should create, populate, and validate the registry."""
     registry = MagicMock()

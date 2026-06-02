@@ -15,6 +15,7 @@ __all__ = [
     "MergeOutputSchema",
     "MergeSchema",
     "MergeSortBySchema",
+    "TargetProteinClassificationProjectionSchema",
 ]
 
 
@@ -78,6 +79,44 @@ class ColumnGroupSchema(BaseModel):
         return self
 
 
+class TargetProteinClassificationProjectionSchema(BaseModel):
+    """Typed projection for deterministic target protein classification aliases."""
+
+    source_prefix: str = Field(
+        default="chembl.target_protein_classification",
+        description="Provider-qualified source prefix for projected classification fields",
+    )
+    include_protein_classifications: bool = Field(
+        default=True,
+        description="Whether to project the forensic protein_classifications payload",
+    )
+    levels: list[int] = Field(
+        default_factory=lambda: [1, 2, 3, 4, 5],
+        description="Hierarchy levels to project into deterministic target fields",
+    )
+
+    @field_validator("levels")
+    @classmethod
+    def validate_levels(cls, value: list[int]) -> list[int]:
+        normalized = sorted({int(level) for level in value})
+        if not normalized or any(level <= 0 for level in normalized):
+            raise ValueError("projection levels must contain positive integers")
+        return normalized
+
+    def expand_field_mappings(self) -> dict[str, str]:
+        mappings: dict[str, str] = {}
+        if self.include_protein_classifications:
+            mappings[f"{self.source_prefix}.protein_classifications"] = (
+                "protein_classifications"
+            )
+        for level in self.levels:
+            for suffix in ("id", "name", "desc"):
+                mappings[
+                    (f"{self.source_prefix}.target_protein_class_{suffix}_L{level}")
+                ] = f"target_protein_class_{suffix}_L{level}"
+        return mappings
+
+
 class MergeSchema(BaseModel):
     """Pydantic schema for merge step configuration."""
 
@@ -102,6 +141,12 @@ class MergeSchema(BaseModel):
     )
     field_mappings: dict[str, str] = Field(
         default_factory=dict, description="Mapping to rename fields during merge"
+    )
+    target_protein_classification_projection: (
+        TargetProteinClassificationProjectionSchema | None
+    ) = Field(
+        default=None,
+        description="Typed projection contract for target protein classification aliases",
     )
     output: MergeOutputSchema = Field(
         ..., description="Output paths for Silver and Gold tables"
@@ -136,6 +181,11 @@ class MergeSchema(BaseModel):
         field_priorities_tuples = {
             key: tuple(value) for key, value in self.field_priorities.items()
         }
+        field_mappings = dict(self.field_mappings)
+        if self.target_protein_classification_projection is not None:
+            field_mappings.update(
+                self.target_protein_classification_projection.expand_field_mappings()
+            )
         column_groups_domain = tuple(
             ColumnGroupConfig(
                 name=group.name,
@@ -156,7 +206,7 @@ class MergeSchema(BaseModel):
             sort_by_gold=tuple(self.sort_by.gold),
             field_priorities=field_priorities_tuples,
             normalization_compatibility_overrides=self.normalization_compatibility_overrides,
-            field_mappings=self.field_mappings,
+            field_mappings=field_mappings,
             preserve_all_sources=self.preserve_all_sources,
             column_groups=column_groups_domain,
             exclude_fields=tuple(self.exclude_fields),

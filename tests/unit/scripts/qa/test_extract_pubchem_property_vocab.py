@@ -15,6 +15,7 @@ from scripts.engineering.qa.extract_pubchem_property_vocab import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_extract_pubchem_property_vocab_matches_expected_fixture_subset() -> None:
     payload = extract_pubchem_property_vocab(
         [Path("tests/fixtures/bronze/pubchem/compound/sample_ci_2026-04-24.jsonl")]

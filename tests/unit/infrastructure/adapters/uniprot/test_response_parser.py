@@ -13,6 +13,7 @@ from bioetl.infrastructure.adapters.uniprot.response_parser import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_parse_uniprot_protein_response_returns_records_and_cursor() -> None:
     response = MagicMock()
     response.status_code = 200

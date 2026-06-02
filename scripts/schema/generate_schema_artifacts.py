@@ -82,9 +82,7 @@ def _load_entry(yaml_path: Path) -> CanonicalSchemaEntry:
         groups = schema.get("column_groups", []) if isinstance(schema, dict) else []
         if not groups:
             merge = composite_dict.get("merge", {})
-            groups = (
-                merge.get("column_groups", []) if isinstance(merge, dict) else []
-            )
+            groups = merge.get("column_groups", []) if isinstance(merge, dict) else []
     else:
         base_dir = CANONICAL_DIR
         rel = yaml_path.relative_to(base_dir)

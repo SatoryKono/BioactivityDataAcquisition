@@ -282,7 +282,9 @@ class TargetProteinClassificationSnapshotDataSource:
         if not filter_ids:
             return tuple(sorted(self._target_component_ids))
         if filter_field in _SUPPORTED_TARGET_FILTER_FIELDS:
-            requested = {str(value).strip() for value in filter_ids if str(value).strip()}
+            requested = {
+                str(value).strip() for value in filter_ids if str(value).strip()
+            }
             return tuple(
                 target_id
                 for target_id in sorted(self._target_component_ids)
@@ -297,8 +299,7 @@ class TargetProteinClassificationSnapshotDataSource:
                 target_ids.update(self._target_ids_by_component.get(component_id, ()))
             return tuple(sorted(target_ids))
         raise ValueError(
-            "Unsupported target protein classification filter_field: "
-            f"{filter_field}"
+            f"Unsupported target protein classification filter_field: {filter_field}"
         )
 
     def _relation_rows_for_target(self, target_id: str) -> tuple[JsonDict, ...]:

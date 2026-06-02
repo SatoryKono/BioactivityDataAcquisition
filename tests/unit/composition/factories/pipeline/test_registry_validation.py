@@ -14,6 +14,7 @@ from bioetl.composition.factories.pipeline.registry_validation import (
 
 pytestmark = pytest.mark.unit
 
+
 class _DummyTransformer:
     def transform(self) -> None:  # pragma: no cover - signature marker only
         return None

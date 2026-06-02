@@ -131,12 +131,8 @@ def _insert_publication_year_in_ranges_block(block: str) -> str:
 
 
 def phase_01_gold_publication_year() -> int:
-    pub_year = (
-        "      publication_year:\n        min: 1950\n        max: 2050\n"
-    )
-    pub_year_indent8 = (
-        "            publication_year:\n                min: 1950\n                max: 2050\n"
-    )
+    pub_year = "      publication_year:\n        min: 1950\n        max: 2050\n"
+    pub_year_indent8 = "            publication_year:\n                min: 1950\n                max: 2050\n"
 
     def fn(_path: Path, text: str) -> str | None:
         if "filters.gold_filters" not in text and "gold_filters:" not in text:
@@ -316,7 +312,9 @@ def phase_08_input_fallback_column() -> int:
 
 def phase_09_silver_publication_year() -> int:
     def fn(_path: Path, text: str) -> str | None:
-        if re.search(r"silver_filters:[\s\S]{0,600}?ranges:[\s\S]{0,200}?publication_year", text):
+        if re.search(
+            r"silver_filters:[\s\S]{0,600}?ranges:[\s\S]{0,200}?publication_year", text
+        ):
             return None
         if "  silver_filters:\n    ranges: {}" in text:
             return text.replace(
@@ -541,7 +539,10 @@ PHASES: list[tuple[str, Callable[[], int]]] = [
     ("composite lineage chembl", phase_17_lineage_chembl),
     ("schema content_hash noop", phase_18_schema_content_hash),
     ("filters identity noop", phase_19_filters_identity),
-    ("composite cross_validation disabled", phase_20_composite_cross_validation_disabled),
+    (
+        "composite cross_validation disabled",
+        phase_20_composite_cross_validation_disabled,
+    ),
 ]
 
 
@@ -553,10 +554,10 @@ def run(count: int = 20, start: int = 1) -> list[PhaseResult]:
         touched = handler()
         _regenerate()
         entity, composite = _metrics()
-        results.append(
-            PhaseResult(idx, name, entity, composite, touched)
+        results.append(PhaseResult(idx, name, entity, composite, touched))
+        print(
+            f"Phase {idx:02d} {name}: touched={touched} entity={entity} composite={composite}"
         )
-        print(f"Phase {idx:02d} {name}: touched={touched} entity={entity} composite={composite}")
     entity, composite = _metrics()
     _update_scorecard(entity, composite)
     print(f"FINAL entity={entity} composite={composite}")

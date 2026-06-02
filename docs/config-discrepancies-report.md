@@ -1,10 +1,10 @@
 # Config Discrepancies Report
 
 Total configs: 27
-Total unique parameters: 537
+Total unique parameters: 525
 Actionable inconsistent parameters: 0
-Sanctioned partial variance parameters: 119
-Raw partial parameter count: 119
+Sanctioned partial variance parameters: 107
+Raw partial parameter count: 107
 
 ## Actionable Drift Parameters
 
@@ -123,22 +123,10 @@ These parameters are intentionally partial across governed config families and r
 
 ### composite_runtime
 
-- `composite.merge.field_mappings.chembl.target_protein_classification.protein_classifications` (1/5): composite/target
-- `composite.merge.field_mappings.chembl.target_protein_classification.target_protein_class_desc_L1` (1/5): composite/target
-- `composite.merge.field_mappings.chembl.target_protein_classification.target_protein_class_desc_L2` (1/5): composite/target
-- `composite.merge.field_mappings.chembl.target_protein_classification.target_protein_class_desc_L3` (1/5): composite/target
-- `composite.merge.field_mappings.chembl.target_protein_classification.target_protein_class_desc_L4` (1/5): composite/target
-- `composite.merge.field_mappings.chembl.target_protein_classification.target_protein_class_desc_L5` (1/5): composite/target
-- `composite.merge.field_mappings.chembl.target_protein_classification.target_protein_class_id_L1` (1/5): composite/target
-- `composite.merge.field_mappings.chembl.target_protein_classification.target_protein_class_id_L2` (1/5): composite/target
-- `composite.merge.field_mappings.chembl.target_protein_classification.target_protein_class_id_L3` (1/5): composite/target
-- `composite.merge.field_mappings.chembl.target_protein_classification.target_protein_class_id_L4` (1/5): composite/target
-- `composite.merge.field_mappings.chembl.target_protein_classification.target_protein_class_id_L5` (1/5): composite/target
-- `composite.merge.field_mappings.chembl.target_protein_classification.target_protein_class_name_L1` (1/5): composite/target
-- `composite.merge.field_mappings.chembl.target_protein_classification.target_protein_class_name_L2` (1/5): composite/target
-- `composite.merge.field_mappings.chembl.target_protein_classification.target_protein_class_name_L3` (1/5): composite/target
-- `composite.merge.field_mappings.chembl.target_protein_classification.target_protein_class_name_L4` (1/5): composite/target
-- `composite.merge.field_mappings.chembl.target_protein_classification.target_protein_class_name_L5` (1/5): composite/target
+- `composite.merge.target_protein_classification_projection` (1/5): composite/target
+- `composite.merge.target_protein_classification_projection.include_protein_classifications` (1/5): composite/target
+- `composite.merge.target_protein_classification_projection.levels` (1/5): composite/target
+- `composite.merge.target_protein_classification_projection.source_prefix` (1/5): composite/target
 
 ## Interpretation
 

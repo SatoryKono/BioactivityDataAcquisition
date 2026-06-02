@@ -21,6 +21,7 @@ from pathlib import Path
 
 pytestmark = pytest.mark.architecture
 
+
 class TestBootstrapLayerBoundaries:
     """Tests for bootstrap package structure and import rules."""
 

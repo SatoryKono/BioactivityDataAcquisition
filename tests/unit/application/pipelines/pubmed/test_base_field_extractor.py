@@ -12,6 +12,7 @@ from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtract
 
 pytestmark = pytest.mark.unit
 
+
 class ConcreteExtractor(BaseFieldExtractor):
     """Concrete implementation for testing."""
 

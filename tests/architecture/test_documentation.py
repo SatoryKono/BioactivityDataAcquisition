@@ -22,6 +22,7 @@ import pytest
 
 pytestmark = pytest.mark.architecture
 
+
 def _iter_parsed_python_modules(
     base_dir: Path,
     *,

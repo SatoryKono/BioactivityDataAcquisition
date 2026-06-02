@@ -23,6 +23,7 @@ from bioetl.infrastructure.errors import (
 
 pytestmark = pytest.mark.unit
 
+
 @pytest.fixture
 def mapper() -> DomainInfraExceptionMapper:
     return DomainInfraExceptionMapper(logger=MagicMock())

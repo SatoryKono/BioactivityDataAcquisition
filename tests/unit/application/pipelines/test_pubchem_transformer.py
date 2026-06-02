@@ -45,7 +45,9 @@ class TestPubChemCompoundTransformer:
         )
 
     @pytest.mark.asyncio
-    async def test_compound_transformer__valid_record__a1346563(self, transformer, mock_context):
+    async def test_compound_transformer__valid_record__a1346563(
+        self, transformer, mock_context
+    ):
         """Test transformation of valid compound record with all fields."""
         record = {
             "molecule_id": 2244,
@@ -197,7 +199,9 @@ class TestPubChemCompoundTransformer:
         assert isinstance(result["molecule_id"], str)
 
     @pytest.mark.asyncio
-    async def test_compound_transformer__entity_id_format__18df995f(self, transformer, mock_context):
+    async def test_compound_transformer__entity_id_format__18df995f(
+        self, transformer, mock_context
+    ):
         """Test that entity_id follows expected format."""
         record = {
             "molecule_id": 2244,
@@ -356,7 +360,9 @@ class TestPubChemCompoundTransformer:
         mock_context.logger.warning.assert_called()
 
     @pytest.mark.asyncio
-    async def test_compound_transformer__fields_present__8b840789(self, transformer, mock_context):
+    async def test_compound_transformer__fields_present__8b840789(
+        self, transformer, mock_context
+    ):
         """Test that lineage fields are properly added to the result."""
         record = {
             "molecule_id": 2244,

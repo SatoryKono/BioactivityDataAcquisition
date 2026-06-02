@@ -9,6 +9,7 @@ from pathlib import Path
 
 pytestmark = pytest.mark.architecture
 
+
 def test_e2e_matrix_blocking_job_runs_in_probe_mode() -> None:
     workflow = Path(".github/workflows/e2e-matrix-health.yml").read_text(
         encoding="utf-8"

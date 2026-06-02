@@ -57,10 +57,21 @@ class _TargetEntityFetchDelegationMixin:
             entity_type=entity_type,
             target_entity_type=self.TARGET_ENTITY_TYPE,
             target_factory=partial(
-                self._fetch_target_records, limit, query, filter_ids, filter_field, offset
+                self._fetch_target_records,
+                limit,
+                query,
+                filter_ids,
+                filter_field,
+                offset,
             ),
             delegate_factory=lambda: yield_wrapped_fetch_records(
-                self._data_source, entity_type, limit, query, filter_ids, filter_field, offset
+                self._data_source,
+                entity_type,
+                limit,
+                query,
+                filter_ids,
+                filter_field,
+                offset,
             ),
         )
 

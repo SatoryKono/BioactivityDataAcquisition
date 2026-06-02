@@ -17,6 +17,7 @@ from bioetl.domain.types import RunType
 
 pytestmark = pytest.mark.unit
 
+
 def test_get_run_statistics_returns_empty_dict_without_hook() -> None:
     """Executors without a run-statistics hook should not break postrun writes."""
     executor = object()

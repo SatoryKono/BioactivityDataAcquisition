@@ -126,7 +126,9 @@ def _family_touch_surface(
     return surface
 
 
-def _ratchet_family_budgets(ratchet_payload: dict[str, Any]) -> dict[str, dict[str, int]]:
+def _ratchet_family_budgets(
+    ratchet_payload: dict[str, Any],
+) -> dict[str, dict[str, int]]:
     families = ratchet_payload.get("families")
     assert isinstance(families, list)
     budgets: dict[str, dict[str, int]] = {}
@@ -196,8 +198,7 @@ def test_touched_twin_family_files_do_not_grow_private_imports() -> None:
             continue
 
         baseline_private_importers = {
-            str(path)
-            for path in baseline_row.get("current_private_src_importers", [])
+            str(path) for path in baseline_row.get("current_private_src_importers", [])
         }
         live_private_importers = {
             str(path) for path in live_row.get("current_private_src_importers", [])
@@ -206,24 +207,22 @@ def test_touched_twin_family_files_do_not_grow_private_imports() -> None:
         live_count = int(live_row["current_private_src_importer_count"])
         max_private = ratchet_budgets[family_id]["max_private_src_importers"]
 
-        new_private_importers = sorted(live_private_importers - baseline_private_importers)
+        new_private_importers = sorted(
+            live_private_importers - baseline_private_importers
+        )
         if live_count > max_private:
             violations.append(
-                (
-                    f"{family_id}: private src importers {live_count} exceed ratchet "
-                    f"budget {max_private} after touching "
-                    f"{sorted(touch_surface & changed_paths)}"
-                )
+                f"{family_id}: private src importers {live_count} exceed ratchet "
+                f"budget {max_private} after touching "
+                f"{sorted(touch_surface & changed_paths)}"
             )
             continue
         if live_count > baseline_count:
             violations.append(
-                (
-                    f"{family_id}: private src importers grew from {baseline_count} to "
-                    f"{live_count} after touching "
-                    f"{sorted(touch_surface & changed_paths)}; refresh the census "
-                    "baseline only with an explicit ratchet review"
-                )
+                f"{family_id}: private src importers grew from {baseline_count} to "
+                f"{live_count} after touching "
+                f"{sorted(touch_surface & changed_paths)}; refresh the census "
+                "baseline only with an explicit ratchet review"
             )
             continue
         if new_private_importers:

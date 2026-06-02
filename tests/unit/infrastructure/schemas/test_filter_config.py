@@ -17,6 +17,7 @@ from bioetl.infrastructure.schemas.filter_config import FilterConfigFile
 
 pytestmark = pytest.mark.unit
 
+
 class TestExtractionParamsDefault:
     """Tests for extraction_params default behavior."""
 

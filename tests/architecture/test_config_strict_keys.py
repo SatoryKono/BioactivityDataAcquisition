@@ -30,7 +30,7 @@ def _has_pipeline_section(config_path: Path) -> bool:
         return False
     if not all(isinstance(key, str) for key in raw_obj):
         return False
-    raw_map: dict[str, object] = {key: value for key, value in raw_obj.items()}
+    raw_map: dict[str, object] = dict(raw_obj)
     pipeline_section = raw_map.get("pipeline")
     return isinstance(pipeline_section, dict)
 

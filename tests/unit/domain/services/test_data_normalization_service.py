@@ -56,7 +56,9 @@ class TestNormalizeDoi:
             ("", None),
         ],
     )
-    def test_service_normalize_doi__normalize_doi__47ffadec(self, doi: str | None, expected: str | None) -> None:
+    def test_service_normalize_doi__normalize_doi__47ffadec(
+        self, doi: str | None, expected: str | None
+    ) -> None:
         """Test DOI normalization."""
         service = DefaultDataNormalizer()
         assert service.normalize_doi(doi) == expected
@@ -85,7 +87,9 @@ class TestNormalizePmid:
             (False, None),
         ],
     )
-    def test_case__46f28ca67b(self, pmid: str | int | None, expected: str | None) -> None:
+    def test_case__46f28ca67b(
+        self, pmid: str | int | None, expected: str | None
+    ) -> None:
         """Test PMID normalization."""
         service = DefaultDataNormalizer()
         assert service.normalize_pmid(pmid) == expected
@@ -196,7 +200,9 @@ class TestStripHtmlTags:
             ("Line\nbreak", "Line break"),
         ],
     )
-    def test_strip_html_tags__strip_html_tags__21abb511(self, text: str | None, expected: str | None) -> None:
+    def test_strip_html_tags__strip_html_tags__21abb511(
+        self, text: str | None, expected: str | None
+    ) -> None:
         """Test HTML tag stripping with entity decoding."""
         service = DefaultDataNormalizer()
         assert service.strip_html_tags(text) == expected
@@ -243,7 +249,9 @@ class TestNormalizeString:
             (None, None),
         ],
     )
-    def test_normalize_string__normalize_string__8f8709de(self, value: str | None, expected: str | None) -> None:
+    def test_normalize_string__normalize_string__8f8709de(
+        self, value: str | None, expected: str | None
+    ) -> None:
         """Test string normalization."""
         service = DefaultDataNormalizer()
         assert service.normalize_string(value) == expected

@@ -16,6 +16,7 @@ from bioetl.composition.bootstrap.runtime.runner_factory_builder_service import 
 
 pytestmark = pytest.mark.unit
 
+
 class TestResolveBronzeOpts:
     """Test _resolve_bronze_opts tri-state resolution."""
 

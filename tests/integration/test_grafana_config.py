@@ -473,9 +473,7 @@ def test_overview_exposes_actual_alert_state_triage_surface() -> None:
 
     assert alert_panel is not None
     assert alert_panel["title"] == "Triage Alert State"
-    expressions = [
-        target.get("expr", "") for target in alert_panel.get("targets", [])
-    ]
+    expressions = [target.get("expr", "") for target in alert_panel.get("targets", [])]
     assert any("ALERTS" in expr for expr in expressions)
     assert any('alertstate=~"firing|pending"' in expr for expr in expressions)
 
@@ -628,27 +626,21 @@ def test_variable_query_sources(dashboard_path):
         assert "dimension=pipeline" in str(
             pipeline_context_exact_infinity.get("url", "")
         )
-        assert "exact_run_only=1" in str(
-            pipeline_context_exact_infinity.get("url", "")
-        )
+        assert "exact_run_only=1" in str(pipeline_context_exact_infinity.get("url", ""))
         assert "/ops/control-plane/filter-options" in str(
             run_type_context_exact_infinity.get("url", "")
         )
         assert "dimension=run_type" in str(
             run_type_context_exact_infinity.get("url", "")
         )
-        assert "exact_run_only=1" in str(
-            run_type_context_exact_infinity.get("url", "")
-        )
+        assert "exact_run_only=1" in str(run_type_context_exact_infinity.get("url", ""))
         assert "/ops/control-plane/filter-options" in str(
             provider_context_exact_infinity.get("url", "")
         )
         assert "dimension=provider" in str(
             provider_context_exact_infinity.get("url", "")
         )
-        assert "exact_run_only=1" in str(
-            provider_context_exact_infinity.get("url", "")
-        )
+        assert "exact_run_only=1" in str(provider_context_exact_infinity.get("url", ""))
         assert "bioetl_workflow_step_events_total" in step_status_query.get("query", "")
         assert "bioetl_workflow_step_events_total" in step_kind_query.get("query", "")
         return
@@ -1419,11 +1411,7 @@ def test_workflow_dashboard_expands_step_diagnostics_below_first_screen() -> Non
 
     panels = dashboard.get("panels", [])
     row_panel = next(
-        (
-            panel
-            for panel in panels
-            if panel.get("title") == "Step Diagnostics"
-        ),
+        (panel for panel in panels if panel.get("title") == "Step Diagnostics"),
         None,
     )
     assert row_panel is not None, "Workflow dashboard must expose step diagnostics row"

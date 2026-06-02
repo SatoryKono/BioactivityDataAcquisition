@@ -13,6 +13,7 @@ from bioetl.infrastructure.validation.contract_validator import (
 
 pytestmark = pytest.mark.unit
 
+
 class TestContractAwareGoldValidatorSmoke:
     """Smoke tests focused on policy resolver behavior."""
 

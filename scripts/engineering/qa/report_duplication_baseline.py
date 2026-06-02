@@ -429,11 +429,7 @@ def _markdown_summary_lines(
     max_duplicate_clusters: int | None,
 ) -> list[str]:
     """Render top-of-report summary bullets and table header."""
-    mode = (
-        "fail-fast"
-        if max_duplicate_clusters is not None
-        else "report-only"
-    )
+    mode = "fail-fast" if max_duplicate_clusters is not None else "report-only"
     lines = [
         "# Duplication Baseline Report",
         "",

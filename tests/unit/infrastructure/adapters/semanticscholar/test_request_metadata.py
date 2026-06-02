@@ -54,7 +54,9 @@ def adapter(
     )
 
 
-def test_request_metadata__count_starts_at_zero__d202a52a(adapter: SemanticScholarAdapter) -> None:
+def test_request_metadata__count_starts_at_zero__d202a52a(
+    adapter: SemanticScholarAdapter,
+) -> None:
     """New adapter instances should start with an empty request collector."""
     assert adapter.request_count == 0
 

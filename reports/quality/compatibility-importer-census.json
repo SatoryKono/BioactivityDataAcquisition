@@ -1,5 +1,5 @@
 {
-  "snapshot_date": "2026-06-01",
+  "snapshot_date": "2026-06-02",
   "inventory_source": "configs/quality/compatibility_facade_inventory.yaml",
   "twin_ratchet_source": "configs/quality/compatibility_twin_module_ratchet.yaml",
   "config_root_facade_source": "configs/quality/infrastructure_config_root_facade_inventory.yaml",
@@ -9,10 +9,10 @@
     "removed_compatibility_surfaces_with_src_importers": 0,
     "removed_compatibility_surfaces_with_test_importers": 0,
     "removed_compatibility_surfaces_still_present": 0,
-    "twin_pair_count": 8,
+    "twin_pair_count": 4,
     "twin_pairs_with_private_src_importers": 0,
     "twin_pairs_without_public_src_importers": 0,
-    "tracked_twin_family_count": 3,
+    "tracked_twin_family_count": 0,
     "config_root_symbol_count": 3,
     "config_root_src_importer_count": 0,
     "retained_public_export_facade_count": 4,
@@ -822,47 +822,6 @@
   ],
   "twin_pairs": [
     {
-      "private_path": "src/bioetl/application/core/_span_helpers.py",
-      "public_path": "src/bioetl/application/core/span_helpers.py",
-      "private_module": "bioetl.application.core._span_helpers",
-      "public_module": "bioetl.application.core.span_helpers",
-      "public_src_importer_count": 8,
-      "public_test_importer_count": 0,
-      "private_src_importer_count": 0,
-      "private_test_importer_count": 0,
-      "public_src_importers": [
-        "src/bioetl/application/core/_base_transformer_execution_support.py",
-        "src/bioetl/application/core/_span_helpers.py",
-        "src/bioetl/application/core/base_transformer_execution_mixin.py",
-        "src/bioetl/application/core/batch_tracing.py",
-        "src/bioetl/application/core/batch_writer_tracing_mixin.py",
-        "src/bioetl/application/core/postrun/service.py",
-        "src/bioetl/application/core/record_processor.py",
-        "src/bioetl/application/core/runner.py"
-      ],
-      "private_src_importers": []
-    },
-    {
-      "private_path": "src/bioetl/application/core/batch_execution/_contracts.py",
-      "public_path": "src/bioetl/application/core/batch_execution/contracts.py",
-      "private_module": "bioetl.application.core.batch_execution._contracts",
-      "public_module": "bioetl.application.core.batch_execution.contracts",
-      "public_src_importer_count": 7,
-      "public_test_importer_count": 0,
-      "private_src_importer_count": 0,
-      "private_test_importer_count": 0,
-      "public_src_importers": [
-        "src/bioetl/application/core/batch_execution/__init__.py",
-        "src/bioetl/application/core/batch_execution/_contracts.py",
-        "src/bioetl/application/core/batch_execution/lifecycle.py",
-        "src/bioetl/application/core/batch_execution/run_service.py",
-        "src/bioetl/application/core/batch_execution/state_service.py",
-        "src/bioetl/application/core/batch_executor_helpers.py",
-        "src/bioetl/application/core/batch_executor_protocols.py"
-      ],
-      "private_src_importers": []
-    },
-    {
       "private_path": "src/bioetl/composition/factories/storage/_audit.py",
       "public_path": "src/bioetl/composition/factories/storage/audit.py",
       "private_module": "bioetl.composition.factories.storage._audit",
@@ -893,49 +852,6 @@
         "src/bioetl/composition/factories/storage/__init__.py",
         "src/bioetl/composition/factories/storage/_helpers.py",
         "src/bioetl/composition/factories/storage/_resilience.py"
-      ],
-      "private_src_importers": []
-    },
-    {
-      "private_path": "src/bioetl/domain/normalization/profiles/_chembl_policy_registry.py",
-      "public_path": "src/bioetl/domain/normalization/profiles/chembl_policy_registry.py",
-      "private_module": "bioetl.domain.normalization.profiles._chembl_policy_registry",
-      "public_module": "bioetl.domain.normalization.profiles.chembl_policy_registry",
-      "public_src_importer_count": 12,
-      "public_test_importer_count": 3,
-      "private_src_importer_count": 0,
-      "private_test_importer_count": 0,
-      "public_src_importers": [
-        "src/bioetl/composition/bootstrap/runtime/normalization_policy_init.py",
-        "src/bioetl/domain/normalization/profiles/_chembl_policy_registry.py",
-        "src/bioetl/domain/normalization/profiles/_chembl_reference_identifier_rules.py",
-        "src/bioetl/domain/normalization/profiles/chembl_activity.py",
-        "src/bioetl/domain/normalization/profiles/chembl_assay.py",
-        "src/bioetl/domain/normalization/profiles/chembl_assay_parameters.py",
-        "src/bioetl/domain/normalization/profiles/chembl_cell_line.py",
-        "src/bioetl/domain/normalization/profiles/chembl_molecule.py",
-        "src/bioetl/domain/normalization/profiles/chembl_protein_class.py",
-        "src/bioetl/domain/normalization/profiles/chembl_publication.py",
-        "src/bioetl/domain/normalization/profiles/chembl_target.py",
-        "src/bioetl/domain/normalization/profiles/chembl_tissue.py"
-      ],
-      "private_src_importers": []
-    },
-    {
-      "private_path": "src/bioetl/domain/normalization/profiles/_chembl_policy_registry_data.py",
-      "public_path": "src/bioetl/domain/normalization/profiles/chembl_policy_registry_data.py",
-      "private_module": "bioetl.domain.normalization.profiles._chembl_policy_registry_data",
-      "public_module": "bioetl.domain.normalization.profiles.chembl_policy_registry_data",
-      "public_src_importer_count": 5,
-      "public_test_importer_count": 0,
-      "private_src_importer_count": 0,
-      "private_test_importer_count": 0,
-      "public_src_importers": [
-        "src/bioetl/composition/bootstrap/runtime/normalization_policy_init.py",
-        "src/bioetl/domain/normalization/profiles/_chembl_policy_registry_data.py",
-        "src/bioetl/domain/normalization/profiles/_chembl_policy_registry_defaults.py",
-        "src/bioetl/domain/normalization/profiles/chembl_policy_registry.py",
-        "src/bioetl/infrastructure/config/chembl_policy_registry_loader.py"
       ],
       "private_src_importers": []
     },
@@ -972,78 +888,7 @@
       "private_src_importers": []
     }
   ],
-  "tracked_twin_families": [
-    {
-      "family_id": "application.core.span_helpers",
-      "owner": "bioetl.application.core",
-      "public_module": "bioetl.application.core.span_helpers",
-      "private_module": "bioetl.application.core._span_helpers",
-      "canonical_first_party_module": "bioetl.application.core.span_helpers",
-      "max_public_src_importers": 8,
-      "max_private_src_importers": 0,
-      "rationale": "Issue #4923 promoted the public span-helper seam to canonical ownership. The old private module remains a backward-compatible re-export wrapper, but no first-party source module may import it.",
-      "current_public_src_importer_count": 8,
-      "current_private_src_importer_count": 0,
-      "current_public_src_importers": [
-        "src/bioetl/application/core/_base_transformer_execution_support.py",
-        "src/bioetl/application/core/_span_helpers.py",
-        "src/bioetl/application/core/base_transformer_execution_mixin.py",
-        "src/bioetl/application/core/batch_tracing.py",
-        "src/bioetl/application/core/batch_writer_tracing_mixin.py",
-        "src/bioetl/application/core/postrun/service.py",
-        "src/bioetl/application/core/record_processor.py",
-        "src/bioetl/application/core/runner.py"
-      ],
-      "current_private_src_importers": []
-    },
-    {
-      "family_id": "domain.normalization.profiles.chembl_policy_registry",
-      "owner": "bioetl.domain.normalization.profiles",
-      "public_module": "bioetl.domain.normalization.profiles.chembl_policy_registry",
-      "private_module": "bioetl.domain.normalization.profiles._chembl_policy_registry",
-      "canonical_first_party_module": "bioetl.domain.normalization.profiles.chembl_policy_registry",
-      "max_public_src_importers": 12,
-      "max_private_src_importers": 0,
-      "rationale": "Issue #4923 promoted the public ChEMBL policy registry seam to canonical ownership. The old private module remains a backward-compatible re-export wrapper, but no first-party source module may import it.",
-      "current_public_src_importer_count": 12,
-      "current_private_src_importer_count": 0,
-      "current_public_src_importers": [
-        "src/bioetl/composition/bootstrap/runtime/normalization_policy_init.py",
-        "src/bioetl/domain/normalization/profiles/_chembl_policy_registry.py",
-        "src/bioetl/domain/normalization/profiles/_chembl_reference_identifier_rules.py",
-        "src/bioetl/domain/normalization/profiles/chembl_activity.py",
-        "src/bioetl/domain/normalization/profiles/chembl_assay.py",
-        "src/bioetl/domain/normalization/profiles/chembl_assay_parameters.py",
-        "src/bioetl/domain/normalization/profiles/chembl_cell_line.py",
-        "src/bioetl/domain/normalization/profiles/chembl_molecule.py",
-        "src/bioetl/domain/normalization/profiles/chembl_protein_class.py",
-        "src/bioetl/domain/normalization/profiles/chembl_publication.py",
-        "src/bioetl/domain/normalization/profiles/chembl_target.py",
-        "src/bioetl/domain/normalization/profiles/chembl_tissue.py"
-      ],
-      "current_private_src_importers": []
-    },
-    {
-      "family_id": "domain.normalization.profiles.chembl_policy_registry_data",
-      "owner": "bioetl.domain.normalization.profiles",
-      "public_module": "bioetl.domain.normalization.profiles.chembl_policy_registry_data",
-      "private_module": "bioetl.domain.normalization.profiles._chembl_policy_registry_data",
-      "canonical_first_party_module": "bioetl.domain.normalization.profiles.chembl_policy_registry_data",
-      "max_public_src_importers": 5,
-      "max_private_src_importers": 0,
-      "rationale": "Issue #4923 promoted the public ChEMBL policy registry data seam to canonical ownership. The old private module remains a backward-compatible re-export wrapper, but no first-party source module may import it.",
-      "current_public_src_importer_count": 5,
-      "current_private_src_importer_count": 0,
-      "current_public_src_importers": [
-        "src/bioetl/composition/bootstrap/runtime/normalization_policy_init.py",
-        "src/bioetl/domain/normalization/profiles/_chembl_policy_registry_data.py",
-        "src/bioetl/domain/normalization/profiles/_chembl_policy_registry_defaults.py",
-        "src/bioetl/domain/normalization/profiles/chembl_policy_registry.py",
-        "src/bioetl/infrastructure/config/chembl_policy_registry_loader.py"
-      ],
-      "current_private_src_importers": []
-    }
-  ],
+  "tracked_twin_families": [],
   "config_root_facade": {
     "target_module": "bioetl.infrastructure.config",
     "new_src_import_policy": "external_only_zero_first_party_growth",

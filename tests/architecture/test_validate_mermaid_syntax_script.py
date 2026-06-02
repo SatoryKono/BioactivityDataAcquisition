@@ -9,6 +9,7 @@ from pathlib import Path
 
 pytestmark = pytest.mark.architecture
 
+
 def _script_text() -> str:
     script_path = Path("scripts/diagrams/validate_mermaid_syntax.sh")
     assert script_path.exists(), (

@@ -576,7 +576,9 @@ class TestRecordProcessorSpanRegression:
     def _build_record_processor(self, tracer: object) -> object:
         """Build a RecordProcessor with mocked dependencies."""
         from bioetl.application.core.record_processor import RecordProcessor
-        from bioetl.application.core.record_processor_config import RecordProcessorConfig
+        from bioetl.application.core.record_processor_config import (
+            RecordProcessorConfig,
+        )
 
         context = PipelineContext(
             run_id=RunID(uuid4()),

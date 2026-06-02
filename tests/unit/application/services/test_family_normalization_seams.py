@@ -54,6 +54,7 @@ from bioetl.application.services.lineage.metadata_coordinator import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_legacy_control_plane_facades_point_to_canonical_package() -> None:
     assert RunManifestServicePackage is RunManifestService
     assert RunManifestInspectionServicePackage is RunManifestInspectionService

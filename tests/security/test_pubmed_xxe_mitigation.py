@@ -10,6 +10,7 @@ from tests.helpers.transformer_dependencies import instantiate_test_transformer
 
 pytestmark = pytest.mark.security
 
+
 def test_transformer_xxe_mitigation():
     """Verify that PubMedPublicationTransformer blocks XXE via defusedxml."""
     transformer = instantiate_test_transformer(

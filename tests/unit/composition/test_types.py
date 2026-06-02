@@ -11,6 +11,7 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+
 class TestTypesModuleExports:
     """Tests for composition/types.py exports."""
 

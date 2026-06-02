@@ -7,6 +7,7 @@ from pathlib import Path
 
 pytestmark = pytest.mark.architecture
 
+
 def test_no_legacy_validation_test_debt_markers() -> None:
     """Validation test modules should not keep stale debt marker comments."""
     targets = {

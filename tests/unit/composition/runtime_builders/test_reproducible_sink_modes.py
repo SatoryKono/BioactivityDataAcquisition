@@ -13,6 +13,7 @@ from bioetl.composition.runtime_builders.run_manifest_support import (
 
 pytestmark = pytest.mark.unit
 
+
 def _yaml_config(*, contract: str, evidence: dict[str, object] | None = None) -> object:
     layer: dict[str, object] = {
         "enabled": True,

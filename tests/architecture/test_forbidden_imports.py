@@ -28,6 +28,7 @@ from pathlib import Path
 
 pytestmark = pytest.mark.architecture
 
+
 def _python_files(path: Path, *, skip_private: bool = False) -> list[Path]:
     files: list[Path] = []
     for current_root, dirnames, filenames in os.walk(path):

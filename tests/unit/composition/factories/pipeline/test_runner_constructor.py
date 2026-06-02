@@ -13,6 +13,7 @@ from bioetl.composition.factories.pipeline import runner_constructor
 
 pytestmark = pytest.mark.unit
 
+
 def test_create_pipeline_runner_uses_grouped_dependency_bundle(monkeypatch) -> None:
     """Composition must call PipelineRunner with typed grouped dependencies."""
     captured: dict[str, object] = {}

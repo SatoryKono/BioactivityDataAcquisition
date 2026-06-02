@@ -21,6 +21,7 @@ from bioetl.infrastructure.control_plane import FileControlPlaneArtifactLifecycl
 
 pytestmark = pytest.mark.unit
 
+
 def _write_json(path: Path, payload: dict[str, object]) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")

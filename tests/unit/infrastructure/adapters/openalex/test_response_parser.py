@@ -13,6 +13,7 @@ from bioetl.infrastructure.adapters.openalex.response_parser import (
 
 pytestmark = pytest.mark.unit
 
+
 class TestParseOpenAlexResults:
     """Tests for parse_openalex_results."""
 

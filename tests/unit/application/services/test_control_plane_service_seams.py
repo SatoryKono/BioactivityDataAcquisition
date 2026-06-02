@@ -32,6 +32,7 @@ from bioetl.application.services.control_plane.workflow import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_control_plane_responsibility_facades_preserve_canonical_exports() -> None:
     """New responsibility seams must not fork existing service classes."""
     assert ManifestSeamService is RunManifestService

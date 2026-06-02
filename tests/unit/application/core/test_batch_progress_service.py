@@ -11,6 +11,7 @@ from bioetl.application.core.batch_progress_service import BatchProgressService
 
 pytestmark = pytest.mark.unit
 
+
 @pytest.fixture
 def mock_logger() -> MagicMock:
     return MagicMock()

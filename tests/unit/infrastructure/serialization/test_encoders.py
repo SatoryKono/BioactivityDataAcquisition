@@ -9,6 +9,7 @@ from bioetl.infrastructure.serialization.encoders import StdLibJsonEncoder, __al
 
 pytestmark = pytest.mark.unit
 
+
 def test_stdlib_json_encoder_round_trips_compact_json() -> None:
     encoder = StdLibJsonEncoder()
     payload = {"b": 2, "a": 1}

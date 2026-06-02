@@ -10,6 +10,7 @@ from scripts.engineering.qa import report_provider_contract_drift as report
 
 pytestmark = pytest.mark.unit
 
+
 def test_build_provider_contract_drift_report_records_lfs_pointer_skips(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

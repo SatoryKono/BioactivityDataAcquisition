@@ -62,7 +62,7 @@ budgets:
   refined_assertless_max: 0
   duplicate_test_names_max: 0
   duplicate_test_name_occurrences_max: 0
-  compatibility_test_file_max: 41
+  compatibility_test_file_max: 39
   markerless_test_functions_max: 0
   uuid4_call_sites_max: 400
   date_today_call_sites_max: 0
@@ -155,11 +155,12 @@ budget_ratchet:
       architecture guards and no longer consume compatibility-debt budget.
   - issue: '#4967'
     owner: test-governance
-    status: compatibility_test_file_max_ratcheted_to_41
-    note: Config/checkpoint assertion quality coverage was renamed out of the
-      compatibility filename inventory because it enforces assertion specificity,
-      not compatibility behavior. The compatibility_test_file_max budget now
-      pins to the reduced live inventory of 41.
+    status: compatibility_test_file_max_ratcheted_to_39
+    note: Two composition public-surface contract modules were renamed from
+      compatibility-oriented filenames to canonical public-API filenames because
+      they enforce explicit facade budgets and removed-symbol absence, not legacy
+      path compatibility. The compatibility_test_file_max budget now pins to the
+      reduced live inventory of 39.
   touch_policy: Refactors touching test families must reduce the applicable budget
     or keep it flat with an explicit owner rationale; increasing a debt budget requires
     a separate governance review.
@@ -348,13 +349,13 @@ oversized_test_module_inventory:
   completed_splits:
     - issue_ref: "#4505"
       source: tests/integration/test_grafana_config.py
-      source_lines_after_split: 1518
+      source_lines_after_split: 1524
       extracted_surface: tests/integration/test_grafana_surface_contracts.py
       extracted_surface_lines: 711
       owner: observability-dashboards
     - issue_ref: "#4506"
       source: tests/unit/composition/runtime_builders/test_runner_builder_profiles.py
-      source_lines_after_split: 1124
+      source_lines_after_split: 1125
       extracted_surface: tests/unit/composition/runtime_builders/test_runner_builder_contracts.py
       extracted_surface_lines: 166
       owner: composition-runtime
@@ -366,7 +367,7 @@ oversized_test_module_inventory:
       owner: application-services
 compatibility_test_inventory:
   review_cadence: quarterly
-  total_files: 41
+  total_files: 39
   default_review_date: '2026-09-30'
   entries:
   - path: tests/architecture/test_application_composite_compat_surface_usage.py
@@ -609,26 +610,10 @@ compatibility_test_inventory:
     review_date: '2026-09-30'
     rationale: Tracked compatibility test surface; retained only while the referenced
       public or migration contract remains supported.
-  - path: tests/unit/composition/bootstrap/runtime/test_runtime_facade_compatibility.py
-    decision: retained_public_facade_contract
-    owner: test-governance
-    protected_surface: unit/composition/bootstrap/runtime/runtime facade compatibility
-    policy_ref: '#4209'
-    review_date: '2026-09-30'
-    rationale: Tracked compatibility test surface; retained only while the referenced
-      public or migration contract remains supported.
   - path: tests/unit/composition/factories/pipeline/test_runner_request_compat.py
     decision: retained_compatibility_contract
     owner: test-governance
     protected_surface: unit/composition/factories/pipeline/runner request compat
-    policy_ref: '#4209'
-    review_date: '2026-09-30'
-    rationale: Tracked compatibility test surface; retained only while the referenced
-      public or migration contract remains supported.
-  - path: tests/unit/composition/test_entrypoints_compatibility.py
-    decision: retained_compatibility_contract
-    owner: test-governance
-    protected_surface: unit/composition/entrypoints compatibility
     policy_ref: '#4209'
     review_date: '2026-09-30'
     rationale: Tracked compatibility test surface; retained only while the referenced

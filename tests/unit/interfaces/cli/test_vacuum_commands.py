@@ -89,7 +89,9 @@ class TestVacuumCommand:
         assert "--retention-days" in result.output
         assert "--dry-run" in result.output
 
-    def test_vacuum_command__vacuum_success__47371b34(self, cli_runner, mock_lifecycle_service):
+    def test_vacuum_command__vacuum_success__47371b34(
+        self, cli_runner, mock_lifecycle_service
+    ):
         """Test successful vacuum operation."""
         with patch(
             "bioetl.interfaces.cli.commands.vacuum.get_lifecycle_service",
@@ -108,7 +110,9 @@ class TestVacuumCommand:
             dry_run=False,
         )
 
-    def test_vacuum_command__custom_retention__02c904ce(self, cli_runner, mock_lifecycle_service):
+    def test_vacuum_command__custom_retention__02c904ce(
+        self, cli_runner, mock_lifecycle_service
+    ):
         """Test vacuum with custom retention days."""
         with patch(
             "bioetl.interfaces.cli.commands.vacuum.get_lifecycle_service",
@@ -125,7 +129,9 @@ class TestVacuumCommand:
             dry_run=False,
         )
 
-    def test_vacuum_command__vacuum_dry_run__2913ed86(self, cli_runner, mock_lifecycle_service):
+    def test_vacuum_command__vacuum_dry_run__2913ed86(
+        self, cli_runner, mock_lifecycle_service
+    ):
         """Test vacuum dry-run mode."""
         with patch(
             "bioetl.interfaces.cli.commands.vacuum.get_lifecycle_service",
@@ -177,7 +183,9 @@ class TestVacuumAllCommand:
         assert "--dry-run" in result.output
         assert "--layer" in result.output
 
-    def test_vacuum_all_command__vacuum_all_success__e32d986c(self, cli_runner, mock_vacuum_service):
+    def test_vacuum_all_command__vacuum_all_success__e32d986c(
+        self, cli_runner, mock_vacuum_service
+    ):
         """Test successful vacuum-all operation."""
         mock_vacuum_service.collect_tables.return_value = [
             ("chembl_activity", "silver"),
@@ -220,7 +228,9 @@ class TestVacuumAllCommand:
         assert result.exit_code == 0
         mock_vacuum_service.collect_tables.assert_called_once_with("silver")
 
-    def test_vacuum_all_command__vacuum_all_dry_run__8e4ee80b(self, cli_runner, mock_vacuum_service):
+    def test_vacuum_all_command__vacuum_all_dry_run__8e4ee80b(
+        self, cli_runner, mock_vacuum_service
+    ):
         """Test vacuum-all dry-run mode."""
         mock_vacuum_service.collect_tables.return_value = [
             ("chembl_activity", "silver"),
@@ -240,7 +250,9 @@ class TestVacuumAllCommand:
         assert "[DRY-RUN]" in result.output
         assert "Would" in result.output
 
-    def test_vacuum_all_command__vacuum_all_no_tables__3e63f89e(self, cli_runner, mock_vacuum_service):
+    def test_vacuum_all_command__vacuum_all_no_tables__3e63f89e(
+        self, cli_runner, mock_vacuum_service
+    ):
         """Test vacuum-all with no tables to vacuum."""
         mock_vacuum_service.collect_tables.return_value = []
 
@@ -254,7 +266,9 @@ class TestVacuumAllCommand:
         assert "No tables found" in result.output
         mock_vacuum_service.vacuum_all.assert_not_called()
 
-    def test_vacuum_all_command__custom_retention__10e1b7a0(self, cli_runner, mock_vacuum_service):
+    def test_vacuum_all_command__custom_retention__10e1b7a0(
+        self, cli_runner, mock_vacuum_service
+    ):
         """Test vacuum-all with custom retention days."""
         mock_vacuum_service.collect_tables.return_value = [
             ("chembl_activity", "silver"),

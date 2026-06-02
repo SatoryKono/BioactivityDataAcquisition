@@ -18,6 +18,7 @@ from bioetl.domain.types import ExecutionContext
 
 pytestmark = pytest.mark.unit
 
+
 class TestFieldValidationEffectiveSeverity:
     """Tests for FieldValidation.effective_severity()."""
 

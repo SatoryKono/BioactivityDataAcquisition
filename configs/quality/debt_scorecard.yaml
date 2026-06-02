@@ -153,7 +153,7 @@ sanctioned_public_entrypoint_governance:
         completion gates whenever the compatibility inventory changes or quarterly
         lifecycle review runs.
     stable_public_api_count:
-      current_count: 13
+      current_count: 14
       owner: '@bioetl-architecture'
       linked_issue: '4565'
       rationale: Stable public entrypoints intentionally remain external patch/import
@@ -163,7 +163,7 @@ sanctioned_public_entrypoint_governance:
       review_policy: Keep the sanctioned public API set explicit and block reversion
         to internal-owner imports outside approved boundary coverage.
     narrow_first_party_callers_count:
-      current_count: 1
+      current_count: 0
       owner: '@bioetl-architecture'
       linked_issue: '4565'
       rationale: A small subset of sanctioned public entrypoints still needs first-party
@@ -248,8 +248,8 @@ config_surface_ratchet:
       ratchet_policy: Non-growth fail-fast unless a reviewed pipeline addition updates
         the budget.
     unique_parameter_count:
-      current_count: 537
-      max_count: 537
+      current_count: 525
+      max_count: 525
       owner: '@bioetl-config'
       linked_issue: '#4818'
       rationale: Flattened parameter vocabulary must not expand silently across the
@@ -266,8 +266,8 @@ config_surface_ratchet:
         B closeout.
       ratchet_policy: Non-growth fail-fast; increases require reviewed contract regression.
     sanctioned_partial_parameter_count:
-      current_count: 119
-      max_count: 119
+      current_count: 107
+      max_count: 107
       owner: '@bioetl-config'
       linked_issue: '#4818'
       rationale: Documented intentional entity-specific partial keys excluded from
@@ -275,8 +275,8 @@ config_surface_ratchet:
       ratchet_policy: Non-growth fail-fast unless a reviewed entity contract adds
         new intentional divergence.
     raw_inconsistent_parameter_count:
-      current_count: 119
-      max_count: 119
+      current_count: 107
+      max_count: 107
       owner: '@bioetl-config'
       linked_issue: '#4818'
       rationale: Raw family-scoped partial key count before sanctioned-prefix exclusion;
@@ -327,8 +327,8 @@ config_surface_ratchet:
           rationale: Composite runtime configs under configs/composites/*.yaml.
           ratchet_policy: Non-growth fail-fast for composite runtime surface.
         unique_parameter_count:
-          current_count: 215
-          max_count: 215
+          current_count: 203
+          max_count: 203
           rationale: Flattened vocabulary for composite runtime configs only.
           ratchet_policy: Non-growth fail-fast unless composite schema expansion updates
             budget.
@@ -338,17 +338,17 @@ config_surface_ratchet:
           rationale: Composite-family actionable drift; Stream B burn-down complete.
           ratchet_policy: Non-growth fail-fast for composite runtime surface.
         sanctioned_partial_parameter_count:
-          current_count: 16
-          max_count: 16
+          current_count: 4
+          max_count: 4
           rationale: Intentional composite-only target protein classification field
-            mappings on composite_target remain sanctioned variance.
+            mappings on composite_target remain the only sanctioned variance.
           ratchet_policy: Non-growth fail-fast unless reviewed composite contract expands
             intentional divergence.
         raw_inconsistent_parameter_count:
-          current_count: 16
-          max_count: 16
-          rationale: Raw composite partial keys currently mirror sanctioned target
-            protein classification field mappings.
+          current_count: 4
+          max_count: 4
+          rationale: Raw composite partial keys currently mirror the sanctioned
+            composite_target field mappings.
           ratchet_policy: Non-growth fail-fast unless governed composite vocabulary expands.
 registry_groups:
   size_metrics:
@@ -584,12 +584,12 @@ oversized_source_module_inventory:
     owner: '@bioetl-reproducibility'
     target_split: separate score-card policy rules from manifest projection helpers
 hotspot_family_coverage_thresholds:
-  snapshot_date: '2026-05-30'
+  snapshot_date: '2026-06-02'
   linked_issue: '#4567'
   mode: fail-fast
   families:
     application_core:
-      min_measured_module_count: 167
+      min_measured_module_count: 166
       max_unmeasured_module_count: 0
       min_covered_module_count: 0
       min_covered_line_percent: 0.0
@@ -812,12 +812,12 @@ retirement_governance_metrics:
         4953 classifies them as retained no-growth shims with owner and review
         expiry so the untriaged zero-import budget stays at zero.
     - issue: '#4965'
-      reviewed_on: '2026-06-01'
+      reviewed_on: '2026-06-02'
       owner: '@bioetl-architecture'
       outcome: removed_zero_import_private_shim_batch
       rationale: Issue 4963 removed the remaining zero-import private compatibility
         shim batch after importer proof and issue 4965 re-ran the dead-code
-        inventory. Repo-wide zero-import candidates fell from 53 to 48 while
+        inventory. Repo-wide zero-import candidates fell from 48 to 44 while
         untriaged candidates remained at zero.
   review_policy: Review dead-code triage and repo-wide zero-import classifications
     together; growth in tracked retirement debt or any untriaged zero-import candidate
@@ -833,8 +833,8 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless a reviewed triage recalibration
         updates the tracked debt budget intentionally.
     repo_wide_zero_import_candidate_count:
-      current_count: 48
-      max_count: 48
+      current_count: 44
+      max_count: 44
       linked_issue: '#4541'
       owner: '@bioetl-architecture'
       rationale: Repo-wide zero-import candidates remain a governed review surface
@@ -842,8 +842,8 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless a reviewed dead-code inventory refresh
         updates the classified candidate set intentionally.
     repo_wide_classified_zero_import_candidate_count:
-      current_count: 48
-      max_count: 48
+      current_count: 44
+      max_count: 44
       linked_issue: '#4541'
       owner: '@bioetl-architecture'
       rationale: Every repo-wide zero-import candidate must stay covered by an explicit
@@ -914,10 +914,10 @@ test_governance_debt_metrics:
     inventory, assertion-strength debt, or deterministic test-seam counts change.
   metrics:
     compatibility_test_file_count:
-      current_count: 41
-      max_count: 41
-      target_count: 41
-      ratchet_policy: Downward ratchet only; keep max_count at 41 unless a future
+      current_count: 39
+      max_count: 39
+      target_count: 39
+      ratchet_policy: Downward ratchet only; keep max_count at 39 unless a future
         owner-approved reduction lowers the live compatibility test inventory.
       rationale: >-
         Issues #4925 and #4967 reclassified pure public-facade and assertion-quality

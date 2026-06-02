@@ -14,6 +14,7 @@ import sys
 
 pytestmark = pytest.mark.architecture
 
+
 def test_dependency_map_script_exists() -> None:
     script = Path("scripts/engineering/qa/generate_architecture_dependency_map.py")
     assert script.exists(), "Missing dependency map generator script"

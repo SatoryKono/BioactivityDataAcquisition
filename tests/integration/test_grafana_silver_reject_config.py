@@ -189,17 +189,13 @@ def test_dq_validation_diagnostics_groups_failures_then_runtime_then_trends() ->
         nested["Monitor: Gold Strict Validation Failures"].get("gridPos", {}).get("y")
         == row_y + 1
     )
-    assert (
-        nested["Track: Anomalies Detected"].get("gridPos", {}).get("y") == row_y + 9
-    )
+    assert nested["Track: Anomalies Detected"].get("gridPos", {}).get("y") == row_y + 9
     assert (
         nested["Track: DQ Check Duration (p95)"].get("gridPos", {}).get("y")
         == row_y + 9
     )
     assert (
-        nested["Track: DQ Threshold Events in Range Trend"]
-        .get("gridPos", {})
-        .get("y")
+        nested["Track: DQ Threshold Events in Range Trend"].get("gridPos", {}).get("y")
         == row_y + 18
     )
     assert (

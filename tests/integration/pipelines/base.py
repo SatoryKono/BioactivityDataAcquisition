@@ -66,8 +66,6 @@ class IntegrationPipelineTestCase:
         # Patch resolve_storage_paths to always use test paths
         from bioetl.composition.factories.storage import _context_resolution
 
-        original_resolve = _context_resolution.resolve_storage_paths
-
         def patched_resolve_storage_paths(
             settings, bronze_config, silver_config, gold_config
         ):
@@ -116,7 +114,7 @@ class IntegrationPipelineTestCase:
                     gold_path=Path(self.gold_path),
                 )
                 if args:
-                    args = (ctx,) + args[1:]
+                    args = (ctx, *args[1:])
                 else:
                     kwargs["ctx"] = ctx
             return original_create_adapter(*args, **kwargs)
@@ -274,7 +272,9 @@ class IntegrationPipelineTestCase:
         """
         # Load config via factory (it handles loading)
         # But we might want to override some values (e.g. limit, or sinks)
-        from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
+        from bioetl.infrastructure.config.pipeline_config_api import (
+            load_pipeline_config,
+        )
 
         pipeline_config = load_pipeline_config(factory.pipeline_name)
 

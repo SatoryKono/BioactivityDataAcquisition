@@ -26,6 +26,7 @@ from bioetl.domain.value_objects.dq_report import (
 
 pytestmark = pytest.mark.unit
 
+
 @pytest.fixture()
 def analyzer() -> GoldDQAnalyzer:
     return GoldDQAnalyzer()

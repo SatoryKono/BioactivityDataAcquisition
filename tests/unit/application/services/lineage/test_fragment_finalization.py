@@ -25,6 +25,7 @@ from bioetl.domain.value_objects.run_context import RunContext
 
 pytestmark = pytest.mark.unit
 
+
 def _make_run_context() -> RunContext:
     return RunContext.create(
         run_id=RunID(uuid4()),

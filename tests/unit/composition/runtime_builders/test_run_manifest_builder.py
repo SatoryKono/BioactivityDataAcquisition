@@ -20,6 +20,7 @@ from bioetl.domain.normalization import compute_input_snapshot_identity_fingerpr
 
 pytestmark = pytest.mark.unit
 
+
 def _make_provenance_bundle() -> RunManifestProvenanceBundle:
     return RunManifestProvenanceBundle(
         effective_config_artifact_id="artifact-1",
@@ -79,7 +80,9 @@ def test_build_manifest_create_request_uses_named_contract_identity_fields(
     assert result is request_inputs
     assert request_inputs.contract_identity is identity
     assert request_inputs.contract_identity.contract_ref == identity.contract_ref
-    assert request_inputs.contract_identity.contract_version == identity.contract_version
+    assert (
+        request_inputs.contract_identity.contract_version == identity.contract_version
+    )
     assert (
         request_inputs.contract_identity.contract_schema_hash
         == identity.contract_schema_hash

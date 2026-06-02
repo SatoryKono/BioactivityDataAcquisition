@@ -26,7 +26,9 @@ def test_chembl_baseline_smoke_workflow_exists_and_supports_ci_entrypoints() -> 
     assert "workflow_dispatch:" in workflow
 
 
-def test_chembl_baseline_smoke_workflow_pins_runner_permissions_and_concurrency() -> None:
+def test_chembl_baseline_smoke_workflow_pins_runner_permissions_and_concurrency() -> (
+    None
+):
     payload = _load_workflow()
 
     assert payload["permissions"] == {"contents": "read"}

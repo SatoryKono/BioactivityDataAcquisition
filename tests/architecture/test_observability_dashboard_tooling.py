@@ -11,6 +11,7 @@ from scripts.ops.observability.grafana import audit_live_grafana_panels as live_
 
 pytestmark = pytest.mark.architecture
 
+
 def test_legacy_fix_grafana_mutation_script_is_removed() -> None:
     """Legacy regex-based dashboard mutator must not remain in the repo."""
     assert not Path(

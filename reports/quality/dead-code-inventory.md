@@ -1,13 +1,13 @@
 # Dead Code Inventory
 
-- snapshot_date: 2026-06-01
+- snapshot_date: 2026-06-02
 - linked_issue: #4541
-- last_reviewed: 2026-06-01
-- next_review_by: 2026-08-30
+- last_reviewed: 2026-06-02
+- next_review_by: 2026-08-31
 - review_cycle_days: 90
 - triaged_entry_count: 18
-- repo_wide_zero_import_candidate_count: 48
-- repo_wide_classified_zero_import_candidate_count: 48
+- repo_wide_zero_import_candidate_count: 44
+- repo_wide_classified_zero_import_candidate_count: 44
 - repo_wide_untriaged_zero_import_candidate_count: 0
 - note: zero static importer count is a review signal, not automatic removal proof
 - guardrail: Zero static importer count is a review signal only; removals must still verify public entrypoints and dynamic/plugin import paths.
@@ -40,12 +40,10 @@
 | Module | Disposition | Path |
 | --- | --- | --- |
 | `bioetl.__main__` | `retain_module_entrypoint` | `src/bioetl/__main__.py` |
-| `bioetl.application.core._span_helpers` | `retain_compat_shim` | `src/bioetl/application/core/_span_helpers.py` |
 | `bioetl.application.core.batch_execution_lifecycle` | `retain_public_facade` | `src/bioetl/application/core/batch_execution_lifecycle.py` |
 | `bioetl.application.core.batch_execution_run_service` | `retain_public_facade` | `src/bioetl/application/core/batch_execution_run_service.py` |
 | `bioetl.application.core.batch_execution_state_service` | `retain_public_facade` | `src/bioetl/application/core/batch_execution_state_service.py` |
 | `bioetl.application.core.pipeline_service_protocols` | `retain_public_facade` | `src/bioetl/application/core/pipeline_service_protocols.py` |
-| `bioetl.application.core.batch_execution._contracts` | `retain_compat_shim` | `src/bioetl/application/core/batch_execution/_contracts.py` |
 | `bioetl.application.pipelines.common.blocks` | `retain_dynamic_entrypoint` | `src/bioetl/application/pipelines/common/blocks.py` |
 | `bioetl.application.pipelines.common.publication_strategies` | `retain_canonical_owner_module` | `src/bioetl/application/pipelines/common/publication_strategies.py` |
 | `bioetl.application.pipelines.pubmed.strategies` | `retain_canonical_owner_module` | `src/bioetl/application/pipelines/pubmed/strategies.py` |
@@ -56,8 +54,6 @@
 | `bioetl.domain.behavior._dq_serializer_html._renderers` | `retain_canonical_owner_module` | `src/bioetl/domain/behavior/_dq_serializer_html/_renderers.py` |
 | `bioetl.domain.entities.bioactivity._entity` | `retain_canonical_owner_module` | `src/bioetl/domain/entities/bioactivity/_entity.py` |
 | `bioetl.domain.normalization._pubchem_standardization_catalog` | `retain_canonical_owner_module` | `src/bioetl/domain/normalization/_pubchem_standardization_catalog.py` |
-| `bioetl.domain.normalization.profiles._chembl_policy_registry` | `retain_compat_shim` | `src/bioetl/domain/normalization/profiles/_chembl_policy_registry.py` |
-| `bioetl.domain.normalization.profiles._chembl_policy_registry_data` | `retain_compat_shim` | `src/bioetl/domain/normalization/profiles/_chembl_policy_registry_data.py` |
 | `bioetl.domain.ports.data_normalization` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/data_normalization.py` |
 | `bioetl.domain.ports.data_source` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/data_source.py` |
 | `bioetl.domain.ports.delta_reader` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/delta_reader.py` |

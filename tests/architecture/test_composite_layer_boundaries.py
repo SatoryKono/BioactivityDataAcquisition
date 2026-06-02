@@ -25,6 +25,7 @@ from pathlib import Path
 
 pytestmark = pytest.mark.architecture
 
+
 def _module_import_violations(package_path: Path, import_root: str) -> list[str]:
     pattern_from = re.compile(rf"^\s*from\s+{re.escape(import_root)}\b", re.MULTILINE)
     pattern_import = re.compile(

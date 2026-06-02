@@ -14,6 +14,7 @@ from bioetl.infrastructure.quality.architecture_debt_reduction import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_build_execution_plan_classifies_and_orders_batches() -> None:
     payload = {
         "source_tasks_file": "tasks_architecture_metric_exemptions_2026-04-04-09-30.json",

@@ -74,7 +74,9 @@ class TestCreateCheckpointManager:
     @patch(
         "bioetl.composition.factories.services.pipeline_builder.CheckpointRuntimeService"
     )
-    def test_checkpoint_manager__loading_strategy__e4adbd8c(self, mock_cls: MagicMock) -> None:
+    def test_checkpoint_manager__loading_strategy__e4adbd8c(
+        self, mock_cls: MagicMock
+    ) -> None:
         """Loading strategy is forwarded to constructor."""
         mock_cls.return_value = MagicMock()
         strategy = MagicMock()

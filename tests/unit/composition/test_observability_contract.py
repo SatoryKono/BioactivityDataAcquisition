@@ -24,7 +24,7 @@ from bioetl.composition.observability import (
 )
 from bioetl.domain.ports.noop import NoOpAudit, NoOpMetrics, NoOpTracing
 from tests.helpers.deterministic_ids import deterministic_uuid
-from tests.helpers.git_index_scan import git_grep_fixed, git_tracked_files
+from tests.helpers.git_index_scan import git_grep_fixed
 
 pytestmark = pytest.mark.repo_backed
 
@@ -288,7 +288,7 @@ class TestBootstrapObservability:
             suffixes=(".py",),
         )
 
-        offenders = sorted(set(match.path for match in matches))
+        offenders = sorted({match.path for match in matches})
         assert offenders == [], (
             "Nested LoggerPort extra payloads are forbidden in application/"
             f"composition. Offenders: {offenders}"

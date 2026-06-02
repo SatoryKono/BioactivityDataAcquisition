@@ -176,7 +176,8 @@ def build_composite_control_plane_bundle(
         dq_contract_compatibility_hash=(
             config_artifacts.dq_contract_compatibility_hash or None
         ),
-        effective_config_artifact_id=config_artifacts.effective_config_artifact_id or None,
+        effective_config_artifact_id=config_artifacts.effective_config_artifact_id
+        or None,
         input_snapshot_fingerprint=_compute_composite_input_snapshot_fingerprint(
             manifest.source_refs
         ),
@@ -231,6 +232,7 @@ def _build_composite_manifest_create_request(
         dq_contract_compatibility_hash=(
             config_artifacts.dq_contract_compatibility_hash or None
         ),
-        effective_config_artifact_id=config_artifacts.effective_config_artifact_id or None,
+        effective_config_artifact_id=config_artifacts.effective_config_artifact_id
+        or None,
         replay_capability=replay_capability,
     )

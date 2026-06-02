@@ -311,9 +311,10 @@ def test_debt_scorecard_declares_compatibility_debt_kpis() -> None:
     )
     assert compatibility.get("owner") == "@bioetl-architecture"
     assert compatibility.get("review_cadence") == "quarterly"
-    assert isinstance(compatibility.get("review_policy"), str) and compatibility[
-        "review_policy"
-    ]
+    assert (
+        isinstance(compatibility.get("review_policy"), str)
+        and compatibility["review_policy"]
+    )
 
     metrics = compatibility.get("metrics", {})
     assert isinstance(metrics, dict)
@@ -414,13 +415,15 @@ def test_debt_scorecard_declares_runtime_uuid_governance_kpis() -> None:
     scorecard = load_debt_scorecard()
     governance = scorecard.get("runtime_uuid_governance_metrics", {})
     assert isinstance(governance, dict)
-    assert governance.get("inventory_source") == "configs/quality/runtime_uuid_seams.yaml"
+    assert (
+        governance.get("inventory_source") == "configs/quality/runtime_uuid_seams.yaml"
+    )
     assert governance.get("owner") == "@bioetl-architecture"
     assert governance.get("linked_issue") == "#4705"
     assert governance.get("review_cadence") == "quarterly"
-    assert isinstance(governance.get("review_policy"), str) and governance[
-        "review_policy"
-    ]
+    assert (
+        isinstance(governance.get("review_policy"), str) and governance["review_policy"]
+    )
 
     inventory_payload = yaml.safe_load(
         (ROOT / "configs" / "quality" / "runtime_uuid_seams.yaml").read_text(
@@ -452,7 +455,9 @@ def test_debt_scorecard_declares_runtime_uuid_governance_kpis() -> None:
         assert isinstance(metric.get("owner"), str) and metric["owner"]
         assert isinstance(metric.get("linked_issue"), str) and metric["linked_issue"]
         assert isinstance(metric.get("rationale"), str) and metric["rationale"]
-        assert isinstance(metric.get("ratchet_policy"), str) and metric["ratchet_policy"]
+        assert (
+            isinstance(metric.get("ratchet_policy"), str) and metric["ratchet_policy"]
+        )
 
 
 def test_debt_scorecard_declares_retirement_governance_kpis() -> None:
@@ -467,9 +472,9 @@ def test_debt_scorecard_declares_retirement_governance_kpis() -> None:
     assert governance.get("owner") == "@bioetl-architecture"
     assert governance.get("linked_issue") == "#4705"
     assert governance.get("review_cadence") == "quarterly"
-    assert isinstance(governance.get("review_policy"), str) and governance[
-        "review_policy"
-    ]
+    assert (
+        isinstance(governance.get("review_policy"), str) and governance["review_policy"]
+    )
 
     inventory = build_dead_code_inventory(ROOT)
     summary = inventory.get("summary", {})
@@ -497,7 +502,9 @@ def test_debt_scorecard_declares_retirement_governance_kpis() -> None:
         assert isinstance(metric.get("owner"), str) and metric["owner"]
         assert isinstance(metric.get("linked_issue"), str) and metric["linked_issue"]
         assert isinstance(metric.get("rationale"), str) and metric["rationale"]
-        assert isinstance(metric.get("ratchet_policy"), str) and metric["ratchet_policy"]
+        assert (
+            isinstance(metric.get("ratchet_policy"), str) and metric["ratchet_policy"]
+        )
 
 
 def test_debt_scorecard_config_surface_ratchet_matches_baseline() -> None:
@@ -528,7 +535,9 @@ def test_debt_scorecard_config_surface_ratchet_matches_baseline() -> None:
         assert isinstance(metric.get("owner"), str) and metric["owner"]
         assert metric.get("linked_issue") == "#4818"
         assert isinstance(metric.get("rationale"), str) and metric["rationale"]
-        assert isinstance(metric.get("ratchet_policy"), str) and metric["ratchet_policy"]
+        assert (
+            isinstance(metric.get("ratchet_policy"), str) and metric["ratchet_policy"]
+        )
 
     baseline_families = baseline_payload.get("families")
     assert isinstance(baseline_families, dict)
@@ -643,9 +652,9 @@ def test_debt_scorecard_declares_test_governance_debt_kpis() -> None:
         == "configs/quality/test_governance_audit.yaml"
     )
     assert governance.get("review_cadence") == "quarterly"
-    assert isinstance(governance.get("review_policy"), str) and governance[
-        "review_policy"
-    ]
+    assert (
+        isinstance(governance.get("review_policy"), str) and governance["review_policy"]
+    )
 
     audit_payload = yaml.safe_load(
         (ROOT / "configs" / "quality" / "test_governance_audit.yaml").read_text(
@@ -666,7 +675,7 @@ def test_debt_scorecard_declares_test_governance_debt_kpis() -> None:
     assert isinstance(metric, dict)
     assert metric.get("current_count") == live_count
     assert metric.get("max_count") == budget_max
-    assert metric.get("target_count") == 41
+    assert metric.get("target_count") == 39
     assert live_count <= budget_max
     assert governance.get("owner") == "@bioetl-architecture"
     assert isinstance(metric.get("ratchet_policy"), str) and metric["ratchet_policy"]

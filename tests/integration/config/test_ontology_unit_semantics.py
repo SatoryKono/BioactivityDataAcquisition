@@ -16,6 +16,7 @@ from scripts.engineering.qa.check_ontology_unit_semantics import (
 
 pytestmark = pytest.mark.integration
 
+
 def test_ontology_unit_semantics_gate_passes_current_repo() -> None:
     findings = validate_ontology_unit_semantics(repo_root=Path("."))
 

@@ -29,7 +29,9 @@ def test_runtime_policy_scans_workflows_and_composite_actions() -> None:
 
 
 def test_runtime_policy_rejects_mutable_external_action_refs() -> None:
-    violation = policy._validate_allowed_uses_ref("actions/github-script@v7", "actions/github-script")
+    violation = policy._validate_allowed_uses_ref(
+        "actions/github-script@v7", "actions/github-script"
+    )
 
     assert violation is not None
     assert "full 40-character SHA" in violation
@@ -67,4 +69,3 @@ def test_contract_tests_workflow_uses_least_privilege_issue_permissions() -> Non
         "issues": "write",
     }
     assert jobs["notify-success"]["permissions"] == {"contents": "read"}
-

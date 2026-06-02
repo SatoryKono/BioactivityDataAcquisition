@@ -9,6 +9,7 @@ from pathlib import Path
 
 pytestmark = pytest.mark.architecture
 
+
 def test_docs_kpi_workflow_exists_and_is_scheduled() -> None:
     workflow_path = Path(".github/workflows/docs-kpi-weekly.yml")
     assert workflow_path.exists(), "docs-kpi-weekly workflow file must exist"

@@ -43,11 +43,7 @@ def load_config(path: Path) -> dict[str, Any]:
 def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
     merged: dict[str, Any] = dict(base)
     for key, value in override.items():
-        if (
-            key in merged
-            and isinstance(merged[key], dict)
-            and isinstance(value, dict)
-        ):
+        if key in merged and isinstance(merged[key], dict) and isinstance(value, dict):
             merged[key] = _deep_merge(merged[key], value)
         else:
             merged[key] = value
@@ -458,9 +454,7 @@ def main(argv: list[str] | None = None) -> int:
         if ok:
             print("[ok] config matrix artifacts are up to date")
             return 0
-        print(
-            "[hint] run: python -m scripts.schema generate-config-matrix --update"
-        )
+        print("[hint] run: python -m scripts.schema generate-config-matrix --update")
         return 1
 
     _write_artifacts(

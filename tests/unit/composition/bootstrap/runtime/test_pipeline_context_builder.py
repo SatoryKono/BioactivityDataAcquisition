@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from uuid import uuid4
 
 import pytest
 
@@ -15,6 +16,7 @@ from tests.helpers.clock import FixedClock
 
 
 pytestmark = pytest.mark.unit
+
 
 def test_build_pipeline_context_uses_injected_clock() -> None:
     """Pipeline context creation should accept deterministic ClockPort input."""
@@ -54,12 +56,40 @@ def test_build_pipeline_context_accepts_explicit_started_at_without_clock() -> N
     context = build_pipeline_context(
         "chembl_activity",
         RunOptions(exact_replay=True, use_cached_bronze=True),
+        run_id=uuid4(),
         started_at=started_at,
     )
 
     assert context.started_at == started_at
     assert context.exact_replay is True
     assert context.cached_bronze.enabled is True
+
+
+def test_build_pipeline_context_requires_explicit_run_id_for_exact_replay() -> None:
+    """Exact replay must not synthesize occurrence IDs implicitly."""
+    with pytest.raises(
+        ValueError,
+        match="exact replay requires explicit run_id or run_id_factory",
+    ):
+        build_pipeline_context(
+            "chembl_activity",
+            RunOptions(exact_replay=True, use_cached_bronze=True),
+            started_at=datetime(2026, 5, 24, 13, 30, tzinfo=UTC),
+        )
+
+
+def test_build_pipeline_context_accepts_injected_run_id_factory() -> None:
+    """Replay callers may inject a deterministic occurrence-ID seam explicitly."""
+    expected_run_id = uuid4()
+
+    context = build_pipeline_context(
+        "chembl_activity",
+        RunOptions(exact_replay=True, use_cached_bronze=True),
+        run_id_factory=lambda: expected_run_id,
+        started_at=datetime(2026, 5, 24, 13, 30, tzinfo=UTC),
+    )
+
+    assert context.run_id == expected_run_id
 
 
 def test_build_pipeline_context_requires_clock_when_started_at_missing() -> None:

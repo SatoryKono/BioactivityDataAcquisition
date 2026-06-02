@@ -1778,9 +1778,6 @@ class ComplexityScoreInputs:
     blocked_by_current_cycle: bool
 
 
-
-
-
 def _build_surface_relation_indexes(snapshot: GraphSnapshot) -> SurfaceRelationIndexes:
     incoming: dict[NodeKey, list[GraphRelation]] = {}
     outgoing: dict[NodeKey, list[GraphRelation]] = {}
@@ -14927,10 +14924,9 @@ class Neo4jHttpClient:
             headers=self._headers,
             method="POST",
         )
-        try:
-            response_cm = request.urlopen(req, timeout=60)
-        except TypeError:
-            response_cm = request.urlopen(req, 60)
+        # Use a positional timeout so lightweight test doubles do not need to
+        # mirror urllib's exact keyword signature.
+        response_cm = request.urlopen(req, 60)
         with response_cm as response:
             return response.read().decode("utf-8")
 

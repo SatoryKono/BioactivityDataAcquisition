@@ -19,8 +19,12 @@ DEPRECATED_METRIC_TOKENS = ("checkpoint_saved_at_epoch_seconds",)
 
 def _load_allowlist() -> tuple[frozenset[str], frozenset[str]]:
     payload = yaml.safe_load(ALLOWLIST_PATH.read_text(encoding="utf-8"))
-    metrics = frozenset(str(item) for item in payload.get("metrics_without_run_type_label", []))
-    dashboards = frozenset(str(item) for item in payload.get("pipeline_summary_dashboards", []))
+    metrics = frozenset(
+        str(item) for item in payload.get("metrics_without_run_type_label", [])
+    )
+    dashboards = frozenset(
+        str(item) for item in payload.get("pipeline_summary_dashboards", [])
+    )
     return metrics, dashboards
 
 
@@ -74,7 +78,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--output",
         type=Path,
-        default=ROOT / "reports" / "observability" / "dashboard-promql-scope-matrix.csv",
+        default=ROOT
+        / "reports"
+        / "observability"
+        / "dashboard-promql-scope-matrix.csv",
     )
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args(argv)
@@ -97,17 +104,26 @@ def main(argv: list[str] | None = None) -> int:
         writer.writerows(rows)
 
     if args.check:
-        deprecated_hits = [row for row in rows if row["deprecated_metric_token"] == "True"]
+        deprecated_hits = [
+            row for row in rows if row["deprecated_metric_token"] == "True"
+        ]
         run_id_hits = [row for row in rows if row["uses_run_id_in_promql"] == "True"]
         if deprecated_hits or run_id_hits:
             if deprecated_hits:
-                print("Deprecated metric tokens found in dashboard PromQL:", file=sys.stderr)
+                print(
+                    "Deprecated metric tokens found in dashboard PromQL:",
+                    file=sys.stderr,
+                )
                 for row in deprecated_hits[:10]:
-                    print(f"  {row['dashboard']} :: {row['panel_title']}", file=sys.stderr)
+                    print(
+                        f"  {row['dashboard']} :: {row['panel_title']}", file=sys.stderr
+                    )
             if run_id_hits:
                 print("run_id used in PromQL (forbidden):", file=sys.stderr)
                 for row in run_id_hits[:10]:
-                    print(f"  {row['dashboard']} :: {row['panel_title']}", file=sys.stderr)
+                    print(
+                        f"  {row['dashboard']} :: {row['panel_title']}", file=sys.stderr
+                    )
             return 1
     print(f"Wrote {len(rows)} rows to {args.output}")
     return 0

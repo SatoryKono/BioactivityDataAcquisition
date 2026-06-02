@@ -1242,16 +1242,16 @@ def test_provider_telemetry_freshness_marks_missing_current_status_as_warn() -> 
     assert len(expressions) == 1
     expression = expressions[0]
     assert (
-        "count_over_time(bioetl_provider_current_status{provider=~\"$provider\"}"
+        'count_over_time(bioetl_provider_current_status{provider=~"$provider"}'
         in expression
     )
-    assert "bioetl_provider_range_operational_ok{provider=~\"$provider\"}" in expression
+    assert 'bioetl_provider_range_operational_ok{provider=~"$provider"}' in expression
     assert (
-        "absent(count_over_time(bioetl_provider_current_status{provider=~\"$provider\"}"
+        'absent(count_over_time(bioetl_provider_current_status{provider=~"$provider"}'
         in expression
     )
     assert (
-        "absent(count_over_time(bioetl_provider_range_operational_ok{provider=~\"$provider\"}"
+        'absent(count_over_time(bioetl_provider_range_operational_ok{provider=~"$provider"}'
         in expression
     )
     assert "or vector(0)" not in expression

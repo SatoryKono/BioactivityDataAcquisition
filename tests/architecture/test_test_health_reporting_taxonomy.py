@@ -11,6 +11,7 @@ import yaml
 
 pytestmark = pytest.mark.architecture
 
+
 def _load_taxonomy() -> dict[str, object]:
     path = Path("configs/quality/test_health_reporting.yaml")
     raw = yaml.safe_load(path.read_text(encoding="utf-8"))

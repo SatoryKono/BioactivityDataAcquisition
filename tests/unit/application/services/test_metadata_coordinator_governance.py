@@ -25,6 +25,7 @@ from bioetl.domain.value_objects.run_context import RunContext
 
 pytestmark = pytest.mark.unit
 
+
 @pytest.fixture
 def run_context() -> RunContext:
     return RunContext.create(

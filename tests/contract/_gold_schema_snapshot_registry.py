@@ -255,7 +255,9 @@ def assert_gold_schema_snapshot_registry_shape(snapshot: Mapping[str, Any]) -> N
     for entity, entry in entities.items():
         assert isinstance(entity, str) and entity
         assert isinstance(entry, dict)
-        assert isinstance(entry.get("contract_version"), str) and entry["contract_version"]
+        assert (
+            isinstance(entry.get("contract_version"), str) and entry["contract_version"]
+        )
         assert isinstance(entry.get("schema_class"), str) and entry["schema_class"]
         assert isinstance(entry.get("published_contract_path"), str)
         assert isinstance(entry.get("strict"), bool)

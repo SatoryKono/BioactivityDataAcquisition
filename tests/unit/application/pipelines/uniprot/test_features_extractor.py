@@ -8,6 +8,7 @@ from bioetl.application.pipelines.uniprot.extractors.features import FeatureExtr
 
 pytestmark = pytest.mark.unit
 
+
 class TestFeatureExtractor:
     """Tests for FeatureExtractor class."""
 

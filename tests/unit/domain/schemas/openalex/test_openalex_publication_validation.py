@@ -18,7 +18,9 @@ from bioetl.domain.schemas.openalex.publication import OpenAlexPublicationSchema
 class TestPmidBaseValidation:
     """Base validation tests for pmid."""
 
-    def test_pmid_base_validation__pmid_valid__7734822a(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
+    def test_pmid_base_validation__pmid_valid__7734822a(
+        self, minimal_openalex_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid pmid value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
@@ -45,7 +47,9 @@ class TestPmidBaseValidation:
 class TestDoiBaseValidation:
     """Base validation tests for doi."""
 
-    def test_doi_base_validation__doi_valid__570b4641(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
+    def test_doi_base_validation__doi_valid__570b4641(
+        self, minimal_openalex_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid doi value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
@@ -74,7 +78,9 @@ class TestDoiBaseValidation:
 class TestPmcIdBaseValidation:
     """Base validation tests for pmc_id."""
 
-    def test_case__cfcf9e0e12(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
+    def test_case__cfcf9e0e12(
+        self, minimal_openalex_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid pmc_id value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
@@ -101,7 +107,9 @@ class TestPmcIdBaseValidation:
 class TestTitleBaseValidation:
     """Base validation tests for title."""
 
-    def test_title_base_validation__title_valid__f0480b60(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
+    def test_title_base_validation__title_valid__f0480b60(
+        self, minimal_openalex_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid title value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
@@ -137,7 +145,9 @@ class TestAbstractBaseValidation:
 class TestAuthorsBaseValidation:
     """Base validation tests for authors."""
 
-    def test_base_validation__authors_valid__1b7708fb(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
+    def test_base_validation__authors_valid__1b7708fb(
+        self, minimal_openalex_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid authors value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
@@ -173,7 +183,9 @@ class TestAffiliationListBaseValidation:
 class TestJournalBaseValidation:
     """Base validation tests for journal."""
 
-    def test_base_validation__journal_valid__e11857a4(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
+    def test_base_validation__journal_valid__e11857a4(
+        self, minimal_openalex_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid journal value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
@@ -342,7 +354,9 @@ class TestCitationsMadeBaseValidation:
 class TestIsOaBaseValidation:
     """Base validation tests for is_oa."""
 
-    def test_is_oa_base_validation__is_oa_valid__9c9c5632(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
+    def test_is_oa_base_validation__is_oa_valid__9c9c5632(
+        self, minimal_openalex_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid is_oa value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
@@ -397,7 +411,9 @@ class TestOriginalIdBaseValidation:
 class TestSourceBaseValidation:
     """Base validation tests for _source."""
 
-    def test_case__bf98a63411(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
+    def test_case__bf98a63411(
+        self, minimal_openalex_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid _source value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
@@ -444,7 +460,9 @@ class TestOpenalexIdBaseValidation:
 class TestIssnBaseValidation:
     """Base validation tests for issn."""
 
-    def test_issn_base_validation__issn_valid__5625a23b(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
+    def test_issn_base_validation__issn_valid__5625a23b(
+        self, minimal_openalex_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid issn value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
@@ -507,7 +525,9 @@ class TestOaStatusBaseValidation:
 class TestVolumeBaseValidation:
     """Base validation tests for volume."""
 
-    def test_case__675547e9dc(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
+    def test_case__675547e9dc(
+        self, minimal_openalex_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid volume value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
@@ -524,7 +544,9 @@ class TestVolumeBaseValidation:
 class TestIssueBaseValidation:
     """Base validation tests for issue."""
 
-    def test_issue_base_validation__issue_valid__2621e055(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
+    def test_issue_base_validation__issue_valid__2621e055(
+        self, minimal_openalex_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid issue value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 

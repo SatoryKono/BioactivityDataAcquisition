@@ -53,7 +53,11 @@ def probe_observability_backend_required_paths(
     """Return True when the backend exposes all required HTTP capability paths."""
     if not required_probe_paths:
         return True
-    base_url = health_url[: -len("/health")] if health_url.endswith("/health") else health_url.rstrip("/")
+    base_url = (
+        health_url[: -len("/health")]
+        if health_url.endswith("/health")
+        else health_url.rstrip("/")
+    )
     for raw_path in required_probe_paths:
         path = raw_path if raw_path.startswith("/") else f"/{raw_path}"
         try:

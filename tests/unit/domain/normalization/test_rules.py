@@ -18,6 +18,7 @@ from bioetl.domain.normalization.rules import (
 
 pytestmark = pytest.mark.unit
 
+
 class TestNormalizeCase:
     """Test case normalization functions."""
 

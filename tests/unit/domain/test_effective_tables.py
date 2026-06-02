@@ -9,6 +9,7 @@ from bioetl.domain.config import PipelineConfig, TableConfig
 
 pytestmark = pytest.mark.unit
 
+
 def test_effective_silver_table_uses_explicit_value() -> None:
     config = PipelineConfig(
         pipeline_name="p1",

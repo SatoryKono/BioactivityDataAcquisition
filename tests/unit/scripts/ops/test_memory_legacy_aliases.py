@@ -7,6 +7,7 @@ import importlib
 
 pytestmark = pytest.mark.unit
 
+
 def test_scripts_memory_sync_is_canonical_module_alias() -> None:
     legacy = importlib.import_module("scripts.memory.sync")
     canonical = importlib.import_module("memory.graph.sync")

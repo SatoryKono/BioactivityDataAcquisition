@@ -409,6 +409,7 @@ def health_check(provider: tuple[str, ...], output_json: bool) -> None:
         return
     _render_health_results(results, output_json=output_json)
 
+
 COMMANDS = (health_server_command,)
 
 __all__ = ["health", "run_health_server_command"]

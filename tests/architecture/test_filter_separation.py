@@ -13,6 +13,7 @@ from bioetl.domain.filtering import (
 
 pytestmark = pytest.mark.architecture
 
+
 def test_silver_and_gold_are_not_subclasses_of_each_other() -> None:
     assert issubclass(SilverFilterConfig, GoldFilterConfig) is False
     assert issubclass(GoldFilterConfig, SilverFilterConfig) is False

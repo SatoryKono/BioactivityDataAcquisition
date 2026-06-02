@@ -10,14 +10,14 @@
 - Sanctioned public entrypoint rows: `14`
 - Retained review entrypoints: `0`
 - Permanent public entrypoints: `14`
-- Measured tracked modules: `22`
-- Measured-only modules outside curated inventory: `8`
-- Discovered docstring-tracked modules: `8`
+- Measured tracked modules: `14`
+- Measured-only modules outside curated inventory: `0`
+- Discovered docstring-tracked modules: `0`
 - Unexpected docstring-tracked modules: `0`
 - Missing allowlisted measured-only modules: `0`
 - First-party src imports targeting measured-only modules: `0`
 - Curated rows requiring external breaking change process: `14`
-- Curated rows marked internal-callers-zero: `0`
+- Curated rows marked internal-callers-zero: `1`
 - First-party src imports targeting internal-callers-zero rows: `0`
 - Ratchet violations: `0`
 
@@ -34,19 +34,11 @@
 ## Expected Measured Registry
 
 - `src/bioetl/application/composite/merger.py`
-- `src/bioetl/application/core/_span_helpers.py`
-- `src/bioetl/application/core/batch_execution/_contracts.py`
 - `src/bioetl/composition/entrypoints.py`
-- `src/bioetl/composition/factories/storage/_audit.py`
-- `src/bioetl/composition/factories/storage/_resilience.py`
 - `src/bioetl/composition/health_api.py`
 - `src/bioetl/composition/maintenance_api.py`
 - `src/bioetl/domain/composite/config.py`
-- `src/bioetl/domain/normalization/profiles/_chembl_policy_registry.py`
-- `src/bioetl/domain/normalization/profiles/_chembl_policy_registry_data.py`
-- `src/bioetl/domain/value_objects/_publication_field_group_types.py`
 - `src/bioetl/domain/value_objects/activity_values.py`
-- `src/bioetl/infrastructure/adapters/_circuit_breaker_contract.py`
 - `src/bioetl/infrastructure/config/__init__.py`
 - `src/bioetl/interfaces/cli/commands/diagnostics.py`
 - `src/bioetl/interfaces/cli/commands/health.py`
@@ -68,42 +60,35 @@
 - `src/bioetl/composition/entrypoints.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/composition/health_api.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/composition/maintenance_api.py` — external breaking change required: `true`, internal callers zero: `false`
-- `src/bioetl/infrastructure/config/__init__.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/infrastructure/config/__init__.py` — external breaking change required: `true`, internal callers zero: `true`
 - `src/bioetl/domain/composite/config.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/domain/value_objects/activity_values.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/application/composite/merger.py` — external breaking change required: `true`, internal callers zero: `false`
 
 ## Measured-Only Allowlist
 
-- `src/bioetl/application/core/_span_helpers.py` — owner: `bioetl.application.core`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Backward-compatible re-export facade retained as a measured-only shim for span helper imports during compatibility review.
-- `src/bioetl/application/core/batch_execution/_contracts.py` — owner: `bioetl.application.core.batch_execution`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Backward-compatible re-export facade retained as a measured-only shim for batch execution contracts imports during compatibility review.
-- `src/bioetl/composition/factories/storage/_audit.py` — owner: `bioetl.composition.factories.storage`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Backward-compatible re-export facade retained as a measured-only shim for storage audit factory imports during compatibility review.
-- `src/bioetl/composition/factories/storage/_resilience.py` — owner: `bioetl.composition.factories.storage`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Backward-compatible re-export facade retained as a measured-only shim for storage resilience factory imports during compatibility review.
-- `src/bioetl/domain/normalization/profiles/_chembl_policy_registry.py` — owner: `bioetl.domain.normalization.profiles`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Backward-compatible re-export facade retained as a measured-only shim for ChEMBL policy registry imports during compatibility review.
-- `src/bioetl/domain/normalization/profiles/_chembl_policy_registry_data.py` — owner: `bioetl.domain.normalization.profiles`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Backward-compatible re-export facade retained as a measured-only shim for ChEMBL policy registry payload imports during compatibility review.
-- `src/bioetl/domain/value_objects/_publication_field_group_types.py` — owner: `bioetl.domain.value_objects`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Backward-compatible re-export facade retained as a measured-only shim for publication field-group type imports during compatibility review.
-- `src/bioetl/infrastructure/adapters/_circuit_breaker_contract.py` — owner: `bioetl.infrastructure.adapters`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Backward-compatible re-export facade retained as a measured-only shim for circuit breaker contract imports during compatibility review.
+- None.
 
 ## Measured-Only Ratchet
 
-- Max measured-only modules: `8`
-- `src/bioetl/application/core/` <= `2` measured-only modules
+- Max measured-only modules: `0`
+- `src/bioetl/application/core/` <= `0` measured-only modules
 - `src/bioetl/application/services/` <= `0` measured-only modules
-- `src/bioetl/composition/factories/storage/` <= `2` measured-only modules
-- `src/bioetl/domain/normalization/profiles/` <= `2` measured-only modules
-- `src/bioetl/domain/value_objects/` <= `1` measured-only modules
-- `src/bioetl/infrastructure/adapters/` <= `1` measured-only modules
+- `src/bioetl/composition/factories/storage/` <= `0` measured-only modules
+- `src/bioetl/domain/normalization/profiles/` <= `0` measured-only modules
+- `src/bioetl/domain/value_objects/` <= `0` measured-only modules
+- `src/bioetl/infrastructure/adapters/` <= `0` measured-only modules
 - `src/bioetl/interfaces/cli/commands/` <= `0` measured-only modules
 
 ### Live Ratchet Counts
 
-- Total measured-only modules: `8`
-- `src/bioetl/application/core/` currently has `2` modules
+- Total measured-only modules: `0`
+- `src/bioetl/application/core/` currently has `0` modules
 - `src/bioetl/application/services/` currently has `0` modules
-- `src/bioetl/composition/factories/storage/` currently has `2` modules
-- `src/bioetl/domain/normalization/profiles/` currently has `2` modules
-- `src/bioetl/domain/value_objects/` currently has `1` modules
-- `src/bioetl/infrastructure/adapters/` currently has `1` modules
+- `src/bioetl/composition/factories/storage/` currently has `0` modules
+- `src/bioetl/domain/normalization/profiles/` currently has `0` modules
+- `src/bioetl/domain/value_objects/` currently has `0` modules
+- `src/bioetl/infrastructure/adapters/` currently has `0` modules
 - `src/bioetl/interfaces/cli/commands/` currently has `0` modules
 
 ### Ratchet Violations
@@ -128,14 +113,7 @@
 
 ### Discovered Docstring-Tracked Modules
 
-- `src/bioetl/application/core/_span_helpers.py`
-- `src/bioetl/application/core/batch_execution/_contracts.py`
-- `src/bioetl/composition/factories/storage/_audit.py`
-- `src/bioetl/composition/factories/storage/_resilience.py`
-- `src/bioetl/domain/normalization/profiles/_chembl_policy_registry.py`
-- `src/bioetl/domain/normalization/profiles/_chembl_policy_registry_data.py`
-- `src/bioetl/domain/value_objects/_publication_field_group_types.py`
-- `src/bioetl/infrastructure/adapters/_circuit_breaker_contract.py`
+- None.
 
 ### Unexpected Docstring-Tracked Modules
 

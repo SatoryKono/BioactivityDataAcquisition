@@ -218,7 +218,9 @@ class TestValueValidatorPotency:
         """Test is_potent returns True at threshold."""
         assert validator.is_potent(5.0, threshold=5.0) is True
 
-    def test_validator_potency__is_highly_potent__737d1a6a(self, validator: ValueValidator) -> None:
+    def test_validator_potency__is_highly_potent__737d1a6a(
+        self, validator: ValueValidator
+    ) -> None:
         """Test is_highly_potent classification."""
         assert validator.is_highly_potent(8.0, threshold=7.0) is True
         assert validator.is_highly_potent(6.0, threshold=7.0) is False

@@ -15,6 +15,7 @@ from tests.helpers.adapter_error_logging import log_adapter_error
 
 pytestmark = pytest.mark.unit
 
+
 class TestLogAdapterError:
     """Tests for log_adapter_error function."""
 

@@ -28,6 +28,7 @@ from bioetl.infrastructure.adapters.chembl.models_additional import (
 
 pytestmark = pytest.mark.unit
 
+
 def _load_first_fixture_row(relative_path: str) -> dict[str, object]:
     path = Path(relative_path)
     for line in path.read_text(encoding="utf-8").splitlines():

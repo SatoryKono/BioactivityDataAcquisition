@@ -98,7 +98,7 @@ class TestChemblActivityPipeline(IntegrationPipelineTestCase):
                 silver_table_name,
             )
             dt_silver = DeltaTable(silver_table_path)
-        except:
+        except Exception:
             # Fall back to production path
             silver_table_path = f"data/output/silver/{silver_table_name}"
             dt_silver = DeltaTable(silver_table_path)

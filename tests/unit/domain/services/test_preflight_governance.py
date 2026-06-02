@@ -18,6 +18,7 @@ from bioetl.domain.types.validation_severity import ValidationSeverity
 
 pytestmark = pytest.mark.unit
 
+
 def _create_validation_service() -> CompositeValidator:
     return CompositeValidator(
         aggregation_validator=AggregationValidator(),

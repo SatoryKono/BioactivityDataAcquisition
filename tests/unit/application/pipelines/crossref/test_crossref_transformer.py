@@ -473,7 +473,9 @@ def test_extract_business_data_subject_list(transformer):
 
 
 @pytest.mark.asyncio
-async def test_crossref_transformer__content_hash__f0915057(transformer, pipeline_context):
+async def test_crossref_transformer__content_hash__f0915057(
+    transformer, pipeline_context
+):
     """Test that transformation generates a content hash."""
     publication = {"DOI": "10.1234/test", "title": ["Test"]}
     result = await transformer.transform(pipeline_context, publication, index=0)
@@ -510,7 +512,9 @@ async def test_transform_different_content_different_hash(
 
 
 @pytest.mark.asyncio
-async def test_crossref_transformer__entity_id_format__556c6824(transformer, pipeline_context):
+async def test_crossref_transformer__entity_id_format__556c6824(
+    transformer, pipeline_context
+):
     """Test that entity_id follows expected format."""
     publication = {"DOI": "10.1234/test", "title": ["Test"]}
     result = await transformer.transform(pipeline_context, publication, index=0)

@@ -26,6 +26,7 @@ from bioetl.domain.validation import (
 
 pytestmark = pytest.mark.unit
 
+
 class TestValidateSmiles:
     """Tests for validate_smiles function."""
 
@@ -381,7 +382,9 @@ class TestValidateNonEmptyString:
             ("test string", "test string"),
         ],
     )
-    def test_non_empty_string__valid_string__56593c57(self, value: str, expected: str) -> None:
+    def test_non_empty_string__valid_string__56593c57(
+        self, value: str, expected: str
+    ) -> None:
         """Test valid strings are normalized and returned."""
         assert validate_non_empty_string(value) == expected
 

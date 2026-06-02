@@ -15,6 +15,7 @@ from bioetl.domain.normalization import normalize_control_plane_sha256
 
 pytestmark = pytest.mark.unit
 
+
 def _build_payload() -> dict[str, str | None]:
     return build_execution_identity_payload(
         pipeline_name="chembl_activity",

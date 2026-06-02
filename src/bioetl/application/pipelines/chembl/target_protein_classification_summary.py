@@ -16,9 +16,7 @@ __all__ = [
     "summarize_target_protein_classification_rows",
 ]
 
-TARGET_PROTEIN_CLASSIFICATION_PIPELINE: Final = (
-    "chembl_target_protein_classification"
-)
+TARGET_PROTEIN_CLASSIFICATION_PIPELINE: Final = "chembl_target_protein_classification"
 MULTIFUNCTIONAL_TARGET_NAME: Final = "Multifunctional target"
 _RESOLVED_STATUS: Final = "resolved"
 _LEVELS: Final = (1, 2, 3, 4, 5)
@@ -26,18 +24,9 @@ _LEVELS: Final = (1, 2, 3, 4, 5)
 _SUMMARY_SCHEMA: Final[dict[str, pl.DataType]] = {
     "target_id": pl.Utf8,
     "protein_classifications": pl.Utf8,
-    **{
-        f"target_protein_class_id_L{level}": pl.Utf8
-        for level in _LEVELS
-    },
-    **{
-        f"target_protein_class_name_L{level}": pl.Utf8
-        for level in _LEVELS
-    },
-    **{
-        f"target_protein_class_desc_L{level}": pl.Utf8
-        for level in _LEVELS
-    },
+    **{f"target_protein_class_id_L{level}": pl.Utf8 for level in _LEVELS},
+    **{f"target_protein_class_name_L{level}": pl.Utf8 for level in _LEVELS},
+    **{f"target_protein_class_desc_L{level}": pl.Utf8 for level in _LEVELS},
 }
 
 
@@ -74,9 +63,7 @@ def summarize_target_protein_classification_rows(
     if not resolved_rows:
         return summary
 
-    summary["protein_classifications"] = _serialize_classifications(
-        resolved_rows
-    )
+    summary["protein_classifications"] = _serialize_classifications(resolved_rows)
     if len(resolved_rows) == 1:
         _copy_single_hierarchy(summary, resolved_rows[0])
         return summary
@@ -185,6 +172,7 @@ def _positive_int_or_none(value: object) -> int | None:
     if normalized is None:
         return None
     return normalized if normalized > 0 else None
+
 
 def _int_or_none(value: object) -> int | None:
     if value is None or isinstance(value, bool):

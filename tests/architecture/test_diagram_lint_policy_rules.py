@@ -12,6 +12,7 @@ from types import ModuleType
 
 pytestmark = pytest.mark.architecture
 
+
 def _load_lint_module() -> ModuleType:
     """Load scripts/diagrams/lint_diagrams.py for direct function testing."""
     repo_root = Path(__file__).resolve().parents[2]

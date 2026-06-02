@@ -350,7 +350,9 @@ class TestQuarantineEntryEncapsulation:
         with pytest.raises(AttributeError):
             quarantine_entry.payload_hash = ContentHash("newhash")  # type: ignore
 
-    def test_entry_encapsulation__returns_copy__3f32547b(self, quarantine_entry: QuarantineEntry) -> None:
+    def test_entry_encapsulation__returns_copy__3f32547b(
+        self, quarantine_entry: QuarantineEntry
+    ) -> None:
         """Invariant: metadata returns a copy."""
         metadata = quarantine_entry.metadata
         metadata["new_key"] = "new_value"

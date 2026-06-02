@@ -14,6 +14,7 @@ from pathlib import Path
 
 pytestmark = pytest.mark.architecture
 
+
 def test_base_pipeline_does_not_have_gold_methods(src_dir: Path) -> None:
     """BasePipeline MUST NOT implement Gold transformation logic.
 

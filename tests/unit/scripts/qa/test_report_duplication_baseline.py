@@ -21,6 +21,7 @@ from scripts.engineering.qa.report_duplication_baseline import TargetDuplication
 
 pytestmark = pytest.mark.unit
 
+
 def test_parse_pylint_duplicate_output_extracts_clusters() -> None:
     stdout = """
 ************* Module bioetl.application.foo

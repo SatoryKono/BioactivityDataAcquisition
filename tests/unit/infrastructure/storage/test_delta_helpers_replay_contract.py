@@ -13,6 +13,7 @@ from bioetl.infrastructure.storage.silver.delta_helpers import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_build_replay_safe_rerun_contract_is_machine_readable() -> None:
     """Silver merge rerun semantics should expose explicit external guards."""
     records = pa.table(

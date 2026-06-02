@@ -84,7 +84,9 @@ def test_request_metadata__and_clears_requests__dc74bc77(
     assert adapter.request_count == 0
 
 
-def test_request_metadata__resets_request_count__e4fdbe1a(adapter: PubChemAdapter) -> None:
+def test_request_metadata__resets_request_count__e4fdbe1a(
+    adapter: PubChemAdapter,
+) -> None:
     """Clearing the collector should drop accumulated request state."""
     adapter._request_collector.record_request(
         url=f"{PUBCHEM_API_BASE}/compound/cid/2244/JSON",

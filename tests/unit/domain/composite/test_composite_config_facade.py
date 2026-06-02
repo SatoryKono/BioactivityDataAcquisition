@@ -27,6 +27,7 @@ from bioetl.domain.composite.config_models import SeedConfig as ModelsSeedConfig
 
 pytestmark = pytest.mark.unit
 
+
 def test_config_facade_keeps_model_reexports() -> None:
     assert facade.SeedConfig is ModelsSeedConfig
     assert facade.DependencyConfig is ModelsDependencyConfig

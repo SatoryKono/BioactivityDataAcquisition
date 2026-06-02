@@ -18,6 +18,7 @@ from bioetl.infrastructure.quality.exemptions_registry_paths import (
 
 pytestmark = pytest.mark.unit
 
+
 class TestProjectRoot:
     """Tests for project_root."""
 

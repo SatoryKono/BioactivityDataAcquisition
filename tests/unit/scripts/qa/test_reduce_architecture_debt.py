@@ -10,6 +10,7 @@ from scripts.engineering.qa.reduce_architecture_debt import main
 
 pytestmark = pytest.mark.unit
 
+
 def test_reduce_architecture_debt_script_writes_plan(tmp_path: Path) -> None:
     tasks_path = tmp_path / "tasks_architecture_metric_exemptions_2026-04-04-09-30.json"
     tasks_path.write_text(

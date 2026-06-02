@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+
 import pytest
 
 # ruff: noqa: F403,F405
@@ -9,11 +11,13 @@ from bioetl.composition.runtime_builders.runner_builder_wiring import (
     LegacyRunnerBuilderOverrides,
     resolve_runner_factory_wiring,
 )
+from bioetl.composition.runtime_builders import runner_control_plane_assembly
 
 from tests.unit.composition.runtime_builders.runner_builder_test_support import *
 
 
 pytestmark = pytest.mark.unit
+
 
 def test_handle_control_plane_setup_returns_effective_manifest_profile(
     monkeypatch,

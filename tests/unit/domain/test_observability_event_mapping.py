@@ -22,6 +22,7 @@ from bioetl.domain.types import BatchID, RunID
 
 pytestmark = pytest.mark.unit
 
+
 def test_pipeline_completed_maps_to_pipeline_finished_event() -> None:
     event = PipelineCompleted(
         occurred_at=datetime(2026, 4, 10, tzinfo=UTC),

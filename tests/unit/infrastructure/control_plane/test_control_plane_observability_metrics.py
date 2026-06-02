@@ -21,6 +21,7 @@ from tests.helpers.deterministic_ids import deterministic_uuid_value
 
 pytestmark = pytest.mark.unit
 
+
 def _make_manifest(pipeline: str = "chembl_activity") -> RunManifest:
     now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
     return RunManifest(

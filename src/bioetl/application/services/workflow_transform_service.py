@@ -99,7 +99,7 @@ class WorkflowTransformService:
             runtime_context = WorkflowTransformRuntimeContext(
                 dry_run=dry_run,
                 workflow_name=workflow_name,
-                destructive_commit_callback=destructive_commit_callback
+                destructive_commit_callback=destructive_commit_callback,
             )
             output = _invoke_transform_executor(
                 executor,

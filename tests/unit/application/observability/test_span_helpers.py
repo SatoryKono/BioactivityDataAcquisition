@@ -144,7 +144,9 @@ class TestTracedAsyncOperation:
         span.__exit__.assert_called_once_with(None, None, None)
 
     @pytest.mark.asyncio
-    async def test_traced_async_operation__closed_on_exception__bcb1033f(self, mock_tracer):
+    async def test_traced_async_operation__closed_on_exception__bcb1033f(
+        self, mock_tracer
+    ):
         """Test span is closed even when exception occurs."""
         tracer, _, span = mock_tracer
 
@@ -155,7 +157,9 @@ class TestTracedAsyncOperation:
         span.__exit__.assert_called_once_with(None, None, None)
 
     @pytest.mark.asyncio
-    async def test_traced_async_operation__recorded_on_span__0b8459ca(self, mock_tracer):
+    async def test_traced_async_operation__recorded_on_span__0b8459ca(
+        self, mock_tracer
+    ):
         """Test exception is recorded on span."""
         tracer, _, span = mock_tracer
 

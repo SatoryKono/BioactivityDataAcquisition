@@ -9,6 +9,7 @@ import bioetl.interfaces.cli.commands as commands_package
 
 pytestmark = pytest.mark.unit
 
+
 def test_commands_package_exports_reviewed_public_command_whitelist() -> None:
     """Helper modules must not silently re-enter the package-root command map."""
     assert commands_package.__all__ == [

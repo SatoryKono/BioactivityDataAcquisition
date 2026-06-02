@@ -16,6 +16,7 @@ from bioetl.application.composite.runtime_models import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_runtime_models_exports_stable_symbols() -> None:
     """Stable runtime module should own the canonical orchestration models."""
     assert CompositeRuntimeConfig.__name__ == "CompositeRuntimeConfig"

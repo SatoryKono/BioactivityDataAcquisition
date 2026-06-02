@@ -11,6 +11,7 @@ from scripts.engineering.qa.file_discovery import discover_files
 
 pytestmark = pytest.mark.unit
 
+
 def test_discover_files_returns_sorted_relative_matches(tmp_path: Path) -> None:
     root = tmp_path / "repo"
     root.mkdir()

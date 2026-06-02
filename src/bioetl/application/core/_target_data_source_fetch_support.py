@@ -67,7 +67,13 @@ def yield_plain_wrapped_fetch_records(
 ) -> AsyncIterator[RecordT]:
     """Delegate a plain unfiltered fetch call to a wrapped adapter."""
     return yield_wrapped_fetch_records(
-        data_source, entity_type, limit, query, _UNSET_FETCH_ARG, _UNSET_FETCH_ARG, offset
+        data_source,
+        entity_type,
+        limit,
+        query,
+        _UNSET_FETCH_ARG,
+        _UNSET_FETCH_ARG,
+        offset,
     )
 
 

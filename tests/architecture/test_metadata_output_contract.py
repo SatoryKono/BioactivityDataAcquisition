@@ -23,6 +23,7 @@ from bioetl.domain.models.metadata import (
 
 pytestmark = pytest.mark.architecture
 
+
 def test_all_layer_metadata_have_base_output() -> None:
     """GIVEN layer metadata classes THEN all have BaseOutputMetadata output field."""
     for cls in [BronzeMetadata, SilverMetadata, GoldMetadata]:

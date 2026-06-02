@@ -81,7 +81,6 @@ def test_cross_scope_links_have_required_tooltip_tokens():
         links = _collect_dashboard_links(dashboard)
 
         for link in links:
-            url = str(link.get("url", ""))
             tooltip = str(link.get("tooltip", ""))
 
             # Only check if tooltip exists and mentions dashboard scope reset or context mapping

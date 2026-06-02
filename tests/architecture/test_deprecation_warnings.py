@@ -58,9 +58,9 @@ def test_deprecation_warning_ignores_are_not_hidden_in_test_modules() -> None:
 
 def test_runner_assembly_has_no_deprecated_fsm_bootstrap_warning() -> None:
     """Composite runner assembly should require explicit FSM helper injection."""
-    source = (ROOT / Path(
-        "src/bioetl/composition/bootstrap/runtime/runner_assembly.py"
-    )).read_text(encoding="utf-8")
+    source = (
+        ROOT / Path("src/bioetl/composition/bootstrap/runtime/runner_assembly.py")
+    ).read_text(encoding="utf-8")
     assert (
         "Creating CompositePipelineRunner without fsm_state_helper is deprecated"
         not in source
@@ -70,14 +70,12 @@ def test_runner_assembly_has_no_deprecated_fsm_bootstrap_warning() -> None:
 
 def test_composite_application_services_do_not_reintroduce_legacy_aliases() -> None:
     """Composite application helpers should expose canonical service names only."""
-    fsm_source = (ROOT / Path("src/bioetl/application/composite/fsm_helper.py")).read_text(
-        encoding="utf-8"
-    )
+    fsm_source = (
+        ROOT / Path("src/bioetl/application/composite/fsm_helper.py")
+    ).read_text(encoding="utf-8")
     dedup_source = (
         ROOT / Path("src/bioetl/application/composite/deduplication.py")
-    ).read_text(
-        encoding="utf-8"
-    )
+    ).read_text(encoding="utf-8")
 
     assert "class FSMStateHelper(" not in fsm_source
     assert '"FSMStateHelper"' not in fsm_source

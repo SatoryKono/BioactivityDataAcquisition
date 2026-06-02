@@ -54,8 +54,7 @@ def test_uv_virtualenv_cache_uses_environment_fingerprint_not_only_lockfile() ->
     assert "steps.environment-cache.outputs.fingerprint" in with_block["key"]
     assert "hashFiles('uv.lock')" not in with_block["key"]
     assert (
-        "steps.environment-cache.outputs.python-fragment"
-        in with_block["restore-keys"]
+        "steps.environment-cache.outputs.python-fragment" in with_block["restore-keys"]
     )
 
 

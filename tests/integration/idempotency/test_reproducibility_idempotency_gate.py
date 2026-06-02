@@ -7,7 +7,9 @@ from pathlib import Path
 
 import pytest
 
-from tests.integration._consolidation_suite_support import run_tracked_fixture_replay_pair
+from tests.integration._consolidation_suite_support import (
+    run_tracked_fixture_replay_pair,
+)
 
 pytestmark = [
     pytest.mark.integration,
@@ -19,8 +21,15 @@ async def test_consolidation_idempotency_contract_guard(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    first_manifest, second_manifest, first_effective, second_effective, _, _ = (
-        await run_tracked_fixture_replay_pair(tmp_path=tmp_path, monkeypatch=monkeypatch)
+    (
+        first_manifest,
+        second_manifest,
+        first_effective,
+        second_effective,
+        _,
+        _,
+    ) = await run_tracked_fixture_replay_pair(
+        tmp_path=tmp_path, monkeypatch=monkeypatch
     )
 
     assert first_manifest["run_id"] != second_manifest["run_id"]
@@ -36,11 +45,13 @@ async def test_consolidation_idempotency_contract_guard(
     assert isinstance(source_refs_second, list) and source_refs_second
     assert len(source_refs_first) == len(source_refs_second) == 1
     assert (
-        source_refs_first[0].get("provider") == source_refs_second[0].get("provider")
+        source_refs_first[0].get("provider")
+        == source_refs_second[0].get("provider")
         == "chembl"
     )
     assert (
-        source_refs_first[0].get("entity") == source_refs_second[0].get("entity")
+        source_refs_first[0].get("entity")
+        == source_refs_second[0].get("entity")
         == "activity"
     )
     assert (
@@ -69,7 +80,9 @@ async def test_consolidation_idempotency_contract_guard(
         == first_manifest["code_provenance"]["effective_config_artifact_id"]
     )
 
-    contract_path = tmp_path / "reports" / "reproducibility" / "tracked_fixture_idempotency.json"
+    contract_path = (
+        tmp_path / "reports" / "reproducibility" / "tracked_fixture_idempotency.json"
+    )
     contract_path.parent.mkdir(parents=True, exist_ok=True)
     contract_path.write_text(
         json.dumps(

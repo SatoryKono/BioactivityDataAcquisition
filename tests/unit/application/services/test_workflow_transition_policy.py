@@ -14,6 +14,7 @@ from bioetl.domain.workflow import TransformStepConfig, WorkflowStepConfig
 
 pytestmark = pytest.mark.unit
 
+
 def test_resolve_step_transition_policy_runs_when_no_failure_or_resume_anchor() -> None:
     step = WorkflowStepConfig(step_id="extract", pipeline_name="chembl_activity")
 

@@ -17,6 +17,7 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 
 pytestmark = pytest.mark.unit
 
+
 class TestCanonicalJsonSerializer:
     """Test canonical JSON serialization functions."""
 

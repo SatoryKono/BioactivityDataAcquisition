@@ -215,6 +215,5 @@ def _validate_target_protein_classification_resolution(
     if component_id is not None and leaf_id is not None:
         return
     raise ValueError(
-        "Resolved target protein classification rows require "
-        "component_id and leaf_id"
+        "Resolved target protein classification rows require component_id and leaf_id"
     )

@@ -1,22 +1,22 @@
 ---
 id: codex-mcp-setup
-title: Configure Codex MCP
+title: Setup MCP for Codex
 task_id: codex-mcp-setup
-created_at: '2026-05-22T08:01:58Z'
+created_at: '2026-06-02T06:06:02Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- scripts/ai/codex/run-codex.ps1
+- docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md
 summary: Active task session context.
-query: codex mcp setup configuration
+query: MCP Codex setup runtime config
 ---
 
 # Session note
 
 ## Task
 
-- Title: Configure Codex MCP
-- Retrieval query: codex mcp setup configuration
+- Title: Setup MCP for Codex
+- Retrieval query: MCP Codex setup runtime config
 
 ## Retrieved context
 

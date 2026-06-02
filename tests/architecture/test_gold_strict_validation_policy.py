@@ -16,7 +16,9 @@ COMPOSITE_CONTRACTS_DIR = PROJECT_ROOT / "configs" / "contracts" / "composite"
 COMPOSITE_WAIVERS_PATH = (
     PROJECT_ROOT / "configs" / "quality" / "composite_gold_strictness_waivers.yaml"
 )
-GOLD_CONTRACT_DOC_PATH = PROJECT_ROOT / "docs" / "04-reference" / "contracts" / "gold-schemas.md"
+GOLD_CONTRACT_DOC_PATH = (
+    PROJECT_ROOT / "docs" / "04-reference" / "contracts" / "gold-schemas.md"
+)
 
 
 def _load_yaml(path: Path) -> dict[str, object]:
@@ -30,9 +32,9 @@ def _load_composite_contracts() -> dict[str, dict[str, object]]:
     for path in sorted(COMPOSITE_CONTRACTS_DIR.glob("*.yaml")):
         payload = _load_yaml(path)
         contract_ref = payload.get("contract_ref")
-        assert isinstance(contract_ref, str) and contract_ref.startswith("composite."), (
-            f"{path} must declare a composite contract_ref"
-        )
+        assert isinstance(contract_ref, str) and contract_ref.startswith(
+            "composite."
+        ), f"{path} must declare a composite contract_ref"
         contracts[contract_ref] = payload
     return contracts
 
@@ -54,7 +56,9 @@ def test_composite_dq_strict_false_contracts_require_explicit_waiver_metadata() 
     waiver_payload = _load_yaml(COMPOSITE_WAIVERS_PATH)
 
     waivers = waiver_payload.get("waivers")
-    assert isinstance(waivers, list), "composite strictness waiver file must define a waivers list"
+    assert isinstance(waivers, list), (
+        "composite strictness waiver file must define a waivers list"
+    )
     waiver_map: dict[str, dict[str, object]] = {}
     for waiver in waivers:
         assert isinstance(waiver, dict), "waiver entries must be mappings"

@@ -21,6 +21,7 @@ from bioetl.domain.validation import INCHI_KEY_REGEX_PATTERN
 
 pytestmark = pytest.mark.unit
 
+
 class TestInchiKeyRegexPattern:
     """Tests for INCHI_KEY_REGEX_PATTERN constant."""
 

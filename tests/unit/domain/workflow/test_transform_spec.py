@@ -9,6 +9,7 @@ from bioetl.domain.workflow import TransformStepConfig, WorkflowTransformSpec
 
 pytestmark = pytest.mark.unit
 
+
 def test_transform_fingerprint_is_stable_for_config_key_order() -> None:
     left = WorkflowTransformSpec.from_step(
         TransformStepConfig(

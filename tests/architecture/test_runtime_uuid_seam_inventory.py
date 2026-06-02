@@ -40,7 +40,9 @@ def _uuid4_candidate_files() -> tuple[Path, ...]:
     else:
         if result.returncode == 0:
             return tuple(
-                ROOT / line for line in result.stdout.splitlines() if line.endswith(".py")
+                ROOT / line
+                for line in result.stdout.splitlines()
+                if line.endswith(".py")
             )
         if result.returncode == 1:
             return ()
@@ -59,7 +61,9 @@ def _uuid4_candidate_files() -> tuple[Path, ...]:
         )
         if result.returncode == 0:
             return tuple(
-                ROOT / line for line in result.stdout.splitlines() if line.endswith(".py")
+                ROOT / line
+                for line in result.stdout.splitlines()
+                if line.endswith(".py")
             )
         if result.returncode == 1:
             return ()
@@ -133,7 +137,7 @@ def test_runtime_uuid4_inventory_documents_exact_replay_injection_seams() -> Non
     }
     expected_requirements = {
         "src/bioetl/application/services/execution/pipeline_runner_service.py": (
-            "require explicit run_id"
+            "exact replay requires explicit run_id"
         ),
         "src/bioetl/application/services/control_plane/manifest/service_scaffold.py": (
             "manifest_id_factory"
@@ -145,7 +149,10 @@ def test_runtime_uuid4_inventory_documents_exact_replay_injection_seams() -> Non
             "run_id_factory"
         ),
         "src/bioetl/composition/bootstrap/runtime/_runner_assembly_support.py": (
-            "exact replay"
+            "control-plane-attached"
+        ),
+        "src/bioetl/composition/bootstrap/runtime/pipeline_context_builder.py": (
+            "run_id_factory"
         ),
     }
 

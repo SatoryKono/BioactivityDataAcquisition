@@ -13,6 +13,7 @@ from memory.tooling.review_curated import review_curated_notes
 
 pytestmark = pytest.mark.unit
 
+
 def _lesson_body() -> str:
     return (
         "# Lesson\n\n"

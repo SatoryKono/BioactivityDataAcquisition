@@ -17,6 +17,7 @@ from bioetl.composition.providers.provider_registry import create_provider_regis
 
 pytestmark = pytest.mark.unit
 
+
 @pytest.fixture
 def mock_settings():
     """Create mock settings."""

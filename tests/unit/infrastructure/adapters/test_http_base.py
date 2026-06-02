@@ -19,6 +19,7 @@ from bioetl.infrastructure.adapters.common import HttpAdapterDependencyContext
 
 pytestmark = pytest.mark.unit
 
+
 class StubHttpAdapter(BaseHttpAdapter):
     """Concrete adapter for testing BaseHttpAdapter."""
 

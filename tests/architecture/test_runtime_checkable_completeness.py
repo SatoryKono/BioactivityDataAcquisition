@@ -17,6 +17,7 @@ from bioetl.domain import ports
 
 pytestmark = pytest.mark.architecture
 
+
 def _discover_all_port_classes() -> list[str]:
     """Discover all Protocol classes ending with 'Port' in domain.ports."""
     return sorted(

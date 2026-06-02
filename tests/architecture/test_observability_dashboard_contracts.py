@@ -32,8 +32,12 @@ _FIRST_SCREEN_MAX_Y = 31
 
 def _load_allowlist() -> tuple[frozenset[str], frozenset[str]]:
     payload = yaml.safe_load(ALLOWLIST_PATH.read_text(encoding="utf-8"))
-    metrics = frozenset(str(item) for item in payload.get("metrics_without_run_type_label", []))
-    dashboards = frozenset(str(item) for item in payload.get("pipeline_summary_dashboards", []))
+    metrics = frozenset(
+        str(item) for item in payload.get("metrics_without_run_type_label", [])
+    )
+    dashboards = frozenset(
+        str(item) for item in payload.get("pipeline_summary_dashboards", [])
+    )
     return metrics, dashboards
 
 
@@ -74,7 +78,9 @@ def test_dashboard_json_must_not_reference_deprecated_checkpoint_alias() -> None
 
 
 def test_dq_dashboard_must_not_use_hardcoded_blocked_share_verdict_math() -> None:
-    dashboard = json.loads((DASHBOARD_DIR / "bioetl-dq-v2.json").read_text(encoding="utf-8"))
+    dashboard = json.loads(
+        (DASHBOARD_DIR / "bioetl-dq-v2.json").read_text(encoding="utf-8")
+    )
     verdict_titles = {
         "Status",
         "Monitor DQ Current Status",
@@ -90,7 +96,7 @@ def test_dq_dashboard_must_not_use_hardcoded_blocked_share_verdict_math() -> Non
                 offenders.append(f"{title}: blocked-share ratio in PromQL")
             if (
                 "filtered_out" in expr
-                and "stage=\"bronze\"" in expr
+                and 'stage="bronze"' in expr
                 and "/ clamp_min(" in expr
                 and title.startswith(("Monitor:", "Track: DQ Impact"))
             ):
@@ -99,7 +105,9 @@ def test_dq_dashboard_must_not_use_hardcoded_blocked_share_verdict_math() -> Non
 
 
 def test_dq_quarantine_count_is_visible_on_first_screen() -> None:
-    dashboard = json.loads((DASHBOARD_DIR / "bioetl-dq-v2.json").read_text(encoding="utf-8"))
+    dashboard = json.loads(
+        (DASHBOARD_DIR / "bioetl-dq-v2.json").read_text(encoding="utf-8")
+    )
     panel = next(
         (
             item
@@ -131,7 +139,9 @@ def test_pipeline_summary_dashboards_apply_run_type_to_labelled_metrics() -> Non
         for panel in _iter_panels(dashboard):
             title = str(panel.get("title", ""))
             for expr in _panel_expressions(panel):
-                for metric_name, selector_body in _PROMQL_METRIC_SELECTOR_RE.findall(expr):
+                for metric_name, selector_body in _PROMQL_METRIC_SELECTOR_RE.findall(
+                    expr
+                ):
                     if metric_name in allowlist:
                         continue
                     expected_labels = label_sets.get(metric_name)
@@ -149,7 +159,11 @@ def test_provider_health_provenance_documents_provider_global_scope() -> None:
         (DASHBOARD_DIR / "bioetl-provider-health-v2.json").read_text(encoding="utf-8")
     )
     provenance = next(
-        (panel for panel in dashboard.get("panels", []) if panel.get("title") == "Provenance"),
+        (
+            panel
+            for panel in dashboard.get("panels", [])
+            if panel.get("title") == "Provenance"
+        ),
         None,
     )
     assert provenance is not None
@@ -191,15 +205,15 @@ def test_workflow_overview_exposes_fail_closed_pipeline_status_verdict() -> None
 
 def test_batch_status_aggregate_is_not_synthesized_as_runtime_metric() -> None:
     forbidden_metric = "bioetl_" + "batch_status"
-    rules = (ROOT / "grafana" / "prometheus-rules" / "bioetl_observability.yml").read_text(
-        encoding="utf-8"
-    )
+    rules = (
+        ROOT / "grafana" / "prometheus-rules" / "bioetl_observability.yml"
+    ).read_text(encoding="utf-8")
     dashboards = "\n".join(
         path.read_text(encoding="utf-8") for path in DASHBOARD_DIR.glob("*.json")
     )
     assert forbidden_metric not in rules
     assert forbidden_metric not in dashboards
-    observability_contract = (ROOT / "docs" / "04-reference" / "contracts" / "observability.md").read_text(
-        encoding="utf-8"
-    )
+    observability_contract = (
+        ROOT / "docs" / "04-reference" / "contracts" / "observability.md"
+    ).read_text(encoding="utf-8")
     assert "BatchStatus aggregate is non-runtime" in observability_contract

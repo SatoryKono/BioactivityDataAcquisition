@@ -778,7 +778,9 @@ class TestQuarantineServiceAclose:
     """Test QuarantineService.aclose method."""
 
     @pytest.mark.asyncio
-    async def test_service_aclose__aclose__1d857769(self, quarantine_service, mock_quarantine_port):
+    async def test_service_aclose__aclose__1d857769(
+        self, quarantine_service, mock_quarantine_port
+    ):
         """Test closing the service."""
         await quarantine_service.aclose()
 

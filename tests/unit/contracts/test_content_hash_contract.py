@@ -18,6 +18,7 @@ from bioetl.domain.transformations import generate_content_hash
 
 pytestmark = pytest.mark.unit
 
+
 def test_content_hash_normalization_contract() -> None:
     """Hash MUST be stable across normalization-equivalent values."""
     service = EntityIdentityGenerator()

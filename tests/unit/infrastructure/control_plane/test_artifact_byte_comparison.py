@@ -12,6 +12,7 @@ from bioetl.infrastructure.control_plane import FileArtifactByteComparisonAdapte
 
 pytestmark = pytest.mark.unit
 
+
 def _ref(path: Path) -> dict[str, object]:
     return {"artifact_path": str(path)}
 

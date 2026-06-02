@@ -21,6 +21,7 @@ from bioetl.infrastructure.quality import (
 
 pytestmark = pytest.mark.architecture
 
+
 def test_exemption_registry_has_required_sections() -> None:
     raw = load_exemptions_registry()
     registries = raw.get("registries", {})

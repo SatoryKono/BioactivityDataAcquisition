@@ -27,10 +27,8 @@ __all__ = [
 
 
 def get_lifecycle_service() -> MedallionLifecycleService:
-    """Load the lifecycle service through the maintenance command seam."""
-    from bioetl.interfaces.cli.commands.maintenance import (
-        get_lifecycle_service as _impl,
-    )
+    """Load the lifecycle service through the canonical maintenance API seam."""
+    from bioetl.composition.maintenance_api import get_lifecycle_service as _impl
 
     return _impl()
 

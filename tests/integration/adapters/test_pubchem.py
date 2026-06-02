@@ -134,7 +134,9 @@ async def _consume_async_iter(async_iter) -> list[object]:
 class TestPubChemAdapterProperties:
     """Unit-like tests for PubChemAdapter that do not require HTTP."""
 
-    def test_adapter_properties__provider_name__2c584564(self, pubchem_adapter: PubChemAdapter) -> None:
+    def test_adapter_properties__provider_name__2c584564(
+        self, pubchem_adapter: PubChemAdapter
+    ) -> None:
         """Adapter should have correct provider name."""
         assert pubchem_adapter.provider_name == "pubchem"
 

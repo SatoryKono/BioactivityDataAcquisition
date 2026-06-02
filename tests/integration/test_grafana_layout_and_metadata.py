@@ -302,9 +302,11 @@ def test_control_plane_manifest_evidence_top_band_uses_full_row_width() -> None:
         ys.add(grid_pos.get("y", 0))
         heights.add(grid_pos.get("h", 0))
 
-    row_y = panels["Incident Drilldown: Manifest / Ledger Integrity"].get(
-        "gridPos", {}
-    ).get("y", 0)
+    row_y = (
+        panels["Incident Drilldown: Manifest / Ledger Integrity"]
+        .get("gridPos", {})
+        .get("y", 0)
+    )
     assert ys == {row_y + 1}
     assert heights == {6}
     assert sum(widths) == 24, (

@@ -11,6 +11,7 @@ from bioetl.domain.behavior.schema_metadata_extractor import extract_schema_meta
 
 pytestmark = pytest.mark.unit
 
+
 class _FakeColumn:
     def __init__(self, dtype: object, nullable: bool) -> None:
         self.dtype = dtype

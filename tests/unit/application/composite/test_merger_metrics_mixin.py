@@ -145,9 +145,9 @@ class TestApplyFieldMappings:
         mixin = _make_mixin(_config=config)
         df = pl.DataFrame(
             {
-                "protein_classifications": [None, "[{\"seed\":true}]"],
+                "protein_classifications": [None, '[{"seed":true}]'],
                 "chembl.target_protein_classification.protein_classifications": [
-                    "[{\"leaf_id\":1}]",
+                    '[{"leaf_id":1}]',
                     None,
                 ],
             }
@@ -157,8 +157,8 @@ class TestApplyFieldMappings:
 
         assert result.columns == ["protein_classifications"]
         assert result["protein_classifications"].to_list() == [
-            "[{\"leaf_id\":1}]",
-            "[{\"seed\":true}]",
+            '[{"leaf_id":1}]',
+            '[{"seed":true}]',
         ]
 
 

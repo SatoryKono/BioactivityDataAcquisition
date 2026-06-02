@@ -17,6 +17,7 @@ from bioetl.application.composite.runner_pkg import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_runner_pkg_facade_reexports_runtime_models() -> None:
     """Legacy runner_pkg facade should preserve canonical runtime model identity."""
     assert CompositeRuntimeConfig is RunnerPkgCompositeRuntimeConfig

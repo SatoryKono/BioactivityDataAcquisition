@@ -303,7 +303,7 @@ def test_root_hash_policy_requires_empty_contract_hash_shims(
         encoding="utf-8",
     )
 
-    with pytest.raises(ValueError, match="contracts.hash_include must be empty"):
+    with pytest.raises(ValueError, match=r"contracts.hash_include must be empty"):
         load_pipeline_contract_policy("chembl", "activity")
 
 

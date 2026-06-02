@@ -3,9 +3,9 @@
     "composite_runtime": {
       "config_count": 5,
       "inconsistent_parameter_count": 0,
-      "raw_inconsistent_parameter_count": 16,
-      "sanctioned_partial_parameter_count": 16,
-      "unique_parameter_count": 215
+      "raw_inconsistent_parameter_count": 4,
+      "sanctioned_partial_parameter_count": 4,
+      "unique_parameter_count": 203
     },
     "entity_effective": {
       "config_count": 22,
@@ -18,9 +18,9 @@
   "metrics": {
     "config_count": 27,
     "inconsistent_parameter_count": 0,
-    "raw_inconsistent_parameter_count": 119,
-    "sanctioned_partial_parameter_count": 119,
-    "unique_parameter_count": 537
+    "raw_inconsistent_parameter_count": 107,
+    "sanctioned_partial_parameter_count": 107,
+    "unique_parameter_count": 525
   },
-  "snapshot_date": "2026-06-01"
+  "snapshot_date": "2026-06-02"
 }

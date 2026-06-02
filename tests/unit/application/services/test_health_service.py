@@ -24,6 +24,7 @@ from tests.helpers.clock import FixedClock
 
 pytestmark = pytest.mark.unit
 
+
 class TestHealthResult:
     """Tests for HealthResult dataclass."""
 

@@ -39,7 +39,9 @@ class TestSilverWriterVacuum:
 
     @pytest.mark.asyncio
     @patch("bioetl.infrastructure.storage.support.retention.DeltaTable")
-    async def test_silver_writer_vacuum__vacuum_dry_run__b6419577(self, mock_delta_table, noop_logger):
+    async def test_silver_writer_vacuum__vacuum_dry_run__b6419577(
+        self, mock_delta_table, noop_logger
+    ):
         """Test vacuum dry run."""
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 

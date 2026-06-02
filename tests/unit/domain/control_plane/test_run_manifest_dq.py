@@ -13,6 +13,7 @@ from bioetl.domain.types import RunID, RunType
 
 pytestmark = pytest.mark.unit
 
+
 class TestRunCodeProvenanceDQIntegration:
     """Tests for RunCodeProvenance with DQ integration."""
 

@@ -13,6 +13,7 @@ from bioetl.application.core import runner_flow
 
 pytestmark = pytest.mark.unit
 
+
 class _Host:
     def __init__(
         self,

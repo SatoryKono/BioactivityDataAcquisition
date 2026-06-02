@@ -190,7 +190,9 @@ class TestCleanupPreviewCommand:
         assert "Silver:" in result.output
         assert "Gold:" in result.output
 
-    def test_preview_command__error_exits_nonzero__9337cc50(self, cli_runner: CliRunner) -> None:
+    def test_preview_command__error_exits_nonzero__9337cc50(
+        self, cli_runner: CliRunner
+    ) -> None:
         """Test that BioETLError on preview exits non-zero."""
         with mock_asyncio_run(side_effect=BioETLError("preview error")):
             result = cli_runner.invoke(

@@ -11,6 +11,7 @@ from bioetl.infrastructure.config_merge import config_merge
 
 pytestmark = pytest.mark.unit
 
+
 def test_default_merge_overrides_scalars_and_lists() -> None:
     base = {
         "a": 1,

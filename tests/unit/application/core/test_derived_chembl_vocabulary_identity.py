@@ -18,6 +18,7 @@ from bioetl.domain.normalization.profiles import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_subcellular_fraction_identity_matches_source_and_derived_profiles() -> None:
     """Assay-derived subcellular fraction IDs must use the same canonical value."""
     source_rule = CHEMBL_ASSAY_PROFILE.rule_for("assay_subcellular_fraction")

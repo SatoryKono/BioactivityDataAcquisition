@@ -153,7 +153,9 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
     assert workflow["pipeline_context"].get("hide") == 2
     assert workflow["pipeline_context"].get("current", {}).get("value") == "unknown"
     assert workflow["pipeline_context_exact"].get("hide") == 2
-    assert workflow["pipeline_context_exact"].get("current", {}).get("value") == "unknown"
+    assert (
+        workflow["pipeline_context_exact"].get("current", {}).get("value") == "unknown"
+    )
     assert workflow["run_type_context"].get("hide") == 2
     assert workflow["run_type_context"].get("current", {}).get("value") == "All"
     assert workflow["run_type_context_exact"].get("hide") == 2
@@ -161,7 +163,9 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
     assert workflow["provider_context"].get("hide") == 2
     assert workflow["provider_context"].get("current", {}).get("value") == "unknown"
     assert workflow["provider_context_exact"].get("hide") == 2
-    assert workflow["provider_context_exact"].get("current", {}).get("value") == "unknown"
+    assert (
+        workflow["provider_context_exact"].get("current", {}).get("value") == "unknown"
+    )
 
     explorer = _variables("bioetl-silver-reject-explorer.json")
     assert explorer["quarantine_run_id"].get("multi") is False

@@ -141,7 +141,9 @@ class TestValidateCompositeName:
 class TestRunCompositeHelp:
     """Test run-composite command help."""
 
-    def test_run_composite_help__displays_options__6849e7c9(self, cli_runner: CliRunner) -> None:
+    def test_run_composite_help__displays_options__6849e7c9(
+        self, cli_runner: CliRunner
+    ) -> None:
         """Test that run-composite --help displays available options."""
         result = cli_runner.invoke(cli, ["run-composite", "--help"])
 
@@ -415,7 +417,9 @@ class TestRunCompositeCommand:
             ),
         )
 
-    def test_run_composite_command__successful_execution__9a97129e(self, cli_runner: CliRunner) -> None:
+    def test_run_composite_command__successful_execution__9a97129e(
+        self, cli_runner: CliRunner
+    ) -> None:
         """Test successful composite pipeline execution via CLI."""
         with mock_asyncio_run(return_value=(True, None)):
             result = cli_runner.invoke(
@@ -749,7 +753,9 @@ class TestRunCompositeAllOptionsOutput:
         assert "Resume mode" in result.output
         assert result.exit_code == ExitCode.OK.value
 
-    def test_all_options_output__with_unknown_error__3e674da9(self, cli_runner: CliRunner) -> None:
+    def test_all_options_output__with_unknown_error__3e674da9(
+        self, cli_runner: CliRunner
+    ) -> None:
         """Test failed execution with None error message."""
         with mock_asyncio_run(return_value=(False, None)):
             result = cli_runner.invoke(

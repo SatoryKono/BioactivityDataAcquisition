@@ -422,7 +422,9 @@ class TestTraceContextProcessor:
         monkeypatch.delitem(sys.modules, "opentelemetry.trace", raising=False)
         monkeypatch.delitem(sys.modules, "opentelemetry", raising=False)
 
-        with patch("builtins.__import__", side_effect=AssertionError("unexpected import")):
+        with patch(
+            "builtins.__import__", side_effect=AssertionError("unexpected import")
+        ):
             result = _get_current_trace_identifiers()
 
         assert result is None

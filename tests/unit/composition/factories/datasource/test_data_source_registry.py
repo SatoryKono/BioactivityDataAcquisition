@@ -19,6 +19,7 @@ from bioetl.composition.providers.provider_registry import (
 
 pytestmark = pytest.mark.unit
 
+
 class TestCanonicalDataSourceCreator:
     """Tests for the canonical provider-bound creator helper."""
 

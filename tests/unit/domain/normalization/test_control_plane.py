@@ -19,6 +19,7 @@ from bioetl.domain.normalization.control_plane import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_normalize_run_manifest_spec_is_deterministic_for_set_like_refs() -> None:
     payload = {
         "schema_version": "1.0",

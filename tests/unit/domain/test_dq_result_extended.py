@@ -14,6 +14,7 @@ from bioetl.domain.types.dq_contracts import (
 
 pytestmark = pytest.mark.unit
 
+
 class TestDQResultExtended:
     """Test extended DQResult with contract-based fields."""
 

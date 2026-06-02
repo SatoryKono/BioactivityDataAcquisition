@@ -8,6 +8,7 @@ from tests.helpers.transformer_dependencies import build_test_transformer_depend
 
 pytestmark = pytest.mark.unit
 
+
 class TestTissueTransformer:
     """Tests for TissueTransformer."""
 

@@ -14,6 +14,7 @@ from bioetl.interfaces.cli.commands._run_manifest_historical_support import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_load_universe_external_records_reads_archived_pack_fixture() -> None:
     pack_path = Path(
         "tests/fixtures/control_plane/historical_replay_universe/minimal_archive_pack.json"

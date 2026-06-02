@@ -364,7 +364,9 @@ class TestRunAllCommand:
         assert "--dry-run" in result.output
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
-    def test_run_all_command__all_requires_source__ec5a5820(self, mock_register, cli_runner):
+    def test_run_all_command__all_requires_source__ec5a5820(
+        self, mock_register, cli_runner
+    ):
         """Test that --source is required."""
         result = cli_runner.invoke(cli, ["run-all"])
         assert result.exit_code != 0

@@ -77,7 +77,9 @@ def main(argv: list[str] | None = None) -> int:
             host=args.probe_host,
             port=args.port,
         )
-        if probe_observability_backend(health_url) and not probe_observability_backend_required_paths(
+        if probe_observability_backend(
+            health_url
+        ) and not probe_observability_backend_required_paths(
             health_url,
             required_probe_paths=required_probe_paths,
         ):
@@ -88,7 +90,9 @@ def main(argv: list[str] | None = None) -> int:
         port=args.port,
         probe_host=args.probe_host,
         bind_host=args.bind_host,
-        ready_timeout_seconds=max(DEFAULT_OBSERVABILITY_BACKEND_READY_TIMEOUT_SECONDS, 60.0),
+        ready_timeout_seconds=max(
+            DEFAULT_OBSERVABILITY_BACKEND_READY_TIMEOUT_SECONDS, 60.0
+        ),
         required_probe_paths=required_probe_paths,
     )
     payload = {

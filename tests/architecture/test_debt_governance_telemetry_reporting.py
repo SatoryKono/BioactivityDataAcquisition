@@ -41,7 +41,9 @@ def test_debt_governance_snapshot_matches_live_sources() -> None:
     telemetry = _load_compatibility_telemetry_module()
     snapshot = telemetry.collect_debt_governance_snapshot()
 
-    runtime_uuid_inventory = yaml.safe_load(RUNTIME_UUID_YAML.read_text(encoding="utf-8"))
+    runtime_uuid_inventory = yaml.safe_load(
+        RUNTIME_UUID_YAML.read_text(encoding="utf-8")
+    )
     assert isinstance(runtime_uuid_inventory, dict)
     seams = runtime_uuid_inventory.get("seams", [])
     assert isinstance(seams, list)
@@ -56,9 +58,7 @@ def test_debt_governance_snapshot_matches_live_sources() -> None:
         [entry for entry in seams if isinstance(entry, dict)]
     )
     assert snapshot.runtime_uuid.replay_critical_uuid_seam_count == sum(
-        1
-        for entry in seams
-        if isinstance(entry, dict) and entry.get("replay_critical")
+        1 for entry in seams if isinstance(entry, dict) and entry.get("replay_critical")
     )
     assert snapshot.retirement.triaged_entry_count == int(
         dead_code_summary["triaged_entry_count"]

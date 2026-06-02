@@ -192,7 +192,9 @@ def disabled_filter_config():
 class TestFilteredDataSourceInit:
     """Tests for FilteredDataSource initialization."""
 
-    def test_data_source_init__initialization__91068ca3(self, mock_data_source, enabled_filter_config):
+    def test_data_source_init__initialization__91068ca3(
+        self, mock_data_source, enabled_filter_config
+    ):
         """Test FilteredDataSource initializes correctly."""
         filtered = FilteredDataSource(
             data_source=mock_data_source,
@@ -401,7 +403,9 @@ class TestFilteredDataSourceFetch:
         assert records == [{"id": "filtered_1"}, {"id": "filtered_2"}]
 
     @pytest.mark.asyncio
-    async def test_data_source_fetch__fetch_with_limit__4dc215e7(self, mock_data_source, disabled_filter_config):
+    async def test_data_source_fetch__fetch_with_limit__4dc215e7(
+        self, mock_data_source, disabled_filter_config
+    ):
         """Test fetch passes limit to wrapped source."""
         filtered = FilteredDataSource(
             data_source=mock_data_source,

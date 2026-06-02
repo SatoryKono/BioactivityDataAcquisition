@@ -354,9 +354,7 @@ def test_semantic_identity_anchors_forbid_all_occurrence_fields() -> None:
         }
         missing = sorted(occurrence_fields - forbidden_fields)
         if missing:
-            missing_forbidden_fields.append(
-                f"{artifact_name}: {', '.join(missing)}"
-            )
+            missing_forbidden_fields.append(f"{artifact_name}: {', '.join(missing)}")
 
     assert not missing_forbidden_fields, (
         "Semantic identity anchors must forbid all operational occurrence fields:\n"

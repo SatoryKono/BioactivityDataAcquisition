@@ -13,6 +13,7 @@ from bioetl.composition.bootstrap.runtime.compatibility import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_apply_runtime_compatibility_patches_delegates_to_pandera_compat() -> None:
     """Runtime compatibility entrypoint should delegate to the canonical compat shim."""
     with patch(

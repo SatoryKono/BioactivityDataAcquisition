@@ -12,6 +12,7 @@ from bioetl.application.services.control_plane.effective_config.service import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_service_module_exports_effective_config_service() -> None:
     assert effective_config.EffectiveConfigService is EffectiveConfigService
     assert effective_config.__all__ == ["EffectiveConfigService"]

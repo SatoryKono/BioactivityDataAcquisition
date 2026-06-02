@@ -440,6 +440,40 @@ class TestPipelineRunnerServiceRun:
         assert context.run_id == run_id
 
     @pytest.mark.asyncio
+    async def test_exact_replay_requires_explicit_run_id(self, service):
+        """Exact replay must fail closed when no occurrence ID is supplied."""
+        with pytest.raises(ValueError, match="exact replay requires explicit run_id"):
+            await service.run(
+                "test_pipeline",
+                options=RunOptions(
+                    exact_replay=True,
+                    use_cached_bronze=True,
+                ),
+            )
+
+    @pytest.mark.asyncio
+    async def test_exact_replay_accepts_explicit_run_id(
+        self,
+        service,
+        mock_runner_factory,
+    ):
+        """Exact replay may still execute when the caller pins run identity."""
+        run_id = uuid4()
+
+        result = await service.run(
+            "test_pipeline",
+            run_id=run_id,
+            options=RunOptions(
+                exact_replay=True,
+                use_cached_bronze=True,
+            ),
+        )
+
+        assert result.run_id == str(run_id)
+        context = mock_runner_factory.create.call_args[0][0]
+        assert context.run_id == run_id
+
+    @pytest.mark.asyncio
     async def test_dry_run(
         self,
         service,

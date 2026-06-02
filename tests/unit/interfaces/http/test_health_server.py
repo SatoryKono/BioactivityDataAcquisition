@@ -17,6 +17,7 @@ from bioetl.interfaces.http.types import HealthResponse
 
 pytestmark = pytest.mark.unit
 
+
 class TestHealthResponse:
     """Tests for HealthResponse dataclass."""
 

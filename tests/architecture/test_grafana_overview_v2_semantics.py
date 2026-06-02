@@ -6,6 +6,7 @@ from pathlib import Path
 
 pytestmark = pytest.mark.architecture
 
+
 def _panels(d):
     out = []
     for p in d.get("panels", []):

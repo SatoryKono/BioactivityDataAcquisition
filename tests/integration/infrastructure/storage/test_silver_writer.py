@@ -27,7 +27,7 @@ class RecordingLogger:
     def __init__(self) -> None:
         self.events: list[tuple[str, str, dict[str, object]]] = []
 
-    def bind(self, **_kwargs: object) -> "RecordingLogger":
+    def bind(self, **_kwargs: object) -> RecordingLogger:
         return self
 
     def info(self, event: str, **kwargs: object) -> None:

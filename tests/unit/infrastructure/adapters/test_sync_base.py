@@ -21,6 +21,7 @@ from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
 
 pytestmark = pytest.mark.unit
 
+
 class StubSyncAdapter(BaseSyncAdapter):
     """Concrete adapter for testing BaseSyncAdapter."""
 

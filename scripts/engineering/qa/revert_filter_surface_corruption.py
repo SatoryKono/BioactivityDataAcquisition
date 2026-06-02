@@ -15,7 +15,13 @@ ENTITIES = ROOT / "configs/entities"
 
 GOLD_COLUMNS_ALLOWLIST: dict[str, frozenset[str]] = {
     "chembl/activity": frozenset(
-        {"standard_type", "standard_units", "standard_relation", "assay_type", "potential_duplicate"}
+        {
+            "standard_type",
+            "standard_units",
+            "standard_relation",
+            "assay_type",
+            "potential_duplicate",
+        }
     ),
     "chembl/assay": frozenset(
         {
@@ -27,7 +33,9 @@ GOLD_COLUMNS_ALLOWLIST: dict[str, frozenset[str]] = {
             "src_id",
         }
     ),
-    "chembl/molecule": frozenset({"inorganic_flag", "molecule_type", "structure_type", "potential_duplicate"}),
+    "chembl/molecule": frozenset(
+        {"inorganic_flag", "molecule_type", "structure_type", "potential_duplicate"}
+    ),
     "chembl/publication": frozenset({"publication_type"}),
     "chembl/target": frozenset({"target_type"}),
     "chembl/target_component": frozenset({"component_type"}),
@@ -35,15 +43,27 @@ GOLD_COLUMNS_ALLOWLIST: dict[str, frozenset[str]] = {
 }
 
 SILVER_COLUMNS_ALLOWLIST: dict[str, frozenset[str]] = {
-    "chembl/activity": frozenset({"assay_type", "potential_duplicate", "standard_relation", "standard_type", "standard_units"}),
+    "chembl/activity": frozenset(
+        {
+            "assay_type",
+            "potential_duplicate",
+            "standard_relation",
+            "standard_type",
+            "standard_units",
+        }
+    ),
     "chembl/assay": frozenset({"assay_type", "relationship_type", "src_id"}),
-    "chembl/molecule": frozenset({"inorganic_flag", "molecule_type", "structure_type", "potential_duplicate"}),
+    "chembl/molecule": frozenset(
+        {"inorganic_flag", "molecule_type", "structure_type", "potential_duplicate"}
+    ),
     "chembl/publication": frozenset({"publication_type"}),
     "chembl/target": frozenset({"target_type"}),
 }
 
 SILVER_RANGES_ALLOWLIST: dict[str, frozenset[str]] = {
-    "chembl/activity": frozenset({"activity_id", "pchembl_value", "standard_value", "publication_year"}),
+    "chembl/activity": frozenset(
+        {"activity_id", "pchembl_value", "standard_value", "publication_year"}
+    ),
     "chembl/assay": frozenset({"confidence_score", "publication_year"}),
     "chembl/molecule": frozenset({"publication_year"}),
     "chembl/publication": frozenset({"publication_year"}),
@@ -151,12 +171,18 @@ def _clean_filters(data: dict[str, Any], rel_key: str) -> bool:
                 silver["columns"] = {}
         ranges = silver.get("ranges")
         if isinstance(ranges, dict):
-            allowed_ranges = SILVER_RANGES_ALLOWLIST.get(rel_key, frozenset({"publication_year"}))
+            allowed_ranges = SILVER_RANGES_ALLOWLIST.get(
+                rel_key, frozenset({"publication_year"})
+            )
             if _prune_mapping(ranges, allowed_ranges):
                 changed = True
 
     quality = data.get("quality")
-    if isinstance(quality, dict) and rel_key != "uniprot/idmapping" and "thresholds" in quality:
+    if (
+        isinstance(quality, dict)
+        and rel_key != "uniprot/idmapping"
+        and "thresholds" in quality
+    ):
         del quality["thresholds"]
         changed = True
 

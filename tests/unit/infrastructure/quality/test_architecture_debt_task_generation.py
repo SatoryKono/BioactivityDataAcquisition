@@ -17,6 +17,7 @@ from bioetl.infrastructure.quality.architecture_debt_task_generation import (
 
 pytestmark = pytest.mark.unit
 
+
 def _write_registry(path: Path, *, registries: dict[str, object]) -> None:
     payload = {
         "schema_version": 1,

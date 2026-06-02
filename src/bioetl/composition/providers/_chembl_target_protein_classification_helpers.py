@@ -28,10 +28,10 @@ def target_id_from_record(record: Mapping[str, object]) -> str | None:
 def component_ids_from_target_record(record: Mapping[str, object]) -> tuple[int, ...]:
     """Extract unique component IDs from a target record."""
     raw_components = record.get("target_components")
-    component_ids = list(
-        _component_ids_from_target_components_value(raw_components)
+    component_ids = list(_component_ids_from_target_components_value(raw_components))
+    component_ids.extend(
+        _component_ids_from_component_ids_value(record.get("component_ids"))
     )
-    component_ids.extend(_component_ids_from_component_ids_value(record.get("component_ids")))
     primary_component_id = coerce_positive_int(record.get("primary_component_id"))
     if primary_component_id is not None:
         component_ids.append(primary_component_id)
@@ -98,9 +98,7 @@ def leaf_ids_from_value(value: object) -> tuple[int, ...]:
     if not isinstance(loaded, Iterable) or isinstance(loaded, (str, bytes)):
         return ()
     leaf_ids = [
-        leaf_id
-        for item in loaded
-        if (leaf_id := coerce_positive_int(item)) is not None
+        leaf_id for item in loaded if (leaf_id := coerce_positive_int(item)) is not None
     ]
     return tuple(dict.fromkeys(leaf_ids))
 

@@ -17,6 +17,7 @@ from bioetl.composition.factories.pipeline.registry import (
 
 pytestmark = pytest.mark.unit
 
+
 @pytest.fixture
 def test_registry() -> PipelineRegistry:
     """Create an isolated registry for testing."""
@@ -224,7 +225,9 @@ class TestRegistryConfigConsistency:
         self, test_registry: PipelineRegistry
     ) -> None:
         """Verify each registered pipeline has a corresponding YAML config file."""
-        from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
+        from bioetl.infrastructure.config.pipeline_config_api import (
+            load_pipeline_config,
+        )
 
         registered = test_registry.list_pipelines()
 

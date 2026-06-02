@@ -22,6 +22,7 @@ from bioetl.domain.ports import noop
 
 pytestmark = pytest.mark.architecture
 
+
 class TestPiiHasherPortContract:
     """Tests for PiiHasherPort contract compliance."""
 

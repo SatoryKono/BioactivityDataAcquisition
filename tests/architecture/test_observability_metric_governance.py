@@ -119,7 +119,9 @@ def test_observability_metric_governance_declares_required_views_and_evidence_pa
     assert "--write-evidence" in command
 
     live_evidence = runtime_cardinality_review["live_evidence"]
-    assert live_evidence["workflow"] == ".github/workflows/tests.yml::quality-metrics-gate"
+    assert (
+        live_evidence["workflow"] == ".github/workflows/tests.yml::quality-metrics-gate"
+    )
     assert (
         live_evidence["artifact"]
         == "reports/observability/runtime_cardinality_review.json"
@@ -128,7 +130,9 @@ def test_observability_metric_governance_declares_required_views_and_evidence_pa
     assert live_evidence["status_when_unavailable"] == "degraded"
     assert live_evidence["fail_on_threshold_violation"] is True
     assert live_evidence["fail_on_degraded_release_review"] is True
-    assert live_evidence["prometheus_url_env_var"] == "BIOETL_OBSERVABILITY_PROMETHEUS_URL"
+    assert (
+        live_evidence["prometheus_url_env_var"] == "BIOETL_OBSERVABILITY_PROMETHEUS_URL"
+    )
     assert (
         live_evidence["prometheus_token_env_var"]
         == "BIOETL_OBSERVABILITY_PROMETHEUS_TOKEN"

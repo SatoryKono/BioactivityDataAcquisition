@@ -22,6 +22,7 @@ from bioetl.domain.ports import (
 
 pytestmark = pytest.mark.unit
 
+
 class TestDQServicesFactory:
     """Tests for DQServicesFactory."""
 

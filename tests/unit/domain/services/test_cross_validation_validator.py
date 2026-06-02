@@ -17,6 +17,7 @@ from bioetl.domain.types.validation_severity import (
 
 pytestmark = pytest.mark.unit
 
+
 class TestCrossValidationValidator:
     """Tests for CrossValidationValidator."""
 

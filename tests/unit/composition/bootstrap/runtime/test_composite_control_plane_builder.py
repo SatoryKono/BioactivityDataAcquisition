@@ -28,6 +28,7 @@ from bioetl.domain.control_plane import (
     RunManifest,
     RunSourceRef,
 )
+
 pytestmark = pytest.mark.unit
 
 _VALID_RUN_ID = "12345678-1234-5678-1234-567812345678"

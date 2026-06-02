@@ -6,7 +6,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from bioetl.composition.factories.storage._resilience import (
+from bioetl.composition.factories.storage.resilience import (
     create_silver_atomic_retry_policy,
     create_silver_merge_resilience_policy,
 )

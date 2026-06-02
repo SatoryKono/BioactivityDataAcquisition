@@ -376,7 +376,9 @@ class TestWriteSilverReport:
         assert report_path.parent == output_dir
         assert report_path.exists()
 
-    async def test_write_silver_report__write_yaml_format__f9f443a4(self, tmp_path: Path) -> None:
+    async def test_write_silver_report__write_yaml_format__f9f443a4(
+        self, tmp_path: Path
+    ) -> None:
         """Should write Silver report in YAML format."""
         writer = DQReportWriter(base_path=tmp_path, logger=MagicMock())
         report = _build_silver_report()
@@ -402,7 +404,9 @@ class TestWriteSilverReport:
 class TestWriteGoldReport:
     """Tests for write_gold_report method."""
 
-    async def test_write_gold_report__write_default_json__d5e46117(self, tmp_path: Path) -> None:
+    async def test_write_gold_report__write_default_json__d5e46117(
+        self, tmp_path: Path
+    ) -> None:
         """Should write Gold report in JSON format by default."""
         writer = DQReportWriter(base_path=tmp_path, logger=MagicMock())
         report = _build_gold_report()
@@ -423,7 +427,9 @@ class TestWriteGoldReport:
         assert report_path == expected
         assert report_path.exists()
 
-    async def test_write_gold_report__with_output_path__aba59b37(self, tmp_path: Path) -> None:
+    async def test_write_gold_report__with_output_path__aba59b37(
+        self, tmp_path: Path
+    ) -> None:
         """Should use explicit output_path when provided."""
         writer = DQReportWriter(base_path=tmp_path, logger=MagicMock())
         report = _build_gold_report()

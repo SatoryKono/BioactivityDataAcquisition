@@ -17,6 +17,7 @@ from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 
 pytestmark = pytest.mark.unit
 
+
 async def _drain_async_iter(async_iter: AsyncIterator[object]) -> None:
     """Consume an async iterator until completion."""
     async for _ in async_iter:

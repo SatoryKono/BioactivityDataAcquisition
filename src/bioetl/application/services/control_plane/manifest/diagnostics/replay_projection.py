@@ -184,7 +184,11 @@ def _build_operator_replay_projection(
     """Return canonical operator-facing replay projection fields."""
     replay_family_contract = _resolve_replay_family_contract(manifest)
     replay_projection_context = _build_replay_projection_context_kwargs(
-        manifest, input_snapshots, requested_exact_replay, resume_requested, policy_assessment
+        manifest,
+        input_snapshots,
+        requested_exact_replay,
+        resume_requested,
+        policy_assessment,
     )
     replay_inputs = _build_operator_replay_projection_inputs(
         **replay_projection_context

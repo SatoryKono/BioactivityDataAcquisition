@@ -14,6 +14,7 @@ import bioetl.composition.bootstrap.runtime.composite as composite_runtime
 
 pytestmark = pytest.mark.unit
 
+
 def _build_composite_payload(name: str) -> dict[str, Any]:
     return {
         "schema_version": "2.0.0",

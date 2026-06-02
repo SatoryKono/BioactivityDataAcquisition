@@ -16,6 +16,7 @@ from bioetl.infrastructure.config.dq_contract_config_loader import (
 
 pytestmark = pytest.mark.unit
 
+
 def _write_yaml(path: Path, payload: dict[str, object]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(yaml.safe_dump(payload, sort_keys=False), encoding="utf-8")

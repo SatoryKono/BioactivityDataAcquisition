@@ -20,6 +20,7 @@ from bioetl.domain.value_objects.dq_anomaly import DQAnomaly
 
 pytestmark = pytest.mark.architecture
 
+
 def _ports_dir(src_dir: Path) -> Path:
     return src_dir / "bioetl" / "domain" / "ports"
 

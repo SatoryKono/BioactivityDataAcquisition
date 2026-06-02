@@ -18,6 +18,7 @@ from bioetl.domain.types.schema_policy import (
 
 pytestmark = pytest.mark.unit
 
+
 class TestSchemaClassifier:
     """Test schema change classification."""
 

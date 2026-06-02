@@ -26,22 +26,21 @@ def test_config_discrepancy_report_separates_actionable_drift_from_sanctioned_va
     assert "## Inconsistent Parameters" not in report
 
     assert (
-        f"Actionable inconsistent parameters: "
-        f"{metrics['inconsistent_parameter_count']}"
+        f"Actionable inconsistent parameters: {metrics['inconsistent_parameter_count']}"
     ) in report
     assert (
         f"Sanctioned partial variance parameters: "
         f"{metrics['sanctioned_partial_parameter_count']}"
     ) in report
-    assert f"Raw partial parameter count: {metrics['raw_inconsistent_parameter_count']}" in report
+    assert (
+        f"Raw partial parameter count: {metrics['raw_inconsistent_parameter_count']}"
+        in report
+    )
 
     if metrics["inconsistent_parameter_count"] == 0:
         assert "No unsanctioned config drift detected." in report
     if metrics["sanctioned_partial_parameter_count"] > 0:
-        assert (
-            "intentionally partial across governed config families"
-            in report
-        )
+        assert "intentionally partial across governed config families" in report
 
     assert "- CI should fail on actionable drift." in report
     assert "merge blocker" in report

@@ -17,6 +17,7 @@ from bioetl.application.pipelines.crossref._publication_field_extractors import 
 
 pytestmark = pytest.mark.unit
 
+
 def test_extract_journal_and_pagination_fields() -> None:
     publication = {
         "container-title": ["Nature", "Nature Publishing Group"],

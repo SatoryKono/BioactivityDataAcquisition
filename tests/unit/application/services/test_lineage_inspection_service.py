@@ -27,6 +27,7 @@ from tests.helpers.control_plane import InMemoryRunManifestStore
 
 pytestmark = pytest.mark.unit
 
+
 class _InMemoryLineageStore(LineageStorePort):
     def __init__(self) -> None:
         self._items: list[LineageGraphFragment] = []

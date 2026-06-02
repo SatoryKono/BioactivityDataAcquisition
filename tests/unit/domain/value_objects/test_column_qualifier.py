@@ -6,6 +6,7 @@ from bioetl.domain.value_objects.column_qualifier import ColumnQualifier
 
 pytestmark = pytest.mark.unit
 
+
 class TestColumnQualifier:
     """Tests for ColumnQualifier."""
 

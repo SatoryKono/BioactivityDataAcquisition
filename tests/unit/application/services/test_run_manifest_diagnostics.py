@@ -1536,8 +1536,7 @@ def test_exact_replay_anchors_exclude_occurrence_only_identifiers() -> None:
         entry
         for entry in semantic_anchors
         if isinstance(entry, dict)
-        and entry.get("artifact")
-        == "control_plane.run_manifest.exact_replay_anchors"
+        and entry.get("artifact") == "control_plane.run_manifest.exact_replay_anchors"
     )
     forbidden_fields = replay_contract["forbidden_occurrence_identity_fields"]
     assert isinstance(forbidden_fields, list)

@@ -15,6 +15,7 @@ from scripts.engineering.qa.check_xwalk_missing_backlog import (
 
 pytestmark = pytest.mark.unit
 
+
 def _write_xwalk(path: Path, body: str) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(body, encoding="utf-8")

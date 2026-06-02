@@ -11,6 +11,7 @@ from bioetl.infrastructure.storage.delta.schema_ops import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_drop_nondeterministic_persisted_fields_removes_runtime_provenance() -> None:
     table = pa.table(
         {

@@ -26,7 +26,9 @@ def build_reconcile_foreign_keys_executor(
     ) -> dict[str, object]:
         del upstream_outputs
         context_dry_run = (
-            False if runtime_context is None else getattr(runtime_context, "dry_run", False)
+            False
+            if runtime_context is None
+            else getattr(runtime_context, "dry_run", False)
         )
         workflow_name = (
             getattr(runtime_context, "workflow_name", None)
@@ -141,8 +143,7 @@ def _resolve_reference_keys(
         )
     if source_keys is None or reference_keys is None:
         raise ValueError(
-            "reconcile_foreign_keys requires source_keys and reference_keys "
-            "together"
+            "reconcile_foreign_keys requires source_keys and reference_keys together"
         )
     if len(source_keys) != len(reference_keys):
         raise ValueError(

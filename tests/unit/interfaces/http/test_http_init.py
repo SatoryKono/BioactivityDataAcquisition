@@ -16,6 +16,6 @@ def test_http_package_root_exposes_no_convenience_exports() -> None:
     assert "HealthResponse" not in dir(module)
     assert "HealthServer" not in dir(module)
     with pytest.raises(AttributeError):
-        getattr(module, "HealthResponse")
+        module.HealthResponse()
     with pytest.raises(AttributeError):
-        getattr(module, "HealthServer")
+        module.HealthServer()

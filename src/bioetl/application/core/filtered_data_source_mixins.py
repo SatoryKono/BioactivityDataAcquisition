@@ -128,5 +128,12 @@ class _FilteredDataSourceFetchMixin(
             offset: Optional pagination offset passed through to the adapter.
         """
         return delegate_bound_fetch_records(
-            fetch_support.fetch_records, self, entity_type, limit, query, filter_ids, filter_field, offset
+            fetch_support.fetch_records,
+            self,
+            entity_type,
+            limit,
+            query,
+            filter_ids,
+            filter_field,
+            offset,
         )

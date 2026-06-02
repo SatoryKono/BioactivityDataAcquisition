@@ -12,6 +12,7 @@ from bioetl.composition import observability_api
 
 pytestmark = pytest.mark.unit
 
+
 def test_start_metrics_server_uses_metrics_service_start() -> None:
     metrics_service = mock.Mock()
     metrics_service.start.return_value = mock.Mock(success=True)

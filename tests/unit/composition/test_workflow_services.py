@@ -14,6 +14,7 @@ from bioetl.composition import _workflow_services
 
 pytestmark = pytest.mark.unit
 
+
 def test_get_workflow_execution_service_injects_real_manifest_clock(
     monkeypatch,
     tmp_path: Path,

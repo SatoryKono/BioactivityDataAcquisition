@@ -11,6 +11,7 @@ from tests.helpers import assert_router_python_command, run_main_in_process
 
 pytestmark = pytest.mark.unit
 
+
 def test_classify_diagnosis_flags_published_port_gap() -> None:
     diagnosis = subject._classify_diagnosis(
         subject.ProbeResult(ok=False, detail="connection reset by peer"),

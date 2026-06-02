@@ -12,6 +12,7 @@ from bioetl.composition.factories.pipeline import construction_types
 
 pytestmark = pytest.mark.unit
 
+
 def test_pipeline_construction_protocols_expose_expected_public_contracts() -> None:
     """Construction protocol module should expose stable callable contracts."""
     assert issubclass(construction_types.EntityTypeExtractor, Protocol)

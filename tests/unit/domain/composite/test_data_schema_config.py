@@ -11,6 +11,7 @@ from bioetl.domain.composite.config import (
 
 pytestmark = pytest.mark.unit
 
+
 class TestLayerColumnConfig:
     """Test LayerColumnConfig validation and behavior."""
 

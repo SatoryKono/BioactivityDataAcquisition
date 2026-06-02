@@ -13,6 +13,7 @@ from bioetl.domain.behavior.dq_serializer import to_dict
 
 pytestmark = pytest.mark.unit
 
+
 class SampleStatus(Enum):
     """Тестовое перечисление для проверки Enum."""
 

@@ -20,6 +20,7 @@ from bioetl.infrastructure.locking.memory_lock import MemoryLock
 
 pytestmark = pytest.mark.architecture
 
+
 class TestLockSafetyGuard:
     """Tests for Lock Safety Guard implementation."""
 

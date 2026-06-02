@@ -24,6 +24,7 @@ from bioetl.domain.control_plane.reproducibility_profiles import (
 
 pytestmark = pytest.mark.unit
 
+
 def _source_ref(
     *,
     snapshots: tuple[RunInputSnapshotRef, ...] = (),

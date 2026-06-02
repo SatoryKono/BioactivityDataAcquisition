@@ -9,6 +9,7 @@ from pathlib import Path
 
 pytestmark = pytest.mark.architecture
 
+
 def test_tests_workflow_keeps_docs_only_changes_out_of_heavy_matrix() -> None:
     workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")
 

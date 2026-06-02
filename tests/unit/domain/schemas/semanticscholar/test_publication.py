@@ -13,6 +13,7 @@ from bioetl.domain.schemas.semanticscholar.publication import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_semanticscholar_publication_schema_extends_publication_base_schema() -> None:
     assert issubclass(SemanticScholarPublicationSchema, PublicationBaseSchema)
 

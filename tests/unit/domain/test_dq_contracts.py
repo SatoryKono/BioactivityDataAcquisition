@@ -15,6 +15,7 @@ from bioetl.domain.types.dq_contracts import (
 
 pytestmark = pytest.mark.unit
 
+
 class TestDQDisposition:
     """Test DQDisposition enum."""
 

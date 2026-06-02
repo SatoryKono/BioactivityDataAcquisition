@@ -15,6 +15,7 @@ from bioetl.domain.composite.result import DependencyResult, DependencyStatus
 
 pytestmark = pytest.mark.unit
 
+
 def _make_logger() -> MagicMock:
     logger = MagicMock()
     logger.debug = MagicMock()

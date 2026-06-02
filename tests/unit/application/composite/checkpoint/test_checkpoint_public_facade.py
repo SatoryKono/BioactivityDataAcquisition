@@ -19,6 +19,7 @@ from tests.helpers.clock import FixedClock
 
 pytestmark = pytest.mark.unit
 
+
 def test_public_facade_exports_anchor_context_helpers() -> None:
     anchors = create_expected_checkpoint_context(
         effective_config_hash=" sha256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ",

@@ -13,6 +13,7 @@ from types import ModuleType
 
 pytestmark = pytest.mark.architecture
 
+
 def _load_fallback_module() -> ModuleType:
     repo_root = Path(__file__).resolve().parents[2]
     module_path = repo_root / "scripts" / "diagrams" / "add_svg_text_fallback.py"

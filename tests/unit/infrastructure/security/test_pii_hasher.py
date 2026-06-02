@@ -211,28 +211,40 @@ class TestNoOpPiiHasher:
         """Create a NoOp hasher."""
         return NoOpPiiHasher()
 
-    def test_no_op_pii_hasher__implements_port__b7b822fb(self, hasher: NoOpPiiHasher) -> None:
+    def test_no_op_pii_hasher__implements_port__b7b822fb(
+        self, hasher: NoOpPiiHasher
+    ) -> None:
         """Test that NoOpPiiHasher implements PiiHasherPort."""
         assert isinstance(hasher, PiiHasherPort)
 
-    def test_no_op_pii_hasher__returns_unchanged__5c18dba9(self, hasher: NoOpPiiHasher) -> None:
+    def test_no_op_pii_hasher__returns_unchanged__5c18dba9(
+        self, hasher: NoOpPiiHasher
+    ) -> None:
         """Test that value is returned unchanged."""
         assert hasher.hash_value("John Doe") == "John Doe"
 
-    def test_no_op_pii_hasher__none_returns_none__ec2e2f93(self, hasher: NoOpPiiHasher) -> None:
+    def test_no_op_pii_hasher__none_returns_none__ec2e2f93(
+        self, hasher: NoOpPiiHasher
+    ) -> None:
         """Test that None returns None."""
         assert hasher.hash_value(None) is None
 
-    def test_no_op_pii_hasher__returns_unchanged__eab645ca(self, hasher: NoOpPiiHasher) -> None:
+    def test_no_op_pii_hasher__returns_unchanged__eab645ca(
+        self, hasher: NoOpPiiHasher
+    ) -> None:
         """Test that list is returned unchanged."""
         values = ["Alice", "Bob"]
         assert hasher.hash_list(values) == values
 
-    def test_no_op_pii_hasher__none_returns_none__6455eafe(self, hasher: NoOpPiiHasher) -> None:
+    def test_no_op_pii_hasher__none_returns_none__6455eafe(
+        self, hasher: NoOpPiiHasher
+    ) -> None:
         """Test that None returns None."""
         assert hasher.hash_list(None) is None
 
-    def test_no_op_pii_hasher__get_salt_id__fb899f11(self, hasher: NoOpPiiHasher) -> None:
+    def test_no_op_pii_hasher__get_salt_id__fb899f11(
+        self, hasher: NoOpPiiHasher
+    ) -> None:
         """Test that salt ID is 'noop'."""
         assert hasher.get_salt_id() == "noop"
 

@@ -16,8 +16,8 @@
         "src/bioetl/application/core/"
       ],
       "duplication_clusters": 0,
-      "files": 168,
-      "total_loc": 21518,
+      "files": 166,
+      "total_loc": 21510,
       "files_ge_250_loc": 12,
       "helper_function_ratio": 0.375,
       "max_internal_fan_in": 14,
@@ -41,10 +41,10 @@
         "src/bioetl/composition/bootstrap/runtime/"
       ],
       "duplication_clusters": 0,
-      "files": 44,
-      "total_loc": 5758,
+      "files": 46,
+      "total_loc": 5889,
       "files_ge_250_loc": 3,
-      "helper_function_ratio": 0.33,
+      "helper_function_ratio": 0.326,
       "max_internal_fan_in": 5,
       "max_internal_fan_in_module": "bioetl.composition.bootstrap.runtime.composite_support_service_bundles",
       "bounded_growth_budgets": {
@@ -66,7 +66,7 @@
       ],
       "duplication_clusters": 0,
       "files": 31,
-      "total_loc": 4532,
+      "total_loc": 4541,
       "files_ge_250_loc": 4,
       "helper_function_ratio": 0.474,
       "max_internal_fan_in": 4,

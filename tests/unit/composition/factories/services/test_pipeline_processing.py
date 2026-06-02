@@ -19,6 +19,7 @@ from bioetl.composition.factories.services.pipeline_processing import (
 
 pytestmark = pytest.mark.unit
 
+
 def _make_callbacks() -> PipelineCallbacksContext:
     return cast(
         PipelineCallbacksContext,

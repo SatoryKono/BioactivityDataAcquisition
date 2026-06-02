@@ -23,6 +23,7 @@ from bioetl.domain.behavior.staged_enforcement import (
 
 pytestmark = pytest.mark.unit
 
+
 def _make_result(
     check_name: str,
     passed: bool,

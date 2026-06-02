@@ -11,6 +11,7 @@ from bioetl.application.pipelines.pubmed.extractors.abstract import AbstractExtr
 
 pytestmark = pytest.mark.unit
 
+
 class TestExtractAbstract:
     """Tests for extract_abstract method."""
 

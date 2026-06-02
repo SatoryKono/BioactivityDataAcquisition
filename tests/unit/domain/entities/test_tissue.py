@@ -7,6 +7,7 @@ from bioetl.domain.entities.chembl_tissue import Tissue
 
 pytestmark = pytest.mark.unit
 
+
 class TestTissue:
     """Tests for Tissue entity validation."""
 

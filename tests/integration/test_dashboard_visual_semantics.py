@@ -80,7 +80,8 @@ def test_thresholds_configuration():
 
 
 def test_status_panels_have_canonical_color_mappings():
-    """Status panels should use canonical color mappings: 0→OK(green), 1→WARN(orange), ≥2→CRIT(red), null→UNKNOWN(gray)."""
+    """Status panels should use canonical color mappings: 0→OK(green), 1→WARN(orange),
+    ≥2→CRIT(red), null→UNKNOWN(gray)."""
     for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
         for panel in get_dashboard_panels(dashboard):
@@ -109,6 +110,7 @@ def test_threshold_steps_have_canonical_colors():
     for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
         for panel in get_dashboard_panels(dashboard):
+            title = panel.get("title", "")
             field_config = panel.get("fieldConfig", {})
             defaults = field_config.get("defaults", {})
             color_config = defaults.get("color", {})

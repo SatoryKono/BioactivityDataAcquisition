@@ -1,4 +1,4 @@
-"""Compatibility and API-budget tests for ``bioetl.composition.entrypoints``."""
+"""Public API budget tests for ``bioetl.composition.entrypoints``."""
 
 from __future__ import annotations
 

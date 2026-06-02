@@ -10,6 +10,7 @@ from pathlib import Path
 
 pytestmark = pytest.mark.architecture
 
+
 def test_c901_governance_job_is_declared_in_workflow() -> None:
     """CI workflow must declare dedicated blocking C901 governance job."""
     workflow = Path(".github/workflows/import-linter.yml").read_text(encoding="utf-8")

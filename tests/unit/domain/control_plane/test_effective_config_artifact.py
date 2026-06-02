@@ -22,6 +22,7 @@ from bioetl.domain.types.dq_contracts import DQDisposition, DQPolicyRef
 
 pytestmark = pytest.mark.unit
 
+
 class TestConfigSourceRef:
     """Tests for ConfigSourceRef."""
 

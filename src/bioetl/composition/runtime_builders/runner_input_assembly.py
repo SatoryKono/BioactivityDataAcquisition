@@ -8,14 +8,14 @@ from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
 from bioetl.composition.observability import ObservabilityBundle
-from bioetl.composition.runtime_builders.inputs_resolver import (
+from bioetl.composition.runtime_builders.inputs_runtime_assembly import (
     ResolvedVacuumSettings,
     assemble_cached_bronze_context,
     assemble_filter_config,
     assemble_runtime_config,
     assemble_vacuum_settings,
-    prepare_runner_inputs,
 )
+from bioetl.composition.runtime_builders.inputs_resolver import prepare_runner_inputs
 from bioetl.composition.runtime_builders.inputs_resolver import (
     RunnerInputs as _RunnerInputs,
 )

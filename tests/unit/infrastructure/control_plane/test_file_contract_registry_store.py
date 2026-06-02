@@ -24,6 +24,7 @@ from bioetl.infrastructure.control_plane.file_contract_registry_store import (
 
 pytestmark = pytest.mark.unit
 
+
 def _build_entry() -> ContractRegistryEntry:
     identity = ContractIdentity(
         contract_ref="test.contract.v1",

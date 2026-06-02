@@ -9,6 +9,7 @@ from pathlib import Path
 
 pytestmark = pytest.mark.architecture
 
+
 def test_tests_workflow_blocks_expired_exemptions() -> None:
     """Merge pipeline must block when expired exemptions are present."""
     workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")
@@ -65,9 +66,9 @@ def test_tests_workflow_runs_observability_cardinality_review_gate() -> None:
     assert "report-observability-metric-inventory" in workflow
     assert "reports/observability/runtime_cardinality_inventory.json" in workflow
     assert "reports/observability/runtime_cardinality_review.json" in workflow
-    assert 'BIOETL_OBSERVABILITY_PROMETHEUS_URL' in workflow
-    assert 'BIOETL_OBSERVABILITY_PROMETHEUS_TOKEN' in workflow
-    assert 'GITHUB_STEP_SUMMARY' in workflow
+    assert "BIOETL_OBSERVABILITY_PROMETHEUS_URL" in workflow
+    assert "BIOETL_OBSERVABILITY_PROMETHEUS_TOKEN" in workflow
+    assert "GITHUB_STEP_SUMMARY" in workflow
     assert "--fail-on-degraded-live-review" in workflow
 
 

@@ -32,8 +32,8 @@ Method:
 - All 14 `chembl_*` pipelines are active in the canonical ChEMBL registry manifest, and each ships a transformer class, Pandera domain schema, Silver schema, and Gold schema surface in one place:
   `src/bioetl/composition/factories/pipeline/_registry_manifest_chembl.py`.
 - The ChEMBL family uses one real shared normalization layer rather than per-transformer ad hoc cleanup. The policy seams are centralized in
-  `src/bioetl/domain/normalization/profiles/_chembl_policy_registry.py`,
-  `src/bioetl/domain/normalization/profiles/_chembl_policy_registry_data.py`,
+  `src/bioetl/domain/normalization/profiles/chembl_policy_registry.py`,
+  `src/bioetl/domain/normalization/profiles/chembl_policy_registry_data.py`,
   `configs/enums/chembl.yaml`,
   `configs/vocab/chembl_controlled.yaml`,
   `configs/vocab/chembl_ontology.yaml`,
@@ -109,7 +109,7 @@ and `tests/integration/config/test_chembl_contract_registry_coverage.py`.
 | Area | Pipeline | Artifact | Fact | Conclusion |
 | --- | --- | --- | --- | --- |
 | Registry completeness | all | `_registry_manifest_chembl.py` | exactly 14 active ChEMBL pipeline configs are registered with transformer, Pandera Silver schema, Arrow Silver schema, and Gold schema classes | audit scope is structurally complete |
-| Shared normalization layer | all | `_chembl_policy_registry.py`, `_chembl_policy_registry_data.py`, `normalization_policy_init.py` | domain policy surfaces are injected from config-backed immutable payloads; filesystem parsing stays in composition/infrastructure bootstrap | domain normalization stays pure |
+| Shared normalization layer | all | `chembl_policy_registry.py`, `chembl_policy_registry_data.py`, `normalization_policy_init.py` | domain policy surfaces are injected from config-backed immutable payloads; filesystem parsing stays in composition/infrastructure bootstrap | domain normalization stays pure |
 | Domain import boundary | all ChEMBL profiles | `src/bioetl/domain/normalization/profiles/chembl*.py`, `src/bioetl/domain/normalization/profiles/_chembl*.py` | no imports from `bioetl.infrastructure`, `bioetl.application`, `bioetl.composition`, or `bioetl.interfaces` were found in ChEMBL normalization profiles | no architecture boundary violation in the normalization layer |
 | Domain I/O boundary | all ChEMBL profiles | same profile set | no `open()`, HTTP client calls, YAML parsing, or file reads were found in ChEMBL normalization profiles | no domain I/O leakage |
 | Transformer placement | all | `src/bioetl/application/pipelines/chembl/base_chembl_transformer.py` | transformers extract/massage source aliases, but normalization and identity are delegated through the shared application normalization path rather than embedding filesystem-driven vocab logic | common semantics are not transformer-fragmented |
@@ -162,10 +162,10 @@ The table below lists the materially distinct enum-like families relevant for ar
 | Rule / Field Family | Pipelines using it | Implemented where | Is behavior identical? | Drift risk | Recommendation |
 | --- | --- | --- | --- | --- | --- |
 | ChEMBL enum catalog | `activity`, `assay`, `assay_parameters`, `molecule`, `publication`, `publication_term`, `target`, `target_component` | `configs/enums/chembl.yaml`, `_chembl_enum_catalog.py`, profile modules, parity tests | yes | low | keep shared seam |
-| Controlled vocabulary registry | `activity`, `assay`, `assay_parameters`, `molecule`, `publication`, `subcellular_fraction`, `target` | `configs/vocab/chembl_controlled.yaml`, `_chembl_policy_registry_data.py`, profiles | yes | low | keep |
+| Controlled vocabulary registry | `activity`, `assay`, `assay_parameters`, `molecule`, `publication`, `subcellular_fraction`, `target` | `configs/vocab/chembl_controlled.yaml`, `chembl_policy_registry_data.py`, profiles | yes | low | keep |
 | Reference identifier canonicalization | cross-family | `configs/vocab/chembl_reference_identifiers.yaml`, `_chembl_reference_identifier_rules.py` | yes | low | keep |
-| Ontology companion bundles | `activity`, `assay`, `assay_parameters`, `cell_line`, `tissue` | `configs/vocab/chembl_ontology.yaml`, `_chembl_policy_registry_data.py`, ontology companion normalizers | yes | low | keep |
-| Bool/flag governance | `activity`, `molecule`, `protein_class` and related surfaces | `_chembl_policy_registry_data.py`, `configs/enums/chembl.yaml` | yes | low | keep |
+| Ontology companion bundles | `activity`, `assay`, `assay_parameters`, `cell_line`, `tissue` | `configs/vocab/chembl_ontology.yaml`, `chembl_policy_registry_data.py`, ontology companion normalizers | yes | low | keep |
+| Bool/flag governance | `activity`, `molecule`, `protein_class` and related surfaces | `chembl_policy_registry_data.py`, `configs/enums/chembl.yaml` | yes | low | keep |
 | Canonical JSON/hash ordering | `activity`, `publication`, `target`, `target_component`, selected set-like fields elsewhere | `chembl_json_ordering_policy.py`, hash golden tests | yes | low | keep |
 | Raw-plus-canonical dual-field strategy | `publication`, `assay_parameters`, `subcellular_fraction` | profile special rules + entity configs + contracts | yes | low | keep |
 | Nested xref source governance | `target`, `target_component` | entity DQ config + `_dq_rule_evaluators.py` + matrix custom coverage | yes | low | keep |

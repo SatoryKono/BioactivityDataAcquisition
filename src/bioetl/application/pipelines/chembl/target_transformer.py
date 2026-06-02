@@ -115,9 +115,7 @@ class TargetTransformer(BaseChemblTransformer):
         # Extract primary component_id (first element) for enricher join key
         component_ids = flattened_components.get("component_ids")
         primary_component_id = component_ids[0] if component_ids else None
-        projected_synonyms = SynonymHelper.project_component_synonyms(
-            target_components
-        )
+        projected_synonyms = SynonymHelper.project_component_synonyms(target_components)
         component_xrefs = XrefHelper.collect_component_xrefs(target_components)
         xref_projection = XrefHelper.project_component_xrefs(component_xrefs)
 
@@ -146,15 +144,9 @@ class TargetTransformer(BaseChemblTransformer):
             or record.get("description"),
             **projected_synonyms,
             "target_xref_pdb_ids": xref_projection["target_xref_pdb_ids"],
-            "target_xref_go_component": xref_projection[
-                "target_xref_go_component"
-            ],
-            "target_xref_go_function": xref_projection[
-                "target_xref_go_function"
-            ],
-            "target_xref_go_process": xref_projection[
-                "target_xref_go_process"
-            ],
+            "target_xref_go_component": xref_projection["target_xref_go_component"],
+            "target_xref_go_function": xref_projection["target_xref_go_function"],
+            "target_xref_go_process": xref_projection["target_xref_go_process"],
             "target_xref_hgnc_ids": xref_projection["target_xref_hgnc_ids"],
             "target_xref_reactome_ids": xref_projection["target_xref_reactome_ids"],
             "target_xref_uniprot_ids": xref_projection["target_xref_uniprot_ids"],

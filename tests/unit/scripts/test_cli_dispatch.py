@@ -13,6 +13,7 @@ from scripts.engineering.common.cli_dispatch import module_command, run_command
 
 pytestmark = pytest.mark.unit
 
+
 def _write_module(
     tmp_path: Path,
     *,

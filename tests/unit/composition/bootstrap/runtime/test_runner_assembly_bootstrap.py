@@ -117,6 +117,41 @@ class TestCreateCompositeRunnerService:
 
         assert result is not None
 
+    def test_runner_service_requires_explicit_run_id_for_control_plane_inputs(
+        self,
+    ) -> None:
+        """Control-plane-attached runner assembly must not synthesize run IDs."""
+        with pytest.raises(
+            ValueError,
+            match="control-plane assembly requires explicit run_id",
+        ):
+            create_composite_runner_service(
+                CompositeRunnerServiceInputs(
+                    config=MagicMock(),
+                    runtime=MagicMock(),
+                    seed_runner_factory=MagicMock(),
+                    enricher_runner_factory=MagicMock(),
+                    key_extractor=MagicMock(),
+                    coordinator=MagicMock(),
+                    merger=MagicMock(),
+                    checkpoint_manager=MagicMock(),
+                    logger=MagicMock(),
+                    lock=MagicMock(),
+                    fsm_state_helper=MagicMock(),
+                    run_id=None,
+                    dq_report_service=None,
+                    preflight_validator=None,
+                    dependencies_runner_factory=None,
+                    dependency_coordinator=None,
+                    quarantine_port=None,
+                    metrics=None,
+                    tracer=None,
+                    observer=None,
+                    manifest_id="manifest-123",
+                    run_ledger_service=MagicMock(name="run_ledger_service"),
+                )
+            )
+
     def test_requires_fsm_state_helper(self) -> None:
         """Implicit FSM helper construction is no longer supported."""
         with pytest.raises(

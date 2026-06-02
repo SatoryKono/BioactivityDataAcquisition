@@ -18,6 +18,7 @@ from bioetl.application.pipelines.uniprot.extractors._comment_structured_facets 
 
 pytestmark = pytest.mark.unit
 
+
 def test_extract_alternative_products_family_raw_collects_isoform_outputs() -> None:
     index = {
         "ALTERNATIVE PRODUCTS": [

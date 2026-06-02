@@ -87,7 +87,7 @@ from bioetl.domain.normalization.profiles import (
     NORMALIZATION_PROFILE_REGISTRY,
     resolve_normalization_profile,
 )
-from bioetl.domain.normalization.profiles._chembl_policy_registry import (
+from bioetl.domain.normalization.profiles.chembl_policy_registry import (
     chembl_policy_surface,
 )
 from bioetl.domain.normalization.profiles.chembl_json_ordering_policy import (

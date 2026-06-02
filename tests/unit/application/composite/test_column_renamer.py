@@ -9,6 +9,7 @@ from bioetl.application.composite.column_renamer import ColumnRenamer
 
 pytestmark = pytest.mark.unit
 
+
 @pytest.fixture
 def mock_logger() -> MagicMock:
     """Create mock logger."""
@@ -96,7 +97,9 @@ class TestColumnRenamer:
         assert "crossref.publication.title" in result.columns
         assert "chembl.publication.abstract" in result.columns
 
-    def test_renamer_column_renamer__empty_dataframe__aa0ada54(self, renamer: ColumnRenamer) -> None:
+    def test_renamer_column_renamer__empty_dataframe__aa0ada54(
+        self, renamer: ColumnRenamer
+    ) -> None:
         """Empty DataFrame returns empty DataFrame."""
         df = pl.DataFrame()
         result = renamer.rename_dataframe(df, "chembl_publication")

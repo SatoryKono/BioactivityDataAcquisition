@@ -331,7 +331,9 @@ class TestLocalCheckpointListAll:
     """Tests for list_all operation."""
 
     @pytest.mark.asyncio
-    async def test_checkpoint_list_all__list_all_empty__957695b8(self, checkpoint: LocalCheckpointAdapter) -> None:
+    async def test_checkpoint_list_all__list_all_empty__957695b8(
+        self, checkpoint: LocalCheckpointAdapter
+    ) -> None:
         """Should return empty list when no checkpoints exist."""
         result = await checkpoint.list_all()
         assert result == []
@@ -392,7 +394,9 @@ class TestLocalCheckpointAclose:
     """Tests for aclose operation."""
 
     @pytest.mark.asyncio
-    async def test_checkpoint_aclose__aclose_is_noop__94522a27(self, checkpoint: LocalCheckpointAdapter) -> None:
+    async def test_checkpoint_aclose__aclose_is_noop__94522a27(
+        self, checkpoint: LocalCheckpointAdapter
+    ) -> None:
         """aclose should not raise and be a no-op."""
         await checkpoint.aclose()
 

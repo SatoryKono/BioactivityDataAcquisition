@@ -13,6 +13,9 @@ from bioetl.application.composite.runtime_wiring_api import (
     CompositeCheckpointServiceContext,
 )
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
+from bioetl.composition.bootstrap.runtime.composite_merge_service_builder import (
+    build_composite_merge_service,
+)
 from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
     CompositeSupportServicesFactory,
 )
@@ -80,7 +83,7 @@ def _make_factory(
 
 @pytest.mark.unit
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_services_factory.MergeService"
+    "bioetl.composition.bootstrap.runtime.composite_merge_service_builder.MergeService"
 )
 @patch(
     "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder.JoinPlannerService"
@@ -100,11 +103,16 @@ def test_create_merge_service_wires_join_planner_field_alias_resolver(
     mock_join_planner_cls.return_value = MagicMock(name="join_planner")
     mock_merge_service_cls.return_value = merge_service
 
-    result = factory._create_merge_service(
+    result = build_composite_merge_service(
+        config=factory._config,
+        storage=factory._infra.storage,
+        resolve_gold_schema=factory._resolve_gold_schema,
         delta_reader=MagicMock(),
         field_group_registry=None,
         cross_validator=None,
         logger=factory._infra.logger,
+        system_columns_to_drop=factory._SYSTEM_COLUMNS_TO_DROP,
+        normalization_policies=factory._JOIN_KEY_NORMALIZATION_POLICIES,
     )
 
     assert result is merge_service
@@ -126,7 +134,7 @@ def test_create_merge_service_wires_join_planner_field_alias_resolver(
     "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.FSMStateHelperService"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_services_factory.build_composite_control_plane_bundle"
+    "bioetl.composition.bootstrap.runtime.composite_support_runtime_context.build_composite_control_plane_bundle"
 )
 @patch(
     "bioetl.composition.bootstrap.runtime.composite_execution_support_builder.EnrichmentCoordinatorService"
@@ -176,17 +184,16 @@ def test_build_uses_canonical_composite_checkpoint_port(
     )
     mock_enrichment_coordinator_cls.return_value = MagicMock(name="coordinator")
     mock_fsm_state_helper_cls.return_value = MagicMock(name="fsm_state_helper")
-    factory._create_delta_reader = MagicMock(
-        return_value=MagicMock(name="delta_reader")
-    )
-    factory._create_cross_validator = MagicMock(return_value=None)
-    factory._create_merge_service = MagicMock(return_value=merger)
-
-    result = factory.build()
+    with patch(
+        "bioetl.composition.bootstrap.runtime.composite_support_services_factory.build_composite_merge_service",
+        return_value=merger,
+    ) as mock_build_merge_service:
+        result = factory.build()
 
     assert result.checkpoint_manager is checkpoint_manager
     mock_bootstrap_checkpoint_adapter.assert_called_once_with()
     factory._infra.logger.bind.assert_called_once_with(manifest_id="manifest-123")
+    mock_build_merge_service.assert_called_once()
     checkpoint_manager_cls.assert_called_once()
     checkpoint_context = checkpoint_manager_cls.call_args.args[0]
     assert isinstance(checkpoint_context, CompositeCheckpointServiceContext)

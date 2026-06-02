@@ -11,6 +11,7 @@ import yaml
 
 pytestmark = pytest.mark.unit
 
+
 def _load_yaml(path: str) -> dict[str, object]:
     return yaml.safe_load(Path(path).read_text(encoding="utf-8"))
 

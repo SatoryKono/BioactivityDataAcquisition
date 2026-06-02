@@ -12,6 +12,7 @@ from bioetl.infrastructure.quality._quarterly_targets_validation import (
 
 pytestmark = pytest.mark.unit
 
+
 class TestValidateQuarterTarget:
     """Tests for _validate_quarter_target."""
 

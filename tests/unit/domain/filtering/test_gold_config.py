@@ -429,7 +429,9 @@ class TestGoldFilterConfigInOperator:
             (None, False),  # "None" not in values
         ],
     )
-    def test_config_in_operator__in_operator__15702b50(self, val: str | None, expected: bool) -> None:
+    def test_config_in_operator__in_operator__15702b50(
+        self, val: str | None, expected: bool
+    ) -> None:
         """Test IN operator matches values in the allowed set."""
         cfg = GoldFilterConfig(
             column_filters=(
@@ -486,7 +488,9 @@ class TestGoldFilterConfigIsNullOperator:
             ([], False),  # Empty list is not null (use IS_EMPTY)
         ],
     )
-    def test_is_null_operator__is_null_operator__a8e4514d(self, val: object, expected: bool) -> None:
+    def test_is_null_operator__is_null_operator__a8e4514d(
+        self, val: object, expected: bool
+    ) -> None:
         """Test IS_NULL operator matches None or empty string."""
         cfg = GoldFilterConfig(
             column_filters=(
@@ -512,7 +516,9 @@ class TestGoldFilterConfigIsNotNullOperator:
             ([], True),  # Empty list is not null
         ],
     )
-    def test_is_not_null_operator__is_not_null_operator__b50fc33a(self, val: object, expected: bool) -> None:
+    def test_is_not_null_operator__is_not_null_operator__b50fc33a(
+        self, val: object, expected: bool
+    ) -> None:
         """Test IS_NOT_NULL operator matches non-None and non-empty-string."""
         cfg = GoldFilterConfig(
             column_filters=(
@@ -544,7 +550,9 @@ class TestGoldFilterConfigIsEmptyOperator:
             (False, False),
         ],
     )
-    def test_is_empty_operator__is_empty_operator__6d96e6ec(self, val: object, expected: bool) -> None:
+    def test_is_empty_operator__is_empty_operator__6d96e6ec(
+        self, val: object, expected: bool
+    ) -> None:
         """Test IS_EMPTY operator matches empty values."""
         cfg = GoldFilterConfig(
             column_filters=(
@@ -573,7 +581,9 @@ class TestGoldFilterConfigIsNotEmptyOperator:
             (False, True),  # False is not empty
         ],
     )
-    def test_is_not_empty_operator__not_empty_operator__76747699(self, val: object, expected: bool) -> None:
+    def test_is_not_empty_operator__not_empty_operator__76747699(
+        self, val: object, expected: bool
+    ) -> None:
         """Test IS_NOT_EMPTY operator matches non-empty values."""
         cfg = GoldFilterConfig(
             column_filters=(

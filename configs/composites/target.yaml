@@ -219,22 +219,10 @@ composite:
       "chembl.tissue.bto_id": "tissue_bto_id"
       "chembl.tissue.caloha_id": "tissue_caloha_id"
       "chembl.target_component.description": "component_description"
-      "chembl.target_protein_classification.protein_classifications": "protein_classifications"
-      "chembl.target_protein_classification.target_protein_class_id_L1": "target_protein_class_id_L1"
-      "chembl.target_protein_classification.target_protein_class_name_L1": "target_protein_class_name_L1"
-      "chembl.target_protein_classification.target_protein_class_desc_L1": "target_protein_class_desc_L1"
-      "chembl.target_protein_classification.target_protein_class_id_L2": "target_protein_class_id_L2"
-      "chembl.target_protein_classification.target_protein_class_name_L2": "target_protein_class_name_L2"
-      "chembl.target_protein_classification.target_protein_class_desc_L2": "target_protein_class_desc_L2"
-      "chembl.target_protein_classification.target_protein_class_id_L3": "target_protein_class_id_L3"
-      "chembl.target_protein_classification.target_protein_class_name_L3": "target_protein_class_name_L3"
-      "chembl.target_protein_classification.target_protein_class_desc_L3": "target_protein_class_desc_L3"
-      "chembl.target_protein_classification.target_protein_class_id_L4": "target_protein_class_id_L4"
-      "chembl.target_protein_classification.target_protein_class_name_L4": "target_protein_class_name_L4"
-      "chembl.target_protein_classification.target_protein_class_desc_L4": "target_protein_class_desc_L4"
-      "chembl.target_protein_classification.target_protein_class_id_L5": "target_protein_class_id_L5"
-      "chembl.target_protein_classification.target_protein_class_name_L5": "target_protein_class_name_L5"
-      "chembl.target_protein_classification.target_protein_class_desc_L5": "target_protein_class_desc_L5"
+    target_protein_classification_projection:
+      source_prefix: "chembl.target_protein_classification"
+      include_protein_classifications: true
+      levels: [1, 2, 3, 4, 5]
 
     # Output paths for merged data
     output:

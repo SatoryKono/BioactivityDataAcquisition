@@ -23,6 +23,7 @@ from memory.graph.importers.expanded_json import (
 
 pytestmark = pytest.mark.unit
 
+
 def _write_expanded_graph(path: Path) -> None:
     payload = {
         "meta": {"generated_at": "2026-04-17", "node_count": 3, "edge_count": 2},

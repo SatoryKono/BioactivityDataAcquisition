@@ -13,6 +13,7 @@ from bioetl.domain.behavior.preflight_governance import PreflightGovernor
 
 pytestmark = pytest.mark.unit
 
+
 def test_create_composite_validation_service_returns_default_wiring() -> None:
     """Factory should assemble the default composite validation collaborators."""
     service = create_composite_validation_service()

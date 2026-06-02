@@ -111,7 +111,9 @@ class TestNormalizeDoi:
             (None, None),
         ],
     )
-    def test_normalize_doi__normalize_doi__4b38378c(self, doi: str | None, expected: str | None) -> None:
+    def test_normalize_doi__normalize_doi__4b38378c(
+        self, doi: str | None, expected: str | None
+    ) -> None:
         """Test DOI normalization."""
         assert normalize_doi(doi) == expected
 

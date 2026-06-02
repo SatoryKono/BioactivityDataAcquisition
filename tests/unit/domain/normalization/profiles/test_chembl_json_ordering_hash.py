@@ -15,6 +15,7 @@ from bioetl.domain.normalization.profiles.chembl_json_ordering_policy import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_chembl_json_ordering_policy_exposes_versioned_hash() -> None:
     assert CHEMBL_JSON_ORDERING_POLICY_VERSION == "2026.06.01"
     assert len(CHEMBL_JSON_ORDERING_POLICY_HASH) == 64

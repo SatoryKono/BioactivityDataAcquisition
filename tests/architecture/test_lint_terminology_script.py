@@ -11,6 +11,7 @@ from pathlib import Path
 
 pytestmark = pytest.mark.architecture
 
+
 def test_lint_terminology_supports_check_without_paths() -> None:
     """CLI must allow --check with no positional paths."""
     repo_root = Path(__file__).resolve().parents[2]

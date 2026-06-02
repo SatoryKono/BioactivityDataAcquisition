@@ -68,9 +68,7 @@ _EXPORT_MODULES = {
         "bioetl.infrastructure.control_plane.file_historical_replay_universe_store"
     ),
     "FileLineageStore": "bioetl.infrastructure.control_plane.file_lineage_store",
-    "FileRunLedgerStore": (
-        "bioetl.infrastructure.control_plane.file_run_ledger_store"
-    ),
+    "FileRunLedgerStore": ("bioetl.infrastructure.control_plane.file_run_ledger_store"),
     "FileRunManifestStore": (
         "bioetl.infrastructure.control_plane.file_run_manifest_store"
     ),

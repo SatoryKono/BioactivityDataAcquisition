@@ -16,9 +16,7 @@ HEALTH_CLI_PATH = (
     / "commands"
     / "health.py"
 )
-FORBIDDEN_IMPORT_PREFIXES = (
-    "bioetl.infrastructure.config",
-)
+FORBIDDEN_IMPORT_PREFIXES = ("bioetl.infrastructure.config",)
 
 
 def _collect_import_targets(tree: ast.AST) -> list[str]:
@@ -41,6 +39,5 @@ def test_health_cli_does_not_import_infrastructure_config_directly() -> None:
         if any(target.startswith(prefix) for prefix in FORBIDDEN_IMPORT_PREFIXES)
     ]
     assert not violations, (
-        "health.py must not import infrastructure config directly; "
-        f"found: {violations}"
+        f"health.py must not import infrastructure config directly; found: {violations}"
     )

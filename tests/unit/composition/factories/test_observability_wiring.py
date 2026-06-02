@@ -20,6 +20,7 @@ from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 pytestmark = pytest.mark.unit
 
+
 def test_cached_bronze_data_source_reuses_shared_metrics(
     monkeypatch,
     tmp_path: Path,

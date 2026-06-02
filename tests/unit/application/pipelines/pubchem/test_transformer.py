@@ -13,6 +13,7 @@ from bioetl.application.pipelines.pubchem.transformer import (
 
 pytestmark = pytest.mark.unit
 
+
 def test_pubchem_transformer_is_canonical_base_transformer_subclass() -> None:
     assert issubclass(PubChemCompoundTransformer, BaseTransformer)
 
