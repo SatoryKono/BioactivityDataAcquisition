@@ -55,9 +55,9 @@ class RunContext:
 
     Example:
         >>> from datetime import UTC, datetime
-        >>> from uuid import uuid4
+        >>> from uuid import UUID
         >>> context = RunContext(
-        ...     run_id=RunID(uuid4()),
+        ...     run_id=RunID(UUID("00000000-0000-0000-0000-000000000101")),
         ...     run_type=RunType.INCREMENTAL,
         ...     started_at=datetime.now(UTC),
         ...     pipeline_name="chembl_activity",

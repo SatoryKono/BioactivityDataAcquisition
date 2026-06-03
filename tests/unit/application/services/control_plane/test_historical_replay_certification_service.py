@@ -29,7 +29,9 @@ from tests.unit.application.services.run_manifest_test_support import (
 pytestmark = pytest.mark.unit
 
 
-def _entry_id_factory(prefix: str = "entry-historical") -> Callable[[], str]:
+def _certification_entry_id_factory(
+    prefix: str = "entry-historical",
+) -> Callable[[], str]:
     sequence = count(1)
     return lambda: f"{prefix}-{next(sequence)}"
 
@@ -93,7 +95,7 @@ def test_certify_historical_source_run_appends_certified_snapshot_evidence() -> 
     service = HistoricalReplayCertificationService(
         manifest_port=manifest_store,
         ledger_port=ledger_store,
-        entry_id_factory=_entry_id_factory("entry-source-certification"),
+        entry_id_factory=_certification_entry_id_factory("entry-source-certification"),
     )
 
     result = service.certify_historical_source_run(
@@ -148,7 +150,9 @@ def test_certify_historical_composite_run_requires_certified_upstream_lineage() 
     service = HistoricalReplayCertificationService(
         manifest_port=manifest_store,
         ledger_port=ledger_store,
-        entry_id_factory=_entry_id_factory("entry-composite-certification"),
+        entry_id_factory=_certification_entry_id_factory(
+            "entry-composite-certification"
+        ),
     )
 
     service.certify_historical_source_run(

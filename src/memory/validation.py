@@ -871,11 +871,13 @@ def _validate_note_files(
                     path,
                     include_body=True,
                     read_timeout_seconds=VALIDATION_NOTE_READ_TIMEOUT_SECONDS,
+                    force_threaded_timeout=True,
                 )
             else:
                 note = parse_markdown_note_metadata(
                     path,
                     read_timeout_seconds=VALIDATION_NOTE_READ_TIMEOUT_SECONDS,
+                    force_threaded_timeout=True,
                 )
         except Exception as exc:
             issues.append(

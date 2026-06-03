@@ -300,7 +300,7 @@ def test_file_store_fails_closed_on_truncated_index_tail(tmp_path) -> None:
         store.list_by_run_id(run_id)
 
 
-def test_append_jsonl_payload_uses_control_plane_flush_policy(
+def test_lineage_store_append_jsonl_payload_uses_control_plane_flush_policy(
     tmp_path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

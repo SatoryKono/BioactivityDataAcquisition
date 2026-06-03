@@ -52,8 +52,9 @@ class BronzeWriteResult:
         checksum_blake2: BLAKE2b checksum of compressed file for integrity verification.
 
     Example:
+        >>> from uuid import UUID
         >>> result = BronzeWriteResult(
-        ...     batch_id=BatchID(uuid4()),
+        ...     batch_id=BatchID(UUID("00000000-0000-0000-0000-000000000201")),
         ...     relative_path="chembl/activity/2024-01-15/batch_abc.jsonl.zst",
         ...     absolute_path="/data/output/bronze/chembl/activity/2024-01-15/batch_abc.jsonl.zst",
         ...     record_count=1000,

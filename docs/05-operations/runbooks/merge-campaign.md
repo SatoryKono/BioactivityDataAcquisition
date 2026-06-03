@@ -104,13 +104,20 @@ uv run pytest tests/integration/determinism tests/integration/idempotency tests/
   - журналы rebase/merge по этапам
 - Merge разрешается только после успешного прохода всех gate-команд.
 
-## Rollback
+## Rollback/Recovery
 
 - Если после rebase обнаружен regression:
   - откатить последний squash/merge commit в campaign branch;
   - повторить полный gate-пакет перед продолжением.
 
-## Post-campaign
+## Post-incident
 
 - Очистить campaign branch после merge.
 - Закрыть служебные ветки-стандарты (`stale`, `docs`, `tail`) согласно triage policy.
+
+## Compliance
+
+- Campaign merges must preserve ADR-010 local-only assumptions and must not add
+  Docker, Redis, Kubernetes, or external orchestration as runtime requirements.
+- Evidence from replay, determinism, control-plane, and architecture gates must
+  be attached to the campaign summary or PR notes before merge to `main`.

@@ -34,7 +34,15 @@ def _wrapper_command(script_name: str, workspace_root: Path) -> dict[str, Any]:
 
 
 def _http_server(url: str) -> dict[str, Any]:
-    return {"url": url}
+    return {"type": "http", "url": url}
+
+
+def _npx_server(*args: str, npm_cache_dir: str) -> dict[str, Any]:
+    return {
+        "command": "npx",
+        "args": ["-y", *args],
+        "env": {"NPM_CONFIG_CACHE": npm_cache_dir},
+    }
 
 
 def _canonical_servers(workspace_root: Path) -> dict[str, dict[str, Any]]:
@@ -48,31 +56,35 @@ def _canonical_servers(workspace_root: Path) -> dict[str, dict[str, Any]]:
     uv_cache_dir = str((cache_root / "uv-cache").resolve())
     uv_tool_dir = str((cache_root / "uv-tools").resolve())
     servers: dict[str, dict[str, Any]] = {
-        "memory": {
-            "command": "npx",
-            "args": ["-y", "@modelcontextprotocol/server-memory@2026.1.26"],
-            "env": {
-                "MEMORY_FILE_PATH": str(memory_file_path),
-                "NPM_CONFIG_CACHE": npm_cache_dir,
-            },
-        },
-        "filesystem": {
-            "command": "npx",
-            "args": [
-                "-y",
-                "@modelcontextprotocol/server-filesystem@2026.1.14",
-                workspace_root_str,
-            ],
-            "env": {"NPM_CONFIG_CACHE": npm_cache_dir},
-        },
+        "memory": _npx_server(
+            "@modelcontextprotocol/server-memory@2026.1.26",
+            npm_cache_dir=npm_cache_dir,
+        ),
+        "filesystem": _npx_server(
+            "@modelcontextprotocol/server-filesystem@2026.1.14",
+            workspace_root_str,
+            npm_cache_dir=npm_cache_dir,
+        ),
+        "sequential-thinking": _npx_server(
+            "@modelcontextprotocol/server-sequential-thinking@2025.12.18",
+            npm_cache_dir=npm_cache_dir,
+        ),
         "fetch": {
             "command": "uvx",
             "args": FETCH_SPEC,
             "env": {"UV_CACHE_DIR": uv_cache_dir, "UV_TOOL_DIR": uv_tool_dir},
         },
+        "pdf": _npx_server(
+            "@modelcontextprotocol/server-pdf@1.3.1",
+            "--stdio",
+            npm_cache_dir=npm_cache_dir,
+        ),
         "github": _wrapper_command("github-mcp-wrapper", workspace_root),
         "docker": _wrapper_command("mcp_docker_wrapper", workspace_root),
+        "docker-docs": _wrapper_command("mcp_docker_docs_wrapper", workspace_root),
         "context7": _wrapper_command("mcp_context7_wrapper", workspace_root),
+        "paper-search": _wrapper_command("mcp_paper_search_wrapper", workspace_root),
+        "dockerhub": _wrapper_command("mcp_dockerhub_wrapper", workspace_root),
         "ast-grep": _wrapper_command("mcp_ast_grep_wrapper", workspace_root),
         "mcp-code-interpreter": _wrapper_command(
             "mcp_code_interpreter_wrapper", workspace_root
@@ -83,6 +95,7 @@ def _canonical_servers(workspace_root: Path) -> dict[str, dict[str, Any]]:
         "sonarqube": _wrapper_command("mcp_sonarqube_wrapper", workspace_root),
         "neo4j-cypher": _wrapper_command("mcp_neo4j_cypher_wrapper", workspace_root),
         "neo4j-memory": _wrapper_command("mcp_neo4j_memory_wrapper", workspace_root),
+        "needle": _wrapper_command("mcp_needle_wrapper", workspace_root),
         "chembl": _wrapper_command("mcp_chembl_wrapper", workspace_root),
         "pubchem": _wrapper_command("mcp_pubchem_wrapper", workspace_root),
         "pubmed": _wrapper_command("mcp_pubmed_wrapper", workspace_root),
@@ -90,10 +103,12 @@ def _canonical_servers(workspace_root: Path) -> dict[str, dict[str, Any]]:
         "biomoltechDocs": _http_server("https://biomoltech.mintlify.app/mcp"),
         "mintlify": _http_server("https://mcp.mintlify.com"),
         "deepwiki": _http_server("https://mcp.deepwiki.com/mcp"),
+        "openaiDeveloperDocs": _http_server("https://developers.openai.com/mcp"),
     }
 
     # Preserve the committed config shape where the GitHub wrapper receives npm cache.
     servers["github"]["env"] = {"NPM_CONFIG_CACHE": npm_cache_dir}
+    servers["memory"]["env"]["MEMORY_FILE_PATH"] = str(memory_file_path)
     return servers
 
 

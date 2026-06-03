@@ -8,6 +8,8 @@ import shutil
 from pathlib import Path
 from typing import Any
 
+import memory.notes as notes_module
+import memory.validation as validation_module
 from memory.notes import write_markdown_note
 from memory.resources import (
     MEMORY_ROOT,
@@ -133,6 +135,73 @@ def test_memory_scaffold_validation_skips_episodic_body_reads(
     assert validate_memory_scaffold(memory_root) == []
 
 
+def test_memory_scaffold_validation_uses_timeout_protected_note_reads(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    memory_root = tmp_path / "memory"
+    _copy_minimal_memory_scaffold(memory_root)
+
+    curated_path = memory_root / "curated" / "lessons" / "valid-lesson.md"
+    write_markdown_note(
+        curated_path,
+        metadata={
+            "id": "valid-lesson",
+            "title": "Valid lesson",
+            "kind": "lesson",
+            "source_refs": ["src/memory/README.md"],
+            "confidence": "curated",
+            "last_verified": "2026-04-20T00:00:00Z",
+            "summary": "Durable lesson for repeated reuse.",
+        },
+        body=(
+            "# Lesson\n\n"
+            "## Observation\n\n"
+            "- Durable guidance\n\n"
+            "## Reuse guidance\n\n"
+            "- Apply again when the same conditions hold.\n"
+        ),
+    )
+    episodic_path = memory_root / "episodic" / "sessions" / "valid-session.md"
+    write_markdown_note(
+        episodic_path,
+        metadata={
+            "id": "valid-session",
+            "title": "Valid session",
+            "task_id": "task-123",
+            "created_at": "2026-04-20T00:00:00Z",
+            "ttl_days": 14,
+            "confidence": "episodic",
+            "source_refs": ["src/memory/README.md"],
+            "summary": "Working context.",
+        },
+        body="# Session\n\n- Current context\n",
+    )
+
+    observed_force_flags: list[bool] = []
+    original_parse_note = notes_module.parse_markdown_note
+    original_parse_metadata = notes_module.parse_markdown_note_metadata
+
+    def tracking_parse_note(*args: Any, **kwargs: Any) -> Any:
+        observed_force_flags.append(bool(kwargs.get("force_threaded_timeout")))
+        return original_parse_note(*args, **kwargs)
+
+    def tracking_parse_metadata(*args: Any, **kwargs: Any) -> Any:
+        observed_force_flags.append(bool(kwargs.get("force_threaded_timeout")))
+        return original_parse_metadata(*args, **kwargs)
+
+    monkeypatch.setattr(validation_module, "parse_markdown_note", tracking_parse_note)
+    monkeypatch.setattr(
+        validation_module,
+        "parse_markdown_note_metadata",
+        tracking_parse_metadata,
+    )
+
+    assert validate_memory_scaffold(memory_root) == []
+    assert observed_force_flags
+    assert all(observed_force_flags)
+
+
 def test_memory_scaffold_validation_bounds_default_episodic_scan(
     memory_local_tmp_path: Path,
     monkeypatch,
@@ -183,8 +252,16 @@ def test_bounded_episodic_note_paths_does_not_stat_notes(
             encoding="utf-8",
         )
 
-    def fail_stat(self: Path) -> object:
-        raise AssertionError(f"unexpected stat call for {self}")
+    original_stat = Path.stat
+
+    def fail_stat(self: Path, *args: object, **kwargs: object) -> object:
+        try:
+            is_note_path = self != sessions_dir and self.relative_to(sessions_dir)
+        except ValueError:
+            is_note_path = False
+        if is_note_path:
+            raise AssertionError(f"unexpected stat call for {self}")
+        return original_stat(self, *args, **kwargs)
 
     monkeypatch.setattr(Path, "stat", fail_stat)
 

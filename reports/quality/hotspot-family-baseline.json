@@ -42,9 +42,9 @@
       ],
       "duplication_clusters": 0,
       "files": 50,
-      "total_loc": 5956,
+      "total_loc": 5980,
       "files_ge_250_loc": 3,
-      "helper_function_ratio": 0.324,
+      "helper_function_ratio": 0.328,
       "max_internal_fan_in": 3,
       "max_internal_fan_in_module": "bioetl.composition.bootstrap.runtime.observability",
       "bounded_growth_budgets": {

@@ -30,7 +30,7 @@ from tests.unit.application.services.run_manifest_test_support import (
 pytestmark = pytest.mark.unit
 
 
-def _entry_id_factory(prefix: str = "entry-historical") -> Callable[[], str]:
+def _corpus_entry_id_factory(prefix: str = "entry-historical") -> Callable[[], str]:
     sequence = count(1)
     return lambda: f"{prefix}-{next(sequence)}"
 
@@ -98,7 +98,7 @@ def test_inventory_distinguishes_pending_and_certified_historical_records() -> N
         certification_service=HistoricalReplayCertificationService(
             manifest_port=manifest_store,
             ledger_port=ledger_store,
-            entry_id_factory=_entry_id_factory("entry-corpus-certification"),
+            entry_id_factory=_corpus_entry_id_factory("entry-corpus-certification"),
         ),
     )
 
@@ -131,7 +131,7 @@ def test_bulk_certification_orders_source_before_composite_and_closes_inventory(
         certification_service=HistoricalReplayCertificationService(
             manifest_port=manifest_store,
             ledger_port=ledger_store,
-            entry_id_factory=_entry_id_factory("entry-corpus-closure"),
+            entry_id_factory=_corpus_entry_id_factory("entry-corpus-closure"),
         ),
     )
 

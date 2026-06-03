@@ -473,9 +473,9 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 50
-      total_loc: 5956
+      total_loc: 5980
       files_ge_250_loc: 3
-      helper_function_ratio: 0.324
+      helper_function_ratio: 0.328
       max_internal_fan_in: 3
       max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.observability
     trend:
@@ -611,7 +611,13 @@ oversized_source_module_inventory:
 hotspot_family_coverage_thresholds:
   snapshot_date: '2026-06-02'
   linked_issue: '#4567'
+  enforcement_issue: '#5036'
   mode: fail-fast
+  authoritative_for_hotspot_refactor_readiness: true
+  authoritative_artifact: reports/quality/module-coverage-inventory.json
+  canonical_lane: coverage-verify
+  readiness_policy: Hotspot refactor targets must pass these module-level family
+    thresholds before structural splits are treated as ready for merge.
   families:
     application_core:
       min_measured_module_count: 166
@@ -813,21 +819,20 @@ runtime_uuid_governance_metrics:
   owner: '@bioetl-architecture'
   linked_issue: '#4705'
   review_cadence: quarterly
-  review_policy: Review the canonical seam inventory whenever uuid generation changes
-    in application/composition, and reject any replay-critical random identity seam
-    without an explicit reviewed migration path.
+  review_policy: Review the canonical seam inventory whenever production UUID
+    generation changes under src/bioetl, and reject every random UUID generation
+    seam.
   metrics:
     runtime_uuid_seam_count:
-      current_count: 11
-      max_count: 11
-      linked_issue: '#4705'
+      current_count: 0
+      max_count: 0
+      linked_issue: '#5048'
       owner: '@bioetl-architecture'
       rationale: >-
-        Runtime UUID seams are sanctioned only as reviewed non-replay-critical
-        identities; issue #5032 retired the logger fallback random UUID seam and
-        growth must stay explicit while deterministic identity debt is burned down.
-      ratchet_policy: Non-growth fail-fast unless a reviewed scorecard update expands
-        the sanctioned seam inventory intentionally.
+        Production random UUID generation is retired across src/bioetl; runtime
+        occurrence identities must use explicit IDs or reviewed deterministic
+        UUIDv5 factories.
+      ratchet_policy: Zero-budget fail-fast metric.
     replay_critical_uuid_seam_count:
       current_count: 0
       max_count: 0

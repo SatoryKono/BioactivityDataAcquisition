@@ -30,7 +30,8 @@ including composite pipelines.
 Current live config baseline on `main`:
 
 - `22` provider entity configs in `configs/entities/**`
-- `5` composite configs in `configs/composites/*.yaml`
+- `5` composite entity configs in `configs/entities/composite/*.yaml`
+- `5` composite merge configs in `configs/composites/*.yaml`
 - `7` provider-level source configs in `configs/providers/*.yaml`
 
 ______________________________________________________________________
@@ -141,10 +142,10 @@ ______________________________________________________________________
 
 ## Schema Files
 
-For standard pipelines, schema definition is stored in the same unified entity file
-(`configs/entities/{provider}/{entity}.yaml`, section `schema`).
-Composite pipelines keep merge schema in `configs/composites/{entity}.yaml`
-(section `composite.merge.column-groups`).
+For provider and composite entity pipelines, schema definition is stored in the
+same unified entity file (`configs/entities/{provider}/{entity}.yaml`, section
+`schema`). Composite pipelines additionally keep seed/enrich/merge behavior in
+`configs/composites/{entity}.yaml` (section `composite.merge.column-groups`).
 
 | Pipeline config                                       | Schema config                 |
 | ----------------------------------------------------- | ----------------------------- |
@@ -170,6 +171,11 @@ Composite pipelines keep merge schema in `configs/composites/{entity}.yaml`
 | `configs/entities/semanticscholar/publication.yaml`   | `schema` section in same file |
 | `configs/entities/uniprot/idmapping.yaml`             | `schema` section in same file |
 | `configs/entities/uniprot/protein.yaml`               | `schema` section in same file |
+| `configs/entities/composite/activity.yaml`            | `schema` section in same file plus `configs/composites/activity.yaml` merge policy |
+| `configs/entities/composite/assay.yaml`               | `schema` section in same file plus `configs/composites/assay.yaml` merge policy |
+| `configs/entities/composite/molecule.yaml`            | `schema` section in same file plus `configs/composites/molecule.yaml` merge policy |
+| `configs/entities/composite/publication.yaml`         | `schema` section in same file plus `configs/composites/publication.yaml` merge policy |
+| `configs/entities/composite/target.yaml`              | `schema` section in same file plus `configs/composites/target.yaml` merge policy |
 
 Domain schema contracts remain in `src/bioetl/domain/schemas/` and Gold contracts in `src/bioetl/domain/contracts/gold/`.
 JSON contract exports are in `docs/04-reference/contracts/gold/`.
@@ -178,8 +184,8 @@ ______________________________________________________________________
 
 ## Configuration Files
 
-Standard pipeline configs are in `configs/entities/`.
-Composite pipeline configs are in `configs/composites/`.
+Provider and composite entity pipeline configs are in `configs/entities/`.
+Composite merge/orchestration configs are in `configs/composites/`.
 
 ```
 configs/
@@ -190,7 +196,8 @@ configs/
 │   ├── pubchem/
 │   ├── pubmed/
 │   ├── semanticscholar/
-│   └── uniprot/
+│   ├── uniprot/
+│   └── composite/
 └── composites/
     ├── activity.yaml
     ├── assay.yaml

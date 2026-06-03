@@ -145,6 +145,7 @@ def test_record_input_snapshot_published_rejects_missing_required_identity() -> 
         ledger_port=_InMemoryRunLedgerStore(),
         manifest_id="manifest-1",
         run_id=run_id,
+        _entry_id_factory=lambda: "entry-input-snapshot-invalid",
     )
 
     with pytest.raises(ValueError, match="content_hash is required"):
@@ -166,6 +167,7 @@ def test_record_manifest_created_rejects_mismatched_manifest_identity() -> None:
         ledger_port=store,
         manifest_id="pending",
         run_id=run_id,
+        _entry_id_factory=lambda: "entry-manifest-mismatch",
     )
 
     with pytest.raises(
@@ -210,6 +212,7 @@ def test_record_run_started_rejects_missing_persisted_manifest_link() -> None:
         ledger_port=store,
         manifest_id="pending",
         run_id=run_id,
+        _entry_id_factory=lambda: "entry-missing-manifest-link",
     )
 
     with pytest.raises(

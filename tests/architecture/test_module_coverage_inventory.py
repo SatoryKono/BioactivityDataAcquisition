@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 
 import pytest
+import yaml
 
 from scripts.engineering.qa.report_module_coverage_inventory import (
     _iter_source_modules,
@@ -17,6 +18,7 @@ from tests.architecture._test_matrix_policy_support import load_matrix
 ROOT = Path(__file__).resolve().parents[2]
 INVENTORY_PATH = ROOT / "reports" / "quality" / "module-coverage-inventory.json"
 WORKFLOW_PATH = ROOT / ".github" / "workflows" / "tests.yml"
+SCORECARD_PATH = ROOT / "configs" / "quality" / "debt_scorecard.yaml"
 
 
 @pytest.mark.architecture
@@ -142,6 +144,31 @@ def test_module_coverage_inventory_reports_measured_hotspot_family_evidence() ->
         assert (
             family_row["covered_line_percent"] >= thresholds["min_covered_line_percent"]
         )
+        assert family_row["threshold_status"] == "pass", family_name
+
+
+@pytest.mark.architecture
+def test_hotspot_refactor_targets_have_authoritative_module_coverage_gates() -> None:
+    """Hotspot refactor families must have an explicit module-level coverage gate."""
+    committed = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
+    hotspot_family_coverage = committed["summary"]["hotspot_family_coverage"]
+    scorecard = yaml.safe_load(SCORECARD_PATH.read_text(encoding="utf-8"))
+    gate = scorecard["hotspot_family_coverage_thresholds"]
+
+    assert gate["mode"] == "fail-fast"
+    assert gate["enforcement_issue"] == "#5036"
+    assert gate["authoritative_for_hotspot_refactor_readiness"] is True
+    assert gate["authoritative_artifact"] == (
+        "reports/quality/module-coverage-inventory.json"
+    )
+    assert gate["canonical_lane"] == "coverage-verify"
+    assert isinstance(gate["readiness_policy"], str) and gate["readiness_policy"]
+
+    gated_families = gate["families"]
+    assert set(gated_families) == set(hotspot_family_coverage)
+    for family_name, thresholds in gated_families.items():
+        family_row = hotspot_family_coverage[family_name]
+        assert family_row["thresholds"] == thresholds
         assert family_row["threshold_status"] == "pass", family_name
 
 

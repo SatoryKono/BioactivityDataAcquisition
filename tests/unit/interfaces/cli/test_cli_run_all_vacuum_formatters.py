@@ -23,6 +23,9 @@ from bioetl.application.services.vacuum_service import (
     VacuumAllResult,
 )
 from bioetl.interfaces.cli import cli
+from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
+    ObservabilityBackendEnsureResult,
+)
 from bioetl.interfaces.cli.commands.run_all import (
     BatchRunResult,
     _echo_batch_summary,
@@ -69,6 +72,25 @@ def mock_registry():
         return_value=mock,
     ):
         yield mock
+
+
+@pytest.fixture(autouse=True)
+def mock_run_all_observability_backend():
+    """Prevent run-all unit tests from probing a real detached backend."""
+    with (
+        patch(
+            "bioetl.interfaces.cli.commands.run_all.ensure_observability_backend_started",
+            return_value=ObservabilityBackendEnsureResult(
+                status="disabled",
+                health_url="http://127.0.0.1:8081/health",
+            ),
+        ),
+        patch(
+            "bioetl.interfaces.cli.commands.run_all.should_disable_transient_health_server",
+            return_value=False,
+        ),
+    ):
+        yield
 
 
 # =============================================================================

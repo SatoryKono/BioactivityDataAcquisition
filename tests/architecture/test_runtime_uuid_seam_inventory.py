@@ -12,7 +12,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG_PATH = ROOT / "configs/quality/runtime_uuid_seams.yaml"
-SCAN_ROOTS = ("src/bioetl/application", "src/bioetl/composition")
+SCAN_ROOTS = ("src/bioetl",)
 UUID4_SCAN_TIMEOUT_SECONDS = 10
 
 pytestmark = pytest.mark.architecture
@@ -119,61 +119,31 @@ def test_runtime_uuid4_inventory_forbids_replay_critical_random_identity() -> No
     entries = cast(list[dict[str, Any]], inventory["seams"])
     replay_critical = [entry for entry in entries if entry.get("replay_critical")]
 
+    assert entries == []
     assert replay_critical == []
     for entry in entries:
         assert str(entry["owner"]).strip()
         assert str(entry["classification"]).strip()
         assert str(entry["migration_policy"]).strip()
-        assert entry["layer"] in {"application", "composition"}
+        assert entry["layer"] in {"application", "composition", "infrastructure"}
 
 
-def test_runtime_uuid4_inventory_documents_exact_replay_injection_seams() -> None:
+def test_runtime_uuid4_inventory_enforces_zero_production_budget() -> None:
     inventory = _load_inventory()
+    policy = cast(dict[str, Any], inventory["policy"])
     entries = cast(list[dict[str, Any]], inventory["seams"])
-    by_path = {
-        str(entry["path"]): str(entry["migration_policy"])
-        for entry in entries
-        if isinstance(entry, dict)
-    }
-    expected_requirements = {
-        "src/bioetl/application/services/execution/pipeline_runner_service.py": (
-            "exact replay requires explicit run_id"
-        ),
-        "src/bioetl/application/services/control_plane/manifest/service_scaffold.py": (
-            "manifest_id_factory"
-        ),
-        "src/bioetl/application/services/control_plane/ledger/service.py": (
-            "event_id_factory"
-        ),
-        "src/bioetl/application/services/control_plane/workflow/execution_service.py": (
-            "run_id_factory"
-        ),
-        "src/bioetl/composition/bootstrap/runtime/_runner_assembly_support.py": (
-            "control-plane-attached"
-        ),
-        "src/bioetl/composition/bootstrap/runtime/pipeline_context_builder.py": (
-            "run_id_factory"
-        ),
-    }
 
-    missing: list[str] = []
-    for path, required_token in expected_requirements.items():
-        policy = by_path.get(path, "")
-        if required_token not in policy:
-            missing.append(f"{path} -> {required_token}")
-
-    assert not missing, (
-        "Exact replay/runtime UUID seams must document their explicit injection "
-        "migration path:\n" + "\n".join(missing)
-    )
+    assert policy["production_uuid4_budget"] == 0
+    assert policy["scan_scope"] == "src/bioetl"
+    assert entries == []
 
 
 def test_runtime_uuid4_inventory_links_deterministic_factory_evidence() -> None:
     inventory = _load_inventory()
     history = cast(list[dict[str, Any]], inventory["review_history"])
-    current_review = [entry for entry in history if entry.get("issue") == "#4968"]
-    assert current_review, "Runtime UUID seam inventory must record #4968 review"
-    assert current_review[0]["outcome"] == "deterministic_factory_evidence_confirmed"
+    current_review = [entry for entry in history if entry.get("issue") == "#5044"]
+    assert current_review, "Runtime UUID seam inventory must record #5044 review"
+    assert current_review[0]["outcome"] == "production_random_uuid_zero_budget_enforced"
 
     evidence = cast(dict[str, Any], inventory["deterministic_factory_evidence"])
     guard_tests = cast(list[str], evidence["guard_tests"])

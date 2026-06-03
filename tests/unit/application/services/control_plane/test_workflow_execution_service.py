@@ -74,6 +74,7 @@ def _create_workflow_ledger_service(
         manifest_id=manifest.manifest_id,
         workflow_run_id=manifest.workflow_run_id,
         workflow_name=manifest.workflow_name,
+        _entry_id_factory=lambda: f"workflow-entry-{len(ledger_port.entries) + 1}",
     )
 
 

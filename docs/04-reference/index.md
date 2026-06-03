@@ -38,6 +38,8 @@ design rationale and layer structure.
 | Section           | Purpose                                                                                      | Entry point                                            |
 | ----------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
 | CLI               | Supported command-line surface                                                               | [cli.md](cli.md)                                       |
+| Workflow Catalog  | Current declarative workflow DAG catalog                                                     | [workflow-catalog.md](workflow-catalog.md)             |
+| Pipeline Catalog  | Current provider and composite pipeline config catalog                                       | [pipeline-catalog.md](pipeline-catalog.md)             |
 | Contracts         | Published contract pack for Gold, DQ, control-plane, and observability surfaces             | [contracts/README.md](contracts/README.md)             |
 | Normalization     | Published normalization governance for provider fields and IDs                               | [normalization/chembl-normalization-overview.md](normalization/chembl-normalization-overview.md) |
 | Providers         | Provider-specific published specs and current config-linked field surfaces                   | [providers/README.md](providers/README.md)             |
@@ -60,6 +62,9 @@ design rationale and layer structure.
 ## Current High-Signal References
 
 - [Run Manifest and Run Ledger Contract](contracts/run-manifest-ledger.md)
+- [Data Contracts Current State](contracts/data-contracts-current.md)
+- [Pipeline Catalog](pipeline-catalog.md)
+- [Workflow Catalog](workflow-catalog.md)
 - [Observability Metrics](contracts/observability.md)
 - [CLI Reference](cli.md)
 - [Gold Schemas](contracts/gold-schemas.md)

@@ -22,9 +22,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_COVERAGE_XML = PROJECT_ROOT / "reports" / "coverage" / "coverage.xml"
 DEFAULT_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "module-coverage-inventory.json"
 SOURCE_ROOT = PROJECT_ROOT / "src" / "bioetl"
-# Two passes are enough to confirm a stable snapshot while keeping the guard
-# under the per-test timeout budget on shared-drive worktrees.
-MAX_SOURCE_TREE_STABILIZATION_ATTEMPTS = 2
+# One full byte-read pass keeps the guard below the per-test timeout budget on
+# shared-drive worktrees; vanished paths are skipped during snapshot reading.
+MAX_SOURCE_TREE_STABILIZATION_ATTEMPTS = 1
 SOURCE_TREE_STABILIZATION_SLEEP_SECONDS = 0.1
 
 
@@ -106,14 +106,10 @@ def _module_name(source_path: Path, repo_root: Path) -> str:
 
 def _iter_source_modules(repo_root: Path) -> list[Path]:
     source_root = repo_root / "src" / "bioetl"
-    source_paths = [
+    return [
         source_root / relative_path
         for relative_path in discover_files(str(source_root.resolve()), ".py")
     ]
-    # Shared-drive worktrees can momentarily expose stale cached file lists while
-    # concurrent refactors/delete operations are in flight; ignore vanished paths
-    # so the inventory reflects the actual current source tree.
-    return [path for path in source_paths if path.exists()]
 
 
 def _read_stable_source_module_snapshots(

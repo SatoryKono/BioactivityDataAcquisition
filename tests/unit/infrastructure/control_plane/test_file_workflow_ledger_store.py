@@ -36,7 +36,7 @@ def test_file_workflow_ledger_round_trips_by_manifest_and_run_id(tmp_path) -> No
     assert store.list_entries_by_run_id(workflow_run_id) == [entry]
 
 
-def test_append_jsonl_payload_uses_control_plane_flush_policy(
+def test_workflow_ledger_store_append_jsonl_payload_uses_control_plane_flush_policy(
     tmp_path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

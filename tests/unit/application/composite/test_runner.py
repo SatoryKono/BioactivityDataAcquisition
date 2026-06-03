@@ -406,6 +406,9 @@ class TestFSMSeedFailure:
             config=MockCompositeConfig(),
             runtime=CompositeRuntimeConfig(),
             deps=deps,
+            run_id=deterministic_uuid_string_from_callsite(
+                "test_error_logged_on_seed_failure"
+            ),
         )
 
         with pytest.raises(RuntimeError):
@@ -551,6 +554,9 @@ class TestFSMSeedResume:
             config=MockCompositeConfig(),
             runtime=CompositeRuntimeConfig(resume=True),
             deps=deps,
+            run_id=deterministic_uuid_string_from_callsite(
+                "test_resume_logs_fsm_transition"
+            ),
         )
 
         await runner.run()
@@ -582,6 +588,9 @@ class TestFSMSeedResume:
             config=MockCompositeConfig(),
             runtime=CompositeRuntimeConfig(resume=True),
             deps=deps,
+            run_id=deterministic_uuid_string_from_callsite(
+                "test_resume_seed_phase_corrects_state"
+            ),
         )
         state = CompositeCheckpointState(
             composite_name="test_composite",
@@ -740,6 +749,9 @@ class TestFSMTransitionLogging:
             config=MockCompositeConfig(),
             runtime=CompositeRuntimeConfig(),
             deps=deps,
+            run_id=deterministic_uuid_string_from_callsite(
+                "test_seed_running_transition_logged"
+            ),
         )
 
         await runner.run()
@@ -769,6 +781,9 @@ class TestFSMTransitionLogging:
             config=MockCompositeConfig(),
             runtime=CompositeRuntimeConfig(),
             deps=deps,
+            run_id=deterministic_uuid_string_from_callsite(
+                "test_seed_complete_transition_logged"
+            ),
         )
 
         await runner.run()
@@ -799,6 +814,9 @@ class TestFSMTransitionLogging:
             config=MockCompositeConfig(),
             runtime=CompositeRuntimeConfig(),
             deps=deps,
+            run_id=deterministic_uuid_string_from_callsite(
+                "test_seed_failed_transition_logged"
+            ),
         )
 
         with pytest.raises(RuntimeError):
@@ -839,6 +857,9 @@ class TestCheckpointSaveErrorHandling:
             config=MockCompositeConfig(),
             runtime=CompositeRuntimeConfig(),
             deps=deps,
+            run_id=deterministic_uuid_string_from_callsite(
+                "test_pipeline_continues_on_checkpoint_save_failure"
+            ),
         )
 
         # Should not raise despite checkpoint save failure
@@ -878,6 +899,9 @@ class TestCheckpointSaveErrorHandling:
             config=MockCompositeConfig(),
             runtime=CompositeRuntimeConfig(),
             deps=deps,
+            run_id=deterministic_uuid_string_from_callsite(
+                "test_warning_logged_on_checkpoint_save_failure"
+            ),
         )
 
         await runner.run()

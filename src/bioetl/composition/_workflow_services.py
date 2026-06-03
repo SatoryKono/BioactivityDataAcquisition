@@ -155,9 +155,7 @@ def _create_workflow_ledger_service(
         manifest_id=manifest.manifest_id,
         workflow_run_id=manifest.workflow_run_id,
         workflow_name=manifest.workflow_name,
-        _entry_id_factory=lambda: create_runtime_occurrence_id(
-            "workflow_ledger_entry"
-        ),
+        _entry_id_factory=lambda: create_runtime_occurrence_id("workflow_ledger_entry"),
     )
 
 
@@ -210,9 +208,7 @@ def get_workflow_execution_service(
         workflow_lock_port=workflow_lock_port
         if workflow_lock_port is not None
         else cast("LockPort", _get_workflow_memory_lock()),
-        run_id_factory=lambda: create_runtime_occurrence_run_id(
-            "workflow_execution"
-        ),
+        run_id_factory=lambda: create_runtime_occurrence_run_id("workflow_execution"),
     )
 
 

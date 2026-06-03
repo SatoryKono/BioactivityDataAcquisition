@@ -37,6 +37,8 @@ architecture section focuses on structure, boundaries, and design rationale.
 
 | Document                                                      | Description                    | C4 Level |
 | ------------------------------------------------------------- | ------------------------------ | -------- |
+| [current-state-inventory.md](current-state-inventory.md)      | Current code/config/docs inventory and drift findings | - |
+| [current-state-diagrams.md](current-state-diagrams.md)        | Current C4, layer, dependency, medallion, lifecycle diagrams | 1-2 |
 | [system-context.md](system-context.md)                        | External systems interaction   | Level 1  |
 | [container-diagram.md](diagrams/guide/container-reference.md) | Internal containers & services | Level 2  |
 | [data-flow.md](diagrams/guide/data-flow-reference.md)         | Medallion data flow            | -        |
@@ -104,6 +106,7 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 | [ADR-045](decisions/ADR-045-dq-contract-system.md)                 | Data Quality Contract System              | -                  |
 | [ADR-046](decisions/ADR-046-checkpoint-vs-ledger-resume.md)        | Checkpoint Versus Ledger-Based Resume     | -                  |
 | [ADR-047](decisions/ADR-047-workflow-control-plane.md)             | Workflow Control Plane for Declarative Workflows | -           |
+| [ADR-048](decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md) | Domain Schema Boundary and Runtime Pandera Compatibility | - |
 
 ______________________________________________________________________
 

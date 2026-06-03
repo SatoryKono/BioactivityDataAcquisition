@@ -8,6 +8,8 @@ from __future__ import annotations
 import asyncio
 from datetime import UTC, datetime, timedelta
 from unittest.mock import ANY, AsyncMock, MagicMock
+from uuid import UUID
+
 from tests.helpers.deterministic_ids import (
     deterministic_uuid_from_callsite,
     deterministic_uuid_string_from_callsite,

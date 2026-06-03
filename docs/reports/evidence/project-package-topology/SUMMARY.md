@@ -13,13 +13,13 @@ place to remove known topology drift; older `2026-03-20` raw evidence files in
 other layer packs remain historical inputs and should not be treated as the
 latest package-count baseline.
 
-Current-baseline note (2026-05-25): architectural planning and GitHub issues
+Current-baseline note (2026-06-03): architectural planning and GitHub issues
 MUST cite this summary or a newer regenerated package-topology pack for current
 counts. The current baseline is reconciled with
-`reports/quality/module-coverage-inventory.json` snapshot `2026-05-25`
-(`source_module_count=1936`,
-`source_tree_sha256=87d54e890b365bc3659f90c5e672c02608b1e323b9b372ce6a7f2d5694af961e`).
-Raw files dated before `2026-05-25` are retained only as historical detailed
+`reports/quality/module-coverage-inventory.json` snapshot `2026-06-03`
+(`source_module_count=1986`,
+`source_tree_sha256=0e8c8de3e82d3d388fdcd373f1f8ed5d511352f94bf6ec676e6293a823b1d478`).
+Raw files dated before `2026-06-03` are retained only as historical detailed
 inputs and must be refreshed before they are used as line-item topology
 evidence.
 
@@ -49,9 +49,9 @@ Collected: `6`
 
 - The repository is not flat at the top level; it is split into clear zones for source, config, tests, scripts, docs, and reports.
 - `src/bioetl/` reflects the intended layered architecture through distinct first-order package groups.
-- Current Python file count under `src/bioetl` is `1936`.
-- Current layer file counts are: `domain=547`, `application=560`, `infrastructure=468`, `composition=244`, `interfaces=115`.
-- Current first-order package counts are: `domain=22`, `application=6`, `infrastructure=20`, `composition=6`, `interfaces=2`.
+- Current Python file count under `src/bioetl` is `1986`.
+- Current layer file counts are: `domain=550`, `application=588`, `infrastructure=469`, `composition=254`, `interfaces=123`.
+- Current first-order package counts are: `domain=22`, `application=6`, `infrastructure=20`, `composition=5`, `interfaces=2`.
 - `domain` and `application` are now the broadest package surfaces by Python file count; `infrastructure` remains the broadest adapter and external-system implementation boundary.
 
 ## Gaps

@@ -99,6 +99,14 @@ ______________________________________________________________________
 ## См. также
 
 - [Running Pipelines](running-pipelines.md) — CLI команды и опции
+- [Run Lifecycle](run-lifecycle.md) — актуальная последовательность runtime,
+  manifest, ledger, storage и quarantine closeout
+- [Replay Guide](replay-guide.md) — fail-closed exact replay boundaries и
+  required evidence
+- [Dashboard Guide](dashboard-guide.md) — shipped Grafana dashboard inventory и
+  validation commands
+- [DQ Framework](dq-framework.md) — DQ analyzers, checks, contracts и
+  quarantine boundaries
 - [Getting Started](getting-started.md) — первичная настройка
 - [ADR-010: Local-Only Deployment](../02-architecture/decisions/ADR-010-local-only-deployment.md) — режим локального запуска
 - [Local Storage Layout](local-storage-layout.md) — структура `data/` и слоёв хранения

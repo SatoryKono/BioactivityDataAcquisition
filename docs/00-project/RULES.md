@@ -83,7 +83,7 @@ ______________________________________________________________________
 
   Остальные порты (`LoggerPort`, `MetricsPort`, `TracingPort` и т.д.) **MAY** не иметь `@runtime-checkable`.
 
-  > **Текущее состояние:** Все 68 портов декорированы `@runtime-checkable` (100% coverage).
+  > **Текущее состояние:** Все 81 порт декорированы `@runtime-checkable` (100% coverage).
   > Минимальное требование — 4 критических порта выше; остальные декорированы для единообразия.
 
 - **Импорт**: Порты **MUST** импортироваться из фасада (`from bioetl.domain.ports import ...`), а не из внутренних модулей. Это правило относится и к runtime-oriented контрактам (`LoggerPort`, `RunnerFactoryPort`, `RunnablePort`, `RateLimiterPort`, `CircuitBreakerPort`): они по проектной политике остаются в `domain.ports` как чистые cross-layer abstractions, а не считаются infrastructure leakage. Проверяется архитектурным тестом.
@@ -808,7 +808,8 @@ pmid → pmid → pubmed-id
 
 **Запуск метрик:**
 
-- Автоматически в `bootstrap_pipeline_runner()` (Composition Root)
+- Автоматически через composition runtime observability bootstrap during
+  normal `bioetl run`, `bioetl run-all` и `bioetl run-composite` execution
 - Идемпотентный: повторный вызов безопасен (Double-Check Locking)
 - Graceful degradation: ошибки метрик не блокируют пайплайн
 
@@ -1258,7 +1259,9 @@ async with services:  # --aenter-- инициализирует ресурсы
 
 - **Source of Truth**: Для текущего project guidance нормативными остаются активные docs в `docs/00-05`.
 - **Archive Boundary**: Материалы в `docs/99-archive/` сохраняются для traceability и historical context, но не являются нормативными для текущего поведения проекта.
-- **Guardrails**: Активная документация и generated docs **MUST** проходить автоматические docs-проверки (`check_doc_links` и выделенные generated-doc checks в CI).
+- **Guardrails**: Активная документация и generated docs **MUST** проходить
+  автоматические docs-проверки (`python -m scripts.docs check-links` и
+  выделенные generated-doc checks в CI).
 - **Карта и Схемы**: Генерируются скриптами в CI (pydantic-to-json-schema, eralchemy2, mkdocs).
 - **Именование**: Зеркальное (`src/bioetl/.../{provider}/` \<-> `docs/04-reference/providers/{provider}/`).
 

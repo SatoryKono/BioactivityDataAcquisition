@@ -235,6 +235,13 @@ All MCP servers use `startup_timeout_sec = 30` to accommodate VPN latency:
 | prometheus          | `prometheus-mcp`                                   | Prometheus queries and target discovery                    |
 | grafana             | `mcp-grafana-npx`                                  | Grafana dashboards, datasources, and observability context |
 
+The generated workspace config from `python -m scripts.ai.codex.setup_mcp`
+also registers BioETL-specific wrapper and HTTP servers used in this repo:
+`docker`, `docker-docs`, `context7`, `paper-search`, `dockerhub`, `ast-grep`,
+`mcp-code-interpreter`, `brave-search`, `sonarqube`, `neo4j-cypher`,
+`neo4j-memory`, `needle`, `chembl`, `pubchem`, `pubmed`, `mermaid`,
+`biomoltechDocs`, `mintlify`, `deepwiki`, and `openaiDeveloperDocs`.
+
 ______________________________________________________________________
 
 ## VPN Workaround Details

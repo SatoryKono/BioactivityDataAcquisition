@@ -142,7 +142,8 @@ AI runtime ownership note:
    architecture.
 1. При миграции структуры (пути, команды, конфиги) сначала обновлять `published`, затем `internal-published`, затем `repo-only` и `internal`.
 1. Исторические упоминания legacy-путей в `published` документах должны быть явно помечены как historical context.
-1. Для активных docs использовать автоматические проверки `check_doc_links` и nav/strict-build guardrails в CI.
+1. Для активных docs использовать автоматические проверки
+   `python -m scripts.docs check-links` и nav/strict-build guardrails в CI.
 1. Документы по runtime, который не является стандартным или default-supported, могут быть `published`, `internal-published` или `repo-only` только при явной пометке experimental/disclaimer и без конфликта с ADR-010 Local-Only posture.
 1. `internal-generated` документы не используются как первичный источник архитектурной или операционной политики.
 1. Материалы в `docs/99-archive/` сохраняются для traceability, но не являются нормативными для текущего поведения проекта.

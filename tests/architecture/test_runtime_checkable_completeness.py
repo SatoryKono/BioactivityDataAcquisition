@@ -9,6 +9,7 @@ See: TYPE-004 in docs/00-project/ai/rules/bioetl-ai-rules.md
 from __future__ import annotations
 
 import inspect
+from pathlib import Path
 
 import pytest
 
@@ -31,6 +32,7 @@ def _discover_all_port_classes() -> list[str]:
 
 ALL_PORT_NAMES = _discover_all_port_classes()
 EXPECTED_PORT_COUNT = 81
+RULES_PATH = Path("docs/00-project/RULES.md")
 
 
 class TestAllPortsRuntimeCheckable:
@@ -43,6 +45,13 @@ class TestAllPortsRuntimeCheckable:
             f"If you added/removed a port, update this test. "
             f"Current ports: {ALL_PORT_NAMES}"
         )
+
+    def test_runtime_checkable_count_is_reflected_in_rules_doc(self) -> None:
+        """RULES.md must not publish stale runtime-checkable port counts."""
+        rules_text = RULES_PATH.read_text(encoding="utf-8")
+
+        assert f"Все {EXPECTED_PORT_COUNT} порт" in rules_text
+        assert "Все 68 порт" not in rules_text
 
     @pytest.mark.parametrize("port_name", ALL_PORT_NAMES)
     def test_port_is_runtime_checkable(self, port_name: str) -> None:

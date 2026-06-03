@@ -2,26 +2,18 @@
 
 from __future__ import annotations
 
-from importlib import import_module
 from pathlib import Path
-from types import ModuleType
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.storage.gold.io_helpers import (
+    load_gold_writer_module as _load_gold_writer_module,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable
 
     from bioetl.domain.types import GoldRecord
-
-
-def _load_gold_writer_module() -> ModuleType:
-    """Load canonical gold_writer module for DeltaTable integration.
-
-    Returns:
-        Loaded gold_writer ModuleType with DeltaTable access.
-    """
-    return import_module("bioetl.infrastructure.storage.gold_writer")
 
 
 def _build_read_projection(

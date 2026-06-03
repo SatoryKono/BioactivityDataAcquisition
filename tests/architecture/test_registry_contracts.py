@@ -93,8 +93,7 @@ class TestRegistryProtocol:
         assert not violations, (
             "Provider registration must use AdapterCreatorProtocol and "
             "ProviderConfig.adapter_creator instead of the legacy custom_creator "
-            "seam.\n"
-            + "\n".join(f"  - {item}" for item in violations)
+            "seam.\n" + "\n".join(f"  - {item}" for item in violations)
         )
 
     def test_datasource_factory_path_avoids_class_level_provider_registry_access(
@@ -191,6 +190,17 @@ class TestRegistryProtocol:
             "compatibility default registry seam.\n"
             + "\n".join(f"  - {item}" for item in violations)
         )
+
+    def test_cli_main_entrypoint_uses_explicit_registry_builder(
+        self,
+        src_dir: Path,
+    ) -> None:
+        """Canonical CLI startup should pass an explicit registry through Click."""
+        main_path = src_dir / "bioetl" / "interfaces" / "cli" / "main.py"
+        content = main_path.read_text(encoding="utf-8")
+
+        assert "def _build_main_registry()" in content
+        assert "cli(obj=_build_main_registry())" in content
 
     def test_src_paths_avoid_raw_class_level_provider_registry_calls(
         self,

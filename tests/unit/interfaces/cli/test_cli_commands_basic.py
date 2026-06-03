@@ -294,12 +294,12 @@ class TestMainFunction:
 
     @patch("bioetl.interfaces.cli.main._build_main_registry")
     @patch("bioetl.interfaces.cli.main.cli")
-    def test_main_calls_cli_without_eager_registry(
+    def test_main_calls_cli_without_prebuilding_registry(
         self,
         mock_cli,
         mock_build_registry,
     ):
-        """Test main function delegates to click without prebuilding a registry."""
+        """Main should stay a thin wrapper over the Click group."""
 
         main()
 
