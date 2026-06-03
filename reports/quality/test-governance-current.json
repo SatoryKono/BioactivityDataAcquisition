@@ -235,14 +235,14 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "441",
+        "line": "476",
         "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_stage_name_accepts_valid"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "460",
+        "line": "495",
         "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_stage_completion_running_allows_none_timestamp"
@@ -3609,8 +3609,8 @@
     "refined_assertless_tests": 0,
     "root": ".",
     "top_duplicate_test_names": [],
-    "total_test_files": 1669,
-    "total_test_functions": 20000,
+    "total_test_files": 1671,
+    "total_test_functions": 19999,
     "uuid4_call_sites": 0
   }
 }

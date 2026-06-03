@@ -206,6 +206,39 @@ quality:
       nullable: false
 ```
 
+## Threshold Semantics
+
+BioETL uses two-level error thresholds for batch-level DQ evaluation:
+
+| Threshold   | Default  | Behavior                                                                 |
+| ----------- | -------- | ------------------------------------------------------------------------ |
+| `soft_fail` | 5%       | Warning emitted, pipeline continues                                      |
+| `hard_fail` | 20%      | Batch fails, records quarantined                                           |
+
+**Invariant**: `soft_fail` must be strictly less than `hard_fail`.
+
+**Configuration**:
+- Global defaults: `configs/base/quality.yaml` → `thresholds.soft_fail`, `thresholds.hard_fail`
+- Entity overrides: `configs/entities/{provider}/{entity}.yaml` → `quality.thresholds`
+- Inline overrides: Pipeline YAML → `pipeline.dq_overrides.hard_fail_threshold`
+
+**Evaluation**: When error rate exceeds `soft_fail`, a warning is logged. When error rate exceeds `hard_fail`, the batch is rejected and records are quarantined according to the disposition policy.
+
+## Validation Layer Matrix
+
+| Layer              | Validation Scope                                   | Primary Contract Source          | Enforcement Point       |
+| ------------------ | --------------------------------------------------- | ---------------------------------- | ----------------------- |
+| **Domain**          | Entity schema contracts, value object invariants    | `domain/schemas/` (Pandera)        | Pandera validation      |
+| **Application**      | Pipeline-level DQ rules, field/cross-field rules     | `configs/entities/`, `configs/composites/` | DQConfigLoader         |
+| **Infrastructure**   | Storage schema contracts, Delta Lake constraints    | `infrastructure/schemas/`          | Delta Lake schema check  |
+| **Composition**      | DQ rule assembly, hierarchical merge resolution     | `configs/base/quality.yaml`        | DQConfigLoader merge    |
+
+**Key Points**:
+- Domain layer enforces structural and semantic validity at the Pandera level
+- Application layer applies business rules via hierarchical DQ config
+- Infrastructure layer validates storage contracts (Delta Lake schema evolution)
+- Composition layer orchestrates threshold evaluation and disposition routing
+
 ## Disposition Policy
 
 The DQ contract system defines five disposition strategies based on the canonical `DQDisposition` enum:
