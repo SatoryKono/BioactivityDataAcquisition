@@ -232,6 +232,17 @@ class TestPipelineRunLifecycleMixin:
         with pytest.raises(InvalidStateError, match="Cannot start"):
             pipeline_run.start(_ts(1))
 
+    def test_start_invalid_after_terminal(self, pipeline_run: PipelineRun):
+        """start() should fail once run reaches a terminal state."""
+        pipeline_run.start(_ts(0))
+        pipeline_run.record_stage_success(
+            "bronze", records_processed=1, started_at=_ts(1), completed_at=_ts(2)
+        )
+        pipeline_run.complete(_ts(3))
+
+        with pytest.raises(InvalidStateError, match="Cannot start"):
+            pipeline_run.start(_ts(4))
+
     def test_record_stage_start_adds_running_stage(self, started_run: PipelineRun):
         """record_stage_start should add a RUNNING stage."""
         started_run.record_stage_start("bronze", _ts(0))
@@ -257,6 +268,18 @@ class TestPipelineRunLifecycleMixin:
         assert stage.status == StageStatus.SUCCESS
         assert stage.records_processed == 100
         assert stage.result == {"output": "data"}
+
+    def test_record_stage_success_invalid_after_complete(self, started_run: PipelineRun):
+        """Cannot append stages after run is completed."""
+        started_run.record_stage_success(
+            "bronze", records_processed=1, started_at=_ts(0), completed_at=_ts(1)
+        )
+        started_run.complete(_ts(2))
+
+        with pytest.raises(InvalidStateError, match="Cannot record_stage_success"):
+            started_run.record_stage_success(
+                "silver", records_processed=1, started_at=_ts(2), completed_at=_ts(3)
+            )
 
     def test_record_stage_failure_adds_failed_stage_and_fails_run(self, started_run: PipelineRun):
         """record_stage_failure should add FAILED stage and transition run to FAILED."""
@@ -299,6 +322,16 @@ class TestPipelineRunLifecycleMixin:
         with pytest.raises(InvalidStateError, match="Cannot complete"):
             pipeline_run.complete(_ts(10))
 
+    def test_complete_invalid_after_shutdown(self, started_run: PipelineRun):
+        """complete() should fail after shutdown."""
+        started_run.record_stage_success(
+            "bronze", records_processed=1, started_at=_ts(1), completed_at=_ts(2)
+        )
+        started_run.shutdown(_ts(5))
+
+        with pytest.raises(InvalidStateError, match="Cannot complete"):
+            started_run.complete(_ts(6))
+
     def test_complete_validates_no_failed_stages(self, started_run: PipelineRun):
         """complete should fail if any stages failed."""
         # Note: record_stage_failure automatically transitions run to FAILED status,
@@ -318,12 +351,42 @@ class TestPipelineRunLifecycleMixin:
         with pytest.raises(InvalidStateError, match="no stages recorded"):
             started_run.complete(_ts(10))
 
+    def test_fail_invalid_after_complete(self, started_run: PipelineRun):
+        """Cannot fail once run is completed."""
+        started_run.record_stage_success(
+            "bronze", records_processed=1, started_at=_ts(1), completed_at=_ts(2)
+        )
+        started_run.complete(_ts(10))
+
+        with pytest.raises(InvalidStateError, match="Cannot fail"):
+            started_run.fail("late failure", failed_at=_ts(11))
+
+    def test_shutdown_invalid_after_complete(self, started_run: PipelineRun):
+        """Cannot shutdown once run is completed."""
+        started_run.record_stage_success(
+            "bronze", records_processed=1, started_at=_ts(1), completed_at=_ts(2)
+        )
+        started_run.complete(_ts(10))
+
+        with pytest.raises(InvalidStateError, match="Cannot shutdown"):
+            started_run.shutdown(_ts(11))
+
     def test_fail_transitions_to_failed(self, started_run: PipelineRun):
         """fail should transition RUNNING -> FAILED."""
         started_run.fail("Pipeline error", "RuntimeError", failed_at=_ts(10))
 
         assert started_run.status == PipelineRunState.FAILED
         assert started_run.ended_at == _ts(10)
+
+    def test_fail_invalid_after_shutdown(self, started_run: PipelineRun):
+        """Cannot fail once run is shutdown."""
+        started_run.record_stage_success(
+            "bronze", records_processed=1, started_at=_ts(1), completed_at=_ts(2)
+        )
+        started_run.shutdown(_ts(4))
+
+        with pytest.raises(InvalidStateError, match="Cannot fail"):
+            started_run.fail("retry", failed_at=_ts(5))
 
     def test_fail_validates_running_status(self, pipeline_run: PipelineRun):
         """fail should only work from RUNNING status."""

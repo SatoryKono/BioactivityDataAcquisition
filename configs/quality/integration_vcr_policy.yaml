@@ -238,6 +238,7 @@ tracked_suite_inventory:
     - tests/integration/infrastructure/storage/test_bronze_writer_metadata_operations.py
     - tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py
     - tests/integration/infrastructure/storage/test_composite_checkpoint_writer.py
+    - tests/integration/infrastructure/storage/test_control_plane_file_stores.py
     - tests/integration/infrastructure/storage/test_delta_reader.py
     - tests/integration/infrastructure/storage/test_deterministic_write.py
     - tests/integration/infrastructure/storage/test_export_reader_version_fallback.py
@@ -249,7 +250,6 @@ tracked_suite_inventory:
     - tests/integration/infrastructure/storage/test_silver_writer.py
     - tests/integration/infrastructure/storage/test_silver_writer_filesystem.py
     - tests/integration/infrastructure/storage/test_storage_factory_audit.py
-    - tests/integration/infrastructure/storage/test_control_plane_file_stores.py
     interface_cli_surfaces:
     - tests/integration/interfaces/test_cli_checkpoint_list.py
     - tests/integration/interfaces/test_cli_config_dq.py

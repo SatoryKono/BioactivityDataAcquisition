@@ -1,10 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-03T06:22:45.434766+00:00",
+  "generated_at": "2026-06-03T16:32:54.592356+00:00",
   "summary": {
-    "total_scripts": 424,
+    "total_scripts": 426,
     "status_counts": {
       "active": 364,
+      "orphan": 2,
       "supporting": 60
     },
     "reference_group_coverage": {
@@ -3162,7 +3163,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-audit-bot.md",
-          "line": 292,
+          "line": 304,
           "source_group": "docs",
           "text": "python -m scripts.diagrams check quality-gates"
         }
@@ -4153,7 +4154,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/agents/py-doc-bot.md",
-          "line": 187,
+          "line": 193,
           "source_group": "docs",
           "text": "1. `run_diagram_checks.sh` завершён без ошибок"
         },
@@ -4895,7 +4896,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1263,
+          "line": 1271,
           "source_group": "docs",
           "text": "автоматические docs-проверки (`python -m scripts.docs check-links` и"
         },
@@ -5823,13 +5824,13 @@
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 128,
+          "line": 132,
           "source_group": "docs",
           "text": "`python -m scripts.engineering.ci neo4j-memory`:"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 134,
+          "line": 138,
           "source_group": "docs",
           "text": "`python -m scripts.engineering.ci neo4j-memory-live`."
         },
@@ -6436,7 +6437,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
-          "line": 145,
+          "line": 148,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.dev setup-mcp"
         },
@@ -6448,13 +6449,13 @@
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-test-bot.md",
-          "line": 249,
+          "line": 250,
           "source_group": "docs",
           "text": "python -m scripts.engineering.dev run-tests                # Local test runner"
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-test-bot.md",
-          "line": 250,
+          "line": 251,
           "source_group": "docs",
           "text": "python -m scripts.engineering.dev test-changed             # Tests for changed files only"
         },
@@ -6735,13 +6736,13 @@
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 25,
+          "line": 31,
           "source_group": "agents",
           "text": "- Mixed checkout в Windows PowerShell: `.\\scripts\\engineering\\dev\\run_pytest.ps1`, `.\\scripts\\engineering\\dev\\run_mypy.ps1`, `.\\.venv-win\\Scripts\\python.exe -m ...`"
         },
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 317,
+          "line": 323,
           "source_group": "agents",
           "text": "> - Команды: используй OS-appropriate path. CI/single-OS: `uv run python -m ...`; PowerShell mixed checkout: `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1`; WSL "
         },
@@ -6771,13 +6772,13 @@
         },
         {
           "path": "docs/00-project/ai/agents/agents/py-test-swarm.md",
-          "line": 28,
+          "line": 34,
           "source_group": "docs",
           "text": "- Mixed checkout в Windows PowerShell: `.\\scripts\\engineering\\dev\\run_pytest.ps1`, `.\\scripts\\engineering\\dev\\run_mypy.ps1`, `.\\.venv-win\\Scripts\\python.exe -m ...`"
         },
         {
           "path": "docs/00-project/ai/agents/agents/py-test-swarm.md",
-          "line": 361,
+          "line": 367,
           "source_group": "docs",
           "text": "> - Команды: используй OS-appropriate path. CI/single-OS: `uv run python -m ...`; PowerShell mixed checkout: `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1`; WSL "
         }
@@ -6794,13 +6795,13 @@
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 26,
+          "line": 32,
           "source_group": "agents",
           "text": "- Mixed checkout в WSL/Linux: `bash scripts/engineering/dev/run_pytest.sh`, `bash scripts/engineering/dev/run_mypy.sh`, `\"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python\" -m ...`"
         },
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 317,
+          "line": 323,
           "source_group": "agents",
           "text": "> - Команды: используй OS-appropriate path. CI/single-OS: `uv run python -m ...`; PowerShell mixed checkout: `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1`; WSL "
         },
@@ -6830,13 +6831,13 @@
         },
         {
           "path": "docs/00-project/ai/agents/agents/py-test-swarm.md",
-          "line": 29,
+          "line": 35,
           "source_group": "docs",
           "text": "- Mixed checkout в WSL/Linux: `bash scripts/engineering/dev/run_pytest.sh`, `bash scripts/engineering/dev/run_mypy.sh`, `\"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python\" -m ...`"
         },
         {
           "path": "docs/00-project/ai/agents/agents/py-test-swarm.md",
-          "line": 361,
+          "line": 367,
           "source_group": "docs",
           "text": "> - Команды: используй OS-appropriate path. CI/single-OS: `uv run python -m ...`; PowerShell mixed checkout: `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1`; WSL "
         }
@@ -6910,13 +6911,13 @@
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 25,
+          "line": 31,
           "source_group": "agents",
           "text": "- Mixed checkout в Windows PowerShell: `.\\scripts\\engineering\\dev\\run_pytest.ps1`, `.\\scripts\\engineering\\dev\\run_mypy.ps1`, `.\\.venv-win\\Scripts\\python.exe -m ...`"
         },
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 317,
+          "line": 323,
           "source_group": "agents",
           "text": "> - Команды: используй OS-appropriate path. CI/single-OS: `uv run python -m ...`; PowerShell mixed checkout: `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1`; WSL "
         },
@@ -6946,13 +6947,13 @@
         },
         {
           "path": "docs/00-project/ai/agents/agents/py-test-swarm.md",
-          "line": 28,
+          "line": 34,
           "source_group": "docs",
           "text": "- Mixed checkout в Windows PowerShell: `.\\scripts\\engineering\\dev\\run_pytest.ps1`, `.\\scripts\\engineering\\dev\\run_mypy.ps1`, `.\\.venv-win\\Scripts\\python.exe -m ...`"
         },
         {
           "path": "docs/00-project/ai/agents/agents/py-test-swarm.md",
-          "line": 361,
+          "line": 367,
           "source_group": "docs",
           "text": "> - Команды: используй OS-appropriate path. CI/single-OS: `uv run python -m ...`; PowerShell mixed checkout: `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1`; WSL "
         }
@@ -6969,13 +6970,13 @@
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 26,
+          "line": 32,
           "source_group": "agents",
           "text": "- Mixed checkout в WSL/Linux: `bash scripts/engineering/dev/run_pytest.sh`, `bash scripts/engineering/dev/run_mypy.sh`, `\"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python\" -m ...`"
         },
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 317,
+          "line": 323,
           "source_group": "agents",
           "text": "> - Команды: используй OS-appropriate path. CI/single-OS: `uv run python -m ...`; PowerShell mixed checkout: `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1`; WSL "
         },
@@ -7005,13 +7006,13 @@
         },
         {
           "path": "docs/00-project/ai/agents/agents/py-test-swarm.md",
-          "line": 29,
+          "line": 35,
           "source_group": "docs",
           "text": "- Mixed checkout в WSL/Linux: `bash scripts/engineering/dev/run_pytest.sh`, `bash scripts/engineering/dev/run_mypy.sh`, `\"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python\" -m ...`"
         },
         {
           "path": "docs/00-project/ai/agents/agents/py-test-swarm.md",
-          "line": 361,
+          "line": 367,
           "source_group": "docs",
           "text": "> - Команды: используй OS-appropriate path. CI/single-OS: `uv run python -m ...`; PowerShell mixed checkout: `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1`; WSL "
         }
@@ -7212,13 +7213,13 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
-          "line": 154,
+          "line": 157,
           "source_group": "docs",
           "text": "- `.\\scripts\\engineering\\dev\\setup_env_windows.ps1` → `.venv-win`"
         },
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
-          "line": 162,
+          "line": 165,
           "source_group": "docs",
           "text": ".\\scripts\\engineering\\dev\\setup_env_windows.ps1"
         },
@@ -7269,13 +7270,13 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
-          "line": 155,
+          "line": 158,
           "source_group": "docs",
           "text": "- `bash scripts/engineering/dev/setup_env_wsl.sh` → `${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}`"
         },
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
-          "line": 168,
+          "line": 171,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/setup_env_wsl.sh"
         },
@@ -7371,19 +7372,19 @@
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-debug-bot.md",
-          "line": 277,
+          "line": 278,
           "source_group": "docs",
           "text": "python -m scripts.engineering.diagnostics debug-pandera    # Pandera schema validation issues"
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-debug-bot.md",
-          "line": 278,
+          "line": 279,
           "source_group": "docs",
           "text": "python -m scripts.engineering.diagnostics debug-storage    # Storage health checks"
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-debug-bot.md",
-          "line": 279,
+          "line": 280,
           "source_group": "docs",
           "text": "python -m scripts.engineering.diagnostics inspect-vcr      # VCR cassette inspection"
         },
@@ -7768,19 +7769,19 @@
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-audit-bot.md",
-          "line": 271,
+          "line": 283,
           "source_group": "docs",
           "text": "python -m scripts.engineering.qa check-c901"
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-debug-bot.md",
-          "line": 293,
+          "line": 294,
           "source_group": "docs",
           "text": "python -m scripts.engineering.qa check-c901"
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-plan-bot.md",
-          "line": 253,
+          "line": 254,
           "source_group": "docs",
           "text": "python -m scripts.engineering.qa check-c901 --mode report"
         },
@@ -7936,7 +7937,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-audit-bot.md",
-          "line": 272,
+          "line": 284,
           "source_group": "docs",
           "text": "python -m scripts.engineering.qa check-naming-pkg --check"
         },
@@ -8270,9 +8271,25 @@
       ]
     },
     {
+      "path": "scripts/engineering/qa/close_github_issue.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/engineering/qa/config_surface_governance.py",
       "type": "py",
       "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/engineering/qa/create_github_issues.py",
+      "type": "py",
+      "status": "orphan",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -8413,7 +8430,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1477,
+          "line": 1485,
           "source_group": "docs",
           "text": "- `python scripts/engineering/qa/generate_architecture_dependency_map.py --update`"
         },
@@ -9485,13 +9502,13 @@
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-debug-bot.md",
-          "line": 282,
+          "line": 283,
           "source_group": "docs",
           "text": "python -m scripts.engineering.qa.vcr check-placement  # VCR cassette placement"
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-test-bot.md",
-          "line": 240,
+          "line": 241,
           "source_group": "docs",
           "text": "python -m scripts.engineering.qa.vcr check-placement  # VCR cassette placement"
         },
@@ -9548,13 +9565,13 @@
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-debug-bot.md",
-          "line": 283,
+          "line": 284,
           "source_group": "docs",
           "text": "python -m scripts.engineering.qa.vcr check-naming     # VCR naming conventions"
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-test-bot.md",
-          "line": 241,
+          "line": 242,
           "source_group": "docs",
           "text": "python -m scripts.engineering.qa.vcr check-naming     # VCR naming conventions"
         },
@@ -9874,13 +9891,13 @@
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-audit-bot.md",
-          "line": 277,
+          "line": 289,
           "source_group": "docs",
           "text": "python -m scripts.engineering.repo check-catalog"
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-plan-bot.md",
-          "line": 264,
+          "line": 265,
           "source_group": "docs",
           "text": "python -m scripts.engineering.repo check-catalog"
         },
@@ -9943,13 +9960,13 @@
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-audit-bot.md",
-          "line": 276,
+          "line": 288,
           "source_group": "docs",
           "text": "python -m scripts.engineering.repo check-inventory --check"
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-plan-bot.md",
-          "line": 263,
+          "line": 264,
           "source_group": "docs",
           "text": "python -m scripts.engineering.repo check-inventory --check"
         },
@@ -10270,49 +10287,49 @@
       "references": [
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 57,
+          "line": 61,
           "source_group": "docs",
           "text": "`python -m scripts.memory sync`"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 98,
+          "line": 102,
           "source_group": "docs",
           "text": "Для cleanup-режима используй `python -m scripts.memory sync --apply --prune-stale`:"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 102,
+          "line": 106,
           "source_group": "docs",
           "text": "`python -m scripts.memory sync --export /tmp/storage-memory.json --only-storage-layer`,"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 103,
+          "line": 107,
           "source_group": "docs",
           "text": "`python -m scripts.memory sync --export /tmp/runtime-memory.json --only-runtime-evidence-layer`,"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 104,
+          "line": 108,
           "source_group": "docs",
           "text": "`python -m scripts.memory sync --export /tmp/workflow-memory.json --only-workflow-graph`,"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 105,
+          "line": 109,
           "source_group": "docs",
           "text": "`python -m scripts.memory sync --export /tmp/docs-drift-memory.json --only-docs-drift`."
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 106,
+          "line": 110,
           "source_group": "docs",
           "text": "Для audit/report режима используй `python -m scripts.memory sync --report /tmp/neo4j-memory-audit.json`:"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 110,
+          "line": 114,
           "source_group": "docs",
           "text": "`python -m scripts.memory sync --report-fast --report /tmp/neo4j-memory-audit.json`:"
         }
@@ -10670,19 +10687,19 @@
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-debug-bot.md",
-          "line": 284,
+          "line": 285,
           "source_group": "docs",
           "text": "python -m scripts.ops.data check-delta                # Delta table integrity"
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-debug-bot.md",
-          "line": 285,
+          "line": 286,
           "source_group": "docs",
           "text": "python -m scripts.ops.data check-data-dir             # Data directory structure"
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-test-bot.md",
-          "line": 242,
+          "line": 243,
           "source_group": "docs",
           "text": "python -m scripts.ops.data check-delta                # Delta table integrity"
         }
@@ -11679,7 +11696,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/README.md",
-          "line": 55,
+          "line": 56,
           "source_group": "docs",
           "text": "- On Linux, `setup_grafana_screenshot_runtime.sh` is the canonical bootstrap"
         },
@@ -12261,7 +12278,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 70,
+      "reference_count": 69,
       "references": [
         {
           "path": ".github/workflows/chembl-baseline-smoke.yml",
@@ -12409,13 +12426,13 @@
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-config-bot.md",
-          "line": 67,
+          "line": 68,
           "source_group": "docs",
           "text": "| ADR-025 | Pipeline Config Unification (required fields)           | `python scripts/schema/config_gap_analysis.py -v`                                                        |"
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-test-bot.md",
-          "line": 226,
+          "line": 227,
           "source_group": "docs",
           "text": "| Config gap analysis | `scripts/schema/config_gap_analysis.py` |"
         },
