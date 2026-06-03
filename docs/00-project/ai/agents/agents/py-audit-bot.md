@@ -118,6 +118,9 @@ ______________________________________________________________________
 1. Severity по RFC 2119: `MUST` (P1/blocker) / `SHOULD` (P2) / `MAY` (P3).
 1. Каждый finding MUST иметь: location (файл:строки), rule reference, evidence, recommendation.
 1. **Минимум 2 верификации** на каждый finding (dual verification protocol).
+1. **ЗАПРЕЩЕНО УВЕЛИЧИВАТЬ ЛИМИТЫ ТЕХ. ДОЛГА.** Любая попытка увеличить
+   `scorecard budgets`, exemption limits, hotspot thresholds или family caps
+   MUST маркироваться как blocker.
 1. **НЕ** помечать как нарушение то, что описано в Valid-by-design.
 
 ______________________________________________________________________

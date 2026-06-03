@@ -40,6 +40,14 @@ fully BioETL-specific.
 - Use `.codex/skills/grafana-dashboard-extension/` when the task is to change
   dashboard JSON, panel queries, navigation, variables, or operator-facing UX.
 
+## Technical Debt Guardrail
+
+- **ЗАПРЕЩЕНО УВЕЛИЧИВАТЬ ЛИМИТЫ ТЕХ. ДОЛГА.**
+- This includes `scorecard budgets`, exemption limits, hotspot thresholds,
+  hotspot family caps, and any equivalent budget/threshold surface.
+- If a task hits a limit, reduce scope, decompose the change, or escalate; do
+  not raise the limit.
+
 ## Key Rule
 
 `py-*` names in `.codex/agents/` are **logical project profiles**, not native

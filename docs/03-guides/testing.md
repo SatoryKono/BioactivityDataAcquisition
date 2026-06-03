@@ -917,8 +917,48 @@ make test-deps-dev
 `governance-preflight` и `config-schema-preflight`, после чего стартуют
 `test-fast` / `test-matrix`, а в финале `coverage-verify` объединяет coverage
 shard-ы и отдельно догоняет только `serial`-тесты. Pytest/Hypothesis cache
-при этом кэшируется не по всему `tests/**/*.py`, а по scoped fingerprint для
-конкретного workflow или test-family, чтобы локальные изменения не
-инвалидировали весь test-cache в CI. Отдельный `duration-telemetry` job
-собирает JUnit telemetry из быстрых lanes и публикует artifact со списком
-самых медленных тестов.
+остаётся стабильным благодаря pinned зависимостям в `pyproject.toml` и
+детерминированному `PYTHONHASHSEED` в CI.
+
+## 8. Forbidden-Artifact Rules для Active Testing Docs
+
+Active testing documentation в `docs/03-guides/testing.md` и связанных ADR
+должна соблюдать следующие forbidden-artifact rules:
+
+### Запрещённые артефакты в active docs
+
+- **VCR cassettes**: Запрещено включать VCR cassette файлы (`.yaml`, `.json`) в
+  active testing docs. VCR файлы MUST храниться только в `tests/cassettes/`
+  и ссылаться из active docs как repository-path evidence.
+- **Test output artifacts**: Запрещено включать stdout/stderr output, coverage reports,
+  или тестовые логи в active testing docs. Такие артефакты MUST храниться в
+  `reports/` или временных директориях.
+- **Deprecated test commands**: Запрещено документировать устаревшие команды
+  запуска тестов (например, `scripts/dev/dev_setup.sh`). Канонические команды
+  MUST быть только из `Makefile` или поддерживаемых скриптов в
+  `scripts/engineering/`.
+- **Hardcoded test paths**: Запрещено хардкодить абсолютные пути к тестовым файлам
+  или директориям в active docs. Используйте относительные пути от корня репозитория.
+- **Environment-specific configs**: Запрещено включать environment-specific
+  конфигурации (например, `.env` файлы, local paths) в active testing docs.
+  Используйте placeholder comments или ссылки на governance docs.
+- **Test execution logs**: Запрещено включать полные логи выполнения тестов в active docs.
+  Краткие примеры команд допустимы, но full execution logs MUST быть в `reports/`.
+
+### Source of Truth Discipline
+
+- **Test governance configs**: Источником истины для testing governance являются
+  `configs/quality/test_matrix.yaml`, `configs/quality/test_governance_audit.yaml`,
+  и `configs/quality/integration_vcr_policy.yaml`.
+- **Testing ADR**: Источником истины для testing strategy является
+  [ADR-042](../02-architecture/decisions/ADR-042-testing-strategy-matrix.md).
+- **Active docs**: `docs/03-guides/testing.md` является canonical entrypoint для
+  contributors, но MUST NOT переопределять governance configs или ADR.
+
+### Archive Policy
+
+- **Deprecated test docs**: Устаревшие testing docs MUST быть перемещены в
+  `docs/99-archive/` с суффиксом `.archive.md`.
+- **Historical test artifacts**: Исторические тестовые артефакты могут храниться в
+  `reports/quality/` как evidence, но MUST NOT ссылаться из active docs как
+  current guidance.

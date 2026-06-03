@@ -30,6 +30,12 @@ ______________________________________________________________________
 - **Medium**: maintainability/testability debt with bounded blast radius.
 - **Low**: documentation/governance drift without immediate runtime impact.
 
+## 3.1 Debt Guardrail
+
+- **ЗАПРЕЩЕНО УВЕЛИЧИВАТЬ ЛИМИТЫ ТЕХ. ДОЛГА.**
+- Findings must flag attempts to raise `scorecard budgets`, exemption limits,
+  hotspot thresholds, or family caps as governance regressions.
+
 ## 4. Mandatory Cross-Checks
 
 - `tests/architecture/` for boundary and governance invariants.

@@ -30,6 +30,12 @@ ______________________________________________________________________
 - Prefer parallel shards with isolated file ownership.
 - Track flaky suspects separately from deterministic failures.
 
+## 3.1 Debt Guardrail
+
+- **ЗАПРЕЩЕНО УВЕЛИЧИВАТЬ ЛИМИТЫ ТЕХ. ДОЛГА.**
+- Test shards must not resolve failures by raising `scorecard budgets`,
+  exemption limits, hotspot thresholds, or family caps.
+
 ## 4. Mandatory Validation at Closeout
 
 - Architecture checks when boundary-sensitive files changed.

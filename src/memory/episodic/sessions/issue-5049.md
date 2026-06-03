@@ -1,22 +1,22 @@
 ---
 id: issue-5049
-title: 'Close issue #5049 runtime-builder/provider split hotspots'
+title: 'Close issue #5049 hotspot family reduction'
 task_id: issue-5049
-created_at: '2026-06-03T11:49:05Z'
+created_at: '2026-06-03T12:50:07Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - <add-source-ref>
 summary: Active task session context.
-query: 'Close issue #5049 runtime-builder/provider split hotspots'
+query: issue 5049 composition hotspot budget files_ge_250_loc
 ---
 
 # Session note
 
 ## Task
 
-- Title: Close issue #5049 runtime-builder/provider split hotspots
-- Retrieval query: Close issue #5049 runtime-builder/provider split hotspots
+- Title: Close issue #5049 hotspot family reduction
+- Retrieval query: issue 5049 composition hotspot budget files_ge_250_loc
 
 ## Retrieved context
 

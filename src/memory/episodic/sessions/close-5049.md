@@ -1,22 +1,22 @@
 ---
 id: close-5049
-title: Close issue 5049 composition hotspot split
+title: 'Close issue #5049'
 task_id: close-5049
-created_at: '2026-06-03T10:46:21Z'
+created_at: '2026-06-03T13:04:07Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - <add-source-ref>
 summary: Active task session context.
-query: composition hotspot file size
+query: 'Close issue #5049'
 ---
 
 # Session note
 
 ## Task
 
-- Title: Close issue 5049 composition hotspot split
-- Retrieval query: composition hotspot file size
+- Title: Close issue #5049
+- Retrieval query: Close issue #5049
 
 ## Retrieved context
 

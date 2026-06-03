@@ -208,7 +208,6 @@ tracked_suite_inventory:
     - tests/integration/config/test_chembl_policy_surface_parity.py
     - tests/integration/config/test_chembl_registry_fixture_contract_parity.py
     - tests/integration/config/test_contract_registry_active_surface_coverage.py
-    - tests/integration/config/test_deprecated_gold_contract_registry_inventory.py
     - tests/integration/config/test_dq_config_loading.py
     - tests/integration/config/test_generic_field_ownership.py
     - tests/integration/config/test_gold_nullable_numeric_compatibility.py

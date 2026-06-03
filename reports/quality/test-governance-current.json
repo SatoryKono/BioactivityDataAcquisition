@@ -200,13 +200,6 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "122",
-        "path": "tests/unit/application/services/test_pipeline_debug_service.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_on_snapshot_noop"
-      },
-      {
-        "category": "intentional_no_exception_contract",
         "line": "6",
         "path": "tests/unit/application/services/control_plane/ledger/test_service.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
@@ -3507,7 +3500,7 @@
       "architecture_helper_guard": 14,
       "benchmark_or_performance": 0,
       "helper_asserted": 0,
-      "intentional_no_exception_contract": 486,
+      "intentional_no_exception_contract": 485,
       "weak_no_value": 0
     },
     "assertless_examples": [
@@ -3537,7 +3530,7 @@
       "tests/unit/application/core/test_otel_spans.py:300",
       "tests/unit/application/core/test_otel_spans.py:548"
     ],
-    "assertless_total_candidates": 500,
+    "assertless_total_candidates": 499,
     "compatibility_examples": [
       "tests/architecture/test_application_composite_compat_surface_usage.py",
       "tests/architecture/test_application_core_lifecycle_shim_usage.py",
@@ -3591,20 +3584,15 @@
       "tests/architecture/test_root_script_compatibility_surfaces.py",
       "tests/architecture/test_run_execution_context_compat_shim_usage.py",
       "tests/architecture/test_silver_filter_compatibility_surface.py",
-      "tests/architecture/test_silver_writer_compatibility_retirement.py",
-      "tests/integration/config/test_deprecated_gold_contract_registry_inventory.py",
       "tests/integration/config/test_gold_nullable_numeric_compatibility.py",
       "tests/unit/composition/factories/pipeline/test_runner_request_compat.py",
-      "tests/unit/infrastructure/test_pandera_compat.py",
       "tests/unit/infrastructure/adapters/crossref/test_compatibility.py",
       "tests/unit/infrastructure/adapters/pubchem/test_fetch_strategies_compat.py",
       "tests/unit/infrastructure/adapters/pubmed/test_models_compat.py",
-      "tests/unit/infrastructure/config/test_pipeline_config_legacy_normalization.py",
-      "tests/unit/infrastructure/config/test_source_config_legacy_normalization.py",
       "tests/unit/interfaces/cli/commands/test_runtime_compat_aliases.py",
       "tests/unit/scripts/ops/test_memory_legacy_aliases.py"
     ],
-    "compatibility_test_files": 37,
+    "compatibility_test_files": 32,
     "date_today_call_sites": 0,
     "duplicate_test_name_inventory": [],
     "duplicate_test_name_inventory_summary": {
@@ -3621,8 +3609,8 @@
     "refined_assertless_tests": 0,
     "root": ".",
     "top_duplicate_test_names": [],
-    "total_test_files": 1669,
-    "total_test_functions": 19965,
+    "total_test_files": 1666,
+    "total_test_functions": 19963,
     "uuid4_call_sites": 0
   }
 }

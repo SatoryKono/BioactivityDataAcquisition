@@ -89,6 +89,9 @@ ______________________________________________________________________
 1. Silver sink MUST содержать `sort_by` (ADR-014).
 1. Composite config MUST содержать `seed`, `enrichers`, `merge` (ADR-026).
 1. При создании нового entity — генерировать unified entity config в `configs/entities/{provider}/{entity}.yaml`; provider config обновлять только если нужен provider-level override.
+1. **ЗАПРЕЩЕНО УВЕЛИЧИВАТЬ ЛИМИТЫ ТЕХ. ДОЛГА.** Этот профиль MUST NOT
+   увеличивать `scorecard budgets`, exemption limits, hotspot thresholds или
+   family caps.
 
 ______________________________________________________________________
 

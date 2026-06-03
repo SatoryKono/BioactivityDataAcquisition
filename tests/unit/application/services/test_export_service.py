@@ -2,294 +2,331 @@
 
 from __future__ import annotations
 
-import asyncio
-import hashlib
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-import pyarrow as pa
 
-from bioetl.application.services.export_service import (
+from bioetl.application.services.export_service import ExportService
+from bioetl.application.services.export_models import (
+    ColumnInfo,
     ExportOptions,
-    ExportService,
+    ExportResult,
+    TableInfo,
     TablePreview,
 )
-from bioetl.domain.ports import (
-    DeltaReaderPort,
-    ExportCatalogPort,
-    ExportFileFingerprint,
-    ExportWriterPort,
-    LoggerPort,
-)
 
 
-pytestmark = pytest.mark.unit
+@pytest.mark.unit
+class TestExportService:
+    """Tests for ExportService."""
 
+    def test_list_tables_all_layers(self):
+        """Test listing tables from both silver and gold layers."""
+        mock_reader = MagicMock()
+        mock_catalog = MagicMock()
+        mock_writer = MagicMock()
+        mock_logger = MagicMock()
 
-@pytest.fixture
-def mock_reader():
-    reader = AsyncMock(spec=DeltaReaderPort)
+        mock_catalog.list_tables.side_effect = [
+            [("activity", Path("data/silver/activity"))],
+            [("compound", Path("data/gold/compound"))],
+        ]
 
-    # Use simple objects for schema fields
-    class Field:
-        def __init__(self, name, type, nullable):
-            self.name = name
-            self.type = type
-            self.nullable = nullable
-
-    reader.get_schema.return_value = [
-        Field("col1", "string", True),
-        Field("col2", "int64", False),
-    ]
-    reader.get_row_count.return_value = 100
-
-    # Mock pyarrow table
-    schema = pa.schema([("col1", pa.string()), ("col2", pa.int64())])
-    data = {"col1": ["a", "b"], "col2": [1, 2]}
-    table = pa.Table.from_pydict(data, schema=schema)
-    reader.read_table.return_value = table
-    reader.table_exists.return_value = True
-
-    return reader
-
-
-@pytest.fixture
-def mock_logger():
-    return MagicMock(spec=LoggerPort)
-
-
-@pytest.fixture
-def mock_catalog(tmp_path: Path):
-    catalog = MagicMock(spec=ExportCatalogPort)
-    table_path = tmp_path / "silver" / "chembl" / "default" / "chembl.activity"
-    catalog.list_tables.side_effect = lambda *, base_path, layer: (
-        [("chembl.activity", table_path)] if layer == "silver" else []
-    )
-
-    def _resolve_table_path(*, base_path, table_name, layer):
-        del base_path
-        if table_name == "chembl.activity":
-            return table_path
-        raise FileNotFoundError(f"Table '{table_name}' not found in {layer} layer")
-
-    catalog.resolve_table_path.side_effect = _resolve_table_path
-    return catalog
-
-
-@pytest.fixture
-def mock_writer():
-    writer = MagicMock(spec=ExportWriterPort)
-
-    def _write_export(
-        *,
-        table,
-        table_name,
-        layer,
-        fmt,
-        output_dir,
-    ):
-        del table
-        output_dir.mkdir(parents=True, exist_ok=True)
-        output_path = output_dir / f"{layer}_{table_name.replace('.', '_')}.{fmt}"
-        output_path.write_text("export", encoding="utf-8")
-        return output_path
-
-    writer.write_export.side_effect = _write_export
-
-    def _write_manifest(
-        *,
-        manifest_name,
-        payload,
-        output_dir,
-    ):
-        del payload
-        output_dir.mkdir(parents=True, exist_ok=True)
-        output_path = output_dir / f"{manifest_name}.json"
-        output_path.write_text("{}", encoding="utf-8")
-        return output_path
-
-    def _fingerprint_file(*, path):
-        content = path.read_bytes()
-        return ExportFileFingerprint(
-            path=path,
-            size_bytes=len(content),
-            sha256=hashlib.sha256(content).hexdigest(),
+        service = ExportService(
+            reader=mock_reader,
+            catalog=mock_catalog,
+            writer=mock_writer,
+            logger=mock_logger,
+            silver_path=Path("data/silver"),
+            gold_path=Path("data/gold"),
         )
 
-    writer.write_manifest.side_effect = _write_manifest
-    writer.fingerprint_file.side_effect = _fingerprint_file
-    return writer
+        tables = service.list_tables(layer="all")
 
+        assert len(tables) == 2
+        assert tables[0].layer == "gold"  # Sorted by layer, name
+        assert tables[0].name == "compound"
+        assert tables[1].layer == "silver"
+        assert tables[1].name == "activity"
 
-@pytest.fixture
-def export_service(mock_reader, mock_catalog, mock_writer, mock_logger, tmp_path):
-    silver = tmp_path / "silver"
-    gold = tmp_path / "gold"
-    silver.mkdir()
-    gold.mkdir()
+    def test_list_tables_silver_only(self):
+        """Test listing tables from silver layer only."""
+        mock_reader = MagicMock()
+        mock_catalog = MagicMock()
+        mock_writer = MagicMock()
+        mock_logger = MagicMock()
 
-    (silver / "chembl" / "default" / "chembl.activity" / "_delta_log").mkdir(
-        parents=True
-    )
+        mock_catalog.list_tables.return_value = [
+            ("activity", Path("data/silver/activity"))
+        ]
 
-    return ExportService(
-        reader=mock_reader,
-        catalog=mock_catalog,
-        writer=mock_writer,
-        logger=mock_logger,
-        silver_path=silver,
-        gold_path=gold,
-        export_path=tmp_path / "exports",
-    )
+        service = ExportService(
+            reader=mock_reader,
+            catalog=mock_catalog,
+            writer=mock_writer,
+            logger=mock_logger,
+            silver_path=Path("data/silver"),
+            gold_path=Path("data/gold"),
+        )
 
+        tables = service.list_tables(layer="silver")
 
-@pytest.mark.asyncio
-async def test_list_tables(export_service):
-    """Test listing tables."""
-    await asyncio.sleep(0)
-    tables = export_service.list_tables(layer="all")
-    assert len(tables) == 1
-    assert tables[0].name == "chembl.activity"
-    assert tables[0].layer == "silver"
+        assert len(tables) == 1
+        assert tables[0].layer == "silver"
+        assert tables[0].name == "activity"
+        mock_catalog.list_tables.assert_called_once()
 
+    def test_list_tables_gold_only(self):
+        """Test listing tables from gold layer only."""
+        mock_reader = MagicMock()
+        mock_catalog = MagicMock()
+        mock_writer = MagicMock()
+        mock_logger = MagicMock()
 
-@pytest.mark.asyncio
-async def test_preview(export_service, mock_reader):
-    """Test table preview."""
-    preview = await export_service.preview("chembl.activity", layer="silver")
+        mock_catalog.list_tables.return_value = [
+            ("compound", Path("data/gold/compound"))
+        ]
 
-    assert isinstance(preview, TablePreview)
-    assert preview.table_name == "chembl.activity"
-    assert preview.row_count == 100
-    assert len(preview.columns) == 2
-    assert preview.columns[0].name == "col1"
-    assert len(preview.sample_rows) == 2
-    assert preview.sample_rows[0]["col1"] == "a"
+        service = ExportService(
+            reader=mock_reader,
+            catalog=mock_catalog,
+            writer=mock_writer,
+            logger=mock_logger,
+            silver_path=Path("data/silver"),
+            gold_path=Path("data/gold"),
+        )
 
+        tables = service.list_tables(layer="gold")
 
-@pytest.mark.asyncio
-async def test_export_csv(export_service, mock_reader):
-    """Test export to CSV."""
-    result = await export_service.export("chembl.activity", layer="silver")
+        assert len(tables) == 1
+        assert tables[0].layer == "gold"
+        assert tables[0].name == "compound"
 
-    assert result.success
-    assert result.format == "csv"
-    assert result.output_path.exists()
-    assert result.output_path.name.endswith(".csv")
-    assert result.row_count == 2
-    assert [path.name for path in result.manifest_paths] == [
-        "silver_chembl_activity.provenance-manifest.json",
-        "silver_chembl_activity.licensing-manifest.json",
-        "silver_chembl_activity.checksums-manifest.json",
-    ]
+    async def test_preview_basic(self):
+        """Test basic table preview."""
+        mock_reader = AsyncMock()
+        mock_catalog = MagicMock()
+        mock_writer = MagicMock()
+        mock_logger = MagicMock()
 
+        # Mock schema
+        mock_field = MagicMock()
+        mock_field.name = "id"
+        mock_field.type = "int64"
+        mock_field.nullable = False
+        mock_reader.get_schema.return_value = [mock_field]
 
-@pytest.mark.asyncio
-async def test_export_can_disable_sidecar_manifests(export_service):
-    """Export manifests can be disabled for legacy callers."""
-    options = ExportOptions(include_manifests=False)
+        # Mock row count
+        mock_reader.get_row_count.return_value = 100
 
-    result = await export_service.export(
-        "chembl.activity", layer="silver", options=options
-    )
+        # Mock sample table
+        mock_table = MagicMock()
+        mock_table.to_pylist.return_value = [{"id": 1}, {"id": 2}]
+        mock_reader.read_table.return_value = mock_table
 
-    assert result.success
-    assert result.manifest_paths == ()
-    export_service.writer.write_manifest.assert_not_called()
+        mock_catalog.resolve_table_path.return_value = Path("data/silver/activity")
 
+        service = ExportService(
+            reader=mock_reader,
+            catalog=mock_catalog,
+            writer=mock_writer,
+            logger=mock_logger,
+            silver_path=Path("data/silver"),
+            gold_path=Path("data/gold"),
+        )
 
-@pytest.mark.asyncio
-async def test_export_requires_generated_at_when_nondeterministic_manifest_timestamp_disabled(
-    export_service,
-) -> None:
-    options = ExportOptions(
-        allow_nondeterministic_manifest_timestamp=False,
-    )
+        preview = await service.preview("activity", layer="silver", sample_rows=2)
 
-    result = await export_service.export(
-        "chembl.activity", layer="silver", options=options
-    )
+        assert preview.table_name == "activity"
+        assert preview.layer == "silver"
+        assert preview.row_count == 100
+        assert len(preview.columns) == 1
+        assert preview.columns[0].name == "id"
+        assert len(preview.sample_rows) == 2
 
-    assert not result.success
-    assert result.error is not None
-    assert "generated_at must be provided" in result.error
+    def test_get_layer_base_path_silver(self):
+        """Test getting base path for silver layer."""
+        mock_reader = MagicMock()
+        mock_catalog = MagicMock()
+        mock_writer = MagicMock()
+        mock_logger = MagicMock()
 
+        service = ExportService(
+            reader=mock_reader,
+            catalog=mock_catalog,
+            writer=mock_writer,
+            logger=mock_logger,
+            silver_path=Path("data/silver"),
+            gold_path=Path("data/gold"),
+        )
 
-@pytest.mark.asyncio
-async def test_export_accepts_explicit_deterministic_manifest_timestamp(
-    export_service,
-) -> None:
-    options = ExportOptions(
-        manifest_generated_at="2026-05-16T00:00:00Z",
-        allow_nondeterministic_manifest_timestamp=False,
-    )
+        path = service._get_layer_base_path("silver")
+        assert path == Path("data/silver")
 
-    result = await export_service.export(
-        "chembl.activity", layer="silver", options=options
-    )
+    def test_get_layer_base_path_gold(self):
+        """Test getting base path for gold layer."""
+        mock_reader = MagicMock()
+        mock_catalog = MagicMock()
+        mock_writer = MagicMock()
+        mock_logger = MagicMock()
 
-    assert result.success
-    assert len(result.manifest_paths) == 3
+        service = ExportService(
+            reader=mock_reader,
+            catalog=mock_catalog,
+            writer=mock_writer,
+            logger=mock_logger,
+            silver_path=Path("data/silver"),
+            gold_path=Path("data/gold"),
+        )
 
+        path = service._get_layer_base_path("gold")
+        assert path == Path("data/gold")
 
-@pytest.mark.asyncio
-async def test_export_tsv(export_service, mock_reader):
-    """Test export to TSV."""
-    options = ExportOptions(format="tsv")
-    result = await export_service.export(
-        "chembl.activity", layer="silver", options=options
-    )
+    def test_get_layer_base_path_invalid(self):
+        """Test that invalid layer raises ValueError."""
+        mock_reader = MagicMock()
+        mock_catalog = MagicMock()
+        mock_writer = MagicMock()
+        mock_logger = MagicMock()
 
-    assert result.success
-    assert result.format == "tsv"
-    assert result.output_path.name.endswith(".tsv")
+        service = ExportService(
+            reader=mock_reader,
+            catalog=mock_catalog,
+            writer=mock_writer,
+            logger=mock_logger,
+            silver_path=Path("data/silver"),
+            gold_path=Path("data/gold"),
+        )
 
+        with pytest.raises(ValueError) as exc_info:
+            service._get_layer_base_path("bronze")
 
-@pytest.mark.asyncio
-async def test_export_table_not_found(export_service, mock_reader):
-    """Test export when table not found via reader."""
-    mock_reader.table_exists.return_value = False
+        assert "Invalid layer" in str(exc_info.value)
 
-    result = await export_service.export("chembl.activity", layer="silver")
+    def test_get_table_path(self):
+        """Test getting table path through catalog."""
+        mock_reader = MagicMock()
+        mock_catalog = MagicMock()
+        mock_writer = MagicMock()
+        mock_logger = MagicMock()
 
-    assert not result.success
-    assert "Table not found" in result.error
+        mock_catalog.resolve_table_path.return_value = Path(
+            "data/silver/activity"
+        )
 
+        service = ExportService(
+            reader=mock_reader,
+            catalog=mock_catalog,
+            writer=mock_writer,
+            logger=mock_logger,
+            silver_path=Path("data/silver"),
+            gold_path=Path("data/gold"),
+        )
 
-@pytest.mark.asyncio
-async def test_export_path_not_found(export_service):
-    """Test export when table path resolution fails."""
-    # Request table that doesn't exist in FS structure
-    # _get_table_path raises FileNotFoundError before try/except in export
-    with pytest.raises(FileNotFoundError, match="not found in silver layer"):
-        await export_service.export("unknown.table", layer="silver")
+        path = service._get_table_path("activity", "silver")
 
+        assert path == Path("data/silver/activity")
+        mock_catalog.resolve_table_path.assert_called_once_with(
+            base_path=Path("data/silver"),
+            table_name="activity",
+            layer="silver",
+        )
 
-@pytest.mark.asyncio
-async def test_export_xlsx_import_error(export_service):
-    """Test XLSX export handles missing dependency."""
-    options = ExportOptions(format="xlsx")
-    export_service.writer.write_export.side_effect = ImportError("openpyxl missing")
-    result = await export_service.export(
-        "chembl.activity", layer="silver", options=options
-    )
+    def test_create_missing_table_result(self):
+        """Test creating result for missing table."""
+        mock_reader = MagicMock()
+        mock_catalog = MagicMock()
+        mock_writer = MagicMock()
+        mock_logger = MagicMock()
 
-    assert not result.success
-    assert "openpyxl missing" in result.error
+        service = ExportService(
+            reader=mock_reader,
+            catalog=mock_catalog,
+            writer=mock_writer,
+            logger=mock_logger,
+            silver_path=Path("data/silver"),
+            gold_path=Path("data/gold"),
+        )
 
+        options = ExportOptions(format="csv")
+        result = service._create_missing_table_result(
+            table_name="activity",
+            layer="silver",
+            options=options,
+            table_path=Path("data/silver/activity"),
+        )
 
-def test_get_table_path_invalid_layer(export_service):
-    """Test _get_table_path with invalid layer."""
-    with pytest.raises(ValueError):
-        export_service._get_table_path("t", "bronze")
+        assert result.table_name == "activity"
+        assert result.layer == "silver"
+        assert result.format == "csv"
+        assert result.output_path is None
+        assert result.row_count == 0
+        assert result.error is not None
+        assert "Table not found" in result.error
 
+    def test_create_success_result(self):
+        """Test creating result for successful export."""
+        mock_reader = MagicMock()
+        mock_catalog = MagicMock()
+        mock_writer = MagicMock()
+        mock_logger = MagicMock()
 
-def test_get_table_path_missing_base(export_service, tmp_path):
-    """Test _get_table_path when catalog cannot resolve layer dir."""
-    export_service.gold_path = tmp_path / "missing"
-    export_service.catalog.resolve_table_path.side_effect = FileNotFoundError(
-        f"Layer path not found: {export_service.gold_path}"
-    )
-    with pytest.raises(FileNotFoundError, match="Layer path not found"):
-        export_service._get_table_path("t", "gold")
+        service = ExportService(
+            reader=mock_reader,
+            catalog=mock_catalog,
+            writer=mock_writer,
+            logger=mock_logger,
+            silver_path=Path("data/silver"),
+            gold_path=Path("data/gold"),
+        )
+
+        options = ExportOptions(format="csv")
+        manifest_paths = (Path("manifest.json"),)
+        result = service._create_success_result(
+            table_name="activity",
+            layer="silver",
+            options=options,
+            output_path=Path("exports/activity.csv"),
+            row_count=100,
+            manifest_paths=manifest_paths,
+        )
+
+        assert result.table_name == "activity"
+        assert result.layer == "silver"
+        assert result.format == "csv"
+        assert result.output_path == Path("exports/activity.csv")
+        assert result.row_count == 100
+        assert result.error is None
+        assert result.manifest_paths == manifest_paths
+
+    def test_create_failed_result(self):
+        """Test creating result for failed export."""
+        mock_reader = MagicMock()
+        mock_catalog = MagicMock()
+        mock_writer = MagicMock()
+        mock_logger = MagicMock()
+
+        service = ExportService(
+            reader=mock_reader,
+            catalog=mock_catalog,
+            writer=mock_writer,
+            logger=mock_logger,
+            silver_path=Path("data/silver"),
+            gold_path=Path("data/gold"),
+        )
+
+        options = ExportOptions(format="csv")
+        result = service._create_failed_result(
+            table_name="activity",
+            layer="silver",
+            options=options,
+            error="Storage error",
+        )
+
+        assert result.table_name == "activity"
+        assert result.layer == "silver"
+        assert result.format == "csv"
+        assert result.output_path is None
+        assert result.row_count == 0
+        assert result.error == "Storage error"

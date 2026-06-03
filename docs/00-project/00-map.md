@@ -68,6 +68,7 @@ ______________________________________________________________________
 | Check DQ contracts                 | [dq-contracts.md](../04-reference/contracts/dq-contracts.md)                           |
 | Browse ADR registry                | [adr-registry.md](../02-architecture/adr-registry.md)                                  |
 | Need historical context            | Repository path `docs/99-archive/README.md` *(non-canonical)*                          |
+| Browse shipped dashboards           | [dashboards/README.md](../03-guides/dashboards/README.md) (coverage matrix)            |
 
 ______________________________________________________________________
 

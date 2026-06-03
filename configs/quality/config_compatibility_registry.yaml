@@ -30,8 +30,9 @@ policy:
 
 # Windows path aliases kept in comments for raw-text registry guards that run on
 # Windows and compare `Path.relative_to()` output verbatim:
-# tests\unit\infrastructure\config\test_pipeline_config_legacy_normalization.py
-# tests\unit\infrastructure\config\test_source_config_legacy_normalization.py
+# tests\unit\infrastructure\config\test_source_normalizers.py
+# tests\architecture\test_pipeline_source_override_policy.py
+# tests\unit\infrastructure\test_config_dynamic.py
 
 accepted_shapes:
   - id: source.timeout_timeout_sec_alias
@@ -98,7 +99,7 @@ retired_rejected_shapes:
       - configs/_schema/source.json
     test_files:
       - tests/architecture/test_config_schema_legacy_status.py
-      - tests/unit/infrastructure/config/test_source_config_legacy_normalization.py
+      - tests/unit/infrastructure/config/test_source_normalizers.py
       - tests/unit/infrastructure/config/source_normalizers/test_source.py
     risk: low
 
@@ -129,7 +130,7 @@ retired_rejected_shapes:
     source_files:
       - src/bioetl/infrastructure/config/pipeline_payload_normalization.py
     test_files:
-      - tests/unit/infrastructure/config/test_pipeline_config_legacy_normalization.py
+      - tests/architecture/test_pipeline_source_override_policy.py
       - tests/unit/infrastructure/test_config_dynamic.py
     risk: low
 

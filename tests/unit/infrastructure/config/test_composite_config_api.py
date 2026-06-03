@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
+from types import SimpleNamespace
 
 import pytest
 import yaml
@@ -90,6 +91,142 @@ def test_load_composite_config_defaults_to_repo_root_when_cwd_differs(
     config = load_composite_config("activity")
 
     assert config.name == "composite_activity"
+
+
+@pytest.mark.unit
+def test_load_composite_config_missing_file_raises_file_not_found(
+    tmp_path: Path,
+) -> None:
+    config_dir = tmp_path / "configs" / "composites"
+
+    with pytest.raises(FileNotFoundError, match="Composite config not found"):
+        load_composite_config("publication", config_dir=config_dir)
+
+
+@pytest.mark.unit
+def test_load_composite_config_rejects_non_mapping_payload(tmp_path: Path) -> None:
+    config_path = tmp_path / "configs" / "composites" / "publication.yaml"
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text("- one\n- two\n", encoding="utf-8")
+
+    with pytest.raises(
+        ValueError,
+        match="expected top-level mapping",
+    ):
+        load_composite_config("publication", config_dir=config_path.parent)
+
+
+@pytest.mark.unit
+def test_load_composite_config_rejects_empty_yaml_payload(tmp_path: Path) -> None:
+    config_path = tmp_path / "configs" / "composites" / "publication.yaml"
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text("", encoding="utf-8")
+
+    with pytest.raises(
+        ValueError,
+        match="expected top-level mapping",
+    ):
+        load_composite_config("publication", config_dir=config_path.parent)
+
+
+@pytest.mark.unit
+def test_load_composite_config_rejects_missing_composite_version(tmp_path: Path) -> None:
+    config_dir = tmp_path / "configs" / "composites"
+    payload = _build_composite_payload("composite_publication")
+    del payload["composite"]["version"]
+    _write_yaml(config_dir / "publication.yaml", payload)
+
+    with pytest.raises(ValueError, match="Invalid composite config 'publication'"):
+        load_composite_config("publication", config_dir=config_dir)
+
+
+@pytest.mark.unit
+def test_load_composite_config_propagates_missing_external_dq_override_path(
+    tmp_path: Path,
+) -> None:
+    config_dir = tmp_path / "configs" / "composites"
+    payload = _build_composite_payload("composite_publication")
+    payload["composite"]["dq_overrides"] = {
+        "dq_config_file": "../quality/entities/composite/missing.yaml",
+    }
+    _write_yaml(config_dir / "publication.yaml", payload)
+
+    with pytest.raises(
+        FileNotFoundError,
+        match="Composite DQ config not found",
+    ):
+        load_composite_config("publication", config_dir=config_dir)
+
+
+@pytest.mark.unit
+def test_load_composite_config_propagates_invalid_external_dq_payload_type(
+    tmp_path: Path,
+) -> None:
+    config_dir = tmp_path / "configs" / "composites"
+    quality_path = (
+        tmp_path
+        / "configs"
+        / "quality"
+        / "entities"
+        / "composite"
+        / "publication.yaml"
+    )
+    quality_path.parent.mkdir(parents=True, exist_ok=True)
+    quality_path.write_text("[1]\n", encoding="utf-8")
+
+    payload = _build_composite_payload("composite_publication")
+    payload["composite"]["dq_overrides"] = {
+        "dq_config_file": "../quality/entities/composite/publication.yaml"
+    }
+    _write_yaml(config_dir / "publication.yaml", payload)
+
+    with pytest.raises(
+        ValueError,
+        match="Composite DQ config must be a mapping",
+    ):
+        load_composite_config("publication", config_dir=config_dir)
+
+
+@pytest.mark.unit
+def test_load_composite_config_uses_custom_validator_and_preserves_payload_mutation(
+    tmp_path: Path,
+) -> None:
+    config_dir = tmp_path / "configs" / "composites"
+    payload = _build_composite_payload("composite_publication")
+    payload["composite"]["dq_overrides"] = {
+        "dq_config_file": "../quality/entities/composite/publication.yaml"
+    }
+    _write_yaml(config_dir / "publication.yaml", payload)
+
+    quality_path = (
+        tmp_path
+        / "configs"
+        / "quality"
+        / "entities"
+        / "composite"
+        / "publication.yaml"
+    )
+    quality_path.parent.mkdir(parents=True, exist_ok=True)
+    _write_yaml(quality_path, {"dq_overrides": {"hard_fail_threshold": 0.25}})
+
+    seen_payload: dict[str, Any] | None = None
+
+    def _validator(validated: dict[str, Any]) -> SimpleNamespace:
+        nonlocal seen_payload
+        seen_payload = validated
+        return SimpleNamespace(to_domain=lambda: "ok")
+
+    result = load_composite_config(
+        "publication",
+        config_dir=config_dir,
+        validate_payload=_validator,
+    )
+
+    assert result == "ok"
+    assert seen_payload is not None
+    composite_dq = seen_payload["composite"]["dq_overrides"]
+    assert isinstance(composite_dq, dict)
+    assert composite_dq["hard_fail_threshold"] == 0.25
 
 
 @pytest.mark.unit
