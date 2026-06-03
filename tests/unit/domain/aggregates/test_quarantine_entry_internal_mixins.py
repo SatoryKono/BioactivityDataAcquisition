@@ -28,6 +28,7 @@ from bioetl.domain.aggregates._quarantine_value_objects import (
     ResolutionInfo,
     _validate_quarantine_required_fields,
 )
+from bioetl.domain.aggregates.events import QuarantineEntryResolved
 from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.types import BatchID, ContentHash, RunID
 from tests.helpers.deterministic_ids import deterministic_uuid_value
@@ -374,6 +375,28 @@ class TestQuarantineEntryTransitionsMixin:
         with pytest.raises(InvalidStateError, match="Cannot mark_ignored"):
             quarantine_entry.mark_ignored(reason="test", resolved_at=_ts(20))
 
+    def test_mark_ignored_emits_quarantine_entry_resolved_event(
+        self, quarantine_entry, run_id: RunID
+    ):
+        """mark_ignored should emit QuarantineEntryResolved event."""
+        quarantine_entry.collect_events()  # clear creation event
+        quarantine_entry.start_review()
+
+        quarantine_entry.mark_ignored(
+            reason="Known bad data source",
+            resolved_by="qa-bot",
+            resolved_at=_ts(10),
+        )
+
+        events = quarantine_entry.collect_events()
+        assert len(events) == 1
+        assert isinstance(events[0], QuarantineEntryResolved)
+        assert events[0].run_id == run_id
+        assert events[0].entry_id == quarantine_entry.entry_id
+        assert events[0].resolution == "ignored"
+        assert events[0].resolved_by == "qa-bot"
+        assert events[0].occurred_at == _ts(10)
+
     def test_mark_reprocessed_transitions_to_reprocessed(self, quarantine_entry):
         """mark_reprocessed should transition to REPROCESSED status."""
         quarantine_entry.start_review()
@@ -401,6 +424,28 @@ class TestQuarantineEntryTransitionsMixin:
                 resolved_at=_ts(10),
             )
 
+    def test_mark_reprocessed_emits_quarantine_entry_resolved_event(
+        self, quarantine_entry, run_id: RunID
+    ):
+        """mark_reprocessed should emit QuarantineEntryResolved event."""
+        quarantine_entry.collect_events()  # clear creation event
+        quarantine_entry.start_review()
+
+        quarantine_entry.mark_reprocessed(
+            new_record_id="silver:999",
+            resolved_by="reprocessor",
+            resolved_at=_ts(12),
+        )
+
+        events = quarantine_entry.collect_events()
+        assert len(events) == 1
+        assert isinstance(events[0], QuarantineEntryResolved)
+        assert events[0].run_id == run_id
+        assert events[0].entry_id == quarantine_entry.entry_id
+        assert events[0].resolution == "reprocessed"
+        assert events[0].resolved_by == "reprocessor"
+        assert events[0].occurred_at == _ts(12)
+
     def test_mark_expired_transitions_to_expired(self, quarantine_entry):
         """mark_expired should transition to EXPIRED status."""
         quarantine_entry.mark_expired(expired_at=_ts(100))
@@ -409,6 +454,23 @@ class TestQuarantineEntryTransitionsMixin:
         assert quarantine_entry.resolution_info is not None
         assert quarantine_entry.resolution_info.resolution_type == "expired"
         assert quarantine_entry.resolution_info.reason == "Retention period exceeded"
+
+    def test_mark_ignored_invalid_from_expired(self, quarantine_entry):
+        """mark_ignored should fail from EXPIRED status."""
+        quarantine_entry.mark_expired(expired_at=_ts(100))
+
+        with pytest.raises(InvalidStateError, match="Cannot mark_ignored"):
+            quarantine_entry.mark_ignored(reason="already expired", resolved_at=_ts(101))
+
+    def test_mark_reprocessed_invalid_from_expired(self, quarantine_entry):
+        """mark_reprocessed should fail from EXPIRED status."""
+        quarantine_entry.mark_expired(expired_at=_ts(100))
+
+        with pytest.raises(InvalidStateError, match="Cannot mark_reprocessed"):
+            quarantine_entry.mark_reprocessed(
+                new_record_id="silver:999",
+                resolved_at=_ts(101),
+            )
 
     def test_mark_expired_validates_non_terminal_status(self, quarantine_entry):
         """mark_expired should fail for terminal statuses."""

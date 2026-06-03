@@ -317,6 +317,41 @@ class TestPipelineRunLifecycleMixin:
         assert started_run.status == PipelineRunState.COMPLETED
         assert started_run.ended_at == _ts(10)
 
+    def test_complete_with_missing_started_at_uses_zero_duration(self, started_run: PipelineRun):
+        """complete should emit duration_seconds=0.0 when _started_at is None."""
+        started_run._started_at = None
+        started_run.record_stage_success(
+            "bronze",
+            records_processed=25,
+            started_at=_ts(5),
+            completed_at=_ts(15),
+        )
+
+        started_run.complete(_ts(20))
+        events = started_run.collect_events()
+
+        assert started_run.status == PipelineRunState.COMPLETED
+        assert started_run.duration_seconds is None
+        assert len(events) == 1
+        assert events[0].duration_seconds == 0.0
+
+    def test_complete_blocks_when_any_stage_failed_but_status_still_running(self, pipeline_run: PipelineRun):
+        """complete should reject terminal transition if failed stages are present."""
+        pipeline_run.start(_ts(0))
+        pipeline_run._stages.append(
+            StageResult(
+                stage="bronze",
+                status=StageStatus.FAILED,
+                started_at=_ts(1),
+                completed_at=_ts(2),
+                error="manual failed stage",
+                error_type="Manual",
+            )
+        )
+
+        with pytest.raises(InvalidStateError, match="Cannot complete"):
+            pipeline_run.complete(_ts(10))
+
     def test_complete_validates_running_status(self, pipeline_run: PipelineRun):
         """complete should only work from RUNNING status."""
         with pytest.raises(InvalidStateError, match="Cannot complete"):
