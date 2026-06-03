@@ -17,14 +17,39 @@ pytestmark = pytest.mark.architecture
 def _normalize_catalog_payload(payload: dict[str, Any]) -> dict[str, Any]:
     normalized = json.loads(json.dumps(payload))
 
+    def _normalize_path(value: Any) -> Any:
+        if isinstance(value, str):
+            return value.replace("\\", "/")
+        return value
+
     cassettes = normalized.get("cassettes")
     if isinstance(cassettes, list):
+        normalized_rows: list[dict[str, Any]] = []
         for row in cassettes:
+            if not isinstance(row, dict):
+                continue
+            normalized_row = dict(row)
+            normalized_row["cassette_rel_path"] = _normalize_path(
+                normalized_row.get("cassette_rel_path")
+            )
+            normalized_row["metadata_rel_path"] = _normalize_path(
+                normalized_row.get("metadata_rel_path")
+            )
             owners = row.get("reachability_owner_paths")
             if isinstance(owners, list):
-                row["reachability_owner_paths"] = sorted(set(owners))
+                normalized_row["reachability_owner_paths"] = sorted(
+                    {
+                        _normalize_path(owner)
+                        for owner in owners
+                        if isinstance(owner, str)
+                    }
+                )
+            else:
+                normalized_row["reachability_owner_paths"] = []
+            normalized_rows.append(normalized_row)
+
         normalized["cassettes"] = sorted(
-            cassettes,
+            normalized_rows,
             key=lambda row: (
                 row.get("provider", ""),
                 row.get("cassette_rel_path", ""),
