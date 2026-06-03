@@ -172,54 +172,124 @@ class CircuitBreakerConfig:
     Args:
         failure_threshold: Consecutive failures before opening (default: 5)
         recovery_timeout: Seconds to wait in OPEN before testing (default: 300 = 5 minutes)
-
-    Example:
-        >>> config = CircuitBreakerConfig(failure_threshold=3, recovery_timeout=60)
-        >>> config.failure_threshold
-        3
     """
 
     failure_threshold: int = 5
     recovery_timeout: int = 300  # 5 minutes
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True, slots=True, init=False)
 class AdapterConfig:
-    """Configuration for data source adapters.
+    """Validated adapter runtime knobs from provider config or direct tests.
 
-    Consolidates adapter-specific settings that were previously hardcoded.
-    Single source of truth for batch sizes, timeouts, and page sizes.
-
-    Implements RULES.md §12.1.2 - YAML MUST map to Pydantic and be validated.
-    All values are loaded from configs/providers/{provider}.yaml.
-
-    Args:
-        batch_size: Number of records per request batch for filtered queries.
-            Used when fetching with ID filters (e.g., ChEMBL filter_batch_size).
-            Default: 20 (matches ChEMBL config).
-        page_size: Number of records per paginated API request.
-            Used for standard pagination (e.g., ChEMBL batch_size parameter).
-            Default: 1000 (matches ChEMBL config).
-        timeout_sec: Request timeout in seconds. Default: 30.0.
-        max_retries: Maximum retry attempts for recoverable errors. Default: 3.
-
-    Example:
-        >>> config = AdapterConfig(batch_size=50, page_size=500)
-        >>> config.batch_size
-        50
+    ``timeout`` is retained as a constructor alias for older direct adapter tests;
+    ``timeout_sec`` remains the canonical stored field used by source configs.
     """
 
     batch_size: int = 20
     page_size: int = 1000
     timeout_sec: float = 30.0
     max_retries: int = 3
+    retry_backoff_factor: float = 2.0
+    rate_limit_requests_per_second: float = 5.0
+    circuit_breaker_failure_threshold: int = 5
+    circuit_breaker_recovery_timeout: int = 300
+    enable_single_id_fallback: bool = False
 
-    def __post_init__(self) -> None:
+    @staticmethod
+    def _validate_timeout_alias(
+        timeout: float | None,
+        timeout_sec: float | None,
+    ) -> None:
+        """Validate that timeout and timeout_sec don't conflict."""
+        if (
+            timeout is not None
+            and timeout_sec is not None
+            and float(timeout) != float(timeout_sec)
+        ):
+            raise ValueError("timeout and timeout_sec must match when both are set")
+
+    @staticmethod
+    def _resolve_timeout(
+        timeout: float | None,
+        timeout_sec: float | None,
+    ) -> float:
+        """Resolve timeout value from alias or canonical parameter."""
+        if timeout is not None:
+            return float(timeout)
+        if timeout_sec is None:
+            return 30.0
+        return float(timeout_sec)
+
+    def __init__(
+        self,
+        batch_size: int = 20,
+        page_size: int = 1000,
+        timeout_sec: float | None = None,
+        max_retries: int = 3,
+        retry_backoff_factor: float = 2.0,
+        rate_limit_requests_per_second: float = 5.0,
+        circuit_breaker_failure_threshold: int = 5,
+        circuit_breaker_recovery_timeout: int = 300,
+        enable_single_id_fallback: bool = False,
+        *,
+        timeout: float | None = None,
+    ) -> None:
+        """Initialize adapter config while preserving the retired ``timeout`` alias."""
+        self._validate_timeout_alias(timeout, timeout_sec)
+        resolved_timeout = self._resolve_timeout(timeout, timeout_sec)
+
+        object.__setattr__(self, "batch_size", batch_size)
+        object.__setattr__(self, "page_size", page_size)
+        object.__setattr__(self, "timeout_sec", float(resolved_timeout))
+        object.__setattr__(self, "max_retries", max_retries)
+        object.__setattr__(self, "retry_backoff_factor", retry_backoff_factor)
+        object.__setattr__(
+            self,
+            "rate_limit_requests_per_second",
+            rate_limit_requests_per_second,
+        )
+        object.__setattr__(
+            self,
+            "circuit_breaker_failure_threshold",
+            circuit_breaker_failure_threshold,
+        )
+        object.__setattr__(
+            self,
+            "circuit_breaker_recovery_timeout",
+            circuit_breaker_recovery_timeout,
+        )
+        object.__setattr__(
+            self,
+            "enable_single_id_fallback",
+            enable_single_id_fallback,
+        )
+        self._validate()
+
+    @property
+    def timeout(self) -> float:
+        """Backward-compatible alias for ``timeout_sec``."""
+        return self.timeout_sec
+
+    def _validate(self) -> None:
         """Validate configuration values on creation."""
         _validate_positive("batch_size", self.batch_size)
         _validate_positive("page_size", self.page_size)
         _validate_positive("timeout_sec", self.timeout_sec)
         _validate_non_negative("max_retries", self.max_retries)
+        _validate_positive("retry_backoff_factor", self.retry_backoff_factor)
+        _validate_positive(
+            "rate_limit_requests_per_second",
+            self.rate_limit_requests_per_second,
+        )
+        _validate_positive(
+            "circuit_breaker_failure_threshold",
+            self.circuit_breaker_failure_threshold,
+        )
+        _validate_positive(
+            "circuit_breaker_recovery_timeout",
+            self.circuit_breaker_recovery_timeout,
+        )
 
 
 def _validate_positive(name: str, value: int | float) -> None:

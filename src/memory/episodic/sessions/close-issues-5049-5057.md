@@ -1,22 +1,22 @@
 ---
 id: close-issues-5049-5057
-title: Close issue refactor waves 5049-5057
+title: close-issues-5049-5057
 task_id: close-issues-5049-5057
-created_at: '2026-06-03T07:08:06Z'
+created_at: '2026-06-03T07:25:55Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- <add-source-ref>
+- reports/codex/review_py-plan-bot_20260602_2150.md
 summary: Active task session context.
-query: Close issue refactor waves 5049-5057
+query: Refactor hotspot waves 5049-5057
 ---
 
 # Session note
 
 ## Task
 
-- Title: Close issue refactor waves 5049-5057
-- Retrieval query: Close issue refactor waves 5049-5057
+- Title: close-issues-5049-5057
+- Retrieval query: Refactor hotspot waves 5049-5057
 
 ## Retrieved context
 

@@ -8,11 +8,13 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-import pandera as pandera_pa
+import pandera.pandas as pandera_pa
 import pytest
 
 from bioetl.domain.medallion import GoldWriteMode
 from bioetl.domain.types import ScdConfig
+
+FIXED_INGESTION_TS = datetime(2024, 1, 1, 12, 0, 0)
 
 
 @pytest.mark.unit
@@ -95,16 +97,16 @@ class TestGoldStrictValidationPaths:
 
         scd_config = ScdConfig(
             scd_type=2,
-            business_keys=["id"],
-            start_date_column="valid_from",
-            end_date_column="valid_to",
+            business_key="id",
+            valid_from_col="valid_from",
+            valid_to_col="valid_to",
         )
 
         # Test valid SCD2 configuration (should not raise)
         writer._validate_scd2_requirements(
             mode=GoldWriteMode.SCD2,
             scd_config=scd_config,
-            ingestion_ts=datetime.now(),
+            ingestion_ts=FIXED_INGESTION_TS,
         )
 
     def test_validate_scd2_requires_config(self) -> None:
@@ -123,7 +125,7 @@ class TestGoldStrictValidationPaths:
             writer._validate_scd2_requirements(
                 mode=GoldWriteMode.SCD2,
                 scd_config=None,
-                ingestion_ts=datetime.now(),
+                ingestion_ts=FIXED_INGESTION_TS,
             )
 
     def test_validate_scd2_requires_type_2(self) -> None:
@@ -139,9 +141,9 @@ class TestGoldStrictValidationPaths:
 
         scd_config = ScdConfig(
             scd_type=1,  # Wrong type
-            business_keys=["id"],
-            start_date_column="valid_from",
-            end_date_column="valid_to",
+            business_key="id",
+            valid_from_col="valid_from",
+            valid_to_col="valid_to",
         )
 
         # Test wrong scd_type
@@ -149,7 +151,7 @@ class TestGoldStrictValidationPaths:
             writer._validate_scd2_requirements(
                 mode=GoldWriteMode.SCD2,
                 scd_config=scd_config,
-                ingestion_ts=datetime.now(),
+                ingestion_ts=FIXED_INGESTION_TS,
             )
 
     def test_validate_scd2_requires_business_keys(self) -> None:
@@ -165,9 +167,9 @@ class TestGoldStrictValidationPaths:
 
         scd_config = ScdConfig(
             scd_type=2,
-            business_keys=[],  # Empty business keys
-            start_date_column="valid_from",
-            end_date_column="valid_to",
+            business_key=None,
+            valid_from_col="valid_from",
+            valid_to_col="valid_to",
         )
 
         # Test empty business_keys
@@ -175,7 +177,7 @@ class TestGoldStrictValidationPaths:
             writer._validate_scd2_requirements(
                 mode=GoldWriteMode.SCD2,
                 scd_config=scd_config,
-                ingestion_ts=datetime.now(),
+                ingestion_ts=FIXED_INGESTION_TS,
             )
 
     def test_validate_scd2_requires_ingestion_ts(self) -> None:
@@ -191,9 +193,9 @@ class TestGoldStrictValidationPaths:
 
         scd_config = ScdConfig(
             scd_type=2,
-            business_keys=["id"],
-            start_date_column="valid_from",
-            end_date_column="valid_to",
+            business_key="id",
+            valid_from_col="valid_from",
+            valid_to_col="valid_to",
         )
 
         # Test missing ingestion_ts
@@ -267,7 +269,10 @@ class TestGoldStrictValidationPaths:
         )
 
         # Test non-strict schema (should raise)
-        with pytest.raises(ValueError, match="must have strict=True"):
+        with pytest.raises(
+            ValueError,
+            match="Gold layer requires strict=True schema validation",
+        ):
             writer._validate_schema_strict(schema)
 
     def test_validate_schema_strict_default(self) -> None:
@@ -287,7 +292,10 @@ class TestGoldStrictValidationPaths:
         )
 
         # Test default schema (should raise)
-        with pytest.raises(ValueError, match="must have strict=True"):
+        with pytest.raises(
+            ValueError,
+            match="Gold layer requires strict=True schema validation",
+        ):
             writer._validate_schema_strict(schema)
 
 
@@ -357,14 +365,14 @@ class TestGoldValidationIntegration:
         # Validate SCD2 requirements
         scd_config = ScdConfig(
             scd_type=2,
-            business_keys=["id"],
-            start_date_column="valid_from",
-            end_date_column="valid_to",
+            business_key="id",
+            valid_from_col="valid_from",
+            valid_to_col="valid_to",
         )
         writer._validate_scd2_requirements(
             mode=mode,
             scd_config=scd_config,
-            ingestion_ts=datetime.now(),
+            ingestion_ts=FIXED_INGESTION_TS,
         )
 
         # Validate schema

@@ -36,3 +36,11 @@ exemptions:
     owner_tests:
       - tests/unit/domain/schemas/generated/test_schema_registry.py
       - tests/unit/domain/schemas/test_generated_registry.py
+  - source: src/bioetl/domain/control_plane/ledger/core_events.py
+    policy: aggregate_owner
+    reason: >
+      Legacy ledger event value object for storage contract compatibility is exercised
+      through RunManifest domain owner tests rather than a mirrored thin-package sibling.
+    owner_tests:
+      - tests/unit/domain/control_plane/test_run_manifest_dq.py
+      - tests/unit/domain/control_plane/test_run_manifest_immutability.py

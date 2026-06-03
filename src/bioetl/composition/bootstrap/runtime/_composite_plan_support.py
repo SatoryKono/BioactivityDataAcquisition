@@ -17,6 +17,7 @@ from bioetl.composition.bootstrap.runtime._composite_config_runtime_compat impor
 from bioetl.composition.bootstrap.runtime._composite_plan_runtime_support import (
     build_bootstrap_runtime_resources,
     build_bootstrap_support_services,
+    create_composite_runner_from_plan_impl,
 )
 from bioetl.infrastructure.config.composite_config_api import (
     load_composite_config as _load_composite_config_impl,
@@ -31,6 +32,7 @@ __all__ = [
     "build_composite_bootstrap_plan_impl",
     "build_runner_factories_impl",
     "build_support_services_impl",
+    "create_composite_runner_from_plan_impl",
     "load_composite_config_impl",
 ]
 
@@ -40,7 +42,6 @@ if TYPE_CHECKING:
 
     import polars as pl
 
-    from bioetl.application.composite.runner_pkg import CompositePipelineRunner
     from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
     from bioetl.application.composite.runtime_wiring_api import PipelineRunner
     from bioetl.application.services.dq_report_service import DQReportService
@@ -236,28 +237,4 @@ def build_composite_bootstrap_plan_impl(
         dependencies_runner_factory=dependencies_runner_factory,
         enricher_runner_factory=enricher_runner_factory,
         support_services=support_services,
-    )
-
-
-def create_composite_runner_from_plan_impl(
-    *,
-    config: CompositeConfig,
-    runtime: CompositeRuntimeConfig,
-    plan: CompositeBootstrapPlan,
-    create_composite_runner_builder_fn: Callable[..., CompositePipelineRunner],
-    runner_factory: Callable[..., CompositePipelineRunner],
-) -> CompositePipelineRunner:
-    return create_composite_runner_builder_fn(
-        config=config,
-        runtime=runtime,
-        run_id=plan.run_id,
-        logger=plan.logger,
-        metrics=plan.metrics,
-        tracer=plan.tracer,
-        lock=plan.lock,
-        seed_runner_factory=plan.seed_runner_factory,
-        dependencies_runner_factory=plan.dependencies_runner_factory,
-        enricher_runner_factory=plan.enricher_runner_factory,
-        support_services=plan.support_services,
-        runner_factory=runner_factory,
     )

@@ -6,16 +6,18 @@ Tests manifest, ledger, and checkpoint file operations in control-plane storage.
 from __future__ import annotations
 
 import os
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from uuid import UUID
 
 import pytest
 
 from bioetl.domain.control_plane.run_manifest import (
     RunArtifactRef,
+    RunCodeProvenance,
     RunManifest,
 )
-from bioetl.domain.types import RunID
+from bioetl.domain.types import RunID, RunType
 
 
 @pytest.mark.integration
@@ -25,32 +27,44 @@ class TestControlPlaneFileStores:
     Tests manifest, ledger, and checkpoint storage read/write operations.
     """
 
-    def test_run_manifest_serialization(self) -> None:
-        """Test RunManifest can be serialized and deserialized correctly."""
-        # Create a sample RunManifest
-        manifest = RunManifest(
-            run_id=RunID("test-run-123"),
+    @staticmethod
+    def _build_manifest() -> RunManifest:
+        """Build a minimal valid run manifest using the current domain contract."""
+        return RunManifest(
+            manifest_id="manifest-test-run-123",
+            execution_fingerprint="fingerprint-test-run-123",
+            schema_version="1.0",
+            created_at=datetime(2024, 1, 1, 0, 0, tzinfo=UTC),
+            run_id=RunID(UUID("12345678-1234-5678-1234-567812345678")),
+            run_type=RunType.INCREMENTAL,
             pipeline_name="test_pipeline",
             provider="test_provider",
-            entity_type="test_entity",
-            run_type="incremental",
-            config_hash="abc123",
-            contract_ref="test.contract",
-            contract_version="1.0.0",
-            created_at="2024-01-01T00:00:00Z",
-            source_revision="clean",
-            source_ref=RunArtifactRef(
-                artifact_type="manifest",
-                artifact_id="artifact-1",
-                path="data/output/control/run_manifest/test-run-123.json",
+            entity="test_entity",
+            launch_context={"mode": "integration-test"},
+            runtime_config={"run_type": "incremental"},
+            resolved_config={"provider": "test_provider", "entity_type": "test_entity"},
+            code_provenance=RunCodeProvenance(
+                config_hash="abc123",
+                contract_ref="test.contract",
+                contract_version="1.0.0",
+                source_revision_state="clean",
             ),
-            artifacts=[],
+            planned_artifacts=(
+                RunArtifactRef(
+                    layer="manifest",
+                    path="data/output/control/run_manifest/test-run-123.json",
+                ),
+            ),
         )
+
+    def test_run_manifest_serialization(self) -> None:
+        """Test RunManifest can be serialized and deserialized correctly."""
+        manifest = self._build_manifest()
 
         # Test serialization
         manifest_dict = manifest.to_dict()
         assert manifest_dict is not None
-        assert manifest_dict["run_id"] == "test-run-123"
+        assert manifest_dict["run_id"] == "12345678-1234-5678-1234-567812345678"
 
         # Test deserialization
         manifest_restored = RunManifest.from_dict(manifest_dict)
@@ -60,12 +74,11 @@ class TestControlPlaneFileStores:
         """Test RunArtifactRef validation."""
         # Valid artifact ref
         artifact = RunArtifactRef(
-            artifact_type="manifest",
-            artifact_id="artifact-1",
+            layer="manifest",
             path="data/output/control/run_manifest/test.json",
         )
 
-        assert artifact.artifact_type in ["manifest", "ledger", "checkpoint"]
+        assert artifact.layer in ["manifest", "ledger", "checkpoint"]
 
     def test_control_plane_directory_structure(self, tmp_path: Path) -> None:
         """Test control-plane directory structure is created correctly."""
@@ -87,8 +100,7 @@ class TestControlPlaneFileStores:
     def test_file_path_generation(self) -> None:
         """Test file path generation for control-plane artifacts."""
         artifact = RunArtifactRef(
-            artifact_type="manifest",
-            artifact_id="test-run-123",
+            layer="manifest",
             path="data/output/control/run_manifest/test-run-123.json",
         )
 
@@ -221,25 +233,22 @@ class TestControlPlaneStorageContracts:
         from bioetl.domain.control_plane.run_manifest import RunManifest
 
         # Verify RunManifest can be instantiated
-        manifest = RunManifest(
-            run_id=RunID("test-run-123"),
-            pipeline_config=None,  # type: ignore
-            pipeline_identity=None,  # type: ignore
-            artifacts=[],
-        )
+        manifest = TestControlPlaneFileStores._build_manifest()
 
-        assert manifest.run_id == "test-run-123"
+        assert manifest.run_id == RunID(UUID("12345678-1234-5678-1234-567812345678"))
 
     def test_ledger_storage_contract(self) -> None:
         """Test ledger storage contract is defined."""
-        from bioetl.domain.control_plane.ledger.core_events import LedgerEvent
+        from bioetl.domain.control_plane.run_ledger import RunLedgerEntry
 
-        # Verify LedgerEvent can be instantiated
-        event = LedgerEvent(
+        # Verify RunLedgerEntry can be instantiated
+        event = RunLedgerEntry(
+            entry_id="entry-1",
+            manifest_id="manifest-test-run-123",
+            run_id=RunID(UUID("12345678-1234-5678-1234-567812345678")),
             event_type="test_event",
-            timestamp="2024-01-01T00:00:00Z",
-            run_id="test-run-123",
-            data={},
+            occurred_at=datetime(2024, 1, 1, 0, 0, tzinfo=UTC),
+            details={},
         )
 
         assert event.event_type == "test_event"

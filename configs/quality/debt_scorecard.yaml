@@ -468,13 +468,13 @@ hotspot_family_ratchets:
     path_prefixes:
     - src/bioetl/composition/bootstrap/runtime/
     bounded_growth_budgets:
-      files_ge_250_loc: 5
+      files_ge_250_loc: 2
       max_internal_fan_in: 5
     metrics:
       duplication_clusters: 0
       files: 50
-      total_loc: 5982
-      files_ge_250_loc: 3
+      total_loc: 5988
+      files_ge_250_loc: 2
       helper_function_ratio: 0.328
       max_internal_fan_in: 3
       max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.observability
@@ -555,7 +555,7 @@ hotspot_family_ratchets:
       duplication_clusters: 0
       files: 40
       total_loc: 6069
-      files_ge_250_loc: 5
+      files_ge_250_loc: 2
       helper_function_ratio: 0.502
       max_internal_fan_in: 9
       max_internal_fan_in_module: bioetl.composition.runtime_builders.run_manifest_support
@@ -580,7 +580,7 @@ oversized_source_module_inventory:
     owner: '@bioetl-control-plane'
     target_split: split checkpoint policy evaluation from diagnostic payload assembly
   - path: src/bioetl/infrastructure/config/_base.py
-    lines: 478
+    lines: 267
     owner: '@bioetl-config'
     target_split: separate config discovery, validation, and environment resolution
       helpers

@@ -1,24 +1,24 @@
 {
   "summary": {
-    "scanned_modules": 1989,
-    "total_internal_imports": 7954,
+    "scanned_modules": 2007,
+    "total_internal_imports": 8005,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 343,
     "violations": 0,
-    "source_fingerprint": "7707ef5caaf5ef666e42204f797f1d0227be997b53fb8bea1e5b88023d383042"
+    "source_fingerprint": "963d1280b352ee60f6cf47e100afdfda213a6b3bddf816a9946d36ff2c090c47"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1387,
+      "imports": 1404,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1171,
+      "imports": 1180,
       "allowed": true
     },
     {
@@ -30,7 +30,7 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 737,
+      "imports": 738,
       "allowed": true
     },
     {
@@ -48,19 +48,19 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1249,
+      "imports": 1250,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 798,
+      "imports": 804,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 979,
+      "imports": 996,
       "allowed": true
     },
     {
@@ -112,7 +112,7 @@
     {
       "source": "application.pipelines",
       "target": "domain.types",
-      "imports": 82
+      "imports": 87
     },
     {
       "source": "application.services",
@@ -345,6 +345,11 @@
       "imports": 17
     },
     {
+      "source": "application.pipelines",
+      "target": "domain.ports",
+      "imports": 16
+    },
+    {
       "source": "composition.bootstrap",
       "target": "infrastructure.observability",
       "imports": 16
@@ -373,11 +378,6 @@
       "source": "interfaces.cli",
       "target": "composition.registry_api",
       "imports": 15
-    },
-    {
-      "source": "application.pipelines",
-      "target": "domain.ports",
-      "imports": 14
     },
     {
       "source": "composition.factories",

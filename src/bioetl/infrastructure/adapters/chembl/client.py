@@ -90,6 +90,8 @@ class ChemblAdapter(
         config = (
             self.adapter_config if self.adapter_config is not None else AdapterConfig()
         )
+        self.adapter_config = config
+        self._adapter_config = config
         self._page_size = config.page_size
         self._filter_batch_size = config.batch_size
 

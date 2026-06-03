@@ -66,7 +66,8 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-045](ADR-045-dq-contract-system.md)                 | Data Quality Contract System               | Accepted                                | Data Quality    | 2026-03-26 |
 | [ADR-046](ADR-046-checkpoint-vs-ledger-resume.md)        | Checkpoint Versus Ledger-Based Resume      | Accepted                                | Reproducibility | 2026-05-06 |
 | [ADR-047](ADR-047-workflow-control-plane.md)             | Workflow Control Plane for Declarative Workflows | Accepted                           | Reproducibility | 2026-05-08 |
-| [ADR-048](ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md) | Domain Schema Boundary and Runtime Pandera Compatibility | Accepted | Architecture | 2026-05-26 |
+| [ADR-048](ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md) | Domain Schema Boundary and Runtime Pandera Compatibility | accepted | Architecture | 2026-05-26 |
+| [ADR-049](ADR-049-context-aware-loc-target-policy.md) | Context-Aware LOC Target Policy | accepted | Architecture | 2026-05-26 |
 
 ## ADRs by Category
 
@@ -82,6 +83,7 @@ This directory contains Architecture Decision Records documenting significant ar
 - [ADR-041](ADR-041-naming-policy-skills-agents.md): Naming Policy for Skills, Agents, and Commands
 - [ADR-043](ADR-043-documentation-knowledge-management.md): Documentation and Knowledge Management Strategy
 - [ADR-048](ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md): Domain Schema Boundary and Runtime Pandera Compatibility
+- [ADR-049](ADR-049-context-aware-loc-target-policy.md): Context-Aware LOC Target Policy
 
 ### Storage
 

@@ -8,6 +8,8 @@ from pathlib import Path
 
 import yaml
 
+from scripts.engineering.qa.hotspot_family_metrics import count_files_ge_loc
+
 pytestmark = pytest.mark.architecture
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -32,14 +34,6 @@ def _iter_family_python_files(*, path_prefixes: list[str]) -> list[Path]:
             seen.add(path)
             files.append(path)
     return files
-
-
-def _count_files_ge_loc(*, files: list[Path], min_lines: int) -> int:
-    return sum(
-        1
-        for path in files
-        if len(path.read_text(encoding="utf-8").splitlines()) >= min_lines
-    )
 
 
 def test_active_hotspot_family_file_growth_budgets_hold_reviewed_baseline() -> None:
@@ -72,7 +66,7 @@ def test_active_hotspot_family_file_growth_budgets_hold_reviewed_baseline() -> N
                 prefix for prefix in path_prefixes if isinstance(prefix, str)
             ]
         )
-        actual_count = _count_files_ge_loc(files=files, min_lines=250)
+        actual_count = count_files_ge_loc(files=files, min_lines=250)
         budget = family["bounded_growth_budgets"].get("files_ge_250_loc")
         assert isinstance(budget, int) and budget >= 0
         assert actual_count <= budget, (

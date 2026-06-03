@@ -90,6 +90,30 @@ class CsvExporter:
         self.sort_by = sort_by or []
         self.sort_ascending = sort_ascending
 
+    def export_table(self, table: pa.Table, output_path: str) -> Path:
+        """Synchronously export one table to an explicit CSV path.
+
+        This compatibility surface is retained for integration tests and
+        legacy callers that predate the async table-name based exporter API.
+        It performs the same CSV shaping steps as the async exporter:
+        complex-type flattening, full-row deduplication, optional sorting,
+        and atomic write.
+        """
+        target_path = Path(output_path)
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+
+        csv_data = self._flatten_for_csv(table)
+        csv_data = self._deduplicate_full_rows(csv_data)
+        if self.sort_by:
+            csv_data = self._sort_table(csv_data, self.sort_by)
+
+        self._atomic_csv_write(
+            csv_data,
+            target_path,
+            self._build_write_options(),
+        )
+        return target_path
+
     def clear(self, table_name: str | None = None) -> list[Path]:
         """Clear CSV files from the export directory.
 
@@ -256,6 +280,32 @@ class CsvExporter:
     def _append_to_csv(self, data: pa.Table, csv_path: Path) -> None:
         """Append records without reading existing CSV (delegates to module-level)."""
         _append_to_csv(data, csv_path, self.delimiter, self._logger)
+
+    def _deduplicate_full_rows(self, table: pa.Table) -> pa.Table:
+        """Drop exact duplicate rows while preserving first-seen order."""
+        if table.num_rows < 2:
+            return table
+
+        rows = table.to_pylist()
+        seen: set[tuple[object, ...]] = set()
+        deduplicated_rows: list[dict[str, object]] = []
+        column_names = table.column_names
+
+        for row in rows:
+            identity = tuple(row.get(column) for column in column_names)
+            if identity in seen:
+                continue
+            seen.add(identity)
+            deduplicated_rows.append(row)
+
+        if len(deduplicated_rows) == len(rows):
+            return table
+
+        self._logger.debug(
+            "csv_export_table_deduplicated",
+            removed_rows=len(rows) - len(deduplicated_rows),
+        )
+        return pa.Table.from_pylist(deduplicated_rows, schema=table.schema)
 
     def _build_write_options(self) -> pv.WriteOptions:
         """Build CSV writer options from exporter configuration.

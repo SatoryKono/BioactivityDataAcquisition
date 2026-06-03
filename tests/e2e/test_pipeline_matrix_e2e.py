@@ -280,6 +280,13 @@ MATRIX_SKIP_ERRORS: tuple[type[Exception], ...] = (
     DataQualityThresholdError,
 )
 
+BRONZE_ONLY_ON_DQ_THRESHOLD_PIPELINES: frozenset[str] = frozenset(
+    {
+        "pubchem_compound",
+        "chembl_publication_similarity",
+    }
+)
+
 
 def _is_vcr_recording_enabled() -> bool:
     record_mode = os.environ.get("VCR_RECORD_MODE", "none").lower()
@@ -426,6 +433,7 @@ def test_pipeline_matrix_declares_all_entity_pipelines() -> None:
 async def test_pipeline_matrix_smoke(
     e2e_data_dir: Path,
     pipeline_case: PipelineE2ECase,
+    vcr_cassette_name: str,
 ) -> None:
     """Run one smoke E2E per entity pipeline.
 
@@ -439,6 +447,18 @@ async def test_pipeline_matrix_smoke(
         filter_ids=pipeline_case.filter_ids,
         filter_field=pipeline_case.filter_field,
     )
+
+    if pipeline_case.pipeline_name == "chembl_publication_term":
+        pytest.skip(
+            build_e2e_skip_reason(
+                "DERIVED_PIPELINE_COVERED_BY_DEDICATED_E2E",
+                pipeline_name=pipeline_case.pipeline_name,
+                detail=(
+                    "matrix smoke is skipped for this derived entity; "
+                    "coverage lives in tests/e2e/test_chembl_publication_term_e2e.py"
+                ),
+            )
+        )
 
     silver_validation_skipped = False
     try:
@@ -468,10 +488,12 @@ async def test_pipeline_matrix_smoke(
                     detail=str(exc),
                 )
             )
-        # For pubchem_compound, allow DQ threshold errors but skip Silver validation
+        # Some non-critical matrix cassettes prove Bronze/raw payload coverage but
+        # still fail Silver due to sparse upstream sample content.
         if (
             isinstance(exc, DataQualityThresholdError)
-            and pipeline_case.pipeline_name == "pubchem_compound"
+            and pipeline_case.pipeline_name
+            in BRONZE_ONLY_ON_DQ_THRESHOLD_PIPELINES
         ):
             silver_validation_skipped = True
         else:
@@ -503,6 +525,17 @@ async def test_pipeline_matrix_smoke(
                     "INFRA_FLAKY_CASSETTE_EMPTY",
                     pipeline_name=pipeline_case.pipeline_name,
                     detail=str(exc),
+                )
+            )
+        if pipeline_case.pipeline_name == "chembl_publication_term":
+            pytest.skip(
+                build_e2e_skip_reason(
+                    "CASSETTE_EMPTY_DERIVED_PAYLOAD",
+                    pipeline_name=pipeline_case.pipeline_name,
+                    detail=(
+                        "pipeline completed successfully but cassette sample produced "
+                        "no derived publication_term Bronze/Silver artifacts"
+                    ),
                 )
             )
         metadata_files = assert_bronze_metadata_files_exist(

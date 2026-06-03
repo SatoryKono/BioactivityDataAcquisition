@@ -17,7 +17,7 @@ def mock_delta_table():
     mock = MagicMock()
     with (
         patch("bioetl.infrastructure.quarantine.unified.DeltaTable", mock),
-        patch("bioetl.infrastructure.quarantine.operations.DeltaTable", mock),
+        patch("bioetl.infrastructure.quarantine._lifecycle.DeltaTable", mock),
     ):
         yield mock
 

@@ -10,14 +10,14 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.infrastructure.adr.fs_adr_service import (
-    FilesystemAdrCatalog,
-    _extract_meta,
-    _extract_with_patterns,
-    _iter_adr_files,
-    _parse_h1_title,
-    DATE_PATTERNS,
-    STATUS_PATTERNS,
+from bioetl.infrastructure.adr.fs_adr_service import FilesystemAdrCatalog
+from bioetl.infrastructure.adr._adr_file_utils import iter_adr_files
+from bioetl.infrastructure.adr._adr_metadata_extractors import (
+    extract_meta,
+    extract_with_patterns,
+    parse_h1_title,
+    DATE_LABELS,
+    STATUS_LABELS,
 )
 
 
@@ -55,16 +55,16 @@ def _minimal_adr(number: int, title: str, status: str = "Accepted") -> str:
 
 @pytest.mark.unit
 class TestIterAdrFiles:
-    """Tests for _iter_adr_files() helper."""
+    """Tests for iter_adr_files() helper."""
 
     def test_empty_dir_returns_empty(self, tmp_path: Path) -> None:
         """No ADR files in directory returns empty iterable."""
-        files = list(_iter_adr_files(tmp_path))
+        files = list(iter_adr_files(tmp_path))
         assert files == []
 
     def test_nonexistent_dir_returns_empty(self, tmp_path: Path) -> None:
         """Non-existent directory returns empty iterable."""
-        files = list(_iter_adr_files(tmp_path / "nonexistent"))
+        files = list(iter_adr_files(tmp_path / "nonexistent"))
         assert files == []
 
     def test_finds_adr_files(self, tmp_path: Path) -> None:
@@ -74,7 +74,7 @@ class TestIterAdrFiles:
         (tmp_path / "README.md").write_text("not an ADR")
         (tmp_path / "ADR-notes.txt").write_text("not md")
 
-        files = list(_iter_adr_files(tmp_path))
+        files = list(iter_adr_files(tmp_path))
         assert len(files) == 2
 
     def test_files_sorted_alphabetically(self, tmp_path: Path) -> None:
@@ -83,93 +83,93 @@ class TestIterAdrFiles:
         _write_adr(tmp_path, 2, "second", "content")
         _write_adr(tmp_path, 1, "first", "content")
 
-        files = list(_iter_adr_files(tmp_path))
+        files = list(iter_adr_files(tmp_path))
         names = [f.name for f in files]
         assert names == sorted(names)
 
 
 @pytest.mark.unit
 class TestParseH1Title:
-    """Tests for _parse_h1_title() helper."""
+    """Tests for parse_h1_title() helper."""
 
     def test_extracts_h1_title(self) -> None:
         """Extracts title from first H1 line."""
         text = "# ADR-001: My Title\n\nSome content"
-        assert _parse_h1_title(text) == "ADR-001: My Title"
+        assert parse_h1_title(text) == "ADR-001: My Title"
 
     def test_returns_none_when_no_h1(self) -> None:
         """Returns None when no H1 line found."""
         text = "## Section\n### Subsection\nContent"
-        assert _parse_h1_title(text) is None
+        assert parse_h1_title(text) is None
 
     def test_returns_first_h1_only(self) -> None:
         """Returns only the first H1."""
         text = "# First Title\n# Second Title"
-        assert _parse_h1_title(text) == "First Title"
+        assert parse_h1_title(text) == "First Title"
 
-    def test_service_parse_h1_title__strips_whitespace__f2d1d957(self) -> None:
+    def test_serviceparse_h1_title__strips_whitespace__f2d1d957(self) -> None:
         """Strips surrounding whitespace from title."""
         text = "#   Spaced Title   "
-        assert _parse_h1_title(text) == "Spaced Title"
+        assert parse_h1_title(text) == "Spaced Title"
 
 
 @pytest.mark.unit
 class TestExtractWithPatterns:
-    """Tests for _extract_with_patterns() helper."""
+    """Tests for extract_with_patterns() helper."""
 
     def test_extracts_bold_status(self) -> None:
         """Extracts status from **Status:** pattern."""
         text = "**Status:** Accepted\n\nOther content"
-        result = _extract_with_patterns(text, STATUS_PATTERNS)
+        result = extract_with_patterns(text, STATUS_LABELS)
         assert result == "Accepted"
 
     def test_extracts_russian_status(self) -> None:
         """Extracts status from **Статус:** pattern."""
         text = "**Статус:** Принято"
-        result = _extract_with_patterns(text, STATUS_PATTERNS)
+        result = extract_with_patterns(text, STATUS_LABELS)
         assert result == "Принято"
 
     def test_extracts_date_pattern(self) -> None:
         """Extracts date from **Date:** pattern."""
         text = "**Date:** 2026-01-15"
-        result = _extract_with_patterns(text, DATE_PATTERNS)
+        result = extract_with_patterns(text, DATE_LABELS)
         assert result == "2026-01-15"
 
     def test_returns_none_when_no_match(self) -> None:
         """Returns None when no pattern matches."""
         text = "No status or date here"
-        result = _extract_with_patterns(text, STATUS_PATTERNS)
+        result = extract_with_patterns(text, STATUS_LABELS)
         assert result is None
 
     def test_table_format_status(self) -> None:
         """Extracts status from table format."""
         text = "| **Status** | Accepted |"
-        result = _extract_with_patterns(text, STATUS_PATTERNS)
+        result = extract_with_patterns(text, STATUS_LABELS)
         assert result == "Accepted"
 
 
 @pytest.mark.unit
 class TestExtractMeta:
-    """Tests for _extract_meta() composite helper."""
+    """Tests for extract_meta() composite helper."""
 
     def test_extracts_both_status_and_date(self) -> None:
         """Extracts status and date from standard ADR format."""
         text = "**Status:** Accepted\n**Date:** 2026-01-15"
-        status, date = _extract_meta(text)
+        status, date = extract_meta(text)
         assert status == "Accepted"
         assert date == "2026-01-15"
 
     def test_returns_none_when_missing(self) -> None:
         """Returns (None, None) when neither found."""
         text = "No metadata here"
-        status, date = _extract_meta(text)
+        status, date = extract_meta(text)
         assert status is None
         assert date is None
 
     def test_partial_metadata(self) -> None:
         """Returns partial when only status found."""
         text = "**Status:** Superseded"
-        status, date = _extract_meta(text)
+        status, date = extract_meta(text)
         assert status == "Superseded"
         assert date is None
 
