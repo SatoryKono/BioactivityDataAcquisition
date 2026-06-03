@@ -416,7 +416,7 @@ def populated_isolated_registry(isolated_registry: Any) -> Any:
 
 @pytest.fixture(autouse=True)
 def _vcr_marker(request: pytest.FixtureRequest) -> None:
-    """Open pytest-vcr cassettes, skipping unresolved Git LFS pointers safely."""
+    """Handle VCR cassettes with Git LFS pointer checking for pytest-recording."""
     marker = request.node.get_closest_marker("vcr")
     if marker is None:
         return
@@ -436,8 +436,13 @@ def _vcr_marker(request: pytest.FixtureRequest) -> None:
                 "VCR cassette is a Git LFS pointer; run git lfs pull before replaying "
                 f"this cassette: {cassette_path}"
             )
-
-    request.getfixturevalue("vcr_cassette")
+    elif cassette_path is not None and not cassette_path.exists():
+        # Skip test if cassette doesn't exist and we're not in recording mode
+        if not is_vcr_recording_mode():
+            pytest.skip(
+                f"VCR cassette not found: {cassette_path}. "
+                f"Run with VCR_RECORD_MODE=new_episodes to record cassettes."
+            )
 
 
 @pytest.fixture(scope="module")

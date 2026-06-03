@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Scanned modules: `1989`
-- Internal import edges (raw): `7954`
+- Scanned modules: `2007`
+- Internal import edges (raw): `8005`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `343`
@@ -21,15 +21,15 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1387 OK| application
-    application -->|1171 OK| domain
+    application -->|1404 OK| application
+    application -->|1180 OK| domain
     composition -->|321 OK| application
-    composition -->|737 OK| composition
+    composition -->|738 OK| composition
     composition -->|469 OK| domain
     composition -->|354 OK| infrastructure
-    domain -->|1249 OK| domain
-    infrastructure -->|798 OK| domain
-    infrastructure -->|979 OK| infrastructure
+    domain -->|1250 OK| domain
+    infrastructure -->|804 OK| domain
+    infrastructure -->|996 OK| infrastructure
     interfaces -->|77 OK| application
     interfaces -->|61 OK| composition
     interfaces -->|68 OK| domain
@@ -40,15 +40,15 @@ flowchart LR
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1387 | allowed |
-| `application`    | `domain`         |    1171 | allowed |
+| `application`    | `application`    |    1404 | allowed |
+| `application`    | `domain`         |    1180 | allowed |
 | `composition`    | `application`    |     321 | allowed |
-| `composition`    | `composition`    |     737 | allowed |
+| `composition`    | `composition`    |     738 | allowed |
 | `composition`    | `domain`         |     469 | allowed |
 | `composition`    | `infrastructure` |     354 | allowed |
-| `domain`         | `domain`         |    1249 | allowed |
-| `infrastructure` | `domain`         |     798 | allowed |
-| `infrastructure` | `infrastructure` |     979 | allowed |
+| `domain`         | `domain`         |    1250 | allowed |
+| `infrastructure` | `domain`         |     804 | allowed |
+| `infrastructure` | `infrastructure` |     996 | allowed |
 | `interfaces`     | `application`    |      77 | allowed |
 | `interfaces`     | `composition`    |      61 | allowed |
 | `interfaces`     | `domain`         |      68 | allowed |
@@ -62,7 +62,7 @@ flowchart LR
 | `infrastructure.adapters`      | `domain.types`                  |     111 |
 | `application.core`             | `domain.types`                  |     110 |
 | `infrastructure.adapters`      | `domain.ports`                  |      89 |
-| `application.pipelines`        | `domain.types`                  |      82 |
+| `application.pipelines`        | `domain.types`                  |      87 |
 | `application.services`         | `domain.control_plane`          |      81 |
 | `application.core`             | `domain.ports`                  |      80 |
 | `application.composite`        | `domain.ports`                  |      74 |
@@ -109,13 +109,13 @@ flowchart LR
 | `application.core`             | `domain.value_objects`          |      17 |
 | `composition.factories`        | `domain.config`                 |      17 |
 | `infrastructure.schemas`       | `domain.config`                 |      17 |
+| `application.pipelines`        | `domain.ports`                  |      16 |
 | `composition.bootstrap`        | `infrastructure.observability`  |      16 |
 | `application.pipelines`        | `domain.context`                |      15 |
 | `infrastructure.control_plane` | `domain.control_plane`          |      15 |
 | `infrastructure.observability` | `domain.ports`                  |      15 |
 | `infrastructure.quality`       | `domain.types`                  |      15 |
 | `interfaces.cli`               | `composition.registry_api`      |      15 |
-| `application.pipelines`        | `domain.ports`                  |      14 |
 | `composition.factories`        | `domain.behavior`               |      14 |
 | `application.services`         | `domain.behavior`               |      13 |
 

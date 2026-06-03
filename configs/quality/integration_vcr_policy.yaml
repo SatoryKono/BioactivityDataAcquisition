@@ -89,6 +89,7 @@ tracked_suite_inventory:
     adapter_provider_surfaces:
       chembl:
       - tests/integration/adapters/test_chembl.py
+      - tests/integration/adapters/test_chembl_paging_resilience.py
       crossref:
       - tests/integration/adapters/test_crossref.py
       - tests/integration/adapters/test_crossref_vcr_rebalance.py
@@ -228,6 +229,7 @@ tracked_suite_inventory:
     - tests/integration/config/test_uniprot_structured_reference_dq.py
     - tests/integration/config/test_validate_pipeline_configs.py
     - tests/integration/fixtures/test_non_chembl_edge_fixture_manifest.py
+    - tests/integration/infrastructure/export/test_csv_dq_export.py
     - tests/integration/infrastructure/storage/test_atomic.py
     - tests/integration/infrastructure/storage/test_atomic_boost.py
     - tests/integration/infrastructure/storage/test_base_delta_writer_filesystem.py
@@ -248,6 +250,7 @@ tracked_suite_inventory:
     - tests/integration/infrastructure/storage/test_silver_writer.py
     - tests/integration/infrastructure/storage/test_silver_writer_filesystem.py
     - tests/integration/infrastructure/storage/test_storage_factory_audit.py
+    - tests/integration/infrastructure/storage/test_control_plane_file_stores.py
     interface_cli_surfaces:
     - tests/integration/interfaces/test_cli_checkpoint_list.py
     - tests/integration/interfaces/test_cli_config_dq.py
@@ -259,6 +262,8 @@ tracked_suite_inventory:
     - tests/integration/interfaces/test_cli_run_incremental.py
     - tests/integration/interfaces/test_cli_run_manifest.py
     - tests/integration/interfaces/test_cli_shutdown_integration.py
+    interface_http_surfaces:
+    - tests/integration/interfaces/http/test_control_plane_identity.py
     external_validation_surfaces:
     - tests/integration/validation/test_external_verification.py
     reproducibility_surfaces:

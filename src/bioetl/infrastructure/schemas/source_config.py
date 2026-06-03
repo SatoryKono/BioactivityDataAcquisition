@@ -343,6 +343,9 @@ class SourceYamlConfig(BaseModel):
             page_size=effective_page_size,
             timeout_sec=self.timeout_sec,
             max_retries=self.max_retries,
+            rate_limit_requests_per_second=self.rate_limit.requests_per_second,
+            circuit_breaker_failure_threshold=(self.circuit_breaker.failure_threshold),
+            circuit_breaker_recovery_timeout=self.circuit_breaker.recovery_timeout,
         )
 
 

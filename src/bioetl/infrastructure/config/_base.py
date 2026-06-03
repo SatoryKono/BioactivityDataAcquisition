@@ -23,7 +23,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import SecretStr, field_validator, model_validator
+from pydantic import SecretStr, field_validator
 from pydantic.fields import Field
 from pydantic_settings import (
     BaseSettings,
@@ -32,14 +32,8 @@ from pydantic_settings import (
 )
 
 from bioetl.domain.config import PipelineConfig
-from bioetl.domain.constants import (
-    DEFAULT_BATCH_SIZE,
-    DEFAULT_CHECKPOINT_INTERVAL,
-    DEFAULT_DQ_QUALITY_SCORE_MIN,
-)
-from bioetl.domain.control_plane.reproducibility_policy import (
-    STRICT_PERSISTENCE_PROFILES,
-)
+from bioetl.infrastructure.config._observability_settings import ObservabilitySettings
+from bioetl.infrastructure.config._pipeline_settings import PipelineSettings
 from bioetl.infrastructure.config._yaml_settings_source import YamlSettingsSource
 from bioetl.infrastructure.config.config_root import resolve_configs_root
 from bioetl.infrastructure.config.converters import yaml_config_to_domain
@@ -89,211 +83,6 @@ def get_pipeline_config(
         configs_root=root,
         relaxed_dq=False,
     )
-
-
-class ObservabilitySettings(BaseSettings):
-    """Observability configuration."""
-
-    model_config = SettingsConfigDict(frozen=True)
-
-    metrics_enabled: bool = Field(default=True)
-    """Enable metrics collection."""
-
-    metrics_server_enabled: bool = Field(default=True)
-    """Enable Prometheus metrics HTTP server. Requires metrics_enabled=True."""
-
-    metrics_fail_fast: bool = Field(default=False)
-    """If True, exit with error when metrics server fails to start."""
-
-    metrics_retry_count: int = Field(default=3, ge=1, le=10)
-    """Number of retries for transient errors when starting metrics server."""
-
-    metrics_retry_delay: float = Field(default=1.0, ge=0.1, le=10.0)
-    """Delay between retries in seconds when starting metrics server."""
-
-    tracing_enabled: bool = Field(default=False)
-    """Enable OpenTelemetry tracing."""
-
-    allow_noop_observability_in_prod: bool = Field(default=False)
-    """Allow NoOp metrics/tracing in prod without failing bootstrap validation."""
-
-    audit_enabled: bool = Field(default=False)
-    """Enable file-backed audit logging for Medallion write operations."""
-
-    audit_base_path: Path | None = Field(default=None)
-    """Optional override path for audit JSONL files."""
-
-    # Data Quality Monitor settings
-    dq_monitor_enabled: bool = Field(default=True)
-    """Enable data quality monitoring. Enabled by default for all pipelines."""
-
-    dq_baseline_window: int = Field(default=7, ge=1, le=30)
-    """Number of recent runs to use for baseline calculation."""
-
-    dq_z_score_threshold: float = Field(default=2.5, ge=1.5, le=5.0)
-    """Z-score threshold for anomaly detection."""
-
-    dq_min_baseline_samples: int = Field(default=3, ge=1, le=10)
-    """Minimum samples before anomaly detection activates."""
-
-    dq_cold_start_runs: int = Field(default=5, ge=0, le=20)
-    """Skip first N runs while building baseline."""
-
-    dq_error_rate_max: float = Field(default=0.10, ge=0.0, le=1.0)
-    """Maximum allowed error rate (10% default)."""
-
-    dq_quality_score_min: float = Field(
-        default=DEFAULT_DQ_QUALITY_SCORE_MIN, ge=0.0, le=1.0
-    )
-    """Minimum quality score threshold (80% default)."""
-
-
-class PipelineSettings(BaseSettings):
-    """Pipeline execution configuration."""
-
-    model_config = SettingsConfigDict(frozen=True)
-
-    class ControlPlaneSettings(BaseSettings):
-        """Feature flags for run manifest and ledger control-plane behavior."""
-
-        model_config = SettingsConfigDict(frozen=True)
-
-        required_persistence_profile: Literal[
-            "degraded_observable", "replay_ready", "forensic_grade"
-        ] = Field(default="replay_ready")
-        """Minimum persistence profile required for this deployment/runtime."""
-
-        run_manifest_enabled: bool = Field(default=True)
-        """When True, create immutable run manifests before execution starts."""
-
-        run_ledger_enabled: bool = Field(default=True)
-        """When True, append run-ledger events for lifecycle and lineage."""
-
-        checkpoint_compatibility_policy: Literal[
-            "observe", "soft_fail", "hard_fail"
-        ] = Field(default="hard_fail")
-        """Resume behavior when checkpoint compatibility validation fails.
-
-        `observe` remains a degraded operator mode only when identity continuity
-        is proven and non-identity signals drift.
-        """
-
-        @model_validator(mode="after")
-        def _validate_ledger_dependency(self) -> PipelineSettings.ControlPlaneSettings:
-            """Ledger requires manifest creation because it is keyed by manifest_id."""
-            if self.run_ledger_enabled and not self.run_manifest_enabled:
-                raise ValueError(
-                    "pipeline.control_plane.run_ledger_enabled requires "
-                    "pipeline.control_plane.run_manifest_enabled"
-                )
-            if (
-                self.required_persistence_profile in STRICT_PERSISTENCE_PROFILES
-                and not self.run_manifest_enabled
-            ):
-                raise ValueError(
-                    "pipeline.control_plane.required_persistence_profile="
-                    f"{self.required_persistence_profile} requires "
-                    "pipeline.control_plane.run_manifest_enabled"
-                )
-            if (
-                self.required_persistence_profile == "forensic_grade"
-                and not self.run_ledger_enabled
-            ):
-                raise ValueError(
-                    "pipeline.control_plane.required_persistence_profile="
-                    "forensic_grade requires "
-                    "pipeline.control_plane.run_ledger_enabled"
-                )
-            if (
-                self.required_persistence_profile in STRICT_PERSISTENCE_PROFILES
-                and self.checkpoint_compatibility_policy != "hard_fail"
-            ):
-                raise ValueError(
-                    "pipeline.control_plane.required_persistence_profile="
-                    f"{self.required_persistence_profile} requires "
-                    "pipeline.control_plane.checkpoint_compatibility_policy "
-                    "to be hard_fail"
-                )
-            return self
-
-    class AtomicReplaceRetrySettings(BaseSettings):
-        """Atomic ``Path.replace`` retry policy for metadata sidecars."""
-
-        model_config = SettingsConfigDict(frozen=True)
-
-        enabled: bool = Field(default=True)
-        adaptive_backoff: bool = Field(default=True)
-        max_retries: int = Field(default=20, ge=0, le=30)
-        base_delay_seconds: float = Field(default=0.010, ge=0.0, le=5.0)
-        max_delay_seconds: float = Field(default=0.250, ge=0.0, le=10.0)
-        jitter_seconds: float = Field(default=0.010, ge=0.0, le=1.0)
-
-    class SilverMergeRetrySettings(BaseSettings):
-        """Retry policy for Delta commit conflict retries in Silver merge."""
-
-        model_config = SettingsConfigDict(frozen=True)
-
-        enabled: bool = Field(default=True)
-        adaptive_backoff: bool = Field(default=True)
-        max_retries: int = Field(default=3, ge=0, le=20)
-        base_delay_seconds: float = Field(default=0.250, ge=0.0, le=30.0)
-        max_delay_seconds: float = Field(default=2.0, ge=0.0, le=60.0)
-        jitter_seconds: float = Field(default=0.050, ge=0.0, le=5.0)
-
-    class SilverMergeTimeoutSettings(BaseSettings):
-        """Timeout and retry policy for Delta merge execution in Silver."""
-
-        model_config = SettingsConfigDict(frozen=True)
-
-        profile: Literal["default", "unit", "e2e"] = Field(default="default")
-        execution_timeout_seconds: float = Field(default=45.0, ge=1.0, le=600.0)
-        unit_execution_timeout_seconds: float = Field(default=15.0, ge=1.0, le=600.0)
-        e2e_execution_timeout_seconds: float = Field(default=90.0, ge=1.0, le=600.0)
-        retry_enabled: bool = Field(default=True)
-        adaptive_backoff: bool = Field(default=True)
-        max_retries: int = Field(default=1, ge=0, le=10)
-        base_delay_seconds: float = Field(default=0.200, ge=0.0, le=30.0)
-        max_delay_seconds: float = Field(default=2.0, ge=0.0, le=60.0)
-        jitter_seconds: float = Field(default=0.050, ge=0.0, le=5.0)
-
-    batch_size: int = Field(default=DEFAULT_BATCH_SIZE, ge=1, le=10000)
-    """Number of records per batch write."""
-
-    checkpoint_interval: int = Field(default=DEFAULT_CHECKPOINT_INTERVAL, ge=100)
-    """Save checkpoint every N records."""
-
-    relaxed_dq: bool = Field(default=False)
-    """When True, DQ thresholds are relaxed (soft=0.99, hard=1.0) for testing."""
-
-    max_concurrent_batches: int = Field(default=4, ge=1, le=16)
-    """Maximum concurrent batch writes."""
-
-    heartbeat_interval: int = Field(default=30, ge=5, le=60)
-    """Lock heartbeat interval in seconds (default: 30s, range: 5-60s)."""
-
-    silver_resilience_enabled: bool = Field(default=True)
-    """Feature flag for adaptive resilience in Silver merge and metadata writes."""
-
-    silver_metadata_atomic_retry: AtomicReplaceRetrySettings = Field(
-        default_factory=AtomicReplaceRetrySettings
-    )
-    """Atomic replace retry policy for Silver metadata sidecars."""
-
-    silver_merge_retry: SilverMergeRetrySettings = Field(
-        default_factory=SilverMergeRetrySettings
-    )
-    """Commit conflict retry policy for Delta merge operations."""
-
-    silver_merge_timeout: SilverMergeTimeoutSettings = Field(
-        default_factory=SilverMergeTimeoutSettings
-    )
-    """Delta merge execution timeout policy with dedicated retry controls."""
-
-    health_check_mode: Literal["strict", "probe"] = Field(default="strict")
-    """Preflight health-check gate mode: strict blocks on UNHEALTHY, probe degrades."""
-
-    control_plane: ControlPlaneSettings = Field(default_factory=ControlPlaneSettings)
-    """Feature flags controlling RunManifest and RunLedger rollout behavior."""
 
 
 class Settings(BaseSettings):
@@ -354,7 +143,7 @@ class Settings(BaseSettings):
     )
     pii_salt_rotation_active: bool = Field(
         default=False,
-        description="Whether salt rotation is active (BIOETL_SALT_ROTATION_ACTIVE)",
+        description="Whether salt rotation is active (BIOETL_PII_SALT_ROTATION_ACTIVE)",
     )
 
     # Serialization settings

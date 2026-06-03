@@ -5,14 +5,53 @@ Tests CSV exporter and DQ report writer integration with storage layer.
 
 from __future__ import annotations
 
+import csv
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
 
 import pyarrow as pa
-import pyarrow.csv as pv
+
+from bioetl.domain.medallion import Layer as MedallionLayer
+from bioetl.domain.value_objects.dq_report import (
+    DQReportStatus,
+    DQReportSummary,
+)
+
+
+def _read_csv_rows(path: Path, *, delimiter: str = ",") -> list[list[str]]:
+    """Read one CSV file into header and data rows."""
+    with path.open("r", encoding="utf-8", newline="") as handle:
+        return list(csv.reader(handle, delimiter=delimiter))
+
+
+def _build_bronze_report(
+    *,
+    provider: str = "test_provider",
+    entity: str = "test_entity",
+    run_id: str = "test-run-123",
+):
+    """Create a Bronze report using the current domain contract."""
+    from bioetl.domain.value_objects.dq_report import BronzeDQReport
+
+    return BronzeDQReport(
+        layer=MedallionLayer.BRONZE,
+        timestamp=datetime(2026, 6, 3, 12, 0, tzinfo=UTC),
+        run_id=run_id,
+        pipeline=f"{provider}_{entity}",
+        batch_id=f"{provider}-{entity}-batch-001",
+        source_file=f"{provider}/{entity}/2026-06-03/batch_001.jsonl.zst",
+        checks={"record_count": {"status": "pass", "value": 100}},
+        summary=DQReportSummary(
+            total_checks=1,
+            passed=1,
+            failed=0,
+            warnings=0,
+            overall_status=DQReportStatus.PASS,
+        ),
+    )
 
 
 @pytest.mark.integration
@@ -49,10 +88,10 @@ class TestCsvExportPaths:
         assert output_path.exists()
 
         # Verify content
-        content = output_path.read_text(encoding="utf-8")
-        assert "id,name,value" in content
-        assert "Alice" in content
-        assert "Bob" in content
+        rows = _read_csv_rows(output_path)
+        assert rows[0] == ["id", "name", "value"]
+        assert rows[1] == ["1", "Alice", "10.5"]
+        assert rows[2] == ["2", "Bob", "20.3"]
 
     def test_csv_export_with_complex_types(self, tmp_path: Path) -> None:
         """Test CSV export with complex types (lists, structs)."""
@@ -81,9 +120,12 @@ class TestCsvExportPaths:
         assert output_path.exists()
 
         # Complex types should be serialized to JSON
-        content = output_path.read_text(encoding="utf-8")
-        assert "tags" in content
-        assert "metadata" in content
+        rows = _read_csv_rows(output_path)
+        assert rows[0] == ["id", "tags", "metadata"]
+        assert rows[1][1] == '["tag1","tag2"]'
+        assert '"key1":"value1"' in rows[1][2]
+        assert rows[2][1] == '["tag3"]'
+        assert '"key2":"value2"' in rows[2][2]
 
     def test_csv_export_with_sorting(self, tmp_path: Path) -> None:
         """Test CSV export with deterministic sorting."""
@@ -113,11 +155,9 @@ class TestCsvExportPaths:
         assert output_path.exists()
 
         # Verify sorting
-        lines = output_path.read_text(encoding="utf-8").split("\n")
-        data_lines = [line for line in lines if line and not line.startswith("id")]
-        assert len(data_lines) == 3
-        # First data row should have id=1
-        assert data_lines[0].startswith("1,Alice")
+        rows = _read_csv_rows(output_path)
+        assert rows[0] == ["id", "name"]
+        assert rows[1:] == [["1", "Alice"], ["2", "Bob"], ["3", "Charlie"]]
 
     def test_csv_export_atomic_write(self, tmp_path: Path) -> None:
         """Test CSV export uses atomic writes."""
@@ -164,9 +204,8 @@ class TestCsvExportPaths:
         output_path = tmp_path / "delimiter_output.csv"
         exporter.export_table(table, str(output_path))
 
-        content = output_path.read_text(encoding="utf-8")
-        assert "|" in content
-        assert "," not in content
+        rows = _read_csv_rows(output_path, delimiter="|")
+        assert rows == [["id", "name"], ["1", "Alice"], ["2", "Bob"]]
 
     def test_csv_export_deduplication(self, tmp_path: Path) -> None:
         """Test CSV export deduplicates rows."""
@@ -189,11 +228,8 @@ class TestCsvExportPaths:
         output_path = tmp_path / "dedup_output.csv"
         exporter.export_table(table, str(output_path))
 
-        content = output_path.read_text(encoding="utf-8")
-        lines = content.split("\n")
-        data_lines = [line for line in lines if line and not line.startswith("id")]
-        # Should have 3 unique rows
-        assert len(data_lines) == 3
+        rows = _read_csv_rows(output_path)
+        assert rows == [["id", "name"], ["1", "Alice"], ["2", "Bob"], ["3", "Charlie"]]
 
 
 @pytest.mark.integration
@@ -221,10 +257,7 @@ class TestDQExportPaths:
     def test_dq_report_json_export(self, tmp_path: Path) -> None:
         """Test DQ report export in JSON format."""
         from bioetl.infrastructure.export.dq_report_writer import DQReportWriter
-        from bioetl.domain.value_objects.dq_report import (
-            BronzeDQReport,
-            DQReportFormat,
-        )
+        from bioetl.domain.value_objects.dq_report import DQReportFormat
 
         logger = MagicMock()
         writer = DQReportWriter(
@@ -234,15 +267,7 @@ class TestDQExportPaths:
         )
 
         # Create sample Bronze DQ report
-        report = BronzeDQReport(
-            provider="test_provider",
-            entity="test_entity",
-            run_id="test-run-123",
-            total_records=100,
-            passed_records=95,
-            failed_records=5,
-            disposition_summary={"PASS": 95, "FAIL": 5},
-        )
+        report = _build_bronze_report()
 
         # Export to JSON
         import asyncio
@@ -263,16 +288,14 @@ class TestDQExportPaths:
         import json
 
         content = json.loads(output_path.read_text(encoding="utf-8"))
-        assert content["provider"] == "test_provider"
-        assert content["entity"] == "test_entity"
+        assert content["run_id"] == "test-run-123"
+        assert content["pipeline"] == "test_provider_test_entity"
+        assert content["layer"] == "bronze"
 
     def test_dq_report_yaml_export(self, tmp_path: Path) -> None:
         """Test DQ report export in YAML format."""
         from bioetl.infrastructure.export.dq_report_writer import DQReportWriter
-        from bioetl.domain.value_objects.dq_report import (
-            BronzeDQReport,
-            DQReportFormat,
-        )
+        from bioetl.domain.value_objects.dq_report import DQReportFormat
 
         logger = MagicMock()
         writer = DQReportWriter(
@@ -281,15 +304,7 @@ class TestDQExportPaths:
             flat_structure=True,
         )
 
-        report = BronzeDQReport(
-            provider="test_provider",
-            entity="test_entity",
-            run_id="test-run-123",
-            total_records=100,
-            passed_records=95,
-            failed_records=5,
-            disposition_summary={"PASS": 95, "FAIL": 5},
-        )
+        report = _build_bronze_report()
 
         import asyncio
 
@@ -309,15 +324,13 @@ class TestDQExportPaths:
         import yaml
 
         content = yaml.safe_load(output_path.read_text(encoding="utf-8"))
-        assert content["provider"] == "test_provider"
+        assert content["run_id"] == "test-run-123"
+        assert content["pipeline"] == "test_provider_test_entity"
 
     def test_dq_report_html_export(self, tmp_path: Path) -> None:
         """Test DQ report export in HTML format."""
         from bioetl.infrastructure.export.dq_report_writer import DQReportWriter
-        from bioetl.domain.value_objects.dq_report import (
-            BronzeDQReport,
-            DQReportFormat,
-        )
+        from bioetl.domain.value_objects.dq_report import DQReportFormat
 
         logger = MagicMock()
         writer = DQReportWriter(
@@ -326,15 +339,7 @@ class TestDQExportPaths:
             flat_structure=True,
         )
 
-        report = BronzeDQReport(
-            provider="test_provider",
-            entity="test_entity",
-            run_id="test-run-123",
-            total_records=100,
-            passed_records=95,
-            failed_records=5,
-            disposition_summary={"PASS": 95, "FAIL": 5},
-        )
+        report = _build_bronze_report()
 
         import asyncio
 
@@ -357,10 +362,7 @@ class TestDQExportPaths:
     def test_dq_report_path_conventions(self, tmp_path: Path) -> None:
         """Test DQ report path conventions by layer."""
         from bioetl.infrastructure.export.dq_report_writer import DQReportWriter
-        from bioetl.domain.value_objects.dq_report import (
-            BronzeDQReport,
-            DQReportFormat,
-        )
+        from bioetl.domain.value_objects.dq_report import DQReportFormat
 
         logger = MagicMock()
         writer = DQReportWriter(
@@ -369,15 +371,7 @@ class TestDQExportPaths:
             flat_structure=False,  # Use hierarchical structure
         )
 
-        report = BronzeDQReport(
-            provider="test_provider",
-            entity="test_entity",
-            run_id="test-run-123",
-            total_records=100,
-            passed_records=95,
-            failed_records=5,
-            disposition_summary={"PASS": 95, "FAIL": 5},
-        )
+        report = _build_bronze_report()
 
         import asyncio
 
@@ -399,10 +393,7 @@ class TestDQExportPaths:
     def test_dq_report_atomic_write(self, tmp_path: Path) -> None:
         """Test DQ report uses atomic writes."""
         from bioetl.infrastructure.export.dq_report_writer import DQReportWriter
-        from bioetl.domain.value_objects.dq_report import (
-            BronzeDQReport,
-            DQReportFormat,
-        )
+        from bioetl.domain.value_objects.dq_report import DQReportFormat
 
         logger = MagicMock()
         writer = DQReportWriter(
@@ -411,15 +402,7 @@ class TestDQExportPaths:
             flat_structure=True,
         )
 
-        report = BronzeDQReport(
-            provider="test_provider",
-            entity="test_entity",
-            run_id="test-run-123",
-            total_records=100,
-            passed_records=95,
-            failed_records=5,
-            disposition_summary={"PASS": 95, "FAIL": 5},
-        )
+        report = _build_bronze_report()
 
         import asyncio
 

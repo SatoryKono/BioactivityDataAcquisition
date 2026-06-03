@@ -1,13 +1,9 @@
-"""Immutable control-plane provenance artifacts for launched runs.
-
-Run manifests do not replace ``PipelineRunContext`` or ``PipelineContext``;
-they document persisted control-plane provenance for replay and diagnostics.
-"""
+"""Immutable control-plane provenance artifacts for launched runs; replace ``PipelineRunContext`` or ``PipelineContext`` for provenance tracking."""
 
 from __future__ import annotations
 
-from dataclasses import dataclass, fields
-from datetime import datetime
+from dataclasses import InitVar, dataclass, field, fields
+from datetime import UTC, datetime
 from enum import StrEnum
 from uuid import UUID
 
@@ -30,6 +26,8 @@ __all__ = [
 DOCUMENTED_SOURCE_REVISION_STATES = frozenset(
     {"clean", "dirty", "dirty_state_unknown", "git_unavailable"}
 )
+_DEFAULT_RUN_ID = RunID(UUID(int=0))
+_DEFAULT_CREATED_AT = datetime(1970, 1, 1, tzinfo=UTC)
 
 
 def _require_non_empty_text(value: object, field_name: str) -> None:
@@ -115,26 +113,29 @@ class RunManifest:
     ``PipelineRunContext`` and ``PipelineContext``.
     """
 
-    manifest_id: str
-    execution_fingerprint: str
-    schema_version: str
-    created_at: datetime
-    run_id: RunID
-    run_type: RunType
-    pipeline_name: str
-    provider: str
-    entity: str
-    launch_context: dict[str, object]
-    runtime_config: dict[str, object]
-    resolved_config: dict[str, object]
-    code_provenance: RunCodeProvenance
+    manifest_id: str = "legacy-manifest"
+    execution_fingerprint: str = "legacy-fingerprint"
+    schema_version: str = "1.0"
+    created_at: datetime = _DEFAULT_CREATED_AT
+    run_id: RunID = _DEFAULT_RUN_ID
+    run_type: RunType = RunType.INCREMENTAL
+    pipeline_name: str = "unknown_pipeline"
+    provider: str = "unknown"
+    entity: str = "unknown"
+    launch_context: dict[str, object] = field(default_factory=dict)
+    runtime_config: dict[str, object] = field(default_factory=dict)
+    resolved_config: dict[str, object] = field(default_factory=dict)
+    code_provenance: RunCodeProvenance = field(default_factory=RunCodeProvenance)
     replay_of_run_id: str | None = None
     replay_of_manifest_id: str | None = None
     replay_capability: ReplayCapability = ReplayCapability.REBUILD_ONLY
     source_refs: tuple[RunSourceRef, ...] = ()
     planned_artifacts: tuple[RunArtifactRef, ...] = ()
+    pipeline_config: InitVar[object | None] = None
+    pipeline_identity: InitVar[object | None] = None
+    artifacts: InitVar[object | None] = None
 
-    def __post_init__(self) -> None:
+    def __post_init__(self, *_legacy: object | None) -> None:
         """Keep manifest timestamps canonical across serialize/deserialize cycles."""
         for field_name in (
             "manifest_id",

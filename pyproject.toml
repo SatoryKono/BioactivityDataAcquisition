@@ -79,7 +79,7 @@ tests = [
     "hypothesis>=6.100",
     # VCR.py for API testing (RULES.md Section 4.2)
     "vcrpy>=6.0",
-    "pytest-vcr>=1.0",
+    "pytest-recording>=0.13",
     # Code formatting (required by architecture tests) - ruff replaces black+isort
     "ruff>=0.4",
     "detect-secrets>=1.4",
@@ -114,7 +114,7 @@ dev = [
     # safety removed: requires paid API key for scan command
     # VCR.py for API testing (RULES.md Section 4.2)
     "vcrpy>=6.0",
-    "pytest-vcr>=1.0",
+    "pytest-recording>=0.13",
     # Code formatting and linting - ruff replaces black+isort
     "import-linter>=2.0",
     # Docstring style checking

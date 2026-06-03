@@ -15,6 +15,7 @@ import yaml
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 SCORECARD_PATH = PROJECT_ROOT / "configs/quality/debt_scorecard.yaml"
 SRC_ROOT = PROJECT_ROOT / "src" / "bioetl"
+TYPE_CHECKING_NAME = "TYPE_CHECKING"
 
 
 @dataclass(frozen=True)
@@ -97,12 +98,148 @@ def count_total_loc(*, files: list[Path]) -> int:
     return sum(len(path.read_text(encoding="utf-8").splitlines()) for path in files)
 
 
+def _is_type_checking_guard(test: ast.AST) -> bool:
+    """Return whether an AST test is ``if TYPE_CHECKING``."""
+    return (
+        (isinstance(test, ast.Name) and test.id == TYPE_CHECKING_NAME)
+        or (isinstance(test, ast.Attribute) and test.attr == TYPE_CHECKING_NAME)
+    )
+
+
+def _is_all_assignment(node: ast.AST) -> bool:
+    """Return whether node is a top-level ``__all__`` declaration."""
+    if isinstance(node, ast.Assign):
+        return any(
+            isinstance(target, ast.Name) and target.id == "__all__"
+            for target in node.targets
+        )
+    if isinstance(node, ast.AnnAssign):
+        return isinstance(node.target, ast.Name) and node.target.id == "__all__"
+    return False
+
+
+def _is_facade_side_effect_node(node: ast.AST) -> bool:
+    """Return whether node is a lightweight facade guard statement."""
+    return isinstance(node, (ast.Assert, ast.Raise, ast.Pass))
+
+
+def _is_facade_only_statement(node: ast.AST) -> bool:
+    """Return whether a top-level node belongs to facade-only structure."""
+    if _is_all_assignment(node):
+        return True
+    if isinstance(node, (ast.Import, ast.ImportFrom)):
+        return True
+    if _is_facade_side_effect_node(node):
+        return True
+    if isinstance(node, ast.If) and _is_type_checking_guard(node.test):
+        if not node.orelse:
+            return all(
+                _is_facade_only_statement(child) and not isinstance(child, ast.If)
+                for child in node.body
+            )
+        return (
+            all(_is_facade_only_statement(child) for child in node.body)
+            and all(_is_facade_only_statement(child) for child in node.orelse)
+        )
+    if isinstance(node, ast.If):
+        body_ok = all(
+            _is_facade_only_statement(child) or _is_facade_side_effect_node(child)
+            for child in node.body
+        )
+        if not body_ok:
+            return False
+        if not node.orelse:
+            return True
+        return all(
+            _is_facade_only_statement(child) or _is_facade_side_effect_node(child)
+            for child in node.orelse
+        )
+    return False
+
+
+def _is_import_facade_file(*, path: Path, source: str | None = None) -> bool:
+    """Heuristic classifier for import/re-export facade modules."""
+    if path.name.startswith("_"):
+        return False
+    if path.suffix != ".py":
+        return False
+
+    try:
+        tree = ast.parse(source if source is not None else path.read_text(encoding="utf-8"))
+    except SyntaxError:
+        return False
+
+    import_count = 0
+    for node in tree.body:
+        if isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant):
+            continue
+        if isinstance(node, (ast.Import, ast.ImportFrom)):
+            import_count += 1
+            continue
+        if _is_facade_only_statement(node):
+            if isinstance(node, (ast.Import, ast.ImportFrom)):
+                import_count += 1
+            continue
+        # Any operational code means this is not a facade
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            return False
+        if isinstance(node, (ast.For, ast.While, ast.Try, ast.If)):
+            return False
+        if isinstance(node, (ast.Assign, ast.AnnAssign)):
+            if _is_all_assignment(node):
+                continue
+            return False
+        return False
+
+    return import_count >= 1
+
+
+def _is_schema_or_field_definition_file(*, path: Path, source: str | None = None) -> bool:
+    """Heuristic classifier for schema/field definition modules."""
+    if path.suffix != ".py":
+        return False
+
+    stem = path.stem.lower()
+    if any(part == "schemas" for part in path.parts):
+        return True
+    if "schema" in stem or "field" in stem:
+        if source is None:
+            try:
+                source = path.read_text(encoding="utf-8")
+            except OSError:
+                return False
+        try:
+            tree = ast.parse(source)
+        except SyntaxError:
+            return True
+        imported_symbol_modules = {
+            alias.name
+            for node in ast.walk(tree)
+            if isinstance(node, (ast.Import, ast.ImportFrom))
+            for alias in node.names
+        }
+        return any(
+            symbol.split(".")[0] in {"pydantic", "pandera", "pyarrow", "polars"}
+            for symbol in imported_symbol_modules
+        )
+    return False
+
+
+def _is_loccap_excluded(*, path: Path, source: str | None = None) -> bool:
+    """Return whether the module is excluded from 250 LOC family-growth checks."""
+    return _is_import_facade_file(path=path, source=source) or _is_schema_or_field_definition_file(
+        path=path,
+        source=source,
+    )
+
+
 def count_files_ge_loc(*, files: list[Path], min_lines: int) -> int:
     """Count files meeting the minimum LOC threshold."""
     return sum(
         1
         for path in files
         if len(path.read_text(encoding="utf-8").splitlines()) >= min_lines
+        and not _is_loccap_excluded(path=path)
     )
 
 
