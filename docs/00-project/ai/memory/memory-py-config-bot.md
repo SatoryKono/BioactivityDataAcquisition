@@ -33,6 +33,7 @@ When config changes affect governance or tracked code areas:
 - distinguish `exemption debt` from `hotspot inventory`;
 - verify whether the change impacts `configs/quality/debt_scorecard.yaml` or
   `configs/quality/architecture_metric_exemptions.yaml`;
+- preserve the hard rule `ЗАПРЕЩЕНО УВЕЛИЧИВАТЬ ЛИМИТЫ ТЕХ. ДОЛГА.`;
 - never add a new exemption without required metadata;
 - mention debt outcome for touched files or config surfaces:
   `improved`, `unchanged`, or `worsened`.

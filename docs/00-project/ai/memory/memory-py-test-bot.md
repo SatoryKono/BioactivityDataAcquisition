@@ -32,6 +32,7 @@ When tests are added or changed alongside code:
 
 - treat test evidence as support for debt evaluation, not as a standalone debt
   classifier;
+- preserve the hard rule `ЗАПРЕЩЕНО УВЕЛИЧИВАТЬ ЛИМИТЫ ТЕХ. ДОЛГА.`;
 - if the task changes tracked files, include debt outcome in the closeout:
   `improved`, `unchanged`, or `worsened`;
 - when tests cover exemption or scorecard behavior, keep

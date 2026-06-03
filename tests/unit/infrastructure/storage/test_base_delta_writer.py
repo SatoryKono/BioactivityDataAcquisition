@@ -147,8 +147,12 @@ class TestBaseDeltaWriter:
         )
         assert not writer.base_path.endswith("/")
 
-    def test_get_table_path(self, writer: BaseDeltaWriter, tmp_path: Path) -> None:
-        """Test get_table_path method."""
+    def test_get_table_path__delta_writer__constructs_expected_path(
+        self,
+        writer: BaseDeltaWriter,
+        tmp_path: Path,
+    ) -> None:
+        """Test get_table_path method constructs expected path for delta writer."""
         path = writer.get_table_path("chembl.activity")
         assert path == tmp_path / "chembl" / "activity"
 

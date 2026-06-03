@@ -19,6 +19,10 @@ profiles в BioETL.
   [`../agents/guides/MEMORY_USAGE.md`](../agents/guides/MEMORY_USAGE.md)
   — обязательный порядок чтения memory surfaces, conflict priority и
   stale-memory protocol.
+- **Global debt guardrail**:
+  все role-specific memory sheets и project memory MUST сохранять правило
+  `ЗАПРЕЩЕНО УВЕЛИЧИВАТЬ ЛИМИТЫ ТЕХ. ДОЛГА`, включая запрет на рост
+  `scorecard budgets`, exemption limits и hotspot thresholds.
 - **Post-change validation policy**:
   [`../agents/policy/POST_CHANGE_VALIDATION.md`](../agents/policy/POST_CHANGE_VALIDATION.md)
   — validation protocol после write-capable AI work.

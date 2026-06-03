@@ -35,6 +35,7 @@ signals for the touched path:
 - review the relevant scorecard registries (`file_size_limits`,
   `function_complexity`, `function_length`, `class_size`,
   `class_method_count`, `god_object`, `domain_complexity`);
+- preserve the hard rule `ЗАПРЕЩЕНО УВЕЛИЧИВАТЬ ЛИМИТЫ ТЕХ. ДОЛГА.`;
 - if the path belongs to a hotspot family, watch `duplication_clusters`,
   `files_ge_250_loc`, `max_internal_fan_in`, and related family caps;
 - report debt outcome as `improved`, `unchanged`, or `worsened`.

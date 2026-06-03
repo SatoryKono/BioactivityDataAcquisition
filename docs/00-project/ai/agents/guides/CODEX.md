@@ -86,6 +86,9 @@ ______________________________________________________________________
 1. Не вводи новый exemption без явного обновления
    `configs/quality/architecture_metric_exemptions.yaml` и без required
    metadata.
+1. **ЗАПРЕЩЕНО УВЕЛИЧИВАТЬ ЛИМИТЫ ТЕХ. ДОЛГА**: не повышай `scorecard budgets`,
+   exemption limits, hotspot thresholds или family caps; если упёрся в лимит,
+   сокращай scope или эскалируй.
 1. В финальном сообщении фиксируй debt outcome для touched files:
    `improved`, `unchanged` или `worsened`.
 

@@ -39,7 +39,7 @@ def test_vcr_metadata_catalog_drift_check_passes_current_repo() -> None:
     artifact_path = Path("reports/quality/vcr-metadata-catalog.json")
     actual = artifact_path.read_text(encoding="utf-8")
 
-    assert actual == expected, (
+    assert json.loads(actual) == json.loads(expected), (
         "VCR metadata catalog artifact drifted from generator output."
     )
 

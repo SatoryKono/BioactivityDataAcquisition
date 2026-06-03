@@ -973,10 +973,10 @@ test_governance_debt_metrics:
     inventory, assertion-strength debt, or deterministic test-seam counts change.
   metrics:
     compatibility_test_file_count:
-      current_count: 37
-      max_count: 37
-      target_count: 37
-      ratchet_policy: Downward ratchet only; keep max_count at 37 unless a future
+      current_count: 33
+      max_count: 33
+      target_count: 33
+      ratchet_policy: Downward ratchet only; keep max_count at 33 unless a future
         owner-approved reduction lowers the live compatibility test inventory.
       rationale: >-
         Issues #4925, #4967, #5023, and #5034 reclassified pure public-facade,

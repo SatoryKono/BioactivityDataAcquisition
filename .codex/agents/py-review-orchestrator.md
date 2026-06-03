@@ -15,6 +15,13 @@ ______________________________________________________________________
 - Role memory: `docs/00-project/ai/memory/memory-py-review-orchestrator.md`
 - Post-change protocol: `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 
+## Debt Guardrail
+
+- **ЗАПРЕЩЕНО УВЕЛИЧИВАТЬ ЛИМИТЫ ТЕХ. ДОЛГА.**
+- Любой review, который предлагает рост `scorecard budgets`, exemption limits,
+  hotspot thresholds или family caps, должен оформляться как finding, а не как
+  рекомендация к принятию.
+
 ______________________________________________________________________
 
 ## 1. Миссия

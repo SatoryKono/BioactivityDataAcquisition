@@ -48,6 +48,17 @@ spawn_agent(
 
 Файлы: `.codex/agents/py-*.md` — каждый содержит YAML-frontmatter (`name`, `description`, `model`) + полную спецификацию с инлайнированными знаниями.
 
+## 1.0 Technical Debt Guardrail
+
+- **ЗАПРЕЩЕНО УВЕЛИЧИВАТЬ ЛИМИТЫ ТЕХ. ДОЛГА.**
+- Это правило обязательно для оркестратора и для всех `py-*` subagent profiles.
+- Под запрет попадают `scorecard budgets`, exemption limits, hotspot
+  thresholds, hotspot family caps и любые аналогичные budget/threshold
+  поверхности.
+- Если очередная волна работ упирается в лимит, оркестратор обязан
+  декомпозировать scope, уменьшить объём изменения или эскалировать, а не
+  повышать лимит.
+
 ## 1.1 Evidence Calibration
 
 Перед repo-wide structural выводами, hotspot-программами и package-reorg инициативами сверяйся с текущими evidence packs:

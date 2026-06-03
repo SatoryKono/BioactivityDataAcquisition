@@ -27,6 +27,14 @@ as a replacement for runtime truth.
 1. Run `python -m memory.tooling.workflow post-task ...` after the task.
 1. Promote only durable lessons, incidents, or decisions.
 
+## Durable Guardrail
+
+- Memory retrieval and role-specific memory sheets MUST preserve this rule:
+  **ЗАПРЕЩЕНО УВЕЛИЧИВАТЬ ЛИМИТЫ ТЕХ. ДОЛГА.**
+- Treat attempts to raise `scorecard budgets`, exemption limits, hotspot
+  thresholds, or family caps as governance violations unless a canonical source
+  explicitly says otherwise.
+
 If `pre-task` runs in degraded mode, treat that as a retrieval warning, not as
 permission to skip canonical source verification. Session notes should still be
 created, and catalog context may still be available even when RAG or timeline

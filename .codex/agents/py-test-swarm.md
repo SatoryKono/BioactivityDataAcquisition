@@ -19,6 +19,12 @@ ______________________________________________________________________
 - `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md` — post-change validation protocol
 - `.codex/agents/ORCHESTRATION.md` — протокол оркестрации (§2-§7)
 
+## Debt Guardrail
+
+- **ЗАПРЕЩЕНО УВЕЛИЧИВАТЬ ЛИМИТЫ ТЕХ. ДОЛГА.**
+- Ни один shard или delegated agent не должен "чинить" quality gates через рост
+  `scorecard budgets`, exemption limits, hotspot thresholds или family caps.
+
 ## Runtime Note
 
 - CI или single-OS checkout: `uv run python -m ...`

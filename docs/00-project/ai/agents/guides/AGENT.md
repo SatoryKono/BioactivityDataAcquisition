@@ -69,6 +69,9 @@ Operational rule:
   `max_internal_fan_in`;
 - не создавай новый exemption молча: если он нужен, оформи required metadata и
   сохрани scorecard sync;
+- **ЗАПРЕЩЕНО УВЕЛИЧИВАТЬ ЛИМИТЫ ТЕХ. ДОЛГА**: нельзя повышать
+  `scorecard budgets`, exemption limits, hotspot thresholds или family caps;
+  если изменение упирается в лимит, уменьши scope или эскалируй;
 - в завершении задачи явно укажи debt outcome: `improved`, `unchanged` или
   `worsened`.
 

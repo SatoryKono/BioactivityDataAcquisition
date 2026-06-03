@@ -22,6 +22,12 @@ ______________________________________________________________________
 - `docs/00-project/ai/memory/memory-py-test-bot.md` — test structure, thresholds, VCR, failure classification
 - `docs/00-project/ai/agents/agents/ORCHESTRATION.md` — публикуемый mirror протокола оркестрации (§2-§7)
 
+## Debt Guardrail
+
+- **ЗАПРЕЩЕНО УВЕЛИЧИВАТЬ ЛИМИТЫ ТЕХ. ДОЛГА.**
+- Ни один shard или delegated agent не должен "чинить" quality gates через рост
+  `scorecard budgets`, exemption limits, hotspot thresholds или family caps.
+
 ## Runtime Note
 
 - CI или single-OS checkout: `uv run python -m ...`

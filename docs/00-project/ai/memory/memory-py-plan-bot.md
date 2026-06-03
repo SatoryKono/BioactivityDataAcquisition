@@ -41,6 +41,7 @@ Every RF that changes files should explicitly preserve a debt-tracking step:
 
 - identify which scorecard registries are likely to move;
 - note whether the path is inside a named hotspot family;
+- preserve the hard rule `ЗАПРЕЩЕНО УВЕЛИЧИВАТЬ ЛИМИТЫ ТЕХ. ДОЛГА.`;
 - require the implementing agent to report debt outcome:
   `improved`, `unchanged`, or `worsened`;
 - if a plan would require a new exemption, surface that explicitly rather than

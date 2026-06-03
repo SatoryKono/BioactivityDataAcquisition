@@ -42,6 +42,7 @@ tracks technical debt correctly:
 - if docs mention debt budgets or exemptions, sync wording with
   `configs/quality/debt_scorecard.yaml` and
   `configs/quality/architecture_metric_exemptions.yaml`;
+- preserve the hard rule `ЗАПРЕЩЕНО УВЕЛИЧИВАТЬ ЛИМИТЫ ТЕХ. ДОЛГА.`;
 - when a task closes, preserve the debt outcome wording:
   `improved`, `unchanged`, or `worsened`.
 

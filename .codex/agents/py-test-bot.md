@@ -133,6 +133,10 @@ mypy src/bioetl/path/to/module.py --strict
    - integration: VCR.py для HTTP
    - обязательно проверять edge cases и error paths
 
+1. **ЗАПРЕЩЕНО УВЕЛИЧИВАТЬ ЛИМИТЫ ТЕХ. ДОЛГА.** Любые изменения, повышающие
+   `scorecard budgets`, exemption limits, hotspot thresholds или family caps,
+   трактуй как дефект governance, а не как допустимый способ "починить" тесты.
+
 ______________________________________________________________________
 
 ## Test Selection Strategy

@@ -482,7 +482,7 @@ pytest tests/architecture/test_dq_contracts.py
 
 ### Current Documentation
 
-- [DQ Contract System Architecture](../../04-reference/components/dq-contract-system.md)
+- [DQ Contract System Architecture (archived)](../../99-archive/dq-contract-system-component-spec.archive.md)
 - [Observability Metrics Contract](observability.md)
 - [Run Manifest & Ledger Contract](run-manifest-ledger.md)
 - [Gold Schema Contracts](gold-schemas.md)
