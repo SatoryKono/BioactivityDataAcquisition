@@ -9,6 +9,7 @@ This suite provides one smoke E2E case per entity pipeline declared in
 
 from __future__ import annotations
 
+import asyncio
 import os
 import sys
 from dataclasses import dataclass
@@ -44,6 +45,9 @@ from .conftest import (
 pytestmark = pytest.mark.usefixtures("relaxed_dq_env")
 
 CASSETTE_ROOT = Path(__file__).parent.parent / "fixtures" / "vcr"
+PIPELINE_MATRIX_EXECUTION_TIMEOUT_SECONDS = float(
+    os.environ.get("BIOETL_E2E_PIPELINE_MATRIX_EXECUTION_TIMEOUT_SECONDS", "105")
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -462,7 +466,22 @@ async def test_pipeline_matrix_smoke(
 
     silver_validation_skipped = False
     try:
-        await run_pipeline_or_skip_transient(ctx)
+        await asyncio.wait_for(
+            run_pipeline_or_skip_transient(ctx),
+            timeout=PIPELINE_MATRIX_EXECUTION_TIMEOUT_SECONDS,
+        )
+    except TimeoutError:
+        pytest.fail(
+            _build_e2e_fail_reason(
+                "PIPELINE_EXECUTION_TIMEOUT",
+                pipeline_name=pipeline_case.pipeline_name,
+                detail=(
+                    f"timeout_seconds={PIPELINE_MATRIX_EXECUTION_TIMEOUT_SECONDS:g}; "
+                    f"run_id={ctx.run_id}"
+                ),
+            ),
+            pytrace=False,
+        )
     except MATRIX_SKIP_ERRORS as exc:
         if _is_rate_limited_http_error(exc):
             pytest.skip(
@@ -492,8 +511,7 @@ async def test_pipeline_matrix_smoke(
         # still fail Silver due to sparse upstream sample content.
         if (
             isinstance(exc, DataQualityThresholdError)
-            and pipeline_case.pipeline_name
-            in BRONZE_ONLY_ON_DQ_THRESHOLD_PIPELINES
+            and pipeline_case.pipeline_name in BRONZE_ONLY_ON_DQ_THRESHOLD_PIPELINES
         ):
             silver_validation_skipped = True
         else:

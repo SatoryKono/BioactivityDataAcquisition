@@ -106,6 +106,8 @@ log_test.txt
 !/reports/quality/dead-code-inventory.json
 !/reports/quality/dead-code-inventory.md
 !/reports/quality/module-coverage-inventory.json
+!/reports/quality/test-governance-current.json
+!/reports/quality/test-duplicate-name-inventory.json
 !/reports/quality/pipeline-config-contract-ownership-map.json
 !/reports/quality/pipeline-config-contract-ownership-map.md
 !/reports/quality/contract-coverage-matrix.json
