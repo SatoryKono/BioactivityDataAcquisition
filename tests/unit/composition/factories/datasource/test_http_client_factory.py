@@ -127,6 +127,49 @@ class TestHttpClientFactory:
         assert kwargs["retry_config"].base_delay == pytest.approx(1.0)
         assert kwargs["retry_config"].max_delay == pytest.approx(60.0)
 
+    def test_create_clamps_retry_waits_in_test_mode(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test mode should preserve attempts but remove wall-clock retry waits."""
+        from bioetl.composition.factories.datasource import http_client as module
+
+        source_config = SimpleNamespace(
+            rate_limit=SimpleNamespace(requests_per_second=7.5, burst=15),
+            circuit_breaker=SimpleNamespace(failure_threshold=9, recovery_timeout=120),
+            timeout_sec=42.0,
+            max_retries=5,
+            retry_base_delay=30.0,
+            retry_max_delay=300.0,
+            max_connections=100,
+            max_keepalive_connections=20,
+            trust_env=False,
+        )
+        client_ctor = MagicMock(return_value="client-test-mode")
+        registry = MagicMock()
+        registry.is_registered.return_value = True
+        registry.get_http_config.return_value = None
+
+        monkeypatch.setattr(
+            module,
+            "_resolve_provider_registry",
+            lambda provider_registry=None: registry,
+        )
+        monkeypatch.setattr(module, "load_source_config", lambda _: source_config)
+        monkeypatch.setattr(module, "UnifiedHTTPClient", client_ctor)
+
+        settings = SimpleNamespace(test_mode=True)
+        result = HttpClientFactory.create_for_provider(
+            "semanticscholar",
+            settings=settings,
+        )
+
+        assert result == "client-test-mode"
+        retry_config = client_ctor.call_args.kwargs["retry_config"]
+        assert retry_config.max_attempts == 5
+        assert retry_config.base_delay == pytest.approx(0.0)
+        assert retry_config.max_delay == pytest.approx(0.0)
+        assert retry_config.max_retry_after_seconds == pytest.approx(0.0)
+
     def test_create_uses_explicit_provider_registry_instance(
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:

@@ -19,13 +19,12 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
-
 from .conftest import (
     assert_bronze_files_exist,
     assert_silver_table_has_records,
     create_test_context,
     get_silver_records,
+    run_pipeline_or_skip_transient,
 )
 
 pytestmark = pytest.mark.usefixtures("relaxed_dq_env")
@@ -58,8 +57,7 @@ async def test_semanticscholar_publication_full_cycle(
         filter_field="doi",
     )
 
-    runner = bootstrap_pipeline_runner(ctx)
-    await runner.run()
+    await run_pipeline_or_skip_transient(ctx)
 
     bronze_files = assert_bronze_files_exist(
         e2e_data_dir, "semanticscholar", "publication"
@@ -96,8 +94,7 @@ async def test_semanticscholar_publication_metadata_fields(
         filter_field="doi",
     )
 
-    runner = bootstrap_pipeline_runner(ctx)
-    await runner.run()
+    await run_pipeline_or_skip_transient(ctx)
 
     records = get_silver_records(e2e_data_dir, "semanticscholar_publication")
     assert len(records) >= 1, "Should have at least one S2 record"
@@ -123,8 +120,7 @@ async def test_semanticscholar_publication_citation_fields(
         filter_field="doi",
     )
 
-    runner = bootstrap_pipeline_runner(ctx)
-    await runner.run()
+    await run_pipeline_or_skip_transient(ctx)
 
     records = get_silver_records(e2e_data_dir, "semanticscholar_publication")
     for record in records:

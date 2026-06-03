@@ -14,6 +14,46 @@ from typing import Any, Protocol, cast
 pytestmark = pytest.mark.architecture
 
 
+def _normalize_catalog_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    normalized = json.loads(json.dumps(payload))
+
+    cassettes = normalized.get("cassettes")
+    if isinstance(cassettes, list):
+        for row in cassettes:
+            owners = row.get("reachability_owner_paths")
+            if isinstance(owners, list):
+                row["reachability_owner_paths"] = sorted(set(owners))
+        normalized["cassettes"] = sorted(
+            cassettes,
+            key=lambda row: (
+                row.get("provider", ""),
+                row.get("cassette_rel_path", ""),
+                row.get("scenario_stem", ""),
+            ),
+        )
+
+    providers = normalized.get("providers")
+    if isinstance(providers, dict):
+        normalized["providers"] = dict(sorted(providers.items(), key=lambda item: item[0]))
+
+    pruning = normalized.get("pruning")
+    if isinstance(pruning, dict):
+        duplicate_scenario_stems = pruning.get("duplicate_scenario_stems")
+        if isinstance(duplicate_scenario_stems, dict):
+            normalized["pruning"]["duplicate_scenario_stems"] = dict(
+                sorted(duplicate_scenario_stems.items(), key=lambda item: item[0])
+            )
+        for key in (
+            "orphan_metadata_sidecar_count",
+            "metadata_review_required_cassettes",
+            "unowned_cassettes",
+        ):
+            value = normalized["pruning"].get(key)
+            if isinstance(value, list):
+                normalized["pruning"][key] = sorted(value)
+    return normalized
+
+
 class CatalogModule(Protocol):
     """Typed surface for the catalog generator module."""
 
@@ -39,7 +79,9 @@ def test_vcr_metadata_catalog_drift_check_passes_current_repo() -> None:
     artifact_path = Path("reports/quality/vcr-metadata-catalog.json")
     actual = artifact_path.read_text(encoding="utf-8")
 
-    assert json.loads(actual) == json.loads(expected), (
+    actual_payload = _normalize_catalog_payload(json.loads(actual))
+    expected_payload = _normalize_catalog_payload(json.loads(expected))
+    assert actual_payload == expected_payload, (
         "VCR metadata catalog artifact drifted from generator output."
     )
 

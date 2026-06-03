@@ -49,6 +49,27 @@ class HttpClientFactory:
     """Create HTTP clients from source config plus registry fallbacks."""
 
     @classmethod
+    def _build_retry_config(
+        cls,
+        cfg: ResolvedHttpConfig,
+        settings: Settings | None,
+    ) -> RetryConfig:
+        """Return provider retry config, clamping waits in test mode."""
+        test_mode = bool(getattr(settings, "test_mode", False))
+        if test_mode:
+            return RetryConfig(
+                max_attempts=cfg.max_retries,
+                base_delay=0.0,
+                max_delay=0.0,
+                max_retry_after_seconds=0.0,
+            )
+        return RetryConfig(
+            max_attempts=cfg.max_retries,
+            base_delay=cfg.base_delay,
+            max_delay=cfg.max_delay,
+        )
+
+    @classmethod
     def create_for_provider(
         cls,
         provider: str,
@@ -167,6 +188,7 @@ class HttpClientFactory:
             settings,
             provider_registry=provider_registry,
         )
+        retry_config = cls._build_retry_config(cfg, settings)
 
         return UnifiedHTTPClient(
             rate_limiter=TokenBucketRateLimiter(
@@ -178,11 +200,7 @@ class HttpClientFactory:
                 recovery_timeout=cfg.recovery_timeout,
                 metrics=metrics,
             ),
-            retry_config=RetryConfig(
-                max_attempts=cfg.max_retries,
-                base_delay=cfg.base_delay,
-                max_delay=cfg.max_delay,
-            ),
+            retry_config=retry_config,
             timeout=cfg.timeout,
             provider=provider,
             run_id=run_id,
