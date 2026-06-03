@@ -97,6 +97,7 @@ The domain layer implements Domain-Driven Design patterns:
 | [CLI Reference](docs/04-reference/cli.md)                                   | Command-line interface documentation                                 |
 | [Run Manifest Contract](docs/04-reference/contracts/run-manifest-ledger.md) | Published control-plane manifest and ledger schema                   |
 | [Operations Runbooks](docs/05-operations/runbooks/)                         | Incident response and procedures                                     |
+| [Monitoring Docs Index](docs/03-guides/dashboards/monitoring-index.md)       | Incident-time operator dashboard navigation and triage guide     |
 | [Archive Index](docs/99-archive/README.md)                                  | Repository-path historical index; not published in MkDocs nav         |
 
 Start with [Project Map](docs/00-project/00-map.md), [RULES.md](docs/00-project/RULES.md),
@@ -458,7 +459,7 @@ How to run:
 
 ### Testing
 
-The project uses `pytest` for testing, split into Unit, Integration, and Architecture tests.
+The project uses `pytest` for testing with a formalized test matrix covering Unit, Integration, Contract, Property-Based, and E2E tests (see [ADR-042: Testing Strategy Matrix](docs/02-architecture/decisions/ADR-042-testing-strategy-matrix.md)).
 
 - **Setup Plugins (pytest + pre-commit):**
 

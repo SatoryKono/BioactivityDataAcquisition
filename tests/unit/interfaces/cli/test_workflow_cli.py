@@ -93,6 +93,24 @@ def _mock_workflow_observability_backend(monkeypatch: Any) -> None:
     )
 
 
+@pytest.fixture(autouse=True)
+def _mock_workflow_metrics_publication(monkeypatch: Any) -> None:
+    import bioetl.interfaces.cli.commands.workflow as workflow_cmd
+
+    monkeypatch.setattr(
+        workflow_cmd,
+        "ensure_metrics_server_started",
+        lambda: True,
+        raising=True,
+    )
+    monkeypatch.setattr(
+        workflow_cmd,
+        "publish_metrics_safely",
+        lambda **_: True,
+        raising=True,
+    )
+
+
 def test_workflow_help_lists_run_and_status(cli_runner: CliRunner) -> None:
     result = cli_runner.invoke(cli, ["workflow", "--help"])
 

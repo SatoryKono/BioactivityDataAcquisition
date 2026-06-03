@@ -13,10 +13,11 @@ ______________________________________________________________________
 
 # BioETL Project Navigator
 
-*Synced with RULES.md v6.1.3 | Last updated: 2026-04-29*
+*Synced with RULES.md v6.1.3 | Last updated: 2026-06-03*
 
-> **Documentation Update:** 2026-04-29
+> **Documentation Update:** 2026-06-03
 >
+> - 2026-06-03: Added ADR-046, ADR-047, ADR-048, ADR-049 to ADR registry
 > - 2026-04-29: navigator trimmed to navigation-only duties; manual document-status matrix removed to avoid freshness drift
 > - **Issue #3091 Resolution**: Fixed ADR status contradiction (ADR-001..043 → ADR-001..045)
 > - **Source-code map updated**: Added missing directories (`domain/lineage/`, `domain/control_plane/`, `domain/config/control_plane.py`, `domain/composite/checkpoint/`, `application/services/control_plane/`, `application/services/dq/`, `application/services/execution/`, `application/services/lineage/`, `composition/monitoring/`, `infrastructure/adr/`, `infrastructure/audit/`, `infrastructure/compat/`, `infrastructure/control_plane/`, `infrastructure/system/`)
@@ -69,6 +70,7 @@ ______________________________________________________________________
 | Browse ADR registry                | [adr-registry.md](../02-architecture/adr-registry.md)                                  |
 | Need historical context            | Repository path `docs/99-archive/README.md` *(non-canonical)*                          |
 | Browse shipped dashboards           | [dashboards/README.md](../03-guides/dashboards/README.md) (coverage matrix)            |
+|| Operator dashboard triage          | [monitoring-index.md](../03-guides/dashboards/monitoring-index.md) (incident-time navigation) |
 
 ______________________________________________________________________
 
@@ -210,6 +212,10 @@ ______________________________________________________________________
 | [ADR-043: Documentation Knowledge Management](../02-architecture/decisions/ADR-043-documentation-knowledge-management.md)       | Documentation governance and knowledge management      | §7         |
 | [ADR-044: Run Manifest and Run Ledger Control Plane](../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md) | Immutable manifest, append-only ledger, inspection CLI | §2.4, §5.5 |
 | [ADR-045: Data Quality Contract System](../02-architecture/decisions/ADR-045-dq-contract-system.md)                             | DQ contract semantics and rollout alignment            | §3.4, §5.5 |
+| [ADR-046: Checkpoint Versus Ledger-Based Resume](../02-architecture/decisions/ADR-046-checkpoint-vs-ledger-resume.md)       | Checkpoint vs ledger resume distinction                 | §2.4       |
+| [ADR-047: Workflow Control Plane](../02-architecture/decisions/ADR-047-workflow-control-plane.md)                                         | Workflow orchestration and recovery control plane      | §2.4, §5.5 |
+| [ADR-048: Domain Schema Boundary and Runtime Pandera Compatibility](../02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md) | Pandera in domain layer boundary                      | §2.8       |
+| [ADR-049: Context-Aware LOC Target Policy](../02-architecture/decisions/ADR-049-context-aware-loc-target-policy.md)                                   | Context-aware LOC reduction targets                    | §7.5       |
 
 ### Data Management
 

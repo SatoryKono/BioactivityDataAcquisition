@@ -153,11 +153,10 @@
       ],
       "test_importers": [
         "tests/unit/composition/test_canonical_module_paths.py",
-        "tests/unit/composition/test_health_api.py",
-        "tests/unit/composition/test_health_api_contract.py"
+        "tests/unit/composition/test_health_api.py"
       ],
       "src_importer_count": 2,
-      "test_importer_count": 3
+      "test_importer_count": 2
     },
     {
       "path": "src/bioetl/composition/maintenance_api.py",
