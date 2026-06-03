@@ -213,7 +213,7 @@ def _run_all_callback(
 ) -> None:
     """Canonical callback implementation for the run-all Click command."""
     cli_input = _build_run_all_command_input_from_options(options)
-    if not cli_input.list_only:
+    if not cli_input.list_only and not cli_input.dry_run:
         backend_result = ensure_observability_backend_started(
             enabled=cli_input.ensure_observability_backend,
             port=cli_input.observability_backend_port,

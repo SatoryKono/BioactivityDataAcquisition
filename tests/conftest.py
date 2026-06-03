@@ -1,6 +1,7 @@
 import enum
 import gc
 import inspect
+import importlib.util
 import os
 import asyncio
 import sys
@@ -14,12 +15,15 @@ from collections.abc import Generator
 
 import pytest
 from tests.helpers.vcr_config import (
+    build_cassette_dir,
     build_base_vcr_config,
     ensure_default_vcr_record_mode,
+    infer_provider_cassette_dir,
     is_vcr_recording_mode,
     is_git_lfs_pointer,
     is_strict_lfs_pointer_blocked_cassette,
     query_ignore_email,
+    resolve_cassette_name,
     resolve_requested_cassette_path,
 )
 
@@ -433,6 +437,12 @@ def _load_vcrpy() -> Any:
     return vcrpy
 
 
+@cache
+def _has_pytest_recording() -> bool:
+    """Return whether pytest-recording is available in the active environment."""
+    return importlib.util.find_spec("pytest_recording") is not None
+
+
 def _selected_tests_need_publication_type_classification(
     request: pytest.FixtureRequest,
 ) -> bool:
@@ -592,6 +602,48 @@ def vcr_config() -> dict[str, object]:
     )
 
 
+@pytest.fixture
+def vcr_cassette_name(
+    request: pytest.FixtureRequest,
+    vcr_cassette_dir: Path,
+) -> str:
+    """Prefer committed class-qualified cassette names when they exist."""
+    node_name = request.node.name
+    nodeid_parts = request.node.nodeid.split("::")
+    class_name = nodeid_parts[-2] if len(nodeid_parts) >= 3 else None
+    candidate_names = []
+    if class_name is not None:
+        candidate_names.append(f"{class_name}.{node_name}")
+    candidate_names.append(node_name)
+
+    for candidate in candidate_names:
+        if (vcr_cassette_dir / f"{candidate}.yaml").exists():
+            return candidate
+    return candidate_names[0]
+
+
+@pytest.fixture
+def vcr_cassette_dir(
+    request: pytest.FixtureRequest,
+    project_root: Path,
+    vcr_config: dict[str, object],
+) -> Path:
+    """Resolve cassette directories without depending on pytest-recording fixtures."""
+    configured_dir = vcr_config.get("cassette_library_dir")
+    if isinstance(configured_dir, str) and configured_dir:
+        return Path(configured_dir)
+
+    provider_dir = infer_provider_cassette_dir(
+        node_name=request.node.name,
+        module_path=str(getattr(request.node, "fspath", "")),
+        overrides={},
+    )
+    return build_cassette_dir(
+        fixtures_root=project_root / "tests" / "fixtures" / "vcr",
+        provider_dir=provider_dir,
+    )
+
+
 @cache
 def _load_pandas() -> Any:
     """Import pandas lazily so pytest collection stays lightweight."""
@@ -619,6 +671,26 @@ def vcr(  # type: ignore[override]
     vcr_instance = vcrpy.VCR(**kwargs)
     vcr_instance.register_matcher("query_ignore_email", query_ignore_email)
     return vcr_instance
+
+
+@pytest.fixture(autouse=True)
+def _manual_vcr_marker_runtime(
+    request: pytest.FixtureRequest,
+) -> Generator[None, None, None]:
+    """Replay VCR cassettes with plain vcrpy when pytest-recording is absent."""
+    marker = request.node.get_closest_marker("vcr")
+    if marker is None or _has_pytest_recording():
+        yield
+        return
+
+    cassette_path = resolve_requested_cassette_path(request)
+    if cassette_path is None:
+        yield
+        return
+
+    vcr = request.getfixturevalue("vcr")
+    with vcr.use_cassette(str(cassette_path), **marker.kwargs):
+        yield
 
 
 @pytest.fixture
