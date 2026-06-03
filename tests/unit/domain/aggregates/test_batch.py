@@ -381,6 +381,52 @@ class TestBatchDomainEvents:
         assert events[0].layer == "silver"
         assert events[0].occurred_at == _ts(20)
 
+    def test_mark_writing_validates_status(self, batch: Batch) -> None:
+        """mark_writing() should only work from SEALED status."""
+        with pytest.raises(InvalidStateError, match="Cannot mark as writing"):
+            batch.mark_writing()
+
+    def test_mark_committed_validates_status(self, batch: Batch) -> None:
+        """mark_committed() should only work from WRITING status."""
+        batch.add_record({"id": "1"})
+        batch.seal(_ts(10))
+
+        with pytest.raises(InvalidStateError, match="Cannot commit"):
+            batch.mark_committed("silver", _ts(20))
+
+    def test_mark_failed_validates_status(self, batch: Batch) -> None:
+        """mark_failed() should only work from WRITING status."""
+        batch.add_record({"id": "1"})
+        batch.seal(_ts(10))
+
+        with pytest.raises(InvalidStateError, match="Cannot fail"):
+            batch.mark_failed("silver", "Error", "TypeError", failed_at=_ts(20))
+
+    def test_mark_failed_emits_event(self, batch: Batch) -> None:
+        """mark_failed() should emit BatchFailed event."""
+        batch.collect_events()  # Clear creation event
+        batch.add_record({"id": "1"})
+        batch.seal(_ts(10))
+        batch.mark_writing()
+        batch.collect_events()  # Clear writing event
+        batch.mark_failed("silver", "Write error", "IOError", failed_at=_ts(20))
+
+        events = batch.collect_events()
+        assert len(events) == 1
+        assert events[0].__class__.__name__ == "BatchFailed"
+        assert events[0].layer == "silver"
+        assert events[0].error == "Write error"
+        assert events[0].error_type == "IOError"
+        assert events[0].occurred_at == _ts(20)
+
+    def test_seal_validates_modifiable_status(self, batch: Batch) -> None:
+        """seal() should only work from modifiable (OPEN) status."""
+        batch.add_record({"id": "1"})
+        batch.seal(_ts(10))
+
+        with pytest.raises(InvalidStateError, match="Cannot seal"):
+            batch.seal(_ts(20))
+
 
 # ──────────────────────────────────────────────────────────────────────────────
 # BatchStatus Tests

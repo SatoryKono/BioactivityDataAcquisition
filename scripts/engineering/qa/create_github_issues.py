@@ -92,17 +92,6 @@ def main():
     print(f"📊 Found {len(issues)} issues to create")
     print()
 
-    # Ask for confirmation
-    print("Issues to create:")
-    for i, issue in enumerate(issues, 1):
-        print(f"  {i}. {issue['title']} ({issue['priority']})")
-    print()
-
-    response = input("Proceed? (y/n): ").strip().lower()
-    if response != "y":
-        print("❌ Aborted")
-        sys.exit(0)
-
     print()
     print("Creating issues...")
     print()

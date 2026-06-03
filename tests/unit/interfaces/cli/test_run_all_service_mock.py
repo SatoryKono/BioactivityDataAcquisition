@@ -25,6 +25,9 @@ from bioetl.composition.registry_api import PipelineRegistry
 from bioetl.interfaces.cli.commands.run_all import (
     _run_all_pipelines_async,
 )
+from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
+    ObservabilityBackendEnsureResult,
+)
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.main import cli
 
@@ -61,6 +64,39 @@ def mock_pipeline_runner_service():
     return service
 
 
+@pytest.fixture(autouse=True)
+def mock_run_all_runtime_boundaries():
+    """Keep run-all service-mock tests off real runtime startup seams."""
+    with (
+        patch(
+            "bioetl.interfaces.cli.commands.run_all.health_server_context",
+            MagicMock(),
+        ) as mock_health,
+        patch(
+            "bioetl.interfaces.cli.commands.run_all.ensure_metrics_server_started",
+            return_value=False,
+        ),
+        patch(
+            "bioetl.interfaces.cli.commands.domains.health.metrics_server_integration.ensure_metrics_server_started",
+            return_value=False,
+        ),
+        patch(
+            "bioetl.interfaces.cli.commands.run_all.ensure_observability_backend_started",
+            return_value=ObservabilityBackendEnsureResult(
+                status="disabled",
+                health_url="http://127.0.0.1:8081/health",
+            ),
+        ),
+        patch(
+            "bioetl.interfaces.cli.commands.run_all.should_disable_transient_health_server",
+            return_value=False,
+        ),
+    ):
+        mock_health.return_value.__aenter__.return_value = None
+        mock_health.return_value.__aexit__.return_value = None
+        yield
+
+
 def _create_run_result(
     pipeline_name: str,
     status: PipelineRunResult = PipelineRunResult.SUCCESS,
@@ -92,22 +128,6 @@ def _create_run_result(
 @pytest.mark.unit
 class TestRunAllWithMockedService:
     """Tests for run-all using mocked PipelineRunnerService."""
-
-    @pytest.fixture(autouse=True)
-    def mock_servers(self):
-        """Mock health and metrics servers to prevent port binding."""
-        with (
-            patch(
-                "bioetl.interfaces.cli.commands.run_all.health_server_context",
-                MagicMock(),
-            ) as mock_health,
-            patch(
-                "bioetl.interfaces.cli.commands.run_all.ensure_metrics_server_started"
-            ),
-        ):
-            mock_health.return_value.__aenter__.return_value = None
-            mock_health.return_value.__aexit__.return_value = None
-            yield
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
     @patch("bioetl.interfaces.cli.commands.run_all.build_cli_registry")

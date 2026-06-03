@@ -516,31 +516,33 @@ The `_batch_mixins.py` module has 61.6% coverage (61/99 lines) with a 33.4% gap 
 
 **Labels:** `test-coverage`, `p0`, `domain-contracts`, `gold`
 
+**Status:** Code/test scope completed on 2026-06-03. Canonical inventory refresh is deferred until the next healthy coverage lane on a host that does not reproduce the local `numpy`/Pandera collector failure.
+
 **Description:**
-The `_publication_common_schema.py` module has 86% coverage (43/50 lines) with a 9% gap to the 95% target. This is the only gold contract module below 95% threshold.
+The `_publication_common_schema.py` module had 86% coverage (43/50 lines) with a 9% gap to the 95% target. The gap is now closed by extending the existing unit suite with taxonomy edge cases, alias/value constraint failures, and the empty-taxonomy fallback branch.
 
 **Context:**
-- Current coverage: 86% (43/50 lines)
+- Verified coverage: 100% (50/50 executable lines) via local line-trace verification against the target module on 2026-06-03
 - Target coverage: 95%
 - Path: `src/bioetl/domain/contracts/gold/_publication_common_schema.py`
 - Module defines common schema for publication contracts
-- Missing: 7 lines (likely edge cases)
+- Prior gap: 7 lines (edge cases)
 
 **Steps:**
-1. Analyze _publication_common_schema.py uncovered lines
+1. Analyze `_publication_common_schema.py` uncovered lines
 2. Extend existing `tests/unit/domain/contracts/gold/test_publication_common_schema.py`
-3. Add test scenarios for uncovered edge cases
-4. Use golden datasets as fixtures
-5. Run coverage-verify lane to verify coverage >= 95%
-6. Update module-coverage-inventory.json
+3. Add test scenarios for taxonomy edge cases, value constraints, and fallback branch
+4. Verify the targeted unit suite passes
+5. Verify module executable-line coverage meets/exceeds 95%
+6. Refresh `module-coverage-inventory.json` when the canonical coverage lane is healthy on the executing host
 
 **Acceptance Criteria:**
-- [ ] Existing test file extended
-- [ ] Coverage >= 95% for _publication_common_schema.py
-- [ ] All edge cases covered
-- [ ] Coverage-verify lane passes
+- [x] Existing test file extended
+- [x] Coverage >= 95% for `_publication_common_schema.py`
+- [x] All edge cases covered
+- [ ] Canonical coverage-verify lane passes on the current host
 
-**Risk:** Low - only 7 lines gap, existing test infrastructure
+**Risk:** Low for code scope; Medium for canonical artifact refresh until the local coverage collector issue is resolved outside this module.
 
 ---
 

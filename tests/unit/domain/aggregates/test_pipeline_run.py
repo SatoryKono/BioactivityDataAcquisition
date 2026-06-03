@@ -20,6 +20,7 @@ from bioetl.domain.aggregates.pipeline_run import (
     StageResult,
     StageStatus,
 )
+from bioetl.domain.aggregates.events import PipelineCompleted, PipelineFailed, PipelineShutdown
 from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.types import RunID, RunType
 from tests.helpers.deterministic_ids import deterministic_uuid_value
@@ -382,8 +383,12 @@ class TestPipelineRunDomainEvents:
 
         events = started_run.collect_events()
         assert len(events) == 1
-        assert events[0].__class__.__name__ == "PipelineCompleted"
+        assert isinstance(events[0], PipelineCompleted)
+        assert events[0].run_id == started_run.run_id
+        assert events[0].pipeline_name == started_run.pipeline_name
         assert events[0].records_processed == 100
+        assert events[0].duration_seconds == pytest.approx(3.0)
+        assert events[0].stages_count == 1
 
     def test_failure_emits_pipeline_failed_event(
         self, started_run: PipelineRun
@@ -398,8 +403,12 @@ class TestPipelineRunDomainEvents:
 
         events = started_run.collect_events()
         assert len(events) == 1
-        assert events[0].__class__.__name__ == "PipelineFailed"
+        assert isinstance(events[0], PipelineFailed)
+        assert events[0].run_id == started_run.run_id
+        assert events[0].pipeline_name == started_run.pipeline_name
+        assert events[0].failed_stage == "execution"
         assert events[0].error == "Test error"
+        assert events[0].error_type is None
 
     def test_shutdown_emits_pipeline_shutdown_event(
         self, started_run: PipelineRun
@@ -414,7 +423,31 @@ class TestPipelineRunDomainEvents:
 
         events = started_run.collect_events()
         assert len(events) == 1
-        assert events[0].__class__.__name__ == "PipelineShutdown"
+        assert isinstance(events[0], PipelineShutdown)
+        assert events[0].run_id == started_run.run_id
+        assert events[0].pipeline_name == started_run.pipeline_name
+        assert events[0].records_processed == 100
+
+    def test_fail_emits_pipeline_failed_event_with_unknown_stage(
+        self, started_run: PipelineRun
+    ) -> None:
+        """fail() should emit PipelineFailed event with unknown stage marker."""
+        started_run.record_stage_success(
+            "test",
+            records_processed=42,
+            started_at=_ts(1),
+            completed_at=_ts(2),
+        )
+        started_run.fail("manual failure", "ValueError", failed_at=_ts(3))
+
+        events = started_run.collect_events()
+        assert len(events) == 1
+        assert isinstance(events[0], PipelineFailed)
+        assert events[0].run_id == started_run.run_id
+        assert events[0].pipeline_name == started_run.pipeline_name
+        assert events[0].failed_stage == "unknown"
+        assert events[0].error == "manual failure"
+        assert events[0].error_type == "ValueError"
 
     def test_pipeline_run_domain_events_collect_events_clears_event_list(
         self, started_run: PipelineRun

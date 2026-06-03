@@ -91,7 +91,7 @@ class TestRunOptions:
 class TestVacuumOptions:
     """Tests for VacuumOptions dataclass."""
 
-    def test_vacuum_options_default_values(self):
+    def test_entrypoints_vacuum_options__default_values(self):
         """Test VacuumOptions defaults."""
         options = VacuumOptions()
         assert options.retention_days == 7

@@ -136,6 +136,12 @@ class TestBatchLifecycleFunctions:
                 BatchStatus.COMMITTED, events, run_id, batch_id, 10, 8, 2, _ts(11)
             )
 
+        # Should fail from FAILED
+        with pytest.raises(InvalidStateError, match="Cannot seal"):
+            lifecycle.seal(
+                BatchStatus.FAILED, events, run_id, batch_id, 10, 8, 2, _ts(12)
+            )
+
     def test_batch_lifecycle_seal_emits_batch_sealed_event(self, run_id, batch_id):
         """seal should emit BatchSealed event with correct counts."""
         events: list = []
@@ -168,6 +174,10 @@ class TestBatchLifecycleFunctions:
         with pytest.raises(InvalidStateError, match="Cannot mark as writing"):
             lifecycle.mark_writing(BatchStatus.COMMITTED)
 
+        # Should fail from FAILED
+        with pytest.raises(InvalidStateError, match="Cannot mark as writing"):
+            lifecycle.mark_writing(BatchStatus.FAILED)
+
     def test_mark_committed_validates_writing_status(self, run_id, batch_id):
         """mark_committed should only transition from WRITING."""
         events: list = []
@@ -190,6 +200,18 @@ class TestBatchLifecycleFunctions:
                 BatchStatus.SEALED, events, run_id, batch_id, 8, "silver", _ts(20)
             )
 
+        # Should fail from COMMITTED
+        with pytest.raises(InvalidStateError, match="Cannot commit"):
+            lifecycle.mark_committed(
+                BatchStatus.COMMITTED, events, run_id, batch_id, 8, "silver", _ts(20)
+            )
+
+        # Should fail from FAILED
+        with pytest.raises(InvalidStateError, match="Cannot commit"):
+            lifecycle.mark_committed(
+                BatchStatus.FAILED, events, run_id, batch_id, 8, "silver", _ts(20)
+            )
+
     def test_mark_committed_emits_batch_written_event(self, run_id, batch_id):
         """mark_committed should emit BatchWritten event."""
         events: list = []
@@ -200,6 +222,8 @@ class TestBatchLifecycleFunctions:
         assert len(events) == 1
         event = events[0]
         assert isinstance(event, BatchWritten)
+        assert event.run_id == run_id
+        assert event.batch_id == batch_id
         assert event.layer == "silver"
         assert event.record_count == 8
         assert event.occurred_at == _ts(20)
@@ -226,6 +250,32 @@ class TestBatchLifecycleFunctions:
                 BatchStatus.SEALED, events, run_id, batch_id, "silver", "Error", None, failed_at=_ts(20)
             )
 
+        # Should fail from COMMITTED
+        with pytest.raises(InvalidStateError, match="Cannot fail"):
+            lifecycle.mark_failed(
+                BatchStatus.COMMITTED,
+                events,
+                run_id,
+                batch_id,
+                "silver",
+                "Error",
+                None,
+                failed_at=_ts(20),
+            )
+
+        # Should fail from FAILED
+        with pytest.raises(InvalidStateError, match="Cannot fail"):
+            lifecycle.mark_failed(
+                BatchStatus.FAILED,
+                events,
+                run_id,
+                batch_id,
+                "silver",
+                "Error",
+                None,
+                failed_at=_ts(20),
+            )
+
     def test_mark_failed_emits_batch_failed_event(self, run_id, batch_id):
         """mark_failed should emit BatchFailed event with error details."""
         events: list = []
@@ -236,6 +286,8 @@ class TestBatchLifecycleFunctions:
         assert len(events) == 1
         event = events[0]
         assert isinstance(event, BatchFailed)
+        assert event.run_id == run_id
+        assert event.batch_id == batch_id
         assert event.layer == "silver"
         assert event.error == "Connection timeout"
         assert event.error_type == "TimeoutError"
@@ -262,6 +314,8 @@ class TestBatchLifecycleFunctions:
         assert event.error_code == "SCHEMA_VIOLATION"
         assert event.error_message == "Missing required field"
         assert event.content_hash == ContentHash("abc123")
+        assert event.batch_id == batch_id
+        assert event.run_id == run_id
         assert event.occurred_at == _ts(5)
 
     def test_emit_record_quarantined_handles_null_entity_id(self, run_id, batch_id):
@@ -530,8 +584,59 @@ class TestBatchLifecycleMixin:
         events = batch.collect_events()
         assert len(events) == 1
         assert isinstance(events[0], BatchFailed)
+        assert events[0].run_id == run_id
+        assert events[0].batch_id == batch.batch_id
+        assert events[0].layer == "bronze"
         assert events[0].error == "Write error"
         assert events[0].error_type == "IOError"
+
+    def test_mark_writing_invalid_without_seal(self, run_id):
+        """mark_writing should require SEALED status."""
+        batch = Batch.create(run_id=run_id, created_at=_ts(0))
+        batch.add_record({"id": "1"})
+
+        with pytest.raises(InvalidStateError, match="Cannot mark as writing"):
+            batch.mark_writing()
+
+    def test_mark_committed_invalid_without_writing(self, run_id):
+        """mark_committed should require WRITING status on aggregate level."""
+        batch = Batch.create(run_id=run_id, created_at=_ts(0))
+        batch.add_record({"id": "1"})
+        batch.seal(_ts(10))
+
+        with pytest.raises(InvalidStateError, match="Cannot commit"):
+            batch.mark_committed("silver", _ts(20))
+
+    def test_mark_failed_invalid_without_writing(self, run_id):
+        """mark_failed should require WRITING status on aggregate level."""
+        batch = Batch.create(run_id=run_id, created_at=_ts(0))
+        batch.add_record({"id": "1"})
+        batch.seal(_ts(10))
+
+        with pytest.raises(InvalidStateError, match="Cannot fail"):
+            batch.mark_failed("bronze", "Write error", "IOError", failed_at=_ts(20))
+
+    def test_quarantine_record_event_payloads(self, run_id):
+        """quarantine_record should emit full RecordQuarantined payload."""
+        batch = Batch.create(run_id=run_id, created_at=_ts(0))
+        batch.collect_events()  # Clear creation event
+        record = batch.add_record({"id": "1"})
+
+        batch.quarantine_record(
+            record,
+            "Schema validation error",
+            "SCHEMA",
+            quarantined_at=_ts(5),
+        )
+
+        event = batch.collect_events()[0]
+        assert isinstance(event, RecordQuarantined)
+        assert event.run_id == run_id
+        assert event.batch_id == batch.batch_id
+        assert event.record_id is None
+        assert event.error_code == "SCHEMA"
+        assert event.error_message == "Schema validation error"
+        assert event.content_hash is None
 
 
 # ──────────────────────────────────────────────────────────────────────────────

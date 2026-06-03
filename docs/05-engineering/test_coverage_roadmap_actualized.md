@@ -38,7 +38,7 @@
 | _chembl_reference_publication_schemas | 100% (77/77) | 95% | +5% | P0 ✓ |
 | _chembl_target_lookup_schemas | 100% (88/88) | 95% | +5% | P0 ✓ |
 | _composite_gold_common_schema | 100% (18/18) | 95% | +5% | P0 ✓ |
-| _publication_common_schema | 86% (43/50) | 95% | -9% | P0 |
+| _publication_common_schema | 100%* (50/50) | 95% | +5% | P0 ✓ |
 | _strict_gold_contract_schema | 100% (10/10) | 95% | +5% | P0 ✓ |
 | chembl.py | 100% (5/5) | 95% | +5% | P0 ✓ |
 | composite.py | 100% (5/5) | 95% | +5% | P0 ✓ |
@@ -54,7 +54,7 @@
 | uniprot.py | 100% (117/117) | 95% | +5% | P0 ✓ |
 
 **Среднее coverage:** ~99%
-**Статус:** Почти достигнуто! Только _publication_common_schema нужно подтянуть до 95%.
+**Статус:** Code/test scope завершён. Все gold contracts достигли целевого порога; `*` означает локальную line-trace verification на 2026-06-03, пока committed inventory ждёт следующего healthy canonical coverage lane.
 
 ### Composition Public APIs (цель: ≥90%)
 
@@ -134,16 +134,16 @@
 
 **Ожидаемый эффект:** Достижение 95% для всех domain aggregates
 
-### Фаза 4: Domain Contracts/Gold - Final Polish (P0)
+### Фаза 4: Domain Contracts/Gold - Final Polish (P0) ✓
 
 **Модуль:**
-1. _publication_common_schema (86% → 95%, gap: -9%)
+1. _publication_common_schema (100%* (50/50), gap closed)
 
 **Действия:**
-- Добавить тесты для uncovered 7 строк
-- Вероятно edge cases в publication common schema
+- Расширить `tests/unit/domain/contracts/gold/test_publication_common_schema.py`
+- Закрыть taxonomy edge cases, alias/value constraints и fallback branch при пустой taxonomy
 
-**Ожидаемый эффект:** Достижение 95% для всех gold contracts
+**Ожидаемый эффект:** Достигнуто 95%+ для всех gold contracts
 
 ---
 
