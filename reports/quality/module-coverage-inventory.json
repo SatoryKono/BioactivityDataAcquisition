@@ -8123,7 +8123,7 @@
       "missing_lines": null,
       "module": "bioetl.composition.runtime_builders._run_manifest_creation_support_policy",
       "path": "src/bioetl/composition/runtime_builders/_run_manifest_creation_support_policy.py",
-      "source_lines": 183
+      "source_lines": 184
     },
     {
       "coverage_percent": 61.02,
@@ -19918,7 +19918,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-06-03",
-  "source_tree_sha256": "d20e6afe833456485c7341b5c08e81601cd5fb26e62dcb9d443cded2d621541c",
+  "source_tree_sha256": "f0a4a5822426540bd9ab949f86ec2ebf93b8a31be0b8129bb44a3c3b892e93e1",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

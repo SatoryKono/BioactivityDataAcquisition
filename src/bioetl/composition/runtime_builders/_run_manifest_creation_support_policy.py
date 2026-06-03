@@ -172,11 +172,12 @@ def emit_replay_reconstructability_metric(
     ``_run_manifest_creation_support.py`` to satisfy ownership checks that expect
     runtime emission code to be co-located in the orchestration support layer.
     """
-    from bioetl.composition.runtime_builders._run_manifest_creation_support import (
-        emit_replay_reconstructability_metric as _emit_replay_reconstructability_metric,
-    )
+    from importlib import import_module
 
-    _emit_replay_reconstructability_metric(
+    emit_replay_reconstructability_metric_impl = import_module(
+        "bioetl.composition.runtime_builders._run_manifest_creation_support"
+    ).emit_replay_reconstructability_metric
+    emit_replay_reconstructability_metric_impl(
         request=request,
         strict_exact_replay_supported=strict_exact_replay_supported,
         metrics=metrics,
