@@ -50,6 +50,26 @@ ACCEPTED_RUNTIME_SCCS: dict[frozenset[str], dict[str, str]] = {
     },
     frozenset(
         {
+            "bioetl.interfaces.http.control_plane_identity.anchor_values",
+            "bioetl.interfaces.http.control_plane_identity.checkpoint_extractors",
+            "bioetl.interfaces.http.control_plane_identity.ledger_extractors",
+            "bioetl.interfaces.http.control_plane_identity.manifest_extractors",
+            "bioetl.interfaces.http.control_plane_identity.replay_extractors",
+        }
+    ): {
+        "owner": "interfaces.http.control_plane_identity",
+        "review_date": "2026-06-03",
+        "linked_issue": "#5057",
+        "rationale": (
+            "Control plane identity extractors form a cohesive functional group "
+            "that share common formatting utilities and domain model imports. "
+            "The cycle enables shared extraction logic across manifest, ledger, "
+            "checkpoint, and replay surfaces without code duplication. "
+            "This pattern is consistent with control plane service organization."
+        ),
+    },
+    frozenset(
+        {
             "bioetl.application.services.control_plane.ledger",
             "bioetl.application.services.control_plane.ledger.service",
         }

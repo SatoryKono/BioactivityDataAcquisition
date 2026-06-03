@@ -233,9 +233,14 @@ PIPELINE_CASE_BY_NAME: dict[str, PipelineE2ECase] = {
 
 MATRIX_REPLAY_DEFERRED_PIPELINES: frozenset[str] = frozenset(
     {
+        "chembl_cell_line",
         "chembl_tissue",
+        "chembl_compound_record",
         "chembl_assay_parameters",
         "chembl_protein_class",
+        "chembl_publication_similarity",
+        "chembl_publication_term",
+        "chembl_subcellular_fraction",
         "chembl_target_component",
         "chembl_target_protein_classification",
         "composite_activity",
@@ -243,6 +248,7 @@ MATRIX_REPLAY_DEFERRED_PIPELINES: frozenset[str] = frozenset(
         "composite_molecule",
         "composite_publication",
         "composite_target",
+        "uniprot_idmapping",
     }
 )
 ACTIVE_PIPELINE_CASES: tuple[PipelineE2ECase, ...] = tuple(

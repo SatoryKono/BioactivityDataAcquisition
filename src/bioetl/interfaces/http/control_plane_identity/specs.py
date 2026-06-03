@@ -7,7 +7,9 @@ from bioetl.interfaces.http.control_plane_identity.p1_specs import P1_ANCHOR_SPE
 from bioetl.interfaces.http.control_plane_identity.p2_specs import P2_ANCHOR_SPECS
 from bioetl.interfaces.http.control_plane_identity.spec_constants import (
     ALLOWED_LOW_CARDINALITY_LABELS,
+    ANCHOR_SPEC_VERSION,
     CHECKPOINT_ANCHORS,
+    SPEC_VALIDATION_RULES,
     TERMINAL_STATUSES,
 )
 from bioetl.interfaces.http.control_plane_identity.types import AnchorSpec
@@ -38,11 +40,28 @@ OVERVIEW_NAMES = frozenset(
     }
 )
 
+
+def get_current_spec_version() -> str:
+    """Return the current HTTP control-plane identity spec version."""
+    return ANCHOR_SPEC_VERSION
+
+
+def is_spec_version_compatible(version: str) -> bool:
+    """Return whether a spec version is compatible with the current major line."""
+    current_major = ANCHOR_SPEC_VERSION.split(".", maxsplit=1)[0]
+    candidate_major = str(version).split(".", maxsplit=1)[0]
+    return candidate_major == current_major
+
+
 __all__ = [
     "ALLOWED_LOW_CARDINALITY_LABELS",
     "ANCHOR_SPECS",
+    "ANCHOR_SPEC_VERSION",
     "CHECKPOINT_ANCHORS",
     "OVERVIEW_NAMES",
     "SPEC_BY_NAME",
+    "SPEC_VALIDATION_RULES",
     "TERMINAL_STATUSES",
+    "get_current_spec_version",
+    "is_spec_version_compatible",
 ]

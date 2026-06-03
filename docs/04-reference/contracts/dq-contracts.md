@@ -27,9 +27,10 @@ The BioETL DQ Contract System defines four primary contract types that govern da
 
 **Canonical Sources**:
 
-- Gold layer: `src/bioetl/domain/contracts/gold/` (Pydantic models)
-- Silver layer: `src/bioetl/domain/schemas/` (PyArrow schemas)
-- Exported JSON: `docs/04-reference/contracts/gold/*.json`
+- Domain schemas: `src/bioetl/domain/schemas/` (Pandera DataFrameModel contracts)
+- Entity configs: `configs/entities/{provider}/{entity}.yaml` (field definitions)
+- Composite configs: `configs/composites/{entity}.yaml` (field definitions)
+- Exported JSON: `docs/04-reference/contracts/gold/*.json` (for external consumers)
 
 **Contract Fields**:
 

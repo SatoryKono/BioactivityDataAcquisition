@@ -494,19 +494,19 @@ class TestConfigListPipelinesCommand:
         result = cli_runner.invoke(cli, ["config", "list-pipelines", "--help"])
 
         assert result.exit_code == 0
-        assert "List all registered pipelines" in result.output
+        assert "List all configured pipelines" in result.output
 
     def test_list_pipelines_success(self, cli_runner, mock_config_service):
         """Test successful pipeline listing."""
-        mock_config_service.list_pipelines.return_value = [
-            "chembl_activity",
-            "chembl_molecule",
-            "pubchem_compound",
-        ]
+        del mock_config_service
 
         with patch(
-            "bioetl.interfaces.cli.commands.config.get_config_service",
-            return_value=mock_config_service,
+            "bioetl.interfaces.cli.commands.config.get_configured_pipeline_names",
+            return_value=[
+                "chembl_activity",
+                "chembl_molecule",
+                "pubchem_compound",
+            ],
         ):
             result = cli_runner.invoke(cli, ["config", "list-pipelines"])
 
@@ -517,30 +517,29 @@ class TestConfigListPipelinesCommand:
         assert "pubchem_compound" in result.output
 
     def test_list_pipelines_empty(self, cli_runner, mock_config_service):
-        """Test list-pipelines with no registered pipelines."""
-        mock_config_service.list_pipelines.return_value = []
+        """Test list-pipelines with no configured pipelines."""
+        del mock_config_service
 
         with patch(
-            "bioetl.interfaces.cli.commands.config.get_config_service",
-            return_value=mock_config_service,
+            "bioetl.interfaces.cli.commands.config.get_configured_pipeline_names",
+            return_value=[],
         ):
             result = cli_runner.invoke(cli, ["config", "list-pipelines"])
 
         assert result.exit_code == 0
-        assert "No pipelines registered" in result.output
+        assert "No pipelines configured" in result.output
 
     def test_list_pipelines_sorted(self, cli_runner, mock_config_service):
         """Test list-pipelines returns sorted list."""
-        # Return unsorted list - the command should sort it
-        mock_config_service.list_pipelines.return_value = [
-            "z_pipeline",
-            "a_pipeline",
-            "m_pipeline",
-        ]
+        del mock_config_service
 
         with patch(
-            "bioetl.interfaces.cli.commands.config.get_config_service",
-            return_value=mock_config_service,
+            "bioetl.interfaces.cli.commands.config.get_configured_pipeline_names",
+            return_value=[
+                "z_pipeline",
+                "a_pipeline",
+                "m_pipeline",
+            ],
         ):
             result = cli_runner.invoke(cli, ["config", "list-pipelines"])
 

@@ -34,6 +34,15 @@ def get_config_service() -> ConfigService:
     return _impl()
 
 
+def get_configured_pipeline_names() -> list[str]:
+    """Load configured pipeline names through the lightweight composition seam."""
+    from bioetl.composition.control_plane_api import (
+        list_configured_pipeline_names as _impl,
+    )
+
+    return _impl()
+
+
 def _config_to_dict(config: object) -> JsonDict:
     """Convert a Pydantic model or dataclass to a JSON-serializable dict.
 
@@ -193,17 +202,16 @@ def show_settings_command(output_format: str) -> None:
 
 @config.command("list-pipelines")
 def list_pipelines_command() -> None:
-    """List all registered pipelines.
+    """List all configured pipelines.
 
     Examples:
 
         bioetl config list-pipelines
     """
-    service = get_config_service()
-    pipelines = service.list_pipelines()
+    pipelines = get_configured_pipeline_names()
 
     if not pipelines:
-        echo_info("No pipelines registered.")
+        echo_info("No pipelines configured.")
         return
 
     echo_info("Available pipelines:")

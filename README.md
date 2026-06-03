@@ -83,8 +83,6 @@ The domain layer implements Domain-Driven Design patterns:
 | Document                                                                    | Description                                                          |
 | --------------------------------------------------------------------------- | -------------------------------------------------------------------- |
 | [Current Architecture Inventory](docs/02-architecture/current-state-inventory.md) | Current code/config/dashboard/control-plane inventory and drift notes |
-- [ADR-049](ADR-049-context-aware-loc-target-policy.md): Context-Aware LOC Target Policy
-- [ADR-049](ADR-049-context-aware-loc-target-policy.md): Context-Aware LOC Target Policy
 | [Current Architecture Diagrams](docs/02-architecture/current-state-diagrams.md) | Current C4, layer, medallion, run, replay, and quarantine diagrams   |
 | [Pipeline Catalog](docs/04-reference/pipeline-catalog.md)                   | Current provider and composite pipeline config catalog               |
 | [Workflow Catalog](docs/04-reference/workflow-catalog.md)                   | Current declarative workflow DAG catalog                             |

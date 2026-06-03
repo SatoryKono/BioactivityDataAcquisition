@@ -4,7 +4,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
+import uuid
 from collections.abc import Iterable, Mapping, Sequence
+
+_PROVIDER_ENTITY_RE = re.compile(r"^[a-z][a-z0-9_]*\.[a-z][a-z0-9_]*$")
 
 
 def stable_hash(value: object) -> str | None:
@@ -85,3 +89,23 @@ def mapping_value(mapping: Mapping[str, object], *keys: str) -> Mapping[str, obj
         if isinstance(value, Mapping):
             return value
     return {}
+
+
+def validate_run_id_format(value: str) -> bool:
+    """Return whether a run id is UUID-formatted."""
+    try:
+        uuid.UUID(str(value))
+    except ValueError:
+        return False
+    return True
+
+
+def validate_manifest_id_format(value: str) -> bool:
+    """Return whether a manifest id follows the HTTP identity contract shape."""
+    text = str(value).strip()
+    return text.startswith("manifest-") and len(text) > len("manifest-")
+
+
+def validate_provider_entity_format(value: str) -> bool:
+    """Return whether a value follows ``provider.entity`` naming."""
+    return bool(_PROVIDER_ENTITY_RE.fullmatch(str(value).strip()))

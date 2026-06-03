@@ -2,6 +2,13 @@
 
 from __future__ import annotations
 
+ANCHOR_SPEC_VERSION = "1.0.0"
+SPEC_VALIDATION_RULES = (
+    "anchor_name_required",
+    "display_name_required",
+    "priority_required",
+    "source_location_required",
+)
 TERMINAL_STATUSES = frozenset({"success", "failed", "shutdown"})
 CHECKPOINT_ANCHORS = (
     "manifest_id",
@@ -25,6 +32,8 @@ ALLOWED_LOW_CARDINALITY_LABELS = [
 
 __all__ = [
     "ALLOWED_LOW_CARDINALITY_LABELS",
+    "ANCHOR_SPEC_VERSION",
     "CHECKPOINT_ANCHORS",
+    "SPEC_VALIDATION_RULES",
     "TERMINAL_STATUSES",
 ]

@@ -84,10 +84,33 @@ def first_payload_value(manifest: RunManifest, *keys: str) -> object | None:
     return None
 
 
+def extract_checkpoint_anchors(checkpoint_data: dict[str, object]) -> list[object]:
+    """Extract legacy HTTP identity anchor values from checkpoint mappings."""
+    from bioetl.interfaces.http.control_plane_identity.anchor_values import (
+        anchor_values_from_mapping,
+    )
+
+    payload = dict(checkpoint_data)
+    checkpoint_id = payload.get("checkpoint_id")
+    if checkpoint_id is not None:
+        payload.setdefault("checkpoint_file_id", checkpoint_id)
+    return anchor_values_from_mapping(
+        payload,
+        source="checkpoint",
+        anchor_names=(
+            "run_id",
+            "manifest_id",
+            "checkpoint_file_id",
+            "execution_fingerprint",
+        ),
+    )
+
+
 __all__ = [
     "checkpoint_anchor_payload",
     "checkpoint_value",
     "composite_run_identity",
+    "extract_checkpoint_anchors",
     "first_payload_value",
     "normalize_checkpoint_metadata_payload",
 ]
