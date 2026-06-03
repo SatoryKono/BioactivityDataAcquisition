@@ -21,6 +21,8 @@ from unittest.mock import MagicMock
 
 import pytest
 import pytest_asyncio
+import respx
+from httpx import Response
 
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
@@ -39,6 +41,8 @@ from tests.helpers.vcr_config import resolve_cassette_name
 CASSETTE_DIR = (
     Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "semanticscholar"
 )
+SEMANTICSCHOLAR_SEARCH_URL = "https://api.semanticscholar.org/graph/v1/paper/search"
+SEMANTICSCHOLAR_BATCH_URL = "https://api.semanticscholar.org/graph/v1/paper/batch"
 
 _CASSETTE_NAME_OVERRIDES = {
     "test_scholar_adapter__health_check__1f0e0a8e": (
@@ -92,6 +96,37 @@ async def _consume_async_iter(async_iter) -> list[object]:
     async for item in async_iter:
         items.append(item)
     return items
+
+
+def _semanticscholar_record(
+    *,
+    paper_id: str,
+    title: str,
+    doi: str | None = None,
+    year: int = 2020,
+) -> dict[str, Any]:
+    """Build a minimal Semantic Scholar paper payload for adapter-flow tests."""
+    record: dict[str, Any] = {
+        "paperId": paper_id,
+        "externalIds": {},
+        "title": title,
+        "abstract": None,
+        "year": year,
+        "publicationDate": f"{year}-01-01",
+        "venue": "Test Venue",
+        "authors": [],
+        "citationCount": 0,
+        "referenceCount": 0,
+        "isOpenAccess": False,
+        "openAccessPdf": None,
+        "tldr": None,
+        "fieldsOfStudy": ["Biology"],
+        "publicationTypes": ["JournalArticle"],
+        "journal": None,
+    }
+    if doi is not None:
+        record["externalIds"] = {"DOI": doi}
+    return record
 
 
 @pytest_asyncio.fixture(scope="module", loop_scope="module")
@@ -207,25 +242,50 @@ class TestSemanticScholarAdapterIntegration:
         assert "10.1038/nature12373" in dois
         assert "10.1016/j.cell.2019.03.025" in dois
 
-    @pytest.mark.vcr
     async def test_fetch_with_query(
         self,
         semanticscholar_adapter: SemanticScholarAdapter,
     ) -> None:
-        """Test search-based fetch with query parameter.
+        """Test search-based fetch with query parameter without live API calls."""
+        mocked_records = [
+            _semanticscholar_record(
+                paper_id="a" * 40,
+                title="CRISPR gene editing in model organisms",
+                year=2021,
+            ),
+            _semanticscholar_record(
+                paper_id="b" * 40,
+                title="Genome engineering with CRISPR systems",
+                year=2022,
+            ),
+            _semanticscholar_record(
+                paper_id="c" * 40,
+                title="Clinical translation of gene editing",
+                year=2023,
+            ),
+        ]
 
-        This test requires a VCR cassette.
-        Record with: pytest --vcr-record=new_episodes -k test_fetch_with_query
-        """
         records: list[dict[str, Any]] = []
-        async for record in semanticscholar_adapter.fetch(
-            entity_type="publication",
-            query="CRISPR gene editing",
-            limit=3,
-        ):
-            records.append(record)
+        with respx.mock:
+            search_route = respx.get(SEMANTICSCHOLAR_SEARCH_URL).mock(
+                return_value=Response(
+                    200,
+                    json={
+                        "data": mocked_records,
+                        "next": None,
+                    },
+                )
+            )
+
+            async for record in semanticscholar_adapter.fetch(
+                entity_type="publication",
+                query="CRISPR gene editing",
+                limit=3,
+            ):
+                records.append(record)
 
         assert len(records) == 3
+        assert search_route.called
 
         # Check that all records have required fields
         for record in records:
@@ -238,33 +298,53 @@ class TestSemanticScholarAdapterIntegration:
         titles = " ".join(r["title"].lower() for r in records)
         assert "crispr" in titles or "genome" in titles
 
-    @pytest.mark.vcr
     async def test_fetch_filtered_with_fallback(
         self,
         semanticscholar_adapter: SemanticScholarAdapter,
     ) -> None:
-        """Test DOI lookup with title fallback for not-found DOIs.
-
-        This test requires a VCR cassette.
-        Record with: pytest --vcr-record=new_episodes -k test_fetch_filtered_with_fallback
-        """
+        """Test DOI lookup with title fallback without live API calls."""
         fallback_mapping = {
             "10.1038/nature12373": "Crystal structure of rhodopsin",
             "10.9999/notfound": "Unknown Paper Title",
         }
+        doi_record = _semanticscholar_record(
+            paper_id="d" * 40,
+            title="Crystal structure of rhodopsin",
+            doi="10.1038/nature12373",
+            year=2000,
+        )
+        fallback_record = _semanticscholar_record(
+            paper_id="e" * 40,
+            title="Unknown Paper Title",
+            year=2024,
+        )
 
         records: list[dict[str, Any]] = []
-        async for record in semanticscholar_adapter.fetch_filtered_with_fallback(
-            entity_type="publication",
-            filter_ids=["10.1038/nature12373", "10.9999/notfound"],
-            filter_field="doi",
-            fallback_mapping=fallback_mapping,
-        ):
-            records.append(record)
+        with respx.mock:
+            batch_route = respx.post(SEMANTICSCHOLAR_BATCH_URL).mock(
+                return_value=Response(200, json=[doi_record, None])
+            )
+            fallback_route = respx.get(SEMANTICSCHOLAR_SEARCH_URL).mock(
+                return_value=Response(
+                    200,
+                    json={
+                        "data": [fallback_record],
+                        "next": None,
+                    },
+                )
+            )
 
-        # At minimum DOI-resolved record must be present.
-        # Title fallback may be unavailable in cassette due API rate limiting.
-        assert len(records) >= 1
+            async for record in semanticscholar_adapter.fetch_filtered_with_fallback(
+                entity_type="publication",
+                filter_ids=["10.1038/nature12373", "10.9999/notfound"],
+                filter_field="doi",
+                fallback_mapping=fallback_mapping,
+            ):
+                records.append(record)
+
+        assert len(records) == 2
+        assert batch_route.called
+        assert fallback_route.called
 
         # DOI-resolved record should always be present
         doi_record = next(r for r in records if r.get("_lookup_method") == "doi")
@@ -277,31 +357,42 @@ class TestSemanticScholarAdapterIntegration:
         if fallback_records:
             assert fallback_records[0]["_original_id"] == "10.9999/notfound"
 
-    @pytest.mark.vcr
     async def test_title_only_lookup(
         self,
         semanticscholar_adapter: SemanticScholarAdapter,
     ) -> None:
-        """Test title-only lookup when DOI is empty.
-
-        This test requires a VCR cassette.
-        Record with: pytest --vcr-record=new_episodes -k test_title_only_lookup
-        """
-        # Title must match what VCR cassette returns for title validation
+        """Test title-only lookup when DOI is empty without live API calls."""
         fallback_mapping = {
             "": "Machine learning for drug discovery",
         }
+        title_only_record = _semanticscholar_record(
+            paper_id="f" * 40,
+            title="Machine learning for drug discovery",
+            year=2019,
+        )
 
         records: list[dict[str, Any]] = []
-        async for record in semanticscholar_adapter.fetch_filtered_with_fallback(
-            entity_type="publication",
-            filter_ids=[""],  # Empty DOI
-            filter_field="doi",
-            fallback_mapping=fallback_mapping,
-        ):
-            records.append(record)
+        with respx.mock:
+            search_route = respx.get(SEMANTICSCHOLAR_SEARCH_URL).mock(
+                return_value=Response(
+                    200,
+                    json={
+                        "data": [title_only_record],
+                        "next": None,
+                    },
+                )
+            )
+
+            async for record in semanticscholar_adapter.fetch_filtered_with_fallback(
+                entity_type="publication",
+                filter_ids=[""],  # Empty DOI
+                filter_field="doi",
+                fallback_mapping=fallback_mapping,
+            ):
+                records.append(record)
 
         assert len(records) == 1
+        assert search_route.called
         assert records[0]["_lookup_method"] == "title_only"
         assert "paperId" in records[0]
         assert len(records[0]["paperId"]) == 40

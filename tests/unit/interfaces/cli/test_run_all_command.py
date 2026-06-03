@@ -27,6 +27,9 @@ from bioetl.interfaces.cli.commands.domains.run_all.support import (
     should_prompt_for_destructive_run,
     validate_provider,
 )
+from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
+    ObservabilityBackendEnsureResult,
+)
 from bioetl.interfaces.cli.main import cli
 
 
@@ -59,6 +62,25 @@ def mock_registry():
         ),
     ):
         yield mock
+
+
+@pytest.fixture(autouse=True)
+def mock_run_all_observability_backend():
+    """Keep run-all command tests off the real observability backend."""
+    with (
+        patch(
+            "bioetl.interfaces.cli.commands.run_all.ensure_observability_backend_started",
+            return_value=ObservabilityBackendEnsureResult(
+                status="disabled",
+                health_url="http://127.0.0.1:8081/health",
+            ),
+        ) as mock_ensure_backend,
+        patch(
+            "bioetl.interfaces.cli.commands.run_all.should_disable_transient_health_server",
+            return_value=False,
+        ),
+    ):
+        yield mock_ensure_backend
 
 
 @pytest.fixture
@@ -427,7 +449,12 @@ class TestRunAllCommand:
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
     @patch("bioetl.interfaces.cli.commands.run_all.asyncio.run")
     def test_run_all_dry_run_mode(
-        self, mock_asyncio, mock_register, cli_runner, mock_registry
+        self,
+        mock_asyncio,
+        mock_register,
+        cli_runner,
+        mock_registry,
+        mock_run_all_observability_backend,
     ):
         """Test that --dry-run mode shows pipelines without executing."""
         # Mock asyncio.run to return BatchRunResult with skipped pipelines
@@ -451,6 +478,7 @@ class TestRunAllCommand:
 
         assert result.exit_code == 0
         assert "[DRY-RUN]" in result.output
+        mock_run_all_observability_backend.assert_not_called()
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
     def test_run_all_rebuild_requires_confirmation(

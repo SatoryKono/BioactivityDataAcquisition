@@ -7,7 +7,7 @@
     "metadata_sidecar_count": 196,
     "provider_count": 8,
     "duplicate_scenario_stem_count": 0,
-    "direct_reachable_cassette_count": 125,
+    "direct_reachable_cassette_count": 126,
     "generated_reachable_cassette_count": 60,
     "metadata_review_required_cassette_count": 0,
     "unowned_cassette_count": 0
@@ -2464,9 +2464,9 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_health_check_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_reviewed",
+      "reachability_status": "direct_reference",
       "reachability_owner_paths": [
-        "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_health_check_meta.yaml"
+        "tests/integration/adapters/test_semanticscholar.py"
       ]
     },
     {

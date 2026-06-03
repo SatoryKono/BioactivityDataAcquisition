@@ -2,15 +2,15 @@
 id: task-architecture-fixes-20260603
 title: 'Fix regression architecture failures: ruff cross-layer budget'
 task_id: task-architecture-fixes-20260603
-created_at: '2026-06-03T10:58:15Z'
+created_at: '2026-06-03T11:43:30Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - <add-source-ref>
-summary: Resolved architecture failures by eliminating new cross-layer import edge
-  from composition->infrastructure.config, regenerating dependency map and VCR catalog
-  artifacts, and aligning control-plane run manifest docs/LOC threshold. All targeted
-  architecture checks and uniprot e2e test now pass.,
+summary: 'All target tasks closed; dependency map/VCR/test-governance artifacts refreshed;
+  architecture drift checks for integration/vcr coverage and module-coverage hash
+  pass. Note: governance live collector check still flags markerless budget policy
+  violation (markerless_test_functions=22 vs max 0) requiring policy ratchet.'
 ---
 
 # Episodic summary
@@ -21,7 +21,7 @@ summary: Resolved architecture failures by eliminating new cross-layer import ed
 
 ## Outcome
 
-- Resolved architecture failures by eliminating new cross-layer import edge from composition->infrastructure.config, regenerating dependency map and VCR catalog artifacts, and aligning control-plane run manifest docs/LOC threshold. All targeted architecture checks and uniprot e2e test now pass.,
+- All target tasks closed; dependency map/VCR/test-governance artifacts refreshed; architecture drift checks for integration/vcr coverage and module-coverage hash pass. Note: governance live collector check still flags markerless budget policy violation (markerless_test_functions=22 vs max 0) requiring policy ratchet.
 
 ## Lessons learned
 
