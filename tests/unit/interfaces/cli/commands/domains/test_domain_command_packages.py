@@ -73,6 +73,7 @@ def test_domain_command_packages_export_lazy_command_symbol(
         module.__getattr__("missing")
 
 
+@pytest.mark.unit
 def test_maintenance_domain_package_has_lazy_export() -> None:
     """Maintenance domain has different architecture - verify __getattr__ works."""
     module_path = Path("src/bioetl/interfaces/cli/commands/domains/maintenance/__init__.py")

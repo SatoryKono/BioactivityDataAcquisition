@@ -17,6 +17,7 @@ from bioetl.infrastructure.config import (
 )
 from bioetl.infrastructure.config.workflow_config_api import (
     load_workflow_config,
+    resolve_workflow_config_dir,
     resolve_workflow_config_path,
 )
 from bioetl.infrastructure.schemas.workflow_config import (
@@ -25,6 +26,7 @@ from bioetl.infrastructure.schemas.workflow_config import (
 
 NON_COMPOSITE_ENTITY_DIR = Path("configs/entities")
 WORKFLOW_CONFIG_DIR = Path("configs/workflows")
+ROOT = Path(__file__).resolve().parents[4]
 
 
 def _non_composite_pipeline_inventory() -> list[tuple[str, Path]]:
@@ -86,7 +88,30 @@ def test_resolve_workflow_config_path_uses_config_dir() -> None:
 
     result = resolve_workflow_config_path("chembl_core", config_dir=config_dir)
 
-    assert result == config_dir / "chembl_core.yaml"
+    assert result == ROOT / "configs" / "workflows" / "chembl_core.yaml"
+
+
+@pytest.mark.unit
+def test_resolve_workflow_config_dir_uses_explicit_configs_root(
+    tmp_path: Path,
+) -> None:
+    configs_root = tmp_path / "tracked-configs"
+
+    result = resolve_workflow_config_dir(configs_root=configs_root)
+
+    assert result == configs_root / "workflows"
+
+
+@pytest.mark.unit
+def test_load_workflow_config_defaults_to_repo_root_when_cwd_differs(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    config = load_workflow_config("chembl_baseline")
+
+    assert config.name == "chembl_baseline"
 
 
 @pytest.mark.unit
@@ -121,6 +146,42 @@ def test_load_workflow_config_loads_defaults_and_steps(tmp_path: Path) -> None:
     }
     assert isinstance(transform_step, TransformStepConfig)
     assert transform_step.depends_on == ("extract",)
+
+
+@pytest.mark.unit
+def test_load_workflow_config_accepts_full_run_options_contract(
+    tmp_path: Path,
+) -> None:
+    workflows_dir = tmp_path / "configs" / "workflows"
+    payload = _build_workflow_payload("example_activity_refresh")
+    workflow_payload = payload["workflow"]
+    assert isinstance(workflow_payload, dict)
+    defaults_payload = workflow_payload["defaults"]
+    assert isinstance(defaults_payload, dict)
+    run_options_payload = defaults_payload["run_options"]
+    assert isinstance(run_options_payload, dict)
+    run_options_payload.update(
+        {
+            "debug_export_enabled": True,
+            "debug_export_formats": ["csv"],
+            "debug_export_dir": "artifacts/debug_exports",
+            "workflow_id": "configured_workflow",
+        }
+    )
+    _write_yaml(
+        workflows_dir / "example_activity_refresh.yaml",
+        payload,
+    )
+
+    config = load_workflow_config(
+        "example_activity_refresh",
+        config_dir=workflows_dir,
+    )
+
+    assert config.defaults.debug_export_enabled is True
+    assert config.defaults.debug_export_formats == ("csv",)
+    assert config.defaults.debug_export_dir == "artifacts/debug_exports"
+    assert config.defaults.workflow_id == "configured_workflow"
 
 
 @pytest.mark.unit

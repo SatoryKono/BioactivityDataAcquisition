@@ -152,18 +152,16 @@ cd BioactivityDataAcquisition
 make install
 make test-deps
 make setup-plugins
-make setup-skills
 ```
 
 Notes:
 
-- `make install` uses `uv sync --extra dev --extra tracing` when `uv` is available; otherwise it creates `.venv` and installs the editable package with dev extras.
-- Documentation site commands such as `make docs-build` require the separate `docs` extra: `uv sync --extra dev --extra tracing --extra docs` or `pip install -e ".[dev,tracing,docs]"`.
-- `make setup-plugins` configures local pytest/pre-commit tooling.
-- `make setup-skills` syncs repository-local Codex `skills` and their paired `agents` into `$CODEX_HOME` (default `~/.codex`).
+- `make install` uses `uv sync --extra dev --extra tests --extra tracing` when `uv` is available; otherwise it installs the editable package with dev, tests, and tracing extras.
+- Documentation site commands require the separate `docs` extra: `uv sync --extra dev --extra tests --extra tracing --extra docs` or `pip install -e ".[dev,tests,tracing,docs]"`.
+- `make test-deps` configures local pytest tooling.
+- `make setup-plugins` configures local pre-commit tooling.
 - If you use Codex or GitHub Copilot MCP, run `uv run python -m scripts.engineering.dev setup-mcp` after install. If you activated the OS-appropriate environment instead of using `uv`, `python -m scripts.engineering.dev setup-mcp` is also valid.
 - For docs verification and strict site builds, use the published [Docs Verification Guide](docs/03-guides/docs-verification.md).
-- `python -m scripts.engineering.dev setup` is a retired legacy command; it now fails fast with guidance to use `make install` or `python -m scripts.engineering.dev setup-mcp`.
 
 #### Mixed Windows + WSL Development
 
@@ -210,14 +208,14 @@ git clone https://github.com/SatoryKono/BioactivityDataAcquisition.git
 cd BioactivityDataAcquisition
 
 # Preferred manual path
-uv sync --extra dev --extra tracing
+uv sync --extra dev --extra tests --extra tracing
    # Add --extra docs if you need MkDocs/site builds
-   uv sync --extra dev --extra tracing --extra docs
+   uv sync --extra dev --extra tests --extra tracing --extra docs
 
    # Fallback without uv
    python3.12 -m venv .venv
    . .venv/bin/activate
-   pip install -e ".[dev,tracing,docs]"
+   pip install -e ".[dev,tests,tracing,docs]"
 ```
 
 1. **Configure Environment** *(optional)*:

@@ -14,9 +14,12 @@ from bioetl.infrastructure.config import (
 )
 from bioetl.infrastructure.config.composite_config_api import (
     load_composite_config,
+    resolve_composite_config_dir,
     resolve_composite_config_path,
     resolve_composite_gold_schema,
 )
+
+ROOT = Path(__file__).resolve().parents[4]
 
 
 def _build_composite_payload(name: str) -> dict[str, Any]:
@@ -63,7 +66,30 @@ def test_resolve_composite_config_path_uses_config_dir() -> None:
 
     result = resolve_composite_config_path("publication", config_dir=config_dir)
 
-    assert result == config_dir / "publication.yaml"
+    assert result == ROOT / "configs" / "composites" / "publication.yaml"
+
+
+@pytest.mark.unit
+def test_resolve_composite_config_dir_uses_explicit_configs_root(
+    tmp_path: Path,
+) -> None:
+    configs_root = tmp_path / "tracked-configs"
+
+    result = resolve_composite_config_dir(configs_root=configs_root)
+
+    assert result == configs_root / "composites"
+
+
+@pytest.mark.unit
+def test_load_composite_config_defaults_to_repo_root_when_cwd_differs(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    config = load_composite_config("activity")
+
+    assert config.name == "composite_activity"
 
 
 @pytest.mark.unit

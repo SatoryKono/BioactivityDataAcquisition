@@ -222,7 +222,7 @@ domain surface. Runtime execution остаётся на `PipelineRunContext` и
 `PipelineContext`, а provenance/control-plane — на
 `domain.control_plane.RunManifest`.
 
-### 2.6. Доменные сервисы (`services/`)
+### 2.6. Доменное поведение (`behavior/`)
 
 `src/bioetl/domain/behavior/` содержит чистые доменные сервисы без I/O, например:
 

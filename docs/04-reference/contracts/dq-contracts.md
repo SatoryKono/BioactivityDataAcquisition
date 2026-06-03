@@ -52,10 +52,12 @@ The BioETL DQ Contract System defines four primary contract types that govern da
 **Contract Fields**:
 
 - `field`: Target field name (snake_case)
-- `type`: Validation rule type (`required`, `range`, `enum`, `pattern`, `length`)
+- `validation_type`: Validation rule type (`required`, `not_null`, `range`, `pattern`, `enum`, `max_length`, `not_empty_list`, `custom`)
 - `nullable`: Boolean nullability constraint
+- `severity`: Severity level ("error" or "warn", default: "error")
+- `severity_enricher`: Override severity for enricher context (optional)
 - `error_message`: Human-readable error message
-- Rule-specific parameters (`min`, `max`, `pattern`, `allowed`, etc.)
+- Rule-specific parameters (`min_value`, `max_value`, `pattern`, `allowed`, `max_length`, `validator`)
 
 **Example**:
 
@@ -63,49 +65,43 @@ The BioETL DQ Contract System defines four primary contract types that govern da
 quality:
   entity_field_validations:
     - field: activity_id
-      type: required
+      validation_type: required
       nullable: false
       error_message: "Activity ID is required for all records"
 
     - field: standard_value
-      type: range
+      validation_type: range
       nullable: true
-      min: 0
-      max: 1000000000
+      min_value: 0
+      max_value: 1000000000
       error_message: "standard_value must be non-negative and below 1B"
 
     - field: assay_type
-      type: enum
+      validation_type: enum
       nullable: false
       allowed: ["B", "F", "A", "T", "P", "U"]
       error_message: "assay_type must be one of B, F, A, T, P, U"
 
     - field: inchi_key
-      type: pattern
+      validation_type: pattern
       nullable: true
       pattern: "^[A-Z]{14}-[A-Z]{10}-[A-Z]$"
       error_message: "InChI key must match standard format"
 
     - field: comment
-      type: max_length
+      validation_type: max_length
       nullable: true
       max_length: 500
       error_message: "Comment must not exceed 500 characters"
 
-    - field: tags
-      type: not_empty_list
-      nullable: true
-      min_items: 1
-      error_message: "At least one tag is required if tags field is present"
-
     - field: custom_validation_field
-      type: custom
+      validation_type: custom
       nullable: true
-      validation: "custom_validation_function"
+      validator: "custom_validation_function"
       error_message: "Field failed custom validation"
 
     - field: required_field
-      type: not_null
+      validation_type: not_null
       nullable: false
       error_message: "This field cannot be null"
 ```
@@ -121,24 +117,31 @@ quality:
 
 **Contract Fields**:
 
-- `field`: Primary field name
-- `related_field`: Related field name
-- `condition`: Jinja2 validation expression
-- `error_message`: Human-readable error message for violation
+- `name`: Unique name for the validation rule
+- `fields`: Tuple of field names involved in the validation
+- `condition`: Validation condition type (Literal: "all_present", "any_present", "mutually_exclusive", "conditional_required", "custom")
+- `severity`: Severity level ("error" or "warn", default: "error")
+- `trigger_field`: For conditional_required: field that triggers requirement
+- `required_field`: For conditional_required: field that becomes required
+- `validator`: For custom condition: custom validation function name
+- `error_message`: Custom error message template
 
 **Example**:
 
 ```yaml
 quality:
   entity_cross_field_validations:
-    - field: standard_value
-      related_field: standard_units
-      condition: "{{ standard_value is not none and standard_units is not none }}"
+    - name: both_values_present
+      fields: ["standard_value", "standard_units"]
+      condition: all_present
+      severity: error
       error_message: "Both standard_value and standard_units must be present together"
 
-    - field: min_value
-      related_field: max_value
-      condition: "{{ min_value is not none and max_value is not none and min_value <= max_value }}"
+    - name: min_max_order
+      fields: ["min_value", "max_value"]
+      condition: custom
+      validator: validate_min_max_order
+      severity: error
       error_message: "min_value must be less than or equal to max_value"
 ```
 
@@ -153,26 +156,26 @@ quality:
 
 **Contract Fields**:
 
-- `condition`: Jinja2 expression defining when validation applies
-- `then`: Validation rules to apply when condition is true
-- `else`: Validation rules to apply when condition is false (optional)
+- `name`: Unique name for the validation rule
+- `condition_field`: Field to check for condition
+- `condition_value`: Value that triggers the validation (scalar or tuple)
+- `condition_operator`: Comparison operator ("eq", "ne", "in", "not_in", default: "eq")
+- `then_validations`: Tuple of FieldValidation rules to apply when condition is true
 
 **Example**:
 
 ```yaml
 quality:
   entity_conditional_validations:
-    - condition: "{{ assay_type == 'B' }}"
-      then:
-        field: standard_type
-        type: enum
-        allowed: ["IC50", "EC50", "Ki"]
-        error_message: "Binding assays require IC50, EC50, or Ki standard types"
-      else:
-        field: standard_type
-        type: enum
-        allowed: ["IC50", "EC50", "Ki", "Potency"]
-        error_message: "Non-binding assays allow additional standard types"
+    - name: binding_assay_standard_type
+      condition_field: assay_type
+      condition_value: "B"
+      condition_operator: eq
+      then_validations:
+        - field: standard_type
+          validation_type: enum
+          allowed: ["IC50", "EC50", "Ki"]
+          error_message: "Binding assays require IC50, EC50, or Ki standard types"
 ```
 
 ### 5. Key Nullability Constraints
@@ -204,26 +207,26 @@ quality:
 
 ## Disposition Policy
 
-The DQ contract system defines four disposition strategies:
+The DQ contract system defines five disposition strategies based on the canonical `DQDisposition` enum:
 
 | Disposition  | Behavior                                                           | Use Case                                                  |
 | ------------ | ------------------------------------------------------------------ | --------------------------------------------------------- |
-| `quarantine` | Record moved to quarantine table with full provenance              | Critical violations that cannot be automatically resolved |
-| `transform`  | Automatic correction applied (null → default, type coercion, etc.) | Recoverable format issues                                 |
-| `allow`      | Violation logged but record passes through                         | Non-critical warnings or known edge cases                 |
-| `escalate`   | Pipeline halted, manual intervention required                      | System-level integrity violations                         |
+| `pass`       | No violation detected                                               | Record passes all validation rules                       |
+| `warn`       | Violation detected but not severe enough for action                | Non-critical warnings or known edge cases                 |
+| `quarantine` | Record moved to quarantine table with full provenance              | Critical violations that require manual review             |
+| `skip`       | Skip processing this data                                           | Recoverable issues or data outside scope                  |
+| `fail`       | Hard failure - stop processing                                      | System-level integrity violations                         |
 
 **Decision Tree**:
 
 ```mermaid
 graph TD
-    A[DQ Violation Detected] --> B{Severity = ERROR?}
-    B -->|Yes| C{Disposition}
-    B -->|No| D[Log Warning]
+    A[DQ Violation Detected] --> B{Severity}
+    B -->|ERROR| C{Disposition Policy}
+    B -->|WARN| D[Log Warning, Continue]
     C -->|quarantine| E[Move to Quarantine]
-    C -->|transform| F[Apply Transformation]
-    C -->|allow| D[Log Warning]
-    C -->|escalate| G[Halt Pipeline]
+    C -->|skip| F[Skip Record]
+    C -->|fail| G[Halt Pipeline]
 ```
 
 ## Replay & Rollout Alignment
@@ -234,21 +237,28 @@ graph TD
 
 **Contract Fields** (QuarantineEntry aggregate):
 
-- `record_id`: Unique identifier of the quarantined record
-- `pipeline_id`: Source pipeline identifier
-- `run_id`: Execution context
-- `violation_type`: Specific DQ rule violated
-- `violation_details`: JSON payload with field values and rule parameters
-- `original_payload`: Full record before quarantine
-- `timestamp`: ISO 8601 timestamp
-- `resolution_status`: `pending`, `resolved`, `escalated`
+- `entry_id`: Unique identifier for this quarantine entry
+- `pipeline_name`: Name of the pipeline where error occurred
+- `error_code`: Classification code for the error (e.g., SCHEMA_VIOLATION)
+- `payload`: The failed record data (immutable copy)
+- `payload_hash`: Content hash of the payload for deduplication
+- `run_id`: Execution context (RunID)
+- `batch_id`: Batch that produced this quarantined record
+- `status`: Entry status (NEW, UNDER_REVIEW, IGNORED, REPROCESSED, EXPIRED)
+- `resolution_info`: Resolution metadata when resolved (resolution_type, resolved_at, resolved_by, reason)
+- `created_at`: ISO 8601 timestamp when entry was created
+- `metadata`: Additional metadata as key-value pairs
 
 **Recovery Workflow**:
 
-1. **Identification**: `SELECT * FROM quarantine WHERE resolution_status = 'pending'`
-1. **Analysis**: Review `violation_details` and `original_payload`
-1. **Resolution**: Apply manual correction or update DQ rules
-1. **Replay**: `bioetl quarantine replay --run-id <run_id> --record-id <record_id>`
+1. **Identification**: `SELECT * FROM quarantine WHERE status = 'NEW'`
+1. **Analysis**: Review `payload` and `error_code`
+1. **Resolution**: Apply manual correction or update DQ rules, then use resolution methods:
+   - `start_review()` → mark as UNDER_REVIEW
+   - `mark_ignored(reason, resolved_by, resolved_at)` → mark as IGNORED
+   - `mark_reprocessed(new_record_id, resolved_by, resolved_at)` → mark as REPROCESSED
+   - `mark_expired(expired_at)` → mark as EXPIRED (retention policy)
+1. **Replay**: Use domain replay mechanisms or re-run pipeline with corrected config
 
 ### Rollout Contract
 
@@ -354,48 +364,49 @@ quality:
   # Field-level validations
   entity_field_validations:
     - field: activity_id
-      type: required
+      validation_type: required
       nullable: false
       error_message: "Activity ID is required for all records"
 
     - field: standard_value
-      type: range
+      validation_type: range
       nullable: true
-      min: 0
-      max: 1000000000
+      min_value: 0
+      max_value: 1000000000
       error_message: "standard_value must be non-negative and below 1B"
 
     - field: assay_type
-      type: enum
+      validation_type: enum
       nullable: false
       allowed: ["B", "F", "A", "T", "P", "U"]
       error_message: "assay_type must be one of B, F, A, T, P, U"
 
   # Cross-field validations
   entity_cross_field_validations:
-    - field: standard_value
-      related_field: standard_units
-      condition: "{{ standard_value is not none and standard_units is not none }}"
+    - name: both_values_present
+      fields: ["standard_value", "standard_units"]
+      condition: all_present
+      severity: error
       error_message: "Both standard_value and standard_units must be present together"
 
-    - field: min_value
-      related_field: max_value
-      condition: "{{ min_value is not none and max_value is not none and min_value <= max_value }}"
+    - name: min_max_order
+      fields: ["min_value", "max_value"]
+      condition: custom
+      validator: validate_min_max_order
+      severity: error
       error_message: "min_value must be less than or equal to max_value"
 
   # Conditional validations
   entity_conditional_validations:
-    - condition: "{{ assay_type == 'B' }}"
-      then:
-        field: standard_type
-        type: enum
-        allowed: ["IC50", "EC50", "Ki"]
-        error_message: "Binding assays require IC50, EC50, or Ki standard types"
-      else:
-        field: standard_type
-        type: enum
-        allowed: ["IC50", "EC50", "Ki", "Potency"]
-        error_message: "Non-binding assays allow additional standard types"
+    - name: binding_assay_standard_type
+      condition_field: assay_type
+      condition_value: "B"
+      condition_operator: eq
+      then_validations:
+        - field: standard_type
+          validation_type: enum
+          allowed: ["IC50", "EC50", "Ki"]
+          error_message: "Binding assays require IC50, EC50, or Ki standard types"
 
   # Nullability constraints
   key_nullability:
@@ -411,16 +422,16 @@ quality:
 
 #### Field Validation Types
 
-| Rule Type        | Parameters         | Example                   | Use Case                |
-| ---------------- | ------------------ | ------------------------- | ----------------------- |
-| `required`       | `nullable: false`  | `type: required`          | Mandatory fields        |
-| `not_null`       | `nullable: false`  | `type: not_null`          | Field must not be null  |
-| `range`          | `min`, `max`       | `min: 0, max: 1000`       | Numeric boundaries      |
-| `enum`           | `allowed: [...]`   | `allowed: ["A", "B"]`     | Enumerated values       |
-| `pattern`        | `pattern: "regex"` | `pattern: "^CHEMBL\\d+$"` | Regex validation        |
-| `max_length`     | `max_length: N`    | `max_length: 100`         | Maximum string length   |
-| `not_empty_list` | `min_items: N`     | `min_items: 1`            | Non-empty list/array    |
-| `custom`         | Custom validation  | `validation: custom`      | Custom validation logic |
+| Rule Type        | Parameters                      | Example                              | Use Case                |
+| ---------------- | ------------------------------- | ------------------------------------ | ----------------------- |
+| `required`       | `nullable: false`               | `validation_type: required`          | Mandatory fields        |
+| `not_null`       | `nullable: false`               | `validation_type: not_null`          | Field must not be null  |
+| `range`          | `min_value`, `max_value`        | `min_value: 0, max_value: 1000`      | Numeric boundaries      |
+| `enum`           | `allowed: [...]`                 | `allowed: ["A", "B"]`                | Enumerated values       |
+| `pattern`        | `pattern: "regex"`               | `pattern: "^CHEMBL\\d+$"`            | Regex validation        |
+| `max_length`     | `max_length: N`                  | `max_length: 100`                     | Maximum string length   |
+| `not_empty_list` | (no min_items parameter)        | `validation_type: not_empty_list`    | Non-empty list/array    |
+| `custom`         | `validator: function_name`       | `validator: custom_validator`        | Custom validation logic |
 
 #### Cross-Field Validation Patterns
 

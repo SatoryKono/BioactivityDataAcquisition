@@ -17,6 +17,7 @@ from bioetl.infrastructure.config._composite_dq_externalization import (
 from bioetl.infrastructure.config._composite_gold_schema_registry import (
     DEFAULT_COMPOSITE_GOLD_SCHEMA_REGISTRY,
 )
+from bioetl.infrastructure.config.config_root import resolve_config_subdir
 from bioetl.infrastructure.schemas.composite_config import (
     validate_composite_config_payload,
 )
@@ -25,20 +26,12 @@ __all__ = [
     "DEFAULT_COMPOSITE_CONFIG_DIR",
     "DEFAULT_COMPOSITE_GOLD_SCHEMA_REGISTRY",
     "load_composite_config",
+    "resolve_composite_config_dir",
     "resolve_composite_config_path",
     "resolve_composite_gold_schema",
 ]
 
-
-class _CompositeSchema(Protocol):
-    """Protocol for validated composite schema payloads."""
-
-    def to_domain(self) -> CompositeConfig:
-        """Convert validated schema payload into immutable domain config."""
-        ...
-
-
-ConfigPayloadValidator = Callable[[JsonDict], _CompositeSchema]
+ConfigPayloadValidator = Callable[[JsonDict], object]
 DQOverrideMerger = Callable[[dict[str, object], Path], None]
 
 DEFAULT_COMPOSITE_CONFIG_DIR = Path("configs/composites")
@@ -55,9 +48,32 @@ def resolve_composite_gold_schema(
     return registry.get(key)
 
 
-def resolve_composite_config_path(name: str, *, config_dir: Path) -> Path:
+def resolve_composite_config_dir(
+    *,
+    config_dir: Path | None = None,
+    configs_root: Path | None = None,
+) -> Path:
+    """Resolve the canonical composite config directory independent of cwd."""
+    return resolve_config_subdir(
+        config_dir or DEFAULT_COMPOSITE_CONFIG_DIR,
+        configs_root=configs_root,
+    )
+
+
+def resolve_composite_config_path(
+    name: str,
+    *,
+    config_dir: Path | None = None,
+    configs_root: Path | None = None,
+) -> Path:
     """Resolve composite config path from canonical composites directory."""
-    config_path = config_dir / f"{name}.yaml"
+    config_path = (
+        resolve_composite_config_dir(
+            config_dir=config_dir,
+            configs_root=configs_root,
+        )
+        / f"{name}.yaml"
+    )
     if config_path.exists():
         return config_path
     raise FileNotFoundError(f"Composite config not found: {config_path}")
@@ -66,12 +82,17 @@ def resolve_composite_config_path(name: str, *, config_dir: Path) -> Path:
 def load_composite_config(
     name: str,
     *,
-    config_dir: Path = DEFAULT_COMPOSITE_CONFIG_DIR,
+    config_dir: Path | None = None,
+    configs_root: Path | None = None,
     validate_payload: ConfigPayloadValidator = validate_composite_config_payload,
     dq_override_merger: DQOverrideMerger = merge_external_dq_overrides,
 ) -> CompositeConfig:
     """Load, merge, and validate composite pipeline configuration from YAML."""
-    config_path = resolve_composite_config_path(name, config_dir=config_dir)
+    config_path = resolve_composite_config_path(
+        name,
+        config_dir=config_dir,
+        configs_root=configs_root,
+    )
 
     with config_path.open(encoding="utf-8") as config_file:
         raw_payload = yaml.safe_load(config_file)

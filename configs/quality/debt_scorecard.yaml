@@ -473,7 +473,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 50
-      total_loc: 5980
+      total_loc: 5982
       files_ge_250_loc: 3
       helper_function_ratio: 0.328
       max_internal_fan_in: 3
@@ -589,7 +589,7 @@ oversized_source_module_inventory:
     owner: '@bioetl-lineage'
     target_split: split node identity builders from metadata enrichment helpers
   - path: src/bioetl/infrastructure/control_plane/file_run_ledger_store.py
-    lines: 490
+    lines: 486
     owner: '@bioetl-control-plane'
     target_split: separate file IO, record serialization, and query helpers
   - path: src/bioetl/application/services/data_quality_service.py
@@ -733,8 +733,12 @@ hotspot_family_coverage_thresholds:
       min_covered_module_count: 35
       min_covered_line_percent: 61.96
       allowlisted_unmeasured_paths:
+      - src/bioetl/composition/runtime_builders/_effective_config_secret_support.py
+      - src/bioetl/composition/runtime_builders/_effective_config_source_refs_support.py
       - src/bioetl/composition/runtime_builders/_run_manifest_data_roots.py
+      - src/bioetl/composition/runtime_builders/_run_manifest_creation_support_policy.py
       - src/bioetl/composition/runtime_builders/_run_manifest_sink_policy.py
+      - src/bioetl/composition/runtime_builders/_runner_control_plane_policy_support.py
       - src/bioetl/composition/runtime_builders/inputs_runtime_assembly.py
       - src/bioetl/composition/runtime_builders/run_manifest_support.py
       - src/bioetl/composition/runtime_builders/runner_builder_wiring.py

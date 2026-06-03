@@ -11,6 +11,7 @@ from bioetl.infrastructure.config.pipeline_config_api import (
 from bioetl.infrastructure.config.config_root import (
     ConfigRootResolver,
     get_default_repo_root,
+    resolve_config_subdir,
     resolve_configs_root,
 )
 
@@ -36,6 +37,23 @@ def test_resolve_configs_root_resolves_relative_path_from_repo_root() -> None:
     repo_root = get_default_repo_root()
 
     assert resolve_configs_root(Path("configs")) == (repo_root / "configs").resolve()
+
+
+def test_resolve_config_subdir_strips_tracked_configs_prefix() -> None:
+    repo_root = get_default_repo_root()
+
+    assert (
+        resolve_config_subdir(Path("configs/composites"))
+        == (repo_root / "configs" / "composites").resolve()
+    )
+
+
+def test_resolve_config_subdir_honors_explicit_configs_root(tmp_path: Path) -> None:
+    configs_root = tmp_path / "tracked-configs"
+
+    assert resolve_config_subdir("workflows", configs_root=configs_root) == (
+        configs_root / "workflows"
+    )
 
 
 def test_resolve_configs_root_ignores_cwd_configs_by_default(

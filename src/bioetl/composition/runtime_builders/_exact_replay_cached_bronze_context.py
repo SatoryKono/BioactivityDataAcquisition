@@ -11,6 +11,7 @@ from uuid import UUID
 
 from bioetl.composition.runtime_builders._run_manifest_refs import control_plane_root
 from bioetl.domain.context import CachedBronzeContext
+from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.run_ledger import INPUT_SNAPSHOT_PUBLISHED_EVENT
 from bioetl.domain.types import RunID
@@ -18,7 +19,6 @@ from bioetl.infrastructure.control_plane import FileRunLedgerStore, FileRunManif
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
-    from bioetl.domain.control_plane import RunLedgerEntry
     from bioetl.infrastructure.config.settings_api import Settings
 
 

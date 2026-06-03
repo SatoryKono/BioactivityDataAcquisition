@@ -342,7 +342,9 @@ class TestBatchDomainEvents:
         assert events[0].__class__.__name__ == "BatchCreated"
         assert events[0].occurred_at == _ts(0)
 
-    def test_seal_emits_batch_sealed_event(self, batch: Batch) -> None:
+    def test_batch_domain_events_seal_emits_batch_sealed_event(
+        self, batch: Batch
+    ) -> None:
         """seal() should emit BatchSealed event."""
         batch.collect_events()  # Clear creation event
         batch.add_record({"id": "1"})

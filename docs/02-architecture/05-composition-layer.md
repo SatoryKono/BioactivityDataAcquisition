@@ -25,7 +25,7 @@ ______________________________________________________________________
 
 - **Глобальная осведомленность:** Единственный слой (наряду с `Interfaces`), который "знает" обо всех остальных слоях. Ему разрешено импортировать из `infrastructure`, `application` и `domain`.
 - **Сборка зависимостей:** Здесь происходит внедрение зависимостей (Dependency Injection). Канонические first-party public seams проходят через `entrypoints.py`, `execution_api.py`, `registry_api.py`, `control_plane_api.py`, `health_api.py`, `maintenance_api.py`, `composite_api.py`, `observability_api.py`; `services_api.py` и `resources_api.py` остаются compatibility-only façades и не являются целевым import surface для нового first-party кода.
-- **Конфигурация:** Потребляет уже загруженные и нормализованные конфигурации. Канонический owner для YAML I/O, merge и normalization находится в `bioetl.infrastructure.config`, а `composition` сохраняет только thin public access / compat seams (`load_pipeline_config()`, `load_composite_config()`) для стабильных runtime entrypoints.
+- **Конфигурация:** Потребляет уже загруженные и нормализованные конфигурации. Канонический owner для YAML I/O, merge и normalization находится в `bioetl.infrastructure.config`, а `composition` сохраняет только thin public access / compat seams (`load_pipeline_config()`, `load_composite_config()`) для стабильных runtime entrypoints. Pipeline, composite и workflow loaders должны разрешать tracked configs через `bioetl.infrastructure.config.config_root`, чтобы `configs/` был привязан к repo root, а не к process `cwd`.
 
 ## 2. Ключевые Компоненты
 

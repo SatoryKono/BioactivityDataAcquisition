@@ -24,12 +24,12 @@ class TestInChIValidation:
         assert not inchi.value.startswith(" ")
         assert not inchi.value.endswith(" ")
 
-    def test_non_string_raises_value_error(self) -> None:
+    def test_inchi_non_string_raises_value_error(self) -> None:
         """Test that non-string raises ValueError."""
         with pytest.raises(ValueError, match="InChI must be str"):
             InChI(12345)  # type: ignore[arg-type]
 
-    def test_empty_string_raises_value_error(self) -> None:
+    def test_inchi_empty_string_raises_value_error(self) -> None:
         """Test that empty string raises ValueError."""
         with pytest.raises(ValueError, match="InChI cannot be empty"):
             InChI("")

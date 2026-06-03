@@ -12,6 +12,7 @@ from bioetl.composition.occurrence_identity import (
 )
 from bioetl.composition.registry_api import PipelineRegistry
 from bioetl.composition.runtime_builders.config_access import get_settings
+from bioetl.infrastructure.config.config_root import resolve_configs_root
 
 if TYPE_CHECKING:
     from bioetl.application.services.control_plane.workflow.execution_service import (
@@ -49,7 +50,7 @@ def load_workflow_config(name: str) -> WorkflowConfig:
         load_workflow_config as load_workflow_config_impl,
     )
 
-    return load_workflow_config_impl(name)
+    return load_workflow_config_impl(name, configs_root=resolve_configs_root())
 
 
 def _default_pipeline_runner_service_factory(

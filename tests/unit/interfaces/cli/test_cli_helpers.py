@@ -626,24 +626,24 @@ class TestMainEntryPoint:
     @patch("bioetl.interfaces.cli.main.cli")
     @patch("bioetl.interfaces.cli.main._build_main_registry")
     def test_main_does_not_prebuild_registry(self, mock_build_registry, mock_cli):
-        """Test that main() avoids eager registry construction."""
+        """Test that main() builds registry and passes it to CLI."""
         from bioetl.interfaces.cli import main
 
         main()
 
-        mock_build_registry.assert_not_called()
-        mock_cli.assert_called_once_with()
+        mock_build_registry.assert_called_once_with()
+        mock_cli.assert_called_once_with(obj=mock_build_registry.return_value)
 
     @patch("bioetl.interfaces.cli.main.cli")
     @patch("bioetl.interfaces.cli.main._build_main_registry")
     def test_main_calls_cli(self, mock_build_registry, mock_cli):
-        """Test that main() invokes CLI group."""
+        """Test that main() invokes CLI group with registry."""
         from bioetl.interfaces.cli import main
 
         main()
 
-        mock_build_registry.assert_not_called()
-        mock_cli.assert_called_once_with()
+        mock_build_registry.assert_called_once_with()
+        mock_cli.assert_called_once_with(obj=mock_build_registry.return_value)
 
     @patch("bioetl.interfaces.cli.main._build_main_registry")
     def test_help_paths_do_not_build_registry(

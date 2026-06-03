@@ -522,7 +522,7 @@ class TestSerializeJson:
 
     # === None и пустые коллекции ===
 
-    def test_none_returns_none(self) -> None:
+    def test_serialize_json_none_returns_none(self) -> None:
         """Test returns None for None input."""
         assert BaseTransformer.serialize_json(None) is None
 
