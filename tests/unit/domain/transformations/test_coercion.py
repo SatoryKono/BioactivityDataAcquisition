@@ -26,7 +26,7 @@ class TestSafeFloat:
     def test_string_with_whitespace(self) -> None:
         assert safe_float("  3.14  ") == pytest.approx(3.14)
 
-    def test_none_returns_default(self) -> None:
+    def test_safe_float_none_returns_default(self) -> None:
         assert safe_float(None) is None
 
     def test_none_with_custom_default(self) -> None:

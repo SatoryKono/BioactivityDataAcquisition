@@ -395,7 +395,7 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
     )
 
     return {
-        "root": root.as_posix(),
+        "root": ".",
         "total_test_files": len(test_files),
         "total_test_functions": total_functions,
         "assertless_total_candidates": assertless_total_candidates,

@@ -32,7 +32,7 @@ class TestCoerceHelpers:
         hbc = HydrogenBondCount("7")
         assert hbc.value == 7
 
-    def test_bool_raises_value_error(self) -> None:
+    def test_hydrogen_bond_count_bool_raises_value_error(self) -> None:
         """Test that bool input raises ValueError (prevents bool→int coercion)."""
         with pytest.raises(ValueError):
             HydrogenBondCount(True)

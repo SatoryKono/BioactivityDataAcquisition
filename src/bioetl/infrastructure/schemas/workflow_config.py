@@ -67,6 +67,10 @@ class WorkflowRunOptionsSchema(BaseModel):
         Literal["degraded_observable", "replay_ready", "forensic_grade"] | None
     ) = None
     enable_tracing: bool | None = None
+    debug_export_enabled: bool | None = None
+    debug_export_formats: list[str] | None = None
+    debug_export_dir: str | None = None
+    workflow_id: str | None = None
 
     def to_domain(self) -> WorkflowRunOptionsConfig:
         """Convert validated overrides into immutable domain config."""
@@ -108,6 +112,14 @@ class WorkflowRunOptionsSchema(BaseModel):
             exact_replay=self.exact_replay,
             required_persistence_profile=self.required_persistence_profile,
             enable_tracing=self.enable_tracing,
+            debug_export_enabled=self.debug_export_enabled,
+            debug_export_formats=(
+                tuple(self.debug_export_formats)
+                if self.debug_export_formats is not None
+                else None
+            ),
+            debug_export_dir=self.debug_export_dir,
+            workflow_id=self.workflow_id,
         )
 
 

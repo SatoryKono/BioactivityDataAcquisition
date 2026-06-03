@@ -205,7 +205,7 @@ def cli(ctx: Context) -> None:
 
 def main() -> None:
     """Main entry point."""
-    cli()
+    cli(obj=_build_main_registry())
 
 
 if __name__ == "__main__":

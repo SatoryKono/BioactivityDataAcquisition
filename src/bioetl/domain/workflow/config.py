@@ -62,6 +62,7 @@ class WorkflowRunOptionsConfig:
     debug_export_enabled: bool | None = None
     debug_export_formats: tuple[str, ...] | None = None
     debug_export_dir: str | None = None
+    workflow_id: str | None = None
 
     def merged_with(
         self, override: WorkflowRunOptionsConfig
@@ -159,6 +160,7 @@ class WorkflowRunOptionsConfig:
                 self.debug_export_dir,
                 override.debug_export_dir,
             ),
+            workflow_id=prefer_override(self.workflow_id, override.workflow_id),
         )
 
     def to_mapping(self) -> JsonDict:

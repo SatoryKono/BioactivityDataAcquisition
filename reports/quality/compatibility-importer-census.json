@@ -121,11 +121,9 @@
       "status": "public-entrypoint",
       "canonical_target": "bioetl.interfaces.cli.commands.maintenance",
       "owner": "bioetl.interfaces.cli.commands",
-      "src_importers": [
-        "src/bioetl/interfaces/cli/commands/domains/maintenance/__init__.py"
-      ],
+      "src_importers": [],
       "test_importers": [],
-      "src_importer_count": 1,
+      "src_importer_count": 0,
       "test_importer_count": 0
     },
     {

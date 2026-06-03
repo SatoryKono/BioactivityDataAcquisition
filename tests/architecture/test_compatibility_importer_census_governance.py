@@ -343,9 +343,7 @@ def test_narrow_first_party_retained_entrypoints_do_not_gain_src_importers() -> 
         if isinstance(row, dict)
     }
     expected_src_importers = {
-        "src/bioetl/interfaces/cli/commands/maintenance.py": {
-            "src/bioetl/interfaces/cli/commands/domains/maintenance/__init__.py",
-        },
+        "src/bioetl/interfaces/cli/commands/maintenance.py": set(),
         "src/bioetl/composition/maintenance_api.py": {
             "src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py",
         },

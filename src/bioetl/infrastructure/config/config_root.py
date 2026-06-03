@@ -14,6 +14,7 @@ from pathlib import Path
 __all__ = [
     "ConfigRootResolver",
     "get_default_repo_root",
+    "resolve_config_subdir",
     "resolve_configs_root",
 ]
 
@@ -68,3 +69,21 @@ def resolve_configs_root(
     return ConfigRootResolver(prefer_cwd_configs=prefer_cwd_configs).resolve(
         configs_root
     )
+
+
+def resolve_config_subdir(
+    subdir: str | Path,
+    *,
+    configs_root: Path | None = None,
+) -> Path:
+    """Resolve a tracked config subdirectory beneath the canonical config root."""
+    subdir_path = Path(subdir).expanduser()
+    if subdir_path.is_absolute() or ConfigRootResolver._is_rooted_explicit_path(
+        subdir_path
+    ):
+        return subdir_path
+
+    parts = subdir_path.parts
+    if parts and parts[0] == "configs":
+        subdir_path = Path(*parts[1:])
+    return resolve_configs_root(configs_root) / subdir_path

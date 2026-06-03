@@ -235,12 +235,12 @@ class TestCompositeResult:
         assert result.is_success is False
         assert result.required_enrichers_succeeded is False
 
-    def test_successful_enrichers(self, composite_result):
+    def test_composite_result_successful_enrichers(self, composite_result):
         """successful_enrichers should list successful ones."""
         assert "crossref" in composite_result.successful_enrichers
         assert "pubmed" not in composite_result.successful_enrichers
 
-    def test_failed_enrichers(self, composite_result):
+    def test_composite_result_failed_enrichers(self, composite_result):
         """failed_enrichers should list failed ones."""
         assert "pubmed" in composite_result.failed_enrichers
         assert "crossref" not in composite_result.failed_enrichers
@@ -284,7 +284,7 @@ class TestCompositeResult:
         assert result.had_warnings is True
         assert result.is_success is True  # Still successful as no required failed
 
-    def test_skipped_enrichers(self):
+    def test_composite_result_skipped_enrichers(self):
         """skipped_enrichers should list enrichers with SKIPPED status."""
         result = CompositeResult(
             composite_name="test",
@@ -304,7 +304,7 @@ class TestCompositeResult:
         assert "crossref" not in result.skipped_enrichers
         assert len(result.skipped_enrichers) == 1
 
-    def test_not_run_enrichers(self):
+    def test_composite_result_not_run_enrichers(self):
         """not_run_enrichers should list enrichers with NOT_RUN status."""
         result = CompositeResult(
             composite_name="test",
@@ -324,7 +324,7 @@ class TestCompositeResult:
         assert "crossref" not in result.not_run_enrichers
         assert len(result.not_run_enrichers) == 1
 
-    def test_optional_failed_enrichers(self):
+    def test_composite_result_optional_failed_enrichers(self):
         """optional_failed_enrichers should list non-required failed enrichers."""
         result = CompositeResult(
             composite_name="test",

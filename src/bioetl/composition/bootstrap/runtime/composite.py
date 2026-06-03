@@ -43,6 +43,7 @@ from bioetl.infrastructure.config.composite_config_api import (
 from bioetl.infrastructure.config.composite_config_api import (
     resolve_composite_gold_schema as _resolve_composite_gold_schema_impl,
 )
+from bioetl.infrastructure.config.config_root import resolve_configs_root
 from bioetl.infrastructure.schemas.composite_config import (
     validate_composite_config_payload,
 )
@@ -105,6 +106,7 @@ def _resolve_composite_config_path(name: str) -> Path:
     return _resolve_composite_config_path_impl(
         name,
         config_dir=DEFAULT_COMPOSITE_CONFIG_DIR,
+        configs_root=resolve_configs_root(),
     )
 
 

@@ -46,6 +46,14 @@ Those classes are validation contracts, not adapter implementations, and must
 not become adapters over time. They must not open files, call networks, construct concrete
 infrastructure, or own runtime bootstrapping.
 
+Schema-contract hotspot ownership is narrow by design. Large generated
+registries, enum catalogs, Pandera schema modules, and Gold/Silver contract
+tables under `domain/schemas` or `domain/contracts` are domain-owned contract
+surfaces only. When touched for behavioral change or material growth, they must
+be split on touch into smaller pure schema/catalog modules before adding more
+responsibility. That split must not move schema ownership into application,
+infrastructure, composition, or interface layers.
+
 Domain behavior, services, entities, aggregates, value objects, ports, and
 normalization code must stay free of direct Pandera/Pandas imports unless a
 future ADR narrows and tests an explicit exception.
@@ -87,6 +95,8 @@ library/runtime compatibility, not domain semantics.
 
 - Architecture tests must fail if direct Pandera/Pandas imports appear outside
   `domain/schemas` or `domain/contracts`.
+- Architecture tests must fail if domain schema-contract hotspots import runtime
+  layers or perform I/O instead of remaining pure schema/catalog surfaces.
 - Architecture tests must fail if package import initialization applies the
   Pandera compatibility patch directly.
 - Runtime bootstrap tests must preserve the explicit

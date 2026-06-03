@@ -393,7 +393,8 @@ Present in the current tree:
 - immutable workflow config models;
 - strict workflow YAML schema;
 - DAG validation and topological ordering;
-- workflow config loading from `configs/workflows`;
+- workflow config loading from repo-root `configs/workflows`, resolved through
+  the canonical config-root seam instead of the current working directory;
 - `WorkflowRunnerService` MVP;
 - transform-step fingerprinting and skip support;
 - workflow-level manifest, ledger, and execution-state persistence;

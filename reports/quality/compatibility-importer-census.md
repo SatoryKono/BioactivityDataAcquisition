@@ -25,7 +25,7 @@
 | `src/bioetl/interfaces/cli/commands/health.py` | 4 | 1 |
 | `src/bioetl/interfaces/cli/commands/diagnostics.py` | 1 | 2 |
 | `src/bioetl/interfaces/cli/commands/quarantine.py` | 1 | 0 |
-| `src/bioetl/interfaces/cli/commands/maintenance.py` | 1 | 0 |
+| `src/bioetl/interfaces/cli/commands/maintenance.py` | 0 | 0 |
 | `src/bioetl/composition/entrypoints.py` | 0 | 3 |
 | `src/bioetl/composition/health_api.py` | 2 | 2 |
 | `src/bioetl/composition/maintenance_api.py` | 1 | 1 |

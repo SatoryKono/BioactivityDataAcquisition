@@ -42,6 +42,7 @@ ______________________________________________________________________
 - Do not bypass Composition Root for DI.
 - Do not introduce compatibility shims without explicit removal deadline.
 - Do not weaken DQ-before-Silver/Gold and Gold strict validation defaults.
+- **УВЕЛИЧИВАТЬ бюджеты тех. долга ЗАПРЕЩЕНО** — технический долг может только уменьшаться или оставаться неизменным, увеличение бюджетов запрещено.
 
 ## 5. Closeout Requirements
 

@@ -28,6 +28,7 @@ ______________________________________________________________________
 - `selector-architecture.md` — selector taxonomy, dashboard families, hidden handoff model и future execution-selector design.
 - `dashboard-v2-updates.md` — active changelog по текущей shipped surface,
   selector/navigation contract и UX evidence links для последних JSON-изменений.
+- `contracts/dashboard-inventory.yaml` — machine-readable mapping shipped dashboards к panels, data sources и contract metadata для drift detection и audibility.
 
 Текущий shipped Explore handoff:
 
@@ -60,9 +61,7 @@ ______________________________________________________________________
 
 - `0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`,
   `4. Data Quality`, `5. Workflow` образуют единую primary top-level шину.
-  `6. Alerts & SLO` is a first-class alert-state dashboard backed by
-  Prometheus `ALERTS`; it is an alert/SLO triage surface, not a duplicate
-  alert-rule engine.
+- `6. Alerts & SLO` (`bioetl-alerts-slo`) существует как отдельный alert/SLO triage dashboard, но не включён в primary navigation panels других dashboards.
 - На каждой странице navigation panel `id=1000` визуально показывает полный bus `0..5`; текущий dashboard рендерится как disabled dark-gray item, а machine-readable `panel.links` сохраняют omit-self contract.
 - Каноническая shipped surface этой шины — text navigation panel `id=1000`;
   root `dashboard.links[]` не обязаны дублировать те же handoff в header row

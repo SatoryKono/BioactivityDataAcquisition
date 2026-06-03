@@ -69,6 +69,7 @@ Minimum expectation:
 - `docs/00-project/ai/memory/mcp-memory.json` and
   `docs/00-project/ai/memory/gemini-memory.json` are machine-readable memory
   artifacts, not human source of truth.
+- **УВЕЛИЧИВАТЬ бюджеты тех. долга ЗАПРЕЩЕНО** — технический долг может только уменьшаться или оставаться неизменным, увеличение бюджетов запрещено.
 
 ## Dashboard Skill Routing
 

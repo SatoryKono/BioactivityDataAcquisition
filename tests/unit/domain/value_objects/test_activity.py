@@ -91,7 +91,7 @@ class TestRelationOperator:
         assert RelationOperator.from_string("") is None
         assert RelationOperator.from_string("   ") is None
 
-    def test_from_string_invalid(self) -> None:
+    def test_relation_operator_from_string_invalid(self) -> None:
         """Test invalid string raises ValueError."""
         with pytest.raises(ValueError, match="Unknown relation operator"):
             RelationOperator.from_string("!=")

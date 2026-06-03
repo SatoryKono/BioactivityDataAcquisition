@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import inspect
 from pathlib import Path
 from typing import Any
 
@@ -66,6 +67,15 @@ class _FakeWorkflowRunnerService:
 @pytest.fixture
 def cli_runner() -> CliRunner:
     return CliRunner()
+
+
+def test_workflow_cli_uses_dedicated_composition_seam_module() -> None:
+    import bioetl.interfaces.cli.commands.workflow as workflow_cmd
+
+    source = inspect.getsource(workflow_cmd)
+
+    assert "bioetl.composition.control_plane_api" not in source
+    assert "_workflow_composition_seams" in source
 
 
 @pytest.fixture(autouse=True)

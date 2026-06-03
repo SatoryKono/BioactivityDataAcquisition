@@ -294,17 +294,17 @@ class TestMainFunction:
 
     @patch("bioetl.interfaces.cli.main._build_main_registry")
     @patch("bioetl.interfaces.cli.main.cli")
-    def test_main_calls_cli_without_prebuilding_registry(
+    def test_main_calls_cli_with_explicit_registry(
         self,
         mock_cli,
         mock_build_registry,
     ):
-        """Main should stay a thin wrapper over the Click group."""
+        """Main should pass an explicit registry object into the Click group."""
 
         main()
 
-        mock_build_registry.assert_not_called()
-        mock_cli.assert_called_once_with()
+        mock_build_registry.assert_called_once_with()
+        mock_cli.assert_called_once_with(obj=mock_build_registry.return_value)
 
 
 class TestCliVersion:

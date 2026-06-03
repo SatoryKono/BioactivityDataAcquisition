@@ -119,7 +119,7 @@ class TestStageResultInvariants:
         assert stage.status == StageStatus.SUCCESS
         assert stage.duration_seconds == pytest.approx(5.0)
 
-    def test_stage_result_is_immutable(self) -> None:
+    def test_pipeline_run_stage_result_is_immutable(self) -> None:
         """StageResult should be frozen (immutable)."""
         now = _ts()
         stage = StageResult(
@@ -416,7 +416,9 @@ class TestPipelineRunDomainEvents:
         assert len(events) == 1
         assert events[0].__class__.__name__ == "PipelineShutdown"
 
-    def test_collect_events_clears_event_list(self, started_run: PipelineRun) -> None:
+    def test_pipeline_run_domain_events_collect_events_clears_event_list(
+        self, started_run: PipelineRun
+    ) -> None:
         """collect_events() should clear internal list."""
         started_run.record_stage_success(
             "test",

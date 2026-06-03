@@ -68,11 +68,13 @@ graph TD
 ```python
 # Core DQ Contract Types
 class DQDisposition(StrEnum):
-    """How to handle DQ violations"""
+    """Canonical dispositions for DQ rule outcomes"""
 
-    FAIL = "fail"  # Pipeline fails on violation
-    WARN = "warn"  # Log warning but continue
-    QUARANTINE = "quarantine"  # Isolate problematic data
+    PASS = "pass"  # No violation detected
+    WARN = "warn"  # Violation detected but not severe enough for action
+    QUARANTINE = "quarantine"  # Isolate records for review
+    SKIP = "skip"  # Skip processing this data
+    FAIL = "fail"  # Hard failure - stop processing
 
 
 class DQViolationKind(StrEnum):

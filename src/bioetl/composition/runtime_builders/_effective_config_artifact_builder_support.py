@@ -14,6 +14,13 @@ from bioetl.composition.runtime_builders._run_manifest_refs import (
     resolve_data_root_mode,
     resolve_run_context_values,
 )
+from bioetl.composition.runtime_builders._effective_config_source_refs_support import (
+    build_effective_config_source_refs as _build_effective_config_source_refs,
+    resolve_effective_config_entity,
+)
+from bioetl.composition.runtime_builders._effective_config_secret_support import (
+    build_secret_surface_inventory,
+)
 from bioetl.composition.runtime_builders._silver_filter_compatibility_support import (
     add_silver_filter_compatibility_defaults,
     current_silver_filter_compatibility_mode,
@@ -26,11 +33,6 @@ from bioetl.composition.runtime_builders.run_manifest_support import (
     to_serializable_mapping as _to_serializable_mapping,
 )
 from bioetl.composition.services.versioning import get_dependency_lock_hash
-from bioetl.domain.control_plane.config_source_hashing import (
-    ConfigSourceHashStrategy,
-    compute_config_source_hashes,
-)
-from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRef
 from bioetl.domain.control_plane.effective_config_environment import (
     semantic_runtime_env_dependencies,
 )
@@ -38,17 +40,9 @@ from bioetl.domain.control_plane.effective_config_environment import (
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
     from bioetl.infrastructure.config.settings_api import Settings
+    from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRef
 
 _EXECUTION_AFFECTING_SETTINGS_SURFACES = semantic_runtime_env_dependencies()
-
-_EXECUTION_SECRET_SETTING_SURFACES: tuple[tuple[str, str], ...] = (
-    ("settings.pii_salt_current", "pii_salt_current"),
-    ("settings.pii_salt_next", "pii_salt_next"),
-    ("settings.pubmed_api_key", "pubmed_api_key"),
-    ("settings.uniprot_api_key", "uniprot_api_key"),
-    ("settings.openalex_api_key", "openalex_api_key"),
-    ("settings.semanticscholar_api_key", "semanticscholar_api_key"),
-)
 
 
 def _setting_attr(host: object, name: str, default: object = None) -> object:
@@ -59,29 +53,8 @@ def _sha256_text(value: str) -> str:
     return f"sha256:{hashlib.sha256(value.encode('utf-8')).hexdigest()}"
 
 
-def _secret_value_hash(value: object) -> str | None:
-    if value is None:
-        return None
-    get_secret_value = getattr(value, "get_secret_value", None)
-    raw_value = get_secret_value() if callable(get_secret_value) else value
-    if raw_value in (None, ""):
-        return None
-    return _sha256_text(str(raw_value))
-
-
 def _build_secret_surface_inventory(settings: Settings) -> dict[str, object]:
-    secret_surfaces: dict[str, object] = {}
-    for surface, attribute_name in _EXECUTION_SECRET_SETTING_SURFACES:
-        value_hash = _secret_value_hash(getattr(settings, attribute_name, None))
-        secret_surfaces[surface] = {
-            "present": value_hash is not None,
-            "value_hash": value_hash,
-        }
-    return {
-        "policy": "secret_values_redacted_hash_anchored",
-        "hash_algorithm": "sha256",
-        "secret_surfaces": secret_surfaces,
-    }
+    return build_secret_surface_inventory(settings=settings, value_hash=_sha256_text)
 
 
 def build_execution_settings_snapshot(settings: Settings) -> dict[str, object]:
@@ -254,43 +227,6 @@ def build_composite_runtime_overrides_snapshot(
     }
 
 
-def _compute_file_hashes(
-    *,
-    relative_path: str,
-    path: Path,
-) -> tuple[str | None, str | None, ConfigSourceHashStrategy | None]:
-    """Return semantic and raw hashes for one config source file when available."""
-    if not path.exists() or not path.is_file():
-        return None, None, None
-    hashes = compute_config_source_hashes(
-        source_path=relative_path,
-        raw_bytes=path.read_bytes(),
-    )
-    return hashes.semantic_hash, hashes.raw_hash, hashes.hash_strategy
-
-
-def _build_config_source_ref(
-    *,
-    relative_path: str,
-    priority: int,
-    repo_root: Path,
-) -> ConfigSourceRef:
-    """Build one canonical file-backed source ref with provenance hash."""
-    source_path = repo_root / relative_path
-    source_hash, raw_source_hash, source_hash_strategy = _compute_file_hashes(
-        relative_path=relative_path,
-        path=source_path,
-    )
-    return ConfigSourceRef(
-        source_type="file",
-        source_path=relative_path,
-        source_hash=source_hash,
-        raw_source_hash=raw_source_hash,
-        source_hash_strategy=source_hash_strategy,
-        priority=priority,
-    )
-
-
 def build_effective_config_source_refs(
     *,
     provider: str,
@@ -299,29 +235,9 @@ def build_effective_config_source_refs(
 ) -> list[ConfigSourceRef]:
     """Build source references used to materialize effective config artifacts."""
     resolved_repo_root = repo_root or Path(__file__).resolve().parents[4]
-    candidate_paths = build_effective_config_candidate_paths(
+    return _build_effective_config_source_refs(
         provider=provider,
-        entity=entity,
+        entity=resolve_effective_config_entity(provider, entity),
+        candidate_paths_factory=build_effective_config_candidate_paths,
         repo_root=resolved_repo_root,
     )
-    refs: list[ConfigSourceRef] = []
-    priority = 1
-    for relative_path in candidate_paths:
-        if not (resolved_repo_root / relative_path).exists():
-            continue
-        refs.append(
-            _build_config_source_ref(
-                relative_path=relative_path,
-                priority=priority,
-                repo_root=resolved_repo_root,
-            )
-        )
-        priority += 1
-    return refs
-
-
-def resolve_effective_config_entity(provider: str, entity: str) -> str:
-    """Map runtime entity labels to canonical effective-config source paths."""
-    if provider == "composite" and entity.startswith("composite_"):
-        return entity.removeprefix("composite_")
-    return entity

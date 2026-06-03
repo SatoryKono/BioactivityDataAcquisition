@@ -91,7 +91,7 @@ class TestResolutionInfoInvariants:
         assert info.resolution_type == "reprocessed"
         assert info.new_record_id == "silver:123"
 
-    def test_resolution_info_is_immutable(self) -> None:
+    def test_quarantine_entry_resolution_info_is_immutable(self) -> None:
         """ResolutionInfo should be frozen (immutable)."""
         info = ResolutionInfo(
             resolution_type="ignored",
@@ -223,7 +223,7 @@ class TestQuarantineEntryStateTransitions:
         assert quarantine_entry.resolution_info.new_record_id == "silver:456"
         assert quarantine_entry.resolution_info.resolved_at == _ts(10)
 
-    def test_mark_reprocessed_requires_new_record_id(
+    def test_quarantine_entry_mark_reprocessed_requires_new_record_id(
         self, quarantine_entry: QuarantineEntry
     ) -> None:
         """Invariant: new_record_id is required for reprocessing."""

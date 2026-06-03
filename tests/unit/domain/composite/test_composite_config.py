@@ -238,7 +238,7 @@ class TestEnricherConfig:
 class TestAggregationFunction:
     """Tests for AggregationFunction enum."""
 
-    def test_from_string_valid(self):
+    def test_composite_config_aggregation_function_from_string_valid(self):
         """Valid string should convert to enum."""
         assert (
             AggregationFunction.from_string("collect_list")
