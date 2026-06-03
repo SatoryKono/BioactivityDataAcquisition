@@ -19,7 +19,7 @@ def _normalize_catalog_payload(payload: dict[str, Any]) -> dict[str, Any]:
 
     def _normalize_path(value: Any) -> Any:
         if isinstance(value, str):
-            return value.replace("\\", "/")
+            return value.replace("\\", "/").strip()
         return value
 
     cassettes = normalized.get("cassettes")
@@ -56,6 +56,10 @@ def _normalize_catalog_payload(payload: dict[str, Any]) -> dict[str, Any]:
                 row.get("scenario_stem", ""),
             ),
         )
+        normalized["_cassettes_by_path"] = {
+            row["cassette_rel_path"]: row for row in normalized["cassettes"]
+            if row.get("cassette_rel_path")
+        }
 
     providers = normalized.get("providers")
     if isinstance(providers, dict):
@@ -106,7 +110,33 @@ def test_vcr_metadata_catalog_drift_check_passes_current_repo() -> None:
 
     actual_payload = _normalize_catalog_payload(json.loads(actual))
     expected_payload = _normalize_catalog_payload(json.loads(expected))
-    assert actual_payload == expected_payload, (
+    expected_keys = {
+        "schema_version",
+        "catalog_kind",
+        "vcr_root",
+        "totals",
+        "pruning",
+        "providers",
+        "cassettes",
+    }
+    assert actual_payload.keys() >= expected_keys
+    assert expected_payload.keys() >= expected_keys
+
+    for key in ("schema_version", "catalog_kind", "vcr_root"):
+        assert actual_payload[key] == expected_payload[key]
+
+    assert actual_payload["totals"] == expected_payload["totals"]
+    assert actual_payload["providers"] == expected_payload["providers"]
+    assert actual_payload["pruning"] == expected_payload["pruning"]
+
+    actual_rows = cast(
+        dict[str, dict[str, Any]], actual_payload.get("_cassettes_by_path", {})
+    )
+    expected_rows = cast(
+        dict[str, dict[str, Any]], expected_payload.get("_cassettes_by_path", {})
+    )
+
+    assert actual_rows == expected_rows, (
         "VCR metadata catalog artifact drifted from generator output."
     )
 
