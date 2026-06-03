@@ -255,6 +255,7 @@ def create_runner(
         config=config,
         runtime=runtime,
         deps=deps,
+        run_id=deterministic_uuid_string_from_callsite("test_runner_required_flag"),
     )
 
 

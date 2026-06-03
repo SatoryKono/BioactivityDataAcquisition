@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-02T11:21:52.888182+00:00",
+  "generated_at": "2026-06-02T19:03:55.670752+00:00",
   "summary": {
     "total_scripts": 424,
     "status_counts": {
@@ -4565,7 +4565,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 120,
+      "reference_count": 125,
       "references": [
         {
           "path": ".github/workflows/docs-kpi-weekly.yml",
@@ -4867,7 +4867,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 30,
+      "reference_count": 31,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -4895,9 +4895,9 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1944,
+          "line": 1263,
           "source_group": "docs",
-          "text": "- **5.26** (2026-05-15): ADR Governance Sync. Приложение F синхронизировано с ADR-046/047 и теперь явно делегирует canonical live registry в `decisions/README.md` и `adr-registry.md`. Исправлен genera"
+          "text": "автоматические docs-проверки (`python -m scripts.docs check-links` и"
         },
         {
           "path": "docs/00-project/TOOLS.md",
@@ -7589,7 +7589,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 178,
+      "reference_count": 181,
       "references": [
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
@@ -7635,7 +7635,7 @@
         },
         {
           "path": ".github/workflows/import-linter.yml",
-          "line": 138,
+          "line": 129,
           "source_group": "ci",
           "text": "uv run python -m scripts.engineering.qa check-c901 \\"
         }
@@ -7750,7 +7750,7 @@
       "references": [
         {
           "path": ".github/workflows/import-linter.yml",
-          "line": 138,
+          "line": 129,
           "source_group": "ci",
           "text": "uv run python -m scripts.engineering.qa check-c901 \\"
         },
@@ -8413,7 +8413,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1474,
+          "line": 1477,
           "source_group": "docs",
           "text": "- `python scripts/engineering/qa/generate_architecture_dependency_map.py --update`"
         },
@@ -9188,7 +9188,7 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 379,
+          "line": 378,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_vcr_metadata_catalog.py\","
         }
@@ -9617,7 +9617,7 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 198,
+          "line": 197,
           "source_group": "tests",
           "text": "\"python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90\""
         },
@@ -10465,7 +10465,7 @@
       "agent_usage": [
         "grafana-dashboard-render"
       ],
-      "reference_count": 21,
+      "reference_count": 24,
       "references": [
         {
           "path": ".codex/skills/grafana-dashboard-render/SKILL.md",
@@ -11440,13 +11440,13 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 380,
+          "line": 379,
           "source_group": "tests",
           "text": "\"scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py\","
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 430,
+          "line": 429,
           "source_group": "tests",
           "text": "assert \"backfill_vcr_metadata_sidecars.py\" in migrations_readme"
         }
@@ -11669,8 +11669,14 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
+        {
+          "path": "docs/03-guides/dashboard-guide.md",
+          "line": 54,
+          "source_group": "docs",
+          "text": "Use `bash scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh`"
+        },
         {
           "path": "docs/03-guides/dashboards/README.md",
           "line": 55,

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from importlib import import_module
+
 __all__ = ["maintenance"]
 
 
@@ -10,6 +12,5 @@ def __getattr__(name: str) -> object:
     if name != "maintenance":
         raise AttributeError(name)
 
-    from bioetl.interfaces.cli.commands.maintenance import maintenance
-
-    return maintenance
+    module = import_module("bioetl.interfaces.cli.commands.maintenance")
+    return module.maintenance

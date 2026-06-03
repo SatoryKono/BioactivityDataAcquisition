@@ -25,11 +25,20 @@ SLUG_PATTERN = re.compile(r"[^a-z0-9]+")
 HEADING_PATTERN = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
 
 
-def _read_text_with_timeout(path: Path, timeout: float) -> str:
+def _read_text_with_timeout(
+    path: Path,
+    timeout: float,
+    *,
+    force_threaded_timeout: bool = False,
+) -> str:
     """Read a file with a timeout to prevent hangs on network drives."""
     # Skip timeout mechanism for local drives with reasonable timeouts to avoid Windows threading issues
     # Very small timeouts (< 1 second) indicate test scenarios where timeout behavior is being tested
-    if not _is_likely_network_drive(path) and timeout >= 1.0:
+    if (
+        not force_threaded_timeout
+        and not _is_likely_network_drive(path)
+        and timeout >= 1.0
+    ):
         try:
             return path.read_text(encoding="utf-8") or ""
         except Exception as exc:
@@ -140,11 +149,20 @@ def _is_likely_network_drive(path: Path) -> bool:
         return False
 
 
-def _read_markdown_metadata_with_timeout(path: Path, timeout: float) -> dict[str, Any]:
+def _read_markdown_metadata_with_timeout(
+    path: Path,
+    timeout: float,
+    *,
+    force_threaded_timeout: bool = False,
+) -> dict[str, Any]:
     """Read only note frontmatter metadata with a timeout."""
     # Skip timeout mechanism for local drives with reasonable timeouts to avoid Windows threading issues
     # Very small timeouts (< 1 second) indicate test scenarios where timeout behavior is being tested
-    if not _is_likely_network_drive(path) and timeout >= 1.0:
+    if (
+        not force_threaded_timeout
+        and not _is_likely_network_drive(path)
+        and timeout >= 1.0
+    ):
         try:
             with path.open(encoding="utf-8") as handle:
                 first_line = handle.readline()
@@ -308,12 +326,14 @@ def parse_markdown_note(
     *,
     include_body: bool = True,
     read_timeout_seconds: float | None = None,
+    force_threaded_timeout: bool = False,
 ) -> MemoryNote:
     """Parse a markdown note with YAML frontmatter."""
     try:
         text = _read_text_with_timeout(
             path,
             timeout=_resolve_read_timeout(read_timeout_seconds),
+            force_threaded_timeout=force_threaded_timeout,
         )
     except (OSError, TimeoutError) as exc:
         raise ValueError(f"failed to open note file: {exc}") from exc
@@ -351,12 +371,14 @@ def parse_markdown_note_metadata(
     path: Path,
     *,
     read_timeout_seconds: float | None = None,
+    force_threaded_timeout: bool = False,
 ) -> MemoryNote:
     """Parse note metadata without loading the body."""
     try:
         metadata = _read_markdown_metadata_with_timeout(
             path,
             timeout=_resolve_read_timeout(read_timeout_seconds),
+            force_threaded_timeout=force_threaded_timeout,
         )
     except (OSError, TimeoutError) as exc:
         raise ValueError(f"failed to open note file: {exc}") from exc

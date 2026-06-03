@@ -9,7 +9,9 @@ import bioetl.infrastructure.control_plane._durability as durability
 pytestmark = pytest.mark.unit
 
 
-def test_should_fsync_control_plane_writes_by_default(monkeypatch) -> None:
+def test_durability_policy_should_fsync_control_plane_writes_by_default(
+    monkeypatch,
+) -> None:
     monkeypatch.delenv("BIOETL_TEST_MODE", raising=False)
     durability.get_settings.cache_clear()
     try:

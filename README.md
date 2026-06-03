@@ -38,10 +38,10 @@ BioETL follows **Hexagonal Architecture** (Ports & Adapters) with **Domain-Drive
 │                     INTERFACES (CLI)                        │
 ├─────────────────────────────────────────────────────────────┤
 │                    COMPOSITION (DI)                         │
-│         bootstrap_pipeline_runner() → Factories             │
+│ entrypoints / execution_api / registry_api / runtime bootstrap│
 ├─────────────────────────────────────────────────────────────┤
 │                     APPLICATION                             │
-│         PipelineRunner → Executor → BaseTransformer         │
+│ PipelineRunner │ WorkflowRunnerService │ CompositePipeline  │
 ├─────────────────────────────────────────────────────────────┤
 │                       DOMAIN (DDD)                          │
 │     Ports │ Aggregates │ Value Objects │ Entities │ Schemas │
@@ -82,6 +82,11 @@ The domain layer implements Domain-Driven Design patterns:
 
 | Document                                                                    | Description                                                          |
 | --------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| [Current Architecture Inventory](docs/02-architecture/current-state-inventory.md) | Current code/config/dashboard/control-plane inventory and drift notes |
+| [Current Architecture Diagrams](docs/02-architecture/current-state-diagrams.md) | Current C4, layer, medallion, run, replay, and quarantine diagrams   |
+| [Pipeline Catalog](docs/04-reference/pipeline-catalog.md)                   | Current provider and composite pipeline config catalog               |
+| [Workflow Catalog](docs/04-reference/workflow-catalog.md)                   | Current declarative workflow DAG catalog                             |
+| [Data Contracts Current State](docs/04-reference/contracts/data-contracts-current.md) | Current data-contract inventory and runtime contract chain       |
 | [API Reference](docs/04-reference/api/index.md)                             | Full API documentation with mkdocstrings                             |
 | [Architecture Decisions](docs/02-architecture/decisions/)                   | Canonical ADR index for architectural decisions                      |
 | [Ubiquitous Language](docs/00-project/glossary.md)                          | Domain terminology and canonical naming                              |

@@ -39,6 +39,9 @@ config surfaces:
 - **Data Quality contracts**:
   [`dq-contracts.md`](dq-contracts.md) — canonical DQ contract pack backed by
   `configs/contracts/**`
+- **Current data contract inventory**:
+  [`data-contracts-current.md`](data-contracts-current.md) — current 27-contract
+  YAML inventory and runtime contract chain
 - **Control-plane contract**:
   [`run-manifest-ledger.md`](run-manifest-ledger.md) — published contract for
   `RunManifest` / `RunLedger`

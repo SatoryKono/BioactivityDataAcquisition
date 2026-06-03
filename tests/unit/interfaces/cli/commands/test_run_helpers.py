@@ -86,10 +86,10 @@ class TestValidatePipelineName:
         assert result == "chembl_activity"
         assert click_context.obj is mock_registry
 
-    def test_valid_pipeline_reuses_populated_default_registry_on_context(
+    def test_valid_pipeline_ignores_retired_default_registry_fallback(
         self, mock_registry: MagicMock
     ) -> None:
-        """Validator should reuse the already-populated default registry."""
+        """Validator should build a fresh explicit registry, not default compat state."""
         click_context = MagicMock(spec=click.Context)
         click_context.obj = None
 
@@ -97,16 +97,18 @@ class TestValidatePipelineName:
             patch(
                 "bioetl.interfaces.cli.commands.domains.run.support._resolve_populated_default_registry",
                 return_value=mock_registry,
-            ),
+            ) as mock_default_registry,
             patch(
                 "bioetl.interfaces.cli.commands.domains.run.support.build_cli_registry",
+                return_value=mock_registry,
             ) as mock_build_registry,
         ):
             result = validate_pipeline_name(click_context, None, "chembl_activity")
 
         assert result == "chembl_activity"
         assert click_context.obj is mock_registry
-        mock_build_registry.assert_not_called()
+        mock_default_registry.assert_not_called()
+        mock_build_registry.assert_called_once_with()
 
     def test_validate_pipeline_name__raises_bad_parameter__2cb0b886(
         self, mock_registry: MagicMock

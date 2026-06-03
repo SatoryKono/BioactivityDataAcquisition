@@ -44,7 +44,10 @@ ______________________________________________________________________
 1. **Загрузка чекпоинта:** Использует `CheckpointPort` для определения, с какого момента начинать загрузку данных.
 1. **Извлечение (Extract):** Вызывает `DataSourcePort.fetch()` для получения сырых данных.
 1. **Преобразование (Transform):** Применяет бизнес-логику из `Domain` для очистки и валидации данных.
-1. **Загрузка (Load):** Использует storage adapter (`PipelineStorageProtocol`) для записи данных в Bronze, Silver и Gold слои.
+1. **Загрузка (Load):** Использует application-owned aggregate protocol
+   `PipelineStorageProtocol`, который объединяет narrow domain storage ports
+   (`BronzeStoragePort`/`SilverStoragePort`/`GoldStoragePort`/
+   `MergedStoragePort`) для записи данных в medallion слои.
 1. **Обновление чекпоинта:** Сохраняет новое состояние через `CheckpointPort`.
 1. **Освобождение блокировки:** Снимает блокировку через `LockPort`.
 
@@ -136,7 +139,7 @@ factory = GenericPipelineFactory(
   прямое no-arg создание трансформеров допускается только как compatibility path.
 - **Если трансформер не передан**: `transform_bronze_to_silver()` выбрасывает `NotImplementedError`
 
-**Доступные трансформеры (23 класса):**
+**Доступные трансформеры и базовые transformer foundations (24 класса):**
 
 | Provider         | Трансформер                             | Расположение                                             |
 | ---------------- | --------------------------------------- | -------------------------------------------------------- |
@@ -153,6 +156,7 @@ factory = GenericPipelineFactory(
 | ChEMBL           | `PublicationTermTransformer`            | `pipelines/chembl/publication_term_transformer.py`       |
 | ChEMBL           | `SubcellularFractionTransformer`        | `pipelines/chembl/subcellular_fraction_transformer.py`   |
 | ChEMBL           | `TargetComponentTransformer`            | `pipelines/chembl/target_component_transformer.py`       |
+| ChEMBL           | `TargetProteinClassificationTransformer` | `pipelines/chembl/target_protein_classification_transformer.py` |
 | ChEMBL           | `TissueTransformer`                     | `pipelines/chembl/tissue_transformer.py`                 |
 | ChEMBL           | `BaseChemblTransformer`                 | `pipelines/chembl/base_chembl_transformer.py`            |
 | CrossRef         | `CrossRefPublicationTransformer`        | `pipelines/crossref/transformer.py`                      |
@@ -193,6 +197,8 @@ factory = GenericPipelineFactory(
 @dataclass(frozen=True)
 class PipelineService:
     data_source: DataSourcePort
+    # Application-owned aggregate protocol from
+    # application/core/pipeline_runtime_service_protocols.py.
     storage: PipelineStorageProtocol
     lock: LockPort
     checkpoint: CheckpointPort

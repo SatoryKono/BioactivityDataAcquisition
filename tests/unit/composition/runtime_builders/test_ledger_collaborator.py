@@ -41,6 +41,7 @@ async def test_artifact_recorder_publishes_bronze_input_snapshot_events(
         ledger_port=ledger_store,
         manifest_id="manifest-1",
         run_id=run_id,
+        _entry_id_factory=lambda: "entry-bronze-input-snapshot",
     )
     writer = MetadataWriter(logger=NoOpLogger())
     runner = _Runner(writer)

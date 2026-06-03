@@ -7,8 +7,8 @@
         "@modelcontextprotocol/server-memory@2026.1.26"
       ],
       "env": {
-        "MEMORY_FILE_PATH": "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/00-project/ai/memory/mcp-memory.json",
-        "NPM_CONFIG_CACHE": "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/.cache/npm-cache"
+        "NPM_CONFIG_CACHE": "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/.cache/npm-cache",
+        "MEMORY_FILE_PATH": "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/00-project/ai/memory/mcp-memory.json"
       }
     },
     "filesystem": {

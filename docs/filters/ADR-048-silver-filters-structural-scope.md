@@ -1,27 +1,43 @@
 ______________________________________________________________________
 
-Version: 0.1.0
-Status: Proposed (Draft)
-Class: draft
+Version: 0.2.0
+Status: Retired Draft
+Class: historical-working-document
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-12'
+  Last verified: '2026-06-03'
 
 ______________________________________________________________________
 
-# ADR-048: Silver Filters Structural Scope
+# Retired Draft: Silver Filters Structural Scope
 
 **Date:** 2026-05-12
-**Status:** Proposed (Draft)
+**Status:** Retired Draft
 **Decision makers:** @BioETL-Team
 **Related:** ADR-002, ADR-018, ADR-027, ADR-028, ADR-045
 **Amends:** ADR-028 (Filter Rules Externalization)
 
-> NOTE: This is a DRAFT located in `docs/filters/`. After review and acceptance
-> it MUST be moved to `docs/02-architecture/decisions/` and renumbered if a
-> higher ADR has been merged in the meantime.
+> NOTE: This file is not an accepted ADR and must not be cited as ADR-048.
+> The accepted canonical ADR-048 is
+> `docs/02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md`.
+> This file is retained only as historical design rationale for the
+> silver_filters -> gold_filters migration. If filter policy needs normative
+> status, create a new ADR number.
+
+Current implementation snapshot (2026-06-03):
+
+- Semantic Silver filter promotion is implemented in
+  `src/bioetl/infrastructure/config/silver_filter_migration.py`.
+- `src/bioetl/infrastructure/schemas/filter_config.py` and
+  `src/bioetl/infrastructure/schemas/pipeline_config.py` apply normalization
+  before validation.
+- `SilverFiltersFileConfig.to_domain()` and `SilverFiltersConfig.to_domain()`
+  project domain Silver filters as structural-only.
+- YAML cleanup is still incomplete: 22 active entity configs under
+  `configs/entities/**/*.yaml` still carry legacy semantic
+  `filters.silver_filters` keys.
 
 ## Context
 
@@ -149,7 +165,9 @@ gold_filters:
 ### Positive
 
 - **DRY**: Eliminates routine duplication between silver_filters and
-  gold_filters (observed in 21 entity configs).
+  gold_filters (observed in the original 2026-05-12 baseline; the 2026-06-03
+  scan found 22 active entity configs with legacy semantic `silver_filters`
+  keys).
 - **Clear separation of concerns**: Silver = structural integrity, Gold =
   business rules.
 - **Aligned with ADR-002 (Medallion)**: Silver layer responsibility is
@@ -163,7 +181,7 @@ gold_filters:
 
 ### Negative
 
-- **Migration overhead**: 21 entity configs require per-entity review for
+- **Migration overhead**: active entity configs require per-entity review for
   semantic conflict resolution.
 - **Slight semantic drift period**: During Phase A rollout, both old and new
   config shapes coexist via auto-promotion.
@@ -268,13 +286,12 @@ Summary of phases:
 
 ## Acceptance Criteria
 
-- [ ] ADR-048 reviewed and accepted by BioETL Team
-- [ ] ADR-048 moved to `docs/02-architecture/decisions/` and indexed in
-      `docs/02-architecture/00-overview.md`
-- [ ] ADR-028 updated with footer cross-link to ADR-048
+- [ ] New filter ADR created if normative governance is still required; do not
+      reuse accepted ADR-048
+- [ ] ADR-028 updated with footer cross-link to the new filter ADR if created
 - [ ] Inventory baseline captured in `docs/filters/inventory-baseline.md`
 - [ ] Per-entity migration diff reviewed and approved
-- [ ] 21 entity configs migrated
+- [ ] 22 active entity configs with legacy semantic `silver_filters` keys migrated or explicitly justified
 - [ ] Integration parity test added and green
 - [ ] Architecture boundary test updated and green
 - [ ] Observability labels updated (Grafana, CLI, docs)

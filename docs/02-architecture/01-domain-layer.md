@@ -38,7 +38,9 @@ ______________________________________________________________________
 фасадный `__init__.py`), и это число синхронизируется архитектурным тестом
 `test_ports_count_matches_docs`.
 
-- источники и хранение (`DataSourcePort`, `PipelineStorageProtocol`, `CheckpointPort`, `LockPort`);
+- источники, хранение и runtime-контроль (`DataSourcePort`,
+  `BronzeStoragePort`, `SilverStoragePort`, `GoldStoragePort`,
+  `MergedStoragePort`, `CheckpointPort`, `LockPort`);
 - observability (`LoggerPort`, `MetricsPort`, `TracingPort`, `DQMonitorPort`);
 - качество данных (`BronzeDQAnalyzerPort`, `SilverDQAnalyzerPort`, `GoldDQAnalyzerPort`, валидаторы, quarantine/report);
 - runtime/resilience (`RunnerFactoryPort`, `PipelineFactoryPort`, `ExecutionObservabilityPort`, `RunnablePort`, `RateLimiterPort`, `CircuitBreakerPort`);
@@ -47,6 +49,11 @@ ______________________________________________________________________
 Runtime-oriented порты намеренно остаются в `domain.ports`: это допустимо, потому что они выражают чистые абстракции
 межслойного контракта, а не concrete infrastructure behavior. Правило слоя звучит как "в domain нельзя тянуть I/O и
 конкретные adapter/framework dependencies", а не как "в domain нельзя описывать runtime contracts".
+
+`PipelineStorageProtocol` не является domain port. Это application-owned
+aggregate protocol в
+`src/bioetl/application/core/pipeline_runtime_service_protocols.py`, который
+комбинирует narrow domain storage ports для DI bundle одного pipeline run.
 
 После `RF-022` runtime factory contracts дополнительно очищены от outer-layer
 semantics: `PipelineFactoryPort` выражается через `SettingsPort`,

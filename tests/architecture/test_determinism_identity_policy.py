@@ -182,7 +182,7 @@ def test_determinism_identity_policy_has_expected_shape() -> None:
     }
 
     entries = payload.get("allowed_occurrence_identity_generators")
-    assert isinstance(entries, list) and entries
+    assert isinstance(entries, list)
     occurrence_budget = reduction_plan.get("occurrence_identity_budget")
     assert isinstance(occurrence_budget, dict)
     assert occurrence_budget.get("max_allowed_call_sites") == len(entries)

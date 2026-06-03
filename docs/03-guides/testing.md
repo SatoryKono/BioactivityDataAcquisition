@@ -53,6 +53,13 @@ must use these `suite_name` values for comparable local and CI runs:
 - `performance`: benchmark-backed hotspot/performance-budget lane;
 - `coverage-verify`: the only lane that enforces the repo-wide coverage gate.
 
+Hotspot refactor readiness is additionally governed by the committed module
+coverage inventory. `configs/quality/debt_scorecard.yaml` section
+`hotspot_family_coverage_thresholds` is the authoritative module-level gate for
+hotspot families, and `tests/architecture/test_module_coverage_inventory.py`
+fails if those thresholds drift from
+`reports/quality/module-coverage-inventory.json`.
+
 Architecture runs are additionally decomposed in the sharded runner into:
 
 - `S7-architecture-fast-boundary`

@@ -24,10 +24,12 @@ It connects:
   [ADR-044](../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md);
 - the current declarative workflow code in `src/bioetl/domain/workflow/` and
   `src/bioetl/application/services/workflow_runner_service.py`;
-- the open implementation backlog `WF-02` through `WF-15`.
+- the shipped workflow control-plane services in
+  `src/bioetl/application/services/control_plane/workflow/`.
 
 Use this guide when you need one stable explanation of what a workflow is, what
-it is not, and which fields/identities are already shipped versus still planned.
+it is not, and how fields, identities, and workflow control-plane artifacts are
+represented in the current codebase.
 
 
 ## Target Control-Plane Model (ADR-047)
@@ -64,9 +66,11 @@ The target and shipped workflow control plane is the **manifest + ledger + execu
 
 > Deprecated wording: any older docs/text that describe workflow resume as ledger-only or name-only are deprecated. Use ADR-047 + this guide + the workflow runbook as the canonical set.
 
-## Backlog Scope
+## Historical Rollout Scope
 
-The workflow control-plane rollout centered on these issues:
+The workflow control-plane rollout centered on these historical issue IDs. They
+remain useful as traceability anchors, but the current behavior is defined by
+the code/config sources cited above and by ADR-047:
 
 - `WF-02` [#2691](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/2691): `WorkflowRunnerService` MVP
 - `WF-03` [#2692](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/2692): workflow CLI
@@ -79,8 +83,8 @@ The workflow control-plane rollout centered on these issues:
 - `WF-11` [#2700](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/2700): destructive ambiguity recovery with explicit repair/force events
 - `WF-15` [#2704](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/2704): docs, runbooks, and ADR
 
-The guide below intentionally describes one coherent object model across those
-issues instead of restating each ticket separately.
+The guide below intentionally describes the current coherent object model rather
+than restating each ticket separately.
 
 ## Canonical Definition
 

@@ -31,7 +31,9 @@ def _raise_index_write_error(*_args: object, **_kwargs: object) -> None:
     raise OSError("index write failed")
 
 
-def test_should_fsync_control_plane_writes_by_default(monkeypatch) -> None:
+def test_run_ledger_store_should_fsync_control_plane_writes_by_default(
+    monkeypatch,
+) -> None:
     monkeypatch.delenv("BIOETL_TEST_MODE", raising=False)
     monkeypatch.delenv(
         "BIOETL_PIPELINE__CONTROL_PLANE__REQUIRED_PERSISTENCE_PROFILE",

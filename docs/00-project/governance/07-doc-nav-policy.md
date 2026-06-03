@@ -83,7 +83,7 @@ If non-nav growth is intentional:
 
 ```bash
 uv run python - <<'PY'
-from scripts.docs.check_doc_links import (
+from scripts.docs.checks.check_links import (
     NOT_IN_NAV_BASELINE_FILE,
     get_not_in_nav_docs,
 )
@@ -101,9 +101,9 @@ ______________________________________________________________________
 ## 4. Ownership
 
 - Primary owner: Documentation/governance maintainers.
-- Enforcement: CI checks (`check_doc_links`, MkDocs strict build, docs architecture tests).
+- Enforcement: CI checks (`python -m scripts.docs check-links`, MkDocs strict build, docs architecture tests).
 - Review requirement: Changes to nav policy or baseline MUST be explicitly reviewed.
-- `check_doc_links` MUST enforce path contracts for:
+- `python -m scripts.docs check-links` MUST enforce path contracts for:
   - `REQUIREMENTS.md` -> `docs/01-requirements/REQUIREMENTS.md`;
   - governance links -> `docs/00-project/governance/**`.
 

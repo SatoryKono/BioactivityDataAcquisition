@@ -1,14 +1,25 @@
 ______________________________________________________________________
 
-Version: 0.1.0
-Status: Draft
-Class: working-document
+Version: 0.2.0
+Status: historical-plan-partially-implemented
+Class: historical-working-document
 Owner: BioETL Team
-Last updated: '2026-05-13'
+Last updated: '2026-06-03'
 
 ______________________________________________________________________
 
 # План миграции: silver_filters → gold_filters (вариант D — гибрид)
+
+> Current-state note (2026-06-03): this plan is no longer a pure future plan.
+> The compatibility boundary is already partially implemented in current code:
+> `src/bioetl/infrastructure/config/silver_filter_migration.py`,
+> `src/bioetl/infrastructure/schemas/filter_config.py`,
+> `src/bioetl/infrastructure/schemas/pipeline_config.py`, and
+> `src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py`.
+> The local draft `docs/filters/ADR-048-silver-filters-structural-scope.md`
+> is retired as a canonical ADR candidate because accepted ADR-048 now refers to
+> `docs/02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md`.
+> Future filter decisions must use a new ADR number.
 
 ## Краткое содержание
 
@@ -18,16 +29,20 @@ ______________________________________________________________________
 
 **Связанные документы:**
 
-- `docs/filters/ADR-048-silver-filters-structural-scope.md` — обоснование решения
+- `docs/filters/ADR-048-silver-filters-structural-scope.md` — retired
+  historical draft; not the accepted ADR-048
 - `scripts/data_quality/inventory_silver_filters_migration.py` — анализатор конфигов
 - `docs/filters/inventory-baseline.md` — baseline отчёт
 - `docs/02-architecture/decisions/ADR-028-filter-rules-externalization.md` — текущая базовая ADR (amended)
+- `docs/02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md` —
+  accepted ADR-048; unrelated domain schema/Pandera boundary decision
 
 ## Ключевые открытия из анализа кода
 
 1. **silver_filters и gold_filters часто дублируются в entity configs** (например, в
    `activity.yaml` `columns` совпадают, `ranges` пересекаются)
-1. **21 entity** содержит секцию `silver_filters`
+1. **22 active entity configs** currently contain legacy semantic
+   `silver_filters` keys in the 2026-06-03 scan
 1. **`required_fields` в Silver vs Gold имеют разную семантику:** в Silver — структурные
    (25+ полей), в Gold — бизнес-критичные (4-6 полей)
 1. **`exclude_if_present` присутствует только в Silver** (для `data_validity_comment` и др.)
@@ -61,10 +76,13 @@ gold_filters:   { required_fields, columns, ranges,           <- business filter
 
 ### Фаза 0: Подготовительные артефакты
 
-#### 0.1. ADR-048 (draft)
+#### 0.1. Filter ADR draft
 
-`docs/filters/ADR-048-silver-filters-structural-scope.md` — обоснование сужения scope
-`silver_filters`. Amends ADR-028.
+`docs/filters/ADR-048-silver-filters-structural-scope.md` captured the
+original rationale for narrowing `silver_filters`. It must not be promoted as
+ADR-048 because the accepted ADR-048 number now belongs to the domain
+schema/Pandera compatibility decision. If this filter policy needs normative
+status, create a new ADR in `docs/02-architecture/decisions/`.
 
 #### 0.2. Inventory script
 
@@ -126,6 +144,10 @@ class SilverFiltersFileConfig(BaseModel):
 
 `to_domain()`: возвращает `SilverFilterConfig` только с structural полями.
 
+Current state (2026-06-03): implemented by
+`SilverFiltersFileConfig.to_domain()` in
+`src/bioetl/infrastructure/schemas/filter_config.py`.
+
 #### 2.2. Filter config loader
 
 `src/bioetl/infrastructure/config/filter_config_loader.py`:
@@ -136,10 +158,21 @@ class SilverFiltersFileConfig(BaseModel):
 - Cache key включает resolved compatibility mode, чтобы rollback env не
   использовал stale normalized config.
 
+Current state (2026-06-03): semantic promotion is implemented in shared helper
+`src/bioetl/infrastructure/config/silver_filter_migration.py` and applied by
+both `FilterConfigFile.promote_semantic_silver_filters()` and
+`PipelineYamlConfig.promote_semantic_silver_filters()`.
+
 #### 2.3. Pipeline config schema
 
 `src/bioetl/infrastructure/schemas/pipeline_config.py:193` — тип `silver_filters` изменить
 с `GoldFiltersConfig` на новый `SilverFiltersConfig` (сужающий).
+
+Current state (2026-06-03): implemented as
+`silver_filters: SilverFiltersConfig` in
+`src/bioetl/infrastructure/schemas/pipeline_config.py`, with structural-only
+domain conversion owned by
+`src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py`.
 
 #### 2.4. CI invariants
 
@@ -234,12 +267,12 @@ Per-entity ревью с владельцем provider/entity.
 
 | File | Изменение |
 | ---- | --------- |
-| `docs/02-architecture/decisions/ADR-048-...` | Создан в Фазе 0 (move from `docs/filters/` after acceptance) |
+| New filter ADR under `docs/02-architecture/decisions/` | Create only if filter policy needs normative status; do not reuse ADR-048 |
 | `docs/02-architecture/decisions/ADR-028-filter-rules-externalization.md` | Footer-ссылка на ADR-048, обновить таблицу Filter Types |
 | `docs/04-reference/providers/{provider}/*.md` | Раздельные таблицы для silver structural и gold semantic |
 | `docs/05-operations/runbooks/quarantine-management.md` | Обновить раздел Silver filter rejects |
 | `docs/05-operations/01-monitoring-guide.md` | Обновить Silver Reject Explorer описание |
-| `docs/plans/silver-filter-rejects-observability-plan.md` | Footer: "scope narrowed per ADR-048" |
+| `docs/plans/silver-filter-rejects-observability-plan.md` | Update wording to reference current compatibility implementation or a future filter ADR, not accepted ADR-048 |
 | `docs/00-project/RULES.md` | §2.1.2 / §2.1.3 — уточнение responsibility scope |
 
 ### Фаза 8: Rollout
@@ -288,10 +321,10 @@ Per-entity ревью с владельцем provider/entity.
 
 ## Acceptance criteria
 
-- [ ] ADR-048 accepted и moved to `docs/02-architecture/decisions/`
+- [ ] New filter ADR created if normative governance is required; do not reuse accepted ADR-048
 - [ ] Inventory baseline зафиксирован
 - [ ] Per-entity migration diff prepared and reviewed
-- [ ] All 21 entity configs migrated
+- [ ] All 22 active entity configs with legacy semantic `silver_filters` keys migrated or explicitly justified
 - [ ] Tests updated, integration parity test added
 - [ ] Observability обновлена
 - [ ] Documentation updated
@@ -303,3 +336,4 @@ Per-entity ревью с владельцем provider/entity.
 | Date       | Author          | Change                                               |
 | ---------- | --------------- | ---------------------------------------------------- |
 | 2026-05-12 | BioETL Team     | Initial draft of variant D (hybrid) migration plan   |
+| 2026-06-03 | BioETL Team     | Marked plan partially implemented; retired local ADR-048 filter draft as non-canonical because accepted ADR-048 now covers domain schema/Pandera compatibility. |

@@ -1,11 +1,38 @@
 # Runtime UUID generation seam inventory.
-# New uuid4 call sites in application/composition must be classified here.
+# Production uuid4 call sites are forbidden across src/bioetl.
 version: 1
 policy:
   owner: architecture-governance
-  replay_critical_rule: replay-critical identity must be explicit or deterministic; uuid4 is allowed only for operational correlation/default launch IDs.
-  migration_policy: migrate replay-critical UUID generation to domain deterministic identity or an injected ID port before use in replay artifacts.
+  scan_scope: src/bioetl
+  production_uuid4_budget: 0
+  replay_critical_rule: replay-critical identity must be explicit or deterministic; random UUID generation is forbidden.
+  migration_policy: runtime occurrence IDs must use explicit IDs, injected deterministic factories, or UUIDv5 values derived from reviewed occurrence payloads.
 review_history:
+  - issue: "#5044"
+    reviewed_on: "2026-06-02"
+    owner: architecture-governance
+    outcome: production_random_uuid_zero_budget_enforced
+    rationale: Runtime UUID inventory now scans all production src/bioetl paths and no longer permits reviewed uuid4 seams.
+  - issue: "#5045"
+    reviewed_on: "2026-06-02"
+    owner: architecture-governance
+    outcome: application_control_plane_uuid4_defaults_removed
+    rationale: Application control-plane services fail closed without injected manifest, ledger, workflow, or pipeline ID factories.
+  - issue: "#5046"
+    reviewed_on: "2026-06-02"
+    owner: architecture-governance
+    outcome: pipeline_and_composite_runtime_uuid4_fallbacks_removed
+    rationale: Pipeline and composite runtime fallback IDs are now supplied by explicit composition occurrence factories or explicit run_id inputs.
+  - issue: "#5047"
+    reviewed_on: "2026-06-02"
+    owner: architecture-governance
+    outcome: residual_batch_and_infrastructure_uuid4_retired
+    rationale: Batch ID generation and workflow foreign-key quarantine grouping no longer use uuid4.
+  - issue: "#5048"
+    reviewed_on: "2026-06-02"
+    owner: architecture-governance
+    outcome: production_random_uuid_zero_budget_ratchet_active
+    rationale: Architecture guards now accept only zero production uuid4 call sites.
   - issue: "#4926"
     reviewed_on: "2026-06-01"
     owner: architecture-governance
@@ -52,103 +79,4 @@ deterministic_factory_evidence:
     - tests/unit/composition/bootstrap/runtime/test_logger_bootstrap.py
     - tests/unit/composition/bootstrap/runtime/test_composite_bootstrap_builders.py
     - tests/unit/composition/factories/services/test_runtime_managers.py
-seams:
-  - path: src/bioetl/application/composite/runner_pkg/runner_runtime_helpers.py
-    line: 143
-    kind: call
-    symbol: uuid4
-    layer: application
-    classification: operational_runtime_default_run_id
-    replay_critical: false
-    owner: composite-runtime
-    migration_policy: require explicit run_id for exact replay and keep generated IDs out of deterministic artifacts.
-  - path: src/bioetl/application/services/control_plane/ledger/service.py
-    line: 55
-    kind: call
-    symbol: uuid4
-    layer: application
-    classification: injectable_ledger_event_id_factory_default
-    replay_critical: false
-    owner: control-plane
-    migration_policy: inject deterministic event_id_factory for replay-critical ledger fixtures or migrations.
-  - path: src/bioetl/application/services/control_plane/manifest/service_scaffold.py
-    line: 42
-    kind: call
-    symbol: uuid4
-    layer: application
-    classification: injectable_manifest_id_factory_default
-    replay_critical: false
-    owner: control-plane
-    migration_policy: inject deterministic manifest_id_factory for exact replay or fixture generation.
-  - path: src/bioetl/application/services/control_plane/workflow/execution_service.py
-    line: 64
-    kind: call
-    symbol: uuid4
-    layer: application
-    classification: injectable_workflow_run_id_factory_default
-    replay_critical: false
-    owner: workflow-control-plane
-    migration_policy: inject deterministic run_id_factory for replay-critical workflow execution tests.
-  - path: src/bioetl/application/services/control_plane/workflow/ledger_service.py
-    line: 62
-    kind: call
-    symbol: uuid4
-    layer: application
-    classification: injectable_workflow_ledger_event_id_factory_default
-    replay_critical: false
-    owner: workflow-control-plane
-    migration_policy: inject deterministic event_id_factory for replay-critical workflow ledgers.
-  - path: src/bioetl/application/services/execution/pipeline_runner_service.py
-    line: 112
-    kind: call
-    symbol: uuid4
-    layer: application
-    classification: operational_runtime_default_run_id
-    replay_critical: false
-    owner: pipeline-runtime
-    migration_policy: exact replay requires explicit run_id; fail closed and avoid generated IDs in deterministic contracts.
-  - path: src/bioetl/composition/bootstrap/runtime/_runner_assembly_support.py
-    line: 84
-    kind: call
-    symbol: uuid4
-    layer: composition
-    classification: composition_default_run_id
-    replay_critical: false
-    owner: runtime-composition
-    migration_policy: control-plane-attached exact replay must provide run_id before assembly.
-  - path: src/bioetl/composition/bootstrap/runtime/composite.py
-    line: 161
-    kind: factory
-    symbol: uuid4
-    layer: composition
-    classification: injected_composite_uuid_factory_default
-    replay_critical: false
-    owner: composite-runtime
-    migration_policy: inject deterministic uuid_factory for harness-mode replay contracts.
-  - path: src/bioetl/composition/bootstrap/runtime/pipeline_context_builder.py
-    line: 92
-    kind: call
-    symbol: uuid4
-    layer: composition
-    classification: fallback_pipeline_context_run_id
-    replay_critical: false
-    owner: runtime-composition
-    migration_policy: exact replay must pass explicit run_id or run_id_factory into pipeline context construction.
-  - path: src/bioetl/composition/bootstrap/runtime/runner.py
-    line: 56
-    kind: call
-    symbol: uuid4
-    layer: composition
-    classification: runtime_service_run_id
-    replay_critical: false
-    owner: runtime-composition
-    migration_policy: exact replay must inject run_id before runner bootstrap.
-  - path: src/bioetl/composition/factories/batch_id_generator.py
-    line: 19
-    kind: call
-    symbol: uuid4
-    layer: composition
-    classification: non_domain_batch_id_generator_adapter
-    replay_critical: false
-    owner: composition-factories
-    migration_policy: domain Batch.create uses deterministic identity; this adapter is only for legacy injected ID generation.
+seams: []

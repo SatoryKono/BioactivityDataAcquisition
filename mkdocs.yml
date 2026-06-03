@@ -147,6 +147,8 @@ nav:
                     -   "Debt Ownership Playbook": 00-project/governance/08-debt-ownership-playbook.md
     -   Architecture:
             -   "Overview": 02-architecture/00-overview.md
+            -   "Current State Inventory": 02-architecture/current-state-inventory.md
+            -   "Current State Diagrams": 02-architecture/current-state-diagrams.md
             -   Layers:
                     -   "Domain": 02-architecture/01-domain-layer.md
                     -   "Application": 02-architecture/02-application-layer.md
@@ -215,6 +217,7 @@ nav:
                     -   "ADR-045 Data Quality Contract System": 02-architecture/decisions/ADR-045-dq-contract-system.md
                     -   "ADR-046 Checkpoint Versus Ledger-Based Resume": 02-architecture/decisions/ADR-046-checkpoint-vs-ledger-resume.md
                     -   "ADR-047 Workflow Control Plane": 02-architecture/decisions/ADR-047-workflow-control-plane.md
+                    -   "ADR-048 Domain Schema Boundary and Runtime Pandera Compatibility": 02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md
                     -   "Quality Gates Stabilization Notes": 02-architecture/decisions/notes/2026-03-04-quality-gates-stabilization.md
     -   Guides:
             -   "Overview": 03-guides/index.md
@@ -228,10 +231,15 @@ nav:
             -   "Pipeline Configuration": 03-guides/pipeline-configuration.md
             -   "Pipeline Lifecycle": 03-guides/pipeline-lifecycle.md
             -   "DQ Configuration": 03-guides/dq-configuration.md
+            -   "DQ Framework": 03-guides/dq-framework.md
             -   "Publication Validation": 03-guides/publication-validation-guide.md
             -   "Date Handling": 03-guides/date-handling.md
             -   "Local Storage Layout": 03-guides/local-storage-layout.md
+            -   "Run Lifecycle": 03-guides/run-lifecycle.md
+            -   "Replay Guide": 03-guides/replay-guide.md
+            -   "Observability Guide": 03-guides/observability-guide.md
             -   "Metrics & Monitoring": 03-guides/metrics-monitoring.md
+            -   "Dashboard Guide": 03-guides/dashboard-guide.md
             -   "Testing": 03-guides/testing.md
             -   "Coverage Configuration": 03-guides/coverage-configuration.md
             -   "Test Optimization": 03-guides/test-optimization-guide.md
@@ -265,6 +273,8 @@ nav:
     -   Reference:
             -   "Reference Index": 04-reference/index.md
             -   CLI: 04-reference/cli.md
+            -   "Workflow Catalog": 04-reference/workflow-catalog.md
+            -   "Pipeline Catalog": 04-reference/pipeline-catalog.md
             -   Engineering:
                     -   "Overview": 05-engineering/README.md
                     -   "Normalization Plan P0-P6": 05-engineering/normalization_plan_P0_P6.md
@@ -336,6 +346,7 @@ nav:
                             -   "Activity": 04-reference/pipelines/composite/04-activity-spec.md
                             -   "Assay": 04-reference/pipelines/composite/05-assay-spec.md
             -   "Data Contracts":
+                    -   "Current State": 04-reference/contracts/data-contracts-current.md
                     -   "Gold Schemas": 04-reference/contracts/gold-schemas.md
                     -   "Data Quality Contracts": 04-reference/contracts/dq-contracts.md
                     -   "Observability Metrics": 04-reference/contracts/observability.md

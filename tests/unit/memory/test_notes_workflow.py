@@ -11,7 +11,7 @@ import pytest
 
 import memory.notes as notes_module
 import memory.tooling.promote_note as promote_note_module
-from memory.notes import parse_markdown_note
+from memory.notes import parse_markdown_note, parse_markdown_note_metadata
 from memory.tooling.archive_note import archive_note
 from memory.tooling.create_note import create_note
 from memory.tooling.promote_note import promote_note
@@ -189,6 +189,61 @@ def test_parse_markdown_note_uses_git_fallback_when_worktree_read_times_out(
     monkeypatch.setattr(Path, "read_text", blocked_read_text)
 
     note = parse_markdown_note(path, include_body=False)
+
+    read_should_complete.set()
+
+    assert note.metadata["id"] == "tracked"
+    assert note.metadata["task_id"] == "task-123"
+
+
+def test_parse_markdown_note_metadata_can_force_timeout_protection_on_local_paths(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    path = tmp_path / "tracked.md"
+    path.write_text("---\nid: tracked\n---\n", encoding="utf-8")
+
+    read_started = threading.Event()
+    read_should_complete = threading.Event()
+
+    class _BlockingHandle:
+        def __enter__(self) -> "_BlockingHandle":
+            return self
+
+        def __exit__(self, exc_type, exc, tb) -> None:
+            _ = (exc_type, exc, tb)
+            return None
+
+        def readline(self) -> str:
+            read_started.set()
+            read_should_complete.wait(timeout=10.0)
+            return ""
+
+    def blocked_open(self: Path, *args: object, **kwargs: object) -> _BlockingHandle:
+        _ = (self, args, kwargs)
+        return _BlockingHandle()
+
+    monkeypatch.setattr(notes_module, "_is_likely_network_drive", lambda _: False)
+    monkeypatch.setattr(notes_module, "NOTE_READ_TIMEOUT_SECONDS", 0.01)
+    monkeypatch.setattr(
+        notes_module,
+        "_read_text_from_git_object",
+        lambda _: (
+            "---\n"
+            "id: tracked\n"
+            "task_id: task-123\n"
+            "created_at: '2026-05-26T00:00:00Z'\n"
+            "ttl_days: 14\n"
+            "confidence: episodic\n"
+            "source_refs:\n"
+            "- src/memory/README.md\n"
+            "---\n\n"
+            "# Session\n"
+        ),
+    )
+    monkeypatch.setattr(Path, "open", blocked_open)
+
+    note = parse_markdown_note_metadata(path, force_threaded_timeout=True)
 
     read_should_complete.set()
 

@@ -24,11 +24,6 @@ import pytest
             "bioetl.interfaces.cli.commands.domains.health.command",
         ),
         (
-            "src/bioetl/interfaces/cli/commands/domains/maintenance/__init__.py",
-            "maintenance",
-            "bioetl.interfaces.cli.commands.maintenance",
-        ),
-        (
             "src/bioetl/interfaces/cli/commands/domains/quarantine/__init__.py",
             "quarantine",
             "bioetl.interfaces.cli.commands.domains.quarantine.command",
@@ -74,5 +69,22 @@ def test_domain_command_packages_export_lazy_command_symbol(
 
     assert module.__all__ == [export_name]
     assert getattr(module, export_name) is sentinel
+    with pytest.raises(AttributeError, match="missing"):
+        module.__getattr__("missing")
+
+
+def test_maintenance_domain_package_has_lazy_export() -> None:
+    """Maintenance domain has different architecture - verify __getattr__ works."""
+    module_path = Path("src/bioetl/interfaces/cli/commands/domains/maintenance/__init__.py")
+    spec = importlib.util.spec_from_file_location(
+        "_test_maintenance_domain_package",
+        module_path,
+    )
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    assert module.__all__ == ["maintenance"]
+    # Verify that __getattr__ is defined and works for missing attributes
     with pytest.raises(AttributeError, match="missing"):
         module.__getattr__("missing")

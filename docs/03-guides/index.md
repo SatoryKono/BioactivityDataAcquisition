@@ -36,12 +36,17 @@ for published contracts, CLI surfaces, and specs.
 | GitHub workflow diagrams           | [github-workflow-diagrams.md](github-workflow-diagrams.md) |
 | Verify docs and strict site build  | [docs-verification.md](docs-verification.md)           |
 | Understand pipeline lifecycle      | [pipeline-lifecycle.md](pipeline-lifecycle.md)         |
+| Understand run lifecycle           | [run-lifecycle.md](run-lifecycle.md)                   |
+| Understand replay support          | [replay-guide.md](replay-guide.md)                     |
 | Configure pipelines                | [pipeline-configuration.md](pipeline-configuration.md) |
 | Configure DQ behavior              | [dq-configuration.md](dq-configuration.md)             |
+| Understand DQ framework boundaries | [dq-framework.md](dq-framework.md)                     |
 | Apply repository cleanup safely    | [cleanup.md](cleanup.md)                               |
 | Run tests and local verification   | [testing.md](testing.md)                               |
 | Debug common local problems        | [troubleshooting.md](troubleshooting.md)               |
 | Metrics and local monitoring setup | [metrics-monitoring.md](metrics-monitoring.md)         |
+| Observability architecture/runtime | [observability-guide.md](observability-guide.md)       |
+| Shipped dashboard inventory        | [dashboard-guide.md](dashboard-guide.md)               |
 | Dashboard usage and extension      | [dashboards/README.md](dashboards/README.md)           |
 | Configure development tools        | [development/pycharm-setup.md](development/pycharm-setup.md) |
 
@@ -71,6 +76,16 @@ for published contracts, CLI surfaces, and specs.
   hygiene workflow.
 - [Metrics & Monitoring](metrics-monitoring.md): local observability setup and
   metric catalog.
+- [Observability Guide](observability-guide.md): current observability source
+  files, runtime flow, and bounded-label policy.
+- [Dashboard Guide](dashboard-guide.md): shipped Grafana dashboard inventory
+  and validation commands.
+- [Run Lifecycle](run-lifecycle.md): split between runtime execution,
+  RunManifest, RunLedger, storage, and quarantine.
+- [Replay Guide](replay-guide.md): exact replay support boundaries and
+  fail-closed evidence requirements.
+- [DQ Framework](dq-framework.md): DQ analyzers, checks, contracts, and
+  quarantine boundaries.
 - [Testing](testing.md): test strategy, local execution paths, and governance.
 - [Troubleshooting](troubleshooting.md): symptom-oriented problem solving.
 - [Development Setup](development/pycharm-setup.md): IDE-specific local setup

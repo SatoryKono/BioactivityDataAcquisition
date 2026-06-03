@@ -13,7 +13,7 @@ import click
 import pytest
 from click.testing import CliRunner
 
-from bioetl.interfaces.cli import cli, main
+from bioetl.interfaces.cli import cli
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
     ObservabilityBackendEnsureResult,
 )
@@ -627,6 +627,8 @@ class TestMainEntryPoint:
     @patch("bioetl.interfaces.cli.main._build_main_registry")
     def test_main_does_not_prebuild_registry(self, mock_build_registry, mock_cli):
         """Test that main() avoids eager registry construction."""
+        from bioetl.interfaces.cli import main
+
         main()
 
         mock_build_registry.assert_not_called()
@@ -636,6 +638,8 @@ class TestMainEntryPoint:
     @patch("bioetl.interfaces.cli.main._build_main_registry")
     def test_main_calls_cli(self, mock_build_registry, mock_cli):
         """Test that main() invokes CLI group."""
+        from bioetl.interfaces.cli import main
+
         main()
 
         mock_build_registry.assert_not_called()
