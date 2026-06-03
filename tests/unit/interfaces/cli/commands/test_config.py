@@ -279,10 +279,11 @@ class TestConfigListPipelinesCommand:
     def test_list_pipelines_command__pipelines_success__7024e288(
         self, cli_runner: CliRunner, mock_config_service: MagicMock
     ) -> None:
-        """Test list-pipelines outputs all registered pipelines."""
+        """Test list-pipelines outputs all configured pipelines."""
+        del mock_config_service
         with patch(
-            "bioetl.interfaces.cli.commands.config.get_config_service",
-            return_value=mock_config_service,
+            "bioetl.interfaces.cli.commands.config.get_configured_pipeline_names",
+            return_value=["chembl_activity", "chembl_molecule"],
         ):
             result = cli_runner.invoke(cli, ["config", "list-pipelines"])
 
@@ -294,11 +295,11 @@ class TestConfigListPipelinesCommand:
         self, cli_runner: CliRunner, mock_config_service: MagicMock
     ) -> None:
         """Test list-pipelines prints 'No pipelines' when list is empty."""
-        mock_config_service.list_pipelines.return_value = []
+        del mock_config_service
 
         with patch(
-            "bioetl.interfaces.cli.commands.config.get_config_service",
-            return_value=mock_config_service,
+            "bioetl.interfaces.cli.commands.config.get_configured_pipeline_names",
+            return_value=[],
         ):
             result = cli_runner.invoke(cli, ["config", "list-pipelines"])
 

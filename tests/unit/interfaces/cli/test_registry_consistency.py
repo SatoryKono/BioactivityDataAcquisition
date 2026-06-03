@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from unittest.mock import patch
 
 from click.testing import CliRunner
 import pytest
@@ -89,3 +90,24 @@ class TestListPipelinesCommandSnapshot:
         assert "Available pipelines:" in result.output
         for pipeline in ("chembl_activity", "pubchem_compound", "uniprot_protein"):
             assert pipeline in result.output, f"Missing pipeline: {pipeline}"
+
+    def test_list_pipelines_does_not_bootstrap_runtime_config_service(
+        self,
+        cli_runner: CliRunner,
+    ) -> None:
+        """Pipeline listing must stay on the lightweight config-catalog seam."""
+        from bioetl.interfaces.cli.main import cli
+
+        with patch(
+            "bioetl.interfaces.cli.commands.config.get_config_service",
+            side_effect=AssertionError("runtime config service should not be used"),
+        ):
+            result = cli_runner.invoke(
+                cli,
+                ["config", "list-pipelines"],
+                color=False,
+                env={"NO_COLOR": "1", "CLICOLOR": "0", "CLICOLOR_FORCE": "0"},
+            )
+
+        assert result.exit_code == 0, f"Command failed: {result.output}"
+        assert "chembl_activity" in result.output

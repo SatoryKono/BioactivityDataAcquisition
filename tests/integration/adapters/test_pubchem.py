@@ -125,6 +125,33 @@ async def _consume_async_iter(async_iter) -> list[object]:
     return items
 
 
+class _FailingPubChemFetchFlow:
+    """Deterministic fetch-flow double for PubChem failure contracts."""
+
+    def __init__(self, error: Exception) -> None:
+        self.error = error
+        self.calls: list[dict[str, object]] = []
+
+    async def execute(
+        self,
+        *,
+        endpoint: str,
+        pubchem_callable: object,
+        pubchem_args: tuple[object, ...],
+    ) -> list[object]:
+        self.calls.append({"endpoint": endpoint, "pubchem_args": pubchem_args})
+        raise self.error
+
+
+def _install_failing_pubchem_fetch_flow(
+    adapter: PubChemAdapter,
+    error: Exception,
+) -> _FailingPubChemFetchFlow:
+    failing_flow = _FailingPubChemFetchFlow(error)
+    adapter._strategies._fetch_flow = failing_flow
+    return failing_flow
+
+
 # ---------------------------------------------------------------------------
 # Basic adapter properties
 # ---------------------------------------------------------------------------
@@ -707,88 +734,101 @@ class TestPubChemStructuralFields:
 class TestPubChemErrorPaths:
     """Tests for HTTP error paths, empty result sets and pagination edge cases.
 
-    VCR cassettes simulate server-side error responses and boundary conditions
-    without making real HTTP calls.
+    Failure-path tests inject deterministic fetch-flow failures instead of using
+    live PubChem identifiers whose upstream behavior can drift.
     """
 
-    @pytest.mark.vcr
     async def test_fetch_by_name_http_503_is_handled(
         self,
         pubchem_adapter: PubChemAdapter,
     ) -> None:
-        """HTTP 503 from a name-based query propagates as an OSError/RuntimeError.
+        """Name-based query failures propagate to callers."""
+        failing_flow = _install_failing_pubchem_fetch_flow(
+            pubchem_adapter,
+            OSError("pubchem 503 service unavailable"),
+        )
 
-        pubchempy raises urllib.error.HTTPError (subclass of OSError) on 503.
-        The circuit breaker records the failure and re-raises.  The adapter
-        does not swallow this error for query-based fetches, so callers can
-        observe the failure.
-        """
-        with pytest.raises((OSError, RuntimeError, Exception)):
+        with pytest.raises(OSError, match="pubchem 503 service unavailable"):
             await _consume_async_iter(
                 pubchem_adapter.fetch(
                     entity_type="compound",
-                    query="ibuprofen",
+                    query="server-busy-sentinel",
                 )
             )
 
-    @pytest.mark.vcr
+        assert failing_flow.calls == [
+            {
+                "endpoint": "/compound/name/server-busy-sentinel/JSON",
+                "pubchem_args": ("server-busy-sentinel", "name"),
+            }
+        ]
+
     async def test_fetch_by_smiles_http_503_is_handled(
         self,
         pubchem_adapter: PubChemAdapter,
         mock_logger: MagicMock,
     ) -> None:
-        """HTTP 503 during a SMILES lookup is caught, logged and yields 0 records.
-
-        pubchempy raises pubchempy.ServerBusyError on HTTP 503.
-        fetch_strategies.fetch_by_smiles() catches errors via FETCH_STRATEGY_ERRORS
-        (which includes RuntimeError, the base of pubchempy.ServerBusyError) and
-        logs a warning.  The overall generator continues and yields nothing when
-        all SMILES fail with a server error.
-        """
+        """SMILES lookup failures are caught, logged, and yield no records."""
+        failing_flow = _install_failing_pubchem_fetch_flow(
+            pubchem_adapter,
+            OSError("pubchem 503 service unavailable"),
+        )
         records: list[dict[str, Any]] = []
 
-        try:
-            async for record in pubchem_adapter.fetch_filtered(
-                entity_type="compound",
-                filter_ids=["C1CCCCC1"],  # cyclohexane SMILES
-                filter_field="smiles",
-            ):
-                records.append(record)
-        except Exception:
-            # If ServerBusyError is not in FETCH_STRATEGY_ERRORS it propagates
-            records = []
+        async for record in pubchem_adapter.fetch_filtered(
+            entity_type="compound",
+            filter_ids=["failure-smiles"],
+            filter_field="smiles",
+        ):
+            records.append(record)
 
-        # Either the error was swallowed (0 records) or propagated (0 records)
-        # — the adapter must not return partial/corrupted data on 503
         assert records == []
+        assert failing_flow.calls == [
+            {
+                "endpoint": "/compound/smiles/JSON",
+                "pubchem_args": ("failure-smiles", "smiles"),
+            }
+        ]
+        mock_logger.warning.assert_called_with(
+            "smiles_fetch_failed",
+            provider="pubchem",
+            smiles="failure-smiles",
+            error="pubchem 503 service unavailable",
+        )
 
-    @pytest.mark.vcr
     async def test_fetch_by_cid_returns_empty_list(
         self,
         pubchem_adapter: PubChemAdapter,
         mock_logger: MagicMock,
     ) -> None:
-        """CID that does not exist in PubChem (404/NotFound) yields 0 records.
-
-        pubchempy returns an empty list when the API responds with a
-        PUGREST.NotFound fault.  The adapter propagates this as an empty
-        async iteration with no records and no exception.
-
-        CID 99999999 is not a real compound; the cassette simulates the
-        PUGREST.NotFound response that PubChem would return.
-        """
+        """CID batch lookup failures are logged and yield no records."""
+        failing_flow = _install_failing_pubchem_fetch_flow(
+            pubchem_adapter,
+            OSError("pubchem cid not found"),
+        )
         records: list[dict[str, Any]] = []
 
-        # 404 / NotFound from the CID batch endpoint causes the fetch_by_cids
-        # strategy to catch the error (OSError from urllib) and log a warning.
         async for record in pubchem_adapter.fetch_filtered(
             entity_type="compound",
-            filter_ids=["99999999"],
+            filter_ids=["999999999"],
             filter_field="cid",
         ):
             records.append(record)
 
         assert records == []
+        assert failing_flow.calls == [
+            {
+                "endpoint": "/compound/cid/999999999/JSON",
+                "pubchem_args": ([999999999], "cid"),
+            }
+        ]
+        mock_logger.warning.assert_called_with(
+            "molecule_id_batch_fetch_failed",
+            provider="pubchem",
+            batch_start=999999999,
+            batch_size=1,
+            error="pubchem cid not found",
+        )
 
     @pytest.mark.vcr
     async def test_fetch_by_cid_single_page_response(

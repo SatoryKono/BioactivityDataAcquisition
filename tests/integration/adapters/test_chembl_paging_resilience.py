@@ -11,12 +11,26 @@ from __future__ import annotations
 import os
 from pathlib import Path
 from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 # VCR cassette directory for ChEMBL adapter tests
 CASSETTE_DIR = Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "chembl"
+
+
+class _ChemblPageResponse:
+    """Minimal response double for deterministic ChEMBL paging tests."""
+
+    def __init__(self, records: list[dict[str, Any]], *, has_next: bool) -> None:
+        self._records = records
+        self._has_next = has_next
+
+    def json(self) -> dict[str, Any]:
+        return {
+            "activities": self._records,
+            "page_meta": {"next": "next-page" if self._has_next else None},
+        }
 
 
 @pytest.fixture(scope="module")
@@ -56,7 +70,6 @@ class TestChemblPagingPaths:
     @pytest.fixture
     def chembl_adapter(self, chembl_client: Any, mock_logger: MagicMock) -> Any:
         """Create ChemblAdapter instance."""
-        from bioetl.domain.resilience import AdapterConfig
         from bioetl.infrastructure.adapters.chembl import ChemblAdapter
 
         return ChemblAdapter(http_client=chembl_client, logger=mock_logger)
@@ -148,29 +161,43 @@ class TestChemblPagingPaths:
 
             assert len(records) == 0
 
-    @pytest.mark.vcr
     async def test_pagination_with_limit_exceeds_available(
-        self, chembl_client: Any, mock_logger: MagicMock
+        self, mock_logger: MagicMock
     ) -> None:
-        """Test pagination when limit exceeds available records."""
+        """Test finite pagination when limit exceeds available records."""
         from bioetl.domain.resilience import AdapterConfig
         from bioetl.infrastructure.adapters.chembl import ChemblAdapter
 
-        async with chembl_client:
-            adapter = ChemblAdapter(
-                http_client=chembl_client,
-                logger=mock_logger,
-                adapter_config=AdapterConfig(page_size=100),
-            )
+        http_client = MagicMock()
+        http_client.get = AsyncMock(
+            side_effect=[
+                _ChemblPageResponse(
+                    [
+                        {"activity_id": 1, "activity_chembl_id": "ACT1"},
+                        {"activity_id": 2, "activity_chembl_id": "ACT2"},
+                    ],
+                    has_next=True,
+                ),
+                _ChemblPageResponse(
+                    [{"activity_id": 3, "activity_chembl_id": "ACT3"}],
+                    has_next=False,
+                ),
+            ],
+        )
+        adapter = ChemblAdapter(
+            http_client=http_client,
+            logger=mock_logger,
+            adapter_config=AdapterConfig(page_size=2),
+        )
 
-            # Request very large limit (should return all available records)
-            records = []
-            async for record in adapter.fetch("activity", limit=1_000_000):
-                records.append(record)
+        records = []
+        async for record in adapter.fetch("activity", limit=1_000_000):
+            records.append(record)
 
-            # Should return all available records (at least some)
-            assert len(records) > 0
-            assert len(records) < 1_000_000
+        assert [record["activity_id"] for record in records] == [1, 2, 3]
+        assert [
+            call.kwargs["params"]["offset"] for call in http_client.get.mock_calls
+        ] == [0, 2]
 
 
 @pytest.mark.integration
@@ -199,7 +226,6 @@ class TestChemblResiliencePaths:
     @pytest.fixture
     def chembl_adapter(self, chembl_client: Any, mock_logger: MagicMock) -> Any:
         """Create ChemblAdapter instance."""
-        from bioetl.domain.resilience import AdapterConfig
         from bioetl.infrastructure.adapters.chembl import ChemblAdapter
 
         return ChemblAdapter(http_client=chembl_client, logger=mock_logger)
@@ -247,6 +273,7 @@ class TestChemblResiliencePaths:
 
             # Verify rate limiter is configured
             assert token_bucket is not None
+            assert adapter._adapter_config.rate_limit_requests_per_second == 3
 
     @pytest.mark.vcr
     async def test_circuit_breaker_on_persistent_failures(
@@ -269,6 +296,7 @@ class TestChemblResiliencePaths:
 
             # Verify circuit breaker is configured
             assert circuit_breaker is not None
+            assert adapter._adapter_config.circuit_breaker_failure_threshold == 5
 
     @pytest.mark.vcr
     async def test_single_id_fallback_on_batch_failure(

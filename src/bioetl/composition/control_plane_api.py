@@ -77,6 +77,8 @@ if TYPE_CHECKING:
 
     def get_config_service() -> ConfigService: ...
 
+    def list_configured_pipeline_names() -> list[str]: ...
+
     def get_export_service() -> ExportService: ...
 
     def get_forensic_run_diff_service() -> ForensicRunDiffService: ...
@@ -130,6 +132,7 @@ __all__ = [
     "get_workflow_execution_service",
     "get_workflow_inspection_service",
     "get_workflow_runner_service",
+    "list_configured_pipeline_names",
     "load_workflow_config",
     "persist_historical_replay_closure_report",
     "persist_historical_replay_universe_report",
@@ -144,6 +147,7 @@ _PUBLIC_EXPORTS = {
     "bootstrap_control_plane_lifecycle_store": _CLI_CONTROL_PLANE_LIFECYCLE_MODULE,
     "get_adr_service": _SERVICES_MODULE,
     "get_checkpoint_runtime_service": _RESOURCE_MANAGEMENT_MODULE,
+    "list_configured_pipeline_names": "bioetl.composition.config_catalog",
     "get_config_service": _SERVICES_MODULE,
     "get_export_service": _SERVICES_MODULE,
     "get_forensic_run_diff_service": _SERVICES_MODULE,

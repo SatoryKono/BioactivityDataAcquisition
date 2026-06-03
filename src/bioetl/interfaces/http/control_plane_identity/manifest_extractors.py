@@ -99,10 +99,35 @@ def artifact_ref_values(artifacts: Sequence[RunArtifactRef]) -> list[str]:
     ]
 
 
+def extract_manifest_anchors(manifest_data: dict[str, object]) -> list[object]:
+    """Extract legacy HTTP identity anchor values from manifest-like mappings."""
+    from bioetl.interfaces.http.control_plane_identity.anchor_values import (
+        anchor_values_from_mapping,
+    )
+
+    payload = dict(manifest_data)
+    provider_entity = join_non_empty(
+        (payload.get("provider"), payload.get("entity")), "."
+    )
+    if provider_entity:
+        payload["provider_entity"] = provider_entity
+    return anchor_values_from_mapping(
+        payload,
+        source="manifest",
+        anchor_names=(
+            "run_id",
+            "manifest_id",
+            "pipeline_name",
+            "provider_entity",
+        ),
+    )
+
+
 __all__ = [
     "artifact_ref_values",
     "correlation_anchor_gaps",
     "diagnostic_value",
+    "extract_manifest_anchors",
     "identity_graph_diagnostics",
     "input_snapshot_fingerprint",
     "input_snapshots",

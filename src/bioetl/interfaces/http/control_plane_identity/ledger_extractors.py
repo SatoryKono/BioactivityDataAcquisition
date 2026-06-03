@@ -95,11 +95,25 @@ def bronze_batch_ids(
     return dedupe(values)
 
 
+def extract_ledger_anchors(ledger_event: dict[str, object]) -> list[object]:
+    """Extract legacy HTTP identity anchor values from ledger-event mappings."""
+    from bioetl.interfaces.http.control_plane_identity.anchor_values import (
+        anchor_values_from_mapping,
+    )
+
+    return anchor_values_from_mapping(
+        ledger_event,
+        source="ledger",
+        anchor_names=("run_id", "manifest_id", "latest_event_id"),
+    )
+
+
 __all__ = [
     "artifact_refs",
     "bronze_batch_ids",
     "component_run_ids",
     "dq_report_paths",
+    "extract_ledger_anchors",
     "lineage_fragment_ids",
     "published_artifacts",
 ]

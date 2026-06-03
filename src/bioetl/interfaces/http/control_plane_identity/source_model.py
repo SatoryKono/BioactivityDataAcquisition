@@ -2,10 +2,24 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 from bioetl.interfaces.http.control_plane_identity.types import (
     AnchorSourceModel,
     DrilldownTarget,
 )
+
+
+@dataclass(frozen=True, slots=True)
+class ControlPlaneSourceModel:
+    """Legacy-compatible source identity model for HTTP integration callers."""
+
+    run_id: str
+    manifest_id: str
+    pipeline_name: str
+    provider: str | None = None
+    entity: str | None = None
+
 
 DEFAULT_SOURCE_MODEL = AnchorSourceModel(
     source_type="derived_identity_evidence",

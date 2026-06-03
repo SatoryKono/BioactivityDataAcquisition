@@ -109,6 +109,17 @@ def build_control_plane_identity_evidence_payload(
     }
 
 
+def validate_identity_payload(payload: dict[str, object]) -> tuple[bool, list[str]]:
+    """Validate minimal legacy identity payload fields for HTTP callers."""
+    required_fields = ("run_id", "manifest_id", "pipeline_name")
+    errors = [
+        f"missing required identity field: {field}"
+        for field in required_fields
+        if not is_present(payload.get(field))
+    ]
+    return not errors, errors
+
+
 def ledger_entries_for(
     manifest: RunManifest | None,
     ledger_port: LedgerEntryProvider | None,

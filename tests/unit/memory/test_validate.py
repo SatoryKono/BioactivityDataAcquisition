@@ -135,7 +135,7 @@ def test_memory_scaffold_validation_skips_episodic_body_reads(
     assert validate_memory_scaffold(memory_root) == []
 
 
-def test_memory_scaffold_validation_uses_timeout_protected_note_reads(
+def test_memory_scaffold_validation_avoids_forced_threaded_note_reads(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -199,7 +199,7 @@ def test_memory_scaffold_validation_uses_timeout_protected_note_reads(
 
     assert validate_memory_scaffold(memory_root) == []
     assert observed_force_flags
-    assert all(observed_force_flags)
+    assert not any(observed_force_flags)
 
 
 def test_memory_scaffold_validation_bounds_default_episodic_scan(

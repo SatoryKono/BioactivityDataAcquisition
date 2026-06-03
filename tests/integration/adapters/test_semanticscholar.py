@@ -33,11 +33,40 @@ from tests.integration.adapters.http_integration_support import (
     reset_http_client_state,
 )
 from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
+from tests.helpers.vcr_config import resolve_cassette_name
 
 # VCR cassette directory
 CASSETTE_DIR = (
     Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "semanticscholar"
 )
+
+_CASSETTE_NAME_OVERRIDES = {
+    "test_scholar_adapter__health_check__1f0e0a8e": (
+        "TestSemanticScholarAdapterIntegration.test_health_check"
+    ),
+    "test_fetch_by_doi": "TestSemanticScholarAdapterIntegration.test_fetch_by_doi",
+    "test_fetch_batch_dois": (
+        "TestSemanticScholarAdapterIntegration.test_fetch_batch_dois"
+    ),
+    "test_fetch_with_query": (
+        "TestSemanticScholarAdapterIntegration.test_fetch_with_query"
+    ),
+    "test_fetch_filtered_with_fallback": (
+        "TestSemanticScholarAdapterIntegration.test_fetch_filtered_with_fallback"
+    ),
+    "test_title_only_lookup": (
+        "TestSemanticScholarAdapterIntegration.test_title_only_lookup"
+    ),
+}
+
+
+@pytest.fixture
+def vcr_cassette_name(request: pytest.FixtureRequest) -> str:
+    """Resolve integration cassette names to the committed class-qualified files."""
+    return resolve_cassette_name(
+        node_name=request.node.name,
+        overrides=_CASSETTE_NAME_OVERRIDES,
+    )
 
 
 @pytest.fixture(scope="module")
@@ -97,6 +126,7 @@ def semanticscholar_adapter(
 
 
 @pytest.mark.integration
+@pytest.mark.usefixtures("vcr_cassette_name")
 class TestSemanticScholarAdapterIntegration:
     """Integration tests for SemanticScholarAdapter.
 

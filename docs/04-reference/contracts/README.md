@@ -13,14 +13,15 @@ ______________________________________________________________________
 
 # Contracts Registry
 
-Кодовые контракты в `src/bioetl/domain/contracts/gold/` — **source of truth** для
-контрактов Gold-слоя. JSON-экспорты в `docs/04-reference/contracts/gold/*.json`
-являются сгенерированными артефактами для публикации и обзора.
+Domain schemas в `src/bioetl/domain/schemas/` — **source of truth** для
+контрактов всех слоёв (Pandera DataFrameModel). JSON-экспорты в
+`docs/04-reference/contracts/gold/*.json` являются сгенерированными артефактами для
+публикации и обзора.
 
 Текущий published contract pack должен оставаться согласованным с live code и
 config surfaces:
 
-- Gold contract code: `src/bioetl/domain/contracts/gold/`
+- Domain schemas: `src/bioetl/domain/schemas/` (Pandera DataFrameModel contracts)
 - Contract configs: `configs/contracts/**`
 - Control-plane domain models and ports:
   `src/bioetl/domain/control_plane/`,
@@ -74,9 +75,19 @@ runbook остаются supported.
 
 Правило синхронизации:
 
-- изменения в `src/bioetl/domain/contracts/gold/` выполняются в коде;
-- после изменения кодовых контрактов необходимо перегенерировать exported JSON;
+- изменения в `src/bioetl/domain/schemas/` выполняются в коде;
+- после изменения схем необходимо перегенерировать exported JSON;
 - parity-check между кодом и exported JSON не должен допускать расхождений по `name/type/nullable/description`.
+
+## Published Surface Hygiene
+
+**Forbidden artifacts in active published tree**:
+
+- Backup files (например, `*.backup-*`, `*.bak`) запрещены в `docs/04-reference/contracts/`
+- Все backup artifacts должны храниться в `docs/99-archive/`
+- Published contract surface должен содержать только активные, утверждённые контракты
+
+Эта политика предотвращает неоднозначность и риск случайной публикации/ссылок на устаревшие артефакты.
 
 Для test-facing drift baselines Gold layer теперь использует отдельный bounded
 snapshot registry:

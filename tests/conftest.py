@@ -1,7 +1,11 @@
 import enum
+import gc
+import inspect
 import os
 import asyncio
 import sys
+import threading
+import traceback
 from functools import cache
 from pathlib import Path
 import pathlib
@@ -22,6 +26,126 @@ from tests.helpers.vcr_config import (
 _ORIGINAL_OS_NAME = os.name
 _ORIGINAL_SYS_PLATFORM = sys.platform
 _ORIGINAL_PATH = pathlib.Path
+_ASYNC_TIMEOUT_DIAGNOSTIC_MARGIN_SECONDS = 5.0
+_DISABLED_ENV_VALUES = frozenset({"0", "false", "no", "off"})
+
+
+def _async_timeout_diagnostics_enabled() -> bool:
+    """Return whether async timeout diagnostics should run for this pytest process."""
+    configured = os.environ.get("BIOETL_ASYNC_TEST_TIMEOUT_DIAGNOSTICS")
+    if configured is not None:
+        return configured.strip().lower() not in _DISABLED_ENV_VALUES
+    return sys.platform.startswith("win") and _is_pycharm_pytest_runner()
+
+
+def _is_async_test_item(item: pytest.Item) -> bool:
+    """Return True when pytest will execute the item through an asyncio loop."""
+    test_object = getattr(item, "obj", None)
+    return inspect.iscoroutinefunction(test_object) or (
+        item.get_closest_marker("asyncio") is not None
+    )
+
+
+def _coerce_timeout_seconds(raw_value: object) -> float | None:
+    """Convert pytest-timeout marker/config values to seconds."""
+    if raw_value in (None, ""):
+        return None
+    try:
+        timeout_seconds = float(raw_value)
+    except (TypeError, ValueError):
+        return None
+    return timeout_seconds if timeout_seconds > 0 else None
+
+
+def _timeout_seconds_for_item(item: pytest.Item) -> float | None:
+    """Resolve the effective pytest-timeout budget for one item."""
+    timeout_marker = item.get_closest_marker("timeout")
+    if timeout_marker is not None:
+        marker_value = (
+            timeout_marker.args[0]
+            if timeout_marker.args
+            else timeout_marker.kwargs.get("timeout")
+        )
+        marker_timeout = _coerce_timeout_seconds(marker_value)
+        if marker_timeout is not None:
+            return marker_timeout
+        if marker_value in {0, "0"}:
+            return None
+
+    option_timeout = _coerce_timeout_seconds(
+        getattr(getattr(item.config, "option", None), "timeout", None)
+    )
+    if option_timeout is not None:
+        return option_timeout
+
+    try:
+        return _coerce_timeout_seconds(item.config.getini("timeout"))
+    except (ValueError, TypeError):
+        return None
+
+
+def _format_async_task_stack(task: asyncio.Task[object]) -> list[str]:
+    """Return a compact stack dump for one pending asyncio task."""
+    lines = [
+        f"  task={task.get_name()!r} state={getattr(task, '_state', 'unknown')!r} "
+        f"coro={task.get_coro()!r}"
+    ]
+    stack = task.get_stack(limit=12)
+    if not stack:
+        lines.append("    <no Python stack available>")
+        return lines
+
+    for frame in stack:
+        formatted = traceback.format_stack(frame, limit=1)
+        lines.extend(f"    {line.rstrip()}" for line in formatted)
+    return lines
+
+
+def _dump_async_timeout_diagnostics(nodeid: str, timeout_seconds: float) -> None:
+    """Print pending asyncio task stacks before pytest-timeout aborts the test."""
+    pending_tasks = [
+        task
+        for task in gc.get_objects()
+        if isinstance(task, asyncio.Task) and not task.done()
+    ]
+    sys.stderr.write(
+        "\n[BIOETL_ASYNC_TIMEOUT_DIAGNOSTIC] "
+        f"nodeid={nodeid} timeout_seconds={timeout_seconds:g} "
+        f"pending_tasks={len(pending_tasks)}\n"
+    )
+    sys.stderr.flush()
+    for task in pending_tasks:
+        for line in _format_async_task_stack(task):
+            sys.stderr.write(f"{line}\n")
+            sys.stderr.flush()
+
+
+def _start_async_timeout_diagnostics(item: pytest.Item) -> threading.Event | None:
+    """Start a watchdog that dumps asyncio task stacks shortly before timeout."""
+    if not _async_timeout_diagnostics_enabled() or not _is_async_test_item(item):
+        return None
+    timeout_seconds = _timeout_seconds_for_item(item)
+    if timeout_seconds is None:
+        return None
+
+    delay = timeout_seconds - _ASYNC_TIMEOUT_DIAGNOSTIC_MARGIN_SECONDS
+    if delay <= 0:
+        return None
+
+    stop_event = threading.Event()
+
+    def _watchdog() -> None:
+        if stop_event.wait(delay):
+            return
+        _dump_async_timeout_diagnostics(item.nodeid, timeout_seconds)
+
+    thread = threading.Thread(
+        target=_watchdog,
+        name="bioetl-async-timeout-diagnostics",
+        daemon=True,
+    )
+    thread.start()
+    return stop_event
 
 
 @pytest.fixture(autouse=True)
@@ -89,6 +213,17 @@ def pytest_itemcollected(item: pytest.Item) -> None:
     config._bioetl_last_failed_collected_count = (
         _last_failed_collected_count(config) + 1
     )
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_call(item: pytest.Item):
+    """Attach async task diagnostics before pytest-timeout interrupts a test."""
+    timeout_diagnostic_stop = _start_async_timeout_diagnostics(item)
+    try:
+        yield
+    finally:
+        if timeout_diagnostic_stop is not None:
+            timeout_diagnostic_stop.set()
 
 
 def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:
@@ -436,13 +571,15 @@ def _vcr_marker(request: pytest.FixtureRequest) -> None:
                 "VCR cassette is a Git LFS pointer; run git lfs pull before replaying "
                 f"this cassette: {cassette_path}"
             )
-    elif cassette_path is not None and not cassette_path.exists():
-        # Skip test if cassette doesn't exist and we're not in recording mode
-        if not is_vcr_recording_mode():
-            pytest.skip(
-                f"VCR cassette not found: {cassette_path}. "
-                f"Run with VCR_RECORD_MODE=new_episodes to record cassettes."
-            )
+    elif (
+        cassette_path is not None
+        and not cassette_path.exists()
+        and not is_vcr_recording_mode()
+    ):
+        pytest.skip(
+            f"VCR cassette not found: {cassette_path}. "
+            f"Run with VCR_RECORD_MODE=new_episodes to record cassettes."
+        )
 
 
 @pytest.fixture(scope="module")

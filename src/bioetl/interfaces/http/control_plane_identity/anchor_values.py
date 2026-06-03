@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 from bioetl.domain.control_plane import RunInputSnapshotRef, RunLedgerEntry, RunManifest
 from bioetl.interfaces.http.control_plane_identity.checkpoint_extractors import (
     checkpoint_value,
@@ -35,6 +37,34 @@ from bioetl.interfaces.http.control_plane_identity.replay_extractors import (
     replay_mode,
     runtime_mode,
 )
+from bioetl.interfaces.http.control_plane_identity.specs import SPEC_BY_NAME
+from bioetl.interfaces.http.control_plane_identity.types import AnchorSpec
+
+
+@dataclass(frozen=True, slots=True)
+class AnchorValues:
+    """Resolved value for one identity anchor from one control-plane source."""
+
+    spec: AnchorSpec
+    value: object
+    source: str
+
+
+def anchor_values_from_mapping(
+    payload: dict[str, object],
+    *,
+    source: str,
+    anchor_names: tuple[str, ...] | None = None,
+) -> list[AnchorValues]:
+    """Build resolved anchor values from a mapping using registered specs."""
+    names = anchor_names or tuple(payload)
+    anchors: list[AnchorValues] = []
+    for name in names:
+        value = payload.get(name)
+        spec = SPEC_BY_NAME.get(name)
+        if spec is not None and value is not None:
+            anchors.append(AnchorValues(spec=spec, value=value, source=source))
+    return anchors
 
 
 def _anchor_snapshot_fingerprint(
@@ -176,4 +206,4 @@ def build_anchor_values(
     }
 
 
-__all__ = ["build_anchor_values"]
+__all__ = ["AnchorValues", "anchor_values_from_mapping", "build_anchor_values"]
