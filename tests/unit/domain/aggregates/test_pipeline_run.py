@@ -387,7 +387,7 @@ class TestPipelineRunDomainEvents:
         assert events[0].run_id == started_run.run_id
         assert events[0].pipeline_name == started_run.pipeline_name
         assert events[0].records_processed == 100
-        assert events[0].duration_seconds == pytest.approx(3.0)
+        assert events[0].duration_seconds == pytest.approx(180.0)
         assert events[0].stages_count == 1
 
     def test_failure_emits_pipeline_failed_event(
@@ -416,6 +416,7 @@ class TestPipelineRunDomainEvents:
         """shutdown() should emit PipelineShutdown event."""
         started_run.record_stage_success(
             "test",
+            records_processed=100,
             started_at=_ts(1),
             completed_at=_ts(2),
         )
