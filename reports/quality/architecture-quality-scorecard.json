@@ -4,7 +4,7 @@
   "source_artifacts": {
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "1fe6997afea4623adc4896c2da2f5b9d089b44f4196572f3654bd0d44f592636"
+      "source_fingerprint": "88bcc5ea11b92cd61605ef2b4b5a6a95871ce31a90a24ed82af1636befb8c29d"
     },
     "module_coverage_inventory": {
       "path": "reports/quality/module-coverage-inventory.json",

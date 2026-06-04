@@ -10,12 +10,15 @@ from typing import cast
 
 import click
 
-from bioetl.interfaces.cli.commands.domains.health.server_integration import (
-    DEFAULT_HEALTH_SERVER_PORT,
-    run_long_lived_health_server_command,
-)
-from bioetl.interfaces.cli.commands.domains.health.server_integration import (
+from bioetl.interfaces.cli.commands.domains.quarantine.runtime_access import (
     get_quarantine_runtime_service as get_runtime_quarantine_service,
+)
+from bioetl.interfaces.cli.commands.domains.quarantine.runtime_access import (
+    get_quarantine_service as get_admin_quarantine_service,
+)
+from bioetl.interfaces.cli.commands.domains.quarantine.server_backend import (
+    DEFAULT_QUARANTINE_SERVER_PORT,
+    run_long_lived_quarantine_backend_command,
 )
 from bioetl.interfaces.cli.commands.domains.quarantine.support import (
     RunManifestInspectionServiceProtocol,
@@ -42,9 +45,7 @@ def get_run_manifest_service() -> RunManifestInspectionServiceProtocol:
 
 def get_quarantine_service() -> _QuarantineService:
     """Load the quarantine admin service through composition on demand."""
-    from bioetl.composition.health_api import get_quarantine_service as _impl
-
-    return cast(_QuarantineService, _impl())
+    return cast(_QuarantineService, get_admin_quarantine_service())
 
 
 @click.group()
@@ -62,14 +63,14 @@ def quarantine() -> None:
 @click.option(
     "--port",
     "-p",
-    default=DEFAULT_HEALTH_SERVER_PORT,
+    default=DEFAULT_QUARANTINE_SERVER_PORT,
     type=int,
     help="Port for the long-lived Quarantine Explorer backend.",
     show_default=True,
 )
 def quarantine_serve(host: str, port: int) -> None:
     """Start the long-lived backend used by Grafana Silver Reject Explorer."""
-    run_long_lived_health_server_command(host=host, port=port)
+    run_long_lived_quarantine_backend_command(host=host, port=port)
 
 
 @quarantine.command("inspect")
