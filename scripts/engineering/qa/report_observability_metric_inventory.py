@@ -400,8 +400,13 @@ def _scan_canonical_metric_mentions(
         rg_mentions = _scan_canonical_metric_mentions_with_rg(paths, repo_root)
         if rg_mentions is not None:
             return rg_mentions
-        return {}
+    return _scan_canonical_metric_mentions_via_direct_reads(paths, repo_root)
 
+
+def _scan_canonical_metric_mentions_via_direct_reads(
+    paths: list[Path],
+    repo_root: Path,
+) -> dict[str, list[str]]:
     mentions: dict[str, list[str]] = defaultdict(list)
     for path in paths:
         try:
@@ -473,7 +478,7 @@ def _scan_canonical_metric_mentions_with_git_grep(
         except OSError:
             return None
         except subprocess.TimeoutExpired:
-            return _normalize_mapping_lists(mentions)
+            return None
         if result.returncode == 1:
             continue
         if result.returncode != 0:
@@ -528,7 +533,7 @@ def _scan_canonical_metric_mentions_with_rg(
         except OSError:
             return None
         except subprocess.TimeoutExpired:
-            return _normalize_mapping_lists(mentions)
+            return None
         if result.returncode == 1:
             continue
         if result.returncode != 0:
