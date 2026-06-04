@@ -368,6 +368,18 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a backward-compatible Gemini launcher while the canonical interactive entrypoint delegates through scripts/ai/gemini/run-gemini.sh; remove it once callers migrate to the canonical launcher surface."
     },
+    "src/tools/apply_elk_layout.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded manual Mermaid layout-governance helper while architecture-diagram guidance still references the direct script path; promote it only if ELK layout normalization graduates to a canonical scripts.docs or scripts.engineering diagram workflow."
+    },
+    "src/tools/differentiate_linkstyle.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded manual Mermaid semantics helper while diagram-governance guidance and security regression tests still reference the direct script path; promote it only if link-style normalization graduates to a canonical scripts.docs or scripts.engineering diagram workflow."
+    },
     "src/tools/neo4j_audit.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",

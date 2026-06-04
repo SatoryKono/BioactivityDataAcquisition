@@ -22,10 +22,10 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.composition._json_types import JsonDict
-from bioetl.domain.context import PipelineContext
 from bioetl.domain.resilience import CircuitBreakerConfig
 
 if TYPE_CHECKING:
+    from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import (
         BronzeDQConfigPort,
         GoldDQConfigPort,

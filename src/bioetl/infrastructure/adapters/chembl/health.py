@@ -2,9 +2,14 @@
 
 from __future__ import annotations
 
-__all__ = ["CHEMBL_HEALTH_ERRORS", "ChemblHealthMixin"]
+__all__ = [
+    "CHEMBL_HEALTH_ERRORS",
+    "CHEMBL_HEALTH_PROBE_TIMEOUT_SECONDS",
+    "ChemblHealthMixin",
+]
 
 
+import asyncio
 from typing import TYPE_CHECKING
 
 import httpx
@@ -31,6 +36,14 @@ CHEMBL_HEALTH_ERRORS = (
     TypeError,
     RuntimeError,
 )
+CHEMBL_HEALTH_PROBE_TIMEOUT_SECONDS = 5.0
+CHEMBL_TRANSIENT_HEALTH_ERRORS = (
+    TimeoutError,
+    httpx.TimeoutException,
+    httpx.ConnectError,
+    httpx.ReadError,
+    httpx.WriteError,
+)
 
 
 class ChemblHealthMixin:
@@ -51,9 +64,10 @@ class ChemblHealthMixin:
         * UNHEALTHY -> raises ``CriticalError`` (fail-fast).
 
     Active probe (``_probe_health``):
-        Hits the ``/chembl/api/data/status`` endpoint. A 200 response with
-        ``{"status": "UP"}`` yields HEALTHY; 5xx or transient network errors
-        (timeout, connect, read, write) yield DEGRADED; other exceptions
+        Hits the ``/chembl/api/data/status`` endpoint with a short provider-local
+        timeout. A 200 response with ``{"status": "UP"}`` yields HEALTHY; 5xx
+        or transient network errors (timeout, connect, read, write) yield
+        DEGRADED; other exceptions
         propagate.
     """
 
@@ -111,7 +125,10 @@ class ChemblHealthMixin:
         """
         try:
             with self._adapter_metrics.measure_request("/status"):
-                response = await self._http_client.get_once(CHEMBL_STATUS_URL)
+                response = await asyncio.wait_for(
+                    self._http_client.get_once(CHEMBL_STATUS_URL),
+                    timeout=CHEMBL_HEALTH_PROBE_TIMEOUT_SECONDS,
+                )
             status = self._handle_health_response(response)
             self._last_probe_health_status = status
             return status
@@ -130,12 +147,7 @@ class ChemblHealthMixin:
                 return HealthStatus.DEGRADED
             if isinstance(
                 exc,
-                (
-                    httpx.TimeoutException,
-                    httpx.ConnectError,
-                    httpx.ReadError,
-                    httpx.WriteError,
-                ),
+                CHEMBL_TRANSIENT_HEALTH_ERRORS,
             ):
                 self._last_probe_health_status = HealthStatus.DEGRADED
                 self._logger.warning(

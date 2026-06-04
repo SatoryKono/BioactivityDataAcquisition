@@ -5,8 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.core.wiring.factory import PipelineService
-from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
 from bioetl.composition.factories.dq.context_resolver import (
     create_dq_services as _create_dq_services_impl,
 )
@@ -20,7 +18,6 @@ from bioetl.composition.factories.dq.context_resolver import (
     is_dq_report_enabled as _is_dq_report_enabled_impl,
 )
 from bioetl.composition.factories.dq.factory import DQServicesFactory
-from bioetl.composition.factories.services.builder import ServicesBuilder
 from bioetl.composition.factories.services.callbacks import (
     create_data_normalization_service,
     extract_pipeline_callbacks,
@@ -38,10 +35,14 @@ from bioetl.composition.factories.services.port_factories import (
     create_metrics,
     create_quarantine,
 )
-from bioetl.composition.factories.storage import StorageFactory
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
+    from bioetl.application.core.wiring.factory import PipelineService
+    from bioetl.application.services.lineage.metadata_coordinator import (
+        MetadataCoordinator,
+    )
+    from bioetl.composition.factories.services.builder import ServicesBuilder
     from bioetl.composition.factories.storage import StorageContext
     from bioetl.domain.ports import (
         AuditPort,
@@ -63,12 +64,35 @@ __all__ = [
     "BaseServicesFactory",
     "DQServicesFactory",
     "ServicesBuilder",
+    "StorageFactory",
     "create_checkpoint",
     "create_data_normalization_service",
     "create_lock",
     "create_quarantine",
     "extract_pipeline_callbacks",
 ]
+
+
+class _LazyStorageFactory:
+    """Patchable storage factory seam without importing storage at module load."""
+
+    @staticmethod
+    def create(*args: object, **kwargs: object) -> object:
+        from bioetl.composition.factories.storage import StorageFactory
+
+        return StorageFactory.create(*args, **kwargs)
+
+
+StorageFactory = _LazyStorageFactory
+
+
+def __getattr__(name: str) -> object:
+    """Load heavier compatibility exports only when callers request them."""
+    if name == "ServicesBuilder":
+        from bioetl.composition.factories.services.builder import ServicesBuilder
+
+        return ServicesBuilder
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 class BaseServicesFactory:

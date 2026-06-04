@@ -2,14 +2,14 @@
 id: observability-runtime-cardinality-evidence-sync-20260604
 title: Sync runtime cardinality evidence artifact
 task_id: observability-runtime-cardinality-evidence-sync-20260604
-created_at: '2026-06-04T10:37:57Z'
+created_at: '2026-06-04T12:17:45Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - AGENTS.md
 summary: Active task session context.
-query: observability runtime cardinality evidence artifact stale dashboarded_metrics
-  docs_mentions
+query: test_observability_metric_governance runtime cardinality evidence artifact
+  stale dashboarded_metrics docs_mentions
 ---
 
 # Session note
@@ -17,7 +17,7 @@ query: observability runtime cardinality evidence artifact stale dashboarded_met
 ## Task
 
 - Title: Sync runtime cardinality evidence artifact
-- Retrieval query: observability runtime cardinality evidence artifact stale dashboarded_metrics docs_mentions
+- Retrieval query: test_observability_metric_governance runtime cardinality evidence artifact stale dashboarded_metrics docs_mentions
 
 ## Retrieved context
 

@@ -115,6 +115,33 @@ class TestBuildCommonServicePorts:
 
         assert result.metrics_port is created_metrics
 
+    @patch(
+        "bioetl.composition.factories.services.common_service_wiring.StorageFactory.create"
+    )
+    def test_uses_module_level_storage_factory_fallback(
+        self, mock_storage_create: MagicMock
+    ) -> None:
+        """Falls back to the module-level StorageFactory patch seam."""
+        storage_ctx = SimpleNamespace(adapter=MagicMock())
+        mock_storage_create.return_value = storage_ctx
+
+        result = build_common_service_ports(
+            CommonServicePortsRequest(
+                settings=MagicMock(),
+                logger=MagicMock(),
+                pipeline_config=MagicMock(),
+                pipeline_name="test_pipeline",
+                metrics=MagicMock(),
+                create_dq_services_fn=MagicMock(return_value={}),
+                create_lock_fn=MagicMock(return_value=MagicMock()),
+                create_checkpoint_fn=MagicMock(return_value=MagicMock()),
+                create_quarantine_fn=MagicMock(return_value=MagicMock()),
+            )
+        )
+
+        assert result.storage_ctx is storage_ctx
+        mock_storage_create.assert_called_once()
+
 
 @pytest.mark.unit
 class TestAssemblePipelineService:

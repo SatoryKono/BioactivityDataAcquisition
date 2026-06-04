@@ -4,12 +4,12 @@
   "source_artifacts": {
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "c651989d4e08b7c3672e6e244b9afe3c9b59ec075d9715b0a9b7c675af92ae20"
+      "source_fingerprint": "d3ca5c924e4853c77a966c3b4646bb83ff99c9fa807fef59b3793469da32f66c"
     },
     "module_coverage_inventory": {
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "da433567fb19f0e7c19d07ab4d63433f08b36f716046cbce353339b83af77124",
-      "coverage_xml_sha256": "5a53a231c1c7ffa68a423586f18a34ec65a727163923e7020739f52769fa161f"
+      "source_tree_sha256": "178c185704bb15561ee9ea1494178fa5f1e031f5038304b629ded7b5938f54c2",
+      "coverage_xml_sha256": "bc9ea3d10a043c180ecd55bc38ce03c3c2c08aadd13de353f0ae1968eb4f734e"
     },
     "compatibility_importer_census": {
       "path": "reports/quality/compatibility-importer-census.json",
@@ -60,7 +60,7 @@
       "score": 8.0,
       "weighted_score": 0.72,
       "evidence_metrics": {
-        "source_module_count": 2136,
+        "source_module_count": 2134,
         "uncovered_module_count": 108
       }
     },
@@ -82,7 +82,7 @@
       "score": 7.0,
       "weighted_score": 0.98,
       "evidence_metrics": {
-        "source_module_count": 2136,
+        "source_module_count": 2134,
         "hotspot_family_count": 5
       }
     },
@@ -104,7 +104,7 @@
       "score": 7.4,
       "weighted_score": 0.888,
       "evidence_metrics": {
-        "unmeasured_module_count": 57,
+        "unmeasured_module_count": 0,
         "uncovered_module_count": 108
       }
     },
@@ -144,8 +144,8 @@
   ],
   "metrics": {
     "layer_violations": 0,
-    "source_module_count": 2136,
-    "unmeasured_module_count": 57,
+    "source_module_count": 2134,
+    "unmeasured_module_count": 0,
     "uncovered_module_count": 108,
     "hotspot_family_count": 5,
     "retained_entrypoint_count": 14,

@@ -16,9 +16,6 @@ from bioetl.domain.ports import (
     QuarantinePort,
     SettingsPort,
 )
-from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
-from bioetl.infrastructure.locking.memory_lock import MemoryLock
-from bioetl.infrastructure.quarantine import UnifiedQuarantineAdapter
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.config.settings_api import Settings
@@ -41,6 +38,8 @@ class _StorageContextLike(Protocol):
 
 def create_lock() -> LockPort:
     """Create in-memory lock for local deployment."""
+    from bioetl.infrastructure.locking.memory_lock import MemoryLock
+
     lock = MemoryLock()
     assert isinstance(lock, LockPort), (
         f"MemoryLock must implement LockPort, got {type(lock)}"
@@ -50,6 +49,8 @@ def create_lock() -> LockPort:
 
 def create_checkpoint(storage_ctx: _StorageContextLike) -> CheckpointPort:
     """Create local filesystem checkpoint."""
+    from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
+
     checkpoint = LocalCheckpointAdapter(base_path=storage_ctx.checkpoints_path)
     assert isinstance(checkpoint, CheckpointPort), (
         f"LocalCheckpointAdapter must implement CheckpointPort, got {type(checkpoint)}"
@@ -59,6 +60,8 @@ def create_checkpoint(storage_ctx: _StorageContextLike) -> CheckpointPort:
 
 def create_quarantine(settings: SettingsPort) -> QuarantinePort:
     """Create unified quarantine storage."""
+    from bioetl.infrastructure.quarantine import UnifiedQuarantineAdapter
+
     quarantine = UnifiedQuarantineAdapter(base_path=str(settings.quarantine_path))
     assert isinstance(quarantine, QuarantinePort), (
         f"UnifiedQuarantineAdapter must implement QuarantinePort, got {type(quarantine)}"

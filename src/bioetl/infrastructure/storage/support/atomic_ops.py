@@ -16,8 +16,8 @@ from __future__ import annotations
 
 __all__ = [
     "ATOMIC_WRITE_EXCEPTIONS",
-    "AtomicWriteGroup",
     "AtomicWriteError",
+    "AtomicWriteGroup",
     "atomic_write",
     "atomic_write_bytes",
     "atomic_write_text",
@@ -29,13 +29,16 @@ import time
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import IO, Any
+from typing import IO, TYPE_CHECKING, Any
 
 from bioetl.domain.exceptions.infrastructure import InfrastructureError as _InfraBase
 from bioetl.infrastructure.storage.delta.resilience import (
     DEFAULT_ATOMIC_REPLACE_RETRY_POLICY,
     AdaptiveRetryPolicy,
 )
+
+if TYPE_CHECKING:
+    from bioetl.infrastructure.storage.support.atomic_group import AtomicWriteGroup
 
 
 class AtomicWriteError(_InfraBase):

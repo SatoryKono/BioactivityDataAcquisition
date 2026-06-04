@@ -6,18 +6,12 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.core.wiring.runtime import (
-    PipelineService,
-    PipelineStorageProtocol,
-)
-from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
 from bioetl.composition.factories.services.port_factories import (
     create_checkpoint,
     create_lock,
     create_metrics,
     create_quarantine,
 )
-from bioetl.composition.factories.storage import StorageContext, StorageFactory
 from bioetl.composition.observability_resolution import (
     resolve_tracing_port as _resolve_tracing_port,
 )
@@ -25,6 +19,13 @@ from bioetl.domain.ports.noop import NoOpAudit
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
+    from bioetl.application.core.wiring.runtime import (
+        PipelineService,
+        PipelineStorageProtocol,
+    )
+    from bioetl.application.services.lineage.metadata_coordinator import (
+        MetadataCoordinator,
+    )
     from bioetl.domain.ports import (
         AuditPort,
         CheckpointPort,
@@ -37,8 +38,22 @@ if TYPE_CHECKING:
         SilverValidatorPort,
         TracingPort,
     )
+    from bioetl.composition.factories.storage import StorageContext, StorageFactory
     from bioetl.infrastructure.config.settings_api import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+
+
+class _LazyStorageFactory:
+    """Patchable storage factory seam without importing storage at module load."""
+
+    @staticmethod
+    def create(*args: object, **kwargs: object) -> object:
+        from bioetl.composition.factories.storage import StorageFactory
+
+        return StorageFactory.create(*args, **kwargs)
+
+
+StorageFactory = _LazyStorageFactory
 
 
 def _create_metrics_from_settings(settings: Settings) -> MetricsPort:
@@ -84,7 +99,7 @@ class CommonServicePortsRequest:
     metadata_coordinator: MetadataCoordinator | None = None
     silver_validator: SilverValidatorPort | None = None
     create_metrics_fn: Callable[[Settings], MetricsPort] = _create_metrics_from_settings
-    storage_factory: type[StorageFactory] = StorageFactory
+    storage_factory: type[StorageFactory] | None = None
     create_lock_fn: Callable[[], LockPort] = create_lock
     create_checkpoint_fn: Callable[[StorageContext], CheckpointPort] = (
         _create_checkpoint_for_storage
@@ -109,7 +124,10 @@ def build_common_service_ports(
         else request.create_metrics_fn(request.settings)
     )
     audit_port = request.audit if request.audit is not None else NoOpAudit()
-    storage_ctx = request.storage_factory.create(
+    storage_factory = request.storage_factory
+    if storage_factory is None:
+        storage_factory = StorageFactory
+    storage_ctx = storage_factory.create(
         request.settings,
         request.pipeline_config,
         request.logger,
@@ -145,12 +163,13 @@ def assemble_pipeline_service(
     common_ports: CommonServicePorts,
 ) -> PipelineService:
     """Assemble ``PipelineService`` from pre-built common ports."""
+    from bioetl.application.core.wiring.runtime import PipelineService
     from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 
     metadata_writer = MetadataWriter(logger=logger)
     return PipelineService(
         data_source=data_source,
-        storage=cast(PipelineStorageProtocol, common_ports.storage_ctx.adapter),
+        storage=cast("PipelineStorageProtocol", common_ports.storage_ctx.adapter),
         lock=common_ports.lock,
         checkpoint=common_ports.checkpoint,
         quarantine=common_ports.quarantine,
