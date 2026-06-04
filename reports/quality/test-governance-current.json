@@ -130,21 +130,21 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "36",
+        "line": "38",
         "path": "tests/contract/schemas/test_pubchem_shard_validation.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_pubchem_stereo_shard_accepts_row_exercising_all_checks"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "40",
+        "line": "42",
         "path": "tests/contract/schemas/test_pubchem_shard_validation.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_pubchem_three_d_shard_accepts_row_exercising_all_checks"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "83",
+        "line": "85",
         "path": "tests/contract/schemas/test_pubchem_shard_validation.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_pubchem_molecule_schema_accepts_composed_minimal_row"
@@ -319,14 +319,14 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "480",
+        "line": "521",
         "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_stage_name_accepts_valid"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "499",
+        "line": "540",
         "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_stage_completion_running_allows_none_timestamp"
@@ -3606,9 +3606,9 @@
       "tests/contract/schemas/test_pubchem_shard_validation.py:24",
       "tests/contract/schemas/test_pubchem_shard_validation.py:28",
       "tests/contract/schemas/test_pubchem_shard_validation.py:32",
-      "tests/contract/schemas/test_pubchem_shard_validation.py:36",
-      "tests/contract/schemas/test_pubchem_shard_validation.py:40",
-      "tests/contract/schemas/test_pubchem_shard_validation.py:83",
+      "tests/contract/schemas/test_pubchem_shard_validation.py:38",
+      "tests/contract/schemas/test_pubchem_shard_validation.py:42",
+      "tests/contract/schemas/test_pubchem_shard_validation.py:85",
       "tests/contract/schemas/test_publication_common_schema.py:34",
       "tests/contract/schemas/test_uniprot_shard_validation.py:22",
       "tests/contract/schemas/test_uniprot_shard_validation.py:47",
@@ -3693,8 +3693,8 @@
     "refined_assertless_tests": 0,
     "root": ".",
     "top_duplicate_test_names": [],
-    "total_test_files": 1714,
-    "total_test_functions": 20201,
+    "total_test_files": 1715,
+    "total_test_functions": 20224,
     "uuid4_call_sites": 0
   }
 }

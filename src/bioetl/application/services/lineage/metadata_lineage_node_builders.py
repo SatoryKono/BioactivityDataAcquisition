@@ -39,6 +39,7 @@ def fragment_timestamp(*values: datetime | None) -> datetime:
             return value
     return current_utc_time()
 
+
 __all__ = [
     "bronze_batch_node_from_input",
     "bronze_batch_nodes_for_silver",

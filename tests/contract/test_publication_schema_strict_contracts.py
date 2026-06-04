@@ -27,7 +27,9 @@ def test_pubmed_silver_schema_rejects_invalid_pmid(
         PubMedPublicationSchema.validate(df)
 
 
-def _minimal_pubmed_gold_df(minimal_pubmed_publication_df: pd.DataFrame) -> pd.DataFrame:
+def _minimal_pubmed_gold_df(
+    minimal_pubmed_publication_df: pd.DataFrame,
+) -> pd.DataFrame:
     silver = minimal_pubmed_publication_df.iloc[0]
     row: dict[str, object] = {}
     for column_name, column in PubMedPublicationGoldSchema.to_schema().columns.items():

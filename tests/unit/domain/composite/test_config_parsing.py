@@ -124,12 +124,16 @@ class TestOptionalStr:
 
     def test_optional_str_empty_string_raises_value_error(self):
         """Empty string should raise ValueError."""
-        with pytest.raises(ValueError, match="must be a non-empty string when provided"):
+        with pytest.raises(
+            ValueError, match="must be a non-empty string when provided"
+        ):
             optional_str("", "test_field")
 
     def test_optional_str_non_string_raises_value_error(self):
         """Non-string value should raise ValueError."""
-        with pytest.raises(ValueError, match="must be a non-empty string when provided"):
+        with pytest.raises(
+            ValueError, match="must be a non-empty string when provided"
+        ):
             optional_str(123, "test_field")
 
 

@@ -828,7 +828,7 @@ def _expected_diagnostics_without_ledger(
                     "per_provider_result_maps",
                     "rich_checkpoint_payloads",
                 ],
-                "forensic_grade_supported": True,
+                "forensic_grade_supported": False,
             },
             "lineage_closure_boundary": _expected_lineage_closure_boundary(manifest),
         },

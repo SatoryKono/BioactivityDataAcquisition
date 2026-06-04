@@ -20,7 +20,11 @@ from bioetl.domain.aggregates.pipeline_run import (
     StageResult,
     StageStatus,
 )
-from bioetl.domain.aggregates.events import PipelineCompleted, PipelineFailed, PipelineShutdown
+from bioetl.domain.aggregates.events import (
+    PipelineCompleted,
+    PipelineFailed,
+    PipelineShutdown,
+)
 from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.types import RunID, RunType
 from tests.helpers.deterministic_ids import deterministic_uuid_value

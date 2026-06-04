@@ -13,7 +13,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters.base import BaseHttpAdapter
+from bioetl.infrastructure.adapters.base import (
+    BaseHttpAdapter,
+    build_json_accept_headers,
+    build_mailto_user_agent_headers,
+)
 from bioetl.infrastructure.adapters.common import HttpAdapterDependencyContext
 
 
@@ -258,6 +262,80 @@ class TestHealthCheckLogging:
         adapter._bind_fallback_fetch_service(fallback_service)
 
         assert adapter._fallback_fetch_service is fallback_service
+
+    def test_build_json_accept_headers_supports_optional_fields(self) -> None:
+        headers = build_json_accept_headers(
+            "agent/1.0",
+            correlation_id=123,
+            extra_headers={"X-Test": "yes"},
+        )
+
+        assert headers == {
+            "User-Agent": "agent/1.0",
+            "Accept": "application/json",
+            "X-Correlation-ID": "123",
+            "X-Test": "yes",
+        }
+
+    def test_build_mailto_user_agent_headers_uses_polite_pool_format(self) -> None:
+        headers = build_mailto_user_agent_headers("bioetl@example.org")
+
+        assert headers == {
+            "User-Agent": "BioETL/1.0 (mailto:bioetl@example.org)",
+            "Accept": "application/json",
+        }
+
+    def test_getattr_resolves_public_aliases_for_dataclass_style_runtime(self) -> None:
+        adapter = object.__new__(DataclassBootstrapStub)
+        http_client = MagicMock(name="http_client")
+        logger = MagicMock(name="logger")
+        adapter.__dict__.update(
+            {
+                "http_client": http_client,
+                "logger": logger,
+                "metrics": None,
+            }
+        )
+
+        assert adapter._http_client is http_client
+        assert adapter._logger is logger
+        assert adapter._metrics is None
+        assert adapter.__dict__["_http_client"] is http_client
+        assert adapter.__dict__["_logger"] is logger
+        assert "_metrics" in adapter.__dict__
+
+    def test_getattr_raises_for_unknown_private_alias(self) -> None:
+        adapter = object.__new__(DataclassBootstrapStub)
+        adapter.__dict__.update(
+            {
+                "http_client": MagicMock(),
+                "logger": MagicMock(),
+                "metrics": None,
+            }
+        )
+
+        with pytest.raises(AttributeError, match="missing_attr"):
+            _ = adapter.missing_attr
+
+    @pytest.mark.asyncio
+    async def test_async_context_methods_delegate_to_http_client(
+        self,
+        mock_http_client: MagicMock,
+        mock_logger: MagicMock,
+    ) -> None:
+        adapter = DataclassBootstrapStub(
+            http_client=mock_http_client,
+            logger=mock_logger,
+        )
+
+        entered = await adapter.__aenter__()
+        await adapter.__aexit__(RuntimeError, RuntimeError("boom"), None)
+        await adapter._close_http_client_context()
+        await adapter.aclose()
+
+        assert entered is adapter
+        mock_http_client.__aenter__.assert_awaited_once()
+        assert mock_http_client.__aexit__.await_count == 2
 
     async def test_health_check_logs_warning_on_exception(
         self,

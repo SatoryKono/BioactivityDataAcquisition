@@ -105,7 +105,9 @@ def _resolve_base_services_factory() -> object:
     local_factory = BaseServicesFactory
     if local_factory is not _DEFAULT_BASE_SERVICES_FACTORY:
         return local_factory
-    from bioetl.composition.factories.services import factory as _services_factory_module
+    from bioetl.composition.factories.services import (
+        factory as _services_factory_module,
+    )
 
     return _services_factory_module.BaseServicesFactory
 

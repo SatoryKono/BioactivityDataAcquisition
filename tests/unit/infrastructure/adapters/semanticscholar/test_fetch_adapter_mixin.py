@@ -133,7 +133,9 @@ async def test_batch_doi_phase_skips_nulls_and_stops_at_limit() -> None:
 
 
 @pytest.mark.asyncio
-async def test_fetch_filtered_with_fallback_passes_primary_fetcher_and_extractor() -> None:
+async def test_fetch_filtered_with_fallback_passes_primary_fetcher_and_extractor() -> (
+    None
+):
     adapter = _SemanticScholarAdapter()
 
     async def _primary_batch(valid_dois, resolved_dois, limit, start_count):
@@ -155,14 +157,18 @@ async def test_fetch_filtered_with_fallback_passes_primary_fetcher_and_extractor
 
     assert rows == [{"id": "fallback"}]
     call = adapter._fallback_decorator.calls[0]
-    primary_rows = await collect_async_iterator(call["primary_record_fetcher"](["10.1/A"], 1))
+    primary_rows = await collect_async_iterator(
+        call["primary_record_fetcher"](["10.1/A"], 1)
+    )
     assert primary_rows == [{"_resolved_doi": "10.1/A", "paperId": "10.1/A"}]
     extracted = call["extract_record_id"]({"_resolved_doi": " 10.1/A "})
     assert extracted == "10.1/a"
 
 
 @pytest.mark.asyncio
-async def test_fetch_adapter_mixin__fetch_multi_filtered__raises_not_implemented() -> None:
+async def test_fetch_adapter_mixin__fetch_multi_filtered__raises_not_implemented() -> (
+    None
+):
     adapter = _SemanticScholarAdapter()
     with pytest.raises(NotImplementedError):
         await anext(adapter.fetch_multi_filtered("publication", {"doi": ["10.1/A"]}))

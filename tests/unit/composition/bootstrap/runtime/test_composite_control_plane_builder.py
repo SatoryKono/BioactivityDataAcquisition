@@ -570,8 +570,7 @@ def test_build_composite_control_plane_bundle_persists_manifest_created_when_led
         == "snapshot_backed_source_runs_only"
     )
     assert (
-        manifest.launch_context["composite_replay_semantics"]
-        == "rebuild_resume_only"
+        manifest.launch_context["composite_replay_semantics"] == "rebuild_resume_only"
     )
 
 

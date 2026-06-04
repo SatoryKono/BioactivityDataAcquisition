@@ -322,9 +322,7 @@ def test_iter_text_files_with_git_ls_files_filters_text_suffixes(
         assert timeout == inventory._TEXT_DISCOVERY_TIMEOUT_SECONDS
         if command == tracked_command:
             stdout = (
-                "src/bioetl/example.py\n"
-                "src/bioetl/notes.txt\n"
-                "src/bioetl/config.yaml\n"
+                "src/bioetl/example.py\nsrc/bioetl/notes.txt\nsrc/bioetl/config.yaml\n"
             )
         elif command == untracked_command:
             stdout = "src/bioetl/untracked.py\nsrc/bioetl/scratch.txt\n"

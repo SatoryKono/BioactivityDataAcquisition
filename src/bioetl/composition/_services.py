@@ -93,6 +93,7 @@ _BOOTSTRAP_EXPORT_MODULES: dict[str, str] = {
     "bootstrap_vacuum_service": _BOOTSTRAP_STORAGE_EXPORT_MODULE,
 }
 
+
 def resolve_bootstrap_attr(name: str) -> object:
     """Resolve one public bootstrap export lazily without invoking it."""
     module_name = _BOOTSTRAP_EXPORT_MODULES.get(name)
@@ -144,11 +145,7 @@ def get_audit_service() -> AuditInspectionService:
 
 
 def get_quarantine_service() -> QuarantineService:
-    """Get quarantine administration service.
-
-    Quarantine admin/explorer operations read shared storage directly and do not
-    require provider or pipeline registration before bootstrap.
-    """
+    """Get quarantine administration service without pipeline registration."""
     return cast("QuarantineService", _invoke_bootstrap("bootstrap_quarantine_service"))
 
 
@@ -318,11 +315,7 @@ def get_observability_workflow_service() -> ObservabilityWorkflowService:
 
 
 def get_health_server_dependencies() -> HealthServerDependenciesProtocol:
-    """Get dependencies for the health server.
-
-    Health listener startup must stay independent from pipeline registration so
-    the server can bind quickly even when registration is slow or broken.
-    """
+    """Get health-server dependencies without pipeline registration."""
     return cast(
         "HealthServerDependenciesProtocol",
         _invoke_bootstrap("bootstrap_health_server_dependencies"),
@@ -342,9 +335,5 @@ def get_adr_service() -> object:
 
 
 def get_quarantine_port() -> QuarantinePort:
-    """Get the shared low-level quarantine port.
-
-    The shared quarantine table is configuration-backed and does not depend on
-    runtime pipeline registration.
-    """
+    """Get the shared low-level quarantine port without pipeline registration."""
     return cast("QuarantinePort", _invoke_bootstrap("bootstrap_quarantine_adapter"))

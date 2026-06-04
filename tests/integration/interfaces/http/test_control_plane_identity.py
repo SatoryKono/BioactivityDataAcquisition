@@ -316,7 +316,9 @@ class TestIdentityContractTests:
 
         anchor_names = [spec.anchor_name for spec in P0_ANCHOR_SPECS]
         for required_anchor in required_anchors:
-            assert required_anchor in anchor_names, f"Missing required anchor: {required_anchor}"
+            assert required_anchor in anchor_names, (
+                f"Missing required anchor: {required_anchor}"
+            )
 
     def test_implementation_status_tracking(self) -> None:
         """Test implementation status tracking for anchor specs."""
@@ -328,8 +330,9 @@ class TestIdentityContractTests:
         valid_statuses = ["SHIPPED", "DEGRADED", "FAILING", "PLANNED"]
 
         for spec in P0_ANCHOR_SPECS:
-            assert spec.implementation_status in valid_statuses, \
+            assert spec.implementation_status in valid_statuses, (
                 f"Invalid implementation status for {spec.anchor_name}: {spec.implementation_status}"
+            )
 
     def test_anchor_spec_mutability(self) -> None:
         """Test anchor specs are immutable (frozen)."""

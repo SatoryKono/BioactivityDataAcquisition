@@ -49,7 +49,7 @@ repo_wide_zero_import_classification:
     review_by: '2026-08-31'
     linked_issue: '#5037'
     rationale: Registry module remains a reviewed public facade while explicit-registry
-      runtime hot-path narrowing is completed under issue #5037.
+      runtime hot-path narrowing is completed under issue
   - module_path: src/bioetl/domain/ports/data_normalization.py
     module_name: bioetl.domain.ports.data_normalization
     disposition: retain_canonical_owner_module
@@ -138,14 +138,6 @@ repo_wide_zero_import_classification:
     linked_issue: '#4541'
     rationale: Resilience port definitions remain canonical domain protocol owners
       even when consumers import them through package-root exports.
-  - module_path: src/bioetl/interfaces/cli/commands/maintenance.py
-    module_name: bioetl.interfaces.cli.commands.maintenance
-    disposition: retain_public_facade
-    reviewed_on: '2026-06-04'
-    review_by: '2026-08-31'
-    linked_issue: '#4541'
-    rationale: CLI maintenance commands are public facades for operational tasks
-      and may be invoked directly by operators through the CLI interface.
 families:
 - name: adapter_layer
   owner: '@bioetl-platform'

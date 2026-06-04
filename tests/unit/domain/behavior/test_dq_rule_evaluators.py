@@ -177,7 +177,9 @@ def test_target_organism_custom_rule_accepts_classifiable_non_binomial_names() -
     )
 
 
-def test_target_organism_custom_rule_accepts_supported_chembl_target_organisms() -> None:
+def test_target_organism_custom_rule_accepts_supported_chembl_target_organisms() -> (
+    None
+):
     rule = FieldValidation(
         field="organism",
         validation_type="custom",

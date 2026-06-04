@@ -159,8 +159,10 @@ def test_build_pipeline_runner_keeps_snapshot_backed_execution_identity_stable_a
                             business_primary_keys=["activity_id"],
                             technical_primary_key="entity_id",
                         ),
-                        build_observability_bundle_fn=lambda **_: _namespace_observability(
-                            SimpleNamespace(info=lambda *_, **__: None),
+                        build_observability_bundle_fn=lambda **_: (
+                            _namespace_observability(
+                                SimpleNamespace(info=lambda *_, **__: None),
+                            )
                         ),
                         assemble_vacuum_settings_fn=lambda **_: "vacuum",
                         assemble_runtime_config_fn=lambda **_: SimpleNamespace(

@@ -125,10 +125,7 @@ class TestControlPlaneFileStores:
 
         async def test_concurrent_writes() -> None:
             # Run multiple concurrent writes
-            tasks = [
-                write_file(test_file, f"content-{i}")
-                for i in range(5)
-            ]
+            tasks = [write_file(test_file, f"content-{i}") for i in range(5)]
             await asyncio.gather(*tasks)
 
             # Verify final content is one of the writes

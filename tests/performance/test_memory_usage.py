@@ -40,22 +40,24 @@ def test_memory_usage_dataframe_creation(memory_tracker: dict[str, int]) -> None
 
     for size in sizes:
         gc.collect()  # Force garbage collection before measurement
-        
+
         data = {
             "id": list(range(size)),
             "value": [float(i) for i in range(size)],
             "name": [f"item_{i}" for i in range(size)],
         }
-        
+
         df = pl.DataFrame(data)
-        
+
         current, peak = tracemalloc.get_traced_memory()
-        memory_snapshots.append({
-            "size": size,
-            "current_mb": current / 1024 / 1024,
-            "peak_mb": peak / 1024 / 1024,
-        })
-        
+        memory_snapshots.append(
+            {
+                "size": size,
+                "current_mb": current / 1024 / 1024,
+                "peak_mb": peak / 1024 / 1024,
+            }
+        )
+
         del df
         gc.collect()
 
@@ -63,18 +65,22 @@ def test_memory_usage_dataframe_creation(memory_tracker: dict[str, int]) -> None
     # Allow 2x tolerance for overhead
     ratio_100_1000 = memory_snapshots[1]["peak_mb"] / memory_snapshots[0]["peak_mb"]
     ratio_1000_10000 = memory_snapshots[2]["peak_mb"] / memory_snapshots[1]["peak_mb"]
-    
-    assert ratio_100_1000 < 20, f"Memory usage scaling 100->1000: {ratio_100_1000:.2f}x (expected ~10x)"
-    assert ratio_1000_10000 < 20, f"Memory usage scaling 1000->10000: {ratio_1000_10000:.2f}x (expected ~10x)"
+
+    assert ratio_100_1000 < 20, (
+        f"Memory usage scaling 100->1000: {ratio_100_1000:.2f}x (expected ~10x)"
+    )
+    assert ratio_1000_10000 < 20, (
+        f"Memory usage scaling 1000->10000: {ratio_1000_10000:.2f}x (expected ~10x)"
+    )
 
 
 def test_memory_usage_no_leak_in_repeated_operations() -> None:
     """Test that repeated operations don't leak memory."""
     tracemalloc.start()
     gc.collect()
-    
+
     initial_current, initial_peak = tracemalloc.get_traced_memory()
-    
+
     # Perform operation 100 times
     for i in range(100):
         data = {
@@ -82,32 +88,36 @@ def test_memory_usage_no_leak_in_repeated_operations() -> None:
             "value": [float(j) for j in range(100)],
         }
         df = pl.DataFrame(data)
-        
+
         # Do some operation
         result = df.filter(pl.col("value") > 50)
-        
+
         del df, result
         gc.collect()
-    
+
     final_current, final_peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
-    
+
     # Memory should not grow significantly (allow 10x tolerance for overhead)
     current_growth = (final_current - initial_current) / 1024 / 1024
     peak_growth = (final_peak - initial_peak) / 1024 / 1024
-    
-    assert current_growth < 50, f"Current memory grew by {current_growth:.2f} MB (possible leak)"
-    assert peak_growth < 100, f"Peak memory grew by {peak_growth:.2f} MB (possible leak)"
+
+    assert current_growth < 50, (
+        f"Current memory grew by {current_growth:.2f} MB (possible leak)"
+    )
+    assert peak_growth < 100, (
+        f"Peak memory grew by {peak_growth:.2f} MB (possible leak)"
+    )
 
 
 def test_process_memory_limits() -> None:
     """Test that process memory usage is within reasonable limits."""
     process = psutil.Process()
-    
+
     # Get memory info
     memory_info = process.memory_info()
     rss_mb = memory_info.rss / 1024 / 1024  # Resident Set Size in MB
-    
+
     # Process should use less than 2GB for idle state
     # This is a sanity check - adjust based on actual requirements
     assert rss_mb < 2048, f"Process using too much memory: {rss_mb:.2f} MB"
@@ -118,9 +128,9 @@ def test_memory_usage_per_batch(batch_size: int) -> None:
     """Test memory usage per batch operation."""
     tracemalloc.start()
     gc.collect()
-    
+
     initial_current, initial_peak = tracemalloc.get_traced_memory()
-    
+
     # Create batch
     data = {
         "id": list(range(batch_size)),
@@ -128,18 +138,20 @@ def test_memory_usage_per_batch(batch_size: int) -> None:
         "text": [f"text_{i}" * 10 for i in range(batch_size)],
     }
     df = pl.DataFrame(data)
-    
+
     # Perform typical operations
     filtered = df.filter(pl.col("value") > batch_size / 2)
     grouped = filtered.group_by("id").agg(pl.col("value").mean())
-    
+
     final_current, final_peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
-    
+
     memory_per_record_mb = (final_peak - initial_peak) / batch_size / 1024 / 1024
-    
+
     # Should use less than 1KB per record (adjust based on actual data)
-    assert memory_per_record_mb < 0.001, f"Memory per record too high: {memory_per_record_mb * 1024:.2f} KB"
-    
+    assert memory_per_record_mb < 0.001, (
+        f"Memory per record too high: {memory_per_record_mb * 1024:.2f} KB"
+    )
+
     del df, filtered, grouped
     gc.collect()

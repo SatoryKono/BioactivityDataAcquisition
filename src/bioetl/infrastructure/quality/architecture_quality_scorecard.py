@@ -90,12 +90,16 @@ _CATEGORY_BASELINES: tuple[dict[str, object], ...] = (
 )
 
 
-def _load_json(repo_root: Path, rel_path: str) -> dict[str, Any]:  # Any: JSON can have any value type
+def _load_json(
+    repo_root: Path, rel_path: str
+) -> dict[str, Any]:  # Any: JSON can have any value type
     path = repo_root / rel_path
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def _load_yaml(repo_root: Path, rel_path: str) -> dict[str, Any]:  # Any: YAML can have any value type
+def _load_yaml(
+    repo_root: Path, rel_path: str
+) -> dict[str, Any]:  # Any: YAML can have any value type
     path = repo_root / rel_path
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))
     return payload if isinstance(payload, dict) else {}
@@ -173,9 +177,7 @@ def _build_source_artifacts(
     return {
         "dependency_map": {
             "path": "docs/02-architecture/generated/module-dependency-map.json",
-            "source_fingerprint": dependency_map["summary"].get(
-                "source_fingerprint"
-            ),
+            "source_fingerprint": dependency_map["summary"].get("source_fingerprint"),
         },
         "module_coverage_inventory": {
             "path": "reports/quality/module-coverage-inventory.json",

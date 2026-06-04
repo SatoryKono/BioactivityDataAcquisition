@@ -100,9 +100,18 @@ class TestAggregationFunction:
 
     def test_merge_lineage_aggregation_function_from_string_valid(self):
         """from_string should parse valid aggregation function strings."""
-        assert AggregationFunction.from_string("collect_list") == AggregationFunction.COLLECT_LIST
-        assert AggregationFunction.from_string("COLLECT_LIST") == AggregationFunction.COLLECT_LIST
-        assert AggregationFunction.from_string("Collect_List") == AggregationFunction.COLLECT_LIST
+        assert (
+            AggregationFunction.from_string("collect_list")
+            == AggregationFunction.COLLECT_LIST
+        )
+        assert (
+            AggregationFunction.from_string("COLLECT_LIST")
+            == AggregationFunction.COLLECT_LIST
+        )
+        assert (
+            AggregationFunction.from_string("Collect_List")
+            == AggregationFunction.COLLECT_LIST
+        )
 
     def test_merge_lineage_aggregation_function_from_string_invalid(self):
         """from_string should raise ValueError for invalid strings."""
@@ -128,8 +137,14 @@ class TestEnricherCardinality:
 
     def test_merge_lineage_enricher_cardinality_from_string_valid(self):
         """from_string should parse valid cardinality strings."""
-        assert EnricherCardinality.from_string("one_to_one") == EnricherCardinality.ONE_TO_ONE
-        assert EnricherCardinality.from_string("MANY_TO_ONE") == EnricherCardinality.MANY_TO_ONE
+        assert (
+            EnricherCardinality.from_string("one_to_one")
+            == EnricherCardinality.ONE_TO_ONE
+        )
+        assert (
+            EnricherCardinality.from_string("MANY_TO_ONE")
+            == EnricherCardinality.MANY_TO_ONE
+        )
 
     def test_merge_lineage_enricher_cardinality_from_string_invalid(self):
         """from_string should raise ValueError for invalid strings."""
@@ -175,7 +190,9 @@ class TestAggregationFieldSpec:
 
     def test_field_spec_validates_source_field(self):
         """AggregationFieldSpec should validate non-empty source_field."""
-        with pytest.raises(ValueError, match="aggregation source_field cannot be empty"):
+        with pytest.raises(
+            ValueError, match="aggregation source_field cannot be empty"
+        ):
             AggregationFieldSpec(
                 source_field="",
                 agg_function=AggregationFunction.COLLECT_LIST,
@@ -356,7 +373,10 @@ class TestConflictResolution:
 
     def test_merge_lineage_conflict_resolution_from_string_valid(self):
         """from_string should parse valid conflict resolution strings."""
-        assert ConflictResolution.from_string("seed_priority") == ConflictResolution.SEED_PRIORITY
+        assert (
+            ConflictResolution.from_string("seed_priority")
+            == ConflictResolution.SEED_PRIORITY
+        )
         assert ConflictResolution.from_string("COALESCE") == ConflictResolution.COALESCE
 
     def test_merge_lineage_conflict_resolution_from_string_invalid(self):
@@ -477,7 +497,13 @@ class TestCompositeResult:
             composite_name="test_composite",
             composite_run_id="run-123",
             seed_result=seed_result,
-            dependency_results={"dep1": DependencyResult(pipeline_name="dep1", status=DependencyStatus.SUCCESS, records_silver=50)},
+            dependency_results={
+                "dep1": DependencyResult(
+                    pipeline_name="dep1",
+                    status=DependencyStatus.SUCCESS,
+                    records_silver=50,
+                )
+            },
             merge_result=merge_result,
             total_duration_seconds=100.0,
             started_at=datetime(2024, 1, 1, tzinfo=UTC),
@@ -485,7 +511,11 @@ class TestCompositeResult:
             _required_dependencies=frozenset(["dep1"]),
         )
 
-        assert result.dependency_results == {"dep1": DependencyResult(pipeline_name="dep1", status=DependencyStatus.SUCCESS, records_silver=50)}
+        assert result.dependency_results == {
+            "dep1": DependencyResult(
+                pipeline_name="dep1", status=DependencyStatus.SUCCESS, records_silver=50
+            )
+        }
         assert result.total_duration_seconds == 100.0
 
     def test_is_success_true_when_all_conditions_met(self, seed_result, merge_result):
@@ -543,7 +573,11 @@ class TestCompositeResult:
             composite_run_id="run-123",
             seed_result=seed_result,
             dependency_results={
-                "dep1": DependencyResult(pipeline_name="dep1", status=DependencyStatus.SUCCESS, records_silver=50),
+                "dep1": DependencyResult(
+                    pipeline_name="dep1",
+                    status=DependencyStatus.SUCCESS,
+                    records_silver=50,
+                ),
             },
             _required_dependencies=frozenset(["dep1"]),
         )
@@ -569,7 +603,11 @@ class TestCompositeResult:
             composite_run_id="run-123",
             seed_result=seed_result,
             dependency_results={
-                "dep1": DependencyResult(pipeline_name="dep1", status=DependencyStatus.FAILED, records_silver=0),
+                "dep1": DependencyResult(
+                    pipeline_name="dep1",
+                    status=DependencyStatus.FAILED,
+                    records_silver=0,
+                ),
             },
             _required_dependencies=frozenset(["dep1"]),
         )
@@ -578,14 +616,21 @@ class TestCompositeResult:
 
     def test_required_enrichers_succeeded_true(self, seed_result):
         """required_enrichers_succeeded should return True when all required enrichers succeeded."""
-        from bioetl.domain.composite.result_enrichment import EnrichmentResult, EnrichmentStatus
+        from bioetl.domain.composite.result_enrichment import (
+            EnrichmentResult,
+            EnrichmentStatus,
+        )
 
         result = CompositeResult(
             composite_name="test_composite",
             composite_run_id="run-123",
             seed_result=seed_result,
             enrichment_results={
-                "enr1": EnrichmentResult(enricher_name="enr1", status=EnrichmentStatus.SUCCESS, records_enriched=50),
+                "enr1": EnrichmentResult(
+                    enricher_name="enr1",
+                    status=EnrichmentStatus.SUCCESS,
+                    records_enriched=50,
+                ),
             },
             _required_enrichers=frozenset(["enr1"]),
         )
@@ -611,8 +656,16 @@ class TestCompositeResult:
             composite_run_id="run-123",
             seed_result=seed_result,
             dependency_results={
-                "dep1": DependencyResult(pipeline_name="dep1", status=DependencyStatus.SUCCESS, records_silver=50),
-                "dep2": DependencyResult(pipeline_name="dep2", status=DependencyStatus.FAILED, records_silver=0),
+                "dep1": DependencyResult(
+                    pipeline_name="dep1",
+                    status=DependencyStatus.SUCCESS,
+                    records_silver=50,
+                ),
+                "dep2": DependencyResult(
+                    pipeline_name="dep2",
+                    status=DependencyStatus.FAILED,
+                    records_silver=0,
+                ),
             },
         )
 
@@ -625,8 +678,16 @@ class TestCompositeResult:
             composite_run_id="run-123",
             seed_result=seed_result,
             dependency_results={
-                "dep1": DependencyResult(pipeline_name="dep1", status=DependencyStatus.SUCCESS, records_silver=50),
-                "dep2": DependencyResult(pipeline_name="dep2", status=DependencyStatus.FAILED, records_silver=0),
+                "dep1": DependencyResult(
+                    pipeline_name="dep1",
+                    status=DependencyStatus.SUCCESS,
+                    records_silver=50,
+                ),
+                "dep2": DependencyResult(
+                    pipeline_name="dep2",
+                    status=DependencyStatus.FAILED,
+                    records_silver=0,
+                ),
             },
         )
 
@@ -634,15 +695,26 @@ class TestCompositeResult:
 
     def test_merge_lineage_successful_enrichers(self, seed_result):
         """successful_enrichers should return list of successful enrichers."""
-        from bioetl.domain.composite.result_enrichment import EnrichmentResult, EnrichmentStatus
+        from bioetl.domain.composite.result_enrichment import (
+            EnrichmentResult,
+            EnrichmentStatus,
+        )
 
         result = CompositeResult(
             composite_name="test_composite",
             composite_run_id="run-123",
             seed_result=seed_result,
             enrichment_results={
-                "enr1": EnrichmentResult(enricher_name="enr1", status=EnrichmentStatus.SUCCESS, records_enriched=50),
-                "enr2": EnrichmentResult(enricher_name="enr2", status=EnrichmentStatus.FAILED, records_enriched=0),
+                "enr1": EnrichmentResult(
+                    enricher_name="enr1",
+                    status=EnrichmentStatus.SUCCESS,
+                    records_enriched=50,
+                ),
+                "enr2": EnrichmentResult(
+                    enricher_name="enr2",
+                    status=EnrichmentStatus.FAILED,
+                    records_enriched=0,
+                ),
             },
         )
 
@@ -650,15 +722,26 @@ class TestCompositeResult:
 
     def test_merge_lineage_failed_enrichers(self, seed_result):
         """failed_enrichers should return list of failed enrichers."""
-        from bioetl.domain.composite.result_enrichment import EnrichmentResult, EnrichmentStatus
+        from bioetl.domain.composite.result_enrichment import (
+            EnrichmentResult,
+            EnrichmentStatus,
+        )
 
         result = CompositeResult(
             composite_name="test_composite",
             composite_run_id="run-123",
             seed_result=seed_result,
             enrichment_results={
-                "enr1": EnrichmentResult(enricher_name="enr1", status=EnrichmentStatus.SUCCESS, records_enriched=50),
-                "enr2": EnrichmentResult(enricher_name="enr2", status=EnrichmentStatus.FAILED, records_enriched=0),
+                "enr1": EnrichmentResult(
+                    enricher_name="enr1",
+                    status=EnrichmentStatus.SUCCESS,
+                    records_enriched=50,
+                ),
+                "enr2": EnrichmentResult(
+                    enricher_name="enr2",
+                    status=EnrichmentStatus.FAILED,
+                    records_enriched=0,
+                ),
             },
         )
 
@@ -666,15 +749,26 @@ class TestCompositeResult:
 
     def test_merge_lineage_skipped_enrichers(self, seed_result):
         """skipped_enrichers should return list of skipped enrichers."""
-        from bioetl.domain.composite.result_enrichment import EnrichmentResult, EnrichmentStatus
+        from bioetl.domain.composite.result_enrichment import (
+            EnrichmentResult,
+            EnrichmentStatus,
+        )
 
         result = CompositeResult(
             composite_name="test_composite",
             composite_run_id="run-123",
             seed_result=seed_result,
             enrichment_results={
-                "enr1": EnrichmentResult(enricher_name="enr1", status=EnrichmentStatus.SUCCESS, records_enriched=50),
-                "enr2": EnrichmentResult(enricher_name="enr2", status=EnrichmentStatus.SKIPPED, records_enriched=0),
+                "enr1": EnrichmentResult(
+                    enricher_name="enr1",
+                    status=EnrichmentStatus.SUCCESS,
+                    records_enriched=50,
+                ),
+                "enr2": EnrichmentResult(
+                    enricher_name="enr2",
+                    status=EnrichmentStatus.SKIPPED,
+                    records_enriched=0,
+                ),
             },
         )
 
@@ -682,15 +776,26 @@ class TestCompositeResult:
 
     def test_merge_lineage_not_run_enrichers(self, seed_result):
         """not_run_enrichers should return list of not-run enrichers."""
-        from bioetl.domain.composite.result_enrichment import EnrichmentResult, EnrichmentStatus
+        from bioetl.domain.composite.result_enrichment import (
+            EnrichmentResult,
+            EnrichmentStatus,
+        )
 
         result = CompositeResult(
             composite_name="test_composite",
             composite_run_id="run-123",
             seed_result=seed_result,
             enrichment_results={
-                "enr1": EnrichmentResult(enricher_name="enr1", status=EnrichmentStatus.SUCCESS, records_enriched=50),
-                "enr2": EnrichmentResult(enricher_name="enr2", status=EnrichmentStatus.NOT_RUN, records_enriched=0),
+                "enr1": EnrichmentResult(
+                    enricher_name="enr1",
+                    status=EnrichmentStatus.SUCCESS,
+                    records_enriched=50,
+                ),
+                "enr2": EnrichmentResult(
+                    enricher_name="enr2",
+                    status=EnrichmentStatus.NOT_RUN,
+                    records_enriched=0,
+                ),
             },
         )
 
@@ -698,15 +803,26 @@ class TestCompositeResult:
 
     def test_merge_lineage_optional_failed_enrichers(self, seed_result):
         """optional_failed_enrichers should return list of failed optional enrichers."""
-        from bioetl.domain.composite.result_enrichment import EnrichmentResult, EnrichmentStatus
+        from bioetl.domain.composite.result_enrichment import (
+            EnrichmentResult,
+            EnrichmentStatus,
+        )
 
         result = CompositeResult(
             composite_name="test_composite",
             composite_run_id="run-123",
             seed_result=seed_result,
             enrichment_results={
-                "enr1": EnrichmentResult(enricher_name="enr1", status=EnrichmentStatus.FAILED, records_enriched=0),
-                "enr2": EnrichmentResult(enricher_name="enr2", status=EnrichmentStatus.FAILED, records_enriched=0),
+                "enr1": EnrichmentResult(
+                    enricher_name="enr1",
+                    status=EnrichmentStatus.FAILED,
+                    records_enriched=0,
+                ),
+                "enr2": EnrichmentResult(
+                    enricher_name="enr2",
+                    status=EnrichmentStatus.FAILED,
+                    records_enriched=0,
+                ),
             },
             _required_enrichers=frozenset(["enr1"]),
         )
@@ -715,15 +831,26 @@ class TestCompositeResult:
 
     def test_total_records_enriched(self, seed_result):
         """total_records_enriched should sum records across all enrichers."""
-        from bioetl.domain.composite.result_enrichment import EnrichmentResult, EnrichmentStatus
+        from bioetl.domain.composite.result_enrichment import (
+            EnrichmentResult,
+            EnrichmentStatus,
+        )
 
         result = CompositeResult(
             composite_name="test_composite",
             composite_run_id="run-123",
             seed_result=seed_result,
             enrichment_results={
-                "enr1": EnrichmentResult(enricher_name="enr1", status=EnrichmentStatus.SUCCESS, records_enriched=50),
-                "enr2": EnrichmentResult(enricher_name="enr2", status=EnrichmentStatus.SUCCESS, records_enriched=30),
+                "enr1": EnrichmentResult(
+                    enricher_name="enr1",
+                    status=EnrichmentStatus.SUCCESS,
+                    records_enriched=50,
+                ),
+                "enr2": EnrichmentResult(
+                    enricher_name="enr2",
+                    status=EnrichmentStatus.SUCCESS,
+                    records_enriched=30,
+                ),
             },
         )
 

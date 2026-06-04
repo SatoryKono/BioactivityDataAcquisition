@@ -26,7 +26,9 @@ def _ts(minutes: int = 0, seconds: int = 0) -> datetime:
 
 
 def _run(run_id: RunID) -> PipelineRun:
-    return PipelineRun(run_id=run_id, run_type=RunType.INCREMENTAL, pipeline_name="test_pipeline")
+    return PipelineRun(
+        run_id=run_id, run_type=RunType.INCREMENTAL, pipeline_name="test_pipeline"
+    )
 
 
 def _run_id() -> RunID:

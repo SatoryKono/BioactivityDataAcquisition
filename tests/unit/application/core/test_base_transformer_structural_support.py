@@ -8,6 +8,7 @@ import pytest
 
 # Import the module to ensure it's covered
 from bioetl.application.core import _base_transformer_structural_support  # noqa: F401
+
 pytestmark = pytest.mark.unit
 
 from bioetl.application.core._base_transformer_structural_support import (

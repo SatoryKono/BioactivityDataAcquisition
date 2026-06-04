@@ -81,7 +81,9 @@ class DebugExportTransformRowsMixin:
             )
         )
         if gold_record is not None:
-            self._record_gold_success(raw_payload, record_index, gold_record, created_at)
+            self._record_gold_success(
+                raw_payload, record_index, gold_record, created_at
+            )
         elif gold_excluded_by_contract:
             self._record_gold_contract_exclusion(
                 raw_payload,
@@ -127,10 +129,12 @@ class DebugExportTransformRowsMixin:
         created_at: datetime,
     ) -> None:
         detail_mapping = _extract_rejection_details_mapping(gold_filter_details)
-        failed_field, failed_value, expected_constraint = _extract_rejection_diagnostics(
-            record=silver_payload,
-            details=gold_filter_details,
-            message="Gold semantic filter excluded the record.",
+        failed_field, failed_value, expected_constraint = (
+            _extract_rejection_diagnostics(
+                record=silver_payload,
+                details=gold_filter_details,
+                message="Gold semantic filter excluded the record.",
+            )
         )
         self._gold_rejected_rows.append(
             _base_row(
@@ -171,10 +175,12 @@ class DebugExportTransformRowsMixin:
         )
         reason_message = details or f"{error_type.value if error_type else 'Unknown'}"
         raw_payload = _record_payload(raw_record)
-        failed_field, failed_value, expected_constraint = _extract_rejection_diagnostics(
-            record=raw_payload,
-            details=details_payload,
-            message=details,
+        failed_field, failed_value, expected_constraint = (
+            _extract_rejection_diagnostics(
+                record=raw_payload,
+                details=details_payload,
+                message=details,
+            )
         )
         target_rows = (
             self._silver_quarantine_rows

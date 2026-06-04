@@ -79,7 +79,6 @@ from bioetl.application.services.lineage.metadata_output_support import (
 )
 
 if TYPE_CHECKING:
-
     from bioetl.domain.models.metadata import BaseOutputMetadata, CompositeOutputExt
     from bioetl.domain.ports import GoldMetadataInput
     from bioetl.domain.value_objects.run_context import RunContext

@@ -38,23 +38,32 @@ def _find_dataclass_definitions(file_path: Path) -> list[dict[str, object]]:
                     if decorator.id == "dataclass":
                         is_dataclass = True
                 elif isinstance(decorator, ast.Call):
-                    if isinstance(decorator.func, ast.Name) and decorator.func.id == "dataclass":
+                    if (
+                        isinstance(decorator.func, ast.Name)
+                        and decorator.func.id == "dataclass"
+                    ):
                         is_dataclass = True
                         # Check for frozen=True argument
                         for keyword in decorator.keywords:
-                            if keyword.arg == "frozen" and isinstance(keyword.value, ast.Constant):
+                            if keyword.arg == "frozen" and isinstance(
+                                keyword.value, ast.Constant
+                            ):
                                 is_frozen = keyword.value.value is True
 
             # Check if class name contains both "quarantine" and "payload" (case-insensitive)
             class_name_lower = node.name.lower()
-            has_quarantine_payload = "quarantine" in class_name_lower and "payload" in class_name_lower
+            has_quarantine_payload = (
+                "quarantine" in class_name_lower and "payload" in class_name_lower
+            )
 
             if is_dataclass and has_quarantine_payload:
-                dataclasses.append({
-                    "name": node.name,
-                    "file": file_path,
-                    "is_frozen": is_frozen,
-                })
+                dataclasses.append(
+                    {
+                        "name": node.name,
+                        "file": file_path,
+                        "is_frozen": is_frozen,
+                    }
+                )
 
     return dataclasses
 
@@ -68,9 +77,7 @@ def test_quarantine_payload_dataclasses_are_frozen() -> None:
         dataclasses = _find_dataclass_definitions(py_file)
         for dc in dataclasses:
             if not dc["is_frozen"]:
-                non_frozen_quarantine_payloads.append(
-                    f"{dc['file']}:{dc['name']}"
-                )
+                non_frozen_quarantine_payloads.append(f"{dc['file']}:{dc['name']}")
 
     if non_frozen_quarantine_payloads:
         pytest.fail(

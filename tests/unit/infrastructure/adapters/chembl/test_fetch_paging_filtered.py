@@ -65,7 +65,9 @@ class _PagingFilteredAdapter(_ChemblFetchPagingFilteredMixin):
         params: dict[str, object],
         entity_type: str,
     ) -> tuple[list[dict[str, object]], bool]:
-        self.fetch_calls.append({"url": url, "params": params.copy(), "entity_type": entity_type})
+        self.fetch_calls.append(
+            {"url": url, "params": params.copy(), "entity_type": entity_type}
+        )
         return self.page_responses.pop(0)
 
 
@@ -85,7 +87,9 @@ def test_yield_deduplicated_filters_duplicate_records() -> None:
 
 
 @pytest.mark.asyncio
-async def test_fetch_with_filter_skips_explicit_pagination_for_small_pk_batches() -> None:
+async def test_fetch_with_filter_skips_explicit_pagination_for_small_pk_batches() -> (
+    None
+):
     adapter = _PagingFilteredAdapter()
     adapter.page_responses = [([{"chembl_id": "1"}], False)]
 

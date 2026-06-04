@@ -1163,13 +1163,17 @@ class TestObserverHelperMethods:
     def test_derive_entity_name_from_underscore_pipeline(self):
         """Test _derive_entity_name with underscore pipeline name."""
         assert PipelineObserver._derive_entity_name("chembl_activity") == "activity"
-        assert PipelineObserver._derive_entity_name("pubmed_publication") == "publication"
+        assert (
+            PipelineObserver._derive_entity_name("pubmed_publication") == "publication"
+        )
 
 
 class TestObserverCaptureExecutionMetrics:
     """Tests for capture_execution_metrics method."""
 
-    def test_capture_execution_metrics_updates_records_processed(self, metrics_mock, logger_mock, run_id):
+    def test_capture_execution_metrics_updates_records_processed(
+        self, metrics_mock, logger_mock, run_id
+    ):
         """Test capture_execution_metrics updates records_processed."""
         observer = PipelineObserver(
             pipeline_name="test_pipeline",
@@ -1182,7 +1186,9 @@ class TestObserverCaptureExecutionMetrics:
         observer.capture_execution_metrics({"records_gold": 42})
         assert observer._terminal_records_processed == 42
 
-    def test_capture_execution_metrics_takes_max_of_multiple_sources(self, metrics_mock, logger_mock, run_id):
+    def test_capture_execution_metrics_takes_max_of_multiple_sources(
+        self, metrics_mock, logger_mock, run_id
+    ):
         """Test capture_execution_metrics takes max of multiple sources."""
         observer = PipelineObserver(
             pipeline_name="test_pipeline",
@@ -1192,14 +1198,18 @@ class TestObserverCaptureExecutionMetrics:
             logger=logger_mock,
         )
 
-        observer.capture_execution_metrics({
-            "records_gold": 10,
-            "records_silver": 42,
-            "records_bronze": 30,
-        })
+        observer.capture_execution_metrics(
+            {
+                "records_gold": 10,
+                "records_silver": 42,
+                "records_bronze": 30,
+            }
+        )
         assert observer._terminal_records_processed == 42
 
-    def test_capture_execution_metrics_defaults_to_zero(self, metrics_mock, logger_mock, run_id):
+    def test_capture_execution_metrics_defaults_to_zero(
+        self, metrics_mock, logger_mock, run_id
+    ):
         """Test capture_execution_metrics defaults to zero."""
         observer = PipelineObserver(
             pipeline_name="test_pipeline",

@@ -211,9 +211,7 @@ class TestExportService:
         mock_writer = MagicMock()
         mock_logger = MagicMock()
 
-        mock_catalog.resolve_table_path.return_value = Path(
-            "data/silver/activity"
-        )
+        mock_catalog.resolve_table_path.return_value = Path("data/silver/activity")
 
         service = ExportService(
             reader=mock_reader,

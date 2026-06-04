@@ -1,22 +1,22 @@
 ---
 id: issue-5177
-title: Improve coverage for modules < 50%
+title: Fix architecture quality and governance test drift
 task_id: issue-5177
-created_at: '2026-06-04T16:37:59Z'
+created_at: '2026-06-04T18:02:18Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - <add-source-ref>
 summary: Active task session context.
-query: Improve coverage for modules < 50%
+query: architecture governance test drift scorecard vcc
 ---
 
 # Session note
 
 ## Task
 
-- Title: Improve coverage for modules < 50%
-- Retrieval query: Improve coverage for modules < 50%
+- Title: Fix architecture quality and governance test drift
+- Retrieval query: architecture governance test drift scorecard vcc
 
 ## Retrieved context
 

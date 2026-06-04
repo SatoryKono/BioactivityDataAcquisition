@@ -20,6 +20,8 @@ __all__ = [
     "archive_command",
     "get_lifecycle_service",
 ]
+
+
 def _archive_policy(table: str) -> CliBoundaryExecutionPolicy:
     """Build the shared CLI boundary policy for archive commands."""
     return CliBoundaryExecutionPolicy(

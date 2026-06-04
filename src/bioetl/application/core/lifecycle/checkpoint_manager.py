@@ -145,12 +145,10 @@ class CheckpointRuntimeService:
             ),
         )
         checkpoint_metadata = resolve_checkpoint_metadata(checkpoint_data)
-        compatible_checkpoint, status_already_emitted = (
-            validate_loaded_checkpoint(
-                self,
-                checkpoint_metadata,
-                current_metadata=current_metadata,
-            )
+        compatible_checkpoint, status_already_emitted = validate_loaded_checkpoint(
+            self,
+            checkpoint_metadata,
+            current_metadata=current_metadata,
         )
         if compatible_checkpoint is None:
             return None

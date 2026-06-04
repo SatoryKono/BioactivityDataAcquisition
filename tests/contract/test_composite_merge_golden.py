@@ -41,7 +41,9 @@ def test_composite_merge_golden_seed_priority_is_stable() -> None:
         logger=logger,
         coalesce_policy=CoalescePolicyService(_merge_config()),
     )
-    seed = pl.DataFrame({"entity_id": ["1"], "title": ["Seed title"], "doi": ["10.1/a"]})
+    seed = pl.DataFrame(
+        {"entity_id": ["1"], "title": ["Seed title"], "doi": ["10.1/a"]}
+    )
     enricher = pl.DataFrame(
         {"entity_id": ["1"], "title": ["Enricher title"], "journal": ["J1"]}
     )
@@ -54,7 +56,9 @@ def test_composite_merge_golden_seed_priority_is_stable() -> None:
     resolved = service.resolve_conflicts(
         merged,
         {"crossref_publication": enricher_df},
-        enrichers=(EnricherConfig(pipeline="crossref_publication", join_keys=("entity_id",)),),
+        enrichers=(
+            EnricherConfig(pipeline="crossref_publication", join_keys=("entity_id",)),
+        ),
         seed_pipeline="chembl_publication",
     )
 

@@ -74,11 +74,13 @@ class TestCsvExportPaths:
         )
 
         # Create simple PyArrow table
-        table = pa.table({
-            "id": [1, 2, 3],
-            "name": ["Alice", "Bob", "Charlie"],
-            "value": [10.5, 20.3, 30.1],
-        })
+        table = pa.table(
+            {
+                "id": [1, 2, 3],
+                "name": ["Alice", "Bob", "Charlie"],
+                "value": [10.5, 20.3, 30.1],
+            }
+        )
 
         # Export to CSV
         output_path = tmp_path / "test_output.csv"
@@ -106,11 +108,13 @@ class TestCsvExportPaths:
         )
 
         # Create table with complex types
-        table = pa.table({
-            "id": [1, 2],
-            "tags": [["tag1", "tag2"], ["tag3"]],
-            "metadata": [{"key1": "value1"}, {"key2": "value2"}],
-        })
+        table = pa.table(
+            {
+                "id": [1, 2],
+                "tags": [["tag1", "tag2"], ["tag3"]],
+                "metadata": [{"key1": "value1"}, {"key2": "value2"}],
+            }
+        )
 
         # Export to CSV
         output_path = tmp_path / "complex_output.csv"
@@ -142,10 +146,12 @@ class TestCsvExportPaths:
         )
 
         # Create unsorted table
-        table = pa.table({
-            "id": [3, 1, 2],
-            "name": ["Charlie", "Alice", "Bob"],
-        })
+        table = pa.table(
+            {
+                "id": [3, 1, 2],
+                "name": ["Charlie", "Alice", "Bob"],
+            }
+        )
 
         # Export to CSV
         output_path = tmp_path / "sorted_output.csv"
@@ -171,10 +177,12 @@ class TestCsvExportPaths:
             header=True,
         )
 
-        table = pa.table({
-            "id": [1, 2, 3],
-            "name": ["Alice", "Bob", "Charlie"],
-        })
+        table = pa.table(
+            {
+                "id": [1, 2, 3],
+                "name": ["Alice", "Bob", "Charlie"],
+            }
+        )
 
         output_path = tmp_path / "atomic_output.csv"
         exporter.export_table(table, str(output_path))
@@ -196,10 +204,12 @@ class TestCsvExportPaths:
             header=True,
         )
 
-        table = pa.table({
-            "id": [1, 2],
-            "name": ["Alice", "Bob"],
-        })
+        table = pa.table(
+            {
+                "id": [1, 2],
+                "name": ["Alice", "Bob"],
+            }
+        )
 
         output_path = tmp_path / "delimiter_output.csv"
         exporter.export_table(table, str(output_path))
@@ -220,10 +230,12 @@ class TestCsvExportPaths:
         )
 
         # Create table with duplicates
-        table = pa.table({
-            "id": [1, 2, 1, 3, 2],
-            "name": ["Alice", "Bob", "Alice", "Charlie", "Bob"],
-        })
+        table = pa.table(
+            {
+                "id": [1, 2, 1, 3, 2],
+                "name": ["Alice", "Bob", "Alice", "Charlie", "Bob"],
+            }
+        )
 
         output_path = tmp_path / "dedup_output.csv"
         exporter.export_table(table, str(output_path))

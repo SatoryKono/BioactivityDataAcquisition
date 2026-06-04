@@ -432,7 +432,9 @@ class TestBronzeBatchNodeFromInput:
         input_data.record_count = 1000
         input_data.compressed_size = 1024
 
-        result = bronze_batch_node_from_input(run_context=run_context, input_data=input_data)
+        result = bronze_batch_node_from_input(
+            run_context=run_context, input_data=input_data
+        )
 
         assert result.node_type == LineageNodeType.BRONZE_BATCH
         assert result.node_id == "bronze_batch:batch-123"
@@ -634,8 +636,12 @@ class TestTransformEdges:
 
         # Should have 2 EXECUTED_IN edges and 1 DERIVED_FROM edge
         assert len(result) == 3
-        executed_in_edges = [e for e in result if e.edge_type == LineageEdgeType.EXECUTED_IN]
-        derived_from_edges = [e for e in result if e.edge_type == LineageEdgeType.DERIVED_FROM]
+        executed_in_edges = [
+            e for e in result if e.edge_type == LineageEdgeType.EXECUTED_IN
+        ]
+        derived_from_edges = [
+            e for e in result if e.edge_type == LineageEdgeType.DERIVED_FROM
+        ]
         assert len(executed_in_edges) == 2
         assert len(derived_from_edges) == 1
 

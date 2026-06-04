@@ -1474,7 +1474,9 @@ class TestGoldWriterMergedValidation:
             schema=strict_schema,
         )
 
-    @patch("bioetl.infrastructure.storage.gold.io_execution.GOLD_WRITE_DURATION_SECONDS")
+    @patch(
+        "bioetl.infrastructure.storage.gold.io_execution.GOLD_WRITE_DURATION_SECONDS"
+    )
     @patch("bioetl.infrastructure.storage.gold.io_execution.GOLD_WRITE_OUTCOMES_TOTAL")
     @patch("bioetl.infrastructure.storage.gold.io_execution.GOLD_WRITE_ATTEMPTS_TOTAL")
     @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
@@ -1512,8 +1514,12 @@ class TestGoldWriterMergedValidation:
         duration_metric.labels.return_value.observe.assert_called_once()
         mock_write_deltalake.assert_called_once()
 
-    @patch("bioetl.infrastructure.storage.gold.io_execution.GOLD_VALIDATION_FAILURES_TOTAL")
-    @patch("bioetl.infrastructure.storage.gold.io_execution.GOLD_WRITE_DURATION_SECONDS")
+    @patch(
+        "bioetl.infrastructure.storage.gold.io_execution.GOLD_VALIDATION_FAILURES_TOTAL"
+    )
+    @patch(
+        "bioetl.infrastructure.storage.gold.io_execution.GOLD_WRITE_DURATION_SECONDS"
+    )
     @patch("bioetl.infrastructure.storage.gold.io_execution.GOLD_WRITE_OUTCOMES_TOTAL")
     @patch("bioetl.infrastructure.storage.gold.io_execution.GOLD_WRITE_ATTEMPTS_TOTAL")
     async def test_write_gold_merged_emits_validation_failure_metrics(

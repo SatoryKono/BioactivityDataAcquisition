@@ -121,8 +121,7 @@ async def _request_or_skip(
             last_transport_error = exc
             if attempt >= _CHEMBL_REQUEST_RETRY_ATTEMPTS:
                 pytest.skip(
-                    "ChEMBL endpoint not reachable: "
-                    f"{_format_reachability_error(exc)}"
+                    f"ChEMBL endpoint not reachable: {_format_reachability_error(exc)}"
                 )
         else:
             if response.status_code not in _CHEMBL_TRANSIENT_STATUS_CODES:
@@ -299,9 +298,7 @@ class TestChemblContract:
         assert page_meta["limit"] == 5
 
     @pytest.mark.slow
-    async def test_filtering_works(
-        self, chembl_client: httpx.AsyncClient
-    ) -> None:
+    async def test_filtering_works(self, chembl_client: httpx.AsyncClient) -> None:
         """Verify server-side filtering capability."""
         response = await _request_or_skip(
             chembl_client,

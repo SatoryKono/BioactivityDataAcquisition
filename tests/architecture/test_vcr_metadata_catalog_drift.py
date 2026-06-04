@@ -57,13 +57,16 @@ def _normalize_catalog_payload(payload: dict[str, Any]) -> dict[str, Any]:
             ),
         )
         normalized["_cassettes_by_path"] = {
-            row["cassette_rel_path"]: row for row in normalized["cassettes"]
+            row["cassette_rel_path"]: row
+            for row in normalized["cassettes"]
             if row.get("cassette_rel_path")
         }
 
     providers = normalized.get("providers")
     if isinstance(providers, dict):
-        normalized["providers"] = dict(sorted(providers.items(), key=lambda item: item[0]))
+        normalized["providers"] = dict(
+            sorted(providers.items(), key=lambda item: item[0])
+        )
 
     pruning = normalized.get("pruning")
     if isinstance(pruning, dict):

@@ -53,9 +53,10 @@ async def test_iter_filtered_by_title_skips_blank_titles_and_logs_summary() -> N
         {"results": [{"id": "W2"}]},
     ]
     flow.response_mapper.extract_results.side_effect = [[], [{"id": "W2"}]]
-    flow.response_mapper.mark_lookup.side_effect = (
-        lambda record, **kwargs: {**record, **kwargs}
-    )
+    flow.response_mapper.mark_lookup.side_effect = lambda record, **kwargs: {
+        **record,
+        **kwargs,
+    }
 
     rows = await collect_async_iterator(
         flow.iter_filtered_by_title(["", "missing", "Found Title"], limit=None)
@@ -70,7 +71,9 @@ async def test_iter_filtered_by_title_skips_blank_titles_and_logs_summary() -> N
         }
     ]
     assert flow.query_executor.request_works_payload.await_count == 2
-    assert flow.logger.info.call_args_list[-1].args[0] == "openalex_title_lookup_summary"
+    assert (
+        flow.logger.info.call_args_list[-1].args[0] == "openalex_title_lookup_summary"
+    )
 
 
 @pytest.mark.asyncio
@@ -163,9 +166,10 @@ async def test_iter_doi_batches_for_fallback_marks_lookup_and_stops_at_limit(
             yield {"id": doi}
 
     monkeypatch.setattr(OpenAlexCursorFlow, "iter_by_dois", _iter_by_dois)
-    flow.response_mapper.mark_lookup.side_effect = (
-        lambda record, **kwargs: {**record, **kwargs}
-    )
+    flow.response_mapper.mark_lookup.side_effect = lambda record, **kwargs: {
+        **record,
+        **kwargs,
+    }
 
     rows = await collect_async_iterator(
         flow.iter_doi_batches_for_fallback(

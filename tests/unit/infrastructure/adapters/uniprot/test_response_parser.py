@@ -48,3 +48,11 @@ def test_parse_uniprot_protein_response_filters_malformed_results_and_cursor() -
         [{"primaryAccession": "P12345"}],
         None,
     )
+
+
+def test_parse_uniprot_protein_response_returns_empty_for_non_200_status() -> None:
+    response = MagicMock()
+    response.status_code = 503
+
+    assert parse_uniprot_protein_response(response) == ([], None)
+    response.json.assert_not_called()

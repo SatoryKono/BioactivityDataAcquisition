@@ -549,7 +549,7 @@ def _expected_provenance_only_summary_without_score(
                     "per_provider_result_maps",
                     "rich_checkpoint_payloads",
                 ],
-                "forensic_grade_supported": True,
+                "forensic_grade_supported": False,
             },
             "lineage_closure_boundary": _expected_lineage_closure_boundary(manifest),
         },
@@ -1207,7 +1207,7 @@ def _assert_required_operator_persistence_profile(
                 "per_provider_result_maps",
                 "rich_checkpoint_payloads",
             ],
-            "forensic_grade_supported": True,
+            "forensic_grade_supported": False,
         },
         "lineage_closure_boundary": _expected_lineage_closure_boundary(manifest),
     }
@@ -1604,7 +1604,9 @@ def test_build_diagnostics_summary_accepts_legacy_data_contract_version_alias() 
     assert summary["correlation_anchor_gaps"]["contract_version"] == 0
 
 
-def test_build_diagnostics_summary_formalizes_composite_rebuild_resume_boundary() -> None:
+def test_build_diagnostics_summary_formalizes_composite_rebuild_resume_boundary() -> (
+    None
+):
     base_manifest = _make_manifest()
     manifest = replace(
         base_manifest,
@@ -1629,8 +1631,7 @@ def test_build_diagnostics_summary_formalizes_composite_rebuild_resume_boundary(
     summary = build_diagnostics_summary(manifest, ())
 
     assert (
-        summary["exact_replay_support_boundary"]
-        == "snapshot_backed_source_runs_only"
+        summary["exact_replay_support_boundary"] == "snapshot_backed_source_runs_only"
     )
     assert summary["replay_family_contract"] == _expected_replay_family_contract(
         manifest

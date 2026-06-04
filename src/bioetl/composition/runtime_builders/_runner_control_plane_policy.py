@@ -26,7 +26,6 @@ class ResolvedRunnerControlPlanePolicy:
     required_profile: str
 
 
-
 def resolve_required_artifact_lineage_layers(
     *,
     yaml_config: object | None,
@@ -196,7 +195,9 @@ def resolve_runner_control_plane_policy(
         runtime_environment=getattr(settings, "env", None),
         debug_mode=getattr(settings, "debug", False),
     )
-    if (exact_replay or critical_runtime) and _normalize_required_persistence_profile_impl(
+    if (
+        exact_replay or critical_runtime
+    ) and _normalize_required_persistence_profile_impl(
         requested_profile
     ) == "degraded_observable":
         requested_profile = DEFAULT_REQUIRED_PERSISTENCE_PROFILE

@@ -137,7 +137,9 @@ class TestPipelineDebugService:
         action = service.check_breakpoint(StageBreakpoint.AFTER_BRONZE, snapshot)
 
         assert action == DebugAction.CONTINUE
-        mock_debug_port.is_breakpoint_enabled.assert_called_once_with(StageBreakpoint.AFTER_BRONZE)
+        mock_debug_port.is_breakpoint_enabled.assert_called_once_with(
+            StageBreakpoint.AFTER_BRONZE
+        )
         mock_debug_port.on_breakpoint.assert_not_called()
 
     @pytest.mark.unit
@@ -164,7 +166,9 @@ class TestPipelineDebugService:
             metadata={},
         )
 
-        action = service.check_breakpoint(StageBreakpoint.AFTER_SILVER, snapshot, "Test message")
+        action = service.check_breakpoint(
+            StageBreakpoint.AFTER_SILVER, snapshot, "Test message"
+        )
 
         assert action == DebugAction.CONTINUE
         mock_debug_port.on_breakpoint.assert_called_once()

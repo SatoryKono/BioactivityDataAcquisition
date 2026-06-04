@@ -164,10 +164,7 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
     assert servers["deepwiki"]["type"] == "http"
     assert servers["deepwiki"]["url"] == "https://mcp.deepwiki.com/mcp"
     assert servers["openaiDeveloperDocs"]["type"] == "http"
-    assert (
-        servers["openaiDeveloperDocs"]["url"]
-        == "https://developers.openai.com/mcp"
-    )
+    assert servers["openaiDeveloperDocs"]["url"] == "https://developers.openai.com/mcp"
 
 
 def test_setup_router_is_the_supported_public_entrypoint() -> None:

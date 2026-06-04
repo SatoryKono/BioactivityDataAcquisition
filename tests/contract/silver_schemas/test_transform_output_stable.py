@@ -51,7 +51,10 @@ def test_normalization_golden_payload_is_deterministic_shape(
     golden_path = NORMALIZATION_GOLDEN_BY_SCHEMA[schema_name]
     payload = json.loads(golden_path.read_text(encoding="utf-8"))
 
-    assert isinstance(payload.get("content_hash"), str) and len(payload["content_hash"]) == 64
+    assert (
+        isinstance(payload.get("content_hash"), str)
+        and len(payload["content_hash"]) == 64
+    )
     normalized = payload.get("normalized")
     assert isinstance(normalized, dict) and normalized
     assert list(normalized.keys()) == sorted(normalized.keys())

@@ -19,6 +19,7 @@ if TYPE_CHECKING:
         StructuralPolicyProtocol,
     )
 
+
 class NoOpStructuralPolicy:
     """Fallback policy used when no schema-aware enforcement is configured."""
 
@@ -47,6 +48,7 @@ class SchemaAwareStructuralPolicy:
             record=cast("SilverRecord", working_record),
             events=tuple(events),
         )
+
 
 def build_structural_policy(
     *,

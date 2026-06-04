@@ -30,6 +30,15 @@ _ORIGINAL_SYS_PLATFORM = sys.platform
 _ORIGINAL_PATH = pathlib.Path
 _ASYNC_TIMEOUT_DIAGNOSTIC_MARGIN_SECONDS = 5.0
 _DISABLED_ENV_VALUES = frozenset({"0", "false", "no", "off"})
+_RUNTIME_BOOTSTRAP_PIPELINE_PATH = (
+    Path(__file__).resolve().parents[1]
+    / "src"
+    / "bioetl"
+    / "composition"
+    / "bootstrap"
+    / "runtime"
+    / "pipeline.py"
+)
 
 
 def _async_timeout_diagnostics_enabled() -> bool:
@@ -160,6 +169,32 @@ def _guard_global_pathlib_state() -> Generator[None, None, None]:
         sys.platform = _ORIGINAL_SYS_PLATFORM
     if pathlib.Path is not _ORIGINAL_PATH:
         pathlib.Path = _ORIGINAL_PATH
+
+
+@pytest.fixture(autouse=True)
+def _restore_runtime_bootstrap_pipeline_after_repo_backed_tests(
+    request: pytest.FixtureRequest,
+) -> Generator[None, None, None]:
+    """Keep repo-backed tests from leaking source-file mutations across the suite."""
+    if request.node.get_closest_marker("repo_backed") is None:
+        yield
+        return
+
+    path = _RUNTIME_BOOTSTRAP_PIPELINE_PATH
+    try:
+        original = path.read_text(encoding="utf-8")
+    except OSError:
+        yield
+        return
+
+    yield
+
+    try:
+        current = path.read_text(encoding="utf-8")
+    except OSError:
+        return
+    if current != original:
+        path.write_text(original, encoding="utf-8")
 
 
 pytest_plugins = (

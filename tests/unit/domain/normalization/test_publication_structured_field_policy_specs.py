@@ -47,7 +47,8 @@ def test_policy_specs_has_expected_structure() -> None:
 
 def test_policy_specs_contains_crossref_publication() -> None:
     crossref_specs = [
-        spec for spec in PUBLICATION_STRUCTURED_FIELD_POLICY_SPECS
+        spec
+        for spec in PUBLICATION_STRUCTURED_FIELD_POLICY_SPECS
         if spec[0] == CROSSREF_PUBLICATION
     ]
     assert len(crossref_specs) > 0
@@ -55,7 +56,8 @@ def test_policy_specs_contains_crossref_publication() -> None:
 
 def test_policy_specs_contains_pubmed_publication() -> None:
     pubmed_specs = [
-        spec for spec in PUBLICATION_STRUCTURED_FIELD_POLICY_SPECS
+        spec
+        for spec in PUBLICATION_STRUCTURED_FIELD_POLICY_SPECS
         if spec[0] == PUBMED_PUBLICATION
     ]
     assert len(pubmed_specs) > 0
@@ -63,7 +65,8 @@ def test_policy_specs_contains_pubmed_publication() -> None:
 
 def test_policy_specs_contains_openalex_publication() -> None:
     openalex_specs = [
-        spec for spec in PUBLICATION_STRUCTURED_FIELD_POLICY_SPECS
+        spec
+        for spec in PUBLICATION_STRUCTURED_FIELD_POLICY_SPECS
         if spec[0] == OPENALEX_PUBLICATION
     ]
     assert len(openalex_specs) > 0
@@ -71,7 +74,8 @@ def test_policy_specs_contains_openalex_publication() -> None:
 
 def test_policy_specs_contains_semanticscholar_publication() -> None:
     semanticscholar_specs = [
-        spec for spec in PUBLICATION_STRUCTURED_FIELD_POLICY_SPECS
+        spec
+        for spec in PUBLICATION_STRUCTURED_FIELD_POLICY_SPECS
         if spec[0] == SEMANTICSCHOLAR_PUBLICATION
     ]
     assert len(semanticscholar_specs) > 0

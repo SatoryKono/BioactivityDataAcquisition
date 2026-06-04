@@ -117,19 +117,28 @@ class TestPipelineRunReadModelMixin:
         with pytest.raises((TypeError, AttributeError)):
             stages.append(None)  # type: ignore
 
-    def test_duration_seconds_returns_none_for_pending_run(self, pipeline_run: PipelineRun):
+    def test_duration_seconds_returns_none_for_pending_run(
+        self, pipeline_run: PipelineRun
+    ):
         """duration_seconds should return None for runs without start/end times."""
         assert pipeline_run.duration_seconds is None
 
-    def test_duration_seconds_at_returns_none_without_start(self, pipeline_run: PipelineRun):
+    def test_duration_seconds_at_returns_none_without_start(
+        self, pipeline_run: PipelineRun
+    ):
         """duration_seconds_at should return None when the run has not started."""
         assert pipeline_run.duration_seconds_at(_ts_seconds(15)) is None
 
-    def test_duration_seconds_calculates_correct_duration(self, pipeline_run: PipelineRun):
+    def test_duration_seconds_calculates_correct_duration(
+        self, pipeline_run: PipelineRun
+    ):
         """duration_seconds should calculate duration between start and end."""
         pipeline_run.start(_ts_seconds(0))
         pipeline_run.record_stage_success(
-            "bronze", records_processed=100, started_at=_ts_seconds(0), completed_at=_ts_seconds(5)
+            "bronze",
+            records_processed=100,
+            started_at=_ts_seconds(0),
+            completed_at=_ts_seconds(5),
         )
         pipeline_run.complete(_ts_seconds(10))
 
@@ -142,7 +151,9 @@ class TestPipelineRunReadModelMixin:
         duration = pipeline_run.duration_seconds_at(_ts_seconds(15))
         assert duration == 15.0
 
-    def test_total_records_processed_sums_across_stages(self, pipeline_run: PipelineRun):
+    def test_total_records_processed_sums_across_stages(
+        self, pipeline_run: PipelineRun
+    ):
         """total_records_processed should sum records from all stages."""
         pipeline_run.start(_ts(0))
         pipeline_run.record_stage_success(
@@ -161,20 +172,30 @@ class TestPipelineRunReadModelMixin:
             "bronze", records_processed=100, started_at=_ts(0), completed_at=_ts(5)
         )
         pipeline_run.record_stage_failure(
-            "silver", "Connection error", "TimeoutError", started_at=_ts(5), completed_at=_ts(10)
+            "silver",
+            "Connection error",
+            "TimeoutError",
+            started_at=_ts(5),
+            completed_at=_ts(10),
         )
 
         assert len(pipeline_run.failed_stages) == 1
         assert pipeline_run.failed_stages[0].stage == "silver"
 
-    def test_successful_stages_filters_successful_stages(self, pipeline_run: PipelineRun):
+    def test_successful_stages_filters_successful_stages(
+        self, pipeline_run: PipelineRun
+    ):
         """successful_stages should return only successful stages."""
         pipeline_run.start(_ts(0))
         pipeline_run.record_stage_success(
             "bronze", records_processed=100, started_at=_ts(0), completed_at=_ts(5)
         )
         pipeline_run.record_stage_failure(
-            "silver", "Connection error", "TimeoutError", started_at=_ts(5), completed_at=_ts(10)
+            "silver",
+            "Connection error",
+            "TimeoutError",
+            started_at=_ts(5),
+            completed_at=_ts(10),
         )
 
         assert len(pipeline_run.successful_stages) == 1
@@ -255,7 +276,9 @@ class TestPipelineRunLifecycleMixin:
         assert started_run.stages[0].stage == "bronze"
         assert started_run.stages[0].status == StageStatus.RUNNING
 
-    def test_record_stage_start_validates_running_status(self, pipeline_run: PipelineRun):
+    def test_record_stage_start_validates_running_status(
+        self, pipeline_run: PipelineRun
+    ):
         """record_stage_start should only work from RUNNING status."""
         with pytest.raises(InvalidStateError, match="Cannot record_stage_start"):
             pipeline_run.record_stage_start("bronze", _ts(0))
@@ -263,7 +286,11 @@ class TestPipelineRunLifecycleMixin:
     def test_record_stage_success_adds_successful_stage(self, started_run: PipelineRun):
         """record_stage_success should add a SUCCESS stage."""
         started_run.record_stage_success(
-            "bronze", result={"output": "data"}, records_processed=100, started_at=_ts(0), completed_at=_ts(5)
+            "bronze",
+            result={"output": "data"},
+            records_processed=100,
+            started_at=_ts(0),
+            completed_at=_ts(5),
         )
 
         assert len(started_run.stages) == 1
@@ -273,7 +300,9 @@ class TestPipelineRunLifecycleMixin:
         assert stage.records_processed == 100
         assert stage.result == {"output": "data"}
 
-    def test_record_stage_success_invalid_after_complete(self, started_run: PipelineRun):
+    def test_record_stage_success_invalid_after_complete(
+        self, started_run: PipelineRun
+    ):
         """Cannot append stages after run is completed."""
         started_run.record_stage_success(
             "bronze", records_processed=1, started_at=_ts(0), completed_at=_ts(1)
@@ -285,10 +314,16 @@ class TestPipelineRunLifecycleMixin:
                 "silver", records_processed=1, started_at=_ts(2), completed_at=_ts(3)
             )
 
-    def test_record_stage_failure_adds_failed_stage_and_fails_run(self, started_run: PipelineRun):
+    def test_record_stage_failure_adds_failed_stage_and_fails_run(
+        self, started_run: PipelineRun
+    ):
         """record_stage_failure should add FAILED stage and transition run to FAILED."""
         started_run.record_stage_failure(
-            "silver", "Connection timeout", "TimeoutError", started_at=_ts(0), completed_at=_ts(5)
+            "silver",
+            "Connection timeout",
+            "TimeoutError",
+            started_at=_ts(0),
+            completed_at=_ts(5),
         )
 
         assert len(started_run.stages) == 1
@@ -301,7 +336,9 @@ class TestPipelineRunLifecycleMixin:
         assert started_run.status == PipelineRunState.FAILED
         assert started_run.ended_at == _ts(5)
 
-    def test_record_stage_failure_with_exception_instance(self, started_run: PipelineRun):
+    def test_record_stage_failure_with_exception_instance(
+        self, started_run: PipelineRun
+    ):
         """record_stage_failure should handle Exception instances."""
         error = ValueError("Invalid input")
         started_run.record_stage_failure(
@@ -321,7 +358,9 @@ class TestPipelineRunLifecycleMixin:
         assert started_run.status == PipelineRunState.COMPLETED
         assert started_run.ended_at == _ts(10)
 
-    def test_complete_with_missing_started_at_uses_zero_duration(self, started_run: PipelineRun):
+    def test_complete_with_missing_started_at_uses_zero_duration(
+        self, started_run: PipelineRun
+    ):
         """complete should emit duration_seconds=0.0 when _started_at is None."""
         started_run._started_at = None
         started_run.record_stage_success(
@@ -339,7 +378,9 @@ class TestPipelineRunLifecycleMixin:
         assert len(events) == 1
         assert events[0].duration_seconds == 0.0
 
-    def test_complete_blocks_when_any_stage_failed_but_status_still_running(self, pipeline_run: PipelineRun):
+    def test_complete_blocks_when_any_stage_failed_but_status_still_running(
+        self, pipeline_run: PipelineRun
+    ):
         """complete should reject terminal transition if failed stages are present."""
         pipeline_run.start(_ts(0))
         pipeline_run._stages.append(
@@ -539,7 +580,9 @@ class TestStageResultValueObject:
             started_at=_ts(0),
         )
 
-        completed = running.with_success(_ts(10), result={"output": "data"}, records_processed=100)
+        completed = running.with_success(
+            _ts(10), result={"output": "data"}, records_processed=100
+        )
 
         assert completed.status == StageStatus.SUCCESS
         assert completed.completed_at == _ts(10)
@@ -610,7 +653,11 @@ class TestStageSequences:
             "bronze", records_processed=100, started_at=_ts(0), completed_at=_ts(5)
         )
         pipeline_run.record_stage_failure(
-            "silver", "Connection error", "TimeoutError", started_at=_ts(5), completed_at=_ts(10)
+            "silver",
+            "Connection error",
+            "TimeoutError",
+            started_at=_ts(5),
+            completed_at=_ts(10),
         )
 
         assert pipeline_run.status == PipelineRunState.FAILED
@@ -677,7 +724,9 @@ class TestStageSequences:
             started_at=_ts(0),
         )
 
-        success = running.with_success(_ts(10), result={"data": "value"}, records_processed=100)
+        success = running.with_success(
+            _ts(10), result={"data": "value"}, records_processed=100
+        )
 
         # Original should be unchanged (immutable)
         assert running.status == StageStatus.RUNNING
