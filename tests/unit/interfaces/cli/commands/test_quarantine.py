@@ -74,11 +74,11 @@ class TestQuarantineGroup:
         assert "8081" in result.output
 
     @patch(
-        "bioetl.interfaces.cli.commands.quarantine.run_long_lived_health_server_command"
+        "bioetl.interfaces.cli.commands.quarantine.run_long_lived_quarantine_backend_command"
     )
     def test_quarantine_serve_delegates_to_long_lived_backend(
         self,
-        mock_run_health_server_command: MagicMock,
+        mock_run_quarantine_backend_command: MagicMock,
         cli_runner: CliRunner,
     ) -> None:
         """Quarantine serve must reuse the long-lived health/quarantine backend."""
@@ -88,7 +88,7 @@ class TestQuarantineGroup:
         )
 
         assert result.exit_code == ExitCode.OK.value
-        mock_run_health_server_command.assert_called_once_with(
+        mock_run_quarantine_backend_command.assert_called_once_with(
             host="127.0.0.1",
             port=18081,
         )
