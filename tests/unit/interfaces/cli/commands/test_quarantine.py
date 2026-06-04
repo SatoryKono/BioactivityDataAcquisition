@@ -73,7 +73,9 @@ class TestQuarantineGroup:
         assert "0.0.0.0" in result.output
         assert "8081" in result.output
 
-    @patch("bioetl.interfaces.cli.commands.quarantine.run_health_server_command")
+    @patch(
+        "bioetl.interfaces.cli.commands.quarantine.run_long_lived_health_server_command"
+    )
     def test_quarantine_serve_delegates_to_long_lived_backend(
         self,
         mock_run_health_server_command: MagicMock,

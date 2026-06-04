@@ -258,6 +258,7 @@
       <excludeFolder url="file://$MODULE_DIR$/docs/99-archive/root-concepts-surface" />
       <excludeFolder url="file://$MODULE_DIR$/path/table/_delta_log" />
       <excludeFolder url="file://$MODULE_DIR$/.tmp_issue_bodies" />
+      <excludeFolder url="file://$MODULE_DIR$/docs/99-archive/decisions" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.13 (BioactivityDataAcquisition2)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

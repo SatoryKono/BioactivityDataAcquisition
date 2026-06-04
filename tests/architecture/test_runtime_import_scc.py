@@ -85,22 +85,6 @@ ACCEPTED_RUNTIME_SCCS: dict[frozenset[str], dict[str, str]] = {
     },
     frozenset(
         {
-            "bioetl.interfaces.cli.commands.domains.health.server_integration",
-            "bioetl.interfaces.cli.commands.health",
-        }
-    ): {
-        "owner": "interfaces.cli.commands",
-        "review_date": "2026-12-31",
-        "linked_issue": "#4820",
-        "rationale": (
-            "Health command module imports from domains.health.server_integration for "
-            "health server utilities. This is a standard CLI command organization pattern "
-            "where domain-specific health utilities are imported by the top-level health "
-            "command entrypoint."
-        ),
-    },
-    frozenset(
-        {
             "bioetl.infrastructure.storage.support.atomic_group",
             "bioetl.infrastructure.storage.support.atomic_ops",
         }

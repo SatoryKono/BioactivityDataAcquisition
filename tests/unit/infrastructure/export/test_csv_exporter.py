@@ -464,6 +464,7 @@ class TestCsvExporterInternals:
                 raise PermissionError("locked")
             return original_replace(path_obj, target_obj)
 
+        monkeypatch.setattr(csv_exporter_io_ops.os, "name", "posix")
         monkeypatch.setattr(Path, "replace", _patched_replace)
 
         exporter._atomic_csv_write(table, target, write_options)

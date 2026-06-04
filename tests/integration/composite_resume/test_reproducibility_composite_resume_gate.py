@@ -46,11 +46,11 @@ def _load_snapshot_ids(manifest_payload: dict) -> list[str]:
     return snapshot_ids
 
 
-def test_reproducibility_composite_full_snapshot_envelope_exact_replay_matrix(
+def test_reproducibility_composite_full_snapshot_envelope_rebuild_resume_matrix(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Composite resume matrix should keep replay envelope invariant across repeated builds."""
+    """Composite resume matrix should stay invariant without exact-replay claims."""
     data_dir = tmp_path / "runtime"
     bronze_root = tmp_path / "cached-bronze"
     _write_composite_snapshot_envelope(bronze_root)
@@ -78,7 +78,7 @@ def test_reproducibility_composite_full_snapshot_envelope_exact_replay_matrix(
                 "control_plane": {
                     "run_manifest_enabled": True,
                     "run_ledger_enabled": True,
-                    "required_persistence_profile": "replay_ready",
+                    "required_persistence_profile": "degraded_observable",
                     "checkpoint_compatibility_policy": "hard_fail",
                 }
             },
@@ -98,7 +98,12 @@ def test_reproducibility_composite_full_snapshot_envelope_exact_replay_matrix(
             infra_context=infra_context,
         )
         manifest = _load_manifest_payload(data_dir, bundle.manifest_id)
-        assert manifest["replay_capability"] == "exact_replay_supported"
+        assert manifest["replay_capability"] == "resume_only"
+        assert manifest["launch_context"]["exact_replay"] is False
+        assert manifest["launch_context"]["strict_exact_replay_supported"] is False
+        assert manifest["launch_context"]["exact_replay_support_boundary"] == (
+            "snapshot_backed_source_runs_only"
+        )
         manifests.append(manifest)
 
     first, second = manifests
@@ -120,13 +125,14 @@ def test_reproducibility_composite_full_snapshot_envelope_exact_replay_matrix(
 
     evidence_dir = tmp_path / "reports" / "reproducibility"
     evidence_dir.mkdir(parents=True, exist_ok=True)
-    evidence_path = evidence_dir / "composite_publication_exact_replay_matrix.json"
+    evidence_path = evidence_dir / "composite_publication_rebuild_resume_matrix.json"
     evidence_path.write_text(
         json.dumps(
             {
                 "pipeline_name": config.name,
-                "case": "composite_full_snapshot_envelope_exact_replay",
+                "case": "composite_cached_bronze_rebuild_resume",
                 "replay_capability": first["replay_capability"],
+                "exact_replay_claimed": False,
                 "semantic_identity": {
                     "execution_fingerprint": first["execution_fingerprint"],
                     "effective_config_artifact_id": first["code_provenance"][
@@ -152,5 +158,5 @@ def test_reproducibility_composite_full_snapshot_envelope_exact_replay_matrix(
         encoding="utf-8",
     )
     evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
-    assert evidence["case"] == "composite_full_snapshot_envelope_exact_replay"
+    assert evidence["case"] == "composite_cached_bronze_rebuild_resume"
     assert len(evidence["occurrences"]) == 2

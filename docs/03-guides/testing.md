@@ -548,7 +548,7 @@ whole E2E lane:
 
 ```bash
 uv run pytest tests/integration/ci/test_track_d_fixture_control_plane_linkage.py -q --tb=short
-uv run pytest tests/integration/ci/test_reproducibility_contract_suite.py::test_reproducibility_contract_composite_full_snapshot_envelope_exact_replay_matrix -q --tb=short
+uv run pytest tests/integration/ci/test_reproducibility_contract_suite.py::test_reproducibility_contract_composite_full_snapshot_envelope_rebuild_resume_matrix -q --tb=short
 ```
 
 The matrix writes compact evidence under `reports/reproducibility/` during the
@@ -580,6 +580,33 @@ cached-Bronze snapshot envelope.
 - Проверка отсутствия паролей и ключей в логах.
 - Тестирование обработки PII (Personal Identifiable Information).
 
+### 2.6. Golden/Snapshot Tests (`tests/fixtures/golden/`)
+
+Golden/Snapshot тесты используются для валидации критических outputs и обеспечения обратной совместимости.
+
+**Назначение:**
+- Валидация Data Quality contracts
+- Проверка корректности transformation логики
+- Обнаружение regressions в output schemas
+
+**Расположение:**
+- Golden fixtures: `tests/fixtures/golden/`
+- Contract tests: `tests/contract/test_gold_dq_golden_snapshots.py`
+
+**Использование:**
+```bash
+# Запуск golden tests
+pytest tests/contract/test_gold_dq_golden_snapshots.py
+
+# Обновление golden snapshots (только при намеренном изменении)
+pytest tests/contract/test_gold_dq_golden_snapshots.py --update-golden
+```
+
+**Best Practices:**
+- Golden snapshots должны быть version-controlled
+- Обновление snapshots требует явного флага `--update-golden`
+- Изменения в snapshots должны сопровождаться коммитом с объяснением
+
 ## 3. Метрики и Покрытие
 
 - **Blocking CI Threshold**: merge-gate в CI использует `coverage report --fail-under=85`, то есть blocking threshold для репозитория составляет **>=85%** общего line coverage.
@@ -589,6 +616,11 @@ cached-Bronze snapshot envelope.
   `reports/quality/module-coverage-inventory.json` после
   `reports/coverage/coverage.xml`; локальная проверка drift:
   `uv run python -m scripts.engineering.qa report-module-coverage --check`.
+  Per-module gates (`configs/quality/module_coverage_gates.yaml`): lane
+  `coverage-verify` также запускает
+  `--enforce-module-thresholds block-regression --fail-on-regression`, чтобы
+  падать при снижении line % относительно committed inventory; tier gaps
+  (85/90/95) пока только warn до Phase C.
   После изменений в `src/bioetl/**/*.py` обновляй `source_tree_sha256`:
   `python _refresh_module_coverage_inventory.py`, затем
   `pytest tests/architecture/test_module_coverage_inventory.py::test_module_coverage_inventory_source_tree_hash_is_current`.

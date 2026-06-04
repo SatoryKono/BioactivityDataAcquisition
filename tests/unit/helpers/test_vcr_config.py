@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pytest
+from vcr.request import Request
 
 from tests.helpers.vcr_config import build_base_vcr_config, is_vcr_recording_mode
 
@@ -36,3 +37,37 @@ def test_build_base_vcr_config_defaults_to_replay_only(monkeypatch) -> None:
     monkeypatch.delenv("VCR_RECORD_MODE", raising=False)
 
     assert build_base_vcr_config()["record_mode"] == "none"
+
+
+def test_build_base_vcr_config_sanitizes_request_headers_and_query() -> None:
+    config = build_base_vcr_config(
+        filter_headers=["authorization"],
+        filter_query_parameters=["api_key"],
+    )
+    before_record_request = config["before_record_request"]
+
+    request = Request(
+        "GET",
+        "https://example.org/search?api_key=secret&query=test",
+        b"",
+        {"authorization": "secret", "x-test": "1"},
+    )
+
+    sanitized = before_record_request(request)
+
+    assert sanitized.headers["x-test"] == "1"
+    assert "authorization" not in sanitized.headers
+    assert "api_key=secret" not in sanitized.uri
+    assert "query=test" in sanitized.uri
+
+
+def test_build_base_vcr_config_before_record_request_noops_on_unexpected_request() -> None:
+    config = build_base_vcr_config(
+        filter_headers=["authorization"],
+        filter_query_parameters=["api_key"],
+    )
+    before_record_request = config["before_record_request"]
+
+    request = "unexpected-request-surface"
+
+    assert before_record_request(request) == request

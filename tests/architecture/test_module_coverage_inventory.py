@@ -19,6 +19,7 @@ ROOT = Path(__file__).resolve().parents[2]
 INVENTORY_PATH = ROOT / "reports" / "quality" / "module-coverage-inventory.json"
 WORKFLOW_PATH = ROOT / ".github" / "workflows" / "tests.yml"
 SCORECARD_PATH = ROOT / "configs" / "quality" / "debt_scorecard.yaml"
+GATES_PATH = ROOT / "configs" / "quality" / "module_coverage_gates.yaml"
 
 
 @pytest.mark.architecture
@@ -227,6 +228,16 @@ def test_coverage_verify_workflow_generates_module_coverage_inventory() -> None:
 
 
 @pytest.mark.architecture
+def test_module_coverage_gates_policy_is_committed() -> None:
+    assert GATES_PATH.exists()
+    gates = yaml.safe_load(GATES_PATH.read_text(encoding="utf-8"))
+    assert gates["schema_version"] == 1
+    assert gates["enforcement"]["default_mode"] == "block-regression"
+    assert "aggregates_and_contracts" in gates["tiers"]
+    assert gates["tiers"]["aggregates_and_contracts"]["line_min_percent"] == 95
+
+
+@pytest.mark.architecture
 def test_test_matrix_declares_module_coverage_inventory_contract() -> None:
     matrix = load_matrix()
     inventory = matrix["module_coverage_inventory"]
@@ -245,6 +256,10 @@ def test_test_matrix_declares_module_coverage_inventory_contract() -> None:
     assert inventory["artifact"] == "reports/quality/module-coverage-inventory.json"
     assert inventory["coverage_xml"] == "reports/coverage/coverage.xml"
     assert inventory["canonical_generation_requires_coverage_xml"] is True
+    per_module_gates = inventory["per_module_gates"]
+    assert per_module_gates["enabled"] is True
+    assert per_module_gates["enforcement_mode"] == "block-regression"
+    assert per_module_gates["policy"] == "configs/quality/module_coverage_gates.yaml"
     assert (
         coverage_lane["expected_artifacts"]["module_coverage_inventory"]
         == (inventory["artifact"])

@@ -157,7 +157,7 @@ def test_build_composite_manifest_create_request_wires_control_plane_payloads() 
                 normalization_profile_version="2026.05",
                 normalization_profile_hash=_VALID_SHA256_F,
                 pipeline_version="1.1.0",
-                effective_required_profile="replay_ready",
+                effective_required_profile="degraded_observable",
             ),
         )
 
@@ -186,7 +186,7 @@ def test_build_composite_manifest_create_request_wires_control_plane_payloads() 
     assert request.normalization_profile_ref == "composite.publication"
     assert request.normalization_profile_version == "2026.05"
     assert request.normalization_profile_hash == _VALID_SHA256_F
-    assert request.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
+    assert request.replay_capability == ReplayCapability.RESUME_ONLY
 
 
 def test_normalize_object_delegates_to_shared_manifest_support() -> None:
@@ -258,7 +258,7 @@ def test_build_composite_control_plane_bundle_fails_closed_when_manifest_disable
     assert not (tmp_path / "output" / "control" / "run_ledger").exists()
 
 
-def test_build_composite_control_plane_bundle_rejects_disabled_ledger_under_promoted_replay_profile(
+def test_build_composite_control_plane_bundle_allows_disabled_ledger_under_degraded_profile(
     tmp_path: Path,
 ) -> None:
     config = cast(Any, _RichMockCompositeConfig())
@@ -284,25 +284,17 @@ def test_build_composite_control_plane_bundle_rejects_disabled_ledger_under_prom
         ),
     )
 
-    with patch(
-        "bioetl.composition.bootstrap.runtime.composite_control_plane_builder.get_code_revision_provenance",
-        return_value=SimpleNamespace(
-            git_commit="abc1234",
-            source_revision_state="clean",
-            dependency_lock_hash=_VALID_SHA256_D,
-        ),
-    ):
-        with pytest.raises(
-            RuntimeError,
-            match="requires run ledgers for required persistence profile 'replay_ready'",
-        ):
-            build_composite_control_plane_bundle(
-                config=config,
-                runtime=runtime,
-                infra_context=infra_context,
-            )
+    bundle = build_composite_control_plane_bundle(
+        config=config,
+        runtime=runtime,
+        infra_context=infra_context,
+    )
 
-    assert not (tmp_path / "output" / "control" / "run_manifest").exists()
+    manifest_path = (
+        tmp_path / "output" / "control" / "run_manifest" / f"{bundle.manifest_id}.json"
+    )
+    manifest = RunManifest.from_dict(json.loads(manifest_path.read_text("utf-8")))
+    assert manifest.replay_capability == ReplayCapability.RESUME_ONLY
     assert not (tmp_path / "output" / "control" / "run_ledger").exists()
 
 
@@ -346,7 +338,7 @@ def test_build_composite_control_plane_bundle_requires_ledger_for_forensic_grade
     assert not (tmp_path / "output" / "control" / "run_ledger").exists()
 
 
-def test_build_composite_control_plane_bundle_allows_forensic_grade_with_full_snapshot_envelope(
+def test_build_composite_control_plane_bundle_rejects_forensic_grade_with_full_snapshot_envelope(
     tmp_path: Path,
 ) -> None:
     config = cast(Any, _RichMockCompositeConfig())
@@ -388,33 +380,18 @@ def test_build_composite_control_plane_bundle_allows_forensic_grade_with_full_sn
         ),
     )
 
-    with patch(
-        "bioetl.composition.bootstrap.runtime.composite_control_plane_builder.get_code_revision_provenance",
-        return_value=SimpleNamespace(
-            git_commit="abc1234",
-            source_revision_state="clean",
-            dependency_lock_hash=_VALID_SHA256_D,
-        ),
+    with pytest.raises(
+        RuntimeError,
+        match="outside the strict exact-replay support boundary",
     ):
-        bundle = build_composite_control_plane_bundle(
+        build_composite_control_plane_bundle(
             config=config,
             runtime=runtime,
             infra_context=infra_context,
         )
 
-    manifest_path = (
-        tmp_path / "output" / "control" / "run_manifest" / f"{bundle.manifest_id}.json"
-    )
-    manifest = RunManifest.from_dict(json.loads(manifest_path.read_text("utf-8")))
-    assert manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
-    assert manifest.provider == "composite"
-    assert manifest.entity == "publication"
-    assert manifest.code_provenance.pipeline_version == "1.1.0"
-    assert manifest.code_provenance.contract_ref == "composite.publication"
-    assert manifest.code_provenance.contract_version == "1.0.0"
-    assert manifest.code_provenance.contract_schema_hash is not None
-    assert manifest.code_provenance.dq_policy_ref == "composite.dq.v1"
-    assert manifest.code_provenance.rule_bundle_version == "dq-rules.v1.0"
+    assert not (tmp_path / "output" / "control" / "run_manifest").exists()
+    assert not (tmp_path / "output" / "control" / "run_ledger").exists()
 
 
 def test_build_composite_control_plane_bundle_rejects_replay_ready_profile(
@@ -445,7 +422,7 @@ def test_build_composite_control_plane_bundle_rejects_replay_ready_profile(
 
     with pytest.raises(
         RuntimeError,
-        match="full cached-Bronze input snapshot envelope was not captured",
+        match="outside the strict exact-replay support boundary",
     ):
         build_composite_control_plane_bundle(
             config=config,
@@ -457,7 +434,7 @@ def test_build_composite_control_plane_bundle_rejects_replay_ready_profile(
     assert not (tmp_path / "output" / "control" / "run_ledger").exists()
 
 
-def test_build_composite_control_plane_bundle_allows_replay_ready_with_full_snapshot_envelope(
+def test_build_composite_control_plane_bundle_rejects_replay_ready_with_full_snapshot_envelope(
     tmp_path: Path,
 ) -> None:
     config = cast(Any, _RichMockCompositeConfig())
@@ -499,40 +476,18 @@ def test_build_composite_control_plane_bundle_allows_replay_ready_with_full_snap
         ),
     )
 
-    with patch(
-        "bioetl.composition.bootstrap.runtime.composite_control_plane_builder.get_code_revision_provenance",
-        return_value=SimpleNamespace(
-            git_commit="abc1234",
-            source_revision_state="clean",
-            dependency_lock_hash=_VALID_SHA256_D,
-        ),
+    with pytest.raises(
+        RuntimeError,
+        match="outside the strict exact-replay support boundary",
     ):
-        bundle = build_composite_control_plane_bundle(
+        build_composite_control_plane_bundle(
             config=config,
             runtime=runtime,
             infra_context=infra_context,
         )
 
-    manifest_path = (
-        tmp_path / "output" / "control" / "run_manifest" / f"{bundle.manifest_id}.json"
-    )
-    manifest = RunManifest.from_dict(json.loads(manifest_path.read_text("utf-8")))
-    assert manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
-    assert all(source_ref.input_snapshots for source_ref in manifest.source_refs)
-    assert manifest.entity == "publication"
-    assert manifest.code_provenance.pipeline_version == "1.1.0"
-    assert manifest.code_provenance.contract_ref == "composite.publication"
-    assert manifest.code_provenance.contract_version == "1.0.0"
-    assert manifest.code_provenance.contract_schema_hash is not None
-    assert manifest.code_provenance.dq_policy_ref == "composite.dq.v1"
-    assert manifest.code_provenance.rule_bundle_version == "dq-rules.v1.0"
-    assert (
-        manifest.code_provenance.effective_config_artifact_id
-        == bundle.effective_config_artifact_id
-    )
-    assert (
-        manifest.code_provenance.effective_config_hash == bundle.effective_config_hash
-    )
+    assert not (tmp_path / "output" / "control" / "run_manifest").exists()
+    assert not (tmp_path / "output" / "control" / "run_ledger").exists()
 
 
 def test_build_composite_control_plane_bundle_persists_manifest_created_when_ledger_enabled(
@@ -602,6 +557,22 @@ def test_build_composite_control_plane_bundle_persists_manifest_created_when_led
     first_entry = json.loads(ledger_path.read_text(encoding="utf-8").splitlines()[0])
     assert first_entry["event_type"] == "manifest_created"
     assert first_entry["manifest_id"] == bundle.manifest_id
+    manifest_path = (
+        tmp_path / "output" / "control" / "run_manifest" / f"{bundle.manifest_id}.json"
+    )
+    manifest = RunManifest.from_dict(json.loads(manifest_path.read_text("utf-8")))
+    assert manifest.replay_capability == ReplayCapability.RESUME_ONLY
+    assert all(source_ref.input_snapshots for source_ref in manifest.source_refs)
+    assert manifest.launch_context["exact_replay"] is False
+    assert manifest.launch_context["strict_exact_replay_supported"] is False
+    assert (
+        manifest.launch_context["exact_replay_support_boundary"]
+        == "snapshot_backed_source_runs_only"
+    )
+    assert (
+        manifest.launch_context["composite_replay_semantics"]
+        == "rebuild_resume_only"
+    )
 
 
 def test_build_composite_control_plane_bundle_persists_effective_config_artifact_and_hashes(

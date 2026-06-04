@@ -85,7 +85,7 @@ def resolve_composite_control_plane_flags(settings: object) -> tuple[bool, bool]
         ledger_enabled=ledger_enabled,
         required_profile=effective_required_profile,
         execution_label="Composite execution",
-        exact_replay_execution_context_supported=True,
+        exact_replay_execution_context_supported=False,
         composite_resume_rich_replay_supported=True,
     )
     return True, ledger_enabled
@@ -199,6 +199,7 @@ def _build_composite_manifest_create_request(
     replay_capability = _resolve_composite_replay_capability(
         source_refs=source_refs,
         required_persistence_profile=config_artifacts.effective_required_profile,
+        resume_requested=runtime.resume,
     )
     code_revision = get_code_revision_provenance()
     dependency_lock_hash = getattr(code_revision, "dependency_lock_hash", None)

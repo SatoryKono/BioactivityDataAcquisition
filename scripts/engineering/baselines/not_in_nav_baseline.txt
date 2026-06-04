@@ -114,6 +114,15 @@
 03-guides/dashboards/dashboard-test-proposals.md
 03-guides/dashboards/design-system.md
 03-guides/dashboards/navigation-contract.md
+03-guides/dashboards/panels/bioetl-alerts-slo-panels.md
+03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md
+03-guides/dashboards/panels/bioetl-dq-v2-panels.md
+03-guides/dashboards/panels/bioetl-overview-v2-panels.md
+03-guides/dashboards/panels/bioetl-provider-health-v2-panels.md
+03-guides/dashboards/panels/bioetl-runtime-panels.md
+03-guides/dashboards/panels/bioetl-silver-reject-explorer-panels.md
+03-guides/dashboards/panels/bioetl-workflow-overview-panels.md
+03-guides/dashboards/panels/dashboard-panels-guide.md
 03-guides/dashboards/panel-title-inventory.md
 03-guides/dashboards/selector-architecture.md
 03-guides/dashboards/variable-reference.md

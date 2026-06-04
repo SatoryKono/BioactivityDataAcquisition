@@ -8,7 +8,6 @@ from typing import Literal
 ReproducibilityExecutionContext = Literal["source", "composite"]
 ReplayFamilyContractName = Literal[
     "snapshot_backed_exact_replay",
-    "composite_snapshot_backed_exact_replay",
     "rebuild_only",
 ]
 ReplaySupportState = Literal[
@@ -18,7 +17,6 @@ ReplaySupportState = Literal[
 ]
 StrictReplayRuntimeVerdict = Literal[
     "allowed_with_snapshot_backed_source_refs",
-    "requires_full_composite_snapshot_envelope",
     "blocked_outside_supported_boundary",
 ]
 

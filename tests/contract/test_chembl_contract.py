@@ -88,6 +88,14 @@ def _request_cache_key(
     return (method.upper(), url, normalized_params)
 
 
+def _format_reachability_error(exc: BaseException) -> str:
+    """Preserve useful skip diagnostics when transport exceptions stringify empty."""
+    message = str(exc).strip()
+    if message:
+        return message
+    return exc.__class__.__name__
+
+
 async def _request_or_skip(
     client: httpx.AsyncClient,
     method: str,
@@ -112,7 +120,10 @@ async def _request_or_skip(
         ) as exc:
             last_transport_error = exc
             if attempt >= _CHEMBL_REQUEST_RETRY_ATTEMPTS:
-                pytest.skip(f"ChEMBL endpoint not reachable: {exc}")
+                pytest.skip(
+                    "ChEMBL endpoint not reachable: "
+                    f"{_format_reachability_error(exc)}"
+                )
         else:
             if response.status_code not in _CHEMBL_TRANSIENT_STATUS_CODES:
                 _CHEMBL_RESPONSE_CACHE[cache_key] = response
@@ -126,7 +137,10 @@ async def _request_or_skip(
         await asyncio.sleep(_CHEMBL_REQUEST_RETRY_DELAY_SECONDS * attempt)
 
     if last_transport_error is not None:
-        pytest.skip(f"ChEMBL endpoint not reachable: {last_transport_error}")
+        pytest.skip(
+            "ChEMBL endpoint not reachable: "
+            f"{_format_reachability_error(last_transport_error)}"
+        )
     pytest.skip("ChEMBL temporary server error: retry budget exhausted")
 
 

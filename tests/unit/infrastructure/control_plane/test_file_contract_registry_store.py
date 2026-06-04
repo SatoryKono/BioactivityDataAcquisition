@@ -84,6 +84,32 @@ def test_registry_loading_invalid_yaml(tmp_path: Path) -> None:
         FileContractRegistryStore(invalid_file).load()
 
 
+def test_registry_filesystem_consistency_flags_missing_source(tmp_path: Path) -> None:
+    registry = ContractRegistry()
+    entry = ContractRegistryEntry(
+        identity=ContractIdentity(
+            contract_ref="test.contract.v1",
+            contract_version="1.0.0",
+            compatibility_level=CompatibilityLevel.PATCH,
+            schema_hash="a" * 64,
+        ),
+        status=LifecycleStatus.ACTIVE,
+        source_path="missing_source.yaml",
+        published_artifacts=[],
+        supported_versions=["1.0.0"],
+        last_updated="2024-01-01T00:00:00+00:00",
+        owners=["test-team"],
+    )
+    registry.register_contract(entry)
+
+    store = FileContractRegistryStore(tmp_path / "registry.yaml")
+    result = store.validate_filesystem_consistency(registry, tmp_path)
+
+    assert result.valid is False
+    assert len(result.issues) == 1
+    assert "Source file not found" in result.issues[0].message
+
+
 def test_registry_filesystem_consistency_validation(tmp_path: Path) -> None:
     existing_source = tmp_path / "existing.yaml"
     existing_source.touch()

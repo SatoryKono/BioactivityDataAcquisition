@@ -79,7 +79,7 @@ class CompositeReplayHost(CompositeRunnerObservabilityMixin):
 
 
 def build_replay_matrix_composite_config() -> CompositeConfig:
-    """Build a canonical composite config for full-envelope exact replay evidence."""
+    """Build a canonical composite config for cached-Bronze rebuild/resume evidence."""
     return CompositeConfig(
         name="composite_publication",
         version="1.0.0",

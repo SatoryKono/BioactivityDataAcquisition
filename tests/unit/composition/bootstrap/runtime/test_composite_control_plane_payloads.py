@@ -60,9 +60,14 @@ def test_build_composite_launch_context_snapshot_returns_runtime_sensitive_field
 
     assert result["pipeline_name"] == "publications"
     assert result["execution_context"] == "composite"
+    assert result["exact_replay"] is False
+    assert result["strict_exact_replay_supported"] is False
+    assert result["exact_replay_support_boundary"] == "snapshot_backed_source_runs_only"
+    assert result["composite_replay_semantics"] == "rebuild_resume_only"
+    assert result["replay_mode"] == "resume"
     assert (
-        result["exact_replay_support_boundary"]
-        == "composite_snapshot_backed_input_envelope"
+        result["replay_boundary_reason"]
+        == "composite_execution_outside_strict_exact_replay_boundary"
     )
     assert result["required_persistence_profile"] == "degraded_observable"
     assert result["required_only"] is True

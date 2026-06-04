@@ -52,8 +52,12 @@ class TestHealthServerCommand:
         assert "8081" in result.output  # default port
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")
-    @patch("bioetl.interfaces.cli.commands.health.get_health_server_quarantine_service")
-    @patch("bioetl.interfaces.cli.commands.health.get_health_server_dependencies")
+    @patch(
+        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_quarantine_service"
+    )
+    @patch(
+        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_dependencies"
+    )
     def test_health_server_default_options(
         self,
         mock_get_deps: MagicMock,
@@ -84,8 +88,12 @@ class TestHealthServerCommand:
         assert result.exit_code == ExitCode.OK.value
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")
-    @patch("bioetl.interfaces.cli.commands.health.get_health_server_quarantine_service")
-    @patch("bioetl.interfaces.cli.commands.health.get_health_server_dependencies")
+    @patch(
+        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_quarantine_service"
+    )
+    @patch(
+        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_dependencies"
+    )
     def test_health_server_custom_host_port(
         self,
         mock_get_deps: MagicMock,
@@ -112,8 +120,12 @@ class TestHealthServerCommand:
         assert result.exit_code == ExitCode.OK.value
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")
-    @patch("bioetl.interfaces.cli.commands.health.get_health_server_quarantine_service")
-    @patch("bioetl.interfaces.cli.commands.health.get_health_server_dependencies")
+    @patch(
+        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_quarantine_service"
+    )
+    @patch(
+        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_dependencies"
+    )
     def test_health_server_keyboard_interrupt(
         self,
         mock_get_deps: MagicMock,
@@ -150,15 +162,19 @@ class TestHealthServerCommand:
         assert "Starting health server on http://localhost:8888" in result.output
         assert result.exit_code == ExitCode.OK.value
 
-    @patch("bioetl.interfaces.cli.commands.health.start_metrics_server")
-    @patch("bioetl.interfaces.cli.commands.health.get_settings")
+    @patch(
+        "bioetl.interfaces.cli.commands.domains.health.server_integration.start_metrics_server"
+    )
+    @patch(
+        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_runtime_settings"
+    )
     def test_start_health_observability_starts_metrics_server_when_enabled(
         self,
         mock_get_settings: MagicMock,
         mock_start_metrics_server: MagicMock,
     ) -> None:
         """Health server mode should start metrics when observability enables it."""
-        import bioetl.interfaces.cli.commands.health as health_module
+        import bioetl.interfaces.cli.commands.domains.health.server_integration as health_server_integration
 
         mock_get_settings.return_value = SimpleNamespace(
             metrics_port=8000,
@@ -174,7 +190,7 @@ class TestHealthServerCommand:
         mock_logger = MagicMock()
         mock_start_metrics_server.return_value = True
 
-        health_module._start_health_observability(mock_logger)
+        health_server_integration._start_health_observability(mock_logger)
 
         mock_start_metrics_server.assert_called_once_with(
             port=8000,
@@ -191,15 +207,19 @@ class TestHealthServerCommand:
             metrics_addr="0.0.0.0",
         )
 
-    @patch("bioetl.interfaces.cli.commands.health.start_metrics_server")
-    @patch("bioetl.interfaces.cli.commands.health.get_settings")
+    @patch(
+        "bioetl.interfaces.cli.commands.domains.health.server_integration.start_metrics_server"
+    )
+    @patch(
+        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_runtime_settings"
+    )
     def test_start_health_observability_skips_when_disabled(
         self,
         mock_get_settings: MagicMock,
         mock_start_metrics_server: MagicMock,
     ) -> None:
         """Health server mode should not start metrics when disabled in settings."""
-        import bioetl.interfaces.cli.commands.health as health_module
+        import bioetl.interfaces.cli.commands.domains.health.server_integration as health_server_integration
 
         mock_get_settings.return_value = SimpleNamespace(
             observability=SimpleNamespace(
@@ -209,7 +229,7 @@ class TestHealthServerCommand:
         )
         mock_logger = MagicMock()
 
-        health_module._start_health_observability(mock_logger)
+        health_server_integration._start_health_observability(mock_logger)
 
         mock_start_metrics_server.assert_not_called()
         mock_logger.info.assert_called_with(
@@ -631,8 +651,12 @@ class TestHealthServerAsyncExecution:
     """Test the actual async execution of health server."""
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")
-    @patch("bioetl.interfaces.cli.commands.health.get_health_server_quarantine_service")
-    @patch("bioetl.interfaces.cli.commands.health.get_health_server_dependencies")
+    @patch(
+        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_quarantine_service"
+    )
+    @patch(
+        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_dependencies"
+    )
     def test_health_server_starts_and_stops(
         self,
         mock_get_deps: MagicMock,
@@ -658,7 +682,7 @@ class TestHealthServerAsyncExecution:
         with (
             patch("asyncio.sleep", side_effect=cancelling_sleep),
             patch(
-                "bioetl.interfaces.cli.commands.health._start_health_observability"
+                "bioetl.interfaces.cli.commands.domains.health.server_integration._start_health_observability"
             ) as mock_start_observability,
         ):
             result = cli_runner.invoke(cli, ["health", "server"])
@@ -671,8 +695,12 @@ class TestHealthServerAsyncExecution:
         assert "Health server stopped." in result.output
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")
-    @patch("bioetl.interfaces.cli.commands.health.get_health_server_quarantine_service")
-    @patch("bioetl.interfaces.cli.commands.health.get_health_server_dependencies")
+    @patch(
+        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_quarantine_service"
+    )
+    @patch(
+        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_dependencies"
+    )
     def test_health_server_with_custom_options(
         self,
         mock_get_deps: MagicMock,
@@ -697,7 +725,7 @@ class TestHealthServerAsyncExecution:
         with (
             patch("asyncio.sleep", side_effect=cancelling_sleep),
             patch(
-                "bioetl.interfaces.cli.commands.health._start_health_observability"
+                "bioetl.interfaces.cli.commands.domains.health.server_integration._start_health_observability"
             ) as mock_start_observability,
         ):
             cli_runner.invoke(
@@ -718,8 +746,12 @@ class TestHealthServerAsyncExecution:
         )
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")
-    @patch("bioetl.interfaces.cli.commands.health.get_health_server_quarantine_service")
-    @patch("bioetl.interfaces.cli.commands.health.get_health_server_dependencies")
+    @patch(
+        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_quarantine_service"
+    )
+    @patch(
+        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_dependencies"
+    )
     def test_health_server_uses_composition_entrypoint(
         self,
         mock_get_deps: MagicMock,
@@ -744,7 +776,7 @@ class TestHealthServerAsyncExecution:
         with (
             patch("asyncio.sleep", side_effect=cancelling_sleep),
             patch(
-                "bioetl.interfaces.cli.commands.health._start_health_observability"
+                "bioetl.interfaces.cli.commands.domains.health.server_integration._start_health_observability"
             ) as mock_start_observability,
         ):
             cli_runner.invoke(cli, ["health", "server"])

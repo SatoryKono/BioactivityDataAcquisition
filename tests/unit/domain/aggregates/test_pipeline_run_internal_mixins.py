@@ -121,6 +121,10 @@ class TestPipelineRunReadModelMixin:
         """duration_seconds should return None for runs without start/end times."""
         assert pipeline_run.duration_seconds is None
 
+    def test_duration_seconds_at_returns_none_without_start(self, pipeline_run: PipelineRun):
+        """duration_seconds_at should return None when the run has not started."""
+        assert pipeline_run.duration_seconds_at(_ts_seconds(15)) is None
+
     def test_duration_seconds_calculates_correct_duration(self, pipeline_run: PipelineRun):
         """duration_seconds should calculate duration between start and end."""
         pipeline_run.start(_ts_seconds(0))

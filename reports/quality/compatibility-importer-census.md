@@ -22,12 +22,12 @@
 | `src/bioetl/interfaces/cli/commands/run.py` | 0 | 2 |
 | `src/bioetl/interfaces/cli/commands/run_all.py` | 0 | 5 |
 | `src/bioetl/interfaces/cli/commands/run_composite.py` | 1 | 1 |
-| `src/bioetl/interfaces/cli/commands/health.py` | 4 | 1 |
+| `src/bioetl/interfaces/cli/commands/health.py` | 1 | 0 |
 | `src/bioetl/interfaces/cli/commands/diagnostics.py` | 1 | 2 |
 | `src/bioetl/interfaces/cli/commands/quarantine.py` | 1 | 0 |
 | `src/bioetl/interfaces/cli/commands/maintenance.py` | 0 | 0 |
 | `src/bioetl/composition/entrypoints.py` | 0 | 3 |
-| `src/bioetl/composition/health_api.py` | 2 | 2 |
+| `src/bioetl/composition/health_api.py` | 5 | 2 |
 | `src/bioetl/composition/maintenance_api.py` | 1 | 1 |
 | `src/bioetl/infrastructure/config/__init__.py` | 0 | 2 |
 | `src/bioetl/domain/composite/config.py` | 81 | 35 |

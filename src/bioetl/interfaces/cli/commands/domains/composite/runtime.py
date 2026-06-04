@@ -61,7 +61,8 @@ def build_runtime_config(
         required_only: When True, optional enrichers are skipped.
         force_enricher: Enricher name whose checkpoint is ignored for a forced re-run;
             no forced re-run if None.
-        use_cached_bronze: When True, loads data from the Bronze cache instead of the API.
+        use_cached_bronze: When True, loads data from the Bronze cache instead of the
+            API for composite rebuild/resume semantics, not strict exact replay.
         cached_bronze_date: ISO date string (YYYY-MM-DD) used to filter cached Bronze files;
             not applied if None.
         cached_bronze_path: Explicit path to a Bronze cache directory; auto-resolved if None.
@@ -155,8 +156,8 @@ def echo_composite_startup(
         composite: Composite pipeline name (e.g., 'publication').
         dry_run: When True, displays a dry-run warning in the output.
         resume: When True, displays a resume-mode notice in the output.
-        cached_bronze_enabled: When True, prints a warning that composite exact
-            replay requires a full seed/dependency/enricher snapshot envelope.
+        cached_bronze_enabled: When True, prints a warning that composite cached
+            Bronze is rebuild/resume evidence, not strict exact replay evidence.
         health_server: Whether the HTTP health server is enabled.
         health_port: Port the health server is listening on.
     """
@@ -167,8 +168,8 @@ def echo_composite_startup(
         echo_info("Resume mode: continuing from last checkpoint")
     if cached_bronze_enabled:
         echo_warning(
-            "Composite exact replay requires a full cached-Bronze snapshot envelope "
-            "for every seed, dependency, and enricher; partial cached Bronze remains "
-            "resume/rebuild evidence and fails closed for exact replay."
+            "Composite execution is outside the strict exact-replay boundary. "
+            "Cached Bronze is rebuild/resume evidence only; strict exact replay "
+            "remains source-run only."
         )
     echo_health_server_info(health_server, health_port)

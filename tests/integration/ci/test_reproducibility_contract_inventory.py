@@ -79,11 +79,16 @@ def test_reproducibility_contract_inventory_profiles_all_production_families() -
     )
     assert (
         profile_by_family["composite.publication"]["exact_replay_support_boundary"]
-        == "composite_snapshot_backed_input_envelope"
+        == "snapshot_backed_source_runs_only"
     )
     assert (
+        profile_by_family["composite.publication"]["strict_exact_replay_supported"]
+        is False
+    )
+    assert profile_by_family["composite.publication"]["support_state"] == "rebuild_only"
+    assert (
         profile_by_family["composite.publication"]["strict_replay_runtime_verdict"]
-        == "requires_full_composite_snapshot_envelope"
+        == "blocked_outside_supported_boundary"
     )
     assert profile_by_family["composite.publication"]["lineage_closure_supported"] is (
         True

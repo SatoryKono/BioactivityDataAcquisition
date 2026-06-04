@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from contextlib import suppress
 from fnmatch import fnmatch
 import os
 import sys
@@ -10,7 +11,7 @@ from typing import TYPE_CHECKING, Any
 from urllib.parse import parse_qsl, urlparse
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping, Sequence
+    from collections.abc import Callable, Mapping, Sequence
 
     import pytest
 
@@ -141,13 +142,71 @@ def build_base_vcr_config(
         config["cassette_library_dir"] = str(cassette_library_dir)
     if decode_compressed_response:
         config["decode_compressed_response"] = True
-    if filter_headers is not None:
-        config["filter_headers"] = list(filter_headers)
-    if filter_query_parameters is not None:
-        config["filter_query_parameters"] = list(filter_query_parameters)
+    before_record_request = _build_before_record_request_sanitizer(
+        filter_headers=filter_headers,
+        filter_query_parameters=filter_query_parameters,
+    )
+    if before_record_request is not None:
+        config["before_record_request"] = before_record_request
     if ignore_localhost:
         config["ignore_localhost"] = True
     return config
+
+
+def _normalize_vcr_replacements(
+    values: Sequence[str] | None,
+) -> tuple[tuple[str, object | None], ...]:
+    """Coerce one VCR replacement list into explicit (key, replacement) pairs."""
+    if values is None:
+        return ()
+    return tuple((value, None) for value in values)
+
+
+def _build_before_record_request_sanitizer(
+    *,
+    filter_headers: Sequence[str] | None,
+    filter_query_parameters: Sequence[str] | None,
+) -> Callable[[Any], Any] | None:
+    """Build one defensive sanitizer for VCR request replay/record hooks.
+
+    Some adapter transports expose request-like objects that do not fully satisfy
+    vcrpy's built-in filter expectations. In those cases, vcrpy's synthesized
+    before_record_request chain can raise TypeError during test setup. This
+    helper preserves header/query secret filtering for standard VCR Request
+    objects while degrading to a no-op for malformed or provider-specific
+    request surfaces.
+    """
+    header_replacements = _normalize_vcr_replacements(filter_headers)
+    query_replacements = _normalize_vcr_replacements(filter_query_parameters)
+    if not header_replacements and not query_replacements:
+        return None
+
+    def before_record_request(request: Any) -> Any:
+        if request is None:
+            return None
+
+        try:
+            from vcr import filters
+        except Exception:  # pragma: no cover - vcr import is environment-owned
+            return request
+
+        sanitized = request
+        if header_replacements and hasattr(sanitized, "headers"):
+            with suppress(AttributeError, KeyError, TypeError, ValueError):
+                sanitized = filters.replace_headers(
+                    sanitized,
+                    replacements=header_replacements,
+                )
+
+        if query_replacements and hasattr(sanitized, "uri"):
+            with suppress(AttributeError, KeyError, TypeError, ValueError):
+                sanitized = filters.replace_query_parameters(
+                    sanitized,
+                    replacements=query_replacements,
+                )
+        return sanitized
+
+    return before_record_request
 
 
 def query_ignore_email(request_1: Any, request_2: Any) -> bool:

@@ -16,11 +16,12 @@ from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
     resolve_contract_identity,
 )
 from bioetl.domain.control_plane.reproducibility_policy import (
-    DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
     STRICT_PERSISTENCE_PROFILES,
     is_critical_reproducibility_runtime,
     resolve_effective_required_persistence_profile,
 )
+
+_COMPOSITE_REQUIRED_PERSISTENCE_PROFILE = "degraded_observable"
 
 if TYPE_CHECKING:
     from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
@@ -110,12 +111,12 @@ def _read_pipeline_control_plane(settings: object) -> object | None:
 def _read_configured_required_persistence_profile(
     control_plane: object | None,
 ) -> str:
-    """Return the configured persistence profile or the published default."""
+    """Return configured profile or the composite rebuild/resume default."""
     return str(
         getattr(
             control_plane,
             "required_persistence_profile",
-            DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
+            _COMPOSITE_REQUIRED_PERSISTENCE_PROFILE,
         )
     )
 
@@ -146,10 +147,10 @@ def _resolve_composite_required_persistence_profile(
     *,
     configured_required_profile: object,
 ) -> str:
-    """Resolve composite launches against the published replay-ready default."""
+    """Resolve composite launches against the rebuild/resume default."""
     return resolve_effective_required_persistence_profile(
         configured_required_profile=configured_required_profile,
-        family_default_profile="replay_ready",
+        family_default_profile=_COMPOSITE_REQUIRED_PERSISTENCE_PROFILE,
         critical_runtime=is_critical_reproducibility_runtime(
             runtime_environment=getattr(settings, "env", None),
             debug_mode=getattr(settings, "debug", False),

@@ -1,0 +1,33 @@
+schema_version: 1
+linked_issue: '#5161'
+enforcement:
+  # Phase B (current): block coverage regressions vs committed inventory; tier gaps warn only.
+  default_mode: block-regression
+  tier_violation_mode: warn
+regression:
+  fail_on_decrease: true
+  # Ignore sub-point noise from coverage XML rounding across platforms.
+  min_delta_points: 0.01
+tiers:
+  global:
+    line_min_percent: 85
+    path_prefixes: []
+  default_module:
+    line_min_percent: 85
+    path_prefixes:
+      - src/bioetl/
+  domain:
+    line_min_percent: 90
+    path_prefixes:
+      - src/bioetl/domain/
+  aggregates_and_contracts:
+    line_min_percent: 95
+    path_prefixes:
+      - src/bioetl/domain/aggregates/
+      - src/bioetl/domain/schemas/
+      - src/bioetl/domain/contracts/
+tier_resolution_order:
+  - aggregates_and_contracts
+  - domain
+  - default_module
+exemptions: []

@@ -8,7 +8,12 @@ from datetime import UTC, datetime
 import pytest
 
 from bioetl.domain.aggregates.pipeline_run import PipelineRun, PipelineRunState
-from bioetl.domain.aggregates.events import PipelineCompleted, PipelineFailed, PipelineShutdown
+from bioetl.domain.aggregates.events import (
+    BatchCreated,
+    PipelineCompleted,
+    PipelineFailed,
+    PipelineShutdown,
+)
 from bioetl.domain.types import RunID, RunType
 from tests.helpers.deterministic_ids import deterministic_uuid_value
 
@@ -128,3 +133,17 @@ def test_pipeline_shutdown_event_payload_roundtrip() -> None:
     )
     assert reconstructed == event
     assert reconstructed.event_id == event.event_id
+
+
+def test_domain_event_preserves_explicit_event_id() -> None:
+    """DomainEvent should not overwrite a caller-supplied event_id."""
+    run_id = _run_id()
+    explicit_id = "fixed-event-id"
+    event = BatchCreated(
+        occurred_at=_ts(0),
+        run_id=run_id,
+        batch_id=run_id,
+        record_count=0,
+        event_id=explicit_id,
+    )
+    assert event.event_id == explicit_id

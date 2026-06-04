@@ -68,8 +68,8 @@ def test_control_plane_services_live_under_ownership_packages() -> None:
     }
 
 
-def test_flat_control_plane_paths_are_compatibility_wrappers_only() -> None:
-    """Legacy module paths should only re-export ownership-package implementations."""
+def test_removed_flat_control_plane_compatibility_wrappers_stay_absent() -> None:
+    """Removed flat compatibility wrappers must not return under control_plane/."""
     root = (
         Path(__file__).resolve().parents[4]
         / "src"
@@ -85,6 +85,4 @@ def test_flat_control_plane_paths_are_compatibility_wrappers_only() -> None:
     )
 
     for wrapper in wrappers:
-        source = (root / wrapper).read_text(encoding="utf-8")
-        assert "Compatibility wrapper" in source
-        assert source.count("from bioetl.application.services.control_plane.") == 1
+        assert not (root / wrapper).exists()

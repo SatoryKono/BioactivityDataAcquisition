@@ -17,7 +17,7 @@ from tests.helpers.deterministic_ids import (
 import pytest
 
 from bioetl.application.core.batch_metrics import BatchMetricsRecorder
-from bioetl.application.core.batch_writer import BatchWriter
+from bioetl.application.core.batch_writer import BatchWriter, BatchWriterOptions
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.domain.config import TableConfig
 from bioetl.domain.context import PipelineContext
@@ -101,7 +101,7 @@ def _make_writer(
         gold_validator=gold_validator,
         error_classifier=ErrorClassifier(),
         batch_metrics=MagicMock(spec=BatchMetricsRecorder),
-        lock_validator=lock_validator,
+        options=BatchWriterOptions(lock_validator=lock_validator),
     )
 
 

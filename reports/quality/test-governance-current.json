@@ -102,6 +102,83 @@
       },
       {
         "category": "intentional_no_exception_contract",
+        "line": "15",
+        "path": "tests/contract/test_publication_schema_strict_contracts.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_pubmed_silver_schema_accepts_minimal_fixture"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "24",
+        "path": "tests/contract/schemas/test_pubchem_shard_validation.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_pubchem_identity_shard_accepts_minimal_valid_row"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "28",
+        "path": "tests/contract/schemas/test_pubchem_shard_validation.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_pubchem_identity_shard_accepts_row_with_all_optional_checks"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "32",
+        "path": "tests/contract/schemas/test_pubchem_shard_validation.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_pubchem_physchem_shard_accepts_row_exercising_all_checks"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "36",
+        "path": "tests/contract/schemas/test_pubchem_shard_validation.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_pubchem_stereo_shard_accepts_row_exercising_all_checks"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "40",
+        "path": "tests/contract/schemas/test_pubchem_shard_validation.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_pubchem_three_d_shard_accepts_row_exercising_all_checks"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "83",
+        "path": "tests/contract/schemas/test_pubchem_shard_validation.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_pubchem_molecule_schema_accepts_composed_minimal_row"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "33",
+        "path": "tests/contract/schemas/test_publication_common_schema.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_publication_common_schema_accepts_minimal_row"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "22",
+        "path": "tests/contract/schemas/test_uniprot_shard_validation.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_uniprot_core_shard_accepts_minimal_valid_row"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "47",
+        "path": "tests/contract/schemas/test_uniprot_shard_validation.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_id_mapping_shard_accepts_found_mapping"
+      },
+      {
+        "category": "intentional_no_exception_contract",
+        "line": "65",
+        "path": "tests/contract/schemas/test_uniprot_shard_validation.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_uniprot_target_schema_accepts_composed_minimal_row"
+      },
+      {
+        "category": "intentional_no_exception_contract",
         "line": "74",
         "path": "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
@@ -113,6 +190,20 @@
         "path": "tests/integration/infrastructure/storage/test_delta_reader.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_aclose_is_noop"
+      },
+      {
+        "category": "weak_no_value",
+        "line": "96",
+        "path": "tests/security/test_sql_injection_prevention.py",
+        "rationale": "candidate tests that need later assertion strengthening or removal review",
+        "test_name": "test_database_operations_use_parameterized_queries"
+      },
+      {
+        "category": "weak_no_value",
+        "line": "77",
+        "path": "tests/security/test_xss_prevention.py",
+        "rationale": "candidate tests that need later assertion strengthening or removal review",
+        "test_name": "test_no_direct_html_rendering_of_user_input"
       },
       {
         "category": "intentional_no_exception_contract",
@@ -165,14 +256,14 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "300",
+        "line": "301",
         "path": "tests/unit/application/core/test_otel_spans.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_pipeline_run_explicit_noop_tracer"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "548",
+        "line": "553",
         "path": "tests/unit/application/core/test_otel_spans.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_postrun_run_explicit_noop_tracer"
@@ -235,14 +326,14 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "476",
+        "line": "480",
         "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_stage_name_accepts_valid"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "495",
+        "line": "499",
         "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_stage_completion_running_allows_none_timestamp"
@@ -2993,14 +3084,14 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "776",
+        "line": "775",
         "path": "tests/unit/infrastructure/test_storage_factory.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_aclose_completes_without_error"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "788",
+        "line": "787",
         "path": "tests/unit/infrastructure/test_storage_factory.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_storage_bundle_aclose__aclose_is_idempotent__79d48809"
@@ -3500,8 +3591,8 @@
       "architecture_helper_guard": 14,
       "benchmark_or_performance": 0,
       "helper_asserted": 0,
-      "intentional_no_exception_contract": 485,
-      "weak_no_value": 0
+      "intentional_no_exception_contract": 496,
+      "weak_no_value": 2
     },
     "assertless_examples": [
       "tests/architecture/test_code_metrics.py:100",
@@ -3518,19 +3609,19 @@
       "tests/architecture/test_port_contracts_hypothesis.py:587",
       "tests/architecture/test_port_contracts_resilience_concurrency.py:183",
       "tests/architecture/test_strict_architecture_contracts.py:918",
-      "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:74",
-      "tests/integration/infrastructure/storage/test_delta_reader.py:576",
-      "tests/unit/application/core/test_batch_metrics.py:138",
-      "tests/unit/application/core/test_batch_metrics.py:495",
-      "tests/unit/application/core/test_batch_metrics.py:555",
-      "tests/unit/application/core/test_batch_tracing.py:110",
-      "tests/unit/application/core/test_batch_writer_tracing_mixin.py:79",
-      "tests/unit/application/core/test_batch_writer_tracing_mixin.py:255",
-      "tests/unit/application/core/test_dq_metrics.py:33",
-      "tests/unit/application/core/test_otel_spans.py:300",
-      "tests/unit/application/core/test_otel_spans.py:548"
+      "tests/contract/test_publication_schema_strict_contracts.py:15",
+      "tests/contract/schemas/test_pubchem_shard_validation.py:24",
+      "tests/contract/schemas/test_pubchem_shard_validation.py:28",
+      "tests/contract/schemas/test_pubchem_shard_validation.py:32",
+      "tests/contract/schemas/test_pubchem_shard_validation.py:36",
+      "tests/contract/schemas/test_pubchem_shard_validation.py:40",
+      "tests/contract/schemas/test_pubchem_shard_validation.py:83",
+      "tests/contract/schemas/test_publication_common_schema.py:33",
+      "tests/contract/schemas/test_uniprot_shard_validation.py:22",
+      "tests/contract/schemas/test_uniprot_shard_validation.py:47",
+      "tests/contract/schemas/test_uniprot_shard_validation.py:65"
     ],
-    "assertless_total_candidates": 499,
+    "assertless_total_candidates": 512,
     "compatibility_examples": [
       "tests/architecture/test_application_composite_compat_surface_usage.py",
       "tests/architecture/test_application_core_lifecycle_shim_usage.py",
@@ -3605,12 +3696,17 @@
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "markerless_test_functions": 0,
-    "parse_errors": [],
-    "refined_assertless_tests": 0,
+    "parse_errors": [
+      {
+        "error": "expected '(' (test_client_observability_helpers.py, line 157)",
+        "path": "tests/unit/infrastructure/adapters/crossref/test_client_observability_helpers.py"
+      }
+    ],
+    "refined_assertless_tests": 2,
     "root": ".",
     "top_duplicate_test_names": [],
-    "total_test_files": 1674,
-    "total_test_functions": 20022,
+    "total_test_files": 1695,
+    "total_test_functions": 20119,
     "uuid4_call_sites": 0
   }
 }

@@ -9,12 +9,14 @@ import bioetl.composition.runtime_builders.run_manifest_support as _manifest_sup
 from bioetl.application.services.control_plane.effective_config.service import (
     create_effective_config_service,
 )
+from bioetl.composition.control_plane_store_builders import (
+    create_effective_config_artifact_store,
+)
 from bioetl.composition.runtime_builders._manifest_publication_context_support import (
     ensure_manifest_publication_identity,
     resolve_manifest_publication_context,
     resolve_manifest_publication_identity,
 )
-from bioetl.composition.runtime_builders._run_manifest_refs import control_plane_root
 from bioetl.composition.runtime_builders._effective_config_artifact_builder_support import (
     build_composite_runtime_overrides_snapshot,
     build_effective_config_source_refs,
@@ -27,7 +29,6 @@ from bioetl.composition.runtime_builders.run_manifest_support import (
 from bioetl.domain.control_plane.effective_config_artifact import (
     ConfigResolutionPolicy,
 )
-from bioetl.infrastructure.control_plane import FileEffectiveConfigArtifactStore
 
 if TYPE_CHECKING:
     from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
@@ -75,9 +76,7 @@ def _create_and_persist_effective_config_artifact_payload(
     if not isinstance(loaded_payload, dict):
         raise ValueError("Effective-config artifact payload must be a JSON object")
     artifact_payload = {str(key): value for key, value in loaded_payload.items()}
-    artifact_store = FileEffectiveConfigArtifactStore(
-        base_path=control_plane_root(settings, "effective_config")
-    )
+    artifact_store = create_effective_config_artifact_store(settings=settings)
     try:
         artifact_store.save(
             artifact_id=artifact.artifact_id,

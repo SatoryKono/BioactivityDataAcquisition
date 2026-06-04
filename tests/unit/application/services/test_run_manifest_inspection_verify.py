@@ -7,7 +7,7 @@ from uuid import UUID
 
 import pytest
 
-from bioetl.application.services.control_plane.effective_config_service import (
+from bioetl.application.services.control_plane.effective_config.service import (
     EffectiveConfigService,
 )
 from bioetl.application.services.control_plane.manifest.inspection_service import (
@@ -16,10 +16,10 @@ from bioetl.application.services.control_plane.manifest.inspection_service impor
 from bioetl.application.services.control_plane.manifest.models import (
     RunManifestCreateSpec as RunManifestCreateRequest,
 )
-from bioetl.application.services.control_plane.run_ledger_service import (
+from bioetl.application.services.control_plane.ledger.service import (
     RunLedgerService,
 )
-from bioetl.application.services.control_plane.run_manifest_service import (
+from bioetl.application.services.control_plane.manifest.service import (
     RunManifestService,
 )
 from bioetl.domain.config.dq import DQConfig

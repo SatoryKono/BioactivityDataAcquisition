@@ -16,7 +16,9 @@ from bioetl.domain.control_plane import (
     ControlPlaneArtifactLifecyclePolicy,
     ControlPlaneArtifactReplayImpact,
 )
-from bioetl.infrastructure.control_plane import FileControlPlaneArtifactLifecycleStore
+from bioetl.infrastructure.control_plane.file_artifact_lifecycle_store import (
+    FileControlPlaneArtifactLifecycleStore,
+)
 
 
 pytestmark = pytest.mark.unit
