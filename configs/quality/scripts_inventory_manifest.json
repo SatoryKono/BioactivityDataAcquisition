@@ -1,6 +1,12 @@
 {
   "schema_version": "1.0",
+<<<<<<< Updated upstream
   "generated_at": "2026-06-04T16:44:40.055923+00:00",
+||||||| Stash base
+  "generated_at": "2026-06-04T19:52:56.212183+00:00",
+=======
+  "generated_at": "2026-06-04T19:54:25.269933+00:00",
+>>>>>>> Stashed changes
   "summary": {
     "total_scripts": 428,
     "status_counts": {
