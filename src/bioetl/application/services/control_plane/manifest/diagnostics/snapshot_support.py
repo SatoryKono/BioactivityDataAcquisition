@@ -7,6 +7,9 @@ from collections.abc import Mapping
 from bioetl.application.services.control_plane.manifest.diagnostics.nested_mapping import (
     lookup_mapping_path,
 )
+from bioetl.application.services.control_plane.manifest.snapshot_payloads import (
+    manifest_input_snapshot_trace_refs,
+)
 from bioetl.application.services.control_plane.replay.historical_certification import (
     LIVE_CAPTURE_SNAPSHOT_MATERIALIZED,
     MIXED_POST_MANIFEST_SNAPSHOT_MATERIALIZATION,
@@ -20,10 +23,6 @@ from bioetl.domain.normalization import (
 
 def collect_input_snapshot_refs(manifest: RunManifest) -> list[dict[str, object]]:
     """Return deterministic flattened snapshot provenance extracted from source refs."""
-    from bioetl.application.services.control_plane.run_manifest_diagnostics_support import (
-        manifest_input_snapshot_trace_refs,
-    )
-
     return manifest_input_snapshot_trace_refs(manifest)
 
 

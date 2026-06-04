@@ -16,6 +16,7 @@ from __future__ import annotations
 
 __all__ = [
     "ATOMIC_WRITE_EXCEPTIONS",
+    "AtomicWriteGroup",
     "AtomicWriteError",
     "atomic_write",
     "atomic_write_bytes",
@@ -27,7 +28,6 @@ import tempfile
 import time
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
-from importlib import import_module
 from pathlib import Path
 from typing import IO, Any
 
@@ -65,7 +65,7 @@ ReplaceRetryHook = Callable[[int, float, OSError], None]
 def __getattr__(name: str) -> object:
     """Lazily expose compatibility re-exports without creating import cycles."""
     if name == "AtomicWriteGroup":
-        AtomicWriteGroup = import_module("bioetl.infrastructure.storage.support.atomic_group").AtomicWriteGroup
+        from bioetl.infrastructure.storage.support.atomic_group import AtomicWriteGroup
 
         return AtomicWriteGroup
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

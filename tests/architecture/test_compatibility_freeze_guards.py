@@ -498,12 +498,6 @@ SANCTIONED_DEAD_CODE_EXCLUSION_MODULE_PATHS = frozenset(
         / "application"
         / "composite"
         / "dependency_join_support.py",
-        ROOT
-        / "src"
-        / "bioetl"
-        / "application"
-        / "core"
-        / "batch_execution_state_service.py",
     }
 )
 ALLOWED_LEGACY_DATASOURCE_FACTORY_TEST_FILES: frozenset[Path] = frozenset()
