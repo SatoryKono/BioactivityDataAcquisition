@@ -260,11 +260,11 @@ CHEMBL_ACTIVITY_PROFILE = build_standard_profile(
         "bao_endpoint_mapping_status": chembl_enum(
             "activity", "bao_endpoint_mapping_status"
         ),
-        "bao_format_mapping_status": chembl_enum("activity", "bao_format_mapping_status"),
-        "uo_unit_mapping_status": chembl_enum("activity", "uo_unit_mapping_status"),
-        "qudt_unit_mapping_status": chembl_enum(
-            "activity", "qudt_unit_mapping_status"
+        "bao_format_mapping_status": chembl_enum(
+            "activity", "bao_format_mapping_status"
         ),
+        "uo_unit_mapping_status": chembl_enum("activity", "uo_unit_mapping_status"),
+        "qudt_unit_mapping_status": chembl_enum("activity", "qudt_unit_mapping_status"),
     },
     special_rules=_SPECIAL_RULE_COMPONENTS,
     unit_fields=_RAW_UNIT_FIELDS,

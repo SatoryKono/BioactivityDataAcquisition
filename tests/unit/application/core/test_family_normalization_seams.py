@@ -22,7 +22,9 @@ from bioetl.application.core.data_sources.publication_term import (
 from bioetl.application.core.data_sources.subcellular_fraction import (
     SubcellularFractionDataSource,
 )
-from bioetl.application.core.factory_wiring_api import PipelineRunner as PipelineRunnerLegacy
+from bioetl.application.core.factory_wiring_api import (
+    PipelineRunner as PipelineRunnerLegacy,
+)
 from bioetl.application.core.filtered_data_source import (
     FilteredDataSource as FilteredDataSourceLegacy,
 )

@@ -118,9 +118,11 @@ def validate_loaded_checkpoint(
         )
 
     assert host._compatibility_service is not None
-    compatibility_result = host._compatibility_service.validate_checkpoint_compatibility(
-        effective_current_metadata,
-        checkpoint_metadata,
+    compatibility_result = (
+        host._compatibility_service.validate_checkpoint_compatibility(
+            effective_current_metadata,
+            checkpoint_metadata,
+        )
     )
     if compatibility_result.compatible:
         host._logger.info(
@@ -189,7 +191,9 @@ def handle_incompatible_checkpoint_result(
         )
         return None
     host._emit_checkpoint_load_status(
-        "observe_loaded_degraded" if disposition == "observe_loaded_degraded" else "loaded"
+        "observe_loaded_degraded"
+        if disposition == "observe_loaded_degraded"
+        else "loaded"
     )
     return result
 

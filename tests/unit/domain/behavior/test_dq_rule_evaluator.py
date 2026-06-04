@@ -275,7 +275,9 @@ class TestEvaluateDQRulesForRecord:
         )
         outcomes = evaluate_dq_rules_for_record(record, dq_config=config)
         # At least one outcome should have QUARANTINE disposition
-        quarantine_outcomes = [o for o in outcomes if o.disposition == DQDisposition.QUARANTINE]
+        quarantine_outcomes = [
+            o for o in outcomes if o.disposition == DQDisposition.QUARANTINE
+        ]
         assert len(quarantine_outcomes) > 0
 
     def test_invalid_record_policy_maps_error_to_skip(self):

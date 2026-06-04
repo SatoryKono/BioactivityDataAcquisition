@@ -50,6 +50,7 @@ class ExportSidecarPayloadsRecord:
     provenance_manifest: dict[str, object]
     licensing_manifest: dict[str, object]
 
+
 ExportSidecarPayloads = ExportSidecarPayloadsRecord
 
 
@@ -237,4 +238,3 @@ def write_export_sidecar_manifests(
         output_dir=output_path.parent,
     )
     return (provenance_path, licensing_path, checksums_path)
-

@@ -51,7 +51,10 @@ def _imported_modules(relative_path: str) -> set[str]:
     ("relative_path", "max_lines", "required_modules"),
     [
         (relative_path, max_lines, required_modules)
-        for relative_path, (max_lines, required_modules) in PIPELINE_SEAM_RATCHETS.items()
+        for relative_path, (
+            max_lines,
+            required_modules,
+        ) in PIPELINE_SEAM_RATCHETS.items()
     ],
 )
 def test_issue_5053_provider_pipeline_modules_stay_thin_and_helper_backed(

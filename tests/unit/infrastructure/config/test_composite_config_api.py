@@ -130,7 +130,9 @@ def test_load_composite_config_rejects_empty_yaml_payload(tmp_path: Path) -> Non
 
 
 @pytest.mark.unit
-def test_load_composite_config_rejects_missing_composite_version(tmp_path: Path) -> None:
+def test_load_composite_config_rejects_missing_composite_version(
+    tmp_path: Path,
+) -> None:
     config_dir = tmp_path / "configs" / "composites"
     payload = _build_composite_payload("composite_publication")
     del payload["composite"]["version"]
@@ -164,12 +166,7 @@ def test_load_composite_config_propagates_invalid_external_dq_payload_type(
 ) -> None:
     config_dir = tmp_path / "configs" / "composites"
     quality_path = (
-        tmp_path
-        / "configs"
-        / "quality"
-        / "entities"
-        / "composite"
-        / "publication.yaml"
+        tmp_path / "configs" / "quality" / "entities" / "composite" / "publication.yaml"
     )
     quality_path.parent.mkdir(parents=True, exist_ok=True)
     quality_path.write_text("[1]\n", encoding="utf-8")
@@ -199,12 +196,7 @@ def test_load_composite_config_uses_custom_validator_and_preserves_payload_mutat
     _write_yaml(config_dir / "publication.yaml", payload)
 
     quality_path = (
-        tmp_path
-        / "configs"
-        / "quality"
-        / "entities"
-        / "composite"
-        / "publication.yaml"
+        tmp_path / "configs" / "quality" / "entities" / "composite" / "publication.yaml"
     )
     quality_path.parent.mkdir(parents=True, exist_ok=True)
     _write_yaml(quality_path, {"dq_overrides": {"hard_fail_threshold": 0.25}})

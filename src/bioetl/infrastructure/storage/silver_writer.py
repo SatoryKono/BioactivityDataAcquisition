@@ -113,7 +113,9 @@ class SilverWriter(
             "contract_rollout_policy": contract_rollout_policy,
         }
         conflicting_dependencies = sorted(
-            name for name, value in explicit_runtime_dependencies.items() if value is not None
+            name
+            for name, value in explicit_runtime_dependencies.items()
+            if value is not None
         )
         if runtime_request is not None and conflicting_dependencies:
             raise TypeError(

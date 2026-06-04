@@ -94,9 +94,7 @@ class TestBatchLifecycleFunctions:
     def test_emit_batch_created_appends_event(self, run_id, batch_id):
         """emit_batch_created should append BatchCreated event."""
         events: list = []
-        lifecycle.emit_batch_created(
-            events, _ts(0), run_id, batch_id
-        )
+        lifecycle.emit_batch_created(events, _ts(0), run_id, batch_id)
 
         assert len(events) == 1
         event = events[0]
@@ -145,9 +143,7 @@ class TestBatchLifecycleFunctions:
     def test_batch_lifecycle_seal_emits_batch_sealed_event(self, run_id, batch_id):
         """seal should emit BatchSealed event with correct counts."""
         events: list = []
-        lifecycle.seal(
-            BatchStatus.OPEN, events, run_id, batch_id, 10, 8, 2, _ts(10)
-        )
+        lifecycle.seal(BatchStatus.OPEN, events, run_id, batch_id, 10, 8, 2, _ts(10))
 
         assert len(events) == 1
         event = events[0]
@@ -234,20 +230,41 @@ class TestBatchLifecycleFunctions:
 
         # Should succeed from WRITING
         new_status = lifecycle.mark_failed(
-            BatchStatus.WRITING, events, run_id, batch_id, "silver", "Write error", None, failed_at=_ts(20)
+            BatchStatus.WRITING,
+            events,
+            run_id,
+            batch_id,
+            "silver",
+            "Write error",
+            None,
+            failed_at=_ts(20),
         )
         assert new_status == BatchStatus.FAILED
 
         # Should fail from OPEN
         with pytest.raises(InvalidStateError, match="Cannot fail"):
             lifecycle.mark_failed(
-                BatchStatus.OPEN, events, run_id, batch_id, "silver", "Error", None, failed_at=_ts(20)
+                BatchStatus.OPEN,
+                events,
+                run_id,
+                batch_id,
+                "silver",
+                "Error",
+                None,
+                failed_at=_ts(20),
             )
 
         # Should fail from SEALED
         with pytest.raises(InvalidStateError, match="Cannot fail"):
             lifecycle.mark_failed(
-                BatchStatus.SEALED, events, run_id, batch_id, "silver", "Error", None, failed_at=_ts(20)
+                BatchStatus.SEALED,
+                events,
+                run_id,
+                batch_id,
+                "silver",
+                "Error",
+                None,
+                failed_at=_ts(20),
             )
 
         # Should fail from COMMITTED
@@ -280,7 +297,14 @@ class TestBatchLifecycleFunctions:
         """mark_failed should emit BatchFailed event with error details."""
         events: list = []
         lifecycle.mark_failed(
-            BatchStatus.WRITING, events, run_id, batch_id, "silver", "Connection timeout", "TimeoutError", failed_at=_ts(20)
+            BatchStatus.WRITING,
+            events,
+            run_id,
+            batch_id,
+            "silver",
+            "Connection timeout",
+            "TimeoutError",
+            failed_at=_ts(20),
         )
 
         assert len(events) == 1
@@ -349,7 +373,9 @@ class TestBatchReadModelMixin:
 
     def test_batch_read_model_property_accessors_return_correct_values(self, run_id):
         """Read model properties should return correct aggregate state."""
-        batch = Batch.create(run_id=run_id, start_index=100, created_at=_ts(0), metadata={"key": "value"})
+        batch = Batch.create(
+            run_id=run_id, start_index=100, created_at=_ts(0), metadata={"key": "value"}
+        )
         batch.add_record({"id": "1"})
         batch.add_record({"id": "2"})
 
@@ -407,7 +433,9 @@ class TestBatchReadModelMixin:
         batch = Batch.create(run_id=run_id, created_at=_ts(0))
         batch.add_record({"id": "1"})
         batch.add_record({"id": "2"})
-        batch.quarantine_record(batch.all_records[0], "Error", "ERR", quarantined_at=_ts(5))
+        batch.quarantine_record(
+            batch.all_records[0], "Error", "ERR", quarantined_at=_ts(5)
+        )
 
         repr_str = repr(batch)
         assert "Batch(" in repr_str
@@ -448,11 +476,13 @@ class TestBatchMutationMixin:
         """add_records should create multiple records at once."""
         batch = Batch.create(run_id=run_id, created_at=_ts(0))
 
-        records = batch.add_records([
-            {"id": "1"},
-            {"id": "2"},
-            {"id": "3"},
-        ])
+        records = batch.add_records(
+            [
+                {"id": "1"},
+                {"id": "2"},
+                {"id": "3"},
+            ]
+        )
 
         assert len(records) == 3
         assert batch.record_count == 3
@@ -509,7 +539,9 @@ class TestBatchMutationMixin:
         batch2.add_record({"id": "2"})
 
         with pytest.raises(ValueError, match="does not belong to this batch"):
-            batch2.quarantine_record(foreign_record, "Error", "ERR", quarantined_at=_ts(5))
+            batch2.quarantine_record(
+                foreign_record, "Error", "ERR", quarantined_at=_ts(5)
+            )
 
     def test_assert_open_blocks_operations_on_sealed(self, run_id):
         """_assert_open should raise InvalidStateError for non-modifiable states."""
@@ -521,7 +553,9 @@ class TestBatchMutationMixin:
             batch.add_record({"id": "2"})
 
         with pytest.raises(InvalidStateError, match="Cannot quarantine_record"):
-            batch.quarantine_record(batch.all_records[0], "Error", "ERR", quarantined_at=_ts(11))
+            batch.quarantine_record(
+                batch.all_records[0], "Error", "ERR", quarantined_at=_ts(11)
+            )
 
 
 class TestBatchLifecycleMixin:
@@ -688,7 +722,9 @@ class TestBatchRecordValueObject:
         assert invalid.entity_id == sample_batch_record.entity_id
         assert invalid.content_hash == sample_batch_record.content_hash
 
-    def test_with_validation_error_overrides_validation_fields(self, sample_batch_record):
+    def test_with_validation_error_overrides_validation_fields(
+        self, sample_batch_record
+    ):
         """with_validation_error should override validation-related fields."""
         invalid = sample_batch_record.with_validation_error("New error", "NEW_CODE")
 

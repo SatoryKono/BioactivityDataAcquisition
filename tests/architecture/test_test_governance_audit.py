@@ -572,6 +572,7 @@ def test_preflight_reports_missing_git_lfs_as_strict_reproducibility_blocker(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(preflight, "_scan_lfs_pointer_files", lambda _root: [])
+
     def fake_git_runner(args: list[str]) -> subprocess.CompletedProcess[str]:
         values = {
             ("branch", "--show-current"): "main",
@@ -610,6 +611,7 @@ def test_preflight_reports_unhealthy_git_lfs_as_strict_reproducibility_blocker(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(preflight, "_scan_lfs_pointer_files", lambda _root: [])
+
     def fake_git_runner(args: list[str]) -> subprocess.CompletedProcess[str]:
         values = {
             ("branch", "--show-current"): subprocess.CompletedProcess(
@@ -668,6 +670,7 @@ def test_preflight_reports_timed_out_git_status_as_strict_reproducibility_blocke
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(preflight, "_scan_lfs_pointer_files", lambda _root: [])
+
     def fake_git_runner(args: list[str]) -> subprocess.CompletedProcess[str]:
         if tuple(args) == ("status", "--short", "--untracked-files=no"):
             raise subprocess.TimeoutExpired(

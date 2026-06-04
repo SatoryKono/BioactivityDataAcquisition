@@ -11,10 +11,13 @@ from bioetl.domain.composite.config import (
     MergeConfig,
     SeedConfig,
 )
+
 pytestmark = pytest.mark.unit
 
 
-def _publication_config(*, dependencies: tuple[DependencyConfig, ...]) -> CompositeConfig:
+def _publication_config(
+    *, dependencies: tuple[DependencyConfig, ...]
+) -> CompositeConfig:
     return CompositeConfig(
         name="publication_composite",
         version="1.0.0",
@@ -69,7 +72,9 @@ def test_validate_composite_config_rejects_join_key_not_in_seed() -> None:
                 silver_table="silver/chembl/publication",
             ),
             dependencies=(),
-            enrichers=(EnricherConfig(pipeline="pubmed_publication", join_keys=("pmid",)),),
+            enrichers=(
+                EnricherConfig(pipeline="pubmed_publication", join_keys=("pmid",)),
+            ),
             merge=MergeConfig(
                 strategy="left_outer",
                 conflict_resolution="seed_priority",

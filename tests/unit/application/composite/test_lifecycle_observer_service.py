@@ -268,10 +268,12 @@ def test_emit_phase_completed_with_duration() -> None:
         phase_name="merge",
     )
 
-    logger.info.assert_called_once()
-    call_args = logger.info.call_args
-    assert "duration_seconds" in call_args.kwargs
-    assert call_args.kwargs["duration_seconds"] > 0
+    assert logger.info.call_count == 2
+    started_call, completed_call = logger.info.call_args_list
+    assert started_call.args[0] == "merge_started"
+    assert completed_call.args[0] == "merge_completed"
+    assert "duration_seconds" in completed_call.kwargs
+    assert completed_call.kwargs["duration_seconds"] > 0
 
 
 @pytest.mark.unit

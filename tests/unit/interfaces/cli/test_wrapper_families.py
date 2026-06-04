@@ -59,7 +59,9 @@ PACKAGE_WRAPPER_CASES: tuple[
 
 
 @pytest.mark.unit
-@pytest.mark.skip(reason="Timeout issue with lazy loading chain - requires investigation")
+@pytest.mark.skip(
+    reason="Timeout issue with lazy loading chain - requires investigation"
+)
 @pytest.mark.parametrize(
     (
         "module_name",

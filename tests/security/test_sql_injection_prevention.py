@@ -58,17 +58,21 @@ class TestSQLInjectionPrevention:
 
         for py_file, content in source_contents:
             # Skip if file doesn't contain SQL keywords
-            if "SELECT" not in content and "INSERT" not in content and "UPDATE" not in content:
+            if (
+                "SELECT" not in content
+                and "INSERT" not in content
+                and "UPDATE" not in content
+            ):
                 continue
 
             for pattern, description in sql_concat_patterns:
                 if re.search(pattern, content, re.IGNORECASE):
                     # Check if it's in a comment or docstring (false positive)
-                    lines = content.split('\n')
+                    lines = content.split("\n")
                     for i, line in enumerate(lines, 1):
                         if re.search(pattern, line, re.IGNORECASE):
                             # Skip if it's a comment
-                            if line.strip().startswith('#'):
+                            if line.strip().startswith("#"):
                                 continue
                             # Skip if it's a docstring
                             if '"""' in line or "'''" in line:
@@ -83,8 +87,7 @@ class TestSQLInjectionPrevention:
         ]
 
         filtered_violations = [
-            v for v in violations
-            if not any(allowed in v for allowed in allowed_files)
+            v for v in violations if not any(allowed in v for allowed in allowed_files)
         ]
 
         assert not filtered_violations, (
@@ -99,14 +102,14 @@ class TestSQLInjectionPrevention:
         """Inventory execute() sites; hard failures stay in the concatenation guard."""
         # This is a positive test - checks for safe patterns
         safe_patterns = [
-            r'\.execute\([^)]*\?',  # execute with ? placeholder
-            r'\.execute\([^)]*%s',  # execute with %s placeholder (when used correctly)
-            r'\.execute\([^)]*:\w+',  # execute with named parameters
+            r"\.execute\([^)]*\?",  # execute with ? placeholder
+            r"\.execute\([^)]*%s",  # execute with %s placeholder (when used correctly)
+            r"\.execute\([^)]*:\w+",  # execute with named parameters
         ]
 
         files_with_db_operations = []
         for py_file, content in source_contents:
-            if any(pattern in content for pattern in ['execute(', 'executemany(']):
+            if any(pattern in content for pattern in ["execute(", "executemany("]):
                 if any(re.search(pattern, content) for pattern in safe_patterns):
                     continue  # File uses safe patterns
                 rel_path = py_file.relative_to(PROJECT_ROOT)

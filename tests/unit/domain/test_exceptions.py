@@ -156,6 +156,13 @@ class TestExceptions:
         assert e.status_code == 429
         assert e.retry_after == pytest.approx(120.0)
 
+    def test_rate_limit_error_requires_provider_without_message_or_service_name(
+        self,
+    ) -> None:
+        """Bare constructor path should reject missing provider."""
+        with pytest.raises(ValueError, match="provider is required"):
+            RateLimitError()
+
     def test_service_authentication_error(self) -> None:
         """Test ServiceAuthenticationError."""
         e = ServiceAuthenticationError(

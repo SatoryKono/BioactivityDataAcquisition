@@ -22,11 +22,13 @@ class TestCompositeMergeGoldenTests:
     def test_seed_merge_golden_output(self) -> None:
         """Test seed merge produces expected golden output."""
         # Create seed data
-        seed_df = pl.DataFrame({
-            "id": [1, 2, 3],
-            "name": ["Alice", "Bob", "Charlie"],
-            "value": [10, 20, 30],
-        })
+        seed_df = pl.DataFrame(
+            {
+                "id": [1, 2, 3],
+                "name": ["Alice", "Bob", "Charlie"],
+                "value": [10, 20, 30],
+            }
+        )
 
         # Expected golden output
         expected_columns = ["id", "name", "value"]
@@ -37,17 +39,21 @@ class TestCompositeMergeGoldenTests:
     def test_dependency_merge_golden_output(self) -> None:
         """Test dependency merge produces expected golden output."""
         # Create seed data
-        seed_df = pl.DataFrame({
-            "id": [1, 2, 3],
-            "name": ["Alice", "Bob", "Charlie"],
-        })
+        seed_df = pl.DataFrame(
+            {
+                "id": [1, 2, 3],
+                "name": ["Alice", "Bob", "Charlie"],
+            }
+        )
 
         # Create dependency data
-        dependency_df = pl.DataFrame({
-            "id": [1, 2, 3],
-            "department": ["Engineering", "Sales", "Marketing"],
-            "salary": [100000, 90000, 95000],
-        })
+        dependency_df = pl.DataFrame(
+            {
+                "id": [1, 2, 3],
+                "department": ["Engineering", "Sales", "Marketing"],
+                "salary": [100000, 90000, 95000],
+            }
+        )
 
         # Expected merge result
         assert len(seed_df) == 3
@@ -58,17 +64,25 @@ class TestCompositeMergeGoldenTests:
     def test_enricher_merge_golden_output(self) -> None:
         """Test enricher merge produces expected golden output."""
         # Create base data
-        base_df = pl.DataFrame({
-            "id": [1, 2, 3],
-            "name": ["Alice", "Bob", "Charlie"],
-        })
+        base_df = pl.DataFrame(
+            {
+                "id": [1, 2, 3],
+                "name": ["Alice", "Bob", "Charlie"],
+            }
+        )
 
         # Create enricher data
-        enricher_df = pl.DataFrame({
-            "id": [1, 2, 3],
-            "metadata": [{"key1": "value1"}, {"key2": "value2"}, {"key3": "value3"}],
-            "tags": [["tag1"], ["tag2"], ["tag3"]],
-        })
+        enricher_df = pl.DataFrame(
+            {
+                "id": [1, 2, 3],
+                "metadata": [
+                    {"key1": "value1"},
+                    {"key2": "value2"},
+                    {"key3": "value3"},
+                ],
+                "tags": [["tag1"], ["tag2"], ["tag3"]],
+            }
+        )
 
         # Expected enricher merge result
         assert len(base_df) == 3
@@ -77,16 +91,20 @@ class TestCompositeMergeGoldenTests:
     def test_column_priority_golden_behavior(self) -> None:
         """Test column priority ordering in merge."""
         # Test priority: seed > dependency > enricher
-        seed_df = pl.DataFrame({
-            "id": [1, 2],
-            "name": ["Alice", "Bob"],
-            "priority_field": ["seed_value", "seed_value"],
-        })
+        seed_df = pl.DataFrame(
+            {
+                "id": [1, 2],
+                "name": ["Alice", "Bob"],
+                "priority_field": ["seed_value", "seed_value"],
+            }
+        )
 
-        dependency_df = pl.DataFrame({
-            "id": [1, 2],
-            "priority_field": ["dep_value", "dep_value"],
-        })
+        dependency_df = pl.DataFrame(
+            {
+                "id": [1, 2],
+                "priority_field": ["dep_value", "dep_value"],
+            }
+        )
 
         # Expected: seed values should take priority
         assert "priority_field" in seed_df.columns
@@ -102,10 +120,12 @@ class TestCompositeMergeGoldenTests:
         }
 
         # Create data with aliased fields
-        aliased_df = pl.DataFrame({
-            "user_id": [1, 2, 3],
-            "full_name": ["Alice", "Bob", "Charlie"],
-        })
+        aliased_df = pl.DataFrame(
+            {
+                "user_id": [1, 2, 3],
+                "full_name": ["Alice", "Bob", "Charlie"],
+            }
+        )
 
         # Expected: aliases should be resolved to canonical names
         assert len(aliased_df) == 3
@@ -115,10 +135,12 @@ class TestCompositeMergeGoldenTests:
     def test_merge_deduplication_golden(self) -> None:
         """Test deduplication in merge results."""
         # Create data with duplicates
-        duplicate_df = pl.DataFrame({
-            "id": [1, 1, 2, 2, 3],
-            "name": ["Alice", "Alice", "Bob", "Bob", "Charlie"],
-        })
+        duplicate_df = pl.DataFrame(
+            {
+                "id": [1, 1, 2, 2, 3],
+                "name": ["Alice", "Alice", "Bob", "Bob", "Charlie"],
+            }
+        )
 
         # Expected: duplicates should be removed
         assert len(duplicate_df) == 5  # Before deduplication
@@ -127,11 +149,13 @@ class TestCompositeMergeGoldenTests:
     def test_merge_type_coercion_golden(self) -> None:
         """Test type coercion in merge operations."""
         # Create data with mixed types
-        mixed_df = pl.DataFrame({
-            "id": [1, 2, 3],
-            "value_int": [10, 20, 30],
-            "value_str": ["10", "20", "30"],
-        })
+        mixed_df = pl.DataFrame(
+            {
+                "id": [1, 2, 3],
+                "value_int": [10, 20, 30],
+                "value_str": ["10", "20", "30"],
+            }
+        )
 
         # Expected: types should be coerced appropriately
         assert len(mixed_df) == 3
@@ -142,11 +166,13 @@ class TestCompositeMergeGoldenTests:
     def test_merge_null_handling_golden(self) -> None:
         """Test null handling in merge operations."""
         # Create data with nulls
-        null_df = pl.DataFrame({
-            "id": [1, 2, 3],
-            "name": ["Alice", None, "Charlie"],
-            "value": [10, None, 30],
-        })
+        null_df = pl.DataFrame(
+            {
+                "id": [1, 2, 3],
+                "name": ["Alice", None, "Charlie"],
+                "value": [10, None, 30],
+            }
+        )
 
         # Expected: nulls should be handled appropriately
         assert len(null_df) == 3
@@ -156,16 +182,20 @@ class TestCompositeMergeGoldenTests:
     def test_merge_schema_evolution_golden(self) -> None:
         """Test schema evolution in merge operations."""
         # Create data with evolving schema
-        v1_df = pl.DataFrame({
-            "id": [1, 2],
-            "name": ["Alice", "Bob"],
-        })
+        v1_df = pl.DataFrame(
+            {
+                "id": [1, 2],
+                "name": ["Alice", "Bob"],
+            }
+        )
 
-        v2_df = pl.DataFrame({
-            "id": [1, 2],
-            "name": ["Alice", "Bob"],
-            "email": ["alice@example.com", "bob@example.com"],
-        })
+        v2_df = pl.DataFrame(
+            {
+                "id": [1, 2],
+                "name": ["Alice", "Bob"],
+                "email": ["alice@example.com", "bob@example.com"],
+            }
+        )
 
         # Expected: schema should evolve with new columns
         assert len(v1_df.columns) == 2
@@ -175,11 +205,13 @@ class TestCompositeMergeGoldenTests:
     def test_merge_performance_golden(self) -> None:
         """Test merge performance characteristics."""
         # Create larger dataset
-        large_df = pl.DataFrame({
-            "id": range(10000),
-            "name": [f"User_{i}" for i in range(10000)],
-            "value": range(10000),
-        })
+        large_df = pl.DataFrame(
+            {
+                "id": range(10000),
+                "name": [f"User_{i}" for i in range(10000)],
+                "value": range(10000),
+            }
+        )
 
         # Expected: merge should complete within reasonable time
         assert len(large_df) == 10000
@@ -255,10 +287,12 @@ class TestCompositeMergeBehaviorTests:
 
     def test_seed_only_merge(self) -> None:
         """Test merge with only seed data (no dependencies/enrichers)."""
-        seed_df = pl.DataFrame({
-            "id": [1, 2, 3],
-            "name": ["Alice", "Bob", "Charlie"],
-        })
+        seed_df = pl.DataFrame(
+            {
+                "id": [1, 2, 3],
+                "name": ["Alice", "Bob", "Charlie"],
+            }
+        )
 
         # Expected: merge should return seed data unchanged
         assert len(seed_df) == 3
@@ -266,15 +300,19 @@ class TestCompositeMergeBehaviorTests:
 
     def test_single_dependency_merge(self) -> None:
         """Test merge with single dependency."""
-        seed_df = pl.DataFrame({
-            "id": [1, 2, 3],
-            "name": ["Alice", "Bob", "Charlie"],
-        })
+        seed_df = pl.DataFrame(
+            {
+                "id": [1, 2, 3],
+                "name": ["Alice", "Bob", "Charlie"],
+            }
+        )
 
-        dependency_df = pl.DataFrame({
-            "id": [1, 2, 3],
-            "department": ["Engineering", "Sales", "Marketing"],
-        })
+        dependency_df = pl.DataFrame(
+            {
+                "id": [1, 2, 3],
+                "department": ["Engineering", "Sales", "Marketing"],
+            }
+        )
 
         # Expected: merge should combine seed and dependency
         assert len(seed_df) == 3
@@ -282,20 +320,26 @@ class TestCompositeMergeBehaviorTests:
 
     def test_multiple_dependencies_merge(self) -> None:
         """Test merge with multiple dependencies."""
-        seed_df = pl.DataFrame({
-            "id": [1, 2, 3],
-            "name": ["Alice", "Bob", "Charlie"],
-        })
+        seed_df = pl.DataFrame(
+            {
+                "id": [1, 2, 3],
+                "name": ["Alice", "Bob", "Charlie"],
+            }
+        )
 
-        dep1_df = pl.DataFrame({
-            "id": [1, 2, 3],
-            "department": ["Engineering", "Sales", "Marketing"],
-        })
+        dep1_df = pl.DataFrame(
+            {
+                "id": [1, 2, 3],
+                "department": ["Engineering", "Sales", "Marketing"],
+            }
+        )
 
-        dep2_df = pl.DataFrame({
-            "id": [1, 2, 3],
-            "location": ["NYC", "LA", "Chicago"],
-        })
+        dep2_df = pl.DataFrame(
+            {
+                "id": [1, 2, 3],
+                "location": ["NYC", "LA", "Chicago"],
+            }
+        )
 
         # Expected: merge should combine seed and all dependencies
         assert len(seed_df) == 3
@@ -304,15 +348,19 @@ class TestCompositeMergeBehaviorTests:
 
     def test_single_enricher_merge(self) -> None:
         """Test merge with single enricher."""
-        seed_df = pl.DataFrame({
-            "id": [1, 2, 3],
-            "name": ["Alice", "Bob", "Charlie"],
-        })
+        seed_df = pl.DataFrame(
+            {
+                "id": [1, 2, 3],
+                "name": ["Alice", "Bob", "Charlie"],
+            }
+        )
 
-        enricher_df = pl.DataFrame({
-            "id": [1, 2, 3],
-            "metadata": [{"key": "value"}, {"key": "value"}, {"key": "value"}],
-        })
+        enricher_df = pl.DataFrame(
+            {
+                "id": [1, 2, 3],
+                "metadata": [{"key": "value"}, {"key": "value"}, {"key": "value"}],
+            }
+        )
 
         # Expected: merge should add enricher data
         assert len(seed_df) == 3
@@ -320,20 +368,26 @@ class TestCompositeMergeBehaviorTests:
 
     def test_full_merge_scenario(self) -> None:
         """Test full merge scenario with seed, dependencies, and enrichers."""
-        seed_df = pl.DataFrame({
-            "id": [1, 2, 3],
-            "name": ["Alice", "Bob", "Charlie"],
-        })
+        seed_df = pl.DataFrame(
+            {
+                "id": [1, 2, 3],
+                "name": ["Alice", "Bob", "Charlie"],
+            }
+        )
 
-        dependency_df = pl.DataFrame({
-            "id": [1, 2, 3],
-            "department": ["Engineering", "Sales", "Marketing"],
-        })
+        dependency_df = pl.DataFrame(
+            {
+                "id": [1, 2, 3],
+                "department": ["Engineering", "Sales", "Marketing"],
+            }
+        )
 
-        enricher_df = pl.DataFrame({
-            "id": [1, 2, 3],
-            "tags": [["tag1"], ["tag2"], ["tag3"]],
-        })
+        enricher_df = pl.DataFrame(
+            {
+                "id": [1, 2, 3],
+                "tags": [["tag1"], ["tag2"], ["tag3"]],
+            }
+        )
 
         # Expected: full merge should combine all sources
         assert len(seed_df) == 3

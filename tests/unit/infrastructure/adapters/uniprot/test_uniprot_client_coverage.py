@@ -8,10 +8,13 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.domain.types import CircuitBreakerState, HealthStatus
+from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
 from bioetl.infrastructure.adapters.common.deduplication import (
     deduplicate_preserving_order,
 )
 from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
+from bioetl.infrastructure.adapters.uniprot.client import _create_uniprot_adapter
+from httpx import RequestError
 from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 
 
@@ -93,6 +96,24 @@ async def test_probe_health_error(adapter, mock_http_client):
 
 
 @pytest.mark.asyncio
+async def test_probe_health_logs_and_reraises_supported_fetch_error(
+    adapter, mock_logger
+):
+    adapter._error_handler = MagicMock()
+    adapter._error_handler.get_error_type.return_value.value = "request_error"
+
+    with pytest.raises(RequestError):
+        with pytest.MonkeyPatch.context() as monkeypatch:
+            monkeypatch.setattr(
+                "bioetl.infrastructure.adapters.uniprot.client.probe_uniprot_health",
+                AsyncMock(side_effect=RequestError("boom")),
+            )
+            await adapter._probe_health()
+
+    mock_logger.warning.assert_called_once()
+
+
+@pytest.mark.asyncio
 async def test_fetch_with_filter_batching(adapter, mock_http_client):
     """Test fetch_filtered handles batching."""
 
@@ -135,10 +156,25 @@ async def test_fetch_routes_to_fetch_filtered_when_ids_passed(adapter):
     assert records == [{"accession": "P1"}]
 
 
+def test_extract_accession_from_record_handles_invalid_and_blank_values(
+    adapter,
+) -> None:
+    assert adapter._extract_accession_from_record({}) is None
+    assert adapter._extract_accession_from_record({"accession": 123}) is None
+    assert adapter._extract_accession_from_record({"accession": "   "}) is None
+    assert adapter._extract_accession_from_record({"accession": " P12345 "}) == "P12345"
+
+
 @pytest.mark.asyncio
 async def test_fetch_filtered_unsupported_entity_raises(adapter):
     with pytest.raises(ValueError, match="Unsupported entity type"):
         await _drain_async_iter(adapter.fetch_filtered("unknown", ["P1"], "accession"))
+
+
+@pytest.mark.asyncio
+async def test_fetch_unsupported_entity_raises(adapter):
+    with pytest.raises(ValueError, match="Unsupported entity type"):
+        await _drain_async_iter(adapter.fetch("unknown"))
 
 
 @pytest.mark.asyncio
@@ -224,6 +260,58 @@ async def test_fetch_multi_filtered_paths(adapter):
     async for record in adapter.fetch_multi_filtered("protein", {"accession": []}):
         none_records.append(record)
     assert none_records == []
+
+
+def test_create_uniprot_adapter_requires_runtime_dependencies(mock_logger) -> None:
+    with pytest.raises(ValueError, match="requires http_client"):
+        _create_uniprot_adapter(
+            None,
+            mock_logger,
+            None,
+            fallback_fetch_service=MagicMock(),
+        )
+
+    with pytest.raises(ValueError, match="requires logger"):
+        _create_uniprot_adapter(
+            MagicMock(),
+            None,
+            None,
+            fallback_fetch_service=MagicMock(),
+        )
+
+    with pytest.raises(ValueError, match="requires fallback_fetch_service"):
+        _create_uniprot_adapter(MagicMock(), mock_logger, None)
+
+
+def test_create_uniprot_adapter_builds_runtime_instance(mock_http_client, mock_logger):
+    metrics = MagicMock()
+    adapter_metrics = MagicMock(spec=AdapterMetricsRecorder)
+    request_collector = MagicMock()
+    error_handler = MagicMock()
+    fallback_fetch_service = MagicMock()
+
+    adapter = _create_uniprot_adapter(
+        mock_http_client,
+        mock_logger,
+        None,
+        fallback_fetch_service=fallback_fetch_service,
+        api_key="secret",
+        base_url="https://example.org/",
+        strict_error_handling=True,
+        metrics=metrics,
+        error_handler=error_handler,
+        adapter_metrics=adapter_metrics,
+        request_collector=request_collector,
+    )
+
+    assert isinstance(adapter, UniProtAdapter)
+    assert adapter.base_url == "https://example.org"
+    assert adapter.api_key == "secret"
+    assert adapter.strict_error_handling is True
+    assert adapter._error_handler is error_handler
+    assert adapter._adapter_metrics is adapter_metrics
+    assert adapter._request_collector is request_collector
+    assert adapter._fallback_fetch_service is fallback_fetch_service
 
 
 @pytest.mark.asyncio

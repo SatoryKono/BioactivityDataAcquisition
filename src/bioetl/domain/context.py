@@ -1,11 +1,4 @@
-"""Domain execution context objects.
-
-``PipelineRunContext`` carries launch-time execution parameters, while
-``PipelineContext`` carries in-run processing state after launch-time
-resolution completes. There is no universal runtime manifest object;
-control-plane provenance remains separate via
-``bioetl.domain.control_plane.run_manifest.RunManifest``.
-"""
+"""Domain execution context objects for launch-time and in-run pipeline state."""
 
 from __future__ import annotations
 
@@ -106,6 +99,7 @@ def _validate_contract_identity_completeness(
         if not str(value or "").strip()
     ]
 
+
 @dataclass(frozen=True, slots=True)
 class PipelineContext:
     """In-run processing context for record, batch, and write execution paths."""
@@ -131,21 +125,7 @@ class PipelineContext:
         pipeline_name: str | None = None,
         workflow_id: str = "standalone",
     ) -> PipelineContext:
-        """Create a new PipelineContext with explicit timestamp ownership.
-
-        Args:
-            run_id: Unique identifier for the pipeline run.
-            run_type: Type of run (incremental, backfill, rebuild).
-            logger: Structured logger port for pipeline-level logging.
-            started_at: UTC start timestamp captured by the caller. When omitted,
-                the compatibility constructor carries a deterministic sentinel.
-            replay_timestamp_anchor: Optional deterministic timestamp used for
-                replay-facing artifacts that must not drift between exact replays.
-            pipeline_name: Optional pipeline name for context identification.
-
-        Returns:
-            New PipelineContext instance with all fields set.
-        """
+        """Create a new PipelineContext with explicit timestamp ownership."""
         return cls(
             run_id=run_id,
             run_type=run_type,
@@ -158,18 +138,12 @@ class PipelineContext:
             pipeline_name=pipeline_name,
             workflow_id=workflow_id,
         )
+
     def bind_logger(
         self,
         **kwargs: Any,  # Any: structlog-compatible key=value pairs
     ) -> PipelineContext:
-        """Bind additional context to the logger.
-
-        Args:
-            **kwargs: Key-value pairs to bind to the structured logger (structlog-compatible).
-
-        Returns:
-            New PipelineContext with the bound logger; all other fields unchanged.
-        """
+        """Bind additional context to the logger."""
         new_logger = self.logger.bind(**kwargs)
         return PipelineContext(
             run_id=self.run_id,
@@ -181,6 +155,7 @@ class PipelineContext:
             pipeline_name=self.pipeline_name,
             workflow_id=self.workflow_id,
         )
+
     def with_source_batch_id(self, source_batch_id: BatchID | None) -> PipelineContext:
         """Return a new context with batch lineage set for the active transform path."""
         return PipelineContext(
@@ -193,6 +168,7 @@ class PipelineContext:
             pipeline_name=self.pipeline_name,
             workflow_id=self.workflow_id,
         )
+
 
 @dataclass(frozen=True, slots=True)
 class PipelineRunContext:
@@ -253,15 +229,18 @@ class PipelineRunContext:
     def has_input_filter(self) -> bool:
         """Check if input filtering is enabled."""
         return bool(self.input_filter.enabled)
+
     @property
     def has_cached_bronze(self) -> bool:
         """Check if cached Bronze mode is enabled."""
         return bool(self.cached_bronze.enabled)
+
     @property
     def vacuum_enabled_override(self) -> bool | None:
         """Return the explicit vacuum override, if one was provided."""
         enabled = self.vacuum.enabled
         return None if enabled is None else bool(enabled)
+
     def log_correlation_fields(self) -> dict[str, str]:
         """Return the mandatory bound logging fields for one pipeline run.
 
@@ -281,11 +260,7 @@ class PipelineRunContext:
         return fields
 
     def validate_contract_consistency(self) -> list[str]:
-        """Validate contract identity consistency across runtime components.
-
-        Returns:
-            list[str]: List of consistency issues, empty if all valid
-        """
+        """Validate contract identity consistency across runtime components."""
         if self.contract_identity is None:
             return []
         issues = _validate_dq_contract_alignment(

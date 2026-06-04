@@ -83,14 +83,20 @@ class TestChemblActivityFactory:
 
         # Cleanup after test if factory was imported
         import sys
-        if 'bioetl.composition.factories.pipeline.registry' in sys.modules:
+
+        if "bioetl.composition.factories.pipeline.registry" in sys.modules:
             from bioetl.composition.factories.pipeline.registry import (
                 chembl_activity_factory,
             )
-            if hasattr(chembl_activity_factory, '_original_create_data_source'):
-                chembl_activity_factory._create_data_source = chembl_activity_factory._original_create_data_source
-            if hasattr(chembl_activity_factory, '_original_pipeline_class'):
-                chembl_activity_factory.pipeline_class = chembl_activity_factory._original_pipeline_class
+
+            if hasattr(chembl_activity_factory, "_original_create_data_source"):
+                chembl_activity_factory._create_data_source = (
+                    chembl_activity_factory._original_create_data_source
+                )
+            if hasattr(chembl_activity_factory, "_original_pipeline_class"):
+                chembl_activity_factory.pipeline_class = (
+                    chembl_activity_factory._original_pipeline_class
+                )
 
     @patch("bioetl.composition.factories.services.bundle.BaseServicesFactory")
     @patch("bioetl.composition.factories.services.bundle.load_pipeline_config")
@@ -106,13 +112,17 @@ class TestChemblActivityFactory:
 
         mock_load_config.return_value = _make_pipeline_config()
         mock_base_services.create_common_services.return_value = _make_services()
-        
+
         # Save original state for cleanup
-        if not hasattr(chembl_activity_factory, '_original_create_data_source'):
-            chembl_activity_factory._original_create_data_source = chembl_activity_factory._create_data_source
-        if not hasattr(chembl_activity_factory, '_original_pipeline_class'):
-            chembl_activity_factory._original_pipeline_class = chembl_activity_factory.pipeline_class
-        
+        if not hasattr(chembl_activity_factory, "_original_create_data_source"):
+            chembl_activity_factory._original_create_data_source = (
+                chembl_activity_factory._create_data_source
+            )
+        if not hasattr(chembl_activity_factory, "_original_pipeline_class"):
+            chembl_activity_factory._original_pipeline_class = (
+                chembl_activity_factory.pipeline_class
+            )
+
         chembl_activity_factory._create_data_source = MagicMock(
             return_value=MagicMock()
         )
@@ -139,11 +149,13 @@ class TestChemblActivityFactory:
 
         mock_load_config.return_value = _make_pipeline_config()
         mock_base_services.create_common_services.return_value = _make_services()
-        
+
         # Save original state for cleanup
-        if not hasattr(chembl_activity_factory, '_original_create_data_source'):
-            chembl_activity_factory._original_create_data_source = chembl_activity_factory._create_data_source
-        
+        if not hasattr(chembl_activity_factory, "_original_create_data_source"):
+            chembl_activity_factory._original_create_data_source = (
+                chembl_activity_factory._create_data_source
+            )
+
         chembl_activity_factory._create_data_source = MagicMock(
             return_value=MagicMock()
         )
@@ -168,11 +180,13 @@ class TestChemblActivityFactory:
         )
 
         mock_base_services.create_common_services.return_value = _make_services()
-        
+
         # Save original state for cleanup
-        if not hasattr(chembl_activity_factory, '_original_create_data_source'):
-            chembl_activity_factory._original_create_data_source = chembl_activity_factory._create_data_source
-        
+        if not hasattr(chembl_activity_factory, "_original_create_data_source"):
+            chembl_activity_factory._original_create_data_source = (
+                chembl_activity_factory._create_data_source
+            )
+
         chembl_activity_factory._create_data_source = MagicMock(
             return_value=MagicMock()
         )
@@ -224,13 +238,17 @@ class TestChemblActivityFactory:
         mock_domain_config.dq.strict_validation = False
         mock_yaml_to_domain.return_value = mock_domain_config
         mock_compute_hash.return_value = "mock_config_hash_12345"
-        
+
         # Save original state for cleanup
-        if not hasattr(chembl_activity_factory, '_original_create_data_source'):
-            chembl_activity_factory._original_create_data_source = chembl_activity_factory._create_data_source
-        if not hasattr(chembl_activity_factory, '_original_pipeline_class'):
-            chembl_activity_factory._original_pipeline_class = chembl_activity_factory.pipeline_class
-        
+        if not hasattr(chembl_activity_factory, "_original_create_data_source"):
+            chembl_activity_factory._original_create_data_source = (
+                chembl_activity_factory._create_data_source
+            )
+        if not hasattr(chembl_activity_factory, "_original_pipeline_class"):
+            chembl_activity_factory._original_pipeline_class = (
+                chembl_activity_factory.pipeline_class
+            )
+
         chembl_activity_factory._create_data_source = MagicMock(
             return_value=MagicMock()
         )

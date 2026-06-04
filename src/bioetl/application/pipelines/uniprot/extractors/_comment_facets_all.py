@@ -66,12 +66,16 @@ def extract_all_comments(
     for key in _COMMENT_OUTPUT_KEYS:
         value = raw.get(key)
         if isinstance(value, list | dict):
-            serialized[key] = serialize_to_json(value, ensure_ascii=False) if value else None
+            serialized[key] = (
+                serialize_to_json(value, ensure_ascii=False) if value else None
+            )
         else:
             serialized[key] = None
 
     isoform_count = raw.get("isoform_count")
-    serialized["isoform_count"] = isoform_count if isinstance(isoform_count, int) else None
+    serialized["isoform_count"] = (
+        isoform_count if isinstance(isoform_count, int) else None
+    )
     index = _build_comment_index(comments)
     if index is not None:
         for (

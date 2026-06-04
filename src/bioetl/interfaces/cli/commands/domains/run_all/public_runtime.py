@@ -216,7 +216,9 @@ def run_all_with_cli_policy_runtime(
     *,
     runtime: RunAllPolicyRuntime,
 ) -> None:
-    registry = runtime.resolve_context_registry(click_context) or runtime.build_cli_registry()
+    registry = (
+        runtime.resolve_context_registry(click_context) or runtime.build_cli_registry()
+    )
     run_all_command_flow(
         cli_input=cli_input,
         registry=registry,

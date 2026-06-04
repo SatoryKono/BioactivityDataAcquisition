@@ -141,7 +141,9 @@ def pubchem_identity_valid_dataframe() -> pd.DataFrame:
     )
 
 
-def pubchem_shard_checks_dataframe(schema_cls: type[ppa.DataFrameModel]) -> pd.DataFrame:
+def pubchem_shard_checks_dataframe(
+    schema_cls: type[ppa.DataFrameModel],
+) -> pd.DataFrame:
     """Build a one-row dataframe with non-null values for every shard column."""
     row: dict[str, Any] = {}
     for column_name, column in schema_cls.to_schema().columns.items():

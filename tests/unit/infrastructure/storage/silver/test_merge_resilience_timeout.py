@@ -11,7 +11,9 @@ from bioetl.infrastructure.storage.delta.resilience import (
     AdaptiveRetryPolicy,
     SilverMergeResiliencePolicy,
 )
-from bioetl.infrastructure.storage.silver.delta_helpers import _MergeExecutionTimeoutError
+from bioetl.infrastructure.storage.silver.delta_helpers import (
+    _MergeExecutionTimeoutError,
+)
 from bioetl.infrastructure.storage.silver.merge_resilience_helpers import (
     _handle_timeout_retry,
     _emit_merge_final_event,

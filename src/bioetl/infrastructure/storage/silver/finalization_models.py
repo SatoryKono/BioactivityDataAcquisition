@@ -135,9 +135,7 @@ def _coerce_request_fields(
     unexpected_fields = sorted(set(resolved_kwargs) - allowed_fields)
     if unexpected_fields:
         unexpected = ", ".join(unexpected_fields)
-        raise TypeError(
-            f"{method_name} got unexpected keyword arguments: {unexpected}"
-        )
+        raise TypeError(f"{method_name} got unexpected keyword arguments: {unexpected}")
 
     missing_fields = [
         field_name

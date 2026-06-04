@@ -35,7 +35,9 @@ class TestBuildCrossrefSourceMetadata:
         collector.clear = MagicMock()
         return collector
 
-    def test_build_crossref_source_metadata_returns_metadata(self, mock_request_collector):
+    def test_build_crossref_source_metadata_returns_metadata(
+        self, mock_request_collector
+    ):
         """Test build_crossref_source_metadata returns SourceMetadata."""
         metadata = build_crossref_source_metadata(
             request_collector=mock_request_collector,
@@ -47,7 +49,9 @@ class TestBuildCrossrefSourceMetadata:
         assert metadata.url == "https://api.crossref.org"
         assert metadata.api_version == "v1"
 
-    def test_build_crossref_source_metadata_consumes_collector(self, mock_request_collector):
+    def test_build_crossref_source_metadata_consumes_collector(
+        self, mock_request_collector
+    ):
         """Test build_crossref_source_metadata consumes collector data."""
         build_crossref_source_metadata(
             request_collector=mock_request_collector,
@@ -72,7 +76,9 @@ class TestClearCrossrefRequestCollector:
         collector.clear = MagicMock()
         return collector
 
-    def test_clear_crossref_request_collector_clears_collector(self, mock_request_collector):
+    def test_clear_crossref_request_collector_clears_collector(
+        self, mock_request_collector
+    ):
         """Test clear_crossref_request_collector clears collector."""
         clear_crossref_request_collector(request_collector=mock_request_collector)
 
@@ -107,7 +113,9 @@ class TestProbeCrossrefHealth:
     @pytest.fixture
     def mock_query_builder(self):
         builder = MagicMock()
-        builder.build_health_probe_url = MagicMock(return_value="https://api.crossref.org/works")
+        builder.build_health_probe_url = MagicMock(
+            return_value="https://api.crossref.org/works"
+        )
         builder.build_health_probe_params = MagicMock(return_value={"test": "param"})
         return builder
 
@@ -245,7 +253,9 @@ class TestProbeCrossrefHealth:
         mock_logger,
     ):
         """Test probe_crossref_health raises on network error."""
-        mock_http_client.get_once = AsyncMock(side_effect=ConnectionError("Network error"))
+        mock_http_client.get_once = AsyncMock(
+            side_effect=ConnectionError("Network error")
+        )
 
         with pytest.raises(ConnectionError):
             await probe_crossref_health(

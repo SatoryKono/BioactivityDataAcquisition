@@ -8,7 +8,9 @@ from typing import Protocol
 from typing import get_type_hints
 
 from bioetl.composition.factories.pipeline import construction_types
-from bioetl.composition.factories.pipeline.entity_type_extractor import EntityTypeExtractor
+from bioetl.composition.factories.pipeline.entity_type_extractor import (
+    EntityTypeExtractor,
+)
 
 
 pytestmark = pytest.mark.unit

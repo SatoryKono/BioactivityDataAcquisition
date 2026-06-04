@@ -28,7 +28,9 @@ if TYPE_CHECKING:
         maybe_start_metrics_server,
     )
     from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
-    from bioetl.infrastructure.control_plane import FileControlPlaneArtifactLifecycleStore
+    from bioetl.infrastructure.control_plane import (
+        FileControlPlaneArtifactLifecycleStore,
+    )
     from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 
 _PUBLIC_EXPORTS = {

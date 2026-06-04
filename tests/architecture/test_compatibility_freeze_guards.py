@@ -510,41 +510,25 @@ ALLOWED_INTERNAL_ENTRYPOINT_TEST_FILES_BY_MODULE = {
     "bioetl.composition._pipeline_execution": frozenset(
         {
             ROOT / "tests" / "unit" / "composition" / "test_entrypoints.py",
-            ROOT
-            / "tests"
-            / "unit"
-            / "composition"
-            / "test_execution_api_contract.py",
+            ROOT / "tests" / "unit" / "composition" / "test_execution_api_contract.py",
             ROOT
             / "tests"
             / "unit"
             / "composition"
             / "test_maintenance_api_contract.py",
-            ROOT
-            / "tests"
-            / "unit"
-            / "composition"
-            / "test_resources_api_contract.py",
+            ROOT / "tests" / "unit" / "composition" / "test_resources_api_contract.py",
         }
     ),
     "bioetl.composition._resource_management": frozenset(
         {
             ROOT / "tests" / "unit" / "composition" / "test_resource_management.py",
-            ROOT
-            / "tests"
-            / "unit"
-            / "composition"
-            / "test_health_api_contract.py",
+            ROOT / "tests" / "unit" / "composition" / "test_health_api_contract.py",
             ROOT
             / "tests"
             / "unit"
             / "composition"
             / "test_maintenance_api_contract.py",
-            ROOT
-            / "tests"
-            / "unit"
-            / "composition"
-            / "test_resources_api_contract.py",
+            ROOT / "tests" / "unit" / "composition" / "test_resources_api_contract.py",
         }
     ),
     "bioetl.composition._services": frozenset(
@@ -556,11 +540,7 @@ ALLOWED_INTERNAL_ENTRYPOINT_TEST_FILES_BY_MODULE = {
             / "unit"
             / "composition"
             / "test_maintenance_api_contract.py",
-            ROOT
-            / "tests"
-            / "unit"
-            / "composition"
-            / "test_resources_api_contract.py",
+            ROOT / "tests" / "unit" / "composition" / "test_resources_api_contract.py",
         }
     ),
 }

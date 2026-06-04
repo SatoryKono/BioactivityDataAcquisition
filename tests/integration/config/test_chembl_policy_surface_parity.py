@@ -182,7 +182,10 @@ def _config_enum_surface_expectations(
 
     # Get all controlled vocabulary fields to avoid overwriting registry expectations
     controlled_vocabulary_fields = frozenset().union(
-        *(family.fields for family in DEFAULT_CHEMBL_POLICY_REGISTRY_DATA.controlled_vocabularies)
+        *(
+            family.fields
+            for family in DEFAULT_CHEMBL_POLICY_REGISTRY_DATA.controlled_vocabularies
+        )
     )
 
     for entity, config in entity_configs.items():

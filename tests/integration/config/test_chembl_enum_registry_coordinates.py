@@ -19,6 +19,8 @@ pytestmark = pytest.mark.integration
 
 ROOT = Path(".")
 ENUM_PATH = ROOT / "configs" / "enums" / "chembl.yaml"
+
+
 @pytest.fixture(scope="module")
 def chembl_enums() -> dict[str, Any]:
     loaded = yaml.safe_load(ENUM_PATH.read_text(encoding="utf-8"))
@@ -30,9 +32,7 @@ def _registry_values(
     enums: dict[str, Any],
     registry_path: tuple[str, ...],
 ) -> frozenset[str]:
-    union_paths = ENUM_REGISTRY_UNIONS.get(
-        ("configs/enums/chembl.yaml", registry_path)
-    )
+    union_paths = ENUM_REGISTRY_UNIONS.get(("configs/enums/chembl.yaml", registry_path))
     if union_paths is not None:
         return frozenset().union(
             *(_registry_values(enums, union_path) for union_path in union_paths)

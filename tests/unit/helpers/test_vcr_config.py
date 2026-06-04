@@ -61,7 +61,9 @@ def test_build_base_vcr_config_sanitizes_request_headers_and_query() -> None:
     assert "query=test" in sanitized.uri
 
 
-def test_build_base_vcr_config_before_record_request_noops_on_unexpected_request() -> None:
+def test_build_base_vcr_config_before_record_request_noops_on_unexpected_request() -> (
+    None
+):
     config = build_base_vcr_config(
         filter_headers=["authorization"],
         filter_query_parameters=["api_key"],

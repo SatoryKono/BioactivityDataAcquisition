@@ -55,15 +55,15 @@ class TestXSSPrevention:
             # This is a heuristic - not perfect but catches common issues
             xss_patterns = [
                 # f"<div>{user_input}</div>"
-                (r'<[^>]*>\{.*\}</[^>]*>', "f-string in HTML template"),
+                (r"<[^>]*>\{.*\}</[^>]*>", "f-string in HTML template"),
                 # "<div>" + user_input + "</div>"
-                (r'<[^>]*>[^<]*\+\s*\w+\s*\+', "string concatenation in HTML"),
+                (r"<[^>]*>[^<]*\+\s*\w+\s*\+", "string concatenation in HTML"),
             ]
 
             for pattern, description in xss_patterns:
                 if re.search(pattern, content):
                     # Check if escaping is used nearby
-                    if 'html.escape' in content or 'escape' in content:
+                    if "html.escape" in content or "escape" in content:
                         continue  # Escaping is used
                     rel_path = py_file.relative_to(PROJECT_ROOT)
                     violations.append(f"{rel_path}: {description}")
@@ -82,8 +82,11 @@ class TestXSSPrevention:
 
         # Look for patterns where user input might be rendered
         dangerous_patterns = [
-            (r'return.*<[^>]*>\s*\w+\s*</[^>]*>', "direct HTML return with variable"),
-            (r'html\s*=\s*["\'].*\{.*\}.*["\']', "HTML string with variable interpolation"),
+            (r"return.*<[^>]*>\s*\w+\s*</[^>]*>", "direct HTML return with variable"),
+            (
+                r'html\s*=\s*["\'].*\{.*\}.*["\']',
+                "HTML string with variable interpolation",
+            ),
         ]
 
         for py_file, content in source_contents:
@@ -94,7 +97,7 @@ class TestXSSPrevention:
             for pattern, description in dangerous_patterns:
                 if re.search(pattern, content):
                     # Check if escaping is used nearby
-                    if 'escape' in content or 'sanitize' in content:
+                    if "escape" in content or "sanitize" in content:
                         continue  # Escaping/sanitization is used
                     rel_path = py_file.relative_to(PROJECT_ROOT)
                     violations.append(f"{rel_path}: {description}")

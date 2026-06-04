@@ -33,7 +33,9 @@ if TYPE_CHECKING:
         bootstrap_health_server_dependencies,
         bootstrap_health_service,
     )
-    from bioetl.infrastructure.control_plane import FileControlPlaneArtifactLifecycleStore
+    from bioetl.infrastructure.control_plane import (
+        FileControlPlaneArtifactLifecycleStore,
+    )
 
 _CLI_HEALTH_MODULE = "bioetl.composition.bootstrap.cli.health"
 _CLI_CHECKPOINT_MODULE = "bioetl.composition.bootstrap.cli.checkpoint"

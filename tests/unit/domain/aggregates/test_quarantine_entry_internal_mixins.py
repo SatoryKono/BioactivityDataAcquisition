@@ -236,7 +236,11 @@ class TestQuarantineEntryPropertiesMixin:
         assert quarantine_entry.entry_id is not None
         assert quarantine_entry.pipeline_name == "test_pipeline"
         assert quarantine_entry.error_code == "SCHEMA_VIOLATION"
-        assert quarantine_entry.payload == {"id": "bad-record", "value": "invalid", "source": "test"}
+        assert quarantine_entry.payload == {
+            "id": "bad-record",
+            "value": "invalid",
+            "source": "test",
+        }
         assert quarantine_entry.payload_hash is not None
         assert quarantine_entry.status == QuarantineStatus.NEW
         assert quarantine_entry.created_at == _ts(0)
@@ -275,7 +279,11 @@ class TestQuarantineEntryPropertiesMixin:
 
     def test_is_resolved_returns_true_for_terminal_statuses(self, run_id, batch_id):
         """is_resolved should return True for terminal statuses."""
-        for status in [QuarantineStatus.IGNORED, QuarantineStatus.REPROCESSED, QuarantineStatus.EXPIRED]:
+        for status in [
+            QuarantineStatus.IGNORED,
+            QuarantineStatus.REPROCESSED,
+            QuarantineStatus.EXPIRED,
+        ]:
             entry = QuarantineEntry(
                 entry_id="test-id",
                 pipeline_name="test_pipeline",
@@ -288,7 +296,9 @@ class TestQuarantineEntryPropertiesMixin:
             )
             # Manually set status for testing
             object.__setattr__(entry, "_status", status)
-            object.__setattr__(entry, "_resolution_info", ResolutionInfo("ignored", _ts(10)))
+            object.__setattr__(
+                entry, "_resolution_info", ResolutionInfo("ignored", _ts(10))
+            )
 
             assert entry.is_resolved
 
@@ -460,7 +470,9 @@ class TestQuarantineEntryTransitionsMixin:
         quarantine_entry.mark_expired(expired_at=_ts(100))
 
         with pytest.raises(InvalidStateError, match="Cannot mark_ignored"):
-            quarantine_entry.mark_ignored(reason="already expired", resolved_at=_ts(101))
+            quarantine_entry.mark_ignored(
+                reason="already expired", resolved_at=_ts(101)
+            )
 
     def test_mark_reprocessed_invalid_from_expired(self, quarantine_entry):
         """mark_reprocessed should fail from EXPIRED status."""
@@ -573,7 +585,9 @@ class TestQuarantineEntryAggregateRoot:
 
         assert entry.status == QuarantineStatus.NEW
 
-    def test_create_factory_generates_deterministic_ids(self, run_id, batch_id, sample_payload):
+    def test_create_factory_generates_deterministic_ids(
+        self, run_id, batch_id, sample_payload
+    ):
         """create factory should generate deterministic entry_id and payload_hash."""
         entry1 = QuarantineEntry.create(
             pipeline_name="test_pipeline",

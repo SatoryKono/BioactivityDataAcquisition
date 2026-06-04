@@ -2,7 +2,10 @@
 
 import pytest
 
-from bioetl.infrastructure.config.config_helpers import load_and_validate_config, load_config
+from bioetl.infrastructure.config.config_helpers import (
+    load_and_validate_config,
+    load_config,
+)
 
 
 pytestmark = pytest.mark.unit

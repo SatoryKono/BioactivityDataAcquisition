@@ -192,4 +192,3 @@ def _resolve_bronze_metadata_bundle_builder(
         _BronzeMetadataBundleBuilder | None,
         getattr(coordinator, "create_bronze_metadata_bundle", None),
     )
-

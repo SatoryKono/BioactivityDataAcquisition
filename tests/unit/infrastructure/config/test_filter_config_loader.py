@@ -714,9 +714,7 @@ filter_defaults:
         _, silver_filters, gold_filters, _ = loader.load("chembl", "assay")
 
         assert {flt.column for flt in silver_filters.range_filters} == set()
-        assert "confidence_score" in {
-            flt.column for flt in gold_filters.range_filters
-        }
+        assert "confidence_score" in {flt.column for flt in gold_filters.range_filters}
         assert "publication_year" not in {
             flt.column for flt in gold_filters.range_filters
         }

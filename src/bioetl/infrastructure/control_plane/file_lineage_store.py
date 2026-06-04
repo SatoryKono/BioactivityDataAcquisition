@@ -169,7 +169,9 @@ class FileLineageStore(FileLineageQueriesMixin, LineageStorePort):
 
     def _fragment_path(self, fragment_id: str) -> Path:
         """Resolve the fragment JSON path for one fragment identifier."""
-        return self.base_path / "fragments" / f"{_stable_key_filename(fragment_id)}.json"
+        return (
+            self.base_path / "fragments" / f"{_stable_key_filename(fragment_id)}.json"
+        )
 
     def _run_index_path(self, run_id: str) -> Path:
         """Resolve the run-id index path."""

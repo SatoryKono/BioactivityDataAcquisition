@@ -29,7 +29,9 @@ class TestIsRetryExhaustedError:
 
     def test_detects_wrapped_retry_exhausted(self) -> None:
         try:
-            raise RetryExhaustedError("https://example.test", attempts=2) from ValueError("outer")
+            raise RetryExhaustedError(
+                "https://example.test", attempts=2
+            ) from ValueError("outer")
         except RetryExhaustedError as exc:
             wrapped = RuntimeError("wrapper")
             wrapped.__cause__ = exc

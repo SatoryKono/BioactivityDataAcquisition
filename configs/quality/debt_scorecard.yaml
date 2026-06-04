@@ -211,39 +211,39 @@ config_surface_ratchet:
   owner: '@bioetl-config'
   mode: fail-fast
   review_history:
-    - issue: '#4927'
-      reviewed_on: '2026-06-01'
-      owner: '@bioetl-config'
-      outcome: held_flat_with_zero_actionable_drift
-      rationale: Sanctioned partial variance remains 122 because residual keys are
-        entity-specific extraction/filter policy or composite target-only protein
-        classification mappings; copying them across unrelated configs would create
-        false contract surface. Actionable inconsistent_parameter_count stays zero.
-    - issue: '#4966'
-      reviewed_on: '2026-06-01'
-      owner: '@bioetl-config'
-      outcome: dq_defaults_effective_matrix_partial_variance_burn_down
-      rationale: Entity effective config rows now merge runtime DQ defaults from
-        configs/base/quality.yaml before drift classification. This removed the
-        quality_thresholds residual category, lowered sanctioned partial variance
-        from 122 to 119, and kept actionable inconsistent_parameter_count at zero.
-    - issue: '#4989'
-      reviewed_on: '2026-06-02'
-      owner: '@bioetl-config'
-      outcome: target_projection_schema_replaced_explicit_partial_field_mapping_set
-      rationale: Composite target now projects target protein classification aliases
-        through a typed schema contract instead of 16 explicit target-only field_mappings
-        keys. This lowered total sanctioned partial variance from 119 to 107, reduced
-        composite_runtime sanctioned partial variance from 16 to 4, and kept actionable
-        inconsistent_parameter_count at zero.
-    - issue: '#4996'
-      reviewed_on: '2026-06-02'
-      owner: '@bioetl-config'
-      outcome: sanctioned_partial_variance_normalized_to_zero
-      rationale: Family-level governance now projects sanctioned keys through a
-        reviewed placeholder-presence normalization, collapsing sanctioned missing-vs-empty
-        variance without mutating live runtime configs. Actionable and raw partial
-        drift counts are both zero across entity_effective and composite_runtime.
+  - issue: '#4927'
+    reviewed_on: '2026-06-01'
+    owner: '@bioetl-config'
+    outcome: held_flat_with_zero_actionable_drift
+    rationale: Sanctioned partial variance remains 122 because residual keys are entity-specific
+      extraction/filter policy or composite target-only protein classification mappings;
+      copying them across unrelated configs would create false contract surface. Actionable
+      inconsistent_parameter_count stays zero.
+  - issue: '#4966'
+    reviewed_on: '2026-06-01'
+    owner: '@bioetl-config'
+    outcome: dq_defaults_effective_matrix_partial_variance_burn_down
+    rationale: Entity effective config rows now merge runtime DQ defaults from configs/base/quality.yaml
+      before drift classification. This removed the quality_thresholds residual category,
+      lowered sanctioned partial variance from 122 to 119, and kept actionable inconsistent_parameter_count
+      at zero.
+  - issue: '#4989'
+    reviewed_on: '2026-06-02'
+    owner: '@bioetl-config'
+    outcome: target_projection_schema_replaced_explicit_partial_field_mapping_set
+    rationale: Composite target now projects target protein classification aliases
+      through a typed schema contract instead of 16 explicit target-only field_mappings
+      keys. This lowered total sanctioned partial variance from 119 to 107, reduced
+      composite_runtime sanctioned partial variance from 16 to 4, and kept actionable
+      inconsistent_parameter_count at zero.
+  - issue: '#4996'
+    reviewed_on: '2026-06-02'
+    owner: '@bioetl-config'
+    outcome: sanctioned_partial_variance_normalized_to_zero
+    rationale: Family-level governance now projects sanctioned keys through a reviewed
+      placeholder-presence normalization, collapsing sanctioned missing-vs-empty variance
+      without mutating live runtime configs. Actionable and raw partial drift counts
+      are both zero across entity_effective and composite_runtime.
   artifact_policy:
     generator_command: python -m scripts.schema generate-config-matrix
     baseline_artifact: reports/quality/config-discrepancy-baseline.json
@@ -424,9 +424,9 @@ hotspot_family_ratchets:
     latest_reviewed_snapshot: '2026-06-01'
     confirming_clean_snapshots_required: 2
     expected_direction: downward
-    ratchet_policy: Enforce a hotspot-level zero-duplication budget in CI after
-      the clean 2026-06-01 baseline; retain family-level non-growth budgets for
-      file-growth and fan-in from the reviewed scorecard baselines.
+    ratchet_policy: Enforce a hotspot-level zero-duplication budget in CI after the
+      clean 2026-06-01 baseline; retain family-level non-growth budgets for file-growth
+      and fan-in from the reviewed scorecard baselines.
   families:
   - name: application_core
     owner: '@bioetl-architecture'
@@ -445,17 +445,16 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 176
-      total_loc: 21994
+      total_loc: 21902
       files_ge_250_loc: 7
-      helper_function_ratio: 0.345
+      helper_function_ratio: 0.344
       max_internal_fan_in: 14
       max_internal_fan_in_module: bioetl.application.core.batch_runtime_failure_policy
     trend:
-      status: reduced_2026-06-04_issue_4554_tracked_baseline_sync
-      next_action: 2026-06-04 syncs the tracked-repo application/core baseline
-        at 176 files, 21994 LOC, 7 files_ge_250_loc, and max_internal_fan_in
-        14; keep duplicate clusters at zero while holding the bounded-growth
-        budgets at 13 and 14.
+      status: updated_2026-06-04_live_metric_sync_to_21902
+      next_action: 2026-06-04 syncs application/core actual metrics to the current
+        live collector value of 21902 LOC; bounded-growth budgets remain at 13
+        files_ge_250_loc and max_internal_fan_in 14.
   - name: composition_bootstrap_runtime
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -473,7 +472,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 50
-      total_loc: 5988
+      total_loc: 6005
       files_ge_250_loc: 2
       helper_function_ratio: 0.328
       max_internal_fan_in: 3
@@ -516,8 +515,8 @@ hotspot_family_ratchets:
     linked_issue: '#4547'
     ratchet_stage: reviewed-baseline
     ratchet_scope: duplication-report-plus-bounded-growth
-    expected_action: Keep duplication clusters at zero while holding file-growth
-      and fan-in at the reviewed baseline during control-plane changes.
+    expected_action: Keep duplication clusters at zero while holding file-growth and
+      fan-in at the reviewed baseline during control-plane changes.
     path_prefixes:
     - src/bioetl/application/services/control_plane/
     bounded_growth_budgets:
@@ -544,8 +543,8 @@ hotspot_family_ratchets:
     linked_issue: '#4552'
     ratchet_stage: reviewed-baseline
     ratchet_scope: duplication-report-plus-bounded-growth
-    expected_action: Keep duplication clusters at zero while holding file-growth
-      and fan-in at the reviewed baseline during runtime-builder changes.
+    expected_action: Keep duplication clusters at zero while holding file-growth and
+      fan-in at the reviewed baseline during runtime-builder changes.
     path_prefixes:
     - src/bioetl/composition/runtime_builders/
     bounded_growth_budgets:
@@ -561,10 +560,10 @@ hotspot_family_ratchets:
       max_internal_fan_in_module: bioetl.composition.runtime_builders.run_manifest_support
     trend:
       status: reviewed_baseline_2026-06-02_issue_4993
-      next_action: 2026-06-02 moves shared runner-input models out of
-        inputs_resolver and collapses manifest/run-context identity helpers,
-        preserving zero duplication while ratcheting composition/runtime_builders
-        max_internal_fan_in down from 11 to 9 under the reviewed baseline.
+      next_action: 2026-06-02 moves shared runner-input models out of inputs_resolver
+        and collapses manifest/run-context identity helpers, preserving zero duplication
+        while ratcheting composition/runtime_builders max_internal_fan_in down from
+        11 to 9 under the reviewed baseline.
 oversized_source_module_inventory:
   linked_issue: '#4679'
   split_on_touch: true
@@ -585,7 +584,7 @@ oversized_source_module_inventory:
     target_split: separate config discovery, validation, and environment resolution
       helpers
   - path: src/bioetl/application/services/lineage/metadata_lineage_node_builders.py
-    lines: 61
+    lines: 62
     owner: '@bioetl-lineage'
     target_split: split node identity builders from metadata enrichment helpers
   - path: src/bioetl/infrastructure/control_plane/file_run_ledger_store.py
@@ -600,6 +599,11 @@ oversized_source_module_inventory:
     lines: 44
     owner: '@bioetl-reproducibility'
     target_split: separate score-card policy rules from manifest projection helpers
+  - path: src/bioetl/interfaces/cli/commands/domains/health/server_integration.py
+    lines: 362
+    owner: '@bioetl-interfaces'
+    target_split: split health server integration, metrics server wiring, and quarantine
+      service helpers
   completed_splits:
   - issue: '#5031'
     source: src/bioetl/application/services/checkpoint_compatibility_service.py
@@ -616,8 +620,8 @@ hotspot_family_coverage_thresholds:
   authoritative_for_hotspot_refactor_readiness: true
   authoritative_artifact: reports/quality/module-coverage-inventory.json
   canonical_lane: coverage-verify
-  readiness_policy: Hotspot refactor targets must pass these module-level family
-    thresholds before structural splits are treated as ready for merge.
+  readiness_policy: Hotspot refactor targets must pass these module-level family thresholds
+    before structural splits are treated as ready for merge.
   families:
     application_core:
       min_measured_module_count: 166
@@ -823,19 +827,17 @@ runtime_uuid_governance_metrics:
   owner: '@bioetl-architecture'
   linked_issue: '#4705'
   review_cadence: quarterly
-  review_policy: Review the canonical seam inventory whenever production UUID
-    generation changes under src/bioetl, and reject every random UUID generation
-    seam.
+  review_policy: Review the canonical seam inventory whenever production UUID generation
+    changes under src/bioetl, and reject every random UUID generation seam.
   metrics:
     runtime_uuid_seam_count:
       current_count: 0
       max_count: 0
       linked_issue: '#5048'
       owner: '@bioetl-architecture'
-      rationale: >-
-        Production random UUID generation is retired across src/bioetl; runtime
-        occurrence identities must use explicit IDs or reviewed deterministic
-        UUIDv5 factories.
+      rationale: Production random UUID generation is retired across src/bioetl; runtime
+        occurrence identities must use explicit IDs or reviewed deterministic UUIDv5
+        factories.
       ratchet_policy: Zero-budget fail-fast metric.
     replay_critical_uuid_seam_count:
       current_count: 0
@@ -850,38 +852,38 @@ retirement_governance_metrics:
   linked_issue: '#4705'
   review_cadence: quarterly
   review_history:
-    - issue: '#4928'
-      reviewed_on: '2026-06-01'
-      owner: '@bioetl-architecture'
-      outcome: held_flat_zero_untriaged
-      rationale: Repo-wide zero-import candidates remain fully classified with zero
-        untriaged candidates; issue 4923 added three zero-import compatibility shims
-        after private importer burn-down, and those are explicitly classified as
-        retained no-growth shims until compatibility retirement.
-    - issue: '#4953'
-      reviewed_on: '2026-06-01'
-      owner: '@bioetl-architecture'
-      outcome: classified_residual_private_twin_shims
-      rationale: Issue 4950 moved first-party imports to canonical public modules,
-        creating six additional zero-import private compatibility shims; issue
-        4953 classifies them as retained no-growth shims with owner and review
-        expiry so the untriaged zero-import budget stays at zero.
-    - issue: '#4965'
-      reviewed_on: '2026-06-02'
-      owner: '@bioetl-architecture'
-      outcome: removed_zero_import_private_shim_batch
-      rationale: Issue 4963 removed the remaining zero-import private compatibility
-        shim batch after importer proof and issue 4965 re-ran the dead-code
-        inventory. Repo-wide zero-import candidates fell from 48 to 44 while
-        untriaged candidates remained at zero.
-    - issue: '#5021'
-      reviewed_on: '2026-06-02'
-      owner: '@bioetl-architecture'
-      outcome: retired_shared_default_registry_singleton_tranche
-      rationale: Issue 5021 retired the residual shared default registry singleton,
-        removed the zero-import composition.registry_default shim, and refreshed the
-        dead-code inventory. Repo-wide zero-import candidates fell from 44 to 40
-        while untriaged candidates remained at zero.
+  - issue: '#4928'
+    reviewed_on: '2026-06-01'
+    owner: '@bioetl-architecture'
+    outcome: held_flat_zero_untriaged
+    rationale: Repo-wide zero-import candidates remain fully classified with zero
+      untriaged candidates; issue 4923 added three zero-import compatibility shims
+      after private importer burn-down, and those are explicitly classified as retained
+      no-growth shims until compatibility retirement.
+  - issue: '#4953'
+    reviewed_on: '2026-06-01'
+    owner: '@bioetl-architecture'
+    outcome: classified_residual_private_twin_shims
+    rationale: Issue 4950 moved first-party imports to canonical public modules, creating
+      six additional zero-import private compatibility shims; issue 4953 classifies
+      them as retained no-growth shims with owner and review expiry so the untriaged
+      zero-import budget stays at zero.
+  - issue: '#4965'
+    reviewed_on: '2026-06-02'
+    owner: '@bioetl-architecture'
+    outcome: removed_zero_import_private_shim_batch
+    rationale: Issue 4963 removed the remaining zero-import private compatibility
+      shim batch after importer proof and issue 4965 re-ran the dead-code inventory.
+      Repo-wide zero-import candidates fell from 48 to 44 while untriaged candidates
+      remained at zero.
+  - issue: '#5021'
+    reviewed_on: '2026-06-02'
+    owner: '@bioetl-architecture'
+    outcome: retired_shared_default_registry_singleton_tranche
+    rationale: Issue 5021 retired the residual shared default registry singleton,
+      removed the zero-import composition.registry_default shim, and refreshed the
+      dead-code inventory. Repo-wide zero-import candidates fell from 44 to 40 while
+      untriaged candidates remained at zero.
   review_policy: Review dead-code triage and repo-wide zero-import classifications
     together; growth in tracked retirement debt or any untriaged zero-import candidate
     requires an explicit reviewed rebaseline.
@@ -900,21 +902,30 @@ retirement_governance_metrics:
       max_count: 13
       linked_issue: '#4541'
       owner: '@bioetl-architecture'
-      rationale: 'Repo-wide zero-import candidates now reflect the reviewed policy-bound residue plus the separately tracked composition registry facade. The governed surface fell from 14 to 13 after bioetl.domain.ports.serialization gained direct test coverage and no longer qualifies as a repo-wide zero-import candidate.'
-      ratchet_policy: 'Non-growth fail-fast unless a reviewed dead-code inventory refresh updates the classified candidate set intentionally.'
+      rationale: Repo-wide zero-import candidates now reflect the reviewed policy-bound
+        residue plus the separately tracked composition registry facade. The governed
+        surface fell from 14 to 13 after bioetl.domain.ports.serialization gained
+        direct test coverage and no longer qualifies as a repo-wide zero-import candidate.
+      ratchet_policy: Non-growth fail-fast unless a reviewed dead-code inventory refresh
+        updates the classified candidate set intentionally.
     repo_wide_classified_zero_import_candidate_count:
       current_count: 13
       max_count: 13
       linked_issue: '#4541'
       owner: '@bioetl-architecture'
-      rationale: 'Every repo-wide zero-import candidate remains covered by an explicit disposition ledger entry. The classified residue is src/bioetl/__main__.py, src/bioetl/composition/registry.py, and the 11 package-root-governed domain.ports owner modules that still have zero first-party static importers.'
-      ratchet_policy: 'Non-growth fail-fast unless the repo-wide classification ledger is intentionally rebaselined during review.'
+      rationale: Every repo-wide zero-import candidate remains covered by an explicit
+        disposition ledger entry. The classified residue is src/bioetl/__main__.py,
+        src/bioetl/composition/registry.py, and the 11 package-root-governed domain.ports
+        owner modules that still have zero first-party static importers.
+      ratchet_policy: Non-growth fail-fast unless the repo-wide classification ledger
+        is intentionally rebaselined during review.
     repo_wide_untriaged_zero_import_candidate_count:
       current_count: 0
       max_count: 0
       linked_issue: '#4541'
       owner: '@bioetl-architecture'
-      rationale: Untriaged repo-wide zero-import candidates are not allowed to persist after review.
+      rationale: Untriaged repo-wide zero-import candidates are not allowed to persist
+        after review.
       ratchet_policy: Zero-budget fail-fast metric.
 quarterly_targets:
 - quarter: 2026-Q1
@@ -977,12 +988,11 @@ test_governance_debt_metrics:
       target_count: 32
       ratchet_policy: Downward ratchet only; keep max_count at 32 unless a future
         owner-approved reduction lowers the live compatibility test inventory.
-      rationale: >-
-        Issues #4925, #4967, #5023, #5034, #5101, #5102, #5104, and #5106 reduced
-        compatibility test inventory from 37 to 32 by removing obsolete guards,
-        renaming tests out of compatibility classification, and cleaning up
-        deprecated contracts. Live compatibility debt count is now limited to
-        compat, legacy, deprecated, shim, and sunset surfaces.
+      rationale: 'Issues #4925, #4967, #5023, #5034, #5101, #5102, #5104, and #5106
+        reduced compatibility test inventory from 37 to 32 by removing obsolete guards,
+        renaming tests out of compatibility classification, and cleaning up deprecated
+        contracts. Live compatibility debt count is now limited to compat, legacy,
+        deprecated, shim, and sunset surfaces.'
 program_done_criteria:
   deadline_quarter: 2027-Q1
   max_total_exemptions: 0

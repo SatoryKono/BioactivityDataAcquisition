@@ -98,7 +98,8 @@ class TestGetBiblioProviderConfigs:
 
         assert configs["pubmed"].adapter_creator is _create_pubmed_adapter_from_settings
         assert (
-            configs["openalex"].adapter_creator is _create_openalex_adapter_from_settings
+            configs["openalex"].adapter_creator
+            is _create_openalex_adapter_from_settings
         )
 
     @patch("bioetl.composition.providers._config_helpers._get_rate_limits_from_config")

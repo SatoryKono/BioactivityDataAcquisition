@@ -140,7 +140,10 @@ def validate_strict_data_root_policy(
 
 def requires_artifact_publication_closure(required_profile: object) -> bool:
     """Return ``True`` when artifact publication must be fully wired."""
-    return _normalize_required_persistence_profile(required_profile) in STRICT_PERSISTENCE_PROFILES
+    return (
+        _normalize_required_persistence_profile(required_profile)
+        in STRICT_PERSISTENCE_PROFILES
+    )
 
 
 def validate_artifact_recorder_attachment(
@@ -198,4 +201,3 @@ def validate_manifest_persistence_requirements(
         composite_resume_rich_replay_supported=True,
         missing_artifact_lineage_layers=missing_artifact_lineage_layers,
     )
-

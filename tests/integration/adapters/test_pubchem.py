@@ -292,7 +292,7 @@ class TestPubChemFetchFilteredBySmiles:
     """Integration tests for fetch_filtered() with filter_field='smiles'.
 
     Records VCR cassettes for pubchempy.get_compounds(smiles, 'smiles').
-    
+
     Note: These tests use flexible assertions to handle VCR cassette staleness
     and PubChem API changes. They verify basic functionality rather than
     exact CID matches.
@@ -337,7 +337,9 @@ class TestPubChemFetchFilteredBySmiles:
 
         # More flexible assertion - at least some records should be returned
         # VCR cassettes may be incomplete or API may have changed
-        assert len(records) >= 1, "Should return at least one record for multiple SMILES"
+        assert len(records) >= 1, (
+            "Should return at least one record for multiple SMILES"
+        )
         # Verify basic structure for returned records
         for record in records:
             assert "cid" in record or "molecule_id" in record

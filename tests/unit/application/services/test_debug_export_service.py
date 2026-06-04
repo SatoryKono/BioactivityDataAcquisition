@@ -148,7 +148,9 @@ def test_debug_export_service_serializes_datetime_source_metadata() -> None:
 
     pack = service.build_pack()
 
-    assert "2026-06-02T10:13:06+00:00" in pack.tables["bronze_index"][0]["source_metadata"]
+    assert (
+        "2026-06-02T10:13:06+00:00" in pack.tables["bronze_index"][0]["source_metadata"]
+    )
 
 
 def test_debug_export_service_preserves_semantic_gold_filter_diagnostics() -> None:
@@ -191,7 +193,9 @@ def test_debug_export_service_preserves_semantic_gold_filter_diagnostics() -> No
     assert row["expected_constraint"] == 'not_in ["BAO_0000218"]'
 
 
-def test_debug_export_service_preserves_structured_silver_rejected_diagnostics() -> None:
+def test_debug_export_service_preserves_structured_silver_rejected_diagnostics() -> (
+    None
+):
     service = DebugExportService(
         config=DebugExportConfig(enabled=True, formats=("csv",)),
         run_id=_RUN_ID,
@@ -224,7 +228,9 @@ def test_debug_export_service_preserves_structured_silver_rejected_diagnostics()
     assert row["expected_constraint"] == 'not_in ["In vivo", "Ex vivo"]'
 
 
-def test_debug_export_service_preserves_structured_silver_quarantine_diagnostics() -> None:
+def test_debug_export_service_preserves_structured_silver_quarantine_diagnostics() -> (
+    None
+):
     service = DebugExportService(
         config=DebugExportConfig(enabled=True, formats=("csv",)),
         run_id=_RUN_ID,

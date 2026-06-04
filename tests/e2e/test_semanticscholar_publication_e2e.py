@@ -41,6 +41,7 @@ def vcr_config(vcr_cassette_dir) -> dict[str, Any]:
         decode_compressed_response=True,
     )
 
+
 # Stable DOIs for deterministic cassette playback.
 S2_TEST_DOIS = (
     "10.1038/s41586-020-2649-2",  # Nature 2020

@@ -38,9 +38,9 @@ class ControlPlaneSettings(BaseSettings):
     run_ledger_enabled: bool = Field(default=True)
     """When True, append run-ledger events for lifecycle and lineage."""
 
-    checkpoint_compatibility_policy: Literal[
-        "observe", "soft_fail", "hard_fail"
-    ] = Field(default="hard_fail")
+    checkpoint_compatibility_policy: Literal["observe", "soft_fail", "hard_fail"] = (
+        Field(default="hard_fail")
+    )
     """Resume behavior when checkpoint compatibility validation fails.
 
     `observe` remains a degraded operator mode only when identity continuity

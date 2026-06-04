@@ -696,7 +696,7 @@
           "per_provider_result_maps",
           "rich_checkpoint_payloads"
         ],
-        "forensic_grade_supported": true,
+        "forensic_grade_supported": false,
         "reconstructs": [
           "state",
           "seed_completed",

@@ -15,7 +15,9 @@ from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
     RunManifestContractIdentity,
 )
 from bioetl.domain.control_plane import ReplayCapability
-from bioetl.domain.control_plane.reproducibility_policy import assess_reproducibility_policy
+from bioetl.domain.control_plane.reproducibility_policy import (
+    assess_reproducibility_policy,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -117,7 +119,9 @@ def build_replay_assessment(
         strict_exact_replay_supported=_read_attr(
             reproducibility_context, "strict_exact_replay_supported"
         ),
-        exact_replay_requested=bool(_read_attr(request_inputs.ctx, "exact_replay", False)),
+        exact_replay_requested=bool(
+            _read_attr(request_inputs.ctx, "exact_replay", False)
+        ),
         resume_requested=bool(_read_attr(request_inputs.ctx, "resume", False)),
         replay_capability=replay_capability,
         run_type=request_inputs.run_type_value,

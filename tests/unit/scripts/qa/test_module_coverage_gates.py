@@ -36,7 +36,9 @@ def _gates() -> dict[str, object]:
 
 
 def test_block_regression_detects_coverage_decrease() -> None:
-    payload = {"modules": [_row("src/bioetl/domain/aggregates/_batch_lifecycle.py", 90.0)]}
+    payload = {
+        "modules": [_row("src/bioetl/domain/aggregates/_batch_lifecycle.py", 90.0)]
+    }
     baseline = {
         "modules": [_row("src/bioetl/domain/aggregates/_batch_lifecycle.py", 95.0)]
     }
@@ -53,7 +55,9 @@ def test_block_regression_detects_coverage_decrease() -> None:
 
 
 def test_block_regression_ignores_tier_gaps() -> None:
-    payload = {"modules": [_row("src/bioetl/domain/aggregates/_batch_lifecycle.py", 90.0)]}
+    payload = {
+        "modules": [_row("src/bioetl/domain/aggregates/_batch_lifecycle.py", 90.0)]
+    }
     baseline = {
         "modules": [_row("src/bioetl/domain/aggregates/_batch_lifecycle.py", 90.0)]
     }
@@ -69,7 +73,9 @@ def test_block_regression_ignores_tier_gaps() -> None:
 
 
 def test_block_all_reports_tier_gap() -> None:
-    payload = {"modules": [_row("src/bioetl/domain/aggregates/_batch_lifecycle.py", 90.0)]}
+    payload = {
+        "modules": [_row("src/bioetl/domain/aggregates/_batch_lifecycle.py", 90.0)]
+    }
     baseline = {
         "modules": [_row("src/bioetl/domain/aggregates/_batch_lifecycle.py", 90.0)]
     }

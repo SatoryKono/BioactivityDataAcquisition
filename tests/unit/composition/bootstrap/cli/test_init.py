@@ -23,7 +23,9 @@ def test_bootstrap_adr_service_uses_filesystem_catalog(monkeypatch):
 
 
 @pytest.mark.unit
-def test_bootstrap_control_plane_lifecycle_store_builds_expected_path(monkeypatch, tmp_path: Path):
+def test_bootstrap_control_plane_lifecycle_store_builds_expected_path(
+    monkeypatch, tmp_path: Path
+):
     """Lifecycle store bootstrap should resolve ``<data_dir>/output/control`` path."""
     from types import SimpleNamespace
 
@@ -49,7 +51,9 @@ def test_bootstrap_control_plane_lifecycle_store_builds_expected_path(monkeypatc
         "get_settings",
         lambda: SimpleNamespace(data_dir=str(tmp_path / "data")),
     )
-    monkeypatch.setattr(control_plane, "FileControlPlaneArtifactLifecycleStore", _FakeStore)
+    monkeypatch.setattr(
+        control_plane, "FileControlPlaneArtifactLifecycleStore", _FakeStore
+    )
     monkeypatch.setattr(noop_logger, "NoOpLogger", _FakeLogger)
     monkeypatch.setattr(noop_port, "NoOpMetrics", _FakeMetrics)
 

@@ -30,7 +30,9 @@ def test_pubchem_identity_shard_accepts_row_with_all_optional_checks() -> None:
 
 
 def test_pubchem_physchem_shard_accepts_row_exercising_all_checks() -> None:
-    PubchemPhysChemSchema.validate(pubchem_shard_checks_dataframe(PubchemPhysChemSchema))
+    PubchemPhysChemSchema.validate(
+        pubchem_shard_checks_dataframe(PubchemPhysChemSchema)
+    )
 
 
 def test_pubchem_stereo_shard_accepts_row_exercising_all_checks() -> None:

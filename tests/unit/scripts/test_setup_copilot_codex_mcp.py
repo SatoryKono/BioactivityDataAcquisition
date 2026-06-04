@@ -69,14 +69,12 @@ def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> 
     )
     assert servers["docker-docs"]["args"][0] == str(
         (
-            workspace_root
-            / f"scripts/ai/mcp/mcp_docker_docs_wrapper{wrapper_suffix}"
+            workspace_root / f"scripts/ai/mcp/mcp_docker_docs_wrapper{wrapper_suffix}"
         ).resolve()
     )
     assert servers["paper-search"]["args"][0] == str(
         (
-            workspace_root
-            / f"scripts/ai/mcp/mcp_paper_search_wrapper{wrapper_suffix}"
+            workspace_root / f"scripts/ai/mcp/mcp_paper_search_wrapper{wrapper_suffix}"
         ).resolve()
     )
     assert servers["dockerhub"]["args"][0] == str(
@@ -92,9 +90,7 @@ def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> 
     assert servers["biomoltechDocs"]["type"] == "http"
     assert servers["biomoltechDocs"]["url"] == "https://biomoltech.mintlify.app/mcp"
     assert servers["openaiDeveloperDocs"]["type"] == "http"
-    assert (
-        servers["openaiDeveloperDocs"]["url"] == "https://developers.openai.com/mcp"
-    )
+    assert servers["openaiDeveloperDocs"]["url"] == "https://developers.openai.com/mcp"
     assert servers["mintlify"]["url"] == "https://mcp.mintlify.com"
     assert servers["deepwiki"]["url"] == "https://mcp.deepwiki.com/mcp"
     assert (

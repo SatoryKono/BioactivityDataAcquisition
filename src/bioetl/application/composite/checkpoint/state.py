@@ -147,13 +147,9 @@ class CompositeCheckpointState:
             "seed_completed": self.seed_completed,
             "seed_result": serialize_seed_result(self.seed_result),
             "completed_dependencies": list(self.completed_dependencies),
-            "dependency_results": serialize_dependency_results(
-                self.dependency_results
-            ),
+            "dependency_results": serialize_dependency_results(self.dependency_results),
             "completed_enrichers": list(self.completed_enrichers),
-            "enrichment_results": serialize_enrichment_results(
-                self.enrichment_results
-            ),
+            "enrichment_results": serialize_enrichment_results(self.enrichment_results),
             "merge_completed": self.merge_completed,
             "merge_result": self.merge_result,
             "checkpoint_schema_version": self.checkpoint_schema_version,
@@ -212,13 +208,9 @@ class CompositeCheckpointState:
             seed_completed=data.get("seed_completed", False),
             seed_result=parse_seed_result(data.get("seed_result")),
             completed_dependencies=frozenset(data.get("completed_dependencies", [])),
-            dependency_results=parse_dependency_results(
-                data.get("dependency_results")
-            ),
+            dependency_results=parse_dependency_results(data.get("dependency_results")),
             completed_enrichers=frozenset(data.get("completed_enrichers", [])),
-            enrichment_results=parse_enrichment_results(
-                data.get("enrichment_results")
-            ),
+            enrichment_results=parse_enrichment_results(data.get("enrichment_results")),
             merge_completed=data.get("merge_completed", False),
             merge_result=data.get("merge_result"),
             checkpoint_schema_version=data.get("checkpoint_schema_version", "1.0.0"),

@@ -82,12 +82,16 @@ class TestPubChemCompoundFactory:
 
         # Cleanup after test if factory was imported
         import sys
-        if 'bioetl.composition.factories.pipeline.registry' in sys.modules:
+
+        if "bioetl.composition.factories.pipeline.registry" in sys.modules:
             from bioetl.composition.factories.pipeline.registry import (
                 pubchem_compound_factory,
             )
-            if hasattr(pubchem_compound_factory, '_original_create_data_source'):
-                pubchem_compound_factory._create_data_source = pubchem_compound_factory._original_create_data_source
+
+            if hasattr(pubchem_compound_factory, "_original_create_data_source"):
+                pubchem_compound_factory._create_data_source = (
+                    pubchem_compound_factory._original_create_data_source
+                )
 
     @patch("bioetl.composition.factories.services.factory.BaseServicesFactory")
     @patch("bioetl.composition.factories.services.bundle.load_pipeline_config")
@@ -110,7 +114,9 @@ class TestPubChemCompoundFactory:
         mock_base_services.create_common_services.return_value = mock_services
 
         # Save original _create_data_source for cleanup
-        pubchem_compound_factory._original_create_data_source = pubchem_compound_factory._create_data_source
+        pubchem_compound_factory._original_create_data_source = (
+            pubchem_compound_factory._create_data_source
+        )
 
         # Mock the data source creator function stored in the factory
         mock_data_source = MagicMock()
@@ -148,8 +154,10 @@ class TestPubChemCompoundFactory:
         mock_base_services.create_common_services.return_value = mock_services
 
         # Save original _create_data_source for cleanup
-        if not hasattr(pubchem_compound_factory, '_original_create_data_source'):
-            pubchem_compound_factory._original_create_data_source = pubchem_compound_factory._create_data_source
+        if not hasattr(pubchem_compound_factory, "_original_create_data_source"):
+            pubchem_compound_factory._original_create_data_source = (
+                pubchem_compound_factory._create_data_source
+            )
 
         # Mock the data source creator
         mock_data_source = MagicMock()
@@ -184,8 +192,10 @@ class TestPubChemCompoundFactory:
         mock_base_services.create_common_services.return_value = mock_services
 
         # Save original _create_data_source for cleanup
-        if not hasattr(pubchem_compound_factory, '_original_create_data_source'):
-            pubchem_compound_factory._original_create_data_source = pubchem_compound_factory._create_data_source
+        if not hasattr(pubchem_compound_factory, "_original_create_data_source"):
+            pubchem_compound_factory._original_create_data_source = (
+                pubchem_compound_factory._create_data_source
+            )
 
         # Mock the data source creator
         mock_data_source = MagicMock()

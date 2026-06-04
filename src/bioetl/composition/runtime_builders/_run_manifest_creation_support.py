@@ -36,6 +36,7 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
 )
 from bioetl.domain.control_plane import ReplayCapability
+
 if TYPE_CHECKING:
     from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
     from bioetl.domain.context import PipelineRunContext
@@ -108,9 +109,11 @@ def build_manifest_create_request(
             reproducibility_context, "required_persistence_profile"
         ),
     )
-    replay_of_run_id, replay_of_manifest_id = _manifest_support.resolve_replay_parentage(
-        ctx=ctx,
-        runtime_config=inputs.runtime_config,
+    replay_of_run_id, replay_of_manifest_id = (
+        _manifest_support.resolve_replay_parentage(
+            ctx=ctx,
+            runtime_config=inputs.runtime_config,
+        )
     )
     replay_capability = _manifest_support.resolve_replay_capability(
         source_refs=source_refs,

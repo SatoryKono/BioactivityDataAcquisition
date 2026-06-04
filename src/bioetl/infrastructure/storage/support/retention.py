@@ -37,9 +37,16 @@ _content_identity = content_identity
 def _resolve_deduplication_timeout_seconds() -> float:
     settings = get_settings()
     configured = float(
-        getattr(settings, "silver_dedup_timeout_seconds", DEFAULT_DEDUPLICATION_TIMEOUT_SECONDS)
+        getattr(
+            settings,
+            "silver_dedup_timeout_seconds",
+            DEFAULT_DEDUPLICATION_TIMEOUT_SECONDS,
+        )
     )
-    if getattr(settings, "test_mode", False) and configured >= DEFAULT_DEDUPLICATION_TIMEOUT_SECONDS:
+    if (
+        getattr(settings, "test_mode", False)
+        and configured >= DEFAULT_DEDUPLICATION_TIMEOUT_SECONDS
+    ):
         return TEST_MODE_DEDUPLICATION_TIMEOUT_SECONDS
     return configured
 

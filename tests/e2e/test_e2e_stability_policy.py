@@ -177,7 +177,9 @@ async def test_run_pipeline_or_skip_transient_skips_immediately_on_retry_exhaust
 ):
     """Nested retry exhaustion on 429 should skip without rerunning the whole pipeline."""
     context = create_test_context("semanticscholar_publication", limit=1)
-    request = httpx.Request("POST", "https://api.semanticscholar.org/graph/v1/paper/batch")
+    request = httpx.Request(
+        "POST", "https://api.semanticscholar.org/graph/v1/paper/batch"
+    )
     response = httpx.Response(429, request=request)
     last_error = httpx.HTTPStatusError(
         "429 Too Many Requests", request=request, response=response
@@ -208,7 +210,9 @@ async def test_run_pipeline_or_skip_transient_skips_immediately_on_retry_exhaust
 
 
 @pytest.mark.asyncio
-async def test_run_pipeline_or_skip_transient_skips_retry_exhausted_message_429() -> None:
+async def test_run_pipeline_or_skip_transient_skips_retry_exhausted_message_429() -> (
+    None
+):
     """Retry-exhausted wrappers without nested causes must still skip as transient."""
     context = create_test_context("semanticscholar_publication", limit=1)
     retry_error = RetryExhaustedError(

@@ -29,7 +29,9 @@ pytestmark = [pytest.mark.contracts, pytest.mark.no_api]
 class _ValidatorProbeSchema(ppa.DataFrameModel):
     """Tiny schema exercising registered Field-level validators."""
 
-    score: Series[int] = ppa.Field(is_non_negative=True, in_closed_range={"min_val": 0, "max_val": 100})
+    score: Series[int] = ppa.Field(
+        is_non_negative=True, in_closed_range={"min_val": 0, "max_val": 100}
+    )
     rank: Series[int] = ppa.Field(is_positive=True)
     label: Series[str] = ppa.Field(max_str_length={"max_len": 5})
     chembl_id: Series[str] = ppa.Field(str_matches_pattern={"pattern": r"^CHEMBL\d+$"})
@@ -106,8 +108,18 @@ def test_prebuilt_json_checks_are_named() -> None:
 @pytest.mark.parametrize(
     ("func", "series", "kwargs", "expected"),
     [
-        (is_non_negative, pd.Series([0, 2, None]), {"min_value": True}, [True, True, True]),
-        (is_non_negative, pd.Series([-1, 0, None]), {"min_value": 0}, [False, True, True]),
+        (
+            is_non_negative,
+            pd.Series([0, 2, None]),
+            {"min_value": True},
+            [True, True, True],
+        ),
+        (
+            is_non_negative,
+            pd.Series([-1, 0, None]),
+            {"min_value": 0},
+            [False, True, True],
+        ),
         (is_positive, pd.Series([1, 2, None]), {"min_value": True}, [True, True, True]),
         (is_positive, pd.Series([0, 1, None]), {"min_value": 1}, [False, True, True]),
         (
