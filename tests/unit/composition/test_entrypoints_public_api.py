@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import importlib
 import sys
+from types import SimpleNamespace
+from unittest.mock import patch
 
 import pytest
 
@@ -85,6 +87,25 @@ def test_entrypoints_unknown_symbol_raises_attribute_error() -> None:
     entrypoints = _reload_entrypoints_module()
     with pytest.raises(AttributeError):
         _ = entrypoints.not_existing_symbol
+
+
+@pytest.mark.unit
+def test_entrypoints_public_symbol_resolves_from_canonical_owner_module() -> None:
+    """Lazy public exports should delegate to the documented owner module."""
+    entrypoints = _reload_entrypoints_module()
+    sentinel = object()
+
+    def fake_import_module(module_name: str) -> SimpleNamespace:
+        assert module_name == "bioetl.composition.execution_api"
+        return SimpleNamespace(run_pipeline=sentinel)
+
+    with patch(
+        "bioetl.composition._lazy_exports.import_module",
+        side_effect=fake_import_module,
+    ) as import_module:
+        assert entrypoints.run_pipeline is sentinel
+
+    import_module.assert_called_once_with("bioetl.composition.execution_api")
 
 
 @pytest.mark.unit

@@ -26,6 +26,34 @@ def _locked_csv_backup_path(path: Path, *, payload_path: Path, mode: str) -> Pat
     return path.with_suffix(f".{mode}-locked.{suffix}.csv")
 
 
+def _copy_csv_payload(source_path: Path, target_path: Path) -> None:
+    """Publish one CSV payload without filesystem rename semantics."""
+    with source_path.open("rb") as source, target_path.open("wb") as target:
+        while chunk := source.read(1024 * 1024):
+            target.write(chunk)
+    source_path.unlink()
+
+
+def _publish_csv_payload(source_path: Path, target_path: Path) -> None:
+    """Publish one CSV payload using the safest available local filesystem path."""
+    if os.name == "nt":
+        # Windows cloud-backed filesystems can hang indefinitely in os.replace().
+        _copy_csv_payload(source_path, target_path)
+        return
+    source_path.replace(target_path)
+
+
+def _publish_locked_csv_backup(
+    source_path: Path,
+    backup_path: Path,
+) -> None:
+    """Publish a locked-target backup without reusing the failed target path."""
+    if os.name == "nt":
+        _copy_csv_payload(source_path, backup_path)
+        return
+    source_path.replace(backup_path)
+
+
 def atomic_csv_write(
     data: pa.Table,
     target_path: Path,
@@ -44,14 +72,14 @@ def atomic_csv_write(
         os.close(fd)
         pv.write_csv(data, temp_path, write_options=write_options)
         try:
-            temp_path.replace(target_path)
+            _publish_csv_payload(temp_path, target_path)
         except PermissionError:
             backup_path = _locked_csv_backup_path(
                 target_path,
                 payload_path=temp_path,
                 mode="write",
             )
-            temp_path.replace(backup_path)
+            _publish_locked_csv_backup(temp_path, backup_path)
             logger.warning(
                 "Target CSV locked, wrote to backup", backup_path=str(backup_path)
             )
@@ -92,7 +120,7 @@ def append_to_csv(
                 "Target CSV locked during append, wrote batch to backup",
                 backup_path=str(backup_path),
             )
-            temp_path.replace(backup_path)
+            _publish_locked_csv_backup(temp_path, backup_path)
             return
     except (OSError, pa.ArrowException, ValueError, TypeError, RuntimeError):
         if temp_path.exists():

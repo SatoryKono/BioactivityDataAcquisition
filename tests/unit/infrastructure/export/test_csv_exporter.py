@@ -15,6 +15,7 @@ import pyarrow.csv as pv
 import pytest
 
 import bioetl.infrastructure.export.csv_exporter_table_ops as csv_exporter_table_ops
+import bioetl.infrastructure.export.csv_exporter_io_ops as csv_exporter_io_ops
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 
@@ -464,6 +465,54 @@ class TestCsvExporterInternals:
             return original_replace(path_obj, target_obj)
 
         monkeypatch.setattr(Path, "replace", _patched_replace)
+
+        exporter._atomic_csv_write(table, target, write_options)
+
+        backup_candidates = list(tmp_path.glob("table.write-locked.*.csv"))
+        assert len(backup_candidates) == 1
+        backup_path = backup_candidates[0]
+        expected_digest = hashlib.sha256(backup_path.read_bytes()).hexdigest()[:12]
+        assert backup_path.name == f"table.write-locked.{expected_digest}.csv"
+        assert backup_path.exists()
+        mock_logger.warning.assert_called()
+
+    def test_atomic_csv_write_uses_copy_publish_on_windows(
+        self, tmp_path: Path, mock_logger: MagicMock, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        table = pa.Table.from_pydict({"id": [1]})
+        target = tmp_path / "table.csv"
+        write_options = pv.WriteOptions(include_header=True, delimiter=",")
+
+        def _raise_if_replace_called(path_obj: Path, target_obj: Path) -> Path:
+            raise AssertionError(f"replace called for {path_obj} -> {target_obj}")
+
+        monkeypatch.setattr(csv_exporter_io_ops.os, "name", "nt")
+        monkeypatch.setattr(Path, "replace", _raise_if_replace_called)
+
+        exporter._atomic_csv_write(table, target, write_options)
+
+        assert target.exists()
+        assert "id" in target.read_text(encoding="utf-8")
+
+    def test_atomic_csv_write_locked_target_uses_copy_backup_on_windows(
+        self, tmp_path: Path, mock_logger: MagicMock, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        table = pa.Table.from_pydict({"id": [1]})
+        target = tmp_path / "table.csv"
+        write_options = pv.WriteOptions(include_header=True, delimiter=",")
+        original_copy = csv_exporter_io_ops._copy_csv_payload
+        state = {"raised": False}
+
+        def _patched_copy(source_path: Path, target_path: Path) -> None:
+            if target_path == target and not state["raised"]:
+                state["raised"] = True
+                raise PermissionError("locked")
+            original_copy(source_path, target_path)
+
+        monkeypatch.setattr(csv_exporter_io_ops.os, "name", "nt")
+        monkeypatch.setattr(csv_exporter_io_ops, "_copy_csv_payload", _patched_copy)
 
         exporter._atomic_csv_write(table, target, write_options)
 

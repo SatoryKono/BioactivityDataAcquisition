@@ -2,19 +2,18 @@
 
 from __future__ import annotations
 
-import asyncio
 import time
 from collections.abc import Iterator
-from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-import orjson
-import zstandard as zstd
-
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+from bioetl.infrastructure.storage.bronze.facade_contracts import (
+    BRONZE_WRITE_ERRORS,
+    BronzeWriterRuntimeServices,
+)
 from bioetl.infrastructure.storage.bronze.io_mixin import BronzeWriterIOMixin
 from bioetl.infrastructure.storage.bronze.metadata_mixin import (
     BronzeWriterMetadataMixin,
@@ -23,11 +22,9 @@ from bioetl.infrastructure.storage.bronze.metrics_mixin import (
     BronzeWriterMetricsMixin,
 )
 from bioetl.infrastructure.storage.bronze.pipeline_helpers import (
-    BronzeWriteArtifacts,
     BronzeWritePostwriteContext,
     BronzeWritePrepared,
     BronzeWriteRequest,
-    build_bronze_write_artifacts,
     prepare_bronze_write,
 )
 from bioetl.infrastructure.storage.bronze.side_effects_mixin import (
@@ -36,7 +33,10 @@ from bioetl.infrastructure.storage.bronze.side_effects_mixin import (
 from bioetl.infrastructure.storage.bronze.validation_mixin import (
     BronzeWriterValidationMixin,
 )
-from bioetl.infrastructure.storage.support.atomic_ops import atomic_write_bytes
+from bioetl.infrastructure.storage.bronze.write_execution import (
+    run_bronze_post_write_actions,
+    write_bronze_data_and_sidecar,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import SourceMetadata
@@ -52,33 +52,6 @@ if TYPE_CHECKING:
 from bioetl.domain.ports.noop import _NoOpSpan
 
 __all__ = ["BRONZE_WRITE_ERRORS", "BronzeWriter"]
-
-BRONZE_WRITE_ERRORS = (
-    OSError,
-    RuntimeError,
-    ValueError,
-    TypeError,
-    zstd.ZstdError,
-)
-BRONZE_REQUIRED_METADATA_FIELDS = (
-    "ingestion_ts",
-    "run_id",
-    "run_type",
-    "batch_id",
-)
-
-
-@dataclass(frozen=True, slots=True)
-class BronzeWriterRuntimeServices:
-    """Optional Bronze runtime collaborators grouped behind one local seam."""
-
-    tracing: TracingPort | None
-    audit: AuditPort | None
-    metadata_writer: MetadataWriterPort
-    save_metadata: bool
-    metadata_coordinator: MetadataCoordinatorPort | None
-    lineage_store: LineageStorePort | None = None
-
 
 class BronzeWriter(
     BronzeWriterValidationMixin,
@@ -262,75 +235,11 @@ class BronzeWriter(
         context: BronzeWritePostwriteContext,
     ) -> None:
         """Emit metrics, optional JSON copy, audit log, and metadata sidecar."""
-        request = context.request
-        prepared = context.prepared
-        write_artifacts = context.write_artifacts
-        self._emit_bronze_write_metrics(
-            duration=context.duration,
-            provider=request.provider,
-            entity=request.entity,
-            record_count=write_artifacts.record_count,
-            compressed_size=write_artifacts.compressed_size,
-            uncompressed_size=write_artifacts.uncompressed_size,
-            relative_path=prepared.relative_path,
-            batch_id=request.batch_id,
-            run_id=request.run_id,
-            run_type=request.run_type,
-        )
-        if self.save_json:
-            await self._write_json_copy(
-                prepared.record_list,
-                request.provider,
-                request.entity,
-                prepared.date_str,
-                request.batch_id,
-            )
-        if self._audit:
-            await self._log_bronze_audit(
-                run_id=request.run_id,
-                ingestion_ts=request.ingestion_ts,
-                relative_path=prepared.relative_path,
-                batch_id=request.batch_id,
-                run_type=request.run_type,
-                record_count=write_artifacts.record_count,
-                compressed_size=write_artifacts.compressed_size,
-                uncompressed_size=write_artifacts.uncompressed_size,
-                provider=request.provider,
-                entity=request.entity,
-            )
-        if self._save_metadata:
-            await self._maybe_write_bronze_metadata(
-                run_id=request.run_id,
-                run_type=request.run_type,
-                provider=request.provider,
-                entity=request.entity,
-                batch_id=request.batch_id,
-                record_count=write_artifacts.record_count,
-                compressed_size=write_artifacts.compressed_size,
-                relative_path=prepared.relative_path,
-                ingestion_ts=request.ingestion_ts,
-                duration=context.duration,
-                source_metadata=request.source_metadata,
-            )
+        await run_bronze_post_write_actions(self, context)
 
     async def _write_bronze_data_and_sidecar(
         self,
         prepared: BronzeWritePrepared,
-    ) -> BronzeWriteArtifacts:
+    ):
         """Write compressed JSONL data and metadata sidecar to disk."""
-
-        def _write_task() -> tuple[int, int]:
-            count, size = self._write_atomic_stream(
-                prepared.records_iter,
-                prepared.full_path,
-            )
-            meta_bytes = orjson.dumps(prepared.metadata, option=orjson.OPT_SORT_KEYS)
-            atomic_write_bytes(prepared.meta_path, meta_bytes)
-            return count, size
-
-        record_count, uncompressed_size = await asyncio.to_thread(_write_task)
-        return build_bronze_write_artifacts(
-            full_path=prepared.full_path,
-            record_count=record_count,
-            uncompressed_size=uncompressed_size,
-        )
+        return await write_bronze_data_and_sidecar(self, prepared)

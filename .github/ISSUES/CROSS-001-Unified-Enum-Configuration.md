@@ -1,10 +1,10 @@
 # Complete Unified Enum Configuration Across ChEMBL Pipelines
 
-**Status**: In Progress
+**Status**: Done
 **Priority**: P0 (Critical)
 **Labels**: `normalization`, `configuration`, `architecture`, `cross-pipeline`
 **Epic**: Cross-Pipeline Normalization Improvements 2026Q2
-**Last audited**: 2026-05-08
+**Last audited**: 2026-06-04
 
 ## Current Decision
 
@@ -63,11 +63,11 @@ domain value objects or format patterns, not duplicated ChEMBL vocabulary.
 - [x] Domain enum loader keeps direct file I/O outside the domain layer.
 - [x] Activity, assay, molecule, target, publication, and related ChEMBL enum
       families are represented in parity tests.
-- [ ] All governed enum families have explicit registry coordinates.
-- [ ] Residual local enum duplication is eliminated or justified.
-- [ ] Schema, profile, config, and generated matrix surfaces agree on enum
+- [x] All governed enum families have explicit registry coordinates.
+- [x] Residual local enum duplication is eliminated or justified.
+- [x] Schema, profile, config, and generated matrix surfaces agree on enum
       source and values.
-- [ ] Targeted enum and parity tests pass.
+- [x] Targeted enum and parity tests pass.
 
 ## Verification
 
@@ -75,8 +75,10 @@ domain value objects or format patterns, not duplicated ChEMBL vocabulary.
 ./.venv/bin/python -m pytest -q tests/unit/domain/config/test_enum_loader.py
 ./.venv/bin/python -m pytest -q tests/unit/domain/schemas/test_constants_yaml.py
 ./.venv/bin/python -m pytest -q tests/integration/config/test_chembl_enum_parity.py
+./.venv/bin/python -m pytest -q tests/integration/config/test_chembl_enum_registry_coordinates.py
 ./.venv/bin/python -m pytest -q tests/integration/config/test_chembl_policy_surface_parity.py
 ./.venv/bin/python -m pytest -q tests/contract/test_chembl_enum_normalization_policy.py
+./.venv/bin/python -m pytest -q tests/unit/domain/normalization/profiles/test_chembl_enum_externalization_ratchet.py
 ```
 
 ## Risks

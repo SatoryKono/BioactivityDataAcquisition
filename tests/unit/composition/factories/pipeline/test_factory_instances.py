@@ -78,15 +78,19 @@ class TestChemblActivityFactory:
 
     @pytest.fixture(autouse=True)
     def _restore_factory_state(self) -> Generator[None, None, None]:
-        from bioetl.composition.factories.pipeline.registry import (
-            chembl_activity_factory,
-        )
+        # Lazy import to avoid timeout on Windows during fixture setup
+        yield  # Don't import at fixture setup
 
-        original_creator = chembl_activity_factory._create_data_source
-        original_class = chembl_activity_factory.pipeline_class
-        yield
-        chembl_activity_factory._create_data_source = original_creator
-        chembl_activity_factory.pipeline_class = original_class
+        # Cleanup after test if factory was imported
+        import sys
+        if 'bioetl.composition.factories.pipeline.registry' in sys.modules:
+            from bioetl.composition.factories.pipeline.registry import (
+                chembl_activity_factory,
+            )
+            if hasattr(chembl_activity_factory, '_original_create_data_source'):
+                chembl_activity_factory._create_data_source = chembl_activity_factory._original_create_data_source
+            if hasattr(chembl_activity_factory, '_original_pipeline_class'):
+                chembl_activity_factory.pipeline_class = chembl_activity_factory._original_pipeline_class
 
     @patch("bioetl.composition.factories.services.bundle.BaseServicesFactory")
     @patch("bioetl.composition.factories.services.bundle.load_pipeline_config")
@@ -95,12 +99,20 @@ class TestChemblActivityFactory:
         mock_load_config: MagicMock,
         mock_base_services: MagicMock,
     ) -> None:
+        # Lazy import to avoid timeout on Windows during test collection
         from bioetl.composition.factories.pipeline.registry import (
             chembl_activity_factory,
         )
 
         mock_load_config.return_value = _make_pipeline_config()
         mock_base_services.create_common_services.return_value = _make_services()
+        
+        # Save original state for cleanup
+        if not hasattr(chembl_activity_factory, '_original_create_data_source'):
+            chembl_activity_factory._original_create_data_source = chembl_activity_factory._create_data_source
+        if not hasattr(chembl_activity_factory, '_original_pipeline_class'):
+            chembl_activity_factory._original_pipeline_class = chembl_activity_factory.pipeline_class
+        
         chembl_activity_factory._create_data_source = MagicMock(
             return_value=MagicMock()
         )
@@ -120,12 +132,18 @@ class TestChemblActivityFactory:
         mock_load_config: MagicMock,
         mock_base_services: MagicMock,
     ) -> None:
+        # Lazy import to avoid timeout on Windows during test collection
         from bioetl.composition.factories.pipeline.registry import (
             chembl_activity_factory,
         )
 
         mock_load_config.return_value = _make_pipeline_config()
         mock_base_services.create_common_services.return_value = _make_services()
+        
+        # Save original state for cleanup
+        if not hasattr(chembl_activity_factory, '_original_create_data_source'):
+            chembl_activity_factory._original_create_data_source = chembl_activity_factory._create_data_source
+        
         chembl_activity_factory._create_data_source = MagicMock(
             return_value=MagicMock()
         )
@@ -144,11 +162,17 @@ class TestChemblActivityFactory:
         mock_load_config: MagicMock,
         mock_base_services: MagicMock,
     ) -> None:
+        # Lazy import to avoid timeout on Windows during test collection
         from bioetl.composition.factories.pipeline.registry import (
             chembl_activity_factory,
         )
 
         mock_base_services.create_common_services.return_value = _make_services()
+        
+        # Save original state for cleanup
+        if not hasattr(chembl_activity_factory, '_original_create_data_source'):
+            chembl_activity_factory._original_create_data_source = chembl_activity_factory._create_data_source
+        
         chembl_activity_factory._create_data_source = MagicMock(
             return_value=MagicMock()
         )
@@ -172,6 +196,7 @@ class TestChemblActivityFactory:
         mock_yaml_to_domain: MagicMock,
         mock_compute_hash: MagicMock,
     ) -> None:
+        # Lazy import to avoid timeout on Windows during test collection
         from bioetl.composition.factories.pipeline.registry import (
             chembl_activity_factory,
         )
@@ -199,6 +224,13 @@ class TestChemblActivityFactory:
         mock_domain_config.dq.strict_validation = False
         mock_yaml_to_domain.return_value = mock_domain_config
         mock_compute_hash.return_value = "mock_config_hash_12345"
+        
+        # Save original state for cleanup
+        if not hasattr(chembl_activity_factory, '_original_create_data_source'):
+            chembl_activity_factory._original_create_data_source = chembl_activity_factory._create_data_source
+        if not hasattr(chembl_activity_factory, '_original_pipeline_class'):
+            chembl_activity_factory._original_pipeline_class = chembl_activity_factory.pipeline_class
+        
         chembl_activity_factory._create_data_source = MagicMock(
             return_value=MagicMock()
         )

@@ -102,6 +102,9 @@ esac
 
 check_file_contains_repo "${REPO_ROOT}/.mcp.json"
 check_file_contains_repo "${REPO_ROOT}/.vscode/mcp.json"
+if [[ -f "${REPO_ROOT}/.cursor/mcp.json" ]]; then
+    check_file_contains_repo "${REPO_ROOT}/.cursor/mcp.json"
+fi
 check_codex_config
 validate_codex_mcp_list
 

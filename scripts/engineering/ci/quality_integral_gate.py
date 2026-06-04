@@ -32,6 +32,9 @@ else:
         render_debt_governance_section,
     )
 
+from bioetl.infrastructure.quality.architecture_quality_scorecard import (
+    build_architecture_quality_scorecard,
+)
 from bioetl.infrastructure.quality.debt_scorecard import (
     evaluate_debt_scorecard,
     load_debt_scorecard,
@@ -118,6 +121,7 @@ class QualityGateOutputContext:
     coverage_percent: float | None
     compatibility_surface: object
     debt_governance_surface: object
+    architecture_quality_scorecard: dict[str, object]
     test_health_payload: dict[str, object]
     bonus: float
     summary: object
@@ -907,6 +911,7 @@ def _quality_gate_output(payload: QualityGateOutputContext) -> dict[str, object]
         },
         "compatibility_surface": payload.compatibility_surface.as_dict(),
         "debt_governance_surface": payload.debt_governance_surface.as_dict(),
+        "architecture_quality_scorecard": payload.architecture_quality_scorecard,
         "test_health": payload.test_health_payload,
         "integral_score": {
             "base": payload.summary.integral_score,
@@ -945,6 +950,7 @@ def _summary_lines(
     debt_governance_surface: object,
 ) -> list[str]:
     """Build compact markdown summary lines."""
+    del compatibility_surface
     skip_classes_detail = test_health_payload["skip_classes_detail"]
     skip_classes_rendered = (
         ", ".join(
@@ -1052,6 +1058,9 @@ def main() -> int:
     coverage_threshold = _require_float(ci_target, "coverage_threshold_percent")
     debt_governance_surface = collect_debt_governance_snapshot()
     compatibility_surface = debt_governance_surface.compatibility_surface
+    architecture_quality_scorecard = build_architecture_quality_scorecard(
+        repo_root=Path.cwd()
+    )
     test_matrix = _load_yaml_mapping(test_matrix_path)
     test_health_taxonomy = _load_yaml_mapping(test_health_taxonomy_path)
 
@@ -1090,6 +1099,7 @@ def main() -> int:
             coverage_percent=coverage_percent,
             compatibility_surface=compatibility_surface,
             debt_governance_surface=debt_governance_surface,
+            architecture_quality_scorecard=architecture_quality_scorecard,
             test_health_payload=test_health_payload,
             bonus=bonus,
             summary=summary,

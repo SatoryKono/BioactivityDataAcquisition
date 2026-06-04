@@ -132,7 +132,7 @@ def coerce_text(value: object) -> str | None:
     return text or None
 
 
-def canonical_json(value: Any) -> str:
+def canonical_json(value: Any) -> str:  # Any: JSON can be any serializable type (str, int, dict, list, etc.)
     """Serialize a deterministic JSON payload for graph lookup helpers."""
     return json.dumps(value, sort_keys=True, separators=(",", ":"))
 

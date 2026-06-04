@@ -7,6 +7,16 @@ the published external surface and are kept in parity by config tests.
 
 from __future__ import annotations
 
+from bioetl.domain.schemas._chembl_enum_catalog_target_publication import (
+    OA_STATUS_VALUES,
+    PUBLICATION_TERM_TYPES,
+    PUBLICATION_TYPES,
+    TARGET_COMPONENT_RELATIONSHIPS,
+    TARGET_COMPONENT_TYPES,
+    TARGET_ORGANISM_CLASSES,
+    TARGET_TYPES,
+)
+
 STANDARD_RELATIONS: frozenset[str] = frozenset(["=", "<", "<=", ">", ">=", "~"])
 
 ACTIVITY_ACTION_TYPES: frozenset[str] = frozenset(
@@ -66,6 +76,9 @@ ASSAY_PARAMETER_STANDARD_TYPES: frozenset[str] = frozenset(
         "SERUM",
     ]
 )
+
+BINARY_FLAG_VALUES: frozenset[str] = frozenset(["0", "1"])
+TRINARY_FLAG_VALUES: frozenset[str] = frozenset(["-1", "0", "1"])
 
 DATA_VALIDITY_COMMENTS: frozenset[str] = frozenset(
     [
@@ -162,70 +175,20 @@ RO3_PASS_VALUES: frozenset[str] = frozenset(["Y", "N"])
 MAX_PHASE_VALUES: tuple[float, ...] = (-1, 0, 0.5, 1, 2, 3, 4)
 CHIRALITY_VALUES: tuple[int, ...] = (-1, 0, 1, 2)
 AVAILABILITY_TYPE_VALUES: tuple[int, ...] = (-2, -1, 0, 1, 2)
-TARGET_TYPES: frozenset[str] = frozenset(
-    [
-        "SINGLE PROTEIN",
-        "PROTEIN FAMILY",
-        "PROTEIN COMPLEX",
-        "PROTEIN COMPLEX GROUP",
-        "SELECTIVITY GROUP",
-        "CHIMERIC PROTEIN",
-        "CELL-LINE",
-        "TISSUE",
-        "ORGANISM",
-        "MACROMOLECULE",
-        "SMALL MOLECULE",
-        "LIPID",
-        "METAL",
-        "UNKNOWN",
-    ]
-)
-TARGET_COMPONENT_RELATIONSHIPS: frozenset[str] = frozenset(
-    [
-        "SINGLE PROTEIN",
-        "PROTEIN SUBUNIT",
-        "RNA",
-        "INTERACTING PROTEIN",
-    ]
-)
-TARGET_COMPONENT_TYPES: frozenset[str] = frozenset(["PROTEIN", "DNA", "RNA"])
-TARGET_ORGANISM_CLASSES: frozenset[str] = frozenset(
-    ["acellular", "unicellular", "multicellular"]
-)
-PUBLICATION_TYPES: frozenset[str] = frozenset(
-    [
-        "journal-article",
-        "patent",
-        "dataset",
-        "book",
-        "review",
-        "letter",
-        "editorial",
-        "clinical-trial",
-        "meta-analysis",
-        "case-reports",
-        "comparative-study",
-        "evaluation-study",
-        "preprint",
-        "book-chapter",
-        "proceedings-article",
-        "posted-content",
-        "report",
-        "standard",
-        "dissertation",
-        "other",
-    ]
-)
-OA_STATUS_VALUES: tuple[str, ...] = (
-    "gold",
-    "green",
-    "hybrid",
-    "bronze",
-    "closed",
-    "diamond",
-)
-PUBLICATION_TERM_TYPES: frozenset[str] = frozenset(
-    ["MESH_HEADING", "MESH_QUALIFIER", "KEYWORD"]
+
+_MAPPING_STATUS_FIELDS: tuple[tuple[str, str], ...] = (
+    ("activity", "bao_endpoint_mapping_status"),
+    ("activity", "bao_format_mapping_status"),
+    ("activity", "qudt_unit_mapping_status"),
+    ("activity", "uo_unit_mapping_status"),
+    ("assay", "bao_format_mapping_status"),
+    ("assay_parameters", "qudt_unit_mapping_status"),
+    ("assay_parameters", "uo_unit_mapping_status"),
+    ("cell_line", "clo_mapping_status"),
+    ("cell_line", "efo_mapping_status"),
+    ("tissue", "bto_mapping_status"),
+    ("tissue", "efo_mapping_status"),
+    ("tissue", "uberon_mapping_status"),
 )
 
 CHEMBL_ENUM_CATALOG: dict[tuple[str, str], frozenset[str]] = {
@@ -244,20 +207,38 @@ CHEMBL_ENUM_CATALOG: dict[tuple[str, str], frozenset[str]] = {
     ("assay", "assay_subcellular_fraction"): SUBCELLULAR_FRACTIONS,
     ("assay", "subcellular_fraction"): SUBCELLULAR_FRACTIONS,
     ("assay", "subcellular_fractions"): SUBCELLULAR_FRACTIONS,
+    ("assay_parameters", "parameter_type"): ASSAY_PARAMETER_STANDARD_TYPES,
+    ("assay_parameters", "type"): ASSAY_PARAMETER_STANDARD_TYPES,
     ("assay_parameters", "standard_relation"): STANDARD_RELATIONS,
     ("assay_parameters", "standard_type"): ASSAY_PARAMETER_STANDARD_TYPES,
     ("assay_parameters", "standard_units"): ACTIVITY_STANDARD_UNITS,
     ("molecule", "availability_type"): frozenset(
         str(value) for value in AVAILABILITY_TYPE_VALUES
     ),
+    ("molecule", "black_box_warning"): BINARY_FLAG_VALUES,
     ("molecule", "chirality"): frozenset(str(value) for value in CHIRALITY_VALUES),
+    ("molecule", "dosed_ingredient"): BINARY_FLAG_VALUES,
+    ("molecule", "first_in_class"): TRINARY_FLAG_VALUES,
+    ("molecule", "inorganic_flag"): TRINARY_FLAG_VALUES,
+    ("molecule", "max_phase"): frozenset(str(value) for value in MAX_PHASE_VALUES),
+    ("molecule", "molecule_type"): MOLECULE_TYPES,
+    ("molecule", "natural_product"): TRINARY_FLAG_VALUES,
+    ("molecule", "polymer_flag"): BINARY_FLAG_VALUES,
+    ("molecule", "prodrug"): TRINARY_FLAG_VALUES,
     ("molecule", "ro3_pass"): RO3_PASS_VALUES,
+    ("molecule", "structure_type"): STRUCTURE_TYPES,
     ("publication", "oa_status"): frozenset(OA_STATUS_VALUES),
+    ("publication", "publication_type"): frozenset(
+        ["journal-article", "book", "dataset", "patent"]
+    ),  # ChEMBL-specific subset
+    ("publication_term", "term_type"): PUBLICATION_TERM_TYPES,
     ("target", "component_relationships"): TARGET_COMPONENT_RELATIONSHIPS,
     ("target", "component_types"): TARGET_COMPONENT_TYPES,
     ("target", "organism_class"): TARGET_ORGANISM_CLASSES,
+    ("target", "target_type"): TARGET_TYPES,
     ("subcellular_fraction", "subcellular_fraction"): SUBCELLULAR_FRACTIONS,
     ("target_component", "component_type"): TARGET_COMPONENT_TYPES,
+    **dict.fromkeys(_MAPPING_STATUS_FIELDS, ONTOLOGY_MAPPING_STATUSES),
 }
 
 __all__ = [
@@ -270,6 +251,7 @@ __all__ = [
     "ASSAY_TEST_TYPES",
     "ASSAY_TYPES",
     "AVAILABILITY_TYPE_VALUES",
+    "BINARY_FLAG_VALUES",
     "CHEMBL_ENUM_CATALOG",
     "CHIRALITY_VALUES",
     "CONFIDENCE_DESCRIPTIONS",
@@ -289,4 +271,5 @@ __all__ = [
     "TARGET_COMPONENT_TYPES",
     "TARGET_ORGANISM_CLASSES",
     "TARGET_TYPES",
+    "TRINARY_FLAG_VALUES",
 ]

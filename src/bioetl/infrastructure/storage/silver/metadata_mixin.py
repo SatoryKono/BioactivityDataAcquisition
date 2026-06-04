@@ -6,127 +6,41 @@ __all__ = ["SilverWriterMetadataMixin", "time"]
 
 import asyncio
 import time
-from collections.abc import Awaitable, Callable, Sequence
+from collections.abc import Sequence
 from datetime import datetime
-from typing import Protocol
 
-import pyarrow as pa
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
-from bioetl.domain.behavior.dq_metrics_calculator import DQMetricsCalculator
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.models.metadata import SilverMetadata
-from bioetl.domain.ports import (
-    AuditPort,
-    LineageStorePort,
-    LoggerPort,
-    MetadataCoordinatorPort,
-    MetadataWriterPort,
-    MetricsPort,
-)
 from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
+from bioetl.infrastructure.storage.silver.metadata_mixin_protocols import (
+    _SilverWriterMetadataRuntimeProtocol,
+)
 from bioetl.infrastructure.storage.silver.metadata_operations import (
-    _build_silver_write_result,
     _execute_silver_metadata_write,
     _prepare_silver_merged_metadata_write,
     _prepare_silver_metadata_write,
-    _prepare_silver_write_finalization_context,
-    _PreparedSilverWriteFinalizationContext,
     _read_delta_version,
-    _SilverMetadataWriteHostProtocol,
     _SilverMetadataWriteRequest,
-    _SilverWriteFinalizationHostProtocol,
 )
 from bioetl.infrastructure.storage.silver.metadata_request_models import (
     _build_silver_merged_metadata_write_request,
-    _coerce_silver_write_finalization_preparation_request,
-    _coerce_silver_write_result_finalization_request,
+    _PreparedSilverWriteFinalizationContext,
     _SilverWriteFinalizationPreparationRequest,
     _SilverWriteResultFinalizationRequest,
+)
+from bioetl.infrastructure.storage.silver.operations.metadata_finalization_operations import (
+    finalize_silver_write_result_operation,
+    prepare_silver_write_finalization_context_operation,
 )
 from bioetl.infrastructure.storage.silver.operations.metadata_write_support import (
     _log_silver_audit_event,
     _SilverMetadataAuditSupportRequest,
 )
-
-
-class _SilverWriterMetadataRuntimeProtocol(
-    _SilverMetadataWriteHostProtocol,
-    _SilverWriteFinalizationHostProtocol,
-    Protocol,
-):
-    """Full runtime contract expected by ``SilverWriterMetadataMixin`` methods."""
-
-    logger: LoggerPort
-    _audit: AuditPort | None
-    _dq_calculator: DQMetricsCalculator
-    _get_table_schema: Callable[[str], Awaitable[pa.Schema | None]]
-    _metadata_coordinator: MetadataCoordinatorPort | None
-    _lineage_store: LineageStorePort | None
-    _metadata_writer: MetadataWriterPort
-    _metrics: MetricsPort | None
-    _flat_structure: bool
-    _transform_version: str | None
-    _transform_steps: tuple[str, ...]
-
-    def _should_skip_silver_metadata_write(
-        self,
-        *,
-        records: list[BronzeRecord],
-        table_path: str,
-        event_name: str,
-    ) -> bool: ...
-
-    async def _log_silver_audit(
-        self,
-        table_name: str,
-        records: list[BronzeRecord],
-        mode: SilverWriteMode,
-        *,
-        run_id: RunID | None,
-        run_type: RunType | None,
-        source_batch_id: BatchID | None,
-        ingestion_ts: datetime | None,
-    ) -> None: ...
-
-    async def _write_silver_metadata(
-        self,
-        request: _SilverMetadataWriteRequest,
-    ) -> None: ...
-
-    async def _maybe_log_silver_audit(
-        self,
-        *,
-        table_name: str,
-        records: list[BronzeRecord],
-        mode: SilverWriteMode,
-        run_id: RunID | None,
-        run_type: RunType | None,
-        source_batch_id: BatchID | None,
-        ingestion_ts: datetime | None,
-    ) -> None: ...
-
-    async def _prepare_silver_write_finalization_context(
-        self,
-        request: _SilverWriteFinalizationPreparationRequest | None = None,
-        *args: object,
-        **kwargs: object,
-    ) -> _PreparedSilverWriteFinalizationContext: ...
-
-    async def _get_delta_version(self, table_path: str) -> int | None: ...
-
-    async def _write_silver_metadata_file(
-        self,
-        *,
-        table_path: str,
-        metadata: SilverMetadata,
-        table_name: str,
-        provider_name: str,
-        entity_name: str,
-    ) -> None: ...
 
 
 class SilverWriterMetadataMixin:
@@ -308,46 +222,11 @@ class SilverWriterMetadataMixin:
         **kwargs: object,
     ) -> SilverWriteResult | None:
         """Compute DQ metrics, write metadata, and build final result."""
-        resolved_request = _coerce_silver_write_result_finalization_request(
+        return await finalize_silver_write_result_operation(
+            self,
             request,
             args=args,
             kwargs=kwargs,
-        )
-        context = await self._prepare_silver_write_finalization_context(
-            table_name=resolved_request.table_name,
-            records=resolved_request.records,
-            table_path=resolved_request.table_path,
-            quarantined_count=resolved_request.quarantined_count,
-            validation_errors=resolved_request.validation_errors,
-            started_at=resolved_request.started_at,
-            start_perf=resolved_request.start_perf,
-        )
-
-        await self._write_silver_metadata(
-            _SilverMetadataWriteRequest(
-                table_path=resolved_request.table_path,
-                table_name=resolved_request.table_name,
-                records=resolved_request.records,
-                primary_keys=resolved_request.primary_keys,
-                mode=resolved_request.validated_mode,
-                bronze_refs=resolved_request.bronze_refs,
-                dq_metrics=context.dq_metrics,
-                partition_by=resolved_request.partition_cols,
-                source_batch_ids=(
-                    [str(resolved_request.source_batch_id)]
-                    if resolved_request.source_batch_id is not None
-                    else None
-                ),
-                started_at=resolved_request.started_at,
-                completed_at=context.completed_at,
-                version_after=context.version_after,
-            )
-        )
-        return _build_silver_write_result(
-            table_name=resolved_request.table_name,
-            table_path=resolved_request.table_path,
-            version_after=context.version_after,
-            records_count=len(resolved_request.records),
         )
 
     async def _prepare_silver_write_finalization_context(
@@ -357,13 +236,10 @@ class SilverWriterMetadataMixin:
         **kwargs: object,
     ) -> _PreparedSilverWriteFinalizationContext:
         """Prepare DQ/version/timing context before Silver metadata persistence."""
-        resolved_request = _coerce_silver_write_finalization_preparation_request(
+        return await prepare_silver_write_finalization_context_operation(
+            self,
             request,
             args=args,
-            kwargs=kwargs,
-        )
-        return await _prepare_silver_write_finalization_context(
-            self,
-            resolved_request,
             perf_counter=time.perf_counter,
+            kwargs=kwargs,
         )

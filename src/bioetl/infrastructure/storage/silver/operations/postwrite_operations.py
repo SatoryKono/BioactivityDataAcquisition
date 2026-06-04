@@ -2,342 +2,58 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
-from dataclasses import dataclass
-from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 
-from bioetl.domain.medallion import SilverWriteMode
-from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.storage.silver.operations.postwrite_execution import (
+    _build_postwrite_audit_hook_request,
+    _build_postwrite_export_hook_request,
+    _complete_silver_write_pipeline_impl,
+    _finalize_silver_postwrite_result,
+    _run_postwrite_audit_via_host_hook,
+    _run_postwrite_export_via_host_hook,
+    _SilverPostwriteAuditHookRequest,
+    _SilverPostwriteExportHookRequest,
+)
+from bioetl.infrastructure.storage.silver.operations.postwrite_protocols import (
+    _SilverMaintenancePostwriteOps,
+    _SilverMetadataPostwriteOps,
+    _SilverPostwriteExecutorProtocol,
+    _SilverPostwriteFinalizerProtocol,
+    _SilverPostwriteHostProtocol,
+    _SilverWritePostwriteContext,
+)
 from bioetl.infrastructure.storage.silver.validation_operations import (
     _PreparedSilverWritePayload,
 )
 
 if TYPE_CHECKING:
-    import pyarrow as pa
-
-    from bioetl.domain.types import BatchID, RunID, RunType
-    from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
-
-class _SilverMaintenancePostwriteOps(Protocol):
-    async def maybe_export_csv(
-        self,
-        *,
-        table_name: str,
-        arrow_data: pa.Table,
-        export_path: str,
-        primary_keys: list[str],
-        audit_timestamp: datetime | None = None,
-    ) -> None: ...
-
-
-class _SilverMetadataPostwriteOps(Protocol):
-    async def log_silver_audit(
-        self,
-        table_name: str,
-        records: list[BronzeRecord],
-        mode: str,
-        validated_mode: SilverWriteMode,
-        run_id: RunID | None = None,
-        run_type: RunType | None = None,
-        source_batch_id: BatchID | None = None,
-        ingestion_ts: datetime | None = None,
-        error: str | None = None,
-    ) -> None: ...
-
-
-class _SilverWritePostwriteContext(Protocol):
-    """Structural type for the write execution context used after Delta write."""
-
-    @property
-    def table_name(self) -> str: ...
-
-    @property
-    def mode(self) -> str: ...
-
-    @property
-    def primary_keys(self) -> list[str]: ...
-
-    @property
-    def bronze_refs(self) -> list[BronzeWriteResult] | None: ...
-
-    @property
-    def partition_cols(self) -> list[str] | None: ...
-
-    @property
-    def run_id(self) -> RunID | None: ...
-
-    @property
-    def run_type(self) -> RunType | None: ...
-
-    @property
-    def source_batch_id(self) -> BatchID | None: ...
-
-    @property
-    def ingestion_ts(self) -> datetime | None: ...
-
-    @property
-    def quarantined_count(self) -> int | None: ...
-
-    @property
-    def validation_errors(self) -> Sequence[str] | None: ...
-
-    @property
-    def started_at(self) -> datetime: ...
-
-    @property
-    def start_perf(self) -> float: ...
-
-
-class _SilverPostwriteHostProtocol(Protocol):
-    """Structural type for postwrite service dependencies."""
-
-    base_path: str | Path
-    _maintenance: _SilverMaintenancePostwriteOps | None
-    _metadata: _SilverMetadataPostwriteOps | None
-
-    async def _maybe_export_csv(
-        self,
-        *,
-        table_name: str,
-        arrow_data: pa.Table,
-        mode: str,
-        validated_mode: SilverWriteMode,
-        primary_keys: list[str],
-    ) -> None: ...
-
-    async def _maybe_log_silver_audit(
-        self,
-        *,
-        table_name: str,
-        records: list[BronzeRecord],
-        mode: SilverWriteMode,
-        run_id: RunID | None,
-        run_type: RunType | None,
-        source_batch_id: BatchID | None,
-        ingestion_ts: datetime | None,
-    ) -> None: ...
-
-    async def _finalize_silver_write_result(
-        self,
-        *,
-        table_name: str,
-        records: list[BronzeRecord],
-        table_path: str,
-        primary_keys: list[str],
-        validated_mode: SilverWriteMode,
-        bronze_refs: list[BronzeWriteResult] | None,
-        partition_cols: list[str] | None,
-        source_batch_id: BatchID | None,
-        quarantined_count: int | None = None,
-        validation_errors: Sequence[str] | None = None,
-        started_at: datetime,
-        start_perf: float,
-    ) -> SilverWriteResult | None: ...
-
-
-class _SilverPostwriteFinalizerProtocol(Protocol):
-    """Keyword-friendly finalization callable shared by mixin and service paths."""
-
-    async def __call__(
-        self,
-        *,
-        table_name: str,
-        records: list[BronzeRecord],
-        table_path: str,
-        primary_keys: list[str],
-        validated_mode: SilverWriteMode,
-        bronze_refs: list[BronzeWriteResult] | None,
-        partition_cols: list[str] | None,
-        source_batch_id: BatchID | None,
-        quarantined_count: int | None = None,
-        validation_errors: Sequence[str] | None = None,
-        started_at: datetime,
-        start_perf: float,
-    ) -> SilverWriteResult | None: ...
-
-
-class _SilverPostwriteExecutorProtocol(Protocol):
-    """Shared postwrite executor contract for mixin and operations implementations."""
-
-    async def _run_postwrite_export(
-        self,
-        *,
-        ctx: _SilverWritePostwriteContext,
-        payload: _PreparedSilverWritePayload,
-    ) -> None: ...
-
-    async def _run_postwrite_audit(
-        self,
-        *,
-        ctx: _SilverWritePostwriteContext,
-        payload: _PreparedSilverWritePayload,
-    ) -> None: ...
-
-    async def _finalize_postwrite_result(
-        self,
-        *,
-        ctx: _SilverWritePostwriteContext,
-        payload: _PreparedSilverWritePayload,
-    ) -> SilverWriteResult | None: ...
-
-
-@dataclass(frozen=True, slots=True)
-class _SilverPostwriteExportHookRequest:
-    """Normalized host-hook request for postwrite export delegation."""
-
-    table_name: str
-    arrow_data: pa.Table
-    mode: str
-    validated_mode: SilverWriteMode
-    primary_keys: list[str]
-
-
-@dataclass(frozen=True, slots=True)
-class _SilverPostwriteAuditHookRequest:
-    """Normalized host-hook request for postwrite audit delegation."""
-
-    table_name: str
-    records: list[BronzeRecord]
-    mode: SilverWriteMode
-    run_id: RunID | None
-    run_type: RunType | None
-    source_batch_id: BatchID | None
-    ingestion_ts: datetime | None
-
-
-def _build_postwrite_export_hook_request(
-    *,
-    ctx: _SilverWritePostwriteContext,
-    payload: _PreparedSilverWritePayload,
-) -> _SilverPostwriteExportHookRequest:
-    """Build the normalized export request from postwrite ctx/payload."""
-    return _SilverPostwriteExportHookRequest(
-        table_name=ctx.table_name,
-        arrow_data=payload.arrow_data,
-        mode=ctx.mode,
-        validated_mode=payload.validated_mode,
-        primary_keys=ctx.primary_keys,
-    )
-
-
-def _build_postwrite_audit_hook_request(
-    *,
-    ctx: _SilverWritePostwriteContext,
-    payload: _PreparedSilverWritePayload,
-) -> _SilverPostwriteAuditHookRequest:
-    """Build the normalized audit request from postwrite ctx/payload."""
-    return _SilverPostwriteAuditHookRequest(
-        table_name=ctx.table_name,
-        records=payload.records,
-        mode=payload.validated_mode,
-        run_id=ctx.run_id,
-        run_type=ctx.run_type,
-        source_batch_id=ctx.source_batch_id,
-        ingestion_ts=ctx.ingestion_ts,
-    )
-
-
-async def _run_postwrite_export_via_host_hook(
-    host: _SilverPostwriteHostProtocol,
-    *,
-    request: _SilverPostwriteExportHookRequest,
-) -> None:
-    """Delegate postwrite export through the compatibility host hook."""
-    await host._maybe_export_csv(
-        table_name=request.table_name,
-        arrow_data=request.arrow_data,
-        mode=request.mode,
-        validated_mode=request.validated_mode,
-        primary_keys=request.primary_keys,
-    )
-
-
-async def _run_postwrite_audit_via_host_hook(
-    host: _SilverPostwriteHostProtocol,
-    *,
-    request: _SilverPostwriteAuditHookRequest,
-) -> None:
-    """Delegate postwrite audit through the compatibility host hook."""
-    await host._maybe_log_silver_audit(
-        table_name=request.table_name,
-        records=request.records,
-        mode=request.mode,
-        run_id=request.run_id,
-        run_type=request.run_type,
-        source_batch_id=request.source_batch_id,
-        ingestion_ts=request.ingestion_ts,
-    )
-
-
-async def _complete_silver_write_pipeline_impl(
-    executor: _SilverPostwriteExecutorProtocol,
-    *,
-    ctx: _SilverWritePostwriteContext,
-    payload: _PreparedSilverWritePayload,
-) -> SilverWriteResult | None:
-    """Run the shared postwrite sequence."""
-    await executor._run_postwrite_export(
-        ctx=ctx,
-        payload=payload,
-    )
-    await executor._run_postwrite_audit(
-        ctx=ctx,
-        payload=payload,
-    )
-    return await executor._finalize_postwrite_result(
-        ctx=ctx,
-        payload=payload,
-    )
-
-
-async def _finalize_silver_postwrite_result(
-    finalizer: _SilverPostwriteFinalizerProtocol,
-    *,
-    ctx: _SilverWritePostwriteContext,
-    payload: _PreparedSilverWritePayload,
-) -> SilverWriteResult | None:
-    """Finalize a postwrite payload using the shared ctx/payload contract."""
-    finalize_kwargs: dict[str, object] = {
-        "table_name": ctx.table_name,
-        "records": payload.records,
-        "table_path": payload.table_path,
-        "primary_keys": ctx.primary_keys,
-        "validated_mode": payload.validated_mode,
-        "bronze_refs": ctx.bronze_refs,
-        "partition_cols": ctx.partition_cols,
-        "source_batch_id": ctx.source_batch_id,
-        "started_at": ctx.started_at,
-        "start_perf": ctx.start_perf,
-    }
-    quarantined_count = getattr(ctx, "quarantined_count", None)
-    if quarantined_count is not None:
-        finalize_kwargs["quarantined_count"] = quarantined_count
-    validation_errors = getattr(ctx, "validation_errors", None)
-    if validation_errors is not None:
-        finalize_kwargs["validation_errors"] = validation_errors
-    return await finalizer(
-        **finalize_kwargs,  # type: ignore[arg-type]
-    )
+__all__ = [
+    "SilverPostwriteOperations",
+    "_SilverMaintenancePostwriteOps",
+    "_SilverMetadataPostwriteOps",
+    "_SilverPostwriteAuditHookRequest",
+    "_SilverPostwriteExecutorProtocol",
+    "_SilverPostwriteExportHookRequest",
+    "_SilverPostwriteFinalizerProtocol",
+    "_SilverPostwriteHostProtocol",
+    "_SilverWritePostwriteContext",
+    "_build_postwrite_audit_hook_request",
+    "_build_postwrite_export_hook_request",
+    "_complete_silver_write_pipeline_impl",
+    "_finalize_silver_postwrite_result",
+    "_run_postwrite_audit_via_host_hook",
+    "_run_postwrite_export_via_host_hook",
+]
 
 
 class SilverPostwriteOperations:
-    """Postwrite operations service for Silver layer writes.
-
-    This service encapsulates post-write orchestration logic previously in SilverWriterPostwriteMixin,
-    following the composition pattern for better separation of concerns and testability.
-    """
+    """Postwrite operations service for Silver layer writes."""
 
     def __init__(self, host: _SilverPostwriteHostProtocol) -> None:
-        """Initialize postwrite operations with host dependencies.
-
-        Args:
-            host: Host object providing access to maintenance, metadata services,
-                  and fallback methods.
-        """
+        """Initialize postwrite operations with host dependencies."""
         self._host = host
 
     async def _run_postwrite_export(
@@ -406,10 +122,7 @@ class SilverPostwriteOperations:
         ctx: _SilverWritePostwriteContext,
         payload: _PreparedSilverWritePayload,
     ) -> SilverWriteResult | None:
-        """Run post-write stages: CSV export, audit, and result finalization.
-
-        Uses maintenance operations if available, otherwise falls back to host methods.
-        """
+        """Run post-write stages: CSV export, audit, and result finalization."""
         return await _complete_silver_write_pipeline_impl(
             self,
             ctx=ctx,

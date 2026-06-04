@@ -5,10 +5,25 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from types import ModuleType
-from typing import TYPE_CHECKING, Protocol, TypeVar, cast
+from typing import TYPE_CHECKING, TypeVar, cast
 
 import pyarrow as pa
 
+from bioetl.infrastructure.storage.gold.io_delta_protocols import (
+    GoldWriteAsyncioProtocol as _GoldWriteAsyncioProtocol,
+)
+from bioetl.infrastructure.storage.gold.io_delta_protocols import (
+    GoldWriterDeltaModuleProtocol as _GoldWriterDeltaModuleProtocol,
+)
+from bioetl.infrastructure.storage.gold.io_delta_protocols import (
+    GoldWriteRetryModuleProtocol as _GoldWriteRetryModuleProtocol,
+)
+from bioetl.infrastructure.storage.gold.io_delta_protocols import (
+    GoldWriterScd2HostProtocol as _GoldWriterScd2HostProtocol,
+)
+from bioetl.infrastructure.storage.gold.io_delta_protocols import (
+    GoldWriterSimpleDeltaHostProtocol as _GoldWriterSimpleDeltaHostProtocol,
+)
 from bioetl.infrastructure.storage.gold.io_helpers import (
     initialize_scd2_records as _initialize_scd2_records,
 )
@@ -22,7 +37,6 @@ if TYPE_CHECKING:
     from datetime import datetime
 
     from bioetl.domain.types import GoldRecord, ScdConfig
-    from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterProtocol
 
 
 @dataclass(frozen=True, slots=True)
@@ -58,75 +72,6 @@ class _PreparedScd2GoldWrite:
     ingestion_ts: datetime
     partition_cols: list[str] | None
     column_order: list[str] | None
-
-
-class _GoldWriterSimpleDeltaHostProtocol(Protocol):
-    """Structural host contract for simple Gold Delta write helpers."""
-
-    csv_exporter: CsvExporterProtocol | None
-
-    async def _run_in_executor(
-        self,
-        func: Callable[..., object],
-        *args: object,
-    ) -> object: ...
-
-    def _to_arrow_table(
-        self, records: list[GoldRecord], column_order: list[str] | None = None
-    ) -> pa.Table: ...
-
-
-class _GoldWriteAsyncioProtocol(Protocol):
-    """Minimal asyncio surface needed by the Gold retry helper."""
-
-    async def sleep(self, delay: float) -> None: ...
-
-
-class _GoldWriteRetryModuleProtocol(Protocol):
-    """Retry-related runtime contract exposed by the canonical gold module."""
-
-    GOLD_WRITE_RETRY_ERRORS: tuple[type[BaseException], ...]
-    asyncio: _GoldWriteAsyncioProtocol
-
-
-class _GoldWriterDeltaModuleProtocol(_GoldWriteRetryModuleProtocol, Protocol):
-    """Runtime contract for the simple Delta write path."""
-
-    def write_deltalake(
-        self,
-        *,
-        table_or_uri: str,
-        data: pa.RecordBatchReader,
-        mode: str,
-        partition_by: list[str] | None,
-        schema_mode: str | None,
-    ) -> None:
-        _ = (table_or_uri, data, mode, partition_by, schema_mode)
-        raise NotImplementedError
-
-
-class _GoldWriterScd2HostProtocol(Protocol):
-    """Structural host contract for SCD2 Gold Delta write helpers."""
-
-    async def _run_in_executor(
-        self,
-        func: Callable[..., object],
-        *args: object,
-    ) -> object: ...
-
-    def _to_arrow_table(
-        self, records: list[GoldRecord], column_order: list[str] | None = None
-    ) -> pa.Table: ...
-
-    async def _merge_scd2(
-        self,
-        dt: object,
-        records: list[GoldRecord],
-        business_key: str | list[str],
-        scd_config: ScdConfig,
-        ingestion_ts: datetime,
-        column_order: list[str] | None = None,
-    ) -> None: ...
 
 
 def _build_simple_gold_write(
@@ -263,6 +208,11 @@ async def _execute_prepared_scd2_gold_write(
 
 
 __all__ = [
+    "_GoldWriteAsyncioProtocol",
+    "_GoldWriteRetryModuleProtocol",
+    "_GoldWriterDeltaModuleProtocol",
+    "_GoldWriterScd2HostProtocol",
+    "_GoldWriterSimpleDeltaHostProtocol",
     "_PreparedScd2GoldWrite",
     "_PreparedSimpleGoldWrite",
     "_SimpleGoldWriteRequest",

@@ -78,15 +78,16 @@ class TestPubChemCompoundFactory:
     @pytest.fixture(autouse=True)
     def _restore_factory_state(self):
         """Restore factory state after each test to prevent pollution."""
-        from bioetl.composition.factories.pipeline.registry import (
-            pubchem_compound_factory,
-        )
+        yield  # Don't do anything at fixture setup to avoid heavy imports
 
-        # Save original _create_data_source
-        original_creator = pubchem_compound_factory._create_data_source
-        yield
-        # Restore after test
-        pubchem_compound_factory._create_data_source = original_creator
+        # Cleanup after test if factory was imported
+        import sys
+        if 'bioetl.composition.factories.pipeline.registry' in sys.modules:
+            from bioetl.composition.factories.pipeline.registry import (
+                pubchem_compound_factory,
+            )
+            if hasattr(pubchem_compound_factory, '_original_create_data_source'):
+                pubchem_compound_factory._create_data_source = pubchem_compound_factory._original_create_data_source
 
     @patch("bioetl.composition.factories.services.factory.BaseServicesFactory")
     @patch("bioetl.composition.factories.services.bundle.load_pipeline_config")
@@ -100,12 +101,16 @@ class TestPubChemCompoundFactory:
         mock_services,
     ):
         """Test build_services creates a data source via the stored creator."""
+        # Lazy import to avoid timeout on Windows during test collection
         from bioetl.composition.factories.pipeline.registry import (
             pubchem_compound_factory,
         )
 
         mock_load_config.return_value = mock_pipeline_config
         mock_base_services.create_common_services.return_value = mock_services
+
+        # Save original _create_data_source for cleanup
+        pubchem_compound_factory._original_create_data_source = pubchem_compound_factory._create_data_source
 
         # Mock the data source creator function stored in the factory
         mock_data_source = MagicMock()
@@ -134,12 +139,17 @@ class TestPubChemCompoundFactory:
         mock_services,
     ):
         """Test build_services uses BaseServicesFactory."""
+        # Lazy import to avoid timeout on Windows during test collection
         from bioetl.composition.factories.pipeline.registry import (
             pubchem_compound_factory,
         )
 
         mock_load_config.return_value = mock_pipeline_config
         mock_base_services.create_common_services.return_value = mock_services
+
+        # Save original _create_data_source for cleanup
+        if not hasattr(pubchem_compound_factory, '_original_create_data_source'):
+            pubchem_compound_factory._original_create_data_source = pubchem_compound_factory._create_data_source
 
         # Mock the data source creator
         mock_data_source = MagicMock()
@@ -166,11 +176,16 @@ class TestPubChemCompoundFactory:
         mock_services,
     ):
         """Test build_services uses provided configuration."""
+        # Lazy import to avoid timeout on Windows during test collection
         from bioetl.composition.factories.pipeline.registry import (
             pubchem_compound_factory,
         )
 
         mock_base_services.create_common_services.return_value = mock_services
+
+        # Save original _create_data_source for cleanup
+        if not hasattr(pubchem_compound_factory, '_original_create_data_source'):
+            pubchem_compound_factory._original_create_data_source = pubchem_compound_factory._create_data_source
 
         # Mock the data source creator
         mock_data_source = MagicMock()

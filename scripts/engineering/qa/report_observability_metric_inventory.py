@@ -21,7 +21,6 @@ import os
 import re
 import subprocess
 import sys
-import tempfile
 from collections import defaultdict
 from datetime import UTC, date, datetime
 from pathlib import Path
@@ -283,12 +282,18 @@ def _iter_text_files_with_git_ls_files(root: Path) -> list[Path] | None:
     if pathspec is None:
         return None
     try:
-        result, stdout = _run_text_discovery_command(
+        tracked_result, tracked_stdout = _run_text_discovery_command(
+            ["git", "-C", _REPO_ROOT.as_posix(), "ls-files", "--", pathspec],
+            timeout=_TEXT_DISCOVERY_TIMEOUT_SECONDS,
+        )
+        untracked_result, untracked_stdout = _run_text_discovery_command(
             [
                 "git",
                 "-C",
                 _REPO_ROOT.as_posix(),
                 "ls-files",
+                "--others",
+                "--exclude-standard",
                 "--",
                 pathspec,
             ],
@@ -296,8 +301,11 @@ def _iter_text_files_with_git_ls_files(root: Path) -> list[Path] | None:
         )
     except (OSError, subprocess.TimeoutExpired):
         return None
-    if result.returncode != 0:
+    if tracked_result.returncode != 0 or untracked_result.returncode != 0:
         return None
+    stdout = "\n".join(
+        part for part in (tracked_stdout.strip(), untracked_stdout.strip()) if part
+    )
     return sorted(
         _REPO_ROOT / line
         for line in stdout.splitlines()
@@ -310,35 +318,18 @@ def _run_text_discovery_command(
     *,
     timeout: float,
 ) -> tuple[subprocess.CompletedProcess[str], str]:
-    """Capture small discovery output without Windows pipe reader threads."""
-    output_path = _temporary_text_discovery_output_path()
-    try:
-        with output_path.open("w", encoding="utf-8", errors="replace") as stdout_file:
-            result = subprocess.run(
-                command,
-                stdout=stdout_file,
-                stderr=subprocess.DEVNULL,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-                check=False,
-                timeout=timeout,
-                **_hidden_windows_subprocess_kwargs(),
-            )
-        stdout = output_path.read_text(encoding="utf-8", errors="replace")
-    finally:
-        output_path.unlink(missing_ok=True)
-    return result, stdout
-
-
-def _temporary_text_discovery_output_path() -> Path:
-    handle = tempfile.NamedTemporaryFile(
-        prefix="observability_metric_inventory_",
-        suffix=".txt",
-        delete=False,
+    """Capture small discovery output through a bounded subprocess call."""
+    result = subprocess.run(
+        command,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
+        timeout=timeout,
+        **_hidden_windows_subprocess_kwargs(),
     )
-    handle.close()
-    return Path(handle.name)
+    return result, result.stdout or ""
 
 
 def _hidden_windows_subprocess_kwargs(
@@ -405,6 +396,11 @@ def _scan_canonical_metric_mentions(
     grep_mentions = _scan_canonical_metric_mentions_with_git_grep(paths, repo_root)
     if grep_mentions is not None:
         return grep_mentions
+    if (repo_root / ".git").exists():
+        rg_mentions = _scan_canonical_metric_mentions_with_rg(paths, repo_root)
+        if rg_mentions is not None:
+            return rg_mentions
+        return {}
 
     mentions: dict[str, list[str]] = defaultdict(list)
     for path in paths:
@@ -415,6 +411,19 @@ def _scan_canonical_metric_mentions(
         for metric_name in sorted(set(_CANONICAL_METRIC_RE.findall(text))):
             mentions[metric_name].append(_as_repo_relative(path, repo_root))
     return _normalize_mapping_lists(mentions)
+
+
+def _repo_relative_paths_for_scan(
+    paths: list[Path],
+    repo_root: Path,
+) -> list[str] | None:
+    relative_paths: list[str] = []
+    for path in paths:
+        try:
+            relative_paths.append(path.relative_to(repo_root).as_posix())
+        except ValueError:
+            return None
+    return relative_paths
 
 
 def _scan_canonical_metric_mentions_with_git_grep(
@@ -430,12 +439,9 @@ def _scan_canonical_metric_mentions_with_git_grep(
     if not (repo_root / ".git").exists():
         return None
 
-    relative_paths: list[str] = []
-    for path in paths:
-        try:
-            relative_paths.append(path.relative_to(repo_root).as_posix())
-        except ValueError:
-            return None
+    relative_paths = _repo_relative_paths_for_scan(paths, repo_root)
+    if relative_paths is None:
+        return None
     if not relative_paths:
         return {}
 
@@ -456,6 +462,61 @@ def _scan_canonical_metric_mentions_with_git_grep(
                     "--",
                     *chunk,
                 ],
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                check=False,
+                timeout=_METRIC_MENTION_GREP_TIMEOUT_SECONDS,
+                **_hidden_windows_subprocess_kwargs(),
+            )
+        except OSError:
+            return None
+        except subprocess.TimeoutExpired:
+            return _normalize_mapping_lists(mentions)
+        if result.returncode == 1:
+            continue
+        if result.returncode != 0:
+            return None
+
+        for line in (result.stdout or "").splitlines():
+            path_text, separator, remainder = line.partition(":")
+            if not separator:
+                continue
+            _line_number, separator, text = remainder.partition(":")
+            if not separator:
+                continue
+            for metric_name in sorted(set(_CANONICAL_METRIC_RE.findall(text))):
+                mentions[metric_name].append(path_text)
+    return _normalize_mapping_lists(mentions)
+
+
+def _scan_canonical_metric_mentions_with_rg(
+    paths: list[Path],
+    repo_root: Path,
+) -> dict[str, list[str]] | None:
+    """Fallback bounded scanner when ``git grep`` is unavailable."""
+    relative_paths = _repo_relative_paths_for_scan(paths, repo_root)
+    if relative_paths is None:
+        return None
+    if not relative_paths:
+        return {}
+
+    mentions: dict[str, list[str]] = defaultdict(list)
+    for index in range(0, len(relative_paths), _METRIC_MENTION_GREP_CHUNK_SIZE):
+        chunk = relative_paths[index : index + _METRIC_MENTION_GREP_CHUNK_SIZE]
+        try:
+            result = subprocess.run(
+                [
+                    "rg",
+                    "--no-heading",
+                    "--line-number",
+                    "--color",
+                    "never",
+                    "bioetl_",
+                    *chunk,
+                ],
+                cwd=repo_root,
                 capture_output=True,
                 text=True,
                 encoding="utf-8",
@@ -1429,7 +1490,9 @@ def _scan_runtime_observability_event_calls(
         if "src/bioetl/infrastructure" in path_str:
             continue
         text = _read_runtime_candidate_text(path)
-        if text is None or not any(marker in text for marker in _RUNTIME_EVENT_SCAN_MARKERS):
+        if text is None or not any(
+            marker in text for marker in _RUNTIME_EVENT_SCAN_MARKERS
+        ):
             continue
         try:
             tree = ast.parse(text)
@@ -1941,9 +2004,7 @@ def collect_metric_inventory(
         "emitted_metrics": sorted(registered_set & runtime_set),
         "declared_observability_events": declared_observability_events,
         "emitted_observability_events": emitted_observability_events,
-        "unused_declared_observability_events": (
-            unused_declared_observability_events
-        ),
+        "unused_declared_observability_events": (unused_declared_observability_events),
         "retired_declared_observability_events": (
             retired_declared_observability_events
         ),
@@ -1973,9 +2034,7 @@ def collect_metric_inventory(
             runtime_cardinality_threshold_violations
         ),
         "declared_risky_label_review_candidates": declared_risky_label_candidates,
-        "declared_risky_label_contract_reviewed": sorted(
-            contract_bounded_risky_labels
-        ),
+        "declared_risky_label_contract_reviewed": sorted(contract_bounded_risky_labels),
         "declared_risky_label_reviewed": declared_risky_label_reviewed,
         "declared_risky_label_review_required": (declared_risky_label_review_required),
         "declared_label_contract_metrics": sorted(declared_label_contract_metrics),

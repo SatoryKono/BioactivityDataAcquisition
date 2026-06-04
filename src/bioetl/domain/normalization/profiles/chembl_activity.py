@@ -5,7 +5,6 @@ from __future__ import annotations
 from collections.abc import Callable
 
 from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
-from bioetl.domain.schemas.constants import ONTOLOGY_MAPPING_STATUSES
 
 from ._chembl_activity_fields import (
     ACTIVITY_ACTION_TYPES,
@@ -22,6 +21,7 @@ from ._chembl_activity_fields import (
 )
 from ._chembl_bao_label_normalizers import normalize_profile_bao_label_from_bao_format
 from ._chembl_reference_identifier_rules import chembl_reference_identifier_rules
+from ._chembl_vocab import chembl_enum
 from ._standard_profile_builder import build_standard_profile
 from .chembl_policy_registry import (
     chembl_controlled_family_fields,
@@ -257,10 +257,14 @@ CHEMBL_ACTIVITY_PROFILE = build_standard_profile(
         "standard_units": ACTIVITY_STANDARD_UNITS,
         "assay_type": ASSAY_TYPES,
         "data_validity_comment": DATA_VALIDITY_COMMENTS,
-        "bao_endpoint_mapping_status": ONTOLOGY_MAPPING_STATUSES,
-        "bao_format_mapping_status": ONTOLOGY_MAPPING_STATUSES,
-        "uo_unit_mapping_status": ONTOLOGY_MAPPING_STATUSES,
-        "qudt_unit_mapping_status": ONTOLOGY_MAPPING_STATUSES,
+        "bao_endpoint_mapping_status": chembl_enum(
+            "activity", "bao_endpoint_mapping_status"
+        ),
+        "bao_format_mapping_status": chembl_enum("activity", "bao_format_mapping_status"),
+        "uo_unit_mapping_status": chembl_enum("activity", "uo_unit_mapping_status"),
+        "qudt_unit_mapping_status": chembl_enum(
+            "activity", "qudt_unit_mapping_status"
+        ),
     },
     special_rules=_SPECIAL_RULE_COMPONENTS,
     unit_fields=_RAW_UNIT_FIELDS,

@@ -26,8 +26,6 @@ from bioetl.domain.schemas.constants import (
     AVAILABILITY_TYPE_VALUES,
     CHIRALITY_VALUES,
     MAX_PHASE_VALUES,
-    MOLECULE_TYPES,
-    STRUCTURE_TYPES,
 )
 
 from ._chembl_vocab import chembl_enum
@@ -150,8 +148,8 @@ _SPECIAL_RULES = {
 
 # Enum fields for strict validation
 _ENUM_FIELDS = {
-    "molecule_type": MOLECULE_TYPES,
-    "structure_type": STRUCTURE_TYPES,
+    "molecule_type": chembl_enum("molecule", "molecule_type"),
+    "structure_type": chembl_enum("molecule", "structure_type"),
     "ro3_pass": RO3_PASS_VALUES,
 }
 

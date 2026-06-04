@@ -445,17 +445,17 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 169
-      total_loc: 21732
-      files_ge_250_loc: 13
-      helper_function_ratio: 0.374
+      total_loc: 20354
+      files_ge_250_loc: 7
+      helper_function_ratio: 0.335
       max_internal_fan_in: 14
       max_internal_fan_in_module: bioetl.application.core.batch_runtime_failure_policy
     trend:
-      status: reduced_2026-05-30_issue_4554
-      next_action: 2026-05-30 consolidates wiring lazy-export facades, quarantine
-        write helpers, preflight observability, and wrapped-adapter health delegation,
-        ratcheting application/core duplicate clusters from 8 down to 5 while files_ge_250_loc
-        and max_internal_fan_in remain at 13 and 14.
+      status: reduced_2026-06-04_issue_4554_tracked_baseline_sync
+      next_action: 2026-06-04 syncs the tracked-repo application/core baseline at
+        169 files, 20354 LOC, 7 files_ge_250_loc, and max_internal_fan_in 14;
+        keep duplicate clusters at zero while holding the bounded-growth budgets
+        at 13 and 14.
   - name: composition_bootstrap_runtime
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -580,16 +580,16 @@ oversized_source_module_inventory:
     owner: '@bioetl-control-plane'
     target_split: split checkpoint policy evaluation from diagnostic payload assembly
   - path: src/bioetl/infrastructure/config/_base.py
-    lines: 267
+    lines: 239
     owner: '@bioetl-config'
     target_split: separate config discovery, validation, and environment resolution
       helpers
   - path: src/bioetl/application/services/lineage/metadata_lineage_node_builders.py
-    lines: 477
+    lines: 61
     owner: '@bioetl-lineage'
     target_split: split node identity builders from metadata enrichment helpers
   - path: src/bioetl/infrastructure/control_plane/file_run_ledger_store.py
-    lines: 486
+    lines: 174
     owner: '@bioetl-control-plane'
     target_split: separate file IO, record serialization, and query helpers
   - path: src/bioetl/application/services/data_quality_service.py

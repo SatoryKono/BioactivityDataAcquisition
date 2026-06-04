@@ -10,6 +10,15 @@ from bioetl.domain.medallion import GoldWriteMode
 from bioetl.domain.models.metadata import GoldMetadata
 from bioetl.domain.ports import LineageStorePort
 from bioetl.domain.types import RunID
+from bioetl.infrastructure.storage.gold.metadata_operation_helpers import (
+    extract_delta_table_version as _extract_delta_table_version,
+)
+from bioetl.infrastructure.storage.gold.metadata_operation_helpers import (
+    normalize_delta_version_value as _normalize_delta_version_value,
+)
+from bioetl.infrastructure.storage.gold.metadata_operation_helpers import (
+    raise_missing_gold_metadata_bundle as _raise_missing_gold_metadata_bundle,
+)
 from bioetl.infrastructure.storage.gold.metadata_payloads import (
     build_gold_merged_metadata_input,
     build_gold_metadata_input,
@@ -39,6 +48,7 @@ __all__ = [
     "_PreparedGoldMetadataWrite",
     "_extract_delta_table_version",
     "_maybe_prepare_gold_merged_metadata_write",
+    "_normalize_delta_version_value",
     "_persist_gold_metadata_write",
     "_prepare_gold_merged_metadata_write",
     "_prepare_gold_metadata_write",
@@ -107,23 +117,6 @@ class _GoldMergedMetadataWriteHostProtocol(_GoldMetadataWriteHostProtocol, Proto
     """Host contract for merged Gold metadata writes."""
 
     logger: LoggerPort
-
-
-def _normalize_delta_version_value(version_value: object) -> int | None:
-    """Normalize a DeltaTable.version() result to an integer version."""
-    if isinstance(version_value, int):
-        return version_value
-    if isinstance(version_value, str) and version_value.strip().isdigit():
-        return int(version_value.strip())
-    return None
-
-
-def _extract_delta_table_version(table: object) -> int | None:
-    """Extract a normalized version from a DeltaTable-like object."""
-    version_fn = getattr(table, "version", None)
-    if not callable(version_fn):
-        return None
-    return _normalize_delta_version_value(version_fn())
 
 
 def _prepare_gold_metadata_write(
@@ -254,16 +247,3 @@ def _maybe_prepare_gold_merged_metadata_write(
             f"table_path={request.table_path}"
         )
     return _prepare_gold_merged_metadata_write(host, request)
-
-
-def _raise_missing_gold_metadata_bundle(
-    *,
-    table_path: str,
-    table_name: str,
-) -> GoldMetadata:
-    """Fail closed when canonical Gold metadata bundle construction is unavailable."""
-    raise RuntimeError(
-        "MetadataCoordinator with create_gold_metadata_bundle is required "
-        f"for Gold metadata publication: table_name={table_name}, "
-        f"table_path={table_path}"
-    )

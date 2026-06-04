@@ -1,0 +1,4 @@
+interface:
+  display_name: "Prometheus Rule Testing"
+  short_description: "Validate repo-backed Prometheus rules with promtool"
+  default_prompt: "Use $prometheus-rule-testing to add or update deterministic promtool tests for repo-backed Prometheus alert and recording rules."

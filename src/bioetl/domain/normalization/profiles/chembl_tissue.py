@@ -19,9 +19,9 @@ from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
     chembl_pseudo_null_fields,
 )
 from bioetl.domain.schemas.chembl.tissue import TissueSchema
-from bioetl.domain.schemas.constants import ONTOLOGY_MAPPING_STATUSES
 
 from ._chembl_reference_identifier_rules import chembl_reference_identifier_rules
+from ._chembl_vocab import chembl_enum
 from .chembl_policy_registry import chembl_ontology_family_fields
 
 __all__ = [
@@ -52,9 +52,9 @@ _ONTOLOGY_ID_FIELDS = (
     | chembl_ontology_family_fields("uberon", entity="tissue")
 )
 _ENUM_FIELDS = {
-    "bto_mapping_status": ONTOLOGY_MAPPING_STATUSES,
-    "efo_mapping_status": ONTOLOGY_MAPPING_STATUSES,
-    "uberon_mapping_status": ONTOLOGY_MAPPING_STATUSES,
+    "bto_mapping_status": chembl_enum("tissue", "bto_mapping_status"),
+    "efo_mapping_status": chembl_enum("tissue", "efo_mapping_status"),
+    "uberon_mapping_status": chembl_enum("tissue", "uberon_mapping_status"),
 }
 _OBO_COMPANION_SPECS = {
     "bto": ("bto_id", "BTO_", BTO_ONTOLOGY_VERSION),

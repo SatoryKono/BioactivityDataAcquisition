@@ -167,6 +167,36 @@ ENUM_POLICIES: tuple[EnumPolicy, ...] = (
         ("target", "component_types"),
         surfaces=frozenset({"quality"}),
     ),
+    EnumPolicy(
+        "cell_line",
+        "clo_mapping_status",
+        ("activity", "mapping_statuses"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "cell_line",
+        "efo_mapping_status",
+        ("activity", "mapping_statuses"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "tissue",
+        "bto_mapping_status",
+        ("activity", "mapping_statuses"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "tissue",
+        "efo_mapping_status",
+        ("activity", "mapping_statuses"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "tissue",
+        "uberon_mapping_status",
+        ("activity", "mapping_statuses"),
+        surfaces=frozenset({"quality"}),
+    ),
 )
 
 REGISTRY_UNIONS: dict[tuple[str, ...], tuple[tuple[str, ...], ...]] = {
@@ -328,6 +358,36 @@ EXACT_DQ_ENUM_POLICIES: tuple[EnumPolicy, ...] = (
         "publication_term",
         "term_type",
         ("publication_term", "term_types"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "cell_line",
+        "clo_mapping_status",
+        ("activity", "mapping_statuses"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "cell_line",
+        "efo_mapping_status",
+        ("activity", "mapping_statuses"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "tissue",
+        "bto_mapping_status",
+        ("activity", "mapping_statuses"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "tissue",
+        "efo_mapping_status",
+        ("activity", "mapping_statuses"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "tissue",
+        "uberon_mapping_status",
+        ("activity", "mapping_statuses"),
         surfaces=frozenset({"quality"}),
     ),
 )

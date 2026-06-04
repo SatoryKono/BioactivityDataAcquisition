@@ -24,7 +24,6 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 )
 from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
 from bioetl.domain.schemas.chembl.assay import AssaySchema
-from bioetl.domain.schemas.constants import ONTOLOGY_MAPPING_STATUSES
 
 from ._chembl_bao_label_normalizers import (
     normalize_profile_bao_label_from_bao_format as normalize_bao_label_from_bao_format,
@@ -119,7 +118,7 @@ _ENUM_FIELDS = {
     "assay_test_type": ASSAY_TEST_TYPES,
     "assay_group": ASSAY_GROUPS,
     "relationship_type": RELATIONSHIP_TYPES,
-    "bao_format_mapping_status": ONTOLOGY_MAPPING_STATUSES,
+    "bao_format_mapping_status": chembl_enum("assay", "bao_format_mapping_status"),
 }
 _SPECIAL_RULE_COMPONENTS = {
     **_REFERENCE_IDENTIFIER_RULES,

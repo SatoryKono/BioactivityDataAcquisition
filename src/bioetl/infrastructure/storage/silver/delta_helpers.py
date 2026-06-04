@@ -1,380 +1,60 @@
-"""Helper utilities for Silver Delta write dispatch and merge orchestration."""
+"""Silver Delta write helpers."""
 
 from __future__ import annotations
 
-import asyncio
-import os
-from collections.abc import Awaitable, Callable
-from dataclasses import dataclass, replace
-from pathlib import Path
-from typing import TYPE_CHECKING, Any, NoReturn, cast
+import asyncio as asyncio
 
-import pyarrow as pa
-from deltalake.exceptions import DeltaError, SchemaMismatchError
-
-from bioetl.domain.exceptions import (
-    MergeConflictError,
-    SchemaViolationError,
+from bioetl.infrastructure.storage.silver.delta_merge_helpers import (
+    ReplaySafeRerunContract,
+    _build_content_changed_predicate,
+    _build_merge_condition,
+    _build_merge_execute_callable,
+    _build_merge_update_predicate,
+    _delta_table_has_parquet_data,
+    _merge_records_with_timeout,
+    _MergeExecutionTimeoutError,
+    build_replay_safe_rerun_contract,
 )
-from bioetl.domain.medallion import SilverWriteMode
+from bioetl.infrastructure.storage.silver.delta_request_models import (
+    _build_dispatch_policy,
+    _DeltaWriteDispatchPolicy,
+    _DeltaWriteHandler,
+    _DeltaWriteRequest,
+    _dispatch_request_by_mode,
+    _dispatch_request_with_domain_errors,
+    _raise_domain_write_error,
+    _select_dispatch_handler,
+)
+from bioetl.infrastructure.storage.silver.delta_write_execution import (
+    _build_plain_delta_write_kwargs,
+    _evolve_delta_schema_with_empty_append,
+    _is_duplicate_field_name_schema_error,
+    _load_delta_table,
+    _write_plain_delta_request,
+)
 
-if TYPE_CHECKING:
-    from deltalake import DeltaTable as DeltaTableType
-
-    from bioetl.domain.ports import LoggerPort
-
-
-class _MergeExecutionTimeoutError(RuntimeError):
-    """Internal timeout marker used for merge retry orchestration."""
-
-    def __init__(self, timeout_seconds: float) -> None:
-        self.timeout_seconds = timeout_seconds
-        super().__init__(f"Merge execution timed out after {timeout_seconds}s")
-
-
-@dataclass(frozen=True, slots=True)
-class _DeltaWriteRequest:
-    """Normalized request object for a single Silver Delta write dispatch."""
-
-    validated_mode: SilverWriteMode
-    table_path: str
-    arrow_data: pa.Table
-    primary_keys: list[str]
-    partition_cols: list[str] | None
-    schema_mode: str | None = None
-    merge_schema: bool = False
-
-
-_DeltaWriteHandler = Callable[[_DeltaWriteRequest], Awaitable[None]]
-
-
-@dataclass(frozen=True, slots=True)
-class _DeltaWriteDispatchPolicy:
-    """Mode-to-handler policy for a normalized Delta write request."""
-
-    write_delete: _DeltaWriteHandler
-    write_append: _DeltaWriteHandler
-    write_merge: _DeltaWriteHandler
-
-
-_MERGE_UPDATE_POLICY = "content_hash_only"
-
-
-@dataclass(frozen=True, slots=True)
-class ReplaySafeRerunContract:
-    """Machine-readable Silver rerun contract for merge-based semantic writes."""
-
-    merge_update_policy: str
-    requires_content_hash: bool
-    external_guards: tuple[str, ...]
-    strict_replay_safe: bool
-
-
-def build_replay_safe_rerun_contract(
-    records: pa.Table | pa.RecordBatchReader,
-) -> ReplaySafeRerunContract:
-    """Describe the actual replay-safe rerun guarantees of one merge input."""
-    has_content_hash = "content_hash" in records.schema.names
-    return ReplaySafeRerunContract(
-        merge_update_policy=(
-            _MERGE_UPDATE_POLICY if has_content_hash else "full_row_update"
-        ),
-        requires_content_hash=has_content_hash,
-        external_guards=("lifecycle_cleanup", "exclusive_locks"),
-        strict_replay_safe=has_content_hash,
-    )
-
-
-def _build_content_changed_predicate(
-    source_alias: str = "source",
-    target_alias: str = "target",
-) -> str:
-    """Build a null-safe content-hash change predicate."""
-    return (
-        f"{source_alias}.content_hash <> {target_alias}.content_hash "
-        f"OR ({source_alias}.content_hash IS NULL AND {target_alias}.content_hash IS NOT NULL) "
-        f"OR ({source_alias}.content_hash IS NOT NULL AND {target_alias}.content_hash IS NULL)"
-    )
-
-
-def _build_merge_update_predicate(records: pa.Table | pa.RecordBatchReader) -> str:
-    """Build the Silver merge update predicate for rerun-safe writes.
-
-    Silver/Gold physical Delta rows intentionally exclude occurrence-scoped runtime
-    anchors such as ``_run_type`` via ``drop_nondeterministic_persisted_fields``.
-    Row-level update decisions therefore remain content-hash based; the effective
-    storage contract is exposed via ``build_replay_safe_rerun_contract()`` instead
-    of a hidden run-type precedence predicate inside the persisted Delta merge.
-    """
-    contract = build_replay_safe_rerun_contract(records)
-    if not contract.requires_content_hash:
-        return "true"
-
-    content_changed = _build_content_changed_predicate()
-    return content_changed
-
-
-def _build_merge_condition(primary_keys: list[str]) -> str:
-    """Build Delta merge predicate from primary key columns."""
-    return " AND ".join(f"target.{key} = source.{key}" for key in primary_keys)
-
-
-def _delta_table_has_parquet_data(table_path: str) -> bool:
-    """Return whether a local Delta table path already contains parquet data files."""
-    table_path_obj = Path(table_path)
-    if "://" in table_path or not table_path_obj.exists():
-        # Remote/object-store tables and injected test doubles cannot be inspected
-        # with os.walk; let DeltaTable.merge handle their storage semantics.
-        return True
-
-    for dirpath, _dirnames, filenames in os.walk(table_path):
-        if dirpath.endswith("_delta_log"):
-            continue
-        for filename in filenames:
-            if filename.endswith(".parquet"):
-                return True
-    return False
-
-
-def _build_merge_execute_callable(
-    *,
-    dt: DeltaTableType,
-    table_path: str,
-    records: pa.Table | pa.RecordBatchReader,
-    merge_condition: str,
-    merge_schema: bool,
-) -> Callable[[], object]:
-    """Build the blocking Delta merge callable for ``run_in_executor``."""
-
-    def _execute() -> object:
-        if not _delta_table_has_parquet_data(table_path):
-            from deltalake import write_deltalake
-
-            write_kwargs: dict[str, object] = {
-                "table_or_uri": table_path,
-                "data": records,
-                "mode": "append",
-            }
-            if merge_schema:
-                write_kwargs["schema_mode"] = "merge"
-            return write_deltalake(**write_kwargs)
-
-        update_predicate = _build_merge_update_predicate(records)
-        return (
-            dt.merge(
-                source=records,
-                predicate=merge_condition,
-                source_alias="source",
-                target_alias="target",
-                merge_schema=merge_schema,
-            )
-            .when_matched_update_all(predicate=update_predicate)
-            .when_not_matched_insert_all()
-            .execute()
-        )
-
-    return _execute
-
-
-def _build_plain_delta_write_kwargs(
-    request: _DeltaWriteRequest,
-    *,
-    mode: str,
-    schema_mode: str | None = None,
-) -> dict[str, Any]:  # Any: Delta Lake write kwargs are heterogeneous
-    """Build keyword arguments for a non-merge Delta write."""
-    kwargs: dict[str, Any] = {  # Any: heterogeneous kwargs dict
-        "table_or_uri": request.table_path,
-        "data": request.arrow_data,
-        "mode": mode,
-        "partition_by": request.partition_cols,
-    }
-    if schema_mode is not None:
-        kwargs["schema_mode"] = schema_mode
-    return kwargs
-
-
-def _raise_domain_write_error(
-    *,
-    table_name: str,
-    exc: SchemaMismatchError | pa.ArrowTypeError | DeltaError,
-) -> NoReturn:
-    """Translate Delta-layer write failures to domain errors when applicable."""
-    if isinstance(exc, (SchemaMismatchError, pa.ArrowTypeError)):
-        raise SchemaViolationError(table_name, errors=[str(exc)]) from exc
-    if "Merge-conflict" in str(exc):
-        raise MergeConflictError(table_name, conflicts=1) from exc
-    raise exc
-
-
-def _build_dispatch_policy(
-    *,
-    write_delete: _DeltaWriteHandler,
-    write_append: _DeltaWriteHandler,
-    write_merge: _DeltaWriteHandler,
-) -> _DeltaWriteDispatchPolicy:
-    """Build the Delta write dispatch policy for a writer instance."""
-    return _DeltaWriteDispatchPolicy(
-        write_delete=write_delete,
-        write_append=write_append,
-        write_merge=write_merge,
-    )
-
-
-def _select_dispatch_handler(
-    *,
-    validated_mode: SilverWriteMode,
-    policy: _DeltaWriteDispatchPolicy,
-) -> _DeltaWriteHandler:
-    """Select the mode-specific write handler from the dispatch policy."""
-    if validated_mode == SilverWriteMode.DELETE:
-        return policy.write_delete
-    if validated_mode == SilverWriteMode.APPEND:
-        return policy.write_append
-    return policy.write_merge
-
-
-async def _dispatch_request_by_mode(
-    *,
-    request: _DeltaWriteRequest,
-    policy: _DeltaWriteDispatchPolicy,
-) -> None:
-    """Dispatch a normalized Delta write request to the mode-specific handler."""
-    handler = _select_dispatch_handler(
-        validated_mode=request.validated_mode,
-        policy=policy,
-    )
-    await handler(request)
-
-
-async def _dispatch_request_with_domain_errors(
-    *,
-    table_name: str,
-    request: _DeltaWriteRequest,
-    dispatch_write: _DeltaWriteHandler,
-) -> None:
-    """Execute a Delta write dispatch and translate storage exceptions."""
-    try:
-        await dispatch_write(request)
-    except (SchemaMismatchError, pa.ArrowTypeError, DeltaError) as exc:
-        _raise_domain_write_error(table_name=table_name, exc=exc)
-
-
-async def _write_plain_delta_request(
-    *,
-    load_module: Callable[[], Any],  # Any: lazy-loaded deltalake module
-    request: _DeltaWriteRequest,
-    mode: str,
-    schema_mode: str | None = None,
-    timeout_seconds: float = 60.0,
-) -> None:
-    """Execute a non-merge Delta write for an already prepared request."""
-    kwargs = _build_plain_delta_write_kwargs(
-        request,
-        mode=mode,
-        schema_mode=schema_mode,
-    )
-    loop = asyncio.get_running_loop()
-    write_future = loop.run_in_executor(
-        None,
-        lambda: load_module().write_deltalake(**kwargs),
-    )
-    try:
-        await asyncio.wait_for(write_future, timeout=timeout_seconds)
-    except TimeoutError as exc:
-        raise TimeoutError(
-            f"Delta write timed out after {timeout_seconds}s for table {request.table_path}"
-        ) from exc
-
-
-def _is_duplicate_field_name_schema_error(exc: BaseException) -> bool:
-    """Return whether an exception matches the known duplicate-field quirk.
-
-    Delta Lake may surface this schema-evolution failure either as ``DeltaError``
-    or as a generic ``Exception`` depending on platform/runtime bindings.
-    """
-    return "Duplicate field name:" in str(exc)
-
-
-async def _evolve_delta_schema_with_empty_append(
-    *,
-    load_module: Callable[[], Any],  # Any: lazy-loaded deltalake module
-    request: _DeltaWriteRequest,
-) -> _DeltaWriteRequest:
-    """Pre-evolve an existing Delta table schema without writing extra rows."""
-    loop = asyncio.get_running_loop()
-    empty_request: _DeltaWriteRequest = cast(  # type: ignore[redundant-cast]
-        _DeltaWriteRequest,
-        replace(
-            request,
-            validated_mode=SilverWriteMode.APPEND,
-            arrow_data=request.arrow_data.slice(0, 0),
-            schema_mode="merge",
-        ),
-    )
-    await loop.run_in_executor(
-        None,
-        lambda: load_module().write_deltalake(
-            **_build_plain_delta_write_kwargs(
-                empty_request,
-                mode="append",
-                schema_mode="merge",
-            )
-        ),
-    )
-    updated_request: _DeltaWriteRequest = cast(  # type: ignore[redundant-cast]
-        _DeltaWriteRequest,
-        replace(request, merge_schema=False),
-    )
-    return updated_request
-
-
-async def _load_delta_table(
-    *,
-    load_module: Callable[[], Any],  # Any: lazy-loaded deltalake module
-    table_path: str,
-) -> DeltaTableType:
-    """Load a Delta table asynchronously for merge execution."""
-    loop = asyncio.get_running_loop()
-    return await loop.run_in_executor(
-        None,
-        lambda: load_module().DeltaTable(table_path),
-    )
-
-
-async def _merge_records_with_timeout(
-    *,
-    logger: LoggerPort,
-    dt: DeltaTableType,
-    records: pa.Table | pa.RecordBatchReader,
-    primary_keys: list[str],
-    table_path: str,
-    timeout_seconds: float,
-    merge_schema: bool = False,
-) -> None:
-    """Execute Delta merge with timeout handling and structured timeout telemetry."""
-    merge_condition = _build_merge_condition(primary_keys)
-    loop = asyncio.get_running_loop()
-    merge_future = loop.run_in_executor(
-        None,
-        _build_merge_execute_callable(
-            dt=dt,
-            table_path=table_path,
-            records=records,
-            merge_condition=merge_condition,
-            merge_schema=merge_schema,
-        ),
-    )
-    try:
-        await asyncio.wait_for(
-            merge_future,
-            timeout=timeout_seconds,
-        )
-    except TimeoutError as exc:
-        logger.warning(
-            "silver_merge_timeout",
-            table_path=table_path,
-            timeout_seconds=timeout_seconds,
-            primary_keys=primary_keys,
-        )
-        raise _MergeExecutionTimeoutError(timeout_seconds) from exc
+__all__ = [
+    "ReplaySafeRerunContract",
+    "_DeltaWriteDispatchPolicy",
+    "_DeltaWriteHandler",
+    "_DeltaWriteRequest",
+    "_MergeExecutionTimeoutError",
+    "_build_content_changed_predicate",
+    "_build_dispatch_policy",
+    "_build_merge_condition",
+    "_build_merge_execute_callable",
+    "_build_merge_update_predicate",
+    "_build_plain_delta_write_kwargs",
+    "_delta_table_has_parquet_data",
+    "_dispatch_request_by_mode",
+    "_dispatch_request_with_domain_errors",
+    "_evolve_delta_schema_with_empty_append",
+    "_is_duplicate_field_name_schema_error",
+    "_load_delta_table",
+    "_merge_records_with_timeout",
+    "_raise_domain_write_error",
+    "_select_dispatch_handler",
+    "_write_plain_delta_request",
+    "asyncio",
+    "build_replay_safe_rerun_contract",
+]

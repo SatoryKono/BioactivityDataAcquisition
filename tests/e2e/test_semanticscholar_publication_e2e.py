@@ -16,8 +16,11 @@ Recording cassettes:
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import pytest
+
+from tests.helpers.vcr_config import build_base_vcr_config
 
 from .conftest import (
     assert_bronze_files_exist,
@@ -28,6 +31,15 @@ from .conftest import (
 )
 
 pytestmark = pytest.mark.usefixtures("relaxed_dq_env")
+
+
+@pytest.fixture
+def vcr_config(vcr_cassette_dir) -> dict[str, Any]:
+    """Configure VCR for Semantic Scholar E2E tests."""
+    return build_base_vcr_config(
+        cassette_library_dir=vcr_cassette_dir,
+        decode_compressed_response=True,
+    )
 
 # Stable DOIs for deterministic cassette playback.
 S2_TEST_DOIS = (

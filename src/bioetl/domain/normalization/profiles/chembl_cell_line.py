@@ -21,9 +21,9 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_cellosaurus_id,
 )
 from bioetl.domain.schemas.chembl.cell_line import CellLineSchema
-from bioetl.domain.schemas.constants import ONTOLOGY_MAPPING_STATUSES
 
 from ._chembl_reference_identifier_rules import chembl_reference_identifier_rules
+from ._chembl_vocab import chembl_enum
 from .chembl_policy_registry import chembl_ontology_family_fields
 
 __all__ = [
@@ -52,8 +52,8 @@ _ONTOLOGY_ID_FIELDS = chembl_ontology_family_fields(
     "clo", entity="cell_line"
 ) | chembl_ontology_family_fields("efo", entity="cell_line")
 _ENUM_FIELDS = {
-    "clo_mapping_status": ONTOLOGY_MAPPING_STATUSES,
-    "efo_mapping_status": ONTOLOGY_MAPPING_STATUSES,
+    "clo_mapping_status": chembl_enum("cell_line", "clo_mapping_status"),
+    "efo_mapping_status": chembl_enum("cell_line", "efo_mapping_status"),
 }
 _OBO_COMPANION_SPECS = {
     "clo": ("clo_id", "CLO_", CLO_ONTOLOGY_VERSION),

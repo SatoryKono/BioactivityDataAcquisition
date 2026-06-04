@@ -2,10 +2,16 @@
 
 import pytest
 
-from bioetl.infrastructure.config.config_helpers import load_and_validate_config
+from bioetl.infrastructure.config.config_helpers import load_and_validate_config, load_config
 
 
 pytestmark = pytest.mark.unit
+
+
+def test_load_config_placeholder():
+    """Test load_config function returns empty dict (placeholder)."""
+    result = load_config("test_path")
+    assert result == {}
 
 
 def test_load_and_validate_config_success():

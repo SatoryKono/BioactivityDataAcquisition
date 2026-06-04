@@ -51,12 +51,19 @@ from bioetl.infrastructure.storage.gold.runtime_helpers import (
 from bioetl.infrastructure.storage.gold.validation_mixin import (
     GoldWriterValidationMixin,
 )
+from bioetl.infrastructure.storage.gold.writer_facade_runtime import (
+    normalize_scd_config as _normalize_scd_config,
+)
+from bioetl.infrastructure.storage.gold.writer_facade_runtime import (
+    write_dual_targets as _write_dual_targets,
+)
+from bioetl.infrastructure.storage.gold.writer_facade_runtime import (
+    write_single_target as _write_single_target,
+)
 from bioetl.infrastructure.storage.gold.writer_support import (
     _build_gold_write_request,
     _resolve_active_gold_schema,
     _resolve_runtime_services,
-    _write_dual_targets_impl,
-    _write_single_target_impl,
 )
 
 if TYPE_CHECKING:
@@ -65,7 +72,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
-__all__ = ["GoldWriteMode", "GoldWriter"]
+__all__ = ["GoldWriteMode", "GoldWriter", "_normalize_scd_config"]
 
 GOLD_WRITE_RETRY_ERRORS = (
     OSError,
@@ -75,41 +82,6 @@ GOLD_WRITE_RETRY_ERRORS = (
     KeyError,
     pa.ArrowException,
 )
-
-
-def _normalize_scd_config(
-    scd_config: ScdConfig,
-    primary_keys: list[str] | None,
-) -> ScdConfig:
-    """Compatibility wrapper preserving canonical monkeypatch/import path."""
-    from bioetl.infrastructure.storage.gold.pipeline_helpers import (
-        normalize_scd_config,
-    )
-
-    return normalize_scd_config(scd_config, primary_keys)
-
-
-async def _write_single_target(
-    writer: GoldWriter,
-    *,
-    request: _GoldWriteRequest,
-) -> None:
-    """Execute one physical Gold write target through the standard pipeline."""
-    await _write_single_target_impl(writer, request=request)
-
-
-async def _write_dual_targets(
-    writer: GoldWriter,
-    *,
-    request: _GoldWriteRequest,
-    schema_policy: GoldSchemaPolicyByVersion,
-) -> None:
-    """Write all versioned Gold targets and fail on the first error."""
-    await _write_dual_targets_impl(
-        writer,
-        request=request,
-        schema_policy=schema_policy,
-    )
 
 
 class GoldWriter(
@@ -264,7 +236,6 @@ class GoldWriter(
         self,
         context: _GoldWritePostwriteContext,
     ) -> None:
-        """Emit audit, lineage, and metadata after a successful Gold write."""
         await _post_write_gold_impl(self, context)
 
     @staticmethod

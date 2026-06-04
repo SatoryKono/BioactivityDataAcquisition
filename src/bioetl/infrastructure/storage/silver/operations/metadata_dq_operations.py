@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import TYPE_CHECKING
+
+import pyarrow as pa
 
 from bioetl.domain.models.metadata import SilverMetadata
 from bioetl.domain.types import BronzeRecord
@@ -21,9 +22,6 @@ from bioetl.infrastructure.storage.silver.operations.metadata_runtime_support im
     should_skip_silver_metadata_write,
     write_silver_metadata_file,
 )
-
-if TYPE_CHECKING:
-    import pyarrow as pa
 
 
 def get_flat_structure(metadata_ops: object) -> bool:

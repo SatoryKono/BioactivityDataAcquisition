@@ -26,7 +26,6 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_text,
 )
 from bioetl.domain.schemas.chembl.assay_parameters import AssayParametersSchema
-from bioetl.domain.schemas.constants import ONTOLOGY_MAPPING_STATUSES
 
 from ._chembl_vocab import chembl_enum
 from .chembl_policy_registry import chembl_controlled_family_fields
@@ -181,10 +180,14 @@ CHEMBL_ASSAY_PARAMETERS_PROFILE = build_standard_profile(
     },
     operator_fields=_OPERATOR_FIELDS,
     enum_fields={
-        "qudt_unit_mapping_status": ONTOLOGY_MAPPING_STATUSES,
+        "qudt_unit_mapping_status": chembl_enum(
+            "assay_parameters", "qudt_unit_mapping_status"
+        ),
         "standard_type": ASSAY_PARAMETER_STANDARD_TYPES,
         "standard_units": ASSAY_PARAMETER_STANDARD_UNITS,
-        "uo_unit_mapping_status": ONTOLOGY_MAPPING_STATUSES,
+        "uo_unit_mapping_status": chembl_enum(
+            "assay_parameters", "uo_unit_mapping_status"
+        ),
     },
     special_rules=_SPECIAL_RULE_COMPONENTS,
     unit_fields=_RAW_UNIT_FIELDS,
