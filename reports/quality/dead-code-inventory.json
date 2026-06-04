@@ -15,11 +15,11 @@
   "summary": {
     "triaged_entry_count": 18,
     "triaged_entries_below_min_importers": 0,
-    "repo_wide_zero_import_candidate_count": 14,
-    "repo_wide_classified_zero_import_candidate_count": 14,
+    "repo_wide_zero_import_candidate_count": 13,
+    "repo_wide_classified_zero_import_candidate_count": 13,
     "repo_wide_untriaged_zero_import_candidate_count": 0,
     "repo_wide_disposition_counts": {
-      "retain_canonical_owner_module": 12,
+      "retain_canonical_owner_module": 11,
       "retain_module_entrypoint": 1,
       "retain_public_facade": 1
     }
@@ -54,7 +54,7 @@
       "module_path": "src/bioetl/infrastructure/adapters/_health_check_observability.py",
       "module_name": "bioetl.infrastructure.adapters._health_check_observability",
       "src_importer_count": 1,
-      "test_importer_count": 0,
+      "test_importer_count": 1,
       "min_src_importers": 1,
       "verification_status": "satisfied"
     },
@@ -393,19 +393,6 @@
       "review_by": "2026-08-31",
       "linked_issue": "#4541",
       "rationale": "Resilience port definitions remain canonical domain protocol owners even when consumers import them through package-root exports."
-    },
-    {
-      "module_name": "bioetl.domain.ports.serialization",
-      "path": "src/bioetl/domain/ports/serialization.py",
-      "is_private_module": false,
-      "src_importer_count": 0,
-      "test_importer_count": 0,
-      "classification_status": "classified",
-      "disposition": "retain_canonical_owner_module",
-      "reviewed_on": "2026-06-02",
-      "review_by": "2026-08-31",
-      "linked_issue": "#4541",
-      "rationale": "Serialization port definitions remain canonical domain protocol owners domain protocol owners even when consumers import them through package-root exports."
     }
   ]
 }

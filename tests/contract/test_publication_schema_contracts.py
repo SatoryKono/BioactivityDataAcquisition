@@ -18,6 +18,7 @@ from bioetl.domain.schemas.openalex.publication import OpenAlexPublicationSchema
 from bioetl.domain.schemas.semanticscholar.publication import (
     SemanticScholarPublicationSchema,
 )
+from tests.contract.schemas._schema_row_helpers import minimal_schema_dataframe
 
 pytestmark = [pytest.mark.contracts, pytest.mark.no_api]
 COMPATIBILITY_BASELINE_PATH = (
@@ -39,6 +40,15 @@ PUBLICATION_SCHEMA_CLASSES = (
     OpenAlexPublicationSchema,
     SemanticScholarPublicationSchema,
 )
+
+
+def _minimal_pubmed_publication_df():
+    frame = minimal_schema_dataframe(PubMedPublicationSchema)
+    frame.loc[0, "pmid"] = "12345678"
+    frame.loc[0, "title"] = "PubMed title"
+    frame.loc[0, "_source"] = "pubmed"
+    frame.loc[0, "_lookup_method"] = "doi"
+    return frame
 
 
 def _load_compatibility_baseline() -> dict[str, object]:
@@ -697,3 +707,27 @@ class TestFieldNamingConventions:
                 assert field_name == field_name.lower(), (
                     f"{schema_class.__name__} field {field_name} must be lowercase"
                 )
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("journal_issn_type", "bad"),
+        ("pub_month", 13),
+        ("pub_day", 32),
+        ("publication_status", "bad"),
+        ("author_count", -1),
+        ("mesh_heading_count", -1),
+        ("keyword_count", -1),
+        ("grant_count", -1),
+        ("chemical_count", -1),
+    ],
+)
+def test_pubmed_publication_schema_rejects_invalid_provider_specific_fields(
+    field: str,
+    value: object,
+) -> None:
+    frame = _minimal_pubmed_publication_df()
+    frame.loc[0, field] = value
+    with pytest.raises(pa.errors.SchemaError):
+        PubMedPublicationSchema.validate(frame)

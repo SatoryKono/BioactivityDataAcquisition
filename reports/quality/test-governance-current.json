@@ -151,7 +151,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "33",
+        "line": "34",
         "path": "tests/contract/schemas/test_publication_common_schema.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_publication_common_schema_accepts_minimal_row"
@@ -179,6 +179,13 @@
       },
       {
         "category": "intentional_no_exception_contract",
+        "line": "108",
+        "path": "tests/contract/schemas/test_uniprot_shard_validation.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_id_mapping_shard_accepts_not_found_without_accession"
+      },
+      {
+        "category": "intentional_no_exception_contract",
         "line": "74",
         "path": "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
@@ -190,20 +197,6 @@
         "path": "tests/integration/infrastructure/storage/test_delta_reader.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_aclose_is_noop"
-      },
-      {
-        "category": "weak_no_value",
-        "line": "96",
-        "path": "tests/security/test_sql_injection_prevention.py",
-        "rationale": "candidate tests that need later assertion strengthening or removal review",
-        "test_name": "test_database_operations_use_parameterized_queries"
-      },
-      {
-        "category": "weak_no_value",
-        "line": "77",
-        "path": "tests/security/test_xss_prevention.py",
-        "rationale": "candidate tests that need later assertion strengthening or removal review",
-        "test_name": "test_no_direct_html_rendering_of_user_input"
       },
       {
         "category": "intentional_no_exception_contract",
@@ -3591,8 +3584,8 @@
       "architecture_helper_guard": 14,
       "benchmark_or_performance": 0,
       "helper_asserted": 0,
-      "intentional_no_exception_contract": 496,
-      "weak_no_value": 2
+      "intentional_no_exception_contract": 497,
+      "weak_no_value": 0
     },
     "assertless_examples": [
       "tests/architecture/test_code_metrics.py:100",
@@ -3616,12 +3609,12 @@
       "tests/contract/schemas/test_pubchem_shard_validation.py:36",
       "tests/contract/schemas/test_pubchem_shard_validation.py:40",
       "tests/contract/schemas/test_pubchem_shard_validation.py:83",
-      "tests/contract/schemas/test_publication_common_schema.py:33",
+      "tests/contract/schemas/test_publication_common_schema.py:34",
       "tests/contract/schemas/test_uniprot_shard_validation.py:22",
       "tests/contract/schemas/test_uniprot_shard_validation.py:47",
       "tests/contract/schemas/test_uniprot_shard_validation.py:65"
     ],
-    "assertless_total_candidates": 512,
+    "assertless_total_candidates": 511,
     "compatibility_examples": [
       "tests/architecture/test_application_composite_compat_surface_usage.py",
       "tests/architecture/test_application_core_lifecycle_shim_usage.py",
@@ -3696,17 +3689,12 @@
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "markerless_test_functions": 0,
-    "parse_errors": [
-      {
-        "error": "expected '(' (test_client_observability_helpers.py, line 157)",
-        "path": "tests/unit/infrastructure/adapters/crossref/test_client_observability_helpers.py"
-      }
-    ],
-    "refined_assertless_tests": 2,
+    "parse_errors": [],
+    "refined_assertless_tests": 0,
     "root": ".",
     "top_duplicate_test_names": [],
-    "total_test_files": 1695,
-    "total_test_functions": 20119,
+    "total_test_files": 1711,
+    "total_test_functions": 20184,
     "uuid4_call_sites": 0
   }
 }

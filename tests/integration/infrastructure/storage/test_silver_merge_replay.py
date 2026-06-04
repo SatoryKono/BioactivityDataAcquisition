@@ -122,7 +122,13 @@ async def test_silver_merge_replay_preserves_business_columns_on_metadata_rerun(
         primary_keys=["id"],
         schema=schema,
     )
-    before = DeltaTable(f"{temp_delta_path}/{table_name}").to_pandas().iloc[0]
+    before_rows = (
+        DeltaTable(f"{temp_delta_path}/{table_name}")
+        .to_pandas()
+        .sort_values("id")
+        .reset_index(drop=True)
+        .to_dict(orient="records")
+    )
 
     await silver_writer.write_silver(
         table_name=table_name,
@@ -130,8 +136,12 @@ async def test_silver_merge_replay_preserves_business_columns_on_metadata_rerun(
         primary_keys=["id"],
         schema=schema,
     )
-    after = DeltaTable(f"{temp_delta_path}/{table_name}").to_pandas().iloc[0]
+    after_rows = (
+        DeltaTable(f"{temp_delta_path}/{table_name}")
+        .to_pandas()
+        .sort_values("id")
+        .reset_index(drop=True)
+        .to_dict(orient="records")
+    )
 
-    assert after["val"] == before["val"]
-    assert after["content_hash"] == before["content_hash"]
-    assert after["_run_id"] == before["_run_id"]
+    assert after_rows == before_rows

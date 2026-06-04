@@ -1,7 +1,7 @@
 ______________________________________________________________________
 
 Version: 1.0.0
-Status: Superseded
+Status: Superseded (revised 2025-12-23; see ADR-010)
 Class: published
 Owner: BioETL Team
 Reviewers:
@@ -13,7 +13,7 @@ ______________________________________________________________________
 
 # ADR-003: In-Memory Locking Strategy
 
-> **Status:** Superseded by [ADR-010](ADR-010-local-only-deployment.md)
+> **Status:** Superseded (revised 2025-12-23; see ADR-010)
 > **Archived:** 2026-06-04
 > status: superseded by ADR-010
 

@@ -896,18 +896,18 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless a reviewed triage recalibration
         updates the tracked debt budget intentionally.
     repo_wide_zero_import_candidate_count:
-      current_count: 14
-      max_count: 14
+      current_count: 13
+      max_count: 13
       linked_issue: '#4541'
       owner: '@bioetl-architecture'
-      rationale: 'Repo-wide zero-import candidates now reflect the reviewed policy-bound residue plus the separately tracked composition registry facade. Issues #5041, #5042, and #5043 reduced the governed surface from 41 to 14 without changing the current domain.ports facade-only import policy.'
+      rationale: 'Repo-wide zero-import candidates now reflect the reviewed policy-bound residue plus the separately tracked composition registry facade. The governed surface fell from 14 to 13 after bioetl.domain.ports.serialization gained direct test coverage and no longer qualifies as a repo-wide zero-import candidate.'
       ratchet_policy: 'Non-growth fail-fast unless a reviewed dead-code inventory refresh updates the classified candidate set intentionally.'
     repo_wide_classified_zero_import_candidate_count:
-      current_count: 14
-      max_count: 14
+      current_count: 13
+      max_count: 13
       linked_issue: '#4541'
       owner: '@bioetl-architecture'
-      rationale: 'Every repo-wide zero-import candidate remains covered by an explicit disposition ledger entry. After issues #5041, #5042, and #5043, the only classified residue is src/bioetl/__main__.py, src/bioetl/composition/registry.py, and the 12 package-root-governed domain.ports owner modules.'
+      rationale: 'Every repo-wide zero-import candidate remains covered by an explicit disposition ledger entry. The classified residue is src/bioetl/__main__.py, src/bioetl/composition/registry.py, and the 11 package-root-governed domain.ports owner modules that still have zero first-party static importers.'
       ratchet_policy: 'Non-growth fail-fast unless the repo-wide classification ledger is intentionally rebaselined during review.'
     repo_wide_untriaged_zero_import_candidate_count:
       current_count: 0

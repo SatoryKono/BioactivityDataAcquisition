@@ -91,6 +91,12 @@ def test_rows_are_valid_json_object_matrix() -> None:
     assert rows_are_valid_json_object(series).tolist() == [True, False, True]
 
 
+def test_json_array_and_object_validators_reject_malformed_json() -> None:
+    malformed = pd.Series(["not-json"])
+    assert rows_are_valid_json_array(malformed).tolist() == [False]
+    assert rows_are_valid_json_object(malformed).tolist() == [False]
+
+
 def test_prebuilt_json_checks_are_named() -> None:
     assert JSON_CHECK.name == "valid_json"
     assert JSON_ARRAY_CHECK.name == "valid_json_array"

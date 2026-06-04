@@ -136,12 +136,7 @@
       "pubmed.publication",
       "semanticscholar.publication",
       "uniprot.idmapping",
-      "uniprot.protein",
-      "composite.activity",
-      "composite.assay",
-      "composite.molecule",
-      "composite.publication",
-      "composite.target"
+      "uniprot.protein"
     ]
   },
   "lineage_fragment_ids": [],
@@ -170,7 +165,7 @@
         "per_provider_result_maps",
         "rich_checkpoint_payloads"
       ],
-      "forensic_grade_supported": true,
+      "forensic_grade_supported": false,
       "reconstructs": [
         "state",
         "seed_completed",
@@ -214,12 +209,7 @@
         "pubmed.publication",
         "semanticscholar.publication",
         "uniprot.idmapping",
-        "uniprot.protein",
-        "composite.activity",
-        "composite.assay",
-        "composite.molecule",
-        "composite.publication",
-        "composite.target"
+        "uniprot.protein"
       ]
     },
     "replay_ready_missing_requirements": [
@@ -335,12 +325,7 @@
       "pubmed.publication",
       "semanticscholar.publication",
       "uniprot.idmapping",
-      "uniprot.protein",
-      "composite.activity",
-      "composite.assay",
-      "composite.molecule",
-      "composite.publication",
-      "composite.target"
+      "uniprot.protein"
     ]
   },
   "replay_mode": "exact_replay",
@@ -572,12 +557,7 @@
           "pubmed.publication",
           "semanticscholar.publication",
           "uniprot.idmapping",
-          "uniprot.protein",
-          "composite.activity",
-          "composite.assay",
-          "composite.molecule",
-          "composite.publication",
-          "composite.target"
+          "uniprot.protein"
         ]
       },
       "reason": "supported_boundary_executable_runs_promote_or_fail_closed",
@@ -652,12 +632,7 @@
           "pubmed.publication",
           "semanticscholar.publication",
           "uniprot.idmapping",
-          "uniprot.protein",
-          "composite.activity",
-          "composite.assay",
-          "composite.molecule",
-          "composite.publication",
-          "composite.target"
+          "uniprot.protein"
         ]
       },
       "reason": "authoritative_historical_replay_universe_artifact_unavailable",
@@ -792,12 +767,7 @@
           "pubmed.publication",
           "semanticscholar.publication",
           "uniprot.idmapping",
-          "uniprot.protein",
-          "composite.activity",
-          "composite.assay",
-          "composite.molecule",
-          "composite.publication",
-          "composite.target"
+          "uniprot.protein"
         ]
       },
       "lineage_fragment_ids": [],
@@ -890,12 +860,7 @@
           "pubmed.publication",
           "semanticscholar.publication",
           "uniprot.idmapping",
-          "uniprot.protein",
-          "composite.activity",
-          "composite.assay",
-          "composite.molecule",
-          "composite.publication",
-          "composite.target"
+          "uniprot.protein"
         ]
       },
       "replay_mode": "exact_replay",

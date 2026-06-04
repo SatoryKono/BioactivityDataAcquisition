@@ -277,7 +277,9 @@ async def test_health_check_returns_degraded_on_slow_response(
 
 
 @pytest.mark.asyncio
-async def test_fetch_multi_filtered_raises_not_implemented(adapter) -> None:
+async def test_crossref_client__fetch_multi_filtered__raises_not_implemented(
+    adapter,
+) -> None:
     """CrossRef adapter should keep rejecting unsupported multi-filter fetches."""
     with pytest.raises(NotImplementedError, match="does not support multi-field"):
         await adapter.fetch_multi_filtered(

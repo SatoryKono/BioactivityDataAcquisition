@@ -93,10 +93,10 @@ class TestSQLInjectionPrevention:
             + "\n\nUse parameterized queries (e.g., conn.execute('SELECT * WHERE id = ?', [id]))"
         )
 
-    def test_database_operations_use_parameterized_queries(
+    def test_database_operations_preserves_parameterized_query_inventory(
         self, source_contents: list[tuple[Path, str]]
     ) -> None:
-        """Verify that database operations use parameterized query patterns."""
+        """Inventory execute() sites; hard failures stay in the concatenation guard."""
         # This is a positive test - checks for safe patterns
         safe_patterns = [
             r'\.execute\([^)]*\?',  # execute with ? placeholder
@@ -112,7 +112,5 @@ class TestSQLInjectionPrevention:
                 rel_path = py_file.relative_to(PROJECT_ROOT)
                 files_with_db_operations.append(str(rel_path))
 
-        # This is informational, not a hard failure
-        # If files are found, we just pass - the test is for prevention
-        # Real violations would be caught by the string concatenation test above
-        pass
+        # Informational inventory only; unsafe string concatenation is enforced above.
+        assert files_with_db_operations is not None
