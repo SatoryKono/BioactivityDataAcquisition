@@ -228,7 +228,7 @@ def test_scan_canonical_metric_mentions_falls_back_to_rg_before_direct_reads(
     }
 
 
-def test_scan_canonical_metric_mentions_skips_direct_reads_in_git_checkout(
+def test_scan_canonical_metric_mentions_falls_back_to_direct_reads_in_git_checkout(
     tmp_path: Path,
     monkeypatch: object,
 ) -> None:
@@ -236,18 +236,36 @@ def test_scan_canonical_metric_mentions_skips_direct_reads_in_git_checkout(
     docs_dir = tmp_path / "docs" / "03-guides"
     docs_dir.mkdir(parents=True)
     metric_doc = docs_dir / "metrics.md"
-    metric_doc.write_text("unused", encoding="utf-8")
-
-    def fail_read_text(self: Path, *args: object, **kwargs: object) -> str:
-        raise AssertionError(f"unexpected direct read: {self}")
+    metric_doc.write_text("bioetl_direct_read_total\n", encoding="utf-8")
 
     def fake_run(*args: object, **kwargs: object) -> subprocess.CompletedProcess[str]:
         raise OSError("bounded scanner unavailable")
 
-    monkeypatch.setattr(Path, "read_text", fail_read_text)
     monkeypatch.setattr(inventory.subprocess, "run", fake_run)
 
-    assert inventory._scan_canonical_metric_mentions([metric_doc], tmp_path) == {}
+    assert inventory._scan_canonical_metric_mentions([metric_doc], tmp_path) == {
+        "bioetl_direct_read_total": ["docs/03-guides/metrics.md"]
+    }
+
+
+def test_scan_canonical_metric_mentions_falls_back_to_direct_reads_after_timeouts(
+    tmp_path: Path,
+    monkeypatch: object,
+) -> None:
+    (tmp_path / ".git").mkdir()
+    docs_dir = tmp_path / "docs" / "03-guides"
+    docs_dir.mkdir(parents=True)
+    metric_doc = docs_dir / "metrics.md"
+    metric_doc.write_text("bioetl_timeout_fallback_total\n", encoding="utf-8")
+
+    def fake_run(*args: object, **kwargs: object) -> subprocess.CompletedProcess[str]:
+        raise subprocess.TimeoutExpired(cmd=args[0], timeout=kwargs["timeout"])
+
+    monkeypatch.setattr(inventory.subprocess, "run", fake_run)
+
+    assert inventory._scan_canonical_metric_mentions([metric_doc], tmp_path) == {
+        "bioetl_timeout_fallback_total": ["docs/03-guides/metrics.md"]
+    }
 
 
 def test_iter_text_files_prefers_git_discovery_before_path_stat(
