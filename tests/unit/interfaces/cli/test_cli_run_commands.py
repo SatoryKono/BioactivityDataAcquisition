@@ -563,8 +563,8 @@ def test_run_all_with_cli_policy_wires_registry_and_cli_seams() -> None:
             "resolve_context_registry",
             return_value=registry,
         ) as mock_resolve_registry,
-        patch.object(
-            run_all_module, "run_all_command_flow"
+        patch(
+            "bioetl.interfaces.cli.commands.run_all.run_all_command_flow"
         ) as mock_run_all_command_flow,
     ):
         run_all_module._run_all_with_cli_policy(ctx, cli_input)
@@ -630,7 +630,9 @@ def test_run_all_callback_ensures_observability_backend_with_catalog_probe() -> 
             "should_disable_transient_health_server",
             return_value=False,
         ) as mock_disable_transient,
-        patch.object(run_all_module, "dispatch_cli_callback") as mock_dispatch,
+        patch(
+            "bioetl.interfaces.cli.commands.run_all.dispatch_cli_callback"
+        ) as mock_dispatch,
     ):
         run_all_module._run_all_callback(
             ctx,

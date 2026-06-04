@@ -6,11 +6,6 @@ import asyncio
 from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Any, TypeVar, cast
 
-import pyarrow as pa
-
-from bioetl.infrastructure.storage.delta.schema_ops import (
-    drop_nondeterministic_persisted_fields,
-)
 from bioetl.infrastructure.storage.gold.io_delta_runtime import (
     _build_simple_gold_write,
     _execute_prepared_scd2_gold_write,
@@ -53,10 +48,13 @@ class _GoldWriterExecutorArrowMixin:
 
     def _to_arrow_table(
         self, records: list[GoldRecord], column_order: list[str] | None = None
-    ) -> pa.Table:
+    ) -> object:
         """Convert records to PyArrow table with Delta-safe null handling."""
         from bioetl.infrastructure.storage.delta.arrow_converter import (
             ArrowDataConverter,
+        )
+        from bioetl.infrastructure.storage.delta.schema_ops import (
+            drop_nondeterministic_persisted_fields,
         )
 
         converter = ArrowDataConverter(logger=self.logger)
@@ -163,6 +161,8 @@ class _GoldWriterScd2MergeMixin(_GoldWriterExecutorArrowMixin):
         column_order: list[str] | None = None,
     ) -> None:
         """Merge records using SCD Type 2 logic."""
+        import pyarrow as pa
+
         business_keys = (
             [business_key] if isinstance(business_key, str) else business_key
         )
@@ -213,6 +213,13 @@ async def _run_gold_write_with_retry(
     """Run a retryable async gold write operation using the legacy helper API."""
     retry_module = cast(_GoldWriteRetryModuleProtocol, module)
     retry_errors = retry_module.GOLD_WRITE_RETRY_ERRORS
+    try:
+        import pyarrow as pa
+    except ImportError:
+        pass
+    else:
+        if pa.ArrowException not in retry_errors:
+            retry_errors = (*retry_errors, pa.ArrowException)
     sleep_module = cast(_GoldWriteAsyncioProtocol, getattr(module, "asyncio", asyncio))
 
     for attempt in range(max_attempts):

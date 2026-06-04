@@ -1,6 +1,6 @@
 # Dead Code Inventory
 
-- snapshot_date: 2026-06-02
+- snapshot_date: 2026-06-04
 - linked_issue: #4541
 - last_reviewed: 2026-06-02
 - next_review_by: 2026-08-31

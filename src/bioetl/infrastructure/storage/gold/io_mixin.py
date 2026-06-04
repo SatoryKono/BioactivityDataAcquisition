@@ -25,14 +25,8 @@ from bioetl.infrastructure.storage.gold.io_delta_mixins import (
     _GoldWriterScd2MergeMixin,
     _GoldWriterSimpleDeltaMixin,
 )
-from bioetl.infrastructure.storage.gold.io_execution import (
-    _execute_gold_merged_write,
-)
 from bioetl.infrastructure.storage.gold.io_helpers import (
     load_gold_writer_module as _load_gold_writer_module,
-)
-from bioetl.infrastructure.storage.gold.io_preparation import (
-    _GoldMergedWriteRequest,
 )
 from bioetl.infrastructure.storage.gold.io_protocols import (
     _GoldWriteDispatchTargetProtocol,
@@ -82,6 +76,13 @@ class _GoldWriterMergedDispatchMixin(_GoldWriterExecutorArrowMixin):
                 "Merged Gold writes require a registered strict schema: "
                 f"table_name={table_name}"
             )
+
+        from bioetl.infrastructure.storage.gold.io_execution import (
+            _execute_gold_merged_write,
+        )
+        from bioetl.infrastructure.storage.gold.io_preparation import (
+            _GoldMergedWriteRequest,
+        )
 
         request = _GoldMergedWriteRequest(
             table_name=table_name,

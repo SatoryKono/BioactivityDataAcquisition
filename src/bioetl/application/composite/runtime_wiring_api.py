@@ -64,9 +64,11 @@ from bioetl.application.composite.runner_pkg.runner import (
 )
 from bioetl.application.composite.runtime_models import CompositeRunnerDependencies
 from bioetl.application.core.runner import PipelineRunner
+from bioetl.application.core.wiring.runtime import BatchExecutionRunService
 
 __all__ = [
     "JOIN_KEY_NORMALIZATION_POLICIES",
+    "BatchExecutionRunService",
     "CoalescePolicyService",
     "ColumnOrderService",
     "ColumnRenamer",

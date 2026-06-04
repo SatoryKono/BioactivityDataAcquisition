@@ -6,8 +6,6 @@ from collections.abc import Callable
 from types import ModuleType
 from typing import TYPE_CHECKING, Any, Protocol
 
-import pyarrow as pa
-
 if TYPE_CHECKING:
     from datetime import datetime
 
@@ -58,7 +56,7 @@ class _GoldWriterSCDHostProtocol(Protocol):
 
     def _to_arrow_table(
         self, records: list[GoldRecord], column_order: list[str] | None = None
-    ) -> pa.Table: ...
+    ) -> object: ...
 
 
 async def write_scd2_once(
@@ -85,6 +83,8 @@ async def write_scd2_once(
             column_order,
         )
     except module.TableNotFoundError:
+        import pyarrow as pa
+
         arrow_data = writer._to_arrow_table(records, column_order=column_order)
         await writer._run_in_executor(
             lambda: module.write_deltalake(

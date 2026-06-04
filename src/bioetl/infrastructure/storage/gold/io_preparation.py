@@ -3,16 +3,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
 from typing import cast
 
 import pyarrow as pa
-from pandera.polars import DataFrameSchema
 
-from bioetl.domain.types import GoldRecord
-from bioetl.infrastructure.storage.delta.schema_ops import (
-    drop_nondeterministic_persisted_fields,
-)
 from bioetl.infrastructure.storage.gold.io_helpers import (
     load_gold_writer_module as _load_gold_writer_module,
 )
@@ -32,10 +26,10 @@ class _GoldMergedWriteRequest:
     """Normalized request for one merged Gold write."""
 
     table_name: str
-    records: list[GoldRecord]
+    records: list[dict[str, object]]
     primary_keys: list[str] | None
-    schema: DataFrameSchema
-    completed_at: datetime | None
+    schema: object
+    completed_at: object | None
     run_id: str | None
     sources_used: list[str] | None
     preserve_column_order: bool = False
@@ -52,12 +46,15 @@ class _PreparedGoldMergedWrite:
 
 def _prepare_gold_merged_table(
     *,
-    records: list[GoldRecord],
+    records: list[dict[str, object]],
     primary_keys: list[str] | None,
     preserve_column_order: bool,
 ) -> pa.Table:
     """Build deterministic arrow table for merged Gold output."""
     from bioetl.domain.schemas.column_order import canonical_column_order
+    from bioetl.infrastructure.storage.delta.schema_ops import (
+        drop_nondeterministic_persisted_fields,
+    )
 
     module = _load_gold_writer_module()
     arrow_table = module.coerce_null_types_for_delta(pa.Table.from_pylist(records))
@@ -91,7 +88,7 @@ async def _prepare_gold_merged_write(
         preserve_column_order=request.preserve_column_order,
     )
     await host._validate_records_against_schema(
-        cast("list[GoldRecord]", arrow_table.to_pylist()),
+        cast("list[dict[str, object]]", arrow_table.to_pylist()),
         request.schema,
     )
     return _PreparedGoldMergedWrite(

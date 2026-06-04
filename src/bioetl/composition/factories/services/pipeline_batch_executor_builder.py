@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.core.batch_execution_state_service import (
+from bioetl.application.core.batch_execution.state_service import (
     BatchExecutionStateService,
 )
 from bioetl.application.core.wiring.runtime import (

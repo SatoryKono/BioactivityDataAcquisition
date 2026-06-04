@@ -330,6 +330,24 @@ REMOVED_COMPAT_MODULES: dict[str, Path] = {
     "application checkpoint legacy wrapper": Path(
         "src/bioetl/application/core/lifecycle/_checkpoint_legacy.py"
     ),
+    "cli run-all internal command wrapper": Path(
+        "src/bioetl/interfaces/cli/commands/domains/run_all/command.py"
+    ),
+    "application core batch execution lifecycle flat facade": Path(
+        "src/bioetl/application/core/batch_execution_lifecycle.py"
+    ),
+    "application core batch execution run service flat facade": Path(
+        "src/bioetl/application/core/batch_execution_run_service.py"
+    ),
+    "application core pipeline registry wiring flat facade": Path(
+        "src/bioetl/application/core/pipeline_registry_wiring_api.py"
+    ),
+    "application core runtime wiring flat facade": Path(
+        "src/bioetl/application/core/runtime_wiring_api.py"
+    ),
+    "application core transformer wiring flat facade": Path(
+        "src/bioetl/application/core/transformer_wiring_api.py"
+    ),
 }
 
 
@@ -485,18 +503,6 @@ SANCTIONED_DEAD_CODE_EXCLUSION_MODULE_PATHS = frozenset(
         / "bioetl"
         / "application"
         / "core"
-        / "batch_execution_lifecycle.py",
-        ROOT
-        / "src"
-        / "bioetl"
-        / "application"
-        / "core"
-        / "batch_execution_run_service.py",
-        ROOT
-        / "src"
-        / "bioetl"
-        / "application"
-        / "core"
         / "batch_execution_state_service.py",
     }
 )
@@ -566,25 +572,8 @@ ALLOWED_INTERNAL_ENTRYPOINT_TEST_FILES_BY_MODULE = {
 }
 ALLOWED_RUN_COMMAND_INTERNAL_SRC_FILES: frozenset[Path] = frozenset()
 ALLOWED_RUN_COMMAND_INTERNAL_STRING_SRC_FILES: frozenset[Path] = frozenset()
-ALLOWED_RUN_ALL_COMMAND_INTERNAL_SRC_FILES = frozenset(
-    {
-        ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "run_all.py",
-        ROOT
-        / "src"
-        / "bioetl"
-        / "interfaces"
-        / "cli"
-        / "commands"
-        / "domains"
-        / "run_all"
-        / "__init__.py",
-    }
-)
-ALLOWED_RUN_ALL_COMMAND_INTERNAL_STRING_SRC_FILES = frozenset(
-    {
-        ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "run_all.py",
-    }
-)
+ALLOWED_RUN_ALL_COMMAND_INTERNAL_SRC_FILES = frozenset()
+ALLOWED_RUN_ALL_COMMAND_INTERNAL_STRING_SRC_FILES = frozenset()
 ALLOWED_RUN_COMPOSITE_COMMAND_INTERNAL_SRC_FILES = frozenset(
     {
         ROOT

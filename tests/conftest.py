@@ -23,7 +23,6 @@ from tests.helpers.vcr_config import (
     is_git_lfs_pointer,
     is_strict_lfs_pointer_blocked_cassette,
     query_ignore_email,
-    resolve_cassette_name,
     resolve_requested_cassette_path,
 )
 

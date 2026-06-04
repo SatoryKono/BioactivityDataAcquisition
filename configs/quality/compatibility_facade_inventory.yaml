@@ -26,7 +26,7 @@ retained_entrypoints:
   exit_criteria: The top-level module remains the sanctioned public CLI patch/import seam and the retired `domains.run.command`
     wrapper stays absent.
 - path: src/bioetl/interfaces/cli/commands/run_all.py
-  compatibility_role: Permanent public run-all command seam over the split internal owner module `bioetl.interfaces.cli.commands.domains.run_all.command`.
+  compatibility_role: Permanent public run-all command seam over split internal owner modules under `bioetl.interfaces.cli.commands.domains.run_all`.
   canonical_target: bioetl.interfaces.cli.commands.run_all
   status: public-entrypoint
   owner: bioetl.interfaces.cli.commands
@@ -34,14 +34,14 @@ retained_entrypoints:
   review_date: '2026-09-30'
   external_breaking_change_required: true
   internal_callers_zero: false
-  allowed_call_sites: '`src`: use `bioetl.interfaces.cli.commands.run_all` as the public seam; direct internal-owner imports
-    stay confined to `src/bioetl/interfaces/cli/commands/domains/run_all/__init__.py`; `tests`: patch/import coverage may
-    target `bioetl.interfaces.cli.commands.run_all`, while direct `bioetl.interfaces.cli.commands.domains.run_all.command`
-    imports stay confined to dedicated boundary coverage'
-  migration_path: Use `bioetl.interfaces.cli.commands.run_all` for public CLI wiring and patch targets; do not import `bioetl.interfaces.cli.commands.domains.run_all.command`
-    directly outside the owning package or dedicated boundary tests.
-  exit_criteria: The top-level module remains the sanctioned public CLI patch/import seam, and direct internal-owner imports
-    remain confined to the owning package plus dedicated boundary tests.
+  allowed_call_sites: '`src`: use `bioetl.interfaces.cli.commands.run_all` as the public seam; retired wrapper module
+    `bioetl.interfaces.cli.commands.domains.run_all.command` must stay absent. `tests`: patch/import coverage may target
+    `bioetl.interfaces.cli.commands.run_all`, while focused owner tests may import narrower `domains.run_all.*` helper
+    modules.'
+  migration_path: Use `bioetl.interfaces.cli.commands.run_all` for public CLI wiring and patch targets; do not reintroduce
+    `bioetl.interfaces.cli.commands.domains.run_all.command` as an internal owner wrapper.
+  exit_criteria: The top-level module remains the sanctioned public CLI patch/import seam and the retired `domains.run_all.command`
+    wrapper stays absent.
 - path: src/bioetl/interfaces/cli/commands/run_composite.py
   compatibility_role: Permanent public run-composite command seam over the internal owner module `bioetl.interfaces.cli.commands.domains.composite.command`.
   canonical_target: bioetl.interfaces.cli.commands.run_composite
@@ -352,13 +352,13 @@ retained_entrypoint_burn_down_plan:
     completion_gate: Keep the top-level CLI command as the sanctioned patch/import seam and block new direct owner-module
       imports outside approved boundary coverage.
   - path: src/bioetl/interfaces/cli/commands/maintenance.py
-    phase: narrow-first-party-callers
-    target_state: narrow_first_party_callers
-    rationale: Public CLI command seam stays stable, but first-party maintenance helpers should import through owner-only
-      `domains/maintenance/service_access.py` instead of the top-level patch seam.
-    completion_gate: Keep the top-level CLI command as the sanctioned patch/import seam while confining its first-party
-      source importer budget to `src/bioetl/interfaces/cli/commands/domains/maintenance/__init__.py`; ordinary runtime
-      maintenance helper imports must use the owner-only service-access module plus dedicated boundary coverage.
+    phase: enforce
+    target_state: retain_as_stable_public_api
+    rationale: Public CLI maintenance command seam; first-party runtime callers have already been narrowed away from the
+      top-level patch seam, so the remaining surface is stable external CLI API rather than active caller-narrowing debt.
+    completion_gate: Keep the top-level CLI command as the sanctioned patch/import seam while holding first-party source
+      importers at zero; ordinary runtime maintenance helper imports must use owner-only modules plus dedicated boundary
+      coverage.
   - path: src/bioetl/composition/entrypoints.py
     phase: enforce
     target_state: retain_as_stable_public_api

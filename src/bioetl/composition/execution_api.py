@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from bioetl.composition._lazy_exports import install_lazy_exports
+from bioetl.composition.lazy_exports import install_lazy_exports
 
 _PIPELINE_EXECUTION_MODULE = "bioetl.composition._pipeline_execution"
 _PIPELINE_RUNNER_MODELS_MODULE = (

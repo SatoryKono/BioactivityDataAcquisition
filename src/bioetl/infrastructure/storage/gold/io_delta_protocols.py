@@ -3,19 +3,13 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from datetime import datetime
 from typing import Protocol
-
-import pyarrow as pa
-
-from bioetl.domain.types import GoldRecord, ScdConfig
-from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterProtocol
 
 
 class GoldWriterSimpleDeltaHostProtocol(Protocol):
     """Structural host contract for simple Gold Delta write helpers."""
 
-    csv_exporter: CsvExporterProtocol | None
+    csv_exporter: object | None
 
     async def _run_in_executor(
         self,
@@ -24,8 +18,8 @@ class GoldWriterSimpleDeltaHostProtocol(Protocol):
     ) -> object: ...
 
     def _to_arrow_table(
-        self, records: list[GoldRecord], column_order: list[str] | None = None
-    ) -> pa.Table: ...
+        self, records: list[dict[str, object]], column_order: list[str] | None = None
+    ) -> object: ...
 
 
 class GoldWriteAsyncioProtocol(Protocol):
@@ -48,7 +42,7 @@ class GoldWriterDeltaModuleProtocol(GoldWriteRetryModuleProtocol, Protocol):
         self,
         *,
         table_or_uri: str,
-        data: pa.RecordBatchReader,
+        data: object,
         mode: str,
         partition_by: list[str] | None,
         schema_mode: str | None,
@@ -67,16 +61,16 @@ class GoldWriterScd2HostProtocol(Protocol):
     ) -> object: ...
 
     def _to_arrow_table(
-        self, records: list[GoldRecord], column_order: list[str] | None = None
-    ) -> pa.Table: ...
+        self, records: list[dict[str, object]], column_order: list[str] | None = None
+    ) -> object: ...
 
     async def _merge_scd2(
         self,
         dt: object,
-        records: list[GoldRecord],
+        records: list[dict[str, object]],
         business_key: str | list[str],
-        scd_config: ScdConfig,
-        ingestion_ts: datetime,
+        scd_config: object,
+        ingestion_ts: object,
         column_order: list[str] | None = None,
     ) -> None: ...
 

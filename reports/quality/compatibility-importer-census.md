@@ -1,6 +1,6 @@
 # Compatibility Importer Census
 
-- snapshot_date: 2026-06-03
+- snapshot_date: 2026-06-04
 - retained_entrypoint_count: 14
 - removed_compatibility_surface_count: 23
 - removed_compatibility_surfaces_with_src_importers: 0
@@ -20,7 +20,7 @@
 | Path | src importers | test importers |
 | --- | ---: | ---: |
 | `src/bioetl/interfaces/cli/commands/run.py` | 0 | 2 |
-| `src/bioetl/interfaces/cli/commands/run_all.py` | 1 | 5 |
+| `src/bioetl/interfaces/cli/commands/run_all.py` | 0 | 5 |
 | `src/bioetl/interfaces/cli/commands/run_composite.py` | 1 | 1 |
 | `src/bioetl/interfaces/cli/commands/health.py` | 4 | 1 |
 | `src/bioetl/interfaces/cli/commands/diagnostics.py` | 1 | 2 |
@@ -75,7 +75,7 @@
 
 | Public module | Public src | Private src |
 | --- | ---: | ---: |
-| `bioetl.composition.lazy_exports` | 1 | 9 |
+| `bioetl.composition.lazy_exports` | 9 | 1 |
 
 ## Tracked Twin Family Ratchet
 

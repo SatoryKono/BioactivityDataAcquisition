@@ -22,9 +22,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_COVERAGE_XML = PROJECT_ROOT / "reports" / "coverage" / "coverage.xml"
 DEFAULT_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "module-coverage-inventory.json"
 SOURCE_ROOT = PROJECT_ROOT / "src" / "bioetl"
-# One full byte-read pass keeps the guard below the per-test timeout budget on
-# shared-drive worktrees; vanished paths are skipped during snapshot reading.
-MAX_SOURCE_TREE_STABILIZATION_ATTEMPTS = 1
+# Shared-drive worktrees can return one transient digest immediately after local
+# edits; prefer a repeated digest before declaring the source-tree hash current.
+MAX_SOURCE_TREE_STABILIZATION_ATTEMPTS = 3
 SOURCE_TREE_STABILIZATION_SLEEP_SECONDS = 0.1
 
 

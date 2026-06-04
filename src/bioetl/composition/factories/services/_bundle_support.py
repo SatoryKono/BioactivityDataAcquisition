@@ -4,26 +4,25 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
-from bioetl.application.core.base import BasePipeline
-from bioetl.application.core.base_transformer import BaseTransformer
-from bioetl.composition.factories.services.observability_api import (
-    create_data_source_with_observability,
-)
-from bioetl.composition.factories.datasource.data_source_factory import (
-    DataSourceCreatorProtocol,
-)
-from bioetl.composition.factories.pipeline.creation_support import (
-    _PipelineCreationInputs,
-    _PipelineCreationRequest,
-)
-from bioetl.composition.factories.services.factory import BaseServicesFactory
-from bioetl.domain.config import DQConfig, PipelineConfig
-from bioetl.domain.context import CachedBronzeContext
-from bioetl.domain.filtering import InputFilterConfig
-from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
-from bioetl.infrastructure.config.settings_api import Settings
-from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+if TYPE_CHECKING:
+    from bioetl.application.core.base import BasePipeline
+    from bioetl.application.core.base_transformer import BaseTransformer
+    from bioetl.composition.factories.datasource.data_source_factory import (
+        DataSourceCreatorProtocol,
+    )
+    from bioetl.composition.factories.pipeline.creation_support import (
+        _PipelineCreationInputs,
+        _PipelineCreationRequest,
+    )
+    from bioetl.composition.factories.services.factory import BaseServicesFactory
+    from bioetl.domain.config import DQConfig, PipelineConfig
+    from bioetl.domain.context import CachedBronzeContext
+    from bioetl.domain.filtering import InputFilterConfig
+    from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
+    from bioetl.infrastructure.config.settings_api import Settings
+    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
 @dataclass(frozen=True, slots=True)
@@ -73,6 +72,10 @@ def create_pipeline_data_source(
     create_data_source_impl_fn: Callable[..., DataSourcePort],
 ) -> DataSourcePort:
     """Resolve live-vs-cached data source construction for one pipeline run."""
+    from bioetl.composition.factories.services.observability_api import (
+        create_data_source_with_observability,
+    )
+
     return create_data_source_with_observability(
         create_data_source_fn=create_data_source_fn,
         settings=settings,
@@ -105,6 +108,10 @@ def build_pipeline_creation_inputs(
     request: _PipelineCreationRequest,
 ) -> _PipelineCreationInputs:
     """Build the delegated pipeline-creation envelope."""
+    from bioetl.composition.factories.pipeline.creation_support import (
+        _PipelineCreationInputs,
+    )
+
     return _PipelineCreationInputs(
         pipeline_name=identity.pipeline_name,
         pipeline_class=identity.pipeline_class,

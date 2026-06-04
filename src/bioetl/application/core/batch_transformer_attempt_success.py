@@ -7,13 +7,8 @@ from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.batch_transformer_state import RecordTransformOutcome
 from bioetl.application.core.pre_silver_record import PreSilverRecord
-from bioetl.domain.behavior.dq_rule_evaluator import (
-    evaluate_dq_rules_for_record,
-    select_highest_priority_disposition,
-)
 from bioetl.domain.exceptions import DataQualityError
 from bioetl.domain.filtering import FilterDecision
-from bioetl.domain.types.dq_contracts import DQDisposition
 
 if TYPE_CHECKING:
     from bioetl.application.core.protocols import (
@@ -102,6 +97,15 @@ def _apply_runtime_dq_outcomes(
     dq_config: DQConfig | None,
 ) -> dict[str, object]:
     """Evaluate runtime DQ rules and project non-blocking flags onto one record."""
+    if dq_config is None:
+        return silver_record
+
+    from bioetl.domain.behavior.dq_rule_evaluator import (
+        evaluate_dq_rules_for_record,
+        select_highest_priority_disposition,
+    )
+    from bioetl.domain.types.dq_contracts import DQDisposition
+
     outcomes = evaluate_dq_rules_for_record(silver_record, dq_config)
     if not outcomes:
         return silver_record

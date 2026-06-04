@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import builtins
+import importlib
 import importlib.util
 from pathlib import Path
 from types import ModuleType
@@ -31,7 +32,7 @@ import pytest
         (
             "src/bioetl/interfaces/cli/commands/domains/run_all/__init__.py",
             "run_all",
-            "bioetl.interfaces.cli.commands.domains.run_all.command",
+            "bioetl.interfaces.cli.commands.run_all",
         ),
     ],
 )
@@ -45,6 +46,7 @@ def test_domain_command_packages_export_lazy_command_symbol(
     fake_command_module = ModuleType(command_module_name)
     setattr(fake_command_module, export_name, sentinel)
     original_import = builtins.__import__
+    original_import_module = importlib.import_module
 
     def _fake_import(
         name: str,
@@ -57,7 +59,13 @@ def test_domain_command_packages_export_lazy_command_symbol(
             return fake_command_module
         return original_import(name, globals, locals, fromlist, level)
 
+    def _fake_import_module(name: str) -> ModuleType:
+        if name == command_module_name:
+            return fake_command_module
+        return original_import_module(name)
+
     monkeypatch.setattr(builtins, "__import__", _fake_import)
+    monkeypatch.setattr(importlib, "import_module", _fake_import_module)
     module_path = Path(relative_path)
     spec = importlib.util.spec_from_file_location(
         f"_test_{module_path.parent.name}_domain_package",

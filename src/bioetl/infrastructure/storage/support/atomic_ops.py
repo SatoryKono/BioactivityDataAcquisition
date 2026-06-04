@@ -17,7 +17,6 @@ from __future__ import annotations
 __all__ = [
     "ATOMIC_WRITE_EXCEPTIONS",
     "AtomicWriteError",
-    "AtomicWriteGroup",
     "atomic_write",
     "atomic_write_bytes",
     "atomic_write_text",
@@ -28,6 +27,7 @@ import tempfile
 import time
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
+from importlib import import_module
 from pathlib import Path
 from typing import IO, Any
 
@@ -36,7 +36,6 @@ from bioetl.infrastructure.storage.delta.resilience import (
     DEFAULT_ATOMIC_REPLACE_RETRY_POLICY,
     AdaptiveRetryPolicy,
 )
-from bioetl.infrastructure.storage.support.atomic_group import AtomicWriteGroup
 
 
 class AtomicWriteError(_InfraBase):
@@ -61,6 +60,15 @@ _REPLACE_RETRYABLE_ERRNOS_WINDOWS = {13, 16}
 _REPLACE_RETRYABLE_ERRNOS_NON_WINDOWS = {16}
 _IS_WINDOWS = os.name == "nt"
 ReplaceRetryHook = Callable[[int, float, OSError], None]
+
+
+def __getattr__(name: str) -> object:
+    """Lazily expose compatibility re-exports without creating import cycles."""
+    if name == "AtomicWriteGroup":
+        AtomicWriteGroup = import_module("bioetl.infrastructure.storage.support.atomic_group").AtomicWriteGroup
+
+        return AtomicWriteGroup
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 def _is_retryable_replace_error(error: OSError) -> bool:

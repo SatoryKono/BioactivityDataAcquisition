@@ -1,23 +1,177 @@
 {
-  "schema_version": 1,
+  "categories": [
+    {
+      "evidence_metrics": {
+        "layer_violations": 0
+      },
+      "id": "layer_compliance",
+      "name": "Layer compliance",
+      "score": 9.2,
+      "weight": 0.13,
+      "weighted_score": 1.196
+    },
+    {
+      "evidence_metrics": {
+        "layer_violations": 0,
+        "retained_entrypoint_count": 14
+      },
+      "id": "hexagonal_ports_adapters",
+      "name": "Hexagonal / Ports & Adapters",
+      "score": 8.4,
+      "weight": 0.11,
+      "weighted_score": 0.924
+    },
+    {
+      "evidence_metrics": {
+        "source_module_count": 2136,
+        "uncovered_module_count": 0
+      },
+      "id": "ddd_invariants",
+      "name": "DDD / aggregates / invariants",
+      "score": 8.0,
+      "weight": 0.09,
+      "weighted_score": 0.72
+    },
+    {
+      "evidence_metrics": {
+        "layer_violations": 0,
+        "retained_public_export_facade_count": 4
+      },
+      "id": "composition_di",
+      "name": "Composition root / DI",
+      "score": 8.0,
+      "weight": 0.1,
+      "weighted_score": 0.8
+    },
+    {
+      "evidence_metrics": {
+        "hotspot_family_count": 5,
+        "source_module_count": 2136
+      },
+      "id": "module_boundaries_coupling",
+      "name": "Module boundaries / coupling",
+      "score": 7.0,
+      "weight": 0.14,
+      "weighted_score": 0.98
+    },
+    {
+      "evidence_metrics": {
+        "retained_entrypoint_count": 14,
+        "twin_pair_count": 1
+      },
+      "id": "naming_package_consistency",
+      "name": "Naming / package consistency",
+      "score": 7.5,
+      "weight": 0.08,
+      "weighted_score": 0.6
+    },
+    {
+      "evidence_metrics": {
+        "uncovered_module_count": 0,
+        "unmeasured_module_count": 0
+      },
+      "id": "test_strategy_testability",
+      "name": "Test strategy / testability",
+      "score": 7.4,
+      "weight": 0.12,
+      "weighted_score": 0.888
+    },
+    {
+      "evidence_metrics": {
+        "contract_blocking_issue_count": 0,
+        "dq_blocking_issue_count": 0
+      },
+      "id": "config_contracts_entrypoints",
+      "name": "Config / contracts / entrypoints",
+      "score": 8.5,
+      "weight": 0.09,
+      "weighted_score": 0.765
+    },
+    {
+      "evidence_metrics": {
+        "contract_blocking_issue_count": 0,
+        "layer_violations": 0
+      },
+      "id": "determinism_replay_observability",
+      "name": "Determinism / replay / observability",
+      "score": 8.2,
+      "weight": 0.08,
+      "weighted_score": 0.656
+    },
+    {
+      "evidence_metrics": {
+        "repo_wide_untriaged_zero_import_candidate_count": 0,
+        "retained_entrypoint_count": 14
+      },
+      "id": "debt_burden_evolution_friction",
+      "name": "Debt burden / evolution friction",
+      "score": 7.5,
+      "weight": 0.06,
+      "weighted_score": 0.45
+    }
+  ],
+  "debt_budget_policy": {
+    "budget_growth_allowed": false,
+    "compatibility_debt_metrics_source": "configs/quality/debt_scorecard.yaml#compatibility_debt_metrics",
+    "current_compatibility_debt_metrics": {
+      "expired_compat_count": {
+        "current_count": 0,
+        "linked_issue": "3354",
+        "max_count": 0,
+        "owner": "@bioetl-architecture",
+        "ratchet_policy": "Zero-budget fail-fast metric.",
+        "rationale": "Expired compatibility items are not allowed to persist after their sunset date."
+      },
+      "retained_public_entrypoint_burden": {
+        "current_count": 14,
+        "linked_issue": "4575",
+        "max_count": 14,
+        "owner": "@bioetl-architecture",
+        "ratchet_policy": "Fail on growth; ratchet max_count downward only after retained public entrypoints are removed or first-party callers are narrowed.",
+        "rationale": "Retained public entrypoints are stable external API, but their size and first-party dependency burden are blocking governance debt when they grow without review."
+      },
+      "sunset_compat_count": {
+        "current_count": 0,
+        "linked_issue": "4700",
+        "max_count": 0,
+        "owner": "@bioetl-architecture",
+        "ratchet_policy": "May only decrease before the sunset; must reach zero after 2026-09-30.",
+        "rationale": "Control-plane run_manifest_diagnostics_* compatibility shims were removed in Stream C; transition_debt inventory is empty.",
+        "sunset_date": "2026-09-30",
+        "target_count": 0
+      },
+      "transition_compat_count": {
+        "current_count": 0,
+        "linked_issue": "4700",
+        "max_count": 0,
+        "owner": "@bioetl-architecture",
+        "ratchet_policy": "Fail on growth; ratchet current/max_count toward target_count zero as transition-only compatibility shims are removed.",
+        "rationale": "Stream C post-sunset shim removal cleared all control-plane manifest diagnostics transition_debt entries; callers use manifest.diagnostics.* owners. Sanctioned public entrypoints are tracked separately as stable public API.",
+        "target_count": 0
+      }
+    }
+  },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
+  "integral_score": 7.98,
+  "interpretation": "satisfactory_system_refactoring_required",
+  "metrics": {
+    "contract_blocking_issue_count": 0,
+    "dq_blocking_issue_count": 0,
+    "hotspot_family_count": 5,
+    "layer_violations": 0,
+    "repo_wide_untriaged_zero_import_candidate_count": 0,
+    "retained_entrypoint_count": 14,
+    "retained_public_export_facade_count": 4,
+    "source_module_count": 2136,
+    "twin_pair_count": 1,
+    "uncovered_module_count": 0,
+    "unmeasured_module_count": 0
+  },
+  "schema_version": 1,
   "source_artifacts": {
-    "dependency_map": {
-      "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "a72d4fa040dd5cb5d09dbadee310105b1ba79d46a9549cdf6e8820b64db42506"
-    },
-    "module_coverage_inventory": {
-      "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "234e51cbfe9aaca10d6a0d55ccd4b9d8f94941552612c828d69a91095a20da60",
-      "coverage_xml_sha256": "5a53a231c1c7ffa68a423586f18a34ec65a727163923e7020739f52769fa161f"
-    },
     "compatibility_importer_census": {
       "path": "reports/quality/compatibility-importer-census.json",
-      "snapshot_date": "2026-06-03"
-    },
-    "dead_code_inventory": {
-      "path": "reports/quality/dead-code-inventory.json",
-      "snapshot_date": "2026-06-02"
+      "snapshot_date": "2026-06-04"
     },
     "contract_registry_diagnostics": {
       "path": "reports/quality/contract-registry-diagnostics.json",
@@ -26,174 +180,20 @@
     "contract_registry_dq_diagnostics": {
       "path": "reports/quality/contract-registry-dq-diagnostics.json",
       "valid": true
+    },
+    "dead_code_inventory": {
+      "path": "reports/quality/dead-code-inventory.json",
+      "snapshot_date": "2026-06-02"
+    },
+    "dependency_map": {
+      "path": "docs/02-architecture/generated/module-dependency-map.json",
+      "source_fingerprint": "a72d4fa040dd5cb5d09dbadee310105b1ba79d46a9549cdf6e8820b64db42506"
+    },
+    "module_coverage_inventory": {
+      "coverage_xml_sha256": null,
+      "path": "reports/quality/module-coverage-inventory.json",
+      "source_tree_sha256": "22c2b80ccc0d8c854bddcec0636f5c7b7621e329087abe9f43b3e5fe992a6889"
     }
   },
-  "weights_sum": 1.0,
-  "integral_score": 7.98,
-  "interpretation": "satisfactory_system_refactoring_required",
-  "categories": [
-    {
-      "id": "layer_compliance",
-      "name": "Layer compliance",
-      "weight": 0.13,
-      "score": 9.2,
-      "weighted_score": 1.196,
-      "evidence_metrics": {
-        "layer_violations": 0
-      }
-    },
-    {
-      "id": "hexagonal_ports_adapters",
-      "name": "Hexagonal / Ports & Adapters",
-      "weight": 0.11,
-      "score": 8.4,
-      "weighted_score": 0.924,
-      "evidence_metrics": {
-        "layer_violations": 0,
-        "retained_entrypoint_count": 14
-      }
-    },
-    {
-      "id": "ddd_invariants",
-      "name": "DDD / aggregates / invariants",
-      "weight": 0.09,
-      "score": 8.0,
-      "weighted_score": 0.72,
-      "evidence_metrics": {
-        "source_module_count": 2133,
-        "uncovered_module_count": 108
-      }
-    },
-    {
-      "id": "composition_di",
-      "name": "Composition root / DI",
-      "weight": 0.1,
-      "score": 8.0,
-      "weighted_score": 0.8,
-      "evidence_metrics": {
-        "layer_violations": 0,
-        "retained_public_export_facade_count": 4
-      }
-    },
-    {
-      "id": "module_boundaries_coupling",
-      "name": "Module boundaries / coupling",
-      "weight": 0.14,
-      "score": 7.0,
-      "weighted_score": 0.98,
-      "evidence_metrics": {
-        "source_module_count": 2133,
-        "hotspot_family_count": 5
-      }
-    },
-    {
-      "id": "naming_package_consistency",
-      "name": "Naming / package consistency",
-      "weight": 0.08,
-      "score": 7.5,
-      "weighted_score": 0.6,
-      "evidence_metrics": {
-        "retained_entrypoint_count": 14,
-        "twin_pair_count": 1
-      }
-    },
-    {
-      "id": "test_strategy_testability",
-      "name": "Test strategy / testability",
-      "weight": 0.12,
-      "score": 7.4,
-      "weighted_score": 0.888,
-      "evidence_metrics": {
-        "unmeasured_module_count": 54,
-        "uncovered_module_count": 108
-      }
-    },
-    {
-      "id": "config_contracts_entrypoints",
-      "name": "Config / contracts / entrypoints",
-      "weight": 0.09,
-      "score": 8.5,
-      "weighted_score": 0.765,
-      "evidence_metrics": {
-        "contract_blocking_issue_count": 0,
-        "dq_blocking_issue_count": 0
-      }
-    },
-    {
-      "id": "determinism_replay_observability",
-      "name": "Determinism / replay / observability",
-      "weight": 0.08,
-      "score": 8.2,
-      "weighted_score": 0.656,
-      "evidence_metrics": {
-        "layer_violations": 0,
-        "contract_blocking_issue_count": 0
-      }
-    },
-    {
-      "id": "debt_burden_evolution_friction",
-      "name": "Debt burden / evolution friction",
-      "weight": 0.06,
-      "score": 7.5,
-      "weighted_score": 0.45,
-      "evidence_metrics": {
-        "retained_entrypoint_count": 14,
-        "repo_wide_untriaged_zero_import_candidate_count": 0
-      }
-    }
-  ],
-  "metrics": {
-    "layer_violations": 0,
-    "source_module_count": 2133,
-    "unmeasured_module_count": 54,
-    "uncovered_module_count": 108,
-    "hotspot_family_count": 5,
-    "retained_entrypoint_count": 14,
-    "retained_public_export_facade_count": 4,
-    "twin_pair_count": 1,
-    "repo_wide_untriaged_zero_import_candidate_count": 0,
-    "contract_blocking_issue_count": 0,
-    "dq_blocking_issue_count": 0
-  },
-  "debt_budget_policy": {
-    "budget_growth_allowed": false,
-    "compatibility_debt_metrics_source": "configs/quality/debt_scorecard.yaml#compatibility_debt_metrics",
-    "current_compatibility_debt_metrics": {
-      "transition_compat_count": {
-        "current_count": 0,
-        "max_count": 0,
-        "target_count": 0,
-        "owner": "@bioetl-architecture",
-        "linked_issue": "4700",
-        "rationale": "Stream C post-sunset shim removal cleared all control-plane manifest diagnostics transition_debt entries; callers use manifest.diagnostics.* owners. Sanctioned public entrypoints are tracked separately as stable public API.",
-        "ratchet_policy": "Fail on growth; ratchet current/max_count toward target_count zero as transition-only compatibility shims are removed."
-      },
-      "retained_public_entrypoint_burden": {
-        "current_count": 14,
-        "max_count": 14,
-        "owner": "@bioetl-architecture",
-        "linked_issue": "4575",
-        "rationale": "Retained public entrypoints are stable external API, but their size and first-party dependency burden are blocking governance debt when they grow without review.",
-        "ratchet_policy": "Fail on growth; ratchet max_count downward only after retained public entrypoints are removed or first-party callers are narrowed."
-      },
-      "sunset_compat_count": {
-        "current_count": 0,
-        "max_count": 0,
-        "target_count": 0,
-        "owner": "@bioetl-architecture",
-        "linked_issue": "4700",
-        "sunset_date": "2026-09-30",
-        "rationale": "Control-plane run_manifest_diagnostics_* compatibility shims were removed in Stream C; transition_debt inventory is empty.",
-        "ratchet_policy": "May only decrease before the sunset; must reach zero after 2026-09-30."
-      },
-      "expired_compat_count": {
-        "current_count": 0,
-        "max_count": 0,
-        "owner": "@bioetl-architecture",
-        "linked_issue": "3354",
-        "rationale": "Expired compatibility items are not allowed to persist after their sunset date.",
-        "ratchet_policy": "Zero-budget fail-fast metric."
-      }
-    }
-  }
+  "weights_sum": 1.0
 }

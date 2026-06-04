@@ -25,29 +25,17 @@ from bioetl.application.core.normalization_fallbacks import (
     UNHANDLED_FALLBACK_NORMALIZATION,
     canonicalize_json_like_string,
     normalize_named_text_field,
+    normalize_plain_text,
     normalize_special_fallback_field,
 )
 from bioetl.application.core.normalization_rules import NormalizationRulesPolicy
 from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.application.core.record_processor_config import ContentHashPolicyByVersion
 from bioetl.domain.normalization.json import serialize_json_canonical
-from bioetl.domain.normalization.profiles import (
-    FieldRule,
-    resolve_normalization_profile,
-)
-from bioetl.domain.normalization.profiles.base import (
-    _normalizer_accepts_record_context as _profile_rule_accepts_record_context,
-)
-from bioetl.domain.normalization.profiles.profile_normalizers import (
-    normalize_profile_passthrough,
-    normalize_profile_smiles,
-)
-from bioetl.domain.normalization.text import (
-    normalize_string,
-)
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
+    from bioetl.domain.normalization.profiles import FieldRule
     from bioetl.domain.types import JsonDict
 
 __all__ = ["NormalizationContractError", "RecordNormalizationProcessor"]
@@ -76,6 +64,8 @@ class RecordNormalizationProcessor(RecordNormalizationHashSupportMixin):
     def __post_init__(self) -> None:
         if self.profile is not None or self.entity_type is None:
             return
+        from bioetl.domain.normalization.profiles import resolve_normalization_profile
+
         resolved_profile = resolve_normalization_profile(
             self.provider,
             self.entity_type,
@@ -227,7 +217,7 @@ class RecordNormalizationProcessor(RecordNormalizationHashSupportMixin):
         if normalized_text is not None:
             return normalized_text
 
-        stripped = normalize_string(value)
+        stripped = normalize_plain_text(value)
         if stripped is None:
             return None
         return self._canonicalize_json_like_string(stripped)
@@ -243,6 +233,10 @@ class RecordNormalizationProcessor(RecordNormalizationHashSupportMixin):
         value: object,
         record: JsonDict,
     ) -> object:
+        from bioetl.domain.normalization.profiles.profile_normalizers import (
+            normalize_profile_passthrough,
+        )
+
         if rule.normalizer is normalize_profile_passthrough:
             return value
         normalized = rule.apply(value, record=record)
@@ -268,6 +262,10 @@ class RecordNormalizationProcessor(RecordNormalizationHashSupportMixin):
         normalized = dict(record)
         for field_name in tuple(normalized.keys()):
             rule = self._profile_rule(field_name)
+            from bioetl.domain.normalization.profiles.base import (
+                _normalizer_accepts_record_context as _profile_rule_accepts_record_context,
+            )
+
             if rule is None or not _profile_rule_accepts_record_context(
                 rule.normalizer
             ):
@@ -294,6 +292,10 @@ class RecordNormalizationProcessor(RecordNormalizationHashSupportMixin):
         return canonicalize_json_like_string(value)
 
     def _normalize_smiles_field(self, field_name: str, value: object) -> str | None:
+        from bioetl.domain.normalization.profiles.profile_normalizers import (
+            normalize_profile_smiles,
+        )
+
         return normalize_profile_smiles(
             value,
             is_canonical=(field_name == "canonical_smiles"),

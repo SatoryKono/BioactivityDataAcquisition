@@ -5,8 +5,6 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Any, Protocol
 
-import pandera as pandera_pa
-
 from bioetl.domain.medallion import GoldWriteMode
 
 if TYPE_CHECKING:
@@ -88,12 +86,13 @@ class GoldWriterValidationMixin:
     ) -> None:
         """Validate records against Pandera schema."""
         import pandas as pd
+        import pandera.errors
 
         df = pd.DataFrame(records)
         try:
             schema_any: Any = schema  # Any: Pandera model class
             await self._run_in_executor(lambda: schema_any.validate(df, lazy=False))
-        except pandera_pa.errors.SchemaError as exc:
+        except pandera.errors.SchemaError as exc:
             raise ValueError(f"Schema validation failed: {exc}") from exc
 
 
