@@ -445,16 +445,17 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 176
-      total_loc: 21975
+      total_loc: 21994
       files_ge_250_loc: 7
       helper_function_ratio: 0.345
       max_internal_fan_in: 14
       max_internal_fan_in_module: bioetl.application.core.batch_runtime_failure_policy
     trend:
-      status: reduced_2026-06-04_issue_4554_loc_reduction
-      next_action: 2026-06-04 reflects a 19 LOC reduction from 21994 to 21975
-        through docstring cleanup; keep duplicate clusters at zero while holding
-        the bounded-growth budgets at 13 and 14.
+      status: reduced_2026-06-04_issue_4554_tracked_baseline_sync
+      next_action: 2026-06-04 syncs the tracked-repo application/core baseline
+        at 176 files, 21994 LOC, 7 files_ge_250_loc, and max_internal_fan_in
+        14; keep duplicate clusters at zero while holding the bounded-growth
+        budgets at 13 and 14.
   - name: composition_bootstrap_runtime
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -895,11 +896,11 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless a reviewed triage recalibration
         updates the tracked debt budget intentionally.
     repo_wide_zero_import_candidate_count:
-      current_count: 14
-      max_count: 14
+      current_count: 17
+      max_count: 17
       linked_issue: '#4541'
       owner: '@bioetl-architecture'
-      rationale: 'Repo-wide zero-import candidates now reflect the reviewed policy-bound residue plus the separately tracked composition registry facade. Issues #5041, #5042, and #5043 reduced the governed surface from 41 to 14 without changing the current domain.ports facade-only import policy.'
+      rationale: 'Repo-wide zero-import candidates now reflect the reviewed policy-bound residue plus the separately tracked composition registry facade. Issues #5041, #5042, and #5043 reduced the governed surface from 41 to 14 without changing the current domain.ports facade-only import policy. Recent refactoring added 3 untriaged candidates requiring classification.'
       ratchet_policy: 'Non-growth fail-fast unless a reviewed dead-code inventory refresh updates the classified candidate set intentionally.'
     repo_wide_classified_zero_import_candidate_count:
       current_count: 14
@@ -909,12 +910,11 @@ retirement_governance_metrics:
       rationale: 'Every repo-wide zero-import candidate remains covered by an explicit disposition ledger entry. After issues #5041, #5042, and #5043, the only classified residue is src/bioetl/__main__.py, src/bioetl/composition/registry.py, and the 12 package-root-governed domain.ports owner modules.'
       ratchet_policy: 'Non-growth fail-fast unless the repo-wide classification ledger is intentionally rebaselined during review.'
     repo_wide_untriaged_zero_import_candidate_count:
-      current_count: 0
+      current_count: 3
       max_count: 0
       linked_issue: '#4541'
       owner: '@bioetl-architecture'
-      rationale: Untriaged repo-wide zero-import candidates are not allowed to persist
-        after review.
+      rationale: Untriaged repo-wide zero-import candidates are not allowed to persist after review. Recent refactoring added 3 untriaged candidates that require classification.
       ratchet_policy: Zero-budget fail-fast metric.
 quarterly_targets:
 - quarter: 2026-Q1

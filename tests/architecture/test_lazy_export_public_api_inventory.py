@@ -47,6 +47,7 @@ EXPECTED_LAZY_EXPORT_FACADES = {
     "src/bioetl/infrastructure/control_plane/__init__.py": "public_package_facade",
     "src/bioetl/infrastructure/export/__init__.py": "public_package_facade",
     "src/bioetl/infrastructure/observability/__init__.py": "public_package_facade",
+    "src/bioetl/infrastructure/storage/support/atomic_ops.py": "compatibility_facade",
     "src/bioetl/interfaces/cli/commands/__init__.py": "public_package_facade",
     "src/bioetl/interfaces/cli/commands/domains/composite/__init__.py": (
         "public_package_facade"

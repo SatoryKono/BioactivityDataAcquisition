@@ -26,8 +26,8 @@ def test_legacy_wiring_api_facades_stay_removed(module_name: str) -> None:
 
 def test_canonical_wiring_owner_modules_remain_importable() -> None:
     """The split owner modules remain the supported first-party import paths."""
+    from bioetl.application.core.wiring.factory import PipelineRunner
     from bioetl.application.core.wiring.registry import ActivityTransformer
-    from bioetl.application.core.wiring.runtime import PipelineRunner
     from bioetl.application.core.wiring.transformer import BaseTransformer
 
     assert isinstance(ActivityTransformer, type)
