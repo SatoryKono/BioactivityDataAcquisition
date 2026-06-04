@@ -10,51 +10,33 @@ import pytest
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    ("compat_module_name", "target_module_name", "export_name"),
+    ("removed_module_name", "canonical_module_name"),
     (
+        (
+            "bioetl.application.core.batch_execution_lifecycle",
+            "bioetl.application.core.batch_execution.lifecycle",
+        ),
         (
             "bioetl.application.core.batch_execution_run_service",
             "bioetl.application.core.batch_execution.run_service",
-            "BatchExecutionRunService",
         ),
         (
             "bioetl.application.core.batch_execution_state_service",
             "bioetl.application.core.batch_execution.state_service",
-            "BatchExecutionStateService",
         ),
     ),
 )
-def test_batch_execution_service_shims_reexport_canonical_types(
-    compat_module_name: str,
-    target_module_name: str,
-    export_name: str,
+def test_batch_execution_flat_facades_stay_removed(
+    removed_module_name: str,
+    canonical_module_name: str,
 ) -> None:
-    """Thin public shims should expose the canonical batch-execution services."""
-    sys.modules.pop(compat_module_name, None)
+    """Batch-execution callers must use the canonical package modules."""
+    sys.modules.pop(removed_module_name, None)
 
-    compat_module = importlib.import_module(compat_module_name)
-    target_module = importlib.import_module(target_module_name)
+    with pytest.raises(ModuleNotFoundError):
+        importlib.import_module(removed_module_name)
 
-    assert getattr(compat_module, export_name) is getattr(target_module, export_name)
-
-
-@pytest.mark.unit
-def test_batch_execution_lifecycle_shim_reexports_canonical_surface() -> None:
-    """Lifecycle shim should mirror the canonical lifecycle module surface."""
-    sys.modules.pop("bioetl.application.core.batch_execution_lifecycle", None)
-
-    compat_module = importlib.import_module(
-        "bioetl.application.core.batch_execution_lifecycle"
-    )
-    target_module = importlib.import_module(
-        "bioetl.application.core.batch_execution.lifecycle"
-    )
-
-    assert compat_module.__all__ == target_module.__all__
-    for export_name in target_module.__all__:
-        assert getattr(compat_module, export_name) is getattr(
-            target_module, export_name
-        )
+    assert importlib.import_module(canonical_module_name)
 
 
 @pytest.mark.unit

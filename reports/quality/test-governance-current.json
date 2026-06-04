@@ -1,5 +1,12 @@
 {
-  "budget_violations": [],
+  "budget_violations": [
+    {
+      "actual": 3,
+      "budget": "markerless_test_functions_max",
+      "expected_max": 0,
+      "metric": "markerless_test_functions"
+    }
+  ],
   "report": {
     "assertless_candidates": [
       {
@@ -3604,13 +3611,13 @@
     },
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
-    "markerless_test_functions": 0,
+    "markerless_test_functions": 3,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "root": ".",
     "top_duplicate_test_names": [],
     "total_test_files": 1674,
-    "total_test_functions": 20017,
+    "total_test_functions": 20020,
     "uuid4_call_sites": 0
   }
 }

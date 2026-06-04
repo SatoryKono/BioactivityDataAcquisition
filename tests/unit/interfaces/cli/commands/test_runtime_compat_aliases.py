@@ -30,11 +30,6 @@ CLI_INTERNAL_WRAPPER_CASES = (
         ("quarantine", "get_quarantine_runtime_service", "get_quarantine_service"),
     ),
     (
-        "bioetl.interfaces.cli.commands.domains.run_all.command",
-        "bioetl.interfaces.cli.commands.run_all",
-        ("run_all", "get_pipeline_runner_service"),
-    ),
-    (
         "bioetl.interfaces.cli.commands.domains.composite.command",
         "bioetl.interfaces.cli.commands.run_composite",
         ("run_composite", "load_composite_config", "bootstrap_composite_runner"),

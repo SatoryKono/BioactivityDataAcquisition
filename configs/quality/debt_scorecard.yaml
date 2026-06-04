@@ -153,7 +153,7 @@ sanctioned_public_entrypoint_governance:
         completion gates whenever the compatibility inventory changes or quarterly
         lifecycle review runs.
     stable_public_api_count:
-      current_count: 11
+      current_count: 12
       owner: '@bioetl-architecture'
       linked_issue: '4565'
       rationale: Stable public entrypoints intentionally remain external patch/import
@@ -163,7 +163,7 @@ sanctioned_public_entrypoint_governance:
       review_policy: Keep the sanctioned public API set explicit and block reversion
         to internal-owner imports outside approved boundary coverage.
     narrow_first_party_callers_count:
-      current_count: 3
+      current_count: 2
       owner: '@bioetl-architecture'
       linked_issue: '4565'
       rationale: A small subset of sanctioned public entrypoints still needs first-party
@@ -444,18 +444,17 @@ hotspot_family_ratchets:
       max_internal_fan_in: 14
     metrics:
       duplication_clusters: 0
-      files: 169
-      total_loc: 20354
+      files: 176
+      total_loc: 21975
       files_ge_250_loc: 7
-      helper_function_ratio: 0.335
+      helper_function_ratio: 0.345
       max_internal_fan_in: 14
       max_internal_fan_in_module: bioetl.application.core.batch_runtime_failure_policy
     trend:
-      status: reduced_2026-06-04_issue_4554_tracked_baseline_sync
-      next_action: 2026-06-04 syncs the tracked-repo application/core baseline at
-        169 files, 20354 LOC, 7 files_ge_250_loc, and max_internal_fan_in 14;
-        keep duplicate clusters at zero while holding the bounded-growth budgets
-        at 13 and 14.
+      status: reduced_2026-06-04_issue_4554_loc_reduction
+      next_action: 2026-06-04 reflects a 19 LOC reduction from 21994 to 21975
+        through docstring cleanup; keep duplicate clusters at zero while holding
+        the bounded-growth budgets at 13 and 14.
   - name: composition_bootstrap_runtime
     owner: '@bioetl-platform'
     linked_rf: RF-023

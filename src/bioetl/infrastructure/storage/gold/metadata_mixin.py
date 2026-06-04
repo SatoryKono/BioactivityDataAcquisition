@@ -7,25 +7,15 @@ from datetime import datetime
 from types import ModuleType
 from typing import TYPE_CHECKING
 
-from bioetl.domain.medallion import GoldWriteMode
-from bioetl.domain.ports.noop import NoOpMetadataWriter
-from bioetl.domain.types import RunID
 from bioetl.infrastructure.storage.gold.metadata_audit import (
     _build_gold_audit_entry,
     _GoldAuditWriteRequest,
-)
-from bioetl.infrastructure.storage.gold.metadata_operations import (
-    _extract_delta_table_version,
-    _GoldMergedMetadataWriteRequest,
-    _GoldMetadataWriteRequest,
-    _maybe_prepare_gold_merged_metadata_write,
-    _persist_gold_metadata_write,
-    _prepare_gold_metadata_write,
 )
 
 if TYPE_CHECKING:
     from pandera.polars import DataFrameSchema
 
+    from bioetl.domain.medallion import GoldWriteMode
     from bioetl.domain.models.metadata import GoldMetadata
     from bioetl.domain.ports import (
         AuditPort,
@@ -35,7 +25,7 @@ if TYPE_CHECKING:
         MetadataWriterPort,
         MetricsPort,
     )
-    from bioetl.domain.types import GoldRecord, ScdConfig
+    from bioetl.domain.types import GoldRecord, RunID, ScdConfig
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 
@@ -84,6 +74,10 @@ class GoldWriterMetadataMixin:
         await self._audit.log_write(audit_entry)
 
     async def _get_delta_version(self, table_path: str) -> int | None:
+        from bioetl.infrastructure.storage.gold.metadata_operations import (
+            _extract_delta_table_version,
+        )
+
         module = self._load_gold_writer_module()
 
         try:
@@ -104,6 +98,13 @@ class GoldWriterMetadataMixin:
         silver_refs: list[SilverWriteResult] | None = None,
         gold_schema: object | None = None,
     ) -> None:
+        from bioetl.domain.ports.noop import NoOpMetadataWriter
+        from bioetl.infrastructure.storage.gold.metadata_operations import (
+            _GoldMetadataWriteRequest,
+            _persist_gold_metadata_write,
+            _prepare_gold_metadata_write,
+        )
+
         if not records:
             return
         if isinstance(self._metadata_writer, NoOpMetadataWriter):
@@ -151,6 +152,13 @@ class GoldWriterMetadataMixin:
         run_id: RunID | None = None,
         schema: DataFrameSchema | None = None,
     ) -> None:
+        from bioetl.domain.ports.noop import NoOpMetadataWriter
+        from bioetl.infrastructure.storage.gold.metadata_operations import (
+            _GoldMergedMetadataWriteRequest,
+            _maybe_prepare_gold_merged_metadata_write,
+            _persist_gold_metadata_write,
+        )
+
         if isinstance(self._metadata_writer, NoOpMetadataWriter):
             return
         prepared = _maybe_prepare_gold_merged_metadata_write(

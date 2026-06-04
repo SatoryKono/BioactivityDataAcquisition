@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from uuid import UUID
 
 import pytest
@@ -11,6 +11,16 @@ from bioetl.application.services.control_plane import (
     WorkflowExecutionService,
     WorkflowLedgerService,
     WorkflowManifestService,
+)
+from bioetl.application.services.control_plane.workflow.execution_preparation_incremental import (
+    _offset_from_successful_state,
+)
+from bioetl.application.services.control_plane.workflow.execution_recording_payloads import (
+    _build_result_summary,
+    _resolve_result_fingerprint,
+)
+from bioetl.application.services.control_plane.workflow.execution_recording_state import (
+    _apply_completed_step_state,
 )
 from bioetl.application.services.workflow_runner_service import (
     WorkflowRunExecutionResult,
@@ -247,6 +257,99 @@ def _build_transform_config() -> WorkflowConfig:
             ),
         ),
     )
+
+
+def test_workflow_recording_payload_helpers_extract_fingerprint_and_counts() -> None:
+    step_result = WorkflowStepExecutionResult(
+        step_id="chembl_activity_ingest",
+        step_kind="pipeline",
+        status="success",
+        payload={"fingerprint": "fp-activity"},
+    )
+    run_result = WorkflowRunExecutionResult(
+        workflow_name="chembl_core",
+        status="failed",
+        steps=(
+            step_result,
+            WorkflowStepExecutionResult(
+                step_id="chembl_assay_ingest",
+                step_kind="pipeline",
+                status="failed",
+            ),
+            WorkflowStepExecutionResult(
+                step_id="chembl_target_ingest",
+                step_kind="pipeline",
+                status="skipped",
+            ),
+        ),
+    )
+
+    assert _resolve_result_fingerprint(step_result) == "fp-activity"
+    assert _build_result_summary(run_result) == {
+        "status": "failed",
+        "step_counts": {"success": 1, "failed": 1, "skipped": 1},
+    }
+
+
+def test_workflow_recording_state_helper_tracks_transform_repair_closure() -> None:
+    state = WorkflowExecutionState(
+        workflow_run_id=RunID(UUID("00000000-0000-0000-0000-000000000515")),
+        manifest_id="workflow-manifest-recording-helper",
+        workflow_name="chembl_repair",
+        execution_fingerprint="fingerprint-recording-helper",
+        status="running",
+        started_at=FIXED_TEST_TIME,
+        updated_at=FIXED_TEST_TIME,
+        completed_at=None,
+        selected_step_ids=("reconcile_assay_target_orphans",),
+        steps=(),
+        completed_transform_fingerprints={},
+        repair_required=True,
+        repair_hint="needs repair",
+        ambiguous_step_ids=("reconcile_assay_target_orphans", "other_step"),
+    )
+    result = WorkflowStepExecutionResult(
+        step_id="reconcile_assay_target_orphans",
+        step_kind="transform",
+        status="success",
+    )
+
+    updated = _apply_completed_step_state(
+        state,
+        result=result,
+        fingerprint="fp-transform",
+        updated_at=FIXED_TEST_TIME,
+        last_event_id="workflow-entry-helper",
+    )
+
+    assert updated.completed_transform_fingerprints == {
+        "reconcile_assay_target_orphans": "fp-transform"
+    }
+    assert updated.ambiguous_step_ids == ("other_step",)
+    assert updated.repair_required is True
+    assert updated.last_event_id == "workflow-entry-helper"
+
+
+def test_workflow_preparation_incremental_offset_uses_successful_state_only() -> None:
+    state = WorkflowExecutionState(
+        workflow_run_id=RunID(UUID("00000000-0000-0000-0000-000000000516")),
+        manifest_id="workflow-manifest-preparation-helper",
+        workflow_name="chembl_core",
+        execution_fingerprint="fingerprint-preparation-helper",
+        status="success",
+        started_at=FIXED_TEST_TIME,
+        updated_at=FIXED_TEST_TIME,
+        completed_at=FIXED_TEST_TIME,
+        selected_step_ids=("chembl_activity_ingest",),
+        steps=(),
+        completed_transform_fingerprints={},
+        last_start_offset=None,
+        last_limit=100,
+    )
+
+    assert _offset_from_successful_state(state) == 100
+    assert _offset_from_successful_state(replace(state, status="failed")) is None
+    assert _offset_from_successful_state(replace(state, last_limit=None)) is None
 
 
 @pytest.mark.asyncio

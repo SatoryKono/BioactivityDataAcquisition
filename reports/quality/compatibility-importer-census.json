@@ -1,5 +1,5 @@
 {
-  "snapshot_date": "2026-06-03",
+  "snapshot_date": "2026-06-04",
   "inventory_source": "configs/quality/compatibility_facade_inventory.yaml",
   "twin_ratchet_source": "configs/quality/compatibility_twin_module_ratchet.yaml",
   "config_root_facade_source": "configs/quality/infrastructure_config_root_facade_inventory.yaml",
@@ -40,9 +40,7 @@
       "status": "public-entrypoint",
       "canonical_target": "bioetl.interfaces.cli.commands.run_all",
       "owner": "bioetl.interfaces.cli.commands",
-      "src_importers": [
-        "src/bioetl/interfaces/cli/commands/domains/run_all/command.py"
-      ],
+      "src_importers": [],
       "test_importers": [
         "tests/integration/interfaces/test_cli_exit_code_matrix.py",
         "tests/unit/interfaces/cli/commands/test_run_all_command_policy.py",
@@ -50,7 +48,7 @@
         "tests/unit/interfaces/cli/test_cli_run_commands.py",
         "tests/unit/interfaces/cli/test_run_all_service_mock.py"
       ],
-      "src_importer_count": 1,
+      "src_importer_count": 0,
       "test_importer_count": 5
     },
     {
@@ -814,23 +812,23 @@
       "public_path": "src/bioetl/composition/lazy_exports.py",
       "private_module": "bioetl.composition._lazy_exports",
       "public_module": "bioetl.composition.lazy_exports",
-      "public_src_importer_count": 1,
+      "public_src_importer_count": 9,
       "public_test_importer_count": 0,
-      "private_src_importer_count": 9,
+      "private_src_importer_count": 1,
       "private_test_importer_count": 1,
       "public_src_importers": [
-        "src/bioetl/composition/bootstrap/__init__.py"
-      ],
-      "private_src_importers": [
+        "src/bioetl/composition/bootstrap/__init__.py",
         "src/bioetl/composition/control_plane_api.py",
         "src/bioetl/composition/entrypoints.py",
         "src/bioetl/composition/execution_api.py",
         "src/bioetl/composition/health_api.py",
-        "src/bioetl/composition/lazy_exports.py",
         "src/bioetl/composition/maintenance_api.py",
         "src/bioetl/composition/registry_api.py",
         "src/bioetl/composition/resources_api.py",
         "src/bioetl/composition/services_api.py"
+      ],
+      "private_src_importers": [
+        "src/bioetl/composition/lazy_exports.py"
       ]
     }
   ],

@@ -5,8 +5,6 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any, Protocol
 
-from pandera.polars import DataFrameSchema
-
 from bioetl.domain.types import GoldRecord, ScdConfig
 
 __all__ = [
@@ -44,7 +42,7 @@ class _GoldWriterHost(Protocol):
         table_name: str,
         records: list[GoldRecord],
         mode: str,
-        schema: DataFrameSchema,
+        schema: object,
         scd_config: ScdConfig | None,
         ingestion_ts: datetime | None,
     ) -> object: ...

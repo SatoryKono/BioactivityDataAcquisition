@@ -397,7 +397,7 @@ class TestRunAllCommand:
         """Test --dry-run mode shows preview."""
         with (
             patch(
-                "bioetl.interfaces.cli.commands.run_all.asyncio.run",
+                "bioetl.interfaces.cli.commands.domains.run_all.public_runtime.asyncio.run",
                 return_value=BatchRunResult(total=2, succeeded=0, failed=0, skipped=2),
             ),
             patch(
@@ -416,7 +416,7 @@ class TestRunAllCommand:
         """Test successful run-all execution."""
         with (
             patch(
-                "bioetl.interfaces.cli.commands.run_all.asyncio.run",
+                "bioetl.interfaces.cli.commands.domains.run_all.public_runtime.asyncio.run",
                 return_value=BatchRunResult(total=2, succeeded=2, failed=0, skipped=0),
             ) as mock_asyncio_run,
             patch(
@@ -433,7 +433,7 @@ class TestRunAllCommand:
         """Test run-all with --limit option."""
         with (
             patch(
-                "bioetl.interfaces.cli.commands.run_all.asyncio.run",
+                "bioetl.interfaces.cli.commands.domains.run_all.public_runtime.asyncio.run",
                 return_value=BatchRunResult(total=2, succeeded=2, failed=0, skipped=0),
             ) as mock_asyncio_run,
             patch(
@@ -452,7 +452,7 @@ class TestRunAllCommand:
         """Test run-all with some failures."""
         with (
             patch(
-                "bioetl.interfaces.cli.commands.run_all.asyncio.run",
+                "bioetl.interfaces.cli.commands.domains.run_all.public_runtime.asyncio.run",
                 return_value=BatchRunResult(
                     total=2,
                     succeeded=1,
@@ -475,7 +475,7 @@ class TestRunAllCommand:
         """Test run-all handles KeyboardInterrupt."""
         with (
             patch(
-                "bioetl.interfaces.cli.commands.run_all.asyncio.run",
+                "bioetl.interfaces.cli.commands.domains.run_all.public_runtime.asyncio.run",
                 side_effect=KeyboardInterrupt(),
             ),
             patch(
@@ -1311,7 +1311,7 @@ class TestRunAllCommandExceptions:
         """Test run-all handles unexpected exceptions during batch execution."""
         with (
             patch(
-                "bioetl.interfaces.cli.commands.run_all.asyncio.run",
+                "bioetl.interfaces.cli.commands.domains.run_all.public_runtime.asyncio.run",
                 side_effect=RuntimeError("Unexpected batch error"),
             ),
             patch(
@@ -1328,7 +1328,7 @@ class TestRunAllCommandExceptions:
         """Test run-all with --debug flag."""
         with (
             patch(
-                "bioetl.interfaces.cli.commands.run_all.asyncio.run",
+                "bioetl.interfaces.cli.commands.domains.run_all.public_runtime.asyncio.run",
                 return_value=BatchRunResult(total=2, succeeded=2, failed=0, skipped=0),
             ) as mock_asyncio_run,
             patch(

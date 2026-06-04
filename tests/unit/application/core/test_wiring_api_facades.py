@@ -1,47 +1,35 @@
-"""Unit tests for wiring API facade modules.
-
-These are legacy flat facades for composition-owned modules.
-Tests verify that imports work correctly.
-"""
+"""Unit tests for retired application/core wiring API facades."""
 
 from __future__ import annotations
 
+import importlib
+
 import pytest
-
-
-class TestPipelineRegistryWiringApi:
-    """Tests for pipeline_registry_wiring_api facade."""
-
-    def test_pipeline_registry_wiring_api_imports(self):
-        """Test that pipeline_registry_wiring_api imports successfully."""
-        # This test verifies that the facade can import from wiring.registry
-        # If the import fails, the test will raise an ImportError
-        from bioetl.application.core.pipeline_registry_wiring_api import (  # noqa: F401
-            ActivityTransformer,
-        )
-
-        # Verify that the imported class is a class
-        assert isinstance(ActivityTransformer, type)
-
-
-class TestTransformerWiringApi:
-    """Tests for transformer_wiring_api facade."""
-
-    def test_transformer_wiring_api_imports(self):
-        """Test that transformer_wiring_api imports successfully."""
-        # This test verifies that the facade can import from wiring.transformer
-        # If the import fails, the test will raise an ImportError
-        from bioetl.application.core.transformer_wiring_api import (  # noqa: F401
-            BaseTransformer,
-        )
-
-        # Verify that the imported class is a class
-        assert isinstance(BaseTransformer, type)
 
 
 pytestmark = pytest.mark.unit
 
 
-# Import modules to ensure they're covered
-from bioetl.application.core import pipeline_registry_wiring_api  # noqa: F401
-from bioetl.application.core import transformer_wiring_api  # noqa: F401
+@pytest.mark.parametrize(
+    "module_name",
+    [
+        "bioetl.application.core.pipeline_registry_wiring_api",
+        "bioetl.application.core.runtime_wiring_api",
+        "bioetl.application.core.transformer_wiring_api",
+    ],
+)
+def test_legacy_wiring_api_facades_stay_removed(module_name: str) -> None:
+    """Legacy flat wiring facades must not be reintroduced."""
+    with pytest.raises(ModuleNotFoundError):
+        importlib.import_module(module_name)
+
+
+def test_canonical_wiring_owner_modules_remain_importable() -> None:
+    """The split owner modules remain the supported first-party import paths."""
+    from bioetl.application.core.wiring.registry import ActivityTransformer
+    from bioetl.application.core.wiring.runtime import PipelineRunner
+    from bioetl.application.core.wiring.transformer import BaseTransformer
+
+    assert isinstance(ActivityTransformer, type)
+    assert isinstance(PipelineRunner, type)
+    assert isinstance(BaseTransformer, type)

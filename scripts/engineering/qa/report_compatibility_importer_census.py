@@ -247,8 +247,23 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--repo-root", default=str(PROJECT_ROOT))
     parser.add_argument("--json-out", default=str(DEFAULT_JSON_OUTPUT))
     parser.add_argument("--md-out", default=str(DEFAULT_MD_OUTPUT))
-    parser.add_argument("--snapshot-date", default=date.today().isoformat())
+    parser.add_argument("--snapshot-date", default=None)
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Fail when committed compatibility census artifacts drift.",
+    )
     return parser.parse_args()
+
+
+def _existing_snapshot_date(path: Path) -> str | None:
+    if not path.exists():
+        return None
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        return None
+    snapshot_date = payload.get("snapshot_date")
+    return snapshot_date if isinstance(snapshot_date, str) else None
 
 
 def _load_retained_entrypoints(path: Path) -> list[dict[str, Any]]:
@@ -453,8 +468,8 @@ def build_compatibility_importer_census(
     repo_root: Path, *, snapshot_date: str | None = None
 ) -> dict[str, object]:
     from scripts.engineering.qa.import_graph_inventory import (
-        collect_exact_module_import_usage,
         collect_bioetl_importers,
+        collect_exact_module_import_usage,
         find_public_private_twin_modules,
     )
 
@@ -654,16 +669,20 @@ def _render_markdown(payload: dict[str, object]) -> str:
         f"- snapshot_date: {payload['snapshot_date']}",
         f"- retained_entrypoint_count: {summary['retained_entrypoint_count']}",
         f"- removed_compatibility_surface_count: {summary['removed_compatibility_surface_count']}",
-        f"- removed_compatibility_surfaces_with_src_importers: {summary['removed_compatibility_surfaces_with_src_importers']}",
-        f"- removed_compatibility_surfaces_with_test_importers: {summary['removed_compatibility_surfaces_with_test_importers']}",
+        "- removed_compatibility_surfaces_with_src_importers: "
+        f"{summary['removed_compatibility_surfaces_with_src_importers']}",
+        "- removed_compatibility_surfaces_with_test_importers: "
+        f"{summary['removed_compatibility_surfaces_with_test_importers']}",
         f"- removed_compatibility_surfaces_still_present: {summary['removed_compatibility_surfaces_still_present']}",
         f"- twin_pair_count: {summary['twin_pair_count']}",
         f"- tracked_twin_family_count: {summary['tracked_twin_family_count']}",
         f"- config_root_symbol_count: {summary['config_root_symbol_count']}",
         f"- config_root_src_importer_count: {summary['config_root_src_importer_count']}",
         f"- retained_public_export_facade_count: {summary['retained_public_export_facade_count']}",
-        f"- retained_public_export_facades_with_duplicate_exports: {summary['retained_public_export_facades_with_duplicate_exports']}",
-        f"- retained_public_export_facades_with_resolution_conflicts: {summary['retained_public_export_facades_with_resolution_conflicts']}",
+        "- retained_public_export_facades_with_duplicate_exports: "
+        f"{summary['retained_public_export_facades_with_duplicate_exports']}",
+        "- retained_public_export_facades_with_resolution_conflicts: "
+        f"{summary['retained_public_export_facades_with_resolution_conflicts']}",
         "- purpose: measure sanctioned public seams and underscore/public twin usage",
         "",
         "## Retained Entrypoints",
@@ -743,7 +762,8 @@ def _render_markdown(payload: dict[str, object]) -> str:
             "",
             f"- inventory_source: `{payload['twin_ratchet_source']}`",
             "",
-            "| Family | Canonical first-party module | Current public src | Current private src | Max public src | Max private src |",
+            "| Family | Canonical first-party module | Current public src | "
+            "Current private src | Max public src | Max private src |",
             "| --- | --- | ---: | ---: | ---: | ---: |",
         ]
     )
@@ -787,15 +807,46 @@ def _render_markdown(payload: dict[str, object]) -> str:
 def main() -> int:
     args = _parse_args()
     repo_root = Path(args.repo_root).resolve()
+    snapshot_date = args.snapshot_date
     payload = build_compatibility_importer_census(
-        repo_root, snapshot_date=str(args.snapshot_date)
+        repo_root,
+        snapshot_date=snapshot_date
+        or (_existing_snapshot_date(Path(args.json_out)) if args.check else None)
+        or date.today().isoformat(),
     )
     json_out = Path(args.json_out)
     md_out = Path(args.md_out)
+    rendered_json = json.dumps(payload, indent=2) + "\n"
+    rendered_markdown = _render_markdown(payload)
+    if args.check:
+        if not json_out.exists():
+            print(f"[compatibility-importer-census] missing JSON artifact: {json_out}")
+            return 1
+        if not md_out.exists():
+            print(
+                "[compatibility-importer-census] missing Markdown artifact: "
+                f"{md_out}"
+            )
+            return 1
+        if json_out.read_text(encoding="utf-8") != rendered_json:
+            print(
+                "[compatibility-importer-census] FAIL: JSON artifact drifted: "
+                f"{json_out}"
+            )
+            return 1
+        if md_out.read_text(encoding="utf-8") != rendered_markdown:
+            print(
+                "[compatibility-importer-census] FAIL: Markdown artifact drifted: "
+                f"{md_out}"
+            )
+            return 1
+        print("[compatibility-importer-census] PASS: artifacts are up to date")
+        return 0
+
     json_out.parent.mkdir(parents=True, exist_ok=True)
     md_out.parent.mkdir(parents=True, exist_ok=True)
-    json_out.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-    md_out.write_text(_render_markdown(payload), encoding="utf-8")
+    json_out.write_text(rendered_json, encoding="utf-8")
+    md_out.write_text(rendered_markdown, encoding="utf-8")
     print(
         "[compatibility-importer-census] "
         f"retained_entrypoints={payload['summary']['retained_entrypoint_count']}; "

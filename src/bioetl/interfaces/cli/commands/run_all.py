@@ -1,33 +1,16 @@
-"""Run-all CLI command."""
+"""Run-all CLI public command seam."""
 
 from __future__ import annotations
 
 import asyncio
 from collections.abc import Mapping
 from dataclasses import replace
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 import click
 
 import bioetl.interfaces.cli.commands.domains.run_all.support as run_all_support
 from bioetl.application.services.execution.pipeline_runner_models import RunOptions
-from bioetl.interfaces.cli.commands.domains.health.metrics_server_integration import (
-    ensure_metrics_server_started,
-)
-from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
-    build_observability_backend_required_probe_paths,
-    ensure_observability_backend_started,
-    should_disable_transient_health_server,
-)
-from bioetl.interfaces.cli.commands.domains.health.server_integration import (
-    DEFAULT_HEALTH_SERVER_PORT,
-    echo_health_server_info,
-    health_server_context,
-)
-from bioetl.interfaces.cli.commands.domains.run.support import (
-    build_cli_registry,
-    resolve_context_registry,
-)
 from bioetl.interfaces.cli.commands.domains.run_all.command_entrypoint import (
     build_run_all_click_command,
 )
@@ -35,35 +18,44 @@ from bioetl.interfaces.cli.commands.domains.run_all.command_policy import (
     RunAllCommandInput,
     build_run_all_command_input,
     exit_with_code,
-    handle_run_all_cli_failure,
     run_all_command_flow,
 )
-from bioetl.interfaces.cli.commands.domains.run_all.execution import (
-    RunAllBatchExecutionRequest,
-    RunAllPolicyRequest,
+from bioetl.interfaces.cli.commands.domains.run_all.public_runtime import (
+    RunAllBatchRuntime,
+    RunAllCallbackRuntime,
+    RunAllPolicyRuntime,
+    RunAllPresentationRuntime,
+    default_batch_runtime,
+    echo_batch_summary_with_runtime,
+    handle_destructive_confirmation_with_runtime,
+    load_pipeline_runner_service,
+    run_all_pipelines_async_with_runtime,
+    run_batch_with_policy_runtime,
 )
-from bioetl.interfaces.cli.commands.domains.run_all.execution import (
-    run_all_pipelines_async as _run_all_pipelines_async_impl,
+from bioetl.interfaces.cli.commands.domains.run_all.public_runtime import (
+    build_run_all_command_input_from_options as _build_input_from_options_impl,
 )
-from bioetl.interfaces.cli.commands.domains.run_all.execution import (
-    run_batch_with_policy as _run_batch_with_policy_impl,
+from bioetl.interfaces.cli.commands.domains.run_all.runtime_boundaries import (
+    DEFAULT_HEALTH_SERVER_PORT,
+    build_cli_registry,
+    build_observability_backend_required_probe_paths,
+    echo_error,
+    echo_health_server_info,
+    echo_info,
+    ensure_metrics_server_started,
+    ensure_observability_backend_started,
+    health_server_context,
+    resolve_context_registry,
+    should_disable_transient_health_server,
 )
 from bioetl.interfaces.cli.commands.domains.run_all.support import (
     BatchRunResult,
     emit_run_all_listing,
     emit_run_all_preview,
-    should_prompt_for_destructive_run,
-)
-from bioetl.interfaces.cli.commands.domains.run_all.support import (
-    echo_batch_summary as _echo_batch_summary_impl,
-)
-from bioetl.interfaces.cli.commands.domains.run_all.support import (
-    handle_destructive_confirmation as _handle_destructive_confirmation_impl,
 )
 from bioetl.interfaces.cli.commands.domains.shared.callback_dispatch import (
     dispatch_cli_callback,
 )
-from bioetl.interfaces.cli.formatters import echo_error, echo_info
 
 if TYPE_CHECKING:
     from bioetl.application.services.execution.pipeline_runner_service import (
@@ -76,9 +68,29 @@ def get_pipeline_runner_service(
     registry: PipelineRegistry | None = None,
 ) -> PipelineRunnerService:
     """Load the pipeline runner service through composition on demand."""
-    from bioetl.composition.execution_api import get_pipeline_runner_service as _impl
+    return load_pipeline_runner_service(registry=registry)
 
-    return _impl(registry=registry)
+
+def _batch_runtime() -> RunAllBatchRuntime:
+    """Build batch runtime from public patchable seams."""
+    return replace(
+        default_batch_runtime(
+            ensure_metrics_server_started=ensure_metrics_server_started,
+            get_pipeline_runner_service=get_pipeline_runner_service,
+            health_server_context_factory=health_server_context,
+        ),
+        run_coro=asyncio.run,
+    )
+
+
+def _presentation_runtime() -> RunAllPresentationRuntime:
+    """Build presentation runtime from public patchable seams."""
+    return RunAllPresentationRuntime(
+        confirm=click.confirm,
+        error_printer=echo_error,
+        exit_func=exit_with_code,
+        info_printer=echo_info,
+    )
 
 
 async def _run_all_pipelines_async(
@@ -88,77 +100,36 @@ async def _run_all_pipelines_async(
     health_port: int = DEFAULT_HEALTH_SERVER_PORT,
     registry: PipelineRegistry | None = None,
 ) -> BatchRunResult:
-    """Run all pipelines sequentially with optional health server.
-
-    Args:
-        pipelines: Ordered list of pipeline names to run sequentially.
-        options: RunOptions controlling run type, limits, and filter settings.
-        health_server_enabled: When True, starts the HTTP health server before
-            pipeline execution. Defaults to True.
-        health_port: TCP port the health server listens on. Defaults to
-            DEFAULT_HEALTH_SERVER_PORT.
-
-    Returns:
-        BatchRunResult aggregating results from all pipeline runs.
-    """
-    return await _run_all_pipelines_async_impl(
-        RunAllBatchExecutionRequest(
-            pipelines=pipelines,
-            options=options,
-            health_server_enabled=health_server_enabled,
-            health_port=health_port,
-            registry=registry,
-        ),
-        get_pipeline_runner_service_fn=get_pipeline_runner_service,
-        ensure_metrics_server_started_fn=ensure_metrics_server_started,
-        health_server_context_factory=health_server_context,
+    """Run all pipelines sequentially with optional health server."""
+    return await run_all_pipelines_async_with_runtime(
+        pipelines,
+        options,
+        health_server_enabled=health_server_enabled,
+        health_port=health_port,
+        registry=registry,
+        runtime=_batch_runtime(),
     )
 
 
 def _echo_batch_summary(result: BatchRunResult, dry_run: bool) -> None:
-    """Output batch run summary.
-
-    Args:
-        result: BatchRunResult with aggregate counts for the completed batch.
-        dry_run: When True, prints a dry-run preview summary instead of execution stats.
-    """
-    _echo_batch_summary_impl(
-        result=result,
-        dry_run=dry_run,
-        info_printer=echo_info,
-        error_printer=echo_error,
+    """Output batch run summary."""
+    echo_batch_summary_with_runtime(
+        result,
+        dry_run,
+        runtime=_presentation_runtime(),
     )
 
 
 def _handle_destructive_confirmation(
     run_type: str, pipelines: list[str], dry_run: bool, yes: bool
 ) -> bool:
-    """Handle confirmation for destructive operations.
-
-    Args:
-        run_type: Type of run; only 'rebuild' and 'backfill' trigger the confirmation
-            prompt.
-        pipelines: List of pipeline names that will be affected by the operation.
-        dry_run: When True, skips the confirmation prompt.
-        yes: When True, bypasses the interactive confirmation prompt.
-
-    Returns:
-        True if should continue, False if cancelled.
-    """
-    if not should_prompt_for_destructive_run(
-        run_type=run_type,
-        dry_run=dry_run,
-        yes=yes,
-    ):
-        return True
-    return _handle_destructive_confirmation_impl(
-        run_type=run_type,
-        pipelines=pipelines,
-        dry_run=dry_run,
-        yes=yes,
-        confirm_fn=click.confirm,
-        info_printer=echo_info,
-        exit_func=exit_with_code,
+    """Handle confirmation for destructive operations."""
+    return handle_destructive_confirmation_with_runtime(
+        run_type,
+        pipelines,
+        dry_run,
+        yes,
+        runtime=_presentation_runtime(),
     )
 
 
@@ -171,38 +142,36 @@ def _run_batch_with_policy(
     health_port: int,
     registry: PipelineRegistry | None = None,
 ) -> BatchRunResult | None:
-    """Execute async batch run with typed exception policy.
+    """Execute async batch run with typed exception policy."""
+    return run_batch_with_policy_runtime(
+        source=source,
+        pipelines=pipelines,
+        options=options,
+        health_server=health_server,
+        health_port=health_port,
+        registry=registry,
+        runtime=_batch_runtime(),
+    )
 
-    Args:
-        source: Provider name used in error context for structured failure handling.
-        pipelines: Ordered list of pipeline names to run sequentially.
-        options: RunOptions controlling run type, limits, and filter settings.
-        health_server: When True, enables the HTTP health server during execution.
-        health_port: TCP port the health server listens on.
 
-    Returns:
-        BatchRunResult on success, None if an exception was handled and process will exit.
-    """
-    return _run_batch_with_policy_impl(
-        RunAllPolicyRequest(
-            source=source,
-            execution=RunAllBatchExecutionRequest(
-                pipelines=pipelines,
-                options=options,
-                health_server_enabled=health_server,
-                health_port=health_port,
-                registry=registry,
-            ),
-        ),
-        get_pipeline_runner_service_fn=get_pipeline_runner_service,
-        ensure_metrics_server_started_fn=ensure_metrics_server_started,
-        health_server_context_factory=health_server_context,
-        run_coro=asyncio.run,
-        handle_failure=lambda exc, source, reason_code: handle_run_all_cli_failure(
-            exc,
-            source=source,
-            reason_code=reason_code,
-        ),
+def _build_run_all_command_input_from_options(
+    options: Mapping[str, object],
+) -> RunAllCommandInput:
+    """Build typed run-all input from Click's object-valued kwargs mapping."""
+    return _build_input_from_options_impl(
+        options,
+        build_input=build_run_all_command_input,
+    )
+
+
+def _callback_runtime() -> RunAllCallbackRuntime:
+    """Build callback runtime from public patchable seams."""
+    return RunAllCallbackRuntime(
+        build_probe_paths=build_observability_backend_required_probe_paths,
+        build_input=build_run_all_command_input,
+        disable_transient_health_server=should_disable_transient_health_server,
+        ensure_observability_backend_started=ensure_observability_backend_started,
+        run_with_cli_policy=_run_all_with_cli_policy,
     )
 
 
@@ -226,6 +195,7 @@ def _run_all_callback(
             backend_result=backend_result,
         ):
             cli_input = replace(cli_input, health_server=False)
+
     dispatch_cli_callback(
         click_context,
         build_cli_input=lambda: cli_input,
@@ -233,26 +203,16 @@ def _run_all_callback(
     )
 
 
-def _build_run_all_command_input_from_options(
-    options: Mapping[str, object],
-) -> RunAllCommandInput:
-    """Build typed run-all input from Click's object-valued kwargs mapping."""
-    return build_run_all_command_input(
-        source=cast("str", options["source"]),
-        run_type=cast("str", options["run_type"]),
-        limit=cast(int | None, options["limit"]),
-        dry_run=cast("bool", options["dry_run"]),
-        yes=cast("bool", options["yes"]),
-        list_only=cast("bool", options["list_only"]),
-        debug=cast("bool", options["debug"]),
-        health_server=cast("bool", options["health_server"]),
-        health_port=cast("int", options["health_port"]),
-        ensure_observability_backend=cast(
-            "bool", options.get("ensure_observability_backend", True)
-        ),
-        observability_backend_port=cast(
-            "int", options.get("observability_backend_port", DEFAULT_HEALTH_SERVER_PORT)
-        ),
+def _policy_runtime() -> RunAllPolicyRuntime:
+    """Build policy runtime from public patchable seams."""
+    return RunAllPolicyRuntime(
+        build_cli_registry=build_cli_registry,
+        destructive_confirmation=_handle_destructive_confirmation,
+        determine_exit_code=run_all_support.determine_batch_exit_code,
+        execute_batch=_run_batch_with_policy,
+        health_info_presenter=echo_health_server_info,
+        resolve_context_registry=resolve_context_registry,
+        summary_presenter=_echo_batch_summary,
     )
 
 
@@ -285,5 +245,11 @@ run_all = build_run_all_click_command(
 __all__ = [
     "BatchRunResult",
     "build_cli_registry",
+    "dispatch_cli_callback",
+    "emit_run_all_listing",
+    "emit_run_all_preview",
+    "exit_with_code",
+    "resolve_context_registry",
     "run_all",
+    "run_all_command_flow",
 ]

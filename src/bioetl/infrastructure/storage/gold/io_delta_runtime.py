@@ -7,8 +7,6 @@ from dataclasses import dataclass
 from types import ModuleType
 from typing import TYPE_CHECKING, TypeVar, cast
 
-import pyarrow as pa
-
 from bioetl.infrastructure.storage.gold.io_delta_protocols import (
     GoldWriteAsyncioProtocol as _GoldWriteAsyncioProtocol,
 )
@@ -57,7 +55,7 @@ class _PreparedSimpleGoldWrite:
     """Prepared simple Gold write payload shared across write stages."""
 
     request: _SimpleGoldWriteRequest
-    arrow_data: pa.Table
+    arrow_data: object
     schema_mode: str | None
 
 
@@ -99,6 +97,8 @@ def _write_prepared_simple_delta(
     prepared: _PreparedSimpleGoldWrite,
 ) -> None:
     """Execute one simple Gold Delta write attempt."""
+    import pyarrow as pa
+
     module.write_deltalake(
         table_or_uri=prepared.request.table_path,
         data=pa.RecordBatchReader.from_batches(
@@ -175,11 +175,19 @@ async def _run_gold_write_with_retry(
     operation: Callable[[], Awaitable[object]],
 ) -> None:
     """Run one Gold write operation under the canonical retry policy."""
+    retry_errors = module.GOLD_WRITE_RETRY_ERRORS
+    try:
+        import pyarrow as pa
+    except ImportError:
+        pass
+    else:
+        if pa.ArrowException not in retry_errors:
+            retry_errors = (*retry_errors, pa.ArrowException)
     for attempt in range(3):
         try:
             await operation()
             return
-        except module.GOLD_WRITE_RETRY_ERRORS as error:
+        except retry_errors as error:
             if attempt == 2:
                 raise error
             await module.asyncio.sleep(_gold_write_retry_delay(attempt))

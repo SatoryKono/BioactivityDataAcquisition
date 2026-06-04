@@ -2,21 +2,14 @@
 
 from __future__ import annotations
 
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
-from bioetl.application.core.base import BasePipeline
-from bioetl.application.core.pipeline_services import PipelineService
-from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
-from bioetl.composition.factories.datasource.data_source_factory import (
-    DataSourceCreatorProtocol,
-)
 from bioetl.composition.factories.pipeline.creation_support import (
     _BuildPipelineServicesFn,
     _create_pipeline_with_services_impl,
     _PipelineCreationInputs,
     _ServiceBundleDeps,
 )
-from bioetl.composition.factories.services import factory as _services_factory_module
 from bioetl.composition.factories.services._bundle_support import (
     ServiceBundleDependencies,
     resolve_service_bundle_dependencies,
@@ -24,27 +17,35 @@ from bioetl.composition.factories.services._bundle_support import (
 from bioetl.composition.factories.services._bundle_support import (
     create_pipeline_data_source as _create_pipeline_data_source_impl,
 )
-from bioetl.composition.factories.services.factory import BaseServicesFactory
-from bioetl.domain.config import DQConfig, PipelineConfig
-from bioetl.domain.context import CachedBronzeContext
-from bioetl.domain.filtering import InputFilterConfig
-from bioetl.domain.ports import (
-    AuditPort,
-    DataSourcePort,
-    DQMonitorPort,
-    LoggerPort,
-    MetricsPort,
-    SilverValidatorPort,
-    TracingPort,
-)
 from bioetl.infrastructure.config.converters import (
     yaml_config_to_domain as _yaml_config_to_domain_direct,
 )
 from bioetl.infrastructure.config.pipeline_config_api import (
     load_pipeline_config as _load_pipeline_config_direct,
 )
-from bioetl.infrastructure.config.settings_api import Settings
-from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+
+if TYPE_CHECKING:
+    from bioetl.application.core.pipeline_services import PipelineService
+    from bioetl.application.services.lineage.metadata_coordinator import (
+        MetadataCoordinator,
+    )
+    from bioetl.composition.factories.datasource.data_source_factory import (
+        DataSourceCreatorProtocol,
+    )
+    from bioetl.domain.config import DQConfig, PipelineConfig
+    from bioetl.domain.context import CachedBronzeContext
+    from bioetl.domain.filtering import InputFilterConfig
+    from bioetl.domain.ports import (
+        AuditPort,
+        DataSourcePort,
+        DQMonitorPort,
+        LoggerPort,
+        MetricsPort,
+        SilverValidatorPort,
+        TracingPort,
+    )
+    from bioetl.infrastructure.config.settings_api import Settings
+    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 __all__ = [
     "PipelineCreationInputs",
@@ -55,7 +56,21 @@ __all__ = [
     "create_pipeline_with_services",
 ]
 
+
+class _BaseServicesFactoryProxy:
+    """Lazy proxy preserving the bundle-level BaseServicesFactory patch seam."""
+
+    def _resolve(self) -> object:
+        from bioetl.composition.factories.services.factory import BaseServicesFactory
+
+        return BaseServicesFactory
+
+    def __getattr__(self, name: str) -> object:
+        return getattr(self._resolve(), name)
+
+
 PipelineCreationInputs = _PipelineCreationInputs
+BaseServicesFactory = _BaseServicesFactoryProxy()
 _DEFAULT_BASE_SERVICES_FACTORY = BaseServicesFactory
 
 
@@ -85,11 +100,13 @@ def compute_config_hash(config: PipelineYamlConfig | dict[str, object]) -> str:
     return config_hash
 
 
-def _resolve_base_services_factory() -> type[BaseServicesFactory]:
+def _resolve_base_services_factory() -> object:
     """Respect both bundle-local and canonical factory patch seams."""
     local_factory = BaseServicesFactory
     if local_factory is not _DEFAULT_BASE_SERVICES_FACTORY:
         return local_factory
+    from bioetl.composition.factories.services import factory as _services_factory_module
+
     return _services_factory_module.BaseServicesFactory
 
 
@@ -203,9 +220,9 @@ def build_pipeline_services(
 
 
 def create_pipeline_with_services(
-    inputs: PipelineCreationInputs,
+    inputs: object,
     _deps: ServiceBundleDependencies | None = None,
-) -> BasePipeline:
+) -> object:
     """Create a pipeline instance with its resolved service bundle."""
     # Compatibility markers for architecture static checks:
     # transformer_class(...) happens inside the delegated builder path.

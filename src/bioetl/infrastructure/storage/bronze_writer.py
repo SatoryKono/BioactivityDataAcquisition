@@ -53,6 +53,9 @@ from bioetl.domain.ports.noop import _NoOpSpan
 
 __all__ = ["BRONZE_WRITE_ERRORS", "BronzeWriter"]
 
+BRONZE_ATOMIC_WRITE_CONTRACT = "atomic_write_bytes via bronze.write_execution"
+
+
 class BronzeWriter(
     BronzeWriterValidationMixin,
     BronzeWriterMetadataMixin,

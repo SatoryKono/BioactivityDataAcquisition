@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from importlib import import_module
+
 __all__ = ["run_all"]
 
 
@@ -10,6 +12,4 @@ def __getattr__(name: str) -> object:
     if name != "run_all":
         raise AttributeError(name)
 
-    from bioetl.interfaces.cli.commands.domains.run_all.command import run_all
-
-    return run_all
+    return getattr(import_module("bioetl.interfaces.cli.commands.run_all"), name)

@@ -3,9 +3,6 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import cast
-
-from pandera.polars import DataFrameSchema
 
 from bioetl.domain.types import GoldRecord, RunID, ScdConfig
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
@@ -35,7 +32,7 @@ def _build_gold_write_request(
     return GoldWriteRequest(
         table_name=table_name,
         records=records,
-        schema=cast("DataFrameSchema", schema),
+        schema=schema,
         primary_keys=primary_keys,
         mode=mode,
         partition_cols=partition_cols,

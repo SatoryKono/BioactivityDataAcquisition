@@ -3,14 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from datetime import datetime
 from typing import Protocol
-
-from pandera.polars import DataFrameSchema
-
-from bioetl.domain.ports import LoggerPort
-from bioetl.domain.types import GoldRecord, ScdConfig
-from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterProtocol
 
 __all__ = [
     "_GoldMergedMetadataWriterProtocol",
@@ -26,10 +19,10 @@ class _GoldMergedMetadataWriterProtocol(Protocol):
         self,
         table_path: str,
         table_name: str,
-        records: list[GoldRecord],
-        completed_at: datetime | None = None,
+        records: list[dict[str, object]],
+        completed_at: object | None = None,
         run_id: str | None = None,
-        schema: DataFrameSchema | None = None,
+        schema: object | None = None,
     ) -> None: ...
 
 
@@ -39,10 +32,10 @@ class _GoldWriteDispatchTargetProtocol(Protocol):
     async def _write_scd2(
         self,
         table_path: str,
-        records: list[GoldRecord],
-        scd_config: ScdConfig,
+        records: list[dict[str, object]],
+        scd_config: object,
         partition_cols: list[str] | None,
-        ingestion_ts: datetime,
+        ingestion_ts: object,
         column_order: list[str] | None = None,
     ) -> None: ...
 
@@ -50,11 +43,11 @@ class _GoldWriteDispatchTargetProtocol(Protocol):
         self,
         table_path: str,
         table_name: str,
-        records: list[GoldRecord],
+        records: list[dict[str, object]],
         mode: str,
         partition_cols: list[str] | None,
         primary_keys: list[str] | None = None,
-        _schema: DataFrameSchema | None = None,
+        _schema: object | None = None,
         column_order: list[str] | None = None,
     ) -> None: ...
 
@@ -62,13 +55,13 @@ class _GoldWriteDispatchTargetProtocol(Protocol):
 class _GoldMergedWriteHostProtocol(Protocol):
     """Structural host contract for merged Gold write helpers."""
 
-    logger: LoggerPort
-    csv_exporter: CsvExporterProtocol | None
+    logger: object
+    csv_exporter: object | None
     _resolve_table_path: Callable[[str], str]
     _validate_records_against_schema: Callable[
-        [list[GoldRecord], DataFrameSchema], Awaitable[None]
+        [list[dict[str, object]], object], Awaitable[None]
     ]
-    _validate_schema_strict: Callable[[DataFrameSchema], None]
+    _validate_schema_strict: Callable[[object], None]
 
     async def _run_in_executor(
         self,

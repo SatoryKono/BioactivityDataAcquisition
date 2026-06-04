@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.composition._lazy_exports import install_lazy_exports
+from bioetl.composition.lazy_exports import install_lazy_exports
 
 if TYPE_CHECKING:
     from bioetl.application.services.audit_inspection_service import (

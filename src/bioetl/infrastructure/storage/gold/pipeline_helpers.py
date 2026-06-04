@@ -6,8 +6,6 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Protocol
 
-from pandera.polars import DataFrameSchema
-
 from bioetl.domain.medallion import GoldWriteMode
 from bioetl.domain.ports import AuditPort
 from bioetl.domain.types import GoldRecord, RunID, ScdConfig
@@ -20,7 +18,7 @@ class GoldWriteRequest:
 
     table_name: str
     records: list[GoldRecord]
-    schema: DataFrameSchema
+    schema: object
     primary_keys: list[str] | None = None
     mode: str = "overwrite"
     partition_cols: list[str] | None = None
@@ -58,7 +56,7 @@ class GoldWritePostwriteContext:
     run_id: RunID | None
     scd_config: ScdConfig | None
     silver_refs: list[SilverWriteResult] | None
-    schema: DataFrameSchema
+    schema: object
 
 
 class _GoldWritePreparationHostProtocol(Protocol):
@@ -75,12 +73,12 @@ class _GoldWritePreparationHostProtocol(Protocol):
         ingestion_ts: datetime | None,
     ) -> None: ...
 
-    def _validate_schema_strict(self, schema: DataFrameSchema) -> None: ...
+    def _validate_schema_strict(self, schema: object) -> None: ...
 
     async def _validate_records_against_schema(
         self,
         records: list[GoldRecord],
-        schema: DataFrameSchema,
+        schema: object,
     ) -> None: ...
 
     def _resolve_table_path(self, table_name: str) -> str: ...
@@ -111,7 +109,7 @@ class _GoldWritePostwriteHostProtocol(Protocol):
         ingestion_ts: datetime | None,
         run_id: RunID | None,
         silver_refs: list[SilverWriteResult] | None,
-        gold_schema: DataFrameSchema,
+        gold_schema: object,
     ) -> None: ...
 
 
@@ -142,7 +140,7 @@ async def prepare_gold_write(
     table_name: str,
     records: list[GoldRecord],
     mode: str,
-    schema: DataFrameSchema,
+    schema: object,
     scd_config: ScdConfig | None,
     ingestion_ts: datetime | None,
 ) -> PreparedGoldWriteContext:

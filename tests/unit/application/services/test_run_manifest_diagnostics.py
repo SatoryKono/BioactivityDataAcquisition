@@ -14,6 +14,12 @@ from bioetl.application.services.control_plane import RunLedgerService
 from bioetl.application.services.control_plane.manifest.diagnostics import (
     build_diagnostics_summary,
 )
+from bioetl.application.services.control_plane.manifest.diagnostics.base_payload_sections import (
+    _build_base_summary_core_payload,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context import (
+    _resolve_base_summary_replay_context,
+)
 from bioetl.domain.control_plane import (
     ReplayCapability,
     RunInputSnapshotRef,
@@ -103,6 +109,26 @@ def test_build_diagnostics_summary_exposes_artifact_publication_closure() -> Non
         ]
         == "closed"
     )
+
+
+def test_base_summary_payload_sections_preserve_replay_and_snapshot_contract() -> None:
+    manifest = _make_manifest()
+    replay_context = _resolve_base_summary_replay_context(manifest)
+
+    payload = _build_base_summary_core_payload(
+        manifest=manifest,
+        replay_context=replay_context,
+    )
+
+    assert payload["manifest_id"] == manifest.manifest_id
+    assert payload["run_id"] == str(manifest.run_id)
+    assert payload["replay_family_contract"] == _expected_replay_family_contract(
+        manifest
+    )
+    assert payload["input_snapshot_ids"] == []
+    assert payload["input_snapshot_content_hashes"] == []
+    assert payload["input_snapshot_count"] == 0
+    assert payload["planned_artifacts"] == []
 
 
 def _build_ledger_entries(

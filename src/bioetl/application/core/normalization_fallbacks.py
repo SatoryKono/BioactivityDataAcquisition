@@ -3,19 +3,6 @@
 from __future__ import annotations
 
 from bioetl.application.core.normalization_rules import NormalizationRulesPolicy
-from bioetl.domain.normalization.dates import normalize_partial_date
-from bioetl.domain.normalization.profiles.profile_normalizers import (
-    normalize_profile_doi,
-    normalize_profile_json_string,
-    normalize_profile_pmid,
-    normalize_profile_smiles,
-)
-from bioetl.domain.normalization.text import (
-    normalize_abstract,
-    normalize_oa_status,
-    normalize_string,
-    normalize_title,
-)
 
 __all__ = [
     "UNHANDLED_FALLBACK_NORMALIZATION",
@@ -82,15 +69,29 @@ def normalize_special_fallback_field(
     if value is None:
         return None
     if is_smiles_field(field_name):
+        from bioetl.domain.normalization.profiles.profile_normalizers import (
+            normalize_profile_smiles,
+        )
+
         return normalize_profile_smiles(
             value,
             is_canonical=(field_name == "canonical_smiles"),
         )
     if is_doi_field(field_name, rule_set=rule_set):
+        from bioetl.domain.normalization.profiles.profile_normalizers import (
+            normalize_profile_doi,
+        )
+
         return normalize_profile_doi(value)
     if is_pmid_field(field_name, rule_set=rule_set):
+        from bioetl.domain.normalization.profiles.profile_normalizers import (
+            normalize_profile_pmid,
+        )
+
         return normalize_profile_pmid(value)
     if is_date_field(field_name, rule_set=rule_set):
+        from bioetl.domain.normalization.dates import normalize_partial_date
+
         return normalize_partial_date(value) if isinstance(value, str) else value
     return UNHANDLED_FALLBACK_NORMALIZATION
 
@@ -103,10 +104,16 @@ def normalize_named_text_field(
 ) -> str | None:
     """Normalize one configured named text field."""
     if field_name in rule_set.title_fields:
+        from bioetl.domain.normalization.text import normalize_title
+
         return normalize_title(value)
     if field_name in rule_set.abstract_fields:
+        from bioetl.domain.normalization.text import normalize_abstract
+
         return normalize_abstract(value)
     if field_name in rule_set.oa_status_fields:
+        from bioetl.domain.normalization.text import normalize_oa_status
+
         return normalize_oa_status(value)
     return None
 
@@ -115,10 +122,16 @@ def canonicalize_json_like_string(value: str) -> str:
     """Canonicalize JSON-like text while preserving invalid JSON as trimmed text."""
     if not is_json_like_string(value):
         return value
+    from bioetl.domain.normalization.profiles.profile_normalizers import (
+        normalize_profile_json_string,
+    )
+
     canonical_json = normalize_profile_json_string(value)
     return canonical_json if isinstance(canonical_json, str) else value
 
 
 def normalize_plain_text(value: str) -> str | None:
     """Normalize plain text outside named field buckets."""
+    from bioetl.domain.normalization.text import normalize_string
+
     return normalize_string(value)

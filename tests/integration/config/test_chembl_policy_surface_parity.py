@@ -179,7 +179,7 @@ def _config_enum_surface_expectations(
     entity_configs: dict[str, dict[str, Any]],
 ) -> dict[str, tuple[str, str]]:
     expectations: dict[str, tuple[str, str]] = {}
-    
+
     # Get all controlled vocabulary fields to avoid overwriting registry expectations
     controlled_vocabulary_fields = frozenset().union(
         *(family.fields for family in DEFAULT_CHEMBL_POLICY_REGISTRY_DATA.controlled_vocabularies)

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from bioetl.composition._lazy_exports import (
     build_lazy_export_hooks,
+    install_cached_public_exports,
     install_lazy_exports,
     lazy_export_dir,
     resolve_lazy_export,
@@ -11,6 +12,7 @@ from bioetl.composition._lazy_exports import (
 
 __all__ = [
     "build_lazy_export_hooks",
+    "install_cached_public_exports",
     "install_lazy_exports",
     "lazy_export_dir",
     "resolve_lazy_export",

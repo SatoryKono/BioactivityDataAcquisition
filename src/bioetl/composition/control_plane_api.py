@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol
 
-from bioetl.composition._lazy_exports import install_cached_public_exports
+from bioetl.composition.lazy_exports import install_cached_public_exports
 
 if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.checkpoint_manager import (
