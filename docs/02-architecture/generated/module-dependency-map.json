@@ -4,9 +4,9 @@
     "total_internal_imports": 8427,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
-    "cross_layer_group_edges_total": 346,
+    "cross_layer_group_edges_total": 342,
     "violations": 0,
-    "source_fingerprint": "88bcc5ea11b92cd61605ef2b4b5a6a95871ce31a90a24ed82af1636befb8c29d"
+    "source_fingerprint": "ad96025da5140dea439a3723cc61727a336e2f37330518d74d81ac14f4e981f5"
   },
   "layer_edges": [
     {
@@ -200,14 +200,14 @@
       "imports": 40
     },
     {
-      "source": "composition.factories",
-      "target": "infrastructure.storage",
+      "source": "composition.bootstrap",
+      "target": "infrastructure.config",
       "imports": 38
     },
     {
-      "source": "composition.bootstrap",
-      "target": "infrastructure.config",
-      "imports": 37
+      "source": "composition.factories",
+      "target": "infrastructure.storage",
+      "imports": 38
     },
     {
       "source": "application.services",

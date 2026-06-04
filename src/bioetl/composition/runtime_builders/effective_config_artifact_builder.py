@@ -9,7 +9,7 @@ import bioetl.composition.runtime_builders.run_manifest_support as _manifest_sup
 from bioetl.application.services.control_plane.effective_config.service import (
     create_effective_config_service,
 )
-from bioetl.composition.control_plane_store_builders import (
+from bioetl.composition.bootstrap.control_plane_store_builders import (
     create_effective_config_artifact_store,
 )
 from bioetl.composition.runtime_builders._manifest_publication_context_support import (
