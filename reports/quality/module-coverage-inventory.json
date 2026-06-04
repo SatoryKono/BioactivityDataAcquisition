@@ -17203,7 +17203,7 @@
       "missing_lines": 52,
       "module": "bioetl.infrastructure.export.csv_exporter_io_ops",
       "path": "src/bioetl/infrastructure/export/csv_exporter_io_ops.py",
-      "source_lines": 131
+      "source_lines": 137
     },
     {
       "coverage_percent": 18.18,
@@ -21328,7 +21328,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-06-04",
-  "source_tree_sha256": "3e318fb0cc3abc8b4681a92504dd4fb4b15ace2707412142e43f6c2b17aa2c1b",
+  "source_tree_sha256": "18da240fd99f119c42f7d3ffccb5441225ed86d514ced3d0ebc1b7153bc99af7",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

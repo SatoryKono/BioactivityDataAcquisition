@@ -88,3 +88,94 @@ def test_pubchem_molecule_schema_accepts_composed_minimal_row() -> None:
         volume_3d=100.0,
     )
     PubchemMoleculeSchema.validate(dataframe_from_row(row))
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("exact_mass", -0.1),
+        ("monoisotopic_mass", -0.1),
+        ("tpsa", -0.1),
+        ("complexity", -0.1),
+        ("charge", 11),
+        ("heavy_atom_count", 0),
+        ("h_bond_donor_count", 51),
+        ("h_bond_acceptor_count", -1),
+        ("rotatable_bond_count", 101),
+    ],
+)
+def test_pubchem_physchem_shard_rejects_additional_invalid_ranges(
+    field: str,
+    value: float | int,
+) -> None:
+    df = pubchem_shard_checks_dataframe(PubchemPhysChemSchema)
+    df.loc[0, field] = value
+    with pytest.raises(pa.errors.SchemaError):
+        PubchemPhysChemSchema.validate(df)
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        "conformer_count_3d",
+        "feature_acceptor_count_3d",
+        "feature_donor_count_3d",
+        "feature_anion_count_3d",
+        "feature_cation_count_3d",
+        "feature_ring_count_3d",
+        "feature_hydrophobe_count_3d",
+        "effective_rotor_count_3d",
+        "conformer_rmsd_3d",
+        "feature_count_3d",
+    ],
+)
+def test_pubchem_three_d_shard_rejects_negative_counts(field: str) -> None:
+    df = pubchem_shard_checks_dataframe(PubchemThreeDSchema)
+    df.loc[0, field] = -0.1
+    with pytest.raises(pa.errors.SchemaError):
+        PubchemThreeDSchema.validate(df)
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("defined_atom_stereo_count", -1),
+        ("undefined_atom_stereo_count", -1),
+        ("bond_stereo_count", -1),
+        ("defined_bond_stereo_count", -1),
+        ("undefined_bond_stereo_count", -1),
+        ("isotope_atom_count", -1),
+        ("covalent_unit_count", 0),
+    ],
+)
+def test_pubchem_stereo_shard_rejects_invalid_stereo_counts(
+    field: str,
+    value: int,
+) -> None:
+    df = pubchem_shard_checks_dataframe(PubchemStereoSchema)
+    df.loc[0, field] = value
+    with pytest.raises(pa.errors.SchemaError):
+        PubchemStereoSchema.validate(df)
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("canonical_smiles", "C" * 10001),
+        ("isomeric_smiles", "C" * 10001),
+        ("inchi_key", "BAD-INCHI-KEY"),
+        ("standardized_inchi", "bad"),
+        ("standardized_inchi_key", "BAD-INCHI-KEY"),
+        ("structure_parent_key", "x" * 10051),
+        ("chemical_standardization_status", "unknown"),
+        ("chemical_standardization_policy_version", "policy-v0"),
+    ],
+)
+def test_pubchem_identity_shard_rejects_additional_invalid_identifier_fields(
+    field: str,
+    value: str,
+) -> None:
+    df = pubchem_identity_valid_dataframe()
+    df.loc[0, field] = value
+    with pytest.raises(pa.errors.SchemaError):
+        PubchemIdentitySchema.validate(df)

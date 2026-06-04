@@ -154,7 +154,7 @@ class TestProbeCrossrefHealth:
         )
 
     @pytest.mark.asyncio
-    async def test test_probe_crossref_health_slow_warning(self, mock_http_client, mock_query_builder, mock_response_mapper, mock_adapter_metrics, mock_logger):
+    async def test_probe_crossref_health_slow_warning(self, mock_http_client, mock_query_builder, mock_response_mapper, mock_adapter_metrics, mock_logger):
         """Test probe_crossref_health logs warning for slow response."""
         mock_response = MagicMock()
         mock_response.status_code = 200

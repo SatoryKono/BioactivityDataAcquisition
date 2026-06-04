@@ -6,6 +6,7 @@ import pandas as pd
 import pandera as pa
 import pytest
 
+import bioetl.domain.contracts.gold._publication_common_schema as publication_common_schema
 from bioetl.domain.contracts.gold._publication_common_schema import (
     PublicationGoldCommonSchema,
 )
@@ -56,3 +57,25 @@ def test_publication_common_schema_rejects_invalid_doi() -> None:
     df.loc[0, "doi"] = "not-a-doi"
     with pytest.raises(pa.errors.SchemaError):
         PublicationGoldCommonSchema.validate(df)
+
+
+def test_publication_common_schema_rejects_invalid_loaded_taxonomy_value() -> None:
+    initialize_test_publication_type_classification()
+    frame = _minimal_publication_common_df()
+    frame.loc[0, "publication_class"] = "BAD"
+    with pytest.raises(pa.errors.SchemaError):
+        PublicationGoldCommonSchema.validate(frame)
+
+
+def test_publication_common_schema_allows_values_when_taxonomy_is_unavailable(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        publication_common_schema,
+        "publication_classification_values",
+        lambda _field_name: [],
+    )
+    frame = _minimal_publication_common_df()
+    frame.loc[0, "publication_type_unified"] = "Provider Specific Type"
+    validated = PublicationGoldCommonSchema.validate(frame)
+    assert validated["publication_type_unified"].iloc[0] == "Provider Specific Type"

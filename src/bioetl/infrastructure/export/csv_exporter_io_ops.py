@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import os
+import shutil
 import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -34,6 +35,11 @@ def _copy_csv_payload(source_path: Path, target_path: Path) -> None:
     source_path.unlink()
 
 
+def _move_csv_payload(source_path: Path, target_path: Path) -> None:
+    """Publish one CSV payload without relying on pathlib's concrete Path class."""
+    shutil.move(os.fspath(source_path), os.fspath(target_path))
+
+
 def _publish_csv_payload(source_path: Path, target_path: Path) -> None:
     """Publish one CSV payload using the safest available local filesystem path."""
     if os.name == "nt":
@@ -51,7 +57,7 @@ def _publish_locked_csv_backup(
     if os.name == "nt":
         _copy_csv_payload(source_path, backup_path)
         return
-    source_path.replace(backup_path)
+    _move_csv_payload(source_path, backup_path)
 
 
 def atomic_csv_write(

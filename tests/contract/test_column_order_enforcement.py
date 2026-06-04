@@ -43,3 +43,34 @@ def test_canonical_column_order_rejects_dq_prefix_in_business_block() -> None:
     columns = ["entity_id", "content_hash", "z_field", "_dq_error"]
     ordered = canonical_column_order(columns)
     assert ordered.index("_dq_error") > ordered.index("z_field")
+
+
+def test_canonical_column_order_places_lookup_fields_before_business_columns() -> None:
+    columns = (
+        "_lookup_method",
+        "z_field",
+        "entity_id",
+        "_original_id",
+        "content_hash",
+        "a_field",
+        "_dq_warn",
+    )
+
+    ordered = canonical_column_order(columns)
+
+    assert ordered == [
+        "entity_id",
+        "content_hash",
+        "_lookup_method",
+        "_original_id",
+        "a_field",
+        "z_field",
+        "_dq_warn",
+    ]
+
+
+def test_canonical_column_order_deduplicates_duplicate_inputs() -> None:
+    ordered = canonical_column_order(
+        ["entity_id", "entity_id", "_dq_error", "name", "name", "content_hash"]
+    )
+    assert ordered == ["entity_id", "content_hash", "name", "_dq_error"]
