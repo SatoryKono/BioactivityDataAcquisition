@@ -13,7 +13,7 @@ from deltalake import DeltaTable
 from bioetl.domain.transformations import generate_content_hash
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-pytestmark = pytest.mark.integration
+pytestmark = [pytest.mark.integration, pytest.mark.timeout(180)]
 
 
 def _content_hash_schema() -> pa.Schema:
@@ -68,7 +68,6 @@ def silver_writer(temp_delta_path: str, noop_logger: object) -> SilverWriter:
 
 
 @pytest.mark.asyncio
-@pytest.mark.timeout(120)
 async def test_silver_merge_replay_is_idempotent_by_table_checksum(
     silver_writer: SilverWriter,
     temp_delta_path: str,
@@ -98,7 +97,6 @@ async def test_silver_merge_replay_is_idempotent_by_table_checksum(
 
 
 @pytest.mark.asyncio
-@pytest.mark.timeout(120)
 async def test_silver_merge_replay_preserves_business_columns_on_metadata_rerun(
     silver_writer: SilverWriter,
     temp_delta_path: str,

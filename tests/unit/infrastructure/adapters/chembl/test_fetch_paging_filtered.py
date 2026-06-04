@@ -129,6 +129,52 @@ async def test_fetch_with_filter_continues_when_more_pages_are_available() -> No
 
 
 @pytest.mark.asyncio
+async def test_paginate_filter_results_yields_records_until_last_page() -> None:
+    adapter = _PagingFilteredAdapter()
+    adapter.page_responses = [
+        ([{"chembl_id": "1"}], True),
+        ([{"chembl_id": "2"}], False),
+    ]
+
+    rows = await collect_async_iterator(
+        adapter._paginate_filter_results(
+            "https://example.test/activity",
+            ["CHEMBL1"],
+            "molecule",
+            "activity",
+            "chembl_id",
+            set(),
+            0,
+            None,
+        )
+    )
+
+    assert rows == [{"chembl_id": "1"}, {"chembl_id": "2"}]
+    assert [call["params"]["offset"] for call in adapter.fetch_calls] == [0, 1]
+
+
+@pytest.mark.asyncio
+async def test_paginate_filter_results_stops_when_offset_reaches_limit() -> None:
+    adapter = _PagingFilteredAdapter()
+
+    rows = await collect_async_iterator(
+        adapter._paginate_filter_results(
+            "https://example.test/activity",
+            ["CHEMBL1"],
+            "molecule",
+            "activity",
+            "chembl_id",
+            set(),
+            2,
+            2,
+        )
+    )
+
+    assert rows == []
+    assert adapter.fetch_calls == []
+
+
+@pytest.mark.asyncio
 async def test_paginate_filter_results_logs_and_stops_on_adapter_error() -> None:
     adapter = _PagingFilteredAdapter()
 
@@ -158,3 +204,20 @@ async def test_paginate_filter_results_logs_and_stops_on_adapter_error() -> None
         offset=0,
         records_yielded=0,
     )
+
+
+@pytest.mark.asyncio
+async def test_fetch_with_filter_returns_early_when_first_page_is_empty() -> None:
+    adapter = _PagingFilteredAdapter()
+    adapter.page_responses = [([], False)]
+
+    rows = await collect_async_iterator(
+        adapter._fetch_with_filter(
+            entity_type="activity",
+            id_batch=["CHEMBL1"],
+            filter_field="molecule",
+            limit=None,
+        )
+    )
+
+    assert rows == []

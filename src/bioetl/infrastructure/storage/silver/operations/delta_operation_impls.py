@@ -77,6 +77,20 @@ async def _write_append_impl(
     )
 
 
+async def _write_create_table_impl(
+    host: _SilverDeltaHostProtocol,
+    request: _DeltaWriteRequest,
+) -> None:
+    """Create a missing Delta table for merge fallback without append semantics."""
+    await _write_plain_delta_request(
+        load_module=host._load_silver_writer_module,
+        request=request,
+        mode="overwrite",
+        schema_mode="overwrite",
+        timeout_seconds=_resolve_merge_policy(host).execution_timeout_seconds,
+    )
+
+
 async def _write_merge_impl(
     host: _SilverDeltaHostProtocol,
     request: _DeltaWriteRequest,
@@ -87,6 +101,10 @@ async def _write_merge_impl(
         policy=_resolve_merge_policy(host),
         load_module=host._load_silver_writer_module,
         write_append=host._write_append,
+        write_create=lambda active_request: _write_create_table_impl(
+            host,
+            active_request,
+        ),
         merge_records=host._merge_records,
         emit_final=host._emit_merge_final_telemetry,
         emit_retry=host._emit_merge_retry_telemetry,

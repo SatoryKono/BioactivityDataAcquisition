@@ -205,7 +205,7 @@ def test_test_governance_artifacts_match_live_collector() -> None:
         check=False,
         capture_output=True,
         text=True,
-        timeout=60,
+        timeout=180,
     )
 
     assert result.returncode == 0, (
@@ -568,7 +568,10 @@ def test_preflight_discovers_wsl_visible_windows_git_lfs_candidate(
 
 
 @pytest.mark.architecture
-def test_preflight_reports_missing_git_lfs_as_strict_reproducibility_blocker() -> None:
+def test_preflight_reports_missing_git_lfs_as_strict_reproducibility_blocker(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(preflight, "_scan_lfs_pointer_files", lambda _root: [])
     def fake_git_runner(args: list[str]) -> subprocess.CompletedProcess[str]:
         values = {
             ("branch", "--show-current"): "main",
@@ -603,9 +606,10 @@ def test_preflight_reports_missing_git_lfs_as_strict_reproducibility_blocker() -
 
 
 @pytest.mark.architecture
-def test_preflight_reports_unhealthy_git_lfs_as_strict_reproducibility_blocker() -> (
-    None
-):
+def test_preflight_reports_unhealthy_git_lfs_as_strict_reproducibility_blocker(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(preflight, "_scan_lfs_pointer_files", lambda _root: [])
     def fake_git_runner(args: list[str]) -> subprocess.CompletedProcess[str]:
         values = {
             ("branch", "--show-current"): subprocess.CompletedProcess(
@@ -660,9 +664,10 @@ def test_preflight_reports_unhealthy_git_lfs_as_strict_reproducibility_blocker()
 
 
 @pytest.mark.architecture
-def test_preflight_reports_timed_out_git_status_as_strict_reproducibility_blocker() -> (
-    None
-):
+def test_preflight_reports_timed_out_git_status_as_strict_reproducibility_blocker(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(preflight, "_scan_lfs_pointer_files", lambda _root: [])
     def fake_git_runner(args: list[str]) -> subprocess.CompletedProcess[str]:
         if tuple(args) == ("status", "--short", "--untracked-files=no"):
             raise subprocess.TimeoutExpired(

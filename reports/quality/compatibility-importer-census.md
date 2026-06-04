@@ -30,7 +30,7 @@
 | `src/bioetl/composition/health_api.py` | 5 | 2 |
 | `src/bioetl/composition/maintenance_api.py` | 1 | 1 |
 | `src/bioetl/infrastructure/config/__init__.py` | 0 | 2 |
-| `src/bioetl/domain/composite/config.py` | 81 | 35 |
+| `src/bioetl/domain/composite/config.py` | 81 | 39 |
 | `src/bioetl/domain/value_objects/activity_values.py` | 0 | 1 |
 | `src/bioetl/application/composite/merger.py` | 5 | 5 |
 

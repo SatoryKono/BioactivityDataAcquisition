@@ -132,6 +132,7 @@ async def _execute_merge_write_request(
     emit_final: Callable[..., None],
     emit_retry: Callable[..., None],
     logger: LoggerPort,
+    write_create: Callable[[_DeltaWriteRequest], Awaitable[None]] | None = None,
 ) -> None:
     """Execute merge/upsert with retry, timeout, and append-fallback orchestration."""
     active_request, schema_pre_evolved = await _pre_evolve_existing_table_schema(
@@ -163,7 +164,8 @@ async def _execute_merge_write_request(
             )
             return
         except DeltaTableNotFoundError:
-            await write_append(active_request)
+            create_table = write_create or write_append
+            await create_table(active_request)
             return
         except CommitFailedError:
             next_commit_retry_count = await _handle_commit_retry(

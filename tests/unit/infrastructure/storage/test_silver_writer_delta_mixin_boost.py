@@ -349,10 +349,10 @@ class TestWriteMergeRetrySuccess:
         assert len(recovery_calls) >= 1
 
     @pytest.mark.asyncio
-    async def test_write_merge_table_not_found_falls_back_to_append(
+    async def test_write_merge_table_not_found_creates_table_without_append_semantics(
         self,
     ) -> None:
-        """Lines 142-143: DeltaTableNotFoundError triggers write_append fallback."""
+        """DeltaTableNotFoundError creates the table without append semantics."""
         from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
         policy = _make_policy()
@@ -372,10 +372,10 @@ class TestWriteMergeRetrySuccess:
         )
         mock_module.TableNotFoundError = DeltaTableNotFoundError
 
-        append_calls: list[dict] = []
+        write_calls: list[dict] = []
 
         def fake_write_deltalake(**kwargs: object) -> None:
-            append_calls.append(kwargs)
+            write_calls.append(kwargs)
 
         mock_module.write_deltalake = fake_write_deltalake
 
@@ -384,8 +384,9 @@ class TestWriteMergeRetrySuccess:
         ):
             await mixin._write_merge(request)
 
-        assert len(append_calls) == 1
-        assert append_calls[0]["mode"] == "append"
+        assert len(write_calls) == 1
+        assert write_calls[0]["mode"] == "overwrite"
+        assert write_calls[0]["schema_mode"] == "overwrite"
 
     @pytest.mark.asyncio
     async def test_write_merge_commit_retries_exhausted_raises(self) -> None:

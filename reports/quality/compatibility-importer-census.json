@@ -273,7 +273,9 @@
         "src/bioetl/interfaces/cli/commands/run_composite.py"
       ],
       "test_importers": [
+        "tests/contract/test_composite_merge_golden.py",
         "tests/integration/ci/reproducibility_contract_support.py",
+        "tests/integration/composite/test_composite_cross_validation.py",
         "tests/integration/composite/test_molecule_pipeline.py",
         "tests/unit/application/composite/merge_test_support.py",
         "tests/unit/application/composite/test_coalesce_qualified.py",
@@ -281,6 +283,8 @@
         "tests/unit/application/composite/test_column_orderer_renames.py",
         "tests/unit/application/composite/test_column_priority_orderer.py",
         "tests/unit/application/composite/test_composite_activity.py",
+        "tests/unit/application/composite/test_composite_merge_conflicts.py",
+        "tests/unit/application/composite/test_composite_phase_ordering.py",
         "tests/unit/application/composite/test_conflict_resolver.py",
         "tests/unit/application/composite/test_cross_validator.py",
         "tests/unit/application/composite/test_dependency_coordinator.py",
@@ -310,7 +314,7 @@
         "tests/unit/infrastructure/schemas/test_composite_config_invariants_source_of_truth.py"
       ],
       "src_importer_count": 81,
-      "test_importer_count": 35
+      "test_importer_count": 39
     },
     {
       "path": "src/bioetl/domain/value_objects/activity_values.py",

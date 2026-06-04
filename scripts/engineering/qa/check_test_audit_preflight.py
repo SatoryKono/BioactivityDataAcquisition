@@ -202,10 +202,13 @@ def _scan_lfs_pointer_files(root: Path) -> list[str]:
         return []
 
     pointer_files: list[str] = []
+    max_pointer_bytes = 4096
     for path in sorted(vcr_root.rglob("*")):
         if not path.is_file():
             continue
         try:
+            if path.stat().st_size > max_pointer_bytes:
+                continue
             if path.read_bytes()[: len(LFS_POINTER_PREFIX)] == LFS_POINTER_PREFIX:
                 pointer_files.append(path.relative_to(root).as_posix())
         except OSError:
