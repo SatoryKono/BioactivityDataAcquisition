@@ -17,13 +17,13 @@ __all__ = [
 
 def get_quarantine_runtime_service(pipeline: str) -> _QuarantineRuntimeService:
     """Load one pipeline-scoped quarantine runtime service through composition."""
-    from bioetl.composition.resources_api import get_quarantine_runtime_service as _impl
+    from bioetl.composition.health_api import get_quarantine_runtime_service as _impl
 
     return cast(_QuarantineRuntimeService, _impl(pipeline))
 
 
 def get_quarantine_service() -> _QuarantineService:
     """Load the quarantine admin service through the canonical services seam."""
-    from bioetl.composition.services_api import get_quarantine_service as _impl
+    from bioetl.composition.health_api import get_quarantine_service as _impl
 
     return cast(_QuarantineService, _impl())
