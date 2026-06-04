@@ -1,25 +1,26 @@
 ---
 id: codex-mcp-setup
-title: Setup MCP for Codex
+title: Setup MCP for Codex runtime
 task_id: codex-mcp-setup
-created_at: '2026-06-02T06:06:55Z'
+created_at: '2026-06-04T05:59:28Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - scripts/ai/codex/setup_mcp.py
-summary: Synchronized workspace MCP files and ~/.codex/config.toml; validated JSON
-  surfaces and ensure-mcp check; skipped codex mcp list due documented hang.
+summary: Verified canonical MCP workspace configs and confirmed ~/.codex/config.toml
+  already contains the managed MCP server block for this repo; no file edits were
+  required.
 ---
 
 # Episodic summary
 
 ## Task
 
-- Title: Setup MCP for Codex
+- Title: Setup MCP for Codex runtime
 
 ## Outcome
 
-- Synchronized workspace MCP files and ~/.codex/config.toml; validated JSON surfaces and ensure-mcp check; skipped codex mcp list due documented hang.
+- Verified canonical MCP workspace configs and confirmed ~/.codex/config.toml already contains the managed MCP server block for this repo; no file edits were required.
 
 ## Lessons learned
 

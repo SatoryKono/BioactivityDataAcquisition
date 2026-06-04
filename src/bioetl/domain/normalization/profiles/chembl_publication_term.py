@@ -11,7 +11,8 @@ from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
     chembl_pseudo_null_fields,
 )
 from bioetl.domain.schemas.chembl.publication_term import PublicationTermSchema
-from bioetl.domain.schemas.constants import PUBLICATION_TERM_TYPES
+
+from ._chembl_vocab import chembl_enum
 
 __all__ = [
     "CHEMBL_PUBLICATION_TERM_PROFILE",
@@ -20,7 +21,7 @@ __all__ = [
 
 CHEMBL_PUBLICATION_TERM_SCHEMA_FIELDS = chembl_schema_fields(PublicationTermSchema)
 _TITLE_FIELDS = frozenset({"term"})
-_ENUM_FIELDS = {"term_type": PUBLICATION_TERM_TYPES}
+_ENUM_FIELDS = {"term_type": chembl_enum("publication_term", "term_type")}
 _NULL_FIELDS = chembl_pseudo_null_fields("publication_term")
 
 CHEMBL_PUBLICATION_TERM_PROFILE = build_chembl_profile(

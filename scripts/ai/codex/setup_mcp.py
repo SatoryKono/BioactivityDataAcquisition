@@ -136,17 +136,21 @@ def _write_workspace_codex_settings(output_root: Path, workspace_root: Path) -> 
     return settings_path
 
 
-def _write_configs(output_root: Path, workspace_root: Path) -> tuple[Path, Path, Path]:
+def _write_configs(
+    output_root: Path, workspace_root: Path
+) -> tuple[Path, Path, Path, Path]:
     servers = _canonical_servers(workspace_root)
     codex_payload = {"mcpServers": deepcopy(servers)}
     vscode_payload = {"servers": deepcopy(servers)}
 
     mcp_path = output_root / ".mcp.json"
     vscode_path = output_root / ".vscode" / "mcp.json"
+    cursor_path = output_root / ".cursor" / "mcp.json"
     codex_settings_path = _write_workspace_codex_settings(output_root, workspace_root)
     _write_json(mcp_path, codex_payload)
     _write_json(vscode_path, vscode_payload)
-    return mcp_path, vscode_path, codex_settings_path
+    _write_json(cursor_path, codex_payload)
+    return mcp_path, vscode_path, cursor_path, codex_settings_path
 
 
 def _gemini_server_config(server: dict[str, Any]) -> dict[str, Any]:
@@ -336,11 +340,12 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     output_root = args.root.absolute()
     workspace_root = args.workspace_root.absolute()
-    mcp_path, vscode_path, codex_settings_path = _write_configs(
+    mcp_path, vscode_path, cursor_path, codex_settings_path = _write_configs(
         output_root, workspace_root
     )
     print(f"Wrote {mcp_path}")
     print(f"Wrote {vscode_path}")
+    print(f"Wrote {cursor_path}")
     print(f"Wrote {codex_settings_path}")
     if not args.skip_codex_config:
         codex_config_path = _write_codex_config(workspace_root)

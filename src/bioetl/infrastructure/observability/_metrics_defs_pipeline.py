@@ -1,14 +1,86 @@
-"""Pipeline lifecycle, transform, shutdown, and adaptive-memory metrics."""
+"""Pipeline runtime Prometheus metrics facade."""
 
 from __future__ import annotations
 
-from prometheus_client import Counter, Gauge, Histogram
+from bioetl.infrastructure.observability._metrics_defs_pipeline_checkpoint import (
+    CHECKPOINT_COMPATIBILITY_EVENTS_TOTAL,
+    CHECKPOINT_LOAD_EVENTS_TOTAL,
+    CHECKPOINT_OPERATOR_DURATION_SECONDS,
+    CHECKPOINT_OPERATOR_OPERATIONS_TOTAL,
+    CHECKPOINT_SAVE_DURATION_SECONDS,
+    CHECKPOINT_SAVE_EVENTS_TOTAL,
+    CHECKPOINT_SAVED_AT_SECONDS,
+)
+from bioetl.infrastructure.observability._metrics_defs_pipeline_composite import (
+    COMPOSITE_SOURCE_SELECTION_TOTAL,
+)
+from bioetl.infrastructure.observability._metrics_defs_pipeline_control_plane import (
+    CONTROL_PLANE_LEDGER_APPEND_DURATION_SECONDS,
+    CONTROL_PLANE_LEDGER_APPENDS_TOTAL,
+    CONTROL_PLANE_LIFECYCLE_APPLY_TOTAL,
+    CONTROL_PLANE_LIFECYCLE_DELETE_CANDIDATES,
+    CONTROL_PLANE_LIFECYCLE_DELETED_TOTAL,
+    CONTROL_PLANE_MANIFEST_WRITE_DURATION_SECONDS,
+    CONTROL_PLANE_MANIFEST_WRITES_TOTAL,
+    CONTROL_PLANE_READ_DURATION_SECONDS,
+    CONTROL_PLANE_READS_TOTAL,
+    CONTROL_PLANE_TERMINAL_EVENTS_TOTAL,
+)
+from bioetl.infrastructure.observability._metrics_defs_pipeline_lifecycle import (
+    OBSERVABILITY_EVENTS_TOTAL,
+    PHASE_DURATION_SECONDS,
+    PIPELINE_RUNS_TOTAL,
+    POSTRUN_PHASE_DURATION_SECONDS,
+    POSTRUN_PHASE_EVENTS_TOTAL,
+    SHUTDOWN_COMPLETED,
+    SHUTDOWN_INITIATED,
+    STORAGE_OPTIMIZATION_TOTAL,
+)
+from bioetl.infrastructure.observability._metrics_defs_pipeline_lineage import (
+    LINEAGE_FRAGMENTS_EMITTED_TOTAL,
+    LINEAGE_REFS_MISSING_TOTAL,
+    TRACED_RUNS_TOTAL,
+)
+from bioetl.infrastructure.observability._metrics_defs_pipeline_memory import (
+    MEMORY_BATCH_RESIZE_EVENTS_TOTAL,
+    MEMORY_MONITOR_FALLBACK_EVENTS_TOTAL,
+    MEMORY_PRESSURE_EVENTS_TOTAL,
+    MEMORY_PRESSURE_STATE,
+)
+from bioetl.infrastructure.observability._metrics_defs_pipeline_quality import (
+    DQ_CONTEXT_BUILD_FAILURES_TOTAL,
+    DQ_REPORT_GENERATED_TOTAL,
+    DQ_REPORT_SKIPPED_TOTAL,
+    DQ_SOFT_THRESHOLD_EXCEEDED,
+    STRUCTURAL_POLICY_EVENTS_TOTAL,
+    STRUCTURAL_POLICY_SHADOW_COMPARISONS_TOTAL,
+)
+from bioetl.infrastructure.observability._metrics_defs_pipeline_replay import (
+    REPLAY_DRIFT_EVENTS_TOTAL,
+    REPLAY_LAG_SECONDS,
+    REPLAY_RECONSTRUCTABILITY_EVENTS_TOTAL,
+)
+from bioetl.infrastructure.observability._metrics_defs_pipeline_transform import (
+    FILTER_COMBINATIONS_LOADED_TOTAL,
+    TRANSFORM_DURATION_SECONDS,
+    TRANSFORM_ERRORS_TOTAL,
+)
+from bioetl.infrastructure.observability._metrics_defs_pipeline_workflow import (
+    WORKFLOW_CURRENT_STATUS,
+    WORKFLOW_RECONCILIATION_ROWS_DELETED_TOTAL,
+    WORKFLOW_RECONCILIATION_ROWS_RETAINED_TOTAL,
+    WORKFLOW_RECONCILIATION_ROWS_SCANNED_TOTAL,
+    WORKFLOW_RUNS_TOTAL,
+    WORKFLOW_STEP_DURATION_SECONDS,
+    WORKFLOW_STEP_EVENTS_TOTAL,
+)
 
 __all__ = [
     "CHECKPOINT_COMPATIBILITY_EVENTS_TOTAL",
     "CHECKPOINT_LOAD_EVENTS_TOTAL",
     "CHECKPOINT_OPERATOR_DURATION_SECONDS",
     "CHECKPOINT_OPERATOR_OPERATIONS_TOTAL",
+    "CHECKPOINT_SAVED_AT_SECONDS",
     "CHECKPOINT_SAVE_DURATION_SECONDS",
     "CHECKPOINT_SAVE_EVENTS_TOTAL",
     "COMPOSITE_SOURCE_SELECTION_TOTAL",
@@ -57,334 +129,3 @@ __all__ = [
     "WORKFLOW_STEP_DURATION_SECONDS",
     "WORKFLOW_STEP_EVENTS_TOTAL",
 ]
-
-PIPELINE_RUNS_TOTAL = Counter(
-    "bioetl_pipeline_runs_total",
-    "Total number of pipeline runs",
-    ["pipeline", "run_type", "status"],
-)
-
-PHASE_DURATION_SECONDS = Histogram(
-    "bioetl_phase_duration_seconds",
-    "Duration of pipeline lifecycle phases in seconds",
-    ["pipeline", "phase", "status"],
-    buckets=[0.1, 0.5, 1.0, 5.0, 10.0, 30.0, 60.0, 120.0, 300.0, 600.0],
-)
-
-POSTRUN_PHASE_EVENTS_TOTAL = Counter(
-    "bioetl_postrun_phase_events_total",
-    "Total bounded postrun phase outcomes by pipeline, phase, and status",
-    ["pipeline", "phase", "status"],
-)
-
-POSTRUN_PHASE_DURATION_SECONDS = Histogram(
-    "bioetl_postrun_phase_duration_seconds",
-    "Duration of postrun subphases in seconds",
-    ["pipeline", "phase", "status"],
-    buckets=[0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0, 5.0, 10.0, 30.0, 60.0],
-)
-
-OBSERVABILITY_EVENTS_TOTAL = Counter(
-    "bioetl_observability_events_total",
-    "Unified observability events emitted by pipeline observer",
-    ["event", "provider", "pipeline", "severity", "error_type"],
-)
-
-TRANSFORM_DURATION_SECONDS = Histogram(
-    "bioetl_transform_duration_seconds",
-    "Duration of data transformation in seconds",
-    ["provider", "entity_type"],
-    buckets=[0.1, 0.5, 1.0, 5.0, 10.0, 30.0, 60.0, 120.0],
-)
-
-TRANSFORM_ERRORS_TOTAL = Counter(
-    "bioetl_transform_errors_total",
-    "Total transformation errors",
-    ["provider", "entity_type", "error_type"],
-)
-
-STRUCTURAL_POLICY_EVENTS_TOTAL = Counter(
-    "bioetl_structural_policy_events_total",
-    "Total structural-policy events emitted by transformer structural enforcement",
-    ["provider", "entity_type", "action"],
-)
-
-STRUCTURAL_POLICY_SHADOW_COMPARISONS_TOTAL = Counter(
-    "bioetl_structural_policy_shadow_comparisons_total",
-    "Total shadow comparisons between structural policy and semantic silver filters",
-    ["provider", "entity_type", "comparison"],
-)
-
-DQ_SOFT_THRESHOLD_EXCEEDED = Counter(
-    "bioetl_dq_soft_threshold_exceeded",
-    "Total times DQ soft threshold was exceeded",
-    ["pipeline"],
-)
-
-DQ_CONTEXT_BUILD_FAILURES_TOTAL = Counter(
-    "bioetl_dq_context_build_failures_total",
-    "Total failures while building DQ dataframe context for report generation",
-    ["pipeline", "stage", "reason"],
-)
-
-DQ_REPORT_SKIPPED_TOTAL = Counter(
-    "bioetl_dq_report_skipped_total",
-    "Total DQ report generation skips by pipeline and medallion stage",
-    ["pipeline", "stage", "reason"],
-)
-
-DQ_REPORT_GENERATED_TOTAL = Counter(
-    "bioetl_dq_report_generated_total",
-    "Total successfully generated DQ reports by pipeline and medallion stage",
-    ["pipeline", "stage"],
-)
-
-SHUTDOWN_INITIATED = Counter(
-    "bioetl_shutdown_initiated",
-    "Total shutdown initiations",
-    ["reason"],
-)
-
-SHUTDOWN_COMPLETED = Counter(
-    "bioetl_shutdown_completed",
-    "Total shutdown completions",
-    ["reason"],
-)
-
-STORAGE_OPTIMIZATION_TOTAL = Counter(
-    "bioetl_storage_optimization_total",
-    "Total storage optimization operations",
-    ["pipeline", "status"],
-)
-
-FILTER_COMBINATIONS_LOADED_TOTAL = Counter(
-    "bioetl_filter_combinations_loaded_total",
-    "Total filter combinations loaded from multi-filter source",
-    ["pipeline", "source_kind"],
-)
-
-CONTROL_PLANE_MANIFEST_WRITES_TOTAL = Counter(
-    "bioetl_control_plane_manifest_writes_total",
-    "Total immutable run-manifest persistence attempts",
-    ["pipeline", "run_type", "status"],
-)
-
-CONTROL_PLANE_MANIFEST_WRITE_DURATION_SECONDS = Histogram(
-    "bioetl_control_plane_manifest_write_duration_seconds",
-    "Latency of immutable run-manifest persistence in seconds",
-    ["pipeline", "run_type", "status"],
-    buckets=[0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0, 5.0],
-)
-
-CONTROL_PLANE_LEDGER_APPENDS_TOTAL = Counter(
-    "bioetl_control_plane_ledger_appends_total",
-    "Total append attempts for run-ledger entries",
-    ["pipeline", "event_type", "status"],
-)
-
-CONTROL_PLANE_LEDGER_APPEND_DURATION_SECONDS = Histogram(
-    "bioetl_control_plane_ledger_append_duration_seconds",
-    "Latency of run-ledger append operations in seconds",
-    ["pipeline", "event_type", "status"],
-    buckets=[0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0, 5.0],
-)
-
-CONTROL_PLANE_TERMINAL_EVENTS_TOTAL = Counter(
-    "bioetl_control_plane_terminal_events_total",
-    "Total terminal run outcomes mirrored from persisted run-ledger entries",
-    ["pipeline", "terminal_status"],
-)
-
-CONTROL_PLANE_READS_TOTAL = Counter(
-    "bioetl_control_plane_reads_total",
-    "Total control-plane read and lookup operations by store, operation, and outcome",
-    ["store", "operation", "status"],
-)
-
-CONTROL_PLANE_READ_DURATION_SECONDS = Histogram(
-    "bioetl_control_plane_read_duration_seconds",
-    "Latency of control-plane read and lookup operations in seconds",
-    ["store", "operation", "status"],
-    buckets=[0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0, 5.0],
-)
-
-CONTROL_PLANE_LIFECYCLE_DELETED_TOTAL = Counter(
-    "bioetl_control_plane_lifecycle_deleted_total",
-    "Total control-plane lifecycle artifacts deleted by retention application",
-    ["surface", "replay_impact"],
-)
-
-CONTROL_PLANE_LIFECYCLE_DELETE_CANDIDATES = Gauge(
-    "bioetl_control_plane_lifecycle_delete_candidates",
-    "Current number of control-plane lifecycle delete candidates in the latest plan",
-)
-
-CONTROL_PLANE_LIFECYCLE_APPLY_TOTAL = Counter(
-    "bioetl_control_plane_lifecycle_apply_total",
-    "Total control-plane lifecycle plan apply attempts by dry-run policy",
-    ["dry_run"],
-)
-
-TRACED_RUNS_TOTAL = Counter(
-    "bioetl_traced_runs_total",
-    "Total pipeline runs that started with real tracing enabled",
-    ["pipeline", "run_type"],
-)
-
-REPLAY_RECONSTRUCTABILITY_EVENTS_TOTAL = Counter(
-    "bioetl_replay_reconstructability_events_total",
-    "Total replay reconstructability observations recorded during manifest assembly",
-    ["pipeline", "replay_capability", "strict_requirement", "status"],
-)
-
-REPLAY_DRIFT_EVENTS_TOTAL = Counter(
-    "bioetl_replay_drift_events_total",
-    "Total bounded replay drift observations recorded during manifest assembly",
-    ["pipeline", "run_type", "replay_capability", "drift_type", "status"],
-)
-
-REPLAY_LAG_SECONDS = Gauge(
-    "bioetl_replay_lag_seconds",
-    "Current bounded replay lag observed during manifest assembly",
-    ["pipeline", "run_type", "replay_capability", "status"],
-)
-
-MEMORY_PRESSURE_EVENTS_TOTAL = Counter(
-    "bioetl_memory_pressure_events_total",
-    "Total adaptive-memory decisions that observed active pressure",
-    ["pipeline", "stage", "reason", "monitor_mode", "status"],
-)
-
-MEMORY_BATCH_RESIZE_EVENTS_TOTAL = Counter(
-    "bioetl_memory_batch_resize_events_total",
-    "Total adaptive-memory decisions that changed batch size",
-    ["pipeline", "stage", "reason", "monitor_mode", "status"],
-)
-
-MEMORY_MONITOR_FALLBACK_EVENTS_TOTAL = Counter(
-    "bioetl_memory_monitor_fallback_events_total",
-    "Total adaptive-memory decisions emitted while using fallback monitor modes",
-    ["pipeline", "stage", "reason", "monitor_mode", "status"],
-)
-
-MEMORY_PRESSURE_STATE = Gauge(
-    "bioetl_memory_pressure_state",
-    "Current bounded adaptive-memory pressure state for the latest decision",
-    ["pipeline", "stage", "reason", "monitor_mode", "status"],
-)
-
-CHECKPOINT_COMPATIBILITY_EVENTS_TOTAL = Counter(
-    "bioetl_checkpoint_compatibility_events_total",
-    "Total checkpoint compatibility outcomes observed during resume validation",
-    ["pipeline", "disposition"],
-)
-
-CHECKPOINT_LOAD_EVENTS_TOTAL = Counter(
-    "bioetl_checkpoint_load_events_total",
-    "Total checkpoint load decisions observed during runtime and composite resume paths",
-    ["pipeline", "status"],
-)
-
-CHECKPOINT_OPERATOR_OPERATIONS_TOTAL = Counter(
-    "bioetl_checkpoint_operator_operations_total",
-    "Total checkpoint admin/operator actions by bounded operation and status",
-    ["operation", "status"],
-)
-
-CHECKPOINT_OPERATOR_DURATION_SECONDS = Histogram(
-    "bioetl_checkpoint_operator_duration_seconds",
-    "Duration of checkpoint admin/operator actions in seconds",
-    ["operation", "status"],
-    buckets=[0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0, 5.0],
-)
-
-CHECKPOINT_SAVE_EVENTS_TOTAL = Counter(
-    "bioetl_checkpoint_save_events_total",
-    "Total checkpoint save outcomes observed during runtime and composite persistence paths",
-    ["pipeline", "operation", "status"],
-)
-
-CHECKPOINT_SAVED_AT_SECONDS = Gauge(
-    "bioetl_checkpoint_saved_at_seconds",
-    "Unix timestamp of the latest persisted checkpoint per pipeline",
-    ["pipeline"],
-)
-
-CHECKPOINT_SAVE_DURATION_SECONDS = Histogram(
-    "bioetl_checkpoint_save_duration_seconds",
-    "Duration of checkpoint save operations in seconds",
-    ["pipeline", "operation", "status"],
-    buckets=[0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0, 5.0],
-)
-
-LINEAGE_FRAGMENTS_EMITTED_TOTAL = Counter(
-    "bioetl_lineage_fragments_emitted_total",
-    "Total lineage fragment persistence attempts by pipeline and layer",
-    ["pipeline", "layer", "status"],
-)
-
-LINEAGE_REFS_MISSING_TOTAL = Counter(
-    "bioetl_lineage_refs_missing_total",
-    "Total writes that detected missing upstream lineage references",
-    ["pipeline", "layer", "ref_type"],
-)
-
-COMPOSITE_SOURCE_SELECTION_TOTAL = Counter(
-    "bioetl_composite_source_selection_total",
-    "Total low-cardinality composite source-selection decisions recorded at persistence time",
-    ["pipeline", "decision_type", "selected_source"],
-)
-
-WORKFLOW_RUNS_TOTAL = Counter(
-    "bioetl_workflow_runs_total",
-    "Total declarative workflow run outcomes by bounded workflow and status",
-    ["workflow", "status", "pipeline_context", "run_type_context", "provider_context"],
-)
-
-WORKFLOW_CURRENT_STATUS = Gauge(
-    "bioetl_workflow_current_status",
-    "Current terminal workflow status by bounded workflow context: 0=OK, 1=WARN, 2=CRIT",
-    ["workflow", "pipeline_context", "run_type_context", "provider_context"],
-)
-
-WORKFLOW_RECONCILIATION_ROWS_SCANNED_TOTAL = Counter(
-    "bioetl_workflow_reconciliation_rows_scanned_total",
-    "Total workflow reconciliation rows scanned",
-)
-
-WORKFLOW_RECONCILIATION_ROWS_RETAINED_TOTAL = Counter(
-    "bioetl_workflow_reconciliation_rows_retained_total",
-    "Total workflow reconciliation rows retained",
-)
-
-WORKFLOW_RECONCILIATION_ROWS_DELETED_TOTAL = Counter(
-    "bioetl_workflow_reconciliation_rows_deleted_total",
-    "Total workflow reconciliation rows deleted",
-)
-
-WORKFLOW_STEP_EVENTS_TOTAL = Counter(
-    "bioetl_workflow_step_events_total",
-    "Total declarative workflow step outcomes by bounded workflow, step kind, and status",
-    [
-        "workflow",
-        "step_kind",
-        "status",
-        "pipeline_context",
-        "run_type_context",
-        "provider_context",
-    ],
-)
-
-WORKFLOW_STEP_DURATION_SECONDS = Histogram(
-    "bioetl_workflow_step_duration_seconds",
-    "Duration of declarative workflow step execution by bounded workflow, step kind, and status",
-    [
-        "workflow",
-        "step_kind",
-        "status",
-        "pipeline_context",
-        "run_type_context",
-        "provider_context",
-    ],
-    buckets=[0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0, 5.0, 10.0, 30.0, 60.0],
-)

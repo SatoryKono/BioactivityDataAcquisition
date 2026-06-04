@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Awaitable, Callable
-from typing import TYPE_CHECKING
 
 from deltalake.exceptions import CommitFailedError
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
 from bioetl.domain.exceptions import DeltaTransactionError
 from bioetl.domain.observability_contract import normalize_observability_pipeline_label
+from bioetl.domain.ports import LoggerPort, MetricsPort
 from bioetl.infrastructure.storage.delta.resilience import SilverMergeResiliencePolicy
 from bioetl.infrastructure.storage.silver.delta_helpers import (
     _DeltaWriteRequest,
@@ -20,10 +20,7 @@ from bioetl.infrastructure.storage.silver.delta_helpers import (
     _MergeExecutionTimeoutError,
 )
 
-if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort, MetricsPort
-
-LoadModule = Callable[[], object]
+LoadModule = Callable[[], object]  # silver_merge_timeout telemetry marker
 
 
 def _emit_merge_recovered_after_retry(
@@ -98,6 +95,7 @@ async def _handle_merge_execution_error(
     load_module: LoadModule,
     emit_final: Callable[..., None],
     emit_retry: Callable[..., None],
+    logger: LoggerPort,
 ) -> tuple[_DeltaWriteRequest, bool, int]:
     """Handle timeout retries and duplicate-field schema recovery."""
     if isinstance(exc, _MergeExecutionTimeoutError):
@@ -108,6 +106,7 @@ async def _handle_merge_execution_error(
             cause=exc,
             emit_final=emit_final,
             emit_retry=emit_retry,
+            logger=logger,
         )
         return active_request, schema_pre_evolved, next_timeout_retry_count
 
@@ -198,6 +197,7 @@ async def _execute_merge_write_request(
                 load_module=load_module,
                 emit_final=emit_final,
                 emit_retry=emit_retry,
+                logger=logger,
             )
 
 
@@ -238,8 +238,15 @@ async def _handle_timeout_retry(
     cause: _MergeExecutionTimeoutError,
     emit_final: Callable[..., None],
     emit_retry: Callable[..., None],
+    logger: LoggerPort,
 ) -> int:
     """Emit timeout retry telemetry and sleep before next merge attempt."""
+    logger.warning(
+        "silver_merge_timeout",
+        table_path=table_path,
+        timeout_seconds=cause.timeout_seconds,
+        retry_count=retry_count,
+    )
     if not policy.timeout_retry.should_retry(retry_count):
         emit_final(
             table_path=table_path,

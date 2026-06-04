@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import ast
 import json
+import subprocess
 from collections import Counter
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -79,6 +80,10 @@ def module_name_from_path(path: Path, *, src_root: Path = SRC_ROOT) -> str:
 
 def iter_family_python_files(*, path_prefixes: list[str]) -> list[Path]:
     """Return unique Python files under the given path prefixes."""
+    tracked_files = _tracked_family_python_files(path_prefixes=path_prefixes)
+    if tracked_files is not None:
+        return tracked_files
+
     seen: set[Path] = set()
     files: list[Path] = []
     for prefix in path_prefixes:
@@ -91,6 +96,35 @@ def iter_family_python_files(*, path_prefixes: list[str]) -> list[Path]:
             seen.add(path)
             files.append(path)
     return files
+
+
+def _tracked_family_python_files(*, path_prefixes: list[str]) -> list[Path] | None:
+    """Return tracked Python files for the family, or None if git is unavailable."""
+    normalized_prefixes = sorted(
+        {prefix.strip() for prefix in path_prefixes if isinstance(prefix, str) and prefix.strip()}
+    )
+    if not normalized_prefixes:
+        return []
+
+    result = subprocess.run(
+        ["git", "ls-files", "--", *normalized_prefixes],
+        cwd=PROJECT_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return None
+
+    seen: set[Path] = set()
+    tracked_files: list[Path] = []
+    for raw_path in result.stdout.splitlines():
+        path = PROJECT_ROOT / raw_path.strip()
+        if path.suffix != ".py" or not path.exists() or path in seen:
+            continue
+        seen.add(path)
+        tracked_files.append(path)
+    return sorted(tracked_files)
 
 
 def count_total_loc(*, files: list[Path]) -> int:

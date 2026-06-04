@@ -204,6 +204,7 @@ tracked_suite_inventory:
     - tests/integration/config/test_chembl_dq_catalog_sync.py
     - tests/integration/config/test_chembl_dq_profile_parity.py
     - tests/integration/config/test_chembl_enum_parity.py
+    - tests/integration/config/test_chembl_enum_registry_coordinates.py
     - tests/integration/config/test_chembl_observed_value_fixtures.py
     - tests/integration/config/test_chembl_policy_surface_parity.py
     - tests/integration/config/test_chembl_registry_fixture_contract_parity.py

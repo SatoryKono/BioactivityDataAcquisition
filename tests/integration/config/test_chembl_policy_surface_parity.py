@@ -179,6 +179,11 @@ def _config_enum_surface_expectations(
     entity_configs: dict[str, dict[str, Any]],
 ) -> dict[str, tuple[str, str]]:
     expectations: dict[str, tuple[str, str]] = {}
+    
+    # Get all controlled vocabulary fields to avoid overwriting registry expectations
+    controlled_vocabulary_fields = frozenset().union(
+        *(family.fields for family in DEFAULT_CHEMBL_POLICY_REGISTRY_DATA.controlled_vocabularies)
+    )
 
     for entity, config in entity_configs.items():
         known_profile_fields = _registered_chembl_profile_fields(entity)
@@ -192,11 +197,15 @@ def _config_enum_surface_expectations(
             field_name = str(validation.get("field", ""))
             if ("chembl", entity, field_name) not in ENUM_REGISTRY_PATHS:
                 continue
+            field_ref = f"chembl_{entity}.{field_name}"
+            # Skip controlled vocabulary fields - they use CHEMBL_CONTROLLED_VOCAB_CONFIG
+            if field_ref in controlled_vocabulary_fields:
+                continue
             if field_name in known_profile_fields:
                 classification = (
                     "operator" if field_name == "standard_relation" else "strict enum"
                 )
-                expectations[f"chembl_{entity}.{field_name}"] = (
+                expectations[field_ref] = (
                     classification,
                     CHEMBL_ENUM_PATH.as_posix(),
                 )
@@ -206,6 +215,10 @@ def _config_enum_surface_expectations(
             columns = filters.get(stage_name, {}).get("columns", {})
             for field_name, values in columns.items():
                 if ("chembl", entity, str(field_name)) not in ENUM_REGISTRY_PATHS:
+                    continue
+                field_ref = f"chembl_{entity}.{field_name}"
+                # Skip controlled vocabulary fields - they use CHEMBL_CONTROLLED_VOCAB_CONFIG
+                if field_ref in controlled_vocabulary_fields:
                     continue
                 if field_name not in known_profile_fields:
                     continue
@@ -218,7 +231,7 @@ def _config_enum_surface_expectations(
                 classification = (
                     "operator" if field_name == "standard_relation" else "strict enum"
                 )
-                expectations[f"chembl_{entity}.{field_name}"] = (
+                expectations[field_ref] = (
                     classification,
                     CHEMBL_ENUM_PATH.as_posix(),
                 )
@@ -227,6 +240,10 @@ def _config_enum_surface_expectations(
         for raw_name, value in extraction_params.items():
             field_name = str(raw_name).removesuffix("__in")
             if ("chembl", entity, field_name) not in ENUM_REGISTRY_PATHS:
+                continue
+            field_ref = f"chembl_{entity}.{field_name}"
+            # Skip controlled vocabulary fields - they use CHEMBL_CONTROLLED_VOCAB_CONFIG
+            if field_ref in controlled_vocabulary_fields:
                 continue
             if field_name not in known_profile_fields:
                 continue

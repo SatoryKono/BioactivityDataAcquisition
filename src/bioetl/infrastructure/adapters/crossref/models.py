@@ -245,7 +245,7 @@ CrossRefMessage = _response_models.CrossRefMessage
 CrossRefPublicationResponse = _response_models.CrossRefPublicationResponse
 CrossRefPublicationsResponse = _response_models.CrossRefPublicationsResponse
 _record_namespace = {
-    "Any": Any,
+    "Any": Any,  # Any: Required for pydantic model_rebuild dynamic type resolution
     "CrossRefPublicationRecord": CrossRefPublicationRecord,
     "JsonDict": JsonDict,
 }

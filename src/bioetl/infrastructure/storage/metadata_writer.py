@@ -14,13 +14,13 @@ from bioetl.infrastructure.storage.metadata.writer_operations import (
     _prepare_metadata_write_operation,
     _PreparedMetadataWriteOperation,
 )
+from bioetl.infrastructure.storage.metadata_writer_operations_impl import (
+    _MetadataWriterOperations as _BaseMetadataWriterOperations,
+)
 
 from . import metadata_writer_helpers as _helpers
 from .metadata_writer_impl import (
     MetadataWriter as _BaseMetadataWriter,
-)
-from .metadata_writer_impl import (
-    _MetadataWriterOperations as _BaseMetadataWriterOperations,
 )
 
 _get_metadata_filename = _helpers._get_metadata_filename

@@ -1,20 +1,4 @@
-"""Centralized Metadata Coordinator Service.
-
-Provides a single source of truth for creating metadata across all Medallion layers.
-Eliminates duplication of RuntimeMetadata, PipelineMetadata, and EnvironmentMetadata
-creation logic that was previously scattered across Bronze, Silver, and Gold writers.
-
-Implements:
-- Consistent run_id and timestamps across layers
-- Cached environment metadata (computed once)
-- Factory methods for layer-specific metadata
-- Implements MetadataCoordinatorPort from domain.ports
-
-Architecture:
-- Composition Service (not Infrastructure)
-- Accepts RunContext once at initialization
-- Pure Python, no I/O operations
-"""
+"""Centralized Metadata Coordinator Service."""
 
 from __future__ import annotations
 
@@ -22,9 +6,6 @@ from datetime import datetime
 from functools import cached_property
 
 from bioetl.application.services.lineage._metadata_coordinator_helpers import (
-    build_bronze_file_output_metadata,
-    build_bronze_output_content_hash,
-    build_bronze_source_metadata,
     create_metadata_bundle,
     validate_records_present,
 )
@@ -36,6 +17,10 @@ from bioetl.application.services.lineage.metadata_context import (
     EnvironmentMetadataRuntimeService,
     RunMetadataAssembler,
 )
+from bioetl.application.services.lineage.metadata_coordinator_bronze import (
+    create_bronze_lineage_sidecar_payload,
+    create_bronze_metadata_payload,
+)
 from bioetl.application.services.lineage.metadata_lineage_fragments import (
     build_bronze_lineage_fragment,
     build_gold_lineage_fragment,
@@ -46,16 +31,13 @@ from bioetl.domain.control_plane.reproducibility_policy import (
 )
 from bioetl.domain.lineage import LineageGraphFragment, MetadataLineageBundleResult
 from bioetl.domain.models.metadata import (
-    BaseOutputMetadata,
     BronzeMetadata,
-    BronzeOutputExt,
     EnvironmentMetadata,
     GoldMetadata,
     PipelineMetadata,
     RuntimeMetadata,
     SilverMetadata,
 )
-from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
 from bioetl.domain.ports import (
     BronzeMetadataInput,
     GoldMetadataInput,
@@ -71,32 +53,10 @@ __all__ = [
 
 
 class MetadataCoordinator(MetadataCoordinatorPort):
-    """Centralized coordinator for metadata creation across Medallion layers.
-
-    Creates consistent metadata with shared run_id, timestamps, and pipeline
-    identification. Environment metadata is computed once and cached.
-
-    Example:
-        >>> from datetime import UTC, datetime
-        >>> from uuid import UUID
-        >>> context = RunContext.create(
-        ...     run_id=RunID(UUID("00000000-0000-0000-0000-000000000301")),
-        ...     run_type=RunType.INCREMENTAL,
-        ...     started_at=datetime.now(UTC),
-        ...     provider="chembl",
-        ...     entity="activity",
-        ... )
-        >>> coordinator = MetadataCoordinator(context)
-        >>> bronze_input = BronzeMetadataInput(...)
-        >>> metadata = coordinator.create_bronze_metadata(bronze_input)
-    """
+    """Centralized coordinator for metadata creation across Medallion layers."""
 
     def __init__(self, run_context: RunContext) -> None:
-        """Initialize coordinator with run context.
-
-        Args:
-            run_context: Immutable context for the pipeline run.
-        """
+        """Initialize coordinator with immutable run context."""
         self._context = run_context
 
     @property
@@ -113,11 +73,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
 
     @classmethod
     def _get_environment_metadata(cls) -> EnvironmentMetadata:
-        """Get cached environment metadata (computed once per process).
-
-        Environment metadata (hostname, python_version, bioetl_version) is
-        immutable during process lifetime, so we cache it at class level.
-        """
+        """Get cached environment metadata computed once per process."""
         return EnvironmentMetadataRuntimeService.get()
 
     @cached_property
@@ -132,16 +88,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         duration_seconds: float | None = None,
         input_snapshot_fingerprint: str | None = None,
     ) -> RuntimeMetadata:
-        """Build RuntimeMetadata with consistent run_id and run_type.
-
-        Args:
-            started_at: Override start time (defaults to context.started_at).
-            completed_at: Completion timestamp.
-            duration_seconds: Operation duration.
-
-        Returns:
-            RuntimeMetadata with run context data.
-        """
+        """Build RuntimeMetadata with consistent run_id and run_type."""
         return self._metadata_assembler.build_runtime_metadata(
             started_at=started_at,
             completed_at=completed_at,
@@ -174,43 +121,11 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         )
 
     def create_bronze_metadata(self, input_data: BronzeMetadataInput) -> BronzeMetadata:
-        """Create Bronze layer metadata.
-
-        Args:
-            input_data: Bronze-specific metadata inputs.
-
-        Returns:
-            Complete BronzeMetadata for sidecar file.
-        """
-        duration = (input_data.completed_at - input_data.started_at).total_seconds()
-        source = build_bronze_source_metadata(input_data)
-        file_metadata = build_bronze_file_output_metadata(input_data)
-        source_snapshot_fingerprint = compute_input_snapshot_identity_fingerprint(
-            list(source.input_snapshots)
-        )
-
-        return BronzeMetadata(
-            runtime=self._build_runtime_metadata(
-                started_at=input_data.started_at,
-                completed_at=input_data.completed_at,
-                duration_seconds=duration,
-                input_snapshot_fingerprint=source_snapshot_fingerprint,
-            ),
-            pipeline=self._build_pipeline_metadata(),
-            source=source,
-            output=BaseOutputMetadata(
-                artifact_id=f"bronze_batch:{input_data.batch_id}",
-                record_count=input_data.record_count,
-                total_bytes=input_data.compressed_size,
-                content_hash=build_bronze_output_content_hash(input_data),
-                write_started_at=input_data.started_at,
-                write_completed_at=input_data.completed_at,
-            ),
-            output_ext=BronzeOutputExt(
-                files=[file_metadata],
-            ),
-            environment=self._get_environment_metadata(),
-            governance=input_data.governance,
+        """Create Bronze layer metadata."""
+        return create_bronze_metadata_payload(
+            run_context=self._context,
+            metadata_assembler=self._metadata_assembler,
+            input_data=input_data,
         )
 
     def build_bronze_lineage_fragment(
@@ -243,41 +158,16 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         ingestion_ts: datetime,
     ) -> dict[str, str]:
         """Project canonical Bronze runtime anchors for the legacy `.meta.json` sidecar."""
-        # Use the provider/entity from the request, not the context
-        # This allows the MetadataCoordinator to be reused across pipelines
-        return {
-            "run_id": str(self._context.run_id),
-            "manifest_id": self._context.manifest_id or "",
-            "run_type": self._context.run_type.value,
-            "ingestion_ts": ingestion_ts.isoformat(),
-            "provider": provider,
-            "entity": entity,
-            "batch_id": str(batch_id),
-            "execution_fingerprint": self._context.execution_fingerprint or "",
-            "effective_config_hash": self._context.effective_config_hash or "",
-            "effective_config_artifact_id": (
-                self._context.effective_config_artifact_id or ""
-            ),
-            "contract_ref": self._context.contract_ref or "",
-            "contract_version": self._context.contract_version or "",
-            "required_persistence_profile": (
-                self._context.required_persistence_profile or ""
-            ),
-            "sidecar_truth_boundary": "legacy_lineage_projection_non_authoritative",
-            "authoritative_replay_artifacts": (
-                "run_manifest,lineage_fragment,layer_metadata,effective_config_artifact"
-            ),
-        }
+        return create_bronze_lineage_sidecar_payload(
+            run_context=self._context,
+            provider=provider,
+            entity=entity,
+            batch_id=batch_id,
+            ingestion_ts=ingestion_ts,
+        )
 
     def create_silver_metadata(self, input_data: SilverMetadataInput) -> SilverMetadata:
-        """Create Silver layer metadata.
-
-        Args:
-            input_data: Silver-specific metadata inputs.
-
-        Returns:
-            Complete SilverMetadata for sidecar file.
-        """
+        """Create Silver layer metadata."""
         validate_records_present(
             records=input_data.records,
             total_records=input_data.total_records,
@@ -312,14 +202,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         )
 
     def create_gold_metadata(self, input_data: GoldMetadataInput) -> GoldMetadata:
-        """Create Gold layer metadata.
-
-        Args:
-            input_data: Gold-specific metadata inputs.
-
-        Returns:
-            Complete GoldMetadata for sidecar file.
-        """
+        """Create Gold layer metadata."""
         validate_records_present(
             records=input_data.records,
             total_records=input_data.total_records,

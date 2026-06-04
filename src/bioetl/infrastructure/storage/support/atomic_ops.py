@@ -27,17 +27,16 @@ import os
 import tempfile
 import time
 from collections.abc import Callable, Iterator
-from contextlib import contextmanager, suppress
+from contextlib import contextmanager
 from pathlib import Path
-from types import TracebackType
 from typing import IO, Any
 
 from bioetl.domain.exceptions.infrastructure import InfrastructureError as _InfraBase
 from bioetl.infrastructure.storage.delta.resilience import (
-    DEFAULT_ATOMIC_GROUP_REPLACE_RETRY_POLICY,
     DEFAULT_ATOMIC_REPLACE_RETRY_POLICY,
     AdaptiveRetryPolicy,
 )
+from bioetl.infrastructure.storage.support.atomic_group import AtomicWriteGroup
 
 
 class AtomicWriteError(_InfraBase):
@@ -213,129 +212,3 @@ def atomic_write_text(
         on_retry=on_retry,
     ) as f:
         f.write(text)
-
-
-class AtomicWriteGroup:
-    """Manage atomic writes for multiple related files.
-
-    Ensures all files in a group are written atomically together.
-    If any file fails, all temp files are cleaned up.
-
-    Example:
-        >>> group = AtomicWriteGroup()
-        >>> group.add(data_path, compressed_data)
-        >>> group.add(meta_path, metadata_json.encode())
-        >>> group.commit()  # Both files appear atomically
-
-    """
-
-    def __init__(
-        self,
-        *,
-        retry_policy: AdaptiveRetryPolicy | None = None,
-    ) -> None:
-        self._pending: list[tuple[Path, Path, bytes]] = []  # (target, temp, data)
-        self._retry_policy = retry_policy or DEFAULT_ATOMIC_GROUP_REPLACE_RETRY_POLICY
-
-    def add(self, target: Path, data: bytes) -> None:
-        """Add a file to the atomic write group.
-
-        Args:
-            target: Path to the final destination file
-            data: Bytes to write
-
-        """
-        target.parent.mkdir(parents=True, exist_ok=True)
-
-        fd, temp_path_str = tempfile.mkstemp(
-            suffix=".tmp",
-            prefix="." + target.stem + "_",
-            dir=target.parent,
-        )
-        temp_path = Path(temp_path_str)
-
-        try:
-            with os.fdopen(fd, "wb") as f:
-                f.write(data)
-            self._pending.append((target, temp_path, data))
-        except (OSError, ValueError, TypeError, RuntimeError):
-            # Clean up on write failure
-            with suppress(OSError):
-                temp_path.unlink()
-            raise
-
-    def commit(self) -> None:
-        """Commit all pending writes atomically.
-
-        Replaces all target files with their temp files.
-        If any replace fails, attempts to rollback.
-
-        Raises:
-            AtomicWriteError: If commit fails
-
-        """
-        committed: list[tuple[Path, Path]] = []
-
-        try:
-            for target, temp_path, _ in self._pending:
-                _replace_with_retry(
-                    temp_path,
-                    target,
-                    retry_policy=self._retry_policy,
-                )
-                committed.append((target, temp_path))
-        except (OSError, ValueError, TypeError, RuntimeError) as e:
-            # Rollback: remove any committed files (best effort)
-            # Note: True rollback is impossible after replace,
-            # but we clean up uncommitted temps
-            self._cleanup_uncommitted(committed)
-            raise AtomicWriteError(
-                target, f"Commit failed after {len(committed)} files: {e}"
-            ) from e
-        finally:
-            self._pending.clear()
-
-    def rollback(self) -> None:
-        """Cancel all pending writes and clean up temp files."""
-        for _, temp_path, _ in self._pending:
-            try:
-                if temp_path.exists():
-                    temp_path.unlink()
-            except OSError:
-                pass  # Why: temp file cleanup is best-effort; skip if already removed or locked
-        self._pending.clear()
-
-    def _cleanup_uncommitted(self, committed: list[tuple[Path, Path]]) -> None:
-        """Clean up temp files that weren't committed."""
-        committed_temps = {temp for _, temp in committed}
-        for _, temp_path, _ in self._pending:
-            if temp_path not in committed_temps:
-                try:
-                    if temp_path.exists():
-                        temp_path.unlink()
-                except OSError:
-                    pass  # Why: temp file cleanup is best-effort; skip if already removed or locked
-
-    def __enter__(self) -> AtomicWriteGroup:
-        return self
-
-    def __exit__(
-        self,
-        exc_type: type[BaseException] | None,
-        exc_val: BaseException | None,
-        exc_tb: TracebackType | None,
-    ) -> None:
-        """Exit context manager, rolling back on exception.
-
-        If an exception occurred within the context, all pending temp files
-        are cleaned up via rollback(). If no exception, user should have
-        called commit() explicitly before exiting.
-
-        Args:
-            exc_type: Exception type if an exception was raised, None otherwise.
-            exc_val: Exception instance if an exception was raised, None otherwise.
-            exc_tb: Traceback if an exception was raised, None otherwise.
-        """
-        if exc_type is not None:
-            self.rollback()
-        # If no exception, user should have called commit()

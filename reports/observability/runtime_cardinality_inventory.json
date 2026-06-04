@@ -2803,7 +2803,7 @@
       "src/bioetl/application/composite/checkpoint/_checkpoint_runtime.py",
       "src/bioetl/application/composite/checkpoint/persistence_service.py",
       "src/bioetl/application/composite/runner_pkg/runner_support_runtime.py",
-      "src/bioetl/application/core/lifecycle/checkpoint_manager.py"
+      "src/bioetl/application/core/lifecycle/checkpoint_saved_at.py"
     ],
     "bioetl_composite_phase_errors_total": [
       "src/bioetl/application/observability/pipeline_metrics.py"
@@ -2821,10 +2821,10 @@
       "src/bioetl/infrastructure/storage/lineage_persistence.py"
     ],
     "bioetl_control_plane_ledger_append_duration_seconds": [
-      "src/bioetl/infrastructure/control_plane/file_run_ledger_store.py"
+      "src/bioetl/infrastructure/control_plane/_file_run_ledger_helpers.py"
     ],
     "bioetl_control_plane_ledger_appends_total": [
-      "src/bioetl/infrastructure/control_plane/file_run_ledger_store.py"
+      "src/bioetl/infrastructure/control_plane/_file_run_ledger_helpers.py"
     ],
     "bioetl_control_plane_lifecycle_apply_total": [
       "src/bioetl/infrastructure/control_plane/file_artifact_lifecycle_store.py"
@@ -2848,7 +2848,7 @@
       "src/bioetl/infrastructure/control_plane/_read_metrics.py"
     ],
     "bioetl_control_plane_terminal_events_total": [
-      "src/bioetl/infrastructure/control_plane/file_run_ledger_store.py"
+      "src/bioetl/infrastructure/control_plane/_file_run_ledger_helpers.py"
     ],
     "bioetl_data_freshness_seconds": [
       "src/bioetl/application/services/data_quality_service.py"
@@ -2925,20 +2925,20 @@
       "src/bioetl/composition/factories/services/pipeline_batch_executor_builder.py"
     ],
     "bioetl_gold_validation_failures_total": [
-      "src/bioetl/infrastructure/storage/gold/io_mixin.py",
-      "src/bioetl/infrastructure/storage/gold/writer_support.py"
+      "src/bioetl/infrastructure/storage/gold/io_execution.py",
+      "src/bioetl/infrastructure/storage/gold/writer_implementation.py"
     ],
     "bioetl_gold_write_attempts_total": [
-      "src/bioetl/infrastructure/storage/gold/io_mixin.py",
-      "src/bioetl/infrastructure/storage/gold/writer_support.py"
+      "src/bioetl/infrastructure/storage/gold/io_execution.py",
+      "src/bioetl/infrastructure/storage/gold/writer_implementation.py"
     ],
     "bioetl_gold_write_duration_seconds": [
-      "src/bioetl/infrastructure/storage/gold/io_mixin.py",
-      "src/bioetl/infrastructure/storage/gold/writer_support.py"
+      "src/bioetl/infrastructure/storage/gold/io_execution.py",
+      "src/bioetl/infrastructure/storage/gold/writer_implementation.py"
     ],
     "bioetl_gold_write_outcomes_total": [
-      "src/bioetl/infrastructure/storage/gold/io_mixin.py",
-      "src/bioetl/infrastructure/storage/gold/writer_support.py"
+      "src/bioetl/infrastructure/storage/gold/io_execution.py",
+      "src/bioetl/infrastructure/storage/gold/writer_implementation.py"
     ],
     "bioetl_health_check_degraded_total": [
       "src/bioetl/infrastructure/adapters/_health_check_observability.py"
@@ -2989,16 +2989,16 @@
       "src/bioetl/infrastructure/storage/lineage_persistence.py"
     ],
     "bioetl_memory_batch_resize_events_total": [
-      "src/bioetl/application/core/batch_memory_manager.py"
+      "src/bioetl/application/core/batch_memory_metrics.py"
     ],
     "bioetl_memory_monitor_fallback_events_total": [
-      "src/bioetl/application/core/batch_memory_manager.py"
+      "src/bioetl/application/core/batch_memory_metrics.py"
     ],
     "bioetl_memory_pressure_events_total": [
-      "src/bioetl/application/core/batch_memory_manager.py"
+      "src/bioetl/application/core/batch_memory_metrics.py"
     ],
     "bioetl_memory_pressure_state": [
-      "src/bioetl/application/core/batch_memory_manager.py"
+      "src/bioetl/application/core/batch_memory_metrics.py"
     ],
     "bioetl_metadata_write_outcomes_total": [
       "src/bioetl/infrastructure/storage/metadata/writer_operations.py",
@@ -3011,7 +3011,7 @@
       "src/bioetl/infrastructure/observability/server.py"
     ],
     "bioetl_observability_events_total": [
-      "src/bioetl/application/composite/_lifecycle_observer_tracing_helpers.py",
+      "src/bioetl/application/composite/_lifecycle_observer_event_metrics.py",
       "src/bioetl/application/observability/observer_event_mixin.py"
     ],
     "bioetl_observability_runtime_status": [
@@ -3019,21 +3019,21 @@
     ],
     "bioetl_output_artifact_publication_events_total": [
       "src/bioetl/application/observability/pipeline_metrics.py",
-      "src/bioetl/infrastructure/storage/metadata_artifact_publication.py"
+      "src/bioetl/infrastructure/storage/metadata_artifact_metrics.py"
     ],
     "bioetl_phase_duration_seconds": [
-      "src/bioetl/application/composite/_lifecycle_observer_tracing_helpers.py",
+      "src/bioetl/application/composite/_lifecycle_observer_event_metrics.py",
       "src/bioetl/application/observability/observer.py"
     ],
     "bioetl_pipeline_duration_seconds": [
-      "src/bioetl/application/composite/_lifecycle_observer_tracing_helpers.py",
+      "src/bioetl/application/composite/_lifecycle_observer_event_metrics.py",
       "src/bioetl/application/observability/observer_context_mixin.py"
     ],
     "bioetl_pipeline_health_check_passed": [
       "src/bioetl/application/observability/observer_health_mixin.py"
     ],
     "bioetl_pipeline_runs_total": [
-      "src/bioetl/application/composite/_lifecycle_observer_tracing_helpers.py",
+      "src/bioetl/application/composite/_lifecycle_observer_event_metrics.py",
       "src/bioetl/application/observability/observer_context_mixin.py",
       "src/bioetl/application/services/execution/pipeline_runner_service.py"
     ],
@@ -3148,7 +3148,7 @@
       "src/bioetl/application/core/_base_transformer_structural_support.py"
     ],
     "bioetl_traced_runs_total": [
-      "src/bioetl/application/composite/_lifecycle_observer_tracing_helpers.py",
+      "src/bioetl/application/composite/_lifecycle_observer_span_management.py",
       "src/bioetl/application/observability/observer_context_mixin.py"
     ],
     "bioetl_transform_duration_seconds": [

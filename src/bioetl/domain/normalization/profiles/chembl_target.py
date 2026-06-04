@@ -22,8 +22,8 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_text,
 )
 from bioetl.domain.schemas.chembl.target import TargetSchema
-from bioetl.domain.schemas.constants import TARGET_ORGANISM_CLASSES, TARGET_TYPES
 
+from ._chembl_vocab import chembl_enum
 from .chembl_json_ordering_policy import (
     chembl_json_fields,
     chembl_set_like_json_fields,
@@ -61,8 +61,8 @@ _REFERENCE_IDENTIFIER_RULES = chembl_reference_identifier_rules("target")
 
 # Enum fields for strict validation
 _ENUM_FIELDS = {
-    "target_type": TARGET_TYPES,
-    "organism_class": TARGET_ORGANISM_CLASSES,
+    "target_type": chembl_enum("target", "target_type"),
+    "organism_class": chembl_enum("target", "organism_class"),
 }
 _SPECIAL_RULE_COMPONENTS = {
     **_REFERENCE_IDENTIFIER_RULES,

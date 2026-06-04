@@ -3,21 +3,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
 
+from bioetl.domain.ports import (
+    AuditPort,
+    LineageStorePort,
+    MetadataCoordinatorPort,
+    MetadataWriterPort,
+    MetricsPort,
+    TracingPort,
+)
 from bioetl.domain.ports.noop import NoOpMetadataWriter
-
-if TYPE_CHECKING:
-    from bioetl.domain.ports import (
-        AuditPort,
-        LineageStorePort,
-        MetadataCoordinatorPort,
-        MetadataWriterPort,
-        MetricsPort,
-        TracingPort,
-    )
-    from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
-    from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterProtocol
+from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
+from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterProtocol
 
 
 @dataclass(frozen=True, slots=True)

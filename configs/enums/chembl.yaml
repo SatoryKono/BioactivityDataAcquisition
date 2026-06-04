@@ -203,6 +203,16 @@ molecule:
         - 1
         - 2
 
+    # DQ-only flag fields (not in ChEMBL DB, but governed in DQ configs)
+    binary_flag_values:
+        - 0
+        - 1
+
+    trinary_flag_values:
+        - -1
+        - 0
+        - 1
+
 # =============================================================================
 # Target
 # =============================================================================
@@ -267,6 +277,14 @@ publication:
         - hybrid
         - bronze
         - closed
+        - diamond
+
+    # ChEMBL-specific DQ subset (not global taxonomy)
+    chembl_specific_types:
+        - journal-article
+        - book
+        - dataset
+        - patent
 
     types:
         - journal-article

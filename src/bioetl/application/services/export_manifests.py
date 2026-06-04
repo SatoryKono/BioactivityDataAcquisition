@@ -2,14 +2,29 @@
 
 from __future__ import annotations
 
-import hashlib
-import json
-from dataclasses import asdict, dataclass
-from datetime import UTC, datetime
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl import __version__ as BIOETL_VERSION
+from bioetl.application.services.export_manifest_attribution import (
+    mixed_license_notice as _mixed_license_notice,
+)
+from bioetl.application.services.export_manifest_attribution import (
+    provider_attribution_payload as _provider_attribution_payload,
+)
+from bioetl.application.services.export_manifest_attribution import (
+    providers_for_table as _providers_for_table,
+)
+from bioetl.application.services.export_manifest_identity import (
+    dataset_bundle_id as _dataset_bundle_id,
+)
+from bioetl.application.services.export_manifest_identity import (
+    fingerprint_payload as _fingerprint_payload,
+)
+from bioetl.application.services.export_manifest_identity import (
+    resolve_generated_at as _resolve_generated_at,
+)
 from bioetl.domain.ports import ExportFileFingerprint
 
 if TYPE_CHECKING:
@@ -28,19 +43,6 @@ MANIFEST_SCHEMA_VERSION = "1.0.0"
 
 
 @dataclass(frozen=True, slots=True)
-class ProviderAttributionRecord:
-    """Provider-level data attribution and redistribution metadata."""
-
-    provider: str
-    source_url: str
-    license_name: str
-    license_url: str
-    attribution_text: str
-    redistribution_notes: str
-    caveats: tuple[str, ...] = ()
-
-
-@dataclass(frozen=True, slots=True)
 class ExportSidecarPayloadsRecord:
     """Provenance and licensing payloads for one exported dataset snapshot."""
 
@@ -48,97 +50,7 @@ class ExportSidecarPayloadsRecord:
     provenance_manifest: dict[str, object]
     licensing_manifest: dict[str, object]
 
-
-ProviderAttribution = ProviderAttributionRecord
 ExportSidecarPayloads = ExportSidecarPayloadsRecord
-
-
-_PROVIDER_ATTRIBUTIONS: dict[str, ProviderAttributionRecord] = {
-    "chembl": ProviderAttributionRecord(
-        provider="chembl",
-        source_url="https://www.ebi.ac.uk/chembl/",
-        license_name="CC BY-SA 3.0",
-        license_url="https://www.ebi.ac.uk/chembl/terms",
-        attribution_text="ChEMBL data is provided by EMBL-EBI.",
-        redistribution_notes=(
-            "Preserve ChEMBL attribution and review share-alike obligations for "
-            "redistributed derived datasets."
-        ),
-    ),
-    "crossref": ProviderAttributionRecord(
-        provider="crossref",
-        source_url="https://api.crossref.org",
-        license_name="Crossref metadata terms",
-        license_url="https://www.crossref.org/documentation/retrieve-metadata/rest-api/",
-        attribution_text="Crossref metadata is provided by Crossref members.",
-        redistribution_notes=(
-            "Metadata is generally open, but linked full text and abstracts may "
-            "carry separate rights."
-        ),
-    ),
-    "openalex": ProviderAttributionRecord(
-        provider="openalex",
-        source_url="https://openalex.org/",
-        license_name="CC0",
-        license_url="https://help.openalex.org/hc/en-us/articles/24397762024087-Pricing",
-        attribution_text="OpenAlex data is provided by OurResearch.",
-        redistribution_notes="OpenAlex states that its data is licensed as CC0.",
-    ),
-    "pubchem": ProviderAttributionRecord(
-        provider="pubchem",
-        source_url="https://pubchem.ncbi.nlm.nih.gov/",
-        license_name="Source-specific / mixed",
-        license_url="https://pubchem.ncbi.nlm.nih.gov/docs/downloads",
-        attribution_text="PubChem data is provided by NCBI and PubChem contributors.",
-        redistribution_notes=(
-            "PubChem aggregates contributor data; check row/source provenance for "
-            "source-specific licensing before redistribution."
-        ),
-    ),
-    "pubmed": ProviderAttributionRecord(
-        provider="pubmed",
-        source_url="https://pubmed.ncbi.nlm.nih.gov/",
-        license_name="NLM/NCBI terms and source-specific rights",
-        license_url="https://www.ncbi.nlm.nih.gov/home/about/policies/",
-        attribution_text="PubMed metadata is provided by NLM/NCBI.",
-        redistribution_notes=(
-            "Citation metadata and abstracts can have different rights; preserve "
-            "source attribution and review NLM policies."
-        ),
-    ),
-    "semanticscholar": ProviderAttributionRecord(
-        provider="semanticscholar",
-        source_url="https://www.semanticscholar.org/",
-        license_name="Semantic Scholar API License Agreement",
-        license_url="https://www.semanticscholar.org/product/api/license",
-        attribution_text="Semantic Scholar data is provided by AI2.",
-        redistribution_notes=(
-            "Semantic Scholar API/data terms require attribution and may include "
-            "use restrictions for API-derived data."
-        ),
-    ),
-    "uniprot": ProviderAttributionRecord(
-        provider="uniprot",
-        source_url="https://www.uniprot.org/",
-        license_name="CC BY 4.0",
-        license_url="https://www.uniprot.org/help/license",
-        attribution_text="UniProt data is provided by the UniProt Consortium.",
-        redistribution_notes="Preserve UniProt attribution for redistributed outputs.",
-    ),
-}
-
-_COMPOSITE_SOURCES: dict[str, tuple[str, ...]] = {
-    "composite.activity": ("chembl",),
-    "composite.assay": ("chembl",),
-    "composite.molecule": ("chembl", "pubchem"),
-    "composite.publication": (
-        "chembl",
-        "openalex",
-        "pubmed",
-        "semanticscholar",
-    ),
-    "composite.target": ("chembl", "uniprot"),
-}
 
 
 def build_export_sidecar_payloads(
@@ -326,113 +238,3 @@ def write_export_sidecar_manifests(
     )
     return (provenance_path, licensing_path, checksums_path)
 
-
-def _providers_for_table(table_name: str) -> tuple[str, ...]:
-    if table_name in _COMPOSITE_SOURCES:
-        return _COMPOSITE_SOURCES[table_name]
-    provider = table_name.split(".", maxsplit=1)[0].strip()
-    return (provider or "unknown",)
-
-
-def _provider_attribution_payload(
-    provider: str,
-    *,
-    strict: bool,
-) -> dict[str, object]:
-    attribution = _PROVIDER_ATTRIBUTIONS.get(provider)
-    if attribution is None:
-        if strict:
-            raise ValueError(
-                f"Missing provider attribution for export provider: {provider}"
-            )
-        return {
-            "provider": provider,
-            "source_url": None,
-            "license_name": "unknown",
-            "license_url": None,
-            "attribution_text": None,
-            "redistribution_notes": (
-                "Provider attribution is not registered; review source terms before "
-                "redistribution."
-            ),
-            "caveats": ["missing_provider_attribution"],
-        }
-    payload = asdict(attribution)
-    payload["caveats"] = list(attribution.caveats)
-    return payload
-
-
-def _dataset_bundle_id(
-    *,
-    table_name: str,
-    layer: str,
-    export_format: str,
-    row_count: int,
-    columns: tuple[str, ...],
-    providers: tuple[str, ...],
-    data_sha256: str,
-) -> str:
-    payload = {
-        "columns": list(columns),
-        "data_sha256": data_sha256,
-        "export_format": export_format,
-        "layer": layer,
-        "providers": list(providers),
-        "row_count": row_count,
-        "table_name": table_name,
-    }
-    digest = hashlib.sha256(
-        json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str).encode()
-    ).hexdigest()
-    return f"bioetl-export-{digest}"
-
-
-def _fingerprint_payload(fingerprint: ExportFileFingerprint) -> dict[str, object]:
-    return {
-        "path": fingerprint.path.as_posix(),
-        "size_bytes": fingerprint.size_bytes,
-        "sha256": fingerprint.sha256,
-    }
-
-
-def _mixed_license_notice(providers: tuple[str, ...]) -> str:
-    if len(providers) <= 1:
-        return (
-            "Single-provider export; data/output license obligations remain separate "
-            "from the MIT code license."
-        )
-    return (
-        "Composite or multi-provider export; downstream redistribution must satisfy "
-        "all contributing provider terms and must not be treated as MIT-licensed data."
-    )
-
-
-def _resolve_generated_at(
-    generated_at: str | None,
-    *,
-    allow_nondeterministic: bool,
-    clock: ClockPort | None,
-) -> str:
-    """Resolve export manifest timestamp without implicit replay-time wall clock drift."""
-    if generated_at is not None:
-        timestamp = generated_at.strip()
-        if timestamp:
-            return timestamp
-    if allow_nondeterministic:
-        if clock is not None:
-            return _format_utc(clock.now())
-        return _utc_now()
-    raise ValueError(
-        "generated_at must be provided for deterministic export manifests; "
-        "operator-only exports must opt into non-deterministic generated_at"
-    )
-
-
-def _utc_now() -> str:
-    return _format_utc(datetime.now(UTC))
-
-
-def _format_utc(value: datetime) -> str:
-    return (
-        value.astimezone(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-    )

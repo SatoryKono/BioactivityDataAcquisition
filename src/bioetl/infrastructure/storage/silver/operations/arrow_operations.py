@@ -3,16 +3,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
 
 import pyarrow as pa
 
+from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.storage.silver.support import (
     prepare_arrow_data as _prepare_arrow_data_standalone,
 )
-
-if TYPE_CHECKING:
-    from bioetl.domain.types import BronzeRecord
 
 
 @dataclass(frozen=True, slots=True)

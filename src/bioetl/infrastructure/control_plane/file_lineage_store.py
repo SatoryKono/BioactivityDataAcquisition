@@ -2,23 +2,28 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 import os
 from contextlib import suppress
 from dataclasses import dataclass, replace
 from pathlib import Path
-from time import perf_counter
 from typing import TYPE_CHECKING
 
 from bioetl.domain.lineage import LineageGraphFragment
 from bioetl.domain.ports import LineageStorePort
-from bioetl.domain.types import RunID
 from bioetl.infrastructure.control_plane._durability import (
     flush_control_plane_file_descriptor,
 )
-from bioetl.infrastructure.control_plane._read_metrics import (
-    emit_control_plane_read_metrics,
+from bioetl.infrastructure.control_plane._file_lineage_index import (
+    LineageIndexCorruptionError,
+    append_jsonl_payload,
+    build_stored_fragment_id,
+    load_fragment_ids,
+    stable_key_filename,
+    truncate_index_to_offset,
+)
+from bioetl.infrastructure.control_plane._file_lineage_queries import (
+    FileLineageQueriesMixin,
 )
 from bioetl.infrastructure.storage.atomic import atomic_write_text
 
@@ -29,113 +34,47 @@ if TYPE_CHECKING:
 
 
 _LINEAGE_APPEND_OPEN_FLAGS = os.O_APPEND | os.O_CREAT | os.O_WRONLY
-
-
-class _LineageIndexCorruptionError(ValueError):
-    """Raised when a lineage index JSONL file is truncated or malformed."""
+_LineageIndexCorruptionError = LineageIndexCorruptionError
 
 
 def _stable_key_filename(key: str) -> str:
     """Return a filesystem-safe filename stem for one semantic key."""
-    return hashlib.sha256(key.encode("utf-8")).hexdigest()
+    return stable_key_filename(key)
 
 
 def _build_stored_fragment_id(fragment: LineageGraphFragment) -> str:
     """Return one occurrence-scoped stored fragment identity."""
-    anchors = [fragment.fragment_id]
-    if fragment.run_id is not None:
-        anchors.append(fragment.run_id)
-    if fragment.manifest_id is not None:
-        anchors.append(fragment.manifest_id)
-    if len(anchors) == 1:
-        return fragment.fragment_id
-    digest = hashlib.sha256("|".join(anchors).encode("utf-8")).hexdigest()[:12]
-    return f"{fragment.fragment_id}:occurrence:{digest}"
+    return build_stored_fragment_id(fragment)
 
 
 def _load_fragment_ids(index_path: Path, *, key: str) -> list[str]:
     """Load fragment identifiers from one JSONL index file."""
-    if not index_path.exists():
-        return []
-    raw_text = index_path.read_text(encoding="utf-8")
-    if not raw_text.strip():
-        return []
-    if not raw_text.endswith(("\n", "\r")):
-        raise _LineageIndexCorruptionError(
-            f"Lineage index '{index_path}' is corrupted: truncated tail line"
-        )
-    fragment_ids: dict[str, None] = {}
-    for line_number, line in enumerate(raw_text.splitlines(), start=1):
-        if not line.strip():
-            continue
-        try:
-            payload = json.loads(line)
-        except json.JSONDecodeError as error:
-            raise _LineageIndexCorruptionError(
-                f"Lineage index '{index_path}' is corrupted at line "
-                f"{line_number}: {error.msg}"
-            ) from error
-        if not isinstance(payload, dict):
-            raise _LineageIndexCorruptionError(
-                f"Lineage index '{index_path}' is corrupted at line "
-                f"{line_number}: payload must be a JSON object"
-            )
-        if str(payload.get("key")) != key:
-            raise _LineageIndexCorruptionError(
-                f"Lineage index '{index_path}' is corrupted at line "
-                f"{line_number}: unexpected key"
-            )
-        fragment_id = payload.get("fragment_id")
-        if fragment_id is None or not str(fragment_id).strip():
-            raise _LineageIndexCorruptionError(
-                f"Lineage index '{index_path}' is corrupted at line "
-                f"{line_number}: missing fragment_id"
-            )
-        fragment_ids[str(fragment_id)] = None
-    return list(fragment_ids)
+    return load_fragment_ids(index_path, key=key)
 
 
 def _truncate_index_to_offset(path: Path, *, offset: int) -> None:
     """Best-effort rollback of one lineage index file to a known-good offset."""
-    if not path.exists():
-        return
-    file_descriptor = os.open(path, os.O_RDWR)
-    try:
-        os.ftruncate(file_descriptor, offset)
-        flush_control_plane_file_descriptor(file_descriptor)
-    finally:
-        os.close(file_descriptor)
+    truncate_index_to_offset(
+        path,
+        offset=offset,
+        os_module=os,
+        flush_file_descriptor=flush_control_plane_file_descriptor,
+    )
 
 
 def _append_jsonl_payload(path: Path, payload: bytes) -> int:
-    """Append one full JSONL payload with rollback on partial writes."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    file_descriptor = os.open(path, _LINEAGE_APPEND_OPEN_FLAGS, 0o666)
-    bytes_written = 0
-    checkpoint_size = 0
-    try:
-        checkpoint_size = os.fstat(file_descriptor).st_size
-        while bytes_written < len(payload):
-            written = os.write(file_descriptor, payload[bytes_written:])
-            if written <= 0:
-                raise OSError("Lineage index append produced an empty write")
-            bytes_written += written
-        flush_control_plane_file_descriptor(file_descriptor)
-        return checkpoint_size
-    except OSError:
-        if bytes_written > 0:
-            try:
-                os.ftruncate(file_descriptor, checkpoint_size)
-                flush_control_plane_file_descriptor(file_descriptor)
-            except OSError:
-                pass
-        raise
-    finally:
-        os.close(file_descriptor)
+    """Append one full JSONL payload with public-module patch points."""
+    return append_jsonl_payload(
+        path,
+        payload,
+        open_flags=_LINEAGE_APPEND_OPEN_FLAGS,
+        os_module=os,
+        flush_file_descriptor=flush_control_plane_file_descriptor,
+    )
 
 
 @dataclass(slots=True)
-class FileLineageStore(LineageStorePort):
+class FileLineageStore(FileLineageQueriesMixin, LineageStorePort):
     """Persist lineage graph fragments under the control-plane output tree."""
 
     base_path: Path
@@ -148,10 +87,7 @@ class FileLineageStore(LineageStorePort):
         stored_fragment_id = fragment.stored_fragment_id or _build_stored_fragment_id(
             fragment
         )
-        persisted_fragment = replace(
-            fragment,
-            stored_fragment_id=stored_fragment_id,
-        )
+        persisted_fragment = replace(fragment, stored_fragment_id=stored_fragment_id)
         fragment_path = self._fragment_path(stored_fragment_id)
         existing_fragment_payload = (
             fragment_path.read_text(encoding="utf-8")
@@ -164,187 +100,76 @@ class FileLineageStore(LineageStorePort):
                 fragment_path,
                 json.dumps(persisted_fragment.to_dict(), indent=2, sort_keys=True),
             )
+            index_rollbacks.extend(self._fragment_indexes(fragment, stored_fragment_id))
+        except (OSError, TypeError, ValueError):
+            self._rollback_save(
+                fragment_path=fragment_path,
+                existing_fragment_payload=existing_fragment_payload,
+                index_rollbacks=index_rollbacks,
+            )
+            raise
+
+    def _fragment_indexes(
+        self,
+        fragment: LineageGraphFragment,
+        stored_fragment_id: str,
+    ) -> list[tuple[Path, int]]:
+        """Append all lookup indexes for one persisted fragment."""
+        index_rollbacks = [
+            self._append_index(
+                self._semantic_fragment_index_path(fragment.fragment_id),
+                key=fragment.fragment_id,
+                fragment_id=stored_fragment_id,
+            )
+        ]
+        if fragment.run_id is not None:
             index_rollbacks.append(
                 self._append_index(
-                    self._semantic_fragment_index_path(fragment.fragment_id),
-                    key=fragment.fragment_id,
+                    self._run_index_path(fragment.run_id),
+                    key=fragment.run_id,
                     fragment_id=stored_fragment_id,
                 )
             )
-
-            if fragment.run_id is not None:
-                index_rollbacks.append(
-                    self._append_index(
-                        self._run_index_path(fragment.run_id),
-                        key=fragment.run_id,
-                        fragment_id=stored_fragment_id,
-                    )
+        if fragment.manifest_id is not None:
+            index_rollbacks.append(
+                self._append_index(
+                    self._manifest_index_path(fragment.manifest_id),
+                    key=fragment.manifest_id,
+                    fragment_id=stored_fragment_id,
                 )
-            if fragment.manifest_id is not None:
-                index_rollbacks.append(
-                    self._append_index(
-                        self._manifest_index_path(fragment.manifest_id),
-                        key=fragment.manifest_id,
-                        fragment_id=stored_fragment_id,
-                    )
+            )
+        for node in fragment.nodes:
+            index_rollbacks.append(
+                self._append_index(
+                    self._node_index_path(node.node_id),
+                    key=node.node_id,
+                    fragment_id=stored_fragment_id,
                 )
-            for node in fragment.nodes:
-                index_rollbacks.append(
-                    self._append_index(
-                        self._node_index_path(node.node_id),
-                        key=node.node_id,
-                        fragment_id=stored_fragment_id,
-                    )
-                )
-        except (OSError, TypeError, ValueError):
-            for index_path, checkpoint_offset in reversed(index_rollbacks):
-                with suppress(OSError):
-                    _truncate_index_to_offset(index_path, offset=checkpoint_offset)
-            if existing_fragment_payload is None:
-                with suppress(OSError):
-                    if fragment_path.exists():
-                        fragment_path.unlink()
-            else:
-                with suppress(OSError):
-                    atomic_write_text(fragment_path, existing_fragment_payload)
-            raise
+            )
+        return index_rollbacks
 
-    def get_occurrence(self, fragment_id: str) -> LineageGraphFragment | None:
-        """Load one stored occurrence fragment id without semantic fallback."""
-        started_at = perf_counter()
-        status = "success"
-        try:
-            fragment = self._load_fragment(fragment_id)
-            if fragment is None:
-                status = "miss"
-            return fragment
-        except (OSError, TypeError, ValueError):
-            status = "failed"
-            raise
-        finally:
-            emit_control_plane_read_metrics(
-                self.metrics,
-                store="lineage",
-                operation="get_occurrence",
-                status=status,
-                duration_seconds=perf_counter() - started_at,
-            )
-
-    def get(self, fragment_id: str) -> LineageGraphFragment | None:
-        """Load one fragment by identifier if present."""
-        started_at = perf_counter()
-        status = "success"
-        try:
-            fragment = self._load_fragment(fragment_id)
-            if fragment is None:
-                stored_fragment_ids = _load_fragment_ids(
-                    self._semantic_fragment_index_path(fragment_id),
-                    key=fragment_id,
-                )
-                if not stored_fragment_ids:
-                    status = "miss"
-                    return None
-                if len(stored_fragment_ids) > 1:
-                    status = "failed"
-                    raise ValueError(
-                        "Semantic lineage fragment id resolves to multiple stored "
-                        "occurrence records; use run_id or manifest_id lookup for "
-                        "historical reconstruction"
-                    )
-                fragment = self._load_fragment(stored_fragment_ids[0])
-                if fragment is None:
-                    status = "miss"
-                    return None
-            return fragment
-        except (OSError, TypeError, ValueError):
-            status = "failed"
-            raise
-        finally:
-            emit_control_plane_read_metrics(
-                self.metrics,
-                store="lineage",
-                operation="get",
-                status=status,
-                duration_seconds=perf_counter() - started_at,
-            )
-
-    def list_by_run_id(self, run_id: RunID) -> list[LineageGraphFragment]:
-        """Return fragments linked to one run identifier."""
-        started_at = perf_counter()
-        status = "success"
-        try:
-            fragments = self._load_from_index(
-                self._run_index_path(str(run_id)),
-                key=str(run_id),
-            )
-            if not fragments:
-                status = "miss"
-            return fragments
-        except (OSError, TypeError, ValueError):
-            status = "failed"
-            raise
-        finally:
-            emit_control_plane_read_metrics(
-                self.metrics,
-                store="lineage",
-                operation="list_by_run_id",
-                status=status,
-                duration_seconds=perf_counter() - started_at,
-            )
-
-    def list_by_manifest_id(self, manifest_id: str) -> list[LineageGraphFragment]:
-        """Return fragments linked to one manifest identifier."""
-        started_at = perf_counter()
-        status = "success"
-        try:
-            fragments = self._load_from_index(
-                self._manifest_index_path(manifest_id),
-                key=manifest_id,
-            )
-            if not fragments:
-                status = "miss"
-            return fragments
-        except (OSError, TypeError, ValueError):
-            status = "failed"
-            raise
-        finally:
-            emit_control_plane_read_metrics(
-                self.metrics,
-                store="lineage",
-                operation="list_by_manifest_id",
-                status=status,
-                duration_seconds=perf_counter() - started_at,
-            )
-
-    def list_by_node_id(self, node_id: str) -> list[LineageGraphFragment]:
-        """Return fragments that mention one node identifier."""
-        started_at = perf_counter()
-        status = "success"
-        try:
-            fragments = self._load_from_index(
-                self._node_index_path(node_id),
-                key=node_id,
-            )
-            if not fragments:
-                status = "miss"
-            return fragments
-        except (OSError, TypeError, ValueError):
-            status = "failed"
-            raise
-        finally:
-            emit_control_plane_read_metrics(
-                self.metrics,
-                store="lineage",
-                operation="list_by_node_id",
-                status=status,
-                duration_seconds=perf_counter() - started_at,
-            )
+    def _rollback_save(
+        self,
+        *,
+        fragment_path: Path,
+        existing_fragment_payload: str | None,
+        index_rollbacks: list[tuple[Path, int]],
+    ) -> None:
+        """Restore fragment and indexes after a failed save."""
+        for index_path, checkpoint_offset in reversed(index_rollbacks):
+            with suppress(OSError):
+                _truncate_index_to_offset(index_path, offset=checkpoint_offset)
+        if existing_fragment_payload is None:
+            with suppress(OSError):
+                if fragment_path.exists():
+                    fragment_path.unlink()
+        else:
+            with suppress(OSError):
+                atomic_write_text(fragment_path, existing_fragment_payload)
 
     def _fragment_path(self, fragment_id: str) -> Path:
         """Resolve the fragment JSON path for one fragment identifier."""
-        return (
-            self.base_path / "fragments" / f"{_stable_key_filename(fragment_id)}.json"
-        )
+        return self.base_path / "fragments" / f"{_stable_key_filename(fragment_id)}.json"
 
     def _run_index_path(self, run_id: str) -> Path:
         """Resolve the run-id index path."""
@@ -394,11 +219,14 @@ class FileLineageStore(LineageStorePort):
     ) -> list[LineageGraphFragment]:
         """Load fragments referenced by one lookup index."""
         fragments: list[LineageGraphFragment] = []
-        for fragment_id in _load_fragment_ids(index_path, key=key):
+        for fragment_id in self._load_fragment_ids(index_path, key=key):
             fragment = self._load_fragment(fragment_id)
             if fragment is not None:
                 fragments.append(fragment)
         return fragments
+
+    def _load_fragment_ids(self, index_path: Path, *, key: str) -> list[str]:
+        return _load_fragment_ids(index_path, key=key)
 
     def _load_fragment(self, fragment_id: str) -> LineageGraphFragment | None:
         """Load one fragment payload without emitting public lookup metrics."""

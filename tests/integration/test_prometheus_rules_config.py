@@ -669,9 +669,13 @@ def test_pushgateway_default_target_has_bounded_replace_and_cleanup_lifecycle() 
         "Pushgateway publication must use replace-style push_to_gateway, not "
         "additive pushadd_to_gateway."
     )
-    assert "push_to_gateway(" in server_source
-    assert "delete_metrics_from_gateway" in server_source
-    assert "delete_from_gateway(" in server_source
+    # Check that replace-style functions are imported for dependency injection
+    assert "from prometheus_client.exposition import delete_from_gateway, push_to_gateway" in server_source
+    # Check that wrapper functions are used (dependency injection pattern)
+    assert "publish_metrics_to_gateway" in server_source
+    assert "remove_metrics_from_gateway" in server_source
+    assert "push_gateway=push_to_gateway" in server_source
+    assert "delete_gateway=delete_from_gateway" in server_source
 
 
 def test_slo_alert_contract_matches_shipped_prometheus_rules() -> None:

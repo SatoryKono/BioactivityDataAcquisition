@@ -307,6 +307,7 @@ quality:
     - hybrid
     - bronze
     - closed
+    - diamond
     nullable: true
     error_message: oa_status must be one of the reviewed open-access status values when present
   - field: title

@@ -15,6 +15,7 @@ zones called out during the 2026-03 architecture review:
 from __future__ import annotations
 
 import ast
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -90,7 +91,7 @@ def _collect_zone_type_checking_stats(
     type_checking_imports = 0
     offenders: list[tuple[int, int, str]] = []
 
-    for py_file in sorted(zone_path.rglob("*.py")):
+    for py_file in _iter_zone_python_files(zone_path, src_root=src_root):
         file_stats = _collect_file_type_checking_stats(py_file, src_root=src_root)
         if file_stats is None:
             continue
@@ -108,6 +109,32 @@ def _collect_zone_type_checking_stats(
         type_checking_imports=type_checking_imports,
         top_offenders=tuple(sorted(offenders, reverse=True)[:8]),
     )
+
+
+def _iter_zone_python_files(zone_path: Path, *, src_root: Path) -> tuple[Path, ...]:
+    """Return tracked Python files for the zone, falling back to a full tree walk."""
+    repo_root = src_root.parents[1]
+    try:
+        relative_zone = zone_path.relative_to(repo_root).as_posix()
+    except ValueError:
+        return tuple(sorted(zone_path.rglob("*.py")))
+
+    result = subprocess.run(
+        ["git", "ls-files", "--", relative_zone],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return tuple(sorted(zone_path.rglob("*.py")))
+
+    files = [
+        repo_root / raw_path.strip()
+        for raw_path in result.stdout.splitlines()
+        if raw_path.strip().endswith(".py")
+    ]
+    return tuple(sorted(path for path in files if path.exists()))
 
 
 def _collect_file_type_checking_stats(

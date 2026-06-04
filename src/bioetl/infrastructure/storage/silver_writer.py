@@ -93,7 +93,7 @@ class SilverWriter(
         lineage_store: LineageStorePort | None = None,
         dq_calculator: DQMetricsCalculator | None = None,
         merge_resilience_policy: SilverMergeResiliencePolicy | None = None,
-        contract_rollout_policy: Any = None,
+        contract_rollout_policy: Any = None,  # Any: Dynamic policy object with .mode and .write_versions attributes
     ) -> None:
         """Initialize Silver writer."""
         self._pipeline_name = pipeline_name

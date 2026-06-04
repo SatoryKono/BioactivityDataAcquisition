@@ -4,16 +4,15 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from datetime import datetime
-from typing import TYPE_CHECKING, Any
+from typing import Any
+
+import pyarrow as pa
 
 from bioetl.domain.context import current_utc_time
 from bioetl.domain.ports import AuditPort, MetricsPort
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterProtocol
 from bioetl.infrastructure.storage.support.retention import RetentionPolicy
-
-if TYPE_CHECKING:
-    import pyarrow as pa
 
 
 class SilverMaintenanceOperations:

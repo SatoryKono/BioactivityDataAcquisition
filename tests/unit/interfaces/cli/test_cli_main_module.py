@@ -9,7 +9,10 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import patch
 
+import click
 import pytest
 
 
@@ -36,6 +39,30 @@ class TestCliMainModule:
 
         # They should be the same function
         assert main is main_from_module
+
+    def test_lazy_command_loader_resolves_only_requested_public_command(self) -> None:
+        """Lazy command loading should keep the CLI entrypoint as a thin seam."""
+        from bioetl.interfaces.cli.main import _load_cli_command
+
+        command = click.Command("run-all")
+
+        with patch(
+            "bioetl.interfaces.cli.main.import_module",
+            return_value=SimpleNamespace(run_all=command),
+        ) as import_module:
+            loaded = _load_cli_command("run-all")
+
+        assert loaded is command
+        import_module.assert_called_once_with("bioetl.interfaces.cli.commands.run_all")
+
+    def test_lazy_command_loader_returns_none_for_unknown_command(self) -> None:
+        """Unknown command names must fail fast without importing command modules."""
+        from bioetl.interfaces.cli.main import _load_cli_command
+
+        with patch("bioetl.interfaces.cli.main.import_module") as import_module:
+            assert _load_cli_command("not-a-command") is None
+
+        import_module.assert_not_called()
 
     @pytest.mark.slow
     @pytest.mark.timeout(120)  # Extended timeout for subprocess on Windows

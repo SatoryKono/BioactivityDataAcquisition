@@ -20,6 +20,7 @@ import json
 import os
 import shutil
 import tempfile
+import re
 from urllib.parse import unquote, urlparse
 from collections.abc import Callable, Generator
 from contextlib import contextmanager
@@ -66,6 +67,7 @@ _E2E_SKIP_PREFIX = "E2E_SKIP"
 _E2E_HEALTHCHECK_PLAYBACK_FAILURE_MARKERS: tuple[str, ...] = (
     "health check failed for: data_source",
 )
+_RETRY_EXHAUSTED_HTTP_STATUS_RE = re.compile(r"\b(429|500|502|503|504)\b")
 
 _E2E_VCR_CASSETTE_DIR_BY_TEST: dict[str, str] = {
     "test_pubchem_compound_pipeline": "pubchem",
@@ -274,6 +276,7 @@ def e2e_environment():
         sys.modules["geopandas"] = None  # type: ignore[assignment]
 
     # Register all pipelines (required for bootstrap_pipeline_runner to work)
+    # Note: This import is session-scoped (once per E2E test session) to avoid timeout
     from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 
     register_all_pipelines()
@@ -730,9 +733,78 @@ def _is_transient_external_error(exc: ExternalServiceError) -> bool:
     return any(marker in message for marker in _TRANSIENT_EXTERNAL_ERROR_MARKERS)
 
 
+def _iter_exception_chain(exc: Exception | BaseException | None) -> list[BaseException]:
+    """Return a bounded chain of cause/context exceptions for deep inspection."""
+    from bioetl.domain.exceptions.network import RetryExhaustedError
+
+    if exc is None:
+        return []
+
+    chain: list[BaseException] = []
+    seen: set[int] = set()
+    current: BaseException | None = exc
+    while current is not None:
+        identity = id(current)
+        if identity in seen:
+            break
+        seen.add(identity)
+        chain.append(current)
+
+        if isinstance(current, RetryExhaustedError) and current.last_error is not None:
+            current = current.last_error
+            continue
+
+        next_exc = current.__cause__ or current.__context__
+        if next_exc is current:
+            break
+        current = next_exc
+
+    return chain
+
+
+def _contains_transient_marker(message: str) -> bool:
+    """Return True if error text looks like transient transport upstream."""
+    lowered = str(message).lower()
+    return any(marker in lowered for marker in _TRANSIENT_EXTERNAL_ERROR_MARKERS)
+
+
+def _is_transient_upstream_error(exc: BaseException | None) -> bool:
+    """Return True if any exception in chain indicates a transient upstream failure."""
+    import httpx
+    from bioetl.domain.exceptions.network import ExternalServiceError
+
+    for candidate in _iter_exception_chain(exc):
+        if isinstance(candidate, ExternalServiceError):
+            if _is_transient_external_error(candidate):
+                return True
+            continue
+        if isinstance(candidate, httpx.HTTPStatusError):
+            if _is_transient_http_status_error(candidate):
+                return True
+            continue
+        if _contains_transient_marker(str(candidate)):
+            return True
+    return False
+
+
 def _is_transient_http_status_error(exc: httpx.HTTPStatusError) -> bool:
     """Return True when HTTPStatusError is likely upstream/transient."""
     return exc.response.status_code in _TRANSIENT_HTTP_STATUS_CODES
+
+
+def _is_transient_retry_exhausted_error(exc: Exception) -> bool:
+    """Return True when a terminal retry wrapper still points to transient upstream."""
+    from bioetl.domain.exceptions.network import RetryExhaustedError
+
+    if not isinstance(exc, RetryExhaustedError):
+        return False
+    if _is_transient_upstream_error(exc):
+        return True
+    if _RETRY_EXHAUSTED_HTTP_STATUS_RE.search(str(exc)) is not None:
+        return True
+    if exc.last_error is not None:
+        return _RETRY_EXHAUSTED_HTTP_STATUS_RE.search(str(exc.last_error)) is not None
+    return False
 
 
 def is_external_healthcheck_playback_failure(exc: Exception) -> bool:
@@ -827,12 +899,22 @@ def _create_retry_run_context(
 def _get_transient_reason_code(exc: Exception | None) -> str:
     """Map transient exception to deterministic CI skip code."""
     import httpx
-    from bioetl.domain.exceptions.network import ExternalServiceError
+    from bioetl.domain.exceptions.network import (
+        ExternalServiceError,
+        RetryExhaustedError,
+    )
 
     if isinstance(exc, ExternalServiceError) and exc.status_code == 429:
         return "INFRA_FLAKY_429"
     if isinstance(exc, httpx.HTTPStatusError) and exc.response.status_code == 429:
         return "INFRA_FLAKY_429"
+    if isinstance(exc, RetryExhaustedError):
+        last_error = exc.last_error
+        if _get_transient_reason_code(last_error) == "INFRA_FLAKY_429":
+            return "INFRA_FLAKY_429"
+        if _RETRY_EXHAUSTED_HTTP_STATUS_RE.search(str(last_error or exc)) is not None:
+            if "429" in str(last_error or exc):
+                return "INFRA_FLAKY_429"
     return "INFRA_FLAKY_UPSTREAM"
 
 
@@ -921,7 +1003,10 @@ def guard_bootstrap_pipeline_runner_for_e2e(
 async def run_pipeline_or_skip_transient(context: PipelineRunContext) -> Any:
     """Run pipeline with deterministic retries; skip on transient exhaustion."""
     import httpx
-    from bioetl.domain.exceptions.network import ExternalServiceError
+    from bioetl.domain.exceptions.network import (
+        ExternalServiceError,
+        RetryExhaustedError,
+    )
 
     from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 
@@ -941,6 +1026,12 @@ async def run_pipeline_or_skip_transient(context: PipelineRunContext) -> Any:
             if not _is_transient_external_error(exc):
                 raise
             transient_exc = exc
+        except RetryExhaustedError as exc:
+            if not _is_transient_retry_exhausted_error(exc):
+                raise
+            # Inner HTTP/client retries already spent the transient retry budget.
+            # Re-running the full pipeline here only burns more wall-clock time.
+            _skip_transient_pipeline_run(context, exc)
         except httpx.HTTPStatusError as exc:
             if not _is_transient_http_status_error(exc):
                 raise

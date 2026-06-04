@@ -17,6 +17,7 @@ from bioetl.domain.schemas._chembl_enum_catalog import (
     ASSAY_TEST_TYPES,
     ASSAY_TYPES,
     AVAILABILITY_TYPE_VALUES,
+    BINARY_FLAG_VALUES,
     CHEMBL_ENUM_CATALOG,
     CHIRALITY_VALUES,
     CONFIDENCE_DESCRIPTIONS,
@@ -36,6 +37,7 @@ from bioetl.domain.schemas._chembl_enum_catalog import (
     TARGET_COMPONENT_TYPES,
     TARGET_ORGANISM_CLASSES,
     TARGET_TYPES,
+    TRINARY_FLAG_VALUES,
 )
 from bioetl.domain.schemas._schema_validation_patterns import (
     BAO_ID_PATTERN,
@@ -90,6 +92,7 @@ __all__ = [
     "ASSAY_TYPES",
     "AVAILABILITY_TYPE_VALUES",
     "BAO_ID_PATTERN",
+    "BINARY_FLAG_VALUES",
     "BTO_ID_PATTERN",
     "CALOHA_ID_PATTERN",
     "CANONICAL_HBA_COUNT_RANGE",
@@ -129,6 +132,7 @@ __all__ = [
     "TARGET_COMPONENT_TYPES",
     "TARGET_ORGANISM_CLASSES",
     "TARGET_TYPES",
+    "TRINARY_FLAG_VALUES",
     "UBERON_ID_PATTERN",
     "UNIPROT_ENTRY_TYPES",
     "UNIPROT_ENUM_CATALOG",

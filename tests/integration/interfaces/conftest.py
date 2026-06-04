@@ -250,6 +250,7 @@ def patch_quarantine(fake_quarantine: InMemoryQuarantine):
 @pytest.fixture
 def registered_pipelines() -> None:
     """Register pipelines lazily for tests that exercise CLI run commands."""
+    # Lazy import to avoid timeout on Windows during test collection
     from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 
     register_all_pipelines()

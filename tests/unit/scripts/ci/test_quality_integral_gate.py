@@ -490,6 +490,11 @@ def test_quality_gate_output_and_summary_include_debt_governance_surface() -> No
             coverage_percent=90.0,
             compatibility_surface=compatibility_surface,
             debt_governance_surface=debt_governance_surface,
+            architecture_quality_scorecard={
+                "schema_version": 1,
+                "integral_score": 7.98,
+                "categories": [],
+            },
             test_health_payload=test_health_payload,
             bonus=5.0,
             summary=SimpleNamespace(integral_score=72.0),
@@ -500,6 +505,7 @@ def test_quality_gate_output_and_summary_include_debt_governance_surface() -> No
     )
 
     assert "debt_governance_surface" in output
+    assert output["architecture_quality_scorecard"]["integral_score"] == 7.98
     assert (
         output["debt_governance_surface"]["runtime_uuid"]["runtime_uuid_seam_count"]
         == 14

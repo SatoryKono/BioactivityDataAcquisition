@@ -190,6 +190,66 @@ def test_scan_canonical_metric_mentions_prefers_bounded_git_grep(
     }
 
 
+def test_scan_canonical_metric_mentions_falls_back_to_rg_before_direct_reads(
+    tmp_path: Path,
+    monkeypatch: object,
+) -> None:
+    (tmp_path / ".git").mkdir()
+    docs_dir = tmp_path / "docs" / "03-guides"
+    docs_dir.mkdir(parents=True)
+    metric_doc = docs_dir / "metrics.md"
+    metric_doc.write_text("unused", encoding="utf-8")
+
+    def fail_read_text(self: Path, *args: object, **kwargs: object) -> str:
+        raise AssertionError(f"unexpected direct read: {self}")
+
+    def fake_run(
+        args: list[str],
+        *unused_args: object,
+        **kwargs: object,
+    ) -> subprocess.CompletedProcess[str]:
+        assert kwargs["timeout"] == inventory._METRIC_MENTION_GREP_TIMEOUT_SECONDS
+        if args[0] == "git":
+            raise OSError("git unavailable")
+        assert args[0] == "rg"
+        assert kwargs["cwd"] == tmp_path
+        return subprocess.CompletedProcess(
+            args=args,
+            returncode=0,
+            stdout="docs/03-guides/metrics.md:7:bioetl_rg_total\n",
+            stderr="",
+        )
+
+    monkeypatch.setattr(Path, "read_text", fail_read_text)
+    monkeypatch.setattr(inventory.subprocess, "run", fake_run)
+
+    assert inventory._scan_canonical_metric_mentions([metric_doc], tmp_path) == {
+        "bioetl_rg_total": ["docs/03-guides/metrics.md"]
+    }
+
+
+def test_scan_canonical_metric_mentions_skips_direct_reads_in_git_checkout(
+    tmp_path: Path,
+    monkeypatch: object,
+) -> None:
+    (tmp_path / ".git").mkdir()
+    docs_dir = tmp_path / "docs" / "03-guides"
+    docs_dir.mkdir(parents=True)
+    metric_doc = docs_dir / "metrics.md"
+    metric_doc.write_text("unused", encoding="utf-8")
+
+    def fail_read_text(self: Path, *args: object, **kwargs: object) -> str:
+        raise AssertionError(f"unexpected direct read: {self}")
+
+    def fake_run(*args: object, **kwargs: object) -> subprocess.CompletedProcess[str]:
+        raise OSError("bounded scanner unavailable")
+
+    monkeypatch.setattr(Path, "read_text", fail_read_text)
+    monkeypatch.setattr(inventory.subprocess, "run", fake_run)
+
+    assert inventory._scan_canonical_metric_mentions([metric_doc], tmp_path) == {}
+
+
 def test_iter_text_files_prefers_git_discovery_before_path_stat(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -223,7 +283,7 @@ def test_iter_text_files_with_git_ls_files_filters_text_suffixes(
         *,
         timeout: float,
     ) -> tuple[subprocess.CompletedProcess[str], str]:
-        assert command == [
+        tracked_command = [
             "git",
             "-C",
             inventory._REPO_ROOT.as_posix(),
@@ -231,10 +291,30 @@ def test_iter_text_files_with_git_ls_files_filters_text_suffixes(
             "--",
             "src/bioetl",
         ]
+        untracked_command = [
+            "git",
+            "-C",
+            inventory._REPO_ROOT.as_posix(),
+            "ls-files",
+            "--others",
+            "--exclude-standard",
+            "--",
+            "src/bioetl",
+        ]
         assert timeout == inventory._TEXT_DISCOVERY_TIMEOUT_SECONDS
+        if command == tracked_command:
+            stdout = (
+                "src/bioetl/example.py\n"
+                "src/bioetl/notes.txt\n"
+                "src/bioetl/config.yaml\n"
+            )
+        elif command == untracked_command:
+            stdout = "src/bioetl/untracked.py\nsrc/bioetl/scratch.txt\n"
+        else:
+            raise AssertionError(f"unexpected command: {command}")
         return (
             subprocess.CompletedProcess(args=command, returncode=0),
-            "src/bioetl/example.py\nsrc/bioetl/notes.txt\nsrc/bioetl/config.yaml\n",
+            stdout,
         )
 
     monkeypatch.setattr(
@@ -246,6 +326,7 @@ def test_iter_text_files_with_git_ls_files_filters_text_suffixes(
     assert inventory._iter_text_files_with_git_ls_files(scan_root) == [
         inventory._REPO_ROOT / "src/bioetl/config.yaml",
         inventory._REPO_ROOT / "src/bioetl/example.py",
+        inventory._REPO_ROOT / "src/bioetl/untracked.py",
     ]
 
 
@@ -991,9 +1072,7 @@ def test_collect_metric_inventory_uses_declared_label_contracts_for_risky_labels
     report = inventory.collect_metric_inventory(tmp_path)
 
     assert report["declared_risky_label_review_candidates"] == ["bioetl_reviewed_total"]
-    assert report["declared_risky_label_contract_reviewed"] == [
-        "bioetl_reviewed_total"
-    ]
+    assert report["declared_risky_label_contract_reviewed"] == ["bioetl_reviewed_total"]
     assert report["declared_risky_label_reviewed"] == ["bioetl_reviewed_total"]
     assert report["declared_risky_label_review_required"] == []
 

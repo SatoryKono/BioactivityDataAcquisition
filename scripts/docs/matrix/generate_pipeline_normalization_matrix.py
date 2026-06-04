@@ -334,6 +334,7 @@ ENTITY_PROFILE_FIELD_ALIASES: dict[str, dict[str, str]] = {
 }
 
 _CHEMBL_ENUM_CONFIG = "configs/enums/chembl.yaml"
+_CHEMBL_CONTROLLED_VOCAB_CONFIG = "configs/vocab/chembl_controlled.yaml"
 _PUBCHEM_ENUM_CONFIG = "configs/enums/pubchem.yaml"
 _UNIPROT_ENUM_CONFIG = "configs/enums/uniprot.yaml"
 _PUBLICATION_CONTROLLED_CONFIG = "configs/vocab/publication_controlled.yaml"
@@ -350,6 +351,7 @@ _REFERENCE_ID_SOURCE = "domain.normalization.reference_ids"
 _OA_STATUS_SOURCE = "domain.schemas.common.publication_base.OA_STATUS_VALUES"
 
 ENUM_CONFIG_SOURCES: dict[tuple[str, str, str], str] = {
+    ("chembl", "activity", "action_type"): _CHEMBL_CONTROLLED_VOCAB_CONFIG,
     ("chembl", "activity", "assay_type"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "activity", "bao_endpoint_mapping_status"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "activity", "bao_format_mapping_status"): _CHEMBL_ENUM_CONFIG,
@@ -358,9 +360,13 @@ ENUM_CONFIG_SOURCES: dict[tuple[str, str, str], str] = {
     ("chembl", "activity", "standard_relation"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "activity", "standard_type"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "activity", "uo_unit_mapping_status"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "assay", "assay_category"): _CHEMBL_CONTROLLED_VOCAB_CONFIG,
     ("chembl", "assay", "assay_group"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "assay", "assay_subcellular_fraction"): _CHEMBL_CONTROLLED_VOCAB_CONFIG,
     ("chembl", "assay", "assay_test_type"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "assay", "assay_type"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "assay", "subcellular_fraction"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "assay", "subcellular_fractions"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "assay", "bao_format_mapping_status"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "assay", "relationship_type"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "cell_line", "clo_mapping_status"): _CHEMBL_ENUM_CONFIG,
@@ -378,8 +384,13 @@ ENUM_CONFIG_SOURCES: dict[tuple[str, str, str], str] = {
     ("chembl", "molecule", "ro3_pass"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "molecule", "molecule_type"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "molecule", "structure_type"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "publication", "oa_status"): _CHEMBL_CONTROLLED_VOCAB_CONFIG,
     ("chembl", "publication", "publication_type"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "publication_term", "term_type"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "subcellular_fraction", "subcellular_fraction"): _CHEMBL_CONTROLLED_VOCAB_CONFIG,
+    ("chembl", "target", "component_relationships"): _CHEMBL_CONTROLLED_VOCAB_CONFIG,
+    ("chembl", "target", "component_types"): _CHEMBL_CONTROLLED_VOCAB_CONFIG,
+    ("chembl", "target", "organism_class"): _CHEMBL_CONTROLLED_VOCAB_CONFIG,
     ("chembl", "target", "target_type"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "target", "cross_references"): _CHEMBL_REFERENCE_SOURCES_CONFIG,
     ("chembl", "target_component", "component_type"): _CHEMBL_ENUM_CONFIG,
@@ -504,6 +515,7 @@ _NON_CHEMBL_INVENTORY_SECTIONS = (
 )
 
 ENUM_REGISTRY_PATHS: dict[tuple[str, str, str], tuple[str, ...]] = {
+    ("chembl", "activity", "action_type"): ("activity", "action_types"),
     ("chembl", "activity", "assay_type"): ("assay", "types"),
     ("chembl", "activity", "bao_endpoint_mapping_status"): (
         "activity",
@@ -530,6 +542,7 @@ ENUM_REGISTRY_PATHS: dict[tuple[str, str, str], tuple[str, ...]] = {
     ("chembl", "activity", "standard_units"): ("activity", "standard_units"),
     ("chembl", "assay", "assay_category"): ("assay", "categories"),
     ("chembl", "assay", "assay_group"): ("assay", "assay_groups"),
+    ("chembl", "assay", "assay_subcellular_fraction"): ("assay", "subcellular_fractions"),
     ("chembl", "assay", "assay_test_type"): ("assay", "test_types"),
     ("chembl", "assay", "assay_type"): ("assay", "types"),
     ("chembl", "assay", "bao_format_mapping_status"): (
@@ -541,13 +554,11 @@ ENUM_REGISTRY_PATHS: dict[tuple[str, str, str], tuple[str, ...]] = {
         "confidence_descriptions",
     ),
     ("chembl", "assay", "relationship_type"): ("assay", "relationship_types"),
-    ("chembl", "cell_line", "clo_mapping_status"): (
-        "activity",
-        "mapping_statuses",
-    ),
-    ("chembl", "cell_line", "efo_mapping_status"): (
-        "activity",
-        "mapping_statuses",
+    ("chembl", "assay", "subcellular_fraction"): ("assay", "subcellular_fractions"),
+    ("chembl", "assay", "subcellular_fractions"): ("assay", "subcellular_fractions"),
+    ("chembl", "assay_parameters", "parameter_type"): (
+        "assay",
+        "parameter_standard_type_universe",
     ),
     ("chembl", "assay_parameters", "standard_relation"): (
         "activity",
@@ -557,30 +568,80 @@ ENUM_REGISTRY_PATHS: dict[tuple[str, str, str], tuple[str, ...]] = {
         "assay",
         "parameter_standard_type_universe",
     ),
-    ("chembl", "assay_parameters", "qudt_unit_mapping_status"): (
-        "activity",
-        "mapping_statuses",
-    ),
     ("chembl", "assay_parameters", "standard_units"): (
         "activity",
         "standard_units",
     ),
+    ("chembl", "assay_parameters", "type"): (
+        "assay",
+        "parameter_standard_type_universe",
+    ),
+    ("chembl", "assay_parameters", "qudt_unit_mapping_status"): (
+        "activity",
+        "mapping_statuses",
+    ),
     ("chembl", "assay_parameters", "uo_unit_mapping_status"): (
         "activity",
         "mapping_statuses",
+    ),
+    ("chembl", "cell_line", "clo_mapping_status"): (
+        "activity",
+        "mapping_statuses",
+    ),
+    ("chembl", "cell_line", "efo_mapping_status"): (
+        "activity",
+        "mapping_statuses",
+    ),
+    # Molecule flag fields use provider-specific numeric codes
+    ("chembl", "molecule", "black_box_warning"): (
+        "molecule",
+        "binary_flag_values",
     ),
     ("chembl", "molecule", "availability_type"): (
         "molecule",
         "availability_type_values",
     ),
     ("chembl", "molecule", "chirality"): ("molecule", "chirality_values"),
+    ("chembl", "molecule", "dosed_ingredient"): (
+        "molecule",
+        "binary_flag_values",
+    ),
+    ("chembl", "molecule", "first_in_class"): (
+        "molecule",
+        "trinary_flag_values",
+    ),
+    ("chembl", "molecule", "inorganic_flag"): (
+        "molecule",
+        "trinary_flag_values",
+    ),
     ("chembl", "molecule", "max_phase"): ("molecule", "max_phase_values"),
     ("chembl", "molecule", "molecule_type"): ("molecule", "types"),
+    ("chembl", "molecule", "natural_product"): (
+        "molecule",
+        "trinary_flag_values",
+    ),
+    ("chembl", "molecule", "polymer_flag"): (
+        "molecule",
+        "binary_flag_values",
+    ),
+    ("chembl", "molecule", "prodrug"): (
+        "molecule",
+        "trinary_flag_values",
+    ),
     ("chembl", "molecule", "ro3_pass"): ("molecule", "ro3_pass_values"),
     ("chembl", "molecule", "structure_type"): ("molecule", "structure_types"),
     ("chembl", "publication", "doc_type"): ("publication", "native_doc_types"),
-    ("chembl", "publication", "publication_type"): ("publication", "types"),
+    ("chembl", "publication", "oa_status"): ("publication", "oa_status_values"),
+    # publication_type uses ChEMBL-specific DQ subset
+    ("chembl", "publication", "publication_type"): (
+        "publication",
+        "chembl_specific_types",
+    ),
     ("chembl", "publication_term", "term_type"): ("publication_term", "term_types"),
+    ("chembl", "subcellular_fraction", "subcellular_fraction"): ("assay", "subcellular_fractions"),
+    ("chembl", "target", "component_relationships"): ("target", "component_relationships"),
+    ("chembl", "target", "component_types"): ("target", "component_types"),
+    ("chembl", "target", "organism_class"): ("target", "organism_classes"),
     ("chembl", "target", "target_type"): ("target", "types"),
     (
         "chembl",

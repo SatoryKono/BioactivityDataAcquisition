@@ -1,22 +1,8 @@
-"""File-based audit logging adapter.
-
-Implements AuditPort using JSON Lines format for audit trail storage.
-Each audit entry is written as a single line of JSON to enable efficient
-append operations and streaming reads.
-
-Path structure:
-    audit/
-    └── audit_YYYY-MM-DD.jsonl
-
-Requirements:
-- REQ-AUDIT-001: Each write operation must be logged
-- REQ-AUDIT-002: Audit log must contain run_id, timestamp, records_count, table
-"""
+"""File-based audit logging adapter."""
 
 from __future__ import annotations
 
 __all__ = ["FileAuditAdapter"]
-
 
 import asyncio
 import time
@@ -24,91 +10,21 @@ from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.domain.observability_contract import build_observability_contract_payload
 from bioetl.domain.ports import AuditEntry, AuditLayer
-from bioetl.domain.serialization import serialize_to_json
+from bioetl.domain.ports.noop import NoOpMetrics, NoOpTracing
 from bioetl.domain.types import JsonDict
-
-from ._file_audit_readers import process_audit_file
+from bioetl.infrastructure.audit._file_audit_io import FileAuditIOMixin
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
     from bioetl.domain.types import RunID
 
-from bioetl.domain.ports.noop import NoOpMetrics, NoOpTracing
 
 _AUDIT_STATUS_ATTRIBUTE = "bioetl.audit.status"
 _AUDIT_ADAPTER_CLOSED_MESSAGE = "FileAuditAdapter has been closed"
-_CANONICAL_AUDIT_OPTIONAL_FIELDS = (
-    "manifest_id",
-    "composite_run_id",
-    "entity",
-    "phase",
-    "status",
-)
-_AUDIT_EVENT_NAME_TO_CANONICAL = {
-    "PipelineRunStarted": "pipeline_started",
-    "PipelineRunCompleted": "pipeline_finished",
-    "PipelineRunFailed": "pipeline_failed",
-    "PipelineRunShutdown": "pipeline_shutdown",
-}
 
 
-def _coerce_text(value: object, *, fallback: str) -> str:
-    text = str(value).strip() if value is not None else ""
-    return text or fallback
-
-
-def _default_severity(event_data: JsonDict) -> str:
-    severity = event_data.get("severity")
-    if severity is not None:
-        return _coerce_text(severity, fallback="info")
-    status = _coerce_text(event_data.get("status"), fallback="")
-    if status in {"failed", "failure", "error"}:
-        return "error"
-    if status in {"warning", "degraded"}:
-        return "warning"
-    return "info"
-
-
-def _build_canonical_event_payload(
-    *,
-    event_name: str,
-    event_data: JsonDict | None,
-    timestamp: datetime,
-) -> JsonDict:
-    raw_event_data = dict(event_data or {})
-    canonical_context = dict(raw_event_data)
-    canonical_context.setdefault(
-        "event",
-        _AUDIT_EVENT_NAME_TO_CANONICAL.get(event_name, event_name),
-    )
-    canonical = build_observability_contract_payload(
-        event_name=event_name,
-        context=canonical_context,
-        default_provider=_coerce_text(
-            raw_event_data.get("provider"), fallback="unknown"
-        ),
-        default_pipeline=_coerce_text(
-            raw_event_data.get("pipeline") or raw_event_data.get("pipeline_name"),
-            fallback="unknown",
-        ),
-        default_run_id=_coerce_text(raw_event_data.get("run_id"), fallback="unknown"),
-        default_severity=_default_severity(raw_event_data),
-    ).context
-    payload: JsonDict = dict(canonical)
-    payload["recorded_at"] = timestamp.isoformat()
-    payload["context"] = dict(canonical)
-    payload["event_name"] = event_name
-    payload["event_data"] = raw_event_data
-    payload["timestamp"] = payload["recorded_at"]
-    for field in _CANONICAL_AUDIT_OPTIONAL_FIELDS:
-        if field in canonical and canonical[field] is not None:
-            payload[field] = canonical[field]
-    return payload
-
-
-class FileAuditAdapter:
+class FileAuditAdapter(FileAuditIOMixin):
     """File-based implementation of the audit port."""
 
     TRACER_NAME = "bioetl.audit"
@@ -169,47 +85,6 @@ class FileAuditAdapter:
             duration_seconds,
             labels=labels,
         )
-
-    def _get_audit_file_path(self, date: datetime) -> Path:
-        """Get the audit file path for a specific date."""
-        date_str = date.strftime("%Y-%m-%d")
-        return self.base_path / f"audit_{date_str}.jsonl"
-
-    def _get_event_file_path(self, date: datetime) -> Path:
-        """Get the audit event file path for a specific date."""
-        date_str = date.strftime("%Y-%m-%d")
-        return self.base_path / f"events_{date_str}.jsonl"
-
-    def _ensure_directory(self) -> None:
-        """Ensure the audit directory exists."""
-        self.base_path.mkdir(parents=True, exist_ok=True)
-
-    def _write_entry_sync(self, entry: AuditEntry) -> None:
-        """Synchronously write an entry to the audit file."""
-        self._ensure_directory()
-        file_path = self._get_audit_file_path(entry.timestamp)
-        json_line = serialize_to_json(entry.to_dict(), sort_keys=True) + "\n"
-        with open(file_path, "a", encoding="utf-8") as f:
-            f.write(json_line)
-            f.flush()
-
-    def _write_event_sync(
-        self,
-        event_name: str,
-        event_data: JsonDict | None,
-        timestamp: datetime,
-    ) -> None:
-        self._ensure_directory()
-        file_path = self._get_event_file_path(timestamp)
-        payload = _build_canonical_event_payload(
-            event_name=event_name,
-            event_data=event_data,
-            timestamp=timestamp,
-        )
-        json_line = serialize_to_json(payload, sort_keys=True) + "\n"
-        with open(file_path, "a", encoding="utf-8") as f:
-            f.write(json_line)
-            f.flush()
 
     async def log_write(self, entry: AuditEntry) -> None:
         """Log a write operation to the audit trail."""
@@ -277,38 +152,6 @@ class FileAuditAdapter:
             event_name=event_name,
             event_data=event_data or {},
         )
-
-    def _read_entries_sync(
-        self,
-        run_id: RunID | None,
-        layer: AuditLayer | None,
-        table_name: str | None,
-        start_time: datetime | None,
-        end_time: datetime | None,
-        limit: int,
-    ) -> list[AuditEntry]:
-        """Synchronously read and filter audit entries."""
-        entries: list[AuditEntry] = []
-        if not self.base_path.exists():
-            return entries
-        audit_files = sorted(self.base_path.glob("audit_*.jsonl"), reverse=True)
-        for file_path in audit_files:
-            if len(entries) >= limit:
-                break
-            file_entries = process_audit_file(
-                file_path,
-                run_id,
-                layer,
-                table_name,
-                start_time,
-                end_time,
-                limit,
-                len(entries),
-            )
-            entries.extend(file_entries)
-
-        entries.sort(key=lambda e: e.timestamp, reverse=True)
-        return entries[:limit]
 
     async def get_entries(
         self,

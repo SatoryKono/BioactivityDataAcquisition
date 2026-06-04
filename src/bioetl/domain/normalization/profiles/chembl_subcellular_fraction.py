@@ -19,7 +19,8 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 from bioetl.domain.schemas.chembl.subcellular_fraction import (
     SubcellularFractionSchema,
 )
-from bioetl.domain.schemas.constants import SUBCELLULAR_FRACTIONS
+
+from ._chembl_vocab import chembl_enum
 
 __all__ = [
     "CHEMBL_SUBCELLULAR_FRACTION_PROFILE",
@@ -29,6 +30,7 @@ __all__ = [
 CHEMBL_SUBCELLULAR_FRACTION_SCHEMA_FIELDS = tuple(
     SubcellularFractionSchema.to_schema().columns.keys()
 )
+SUBCELLULAR_FRACTIONS = chembl_enum("subcellular_fraction", "subcellular_fraction")
 
 _META_FIELDS = frozenset(
     {

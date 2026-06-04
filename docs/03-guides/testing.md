@@ -270,6 +270,14 @@ Supported policy slice for issue `#2598`:
   обновляться после любых изменений под `src/bioetl/**/*.py` через
   `python _refresh_module_coverage_inventory.py` (см.
   `tests/architecture/test_module_coverage_inventory.py`).
+- Architecture quality scorecard теперь является committed trend artifact:
+  `reports/quality/architecture-quality-scorecard.json` агрегирует dependency
+  map, module coverage inventory, compatibility census, dead-code inventory и
+  contract diagnostics в 10-категорийную модель с суммой весов `1.00`.
+  Artifact строится через
+  `bioetl.infrastructure.quality.architecture_quality_scorecard` и проверяется
+  `tests/architecture/test_architecture_quality_scorecard.py`; `quality_integral_gate`
+  включает этот payload в CI JSON output для trend visibility.
 - canonical VCR placement уже enforced в CI: кассеты вне `tests/fixtures/vcr/{provider}/` блокируются
 - extensionless VCR files пока допустимы только через `.github/vcr-noext-allowlist.txt`; новые такие файлы добавлять нельзя
 
@@ -584,6 +592,11 @@ cached-Bronze snapshot envelope.
   После изменений в `src/bioetl/**/*.py` обновляй `source_tree_sha256`:
   `python _refresh_module_coverage_inventory.py`, затем
   `pytest tests/architecture/test_module_coverage_inventory.py::test_module_coverage_inventory_source_tree_hash_is_current`.
+- **Architecture Quality Scorecard**:
+  `reports/quality/architecture-quality-scorecard.json` фиксирует
+  evidence-backed quality trend по слоям, DI, module boundaries, tests,
+  contracts, determinism и debt burden. Локальная drift-проверка:
+  `pytest tests/architecture/test_architecture_quality_scorecard.py`.
 - **Regression**: Все исправления багов обязаны сопровождаться регрессионным тестом.
 - **Coverage Configuration**: Подробная информация о настройке покрытия, исключаемых паттернах и troubleshooting — см. [Coverage Configuration Guide](./coverage-configuration.md)
 

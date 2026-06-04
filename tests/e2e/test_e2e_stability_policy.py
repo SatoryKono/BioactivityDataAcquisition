@@ -9,6 +9,7 @@ import httpx
 import pytest
 
 from bioetl.domain.exceptions.network import ExternalServiceError
+from bioetl.domain.exceptions.network import RetryExhaustedError
 from tests.helpers.vcr_config import build_cassette_dir
 
 from .conftest import (
@@ -168,6 +169,67 @@ async def test_run_pipeline_or_skip_transient_skips_after_retry_exhaustion() -> 
     skip_text = str(exc_info.value)
     assert "E2E_SKIP[INFRA_FLAKY_429]" in skip_text
     assert "pipeline=semanticscholar_publication" in skip_text
+
+
+@pytest.mark.asyncio
+async def test_run_pipeline_or_skip_transient_skips_immediately_on_retry_exhausted_429() -> (
+    None
+):
+    """Nested retry exhaustion on 429 should skip without rerunning the whole pipeline."""
+    context = create_test_context("semanticscholar_publication", limit=1)
+    request = httpx.Request("POST", "https://api.semanticscholar.org/graph/v1/paper/batch")
+    response = httpx.Response(429, request=request)
+    last_error = httpx.HTTPStatusError(
+        "429 Too Many Requests", request=request, response=response
+    )
+    retry_error = RetryExhaustedError(
+        "https://api.semanticscholar.org/graph/v1/paper/batch",
+        attempts=5,
+        last_error=last_error,
+    )
+    flaky_runner = MagicMock()
+    flaky_runner.run = AsyncMock(side_effect=retry_error)
+
+    with (
+        patch(
+            "bioetl.composition.bootstrap.bootstrap_pipeline_runner",
+            side_effect=[flaky_runner],
+        ) as mock_bootstrap,
+        patch("tests.e2e.conftest.asyncio.sleep", new=AsyncMock()) as mock_sleep,
+        pytest.raises(pytest.skip.Exception) as exc_info,
+    ):
+        await run_pipeline_or_skip_transient(context)
+
+    skip_text = str(exc_info.value)
+    assert "E2E_SKIP[INFRA_FLAKY_429]" in skip_text
+    assert "pipeline=semanticscholar_publication" in skip_text
+    assert mock_bootstrap.call_count == 1
+    mock_sleep.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_run_pipeline_or_skip_transient_skips_retry_exhausted_message_429() -> None:
+    """Retry-exhausted wrappers without nested causes must still skip as transient."""
+    context = create_test_context("semanticscholar_publication", limit=1)
+    retry_error = RetryExhaustedError(
+        "https://api.semanticscholar.org/graph/v1/paper/batch: 429 Too Many Requests",
+        attempts=5,
+    )
+
+    with (
+        patch(
+            "bioetl.composition.bootstrap.bootstrap_pipeline_runner",
+            side_effect=[MagicMock(run=AsyncMock(side_effect=retry_error))],
+        ),
+        patch("tests.e2e.conftest.asyncio.sleep", new=AsyncMock()) as mock_sleep,
+        pytest.raises(pytest.skip.Exception) as exc_info,
+    ):
+        await run_pipeline_or_skip_transient(context)
+
+    skip_text = str(exc_info.value)
+    assert "E2E_SKIP[INFRA_FLAKY_429]" in skip_text
+    assert "pipeline=semanticscholar_publication" in skip_text
+    mock_sleep.assert_not_awaited()
 
 
 @pytest.mark.asyncio

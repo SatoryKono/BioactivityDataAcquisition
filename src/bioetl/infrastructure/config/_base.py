@@ -33,7 +33,11 @@ from pydantic_settings import (
 
 from bioetl.domain.config import PipelineConfig
 from bioetl.infrastructure.config._observability_settings import ObservabilitySettings
+from bioetl.infrastructure.config._path_settings import StoragePathSettingsMixin
 from bioetl.infrastructure.config._pipeline_settings import PipelineSettings
+from bioetl.infrastructure.config._settings_validation import (
+    coerce_silver_dedup_timeout_seconds,
+)
 from bioetl.infrastructure.config._yaml_settings_source import YamlSettingsSource
 from bioetl.infrastructure.config.config_root import resolve_configs_root
 from bioetl.infrastructure.config.converters import yaml_config_to_domain
@@ -85,7 +89,7 @@ def get_pipeline_config(
     )
 
 
-class Settings(BaseSettings):
+class Settings(StoragePathSettingsMixin, BaseSettings):
     """Main application settings for local deployment."""
 
     model_config = SettingsConfigDict(
@@ -178,44 +182,12 @@ class Settings(BaseSettings):
     @classmethod
     def _validate_silver_dedup_timeout_seconds(cls, value: object) -> float:
         """Coerce invalid or non-positive timeout values back to the safe default."""
-        if value is None or value == "":
-            return 60.0
-        if isinstance(value, bool):
-            return 60.0
-        if isinstance(value, (int, float, str)):
-            parsed = float(value)
-            return parsed if parsed > 0 else 60.0
-        return 60.0
+        return coerce_silver_dedup_timeout_seconds(value)
 
     semanticscholar_api_key: SecretStr | None = Field(
         default=None,
         description="API key for Semantic Scholar Academic Graph API",
     )
-
-    @property
-    def bronze_path(self) -> Path:
-        """Path for Bronze layer storage."""
-        return self.data_dir / "output" / "bronze"
-
-    @property
-    def silver_path(self) -> Path:
-        """Path for Silver layer storage."""
-        return self.data_dir / "output" / "silver"
-
-    @property
-    def gold_path(self) -> Path:
-        """Path for Gold layer storage."""
-        return self.data_dir / "output" / "gold"
-
-    @property
-    def checkpoint_path(self) -> Path:
-        """Path for checkpoint storage."""
-        return self.data_dir / "output" / "checkpoints"
-
-    @property
-    def quarantine_path(self) -> Path:
-        """Path for quarantine storage."""
-        return self.data_dir / "output" / "quarantine"
 
     @classmethod
     def settings_customise_sources(

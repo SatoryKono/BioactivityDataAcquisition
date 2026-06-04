@@ -108,7 +108,7 @@ def _iter_source_modules(repo_root: Path) -> list[Path]:
     source_root = repo_root / "src" / "bioetl"
     return [
         source_root / relative_path
-        for relative_path in discover_files(str(source_root.resolve()), ".py")
+        for relative_path in sorted(discover_files(str(source_root.resolve()), ".py"))
     ]
 
 
