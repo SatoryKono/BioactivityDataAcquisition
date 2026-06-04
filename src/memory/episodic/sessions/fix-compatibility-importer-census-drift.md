@@ -2,14 +2,13 @@
 id: fix-compatibility-importer-census-drift
 title: Fix compatibility importer census drift
 task_id: fix-compatibility-importer-census-drift
-created_at: '2026-06-01T14:50:00Z'
+created_at: '2026-06-04T17:22:55Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- user-failure-compatibility-importer-census
+- <add-source-ref>
 summary: Active task session context.
-query: compatibility importer census governance drift public_src_importer_count data_source_mixins
-  target_data_source_mixins chembl target protein classification
+query: compatibility importer census retained entrypoints test importer count drift
 ---
 
 # Session note
@@ -17,7 +16,7 @@ query: compatibility importer census governance drift public_src_importer_count 
 ## Task
 
 - Title: Fix compatibility importer census drift
-- Retrieval query: compatibility importer census governance drift public_src_importer_count data_source_mixins target_data_source_mixins chembl target protein classification
+- Retrieval query: compatibility importer census retained entrypoints test importer count drift
 
 ## Retrieved context
 

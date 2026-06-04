@@ -10,7 +10,7 @@ from deltalake import DeltaTable
 
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-pytestmark = pytest.mark.integration
+pytestmark = [pytest.mark.integration, pytest.mark.timeout(180)]
 
 
 def _schema() -> pa.Schema:

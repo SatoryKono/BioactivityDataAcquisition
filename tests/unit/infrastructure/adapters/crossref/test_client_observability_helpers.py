@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -24,11 +24,15 @@ class TestBuildCrossrefSourceMetadata:
     @pytest.fixture
     def mock_request_collector(self):
         collector = MagicMock()
-        collector.get_request_count = MagicMock(return_value=42)
-        collector.get_successful_requests = MagicMock(return_value=40)
-        collector.get_failed_requests = MagicMock(return_value=2)
-        collector.get_total_bytes = MagicMock(return_value=1024000)
-        collector.get_requests = MagicMock(return_value=[])
+        collector.to_source_metadata = MagicMock(
+            return_value=SourceMetadata(
+                source_type="api",
+                url="https://api.crossref.org",
+                api_version="v1",
+            )
+        )
+        collector.request_count = 42
+        collector.clear = MagicMock()
         return collector
 
     def test_build_crossref_source_metadata_returns_metadata(self, mock_request_collector):
@@ -50,10 +54,13 @@ class TestBuildCrossrefSourceMetadata:
             api_base="https://api.crossref.org",
         )
 
-        mock_request_collector.get_request_count.assert_called_once()
-        mock_request_collector.get_successful_requests.assert_called_once()
-        mock_request_collector.get_failed_requests.assert_called_once()
-        mock_request_collector.get_total_bytes.assert_called_once()
+        mock_request_collector.to_source_metadata.assert_called_once_with(
+            source_type="api",
+            url="https://api.crossref.org",
+            api_version=None,
+            query_string=None,
+        )
+        mock_request_collector.clear.assert_called_once()
 
 
 class TestClearCrossrefRequestCollector:
@@ -78,7 +85,7 @@ class TestGetCrossrefRequestCount:
     @pytest.fixture
     def mock_request_collector(self):
         collector = MagicMock()
-        collector.get_request_count = MagicMock(return_value=42)
+        collector.request_count = 42
         return collector
 
     def test_get_crossref_request_count_returns_count(self, mock_request_collector):
@@ -86,7 +93,6 @@ class TestGetCrossrefRequestCount:
         count = get_crossref_request_count(request_collector=mock_request_collector)
 
         assert count == 42
-        mock_request_collector.get_request_count.assert_called_once()
 
 
 class TestProbeCrossrefHealth:
@@ -123,7 +129,14 @@ class TestProbeCrossrefHealth:
         return logger
 
     @pytest.mark.asyncio
-    async def test_probe_crossref_health_success(self, mock_http_client, mock_query_builder, mock_response_mapper, mock_adapter_metrics, mock_logger):
+    async def test_probe_crossref_health_success(
+        self,
+        mock_http_client,
+        mock_query_builder,
+        mock_response_mapper,
+        mock_adapter_metrics,
+        mock_logger,
+    ):
         """Test probe_crossref_health returns healthy status on success."""
         # Configure successful response
         mock_response = MagicMock()
@@ -154,7 +167,14 @@ class TestProbeCrossrefHealth:
         )
 
     @pytest.mark.asyncio
-    async def test_probe_crossref_health_slow_warning(self, mock_http_client, mock_query_builder, mock_response_mapper, mock_adapter_metrics, mock_logger):
+    async def test_probe_crossref_health_slow_warning(
+        self,
+        mock_http_client,
+        mock_query_builder,
+        mock_response_mapper,
+        mock_adapter_metrics,
+        mock_logger,
+    ):
         """Test probe_crossref_health logs warning for slow response."""
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -182,7 +202,14 @@ class TestProbeCrossrefHealth:
         assert "elapsed_seconds" in warning_call.kwargs
 
     @pytest.mark.asyncio
-    async def test_probe_crossref_health_unhealthy_status(self, mock_http_client, mock_query_builder, mock_response_mapper, mock_adapter_metrics, mock_logger):
+    async def test_probe_crossref_health_unhealthy_status(
+        self,
+        mock_http_client,
+        mock_query_builder,
+        mock_response_mapper,
+        mock_adapter_metrics,
+        mock_logger,
+    ):
         """Test probe_crossref_health returns unhealthy status."""
         mock_response = MagicMock()
         mock_response.status_code = 503
@@ -209,7 +236,14 @@ class TestProbeCrossrefHealth:
         assert warning_call.args[0] == "crossref_health_check_failed"
 
     @pytest.mark.asyncio
-    async def test_probe_crossref_health_raises_on_error(self, mock_http_client, mock_query_builder, mock_response_mapper, mock_adapter_metrics, mock_logger):
+    async def test_probe_crossref_health_raises_on_error(
+        self,
+        mock_http_client,
+        mock_query_builder,
+        mock_response_mapper,
+        mock_adapter_metrics,
+        mock_logger,
+    ):
         """Test probe_crossref_health raises on network error."""
         mock_http_client.get_once = AsyncMock(side_effect=ConnectionError("Network error"))
 

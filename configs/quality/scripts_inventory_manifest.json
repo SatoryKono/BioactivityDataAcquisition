@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-04T11:40:37.693770+00:00",
+  "generated_at": "2026-06-04T16:44:40.055923+00:00",
   "summary": {
     "total_scripts": 428,
     "status_counts": {
@@ -7086,13 +7086,13 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 635,
+          "line": 667,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/run_pytest_sharded.sh \\"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 726,
+          "line": 758,
           "source_group": "docs",
           "text": "| 6   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing` | В"
         },
@@ -9047,13 +9047,13 @@
         },
         {
           "path": "tests/architecture/test_module_coverage_inventory.py",
-          "line": 30,
+          "line": 31,
           "source_group": "tests",
           "text": "assert committed[\"generated_by\"].endswith(\"report_module_coverage_inventory.py\")"
         },
         {
           "path": "tests/architecture/test_module_coverage_inventory.py",
-          "line": 238,
+          "line": 249,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_module_coverage_inventory.py\""
         }
@@ -9555,7 +9555,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 668,
+          "line": 700,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-placement`"
         },
@@ -9618,7 +9618,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 669,
+          "line": 701,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-naming`"
         },
@@ -10219,7 +10219,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 14,
       "references": [
         {
           "path": "docs/02-architecture/04-interfaces-layer.md",
@@ -10252,12 +10252,6 @@
           "text": "- `src/bioetl/interfaces/cli/commands/run.py` — external breaking change required: `true`, internal callers zero: `false`"
         },
         {
-          "path": "docs/02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md",
-          "line": 33,
-          "source_group": "docs",
-          "text": "> **Update 2025-12-31:** Signal handlers in `interfaces/orchestration/signals.py` were removed. Shutdown is now handled at CLI level via `KeyboardInterrupt` in the retained public command modules `int"
-        },
-        {
           "path": "docs/02-architecture/diagrams/foundation/33-cli-run-interaction.mmd",
           "line": 16,
           "source_group": "docs",
@@ -10268,6 +10262,12 @@
           "line": 1,
           "source_group": "docs",
           "text": "<svg id=\"my-svg\" width=\"100%\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" style=\"max-width: 3340.5px; background-color: white;\" viewBox=\"-50 -16 3340.5 1284\" role=\"gr"
+        },
+        {
+          "path": "docs/02-architecture/diagrams/governance/PROMPT-diagram-expansion.md",
+          "line": 309,
+          "source_group": "docs",
+          "text": "src/bioetl/interfaces/cli/commands/run.py"
         }
       ]
     },

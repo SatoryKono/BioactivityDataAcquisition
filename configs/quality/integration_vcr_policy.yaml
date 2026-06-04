@@ -197,6 +197,7 @@ tracked_suite_inventory:
     composite_config_and_merge:
     - tests/integration/composite/test_column_naming_integration.py
     - tests/integration/composite/test_composite_config_schema_contract.py
+    - tests/integration/composite/test_composite_cross_validation.py
     - tests/integration/composite/test_molecule_pipeline.py
     config_and_storage_surfaces:
     - tests/integration/config/test_chembl_bronze_observed_value_inventory_snapshot.py
@@ -248,6 +249,8 @@ tracked_suite_inventory:
     - tests/integration/infrastructure/storage/test_metadata_integration.py
     - tests/integration/infrastructure/storage/test_metadata_writer_filesystem.py
     - tests/integration/infrastructure/storage/test_retention_dedup.py
+    - tests/integration/infrastructure/storage/test_silver_merge_replay.py
+    - tests/integration/infrastructure/storage/test_silver_vacuum_optimize.py
     - tests/integration/infrastructure/storage/test_silver_writer.py
     - tests/integration/infrastructure/storage/test_silver_writer_filesystem.py
     - tests/integration/infrastructure/storage/test_storage_factory_audit.py

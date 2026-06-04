@@ -92,6 +92,16 @@ async def test_fetch_by_dois_logs_partial_results_and_normalizes_ids() -> None:
 
 
 @pytest.mark.asyncio
+async def test_fetch_by_dois_returns_empty_when_normalization_drops_all_ids() -> None:
+    flow = _build_flow()
+
+    rows = await flow.fetch_by_dois(["", "   "])
+
+    assert rows == []
+    flow.query_executor.request_works_payload.assert_not_awaited()
+
+
+@pytest.mark.asyncio
 async def test_search_by_title_caches_results_and_evicts_oldest() -> None:
     flow = _build_flow()
     flow.query_executor.request_works_payload.side_effect = [
@@ -128,3 +138,44 @@ async def test_search_by_title_returns_empty_and_caches_runtime_errors() -> None
         title="Gamma",
         error="down",
     )
+
+
+@pytest.mark.asyncio
+async def test_iter_filtered_by_title_breaks_immediately_when_limit_is_zero() -> None:
+    flow = _build_flow()
+
+    rows = await collect_async_iterator(
+        flow.iter_filtered_by_title(["Title A"], limit=0)
+    )
+
+    assert rows == []
+    flow.query_executor.request_works_payload.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_iter_doi_batches_for_fallback_marks_lookup_and_stops_at_limit(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    flow = _build_flow()
+
+    async def _iter_by_dois(_self, dois: list[str]):
+        for doi in dois:
+            yield {"id": doi}
+
+    monkeypatch.setattr(OpenAlexCursorFlow, "iter_by_dois", _iter_by_dois)
+    flow.response_mapper.mark_lookup.side_effect = (
+        lambda record, **kwargs: {**record, **kwargs}
+    )
+
+    rows = await collect_async_iterator(
+        flow.iter_doi_batches_for_fallback(
+            ["10.1/A", "10.2/B", "10.3/C"],
+            limit=2,
+            start_count=0,
+        )
+    )
+
+    assert rows == [
+        {"id": "10.1/A", "lookup_method": "doi"},
+        {"id": "10.2/B", "lookup_method": "doi"},
+    ]

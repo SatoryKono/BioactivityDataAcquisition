@@ -1,22 +1,22 @@
 ---
 id: dependency-map-drift-fix
-title: Fix dependency map drift
+title: Fix architecture dependency map drift
 task_id: dependency-map-drift-fix
-created_at: '2026-05-22T19:43:56Z'
+created_at: '2026-06-04T16:36:23Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- scripts/engineering/qa/generate_architecture_dependency_map.py
+- tests/architecture/test_architecture_dependency_docs_drift.py
 summary: Active task session context.
-query: architecture dependency map drift generated docs
+query: dependency map drift architecture
 ---
 
 # Session note
 
 ## Task
 
-- Title: Fix dependency map drift
-- Retrieval query: architecture dependency map drift generated docs
+- Title: Fix architecture dependency map drift
+- Retrieval query: dependency map drift architecture
 
 ## Retrieved context
 

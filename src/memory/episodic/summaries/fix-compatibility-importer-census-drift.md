@@ -2,17 +2,15 @@
 id: fix-compatibility-importer-census-drift
 title: Fix compatibility importer census drift
 task_id: fix-compatibility-importer-census-drift
-created_at: '2026-06-01T15:22:21Z'
+created_at: '2026-06-04T17:24:14Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- <add-source-ref>
-summary: 'Closed compatibility importer census drift by keeping the target protein-classification
-  provider on composition-local delegation instead of application-core compatibility
-  twin facades, syncing compatibility importer census reports to the current #4923
-  twin-ratchet policy, and refreshing module coverage inventory. Verified census governance,
-  wrapper unit coverage, private-module boundary, ruff, module coverage hash guard,
-  and artifact checks.'
+- reports/quality/compatibility-importer-census.json
+summary: 'Regenerated compatibility importer census JSON/Markdown after new composite
+  config test importers raised retained entrypoint test_importer_count from 35 to
+  39 without changing src importer counts or budgets. Validation passed: report-compatibility-importer-census
+  --check and targeted architecture sync test.'
 ---
 
 # Episodic summary
@@ -23,7 +21,7 @@ summary: 'Closed compatibility importer census drift by keeping the target prote
 
 ## Outcome
 
-- Closed compatibility importer census drift by keeping the target protein-classification provider on composition-local delegation instead of application-core compatibility twin facades, syncing compatibility importer census reports to the current #4923 twin-ratchet policy, and refreshing module coverage inventory. Verified census governance, wrapper unit coverage, private-module boundary, ruff, module coverage hash guard, and artifact checks.
+- Regenerated compatibility importer census JSON/Markdown after new composite config test importers raised retained entrypoint test_importer_count from 35 to 39 without changing src importer counts or budgets. Validation passed: report-compatibility-importer-census --check and targeted architecture sync test.
 
 ## Lessons learned
 

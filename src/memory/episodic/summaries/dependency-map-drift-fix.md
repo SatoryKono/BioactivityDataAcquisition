@@ -1,25 +1,26 @@
 ---
 id: dependency-map-drift-fix
-title: Fix dependency map drift
+title: Fix architecture dependency map drift
 task_id: dependency-map-drift-fix
-created_at: '2026-05-22T19:50:32Z'
+created_at: '2026-06-04T16:41:22Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- scripts/engineering/qa/generate_architecture_dependency_map.py
-summary: Regenerated architecture dependency map artifacts after real topology drift
-  and verified the generator check passes on the updated snapshot.
+- docs/02-architecture/generated/module-dependency-map.json
+summary: Regenerated architecture dependency map markdown and JSON artifacts so committed
+  docs reflect the current source fingerprint and updated composition-to-infrastructure
+  import topology.
 ---
 
 # Episodic summary
 
 ## Task
 
-- Title: Fix dependency map drift
+- Title: Fix architecture dependency map drift
 
 ## Outcome
 
-- Regenerated architecture dependency map artifacts after real topology drift and verified the generator check passes on the updated snapshot.
+- Regenerated architecture dependency map markdown and JSON artifacts so committed docs reflect the current source fingerprint and updated composition-to-infrastructure import topology.
 
 ## Lessons learned
 
