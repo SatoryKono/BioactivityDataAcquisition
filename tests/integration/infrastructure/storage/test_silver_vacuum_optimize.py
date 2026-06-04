@@ -58,7 +58,7 @@ async def test_silver_vacuum_dry_run_on_materialized_table(
     temp_delta_path: str,
 ) -> None:
     """Vacuum dry-run must succeed without deleting rows from a freshly written table."""
-    table_name = "maintenance.vacuum"
+    table_name = "maintenance_vacuum"
     await silver_writer.write_silver(
         table_name=table_name,
         records=_records(),
@@ -79,7 +79,7 @@ async def test_silver_optimize_returns_metrics_on_materialized_table(
     silver_writer: SilverWriter,
 ) -> None:
     """Optimize compact must run against a real Delta table and return metrics payload."""
-    table_name = "maintenance.optimize"
+    table_name = "maintenance_optimize"
     await silver_writer.write_silver(
         table_name=table_name,
         records=_records(),

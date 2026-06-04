@@ -1,28 +1,28 @@
 ---
-id: mcp-setup
-title: Configure MCP
-task_id: mcp-setup
-created_at: '2026-06-04T16:25:50Z'
+id: issue-5158
+title: Close issue 5158
+task_id: issue-5158
+created_at: '2026-06-04T16:26:21Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - AGENTS.md
 summary: Active task session context.
-query: mcp
+query: '5158'
 ---
 
 # Session note
 
 ## Task
 
-- Title: Configure MCP
-- Retrieval query: mcp
+- Title: Close issue 5158
+- Retrieval query: 5158
 
 ## Retrieved context
 
 - Catalog hits: 0
-- RAG hits: 4
-- Timeline hits: 0
+- RAG hits: 0
+- Timeline hits: 1
 
 ## Working notes
 

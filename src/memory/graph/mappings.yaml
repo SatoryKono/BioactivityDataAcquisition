@@ -219,9 +219,9 @@ contracts:
     - "bioetl.domain.contracts.gold"
     - "bioetl.domain.schemas"
   control_plane_modules:
-    - "src/bioetl/application/services/control_plane/run_manifest_service.py"
-    - "src/bioetl/application/services/control_plane/run_ledger_service.py"
-    - "src/bioetl/application/services/control_plane/effective_config_service.py"
+    - "src/bioetl/application/services/control_plane/manifest/service.py"
+    - "src/bioetl/application/services/control_plane/ledger/service.py"
+    - "src/bioetl/application/services/control_plane/effective_config/service.py"
     - "src/bioetl/application/services/config_dq_service.py"
     - "src/bioetl/composition/runtime_builders/control_plane.py"
     - "src/bioetl/composition/runtime_builders/run_manifest_builder.py"
@@ -245,7 +245,7 @@ contracts:
     - "dq_contract_compatibility_hash"
   lineage_modules:
     - "src/bioetl/application/services/lineage/lineage_inspection_service.py"
-    - "src/bioetl/application/services/control_plane/manifest/diagnostics.py"
+    - "src/bioetl/application/services/control_plane/manifest/diagnostics/__init__.py"
   lineage_runtime_modules:
     - "src/bioetl/composition/bootstrap/cli/lineage.py"
     - "src/bioetl/interfaces/cli/commands/lineage.py"

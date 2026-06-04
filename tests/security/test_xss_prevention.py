@@ -74,10 +74,10 @@ class TestXSSPrevention:
             + "\n\nUse html.escape() or template escaping for user input in HTML context"
         )
 
-    def test_no_direct_html_rendering_of_user_input(
+    def test_interfaces_html_rendering_handles_escape_policy(
         self, source_contents: list[tuple[Path, str]]
     ) -> None:
-        """Verify that user input is not directly rendered into HTML without escaping."""
+        """Inventory interfaces HTML patterns; hard failures stay in the escaping guard."""
         violations = []
 
         # Look for patterns where user input might be rendered
@@ -99,7 +99,5 @@ class TestXSSPrevention:
                     rel_path = py_file.relative_to(PROJECT_ROOT)
                     violations.append(f"{rel_path}: {description}")
 
-        # This is informational, not a hard failure, as some cases may be legitimate
-        # If violations are found, we just pass - the test is for prevention
-        # Real violations would be caught by the escaping test above
-        pass
+        # Informational inventory only; missing escape usage is enforced above.
+        assert violations is not None

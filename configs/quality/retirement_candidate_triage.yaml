@@ -138,15 +138,14 @@ repo_wide_zero_import_classification:
     linked_issue: '#4541'
     rationale: Resilience port definitions remain canonical domain protocol owners
       even when consumers import them through package-root exports.
-  - module_path: src/bioetl/domain/ports/serialization.py
-    module_name: bioetl.domain.ports.serialization
-    disposition: retain_canonical_owner_module
-    reviewed_on: '2026-06-02'
+  - module_path: src/bioetl/interfaces/cli/commands/maintenance.py
+    module_name: bioetl.interfaces.cli.commands.maintenance
+    disposition: retain_public_facade
+    reviewed_on: '2026-06-04'
     review_by: '2026-08-31'
     linked_issue: '#4541'
-    rationale: Serialization port definitions remain canonical domain protocol owners
-      domain protocol owners even when consumers import them through package-root
-      exports.
+    rationale: CLI maintenance commands are public facades for operational tasks
+      and may be invoked directly by operators through the CLI interface.
 families:
 - name: adapter_layer
   owner: '@bioetl-platform'

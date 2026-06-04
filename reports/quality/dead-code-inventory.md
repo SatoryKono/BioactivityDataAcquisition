@@ -6,8 +6,8 @@
 - next_review_by: 2026-08-31
 - review_cycle_days: 90
 - triaged_entry_count: 18
-- repo_wide_zero_import_candidate_count: 14
-- repo_wide_classified_zero_import_candidate_count: 14
+- repo_wide_zero_import_candidate_count: 13
+- repo_wide_classified_zero_import_candidate_count: 13
 - repo_wide_untriaged_zero_import_candidate_count: 0
 - note: zero static importer count is a review signal, not automatic removal proof
 - guardrail: Zero static importer count is a review signal only; removals must still verify public entrypoints and dynamic/plugin import paths.
@@ -52,4 +52,3 @@
 | `bioetl.domain.ports.protein_classification` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/protein_classification.py` |
 | `bioetl.domain.ports.publication_strategy` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/publication_strategy.py` |
 | `bioetl.domain.ports.resilience` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/resilience.py` |
-| `bioetl.domain.ports.serialization` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/serialization.py` |
