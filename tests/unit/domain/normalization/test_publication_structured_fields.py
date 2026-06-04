@@ -108,3 +108,38 @@ def test_publication_structured_field_identifier_families_are_registered() -> No
         assert reference_identifier_family(policy.identifier_family).name == (
             policy.identifier_family
         )
+
+
+def test_publication_structured_field_policy_returns_none_for_unknown_field() -> None:
+    policy = publication_structured_field_policy(
+        "unknown.profile",
+        "unknown_field",
+    )
+    assert policy is None
+
+
+def test_field_representation_enum_values() -> None:
+    assert FieldRepresentation.CANONICAL_JSON_STRING == "canonical_json_string"
+    assert FieldRepresentation.SCALAR_STRING == "scalar_string"
+
+
+def test_collection_semantics_enum_values() -> None:
+    assert CollectionSemantics.ORDERED_SEQUENCE == "ordered_sequence"
+    assert CollectionSemantics.UNORDERED_SET == "unordered_set"
+    assert CollectionSemantics.RAW_PROVIDER_VALUE == "raw_provider_value"
+
+
+def test_hash_ordering_property() -> None:
+    policy = publication_structured_field_policy(
+        "crossref.publication",
+        "authors",
+    )
+    assert policy is not None
+    assert policy.hash_ordering == "order_sensitive"
+
+    policy_set = publication_structured_field_policy(
+        "crossref.publication",
+        "author_orcids",
+    )
+    assert policy_set is not None
+    assert policy_set.hash_ordering == "set_like"
