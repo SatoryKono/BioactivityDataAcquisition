@@ -4,7 +4,7 @@
   "source_artifacts": {
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "88bcc5ea11b92cd61605ef2b4b5a6a95871ce31a90a24ed82af1636befb8c29d"
+      "source_fingerprint": "b2c3776318fedd7113a32e2c3ef427d28789f15657bf1bb6bed473617e73ba48"
     },
     "module_coverage_inventory": {
       "path": "reports/quality/module-coverage-inventory.json",
@@ -60,7 +60,7 @@
       "score": 8.0,
       "weighted_score": 0.72,
       "evidence_metrics": {
-        "source_module_count": 2132,
+        "source_module_count": 2134,
         "uncovered_module_count": 104
       }
     },
@@ -82,7 +82,7 @@
       "score": 7.0,
       "weighted_score": 0.98,
       "evidence_metrics": {
-        "source_module_count": 2132,
+        "source_module_count": 2134,
         "hotspot_family_count": 5
       }
     },
@@ -104,7 +104,7 @@
       "score": 7.4,
       "weighted_score": 0.888,
       "evidence_metrics": {
-        "unmeasured_module_count": 1,
+        "unmeasured_module_count": 3,
         "uncovered_module_count": 104
       }
     },
@@ -144,8 +144,8 @@
   ],
   "metrics": {
     "layer_violations": 0,
-    "source_module_count": 2132,
-    "unmeasured_module_count": 1,
+    "source_module_count": 2134,
+    "unmeasured_module_count": 3,
     "uncovered_module_count": 104,
     "hotspot_family_count": 5,
     "retained_entrypoint_count": 14,
