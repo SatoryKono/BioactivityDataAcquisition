@@ -24,8 +24,10 @@ DEFAULT_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "module-coverage-invento
 SOURCE_ROOT = PROJECT_ROOT / "src" / "bioetl"
 # Shared-drive worktrees can return one transient digest immediately after local
 # edits; prefer a repeated digest before declaring the source-tree hash current.
-MAX_SOURCE_TREE_STABILIZATION_ATTEMPTS = 3
-SOURCE_TREE_STABILIZATION_SLEEP_SECONDS = 0.1
+DEFAULT_SOURCE_TREE_STABILIZATION_ATTEMPTS = 5
+DEFAULT_SOURCE_TREE_STABILIZATION_SLEEP_SECONDS = 0.1
+MOUNTED_SOURCE_TREE_STABILIZATION_ATTEMPTS = 12
+MOUNTED_SOURCE_TREE_STABILIZATION_SLEEP_SECONDS = 0.25
 
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -112,19 +114,45 @@ def _iter_source_modules(repo_root: Path) -> list[Path]:
     ]
 
 
+def _source_tree_stabilization_profile(
+    repo_root: Path,
+) -> tuple[int, float]:
+    """Use longer read windows on mounted/shared-drive worktrees."""
+    normalized_root = str(repo_root.resolve()).replace("\\", "/").lower()
+    if "/mnt/" in normalized_root or "g-drive" in normalized_root:
+        return (
+            MOUNTED_SOURCE_TREE_STABILIZATION_ATTEMPTS,
+            MOUNTED_SOURCE_TREE_STABILIZATION_SLEEP_SECONDS,
+        )
+    return (
+        DEFAULT_SOURCE_TREE_STABILIZATION_ATTEMPTS,
+        DEFAULT_SOURCE_TREE_STABILIZATION_SLEEP_SECONDS,
+    )
+
+
 def _read_stable_source_module_snapshots(
     repo_root: Path,
     *,
-    max_attempts: int = MAX_SOURCE_TREE_STABILIZATION_ATTEMPTS,
+    max_attempts: int | None = None,
+    sleep_seconds: float | None = None,
 ) -> tuple[list[_SourceModuleSnapshot], str]:
-    """Retry source-tree reads and prefer the largest readable snapshot set."""
+    """Retry source-tree reads until two consecutive snapshots agree."""
+    profile_attempts, profile_sleep = _source_tree_stabilization_profile(repo_root)
+    attempts = max_attempts if max_attempts is not None else profile_attempts
+    pause_seconds = (
+        sleep_seconds
+        if sleep_seconds is not None
+        else profile_sleep
+    )
     best_digest: str | None = None
     best_paths: tuple[str, ...] = ()
     best_snapshots: list[_SourceModuleSnapshot] | None = None
+    peak_module_count = 0
+    stable_at_peak_reads = 0
     previous_digest: str | None = None
     previous_paths: tuple[str, ...] | None = None
 
-    for attempt in range(max_attempts):
+    for attempt in range(attempts):
         source_paths = _iter_source_modules(repo_root)
         snapshots, digest = _read_source_module_snapshots(
             source_paths,
@@ -135,21 +163,24 @@ def _read_stable_source_module_snapshots(
             best_digest = digest
             best_paths = repo_paths
             best_snapshots = snapshots
-        if (
-            digest == previous_digest
+        if len(repo_paths) > peak_module_count:
+            peak_module_count = len(repo_paths)
+            stable_at_peak_reads = 0
+        elif (
+            previous_digest is not None
+            and digest == previous_digest
             and repo_paths == previous_paths
-            and (
-                best_snapshots is None
-                or len(repo_paths) >= len(best_paths)
-            )
+            and len(repo_paths) == peak_module_count
         ):
-            best_digest = digest
-            best_paths = repo_paths
-            best_snapshots = snapshots
+            stable_at_peak_reads += 1
+            if stable_at_peak_reads >= 2:
+                return snapshots, digest
+        else:
+            stable_at_peak_reads = 0
         previous_digest = digest
         previous_paths = repo_paths
-        if attempt + 1 < max_attempts:
-            time.sleep(SOURCE_TREE_STABILIZATION_SLEEP_SECONDS)
+        if attempt + 1 < attempts:
+            time.sleep(pause_seconds)
 
     if best_snapshots is None or best_digest is None:
         return [], hashlib.sha256().hexdigest()

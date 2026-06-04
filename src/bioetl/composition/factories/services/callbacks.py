@@ -7,15 +7,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.core.wiring.runtime import (
-    BasePipeline,
-    GoldFilterCallback,
-    GoldTransformCallback,
-    TransformCallback,
-)
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
 
 if TYPE_CHECKING:
+    from bioetl.application.core.wiring.runtime import (
+        BasePipeline,
+        GoldFilterCallback,
+        GoldTransformCallback,
+        TransformCallback,
+    )
     from bioetl.domain.behavior import DataNormalizationConfig
     from bioetl.domain.ports import DataNormalizationPort
 
@@ -31,24 +31,24 @@ def extract_pipeline_callbacks(pipeline: BasePipeline) -> PipelineCallbacksConte
     transformer = pipeline.transformer
     if transformer is not None:
         transform_callback = cast(
-            TransformCallback,
+            "TransformCallback",
             getattr(transformer, "transform_pre_silver", transformer.transform),
         )
         return PipelineCallbacksContext(
             transform=transform_callback,
-            gold_filter=cast(GoldFilterCallback, transformer.should_write_gold),
-            gold_transform=cast(GoldTransformCallback, transformer.transform_for_gold),
+            gold_filter=cast("GoldFilterCallback", transformer.should_write_gold),
+            gold_transform=cast("GoldTransformCallback", transformer.transform_for_gold),
         )
 
     # Fallback for pipelines without explicit transformer (legacy)
     return PipelineCallbacksContext(
-        transform=cast(TransformCallback, pipeline.transform_bronze_to_silver),
+        transform=cast("TransformCallback", pipeline.transform_bronze_to_silver),
         gold_filter=cast(
-            GoldFilterCallback,
+            "GoldFilterCallback",
             getattr(pipeline, "should_write_gold", lambda _context, record: True),
         ),
         gold_transform=cast(
-            GoldTransformCallback,
+            "GoldTransformCallback",
             getattr(
                 pipeline,
                 "transform_for_gold",

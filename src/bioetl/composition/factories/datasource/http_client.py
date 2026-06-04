@@ -27,6 +27,8 @@ __all__ = [
     "ResolvedHttpConfig",
 ]
 
+_TEST_MODE_HTTP_TIMEOUT_SECONDS = 5.0
+
 
 @dataclass(frozen=True)
 class ResolvedHttpConfig:
@@ -68,6 +70,24 @@ class HttpClientFactory:
             base_delay=cfg.base_delay,
             max_delay=cfg.max_delay,
         )
+
+    @classmethod
+    def _resolve_request_timeout(
+        cls,
+        cfg: ResolvedHttpConfig,
+        settings: Settings | None,
+    ) -> float:
+        """Return request timeout, clamping test-mode runs to a bounded value.
+
+        E2E and policy suites intentionally exercise transient upstream handling.
+        Keeping production-sized provider timeouts in ``test_mode`` lets one
+        flaky live 5xx consume most of the per-test wall-clock budget before the
+        deterministic retry/skip envelope can react.
+        """
+        test_mode = bool(getattr(settings, "test_mode", False))
+        if not test_mode:
+            return cfg.timeout
+        return min(cfg.timeout, _TEST_MODE_HTTP_TIMEOUT_SECONDS)
 
     @classmethod
     def create_for_provider(
@@ -189,6 +209,7 @@ class HttpClientFactory:
             provider_registry=provider_registry,
         )
         retry_config = cls._build_retry_config(cfg, settings)
+        timeout = cls._resolve_request_timeout(cfg, settings)
 
         return UnifiedHTTPClient(
             rate_limiter=TokenBucketRateLimiter(
@@ -201,7 +222,7 @@ class HttpClientFactory:
                 metrics=metrics,
             ),
             retry_config=retry_config,
-            timeout=cfg.timeout,
+            timeout=timeout,
             provider=provider,
             run_id=run_id,
             max_connections=cfg.max_connections,

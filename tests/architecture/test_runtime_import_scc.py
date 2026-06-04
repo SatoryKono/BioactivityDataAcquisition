@@ -99,6 +99,22 @@ ACCEPTED_RUNTIME_SCCS: dict[frozenset[str], dict[str, str]] = {
             "command entrypoint."
         ),
     },
+    frozenset(
+        {
+            "bioetl.infrastructure.storage.support.atomic_group",
+            "bioetl.infrastructure.storage.support.atomic_ops",
+        }
+    ): {
+        "owner": "infrastructure.storage.support",
+        "review_date": "2026-12-31",
+        "linked_issue": "#4820",
+        "rationale": (
+            "atomic_ops lazily re-exports AtomicWriteGroup from atomic_group via __getattr__ "
+            "for backward compatibility, while atomic_group imports low-level atomic write "
+            "utilities from atomic_ops. This is a reviewed same-family cycle supporting "
+            "the compatibility facade pattern for atomic write utilities."
+        ),
+    },
 }
 FORBIDDEN_RUNTIME_SCCS: tuple[frozenset[str], ...] = (
     frozenset(

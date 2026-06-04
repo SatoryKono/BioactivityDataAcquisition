@@ -15,16 +15,6 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.dq import (
-    BronzeDQAnalyzer,
-    GoldDQAnalyzer,
-    SilverCheckExecutor,
-    SilverDQAnalyzer,
-    SilverStatisticsCalculator,
-    SilverThresholdChecker,
-)
-from bioetl.infrastructure.export.dq_report_writer import DQReportWriter
-
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
         BronzeDQAnalyzerPort,
@@ -56,6 +46,8 @@ class DQServicesFactory:
         Returns:
             BronzeDQAnalyzerPort implementation for analyzing raw Bronze data.
         """
+        from bioetl.application.services.dq.bronze_analyzer import BronzeDQAnalyzer
+
         return BronzeDQAnalyzer()
 
     @staticmethod
@@ -65,6 +57,17 @@ class DQServicesFactory:
         Returns:
             SilverDQAnalyzerPort implementation for analyzing normalized Silver data.
         """
+        from bioetl.application.services.dq.silver_analyzer import SilverDQAnalyzer
+        from bioetl.application.services.dq.silver_check_executor import (
+            SilverCheckExecutor,
+        )
+        from bioetl.application.services.dq.silver_statistics import (
+            SilverStatisticsCalculator,
+        )
+        from bioetl.application.services.dq.silver_threshold import (
+            SilverThresholdChecker,
+        )
+
         statistics = SilverStatisticsCalculator()
         threshold_checker = SilverThresholdChecker()
         check_executor = SilverCheckExecutor(
@@ -84,6 +87,8 @@ class DQServicesFactory:
         Returns:
             GoldDQAnalyzerPort implementation for analyzing Gold data marts.
         """
+        from bioetl.application.services.dq.gold_analyzer import GoldDQAnalyzer
+
         return GoldDQAnalyzer()
 
     @staticmethod
@@ -103,6 +108,8 @@ class DQServicesFactory:
         Returns:
             DQReportWriterPort implementation for writing reports to filesystem.
         """
+        from bioetl.infrastructure.export.dq_report_writer import DQReportWriter
+
         return DQReportWriter(
             base_path=base_path,
             logger=logger,

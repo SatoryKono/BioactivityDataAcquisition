@@ -140,7 +140,8 @@ class IntegrationPipelineTestCase:
                             self._create_local_storage_context
                         )
                         with patch(
-                            "bioetl.composition.factories.services.common_service_wiring.StorageFactory.create"
+                            "bioetl.composition.factories.services.common_service_wiring.StorageFactory.create",
+                            create=True,
                         ) as mock_create_wiring:
                             mock_create_wiring.side_effect = (
                                 self._create_local_storage_context

@@ -336,6 +336,29 @@ async def test_health_check_status_endpoint_500_returns_degraded(
 
 
 @pytest.mark.asyncio
+async def test_health_check_probe_timeout_returns_degraded(
+    adapter,
+    mock_http_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A stuck ChEMBL status probe should fail fast as DEGRADED."""
+
+    async def _hang(_url: str) -> None:
+        await asyncio.sleep(1)
+
+    monkeypatch.setattr(
+        "bioetl.infrastructure.adapters.chembl.health.CHEMBL_HEALTH_PROBE_TIMEOUT_SECONDS",
+        0.01,
+    )
+    mock_http_client.get_once = AsyncMock(side_effect=_hang)
+
+    status = await adapter.health_check()
+
+    assert status == HealthStatus.DEGRADED
+    assert adapter._last_probe_health_status == HealthStatus.DEGRADED
+
+
+@pytest.mark.asyncio
 async def test_check_health_status_endpoint_500_returns_degraded(
     adapter, mock_http_client
 ):

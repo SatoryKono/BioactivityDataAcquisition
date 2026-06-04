@@ -1,9 +1,8 @@
 """Integration tests for ChEMBL adapter.
 
-These tests use VCR.py to record/replay HTTP interactions.
-To record new cassettes: pytest --vcr-record=new_episodes
-
-Cassettes location: tests/fixtures/vcr/chembl/
+The adapter-level tests below use a deterministic replay HTTP seam so routine
+runs do not depend on live ChEMBL latency. Broader ChEMBL pipeline tests keep
+their VCR cassettes under tests/fixtures/vcr/chembl/.
 """
 
 from __future__ import annotations
@@ -14,9 +13,83 @@ from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
+import httpx
 
 # VCR cassette directory for ChEMBL adapter tests
 CASSETTE_DIR = Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "chembl"
+
+
+class _ReplayChemblHTTPClient:
+    """Fast deterministic ChEMBL HTTP seam for adapter integration tests."""
+
+    def __init__(self, circuit_breaker: Any) -> None:
+        self.circuit_breaker = circuit_breaker
+        self.requests: list[tuple[str, dict[str, object]]] = []
+
+    async def __aenter__(self) -> _ReplayChemblHTTPClient:
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: object | None,
+    ) -> None:
+        del exc_type, exc_val, exc_tb
+
+    async def get(
+        self,
+        url: str,
+        params: dict[str, object] | None = None,
+        headers: dict[str, str] | None = None,
+    ) -> httpx.Response:
+        del headers
+        request_params = dict(params or {})
+        self.requests.append((url, request_params))
+        return self._response(url=url, params=request_params)
+
+    async def get_once(
+        self,
+        url: str,
+        params: dict[str, object] | None = None,
+        headers: dict[str, str] | None = None,
+    ) -> httpx.Response:
+        return await self.get(url, params=params, headers=headers)
+
+    def _response(self, *, url: str, params: dict[str, object]) -> httpx.Response:
+        request = httpx.Request("GET", url, params=params)
+        if url.endswith("/status"):
+            return httpx.Response(200, json={"status": "UP"}, request=request)
+        if url.endswith("/molecule"):
+            return httpx.Response(
+                200,
+                json={"molecules": [], "page_meta": {"total_count": 2_426_731}},
+                request=request,
+            )
+        if url.endswith("/activity"):
+            expected_params = {"format": "json", "limit": 5, "offset": 0}
+            assert params == expected_params
+            return httpx.Response(
+                200,
+                json={
+                    "activities": [
+                        {"activity_id": 31863},
+                        {"activity_id": 31864},
+                        {"activity_id": 31865},
+                        {"activity_id": 31866},
+                        {"activity_id": 31867},
+                    ],
+                    "page_meta": {
+                        "limit": 5,
+                        "next": "/chembl/api/data/activity?limit=5&offset=5",
+                        "offset": 0,
+                        "previous": None,
+                        "total_count": 24_267_312,
+                    },
+                },
+                request=request,
+            )
+        return httpx.Response(404, json={"detail": "not found"}, request=request)
 
 
 @pytest.fixture(scope="module")
@@ -45,14 +118,9 @@ class TestChemblAdapter:
 
     @pytest.fixture
     def chembl_client(self, token_bucket: Any, circuit_breaker: Any) -> Any:
-        """Create ChEMBL HTTP client for testing."""
-        from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-
-        return UnifiedHTTPClient(
-            rate_limiter=token_bucket,
-            circuit_breaker=circuit_breaker,
-            timeout=30.0,
-        )
+        """Create deterministic ChEMBL replay client for adapter integration tests."""
+        del token_bucket
+        return _ReplayChemblHTTPClient(circuit_breaker)
 
     @pytest.fixture
     def chembl_adapter(self, chembl_client: Any, mock_logger: MagicMock) -> Any:
@@ -65,15 +133,10 @@ class TestChemblAdapter:
         """Adapter should have correct provider name."""
         assert chembl_adapter.provider_name == "chembl"
 
-    @pytest.mark.vcr
     async def test_fetch_activities(
         self, chembl_client: Any, mock_logger: MagicMock
     ) -> None:
-        """Test fetching activities from ChEMBL.
-
-        This test requires a VCR cassette.
-        Record with: pytest --vcr-record=new_episodes -k test_fetch_activities
-        """
+        """Test fetching activities from a replayed ChEMBL response."""
         from bioetl.domain.resilience import AdapterConfig
         from bioetl.infrastructure.adapters.chembl import ChemblAdapter
 
@@ -93,15 +156,10 @@ class TestChemblAdapter:
             for record in records:
                 assert "activity_id" in record
 
-    @pytest.mark.vcr
     async def test_health_check(
         self, chembl_client: Any, mock_logger: MagicMock
     ) -> None:
-        """Test ChEMBL health check endpoint.
-
-        This test requires a VCR cassette.
-        Record with: pytest --vcr-record=new_episodes -k test_health_check
-        """
+        """Test ChEMBL health check response handling."""
         from bioetl.domain.types import HealthStatus
         from bioetl.infrastructure.adapters.chembl import ChemblAdapter
 
@@ -116,15 +174,10 @@ class TestChemblAdapter:
                 HealthStatus.UNHEALTHY,
             ]
 
-    @pytest.mark.vcr
     async def test_get_entity_count(
         self, chembl_client: Any, mock_logger: MagicMock
     ) -> None:
-        """Test getting entity count from ChEMBL.
-
-        This test requires a VCR cassette.
-        Record with: pytest --vcr-record=new_episodes -k test_get_entity_count
-        """
+        """Test getting entity count from a replayed ChEMBL response."""
         from bioetl.infrastructure.adapters.chembl import ChemblAdapter
 
         async with chembl_client:

@@ -259,6 +259,7 @@ def _build_transform_config() -> WorkflowConfig:
     )
 
 
+@pytest.mark.unit
 def test_workflow_recording_payload_helpers_extract_fingerprint_and_counts() -> None:
     step_result = WorkflowStepExecutionResult(
         step_id="chembl_activity_ingest",
@@ -291,6 +292,7 @@ def test_workflow_recording_payload_helpers_extract_fingerprint_and_counts() -> 
     }
 
 
+@pytest.mark.unit
 def test_workflow_recording_state_helper_tracks_transform_repair_closure() -> None:
     state = WorkflowExecutionState(
         workflow_run_id=RunID(UUID("00000000-0000-0000-0000-000000000515")),
@@ -330,6 +332,7 @@ def test_workflow_recording_state_helper_tracks_transform_repair_closure() -> No
     assert updated.last_event_id == "workflow-entry-helper"
 
 
+@pytest.mark.unit
 def test_workflow_preparation_incremental_offset_uses_successful_state_only() -> None:
     state = WorkflowExecutionState(
         workflow_run_id=RunID(UUID("00000000-0000-0000-0000-000000000516")),

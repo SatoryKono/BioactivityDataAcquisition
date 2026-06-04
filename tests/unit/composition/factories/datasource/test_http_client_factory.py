@@ -130,7 +130,7 @@ class TestHttpClientFactory:
     def test_create_clamps_retry_waits_in_test_mode(
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        """Test mode should preserve attempts but remove wall-clock retry waits."""
+        """Test mode should keep retries bounded and clamp request timeout."""
         from bioetl.composition.factories.datasource import http_client as module
 
         source_config = SimpleNamespace(
@@ -164,6 +164,7 @@ class TestHttpClientFactory:
         )
 
         assert result == "client-test-mode"
+        assert client_ctor.call_args.kwargs["timeout"] == pytest.approx(5.0)
         retry_config = client_ctor.call_args.kwargs["retry_config"]
         assert retry_config.max_attempts == 5
         assert retry_config.base_delay == pytest.approx(0.0)
