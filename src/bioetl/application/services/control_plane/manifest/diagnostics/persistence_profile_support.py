@@ -181,7 +181,7 @@ def build_composite_resume_reconstructability(
             "per_provider_result_maps",
             "rich_checkpoint_payloads",
         ],
-        "forensic_grade_supported": composite_resume_rich_replay_supported,
+        "forensic_grade_supported": False,
     }
 
 

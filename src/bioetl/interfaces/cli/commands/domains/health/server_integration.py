@@ -153,7 +153,7 @@ def _start_health_observability(logger: LoggerPort | None = None) -> None:
             )
         return
 
-    started = _start_metrics_server_via_interface(
+    started = get_metrics_server_starter()(
         port=settings.metrics_port,
         addr=settings.metrics_addr,
         fail_fast=settings.observability.metrics_fail_fast,

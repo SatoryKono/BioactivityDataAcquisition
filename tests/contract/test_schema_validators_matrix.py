@@ -95,3 +95,45 @@ def test_prebuilt_json_checks_are_named() -> None:
     assert JSON_CHECK.name == "valid_json"
     assert JSON_ARRAY_CHECK.name == "valid_json_array"
     assert JSON_OBJECT_CHECK.name == "valid_json_object"
+
+
+@pytest.mark.parametrize(
+    ("func", "series", "kwargs", "expected"),
+    [
+        (is_non_negative, pd.Series([0, 2, None]), {"min_value": True}, [True, True, True]),
+        (is_non_negative, pd.Series([-1, 0, None]), {"min_value": 0}, [False, True, True]),
+        (is_positive, pd.Series([1, 2, None]), {"min_value": True}, [True, True, True]),
+        (is_positive, pd.Series([0, 1, None]), {"min_value": 1}, [False, True, True]),
+        (
+            in_closed_range,
+            pd.Series([-1, 0, 5, None]),
+            {"min_val": 0, "max_val": 5},
+            [False, True, True, True],
+        ),
+        (
+            max_str_length,
+            pd.Series(["ok", "toolong", None]),
+            {"max_len": 5},
+            [True, False, True],
+        ),
+        (
+            str_starts_with,
+            pd.Series(["InChI=1/CH4", "SMILES", None]),
+            {"prefix": "InChI="},
+            [True, False, True],
+        ),
+        (
+            str_matches_pattern,
+            pd.Series(["CHEMBL1", "BAD", None]),
+            {"pattern": r"^CHEMBL\d+$"},
+            [True, False, True],
+        ),
+    ],
+)
+def test_registered_validator_helpers_cover_null_and_boundary_paths(
+    func,
+    series: pd.Series,
+    kwargs: dict[str, object],
+    expected: list[bool],
+) -> None:
+    assert func(series, **kwargs).tolist() == expected
