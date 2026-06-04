@@ -144,8 +144,8 @@
         "src/bioetl/composition/services_api.py",
         "src/bioetl/interfaces/cli/commands/diagnostics.py",
         "src/bioetl/interfaces/cli/commands/domains/health/server_integration.py",
-        "src/bioetl/interfaces/cli/commands/health.py",
-        "src/bioetl/interfaces/cli/commands/quarantine.py"
+        "src/bioetl/interfaces/cli/commands/domains/quarantine/runtime_access.py",
+        "src/bioetl/interfaces/cli/commands/health.py"
       ],
       "test_importers": [
         "tests/unit/composition/test_canonical_module_paths.py",
