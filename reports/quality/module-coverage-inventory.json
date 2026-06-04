@@ -6556,6 +6556,16 @@
       "source_lines": 38
     },
     {
+      "coverage_percent": null,
+      "coverage_status": "unmeasured",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
+      "module": "bioetl.composition.bootstrap.control_plane_store_builders",
+      "path": "src/bioetl/composition/bootstrap/control_plane_store_builders.py",
+      "source_lines": 80
+    },
+    {
       "coverage_percent": 80.0,
       "coverage_status": "partially_covered",
       "covered_lines": 16,
@@ -7114,16 +7124,6 @@
       "module": "bioetl.composition.control_plane_api",
       "path": "src/bioetl/composition/control_plane_api.py",
       "source_lines": 171
-    },
-    {
-      "coverage_percent": null,
-      "coverage_status": "unmeasured",
-      "covered_lines": null,
-      "executable_lines": null,
-      "missing_lines": null,
-      "module": "bioetl.composition.control_plane_store_builders",
-      "path": "src/bioetl/composition/control_plane_store_builders.py",
-      "source_lines": 80
     },
     {
       "coverage_percent": 100.0,
@@ -8483,7 +8483,7 @@
       "missing_lines": 4,
       "module": "bioetl.composition.runtime_builders._run_manifest_creation_support_policy",
       "path": "src/bioetl/composition/runtime_builders/_run_manifest_creation_support_policy.py",
-      "source_lines": 186
+      "source_lines": 188
     },
     {
       "coverage_percent": 65.67,
@@ -8503,7 +8503,7 @@
       "missing_lines": 0,
       "module": "bioetl.composition.runtime_builders._run_manifest_publication_support",
       "path": "src/bioetl/composition/runtime_builders/_run_manifest_publication_support.py",
-      "source_lines": 46
+      "source_lines": 48
     },
     {
       "coverage_percent": 100.0,
@@ -21348,7 +21348,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-06-04",
-  "source_tree_sha256": "dc8a82efb0af269f6d40e2e1173dfc331879fdcfd8a33c7c6af37f95fdee4519",
+  "source_tree_sha256": "24c76991d26747ed62aef88b7462633caaed7bd2f270da4211f646c718cea775",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -21593,8 +21593,8 @@
     "unmeasured_module_count": 3,
     "unmeasured_modules": [
       {
-        "module": "bioetl.composition.control_plane_store_builders",
-        "path": "src/bioetl/composition/control_plane_store_builders.py",
+        "module": "bioetl.composition.bootstrap.control_plane_store_builders",
+        "path": "src/bioetl/composition/bootstrap/control_plane_store_builders.py",
         "reason": "coverage_xml_has_no_class_entry"
       },
       {

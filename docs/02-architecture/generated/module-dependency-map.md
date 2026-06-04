@@ -9,7 +9,7 @@
 - Internal import edges (raw): `8427`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
-- Cross-layer module-group edges (total): `346`
+- Cross-layer module-group edges (total): `342`
 - Cross-layer module-group edges (top 60): `60`
 
 ## Layer Dependency Graph
@@ -80,8 +80,8 @@ flowchart LR
 | `application.core`             | `domain.context`                |      41 |
 | `infrastructure.storage`       | `domain.models`                 |      41 |
 | `composition.factories`        | `infrastructure.config`         |      40 |
+| `composition.bootstrap`        | `infrastructure.config`         |      38 |
 | `composition.factories`        | `infrastructure.storage`        |      38 |
-| `composition.bootstrap`        | `infrastructure.config`         |      37 |
 | `application.services`         | `domain.value_objects`          |      36 |
 | `composition.factories`        | `domain.types`                  |      35 |
 | `infrastructure.adapters`      | `domain.exceptions`             |      34 |

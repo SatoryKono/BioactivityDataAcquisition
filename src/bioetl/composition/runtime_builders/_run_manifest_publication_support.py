@@ -10,7 +10,9 @@ from bioetl.application.services.control_plane.manifest.service import (
     RunManifestCreateSpec,
     RunManifestService,
 )
-from bioetl.composition.control_plane_store_builders import create_run_manifest_store
+from bioetl.composition.bootstrap.control_plane_store_builders import (
+    create_run_manifest_store,
+)
 from bioetl.composition.occurrence_identity import create_runtime_occurrence_id
 from bioetl.domain.control_plane import RunManifest
 from bioetl.infrastructure.time import SystemClock

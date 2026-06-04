@@ -24,7 +24,7 @@ from bioetl.application.services.control_plane.replay.historical_universe_servic
 from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestInspectionService,
 )
-from bioetl.composition.control_plane_store_builders import (
+from bioetl.composition.bootstrap.control_plane_store_builders import (
     create_effective_config_artifact_store,
     create_historical_replay_closure_store,
     create_historical_replay_universe_store,
