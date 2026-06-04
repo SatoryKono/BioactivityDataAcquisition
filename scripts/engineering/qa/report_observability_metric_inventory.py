@@ -83,6 +83,7 @@ _RUNTIME_EXCLUDE_PARTS = (
 _TEXT_SUFFIXES = {".py", ".md", ".json", ".yml", ".yaml"}
 _TEXT_FILE_DISCOVERY_CACHE: dict[str, tuple[Path, ...]] = {}
 _METRIC_INVENTORY_CACHE: dict[str, dict[str, object]] = {}
+_RUNTIME_CANDIDATE_TEXT_CACHE: dict[str, str | None] = {}
 _TEXT_DISCOVERY_TIMEOUT_SECONDS: Final[float] = 20.0
 _METRIC_MENTION_GREP_TIMEOUT_SECONDS: Final[float] = 20.0
 _METRIC_MENTION_GREP_CHUNK_SIZE: Final[int] = 128
@@ -559,12 +560,19 @@ def _normalize_mapping_lists(
 
 
 def _read_runtime_candidate_text(path: Path) -> str | None:
+    cache_key = path.as_posix()
+    cached = _RUNTIME_CANDIDATE_TEXT_CACHE.get(cache_key)
+    if cache_key in _RUNTIME_CANDIDATE_TEXT_CACHE:
+        return cached
     try:
         text = path.read_text(encoding="utf-8")
     except (OSError, UnicodeDecodeError):
+        _RUNTIME_CANDIDATE_TEXT_CACHE[cache_key] = None
         return None
     if not any(marker in text for marker in _RUNTIME_SCAN_MARKERS):
+        _RUNTIME_CANDIDATE_TEXT_CACHE[cache_key] = None
         return None
+    _RUNTIME_CANDIDATE_TEXT_CACHE[cache_key] = text
     return text
 
 
