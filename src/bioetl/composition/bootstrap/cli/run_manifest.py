@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane.forensic_diff_service import (
     ForensicRunDiffService,
@@ -24,17 +24,27 @@ from bioetl.application.services.control_plane.replay.historical_universe_servic
 from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestInspectionService,
 )
+from bioetl.composition.control_plane_store_builders import (
+    create_effective_config_artifact_store,
+    create_historical_replay_closure_store,
+    create_historical_replay_universe_store,
+    create_run_ledger_store,
+    create_run_manifest_store,
+)
 from bioetl.composition.factories.services.port_factories import create_metrics
 from bioetl.composition.occurrence_identity import create_runtime_occurrence_id
 from bioetl.composition.runtime_builders.config_access import get_settings
-from bioetl.infrastructure.control_plane import (
-    FileArtifactByteComparisonAdapter,
-    FileEffectiveConfigArtifactStore,
-    FileHistoricalReplayClosureStore,
-    FileHistoricalReplayUniverseStore,
-    FileRunLedgerStore,
-    FileRunManifestStore,
-)
+from bioetl.infrastructure.control_plane import FileArtifactByteComparisonAdapter
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from bioetl.infrastructure.control_plane import (
+        FileEffectiveConfigArtifactStore,
+        FileHistoricalReplayUniverseStore,
+        FileRunLedgerStore,
+        FileRunManifestStore,
+    )
 
 __all__ = [
     "bootstrap_forensic_run_diff_service",
@@ -56,21 +66,20 @@ def _create_control_plane_stores() -> tuple[
     """Create file-backed control-plane stores for CLI inspection services."""
     settings = get_settings()
     metrics = create_metrics(settings)
-    output_root = Path(settings.data_dir) / "output" / "control"
     return (
-        FileRunManifestStore(
-            base_path=output_root / "run_manifest",
+        create_run_manifest_store(
+            settings=settings,
             metrics=metrics,
         ),
-        FileRunLedgerStore(
-            base_path=output_root / "run_ledger",
+        create_run_ledger_store(
+            settings=settings,
             metrics=metrics,
         ),
-        FileEffectiveConfigArtifactStore(
-            base_path=output_root / "effective_config",
+        create_effective_config_artifact_store(
+            settings=settings,
         ),
-        FileHistoricalReplayUniverseStore(
-            base_path=output_root / "historical_replay_universe"
+        create_historical_replay_universe_store(
+            settings=settings,
         ),
     )
 
@@ -171,10 +180,7 @@ def persist_historical_replay_closure_report(
 ) -> Path:
     """Persist one historical replay closure report via composition-owned wiring."""
     settings = get_settings()
-    output_root = Path(settings.data_dir) / "output" / "control"
-    store = FileHistoricalReplayClosureStore(
-        base_path=output_root / "historical_replay_closure"
-    )
+    store = create_historical_replay_closure_store(settings=settings)
     return store.save(report)
 
 
@@ -183,8 +189,5 @@ def persist_historical_replay_universe_report(
 ) -> Path:
     """Persist one historical replay universe report via composition-owned wiring."""
     settings = get_settings()
-    output_root = Path(settings.data_dir) / "output" / "control"
-    store = FileHistoricalReplayUniverseStore(
-        base_path=output_root / "historical_replay_universe"
-    )
+    store = create_historical_replay_universe_store(settings=settings)
     return store.save(report)

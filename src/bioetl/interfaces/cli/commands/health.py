@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import sys
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 import click
 
@@ -13,11 +13,11 @@ from bioetl.interfaces.cli.commands.domains.health.rendering import (
     HealthResults,
     all_health_results_healthy,
     build_health_result_lines,
-    build_health_server_info_lines,
     render_health_results_json,
 )
 from bioetl.interfaces.cli.commands.domains.health.server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
+    run_long_lived_health_server_command,
 )
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,
@@ -30,12 +30,7 @@ from bioetl.interfaces.cli.exit_codes import ExitCode
 if TYPE_CHECKING:
     from bioetl.application.services.health_service import HealthService
     from bioetl.application.services.quarantine_service import QuarantineService
-    from bioetl.composition.health_api import (
-        HealthServerDependenciesProtocol,
-        QuarantineRuntimeServiceProtocol,
-        RuntimeSettingsProtocol,
-    )
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.composition.health_api import HealthServerDependenciesProtocol
 
 _HEALTH_SERVER_DOMAIN_ERROR_TITLE = "Health server failed with domain error"
 _HEALTH_SERVER_UNEXPECTED_ERROR_TITLE = "Unexpected error in health server command"
@@ -52,8 +47,10 @@ def get_health_service() -> HealthService:
 
 
 def get_health_server_dependencies() -> HealthServerDependenciesProtocol:
-    """Load health server dependencies through composition on demand."""
-    from bioetl.composition.health_api import get_health_server_dependencies as _impl
+    """Load health server dependencies through the lower-level server seam."""
+    from bioetl.interfaces.cli.commands.domains.health.server_integration import (
+        get_health_server_dependencies as _impl,
+    )
 
     return _impl()
 
@@ -70,48 +67,6 @@ def get_health_server_quarantine_service() -> QuarantineService:
     from bioetl.composition.health_api import get_quarantine_service as _impl
 
     return _impl()
-
-
-def get_quarantine_runtime_service(
-    pipeline: str,
-) -> QuarantineRuntimeServiceProtocol:
-    """Load quarantine runtime service through the health composition seam."""
-    from bioetl.composition.health_api import get_quarantine_runtime_service as _impl
-
-    return cast("QuarantineRuntimeServiceProtocol", _impl(pipeline))
-
-
-def get_settings() -> RuntimeSettingsProtocol:
-    """Load runtime settings through composition on demand."""
-    from bioetl.composition.health_api import get_runtime_settings as _impl
-
-    return cast("RuntimeSettingsProtocol", _impl())
-
-
-def _start_metrics_server_via_interface(
-    *,
-    port: int,
-    addr: str,
-    fail_fast: bool,
-    retry_count: int,
-    retry_delay: float,
-    logger: LoggerPort | None,
-) -> bool:
-    """Start the metrics server through the lightweight runtime server seam."""
-    from bioetl.composition.observability_api import start_metrics_server as _impl
-
-    return _impl(
-        port=port,
-        addr=addr,
-        fail_fast=fail_fast,
-        retry_count=retry_count,
-        retry_delay=retry_delay,
-        logger=logger,
-    )
-
-
-# Backward-compatible patch point for existing tests and callers.
-start_metrics_server = _start_metrics_server_via_interface
 
 
 def _handle_health_failure(
@@ -141,121 +96,9 @@ def _provider_subject(provider: tuple[str, ...]) -> str:
     return ",".join(provider) if provider else "all"
 
 
-def _echo_health_server_info(host: str, port: int) -> None:
-    """Print startup information for the health server command."""
-    for line in build_health_server_info_lines(host, port):
-        click.echo(line)
-
-
-def _start_health_observability(logger: LoggerPort | None = None) -> None:
-    """Start the Prometheus metrics server for long-lived health mode."""
-    settings = get_settings()
-    if not (
-        settings.observability.metrics_enabled
-        and settings.observability.metrics_server_enabled
-    ):
-        if logger is not None:
-            logger.info(
-                "health_server_metrics_disabled",
-                metrics_enabled=settings.observability.metrics_enabled,
-                metrics_server_enabled=settings.observability.metrics_server_enabled,
-            )
-        return
-
-    start_metrics = start_metrics_server
-    started = start_metrics(
-        port=settings.metrics_port,
-        addr=settings.metrics_addr,
-        fail_fast=settings.observability.metrics_fail_fast,
-        retry_count=settings.observability.metrics_retry_count,
-        retry_delay=settings.observability.metrics_retry_delay,
-        logger=logger,
-    )
-    if logger is not None:
-        logger.info(
-            "health_server_metrics_ready",
-            metrics_started=started,
-            metrics_port=settings.metrics_port,
-            metrics_addr=settings.metrics_addr,
-        )
-
-
-async def _run_health_server(host: str, port: int) -> None:
-    """Start and keep the health server alive until interrupted."""
-    from bioetl.interfaces.http.health_server import HealthServer
-
-    if sys.pycache_prefix is None:
-        sys.pycache_prefix = "/tmp/bioetl-pycache"
-    deps = get_health_server_dependencies()
-    _start_health_observability()
-    quarantine_service: QuarantineService | None = None
-    try:
-        quarantine_service = get_health_server_quarantine_service()
-    except CLI_ENTRYPOINT_TYPED_ERRORS:
-        # Why: Health probes must stay available even when quarantine storage
-        # setup fails; explorer endpoints remain disabled in that case.
-        quarantine_service = None
-    server = HealthServer(
-        host=host,
-        port=port,
-        health_monitor=deps.health_monitor,
-        quarantine_service=quarantine_service,
-        checkpoint_port=deps.checkpoint_port,
-        run_manifest_port=deps.run_manifest_port,
-        run_ledger_port=deps.run_ledger_port,
-    )
-    try:
-        await server.start()
-        while True:
-            await asyncio.sleep(1)
-    finally:
-        await server.stop()
-        await deps.checkpoint_port.aclose()
-        if quarantine_service is not None:
-            await quarantine_service.aclose()
-        click.echo("\nHealth server stopped.")
-
-
-def _execute_health_server(host: str, port: int) -> None:
-    """Execute health server coroutine with CLI error policy."""
-    coro = _run_health_server(host=host, port=port)
-    try:
-        asyncio.run(coro)
-    except asyncio.CancelledError:
-        # Why: tests and shutdown callers may use CancelledError as the stop
-        # signal for the long-lived health server loop. The coroutine already
-        # performs cleanup and emits the shutdown line in its finally block.
-        return
-    except BioETLError as exc:
-        _handle_health_failure(
-            exc,
-            reason_code="CLI_HEALTH_SERVER_DOMAIN_ERROR",
-            target=f"{host}:{port}",
-            domain_error_title=_HEALTH_SERVER_DOMAIN_ERROR_TITLE,
-            unexpected_error_title=_HEALTH_SERVER_UNEXPECTED_ERROR_TITLE,
-            interrupted_message=_HEALTH_SERVER_INTERRUPTED_MESSAGE,
-        )
-    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
-        _handle_health_failure(
-            exc,
-            reason_code="CLI_HEALTH_SERVER_UNEXPECTED_ERROR",
-            target=f"{host}:{port}",
-            domain_error_title=_HEALTH_SERVER_DOMAIN_ERROR_TITLE,
-            unexpected_error_title=_HEALTH_SERVER_UNEXPECTED_ERROR_TITLE,
-            interrupted_message=_HEALTH_SERVER_INTERRUPTED_MESSAGE,
-        )
-    except KeyboardInterrupt:
-        click.echo("\nShutting down...")
-        sys.exit(ExitCode.OK)
-    finally:
-        if getattr(coro, "cr_frame", None) is not None:
-            coro.close()
-
-
 def run_health_server_command(host: str, port: int) -> None:
     """Start the long-lived health/quarantine explorer backend."""
-    _echo_health_server_info(host, port)
-    _execute_health_server(host, port)
+    run_long_lived_health_server_command(host=host, port=port)
 
 
 async def _run_health_checks(provider: tuple[str, ...]) -> HealthResults:
@@ -412,4 +255,10 @@ def health_check(provider: tuple[str, ...], output_json: bool) -> None:
 
 COMMANDS = (health_server_command,)
 
-__all__ = ["health", "run_health_server_command"]
+__all__ = [
+    "get_health_server_dependencies",
+    "get_health_service",
+    "health",
+    "health_check",
+    "run_health_server_command",
+]

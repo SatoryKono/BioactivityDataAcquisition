@@ -636,6 +636,11 @@ module_coverage_inventory:
   canonical_generation_requires_coverage_xml: true
   source_scope: src/bioetl/**/*.py
   schema_version: 1
+  per_module_gates:
+    enabled: true
+    policy: configs/quality/module_coverage_gates.yaml
+    enforcement_mode: block-regression
+    fail_on_regression: true
 
 # ── Fixture governance ───────────────────────────────────────
 

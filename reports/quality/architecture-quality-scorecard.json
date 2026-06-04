@@ -4,12 +4,12 @@
   "source_artifacts": {
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "d3ca5c924e4853c77a966c3b4646bb83ff99c9fa807fef59b3793469da32f66c"
+      "source_fingerprint": "b21e027a3bf1d7d3d666b47d01cc44eb33459c114f4c62675730d82c969b38df"
     },
     "module_coverage_inventory": {
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "178c185704bb15561ee9ea1494178fa5f1e031f5038304b629ded7b5938f54c2",
-      "coverage_xml_sha256": "bc9ea3d10a043c180ecd55bc38ce03c3c2c08aadd13de353f0ae1968eb4f734e"
+      "source_tree_sha256": "d72ac9da5855add97a6f2d22879e07dbfb2ccfe2a6737bc63dd3aba14227c1fd",
+      "coverage_xml_sha256": "2c76f2ab41fbf4126a4ace35bd5f8d6af4190990c7db770c860213ed6a89ecf1"
     },
     "compatibility_importer_census": {
       "path": "reports/quality/compatibility-importer-census.json",
@@ -60,8 +60,8 @@
       "score": 8.0,
       "weighted_score": 0.72,
       "evidence_metrics": {
-        "source_module_count": 2134,
-        "uncovered_module_count": 108
+        "source_module_count": 2132,
+        "uncovered_module_count": 104
       }
     },
     {
@@ -82,7 +82,7 @@
       "score": 7.0,
       "weighted_score": 0.98,
       "evidence_metrics": {
-        "source_module_count": 2134,
+        "source_module_count": 2132,
         "hotspot_family_count": 5
       }
     },
@@ -104,8 +104,8 @@
       "score": 7.4,
       "weighted_score": 0.888,
       "evidence_metrics": {
-        "unmeasured_module_count": 0,
-        "uncovered_module_count": 108
+        "unmeasured_module_count": 1,
+        "uncovered_module_count": 104
       }
     },
     {
@@ -144,9 +144,9 @@
   ],
   "metrics": {
     "layer_violations": 0,
-    "source_module_count": 2134,
-    "unmeasured_module_count": 0,
-    "uncovered_module_count": 108,
+    "source_module_count": 2132,
+    "unmeasured_module_count": 1,
+    "uncovered_module_count": 104,
     "hotspot_family_count": 5,
     "retained_entrypoint_count": 14,
     "retained_public_export_facade_count": 4,

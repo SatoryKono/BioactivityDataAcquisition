@@ -12,7 +12,7 @@ from tests.helpers.deterministic_ids import (
 import pytest
 
 from bioetl.application.core.batch_metrics import BatchMetricsRecorder
-from bioetl.application.core.batch_writer import BatchWriter
+from bioetl.application.core.batch_writer import BatchWriter, BatchWriterOptions
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.domain.config import TableConfig
 from bioetl.domain.context import PipelineContext
@@ -89,6 +89,7 @@ def batch_writer(
         gold_validator=mock_gold_validator,
         error_classifier=mock_error_classifier,
         batch_metrics=mock_batch_metrics,
+        options=BatchWriterOptions(),
     )
 
 
@@ -354,7 +355,7 @@ def batch_writer_with_tracer(
         gold_validator=mock_gold_validator,
         error_classifier=mock_error_classifier,
         batch_metrics=mock_batch_metrics,
-        tracer=mock_tracer,
+        options=BatchWriterOptions(tracer=mock_tracer),
     )
 
 
@@ -443,7 +444,7 @@ class TestBatchWriterTracing:
             gold_validator=MagicMock(),
             error_classifier=ErrorClassifier(),
             batch_metrics=MagicMock(spec=BatchMetricsRecorder),
-            tracer=mock_tracer,
+            options=BatchWriterOptions(tracer=mock_tracer),
         )
 
         records = [{"id": "1"}]
@@ -507,7 +508,7 @@ def batch_writer_with_lock(
         gold_validator=mock_gold_validator,
         error_classifier=mock_error_classifier,
         batch_metrics=mock_batch_metrics,
-        lock_validator=lock_validator_holds,
+        options=BatchWriterOptions(lock_validator=lock_validator_holds),
     )
 
 
@@ -581,7 +582,7 @@ class TestBatchWriterLockValidation:
             gold_validator=mock_gold_validator,
             error_classifier=mock_error_classifier,
             batch_metrics=mock_batch_metrics,
-            lock_validator=lock_validator_lost,
+            options=BatchWriterOptions(lock_validator=lock_validator_lost),
         )
 
         records = [{"id": "1", "value": 10}]
@@ -620,7 +621,7 @@ class TestBatchWriterLockValidation:
             gold_validator=mock_gold_validator,
             error_classifier=mock_error_classifier,
             batch_metrics=mock_batch_metrics,
-            lock_validator=lock_validator_lost,
+            options=BatchWriterOptions(lock_validator=lock_validator_lost),
         )
 
         records = [{"entity_id": "1", "value": 10}]
@@ -659,8 +660,10 @@ class TestBatchWriterLockValidation:
             gold_validator=mock_gold_validator,
             error_classifier=mock_error_classifier,
             batch_metrics=mock_batch_metrics,
-            tracer=mock_tracer,
-            lock_validator=lock_validator_lost,
+            options=BatchWriterOptions(
+                tracer=mock_tracer,
+                lock_validator=lock_validator_lost,
+            ),
         )
 
         records = [
@@ -713,8 +716,10 @@ class TestBatchWriterLockValidation:
             gold_validator=mock_gold_validator,
             error_classifier=mock_error_classifier,
             batch_metrics=mock_batch_metrics,
-            tracer=mock_tracer,
-            lock_validator=lock_validator_lost,
+            options=BatchWriterOptions(
+                tracer=mock_tracer,
+                lock_validator=lock_validator_lost,
+            ),
         )
 
         records = [{"id": "1", "bad": object()}]
@@ -754,7 +759,7 @@ class TestBatchWriterLockValidation:
             gold_validator=mock_gold_validator,
             error_classifier=mock_error_classifier,
             batch_metrics=mock_batch_metrics,
-            lock_validator=lock_validator_lost,
+            options=BatchWriterOptions(lock_validator=lock_validator_lost),
         )
 
         records = [{"entity_id": "1", "value": 10}]
@@ -794,8 +799,10 @@ class TestBatchWriterLockValidation:
             gold_validator=failing_validator,
             error_classifier=mock_error_classifier,
             batch_metrics=mock_batch_metrics,
-            tracer=mock_tracer,
-            lock_validator=lock_validator_lost,
+            options=BatchWriterOptions(
+                tracer=mock_tracer,
+                lock_validator=lock_validator_lost,
+            ),
         )
 
         with pytest.raises(LockNotHeldError):
@@ -846,7 +853,7 @@ class TestBatchWriterLockValidation:
             gold_validator=mock_gold_validator,
             error_classifier=mock_error_classifier,
             batch_metrics=mock_batch_metrics,
-            lock_validator=lock_validator_lost,
+            options=BatchWriterOptions(lock_validator=lock_validator_lost),
         )
 
         records = [{"id": "1", "value": 10}]

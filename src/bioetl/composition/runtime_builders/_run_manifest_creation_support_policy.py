@@ -144,14 +144,12 @@ def create_ledger_service(
     ctx: object,
 ) -> RunLedgerService | None:
     """Build the optional run-ledger service for manifest publication."""
+    from bioetl.composition.control_plane_store_builders import create_run_ledger_store
     from bioetl.composition.occurrence_identity import create_runtime_occurrence_id
-    from bioetl.infrastructure.control_plane import FileRunLedgerStore
 
     return RunLedgerService(
-        ledger_port=FileRunLedgerStore(
-            base_path=_manifest_support.control_plane_root(
-                inputs.settings, "run_ledger"
-            ),
+        ledger_port=create_run_ledger_store(
+            settings=inputs.settings,
             metrics=inputs.observability.metrics,
         ),
         manifest_id="pending",

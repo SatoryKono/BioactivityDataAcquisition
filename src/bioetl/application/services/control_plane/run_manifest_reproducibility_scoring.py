@@ -48,12 +48,17 @@ def build_reproducibility_audit_scoring(summary: JsonDict) -> JsonDict:
     )
     blockers = overall_blockers(summary, score_cards)
     evidence_refs = overall_evidence_refs(score_cards)
+    supported_boundary_verdict = build_supported_boundary_verdict(
+        summary=summary,
+        required_profile=required_profile,
+        threshold_failures=threshold_failures,
+    )
     return {
         "schema_version": "2.0",
         "contract_version": summary.get("contract_version"),
         "scale": "0-10",
         "required_profile": required_profile,
-        "score_scope": "supported_boundary_run",
+        "score_scope": supported_boundary_verdict.get("scope"),
         "overall_score": overall,
         "category_scores": category_scores,
         "thresholds": thresholds,
@@ -61,11 +66,7 @@ def build_reproducibility_audit_scoring(summary: JsonDict) -> JsonDict:
         "thresholds_satisfied": not threshold_failures,
         "blockers": blockers,
         "evidence_refs": evidence_refs,
-        "supported_boundary_verdict": build_supported_boundary_verdict(
-            summary=summary,
-            required_profile=required_profile,
-            threshold_failures=threshold_failures,
-        ),
+        "supported_boundary_verdict": supported_boundary_verdict,
         "historical_replay_universe_exact_replay_claim": (
             build_historical_replay_universe_exact_replay_claim(
                 summary=summary,

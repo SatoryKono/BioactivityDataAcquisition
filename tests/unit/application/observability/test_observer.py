@@ -1140,3 +1140,74 @@ def test_emit_domain_event_allows_explicit_phase_override(
     assert log_call[0][0] == "quarantine_entry_resolved"
     assert log_call[1]["event_family"] == "quarantine"
     assert log_call[1]["resolution"] == "reprocessed"
+
+
+class TestObserverHelperMethods:
+    """Tests for observer helper methods."""
+
+    def test_derive_provider_name_from_simple_pipeline(self):
+        """Test _derive_provider_name with simple pipeline name."""
+        assert PipelineObserver._derive_provider_name("chembl") == "chembl"
+        assert PipelineObserver._derive_provider_name("pubmed") == "pubmed"
+
+    def test_derive_provider_name_from_underscore_pipeline(self):
+        """Test _derive_provider_name with underscore pipeline name."""
+        assert PipelineObserver._derive_provider_name("chembl_activity") == "chembl"
+        assert PipelineObserver._derive_provider_name("pubmed_publication") == "pubmed"
+
+    def test_derive_entity_name_from_simple_pipeline(self):
+        """Test _derive_entity_name with simple pipeline name."""
+        assert PipelineObserver._derive_entity_name("chembl") is None
+        assert PipelineObserver._derive_entity_name("pubmed") is None
+
+    def test_derive_entity_name_from_underscore_pipeline(self):
+        """Test _derive_entity_name with underscore pipeline name."""
+        assert PipelineObserver._derive_entity_name("chembl_activity") == "activity"
+        assert PipelineObserver._derive_entity_name("pubmed_publication") == "publication"
+
+
+class TestObserverCaptureExecutionMetrics:
+    """Tests for capture_execution_metrics method."""
+
+    def test_capture_execution_metrics_updates_records_processed(self, metrics_mock, logger_mock, run_id):
+        """Test capture_execution_metrics updates records_processed."""
+        observer = PipelineObserver(
+            pipeline_name="test_pipeline",
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            metrics=metrics_mock,
+            logger=logger_mock,
+        )
+
+        observer.capture_execution_metrics({"records_gold": 42})
+        assert observer._terminal_records_processed == 42
+
+    def test_capture_execution_metrics_takes_max_of_multiple_sources(self, metrics_mock, logger_mock, run_id):
+        """Test capture_execution_metrics takes max of multiple sources."""
+        observer = PipelineObserver(
+            pipeline_name="test_pipeline",
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            metrics=metrics_mock,
+            logger=logger_mock,
+        )
+
+        observer.capture_execution_metrics({
+            "records_gold": 10,
+            "records_silver": 42,
+            "records_bronze": 30,
+        })
+        assert observer._terminal_records_processed == 42
+
+    def test_capture_execution_metrics_defaults_to_zero(self, metrics_mock, logger_mock, run_id):
+        """Test capture_execution_metrics defaults to zero."""
+        observer = PipelineObserver(
+            pipeline_name="test_pipeline",
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            metrics=metrics_mock,
+            logger=logger_mock,
+        )
+
+        observer.capture_execution_metrics({})
+        assert observer._terminal_records_processed == 0

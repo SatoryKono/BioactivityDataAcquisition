@@ -294,6 +294,7 @@ class TestChemblTargetSchema:
         "component_ids",
         "component_types",
         "component_relationships",
+        "protein_classifications",
         "target_components",
         "cross_references",
         "target_component_synonyms",

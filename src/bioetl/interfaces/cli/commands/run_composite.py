@@ -221,7 +221,7 @@ def _exit_with_composite_result(success: bool, error_message: str | None) -> Non
     "--use-cached-bronze/--no-cached-bronze",
     "use_cached_bronze",
     default=False,
-    help="Load data from Bronze cache instead of API",
+    help="Load data from Bronze cache instead of API; composite remains rebuild/resume only",
     show_default=True,
 )
 @click.option(

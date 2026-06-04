@@ -222,3 +222,72 @@ def test_composite_lifecycle_tracing_records_exceptions_on_failed_run() -> None:
     assert run_span.attributes["bioetl.status"] == "failed"
     assert phase_span.attributes["bioetl.status"] == "failed"
     assert tracer.flush_calls == 1
+
+
+@pytest.mark.unit
+def test_emit_run_shutdown_emits_shutdown_event() -> None:
+    """Test emit_run_shutdown emits shutdown event with proper context."""
+    logger = MagicMock()
+    observer = CompositeLifecycleObserverService(logger=logger)
+
+    error = KeyboardInterrupt("User interrupted")
+    observer.emit_run_shutdown(
+        composite_name="test_composite",
+        run_id="run-123",
+        error=error,
+        reason="User requested shutdown",
+        reason_code="user_interrupted",
+    )
+
+    logger.warning.assert_called_once()
+    call_args = logger.warning.call_args
+    assert call_args.args[0] == PipelineEvent.SHUTDOWN
+    assert call_args.kwargs["composite"] == "test_composite"
+    assert call_args.kwargs["run_id"] == "run-123"
+    assert call_args.kwargs["error"] == "User interrupted"
+    assert call_args.kwargs["error_type"] == "KeyboardInterrupt"
+    assert call_args.kwargs["reason"] == "User requested shutdown"
+    assert call_args.kwargs["reason_code"] == "user_interrupted"
+    assert call_args.kwargs["phase"] == "cleanup"
+
+
+@pytest.mark.unit
+def test_emit_phase_completed_with_duration() -> None:
+    """Test emit_phase_completed records duration when start_time exists."""
+    logger = MagicMock()
+    observer = CompositeLifecycleObserverService(logger=logger)
+
+    observer.emit_phase_started(
+        composite_name="test_composite",
+        run_id="run-123",
+        phase_name="merge",
+    )
+    observer.emit_phase_completed(
+        composite_name="test_composite",
+        run_id="run-123",
+        phase_name="merge",
+    )
+
+    logger.info.assert_called_once()
+    call_args = logger.info.call_args
+    assert "duration_seconds" in call_args.kwargs
+    assert call_args.kwargs["duration_seconds"] > 0
+
+
+@pytest.mark.unit
+def test_emit_phase_completed_without_start_time() -> None:
+    """Test emit_phase_completed handles missing start_time gracefully."""
+    logger = MagicMock()
+    observer = CompositeLifecycleObserverService(logger=logger)
+
+    observer.emit_phase_completed(
+        composite_name="test_composite",
+        run_id="run-123",
+        phase_name="merge",
+    )
+
+    logger.info.assert_called_once()
+    call_args = logger.info.call_args
+    assert call_args.kwargs["status"] == "success"
+    # duration_seconds should not be present if start_time is None
+    assert "duration_seconds" not in call_args.kwargs

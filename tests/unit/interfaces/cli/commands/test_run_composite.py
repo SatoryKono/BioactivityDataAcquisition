@@ -461,10 +461,10 @@ class TestRunCompositeCommand:
         assert "Resume mode: continuing from last checkpoint" in result.output
         assert result.exit_code == ExitCode.OK.value
 
-    def test_cached_bronze_mode_displays_exact_replay_envelope_warning(
+    def test_cached_bronze_mode_displays_rebuild_resume_boundary_warning(
         self, cli_runner: CliRunner
     ) -> None:
-        """Cached Bronze startup warns that composite exact replay needs an envelope."""
+        """Cached Bronze startup warns that composite remains rebuild/resume only."""
         with mock_asyncio_run(return_value=(True, None)):
             result = cli_runner.invoke(
                 cli,
@@ -476,14 +476,15 @@ class TestRunCompositeCommand:
                 ],
             )
 
-        assert "full cached-Bronze snapshot envelope" in result.output
-        assert "fails closed for exact replay" in result.output
+        assert "outside the strict exact-replay boundary" in result.output
+        assert "Cached Bronze is rebuild/resume evidence only" in result.output
+        assert "strict exact replay remains source-run only" in result.output
         assert result.exit_code == ExitCode.OK.value
 
-    def test_cached_bronze_dependencies_displays_exact_replay_envelope_warning(
+    def test_cached_bronze_dependencies_displays_rebuild_resume_boundary_warning(
         self, cli_runner: CliRunner
     ) -> None:
-        """Dependency-only cached Bronze still warns about the full envelope."""
+        """Dependency-only cached Bronze still warns about rebuild/resume boundary."""
         with mock_asyncio_run(return_value=(True, None)):
             result = cli_runner.invoke(
                 cli,
@@ -495,7 +496,8 @@ class TestRunCompositeCommand:
                 ],
             )
 
-        assert "full cached-Bronze snapshot envelope" in result.output
+        assert "outside the strict exact-replay boundary" in result.output
+        assert "Cached Bronze is rebuild/resume evidence only" in result.output
         assert result.exit_code == ExitCode.OK.value
 
     def test_keyboard_interrupt(self, cli_runner: CliRunner) -> None:

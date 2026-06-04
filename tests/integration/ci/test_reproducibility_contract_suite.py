@@ -1437,7 +1437,7 @@ def test_reproducibility_contract_composite_replay_ready_profile_is_fail_closed(
     ).show(manifest.manifest_id)
 
     assert result.diagnostics["exact_replay_support_boundary"] == (
-        "composite_snapshot_backed_input_envelope"
+        "snapshot_backed_source_runs_only"
     )
     assert (
         result.diagnostics["persistence_profile"]["required_profile_satisfied"] is False
@@ -1445,19 +1445,20 @@ def test_reproducibility_contract_composite_replay_ready_profile_is_fail_closed(
     assert result.diagnostics["persistence_profile"][
         "required_profile_missing_requirements"
     ] == [
+        "strict_replay_execution_context_support",
         "exact_replay_capability",
         "immutable_input_snapshots",
         "produced_artifact_trace",
     ]
-    assert result.diagnostics["alert_signals"]["strict_replay_boundary_gap"] is False
+    assert result.diagnostics["alert_signals"]["strict_replay_boundary_gap"] is True
     assert (
         result.diagnostics["alert_signals"]["required_persistence_profile_gap"] is True
     )
     score = result.diagnostics["reproducibility_audit_score"]
     assert score["schema_version"] == "2.0"
-    assert score["score_scope"] == "supported_boundary_run"
+    assert score["score_scope"] == "unsupported_boundary_run"
     assert score["supported_boundary_verdict"]["verdict"] == (
-        "supported_boundary_gaps_present"
+        "blocked_outside_supported_boundary"
     )
     assert score["supported_boundary_verdict"]["supported_boundary_satisfied"] is False
     assert score["historical_replay_universe_exact_replay_claim"]["claimed"] is False
@@ -1470,11 +1471,11 @@ def test_reproducibility_contract_composite_replay_ready_profile_is_fail_closed(
     assert {"determinism", "replay_readiness"} <= set(threshold_failures)
 
 
-def test_reproducibility_contract_composite_full_snapshot_envelope_exact_replay_matrix(
+def test_reproducibility_contract_composite_full_snapshot_envelope_rebuild_resume_matrix(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Composite replay matrix must prove stable semantic identity at runtime."""
+    """Composite matrix must prove stable rebuild/resume identity without replay claims."""
     data_dir = tmp_path / "runtime"
     bronze_root = tmp_path / "cached-bronze"
     _write_composite_snapshot_envelope(bronze_root)
@@ -1503,7 +1504,7 @@ def test_reproducibility_contract_composite_full_snapshot_envelope_exact_replay_
                 "control_plane": {
                     "run_manifest_enabled": True,
                     "run_ledger_enabled": True,
-                    "required_persistence_profile": "replay_ready",
+                    "required_persistence_profile": "degraded_observable",
                     "checkpoint_compatibility_policy": "hard_fail",
                 }
             },
@@ -1528,8 +1529,16 @@ def test_reproducibility_contract_composite_full_snapshot_envelope_exact_replay_
     first, second = manifests
     assert first["run_id"] != second["run_id"]
     assert first["manifest_id"] != second["manifest_id"]
-    assert first["replay_capability"] == "exact_replay_supported"
-    assert second["replay_capability"] == "exact_replay_supported"
+    assert first["replay_capability"] == "resume_only"
+    assert second["replay_capability"] == "resume_only"
+    assert first["launch_context"]["exact_replay"] is False
+    assert first["launch_context"]["strict_exact_replay_supported"] is False
+    assert first["launch_context"]["exact_replay_support_boundary"] == (
+        "snapshot_backed_source_runs_only"
+    )
+    assert first["launch_context"]["composite_replay_semantics"] == (
+        "rebuild_resume_only"
+    )
     assert first["provider"] == "composite"
     assert first["entity"] == "publication"
     assert first["code_provenance"]["pipeline_version"] == "1.0.0"
@@ -1558,13 +1567,14 @@ def test_reproducibility_contract_composite_full_snapshot_envelope_exact_replay_
 
     evidence_dir = tmp_path / "reports" / "reproducibility"
     evidence_dir.mkdir(parents=True, exist_ok=True)
-    evidence_path = evidence_dir / "composite_publication_exact_replay_matrix.json"
+    evidence_path = evidence_dir / "composite_publication_rebuild_resume_matrix.json"
     evidence_path.write_text(
         json.dumps(
             {
                 "pipeline_name": config.name,
-                "case": "composite_full_snapshot_envelope_exact_replay",
+                "case": "composite_cached_bronze_rebuild_resume",
                 "replay_capability": first["replay_capability"],
+                "exact_replay_claimed": False,
                 "semantic_identity": {
                     "execution_fingerprint": first["execution_fingerprint"],
                     "effective_config_artifact_id": first["code_provenance"][
@@ -1590,15 +1600,15 @@ def test_reproducibility_contract_composite_full_snapshot_envelope_exact_replay_
         encoding="utf-8",
     )
     evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
-    assert evidence["case"] == "composite_full_snapshot_envelope_exact_replay"
+    assert evidence["case"] == "composite_cached_bronze_rebuild_resume"
     assert len(evidence["occurrences"]) == 2
 
 
-def test_reproducibility_contract_composite_forensic_grade_matrix_allows_full_snapshot_envelope(
+def test_reproducibility_contract_composite_forensic_grade_matrix_rejects_full_snapshot_envelope(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Composite forensic-grade should succeed once the full replay envelope exists."""
+    """Composite forensic-grade cannot claim strict exact replay from cached Bronze."""
     data_dir = tmp_path / "runtime"
     bronze_root = tmp_path / "cached-bronze"
     _write_composite_snapshot_envelope(bronze_root)
@@ -1638,20 +1648,15 @@ def test_reproducibility_contract_composite_forensic_grade_matrix_allows_full_sn
         lock=MagicMock(),
     )
 
-    bundle = build_composite_control_plane_bundle(
-        config=config,
-        runtime=runtime,
-        infra_context=infra_context,
-    )
-
-    manifest = _load_manifest_payload(data_dir, bundle.manifest_id)
-    assert manifest["launch_context"]["required_persistence_profile"] == (
-        "forensic_grade"
-    )
-    assert manifest["replay_capability"] == "exact_replay_supported"
-    assert manifest["code_provenance"]["contract_ref"] == "composite.publication"
-    assert manifest["code_provenance"]["contract_version"] == "1.0.0"
-    assert manifest["code_provenance"]["contract_schema_hash"]
+    with pytest.raises(
+        RuntimeError,
+        match="outside the strict exact-replay support boundary",
+    ):
+        build_composite_control_plane_bundle(
+            config=config,
+            runtime=runtime,
+            infra_context=infra_context,
+        )
 
 
 def test_reproducibility_contract_forensic_diff_exposes_byte_mismatch_inside_semantic_equivalence(
@@ -1870,7 +1875,7 @@ def test_reproducibility_contract_forensic_grade_is_blocked_outside_supported_li
     )
     score = result.diagnostics["reproducibility_audit_score"]
     assert score["schema_version"] == "2.0"
-    assert score["score_scope"] == "supported_boundary_run"
+    assert score["score_scope"] == "unsupported_boundary_run"
     assert score["supported_boundary_verdict"]["verdict"] == (
         "blocked_outside_supported_boundary"
     )

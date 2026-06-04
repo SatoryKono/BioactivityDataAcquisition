@@ -793,14 +793,18 @@ jobs:
                     uv run python -m coverage xml -o reports/coverage/coverage.xml
                     uv run python -m scripts.engineering.qa report-module-coverage \
                       --coverage-xml reports/coverage/coverage.xml \
-                      --json-out reports/quality/module-coverage-inventory.json
+                      --json-out reports/quality/module-coverage-inventory.json \
+                      --enforce-module-thresholds block-regression \
+                      --fail-on-regression
 
             -   name: Verify committed module coverage inventory is current
                 run: |
                     uv run python -m scripts.engineering.qa report-module-coverage \
                       --coverage-xml reports/coverage/coverage.xml \
                       --json-out reports/quality/module-coverage-inventory.json \
-                      --check
+                      --check \
+                      --enforce-module-thresholds block-regression \
+                      --fail-on-regression
 
             -   name: Upload Coverage Report
                 uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4

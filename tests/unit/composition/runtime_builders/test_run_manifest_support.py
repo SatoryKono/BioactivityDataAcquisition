@@ -705,7 +705,7 @@ def test_build_launch_context_snapshot_marks_ordinary_source_boundary() -> None:
 
 
 @pytest.mark.unit
-def test_build_launch_context_snapshot_marks_composite_snapshot_envelope_boundary() -> (
+def test_build_launch_context_snapshot_marks_source_run_exact_replay_boundary_for_composite() -> (
     None
 ):
     ctx = _make_run_context(limit=10)
@@ -725,7 +725,7 @@ def test_build_launch_context_snapshot_marks_composite_snapshot_envelope_boundar
     )
     assert (
         launch_context["exact_replay_support_boundary"]
-        == "composite_snapshot_backed_input_envelope"
+        == "snapshot_backed_source_runs_only"
     )
 
 

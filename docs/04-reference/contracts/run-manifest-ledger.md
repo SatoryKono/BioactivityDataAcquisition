@@ -696,10 +696,10 @@ Canonical identity roles are intentionally split:
 
 - `execution_context` distinguishes ordinary source execution from composite execution;
 - `exact_replay_support_boundary` publishes the strict replay boundary for that execution context:
-  - `snapshot_backed_source_runs_only` for ordinary source execution;
-  - `composite_snapshot_backed_input_envelope` for composite execution when
-    every seed, dependency, and enricher input is represented by immutable
-    snapshot refs.
+  - `snapshot_backed_source_runs_only` for strict exact replay;
+  - composite execution remains outside that strict boundary and uses
+    rebuild/resume semantics even when cached Bronze snapshot refs are present
+    for every seed, dependency, and enricher input.
 - `replay_family_contract.strict_replay_runtime_verdict` is the operator-facing
   preflight verdict for strict replay requests:
   - `allowed_with_snapshot_backed_source_refs` for supported source families;
@@ -1185,9 +1185,8 @@ surface:
 - `requested_exact_replay` reports launch-time operator intent from
   `launch_context.exact_replay`;
 - `exact_replay_support_boundary` reports whether the manifested execution
-  context can ever be strict-replayable. Current published values are
-  `snapshot_backed_source_runs_only` and
-  `composite_snapshot_backed_input_envelope`;
+  context can ever be strict-replayable. The current published strict boundary
+  is `snapshot_backed_source_runs_only`;
 - `replay_family_contract` publishes the per-family replay contract that
   decides whether strict exact replay is supported for this manifested family;
 - `replay_capability` and `exact_replay_eligible` report what the persisted

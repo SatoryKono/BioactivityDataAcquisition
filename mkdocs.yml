@@ -160,6 +160,10 @@ nav:
             -   "Data Flow": 02-architecture/diagrams/guide/data-flow-reference.md
             -   "Data Layers": 02-architecture/data-layers.md
             -   "Observability Layers": 02-architecture/observability-layers.md
+            -   "Domain Deep Dives":
+                    -   "Composite Domain": 02-architecture/domain-composite.md
+                    -   "Control Plane Domain": 02-architecture/domain-control-plane.md
+                    -   "Lineage Domain": 02-architecture/domain-lineage.md
             -   "Module Dependency Map": 02-architecture/generated/module-dependency-map.md
             -   Diagrams:
                     -   "Overview": 02-architecture/diagrams/guide/index.md
@@ -263,6 +267,16 @@ nav:
                             -   "LLM": 03-guides/dashboards/dashboard-extension-llm.md
                     -   "Monitoring Index": 03-guides/dashboards/monitoring-index.md
                     -   "Variables Guide": 03-guides/dashboards/variables-guide.md
+                    -   "Panels":
+                            -   "Panels Guide": 03-guides/dashboards/panels/dashboard-panels-guide.md
+                            -   "Overview v2 Panels": 03-guides/dashboards/panels/bioetl-overview-v2-panels.md
+                            -   "Control Plane v1 Panels": 03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md
+                            -   "Data Quality v2 Panels": 03-guides/dashboards/panels/bioetl-dq-v2-panels.md
+                            -   "Provider Health v2 Panels": 03-guides/dashboards/panels/bioetl-provider-health-v2-panels.md
+                            -   "Runtime Panels": 03-guides/dashboards/panels/bioetl-runtime-panels.md
+                            -   "Silver Reject Explorer Panels": 03-guides/dashboards/panels/bioetl-silver-reject-explorer-panels.md
+                            -   "Workflow Overview Panels": 03-guides/dashboards/panels/bioetl-workflow-overview-panels.md
+                            -   "Alerts SLO Panels": 03-guides/dashboards/panels/bioetl-alerts-slo-panels.md
                     -   "V3 Draft":
                             -   "Overview": 03-guides/dashboards/v3.0/README.md
                             -   "1. Overview": 03-guides/dashboards/v3.0/1-overview.md
@@ -355,6 +369,8 @@ nav:
                     -   "Data Quality Contracts": 04-reference/contracts/dq-contracts.md
                     -   "Observability Metrics": 04-reference/contracts/observability.md
                     -   "Run Manifest & Ledger": 04-reference/contracts/run-manifest-ledger.md
+            -   Observability:
+                    -   "Metrics Catalog": 04-reference/observability/metrics-catalog.md
             -   Normalization:
                     -   "ChEMBL": 04-reference/normalization/chembl-normalization-overview.md
                     -   Overview: 04-reference/normalization/non-chembl-normalization-overview.md

@@ -24,6 +24,15 @@ def test_runtime_models_exports_stable_symbols() -> None:
     assert CompositeRunnerDependencies.__name__ == "CompositeRunnerDependencies"
 
 
+def test_composite_runtime_config_rejects_strict_exact_replay_request() -> None:
+    """Composite launches are rebuild/resume only, not strict exact replay."""
+    with pytest.raises(
+        ValueError,
+        match="outside the strict exact-replay support boundary",
+    ):
+        CompositeRuntimeConfig(exact_replay=True)
+
+
 def _file_contains_bytes(path: Path, needle: bytes, *, chunk_size: int = 65536) -> bool:
     with path.open("rb") as handle:
         while chunk := handle.read(chunk_size):

@@ -33,7 +33,43 @@ BioETL's supported runtime profile remains:
 - no Kubernetes, Redis, or Docker-based runtime orchestration in the standard
   development/operations path
 
-Use the main operations section for supported runbooks:
+### Local Installation
+
+Для локальной установки и разработки используйте [Quick Start](../../../README.md#quick-start) в главном README:
+
+**Требования:**
+- Python 3.12 или 3.13
+- uv (Python package manager)
+
+**Установка:**
+```bash
+# Клонирование репозитория
+git clone https://github.com/SatoryKono/BioactivityDataAcquisition.git
+cd BioactivityDataAcquisition
+
+# Установка зависимостей через uv
+uv sync
+
+# Активация виртуального окружения
+source .venv/bin/activate  # Linux/Mac
+# или
+.venv\Scripts\activate  # Windows
+```
+
+**Запуск:**
+```bash
+# Запуск pipeline
+python -m bioetl run <pipeline-name>
+
+# Запуск с конфигурацией
+python -m bioetl run <pipeline-name> --config <config-file>
+```
+
+Для детальной информации о командной интерфейсе см. [CLI Reference](../../04-reference/cli.md).
+
+### Supported Runbooks
+
+Для поддерживаемых operational procedures используйте основной раздел operations:
 
 - [Operations README](../README.md)
 - [Runbooks Index](../runbooks/index.md)

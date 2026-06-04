@@ -21,7 +21,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 
 DEFAULT_COVERAGE_XML = PROJECT_ROOT / "reports" / "coverage" / "coverage.xml"
 DEFAULT_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "module-coverage-inventory.json"
+DEFAULT_GATES_CONFIG = PROJECT_ROOT / "configs" / "quality" / "module_coverage_gates.yaml"
 SOURCE_ROOT = PROJECT_ROOT / "src" / "bioetl"
+ENFORCEMENT_MODES = frozenset({"off", "warn", "block-regression", "block-all"})
 # Shared-drive worktrees can return one transient digest immediately after local
 # edits; prefer a repeated digest before declaring the source-tree hash current.
 DEFAULT_SOURCE_TREE_STABILIZATION_ATTEMPTS = 5
@@ -44,6 +46,38 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "Permit source-tree-only inventory checks when reports/coverage/coverage.xml "
             "has not been produced by the coverage-verify lane."
         ),
+    )
+    parser.add_argument(
+        "--enforce-module-thresholds",
+        choices=sorted(ENFORCEMENT_MODES),
+        default="off",
+        help=(
+            "Enforce per-module coverage tiers and/or regressions. "
+            "block-regression fails when line coverage decreases vs baseline; "
+            "block-all also fails tier threshold gaps."
+        ),
+    )
+    parser.add_argument(
+        "--fail-on-regression",
+        action="store_true",
+        help=(
+            "Alias for --enforce-module-thresholds=block-regression when enforcement is off."
+        ),
+    )
+    parser.add_argument(
+        "--baseline-json",
+        type=Path,
+        default=None,
+        help=(
+            "Committed inventory baseline for regression checks "
+            "(defaults to --json-out when enforcing regressions)."
+        ),
+    )
+    parser.add_argument(
+        "--gates-config",
+        type=Path,
+        default=DEFAULT_GATES_CONFIG,
+        help="YAML policy for tier thresholds, exemptions, and enforcement modes.",
     )
     return parser.parse_args(argv)
 
@@ -571,6 +605,208 @@ def build_module_coverage_inventory(
     }
 
 
+def _load_module_coverage_gates(repo_root: Path, gates_config: Path) -> dict[str, Any]:
+    path = gates_config if gates_config.is_absolute() else repo_root / gates_config
+    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError(f"Invalid module coverage gates config: {path}")
+    return payload
+
+
+def _resolve_enforcement_mode(args: argparse.Namespace) -> str:
+    mode = str(args.enforce_module_thresholds)
+    if mode == "off" and args.fail_on_regression:
+        return "block-regression"
+    return mode
+
+
+def _exempt_paths(gates: dict[str, Any]) -> frozenset[str]:
+    exemptions = gates.get("exemptions", [])
+    if not isinstance(exemptions, list):
+        return frozenset()
+    paths: set[str] = set()
+    for entry in exemptions:
+        if not isinstance(entry, dict):
+            continue
+        path = entry.get("path")
+        if isinstance(path, str) and path:
+            paths.add(path)
+    return frozenset(paths)
+
+
+def _resolve_module_tier(
+    repo_path: str,
+    *,
+    gates: dict[str, Any],
+) -> tuple[str, float]:
+    tiers = gates.get("tiers", {})
+    if not isinstance(tiers, dict):
+        return "default_module", 85.0
+    order = gates.get("tier_resolution_order", [])
+    if not isinstance(order, list):
+        order = list(tiers.keys())
+    for tier_name in order:
+        if not isinstance(tier_name, str):
+            continue
+        tier = tiers.get(tier_name, {})
+        if not isinstance(tier, dict):
+            continue
+        prefixes = tier.get("path_prefixes", [])
+        if not isinstance(prefixes, list):
+            prefixes = []
+        if any(repo_path.startswith(prefix) for prefix in prefixes if isinstance(prefix, str)):
+            line_min = tier.get("line_min_percent", 85)
+            if isinstance(line_min, int | float):
+                return tier_name, float(line_min)
+    default = tiers.get("default_module", {})
+    if isinstance(default, dict):
+        line_min = default.get("line_min_percent", 85)
+        if isinstance(line_min, int | float):
+            return "default_module", float(line_min)
+    return "default_module", 85.0
+
+
+def _baseline_coverage_by_path(baseline_payload: dict[str, Any]) -> dict[str, float]:
+    baseline_rows = baseline_payload.get("modules", [])
+    if not isinstance(baseline_rows, list):
+        return {}
+    baseline: dict[str, float] = {}
+    for row in baseline_rows:
+        if not isinstance(row, dict):
+            continue
+        path = row.get("path")
+        coverage_percent = row.get("coverage_percent")
+        if isinstance(path, str) and isinstance(coverage_percent, int | float):
+            baseline[path] = float(coverage_percent)
+    return baseline
+
+
+@dataclass(frozen=True, slots=True)
+class _ModuleCoverageViolation:
+    path: str
+    kind: str
+    tier: str
+    current_percent: float | None
+    baseline_percent: float | None
+    required_percent: float | None
+    message: str
+
+
+def evaluate_module_coverage_gates(
+    payload: dict[str, Any],
+    *,
+    baseline_payload: dict[str, Any],
+    gates: dict[str, Any],
+    enforcement_mode: str,
+) -> list[_ModuleCoverageViolation]:
+    """Return tier/regression violations for the supplied inventory payload."""
+    if enforcement_mode == "off":
+        return []
+
+    rows = payload.get("modules", [])
+    if not isinstance(rows, list):
+        return []
+
+    exempt = _exempt_paths(gates)
+    regression_cfg = gates.get("regression", {})
+    min_delta = 0.01
+    if isinstance(regression_cfg, dict):
+        raw_delta = regression_cfg.get("min_delta_points", min_delta)
+        if isinstance(raw_delta, int | float):
+            min_delta = float(raw_delta)
+
+    enforcement_cfg = gates.get("enforcement", {})
+    tier_mode = "warn"
+    if isinstance(enforcement_cfg, dict):
+        raw_tier_mode = enforcement_cfg.get("tier_violation_mode", tier_mode)
+        if isinstance(raw_tier_mode, str):
+            tier_mode = raw_tier_mode
+
+    baseline_by_path = _baseline_coverage_by_path(baseline_payload)
+    violations: list[_ModuleCoverageViolation] = []
+
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        path = str(row.get("path", ""))
+        if not path or path in exempt:
+            continue
+        status = str(row.get("coverage_status", ""))
+        if status not in {"partially_covered", "fully_covered"}:
+            continue
+        current = row.get("coverage_percent")
+        current_percent = float(current) if isinstance(current, int | float) else None
+        if current_percent is None:
+            continue
+
+        baseline_percent = baseline_by_path.get(path)
+        if baseline_percent is not None and current_percent + min_delta < baseline_percent:
+            violations.append(
+                _ModuleCoverageViolation(
+                    path=path,
+                    kind="regression",
+                    tier="regression",
+                    current_percent=current_percent,
+                    baseline_percent=baseline_percent,
+                    required_percent=baseline_percent,
+                    message=(
+                        f"{path}: coverage regressed "
+                        f"{baseline_percent:.2f}% -> {current_percent:.2f}%"
+                    ),
+                )
+            )
+
+        tier_name, required_percent = _resolve_module_tier(path, gates=gates)
+        if current_percent + min_delta < required_percent:
+            violations.append(
+                _ModuleCoverageViolation(
+                    path=path,
+                    kind="tier",
+                    tier=tier_name,
+                    current_percent=current_percent,
+                    baseline_percent=baseline_percent,
+                    required_percent=required_percent,
+                    message=(
+                        f"{path}: {tier_name} tier requires >= {required_percent:.2f}% "
+                        f"(current {current_percent:.2f}%)"
+                    ),
+                )
+            )
+
+    if enforcement_mode == "block-regression":
+        return [violation for violation in violations if violation.kind == "regression"]
+    if enforcement_mode == "warn" and tier_mode != "warn":
+        return violations
+    return violations
+
+
+def _report_gate_violations(
+    violations: list[_ModuleCoverageViolation],
+    *,
+    enforcement_mode: str,
+) -> int:
+    if not violations:
+        print("[module-coverage-inventory] module coverage gates: pass")
+        return 0
+
+    regressions = [v for v in violations if v.kind == "regression"]
+    tiers = [v for v in violations if v.kind == "tier"]
+    print(
+        "[module-coverage-inventory] module coverage gates: "
+        f"mode={enforcement_mode}; regressions={len(regressions)}; tier_gaps={len(tiers)}"
+    )
+    for violation in violations[:25]:
+        print(f"  - {violation.message}")
+    if len(violations) > 25:
+        print(f"  - ... and {len(violations) - 25} more")
+
+    if enforcement_mode == "block-regression" and regressions:
+        return 1
+    if enforcement_mode == "block-all" and (regressions or tiers):
+        return 1
+    return 0
+
+
 def _payload_for_check(args: argparse.Namespace) -> dict[str, Any]:
     snapshot_date = args.snapshot_date
     if args.check and args.json_out.exists() and snapshot_date is None:
@@ -585,6 +821,8 @@ def _payload_for_check(args: argparse.Namespace) -> dict[str, Any]:
 
 def main(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
+    repo_root = args.repo_root.resolve()
+    enforcement_mode = _resolve_enforcement_mode(args)
 
     if not args.coverage_xml.exists() and not args.allow_missing_coverage_xml:
         print(f"[module-coverage-inventory] missing coverage XML: {args.coverage_xml}")
@@ -597,6 +835,27 @@ def main(argv: list[str] | None = None) -> int:
     payload = _payload_for_check(args)
     rendered = json.dumps(payload, indent=2, sort_keys=True) + "\n"
 
+    gate_exit = 0
+    if enforcement_mode != "off":
+        baseline_path = args.baseline_json or args.json_out
+        if not baseline_path.exists():
+            print(
+                f"[module-coverage-inventory] missing baseline inventory: {baseline_path}"
+            )
+            return 1
+        baseline_payload = json.loads(baseline_path.read_text(encoding="utf-8"))
+        gates = _load_module_coverage_gates(repo_root, args.gates_config)
+        violations = evaluate_module_coverage_gates(
+            payload,
+            baseline_payload=baseline_payload,
+            gates=gates,
+            enforcement_mode=enforcement_mode,
+        )
+        gate_exit = _report_gate_violations(
+            violations,
+            enforcement_mode=enforcement_mode,
+        )
+
     if args.check:
         if not args.json_out.exists():
             print(f"[module-coverage-inventory] missing artifact: {args.json_out}")
@@ -606,7 +865,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"[module-coverage-inventory] stale artifact: {args.json_out}")
             return 1
         print("[module-coverage-inventory] artifact is current")
-        return 0
+        return gate_exit
 
     args.json_out.parent.mkdir(parents=True, exist_ok=True)
     args.json_out.write_text(rendered, encoding="utf-8")
@@ -614,7 +873,7 @@ def main(argv: list[str] | None = None) -> int:
         "[module-coverage-inventory] "
         f"modules={payload['summary']['source_module_count']}; json={args.json_out}"
     )
-    return 0
+    return gate_exit
 
 
 if __name__ == "__main__":

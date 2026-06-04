@@ -199,9 +199,9 @@ Observed facts:
 | --- | --- | --- | --- |
 | Run manifest artifact | `src/bioetl/domain/control_plane/run_manifest.py` | Immutable run intent/provenance snapshot. | Domain |
 | Run ledger artifact | `src/bioetl/domain/control_plane/run_ledger.py` | Append-only event history. | Domain |
-| Manifest service | `src/bioetl/application/services/control_plane/run_manifest_service.py` | Creates and inspects manifests. | Application |
-| Ledger service | `src/bioetl/application/services/control_plane/run_ledger_service.py` | Appends and inspects ledger entries. | Application |
-| Effective config service | `src/bioetl/application/services/control_plane/effective_config_service.py` | Produces semantic and occurrence effective-config artifacts. | Application |
+| Manifest service | `src/bioetl/application/services/control_plane/manifest/service.py` | Creates and inspects manifests. | Application |
+| Ledger service | `src/bioetl/application/services/control_plane/ledger/service.py` | Appends and inspects ledger entries. | Application |
+| Effective config service | `src/bioetl/application/services/control_plane/effective_config/service.py` | Produces semantic and occurrence effective-config artifacts. | Application |
 | Replay services | `src/bioetl/application/services/control_plane/replay/**` | Historical replay closure, certification, corpus, universe, scorecards. | Application |
 | Manifest stores | `src/bioetl/infrastructure/control_plane/file_run_manifest_store.py` | File-backed manifest persistence. | Infrastructure |
 | Ledger stores | `src/bioetl/infrastructure/control_plane/file_run_ledger_store.py` | File-backed ledger persistence. | Infrastructure |

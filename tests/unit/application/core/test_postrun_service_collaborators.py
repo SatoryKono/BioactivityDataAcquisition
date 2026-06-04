@@ -14,8 +14,8 @@ from bioetl.application.core.postrun._service_collaborators import (
 pytestmark = pytest.mark.unit
 
 
-def test_resolve_postrun_collaborators_prefers_explicit_values() -> None:
-    """Explicit collaborators should override service-container collaborators."""
+def test_resolve_postrun_collaborators_reads_collaborators_from_services() -> None:
+    """Collaborators should be sourced from the canonical services bundle."""
     context = MagicMock()
     context.logger = MagicMock()
     services = MagicMock()
@@ -25,21 +25,14 @@ def test_resolve_postrun_collaborators_prefers_explicit_values() -> None:
     services.metadata_coordinator = MagicMock(name="services_metadata_coordinator")
     services.metadata_writer = MagicMock(name="services_metadata_writer")
 
-    explicit_storage = MagicMock(name="explicit_storage")
-    explicit_logger = MagicMock(name="explicit_logger")
-    explicit_metrics = MagicMock(name="explicit_metrics")
-
     resolved = resolve_postrun_collaborators(
         services=services,
         context=context,
-        storage=explicit_storage,
-        logger=explicit_logger,
-        metrics=explicit_metrics,
     )
 
-    assert resolved.storage is explicit_storage
-    assert resolved.logger is explicit_logger
-    assert resolved.metrics is explicit_metrics
+    assert resolved.storage is services.storage
+    assert resolved.logger is services.logger
+    assert resolved.metrics is services.metrics
     assert resolved.metadata_coordinator is services.metadata_coordinator
     assert resolved.metadata_writer is services.metadata_writer
 
@@ -81,5 +74,17 @@ def test_resolve_postrun_collaborators_rejects_missing_metrics() -> None:
     with pytest.raises(AssertionError, match="requires metrics"):
         resolve_postrun_collaborators(
             services=services,
+            context=context,
+        )
+
+
+def test_resolve_postrun_collaborators_rejects_missing_services() -> None:
+    """Services bundle is mandatory after removing legacy constructor kwargs."""
+    context = MagicMock()
+    context.logger = MagicMock(name="context_logger")
+
+    with pytest.raises(AssertionError, match="requires services"):
+        resolve_postrun_collaborators(
+            services=None,
             context=context,
         )

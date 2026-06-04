@@ -52,7 +52,14 @@ def build_composite_launch_context_snapshot(
         "cached_bronze_enrichers": runtime.cached_bronze_enrichers,
         "cached_bronze_dependencies": runtime.cached_bronze_dependencies,
         "execution_context": "composite",
-        "exact_replay_support_boundary": "composite_snapshot_backed_input_envelope",
+        "exact_replay": False,
+        "strict_exact_replay_supported": False,
+        "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+        "composite_replay_semantics": "rebuild_resume_only",
+        "replay_mode": "resume" if runtime.resume else "rebuild",
+        "replay_boundary_reason": (
+            "composite_execution_outside_strict_exact_replay_boundary"
+        ),
         "required_persistence_profile": required_persistence_profile,
     }
 

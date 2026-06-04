@@ -57,7 +57,7 @@ Current source-of-truth artifacts:
 - `src/bioetl/application/composite/checkpoint/load_service.py`
 - `src/bioetl/application/composite/checkpoint/state.py`
 - `src/bioetl/domain/control_plane/run_ledger.py`
-- `src/bioetl/application/services/control_plane/run_ledger_service.py`
+- `src/bioetl/application/services/control_plane/ledger/service.py`
 - `docs/02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md`
 - `docs/05-operations/runbooks/run-manifest-inspection.md`
 
@@ -258,6 +258,6 @@ execution state.
 - `src/bioetl/application/composite/checkpoint/load_service.py`
 - `src/bioetl/application/composite/checkpoint/state.py`
 - `src/bioetl/domain/control_plane/run_ledger.py`
-- `src/bioetl/application/services/control_plane/run_ledger_service.py`
+- `src/bioetl/application/services/control_plane/ledger/service.py`
 - `docs/02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md`
 - `docs/05-operations/runbooks/run-manifest-inspection.md`

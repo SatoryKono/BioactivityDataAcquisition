@@ -706,6 +706,21 @@ def _manual_vcr_marker_runtime(
         yield
         return
 
+    if cassette_path.exists() and is_git_lfs_pointer(cassette_path):
+        if is_vcr_recording_mode():
+            cassette_path.unlink(missing_ok=True)
+        elif is_strict_lfs_pointer_blocked_cassette(cassette_path):
+            pytest.fail(
+                "Replay-critical VCR cassette is an unresolved Git LFS pointer; "
+                f"run git lfs pull before replaying this cassette: {cassette_path}",
+                pytrace=False,
+            )
+        else:
+            pytest.skip(
+                "VCR cassette is a Git LFS pointer; run git lfs pull before replaying "
+                f"this cassette: {cassette_path}"
+            )
+
     vcr = request.getfixturevalue("vcr")
     with vcr.use_cassette(str(cassette_path), **marker.kwargs):
         yield

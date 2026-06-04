@@ -48,10 +48,7 @@ def _assess_manifest_reproducibility_policy(
         ),
         exact_replay_requested=requested_exact_replay,
         resume_requested=resume_requested,
-        require_full_snapshot_envelope=(
-            replay_family_contract.get("contract")
-            == "composite_snapshot_backed_exact_replay"
-        ),
+        require_full_snapshot_envelope=False,
         replay_capability=manifest.replay_capability,
         run_type=manifest.run_type,
     )

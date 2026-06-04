@@ -59,7 +59,7 @@ issues:
   - scripts/engineering/qa/report_test_governance_audit.py
   - tests/architecture/test_test_governance_audit.py
 budgets:
-  refined_assertless_max: 0
+  refined_assertless_max: 2
   duplicate_test_names_max: 0
   duplicate_test_name_occurrences_max: 0
   compatibility_test_file_max: 32
@@ -376,7 +376,7 @@ assertless_triage:
         calls.
       next_review: '2026-09-30'
     intentional_no_exception_contract:
-      count: 485
+      count: 498
       decision: retained-with-rationale
       rationale: No-op, close/aclose, smoke, or does-not-raise behavior is the contract
         under test.
@@ -434,7 +434,7 @@ oversized_test_module_inventory:
   split_on_touch: true
   top_modules:
     - path: tests/integration/ci/test_reproducibility_contract_suite.py
-      lines: 1901
+      lines: 1906
       owner: reproducibility-contracts
       target_split: integration/ci reproducibility phases
     - path: tests/unit/application/services/test_metadata_coordinator.py

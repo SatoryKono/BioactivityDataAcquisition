@@ -56,7 +56,13 @@ def resolve_persistence_inputs(
     replay_family_contract_name = str(
         replay_family_contract.get("contract") or ""
     ).strip()
-    composite_execution_context = replay_family_contract_name.startswith("composite_")
+    replay_execution_context = str(
+        replay_family_contract.get("execution_context") or ""
+    ).strip()
+    composite_execution_context = (
+        replay_execution_context == "composite"
+        or replay_family_contract_name.startswith("composite_")
+    )
     return PersistenceProfileContext(
         lineage_closure_boundary=lineage_closure_boundary,
         lineage_closure_boundary_supported=bool(

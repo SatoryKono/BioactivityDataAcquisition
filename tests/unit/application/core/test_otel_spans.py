@@ -16,6 +16,7 @@ Tests verify:
 from __future__ import annotations
 
 import asyncio
+from types import SimpleNamespace
 from typing import Any, cast
 from unittest.mock import AsyncMock, MagicMock
 from uuid import UUID
@@ -399,10 +400,14 @@ class TestPostrunServiceSpan:
             context=context,
             dq_service=dq_service,
             lifecycle_service=lifecycle_service,
-            storage=storage,
-            metrics=NoOpMetrics(warn_on_use=False),
-            logger=mock_logger,
             dependencies=dependencies,
+            services=SimpleNamespace(
+                storage=storage,
+                metrics=NoOpMetrics(warn_on_use=False),
+                logger=mock_logger,
+                metadata_coordinator=None,
+                metadata_writer=None,
+            ),
             tracer=cast(TracingPort | None, tracer),
         )
 

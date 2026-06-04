@@ -728,19 +728,20 @@ bioetl run-composite --composite publication --seed-limit 100
 bioetl run-composite --composite publication --use-cached-bronze
 ```
 
-Composite exact replay is supported only at the
-`composite_snapshot_backed_input_envelope` boundary. This means cached Bronze
-must be present for every seed, dependency, and enricher participant; a partial
-envelope is fail-closed and is treated as non-exact replay. The covered runtime
+Composite execution is outside the strict exact-replay boundary. Cached Bronze
+may be used as rebuild/resume evidence for every seed, dependency, and enricher
+participant, but it does not make the composite run exact-replayable. Strict
+exact replay remains limited to snapshot-backed source runs. The covered runtime
 validation is:
 
 ```bash
-uv run pytest tests/integration/ci/test_reproducibility_contract_suite.py::test_reproducibility_contract_composite_full_snapshot_envelope_exact_replay_matrix -q --tb=short
+uv run pytest tests/integration/ci/test_reproducibility_contract_suite.py::test_reproducibility_contract_composite_full_snapshot_envelope_rebuild_resume_matrix -q --tb=short
 ```
 
 The validation records two composite control-plane occurrences and proves that
 `execution_fingerprint`, effective-config semantic identity, and all participant
-snapshot IDs remain stable while `run_id` and `manifest_id` differ.
+snapshot IDs remain stable while `run_id` and `manifest_id` differ, with
+`replay_capability=resume_only` rather than `exact_replay_supported`.
 
 ______________________________________________________________________
 

@@ -144,7 +144,11 @@ def build_supported_boundary_verdict(
         reason = "supported_boundary_requirements_met"
 
     return {
-        "scope": "supported_boundary_run",
+        "scope": (
+            "unsupported_boundary_run"
+            if blocked_outside_supported_boundary
+            else "supported_boundary_run"
+        ),
         "supported_boundary_satisfied": supported_boundary_satisfied,
         "verdict": verdict,
         "reason": reason,

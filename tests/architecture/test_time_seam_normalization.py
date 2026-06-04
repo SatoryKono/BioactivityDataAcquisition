@@ -20,7 +20,7 @@ def test_targeted_runtime_admin_paths_do_not_reintroduce_wall_clock_fallbacks() 
         "src/bioetl/application/services/execution/pipeline_run_context_service.py"
     )
     assert "current_utc_time(" not in _read(
-        "src/bioetl/application/services/control_plane/run_manifest_service.py"
+        "src/bioetl/application/services/control_plane/manifest/service.py"
     )
     assert "current_utc_time(" not in _read(
         "src/bioetl/application/core/preflight/health_aggregator.py"

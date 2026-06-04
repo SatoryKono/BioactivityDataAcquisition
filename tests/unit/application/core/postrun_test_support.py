@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.postrun.service import PostrunService
@@ -72,9 +73,6 @@ def build_test_postrun_service(
         context=context,
         dq_service=dq_service,
         lifecycle_service=lifecycle_service,
-        storage=storage,
-        metrics=metrics if metrics is not None else NoOpMetrics(warn_on_use=False),
-        logger=logger,
         tracer=tracer if tracer is not None else NoOpTracing(),
         dependencies=build_postrun_dependency_context(
             config=config,
@@ -86,6 +84,13 @@ def build_test_postrun_service(
             bronze_dq_config=dependency_overrides.bronze_dq_config,
             silver_dq_config=dependency_overrides.silver_dq_config,
             gold_dq_config=dependency_overrides.gold_dq_config,
+            metadata_coordinator=dependency_overrides.metadata_coordinator,
+            metadata_writer=dependency_overrides.metadata_writer,
+        ),
+        services=SimpleNamespace(
+            storage=storage,
+            metrics=metrics if metrics is not None else NoOpMetrics(warn_on_use=False),
+            logger=logger,
             metadata_coordinator=dependency_overrides.metadata_coordinator,
             metadata_writer=dependency_overrides.metadata_writer,
         ),

@@ -13,7 +13,6 @@ from bioetl.domain.composite.result import (
     MergeResult,
     SeedResult,
 )
-from bioetl.domain.constants import DEFAULT_LOCK_TTL_SECONDS
 
 if TYPE_CHECKING:
     import polars as pl
@@ -62,6 +61,8 @@ __all__ = [
     "CompositeRuntimeConfig",
 ]
 
+_DEFAULT_COMPOSITE_LOCK_TTL_SECONDS = 3600
+
 
 @dataclass(frozen=True, slots=True)
 class CompositeRuntimeConfig:
@@ -78,11 +79,18 @@ class CompositeRuntimeConfig:
     cached_bronze_date: str | None = None
     cached_bronze_enrichers: bool | None = None
     cached_bronze_dependencies: bool = False
+    exact_replay: bool = False
     heartbeat_interval_seconds: int = 30
-    lock_ttl_seconds: int = DEFAULT_LOCK_TTL_SECONDS
+    lock_ttl_seconds: int = _DEFAULT_COMPOSITE_LOCK_TTL_SECONDS
 
     def __post_init__(self) -> None:
         """Normalize mutable values into immutable runtime fields."""
+        if self.exact_replay:
+            raise ValueError(
+                "Composite execution is outside the strict exact-replay support "
+                "boundary; use source-run exact replay or composite rebuild/resume "
+                "semantics instead."
+            )
         if isinstance(self.enrich_only, list):
             object.__setattr__(self, "enrich_only", tuple(self.enrich_only))
 

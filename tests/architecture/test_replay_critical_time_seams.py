@@ -22,7 +22,7 @@ TARGETS: tuple[Path, ...] = (
     Path("src/bioetl/application/runtime_timestamps.py"),
     Path("src/bioetl/application/composite/checkpoint"),
     Path("src/bioetl/application/services/control_plane"),
-    Path("src/bioetl/application/services/control_plane/run_manifest_service.py"),
+    Path("src/bioetl/application/services/control_plane/manifest/service.py"),
     Path("src/bioetl/composition/_pipeline_execution.py"),
     Path("src/bioetl/composition/bootstrap/runtime/pipeline_context_builder.py"),
 )

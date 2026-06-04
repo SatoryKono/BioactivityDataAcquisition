@@ -157,6 +157,7 @@ shards:
     wave: 3
     paths:
       - tests/unit/infrastructure/config
+      - tests/unit/infrastructure/control_plane
       - tests/unit/infrastructure/quality
       - tests/unit/infrastructure/observability
       - tests/unit/infrastructure/schemas

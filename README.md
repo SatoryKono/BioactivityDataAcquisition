@@ -1,6 +1,6 @@
 # BioETL: Bioactivity Data Acquisition Pipeline
 
-[![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code Style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
@@ -138,6 +138,7 @@ fallback when `uv` is unavailable.
 ### Runtime compatibility policy
 
 - **Python runtime baseline: 3.12** for local development, onboarding, and CI defaults.
+- **Supported versions: Python 3.12 and 3.13** (see `pyproject.toml` classifiers).
 - The **source of truth** for Python runtime compatibility is `pyproject.toml` (`requires-python` and classifiers).
 - Any docs or scripts mentioning older Python versions (3.10/3.11) should be treated as deprecated and updated before use.
 

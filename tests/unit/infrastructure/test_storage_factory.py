@@ -356,11 +356,10 @@ class TestStorageFactoryLocal:
                 audit=mock_audit,
             )
 
-            # Verify SilverWriter (Silver) was called with csv_exporter
+            # Verify SilverWriter receives csv_exporter through runtime services.
             mock_delta.assert_called_once()
             silver_call_kwargs = mock_delta.call_args[1]
-            assert "csv_exporter" in silver_call_kwargs
-            silver_exporter = silver_call_kwargs["csv_exporter"]
+            silver_exporter = silver_call_kwargs["runtime_services"].csv_exporter
             assert isinstance(silver_exporter, CsvExporter)
             assert silver_exporter.base_path == Path("data/export/silver.csv")
             assert silver_exporter.delimiter == ","

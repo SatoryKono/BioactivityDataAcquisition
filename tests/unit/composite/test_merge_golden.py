@@ -66,8 +66,8 @@ class TestCompositeMergeGoldenTests:
         # Create enricher data
         enricher_df = pl.DataFrame({
             "id": [1, 2, 3],
-            "metadata": {"key1": "value1"},
-            "tags": ["tag1", "tag2"],
+            "metadata": [{"key1": "value1"}, {"key2": "value2"}, {"key3": "value3"}],
+            "tags": [["tag1"], ["tag2"], ["tag3"]],
         })
 
         # Expected enricher merge result
