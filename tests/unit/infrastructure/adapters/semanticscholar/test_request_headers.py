@@ -28,7 +28,7 @@ def test_build_semanticscholar_headers_includes_content_type_and_api_key() -> No
 
 def test_build_semanticscholar_headers_skips_placeholder_api_key() -> None:
     headers = build_semanticscholar_headers(
-        "your-api-key-here",
+        "your_api_key_here",
         include_content_type=False,
         skip_placeholder_api_key=True,
     )
@@ -41,9 +41,9 @@ def test_build_semanticscholar_headers_skips_placeholder_api_key() -> None:
 
 def test_build_semanticscholar_headers_keeps_placeholder_when_not_skipping() -> None:
     headers = build_semanticscholar_headers(
-        "your-api-key-here",
+        "your_api_key_here",
         include_content_type=False,
         skip_placeholder_api_key=False,
     )
 
-    assert headers["x-api-key"] == "your-api-key-here"
+    assert headers["x-api-key"] == "your_api_key_here"
