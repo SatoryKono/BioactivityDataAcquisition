@@ -134,7 +134,7 @@ def _tracked_memory_files(memory_root: Path) -> list[str]:
     if not (repo_root / ".git").exists():
         return []
     try:
-        result = subprocess.run(
+        result = subprocess.run(  # nosec B603 B607
             ["git", "ls-files", "--", "src/memory"],
             cwd=repo_root,
             check=True,

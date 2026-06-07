@@ -144,7 +144,7 @@ jobs:
                     mkdir -p reports/e2e
                     VCR_RECORD_MODE=none uv run pytest \
                       tests/e2e/test_pubchem_compound_e2e.py::test_pubchem_compound_full_cycle \
-                      --vcr-record=none \
+                      --record-mode=none \
                       -q --tb=short \
                       --junitxml=reports/e2e/control-plane-completeness.xml
 

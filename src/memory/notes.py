@@ -84,7 +84,7 @@ def _read_text_from_git_object(path: Path) -> str | None:
 
     relative_path = os.path.relpath(path, repo_root).replace(os.sep, "/")
     try:
-        completed = subprocess.run(
+        completed = subprocess.run(  # nosec B603 B607
             ["git", "-C", str(repo_root), "show", f"HEAD:{relative_path}"],
             check=False,
             capture_output=True,
@@ -230,7 +230,7 @@ def _git_repo_root(path: Path) -> Path | None:
         return packaged_root
 
     try:
-        completed = subprocess.run(
+        completed = subprocess.run(  # nosec B603 B607
             ["git", "-C", str(path.parent), "rev-parse", "--show-toplevel"],
             check=False,
             capture_output=True,

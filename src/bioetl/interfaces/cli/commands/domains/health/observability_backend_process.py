@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 import signal
-import subprocess
+import subprocess  # nosec B404
 import sys
 import tempfile
 import time
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
 def _find_listening_backend_pids_by_port(port: int) -> tuple[int, ...]:
     if os.name == "nt":
-        result = subprocess.run(
+        result = subprocess.run(  # nosec B603 B607
             ["netstat", "-ano", "-p", "tcp"],
             check=False,
             capture_output=True,
@@ -42,7 +42,7 @@ def _find_listening_backend_pids_by_port(port: int) -> tuple[int, ...]:
                 continue
         return tuple(sorted(pids))
 
-    result = subprocess.run(
+    result = subprocess.run(  # nosec B603 B607
         ["ss", "-ltnp"],
         check=False,
         capture_output=True,
@@ -79,7 +79,7 @@ def drop_listening_backend_on_port(
         return True
     if os.name == "nt":
         for pid in pids:
-            result = subprocess.run(
+            result = subprocess.run(  # nosec B603 B607
                 ["taskkill", "/PID", str(pid), "/T", "/F"],
                 check=False,
                 capture_output=True,
@@ -167,7 +167,7 @@ def start_detached_quarantine_backend(
     bind_host: str = "0.0.0.0",
     port: int = DEFAULT_HEALTH_SERVER_PORT,
     python_executable: str | None = None,
-    popen_factory: Callable[..., subprocess.Popen[bytes]] = subprocess.Popen,
+    popen_factory: Callable[..., subprocess.Popen[bytes]] = subprocess.Popen,  # nosec B603
 ) -> subprocess.Popen[bytes]:
     """Launch ``bioetl quarantine serve`` as a detached background process."""
     command = [

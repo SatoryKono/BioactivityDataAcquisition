@@ -24,10 +24,28 @@ def _canonical_script() -> Path:
         / "architecture-techdebt-automation.py"
     )
 
-
-if __name__ == "__main__":
+def main(argv: list[str] | None = None) -> int:
     script = _canonical_script()
     if not script.exists():
         sys.stderr.write(f"ERROR: canonical script not found: {script}\n")
-        raise SystemExit(2)
-    runpy.run_path(str(script), run_name="__main__")
+        return 2
+
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("__main__", str(script))
+    if spec is None or spec.loader is None:
+        sys.stderr.write(f"ERROR: failed to load spec from {script}\n")
+        return 2
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["__main__"] = module
+    try:
+        spec.loader.exec_module(module)
+        if hasattr(module, "main"):
+            return module.main(argv)
+        else:
+            sys.stderr.write(f"ERROR: {script} does not expose a callable main()\n")
+            return 2
+    except SystemExit as e:
+        return e.code if isinstance(e.code, int) else 1
+
+if __name__ == "__main__":
+    raise SystemExit(main())

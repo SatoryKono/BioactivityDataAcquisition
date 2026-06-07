@@ -56,7 +56,7 @@ jobs:
                       VCR_RECORD_MODE=none uv run pytest \
                         tests/e2e/test_pipeline_matrix_e2e.py \
                         -k "test_pipeline_matrix_smoke" \
-                        --vcr-record=none \
+                        --record-mode=none \
                         -q --tb=short \
                         --junitxml="reports/e2e/matrix-smoke-run${run}.xml"
                       echo $? > "reports/e2e/pytest_exit_code_run${run}.txt"
@@ -135,7 +135,7 @@ jobs:
                     VCR_RECORD_MODE=new_episodes uv run pytest \
                       tests/e2e/test_pipeline_matrix_e2e.py \
                       -k "test_pipeline_matrix_smoke" \
-                      --vcr-record=new_episodes \
+                      --record-mode=new_episodes \
                       -q --tb=short \
                       --junitxml=reports/e2e/matrix-smoke-live.xml
                     echo $? > reports/e2e/pytest_exit_code_live.txt

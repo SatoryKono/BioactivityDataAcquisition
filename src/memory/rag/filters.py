@@ -169,7 +169,7 @@ def _git_tracked_source_paths(*, root: Path, base: Path) -> list[Path]:
     if not git_dir.exists():
         return []
     try:
-        result = subprocess.run(
+        result = subprocess.run(  # nosec B603 B607
             ["git", "ls-files", "--", base.as_posix()],
             cwd=root,
             check=True,
