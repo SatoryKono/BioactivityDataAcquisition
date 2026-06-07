@@ -128,20 +128,30 @@ class EnricherDeduplicatorService:
         # Classify each column based on the single aggregation result
         columns_with_conflicts: list[str] = []
         columns_without_conflicts: list[str] = []
+
+        if aggregated.height == 0:
+            return columns_with_conflicts, non_key_columns
+
+        conflict_exprs: list[pl.Expr] = []
         for col in non_key_columns:
             n_unique_col = f"{col}__n_unique"
             has_null_col = f"{col}__has_null"
             all_null_col = f"{col}__all_null"
 
-            has_conflict = (
-                aggregated.filter(
+            conflict_exprs.append(
+                (
                     (pl.col(n_unique_col) > 1)
                     | (pl.col(has_null_col) & ~pl.col(all_null_col))
-                ).height
-                > 0
+                ).any().alias(col)
             )
 
-            if has_conflict:
+        # ⚡ Bolt optimization: execute all conflict checks simultaneously
+        # Using a single `.select` avoids the high execution overhead of iterating
+        # and evaluating a separate Polars `.filter` for each non-key column
+        conflict_results = aggregated.select(conflict_exprs).row(0, named=True)
+
+        for col in non_key_columns:
+            if conflict_results[col]:
                 columns_with_conflicts.append(col)
             else:
                 columns_without_conflicts.append(col)
