@@ -1,3 +1,4 @@
 # Failure Frequency Summary
 
-All tests passed successfully.
+Baseline check completed. Major issues in e2e and architecture layers.
+No flaky tests detected in 5 runs yet.

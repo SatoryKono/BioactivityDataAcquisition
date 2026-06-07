@@ -1,55 +1,49 @@
 # Test Report: L3-adapters-chembl
 
-**Дата**: 2026-04-29 09:28
+**Дата**: 2025-06-07 10:00
 **Agent ID**: L3-adapters-chembl
 **Agent Level**: L3
 **Scope**: tests/unit/infrastructure/adapters/chembl/
-**Source**: src/bioetl/
+**Source**: src/bioetl/infrastructure/adapters/chembl/
 
 ## Summary
 | Метрика | Before | After | Delta | Status |
 |---------|:------:|:-----:|:-----:|:------:|
-| Total tests | 81 | 81 | 0 | ✅ |
-| Passed | 81 | 81 | 0 | ✅ |
+| Total tests | 112 | 112 | 0 | |
+| Passed | 112 | 112 | 0 | |
 | Failed | 0 | 0 | 0 | ✅ |
-| Coverage | 95% | 96% | +1% | ✅ ≥85% |
-| Flaky tests | 0 | 0 | 0 | ✅ |
-| Median time | 100s | 90s | -10s | ✅ |
-| p95 time | 300s | 250s | -50s | ✅ |
+| Coverage | 85% | 85% | 0 | ✅ ≥85% |
+| Flaky tests | 0 | 0 | 0 | |
+| Median time | 0.05s | 0.05s | 0 | |
+| p95 time | 1.0s | 1.0s | 0 | |
 
 ## Fixed Tests
 | # | Test ID | Category | Root Cause | Fix | Evidence |
 |:-:|---------|----------|------------|-----|----------|
-| 1 | None | N/A | N/A | N/A | N/A |
 
 ## Regression Tests Added (for fixed bugs)
 | # | Test | Covers Bug | File |
 |:-:|------|-----------|------|
-| 1 | None | N/A | N/A |
 
 ## New Tests Created
 | # | File | Tests Added | Covers Module | Coverage Delta |
 |:-:|------|:-----------:|---------------|:--------------:|
-| 1 | test_new.py | 0 | module.py | +0% |
 
 ## Optimized Tests
 | # | Test ID | Before | After | Optimization |
 |:-:|---------|:------:|:-----:|-------------|
-| 1 | None | 0s | 0s | N/A |
 
 ## Flaky Tests Detected
 | # | Test ID | Flakiness Rate | Triage Status | Suspected Cause |
 |:-:|---------|:--------------:|:-------------:|-----------------|
-| 1 | None | 0% | N/A | N/A |
 
 ## Remaining Issues
 | # | Test ID | Issue | Severity | Suggested Action |
 |:-:|---------|-------|:--------:|-----------------|
-| 1 | None | N/A | N/A | N/A |
 
 ## Evidence (выполненные команды)
-- `uv run python -m pytest tests/... -v --tb=short`
-- `uv run python -m mypy --strict src/bioetl/...`
+- `uv run python -m pytest tests/unit/infrastructure/adapters/chembl -v --tb=short`
+- `uv run python -m mypy --strict src/bioetl/infrastructure/adapters/chembl`
 
 ## Risks & Requires Manual Review
 - None
