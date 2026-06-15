@@ -17,10 +17,6 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
-from bioetl.infrastructure.config.silver_filter_migration import (
-    normalize_silver_gold_filter_payload,
-)
-
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_FIXTURE = (
     PROJECT_ROOT
@@ -38,6 +34,10 @@ SCHEMA_VERSION = "silver-gold-filter-parity-report-v1"
 
 JsonDict = dict[str, Any]
 PkTuple = tuple[str, ...]
+LEGACY_SILVER_SEMANTIC_FILTER_KEYS = frozenset(
+    {"columns", "ranges", "list_lengths", "list_contains"}
+)
+SILVER_STRUCTURAL_FILTER_KEYS = frozenset({"required_fields", "exclude_if_present"})
 
 
 def _json_ready(value: Any) -> Any:
@@ -190,6 +190,41 @@ def _same_canonical(left: Any, right: Any) -> bool:
     return _canonical(left) == _canonical(right)
 
 
+def _normalize_legacy_silver_gold_filter_payload(
+    payload: Mapping[str, Any],
+) -> JsonDict:
+    """Normalize legacy fixtures; production config validation no longer does this."""
+    result = deepcopy(dict(payload))
+    silver_filters = result.get("silver_filters")
+    if not isinstance(silver_filters, Mapping):
+        return result
+
+    gold_filters = result.get("gold_filters")
+    if not isinstance(gold_filters, Mapping):
+        gold_filters = {}
+
+    result["silver_filters"] = {
+        key: deepcopy(value)
+        for key, value in silver_filters.items()
+        if key in SILVER_STRUCTURAL_FILTER_KEYS
+    }
+    promoted_gold = deepcopy(dict(gold_filters))
+    for key in LEGACY_SILVER_SEMANTIC_FILTER_KEYS:
+        silver_section = silver_filters.get(key)
+        if not isinstance(silver_section, Mapping) or not silver_section:
+            continue
+        gold_section = promoted_gold.get(key)
+        if not isinstance(gold_section, Mapping):
+            gold_section = {}
+        else:
+            gold_section = dict(gold_section)
+        for field_name, silver_value in silver_section.items():
+            gold_section.setdefault(field_name, deepcopy(silver_value))
+        promoted_gold[key] = gold_section
+    result["gold_filters"] = promoted_gold
+    return result
+
+
 def _required_mapping(payload: Mapping[str, Any], key: str) -> Mapping[str, Any]:
     value = payload.get(key)
     if not isinstance(value, Mapping):
@@ -199,17 +234,21 @@ def _required_mapping(payload: Mapping[str, Any], key: str) -> Mapping[str, Any]
 
 def _required_list(payload: Mapping[str, Any], key: str) -> list[Mapping[str, Any]]:
     value = payload.get(key)
-    if not isinstance(value, list) or not all(isinstance(item, Mapping) for item in value):
+    if not isinstance(value, list) or not all(
+        isinstance(item, Mapping) for item in value
+    ):
         raise ValueError(f"Scenario missing object-list field: {key}")
     return value
 
 
-def _compare_config(legacy_run: Mapping[str, Any], cleaned_run: Mapping[str, Any]) -> bool:
+def _compare_config(
+    legacy_run: Mapping[str, Any], cleaned_run: Mapping[str, Any]
+) -> bool:
     legacy_config = _required_mapping(legacy_run, "filter_config")
     cleaned_config = _required_mapping(cleaned_run, "filter_config")
     return _same_canonical(
-        normalize_silver_gold_filter_payload(legacy_config),
-        normalize_silver_gold_filter_payload(cleaned_config),
+        _normalize_legacy_silver_gold_filter_payload(legacy_config),
+        _normalize_legacy_silver_gold_filter_payload(cleaned_config),
     )
 
 
@@ -321,7 +360,9 @@ def evaluate_scenario(scenario: Mapping[str, Any]) -> JsonDict:
         "silver_delta": silver_delta,
         "silver_widening": {
             "added_pks": _sorted_pk_lists(added_silver_pks),
-            "bounded_added_pks": _sorted_pk_lists(added_silver_pks & allowed_widening_pks),
+            "bounded_added_pks": _sorted_pk_lists(
+                added_silver_pks & allowed_widening_pks
+            ),
             "unbounded_added_pks": _sorted_pk_lists(unbounded_added_pks),
             "removed_pks": _sorted_pk_lists(removed_silver_pks),
             "legacy_semantic_silver_reject_pks": _sorted_pk_lists(
@@ -355,11 +396,13 @@ def build_parity_report(
         raise ValueError("Parity fixture must contain a non-empty scenarios list")
 
     scenario_reports = [evaluate_scenario(deepcopy(scenario)) for scenario in scenarios]
-    failing = [report["scenario_id"] for report in scenario_reports if report["verdict"] != "pass"]
-    silver_widening_count = sum(
-        1
+    failing = [
+        report["scenario_id"]
         for report in scenario_reports
-        if report["silver_widening"]["added_pks"]
+        if report["verdict"] != "pass"
+    ]
+    silver_widening_count = sum(
+        1 for report in scenario_reports if report["silver_widening"]["added_pks"]
     )
     return {
         "schema_version": SCHEMA_VERSION,

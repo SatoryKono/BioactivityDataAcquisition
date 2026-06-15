@@ -5,11 +5,8 @@ from __future__ import annotations
 import threading
 from collections.abc import Iterator, Mapping
 from importlib import import_module
-from typing import Any, Protocol, cast
+from typing import TYPE_CHECKING, Protocol, cast
 
-from bioetl.composition.factories.pipeline._assembler_factory import (
-    GenericPipelineFactory,
-)
 from bioetl.composition.factories.pipeline.contract_validator import create_factory
 from bioetl.composition.factories.pipeline.registry_exports import (
     FACTORY_EXPORTS,
@@ -19,6 +16,11 @@ from bioetl.composition.factories.pipeline.registry_manifest import (
     PIPELINE_CONFIGS,
 )
 from bioetl.domain.ports import PipelineFactoryPort
+
+if TYPE_CHECKING:
+    from bioetl.composition.factories.pipeline._assembler_factory import (
+        GenericPipelineFactory,
+    )
 
 _registry_module = import_module("bioetl.composition.registry")
 PipelineDefinition = _registry_module.PipelineDefinition
@@ -42,7 +44,7 @@ class PipelineRegistryProtocol(Protocol):
         ...
 
 
-def _build_factories() -> dict[str, GenericPipelineFactory[object]]:
+def _build_factories() -> dict[str, object]:
     """Build factory instances from the canonical pipeline config table."""
     return {config.pipeline_name: create_factory(config) for config in PIPELINE_CONFIGS}
 
@@ -50,14 +52,14 @@ def _build_factories() -> dict[str, GenericPipelineFactory[object]]:
 _configs_by_name = {config.pipeline_name: config for config in PIPELINE_CONFIGS}
 
 
-class _LazyFactoryCatalog(Mapping[str, GenericPipelineFactory[object]]):
+class _LazyFactoryCatalog(Mapping[str, object]):
     """Read-only lazy pipeline factory catalog."""
 
     def __init__(self) -> None:
         self._lock = threading.RLock()
-        self._cache: dict[str, GenericPipelineFactory[object]] = {}
+        self._cache: dict[str, object] = {}
 
-    def __getitem__(self, pipeline_name: str) -> GenericPipelineFactory[object]:
+    def __getitem__(self, pipeline_name: str) -> object:
         if pipeline_name in self._cache:
             return self._cache[pipeline_name]
         with self._lock:
@@ -235,7 +237,7 @@ def reset_registration(
         state._registered = False
 
 
-def get_factory(pipeline_name: str) -> GenericPipelineFactory[Any]:
+def get_factory(pipeline_name: str) -> object:
     """Get a pipeline factory by name.
 
     Convenience function for accessing factories without going through registry.

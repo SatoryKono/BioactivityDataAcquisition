@@ -88,33 +88,25 @@ def test_yaml_config_to_domain_maps_sink_idempotency_contracts() -> None:
     assert domain_config.table.gold_idempotency_contract == "overwrite_rebuild"
 
 
-def test_pipeline_yaml_config_promotes_semantic_silver_filters_to_gold() -> None:
-    """Unified schema should normalize Silver semantic filters before domain mapping."""
-    yaml_config = PipelineYamlConfig.model_validate(
-        {
-            "pipeline_name": "test_pipeline",
-            "provider": "test",
-            "entity_type": "entity",
-            "business_primary_keys": ["id"],
-            "silver_table": "silver.test",
-            "silver_filters": {
-                "required_fields": ["id"],
-                "columns": {"status": ["active"]},
-            },
-            "gold_filters": {
-                "columns": {"tier": ["gold"]},
-            },
-        }
-    )
-
-    domain_config = yaml_config_to_domain(yaml_config)
-
-    assert domain_config.silver_filters.required_fields == ("id",)
-    assert domain_config.silver_filters.column_filters == ()
-    assert {rule.column for rule in domain_config.gold_filters.column_filters} == {
-        "status",
-        "tier",
-    }
+def test_pipeline_yaml_config_rejects_semantic_silver_filters() -> None:
+    """Unified schema should fail closed on semantic Silver filters."""
+    with pytest.raises(Exception, match=r"silver_filters\.columns"):
+        PipelineYamlConfig.model_validate(
+            {
+                "pipeline_name": "test_pipeline",
+                "provider": "test",
+                "entity_type": "entity",
+                "business_primary_keys": ["id"],
+                "silver_table": "silver.test",
+                "silver_filters": {
+                    "required_fields": ["id"],
+                    "columns": {"status": ["active"]},
+                },
+                "gold_filters": {
+                    "columns": {"tier": ["gold"]},
+                },
+            }
+        )
 
 
 def test_yaml_config_to_domain_maps_source_profile() -> None:

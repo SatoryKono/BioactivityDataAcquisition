@@ -72,6 +72,12 @@ budget_ratchet:
   expected_direction: downward
   refreshed_on: '2026-06-01'
   stream_g_owner_notes:
+  - issue: '#5123'
+    owner: architecture-governance
+    status: silver_semantic_compatibility_guard_enforced
+    note: Removed runtime/schema auto-promotion for semantic Silver filter buckets
+      and added hard CI coverage for active configs. No technical-debt budget was
+      increased; compatibility inventory limits remain unchanged.
   - issue: '#4901'
     owner: test-governance
     status: duplicate_test_names_zero_enforced

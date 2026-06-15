@@ -6,7 +6,14 @@ from __future__ import annotations
 import re
 from typing import Literal
 
-from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_validator
+from pydantic import (
+    AliasChoices,
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_validator,
+    model_validator,
+)
 
 from bioetl.domain.config.table import IdempotencyContract
 from bioetl.domain.filtering import SilverFilterConfig
@@ -217,9 +224,20 @@ class SilverFiltersConfig(BaseGoldFiltersConfig):
     """Schema for structural Silver filters in YAML.
 
     Canonical Silver accepts ``required_fields`` and ``exclude_if_present``.
-    Semantic Gold-style keys remain parseable only for legacy boundary
-    compatibility and are promoted before domain conversion.
+    Semantic Gold-style keys are rejected at the schema boundary.
     """
+
+    @model_validator(mode="before")
+    @classmethod
+    def reject_semantic_silver_filters(cls, data: object) -> object:
+        """Reject semantic keys even when this sub-schema is validated directly."""
+        if isinstance(data, dict):
+            from bioetl.infrastructure.config.silver_filter_migration import (
+                validate_structural_silver_filter_payload,
+            )
+
+            validate_structural_silver_filter_payload(data)
+        return data
 
     def to_domain(self) -> SilverFilterConfig:  # type: ignore[override]
         """Convert to a structural-only SilverFilterConfig."""

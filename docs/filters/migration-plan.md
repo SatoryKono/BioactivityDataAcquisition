@@ -164,16 +164,17 @@ Current state (2026-06-03): implemented by
 
 `src/bioetl/infrastructure/config/filter_config_loader.py`:
 
-- В `load()` и `load_as_dict()` после merge: auto-promotion semantic полей
-  `silver_filters` → `gold_filters`
-- При конфликте gold выигрывает: существующее gold-правило не перезаписывается.
-- Cache key включает resolved compatibility mode, чтобы rollback env не
-  использовал stale normalized config.
+- В `load()` и `load_as_dict()` после merge: semantic поля под
+  `silver_filters` запрещены и вызывают ошибку валидации.
+- `columns`, `ranges`, `list_lengths`, `list_contains` должны находиться в
+  `gold_filters` или source-profile metadata, но не в Silver.
+- Legacy auto-promotion оставлен только в offline parity/backfill tooling для
+  сравнения старого и очищенного YAML, не в runtime loader.
 
-Current state (2026-06-03): semantic promotion is implemented in shared helper
-`src/bioetl/infrastructure/config/silver_filter_migration.py` and applied by
-both `FilterConfigFile.promote_semantic_silver_filters()` and
-`PipelineYamlConfig.promote_semantic_silver_filters()`.
+Current state (2026-06-15): production schemas call
+`validate_no_semantic_silver_filter_payload()` and fail closed on semantic
+Silver keys. The parity harness keeps a local legacy normalizer only for
+historical migration comparison.
 
 #### 2.3. Pipeline config schema
 

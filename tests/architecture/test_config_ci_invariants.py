@@ -113,6 +113,12 @@ REQUIRED_SCD_CONFIG_KEYS: set[str] = {
 }
 
 LEGACY_SCD_CONFIG_KEYS: set[str] = {"valid_from", "valid_to", "is_current", "version"}
+SEMANTIC_SILVER_FILTER_KEYS: set[str] = {
+    "columns",
+    "ranges",
+    "list_lengths",
+    "list_contains",
+}
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -161,6 +167,28 @@ def _collect_composite_configs() -> list[Path]:
 def _collect_provider_configs() -> list[Path]:
     """Collect unified provider YAML configs."""
     return sorted(p for p in PROVIDERS_DIR.glob("*.yaml") if not p.name.startswith("_"))
+
+
+def _collect_filter_sections() -> list[tuple[Path, str, dict[str, Any]]]:
+    """Collect active filter sections that can contain silver_filters."""
+    sections: list[tuple[Path, str, dict[str, Any]]] = []
+
+    base_path = CONFIGS_DIR / "base" / "pipeline.yaml"
+    base_filters = _load_yaml(base_path).get("filter_defaults")
+    if isinstance(base_filters, dict):
+        sections.append((base_path, "filter_defaults", base_filters))
+
+    for path in _collect_provider_configs():
+        provider_filters = _load_yaml(path).get("filters")
+        if isinstance(provider_filters, dict):
+            sections.append((path, "filters", provider_filters))
+
+    for path in _collect_pipeline_configs():
+        entity_filters = _load_yaml(path).get("filters")
+        if isinstance(entity_filters, dict):
+            sections.append((path, "filters", entity_filters))
+
+    return sections
 
 
 def _rel(path: Path) -> str:
@@ -723,6 +751,30 @@ class TestSilverRequiredFieldsCoverage:
             _collect_pipeline_configs()
         )
         assert not violations, "\n".join(violations)
+
+
+# ---------------------------------------------------------------------------
+# INV-CFG-007A: Silver filters are structural-only in active config YAML
+# ---------------------------------------------------------------------------
+class TestSilverSemanticFilterHardGuard:
+    """INV-CFG-007A: active silver_filters must not contain semantic buckets."""
+
+    def test_no_semantic_silver_filter_keys_in_active_configs(self) -> None:
+        violations: list[str] = []
+        for path, section_name, filters in _collect_filter_sections():
+            silver_filters = filters.get("silver_filters")
+            if not isinstance(silver_filters, dict):
+                continue
+            for key in sorted(SEMANTIC_SILVER_FILTER_KEYS):
+                if key in silver_filters:
+                    violations.append(
+                        f"{_rel(path)}:{section_name}.silver_filters.{key}"
+                    )
+
+        assert not violations, (
+            "Semantic filters are forbidden under active silver_filters; "
+            "move them to gold_filters or source_profile:\n" + "\n".join(violations)
+        )
 
 
 # ---------------------------------------------------------------------------

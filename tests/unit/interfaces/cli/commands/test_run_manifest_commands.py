@@ -739,7 +739,7 @@ class _FakeHistoricalReplayUniverseService:
 
 @pytest.fixture
 def cli_runner() -> CliRunner:
-    return CliRunner()
+    return CliRunner(mix_stderr=False)
 
 
 def _patch_run_manifest_service(monkeypatch: Any, service: object) -> None:
@@ -1317,4 +1317,4 @@ class TestRunManifestCommands:
         )
 
         assert result.exit_code != 0
-        assert "Authoritative historical replay universe claim" in result.output
+        assert "Authoritative historical replay universe claim" in result.stderr

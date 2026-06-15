@@ -98,9 +98,9 @@ OUT OF SCOPE for this retired filter draft.
 
 | Concern | Evidence | Status |
 | --- | --- | --- |
-| Semantic Silver rule promotion | `src/bioetl/infrastructure/config/silver_filter_migration.py` | Implemented through `normalize_silver_gold_filter_payload()`. |
-| Filter file schema normalization | `src/bioetl/infrastructure/schemas/filter_config.py` | Implemented by `FilterConfigFile.promote_semantic_silver_filters()`. |
-| Entity pipeline schema normalization | `src/bioetl/infrastructure/schemas/pipeline_config.py` | Implemented by `PipelineYamlConfig.promote_semantic_silver_filters()`. |
+| Semantic Silver hard guard | `src/bioetl/infrastructure/config/silver_filter_migration.py` | Implemented through `validate_no_semantic_silver_filter_payload()`. |
+| Filter file schema validation | `src/bioetl/infrastructure/schemas/filter_config.py` | `FilterConfigFile.reject_semantic_silver_filters()` rejects semantic keys before field validation. |
+| Entity pipeline schema validation | `src/bioetl/infrastructure/schemas/pipeline_config.py` | `PipelineYamlConfig.reject_semantic_silver_filters()` rejects semantic keys before field validation. |
 | Structural-only domain Silver projection | `src/bioetl/infrastructure/schemas/filter_config.py`, `src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py` | Implemented through `SilverFiltersFileConfig.to_domain()` and `SilverFiltersConfig.to_domain()`. |
 | Legacy YAML cleanup | `configs/entities/**/*.yaml` | Complete for active YAML; semantic buckets are absent from `silver_filters` and CI fails reintroduction. |
 

@@ -156,15 +156,14 @@ Observed facts:
 - `configs/entities/**/*.yaml` contains 27 entity pipeline configs; 22 of them
   currently include `filters.silver_filters`, and active Silver filters are now
   structural-only (`required_fields` and `exclude_if_present`).
-- Runtime config loading does not pass those semantic Silver keys into the
-  domain Silver filter unchanged. The infrastructure boundary normalizes the
-  payload through
+- Runtime config loading rejects semantic Silver keys before the domain Silver
+  filter is built. The infrastructure boundary validates the payload through
   `src/bioetl/infrastructure/config/silver_filter_migration.py`.
-- `FilterConfigFile.promote_semantic_silver_filters()` in
+- `FilterConfigFile.reject_semantic_silver_filters()` in
   `src/bioetl/infrastructure/schemas/filter_config.py` and
-  `PipelineYamlConfig.promote_semantic_silver_filters()` in
+  `PipelineYamlConfig.reject_semantic_silver_filters()` in
   `src/bioetl/infrastructure/schemas/pipeline_config.py` call
-  `normalize_silver_gold_filter_payload()` before strict validation.
+  `validate_no_semantic_silver_filter_payload()` before strict validation.
 - `SilverFiltersFileConfig.to_domain()` and
   `SilverFiltersConfig.to_domain()` convert to structural-only
   `SilverFilterConfig` using
@@ -173,8 +172,8 @@ Observed facts:
 | Surface | File | Current behavior | Layer |
 | --- | --- | --- | --- |
 | Compatibility mode | `src/bioetl/infrastructure/config/silver_filter_migration.py` | Default mode is `structural_only_auto_promote`. | Infrastructure |
-| Filter file schema | `src/bioetl/infrastructure/schemas/filter_config.py` | Legacy semantic Silver keys are accepted at the file boundary and promoted to Gold before domain conversion. | Infrastructure |
-| Entity pipeline schema | `src/bioetl/infrastructure/schemas/pipeline_config.py` | Entity YAML payloads are normalized before validation. | Infrastructure |
+| Filter file schema | `src/bioetl/infrastructure/schemas/filter_config.py` | Legacy semantic Silver keys fail validation at the file boundary. | Infrastructure |
+| Entity pipeline schema | `src/bioetl/infrastructure/schemas/pipeline_config.py` | Entity YAML payloads fail validation when semantic keys appear under `silver_filters`. | Infrastructure |
 | Domain Silver filter projection | `src/bioetl/infrastructure/schemas/filter_config.py`, `src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py` | Domain Silver filter receives only `required_fields` and `exclude_if_present`. | Infrastructure -> Domain boundary |
 | Legacy config inventory | `configs/entities/**/*.yaml` | Semantic Silver buckets have been removed from active YAML; reintroduction fails architecture guardrails. | Config |
 | Source-profile metadata | `configs/entities/chembl/{activity,assay,molecule,publication,publication_term,target}.yaml` | Current curated ChEMBL extraction_params are versioned as baseline source profiles before any widening. | Config |

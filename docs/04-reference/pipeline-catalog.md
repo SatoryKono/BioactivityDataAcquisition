@@ -100,14 +100,14 @@ flowchart LR
 
 ## Filter Compatibility Status
 
-The pipeline config boundary currently supports a compatibility window for
+The pipeline config boundary no longer supports runtime compatibility for
 legacy semantic Silver filters:
 
 | Surface | Evidence | Current behavior |
 | --- | --- | --- |
 | Entity YAML | `configs/entities/**/*.yaml` | Active `filters.silver_filters` are structural-only; semantic keys were moved to `gold_filters` or dropped as duplicates. |
-| Normalization helper | `src/bioetl/infrastructure/config/silver_filter_migration.py` | `normalize_silver_gold_filter_payload()` promotes semantic Silver keys into `gold_filters` and leaves Silver structural-only. |
-| Pipeline schema | `src/bioetl/infrastructure/schemas/pipeline_config.py` | `PipelineYamlConfig.promote_semantic_silver_filters()` normalizes entity payloads before validation. |
+| Validation helper | `src/bioetl/infrastructure/config/silver_filter_migration.py` | `validate_no_semantic_silver_filter_payload()` rejects semantic keys under `silver_filters`. |
+| Pipeline schema | `src/bioetl/infrastructure/schemas/pipeline_config.py` | `PipelineYamlConfig.reject_semantic_silver_filters()` fails before field validation. |
 | Domain projection | `src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py` | `SilverFiltersConfig.to_domain()` returns structural-only `SilverFilterConfig`. |
 | Source profiles | `configs/entities/chembl/*.yaml` | Curated ChEMBL `extraction_params` profiles are explicitly versioned as baseline and are not widened by Silver/Gold cleanup. |
 

@@ -27,7 +27,7 @@ _PUBLIC_EXPORTS = {
         "get_default_registry",
     ),
     "register_all_pipelines": (
-        "bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases",
+        "bioetl.composition.factories.pipeline.registry",
         "register_all_pipelines",
     ),
 }

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-15T14:40:17.358897+00:00",
+  "generated_at": "2026-06-15T15:17:55.468761+00:00",
   "summary": {
     "total_scripts": 429,
     "status_counts": {
@@ -3153,13 +3153,13 @@
         },
         {
           "path": "docs/filters/migration-plan.md",
-          "line": 194,
+          "line": 195,
           "source_group": "docs",
           "text": "`scripts/data_quality/inventory_silver_filters_migration.py`."
         },
         {
           "path": "tests/architecture/test_silver_filter_boundary_inventory.py",
-          "line": 400,
+          "line": 417,
           "source_group": "tests",
           "text": "\"Run: python scripts/data_quality/inventory_silver_filters_migration.py\\n\""
         }
@@ -5544,19 +5544,19 @@
         },
         {
           "path": "docs/filters/inventory-baseline.csv",
-          "line": 175,
+          "line": 176,
           "source_group": "docs",
           "text": ",,,,,,inventory,,surface,source_profile,extraction_params,config_source_profile_policy,scripts/docs/matrix/generate_pipeline_normalization_matrix.py,5,1573,Source-profile extraction policy,extraction_"
         },
         {
           "path": "docs/filters/inventory-baseline.json",
-          "line": 2262,
+          "line": 2273,
           "source_group": "docs",
           "text": "\"path\": \"scripts/docs/matrix/generate_pipeline_normalization_matrix.py\","
         },
         {
           "path": "docs/filters/inventory-baseline.md",
-          "line": 134,
+          "line": 135,
           "source_group": "docs",
           "text": "| `config_source_profile_policy` | `extraction_params` | `scripts/docs/matrix/generate_pipeline_normalization_matrix.py` | 5 | 1573 | Source-profile extraction policy |"
         },
@@ -8361,19 +8361,19 @@
       "references": [
         {
           "path": "docs/filters/inventory-baseline.csv",
-          "line": 176,
+          "line": 177,
           "source_group": "docs",
           "text": ",,,,,,inventory,,surface,source_profile,extraction_params,config_source_profile_policy,scripts/engineering/qa/config_surface_governance.py,1,8,Source-profile extraction policy,extraction_params are pr"
         },
         {
           "path": "docs/filters/inventory-baseline.json",
-          "line": 2273,
+          "line": 2284,
           "source_group": "docs",
           "text": "\"path\": \"scripts/engineering/qa/config_surface_governance.py\","
         },
         {
           "path": "docs/filters/inventory-baseline.md",
-          "line": 135,
+          "line": 136,
           "source_group": "docs",
           "text": "| `config_source_profile_policy` | `extraction_params` | `scripts/engineering/qa/config_surface_governance.py` | 1 | 8 | Source-profile extraction policy |"
         },

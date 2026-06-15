@@ -23,7 +23,7 @@ from bioetl.domain.models.filter import ExtractionParams
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.base_config_loader import BaseConfigLoader
 from bioetl.infrastructure.config.silver_filter_migration import (
-    normalize_silver_gold_filter_payload,
+    validate_no_semantic_silver_filter_payload,
 )
 from bioetl.infrastructure.schemas.filter_config import FilterConfigFile
 
@@ -86,7 +86,7 @@ class FilterConfigLoader(
             inline_overrides,
             defaults=defaults,
         )
-        merged = normalize_silver_gold_filter_payload(merged)
+        merged = validate_no_semantic_silver_filter_payload(merged)
 
         # Validate via Pydantic
         validated = FilterConfigFile.model_validate(merged)
@@ -131,7 +131,7 @@ class FilterConfigLoader(
         Returns:
             Merged configuration dict (may be empty).
         """
-        return normalize_silver_gold_filter_payload(
+        return validate_no_semantic_silver_filter_payload(
             self._merge_hierarchy(provider, entity, inline_overrides)
         )
 

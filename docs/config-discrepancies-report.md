@@ -1,7 +1,7 @@
 # Config Discrepancies Report
 
 Total configs: 27
-Total unique parameters: 513
+Total unique parameters: 507
 Actionable inconsistent parameters: 0
 Sanctioned partial variance parameters: 0
 Raw partial parameter count: 0
