@@ -102,6 +102,16 @@ def test_sharded_runner_loads_declarative_inventory_and_documents_path() -> None
 
 
 @pytest.mark.architecture
+def test_application_observability_unit_tests_are_tracked_in_app_shards() -> None:
+    inventory = _load_inventory()
+    shard_map = {entry["name"]: entry for entry in inventory["shards"]}
+
+    foundation_paths = shard_map["S3-app-foundation"]["paths"]
+
+    assert "tests/unit/application/observability" in foundation_paths
+
+
+@pytest.mark.architecture
 @_BASH_RUNNER_UNSUPPORTED_ON_WINDOWS
 def test_sharded_runner_list_matches_inventory_order() -> None:
     inventory = _load_inventory()
