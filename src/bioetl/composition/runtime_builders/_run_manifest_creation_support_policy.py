@@ -148,7 +148,9 @@ def create_ledger_service(
     ctx: object,
 ) -> RunLedgerService | None:
     """Build the optional run-ledger service for manifest publication."""
-    from bioetl.composition.control_plane_store_builders import create_run_ledger_store
+    from bioetl.composition.bootstrap.control_plane_store_builders import (
+        create_run_ledger_store,
+    )
     from bioetl.composition.occurrence_identity import create_runtime_occurrence_id
 
     return RunLedgerService(

@@ -12,11 +12,11 @@ from bioetl.interfaces.cli.commands.domains.quarantine.server_backend import (
 pytestmark = pytest.mark.unit
 
 
-def test_get_quarantine_runtime_service_delegates_to_resources_api() -> None:
+def test_get_quarantine_runtime_service_delegates_to_health_api() -> None:
     expected_service = MagicMock(name="QuarantineRuntimeService")
 
     with patch(
-        "bioetl.composition.resources_api.get_quarantine_runtime_service",
+        "bioetl.composition.health_api.get_quarantine_runtime_service",
         return_value=expected_service,
     ) as mock_impl:
         result = runtime_access.get_quarantine_runtime_service("chembl_activity")
@@ -25,11 +25,11 @@ def test_get_quarantine_runtime_service_delegates_to_resources_api() -> None:
     mock_impl.assert_called_once_with("chembl_activity")
 
 
-def test_get_quarantine_service_delegates_to_services_api() -> None:
+def test_get_quarantine_service_delegates_to_health_api() -> None:
     expected_service = MagicMock(name="QuarantineService")
 
     with patch(
-        "bioetl.composition.services_api.get_quarantine_service",
+        "bioetl.composition.health_api.get_quarantine_service",
         return_value=expected_service,
     ) as mock_impl:
         result = runtime_access.get_quarantine_service()
