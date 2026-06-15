@@ -72,8 +72,8 @@ __all__ = [
     "SilverFiltersConfig",
     "SinkDQReportConfig",
     "SinkLayerConfig",
-    "SourceProfileYamlConfig",
     "SourceConfig",
+    "SourceProfileYamlConfig",
     "TransformConfig",
 ]
 
