@@ -39,6 +39,10 @@ class TestCliQuarantineInspect:
         assert "--pipeline" in result.output
         assert "--limit" in result.output
         assert "--silver-filter-only" in result.output
+        assert "Legacy alias" in result.output
+        assert "FILTERED_OUT_SILVER" in result.output
+        assert "not Gold" in result.output
+        assert "contract/semantic rejects" in result.output
 
     def test_quarantine_inspect_requires_pipeline(self, cli_runner: CliRunner):
         """Test that quarantine inspect requires --pipeline option."""

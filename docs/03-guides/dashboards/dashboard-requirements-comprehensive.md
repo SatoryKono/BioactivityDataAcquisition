@@ -565,7 +565,10 @@ Selected-range declarative workflow run/step evidence and transform-step latency
 ## 7. bioetl-silver-reject-explorer (Silver Reject Explorer)
 
 ### Назначение
-Record-level explorer для `filtered_out`/`FILTERED_OUT_SILVER` записей (quarantine-backed)
+Record-level explorer для Silver structural `filtered_out`/legacy
+`FILTERED_OUT_SILVER` записей (quarantine-backed). Gold contract/semantic
+rejects должны оставаться в `4. Data Quality` Gold reject panels and
+processed-records surfaces.
 
 ### Переменные
 - **Видимые**: `pipeline` (single-select, required), `run_type` (multi-select with Include All, default `All`), `reason_code` (multi-select with Include All, default `All`), `field` (multi-select with Include All, default `All`), `quarantine_run_id` (single-select, empty until selected; backend `dimension=run_id`), `payload_hash` (visible textbox, empty string)

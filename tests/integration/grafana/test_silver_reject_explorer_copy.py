@@ -46,6 +46,28 @@ def test_scope_banner_explains_origin_dashboard_ownership() -> None:
     assert "origin dashboards own shared workflow/run_id shell context" in content
     assert "never owns shared workflow or run_id selectors" in content
     assert "stays pipeline/run_type forensic" in description
+    assert "filtered_out_silver is a legacy alias" in content
+    assert "silver structural rejects only" in content
+    assert "gold contract and semantic rejects are not shown here" in content
+    assert (
+        "gold contract and semantic rejects are intentionally excluded" in description
+    )
+
+
+def test_filtered_records_table_documents_legacy_silver_alias_scope() -> None:
+    dashboard = json.loads(
+        Path("grafana/dashboards/bioetl-silver-reject-explorer.json").read_text(
+            encoding="utf-8"
+        )
+    )
+
+    panel = next((p for p in dashboard["panels"] if p.get("id") == 8), None)
+
+    assert panel is not None
+    description = str(panel.get("description", "")).lower()
+    assert "silver structural filtered_out_silver records" in description
+    assert "filtered_out_silver is a legacy alias" in description
+    assert "gold contract and semantic rejects are not included" in description
 
 
 def test_first_action_copy_keeps_zero_result_and_unknown_states_distinct() -> None:

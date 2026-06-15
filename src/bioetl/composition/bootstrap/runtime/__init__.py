@@ -19,6 +19,13 @@ from typing import Any
 
 _RUNTIME_OBSERVABILITY_MODULE = "bioetl.composition.bootstrap.runtime.observability"
 _RUNTIME_ASSEMBLY_MODULE = "bioetl.composition.bootstrap.runtime.assembly"
+_RUNTIME_MODULE_EXPORTS: dict[str, str] = {
+    "compatibility": "bioetl.composition.bootstrap.runtime.compatibility",
+    # Compatibility surface for monkeypatch-string resolution and owner-module imports.
+    "composite_control_plane_builder": (
+        "bioetl.composition.bootstrap.runtime.composite_control_plane_builder"
+    ),
+}
 
 __all__ = [
     "MetricsServerError",
@@ -34,6 +41,7 @@ __all__ = [
     "bootstrap_pipeline_runner",
     "bootstrap_pipeline_runner_service",
     "bootstrap_tracer",
+    "composite_control_plane_builder",
     "load_composite_config",
     "maybe_start_metrics_server",
     "validate_observability_preflight",
@@ -67,14 +75,15 @@ def __getattr__(
     Any  # Any: lazy runtime re-export preserves the original symbol type at lookup time.
 ):  # Any: lazy runtime re-export preserves the original symbol type at lookup time.
     """Resolve runtime re-exports lazily to keep package import light-weight."""
-    if name == "compatibility":
-        module = import_module("bioetl.composition.bootstrap.runtime.compatibility")
+    module_name = _RUNTIME_MODULE_EXPORTS.get(name)
+    if module_name is not None:
+        module = import_module(module_name)
         globals()[name] = module
         return module
-    module_name = _PUBLIC_EXPORTS.get(name)
-    if module_name is None:
+    export_module_name = _PUBLIC_EXPORTS.get(name)
+    if export_module_name is None:
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    value = getattr(import_module(module_name), name)
+    value = getattr(import_module(export_module_name), name)
     globals()[name] = value
     return value
 

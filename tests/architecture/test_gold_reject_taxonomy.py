@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -22,6 +23,7 @@ FORBIDDEN_SILVER_MARKERS = (
     "analysis_readiness",
     "analysis-readiness",
 )
+DQ_DASHBOARD = ROOT / "grafana" / "dashboards" / "bioetl-dq-v2.json"
 
 
 def _iter_python_files(path: Path) -> tuple[Path, ...]:
@@ -40,3 +42,36 @@ def test_silver_surfaces_do_not_emit_gold_candidate_or_readiness_flags() -> None
                     offenders.append(f"{path.relative_to(ROOT)}:{marker}")
 
     assert offenders == []
+
+
+def test_dq_dashboard_gold_reject_panel_is_not_silver_alias_surface() -> None:
+    dashboard = json.loads(DQ_DASHBOARD.read_text(encoding="utf-8"))
+    panel = next(
+        (
+            item
+            for item in dashboard.get("panels", [])
+            if item.get("title") == "Inspect: Gold Reject Outcomes by Pipeline"
+        ),
+        None,
+    )
+
+    assert panel is not None
+    expressions = [
+        target.get("expr", "")
+        for target in panel.get("targets", [])
+        if isinstance(target.get("expr"), str)
+    ]
+    joined = "\n".join(expressions)
+    assert "bioetl_processed_records_gold_quarantined_current" in joined
+    assert "bioetl_processed_records_gold_excluded_by_contract_current" in joined
+    assert "bioetl_silver_filter_rejections_total" not in joined
+    assert 'stage="filtered_out"' not in joined
+
+    links = [
+        *panel.get("links", []),
+        *panel.get("options", {}).get("dataLinks", []),
+    ]
+    assert all(
+        "bioetl-silver-reject-explorer" not in str(link.get("url", ""))
+        for link in links
+    )

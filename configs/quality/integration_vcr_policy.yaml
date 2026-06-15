@@ -165,6 +165,7 @@ tracked_suite_inventory:
       - tests/integration/ci/test_reproducibility_contract_inventory.py
       - tests/integration/ci/test_reproducibility_contract_manifest_diff.py
       - tests/integration/ci/test_reproducibility_contract_suite.py
+      - tests/integration/ci/test_silver_gold_filter_parity.py
       - tests/integration/ci/test_track_d_fixture_control_plane_linkage.py
       - tests/integration/config/test_activity_hash_policy_alignment.py
       - tests/integration/test_preflight_health_modes.py

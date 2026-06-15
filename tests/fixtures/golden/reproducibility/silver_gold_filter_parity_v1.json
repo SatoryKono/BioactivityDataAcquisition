@@ -1,0 +1,247 @@
+{
+  "schema_version": "silver-gold-filter-parity-fixture-v1",
+  "scenarios": [
+    {
+      "cleaned_yaml": {
+        "bronze_snapshot": {
+          "content_hash": "sha256:bronze-chembl-activity-parity-001",
+          "record_count": 4,
+          "snapshot_id": "bronze-chembl-activity-parity-001"
+        },
+        "filter_config": {
+          "gold_filters": {
+            "columns": {
+              "standard_type": {
+                "operator": "in",
+                "values": [
+                  "IC50"
+                ]
+              }
+            },
+            "ranges": {
+              "pchembl_value": {
+                "include_max": true,
+                "include_min": true,
+                "max_value": 10.0,
+                "min_value": 3.0
+              }
+            },
+            "required_fields": [
+              "activity_id",
+              "standard_value"
+            ]
+          },
+          "silver_filters": {
+            "exclude_if_present": [
+              "data_validity_comment"
+            ],
+            "required_fields": [
+              "activity_id",
+              "target_id"
+            ]
+          }
+        },
+        "gold_records": [
+          {
+            "content_hash": "sha256:gold-a1",
+            "pk": [
+              "activity",
+              "A1"
+            ]
+          },
+          {
+            "content_hash": "sha256:gold-a2",
+            "pk": [
+              "activity",
+              "A2"
+            ]
+          }
+        ],
+        "identity_anchors": {
+          "bronze_snapshot_content_hash": "sha256:bronze-chembl-activity-parity-001",
+          "bronze_snapshot_id": "bronze-chembl-activity-parity-001",
+          "contract_ref": "chembl.activity",
+          "contract_version": "1.0.0",
+          "entity": "activity",
+          "pipeline_name": "chembl_activity",
+          "provider": "chembl",
+          "run_type": "backfill",
+          "silver_filter_compatibility_mode": "structural_only_auto_promote",
+          "source_profile_id": "chembl.activity.curated",
+          "source_profile_version": "1.0.0"
+        },
+        "rejects": [
+          {
+            "compatibility_origin": "promoted_legacy_semantic_silver_filter",
+            "field": "standard_type",
+            "pk": [
+              "activity",
+              "A3"
+            ],
+            "reason_code": "standard_type_not_allowed",
+            "rule_class": "semantic",
+            "stage": "gold"
+          },
+          {
+            "compatibility_origin": "structural_silver_filter",
+            "field": "target_id",
+            "pk": [
+              "activity",
+              "A4"
+            ],
+            "reason_code": "missing_target_id",
+            "rule_class": "structural",
+            "stage": "silver"
+          }
+        ],
+        "silver_records": [
+          {
+            "content_hash": "sha256:silver-a1",
+            "pk": [
+              "activity",
+              "A1"
+            ]
+          },
+          {
+            "content_hash": "sha256:silver-a2",
+            "pk": [
+              "activity",
+              "A2"
+            ]
+          },
+          {
+            "content_hash": "sha256:silver-a3",
+            "pk": [
+              "activity",
+              "A3"
+            ]
+          }
+        ],
+        "source_profile": {
+          "description": "Baseline curated ChEMBL activity extraction profile.",
+          "extraction_params_sha256": "d4c7fc76dfcd88aa075762c96795ebd6de8af735540cf28a551a6d75149e4078",
+          "profile_id": "chembl.activity.curated",
+          "status": "baseline",
+          "version": "1.0.0"
+        }
+      },
+      "legacy_normalized": {
+        "bronze_snapshot": {
+          "content_hash": "sha256:bronze-chembl-activity-parity-001",
+          "record_count": 4,
+          "snapshot_id": "bronze-chembl-activity-parity-001"
+        },
+        "filter_config": {
+          "gold_filters": {
+            "required_fields": [
+              "activity_id",
+              "standard_value"
+            ]
+          },
+          "silver_filters": {
+            "columns": {
+              "standard_type": {
+                "operator": "in",
+                "values": [
+                  "IC50"
+                ]
+              }
+            },
+            "exclude_if_present": [
+              "data_validity_comment"
+            ],
+            "ranges": {
+              "pchembl_value": {
+                "include_max": true,
+                "include_min": true,
+                "max_value": 10.0,
+                "min_value": 3.0
+              }
+            },
+            "required_fields": [
+              "activity_id",
+              "target_id"
+            ]
+          }
+        },
+        "gold_records": [
+          {
+            "content_hash": "sha256:gold-a1",
+            "pk": [
+              "activity",
+              "A1"
+            ]
+          },
+          {
+            "content_hash": "sha256:gold-a2",
+            "pk": [
+              "activity",
+              "A2"
+            ]
+          }
+        ],
+        "identity_anchors": {
+          "bronze_snapshot_content_hash": "sha256:bronze-chembl-activity-parity-001",
+          "bronze_snapshot_id": "bronze-chembl-activity-parity-001",
+          "contract_ref": "chembl.activity",
+          "contract_version": "1.0.0",
+          "entity": "activity",
+          "pipeline_name": "chembl_activity",
+          "provider": "chembl",
+          "run_type": "backfill",
+          "silver_filter_compatibility_mode": "structural_only_auto_promote",
+          "source_profile_id": "chembl.activity.curated",
+          "source_profile_version": "1.0.0"
+        },
+        "rejects": [
+          {
+            "compatibility_origin": "legacy_semantic_silver_filter",
+            "field": "standard_type",
+            "pk": [
+              "activity",
+              "A3"
+            ],
+            "reason_code": "standard_type_not_allowed",
+            "rule_class": "semantic",
+            "stage": "silver"
+          },
+          {
+            "compatibility_origin": "structural_silver_filter",
+            "field": "target_id",
+            "pk": [
+              "activity",
+              "A4"
+            ],
+            "reason_code": "missing_target_id",
+            "rule_class": "structural",
+            "stage": "silver"
+          }
+        ],
+        "silver_records": [
+          {
+            "content_hash": "sha256:silver-a1",
+            "pk": [
+              "activity",
+              "A1"
+            ]
+          },
+          {
+            "content_hash": "sha256:silver-a2",
+            "pk": [
+              "activity",
+              "A2"
+            ]
+          }
+        ],
+        "source_profile": {
+          "description": "Baseline curated ChEMBL activity extraction profile.",
+          "extraction_params_sha256": "d4c7fc76dfcd88aa075762c96795ebd6de8af735540cf28a551a6d75149e4078",
+          "profile_id": "chembl.activity.curated",
+          "status": "baseline",
+          "version": "1.0.0"
+        }
+      },
+      "scenario_id": "chembl_activity_semantic_silver_to_gold_backfill"
+    }
+  ]
+}

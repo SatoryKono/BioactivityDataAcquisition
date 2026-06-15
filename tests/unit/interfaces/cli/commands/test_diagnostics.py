@@ -824,3 +824,17 @@ def test_diagnostics_quarantine_json_reuses_quarantine_stats_helper(
     payload = json.loads(result.output)
     assert payload["total_count"] == 3
     manager.get_stats.assert_awaited_once_with(error_code=None, run_id=None)
+
+
+@pytest.mark.unit
+def test_diagnostics_quarantine_help_marks_silver_shortcut_as_legacy_alias(
+    cli_runner: CliRunner,
+) -> None:
+    result = cli_runner.invoke(cli, ["diagnostics", "quarantine", "--help"])
+
+    assert result.exit_code == 0
+    assert "--silver-filter-only" in result.output
+    assert "Legacy alias" in result.output
+    assert "FILTERED_OUT_SILVER" in result.output
+    assert "not Gold" in result.output
+    assert "contract/semantic rejects" in result.output

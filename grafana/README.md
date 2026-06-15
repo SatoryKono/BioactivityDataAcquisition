@@ -1083,10 +1083,11 @@ not use it as a Prometheus label.
 | 3   | Track: Source Records in Range (Bronze)      | Stat       | `round(sum(max_over_time(bioetl_records_processed_total{...stage="bronze"}[$__range])) or vector(0))`                                  | Суммарный Bronze input для pushed-counter evidence внутри активного Grafana окна; это bounded range evidence, а не latest-value snapshot.                                   |
 | 4   | Track: Clean Records in Range (Gold)         | Stat       | `round(sum(max_over_time(bioetl_records_processed_total{...stage="gold"}[$__range])) or vector(0))`                                    | Суммарный Gold output для pushed-counter evidence внутри активного Grafana окна; это bounded range evidence, а не latest-value snapshot.                                    |
 | 5   | Monitor: Worst-Entity DQ Score               | Gauge      | `min(bioetl_dq_validation_score{pipeline=~"$pipeline"})`                                                                                | Худший observed DQ score по сущностям внутри выбранного pipeline scope. При отсутствии DQ samples panel должен оставаться в состоянии `No data`, а не показывать synthetic `0`. |
-| 6   | Track: Records Quarantined in Range          | Stat       | `round(sum(max_over_time(bioetl_dq_records_quarantined_total{...}[$__range])) or vector(0))`                                           | Selected-range quarantine evidence; non-zero here can explain current DQ pressure even when Silver filter rejects remain zero.                                               |
+| 6   | Track: Records Quarantined in Range          | Stat       | `round(sum(max_over_time(bioetl_dq_records_quarantined_total{...}[$__range])) or vector(0))`                                           | Selected-range quarantine evidence; non-zero here can explain current DQ pressure even when Silver structural rejects remain zero.                                           |
 | 7   | Track: Silver Validation Failures in Range   | Stat       | `round(sum(max_over_time(bioetl_silver_validation_failures_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__range])) or vector(0))` | Visible selected-range validation blocker count; non-zero can drive current `CRIT` even when `filtered_out=0`.                                                               |
-| 117 | Track: Silver Filter Rejects in Range        | Stat       | `round(sum(max_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))`                             | Отдельный счётчик Silver filter rejects внутри выбранного временного окна; не заменяет `Track: Records Quarantined in Range`.                                              |
+| 117 | Track: Silver Filter Rejects in Range        | Stat       | `round(sum(max_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))`                             | Отдельный счётчик Silver structural rejects внутри выбранного временного окна; не заменяет `Track: Records Quarantined in Range` или Gold reject panels.                    |
 | 118 | Inspect: Silver Filter Rejects by Pipeline   | Bar gauge  | `sum by (pipeline) (max_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range]))`                                  | Scope/distribution panel over the stage-total `filtered_out` counter. Explorer handoff preserves only `pipeline`/`run_type`; it does not synthesize a `reason_code`. No data remains an honest empty-state, not a fake `pipeline=no_events` row. |
+| 156 | Inspect: Gold Reject Outcomes by Pipeline    | Bar gauge  | `bioetl_processed_records_gold_quarantined_current` + `bioetl_processed_records_gold_excluded_by_contract_current` over `$__range`       | Separate Gold contract/semantic reject surface. It does not read `FILTERED_OUT_SILVER` and does not hand off to Silver Reject Explorer.                                      |
 | 121 | Inspect: Top Silver Reject Reasons (Pareto) | Bar gauge  | `topk(10, sum by (reason_code) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))`                                      | Bounded top-10 summary по `reason_code`; each bar opens `Silver Reject Explorer` already scoped by `pipeline`/`run_type`/`reason_code`. No data remains empty-state instead of a synthetic `reason_code=none` bucket. |
 | 122 | Inspect: Top Silver Reject Fields            | Bar gauge  | `topk(10, sum by (field) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))`                                            | Bounded top-10 summary по `field`; each bar opens `Silver Reject Explorer` already scoped by `pipeline`/`run_type`/`field`. No data remains empty-state instead of a synthetic `field=none` bucket. |
 | 152 | Monitor: Silver Filter Reject Accounting Mismatch | Stat  | `round(sum(max_over_time(bioetl_silver_filter_reject_total_mismatch_15m{...}[$__range])))`                                              | Reconciliation guard между stage-total `filtered_out` surface и bounded breakdown metric. `0` = healthy, non-zero = расследовать drift, `No data` = recording rule не публикуется. |
@@ -1098,7 +1099,11 @@ not use it as a Prometheus label.
 Важно: shipped DQ surface теперь явно различает два потока.
 
 - DQ quarantine = `bioetl_dq_records_quarantined_total`
-- Silver filter rejects = `bioetl_records_processed_total{stage="filtered_out"}`
+- Silver structural rejects = `bioetl_records_processed_total{stage="filtered_out"}`;
+  `FILTERED_OUT_SILVER` remains a compatibility alias only for these rows.
+- Gold contract/semantic rejects = `bioetl_processed_records_gold_quarantined_current`
+  and `bioetl_processed_records_gold_excluded_by_contract_current`; inspect the
+  Gold reject panel/processed-records surfaces, not Silver Reject Explorer.
 - blocked-share impact = `(filtered_out + quarantined) / bronze` inside the
   selected pipeline/run_type window
 
@@ -1132,7 +1137,11 @@ ______________________________________________________________________
 **UID:** `bioetl-silver-reject-explorer`
 **Refresh:** 1 минута
 **Time range:** Последние 24 часа
-**Назначение:** Record-level browsing для Silver `filtered_out` записей на read-only quarantine API.
+**Назначение:** Record-level browsing для Silver structural `filtered_out`
+записей на read-only quarantine API. `FILTERED_OUT_SILVER` documented here is
+only a legacy alias for Silver structural rejects; Gold contract/semantic
+rejects live in `4. Data Quality` Gold reject panels and processed-records
+surfaces.
 
 ### Панели
 
@@ -1928,12 +1937,14 @@ Entity-level gauge `bioetl_dq_validation_score` сохраняется отде�
 - `bioetl_records_processed_total{stage="quarantined"}` может встречаться как legacy/support signal в части runtime paths.
 - shipped dashboards и alerting должны опираться на `bioetl_dq_records_quarantined_total`, когда речь идёт именно о DQ quarantine.
 
-Silver filter rejects имеют две связанные поверхности: stage-total
+Silver structural rejects имеют две связанные поверхности: stage-total
 `bioetl_records_processed_total{stage="filtered_out"}` и bounded breakdown
 `bioetl_silver_filter_rejections_total{pipeline, run_type, reason_code, rule_type, field}`.
 Shipped rules публикуют `bioetl_silver_filter_reject_total_mismatch_15m` и alert
 `BioETLSilverFilterRejectAccountingMismatch`, чтобы эти surfaces не расходились
-молча.
+молча. `FILTERED_OUT_SILVER` остаётся legacy alias только для этого Silver
+structural пути; Gold contract/semantic rejects отслеживаются отдельными
+`bioetl_processed_records_gold_*_current` surfaces.
 
 ______________________________________________________________________
 

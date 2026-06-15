@@ -179,6 +179,8 @@
     "bioetl_postrun_phase_duration_seconds",
     "bioetl_postrun_phase_events_total",
     "bioetl_probe_mode_fallback_total",
+    "bioetl_processed_records_gold_excluded_by_contract_current",
+    "bioetl_processed_records_gold_quarantined_current",
     "bioetl_processed_records_reconciliation_status",
     "bioetl_provider_current_status",
     "bioetl_provider_health_status",
@@ -1410,6 +1412,14 @@
     ],
     "bioetl_probe_mode_fallback_total": [
       "docs/04-reference/observability/metrics-catalog.md"
+    ],
+    "bioetl_processed_records_gold_excluded_by_contract_current": [
+      "grafana/README.md",
+      "grafana/dashboards/bioetl-dq-v2.json"
+    ],
+    "bioetl_processed_records_gold_quarantined_current": [
+      "grafana/README.md",
+      "grafana/dashboards/bioetl-dq-v2.json"
     ],
     "bioetl_processed_records_reconciliation_status": [
       "docs/03-guides/metrics-monitoring.md",

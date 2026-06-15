@@ -95,6 +95,47 @@ def test_silver_filter_reject_panels_use_filtered_out_stage(
     )
 
 
+def test_gold_reject_panel_uses_gold_outcome_recording_rules() -> None:
+    """Gold reject surface must not reuse Silver filtered_out semantics."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == "Inspect: Gold Reject Outcomes by Pipeline"
+        ),
+        None,
+    )
+
+    assert panel is not None
+    expressions = [
+        target.get("expr", "")
+        for target in panel.get("targets", [])
+        if isinstance(target.get("expr"), str)
+    ]
+    joined = "\n".join(expressions)
+    assert "bioetl_processed_records_gold_quarantined_current" in joined
+    assert "bioetl_processed_records_gold_excluded_by_contract_current" in joined
+    assert 'stage="filtered_out"' not in joined
+    assert "bioetl_silver_filter_rejections_total" not in joined
+    assert "[$__range]" in joined
+
+    description = str(panel.get("description", "")).lower()
+    assert "gold contract" in description
+    assert "semantic" in description
+    assert "silver structural" in description
+    assert "filtered_out_silver" in description
+
+    links = [
+        *panel.get("links", []),
+        *panel.get("options", {}).get("dataLinks", []),
+    ]
+    assert all(
+        "bioetl-silver-reject-explorer" not in str(link.get("url", ""))
+        for link in links
+    )
+
+
 def test_silver_filter_reject_rate_uses_selected_time_range() -> None:
     """Silver filter reject rate must follow the active dashboard time range."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
@@ -126,20 +167,24 @@ def test_dq_reject_row_orders_trust_then_causes_then_scope_distribution() -> Non
             item
             for item in dashboard.get("panels", [])
             if item.get("type") == "row"
-            and item.get("title") == "Reject / Pareto / Fields"
+            and item.get("title")
+            == "Silver Structural / Gold Contract-Semantic Rejects"
         ),
         None,
     )
     assert row is not None
     nested = {
         panel.get("title"): panel
-        for panel in get_row_child_panels(dashboard, "Reject / Pareto / Fields")
+        for panel in get_row_child_panels(
+            dashboard, "Silver Structural / Gold Contract-Semantic Rejects"
+        )
     }
     expected_titles = {
         "Monitor: Silver Filter Reject Accounting Mismatch",
         "Inspect: Top Silver Reject Reasons (Pareto)",
         "Inspect: Top Silver Reject Fields",
         "Inspect: Silver Filter Rejects by Pipeline",
+        "Inspect: Gold Reject Outcomes by Pipeline",
     }
     assert expected_titles.issubset(nested)
     ordering = {
@@ -154,6 +199,7 @@ def test_dq_reject_row_orders_trust_then_causes_then_scope_distribution() -> Non
     assert ordering["Inspect: Top Silver Reject Reasons (Pareto)"] == (1, 8)
     assert ordering["Inspect: Top Silver Reject Fields"] == (1, 16)
     assert ordering["Inspect: Silver Filter Rejects by Pipeline"] == (9, 0)
+    assert ordering["Inspect: Gold Reject Outcomes by Pipeline"] == (9, 8)
 
 
 def test_dq_validation_diagnostics_groups_failures_then_runtime_then_trends() -> None:

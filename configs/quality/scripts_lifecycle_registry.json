@@ -254,6 +254,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the deterministic ChEMBL observed-vocabulary export helper while docs-generated inventory artifacts and normalization parity checks still consume this surface; fold it into broader QA/docs generation only if that reporting pipeline is consolidated."
     },
+    "scripts/data_quality/run_silver_gold_filter_parity.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the deterministic Silver/Gold migration parity report helper consumed by reproducibility contract tests and CI artifacts; fold it into a broader governed QA parity runner only if filter-migration report surfaces consolidate."
+    },
     "scripts/memory/mcp_smoke.py": {
       "owner": "@bioetl-platform",
       "decision": "compatibility_wrapper",

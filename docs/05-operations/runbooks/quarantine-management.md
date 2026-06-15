@@ -35,8 +35,12 @@ ______________________________________________________________________
 ### Overview
 
 - Records that fail Data Quality (DQ) checks are sent to the Quarantine table (`common.quarantine`) instead of crashing the pipeline.
-- Silver filter rejects also land in `common.quarantine` with `error_code=FILTERED_OUT_SILVER`,
-  `classification=filter_rejection`, and `quarantine_category=silver_filter`.
+- Silver structural rejects also land in `common.quarantine` with legacy
+  `error_code=FILTERED_OUT_SILVER`, `classification=filter_rejection`, and
+  `quarantine_category=silver_filter`. Gold contract/semantic rejects are
+  separate operator surfaces in `4. Data Quality` Gold panels and
+  processed-records views; do not interpret `FILTERED_OUT_SILVER` as a Gold
+  semantic reject code.
 
 ### Routine Tasks (Weekly)
 
@@ -48,7 +52,7 @@ ______________________________________________________________________
 bioetl quarantine inspect --pipeline {pipeline-name} --limit 50
 ```
 
-- For Silver-only triage, start with:
+- For Silver structural triage, start with:
 
 ```bash
 bioetl quarantine stats --pipeline {pipeline-name} --silver-filter-only
@@ -64,7 +68,8 @@ bioetl quarantine stats --pipeline {pipeline-name} --silver-filter-only --run-id
 bioetl quarantine inspect --pipeline {pipeline-name} --silver-filter-only --run-id {run-id} --limit 20
 ```
 
-- `stats --silver-filter-only` is the fastest way to see:
+- `stats --silver-filter-only` is the fastest legacy-alias way to see Silver
+  structural rejects:
 
   - total Silver rejects;
   - top `reason_code`;
@@ -95,8 +100,10 @@ bioetl quarantine inspect --pipeline {pipeline-name} --silver-filter-only --run-
   использоваться как aggregation key.
 
 - `inspect --silver-filter-only` is the right drilldown when you need the exact
-  reason for one record. The CLI renders `Reason`, `reason_code`, `rule_type`,
-  `field`, `operator`, `expected`, `actual`, and the original payload.
+  Silver structural reason for one record. The CLI renders `Reason`,
+  `reason_code`, `rule_type`, `field`, `operator`, `expected`, `actual`, and
+  the original payload. For Gold contract/semantic rejects, start from the
+  `4. Data Quality` Gold reject panel/processed-records surfaces.
 
 ### 2. Triage Errors
 
@@ -140,15 +147,19 @@ bioetl quarantine purge --pipeline {pipeline-name}
     `$pipeline/$run_type/$reason_code/$field/$run_id` и detail по `payload_hash`.
 - CLI/quarantine остаётся action surface для `resolve/replay/purge`.
 
-### Silver Rejects Triage Sequence
+### Silver Structural Rejects Triage Sequence
 
 1. Open `1. Overview` or `2. Runtime` and confirm that `Silver Filter Rejects`
-   is actually spiking in the active Grafana time window.
+   is actually spiking in the active Grafana time window. This is the Silver
+   structural `FILTERED_OUT_SILVER` legacy-alias path, not Gold
+   contract/semantic rejection.
 1. Pivot to `4. Data Quality` and inspect `Top Silver Reject Reasons` plus
    `Top Silver Reject Fields` to reduce the issue to a bounded cause summary.
 1. Open `Silver Reject Explorer` for exact record-level evidence and selected-record context.
 1. Run `bioetl quarantine inspect ... --silver-filter-only` /
    `bioetl quarantine resolve ...` when you need operator action in CLI.
+1. For Gold contract/semantic rejects, stay in `4. Data Quality` and inspect
+   `Inspect: Gold Reject Outcomes by Pipeline` plus processed-records surfaces.
 
 ### Retention
 

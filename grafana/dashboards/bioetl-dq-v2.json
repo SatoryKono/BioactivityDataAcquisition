@@ -1974,7 +1974,7 @@
       ],
       "title": "Track: Silver Filter Rejects in Range",
       "type": "stat",
-      "description": "Selected-range Silver reject count from the filtered_out path only. A zero here does not refute current CRIT because quarantine and Silver validation blockers are separate paths; use first-screen DQ reasons and the quarantine/validation panels before assuming the incident is filter-driven. The Explorer handoff preserves pipeline/run_type and time range so the operator can validate scoped totals before narrowing by reason_code or field."
+      "description": "Selected-range Silver structural reject count from the filtered_out path only. FILTERED_OUT_SILVER is a legacy alias for this Silver structural path and is not a Gold contract/semantic reject code. A zero here does not refute current CRIT because quarantine, Gold reject outcomes, and Silver validation blockers are separate paths; use first-screen DQ reasons and the quarantine/validation/Gold panels before assuming the incident is filter-driven. The Explorer handoff preserves pipeline/run_type and time range so the operator can validate scoped totals before narrowing by reason_code or field."
     },
     {
       "collapsed": false,
@@ -1985,7 +1985,7 @@
         "y": 52
       },
       "id": 220,
-      "title": "Reject / Pareto / Fields",
+      "title": "Silver Structural / Gold Contract-Semantic Rejects",
       "type": "row"
     },
     {
@@ -1993,7 +1993,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Silver reject reconciliation signal. Non-zero means the stage-total filtered_out counter diverges from the bounded Silver reject breakdown metric over the selected range.",
+      "description": "Silver structural reject reconciliation signal. Non-zero means the stage-total filtered_out counter diverges from the bounded Silver reject breakdown metric over the selected range. Gold contract/semantic reject outcomes are excluded from this guardrail.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -2082,7 +2082,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Selected-range pipeline breakdown of Silver filter rejects from the filtered_out stage-total counter. This is a scope/distribution panel, not a reason_code summary. No data means no filtered_out samples were observed in the active window; the panel must not invent a synthetic pipeline row.",
+      "description": "Selected-range pipeline breakdown of Silver structural rejects from the filtered_out stage-total counter. This is a scope/distribution panel, not a reason_code summary, and it intentionally excludes Gold contract/semantic rejects. No data means no filtered_out samples were observed in the active window; the panel must not invent a synthetic pipeline row.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -2159,6 +2159,95 @@
         }
       ],
       "title": "Inspect: Silver Filter Rejects by Pipeline",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Selected-range Gold reject outcomes by pipeline. This panel separates Gold contract quarantines and semantic/contract exclusions from Silver structural FILTERED_OUT_SILVER rows; use it when DQ pressure is not explained by the Silver Reject Explorer. No data means no Gold reject outcome samples were observed in the active window.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "Gold rejects",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "noValue": "No Gold reject samples in range",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short",
+          "links": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 61
+      },
+      "id": 156,
+      "options": {
+        "dataLinks": [
+          {
+            "targetBlank": true,
+            "title": "Open Silver/Gold Boundary ADR",
+            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/02-architecture/decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md?pipeline=${pipeline:queryparam}&${__url_time_range}"
+          }
+        ],
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "targets": [
+        {
+          "expr": "sum by (pipeline) (max_over_time(bioetl_processed_records_gold_quarantined_current{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))",
+          "instant": true,
+          "legendFormat": "gold_quarantined {{pipeline}}",
+          "refId": "A"
+        },
+        {
+          "expr": "sum by (pipeline) (max_over_time(bioetl_processed_records_gold_excluded_by_contract_current{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))",
+          "instant": true,
+          "legendFormat": "gold_excluded_by_contract {{pipeline}}",
+          "refId": "B"
+        }
+      ],
+      "title": "Inspect: Gold Reject Outcomes by Pipeline",
       "type": "bargauge"
     },
     {
@@ -2243,7 +2332,7 @@
       ],
       "title": "Inspect: Top Silver Reject Reasons (Pareto)",
       "type": "bargauge",
-      "description": "Pareto ranking of bounded Silver reject reasons across the selected range. Use the direct Silver Reject Explorer drilldown on each bar to open record-level detail already filtered by pipeline/run_type/reason_code and then validate representative payload_hash rows. No data means no bounded reject breakdown samples were observed in range; the panel must not invent a synthetic reason bucket."
+      "description": "Pareto ranking of bounded Silver structural reject reasons across the selected range. Use the direct Silver Reject Explorer drilldown on each bar to open record-level detail already filtered by pipeline/run_type/reason_code and then validate representative payload_hash rows. Gold contract/semantic rejects are intentionally excluded. No data means no bounded reject breakdown samples were observed in range; the panel must not invent a synthetic reason bucket."
     },
     {
       "datasource": {
@@ -2327,7 +2416,7 @@
       ],
       "title": "Inspect: Top Silver Reject Fields",
       "type": "bargauge",
-      "description": "Bounded schema-field summary for the selected range. Use the direct Silver Reject Explorer drilldown on each bar to open record-level detail already filtered by pipeline/run_type/field and then compare top reason signatures inside the explorer. No data means no bounded reject field samples were observed in range; the panel must not invent a synthetic field bucket."
+      "description": "Bounded Silver structural schema-field summary for the selected range. Use the direct Silver Reject Explorer drilldown on each bar to open record-level detail already filtered by pipeline/run_type/field and then compare top reason signatures inside the explorer. Gold contract/semantic rejects are intentionally excluded. No data means no bounded reject field samples were observed in range; the panel must not invent a synthetic field bucket."
     },
     {
       "collapsed": false,
