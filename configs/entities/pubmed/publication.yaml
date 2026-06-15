@@ -355,11 +355,6 @@ filters:
     checkpoint_interval: 1000
   extraction_params: {}
   silver_filters:
-    ranges:
-      publication_year:
-        min: 1950
-        max: 2050
-    columns: {}
     exclude_if_present: []
     required_fields:
     - pmid
@@ -367,7 +362,10 @@ filters:
   gold_filters:
     list_contains: {}
     list_lengths: {}
-    ranges: {}
+    ranges:
+      publication_year:
+        min: 1950
+        max: 2050
     required_fields:
     - pmid
     - title

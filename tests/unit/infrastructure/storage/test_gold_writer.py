@@ -14,6 +14,7 @@ import pyarrow as pa
 import pytest
 from deltalake.exceptions import TableNotFoundError
 from pandera.pandas import Column, DataFrameSchema
+from pandera.typing import Series
 
 from bioetl.domain.types import (
     GoldContractValidationError,
@@ -1459,7 +1460,6 @@ class TestGoldWriterMergedValidation:
     ):
         """Merged Gold writes reject schemas that do not enforce strict mode."""
         import pandera.pandas as pa
-        from pandera.typing import Series
 
         class NonStrictSchema(pa.DataFrameModel):
             entity_id: Series[str] = pa.Field(nullable=False)

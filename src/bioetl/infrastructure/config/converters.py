@@ -208,6 +208,7 @@ def yaml_config_to_domain(
             )
         ),
         field_policy=field_policy,
+        source_profile=yaml_config.source_profile.to_domain(),
         dq=dq_config,
         transform_version=transform_version,
         transform_steps=transform_steps,

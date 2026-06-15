@@ -294,26 +294,17 @@ class TestPythonConstantsSync:
 class TestFilterSubsetGovernance:
     """Silver/gold filters must be documented as source-specific constraints."""
 
-    def test_silver_filter_is_subset_of_global(
+    def test_silver_filter_does_not_carry_publication_type_subset(
         self,
-        chembl_enum_config: dict[str, Any],
         chembl_publication_entity_config: dict[str, Any],
     ) -> None:
-        """Silver filter must be a subset of global taxonomy."""
-        global_types = frozenset(chembl_enum_config["publication"]["types"])
-
+        """Publication type is semantic Gold/source-profile policy, not Silver."""
         silver_filters = chembl_publication_entity_config.get("filters", {}).get(
             "silver_filters", {}
         )
-        silver_types = frozenset(
-            silver_filters.get("columns", {}).get("publication_type", [])
-        )
 
-        if silver_types:
-            assert silver_types <= global_types, (
-                f"Silver filter types {sorted(silver_types)} must be a subset of "
-                f"global types {sorted(global_types)}"
-            )
+        assert "columns" not in silver_filters
+        assert "ranges" not in silver_filters
 
     def test_gold_filter_is_subset_of_global(
         self,

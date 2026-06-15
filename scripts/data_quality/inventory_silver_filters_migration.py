@@ -242,6 +242,22 @@ SURFACE_PATTERNS: tuple[SurfacePattern, ...] = (
         migration_relevance="extraction_params are provider request policy and must not be treated as Silver filters.",
     ),
     SurfacePattern(
+        category="source_profile",
+        surface="config_source_profile_metadata",
+        symbol="source_profile",
+        paths=(
+            "src/bioetl/infrastructure/config",
+            "src/bioetl/infrastructure/schemas",
+            "configs/_schema/pipeline.json",
+            "tests/architecture/test_config_ci_invariants.py",
+        ),
+        role="Versioned source-profile metadata",
+        migration_relevance=(
+            "Explicit source-profile metadata anchors extraction_params widening "
+            "separately from Silver/Gold filter migration."
+        ),
+    ),
+    SurfacePattern(
         category="observability",
         surface="silver_filter_metric",
         symbol="bioetl_silver_filter_rejections_total",
@@ -683,11 +699,45 @@ def _extract_entity_extraction_params_surfaces() -> list[SurfaceFinding]:
     return findings
 
 
+def _extract_entity_source_profile_surfaces() -> list[SurfaceFinding]:
+    findings: list[SurfaceFinding] = []
+    for provider, entity, path in discover_entity_configs():
+        raw = _load_yaml(path)
+        filters_block = _extract_filters(raw)
+        source_profile = filters_block.get("source_profile")
+        if not isinstance(source_profile, dict):
+            continue
+        text = path.read_text(encoding="utf-8", errors="ignore")
+        profile_id = source_profile.get("profile_id", "unknown")
+        version = source_profile.get("version", "unknown")
+        status = source_profile.get("status", "unknown")
+        findings.append(
+            SurfaceFinding(
+                category="source_profile",
+                surface="entity_config_source_profile",
+                symbol="filters.source_profile",
+                path=_rel_path(path),
+                occurrence_count=1,
+                first_line=_first_line_number(text, "source_profile"),
+                role=f"Entity source-profile metadata for {provider}.{entity}",
+                migration_relevance=(
+                    "Versioned source-profile metadata must change before "
+                    "source-side extraction widening."
+                ),
+                notes=(
+                    f"profile_id={profile_id}; version={version}; status={status}"
+                ),
+            )
+        )
+    return findings
+
+
 def build_surface_inventory() -> list[SurfaceFinding]:
     """Build runtime, ops, source-profile, and compatibility surface inventory."""
     findings = [
         *_scan_literal_surface_patterns(),
         *_extract_entity_extraction_params_surfaces(),
+        *_extract_entity_source_profile_surfaces(),
     ]
     return sorted(
         findings,

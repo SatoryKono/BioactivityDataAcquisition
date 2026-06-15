@@ -1047,6 +1047,18 @@
           "title": "Field Mappings",
           "type": "object"
         },
+        "target_protein_classification_projection": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TargetProteinClassificationProjectionSchema"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Typed projection contract for target protein classification aliases"
+        },
         "output": {
           "$ref": "#/$defs/MergeOutputSchema",
           "description": "Output paths for Silver and Gold tables"
@@ -1180,6 +1192,33 @@
         "silver_table"
       ],
       "title": "SeedSchema",
+      "type": "object"
+    },
+    "TargetProteinClassificationProjectionSchema": {
+      "description": "Typed projection for deterministic target protein classification aliases.",
+      "properties": {
+        "source_prefix": {
+          "default": "chembl.target_protein_classification",
+          "description": "Provider-qualified source prefix for projected classification fields",
+          "title": "Source Prefix",
+          "type": "string"
+        },
+        "include_protein_classifications": {
+          "default": true,
+          "description": "Whether to project the forensic protein_classifications payload",
+          "title": "Include Protein Classifications",
+          "type": "boolean"
+        },
+        "levels": {
+          "description": "Hierarchy levels to project into deterministic target fields",
+          "items": {
+            "type": "integer"
+          },
+          "title": "Levels",
+          "type": "array"
+        }
+      },
+      "title": "TargetProteinClassificationProjectionSchema",
       "type": "object"
     }
   },

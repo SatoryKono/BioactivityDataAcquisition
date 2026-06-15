@@ -197,16 +197,13 @@ filters:
     doc_type: PUBLICATION
     year__gte: 1950
     year__lte: 2050
+  source_profile:
+    profile_id: chembl.publication_term.curated
+    version: 1.0.0
+    status: baseline
+    extraction_params_sha256: d9dec3600fd2f00e1c7b639e53ca8e8a80c6f8af6eb6a7ab957399196dba3975
+    description: Baseline curated ChEMBL publication-term extraction profile; no widening in ADR-050 cleanup.
   silver_filters:
-    ranges:
-      publication_year:
-        min: 1950
-        max: 2050
-    columns:
-      term_type:
-      - MESH_HEADING
-      - MESH_QUALIFIER
-      - KEYWORD
     exclude_if_present: []
     required_fields:
     - publication_id
@@ -215,7 +212,10 @@ filters:
   gold_filters:
     list_contains: {}
     list_lengths: {}
-    ranges: {}
+    ranges:
+      publication_year:
+        min: 1950
+        max: 2050
     columns:
       term_type:
       - MESH_HEADING

@@ -4,13 +4,38 @@ from __future__ import annotations
 
 import pytest
 
+from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.application.core.pre_silver_adapter_mixin import PreSilverAdapterMixin
+from bioetl.domain.context import PipelineContext
+from bioetl.domain.filtering.column_filter import GoldColumnFilter
+from bioetl.domain.filtering.silver_config import SilverFilterConfig
 from bioetl.domain.transformations.hashing import generate_content_hash
+from bioetl.domain.types import RunType
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
+from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
 # ruff: noqa: F403,F405
 from tests.unit.application.core.normalization_test_support import *
 
 
 pytestmark = pytest.mark.unit
+
+
+class _PreSilverFilterTransformer(PreSilverAdapterMixin, BaseTransformer):
+    async def _transform_impl(self, context, record, index):
+        del context, record, index
+        return None
+
+
+def _pipeline_context() -> PipelineContext:
+    logger = MagicMock()
+    logger.bind = MagicMock(return_value=logger)
+    logger.debug = MagicMock()
+    return PipelineContext(
+        run_id=deterministic_uuid_from_callsite("test_record_normalization_core"),
+        run_type=RunType.INCREMENTAL,
+        logger=logger,
+    )
 
 
 def test_normalize_record_applies_identifier_date_json_and_hash_rules() -> None:
@@ -379,3 +404,41 @@ def test_finalize_pre_silver_skips_versioned_hash_projection_when_rollout_does_n
 
     assert silver_record is not None
     assert "_content_hashes_by_version" not in silver_record
+
+
+@pytest.mark.unit
+def test_finalize_pre_silver_cannot_reject_on_semantic_silver_filter() -> None:
+    transformer = _PreSilverFilterTransformer(
+        provider="crossref",
+        silver_filters=SilverFilterConfig(
+            column_filters=(
+                GoldColumnFilter(
+                    column="status",
+                    values=frozenset({"allowed"}),
+                ),
+            ),
+        ),
+        dependencies=build_test_transformer_dependencies(),
+    )
+    pre_silver = PreSilverRecord(
+        entity_id="crossref:1",
+        business_data={"status": "blocked-by-semantic-filter"},
+        build_silver_record=lambda _context, entity_id, content_hash, index, business: {
+            "entity_id": entity_id,
+            "content_hash": content_hash,
+            "_index": index,
+            **business,
+        },
+        apply_silver_filter=transformer._apply_pre_silver_filter,
+    )
+
+    silver_record = build_normalization_processor(
+        provider="crossref"
+    ).finalize_pre_silver(
+        pre_silver,
+        context=_pipeline_context(),
+        index=0,
+    )
+
+    assert silver_record is not None
+    assert silver_record["status"] == "blocked-by-semantic-filter"

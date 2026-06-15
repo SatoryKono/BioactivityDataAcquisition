@@ -8,12 +8,33 @@ Domain layer — no infrastructure or application imports allowed.
 
 from __future__ import annotations
 
+import hashlib
+import json
 from collections.abc import Mapping
 from dataclasses import dataclass
+from typing import Literal
 
 __all__ = [
     "ExtractionParams",
+    "SourceProfile",
+    "SourceProfileStatus",
+    "compute_extraction_params_sha256",
 ]
+
+SourceProfileStatus = Literal["baseline", "candidate", "widened"]
+
+
+def compute_extraction_params_sha256(
+    params: Mapping[str, str | int | bool],
+) -> str:
+    """Return a deterministic hash for provider source-profile query policy."""
+    payload = json.dumps(
+        {str(key): value for key, value in sorted(params.items())},
+        ensure_ascii=False,
+        separators=(",", ":"),
+        sort_keys=True,
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
 @dataclass(frozen=True, slots=True)
@@ -70,3 +91,19 @@ class ExtractionParams:
             The ExtractionParams result.
         """
         return cls(params={})
+
+
+@dataclass(frozen=True, slots=True)
+class SourceProfile:
+    """Versioned source-side extraction policy metadata.
+
+    Source profiles describe provider request narrowing such as
+    ``extraction_params``. They are not Silver filters and do not change adapter
+    query behavior by themselves.
+    """
+
+    profile_id: str = "default"
+    version: str = "1.0.0"
+    status: SourceProfileStatus = "baseline"
+    extraction_params_sha256: str | None = None
+    description: str | None = None

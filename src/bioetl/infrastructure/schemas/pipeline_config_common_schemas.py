@@ -21,6 +21,7 @@ from bioetl.infrastructure.schemas.base_schemas import (
     BaseInputFilterConfig,
 )
 from bioetl.infrastructure.schemas.pipeline_config_common import CsvExportConfig
+from bioetl.infrastructure.schemas.source_profile_config import SourceProfileYamlConfig
 
 __all__ = [
     "SEMVER_PATTERN",
@@ -40,6 +41,7 @@ __all__ = [
     "SilverFiltersConfig",
     "SinkDQReportConfig",
     "SinkLayerConfig",
+    "SourceProfileYamlConfig",
     "TransformConfig",
 ]
 
@@ -212,7 +214,12 @@ class GoldFiltersConfig(BaseGoldFiltersConfig):
 
 
 class SilverFiltersConfig(BaseGoldFiltersConfig):
-    """Schema for structural Silver filters in YAML."""
+    """Schema for structural Silver filters in YAML.
+
+    Canonical Silver accepts ``required_fields`` and ``exclude_if_present``.
+    Semantic Gold-style keys remain parseable only for legacy boundary
+    compatibility and are promoted before domain conversion.
+    """
 
     def to_domain(self) -> SilverFilterConfig:  # type: ignore[override]
         """Convert to a structural-only SilverFilterConfig."""

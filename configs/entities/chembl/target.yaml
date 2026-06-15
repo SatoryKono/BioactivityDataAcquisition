@@ -312,11 +312,13 @@ filters:
     target_type: SINGLE PROTEIN
     organism__isnull: false
     tax_id__isnull: false
+  source_profile:
+    profile_id: chembl.target.curated
+    version: 1.0.0
+    status: baseline
+    extraction_params_sha256: 6b7895f5aefb0891981a15b9a2eca407ef801bbd90c9360efccd68f9e1f0e097
+    description: Baseline curated ChEMBL target extraction profile; no widening in ADR-050 cleanup.
   silver_filters:
-    ranges: {}
-    columns:
-      target_type:
-      - SINGLE PROTEIN
     required_fields:
     - target_id
     - pref_name

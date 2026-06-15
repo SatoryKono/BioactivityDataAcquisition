@@ -231,6 +231,7 @@ class FilterConfigLoader(
                     "silver_filters",
                     "gold_filters",
                     "extraction_params",
+                    "source_profile",
                 )
             ):
                 return unified_raw
@@ -262,6 +263,7 @@ class FilterConfigLoader(
                     "silver_filters",
                     "gold_filters",
                     "extraction_params",
+                    "source_profile",
                 )
             ):
                 return unified_raw

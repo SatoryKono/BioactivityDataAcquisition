@@ -59,6 +59,7 @@ PIPELINE_ALLOWED_KEYS: Final[frozenset[str]] = frozenset(
         "maintenance",
         "transform",
         "extraction_params",
+        "source_profile",
         "page_size_override",
     }
 )
@@ -149,6 +150,7 @@ FILTER_ALLOWED_KEYS: Final[frozenset[str]] = frozenset(
         "silver_filters",
         "gold_filters",
         "extraction_params",
+        "source_profile",
         "batch_size",
         "page_size",
         "filter_rules",

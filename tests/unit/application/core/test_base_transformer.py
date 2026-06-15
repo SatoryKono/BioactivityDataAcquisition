@@ -35,6 +35,12 @@ from bioetl.domain.context import PipelineContext
 pytestmark = pytest.mark.unit
 from bioetl.domain.entities import Bioactivity
 from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
+from bioetl.domain.filtering.column_filter import GoldColumnFilter
+from bioetl.domain.filtering.list_filters import (
+    GoldListContainsFilter,
+    GoldListLengthFilter,
+)
+from bioetl.domain.filtering.range_filter import GoldRangeFilter
 from bioetl.domain.types import RunType
 from tests.helpers.transformer_dependencies import (
     build_test_transformer_dependencies,
@@ -368,6 +374,68 @@ class TestTemplateMethodPattern:
         mock_context.logger.debug.assert_called_once()
         call_args = mock_context.logger.debug.call_args
         assert "silver_filter_quarantined" in call_args[0]
+
+    def test_should_write_silver_ignores_direct_semantic_silver_filters(
+        self,
+        mock_context: PipelineContext,
+    ) -> None:
+        transformer = ConcreteTransformer(
+            provider="test",
+            silver_filters=SilverFilterConfig(
+                column_filters=(
+                    GoldColumnFilter(
+                        column="status",
+                        values=frozenset({"ACTIVE"}),
+                    ),
+                ),
+                range_filters=(
+                    GoldRangeFilter(column="score", min_value=0.0, max_value=10.0),
+                ),
+                list_length_filters=(
+                    GoldListLengthFilter(column="tags", min_length=2),
+                ),
+                list_contains_filters=(
+                    GoldListContainsFilter(
+                        column="tags",
+                        values=frozenset({"approved"}),
+                        mode="all",
+                    ),
+                ),
+            ),
+            dependencies=build_test_transformer_dependencies(),
+        )
+
+        assert transformer.should_write_silver(
+            mock_context,
+            {"status": "INACTIVE", "score": 99, "tags": ["rejected"]},
+        )
+
+    @pytest.mark.asyncio
+    async def test_transform_does_not_filter_silver_on_direct_semantic_filters(
+        self,
+        mock_context: PipelineContext,
+    ) -> None:
+        transformer = ConcreteTransformer(
+            provider="test",
+            silver_filters=SilverFilterConfig(
+                column_filters=(
+                    GoldColumnFilter(
+                        column="value",
+                        values=frozenset({"allowed"}),
+                    ),
+                ),
+            ),
+            dependencies=build_test_transformer_dependencies(),
+        )
+
+        result = await transformer.transform(
+            mock_context,
+            {"id": "123", "value": "blocked-by-semantic-filter"},
+            index=0,
+        )
+
+        assert result == {"id": "123", "value": "blocked-by-semantic-filter"}
+        mock_context.logger.debug.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_transform_applies_structural_policy_before_silver_filter(
