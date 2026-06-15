@@ -15,10 +15,34 @@ from bioetl.domain.types.debug_export import (
     DebugExportResult as DebugExportResult,
 )
 from bioetl.domain.types.gold_contracts import (
+    GOLD_CONTRACT_VERSION_UNKNOWN as GOLD_CONTRACT_VERSION_UNKNOWN,
+)
+from bioetl.domain.types.gold_contracts import (
     GoldBusinessRuleSpec as GoldBusinessRuleSpec,
 )
 from bioetl.domain.types.gold_contracts import (
+    GoldContractValidationError as GoldContractValidationError,
+)
+from bioetl.domain.types.gold_contracts import (
+    GoldRejectReason as GoldRejectReason,
+)
+from bioetl.domain.types.gold_contracts import (
+    GoldRejectReasonCode as GoldRejectReasonCode,
+)
+from bioetl.domain.types.gold_contracts import (
     ScdConfig as ScdConfig,
+)
+from bioetl.domain.types.gold_contracts import (
+    build_gold_contract_reject_reason as build_gold_contract_reject_reason,
+)
+from bioetl.domain.types.gold_contracts import (
+    build_gold_semantic_reject_reason as build_gold_semantic_reject_reason,
+)
+from bioetl.domain.types.gold_contracts import (
+    classify_gold_schema_error_reason as classify_gold_schema_error_reason,
+)
+from bioetl.domain.types.gold_contracts import (
+    resolve_gold_contract_version as resolve_gold_contract_version,
 )
 from bioetl.domain.types.gold_schema_policy import (
     GoldSchemaPolicyByVersion as GoldSchemaPolicyByVersion,
@@ -41,8 +65,16 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
         "RunType",
     ),
     "bioetl.domain.types.gold_contracts": (
+        "GOLD_CONTRACT_VERSION_UNKNOWN",
+        "GoldContractValidationError",
+        "GoldRejectReason",
+        "GoldRejectReasonCode",
         "GoldBusinessRuleSpec",
         "ScdConfig",
+        "build_gold_contract_reject_reason",
+        "build_gold_semantic_reject_reason",
+        "classify_gold_schema_error_reason",
+        "resolve_gold_contract_version",
     ),
     "bioetl.domain.types.gold_schema_policy": (
         "GoldSchemaPolicyByVersion",

@@ -5,7 +5,13 @@ from __future__ import annotations
 from collections.abc import Sequence
 from datetime import datetime
 
-from bioetl.domain.types import BronzeRecord, GoldRecord
+from bioetl.domain.types import (
+    GOLD_CONTRACT_VERSION_UNKNOWN,
+    BronzeRecord,
+    GoldRecord,
+    GoldRejectReason,
+    GoldRejectReasonCode,
+)
 
 from .debug_export_collector_helpers import (
     build_gold_rejected_row,
@@ -33,6 +39,7 @@ class DebugExportGoldRowsMixin:
         for record in records:
             normalized = _record_payload(record)
             record_index = resolve_debug_record_index(normalized)
+            resolved_reason_code = _canonical_gold_filter_reason_code(reason_code)
             self._gold_rejected_rows.append(
                 build_gold_rejected_row(
                     run_id=self._run_id,
@@ -41,12 +48,13 @@ class DebugExportGoldRowsMixin:
                     provider_id=self._provider_id,
                     record_index=record_index,
                     normalized_record=normalized,
-                    action=reason_code,
+                    action=resolved_reason_code,
                     created_at=created_at,
-                    reason_code=reason_code,
+                    reason_code=resolved_reason_code,
                     reason_message=reason_message,
                     rule_id="",
                     failed_field="",
+                    contract_version=_record_contract_version(normalized),
                 )
             )
 
@@ -58,9 +66,15 @@ class DebugExportGoldRowsMixin:
         created_at: datetime,
     ) -> None:
         error_text = str(errors)
+        reject_reason = _extract_gold_reject_reason(errors)
         for record in records:
             normalized = _record_payload(record)
             record_index = resolve_debug_record_index(normalized)
+            reason_code = (
+                reject_reason.reason_code.value
+                if reject_reason is not None
+                else GoldRejectReasonCode.CONTRACT_SCHEMA_FAILURE.value
+            )
             self._gold_rejected_rows.append(
                 build_gold_rejected_row(
                     run_id=self._run_id,
@@ -71,10 +85,27 @@ class DebugExportGoldRowsMixin:
                     normalized_record=normalized,
                     action="fail",
                     created_at=created_at,
-                    reason_code="GOLD_CONTRACT_VIOLATION",
-                    reason_message=error_text,
-                    rule_id=_extract_rule_id(error_text),
-                    failed_field=_infer_failed_field(normalized, error_text),
+                    reason_code=reason_code,
+                    reason_message=(
+                        reject_reason.message
+                        if reject_reason is not None and reject_reason.message
+                        else error_text
+                    ),
+                    rule_id=(
+                        reject_reason.rule_id
+                        if reject_reason is not None
+                        else _extract_rule_id(error_text)
+                    ),
+                    failed_field=(
+                        reject_reason.field
+                        if reject_reason is not None and reject_reason.field
+                        else _infer_failed_field(normalized, error_text)
+                    ),
+                    contract_version=(
+                        reject_reason.contract_version
+                        if reject_reason is not None
+                        else _record_contract_version(normalized)
+                    ),
                 )
             )
 
@@ -103,3 +134,23 @@ class DebugExportGoldRowsMixin:
 
 
 __all__ = ["DebugExportGoldRowsMixin"]
+
+
+def _record_contract_version(record: dict[str, object]) -> str:
+    value = record.get("contract_version")
+    return (
+        str(value).strip()
+        if value is not None and str(value).strip()
+        else GOLD_CONTRACT_VERSION_UNKNOWN
+    )
+
+
+def _canonical_gold_filter_reason_code(reason_code: str) -> str:
+    if reason_code.startswith("gold_semantic_"):
+        return reason_code
+    return GoldRejectReasonCode.SEMANTIC_BUSINESS_EXCLUSION.value
+
+
+def _extract_gold_reject_reason(errors: object) -> GoldRejectReason | None:
+    reject_reason = getattr(errors, "reject_reason", None)
+    return reject_reason if isinstance(reject_reason, GoldRejectReason) else None

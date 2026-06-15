@@ -93,6 +93,7 @@ class DQReportContext:
     gold_business_rules: list[GoldBusinessRuleSpec] | None = None
     gold_baseline_stats: JsonDict | None = None  # Any: heterogeneous DQ metrics
     gold_scd_config: ScdConfig | None = None
+    gold_contract_version: str | None = None
     gold_output_path: str | None = None
 
     dq_soft_threshold: float = 0.05
@@ -109,7 +110,10 @@ class DQReportContext:
                 [
                     rule
                     if isinstance(rule, GoldBusinessRuleSpec)
-                    else GoldBusinessRuleSpec.from_mapping(rule)
+                    else GoldBusinessRuleSpec.from_mapping(
+                        rule,
+                        default_contract_version=self.gold_contract_version,
+                    )
                     for rule in self.gold_business_rules
                 ],
             )

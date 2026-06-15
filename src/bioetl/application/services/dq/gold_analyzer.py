@@ -41,7 +41,12 @@ from bioetl.application.services.dq.dq_report_builders import (
 )
 from bioetl.domain.behavior.dq_serializer import to_dict
 from bioetl.domain.ports import GoldDQConfigPort
-from bioetl.domain.types import GoldBusinessRuleSpec, JsonDict, ScdConfig
+from bioetl.domain.types import (
+    GOLD_CONTRACT_VERSION_UNKNOWN,
+    GoldBusinessRuleSpec,
+    JsonDict,
+    ScdConfig,
+)
 from bioetl.domain.value_objects.dq_report import (
     GoldDQCheckType,
     GoldDQReport,
@@ -73,6 +78,7 @@ class GoldDQAnalyzer:
             | None
         ),
         scd_config: ScdConfig | None,
+        contract_version: str | None,
     ) -> tuple[
         JsonDict, int, int, int  # Any: DQ check values vary by check type
     ]:  # Any: DQ check values vary by check type
@@ -91,17 +97,30 @@ class GoldDQAnalyzer:
             (
                 GoldDQCheckType.COMPLETENESS,
                 "completeness",
-                lambda: check_completeness(df, required_fields, completeness_threshold),
+                lambda: check_completeness(
+                    df,
+                    required_fields,
+                    completeness_threshold,
+                    contract_version=contract_version,
+                ),
             ),
             (
                 GoldDQCheckType.BUSINESS_RULES,
                 "business_rules",
-                lambda: check_business_rules(df, business_rules),
+                lambda: check_business_rules(
+                    df,
+                    business_rules,
+                    contract_version=contract_version,
+                ),
             ),
             (
                 GoldDQCheckType.REFERENTIAL_INTEGRITY,
                 "referential_integrity",
-                lambda: check_referential_integrity(df, reference_tables),
+                lambda: check_referential_integrity(
+                    df,
+                    reference_tables,
+                    contract_version=contract_version,
+                ),
             ),
             (
                 GoldDQCheckType.STATISTICAL_PROFILE,
@@ -150,6 +169,7 @@ class GoldDQAnalyzer:
             | None
         ) = None,  # Any: DQ check values vary by check type
         scd_config: ScdConfig | None = None,
+        contract_version: str | None = GOLD_CONTRACT_VERSION_UNKNOWN,
     ) -> GoldDQReport:
         """Analyze Gold data and generate DQ report.
 
@@ -166,6 +186,7 @@ class GoldDQAnalyzer:
             reference_tables: Tables for referential integrity checks.
             baseline_stats: Historical baseline for anomaly detection.
             scd_config: SCD configuration if applicable.
+            contract_version: Gold contract version for reject reason payloads.
 
         Returns:
             GoldDQReport: Complete DQ report for Gold layer.
@@ -187,6 +208,7 @@ class GoldDQAnalyzer:
             reference_tables=reference_tables or {},
             baseline_stats=baseline_stats,
             scd_config=scd_config,
+            contract_version=contract_version,
         )
 
         data_freshness = check_data_freshness(df, timestamp)

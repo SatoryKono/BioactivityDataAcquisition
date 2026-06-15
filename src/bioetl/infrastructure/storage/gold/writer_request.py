@@ -23,6 +23,7 @@ def _build_gold_write_request(
     ingestion_ts: datetime | None,
     run_id: RunID | None,
     silver_refs: list[SilverWriteResult] | None,
+    contract_version: str | None = None,
 ) -> object:
     """Build the canonical Gold write request."""
     from bioetl.infrastructure.storage.gold.pipeline_helpers import (
@@ -41,4 +42,5 @@ def _build_gold_write_request(
         ingestion_ts=ingestion_ts,
         run_id=run_id,
         silver_refs=silver_refs,
+        contract_version=contract_version,
     )

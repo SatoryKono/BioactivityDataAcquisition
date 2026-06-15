@@ -150,7 +150,11 @@ class GoldWriter(
     ) -> None:
         """Validate and write Gold records, including SCD2 and dual-write flows."""
         from bioetl.domain.ports.noop import _NoOpSpan
-        from bioetl.domain.types import GoldSchemaPolicyByVersion, ScdConfig
+        from bioetl.domain.types import (
+            GoldSchemaPolicyByVersion,
+            ScdConfig,
+            resolve_gold_contract_version,
+        )
         from bioetl.infrastructure.storage.gold.writer_support import (
             _build_gold_write_request,
             _resolve_active_gold_schema,
@@ -168,6 +172,11 @@ class GoldWriter(
                 else scd_config
             )
             active_schema = _resolve_active_gold_schema(schema)
+            contract_version = (
+                schema.active_version
+                if isinstance(schema, GoldSchemaPolicyByVersion)
+                else resolve_gold_contract_version(active_schema)
+            )
             request = _build_gold_write_request(
                 table_name=table_name,
                 records=records,
@@ -180,6 +189,7 @@ class GoldWriter(
                 ingestion_ts=ingestion_ts,
                 run_id=run_id,
                 silver_refs=silver_refs,
+                contract_version=contract_version,
             )
             self._set_write_span_attributes(
                 span,
@@ -236,6 +246,7 @@ class GoldWriter(
         schema: DataFrameSchema,
         scd_config: ScdConfig | None,
         ingestion_ts: datetime | None,
+        contract_version: str | None = None,
     ) -> _PreparedGoldWriteContext:
         """Run validation and path resolution before a Gold write."""
         from bioetl.infrastructure.storage.gold.pipeline_helpers import (
@@ -250,6 +261,7 @@ class GoldWriter(
             schema=schema,
             scd_config=scd_config,
             ingestion_ts=ingestion_ts,
+            contract_version=contract_version,
         )
 
     async def _post_write_gold(

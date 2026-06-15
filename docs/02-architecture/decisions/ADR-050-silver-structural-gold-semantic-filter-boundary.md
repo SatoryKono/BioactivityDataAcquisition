@@ -105,6 +105,22 @@ Target taxonomy must distinguish:
 - Gold contract rejects: records that fail Gold strict validation or DQ
   contract enforcement.
 
+Gold reject reason codes are canonicalized by family:
+
+- `gold_contract_schema_failure`: strict Gold schema/type/unknown-column
+  validation failure.
+- `gold_contract_required_failure`: missing or null required Gold contract
+  field.
+- `gold_contract_reference_failure`: Gold referential integrity failure.
+- `gold_semantic_business_exclusion`: Gold business eligibility exclusion.
+- `gold_semantic_profile_exclusion`: source-profile or profile-governed Gold
+  eligibility exclusion.
+
+Every Gold reject payload MUST carry `contract_version` and stable rule identity
+(`rule_id`). Silver records MUST NOT receive `gold_candidate_*` fields or
+analysis-readiness flags; Gold eligibility is enforced only at Gold/DQ/debug
+export surfaces.
+
 Operator-facing text may retain legacy names only while it clearly describes the
 narrowed structural meaning and has a cleanup path.
 

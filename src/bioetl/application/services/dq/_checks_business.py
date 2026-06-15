@@ -12,7 +12,7 @@ from collections.abc import Mapping, Sequence
 
 import polars as pl
 
-from bioetl.domain.types import GoldBusinessRuleSpec
+from bioetl.domain.types import GOLD_CONTRACT_VERSION_UNKNOWN, GoldBusinessRuleSpec
 from bioetl.domain.value_objects.dq_report import (
     BusinessRuleResult,
     BusinessRulesResult,
@@ -93,15 +93,79 @@ def _evaluate_single_rule(
     return True, 0
 
 
+def _normalize_business_rule(
+    raw_rule: GoldBusinessRuleSpec | Mapping[str, object],
+    *,
+    contract_version: str | None,
+) -> GoldBusinessRuleSpec:
+    if isinstance(raw_rule, GoldBusinessRuleSpec):
+        return raw_rule
+    return GoldBusinessRuleSpec.from_mapping(
+        raw_rule,
+        default_contract_version=contract_version,
+    )
+
+
+def _evaluate_rule_outcome(
+    df: pl.DataFrame,
+    rule: GoldBusinessRuleSpec,
+) -> tuple[bool, int | None]:
+    try:
+        return _evaluate_single_rule(df, rule)
+    except _BUSINESS_RULE_EVALUATION_ERRORS:
+        # Catch all: rule evaluation may fail due to missing columns, type errors,
+        # or malformed rule expressions. Treat as rule failure for DQ reporting.
+        return False, None
+
+
+def _rule_decision_for_result(
+    rule: GoldBusinessRuleSpec,
+    *,
+    passed: bool,
+) -> str:
+    return rule.decision or ("pass" if passed else "fail")
+
+
+def _build_rule_result(
+    rule: GoldBusinessRuleSpec,
+    *,
+    column: str,
+    passed: bool,
+    violations: int | None,
+) -> BusinessRuleResult:
+    decision = _rule_decision_for_result(rule, passed=passed)
+    reject_reason = (
+        None
+        if passed or decision in {"pass", "warn"}
+        else rule.build_reject_reason(violations=violations)
+    )
+    return BusinessRuleResult(
+        rule_id=rule.rule_id,
+        name=rule.name,
+        description=rule.description,
+        passed=passed,
+        violations=violations,
+        config_path=rule.config_path,
+        layer=rule.layer,
+        field=rule.field or column,
+        severity=rule.severity,
+        decision=decision,
+        reject_reason=reject_reason,
+    )
+
+
 def check_business_rules(
     df: pl.DataFrame,
     rules: Sequence[GoldBusinessRuleSpec | Mapping[str, object]],
+    *,
+    contract_version: str | None = GOLD_CONTRACT_VERSION_UNKNOWN,
 ) -> BusinessRulesResult:
     """Validate business rules.
 
     Args:
         df: Input DataFrame.
         rules: Rules.
+        contract_version: Gold contract version used for default reject payloads.
 
     Returns:
         Check result as BusinessRulesResult.
@@ -120,18 +184,12 @@ def check_business_rules(
     rules_failed = 0
 
     for raw_rule in rules:
-        rule = (
-            raw_rule
-            if isinstance(raw_rule, GoldBusinessRuleSpec)
-            else GoldBusinessRuleSpec.from_mapping(raw_rule)
+        rule = _normalize_business_rule(
+            raw_rule,
+            contract_version=contract_version,
         )
         column = rule.column
-        try:
-            passed, violations = _evaluate_single_rule(df, rule)
-        except _BUSINESS_RULE_EVALUATION_ERRORS:
-            # Catch all: rule evaluation may fail due to missing columns, type errors,
-            # or malformed rule expressions. Treat as rule failure for DQ reporting.
-            passed, violations = False, None
+        passed, violations = _evaluate_rule_outcome(df, rule)
 
         if passed:
             rules_passed += 1
@@ -139,17 +197,11 @@ def check_business_rules(
             rules_failed += 1
 
         results.append(
-            BusinessRuleResult(
-                rule_id=rule.rule_id,
-                name=rule.name,
-                description=rule.description,
+            _build_rule_result(
+                rule,
+                column=column,
                 passed=passed,
                 violations=violations,
-                config_path=rule.config_path,
-                layer=rule.layer,
-                field=rule.field or column,
-                severity=rule.severity,
-                decision=rule.decision or ("pass" if passed else "fail"),
             )
         )
 

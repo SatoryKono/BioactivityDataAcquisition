@@ -27,6 +27,7 @@ class GoldWriteRequest:
     ingestion_ts: datetime | None = None
     run_id: RunID | None = None
     silver_refs: list[SilverWriteResult] | None = None
+    contract_version: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -73,12 +74,17 @@ class _GoldWritePreparationHostProtocol(Protocol):
         ingestion_ts: datetime | None,
     ) -> None: ...
 
-    def _validate_schema_strict(self, schema: object) -> None: ...
+    def _validate_schema_strict(
+        self,
+        schema: object,
+        contract_version: str | None = None,
+    ) -> None: ...
 
     async def _validate_records_against_schema(
         self,
         records: list[GoldRecord],
         schema: object,
+        contract_version: str | None = None,
     ) -> None: ...
 
     def _resolve_table_path(self, table_name: str) -> str: ...
@@ -143,13 +149,18 @@ async def prepare_gold_write(
     schema: object,
     scd_config: ScdConfig | None,
     ingestion_ts: datetime | None,
+    contract_version: str | None = None,
 ) -> PreparedGoldWriteContext:
     """Validate one Gold write request and resolve target path."""
     validated_mode = host._validate_write_mode(mode)
     host._validate_records(records)
     host._validate_scd2_requirements(validated_mode, scd_config, ingestion_ts)
-    host._validate_schema_strict(schema)
-    await host._validate_records_against_schema(records, schema)
+    host._validate_schema_strict(schema, contract_version=contract_version)
+    await host._validate_records_against_schema(
+        records,
+        schema,
+        contract_version=contract_version,
+    )
     return PreparedGoldWriteContext(
         table_name=table_name,
         table_path=host._resolve_table_path(table_name),

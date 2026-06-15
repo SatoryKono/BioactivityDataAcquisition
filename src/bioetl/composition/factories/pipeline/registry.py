@@ -5,9 +5,8 @@ from __future__ import annotations
 import threading
 from collections.abc import Iterator, Mapping
 from importlib import import_module
-from typing import Protocol, cast
+from typing import Any, Protocol, cast
 
-from bioetl.application.pipelines.generic import GenericPipeline
 from bioetl.composition.factories.pipeline._assembler_factory import (
     GenericPipelineFactory,
 )
@@ -236,7 +235,7 @@ def reset_registration(
         state._registered = False
 
 
-def get_factory(pipeline_name: str) -> GenericPipelineFactory[GenericPipeline]:
+def get_factory(pipeline_name: str) -> GenericPipelineFactory[Any]:
     """Get a pipeline factory by name.
 
     Convenience function for accessing factories without going through registry.

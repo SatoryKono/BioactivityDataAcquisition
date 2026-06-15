@@ -34,10 +34,16 @@ DEBUG_REASON_DICTIONARY: tuple[dict[str, str], ...] = (
         "reason_message": "A duplicate business key was skipped during merge.",
     },
     {
-        "reason_code": "SEMANTIC_FILTER_EXCLUDED",
+        "reason_code": "gold_semantic_business_exclusion",
         "rule_layer": "gold",
         "action": "filter",
-        "reason_message": "Gold semantic filter excluded the record.",
+        "reason_message": "Gold business eligibility excluded the record.",
+    },
+    {
+        "reason_code": "gold_semantic_profile_exclusion",
+        "rule_layer": "gold",
+        "action": "filter",
+        "reason_message": "Gold source/profile eligibility excluded the record.",
     },
     {
         "reason_code": "CROSS_VALIDATION_NULLIFIED",
@@ -46,10 +52,22 @@ DEBUG_REASON_DICTIONARY: tuple[dict[str, str], ...] = (
         "reason_message": "Cross-validation nullified one or more fields.",
     },
     {
-        "reason_code": "GOLD_CONTRACT_VIOLATION",
+        "reason_code": "gold_contract_schema_failure",
         "rule_layer": "gold",
         "action": "fail",
         "reason_message": "Gold strict contract validation rejected the record.",
+    },
+    {
+        "reason_code": "gold_contract_required_failure",
+        "rule_layer": "gold",
+        "action": "fail",
+        "reason_message": "Gold required-field contract validation rejected the record.",
+    },
+    {
+        "reason_code": "gold_contract_reference_failure",
+        "rule_layer": "gold",
+        "action": "fail",
+        "reason_message": "Gold reference contract validation rejected the record.",
     },
     {
         "reason_code": "QUARANTINE_POLICY",

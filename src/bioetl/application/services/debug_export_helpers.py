@@ -275,6 +275,7 @@ def _base_row(
     failed_field: str = "",
     failed_value: str = "",
     expected_constraint: str = "",
+    contract_version: str = "",
 ) -> dict[str, object]:
     return {
         "run_id": run_id,
@@ -300,6 +301,7 @@ def _base_row(
         "failed_field": failed_field,
         "failed_value": failed_value,
         "expected_constraint": expected_constraint,
+        "contract_version": contract_version,
         "action": action,
         "created_at": created_at.isoformat(),
         "raw_payload": _jsonable_payload(raw_record),

@@ -6,7 +6,7 @@
 ## Summary
 
 - Scanned modules: `2132`
-- Internal import edges (raw): `8447`
+- Internal import edges (raw): `8451`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `342`
@@ -22,13 +22,13 @@ flowchart LR
     composition[composition]
     interfaces[interfaces]
     application -->|1478 OK| application
-    application -->|1238 OK| domain
+    application -->|1239 OK| domain
     composition -->|323 OK| application
     composition -->|747 OK| composition
     composition -->|469 OK| domain
     composition -->|356 OK| infrastructure
-    domain -->|1271 OK| domain
-    infrastructure -->|873 OK| domain
+    domain -->|1273 OK| domain
+    infrastructure -->|874 OK| domain
     infrastructure -->|1174 OK| infrastructure
     interfaces -->|81 OK| application
     interfaces -->|69 OK| composition
@@ -41,13 +41,13 @@ flowchart LR
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
 | `application`    | `application`    |    1478 | allowed |
-| `application`    | `domain`         |    1238 | allowed |
+| `application`    | `domain`         |    1239 | allowed |
 | `composition`    | `application`    |     323 | allowed |
 | `composition`    | `composition`    |     747 | allowed |
 | `composition`    | `domain`         |     469 | allowed |
 | `composition`    | `infrastructure` |     356 | allowed |
-| `domain`         | `domain`         |    1271 | allowed |
-| `infrastructure` | `domain`         |     873 | allowed |
+| `domain`         | `domain`         |    1273 | allowed |
+| `infrastructure` | `domain`         |     874 | allowed |
 | `infrastructure` | `infrastructure` |    1174 | allowed |
 | `interfaces`     | `application`    |      81 | allowed |
 | `interfaces`     | `composition`    |      69 | allowed |
@@ -65,9 +65,9 @@ flowchart LR
 | `application.pipelines`        | `domain.types`                  |      87 |
 | `application.services`         | `domain.control_plane`          |      86 |
 | `application.core`             | `domain.ports`                  |      84 |
-| `infrastructure.storage`       | `domain.types`                  |      82 |
+| `infrastructure.storage`       | `domain.types`                  |      83 |
 | `application.services`         | `domain.ports`                  |      79 |
-| `application.services`         | `domain.types`                  |      76 |
+| `application.services`         | `domain.types`                  |      77 |
 | `infrastructure.storage`       | `domain.ports`                  |      75 |
 | `application.composite`        | `domain.ports`                  |      74 |
 | `composition.factories`        | `application.core`              |      68 |

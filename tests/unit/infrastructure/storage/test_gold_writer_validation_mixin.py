@@ -7,6 +7,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.domain.medallion import GoldWriteMode
+from bioetl.domain.types import GoldContractValidationError
 from bioetl.infrastructure.storage.gold.validation_mixin import (
     GoldWriterValidationMixin,
 )
@@ -100,5 +101,11 @@ class TestGoldWriterValidationMixin:
         host = _Host()
         schema = MagicMock(spec=[])
         # No strict attr at all
-        with pytest.raises(ValueError, match="strict=True"):
+        with pytest.raises(
+            GoldContractValidationError, match="strict=True"
+        ) as exc_info:
             host._validate_schema_strict(schema)
+        assert (
+            exc_info.value.reject_reason.reason_code == "gold_contract_schema_failure"
+        )
+        assert exc_info.value.reject_reason.rule_id == "gold.contract.strict_schema"

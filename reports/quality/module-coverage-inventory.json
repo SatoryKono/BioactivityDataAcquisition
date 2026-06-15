@@ -4063,7 +4063,7 @@
       "missing_lines": 2,
       "module": "bioetl.application.services._dq_report_layer_flows",
       "path": "src/bioetl/application/services/_dq_report_layer_flows.py",
-      "source_lines": 379
+      "source_lines": 380
     },
     {
       "coverage_percent": 87.5,
@@ -5413,7 +5413,7 @@
       "missing_lines": 10,
       "module": "bioetl.application.services.debug_export_collector_gold_mixin",
       "path": "src/bioetl/application/services/debug_export_collector_gold_mixin.py",
-      "source_lines": 105
+      "source_lines": 156
     },
     {
       "coverage_percent": 72.73,
@@ -5423,7 +5423,7 @@
       "missing_lines": 9,
       "module": "bioetl.application.services.debug_export_collector_helpers",
       "path": "src/bioetl/application/services/debug_export_collector_helpers.py",
-      "source_lines": 159
+      "source_lines": 161
     },
     {
       "coverage_percent": 95.74,
@@ -5433,7 +5433,7 @@
       "missing_lines": 2,
       "module": "bioetl.application.services.debug_export_collector_transform_mixin",
       "path": "src/bioetl/application/services/debug_export_collector_transform_mixin.py",
-      "source_lines": 231
+      "source_lines": 260
     },
     {
       "coverage_percent": 72.61,
@@ -5443,7 +5443,7 @@
       "missing_lines": 43,
       "module": "bioetl.application.services.debug_export_helpers",
       "path": "src/bioetl/application/services/debug_export_helpers.py",
-      "source_lines": 307
+      "source_lines": 309
     },
     {
       "coverage_percent": 100.0,
@@ -5483,7 +5483,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.debug_reason_dictionary",
       "path": "src/bioetl/application/services/debug_reason_dictionary.py",
-      "source_lines": 60
+      "source_lines": 78
     },
     {
       "coverage_percent": 100.0,
@@ -5503,7 +5503,7 @@
       "missing_lines": 2,
       "module": "bioetl.application.services.dq._checks_basic",
       "path": "src/bioetl/application/services/dq/_checks_basic.py",
-      "source_lines": 173
+      "source_lines": 199
     },
     {
       "coverage_percent": 98.36,
@@ -5513,7 +5513,7 @@
       "missing_lines": 1,
       "module": "bioetl.application.services.dq._checks_business",
       "path": "src/bioetl/application/services/dq/_checks_business.py",
-      "source_lines": 164
+      "source_lines": 216
     },
     {
       "coverage_percent": 96.15,
@@ -5523,7 +5523,7 @@
       "missing_lines": 4,
       "module": "bioetl.application.services.dq._checks_integrity",
       "path": "src/bioetl/application/services/dq/_checks_integrity.py",
-      "source_lines": 278
+      "source_lines": 308
     },
     {
       "coverage_percent": 98.8,
@@ -5563,7 +5563,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.dq.gold_analyzer",
       "path": "src/bioetl/application/services/dq/gold_analyzer.py",
-      "source_lines": 207
+      "source_lines": 229
     },
     {
       "coverage_percent": 100.0,
@@ -5633,7 +5633,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.dq_report_models",
       "path": "src/bioetl/application/services/dq_report_models.py",
-      "source_lines": 128
+      "source_lines": 132
     },
     {
       "coverage_percent": 100.0,
@@ -7503,7 +7503,7 @@
       "missing_lines": 0,
       "module": "bioetl.composition.factories.pipeline.contract_validator",
       "path": "src/bioetl/composition/factories/pipeline/contract_validator.py",
-      "source_lines": 127
+      "source_lines": 126
     },
     {
       "coverage_percent": 100.0,
@@ -7673,7 +7673,7 @@
       "missing_lines": 7,
       "module": "bioetl.composition.factories.services",
       "path": "src/bioetl/composition/factories/services/__init__.py",
-      "source_lines": 68
+      "source_lines": 74
     },
     {
       "coverage_percent": 100.0,
@@ -10523,7 +10523,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.entities",
       "path": "src/bioetl/domain/entities/__init__.py",
-      "source_lines": 224
+      "source_lines": 275
     },
     {
       "coverage_percent": 100.0,
@@ -12753,7 +12753,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.ports.quality.dq_report",
       "path": "src/bioetl/domain/ports/quality/dq_report.py",
-      "source_lines": 251
+      "source_lines": 253
     },
     {
       "coverage_percent": 100.0,
@@ -13673,7 +13673,7 @@
       "missing_lines": 2,
       "module": "bioetl.domain.types",
       "path": "src/bioetl/domain/types/__init__.py",
-      "source_lines": 97
+      "source_lines": 129
     },
     {
       "coverage_percent": 69.23,
@@ -13704,6 +13704,16 @@
       "module": "bioetl.domain.types._execution_phase_transition_support",
       "path": "src/bioetl/domain/types/_execution_phase_transition_support.py",
       "source_lines": 112
+    },
+    {
+      "coverage_percent": null,
+      "coverage_status": "unmeasured",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
+      "module": "bioetl.domain.types._gold_contracts_support",
+      "path": "src/bioetl/domain/types/_gold_contracts_support.py",
+      "source_lines": 80
     },
     {
       "coverage_percent": 100.0,
@@ -13803,7 +13813,37 @@
       "missing_lines": 19,
       "module": "bioetl.domain.types.gold_contracts",
       "path": "src/bioetl/domain/types/gold_contracts.py",
-      "source_lines": 253
+      "source_lines": 39
+    },
+    {
+      "coverage_percent": null,
+      "coverage_status": "unmeasured",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
+      "module": "bioetl.domain.types.gold_contracts_rejects",
+      "path": "src/bioetl/domain/types/gold_contracts_rejects.py",
+      "source_lines": 301
+    },
+    {
+      "coverage_percent": null,
+      "coverage_status": "unmeasured",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
+      "module": "bioetl.domain.types.gold_contracts_rules",
+      "path": "src/bioetl/domain/types/gold_contracts_rules.py",
+      "source_lines": 174
+    },
+    {
+      "coverage_percent": null,
+      "coverage_status": "unmeasured",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
+      "module": "bioetl.domain.types.gold_contracts_scd",
+      "path": "src/bioetl/domain/types/gold_contracts_scd.py",
+      "source_lines": 110
     },
     {
       "coverage_percent": 90.24,
@@ -14223,7 +14263,7 @@
       "missing_lines": 3,
       "module": "bioetl.domain.value_objects.dq_report_results_quality",
       "path": "src/bioetl/domain/value_objects/dq_report_results_quality.py",
-      "source_lines": 164
+      "source_lines": 173
     },
     {
       "coverage_percent": 88.0,
@@ -19013,7 +19053,7 @@
       "missing_lines": 15,
       "module": "bioetl.infrastructure.storage.gold.pipeline_helpers",
       "path": "src/bioetl/infrastructure/storage/gold/pipeline_helpers.py",
-      "source_lines": 197
+      "source_lines": 208
     },
     {
       "coverage_percent": 24.53,
@@ -19043,7 +19083,7 @@
       "missing_lines": 27,
       "module": "bioetl.infrastructure.storage.gold.validation_mixin",
       "path": "src/bioetl/infrastructure/storage/gold/validation_mixin.py",
-      "source_lines": 99
+      "source_lines": 135
     },
     {
       "coverage_percent": 100.0,
@@ -19063,7 +19103,7 @@
       "missing_lines": 31,
       "module": "bioetl.infrastructure.storage.gold.writer_implementation",
       "path": "src/bioetl/infrastructure/storage/gold/writer_implementation.py",
-      "source_lines": 157
+      "source_lines": 159
     },
     {
       "coverage_percent": 34.48,
@@ -19083,7 +19123,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.storage.gold.writer_protocols",
       "path": "src/bioetl/infrastructure/storage/gold/writer_protocols.py",
-      "source_lines": 54
+      "source_lines": 55
     },
     {
       "coverage_percent": 80.0,
@@ -19093,7 +19133,7 @@
       "missing_lines": 2,
       "module": "bioetl.infrastructure.storage.gold.writer_request",
       "path": "src/bioetl/infrastructure/storage/gold/writer_request.py",
-      "source_lines": 44
+      "source_lines": 46
     },
     {
       "coverage_percent": 88.24,
@@ -19133,7 +19173,7 @@
       "missing_lines": 22,
       "module": "bioetl.infrastructure.storage.gold_writer",
       "path": "src/bioetl/infrastructure/storage/gold_writer.py",
-      "source_lines": 277
+      "source_lines": 289
     },
     {
       "coverage_percent": 24.05,
@@ -21348,7 +21388,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-06-15",
-  "source_tree_sha256": "5cc9fd42a7b15ece8b4ffc066874e6c812a964563eb8fa1cb3a7a1521fffd4ee",
+  "source_tree_sha256": "a48dcd7917ebe476130d47c10c90cfa41c00f7a461218e671e87f079e0931a6d",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -21583,18 +21623,38 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2134,
+    "source_module_count": 2138,
     "status_counts": {
       "fully_covered": 928,
       "partially_covered": 1099,
       "uncovered": 104,
-      "unmeasured": 3
+      "unmeasured": 7
     },
-    "unmeasured_module_count": 3,
+    "unmeasured_module_count": 7,
     "unmeasured_modules": [
       {
         "module": "bioetl.composition.bootstrap.control_plane_store_builders",
         "path": "src/bioetl/composition/bootstrap/control_plane_store_builders.py",
+        "reason": "coverage_xml_has_no_class_entry"
+      },
+      {
+        "module": "bioetl.domain.types._gold_contracts_support",
+        "path": "src/bioetl/domain/types/_gold_contracts_support.py",
+        "reason": "coverage_xml_has_no_class_entry"
+      },
+      {
+        "module": "bioetl.domain.types.gold_contracts_rejects",
+        "path": "src/bioetl/domain/types/gold_contracts_rejects.py",
+        "reason": "coverage_xml_has_no_class_entry"
+      },
+      {
+        "module": "bioetl.domain.types.gold_contracts_rules",
+        "path": "src/bioetl/domain/types/gold_contracts_rules.py",
+        "reason": "coverage_xml_has_no_class_entry"
+      },
+      {
+        "module": "bioetl.domain.types.gold_contracts_scd",
+        "path": "src/bioetl/domain/types/gold_contracts_scd.py",
         "reason": "coverage_xml_has_no_class_entry"
       },
       {
