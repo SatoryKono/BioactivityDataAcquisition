@@ -1,26 +1,25 @@
 ---
 id: codex-mcp-setup
-title: Setup MCP for Codex runtime
+title: Configure MCP for local workspace
 task_id: codex-mcp-setup
-created_at: '2026-06-04T05:59:28Z'
+created_at: '2026-06-15T09:02:35Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - scripts/ai/codex/setup_mcp.py
-summary: Verified canonical MCP workspace configs and confirmed ~/.codex/config.toml
-  already contains the managed MCP server block for this repo; no file edits were
-  required.
+summary: Validated canonical MCP workspace setup via setup_mcp.py, confirmed codex
+  mcp list succeeds, and observed no workspace config drift.
 ---
 
 # Episodic summary
 
 ## Task
 
-- Title: Setup MCP for Codex runtime
+- Title: Configure MCP for local workspace
 
 ## Outcome
 
-- Verified canonical MCP workspace configs and confirmed ~/.codex/config.toml already contains the managed MCP server block for this repo; no file edits were required.
+- Validated canonical MCP workspace setup via setup_mcp.py, confirmed codex mcp list succeeds, and observed no workspace config drift.
 
 ## Lessons learned
 

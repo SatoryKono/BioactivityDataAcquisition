@@ -1,6 +1,9 @@
-______________________________________________________________________
-
-## name: create-pr description: "Creates GitHub PRs with Conventional Commits titles adapted for BioETL project." context: none agent: general-purpose
+---
+name: "create-pr"
+description: "Creates GitHub PRs with Conventional Commits titles adapted for BioETL project."
+context: "none"
+agent: "general-purpose"
+---
 
 # Create Pull Request
 

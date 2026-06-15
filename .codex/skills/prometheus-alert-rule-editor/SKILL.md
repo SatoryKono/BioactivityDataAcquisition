@@ -1,6 +1,7 @@
-______________________________________________________________________
-
-## name: prometheus-alert-rule-editor description: Create, review, and safely update Prometheus-backed alert rules, including expressions, labels, annotations, severity, and rule-group structure. Use when tasks touch alert behavior in Prometheus or Grafana-managed Prometheus alerting.
+---
+name: "prometheus-alert-rule-editor"
+description: "Create, review, and safely update Prometheus-backed alert rules, including expressions, labels, annotations, severity, and rule-group structure. Use when tasks touch alert behavior in Prometheus or Grafana-managed Prometheus alerting."
+---
 
 # Prometheus Alert Rule Editor
 

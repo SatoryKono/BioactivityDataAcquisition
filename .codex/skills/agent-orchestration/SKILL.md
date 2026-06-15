@@ -1,6 +1,7 @@
-______________________________________________________________________
-
-## name: agent-orchestration description: Coordinate BioETL multi-agent workflow across py-\* profiles using the Codex-local orchestration map.
+---
+name: "agent-orchestration"
+description: "Coordinate BioETL multi-agent workflow across py-\\* profiles using the Codex-local orchestration map."
+---
 
 # Agent Orchestration
 

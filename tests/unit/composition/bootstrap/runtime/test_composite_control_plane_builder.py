@@ -284,18 +284,26 @@ def test_build_composite_control_plane_bundle_allows_disabled_ledger_under_degra
         ),
     )
 
-    bundle = build_composite_control_plane_bundle(
-        config=config,
-        runtime=runtime,
-        infra_context=infra_context,
-    )
+    with patch(
+        "bioetl.composition.bootstrap.runtime.composite_control_plane_builder.get_code_revision_provenance",
+        return_value=SimpleNamespace(
+            git_commit="abc1234",
+            source_revision_state="clean",
+            dependency_lock_hash=_VALID_SHA256_D,
+        ),
+    ):
+        bundle = build_composite_control_plane_bundle(
+            config=config,
+            runtime=runtime,
+            infra_context=infra_context,
+        )
 
-    manifest_path = (
-        tmp_path / "output" / "control" / "run_manifest" / f"{bundle.manifest_id}.json"
-    )
-    manifest = RunManifest.from_dict(json.loads(manifest_path.read_text("utf-8")))
-    assert manifest.replay_capability == ReplayCapability.RESUME_ONLY
-    assert not (tmp_path / "output" / "control" / "run_ledger").exists()
+        manifest_path = (
+            tmp_path / "output" / "control" / "run_manifest" / f"{bundle.manifest_id}.json"
+        )
+        manifest = RunManifest.from_dict(json.loads(manifest_path.read_text("utf-8")))
+        assert manifest.replay_capability == ReplayCapability.RESUME_ONLY
+        assert not (tmp_path / "output" / "control" / "run_ledger").exists()
 
 
 def test_build_composite_control_plane_bundle_requires_ledger_for_forensic_grade_profile(

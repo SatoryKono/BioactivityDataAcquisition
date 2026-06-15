@@ -240,6 +240,7 @@ def pytest_configure(config):
     _auto_enable_benchmark_selection_for_explicit_benchmark_runs(config)
     _configure_windows_asyncio(config)
     _configure_windows_pycharm_traceback_style(config)
+    _configure_wsl_timeout(config)
     if _selected_paths_need_hypothesis(config):
         _configure_hypothesis_profiles()
 
@@ -303,6 +304,29 @@ def _configure_windows_pycharm_traceback_style(config: pytest.Config) -> None:
     tbstyle = getattr(option_namespace, "tbstyle", None)
     if tbstyle not in {"line", "no"}:
         option_namespace.tbstyle = "line"
+
+
+def _is_wsl() -> bool:
+    """Detect if running under WSL (Windows Subsystem for Linux)."""
+    try:
+        with open("/proc/version", "r") as f:
+            return "microsoft" in f.read().lower()
+    except (OSError, IOError):
+        return False
+
+
+def _configure_wsl_timeout(config: pytest.Config) -> None:
+    """Increase pytest timeout on WSL due to slower filesystem access."""
+    if not _is_wsl():
+        return
+
+    # Increase timeout from default 60s to 180s on WSL
+    try:
+        current_timeout = config.getini("timeout")
+        if current_timeout and float(current_timeout) < 180:
+            config.inicfg["timeout"] = "180"
+    except (ValueError, TypeError, AttributeError):
+        config.inicfg["timeout"] = "180"
 
 
 def _is_pycharm_pytest_runner() -> bool:

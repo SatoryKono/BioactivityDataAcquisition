@@ -1,6 +1,7 @@
-______________________________________________________________________
-
-## name: py-debug-bot description: Execute BioETL py-debug-bot profile for role-specific workflow and constraints.
+---
+name: "py-debug-bot"
+description: "Execute BioETL py-debug-bot profile for role-specific workflow and constraints."
+---
 
 # py-debug-bot
 

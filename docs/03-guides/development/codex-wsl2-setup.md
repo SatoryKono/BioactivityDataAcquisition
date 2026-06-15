@@ -242,6 +242,12 @@ also registers BioETL-specific wrapper and HTTP servers used in this repo:
 `neo4j-memory`, `needle`, `chembl`, `pubchem`, `pubmed`, `mermaid`,
 `biomoltechDocs`, `mintlify`, `deepwiki`, and `openaiDeveloperDocs`.
 
+After the initial setup, manual MCP re-registration should not be necessary on
+every new Codex session: `bash scripts/ai/codex/run-codex.sh`,
+`scripts/ops/launchers/codex/codex.sh`, and
+`scripts/ops/launchers/codex/codex-exec.sh` resynchronize `~/.codex/config.toml`
+from the canonical generated config before launching Codex.
+
 ______________________________________________________________________
 
 ## VPN Workaround Details

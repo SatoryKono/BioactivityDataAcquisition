@@ -21,109 +21,145 @@ Field Classification:
 
 from __future__ import annotations
 
-from bioetl.domain.entities.base import BaseEntity
-from bioetl.domain.entities.bioactivity import Bioactivity, BioactivityState
+import functools
+from importlib import import_module
+from typing import TYPE_CHECKING
 
-# ChEMBL DTOs (Pydantic)
-from bioetl.domain.entities.chembl import (
-    ActivityRecord,
-    AssayRecord,
-    CellLineRecord,
-    ChemblPublicationRecord,
-    ChemblPublicationTermRecord,
-    CompoundLinkRecord,
-    MoleculeRecord,
-    PublicationSimilarityRecord,
-    TargetComponentRecord,
-    TargetRecord,
-    TissueRecord,
-)
+if TYPE_CHECKING:
+    from bioetl.domain.entities.base import BaseEntity
+    from bioetl.domain.entities.bioactivity import Bioactivity, BioactivityState
 
-# ChEMBL Domain Entities (dataclass)
-from bioetl.domain.entities.chembl_activity import Assay
-from bioetl.domain.entities.chembl_assay_parameters import AssayParameters
-from bioetl.domain.entities.chembl_compound_record import CompoundRecord
-from bioetl.domain.entities.chembl_structures import (
-    CellLine,
-    ChemblPublication,
-    ChemblPublicationSimilarity,
-    ChemblPublicationTerm,
-    Molecule,
-    ProteinClassification,
-    Target,
-    TargetComponent,
-    TargetProteinClassification,
-)
-from bioetl.domain.entities.chembl_subcellular_fraction import SubcellularFraction
-from bioetl.domain.entities.chembl_tissue import Tissue
+    # ChEMBL DTOs (Pydantic)
+    from bioetl.domain.entities.chembl import (
+        ActivityRecord,
+        AssayRecord,
+        CellLineRecord,
+        ChemblPublicationRecord,
+        ChemblPublicationTermRecord,
+        CompoundLinkRecord,
+        MoleculeRecord,
+        PublicationSimilarityRecord,
+        TargetComponentRecord,
+        TargetRecord,
+        TissueRecord,
+    )
 
-# CrossRef DTO + Entity
-from bioetl.domain.entities.crossref import (
-    CrossRefPublicationEntity,
-    PublicationRecord,
-)
+    # ChEMBL Domain Entities (dataclass)
+    from bioetl.domain.entities.chembl_activity import Assay
+    from bioetl.domain.entities.chembl_assay_parameters import AssayParameters
+    from bioetl.domain.entities.chembl_compound_record import CompoundRecord
+    from bioetl.domain.entities.chembl_structures import (
+        CellLine,
+        ChemblPublication,
+        ChemblPublicationSimilarity,
+        ChemblPublicationTerm,
+        Molecule,
+        ProteinClassification,
+        Target,
+        TargetComponent,
+        TargetProteinClassification,
+    )
+    from bioetl.domain.entities.chembl_subcellular_fraction import SubcellularFraction
+    from bioetl.domain.entities.chembl_tissue import Tissue
 
-# OpenAlex Entity
-from bioetl.domain.entities.openalex import OpenAlexPublicationEntity
+    # CrossRef DTO + Entity
+    from bioetl.domain.entities.crossref import (
+        CrossRefPublicationEntity,
+        PublicationRecord,
+    )
 
-# PubChem DTO + Entity
-from bioetl.domain.entities.pubchem import (
-    PubchemMolecule,
-    PubchemMoleculeRecord,
-)
+    # OpenAlex Entity
+    from bioetl.domain.entities.openalex import OpenAlexPublicationEntity
 
-# Publication Base (for type hints in composite pipelines)
-from bioetl.domain.entities.publication_base import PublicationEntityBase
+    # PubChem DTO + Entity
+    from bioetl.domain.entities.pubchem import (
+        PubchemMolecule,
+        PubchemMoleculeRecord,
+    )
 
-# PubMed DTO + Entity
-from bioetl.domain.entities.pubmed import (
-    ArticleRecord,
-    PubMedPublicationEntity,
-)
+    # Publication Base (for type hints in composite pipelines)
+    from bioetl.domain.entities.publication_base import PublicationEntityBase
 
-# Semantic Scholar Entity
-from bioetl.domain.entities.semanticscholar import SemanticScholarPublicationEntity
+    # PubMed DTO + Entity
+    from bioetl.domain.entities.pubmed import (
+        ArticleRecord,
+        PubMedPublicationEntity,
+    )
 
-# UniProt Entity
-from bioetl.domain.entities.uniprot import UniprotTarget
+    # Semantic Scholar Entity
+    from bioetl.domain.entities.semanticscholar import SemanticScholarPublicationEntity
 
-__all__ = [
-    "ActivityRecord",
-    "ArticleRecord",
-    "Assay",
-    "AssayParameters",
-    "AssayRecord",
-    "BaseEntity",
-    "Bioactivity",
-    "BioactivityState",
-    "CellLine",
-    "CellLineRecord",
-    "ChemblPublication",
-    "ChemblPublicationRecord",
-    "ChemblPublicationSimilarity",
-    "ChemblPublicationTerm",
-    "ChemblPublicationTermRecord",
-    "CompoundLinkRecord",
-    "CompoundRecord",  # ChEMBL compound_record (molecule-document link)
-    "CrossRefPublicationEntity",
-    "Molecule",
-    "MoleculeRecord",
-    "OpenAlexPublicationEntity",
-    "ProteinClassification",
-    "PubMedPublicationEntity",
-    "PubchemMolecule",
-    "PubchemMoleculeRecord",
-    "PublicationEntityBase",
-    "PublicationRecord",
-    "PublicationSimilarityRecord",
-    "SemanticScholarPublicationEntity",
-    "SubcellularFraction",
-    "Target",
-    "TargetComponent",
-    "TargetComponentRecord",
-    "TargetProteinClassification",
-    "TargetRecord",
-    "Tissue",
-    "TissueRecord",
-    "UniprotTarget",
-]
+    # UniProt Entity
+    from bioetl.domain.entities.uniprot import UniprotTarget
+
+
+_ENTITY_IMPORTS = {
+    "ActivityRecord": ("bioetl.domain.entities.chembl", "ActivityRecord"),
+    "ArticleRecord": ("bioetl.domain.entities.pubmed", "ArticleRecord"),
+    "Assay": ("bioetl.domain.entities.chembl_activity", "Assay"),
+    "AssayParameters": ("bioetl.domain.entities.chembl_assay_parameters", "AssayParameters"),
+    "AssayRecord": ("bioetl.domain.entities.chembl", "AssayRecord"),
+    "BaseEntity": ("bioetl.domain.entities.base", "BaseEntity"),
+    "Bioactivity": ("bioetl.domain.entities.bioactivity", "Bioactivity"),
+    "BioactivityState": ("bioetl.domain.entities.bioactivity", "BioactivityState"),
+    "CellLine": ("bioetl.domain.entities.chembl_structures", "CellLine"),
+    "CellLineRecord": ("bioetl.domain.entities.chembl", "CellLineRecord"),
+    "ChemblPublication": ("bioetl.domain.entities.chembl_structures", "ChemblPublication"),
+    "ChemblPublicationRecord": ("bioetl.domain.entities.chembl", "ChemblPublicationRecord"),
+    "ChemblPublicationSimilarity": ("bioetl.domain.entities.chembl_structures", "ChemblPublicationSimilarity"),
+    "ChemblPublicationTerm": ("bioetl.domain.entities.chembl_structures", "ChemblPublicationTerm"),
+    "ChemblPublicationTermRecord": ("bioetl.domain.entities.chembl", "ChemblPublicationTermRecord"),
+    "CompoundLinkRecord": ("bioetl.domain.entities.chembl", "CompoundLinkRecord"),
+    "CompoundRecord": ("bioetl.domain.entities.chembl_compound_record", "CompoundRecord"),
+    "CrossRefPublicationEntity": ("bioetl.domain.entities.crossref", "CrossRefPublicationEntity"),
+    "Molecule": ("bioetl.domain.entities.chembl_structures", "Molecule"),
+    "MoleculeRecord": ("bioetl.domain.entities.chembl", "MoleculeRecord"),
+    "OpenAlexPublicationEntity": ("bioetl.domain.entities.openalex", "OpenAlexPublicationEntity"),
+    "ProteinClassification": ("bioetl.domain.entities.chembl_structures", "ProteinClassification"),
+    "PubMedPublicationEntity": ("bioetl.domain.entities.pubmed", "PubMedPublicationEntity"),
+    "PubchemMolecule": ("bioetl.domain.entities.pubchem", "PubchemMolecule"),
+    "PubchemMoleculeRecord": ("bioetl.domain.entities.pubchem", "PubchemMoleculeRecord"),
+    "PublicationEntityBase": ("bioetl.domain.entities.publication_base", "PublicationEntityBase"),
+    "PublicationRecord": ("bioetl.domain.entities.crossref", "PublicationRecord"),
+    "PublicationSimilarityRecord": ("bioetl.domain.entities.chembl", "PublicationSimilarityRecord"),
+    "SemanticScholarPublicationEntity": ("bioetl.domain.entities.semanticscholar", "SemanticScholarPublicationEntity"),
+    "SubcellularFraction": ("bioetl.domain.entities.chembl_subcellular_fraction", "SubcellularFraction"),
+    "Target": ("bioetl.domain.entities.chembl_structures", "Target"),
+    "TargetComponent": ("bioetl.domain.entities.chembl_structures", "TargetComponent"),
+    "TargetComponentRecord": ("bioetl.domain.entities.chembl", "TargetComponentRecord"),
+    "TargetProteinClassification": ("bioetl.domain.entities.chembl_structures", "TargetProteinClassification"),
+    "TargetRecord": ("bioetl.domain.entities.chembl", "TargetRecord"),
+    "Tissue": ("bioetl.domain.entities.chembl_tissue", "Tissue"),
+    "TissueRecord": ("bioetl.domain.entities.chembl", "TissueRecord"),
+    "UniprotTarget": ("bioetl.domain.entities.uniprot", "UniprotTarget"),
+}
+
+
+@functools.lru_cache(maxsize=1)
+def _get_entity_imports() -> dict[str, tuple[str, str]]:
+    return _ENTITY_IMPORTS
+
+
+__all__: list[str] = []  # Populated lazily on first access
+
+
+def __getattr__(name: str) -> object:
+    # Populate __all__ lazily on first access
+    if not __all__:
+        __all__.extend(_get_entity_imports().keys())
+
+    entity_imports = _get_entity_imports()
+    if name not in entity_imports:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+    module_name, attr_name = entity_imports[name]
+    value = getattr(import_module(module_name), attr_name)
+    globals()[name] = value
+    return value
+
+
+def __dir__() -> list[str]:
+    # Ensure __all__ is populated before returning dir
+    if not __all__:
+        __all__.extend(_get_entity_imports().keys())
+    return sorted(set(globals()) | set(__all__))

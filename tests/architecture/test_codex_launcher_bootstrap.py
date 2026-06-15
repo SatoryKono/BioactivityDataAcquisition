@@ -25,10 +25,16 @@ def test_wsl_launchers_use_local_bootstrap_helper() -> None:
     ).read_text(encoding="utf-8")
 
     assert "ensure-codex-cli.sh" in codex_sh
+    assert "ensure-mcp.sh" in codex_sh
+    assert 'if [[ "${CODEX_SKIP_MCP_SETUP:-0}" != "1" ]]; then' in codex_sh
+    assert '--ensure --codex-bin "${CODEX_BIN}"' in codex_sh
     assert 'exec "${CODEX_BIN}" -C "${REPO_ROOT}"' in codex_sh
     assert "npm install -g @openai/codex" not in codex_sh
 
     assert "ensure-codex-cli.sh" in codex_exec_sh
+    assert "ensure-mcp.sh" in codex_exec_sh
+    assert 'if [[ "${CODEX_SKIP_MCP_SETUP:-0}" != "1" ]]; then' in codex_exec_sh
+    assert '--ensure --codex-bin "${CODEX_BIN}"' in codex_exec_sh
     assert 'exec "${CODEX_BIN}" exec --full-auto -C "${REPO_ROOT}" "$@"' in (
         codex_exec_sh
     )

@@ -85,6 +85,7 @@ def test_get_code_revision_provenance_reports_clean_state(
     full_hash = "b" * 40
     mock_run.side_effect = [
         SimpleNamespace(returncode=0, stdout=f"{full_hash}\n"),
+        SimpleNamespace(returncode=0, stdout="version = 1\n"),
         SimpleNamespace(returncode=0, stdout=""),
     ]
 
@@ -103,6 +104,7 @@ def test_get_code_revision_provenance_reports_dirty_state(
     full_hash = "c" * 40
     mock_run.side_effect = [
         SimpleNamespace(returncode=0, stdout=f"{full_hash}\n"),
+        SimpleNamespace(returncode=0, stdout="version = 1\n"),
         SimpleNamespace(returncode=1, stdout=""),
     ]
 
@@ -140,6 +142,8 @@ def test_get_code_revision_provenance_uses_same_windows_git_fallback_for_dirty_c
     mock_run.side_effect = [
         SimpleNamespace(returncode=4294967295, stdout="", stderr=""),
         SimpleNamespace(returncode=0, stdout=f"{full_hash}\n", stderr=""),
+        SimpleNamespace(returncode=4294967295, stdout="", stderr=""),
+        SimpleNamespace(returncode=0, stdout="version = 1\n", stderr=""),
         SimpleNamespace(returncode=4294967295, stdout="", stderr=""),
         SimpleNamespace(returncode=0, stdout="", stderr=""),
     ]
@@ -205,6 +209,31 @@ def test_get_dependency_lock_hash_returns_none_without_supported_lockfile(
     versioning.get_dependency_lock_hash.cache_clear()
 
     assert versioning.get_dependency_lock_hash() is None
+
+
+@pytest.mark.unit
+@patch("bioetl.composition.services.versioning.subprocess.run")
+def test_get_code_revision_provenance_falls_back_to_repo_lockfile_outside_runtime_tree(
+    mock_run: MagicMock,
+    tmp_path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    full_hash = "f" * 40
+    isolated = tmp_path / "external-cwd"
+    isolated.mkdir()
+    monkeypatch.chdir(isolated)
+    mock_run.side_effect = [
+        SimpleNamespace(returncode=0, stdout=f"{full_hash}\n"),
+        SimpleNamespace(returncode=0, stdout="version = 1\n"),
+        SimpleNamespace(returncode=0, stdout=""),
+    ]
+
+    provenance = versioning.get_code_revision_provenance()
+
+    assert versioning.get_dependency_lock_hash() is None
+    assert provenance.git_commit == full_hash
+    assert provenance.source_revision_state == "clean"
+    assert provenance.dependency_lock_hash is not None
 
 
 @pytest.mark.unit

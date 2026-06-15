@@ -1,6 +1,7 @@
-______________________________________________________________________
-
-## name: py-code-bot description: Deprecated compatibility profile retained only to interpret historical py-code-bot references.
+---
+name: "py-code-bot"
+description: "Deprecated compatibility profile retained only to interpret historical py-code-bot references."
+---
 
 # py-code-bot
 

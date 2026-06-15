@@ -1,6 +1,7 @@
-______________________________________________________________________
-
-## name: vcr-record description: Record, validate, update, and clean VCR cassettes for BioETL HTTP tests with secret-safety checks.
+---
+name: "vcr-record"
+description: "Record, validate, update, and clean VCR cassettes for BioETL HTTP tests with secret-safety checks."
+---
 
 # VCR Record
 

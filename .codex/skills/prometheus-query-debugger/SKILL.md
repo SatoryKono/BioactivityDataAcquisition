@@ -1,6 +1,7 @@
-______________________________________________________________________
-
-## name: prometheus-query-debugger description: Debug PromQL semantics, empty results, aggregation mistakes, histogram queries, and `No data` versus `0` behavior. Use when Prometheus-backed Grafana panels, recording rules, or alert expressions behave unexpectedly.
+---
+name: "prometheus-query-debugger"
+description: "Debug PromQL semantics, empty results, aggregation mistakes, histogram queries, and `No data` versus `0` behavior. Use when Prometheus-backed Grafana panels, recording rules, or alert expressions behave unexpectedly."
+---
 
 # Prometheus Query Debugger
 

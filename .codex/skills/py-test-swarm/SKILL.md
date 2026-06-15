@@ -1,6 +1,7 @@
-______________________________________________________________________
-
-## name: py-test-swarm description: Orchestrate hierarchical BioETL test swarms (L1/L2/L3) for full_audit, fix_failures, coverage_boost, optimize, and flakiness_scan with workload-based delegation, telemetry aggregation, flaky analysis, and final reporting in `reports/{LLM}/review_py-test-swarm_{YYYYMMDD}_{HHMM}_FINAL.md`. Use when users request broad test campaigns, failure triage at scale, coverage expansion, or stability diagnostics across layers/providers.
+---
+name: "py-test-swarm"
+description: "Orchestrate hierarchical BioETL test swarms (L1/L2/L3) for full_audit, fix_failures, coverage_boost, optimize, and flakiness_scan with workload-based delegation, telemetry aggregation, flaky analysis, and final reporting in `reports/{LLM}/review_py-test-swarm_{YYYYMMDD}_{HHMM}_FINAL.md`. Use when users request broad test campaigns, failure triage at scale, coverage expansion, or stability diagnostics across layers/providers."
+---
 
 # py-test-swarm
 

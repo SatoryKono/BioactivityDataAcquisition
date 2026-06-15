@@ -131,7 +131,9 @@ This will:
 ## MCP configuration
 
 `run-codex.sh` runs `helper/ensure-mcp.sh` before launching Codex. `run-codex.ps1`
-delegates to that same flow. This writes:
+delegates to that same flow, and the retained transport launchers
+`scripts/ops/launchers/codex/codex.sh` and
+`scripts/ops/launchers/codex/codex-exec.sh` now do the same. This writes:
 
 - `.mcp.json` - workspace MCP config used by compatible tools
 - `.vscode/mcp.json` - VS Code MCP config

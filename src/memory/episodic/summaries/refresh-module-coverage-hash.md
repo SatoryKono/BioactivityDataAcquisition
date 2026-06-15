@@ -2,13 +2,14 @@
 id: refresh-module-coverage-hash
 title: Refresh module coverage inventory hash
 task_id: refresh-module-coverage-hash
-created_at: '2026-05-31T14:59:41Z'
+created_at: '2026-06-15T09:36:34Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - reports/quality/module-coverage-inventory.json
-summary: Updated module coverage inventory source_tree_sha256 to match the current
-  src/bioetl tree and verified the hash contract directly.
+summary: Refreshed reports/quality/module-coverage-inventory.json via the canonical
+  module coverage inventory generator, updating source_tree_sha256 and live source_lines
+  so the architecture hash guard matches the current src/bioetl tree.
 ---
 
 # Episodic summary
@@ -19,7 +20,7 @@ summary: Updated module coverage inventory source_tree_sha256 to match the curre
 
 ## Outcome
 
-- Updated module coverage inventory source_tree_sha256 to match the current src/bioetl tree and verified the hash contract directly.
+- Refreshed reports/quality/module-coverage-inventory.json via the canonical module coverage inventory generator, updating source_tree_sha256 and live source_lines so the architecture hash guard matches the current src/bioetl tree.
 
 ## Lessons learned
 

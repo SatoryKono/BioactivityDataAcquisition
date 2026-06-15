@@ -1,6 +1,12 @@
-______________________________________________________________________
-
-## name: suggest-users description: Use when creating PRs to suggest reviewers, when creating issues to suggest assignees, or when re-requesting review after addressing comments. Ranks users by CODEOWNERS match, file expertise, recent activity, and workload balancing. allowed-tools: Bash, Read context: fork agent: Explore
+---
+name: "suggest-users"
+description: "Use when creating PRs to suggest reviewers, when creating issues to suggest assignees, or when re-requesting review after addressing comments. Ranks users by CODEOWNERS match, file expertise, recent activity, and workload balancing."
+allowed-tools:
+  - Bash
+  - Read
+context: "fork"
+agent: "Explore"
+---
 
 # Suggest Users
 
