@@ -72,13 +72,23 @@ class SilverFiltersFileConfig(BaseGoldFiltersConfig):
     """Silver filter configuration for structural Silver quality gates.
 
     Applied AFTER transformation but BEFORE writing to Silver layer.
-    Semantic Gold-style keys are accepted at the schema boundary only for
-    migration compatibility and are promoted to ``gold_filters`` by
-    ``FilterConfigFile`` before domain conversion.
+    Semantic Gold-style keys are rejected at the schema boundary.
 
     Canonical Silver rules are limited to ``required_fields`` and
     ``exclude_if_present``. Do not add new semantic keys here.
     """
+
+    @model_validator(mode="before")
+    @classmethod
+    def reject_semantic_silver_filters(cls, data: object) -> object:
+        """Reject semantic keys even when this sub-schema is validated directly."""
+        if isinstance(data, dict):
+            from bioetl.infrastructure.config.silver_filter_migration import (
+                validate_structural_silver_filter_payload,
+            )
+
+            validate_structural_silver_filter_payload(data)
+        return data
 
     def to_domain(self) -> SilverFilterConfig:  # type: ignore[override]
         """Convert to a structural-only domain SilverFilterConfig dataclass.
@@ -174,15 +184,15 @@ class FilterConfigFile(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def promote_semantic_silver_filters(cls, data: object) -> object:
-        """Normalize legacy semantic Silver rules before field validation."""
+    def reject_semantic_silver_filters(cls, data: object) -> object:
+        """Reject semantic Silver rules before field validation."""
         if not isinstance(data, dict):
             return data
         from bioetl.infrastructure.config.silver_filter_migration import (
-            normalize_silver_gold_filter_payload,
+            validate_no_semantic_silver_filter_payload,
         )
 
-        return normalize_silver_gold_filter_payload(data)
+        return validate_no_semantic_silver_filter_payload(data)
 
     @field_validator("extraction_params")
     @classmethod

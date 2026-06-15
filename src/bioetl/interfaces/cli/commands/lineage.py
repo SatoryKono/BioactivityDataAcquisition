@@ -291,7 +291,7 @@ def explain_command(
             "Lineage explain failed",
             "Provide exactly one of --run-id or --manifest-id",
         )
-        return
+        raise SystemExit(1)
 
     service = get_lineage_service()
     try:

@@ -1,9 +1,8 @@
-"""Silver-filter normalization helpers owned by the infrastructure boundary."""
+"""Silver-filter structural boundary helpers owned by infrastructure."""
 
 from __future__ import annotations
 
 from collections.abc import Mapping
-from copy import deepcopy
 from typing import Any, Literal
 
 from bioetl.domain.filtering import BaseFilterConfig, SilverFilterConfig
@@ -15,7 +14,7 @@ DEFAULT_SILVER_FILTER_COMPATIBILITY_MODE: SilverFilterCompatibilityMode = (
     "structural_only_auto_promote"
 )
 SILVER_STRUCTURAL_FILTER_KEYS = frozenset({"required_fields", "exclude_if_present"})
-SILVER_SEMANTIC_FILTER_KEYS = frozenset(
+FORBIDDEN_SILVER_SEMANTIC_FILTER_KEYS = frozenset(
     {"columns", "ranges", "list_lengths", "list_contains"}
 )
 
@@ -33,7 +32,11 @@ def build_structural_silver_filter_config(
 def build_silver_filter_config_for_compatibility(
     source: BaseFilterConfig,
 ) -> SilverFilterConfig:
-    """Return the canonical structural-only Silver config."""
+    """Return the canonical structural-only Silver config.
+
+    The import path is retained for existing runtime identity helpers; it no
+    longer performs or implies semantic Silver-to-Gold promotion.
+    """
     return build_structural_silver_filter_config(source)
 
 
@@ -51,50 +54,58 @@ def build_silver_filter_compatibility_snapshot() -> JsonDict:
     }
 
 
-def normalize_silver_gold_filter_payload(
+def forbidden_semantic_silver_filter_keys(
+    silver_filters: Mapping[str, Any],
+) -> tuple[str, ...]:
+    """Return semantic Silver keys present in a Silver filter payload."""
+    return tuple(
+        sorted(
+            key
+            for key in FORBIDDEN_SILVER_SEMANTIC_FILTER_KEYS
+            if key in silver_filters
+        )
+    )
+
+
+def validate_structural_silver_filter_payload(
+    silver_filters: Mapping[str, Any],
+    *,
+    path: str = "silver_filters",
+) -> None:
+    """Reject semantic keys in a Silver filter payload."""
+    forbidden = forbidden_semantic_silver_filter_keys(silver_filters)
+    if not forbidden:
+        return
+
+    qualified = ", ".join(f"{path}.{key}" for key in forbidden)
+    raise ValueError(
+        "Semantic filter keys are not allowed under silver_filters after "
+        f"ADR-050 cleanup: {qualified}. Move semantic/business filters to "
+        "gold_filters or source_profile."
+    )
+
+
+def validate_no_semantic_silver_filter_payload(
     payload: Mapping[str, Any],  # Any: Filter payloads have heterogeneous value types
 ) -> JsonDict:
-    """Promote semantic Silver rules into Gold and leave Silver structural-only."""
-    result = deepcopy(dict(payload))
-
+    """Validate a full filter payload and return a shallow dict copy."""
+    result = dict(payload)
     silver_filters = result.get("silver_filters")
-    if not isinstance(silver_filters, dict):
-        return result
-
-    gold_filters = result.get("gold_filters")
-    if not isinstance(gold_filters, dict):
-        gold_filters = {}
-
-    structural_silver = {
-        key: deepcopy(value)
-        for key, value in silver_filters.items()
-        if key in SILVER_STRUCTURAL_FILTER_KEYS
-    }
-    promoted_gold = deepcopy(gold_filters)
-    for key in SILVER_SEMANTIC_FILTER_KEYS:
-        silver_section = silver_filters.get(key)
-        if not isinstance(silver_section, dict) or not silver_section:
-            continue
-        gold_section = promoted_gold.get(key)
-        if not isinstance(gold_section, dict):
-            gold_section = {}
-        for field_name, silver_value in silver_section.items():
-            gold_section.setdefault(field_name, deepcopy(silver_value))
-        promoted_gold[key] = gold_section
-
-    result["silver_filters"] = structural_silver
-    result["gold_filters"] = promoted_gold
+    if isinstance(silver_filters, Mapping):
+        validate_structural_silver_filter_payload(silver_filters)
     return result
 
 
 __all__ = [
     "DEFAULT_SILVER_FILTER_COMPATIBILITY_MODE",
-    "SILVER_SEMANTIC_FILTER_KEYS",
+    "FORBIDDEN_SILVER_SEMANTIC_FILTER_KEYS",
     "SILVER_STRUCTURAL_FILTER_KEYS",
     "SilverFilterCompatibilityMode",
     "build_silver_filter_compatibility_snapshot",
     "build_silver_filter_config_for_compatibility",
     "build_structural_silver_filter_config",
-    "normalize_silver_gold_filter_payload",
+    "forbidden_semantic_silver_filter_keys",
     "resolve_silver_filter_compatibility_mode",
+    "validate_no_semantic_silver_filter_payload",
+    "validate_structural_silver_filter_payload",
 ]

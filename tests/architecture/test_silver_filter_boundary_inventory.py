@@ -37,9 +37,10 @@ BUCKETS = (
     "columns",
     "ranges",
     "exclude_if_present",
-    "list_length",
+    "list_lengths",
     "list_contains",
 )
+SEMANTIC_SILVER_FILTER_KEYS = {"columns", "ranges", "list_lengths", "list_contains"}
 SHADOW_CHECK_TYPES = {"join_cardinality", "field_sparsity", "gold_projection_delta"}
 EXPECTED_SHADOW_METRICS = {
     "current_rejections": "bioetl_silver_filter_rejections_total",
@@ -67,7 +68,8 @@ REQUIRED_SURFACE_SYMBOLS = {
     },
     "silver_config": {
         "SilverFilterConfig(",
-        "SILVER_SEMANTIC_FILTER_KEYS",
+        "FORBIDDEN_SILVER_SEMANTIC_FILTER_KEYS",
+        "validate_no_semantic_silver_filter_payload",
     },
 }
 
@@ -106,7 +108,7 @@ def _iter_active_silver_filters() -> list[tuple[str, dict[str, Any], dict[str, A
 def _actual_rule_names(bucket: str, bucket_payload: Any) -> set[str]:
     if bucket in {"required_fields", "exclude_if_present"}:
         return {str(item) for item in (bucket_payload or [])}
-    if bucket in {"columns", "ranges", "list_length", "list_contains"}:
+    if bucket in {"columns", "ranges", "list_lengths", "list_contains"}:
         return {str(key) for key in (bucket_payload or {})}
     raise AssertionError(f"Unexpected bucket: {bucket}")
 
@@ -194,13 +196,18 @@ def test_inventory_covers_every_active_silver_rule_exactly_by_name() -> None:
 
 def test_active_silver_filters_do_not_contain_semantic_buckets() -> None:
     """ADR-050 cleanup forbids semantic buckets under active Silver filters."""
-    semantic_buckets = {"columns", "ranges", "list_lengths", "list_contains"}
     violations: list[str] = []
-    for relative_path, config, silver_filters in _iter_active_silver_filters():
+    for path in sorted(ENTITY_CONFIG_ROOT.rglob("*.yaml")):
+        payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        filters = payload.get("filters") or {}
+        silver_filters = filters.get("silver_filters") or {}
+        if not isinstance(silver_filters, dict):
+            continue
+        relative_path = str(path.relative_to(ROOT))
+        config = payload
         pipeline_id = _pipeline_id(config)
-        for bucket in sorted(semantic_buckets):
-            payload = silver_filters.get(bucket)
-            if payload:
+        for bucket in sorted(SEMANTIC_SILVER_FILTER_KEYS):
+            if bucket in silver_filters:
                 violations.append(
                     f"{pipeline_id} ({relative_path}): silver_filters.{bucket}"
                 )
@@ -209,6 +216,16 @@ def test_active_silver_filters_do_not_contain_semantic_buckets() -> None:
         "Semantic filters belong in gold_filters or source_profile, not "
         "silver_filters:\n" + "\n".join(violations)
     )
+
+
+def test_inventory_baseline_reports_zero_semantic_silver_migration_actions() -> None:
+    """Generated inventory must report no active semantic Silver buckets."""
+    payload = yaml.safe_load(JSON_OUT.read_text(encoding="utf-8")) or {}
+    totals = payload.get("totals") or {}
+
+    assert totals.get("move_to_gold") == 0
+    assert totals.get("duplicate") == 0
+    assert totals.get("conflict") == 0
 
 
 def test_business_only_rules_require_migration_metadata() -> None:

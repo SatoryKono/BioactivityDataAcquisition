@@ -62,17 +62,17 @@ flowchart LR
 
 ## Silver/Gold Filter Boundary
 
-The current code keeps YAML compatibility for legacy semantic Silver filter
-keys while projecting domain Silver filters as structural-only:
+The current code rejects legacy semantic Silver filter keys and projects domain
+Silver filters as structural-only:
 
-- `configs/entities/**/*.yaml` may still contain semantic
-  `filters.silver_filters.columns` and `filters.silver_filters.ranges`.
-- `src/bioetl/infrastructure/config/silver_filter_migration.py` promotes
-  semantic Silver sections into `gold_filters` and leaves Silver with
+- `configs/entities/**/*.yaml` must not contain semantic
+  `filters.silver_filters.columns`, `ranges`, `list_lengths`, or `list_contains`.
+- `src/bioetl/infrastructure/config/silver_filter_migration.py` rejects
+  semantic Silver sections before domain conversion and leaves Silver with
   `required_fields` / `exclude_if_present`.
 - `src/bioetl/infrastructure/schemas/filter_config.py` and
-  `src/bioetl/infrastructure/schemas/pipeline_config.py` apply this
-  normalization before validation.
+  `src/bioetl/infrastructure/schemas/pipeline_config.py` apply this hard guard
+  before validation.
 - `SilverFiltersFileConfig.to_domain()` and `SilverFiltersConfig.to_domain()`
   return structural-only `SilverFilterConfig` instances for application/domain
   consumption.

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 import json
 from datetime import UTC, datetime
 from typing import Any
@@ -88,6 +89,8 @@ class _FakeLineageService:
 
 @pytest.fixture
 def cli_runner() -> CliRunner:
+    if "mix_stderr" in inspect.signature(CliRunner).parameters:
+        return CliRunner(mix_stderr=False)
     return CliRunner()
 
 
@@ -196,5 +199,5 @@ class TestLineageCommands:
             ],
         )
 
-        assert result.exit_code == 0
+        assert result.exit_code != 0
         assert "Provide exactly one of --run-id or --manifest-id" in result.stderr

@@ -269,12 +269,10 @@ filters:
     fallback_column: title
   extraction_params: {}
   silver_filters:
-    columns: {}
     exclude_if_present: []
     required_fields:
     - cell_id
     - cell_name
-    ranges: {}
   gold_filters:
     columns: {}
     exclude_if_present: []

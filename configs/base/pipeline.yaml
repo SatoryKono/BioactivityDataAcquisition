@@ -78,10 +78,6 @@ input_filter:
 filter_defaults:
     silver_filters:
         required_fields: [ ]
-        columns: { }
-        ranges: { }
-        list_lengths: { }
-        list_contains: { }
         exclude_if_present: [ ]
     gold_filters:
         required_fields: [ ]

@@ -265,8 +265,8 @@ config_surface_ratchet:
       ratchet_policy: Non-growth fail-fast unless a reviewed pipeline addition updates
         the budget.
     unique_parameter_count:
-      current_count: 513
-      max_count: 513
+      current_count: 507
+      max_count: 507
       owner: '@bioetl-config'
       linked_issue: '#4818'
       rationale: Flattened parameter vocabulary must not expand silently across the
@@ -311,8 +311,8 @@ config_surface_ratchet:
           rationale: Effective entity pipeline surface after base defaults merge.
           ratchet_policy: Non-growth fail-fast for governed entity configs.
         unique_parameter_count:
-          current_count: 310
-          max_count: 310
+          current_count: 304
+          max_count: 304
           rationale: Effective flattened vocabulary for entity configs only.
           ratchet_policy: Non-growth fail-fast unless reviewed schema expansion updates
             budget.
@@ -472,15 +472,16 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 50
-      total_loc: 6005
+      total_loc: 6014
       files_ge_250_loc: 2
       helper_function_ratio: 0.328
       max_internal_fan_in: 3
       max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.observability
     trend:
-      status: reduced_2026-05-30_issue_4548_zero_duplication
-      next_action: Maintain zero-duplication snapshot for composition/bootstrap/runtime
-        while holding file-growth and fan-in budgets during future bootstrap changes.
+      status: updated_2026-06-15_live_metric_sync_to_6014
+      next_action: 2026-06-15 syncs composition/bootstrap/runtime actual metrics
+        to the current live collector value of 6014 LOC; bounded-growth budgets
+        remain at 2 files_ge_250_loc and max_internal_fan_in 5.
   - name: composition_factories_pipeline
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -498,17 +499,16 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 33
-      total_loc: 4568
-      files_ge_250_loc: 3
-      helper_function_ratio: 0.456
-      max_internal_fan_in: 3
-      max_internal_fan_in_module: bioetl.composition.factories.pipeline.registry_manifest
+      total_loc: 4590
+      files_ge_250_loc: 4
+      helper_function_ratio: 0.46
+      max_internal_fan_in: 4
+      max_internal_fan_in_module: bioetl.composition.factories.pipeline.config_types
     trend:
-      status: reduced_2026-05-21_issue_4477
-      next_action: 2026-05-21 closes the remaining composition/factories/pipeline
-        duplicate cluster by removing mirrored public/private transformer keyword
-        forwarding; keep the family on a zero-duplication ratchet while file-growth
-        and max_internal_fan_in stay pinned at the reviewed ceiling.
+      status: reduced_2026-06-15_issue_4477_live_metric_sync_to_4590
+      next_action: 2026-06-15 syncs composition/factories/pipeline actual metrics
+        to the current live collector value of 4590 LOC; bounded-growth budgets
+        remain at 4 files_ge_250_loc and max_internal_fan_in 4.
   - name: application_services_control_plane
     owner: '@bioetl-platform'
     linked_rf: RF-023

@@ -269,15 +269,15 @@ class PipelineYamlConfig(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def promote_semantic_silver_filters(cls, data: object) -> object:
-        """Normalize legacy semantic Silver rules before strict field validation."""
+    def reject_semantic_silver_filters(cls, data: object) -> object:
+        """Reject semantic Silver rules before strict field validation."""
         if not isinstance(data, dict):
             return data
         from bioetl.infrastructure.config.silver_filter_migration import (
-            normalize_silver_gold_filter_payload,
+            validate_no_semantic_silver_filter_payload,
         )
 
-        return normalize_silver_gold_filter_payload(data)
+        return validate_no_semantic_silver_filter_payload(data)
 
     def _validate_primary_key_presence(self) -> None:
         """Ensure business primary keys are specified."""

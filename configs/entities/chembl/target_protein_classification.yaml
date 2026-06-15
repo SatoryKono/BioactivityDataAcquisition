@@ -169,8 +169,6 @@ filters:
     fallback_column: target_id
   extraction_params: {}
   silver_filters:
-    ranges: {}
-    columns: {}
     exclude_if_present: []
     required_fields:
     - target_id

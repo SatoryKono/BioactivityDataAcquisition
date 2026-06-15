@@ -324,11 +324,11 @@ class TestFilterConfigLoaderMerge:
         assert "field_a" in gold_filters.required_fields
         assert "field_b" in gold_filters.required_fields
 
-    def test_semantic_silver_filters_are_promoted_to_gold(
+    def test_semantic_silver_filters_are_rejected(
         self,
         tmp_path: Path,
     ) -> None:
-        """Semantic Silver rules should be removed from Silver and added to Gold."""
+        """Semantic Silver rules should fail after ADR-050 cleanup."""
         base_root = tmp_path / "base"
         base_root.mkdir(parents=True)
         (base_root / "pipeline.yaml").write_text(
@@ -360,26 +360,16 @@ filters:
         )
 
         loader = FilterConfigLoader(tmp_path)
-        _, silver_filters, gold_filters, _ = loader.load("chembl", "activity")
-        merged = loader.load_as_dict("chembl", "activity")
+        with pytest.raises(Exception, match=r"silver_filters\.columns"):
+            loader.load("chembl", "activity")
+        with pytest.raises(Exception, match=r"silver_filters\.columns"):
+            loader.load_as_dict("chembl", "activity")
 
-        assert silver_filters.required_fields == ("activity_id",)
-        assert silver_filters.column_filters == ()
-        assert {rule.column for rule in gold_filters.column_filters} == {
-            "standard_type",
-            "standard_units",
-        }
-        assert "columns" not in merged["silver_filters"]
-        assert set(merged["gold_filters"]["columns"]) == {
-            "standard_type",
-            "standard_units",
-        }
-
-    def test_gold_filter_wins_when_legacy_silver_semantic_rule_conflicts(
+    def test_legacy_silver_semantic_rule_conflict_is_rejected(
         self,
         tmp_path: Path,
     ) -> None:
-        """Explicit Gold semantics must not be overwritten by legacy Silver."""
+        """Explicit Gold semantics no longer mask legacy Silver semantic keys."""
         _write_minimal_filter_defaults(tmp_path)
         entities = tmp_path / "entities" / "chembl"
         entities.mkdir(parents=True)
@@ -400,49 +390,27 @@ filters:
         )
 
         loader = FilterConfigLoader(tmp_path)
-        _, silver_filters, gold_filters, _ = loader.load("chembl", "activity")
-        merged = loader.load_as_dict("chembl", "activity")
+        with pytest.raises(Exception, match=r"silver_filters\.columns"):
+            loader.load("chembl", "activity")
 
-        assert silver_filters.column_filters == ()
-        assert gold_filters.column_filters[0].values == frozenset({"Ki"})
-        assert merged["gold_filters"]["columns"]["standard_type"] == ["Ki"]
-
-    def test_inline_semantic_silver_overrides_are_normalized_like_files(
+    def test_inline_semantic_silver_overrides_are_rejected(
         self,
         tmp_path: Path,
     ) -> None:
-        """Inline overrides follow the same promotion path as file YAML."""
+        """Inline overrides follow the same hard guard as file YAML."""
         _write_minimal_filter_defaults(tmp_path)
 
         loader = FilterConfigLoader(tmp_path)
-        _, silver_filters, gold_filters, _ = loader.load(
-            "chembl",
-            "activity",
-            inline_overrides={
-                "silver_filters": {
-                    "required_fields": ["activity_id"],
-                    "columns": {"standard_type": ["IC50"]},
-                }
-            },
-        )
-        merged = loader.load_as_dict(
-            "chembl",
-            "activity",
-            inline_overrides={
-                "silver_filters": {
-                    "required_fields": ["activity_id"],
-                    "columns": {"standard_type": ["IC50"]},
-                }
-            },
-        )
-
-        assert silver_filters.required_fields == ("activity_id",)
-        assert silver_filters.column_filters == ()
-        assert [rule.column for rule in gold_filters.column_filters] == [
-            "standard_type"
-        ]
-        assert merged["silver_filters"] == {"required_fields": ["activity_id"]}
-        assert merged["gold_filters"]["columns"]["standard_type"] == ["IC50"]
+        inline_overrides = {
+            "silver_filters": {
+                "required_fields": ["activity_id"],
+                "columns": {"standard_type": ["IC50"]},
+            }
+        }
+        with pytest.raises(Exception, match=r"silver_filters\.columns"):
+            loader.load("chembl", "activity", inline_overrides=inline_overrides)
+        with pytest.raises(Exception, match=r"silver_filters\.columns"):
+            loader.load_as_dict("chembl", "activity", inline_overrides=inline_overrides)
 
 
 class TestFilterConfigLoaderInlineOverrides:
@@ -550,6 +518,7 @@ entity: activity
 filters:
   silver_filters:
     required_fields: [activity_id]
+  gold_filters:
     columns:
       standard_type: [IC50]
 """,
@@ -879,13 +848,6 @@ extraction_params:
   relationship_type: "D"
   target_chembl_id__isnull: false
 silver_filters:
-  columns:
-    assay_type: [B, F]
-    relationship_type: [D]
-  ranges:
-    confidence_score:
-      min: 8
-      max: 9
   required_fields:
     - assay_id
     - assay_type
@@ -896,6 +858,10 @@ gold_filters:
     assay_type: [B, F]
     confidence_score: ["8", "9"]
     relationship_type: [D]
+  ranges:
+    confidence_score:
+      min: 8
+      max: 9
   required_fields:
     - assay_type
     - description
@@ -985,6 +951,12 @@ version: "1.0.0"
 provider: chembl
 entity: assay
 silver_filters:
+  required_fields:
+    - assay_id
+    - assay_type
+    - description
+    - target_chembl_id
+gold_filters:
   columns:
     assay_type: [B, F]
     relationship_type: [D]
@@ -992,12 +964,6 @@ silver_filters:
     confidence_score:
       min: 8
       max: 9
-  required_fields:
-    - assay_id
-    - assay_type
-    - description
-    - target_chembl_id
-gold_filters:
   required_fields: []
 """
         )
