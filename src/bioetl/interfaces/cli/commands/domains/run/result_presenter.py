@@ -29,13 +29,13 @@ def echo_run_result(result: RunResult) -> None:
         if result.records_gold > 0:
             echo_info(f"  - Gold records:        {result.records_gold}")
         if result.records_filtered_out > 0:
-            echo_info(f"  - Silver filter rejects: {result.records_filtered_out}")
+            echo_info(f"  - Silver structural rejects: {result.records_filtered_out}")
         else:
-            echo_info("  - Silver filter rejects: 0")
+            echo_info("  - Silver structural rejects: 0")
         if result.records_quarantined > 0:
-            echo_info(f"  - Quarantined (DQ):    {result.records_quarantined}")
+            echo_info(f"  - Quarantined (DQ/contract): {result.records_quarantined}")
         else:
-            echo_info("  - Quarantined (DQ):    0")
+            echo_info("  - Quarantined (DQ/contract): 0")
         return
 
     if result.status == PipelineRunResult.DRY_RUN:

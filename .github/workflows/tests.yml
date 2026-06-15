@@ -261,6 +261,9 @@ jobs:
             -   name: Validate config discrepancy baseline artifacts
                 run: uv run python -m scripts.schema generate-config-matrix --check
 
+            -   name: Validate Silver/Gold filter parity artifact
+                run: uv run python scripts/data_quality/run_silver_gold_filter_parity.py --check
+
             -   name: Validate xwalk missing backlog
                 run: uv run python -m scripts.engineering.qa check-xwalk-missing-backlog
 
@@ -501,6 +504,14 @@ jobs:
                 with:
                     name: ci-quality-metrics
                     path: reports/quality/ci-quality-metrics.json
+
+            -   name: Upload Silver/Gold filter parity artifact
+                if: always()
+                uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+                with:
+                    name: silver-gold-filter-parity-report
+                    path: reports/quality/silver-gold-filter-parity-report.json
+                    if-no-files-found: warn
 
             -   name: Upload observability review artifacts
                 if: always()

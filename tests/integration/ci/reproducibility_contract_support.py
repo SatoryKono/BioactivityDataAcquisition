@@ -34,6 +34,18 @@ class ManifestIdentity:
 
 
 DEFAULT_MANIFEST_IDENTITY = ManifestIdentity()
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+SILVER_GOLD_PARITY_FIXTURE = (
+    PROJECT_ROOT
+    / "tests"
+    / "fixtures"
+    / "golden"
+    / "reproducibility"
+    / "silver_gold_filter_parity_v1.json"
+)
+SILVER_GOLD_PARITY_REPORT = (
+    PROJECT_ROOT / "reports" / "quality" / "silver-gold-filter-parity-report.json"
+)
 
 
 class InMemoryRunLedgerStore:
@@ -130,3 +142,26 @@ def load_manifest_payload(data_dir: Path, manifest_id: str) -> dict[str, object]
         data_dir / "output" / "control" / "run_manifest" / f"{manifest_id}.json"
     )
     return json.loads(manifest_path.read_text(encoding="utf-8"))
+
+
+def load_silver_gold_parity_fixture(
+    fixture_path: Path = SILVER_GOLD_PARITY_FIXTURE,
+) -> dict[str, object]:
+    """Load the deterministic Silver/Gold migration parity fixture."""
+    return json.loads(fixture_path.read_text(encoding="utf-8"))
+
+
+def build_silver_gold_parity_report(
+    fixture_path: Path = SILVER_GOLD_PARITY_FIXTURE,
+) -> dict[str, object]:
+    """Build the committed Silver/Gold migration parity report."""
+    from scripts.data_quality.run_silver_gold_filter_parity import build_parity_report
+
+    return build_parity_report(fixture_path)
+
+
+def load_silver_gold_parity_report(
+    report_path: Path = SILVER_GOLD_PARITY_REPORT,
+) -> dict[str, object]:
+    """Load the committed Silver/Gold migration parity report artifact."""
+    return json.loads(report_path.read_text(encoding="utf-8"))

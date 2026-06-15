@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "Record-level explorer for Silver filtered_out rows (quarantine-backed, read-only, single-pipeline scoped). Primary question: which records were rejected before/at Silver, why, how large is the impact, and what remediation path should the operator take next?",
+  "description": "Record-level explorer for Silver structural filtered_out rows (quarantine-backed, read-only, single-pipeline scoped). FILTERED_OUT_SILVER is a legacy alias for Silver structural rejects only; Gold contract and semantic rejects are surfaced in Data Quality Gold reject panels, not this explorer. Primary question: which Silver structural records were rejected before/at Silver, why, how large is the impact, and what remediation path should the operator take next?",
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
@@ -99,12 +99,12 @@
       },
       "id": 1,
       "options": {
-        "content": "<div style='padding:0.7rem 0.85rem;text-align:center;line-height:1.45'><div style='display:flex;flex-wrap:wrap;justify-content:center;gap:0.5rem 1rem;font-size:1.05rem;font-weight:600'><span>Pipeline: <strong>$pipeline</strong></span><span>Run Type: <strong>$run_type</strong></span><span>Reason: <strong>$reason_code</strong></span><span>Field: <strong>$field</strong></span><span>Reject Run ID: <strong>$quarantine_run_id</strong></span></div><div style='margin-top:0.35rem'><strong style='color:#ffb347'>default 24h forensic window</strong></div><div style='margin-top:0.3rem'><small>Origin dashboards own shared workflow/run_id shell context; this explorer never owns shared workflow or run_id selectors. Select exactly one pipeline. This explorer is read-only and scoped to Silver FILTERED_OUT_SILVER rows. quarantine_run_id remains the forensic row filter and must not become a Prometheus label. Quarantine Explorer is fail-closed and forensic filters like quarantine_run_id/payload_hash stay explorer-only. A zero-reject workflow run is an intentional empty explorer state only after the datasource responds, scope is confirmed, and the bronze denominator is non-zero.</small></div></div>",
+        "content": "<div style='padding:0.7rem 0.85rem;text-align:center;line-height:1.45'><div style='display:flex;flex-wrap:wrap;justify-content:center;gap:0.5rem 1rem;font-size:1.05rem;font-weight:600'><span>Pipeline: <strong>$pipeline</strong></span><span>Run Type: <strong>$run_type</strong></span><span>Reason: <strong>$reason_code</strong></span><span>Field: <strong>$field</strong></span><span>Reject Run ID: <strong>$quarantine_run_id</strong></span></div><div style='margin-top:0.35rem'><strong style='color:#ffb347'>default 24h forensic window</strong></div><div style='margin-top:0.3rem'><small>Origin dashboards own shared workflow/run_id shell context; this explorer never owns shared workflow or run_id selectors. Select exactly one pipeline. This explorer is read-only and scoped to Silver FILTERED_OUT_SILVER rows. FILTERED_OUT_SILVER is a legacy alias for Silver structural rejects only; Gold contract and semantic rejects are not shown here and belong to the Data Quality Gold reject panels. quarantine_run_id remains the forensic row filter and must not become a Prometheus label. Quarantine Explorer is fail-closed and forensic filters like quarantine_run_id/payload_hash stay explorer-only. A zero-reject workflow run is an intentional empty explorer state only after the datasource responds, scope is confirmed, and the bronze denominator is non-zero.</small></div></div>",
         "mode": "html"
       },
       "title": "Inspect Explorer Scope",
       "type": "text",
-      "description": "Scope banner for Silver Reject Explorer. Origin dashboards own shared workflow/run_id shell context; this explorer never owns shared workflow or run_id selectors and stays pipeline/run_type forensic. quarantine_run_id remains the forensic row filter and is not a Prometheus label. Zero-reject workflow interpretation also requires a non-zero bronze denominator."
+      "description": "Scope banner for Silver Reject Explorer. Origin dashboards own shared workflow/run_id shell context; this explorer never owns shared workflow or run_id selectors and stays pipeline/run_type forensic. FILTERED_OUT_SILVER is a legacy alias for Silver structural rejects only; Gold contract and semantic rejects are intentionally excluded. quarantine_run_id remains the forensic row filter and is not a Prometheus label. Zero-reject workflow interpretation also requires a non-zero bronze denominator."
     },
     {
       "datasource": "Quarantine Explorer",
@@ -263,7 +263,7 @@
       ],
       "title": "Monitor Filtered Records Total",
       "type": "table",
-      "description": "Selected-range total Silver FILTERED_OUT_SILVER records from /ops/quarantine/filtered-stats for the current pipeline/run_type/reason_code/field/quarantine_run_id filters. 0 is normal only when Quarantine Explorer responds and the selected pipeline has valid scope; a zero-reject workflow run is therefore a legitimate empty explorer state only after the datasource responds. No data or datasource errors are UNKNOWN and require checking the health server/quarantine datasource before declaring no rejects. Non-zero means inspect top reason/field/signature and row samples."
+      "description": "Selected-range total Silver structural FILTERED_OUT_SILVER records from /ops/quarantine/filtered-stats for the current pipeline/run_type/reason_code/field/quarantine_run_id filters. FILTERED_OUT_SILVER is a legacy alias for Silver structural rejects only; Gold contract and semantic rejects are not included. 0 is normal only when Quarantine Explorer responds and the selected pipeline has valid scope; a zero-reject workflow run is therefore a legitimate empty explorer state only after the datasource responds. No data or datasource errors are UNKNOWN and require checking the health server/quarantine datasource before declaring no rejects. Non-zero means inspect top reason/field/signature and row samples."
     },
     {
       "datasource": "Quarantine Explorer",
@@ -805,7 +805,7 @@
           "expr": ""
         }
       ],
-      "description": "Shows latest 100 Silver FILTERED_OUT_SILVER records for the selected pipeline/run_type/reason_code/field/quarantine_run_id scope, sorted by ingestion_ts descending. Columns include payload_hash, run_id, run_type, reason_code, rule_type, field, operator, expected/actual, dq_status, and reason when the backend provides them; raw payload is intentionally not shown in this list. Empty-state copy: No rejected records for current filters means zero matching rows only after the pipeline/filter scope is confirmed. Backend/query failure copy: If data source query fails, treat this as an error state and inspect Grafana query error details. Use payload_hash self-drilldown for one-record focus and CLI handoff for inspect/resolve actions; verify Bronze/run/batch lineage before replay decisions.",
+      "description": "Shows latest 100 Silver structural FILTERED_OUT_SILVER records for the selected pipeline/run_type/reason_code/field/quarantine_run_id scope, sorted by ingestion_ts descending. FILTERED_OUT_SILVER is a legacy alias for Silver structural rejects only; Gold contract and semantic rejects are not included in this explorer. Columns include payload_hash, run_id, run_type, reason_code, rule_type, field, operator, expected/actual, dq_status, and reason when the backend provides them; raw payload is intentionally not shown in this list. Empty-state copy: No rejected records for current filters means zero matching rows only after the pipeline/filter scope is confirmed. Backend/query failure copy: If data source query fails, treat this as an error state and inspect Grafana query error details. Use payload_hash self-drilldown for one-record focus and CLI handoff for inspect/resolve actions; verify Bronze/run/batch lineage before replay decisions.",
       "title": "Inspect Filtered Records Table",
       "type": "table"
     },

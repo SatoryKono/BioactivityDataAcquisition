@@ -107,6 +107,10 @@ class TestQuarantineInspect:
         assert "--error-code" in result.output
         assert "--run-id" in result.output
         assert "--silver-filter-only" in result.output
+        assert "Legacy alias" in result.output
+        assert "FILTERED_OUT_SILVER" in result.output
+        assert "not Gold" in result.output
+        assert "contract/semantic rejects" in result.output
 
     def test_inspect_requires_pipeline(self, cli_runner: CliRunner) -> None:
         """Test that quarantine inspect requires --pipeline option."""
@@ -301,6 +305,10 @@ class TestQuarantineStats:
         assert "--error-code" in result.output
         assert "--run-id" in result.output
         assert "--silver-filter-only" in result.output
+        assert "Legacy alias" in result.output
+        assert "FILTERED_OUT_SILVER" in result.output
+        assert "not Gold" in result.output
+        assert "contract/semantic rejects" in result.output
         assert "--group-by" in result.output
         assert "--top" in result.output
 

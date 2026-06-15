@@ -402,7 +402,11 @@ tracing-backed log hygiene живёт в expanded row
 
 #### Silver Reject Explorer
 
-Record-level dashboard для `FILTERED_OUT_SILVER` записей (quarantine-backed, read-only datasource).
+Record-level dashboard для Silver structural `FILTERED_OUT_SILVER` записей
+(quarantine-backed, read-only datasource). `FILTERED_OUT_SILVER` is a legacy
+alias only for Silver structural rejects; Gold contract/semantic rejects are
+reviewed in `4. Data Quality` Gold reject panels and processed-records
+surfaces.
 
 - **Filtered Records Table**: полный список отфильтрованных записей с server-side filtering/pagination.
 - **Selected Record Details**: exact reject context по выбранному `payload_hash`.
@@ -473,16 +477,19 @@ Checkpoint admin workflows emit a separate bounded operator surface:
 Use them when investigating `bioetl checkpoint list|get|delete` regressions or
 operator-facing checkpoint store latency outside ordinary runtime resume paths.
 
-#### Silver Filter Rejects Handoff
+#### Silver Structural Rejects Handoff
 
 - Используйте `1. Overview` или `2. Runtime` как summary surface, чтобы
   подтвердить spike по `Track: Silver Filter Rejects in Range` в активном Grafana time range.
+  Это Silver structural path; `FILTERED_OUT_SILVER` остаётся legacy alias only.
 - После подтверждения переходите в `4. Data Quality`, где
   `Inspect: Silver Filter Rejects by Pipeline` показывает scope/distribution по
   stage-total `filtered_out`, а
   `Inspect: Top Silver Reject Reasons (Pareto)` и `Inspect: Top Silver Reject Fields` дают bounded cause
   summary без raw quarantine text.
-- Для row-level browsing переходите в `Silver Reject Explorer`.
+- Для Silver row-level browsing переходите в `Silver Reject Explorer`. Для Gold
+  contract/semantic rejects используйте Gold reject panel/processed-records
+  surfaces в `4. Data Quality`.
 - CLI остаётся execution surface для replay/resolve:
   `bioetl quarantine inspect --pipeline <pipeline> --silver-filter-only --run-id <run-id> --limit 200` и
   `bioetl quarantine resolve --pipeline <pipeline> --payload-hash <payload-hash> --status IGNORED`.

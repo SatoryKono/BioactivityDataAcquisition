@@ -27,6 +27,10 @@ from bioetl.interfaces.cli.commands.domains.quarantine.support import (
 )
 
 SILVER_FILTER_ERROR_CODE = "FILTERED_OUT_SILVER"
+SILVER_FILTER_ALIAS_HELP = (
+    "Legacy alias for --error-code FILTERED_OUT_SILVER; Silver structural "
+    "rejects only, not Gold contract/semantic rejects."
+)
 
 
 def get_quarantine_runtime_service(pipeline: str) -> _QuarantineRuntimeService:
@@ -69,7 +73,7 @@ def quarantine() -> None:
     show_default=True,
 )
 def quarantine_serve(host: str, port: int) -> None:
-    """Start the long-lived backend used by Grafana Silver Reject Explorer."""
+    """Start the backend used by Grafana Silver structural Reject Explorer."""
     run_long_lived_quarantine_backend_command(host=host, port=port)
 
 
@@ -84,7 +88,7 @@ def quarantine_serve(host: str, port: int) -> None:
 @click.option(
     "--silver-filter-only",
     is_flag=True,
-    help="Shortcut for --error-code FILTERED_OUT_SILVER",
+    help=SILVER_FILTER_ALIAS_HELP,
 )
 def quarantine_inspect(
     pipeline: str,
@@ -119,7 +123,7 @@ def quarantine_inspect(
 @click.option(
     "--silver-filter-only",
     is_flag=True,
-    help="Shortcut for --error-code FILTERED_OUT_SILVER",
+    help=SILVER_FILTER_ALIAS_HELP,
 )
 @click.option(
     "--group-by",

@@ -53,7 +53,7 @@ Detached audit backend contract:
 | 2. Runtime                | `bioetl-runtime`                | L2 diagnostic runtime triage: blockers, latency, backlog, error localization, handoffs     |
 | 3. Provider Health        | `bioetl-provider-health-v2`     | Incident triage по provider health: latency/failures/degraded/retries exhausted            |
 | 4. Data Quality           | `bioetl-dq-v2`                  | Качество данных, карантин, аномалии, freshness                                             |
-| Silver Reject Explorer    | `bioetl-silver-reject-explorer` | Record-level explorer для `filtered_out`/`FILTERED_OUT_SILVER` записей (quarantine-backed) |
+| Silver Reject Explorer    | `bioetl-silver-reject-explorer` | Record-level explorer для Silver structural `filtered_out`/legacy `FILTERED_OUT_SILVER` записей (quarantine-backed); Gold contract/semantic rejects остаются в `4. Data Quality` Gold panels |
 | 5. Workflow               | `bioetl-workflow-overview`      | Selected-range declarative workflow run/step evidence and transform-step latency handoff   |
 
 ## From where to enter each dashboard in 1 click
@@ -354,7 +354,7 @@ Compact evidence ниже первого экрана:
      threshold state, reasons, invalid-record-policy note), чтобы определить
      severity и первое действие.
   1. **L1 cause narrowing:** проверьте expanded rows `Reject / Pareto / Fields` и `Validation Failures / Runtime Diagnostics / Trends`. В reject row сначала проверьте trust guard `Monitor: Silver Filter Reject Accounting Mismatch`, затем `Inspect: Top Silver Reject Reasons (Pareto)` / `Inspect: Top Silver Reject Fields`, и только после этого переходите к pipeline distribution через `Inspect: Silver Filter Rejects by Pipeline`.
-  1. **L2 explorer:** откройте `Silver Reject Explorer` через top-level link в `4. Data Quality` для record-level списка, выбора `reason_code/field/quarantine_run_id` и detail по `payload_hash`.
+  1. **L2 explorer:** откройте `Silver Reject Explorer` через top-level link в `4. Data Quality` для Silver structural record-level списка, выбора `reason_code/field/quarantine_run_id` и detail по `payload_hash`. Для Gold contract/semantic rejects используйте Gold reject panel в `4. Data Quality`; `FILTERED_OUT_SILVER` является legacy alias только для Silver structural rejects.
   1. **L2 no-data gate:** считайте `0` rejects нормой только когда `Review: First Action / No-Data Semantics` подтверждает конкретный pipeline, доступный Quarantine Explorer и ненулевой Bronze denominator; zero-reject workflow run is a valid empty explorer state only after those checks pass. Zero matching rows остаются empty-result состоянием, а plugin errors, unsupported filter chains, `unknown` pipeline или `bronze_records=0` остаются UNKNOWN/error.
   1. Используйте quarantine CLI для action-операций (`replay/resolve/purge`) и финального подтверждения remediation.
 - Эти панели отвечают на вопросы:

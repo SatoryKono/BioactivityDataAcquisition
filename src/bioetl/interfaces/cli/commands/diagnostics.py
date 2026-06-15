@@ -8,9 +8,7 @@ from typing import TYPE_CHECKING, cast
 
 import click
 
-from bioetl.interfaces.cli.commands._run_manifest_output import (
-    render_text_payload,
-)
+from bioetl.interfaces.cli.commands._run_manifest_output import render_text_payload
 from bioetl.interfaces.cli.commands.checkpoint import _render_checkpoint_payload
 from bioetl.interfaces.cli.commands.domains.diagnostics.contract_checks import (
     render_contract_check_report,
@@ -73,6 +71,11 @@ __all__ = [
 ]
 
 _UNAVAILABLE_LINE = "  - unavailable"
+SILVER_FILTER_ERROR_CODE = "FILTERED_OUT_SILVER"
+SILVER_FILTER_ALIAS_HELP = (
+    "Legacy alias for --error-code FILTERED_OUT_SILVER; Silver structural "
+    "rejects only, not Gold contract/semantic rejects."
+)
 
 
 def get_observability_diagnostics_bundle() -> ObservabilityDiagnosticsBundle:
@@ -356,7 +359,7 @@ def diagnostics_forensic_diff(
 @click.option(
     "--silver-filter-only",
     is_flag=True,
-    help="Shortcut for --error-code FILTERED_OUT_SILVER",
+    help=SILVER_FILTER_ALIAS_HELP,
 )
 @click.option(
     "--group-by",
@@ -391,7 +394,7 @@ def diagnostics_quarantine(
 ) -> None:
     """Inspect quarantine statistics from the unified operator entrypoint."""
     bundle = get_observability_diagnostics_bundle()
-    resolved_error_code = "FILTERED_OUT_SILVER" if silver_filter_only else error_code
+    resolved_error_code = SILVER_FILTER_ERROR_CODE if silver_filter_only else error_code
     _show_quarantine_stats(
         get_quarantine_runtime_service(pipeline),
         pipeline=pipeline,
@@ -405,14 +408,6 @@ def diagnostics_quarantine(
 
 
 COMMANDS = (
-    "guide",
-    "metrics",
-    "health",
-    "run",
-    "dossier",
-    "contract-checks",
-    "checkpoint",
-    "manifest",
-    "forensic-diff",
-    "quarantine",
+    "guide", "metrics", "health", "run", "dossier", "contract-checks",
+    "checkpoint", "manifest", "forensic-diff", "quarantine",
 )

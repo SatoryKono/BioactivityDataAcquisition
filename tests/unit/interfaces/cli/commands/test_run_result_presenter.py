@@ -108,7 +108,7 @@ class TestEchoRunResultSuccess:
         )
         echo_run_result(result)
         out = capsys.readouterr().out
-        assert "Quarantined (DQ):    5" in out
+        assert "Quarantined (DQ/contract): 5" in out
         assert "WARNING" not in out
 
     def test_success_filtered_out_nonzero_prints_neutral_summary_line(
@@ -125,7 +125,7 @@ class TestEchoRunResultSuccess:
         )
         echo_run_result(result)
         out = capsys.readouterr().out
-        assert "Silver filter rejects: 5" in out
+        assert "Silver structural rejects: 5" in out
         assert "WARNING" not in out
 
     def test_success_filtered_out_zero_prints_zero_line(
@@ -142,7 +142,7 @@ class TestEchoRunResultSuccess:
         )
         echo_run_result(result)
         out = capsys.readouterr().out
-        assert "Silver filter rejects: 0" in out
+        assert "Silver structural rejects: 0" in out
 
     def test_success_quarantined_zero_prints_zero_line(
         self, capsys: pytest.CaptureFixture[str]
@@ -157,7 +157,7 @@ class TestEchoRunResultSuccess:
         )
         echo_run_result(result)
         out = capsys.readouterr().out
-        assert "Quarantined (DQ):    0" in out
+        assert "Quarantined (DQ/contract): 0" in out
         assert "WARNING" not in out
 
 
