@@ -23,6 +23,10 @@ ______________________________________________________________________
 > - auxiliary tooling setup notes that may use Docker or external services but
 >   do **not** change BioETL runtime policy.
 
+Do **not** use this subtree as the default operator path. For supported
+day-to-day runtime operation, start from [Operations README](../README.md) and
+the runbooks linked there.
+
 ## Scope Boundary
 
 BioETL's supported runtime profile remains:
@@ -74,6 +78,10 @@ python -m bioetl run <pipeline-name> --config <config-file>
 - [Operations README](../README.md)
 - [Runbooks Index](../runbooks/index.md)
 - [ADR-010 Local-Only Deployment](../../02-architecture/decisions/ADR-010-local-only-deployment.md)
+
+Repo-only drafts, experimental notes, and historical setup material may
+reference this subtree, but they do not override the supported Local-Only
+runtime posture.
 
 ## Contents
 

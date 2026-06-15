@@ -39,3 +39,14 @@ def test_quality_debt_weekly_workflow_uploads_artifacts() -> None:
     assert "Upload weekly debt artifacts" in workflow
     assert "reports/quality/debt-weekly.json" in workflow
     assert "reports/quality/debt-weekly.md" in workflow
+
+
+def test_pr_tests_workflow_runs_debt_freeze_fail_fast_checks() -> None:
+    """PR governance preflight should fail fast on debt-freeze regressions."""
+    workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")
+
+    assert "Validate technical-debt freeze ratchets" in workflow
+    assert "tests/architecture/test_compatibility_freeze_guards.py" in workflow
+    assert "tests/architecture/test_compatibility_importer_census_governance.py" in workflow
+    assert "tests/architecture/test_runtime_uuid_seam_inventory.py" in workflow
+    assert "tests/architecture/test_quality_debt_scorecard.py" in workflow

@@ -255,6 +255,15 @@ jobs:
             -   name: Validate compatibility importer census artifacts
                 run: uv run python -m scripts.engineering.qa report-compatibility-importer-census --check
 
+            -   name: Validate technical-debt freeze ratchets
+                run: |
+                    uv run pytest \
+                      tests/architecture/test_compatibility_freeze_guards.py \
+                      tests/architecture/test_compatibility_importer_census_governance.py \
+                      tests/architecture/test_runtime_uuid_seam_inventory.py \
+                      tests/architecture/test_quality_debt_scorecard.py \
+                      -q --tb=short
+
             -   name: Validate dead-code inventory artifacts
                 run: uv run python -m scripts.engineering.qa report-dead-code-inventory --check
 

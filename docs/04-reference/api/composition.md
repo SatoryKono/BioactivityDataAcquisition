@@ -23,9 +23,10 @@ This is the only layer allowed to import from both Application and Infrastructur
 See also: [ADR-005: Composition Layer Separation](../../02-architecture/decisions/ADR-005-composition-layer-separation.md)
 
 Package-root note: `bioetl.composition` is narrower than the layer as a whole.
-Its package root currently exports registry helpers, while execution/services/resource
-seams are exposed through dedicated submodules such as `entrypoints`,
-`execution_api`, `services_api`, and `resources_api`.
+Its package root currently exports registry helpers, while execution/resource
+and service-oriented seams are exposed through dedicated submodules such as
+`entrypoints`, `execution_api`, `resources_api`, `control_plane_api`,
+`health_api`, `maintenance_api`, and `observability_api`.
 
 ______________________________________________________________________
 
@@ -214,14 +215,15 @@ Current sanctioned public surfaces in `composition/`:
 
 | Module          | Policy Role                            | New Code Guidance                                                                                                   |
 | --------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `entrypoints`   | `public-entrypoint` stable public seam | Treat as execution-focused seam. For service/resource operations, import `services_api` / `resources_api` directly. |
+| `entrypoints`   | `public-entrypoint` stable public seam | Treat as execution-focused seam. For service/resource operations, import narrow owner APIs directly.                |
 | `execution_api` | Narrow execution-focused public API    | Prefer for new CLI/orchestration execution call sites.                                                              |
-| `services_api`  | Narrow services-focused public API     | Prefer for new service/bootstrap retrieval call sites.                                                              |
 | `resources_api` | Narrow resource-management public API  | Prefer for new quarantine/checkpoint/lifecycle call sites.                                                          |
 
 Internal modules `_pipeline_execution`, `_resource_management`, `_services` remain
 implementation seams behind the public modules above and are not sanctioned import paths
-outside the owning `composition` package and dedicated boundary tests. For details, see
+outside the owning `composition` package and dedicated boundary tests. The retired
+`services_api` umbrella must stay absent; service access belongs to narrow owner APIs.
+For details, see
 [Internal/Extended Material](#internalextended-material).
 
 Governance status model and exit criteria for compatibility surfaces are tracked in
@@ -235,7 +237,7 @@ This section contains references to internal implementation details and extended
 
 - **`_pipeline_execution`**: Internal implementation behind `entrypoints`/`execution_api`
 - **`_resource_management`**: Internal implementation behind `entrypoints`/`resources_api`
-- **`_services`**: Internal implementation behind `entrypoints`/`services_api`
+- **`_services`**: Internal implementation behind service-oriented owner APIs
 
 For comprehensive documentation on internal modules, see:
 
@@ -287,8 +289,9 @@ First-party source must not add imports of those deprecated symbols; they are
 retained only for external compatibility and dedicated boundary tests.
 
 When new call sites only need one capability family, import the narrower
-`execution_api`, `services_api`, or `resources_api` modules directly instead of
-expanding `entrypoints`.
+`execution_api`, `resources_api`, `control_plane_api`, `health_api`,
+`maintenance_api`, or `observability_api` modules directly instead of expanding
+`entrypoints`.
 
 ______________________________________________________________________
 
@@ -310,14 +313,13 @@ ______________________________________________________________________
 | `bootstrap_contexts`   | Context objects for bootstrap configuration                                                                                        |
 | `entrypoints`          | Retained stable public composition seam (execution-first + legacy compatibility lookup)                                            |
 | `execution_api`        | Public execution-focused composition API                                                                                           |
-| `services_api`         | Public services-focused composition API                                                                                            |
 | `resources_api`        | Public resource-management composition API                                                                                         |
 | `composite_api`        | Public composite-runtime composition API                                                                                           |
 | `observability_api`    | Public observability composition API                                                                                               |
 | `types`                | Type definitions for composition layer                                                                                             |
 | `_pipeline_execution`  | Internal implementation module behind `entrypoints`/`execution_api` (see [Internal/Extended Material](#internalextended-material)) |
 | `_resource_management` | Internal implementation module behind `entrypoints`/`resources_api` (see [Internal/Extended Material](#internalextended-material)) |
-| `_services`            | Internal implementation module behind `entrypoints`/`services_api` (see [Internal/Extended Material](#internalextended-material))  |
+| `_services`            | Internal implementation module behind service-oriented owner APIs (see [Internal/Extended Material](#internalextended-material))   |
 | `_pipeline_execution`  | Internal implementation module behind `entrypoints`/`execution_api` (see [Internal/Extended Material](#internalextended-material)) |
 | `_resource_management` | Internal implementation module behind `entrypoints`/`resources_api` (see [Internal/Extended Material](#internalextended-material)) |
-| `_services`            | Internal implementation module behind `entrypoints`/`services_api` (see [Internal/Extended Material](#internalextended-material))  |
+| `_services`            | Internal implementation module behind service-oriented owner APIs (see [Internal/Extended Material](#internalextended-material))   |

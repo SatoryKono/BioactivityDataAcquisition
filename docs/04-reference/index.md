@@ -26,6 +26,9 @@ design rationale and layer structure.
 
 - This section catalogs **published** reference entrypoints that are expected to
   stay aligned with live code, configs, and supported operator workflows.
+- Package maps under `src/**/README.md` are `code-navigation-only` repo
+  surfaces. They help contributors read the source tree but they are not the
+  canonical published reference authority.
 - Repo-only supporting material such as `docs/plans/**`, `docs/reports/**`, and
   `docs/99-archive/**` remains outside MkDocs publication and should be cited as
   repository-path context, not treated as active reference guidance.
@@ -40,6 +43,7 @@ design rationale and layer structure.
 | CLI               | Supported command-line surface                                                               | [cli.md](cli.md)                                       |
 | Workflow Catalog  | Current declarative workflow DAG catalog                                                     | [workflow-catalog.md](workflow-catalog.md)             |
 | Pipeline Catalog  | Current provider and composite pipeline config catalog                                       | [pipeline-catalog.md](pipeline-catalog.md)             |
+| Domain            | Canonical published catalog for aggregates, value objects, events, ports, invariants, and workflow lifecycle semantics | [domain/README.md](domain/README.md) |
 | Contracts         | Published contract pack for Gold, DQ, control-plane, and observability surfaces             | [contracts/README.md](contracts/README.md)             |
 | Normalization     | Published normalization governance for provider fields and IDs                               | [normalization/chembl-normalization-overview.md](normalization/chembl-normalization-overview.md) |
 | Providers         | Provider-specific published specs and current config-linked field surfaces                   | [providers/README.md](providers/README.md)             |
@@ -65,6 +69,8 @@ design rationale and layer structure.
 - [Data Contracts Current State](contracts/data-contracts-current.md)
 - [Pipeline Catalog](pipeline-catalog.md)
 - [Workflow Catalog](workflow-catalog.md)
+- [Domain Reference](domain/README.md)
+- [Workflow State Machine](domain/workflow-state-machine.md)
 - [Observability Metrics](contracts/observability.md)
 - [CLI Reference](cli.md)
 - [Gold Schemas](contracts/gold-schemas.md)

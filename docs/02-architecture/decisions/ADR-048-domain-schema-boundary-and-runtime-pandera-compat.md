@@ -66,7 +66,7 @@ compatibility in `bioetl.__init__` or
 
 The only sanctioned runtime activation seam is:
 
-- `bioetl.composition.bootstrap.runtime.compatibility.apply_runtime_compatibility_patches`
+- `bioetl.composition.bootstrap.runtime.pipeline.apply_runtime_compatibility_patches`
 
 That function delegates to the infrastructure-owned implementation:
 

@@ -53,6 +53,8 @@ Notes:
 - Path-classified bulk families MAY rely on their zone-level rule and entrypoint
   instead of per-file frontmatter.
 - Non-nav documents MUST NOT be used as the primary source of architecture or operational policy.
+- Package maps outside `docs/` (for example `src/**/README.md`) are
+  `code-navigation-only` surfaces and intentionally stay outside MkDocs nav.
 
 ______________________________________________________________________
 

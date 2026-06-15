@@ -8,6 +8,9 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay impor
     _assess_manifest_reproducibility_policy,
     _build_resume_contract,
 )
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.persistence_profile import (
+    _resolve_replay_family_contract,
+)
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_projection import (
     _build_replay_projection_bundle,
     _build_replay_projection_context_kwargs,
@@ -15,10 +18,7 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay_proje
 from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
     collect_input_snapshot_refs as _collect_input_snapshot_refs,
 )
-from bioetl.application.services.control_plane.run_manifest_diagnostics_support import (
-    _resolve_replay_family_contract,
-)
-from bioetl.application.services.control_plane.run_manifest_diagnostics_support import (
+from bioetl.application.services.control_plane.manifest.replay_family_contract_payload import (
     build_replay_family_contract_payload as _build_replay_family_contract_payload,
 )
 from bioetl.domain.control_plane import RunManifest

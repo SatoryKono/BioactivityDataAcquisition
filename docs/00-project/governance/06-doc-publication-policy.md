@@ -90,6 +90,18 @@ consistency, а этот документ задаёт правила публи
   - документ должен содержать пометку о служебном статусе;
   - нормативные утверждения должны ссылаться на `published` документы.
 
+7. `code-navigation-only`
+
+- Документ или семейство документов существует для чтения структуры кода, а не
+  как operator/reference truth surface.
+- Типичный пример: package maps в `src/**/README.md`.
+- Требования:
+  - MAY ссылаться на live package structure и import seams;
+  - MUST NOT подменять published docs как canonical source of contracts,
+    operator workflows или runtime policy;
+  - SHOULD направлять читателя в `docs/04-reference/**`,
+    `docs/02-architecture/**` или другой published entrypoint.
+
 ## Path-Classified Bulk Surfaces
 
 Для bulk / generated семейств допускается классификация по path-prefix и
@@ -113,6 +125,7 @@ consistency, а этот документ задаёт правила публи
 - unpublished bulk skill bodies / references under
   `docs/00-project/ai/skills/local/**` -> `internal-generated`
 - `reports/**` and `reports/evidence/**` -> `repo-only`
+- `src/**/README.md` package maps -> `code-navigation-only`
 
 AI runtime ownership note:
 
@@ -132,6 +145,9 @@ AI runtime ownership note:
    Для текущего project guidance источником истины остаются активные docs в `docs/00-05`.
 1. Документы класса `internal-published` публикуются для удобства команды, но не являются нормативным источником требований.
 1. Документы класса `repo-only` остаются discoverable через repository-path ссылки и curated summaries, но не должны маскироваться под nav-published guidance.
+1. `code-navigation-only` surfaces помогают читать live source tree, но не
+   должны рассматриваться как самостоятельный нормативный слой поверх
+   `published` docs.
 1. Path-classified bulk families MAY inherit class from governance policy and
    entrypoint without per-file frontmatter, если они не претендуют на
    normative status.

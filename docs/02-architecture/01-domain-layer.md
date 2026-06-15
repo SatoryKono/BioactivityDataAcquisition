@@ -22,6 +22,14 @@ ______________________________________________________________________
 для чистых cross-layer contracts и детерминированных runtime context primitives. Слой не должен зависеть от
 `application`, `infrastructure` и `interfaces`.
 
+### Published reference routing
+
+- Эта архитектурная страница остаётся объяснением структуры и rationale.
+- Canonical published catalog для live domain surfaces теперь находится в
+  [`../04-reference/domain/README.md`](../04-reference/domain/README.md).
+- `src/bioetl/domain/README.md` следует трактовать как `code-navigation-only`
+  package map, а не как operator/reference source of truth.
+
 Ключевые характеристики:
 
 - Чистота: без I/O и без инфраструктурных зависимостей.

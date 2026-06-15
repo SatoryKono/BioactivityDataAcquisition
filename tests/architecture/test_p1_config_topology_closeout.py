@@ -10,12 +10,6 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 
 CONFIG_TOPOLOGY_RATCHETS: dict[str, tuple[int, set[str]]] = {
-    "src/bioetl/composition/bootstrap/runtime/_composite_config_runtime_compat.py": (
-        35,
-        {
-            "bioetl.domain.composite.config",
-        },
-    ),
     "src/bioetl/composition/factories/pipeline/registry_manifest.py": (
         25,
         {
@@ -53,11 +47,6 @@ CONFIG_TOPOLOGY_RATCHETS: dict[str, tuple[int, set[str]]] = {
 }
 
 FORBIDDEN_IMPORT_PREFIXES: dict[str, tuple[str, ...]] = {
-    "src/bioetl/composition/bootstrap/runtime/_composite_config_runtime_compat.py": (
-        "bioetl.composition",
-        "bioetl.infrastructure.schemas.composite_config",
-        "yaml",
-    ),
     "src/bioetl/composition/factories/pipeline/registry_manifest.py": (
         "bioetl.infrastructure.config",
     ),
@@ -71,6 +60,14 @@ FORBIDDEN_IMPORT_PREFIXES: dict[str, tuple[str, ...]] = {
 
 def _path(relative_path: str) -> Path:
     return ROOT / relative_path
+
+
+@pytest.mark.architecture
+def test_retired_composite_config_runtime_compat_file_stays_absent() -> None:
+    """Composite config loading must stay owned by _composite_plan_support."""
+    assert not _path(
+        "src/bioetl/composition/bootstrap/runtime/_composite_config_runtime_compat.py"
+    ).exists()
 
 
 def _tree(relative_path: str) -> ast.Module:

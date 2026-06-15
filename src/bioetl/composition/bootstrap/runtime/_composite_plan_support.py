@@ -3,24 +3,16 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from pathlib import Path
 from typing import TYPE_CHECKING, cast
-
-from pydantic import ValidationError
 
 from bioetl.composition.bootstrap.composite_infrastructure_context import (
     CompositeInfrastructureContext,
-)
-from bioetl.composition.bootstrap.runtime._composite_config_runtime_compat import (
-    load_runtime_composite_config as _load_runtime_composite_config_impl,
 )
 from bioetl.composition.bootstrap.runtime._composite_plan_runtime_support import (
     build_bootstrap_runtime_resources,
     build_bootstrap_support_services,
     create_composite_runner_from_plan_impl,
-)
-from bioetl.infrastructure.config.composite_config_api import (
-    load_composite_config as _load_composite_config_impl,
+    load_runtime_composite_config_impl,
 )
 
 __all__ = [
@@ -38,6 +30,7 @@ __all__ = [
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+    from pathlib import Path
     from uuid import UUID
 
     import polars as pl
@@ -107,12 +100,10 @@ def load_composite_config_impl(
     resolve_config_path_fn: Callable[[str], Path],
     validate_payload: Callable[[dict[str, object]], object],
 ) -> CompositeConfig:
-    return _load_runtime_composite_config_impl(
+    return load_runtime_composite_config_impl(
         name,
         resolve_config_path_fn=resolve_config_path_fn,
-        load_config_fn=_load_composite_config_impl,
         validate_payload=validate_payload,
-        validation_error_cls=ValidationError,
     )
 
 

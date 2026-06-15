@@ -155,6 +155,9 @@ TRANSFORMER_DEPENDENCY_SHIM_PATH = (
 )
 BIOETL_PACKAGE_INIT_PATH = ROOT / "src" / "bioetl" / "__init__.py"
 COMPOSITION_PACKAGE_INIT_PATH = ROOT / "src" / "bioetl" / "composition" / "__init__.py"
+COMPOSITION_SERVICES_API_MODULE_PATH = (
+    ROOT / "src" / "bioetl" / "composition" / "services_api.py"
+)
 COMPOSITION_BOOTSTRAP_INIT_PATH = (
     ROOT / "src" / "bioetl" / "composition" / "bootstrap" / "__init__.py"
 )
@@ -533,6 +536,7 @@ ALLOWED_INTERNAL_ENTRYPOINT_TEST_FILES_BY_MODULE = {
     ),
     "bioetl.composition._services": frozenset(
         {
+            ROOT / "tests" / "unit" / "composition" / "test_canonical_module_paths.py",
             ROOT / "tests" / "unit" / "composition" / "test_services_entrypoints.py",
             ROOT / "tests" / "unit" / "composition" / "test_observability_api.py",
             ROOT
@@ -1426,6 +1430,30 @@ def test_cli_run_orchestration_singleton_stays_private_compat_owner() -> None:
 
 
 @pytest.mark.architecture
+def test_cli_command_modules_do_not_declare_patch_point_markers() -> None:
+    """Public CLI command modules must not grow compatibility patch-point markers."""
+    command_root = ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands"
+    offenders = [
+        path.relative_to(ROOT).as_posix()
+        for path in sorted(command_root.rglob("*.py"))
+        if "PATCH_POINT" in path.read_text(encoding="utf-8")
+    ]
+
+    assert not offenders, (
+        "CLI command modules must not declare compatibility PATCH_POINT markers:\n"
+        + "\n".join(offenders)
+    )
+
+
+@pytest.mark.architecture
+def test_cli_run_command_has_no_compatibility_seam_inventory() -> None:
+    """run.py retains canonical command seams but not a compatibility-seam inventory."""
+    run_source = CLI_RUN_COMMAND_PATH.read_text(encoding="utf-8")
+    assert "_RUN_CANONICAL_BOUNDARY_SEAMS" in run_source
+    assert "_RUN_COMPATIBILITY_SEAMS" not in run_source
+
+
+@pytest.mark.architecture
 @pytest.mark.parametrize(
     (
         "scope_label",
@@ -1585,6 +1613,12 @@ def test_package_level_lazy_proxy_surfaces_stay_frozen() -> None:
 def test_service_bootstraps_compat_wrapper_file_stays_removed() -> None:
     """The retired `_service_bootstraps` wrapper module must not be reintroduced."""
     assert not SERVICE_BOOTSTRAPS_COMPAT_MODULE_PATH.exists()
+
+
+@pytest.mark.architecture
+def test_services_api_compatibility_umbrella_file_stays_removed() -> None:
+    """The retired services_api umbrella must not return as a composition facade."""
+    assert not COMPOSITION_SERVICES_API_MODULE_PATH.exists()
 
 
 @pytest.mark.architecture

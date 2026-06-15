@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from importlib import import_module
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import TYPE_CHECKING, Protocol
 from uuid import UUID
 
 from bioetl.composition.observability import ObservabilityBundle
@@ -60,39 +59,6 @@ class _ObservabilityApiModule(Protocol):
     ) -> bool:
         """Start the public metrics server."""
         ...
-
-
-class OpenTelemetryTracer:
-    """Lazy compatibility patch point for legacy tests and monkeypatches."""
-
-    def __new__(cls, *args: object, **kwargs: object) -> TracingPort:
-        from bioetl.infrastructure.observability.tracing import (
-            OpenTelemetryTracer as _OpenTelemetryTracer,
-        )
-
-        return _OpenTelemetryTracer(*args, **kwargs)
-
-
-class PrometheusMetrics:
-    """Lazy compatibility patch point for legacy tests and monkeypatches."""
-
-    def __new__(cls, *args: object, **kwargs: object) -> MetricsPort:
-        from bioetl.infrastructure.observability.prometheus_metrics import (
-            PrometheusMetrics as _PrometheusMetrics,
-        )
-
-        return _PrometheusMetrics(*args, **kwargs)
-
-
-class UnifiedLogger:
-    """Lazy compatibility patch point for legacy tests and monkeypatches."""
-
-    def __new__(cls, *args: object, **kwargs: object) -> LoggerPort:
-        from bioetl.infrastructure.observability.unified_logger import (
-            UnifiedLogger as _UnifiedLogger,
-        )
-
-        return _UnifiedLogger(*args, **kwargs)
 
 
 def _create_runtime_audit_port(
@@ -171,23 +137,10 @@ def bootstrap_logger(
         Configured LoggerPort for structured pipeline logging.
     """
 
-    def _logger_factory(
-        logger_pipeline: str,
-        logger_run_id: UUID,
-        logger_level: str,
-    ) -> LoggerPort:
-        return UnifiedLogger(
-            pipeline=logger_pipeline,
-            run_id=logger_run_id,
-            log_level=logger_level,
-            json_format=True,
-        )
-
     return _bootstrap_logger_impl(
         pipeline=pipeline,
         run_id=run_id,
         log_level=log_level,
-        logger_factory=_logger_factory,
     )
 
 
@@ -208,9 +161,6 @@ def bootstrap_tracer(
     return _bootstrap_tracer_impl(
         settings=settings,
         service_name=service_name,
-        tracer_factory=lambda trace_service_name: OpenTelemetryTracer(
-            service_name=trace_service_name
-        ),
     )
 
 
@@ -225,7 +175,6 @@ def bootstrap_metrics(settings: Settings) -> MetricsPort:
     """
     return _bootstrap_metrics_impl(
         settings=settings,
-        metrics_factory=PrometheusMetrics,
     )
 
 
@@ -240,30 +189,6 @@ def maybe_start_metrics_server(settings: Settings) -> bool:
     """
     return _maybe_start_metrics_server_impl(
         settings=settings,
-    )
-
-
-def start_metrics_server(
-    port: int = 8000,
-    addr: str = "0.0.0.0",
-    *,
-    fail_fast: bool = False,
-    retry_count: int = 3,
-    retry_delay: float = 1.0,
-    logger: LoggerPort | None = None,
-) -> bool:
-    """Compatibility patch-point delegating to the composition observability seam."""
-    observability_api = cast(
-        _ObservabilityApiModule,
-        import_module("bioetl.composition.observability_api"),
-    )
-    return observability_api.start_metrics_server(
-        port=port,
-        addr=addr,
-        fail_fast=fail_fast,
-        retry_count=retry_count,
-        retry_delay=retry_delay,
-        logger=logger,
     )
 
 

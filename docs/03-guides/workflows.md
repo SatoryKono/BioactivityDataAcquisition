@@ -31,6 +31,18 @@ Use this guide when you need one stable explanation of what a workflow is, what
 it is not, and how fields, identities, and workflow control-plane artifacts are
 represented in the current codebase.
 
+## Formal Reference Surfaces
+
+Use this guide for operator narrative and end-to-end flow. Use the following
+published references for formal semantics:
+
+- [Workflow State Machine](../04-reference/domain/workflow-state-machine.md) —
+  canonical workflow/step statuses, transitions, and ambiguity semantics;
+- [Workflow Catalog](../04-reference/workflow-catalog.md) — current
+  config-backed inventory of `configs/workflows/*.yaml`;
+- [Workflow Control-Plane Recovery Runbook](../05-operations/runbooks/workflow-control-plane.md) —
+  incident-time recovery and operator procedures.
+
 
 ## Target Control-Plane Model (ADR-047)
 

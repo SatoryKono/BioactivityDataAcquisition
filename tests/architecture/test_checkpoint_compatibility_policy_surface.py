@@ -29,15 +29,6 @@ ACTIVE_SURFACES = (
     / "application"
     / "services"
     / "control_plane"
-    / "manifest"
-    / "diagnostics"
-    / "replay_helpers.py",
-    ROOT
-    / "src"
-    / "bioetl"
-    / "application"
-    / "services"
-    / "control_plane"
     / "run_manifest_reproducibility_scoring.py",
     ROOT / "docs" / "04-reference" / "cli.md",
 )

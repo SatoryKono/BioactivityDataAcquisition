@@ -44,17 +44,17 @@ def test_runtime_observability_import_does_not_load_heavy_adapters() -> None:
 class TestBootstrapLoggerPort:
     """Tests for bootstrap_logger runtime entrypoint."""
 
-    @patch("bioetl.composition.bootstrap.runtime.observability.UnifiedLogger")
+    @patch("bioetl.composition.bootstrap.runtime.logger_bootstrap._default_logger_factory")
     def test_bootstrap_logger_delegates_to_unified_logger(
         self,
-        mock_unified_logger: MagicMock,
+        mock_logger_factory: MagicMock,
     ) -> None:
         """bootstrap_logger should pass runtime metadata to UnifiedLogger."""
         from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger
 
         run_id = deterministic_uuid_from_callsite("test_observability_entrypoints")
         expected_logger = MagicMock()
-        mock_unified_logger.return_value = expected_logger
+        mock_logger_factory.return_value = expected_logger
 
         logger = bootstrap_logger(
             pipeline="test_pipeline",
@@ -63,12 +63,7 @@ class TestBootstrapLoggerPort:
         )
 
         assert logger is expected_logger
-        mock_unified_logger.assert_called_once_with(
-            pipeline="test_pipeline",
-            run_id=run_id,
-            log_level="INFO",
-            json_format=True,
-        )
+        mock_logger_factory.assert_called_once_with("test_pipeline", run_id, "INFO")
 
 
 @pytest.mark.unit

@@ -70,7 +70,20 @@ ______________________________________________________________________
 | Browse ADR registry                | [adr-registry.md](../02-architecture/adr-registry.md)                                  |
 | Need historical context            | Repository path `docs/99-archive/README.md` *(non-canonical)*                          |
 | Browse shipped dashboards           | [dashboards/README.md](../03-guides/dashboards/README.md) (coverage matrix)            |
-|| Operator dashboard triage          | [monitoring-index.md](../03-guides/dashboards/monitoring-index.md) (incident-time navigation) |
+| Operator dashboard triage          | [monitoring-index.md](../03-guides/dashboards/monitoring-index.md) (incident-time navigation) |
+| Find canonical domain catalog      | [domain/README.md](../04-reference/domain/README.md)                                   |
+| Check workflow lifecycle semantics | [workflow-state-machine.md](../04-reference/domain/workflow-state-machine.md)          |
+
+## Surface Routing
+
+- Published guidance: `docs/00-05/**`
+- Repo-only drafts and working notes: repository paths such as `docs/D-*.md`,
+  `docs/plans/**`, `docs/reports/**`, `reports/**`
+- Historical material: repository path `docs/99-archive/**`
+- Code-navigation-only package maps: `src/**/README.md`
+
+When multiple surfaces discuss the same area, prefer the published entrypoint
+first and use repo-only or code-navigation-only material as supporting context.
 
 ______________________________________________________________________
 

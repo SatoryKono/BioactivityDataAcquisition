@@ -149,20 +149,18 @@ def test_observability_runtime_public_exports_stable() -> None:
 
 
 @pytest.mark.unit
-def test_observability_runtime_patch_points_remain_available() -> None:
-    """Legacy tests monkeypatch these runtime observability symbols."""
-    expected_attrs = {
+def test_observability_runtime_patch_points_stay_removed() -> None:
+    """Runtime facade must not expose legacy observability monkeypatch aliases."""
+    retired_attrs = {
         "OpenTelemetryTracer",
         "PrometheusMetrics",
         "UnifiedLogger",
         "start_metrics_server",
     }
-    missing = [
-        name
-        for name in sorted(expected_attrs)
-        if not hasattr(observability_runtime, name)
+    offenders = [
+        name for name in sorted(retired_attrs) if hasattr(observability_runtime, name)
     ]
-    assert not missing, f"Missing observability runtime patch points: {missing}"
+    assert not offenders, f"Retired observability patch points returned: {offenders}"
 
 
 @pytest.mark.unit

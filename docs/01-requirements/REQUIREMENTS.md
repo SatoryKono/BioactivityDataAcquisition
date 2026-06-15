@@ -685,7 +685,7 @@ ______________________________________________________________________
 #### REQ-STACK-003
 
 - **Уровень**: MUST
-- **Описание**: Валидация DataFrame-контрактов выполняется через Pandera строго в boundary, определённой [ADR-048](../02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md): domain schema/contracts описываются в `src/bioetl/domain/schemas/` и `src/bioetl/domain/contracts/`, а runtime-совместимость Pandera активируется только через `bioetl.composition.bootstrap.runtime.compatibility.apply_runtime_compatibility_patches` (ownership: composition orchestration seam + infrastructure implementation).
+- **Описание**: Валидация DataFrame-контрактов выполняется через Pandera строго в boundary, определённой [ADR-048](../02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md): domain schema/contracts описываются в `src/bioetl/domain/schemas/` и `src/bioetl/domain/contracts/`, а runtime-совместимость Pandera активируется только через `bioetl.composition.bootstrap.runtime.pipeline.apply_runtime_compatibility_patches` (ownership: composition orchestration seam + infrastructure implementation).
 - **Проверка**: Проверить использование Pandera schema/contracts в разрешённых пакетах и отсутствие import-time patching в package `__init__` entrypoints.
 
 #### REQ-STACK-004

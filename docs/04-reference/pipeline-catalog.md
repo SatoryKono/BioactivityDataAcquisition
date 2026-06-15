@@ -22,6 +22,10 @@ Current source of truth:
   `src/bioetl/infrastructure/config/composite_config_api.py`
 - Composition factories: `src/bioetl/composition/factories/`
 
+This page is the config-backed inventory of active provider/entity/composite
+pipeline surfaces. It is not the architectural rationale page and it is not the
+workflow lifecycle spec.
+
 ## Summary
 
 | Family | Count | Files | Notes |
@@ -113,3 +117,20 @@ legacy semantic Silver filters:
 
 Future source-side widening must update `filters.source_profile` separately and
 prove Gold/Silver parity before changing provider extraction params.
+
+## Regeneration Workflow
+
+Refresh this page whenever any of the following changes:
+
+- `configs/entities/**/*.yaml`
+- `configs/composites/*.yaml`
+- `configs/providers/*.yaml`
+
+Revalidate the updated inventory against:
+
+1. active provider and pipeline reference pages under `docs/04-reference/`;
+2. composition/runtime owners under `src/bioetl/composition/` and
+   `src/bioetl/application/composite/`;
+3. the current workflow inventory in [workflow-catalog.md](workflow-catalog.md)
+   when declarative workflows or composite packs depend on the changed
+   pipeline/config surfaces.

@@ -1,6 +1,6 @@
 # Compatibility Importer Census
 
-- snapshot_date: 2026-06-04
+- snapshot_date: 2026-06-15
 - retained_entrypoint_count: 14
 - removed_compatibility_surface_count: 23
 - removed_compatibility_surfaces_with_src_importers: 0
@@ -27,10 +27,10 @@
 | `src/bioetl/interfaces/cli/commands/quarantine.py` | 1 | 0 |
 | `src/bioetl/interfaces/cli/commands/maintenance.py` | 0 | 0 |
 | `src/bioetl/composition/entrypoints.py` | 0 | 3 |
-| `src/bioetl/composition/health_api.py` | 5 | 2 |
+| `src/bioetl/composition/health_api.py` | 4 | 2 |
 | `src/bioetl/composition/maintenance_api.py` | 1 | 1 |
 | `src/bioetl/infrastructure/config/__init__.py` | 0 | 2 |
-| `src/bioetl/domain/composite/config.py` | 81 | 39 |
+| `src/bioetl/domain/composite/config.py` | 80 | 39 |
 | `src/bioetl/domain/value_objects/activity_values.py` | 0 | 1 |
 | `src/bioetl/application/composite/merger.py` | 5 | 5 |
 
@@ -39,7 +39,7 @@
 | Path | Public exports | Lazy exports | Duplicate exports | Resolution conflicts |
 | --- | ---: | ---: | --- | --- |
 | `src/bioetl/composition/entrypoints.py` | 15 | 15 | none | none |
-| `src/bioetl/composition/health_api.py` | 8 | 3 | none | none |
+| `src/bioetl/composition/health_api.py` | 8 | 6 | none | none |
 | `src/bioetl/composition/maintenance_api.py` | 8 | 8 | none | none |
 | `src/bioetl/infrastructure/config/__init__.py` | 18 | 5 | none | none |
 
@@ -75,7 +75,7 @@
 
 | Public module | Public src | Private src |
 | --- | ---: | ---: |
-| `bioetl.composition.lazy_exports` | 9 | 1 |
+| `bioetl.composition.lazy_exports` | 8 | 1 |
 
 ## Tracked Twin Family Ratchet
 

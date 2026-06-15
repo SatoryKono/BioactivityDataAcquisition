@@ -15,6 +15,9 @@ ______________________________________________________________________
 
 Current source of truth: `configs/workflows/*.yaml`.
 
+This page is the current declarative workflow inventory. It is not the formal
+lifecycle-state specification.
+
 Runtime model evidence:
 
 - Domain config: `src/bioetl/domain/workflow/config.py`
@@ -23,6 +26,9 @@ Runtime model evidence:
 - Runner: `src/bioetl/application/services/workflow_runner_service.py`
 - Workflow control plane:
   `src/bioetl/application/services/control_plane/workflow/`
+
+For current workflow lifecycle semantics, statuses, and repair/force behavior,
+use [Workflow State Machine](domain/workflow-state-machine.md).
 
 ## Contract
 
@@ -90,3 +96,17 @@ schema conversion in `src/bioetl/infrastructure/schemas/workflow_config.py` as
 the regression guard. Workflow documentation must not describe `tasks` or
 ledger-only resume semantics; the current YAML contract is `workflow.steps`,
 and resume/repair semantics belong to ADR-047 plus the workflow control plane.
+
+## Regeneration Workflow
+
+Refresh this page whenever `configs/workflows/*.yaml` changes.
+
+Minimum revalidation:
+
+1. confirm the updated YAML still matches
+   `src/bioetl/infrastructure/schemas/workflow_config.py`;
+2. confirm step semantics still align with
+   `src/bioetl/domain/workflow/dag.py` and
+   `src/bioetl/application/services/workflow_runner_service.py`;
+3. confirm lifecycle wording remains aligned with
+   [Workflow State Machine](domain/workflow-state-machine.md).
