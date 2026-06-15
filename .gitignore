@@ -113,6 +113,7 @@ log_test.txt
 !/reports/quality/pipeline-config-contract-ownership-map.md
 !/reports/quality/contract-coverage-matrix.json
 !/reports/quality/contract-coverage-matrix.md
+!/reports/quality/silver-gold-filter-parity-report.json
 !/reports/observability/
 /reports/observability/*
 !/reports/observability/runtime_cardinality_inventory.json
