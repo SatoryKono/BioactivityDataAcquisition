@@ -175,6 +175,7 @@ def test_debug_export_service_preserves_semantic_gold_filter_diagnostics() -> No
             "include": False,
             "reason_code": "column_filter_mismatch",
             "rule_type": "column_filters",
+            "contract_version": "1.0.0",
             "field": "bao_format",
             "operator": "not_in",
             "expected": ["BAO_0000218"],
@@ -186,7 +187,8 @@ def test_debug_export_service_preserves_semantic_gold_filter_diagnostics() -> No
     pack = service.build_pack(status="success")
     row = pack.tables["gold_rejected"][0]
 
-    assert row["reason_code"] == "SEMANTIC_FILTER_EXCLUDED"
+    assert row["reason_code"] == "gold_semantic_business_exclusion"
+    assert row["contract_version"] == "1.0.0"
     assert row["rule_id"] == "column_filters"
     assert row["failed_field"] == "bao_format"
     assert row["failed_value"] == "BAO_0000218"

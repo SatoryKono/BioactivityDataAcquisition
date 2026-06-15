@@ -221,10 +221,18 @@ class TestCompletenessCheck:
         """Completeness check fails with low fill rate."""
         df = pl.DataFrame({"id": [1, 2, 3], "name": ["a", None, None]})
 
-        result = check_completeness(df, ["id", "name"], 0.9)
+        result = check_completeness(
+            df,
+            ["id", "name"],
+            0.9,
+            contract_version="1.0.0",
+        )
 
         assert result.overall_completeness_score < 0.9
         assert result.status == DQCheckStatus.FAIL
+        assert result.reject_reasons[0].reason_code == "gold_contract_required_failure"
+        assert result.reject_reasons[0].contract_version == "1.0.0"
+        assert result.reject_reasons[0].rule_id == "gold.contract.required.name"
 
     def test_completeness_missing_field(self) -> None:
         """Completeness check handles missing required field.
@@ -289,10 +297,15 @@ class TestBusinessRulesCheck:
             }
         ]
 
-        result = check_business_rules(df, rules)
+        result = check_business_rules(df, rules, contract_version="1.0.0")
 
         assert result.rules_failed == 1
         assert result.status == DQCheckStatus.FAIL
+        assert result.rules[0].reject_reason is not None
+        assert (
+            result.rules[0].reject_reason.reason_code
+            == "gold_semantic_business_exclusion"
+        )
 
     def test_business_rules_not_null(self) -> None:
         """Test not_null condition."""
@@ -413,10 +426,16 @@ class TestReferentialIntegrityCheck:
         ref_table = pl.DataFrame({"id": [1, 2, 3]})
 
         result = check_referential_integrity(
-            df, {"category_id -> categories.id": ref_table}
+            df,
+            {"category_id -> categories.id": ref_table},
+            contract_version="1.0.0",
         )
 
         assert result.status == DQCheckStatus.FAIL
+        fk_result = result.foreign_keys["category_id -> categories.id"]
+        assert fk_result.reject_reason is not None
+        assert fk_result.reject_reason.reason_code == "gold_contract_reference_failure"
+        assert fk_result.reject_reason.contract_version == "1.0.0"
 
     def test_referential_integrity_empty_refs(self) -> None:
         """Referential integrity check passes with no references."""

@@ -14,6 +14,7 @@ from pandera.pandas import Column, DataFrameSchema
 
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import (
+    GoldContractValidationError,
     GoldSchemaPolicyByVersion,
     GoldSchemaVersionPolicy,
 )
@@ -199,6 +200,45 @@ async def test_gold_writer_dual_write_fails_fast_when_shadow_target_errors(
         active_contract_version="2.0.0",
         write_versions=("1.0.0", "2.0.0"),
     )
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_gold_writer_dual_write_validation_failure_carries_contract_version(
+    tmp_path: Path,
+    noop_logger: object,
+    strict_schema: DataFrameSchema,
+    legacy_schema: DataFrameSchema,
+) -> None:
+    writer = GoldWriter(
+        base_path=tmp_path / "gold",
+        logger=cast(LoggerPort, noop_logger),
+        runtime_services=_build_runtime_services(),
+    )
+
+    with pytest.raises(GoldContractValidationError) as exc_info:
+        await writer.write_gold(
+            table_name="chembl.activity",
+            records=[
+                {
+                    "entity_id": "CHEMBL123",
+                    "legacy_value": "old-shape",
+                    "value": "not-a-float",
+                }
+            ],
+            schema=GoldSchemaPolicyByVersion(
+                active_version="2.0.0",
+                policies=(
+                    GoldSchemaVersionPolicy(version="1.0.0", schema=legacy_schema),
+                    GoldSchemaVersionPolicy(version="2.0.0", schema=strict_schema),
+                ),
+            ),
+            mode="append",
+        )
+
+    assert exc_info.value.reject_reason.reason_code == "gold_contract_schema_failure"
+    assert exc_info.value.reject_reason.contract_version == "2.0.0"
+    assert exc_info.value.reject_reason.rule_id == "gold.contract.schema"
 
 
 @pytest.mark.integration

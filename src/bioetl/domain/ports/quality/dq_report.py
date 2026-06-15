@@ -140,6 +140,7 @@ class GoldDQAnalyzerPort(Protocol):
             dict[str, Any] | None  # Any: baseline stat values are float|int|str|None
         ) = None,
         scd_config: ScdConfig | None = None,
+        contract_version: str | None = None,
     ) -> GoldDQReport:
         """Analyze Gold data and generate DQ report.
 
@@ -156,6 +157,7 @@ class GoldDQAnalyzerPort(Protocol):
             reference_tables: Tables for referential integrity checks.
             baseline_stats: Historical baseline for anomaly detection.
             scd_config: SCD configuration if applicable.
+            contract_version: Gold contract version for reject reason payloads.
 
         Returns:
             GoldDQReport: Complete DQ report for Gold layer.

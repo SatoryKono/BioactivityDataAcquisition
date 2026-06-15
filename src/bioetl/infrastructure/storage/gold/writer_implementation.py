@@ -67,6 +67,7 @@ async def _write_single_target_impl(
             schema=request.schema,
             scd_config=request.scd_config,
             ingestion_ts=request.ingestion_ts,
+            contract_version=request.contract_version,
         )
         await writer._dispatch_write(
             _GoldWriteDispatchContext(
@@ -142,6 +143,7 @@ async def _write_dual_targets_impl(
             ingestion_ts=request.ingestion_ts,
             run_id=request.run_id,
             silver_refs=request.silver_refs,
+            contract_version=contract_version,
         )
         try:
             await writer._write_single_target(request=target_request)

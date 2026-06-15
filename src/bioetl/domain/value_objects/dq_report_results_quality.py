@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime
 
+from bioetl.domain.types import GoldRejectReason
 from bioetl.domain.value_objects.dq_report_enums import DQCheckStatus
 
 
@@ -16,6 +17,12 @@ class CompletenessResult:
     overall_completeness_score: float
     minimum_threshold: float
     status: DQCheckStatus
+    reject_reasons: tuple[GoldRejectReason, ...] = ()
+
+    def __post_init__(self) -> None:
+        """Convert lists to tuples for immutability."""
+        if isinstance(self.reject_reasons, list):
+            object.__setattr__(self, "reject_reasons", tuple(self.reject_reasons))
 
 
 @dataclass(frozen=True, slots=True)
@@ -32,6 +39,7 @@ class BusinessRuleResult:
     field: str | None = None
     severity: str | None = None
     decision: str | None = None
+    reject_reason: GoldRejectReason | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -60,6 +68,7 @@ class ForeignKeyResult:
     orphan_records: int
     status: DQCheckStatus
     note: str | None = None
+    reject_reason: GoldRejectReason | None = None
 
 
 @dataclass(frozen=True, slots=True)

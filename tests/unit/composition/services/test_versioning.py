@@ -81,11 +81,20 @@ def test_get_git_commit_falls_back_to_explicit_windows_git_executable(
 @patch("bioetl.composition.services.versioning.subprocess.run")
 def test_get_code_revision_provenance_reports_clean_state(
     mock_run: MagicMock,
+    tmp_path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     full_hash = "b" * 40
+    isolated = tmp_path / "external-cwd-clean"
+    isolated.mkdir()
+    monkeypatch.chdir(isolated)
+    monkeypatch.setattr(
+        versioning,
+        "_get_repo_dependency_lock_hash",
+        lambda: "sha256:" + "1" * 64,
+    )
     mock_run.side_effect = [
         SimpleNamespace(returncode=0, stdout=f"{full_hash}\n"),
-        SimpleNamespace(returncode=0, stdout="version = 1\n"),
         SimpleNamespace(returncode=0, stdout=""),
     ]
 
@@ -100,11 +109,20 @@ def test_get_code_revision_provenance_reports_clean_state(
 @patch("bioetl.composition.services.versioning.subprocess.run")
 def test_get_code_revision_provenance_reports_dirty_state(
     mock_run: MagicMock,
+    tmp_path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     full_hash = "c" * 40
+    isolated = tmp_path / "external-cwd-dirty"
+    isolated.mkdir()
+    monkeypatch.chdir(isolated)
+    monkeypatch.setattr(
+        versioning,
+        "_get_repo_dependency_lock_hash",
+        lambda: "sha256:" + "2" * 64,
+    )
     mock_run.side_effect = [
         SimpleNamespace(returncode=0, stdout=f"{full_hash}\n"),
-        SimpleNamespace(returncode=0, stdout="version = 1\n"),
         SimpleNamespace(returncode=1, stdout=""),
     ]
 
@@ -136,14 +154,22 @@ def test_get_code_revision_provenance_reports_documented_git_unavailable_state(
 def test_get_code_revision_provenance_uses_same_windows_git_fallback_for_dirty_check(
     mock_run: MagicMock,
     mock_candidates: MagicMock,
+    tmp_path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     full_hash = "e" * 40
+    isolated = tmp_path / "external-cwd-windows"
+    isolated.mkdir()
+    monkeypatch.chdir(isolated)
+    monkeypatch.setattr(
+        versioning,
+        "_get_repo_dependency_lock_hash",
+        lambda: "sha256:" + "3" * 64,
+    )
     mock_candidates.return_value = ("C:/Program Files/Git/cmd/git.exe",)
     mock_run.side_effect = [
         SimpleNamespace(returncode=4294967295, stdout="", stderr=""),
         SimpleNamespace(returncode=0, stdout=f"{full_hash}\n", stderr=""),
-        SimpleNamespace(returncode=4294967295, stdout="", stderr=""),
-        SimpleNamespace(returncode=0, stdout="version = 1\n", stderr=""),
         SimpleNamespace(returncode=4294967295, stdout="", stderr=""),
         SimpleNamespace(returncode=0, stdout="", stderr=""),
     ]

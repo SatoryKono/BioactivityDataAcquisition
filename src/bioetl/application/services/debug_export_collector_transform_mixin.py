@@ -5,7 +5,13 @@ from __future__ import annotations
 from collections.abc import Sequence
 from datetime import datetime
 
-from bioetl.domain.types import BatchID, BronzeRecord, ErrorType
+from bioetl.domain.types import (
+    GOLD_CONTRACT_VERSION_UNKNOWN,
+    BatchID,
+    BronzeRecord,
+    ErrorType,
+    GoldRejectReasonCode,
+)
 
 from .debug_export_collector_helpers import source_metadata_attrs
 from .debug_export_helpers import (
@@ -149,13 +155,14 @@ class DebugExportTransformRowsMixin:
                 status="rejected",
                 action="filter",
                 created_at=created_at,
-                reason_code="SEMANTIC_FILTER_EXCLUDED",
+                reason_code=_gold_filter_reason_code(detail_mapping),
                 reason_message=_gold_filter_message(detail_mapping),
                 rule_id=_gold_filter_rule_id(detail_mapping),
                 rule_layer="gold",
                 failed_field=failed_field,
                 failed_value=failed_value,
                 expected_constraint=expected_constraint,
+                contract_version=_gold_filter_contract_version(detail_mapping),
             )
         )
 
@@ -226,6 +233,28 @@ def _gold_filter_rule_id(detail_mapping: dict[str, object] | None) -> str:
     return _normalize_text(detail_mapping.get("rule_type")) or _normalize_text(
         detail_mapping.get("reason_code")
     )
+
+
+def _gold_filter_reason_code(detail_mapping: dict[str, object] | None) -> str:
+    if detail_mapping is not None:
+        existing = _normalize_text(detail_mapping.get("reason_code"))
+        if existing.startswith("gold_semantic_"):
+            return existing
+        scope = (
+            _normalize_text(detail_mapping.get("semantic_scope"))
+            or _normalize_text(detail_mapping.get("rule_type"))
+            or existing
+        ).lower()
+        if "profile" in scope:
+            return GoldRejectReasonCode.SEMANTIC_PROFILE_EXCLUSION.value
+    return GoldRejectReasonCode.SEMANTIC_BUSINESS_EXCLUSION.value
+
+
+def _gold_filter_contract_version(detail_mapping: dict[str, object] | None) -> str:
+    if detail_mapping is None:
+        return GOLD_CONTRACT_VERSION_UNKNOWN
+    contract_version = _normalize_text(detail_mapping.get("contract_version")).strip()
+    return contract_version or GOLD_CONTRACT_VERSION_UNKNOWN
 
 
 __all__ = ["DebugExportTransformRowsMixin"]

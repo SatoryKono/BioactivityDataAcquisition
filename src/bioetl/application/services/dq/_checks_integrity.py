@@ -14,7 +14,12 @@ from typing import cast
 import polars as pl
 import pyarrow as pa
 
-from bioetl.domain.types import ScdConfig
+from bioetl.domain.types import (
+    GOLD_CONTRACT_VERSION_UNKNOWN,
+    GoldRejectReasonCode,
+    ScdConfig,
+    build_gold_contract_reject_reason,
+)
 from bioetl.domain.value_objects.dq_report import (
     DQCheckStatus,
     ForeignKeyResult,
@@ -124,6 +129,8 @@ def _build_fk_result(
     local_col: str,
     ref_df: pl.DataFrame,
     ref_col: str,
+    *,
+    contract_version: str | None,
 ) -> ForeignKeyResult:
     """Compute foreign-key metrics for one mapping rule."""
     local_values = df[local_col].drop_nulls()
@@ -133,6 +140,23 @@ def _build_fk_result(
     valid_refs = int(local_values.is_in(ref_values.implode()).sum())
     orphans = total_refs - valid_refs
     status = _classify_fk_status(orphans, total_refs)
+    reject_reason = (
+        build_gold_contract_reject_reason(
+            reason_code=GoldRejectReasonCode.CONTRACT_REFERENCE_FAILURE,
+            contract_version=contract_version,
+            rule_id=f"gold.contract.reference.{local_col}.{ref_col}",
+            field=local_col,
+            message="Gold referential integrity check found orphan references",
+            details={
+                "reference": ref_key,
+                "total_references": total_refs,
+                "valid_references": valid_refs,
+                "orphan_records": orphans,
+            },
+        )
+        if orphans > 0
+        else None
+    )
 
     return ForeignKeyResult(
         reference=ref_key,
@@ -140,6 +164,7 @@ def _build_fk_result(
         valid_references=valid_refs,
         orphan_records=orphans,
         status=status,
+        reject_reason=reject_reason,
     )
 
 
@@ -153,13 +178,17 @@ def _aggregate_dq_status(statuses: list[DQCheckStatus]) -> DQCheckStatus:
 
 
 def check_referential_integrity(
-    df: pl.DataFrame, reference_tables: dict[str, pl.DataFrame | pa.Table]
+    df: pl.DataFrame,
+    reference_tables: dict[str, pl.DataFrame | pa.Table],
+    *,
+    contract_version: str | None = GOLD_CONTRACT_VERSION_UNKNOWN,
 ) -> ReferentialIntegrityResult:
     """Check foreign key references.
 
     Args:
         df: Input DataFrame.
         reference_tables: Reference tables.
+        contract_version: Gold contract version used for reject payloads.
 
     Returns:
         Check result as ReferentialIntegrityResult.
@@ -191,6 +220,7 @@ def check_referential_integrity(
             local_col=local_col,
             ref_df=ref_df,
             ref_col=ref_col,
+            contract_version=contract_version,
         )
 
     return ReferentialIntegrityResult(

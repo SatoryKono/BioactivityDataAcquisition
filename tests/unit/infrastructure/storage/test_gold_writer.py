@@ -15,7 +15,11 @@ import pytest
 from deltalake.exceptions import TableNotFoundError
 from pandera.pandas import Column, DataFrameSchema
 
-from bioetl.domain.types import GoldSchemaPolicyByVersion, GoldSchemaVersionPolicy
+from bioetl.domain.types import (
+    GoldContractValidationError,
+    GoldSchemaPolicyByVersion,
+    GoldSchemaVersionPolicy,
+)
 from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 from bioetl.infrastructure.storage.gold.runtime_helpers import (
     GoldWriterRuntimeServices,
@@ -843,13 +847,20 @@ class TestGoldWriterSchemaValidation:
             {"entity_id": "CHEMBL123"},  # Missing 'value'
         ]
 
-        with pytest.raises(ValueError, match="Schema validation failed"):
+        with pytest.raises(
+            GoldContractValidationError,
+            match="Schema validation failed",
+        ) as exc_info:
             await gold_writer.write_gold(
                 table_name="test.table",
                 records=invalid_records,
                 schema=strict_schema,
                 mode="overwrite",
             )
+        assert (
+            exc_info.value.reject_reason.reason_code == "gold_contract_required_failure"
+        )
+        assert exc_info.value.reject_reason.rule_id == "gold.contract.required_fields"
 
 
 @pytest.mark.unit

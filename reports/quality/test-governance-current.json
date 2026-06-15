@@ -3350,7 +3350,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "1466",
+        "line": "1477",
         "path": "tests/unit/infrastructure/storage/test_gold_writer.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_write_gold_merged_empty_records_returns"
@@ -3364,21 +3364,21 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "42",
+        "line": "43",
         "path": "tests/unit/infrastructure/storage/test_gold_writer_validation_mixin.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_records_non_empty"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "53",
+        "line": "54",
         "path": "tests/unit/infrastructure/storage/test_gold_writer_validation_mixin.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_scd2_requirements_non_scd2_mode_skips"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "91",
+        "line": "92",
         "path": "tests/unit/infrastructure/storage/test_gold_writer_validation_mixin.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_schema_strict_passes"
@@ -3693,8 +3693,8 @@
     "refined_assertless_tests": 0,
     "root": ".",
     "top_duplicate_test_names": [],
-    "total_test_files": 1719,
-    "total_test_functions": 20243,
+    "total_test_files": 1721,
+    "total_test_functions": 20253,
     "uuid4_call_sites": 0
   }
 }

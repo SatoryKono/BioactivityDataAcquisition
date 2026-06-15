@@ -45,6 +45,7 @@ class _GoldWriterHost(Protocol):
         schema: object,
         scd_config: ScdConfig | None,
         ingestion_ts: datetime | None,
+        contract_version: str | None = None,
     ) -> object: ...
 
     async def _dispatch_write(self, context: object) -> None: ...

@@ -357,6 +357,7 @@ class TestDQReportIntegration:
             gold_data=pl.DataFrame({"value": [-1.0, 2.0]}),
             gold_target_table="chembl.activity",
             gold_required_fields=["value"],
+            gold_contract_version="1.0.0",
             gold_business_rules=[
                 {
                     "rule_id": "R_TRACE_01",
@@ -396,6 +397,11 @@ class TestDQReportIntegration:
         assert rules[0]["field"] == "value"
         assert rules[0]["severity"] == "error"
         assert rules[0]["decision"] == "quarantine"
+        assert rules[0]["reject_reason"]["reason_code"] == (
+            "gold_semantic_business_exclusion"
+        )
+        assert rules[0]["reject_reason"]["contract_version"] == "1.0.0"
+        assert rules[0]["reject_reason"]["rule_id"] == "R_TRACE_01"
 
 
 @pytest.mark.integration

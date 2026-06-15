@@ -301,6 +301,7 @@ async def generate_gold_report(
             business_rules=context.gold_business_rules,
             baseline_stats=context.gold_baseline_stats,
             scd_config=context.gold_scd_config,
+            contract_version=context.gold_contract_version,
         )
 
     async def _write_report(report: object) -> Path:

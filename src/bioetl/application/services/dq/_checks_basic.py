@@ -18,6 +18,11 @@ from datetime import datetime
 
 import polars as pl
 
+from bioetl.domain.types import (
+    GOLD_CONTRACT_VERSION_UNKNOWN,
+    GoldRejectReasonCode,
+    build_gold_contract_reject_reason,
+)
 from bioetl.domain.value_objects.dq_report import (
     CompletenessResult,
     DataFreshnessResult,
@@ -74,6 +79,8 @@ def check_completeness(
     df: pl.DataFrame,
     required_fields: list[str],
     threshold: float,
+    *,
+    contract_version: str | None = GOLD_CONTRACT_VERSION_UNKNOWN,
 ) -> CompletenessResult:
     """Check completeness of required fields.
 
@@ -81,6 +88,7 @@ def check_completeness(
         df: Input DataFrame.
         required_fields: Required fields.
         threshold: Threshold value.
+        contract_version: Gold contract version used for reject payloads.
 
     Returns:
         Check result as CompletenessResult.
@@ -110,12 +118,30 @@ def check_completeness(
     overall_score = total_rate / count if count > 0 else 0.0
 
     status = DQCheckStatus.PASS if overall_score >= threshold else DQCheckStatus.FAIL
+    reject_reasons = ()
+    if status == DQCheckStatus.FAIL:
+        reject_reasons = tuple(
+            build_gold_contract_reject_reason(
+                reason_code=GoldRejectReasonCode.CONTRACT_REQUIRED_FAILURE,
+                contract_version=contract_version,
+                rule_id=f"gold.contract.required.{field}",
+                field=field,
+                message="Gold required-field completeness failed",
+                details={
+                    "completeness_rate": rate,
+                    "minimum_threshold": threshold,
+                },
+            )
+            for field, rate in field_rates.items()
+            if rate < threshold
+        )
 
     return CompletenessResult(
         required_fields=field_rates,
         overall_completeness_score=round(overall_score, 4),
         minimum_threshold=threshold,
         status=status,
+        reject_reasons=reject_reasons,
     )
 
 

@@ -25,6 +25,8 @@ _FACTORY_EXPORTS = frozenset(
     }
 )
 
+_SUBMODULE_EXPORTS = frozenset({"factory", "bundle"})
+
 _OBSERVABILITY_EXPORTS = frozenset(
     {
         "_create_cached_bronze_data_source",
@@ -36,6 +38,8 @@ _OBSERVABILITY_EXPORTS = frozenset(
 
 def __getattr__(name: str) -> object:
     """Expose service factory helpers lazily to avoid package import cycles."""
+    if name in _SUBMODULE_EXPORTS:
+        return import_module(f"bioetl.composition.factories.services.{name}")
     if name in _PIPELINE_CREATION_EXPORTS:
         return getattr(
             import_module("bioetl.composition.factories.pipeline.creation_support"),
@@ -63,6 +67,8 @@ __all__ = [
     "_create_cached_bronze_data_source",
     "_create_data_source",
     "_create_pipeline_with_services_impl",
+    "bundle",
     "create_data_normalization_service",
     "create_shared_metrics",
+    "factory",
 ]

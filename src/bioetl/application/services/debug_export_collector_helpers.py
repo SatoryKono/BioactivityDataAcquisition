@@ -99,6 +99,7 @@ def build_gold_rejected_row(
     reason_message: str,
     rule_id: str,
     failed_field: str,
+    contract_version: str = "",
 ) -> dict[str, object]:
     """Build one canonical Gold rejection row."""
     return _base_row(
@@ -118,6 +119,7 @@ def build_gold_rejected_row(
         rule_id=rule_id,
         rule_layer="gold",
         failed_field=failed_field,
+        contract_version=contract_version,
     )
 
 

@@ -1,12 +1,12 @@
 {
   "summary": {
     "scanned_modules": 2132,
-    "total_internal_imports": 8447,
+    "total_internal_imports": 8451,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 342,
     "violations": 0,
-    "source_fingerprint": "88855f60fac3f99a2aab4fcf50a0661aee301282c7d116be97452a4c66cf835a"
+    "source_fingerprint": "a6cfcc8f52415579c7dc4ee0d42a53402d4d35cdacd05023065a23292495f146"
   },
   "layer_edges": [
     {
@@ -18,7 +18,7 @@
     {
       "source": "application",
       "target": "domain",
-      "imports": 1238,
+      "imports": 1239,
       "allowed": true
     },
     {
@@ -48,13 +48,13 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1271,
+      "imports": 1273,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 873,
+      "imports": 874,
       "allowed": true
     },
     {
@@ -127,7 +127,7 @@
     {
       "source": "infrastructure.storage",
       "target": "domain.types",
-      "imports": 82
+      "imports": 83
     },
     {
       "source": "application.services",
@@ -137,7 +137,7 @@
     {
       "source": "application.services",
       "target": "domain.types",
-      "imports": 76
+      "imports": 77
     },
     {
       "source": "infrastructure.storage",

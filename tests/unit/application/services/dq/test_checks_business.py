@@ -110,3 +110,48 @@ class TestCheckBusinessRulesDirect:
         assert result.rules[0].passed is False
         assert result.rules[0].violations is None
         assert result.rules[0].decision == "fail"
+
+    def test_failed_business_rule_carries_gold_semantic_reject_reason(self) -> None:
+        df = pl.DataFrame({"value": [-1, 2]})
+
+        result = check_business_rules(
+            df,
+            [
+                {
+                    "rule_id": "GOLD-BUSINESS-01",
+                    "column": "value",
+                    "condition": "range",
+                    "min": 0,
+                    "decision": "quarantine",
+                }
+            ],
+            contract_version="1.2.0",
+        )
+
+        reject_reason = result.rules[0].reject_reason
+        assert reject_reason is not None
+        assert reject_reason.reason_code == "gold_semantic_business_exclusion"
+        assert reject_reason.contract_version == "1.2.0"
+        assert reject_reason.rule_id == "GOLD-BUSINESS-01"
+
+    def test_failed_profile_rule_carries_profile_semantic_reject_reason(self) -> None:
+        df = pl.DataFrame({"source_profile": ["retired"]})
+
+        result = check_business_rules(
+            df,
+            [
+                {
+                    "rule_id": "GOLD-PROFILE-01",
+                    "column": "source_profile",
+                    "condition": "in_list",
+                    "values": ["active"],
+                    "semantic_scope": "profile",
+                }
+            ],
+            contract_version="2.0.0",
+        )
+
+        reject_reason = result.rules[0].reject_reason
+        assert reject_reason is not None
+        assert reject_reason.reason_code == "gold_semantic_profile_exclusion"
+        assert reject_reason.contract_version == "2.0.0"
