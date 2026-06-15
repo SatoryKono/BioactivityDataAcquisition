@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import inspect
 import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
@@ -739,7 +740,9 @@ class _FakeHistoricalReplayUniverseService:
 
 @pytest.fixture
 def cli_runner() -> CliRunner:
-    return CliRunner(mix_stderr=False)
+    if "mix_stderr" in inspect.signature(CliRunner).parameters:
+        return CliRunner(mix_stderr=False)
+    return CliRunner()
 
 
 def _patch_run_manifest_service(monkeypatch: Any, service: object) -> None:

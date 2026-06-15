@@ -5,7 +5,7 @@ from __future__ import annotations
 import threading
 from collections.abc import Iterator, Mapping
 from importlib import import_module
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import Protocol, cast
 
 from bioetl.composition.factories.pipeline.contract_validator import create_factory
 from bioetl.composition.factories.pipeline.registry_exports import (
@@ -16,11 +16,6 @@ from bioetl.composition.factories.pipeline.registry_manifest import (
     PIPELINE_CONFIGS,
 )
 from bioetl.domain.ports import PipelineFactoryPort
-
-if TYPE_CHECKING:
-    from bioetl.composition.factories.pipeline._assembler_factory import (
-        GenericPipelineFactory,
-    )
 
 _registry_module = import_module("bioetl.composition.registry")
 PipelineDefinition = _registry_module.PipelineDefinition
