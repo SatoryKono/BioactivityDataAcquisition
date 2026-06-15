@@ -80,19 +80,36 @@ def _exported_names_from_all_assign(node: ast.Assign) -> set[str]:
 
 
 def _is_all_assignment(node: ast.AST) -> bool:
-    if not isinstance(node, ast.Assign):
-        return False
-    return any(
-        isinstance(target, ast.Name) and target.id == "__all__"
-        for target in node.targets
-    )
+    if isinstance(node, ast.Assign):
+        return any(
+            isinstance(target, ast.Name) and target.id == "__all__"
+            for target in node.targets
+        )
+    if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+        return node.target.id == "__all__"
+    return False
 
 
 def _extract_all_exports(path: Path) -> set[str]:
+    """Extract exported names from __all__, handling lazy export patterns."""
     tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
     for node in tree.body:
         if _is_all_assignment(node):
-            return _exported_names_from_all_assign(node)
+            exports = _exported_names_from_all_assign(node)
+            if exports:
+                return exports
+            # Handle lazy export pattern where __all__ is initially empty
+            # Look for _ENTITY_IMPORTS dictionary that defines lazy exports
+            for child_node in tree.body:
+                if isinstance(child_node, ast.Assign):
+                    for target in child_node.targets:
+                        if isinstance(target, ast.Name) and target.id == "_ENTITY_IMPORTS":
+                            if isinstance(child_node.value, ast.Dict):
+                                return {
+                                    key.value
+                                    for key in child_node.value.keys
+                                    if isinstance(key, ast.Constant) and isinstance(key.value, str)
+                                }
     return set()
 
 
