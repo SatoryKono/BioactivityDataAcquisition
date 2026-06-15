@@ -79,6 +79,6 @@ composition layer; the domain module no longer assembles them internally.
 ## Related docs
 
 - [Composite Validation Layer](composite-validation-layer.md)
-- [DQ Contract System](dq-contract-system.md)
+- [DQ Contract System](../contracts/dq-contracts.md)
 - [Configuration Runtime Artifacts](config-runtime-artifacts.md)
 - [Phased Migration Support](phased-migration.md)

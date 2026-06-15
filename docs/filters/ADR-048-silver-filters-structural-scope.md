@@ -23,8 +23,9 @@ ______________________________________________________________________
 > The accepted canonical ADR-048 is
 > `docs/02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md`.
 > This file is retained only as historical design rationale for the
-> silver_filters -> gold_filters migration. If filter policy needs normative
-> status, create a new ADR number.
+> silver_filters -> gold_filters migration. Normative filter-boundary
+> governance now lives in
+> `docs/02-architecture/decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md`.
 
 Current implementation snapshot (2026-06-03):
 
@@ -259,7 +260,7 @@ Summary of phases:
 
 ## Rollback
 
-- **Last known good**: pre-ADR-048 state with silver_filters accepting
+- **Last known good**: pre-retired-filter-draft state with silver_filters accepting
   semantic rules.
 - **Triggers**:
   - E2E parity test (`tests/integration/test_silver_to_gold_migration_parity.py`)
@@ -286,9 +287,9 @@ Summary of phases:
 
 ## Acceptance Criteria
 
-- [ ] New filter ADR created if normative governance is still required; do not
-      reuse accepted ADR-048
-- [ ] ADR-028 updated with footer cross-link to the new filter ADR if created
+- [x] ADR-050 created as normative filter-boundary governance; do not reuse
+      accepted ADR-048 or this retired draft
+- [x] ADR-028 updated with cross-link to ADR-050
 - [ ] Inventory baseline captured in `docs/filters/inventory-baseline.md`
 - [ ] Per-entity migration diff reviewed and approved
 - [ ] 22 active entity configs with legacy semantic `silver_filters` keys migrated or explicitly justified
@@ -304,3 +305,4 @@ Summary of phases:
 | Date       | Author      | Change                                  |
 | ---------- | ----------- | --------------------------------------- |
 | 2026-05-12 | BioETL Team | Initial draft of ADR-048 (variant D)    |
+| 2026-06-15 | Codex       | Marked ADR-050 as the canonical replacement for normative filter-boundary governance. |

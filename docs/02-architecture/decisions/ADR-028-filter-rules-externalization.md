@@ -161,6 +161,19 @@ filter-config-file: ../../entities/chembl/activity.yaml
 | `list-contains`      | dict[str, Contains] | List content filter        |
 | `exclude-if-present` | list[str]           | Exclude if field has value |
 
+### Silver Filter Types
+
+Per ADR-050, canonical Silver filters are structural admission rules only:
+
+| Filter               | Parameters | Description                         |
+| -------------------- | ---------- | ----------------------------------- |
+| `required-fields`    | list[str]  | Fields required to enter Silver     |
+| `exclude-if-present` | list[str]  | Structural exclusion before Silver  |
+
+Legacy semantic keys under `silver-filters` are accepted only during the ADR-050
+compatibility window and must be promoted to `gold-filters` before domain
+conversion.
+
 ### §3. Extraction-Level Filtering (extraction-params)
 
 #### Назначение
@@ -286,11 +299,12 @@ Define filters in Python code. Rejected because:
 | Backward compatibility | PASS   | Inline `input-filter`/`gold-filters` supported          |
 | Domain conversion      | PASS   | `FilterConfigFile.to-domain()`                          |
 | Extraction params      | PASS   | `extraction-params` section in filter YAML              |
-| Silver filters         | PASS   | `silver-filters` section now loaded from hierarchy      |
+| Silver filters         | PASS   | `silver-filters` section loaded from hierarchy; structural-only canonical scope governed by ADR-050 |
 
 ## References
 
 - ADR-027: DQ Rules Externalization (pattern reference)
+- [ADR-050: Silver Structural and Gold Semantic Filter Boundary](ADR-050-silver-structural-gold-semantic-filter-boundary.md) - narrows canonical `silver_filters` to structural admission and assigns semantic/business eligibility to `gold_filters`.
 - Domain models: `src/bioetl/domain/filtering/`
 - Schema: `src/bioetl/infrastructure/schemas/filter_config.py`
 - Loader: `src/bioetl/infrastructure/config/filter_config_loader.py`
@@ -306,6 +320,7 @@ Define filters in Python code. Rejected because:
 | 2026-02-09 | Claude Code | Added §3 Extraction-Level Filtering (extraction-params)                                                                                                                                                                                                                                        |
 | 2026-02-17 | Claude Code | Consolidated filter merge: removed legacy `load_filter_config`/`merge_filter_config` from `config_loader.py`, unified via `FilterConfigLoader._merge_hierarchy()`. All 4 filter sections (`input-filter`, `silver-filters`, `gold-filters`, `extraction-params`) now load from full hierarchy. |
 | 2026-02-17 | Claude Code | Fixed: ChEMBL provider batch-size in table: 20 → 1000 (actual provider default)                                                                                                                                                                                                                |
+| 2026-06-15 | Codex       | Cross-linked ADR-050 as the canonical Silver structural / Gold semantic filter-boundary decision that amends this ADR's filter-scope semantics.                                                                                                                                                |
 
 ## Rollout
 

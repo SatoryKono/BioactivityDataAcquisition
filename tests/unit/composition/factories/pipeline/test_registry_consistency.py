@@ -8,6 +8,9 @@ import re
 import pytest
 
 from bioetl.composition.registry_api import PipelineRegistry, create_registry
+from bioetl.composition.factories.pipeline.contract_validator import (
+    _resolve_transformer_class_ref,
+)
 from bioetl.composition.factories.pipeline.registry import (
     PIPELINE_CONFIGS,
     list_available_pipelines,
@@ -250,7 +253,7 @@ class TestTransformerClassConsistency:
     def test_all_configs_have_valid_transformer_class(self) -> None:
         """Verify each PIPELINE_CONFIG has a valid transformer class."""
         for config in PIPELINE_CONFIGS:
-            transformer_class = config.transformer_class
+            transformer_class = _resolve_transformer_class_ref(config.transformer_class)
 
             assert inspect.isclass(transformer_class), (
                 f"Pipeline {config.pipeline_name}: "

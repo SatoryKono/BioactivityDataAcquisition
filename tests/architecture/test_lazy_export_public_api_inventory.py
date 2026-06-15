@@ -27,6 +27,7 @@ EXPECTED_LAZY_EXPORT_FACADES = {
     "src/bioetl/composition/factories/__init__.py": "public_package_facade",
     "src/bioetl/composition/factories/dq/__init__.py": "public_package_facade",
     "src/bioetl/composition/factories/pipeline/__init__.py": ("public_package_facade"),
+    "src/bioetl/composition/factories/pipeline/registry.py": "public_facade",
     "src/bioetl/composition/factories/services/__init__.py": ("public_package_facade"),
     "src/bioetl/composition/factories/services/factory.py": "compatibility_facade",
     "src/bioetl/composition/providers/__init__.py": "public_package_facade",

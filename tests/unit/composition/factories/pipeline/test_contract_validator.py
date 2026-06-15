@@ -8,12 +8,35 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from bioetl.composition.factories.pipeline.contract_validator import (
+    _resolve_transformer_class_ref,
     _resolve_silver_columns,
     _schema_columns,
     _validate_contract_policy,
     create_factory,
 )
 from bioetl.composition.providers.provider_registry import create_provider_registry
+
+
+@pytest.mark.unit
+class TestResolveTransformerClassRef:
+    """Tests for manifest transformer reference resolution."""
+
+    def test_returns_none_for_none(self) -> None:
+        assert _resolve_transformer_class_ref(None) is None
+
+    def test_returns_existing_class_as_is(self) -> None:
+        class _Transformer:
+            pass
+
+        assert _resolve_transformer_class_ref(_Transformer) is _Transformer
+
+    def test_resolves_import_path_string(self) -> None:
+        resolved = _resolve_transformer_class_ref(
+            "bioetl.application.pipelines.pubchem.transformer.PubChemCompoundTransformer"
+        )
+
+        assert resolved is not None
+        assert resolved.__name__ == "PubChemCompoundTransformer"
 
 
 @pytest.mark.unit
@@ -185,6 +208,32 @@ class TestCreateFactory:
 
         assert result is not None
         assert result.pipeline_name == "test_pipe"
+
+    @patch("bioetl.composition.factories.pipeline.assembler.get_data_source_creator")
+    @patch(
+        "bioetl.composition.factories.pipeline.contract_validator._validate_contract_policy"
+    )
+    def test_create_factory_resolves_string_transformer_reference(
+        self,
+        mock_validate: MagicMock,
+        mock_get_creator: MagicMock,
+    ) -> None:
+        mock_get_creator.return_value = MagicMock()
+        config = SimpleNamespace(
+            pipeline_name="pubchem_compound",
+            provider="pubchem",
+            entity_type="compound",
+            silver_schema=None,
+            gold_schema=MagicMock(),
+            pandera_silver_schema=None,
+            transformer_class="bioetl.application.pipelines.pubchem.transformer.PubChemCompoundTransformer",
+            data_source_provider=None,
+        )
+
+        result = create_factory(config)
+
+        assert result.transformer_class is not None
+        assert result.transformer_class.__name__ == "PubChemCompoundTransformer"
 
     @patch("bioetl.composition.factories.pipeline.assembler.get_data_source_creator")
     @patch(

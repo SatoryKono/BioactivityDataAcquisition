@@ -10,7 +10,9 @@ if TYPE_CHECKING:
     from bioetl.application.core.base_transformer import BaseTransformer
 
 
-__all__ = ["PipelineFactoryConfig"]
+type TransformerClassRef = "type[BaseTransformer] | str"
+
+__all__ = ["PipelineFactoryConfig", "TransformerClassRef"]
 
 
 class PipelineFactoryConfig(NamedTuple):
@@ -19,7 +21,7 @@ class PipelineFactoryConfig(NamedTuple):
     pipeline_name: str
     provider: str
     entity_type: str
-    transformer_class: type[BaseTransformer]
+    transformer_class: TransformerClassRef
     silver_schema: pa.Schema | None
     gold_schema: object
     pandera_silver_schema: object | None = None
