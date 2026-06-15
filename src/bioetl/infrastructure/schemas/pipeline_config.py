@@ -28,6 +28,7 @@ from bioetl.infrastructure.schemas.pipeline_config_common_schemas import (
     SilverFiltersConfig,
     SinkDQReportConfig,
     SinkLayerConfig,
+    SourceProfileYamlConfig,
     TransformConfig,
 )
 from bioetl.infrastructure.schemas.pipeline_config_dq import (
@@ -71,6 +72,7 @@ __all__ = [
     "SilverFiltersConfig",
     "SinkDQReportConfig",
     "SinkLayerConfig",
+    "SourceProfileYamlConfig",
     "SourceConfig",
     "TransformConfig",
 ]
@@ -235,6 +237,13 @@ class PipelineYamlConfig(BaseModel):
         description="Server-side API query parameters for Bronze extraction (ADR-028 §3). "
         "Merged from filter config file. Keys are provider-specific query params.",
     )
+    source_profile: SourceProfileYamlConfig = Field(
+        default_factory=SourceProfileYamlConfig,
+        description=(
+            "Versioned source-side extraction policy metadata. "
+            "It fingerprints extraction_params separately from Silver filtering."
+        ),
+    )
     loading_strategy: Literal["full_scan_only"] | None = Field(
         default=None,
         description="Explicit loading strategy for the pipeline. "
@@ -303,6 +312,7 @@ class PipelineYamlConfig(BaseModel):
         self._validate_primary_key_presence()
         self._validate_technical_key_separation()
         self._validate_sink_sort_by()
+        self.source_profile.assert_matches_extraction_params(self.extraction_params)
         return self
 
     @model_validator(mode="after")

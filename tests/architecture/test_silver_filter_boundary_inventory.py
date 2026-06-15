@@ -62,6 +62,8 @@ REQUIRED_SURFACE_SYMBOLS = {
     "source_profile": {
         "extraction_params",
         "filters.extraction_params",
+        "source_profile",
+        "filters.source_profile",
     },
     "silver_config": {
         "SilverFilterConfig(",
@@ -188,6 +190,25 @@ def test_inventory_covers_every_active_silver_rule_exactly_by_name() -> None:
                 )
 
     assert not violations, "\n".join(violations)
+
+
+def test_active_silver_filters_do_not_contain_semantic_buckets() -> None:
+    """ADR-050 cleanup forbids semantic buckets under active Silver filters."""
+    semantic_buckets = {"columns", "ranges", "list_lengths", "list_contains"}
+    violations: list[str] = []
+    for relative_path, config, silver_filters in _iter_active_silver_filters():
+        pipeline_id = _pipeline_id(config)
+        for bucket in sorted(semantic_buckets):
+            payload = silver_filters.get(bucket)
+            if payload:
+                violations.append(
+                    f"{pipeline_id} ({relative_path}): silver_filters.{bucket}"
+                )
+
+    assert not violations, (
+        "Semantic filters belong in gold_filters or source_profile, not "
+        "silver_filters:\n" + "\n".join(violations)
+    )
 
 
 def test_business_only_rules_require_migration_metadata() -> None:

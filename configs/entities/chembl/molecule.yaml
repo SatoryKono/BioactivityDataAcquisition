@@ -381,20 +381,13 @@ filters:
     molecule_type: Small molecule
     structure_type: MOL
     inorganic_flag: 0
+  source_profile:
+    profile_id: chembl.molecule.curated
+    version: 1.0.0
+    status: baseline
+    extraction_params_sha256: ab560a44c3534971cf3a12391cf33f1c0db0369b207b4cc044da91235dfdd1a5
+    description: Baseline curated ChEMBL molecule extraction profile; no widening in ADR-050 cleanup.
   silver_filters:
-    ranges:
-      publication_year:
-        min: 1950
-        max: 2050
-    columns:
-      molecule_type:
-      - Small molecule
-      structure_type:
-      - MOL
-      inorganic_flag:
-      - 0
-      potential_duplicate:
-      - 0
     exclude_if_present: []
     required_fields:
     - molecule_id
@@ -402,7 +395,10 @@ filters:
   gold_filters:
     list_contains: {}
     list_lengths: {}
-    ranges: {}
+    ranges:
+      publication_year:
+        min: 1950
+        max: 2050
     columns:
       molecule_type:
       - Small molecule

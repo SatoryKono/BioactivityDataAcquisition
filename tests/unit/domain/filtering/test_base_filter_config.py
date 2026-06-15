@@ -7,16 +7,12 @@ import pytest
 from bioetl.domain.filtering.column_filter import GoldColumnFilter
 from bioetl.domain.filtering.gold_config import GoldFilterConfig
 from bioetl.domain.filtering.range_filter import GoldRangeFilter
-from bioetl.domain.filtering.silver_config import SilverFilterConfig
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize("config_cls", [GoldFilterConfig, SilverFilterConfig])
-def test_should_include_shared_logic(
-    config_cls: type[GoldFilterConfig | SilverFilterConfig],
-) -> None:
-    """Gold and Silver must evaluate records identically with same config data."""
-    config = config_cls(
+def test_gold_should_include_uses_full_filter_logic() -> None:
+    """Gold filter configs evaluate structural and semantic buckets."""
+    config = GoldFilterConfig(
         required_fields=("id",),
         exclude_if_present=("deleted",),
         column_filters=(

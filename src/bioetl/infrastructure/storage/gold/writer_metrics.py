@@ -5,6 +5,7 @@ from __future__ import annotations
 from bioetl.domain.observability_contract import normalize_observability_pipeline_label
 
 __all__ = [
+    "_gold_validation_error_type_label",
     "_gold_validation_metric_labels",
     "_gold_write_metric_labels",
     "_normalize_gold_metric_mode",
@@ -59,11 +60,17 @@ def _gold_write_metric_labels(
     return labels
 
 
+def _gold_validation_error_type_label(error: Exception) -> str:
+    if isinstance(error, ValueError):
+        return "ValueError"
+    return type(error).__name__
+
+
 def _gold_validation_metric_labels(
     request: object,
     error: Exception,
 ) -> dict[str, str]:
     return {
         **_gold_write_metric_labels(request),
-        "error_type": type(error).__name__,
+        "error_type": _gold_validation_error_type_label(error),
     }

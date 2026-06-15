@@ -24,6 +24,7 @@ import pytest
 import yaml
 
 from bioetl.domain.constants import META_FIELDS
+from bioetl.domain.models.filter import compute_extraction_params_sha256
 from bioetl.infrastructure.config.config_ci_contract import (
     COMPOSITE_ALLOWED_KEYS,
     CONTRACT_ALLOWED_KEYS,
@@ -767,6 +768,46 @@ class TestExtractionParamsAllowlist:
                 violations.append(
                     f"{path.relative_to(PROJECT_ROOT)}: unexpected extraction_params "
                     f"{extra}; allowed={sorted(allowed)}"
+                )
+        assert not violations, "\n".join(violations)
+
+    def test_non_empty_extraction_params_have_source_profile_metadata(self) -> None:
+        """Source-side narrowing requires explicit baseline source-profile metadata."""
+        violations: list[str] = []
+        for path in sorted(ENTITIES_DIR.glob("*/*.yaml")):
+            filters = _load_yaml(path).get("filters")
+            if not isinstance(filters, dict):
+                continue
+            extraction = filters.get("extraction_params")
+            if not isinstance(extraction, dict) or not extraction:
+                continue
+            source_profile = filters.get("source_profile")
+            if not isinstance(source_profile, dict):
+                violations.append(
+                    f"{path.relative_to(PROJECT_ROOT)}: missing filters.source_profile"
+                )
+                continue
+            profile_id = source_profile.get("profile_id")
+            version = source_profile.get("version")
+            status = source_profile.get("status")
+            declared_hash = source_profile.get("extraction_params_sha256")
+            actual_hash = compute_extraction_params_sha256(extraction)
+            if not isinstance(profile_id, str) or not profile_id:
+                violations.append(
+                    f"{path.relative_to(PROJECT_ROOT)}: source_profile.profile_id missing"
+                )
+            if not isinstance(version, str) or not version:
+                violations.append(
+                    f"{path.relative_to(PROJECT_ROOT)}: source_profile.version missing"
+                )
+            if status != "baseline":
+                violations.append(
+                    f"{path.relative_to(PROJECT_ROOT)}: source_profile.status={status!r}"
+                )
+            if declared_hash != actual_hash:
+                violations.append(
+                    f"{path.relative_to(PROJECT_ROOT)}: source_profile hash mismatch "
+                    f"declared={declared_hash!r} actual={actual_hash!r}"
                 )
         assert not violations, "\n".join(violations)
 

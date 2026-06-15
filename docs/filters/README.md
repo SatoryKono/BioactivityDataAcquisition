@@ -62,32 +62,29 @@ source-profile surfaces required by ADR-050 cleanup.
 - **Entities scanned**: 27
 - **Entities with `silver_filters`**: 22
 - **Entities with `gold_filters`**: 22
-- **Total rules**: 131
+- **Total rules**: 95
   - **keep_in_silver**: 95 (structural — stay in silver_filters)
-  - **move_to_gold**: 17 (semantic, missing in gold — must be moved)
-  - **duplicate**: 19 (semantic, identical in gold — drop from silver)
+  - **move_to_gold**: 0 (semantic, missing in gold — already moved)
+  - **duplicate**: 0 (semantic, identical in gold — already dropped from silver)
   - **conflict**: 0 (semantic mismatch — would require manual review)
-- **Runtime/ops/source-profile surfaces**: 96
+- **Runtime/ops/source-profile surfaces**: 113
   - **consumer_alias**: 33
   - **observability**: 11
   - **runtime_gate**: 12
   - **silver_config**: 11
-  - **source_profile**: 29
+  - **source_profile**: 46
 
-**Key finding:** zero conflicts. The migration is technically safe — no
-silver/gold semantic rule diverges between layers.
+**Key finding:** active YAML `silver_filters` are structural-only. Semantic
+rules were either moved to `gold_filters` or were already duplicated there.
+Current ChEMBL extraction narrowing is anchored separately with
+`filters.source_profile` metadata.
 
-### Where the semantic work concentrates
+### Semantic Cleanup Status
 
-| Entity | duplicate | move_to_gold | Notes |
-| ------ | --------- | ------------ | ----- |
-| `chembl.activity` | 7 | 2 | Largest semantic surface (columns + ranges) |
-| `chembl.assay` | 2 | 2 | columns + ranges |
-| `chembl.molecule` | 4 | 1 | columns + ranges |
-| `chembl.publication` | 2 | 0 | columns + ranges |
-| `chembl.target` | 1 | 0 | columns only |
-| Other 14 entities with semantic rows | 3 | 12 | Mostly one ranged semantic policy per entity |
-| Other 8 entities | 0 | 0 | Only structural rules — no semantic migration needed |
+Active entity YAML no longer carries non-empty `columns`, `ranges`,
+`list_lengths`, or `list_contains` under `filters.silver_filters`. The
+architecture guard `test_active_silver_filters_do_not_contain_semantic_buckets`
+now fails closed if semantic Silver buckets are reintroduced.
 
 ### Structural surface (`keep_in_silver`)
 
@@ -97,7 +94,7 @@ review SHOULD decide whether to deduplicate `required_fields` between silver
 (structural completeness) and gold (business critical fields), but this is
 OUT OF SCOPE for this retired filter draft.
 
-## Current implementation status (2026-06-03)
+## Current implementation status (2026-06-15)
 
 | Concern | Evidence | Status |
 | --- | --- | --- |
@@ -105,7 +102,7 @@ OUT OF SCOPE for this retired filter draft.
 | Filter file schema normalization | `src/bioetl/infrastructure/schemas/filter_config.py` | Implemented by `FilterConfigFile.promote_semantic_silver_filters()`. |
 | Entity pipeline schema normalization | `src/bioetl/infrastructure/schemas/pipeline_config.py` | Implemented by `PipelineYamlConfig.promote_semantic_silver_filters()`. |
 | Structural-only domain Silver projection | `src/bioetl/infrastructure/schemas/filter_config.py`, `src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py` | Implemented through `SilverFiltersFileConfig.to_domain()` and `SilverFiltersConfig.to_domain()`. |
-| Legacy YAML cleanup | `configs/entities/**/*.yaml` | Not complete; 22 active entity configs still contain semantic `silver_filters` keys (`columns`, `ranges`). |
+| Legacy YAML cleanup | `configs/entities/**/*.yaml` | Complete for active YAML; semantic buckets are absent from `silver_filters` and CI fails reintroduction. |
 
 ## How to regenerate the inventory
 
@@ -130,14 +127,13 @@ The script is read-only and produces three artifacts:
    compatibility changes: schema/loader auto-promotion, structural-only
    `SilverFiltersConfig.to_domain()`, and explicit rollback mode in effective
    config / run manifest / checkpoint identity.
-1. **Generate per-entity migration diff** — author
-   `scripts/migrations/migrate_silver_to_gold_filters.py` (Phase 4.1) and
-   produce `docs/filters/migration-diff-{date}.md`.
-1. **Per-entity manual review** (Phase 4.2) — only `chembl.activity` and
-   `chembl.assay` have `move_to_gold` rules; `chembl.molecule`,
-   `chembl.publication`, and `chembl.target` still need duplicate semantic
-   cleanup.
-1. **Tests + Observability + Documentation** — Phases 5-7.
+1. **YAML semantic cleanup** — complete for active entity configs; keep the
+   inventory and architecture guard current.
+1. **Source-profile rollout** — current ChEMBL extraction profiles are
+   explicitly versioned as baseline; any widening requires a separate profile
+   version and parity evidence.
+1. **Tests + Observability + Documentation** — remaining work is observability
+   wording and legacy alias cleanup.
 1. **Phased rollout** — Phase 8.
 
 ## Related documents (canonical)
@@ -170,3 +166,4 @@ The script is read-only and produces three artifacts:
 | 2026-06-03 | BioETL Team | Marked folder historical/non-canonical after accepted ADR-048 was assigned to domain schema boundary; documented current code compatibility status. |
 | 2026-06-15 | Codex       | Linked ADR-050 as canonical Silver structural / Gold semantic boundary; kept local ADR-048 file historical only. |
 | 2026-06-15 | Codex       | Refreshed inventory baseline to 27 entities and added runtime/ops/source-profile surface inventory. |
+| 2026-06-15 | Codex       | Removed semantic Silver buckets from active YAML and added baseline source-profile metadata for curated ChEMBL extraction params. |

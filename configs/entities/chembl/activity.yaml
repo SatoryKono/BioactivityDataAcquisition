@@ -520,33 +520,13 @@ filters:
     pchembl_value__isnull: false
     standard_flag: 1
     target_tax_id__isnull: false
+  source_profile:
+    profile_id: chembl.activity.curated
+    version: 1.0.0
+    status: baseline
+    extraction_params_sha256: d4c7fc76dfcd88aa075762c96795ebd6de8af735540cf28a551a6d75149e4078
+    description: Baseline curated ChEMBL activity extraction profile; no widening in ADR-050 cleanup.
   silver_filters:
-    columns:
-      standard_type:
-      - IC50
-      - Ki
-      standard_relation:
-      - '='
-      standard_units:
-      - nM
-      assay_type:
-      - B
-      - F
-      potential_duplicate:
-      - 0
-    ranges:
-      activity_id:
-        min: 1
-        max: 10000000000
-      standard_value:
-        min: 0
-        include_min: false
-      pchembl_value:
-        min: 3
-        max: 10
-      publication_year:
-        min: 1950
-        max: 2050
     required_fields:
             # Final Silver policy: unit-less activity records are quarantined
 
@@ -613,9 +593,15 @@ filters:
       potential_duplicate:
       - 0
     ranges:
+      activity_id:
+        min: 1
+        max: 10000000000
       standard_value:
         min: 0
         include_min: false
+      pchembl_value:
+        min: 3
+        max: 10
       publication_year:
         min: 1950
         max: 2050

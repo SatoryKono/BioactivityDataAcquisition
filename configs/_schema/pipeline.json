@@ -1492,7 +1492,7 @@
       "type": "object"
     },
     "SilverFiltersConfig": {
-      "description": "Schema for structural Silver filters in YAML.",
+      "description": "Schema for structural Silver filters in YAML.\n\nCanonical Silver accepts ``required_fields`` and ``exclude_if_present``.\nSemantic Gold-style keys remain parseable only for legacy boundary\ncompatibility and are promoted before domain conversion.",
       "properties": {
         "columns": {
           "additionalProperties": {
@@ -1779,6 +1779,63 @@
         }
       },
       "title": "SourceConfig",
+      "type": "object"
+    },
+    "SourceProfileYamlConfig": {
+      "additionalProperties": false,
+      "description": "Versioned source-side extraction policy metadata.",
+      "properties": {
+        "profile_id": {
+          "default": "default",
+          "description": "Stable source-profile identifier for extraction policy.",
+          "title": "Profile Id",
+          "type": "string"
+        },
+        "version": {
+          "default": "1.0.0",
+          "description": "Source-profile version; widening requires a new version.",
+          "title": "Version",
+          "type": "string"
+        },
+        "status": {
+          "default": "baseline",
+          "description": "Rollout state for this source-profile policy.",
+          "enum": [
+            "baseline",
+            "candidate",
+            "widened"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "extraction_params_sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "SHA256 over canonical filters.extraction_params payload.",
+          "title": "Extraction Params Sha256"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Human-readable source-profile scope note.",
+          "title": "Description"
+        }
+      },
+      "title": "SourceProfileYamlConfig",
       "type": "object"
     },
     "TransformConfig": {
@@ -2100,6 +2157,10 @@
       "description": "Server-side API query parameters for Bronze extraction (ADR-028 §3). Merged from filter config file. Keys are provider-specific query params.",
       "title": "Extraction Params",
       "type": "object"
+    },
+    "source_profile": {
+      "$ref": "#/$defs/SourceProfileYamlConfig",
+      "description": "Versioned source-side extraction policy metadata. It fingerprints extraction_params separately from Silver filtering."
     },
     "loading_strategy": {
       "anyOf": [

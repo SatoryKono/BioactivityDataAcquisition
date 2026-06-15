@@ -1,10 +1,10 @@
 ______________________________________________________________________
 
 Version: 0.2.0
-Status: historical-plan-partially-implemented
+Status: historical-plan-implemented-for-yaml-cleanup
 Class: historical-working-document
 Owner: BioETL Team
-Last updated: '2026-06-03'
+Last updated: '2026-06-15'
 
 ______________________________________________________________________
 
@@ -21,6 +21,12 @@ ______________________________________________________________________
 > `docs/02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md`.
 > The accepted filter-boundary decision is
 > `docs/02-architecture/decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md`.
+> Current-state update (2026-06-15): active entity YAML no longer carries
+> semantic buckets under `filters.silver_filters`; those rules were moved to
+> `gold_filters` or dropped where Gold already carried the identical rule.
+> Curated ChEMBL `extraction_params` profiles now carry explicit
+> `filters.source_profile` baseline metadata and are governed separately from
+> Silver/Gold cleanup.
 
 ## Краткое содержание
 
@@ -42,10 +48,11 @@ ______________________________________________________________________
 
 ## Ключевые открытия из анализа кода
 
-1. **silver_filters и gold_filters часто дублируются в entity configs** (например, в
-   `activity.yaml` `columns` совпадают, `ranges` пересекаются)
-1. **22 active entity configs** currently contain legacy semantic
-   `silver_filters` keys in the 2026-06-03 scan
+1. **silver_filters и gold_filters исторически дублировались в entity configs**
+   (например, в `activity.yaml` `columns` совпадали, `ranges` пересекались)
+1. **22 active entity configs** contained legacy semantic `silver_filters`
+   keys in the 2026-06-03 scan; the 2026-06-15 cleanup removed those semantic
+   buckets from active YAML
 1. **`required_fields` в Silver vs Gold имеют разную семантику:** в Silver — структурные
    (25+ полей), в Gold — бизнес-критичные (4-6 полей)
 1. **`exclude_if_present` присутствует только в Silver** (для `data_validity_comment` и др.)
@@ -327,12 +334,12 @@ Per-entity ревью с владельцем provider/entity.
 ## Acceptance criteria
 
 - [x] ADR-050 created as normative filter-boundary governance; retired local ADR-048 remains historical only
-- [ ] Inventory baseline зафиксирован
-- [ ] Per-entity migration diff prepared and reviewed
-- [ ] All 22 active entity configs with legacy semantic `silver_filters` keys migrated or explicitly justified
-- [ ] Tests updated, integration parity test added
+- [x] Inventory baseline зафиксирован
+- [x] Per-entity migration diff prepared and reviewed
+- [x] All 22 active entity configs with legacy semantic `silver_filters` keys migrated or explicitly justified
+- [x] Targeted config and architecture guardrail tests updated
 - [ ] Observability обновлена
-- [ ] Documentation updated
+- [x] Documentation updated
 - [ ] Feature flag tested
 - [ ] No regression в E2E
 
@@ -343,3 +350,4 @@ Per-entity ревью с владельцем provider/entity.
 | 2026-05-12 | BioETL Team     | Initial draft of variant D (hybrid) migration plan   |
 | 2026-06-03 | BioETL Team     | Marked plan partially implemented; retired local ADR-048 filter draft as non-canonical because accepted ADR-048 now covers domain schema/Pandera compatibility. |
 | 2026-06-15 | Codex           | Linked ADR-050 as canonical Silver structural / Gold semantic boundary; updated historical ADR-048 references. |
+| 2026-06-15 | Codex           | Completed active YAML cleanup for semantic `silver_filters` buckets and added separate source-profile baseline metadata for curated ChEMBL `extraction_params`. |

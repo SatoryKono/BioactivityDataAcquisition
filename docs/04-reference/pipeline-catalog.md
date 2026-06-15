@@ -105,11 +105,11 @@ legacy semantic Silver filters:
 
 | Surface | Evidence | Current behavior |
 | --- | --- | --- |
-| Entity YAML | `configs/entities/**/*.yaml` | 22 entity configs still include semantic `filters.silver_filters` keys such as `columns` and `ranges`. |
+| Entity YAML | `configs/entities/**/*.yaml` | Active `filters.silver_filters` are structural-only; semantic keys were moved to `gold_filters` or dropped as duplicates. |
 | Normalization helper | `src/bioetl/infrastructure/config/silver_filter_migration.py` | `normalize_silver_gold_filter_payload()` promotes semantic Silver keys into `gold_filters` and leaves Silver structural-only. |
 | Pipeline schema | `src/bioetl/infrastructure/schemas/pipeline_config.py` | `PipelineYamlConfig.promote_semantic_silver_filters()` normalizes entity payloads before validation. |
 | Domain projection | `src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py` | `SilverFiltersConfig.to_domain()` returns structural-only `SilverFilterConfig`. |
+| Source profiles | `configs/entities/chembl/*.yaml` | Curated ChEMBL `extraction_params` profiles are explicitly versioned as baseline and are not widened by Silver/Gold cleanup. |
 
-Future YAML cleanup should remove semantic keys from
-`filters.silver_filters` after parity and observability checks confirm no
-behavioral drift.
+Future source-side widening must update `filters.source_profile` separately and
+prove Gold/Silver parity before changing provider extraction params.

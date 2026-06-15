@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from bioetl.domain.medallion import GoldWriteMode
 from bioetl.domain.observability_contract import normalize_observability_pipeline_label
+from bioetl.infrastructure.storage.gold.writer_metrics import (
+    _gold_validation_error_type_label,
+)
 
 __all__ = [
     "_gold_merged_metric_labels",
@@ -61,5 +64,5 @@ def _gold_merged_validation_metric_labels(
 ) -> dict[str, str]:
     return {
         **_gold_merged_metric_labels(table_name),
-        "error_type": type(error).__name__,
+        "error_type": _gold_validation_error_type_label(error),
     }

@@ -34,6 +34,7 @@ from bioetl.infrastructure.schemas.base_schemas import (
     BaseGoldFiltersConfig,
     BaseInputFilterConfig,
 )
+from bioetl.infrastructure.schemas.source_profile_config import SourceProfileYamlConfig
 
 # =============================================================================
 # Filter Configuration File Schemas
@@ -75,13 +76,8 @@ class SilverFiltersFileConfig(BaseGoldFiltersConfig):
     migration compatibility and are promoted to ``gold_filters`` by
     ``FilterConfigFile`` before domain conversion.
 
-    Attributes:
-        columns: Column value filters with operator support.
-        ranges: Numeric range filters.
-        list_lengths: List length filters.
-        list_contains: List contains filters.
-        required_fields: Required non-null fields.
-        exclude_if_present: Exclude if field has value.
+    Canonical Silver rules are limited to ``required_fields`` and
+    ``exclude_if_present``. Do not add new semantic keys here.
     """
 
     def to_domain(self) -> SilverFilterConfig:  # type: ignore[override]
@@ -168,6 +164,13 @@ class FilterConfigFile(BaseModel):
         default_factory=dict,
         description="Server-side API query parameters for Bronze extraction (ADR-028 §3)",
     )
+    source_profile: SourceProfileYamlConfig = Field(
+        default_factory=SourceProfileYamlConfig,
+        description=(
+            "Versioned source-profile metadata for extraction_params. "
+            "This is provider request policy, not a Silver filter."
+        ),
+    )
 
     @model_validator(mode="before")
     @classmethod
@@ -207,6 +210,12 @@ class FilterConfigFile(BaseModel):
                 )
         return v
 
+    @model_validator(mode="after")
+    def validate_source_profile_hash(self) -> FilterConfigFile:
+        """Validate declared source-profile hash against extraction params."""
+        self.source_profile.assert_matches_extraction_params(self.extraction_params)
+        return self
+
     def to_domain(
         self,
     ) -> tuple[
@@ -231,4 +240,5 @@ __all__ = [
     "GoldFiltersFileConfig",
     "InputFilterFileConfig",
     "SilverFiltersFileConfig",
+    "SourceProfileYamlConfig",
 ]

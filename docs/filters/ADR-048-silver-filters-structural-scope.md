@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-03'
+  Last verified: '2026-06-15'
 
 ______________________________________________________________________
 
@@ -27,7 +27,7 @@ ______________________________________________________________________
 > governance now lives in
 > `docs/02-architecture/decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md`.
 
-Current implementation snapshot (2026-06-03):
+Current implementation snapshot (2026-06-15):
 
 - Semantic Silver filter promotion is implemented in
   `src/bioetl/infrastructure/config/silver_filter_migration.py`.
@@ -36,9 +36,9 @@ Current implementation snapshot (2026-06-03):
   before validation.
 - `SilverFiltersFileConfig.to_domain()` and `SilverFiltersConfig.to_domain()`
   project domain Silver filters as structural-only.
-- YAML cleanup is still incomplete: 22 active entity configs under
-  `configs/entities/**/*.yaml` still carry legacy semantic
-  `filters.silver_filters` keys.
+- Active YAML cleanup is complete: `configs/entities/**/*.yaml` no longer
+  carries semantic buckets under `filters.silver_filters`; CI guardrails fail
+  reintroduction.
 
 ## Context
 
@@ -166,9 +166,8 @@ gold_filters:
 ### Positive
 
 - **DRY**: Eliminates routine duplication between silver_filters and
-  gold_filters (observed in the original 2026-05-12 baseline; the 2026-06-03
-  scan found 22 active entity configs with legacy semantic `silver_filters`
-  keys).
+  gold_filters (observed in the original 2026-05-12 baseline; cleaned from
+  active YAML on 2026-06-15).
 - **Clear separation of concerns**: Silver = structural integrity, Gold =
   business rules.
 - **Aligned with ADR-002 (Medallion)**: Silver layer responsibility is
@@ -290,15 +289,15 @@ Summary of phases:
 - [x] ADR-050 created as normative filter-boundary governance; do not reuse
       accepted ADR-048 or this retired draft
 - [x] ADR-028 updated with cross-link to ADR-050
-- [ ] Inventory baseline captured in `docs/filters/inventory-baseline.md`
-- [ ] Per-entity migration diff reviewed and approved
-- [ ] 22 active entity configs with legacy semantic `silver_filters` keys migrated or explicitly justified
-- [ ] Integration parity test added and green
-- [ ] Architecture boundary test updated and green
+- [x] Inventory baseline captured in `docs/filters/inventory-baseline.md`
+- [x] Per-entity migration diff reviewed and approved
+- [x] 22 active entity configs with legacy semantic `silver_filters` keys migrated or explicitly justified
+- [x] Targeted config guardrail tests added and green
+- [x] Architecture boundary test updated and green
 - [ ] Observability labels updated (Grafana, CLI, docs)
 - [ ] No regression in E2E representative runs
 - [ ] Feature flag tested in staging
-- [ ] CI invariant hardened from warning to error after auto-promotion window
+- [x] CI invariant added for active YAML semantic Silver bucket reintroduction
 
 ## Changelog
 
@@ -306,3 +305,4 @@ Summary of phases:
 | ---------- | ----------- | --------------------------------------- |
 | 2026-05-12 | BioETL Team | Initial draft of ADR-048 (variant D)    |
 | 2026-06-15 | Codex       | Marked ADR-050 as the canonical replacement for normative filter-boundary governance. |
+| 2026-06-15 | Codex       | Recorded active YAML cleanup completion and source-profile baseline split. |

@@ -11,6 +11,7 @@ FILTER_SECTIONS: tuple[str, ...] = (
     "silver_filters",
     "gold_filters",
     "extraction_params",
+    "source_profile",
 )
 
 

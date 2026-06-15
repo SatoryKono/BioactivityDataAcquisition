@@ -19,6 +19,7 @@ from bioetl.domain.types import ScdConfig
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
+    from bioetl.domain.models.filter import SourceProfile
 
 __all__ = [
     "FieldCoercionPolicy",
@@ -87,6 +88,7 @@ class PipelineConfig:
     column_groups: tuple[ColumnGroupConfig, ...] = ()
     data_schema: DataSchemaConfig | None = None
     field_policy: tuple[FieldPolicyConfig, ...] = ()
+    source_profile: SourceProfile | None = None
 
     # Data Quality
     dq: DQConfig = field(default_factory=DQConfig)

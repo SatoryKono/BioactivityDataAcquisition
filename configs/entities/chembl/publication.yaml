@@ -411,22 +411,13 @@ filters:
     doc_type: PUBLICATION
     year__gte: 1950
     year__lte: 2050
+  source_profile:
+    profile_id: chembl.publication.curated
+    version: 1.0.0
+    status: baseline
+    extraction_params_sha256: d9dec3600fd2f00e1c7b639e53ca8e8a80c6f8af6eb6a7ab957399196dba3975
+    description: Baseline curated ChEMBL publication extraction profile; no widening in ADR-050 cleanup.
   silver_filters:
-        # Source-specific filter: ChEMBL publication pipeline currently scoped
-
-
-
-        # to journal-article only. This is NOT a global publication type constraint.
-
-
-
-    columns:
-      publication_type:
-      - journal-article
-    ranges:
-      publication_year:
-        min: 1950
-        max: 2050
     exclude_if_present: []
     required_fields:
     - publication_id

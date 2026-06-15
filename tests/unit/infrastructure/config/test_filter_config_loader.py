@@ -20,6 +20,26 @@ from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
 pytestmark = pytest.mark.unit
 
 
+def _write_minimal_filter_defaults(configs_root: Path) -> None:
+    """Write the minimal base filter defaults required by FilterConfigLoader."""
+    base_root = configs_root / "base"
+    base_root.mkdir(parents=True)
+    (base_root / "pipeline.yaml").write_text(
+        """
+version: "1.0.0"
+filter_defaults:
+  gold_filters:
+    required_fields: []
+    columns: {}
+    ranges: {}
+    list_lengths: {}
+    list_contains: {}
+    exclude_if_present: []
+""",
+        encoding="utf-8",
+    )
+
+
 @pytest.fixture
 def test_configs_root__infrastructure_config_test_filter_config_loader_22(
     tmp_path: Path,
@@ -355,6 +375,75 @@ filters:
             "standard_units",
         }
 
+    def test_gold_filter_wins_when_legacy_silver_semantic_rule_conflicts(
+        self,
+        tmp_path: Path,
+    ) -> None:
+        """Explicit Gold semantics must not be overwritten by legacy Silver."""
+        _write_minimal_filter_defaults(tmp_path)
+        entities = tmp_path / "entities" / "chembl"
+        entities.mkdir(parents=True)
+        (entities / "activity.yaml").write_text(
+            """
+version: "1.0.0"
+provider: chembl
+entity: activity
+filters:
+  silver_filters:
+    columns:
+      standard_type: [IC50]
+  gold_filters:
+    columns:
+      standard_type: [Ki]
+""",
+            encoding="utf-8",
+        )
+
+        loader = FilterConfigLoader(tmp_path)
+        _, silver_filters, gold_filters, _ = loader.load("chembl", "activity")
+        merged = loader.load_as_dict("chembl", "activity")
+
+        assert silver_filters.column_filters == ()
+        assert gold_filters.column_filters[0].values == frozenset({"Ki"})
+        assert merged["gold_filters"]["columns"]["standard_type"] == ["Ki"]
+
+    def test_inline_semantic_silver_overrides_are_normalized_like_files(
+        self,
+        tmp_path: Path,
+    ) -> None:
+        """Inline overrides follow the same promotion path as file YAML."""
+        _write_minimal_filter_defaults(tmp_path)
+
+        loader = FilterConfigLoader(tmp_path)
+        _, silver_filters, gold_filters, _ = loader.load(
+            "chembl",
+            "activity",
+            inline_overrides={
+                "silver_filters": {
+                    "required_fields": ["activity_id"],
+                    "columns": {"standard_type": ["IC50"]},
+                }
+            },
+        )
+        merged = loader.load_as_dict(
+            "chembl",
+            "activity",
+            inline_overrides={
+                "silver_filters": {
+                    "required_fields": ["activity_id"],
+                    "columns": {"standard_type": ["IC50"]},
+                }
+            },
+        )
+
+        assert silver_filters.required_fields == ("activity_id",)
+        assert silver_filters.column_filters == ()
+        assert [rule.column for rule in gold_filters.column_filters] == [
+            "standard_type"
+        ]
+        assert merged["silver_filters"] == {"required_fields": ["activity_id"]}
+        assert merged["gold_filters"]["columns"]["standard_type"] == ["IC50"]
+
 
 class TestFilterConfigLoaderInlineOverrides:
     """Tests for inline override handling."""
@@ -444,6 +533,38 @@ class TestFilterConfigLoaderCaching:
 
         assert config1 != config2
         assert len(loader._cache) == 2
+
+    def test_load_as_dict_mutation_does_not_pollute_cached_domain_config(
+        self,
+        tmp_path: Path,
+    ) -> None:
+        """Raw dict callers must not be able to mutate cached domain filters."""
+        _write_minimal_filter_defaults(tmp_path)
+        entities = tmp_path / "entities" / "chembl"
+        entities.mkdir(parents=True)
+        (entities / "activity.yaml").write_text(
+            """
+version: "1.0.0"
+provider: chembl
+entity: activity
+filters:
+  silver_filters:
+    required_fields: [activity_id]
+    columns:
+      standard_type: [IC50]
+""",
+            encoding="utf-8",
+        )
+
+        loader = FilterConfigLoader(tmp_path)
+        _, cached_silver, cached_gold, _ = loader.load("chembl", "activity")
+        normalized = loader.load_as_dict("chembl", "activity")
+        normalized["gold_filters"]["columns"]["standard_type"] = ["Ki"]
+        _, silver_again, gold_again, _ = loader.load("chembl", "activity")
+
+        assert cached_silver == silver_again
+        assert cached_gold == gold_again
+        assert gold_again.column_filters[0].values == frozenset({"IC50"})
 
 
 class TestFilterConfigLoaderErrors:

@@ -333,19 +333,13 @@ filters:
     confidence_score__gte: 8
     relationship_type: D
     target_chembl_id__isnull: false
+  source_profile:
+    profile_id: chembl.assay.curated
+    version: 1.0.0
+    status: baseline
+    extraction_params_sha256: 891e1c271632b4527961f04aaa0aa24ca258c5fa817cf9a565600f1db0c6bcee
+    description: Baseline curated ChEMBL assay extraction profile; no widening in ADR-050 cleanup.
   silver_filters:
-    columns:
-      assay_type:
-      - B
-      - F
-      relationship_type:
-      - D
-      src_id:
-      - '1'
-    ranges:
-      confidence_score:
-        min: 8
-        max: 9
     exclude_if_present: []
     required_fields:
     - assay_id
@@ -360,11 +354,16 @@ filters:
   gold_filters:
     list_contains: {}
     list_lengths: {}
-    ranges: {}
+    ranges:
+      confidence_score:
+        min: 8
+        max: 9
     columns:
       assay_type:
       - B
       - F
+      relationship_type:
+      - D
       confidence_score:
       - 8
       - 9

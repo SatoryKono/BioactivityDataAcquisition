@@ -11,7 +11,10 @@ from __future__ import annotations
 import pytest
 
 from bioetl.domain.filtering import SilverFilterConfig
-from bioetl.domain.models.filter import ExtractionParams
+from bioetl.domain.models.filter import (
+    ExtractionParams,
+    compute_extraction_params_sha256,
+)
 from bioetl.infrastructure.schemas.filter_config import FilterConfigFile
 
 
@@ -145,6 +148,46 @@ class TestExtractionParamsToDomain:
         result = config.to_domain()
 
         assert len(result) == 4
+
+
+class TestSourceProfileMetadata:
+    """Tests for source-profile metadata bound to extraction_params."""
+
+    def test_source_profile_hash_matches_extraction_params(self) -> None:
+        params = {
+            "standard_type__in": "IC50,Ki",
+            "potential_duplicate": 0,
+        }
+        config = FilterConfigFile.model_validate(
+            {
+                "extraction_params": params,
+                "source_profile": {
+                    "profile_id": "chembl.activity.curated",
+                    "version": "v1.0.0",
+                    "status": "baseline",
+                    "extraction_params_sha256": compute_extraction_params_sha256(
+                        params
+                    ),
+                },
+            }
+        )
+
+        assert config.source_profile.profile_id == "chembl.activity.curated"
+        assert config.source_profile.version == "1.0.0"
+
+    def test_source_profile_hash_drift_is_rejected(self) -> None:
+        with pytest.raises(Exception, match="source_profile.extraction_params_sha256"):
+            FilterConfigFile.model_validate(
+                {
+                    "extraction_params": {"standard_type__in": "IC50,Ki"},
+                    "source_profile": {
+                        "profile_id": "chembl.activity.curated",
+                        "version": "1.0.0",
+                        "status": "baseline",
+                        "extraction_params_sha256": "0" * 64,
+                    },
+                }
+            )
 
 
 class TestSilverFilterMigration:

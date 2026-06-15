@@ -18,7 +18,14 @@ ______________________________________________________________________
 **Decision makers:** @BioETL-Team
 **Related:** ADR-002, ADR-014, ADR-017, ADR-018, ADR-028, ADR-042, ADR-044, ADR-045, ADR-046, ADR-047
 **Amends:** ADR-028 (Filter Rules Externalization)
-**Source issue:** [#5112](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5112)
+**Source issues:** [#5112](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5112),
+[#5116](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5116),
+[#5117](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5117),
+[#5118](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5118),
+[#5119](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5119),
+[#5114](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5114),
+[#5115](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5115),
+[#5120](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5120)
 
 ## Context (ADR-002, ADR-018, ADR-028)
 
@@ -29,10 +36,11 @@ filter rules into the unified configuration hierarchy, but historical
 `silver_filters` and `gold_filters` shared semantic operator shapes such as
 `columns`, `ranges`, `list_lengths`, and `list_contains`.
 
-That overlap left the boundary ambiguous. Some active entity configs still carry
-legacy semantic rules under `filters.silver_filters`, while current
-infrastructure already normalizes those rules through
-`src/bioetl/infrastructure/config/silver_filter_migration.py`.
+That overlap left the boundary ambiguous. Historical entity configs carried
+legacy semantic rules under `filters.silver_filters`; current infrastructure
+normalizes those rules through
+`src/bioetl/infrastructure/config/silver_filter_migration.py`, and active YAML
+no longer carries semantic Silver buckets.
 
 The retired working draft
 `docs/filters/ADR-048-silver-filters-structural-scope.md` captured the original
@@ -70,7 +78,10 @@ structural admission and Gold semantic eligibility.
 Any change that widens or narrows `extraction_params` is a source-profile change
 and must be reviewed separately from the Silver-to-Gold semantic filter
 migration. When source-profile behavior changes, execution identity and replay
-surfaces must stay deterministic under ADR-014 and ADR-044.
+surfaces must stay deterministic under ADR-014 and ADR-044. Curated source
+profiles are versioned under `filters.source_profile` with an
+extraction-parameter SHA-256; the metadata is part of the validated effective
+configuration rather than a separate runtime identity field.
 
 ## Compatibility Window (ADR-014, ADR-044, ADR-046, ADR-047)
 
@@ -80,8 +91,9 @@ runtime mode is `structural_only_auto_promote`:
 
 1. Semantic Silver rules are promoted into Gold filter payloads before domain
    conversion.
-1. Domain Silver filter objects used by runtime code contain only structural
-   rules.
+1. Domain Silver filter runtime evaluation uses only structural rules, even if
+   direct construction or legacy compatibility surfaces still carry semantic
+   buckets.
 1. Effective config, run manifest, execution fingerprint, and checkpoint
    compatibility payloads must record the compatibility mode.
 1. Gold wins when a legacy Silver semantic rule conflicts with an explicit Gold
@@ -158,8 +170,9 @@ After cleanup, new semantic Silver rules are governance violations.
 
 ### Negative
 
-- Current YAML configs still require cleanup or reviewed exceptions for legacy
-  semantic Silver keys.
+- Compatibility normalization remains necessary for historical payloads and
+  file-level compatibility surfaces, even though active YAML is now
+  structural-only at Silver.
 - Metrics, dashboards, and CLI wording need follow-up work because historical
   names imply broader Silver reject semantics.
 - The compatibility window adds temporary complexity to config identity and
@@ -205,6 +218,9 @@ Implementation and follow-up work must verify:
   historical context only.
 - Targeted search finds no stale references that cite the retired ADR-048 draft
   as accepted Silver-filter governance.
+- Active entity YAML does not carry semantic buckets under
+  `filters.silver_filters`, and non-empty `extraction_params` carry matching
+  `filters.source_profile` baseline metadata.
 - The compatibility-surface guardrail includes this ADR.
 - Documentation link checks pass or report pre-existing unrelated failures.
 

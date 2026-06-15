@@ -63,6 +63,7 @@ from bioetl.infrastructure.schemas.filter_config import (
     GoldFiltersFileConfig,
     InputFilterFileConfig,
 )
+from bioetl.infrastructure.schemas.source_profile_config import SourceProfileYamlConfig
 
 __all__ = [
     "BaseApiConfig",
@@ -95,5 +96,6 @@ __all__ = [
     "MergeSchema",
     "RetrySchema",
     "SeedSchema",
+    "SourceProfileYamlConfig",
     "ThresholdsConfig",
 ]

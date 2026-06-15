@@ -7,7 +7,11 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.domain.models.filter import ExtractionParams
+from bioetl.domain.models.filter import (
+    ExtractionParams,
+    SourceProfile,
+    compute_extraction_params_sha256,
+)
 
 
 @pytest.mark.unit
@@ -105,3 +109,34 @@ class TestExtractionParams:
         ep2 = ExtractionParams(params={"key": "value"})
 
         assert ep1 == ep2
+
+
+@pytest.mark.unit
+class TestSourceProfile:
+    """Tests for source-profile extraction policy metadata."""
+
+    def test_extraction_params_sha256_is_key_order_stable(self) -> None:
+        """Equivalent extraction params must hash identically regardless of order."""
+        left = {"standard_type__in": "IC50,Ki", "potential_duplicate": 0}
+        right = {"potential_duplicate": 0, "standard_type__in": "IC50,Ki"}
+
+        assert compute_extraction_params_sha256(left) == (
+            compute_extraction_params_sha256(right)
+        )
+
+    def test_extraction_params_sha256_changes_when_profile_policy_changes(self) -> None:
+        """Changing source-side query policy must perturb the source-profile hash."""
+        baseline = {"standard_type__in": "IC50,Ki"}
+        widened = {"standard_type__in": "IC50,Ki,Kd"}
+
+        assert compute_extraction_params_sha256(baseline) != (
+            compute_extraction_params_sha256(widened)
+        )
+
+    def test_source_profile_defaults_to_baseline(self) -> None:
+        """SourceProfile defaults describe an unversioned no-op source policy."""
+        profile = SourceProfile()
+
+        assert profile.profile_id == "default"
+        assert profile.version == "1.0.0"
+        assert profile.status == "baseline"

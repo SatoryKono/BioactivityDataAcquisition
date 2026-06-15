@@ -6,6 +6,7 @@ import pytest
 
 from bioetl.domain.config import FieldPolicyConfig, PipelineConfig
 from bioetl.domain.medallion import SilverWriteMode
+from bioetl.domain.models.filter import compute_extraction_params_sha256
 from bioetl.infrastructure.config._base import yaml_config_to_domain
 from bioetl.infrastructure.schemas.pipeline_config import DQYamlConfig as YamlDQConfig
 from bioetl.infrastructure.schemas.pipeline_config import (
@@ -114,6 +115,35 @@ def test_pipeline_yaml_config_promotes_semantic_silver_filters_to_gold() -> None
         "status",
         "tier",
     }
+
+
+def test_yaml_config_to_domain_maps_source_profile() -> None:
+    """Source-profile metadata must be part of resolved domain config."""
+    extraction_params = {"standard_type__in": "IC50,Ki"}
+    yaml_config = PipelineYamlConfig.model_validate(
+        {
+            "pipeline_name": "test_pipeline",
+            "provider": "test",
+            "entity_type": "entity",
+            "business_primary_keys": ["id"],
+            "silver_table": "silver.test",
+            "extraction_params": extraction_params,
+            "source_profile": {
+                "profile_id": "test.entity.curated",
+                "version": "1.0.0",
+                "status": "baseline",
+                "extraction_params_sha256": compute_extraction_params_sha256(
+                    extraction_params
+                ),
+            },
+        }
+    )
+
+    domain_config = yaml_config_to_domain(yaml_config)
+
+    assert domain_config.source_profile is not None
+    assert domain_config.source_profile.profile_id == "test.entity.curated"
+    assert domain_config.source_profile.version == "1.0.0"
 
 
 def test_pipeline_yaml_config_accepts_field_policy() -> None:

@@ -154,8 +154,8 @@ the narrow domain storage ports for one pipeline service bundle.
 Observed facts:
 
 - `configs/entities/**/*.yaml` contains 27 entity pipeline configs; 22 of them
-  currently include `filters.silver_filters`, and those 22 still carry legacy
-  semantic keys (`columns` and `ranges`) in addition to structural keys.
+  currently include `filters.silver_filters`, and active Silver filters are now
+  structural-only (`required_fields` and `exclude_if_present`).
 - Runtime config loading does not pass those semantic Silver keys into the
   domain Silver filter unchanged. The infrastructure boundary normalizes the
   payload through
@@ -176,7 +176,8 @@ Observed facts:
 | Filter file schema | `src/bioetl/infrastructure/schemas/filter_config.py` | Legacy semantic Silver keys are accepted at the file boundary and promoted to Gold before domain conversion. | Infrastructure |
 | Entity pipeline schema | `src/bioetl/infrastructure/schemas/pipeline_config.py` | Entity YAML payloads are normalized before validation. | Infrastructure |
 | Domain Silver filter projection | `src/bioetl/infrastructure/schemas/filter_config.py`, `src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py` | Domain Silver filter receives only `required_fields` and `exclude_if_present`. | Infrastructure -> Domain boundary |
-| Legacy config inventory | `configs/entities/**/*.yaml` | 22 active entity configs still contain legacy semantic `silver_filters`; YAML rewrite is not complete. | Config |
+| Legacy config inventory | `configs/entities/**/*.yaml` | Semantic Silver buckets have been removed from active YAML; reintroduction fails architecture guardrails. | Config |
+| Source-profile metadata | `configs/entities/chembl/{activity,assay,molecule,publication,publication_term,target}.yaml` | Current curated ChEMBL extraction_params are versioned as baseline source profiles before any widening. | Config |
 
 ## Dashboards And Observability Components
 

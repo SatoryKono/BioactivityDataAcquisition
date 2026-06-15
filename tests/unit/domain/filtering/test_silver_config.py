@@ -7,6 +7,10 @@ import pytest
 from bioetl.domain.filtering import BaseFilterConfig
 from bioetl.domain.filtering.column_filter import GoldColumnFilter
 from bioetl.domain.filtering.gold_config import GoldFilterConfig
+from bioetl.domain.filtering.list_filters import (
+    GoldListContainsFilter,
+    GoldListLengthFilter,
+)
 from bioetl.domain.filtering.range_filter import GoldRangeFilter
 from bioetl.domain.filtering.silver_config import SilverFilterConfig
 
@@ -63,18 +67,8 @@ class TestSilverFromBase:
             ),
         )
 
-    @pytest.mark.parametrize(
-        "record",
-        [
-            {"id": "1", "status": "ACTIVE", "score": 3.5},
-            {"id": "1", "status": "INACTIVE", "score": 3.5},
-            {"id": "1", "status": "ACTIVE", "score": 11},
-            {"id": "1", "status": "ACTIVE", "score": 3.5, "deleted": True},
-            {"status": "ACTIVE", "score": 3.5},
-        ],
-    )
-    def test_should_include_equivalent_for_same_content(
-        self, record: dict[str, object]
+    def test_from_base_keeps_legacy_semantic_buckets_but_runtime_is_structural_only(
+        self,
     ) -> None:
         gold = GoldFilterConfig(
             required_fields=("id",),
@@ -88,4 +82,77 @@ class TestSilverFromBase:
         )
         silver = SilverFilterConfig.from_base(gold)
 
-        assert silver.should_include(record) == gold.should_include(record)
+        assert silver.column_filters == gold.column_filters
+        assert silver.range_filters == gold.range_filters
+        assert silver.should_include({"id": "1", "status": "INACTIVE", "score": 11})
+        assert not silver.should_include(
+            {"id": "1", "status": "ACTIVE", "score": 3.5, "deleted": True}
+        )
+        assert not silver.should_include({"status": "ACTIVE", "score": 3.5})
+
+
+@pytest.mark.unit
+class TestSilverStructuralOnlyRuntime:
+    """Direct SilverFilterConfig construction cannot create semantic gates."""
+
+    def test_column_and_range_filters_do_not_reject_silver_records(self) -> None:
+        silver = SilverFilterConfig(
+            column_filters=(
+                GoldColumnFilter(column="status", values=frozenset({"ACTIVE"})),
+            ),
+            range_filters=(
+                GoldRangeFilter(column="score", min_value=0.0, max_value=10.0),
+            ),
+        )
+
+        decision = silver.evaluate({"status": "INACTIVE", "score": 99})
+
+        assert decision.include is True
+        assert silver.should_include({"status": "INACTIVE", "score": 99})
+        assert silver.is_empty()
+
+    def test_list_filters_do_not_reject_silver_records(self) -> None:
+        silver = SilverFilterConfig(
+            list_length_filters=(GoldListLengthFilter(column="tags", min_length=2),),
+            list_contains_filters=(
+                GoldListContainsFilter(
+                    column="tags",
+                    values=frozenset({"approved"}),
+                    mode="all",
+                ),
+            ),
+        )
+
+        decision = silver.evaluate({"tags": ["rejected"]})
+
+        assert decision.include is True
+        assert silver.should_include({"tags": ["rejected"]})
+        assert silver.is_empty()
+
+    @pytest.mark.parametrize(
+        ("silver", "record", "reason_code"),
+        [
+            (
+                SilverFilterConfig(required_fields=("id",)),
+                {"status": "ACTIVE"},
+                "required_field_missing",
+            ),
+            (
+                SilverFilterConfig(exclude_if_present=("deleted",)),
+                {"id": "1", "deleted": True},
+                "exclude_if_present",
+            ),
+        ],
+    )
+    def test_structural_filters_still_reject_silver_records(
+        self,
+        silver: SilverFilterConfig,
+        record: dict[str, object],
+        reason_code: str,
+    ) -> None:
+        decision = silver.evaluate(record)
+
+        assert decision.include is False
+        assert decision.reason_code == reason_code
+        assert not silver.should_include(record)
+        assert not silver.is_empty()
