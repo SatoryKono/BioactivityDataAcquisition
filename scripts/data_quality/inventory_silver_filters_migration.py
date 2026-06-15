@@ -724,9 +724,7 @@ def _extract_entity_source_profile_surfaces() -> list[SurfaceFinding]:
                     "Versioned source-profile metadata must change before "
                     "source-side extraction widening."
                 ),
-                notes=(
-                    f"profile_id={profile_id}; version={version}; status={status}"
-                ),
+                notes=(f"profile_id={profile_id}; version={version}; status={status}"),
             )
         )
     return findings

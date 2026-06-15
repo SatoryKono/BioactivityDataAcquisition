@@ -2228,7 +2228,7 @@
       "symbol": "source_profile",
       "path": "src/bioetl/infrastructure/schemas/source_profile_config.py",
       "occurrence_count": 4,
-      "first_line": 55,
+      "first_line": 53,
       "role": "Versioned source-profile metadata",
       "migration_relevance": "Explicit source-profile metadata anchors extraction_params widening separately from Silver/Gold filter migration.",
       "notes": ""

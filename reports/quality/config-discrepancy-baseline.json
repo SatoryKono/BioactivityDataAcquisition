@@ -12,7 +12,7 @@
       "inconsistent_parameter_count": 0,
       "raw_inconsistent_parameter_count": 0,
       "sanctioned_partial_parameter_count": 0,
-      "unique_parameter_count": 322
+      "unique_parameter_count": 310
     }
   },
   "metrics": {
@@ -20,7 +20,7 @@
     "inconsistent_parameter_count": 0,
     "raw_inconsistent_parameter_count": 0,
     "sanctioned_partial_parameter_count": 0,
-    "unique_parameter_count": 525
+    "unique_parameter_count": 513
   },
-  "snapshot_date": "2026-06-04"
+  "snapshot_date": "2026-06-15"
 }

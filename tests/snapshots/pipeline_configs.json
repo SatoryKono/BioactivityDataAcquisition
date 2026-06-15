@@ -332,20 +332,6 @@
       "list_length_filters": [],
       "range_filters": [
         {
-          "column": "standard_value",
-          "include_max": true,
-          "include_min": false,
-          "max_value": null,
-          "min_value": 0.0
-        },
-        {
-          "column": "publication_year",
-          "include_max": true,
-          "include_min": true,
-          "max_value": 2050.0,
-          "min_value": 1950.0
-        },
-        {
           "column": "activity_id",
           "include_max": true,
           "include_min": true,
@@ -353,11 +339,25 @@
           "min_value": 1.0
         },
         {
+          "column": "standard_value",
+          "include_max": true,
+          "include_min": false,
+          "max_value": null,
+          "min_value": 0.0
+        },
+        {
           "column": "pchembl_value",
           "include_max": true,
           "include_min": true,
           "max_value": 10.0,
           "min_value": 3.0
+        },
+        {
+          "column": "publication_year",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 2050.0,
+          "min_value": 1950.0
         }
       ],
       "required_fields": [
@@ -417,6 +417,13 @@
         "potential_duplicate",
         "standard_relation"
       ]
+    },
+    "source_profile": {
+      "description": "Baseline curated ChEMBL activity extraction profile; no widening in ADR-050 cleanup.",
+      "extraction_params_sha256": "d4c7fc76dfcd88aa075762c96795ebd6de8af735540cf28a551a6d75149e4078",
+      "profile_id": "chembl.activity.curated",
+      "status": "baseline",
+      "version": "1.0.0"
     },
     "table": {
       "gold_idempotency_contract": "scd2",
@@ -775,6 +782,13 @@
         "molecule_type"
       ]
     },
+    "source_profile": {
+      "description": "Baseline curated ChEMBL molecule extraction profile; no widening in ADR-050 cleanup.",
+      "extraction_params_sha256": "ab560a44c3534971cf3a12391cf33f1c0db0369b207b4cc044da91235dfdd1a5",
+      "profile_id": "chembl.molecule.curated",
+      "status": "baseline",
+      "version": "1.0.0"
+    },
     "table": {
       "gold_idempotency_contract": "scd2",
       "gold_table": "chembl.molecule",
@@ -1010,6 +1024,13 @@
         "term",
         "term_type"
       ]
+    },
+    "source_profile": {
+      "description": "Baseline curated ChEMBL publication-term extraction profile; no widening in ADR-050 cleanup.",
+      "extraction_params_sha256": "d9dec3600fd2f00e1c7b639e53ca8e8a80c6f8af6eb6a7ab957399196dba3975",
+      "profile_id": "chembl.publication_term.curated",
+      "status": "baseline",
+      "version": "1.0.0"
     },
     "table": {
       "gold_idempotency_contract": "overwrite_rebuild",
@@ -1696,6 +1717,13 @@
         "doi",
         "title"
       ]
+    },
+    "source_profile": {
+      "description": null,
+      "extraction_params_sha256": null,
+      "profile_id": "default",
+      "status": "baseline",
+      "version": "1.0.0"
     },
     "table": {
       "gold_idempotency_contract": "scd2",
@@ -2473,6 +2501,13 @@
         "title"
       ]
     },
+    "source_profile": {
+      "description": null,
+      "extraction_params_sha256": null,
+      "profile_id": "default",
+      "status": "baseline",
+      "version": "1.0.0"
+    },
     "table": {
       "gold_idempotency_contract": "scd2",
       "gold_table": "openalex.publication",
@@ -2777,6 +2812,13 @@
       "required_fields": [
         "molecule_id"
       ]
+    },
+    "source_profile": {
+      "description": null,
+      "extraction_params_sha256": null,
+      "profile_id": "default",
+      "status": "baseline",
+      "version": "1.0.0"
     },
     "table": {
       "gold_idempotency_contract": "scd2",
@@ -3512,6 +3554,13 @@
         "title"
       ]
     },
+    "source_profile": {
+      "description": null,
+      "extraction_params_sha256": null,
+      "profile_id": "default",
+      "status": "baseline",
+      "version": "1.0.0"
+    },
     "table": {
       "gold_idempotency_contract": "scd2",
       "gold_table": "pubmed.publication",
@@ -4149,6 +4198,13 @@
         "title"
       ]
     },
+    "source_profile": {
+      "description": null,
+      "extraction_params_sha256": null,
+      "profile_id": "default",
+      "status": "baseline",
+      "version": "1.0.0"
+    },
     "table": {
       "gold_idempotency_contract": "scd2",
       "gold_table": "semanticscholar.publication",
@@ -4386,6 +4442,13 @@
         "target_id",
         "mapping_status"
       ]
+    },
+    "source_profile": {
+      "description": null,
+      "extraction_params_sha256": null,
+      "profile_id": "default",
+      "status": "baseline",
+      "version": "1.0.0"
     },
     "table": {
       "gold_idempotency_contract": "scd2",
@@ -4789,6 +4852,13 @@
         "accession",
         "organism_scientific"
       ]
+    },
+    "source_profile": {
+      "description": null,
+      "extraction_params_sha256": null,
+      "profile_id": "default",
+      "status": "baseline",
+      "version": "1.0.0"
     },
     "table": {
       "gold_idempotency_contract": "scd2",

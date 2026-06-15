@@ -13,9 +13,7 @@ from bioetl.domain.models.filter import (
 )
 
 _PROFILE_ID_PATTERN = re.compile(r"^[a-z0-9]+(?:[._-][a-z0-9]+)*$")
-_SEMVER_PATTERN = re.compile(
-    r"^v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$"
-)
+_SEMVER_PATTERN = re.compile(r"^v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
 _SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 
 
