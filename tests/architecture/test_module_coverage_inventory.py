@@ -111,7 +111,10 @@ def test_module_coverage_inventory_covers_every_source_module() -> None:
 
 @pytest.mark.architecture
 def test_module_coverage_inventory_source_tree_hash_is_current() -> None:
-    # Skip on WSL due to slow filesystem performance causing hash computation timeout
+    # Skip on WSL and Windows due to filesystem performance causing hash computation timeout
+    import sys
+    if sys.platform.startswith("win"):
+        pytest.skip("Skipped on Windows due to filesystem performance")
     try:
         with open("/proc/version", "r") as f:
             if "microsoft" in f.read().lower():

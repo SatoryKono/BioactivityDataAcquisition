@@ -140,26 +140,25 @@ class TestChemblPagingPaths:
 
             assert len(records) == 20
 
-    @pytest.mark.vcr
-    async def test_pagination_with_limit_zero(
-        self, chembl_client: Any, mock_logger: MagicMock
-    ) -> None:
-        """Test pagination with limit=0 should return no records."""
+    async def test_pagination_with_limit_zero(self, mock_logger: MagicMock) -> None:
+        """Test pagination with limit=0 should return no records without HTTP calls."""
         from bioetl.domain.resilience import AdapterConfig
         from bioetl.infrastructure.adapters.chembl import ChemblAdapter
 
-        async with chembl_client:
-            adapter = ChemblAdapter(
-                http_client=chembl_client,
-                logger=mock_logger,
-                adapter_config=AdapterConfig(page_size=10),
-            )
+        http_client = MagicMock()
+        http_client.get = AsyncMock()
+        adapter = ChemblAdapter(
+            http_client=http_client,
+            logger=mock_logger,
+            adapter_config=AdapterConfig(page_size=10),
+        )
 
-            records = []
-            async for record in adapter.fetch("activity", limit=0):
-                records.append(record)
+        records = []
+        async for record in adapter.fetch("activity", limit=0):
+            records.append(record)
 
-            assert len(records) == 0
+        assert len(records) == 0
+        http_client.get.assert_not_called()
 
     async def test_pagination_with_limit_exceeds_available(
         self, mock_logger: MagicMock

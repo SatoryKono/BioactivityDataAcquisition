@@ -6,7 +6,7 @@
 ## Summary
 
 - Scanned modules: `2132`
-- Internal import edges (raw): `8427`
+- Internal import edges (raw): `8447`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `342`
@@ -23,11 +23,11 @@ flowchart LR
     interfaces[interfaces]
     application -->|1478 OK| application
     application -->|1238 OK| domain
-    composition -->|326 OK| application
-    composition -->|746 OK| composition
+    composition -->|323 OK| application
+    composition -->|747 OK| composition
     composition -->|469 OK| domain
     composition -->|356 OK| infrastructure
-    domain -->|1249 OK| domain
+    domain -->|1271 OK| domain
     infrastructure -->|873 OK| domain
     infrastructure -->|1174 OK| infrastructure
     interfaces -->|81 OK| application
@@ -42,11 +42,11 @@ flowchart LR
 | ---------------- | ---------------- | ------: | ------- |
 | `application`    | `application`    |    1478 | allowed |
 | `application`    | `domain`         |    1238 | allowed |
-| `composition`    | `application`    |     326 | allowed |
-| `composition`    | `composition`    |     746 | allowed |
+| `composition`    | `application`    |     323 | allowed |
+| `composition`    | `composition`    |     747 | allowed |
 | `composition`    | `domain`         |     469 | allowed |
 | `composition`    | `infrastructure` |     356 | allowed |
-| `domain`         | `domain`         |    1249 | allowed |
+| `domain`         | `domain`         |    1271 | allowed |
 | `infrastructure` | `domain`         |     873 | allowed |
 | `infrastructure` | `infrastructure` |    1174 | allowed |
 | `interfaces`     | `application`    |      81 | allowed |
@@ -70,7 +70,7 @@ flowchart LR
 | `application.services`         | `domain.types`                  |      76 |
 | `infrastructure.storage`       | `domain.ports`                  |      75 |
 | `application.composite`        | `domain.ports`                  |      74 |
-| `composition.factories`        | `application.core`              |      71 |
+| `composition.factories`        | `application.core`              |      68 |
 | `interfaces.cli`               | `application.services`          |      66 |
 | `composition.factories`        | `domain.ports`                  |      62 |
 | `composition.bootstrap`        | `application.services`          |      61 |

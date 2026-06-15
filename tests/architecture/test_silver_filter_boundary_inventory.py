@@ -16,6 +16,8 @@ from scripts.data_quality.inventory_silver_filters_migration import (
     CSV_OUT,
     JSON_OUT,
     MD_OUT,
+    SURFACE_CATEGORIES,
+    build_surface_inventory,
     build_entity_plan,
     discover_entity_configs,
     write_csv,
@@ -42,6 +44,29 @@ SHADOW_CHECK_TYPES = {"join_cardinality", "field_sparsity", "gold_projection_del
 EXPECTED_SHADOW_METRICS = {
     "current_rejections": "bioetl_silver_filter_rejections_total",
     "structural_shadow_comparisons": "bioetl_structural_policy_shadow_comparisons_total",
+}
+REQUIRED_SURFACE_SYMBOLS = {
+    "runtime_gate": {
+        "apply_silver_filter",
+        "_apply_pre_silver_filter",
+        "should_write_silver",
+    },
+    "consumer_alias": {
+        "FILTERED_OUT_SILVER",
+        "--silver-filter-only",
+        "silver_filter_rejects",
+    },
+    "observability": {
+        "bioetl_silver_filter_rejections_total",
+    },
+    "source_profile": {
+        "extraction_params",
+        "filters.extraction_params",
+    },
+    "silver_config": {
+        "SilverFilterConfig(",
+        "SILVER_SEMANTIC_FILTER_KEYS",
+    },
 }
 
 
@@ -324,18 +349,19 @@ def test_shadow_candidate_rules_match_business_only_inventory() -> None:
 
 
 def test_inventory_baseline_outputs_match_generator(tmp_path: Path) -> None:
-    """Keep committed ADR-048 inventory artifacts tied to the scanner output."""
+    """Keep committed ADR-050 inventory artifacts tied to the scanner output."""
     plans = [
         build_entity_plan(provider, entity, path)
         for provider, entity, path in discover_entity_configs()
     ]
+    surface_inventory = build_surface_inventory()
 
     generated_csv = tmp_path / CSV_OUT.name
     generated_json = tmp_path / JSON_OUT.name
     generated_md = tmp_path / MD_OUT.name
-    write_csv(plans, generated_csv)
-    write_json(plans, generated_json)
-    write_markdown(plans, generated_md)
+    write_csv(plans, surface_inventory, generated_csv)
+    write_json(plans, surface_inventory, generated_json)
+    write_markdown(plans, surface_inventory, generated_md)
 
     mismatches: list[str] = []
     for expected_path, actual_path in (
@@ -349,7 +375,32 @@ def test_inventory_baseline_outputs_match_generator(tmp_path: Path) -> None:
             mismatches.append(str(expected_path.relative_to(ROOT)))
 
     assert not mismatches, (
-        "ADR-048 inventory baseline drifted from generator output. "
+        "ADR-050 inventory baseline drifted from generator output. "
         "Run: python scripts/data_quality/inventory_silver_filters_migration.py\n"
         + "\n".join(mismatches)
     )
+
+
+def test_inventory_baseline_reports_runtime_ops_and_source_profile_surfaces() -> None:
+    payload = yaml.safe_load(JSON_OUT.read_text(encoding="utf-8")) or {}
+    assert payload.get("schema_version") == "2.0.0"
+    assert payload["totals"]["entities_total"] == 27
+    assert "conflict" in payload["totals"]
+    assert isinstance(payload["totals"]["conflict"], int)
+
+    surface_inventory = payload.get("surface_inventory")
+    assert isinstance(surface_inventory, list)
+    categories = {row.get("category") for row in surface_inventory}
+    assert categories == SURFACE_CATEGORIES
+
+    for category, symbols in REQUIRED_SURFACE_SYMBOLS.items():
+        actual_symbols = {
+            row.get("symbol")
+            for row in surface_inventory
+            if row.get("category") == category
+        }
+        missing = symbols - actual_symbols
+        assert not missing, (
+            f"Inventory category {category!r} is missing required symbols: "
+            f"{sorted(missing)}"
+        )

@@ -68,6 +68,7 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-047](ADR-047-workflow-control-plane.md)             | Workflow Control Plane for Declarative Workflows | Accepted                           | Reproducibility | 2026-05-08 |
 | [ADR-048](ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md) | Domain Schema Boundary and Runtime Pandera Compatibility | accepted | Architecture | 2026-05-26 |
 | [ADR-049](ADR-049-context-aware-loc-target-policy.md) | Context-Aware LOC Target Policy | accepted | Architecture | 2026-05-26 |
+| [ADR-050](ADR-050-silver-structural-gold-semantic-filter-boundary.md) | Silver Structural and Gold Semantic Filter Boundary | Accepted | Data Quality | 2026-06-15 |
 
 ## ADRs by Category
 
@@ -117,6 +118,7 @@ This directory contains Architecture Decision Records documenting significant ar
 - [ADR-033](ADR-033-publication-validation-strategy.md): Publication Metadata Validation Strategy — 5-level validation for publication data
 - [ADR-036](ADR-036-gold-contract-versioning-policy.md): Gold Contract Versioning Policy — Semver for Gold contracts with breaking window policy
 - [ADR-045](ADR-045-dq-contract-system.md): Data Quality Contract System
+- [ADR-050](ADR-050-silver-structural-gold-semantic-filter-boundary.md): Silver structural and Gold semantic filter boundary
 
 ### Domain Model
 
@@ -158,6 +160,7 @@ This directory contains Architecture Decision Records documenting significant ar
 - [ADR-028](ADR-028-filter-rules-externalization.md): Filter Rules Externalization — Hierarchical filter config
 - [ADR-038](ADR-038-enum-externalization.md): ChEMBL Enum Values Externalization to YAML
 - [ADR-039](ADR-039-unified-entity-config-format.md): Unified Entity Config Format
+- [ADR-050](ADR-050-silver-structural-gold-semantic-filter-boundary.md): Silver structural and Gold semantic filter boundary
 
 ## ADR Relationships Graph
 

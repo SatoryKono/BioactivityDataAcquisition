@@ -866,7 +866,7 @@ migrated = service.apply_migration_fallback(optimized_config, target_phase)
 
 ## Related Components
 
-- [DQ Contract System](dq-contract-system.md)
+- [DQ Contract System](../contracts/dq-contracts.md)
 - [Configuration Runtime Artifacts](config-runtime-artifacts.md)
 - [Composite Validation Service](composite-validation-service.md)
 - [Observability Architecture](../../02-architecture/decisions/ADR-017-observability-architecture.md)

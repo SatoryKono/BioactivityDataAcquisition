@@ -19,6 +19,11 @@ ACTIVE_SURFACES = (
     ROOT / "src" / "bioetl" / "infrastructure" / "config" / "filter_config_loader.py",
     ROOT / "docs" / "filters" / "ADR-048-silver-filters-structural-scope.md",
     ROOT / "docs" / "filters" / "migration-plan.md",
+    ROOT
+    / "docs"
+    / "02-architecture"
+    / "decisions"
+    / "ADR-050-silver-structural-gold-semantic-filter-boundary.md",
 )
 
 

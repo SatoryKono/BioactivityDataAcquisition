@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import threading
+from collections.abc import Iterator, Mapping
 from importlib import import_module
-from types import MappingProxyType
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import Protocol, cast
 
+from bioetl.application.pipelines.generic import GenericPipeline
 from bioetl.composition.factories.pipeline._assembler_factory import (
     GenericPipelineFactory,
 )
@@ -19,9 +20,6 @@ from bioetl.composition.factories.pipeline.registry_manifest import (
     PIPELINE_CONFIGS,
 )
 from bioetl.domain.ports import PipelineFactoryPort
-
-if TYPE_CHECKING:
-    from bioetl.application.core.wiring.registry import GenericPipeline
 
 _registry_module = import_module("bioetl.composition.registry")
 PipelineDefinition = _registry_module.PipelineDefinition
@@ -45,20 +43,43 @@ class PipelineRegistryProtocol(Protocol):
         ...
 
 
-def _build_factories() -> dict[str, GenericPipelineFactory[GenericPipeline]]:
+def _build_factories() -> dict[str, GenericPipelineFactory[object]]:
     """Build factory instances from the canonical pipeline config table."""
     return {config.pipeline_name: create_factory(config) for config in PIPELINE_CONFIGS}
 
 
-# Backward-compatible module surface kept for tests/importers, but frozen to
-# avoid additional module-level mutable registry state.
-_factories = MappingProxyType(_build_factories())
-globals().update(
-    {
-        export_name: _factories[pipeline_name]
-        for export_name, pipeline_name in FACTORY_EXPORTS.items()
-    }
-)
+_configs_by_name = {config.pipeline_name: config for config in PIPELINE_CONFIGS}
+
+
+class _LazyFactoryCatalog(Mapping[str, GenericPipelineFactory[object]]):
+    """Read-only lazy pipeline factory catalog."""
+
+    def __init__(self) -> None:
+        self._lock = threading.RLock()
+        self._cache: dict[str, GenericPipelineFactory[object]] = {}
+
+    def __getitem__(self, pipeline_name: str) -> GenericPipelineFactory[object]:
+        if pipeline_name in self._cache:
+            return self._cache[pipeline_name]
+        with self._lock:
+            if pipeline_name in self._cache:
+                return self._cache[pipeline_name]
+            try:
+                config = _configs_by_name[pipeline_name]
+            except KeyError as exc:
+                raise KeyError(pipeline_name) from exc
+            factory = create_factory(config)
+            self._cache[pipeline_name] = factory
+            return factory
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(_configs_by_name)
+
+    def __len__(self) -> int:
+        return len(_configs_by_name)
+
+
+_factories = _LazyFactoryCatalog()
 
 
 class PipelineFactoryRegistrationState:
@@ -165,7 +186,7 @@ def _register_factories_to(registry: PipelineRegistryProtocol) -> None:
 
 def _list_pipeline_names() -> list[str]:
     """Return available pipeline names in canonical sorted order."""
-    return sorted(_factories.keys())
+    return sorted(_configs_by_name.keys())
 
 
 def is_registered(
@@ -242,6 +263,13 @@ def list_available_pipelines() -> list[str]:
         Sorted list of pipeline names
     """
     return _list_pipeline_names()
+
+
+def __getattr__(name: str) -> object:
+    """Resolve backward-compatible module-level factory exports lazily."""
+    if name in FACTORY_EXPORTS:
+        return _factories[FACTORY_EXPORTS[name]]
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 __all__ = REGISTRY_PUBLIC_EXPORTS

@@ -775,7 +775,7 @@ if not artifact.validate():
 
 ## Related Components
 
-- [DQ Contract System](dq-contract-system.md)
+- [DQ Contract System](../contracts/dq-contracts.md)
 - [Phased Migration Support](phased-migration.md)
 - [Composite Validation Service](composite-validation-service.md)
 - [Observability Architecture](../../02-architecture/decisions/ADR-017-observability-architecture.md)

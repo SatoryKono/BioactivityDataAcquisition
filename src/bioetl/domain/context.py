@@ -1,4 +1,10 @@
-"""Domain execution context objects: ``PipelineRunContext`` carries launch-time state, ``PipelineContext`` carries in-run state, there is no universal runtime manifest object, and control-plane provenance remains separate via ``run_manifest.RunManifest``."""
+"""Domain execution context objects.
+
+``PipelineRunContext`` carries launch-time state.
+``PipelineContext`` carries in-run state.
+There is no universal runtime manifest object.
+Control-plane provenance remains separate via ``run_manifest.RunManifest``.
+"""
 
 from __future__ import annotations
 

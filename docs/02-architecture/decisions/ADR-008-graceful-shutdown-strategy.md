@@ -26,4 +26,4 @@ ADR-008 described graceful shutdown strategy. This approach was superseded by AD
 ## Archived Content
 
 The full content of this ADR is available in the archive:
-- [ADR-008: Graceful Shutdown Strategy](../../../99-archive/decisions/ADR-008-graceful-shutdown-strategy.md)
+- [Archived ADR-008: Graceful Shutdown Strategy](../../99-archive/decisions/ADR-008-graceful-shutdown-strategy.md)

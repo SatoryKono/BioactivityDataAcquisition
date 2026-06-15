@@ -664,14 +664,14 @@ fixture_governance:
     metadata_catalog_location: reports/quality/vcr-metadata-catalog.json
     stale_age_checker: scripts/engineering/qa/vcr/check_vcr_metadata_age.py
     provider_expected_sidecar_counts:
-      chembl: 52
+      chembl: 58
       crossref: 24
       multi_provider: 1
       openalex: 25
       pubchem: 31
       pubmed: 24
       semanticscholar: 24
-      uniprot: 15
+      uniprot: 18
   rollout:
     cassette_metadata: enforced
     cassette_staleness_age: enforced

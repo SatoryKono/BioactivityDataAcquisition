@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from importlib import import_module
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.wiring.registry import GenericPipeline
@@ -11,6 +12,7 @@ from bioetl.composition.factories.datasource.data_source_factory import (
 from bioetl.composition.factories.pipeline.registry_manifest import (
     PipelineFactoryConfig,
 )
+from bioetl.composition.factories.pipeline.config_types import TransformerClassRef
 from bioetl.composition.providers.provider_registry import (
     ProviderDataSourceAccessProtocol,
 )
@@ -63,6 +65,18 @@ def _validate_contract_policy(config: PipelineFactoryConfig) -> None:
     )
 
 
+def _resolve_transformer_class_ref(
+    transformer_class: TransformerClassRef | None,
+) -> type[object] | None:
+    """Resolve a manifest transformer reference into the actual class."""
+    if transformer_class is None or not isinstance(transformer_class, str):
+        return transformer_class
+    module_name, _, attr_name = transformer_class.rpartition(".")
+    if not module_name or not attr_name:
+        raise ValueError(f"Invalid transformer class reference: {transformer_class!r}")
+    return cast(type[object], getattr(import_module(module_name), attr_name))
+
+
 def create_factory(
     config: PipelineFactoryConfig,
     *,
@@ -81,6 +95,8 @@ def create_factory(
         GenericPipelineFactory,
     )
 
+    transformer_class = _resolve_transformer_class_ref(config.transformer_class)
+
     # Resolve data source creator: use data_source_provider override if set
     data_source_creator = (
         get_data_source_creator(
@@ -98,12 +114,13 @@ def create_factory(
         silver_schema=config.silver_schema,
         gold_schema=cast("GoldSchemaType", config.gold_schema),
         pandera_silver_schema=config.pandera_silver_schema,
-        transformer_class=config.transformer_class,
+        transformer_class=cast(type[object] | None, transformer_class),
         data_source_creator=data_source_creator,
         provider_registry=provider_registry,
     )
 
 
 __all__ = [
+    "_resolve_transformer_class_ref",
     "create_factory",
 ]

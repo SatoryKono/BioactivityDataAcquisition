@@ -19,7 +19,8 @@ ______________________________________________________________________
 > The local draft `docs/filters/ADR-048-silver-filters-structural-scope.md`
 > is retired as a canonical ADR candidate because accepted ADR-048 now refers to
 > `docs/02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md`.
-> Future filter decisions must use a new ADR number.
+> The accepted filter-boundary decision is
+> `docs/02-architecture/decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md`.
 
 ## Краткое содержание
 
@@ -36,6 +37,8 @@ ______________________________________________________________________
 - `docs/02-architecture/decisions/ADR-028-filter-rules-externalization.md` — текущая базовая ADR (amended)
 - `docs/02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md` —
   accepted ADR-048; unrelated domain schema/Pandera boundary decision
+- `docs/02-architecture/decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md` —
+  accepted canonical Silver structural / Gold semantic filter-boundary decision
 
 ## Ключевые открытия из анализа кода
 
@@ -81,8 +84,10 @@ gold_filters:   { required_fields, columns, ranges,           <- business filter
 `docs/filters/ADR-048-silver-filters-structural-scope.md` captured the
 original rationale for narrowing `silver_filters`. It must not be promoted as
 ADR-048 because the accepted ADR-048 number now belongs to the domain
-schema/Pandera compatibility decision. If this filter policy needs normative
-status, create a new ADR in `docs/02-architecture/decisions/`.
+schema/Pandera compatibility decision.
+
+Current state (2026-06-15): normative governance now lives in
+`docs/02-architecture/decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md`.
 
 #### 0.2. Inventory script
 
@@ -212,7 +217,7 @@ domain conversion owned by
    - Если правило **полностью совпадает** с gold_filters → удалить из silver
    - Если правило **отсутствует** в gold_filters → переместить из silver в gold
    - Если правило **частично совпадает** → создать `conflicts/{provider}_{entity}.diff` для review
-1. Сохранить обновлённый YAML с комментариями (`# migrated from silver_filters per ADR-048`)
+1. Сохранить обновлённый YAML с комментариями (`# migrated from silver_filters per ADR-050`)
 
 Output: `docs/filters/migration-diff-{date}.md` с per-entity diff.
 
@@ -267,12 +272,12 @@ Per-entity ревью с владельцем provider/entity.
 
 | File | Изменение |
 | ---- | --------- |
-| New filter ADR under `docs/02-architecture/decisions/` | Create only if filter policy needs normative status; do not reuse ADR-048 |
-| `docs/02-architecture/decisions/ADR-028-filter-rules-externalization.md` | Footer-ссылка на ADR-048, обновить таблицу Filter Types |
+| `docs/02-architecture/decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md` | Canonical accepted Silver structural / Gold semantic boundary; do not reuse retired local ADR-048 |
+| `docs/02-architecture/decisions/ADR-028-filter-rules-externalization.md` | Cross-link ADR-050 and update Filter Types scope |
 | `docs/04-reference/providers/{provider}/*.md` | Раздельные таблицы для silver structural и gold semantic |
 | `docs/05-operations/runbooks/quarantine-management.md` | Обновить раздел Silver filter rejects |
 | `docs/05-operations/01-monitoring-guide.md` | Обновить Silver Reject Explorer описание |
-| `docs/plans/silver-filter-rejects-observability-plan.md` | Update wording to reference current compatibility implementation or a future filter ADR, not accepted ADR-048 |
+| `docs/plans/silver-filter-rejects-observability-plan.md` | Update wording to align Silver structural rejects with ADR-050 |
 | `docs/00-project/RULES.md` | §2.1.2 / §2.1.3 — уточнение responsibility scope |
 
 ### Фаза 8: Rollout
@@ -321,7 +326,7 @@ Per-entity ревью с владельцем provider/entity.
 
 ## Acceptance criteria
 
-- [ ] New filter ADR created if normative governance is required; do not reuse accepted ADR-048
+- [x] ADR-050 created as normative filter-boundary governance; retired local ADR-048 remains historical only
 - [ ] Inventory baseline зафиксирован
 - [ ] Per-entity migration diff prepared and reviewed
 - [ ] All 22 active entity configs with legacy semantic `silver_filters` keys migrated or explicitly justified
@@ -337,3 +342,4 @@ Per-entity ревью с владельцем provider/entity.
 | ---------- | --------------- | ---------------------------------------------------- |
 | 2026-05-12 | BioETL Team     | Initial draft of variant D (hybrid) migration plan   |
 | 2026-06-03 | BioETL Team     | Marked plan partially implemented; retired local ADR-048 filter draft as non-canonical because accepted ADR-048 now covers domain schema/Pandera compatibility. |
+| 2026-06-15 | Codex           | Linked ADR-050 as canonical Silver structural / Gold semantic boundary; updated historical ADR-048 references. |

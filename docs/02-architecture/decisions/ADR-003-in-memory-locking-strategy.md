@@ -26,4 +26,4 @@ ADR-003 described in-memory locking strategy for multi-instance deployment. This
 ## Archived Content
 
 The full content of this ADR is available in the archive:
-- [ADR-003: In-Memory Locking Strategy](../../../99-archive/decisions/ADR-003-in-memory-locking-strategy.md)
+- [Archived ADR-003: In-Memory Locking Strategy](../../99-archive/decisions/ADR-003-in-memory-locking-strategy.md)
