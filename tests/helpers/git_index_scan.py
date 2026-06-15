@@ -11,6 +11,15 @@ _GIT_GREP_TIMEOUT_RETURN_CODE = -2
 _WINDOWS_GIT_FAILURE_CODES = {-1, 4294967295}
 
 
+def _is_wsl() -> bool:
+    """Detect if running under WSL (Windows Subsystem for Linux)."""
+    try:
+        with open("/proc/version", "r") as f:
+            return "microsoft" in f.read().lower()
+    except (OSError, IOError):
+        return False
+
+
 @dataclass(frozen=True, slots=True)
 class GitGrepMatch:
     """One line returned by ``git grep -n``."""
@@ -246,6 +255,10 @@ def git_grep_fixed(
     Architecture tests should prefer this over ``Path.rglob`` for repo-wide
     source scans, especially on Windows/WSL mounted worktrees.
     """
+    # Increase timeout on WSL due to slower filesystem access
+    if _is_wsl():
+        timeout = max(timeout, 120.0)  # At least 2 minutes on WSL
+
     pathspecs = _git_grep_pathspecs(paths=paths, suffixes=suffixes)
     if os.name == "nt" and len(pathspecs) > 8:
         batched_matches = _git_grep_fixed_in_batches(
@@ -278,6 +291,12 @@ def git_grep_fixed(
         )
         if batched_matches is not None:
             return batched_matches
+        # Skip filesystem fallback on WSL due to poor performance
+        if _is_wsl():
+            raise AssertionError(
+                f"git grep scan failed on WSL and filesystem fallback is disabled. "
+                f"Git error: {result.stderr}"
+            )
         return _filesystem_grep_fixed(
             root=root,
             patterns=patterns,

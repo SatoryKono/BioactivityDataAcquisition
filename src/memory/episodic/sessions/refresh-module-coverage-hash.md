@@ -2,13 +2,13 @@
 id: refresh-module-coverage-hash
 title: Refresh module coverage inventory hash
 task_id: refresh-module-coverage-hash
-created_at: '2026-05-31T14:51:11Z'
+created_at: '2026-06-15T09:33:07Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md
 summary: Active task session context.
-query: module coverage inventory hash
+query: module coverage inventory source_tree_sha256
 ---
 
 # Session note
@@ -16,7 +16,7 @@ query: module coverage inventory hash
 ## Task
 
 - Title: Refresh module coverage inventory hash
-- Retrieval query: module coverage inventory hash
+- Retrieval query: module coverage inventory source_tree_sha256
 
 ## Retrieved context
 

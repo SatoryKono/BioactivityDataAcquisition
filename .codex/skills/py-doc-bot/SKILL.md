@@ -1,6 +1,7 @@
-______________________________________________________________________
-
-## name: py-doc-bot description: Execute BioETL py-doc-bot profile for role-specific workflow and constraints.
+---
+name: "py-doc-bot"
+description: "Execute BioETL py-doc-bot profile for role-specific workflow and constraints."
+---
 
 # py-doc-bot
 

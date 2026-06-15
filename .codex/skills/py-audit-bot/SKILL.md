@@ -1,6 +1,7 @@
-______________________________________________________________________
-
-## name: py-audit-bot description: Execute BioETL py-audit-bot profile for role-specific workflow and constraints.
+---
+name: "py-audit-bot"
+description: "Execute BioETL py-audit-bot profile for role-specific workflow and constraints."
+---
 
 # py-audit-bot
 

@@ -1,6 +1,7 @@
-______________________________________________________________________
-
-## name: documentation-audit description: Full audit and update of BioETL project documentation for v5.23+. Use when asked to review docs for staleness, reconcile docs with code, sync RULES.md and REQUIREMENTS.md, update architecture/provider/contract docs, reflect ADR-010/ADR-014/ADR-017, or identify dead documentation.
+---
+name: "documentation-audit"
+description: "Full audit and update of BioETL project documentation for v5.23+. Use when asked to review docs for staleness, reconcile docs with code, sync RULES.md and REQUIREMENTS.md, update architecture/provider/contract docs, reflect ADR-010/ADR-014/ADR-017, or identify dead documentation."
+---
 
 # Documentation Audit
 

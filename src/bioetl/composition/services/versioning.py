@@ -28,6 +28,7 @@ if TYPE_CHECKING:
 
 _FULL_GIT_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 _RUNTIME_PATH_CLS = type(Path())
+_REPO_ROOT = Path(__file__).resolve().parents[4]
 
 __all__ = [
     "CodeRevisionProvenance",
@@ -156,11 +157,29 @@ def get_dependency_lock_hash() -> str | None:
     return None
 
 
+def _get_repo_dependency_lock_hash() -> str | None:
+    """Return the checkout lockfile hash for provenance when cwd is external."""
+    for lockfile_name in ("uv.lock", "poetry.lock"):
+        lockfile = _REPO_ROOT / lockfile_name
+        if lockfile.is_file():
+            digest = hashlib.sha256(lockfile.read_bytes()).hexdigest()
+            return f"sha256:{digest}"
+    for lockfile_name in ("uv.lock", "poetry.lock"):
+        result = _run_git_command("show", f"HEAD:{lockfile_name}")
+        if result is None or result.returncode != 0:
+            continue
+        digest = hashlib.sha256(result.stdout.encode("utf-8")).hexdigest()
+        return f"sha256:{digest}"
+    return None
+
+
 @lru_cache(maxsize=1)
 def get_code_revision_provenance() -> CodeRevisionProvenance:
     """Return git commit plus coarse source revision state for manifests."""
     commit = get_git_commit()
     dependency_lock_hash = get_dependency_lock_hash()
+    if dependency_lock_hash is None and commit is not None:
+        dependency_lock_hash = _get_repo_dependency_lock_hash()
     if commit is None:
         return CodeRevisionProvenance(
             git_commit=None,

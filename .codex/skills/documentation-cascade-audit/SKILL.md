@@ -1,6 +1,7 @@
-______________________________________________________________________
-
-## name: documentation-cascade-audit description: Run a hierarchical documentation audit for BioETL using cascade decomposition across doc domains (architecture, providers, contracts, operations, onboarding), aggregate findings into one prioritized report, and generate an actionable remediation plan. Use when users request large-scale doc audits, stale-doc cleanup, or coordinated doc reconciliation after major refactors/releases.
+---
+name: "documentation-cascade-audit"
+description: "Run a hierarchical documentation audit for BioETL using cascade decomposition across doc domains (architecture, providers, contracts, operations, onboarding), aggregate findings into one prioritized report, and generate an actionable remediation plan. Use when users request large-scale doc audits, stale-doc cleanup, or coordinated doc reconciliation after major refactors/releases."
+---
 
 # Documentation Cascade Audit
 

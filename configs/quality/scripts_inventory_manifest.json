@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-04T19:52:56.212183+00:00",
+  "generated_at": "2026-06-15T09:24:42.364650+00:00",
   "summary": {
     "total_scripts": 428,
     "status_counts": {
@@ -11,7 +11,7 @@
       "agents": 4,
       "build": 3,
       "ci": 61,
-      "docs": 147,
+      "docs": 148,
       "scripts": 329,
       "skills": 11,
       "tests": 168
@@ -203,13 +203,13 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 144,
+          "line": 146,
           "source_group": "scripts",
           "text": "for you. `diagnose_wsl.sh`, `diagnose_wsl.ps1`, and `diagnose_wsl.bat` are the"
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 130,
+          "line": 136,
           "source_group": "tests",
           "text": "assert (root / \"scripts\" / \"ai\" / \"codex\" / \"diagnose_wsl.bat\").exists()"
         }
@@ -236,7 +236,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 144,
+          "line": 146,
           "source_group": "scripts",
           "text": "for you. `diagnose_wsl.sh`, `diagnose_wsl.ps1`, and `diagnose_wsl.bat` are the"
         },
@@ -248,7 +248,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 129,
+          "line": 135,
           "source_group": "tests",
           "text": "assert (root / \"scripts\" / \"ai\" / \"codex\" / \"diagnose_wsl.ps1\").exists()"
         }
@@ -275,7 +275,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 144,
+          "line": 146,
           "source_group": "scripts",
           "text": "for you. `diagnose_wsl.sh`, `diagnose_wsl.ps1`, and `diagnose_wsl.bat` are the"
         },
@@ -299,13 +299,13 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 125,
+          "line": 131,
           "source_group": "tests",
           "text": "assert \"../ai/codex/diagnose_wsl.sh\" in ops_router"
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 128,
+          "line": 134,
           "source_group": "tests",
           "text": "assert (root / \"scripts\" / \"ai\" / \"codex\" / \"diagnose_wsl.sh\").exists()"
         }
@@ -340,7 +340,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 143,
+          "line": 145,
           "source_group": "scripts",
           "text": "The canonical `headless.sh` / `headless.ps1` launchers set `CODEX_SKIP_MCP_SETUP=1`"
         }
@@ -367,7 +367,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 143,
+          "line": 145,
           "source_group": "scripts",
           "text": "The canonical `headless.sh` / `headless.ps1` launchers set `CODEX_SKIP_MCP_SETUP=1`"
         },
@@ -430,13 +430,13 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 163,
+          "line": 165,
           "source_group": "scripts",
           "text": ".\\helper\\diagnose-hang.ps1"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 225,
+          "line": 227,
           "source_group": "scripts",
           "text": "- `diagnose-hang.ps1` - **NEW**: Debug tool for setup hangs"
         },
@@ -522,7 +522,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/ai/codex/helper/check-env.sh",
@@ -541,6 +541,18 @@
           "line": 10,
           "source_group": "scripts",
           "text": "ENSURE_MCP_SCRIPT=\"${SCRIPT_DIR}/ensure-mcp.sh\""
+        },
+        {
+          "path": "scripts/ops/launchers/codex/codex-exec.sh",
+          "line": 9,
+          "source_group": "scripts",
+          "text": "ENSURE_MCP_SCRIPT=\"${REPO_ROOT}/scripts/ai/codex/helper/ensure-mcp.sh\""
+        },
+        {
+          "path": "scripts/ops/launchers/codex/codex.sh",
+          "line": 9,
+          "source_group": "scripts",
+          "text": "ENSURE_MCP_SCRIPT=\"${REPO_ROOT}/scripts/ai/codex/helper/ensure-mcp.sh\""
         }
       ]
     },
@@ -559,7 +571,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 226,
+          "line": 228,
           "source_group": "scripts",
           "text": "- `run-codex-impl.sh` - Launch Codex with environment"
         },
@@ -923,8 +935,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 46,
+      "reference_count": 47,
       "references": [
+        {
+          "path": "docs/03-guides/development/codex-wsl2-setup.md",
+          "line": 246,
+          "source_group": "docs",
+          "text": "every new Codex session: `bash scripts/ai/codex/run-codex.sh`,"
+        },
         {
           "path": "scripts/ai/__main__.py",
           "line": 37,
@@ -966,12 +984,6 @@
           "line": 80,
           "source_group": "scripts",
           "text": "bash run-codex.sh                 # Interactive mode"
-        },
-        {
-          "path": "scripts/ai/codex/README.md",
-          "line": 81,
-          "source_group": "scripts",
-          "text": "bash run-codex.sh \"prompt\"        # With prompt"
         }
       ]
     },
@@ -6412,25 +6424,25 @@
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 260,
+          "line": 266,
           "source_group": "docs",
           "text": "**Layer 1: DNS** (`scripts/engineering/dev/.setup_wsl_codex.sh`)"
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 273,
+          "line": 279,
           "source_group": "docs",
           "text": "bash \"$BIOETL_DIR/scripts/engineering/dev/.setup_wsl_codex.sh\""
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 299,
+          "line": 305,
           "source_group": "docs",
           "text": "bash \"$BIOETL_DIR/scripts/engineering/dev/.setup_wsl_codex.sh\" 2>/dev/null"
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 355,
+          "line": 361,
           "source_group": "docs",
           "text": "bash \"$BIOETL_DIR/scripts/engineering/dev/.setup_wsl_codex.sh\""
         },
@@ -6547,13 +6559,13 @@
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 280,
+          "line": 286,
           "source_group": "docs",
           "text": "environment variables (set by `.wsl_proxy_env.sh`)."
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 303,
+          "line": 309,
           "source_group": "docs",
           "text": "source \"$BIOETL_DIR/.wsl_proxy_env.sh\" 2>/dev/null"
         },
@@ -11029,8 +11041,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 41,
+      "reference_count": 43,
       "references": [
+        {
+          "path": "docs/03-guides/development/codex-wsl2-setup.md",
+          "line": 248,
+          "source_group": "docs",
+          "text": "`scripts/ops/launchers/codex/codex-exec.sh` resynchronize `~/.codex/config.toml`"
+        },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 25,
@@ -11072,12 +11090,6 @@
           "line": 45,
           "source_group": "docs",
           "text": "./scripts/ops/launchers/codex/codex-exec.sh \"fix all TODOs\""
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/CODEX_WSL_QUICK_REF.md",
-          "line": 58,
-          "source_group": "docs",
-          "text": "| **Auto-Apply**     | `./scripts/ops/launchers/codex/codex-exec.sh \"add type hints everywhere\"`          |"
         }
       ]
     },
@@ -11200,8 +11212,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 112,
+      "reference_count": 114,
       "references": [
+        {
+          "path": "docs/03-guides/development/codex-wsl2-setup.md",
+          "line": 247,
+          "source_group": "docs",
+          "text": "`scripts/ops/launchers/codex/codex.sh`, and"
+        },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 24,
@@ -11243,12 +11261,6 @@
           "line": 216,
           "source_group": "docs",
           "text": "./scripts/ops/launchers/codex/codex.sh \"identify performance bottlenecks in ETL\""
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 222,
-          "source_group": "docs",
-          "text": "./scripts/ops/launchers/codex/codex.sh \"create Pydantic models for bronze layer\""
         }
       ]
     },
@@ -11336,7 +11348,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 69,
+          "line": 75,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ops\" / \"launchers\" / \"codex\" / \"start-codex.bat\""
         }
@@ -11357,7 +11369,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 72,
+          "line": 78,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ops\" / \"launchers\" / \"codex\" / \"verify-setup.bat\""
         }
@@ -11396,7 +11408,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 75,
+          "line": 81,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ops\" / \"launchers\" / \"codex\" / \"verify-setup.ps1\""
         }
@@ -12060,7 +12072,7 @@
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 333,
+          "line": 339,
           "source_group": "docs",
           "text": "If not listening, run `scripts\\ops\\start-wsl-proxy.bat`."
         },
@@ -12123,7 +12135,7 @@
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 276,
+          "line": 282,
           "source_group": "docs",
           "text": "**Layer 2: Proxy** (`scripts/ops/runtime/wsl/wsl_proxy.py`)"
         },

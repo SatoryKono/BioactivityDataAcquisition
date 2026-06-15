@@ -35,6 +35,7 @@ EXPECTED_LAZY_EXPORT_FACADES = {
     "src/bioetl/domain/__init__.py": "public_package_facade",
     "src/bioetl/domain/behavior/__init__.py": "public_package_facade",
     "src/bioetl/domain/config/__init__.py": "public_package_facade",
+    "src/bioetl/domain/entities/__init__.py": "public_package_facade",
     "src/bioetl/domain/exceptions/__init__.py": "public_package_facade",
     "src/bioetl/domain/filtering/__init__.py": "public_package_facade",
     "src/bioetl/domain/normalization/profiles/__init__.py": ("public_package_facade"),

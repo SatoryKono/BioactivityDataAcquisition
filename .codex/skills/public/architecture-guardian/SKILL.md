@@ -1,6 +1,7 @@
-______________________________________________________________________
-
-## name: architecture-guardian description: "Validate BioETL architecture boundaries, ADR compliance, naming conventions, and anti-patterns. Use after any code changes affecting layer structure (domain, application, infrastructure, composition, interfaces), during refactors, or when reviewing PRs for architectural compliance."
+---
+name: "architecture-guardian"
+description: "Validate BioETL architecture boundaries, ADR compliance, naming conventions, and anti-patterns. Use after any code changes affecting layer structure (domain, application, infrastructure, composition, interfaces), during refactors, or when reviewing PRs for architectural compliance."
+---
 
 # Architecture Guardian
 

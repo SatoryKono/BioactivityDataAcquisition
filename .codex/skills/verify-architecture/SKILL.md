@@ -1,6 +1,7 @@
-______________________________________________________________________
-
-## name: verify-architecture description: Run architecture compliance checks for BioETL (quick/full/category modes) before commit or PR.
+---
+name: "verify-architecture"
+description: "Run architecture compliance checks for BioETL (quick/full/category modes) before commit or PR."
+---
 
 # Verify Architecture
 

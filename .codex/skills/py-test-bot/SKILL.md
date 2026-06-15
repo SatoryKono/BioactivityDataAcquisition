@@ -1,6 +1,7 @@
-______________________________________________________________________
-
-## name: py-test-bot description: Execute BioETL py-test-bot profile for role-specific workflow and constraints.
+---
+name: "py-test-bot"
+description: "Execute BioETL py-test-bot profile for role-specific workflow and constraints."
+---
 
 # py-test-bot
 

@@ -1,6 +1,12 @@
-______________________________________________________________________
-
-## name: repo-config description: Use when needing to get the default branch, detect repository settings, fetch available labels, get repo info for API calls, or when any gh-workflow command needs dynamic repository configuration instead of hardcoded values. allowed-tools: Bash, Read context: fork agent: Explore
+---
+name: "repo-config"
+description: "Use when needing to get the default branch, detect repository settings, fetch available labels, get repo info for API calls, or when any gh-workflow command needs dynamic repository configuration instead of hardcoded values."
+allowed-tools:
+  - Bash
+  - Read
+context: "fork"
+agent: "Explore"
+---
 
 # Repository Configuration
 

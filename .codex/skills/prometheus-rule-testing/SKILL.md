@@ -1,6 +1,7 @@
-______________________________________________________________________
-
-## name: prometheus-rule-testing description: Test repo-backed Prometheus alert and recording rules with `promtool` before deployment. Use when rule files are added, changed, reviewed, or debugged and deterministic validation is needed.
+---
+name: "prometheus-rule-testing"
+description: "Test repo-backed Prometheus alert and recording rules with `promtool` before deployment. Use when rule files are added, changed, reviewed, or debugged and deterministic validation is needed."
+---
 
 # Prometheus Rule Testing
 

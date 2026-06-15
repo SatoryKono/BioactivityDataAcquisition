@@ -1,6 +1,7 @@
-______________________________________________________________________
-
-## name: py-architecture-debt-bot description: Execute the full BioETL architecture-debt reduction workflow: generate tasks from the exemptions registry, build an execution plan, coordinate targeted debt reduction, and close with verification across py-test-bot, py-config-bot, py-doc-bot, and py-audit-bot.
+---
+name: "py-architecture-debt-bot"
+description: "Execute the full BioETL architecture-debt reduction workflow: generate tasks from the exemptions registry, build an execution plan, coordinate targeted debt reduction, and close with verification across py-test-bot, py-config-bot, py-doc-bot, and py-audit-bot."
+---
 
 # py-architecture-debt-bot
 

@@ -1,6 +1,7 @@
-______________________________________________________________________
-
-## name: py-config-bot description: Execute BioETL py-config-bot profile for role-specific workflow and constraints.
+---
+name: "py-config-bot"
+description: "Execute BioETL py-config-bot profile for role-specific workflow and constraints."
+---
 
 # py-config-bot
 

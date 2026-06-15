@@ -1,6 +1,7 @@
-______________________________________________________________________
-
-## name: py-plan-bot description: Execute BioETL py-plan-bot profile for role-specific workflow and constraints.
+---
+name: "py-plan-bot"
+description: "Execute BioETL py-plan-bot profile for role-specific workflow and constraints."
+---
 
 # py-plan-bot
 

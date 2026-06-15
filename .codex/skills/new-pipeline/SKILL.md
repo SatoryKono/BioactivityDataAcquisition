@@ -1,6 +1,7 @@
-______________________________________________________________________
-
-## name: new-pipeline description: Scaffold a new BioETL provider/entity pipeline with configs, transformer registration, and baseline verification checks.
+---
+name: "new-pipeline"
+description: "Scaffold a new BioETL provider/entity pipeline with configs, transformer registration, and baseline verification checks."
+---
 
 # New Pipeline
 
