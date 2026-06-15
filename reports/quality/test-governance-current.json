@@ -3693,8 +3693,8 @@
     "refined_assertless_tests": 0,
     "root": ".",
     "top_duplicate_test_names": [],
-    "total_test_files": 1715,
-    "total_test_functions": 20224,
+    "total_test_files": 1719,
+    "total_test_functions": 20237,
     "uuid4_call_sites": 0
   }
 }
