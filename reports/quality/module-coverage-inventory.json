@@ -7563,7 +7563,7 @@
       "missing_lines": 6,
       "module": "bioetl.composition.factories.pipeline.registry",
       "path": "src/bioetl/composition/factories/pipeline/registry.py",
-      "source_lines": 276
+      "source_lines": 271
     },
     {
       "coverage_percent": 100.0,
@@ -21398,7 +21398,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-06-15",
-  "source_tree_sha256": "e724d04c35ea7d7390d527eef45927add608f854e453dc08dbfc0e9b8d92d432",
+  "source_tree_sha256": "677d5f4abb6654c2445fe9d2e81711e88ee7abb3370d8d14b75710684cc62ba1",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
