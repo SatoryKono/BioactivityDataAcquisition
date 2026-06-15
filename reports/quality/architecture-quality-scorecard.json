@@ -4,16 +4,16 @@
   "source_artifacts": {
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "a6cfcc8f52415579c7dc4ee0d42a53402d4d35cdacd05023065a23292495f146"
+      "source_fingerprint": "772a49d0dac0192be675f6c832f7a73ca5ee80a8a260d91b41e5255b07512ad3"
     },
     "module_coverage_inventory": {
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "677d5f4abb6654c2445fe9d2e81711e88ee7abb3370d8d14b75710684cc62ba1",
+      "source_tree_sha256": "5a623887f09f185c78f1c35ecf8dcc03d9228f340c525447f007f68b847282cd",
       "coverage_xml_sha256": "2c76f2ab41fbf4126a4ace35bd5f8d6af4190990c7db770c860213ed6a89ecf1"
     },
     "compatibility_importer_census": {
       "path": "reports/quality/compatibility-importer-census.json",
-      "snapshot_date": "2026-06-04"
+      "snapshot_date": "2026-06-15"
     },
     "dead_code_inventory": {
       "path": "reports/quality/dead-code-inventory.json",
@@ -60,7 +60,7 @@
       "score": 8.0,
       "weighted_score": 0.72,
       "evidence_metrics": {
-        "source_module_count": 2139,
+        "source_module_count": 2134,
         "uncovered_module_count": 104
       }
     },
@@ -82,7 +82,7 @@
       "score": 7.0,
       "weighted_score": 0.98,
       "evidence_metrics": {
-        "source_module_count": 2139,
+        "source_module_count": 2134,
         "hotspot_family_count": 5
       }
     },
@@ -144,7 +144,7 @@
   ],
   "metrics": {
     "layer_violations": 0,
-    "source_module_count": 2139,
+    "source_module_count": 2134,
     "unmeasured_module_count": 8,
     "uncovered_module_count": 104,
     "hotspot_family_count": 5,

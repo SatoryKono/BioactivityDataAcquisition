@@ -21,8 +21,23 @@ from bioetl.domain.control_plane import ReplayCapability, RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
     ReproducibilityPolicyAssessment,
 )
+from bioetl.domain.control_plane.reproducibility_profiles import (
+    resolve_reproducibility_family_profile,
+)
 
-from .persistence_profile import _resolve_reproducibility_profile
+from .replay_parentage import _is_composite_execution_context
+
+
+def _resolve_reproducibility_profile(manifest: RunManifest):
+    execution_context = (
+        "composite" if _is_composite_execution_context(manifest) else "source"
+    )
+    return resolve_reproducibility_family_profile(
+        provider=manifest.provider,
+        entity=manifest.entity,
+        contract_ref=manifest.code_provenance.contract_ref,
+        execution_context=execution_context,
+    )
 
 
 def _requires_resume_without_snapshot_reason(

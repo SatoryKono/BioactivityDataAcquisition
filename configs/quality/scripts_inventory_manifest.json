@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-15T15:17:55.468761+00:00",
+  "generated_at": "2026-06-15T17:22:12.087887+00:00",
   "summary": {
     "total_scripts": 429,
     "status_counts": {
@@ -3174,7 +3174,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 265,
+          "line": 274,
           "source_group": "ci",
           "text": "run: uv run python scripts/data_quality/run_silver_gold_filter_parity.py --check"
         }
@@ -4662,13 +4662,13 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 385,
+          "line": 394,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.docs export-matrix-structural-contract --check"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 394,
+          "line": 403,
           "source_group": "ci",
           "text": "uv run python -m scripts.docs sync-matrix-structural-policy --check --input \"$workbook\" --output \"$workbook\""
         },
@@ -5886,7 +5886,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 351,
+          "line": 360,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.ci neo4j-memory-live"
         },
@@ -6228,7 +6228,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 793,
+          "line": 802,
           "source_group": "ci",
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -6547,7 +6547,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 106,
+          "line": 131,
           "source_group": "docs",
           "text": "`python -m scripts.engineering.dev run-tests`, and"
         },
@@ -7107,25 +7107,25 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 73,
+          "line": 98,
           "source_group": "docs",
           "text": "BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 86,
+          "line": 111,
           "source_group": "docs",
           "text": "ignore/deselect inventory for `run_pytest_sharded.sh` lives in"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 667,
+          "line": 692,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/run_pytest_sharded.sh \\"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 758,
+          "line": 783,
           "source_group": "docs",
           "text": "| 6   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing` | В"
         },
@@ -7191,7 +7191,7 @@
       "references": [
         {
           "path": "docs/03-guides/testing.md",
-          "line": 105,
+          "line": 130,
           "source_group": "docs",
           "text": "Developer wrappers such as `scripts/engineering/dev/run_tests.py`,"
         },
@@ -7248,7 +7248,7 @@
       "references": [
         {
           "path": "docs/03-guides/testing.md",
-          "line": 107,
+          "line": 132,
           "source_group": "docs",
           "text": "`scripts/engineering/dev/run_tests.sh` are convenience entry points for local"
         },
@@ -8005,7 +8005,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 271,
+          "line": 280,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.qa check-naming-pkg --check"
         },
@@ -8517,7 +8517,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 400,
+          "line": 409,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
@@ -8613,7 +8613,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 713,
+          "line": 722,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/qa/generate_hotspot_degradation_report.py \\"
         },
@@ -9268,7 +9268,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 244,
+          "line": 269,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadat"
         },
@@ -9613,7 +9613,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 700,
+          "line": 725,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-placement`"
         },
@@ -9676,7 +9676,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 701,
+          "line": 726,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-naming`"
         },
@@ -9703,7 +9703,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 242,
+          "line": 267,
           "source_group": "docs",
           "text": "- `vcr_cassette_max_age_days: 90` является blocking stale-age threshold: CI теперь валидирует managed metadata inventory через `scripts/engineering/qa/vcr/check_vcr_metadata_age.py --max-age-days 90`"
         },
@@ -10277,7 +10277,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 15,
       "references": [
         {
           "path": "docs/02-architecture/04-interfaces-layer.md",
@@ -10581,7 +10581,7 @@
       "agent_usage": [
         "grafana-dashboard-render"
       ],
-      "reference_count": 24,
+      "reference_count": 27,
       "references": [
         {
           "path": ".codex/skills/grafana-dashboard-render/SKILL.md",
@@ -11331,7 +11331,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 199,
+          "line": 224,
           "source_group": "docs",
           "text": "`scripts/ops/launchers/codex/setup_plugins.sh --pytest-only` перед запуском pytest."
         },
@@ -11532,7 +11532,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 244,
+          "line": 269,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadat"
         },
@@ -11789,13 +11789,13 @@
       "references": [
         {
           "path": "docs/03-guides/dashboard-guide.md",
-          "line": 54,
+          "line": 56,
           "source_group": "docs",
           "text": "Use `bash scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh`"
         },
         {
           "path": "docs/03-guides/dashboards/README.md",
-          "line": 56,
+          "line": 65,
           "source_group": "docs",
           "text": "- On Linux, `setup_grafana_screenshot_runtime.sh` is the canonical bootstrap"
         },
@@ -12399,31 +12399,31 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 262,
+          "line": 271,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema generate-config-matrix --check"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 373,
+          "line": 382,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema validate-configs"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 376,
+          "line": 385,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema check-invariants"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 379,
+          "line": 388,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema check-required-fields --verbose"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 382,
+          "line": 391,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema audit-optionality --check"
         }

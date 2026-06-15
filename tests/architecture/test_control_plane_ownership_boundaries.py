@@ -17,7 +17,6 @@ APPROVED_FLAT_CONTROL_PLANE_MODULES = frozenset(
         "_lazy_export_facade.py",
         "effective_config_support.py",
         "forensic_diff_service.py",
-        "run_manifest_diagnostics_support.py",
         "run_manifest_exact_replay_blockers.py",
         "run_manifest_reproducibility_claims.py",
         "run_manifest_reproducibility_score_cards.py",
@@ -136,7 +135,6 @@ def test_manifest_diagnostics_helpers_are_owned_by_manifest_package() -> None:
         "persistence_alerts.py",
         "persistence_profile_support.py",
         "persistence_profiles.py",
-        "replay_helpers.py",
         "replay_state.py",
         "summary.py",
     }
@@ -149,3 +147,26 @@ def test_manifest_diagnostics_helpers_are_owned_by_manifest_package() -> None:
     ]
 
     assert missing == []
+
+
+@pytest.mark.architecture
+def test_manifest_diagnostics_replay_helpers_facade_stays_removed() -> None:
+    """The zero-import replay_helpers compatibility facade must stay removed."""
+    assert not (
+        CONTROL_PLANE_ROOT / "manifest" / "diagnostics" / "replay_helpers.py"
+    ).exists()
+
+
+@pytest.mark.architecture
+def test_run_manifest_diagnostics_transition_shims_stay_removed() -> None:
+    """run_manifest_diagnostics_* transition facades must not return at root."""
+    offenders = sorted(
+        path.name
+        for path in CONTROL_PLANE_ROOT.glob("run_manifest_diagnostics*.py")
+    )
+
+    assert offenders == [], (
+        "Run-manifest diagnostics transition shims must stay under "
+        "manifest/diagnostics owners, not control_plane root: "
+        f"{offenders}"
+    )

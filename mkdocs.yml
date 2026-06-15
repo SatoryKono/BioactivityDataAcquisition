@@ -265,6 +265,7 @@ nav:
                     -   "Extension Guides":
                             -   "Human": 03-guides/dashboards/dashboard-extension-human.md
                             -   "LLM": 03-guides/dashboards/dashboard-extension-llm.md
+                    -   "Dashboard Inventory": 03-guides/dashboards/dashboard-inventory.md
                     -   "Monitoring Index": 03-guides/dashboards/monitoring-index.md
                     -   "Variables Guide": 03-guides/dashboards/variables-guide.md
                     -   "Panels":
@@ -290,6 +291,14 @@ nav:
             -   CLI: 04-reference/cli.md
             -   "Workflow Catalog": 04-reference/workflow-catalog.md
             -   "Pipeline Catalog": 04-reference/pipeline-catalog.md
+            -   Domain:
+                    -   "Overview": 04-reference/domain/README.md
+                    -   "Aggregates": 04-reference/domain/aggregates.md
+                    -   "Value Objects": 04-reference/domain/value-objects.md
+                    -   "Events": 04-reference/domain/events.md
+                    -   "Ports": 04-reference/domain/ports.md
+                    -   "Invariants": 04-reference/domain/invariants.md
+                    -   "Workflow State Machine": 04-reference/domain/workflow-state-machine.md
             -   Engineering:
                     -   "Overview": 05-engineering/README.md
                     -   "Normalization Plan P0-P6": 05-engineering/normalization_plan_P0_P6.md

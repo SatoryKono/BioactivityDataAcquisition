@@ -13,22 +13,24 @@ ______________________________________________________________________
 
 # Dashboard Guide
 
-This guide is the current compact inventory for shipped Grafana dashboards.
+This guide is the operator/contributor orientation page for shipped Grafana
+dashboards.
+
+Canonical shipped inventory and versioning policy now live in
+[dashboards/dashboard-inventory.md](dashboards/dashboard-inventory.md).
 Detailed monitoring setup remains in `grafana/README.md` and
 [Metrics & Monitoring Guide](metrics-monitoring.md).
 
-## Dashboard Inventory
+## Canonical Reading Order
 
-| Dashboard | File | Primary purpose |
-| --- | --- | --- |
-| Control Plane | `grafana/dashboards/bioetl-control-plane-v1.json` | RunManifest, RunLedger, replay/control-plane health. |
-| Overview | `grafana/dashboards/bioetl-overview-v2.json` | Pipeline and provider-level operator summary. |
-| Runtime | `grafana/dashboards/bioetl-runtime.json` | Runtime durations, stages, throughput, record accounting. |
-| Provider Health | `grafana/dashboards/bioetl-provider-health-v2.json` | Provider/API health and adapter status. |
-| Data Quality | `grafana/dashboards/bioetl-dq-v2.json` | DQ score, validation failures, quarantine, anomalies. |
-| Workflow Overview | `grafana/dashboards/bioetl-workflow-overview.json` | Workflow step and status projections. |
-| Alerts & SLO | `grafana/dashboards/bioetl-alerts-slo.json` | Alert rule and SLO status. |
-| Silver Reject Explorer | `grafana/dashboards/bioetl-silver-reject-explorer.json` | Silver filter rejects and quarantine drilldown. |
+1. [dashboards/dashboard-inventory.md](dashboards/dashboard-inventory.md) for
+   shipped JSON -> docs -> datasource -> versioning mapping
+2. [dashboards/monitoring-index.md](dashboards/monitoring-index.md) for
+   incident-time routing
+3. [dashboards/dashboard-v2-usage.md](dashboards/dashboard-v2-usage.md) for
+   operational usage and triage semantics
+4. panel-specific pages under `dashboards/panels/` for formula- and
+   panel-level detail
 
 ## Provisioning Surfaces
 
@@ -59,5 +61,7 @@ on Linux/WSL hosts when Playwright/Chromium runtime libraries are missing.
 - Dashboards are source-controlled JSON under `grafana/dashboards/`.
 - Dashboard behavior must match live metric families registered/emitted by
   `src/bioetl/infrastructure/observability/`.
+- Human-readable dashboard inventory must stay aligned with
+  `docs/03-guides/dashboards/contracts/dashboard-inventory.yaml`.
 - PromQL and panel labels must preserve bounded-label policy from
   [Observability Guide](observability-guide.md).

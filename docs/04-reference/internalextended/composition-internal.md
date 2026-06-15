@@ -40,7 +40,7 @@ This document describes the internal implementation modules within the compositi
 
 ### `_services`
 
-**Purpose**: Internal implementation module behind the public `entrypoints` and `services_api` modules.
+**Purpose**: Internal implementation module behind service-oriented composition owner APIs.
 
 **Key Responsibilities**:
 
@@ -51,7 +51,10 @@ This document describes the internal implementation modules within the compositi
 **Public Counterparts**:
 
 - `composition.entrypoints`
-- `composition.services_api`
+- `composition.control_plane_api`
+- `composition.health_api`
+- `composition.maintenance_api`
+- `composition.observability_api`
 
 ## Implementation Patterns
 
@@ -61,7 +64,6 @@ This document describes the internal implementation modules within the compositi
 composition/
 ├── entrypoints/              # Public execution-focused seam
 ├── execution_api/           # Narrow execution-focused public API
-├── services_api/            # Narrow services-focused public API
 ├── resources_api/           # Narrow resource-management public API
 ├── _pipeline_execution/     # Internal implementation
 ├── _resource_management/    # Internal implementation

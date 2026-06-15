@@ -67,8 +67,11 @@ _BOOTSTRAP_HEALTH_MODULE = "bioetl.composition.bootstrap.cli.health"
 _RESOURCE_MANAGEMENT_MODULE = "bioetl.composition._resource_management"
 _PUBLIC_EXPORTS = {
     "HealthServerDependencies": _BOOTSTRAP_HEALTH_MODULE,
+    "get_health_server_dependencies": _SERVICES_MODULE,
     "get_health_service": _SERVICES_MODULE,
+    "get_quarantine_port": _SERVICES_MODULE,
     "get_quarantine_runtime_service": _RESOURCE_MANAGEMENT_MODULE,
+    "get_quarantine_service": _SERVICES_MODULE,
 }
 
 
@@ -95,23 +98,3 @@ def get_runtime_settings() -> object:
 
     return get_settings()
 
-
-def get_health_server_dependencies() -> HealthServerDependenciesProtocol:
-    """Load health-listener dependencies from the canonical composition services seam."""
-    from bioetl.composition._services import get_health_server_dependencies as _impl
-
-    return _impl()
-
-
-def get_quarantine_port() -> object:
-    """Load the shared quarantine adapter through the canonical services seam."""
-    from bioetl.composition._services import get_quarantine_port as _impl
-
-    return _impl()
-
-
-def get_quarantine_service() -> object:
-    """Load quarantine admin service through the canonical services seam."""
-    from bioetl.composition._services import get_quarantine_service as _impl
-
-    return _impl()

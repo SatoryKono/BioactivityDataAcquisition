@@ -106,7 +106,7 @@ def test_execution_api_reexports_pipeline_runner_service() -> None:
     from bioetl.composition.execution_api import (
         get_pipeline_runner_service as canonical_get_pipeline_runner_service,
     )
-    from bioetl.composition.services_api import get_pipeline_runner_service
+    from bioetl.composition._services import get_pipeline_runner_service
 
     assert canonical_get_pipeline_runner_service is get_pipeline_runner_service
 
@@ -118,8 +118,8 @@ def test_control_plane_api_reexports_canonical_control_plane_services() -> None:
         get_checkpoint_runtime_service as canonical_get_checkpoint_runtime_service,
         get_config_service as canonical_get_config_service,
     )
+    from bioetl.composition._services import get_adr_service, get_config_service
     from bioetl.composition.resources_api import get_checkpoint_runtime_service
-    from bioetl.composition.services_api import get_adr_service, get_config_service
 
     assert canonical_get_adr_service is get_adr_service
     assert canonical_get_checkpoint_runtime_service is get_checkpoint_runtime_service
@@ -137,11 +137,8 @@ def test_health_api_reexports_canonical_health_services() -> None:
         get_quarantine_runtime_service as canonical_get_quarantine_runtime_service,
         get_quarantine_service as canonical_get_quarantine_service,
     )
+    from bioetl.composition._services import get_health_service, get_quarantine_service
     from bioetl.composition.resources_api import get_quarantine_runtime_service
-    from bioetl.composition.services_api import (
-        get_health_service,
-        get_quarantine_service,
-    )
 
     assert HealthServerDependencies is CanonicalHealthServerDependencies
     assert canonical_get_health_service is get_health_service
@@ -157,13 +154,13 @@ def test_maintenance_api_reexports_canonical_maintenance_services() -> None:
         preview_cleanup as canonical_preview_cleanup,
         get_vacuum_service as canonical_get_vacuum_service,
     )
+    from bioetl.composition._services import (
+        get_bronze_cleanup_service,
+        get_vacuum_service,
+    )
     from bioetl.composition.resources_api import (
         get_lifecycle_service,
         preview_cleanup,
-    )
-    from bioetl.composition.services_api import (
-        get_bronze_cleanup_service,
-        get_vacuum_service,
     )
 
     assert canonical_get_lifecycle_service is get_lifecycle_service

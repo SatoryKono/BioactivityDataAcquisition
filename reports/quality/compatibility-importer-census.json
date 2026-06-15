@@ -1,5 +1,5 @@
 {
-  "snapshot_date": "2026-06-04",
+  "snapshot_date": "2026-06-15",
   "inventory_source": "configs/quality/compatibility_facade_inventory.yaml",
   "twin_ratchet_source": "configs/quality/compatibility_twin_module_ratchet.yaml",
   "config_root_facade_source": "configs/quality/infrastructure_config_root_facade_inventory.yaml",
@@ -141,7 +141,6 @@
       "canonical_target": "bioetl.composition.health_api",
       "owner": "bioetl.composition",
       "src_importers": [
-        "src/bioetl/composition/services_api.py",
         "src/bioetl/interfaces/cli/commands/diagnostics.py",
         "src/bioetl/interfaces/cli/commands/domains/health/server_integration.py",
         "src/bioetl/interfaces/cli/commands/domains/quarantine/runtime_access.py",
@@ -151,7 +150,7 @@
         "tests/unit/composition/test_canonical_module_paths.py",
         "tests/unit/composition/test_health_api.py"
       ],
-      "src_importer_count": 5,
+      "src_importer_count": 4,
       "test_importer_count": 2
     },
     {
@@ -240,7 +239,6 @@
         "src/bioetl/application/composite/runner_pkg/runner_support_types.py",
         "src/bioetl/application/core/batch_writer.py",
         "src/bioetl/application/core/record_processor_config.py",
-        "src/bioetl/composition/bootstrap/runtime/_composite_config_runtime_compat.py",
         "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_builder_support.py",
         "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_payloads.py",
         "src/bioetl/composition/bootstrap/runtime/_composite_plan_runtime_support.py",
@@ -313,7 +311,7 @@
         "tests/unit/domain/composite/test_data_schema_config.py",
         "tests/unit/infrastructure/schemas/test_composite_config_invariants_source_of_truth.py"
       ],
-      "src_importer_count": 81,
+      "src_importer_count": 80,
       "test_importer_count": 39
     },
     {
@@ -422,8 +420,11 @@
       "lazy_export_table": "_PUBLIC_EXPORTS",
       "lazy_export_keys": [
         "HealthServerDependencies",
+        "get_health_server_dependencies",
         "get_health_service",
-        "get_quarantine_runtime_service"
+        "get_quarantine_port",
+        "get_quarantine_runtime_service",
+        "get_quarantine_service"
       ],
       "duplicate_lazy_export_keys": [],
       "orphan_lazy_export_keys": [],
@@ -814,7 +815,7 @@
       "public_path": "src/bioetl/composition/lazy_exports.py",
       "private_module": "bioetl.composition._lazy_exports",
       "public_module": "bioetl.composition.lazy_exports",
-      "public_src_importer_count": 9,
+      "public_src_importer_count": 8,
       "public_test_importer_count": 0,
       "private_src_importer_count": 1,
       "private_test_importer_count": 1,
@@ -826,8 +827,7 @@
         "src/bioetl/composition/health_api.py",
         "src/bioetl/composition/maintenance_api.py",
         "src/bioetl/composition/registry_api.py",
-        "src/bioetl/composition/resources_api.py",
-        "src/bioetl/composition/services_api.py"
+        "src/bioetl/composition/resources_api.py"
       ],
       "private_src_importers": [
         "src/bioetl/composition/lazy_exports.py"

@@ -28,6 +28,9 @@ operator validation and incident-readiness checks.
 [sli-slo-baseline.md](sli-slo-baseline.md) for numeric operational objectives,
 target windows, and alert-to-SLI mapping.
 
+Shipped dashboard inventory, JSON mapping, and naming/versioning policy now
+live in [../03-guides/dashboards/dashboard-inventory.md](../03-guides/dashboards/dashboard-inventory.md).
+
 ## 0. Канонический operator workflow
 
 Используйте observability surface в таком порядке:

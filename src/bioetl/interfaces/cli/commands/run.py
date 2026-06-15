@@ -122,16 +122,9 @@ _RUN_CANONICAL_BOUNDARY_SEAMS = (
     "_run_prepared_request_async",
 )
 
-_RUN_COMPATIBILITY_SEAMS = (
-    "echo_health_server_info",
-    "ensure_metrics_server_started",
-    "health_server_context",
-    "get_pipeline_runner_service",
-)
-
 
 def get_cli_run_orchestration_service() -> CliRunOrchestrationService:
-    """Return process-local run orchestration service compatibility accessor."""
+    """Return process-local run orchestration service accessor."""
     return _get_cli_run_orchestration_service_impl()
 
 
@@ -180,7 +173,6 @@ def execute_run(
     )
 
 
-# PATCH_POINT: retained thin helper aliases for tests and CLI patch seams.
 _build_run_command_input = _build_run_command_input_impl
 _map_status_to_exit_code = map_status_to_exit_code
 _build_run_pipeline_callable = _build_run_pipeline_callable_impl
@@ -336,9 +328,6 @@ run = build_run_click_command(
 )
 
 
-# ---------------------------------------------------------------------------
-# PATCH_POINT: compatibility-only re-exports for tests and legacy patch seams.
-# ---------------------------------------------------------------------------
 echo_health_server_info = _echo_health_server_info_impl
 ensure_metrics_server_started = _ensure_metrics_server_started_impl
 health_server_context = _health_server_context_impl

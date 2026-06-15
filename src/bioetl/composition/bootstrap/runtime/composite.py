@@ -29,7 +29,7 @@ from bioetl.composition.bootstrap.runtime._composite_plan_support import (
 from bioetl.composition.bootstrap.runtime._composite_plan_support import (
     load_composite_config_impl as _load_runtime_composite_config_impl,
 )
-from bioetl.composition.bootstrap.runtime.compatibility import (
+from bioetl.composition.bootstrap.runtime.pipeline import (
     apply_runtime_compatibility_patches,
 )
 from bioetl.domain.composite.config import CompositeConfig

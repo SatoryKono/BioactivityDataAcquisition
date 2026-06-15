@@ -187,13 +187,33 @@ def test_runtime_pandera_compatibility_patch_is_not_package_import_side_effect()
         / "composition"
         / "bootstrap"
         / "runtime"
-        / "compatibility.py"
+        / "pipeline.py"
     ).read_text(encoding="utf-8")
+    retired_runtime_compat = (
+        ROOT
+        / "src"
+        / "bioetl"
+        / "composition"
+        / "bootstrap"
+        / "runtime"
+        / "compatibility.py"
+    )
+    retired_pandera_runtime = (
+        ROOT
+        / "src"
+        / "bioetl"
+        / "composition"
+        / "bootstrap"
+        / "runtime"
+        / "pandera_runtime.py"
+    )
 
     assert "apply_pandera_typing_compat_if_needed()" not in top_level_init
     assert "apply_pandera_typing_compat_if_needed()" not in runtime_init
     assert "apply_runtime_compatibility_patches" in runtime_init
     assert "apply_pandera_typing_compat_if_needed" in runtime_patch
+    assert not retired_runtime_compat.exists()
+    assert not retired_pandera_runtime.exists()
 
 
 def test_adr_048_records_schema_boundary_and_runtime_patch_decisions() -> None:

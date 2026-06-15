@@ -5,12 +5,18 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol, TypeGuard
 
+from pydantic import ValidationError
+
 from bioetl.composition.bootstrap.composite_infrastructure_context import (
     CompositeInfrastructureContext,
+)
+from bioetl.infrastructure.config.composite_config_api import (
+    load_composite_config as _load_composite_config_impl,
 )
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+    from pathlib import Path
 
     from bioetl.application.composite.runner_pkg import CompositePipelineRunner
     from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
@@ -51,6 +57,24 @@ class _NamedRuntimeBundle(Protocol):
     tracer: TracingPort
     storage: object
     lock: LockPort
+
+
+def load_runtime_composite_config_impl(
+    name: str,
+    *,
+    resolve_config_path_fn: Callable[[str], Path],
+    validate_payload: Callable[[dict[str, object]], object],
+) -> CompositeConfig:
+    """Load a composite config through the infrastructure owner API."""
+    config_path = resolve_config_path_fn(name)
+    try:
+        return _load_composite_config_impl(
+            config_path.stem,
+            config_dir=config_path.parent,
+            validate_payload=validate_payload,
+        )
+    except ValidationError as error:
+        raise ValueError(f"Invalid composite config '{name}': {error}") from error
 
 
 def build_bootstrap_runtime_resources(

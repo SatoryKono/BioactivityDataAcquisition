@@ -26,7 +26,7 @@ Completed in this cycle:
   Pandera/Pandas imports are sanctioned only inside
   `src/bioetl/domain/schemas/` and `src/bioetl/domain/contracts/`.
 - Locked runtime compatibility ownership to the explicit composition seam
-  `bioetl.composition.bootstrap.runtime.compatibility.apply_runtime_compatibility_patches`,
+  `bioetl.composition.bootstrap.runtime.pipeline.apply_runtime_compatibility_patches`,
   with implementation delegated to
   `bioetl.infrastructure.compat.pandera_compat.apply_pandera_typing_compat_if_needed`.
 - Reworded requirements/glossary surfaces to remove ambiguity between domain

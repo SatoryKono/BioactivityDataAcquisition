@@ -174,7 +174,7 @@ def test_run_prepared_request_async_uses_compat_runtime_path():
 
 @pytest.mark.unit
 def test_run_module_declares_expected_seam_inventory() -> None:
-    """run.py should keep an explicit inventory of canonical and compatibility seams."""
+    """run.py should keep an explicit inventory of canonical command seams."""
     from bioetl.interfaces.cli.commands import run as run_module
 
     assert run_module._RUN_CANONICAL_BOUNDARY_SEAMS == (
@@ -188,17 +188,9 @@ def test_run_module_declares_expected_seam_inventory() -> None:
         "_run_pipeline_async",
         "_run_prepared_request_async",
     )
-    assert run_module._RUN_COMPATIBILITY_SEAMS == (
-        "echo_health_server_info",
-        "ensure_metrics_server_started",
-        "health_server_context",
-        "get_pipeline_runner_service",
-    )
+    assert not hasattr(run_module, "_RUN_COMPATIBILITY_SEAMS")
 
-    for seam_name in (
-        *run_module._RUN_CANONICAL_BOUNDARY_SEAMS,
-        *run_module._RUN_COMPATIBILITY_SEAMS,
-    ):
+    for seam_name in run_module._RUN_CANONICAL_BOUNDARY_SEAMS:
         assert hasattr(run_module, seam_name)
 
     assert (

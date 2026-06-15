@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from functools import lru_cache
+from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
 from bioetl.composition.factories.datasource.adapter_helpers import (
@@ -13,13 +15,28 @@ from bioetl.composition.factories.datasource.provider_registry_resolution import
 from bioetl.composition.providers.provider_registry import (
     DataSourceCreatorProtocol,
     ProviderDataSourceAccessProtocol,
+    ensure_provider_registry_ready,
+    resolve_provider_registry,
 )
 from bioetl.domain.ports import DataSourcePort
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort, MetricsPort
+    from bioetl.domain.filtering import InputFilterConfig
+    from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config.settings_api import Settings
+    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+
+
+@lru_cache(maxsize=1)
+def _get_default_provider_names() -> frozenset[str]:
+    """Return config-backed provider names without loading the provider graph."""
+    providers_dir = Path(__file__).resolve().parents[5] / "configs" / "providers"
+    configured_provider_names = frozenset(
+        path.stem for path in providers_dir.glob("*.yaml")
+    )
+    registry_only_provider_names = frozenset({"uniprot_idmapping"})
+    return configured_provider_names | registry_only_provider_names
 
 
 def get_data_source_creator(
@@ -28,8 +45,44 @@ def get_data_source_creator(
     provider_registry: ProviderDataSourceAccessProtocol | None = None,
 ) -> DataSourceCreatorProtocol:
     """Return the canonical provider-bound data-source creator callback."""
-    registry = _resolve_provider_registry(provider_registry)
-    return registry.build_data_source_creator(provider)
+    resolved_registry = cast(
+        "ProviderDataSourceAccessProtocol",
+        resolve_provider_registry(provider_registry, ensure_ready=False),
+    )
+    available_providers = resolved_registry.list_providers()
+    if available_providers and not resolved_registry.is_registered(provider):
+        available = ", ".join(available_providers)
+        raise KeyError(f"Unknown provider: {provider}. Available: {available}")
+    if provider_registry is None and provider not in _get_default_provider_names():
+        available = ", ".join(sorted(_get_default_provider_names()))
+        raise KeyError(f"Unknown provider: {provider}. Available: {available}")
+    cached_creator: DataSourceCreatorProtocol | None = None
+
+    def _lazy_creator(
+        settings: object,
+        pipeline_config: "PipelineYamlConfig",
+        logger: "LoggerPort",
+        filter_config: "InputFilterConfig | None" = None,
+        metrics: "MetricsPort | None" = None,
+        pipeline_name: str = "unknown",
+    ) -> DataSourcePort:
+        nonlocal cached_creator
+        if cached_creator is None:
+            ready_registry = cast(
+                "ProviderDataSourceAccessProtocol",
+                ensure_provider_registry_ready(resolved_registry),
+            )
+            cached_creator = ready_registry.build_data_source_creator(provider)
+        return cached_creator(
+            settings=settings,
+            pipeline_config=pipeline_config,
+            logger=logger,
+            filter_config=filter_config,
+            metrics=metrics,
+            pipeline_name=pipeline_name,
+        )
+
+    return cast("DataSourceCreatorProtocol", _lazy_creator)
 
 
 class DataSourceFactory:

@@ -18,6 +18,10 @@ ______________________________________________________________________
 Use this page first when an incident family is unclear. It is intentionally short.
 Use the linked dashboards and artifacts for deep setup, contracts, and extension rules.
 
+For the authoritative shipped dashboard mapping
+(`JSON -> docs -> datasources -> versioning policy`), use
+[dashboard-inventory.md](dashboard-inventory.md).
+
 | Question / symptom | Open first | Then use | Owner doc |
 | ------------------ | ---------- | -------- | --------- |
 | What is currently broken or degraded? | `bioetl-overview-v2` | `Status`, `First Action`, then `0. Control Plane`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow` | [Dashboard v2 Usage](dashboard-v2-usage.md) |

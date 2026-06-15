@@ -53,6 +53,31 @@ must use these `suite_name` values for comparable local and CI runs:
 - `performance`: benchmark-backed hotspot/performance-budget lane;
 - `coverage-verify`: the only lane that enforces the repo-wide coverage gate.
 
+## Testing Topology Crosswalk
+
+This matrix links the live `tests/**` topology to the canonical lane model and
+governance artifacts.
+
+| Test family | Primary purpose | Canonical lane(s) | Main artifact / governance anchor |
+| --- | --- | --- | --- |
+| `tests/architecture/**` | Architecture boundaries, governance budgets, generated artifact drift, docs/code sync | `architecture`, `architecture-fast-boundary`, `architecture-slow-governance` | `configs/quality/test_matrix.yaml`, `configs/quality/test_governance_audit.yaml` |
+| `tests/contract/**` | Live/provider contracts, schema snapshots, provider-facing compatibility | `contracts` | provider contract fixtures, schema snapshots, live-network policy |
+| `tests/integration/**` | Replay-backed integration between adapters, pipelines, configs, runtime, and CI artifacts | `integration-replay` | VCR policy, metadata inventory, replay determinism |
+| `tests/e2e/**` | Slow end-to-end pipeline and scenario flows | `e2e` | end-to-end scenario coverage and operator-facing behavior |
+| `tests/unit/**` | Isolated deterministic behavior in domain/application/infrastructure/interfaces | `unit-fast`, `repo-backed-unit`, `unit-parallel-safe` | fast feedback, repo-backed fixtures, shard-safe unit coverage |
+| `tests/smoke/**` | Minimal startup/import confidence | `smoke` | bootstrap/import survivability |
+| `tests/performance/**`, `tests/benchmarks/**` | Performance budgets and hotspot regressions | `performance` | benchmark-backed budget checks |
+| `tests/security/**` | Secret hygiene, security regressions, policy enforcement | `security` | security-focused policy checks |
+| `tests/fixtures/golden/**` plus golden-backed tests | Frozen compatibility bundles and deterministic output baselines | usually exercised via `contracts`, `integration-replay`, or targeted unit/integration selectors | golden registries, snapshots, bounded output bundles |
+
+Interpretation rules:
+
+- A directory family and a lane are related but not identical concepts.
+- Wrapper shortcuts such as `unit`, `arch`, or `integration` are local UX
+  aliases, not the canonical governance identifiers.
+- Comparable test-health evidence must preserve the named lane from
+  `configs/quality/test_matrix.yaml`.
+
 Hotspot refactor readiness is additionally governed by the committed module
 coverage inventory. `configs/quality/debt_scorecard.yaml` section
 `hotspot_family_coverage_thresholds` is the authoritative module-level gate for

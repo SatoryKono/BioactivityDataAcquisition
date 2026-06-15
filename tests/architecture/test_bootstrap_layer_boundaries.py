@@ -183,12 +183,28 @@ class TestBootstrapLayerBoundaries:
             + "\n".join(f"  - {f}" for f in missing)
         )
 
-        # Verify it uses proper implementations, not NoOp
-        assert "UnifiedLogger" in content, (
-            "Runtime observability should use UnifiedLogger, not NoOpLogger"
+        logger_bootstrap = (
+            src_dir
+            / "bioetl"
+            / "composition"
+            / "bootstrap"
+            / "runtime"
+            / "logger_bootstrap.py"
+        ).read_text(encoding="utf-8")
+        metrics_bootstrap = (
+            src_dir
+            / "bioetl"
+            / "composition"
+            / "bootstrap"
+            / "runtime"
+            / "metrics_bootstrap.py"
+        ).read_text(encoding="utf-8")
+
+        assert "UnifiedLogger" in logger_bootstrap, (
+            "Runtime logger owner should use UnifiedLogger, not NoOpLogger"
         )
-        assert "PrometheusMetrics" in content, (
-            "Runtime observability should use PrometheusMetrics, not NoOpMetrics"
+        assert "PrometheusMetrics" in metrics_bootstrap, (
+            "Runtime metrics owner should use PrometheusMetrics, not NoOpMetrics"
         )
 
     def test_cli_can_import_runtime(self, src_dir: Path) -> None:

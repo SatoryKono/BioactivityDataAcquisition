@@ -29,6 +29,10 @@ Experimental deployment material and auxiliary tooling setup live under
 [`deployment/`](deployment/README.md) and are intentionally excluded from the
 standard runbook path.
 
+Use this section as the supported operator entrypoint. Repo-only drafts,
+archived materials, and deployment/tooling extras do not redefine the supported
+runtime path.
+
 ## Navigation
 
 | Section                                               | Description                                                                                     |
@@ -72,6 +76,14 @@ standard runbook path.
 
 - [Deployment & Tooling Extras](deployment/README.md) (Internal / Extended)
 - [Operations Archive Index](archive-index.md)
+
+Boundary rule:
+
+- supported Local-Only operation starts from this page, the monitoring guide,
+  and runbooks;
+- `deployment/` is extended/non-default material only;
+- repo-only drafts and archive pages may provide context, but they are not the
+  default operator path.
 
 ## Related Documentation
 

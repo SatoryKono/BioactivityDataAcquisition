@@ -14,6 +14,9 @@ from bioetl.application.services.control_plane.manifest.diagnostics.base_summary
 from bioetl.application.services.control_plane.manifest.diagnostics.replay import (
     _build_replay_parentage,
 )
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_blockers import (
+    _collect_append_mode_semantic_sinks,
+)
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_projection import (
     _build_replay_projection_bundle,
 )
@@ -26,10 +29,7 @@ from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_sup
 from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
     compute_input_snapshot_identity_fingerprint as _compute_input_snapshot_identity_fingerprint,
 )
-from bioetl.application.services.control_plane.run_manifest_diagnostics_support import (
-    _collect_append_mode_semantic_sinks,
-)
-from bioetl.application.services.control_plane.run_manifest_diagnostics_support import (
+from bioetl.application.services.control_plane.manifest.replay_family_contract_payload import (
     build_replay_family_contract_payload as _build_replay_family_contract_payload,
 )
 from bioetl.domain.control_plane import RunManifest

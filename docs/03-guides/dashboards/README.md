@@ -18,6 +18,8 @@ ______________________________________________________________________
 
 ## Актуальные документы
 
+- `dashboard-inventory.md` — canonical human-readable mapping between shipped
+  dashboard JSON, docs, datasources и naming/versioning policy.
 - `monitoring-index.md` — canonical reading order по monitoring docs.
 - `dashboard-v2-usage.md` — как использовать дашборды в операционной работе, включая runtime adaptive-memory triage.
 - `dashboard-extension-human.md` — краткое руководство для инженера по расширению shipped dashboards.
@@ -29,6 +31,13 @@ ______________________________________________________________________
 - `dashboard-v2-updates.md` — active changelog по текущей shipped surface,
   selector/navigation contract и UX evidence links для последних JSON-изменений.
 - `contracts/dashboard-inventory.yaml` — machine-readable mapping shipped dashboards к panels, data sources и contract metadata для drift detection и audibility.
+
+Правило routing:
+
+- `dashboard-inventory.md` — canonical human-readable shipped inventory;
+- `contracts/dashboard-inventory.yaml` — machine-readable SSOT for drift
+  detection and audit tooling;
+- panel docs и usage guides не должны конкурировать с inventory role.
 
 Текущий shipped Explore handoff:
 

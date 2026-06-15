@@ -384,16 +384,14 @@ class TestEntrypointsLegacyServiceCompatibility:
         )
 
     def test_entrypoints_all_excludes_legacy_service_getters(self):
-        """Legacy service getters stay on services_api only, not on entrypoints."""
-        from bioetl.composition import entrypoints, services_api
+        """Legacy service getters must stay off entrypoints and retired umbrella APIs."""
+        from bioetl.composition import entrypoints
 
         assert "get_checkpoint_service" not in entrypoints.__all__
         assert "get_quarantine_service" not in entrypoints.__all__
         assert "get_bronze_cleanup_service" not in entrypoints.__all__
 
-        assert hasattr(services_api, "get_checkpoint_service")
-        assert hasattr(services_api, "get_quarantine_service")
-        assert hasattr(services_api, "get_bronze_cleanup_service")
+        assert not (SRC_PATH / "composition" / "services_api.py").exists()
 
 
 def get_runtime_imports_from_file(file_path: Path) -> list[str]:
