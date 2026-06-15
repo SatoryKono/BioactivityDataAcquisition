@@ -176,7 +176,9 @@ class TestSourceProfileMetadata:
         assert config.source_profile.version == "1.0.0"
 
     def test_source_profile_hash_drift_is_rejected(self) -> None:
-        with pytest.raises(Exception, match="source_profile.extraction_params_sha256"):
+        with pytest.raises(
+            Exception, match=r"source_profile\.extraction_params_sha256"
+        ):
             FilterConfigFile.model_validate(
                 {
                     "extraction_params": {"standard_type__in": "IC50,Ki"},
