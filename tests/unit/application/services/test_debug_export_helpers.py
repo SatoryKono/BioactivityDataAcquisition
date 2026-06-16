@@ -7,8 +7,12 @@ from datetime import UTC, date, datetime
 from pathlib import Path
 from uuid import UUID
 
+import pytest
+
 from bioetl.application.services import debug_export_helpers as helpers
 from bioetl.domain.types import ErrorType
+
+pytestmark = pytest.mark.unit
 
 
 @dataclass

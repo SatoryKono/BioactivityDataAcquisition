@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.application.observability.span_attribute_values import (
     _bool_sequence,
     _float_sequence,
@@ -10,6 +12,8 @@ from bioetl.application.observability.span_attribute_values import (
     _string_sequence,
     coerce_span_attribute_value,
 )
+
+pytestmark = pytest.mark.unit
 
 
 def test_sequence_items_rejects_scalars_and_accepts_sequences() -> None:

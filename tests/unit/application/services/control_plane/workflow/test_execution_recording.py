@@ -7,6 +7,8 @@ from datetime import UTC, datetime
 from types import SimpleNamespace
 from uuid import UUID
 
+import pytest
+
 from bioetl.application.services.control_plane.workflow import execution_recording
 from bioetl.application.services.control_plane.workflow.execution_recording import (
     WorkflowExecutionRecorder,
@@ -21,6 +23,8 @@ from bioetl.application.services.workflow_transform_service import (
 from bioetl.domain.control_plane import WorkflowExecutionState, WorkflowStepState
 from bioetl.domain.types import RunID
 from bioetl.domain.workflow import TransformStepConfig, WorkflowStepConfig
+
+pytestmark = pytest.mark.unit
 
 
 def _make_state() -> WorkflowExecutionState:
