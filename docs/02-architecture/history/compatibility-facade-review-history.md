@@ -161,9 +161,9 @@ Review outcome for the remaining curated inventory rows:
   because application, composition, infrastructure, and tests depend on the root config
   entrypoint while split `config_*` internals remain confined to `domain/composite/`
   and the dedicated facade test.
-- `src/bioetl/domain/value_objects/activity_values.py`: `retain`
-  because domain/application code uses the public activity value-object entrypoint and
-  the split implementation modules remain confined to `domain/value_objects/`.
+- `src/bioetl/domain/value_objects/activity_values.py`: `removed`
+  on 2026-06-16 after importer census showed no first-party source importers; activity
+  value-object symbols remain available through `bioetl.domain.value_objects`.
 - `src/bioetl/domain/value_objects/publication_field_groups.py`: `retain`
   because public field-group types are consumed through the root entrypoint while
   private `_publication_field_group_*` modules remain internal.
