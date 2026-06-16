@@ -220,6 +220,11 @@ def test_build_dead_code_inventory_flags_zero_import_candidates(tmp_path: Path) 
     payload = build_dead_code_inventory(tmp_path)
 
     assert payload["summary"]["triaged_entry_count"] == 1
+    assert payload["summary"]["repo_wide_owner_test_anchored_candidate_count"] == 0
+    assert payload["summary"]["repo_wide_candidates_without_owner_tests_count"] == 1
+    assert payload["summary"]["repo_wide_non_static_reachability_candidate_count"] == 0
+    assert payload["summary"]["triaged_retained_owner_test_anchored_count"] == 0
+    assert payload["summary"]["triaged_retained_without_owner_tests_count"] == 1
     review_window = payload["review_window"]
     assert review_window == {
         "linked_issue": "#4541",
@@ -236,16 +241,24 @@ def test_build_dead_code_inventory_flags_zero_import_candidates(tmp_path: Path) 
     }
     triaged = payload["triaged_entries"][0]
     assert triaged["verification_status"] == "below_min"
+    assert triaged["evidence_lane"] == "retained_module_owner_suite"
+    assert triaged["owner_tests"] == []
+    assert triaged["owner_test_count"] == 0
+    assert triaged["owner_test_paths_exist_count"] == 0
 
     zero_candidates = payload["repo_wide_zero_import_candidates"]
     assert zero_candidates == [
         {
             "classification_status": "classified",
             "disposition": "retain_canonical_owner_module",
+            "evidence_lane": "canonical_owner_contract",
             "linked_issue": "#4541",
             "module_name": "bioetl.application.unused",
             "path": "src/bioetl/application/unused.py",
             "is_private_module": False,
+            "owner_test_count": 0,
+            "owner_test_paths_exist_count": 0,
+            "owner_tests": [],
             "rationale": "Canonical owner module retained intentionally for test coverage.",
             "review_by": "2026-08-20",
             "reviewed_on": "2026-05-22",

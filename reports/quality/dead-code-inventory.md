@@ -9,6 +9,11 @@
 - repo_wide_zero_import_candidate_count: 2
 - repo_wide_classified_zero_import_candidate_count: 2
 - repo_wide_untriaged_zero_import_candidate_count: 0
+- repo_wide_owner_test_anchored_candidate_count: 2
+- repo_wide_candidates_without_owner_tests_count: 0
+- repo_wide_non_static_reachability_candidate_count: 2
+- triaged_retained_owner_test_anchored_count: 14
+- triaged_retained_without_owner_tests_count: 0
 - note: zero static importer count is a review signal, not automatic removal proof
 - guardrail: Zero static importer count is a review signal only; removals must still verify public entrypoints and dynamic/plugin import paths.
 
@@ -41,3 +46,31 @@
 | --- | --- | --- |
 | `bioetl.__main__` | `retain_module_entrypoint` | `src/bioetl/__main__.py` |
 | `bioetl.composition.registry` | `retain_public_facade` | `src/bioetl/composition/registry.py` |
+
+## Retained Owner-Test Evidence
+
+| Scope | Module | Evidence Lane | Owner Tests |
+| --- | --- | --- | --- |
+| `triaged_retained` | `src/bioetl/infrastructure/adapters/_cached_bronze_support.py` | `retained_module_owner_suite` | `tests/architecture/test_wave4_complexity_closeout.py`, `tests/unit/infrastructure/adapters/test_cached_bronze_data_source.py` |
+| `triaged_retained` | `src/bioetl/infrastructure/adapters/_error_handling_support.py` | `retained_module_owner_suite` | `tests/architecture/test_wave3_adapter_facade_closeout.py` |
+| `triaged_retained` | `src/bioetl/infrastructure/adapters/_health_check_observability.py` | `retained_module_owner_suite` | `tests/architecture/test_wave3_adapter_facade_closeout.py` |
+| `triaged_retained` | `src/bioetl/infrastructure/adapters/_health_check_policy.py` | `retained_module_owner_suite` | `tests/architecture/test_wave3_adapter_facade_closeout.py` |
+| `triaged_retained` | `src/bioetl/application/composite/fsm_helper.py` | `retained_module_owner_suite` | `tests/unit/application/composite/test_fsm_helper.py`, `tests/unit/application/composite/test_runner_fsm.py` |
+| `triaged_retained` | `src/bioetl/application/composite/column_priority_orderer.py` | `retained_module_owner_suite` | `tests/unit/application/composite/test_column_priority_orderer.py` |
+| `triaged_retained` | `src/bioetl/application/composite/merger_input_mixin.py` | `retained_module_owner_suite` | `tests/unit/application/composite/test_merger_input_mixin.py` |
+| `triaged_retained` | `src/bioetl/application/composite/runner_pkg/runner_support_flow.py` | `retained_module_owner_suite` | `tests/architecture/test_tracing_enforcement.py`, `tests/unit/application/composite/test_runner.py` |
+| `triaged_retained` | `src/bioetl/application/composite/runner_pkg/runner_support_mixin.py` | `retained_module_owner_suite` | `tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py` |
+| `triaged_retained` | `src/bioetl/application/composite/runner_pkg/runner_support_policy.py` | `retained_module_owner_suite` | `tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py`, `tests/unit/application/composite/test_runner.py` |
+| `triaged_retained` | `src/bioetl/application/composite/runner_pkg/runner_support_runtime.py` | `retained_module_owner_suite` | `tests/architecture/test_replay_time_seam_inventory.py`, `tests/unit/application/composite/test_runner_checkpoint_resume.py` |
+| `triaged_retained` | `src/bioetl/application/composite/runner_pkg/runner_support_types.py` | `retained_module_owner_suite` | `tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py`, `tests/unit/application/composite/test_runner.py` |
+| `triaged_retained` | `src/bioetl/application/composite/runtime_models.py` | `retained_module_owner_suite` | `tests/unit/application/composite/test_runtime_models.py` |
+| `triaged_retained` | `src/bioetl/application/composite/runtime_wiring_api.py` | `retained_module_owner_suite` | `tests/architecture/test_composite_canonical_surfaces.py`, `tests/architecture/test_column_ordering_family.py`, `tests/unit/composition/bootstrap/runtime/test_composite_support_service_builders.py` |
+| `repo_wide_zero_import` | `src/bioetl/__main__.py` | `module_entrypoint_owner_suite` | `tests/unit/interfaces/cli/test_cli_commands_basic.py`, `tests/unit/interfaces/cli/test_cli_helpers.py` |
+| `repo_wide_zero_import` | `src/bioetl/composition/registry.py` | `compatibility_facade_contract` | `tests/architecture/test_compatibility_freeze_guards.py`, `tests/unit/composition/test_canonical_module_paths.py` |
+
+## Non-Static Reachability Evidence
+
+| Module | Disposition | Evidence Lane | Owner Tests |
+| --- | --- | --- | --- |
+| `bioetl.__main__` | `retain_module_entrypoint` | `module_entrypoint_owner_suite` | `tests/unit/interfaces/cli/test_cli_commands_basic.py`, `tests/unit/interfaces/cli/test_cli_helpers.py` |
+| `bioetl.composition.registry` | `retain_public_facade` | `compatibility_facade_contract` | `tests/architecture/test_compatibility_freeze_guards.py`, `tests/unit/composition/test_canonical_module_paths.py` |

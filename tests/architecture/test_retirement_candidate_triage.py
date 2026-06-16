@@ -301,6 +301,47 @@ def test_repo_wide_zero_import_classification_exactly_covers_candidates() -> Non
         assert isinstance(entry.get("rationale"), str) and entry["rationale"].strip()
 
 
+def test_retained_zero_import_rows_have_owner_test_evidence() -> None:
+    """Retained zero-import residue must materialize explicit owner-test evidence."""
+    inventory = build_dead_code_inventory(PROJECT_ROOT)
+    summary = inventory["summary"]
+    assert isinstance(summary, dict)
+
+    zero_candidates = inventory["repo_wide_zero_import_candidates"]
+    assert isinstance(zero_candidates, list)
+    for row in zero_candidates:
+        assert isinstance(row.get("evidence_lane"), str) and row["evidence_lane"]
+        assert int(row["owner_test_count"]) > 0, (
+            f"Repo-wide zero-import candidate lacks owner tests: {row['path']}"
+        )
+        assert int(row["owner_test_count"]) == int(
+            row["owner_test_paths_exist_count"]
+        ), f"Owner-test paths drifted for repo-wide zero-import candidate: {row['path']}"
+
+    triaged_rows = inventory["triaged_entries"]
+    assert isinstance(triaged_rows, list)
+    for row in triaged_rows:
+        if row.get("disposition") != "retain_active":
+            continue
+        assert isinstance(row.get("evidence_lane"), str) and row["evidence_lane"]
+        assert int(row["owner_test_count"]) > 0, (
+            f"Retained triage row lacks owner tests: {row['module_path']}"
+        )
+        assert int(row["owner_test_count"]) == int(
+            row["owner_test_paths_exist_count"]
+        ), f"Owner-test paths drifted for retained triage row: {row['module_path']}"
+
+    assert summary["repo_wide_owner_test_anchored_candidate_count"] == len(
+        zero_candidates
+    )
+    assert summary["repo_wide_candidates_without_owner_tests_count"] == 0
+    assert summary["triaged_retained_without_owner_tests_count"] == 0
+    retained_triage_count = sum(
+        1 for row in triaged_rows if row.get("disposition") == "retain_active"
+    )
+    assert summary["triaged_retained_owner_test_anchored_count"] == retained_triage_count
+
+
 def test_dead_code_inventory_artifacts_are_committed_and_current() -> None:
     """Dead-code review evidence must stay materialized for zero-import triage."""
     assert DEAD_CODE_JSON_PATH.exists()

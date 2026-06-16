@@ -382,18 +382,23 @@ def test_quality_gate_output_and_summary_include_debt_governance_surface() -> No
                 replay_critical_uuid_seam_count=0,
             )
             self.retirement = SimpleNamespace(
-                triaged_entry_count=19,
-                repo_wide_zero_import_candidate_count=45,
-                repo_wide_classified_zero_import_candidate_count=45,
+                triaged_entry_count=18,
+                repo_wide_zero_import_candidate_count=2,
+                repo_wide_classified_zero_import_candidate_count=2,
                 repo_wide_untriaged_zero_import_candidate_count=0,
+                repo_wide_owner_test_anchored_candidate_count=2,
+                repo_wide_candidates_without_owner_tests_count=0,
+                repo_wide_non_static_reachability_candidate_count=2,
+                triaged_retained_owner_test_anchored_count=14,
+                triaged_retained_without_owner_tests_count=0,
             )
             self.test_governance = SimpleNamespace(
-                compatibility_test_files=53,
-                refined_assertless_tests=499,
-                markerless_test_functions=6991,
-                duplicate_test_names=787,
-                duplicate_test_name_occurrences=869,
-                uuid4_call_sites=400,
+                compatibility_test_files=32,
+                refined_assertless_tests=0,
+                markerless_test_functions=0,
+                duplicate_test_names=0,
+                duplicate_test_name_occurrences=0,
+                uuid4_call_sites=0,
                 date_today_call_sites=0,
             )
 
@@ -416,6 +421,21 @@ def test_quality_gate_output_and_summary_include_debt_governance_surface() -> No
                     ),
                     "repo_wide_untriaged_zero_import_candidate_count": (
                         self.retirement.repo_wide_untriaged_zero_import_candidate_count
+                    ),
+                    "repo_wide_owner_test_anchored_candidate_count": (
+                        self.retirement.repo_wide_owner_test_anchored_candidate_count
+                    ),
+                    "repo_wide_candidates_without_owner_tests_count": (
+                        self.retirement.repo_wide_candidates_without_owner_tests_count
+                    ),
+                    "repo_wide_non_static_reachability_candidate_count": (
+                        self.retirement.repo_wide_non_static_reachability_candidate_count
+                    ),
+                    "triaged_retained_owner_test_anchored_count": (
+                        self.retirement.triaged_retained_owner_test_anchored_count
+                    ),
+                    "triaged_retained_without_owner_tests_count": (
+                        self.retirement.triaged_retained_without_owner_tests_count
                     ),
                 },
                 "test_governance": {
@@ -526,5 +546,6 @@ def test_quality_gate_output_and_summary_include_debt_governance_surface() -> No
     rendered = "\n".join(summary)
     assert "## Debt Governance Surface Snapshot" in rendered
     assert "- runtime_uuid_seam_count: `14`" in rendered
-    assert "- triaged_entry_count: `19`" in rendered
-    assert "- compatibility_test_files: `53`" in rendered
+    assert "- triaged_entry_count: `18`" in rendered
+    assert "- repo_wide_owner_test_anchored_candidate_count: `2`" in rendered
+    assert "- compatibility_test_files: `32`" in rendered

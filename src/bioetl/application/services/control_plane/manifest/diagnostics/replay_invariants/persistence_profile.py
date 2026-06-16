@@ -8,6 +8,9 @@ from bioetl.application.services.control_plane.manifest.diagnostics.nested_mappi
     lookup_mapping_path,
 )
 from bioetl.domain.control_plane import RunManifest
+from bioetl.domain.control_plane.execution_context import (
+    is_composite_execution_context as _is_composite_execution_context,
+)
 from bioetl.domain.control_plane.reproducibility_policy import (
     DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
     STRICT_PERSISTENCE_PROFILES,
@@ -17,10 +20,6 @@ from bioetl.domain.control_plane.reproducibility_profiles import (
     ReproducibilityFamilyProfile,
     build_replay_family_contract,
     resolve_reproducibility_family_profile,
-)
-
-from bioetl.domain.control_plane.execution_context import (
-    is_composite_execution_context as _is_composite_execution_context,
 )
 
 

@@ -59,6 +59,22 @@ def test_tests_workflow_runs_ci_quality_integral_gate() -> None:
     assert 'QUALITY_SUMMARY_OUT="$GITHUB_STEP_SUMMARY"' in workflow
 
 
+def test_tests_workflow_enforces_dead_code_inventory_drift_gate() -> None:
+    """Merge pipeline must fail fast when dead-code evidence artifacts drift."""
+    workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")
+    assert "Validate dead-code inventory artifacts" in workflow
+    assert "python -m scripts.engineering.qa report-dead-code-inventory --check" in workflow
+
+
+def test_tests_workflow_enforces_test_governance_snapshot_gate() -> None:
+    """Merge pipeline must fail fast when test-governance artifacts drift."""
+    workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")
+    assert "Validate committed test-governance snapshots" in workflow
+    assert "python -m scripts.engineering.qa.report_test_governance_audit" in workflow
+    assert "reports/quality/test-governance-current.json" in workflow
+    assert "reports/quality/test-duplicate-name-inventory.json" in workflow
+
+
 def test_tests_workflow_runs_observability_cardinality_review_gate() -> None:
     """Merge pipeline must emit explicit runtime-cardinality review evidence."""
     workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")

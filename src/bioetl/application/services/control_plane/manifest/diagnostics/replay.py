@@ -22,13 +22,13 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay_invar
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_parentage import (
     _build_replay_parentage,
 )
-from bioetl.domain.control_plane.execution_context import (
-    is_composite_execution_context as _is_composite_execution_context,
-)
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_state import (
     _resolve_continuation_mode,
 )
 from bioetl.domain.control_plane import ReplayCapability, RunManifest
+from bioetl.domain.control_plane.execution_context import (
+    is_composite_execution_context as _is_composite_execution_context,
+)
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
     ReplayReadinessVerdict,

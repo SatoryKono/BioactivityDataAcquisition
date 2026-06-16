@@ -490,6 +490,21 @@ def test_debt_scorecard_declares_retirement_governance_kpis() -> None:
         "repo_wide_untriaged_zero_import_candidate_count": int(
             summary["repo_wide_untriaged_zero_import_candidate_count"]
         ),
+        "repo_wide_owner_test_anchored_candidate_count": int(
+            summary["repo_wide_owner_test_anchored_candidate_count"]
+        ),
+        "repo_wide_candidates_without_owner_tests_count": int(
+            summary["repo_wide_candidates_without_owner_tests_count"]
+        ),
+        "repo_wide_non_static_reachability_candidate_count": int(
+            summary["repo_wide_non_static_reachability_candidate_count"]
+        ),
+        "triaged_retained_owner_test_anchored_count": int(
+            summary["triaged_retained_owner_test_anchored_count"]
+        ),
+        "triaged_retained_without_owner_tests_count": int(
+            summary["triaged_retained_without_owner_tests_count"]
+        ),
     }
 
     metrics = governance.get("metrics", {})

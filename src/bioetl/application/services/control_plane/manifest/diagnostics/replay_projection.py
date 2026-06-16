@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.application.services.control_plane.manifest.diagnostics.base_summary_helpers import (
+from bioetl.application.services.control_plane.manifest.diagnostics.base_replay_labels import (
     _resolve_operator_replay_mode,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.persistence import (

@@ -72,6 +72,21 @@ def test_debt_governance_snapshot_matches_live_sources() -> None:
     assert snapshot.retirement.repo_wide_untriaged_zero_import_candidate_count == int(
         dead_code_summary["repo_wide_untriaged_zero_import_candidate_count"]
     )
+    assert snapshot.retirement.repo_wide_owner_test_anchored_candidate_count == int(
+        dead_code_summary["repo_wide_owner_test_anchored_candidate_count"]
+    )
+    assert snapshot.retirement.repo_wide_candidates_without_owner_tests_count == int(
+        dead_code_summary["repo_wide_candidates_without_owner_tests_count"]
+    )
+    assert snapshot.retirement.repo_wide_non_static_reachability_candidate_count == int(
+        dead_code_summary["repo_wide_non_static_reachability_candidate_count"]
+    )
+    assert snapshot.retirement.triaged_retained_owner_test_anchored_count == int(
+        dead_code_summary["triaged_retained_owner_test_anchored_count"]
+    )
+    assert snapshot.retirement.triaged_retained_without_owner_tests_count == int(
+        dead_code_summary["triaged_retained_without_owner_tests_count"]
+    )
     assert snapshot.test_governance.compatibility_test_files == int(
         test_governance["compatibility_test_files"]
     )
@@ -113,6 +128,11 @@ def test_debt_governance_summary_section_lists_required_metrics() -> None:
         "repo_wide_zero_import_candidate_count",
         "repo_wide_classified_zero_import_candidate_count",
         "repo_wide_untriaged_zero_import_candidate_count",
+        "repo_wide_owner_test_anchored_candidate_count",
+        "repo_wide_candidates_without_owner_tests_count",
+        "repo_wide_non_static_reachability_candidate_count",
+        "triaged_retained_owner_test_anchored_count",
+        "triaged_retained_without_owner_tests_count",
         "compatibility_test_files",
         "refined_assertless_tests",
         "markerless_test_functions",

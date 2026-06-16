@@ -370,12 +370,20 @@ def _last_failed_collected_count(config: pytest.Config) -> int:
     return int(getattr(config, "_bioetl_last_failed_collected_count", 0))
 
 
-@pytest.fixture(scope="session")
-def event_loop_policy() -> Any:
-    """Use Selector policy on Windows to avoid Proactor loop socket pressure."""
-    if sys.platform.startswith("win"):
-        return asyncio.WindowsSelectorEventLoopPolicy()
-    return asyncio.get_event_loop_policy()
+def _windows_selector_loop_factory() -> asyncio.AbstractEventLoop:
+    """Create Windows selector loops without overriding pytest-asyncio policy fixture."""
+    return asyncio.WindowsSelectorEventLoopPolicy().new_event_loop()
+
+
+# Only register pytest_asyncio_loop_factories hook on Windows
+if sys.platform.startswith("win"):
+    def pytest_asyncio_loop_factories(
+        config: pytest.Config,
+        item: pytest.Item,
+    ) -> dict[str, Any]:
+        """Provide a selector-loop factory on Windows for pytest-asyncio >= 1.4."""
+        del config, item
+        return {"windows_selector": _windows_selector_loop_factory}
 
 
 def _normalize_enum_option(option_namespace: object, option_name: str) -> None:

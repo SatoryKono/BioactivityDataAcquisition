@@ -12,7 +12,7 @@ from bioetl.application.services.control_plane.manifest.diagnostics.base import 
     _build_base_summary_payload,
     _resolve_base_summary_replay_context,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.base_summary_helpers import (
+from bioetl.application.services.control_plane.manifest.diagnostics.base_replay_labels import (
     _resolve_snapshot_status,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.finalization import (

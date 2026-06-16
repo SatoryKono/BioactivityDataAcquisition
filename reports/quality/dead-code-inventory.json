@@ -18,9 +18,21 @@
     "repo_wide_zero_import_candidate_count": 2,
     "repo_wide_classified_zero_import_candidate_count": 2,
     "repo_wide_untriaged_zero_import_candidate_count": 0,
+    "repo_wide_owner_test_anchored_candidate_count": 2,
+    "repo_wide_candidates_without_owner_tests_count": 0,
+    "repo_wide_non_static_reachability_candidate_count": 2,
     "repo_wide_disposition_counts": {
       "retain_module_entrypoint": 1,
       "retain_public_facade": 1
+    },
+    "repo_wide_evidence_lane_counts": {
+      "compatibility_facade_contract": 1,
+      "module_entrypoint_owner_suite": 1
+    },
+    "triaged_retained_owner_test_anchored_count": 14,
+    "triaged_retained_without_owner_tests_count": 0,
+    "triaged_retained_evidence_lane_counts": {
+      "retained_module_owner_suite": 14
     }
   },
   "triaged_entries": [
@@ -33,7 +45,14 @@
       "src_importer_count": 1,
       "test_importer_count": 2,
       "min_src_importers": 1,
-      "verification_status": "satisfied"
+      "verification_status": "satisfied",
+      "evidence_lane": "retained_module_owner_suite",
+      "owner_tests": [
+        "tests/architecture/test_wave4_complexity_closeout.py",
+        "tests/unit/infrastructure/adapters/test_cached_bronze_data_source.py"
+      ],
+      "owner_test_count": 2,
+      "owner_test_paths_exist_count": 2
     },
     {
       "family": "adapter_layer",
@@ -44,7 +63,13 @@
       "src_importer_count": 1,
       "test_importer_count": 0,
       "min_src_importers": 1,
-      "verification_status": "satisfied"
+      "verification_status": "satisfied",
+      "evidence_lane": "retained_module_owner_suite",
+      "owner_tests": [
+        "tests/architecture/test_wave3_adapter_facade_closeout.py"
+      ],
+      "owner_test_count": 1,
+      "owner_test_paths_exist_count": 1
     },
     {
       "family": "adapter_layer",
@@ -55,7 +80,13 @@
       "src_importer_count": 1,
       "test_importer_count": 1,
       "min_src_importers": 1,
-      "verification_status": "satisfied"
+      "verification_status": "satisfied",
+      "evidence_lane": "retained_module_owner_suite",
+      "owner_tests": [
+        "tests/architecture/test_wave3_adapter_facade_closeout.py"
+      ],
+      "owner_test_count": 1,
+      "owner_test_paths_exist_count": 1
     },
     {
       "family": "adapter_layer",
@@ -66,7 +97,13 @@
       "src_importer_count": 1,
       "test_importer_count": 0,
       "min_src_importers": 1,
-      "verification_status": "satisfied"
+      "verification_status": "satisfied",
+      "evidence_lane": "retained_module_owner_suite",
+      "owner_tests": [
+        "tests/architecture/test_wave3_adapter_facade_closeout.py"
+      ],
+      "owner_test_count": 1,
+      "owner_test_paths_exist_count": 1
     },
     {
       "family": "composite_layer",
@@ -77,7 +114,11 @@
       "src_importer_count": 0,
       "test_importer_count": 0,
       "min_src_importers": null,
-      "verification_status": "not_applicable"
+      "verification_status": "not_applicable",
+      "evidence_lane": null,
+      "owner_tests": [],
+      "owner_test_count": 0,
+      "owner_test_paths_exist_count": 0
     },
     {
       "family": "composite_layer",
@@ -88,7 +129,11 @@
       "src_importer_count": 0,
       "test_importer_count": 0,
       "min_src_importers": null,
-      "verification_status": "not_applicable"
+      "verification_status": "not_applicable",
+      "evidence_lane": null,
+      "owner_tests": [],
+      "owner_test_count": 0,
+      "owner_test_paths_exist_count": 0
     },
     {
       "family": "composite_layer",
@@ -99,7 +144,11 @@
       "src_importer_count": 0,
       "test_importer_count": 0,
       "min_src_importers": null,
-      "verification_status": "not_applicable"
+      "verification_status": "not_applicable",
+      "evidence_lane": null,
+      "owner_tests": [],
+      "owner_test_count": 0,
+      "owner_test_paths_exist_count": 0
     },
     {
       "family": "composite_layer",
@@ -110,7 +159,14 @@
       "src_importer_count": 10,
       "test_importer_count": 5,
       "min_src_importers": 5,
-      "verification_status": "satisfied"
+      "verification_status": "satisfied",
+      "evidence_lane": "retained_module_owner_suite",
+      "owner_tests": [
+        "tests/unit/application/composite/test_fsm_helper.py",
+        "tests/unit/application/composite/test_runner_fsm.py"
+      ],
+      "owner_test_count": 2,
+      "owner_test_paths_exist_count": 2
     },
     {
       "family": "composite_layer",
@@ -121,7 +177,11 @@
       "src_importer_count": 0,
       "test_importer_count": 0,
       "min_src_importers": null,
-      "verification_status": "not_applicable"
+      "verification_status": "not_applicable",
+      "evidence_lane": null,
+      "owner_tests": [],
+      "owner_test_count": 0,
+      "owner_test_paths_exist_count": 0
     },
     {
       "family": "composite_layer",
@@ -132,7 +192,13 @@
       "src_importer_count": 2,
       "test_importer_count": 2,
       "min_src_importers": 1,
-      "verification_status": "satisfied"
+      "verification_status": "satisfied",
+      "evidence_lane": "retained_module_owner_suite",
+      "owner_tests": [
+        "tests/unit/application/composite/test_column_priority_orderer.py"
+      ],
+      "owner_test_count": 1,
+      "owner_test_paths_exist_count": 1
     },
     {
       "family": "composite_layer",
@@ -143,7 +209,13 @@
       "src_importer_count": 2,
       "test_importer_count": 2,
       "min_src_importers": 2,
-      "verification_status": "satisfied"
+      "verification_status": "satisfied",
+      "evidence_lane": "retained_module_owner_suite",
+      "owner_tests": [
+        "tests/unit/application/composite/test_merger_input_mixin.py"
+      ],
+      "owner_test_count": 1,
+      "owner_test_paths_exist_count": 1
     },
     {
       "family": "composite_layer",
@@ -154,7 +226,14 @@
       "src_importer_count": 1,
       "test_importer_count": 0,
       "min_src_importers": 1,
-      "verification_status": "satisfied"
+      "verification_status": "satisfied",
+      "evidence_lane": "retained_module_owner_suite",
+      "owner_tests": [
+        "tests/architecture/test_tracing_enforcement.py",
+        "tests/unit/application/composite/test_runner.py"
+      ],
+      "owner_test_count": 2,
+      "owner_test_paths_exist_count": 2
     },
     {
       "family": "composite_layer",
@@ -165,7 +244,13 @@
       "src_importer_count": 1,
       "test_importer_count": 1,
       "min_src_importers": 1,
-      "verification_status": "satisfied"
+      "verification_status": "satisfied",
+      "evidence_lane": "retained_module_owner_suite",
+      "owner_tests": [
+        "tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py"
+      ],
+      "owner_test_count": 1,
+      "owner_test_paths_exist_count": 1
     },
     {
       "family": "composite_layer",
@@ -176,7 +261,14 @@
       "src_importer_count": 1,
       "test_importer_count": 0,
       "min_src_importers": 1,
-      "verification_status": "satisfied"
+      "verification_status": "satisfied",
+      "evidence_lane": "retained_module_owner_suite",
+      "owner_tests": [
+        "tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py",
+        "tests/unit/application/composite/test_runner.py"
+      ],
+      "owner_test_count": 2,
+      "owner_test_paths_exist_count": 2
     },
     {
       "family": "composite_layer",
@@ -187,7 +279,14 @@
       "src_importer_count": 1,
       "test_importer_count": 0,
       "min_src_importers": 1,
-      "verification_status": "satisfied"
+      "verification_status": "satisfied",
+      "evidence_lane": "retained_module_owner_suite",
+      "owner_tests": [
+        "tests/architecture/test_replay_time_seam_inventory.py",
+        "tests/unit/application/composite/test_runner_checkpoint_resume.py"
+      ],
+      "owner_test_count": 2,
+      "owner_test_paths_exist_count": 2
     },
     {
       "family": "composite_layer",
@@ -198,7 +297,14 @@
       "src_importer_count": 4,
       "test_importer_count": 0,
       "min_src_importers": 1,
-      "verification_status": "satisfied"
+      "verification_status": "satisfied",
+      "evidence_lane": "retained_module_owner_suite",
+      "owner_tests": [
+        "tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py",
+        "tests/unit/application/composite/test_runner.py"
+      ],
+      "owner_test_count": 2,
+      "owner_test_paths_exist_count": 2
     },
     {
       "family": "composite_layer",
@@ -209,7 +315,13 @@
       "src_importer_count": 39,
       "test_importer_count": 11,
       "min_src_importers": 3,
-      "verification_status": "satisfied"
+      "verification_status": "satisfied",
+      "evidence_lane": "retained_module_owner_suite",
+      "owner_tests": [
+        "tests/unit/application/composite/test_runtime_models.py"
+      ],
+      "owner_test_count": 1,
+      "owner_test_paths_exist_count": 1
     },
     {
       "family": "composite_layer",
@@ -220,7 +332,15 @@
       "src_importer_count": 18,
       "test_importer_count": 4,
       "min_src_importers": 2,
-      "verification_status": "satisfied"
+      "verification_status": "satisfied",
+      "evidence_lane": "retained_module_owner_suite",
+      "owner_tests": [
+        "tests/architecture/test_composite_canonical_surfaces.py",
+        "tests/architecture/test_column_ordering_family.py",
+        "tests/unit/composition/bootstrap/runtime/test_composite_support_service_builders.py"
+      ],
+      "owner_test_count": 3,
+      "owner_test_paths_exist_count": 3
     }
   ],
   "repo_wide_zero_import_candidates": [
@@ -235,7 +355,14 @@
       "reviewed_on": "2026-06-16",
       "review_by": "2026-09-14",
       "linked_issue": "#4541",
-      "rationale": "Module entrypoint for `python -m bioetl`; static import scans stay at zero because the interpreter dispatches the module directly."
+      "rationale": "Module entrypoint for `python -m bioetl`; static import scans stay at zero because the interpreter dispatches the module directly.",
+      "evidence_lane": "module_entrypoint_owner_suite",
+      "owner_tests": [
+        "tests/unit/interfaces/cli/test_cli_commands_basic.py",
+        "tests/unit/interfaces/cli/test_cli_helpers.py"
+      ],
+      "owner_test_count": 2,
+      "owner_test_paths_exist_count": 2
     },
     {
       "module_name": "bioetl.composition.registry",
@@ -248,7 +375,14 @@
       "reviewed_on": "2026-06-16",
       "review_by": "2026-09-14",
       "linked_issue": "#5037",
-      "rationale": "Registry module remains a reviewed public facade while explicit-registry runtime hot-path narrowing is completed under issue"
+      "rationale": "Registry module remains a reviewed public facade while explicit-registry runtime hot-path narrowing is completed under issue",
+      "evidence_lane": "compatibility_facade_contract",
+      "owner_tests": [
+        "tests/architecture/test_compatibility_freeze_guards.py",
+        "tests/unit/composition/test_canonical_module_paths.py"
+      ],
+      "owner_test_count": 2,
+      "owner_test_paths_exist_count": 2
     }
   ]
 }

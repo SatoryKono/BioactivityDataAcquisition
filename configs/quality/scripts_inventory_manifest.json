@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-16T08:15:03.468394+00:00",
+  "generated_at": "2026-06-16T12:06:59.915447+00:00",
   "summary": {
     "total_scripts": 430,
     "status_counts": {
@@ -4634,7 +4634,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 127,
+      "reference_count": 128,
       "references": [
         {
           "path": ".github/workflows/docs-kpi-weekly.yml",
@@ -4915,7 +4915,7 @@
           "path": "scripts/docs/README.md",
           "line": 44,
           "source_group": "scripts",
-          "text": "| `check-drift`                            | `scripts/docs/checks/check_drift.py`                            | Check documentation drift (ports, classes, runtime mirrors, freshness, AI runtime surface"
+          "text": "| `check-drift`                            | `scripts/docs/checks/check_drift.py`                            | Check documentation drift (ports, classes, bounded narrative parity, runtime mirrors, fre"
         },
         {
           "path": "scripts/docs/__main__.py",
@@ -7331,7 +7331,7 @@
         },
         {
           "path": "docs/03-guides/docs-verification.md",
-          "line": 144,
+          "line": 152,
           "source_group": "docs",
           "text": ".\\scripts\\engineering\\dev\\setup_env_windows.ps1"
         },
@@ -7388,7 +7388,7 @@
         },
         {
           "path": "docs/03-guides/docs-verification.md",
-          "line": 149,
+          "line": 157,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/setup_env_wsl.sh"
         },
@@ -7672,7 +7672,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 183,
+      "reference_count": 186,
       "references": [
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",

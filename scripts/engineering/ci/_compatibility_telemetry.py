@@ -88,6 +88,11 @@ class RetirementGovernanceSnapshot:
     repo_wide_zero_import_candidate_count: int
     repo_wide_classified_zero_import_candidate_count: int
     repo_wide_untriaged_zero_import_candidate_count: int
+    repo_wide_owner_test_anchored_candidate_count: int
+    repo_wide_candidates_without_owner_tests_count: int
+    repo_wide_non_static_reachability_candidate_count: int
+    triaged_retained_owner_test_anchored_count: int
+    triaged_retained_without_owner_tests_count: int
 
     def as_dict(self) -> dict[str, int]:
         """Return a stable JSON-serializable mapping."""
@@ -101,6 +106,21 @@ class RetirementGovernanceSnapshot:
             ),
             "repo_wide_untriaged_zero_import_candidate_count": (
                 self.repo_wide_untriaged_zero_import_candidate_count
+            ),
+            "repo_wide_owner_test_anchored_candidate_count": (
+                self.repo_wide_owner_test_anchored_candidate_count
+            ),
+            "repo_wide_candidates_without_owner_tests_count": (
+                self.repo_wide_candidates_without_owner_tests_count
+            ),
+            "repo_wide_non_static_reachability_candidate_count": (
+                self.repo_wide_non_static_reachability_candidate_count
+            ),
+            "triaged_retained_owner_test_anchored_count": (
+                self.triaged_retained_owner_test_anchored_count
+            ),
+            "triaged_retained_without_owner_tests_count": (
+                self.triaged_retained_without_owner_tests_count
             ),
         }
 
@@ -224,6 +244,21 @@ def collect_retirement_governance_snapshot(
         repo_wide_untriaged_zero_import_candidate_count=int(
             summary["repo_wide_untriaged_zero_import_candidate_count"]
         ),
+        repo_wide_owner_test_anchored_candidate_count=int(
+            summary["repo_wide_owner_test_anchored_candidate_count"]
+        ),
+        repo_wide_candidates_without_owner_tests_count=int(
+            summary["repo_wide_candidates_without_owner_tests_count"]
+        ),
+        repo_wide_non_static_reachability_candidate_count=int(
+            summary["repo_wide_non_static_reachability_candidate_count"]
+        ),
+        triaged_retained_owner_test_anchored_count=int(
+            summary["triaged_retained_owner_test_anchored_count"]
+        ),
+        triaged_retained_without_owner_tests_count=int(
+            summary["triaged_retained_without_owner_tests_count"]
+        ),
     )
 
 
@@ -312,6 +347,26 @@ def render_debt_governance_section(
             (
                 "- repo_wide_untriaged_zero_import_candidate_count: `"
                 f"{snapshot.retirement.repo_wide_untriaged_zero_import_candidate_count}`"
+            ),
+            (
+                "- repo_wide_owner_test_anchored_candidate_count: `"
+                f"{snapshot.retirement.repo_wide_owner_test_anchored_candidate_count}`"
+            ),
+            (
+                "- repo_wide_candidates_without_owner_tests_count: `"
+                f"{snapshot.retirement.repo_wide_candidates_without_owner_tests_count}`"
+            ),
+            (
+                "- repo_wide_non_static_reachability_candidate_count: `"
+                f"{snapshot.retirement.repo_wide_non_static_reachability_candidate_count}`"
+            ),
+            (
+                "- triaged_retained_owner_test_anchored_count: `"
+                f"{snapshot.retirement.triaged_retained_owner_test_anchored_count}`"
+            ),
+            (
+                "- triaged_retained_without_owner_tests_count: `"
+                f"{snapshot.retirement.triaged_retained_without_owner_tests_count}`"
             ),
             "### Test Governance",
             f"- compatibility_test_files: `{snapshot.test_governance.compatibility_test_files}`",
