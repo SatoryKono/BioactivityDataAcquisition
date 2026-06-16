@@ -10,7 +10,7 @@
 %% @nodes   23
 %% keep-orphan: ENTRY
 %% @uniform-group interfaces nodes=CLI
-%% @uniform-group public     nodes=EXEC,SERV,RES,CAPI,ENTRY
+%% @uniform-group public     nodes=EXEC,CTRL,HEALTH,MAINT,RES,CAPI,ENTRY
 %% @uniform-group assembly   nodes=BPR,BSRV,GPF,FMH,CSUP,CWIR,DSF,STF,REG,PRI,CPB,LCOL
 %% @uniform-group runtime    nodes=PRS,PRUN,PS,ADP,STOR,ISVC,CPART
 %% @uniform-width group
@@ -22,7 +22,9 @@ flowchart TB
 
     subgraph PublicAPIs["Public composition APIs"]
         EXEC["execution_api<br/>runner creation + metrics flush"]
-        SERV["services_api<br/>service accessors"]
+        CTRL["control_plane_api<br/>inspection + admin accessors"]
+        HEALTH["health_api<br/>health + quarantine accessors"]
+        MAINT["maintenance_api<br/>maintenance accessors"]
         RES["resources_api<br/>cleanup / checkpoint / archive helpers"]
         CAPI["creation_api<br/>compat shim → creation_support"]
         ENTRY["entrypoints.py<br/>retained broad facade"]
@@ -53,17 +55,23 @@ flowchart TB
         STOR["Bronze / Silver / Gold writers"]
     end
 
-    CLI --> SERV
+    CLI --> CTRL
+    CLI --> HEALTH
+    CLI --> MAINT
     CLI --> EXEC
     CLI -. cleanup and lifecycle commands .-> RES
 
     ENTRY -. retained public re-export .-> EXEC
-    ENTRY -. retained public re-export .-> SERV
+    ENTRY -. retained public re-export .-> CTRL
+    ENTRY -. retained public re-export .-> HEALTH
+    ENTRY -. retained public re-export .-> MAINT
     ENTRY -. retained public re-export .-> RES
     ENTRY -. retained public re-export .-> CAPI
 
     EXEC ==> BPR
-    SERV ==> BSRV
+    CTRL ==> BSRV
+    HEALTH ==> BSRV
+    MAINT ==> BSRV
     CAPI --> CSUP
     RES --> STF
 
@@ -88,7 +96,7 @@ flowchart TB
     PRS --> PS
     PRUN --> PS
     PRUN --> ADP
-    SERV --> ISVC
+    CTRL --> ISVC
 
     style Interfaces fill:#eff6ff,stroke:#2563eb
     style PublicAPIs fill:#fff7ed,stroke:#f59e0b

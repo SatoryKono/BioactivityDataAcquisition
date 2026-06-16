@@ -34,7 +34,8 @@ graph LR
 
     subgraph Composition["composition boundary"]
         EXEC["execution_api<br/>run / composite runtime"]:::size-md
-        SVC["services_api<br/>runner + inspection + admin services"]:::size-md
+        CTRL["control_plane_api<br/>inspection + admin services"]:::size-md
+        HEALTH["health_api / maintenance_api<br/>health + service maintenance"]:::size-md
         RES["resources_api<br/>cleanup / quarantine / lifecycle"]:::size-md
         ENTRY["entrypoints<br/>retained broad public seam"]:::size-md
         PIPE["PipelineRegistry"]:::size-md
@@ -56,22 +57,24 @@ graph LR
 
     RUN --> REG --> PIPE
     RUN --> EXEC
-    RUN --> SVC
+    RUN --> CTRL
     RC --> EXEC
-    INS --> SVC
-    OPS --> SVC
+    INS --> CTRL
+    OPS --> CTRL
+    OPS --> HEALTH
     OPS --> RES
 
     EXEC --> PRUN
     EXEC --> CRUN
-    SVC --> PRUN
-    SVC --> ISVC
-    SVC --> ASVC
+    CTRL --> PRUN
+    CTRL --> ISVC
+    CTRL --> ASVC
+    HEALTH --> ASVC
     RES --> ASVC
     OPS -.->|"server mode"| HSRV
-    SVC -.->|"health deps"| HSRV
+    HEALTH -.->|"health deps"| HSRV
 
-    NOTE["CLI prefers narrow APIs.<br/>Use execution_api, services_api,<br/>and resources_api for command paths.<br/>entrypoints kept for broad callers/tests."]:::size-md
+    NOTE["CLI prefers narrow APIs.<br/>Use execution_api, control_plane_api,<br/>health_api, maintenance_api,<br/>and resources_api for command paths.<br/>entrypoints kept for broad callers/tests."]:::size-md
     ENTRY -.-> NOTE
     REG -.-> NOTE
 
@@ -82,5 +85,5 @@ graph LR
 
     class TERM user
     class MAIN,REG,RUN,RC,INS,OPS cli
-    class EXEC,SVC,RES,ENTRY,PIPE comp
+    class EXEC,CTRL,HEALTH,RES,ENTRY,PIPE comp
     class PRUN,CRUN,ISVC,ASVC,HSRV,NOTE app

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import shutil
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -126,22 +128,83 @@ ALLOWED_TEST_FILES = frozenset(
 )
 
 
-def _iter_legacy_path_mentions(
+def _iter_python_file_mentions_fallback(
     search_root: Path,
     *,
     allowed_files: frozenset[Path],
+    module_paths: frozenset[str],
 ) -> list[str]:
     violations: list[str] = []
     for py_file in search_root.rglob("*.py"):
         if py_file in allowed_files or "__pycache__" in py_file.parts:
             continue
         rel_path = py_file.relative_to(ROOT).as_posix()
-        lines = py_file.read_text(encoding="utf-8").splitlines()
-        for lineno, line in enumerate(lines, start=1):
-            for legacy_path in LEGACY_IMPLEMENTATION_PATHS:
-                if legacy_path in line:
-                    violations.append(f"{rel_path}:{lineno} mentions {legacy_path}")
+        with py_file.open(encoding="utf-8") as handle:
+            for lineno, line in enumerate(handle, start=1):
+                for module_path in module_paths:
+                    if module_path in line:
+                        violations.append(
+                            f"{rel_path}:{lineno} mentions {module_path}"
+                        )
     return violations
+
+
+def _iter_module_mentions(
+    search_root: Path,
+    *,
+    allowed_files: frozenset[Path],
+    module_paths: frozenset[str],
+) -> list[str]:
+    rg_executable = shutil.which("rg")
+    if rg_executable is None:
+        return _iter_python_file_mentions_fallback(
+            search_root,
+            allowed_files=allowed_files,
+            module_paths=module_paths,
+        )
+
+    violations: list[str] = []
+    allowed_paths = {path.resolve() for path in allowed_files}
+    for module_path in sorted(module_paths):
+        result = subprocess.run(
+            [
+                rg_executable,
+                "-n",
+                "-F",
+                "--glob",
+                "*.py",
+                module_path,
+                str(search_root),
+            ],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if result.returncode not in {0, 1}:
+            raise RuntimeError(
+                f"rg scan failed for {module_path!r}: {result.stderr or result.stdout}"
+            )
+        for row in result.stdout.splitlines():
+            path_str, lineno, _line = row.split(":", 2)
+            py_file = Path(path_str).resolve()
+            if py_file in allowed_paths or "__pycache__" in py_file.parts:
+                continue
+            rel_path = py_file.relative_to(ROOT).as_posix()
+            violations.append(f"{rel_path}:{lineno} mentions {module_path}")
+    return violations
+
+
+def _iter_legacy_path_mentions(
+    search_root: Path,
+    *,
+    allowed_files: frozenset[Path],
+) -> list[str]:
+    return _iter_module_mentions(
+        search_root,
+        allowed_files=allowed_files,
+        module_paths=LEGACY_IMPLEMENTATION_PATHS,
+    )
 
 
 def _iter_public_entrypoint_mentions(
@@ -149,17 +212,11 @@ def _iter_public_entrypoint_mentions(
     *,
     allowed_files: frozenset[Path],
 ) -> list[str]:
-    violations: list[str] = []
-    for py_file in search_root.rglob("*.py"):
-        if py_file in allowed_files or "__pycache__" in py_file.parts:
-            continue
-        rel_path = py_file.relative_to(ROOT).as_posix()
-        lines = py_file.read_text(encoding="utf-8").splitlines()
-        for lineno, line in enumerate(lines, start=1):
-            for module_path in RETAINED_ENTRYPOINT_MODULES:
-                if module_path in line:
-                    violations.append(f"{rel_path}:{lineno} mentions {module_path}")
-    return violations
+    return _iter_module_mentions(
+        search_root,
+        allowed_files=allowed_files,
+        module_paths=RETAINED_ENTRYPOINT_MODULES,
+    )
 
 
 def _iter_removed_client_shim_mentions(
@@ -167,17 +224,11 @@ def _iter_removed_client_shim_mentions(
     *,
     allowed_files: frozenset[Path],
 ) -> list[str]:
-    violations: list[str] = []
-    for py_file in search_root.rglob("*.py"):
-        if py_file in allowed_files or "__pycache__" in py_file.parts:
-            continue
-        rel_path = py_file.relative_to(ROOT).as_posix()
-        lines = py_file.read_text(encoding="utf-8").splitlines()
-        for lineno, line in enumerate(lines, start=1):
-            for module_path in REMOVED_CLIENT_SHIM_MODULES:
-                if module_path in line:
-                    violations.append(f"{rel_path}:{lineno} mentions {module_path}")
-    return violations
+    return _iter_module_mentions(
+        search_root,
+        allowed_files=allowed_files,
+        module_paths=REMOVED_CLIENT_SHIM_MODULES,
+    )
 
 
 @pytest.mark.architecture

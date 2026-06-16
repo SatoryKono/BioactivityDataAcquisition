@@ -12,7 +12,6 @@ composition/
 ├── control_plane_api.py        # Canonical control-plane service API
 ├── health_api.py               # Canonical health/quarantine service API
 ├── maintenance_api.py          # Canonical maintenance service API
-├── services_api.py             # Legacy umbrella service-bootstrap API
 ├── resources_api.py            # Canonical resource-management API
 ├── registry.py                 # PipelineRegistry — maps (provider, entity) → pipeline class
 ├── builders.py                 # High-level builder helpers for CLI/orchestration
@@ -145,7 +144,8 @@ StorageFactory
 - Internal modules such as `_pipeline_execution`, `_resource_management`, and `_services`
   stay private to `composition/` plus dedicated entrypoint tests.
 - New first-party integration surfaces SHOULD prefer specialized `*_api.py`
-  seams over growing `entrypoints.py` or importing `composition.services_api`;
+  seams over growing `entrypoints.py`; the retired `composition.services_api`
+  umbrella must stay absent;
   expand `entrypoints.py` only for explicit backward-compatibility reasons.
 - Composite runtime flows should use `load_composite_config()` as the stable
   public access seam over the canonical owner

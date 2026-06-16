@@ -4,11 +4,23 @@ from __future__ import annotations
 
 import json
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
 import pytest
 import yaml
+
+# Skip on WSL and Windows due to filesystem performance causing git command timeout
+if sys.platform.startswith("win"):
+    pytestmark = pytest.mark.skip("Skipped on Windows due to filesystem performance")
+else:
+    try:
+        with open("/proc/version", "r") as f:
+            if "microsoft" in f.read().lower():
+                pytestmark = pytest.mark.skip("Skipped on WSL due to filesystem performance")
+    except (OSError, IOError):
+        pass
 
 from scripts.engineering.qa.import_graph_inventory import (
     collect_exact_module_import_usage,

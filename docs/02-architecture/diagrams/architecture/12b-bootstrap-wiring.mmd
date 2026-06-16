@@ -24,7 +24,7 @@
 graph TB
     subgraph Public["Public composition APIs"]
         ENTRY["composition.entrypoints"]:::size-sm
-        APIS["execution_api / services_api / resources_api"]:::size-sm
+        APIS["execution_api / control_plane_api / health_api<br/>maintenance_api / resources_api"]:::size-sm
         BOOT["composition.bootstrap<br/>lower-level seam"]:::size-sm
     end
 

@@ -31,7 +31,8 @@ graph TB
 
     subgraph Composition["composition boundary"]
         EXEC["execution_api"]:::size-sm
-        SVC["services_api"]:::size-sm
+        CTRL["control_plane_api"]:::size-sm
+        HEALTH["health_api / maintenance_api"]:::size-sm
         RES["resources_api"]:::size-sm
         ENTRY["entrypoints<br/>retained broad seam"]:::size-sm
         PIPE["PipelineRegistry"]:::size-sm
@@ -47,13 +48,14 @@ graph TB
 
     RUN --> REG --> PIPE
     RUN --> EXEC --> PRUN
-    RUN --> SVC --> PRUN
+    RUN --> CTRL --> PRUN
     RC --> EXEC --> CRUN
-    INS --> SVC --> ISVC
-    OPS --> SVC --> ASVC
+    INS --> CTRL --> ISVC
+    OPS --> CTRL --> ASVC
+    OPS --> HEALTH --> ASVC
     OPS --> RES --> ASVC
     OPS -.->|"server mode"| HSRV
-    SVC -.->|"health deps"| HSRV
+    HEALTH -.->|"health deps"| HSRV
     ENTRY -.->|"broad public seam / compat"| NOTE["Retained for broad callers;<br/>not the primary internal CLI route"]:::size-sm
 
     classDef cli fill:#eff6ff,stroke:#2563eb,stroke-width:2px
@@ -61,5 +63,5 @@ graph TB
     classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
 
     class RUN,RC,INS,OPS,REG cli
-    class EXEC,SVC,RES,ENTRY,PIPE comp
+    class EXEC,CTRL,HEALTH,RES,ENTRY,PIPE comp
     class PRUN,CRUN,ISVC,ASVC,HSRV,NOTE app

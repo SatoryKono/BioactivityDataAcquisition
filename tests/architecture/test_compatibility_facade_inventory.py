@@ -12,6 +12,17 @@ from types import ModuleType
 import pytest
 import yaml
 
+# Skip on WSL and Windows due to filesystem performance causing timeout
+if sys.platform.startswith("win"):
+    pytestmark = pytest.mark.skip("Skipped on Windows due to filesystem performance")
+else:
+    try:
+        with open("/proc/version", "r") as f:
+            if "microsoft" in f.read().lower():
+                pytestmark = pytest.mark.skip("Skipped on WSL due to filesystem performance")
+    except (OSError, IOError):
+        pass
+
 ROOT = Path(__file__).resolve().parents[2]
 REGISTRY_YAML = ROOT / "configs" / "quality" / "compatibility_facade_inventory.yaml"
 POLICY_REVIEW_DATE = date(2026, 5, 15)

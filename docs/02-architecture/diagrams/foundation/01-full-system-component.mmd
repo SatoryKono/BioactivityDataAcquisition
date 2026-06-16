@@ -1,7 +1,7 @@
 %% Title: Full System Component Diagram
 %% Covers: RULES.md §1.1 (Five-Layer Architecture), §1.2 (Ports & Adapters), composition/runtime_builders, application/core
 %% Updated: 2026-03-28
-%% Components: CLI command families, execution/services/resources APIs, control-plane builders, PipelineRunnerService, PipelineRunner, BatchExecutor, BatchProcessingService, inspection/control-plane services, provider adapters, medallion + control-plane storage
+%% Components: CLI command families, execution/control-plane/health/maintenance/resources APIs, control-plane builders, PipelineRunnerService, PipelineRunner, BatchExecutor, BatchProcessingService, inspection/control-plane services, provider adapters, medallion + control-plane storage
 
 %% @version 1.3.0
 %% @date    2026-03-28
@@ -31,7 +31,9 @@ flowchart TB
     subgraph Composition["Composition Layer"]
         direction TB
         ExecAPI["execution_api"]
-        ServicesAPI["services_api"]
+        ControlPlaneAPI["control_plane_api"]
+        HealthAPI["health_api"]
+        MaintenanceAPI["maintenance_api"]
         ResourcesAPI["resources_api"]
         BuildRunner["build_pipeline_runner"]
         Registry["PipelineRegistry"]
@@ -87,7 +89,9 @@ flowchart TB
     PublicationAPIs --> ProviderAdapters
 
     CLI ==> ExecAPI
-    InspectCLI ==> ServicesAPI
+    InspectCLI ==> ControlPlaneAPI
+    InspectCLI ==> HealthAPI
+    InspectCLI ==> MaintenanceAPI
     InspectCLI ==> ResourcesAPI
     Signals --> RunnerService
 
@@ -98,7 +102,9 @@ flowchart TB
     Assembly --> RunnerService
     Assembly --> PipelineRunner
     Assembly --> ControlPlaneBuild
-    ServicesAPI --> InspectionServices
+    ControlPlaneAPI --> InspectionServices
+    HealthAPI --> Lifecycle
+    MaintenanceAPI --> Lifecycle
     ResourcesAPI --> Lifecycle
 
     RunnerService ==> PipelineRunner

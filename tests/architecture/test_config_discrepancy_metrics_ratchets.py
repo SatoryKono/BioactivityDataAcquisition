@@ -13,6 +13,7 @@ from scripts.schema.generate_config_matrix import (
     _collect_family_configs,
     _family_metrics,
     _live_baseline_metrics,
+    build_config_parameter_taxonomy_payload,
 )
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -56,6 +57,14 @@ def _load_baseline_families() -> dict[str, dict[str, int]]:
     return normalized
 
 
+def _load_baseline_taxonomy() -> dict[str, object]:
+    payload = json.loads(BASELINE_PATH.read_text(encoding="utf-8"))
+    assert isinstance(payload, dict)
+    taxonomy = payload.get("parameter_taxonomy")
+    assert isinstance(taxonomy, dict)
+    return taxonomy
+
+
 def _live_metrics() -> dict[str, int]:
     _, _, unique_parameter_count, config_count, raw_partial_count, _, _ = (
         _build_artifact_contents()
@@ -83,6 +92,7 @@ def test_config_discrepancy_baseline_matches_live_generator() -> None:
     )
     assert _load_baseline_metrics() == _live_metrics()
     assert _load_baseline_families() == _live_family_metrics()
+    assert _load_baseline_taxonomy() == build_config_parameter_taxonomy_payload()
 
 
 @pytest.mark.architecture
@@ -145,3 +155,26 @@ def test_config_discrepancy_family_metrics_within_scorecard_budget() -> None:
                 )
 
     assert not violations, "\n".join(violations)
+
+
+@pytest.mark.architecture
+def test_config_parameter_taxonomy_has_owner_and_no_unclassified_parameters() -> None:
+    """Config parameters must remain classified by a family-scoped taxonomy."""
+    taxonomy = build_config_parameter_taxonomy_payload()
+
+    assert taxonomy["owner"] == "BioETL Team"
+    assert (
+        taxonomy["classification_mode"]
+        == "derived_from_flattened_config_parameter_paths"
+    )
+    families = taxonomy["families"]
+    assert isinstance(families, dict)
+    assert set(families) == {"composite_runtime", "entity_effective"}
+    for family_name, family_taxonomy in families.items():
+        assert isinstance(family_taxonomy, dict), family_name
+        assert family_taxonomy["owner"] == "BioETL Team"
+        assert family_taxonomy["parameter_count"] > 0
+        assert family_taxonomy["unclassified_parameter_count"] == 0
+        assert family_taxonomy["unclassified_parameters"] == []
+        groups = family_taxonomy["groups"]
+        assert isinstance(groups, dict) and groups

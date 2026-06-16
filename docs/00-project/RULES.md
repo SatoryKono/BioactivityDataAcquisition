@@ -490,7 +490,9 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 
 #### 2.8.1. Типы контрактов
 
-- **SCHEMA**: Структурная валидация (JSON Schema / Pandera).
+- **SCHEMA**: Структурная runtime-валидация DataFrame contracts через
+  Pandera. JSON/YAML contract artifacts являются derived projection/catalog
+  surfaces, если конкретный runtime path не документирует другое.
 - **CONTENT**: Бизнес-правила качества (диапазоны, паттерны).
 - **CONSISTENCY**: Проверка согласованности между разными источниками.
 - **PROVENANCE**: Отслеживание происхождения и цепочки изменений (Git commit, config hash).

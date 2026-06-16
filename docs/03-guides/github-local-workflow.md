@@ -56,6 +56,47 @@ bash scripts/engineering/dev/run_mypy.sh
 the preferred route when the same checkout is used from both PowerShell and
 WSL.
 
+## Local Git hooks
+
+Install the repository hooks through the Make target so `pre-commit`, `pre-push`,
+and `commit-msg` stay aligned:
+
+```bash
+make precommit-install
+```
+
+Daily local hooks intentionally stay narrow:
+
+- `pre-commit` runs fast formatting, file hygiene, config/schema path guards,
+  root cleanliness, diagram checks when diagrams are touched, and a blocker for
+  secret-bearing `.env` files.
+- `commit-msg` performs a local Conventional Commit header fast-fail compatible
+  with the CI `commit-lint` policy.
+- `pre-push` runs the heavier local gates already configured for strict typing,
+  architecture smoke, Bandit, and Gitleaks.
+
+Run the baseline hook suites explicitly when needed:
+
+```bash
+make quality-fast
+make quality-pre-push
+```
+
+For a stricter pre-PR pass, use the maintained repository commands instead of
+moving CI-scale checks into `pre-commit`:
+
+```bash
+make lint
+make test-fast
+make test-architecture
+python -m pre_commit run smoke-lane --hook-stage manual --all-files
+```
+
+Do not add full coverage, full architecture governance, documentation link
+crawls, observability metric inventory, Silver/Gold parity, Docker/promtool, or
+VCR/LFS audit checks to default `pre-commit`; those surfaces are too slow or
+environment-sensitive for the daily edit loop and remain manual/CI gates.
+
 ## Recommended local Git defaults
 
 The repository-local Git workflow is configured around fast-forward sync and conflict minimization:

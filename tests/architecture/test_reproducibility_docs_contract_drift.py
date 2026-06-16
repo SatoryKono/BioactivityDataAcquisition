@@ -229,6 +229,23 @@ def test_run_manifest_docs_define_replay_equivalence_levels() -> None:
 
 
 @pytest.mark.architecture
+def test_run_manifest_contract_bounds_composite_exact_replay_claims() -> None:
+    """Composite Gold outputs require snapshot envelope proof for exact replay."""
+    contract = _read("docs/04-reference/contracts/run-manifest-ledger.md")
+
+    assert "requires_full_composite_snapshot_envelope" in contract
+    assert "Composite execution can publish `exact_replay_supported` only when" in (
+        contract
+    )
+    assert "full immutable snapshot envelope for every seed, dependency, and" in (
+        contract
+    )
+    assert "Composite manifests without that full envelope remain" in contract
+    assert "universal exact replay for every family and every" in contract
+    assert "It is not a project-wide claim" in contract
+
+
+@pytest.mark.architecture
 def test_reproducibility_support_matrix_matches_published_profiles() -> None:
     """Generated support docs must drift-check against domain profiles."""
     assert (

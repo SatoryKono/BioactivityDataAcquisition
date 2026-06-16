@@ -19,6 +19,21 @@ COMPOSITE_WAIVERS_PATH = (
 GOLD_CONTRACT_DOC_PATH = (
     PROJECT_ROOT / "docs" / "04-reference" / "contracts" / "gold-schemas.md"
 )
+GOLD_STRICT_ADR_PATH = (
+    PROJECT_ROOT
+    / "docs"
+    / "02-architecture"
+    / "decisions"
+    / "ADR-018-gold-strict-validation.md"
+)
+DQ_CONTRACT_ADR_PATH = (
+    PROJECT_ROOT
+    / "docs"
+    / "02-architecture"
+    / "decisions"
+    / "ADR-045-dq-contract-system.md"
+)
+RULES_PATH = PROJECT_ROOT / "docs" / "00-project" / "RULES.md"
 
 
 def _load_yaml(path: Path) -> dict[str, object]:
@@ -47,6 +62,34 @@ def test_runtime_gold_strictness_stays_separate_from_dq_strict_defaults() -> Non
 
     assert runtime.strict_gold_validation is True
     assert dq_config.strict_validation is False
+
+
+@pytest.mark.architecture
+def test_gold_strict_governance_docs_publish_current_runtime_contract() -> None:
+    """ADR-018 must not publish the historical feature flag as current policy."""
+    content = GOLD_STRICT_ADR_PATH.read_text(encoding="utf-8")
+
+    assert "strict_gold_validation: bool = True" in content
+    assert "production assembly принудительно включает strictness" in content
+    assert "Миграционный feature flag остаётся только историческим контекстом" in content
+    assert "strict - gold - validation: bool = False" not in content
+    assert "strict-gold-validation=False без схемы" not in content
+    assert "Feature Flag минимизирует риск" not in content
+
+
+@pytest.mark.architecture
+def test_dq_contract_docs_keep_pandera_as_runtime_schema_authority() -> None:
+    """DQ docs must separate Pandera runtime authority from derived artifacts."""
+    adr_content = DQ_CONTRACT_ADR_PATH.read_text(encoding="utf-8")
+    rules_content = RULES_PATH.read_text(encoding="utf-8")
+
+    assert "Pandera-owned runtime validation" in adr_content
+    assert "MUST NOT silently activate a default/global Gold or Silver schema" in (
+        adr_content
+    )
+    assert "JSON/YAML contract artifacts are derived" in adr_content
+    assert "JSON Schema / Pandera" not in adr_content
+    assert "JSON Schema / Pandera" not in rules_content
 
 
 @pytest.mark.architecture

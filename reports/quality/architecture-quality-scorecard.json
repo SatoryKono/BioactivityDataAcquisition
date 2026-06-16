@@ -4,11 +4,11 @@
   "source_artifacts": {
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "772a49d0dac0192be675f6c832f7a73ca5ee80a8a260d91b41e5255b07512ad3"
+      "source_fingerprint": "6ad2e799001eb90ba0d290b02b1b48121df067c27049f37b622210d98c7b341e"
     },
     "module_coverage_inventory": {
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "5a623887f09f185c78f1c35ecf8dcc03d9228f340c525447f007f68b847282cd",
+      "source_tree_sha256": "af4b61f8e99fd625cf624a6e93e00cc872fa26f9f7a4cf9f68316c2a8bec2790",
       "coverage_xml_sha256": "2c76f2ab41fbf4126a4ace35bd5f8d6af4190990c7db770c860213ed6a89ecf1"
     },
     "compatibility_importer_census": {

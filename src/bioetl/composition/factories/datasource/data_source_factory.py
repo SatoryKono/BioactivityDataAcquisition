@@ -60,10 +60,10 @@ def get_data_source_creator(
 
     def _lazy_creator(
         settings: object,
-        pipeline_config: "PipelineYamlConfig",
-        logger: "LoggerPort",
-        filter_config: "InputFilterConfig | None" = None,
-        metrics: "MetricsPort | None" = None,
+        pipeline_config: PipelineYamlConfig,
+        logger: LoggerPort,
+        filter_config: InputFilterConfig | None = None,
+        metrics: MetricsPort | None = None,
         pipeline_name: str = "unknown",
     ) -> DataSourcePort:
         nonlocal cached_creator
