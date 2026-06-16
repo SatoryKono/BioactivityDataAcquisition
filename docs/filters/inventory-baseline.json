@@ -2250,7 +2250,7 @@
       "symbol": "source_profile",
       "path": "tests/architecture/test_config_ci_invariants.py",
       "occurrence_count": 14,
-      "first_line": 776,
+      "first_line": 778,
       "role": "Versioned source-profile metadata",
       "migration_relevance": "Explicit source-profile metadata anchors extraction_params widening separately from Silver/Gold filter migration.",
       "notes": ""

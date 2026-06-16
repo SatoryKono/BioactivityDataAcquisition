@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from bioetl.domain.ports.export import ExportCatalogPort
+from bioetl.domain.ports import ExportCatalogPort
 
 __all__ = ["ExportCatalogAdapter"]
 

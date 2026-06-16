@@ -12,13 +12,13 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.behavior import EntityIdentityGenerator
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
-    from bioetl.domain.ports.observability.metrics import MetricsPort
-    from bioetl.domain.ports.observability.tracing import TracingPort
-    from bioetl.domain.ports.pii import PiiHasherPort
-    from bioetl.domain.ports.publication_strategy import (
+    from bioetl.domain.ports import (
         DataExtractorStrategy,
         IdentifierResolverStrategy,
+        MetricsPort,
+        PiiHasherPort,
         PublicationMetadataStrategy,
+        TracingPort,
     )
 
 

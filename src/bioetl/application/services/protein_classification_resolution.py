@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 from dataclasses import dataclass
 
-from bioetl.domain.ports.protein_classification import ProteinClassificationPort
+from bioetl.domain.ports import ProteinClassificationPort
 from bioetl.domain.value_objects.protein_class_hierarchy import (
     ProteinClassHierarchy,
     ProteinClassificationResolutionError,

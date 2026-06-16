@@ -6,7 +6,7 @@ import time
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError
-from bioetl.domain.ports.logger_port import LoggerPort
+from bioetl.domain.ports import LoggerPort
 
 
 class _HeartbeatTaskProtocol(Protocol):
