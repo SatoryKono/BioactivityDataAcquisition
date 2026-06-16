@@ -110,12 +110,18 @@ log_info "STEP 4: Configuring .env.codex..."
 ENV_FILE="${ROOT_DIR}/.env.codex"
 
 if [[ ! -f "${ENV_FILE}" ]]; then
-    cat > "${ENV_FILE}" <<'ENVEOF'
+    if [[ "${BIOETL_CREATE_LOCAL_ENV_FILES:-0}" != "1" ]]; then
+        log_warn ".env.codex not found; not creating it without BIOETL_CREATE_LOCAL_ENV_FILES=1"
+        log_info "Create ${ENV_FILE} manually, or rerun with BIOETL_CREATE_LOCAL_ENV_FILES=1 to generate a local template."
+    else
+        log_warn "BIOETL_CREATE_LOCAL_ENV_FILES=1 set; creating .env.codex template"
+        cat > "${ENV_FILE}" <<'ENVEOF'
 # OpenAI Codex Configuration
 # Get your API key from: https://platform.openai.com/api-keys
 OPENAI_API_KEY=sk-your-key-here
 ENVEOF
-    log_warn ".env.codex created - please add your API key"
+        log_warn ".env.codex created - please add your API key"
+    fi
 else
     log_success ".env.codex exists"
 fi

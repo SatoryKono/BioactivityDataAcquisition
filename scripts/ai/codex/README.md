@@ -103,6 +103,10 @@ Codex does not read the workspace `.mcp.json` directly. The launcher keeps `~/.c
 
 ### 1. Edit .env.codex
 
+Launcher and setup scripts do not create `.env.codex` by default. Create it
+manually, or set `BIOETL_CREATE_LOCAL_ENV_FILES=1` when you explicitly want a
+local template generated.
+
 ```powershell
 notepad .env.codex
 ```

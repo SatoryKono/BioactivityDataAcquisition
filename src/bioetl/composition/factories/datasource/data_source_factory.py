@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from functools import lru_cache
-from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
 from bioetl.composition.factories.datasource.adapter_helpers import (
@@ -19,6 +18,7 @@ from bioetl.composition.providers.provider_registry import (
     resolve_provider_registry,
 )
 from bioetl.domain.ports import DataSourcePort
+from bioetl.infrastructure.config.config_root import resolve_config_subdir
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import InputFilterConfig
@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 @lru_cache(maxsize=1)
 def _get_default_provider_names() -> frozenset[str]:
     """Return config-backed provider names without loading the provider graph."""
-    providers_dir = Path(__file__).resolve().parents[5] / "configs" / "providers"
+    providers_dir = resolve_config_subdir("providers")
     configured_provider_names = frozenset(
         path.stem for path in providers_dir.glob("*.yaml")
     )

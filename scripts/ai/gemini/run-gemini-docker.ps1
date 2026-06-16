@@ -14,6 +14,7 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RepoRoot = [System.IO.Path]::GetFullPath((Join-Path $ScriptDir "..\..\.."))
 $ComposeFile = Join-Path $RepoRoot "docker-compose.gemini.yml"
 $EnvFile = Join-Path $ScriptDir ".env.gemini"
+$CanCreateEnvFile = $env:BIOETL_CREATE_LOCAL_ENV_FILES -eq "1"
 
 # Colors
 function Write-Success { param([string]$msg); Write-Host "[OK] $msg" -ForegroundColor Green }
@@ -48,14 +49,19 @@ try {
 # Check API key
 Write-Info "Checking API key..."
 if (-not (Test-Path $EnvFile)) {
-    Write-Warn ".env.gemini not found, creating template..."
-    @"
-# Google Gemini CLI Configuration
-# Get your API key from: https://aistudio.google.com/app/apikeys
-GEMINI_API_KEY=your-api-key-here
-# Optional model override
-# GEMINI_MODEL=gemini-2.5-flash
-"@ | Out-File -FilePath $EnvFile -Encoding UTF8
+    if (-not $CanCreateEnvFile) {
+        Write-Error ".env.gemini not found. Create it manually, or rerun with BIOETL_CREATE_LOCAL_ENV_FILES=1 to generate a local template."
+        exit 1
+    }
+
+    Write-Warn "BIOETL_CREATE_LOCAL_ENV_FILES=1 set; creating .env.gemini template..."
+    @(
+        "# Google Gemini CLI Configuration",
+        "# Get your API key from: https://aistudio.google.com/app/apikeys",
+        "GEMINI_API_KEY=your-api-key-here",
+        "# Optional model override",
+        "# GEMINI_MODEL=gemini-2.5-flash"
+    ) | Out-File -FilePath $EnvFile -Encoding UTF8
     Write-Error "Please edit $EnvFile and add your Gemini API key"
     exit 1
 }

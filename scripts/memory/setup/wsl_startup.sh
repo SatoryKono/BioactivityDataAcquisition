@@ -104,6 +104,10 @@ DOCKER_BIN="$(select_docker_bin "$ENV_TYPE" || true)"
 CONTAINER_ALREADY_RUNNING=0
 CONTAINER_RESTARTED=0
 WSL_NEO4J_HOST="host.docker.internal"
+ENV_FILE_WRITE_ALLOWED=0
+if [[ "${BIOETL_CREATE_LOCAL_ENV_FILES:-0}" == "1" ]]; then
+  ENV_FILE_WRITE_ALLOWED=1
+fi
 
 header "Neo4j Backend Setup for $ENV_TYPE"
 
@@ -162,15 +166,19 @@ case "$ENV_TYPE" in
 esac
 
 # ============================================================================
-# Step 3: Create .env.local for WSL-specific configuration
+# Step 3: Check .env.local for WSL-specific configuration
 # ============================================================================
 header "Step 3: WSL Environment Configuration"
 
 ENV_LOCAL="${REPO_ROOT}/.env.local"
 
 if [[ ! -f "$ENV_LOCAL" ]]; then
-  info "Creating $ENV_LOCAL with WSL settings"
-  cat > "$ENV_LOCAL" << ENVEOF
+  if [[ ${ENV_FILE_WRITE_ALLOWED} -ne 1 ]]; then
+    warn "$ENV_LOCAL not found; not creating it without BIOETL_CREATE_LOCAL_ENV_FILES=1"
+    info "Create $ENV_LOCAL manually, or rerun with BIOETL_CREATE_LOCAL_ENV_FILES=1 to generate and synchronize local settings."
+  else
+    info "BIOETL_CREATE_LOCAL_ENV_FILES=1 set; creating $ENV_LOCAL with WSL settings"
+    cat > "$ENV_LOCAL" << ENVEOF
 # WSL-Optimized Neo4j Configuration
 # Generated for $ENV_TYPE environment
 
@@ -187,19 +195,27 @@ NPM_CONFIG_CACHE=/tmp/npm-cache
 # For WSL: Store memory in /home/user/... (not /mnt/c/...)
 MEMORY_FILE_PATH=${REPO_ROOT}/docs/00-project/ai/memory/mcp-memory.json
 ENVEOF
-  ok "Created .env.local"
+    ok "Created .env.local"
+  fi
 else
-  ok ".env.local already exists"
+  if [[ ${ENV_FILE_WRITE_ALLOWED} -eq 1 ]]; then
+    ok ".env.local already exists; synchronizing because BIOETL_CREATE_LOCAL_ENV_FILES=1 is set"
+  else
+    ok ".env.local already exists"
+    warn "Skipping .env.local synchronization without BIOETL_CREATE_LOCAL_ENV_FILES=1"
+  fi
 fi
 
-upsert_env_local "$ENV_LOCAL" "NEO4J_URI" "bolt://${NEO4J_HOST}:7687"
-upsert_env_local "$ENV_LOCAL" "NEO4J_USERNAME" "neo4j"
-upsert_env_local "$ENV_LOCAL" "NEO4J_PASSWORD" "bioetl_secure_password"
-upsert_env_local "$ENV_LOCAL" "NEO4J_DATABASE" "neo4j"
-upsert_env_local "$ENV_LOCAL" "NEO4J_AUTH" "neo4j/bioetl_secure_password"
-upsert_env_local "$ENV_LOCAL" "NPM_CONFIG_CACHE" "/tmp/npm-cache"
-upsert_env_local "$ENV_LOCAL" "MEMORY_FILE_PATH" "${REPO_ROOT}/docs/00-project/ai/memory/mcp-memory.json"
-ok "Neo4j keys in .env.local synchronized for ${ENV_TYPE}"
+if [[ ${ENV_FILE_WRITE_ALLOWED} -eq 1 ]]; then
+  upsert_env_local "$ENV_LOCAL" "NEO4J_URI" "bolt://${NEO4J_HOST}:7687"
+  upsert_env_local "$ENV_LOCAL" "NEO4J_USERNAME" "neo4j"
+  upsert_env_local "$ENV_LOCAL" "NEO4J_PASSWORD" "bioetl_secure_password"
+  upsert_env_local "$ENV_LOCAL" "NEO4J_DATABASE" "neo4j"
+  upsert_env_local "$ENV_LOCAL" "NEO4J_AUTH" "neo4j/bioetl_secure_password"
+  upsert_env_local "$ENV_LOCAL" "NPM_CONFIG_CACHE" "/tmp/npm-cache"
+  upsert_env_local "$ENV_LOCAL" "MEMORY_FILE_PATH" "${REPO_ROOT}/docs/00-project/ai/memory/mcp-memory.json"
+  ok "Neo4j keys in .env.local synchronized for ${ENV_TYPE}"
+fi
 
 # ============================================================================
 # Step 4: Start Neo4j Container

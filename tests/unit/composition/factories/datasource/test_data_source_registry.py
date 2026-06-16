@@ -7,6 +7,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+import bioetl.composition.factories.datasource.data_source_factory as data_source_factory_module
 from bioetl.composition.factories.datasource.data_source_factory import (
     get_data_source_creator,
 )
@@ -80,6 +81,30 @@ class TestCanonicalDataSourceCreator:
 
         assert result is expected
         creator.assert_called_once()
+
+    def test_default_provider_names_resolve_through_config_root_seam(
+        self,
+        tmp_path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        providers_dir = tmp_path / "providers"
+        providers_dir.mkdir()
+        (providers_dir / "chembl.yaml").write_text("provider: chembl\n")
+        (providers_dir / "ignored.yml").write_text("provider: ignored\n")
+
+        data_source_factory_module._get_default_provider_names.cache_clear()
+        monkeypatch.setattr(
+            data_source_factory_module,
+            "resolve_config_subdir",
+            lambda _subdir: providers_dir,
+        )
+
+        try:
+            provider_names = data_source_factory_module._get_default_provider_names()
+        finally:
+            data_source_factory_module._get_default_provider_names.cache_clear()
+
+        assert provider_names == frozenset({"chembl", "uniprot_idmapping"})
 
 
 class TestDataSourceCreatorProtocol:
