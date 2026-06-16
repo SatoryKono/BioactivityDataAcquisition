@@ -5,6 +5,9 @@ from __future__ import annotations
 from bioetl.application.services.control_plane.manifest.diagnostics.nested_mapping import (
     lookup_mapping_path,
 )
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family import (
+    _resolve_reproducibility_profile,
+)
 from bioetl.application.services.control_plane.run_manifest_exact_replay_blockers import (
     append_mode_exact_replay_blockers as _append_mode_exact_replay_blockers,
 )
@@ -18,27 +21,9 @@ from bioetl.application.services.control_plane.run_manifest_exact_replay_blocker
     snapshot_exact_replay_blockers as _snapshot_exact_replay_blockers,
 )
 from bioetl.domain.control_plane import ReplayCapability, RunManifest
-from bioetl.domain.control_plane.execution_context import (
-    is_composite_execution_context as _is_composite_execution_context,
-)
 from bioetl.domain.control_plane.reproducibility_policy import (
     ReproducibilityPolicyAssessment,
 )
-from bioetl.domain.control_plane.reproducibility_profiles import (
-    resolve_reproducibility_family_profile,
-)
-
-
-def _resolve_reproducibility_profile(manifest: RunManifest):
-    execution_context = (
-        "composite" if _is_composite_execution_context(manifest) else "source"
-    )
-    return resolve_reproducibility_family_profile(
-        provider=manifest.provider,
-        entity=manifest.entity,
-        contract_ref=manifest.code_provenance.contract_ref,
-        execution_context=execution_context,
-    )
 
 
 def _requires_resume_without_snapshot_reason(

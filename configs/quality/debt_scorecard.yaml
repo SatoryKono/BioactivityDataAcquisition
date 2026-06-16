@@ -111,8 +111,8 @@ compatibility_debt_metrics:
       ratchet_policy: Fail on growth; ratchet current/max_count toward target_count
         zero as transition-only compatibility shims are removed.
     retained_public_entrypoint_burden:
-      current_count: 14
-      max_count: 14
+      current_count: 13
+      max_count: 13
       owner: '@bioetl-architecture'
       linked_issue: '4575'
       rationale: Retained public entrypoints are stable external API, but their size
@@ -142,7 +142,7 @@ sanctioned_public_entrypoint_governance:
   inventory_source: configs/quality/compatibility_facade_inventory.yaml
   metrics:
     public_entrypoint_count:
-      current_count: 14
+      current_count: 13
       owner: '@bioetl-architecture'
       linked_issue: '4565'
       rationale: Permanent public entrypoints remain governed as sanctioned public
@@ -163,7 +163,7 @@ sanctioned_public_entrypoint_governance:
       review_policy: Keep the sanctioned public API set explicit and block reversion
         to internal-owner imports outside approved boundary coverage.
     narrow_first_party_callers_count:
-      current_count: 2
+      current_count: 1
       owner: '@bioetl-architecture'
       linked_issue: '4565'
       rationale: A small subset of sanctioned public entrypoints still needs first-party
@@ -520,22 +520,20 @@ hotspot_family_ratchets:
     - src/bioetl/application/services/control_plane/
     bounded_growth_budgets:
       files_ge_250_loc: 22
-      max_internal_fan_in: 5
+      max_internal_fan_in: 4
     metrics:
       duplication_clusters: 0
       files: 105
       total_loc: 14845
       files_ge_250_loc: 18
       helper_function_ratio: 0.478
-      max_internal_fan_in: 5
-      max_internal_fan_in_module: bioetl.application.services.control_plane.manifest.diagnostics.snapshot_refs
+      max_internal_fan_in: 4
+      max_internal_fan_in_module: bioetl.application.services.control_plane.replay.historical_certification
     trend:
-      status: reduced_2026-06-16_issue_5267
-      next_action: 2026-06-16 splits input-snapshot diagnostics coordination into
-        dedicated refs, ledger, materialization, and summary modules while retaining
-        the compatibility facade; files_ge_250_loc drops to 18, total LOC drops to
-        14845, max_internal_fan_in remains at the existing budget of 5, and duplication
-        remains zero.
+      status: reduced_2026-06-16_issue_5273_fan_in_ratchet_to_4
+      next_action: 2026-06-16 splits replay diagnostics labels, replay-family,
+        persistence-policy, readiness, and resume-contract helpers into narrower
+        modules; max_internal_fan_in drops to 4 and duplication remains zero.
   - name: composition_runtime_builders
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -894,22 +892,22 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless a reviewed triage recalibration
         updates the tracked debt budget intentionally.
     repo_wide_zero_import_candidate_count:
-      current_count: 13
-      max_count: 13
+      current_count: 11
+      max_count: 11
       linked_issue: '#4541'
       owner: '@bioetl-architecture'
       rationale: REQ-ARCH-027 port facade refactoring moved all port imports to bioetl.domain.ports,
-        creating 11 new zero-import port owner modules. These are canonical owner modules
+        leaving 9 zero-import port owner modules. These are canonical owner modules
         that now serve only the facade, not direct importers.
       ratchet_policy: Non-growth fail-fast unless a reviewed dead-code inventory refresh
         updates the classified candidate set intentionally.
     repo_wide_classified_zero_import_candidate_count:
-      current_count: 13
-      max_count: 13
+      current_count: 11
+      max_count: 11
       linked_issue: '#4541'
       owner: '@bioetl-architecture'
       rationale: Every repo-wide zero-import candidate remains covered by an explicit
-        disposition ledger entry. The classified residue now includes 11 port owner modules
+        disposition ledger entry. The classified residue now includes 9 port owner modules
         plus __main__.py and composition/registry.py.
       ratchet_policy: Non-growth fail-fast unless the repo-wide classification ledger
         is intentionally rebaselined during review.
@@ -922,14 +920,14 @@ retirement_governance_metrics:
         after review.
       ratchet_policy: Zero-budget fail-fast metric.
     repo_wide_owner_test_anchored_candidate_count:
-      current_count: 13
-      max_count: 13
+      current_count: 11
+      max_count: 11
       linked_issue: '#4654'
       owner: '@bioetl-architecture'
       rationale: >-
-        All 13 repo-wide zero-import candidates are now anchored by evidence:
+        All 11 repo-wide zero-import candidates are now anchored by evidence:
         __main__.py and composition/registry.py have explicit owner-test suites,
-        and the 11 port owner modules are anchored by canonical_owner_contract
+        and the 9 port owner modules are anchored by canonical_owner_contract
         evidence.
       ratchet_policy: Non-growth fail-fast unless the reviewed candidate set intentionally
         shrinks and the owner-test evidence is regenerated in lockstep.

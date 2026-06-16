@@ -27,9 +27,13 @@ from bioetl.application.services.control_plane.manifest.diagnostics.base_provena
 from bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context import (
     _resolve_base_summary_replay_context,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.base_replay_labels import (
+from bioetl.application.services.control_plane.manifest.diagnostics.operator_replay_mode import (
     _resolve_operator_replay_mode,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_status import (
     _resolve_snapshot_status,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.source_posture import (
     _resolve_source_posture,
 )
 from bioetl.domain.control_plane import (

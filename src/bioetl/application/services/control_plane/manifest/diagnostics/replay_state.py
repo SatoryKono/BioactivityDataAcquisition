@@ -2,16 +2,11 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.manifest.diagnostics.base_replay_labels import (
-    _resolve_source_posture,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.persistence_profile import (
-    _resolve_reproducibility_profile,
-)
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_blockers import (
     _collect_append_mode_semantic_sinks,
     _requires_resume_without_snapshot_reason,
     _resolve_exact_replay_blockers,
+    _resolve_reproducibility_profile,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_parentage import (
     _build_replay_parentage,
@@ -23,6 +18,9 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay_invar
     _has_live_capture_materialized_snapshots,
     _has_partial_input_snapshot_envelope,
     _resolve_exact_replay_supported_reason,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.source_posture import (
+    _resolve_source_posture,
 )
 from bioetl.domain.control_plane import ReplayCapability, RunManifest
 from bioetl.domain.control_plane.execution_context import (

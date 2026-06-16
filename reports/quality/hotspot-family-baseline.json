@@ -93,15 +93,15 @@
       "total_loc": 14845,
       "files_ge_250_loc": 18,
       "helper_function_ratio": 0.478,
-      "max_internal_fan_in": 5,
-      "max_internal_fan_in_module": "bioetl.application.services.control_plane.manifest.diagnostics.snapshot_refs",
+      "max_internal_fan_in": 4,
+      "max_internal_fan_in_module": "bioetl.application.services.control_plane.replay.historical_certification",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 22,
-        "max_internal_fan_in": 5
+        "max_internal_fan_in": 4
       },
       "budget_warnings": [
         "near_budget:files_ge_250_loc=18/22",
-        "at_budget:max_internal_fan_in=5/5"
+        "at_budget:max_internal_fan_in=4/4"
       ]
     },
     {

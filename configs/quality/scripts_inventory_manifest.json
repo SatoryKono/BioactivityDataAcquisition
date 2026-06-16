@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-16T16:09:43.606383+00:00",
+  "generated_at": "2026-06-16T18:02:57.905423+00:00",
   "summary": {
     "total_scripts": 430,
     "status_counts": {
@@ -14,7 +14,7 @@
       "docs": 150,
       "scripts": 330,
       "skills": 11,
-      "tests": 168
+      "tests": 175
     }
   },
   "scripts": [
@@ -203,7 +203,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 146,
+          "line": 150,
           "source_group": "scripts",
           "text": "for you. `diagnose_wsl.sh`, `diagnose_wsl.ps1`, and `diagnose_wsl.bat` are the"
         },
@@ -236,7 +236,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 146,
+          "line": 150,
           "source_group": "scripts",
           "text": "for you. `diagnose_wsl.sh`, `diagnose_wsl.ps1`, and `diagnose_wsl.bat` are the"
         },
@@ -275,7 +275,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 146,
+          "line": 150,
           "source_group": "scripts",
           "text": "for you. `diagnose_wsl.sh`, `diagnose_wsl.ps1`, and `diagnose_wsl.bat` are the"
         },
@@ -340,7 +340,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 145,
+          "line": 149,
           "source_group": "scripts",
           "text": "The canonical `headless.sh` / `headless.ps1` launchers set `CODEX_SKIP_MCP_SETUP=1`"
         }
@@ -367,7 +367,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 145,
+          "line": 149,
           "source_group": "scripts",
           "text": "The canonical `headless.sh` / `headless.ps1` launchers set `CODEX_SKIP_MCP_SETUP=1`"
         },
@@ -390,12 +390,18 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
           "line": 211,
           "source_group": "scripts",
+          "text": "\"scripts/ai/codex/helper/check-env.ps1\","
+        },
+        {
+          "path": "tests/architecture/test_env_file_write_governance.py",
+          "line": 20,
+          "source_group": "tests",
           "text": "\"scripts/ai/codex/helper/check-env.ps1\","
         }
       ]
@@ -430,13 +436,13 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 165,
+          "line": 169,
           "source_group": "scripts",
           "text": ".\\helper\\diagnose-hang.ps1"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 227,
+          "line": 231,
           "source_group": "scripts",
           "text": "- `diagnose-hang.ps1` - **NEW**: Debug tool for setup hangs"
         },
@@ -571,7 +577,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 228,
+          "line": 232,
           "source_group": "scripts",
           "text": "- `run-codex-impl.sh` - Launch Codex with environment"
         },
@@ -626,12 +632,18 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
           "line": 213,
           "source_group": "scripts",
+          "text": "\"scripts/ai/codex/helper/setup-env.sh\","
+        },
+        {
+          "path": "tests/architecture/test_env_file_write_governance.py",
+          "line": 18,
+          "source_group": "tests",
           "text": "\"scripts/ai/codex/helper/setup-env.sh\","
         }
       ]
@@ -935,7 +947,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 47,
+      "reference_count": 48,
       "references": [
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
@@ -1316,7 +1328,7 @@
         },
         {
           "path": "scripts/ai/gemini/README.md",
-          "line": 112,
+          "line": 116,
           "source_group": "scripts",
           "text": "- `headless.sh` / `headless.ps1` set `GEMINI_SKIP_MCP_SETUP=1` for one launch and then delegate back to the canonical launcher."
         }
@@ -1367,7 +1379,7 @@
         },
         {
           "path": "scripts/ai/gemini/README.md",
-          "line": 112,
+          "line": 116,
           "source_group": "scripts",
           "text": "- `headless.sh` / `headless.ps1` set `GEMINI_SKIP_MCP_SETUP=1` for one launch and then delegate back to the canonical launcher."
         },
@@ -1460,7 +1472,7 @@
         },
         {
           "path": "scripts/ai/gemini/run-gemini.sh",
-          "line": 146,
+          "line": 151,
           "source_group": "scripts",
           "text": "bash \"${HELPER_DIR}/ensure-gemini-cli.sh\" --update"
         }
@@ -1514,31 +1526,31 @@
         },
         {
           "path": "scripts/ai/gemini/run-gemini.sh",
-          "line": 202,
+          "line": 207,
           "source_group": "scripts",
           "text": "bash \"${HELPER_DIR}/run-gemini-impl.sh\" \"$@\""
         },
         {
           "path": "scripts/ai/gemini/run-gemini.sh",
-          "line": 212,
+          "line": 217,
           "source_group": "scripts",
           "text": "bash \"${HELPER_DIR}/run-gemini-impl.sh\" --prompt \"$*\""
         },
         {
           "path": "scripts/ai/gemini/run-gemini.sh",
-          "line": 222,
+          "line": 227,
           "source_group": "scripts",
           "text": "bash \"${HELPER_DIR}/run-gemini-impl.sh\" --prompt \"$*\" --approval-mode yolo"
         },
         {
           "path": "scripts/ai/gemini/run-gemini.sh",
-          "line": 230,
+          "line": 235,
           "source_group": "scripts",
           "text": "bash \"${HELPER_DIR}/run-gemini-impl.sh\" --prompt \"${COMMAND} $*\""
         },
         {
           "path": "scripts/ai/gemini/run-gemini.sh",
-          "line": 232,
+          "line": 237,
           "source_group": "scripts",
           "text": "bash \"${HELPER_DIR}/run-gemini-impl.sh\" --prompt \"${COMMAND}\""
         }
@@ -1549,12 +1561,18 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
           "line": 215,
           "source_group": "scripts",
+          "text": "\"scripts/ai/gemini/helper/setup-env.sh\","
+        },
+        {
+          "path": "tests/architecture/test_env_file_write_governance.py",
+          "line": 19,
+          "source_group": "tests",
           "text": "\"scripts/ai/gemini/helper/setup-env.sh\","
         }
       ]
@@ -1597,7 +1615,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 11,
       "references": [
         {
           "path": "scripts/ai/gemini/DOCKER_SETUP.md",
@@ -1711,7 +1729,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 65,
+      "reference_count": 66,
       "references": [
         {
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
@@ -2876,7 +2894,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "docs/03-guides/development/mistral-vibe-wsl2-setup.md",
@@ -2900,6 +2918,12 @@
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
           "line": 219,
           "source_group": "scripts",
+          "text": "\"scripts/ai/vibe/helper/setup-env.sh\","
+        },
+        {
+          "path": "tests/architecture/test_env_file_write_governance.py",
+          "line": 22,
+          "source_group": "tests",
           "text": "\"scripts/ai/vibe/helper/setup-env.sh\","
         }
       ]
@@ -10527,7 +10551,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 11,
       "references": [
         {
           "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",

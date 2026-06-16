@@ -6,10 +6,10 @@
 - next_review_by: 2026-09-14
 - review_cycle_days: 90
 - triaged_entry_count: 18
-- repo_wide_zero_import_candidate_count: 13
-- repo_wide_classified_zero_import_candidate_count: 13
+- repo_wide_zero_import_candidate_count: 11
+- repo_wide_classified_zero_import_candidate_count: 11
 - repo_wide_untriaged_zero_import_candidate_count: 0
-- repo_wide_owner_test_anchored_candidate_count: 13
+- repo_wide_owner_test_anchored_candidate_count: 11
 - repo_wide_candidates_without_owner_tests_count: 0
 - repo_wide_non_static_reachability_candidate_count: 2
 - triaged_retained_owner_test_anchored_count: 14
@@ -52,10 +52,8 @@
 | `bioetl.domain.ports.export` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/export.py` |
 | `bioetl.domain.ports.filtering` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/filtering.py` |
 | `bioetl.domain.ports.idmapping` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/idmapping.py` |
-| `bioetl.domain.ports.logger_port` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/logger_port.py` |
 | `bioetl.domain.ports.pii` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/pii.py` |
 | `bioetl.domain.ports.protein_classification` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/protein_classification.py` |
-| `bioetl.domain.ports.publication_strategy` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/publication_strategy.py` |
 | `bioetl.domain.ports.resilience` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/resilience.py` |
 
 ## Retained Owner-Test Evidence
@@ -84,10 +82,8 @@
 | `repo_wide_zero_import` | `src/bioetl/domain/ports/export.py` | `canonical_owner_contract` | `tests/architecture/test_domain_public_api.py`, `tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py`, `tests/architecture/test_port_contracts.py` |
 | `repo_wide_zero_import` | `src/bioetl/domain/ports/filtering.py` | `canonical_owner_contract` | `tests/architecture/test_domain_public_api.py`, `tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py`, `tests/architecture/test_port_contracts.py` |
 | `repo_wide_zero_import` | `src/bioetl/domain/ports/idmapping.py` | `canonical_owner_contract` | `tests/architecture/test_domain_public_api.py`, `tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py`, `tests/architecture/test_port_contracts.py` |
-| `repo_wide_zero_import` | `src/bioetl/domain/ports/logger_port.py` | `canonical_owner_contract` | `tests/architecture/test_domain_public_api.py`, `tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py`, `tests/architecture/test_port_contracts.py` |
 | `repo_wide_zero_import` | `src/bioetl/domain/ports/pii.py` | `canonical_owner_contract` | `tests/architecture/test_domain_public_api.py`, `tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py`, `tests/architecture/test_port_contracts.py` |
 | `repo_wide_zero_import` | `src/bioetl/domain/ports/protein_classification.py` | `canonical_owner_contract` | `tests/architecture/test_domain_public_api.py`, `tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py`, `tests/architecture/test_port_contracts.py` |
-| `repo_wide_zero_import` | `src/bioetl/domain/ports/publication_strategy.py` | `canonical_owner_contract` | `tests/architecture/test_domain_public_api.py`, `tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py`, `tests/architecture/test_port_contracts.py` |
 | `repo_wide_zero_import` | `src/bioetl/domain/ports/resilience.py` | `canonical_owner_contract` | `tests/architecture/test_domain_public_api.py`, `tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py`, `tests/architecture/test_port_contracts.py` |
 
 ## Non-Static Reachability Evidence

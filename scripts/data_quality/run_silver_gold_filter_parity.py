@@ -347,10 +347,14 @@ def evaluate_scenario(scenario: Mapping[str, Any]) -> JsonDict:
 
     return {
         "scenario_id": scenario_id,
+        "contract_ref": cleaned_anchors.get("contract_ref"),
+        "contract_version": cleaned_anchors.get("contract_version"),
         "pipeline_name": cleaned_anchors.get("pipeline_name"),
         "provider": cleaned_anchors.get("provider"),
         "entity": cleaned_anchors.get("entity"),
         "run_type": cleaned_anchors.get("run_type"),
+        "source_profile_id": cleaned_anchors.get("source_profile_id"),
+        "source_profile_version": cleaned_anchors.get("source_profile_version"),
         "source_profile": _json_ready(cleaned_run.get("source_profile")),
         "bronze_snapshot": _json_ready(cleaned_run.get("bronze_snapshot")),
         "verdict": verdict,
