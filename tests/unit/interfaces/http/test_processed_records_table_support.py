@@ -204,7 +204,7 @@ def test_query_prometheus_scalar_with_fallbacks_reports_all_errors(
 
     monkeypatch.setattr(support, "_query_prometheus_scalar", always_fails)
 
-    with pytest.raises(RuntimeError, match="http://one: .*http://two:"):
+    with pytest.raises(RuntimeError, match=r"http://one: .*http://two:"):
         support._query_prometheus_scalar_with_fallbacks(
             prometheus_base_urls=("http://one", "http://two"),
             query="down",

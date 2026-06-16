@@ -1,7 +1,7 @@
 {
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
-  "coverage_xml_sha256": "1eeb1a05a5fb2114b550452c76b16ccbb5955d71dcbc26e4675214728034299e",
+  "coverage_xml_sha256": "16dd667ea8a953fdc527f8bca00ab9031f9f53e41dfbe57eda23042e0aa30d82",
   "generated_by": "scripts/engineering/qa/report_module_coverage_inventory.py",
   "measurement_mode": "coverage_xml",
   "modules": [
@@ -19016,11 +19016,11 @@
       "source_lines": 208
     },
     {
-      "coverage_percent": 24.53,
-      "coverage_status": "partially_covered",
-      "covered_lines": 13,
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 53,
       "executable_lines": 53,
-      "missing_lines": 40,
+      "missing_lines": 0,
       "module": "bioetl.infrastructure.storage.gold.read_cleanup_mixin",
       "path": "src/bioetl/infrastructure/storage/gold/read_cleanup_mixin.py",
       "source_lines": 149
@@ -19106,11 +19106,11 @@
       "source_lines": 76
     },
     {
-      "coverage_percent": 33.33,
-      "coverage_status": "partially_covered",
-      "covered_lines": 9,
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 27,
       "executable_lines": 27,
-      "missing_lines": 18,
+      "missing_lines": 0,
       "module": "bioetl.infrastructure.storage.gold.writer_schema_helpers",
       "path": "src/bioetl/infrastructure/storage/gold/writer_schema_helpers.py",
       "source_lines": 61
@@ -19426,11 +19426,11 @@
       "source_lines": 56
     },
     {
-      "coverage_percent": 0.0,
-      "coverage_status": "uncovered",
-      "covered_lines": 0,
-      "executable_lines": 85,
-      "missing_lines": 85,
+      "coverage_percent": 95.16,
+      "coverage_status": "partially_covered",
+      "covered_lines": 59,
+      "executable_lines": 62,
+      "missing_lines": 3,
       "module": "bioetl.infrastructure.storage.silver.metadata_mixin",
       "path": "src/bioetl/infrastructure/storage/silver/metadata_mixin.py",
       "source_lines": 260
@@ -19636,11 +19636,11 @@
       "source_lines": 43
     },
     {
-      "coverage_percent": 31.86,
+      "coverage_percent": 99.12,
       "coverage_status": "partially_covered",
-      "covered_lines": 36,
+      "covered_lines": 112,
       "executable_lines": 113,
-      "missing_lines": 77,
+      "missing_lines": 1,
       "module": "bioetl.infrastructure.storage.silver.operations.metadata_runtime_support",
       "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_runtime_support.py",
       "source_lines": 302
@@ -19666,11 +19666,11 @@
       "source_lines": 139
     },
     {
-      "coverage_percent": 50.81,
-      "coverage_status": "partially_covered",
-      "covered_lines": 63,
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 124,
       "executable_lines": 124,
-      "missing_lines": 61,
+      "missing_lines": 0,
       "module": "bioetl.infrastructure.storage.silver.operations.metadata_write_support",
       "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_write_support.py",
       "source_lines": 342
@@ -19816,11 +19816,11 @@
       "source_lines": 292
     },
     {
-      "coverage_percent": 43.62,
+      "coverage_percent": 95.56,
       "coverage_status": "partially_covered",
-      "covered_lines": 41,
-      "executable_lines": 94,
-      "missing_lines": 53,
+      "covered_lines": 43,
+      "executable_lines": 45,
+      "missing_lines": 2,
       "module": "bioetl.infrastructure.storage.silver.writer_runtime_facade",
       "path": "src/bioetl/infrastructure/storage/silver/writer_runtime_facade.py",
       "source_lines": 224
@@ -19836,11 +19836,11 @@
       "source_lines": 179
     },
     {
-      "coverage_percent": 68.18,
-      "coverage_status": "partially_covered",
-      "covered_lines": 60,
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 88,
       "executable_lines": 88,
-      "missing_lines": 28,
+      "missing_lines": 0,
       "module": "bioetl.infrastructure.storage.silver.writer_runtime_support",
       "path": "src/bioetl/infrastructure/storage/silver/writer_runtime_support.py",
       "source_lines": 220
@@ -21584,9 +21584,9 @@
     },
     "source_module_count": 2134,
     "status_counts": {
-      "fully_covered": 928,
-      "partially_covered": 1113,
-      "uncovered": 93
+      "fully_covered": 932,
+      "partially_covered": 1110,
+      "uncovered": 92
     },
     "unmeasured_module_count": 0,
     "unmeasured_modules": []
