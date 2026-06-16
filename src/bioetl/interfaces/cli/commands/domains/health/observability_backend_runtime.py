@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-import subprocess
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import Protocol
 from urllib.parse import quote
 
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_failure_details import (
@@ -39,8 +39,12 @@ from bioetl.interfaces.cli.commands.domains.health.server_integration import (
 )
 from bioetl.interfaces.cli.formatters import echo_info, echo_warning
 
-if TYPE_CHECKING:
-    from collections.abc import Callable
+
+class _StartedBackendProcess(Protocol):
+    """Minimal process surface needed after detached backend startup."""
+
+    args: object
+    pid: int | None
 
 DEFAULT_OBSERVABILITY_BACKEND_PROBE_HOST = "127.0.0.1"
 DEFAULT_OBSERVABILITY_BACKEND_BIND_HOST = "0.0.0.0"
@@ -146,7 +150,7 @@ def _start_observability_backend_detached(
     required_probe_paths: tuple[str, ...],
     probe_fn: Callable[..., bool],
     required_probe_fn: Callable[..., bool],
-    start_fn: Callable[..., subprocess.Popen[bytes]],
+    start_fn: Callable[..., _StartedBackendProcess],
     wait_fn: Callable[..., bool],
     wait_required_paths_fn: Callable[..., bool],
     info_printer: Callable[[str], None],
@@ -236,9 +240,7 @@ def ensure_observability_backend_started(
     required_probe_paths: tuple[str, ...] = (),
     probe_fn: Callable[..., bool] = probe_observability_backend,
     required_probe_fn: Callable[..., bool] = probe_observability_backend_required_paths,
-    start_fn: Callable[
-        ..., subprocess.Popen[bytes]
-    ] = start_detached_quarantine_backend,
+    start_fn: Callable[..., _StartedBackendProcess] = start_detached_quarantine_backend,
     wait_fn: Callable[..., bool] = wait_for_observability_backend_ready,
     wait_required_paths_fn: Callable[
         ..., bool

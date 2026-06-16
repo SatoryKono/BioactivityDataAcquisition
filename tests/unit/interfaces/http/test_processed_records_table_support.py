@@ -148,7 +148,7 @@ def test_query_prometheus_scalar_parses_success_and_missing_values(
         assert timeout == support.PROMETHEUS_QUERY_TIMEOUT_SECONDS
         return _FakeResponse(next(payloads))
 
-    monkeypatch.setattr(support, "urlopen", fake_urlopen)
+    monkeypatch.setattr(support, "_open_url", fake_urlopen)
 
     assert (
         support._query_prometheus_scalar(

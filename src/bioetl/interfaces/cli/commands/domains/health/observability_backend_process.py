@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import os
 import signal
-import subprocess
+import subprocess  # nosec B404
 import sys
 import tempfile
 import time
 from pathlib import Path
+from shutil import which
 from typing import TYPE_CHECKING
 
 from bioetl.interfaces.cli.commands.domains.health.server_integration import (
@@ -19,10 +20,18 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
 
+def _resolve_system_executable(command: str) -> str | None:
+    """Return an absolute executable path when available."""
+    return which(command)
+
+
 def _find_listening_backend_pids_by_port(port: int) -> tuple[int, ...]:
     if os.name == "nt":
+        netstat = _resolve_system_executable("netstat")
+        if netstat is None:
+            return ()
         result = subprocess.run(
-            ["netstat", "-ano", "-p", "tcp"],
+            [netstat, "-ano", "-p", "tcp"],  # nosec B603
             check=False,
             capture_output=True,
             text=True,
@@ -42,8 +51,11 @@ def _find_listening_backend_pids_by_port(port: int) -> tuple[int, ...]:
                 continue
         return tuple(sorted(pids))
 
+    ss = _resolve_system_executable("ss")
+    if ss is None:
+        return ()
     result = subprocess.run(
-        ["ss", "-ltnp"],
+        [ss, "-ltnp"],  # nosec B603
         check=False,
         capture_output=True,
         text=True,
@@ -78,13 +90,17 @@ def drop_listening_backend_on_port(
     if not pids:
         return True
     if os.name == "nt":
+        taskkill = _resolve_system_executable("taskkill")
         for pid in pids:
-            result = subprocess.run(
-                ["taskkill", "/PID", str(pid), "/T", "/F"],
-                check=False,
-                capture_output=True,
-                text=True,
-            )
+            if taskkill is None:
+                result = subprocess.CompletedProcess(args=(), returncode=1)
+            else:
+                result = subprocess.run(
+                    [taskkill, "/PID", str(pid), "/T", "/F"],  # nosec B603
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
             remaining_pids = _find_listening_backend_pids_by_port(port)
             if result.returncode == 0 or pid not in remaining_pids:
                 continue

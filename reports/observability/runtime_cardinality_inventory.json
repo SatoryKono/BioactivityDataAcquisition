@@ -261,7 +261,9 @@
     "bioetl_workflow_status",
     "bioetl_workflow_success_rate"
   ],
-  "dashboarded_without_emission": [],
+  "dashboarded_without_emission": [
+    "bioetl_gold_lifecycle_state_total"
+  ],
   "dead_metrics": [],
   "declared_label_contract_metrics": [
     "bioetl_adapter_fallback_attempts_total",
@@ -641,7 +643,6 @@
     "bioetl_filter_combinations_loaded_total",
     "bioetl_filter_ids_duplicates_total",
     "bioetl_filter_ids_loaded_total",
-    "bioetl_gold_lifecycle_state_total",
     "bioetl_gold_validation_failures_total",
     "bioetl_gold_write_attempts_total",
     "bioetl_gold_write_duration_seconds",
@@ -1739,7 +1740,9 @@
       "docs/03-guides/dashboards/panels/bioetl-workflow-overview-panels.md"
     ]
   },
-  "documented_only_metrics": [],
+  "documented_only_metrics": [
+    "bioetl_gold_lifecycle_state_total"
+  ],
   "documented_without_registry": [
     "bioetl_alert_resolution_duration_seconds",
     "bioetl_alerts_fired_total",
@@ -1771,7 +1774,9 @@
     "bioetl_workflow_status",
     "bioetl_workflow_success_rate"
   ],
-  "documented_without_runtime": [],
+  "documented_without_runtime": [
+    "bioetl_gold_lifecycle_state_total"
+  ],
   "domain_event_emitters": [
     "src/bioetl/application/observability/observer_context_mixin.py"
   ],
@@ -1848,7 +1853,6 @@
     "bioetl_filter_combinations_loaded_total",
     "bioetl_filter_ids_duplicates_total",
     "bioetl_filter_ids_loaded_total",
-    "bioetl_gold_lifecycle_state_total",
     "bioetl_gold_validation_failures_total",
     "bioetl_gold_write_attempts_total",
     "bioetl_gold_write_duration_seconds",
@@ -2120,7 +2124,6 @@
     "bioetl_filter_combinations_loaded_total",
     "bioetl_filter_ids_duplicates_total",
     "bioetl_filter_ids_loaded_total",
-    "bioetl_gold_lifecycle_state_total",
     "bioetl_gold_validation_failures_total",
     "bioetl_gold_write_attempts_total",
     "bioetl_gold_write_duration_seconds",
@@ -2472,8 +2475,12 @@
     "bioetl_workflow_step_duration_seconds",
     "bioetl_workflow_step_events_total"
   ],
-  "registered_without_runtime": [],
-  "registry_only_metrics": [],
+  "registered_without_runtime": [
+    "bioetl_gold_lifecycle_state_total"
+  ],
+  "registry_only_metrics": [
+    "bioetl_gold_lifecycle_state_total"
+  ],
   "retired_declared_observability_events": [
     "artifact_published",
     "batch_completed",
@@ -3361,9 +3368,6 @@
     "bioetl_filter_ids_loaded_total": [
       "src/bioetl/application/core/_filtered_data_source_support.py"
     ],
-    "bioetl_gold_lifecycle_state_total": [
-      "src/bioetl/composition/factories/services/pipeline_batch_executor_builder.py"
-    ],
     "bioetl_gold_validation_failures_total": [
       "src/bioetl/infrastructure/storage/gold/io_execution.py",
       "src/bioetl/infrastructure/storage/gold/writer_implementation.py"
@@ -3627,6 +3631,8 @@
   "runtime_label_contract_unresolved": [],
   "runtime_label_contract_violations": [],
   "runtime_without_registry": [],
-  "unused_declared_metrics": [],
+  "unused_declared_metrics": [
+    "bioetl_gold_lifecycle_state_total"
+  ],
   "unused_declared_observability_events": []
 }

@@ -9,6 +9,7 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 from urllib.error import HTTPError
 
+import bioetl.interfaces.cli.commands.domains.health.observability_backend_failure_details as failure_details_subject
 import bioetl.interfaces.cli.commands.domains.health.observability_backend_process as process_subject
 import bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime as runtime_subject
 import pytest
@@ -142,6 +143,20 @@ def test_describe_required_probe_failure_includes_http_status_and_body() -> None
     assert detail is not None
     assert "HTTP 503 Service Unavailable" in detail
     assert "Control-plane selector catalog unavailable" in detail
+
+
+def test_open_url_uses_standard_library_opener(monkeypatch: pytest.MonkeyPatch) -> None:
+    opener = MagicMock()
+    build_opener = MagicMock(return_value=opener)
+    monkeypatch.setattr(failure_details_subject, "build_opener", build_opener)
+
+    failure_details_subject._open_url("http://127.0.0.1:8081/health", timeout=1.5)
+
+    build_opener.assert_called_once_with()
+    opener.open.assert_called_once_with(
+        "http://127.0.0.1:8081/health",
+        timeout=1.5,
+    )
 
 
 def test_ensure_backend_returns_disabled_when_flag_is_off() -> None:
@@ -456,6 +471,7 @@ def test_drop_listening_backend_on_port_terminates_all_windows_listeners(
         return SimpleNamespace(returncode=0)
 
     monkeypatch.setattr(process_subject.os, "name", "nt")
+    monkeypatch.setattr(process_subject, "_resolve_system_executable", lambda _name: _name)
     monkeypatch.setattr(
         process_subject,
         "_find_listening_backend_pids_by_port",
@@ -492,6 +508,7 @@ def test_drop_listening_backend_on_port_falls_back_when_taskkill_fails(
         state["pids"] = ()
 
     monkeypatch.setattr(process_subject.os, "name", "nt")
+    monkeypatch.setattr(process_subject, "_resolve_system_executable", lambda _name: _name)
     monkeypatch.setattr(
         process_subject,
         "_find_listening_backend_pids_by_port",
@@ -506,6 +523,15 @@ def test_drop_listening_backend_on_port_falls_back_when_taskkill_fails(
     )
     assert taskkill_commands == [["taskkill", "/PID", "111", "/T", "/F"]]
     assert kill_calls == [(111, signal.SIGTERM)]
+
+
+def test_find_listening_backend_pids_by_port_returns_empty_when_command_missing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(process_subject.os, "name", "posix")
+    monkeypatch.setattr(process_subject, "_resolve_system_executable", lambda _name: None)
+
+    assert process_subject._find_listening_backend_pids_by_port(8081) == ()
 
 
 def test_build_detached_backend_env_prefixes_src_pythonpath() -> None:

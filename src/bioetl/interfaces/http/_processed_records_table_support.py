@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from typing import Literal
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
-from urllib.request import urlopen
+from urllib.request import build_opener
 from uuid import UUID
 
 from bioetl.domain.control_plane import RunLedgerEntry
@@ -248,6 +248,11 @@ def display_token(parameter: str, display_text: str) -> str:
     return f"{parameter}|{display_text}"
 
 
+def _open_url(url: str, *, timeout: float) -> object:
+    """Open one Prometheus API URL through a short-lived standard-library opener."""
+    return build_opener().open(url, timeout=timeout)
+
+
 def row_status(
     *,
     parameter: str,
@@ -286,7 +291,7 @@ def _query_prometheus_scalar(*, prometheus_base_url: str, query: str) -> float |
         prometheus_base_url.rstrip("/") + "/api/v1/query?" + urlencode({"query": query})
     )
     try:
-        with urlopen(url, timeout=PROMETHEUS_QUERY_TIMEOUT_SECONDS) as response:
+        with _open_url(url, timeout=PROMETHEUS_QUERY_TIMEOUT_SECONDS) as response:
             payload = json.loads(response.read().decode("utf-8"))
     except (HTTPError, URLError, TimeoutError, OSError, json.JSONDecodeError) as exc:
         raise RuntimeError(f"Prometheus query failed: {exc}") from exc

@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import importlib.util
 import sys
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from types import ModuleType, SimpleNamespace
 from unittest import mock
 
@@ -542,7 +542,7 @@ def test_run_manifest_data_root_helpers_cover_explicit_and_fallback_modes(
         lambda path: (_ for _ in ()).throw(OSError("no-cache")) if "bioetl-data" in str(path) else path,
     )
     assert data_roots._private_fallback_data_root_mode() == "tmp"
-    assert data_roots._artifact_path_string(Path("a\\b")) == "a\\b"
+    assert data_roots._artifact_path_string(PureWindowsPath(r"a\b")) == "a/b"
 
     monkeypatch.setattr(
         data_roots.Path,
@@ -782,7 +782,7 @@ def test_exact_replay_resolution_helpers_cover_parent_lookup_and_date_errors(
         settings=settings,
         cached_bronze=SimpleNamespace(enabled=False),
     )
-    assert resolved.bronze_path.endswith("/chembl/activity")
+    assert Path(resolved.bronze_path).parts[-2:] == ("chembl", "activity")
     assert resolved.bronze_date == "2026-02-01"
 
     unchanged = replay_context.resolve_exact_replay_cached_bronze_context(

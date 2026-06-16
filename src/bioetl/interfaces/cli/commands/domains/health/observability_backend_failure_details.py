@@ -2,14 +2,22 @@
 
 from __future__ import annotations
 
-import subprocess
+from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import Protocol
 from urllib.error import HTTPError, URLError
-from urllib.request import urlopen
+from urllib.request import build_opener
 
-if TYPE_CHECKING:
-    from collections.abc import Callable
+
+class _SupportsPoll(Protocol):
+    """Minimal detached-process interface used for startup diagnostics."""
+
+    def poll(self) -> int | None: ...
+
+
+def _open_url(url: str, *, timeout: float) -> object:
+    """Open one HTTP probe URL through a short-lived standard-library opener."""
+    return build_opener().open(url, timeout=timeout)
 
 
 def _read_backend_startup_log_excerpt(
@@ -34,7 +42,7 @@ def _read_backend_startup_log_excerpt(
 def _build_startup_failure_detail(
     log_path: Path,
     *,
-    process: subprocess.Popen[bytes] | None = None,
+    process: _SupportsPoll | None = None,
 ) -> str:
     details: list[str] = [f"Startup log: {log_path}."]
     if process is not None and hasattr(process, "poll"):
@@ -58,7 +66,7 @@ def _describe_required_probe_failure(
     *,
     required_probe_paths: tuple[str, ...],
     timeout_seconds: float = 1.0,
-    urlopen_fn: Callable[..., object] = urlopen,
+    urlopen_fn: Callable[..., object] = _open_url,
 ) -> str | None:
     if not required_probe_paths:
         return None
@@ -95,5 +103,6 @@ def _describe_required_probe_failure(
 __all__ = [
     "_build_startup_failure_detail",
     "_describe_required_probe_failure",
+    "_open_url",
     "_read_backend_startup_log_excerpt",
 ]

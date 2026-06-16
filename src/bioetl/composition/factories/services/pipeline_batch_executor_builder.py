@@ -29,7 +29,6 @@ from bioetl.composition.factories.services.runtime_managers import (
 )
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.observability_contract import normalize_observability_pipeline_label
-from bioetl.infrastructure.observability.metrics import GOLD_LIFECYCLE_STATE_TOTAL
 from bioetl.infrastructure.validation import ContractAwareGoldValidator
 
 if TYPE_CHECKING:
@@ -150,11 +149,18 @@ def _emit_gold_lifecycle_state(
     state: str,
 ) -> None:
     """Emit bounded Gold lifecycle state at the composition decision seam."""
-    GOLD_LIFECYCLE_STATE_TOTAL.labels(
+    _gold_lifecycle_state_total().labels(
         pipeline=normalize_observability_pipeline_label(pipeline_name),
         table=normalize_observability_pipeline_label(table_name),
         state=state,
     ).inc()
+
+
+def _gold_lifecycle_state_total() -> object:
+    """Resolve the Gold lifecycle metric lazily to avoid import-time metric boot."""
+    from bioetl.infrastructure.observability.metrics import GOLD_LIFECYCLE_STATE_TOTAL
+
+    return GOLD_LIFECYCLE_STATE_TOTAL
 
 
 def _build_batch_executor_dependencies(
