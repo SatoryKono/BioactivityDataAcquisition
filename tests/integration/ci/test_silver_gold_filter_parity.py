@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+import json
 from pathlib import Path
 
 import pytest
@@ -22,6 +23,10 @@ from tests.integration.ci.reproducibility_contract_support import (
 
 
 pytestmark = pytest.mark.integration
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+CONTRACT_COVERAGE_MATRIX = (
+    PROJECT_ROOT / "reports" / "quality" / "contract-coverage-matrix.json"
+)
 
 
 def _fixture_scenario() -> dict[str, object]:
@@ -130,3 +135,28 @@ def test_silver_gold_filter_parity_rejects_source_profile_drift() -> None:
 def test_silver_gold_filter_parity_public_builder_uses_default_fixture() -> None:
     assert build_parity_report(SILVER_GOLD_PARITY_FIXTURE) == load_silver_gold_parity_report()
     assert SILVER_GOLD_PARITY_REPORT.name == "silver-gold-filter-parity-report.json"
+
+
+def test_silver_gold_filter_parity_scenarios_link_to_gold_contract_matrix() -> None:
+    matrix = json.loads(CONTRACT_COVERAGE_MATRIX.read_text(encoding="utf-8"))
+    rows = {
+        (row["pipeline_name"], row["contract_ref"], row["registry_contract_version"])
+        for row in matrix["rows"]
+        if row["gold_enabled"] and row["parity_status"] == "covered"
+    }
+
+    report = load_silver_gold_parity_report()
+    missing: list[str] = []
+    for scenario in report["scenarios"]:
+        key = (
+            scenario["pipeline_name"],
+            scenario["contract_ref"],
+            scenario["contract_version"],
+        )
+        if key not in rows:
+            missing.append(f"{scenario['scenario_id']}: {key}")
+
+    assert not missing, (
+        "Silver/Gold parity scenarios must map to covered gold contract rows:\n"
+        + "\n".join(missing)
+    )

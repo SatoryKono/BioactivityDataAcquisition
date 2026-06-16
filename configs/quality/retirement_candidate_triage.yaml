@@ -92,13 +92,6 @@ repo_wide_zero_import_classification:
     review_by: '2026-09-14'
     linked_issue: '#4541'
     rationale: Port owner module for idmapping; imports now go through bioetl.domain.ports facade per REQ-ARCH-027
-  - module_path: src/bioetl/domain/ports/logger_port.py
-    module_name: bioetl.domain.ports.logger_port
-    disposition: retain_canonical_owner_module
-    reviewed_on: '2026-06-16'
-    review_by: '2026-09-14'
-    linked_issue: '#4541'
-    rationale: Port owner module for logger_port; imports now go through bioetl.domain.ports facade per REQ-ARCH-027
   - module_path: src/bioetl/domain/ports/pii.py
     module_name: bioetl.domain.ports.pii
     disposition: retain_canonical_owner_module
@@ -113,13 +106,6 @@ repo_wide_zero_import_classification:
     review_by: '2026-09-14'
     linked_issue: '#4541'
     rationale: Port owner module for protein_classification; imports now go through bioetl.domain.ports facade per REQ-ARCH-027
-  - module_path: src/bioetl/domain/ports/publication_strategy.py
-    module_name: bioetl.domain.ports.publication_strategy
-    disposition: retain_canonical_owner_module
-    reviewed_on: '2026-06-16'
-    review_by: '2026-09-14'
-    linked_issue: '#4541'
-    rationale: Port owner module for publication_strategy; imports now go through bioetl.domain.ports facade per REQ-ARCH-027
   - module_path: src/bioetl/domain/ports/resilience.py
     module_name: bioetl.domain.ports.resilience
     disposition: retain_canonical_owner_module

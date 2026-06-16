@@ -22,6 +22,8 @@
         "silver_no_removed_pks": true,
         "silver_widening_bounded_to_legacy_semantic_rejects": true
       },
+      "contract_ref": "chembl.activity",
+      "contract_version": "1.0.0",
       "entity": "activity",
       "gold_delta": {
         "changed_content_hash_pks": [],
@@ -97,6 +99,8 @@
         "status": "baseline",
         "version": "1.0.0"
       },
+      "source_profile_id": "chembl.activity.curated",
+      "source_profile_version": "1.0.0",
       "verdict": "pass"
     }
   ],

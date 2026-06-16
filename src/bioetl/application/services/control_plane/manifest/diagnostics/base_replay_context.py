@@ -4,18 +4,20 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.application.services.control_plane.manifest.diagnostics.replay import (
-    _assess_manifest_reproducibility_policy,
-    _build_resume_contract,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.persistence_profile import (
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family import (
     _resolve_replay_family_contract,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_projection import (
     _build_replay_projection_bundle,
     _build_replay_projection_context_kwargs,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_refs import (
+from bioetl.application.services.control_plane.manifest.diagnostics.reproducibility_assessment import (
+    _assess_manifest_reproducibility_policy,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.resume_contract import (
+    _build_resume_contract,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
     collect_input_snapshot_refs as _collect_input_snapshot_refs,
 )
 from bioetl.application.services.control_plane.manifest.replay_family_contract_payload import (

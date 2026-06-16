@@ -14,10 +14,6 @@ from bioetl.application.services.control_plane.manifest.diagnostics.base_provena
     _build_code_provenance_state,
     _build_planned_artifact_refs,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.base_replay_labels import (
-    _resolve_operator_replay_mode,
-    _resolve_snapshot_status,
-)
 from bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_projection import (
     build_checkpoint_anchor_projection as _build_checkpoint_anchor_projection,
 )
@@ -30,31 +26,41 @@ from bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_p
 from bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_projection import (
     resolve_resume_identity_maps as _resolve_resume_identity_maps,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.replay import (
-    _assess_manifest_reproducibility_policy,
-    _build_replay_parentage,
-    _build_resume_contract,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.persistence_profile import (
-    _resolve_replay_family_contract,
+from bioetl.application.services.control_plane.manifest.diagnostics.operator_replay_mode import (
+    _resolve_operator_replay_mode,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_blockers import (
     _collect_append_mode_semantic_sinks,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family import (
+    _resolve_replay_family_contract,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_parentage import (
+    _build_replay_parentage,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_projection import (
     _build_replay_projection_bundle,
     _build_replay_projection_context_kwargs,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_refs import (
+from bioetl.application.services.control_plane.manifest.diagnostics.reproducibility_assessment import (
+    _assess_manifest_reproducibility_policy,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.resume_contract import (
+    _build_resume_contract,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_status import (
+    _resolve_snapshot_status,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
     collect_input_snapshot_content_hashes as _collect_input_snapshot_content_hashes,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_refs import (
+from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
     collect_input_snapshot_ids as _collect_input_snapshot_ids,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_refs import (
+from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
     collect_input_snapshot_refs as _collect_input_snapshot_refs,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_refs import (
+from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
     compute_input_snapshot_identity_fingerprint as _compute_input_snapshot_identity_fingerprint,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.summary import (

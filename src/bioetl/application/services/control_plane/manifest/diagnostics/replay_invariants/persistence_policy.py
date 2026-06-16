@@ -1,56 +1,16 @@
-"""Persistence-profile invariants for replay diagnostics."""
+"""Required persistence and checkpoint-policy invariants for diagnostics."""
 
 from __future__ import annotations
-
-from typing import Literal
 
 from bioetl.application.services.control_plane.manifest.diagnostics.nested_mapping import (
     lookup_mapping_path,
 )
 from bioetl.domain.control_plane import RunManifest
-from bioetl.domain.control_plane.execution_context import (
-    is_composite_execution_context as _is_composite_execution_context,
-)
 from bioetl.domain.control_plane.reproducibility_policy import (
     DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
     STRICT_PERSISTENCE_PROFILES,
     normalize_required_persistence_profile,
 )
-from bioetl.domain.control_plane.reproducibility_profiles import (
-    ReproducibilityFamilyProfile,
-    build_replay_family_contract,
-    resolve_reproducibility_family_profile,
-)
-
-
-def _resolve_reproducibility_profile(
-    manifest: RunManifest,
-) -> ReproducibilityFamilyProfile:
-    execution_context: Literal["source", "composite"] = (
-        "composite" if _is_composite_execution_context(manifest) else "source"
-    )
-    return resolve_reproducibility_family_profile(
-        provider=manifest.provider,
-        entity=manifest.entity,
-        contract_ref=manifest.code_provenance.contract_ref,
-        execution_context=execution_context,
-    )
-
-
-def _resolve_replay_family_contract(manifest: RunManifest) -> dict[str, object]:
-    execution_context: Literal["source", "composite"] = (
-        "composite" if _is_composite_execution_context(manifest) else "source"
-    )
-    return build_replay_family_contract(
-        provider=manifest.provider,
-        entity=manifest.entity,
-        contract_ref=manifest.code_provenance.contract_ref,
-        execution_context=execution_context,
-    )
-
-
-def _resolve_exact_replay_support_boundary(manifest: RunManifest) -> str:
-    return _resolve_reproducibility_profile(manifest).exact_replay_support_boundary
 
 
 def _resolve_required_persistence_profile(manifest: RunManifest) -> str:
@@ -127,9 +87,6 @@ def _resolve_requested_checkpoint_compatibility_policy(
 
 __all__ = [
     "_resolve_applied_checkpoint_compatibility_policy",
-    "_resolve_exact_replay_support_boundary",
-    "_resolve_replay_family_contract",
-    "_resolve_reproducibility_profile",
     "_resolve_requested_checkpoint_compatibility_policy",
     "_resolve_required_persistence_profile",
 ]

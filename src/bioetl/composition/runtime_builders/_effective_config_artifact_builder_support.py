@@ -18,6 +18,7 @@ from bioetl.composition.runtime_builders._effective_config_source_refs_support i
     build_effective_config_source_refs as _build_effective_config_source_refs,
     resolve_effective_config_entity,
 )
+from bioetl.composition.runtime_builders.config_access import resolve_configs_root
 from bioetl.composition.runtime_builders._effective_config_secret_support import (
     build_secret_surface_inventory,
 )
@@ -234,7 +235,7 @@ def build_effective_config_source_refs(
     repo_root: Path | None = None,
 ) -> list[ConfigSourceRef]:
     """Build source references used to materialize effective config artifacts."""
-    resolved_repo_root = repo_root or Path(__file__).resolve().parents[4]
+    resolved_repo_root = repo_root or resolve_configs_root().parent
     return _build_effective_config_source_refs(
         provider=provider,
         entity=resolve_effective_config_entity(provider, entity),
