@@ -78,7 +78,7 @@ async def test_transform_preserves_shaped_relation_row_identity(
     assert result["leaf_id"] == "148"
     assert result["path_ids"] == "[1,2,148]"
     assert result["depth"] == 2
-    assert result["root_id"] == 1
+    assert result["root_id"] == "1"
     assert result["is_leaf"] is True
     assert result["dataset_version"] == "target-protein-classification-path-v2.1.0"
     assert result["source_snapshot_fingerprint"] == "a" * 64

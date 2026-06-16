@@ -1,27 +1,28 @@
 ---
 id: fix-test-governance-audit-drift
-title: Fix test governance audit baseline drift
+title: Fix test governance audit artifact drift
 task_id: fix-test-governance-audit-drift
-created_at: '2026-05-31T15:59:16Z'
+created_at: '2026-06-16T15:30:48Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- tests/architecture/test_test_governance_audit.py
-summary: Investigated reported test_governance_audit failures. Current checkout already
-  has compatibility ratchet target/budget at 53 and assertless triage weak_no_value
-  at 424; WSL and Windows scanner outputs match config, and the targeted governance
-  tests pass on both runtimes. No source/config patch required.
+- reports/quality/test-governance-current.json
+summary: 'Updated reports/quality/test-governance-current.json from the live test
+  governance collector after new tests changed total file/function counts. Debt counters
+  stayed flat: compatibility_test_files=32 and duplicate/markerless/refined-assertless/date_today/uuid4
+  counters remain 0. The collector --check and full tests/architecture/test_test_governance_audit.py
+  now pass.'
 ---
 
 # Episodic summary
 
 ## Task
 
-- Title: Fix test governance audit baseline drift
+- Title: Fix test governance audit artifact drift
 
 ## Outcome
 
-- Investigated reported test_governance_audit failures. Current checkout already has compatibility ratchet target/budget at 53 and assertless triage weak_no_value at 424; WSL and Windows scanner outputs match config, and the targeted governance tests pass on both runtimes. No source/config patch required.
+- Updated reports/quality/test-governance-current.json from the live test governance collector after new tests changed total file/function counts. Debt counters stayed flat: compatibility_test_files=32 and duplicate/markerless/refined-assertless/date_today/uuid4 counters remain 0. The collector --check and full tests/architecture/test_test_governance_audit.py now pass.
 
 ## Lessons learned
 

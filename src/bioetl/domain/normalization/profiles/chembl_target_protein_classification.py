@@ -38,7 +38,6 @@ _INT_FIELDS = frozenset(
     {
         "component_id",
         "depth",
-        "root_id",
         "target_snapshot_row_count",
         "target_component_snapshot_row_count",
         "protein_class_snapshot_row_count",
@@ -65,6 +64,20 @@ CHEMBL_TARGET_PROTEIN_CLASSIFICATION_PROFILE = build_standard_profile(
     title_fields=_TITLE_FIELDS,
     int_fields=_INT_FIELDS,
     null_fields=chembl_pseudo_null_fields("target_protein_classification"),
+    field_rule_overrides={
+        "path_ids": {
+            "notes": "Trim and collapse blank textual values to None where applicable. JSON pipe-delimited list field.",
+            "set_like": True,
+        },
+        "path_names": {
+            "notes": "Trim and collapse blank textual values to None where applicable. JSON pipe-delimited list field.",
+            "set_like": True,
+        },
+        "path_labels": {
+            "notes": "Trim and collapse blank textual values to None where applicable. JSON pipe-delimited list field.",
+            "set_like": True,
+        },
+    },
 )
 
 CHEMBL_TARGET_PROTEIN_CLASSIFICATION_PROFILE.assert_covers_schema(

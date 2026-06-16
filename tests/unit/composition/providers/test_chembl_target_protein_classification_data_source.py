@@ -10,6 +10,10 @@ import pytest
 from bioetl.composition.providers._chembl_target_protein_classification_data_source import (
     TargetProteinClassificationSnapshotDataSource,
 )
+from bioetl.composition.providers._chembl_target_protein_classification_manifest import (
+    source_manifest,
+    with_source_manifest,
+)
 from bioetl.domain.types import HealthStatus
 
 
@@ -298,3 +302,46 @@ def test_relation_rows_for_target_requires_loaded_snapshot(
 ) -> None:
     with pytest.raises(RuntimeError, match="was not initialized"):
         data_source._relation_rows_for_target("CHEMBL_T1")
+
+
+def test_source_manifest_prefers_release_metadata_and_stable_fingerprint() -> None:
+    first = source_manifest(
+        target_rows=({"target_id": "T2"}, {"target_id": "T1"}),
+        target_component_rows=({"component_id": 10},),
+        protein_class_rows=(
+            {
+                "protein_class_id": 3,
+                "chembl_release": "35",
+                "chembl_api_version": "v1",
+            },
+        ),
+    )
+    second = source_manifest(
+        target_rows=({"target_id": "T1"}, {"target_id": "T2"}),
+        target_component_rows=({"component_id": 10},),
+        protein_class_rows=(
+            {
+                "protein_class_id": 3,
+                "chembl_release": "35",
+                "chembl_api_version": "v1",
+            },
+        ),
+    )
+
+    assert first["chembl_release"] == "35"
+    assert first["chembl_api_version"] == "v1"
+    assert first["source_manifest_status"] == "release_metadata_available"
+    assert first["source_snapshot_fingerprint"] == second[
+        "source_snapshot_fingerprint"
+    ]
+
+
+def test_with_source_manifest_overlays_relation_row_metadata() -> None:
+    assert with_source_manifest(
+        {"target_id": "CHEMBL_T1", "dataset_version": "row"},
+        {"dataset_version": "manifest", "source_url": "https://example.test"},
+    ) == {
+        "target_id": "CHEMBL_T1",
+        "dataset_version": "manifest",
+        "source_url": "https://example.test",
+    }

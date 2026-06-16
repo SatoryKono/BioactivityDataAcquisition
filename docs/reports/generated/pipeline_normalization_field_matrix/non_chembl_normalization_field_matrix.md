@@ -21,7 +21,7 @@ Entity coverage is entity-scoped only; composite join-key and control-plane surf
 
 - profile_semantics / shipped_profile_meta_passthrough_pct: `100.00%` (`214` / `214`) Shipped profile meta fields must use passthrough semantics and stay excluded from content_hash.
 - profile_semantics / shipped_profile_set_like_json_string_pct: `100.00%` (`67` / `67`) Shipped profile set-like fields must canonicalize through the JSON-string normalizer family.
-- profile_semantics / shipped_profile_non_meta_passthrough_free_pct: `100.00%` (`721` / `721`) Non-meta shipped profile fields must not silently fall through the passthrough seam.
+- profile_semantics / shipped_profile_non_meta_passthrough_free_pct: `100.00%` (`736` / `736`) Non-meta shipped profile fields must not silently fall through the passthrough seam.
 
 | provider | pipeline_name | pipeline_kind | entity | field_name | field_type | normalization_source | normalizer | normalization_summary | controlled_vocabulary_source | policy_scope | semantic_category | classification | identifier_family | collection_semantics | raw_sidecar | canonical_sidecar | include_in_content_hash | set_like | hash_ordering | strictness | schema_coverage | dq_coverage | dq_rule | composite_usage | observed_source | notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |

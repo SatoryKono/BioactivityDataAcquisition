@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from collections import defaultdict
 from collections.abc import Iterable, Mapping
 from typing import Any
 
@@ -14,6 +15,8 @@ _TARGET_ENTITY_TYPE = "target"
 _TARGET_COMPONENT_ENTITY_TYPE = "target_component"
 _PROTEIN_CLASS_ENTITY_TYPE = "protein_class"
 _TARGET_PROTEIN_CLASSIFICATION_ENTITY_TYPE = "target_protein_classification"
+_SUPPORTED_TARGET_FILTER_FIELDS = frozenset({"target_id", "target_chembl_id"})
+_SUPPORTED_COMPONENT_FILTER_FIELDS = frozenset({"component_id", "primary_component_id"})
 
 
 def target_id_from_record(record: Mapping[str, object]) -> str | None:
@@ -36,6 +39,56 @@ def component_ids_from_target_record(record: Mapping[str, object]) -> tuple[int,
     if primary_component_id is not None:
         component_ids.append(primary_component_id)
     return tuple(dict.fromkeys(component_ids))
+
+
+def build_target_component_indexes(
+    target_rows: Iterable[Mapping[str, object]],
+) -> tuple[dict[str, tuple[int, ...]], dict[int, tuple[str, ...]]]:
+    """Build deterministic target/component lookup indexes from snapshot rows."""
+    target_ids_by_component: dict[int, list[str]] = defaultdict(list)
+    component_ids_by_target: dict[str, tuple[int, ...]] = {}
+    for row in target_rows:
+        target_id = target_id_from_record(row)
+        if target_id is None:
+            continue
+        component_ids = component_ids_from_target_record(row)
+        component_ids_by_target[target_id] = component_ids
+        for component_id in component_ids:
+            target_ids_by_component[component_id].append(target_id)
+    return dict(sorted(component_ids_by_target.items())), {
+        component_id: tuple(dict.fromkeys(sorted(target_ids)))
+        for component_id, target_ids in sorted(target_ids_by_component.items())
+    }
+
+
+def resolve_target_ids(
+    *,
+    filter_ids: list[str] | None,
+    filter_field: str | None,
+    target_component_ids: Mapping[str, tuple[int, ...]],
+    target_ids_by_component: Mapping[int, tuple[str, ...]],
+) -> tuple[str, ...]:
+    """Resolve target IDs from target/component filters against snapshot indexes."""
+    if not filter_ids:
+        return tuple(sorted(target_component_ids))
+    if filter_field in _SUPPORTED_TARGET_FILTER_FIELDS:
+        requested = {str(value).strip() for value in filter_ids if str(value).strip()}
+        return tuple(
+            target_id
+            for target_id in sorted(target_component_ids)
+            if target_id in requested
+        )
+    if filter_field in _SUPPORTED_COMPONENT_FILTER_FIELDS:
+        target_ids: set[str] = set()
+        for raw_component_id in filter_ids:
+            component_id = coerce_positive_int(raw_component_id)
+            if component_id is None:
+                continue
+            target_ids.update(target_ids_by_component.get(component_id, ()))
+        return tuple(sorted(target_ids))
+    raise ValueError(
+        f"Unsupported target protein classification filter_field: {filter_field}"
+    )
 
 
 def target_ids_from_component_record(record: Mapping[str, object]) -> tuple[str, ...]:
