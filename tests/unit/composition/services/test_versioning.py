@@ -238,6 +238,68 @@ def test_get_dependency_lock_hash_returns_none_without_supported_lockfile(
 
 
 @pytest.mark.unit
+def test_should_try_windows_git_fallback_branch_matrix(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(versioning.os, "name", "posix", raising=False)
+    assert (
+        versioning._should_try_windows_git_fallback(
+            None,
+            accepted_returncodes=(0,),
+        )
+        is False
+    )
+
+    monkeypatch.setattr(versioning.os, "name", "nt", raising=False)
+    assert versioning._should_try_windows_git_fallback(None, accepted_returncodes=(0,))
+    assert not versioning._should_try_windows_git_fallback(
+        SimpleNamespace(returncode=0),
+        accepted_returncodes=(0,),
+    )
+    assert not versioning._should_try_windows_git_fallback(
+        SimpleNamespace(returncode=128),
+        accepted_returncodes=(0,),
+    )
+    assert versioning._should_try_windows_git_fallback(
+        SimpleNamespace(returncode=4294967295),
+        accepted_returncodes=(0,),
+    )
+
+
+@pytest.mark.unit
+@patch("bioetl.composition.services.versioning._iter_windows_git_fallback_executables")
+@patch("bioetl.composition.services.versioning.subprocess.run")
+def test_run_git_command_preserves_repo_failures_without_windows_retry(
+    mock_run: MagicMock,
+    mock_candidates: MagicMock,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(versioning.os, "name", "nt", raising=False)
+    mock_run.return_value = SimpleNamespace(returncode=128, stdout="", stderr="")
+
+    result = versioning._run_git_command("rev-parse", "HEAD")
+
+    assert result.returncode == 128
+    mock_candidates.assert_not_called()
+    mock_run.assert_called_once()
+
+
+@pytest.mark.unit
+def test_get_repo_dependency_lock_hash_reads_repo_root_lockfile(
+    tmp_path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    lockfile = tmp_path / "uv.lock"
+    lockfile.write_text("version = 1\n", encoding="utf-8")
+    monkeypatch.setattr(versioning, "_REPO_ROOT", tmp_path)
+
+    digest = versioning._get_repo_dependency_lock_hash()
+
+    assert isinstance(digest, str)
+    assert digest.startswith("sha256:")
+
+
+@pytest.mark.unit
 @patch("bioetl.composition.services.versioning.subprocess.run")
 def test_get_code_revision_provenance_falls_back_to_repo_lockfile_outside_runtime_tree(
     mock_run: MagicMock,
@@ -321,6 +383,11 @@ def test_compute_config_hash_rejects_non_finite_numeric_values() -> None:
 @pytest.mark.unit
 def test_get_pipeline_version_reads_dict_version() -> None:
     assert versioning.get_pipeline_version({"version": "2.3.4"}) == "2.3.4"
+
+
+@pytest.mark.unit
+def test_get_pipeline_version_reads_object_version() -> None:
+    assert versioning.get_pipeline_version(SimpleNamespace(version="3.4.5")) == "3.4.5"
 
 
 @pytest.mark.unit
