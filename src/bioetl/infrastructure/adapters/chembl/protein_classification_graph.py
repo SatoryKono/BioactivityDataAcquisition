@@ -18,6 +18,8 @@ __all__ = [
     "ProteinClassificationNode",
 ]
 
+_MAX_PROVIDER_CLASS_LEVEL = 10
+
 
 @dataclass(frozen=True, slots=True)
 class ProteinClassificationNode:
@@ -87,7 +89,12 @@ class ChEMBLProteinClassificationGraph(ProteinClassificationPort):
         if cached is not None:
             return cached
         resolved_leaf_id = self._resolve_replacement(leaf_id)
-        levels = self._walk_levels(resolved_leaf_id)
+        path = self._walk_path(resolved_leaf_id)
+        levels = {
+            level_number: level
+            for level_number, level in path
+            if level_number <= 5
+        }
         hierarchy = ProteinClassHierarchy(
             l1=levels.get(1, ProteinClassLevel.empty()),
             l2=levels.get(2, ProteinClassLevel.empty()),
@@ -95,6 +102,7 @@ class ChEMBLProteinClassificationGraph(ProteinClassificationPort):
             l4=levels.get(4, ProteinClassLevel.empty()),
             l5=levels.get(5, ProteinClassLevel.empty()),
             leaf_id=resolved_leaf_id,
+            path=tuple(level for _level_number, level in path),
         )
         self._hierarchy_cache[leaf_id] = hierarchy
         return hierarchy
@@ -113,7 +121,7 @@ class ChEMBLProteinClassificationGraph(ProteinClassificationPort):
                 return current_id
             current_id = node.replaced_by
 
-    def _walk_levels(self, leaf_id: int) -> dict[int, ProteinClassLevel]:
+    def _walk_path(self, leaf_id: int) -> tuple[tuple[int, ProteinClassLevel], ...]:
         current_id: int | None = leaf_id
         seen: set[int] = set()
         levels: dict[int, ProteinClassLevel] = {}
@@ -125,16 +133,19 @@ class ChEMBLProteinClassificationGraph(ProteinClassificationPort):
             seen.add(current_id)
             node = self._node(current_id)
             level = _validated_class_level(node, leaf_id=leaf_id)
-            if level <= 5:
-                levels[level] = ProteinClassLevel(
-                    id=node.protein_class_id,
-                    name=node.pref_name,
-                    desc=node.protein_class_desc,
+            if level in levels:
+                raise ProteinClassificationResolutionError(
+                    f"duplicate class_level {level} for protein_class_id={leaf_id}"
                 )
+            levels[level] = ProteinClassLevel(
+                id=node.protein_class_id,
+                name=node.pref_name,
+                desc=node.protein_class_desc,
+            )
             current_id = node.parent_id
 
         _validate_contiguous_levels(levels, leaf_id=leaf_id)
-        return levels
+        return tuple(sorted(levels.items()))
 
     def _node(self, protein_class_id: int) -> ProteinClassificationNode:
         node = self._nodes.get(protein_class_id)
@@ -276,7 +287,7 @@ def _validated_class_level(
         raise ProteinClassificationResolutionError(
             f"class_level must be >= 1 for protein_class_id={node.protein_class_id}"
         )
-    if level > 6:
+    if level > _MAX_PROVIDER_CLASS_LEVEL:
         raise ProteinClassificationResolutionError(
             f"class_level {level} exceeds supported provider range for protein_class_id={node.protein_class_id}"
         )
@@ -290,7 +301,7 @@ def _validate_contiguous_levels(
 ) -> None:
     if not levels:
         raise ProteinClassificationResolutionError(
-            f"no L1-L5 levels resolved for protein_class_id={leaf_id}"
+            f"no protein classification path resolved for protein_class_id={leaf_id}"
         )
     ordered_levels = sorted(levels)
     expected = list(range(1, max(ordered_levels) + 1))
