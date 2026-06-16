@@ -9,11 +9,11 @@ from bioetl.domain.types import JsonDict
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Mapping
 
-    from bioetl.domain.ports.idmapping import (
+    from bioetl.domain.ports import (
         IDMappingPort,
         IDMappingSourceReaderPort,
+        LoggerPort,
     )
-    from bioetl.domain.ports.logger_port import LoggerPort
 
 
 class _IDMappingFetchState(Protocol):

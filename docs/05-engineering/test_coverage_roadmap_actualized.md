@@ -9,14 +9,16 @@ This roadmap supersedes older composition-focused backlog notes that still
 claimed several public APIs were at `0%`. They are no longer accurate on
 current `main`.
 
-Current committed inventory shows that the `#5153` epic is **not closable yet**.
+Original epic `#5153` is now closed as superseded by `#5243`, but the
+committed inventory shows the program is still **not closable yet** by
+substance.
 
 | Metric | Current value | Epic target |
 |--------|---------------|-------------|
-| Production modules | 2134 | all in inventory |
-| Global line coverage | **69.71%** (`62512 / 89677`) | `>= 85%` |
-| Modules `<85%` | **864** | `0` |
-| Uncovered modules (`0%`) | **127** | `0` |
+| Production modules | 2137 | all in inventory |
+| Global line coverage | **69.72%** (`62528 / 89686`) | `>= 85%` |
+| Modules `<85%` | **862** | `0` |
+| Uncovered modules (`0%`) | **125** | `0` |
 | Aggregates `<95%` | **13 / 18** | `0` |
 | Contracts / schemas `<95%` | **13 / 72** | `0` |
 | Unmeasured modules | **2** | `0` or explicitly allowlisted |
@@ -26,10 +28,12 @@ Known unmeasured modules:
 - `src/bioetl/__main__.py`
 - `src/bioetl/interfaces/cli/__main__.py`
 
-Child issue status from the epic body:
+Issue-management status after the 2026-06-16 refresh:
 
-- `#5136` — closed
-- `#5143` — closed
+- `#5136` — closed as duplicate; successor scope moved to `#5239` and `#5240`
+- `#5143` — closed as duplicate; successor scope moved to `#5241` and `#5242`
+- `#5161` — closed as completed
+- `#5243` — refreshed epic carrying the live baseline
 
 ## Composition Surface Status
 
@@ -144,15 +148,15 @@ Goal:
 
 Global backlog remains the hard blocker to epic closure:
 
-- `864` modules below `85%`
-- `127` fully uncovered modules
+- `862` modules below `85%`
+- `125` fully uncovered modules
 
 This phase needs breadth-oriented child issues, not more stale composition-only
 tickets.
 
 ## Definition Of Done
 
-`#5153` is closable only when all of the following are true:
+Successor epic `#5243` is closable only when all of the following are true:
 
 - global line coverage is `>= 85%`
 - modules below tier thresholds are reduced to `0`

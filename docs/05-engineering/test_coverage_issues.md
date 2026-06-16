@@ -5,23 +5,28 @@ Last refreshed from `reports/quality/module-coverage-inventory.json`
 
 ## Program Status
 
-Epic `#5153` remains open by substance and is **not ready for closure** on
-current `main`.
+Original epic `#5153` is now closed as superseded by `#5243`, but the coverage
+program remains open by substance on current `main`.
 
 Current blockers:
 
-- global line coverage is `69.71%`, below the `85%` gate;
-- `864` modules remain below `85%`;
-- `127` production modules remain at `0%`;
+- global line coverage is `69.72%`, below the `85%` gate;
+- `862` modules remain below `85%`;
+- `125` production modules remain at `0%`;
 - `13 / 18` aggregate modules remain below `95%`;
 - `13 / 72` contracts/schema modules remain below `95%`;
 - two modules remain unmeasured in committed inventory:
   `src/bioetl/__main__.py` and `src/bioetl/interfaces/cli/__main__.py`.
 
-Resolved child issues already referenced by the epic:
+Superseded child issues from the older epic:
 
-- `#5136` — closed
-- `#5143` — closed
+- `#5136` — closed as duplicate; successor scope moved to `#5239` and `#5240`
+- `#5143` — closed as duplicate; successor scope moved to `#5241` and `#5242`
+
+Refresh note:
+
+- `#5161` is now closed as completed
+- refreshed epic: `#5243`
 
 ## Resolved / Retired Composition Drafts
 
@@ -134,8 +139,8 @@ These older composition issue ideas should **not** be created again:
 
 **Context:**
 
-- `864` modules remain below `85%`
-- `127` modules remain fully uncovered
+- `862` modules remain below `85%`
+- `125` modules remain fully uncovered
 - closing the epic is impossible without broad repo-wide follow-up beyond the
   composition and aggregate clusters
 
@@ -143,4 +148,4 @@ These older composition issue ideas should **not** be created again:
 
 - [ ] broad backlog is decomposed into tractable child issues by family / layer
 - [ ] global line coverage moves materially toward `85%`
-- [ ] epic `#5153` is only closed after the repo-wide floor is actually met
+- [ ] successor epic `#5243` is only closed after the repo-wide floor is actually met
