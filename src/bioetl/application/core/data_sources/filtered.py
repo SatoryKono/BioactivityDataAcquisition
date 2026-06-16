@@ -13,18 +13,16 @@ from bioetl.application.core.filtered_data_source_mixins import (
     _FilteredDataSourceFetchMixin,
     _FilteredDataSourceLifecycleMixin,
 )
-from bioetl.domain.ports import FilterableDataSourcePort
+from bioetl.domain.ports.data_source import FilterableDataSourcePort
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from bioetl.domain.filtering import FilterLoadResult, InputFilterConfig
-    from bioetl.domain.ports import (
-        DataSourcePort,
-        InputFilterPort,
-        LoggerPort,
-        MetricsPort,
-    )
+    from bioetl.domain.ports.data_source import DataSourcePort
+    from bioetl.domain.ports.filtering import InputFilterPort
+    from bioetl.domain.ports.logger_port import LoggerPort
+    from bioetl.domain.ports.observability.metrics import MetricsPort
 
 __all__ = ["FilteredDataSource"]
 

@@ -6,7 +6,7 @@ from dataclasses import dataclass
 
 from httpx import HTTPStatusError, RequestError
 
-from bioetl.domain.ports import CircuitBreakerPort
+from bioetl.domain.ports.resilience import CircuitBreakerPort
 from bioetl.domain.types import HealthStatus, JsonDict
 from bioetl.infrastructure.adapters.health_check_contract import (
     HEALTH_CHECK_ERRORS,

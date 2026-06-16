@@ -9,13 +9,11 @@ from bioetl.application.core.base_transformer.structural_policy import (
     StructuralPolicyProtocol,
 )
 from bioetl.domain.behavior import EntityIdentityGenerator
-from bioetl.domain.ports import (
-    ContractPolicyProtocol,
-    DataNormalizationPort,
-    MetricsPort,
-    PiiHasherPort,
-    TracingPort,
-)
+from bioetl.domain.ports.data_normalization import DataNormalizationPort
+from bioetl.domain.ports.observability.metrics import MetricsPort
+from bioetl.domain.ports.observability.tracing import TracingPort
+from bioetl.domain.ports.pii import PiiHasherPort
+from bioetl.domain.ports.quality.contract_policy import ContractPolicyProtocol
 
 if TYPE_CHECKING:
     from bioetl.domain.entities import BaseEntity

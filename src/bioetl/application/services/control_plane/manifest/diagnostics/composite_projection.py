@@ -7,8 +7,8 @@ from typing import Protocol
 from bioetl.application.services.control_plane.manifest.diagnostics.dq_details import (
     extract_diagnostic_context,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_parentage import (
-    _is_composite_execution_context,
+from bioetl.domain.control_plane.execution_context import (
+    is_composite_execution_context as _is_composite_execution_context,
 )
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 

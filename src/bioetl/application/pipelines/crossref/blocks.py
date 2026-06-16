@@ -19,7 +19,7 @@ from bioetl.application.pipelines.crossref.extractors import (
     extract_references,
 )
 from bioetl.domain.normalization import extract_first_string
-from bioetl.domain.ports import DataNormalizationPort
+from bioetl.domain.ports.data_normalization import DataNormalizationPort
 from bioetl.domain.types import BronzeRecord, JsonDict
 
 

@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.domain.ports import ExportFileFingerprint, ExportWriterPort
+from bioetl.domain.ports.export import ExportFileFingerprint, ExportWriterPort
 from bioetl.infrastructure.storage.atomic import atomic_write_text
 
 if TYPE_CHECKING:

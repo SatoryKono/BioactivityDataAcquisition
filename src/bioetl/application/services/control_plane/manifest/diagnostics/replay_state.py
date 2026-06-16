@@ -15,7 +15,6 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay_invar
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_parentage import (
     _build_replay_parentage,
-    _is_composite_execution_context,
     _is_full_scan_idempotent_rebuild,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.snapshot_envelope import (
@@ -26,6 +25,9 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay_invar
     _resolve_exact_replay_supported_reason,
 )
 from bioetl.domain.control_plane import ReplayCapability, RunManifest
+from bioetl.domain.control_plane.execution_context import (
+    is_composite_execution_context as _is_composite_execution_context,
+)
 from bioetl.domain.control_plane.reproducibility_policy import (
     ReproducibilityPolicyAssessment,
 )

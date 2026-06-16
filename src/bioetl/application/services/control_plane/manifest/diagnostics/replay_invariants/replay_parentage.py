@@ -5,6 +5,9 @@ from __future__ import annotations
 from bioetl.application.services.control_plane.manifest.diagnostics.nested_mapping import (
     lookup_mapping_path,
 )
+from bioetl.domain.control_plane.execution_context import (
+    is_composite_execution_context as _is_composite_execution_context,
+)
 from bioetl.domain.control_plane import RunManifest
 
 
@@ -21,10 +24,6 @@ def _is_full_scan_idempotent_rebuild(manifest: RunManifest) -> bool:
         str(candidate or "").strip().lower() == "full_scan_only"
         for candidate in candidates
     )
-
-
-def _is_composite_execution_context(manifest: RunManifest) -> bool:
-    return manifest.launch_context.get("execution_context") == "composite"
 
 
 def _build_replay_parentage(manifest: RunManifest) -> dict[str, object]:
