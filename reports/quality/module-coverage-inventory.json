@@ -1493,7 +1493,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.core.base_transformer.types",
       "path": "src/bioetl/application/core/base_transformer/types.py",
-      "source_lines": 54
+      "source_lines": 56
     },
     {
       "coverage_percent": 36.84,
@@ -1963,7 +1963,7 @@
       "missing_lines": 5,
       "module": "bioetl.application.core.data_sources.filtered",
       "path": "src/bioetl/application/core/data_sources/filtered.py",
-      "source_lines": 83
+      "source_lines": 85
     },
     {
       "coverage_percent": 48.39,
@@ -8123,7 +8123,7 @@
       "missing_lines": 3,
       "module": "bioetl.composition.providers._chembl_target_protein_classification_data_source",
       "path": "src/bioetl/composition/providers/_chembl_target_protein_classification_data_source.py",
-      "source_lines": 330
+      "source_lines": 329
     },
     {
       "coverage_percent": 92.16,
@@ -21378,7 +21378,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-06-16",
-  "source_tree_sha256": "3669bd4d2bec4b8ab4b3a81b59fb6ccafd450974dea7332cdb75f9a3f3959e53",
+  "source_tree_sha256": "fff19870a8df5a37e5becd9f78132baa5c850f22cc9514bba6bc9b85d432c46d",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -21455,8 +21455,6 @@
             "src/bioetl/application/services/control_plane/manifest/diagnostics/__init__.py",
             "src/bioetl/application/services/control_plane/manifest/diagnostics/artifact_support.py",
             "src/bioetl/application/services/control_plane/manifest/diagnostics/base.py",
-            "src/bioetl/application/services/control_plane/manifest/diagnostics/base_summary_helpers.py",
-            "src/bioetl/application/services/control_plane/manifest/diagnostics/base_summary_helpers.py",
             "src/bioetl/application/services/control_plane/manifest/diagnostics/checkpoint_projection.py",
             "src/bioetl/application/services/control_plane/manifest/diagnostics/dq_details.py",
             "src/bioetl/application/services/control_plane/manifest/diagnostics/finalization.py",
