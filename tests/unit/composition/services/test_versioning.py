@@ -267,6 +267,31 @@ def test_should_try_windows_git_fallback_branch_matrix(
 
 
 @pytest.mark.unit
+def test_iter_windows_git_fallback_executables_discovers_unique_git_exe(
+    tmp_path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    bin_one = tmp_path / "git-one"
+    bin_two = tmp_path / "git-two"
+    bin_one.mkdir()
+    bin_two.mkdir()
+    git_one = bin_one / "git.exe"
+    git_two = bin_two / "git.exe"
+    git_one.write_text("", encoding="utf-8")
+    git_two.write_text("", encoding="utf-8")
+    monkeypatch.setattr(
+        versioning.os,
+        "get_exec_path",
+        lambda: [str(bin_one), str(bin_one), str(bin_two), str(tmp_path / "empty")],
+    )
+
+    assert versioning._iter_windows_git_fallback_executables() == (
+        str(git_one.resolve()),
+        str(git_two.resolve()),
+    )
+
+
+@pytest.mark.unit
 @patch("bioetl.composition.services.versioning._iter_windows_git_fallback_executables")
 @patch("bioetl.composition.services.versioning.subprocess.run")
 def test_run_git_command_preserves_repo_failures_without_windows_retry(
@@ -285,6 +310,28 @@ def test_run_git_command_preserves_repo_failures_without_windows_retry(
 
 
 @pytest.mark.unit
+@patch("bioetl.composition.services.versioning._iter_windows_git_fallback_executables")
+@patch("bioetl.composition.services.versioning.subprocess.run")
+def test_run_git_command_returns_last_windows_fallback_result_after_failures(
+    mock_run: MagicMock,
+    mock_candidates: MagicMock,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(versioning.os, "name", "nt", raising=False)
+    mock_candidates.return_value = ("C:/Git/git.exe", "D:/Git/git.exe")
+    mock_run.side_effect = [
+        OSError("shim failed"),
+        OSError("candidate failed"),
+        SimpleNamespace(returncode=2, stdout="", stderr="bad fallback"),
+    ]
+
+    result = versioning._run_git_command("rev-parse", "HEAD")
+
+    assert result.returncode == 2
+    assert mock_run.call_count == 3
+
+
+@pytest.mark.unit
 def test_get_repo_dependency_lock_hash_reads_repo_root_lockfile(
     tmp_path,
     monkeypatch: pytest.MonkeyPatch,
@@ -297,6 +344,66 @@ def test_get_repo_dependency_lock_hash_reads_repo_root_lockfile(
 
     assert isinstance(digest, str)
     assert digest.startswith("sha256:")
+
+
+@pytest.mark.unit
+def test_get_repo_dependency_lock_hash_falls_back_to_git_show(
+    tmp_path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[tuple[str, ...]] = []
+    monkeypatch.setattr(versioning, "_REPO_ROOT", tmp_path)
+
+    def _fake_run_git_command(*arguments: str) -> object:
+        calls.append(arguments)
+        if arguments == ("show", "HEAD:poetry.lock"):
+            return SimpleNamespace(returncode=0, stdout="poetry-lock\n")
+        return SimpleNamespace(returncode=1, stdout="")
+
+    monkeypatch.setattr(versioning, "_run_git_command", _fake_run_git_command)
+
+    digest = versioning._get_repo_dependency_lock_hash()
+
+    assert isinstance(digest, str)
+    assert digest.startswith("sha256:")
+    assert calls == [("show", "HEAD:uv.lock"), ("show", "HEAD:poetry.lock")]
+
+
+@pytest.mark.unit
+def test_get_code_revision_provenance_reports_unknown_when_dirty_check_missing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    full_hash = "a" * 40
+    monkeypatch.setattr(versioning, "get_git_commit", lambda: full_hash)
+    monkeypatch.setattr(versioning, "get_dependency_lock_hash", lambda: None)
+    monkeypatch.setattr(versioning, "_get_repo_dependency_lock_hash", lambda: None)
+    monkeypatch.setattr(versioning, "_run_git_command", lambda *args, **kwargs: None)
+    versioning.get_code_revision_provenance.cache_clear()
+
+    provenance = versioning.get_code_revision_provenance()
+
+    assert provenance.git_commit == full_hash
+    assert provenance.source_revision_state == "dirty_state_unknown"
+
+
+@pytest.mark.unit
+def test_get_code_revision_provenance_reports_unknown_on_unexpected_returncode(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    full_hash = "a" * 40
+    monkeypatch.setattr(versioning, "get_git_commit", lambda: full_hash)
+    monkeypatch.setattr(versioning, "get_dependency_lock_hash", lambda: "sha256:abc")
+    monkeypatch.setattr(
+        versioning,
+        "_run_git_command",
+        lambda *args, **kwargs: SimpleNamespace(returncode=2, stdout=""),
+    )
+    versioning.get_code_revision_provenance.cache_clear()
+
+    provenance = versioning.get_code_revision_provenance()
+
+    assert provenance.git_commit == full_hash
+    assert provenance.source_revision_state == "dirty_state_unknown"
 
 
 @pytest.mark.unit
@@ -343,6 +450,19 @@ def test_compute_config_hash_supports_legacy_dict_method() -> None:
 
 
 @pytest.mark.unit
+def test_compute_config_hash_supports_pydantic_model_dump_path() -> None:
+    class ModelConfig:
+        def model_dump(self, *, mode: str, exclude_none: bool) -> dict[str, object]:
+            assert mode == "json"
+            assert exclude_none is True
+            return {"version": "1.0.0", "nested": {"x": 1}}
+
+    digest = versioning.compute_config_hash(ModelConfig())
+
+    assert len(digest) == 64
+
+
+@pytest.mark.unit
 def test_compute_config_hash_supports_mapping_cast_path() -> None:
     class MappingConfig:
         def __iter__(self):
@@ -372,6 +492,16 @@ def test_compute_config_hash_is_stable_for_equivalent_mappings() -> None:
 
 
 @pytest.mark.unit
+def test_compute_config_hash_rejects_non_json_like_normalization(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(versioning, "_normalize_for_hash", lambda obj: "not-json-like")
+
+    with pytest.raises(TypeError, match="must produce JSON-like data"):
+        versioning.compute_config_hash({"provider": "chembl"})
+
+
+@pytest.mark.unit
 def test_compute_config_hash_rejects_non_finite_numeric_values() -> None:
     with pytest.raises(
         ValueError,
@@ -388,6 +518,14 @@ def test_get_pipeline_version_reads_dict_version() -> None:
 @pytest.mark.unit
 def test_get_pipeline_version_reads_object_version() -> None:
     assert versioning.get_pipeline_version(SimpleNamespace(version="3.4.5")) == "3.4.5"
+
+
+@pytest.mark.unit
+@patch("bioetl.composition.services.versioning.pkg_version", return_value="8.8.8")
+def test_get_pipeline_version_handles_absent_config(
+    _mock_pkg_version: MagicMock,
+) -> None:
+    assert versioning.get_pipeline_version(None) == "8.8.8"
 
 
 @pytest.mark.unit

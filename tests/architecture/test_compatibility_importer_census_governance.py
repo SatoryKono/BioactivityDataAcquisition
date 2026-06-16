@@ -4,25 +4,18 @@ from __future__ import annotations
 
 import json
 import subprocess
-import sys
 from pathlib import Path
 from typing import Any
 
 import pytest
 import yaml
 
-# Skip on WSL and Windows due to filesystem performance causing git command timeout
-is_wsl_or_windows = sys.platform.startswith("win")
-if not is_wsl_or_windows:
-    try:
-        with open("/proc/version", "r") as f:
-            if "microsoft" in f.read().lower():
-                is_wsl_or_windows = True
-    except (OSError, IOError):
-        pass
+from tests.architecture._platform_skip_support import mounted_worktree_skip_reason
 
-if is_wsl_or_windows:
-    pytestmark = pytest.mark.skip(reason="Skipped on WSL/Windows due to filesystem performance")
+# Skip on WSL and Windows due to filesystem performance causing git command timeout
+pytestmark = [pytest.mark.timeout(300)]
+if (skip_reason := mounted_worktree_skip_reason()) is not None:
+    pytestmark.append(pytest.mark.skip(reason=skip_reason))
 
 from scripts.engineering.qa.import_graph_inventory import (
     collect_exact_module_import_usage,
@@ -64,10 +57,6 @@ REMOVED_COMPATIBILITY_MODULES = {
     "bioetl.application.services.checkpoint_compatibility_service_v2",
     "bioetl.domain.normalization.legacy_fingerprints",
 }
-
-# Import graph census traverses the whole repository and can exceed the default
-# 60s timeout on Windows-backed filesystems.
-pytestmark = pytest.mark.timeout(300)
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
