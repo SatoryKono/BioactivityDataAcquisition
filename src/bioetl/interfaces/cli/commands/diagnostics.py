@@ -408,6 +408,14 @@ def diagnostics_quarantine(
 
 
 COMMANDS = (
-    "guide", "metrics", "health", "run", "dossier", "contract-checks",
-    "checkpoint", "manifest", "forensic-diff", "quarantine",
+    "guide",
+    "metrics",
+    "health",
+    "run",
+    "dossier",
+    "contract-checks",
+    "checkpoint",
+    "manifest",
+    "forensic-diff",
+    "quarantine",
 )
