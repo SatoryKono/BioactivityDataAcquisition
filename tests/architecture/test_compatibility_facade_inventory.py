@@ -12,16 +12,11 @@ from types import ModuleType
 import pytest
 import yaml
 
-# Skip on WSL and Windows due to filesystem performance causing timeout
-if sys.platform.startswith("win"):
-    pytestmark = pytest.mark.skip("Skipped on Windows due to filesystem performance")
-else:
-    try:
-        with open("/proc/version", "r") as f:
-            if "microsoft" in f.read().lower():
-                pytestmark = pytest.mark.skip("Skipped on WSL due to filesystem performance")
-    except (OSError, IOError):
-        pass
+from tests.architecture._platform_skip_support import mounted_worktree_skip_reason
+
+_SKIP_REASON = mounted_worktree_skip_reason()
+if _SKIP_REASON is not None:
+    pytestmark = pytest.mark.skip(reason=_SKIP_REASON)
 
 ROOT = Path(__file__).resolve().parents[2]
 REGISTRY_YAML = ROOT / "configs" / "quality" / "compatibility_facade_inventory.yaml"

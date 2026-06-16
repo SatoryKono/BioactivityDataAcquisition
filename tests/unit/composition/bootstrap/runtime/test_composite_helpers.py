@@ -342,10 +342,15 @@ def test_composite_bootstrap_plan_and_runner_entrypoint_delegate(
     from bioetl.composition.bootstrap.runtime import composite
 
     captured: dict[str, object] = {}
+
+    def _capture_plan_impl(**kwargs: object) -> object:
+        captured["plan_kwargs"] = kwargs
+        return mock.sentinel.plan
+
     monkeypatch.setattr(
         composite,
         "_build_composite_bootstrap_plan_impl",
-        lambda **kwargs: captured.setdefault("plan_kwargs", kwargs) or mock.sentinel.plan,
+        _capture_plan_impl,
     )
     plan = composite._build_composite_bootstrap_plan(
         config=mock.sentinel.config,

@@ -1,24 +1,5 @@
 {
-  "budget_violations": [
-    {
-      "actual": 1,
-      "budget": "duplicate_test_names_max",
-      "expected_max": 0,
-      "metric": "duplicate_test_names"
-    },
-    {
-      "actual": 2,
-      "budget": "duplicate_test_name_occurrences_max",
-      "expected_max": 0,
-      "metric": "duplicate_test_name_occurrences"
-    },
-    {
-      "actual": 11,
-      "budget": "markerless_test_functions_max",
-      "expected_max": 0,
-      "metric": "markerless_test_functions"
-    }
-  ],
+  "budget_violations": [],
   "report": {
     "assertless_candidates": [
       {
@@ -3697,46 +3678,23 @@
     ],
     "compatibility_test_files": 32,
     "date_today_call_sites": 0,
-    "duplicate_test_name_inventory": [
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "unit": 2
-        },
-        "locations": [
-          "tests/unit/application/services/test_lineage_inspection_service.py:309",
-          "tests/unit/application/services/test_run_manifest_inspection_verification.py:105"
-        ],
-        "name": "test_parse_run_id_returns_none_for_invalid_identifier",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      }
-    ],
+    "duplicate_test_name_inventory": [],
     "duplicate_test_name_inventory_summary": {
-      "cross_file_groups": 1,
-      "duplicate_occurrences": 2,
+      "cross_file_groups": 0,
+      "duplicate_occurrences": 0,
       "mixed_groups": 0,
       "same_file_groups": 0,
-      "total_duplicate_names": 1
+      "total_duplicate_names": 0
     },
-    "duplicate_test_name_occurrences": 2,
-    "duplicate_test_names": 1,
-    "markerless_test_functions": 11,
+    "duplicate_test_name_occurrences": 0,
+    "duplicate_test_names": 0,
+    "markerless_test_functions": 0,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "root": ".",
-    "top_duplicate_test_names": [
-      {
-        "count": 2,
-        "examples": [
-          "tests/unit/application/services/test_lineage_inspection_service.py:309",
-          "tests/unit/application/services/test_run_manifest_inspection_verification.py:105"
-        ],
-        "name": "test_parse_run_id_returns_none_for_invalid_identifier"
-      }
-    ],
-    "total_test_files": 1751,
-    "total_test_functions": 20507,
+    "top_duplicate_test_names": [],
+    "total_test_files": 1755,
+    "total_test_functions": 20580,
     "uuid4_call_sites": 0
   }
 }

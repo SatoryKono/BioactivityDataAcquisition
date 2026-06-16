@@ -102,7 +102,7 @@ def _make_manifest(*, run_id: RunID, artifact_id: str) -> object:
     )
 
 
-def test_parse_run_id_returns_none_for_invalid_identifier() -> None:
+def test_parse_run_id_function_returns_none_for_invalid_identifier() -> None:
     assert parse_run_id("not-a-uuid") is None
 
 
