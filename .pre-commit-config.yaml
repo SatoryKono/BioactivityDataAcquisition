@@ -197,17 +197,9 @@ repos:
       - id: commit-message-conventional
         name: Check Conventional Commit header
         entry: >
-          python scripts/engineering/dev/run_project_python.py -c "import
-          pathlib, re, sys; header = next((line.strip() for line in
-          pathlib.Path(sys.argv[1]).read_text(encoding='utf-8').splitlines() if
-          line.strip()), ''); allowed = header.startswith(('Merge', 'Revert'));
-          pattern =
-          r'^(feat|fix|refactor|docs|test|chore|perf|ci|build|style|revert)(\([a-z0-9._/-]+\))?: .{1,100}$';
-          ok = allowed or re.match(pattern, header); sys.exit(0 if ok else
-          (print('Commit message must match Conventional Commits
-          (<type>(<scope>): <description>, header <= 100 chars). Actual: %s' %
-          (header or '<empty>')) or 1))"
-        language: system
+          \A(?=[^\r\n]{1,100}(?:\r?\n|\Z))(?:Merge|Revert|(?:feat|fix|refactor|docs|test|chore|perf|ci|build|style|revert)(?:\([a-z0-9._/-]+\))?: [^\r\n]+)(?:\r?\n|\Z)
+        language: pygrep
+        args: [--multiline, --negate]
         pass_filenames: true
         stages: [commit-msg]
 
