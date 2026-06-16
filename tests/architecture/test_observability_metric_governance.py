@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import date
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -27,23 +28,56 @@ REGENERATION_COMMAND = (
     "--repo-root . "
     "--write-evidence reports/observability/runtime_cardinality_inventory.json"
 )
+FRESH_INVENTORY_TIMEOUT_SECONDS = int(
+    os.environ.get("BIOETL_OBSERVABILITY_INVENTORY_TIMEOUT_SECONDS", "90")
+)
+FORCE_FRESH_INVENTORY_SUBPROCESS = (
+    os.environ.get("BIOETL_FORCE_FRESH_OBSERVABILITY_INVENTORY_SUBPROCESS") == "1"
+)
+
+
+def _collect_inprocess_metric_inventory() -> dict[str, object]:
+    """Collect static inventory without a subprocess for Windows/GDrive runs."""
+    inventory._METRIC_INVENTORY_CACHE.clear()
+    try:
+        loaded = inventory.collect_metric_inventory(ROOT)
+    finally:
+        inventory._METRIC_INVENTORY_CACHE.clear()
+    assert isinstance(loaded, dict)
+    return loaded
 
 
 def _collect_fresh_metric_inventory() -> dict[str, object]:
-    """Collect inventory in a fresh process to avoid test-order metric pollution."""
-    result = subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "scripts.engineering.qa.report_observability_metric_inventory",
-            "--repo-root",
-            str(ROOT),
-            "--json",
-        ],
-        check=False,
-        capture_output=True,
-        text=True,
-    )
+    """Collect current inventory without hanging Windows/PyCharm subprocess runs."""
+    if os.name == "nt" and not FORCE_FRESH_INVENTORY_SUBPROCESS:
+        return _collect_inprocess_metric_inventory()
+
+    command = [
+        sys.executable,
+        "-m",
+        "scripts.engineering.qa.report_observability_metric_inventory",
+        "--repo-root",
+        str(ROOT),
+        "--json",
+    ]
+    env = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}
+    try:
+        result = subprocess.run(
+            command,
+            check=False,
+            capture_output=True,
+            text=True,
+            cwd=ROOT,
+            env=env,
+            timeout=FRESH_INVENTORY_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired as exc:
+        if os.name == "nt":
+            return _collect_inprocess_metric_inventory()
+        raise AssertionError(
+            "Fresh observability metric inventory subprocess timed out after "
+            f"{FRESH_INVENTORY_TIMEOUT_SECONDS}s. Command: {' '.join(command)}"
+        ) from exc
     assert result.returncode == 0, result.stderr
     loaded = json.loads(result.stdout)
     assert isinstance(loaded, dict)

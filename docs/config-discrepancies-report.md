@@ -16,6 +16,37 @@ These parameters are intentionally partial across governed config families and r
 
 No sanctioned partial variance detected.
 
+## Parameter Ownership Taxonomy
+
+Parameter ownership taxonomy is derived from flattened config parameter paths. It is a governance/reporting projection, not a second config source of truth.
+
+
+### composite_runtime
+
+Owner: BioETL Team
+Parameters: 203
+
+- `compatibility_legacy`: 16
+- `domain_entity_contract`: 108
+- `dq_validation`: 36
+- `medallion_write_policy`: 5
+- `provider_source_access`: 3
+- `replay_provenance`: 27
+- `runtime_control_plane`: 8
+
+### entity_effective
+
+Owner: BioETL Team
+Parameters: 304
+
+- `compatibility_legacy`: 17
+- `domain_entity_contract`: 39
+- `dq_validation`: 78
+- `medallion_write_policy`: 106
+- `provider_source_access`: 34
+- `replay_provenance`: 3
+- `runtime_control_plane`: 27
+
 ## Interpretation
 
 - CI should fail on actionable drift.

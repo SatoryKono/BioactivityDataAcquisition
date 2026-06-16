@@ -96,12 +96,20 @@ class DQPolicyRef(NamedTuple):
 
 #### 2.2 Contract Validation Layers
 
-1. **Schema Validation**: JSON Schema validation for data structure
+1. **Schema Validation**: Pandera-owned runtime validation for DataFrame
+   contract enforcement. JSON/YAML contract artifacts are derived
+   projection/catalog surfaces unless a specific runtime path explicitly
+   documents otherwise.
 1. **Content Validation**: Rule-based validation for data quality
 1. **Consistency Validation**: Cross-source data consistency checks
 1. **Provenance Validation**: Lineage and audit trail verification
 
 #### 2.3 Policy Resolution Strategy
+
+Gold and Silver runtime contract activation is fail-closed. The resolution chain
+below applies to explicit DQ policy lookup and reporting/catalog contexts; it
+MUST NOT silently activate a default/global Gold or Silver schema contract when
+the requested runtime contract cannot be resolved.
 
 ```
 Exact Match (contract_id + version)
@@ -110,7 +118,7 @@ Latest Version of Contract
     ↓
 Default Contract for Entity Type
     ↓
-Global Fallback Policy
+Global Fallback Policy (reporting/catalog contexts only)
 ```
 
 #### 2.4 Configuration Runtime Artifacts

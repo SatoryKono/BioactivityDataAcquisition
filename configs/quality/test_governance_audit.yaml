@@ -59,7 +59,7 @@ issues:
   - scripts/engineering/qa/report_test_governance_audit.py
   - tests/architecture/test_test_governance_audit.py
 budgets:
-  refined_assertless_max: 2
+  refined_assertless_max: 0
   duplicate_test_names_max: 0
   duplicate_test_name_occurrences_max: 0
   compatibility_test_file_max: 32
@@ -70,8 +70,18 @@ budget_ratchet:
   linked_issue: '#4901'
   mode: fail-fast-no-growth
   expected_direction: downward
-  refreshed_on: '2026-06-01'
+  refreshed_on: '2026-06-15'
   stream_g_owner_notes:
+  - issue: '#5200'
+    owner: test-governance
+    status: rf_009_closeout_zero_ratchet
+    note: >-
+      RF-009 closeout revalidated the live static test-governance collector:
+      actionable assertless debt, duplicate names, markerless tests, uuid4 call
+      sites, and date.today call sites are all zero; compatibility filename debt
+      remains pinned at the reviewed inventory of 32 with per-file rationale. The
+      refined_assertless_max budget ratcheted from 2 to 0; no technical-debt budget
+      increased.
   - issue: '#5123'
     owner: architecture-governance
     status: silver_semantic_compatibility_guard_enforced
@@ -327,6 +337,35 @@ current_issue_closeout:
   - tests/unit/composition/bootstrap/cli/test_noop.py
   - tests/unit/composition/factories/pipeline/test_contract_validator.py
   - tests/unit/composition/providers/test_registration.py
+rf_009_closeout:
+  issue_ref: '#5200'
+  decision: closeable
+  closed_on: '2026-06-15'
+  evidence:
+  - configs/quality/test_governance_audit.yaml
+  - reports/quality/test-governance-current.json
+  - reports/quality/test-duplicate-name-inventory.json
+  - scripts/engineering/qa/report_test_governance_audit.py
+  - tests/architecture/test_test_governance_audit.py
+  - tests/architecture/test_test_matrix_lane_policy.py
+  - tests/contract/test_gold_dq_golden_snapshots.py
+  - tests/integration/test_observability_emission_integration.py
+  coverage_surfaces:
+  - assertless_zero_ratchet
+  - compatibility_inventory_rationale
+  - deterministic_uuid4_date_today_zero
+  - duplicate_name_zero
+  - gold_dq_golden_bundles
+  - marker_lane_policy
+  - tracing_emission_observability
+  live_metrics:
+    refined_assertless_tests: 0
+    duplicate_test_names: 0
+    duplicate_test_name_occurrences: 0
+    compatibility_test_files: 32
+    markerless_test_functions: 0
+    uuid4_call_sites: 0
+    date_today_call_sites: 0
 preflight:
   script: scripts/engineering/qa/check_test_audit_preflight.py
   telemetry_baseline: docs/05-engineering/test-telemetry-baseline.md
@@ -390,8 +429,8 @@ assertless_triage:
         no-exception contracts.
       next_review: '2026-09-30'
   policy:
-    new_no_effect_tests: must reduce refined_assertless_max or document an intentional
-      contract category
+    new_no_effect_tests: must keep refined_assertless_max at zero by strengthening,
+      removing, or explicitly reclassifying the test as an intentional contract category
     highest_priority_paths:
     - tests/integration/
     - tests/e2e/

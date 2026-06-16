@@ -2,19 +2,14 @@
 id: fix-retirement-candidate-triage-drift
 title: Fix retirement candidate triage drift
 task_id: fix-retirement-candidate-triage-drift
-created_at: '2026-06-04T16:32:23Z'
+created_at: '2026-06-15T18:00:53Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - configs/quality/retirement_candidate_triage.yaml
-- reports/quality/dead-code-inventory.json
-- configs/quality/debt_scorecard.yaml
-summary: Removed stale repo-wide zero-import classification for bioetl.domain.ports.serialization
-  after direct test import coverage made it no longer a zero-import candidate. Regenerated
-  dead-code inventory JSON/MD to 13 classified candidates and ratcheted retirement
-  governance counts in debt_scorecard from 14 to 13 while keeping untriaged zero-import
-  budget at 0. Validated retirement triage, debt scorecard, dead-code inventory check,
-  and debt governance telemetry guards.
+summary: Removed the stale repo-wide zero-import classification entry for replay_helpers.py
+  after confirming it is no longer part of the live zero-import candidate set; dead-code
+  inventory artifacts remain current with zero untriaged candidates.
 ---
 
 # Episodic summary
@@ -25,7 +20,7 @@ summary: Removed stale repo-wide zero-import classification for bioetl.domain.po
 
 ## Outcome
 
-- Removed stale repo-wide zero-import classification for bioetl.domain.ports.serialization after direct test import coverage made it no longer a zero-import candidate. Regenerated dead-code inventory JSON/MD to 13 classified candidates and ratcheted retirement governance counts in debt_scorecard from 14 to 13 while keeping untriaged zero-import budget at 0. Validated retirement triage, debt scorecard, dead-code inventory check, and debt governance telemetry guards.
+- Removed the stale repo-wide zero-import classification entry for replay_helpers.py after confirming it is no longer part of the live zero-import candidate set; dead-code inventory artifacts remain current with zero untriaged candidates.
 
 ## Lessons learned
 

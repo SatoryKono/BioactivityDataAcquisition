@@ -182,6 +182,21 @@ def _render_failure_hint(config: RenderConfig) -> str:
     )
 
 
+def _render_failure_message(
+    config: RenderConfig,
+    *,
+    prefix: str,
+    auto_fallback: bool,
+) -> str:
+    """Build a user-facing failure message without blocking auto fallback."""
+    if auto_fallback:
+        return (
+            f"{prefix}. Grafana render API failed. Falling back to Playwright "
+            "screenshot capture."
+        )
+    return f"{prefix}. {_render_failure_hint(config)}"
+
+
 def _parse_args(argv: list[str] | None) -> RenderConfig:
     parser = argparse.ArgumentParser(
         description=(
@@ -673,26 +688,39 @@ def main(argv: list[str] | None = None) -> int:
             return _run_playwright_fallback(config)
         _render_via_api(config)
     except RenderApiFailure as exc:
-        print(f"{exc}. {_render_failure_hint(config)}")
+        print(
+            _render_failure_message(
+                config,
+                prefix=str(exc),
+                auto_fallback=config.fallback == "auto",
+            )
+        )
         if config.fallback == "auto":
-            print("Falling back to Playwright screenshot capture.")
             return _run_playwright_fallback(config)
         return 1
     except HTTPError as exc:
         if exc.code == 500:
             print(
-                f"HTTP error: {exc.code} {exc.reason}. {_render_failure_hint(config)}"
+                _render_failure_message(
+                    config,
+                    prefix=f"HTTP error: {exc.code} {exc.reason}",
+                    auto_fallback=config.fallback == "auto",
+                )
             )
         else:
             print(f"HTTP error: {exc.code} {exc.reason}")
         if config.fallback == "auto":
-            print("Falling back to Playwright screenshot capture.")
             return _run_playwright_fallback(config)
         return 1
     except OSError as exc:
-        print(f"Render request failed: {exc}. {_render_failure_hint(config)}")
+        print(
+            _render_failure_message(
+                config,
+                prefix=f"Render request failed: {exc}",
+                auto_fallback=config.fallback == "auto",
+            )
+        )
         if config.fallback == "auto":
-            print("Falling back to Playwright screenshot capture.")
             return _run_playwright_fallback(config)
         return 1
     except URLError as exc:

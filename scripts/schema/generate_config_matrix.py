@@ -18,6 +18,66 @@ from scripts.engineering.qa.config_surface_governance import is_sanctioned_parti
 
 DEFAULT_BASELINE_JSON = Path("reports/quality/config-discrepancy-baseline.json")
 SANCTIONED_DEFAULT_SCALAR = "<sanctioned-default>"
+CONFIG_PARAMETER_TAXONOMY_OWNER = "BioETL Team"
+_DEFAULT_TAXONOMY_GROUP = "domain_entity_contract"
+_TAXONOMY_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
+    (
+        "compatibility_legacy",
+        ("compat", "legacy", "deprecated", "alias"),
+    ),
+    (
+        "replay_provenance",
+        (
+            "manifest",
+            "ledger",
+            "lineage",
+            "provenance",
+            "replay",
+            "snapshot",
+            "fingerprint",
+            "content_hash",
+        ),
+    ),
+    (
+        "observability",
+        ("observability", "metrics", "tracing", "logging", "health", "telemetry"),
+    ),
+    (
+        "dq_validation",
+        ("quality", "dq", "validation", "schema", "contract", "rule", "quarantine"),
+    ),
+    (
+        "medallion_write_policy",
+        ("sink", "storage", "bronze", "silver", "gold", "delta", "write", "partition"),
+    ),
+    (
+        "provider_source_access",
+        (
+            "source",
+            "api",
+            "adapter",
+            "endpoint",
+            "request",
+            "query",
+            "rate_limit",
+            "pagination",
+            "extraction_params",
+        ),
+    ),
+    (
+        "runtime_control_plane",
+        (
+            "pipeline",
+            "runtime",
+            "execution",
+            "checkpoint",
+            "lock",
+            "batch",
+            "incremental",
+            "schedule",
+        ),
+    ),
+)
 
 
 def flatten_dict(d: dict[str, Any], parent_key: str = "") -> dict[str, Any]:
@@ -150,6 +210,48 @@ def _family_metrics(configs: dict[str, dict[str, Any]]) -> dict[str, int]:
         "inconsistent_parameter_count": len(actionable_partial),
         "sanctioned_partial_parameter_count": len(partial) - len(actionable_partial),
         "raw_inconsistent_parameter_count": len(partial),
+    }
+
+
+def _classify_parameter_key(key: str) -> str:
+    normalized = key.lower().replace("-", "_")
+    for group_name, needles in _TAXONOMY_RULES:
+        if any(needle in normalized for needle in needles):
+            return group_name
+    return _DEFAULT_TAXONOMY_GROUP
+
+
+def _family_parameter_taxonomy(configs: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    all_keys = sorted({key for values in configs.values() for key in values})
+    groups: dict[str, int] = {}
+    examples: dict[str, list[str]] = {}
+    for key in all_keys:
+        group_name = _classify_parameter_key(key)
+        groups[group_name] = groups.get(group_name, 0) + 1
+        examples.setdefault(group_name, [])
+        if len(examples[group_name]) < 5:
+            examples[group_name].append(key)
+    return {
+        "owner": CONFIG_PARAMETER_TAXONOMY_OWNER,
+        "parameter_count": len(all_keys),
+        "groups": dict(sorted(groups.items())),
+        "examples": {key: examples[key] for key in sorted(examples)},
+        "unclassified_parameter_count": 0,
+        "unclassified_parameters": [],
+    }
+
+
+def build_config_parameter_taxonomy_payload() -> dict[str, Any]:
+    """Return family-scoped config parameter ownership/taxonomy metadata."""
+    families = _collect_family_configs()
+    return {
+        "owner": CONFIG_PARAMETER_TAXONOMY_OWNER,
+        "classification_mode": "derived_from_flattened_config_parameter_paths",
+        "default_group": _DEFAULT_TAXONOMY_GROUP,
+        "families": {
+            family_name: _family_parameter_taxonomy(family_configs)
+            for family_name, family_configs in families.items()
+        },
     }
 
 
@@ -348,6 +450,28 @@ def _build_artifact_contents() -> tuple[str, str, int, int, int, int, int]:
     report_lines.extend(
         [
             "",
+            "## Parameter Ownership Taxonomy",
+            "",
+            "Parameter ownership taxonomy is derived from flattened config "
+            "parameter paths. It is a governance/reporting projection, not a "
+            "second config source of truth.",
+            "",
+        ]
+    )
+    taxonomy_payload = build_config_parameter_taxonomy_payload()
+    taxonomy_families = taxonomy_payload["families"]
+    for family_name in sorted(taxonomy_families):
+        family_taxonomy = taxonomy_families[family_name]
+        report_lines.extend(["", f"### {family_name}", ""])
+        report_lines.append(f"Owner: {family_taxonomy['owner']}")
+        report_lines.append(f"Parameters: {family_taxonomy['parameter_count']}")
+        report_lines.append("")
+        for group_name, count in family_taxonomy["groups"].items():
+            report_lines.append(f"- `{group_name}`: {count}")
+
+    report_lines.extend(
+        [
+            "",
             "## Interpretation",
             "",
             "- CI should fail on actionable drift.",
@@ -425,11 +549,13 @@ def _build_baseline_payload(
     snapshot_date: str,
     metrics: dict[str, int],
     families: dict[str, dict[str, int]],
+    parameter_taxonomy: dict[str, Any],
 ) -> dict[str, Any]:
     return {
         "snapshot_date": snapshot_date,
         "metrics": metrics,
         "families": families,
+        "parameter_taxonomy": parameter_taxonomy,
     }
 
 
@@ -472,6 +598,20 @@ def _baseline_families_match(
     return False
 
 
+def _baseline_taxonomy_match(
+    path: Path,
+    expected_taxonomy: dict[str, Any],
+) -> bool:
+    if not path.exists():
+        print(f"[drift] missing: {path}")
+        return False
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if payload.get("parameter_taxonomy") == expected_taxonomy:
+        return True
+    print(f"[drift] mismatch parameter taxonomy: {path}")
+    return False
+
+
 def main(argv: list[str] | None = None) -> int:
     """Generate or check CSV and Markdown comparison outputs."""
     args = _parse_args(argv)
@@ -493,6 +633,7 @@ def main(argv: list[str] | None = None) -> int:
         family_name: _family_metrics(family_configs)
         for family_name, family_configs in _collect_family_configs().items()
     }
+    parameter_taxonomy = build_config_parameter_taxonomy_payload()
     if args.check:
         ok = _artifact_matches(
             args.matrix_output,
@@ -500,6 +641,9 @@ def main(argv: list[str] | None = None) -> int:
         ) and _artifact_matches(args.report_output, report_content)
         ok = ok and _baseline_metrics_match(args.baseline_json_out, baseline_metrics)
         ok = ok and _baseline_families_match(args.baseline_json_out, family_payload)
+        ok = ok and _baseline_taxonomy_match(
+            args.baseline_json_out, parameter_taxonomy
+        )
         if ok:
             print("[ok] config matrix artifacts are up to date")
             return 0
@@ -518,6 +662,7 @@ def main(argv: list[str] | None = None) -> int:
             snapshot_date=date.today().isoformat(),
             metrics=baseline_metrics,
             families=family_payload,
+            parameter_taxonomy=parameter_taxonomy,
         ),
     )
     print(f"Matrix saved to {args.matrix_output}")

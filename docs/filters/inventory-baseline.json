@@ -1414,7 +1414,7 @@
       "symbol": "--silver-filter-only",
       "path": "docs/03-guides/dashboards/monitoring-index.md",
       "occurrence_count": 2,
-      "first_line": 28,
+      "first_line": 32,
       "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
       "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
       "notes": ""
@@ -1469,7 +1469,7 @@
       "symbol": "--silver-filter-only",
       "path": "docs/05-operations/01-monitoring-guide.md",
       "occurrence_count": 1,
-      "first_line": 494,
+      "first_line": 497,
       "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
       "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
       "notes": ""
@@ -1557,7 +1557,7 @@
       "symbol": "FILTERED_OUT_SILVER",
       "path": "docs/05-operations/01-monitoring-guide.md",
       "occurrence_count": 3,
-      "first_line": 405,
+      "first_line": 408,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""

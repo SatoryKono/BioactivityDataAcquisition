@@ -20,11 +20,27 @@ ______________________________________________________________________
 
 ## Context
 
-Gold-слой должен гарантировать качество данных для downstream consumers. Текущая реализация позволяет пайплайнам работать без определённой Gold-схемы, что может привести к несогласованности данных и проблемам интеграции.
+Gold-слой должен гарантировать качество данных для downstream consumers.
+Исторически ADR вводила feature flag для контролируемой миграции существующих
+пайплайнов. Этот миграционный этап завершён: текущий runtime contract требует
+строгую Gold validation по умолчанию и fail-closed поведение для Gold write path.
 
 ## Decision
 
-Мы вводим **строгую валидацию Gold-схем** с feature flag для контролируемой миграции существующих пайплайнов.
+BioETL использует **обязательную строгую валидацию Gold-схем**. Текущий
+источник истины для runtime enforcement:
+
+- `src/bioetl/domain/config/runtime.py`: `RuntimeConfig.strict_gold_validation`
+  по умолчанию `True`;
+- `src/bioetl/composition/factories/pipeline/_factory_method_control_plane.py`:
+  production runs принудительно включают strict Gold validation;
+- `src/bioetl/infrastructure/storage/gold/validation_mixin.py`: Gold schema
+  validation требует Pandera `strict=True`;
+- `docs/04-reference/contracts/gold-schemas.md`: public contract documentation
+  фиксирует Pandera-based `strict=True` для Gold.
+
+Миграционный feature flag остаётся только историческим контекстом. Его нельзя
+использовать как текущую Gold policy, отключающую fail-closed runtime behavior.
 
 **Operationalization note (2026-05-14):** for semantic field unification,
 Gold-facing schema and config validation surfaces bind to canonical names
@@ -32,27 +48,24 @@ listed in `configs/field_registry/canonical_registry.json`.
 
 ### 1. Обязательная Gold-схема
 
-При `strict-gold-validation=True` в конфигурации пайплайна:
+В текущем runtime strict Gold validation включена по умолчанию:
 
 ```python
 @dataclass(frozen=True)
-class PipelineConfig:
-    """Конфигурация пайплайна."""
+class RuntimeConfig:
+    """Runtime policy shared by pipeline assembly."""
 
-    name: str
-    provider: str
-    entity: str
-    strict - gold - validation: bool = False  # Feature flag
-    gold - schema: GoldSchema | None = None
+    strict_gold_validation: bool = True
 ```
 
 **Правила валидации:**
 
-| Условие              | `strict-gold-validation=True`  | `strict-gold-validation=False` |
-| -------------------- | ------------------------------ | ------------------------------ |
-| `gold-schema=None`   | `SchemaValidationError` (FAIL) | Warning в лог                  |
-| Несоответствие типов | `SchemaValidationError` (FAIL) | Warning + пропуск записи       |
-| Отсутствующие поля   | `SchemaValidationError` (FAIL) | Warning + `None` значение      |
+| Условие              | Текущее Gold runtime поведение |
+| -------------------- | ------------------------------ |
+| `gold_schema=None`   | FAIL для strict Gold write path |
+| Pandera `strict=False` | FAIL: Gold schemas must use `strict=True` |
+| Несоответствие типов | FAIL до публикации Gold output |
+| Отсутствующие поля   | FAIL до публикации Gold output |
 
 ### 2. Иерархия валидации
 
@@ -61,13 +74,14 @@ Pipeline Start
     │
     ▼
 ┌─────────────────────────────────────┐
-│ Check: strict-gold-validation=True? │
+│ Resolve strict_gold_validation       │
+│ default=True; prod forces True       │
 └─────────────────────────────────────┘
-    │ Yes                      │ No
-    ▼                          ▼
+    │
+    ▼
 ┌─────────────────────┐   ┌─────────────────────┐
-│ Check: gold-schema? │   │ Soft validation     │
-└─────────────────────┘   │ (warnings only)     │
+│ Check: gold schema │   │ Check: Pandera      │
+└─────────────────────┘   │ strict=True         │
     │ None       │ Set    └─────────────────────┘
     ▼            ▼
 ┌──────────┐ ┌─────────────────┐
@@ -82,44 +96,34 @@ Pipeline Start
 class BasePipeline:
     """Базовый класс пайплайна с поддержкой строгой валидации."""
 
-    async def validate-gold-schema(self, context: PipelineContext) -> None:
+    async def validate_gold_schema(self, context: PipelineContext) -> None:
         """Валидация Gold-схемы перед трансформацией.
 
         Raises:
-            SchemaValidationError: Если strict-gold-validation=True и схема отсутствует.
+            SchemaValidationError: Если Gold-схема отсутствует или не strict.
         """
         config = context.config
 
-        if config.strict-gold-validation and config.gold-schema is None:
+        if config.gold_schema is None:
             raise SchemaValidationError(
-                f"Pipeline '{config.name}' requires Gold schema when "
-                f"strict-gold-validation=True. Define gold-schema in config."
+                f"Pipeline '{config.name}' requires strict Gold schema."
             )
 
-        if config.gold-schema is None:
-            self.logger.warning(
-                "gold-schema-missing",
-                pipeline=config.name,
-                message="Gold schema not defined. Validation skipped.",
-            )
+        validate_schema_is_strict(config.gold_schema)
 ```
 
-### 4. Feature Flag для миграции
+### 4. Исторический миграционный flag
 
-Feature flag `strict-gold-validation` позволяет:
+Первоначальная версия ADR использовала feature flag `strict-gold-validation`
+для безопасной миграции. В текущей архитектуре этот flag не является способом
+отключить Gold strictness в production. Текущий статус миграции:
 
-1. **Постепенную миграцию**: Существующие пайплайны продолжают работать
-1. **Явный opt-in**: Новые пайплайны включают строгую валидацию
-1. **Тестирование**: Можно включить в staging до production
-
-**План миграции:**
-
-| Фаза | Действие                                           | Срок   |
+| Фаза | Действие                                           | Статус |
 | ---- | -------------------------------------------------- | ------ |
-| 1    | Добавить `strict-gold-validation` flag             | Сейчас |
-| 2    | Определить Gold-схемы для всех пайплайнов          | -      |
-| 3    | Включить `strict-gold-validation=True` поэтапно    | -      |
-| 4    | Сделать `strict-gold-validation=True` по умолчанию | -      |
+| 1    | Добавить миграционный flag                         | Завершено |
+| 2    | Определить Gold-схемы для опубликованных сущностей | Завершено для managed Gold contracts |
+| 3    | Включить `strict_gold_validation=True` по умолчанию | Завершено |
+| 4    | Принудительно включать strictness для production    | Завершено |
 
 ### 5. Конфигурация пайплайна
 
@@ -247,13 +251,13 @@ Gold-схема служит документацией:
 - Версионирование схемы возможно
 - Self-documenting pipeline configuration
 
-### 4. Feature Flag минимизирует риск
+### 4. Fail-closed strictness минимизирует downstream риск
 
-Постепенное включение:
+Текущий default/production strictness:
 
-- Нет breaking changes для существующих пайплайнов
-- Можно откатить на уровне конфигурации
-- Не требует code changes для rollback
+- не допускает тихую публикацию непроверенных Gold outputs;
+- делает contract drift видимым до записи;
+- исключает расхождение dev/prod для published Gold contracts.
 
 ## Implementation Details
 
@@ -316,32 +320,28 @@ def test-strict-validation-fails-without-schema():
 
     assert "requires Gold schema" in str(exc-info.value)
 
-def test-non-strict-validation-warns-without-schema(caplog):
-    """strict-gold-validation=False без схемы должен логировать warning."""
-    config = PipelineConfig(
-        name="test-pipeline",
-        provider="test",
-        entity="test",
-        strict-gold-validation=False,
-        gold-schema=None,
-    )
-    context = create-test-context(config)
-    pipeline = TestPipeline()
+def test-create-runner-forces-strict-gold-validation-in-prod():
+    """Production assembly forces strict Gold validation."""
+    runtime = RuntimeConfig(strict_gold_validation=False)
+    settings = Settings(env="prod", test_mode=False)
 
-    await pipeline.validate-gold-schema(context)
-
-    assert "gold-schema-missing" in caplog.text
+    assert resolve_strict_gold_validation(runtime=runtime, settings=settings) is True
 ```
 
 ## Alternatives Considered
 
 ### 1. Всегда требовать Gold-схему
 
-Отклонено потому что:
+Исторически отклонялось на период миграции потому что:
 
 - Breaking change для всех существующих пайплайнов
 - Требует одновременного обновления всех конфигов
 - Высокий риск при деплое
+
+Текущий runtime contract после миграции принимает этот вариант для managed Gold
+write path: Gold validation strictness включена по умолчанию, а production
+assembly принудительно включает strictness даже если локальный runtime объект
+создан со значением `False`.
 
 ### 2. Валидация только в production
 
@@ -374,7 +374,8 @@ def test-non-strict-validation-warns-without-schema(caplog):
 - **Гарантия качества**: Gold-схема явно определена и проверена
 - **Раннее обнаружение**: Ошибки видны до записи в хранилище
 - **Документация**: Схема служит контрактом с consumers
-- **Безопасная миграция**: Feature flag позволяет постепенное внедрение
+- **Fail-closed Gold publication**: production не публикует Gold output без
+  strict schema enforcement
 - **Тестируемость**: Можно unit-тестировать валидацию
 
 ### Negative
@@ -399,7 +400,9 @@ def test-non-strict-validation-warns-without-schema(caplog):
 
 - Вместо `SchemaValidationError` используется `ValidationResult` с errors — более гибкий подход
 - Валидация интегрирована в `GoldWriter` через `_validate_schema_strict()` проверку
-- Feature flag находится в `RuntimeConfig` вместо `PipelineConfig` — централизованное управление
+- Миграционный flag находится в `RuntimeConfig` вместо `PipelineConfig`, но
+  текущая production assembly принудительно включает strictness и не трактует
+  `False` как разрешение на soft Gold validation
 
 ## References
 

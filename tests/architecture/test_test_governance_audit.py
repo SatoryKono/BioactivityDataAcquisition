@@ -152,6 +152,36 @@ def test_current_test_audit_issue_closeout_tracks_live_evidence() -> None:
 
 
 @pytest.mark.architecture
+def test_rf_009_test_governance_closeout_tracks_live_zero_debt_metrics() -> None:
+    payload = _load_yaml(CONFIG_PATH)
+    closeout = cast(YamlMap, payload["rf_009_closeout"])
+    report = collect_test_governance_report(ROOT)
+    budgets = cast(YamlMap, payload["budgets"])
+
+    assert closeout["issue_ref"] == "#5200"
+    assert closeout["decision"] == "closeable"
+    assert closeout["closed_on"] == "2026-06-15"
+    assert int(budgets["refined_assertless_max"]) == 0
+
+    for relative_path in cast(list[str], closeout["evidence"]):
+        assert (ROOT / relative_path).exists(), (
+            f"RF-009 closeout references missing evidence: {relative_path}"
+        )
+
+    assert set(cast(list[str], closeout["coverage_surfaces"])) == {
+        "assertless_zero_ratchet",
+        "compatibility_inventory_rationale",
+        "deterministic_uuid4_date_today_zero",
+        "duplicate_name_zero",
+        "gold_dq_golden_bundles",
+        "marker_lane_policy",
+        "tracing_emission_observability",
+    }
+    for metric_name, expected_value in cast(YamlMap, closeout["live_metrics"]).items():
+        assert int(report[metric_name]) == int(expected_value)
+
+
+@pytest.mark.architecture
 def test_static_test_governance_report_stays_within_committed_budgets() -> None:
     payload = _load_yaml(CONFIG_PATH)
     report = collect_test_governance_report(ROOT)

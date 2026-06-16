@@ -472,15 +472,15 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 48
-      total_loc: 5912
+      total_loc: 5905
       files_ge_250_loc: 2
       helper_function_ratio: 0.326
       max_internal_fan_in: 3
       max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.observability
     trend:
-      status: reduced_2026-06-15_live_metric_sync_to_5912
+      status: reduced_2026-06-15_live_metric_sync_to_5905
       next_action: 2026-06-15 syncs composition/bootstrap/runtime actual metrics
-        to the current live collector value of 5912 LOC; bounded-growth budgets
+        to the current live collector value of 5905 LOC; bounded-growth budgets
         remain at 2 files_ge_250_loc and max_internal_fan_in 5.
   - name: composition_factories_pipeline
     owner: '@bioetl-platform'

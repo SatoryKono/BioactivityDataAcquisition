@@ -19,7 +19,7 @@ sequenceDiagram
     participant Orch as CliRunOrchestrationService
     participant Runtime as run_runtime_helpers
     participant Health as health_server_context
-    participant ServAPI as services_api
+    participant CtrlAPI as control_plane_api
     participant PRS as PipelineRunnerService
     participant ExecAPI as execution_api
 
@@ -37,8 +37,8 @@ sequenceDiagram
     Orch->>Runtime: run_coroutine(run_prepared_request_async)
     Runtime->>Runtime: ensure_metrics_server_started()
     Runtime->>Health: enter async health context
-    Runtime->>ServAPI: get_pipeline_runner_service(registry)
-    ServAPI-->>Runtime: PipelineRunnerService
+    Runtime->>CtrlAPI: get_pipeline_runner_service(registry)
+    CtrlAPI-->>Runtime: PipelineRunnerService
     Runtime->>PRS: run(pipeline, options)
     PRS-->>Runtime: RunResult
     Runtime->>Health: exit async health context
@@ -48,5 +48,5 @@ sequenceDiagram
     Policy->>CLI: finalize result + map exit code
     CLI-->>User: ExitCode
 
-    Note over ServAPI,ExecAPI: Narrow composition APIs are the primary internal route.
+    Note over CtrlAPI,ExecAPI: Narrow composition APIs are the primary internal route.
     Note over Access,Orch: module-level singleton state is replaced by accessor seam.
