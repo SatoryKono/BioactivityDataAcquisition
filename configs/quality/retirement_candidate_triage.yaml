@@ -18,15 +18,15 @@ repo_wide_zero_import_review:
   check_command: python -m scripts.engineering.qa.report_dead_code_inventory --check
     --json-out reports/quality/dead-code-inventory.json --md-out reports/quality/dead-code-inventory.md
   max_untriaged_zero_import_candidates: 0
-  last_reviewed: '2026-06-02'
-  next_review_by: '2026-08-31'
+  last_reviewed: '2026-06-16'
+  next_review_by: '2026-09-14'
   rationale: Zero static import count is a review signal, not automatic removal proof.
     Keep repo-wide zero-import findings fully classified so dynamic entrypoints, sanctioned
     facades, and compatibility shims do not remain as implicit false positives in
     the dead-code budget.
 repo_wide_zero_import_classification:
   linked_issue: '#4541'
-  review_date: '2026-06-02'
+  review_date: '2026-06-16'
   allowed_dispositions:
   - retain_module_entrypoint
   - retain_dynamic_entrypoint
@@ -37,107 +37,19 @@ repo_wide_zero_import_classification:
   - module_path: src/bioetl/__main__.py
     module_name: bioetl.__main__
     disposition: retain_module_entrypoint
-    reviewed_on: '2026-06-02'
-    review_by: '2026-08-31'
+    reviewed_on: '2026-06-16'
+    review_by: '2026-09-14'
     linked_issue: '#4541'
     rationale: Module entrypoint for `python -m bioetl`; static import scans stay
       at zero because the interpreter dispatches the module directly.
   - module_path: src/bioetl/composition/registry.py
     module_name: bioetl.composition.registry
     disposition: retain_public_facade
-    reviewed_on: '2026-06-02'
-    review_by: '2026-08-31'
+    reviewed_on: '2026-06-16'
+    review_by: '2026-09-14'
     linked_issue: '#5037'
     rationale: Registry module remains a reviewed public facade while explicit-registry
       runtime hot-path narrowing is completed under issue
-  - module_path: src/bioetl/domain/ports/data_normalization.py
-    module_name: bioetl.domain.ports.data_normalization
-    disposition: retain_canonical_owner_module
-    reviewed_on: '2026-06-02'
-    review_by: '2026-08-31'
-    linked_issue: '#4541'
-    rationale: Data-normalization port definitions remain canonical domain protocol
-      owners even when consumers import them through package-root exports.
-  - module_path: src/bioetl/domain/ports/data_source.py
-    module_name: bioetl.domain.ports.data_source
-    disposition: retain_canonical_owner_module
-    reviewed_on: '2026-06-02'
-    review_by: '2026-08-31'
-    linked_issue: '#4541'
-    rationale: Data-source port definitions remain canonical domain protocol owners
-      even when consumers import them through package-root exports.
-  - module_path: src/bioetl/domain/ports/delta_reader.py
-    module_name: bioetl.domain.ports.delta_reader
-    disposition: retain_canonical_owner_module
-    reviewed_on: '2026-06-02'
-    review_by: '2026-08-31'
-    linked_issue: '#4541'
-    rationale: Delta-reader port definitions remain canonical domain protocol owners
-      even when consumers import them through package-root exports.
-  - module_path: src/bioetl/domain/ports/export.py
-    module_name: bioetl.domain.ports.export
-    disposition: retain_canonical_owner_module
-    reviewed_on: '2026-06-02'
-    review_by: '2026-08-31'
-    linked_issue: '#4541'
-    rationale: Export port definitions remain canonical domain protocol owners even
-      when consumers import them through package-root exports.
-  - module_path: src/bioetl/domain/ports/filtering.py
-    module_name: bioetl.domain.ports.filtering
-    disposition: retain_canonical_owner_module
-    reviewed_on: '2026-06-02'
-    review_by: '2026-08-31'
-    linked_issue: '#4541'
-    rationale: Filtering port definitions remain canonical domain protocol owners
-      even when consumers import them through package-root exports.
-  - module_path: src/bioetl/domain/ports/idmapping.py
-    module_name: bioetl.domain.ports.idmapping
-    disposition: retain_canonical_owner_module
-    reviewed_on: '2026-06-02'
-    review_by: '2026-08-31'
-    linked_issue: '#4541'
-    rationale: ID-mapping port definitions remain canonical domain protocol owners
-      even when consumers import them through package-root exports.
-  - module_path: src/bioetl/domain/ports/logger_port.py
-    module_name: bioetl.domain.ports.logger_port
-    disposition: retain_canonical_owner_module
-    reviewed_on: '2026-06-02'
-    review_by: '2026-08-31'
-    linked_issue: '#4541'
-    rationale: LoggerPort remains the canonical domain protocol module even though
-      consumers import it through package-root exports.
-  - module_path: src/bioetl/domain/ports/pii.py
-    module_name: bioetl.domain.ports.pii
-    disposition: retain_canonical_owner_module
-    reviewed_on: '2026-06-02'
-    review_by: '2026-08-31'
-    linked_issue: '#4541'
-    rationale: PII port definitions remain canonical domain protocol owners even when
-      consumers import them through package-root exports.
-  - module_path: src/bioetl/domain/ports/protein_classification.py
-    module_name: bioetl.domain.ports.protein_classification
-    disposition: retain_canonical_owner_module
-    reviewed_on: '2026-06-02'
-    review_by: '2026-08-31'
-    linked_issue: '#4541'
-    rationale: Protein-classification port definitions remain the canonical domain
-      protocol owner module even when consumers import them through package-root exports.
-  - module_path: src/bioetl/domain/ports/publication_strategy.py
-    module_name: bioetl.domain.ports.publication_strategy
-    disposition: retain_canonical_owner_module
-    reviewed_on: '2026-06-02'
-    review_by: '2026-08-31'
-    linked_issue: '#4541'
-    rationale: Publication-strategy port definitions remain canonical domain protocol
-      owners even when consumers import them through package-root exports.
-  - module_path: src/bioetl/domain/ports/resilience.py
-    module_name: bioetl.domain.ports.resilience
-    disposition: retain_canonical_owner_module
-    reviewed_on: '2026-06-02'
-    review_by: '2026-08-31'
-    linked_issue: '#4541'
-    rationale: Resilience port definitions remain canonical domain protocol owners
-      even when consumers import them through package-root exports.
 families:
 - name: adapter_layer
   owner: '@bioetl-platform'

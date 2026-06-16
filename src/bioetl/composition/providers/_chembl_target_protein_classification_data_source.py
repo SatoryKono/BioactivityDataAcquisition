@@ -10,7 +10,8 @@ from types import TracebackType
 from bioetl.application.services.protein_classification_resolution import (
     ProteinClassificationResolutionService,
 )
-from bioetl.domain.ports import DeltaReaderPort, LoggerPort
+from bioetl.domain.ports.delta_reader import DeltaReaderPort
+from bioetl.domain.ports.logger_port import LoggerPort
 from bioetl.domain.types import HealthStatus, JsonDict
 from bioetl.infrastructure.adapters.chembl.protein_classification_graph import (
     ChEMBLProteinClassificationGraph,
