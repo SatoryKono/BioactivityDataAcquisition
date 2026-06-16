@@ -52,6 +52,8 @@ SRC_DIR = PROJECT_ROOT / "src" / "bioetl"
 MANDATORY_TRACING_COVERAGE_PATH = (
     PROJECT_ROOT / "configs" / "quality" / "mandatory_tracing_coverage.yaml"
 )
+ROOT_README_PATH = PROJECT_ROOT / "README.md"
+WORKFLOW_GUIDE_PATH = DOCS_DIR / "03-guides" / "workflows.md"
 
 
 @dataclass
@@ -620,6 +622,54 @@ def check_classes(report: DriftReport) -> None:
             all_classes=all_classes,
             doc_refs=doc_refs,
         )
+
+    check_narrative_surfaces(report)
+
+
+def check_narrative_surfaces(report: DriftReport) -> None:
+    """Detect bounded narrative drift in high-traffic published docs."""
+    _check_root_readme_interfaces_surface(report)
+    _check_workflow_guide_framing(report)
+
+
+def _check_root_readme_interfaces_surface(report: DriftReport) -> None:
+    """Reject a CLI-only interfaces claim when HTTP surfaces are shipped."""
+    if not ROOT_README_PATH.exists():
+        return
+
+    http_surface_dir = SRC_DIR / "interfaces" / "http"
+    if not http_surface_dir.exists():
+        return
+
+    readme_text = ROOT_README_PATH.read_text(encoding="utf-8")
+    if "INTERFACES (CLI)" in readme_text:
+        report.add(
+            "narrative",
+            "ERROR",
+            _display_relative_path(ROOT_README_PATH.relative_to(PROJECT_ROOT)),
+            "Root README still describes the interfaces layer as CLI-only while src/bioetl/interfaces/http/ is shipped",
+        )
+
+
+def _check_workflow_guide_framing(report: DriftReport) -> None:
+    """Reject backlog-first workflow guide phrases on the shipped control plane."""
+    if not WORKFLOW_GUIDE_PATH.exists():
+        return
+
+    guide_text = WORKFLOW_GUIDE_PATH.read_text(encoding="utf-8")
+    forbidden_phrases = (
+        "Workflow Control Plane backlog.",
+        "The workflow backlog implies three different identity layers.",
+        "Not yet fully shipped from the open backlog:",
+    )
+    for phrase in forbidden_phrases:
+        if phrase in guide_text:
+            report.add(
+                "narrative",
+                "ERROR",
+                _display_relative_path(WORKFLOW_GUIDE_PATH.relative_to(PROJECT_ROOT)),
+                f"Workflow guide still contains backlog-first framing: {phrase}",
+            )
 
 
 def _report_missing_ports_dir(report: DriftReport, ports_dir: Path) -> bool:

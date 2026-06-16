@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.0.1
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-05'
+  Last verified: '2026-06-16'
 
 ______________________________________________________________________
 
@@ -111,8 +111,16 @@ uploaded as the `docs-link-check-report` artifact.
 uv run python -m scripts.docs check-drift --ports --classes
 ```
 
-Use this when docs mention code structures that are expected to stay aligned
-with current ports, classes, or generated references.
+Use this when docs mention code structures or high-value runtime narratives
+that are expected to stay aligned with current ports, classes, or published
+operator-facing semantics.
+
+Current drift coverage also includes bounded narrative guards for:
+
+- root `README.md` architecture wording that must not describe the interfaces
+  layer as CLI-only while `src/bioetl/interfaces/http/` is shipped;
+- `docs/03-guides/workflows.md` phrases that would present backlog wording as
+  the primary framing for the shipped workflow control plane.
 
 ### 3. Docstring inventory check
 
@@ -229,6 +237,21 @@ rg -n 'data/output|checkpoints|quarantine|control' \
 ```bash
 uv run python -m scripts.docs check-links --links --specs --configs
 uv run python -m scripts.docs build-site --strict
+```
+
+### 6. Root architecture and workflow narrative surfaces
+
+- **Source of truth**: `src/bioetl/interfaces/**`,
+  `src/bioetl/domain/workflow/**`,
+  `src/bioetl/application/services/control_plane/workflow/**`
+- **Docs to review**: `README.md`,
+  `docs/03-guides/workflows.md`,
+  `docs/04-reference/domain/workflow-state-machine.md`
+- **Command/check**:
+
+```bash
+uv run python -m scripts.docs check-drift --ports --classes
+rg -n 'INTERFACES \(CLI|backlog' README.md docs/03-guides/workflows.md
 ```
 
 ## Doc-Sync PR Checklist

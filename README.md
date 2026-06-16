@@ -35,7 +35,7 @@ BioETL follows **Hexagonal Architecture** (Ports & Adapters) with **Domain-Drive
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                     INTERFACES (CLI)                        │
+│                  INTERFACES (CLI / HTTP)                    │
 ├─────────────────────────────────────────────────────────────┤
 │                    COMPOSITION (DI)                         │
 │ entrypoints / execution_api / registry_api / runtime bootstrap│
@@ -52,6 +52,9 @@ BioETL follows **Hexagonal Architecture** (Ports & Adapters) with **Domain-Drive
 ```
 
 **Data Flow**: External API -> Bronze (JSONL+zstd) -> Silver (Delta Lake) -> Gold (Analytics)
+
+The interfaces layer includes both the Click CLI and lightweight HTTP-facing
+operator surfaces under `src/bioetl/interfaces/http/`.
 
 ### Domain Layer (DDD)
 
