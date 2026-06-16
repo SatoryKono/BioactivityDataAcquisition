@@ -314,7 +314,8 @@ def test_services_facade_helpers_cover_lazy_resolution_and_workflow_delegation(
     assert calls[-1] == (None, "providers")
 
     monkeypatch.setattr(
-        "bioetl.composition._workflow_services.get_workflow_runner_service",
+        _workflow_services,
+        "get_workflow_runner_service",
         lambda registry=None: ("workflow_runner", registry),
     )
     assert _services.get_workflow_runner_service(registry="registry-1") == (

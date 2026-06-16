@@ -521,7 +521,7 @@ The project uses `pytest` for testing with a formalized test matrix covering Uni
 
   ```bash
   uv sync --extra dev --extra tests --extra tests_full --extra tracing
-  uv run python -m pre_commit install --install-hooks --hook-type pre-commit --hook-type pre-push --hook-type commit-msg
+  uv run python -m pre_commit install --hook-type pre-commit --hook-type pre-push --hook-type commit-msg
   ```
 
   Если `pytest` сообщает об отсутствии обязательных плагинов (`pytest-asyncio`, `pytest-cov`, `pytest-xdist`, `pytest-timeout`, `pytest-vcr`), выполните повторную синхронизацию:
