@@ -177,16 +177,21 @@ class MergeMetricsRecorderMixin:
             to its non-null ratio between 0.0 and 1.0. Returns an empty dict for
             empty DataFrames.
         """
-        if len(df) == 0:
+        total_rows = len(df)
+        if total_rows == 0:
             return {}
 
-        coverage: dict[str, float] = {}
-        for col in df.columns:
-            if not col.startswith("_"):
-                non_null = len(df.filter(df[col].is_not_null()))
-                coverage[col] = non_null / len(df)
+        import polars as pl
 
-        return coverage
+        cols_to_check = [col for col in df.columns if not col.startswith("_")]
+        if not cols_to_check:
+            return {}
+
+        # Evaluate expressions simultaneously to eliminate Python loop overhead
+        exprs = [pl.col(col).is_not_null().sum().alias(col) for col in cols_to_check]
+        non_null_counts = df.select(exprs).row(0, named=True)
+
+        return {col: count / total_rows for col, count in non_null_counts.items()}
 
 
 __all__ = ["MergeMetricsRecorderMixin"]
