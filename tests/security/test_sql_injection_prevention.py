@@ -31,8 +31,9 @@ class TestSQLInjectionPrevention:
     """Tests for SQL injection prevention in database operations."""
 
     @pytest.fixture(scope="class")
+    @classmethod
     def source_contents(
-        self, _src_file_contents: list[tuple[Path, str]]
+        cls, _src_file_contents: list[tuple[Path, str]]
     ) -> list[tuple[Path, str]]:
         """Class-scoped alias for session-cached source file contents."""
         return _src_file_contents

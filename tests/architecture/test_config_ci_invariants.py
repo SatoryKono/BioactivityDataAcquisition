@@ -509,7 +509,8 @@ class TestNoLegacyNaming:
     canonical directory names (quality/ not dq/, filters/ not filter/)."""
 
     @pytest.fixture(scope="class")
-    def all_pipeline_configs(self) -> list[tuple[Path, dict[str, Any]]]:
+    @classmethod
+    def all_pipeline_configs(cls) -> list[tuple[Path, dict[str, Any]]]:
         return [(p, _load_yaml(p)) for p in _collect_pipeline_configs()]
 
     def test_no_legacy_entity_type(
@@ -553,7 +554,8 @@ class TestConfigFilesExist:
     """INV-CFG-002: every unified entity must include required sections."""
 
     @pytest.fixture(scope="class")
-    def standard_pipelines(self) -> list[tuple[str, str, Path, dict[str, Any]]]:
+    @classmethod
+    def standard_pipelines(cls) -> list[tuple[str, str, Path, dict[str, Any]]]:
         """Return (provider, entity, path, raw) for unified entity configs."""
         result: list[tuple[str, str, Path, dict[str, Any]]] = []
         for path in _collect_pipeline_configs():

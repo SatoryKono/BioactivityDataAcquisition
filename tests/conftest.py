@@ -7,6 +7,7 @@ import sys
 import threading
 import traceback
 from functools import cache
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 import pathlib
 from typing import Any
@@ -375,8 +376,31 @@ def _windows_selector_loop_factory() -> asyncio.AbstractEventLoop:
     return asyncio.WindowsSelectorEventLoopPolicy().new_event_loop()
 
 
-# Only register pytest_asyncio_loop_factories hook on Windows
-if sys.platform.startswith("win"):
+def _supports_pytest_asyncio_loop_factories_hook() -> bool:
+    """Return whether the installed pytest-asyncio exposes the loop-factories hook."""
+    if not sys.platform.startswith("win"):
+        return False
+    try:
+        raw_version = version("pytest-asyncio")
+    except PackageNotFoundError:
+        return False
+
+    major_minor: list[int] = []
+    for part in raw_version.split("."):
+        digits = "".join(ch for ch in part if ch.isdigit())
+        if not digits:
+            break
+        major_minor.append(int(digits))
+        if len(major_minor) == 2:
+            break
+
+    while len(major_minor) < 2:
+        major_minor.append(0)
+    return tuple(major_minor) >= (1, 4)
+
+
+# pytest-asyncio < 1.4 rejects unknown hook implementations during collection.
+if _supports_pytest_asyncio_loop_factories_hook():
     def pytest_asyncio_loop_factories(
         config: pytest.Config,
         item: pytest.Item,

@@ -683,8 +683,6 @@ hotspot_family_coverage_thresholds:
       - src/bioetl/application/services/control_plane/manifest/diagnostics/__init__.py
       - src/bioetl/application/services/control_plane/manifest/diagnostics/artifact_support.py
       - src/bioetl/application/services/control_plane/manifest/diagnostics/base.py
-      - src/bioetl/application/services/control_plane/manifest/diagnostics/base_summary_helpers.py
-      - src/bioetl/application/services/control_plane/manifest/diagnostics/base_summary_helpers.py
       - src/bioetl/application/services/control_plane/manifest/diagnostics/checkpoint_projection.py
       - src/bioetl/application/services/control_plane/manifest/diagnostics/dq_details.py
       - src/bioetl/application/services/control_plane/manifest/diagnostics/finalization.py
