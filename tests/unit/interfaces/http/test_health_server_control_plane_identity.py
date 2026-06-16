@@ -260,6 +260,114 @@ def _identity_severity_manifest(*, exact_replay: bool = False) -> RunManifest:
     )
 
 
+def test_control_plane_identity_support_formats_contract_replay_and_health_edges() -> (
+    None
+):
+    """Identity table support helpers should render fallback and unknown states."""
+    assert _health_server_identity_support._contract_schema(
+        {"contract_version": "1.2.3"}
+    ) == "version=1.2.3"
+    assert _health_server_identity_support._contract_schema(
+        {"contract_schema_hash": "abc123"}
+    ) == "schema=abc123"
+    assert _health_server_identity_support._contract_schema(
+        {
+            "contract_ref": "gold.pubchem",
+            "contract_version": "1.0.0",
+            "contract_schema_hash": "hash",
+        }
+    ) == "gold.pubchem.1.0.0 [hash]"
+
+    assert _health_server_identity_support._replay_summary({}) is None
+    assert _health_server_identity_support._replay_summary(
+        {
+            "exact_replay_eligible": None,
+            "replay_capability": "custom-capability",
+            "replay_mode": "custom-mode",
+        }
+    ) == "Unknown [Custom Capability.Custom Mode]"
+    assert _health_server_identity_support._replay_summary(
+        {
+            "exact_replay_eligible": "yes",
+            "replay_capability": "resume_only",
+            "replay_mode": "exact_replay",
+        }
+    ) == "Yes [Resume only.Exact Replay]"
+
+    assert _health_server_identity_support._checkpoint_anchor_status(
+        {"checkpoint_anchor_status": "PARTIAL"},
+        {"checkpoint_anchor_status": ""},
+    ) == "PARTIAL"
+    assert _health_server_identity_support._identity_health(
+        {},
+        {"identity_graph_complete": None, "identity_gap_count": "bad"},
+    ) == "Unknown [0 gaps]"
+    assert _health_server_identity_support._identity_health(
+        {},
+        {"identity_graph_complete": True, "identity_gap_count": -1},
+    ) == "Complete [0 gaps]"
+    assert _health_server_identity_support._identity_health(
+        {
+            "identity_graph_complete": "partial",
+            "correlation_anchor_gaps": {
+                "missing_bool": True,
+                "missing_list": ["a", "b"],
+                "missing_dict": {"x": 1},
+                "missing_text": "yes",
+            },
+        },
+        None,
+    ) == "Incomplete [5 gaps]"
+
+
+def test_control_plane_identity_support_payload_and_display_edges() -> None:
+    """Small display helpers should preserve deterministic yes/no/unavailable text."""
+    manifest = RunManifest(
+        manifest_id="manifest-display",
+        execution_fingerprint="fingerprint-display",
+        schema_version="1.0",
+        created_at=datetime(2026, 5, 12, 8, 21, tzinfo=UTC),
+        run_id=deterministic_run_uuid_from_callsite(
+            "test_health_server_control_plane_identity"
+        ),
+        run_type=RunType.BACKFILL,
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity="activity",
+        launch_context={"dry_run": "1"},
+        runtime_config={"resume": False, "execution_context": ""},
+        resolved_config={"use_cached_bronze": "yes", "execution_context": "manual"},
+        code_provenance=RunCodeProvenance(),
+    )
+
+    assert _health_server_identity_support._execution_summary(
+        manifest,
+        {"git_commit": " abc123 "},
+    ) == "backfill | manual | git=abc123"
+    assert _health_server_identity_support._execution_flags(manifest) == (
+        "No | Yes | Yes"
+    )
+    assert _health_server_identity_support._payload_value(
+        manifest,
+        "missing",
+        "use_cached_bronze",
+    ) == "yes"
+    assert _health_server_identity_support._yes_no(True) == "Yes"
+    assert _health_server_identity_support._yes_no("false") == "No"
+    assert _health_server_identity_support._display_eligible(False) == "No"
+    assert _health_server_identity_support._display_eligible("false") == "No"
+    assert _health_server_identity_support._display_capability(None) == "Unknown"
+    assert _health_server_identity_support._display_replay_mode("backfill") == (
+        "Backfill"
+    )
+    assert _health_server_identity_support._gap_count(["a", "b"]) == 2
+    assert _health_server_identity_support._display(
+        "",
+        unavailable="not available",
+    ) == "not available"
+    assert _health_server_identity_support._text(None) is None
+
+
 @pytest.mark.parametrize(
     ("checkpoint_status", "expected"),
     [
