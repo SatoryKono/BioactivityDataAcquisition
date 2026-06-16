@@ -24,6 +24,14 @@ DEFAULT_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "module-coverage-invento
 DEFAULT_GATES_CONFIG = PROJECT_ROOT / "configs" / "quality" / "module_coverage_gates.yaml"
 SOURCE_ROOT = PROJECT_ROOT / "src" / "bioetl"
 ENFORCEMENT_MODES = frozenset({"off", "warn", "block-regression", "block-all"})
+COVERAGE_STATUSES = (
+    "coverage_xml_missing",
+    "fully_covered",
+    "no_executable_lines",
+    "partially_covered",
+    "uncovered",
+    "unmeasured",
+)
 # Shared-drive worktrees can return one transient digest immediately after local
 # edits; prefer a repeated digest before declaring the source-tree hash current.
 DEFAULT_SOURCE_TREE_STABILIZATION_ATTEMPTS = 5
@@ -443,6 +451,14 @@ def _status_is_measured(status: str) -> bool:
     }
 
 
+def _coverage_status_counts(rows: list[dict[str, Any]]) -> dict[str, int]:
+    status_counts = dict.fromkeys(COVERAGE_STATUSES, 0)
+    for row in rows:
+        status = str(row["coverage_status"])
+        status_counts[status] = status_counts.get(status, 0) + 1
+    return dict(sorted(status_counts.items()))
+
+
 def _build_hotspot_family_coverage(
     rows: list[dict[str, Any]],
     *,
@@ -495,10 +511,7 @@ def _build_hotspot_family_coverage(
             for row in family_rows
             if row["coverage_percent"] is not None
         ]
-        status_counts: dict[str, int] = {}
-        for row in family_rows:
-            status = str(row["coverage_status"])
-            status_counts[status] = status_counts.get(status, 0) + 1
+        status_counts = _coverage_status_counts(family_rows)
         covered_line_percent = (
             round(100.0 * covered_lines_total / executable_lines_total, 2)
             if executable_lines_total
@@ -550,7 +563,7 @@ def _build_hotspot_family_coverage(
                 if coverage_percents
                 else None
             ),
-            "status_counts": dict(sorted(status_counts.items())),
+            "status_counts": status_counts,
             "thresholds": family_thresholds,
             "threshold_status": threshold_status,
         }
@@ -598,10 +611,7 @@ def build_module_coverage_inventory(
             }
         )
 
-    status_counts: dict[str, int] = {}
-    for row in rows:
-        status = str(row["coverage_status"])
-        status_counts[status] = status_counts.get(status, 0) + 1
+    status_counts = _coverage_status_counts(rows)
 
     hotspot_family_coverage = _build_hotspot_family_coverage(rows, repo_root=repo_root)
     unmeasured_modules = [
@@ -628,7 +638,7 @@ def build_module_coverage_inventory(
         "summary": {
             "source_module_count": len(rows),
             "coverage_xml_present": coverage_xml_exists,
-            "status_counts": dict(sorted(status_counts.items())),
+            "status_counts": status_counts,
             "unmeasured_module_count": len(unmeasured_modules),
             "unmeasured_modules": unmeasured_modules,
             "hotspot_family_coverage": hotspot_family_coverage,
