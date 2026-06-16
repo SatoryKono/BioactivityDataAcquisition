@@ -232,23 +232,6 @@ retained_entrypoints:
     outside the owning package or the dedicated composite-config coverage tests.
   exit_criteria: The root config entrypoint remains the sanctioned public path and direct imports of split config internals
     stay confined to the owning package plus the dedicated composite-config coverage tests.
-- path: src/bioetl/domain/value_objects/activity_values.py
-  compatibility_role: Permanent public entrypoint for activity-related value objects that shields split concentration/type/pChEMBL
-    modules.
-  canonical_target: bioetl.domain.value_objects.activity_values
-  status: public-entrypoint
-  owner: bioetl.domain.value_objects
-  introduced_in: legacy-pre-2026-03
-  review_date: '2026-09-30'
-  external_breaking_change_required: true
-  internal_callers_zero: false
-  allowed_call_sites: '`src`: canonical entrypoint usage allowed; internal split modules stay inside `src/bioetl/domain/value_objects/`;
-    `tests`: direct split-internal coverage stays confined to `tests/unit/domain/value_objects/test_value_object_facade_reexports.py`,
-    while ordinary tests keep importing the public entrypoint'
-  migration_path: Use `bioetl.domain.value_objects.activity_values` as the sanctioned public seam; do not import split value-object
-    internals outside the owning package or the dedicated facade-coverage test.
-  exit_criteria: The facade remains the sanctioned public path and direct imports of split activity-value internals stay confined
-    to the owning package plus the dedicated facade-coverage test.
 - path: src/bioetl/application/composite/merger.py
   compatibility_role: Permanent public composite merge module that requires `MergeCollaboratorGroup` bundle; legacy per-collaborator
     keyword wiring removed in RF-009.2.
@@ -391,13 +374,6 @@ retained_entrypoint_burn_down_plan:
     rationale: Public domain config model entrypoint; retained as stable integration API.
     completion_gate: Keep the root domain config entrypoint stable and block new imports of split config internals outside
       the owner package and dedicated boundary tests.
-  - path: src/bioetl/domain/value_objects/activity_values.py
-    phase: narrow-first-party-callers
-    target_state: narrow_first_party_callers
-    rationale: Public value-object entrypoint stays stable for external callers, but first-party domain code should import
-      owner concentration/type/pChEMBL modules directly.
-    completion_gate: Keep the public value-object facade stable while holding first-party `src/` imports at zero and blocking
-      regression back to internal runtime usage through the facade.
   - path: src/bioetl/application/composite/merger.py
     phase: enforce
     target_state: retain_as_stable_public_api

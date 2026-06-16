@@ -14196,16 +14196,6 @@
       "source_lines": 80
     },
     {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
-      "covered_lines": 5,
-      "executable_lines": 5,
-      "missing_lines": 0,
-      "module": "bioetl.domain.value_objects.activity_values",
-      "path": "src/bioetl/domain/value_objects/activity_values.py",
-      "source_lines": 17
-    },
-    {
       "coverage_percent": 96.67,
       "coverage_status": "partially_covered",
       "covered_lines": 29,
@@ -21488,7 +21478,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-06-16",
-  "source_tree_sha256": "8b552c2dc3e93f7df46373acdca236ccdf0cb5fde1ca2b4103ba0fd110f3a6bc",
+  "source_tree_sha256": "45d4d7dd457b1f08e4c63eb213bcff4150a89bbf04cb66fb945fb66a037dc04d",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -21720,9 +21710,9 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2148,
+    "source_module_count": 2147,
     "status_counts": {
-      "fully_covered": 1242,
+      "fully_covered": 1241,
       "partially_covered": 906
     },
     "unmeasured_module_count": 0,
