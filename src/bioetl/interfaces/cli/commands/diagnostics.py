@@ -111,7 +111,6 @@ def get_forensic_run_diff_service() -> ForensicRunDiffService:
 
     return _impl()
 
-
 def _build_diagnostics_guide_lines() -> list[str]:
     """Compatibility seam for diagnostics guide rendering tests."""
     return build_diagnostics_guide_lines()

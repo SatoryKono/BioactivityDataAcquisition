@@ -5083,7 +5083,7 @@
       "missing_lines": 2,
       "module": "bioetl.application.services.control_plane.replay._bundle_descriptor_payloads",
       "path": "src/bioetl/application/services/control_plane/replay/_bundle_descriptor_payloads.py",
-      "source_lines": 189
+      "source_lines": 187
     },
     {
       "coverage_percent": 90.0,
@@ -5343,7 +5343,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.control_plane.workflow.execution_recording",
       "path": "src/bioetl/application/services/control_plane/workflow/execution_recording.py",
-      "source_lines": 248
+      "source_lines": 253
     },
     {
       "coverage_percent": 100.0,
@@ -8073,7 +8073,7 @@
       "missing_lines": 2,
       "module": "bioetl.composition.health_api",
       "path": "src/bioetl/composition/health_api.py",
-      "source_lines": 100
+      "source_lines": 99
     },
     {
       "coverage_percent": 100.0,
@@ -8163,7 +8163,7 @@
       "missing_lines": 2,
       "module": "bioetl.composition.providers._chembl_target_protein_classification_data_source",
       "path": "src/bioetl/composition/providers/_chembl_target_protein_classification_data_source.py",
-      "source_lines": 300
+      "source_lines": 302
     },
     {
       "coverage_percent": 93.18,
@@ -20353,7 +20353,7 @@
       "missing_lines": 17,
       "module": "bioetl.interfaces.cli.commands.diagnostics",
       "path": "src/bioetl/interfaces/cli/commands/diagnostics.py",
-      "source_lines": 413
+      "source_lines": 420
     },
     {
       "coverage_percent": 100.0,
@@ -20543,7 +20543,7 @@
       "missing_lines": 0,
       "module": "bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime",
       "path": "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_runtime.py",
-      "source_lines": 332
+      "source_lines": 333
     },
     {
       "coverage_percent": 100.0,
@@ -21428,7 +21428,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-06-16",
-  "source_tree_sha256": "06db309d2e9a8d7ece80d8af0e6f09b2368b301c0b34d545e5bdbf4444f0bfd2",
+  "source_tree_sha256": "3c8ef4d014f08aa086800abc6b85ef6783968e45e927594bdd3ddf9b495d1cf9",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

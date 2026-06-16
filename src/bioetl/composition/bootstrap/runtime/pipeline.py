@@ -12,9 +12,7 @@ from bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases import (
 )
 from bioetl.composition.registry_api import PipelineRegistry
 from bioetl.composition.runtime_builders.config_access import resolve_configs_root
-from bioetl.composition.runtime_builders.runner_builder import (
-    build_pipeline_runner as _build_pipeline_runner,
-)
+from bioetl.composition.runtime_builders.runner_builder import build_pipeline_runner as _build_pipeline_runner
 from bioetl.infrastructure.compat.pandera_compat import (
     apply_pandera_typing_compat_if_needed,
 )
@@ -24,12 +22,7 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
-__all__ = [
-    "RuntimeBootstrapPhases",
-    "apply_runtime_compatibility_patches",
-    "bootstrap_pipeline_runner",
-    "build_runtime_bootstrap_phases",
-]
+__all__ = ["RuntimeBootstrapPhases", "apply_runtime_compatibility_patches", "bootstrap_pipeline_runner", "build_runtime_bootstrap_phases"]
 
 
 def apply_runtime_compatibility_patches() -> bool:

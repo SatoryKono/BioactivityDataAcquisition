@@ -11,6 +11,7 @@ $RootDir = Split-Path -Parent $ScriptDir
 $HelperDir = Join-Path $ScriptDir "helper"
 $RepoWin = (Resolve-Path (Join-Path $ScriptDir "..\..\..")).Path
 $RepoWSL = $null
+$CanCreateEnvFile = $env:BIOETL_CREATE_LOCAL_ENV_FILES -eq "1"
 
 try {
     $RepoWSL = (wsl -d Ubuntu -- wslpath -a "$RepoWin" 2>$null | Select-Object -First 1).Trim()
@@ -90,8 +91,8 @@ if ($?) {
 
 # 4. Check Codex binary
 Log-Info "Checking Codex CLI..."
-$RepoWSLQuoted = $RepoWSL.Replace("'", "'\"'\"'")
-$codexCheck = wsl -- bash -lc "test -x '$RepoWSLQuoted/.cache/tools/codex-cli/npm-global/bin/codex' && echo OK" 2>$null
+$CodexBinWSL = "$RepoWSL/.cache/tools/codex-cli/npm-global/bin/codex"
+$codexCheck = wsl -- bash -lc "test -x `"$CodexBinWSL`" && echo OK" 2>$null
 if ($codexCheck -eq "OK") {
     Log-Success "Codex CLI is installed"
 } else {
@@ -103,13 +104,17 @@ if ($codexCheck -eq "OK") {
 
 # 5. Check .env.codex file exists
 if (-not (Test-Path $EnvFile)) {
-    Log-Warn "Creating .env.codex template..."
-    @"
-# OpenAI Codex Configuration
-# Get your API key from: https://platform.openai.com/api-keys
-OPENAI_API_KEY=sk-your-key-here
-"@ | Set-Content $EnvFile
-    Log-Success ".env.codex created - please edit and add your API key"
+    if (-not $CanCreateEnvFile) {
+        Log-Warn ".env.codex not found; not creating it without BIOETL_CREATE_LOCAL_ENV_FILES=1"
+    } else {
+        Log-Warn "BIOETL_CREATE_LOCAL_ENV_FILES=1 set; creating .env.codex template..."
+        @(
+            "# OpenAI Codex Configuration",
+            "# Get your API key from: https://platform.openai.com/api-keys",
+            "OPENAI_API_KEY=sk-your-key-here"
+        ) | Set-Content $EnvFile
+        Log-Success ".env.codex created - please edit and add your API key"
+    }
 }
 
 Write-Host ""

@@ -155,7 +155,7 @@ echo ""
 log_info "Environment ready - launching Codex"
 echo ""
 
-# Ensure .env.codex exists with minimal setup
+# Locate .env.codex without creating local secret-bearing files by default.
 SCRIPT_DIR_CODEX="${SCRIPT_DIR}"
 ENV_FILE="${SCRIPT_DIR_CODEX}/.env.codex"
 if [[ ! -f "${ENV_FILE}" ]]; then
@@ -163,7 +163,11 @@ if [[ ! -f "${ENV_FILE}" ]]; then
     # Try repo root as fallback
     ENV_FILE="${REPO_ROOT}/.env.codex"
     if [[ ! -f "${ENV_FILE}" ]]; then
-        log_warn "Creating .env.codex in scripts/ai/codex/..."
+        if [[ "${BIOETL_CREATE_LOCAL_ENV_FILES:-0}" != "1" ]]; then
+            log_error ".env.codex not found. Create it manually, or rerun with BIOETL_CREATE_LOCAL_ENV_FILES=1 to generate a local template."
+            exit 1
+        fi
+        log_warn "BIOETL_CREATE_LOCAL_ENV_FILES=1 set; creating .env.codex in scripts/ai/codex/..."
         cat > "${SCRIPT_DIR_CODEX}/.env.codex" <<'ENVEOF'
 # OpenAI Codex Configuration
 # Get your API key from: https://platform.openai.com/api-keys

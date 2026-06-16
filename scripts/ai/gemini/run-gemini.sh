@@ -63,7 +63,12 @@ ensure_env_template() {
         return 0
     fi
 
-    log_warn "Creating .env.gemini in scripts/ai/gemini/..."
+    if [[ "${BIOETL_CREATE_LOCAL_ENV_FILES:-0}" != "1" ]]; then
+        log_error ".env.gemini not found. Create it manually, or rerun with BIOETL_CREATE_LOCAL_ENV_FILES=1 to generate a local template."
+        exit 1
+    fi
+
+    log_warn "BIOETL_CREATE_LOCAL_ENV_FILES=1 set; creating .env.gemini in scripts/ai/gemini/..."
     cat > "${env_file}" <<'ENVEOF'
 # Google Gemini CLI Configuration
 # Get your API key from: https://aistudio.google.com/app/apikeys

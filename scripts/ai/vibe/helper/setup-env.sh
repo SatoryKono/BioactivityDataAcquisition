@@ -52,18 +52,24 @@ else
     exit 1
 fi
 
-log_info "STEP 2: Creating .env.vibe..."
+log_info "STEP 2: Checking .env.vibe..."
 ENV_FILE="${ROOT_DIR}/.env.vibe"
 if [[ -f "${ENV_FILE}" ]]; then
     log_success ".env.vibe already exists"
 else
-    cat > "${ENV_FILE}" <<'EOF'
+    if [[ "${BIOETL_CREATE_LOCAL_ENV_FILES:-0}" != "1" ]]; then
+        log_warn ".env.vibe not found; not creating it without BIOETL_CREATE_LOCAL_ENV_FILES=1"
+        log_info "Create ${ENV_FILE} manually, or rerun with BIOETL_CREATE_LOCAL_ENV_FILES=1 to generate a local template."
+    else
+        log_warn "BIOETL_CREATE_LOCAL_ENV_FILES=1 set; creating .env.vibe template"
+        cat > "${ENV_FILE}" <<'EOF'
 # Mistral Vibe Configuration
 MISTRAL_API_KEY=your-api-key-here
 # Legacy compatibility alias:
 # VIBE_API_KEY=your-api-key-here
 EOF
-    log_warn ".env.vibe created - please add your Mistral API key"
+        log_warn ".env.vibe created - please add your Mistral API key"
+    fi
 fi
 
 echo ""
@@ -131,7 +137,8 @@ log_success "Setup completed successfully!"
 echo "${SEPARATOR}"
 echo ""
 log_info "Next steps:"
-echo "  1. Edit scripts/ai/vibe/.env.vibe and add MISTRAL_API_KEY"
+echo "  1. Create or edit scripts/ai/vibe/.env.vibe and add MISTRAL_API_KEY"
+echo "     To generate a local template, rerun with BIOETL_CREATE_LOCAL_ENV_FILES=1"
 echo "  2. Verify setup: python -m scripts.ai vibe check"
 echo "  3. Start Vibe: python -m scripts.ai vibe"
 echo ""

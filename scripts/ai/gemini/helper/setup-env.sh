@@ -102,14 +102,20 @@ log_success "Prefix: ${GEMINI_PREFIX}"
 log_info "STEP 4: Configuring .env.gemini..."
 ENV_FILE="${ROOT_DIR}/.env.gemini"
 if [[ ! -f "${ENV_FILE}" ]]; then
-    cat > "${ENV_FILE}" <<EOF
+    if [[ "${BIOETL_CREATE_LOCAL_ENV_FILES:-0}" != "1" ]]; then
+        log_warn ".env.gemini not found; not creating it without BIOETL_CREATE_LOCAL_ENV_FILES=1"
+        log_info "Create ${ENV_FILE} manually, or rerun with BIOETL_CREATE_LOCAL_ENV_FILES=1 to generate a local template."
+    else
+        log_warn "BIOETL_CREATE_LOCAL_ENV_FILES=1 set; creating .env.gemini template"
+        cat > "${ENV_FILE}" <<EOF
 # Google Gemini CLI Configuration
 # Get your API key from: https://aistudio.google.com/app/apikeys
 GEMINI_API_KEY=your-api-key-here
 # Optional model override, if supported by the installed Gemini CLI.
 # GEMINI_MODEL=gemini-2.5-flash
 EOF
-    log_warn ".env.gemini created - please edit and add your API key"
+        log_warn ".env.gemini created - please edit and add your API key"
+    fi
 else
     log_success ".env.gemini exists"
 fi

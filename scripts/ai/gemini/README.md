@@ -81,6 +81,10 @@ The managed runtime lives under:
 
 Create or edit `scripts/ai/gemini/.env.gemini`:
 
+Launcher and setup scripts do not create `.env.gemini` by default. Create it
+manually, or set `BIOETL_CREATE_LOCAL_ENV_FILES=1` when you explicitly want a
+local template generated.
+
 ```bash
 GEMINI_API_KEY=your-api-key-here
 # GEMINI_MODEL=gemini-2.5-flash
