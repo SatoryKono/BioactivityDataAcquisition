@@ -9,16 +9,17 @@ This roadmap supersedes older composition-focused backlog notes that still
 claimed several public APIs were at `0%`. They are no longer accurate on
 current `main`.
 
-Original epic `#5153` is now closed as superseded by `#5243`, but the
+Original epic `#5153` is now closed as superseded by `#5243`, and that refresh
+epic is now superseded by `#5244`, but the
 committed inventory shows the program is still **not closable yet** by
 substance.
 
 | Metric | Current value | Epic target |
 |--------|---------------|-------------|
 | Production modules | 2137 | all in inventory |
-| Global line coverage | **69.72%** (`62528 / 89686`) | `>= 85%` |
-| Modules `<85%` | **862** | `0` |
-| Uncovered modules (`0%`) | **125** | `0` |
+| Global line coverage | **73.71%** (`66104 / 89686`) | `>= 85%` |
+| Modules `<85%` | **787** | `0` |
+| Uncovered modules (`0%`) | **85** | `0` |
 | Aggregates `<95%` | **13 / 18** | `0` |
 | Contracts / schemas `<95%` | **13 / 72** | `0` |
 | Unmeasured modules | **2** | `0` or explicitly allowlisted |
@@ -33,7 +34,9 @@ Issue-management status after the 2026-06-16 refresh:
 - `#5136` — closed as duplicate; successor scope moved to `#5239` and `#5240`
 - `#5143` — closed as duplicate; successor scope moved to `#5241` and `#5242`
 - `#5161` — closed as completed
-- `#5243` — refreshed epic carrying the live baseline
+- `#5239`, `#5240`, `#5241`, `#5242` — closed as completed
+- `#5243` — closed as superseded by `#5244`
+- `#5244` — live epic carrying the post-fix baseline
 
 ## Composition Surface Status
 
@@ -148,15 +151,15 @@ Goal:
 
 Global backlog remains the hard blocker to epic closure:
 
-- `862` modules below `85%`
-- `125` fully uncovered modules
+- `787` modules below `85%`
+- `85` fully uncovered modules
 
 This phase needs breadth-oriented child issues, not more stale composition-only
 tickets.
 
 ## Definition Of Done
 
-Successor epic `#5243` is closable only when all of the following are true:
+Live epic `#5244` is closable only when all of the following are true:
 
 - global line coverage is `>= 85%`
 - modules below tier thresholds are reduced to `0`

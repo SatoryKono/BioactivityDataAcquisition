@@ -5,14 +5,15 @@ Last refreshed from `reports/quality/module-coverage-inventory.json`
 
 ## Program Status
 
-Original epic `#5153` is now closed as superseded by `#5243`, but the coverage
+Original epic `#5153` is now closed as superseded by `#5243`, and that refresh
+epic is now itself superseded by `#5244`, but the coverage
 program remains open by substance on current `main`.
 
 Current blockers:
 
-- global line coverage is `69.72%`, below the `85%` gate;
-- `862` modules remain below `85%`;
-- `125` production modules remain at `0%`;
+- global line coverage is `73.71%`, below the `85%` gate;
+- `787` modules remain below `85%`;
+- `85` production modules remain at `0%`;
 - `13 / 18` aggregate modules remain below `95%`;
 - `13 / 72` contracts/schema modules remain below `95%`;
 - two modules remain unmeasured in committed inventory:
@@ -23,10 +24,12 @@ Superseded child issues from the older epic:
 - `#5136` — closed as duplicate; successor scope moved to `#5239` and `#5240`
 - `#5143` — closed as duplicate; successor scope moved to `#5241` and `#5242`
 
-Refresh note:
+Refresh/closure note:
 
 - `#5161` is now closed as completed
-- refreshed epic: `#5243`
+- `#5239`, `#5240`, `#5241`, and `#5242` are now closed as completed
+- `#5243` is now closed as superseded by `#5244`
+- live epic: `#5244`
 
 ## Resolved / Retired Composition Drafts
 
@@ -139,8 +142,8 @@ These older composition issue ideas should **not** be created again:
 
 **Context:**
 
-- `862` modules remain below `85%`
-- `125` modules remain fully uncovered
+- `787` modules remain below `85%`
+- `85` modules remain fully uncovered
 - closing the epic is impossible without broad repo-wide follow-up beyond the
   composition and aggregate clusters
 
@@ -148,4 +151,4 @@ These older composition issue ideas should **not** be created again:
 
 - [ ] broad backlog is decomposed into tractable child issues by family / layer
 - [ ] global line coverage moves materially toward `85%`
-- [ ] successor epic `#5243` is only closed after the repo-wide floor is actually met
+- [ ] live epic `#5244` is only closed after the repo-wide floor is actually met

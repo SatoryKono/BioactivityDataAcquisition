@@ -1,5 +1,5 @@
 {
-  "snapshot_date": "2026-06-15",
+  "snapshot_date": "2026-06-16",
   "inventory_source": "configs/quality/compatibility_facade_inventory.yaml",
   "twin_ratchet_source": "configs/quality/compatibility_twin_module_ratchet.yaml",
   "config_root_facade_source": "configs/quality/infrastructure_config_root_facade_inventory.yaml",
@@ -177,10 +177,12 @@
       "src_importers": [],
       "test_importers": [
         "tests/unit/infrastructure/config/test_composite_config_api.py",
+        "tests/unit/infrastructure/config/test_config_ci_contract.py",
+        "tests/unit/infrastructure/config/test_public_config_surfaces.py",
         "tests/unit/infrastructure/config/test_workflow_config_api.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 2
+      "test_importer_count": 4
     },
     {
       "path": "src/bioetl/domain/composite/config.py",

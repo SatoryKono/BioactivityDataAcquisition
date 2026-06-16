@@ -8,12 +8,12 @@
     },
     "module_coverage_inventory": {
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "fff19870a8df5a37e5becd9f78132baa5c850f22cc9514bba6bc9b85d432c46d",
-      "coverage_xml_sha256": "bfae2e6b12b1431ce3b5103504fcb655910516e93d4ec492b7eff2832804a6f2"
+      "source_tree_sha256": "a4d158e67ad9bfae19c2f8f791ca2edff9b4bae20ff578df58b21eba973c6090",
+      "coverage_xml_sha256": "510f0907de61968280131777da623ec0da2b1f7aa3dbebe22554e1773ab713b1"
     },
     "compatibility_importer_census": {
       "path": "reports/quality/compatibility-importer-census.json",
-      "snapshot_date": "2026-06-15"
+      "snapshot_date": "2026-06-16"
     },
     "dead_code_inventory": {
       "path": "reports/quality/dead-code-inventory.json",
@@ -61,7 +61,7 @@
       "weighted_score": 0.72,
       "evidence_metrics": {
         "source_module_count": 2137,
-        "uncovered_module_count": 125
+        "uncovered_module_count": 85
       }
     },
     {
@@ -105,7 +105,7 @@
       "weighted_score": 0.888,
       "evidence_metrics": {
         "unmeasured_module_count": 2,
-        "uncovered_module_count": 125
+        "uncovered_module_count": 85
       }
     },
     {
@@ -146,7 +146,7 @@
     "layer_violations": 0,
     "source_module_count": 2137,
     "unmeasured_module_count": 2,
-    "uncovered_module_count": 125,
+    "uncovered_module_count": 85,
     "hotspot_family_count": 5,
     "retained_entrypoint_count": 14,
     "retained_public_export_facade_count": 4,

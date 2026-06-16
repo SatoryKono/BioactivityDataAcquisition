@@ -1,23 +1,23 @@
 ---
 id: fix-architecture-quality-scorecard-20260616
-title: Fix architecture quality scorecard drift
+title: Fix architecture quality scorecard artifact drift
 task_id: fix-architecture-quality-scorecard-20260616
-created_at: '2026-06-16T08:57:23Z'
+created_at: '2026-06-16T13:12:33Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- <add-source-ref>
+- reports/quality/architecture-quality-scorecard.json
 summary: Active task session context.
-query: test_architecture_quality_scorecard artifact matches live collector module
-  coverage drift
+query: architecture quality scorecard artifact drift uncovered_module_count compatibility
+  importer census snapshot date
 ---
 
 # Session note
 
 ## Task
 
-- Title: Fix architecture quality scorecard drift
-- Retrieval query: test_architecture_quality_scorecard artifact matches live collector module coverage drift
+- Title: Fix architecture quality scorecard artifact drift
+- Retrieval query: architecture quality scorecard artifact drift uncovered_module_count compatibility importer census snapshot date
 
 ## Retrieved context
 
