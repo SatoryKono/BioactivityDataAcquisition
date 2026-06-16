@@ -1522,7 +1522,7 @@
       "symbol": "--silver-filter-only",
       "path": "src/bioetl/interfaces/cli/commands/diagnostics.py",
       "occurrence_count": 1,
-      "first_line": 359,
+      "first_line": 360,
       "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
       "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
       "notes": ""
