@@ -50,6 +50,83 @@ repo_wide_zero_import_classification:
     linked_issue: '#5037'
     rationale: Registry module remains a reviewed public facade while explicit-registry
       runtime hot-path narrowing is completed under issue
+  - module_path: src/bioetl/domain/ports/data_normalization.py
+    module_name: bioetl.domain.ports.data_normalization
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-06-16'
+    review_by: '2026-09-14'
+    linked_issue: '#4541'
+    rationale: Port owner module for data_normalization; imports now go through bioetl.domain.ports facade per REQ-ARCH-027
+  - module_path: src/bioetl/domain/ports/data_source.py
+    module_name: bioetl.domain.ports.data_source
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-06-16'
+    review_by: '2026-09-14'
+    linked_issue: '#4541'
+    rationale: Port owner module for data_source; imports now go through bioetl.domain.ports facade per REQ-ARCH-027
+  - module_path: src/bioetl/domain/ports/delta_reader.py
+    module_name: bioetl.domain.ports.delta_reader
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-06-16'
+    review_by: '2026-09-14'
+    linked_issue: '#4541'
+    rationale: Port owner module for delta_reader; imports now go through bioetl.domain.ports facade per REQ-ARCH-027
+  - module_path: src/bioetl/domain/ports/export.py
+    module_name: bioetl.domain.ports.export
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-06-16'
+    review_by: '2026-09-14'
+    linked_issue: '#4541'
+    rationale: Port owner module for export; imports now go through bioetl.domain.ports facade per REQ-ARCH-027
+  - module_path: src/bioetl/domain/ports/filtering.py
+    module_name: bioetl.domain.ports.filtering
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-06-16'
+    review_by: '2026-09-14'
+    linked_issue: '#4541'
+    rationale: Port owner module for filtering; imports now go through bioetl.domain.ports facade per REQ-ARCH-027
+  - module_path: src/bioetl/domain/ports/idmapping.py
+    module_name: bioetl.domain.ports.idmapping
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-06-16'
+    review_by: '2026-09-14'
+    linked_issue: '#4541'
+    rationale: Port owner module for idmapping; imports now go through bioetl.domain.ports facade per REQ-ARCH-027
+  - module_path: src/bioetl/domain/ports/logger_port.py
+    module_name: bioetl.domain.ports.logger_port
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-06-16'
+    review_by: '2026-09-14'
+    linked_issue: '#4541'
+    rationale: Port owner module for logger_port; imports now go through bioetl.domain.ports facade per REQ-ARCH-027
+  - module_path: src/bioetl/domain/ports/pii.py
+    module_name: bioetl.domain.ports.pii
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-06-16'
+    review_by: '2026-09-14'
+    linked_issue: '#4541'
+    rationale: Port owner module for pii; imports now go through bioetl.domain.ports facade per REQ-ARCH-027
+  - module_path: src/bioetl/domain/ports/protein_classification.py
+    module_name: bioetl.domain.ports.protein_classification
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-06-16'
+    review_by: '2026-09-14'
+    linked_issue: '#4541'
+    rationale: Port owner module for protein_classification; imports now go through bioetl.domain.ports facade per REQ-ARCH-027
+  - module_path: src/bioetl/domain/ports/publication_strategy.py
+    module_name: bioetl.domain.ports.publication_strategy
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-06-16'
+    review_by: '2026-09-14'
+    linked_issue: '#4541'
+    rationale: Port owner module for publication_strategy; imports now go through bioetl.domain.ports facade per REQ-ARCH-027
+  - module_path: src/bioetl/domain/ports/resilience.py
+    module_name: bioetl.domain.ports.resilience
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-06-16'
+    review_by: '2026-09-14'
+    linked_issue: '#4541'
+    rationale: Port owner module for resilience; imports now go through bioetl.domain.ports facade per REQ-ARCH-027
 families:
 - name: adapter_layer
   owner: '@bioetl-platform'

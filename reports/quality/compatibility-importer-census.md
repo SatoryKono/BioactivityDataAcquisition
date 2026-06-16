@@ -1,6 +1,6 @@
 # Compatibility Importer Census
 
-- snapshot_date: 2026-06-15
+- snapshot_date: 2026-06-16
 - retained_entrypoint_count: 14
 - removed_compatibility_surface_count: 23
 - removed_compatibility_surfaces_with_src_importers: 0
@@ -29,7 +29,7 @@
 | `src/bioetl/composition/entrypoints.py` | 0 | 3 |
 | `src/bioetl/composition/health_api.py` | 4 | 2 |
 | `src/bioetl/composition/maintenance_api.py` | 1 | 1 |
-| `src/bioetl/infrastructure/config/__init__.py` | 0 | 2 |
+| `src/bioetl/infrastructure/config/__init__.py` | 0 | 4 |
 | `src/bioetl/domain/composite/config.py` | 80 | 39 |
 | `src/bioetl/domain/value_objects/activity_values.py` | 0 | 1 |
 | `src/bioetl/application/composite/merger.py` | 5 | 5 |

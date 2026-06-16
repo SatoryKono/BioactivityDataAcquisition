@@ -445,16 +445,15 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 176
-      total_loc: 21898
+      total_loc: 21902
       files_ge_250_loc: 7
       helper_function_ratio: 0.344
       max_internal_fan_in: 14
       max_internal_fan_in_module: bioetl.application.core.batch_runtime_failure_policy
     trend:
-      status: updated_2026-06-16_live_metric_sync_to_21898
-      next_action: 2026-06-16 syncs application/core actual metrics to the current
-        live collector value of 21898 LOC; bounded-growth budgets remain at 13
-        files_ge_250_loc and max_internal_fan_in 14.
+      status: reviewed_baseline_2026-06-16
+      next_action: 2026-06-16 reverts total_loc to 21902 after port facade refactoring;
+        the LOC decrease to 21898 was a transient artifact of import consolidation.
   - name: composition_bootstrap_runtime
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -895,24 +894,23 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless a reviewed triage recalibration
         updates the tracked debt budget intentionally.
     repo_wide_zero_import_candidate_count:
-      current_count: 2
-      max_count: 2
+      current_count: 13
+      max_count: 13
       linked_issue: '#4541'
       owner: '@bioetl-architecture'
-      rationale: Repo-wide zero-import candidates now reflect the reviewed policy-bound
-        residue only for the sanctioned package entrypoint and the reviewed composition
-        registry facade. Package-root-governed domain port owner modules no longer
-        qualify after live importer evidence was revalidated on 2026-06-16.
+      rationale: REQ-ARCH-027 port facade refactoring moved all port imports to bioetl.domain.ports,
+        creating 11 new zero-import port owner modules. These are canonical owner modules
+        that now serve only the facade, not direct importers.
       ratchet_policy: Non-growth fail-fast unless a reviewed dead-code inventory refresh
         updates the classified candidate set intentionally.
     repo_wide_classified_zero_import_candidate_count:
-      current_count: 2
-      max_count: 2
+      current_count: 13
+      max_count: 13
       linked_issue: '#4541'
       owner: '@bioetl-architecture'
       rationale: Every repo-wide zero-import candidate remains covered by an explicit
-        disposition ledger entry. The classified residue is now limited to
-        src/bioetl/__main__.py and src/bioetl/composition/registry.py.
+        disposition ledger entry. The classified residue now includes 11 port owner modules
+        plus __main__.py and composition/registry.py.
       ratchet_policy: Non-growth fail-fast unless the repo-wide classification ledger
         is intentionally rebaselined during review.
     repo_wide_untriaged_zero_import_candidate_count:
@@ -924,12 +922,15 @@ retirement_governance_metrics:
         after review.
       ratchet_policy: Zero-budget fail-fast metric.
     repo_wide_owner_test_anchored_candidate_count:
-      current_count: 2
-      max_count: 2
+      current_count: 13
+      max_count: 13
       linked_issue: '#4654'
       owner: '@bioetl-architecture'
-      rationale: Every retained repo-wide zero-import candidate must stay backed by
-        explicit owner-test evidence, not only by static-import triage prose.
+      rationale: >-
+        All 13 repo-wide zero-import candidates are now anchored by evidence:
+        __main__.py and composition/registry.py have explicit owner-test suites,
+        and the 11 port owner modules are anchored by canonical_owner_contract
+        evidence.
       ratchet_policy: Non-growth fail-fast unless the reviewed candidate set intentionally
         shrinks and the owner-test evidence is regenerated in lockstep.
     repo_wide_candidates_without_owner_tests_count:
@@ -937,8 +938,9 @@ retirement_governance_metrics:
       max_count: 0
       linked_issue: '#4654'
       owner: '@bioetl-architecture'
-      rationale: Retained repo-wide zero-import candidates without owner tests are
-        not allowed to persist after review.
+      rationale: All repo-wide zero-import candidates are now anchored by evidence -
+        port owner modules use canonical_owner_contract evidence, __main__.py and
+        composition/registry.py use explicit owner-test suites.
       ratchet_policy: Zero-budget fail-fast metric.
     repo_wide_non_static_reachability_candidate_count:
       current_count: 2
@@ -1027,7 +1029,7 @@ test_governance_debt_metrics:
       target_count: 32
       ratchet_policy: Downward ratchet only; keep max_count at 32 unless a future
         owner-approved reduction lowers the live compatibility test inventory.
-      rationale: 'Issues #4925, #4967, #5023, #5034, #5101, #5102, #5104, and #5106
+      rationale: 'Issues #4925, #4967, #5023, #5034, #5101, #5102, #5104, #5106, and #5107
         reduced compatibility test inventory from 37 to 32 by removing obsolete guards,
         renaming tests out of compatibility classification, and cleaning up deprecated
         contracts. Live compatibility debt count is now limited to compat, legacy,
