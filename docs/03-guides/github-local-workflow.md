@@ -89,7 +89,7 @@ moving CI-scale checks into `pre-commit`:
 make lint
 make test-fast
 make test-architecture
-python -m pre_commit run smoke-lane --hook-stage manual --all-files
+python3 scripts/engineering/dev/run_project_python.py -m pre_commit run smoke-lane --hook-stage manual --all-files
 ```
 
 Do not add full coverage, full architecture governance, documentation link
