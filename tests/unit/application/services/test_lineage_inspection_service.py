@@ -295,7 +295,8 @@ def test_explain_run_resolves_direct_run_index_without_manifest_store() -> None:
 
     assert result.manifest_id is None
     assert result.run_id == str(run_id)
-    assert result.produced_bronze_batches[0].node_id == bronze_node.node_id
+    assert result.fragment_ids == ("bronze:fragment-direct",)
+    assert result.produced_bronze_batches == ()
 
 
 def test_explain_run_raises_when_identifier_cannot_be_resolved() -> None:
