@@ -10,6 +10,7 @@ from tests.async_utils import collect_async_iterator
 
 import bioetl.infrastructure.adapters.common.fallback_fetch_service as fallback_service
 from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
+    DefaultFallbackExecution,
     FallbackFetchOrchestrator,
     FallbackFetchRequest,
 )
@@ -25,6 +26,14 @@ def _normalize_identity(value: str) -> str:
 
 def _extract_record_id(record: dict[str, object]) -> str:
     return str(record.get("id", ""))
+
+
+async def _empty_records(
+    _ids: list[str],
+    _limit: int | None,
+) -> AsyncIterator[dict[str, object]]:
+    if False:
+        yield {}
 
 
 @pytest.mark.asyncio
@@ -223,3 +232,79 @@ async def test_execute_records_unified_fallback_metrics(
         candidates=2,
         hits=1,
     )
+
+
+def test_default_fallback_execution_delegates_hooks_and_handler() -> None:
+    handler = MagicMock()
+    strategy = DefaultFallbackExecution(
+        normalize_id_hook=_normalize_strip_lower,
+        extract_record_id_hook=_extract_record_id,
+        fallback_handler_hook=handler,
+    )
+
+    assert strategy.normalize_id("  A  ") == "a"
+    assert strategy.extract_record_id({"id": "record-1"}) == "record-1"
+    assert strategy.fallback_handler is handler
+
+
+def test_request_resolve_methods_prefer_explicit_hooks_over_strategy() -> None:
+    strategy = DefaultFallbackExecution(
+        normalize_id_hook=lambda _value: "from-strategy",
+        extract_record_id_hook=lambda _record: "from-strategy",
+        fallback_handler_hook=MagicMock(name="strategy-handler"),
+    )
+    explicit_handler = MagicMock(name="explicit-handler")
+    request = FallbackFetchRequest(
+        filter_ids=[],
+        fallback_mapping={},
+        primary_record_fetcher=_empty_records,
+        normalize_id=_normalize_identity,
+        extract_record_id=_extract_record_id,
+        fallback_handler=explicit_handler,
+        strategy=strategy,
+    )
+
+    assert request.resolve_normalize_id() is _normalize_identity
+    assert request.resolve_extract_record_id() is _extract_record_id
+    assert request.resolve_fallback_handler() is explicit_handler
+
+
+def test_request_resolve_methods_fall_back_to_strategy_hooks() -> None:
+    handler = MagicMock(name="strategy-handler")
+    strategy = DefaultFallbackExecution(
+        normalize_id_hook=_normalize_strip_lower,
+        extract_record_id_hook=_extract_record_id,
+        fallback_handler_hook=handler,
+    )
+    request = FallbackFetchRequest(
+        filter_ids=[],
+        fallback_mapping={},
+        primary_record_fetcher=_empty_records,
+        strategy=strategy,
+    )
+
+    assert request.resolve_normalize_id()("  A  ") == "a"
+    assert request.resolve_extract_record_id()({"id": "record-2"}) == "record-2"
+    assert request.resolve_fallback_handler() is handler
+
+
+@pytest.mark.parametrize(
+    ("resolver_name", "expected_message"),
+    [
+        ("resolve_normalize_id", "normalize_id"),
+        ("resolve_extract_record_id", "extract_record_id"),
+    ],
+)
+def test_request_resolve_methods_raise_without_explicit_or_strategy(
+    resolver_name: str,
+    expected_message: str,
+) -> None:
+    request = FallbackFetchRequest(
+        filter_ids=[],
+        fallback_mapping={},
+        primary_record_fetcher=_empty_records,
+    )
+
+    resolver = getattr(request, resolver_name)
+    with pytest.raises(ValueError, match=expected_message):
+        resolver()

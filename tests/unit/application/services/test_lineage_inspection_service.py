@@ -197,6 +197,13 @@ def test_trace_returns_upstream_and_downstream_relations() -> None:
     )
 
 
+def test_trace_raises_when_dataset_ref_is_missing() -> None:
+    service = LineageInspectionService(lineage_store=_InMemoryLineageStore())
+
+    with pytest.raises(ValueError, match="Lineage trace not found"):
+        service.trace("silver:missing")
+
+
 def test_explain_run_resolves_manifest_and_aggregates_outputs() -> None:
     store = _InMemoryLineageStore()
     manifest_store = _InMemoryRunManifestStore()
@@ -252,6 +259,34 @@ def test_explain_run_resolves_manifest_and_aggregates_outputs() -> None:
     assert result.source_systems[0].node_id == source_node.node_id
 
 
+def test_explain_run_falls_back_to_run_index_when_manifest_has_no_manifest_fragments() -> None:
+    store = _InMemoryLineageStore()
+    manifest_store = _InMemoryRunManifestStore()
+    run_id = deterministic_run_uuid_from_callsite("lineage-manifest-run-fallback")
+    manifest = _make_manifest(manifest_id="manifest-run-fallback", run_id=run_id)
+    manifest_store.save(manifest)
+    bronze_node = LineageNodeRef(
+        node_type=LineageNodeType.BRONZE_BATCH,
+        node_id="bronze_batch:manifest-fallback",
+    )
+    fragment = LineageGraphFragment(
+        fragment_id="bronze:fragment-manifest-run-fallback",
+        stored_fragment_id="bronze:fragment-manifest-run-fallback:occurrence",
+        nodes=(bronze_node,),
+        run_id=str(run_id),
+    )
+    store.save(fragment)
+
+    result = LineageInspectionService(
+        lineage_store=store,
+        manifest_port=manifest_store,
+    ).explain_run("manifest-run-fallback")
+
+    assert result.manifest_id == "manifest-run-fallback"
+    assert result.run_id == str(run_id)
+    assert result.fragment_ids == ("bronze:fragment-manifest-run-fallback",)
+
+
 def test_explain_run_resolves_direct_manifest_index_without_manifest_store() -> None:
     store = _InMemoryLineageStore()
     run_id = deterministic_run_uuid_from_callsite("lineage-direct-manifest")
@@ -304,6 +339,48 @@ def test_explain_run_raises_when_identifier_cannot_be_resolved() -> None:
 
     with pytest.raises(ValueError, match="Lineage run explanation not found"):
         service.explain_run("missing-run")
+
+
+def test_explain_run_resolves_via_manifest_lookup_by_run_id() -> None:
+    store = _InMemoryLineageStore()
+    manifest_store = _InMemoryRunManifestStore()
+    run_id = deterministic_run_uuid_from_callsite("lineage-manifest-by-run-id")
+    manifest = _make_manifest(manifest_id="manifest-run-lookup", run_id=run_id)
+    manifest_store.save(manifest)
+    dataset_node = DatasetRef(
+        layer="silver",
+        logical_name="chembl.activity",
+        version=14,
+    ).to_node_ref()
+    fragment = LineageGraphFragment(
+        fragment_id="silver:fragment-run-lookup",
+        stored_fragment_id="silver:fragment-run-lookup:occurrence",
+        nodes=(dataset_node,),
+        manifest_id="manifest-run-lookup",
+        run_id=str(run_id),
+    )
+    store.save(fragment)
+
+    result = LineageInspectionService(
+        lineage_store=store,
+        manifest_port=manifest_store,
+    ).explain_run(str(run_id))
+
+    assert result.manifest_id == "manifest-run-lookup"
+    assert result.run_id == str(run_id)
+    assert result.fragment_ids == ("silver:fragment-run-lookup",)
+
+
+def test_resolve_via_manifest_returns_none_when_manifest_lookup_by_run_id_has_no_fragments() -> None:
+    manifest_store = _InMemoryRunManifestStore()
+    run_id = deterministic_run_uuid_from_callsite("lineage-empty-manifest-run-id")
+    manifest_store.save(_make_manifest(manifest_id="manifest-empty", run_id=run_id))
+    service = LineageInspectionService(
+        lineage_store=_InMemoryLineageStore(),
+        manifest_port=manifest_store,
+    )
+
+    assert service._resolve_via_manifest(str(run_id)) is None
 
 
 def test_parse_run_id_returns_none_for_invalid_identifier() -> None:

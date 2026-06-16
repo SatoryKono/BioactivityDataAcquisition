@@ -294,27 +294,31 @@ workflow definition itself.
 
 ## Status Model
 
-The backlog defines the target workflow step status vocabulary in `WF-02`:
+The shipped workflow status vocabulary is defined in
+[`workflow-state-machine.md`](../04-reference/domain/workflow-state-machine.md).
+Use these names in configs, ledgers, operator output, tests, and docs.
+
+Workflow-level statuses:
+
+- `created`
+- `running`
+- `success`
+- `failed`
+- `incomplete`
+
+Step-level statuses:
 
 - `pending`
 - `running`
-- `succeeded`
+- `commit_pending_confirmation`
+- `success`
 - `failed`
 - `skipped`
-- `blocked`
 
-`WF-06` adds one more derived operational state:
-
-- `incomplete`
-
-Current code-state note:
-
-- the shipped workflow runner still emits compact terminal step outcomes such
-  as `success`, `failed`, and `skipped`;
-- durable workflow control-plane state now persists workflow-level statuses such
-  as `created`, `running`, `success`, `failed`, and `incomplete`;
-- operator surfaces also publish `repair_required` and `ambiguous_step_ids`
-  instead of silently replaying destructive ambiguity.
+Operator-facing fields such as `repair_required` and `ambiguous_step_ids`
+describe repair posture and destructive ambiguity; they are not status values.
+Older backlog-only aliases are historical planning vocabulary and are not part
+of the current shipped status contract.
 
 ## Relationship To Pipelines
 
@@ -389,7 +393,7 @@ Current operator surface:
 
 The linked issues now define the shipped object behavior on rerun:
 
-- succeeded steps should normally be skipped on resume;
+- steps with terminal `success` status should normally be skipped on resume;
 - failed steps should be retried;
 - `started` without terminal event should be treated as incomplete and retriable;
 - destructive transforms must not silently replay after ambiguous crash points;
@@ -545,7 +549,7 @@ Not yet fully shipped from the open backlog:
 - multi-runtime or distributed workflow coordination;
 - separate workflow-manifest diff/show namespace beyond the published
   `workflow status` / `workflow run` surface;
-- richer live step taxonomy such as `blocked` on every runner result.
+- richer live step repair classification beyond the shipped status contract.
 
 ## Canonical Summary
 

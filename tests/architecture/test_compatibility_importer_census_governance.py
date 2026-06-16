@@ -12,15 +12,17 @@ import pytest
 import yaml
 
 # Skip on WSL and Windows due to filesystem performance causing git command timeout
-if sys.platform.startswith("win"):
-    pytestmark = pytest.mark.skip("Skipped on Windows due to filesystem performance")
-else:
+is_wsl_or_windows = sys.platform.startswith("win")
+if not is_wsl_or_windows:
     try:
         with open("/proc/version", "r") as f:
             if "microsoft" in f.read().lower():
-                pytestmark = pytest.mark.skip("Skipped on WSL due to filesystem performance")
+                is_wsl_or_windows = True
     except (OSError, IOError):
         pass
+
+if is_wsl_or_windows:
+    pytestmark = pytest.mark.skip(reason="Skipped on WSL/Windows due to filesystem performance")
 
 from scripts.engineering.qa.import_graph_inventory import (
     collect_exact_module_import_usage,

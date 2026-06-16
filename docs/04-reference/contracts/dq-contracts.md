@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.0.1
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-23'
+  Last verified: '2026-06-16'
 
 ______________________________________________________________________
 
@@ -15,7 +15,7 @@ ______________________________________________________________________
 
 *Canonical DQ contract pack for BioETL | Aligned with ADR-045*
 
-This page serves as the first-class canonical contract surface for Data Quality (DQ) contracts in BioETL. It provides operators and auditors with a single entrypoint for DQ contract semantics, disposition policies, and replay-relevant behavior.
+This page serves as the first-class published contract surface for Data Quality (DQ) contracts in BioETL. It provides operators and auditors with a single entrypoint for DQ contract semantics, disposition policies, and replay-relevant behavior. Runtime DQ/data-contract routing is backed by `configs/contracts/**`; Pandera models in `src/bioetl/domain/schemas/` remain the structural schema source of truth, and JSON files under `docs/04-reference/contracts/gold/*.json` are generated publication artifacts.
 
 ## Contract Registry
 
@@ -28,9 +28,17 @@ The BioETL DQ Contract System defines four primary contract types that govern da
 **Canonical Sources**:
 
 - Domain schemas: `src/bioetl/domain/schemas/` (Pandera DataFrameModel contracts)
+- Contract YAML: `configs/contracts/**/*.yaml` (current DQ/data-contract routing inventory)
 - Entity configs: `configs/entities/{provider}/{entity}.yaml` (field definitions)
 - Composite configs: `configs/composites/{entity}.yaml` (field definitions)
 - Exported JSON: `docs/04-reference/contracts/gold/*.json` (for external consumers)
+
+**Source-of-truth routing**:
+
+- `src/bioetl/domain/schemas/` owns executable Pandera structural contracts.
+- `configs/contracts/**` owns the current provider/entity contract YAML inventory used by DQ/data-contract routing and policy documentation.
+- `configs/entities/**` and `configs/composites/**` provide pipeline and composite field metadata; they do not replace the contract YAML inventory.
+- `docs/04-reference/contracts/gold/*.json` is generated from contract/schema sources for publication and review.
 
 **Contract Fields**:
 
@@ -353,9 +361,10 @@ graph TD
 
 **CI/CD Enforcement**:
 
-- `scripts/check_dq_parity.py`: Validates code-config-docs synchronization
-- `scripts/validate_contracts.py`: Ensures JSON exports match domain models
-- `tests/architecture/test_dq_contracts.py`: Architecture tests for contract compliance
+- `python -m scripts.schema check-invariants`: validates YAML parse safety and config invariants, including `configs/contracts/**/*.yaml`
+- `python -m scripts.schema generate-contracts`: regenerates JSON contract exports from schema sources
+- `python -m scripts.check_dq_dsl_parity`: validates DQ DSL parity
+- `tests/architecture/test_dq_contract_patterns.py` and `tests/architecture/test_config_contract_yaml_parse_gate.py`: architecture tests for DQ pattern and contract YAML compliance
 
 **Manual Verification**:
 
@@ -475,7 +484,7 @@ quality:
 | Comparison  | `field <= related_field`                             | Min/max relationships |
 | Conditional | `field == 'value' implies related_field is not none` | Dependent fields      |
 
-### Contract Export Command
+### Contract Export And Validation Commands
 
 ```bash
 # Generate JSON contract exports
@@ -484,21 +493,8 @@ python -m scripts.schema generate-contracts
 # Validate contract parity
 python -m scripts.check_dq_dsl_parity
 
-# Run architecture tests
-pytest tests/architecture/test_dq_contracts.py
-```
-
-### Contract Export Command
-
-```bash
-# Generate JSON contract exports
-python -m scripts.schema generate-contracts
-
-# Validate contract parity
-python -m scripts.check_dq_parity
-
-# Run architecture tests
-pytest tests/architecture/test_dq_contracts.py
+# Run related architecture tests
+pytest tests/architecture/test_dq_contract_patterns.py tests/architecture/test_config_contract_yaml_parse_gate.py
 ```
 
 ## Glossary

@@ -554,49 +554,48 @@ The project uses `pytest` for testing with a formalized test matrix covering Uni
   make test-architecture
   ```
 
-### Codex Skills
+### Local Tooling
 
-- **Sync project skills into Codex**:
-
-  ```bash
-  make setup-skills
-  ```
-
-  This syncs local project skills from `.codex/skills` into `$CODEX_HOME/skills` (default `~/.codex/skills`) and also keeps the paired `.codex/agents` tree aligned in `$CODEX_HOME/agents`.
-
-- **Sync only project agents into Codex**:
+- **Configure project plugin/test tooling**:
 
   ```bash
-  make setup-agents
+  make setup-plugins
   ```
+
+  This runs the supported local setup launcher for project plugin and test tooling.
 
 ### Code Quality
 
 Strict quality standards are enforced using `ruff`, `mypy`, and other tools.
 
 - **Linting & Formatting**:
+
   ```bash
   make lint      # Check only
   make lint-fix  # Auto-fix and format
   ```
-- **Type Checking**:
+
+- **Debt and complexity guardrails**:
+
   ```bash
-  make typecheck # Strict mypy
+  make qa-debt
   ```
-- **Complexity Check**:
-  ```bash
-  make complexity
-  ```
+
+  `make lint` includes strict mypy and ruff checks; `make qa-debt` runs the published quality exemption/debt trend guardrail.
 
 ### Documentation
 
-Build and serve local documentation:
+Validate published documentation surfaces:
 
 ```bash
-make docs-serve
+python -m scripts.docs check-links --links --specs --configs
+python -m scripts.docs check-drift --ports --classes
+python -m scripts.docs check-docstrings --summary
 ```
 
-Access the docs at `http://localhost:8000`.
+If a local docs server is needed, use the separate docs environment described in
+`docs/03-guides/quick-start.md`; the current Makefile publishes validation
+commands, not a local docs server target.
 
 ## Project Structure
 
@@ -629,11 +628,14 @@ Access the docs at `http://localhost:8000`.
 │       │   ├── runtime_builders/ # Leaf builders for runner inputs and observability
 │       │   ├── services/     # Thin re-exports for metadata/versioning helpers
 │       │   ├── entrypoints.py # Stable broad public seam
-│       │   ├── execution_api.py # Narrow execution API
-│       │   ├── services_api.py # Narrow services API
-│       │   ├── resources_api.py # Narrow checkpoint/quarantine API
 │       │   ├── composite_api.py # Composite runtime facade
-│       │   └── observability_api.py # Observability facade
+│       │   ├── control_plane_api.py # Control-plane API seam
+│       │   ├── execution_api.py # Narrow execution API
+│       │   ├── health_api.py # Health and diagnostics seam
+│       │   ├── maintenance_api.py # Maintenance API seam
+│       │   ├── observability_api.py # Observability facade
+│       │   ├── registry_api.py # Registry API seam
+│       │   └── resources_api.py # Narrow checkpoint/quarantine API
 │       ├── infrastructure/   # Adapters (API clients, Delta Lake, Storage)
 │       │   ├── adapters/     # HTTP clients with unified resilience
 │       │   ├── storage/      # Bronze/Silver/Gold writers
@@ -641,9 +643,8 @@ Access the docs at `http://localhost:8000`.
 │       │   └── observability/ # Metrics, tracing, logging
 │       └── interfaces/       # External interfaces
 │           ├── cli/          # Click CLI commands
-│           ├── http/         # HTTP health server and request/response types
-│           └── orchestration/ # Reserved (empty; signal handlers removed 2025-12-31, shutdown logic in application/core/lifecycle/shutdown.py)
-├── tests/                    # Unit, Integration, Architecture & E2E tests
+│           └── http/         # HTTP health server and request/response types
+├── tests/                    # Unit, integration, contract, architecture, E2E, smoke, performance, security, golden/snapshot, benchmark, fixture/helper suites
 ├── scripts/                  # Utility scripts (lint_terminology.py, etc.)
 ├── Makefile                  # Automation commands
 └── pyproject.toml            # Dependencies & Tool configuration
