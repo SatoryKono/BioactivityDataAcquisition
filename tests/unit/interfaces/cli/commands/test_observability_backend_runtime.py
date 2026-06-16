@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import signal
 from io import BytesIO
 from types import SimpleNamespace
 from unittest.mock import MagicMock
@@ -440,14 +441,18 @@ def test_build_detached_backend_popen_kwargs_hides_windows_console() -> None:
 def test_drop_listening_backend_on_port_terminates_all_windows_listeners(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    remaining_pid_sets = iter(((111, 222), ()))
+    state = {"pids": (111, 222)}
     taskkill_commands: list[list[str]] = []
 
     def fake_find(_port: int) -> tuple[int, ...]:
-        return next(remaining_pid_sets)
+        return state["pids"]
 
     def fake_run(command: list[str], **_kwargs: object) -> SimpleNamespace:
         taskkill_commands.append(command)
+        if command[2] == "111":
+            state["pids"] = (222,)
+        else:
+            state["pids"] = ()
         return SimpleNamespace(returncode=0)
 
     monkeypatch.setattr(process_subject.os, "name", "nt")
@@ -466,6 +471,41 @@ def test_drop_listening_backend_on_port_terminates_all_windows_listeners(
         ["taskkill", "/PID", "111", "/T", "/F"],
         ["taskkill", "/PID", "222", "/T", "/F"],
     ]
+
+
+def test_drop_listening_backend_on_port_falls_back_when_taskkill_fails(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    state = {"pids": (111,)}
+    taskkill_commands: list[list[str]] = []
+    kill_calls: list[tuple[int, int]] = []
+
+    def fake_find(_port: int) -> tuple[int, ...]:
+        return state["pids"]
+
+    def fake_run(command: list[str], **_kwargs: object) -> SimpleNamespace:
+        taskkill_commands.append(command)
+        return SimpleNamespace(returncode=1)
+
+    def fake_kill(pid: int, sig: int) -> None:
+        kill_calls.append((pid, sig))
+        state["pids"] = ()
+
+    monkeypatch.setattr(process_subject.os, "name", "nt")
+    monkeypatch.setattr(
+        process_subject,
+        "_find_listening_backend_pids_by_port",
+        fake_find,
+    )
+    monkeypatch.setattr(process_subject.subprocess, "run", fake_run)
+    monkeypatch.setattr(process_subject.os, "kill", fake_kill)
+
+    assert process_subject.drop_listening_backend_on_port(
+        8081,
+        sleep_fn=lambda _seconds: None,
+    )
+    assert taskkill_commands == [["taskkill", "/PID", "111", "/T", "/F"]]
+    assert kill_calls == [(111, signal.SIGTERM)]
 
 
 def test_build_detached_backend_env_prefixes_src_pythonpath() -> None:

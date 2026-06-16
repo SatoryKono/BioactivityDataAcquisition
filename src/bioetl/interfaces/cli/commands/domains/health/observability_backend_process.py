@@ -85,10 +85,14 @@ def drop_listening_backend_on_port(
                 capture_output=True,
                 text=True,
             )
-            if result.returncode != 0 and pid in _find_listening_backend_pids_by_port(
-                port
-            ):
-                return False
+            remaining_pids = _find_listening_backend_pids_by_port(port)
+            if result.returncode == 0 or pid not in remaining_pids:
+                continue
+            try:
+                os.kill(pid, signal.SIGTERM)
+            except OSError:
+                if pid in _find_listening_backend_pids_by_port(port):
+                    return False
     else:
         for pid in pids:
             try:
