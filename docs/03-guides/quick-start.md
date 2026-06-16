@@ -89,8 +89,7 @@ python3.12 -m venv .venv
 pip install -e ".[dev,tracing]"
 ```
 
-If you need `make docs-build` or `make docs-serve`, install the separate docs
-toolchain as well:
+If you need MkDocs/site tooling, install the separate docs toolchain as well:
 
 ```bash
 uv sync --extra dev --extra tracing --extra docs

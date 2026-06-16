@@ -24,7 +24,7 @@ from bioetl.composition.runtime_builders import (
 )
 
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.repo_backed
 
 
 def test_factories_package_lazy_exports_and_unknown_attributes(

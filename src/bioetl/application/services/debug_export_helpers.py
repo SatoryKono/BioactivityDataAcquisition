@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from datetime import UTC, date, datetime
-from pathlib import Path
+from pathlib import Path, PurePath
 from uuid import UUID
 
 from bioetl.domain.behavior.identity_service import EntityIdentityGenerator
@@ -83,7 +83,9 @@ def _jsonable_value(value: object | None) -> str:
 def _json_default(value: object) -> str:
     if isinstance(value, datetime | date):
         return value.isoformat()
-    if isinstance(value, Path | UUID):
+    if isinstance(value, PurePath):
+        return value.as_posix()
+    if isinstance(value, UUID):
         return str(value)
     return str(value)
 

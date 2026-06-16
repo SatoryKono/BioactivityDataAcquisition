@@ -210,45 +210,19 @@ The `resources_api.py` module has 0% coverage (0/16 lines) despite being a criti
 
 ---
 
-## Issue #6: Создать тесты для composition services_api (0% → 90%)
+## Issue #6: Retired target note for composition services_api
 
-**Title:** Add contract tests for composition services_api (0% coverage → 90%)
+**Status:** Retired on current `main`
 
-**Priority:** P0 (Critical - public bootstrap surface)
+`src/bioetl/composition/services_api.py` больше не существует в текущем дереве
+исходников. Composition docs и architecture tests трактуют `services_api.py`
+как retired umbrella facade, а не как live public API target.
 
-**Labels:** `test-coverage`, `p0`, `composition-api`, `public-surface`
+Следствие:
 
-**Description:**
-The `services_api.py` module has 0% coverage (0/12 lines) despite being a critical public composition API for service access operations. This module defines the interface for service factory and service retrieval.
-
-**Context:**
-- Current coverage: 0% (0/12 executable lines)
-- Target coverage: 90%
-- Path: `src/bioetl/composition/services_api.py`
-- Module exposes service factory operations
-- Critical for DI and service wiring
-
-**Steps:**
-1. Analyze services_api.py public interface
-2. Create `tests/unit/composition/test_services_api_contract.py`
-3. Test scenarios:
-   - `__all__` export validation
-   - Service factory methods
-   - Service retrieval operations
-   - Error handling
-   - Service caching behavior
-4. Use mocks for downstream service dependencies
-5. Run coverage-verify lane to verify coverage >= 90%
-6. Update module-coverage-inventory.json
-
-**Acceptance Criteria:**
-- [ ] Test file created with comprehensive coverage
-- [ ] Coverage >= 90% for services_api.py
-- [ ] All service operations tested
-- [ ] Factory patterns validated
-- [ ] Coverage-verify lane passes
-
-**Risk:** Low - service factory APIs typically straightforward
+- coverage backlog **не должен** планировать новые тесты для `services_api.py`;
+- любые follow-up задачи по composition coverage должны ссылаться только на
+  существующие current-main surfaces.
 
 ---
 

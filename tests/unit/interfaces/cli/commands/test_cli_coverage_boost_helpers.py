@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import sys
 from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
@@ -710,6 +711,7 @@ def test_lineage_text_renderers_cover_structured_payloads_and_command_errors(
     assert ("Lineage run explanation not found", "missing run") in errors
 
 
+@pytest.mark.skipif(sys.platform != "win32", reason="Windows-specific backend process test")
 def test_backend_process_helpers_cover_env_kwargs_and_argument_normalization(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -760,6 +762,7 @@ def test_backend_process_helpers_cover_env_kwargs_and_argument_normalization(
     assert backend_process.python_executable_to_tuple("python") == ("python",)
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="PosixPath not available on Windows")
 def test_backend_process_helpers_cover_listener_parsing_and_detached_start(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

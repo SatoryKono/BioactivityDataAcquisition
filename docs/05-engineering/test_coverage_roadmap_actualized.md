@@ -86,8 +86,7 @@
 3. health_api.py (0/35)
 4. maintenance_api.py (0/24)
 5. resources_api.py (0/16)
-6. services_api.py (0/12)
-7. _pipeline_execution.py (0/84)
+6. _pipeline_execution.py (0/84)
 
 **Действия:**
 - Создать unit тесты для public API contracts

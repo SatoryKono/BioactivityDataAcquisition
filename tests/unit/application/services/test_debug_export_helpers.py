@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from uuid import UUID
 
 import pytest
@@ -54,6 +54,7 @@ def test_record_payload_and_json_helpers_cover_mapping_model_and_object_payloads
     assert "2026-01-01T12:00:00+00:00" in rendered
     assert "/tmp/debug" in rendered
     assert "00000000-0000-0000-0000-000000000123" in rendered
+    assert helpers._json_default(PureWindowsPath(r"\tmp\debug")) == "/tmp/debug"
     assert helpers._jsonable_value({"a": 1}) == '{"a": 1}'
     assert helpers._json_default(date(2026, 1, 2)) == "2026-01-02"
     assert helpers._json_default(object()).startswith("<object object at ")

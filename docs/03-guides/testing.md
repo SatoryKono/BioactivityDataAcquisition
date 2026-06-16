@@ -950,9 +950,9 @@ make setup-plugins
 bash scripts/engineering/dev/setup_env_wsl.sh
 ```
 
-`make setup-dev` остаётся удобным aggregate target поверх `make install` и
-dependency verification. `scripts/engineering/dev/dev_setup.sh` — legacy placeholder и не
-является поддерживаемым onboarding/testing path.
+Поддерживаемый aggregate flow для локального окружения: `make install`,
+`make test-deps`, `make setup-plugins`. `scripts/engineering/dev/dev_setup.sh`
+— legacy placeholder и не является поддерживаемым onboarding/testing path.
 
 ### 7.2. Smoke-check зависимостей и инструментов
 
@@ -969,18 +969,20 @@ make test-deps
 **Инструменты разработки:**
 
 ```bash
-make test-deps-dev
+make lint
 ```
 
-Дополнительно проверяет наличие `ruff`, `mypy`, `detect-secrets` и других инструментов аудита.
+Проверяет доступность repo-supported lint/type toolchain (`ruff`, `mypy`) и
+остаётся каноническим smoke path для инструментов аудита, которые реально
+участвуют в локальных quality lanes.
 
 ### 7.3. Решение проблем с воспроизводимостью
 
 Если аудит или CI падают с ошибками `ModuleNotFoundError`:
 
-1. Выполните `make install` или `make setup-dev`.
+1. Выполните `make install`, затем `make test-deps` и `make setup-plugins`.
 1. В mixed Windows + WSL checkout пересоберите правильное OS-specific окружение через `setup_env_windows.ps1` или `setup_env_wsl.sh`, а затем запускайте `run_pytest.ps1|.sh` / `run_mypy.ps1|.sh`.
-1. Проверьте статус инструментов через `make test-deps-dev`.
+1. Проверьте статус инструментов через `make lint`.
 
 В CI для этого используется не `make test`, а отдельный набор шагов в
 `.github/workflows/tests.yml`: короткий `smoke-check`, затем независимые

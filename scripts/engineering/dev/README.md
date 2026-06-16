@@ -10,6 +10,7 @@ For normal local onboarding, prefer the maintained project entrypoints:
 make install
 make test-deps
 make setup-plugins
+make precommit-install  # hook-only reinstall via the same maintained hook installer
 python -m scripts.engineering.dev setup-mcp  # optional MCP tooling via canonical backend
 ```
 
@@ -158,8 +159,7 @@ See `docs/03-guides/testing.md` and
 `configs/quality/integration_vcr_policy.yaml` for the canonical policy scope,
 supported test families, cassette lifecycle, and CI/live-contract split.
 
-If you need MkDocs commands such as `make docs-build` or `make docs-serve`,
-install the separate docs toolchain extra:
+If you need MkDocs/site tooling, install the separate docs toolchain extra:
 
 ```bash
 uv sync --extra dev --extra tracing --extra docs
