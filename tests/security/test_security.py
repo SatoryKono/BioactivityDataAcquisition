@@ -89,14 +89,16 @@ class TestVCRCassetteSanitization:
     """Tests that VCR cassettes don't contain secrets."""
 
     @pytest.fixture(scope="class")
-    def cassette_files(self) -> list[Path]:
+    @classmethod
+    def cassette_files(cls) -> list[Path]:
         """Get all VCR cassette files (class-scoped to avoid repeated glob)."""
         if not VCR_DIR.exists():
             pytest.skip("VCR directory not found")
         return list(VCR_DIR.rglob("*.yaml"))
 
     @pytest.fixture(scope="class")
-    def cassette_contents(self, cassette_files: list[Path]) -> list[tuple[str, str]]:
+    @classmethod
+    def cassette_contents(cls, cassette_files: list[Path]) -> list[tuple[str, str]]:
         """Pre-load all cassette contents once for the entire class.
 
         Returns list of (filename, content) tuples. Reading 182 YAML files
@@ -189,8 +191,9 @@ class TestNoHardcodedSecrets:
     """Tests that source code doesn't contain hardcoded secrets."""
 
     @pytest.fixture(scope="class")
+    @classmethod
     def source_contents(
-        self, _src_file_contents: list[tuple[Path, str]]
+        cls, _src_file_contents: list[tuple[Path, str]]
     ) -> list[tuple[Path, str]]:
         """Class-scoped alias for session-cached source file contents."""
         return _src_file_contents
@@ -264,7 +267,8 @@ class TestPrivateKeyExposure:
     """Tests for private key exposure."""
 
     @pytest.fixture(scope="class")
-    def all_files(self) -> list[Path]:
+    @classmethod
+    def all_files(cls) -> list[Path]:
         """Get all files in project (excluding .git and venv).
 
         Uses os.walk for efficiency to prune ignored directories.
@@ -497,8 +501,9 @@ class TestInputValidation:
     """Tests for input validation and injection prevention."""
 
     @pytest.fixture(scope="class")
+    @classmethod
     def source_contents(
-        self, _src_file_contents: list[tuple[Path, str]]
+        cls, _src_file_contents: list[tuple[Path, str]]
     ) -> list[tuple[Path, str]]:
         """Class-scoped alias for session-cached source file contents."""
         return _src_file_contents
@@ -603,8 +608,9 @@ class TestPathTraversal:
     """Tests for path traversal vulnerabilities."""
 
     @pytest.fixture(scope="class")
+    @classmethod
     def source_contents(
-        self, _src_file_contents: list[tuple[Path, str]]
+        cls, _src_file_contents: list[tuple[Path, str]]
     ) -> list[tuple[Path, str]]:
         """Class-scoped alias for session-cached source file contents."""
         return _src_file_contents
@@ -662,8 +668,9 @@ class TestSecurityHeaders:
     """Tests for security-related header handling."""
 
     @pytest.fixture(scope="class")
+    @classmethod
     def source_contents(
-        self, _src_file_contents: list[tuple[Path, str]]
+        cls, _src_file_contents: list[tuple[Path, str]]
     ) -> list[tuple[Path, str]]:
         """Class-scoped alias for session-cached source file contents."""
         return _src_file_contents
@@ -703,8 +710,9 @@ class TestCryptographyUsage:
     """Tests for proper cryptography usage."""
 
     @pytest.fixture(scope="class")
+    @classmethod
     def source_contents(
-        self, _src_file_contents: list[tuple[Path, str]]
+        cls, _src_file_contents: list[tuple[Path, str]]
     ) -> list[tuple[Path, str]]:
         """Class-scoped alias for session-cached source file contents."""
         return _src_file_contents
