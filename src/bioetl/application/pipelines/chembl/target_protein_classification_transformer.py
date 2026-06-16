@@ -81,7 +81,7 @@ class TargetProteinClassificationTransformer(BaseChemblTransformer):
             "path_names": _optional_text(record.get("path_names")),
             "path_labels": _optional_text(record.get("path_labels")),
             "depth": _optional_int(record.get("depth")),
-            "root_id": _optional_int(record.get("root_id")),
+            "root_id": _optional_id_text(record.get("root_id")),
             "is_leaf": _optional_bool(record.get("is_leaf")),
             "l1_id": _optional_id_text(record.get("l1_id")),
             "l1_name": _optional_text(record.get("l1_name")),

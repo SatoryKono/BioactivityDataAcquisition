@@ -3,10 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-import hashlib
-import json
-from collections import defaultdict
-from collections.abc import AsyncIterator, Iterable, Mapping
+from collections.abc import AsyncIterator
 from types import TracebackType
 
 from bioetl.application.services.protein_classification_resolution import (
@@ -20,9 +17,12 @@ from bioetl.infrastructure.adapters.chembl.protein_classification_graph import (
 
 from ._chembl_target_protein_classification_helpers import (
     _TARGET_PROTEIN_CLASSIFICATION_ENTITY_TYPE,
-    coerce_positive_int,
-    component_ids_from_target_record,
-    target_id_from_record,
+    build_target_component_indexes,
+    resolve_target_ids,
+)
+from ._chembl_target_protein_classification_manifest import (
+    source_manifest,
+    with_source_manifest,
 )
 
 __all__ = ["TargetProteinClassificationSnapshotDataSource"]
@@ -30,13 +30,6 @@ __all__ = ["TargetProteinClassificationSnapshotDataSource"]
 _TARGET_TABLE = "chembl.target"
 _TARGET_COMPONENT_TABLE = "chembl.target_component"
 _PROTEIN_CLASS_TABLE = "chembl.protein_class"
-_DATASET_VERSION = "target-protein-classification-path-v2.1.0"
-_SOURCE_URL = "https://www.ebi.ac.uk/chembl/api/data/protein_classification"
-_UNKNOWN_METADATA = "unknown"
-_SUPPORTED_TARGET_FILTER_FIELDS = frozenset({"target_id", "target_chembl_id"})
-_SUPPORTED_COMPONENT_FILTER_FIELDS = frozenset({"component_id", "primary_component_id"})
-
-
 class TargetProteinClassificationSnapshotDataSource:
     """Expose relation rows from materialized local ChEMBL snapshot tables."""
 
@@ -151,9 +144,11 @@ class TargetProteinClassificationSnapshotDataSource:
     ) -> AsyncIterator[JsonDict]:
         del query
         await self._ensure_loaded()
-        target_ids = self._resolve_target_ids(
+        target_ids = resolve_target_ids(
             filter_ids=filter_ids,
             filter_field=filter_field,
+            target_component_ids=self._target_component_ids,
+            target_ids_by_component=self._target_ids_by_component,
         )
         if offset is not None and offset > 0:
             target_ids = target_ids[offset:]
@@ -181,9 +176,11 @@ class TargetProteinClassificationSnapshotDataSource:
         await self._ensure_loaded()
         target_id_sets = [
             set(
-                self._resolve_target_ids(
+                resolve_target_ids(
                     filter_ids=filter_ids,
                     filter_field=filter_field,
+                    target_component_ids=self._target_component_ids,
+                    target_ids_by_component=self._target_ids_by_component,
                 )
             )
             for filter_field, filter_ids in filters.items()
@@ -233,8 +230,11 @@ class TargetProteinClassificationSnapshotDataSource:
                     "replaced_by",
                 ],
             )
-            self._load_target_maps(target_rows)
-            self._source_manifest = _source_manifest(
+            (
+                self._target_component_ids,
+                self._target_ids_by_component,
+            ) = build_target_component_indexes(target_rows)
+            self._source_manifest = source_manifest(
                 target_rows=target_rows,
                 target_component_rows=target_component_rows,
                 protein_class_rows=protein_class_rows,
@@ -270,52 +270,6 @@ class TargetProteinClassificationSnapshotDataSource:
         arrow_table = await self._delta_reader.read_table(table_name, columns=columns)
         return [dict(row) for row in arrow_table.to_pylist()]
 
-    def _load_target_maps(self, target_rows: Iterable[Mapping[str, object]]) -> None:
-        target_ids_by_component: dict[int, list[str]] = defaultdict(list)
-        component_ids_by_target: dict[str, tuple[int, ...]] = {}
-        for row in target_rows:
-            target_id = target_id_from_record(row)
-            if target_id is None:
-                continue
-            component_ids = component_ids_from_target_record(row)
-            component_ids_by_target[target_id] = component_ids
-            for component_id in component_ids:
-                target_ids_by_component[component_id].append(target_id)
-        self._target_component_ids = dict(sorted(component_ids_by_target.items()))
-        self._target_ids_by_component = {
-            component_id: tuple(dict.fromkeys(sorted(target_ids)))
-            for component_id, target_ids in sorted(target_ids_by_component.items())
-        }
-
-    def _resolve_target_ids(
-        self,
-        *,
-        filter_ids: list[str] | None,
-        filter_field: str | None,
-    ) -> tuple[str, ...]:
-        if not filter_ids:
-            return tuple(sorted(self._target_component_ids))
-        if filter_field in _SUPPORTED_TARGET_FILTER_FIELDS:
-            requested = {
-                str(value).strip() for value in filter_ids if str(value).strip()
-            }
-            return tuple(
-                target_id
-                for target_id in sorted(self._target_component_ids)
-                if target_id in requested
-            )
-        if filter_field in _SUPPORTED_COMPONENT_FILTER_FIELDS:
-            target_ids: set[str] = set()
-            for raw_component_id in filter_ids:
-                component_id = coerce_positive_int(raw_component_id)
-                if component_id is None:
-                    continue
-                target_ids.update(self._target_ids_by_component.get(component_id, ()))
-            return tuple(sorted(target_ids))
-        raise ValueError(
-            f"Unsupported target protein classification filter_field: {filter_field}"
-        )
-
     def _relation_rows_for_target(self, target_id: str) -> tuple[JsonDict, ...]:
         service = self._resolution_service
         if service is None:
@@ -339,106 +293,8 @@ class TargetProteinClassificationSnapshotDataSource:
                     for issue in result.dq_issues
                 ],
                 resolution_policy=self._invalid_record_policy,
-            )
+        )
         return tuple(
-            _with_source_manifest(row.to_dict(), self._source_manifest)
+            with_source_manifest(row.to_dict(), self._source_manifest)
             for row in result.rows
         )
-
-
-def _source_manifest(
-    *,
-    target_rows: Iterable[Mapping[str, object]],
-    target_component_rows: Iterable[Mapping[str, object]],
-    protein_class_rows: Iterable[Mapping[str, object]],
-) -> JsonDict:
-    """Build deterministic source metadata from local snapshot inputs."""
-    target_rows_tuple = tuple(target_rows)
-    target_component_rows_tuple = tuple(target_component_rows)
-    protein_class_rows_tuple = tuple(protein_class_rows)
-    return {
-        "dataset_version": _DATASET_VERSION,
-        "source_url": _SOURCE_URL,
-        "chembl_release": _first_text(
-            protein_class_rows_tuple,
-            "chembl_release",
-            "chembl_db_version",
-            "db_version",
-        ),
-        "chembl_api_version": _first_text(
-            protein_class_rows_tuple,
-            "chembl_api_version",
-            "api_version",
-        ),
-        "source_manifest_status": _manifest_status(protein_class_rows_tuple),
-        "source_snapshot_fingerprint": _source_snapshot_fingerprint(
-            target_rows=target_rows_tuple,
-            target_component_rows=target_component_rows_tuple,
-            protein_class_rows=protein_class_rows_tuple,
-        ),
-        "target_snapshot_row_count": len(target_rows_tuple),
-        "target_component_snapshot_row_count": len(target_component_rows_tuple),
-        "protein_class_snapshot_row_count": len(protein_class_rows_tuple),
-    }
-
-
-def _first_text(
-    rows: Iterable[Mapping[str, object]],
-    *field_names: str,
-) -> str:
-    """Return the first non-empty metadata value from snapshot rows."""
-    for row in rows:
-        for field_name in field_names:
-            value = row.get(field_name)
-            if value is None:
-                continue
-            stripped = str(value).strip()
-            if stripped:
-                return stripped
-    return _UNKNOWN_METADATA
-
-
-def _manifest_status(rows: Iterable[Mapping[str, object]]) -> str:
-    """Return whether release metadata was available in the local snapshot."""
-    release = _first_text(rows, "chembl_release", "chembl_db_version", "db_version")
-    api_version = _first_text(rows, "chembl_api_version", "api_version")
-    if release == _UNKNOWN_METADATA or api_version == _UNKNOWN_METADATA:
-        return "release_metadata_unavailable"
-    return "release_metadata_available"
-
-
-def _source_snapshot_fingerprint(
-    *,
-    target_rows: Iterable[Mapping[str, object]],
-    target_component_rows: Iterable[Mapping[str, object]],
-    protein_class_rows: Iterable[Mapping[str, object]],
-) -> str:
-    """Hash stable identifiers from source snapshots for manifest drift checks."""
-    payload = {
-        "targets": sorted(
-            str(row.get("target_id"))
-            for row in target_rows
-            if row.get("target_id") is not None
-        ),
-        "target_components": sorted(
-            str(row.get("component_id"))
-            for row in target_component_rows
-            if row.get("component_id") is not None
-        ),
-        "protein_classes": sorted(
-            str(row.get("protein_class_id"))
-            for row in protein_class_rows
-            if row.get("protein_class_id") is not None
-        ),
-    }
-    serialized = json.dumps(payload, sort_keys=True, separators=(",", ":"))
-    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
-
-
-def _with_source_manifest(
-    row: JsonDict, source_manifest: Mapping[str, object]
-) -> JsonDict:
-    """Attach source manifest fields to one relation row."""
-    enriched = dict(row)
-    enriched.update(source_manifest)
-    return enriched

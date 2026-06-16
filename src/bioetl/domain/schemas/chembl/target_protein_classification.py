@@ -45,9 +45,8 @@ class TargetProteinClassificationSchema(ETLRecordSchema):
         ge=0,
         description="Zero-based depth of the resolved leaf in the hierarchy.",
     )
-    root_id: Series[pd.Int64Dtype] | None = pa.Field(
+    root_id: Series[str] | None = pa.Field(
         nullable=True,
-        ge=1,
         description="Root protein classification ID for the resolved path.",
     )
     is_leaf: Series[bool] | None = pa.Field(

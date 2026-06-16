@@ -651,6 +651,8 @@ pipelines:
       required_fields:
         structural:
         - classification_status
+        - dataset_version
+        - source_snapshot_fingerprint
         - target_id
   chembl_tissue:
     downstream_role: composite_enricher
