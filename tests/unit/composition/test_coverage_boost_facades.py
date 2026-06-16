@@ -13,6 +13,7 @@ import pytest
 
 from bioetl.composition import _services
 from bioetl.composition import _workflow_services
+from bioetl.composition import factories as factories_pkg
 from bioetl.composition.bootstrap import cli as cli_bootstrap
 from bioetl.composition.factories import __getattr__ as factories_getattr
 from bioetl.composition.runtime_builders import (
@@ -32,7 +33,10 @@ def test_factories_package_lazy_exports_and_unknown_attributes(
     fake_module = ModuleType("fake_services")
     fake_module.BaseServicesFactory = object()
     fake_pipeline = ModuleType("fake_pipeline")
+    fake_pipeline.__path__ = []  # type: ignore[attr-defined]
     fake_pipeline.create_pipeline_factory = mock.sentinel.pipeline_factory
+    fake_assembler = ModuleType("fake_assembler")
+    fake_assembler.create_pipeline_factory = mock.sentinel.pipeline_factory
     fake_registry = ModuleType("fake_registry")
     fake_registry.pubchem_compound_factory = mock.sentinel.pubchem_factory
     fake_pipeline.registry = fake_registry
@@ -44,7 +48,13 @@ def test_factories_package_lazy_exports_and_unknown_attributes(
         return mapping[name]
 
     monkeypatch.setattr("bioetl.composition.factories.import_module", _fake_import_module)
+    monkeypatch.setattr(factories_pkg, "pipeline", fake_pipeline, raising=False)
     monkeypatch.setitem(__import__("sys").modules, "bioetl.composition.factories.pipeline", fake_pipeline)
+    monkeypatch.setitem(
+        __import__("sys").modules,
+        "bioetl.composition.factories.pipeline.assembler",
+        fake_assembler,
+    )
     monkeypatch.setitem(
         __import__("sys").modules,
         "bioetl.composition.factories.pipeline.registry",

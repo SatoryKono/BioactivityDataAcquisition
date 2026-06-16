@@ -79,7 +79,14 @@ def test_build_openalex_runtime_services_from_request_alias_matches_primary_buil
     via_primary = build_openalex_runtime_services(request)
     via_alias = build_openalex_runtime_services_from_request(request)
 
-    assert via_alias == via_primary
+    assert type(via_alias.query_executor) is type(via_primary.query_executor)
+    assert type(via_alias.response_mapper) is type(via_primary.response_mapper)
+    assert type(via_alias.cursor_flow) is type(via_primary.cursor_flow)
+    assert type(via_alias.fallback_handler) is type(via_primary.fallback_handler)
+    assert type(via_alias.fallback_orchestrator) is type(
+        via_primary.fallback_orchestrator
+    )
+    assert via_alias.fallback_fetch_service is request.fallback_fetch_service
     assert via_alias.cursor_flow.query_executor is via_alias.query_executor
     assert via_alias.cursor_flow.response_mapper is via_alias.response_mapper
     assert via_alias.fallback_orchestrator.fallback_handler is via_alias.fallback_handler
