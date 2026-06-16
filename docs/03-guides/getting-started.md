@@ -104,7 +104,7 @@ Manual fallback without `make`:
 uv sync --extra dev --extra tracing
 ```
 
-If you need MkDocs or `make docs-build`, install the separate docs toolchain extra:
+If you need MkDocs/site tooling, install the separate docs toolchain extra:
 
 ```bash
 uv sync --extra dev --extra tracing --extra docs
@@ -118,9 +118,9 @@ python3.12 -m venv .venv
 pip install -e .[dev,tracing,docs]
 ```
 
-If you prefer the convenience aggregate target, `make setup-dev` is still valid;
-it currently expands to `make install` plus dependency verification. The
-repository-local `scripts/engineering/dev/dev_setup.sh` is not part of the supported path.
+For the supported aggregate setup flow, run `make install`, `make test-deps`,
+and `make setup-plugins`. The repository-local
+`scripts/engineering/dev/dev_setup.sh` is not part of the supported path.
 
 ## 3. Configuration
 

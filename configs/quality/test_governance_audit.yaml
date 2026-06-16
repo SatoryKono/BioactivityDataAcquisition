@@ -911,6 +911,9 @@ repo_backed_unit_test_exceptions:
   - path: tests/unit/composition/bootstrap/runtime/test_pipeline_bootstrap.py
     target_lane: repo-backed-unit
     protected_surface: src/bioetl/composition/bootstrap/runtime/pipeline.py
+  - path: tests/unit/composition/test_coverage_boost_facades.py
+    target_lane: repo-backed-unit
+    protected_surface: src/bioetl/composition/factories/storage/maintenance_mixin.py
   - path: tests/unit/composition/factories/test_factory_decoupling_contracts.py
     target_lane: repo-backed-unit
     protected_surface: src/bioetl/composition/factories/services/bundle.py

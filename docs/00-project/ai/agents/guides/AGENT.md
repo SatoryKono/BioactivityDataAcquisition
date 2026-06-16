@@ -182,8 +182,8 @@ bash scripts/engineering/dev/run_mypy.sh
 | 3   | Проверяет runtime dependencies (`make test-deps`)                                       |
 | 4   | Настраивает локальные pytest/pre-commit plugins                                         |
 
-Если нужен convenience aggregate target, допустим и `make setup-dev`; он
-раскрывается в `install` + dependency verification.
+Поддерживаемый aggregate flow: `make install`, `make test-deps`,
+`make setup-plugins`.
 
 ______________________________________________________________________
 

@@ -57,8 +57,9 @@ uv run python -m scripts.docs build-site --strict
 
 - Published workflow guide: [Docs Verification](../03-guides/docs-verification.md)
 
-- `make docs-build` remains a convenient wrapper for a non-strict site build when
-  you only need a local rendered preview.
+- For a non-strict local site render, use
+  `uv run python -m scripts.docs build-site` after installing the separate
+  `docs` extra.
 
 - Migration to MkDocs 2.x must be tracked as a dedicated task with explicit compatibility validation.
 
