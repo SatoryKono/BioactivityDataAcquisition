@@ -85,6 +85,12 @@ class ChEMBLTargetProteinClassificationGoldSchema(StrictGoldContractSchema):
     )
     component_id: Series[float] = pa.Field(nullable=True, ge=1, coerce=True)
     leaf_id: Series[float] = pa.Field(nullable=True, ge=1, coerce=True)
+    path_ids: Series[str] = pa.Field(nullable=True)
+    path_names: Series[str] = pa.Field(nullable=True)
+    path_labels: Series[str] = pa.Field(nullable=True)
+    depth: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
+    root_id: Series[float] = pa.Field(nullable=True, ge=1, coerce=True)
+    is_leaf: Series[bool] = pa.Field(nullable=True)
     l1_id: Series[float] = pa.Field(nullable=True, ge=1, coerce=True)
     l1_name: Series[str] = pa.Field(nullable=True)
     l1_desc: Series[str] = pa.Field(nullable=True)
@@ -100,6 +106,24 @@ class ChEMBLTargetProteinClassificationGoldSchema(StrictGoldContractSchema):
     l5_id: Series[float] = pa.Field(nullable=True, ge=1, coerce=True)
     l5_name: Series[str] = pa.Field(nullable=True)
     l5_desc: Series[str] = pa.Field(nullable=True)
+    dataset_version: Series[str] = pa.Field(nullable=True)
+    source_url: Series[str] = pa.Field(nullable=True)
+    chembl_release: Series[str] = pa.Field(nullable=True)
+    chembl_api_version: Series[str] = pa.Field(nullable=True)
+    source_manifest_status: Series[str] = pa.Field(
+        nullable=True,
+        isin=["release_metadata_available", "release_metadata_unavailable"],
+    )
+    source_snapshot_fingerprint: Series[str] = pa.Field(nullable=True)
+    target_snapshot_row_count: Series[float] = pa.Field(
+        nullable=True, ge=0, coerce=True
+    )
+    target_component_snapshot_row_count: Series[float] = pa.Field(
+        nullable=True, ge=0, coerce=True
+    )
+    protein_class_snapshot_row_count: Series[float] = pa.Field(
+        nullable=True, ge=0, coerce=True
+    )
 
 
 class ChEMBLTissueGoldSchema(StrictGoldContractSchema):

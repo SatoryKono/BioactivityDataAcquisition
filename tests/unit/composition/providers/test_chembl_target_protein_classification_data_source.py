@@ -91,50 +91,71 @@ async def test_relation_data_source_derives_rows_from_local_snapshot_tables(
         async for row in data_source.fetch("target_protein_classification", limit=10)
     ]
 
-    assert rows == [
-        {
-            "target_id": "CHEMBL_T1",
-            "classification_status": "resolved",
-            "component_id": 10,
-            "leaf_id": 3,
-            "l1_id": 1,
-            "l1_name": "Enzyme",
-            "l1_desc": "Root",
-            "l2_id": 2,
-            "l2_name": "Kinase",
-            "l2_desc": "Branch",
-            "l3_id": 3,
-            "l3_name": "Serine/threonine kinase",
-            "l3_desc": "Leaf",
-            "l4_id": None,
-            "l4_name": None,
-            "l4_desc": None,
-            "l5_id": None,
-            "l5_name": None,
-            "l5_desc": None,
-        },
-        {
-            "target_id": "CHEMBL_T2",
-            "classification_status": "missing_classification",
-            "component_id": None,
-            "leaf_id": None,
-            "l1_id": None,
-            "l1_name": None,
-            "l1_desc": None,
-            "l2_id": None,
-            "l2_name": None,
-            "l2_desc": None,
-            "l3_id": None,
-            "l3_name": None,
-            "l3_desc": None,
-            "l4_id": None,
-            "l4_name": None,
-            "l4_desc": None,
-            "l5_id": None,
-            "l5_name": None,
-            "l5_desc": None,
-        },
-    ]
+    assert len(rows) == 2
+    assert {
+        key: rows[0][key]
+        for key in (
+            "target_id",
+            "classification_status",
+            "component_id",
+            "leaf_id",
+            "path_ids",
+            "path_names",
+            "path_labels",
+            "depth",
+            "root_id",
+            "is_leaf",
+            "l1_id",
+            "l2_id",
+            "l3_id",
+        )
+    } == {
+        "target_id": "CHEMBL_T1",
+        "classification_status": "resolved",
+        "component_id": 10,
+        "leaf_id": 3,
+        "path_ids": "[1,2,3]",
+        "path_names": '["Enzyme","Kinase","Serine/threonine kinase"]',
+        "path_labels": '["1:Enzyme","2:Kinase","3:Serine/threonine kinase"]',
+        "depth": 2,
+        "root_id": 1,
+        "is_leaf": True,
+        "l1_id": 1,
+        "l2_id": 2,
+        "l3_id": 3,
+    }
+    assert {
+        key: rows[1][key]
+        for key in (
+            "target_id",
+            "classification_status",
+            "component_id",
+            "leaf_id",
+            "path_ids",
+            "depth",
+            "root_id",
+            "is_leaf",
+        )
+    } == {
+        "target_id": "CHEMBL_T2",
+        "classification_status": "missing_classification",
+        "component_id": None,
+        "leaf_id": None,
+        "path_ids": None,
+        "depth": None,
+        "root_id": None,
+        "is_leaf": None,
+    }
+    for row in rows:
+        assert row["dataset_version"] == "target-protein-classification-path-v2.1.0"
+        assert row["source_url"].endswith("/protein_classification")
+        assert row["chembl_release"] == "unknown"
+        assert row["chembl_api_version"] == "unknown"
+        assert row["source_manifest_status"] == "release_metadata_unavailable"
+        assert len(row["source_snapshot_fingerprint"]) == 64
+        assert row["target_snapshot_row_count"] == 2
+        assert row["target_component_snapshot_row_count"] == 1
+        assert row["protein_class_snapshot_row_count"] == 3
 
 
 @pytest.mark.asyncio

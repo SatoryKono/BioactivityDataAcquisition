@@ -28,6 +28,32 @@ class TargetProteinClassificationSchema(ETLRecordSchema):
         nullable=True,
         description="Resolved leaf protein classification ID.",
     )
+    path_ids: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Canonical JSON array of root-to-leaf protein class IDs.",
+    )
+    path_names: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Canonical JSON array of root-to-leaf protein class names.",
+    )
+    path_labels: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Canonical JSON array of root-to-leaf display labels.",
+    )
+    depth: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True,
+        ge=0,
+        description="Zero-based depth of the resolved leaf in the hierarchy.",
+    )
+    root_id: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True,
+        ge=1,
+        description="Root protein classification ID for the resolved path.",
+    )
+    is_leaf: Series[bool] | None = pa.Field(
+        nullable=True,
+        description="Whether the row represents a resolved leaf classification.",
+    )
     l1_id: Series[str] | None = pa.Field(
         nullable=True, description="Level 1 protein classification ID."
     )
@@ -72,6 +98,46 @@ class TargetProteinClassificationSchema(ETLRecordSchema):
     )
     l5_desc: Series[str] | None = pa.Field(
         nullable=True, description="Level 5 protein classification description."
+    )
+    dataset_version: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Version of the local target classification dictionary build.",
+    )
+    source_url: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Canonical ChEMBL source resource for protein classifications.",
+    )
+    chembl_release: Series[str] | None = pa.Field(
+        nullable=True,
+        description="ChEMBL release captured in the local snapshot when available.",
+    )
+    chembl_api_version: Series[str] | None = pa.Field(
+        nullable=True,
+        description="ChEMBL API version captured in the local snapshot when available.",
+    )
+    source_manifest_status: Series[str] | None = pa.Field(
+        nullable=True,
+        isin=["release_metadata_available", "release_metadata_unavailable"],
+        description="Availability status for ChEMBL release/API metadata.",
+    )
+    source_snapshot_fingerprint: Series[str] | None = pa.Field(
+        nullable=True,
+        description="SHA-256 fingerprint of local snapshot identifiers.",
+    )
+    target_snapshot_row_count: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True,
+        ge=0,
+        description="Source target snapshot row count used to build the relation.",
+    )
+    target_component_snapshot_row_count: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True,
+        ge=0,
+        description="Source target_component snapshot row count used to build relation.",
+    )
+    protein_class_snapshot_row_count: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True,
+        ge=0,
+        description="Source protein_class snapshot row count used to build relation.",
     )
 
     class Config:

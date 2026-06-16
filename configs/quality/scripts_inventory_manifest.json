@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-16T12:31:43.739984+00:00",
+  "generated_at": "2026-06-16T14:47:20.472573+00:00",
   "summary": {
     "total_scripts": 430,
     "status_counts": {
@@ -5943,7 +5943,7 @@
         },
         {
           "path": "tests/architecture/test_compatibility_facade_inventory.py",
-          "line": 59,
+          "line": 62,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"_compatibility_registry.py\","
         },
@@ -9181,7 +9181,7 @@
         },
         {
           "path": "tests/architecture/test_observability_metric_governance.py",
-          "line": 97,
+          "line": 100,
           "source_group": "tests",
           "text": "== \"scripts/engineering/qa/report_observability_metric_inventory.py\""
         }

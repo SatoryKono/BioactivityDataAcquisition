@@ -6,6 +6,7 @@ Verifies the CLI can be invoked as a module.
 from __future__ import annotations
 
 import os
+import runpy
 import subprocess
 import sys
 from pathlib import Path
@@ -39,6 +40,18 @@ class TestCliMainModule:
 
         # They should be the same function
         assert main is main_from_module
+
+    def test_top_level_module_entrypoint_delegates_to_cli_main(self) -> None:
+        """The retained python -m bioetl seam must stay a thin CLI delegate."""
+        calls: list[str] = []
+
+        with patch(
+            "bioetl.interfaces.cli._main_module.main",
+            side_effect=lambda: calls.append("main"),
+        ):
+            runpy.run_module("bioetl", run_name="__main__")
+
+        assert calls == ["main"]
 
     def test_lazy_command_loader_resolves_only_requested_public_command(self) -> None:
         """Lazy command loading should keep the CLI entrypoint as a thin seam."""

@@ -173,6 +173,32 @@ class TestOpenTelemetryTracerClose:
             pytest.skip("OpenTelemetry is not available")
 
 
+class TestTelemetryExporterSelection:
+    """Tests for telemetry exporter configuration safety."""
+
+    def test_local_otlp_endpoint_defaults_to_insecure(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Local OTLP endpoints must set insecure=True unless explicitly overridden."""
+        from bioetl.infrastructure.observability import tracing
+
+        exporter_factory = MagicMock(return_value=object())
+        monkeypatch.setattr(tracing, "OTLP_AVAILABLE", True)
+        monkeypatch.setattr(tracing, "_OtlpExporterClass", exporter_factory)
+        monkeypatch.setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4317")
+        monkeypatch.delenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", raising=False)
+        monkeypatch.delenv("OTEL_EXPORTER_OTLP_INSECURE", raising=False)
+        monkeypatch.delenv("OTEL_EXPORTER_OTLP_TRACES_INSECURE", raising=False)
+
+        tracing._build_telemetry_exporter()
+
+        exporter_factory.assert_called_once_with(
+            endpoint="http://localhost:4317",
+            insecure=True,
+        )
+
+
 class TestOpenTelemetryTracerSpanAdapter:
     """Tests for span-handle compatibility returned by get_tracer()."""
 

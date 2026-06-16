@@ -23,7 +23,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CONTRACT_VERSION = "1.0.0"
 ENTITY_CONTRACT_VERSIONS: dict[str, str] = {
     "chembl_target": "3.0.0",
-    "chembl_target_protein_classification": "2.0.0",
+    "chembl_target_protein_classification": "2.1.0",
 }
 JSON_SCHEMA_DRAFT7_URI = urlunsplit(
     ("http", "json-schema.org", "/draft-07/schema", "", "")

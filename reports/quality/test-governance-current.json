@@ -3189,14 +3189,14 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "69",
+        "line": "71",
         "path": "tests/unit/infrastructure/observability/test_logging.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_structlog_logger_ignores_event_kwarg_conflict"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "129",
+        "line": "152",
         "path": "tests/unit/infrastructure/observability/test_logging.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_logger_can_log_info"
@@ -3693,8 +3693,8 @@
     "refined_assertless_tests": 0,
     "root": ".",
     "top_duplicate_test_names": [],
-    "total_test_files": 1765,
-    "total_test_functions": 20621,
+    "total_test_files": 1771,
+    "total_test_functions": 20652,
     "uuid4_call_sites": 0
   }
 }

@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 
+from unittest.mock import MagicMock
+
 import pytest
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
@@ -75,6 +77,27 @@ class TestStructlogLogger:
         )
 
         logger.info("pipeline_started", event="pipeline_started", stage="extract")
+
+    def test_logger_methods_sanitize_event_kwarg_collision(self) -> None:
+        """All logger methods must drop colliding event kwargs before delegation."""
+        bound_logger = MagicMock()
+        logger = StructlogLogger(bound_logger)
+
+        logger.warning("warning_event", event="override", stage="silver")
+        logger.error("error_event", event="override", stage="gold")
+        logger.debug("debug_event", event="override", stage="bronze")
+        logger.exception("exception_event", event="override", stage="load")
+
+        bound_logger.warning.assert_called_once_with(
+            "warning_event",
+            stage="silver",
+        )
+        bound_logger.error.assert_called_once_with("error_event", stage="gold")
+        bound_logger.debug.assert_called_once_with("debug_event", stage="bronze")
+        bound_logger.exception.assert_called_once_with(
+            "exception_event",
+            stage="load",
+        )
 
 
 @pytest.mark.unit

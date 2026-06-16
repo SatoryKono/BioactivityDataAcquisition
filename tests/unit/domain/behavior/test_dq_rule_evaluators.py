@@ -11,6 +11,11 @@ from bioetl.domain.behavior._dq_rule_evaluators import (
     _conditional_matches,
     _cross_rule_violated,
 )
+from bioetl.domain.behavior._dq_condition_matchers import _condition_options
+from bioetl.domain.behavior._dq_condition_matchers import _in_condition_matches
+from bioetl.domain.behavior._dq_condition_matchers import _not_in_condition_matches
+from bioetl.domain.behavior._dq_value_coercion import _coerce_list_like
+from bioetl.domain.behavior._dq_value_coercion import _coerce_numeric_value
 from bioetl.domain.behavior._dq_rule_evaluators_vocab import (
     _coerce_string_list_like,
     _coerce_target_json_list,
@@ -462,6 +467,25 @@ def test_conditional_matches_uses_registered_matchers_and_unknown_operator_is_fa
     assert _conditional_matches({"kind": "target"}, _ConditionalRule()) is True  # type: ignore[arg-type]
     assert _conditional_matches({"kind": "other"}, _ConditionalRule()) is False  # type: ignore[arg-type]
     assert _conditional_matches({"kind": "target"}, _UnknownConditionalRule()) is False  # type: ignore[arg-type]
+
+
+def test_condition_options_and_membership_matchers_are_tuple_stable() -> None:
+    assert _condition_options("target") == ("target",)
+    assert _condition_options(("target", "decoy")) == ("target", "decoy")
+    assert _in_condition_matches("target", ("target", "decoy")) is True
+    assert _in_condition_matches("missing", "target") is False
+    assert _not_in_condition_matches("missing", ("target", "decoy")) is True
+    assert _not_in_condition_matches("target", "target") is False
+
+
+def test_value_coercion_rejects_bool_numeric_and_decodes_json_lists() -> None:
+    assert _coerce_numeric_value(True) is None
+    assert _coerce_numeric_value("1.25") == 1.25
+    assert _coerce_numeric_value("not-numeric") is None
+    assert _coerce_list_like(("a", "b")) == ["a", "b"]
+    assert sorted(_coerce_list_like({"b", "a"}) or []) == ["a", "b"]
+    assert _coerce_list_like('["a", 1]') == ["a", 1]
+    assert _coerce_list_like("not-json") is None
 
 
 def test_vocabulary_strategy_resolution_and_target_json_coercion() -> None:

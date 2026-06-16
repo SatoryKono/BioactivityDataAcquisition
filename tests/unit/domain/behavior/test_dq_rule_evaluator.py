@@ -411,3 +411,91 @@ class TestEvaluateDQRulesForRecord:
         # Valid record should generate minimal or no outcomes
         # (Some rules might still generate warnings depending on implementation)
         assert isinstance(outcomes, list)
+
+    def test_rule_outcomes_are_deterministic_and_ordered_by_rule_family(self) -> None:
+        """Repeated evaluation should produce stable IDs, disposition, and provenance."""
+        record = {
+            "required_field": None,
+            "field1": "present",
+            "field2": None,
+            "activity_type": "IC50",
+            "activity_value": -1,
+        }
+        config = DQConfig(
+            field_validations=(
+                FieldValidation(
+                    field="required_field",
+                    validation_type="required",
+                    nullable=False,
+                ),
+            ),
+            cross_field_validations=(
+                CrossFieldValidation(
+                    name="all_present",
+                    fields=("field1", "field2"),
+                    condition="all_present",
+                    severity="error",
+                ),
+            ),
+            conditional_validations=(
+                ConditionalValidation(
+                    name="ic50_positive",
+                    condition_field="activity_type",
+                    condition_value="IC50",
+                    condition_operator="eq",
+                    then_validations=(
+                        FieldValidation(
+                            field="activity_value",
+                            validation_type="range",
+                            min_value=0,
+                        ),
+                    ),
+                ),
+            ),
+            contract_ref="chembl.activity",
+            invalid_record_policy="fail",
+        )
+
+        first_pass = evaluate_dq_rules_for_record(record, dq_config=config)
+        second_pass = evaluate_dq_rules_for_record(record, dq_config=config)
+
+        projected_first = [
+            (
+                outcome.rule_id,
+                outcome.disposition,
+                tuple(outcome.affected_fields or ()),
+                outcome.config_path,
+            )
+            for outcome in first_pass
+        ]
+        projected_second = [
+            (
+                outcome.rule_id,
+                outcome.disposition,
+                tuple(outcome.affected_fields or ()),
+                outcome.config_path,
+            )
+            for outcome in second_pass
+        ]
+
+        assert projected_first == projected_second
+        assert projected_first == [
+            (
+                "field.required_field.required",
+                DQDisposition.FAIL,
+                ("required_field",),
+                "contracts/chembl.activity/dq_rules.yaml",
+            ),
+            (
+                "cross.all_present",
+                DQDisposition.WARN,
+                ("field1", "field2"),
+                "contracts/chembl.activity/dq_rules.yaml",
+            ),
+            (
+                "conditional.ic50_positive.activity_value.range",
+                DQDisposition.FAIL,
+                ("activity_value",),
+                "contracts/chembl.activity/dq_rules.yaml",
+            ),
+        ]

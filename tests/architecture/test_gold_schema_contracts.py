@@ -32,7 +32,7 @@ REQUIRED_SCHEMAS = (
     "chembl_protein_class_v1.0.json",
     "chembl_subcellular_fraction_v1.0.json",
     "chembl_target_v3.0.json",
-    "chembl_target_protein_classification_v2.0.json",
+    "chembl_target_protein_classification_v2.1.json",
     "chembl_target_component_v1.0.json",
     "chembl_tissue_v1.0.json",
     "composite_molecule_v1.0.json",
@@ -205,7 +205,7 @@ class TestGoldSchemaContracts:
         unversioned = [
             name
             for name in schema_files.keys()
-            if not any(f"_v{v}" in name for v in ["1.0", "1.1", "2.0", "3.0"])
+            if not any(f"_v{v}" in name for v in ["1.0", "1.1", "2.0", "2.1", "3.0"])
         ]
 
         assert not unversioned, (

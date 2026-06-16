@@ -107,6 +107,9 @@ log_test.txt
 !/reports/quality/dead-code-inventory.md
 !/reports/quality/module-coverage-inventory.json
 !/reports/quality/architecture-quality-scorecard.json
+!/reports/quality/domain-composite-config-importer-map.md
+!/reports/quality/config-compatibility-legacy-taxonomy-review.json
+!/reports/quality/tech-debt-issues-5253-5264-closeout.json
 !/reports/quality/total-tech-debt-audit-main-2026-06-16.md
 !/reports/quality/test-governance-current.json
 !/reports/quality/test-duplicate-name-inventory.json
@@ -118,6 +121,7 @@ log_test.txt
 !/reports/observability/
 /reports/observability/*
 !/reports/observability/runtime_cardinality_inventory.json
+!/reports/observability/runtime_cardinality_review.json
 /reports/Codex/review_documentation-cascade-audit_*.md
 /reports/Codex/review_py-test-swarm_*.md
 

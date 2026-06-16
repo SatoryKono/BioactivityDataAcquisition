@@ -123,6 +123,12 @@ class TargetProteinClassification(BaseEntity):
     classification_status: str = "resolved"
     component_id: int | None = None
     leaf_id: int | None = None
+    path_ids: str | None = None
+    path_names: str | None = None
+    path_labels: str | None = None
+    depth: int | None = None
+    root_id: int | None = None
+    is_leaf: bool | None = None
     l1_id: int | None = None
     l1_name: str | None = None
     l1_desc: str | None = None
@@ -138,6 +144,15 @@ class TargetProteinClassification(BaseEntity):
     l5_id: int | None = None
     l5_name: str | None = None
     l5_desc: str | None = None
+    dataset_version: str | None = None
+    source_url: str | None = None
+    chembl_release: str | None = None
+    chembl_api_version: str | None = None
+    source_manifest_status: str | None = None
+    source_snapshot_fingerprint: str | None = None
+    target_snapshot_row_count: int | None = None
+    target_component_snapshot_row_count: int | None = None
+    protein_class_snapshot_row_count: int | None = None
 
     def _validate_invariants(self) -> None:
         if not self.target_id:

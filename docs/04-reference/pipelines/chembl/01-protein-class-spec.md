@@ -36,6 +36,10 @@ ______________________________________________________________________
   `protein_class_id`, `parent_id`, `replaced_by`, `pref_name`, `short_name`,
   `protein_class_desc`, `definition`, `class_level`, `sort_order`,
   `downgraded`.
+- BioETL canonical ownership stays on the `protein_class` entity and
+  `chembl_protein_class` pipeline. ChEMBL exposes the same dictionary through
+  the external API resource `/protein_classification`; that provider resource
+  name is not a separate BioETL entity or duplicate DTO surface.
 - This page no longer republishes older dashed labels such as
   `protein-class-id`, `parent-id`, `class-level`, or `sort-order` as the
   active contract.
