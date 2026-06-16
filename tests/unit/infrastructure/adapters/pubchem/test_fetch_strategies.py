@@ -175,6 +175,35 @@ class TestPubChemFetchStrategiesInit:
 
         assert strategies._provider_name == "pubchem"
 
+    def test_record_request_uses_collector_when_available(
+        self,
+        mock_logger,
+        mock_rate_limiter,
+        mock_circuit_breaker,
+        mock_entity_mapper,
+        mock_run_in_executor,
+    ):
+        """Request collector receives canonical PubChem URL and estimated size."""
+        collector = MagicMock()
+        strategies = PubChemFetchStrategies(
+            logger=mock_logger,
+            rate_limiter=mock_rate_limiter,
+            circuit_breaker=mock_circuit_breaker,
+            mapper=mock_entity_mapper,
+            run_in_executor=mock_run_in_executor,
+            request_collector=collector,
+        )
+
+        strategies._record_request("/compound/name/water/json", 12.5, result_count=3)
+
+        collector.record_request.assert_called_once_with(
+            url="https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/water/json",
+            method="GET",
+            response_size=6000,
+            duration_ms=12.5,
+            status_code=200,
+        )
+
 
 @pytest.mark.unit
 class TestFetchByQuery:
@@ -310,6 +339,37 @@ class TestFetchBySmiles:
         assert len(results) == 2
 
     @pytest.mark.asyncio
+    async def test_fetch_by_smiles_limit_zero_skips_api_calls(
+        self, fetch_strategies, mock_circuit_breaker
+    ):
+        """A zero limit should stop before scheduling the first chunk."""
+        results = await collect_async_iterator(
+            fetch_strategies.fetch_by_smiles(["CC", "CCC"], limit=0)
+        )
+
+        assert results == []
+        mock_circuit_breaker.call.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_fetch_by_smiles_stops_mid_chunk_when_limit_is_reached(
+        self, fetch_strategies
+    ):
+        """The async chunk iterator can yield more records than the requested limit."""
+
+        async def fake_iter_chunk_records(chunk: list[str]) -> AsyncIterator[dict[str, int]]:
+            assert chunk == ["CC", "CCC"]
+            for molecule_id in (1, 2, 3):
+                yield {"molecule_id": molecule_id}
+
+        fetch_strategies._iter_smiles_chunk_records = fake_iter_chunk_records
+
+        results = await collect_async_iterator(
+            fetch_strategies.fetch_by_smiles(["CC", "CCC"], limit=2, batch_size=2)
+        )
+
+        assert results == [{"molecule_id": 1}, {"molecule_id": 2}]
+
+    @pytest.mark.asyncio
     async def test_fetch_by_smiles_logs_warning_on_error(
         self, fetch_strategies, mock_circuit_breaker, mock_logger
     ):
@@ -404,6 +464,18 @@ class TestFetchByCids:
         assert len(results) == 5
 
     @pytest.mark.asyncio
+    async def test_fetch_by_cids_limit_zero_skips_first_batch(
+        self, fetch_strategies, mock_circuit_breaker
+    ):
+        """A zero CID limit should return before issuing a batch request."""
+        results = await collect_async_iterator(
+            fetch_strategies.fetch_by_cids(["2244", "3672"], limit=0)
+        )
+
+        assert results == []
+        mock_circuit_breaker.call.assert_not_called()
+
+    @pytest.mark.asyncio
     async def test_fetch_by_cids_logs_warning_on_batch_error(
         self, fetch_strategies, mock_circuit_breaker, mock_logger
     ):
@@ -419,6 +491,88 @@ class TestFetchByCids:
         mock_logger.warning.assert_called()
         call_args = mock_logger.warning.call_args
         assert call_args[0][0] == "molecule_id_batch_fetch_failed"
+
+
+@pytest.mark.unit
+class TestFetchByInchiKey:
+    """Tests for fetch_by_inchikey method."""
+
+    @pytest.mark.asyncio
+    async def test_fetch_by_inchikey_yields_compounds(
+        self, fetch_strategies, mock_circuit_breaker, mock_entity_mapper
+    ):
+        """Valid InChIKey values are routed through the PubChem compound mapper."""
+        mock_compound = MagicMock(molecule_id=702)
+        mock_circuit_breaker.call.return_value = [mock_compound]
+
+        results = await collect_async_iterator(
+            fetch_strategies.fetch_by_inchikey(
+                ["BSYNRYMUTXBXSQ-UHFFFAOYSA-N"], limit=None
+            )
+        )
+
+        assert len(results) == 1
+        mock_entity_mapper.compound_to_dict.assert_called_once_with(mock_compound)
+
+    @pytest.mark.asyncio
+    async def test_fetch_by_inchikey_skips_blank_and_invalid_values(
+        self, fetch_strategies, mock_circuit_breaker, mock_logger
+    ):
+        """Invalid InChIKey selectors should be skipped without network calls."""
+        results = await collect_async_iterator(
+            fetch_strategies.fetch_by_inchikey(["", "bad-key"], limit=None)
+        )
+
+        assert results == []
+        mock_circuit_breaker.call.assert_not_called()
+        mock_logger.warning.assert_called_once()
+        assert mock_logger.warning.call_args[0][0] == "invalid_inchikey_skipped"
+
+    @pytest.mark.asyncio
+    async def test_fetch_by_inchikey_logs_fetch_errors(
+        self, fetch_strategies, mock_circuit_breaker, mock_logger
+    ):
+        """Fetch strategy errors are logged and do not stop later chunk processing."""
+        mock_circuit_breaker.call.side_effect = RuntimeError("API error")
+
+        results = await collect_async_iterator(
+            fetch_strategies.fetch_by_inchikey(
+                ["BSYNRYMUTXBXSQ-UHFFFAOYSA-N"], limit=None
+            )
+        )
+
+        assert results == []
+        mock_logger.warning.assert_called()
+        assert mock_logger.warning.call_args[0][0] == "inchikey_fetch_failed"
+
+    @pytest.mark.asyncio
+    async def test_fetch_by_inchikey_stops_mid_chunk_when_limit_is_reached(
+        self, fetch_strategies
+    ):
+        """The InChIKey iterator enforces limits after records are yielded."""
+
+        async def fake_iter_chunk_records(chunk: list[str]) -> AsyncIterator[dict[str, int]]:
+            assert chunk == [
+                "BSYNRYMUTXBXSQ-UHFFFAOYSA-N",
+                "LFQSCWFLJHTTHZ-UHFFFAOYSA-N",
+            ]
+            for molecule_id in (1, 2, 3):
+                yield {"molecule_id": molecule_id}
+
+        fetch_strategies._iter_inchikey_chunk_records = fake_iter_chunk_records
+
+        results = await collect_async_iterator(
+            fetch_strategies.fetch_by_inchikey(
+                [
+                    "BSYNRYMUTXBXSQ-UHFFFAOYSA-N",
+                    "LFQSCWFLJHTTHZ-UHFFFAOYSA-N",
+                ],
+                limit=2,
+                batch_size=2,
+            )
+        )
+
+        assert results == [{"molecule_id": 1}, {"molecule_id": 2}]
 
 
 @pytest.mark.unit

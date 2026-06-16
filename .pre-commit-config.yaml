@@ -15,7 +15,7 @@ default_install_hook_types:
 repos:
   # Ruff - Fast Python linter and formatter
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.10
+    rev: v0.15.17
     hooks:
       # Run the linter
       - id: ruff
@@ -29,11 +29,11 @@ repos:
 
   # Security checks
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.9.2
+    rev: 1.9.4
     hooks:
       - id: bandit
         args: [-c, pyproject.toml, -r, src/bioetl]
-        additional_dependencies: ["bandit[toml]==1.9.2"]
+        additional_dependencies: ["bandit[toml]==1.9.4"]
         pass_filenames: false
         stages: [pre-push]
 
@@ -58,13 +58,13 @@ repos:
       - id: check-yaml
         stages: [pre-commit]
         exclude: >
-          (?x)(^|.*[\\/])(
+          (?x)(^|.*/)(
             mkdocs\.yml|
-            docs[/\\]plugins[/\\]link_checker[/\\]mkdocs_example\.yml|
-            docs[/\\]05-operations[/\\]deployment[/\\]k8s-deployment\.yaml|
-            docs[/\\]05-operations[/\\]deployment[/\\]k8s-monitoring\.yaml|
-            docs[/\\]05-operations[/\\]deployment[/\\]k8s-networking\.yaml|
-            docs[/\\].*\.ya?ml
+            docs/plugins/link_checker/mkdocs_example\.yml|
+            docs/05-operations/deployment/k8s-deployment\.yaml|
+            docs/05-operations/deployment/k8s-monitoring\.yaml|
+            docs/05-operations/deployment/k8s-networking\.yaml|
+            docs/.*\.ya?ml
           )$
       - id: check-json
         stages: [pre-commit]
@@ -98,16 +98,16 @@ repos:
           - mdformat-gfm==0.4.1
           - mdformat-black==0.1.1
         exclude: >
-          (?x)(^|.*[\\/])(
+          (?x)(^|.*/)(
             CHANGELOG\.md|
-            \.codex[/\\].*\.md|
-            \.gemini[/\\].*\.md|
-            docs[/\\]00-project[/\\]ai[/\\](agents|skills)[/\\].*\.md|
-            docs[/\\]02-architecture[/\\]decisions[/\\].*\.md|
-            docs[/\\]03-guides[/\\].*\.md|
-            docs[/\\]05-architecture[/\\].*\.md|
-            docs[/\\]05-operations[/\\]runbooks[/\\].*\.md|
-            grafana[/\\]README\.md
+            \.codex/.*\.md|
+            \.gemini/.*\.md|
+            docs/00-project/ai/(agents|skills)/.*\.md|
+            docs/02-architecture/decisions/.*\.md|
+            docs/03-guides/.*\.md|
+            docs/05-architecture/.*\.md|
+            docs/05-operations/runbooks/.*\.md|
+            grafana/README\.md
           )$
 
   # Local hooks
@@ -116,7 +116,7 @@ repos:
       - id: pip-audit
         name: Check for known vulnerabilities in dependencies
         entry: python scripts/engineering/dev/run_project_python.py -m pip_audit --cache-dir .cache/pip-audit --skip-editable --strict
-        language: system
+        language: python
         pass_filenames: false
         stages: [manual]
         verbose: true
@@ -124,7 +124,7 @@ repos:
       - id: mypy-strict
         name: Run strict mypy gate on src/bioetl
         entry: python scripts/engineering/dev/run_project_python.py -m mypy --config-file pyproject.toml --strict --no-incremental src/bioetl
-        language: system
+        language: python
         pass_filenames: false
         stages: [pre-push]
 
@@ -144,7 +144,7 @@ repos:
           tests/architecture/test_domain_normalization_guardrails.py::test_domain_normalization_modules_have_no_disallowed_runtime_imports
           tests/architecture/test_domain_normalization_guardrails.py::test_domain_normalization_modules_do_not_call_open
           -q --tb=short
-        language: system
+        language: python
         pass_filenames: false
         stages: [pre-push]
 
@@ -154,7 +154,7 @@ repos:
           python scripts/engineering/dev/run_project_python.py -m pytest
           tests/architecture/ -m "not slow and not benchmark and not memory"
           -q --tb=short
-        language: system
+        language: python
         pass_filenames: false
         stages: [manual]
 
@@ -164,7 +164,7 @@ repos:
           python scripts/engineering/dev/run_project_python.py -m
           scripts.engineering.qa run-tests --suite smoke --skip-preflight --
           --no-cov
-        language: system
+        language: python
         pass_filenames: false
         stages: [manual]
 
@@ -183,7 +183,7 @@ repos:
             .*\.python-user/.*|
             .*\.codex_tmp/.*
           )$
-        exclude: ^(tests/|\.codex/|\.gemini/|\.agent-work/)
+        exclude: ^(\.codex/|\.gemini/|\.agent-work/)
         stages: [pre-commit]
 
       - id: forbid-env-files
@@ -197,7 +197,7 @@ repos:
       - id: commit-message-conventional
         name: Check Conventional Commit header
         entry: >
-          \A(?=[^\r\n]{1,100}(?:\r?\n|\Z))(?:Merge|Revert|(?:feat|fix|refactor|docs|test|chore|perf|ci|build|style|revert)(?:\([a-z0-9._/-]+\))?: [^\r\n]+)(?:\r?\n|\Z)
+          \A(?:Merge[^\r\n]*|Revert[^\r\n]*|(?=[^\r\n]{1,100}(?:\r?\n|\Z))(?:feat|fix|refactor|docs|test|chore|perf|ci|build|style|revert)(?:\([a-z0-9._/-]+\))?!?: [^\r\n]+)(?:\r?\n|\Z)
         language: pygrep
         args: [--multiline, --negate]
         pass_filenames: true
@@ -206,7 +206,7 @@ repos:
       - id: validate-pipeline-configs
         name: Validate unified pipeline YAML configs
         entry: python scripts/engineering/dev/run_project_python.py -m scripts.schema validate-configs
-        language: system
+        language: python
         files: ^configs/(entities|composites|_schema)/.*\.(yaml|json)$
         pass_filenames: false
         stages: [pre-commit]
@@ -214,14 +214,14 @@ repos:
       - id: audit-root-cleanliness
         name: Audit repository root layout allowlist
         entry: python scripts/engineering/dev/run_project_python.py -m scripts.engineering.repo check-cleanliness
-        language: system
+        language: python
         pass_filenames: false
         stages: [pre-commit]
 
       - id: lint-config-paths
         name: Check for legacy dq/filter config path references
         entry: python scripts/engineering/dev/run_project_python.py -m scripts.schema check-config-paths
-        language: system
+        language: python
         pass_filenames: false
         files: ^(configs/|src/|docs/)
         exclude: ^src/bioetl/infrastructure/config/config_ci_contract\.py$
@@ -231,7 +231,7 @@ repos:
       - id: check-config-invariants
         name: Validate config CI invariants (naming, schemas, auth, keys)
         entry: python scripts/engineering/dev/run_project_python.py -m scripts.schema check-invariants
-        language: system
+        language: python
         pass_filenames: false
         files: ^configs/
         exclude: ^configs/entities/composite/
@@ -241,14 +241,14 @@ repos:
       - id: lint-diagrams
         name: Lint architecture diagrams (.mmd/.mermaid)
         entry: python scripts/engineering/dev/run_project_python.py -m scripts.diagrams lint
-        language: system
+        language: python
         files: ^docs/02-architecture/(mmd-diagrams/.*\.mmd|diagrams/mermaid/.*\.mermaid)$
         stages: [pre-commit]
 
       - id: prune-orphan-diagram-nodes
         name: Check for orphan nodes in Mermaid diagrams (GRAPH-001)
         entry: python scripts/engineering/dev/run_project_python.py -m scripts.diagrams fix-orphans --check
-        language: system
+        language: python
         files: ^docs/02-architecture/(mmd-diagrams/.*\.mmd|diagrams/mermaid/.*\.mermaid)$
         pass_filenames: false
         stages: [pre-commit]
@@ -257,7 +257,7 @@ repos:
       - id: repo-identity-check
         name: Check repository identity synchronization
         entry: python scripts/engineering/dev/run_project_python.py -m scripts.docs sync-repo-identity --check
-        language: system
+        language: python
         pass_filenames: false
         stages: [manual]
 
@@ -270,7 +270,7 @@ repos:
           --check-lifecycle
           --forbid-evaluate-active
           --lifecycle-registry configs/quality/scripts_lifecycle_registry.json
-        language: system
+        language: python
         pass_filenames: false
         stages: [manual]
 
@@ -279,7 +279,7 @@ repos:
         entry: >
           python scripts/engineering/dev/run_project_python.py -m scripts.engineering.repo
           check-catalog --catalog scripts/engineering/repo/catalog.yaml
-        language: system
+        language: python
         pass_filenames: false
         stages: [manual]
 
@@ -288,7 +288,7 @@ repos:
         entry: >
           python scripts/engineering/dev/run_project_python.py -m scripts.docs
           check-links --links --specs --configs
-        language: system
+        language: python
         pass_filenames: false
         stages: [manual]
 
@@ -297,7 +297,7 @@ repos:
         entry: >
           python scripts/engineering/dev/run_project_python.py -m scripts.docs
           check-drift --ports --classes
-        language: system
+        language: python
         pass_filenames: false
         stages: [manual]
 
@@ -306,7 +306,7 @@ repos:
         entry: >
           python scripts/engineering/dev/run_project_python.py -m scripts.docs
           check-docstrings --summary
-        language: system
+        language: python
         pass_filenames: false
         stages: [manual]
 
@@ -315,7 +315,7 @@ repos:
         entry: >
           python scripts/engineering/dev/run_project_python.py -m scripts.engineering.qa.vcr
           check-placement
-        language: system
+        language: python
         pass_filenames: false
         stages: [manual]
 
@@ -324,15 +324,16 @@ repos:
         entry: >
           python scripts/engineering/dev/run_project_python.py -m scripts.engineering.qa.vcr
           check-naming
-        language: system
+        language: python
         pass_filenames: false
         stages: [manual]
 
       - id: check-architecture-dependency-map-drift
         name: Check architecture dependency-map docs drift
         entry: >
-          python scripts/engineering/qa/generate_architecture_dependency_map.py --check
-        language: system
+          python scripts/engineering/dev/run_project_python.py
+          scripts/engineering/qa/generate_architecture_dependency_map.py --check
+        language: python
         pass_filenames: false
         files: ^(src/bioetl/.*\.py|docs/02-architecture/generated/module-dependency-map\.(md|json)|scripts/engineering/qa/generate_architecture_dependency_map\.py)$
         stages: [manual]
@@ -340,6 +341,6 @@ repos:
       - id: ruff-scripts-advisory
         name: Ruff advisory scan for scripts backlog
         entry: python scripts/engineering/dev/run_project_python.py -m ruff check scripts --exit-zero
-        language: system
+        language: python
         pass_filenames: false
         stages: [manual]

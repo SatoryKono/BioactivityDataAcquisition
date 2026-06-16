@@ -2,9 +2,26 @@
 
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 import pytest
 
 from bioetl.domain.behavior._dq_rule_evaluators import _field_rule_violated
+from bioetl.domain.behavior._dq_rule_evaluators import (
+    _conditional_matches,
+    _cross_rule_violated,
+)
+from bioetl.domain.behavior._dq_rule_evaluators_vocab import (
+    _coerce_string_list_like,
+    _coerce_target_json_list,
+    _is_invalid_xref_item,
+    _publication_taxonomy_rule_violated,
+    _publication_taxonomy_vocabulary,
+    _resolve_custom_validation_strategy,
+    _target_json_vocabulary_rule_violated,
+    _target_xref_json_vocabulary_rule_violated,
+)
+from bioetl.domain.config.validation import CrossFieldValidation
 from bioetl.domain.config.validation import FieldValidation
 
 
@@ -228,4 +245,287 @@ def test_target_organism_custom_rule_keeps_binomial_fallback_without_taxonomy_id
             rule,
         )
         is False
+    )
+
+
+def test_field_rule_dispatch_covers_required_null_range_pattern_and_enum_rules() -> None:
+    assert _field_rule_violated(
+        {},
+        FieldValidation(field="pmid", validation_type="required"),
+    )
+    assert _field_rule_violated(
+        {"pmid": None},
+        FieldValidation(field="pmid", validation_type="not_null"),
+    )
+    assert not _field_rule_violated(
+        {"year": 2024},
+        FieldValidation(
+            field="year",
+            validation_type="range",
+            min_value=1900,
+            max_value=2100,
+        ),
+    )
+    assert _field_rule_violated(
+        {"year": "not-numeric"},
+        FieldValidation(field="year", validation_type="range"),
+    )
+    assert not _field_rule_violated(
+        {"doi": "10.1000/example"},
+        FieldValidation(field="doi", validation_type="pattern", pattern=r"^10\."),
+    )
+    assert _field_rule_violated(
+        {"doi": "bad"},
+        FieldValidation(field="doi", validation_type="pattern", pattern=r"^10\."),
+    )
+    assert not _field_rule_violated(
+        {"source": "pubmed"},
+        FieldValidation(
+            field="source",
+            validation_type="enum",
+            allowed=("pubmed", "crossref"),
+        ),
+    )
+    assert _field_rule_violated(
+        {"source": "unknown"},
+        FieldValidation(
+            field="source",
+            validation_type="enum",
+            allowed=("pubmed", "crossref"),
+        ),
+    )
+
+
+def test_field_rule_dispatch_covers_max_length_list_custom_and_unknown_rules() -> None:
+    assert not _field_rule_violated(
+        {"title": "short"},
+        FieldValidation(field="title", validation_type="max_length", max_length=10),
+    )
+    assert _field_rule_violated(
+        {"title": "too long"},
+        FieldValidation(field="title", validation_type="max_length", max_length=3),
+    )
+    assert not _field_rule_violated(
+        {"authors": ["A"]},
+        FieldValidation(field="authors", validation_type="not_empty_list"),
+    )
+    assert _field_rule_violated(
+        {"authors": []},
+        FieldValidation(field="authors", validation_type="not_empty_list"),
+    )
+    assert not _field_rule_violated(
+        {"smiles": "CCO"},
+        FieldValidation(
+            field="smiles",
+            validation_type="custom",
+            validator="smiles_validator",
+        ),
+    )
+    assert _field_rule_violated(
+        {"smiles": "invalid smiles"},
+        FieldValidation(
+            field="smiles",
+            validation_type="custom",
+            validator="smiles_validator",
+        ),
+    )
+    assert not _field_rule_violated(
+        {"field": "value"},
+        FieldValidation(field="field", validation_type="required"),
+    )
+
+
+def test_field_rule_dispatch_covers_malformed_rule_inputs_and_unknown_dispatcher() -> None:
+    unknown_rule = SimpleNamespace(field="field", validation_type="unknown")
+    assert not _field_rule_violated({"field": "value"}, unknown_rule)  # type: ignore[arg-type]
+
+    assert _field_rule_violated(
+        {"doi": "10.1000/example"},
+        FieldValidation(field="doi", validation_type="pattern", pattern=None),
+    )
+    assert _field_rule_violated(
+        {"doi": 10},
+        FieldValidation(field="doi", validation_type="pattern", pattern=r"^10\."),
+    )
+    assert _field_rule_violated(
+        {"title": "short"},
+        FieldValidation(field="title", validation_type="max_length", max_length=None),
+    )
+    assert _field_rule_violated(
+        {"title": 123},
+        FieldValidation(field="title", validation_type="max_length", max_length=5),
+    )
+    assert _field_rule_violated(
+        {"authors": object()},
+        FieldValidation(field="authors", validation_type="not_empty_list"),
+    )
+    assert not _field_rule_violated(
+        {"field": "value"},
+        FieldValidation(field="field", validation_type="custom", validator="unknown"),
+    )
+    assert _field_rule_violated(
+        {"protein_class_id": "PC1", "parent_id": "PC1"},
+        FieldValidation(
+            field="protein_class_id",
+            validation_type="custom",
+            validator="validate_hierarchy_no_self_reference",
+        ),
+    )
+
+
+def test_field_rule_dispatch_ignores_optional_missing_values() -> None:
+    assert not _field_rule_violated(
+        {},
+        FieldValidation(field="optional", validation_type="range"),
+    )
+    assert not _field_rule_violated(
+        {"optional": None},
+        FieldValidation(field="optional", validation_type="pattern", pattern=r".+"),
+    )
+    assert not _field_rule_violated(
+        {"optional": None},
+        FieldValidation(field="optional", validation_type="enum", allowed=("x",)),
+    )
+    assert not _field_rule_violated(
+        {"optional": None},
+        FieldValidation(field="optional", validation_type="custom", validator="unknown"),
+    )
+
+
+def test_cross_rule_dispatch_covers_standard_conditions_and_unknown_condition() -> None:
+    assert _cross_rule_violated(
+        {"a": 1},
+        CrossFieldValidation(name="all", fields=("a", "b"), condition="all_present"),
+    )
+    assert _cross_rule_violated(
+        {"a": None, "b": None},
+        CrossFieldValidation(name="any", fields=("a", "b"), condition="any_present"),
+    )
+    assert _cross_rule_violated(
+        {"a": 1, "b": 2},
+        CrossFieldValidation(
+            name="exclusive",
+            fields=("a", "b"),
+            condition="mutually_exclusive",
+        ),
+    )
+    assert _cross_rule_violated(
+        {"trigger": "yes"},
+        CrossFieldValidation(
+            name="conditional",
+            fields=("trigger", "required"),
+            condition="conditional_required",
+            trigger_field="trigger",
+            required_field="required",
+        ),
+    )
+    assert not _cross_rule_violated(
+        {"trigger": None},
+        CrossFieldValidation(
+            name="conditional",
+            fields=("trigger", "required"),
+            condition="conditional_required",
+            trigger_field="trigger",
+            required_field="required",
+        ),
+    )
+    assert _cross_rule_violated(
+        {"protein_class_id": "PC1", "parent_id": "PC1"},
+        CrossFieldValidation(
+            name="custom",
+            fields=("protein_class_id", "parent_id"),
+            condition="custom",
+            validator="validate_hierarchy_no_self_reference",
+        ),
+    )
+    assert not _cross_rule_violated(
+        {"a": 1},
+        CrossFieldValidation(name="unknown", fields=("a",), condition="custom"),
+    )
+    unknown_rule = SimpleNamespace(fields=("a",), condition="unknown")
+    assert not _cross_rule_violated({"a": 1}, unknown_rule)  # type: ignore[arg-type]
+
+
+class _ConditionalRule:
+    condition_field = "kind"
+    condition_operator = "eq"
+    condition_value = "target"
+
+
+class _UnknownConditionalRule:
+    condition_field = "kind"
+    condition_operator = "unknown"
+    condition_value = "target"
+
+
+def test_conditional_matches_uses_registered_matchers_and_unknown_operator_is_false() -> None:
+    assert _conditional_matches({"kind": "target"}, _ConditionalRule()) is True  # type: ignore[arg-type]
+    assert _conditional_matches({"kind": "other"}, _ConditionalRule()) is False  # type: ignore[arg-type]
+    assert _conditional_matches({"kind": "target"}, _UnknownConditionalRule()) is False  # type: ignore[arg-type]
+
+
+def test_vocabulary_strategy_resolution_and_target_json_coercion() -> None:
+    strategy = _resolve_custom_validation_strategy(
+        "validate_target_component_types_json_vocab"
+    )
+    assert strategy is not None
+    assert strategy('["PROTEIN"]', "validate_target_component_types_json_vocab") is False
+    assert strategy('["UNKNOWN"]', "validate_target_component_types_json_vocab") is True
+    assert _resolve_custom_validation_strategy("missing") is None
+
+    assert _coerce_string_list_like("") == []
+    assert _coerce_string_list_like("{}") is None
+    assert _coerce_string_list_like("[not-json]") is None
+    assert _coerce_target_json_list(["PROTEIN"]) == ["PROTEIN"]
+    assert _coerce_target_json_list({"bad": "shape"}) is None
+    assert _target_json_vocabulary_rule_violated(
+        ["PROTEIN", 123],
+        allowed_values=frozenset({"PROTEIN"}),
+    )
+
+
+def test_xref_and_publication_taxonomy_vocabulary_strategies() -> None:
+    xref_strategy = _resolve_custom_validation_strategy(
+        "validate_target_xref_src_db_json_vocab"
+    )
+    assert xref_strategy is not None
+    assert (
+        xref_strategy(
+            '[{"xref_src_db":"UniProt"}]',
+            "validate_target_xref_src_db_json_vocab",
+        )
+        is False
+    )
+    assert (
+        xref_strategy(
+            '[{"xref_src_db":"UnknownDB"}]',
+            "validate_target_xref_src_db_json_vocab",
+        )
+        is True
+    )
+    assert _target_xref_json_vocabulary_rule_violated(
+        ["bad"],
+        allowed_values=frozenset({"UniProt"}),
+    )
+    assert _is_invalid_xref_item({"xref_src_db": 1}, frozenset({"UniProt"}))
+
+    taxonomy = _publication_taxonomy_vocabulary(
+        "validate_publication_type_unified_taxonomy"
+    )
+    assert taxonomy is not None
+    taxonomy_strategy = _resolve_custom_validation_strategy(
+        "validate_publication_type_unified_taxonomy"
+    )
+    assert taxonomy_strategy is not None
+    assert (
+        taxonomy_strategy("not-in-taxonomy", "validate_publication_type_unified_taxonomy")
+        is True
+    )
+    assert not _publication_taxonomy_rule_violated(
+        "research-article",
+        allowed_values=frozenset({"research-article"}),
+    )
+    assert _publication_taxonomy_rule_violated(
+        123,
+        allowed_values=frozenset({"research-article"}),
     )
