@@ -9,7 +9,7 @@ Commands:
     verify             Run the canonical docs verification chain
     build-site         Build the MkDocs site through the packaged build entrypoint
     check-links        Check documentation links, specs, and configs
-    check-drift        Check documentation drift (ports, classes, runtime mirrors, freshness)
+    check-drift        Check documentation drift (ports, classes, bounded narrative parity, runtime mirrors, freshness)
     check-docstrings   Check docstring coverage
     check-kpi          Report documentation KPI metrics
     export-matrix-structural-contract Export canonical runtime structural contract for ChEMBL matrix sync

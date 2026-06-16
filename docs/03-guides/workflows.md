@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.0.1
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-08'
+  Last verified: '2026-06-16'
 
 ______________________________________________________________________
 
@@ -16,7 +16,7 @@ ______________________________________________________________________
 ## Purpose
 
 This guide describes the canonical BioETL `workflow` object for the active
-Workflow Control Plane backlog.
+Workflow Control Plane.
 
 It connects:
 
@@ -78,7 +78,7 @@ The target and shipped workflow control plane is the **manifest + ledger + execu
 
 > Deprecated wording: any older docs/text that describe workflow resume as ledger-only or name-only are deprecated. Use ADR-047 + this guide + the workflow runbook as the canonical set.
 
-## Historical Rollout Scope
+## Historical Rollout Traceability
 
 The workflow control-plane rollout centered on these historical issue IDs. They
 remain useful as traceability anchors, but the current behavior is defined by
@@ -201,7 +201,7 @@ ordered list.
 
 ## Identity Model
 
-The workflow backlog implies three different identity layers.
+The workflow model uses three different identity layers.
 
 ### 1. Definition Identity
 
@@ -544,7 +544,10 @@ If a future workflow needs composite reconciliation keys, keep the paired
 `source_keys` / `reference_keys` lists aligned and prefer logical table names
 only.
 
-Not yet fully shipped from the open backlog:
+## Future Work Outside The Active Contract
+
+The items below remain useful roadmap context, but they are not part of the
+current shipped workflow contract:
 
 - multi-runtime or distributed workflow coordination;
 - separate workflow-manifest diff/show namespace beyond the published
