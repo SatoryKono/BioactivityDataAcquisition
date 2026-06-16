@@ -96,3 +96,24 @@ def test_setup_plugins_prefers_local_venv_and_windows_git_fallback() -> None:
     assert "elif command -v uv >/dev/null 2>&1; then" in content
     assert "\\$env:Path='C:\\\\Program Files\\\\Git\\\\cmd;'+\\$env:Path" in content
     assert "\\$env:PRE_COMMIT_HOME=" in content
+
+
+def test_setup_plugins_supports_hook_only_install_and_commit_msg_hook() -> None:
+    """setup_plugins should expose a hook-only path and install commit-msg."""
+    root = repo_root()
+    content = (root / "scripts/ops/launchers/codex/setup_plugins.sh").read_text(
+        encoding="utf-8"
+    )
+
+    assert "--hooks-only" in content
+    assert "--hook-type commit-msg" in content
+
+
+def test_make_precommit_install_reuses_setup_plugins_helper() -> None:
+    """Makefile precommit-install should reuse the canonical setup helper."""
+    root = repo_root()
+    makefile = (root / "Makefile").read_text(encoding="utf-8")
+
+    assert (
+        "bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only" in makefile
+    )

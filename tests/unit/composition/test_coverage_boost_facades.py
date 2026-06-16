@@ -27,6 +27,191 @@ from bioetl.composition.runtime_builders import (
 pytestmark = pytest.mark.repo_backed
 
 
+def _install_workflow_runner_service_dependencies(
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    tmp_path: Path,
+    created: dict[str, object],
+) -> None:
+    workflow_runner_module = ModuleType("workflow_runner_service")
+
+    class _WorkflowRunnerService:
+        def __init__(self, **kwargs):
+            created["workflow_runner_service"] = kwargs
+
+    workflow_runner_module.WorkflowRunnerService = _WorkflowRunnerService
+    monkeypatch.setitem(
+        sys.modules,
+        "bioetl.application.services.workflow_runner_service",
+        workflow_runner_module,
+    )
+
+    transform_service_module = ModuleType("workflow_transform_service")
+
+    class _WorkflowTransformService:
+        def __init__(self, **kwargs):
+            created["transform_service"] = kwargs
+
+    transform_service_module.WorkflowTransformService = _WorkflowTransformService
+    monkeypatch.setitem(
+        sys.modules,
+        "bioetl.application.services.workflow_transform_service",
+        transform_service_module,
+    )
+
+    transforms_module = ModuleType("workflow_transforms")
+    transforms_module.WorkflowTransformRegistry = lambda: "transform_registry"
+    monkeypatch.setitem(
+        sys.modules,
+        "bioetl.application.workflow.transforms",
+        transforms_module,
+    )
+
+    builtins_module = ModuleType("workflow_transforms_builtins")
+    builtins_module.register_builtin_workflow_transforms = (
+        lambda registry, foreign_key_reconciliation_port: (
+            "registered_registry",
+            registry,
+            foreign_key_reconciliation_port,
+        )
+    )
+    monkeypatch.setitem(
+        sys.modules,
+        "bioetl.application.workflow.transforms.builtins",
+        builtins_module,
+    )
+
+    observability_module = ModuleType("observability")
+    observability_module.bootstrap_logger = (
+        lambda name: SimpleNamespace(bind=lambda **kwargs: ("logger", name, kwargs))
+    )
+    monkeypatch.setitem(
+        sys.modules,
+        "bioetl.composition.bootstrap.runtime.observability",
+        observability_module,
+    )
+
+    noop_module = ModuleType("noop")
+    noop_module.create_noop_logger = lambda: "noop-logger"
+    monkeypatch.setitem(
+        sys.modules,
+        "bioetl.composition.bootstrap.cli.noop",
+        noop_module,
+    )
+
+    port_factories = ModuleType("port_factories")
+    port_factories.create_metrics = lambda settings: "metrics"
+    monkeypatch.setitem(
+        sys.modules,
+        "bioetl.composition.factories.services.port_factories",
+        port_factories,
+    )
+
+    silver_writer_module = ModuleType("silver_writer")
+
+    class _SilverWriter:
+        def __init__(self, **kwargs):
+            created["silver_writer"] = kwargs
+
+    silver_writer_module.SilverWriter = _SilverWriter
+    monkeypatch.setitem(
+        sys.modules,
+        "bioetl.infrastructure.storage.silver_writer",
+        silver_writer_module,
+    )
+
+    quarantine_module = ModuleType("quarantine")
+    quarantine_module.UnifiedQuarantineAdapter = lambda **kwargs: ("quarantine", kwargs)
+    monkeypatch.setitem(
+        sys.modules,
+        "bioetl.infrastructure.quarantine",
+        quarantine_module,
+    )
+
+    reconciliation_module = ModuleType("reconciliation")
+    reconciliation_module.SilverForeignKeyReconciliationAdapter = (
+        lambda **kwargs: ("reconciliation", kwargs)
+    )
+    monkeypatch.setitem(
+        sys.modules,
+        "bioetl.infrastructure.storage.workflow_foreign_key_reconciliation",
+        reconciliation_module,
+    )
+
+    monkeypatch.setattr(
+        _workflow_services,
+        "get_settings",
+        lambda: SimpleNamespace(
+            silver_path=tmp_path / "silver",
+            quarantine_path=tmp_path / "quarantine",
+            data_dir=tmp_path,
+        ),
+    )
+
+
+def _install_workflow_execution_service_dependencies(
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    created: dict[str, object],
+) -> None:
+    execution_module = ModuleType("execution_service")
+
+    class _WorkflowExecutionService:
+        def __init__(self, **kwargs):
+            created["execution_service"] = kwargs
+
+    execution_module.WorkflowExecutionService = _WorkflowExecutionService
+    monkeypatch.setitem(
+        sys.modules,
+        "bioetl.application.services.control_plane.workflow.execution_service",
+        execution_module,
+    )
+
+    manifest_service_module = ModuleType("manifest_service")
+    manifest_service_module.WorkflowManifestService = lambda **kwargs: (
+        "manifest_service",
+        kwargs,
+    )
+    monkeypatch.setitem(
+        sys.modules,
+        "bioetl.application.services.control_plane.workflow.manifest_service",
+        manifest_service_module,
+    )
+
+    control_plane_module = ModuleType("control_plane")
+    control_plane_module.FileWorkflowManifestStore = lambda **kwargs: (
+        "manifest_store",
+        kwargs,
+    )
+    control_plane_module.FileWorkflowLedgerStore = lambda **kwargs: (
+        "ledger_store",
+        kwargs,
+    )
+    control_plane_module.FileWorkflowExecutionStateStore = lambda **kwargs: (
+        "state_store",
+        kwargs,
+    )
+    monkeypatch.setitem(
+        sys.modules,
+        "bioetl.infrastructure.control_plane",
+        control_plane_module,
+    )
+
+    time_module = ModuleType("time")
+    time_module.SystemClock = lambda: "clock"
+    monkeypatch.setitem(sys.modules, "bioetl.infrastructure.time", time_module)
+    monkeypatch.setattr(
+        _workflow_services,
+        "get_workflow_runner_service",
+        lambda registry=None: ("workflow_runner", registry),
+    )
+    monkeypatch.setattr(
+        _workflow_services,
+        "_get_workflow_memory_lock",
+        lambda: "memory-lock",
+    )
+
+
 def test_factories_package_lazy_exports_and_unknown_attributes(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -120,7 +305,8 @@ def test_services_facade_helpers_cover_lazy_resolution_and_workflow_delegation(
         lambda registry=None, scope="pipelines": calls.append((registry, scope)),
     )
     monkeypatch.setattr(
-        "bioetl.composition._services._invoke_bootstrap",
+        _services,
+        "_invoke_bootstrap",
         lambda name, *args, **kwargs: (name, args, kwargs),
     )
     result = _services.get_metrics_service()
@@ -259,7 +445,7 @@ def test_workflow_services_helpers_cover_loading_and_singleton_lock(
     assert _workflow_services._get_workflow_memory_lock() is fake_lock
 
 
-def test_workflow_services_cover_default_factory_and_runner_execution_paths(
+def test_workflow_services_cover_default_factory_and_runner_service_paths(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
@@ -278,120 +464,10 @@ def test_workflow_services_cover_default_factory_and_runner_execution_paths(
     )
 
     created: dict[str, object] = {}
-
-    workflow_runner_module = ModuleType("workflow_runner_service")
-
-    class _WorkflowRunnerService:
-        def __init__(self, **kwargs):
-            created["workflow_runner_service"] = kwargs
-
-    workflow_runner_module.WorkflowRunnerService = _WorkflowRunnerService
-    monkeypatch.setitem(
-        sys.modules,
-        "bioetl.application.services.workflow_runner_service",
-        workflow_runner_module,
-    )
-
-    transform_service_module = ModuleType("workflow_transform_service")
-
-    class _WorkflowTransformService:
-        def __init__(self, **kwargs):
-            created["transform_service"] = kwargs
-
-    transform_service_module.WorkflowTransformService = _WorkflowTransformService
-    monkeypatch.setitem(
-        sys.modules,
-        "bioetl.application.services.workflow_transform_service",
-        transform_service_module,
-    )
-
-    transforms_module = ModuleType("workflow_transforms")
-    transforms_module.WorkflowTransformRegistry = lambda: "transform_registry"
-    monkeypatch.setitem(
-        sys.modules,
-        "bioetl.application.workflow.transforms",
-        transforms_module,
-    )
-
-    builtins_module = ModuleType("workflow_transforms_builtins")
-    builtins_module.register_builtin_workflow_transforms = (
-        lambda registry, foreign_key_reconciliation_port: (
-            "registered_registry",
-            registry,
-            foreign_key_reconciliation_port,
-        )
-    )
-    monkeypatch.setitem(
-        sys.modules,
-        "bioetl.application.workflow.transforms.builtins",
-        builtins_module,
-    )
-
-    observability_module = ModuleType("observability")
-    observability_module.bootstrap_logger = (
-        lambda name: SimpleNamespace(bind=lambda **kwargs: ("logger", name, kwargs))
-    )
-    monkeypatch.setitem(
-        sys.modules,
-        "bioetl.composition.bootstrap.runtime.observability",
-        observability_module,
-    )
-
-    noop_module = ModuleType("noop")
-    noop_module.create_noop_logger = lambda: "noop-logger"
-    monkeypatch.setitem(
-        sys.modules,
-        "bioetl.composition.bootstrap.cli.noop",
-        noop_module,
-    )
-
-    port_factories = ModuleType("port_factories")
-    port_factories.create_metrics = lambda settings: "metrics"
-    monkeypatch.setitem(
-        sys.modules,
-        "bioetl.composition.factories.services.port_factories",
-        port_factories,
-    )
-
-    silver_writer_module = ModuleType("silver_writer")
-
-    class _SilverWriter:
-        def __init__(self, **kwargs):
-            created["silver_writer"] = kwargs
-
-    silver_writer_module.SilverWriter = _SilverWriter
-    monkeypatch.setitem(
-        sys.modules,
-        "bioetl.infrastructure.storage.silver_writer",
-        silver_writer_module,
-    )
-
-    quarantine_module = ModuleType("quarantine")
-    quarantine_module.UnifiedQuarantineAdapter = lambda **kwargs: ("quarantine", kwargs)
-    monkeypatch.setitem(
-        sys.modules,
-        "bioetl.infrastructure.quarantine",
-        quarantine_module,
-    )
-
-    reconciliation_module = ModuleType("reconciliation")
-    reconciliation_module.SilverForeignKeyReconciliationAdapter = (
-        lambda **kwargs: ("reconciliation", kwargs)
-    )
-    monkeypatch.setitem(
-        sys.modules,
-        "bioetl.infrastructure.storage.workflow_foreign_key_reconciliation",
-        reconciliation_module,
-    )
-
-    monkeypatch.setattr(
-        _workflow_services,
-        "get_settings",
-        lambda: SimpleNamespace(
-            silver_path=tmp_path / "silver",
-            quarantine_path=tmp_path / "quarantine",
-            data_dir=tmp_path,
-        ),
+    _install_workflow_runner_service_dependencies(
+        monkeypatch,
+        tmp_path=tmp_path,
+        created=created,
     )
 
     _workflow_services.get_workflow_runner_service(registry="registry-y")
@@ -402,61 +478,20 @@ def test_workflow_services_cover_default_factory_and_runner_execution_paths(
     assert created["transform_service"]["metrics"] == "metrics"
     assert created["silver_writer"]["pipeline_name"] == "workflow_transforms"
 
-    execution_module = ModuleType("execution_service")
 
-    class _WorkflowExecutionService:
-        def __init__(self, **kwargs):
-            created["execution_service"] = kwargs
-
-    execution_module.WorkflowExecutionService = _WorkflowExecutionService
-    monkeypatch.setitem(
-        sys.modules,
-        "bioetl.application.services.control_plane.workflow.execution_service",
-        execution_module,
+def test_workflow_services_cover_execution_service_paths(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    created: dict[str, object] = {}
+    _install_workflow_runner_service_dependencies(
+        monkeypatch,
+        tmp_path=tmp_path,
+        created=created,
     )
-
-    manifest_service_module = ModuleType("manifest_service")
-    manifest_service_module.WorkflowManifestService = lambda **kwargs: (
-        "manifest_service",
-        kwargs,
-    )
-    monkeypatch.setitem(
-        sys.modules,
-        "bioetl.application.services.control_plane.workflow.manifest_service",
-        manifest_service_module,
-    )
-
-    control_plane_module = ModuleType("control_plane")
-    control_plane_module.FileWorkflowManifestStore = lambda **kwargs: (
-        "manifest_store",
-        kwargs,
-    )
-    control_plane_module.FileWorkflowLedgerStore = lambda **kwargs: (
-        "ledger_store",
-        kwargs,
-    )
-    control_plane_module.FileWorkflowExecutionStateStore = lambda **kwargs: (
-        "state_store",
-        kwargs,
-    )
-    monkeypatch.setitem(
-        sys.modules,
-        "bioetl.infrastructure.control_plane",
-        control_plane_module,
-    )
-
-    time_module = ModuleType("time")
-    time_module.SystemClock = lambda: "clock"
-    monkeypatch.setitem(sys.modules, "bioetl.infrastructure.time", time_module)
-    monkeypatch.setattr(
-        _workflow_services,
-        "get_workflow_runner_service",
-        lambda registry=None: ("workflow_runner", registry),
-    )
-    monkeypatch.setattr(
-        _workflow_services,
-        "_get_workflow_memory_lock",
-        lambda: "memory-lock",
+    _install_workflow_execution_service_dependencies(
+        monkeypatch,
+        created=created,
     )
 
     _workflow_services.get_workflow_execution_service(registry="registry-z")

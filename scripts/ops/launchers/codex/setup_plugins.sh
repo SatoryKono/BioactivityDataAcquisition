@@ -3,6 +3,7 @@
 # Usage:
 #   bash scripts/ops/launchers/codex/setup_plugins.sh
 #   bash scripts/ops/launchers/codex/setup_plugins.sh --pytest-only
+#   bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only
 
 set -euo pipefail
 
@@ -11,11 +12,14 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
 cd "$REPO_ROOT"
 
 PYTEST_ONLY=false
+HOOKS_ONLY=false
 if [[ "${1:-}" == "--pytest-only" ]]; then
     PYTEST_ONLY=true
+elif [[ "${1:-}" == "--hooks-only" ]]; then
+    HOOKS_ONLY=true
 elif [[ -n "${1:-}" ]]; then
     echo "[setup-plugins][error] Unknown argument: $1" >&2
-    echo "[setup-plugins][hint] Supported arguments: --pytest-only" >&2
+    echo "[setup-plugins][hint] Supported arguments: --pytest-only, --hooks-only" >&2
     exit 2
 fi
 
@@ -550,7 +554,7 @@ New-Item -ItemType Directory -Force -Path \$env:GOCACHE | Out-Null
 New-Item -ItemType Directory -Force -Path \$env:GOPATH | Out-Null
 New-Item -ItemType Directory -Force -Path \$env:UV_CACHE_DIR | Out-Null
 Set-Location '$repo_root_win'
-& '$python_bin_win' -m pre_commit install --install-hooks --hook-type pre-commit --hook-type pre-push
+& '$python_bin_win' -m pre_commit install --install-hooks --hook-type pre-commit --hook-type pre-push --hook-type commit-msg
 " >/dev/null
             log_ok "pre-commit hooks installed"
             return 0
@@ -564,7 +568,7 @@ Set-Location '$repo_root_win'
             uv run python -m pip install pre-commit
         fi
         if git rev-parse --git-dir >/dev/null 2>&1; then
-            uv run python -m pre_commit install --install-hooks --hook-type pre-commit --hook-type pre-push
+            uv run python -m pre_commit install --install-hooks --hook-type pre-commit --hook-type pre-push --hook-type commit-msg
             log_ok "pre-commit hooks installed"
         else
             log_warn "Not a git repository, skipping pre-commit install"
@@ -574,7 +578,7 @@ Set-Location '$repo_root_win'
             "$PYTHON_BIN" -m pip install pre-commit
         fi
         if git rev-parse --git-dir >/dev/null 2>&1; then
-            "$PYTHON_BIN" -m pre_commit install --install-hooks --hook-type pre-commit --hook-type pre-push
+            "$PYTHON_BIN" -m pre_commit install --install-hooks --hook-type pre-commit --hook-type pre-push --hook-type commit-msg
             log_ok "pre-commit hooks installed"
         else
             log_warn "Not a git repository, skipping pre-commit install"
@@ -582,6 +586,12 @@ Set-Location '$repo_root_win'
     fi
     return 0
 }
+
+if [[ "$HOOKS_ONLY" == true ]]; then
+    install_precommit
+    log_ok "Hook setup completed"
+    exit 0
+fi
 
 if pytest_only_stamp_is_fresh; then
     log_ok "pytest plugin setup already verified"

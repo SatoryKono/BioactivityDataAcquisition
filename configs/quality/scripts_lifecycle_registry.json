@@ -200,6 +200,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded shared path helper while governed scripts still depend on repository-root resolution; fold it into broader canonical helper surfaces once the remaining bootstrap helpers converge."
     },
+    "scripts/engineering/dev/check_commit_message.py": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_helper_orphan",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the internal Conventional Commit validator invoked by the local pre-commit commit-msg hook; keep it dependency-light and avoid promoting it into a broader public CLI unless additional governed callers emerge."
+    },
     "scripts/docs/_compat_shim.py": {
       "owner": "@bioetl-docs",
       "decision": "internal_helper_orphan",

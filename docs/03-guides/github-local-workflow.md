@@ -58,11 +58,14 @@ WSL.
 
 ## Local Git hooks
 
-Install the repository hooks through the Make target so `pre-commit`, `pre-push`,
-and `commit-msg` stay aligned:
+Install the repository hooks through the hook-only Make target so `pre-commit`,
+`pre-push`, and `commit-msg` stay aligned:
 
 ```bash
 make precommit-install
+
+# or bootstrap pytest + hooks together
+make setup-plugins
 ```
 
 Daily local hooks intentionally stay narrow:

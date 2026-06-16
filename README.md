@@ -162,6 +162,7 @@ Notes:
 - Documentation site commands require the separate `docs` extra: `uv sync --extra dev --extra tests --extra tracing --extra docs` or `pip install -e ".[dev,tests,tracing,docs]"`.
 - `make test-deps` configures local pytest tooling.
 - `make setup-plugins` configures local pre-commit tooling.
+- `make precommit-install` reinstalls only the Git hooks through the same maintained hook installer.
 - If you use Codex or GitHub Copilot MCP, run `uv run python -m scripts.engineering.dev setup-mcp` after install. If you activated the OS-appropriate environment instead of using `uv`, `python -m scripts.engineering.dev setup-mcp` is also valid.
 - For docs verification and strict site builds, use the published [Docs Verification Guide](docs/03-guides/docs-verification.md).
 
@@ -469,6 +470,7 @@ The project uses `pytest` for testing with a formalized test matrix covering Uni
   ```
 
   This command validates required pytest plugins and installs pre-commit hooks.
+  Use `make precommit-install` when you only need to reinstall hooks.
 
 - **Quick Check (with dependencies auto-synced and coverage):**
 
@@ -519,7 +521,7 @@ The project uses `pytest` for testing with a formalized test matrix covering Uni
 
   ```bash
   uv sync --extra dev --extra tests --extra tests_full --extra tracing
-  uv run python -m pre_commit install --install-hooks
+  uv run python -m pre_commit install --install-hooks --hook-type pre-commit --hook-type pre-push --hook-type commit-msg
   ```
 
   Если `pytest` сообщает об отсутствии обязательных плагинов (`pytest-asyncio`, `pytest-cov`, `pytest-xdist`, `pytest-timeout`, `pytest-vcr`), выполните повторную синхронизацию:
