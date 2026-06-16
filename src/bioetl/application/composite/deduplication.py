@@ -128,23 +128,29 @@ class EnricherDeduplicatorService:
         # Classify each column based on the single aggregation result
         columns_with_conflicts: list[str] = []
         columns_without_conflicts: list[str] = []
+
+        conflict_exprs = []
         for col in non_key_columns:
             n_unique_col = f"{col}__n_unique"
             has_null_col = f"{col}__has_null"
             all_null_col = f"{col}__all_null"
-
-            has_conflict = (
-                aggregated.filter(
+            expr = (
+                (
                     (pl.col(n_unique_col) > 1)
                     | (pl.col(has_null_col) & ~pl.col(all_null_col))
-                ).height
-                > 0
+                )
+                .any()
+                .alias(col)
             )
+            conflict_exprs.append(expr)
 
-            if has_conflict:
-                columns_with_conflicts.append(col)
-            else:
-                columns_without_conflicts.append(col)
+        if conflict_exprs:
+            conflicts_dict = aggregated.select(conflict_exprs).row(0, named=True)
+            for col in non_key_columns:
+                if conflicts_dict[col]:
+                    columns_with_conflicts.append(col)
+                else:
+                    columns_without_conflicts.append(col)
 
         return columns_with_conflicts, columns_without_conflicts
 
