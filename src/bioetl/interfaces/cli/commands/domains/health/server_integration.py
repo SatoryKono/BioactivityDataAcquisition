@@ -12,8 +12,10 @@ from __future__ import annotations
 
 import asyncio
 import sys
+import tempfile
 from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
 import click
@@ -138,6 +140,11 @@ def _echo_health_server_startup(host: str, port: int) -> None:
         click.echo(line)
 
 
+def build_health_server_pycache_prefix() -> Path:
+    """Return the deterministic pycache root for the health server process."""
+    return Path(tempfile.gettempdir()) / "bioetl-pycache"
+
+
 def _start_health_observability(logger: LoggerPort | None = None) -> None:
     """Start the Prometheus metrics server for long-lived health mode."""
     settings = get_runtime_settings()
@@ -175,7 +182,7 @@ async def _run_health_server(host: str, port: int) -> None:
     from bioetl.interfaces.http.health_server import HealthServer
 
     if sys.pycache_prefix is None:
-        sys.pycache_prefix = "/tmp/bioetl-pycache"
+        sys.pycache_prefix = str(build_health_server_pycache_prefix())
     deps = get_health_server_dependencies()
     _start_health_observability()
     quarantine_service: QuarantineService | None = None

@@ -16,12 +16,20 @@ from bioetl.interfaces.cli import cli
 from bioetl.interfaces.cli.commands.domains.health.server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
     add_health_server_options,
+    build_health_server_pycache_prefix,
     echo_health_server_info,
     health_server_context,
 )
 
 
 pytestmark = pytest.mark.unit
+
+
+def test_build_health_server_pycache_prefix_uses_platform_tempdir() -> None:
+    path = build_health_server_pycache_prefix()
+
+    assert path.name == "bioetl-pycache"
+    assert path.parent.exists()
 
 
 @pytest.fixture

@@ -1,188 +1,169 @@
-# Test Coverage Roadmap - Актуализированный план на основе текущего кода
+# Test Coverage Roadmap - Current Main Status
 
-## Текущее состояние P0 модулей
+Last refreshed from `reports/quality/module-coverage-inventory.json`
+(`snapshot_date: 2026-06-16`).
 
-### Domain Aggregates (цель: ≥95%)
+## Executive Status
 
-| Модуль | Текущее coverage | Цель | Gap | Приоритет |
-|--------|-----------------|------|-----|----------|
-| _batch_aggregate | 48.4% (15/31) | 95% | -46.6% | P0 |
-| _batch_lifecycle | 43.3% (13/30) | 95% | -51.7% | P0 |
-| _batch_mixins | 61.6% (61/99) | 95% | -33.4% | P0 |
-| _batch_record | 75% (15/20) | 95% | -20% | P0 |
-| _batch_status | 93.75% (15/16) | 95% | -1.25% | P0 |
-| _pipeline_run_mixins | 31.1% (19/61) | 95% | -63.9% | P0 |
-| _pipeline_run_read_model_mixin | 66.2% (49/74) | 95% | -28.8% | P0 |
-| _quarantine_aggregate | 37.8% (14/37) | 95% | -57.2% | P0 |
-| _quarantine_entry_properties_mixin | 72.6% (45/62) | 95% | -22.4% | P0 |
-| _quarantine_entry_transitions_mixin | 42.6% (20/47) | 95% | -52.4% | P0 |
-| _quarantine_value_objects | 77.8% (28/36) | 95% | -17.2% | P0 |
-| batch.py | 100% (5/5) | 95% | +5% | P0 ✓ |
-| events.py | 95.1% (77/81) | 95% | +0.1% | P0 ✓ |
-| pipeline_run.py | 67.7% (21/31) | 95% | -27.3% | P0 |
-| pipeline_run_stage_result | 57.5% (23/40) | 95% | -37.5% | P0 |
-| pipeline_run_state | 94.1% (16/17) | 95% | -0.9% | P0 |
-| quarantine_entry.py | 100% (4/4) | 95% | +5% | P0 ✓ |
+This roadmap supersedes older composition-focused backlog notes that still
+claimed several public APIs were at `0%`. They are no longer accurate on
+current `main`.
 
-**Среднее coverage:** ~65%
-**Наибольшие gaps:** _pipeline_run_mixins (-63.9%), _quarantine_aggregate (-57.2%), _batch_lifecycle (-51.7%)
+Current committed inventory shows that the `#5153` epic is **not closable yet**.
 
-### Domain Contracts/Gold (цель: ≥95%)
+| Metric | Current value | Epic target |
+|--------|---------------|-------------|
+| Production modules | 2134 | all in inventory |
+| Global line coverage | **69.71%** (`62512 / 89677`) | `>= 85%` |
+| Modules `<85%` | **864** | `0` |
+| Uncovered modules (`0%`) | **127** | `0` |
+| Aggregates `<95%` | **13 / 18** | `0` |
+| Contracts / schemas `<95%` | **13 / 72** | `0` |
+| Unmeasured modules | **2** | `0` or explicitly allowlisted |
 
-| Модуль | Текущее coverage | Цель | Gap | Приоритет |
-|--------|-----------------|------|-----|----------|
-| _base | 100% (3/3) | 95% | +5% | P0 ✓ |
-| _chembl_activity_assay_schemas | 100% (139/139) | 95% | +5% | P0 ✓ |
-| _chembl_molecule_protein_schemas | 100% (73/73) | 95% | +5% | P0 ✓ |
-| _chembl_molecule_target_schemas | 100% (4/4) | 95% | +5% | P0 ✓ |
-| _chembl_reference_publication_schemas | 100% (77/77) | 95% | +5% | P0 ✓ |
-| _chembl_target_lookup_schemas | 100% (88/88) | 95% | +5% | P0 ✓ |
-| _composite_gold_common_schema | 100% (18/18) | 95% | +5% | P0 ✓ |
-| _publication_common_schema | 100%* (50/50) | 95% | +5% | P0 ✓ |
-| _strict_gold_contract_schema | 100% (10/10) | 95% | +5% | P0 ✓ |
-| chembl.py | 100% (5/5) | 95% | +5% | P0 ✓ |
-| composite.py | 100% (5/5) | 95% | +5% | P0 ✓ |
-| composite_bioassay.py | 100% (29/29) | 95% | +5% | P0 ✓ |
-| composite_molecule.py | 100% (11/11) | 95% | +5% | P0 ✓ |
-| composite_publication.py | 100% (12/12) | 95% | +5% | P0 ✓ |
-| pubchem.py | 100% (42/42) | 95% | +5% | P0 ✓ |
-| publications.py | 100% (6/6) | 95% | +5% | P0 ✓ |
-| publications_crossref.py | 100% (33/33) | 95% | +5% | P0 ✓ |
-| publications_openalex.py | 100% (33/33) | 95% | +5% | P0 ✓ |
-| publications_pubmed.py | 100% (46/46) | 95% | +5% | P0 ✓ |
-| publications_semanticscholar.py | 100% (33/33) | 95% | +5% | P0 ✓ |
-| uniprot.py | 100% (117/117) | 95% | +5% | P0 ✓ |
+Known unmeasured modules:
 
-**Среднее coverage:** ~99%
-**Статус:** Code/test scope завершён. Все gold contracts достигли целевого порога; `*` означает локальную line-trace verification на 2026-06-03, пока committed inventory ждёт следующего healthy canonical coverage lane.
+- `src/bioetl/__main__.py`
+- `src/bioetl/interfaces/cli/__main__.py`
 
-### Composition Public APIs (цель: ≥90%)
+Child issue status from the epic body:
 
-| Модуль | Текущее coverage | Цель | Gap | Приоритет |
-|--------|-----------------|------|-----|----------|
-| control_plane_api | 0% (0/19) | 90% | -90% | P0 |
-| execution_api | 0% (0/23) | 90% | -90% | P0 |
-| health_api | 0% (0/35) | 90% | -90% | P0 |
-| maintenance_api | 0% (0/24) | 90% | -90% | P0 |
-| registry_api | 93.3% (14/15) | 90% | +3.3% | P0 ✓ |
-| resources_api | 0% (0/16) | 90% | -90% | P0 |
-| services_api | 0% (0/12) | 90% | -90% | P0 |
-| _pipeline_execution | 0% (0/84) | 90% | -90% | P0 |
+- `#5136` — closed
+- `#5143` — closed
 
-**Среднее coverage:** ~12%
-**Статус:** КРИТИЧНО! Большинство public APIs вообще не покрыты тестами.
+## Composition Surface Status
 
----
+The biggest drift in earlier roadmap drafts was the composition section.
+Current main now looks like this:
 
-## Актуализированный приоритетный план
+| Module | Coverage | Status |
+|--------|----------|--------|
+| `control_plane_api.py` | `100.00%` (`11 / 11`) | done |
+| `execution_api.py` | `100.00%` (`19 / 19`) | done |
+| `health_api.py` | `88.89%` (`16 / 18`) | below target |
+| `maintenance_api.py` | `100.00%` (`16 / 16`) | done |
+| `registry_api.py` | `100.00%` (`6 / 6`) | done |
+| `resources_api.py` | `100.00%` (`8 / 8`) | done |
+| `_pipeline_execution.py` | `84.52%` (`71 / 84`) | below target |
+| `services_api.py` | retired / absent | do not backlog |
 
-### Фаза 1: Критические Public APIs (P0 - немедленно)
+Implication:
 
-**Причина:** 0% coverage для public composition APIs - критический риск
+- old issue drafts for `control_plane_api`, `execution_api`,
+  `maintenance_api`, and `resources_api` should be treated as completed and
+  not reopened;
+- `services_api.py` remains a retired target and must stay out of active
+  backlog;
+- the only remaining composition items from that cluster are `health_api.py`
+  and `_pipeline_execution.py`.
 
-**Модули:**
-1. execution_api.py (0/23)
-2. control_plane_api.py (0/19)
-3. health_api.py (0/35)
-4. maintenance_api.py (0/24)
-5. resources_api.py (0/16)
-6. _pipeline_execution.py (0/84)
+## Domain Aggregate Status
 
-**Действия:**
-- Создать unit тесты для public API contracts
-- Тестировать lazy exports, routing, dependency wiring
-- Mock downstream dependencies (ledger, checkpoint store)
-- Цель: достичь 90% coverage
+The aggregate cluster is still the clearest epic blocker.
 
-**Ожидаемый эффект:** Покрытие critical public bootstrap surface
+| Module | Coverage | Target |
+|--------|----------|--------|
+| `_batch_lifecycle.py` | `43.33%` (`13 / 30`) | `>= 95%` |
+| `_batch_aggregate.py` | `48.39%` (`15 / 31`) | `>= 95%` |
+| `_quarantine_entry_transitions_mixin.py` | `42.55%` (`20 / 47`) | `>= 95%` |
+| `_quarantine_aggregate.py` | `37.84%` (`14 / 37`) | `>= 95%` |
+| `_batch_mixins.py` | `61.62%` (`61 / 99`) | `>= 95%` |
+| `_pipeline_run_read_model_mixin.py` | `72.97%` (`54 / 74`) | `>= 95%` |
+| `_pipeline_run_stage_result.py` | `77.50%` (`31 / 40`) | `>= 95%` |
+| `_quarantine_entry_properties_mixin.py` | `72.58%` (`45 / 62`) | `>= 95%` |
+| `_quarantine_value_objects.py` | `77.78%` (`28 / 36`) | `>= 95%` |
+| `_batch_record.py` | `75.00%` (`15 / 20`) | `>= 95%` |
+| `_batch_status.py` | `93.75%` (`15 / 16`) | `>= 95%` |
+| `pipeline_run_state.py` | `94.12%` (`16 / 17`) | `>= 95%` |
+| `_pipeline_run_mixins.py` | `90.16%` (`55 / 61`) | `>= 95%` |
 
-### Фаза 2: Domain Aggregates - Lifecycle & State (P0)
+Already at target:
 
-**Причина:** Наибольшие gaps в business-critical domain logic
+- `batch.py`
+- `events.py`
+- `pipeline_run.py`
+- `quarantine_entry.py`
 
-**Модули (по убыванию gap):**
-1. _pipeline_run_mixins (31.1% → 95%, gap: -63.9%)
-2. _quarantine_aggregate (37.8% → 95%, gap: -57.2%)
-3. _batch_lifecycle (43.3% → 95%, gap: -51.7%)
-4. _quarantine_entry_transitions_mixin (42.6% → 95%, gap: -52.4%)
-5. _pipeline_run_stage_result (57.5% → 95%, gap: -37.5%)
-6. _pipeline_run (67.7% → 95%, gap: -27.3%)
-7. _pipeline_run_read_model_mixin (66.2% → 95%, gap: -28.8%)
+## Contracts / Schema Status
 
-**Действия:**
-- test_pipeline_run_lifecycle.py: start/complete/fail/shutdown, terminal mutation lock
-- test_pipeline_run_events.py: доменные события и их payload
-- test_quarantine_entry_invariants.py: payload immutability, status transitions
-- test_batch_lifecycle.py: OPEN → SEALED → WRITING → COMMITTED, OPEN → SEALED → FAILED
-- test_batch_determinism.py: hash determinism, index sequencing, replay stability
+Earlier roadmap text incorrectly treated the whole Gold/contracts area as done.
+Current committed inventory still reports `13 / 72` contract-or-schema modules
+below the `95%` tier. That makes the “Gold/schema contracts >=95%” track still
+open on current main.
 
-**Ожидаемый эффект:** Meaningful domain coverage, снижение риска ложного покрытия
+## Priority Order
 
-### Фаза 3: Domain Aggregates - Remaining (P0)
+### Phase 1: Finish residual composition blockers
 
-**Модули:**
-1. _quarantine_entry_properties_mixin (72.6% → 95%, gap: -22.4%)
-2. _quarantine_value_objects (77.8% → 95%, gap: -17.2%)
-3. _batch_record (75% → 95%, gap: -20%)
-4. _batch_mixins (61.6% → 95%, gap: -33.4%)
-5. _batch_aggregate (48.4% → 95%, gap: -46.6%)
+Scope:
 
-**Действия:**
-- Добавить тесты для uncovered путей в существующих тестовых файлах
-- Или создать специализированные тесты для сложных сценариев
+- `src/bioetl/composition/health_api.py`
+- `src/bioetl/composition/_pipeline_execution.py`
 
-**Ожидаемый эффект:** Достижение 95% для всех domain aggregates
+Goal:
 
-### Фаза 4: Domain Contracts/Gold - Final Polish (P0) ✓
+- raise both to `>= 90%`
+- keep `services_api.py` retired
 
-**Модуль:**
-1. _publication_common_schema (100%* (50/50), gap closed)
+### Phase 2: Close aggregate lifecycle and quarantine gaps
 
-**Действия:**
-- Расширить `tests/unit/domain/contracts/gold/test_publication_common_schema.py`
-- Закрыть taxonomy edge cases, alias/value constraints и fallback branch при пустой taxonomy
+Primary targets:
 
-**Ожидаемый эффект:** Достигнуто 95%+ для всех gold contracts
+- `_batch_lifecycle.py`
+- `_batch_aggregate.py`
+- `_quarantine_entry_transitions_mixin.py`
+- `_quarantine_aggregate.py`
+- `_batch_mixins.py`
 
----
+Focus:
 
-## Конкретные новые тестовые файлы (актуализировано)
+- batch FSM transitions
+- quarantine immutability and transition rules
+- deterministic record/hash behavior
 
-### Фаза 1: Public APIs
-1. tests/unit/composition/test_execution_api_contract.py
-2. tests/unit/composition/test_control_plane_api_contract.py
-3. tests/unit/composition/test_health_api_contract.py
-4. tests/unit/composition/test_maintenance_api_contract.py
-5. tests/unit/composition/test_resources_api_contract.py
-6. tests/unit/composition/test_services_api_contract.py
-7. tests/unit/composition/test_pipeline_execution_contract.py
+### Phase 3: Raise remaining aggregate read-model and value-object coverage
 
-### Фаза 2: Lifecycle & State
-1. tests/unit/domain/aggregates/test_pipeline_run_lifecycle.py
-2. tests/unit/domain/aggregates/test_pipeline_run_events.py
-3. tests/unit/domain/aggregates/test_quarantine_entry_invariants.py
-4. tests/unit/domain/aggregates/test_batch_lifecycle.py
-5. tests/unit/domain/aggregates/test_batch_determinism.py
+Primary targets:
 
-### Фаза 3: Remaining Aggregates
-- Расширить существующие test files или добавить специализированные тесты
+- `_pipeline_run_read_model_mixin.py`
+- `_pipeline_run_stage_result.py`
+- `_quarantine_entry_properties_mixin.py`
+- `_quarantine_value_objects.py`
+- `_batch_record.py`
+- `_pipeline_run_mixins.py`
+- `_batch_status.py`
+- `pipeline_run_state.py`
 
-### Фаза 4: Gold Polish
-- Расширить tests/unit/domain/contracts/gold/test_publication_common_schema.py
+### Phase 4: Restore contracts/schema tier compliance
 
----
+Goal:
 
-## Критерий завершения
+- reduce contracts/schema `<95%` count from `13` to `0`
 
-Для каждого фазы:
-1. Создать тестовые файлы согласно плану
-2. Запустить coverage-verify lane
-3. Обновить module-coverage-inventory.json
-4. Проверить, что coverage >= target для всех модулей фазы
+### Phase 5: Attack broad repo-wide floor
 
-**Итоговая цель:**
-- Global line coverage >= 85%
-- Global branch coverage >= 80%
-- Domain aggregates >= 95%
-- Domain contracts/gold >= 95%
-- Public composition APIs >= 90%
+Global backlog remains the hard blocker to epic closure:
+
+- `864` modules below `85%`
+- `127` fully uncovered modules
+
+This phase needs breadth-oriented child issues, not more stale composition-only
+tickets.
+
+## Definition Of Done
+
+`#5153` is closable only when all of the following are true:
+
+- global line coverage is `>= 85%`
+- modules below tier thresholds are reduced to `0`
+- aggregates below `95%` are reduced to `0`
+- contracts / schemas below `95%` are reduced to `0`
+- unmeasured modules are eliminated or explicitly policy-allowlisted
+- `python -m scripts.engineering.qa report-module-coverage --check` passes
+
+## Canonical Sources
+
+- `reports/quality/module-coverage-inventory.json`
+- `reports/coverage/coverage.xml`
+- `configs/quality/debt_scorecard.yaml`
+- `configs/quality/test_matrix.yaml`

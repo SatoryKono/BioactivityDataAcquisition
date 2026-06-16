@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from datetime import UTC, date, datetime
-from pathlib import Path, PurePath
+from pathlib import PurePath
 from uuid import UUID
 
 from bioetl.domain.behavior.identity_service import EntityIdentityGenerator
