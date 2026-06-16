@@ -22,7 +22,12 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
-__all__ = ["RuntimeBootstrapPhases", "apply_runtime_compatibility_patches", "bootstrap_pipeline_runner", "build_runtime_bootstrap_phases"]
+__all__ = [
+    "RuntimeBootstrapPhases",
+    "apply_runtime_compatibility_patches",
+    "bootstrap_pipeline_runner",
+    "build_runtime_bootstrap_phases",
+]
 
 
 def apply_runtime_compatibility_patches() -> bool:

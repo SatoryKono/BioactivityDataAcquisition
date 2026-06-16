@@ -350,7 +350,6 @@ def test_narrow_first_party_retained_entrypoints_do_not_gain_src_importers() -> 
         "src/bioetl/composition/maintenance_api.py": {
             "src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py",
         },
-        "src/bioetl/domain/value_objects/activity_values.py": set(),
     }
 
     violations: list[str] = []

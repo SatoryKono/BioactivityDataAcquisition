@@ -1,7 +1,7 @@
 # Compatibility Importer Census
 
 - snapshot_date: 2026-06-16
-- retained_entrypoint_count: 14
+- retained_entrypoint_count: 13
 - removed_compatibility_surface_count: 23
 - removed_compatibility_surfaces_with_src_importers: 0
 - removed_compatibility_surfaces_with_test_importers: 0
@@ -31,7 +31,6 @@
 | `src/bioetl/composition/maintenance_api.py` | 1 | 1 |
 | `src/bioetl/infrastructure/config/__init__.py` | 0 | 5 |
 | `src/bioetl/domain/composite/config.py` | 80 | 39 |
-| `src/bioetl/domain/value_objects/activity_values.py` | 0 | 1 |
 | `src/bioetl/application/composite/merger.py` | 5 | 5 |
 
 ## Retained Public Export Facades
