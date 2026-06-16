@@ -50,11 +50,7 @@ _WINDOWS_GIT_CANDIDATES = (
     Path("C:/Program Files (x86)/Git/bin/git.exe"),
 )
 
-EXPECTED_TEST_IMPORTS: dict[str, frozenset[str]] = {
-    "tests/unit/application/services/test_debug_export_helpers.py": frozenset(
-        {"debug_export_helpers"}
-    ),
-}
+EXPECTED_TEST_IMPORTS: dict[str, frozenset[str]] = {}
 
 
 @lru_cache(maxsize=2)

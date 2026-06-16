@@ -1,23 +1,23 @@
 ---
 id: fix-test-structural-debt-2000-loc
-title: Fix test structural debt guardrails
+title: Fix test structural debt failures
 task_id: fix-test-structural-debt-2000-loc
-created_at: '2026-06-16T07:55:48Z'
+created_at: '2026-06-16T08:11:11Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- tests/architecture/test_test_structural_debt.py
+- AGENTS.md
 summary: Active task session context.
-query: test structural debt no test files over 2000 LOC no test functions over 200
-  LOC health_server_control_plane_identity coverage_boost_facades
+query: test structural debt 2000 loc 200 function interfaces http health server control
+  plane identity coverage boost facades
 ---
 
 # Session note
 
 ## Task
 
-- Title: Fix test structural debt guardrails
-- Retrieval query: test structural debt no test files over 2000 LOC no test functions over 200 LOC health_server_control_plane_identity coverage_boost_facades
+- Title: Fix test structural debt failures
+- Retrieval query: test structural debt 2000 loc 200 function interfaces http health server control plane identity coverage boost facades
 
 ## Retrieved context
 
