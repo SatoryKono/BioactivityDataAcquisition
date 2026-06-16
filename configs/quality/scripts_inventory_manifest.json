@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-16T05:47:09.520037+00:00",
+  "generated_at": "2026-06-16T08:03:25.713108+00:00",
   "summary": {
-    "total_scripts": 429,
+    "total_scripts": 430,
     "status_counts": {
       "active": 364,
-      "supporting": 65
+      "supporting": 66
     },
     "reference_group_coverage": {
       "agents": 4,
@@ -1361,7 +1361,7 @@
         },
         {
           "path": "scripts/ai/gemini/README.md",
-          "line": 64,
+          "line": 59,
           "source_group": "scripts",
           "text": "bash scripts/ai/gemini/headless.sh exec \"...\"      # Launch without MCP sync"
         },
@@ -3189,19 +3189,19 @@
       "references": [
         {
           "path": ".pre-commit-config.yaml",
-          "line": 243,
+          "line": 240,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py -m scripts.diagrams lint"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 250,
+          "line": 247,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py -m scripts.diagrams fix-orphans --check"
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 79,
+          "line": 80,
           "source_group": "docs",
           "text": "uv run python -m scripts.diagrams lint"
         },
@@ -4634,7 +4634,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 125,
+      "reference_count": 127,
       "references": [
         {
           "path": ".github/workflows/docs-kpi-weekly.yml",
@@ -4674,13 +4674,13 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 259,
+          "line": 256,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py -m scripts.docs sync-repo-identity --check"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 289,
+          "line": 286,
           "source_group": "ci",
           "text": "python scripts/engineering/dev/run_project_python.py -m scripts.docs"
         }
@@ -4946,7 +4946,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 286,
+          "line": 283,
           "source_group": "ci",
           "text": "- id: docs-check-links"
         },
@@ -5814,7 +5814,7 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 102,
+          "line": 103,
           "source_group": "docs",
           "text": "| `dq_baseline_update.py`        | scripts/engineering/baselines/   | Нет     | `uv run python -m scripts.engineering.baselines dq-baseline` | —            | Пересчёт DQ baseline                      "
         },
@@ -5853,13 +5853,13 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 102,
+          "line": 103,
           "source_group": "docs",
           "text": "| `dq_baseline_update.py`        | scripts/engineering/baselines/   | Нет     | `uv run python -m scripts.engineering.baselines dq-baseline` | —            | Пересчёт DQ baseline                      "
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 149,
+          "line": 150,
           "source_group": "docs",
           "text": "| RULES.md §3.4.1                                             | `dq_baseline_update.py`                                        |"
         },
@@ -5892,7 +5892,7 @@
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 80,
+          "line": 81,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.ci quality-gate"
         },
@@ -6617,6 +6617,14 @@
       ]
     },
     {
+      "path": "scripts/engineering/dev/check_commit_message.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/engineering/dev/install_deps.py",
       "type": "py",
       "status": "active",
@@ -6682,19 +6690,19 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 48,
+          "line": 49,
           "source_group": "scripts",
           "text": "bash scripts/engineering/dev/pretest_guardrails.sh --mode check --scope full"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 49,
+          "line": 50,
           "source_group": "scripts",
           "text": "bash scripts/engineering/dev/pretest_guardrails.sh --mode auto --scope full  # explicit write-capable metadata refresh"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 99,
+          "line": 100,
           "source_group": "scripts",
           "text": "invoke `bash scripts/engineering/dev/pretest_guardrails.sh --scope full`"
         },
@@ -6922,55 +6930,55 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 26,
+      "reference_count": 28,
       "references": [
         {
           "path": ".pre-commit-config.yaml",
-          "line": 118,
+          "line": 108,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py -m pip_audit --cache-dir .cache/pip-audit --skip-editable --strict"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 126,
+          "line": 116,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py -m mypy --config-file pyproject.toml --strict --no-incremental src/bioetl"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 134,
+          "line": 123,
+          "source_group": "ci",
+          "text": "entry: python scripts/engineering/dev/run_project_python.py -m bandit -c pyproject.toml -r src/bioetl"
+        },
+        {
+          "path": ".pre-commit-config.yaml",
+          "line": 131,
           "source_group": "ci",
           "text": "python scripts/engineering/dev/run_project_python.py -m pytest"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 154,
+          "line": 151,
           "source_group": "ci",
           "text": "python scripts/engineering/dev/run_project_python.py -m pytest"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 164,
+          "line": 161,
           "source_group": "ci",
           "text": "python scripts/engineering/dev/run_project_python.py -m"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 208,
+          "line": 197,
+          "source_group": "ci",
+          "text": "python scripts/engineering/dev/run_project_python.py -m"
+        },
+        {
+          "path": ".pre-commit-config.yaml",
+          "line": 205,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py -m scripts.schema validate-configs"
-        },
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 216,
-          "source_group": "ci",
-          "text": "entry: python scripts/engineering/dev/run_project_python.py -m scripts.engineering.repo check-cleanliness"
-        },
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 223,
-          "source_group": "ci",
-          "text": "entry: python scripts/engineering/dev/run_project_python.py -m scripts.schema check-config-paths"
         }
       ]
     },
@@ -7137,13 +7145,13 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 50,
+          "line": 51,
           "source_group": "scripts",
           "text": "bash scripts/engineering/dev/run_pytest_sharded.sh"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 51,
+          "line": 52,
           "source_group": "scripts",
           "text": "bash scripts/engineering/dev/run_pytest_sharded.sh --stream"
         }
@@ -7323,7 +7331,7 @@
         },
         {
           "path": "docs/03-guides/docs-verification.md",
-          "line": 143,
+          "line": 144,
           "source_group": "docs",
           "text": ".\\scripts\\engineering\\dev\\setup_env_windows.ps1"
         },
@@ -7380,7 +7388,7 @@
         },
         {
           "path": "docs/03-guides/docs-verification.md",
-          "line": 148,
+          "line": 149,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/setup_env_wsl.sh"
         },
@@ -7428,13 +7436,13 @@
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 98,
+          "line": 99,
           "source_group": "docs",
           "text": "| `cleanup_project.py`           | scripts/engineering/diagnostics/ | Нет     | `uv run python -m scripts.engineering.diagnostics cleanup`   | `make clean` | Очистка локальных кэшей и build-артефактов"
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 100,
+          "line": 101,
           "source_group": "docs",
           "text": "| `audit_structure.py`           | scripts/engineering/diagnostics/ | Нет     | `uv run python -m scripts.engineering.diagnostics audit-structure` | —     | Аудит соответствия File Policy             "
         },
@@ -7500,13 +7508,13 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 100,
+          "line": 101,
           "source_group": "docs",
           "text": "| `audit_structure.py`           | scripts/engineering/diagnostics/ | Нет     | `uv run python -m scripts.engineering.diagnostics audit-structure` | —     | Аудит соответствия File Policy             "
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 145,
+          "line": 146,
           "source_group": "docs",
           "text": "| [03-file-policy.md](governance/03-file-policy.md)           | `audit_structure.py`, `create_pipeline.py`                     |"
         },
@@ -7545,7 +7553,7 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 99,
+          "line": 100,
           "source_group": "docs",
           "text": "| `cleanup_consolidate.py`       | scripts/engineering/diagnostics/ | Нет     | —                                                            | —            | Консолидированный аудит очистки           "
         },
@@ -7572,13 +7580,13 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 98,
+          "line": 99,
           "source_group": "docs",
           "text": "| `cleanup_project.py`           | scripts/engineering/diagnostics/ | Нет     | `uv run python -m scripts.engineering.diagnostics cleanup`   | `make clean` | Очистка локальных кэшей и build-артефактов"
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 146,
+          "line": 147,
           "source_group": "docs",
           "text": "| [cleanup-policy.md](../03-guides/cleanup-policy.md)         | `cleanup_project.py`, `cleanup_repository.py`, `vacuum_delta.py`, `verify_checksums.py` |"
         },
@@ -7831,7 +7839,7 @@
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 74,
+          "line": 75,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.qa check-c901 --target src/bioetl"
         },
@@ -8523,7 +8531,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 335,
+          "line": 332,
           "source_group": "ci",
           "text": "scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
@@ -8704,13 +8712,13 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 106,
+          "line": 107,
           "source_group": "docs",
           "text": "| `lint_terminology.py`          | scripts/engineering/qa/          | Нет     | `uv run python -m scripts.engineering.qa check-terminology`  | —            | Линтер терминологии                       "
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 151,
+          "line": 152,
           "source_group": "docs",
           "text": "| [glossary.md](glossary.md)                                  | `lint_terminology.py`                                          |"
         },
@@ -8761,13 +8769,13 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 105,
+          "line": 106,
           "source_group": "docs",
           "text": "| `naming_audit.py`              | scripts/engineering/qa/          | Нет     | `uv run python -m scripts.engineering.qa check-naming`       | —            | Аудит naming conventions                  "
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 147,
+          "line": 148,
           "source_group": "docs",
           "text": "| RULES.md §2                                                 | `naming_audit.py`                                              |"
         },
@@ -9544,19 +9552,19 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 316,
+          "line": 313,
           "source_group": "ci",
           "text": "python scripts/engineering/dev/run_project_python.py -m scripts.engineering.qa.vcr"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 325,
+          "line": 322,
           "source_group": "ci",
           "text": "python scripts/engineering/dev/run_project_python.py -m scripts.engineering.qa.vcr"
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 76,
+          "line": 77,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.qa.vcr check-naming"
         },
@@ -9589,7 +9597,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 317,
+          "line": 314,
           "source_group": "ci",
           "text": "check-placement"
         },
@@ -9646,13 +9654,13 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 326,
+          "line": 323,
           "source_group": "ci",
           "text": "check-naming"
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 76,
+          "line": 77,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.qa.vcr check-naming"
         },
@@ -9984,7 +9992,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 281,
+          "line": 278,
           "source_group": "ci",
           "text": "check-catalog --catalog scripts/engineering/repo/catalog.yaml"
         },
@@ -10041,13 +10049,13 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 268,
+          "line": 265,
           "source_group": "ci",
           "text": "check-inventory --check"
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 73,
+          "line": 74,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.repo check-inventory --check"
         },
@@ -10756,19 +10764,19 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 77,
+          "line": 78,
           "source_group": "docs",
           "text": "uv run python -m scripts.ops.data check-delta"
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 101,
+          "line": 102,
           "source_group": "docs",
           "text": "| `vacuum_delta.py`              | scripts/ops/data/                | Нет     | `uv run python -m scripts.ops.data vacuum`                   | —            | VACUUM Delta Lake таблиц                  "
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 103,
+          "line": 104,
           "source_group": "docs",
           "text": "| `verify_checksums.py`          | scripts/ops/data/                | Нет     | `uv run python -m scripts.ops.data checksums`                | —            | Верификация контрольных сумм              "
         },
@@ -10858,19 +10866,19 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 101,
+          "line": 102,
           "source_group": "docs",
           "text": "| `vacuum_delta.py`              | scripts/ops/data/                | Нет     | `uv run python -m scripts.ops.data vacuum`                   | —            | VACUUM Delta Lake таблиц                  "
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 146,
+          "line": 147,
           "source_group": "docs",
           "text": "| [cleanup-policy.md](../03-guides/cleanup-policy.md)         | `cleanup_project.py`, `cleanup_repository.py`, `vacuum_delta.py`, `verify_checksums.py` |"
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 148,
+          "line": 149,
           "source_group": "docs",
           "text": "| RULES.md §2.1.1                                             | `vacuum_delta.py`                                              |"
         },
@@ -10906,13 +10914,13 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 103,
+          "line": 104,
           "source_group": "docs",
           "text": "| `verify_checksums.py`          | scripts/ops/data/                | Нет     | `uv run python -m scripts.ops.data checksums`                | —            | Верификация контрольных сумм              "
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 146,
+          "line": 147,
           "source_group": "docs",
           "text": "| [cleanup-policy.md](../03-guides/cleanup-policy.md)         | `cleanup_project.py`, `cleanup_repository.py`, `vacuum_delta.py`, `verify_checksums.py` |"
         },
@@ -11315,7 +11323,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 21,
       "references": [
         {
           "path": "Makefile",
@@ -11328,6 +11336,12 @@
           "line": 36,
           "source_group": "build",
           "text": "bash scripts/ops/launchers/codex/setup_plugins.sh"
+        },
+        {
+          "path": "Makefile",
+          "line": 39,
+          "source_group": "build",
+          "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only"
         },
         {
           "path": "docs/03-guides/testing.md",
@@ -11348,22 +11362,16 @@
           "text": "bash scripts/ops/launchers/codex/setup_plugins.sh"
         },
         {
+          "path": "makefile",
+          "line": 39,
+          "source_group": "build",
+          "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only"
+        },
+        {
           "path": "scripts/engineering/dev/README.md",
-          "line": 91,
+          "line": 92,
           "source_group": "scripts",
           "text": "- `bash scripts/engineering/dev/run_pytest.sh` runs `bash scripts/ops/launchers/codex/setup_plugins.sh --pytest-only`"
-        },
-        {
-          "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 522,
-          "source_group": "scripts",
-          "text": "if [[ -f \"scripts/ops/launchers/codex/setup_plugins.sh\" ]]; then"
-        },
-        {
-          "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 523,
-          "source_group": "scripts",
-          "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --pytest-only"
         }
       ]
     },
@@ -11493,13 +11501,13 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 104,
+          "line": 105,
           "source_group": "docs",
           "text": "| `salt_rotate.py`               | scripts/ops/                     | Нет     | —                                                            | —            | Ротация PII-соли                          "
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 150,
+          "line": 151,
           "source_group": "docs",
           "text": "| RULES.md §5.4.1                                             | `salt_rotate.py`                                               |"
         },
@@ -12261,7 +12269,7 @@
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 146,
+          "line": 147,
           "source_group": "docs",
           "text": "| [cleanup-policy.md](../03-guides/cleanup-policy.md)         | `cleanup_project.py`, `cleanup_repository.py`, `vacuum_delta.py`, `verify_checksums.py` |"
         },
@@ -12377,7 +12385,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 69,
+      "reference_count": 70,
       "references": [
         {
           "path": ".github/workflows/chembl-baseline-smoke.yml",
@@ -12513,13 +12521,13 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 107,
+          "line": 108,
           "source_group": "docs",
           "text": "| `config_gap_analysis.py`       | scripts/schema/                  | Нет     | `uv run python -m scripts.schema analyze-gaps`               | —            | Анализ расхождений конфигов               "
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 152,
+          "line": 153,
           "source_group": "docs",
           "text": "| [03-file-policy.md](governance/03-file-policy.md) (configs) | `config_gap_analysis.py`, `validate_pipeline_configs.py`       |"
         },
@@ -12825,13 +12833,13 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 108,
+          "line": 109,
           "source_group": "docs",
           "text": "| `validate_pipeline_configs.py` | scripts/schema/                  | Нет     | `uv run python -m scripts.schema validate-configs`           | —            | Валидация configs vs JSON Schema          "
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 152,
+          "line": 153,
           "source_group": "docs",
           "text": "| [03-file-policy.md](governance/03-file-policy.md) (configs) | `config_gap_analysis.py`, `validate_pipeline_configs.py`       |"
         },
@@ -13098,13 +13106,13 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 95,
+          "line": 96,
           "source_group": "docs",
           "text": "| `create_pipeline.py`           | src/tools/                       | Да      | —                                                            | —            | Генерация boilerplate для новых пайплайнов"
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 145,
+          "line": 146,
           "source_group": "docs",
           "text": "| [03-file-policy.md](governance/03-file-policy.md)           | `audit_structure.py`, `create_pipeline.py`                     |"
         },
@@ -13194,7 +13202,7 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 97,
+          "line": 98,
           "source_group": "docs",
           "text": "| `file_merger.py`               | src/tools/                       | Нет     | —                                                            | —            | Объединение файлов с метаданными          "
         },
@@ -13413,7 +13421,7 @@
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 96,
+          "line": 97,
           "source_group": "docs",
           "text": "| `verify_schema_parity.py`      | src/tools/                       | Да      | —                                                            | —            | Верификация Silver↔Gold schema parity     "
         },

@@ -36,7 +36,7 @@ setup-plugins:
 	bash scripts/ops/launchers/codex/setup_plugins.sh
 
 precommit-install:
-	$(RUN) pre_commit install --hook-type pre-commit --hook-type pre-push --hook-type commit-msg
+	bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only
 
 lint:
 	$(RUN) ruff check src tests
