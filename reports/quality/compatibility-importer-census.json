@@ -9,8 +9,8 @@
     "removed_compatibility_surfaces_with_src_importers": 0,
     "removed_compatibility_surfaces_with_test_importers": 0,
     "removed_compatibility_surfaces_still_present": 0,
-    "twin_pair_count": 1,
-    "twin_pairs_with_private_src_importers": 1,
+    "twin_pair_count": 0,
+    "twin_pairs_with_private_src_importers": 0,
     "twin_pairs_without_public_src_importers": 0,
     "tracked_twin_family_count": 0,
     "config_root_symbol_count": 3,
@@ -178,11 +178,12 @@
       "test_importers": [
         "tests/unit/infrastructure/config/test_composite_config_api.py",
         "tests/unit/infrastructure/config/test_config_ci_contract.py",
+        "tests/unit/infrastructure/config/test_config_package_root_contract.py",
         "tests/unit/infrastructure/config/test_public_config_surfaces.py",
         "tests/unit/infrastructure/config/test_workflow_config_api.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 4
+      "test_importer_count": 5
     },
     {
       "path": "src/bioetl/domain/composite/config.py",
@@ -811,31 +812,7 @@
       "test_importer_count": 0
     }
   ],
-  "twin_pairs": [
-    {
-      "private_path": "src/bioetl/composition/_lazy_exports.py",
-      "public_path": "src/bioetl/composition/lazy_exports.py",
-      "private_module": "bioetl.composition._lazy_exports",
-      "public_module": "bioetl.composition.lazy_exports",
-      "public_src_importer_count": 8,
-      "public_test_importer_count": 0,
-      "private_src_importer_count": 1,
-      "private_test_importer_count": 1,
-      "public_src_importers": [
-        "src/bioetl/composition/bootstrap/__init__.py",
-        "src/bioetl/composition/control_plane_api.py",
-        "src/bioetl/composition/entrypoints.py",
-        "src/bioetl/composition/execution_api.py",
-        "src/bioetl/composition/health_api.py",
-        "src/bioetl/composition/maintenance_api.py",
-        "src/bioetl/composition/registry_api.py",
-        "src/bioetl/composition/resources_api.py"
-      ],
-      "private_src_importers": [
-        "src/bioetl/composition/lazy_exports.py"
-      ]
-    }
-  ],
+  "twin_pairs": [],
   "tracked_twin_families": [],
   "config_root_facade": {
     "target_module": "bioetl.infrastructure.config",

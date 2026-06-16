@@ -3,6 +3,14 @@
 This directory contains the generated Architecture Decision Record (ADR) registry
 with metadata, status tracking, and navigation aids.
 
+## Authority
+
+- `docs/02-architecture/decisions/README.md` is the canonical live ADR index.
+- `index.md`, `status-dashboard.md`, and `registry.json` in this directory are
+  generated mirrors for navigation and tooling.
+- Regenerate these files with `python3 scripts/generate_adr_registry.py`
+  whenever ADR files or ADR index metadata change.
+
 ## Files
 
 - `index.md` - Main ADR registry with all decisions organized by status

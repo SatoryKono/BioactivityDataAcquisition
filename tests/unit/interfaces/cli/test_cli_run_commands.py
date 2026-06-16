@@ -231,7 +231,7 @@ def test_execute_run_uses_canonical_runtime_callable_builder() -> None:
         ) as mock_build_callable,
         patch.object(
             run_module,
-            "get_cli_run_orchestration_service",
+            "create_cli_run_orchestration_service",
             return_value=service,
         ),
     ):

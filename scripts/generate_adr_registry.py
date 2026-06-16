@@ -439,6 +439,16 @@ class ADRRegistryGenerator:
         )
         lines.append("with metadata, status, and relationships.")
         lines.append("")
+        lines.append(
+            "Canonical live ADR index: `docs/02-architecture/decisions/README.md`."
+        )
+        lines.append(
+            "This page is a generated governance mirror and MUST be regenerated via"
+        )
+        lines.append(
+            "`python3 scripts/generate_adr_registry.py` after ADR additions or metadata changes."
+        )
+        lines.append("")
         lines.append(f"**Total ADRs**: {len(self.adrs)}")
         lines.append(f"**Last Updated**: {datetime.now().strftime('%Y-%m-%d')}")
         lines.append("")
@@ -768,6 +778,14 @@ class ADRRegistryGenerator:
 
 This directory contains the generated Architecture Decision Record (ADR) registry
 with metadata, status tracking, and navigation aids.
+
+## Authority
+
+- `docs/02-architecture/decisions/README.md` is the canonical live ADR index.
+- `index.md`, `status-dashboard.md`, and `registry.json` in this directory are
+  generated mirrors for navigation and tooling.
+- Regenerate these files with `python3 scripts/generate_adr_registry.py`
+  whenever ADR files or ADR index metadata change.
 
 ## Files
 

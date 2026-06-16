@@ -2,50 +2,50 @@
 
 Quick overview of ADR status and distribution.
 
-**Last Updated**: 2026-05-30 14:37:15
+**Last Updated**: 2026-06-16 19:05:56
 
 ## 📈 Status Distribution
 
 | Status | Count | Percentage |
 |--------|-------|------------|
-| `accepted` | 46 | 95.8% |
-| `superseded` | 2 | 4.2% |
+| `accepted` | 48 | 96.0% |
+| `superseded` | 2 | 4.0% |
 
 ## 🏷️  Category Distribution
 
 | Category | Count | Percentage |
 |----------|-------|------------|
-| `Architecture` | 8 | 16.7% |
-| `Configuration` | 4 | 8.3% |
-| `Data Contracts` | 1 | 2.1% |
-| `Data Fetching` | 2 | 4.2% |
-| `Data Loading` | 2 | 4.2% |
-| `Data Modeling` | 3 | 6.2% |
-| `Data Quality` | 5 | 10.4% |
-| `Deployment` | 1 | 2.1% |
-| `Documentation` | 2 | 4.2% |
-| `Domain Model` | 1 | 2.1% |
-| `HTTP/Networking` | 1 | 2.1% |
-| `Lifecycle` | 2 | 4.2% |
-| `Locking` | 1 | 2.1% |
-| `Observability` | 5 | 10.4% |
-| `Reproducibility` | 4 | 8.3% |
-| `Resilience` | 2 | 4.2% |
-| `Storage` | 3 | 6.2% |
-| `Testing` | 1 | 2.1% |
+| `Architecture` | 9 | 18.0% |
+| `Configuration` | 4 | 8.0% |
+| `Data Contracts` | 1 | 2.0% |
+| `Data Fetching` | 2 | 4.0% |
+| `Data Loading` | 2 | 4.0% |
+| `Data Modeling` | 3 | 6.0% |
+| `Data Quality` | 6 | 12.0% |
+| `Deployment` | 1 | 2.0% |
+| `Documentation` | 2 | 4.0% |
+| `Domain Model` | 1 | 2.0% |
+| `HTTP/Networking` | 1 | 2.0% |
+| `Lifecycle` | 2 | 4.0% |
+| `Locking` | 1 | 2.0% |
+| `Observability` | 5 | 10.0% |
+| `Reproducibility` | 4 | 8.0% |
+| `Resilience` | 2 | 4.0% |
+| `Storage` | 3 | 6.0% |
+| `Testing` | 1 | 2.0% |
 
 ## 🕒 Recent Activity
 
 Last 5 updated ADRs:
 
+- **ADR-050**: Silver Structural and Gold Semantic Filter Boundary (2026-06-15)
+- **ADR-003**: In-Memory Locking (MemoryLock) (2026-06-04)
+- **ADR-008**: Graceful Shutdown Strategy (2026-06-04)
 - **ADR-048**: Domain Schema Boundary and Runtime Pandera Compatibility (2026-05-26)
-- **ADR-042**: Testing Strategy Matrix & Fixture Gov. (2026-05-21)
-- **ADR-047**: Workflow Control Plane for Declarative Workflows (2026-05-08)
-- **ADR-046**: Checkpoint Versus Ledger-Based Resume (2026-05-06)
-- **ADR-044**: Run Manifest & Ledger Control Plane (2026-04-29)
+- **ADR-049**: Context-Aware LOC Target Policy (2026-05-26)
 
 ## 🎯 Health Metrics
 
-- **Accepted ADRs**: 46/48 (95.8%)
-- **Maintenance Ratio**: 46:2
-- **Average ADRs/Year**: 16.0 (assuming 3-year project)
+- **Accepted ADRs**: 48/50 (96.0%)
+- **Maintenance Ratio**: 48:2
+- **Average ADRs/Year**: 16.7 (assuming 3-year project)

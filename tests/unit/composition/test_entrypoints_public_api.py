@@ -100,7 +100,7 @@ def test_entrypoints_public_symbol_resolves_from_canonical_owner_module() -> Non
         return SimpleNamespace(run_pipeline=sentinel)
 
     with patch(
-        "bioetl.composition._lazy_exports.import_module",
+        "bioetl.composition.lazy_exports.import_module",
         side_effect=fake_import_module,
     ) as import_module:
         assert entrypoints.run_pipeline is sentinel

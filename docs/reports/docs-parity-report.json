@@ -1,8 +1,8 @@
 {
-  "timestamp": "2026-05-21T16:45:09+03:00",
+  "timestamp": "2026-06-16T19:06:49+03:00",
   "metrics": {
-    "total_checked": 26,
-    "matches": 26,
+    "total_checked": 32,
+    "matches": 32,
     "mismatches": 0,
     "parity_percentage": 100.0,
     "missing_docs_count": 0,

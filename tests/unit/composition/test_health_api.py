@@ -17,7 +17,7 @@ def test_get_health_server_dependencies_delegates_to_services_seam() -> None:
             "bioetl.composition.health_api.get_health_server_dependencies",
             return_value=expected_dependencies,
         ) as mock_impl,
-        patch("bioetl.composition._lazy_exports.import_module") as mock_import_module,
+        patch("bioetl.composition.lazy_exports.import_module") as mock_import_module,
     ):
         result = health_api.get_health_server_dependencies()
 
@@ -34,7 +34,7 @@ def test_get_quarantine_port_delegates_to_services_seam() -> None:
             "bioetl.composition.health_api.get_quarantine_port",
             return_value=expected_port,
         ) as mock_impl,
-        patch("bioetl.composition._lazy_exports.import_module") as mock_import_module,
+        patch("bioetl.composition.lazy_exports.import_module") as mock_import_module,
     ):
         result = health_api.get_quarantine_port()
 
@@ -51,7 +51,7 @@ def test_get_quarantine_service_delegates_to_services_seam() -> None:
             "bioetl.composition.health_api.get_quarantine_service",
             return_value=expected_service,
         ) as mock_impl,
-        patch("bioetl.composition._lazy_exports.import_module") as mock_import_module,
+        patch("bioetl.composition.lazy_exports.import_module") as mock_import_module,
     ):
         result = health_api.get_quarantine_service()
 

@@ -5,9 +5,6 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 from datetime import datetime
 
-from bioetl.application.services.control_plane.workflow.ledger_service import (
-    WorkflowLedgerService,
-)
 from bioetl.application.services.control_plane.workflow.execution_recording_payloads import (
     _build_result_summary,
     _find_failed_step,
@@ -17,11 +14,14 @@ from bioetl.application.services.control_plane.workflow.execution_recording_payl
 )
 from bioetl.application.services.control_plane.workflow.execution_recording_state import (
     _apply_completed_step_state,
-    _clear_ambiguous_step,
+    _clear_ambiguous_step,  # noqa: F401 - retained private compatibility export.
     _find_step_state,
-    _record_completed_transform_fingerprint,
+    _record_completed_transform_fingerprint,  # noqa: F401 - retained private compatibility export.
     _record_step_state,
     _remove_step_ids,
+)
+from bioetl.application.services.control_plane.workflow.ledger_service import (
+    WorkflowLedgerService,
 )
 from bioetl.application.services.workflow_runner_service import (
     WorkflowRunExecutionResult,

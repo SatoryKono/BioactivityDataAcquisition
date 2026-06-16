@@ -30,7 +30,7 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay impor
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_projection import (
     _build_replay_projection_bundle,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
+from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_materialization import (
     resolve_post_manifest_input_snapshot_materialization_mode,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.source_refs import (

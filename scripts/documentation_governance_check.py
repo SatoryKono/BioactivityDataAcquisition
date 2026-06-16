@@ -17,6 +17,12 @@ from pathlib import Path
 
 import yaml
 
+try:
+    from scripts.generate_adr_registry import ADRRegistryGenerator
+except ModuleNotFoundError:  # pragma: no cover - script entrypoint fallback
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from scripts.generate_adr_registry import ADRRegistryGenerator
+
 
 @dataclass
 class GovernanceCheckResult:
@@ -306,6 +312,100 @@ class DocumentationGovernanceChecker:
             checks_passed if structure_compliant else checks_failed,
         )
 
+    def check_adr_registry_sync(self) -> tuple[bool, list[str], list[str]]:
+        """Check ADR registry mirrors against the canonical decision index."""
+
+        checks_passed = []
+        checks_failed = []
+        warnings = []
+
+        generator = ADRRegistryGenerator()
+        adr_index_metadata = generator.adr_index_metadata
+        if not adr_index_metadata:
+            checks_failed.append("ADR decision index metadata could not be loaded")
+            return (False, warnings, checks_failed)
+
+        expected_total = len(adr_index_metadata)
+        latest_adr = max(adr_index_metadata, key=int)
+
+        registry_json = (
+            self.docs_dir / "02-architecture" / "adr-registry" / "registry.json"
+        )
+        registry_index = self.docs_dir / "02-architecture" / "adr-registry" / "index.md"
+        navigator_registry = self.docs_dir / "02-architecture" / "adr-registry.md"
+        rules_doc = self.docs_dir / "00-project" / "RULES.md"
+        requirements_doc = self.docs_dir / "01-requirements" / "REQUIREMENTS.md"
+
+        required_files = (
+            registry_json,
+            registry_index,
+            navigator_registry,
+            rules_doc,
+            requirements_doc,
+        )
+        missing = [str(path) for path in required_files if not path.exists()]
+        if missing:
+            checks_failed.append(
+                "ADR governance sync inputs missing: " + ", ".join(sorted(missing))
+            )
+            return (False, warnings, checks_failed)
+
+        registry_payload = json.loads(registry_json.read_text(encoding="utf-8"))
+        registry_entries = registry_payload.get("adrs", [])
+        registry_numbers = {
+            str(entry.get("adr_number", "")).zfill(3) for entry in registry_entries
+        }
+        if registry_payload.get("total_adrs") != expected_total:
+            checks_failed.append(
+                "ADR registry total mismatch: "
+                f"registry.json={registry_payload.get('total_adrs')} "
+                f"decisions/README.md={expected_total}"
+            )
+        if len(registry_entries) != expected_total:
+            checks_failed.append(
+                "ADR registry entry-count mismatch: "
+                f"registry.json entries={len(registry_entries)} "
+                f"decisions/README.md={expected_total}"
+            )
+        if latest_adr not in registry_numbers:
+            checks_failed.append(
+                f"ADR registry JSON is missing the latest ADR-{latest_adr} entry"
+            )
+
+        for path in (registry_index, navigator_registry):
+            text = path.read_text(encoding="utf-8")
+            if f"**Total ADRs**: {expected_total}" not in text:
+                checks_failed.append(
+                    f"{path} total ADR count drifted from {expected_total}"
+                )
+            if f"ADR-{latest_adr}" not in text:
+                checks_failed.append(f"{path} is missing ADR-{latest_adr}")
+
+        rules_text = rules_doc.read_text(encoding="utf-8")
+        if f"[ADR-{latest_adr}]" not in rules_text:
+            checks_failed.append(
+                f"RULES.md appendix does not reference the latest ADR-{latest_adr}"
+            )
+
+        requirements_text = requirements_doc.read_text(encoding="utf-8")
+        verification_marker = f"ADR registry verified through ADR-{latest_adr}"
+        if verification_marker not in requirements_text:
+            checks_failed.append(
+                "REQUIREMENTS.md verification marker drifted from latest ADR: "
+                f"expected '{verification_marker}'"
+            )
+
+        if not checks_failed:
+            checks_passed.append(
+                f"ADR registry mirrors are synchronized through ADR-{latest_adr}"
+            )
+
+        return (
+            not checks_failed,
+            warnings,
+            checks_passed if not checks_failed else checks_failed,
+        )
+
     def run_all_checks(self) -> GovernanceCheckResult:
         """Run all governance checks and return combined result."""
 
@@ -320,6 +420,7 @@ class DocumentationGovernanceChecker:
             ("Link Validity", self.check_link_validity),
             ("Metadata Completeness", self.check_metadata_completeness),
             ("Structure Compliance", self.check_structure_compliance),
+            ("ADR Registry Sync", self.check_adr_registry_sync),
         ]
 
         for check_name, check_func in checks:
