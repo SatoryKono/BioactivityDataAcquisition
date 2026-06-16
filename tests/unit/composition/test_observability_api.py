@@ -4,7 +4,8 @@ import pytest
 
 import asyncio
 import sys
-from types import ModuleType
+from datetime import UTC, datetime
+from types import ModuleType, SimpleNamespace
 from unittest import mock
 
 from bioetl.composition import observability_api
@@ -54,6 +55,20 @@ def test_start_metrics_server_overrides_logger_when_provided() -> None:
         observability_api.start_metrics_server(logger=logger)
 
     assert metrics_service.logger is logger
+
+
+def test_start_metrics_server_returns_false_or_raises_on_failed_start() -> None:
+    metrics_service = mock.Mock()
+    metrics_service.start.return_value = mock.Mock(success=False, error="bind failed")
+
+    with mock.patch.object(
+        observability_api,
+        "get_metrics_service",
+        return_value=metrics_service,
+    ):
+        assert observability_api.start_metrics_server(fail_fast=False) is False
+        with pytest.raises(observability_api.MetricsServerError, match="bind failed"):
+            observability_api.start_metrics_server(port=9200, fail_fast=True)
 
 
 def test_get_metrics_service_delegates_to_internal_services_owner() -> None:
@@ -118,6 +133,46 @@ def test_push_metrics_to_gateway_does_not_bootstrap_fallback_logger() -> None:
     assert metrics_service.logger is mock.sentinel.logger
 
 
+def test_push_metrics_to_gateway_applies_extra_grouping_metric_names_and_logger() -> None:
+    metrics_service = mock.Mock()
+    metrics_service.push_to_gateway.return_value = mock.Mock(success=True)
+    settings = SimpleNamespace(pushgateway_url="pushgateway:9091")
+    logger = mock.Mock()
+
+    with (
+        mock.patch(
+            "bioetl.composition.runtime_builders.config_access.get_settings",
+            return_value=settings,
+        ),
+        mock.patch.object(
+            observability_api,
+            "get_metrics_service",
+            return_value=metrics_service,
+        ),
+    ):
+        result = observability_api.push_metrics_to_gateway(
+            run_label="bioetl",
+            pipeline_name="chembl_activity",
+            run_type="full",
+            grouping_key_extra={"run_id": "run-1"},
+            metric_names=("bioetl_rows_total",),
+            logger=logger,
+        )
+
+    assert result is True
+    assert metrics_service.logger is logger
+    metrics_service.push_to_gateway.assert_called_once_with(
+        gateway="pushgateway:9091",
+        run_label="bioetl",
+        grouping_key={
+            "pipeline": "chembl_activity",
+            "run_type": "full",
+            "run_id": "run-1",
+        },
+        metric_names=("bioetl_rows_total",),
+    )
+
+
 def test_delete_metrics_from_gateway_uses_metrics_service_delete() -> None:
     metrics_service = mock.Mock()
     metrics_service.delete_from_gateway.return_value = mock.Mock(success=True)
@@ -164,6 +219,37 @@ def test_delete_metrics_from_gateway_does_not_bootstrap_fallback_logger() -> Non
     assert metrics_service.logger is mock.sentinel.logger
 
 
+def test_delete_metrics_from_gateway_overrides_logger_and_uses_configured_gateway() -> None:
+    metrics_service = mock.Mock()
+    metrics_service.delete_from_gateway.return_value = mock.Mock(success=False)
+    logger = mock.Mock()
+
+    with (
+        mock.patch(
+            "bioetl.composition.runtime_builders.config_access.get_settings",
+            return_value=SimpleNamespace(pushgateway_url="pushgateway:9091"),
+        ),
+        mock.patch.object(
+            observability_api,
+            "get_metrics_service",
+            return_value=metrics_service,
+        ),
+    ):
+        result = observability_api.delete_metrics_from_gateway(
+            run_label="bioetl",
+            run_type="incremental",
+            logger=logger,
+        )
+
+    assert result is False
+    assert metrics_service.logger is logger
+    metrics_service.delete_from_gateway.assert_called_once_with(
+        gateway="pushgateway:9091",
+        run_label="bioetl",
+        grouping_key={"run_type": "incremental"},
+    )
+
+
 def test_get_audit_service_delegates_to_internal_services_owner() -> None:
     expected = mock.Mock()
     fake_services = ModuleType("bioetl.composition._services")
@@ -194,6 +280,104 @@ def test_get_observability_workflow_service_delegates_to_internal_services_owner
 
     assert result is expected
     mock_impl.assert_called_once_with()
+
+
+def test_remaining_service_delegates_use_internal_services_owner() -> None:
+    fake_services = ModuleType("bioetl.composition._services")
+    delegates = {
+        "get_checkpoint_service": observability_api.get_checkpoint_service,
+        "get_health_service": observability_api.get_health_service,
+        "get_quarantine_service": observability_api.get_quarantine_service,
+        "get_run_manifest_service": observability_api.get_run_manifest_service,
+        "get_lineage_service": observability_api.get_lineage_service,
+    }
+    mocks: dict[str, mock.Mock] = {}
+    for name in delegates:
+        mocks[name] = mock.Mock(return_value=f"{name}:result")
+        setattr(fake_services, name, mocks[name])
+
+    with mock.patch.dict(
+        sys.modules,
+        {"bioetl.composition._services": fake_services},
+    ):
+        for name, fn in delegates.items():
+            assert fn() == f"{name}:result"
+            mocks[name].assert_called_once_with()
+
+
+def test_get_metrics_operator_profile_reports_enabled_and_disabled_modes() -> None:
+    metrics_service = mock.Mock()
+    started_at = datetime(2026, 6, 16, 12, 0, tzinfo=UTC)
+    metrics_service.get_status.return_value = SimpleNamespace(
+        running=True,
+        port=9101,
+        started_at=started_at,
+    )
+    enabled_settings = SimpleNamespace(
+        metrics_port=8000,
+        metrics_addr="127.0.0.1",
+        pushgateway_url="",
+        observability=SimpleNamespace(
+            metrics_enabled=True,
+            metrics_server_enabled=True,
+            tracing_enabled=True,
+            audit_enabled=False,
+        ),
+    )
+
+    with (
+        mock.patch(
+            "bioetl.composition.runtime_builders.config_access.get_settings",
+            return_value=enabled_settings,
+        ),
+        mock.patch.object(
+            observability_api,
+            "get_metrics_service",
+            return_value=metrics_service,
+        ),
+    ):
+        profile = observability_api.get_metrics_operator_profile()
+
+    assert profile.metrics_endpoint == "http://127.0.0.1:9101/metrics"
+    assert profile.metrics_server_mode == "auto_managed_during_pipeline_runs"
+    assert profile.pushgateway_mode == "best_effort_on_run_completion"
+    assert profile.pushgateway_gateway == "localhost:9091"
+    assert profile.to_dict()["metrics_started_at"] == started_at.isoformat()
+
+    metrics_service.get_status.return_value = SimpleNamespace(
+        running=False,
+        port=None,
+        started_at=None,
+    )
+    disabled_settings = SimpleNamespace(
+        metrics_port=8000,
+        metrics_addr="0.0.0.0",
+        pushgateway_url="pushgateway:9091",
+        observability=SimpleNamespace(
+            metrics_enabled=False,
+            metrics_server_enabled=False,
+            tracing_enabled=False,
+            audit_enabled=True,
+        ),
+    )
+
+    with (
+        mock.patch(
+            "bioetl.composition.runtime_builders.config_access.get_settings",
+            return_value=disabled_settings,
+        ),
+        mock.patch.object(
+            observability_api,
+            "get_metrics_service",
+            return_value=metrics_service,
+        ),
+    ):
+        disabled_profile = observability_api.get_metrics_operator_profile()
+
+    assert disabled_profile.metrics_endpoint is None
+    assert disabled_profile.metrics_server_mode == "disabled"
+    assert disabled_profile.pushgateway_mode == "disabled"
+    assert disabled_profile.pushgateway_gateway == "pushgateway:9091"
 
 
 def test_inspect_run_dossier_delegates_to_workflow_service() -> None:

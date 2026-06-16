@@ -991,6 +991,50 @@ def test_config_dq_helpers_cover_lazy_import_and_error_branches(
     assert any(kind == "error" and args[0] == "Compatibility check failed" for kind, args in messages)
 
 
+def test_config_dq_helpers_cover_success_and_incompatible_branches(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    messages: list[tuple[str, tuple[object, ...]]] = []
+    monkeypatch.setattr(config_dq, "echo_info", lambda *args: messages.append(("info", args)))
+    monkeypatch.setattr(config_dq, "echo_error", lambda *args: messages.append(("error", args)))
+    service = MagicMock()
+    monkeypatch.setattr(config_dq, "get_config_service", lambda: service)
+
+    service.get_dq_config.return_value = {
+        "contract_ref": "chembl_activity_dq",
+        "contract_version": "1.0",
+        "rule_bundle_version": "2026.06",
+        "default_disposition_policy": "quarantine",
+        "strictness_mode": "strict",
+    }
+    config_dq.show_dq_config_command.callback("chembl_activity", "json")
+    config_dq.validate_dq_config_command.callback("chembl_activity", None)
+    assert any('"contract_ref": "chembl_activity_dq"' in str(args[0]) for _, args in messages)
+    assert any("Contract Ref: chembl_activity_dq" in str(args[0]) for _, args in messages)
+
+    messages.clear()
+    config_file = tmp_path / "dq.yaml"
+    config_file.write_text("contract_ref: chembl_activity_dq\n", encoding="utf-8")
+    service.validate_dq_config.return_value = True
+    config_dq.validate_dq_config_command.callback("chembl_activity", str(config_file))
+    assert any("[OK] DQ configuration is valid" in str(args[0]) for _, args in messages)
+
+    messages.clear()
+    service.validate_dq_config.return_value = False
+    config_dq.validate_dq_config_command.callback("chembl_activity", str(config_file))
+    assert any("[ERROR] DQ configuration is invalid" in str(args[0]) for _, args in messages)
+
+    messages.clear()
+    artifact1 = tmp_path / "artifact1.json"
+    artifact2 = tmp_path / "artifact2.json"
+    artifact1.write_text(json.dumps({"artifact_id": "a1"}), encoding="utf-8")
+    artifact2.write_text(json.dumps({"artifact_id": "a2"}), encoding="utf-8")
+    service.check_config_compatibility.return_value = False
+    config_dq.check_compatibility_command.callback(str(artifact1), str(artifact2))
+    assert any("NOT compatible" in str(args[0]) for _, args in messages)
+
+
 def test_run_manifest_commands_cover_error_and_persisted_artifact_paths(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

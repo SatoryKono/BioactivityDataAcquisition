@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
+from unittest import mock
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -203,6 +204,183 @@ class TestResolveCompositeConfigPath:
             result = fn("my_pipeline")
 
         assert result == config_file
+
+
+@pytest.mark.unit
+def test_composite_facade_delegates_config_and_schema_helpers(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    from bioetl.composition.bootstrap.runtime import composite
+
+    schema_registry = {"activity": object()}
+    monkeypatch.setattr(
+        composite,
+        "DEFAULT_COMPOSITE_GOLD_SCHEMA_REGISTRY",
+        schema_registry,
+    )
+    monkeypatch.setattr(
+        composite,
+        "_resolve_composite_gold_schema_impl",
+        lambda composite_name, *, schema_registry: (
+            composite_name,
+            schema_registry,
+        ),
+    )
+    assert composite._resolve_composite_gold_schema("composite_activity") == (
+        "composite_activity",
+        schema_registry,
+    )
+
+    config_dir = tmp_path / "composites"
+    configs_root = tmp_path / "configs-root"
+    config_path = config_dir / "composite_activity.yaml"
+    monkeypatch.setattr(composite, "DEFAULT_COMPOSITE_CONFIG_DIR", config_dir)
+    monkeypatch.setattr(composite, "resolve_configs_root", lambda: configs_root)
+    monkeypatch.setattr(
+        composite,
+        "_resolve_composite_config_path_impl",
+        lambda name, *, config_dir, configs_root: (name, config_dir, configs_root),
+    )
+    assert composite._resolve_composite_config_path("composite_activity") == (
+        "composite_activity",
+        config_dir,
+        configs_root,
+    )
+
+    monkeypatch.setattr(
+        composite,
+        "_load_runtime_composite_config_impl",
+        lambda name, *, resolve_config_path_fn, validate_payload: (
+            name,
+            resolve_config_path_fn,
+            validate_payload,
+        ),
+    )
+    loaded = composite.load_composite_config("composite_activity")
+    assert loaded[0] == "composite_activity"
+    assert loaded[1] is composite._resolve_composite_config_path
+    assert loaded[2] is composite.validate_composite_config_payload
+
+    monkeypatch.setattr(
+        composite,
+        "_resolve_composite_config_path_impl",
+        lambda name, *, config_dir, configs_root: config_path,
+    )
+    assert composite._resolve_composite_config_path("composite_activity") == config_path
+
+
+@pytest.mark.unit
+def test_composite_lazy_exports_and_bootstrap_wrappers_delegate(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from bioetl.composition.bootstrap.runtime import composite
+
+    assert composite.__getattr__("CompositeRuntimeConfig").__name__ == "CompositeRuntimeConfig"
+    assert callable(composite.__getattr__("create_composite_runner_service"))
+    assert callable(composite.__getattr__("_create_dq_report_service"))
+    with pytest.raises(AttributeError):
+        composite.__getattr__("missing")
+
+    captures: dict[str, dict[str, object]] = {}
+    monkeypatch.setattr(
+        composite,
+        "_bootstrap_runtime_basics_impl",
+        lambda **kwargs: captures.setdefault("basics", kwargs),
+    )
+    basics = composite._bootstrap_runtime_basics(config=mock.sentinel.config, run_id="run-1")
+    assert basics["config"] is mock.sentinel.config
+    assert basics["run_id"] == "run-1"
+    assert callable(basics["settings_provider"])
+    assert callable(basics["uuid_factory"])
+
+    monkeypatch.setattr(
+        composite,
+        "_build_runner_factories_impl",
+        lambda **kwargs: captures.setdefault("factories", kwargs),
+    )
+    factories = composite._build_runner_factories(
+        config=mock.sentinel.config,
+        runtime=mock.sentinel.runtime,
+        logger=mock.sentinel.logger,
+    )
+    assert factories["config"] is mock.sentinel.config
+    assert factories["runtime"] is mock.sentinel.runtime
+    assert callable(factories["resolve_bronze_opts_fn"])
+
+    monkeypatch.setattr(
+        composite,
+        "_build_support_services_impl",
+        lambda **kwargs: captures.setdefault("support", kwargs),
+    )
+    support = composite._build_support_services(
+        config=mock.sentinel.config,
+        runtime=mock.sentinel.runtime,
+        infra_context=mock.sentinel.infra,
+    )
+    assert support["infra_context"] is mock.sentinel.infra
+    assert support["resolve_gold_schema_fn"] is composite._resolve_composite_gold_schema
+
+    monkeypatch.setattr(
+        composite,
+        "_create_composite_runner_from_plan_impl",
+        lambda **kwargs: captures.setdefault("runner", kwargs),
+    )
+    runner = composite._create_composite_runner_from_plan(
+        config=mock.sentinel.config,
+        runtime=mock.sentinel.runtime,
+        plan=mock.sentinel.plan,
+    )
+    assert runner["plan"] is mock.sentinel.plan
+    assert callable(runner["runner_factory"])
+
+
+@pytest.mark.unit
+def test_composite_bootstrap_plan_and_runner_entrypoint_delegate(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from bioetl.composition.bootstrap.runtime import composite
+
+    captured: dict[str, object] = {}
+    monkeypatch.setattr(
+        composite,
+        "_build_composite_bootstrap_plan_impl",
+        lambda **kwargs: captured.setdefault("plan_kwargs", kwargs) or mock.sentinel.plan,
+    )
+    plan = composite._build_composite_bootstrap_plan(
+        config=mock.sentinel.config,
+        runtime=mock.sentinel.runtime,
+        run_id="run-1",
+    )
+    assert plan is mock.sentinel.plan
+    assert captured["plan_kwargs"]["bootstrap_runtime_basics_fn"] is composite._bootstrap_runtime_basics
+
+    patch_calls: list[str] = []
+    monkeypatch.setattr(
+        composite,
+        "apply_runtime_compatibility_patches",
+        lambda: patch_calls.append("patched"),
+    )
+    monkeypatch.setattr(
+        composite,
+        "_build_composite_bootstrap_plan",
+        lambda **kwargs: mock.sentinel.entrypoint_plan,
+    )
+    monkeypatch.setattr(
+        composite,
+        "_create_composite_runner_from_plan",
+        lambda **kwargs: ("runner", kwargs),
+    )
+
+    runner = composite.bootstrap_composite_runner(
+        mock.sentinel.config,
+        mock.sentinel.runtime,
+        run_id="run-2",
+    )
+
+    assert patch_calls == ["patched"]
+    assert runner[0] == "runner"
+    assert runner[1]["plan"] is mock.sentinel.entrypoint_plan
 
 
 # =============================================================================

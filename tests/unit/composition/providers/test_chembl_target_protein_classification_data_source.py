@@ -18,6 +18,7 @@ pytestmark = pytest.mark.unit
 
 class _FakeDeltaReader:
     def __init__(self) -> None:
+        self.closed = False
         self.tables = {
             "chembl.target": pa.table(
                 {
@@ -69,7 +70,7 @@ class _FakeDeltaReader:
         return self.tables[table_path].num_rows
 
     async def aclose(self) -> None:
-        return None
+        self.closed = True
 
 
 @pytest.fixture
@@ -179,3 +180,100 @@ async def test_relation_data_source_health_check_requires_snapshot_tables(
     data_source: TargetProteinClassificationSnapshotDataSource,
 ) -> None:
     assert await data_source.health_check() == HealthStatus.HEALTHY
+
+
+@pytest.mark.asyncio
+async def test_relation_data_source_context_offset_and_close(
+    data_source: TargetProteinClassificationSnapshotDataSource,
+) -> None:
+    async with data_source as loaded:
+        assert loaded is data_source
+
+    assert data_source._delta_reader.closed is True
+
+    rows = [
+        row
+        async for row in data_source.fetch(
+            "target_protein_classification",
+            limit=1,
+            offset=1,
+        )
+    ]
+
+    assert len(rows) == 1
+    assert rows[0]["target_id"] == "CHEMBL_T2"
+
+
+@pytest.mark.asyncio
+async def test_relation_data_source_health_check_reports_missing_tables(
+    data_source: TargetProteinClassificationSnapshotDataSource,
+) -> None:
+    data_source._delta_reader.tables.pop("chembl.protein_class")
+
+    assert await data_source.health_check() == HealthStatus.DEGRADED
+    data_source._logger.warning.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_relation_data_source_rejects_invalid_entity_and_filter(
+    data_source: TargetProteinClassificationSnapshotDataSource,
+) -> None:
+    with pytest.raises(ValueError, match="only serves target_protein_classification"):
+        data_source.fetch("target", limit=1)
+
+    with pytest.raises(ValueError, match="Unsupported target protein classification"):
+        [
+            row
+            async for row in data_source.fetch(
+                "target_protein_classification",
+                filter_ids=["CHEMBL_T1"],
+                filter_field="unsupported_field",
+                limit=1,
+            )
+        ]
+
+    with pytest.raises(ValueError, match="only serves target_protein_classification"):
+        [
+            row
+            async for row in data_source.fetch_multi_filtered(
+                "target",
+                {"target_id": ["CHEMBL_T1"]},
+                limit=1,
+            )
+        ]
+
+
+@pytest.mark.asyncio
+async def test_relation_data_source_multi_filter_intersection_and_empty_filters(
+    data_source: TargetProteinClassificationSnapshotDataSource,
+) -> None:
+    rows = [
+        row
+        async for row in data_source.fetch_multi_filtered(
+            "target_protein_classification",
+            {
+                "target_id": ["CHEMBL_T1", "CHEMBL_T2"],
+                "component_id": ["10", "bad"],
+            },
+            limit=1,
+        )
+    ]
+
+    assert len(rows) == 1
+    assert rows[0]["target_id"] == "CHEMBL_T1"
+
+    assert [
+        row
+        async for row in data_source.fetch_multi_filtered(
+            "target_protein_classification",
+            {},
+            limit=10,
+        )
+    ] == []
+
+
+def test_relation_rows_for_target_requires_loaded_snapshot(
+    data_source: TargetProteinClassificationSnapshotDataSource,
+) -> None:
+    with pytest.raises(RuntimeError, match="was not initialized"):
+        data_source._relation_rows_for_target("CHEMBL_T1")
