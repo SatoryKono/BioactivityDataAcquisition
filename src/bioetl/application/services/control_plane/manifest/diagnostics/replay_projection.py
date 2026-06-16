@@ -13,7 +13,7 @@ from bioetl.application.services.control_plane.manifest.diagnostics.persistence 
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_blockers import (
     _collect_append_mode_semantic_sinks,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family import (
+from bioetl.application.services.control_plane.manifest.diagnostics.replay import (
     _resolve_exact_replay_support_boundary,
     _resolve_replay_family_contract,
 )

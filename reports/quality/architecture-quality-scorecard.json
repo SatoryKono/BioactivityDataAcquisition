@@ -8,8 +8,8 @@
     },
     "module_coverage_inventory": {
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "49acbac8ffe7882c53bed4c9e3efb21a2cef79d7fe1db22bc4e5e5a0fc7ffd6f",
-      "coverage_xml_sha256": "877c30d83891c52ee94704ea87d15004f95f8f36e0dffdce50e843bb83f46875"
+      "source_tree_sha256": "01c87a6b6da6d1b28dd982040001413e1d7d5a9031531952cc2d7b2c3217bbec",
+      "coverage_xml_sha256": "3b76ecf2d30ec66ade8f98805a0dcb0dcaddff4a12182b4af1e9082d859898c4"
     },
     "compatibility_importer_census": {
       "path": "reports/quality/compatibility-importer-census.json",
@@ -50,7 +50,7 @@
       "weighted_score": 0.924,
       "evidence_metrics": {
         "layer_violations": 0,
-        "retained_entrypoint_count": 14
+        "retained_entrypoint_count": 13
       }
     },
     {
@@ -60,7 +60,7 @@
       "score": 8.0,
       "weighted_score": 0.72,
       "evidence_metrics": {
-        "source_module_count": 2149,
+        "source_module_count": 2148,
         "uncovered_module_count": 0
       }
     },
@@ -82,7 +82,7 @@
       "score": 7.0,
       "weighted_score": 0.98,
       "evidence_metrics": {
-        "source_module_count": 2149,
+        "source_module_count": 2148,
         "hotspot_family_count": 5
       }
     },
@@ -93,7 +93,7 @@
       "score": 7.5,
       "weighted_score": 0.6,
       "evidence_metrics": {
-        "retained_entrypoint_count": 14,
+        "retained_entrypoint_count": 13,
         "twin_pair_count": 0
       }
     },
@@ -104,7 +104,7 @@
       "score": 7.4,
       "weighted_score": 0.888,
       "evidence_metrics": {
-        "unmeasured_module_count": 1,
+        "unmeasured_module_count": 0,
         "uncovered_module_count": 0
       }
     },
@@ -137,18 +137,18 @@
       "score": 7.5,
       "weighted_score": 0.45,
       "evidence_metrics": {
-        "retained_entrypoint_count": 14,
+        "retained_entrypoint_count": 13,
         "repo_wide_untriaged_zero_import_candidate_count": 0
       }
     }
   ],
   "metrics": {
     "layer_violations": 0,
-    "source_module_count": 2149,
-    "unmeasured_module_count": 1,
+    "source_module_count": 2148,
+    "unmeasured_module_count": 0,
     "uncovered_module_count": 0,
     "hotspot_family_count": 5,
-    "retained_entrypoint_count": 14,
+    "retained_entrypoint_count": 13,
     "retained_public_export_facade_count": 4,
     "twin_pair_count": 0,
     "repo_wide_untriaged_zero_import_candidate_count": 0,
@@ -169,8 +169,8 @@
         "ratchet_policy": "Fail on growth; ratchet current/max_count toward target_count zero as transition-only compatibility shims are removed."
       },
       "retained_public_entrypoint_burden": {
-        "current_count": 14,
-        "max_count": 14,
+        "current_count": 13,
+        "max_count": 13,
         "owner": "@bioetl-architecture",
         "linked_issue": "4575",
         "rationale": "Retained public entrypoints are stable external API, but their size and first-party dependency burden are blocking governance debt when they grow without review.",

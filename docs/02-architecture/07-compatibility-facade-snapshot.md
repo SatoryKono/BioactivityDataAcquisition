@@ -5,18 +5,18 @@
 ## Summary
 
 - Registry YAML: `configs/quality/compatibility_facade_inventory.yaml`
-- Curated inventory rows: `14`
+- Curated inventory rows: `13`
 - Transition debt rows: `0`
-- Sanctioned public entrypoint rows: `14`
+- Sanctioned public entrypoint rows: `13`
 - Retained review entrypoints: `0`
-- Permanent public entrypoints: `14`
-- Measured tracked modules: `14`
+- Permanent public entrypoints: `13`
+- Measured tracked modules: `13`
 - Measured-only modules outside curated inventory: `0`
 - Discovered docstring-tracked modules: `0`
 - Unexpected docstring-tracked modules: `0`
 - Missing allowlisted measured-only modules: `0`
 - First-party src imports targeting measured-only modules: `0`
-- Curated rows requiring external breaking change process: `14`
+- Curated rows requiring external breaking change process: `13`
 - Curated rows marked internal-callers-zero: `1`
 - First-party src imports targeting internal-callers-zero rows: `0`
 - Ratchet violations: `0`
@@ -38,7 +38,6 @@
 - `src/bioetl/composition/health_api.py`
 - `src/bioetl/composition/maintenance_api.py`
 - `src/bioetl/domain/composite/config.py`
-- `src/bioetl/domain/value_objects/activity_values.py`
 - `src/bioetl/infrastructure/config/__init__.py`
 - `src/bioetl/interfaces/cli/commands/diagnostics.py`
 - `src/bioetl/interfaces/cli/commands/health.py`
@@ -62,7 +61,6 @@
 - `src/bioetl/composition/maintenance_api.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/infrastructure/config/__init__.py` — external breaking change required: `true`, internal callers zero: `true`
 - `src/bioetl/domain/composite/config.py` — external breaking change required: `true`, internal callers zero: `false`
-- `src/bioetl/domain/value_objects/activity_values.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/application/composite/merger.py` — external breaking change required: `true`, internal callers zero: `false`
 
 ## Measured-Only Allowlist

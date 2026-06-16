@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family import (
+from bioetl.application.services.control_plane.manifest.diagnostics.replay import (
     _resolve_replay_family_contract,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_projection import (

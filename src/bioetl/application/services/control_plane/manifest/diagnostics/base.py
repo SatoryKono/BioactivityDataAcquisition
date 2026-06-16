@@ -29,11 +29,11 @@ from bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_p
 from bioetl.application.services.control_plane.manifest.diagnostics.operator_replay_mode import (
     _resolve_operator_replay_mode,
 )
+from bioetl.application.services.control_plane.manifest.diagnostics.replay import (
+    _resolve_replay_family_contract,
+)
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_blockers import (
     _collect_append_mode_semantic_sinks,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family import (
-    _resolve_replay_family_contract,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_parentage import (
     _build_replay_parentage,
