@@ -77,6 +77,12 @@ class TargetProteinClassificationTransformer(BaseChemblTransformer):
             ),
             "component_id": _optional_int(record.get("component_id")),
             "leaf_id": _optional_id_text(record.get("leaf_id")),
+            "path_ids": _optional_text(record.get("path_ids")),
+            "path_names": _optional_text(record.get("path_names")),
+            "path_labels": _optional_text(record.get("path_labels")),
+            "depth": _optional_int(record.get("depth")),
+            "root_id": _optional_int(record.get("root_id")),
+            "is_leaf": _optional_bool(record.get("is_leaf")),
             "l1_id": _optional_id_text(record.get("l1_id")),
             "l1_name": _optional_text(record.get("l1_name")),
             "l1_desc": _optional_text(record.get("l1_desc")),
@@ -92,6 +98,25 @@ class TargetProteinClassificationTransformer(BaseChemblTransformer):
             "l5_id": _optional_id_text(record.get("l5_id")),
             "l5_name": _optional_text(record.get("l5_name")),
             "l5_desc": _optional_text(record.get("l5_desc")),
+            "dataset_version": _optional_text(record.get("dataset_version")),
+            "source_url": _optional_text(record.get("source_url")),
+            "chembl_release": _optional_text(record.get("chembl_release")),
+            "chembl_api_version": _optional_text(record.get("chembl_api_version")),
+            "source_manifest_status": _optional_text(
+                record.get("source_manifest_status")
+            ),
+            "source_snapshot_fingerprint": _optional_text(
+                record.get("source_snapshot_fingerprint")
+            ),
+            "target_snapshot_row_count": _optional_int(
+                record.get("target_snapshot_row_count")
+            ),
+            "target_component_snapshot_row_count": _optional_int(
+                record.get("target_component_snapshot_row_count")
+            ),
+            "protein_class_snapshot_row_count": _optional_int(
+                record.get("protein_class_snapshot_row_count")
+            ),
         }
 
 
@@ -137,6 +162,22 @@ def _optional_text(value: object) -> str | None:
         return None
     stripped = str(value).strip()
     return stripped or None
+
+
+def _optional_bool(value: object) -> bool | None:
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, int):
+        return bool(value)
+    if isinstance(value, str):
+        stripped = value.strip().lower()
+        if stripped in {"true", "1", "yes"}:
+            return True
+        if stripped in {"false", "0", "no"}:
+            return False
+    return None
 
 
 def _optional_id_text(value: object) -> str | None:

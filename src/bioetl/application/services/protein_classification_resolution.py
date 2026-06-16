@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from collections.abc import Iterable
 from dataclasses import dataclass
 
@@ -42,6 +43,12 @@ class TargetProteinClassificationRecord:
     classification_status: str
     component_id: int | None = None
     leaf_id: int | None = None
+    path_ids: str | None = None
+    path_names: str | None = None
+    path_labels: str | None = None
+    depth: int | None = None
+    root_id: int | None = None
+    is_leaf: bool | None = None
     l1_id: int | None = None
     l1_name: str | None = None
     l1_desc: str | None = None
@@ -91,6 +98,12 @@ class TargetProteinClassificationRecord:
             target_id=target_id,
             component_id=component_id,
             leaf_id=hierarchy.leaf_id,
+            path_ids=_json_array(hierarchy.path_ids),
+            path_names=_json_array(hierarchy.path_names),
+            path_labels=_json_array(hierarchy.path_labels),
+            depth=hierarchy.depth,
+            root_id=hierarchy.root_id,
+            is_leaf=hierarchy.is_leaf,
             classification_status=_STATUS_RESOLVED,
             l1_id=levels[0].id,
             l1_name=levels[0].name,
@@ -116,6 +129,12 @@ class TargetProteinClassificationRecord:
             "classification_status": self.classification_status,
             "component_id": self.component_id,
             "leaf_id": self.leaf_id,
+            "path_ids": self.path_ids,
+            "path_names": self.path_names,
+            "path_labels": self.path_labels,
+            "depth": self.depth,
+            "root_id": self.root_id,
+            "is_leaf": self.is_leaf,
             "l1_id": self.l1_id,
             "l1_name": self.l1_name,
             "l1_desc": self.l1_desc,
@@ -313,3 +332,8 @@ def _unresolved_resolution(
 
 ProteinClassificationResolution = ProteinClassificationResolutionResult
 ResolveProteinClassificationUseCase = ProteinClassificationResolutionService
+
+
+def _json_array(values: Iterable[object]) -> str:
+    """Return a stable JSON array for publication in scalar contract fields."""
+    return json.dumps(tuple(values), ensure_ascii=False, separators=(",", ":"))

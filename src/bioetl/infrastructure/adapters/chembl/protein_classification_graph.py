@@ -91,9 +91,7 @@ class ChEMBLProteinClassificationGraph(ProteinClassificationPort):
         resolved_leaf_id = self._resolve_replacement(leaf_id)
         path = self._walk_path(resolved_leaf_id)
         levels = {
-            level_number: level
-            for level_number, level in path
-            if level_number <= 5
+            level_number: level for level_number, level in path if level_number <= 5
         }
         hierarchy = ProteinClassHierarchy(
             l1=levels.get(1, ProteinClassLevel.empty()),

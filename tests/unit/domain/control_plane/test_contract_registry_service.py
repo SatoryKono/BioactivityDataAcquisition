@@ -78,6 +78,31 @@ def sample_entry(sample_identity):
 
 
 @pytest.fixture
+def alternate_entry():
+    """Create a second valid ContractRegistryEntry for ordering tests."""
+    identity = ContractIdentity(
+        contract_ref="test.alternate.v1",
+        contract_version="1.1.0",
+        compatibility_level=CompatibilityLevel.MINOR,
+        schema_hash="c" * 64,
+        normalization_profile_ref="test.alternate",
+        normalization_profile_version="1.0.0",
+        normalization_profile_hash="d" * 64,
+    )
+    return ContractRegistryEntry(
+        identity=identity,
+        status=LifecycleStatus.ACTIVE,
+        source_path="src/schemas/alternate.v1.yaml",
+        supported_versions=["1.0.0", "1.1.0"],
+        last_updated="2024-01-02T00:00:00+00:00",
+        owners=["test-team"],
+        normalization_profile_ref="test.alternate",
+        normalization_profile_version="1.0.0",
+        normalization_profile_hash="d" * 64,
+    )
+
+
+@pytest.fixture
 def sample_registry_data():
     """Create sample registry data for testing."""
     return {
@@ -126,6 +151,54 @@ class TestParseSemver:
 
         with pytest.raises(ValueError, match="Invalid version format"):
             parse_semver("a.b.c")  # Non-numeric
+
+
+def test_registry_hash_is_stable_across_insertion_order(
+    sample_entry: ContractRegistryEntry,
+    alternate_entry: ContractRegistryEntry,
+) -> None:
+    """Registry hash must not depend on Python dict insertion order."""
+    first = ContractRegistry()
+    second = ContractRegistry()
+
+    assert first.register_contract(sample_entry).valid is True
+    assert first.register_contract(alternate_entry).valid is True
+    assert second.register_contract(alternate_entry).valid is True
+    assert second.register_contract(sample_entry).valid is True
+
+    assert first.registry_hash_v2 == second.registry_hash_v2
+    assert first.registry_hash_v1 == second.registry_hash_v1
+
+
+def test_registry_validation_blocks_dq_identity_drift(
+    sample_identity: ContractIdentity,
+) -> None:
+    """DQ metadata must match identity and entry payloads exactly."""
+    entry = ContractRegistryEntry(
+        identity=sample_identity,
+        status=LifecycleStatus.ACTIVE,
+        source_path="src/schemas/test.v1.yaml",
+        supported_versions=["1.0.0"],
+        last_updated="2024-01-01T00:00:00+00:00",
+        owners=["test-team"],
+        normalization_profile_ref="different.profile",
+        normalization_profile_version="1.0.0",
+        normalization_profile_hash="b" * 64,
+    )
+
+    result = ContractRegistry().register_contract(entry)
+
+    assert result.valid is False
+    assert result.has_blocking_issues is True
+    assert [
+        (issue.field, issue.severity, issue.contract_ref) for issue in result.issues
+    ] == [
+        (
+            "normalization_profile_ref",
+            RegistryValidationSeverity.BLOCKING,
+            "test.contract.v1",
+        )
+    ]
 
 
 class TestStringMappingValidation:

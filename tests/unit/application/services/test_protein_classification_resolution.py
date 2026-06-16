@@ -47,6 +47,41 @@ def _hierarchy(leaf_id: int) -> ProteinClassHierarchy:
     )
 
 
+def test_resolver_publishes_path_fields_and_legacy_projection() -> None:
+    hierarchy = ProteinClassHierarchy(
+        l1=ProteinClassLevel(id=1, name="Root", desc="root desc"),
+        l2=ProteinClassLevel(id=2, name="Branch", desc="branch desc"),
+        l3=ProteinClassLevel.empty(),
+        l4=ProteinClassLevel.empty(),
+        l5=ProteinClassLevel.empty(),
+        leaf_id=3,
+        path=(
+            ProteinClassLevel(id=1, name="Root", desc="root desc"),
+            ProteinClassLevel(id=2, name="Branch", desc="branch desc"),
+            ProteinClassLevel(id=3, name="Leaf", desc="leaf desc"),
+        ),
+    )
+    use_case = ResolveProteinClassificationUseCase(
+        _FakeClassificationPort({7: (hierarchy,)})
+    )
+
+    result = use_case.resolve_target(
+        target_id="CHEMBL_TARGET",
+        component_ids=[7],
+    )
+
+    row = result.rows[0].to_dict()
+    assert row["path_ids"] == "[1,2,3]"
+    assert row["path_names"] == '["Root","Branch","Leaf"]'
+    assert row["path_labels"] == '["1:Root","2:Branch","3:Leaf"]'
+    assert row["depth"] == 2
+    assert row["root_id"] == 1
+    assert row["is_leaf"] is True
+    assert row["l1_id"] == 1
+    assert row["l2_id"] == 2
+    assert row["l3_id"] is None
+
+
 def test_resolver_deduplicates_and_sorts_multiple_classifications() -> None:
     use_case = ResolveProteinClassificationUseCase(
         _FakeClassificationPort(

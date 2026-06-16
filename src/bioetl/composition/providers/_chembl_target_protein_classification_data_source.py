@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
+import json
 from collections import defaultdict
 from collections.abc import AsyncIterator, Iterable, Mapping
 from types import TracebackType
@@ -28,6 +30,9 @@ __all__ = ["TargetProteinClassificationSnapshotDataSource"]
 _TARGET_TABLE = "chembl.target"
 _TARGET_COMPONENT_TABLE = "chembl.target_component"
 _PROTEIN_CLASS_TABLE = "chembl.protein_class"
+_DATASET_VERSION = "target-protein-classification-path-v2.1.0"
+_SOURCE_URL = "https://www.ebi.ac.uk/chembl/api/data/protein_classification"
+_UNKNOWN_METADATA = "unknown"
 _SUPPORTED_TARGET_FILTER_FIELDS = frozenset({"target_id", "target_chembl_id"})
 _SUPPORTED_COMPONENT_FILTER_FIELDS = frozenset({"component_id", "primary_component_id"})
 
@@ -52,6 +57,7 @@ class TargetProteinClassificationSnapshotDataSource:
         self._target_component_ids: dict[str, tuple[int, ...]] = {}
         self._target_ids_by_component: dict[int, tuple[str, ...]] = {}
         self._resolution_service: ProteinClassificationResolutionService | None = None
+        self._source_manifest: JsonDict = {}
 
     async def __aenter__(self) -> TargetProteinClassificationSnapshotDataSource:
         await self._ensure_loaded()
@@ -228,6 +234,11 @@ class TargetProteinClassificationSnapshotDataSource:
                 ],
             )
             self._load_target_maps(target_rows)
+            self._source_manifest = _source_manifest(
+                target_rows=target_rows,
+                target_component_rows=target_component_rows,
+                protein_class_rows=protein_class_rows,
+            )
             self._resolution_service = ProteinClassificationResolutionService(
                 ChEMBLProteinClassificationGraph.from_rows(
                     protein_class_rows=protein_class_rows,
@@ -245,6 +256,9 @@ class TargetProteinClassificationSnapshotDataSource:
                     _TARGET_COMPONENT_TABLE,
                     _PROTEIN_CLASS_TABLE,
                 ],
+                source_snapshot_fingerprint=self._source_manifest.get(
+                    "source_snapshot_fingerprint"
+                ),
             )
 
     async def _read_rows(
@@ -326,4 +340,105 @@ class TargetProteinClassificationSnapshotDataSource:
                 ],
                 resolution_policy=self._invalid_record_policy,
             )
-        return tuple(row.to_dict() for row in result.rows)
+        return tuple(
+            _with_source_manifest(row.to_dict(), self._source_manifest)
+            for row in result.rows
+        )
+
+
+def _source_manifest(
+    *,
+    target_rows: Iterable[Mapping[str, object]],
+    target_component_rows: Iterable[Mapping[str, object]],
+    protein_class_rows: Iterable[Mapping[str, object]],
+) -> JsonDict:
+    """Build deterministic source metadata from local snapshot inputs."""
+    target_rows_tuple = tuple(target_rows)
+    target_component_rows_tuple = tuple(target_component_rows)
+    protein_class_rows_tuple = tuple(protein_class_rows)
+    return {
+        "dataset_version": _DATASET_VERSION,
+        "source_url": _SOURCE_URL,
+        "chembl_release": _first_text(
+            protein_class_rows_tuple,
+            "chembl_release",
+            "chembl_db_version",
+            "db_version",
+        ),
+        "chembl_api_version": _first_text(
+            protein_class_rows_tuple,
+            "chembl_api_version",
+            "api_version",
+        ),
+        "source_manifest_status": _manifest_status(protein_class_rows_tuple),
+        "source_snapshot_fingerprint": _source_snapshot_fingerprint(
+            target_rows=target_rows_tuple,
+            target_component_rows=target_component_rows_tuple,
+            protein_class_rows=protein_class_rows_tuple,
+        ),
+        "target_snapshot_row_count": len(target_rows_tuple),
+        "target_component_snapshot_row_count": len(target_component_rows_tuple),
+        "protein_class_snapshot_row_count": len(protein_class_rows_tuple),
+    }
+
+
+def _first_text(
+    rows: Iterable[Mapping[str, object]],
+    *field_names: str,
+) -> str:
+    """Return the first non-empty metadata value from snapshot rows."""
+    for row in rows:
+        for field_name in field_names:
+            value = row.get(field_name)
+            if value is None:
+                continue
+            stripped = str(value).strip()
+            if stripped:
+                return stripped
+    return _UNKNOWN_METADATA
+
+
+def _manifest_status(rows: Iterable[Mapping[str, object]]) -> str:
+    """Return whether release metadata was available in the local snapshot."""
+    release = _first_text(rows, "chembl_release", "chembl_db_version", "db_version")
+    api_version = _first_text(rows, "chembl_api_version", "api_version")
+    if release == _UNKNOWN_METADATA or api_version == _UNKNOWN_METADATA:
+        return "release_metadata_unavailable"
+    return "release_metadata_available"
+
+
+def _source_snapshot_fingerprint(
+    *,
+    target_rows: Iterable[Mapping[str, object]],
+    target_component_rows: Iterable[Mapping[str, object]],
+    protein_class_rows: Iterable[Mapping[str, object]],
+) -> str:
+    """Hash stable identifiers from source snapshots for manifest drift checks."""
+    payload = {
+        "targets": sorted(
+            str(row.get("target_id"))
+            for row in target_rows
+            if row.get("target_id") is not None
+        ),
+        "target_components": sorted(
+            str(row.get("component_id"))
+            for row in target_component_rows
+            if row.get("component_id") is not None
+        ),
+        "protein_classes": sorted(
+            str(row.get("protein_class_id"))
+            for row in protein_class_rows
+            if row.get("protein_class_id") is not None
+        ),
+    }
+    serialized = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
+
+
+def _with_source_manifest(
+    row: JsonDict, source_manifest: Mapping[str, object]
+) -> JsonDict:
+    """Attach source manifest fields to one relation row."""
+    enriched = dict(row)
+    enriched.update(source_manifest)
+    return enriched

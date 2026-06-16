@@ -69,6 +69,26 @@ class TestLoggingDebugAdapter:
         call_kwargs = logger.info.call_args
         assert "debug_breakpoint" in call_kwargs[0]
 
+    def test_on_breakpoint_logs_low_cardinality_payload(self) -> None:
+        """Breakpoint logs must avoid sample payloads and high-cardinality fields."""
+        logger = _make_logger()
+        adapter = LoggingDebugAdapter(logger=logger)
+
+        adapter.on_breakpoint(_make_hit())
+
+        args, kwargs = logger.info.call_args
+        assert args == ("debug_breakpoint",)
+        assert set(kwargs) == {
+            "breakpoint",
+            "message",
+            "records_bronze",
+            "records_fetched",
+            "records_gold",
+            "records_quarantined",
+            "records_silver",
+            "stage",
+        }
+
     def test_on_snapshot_stores_and_logs(self) -> None:
         logger = _make_logger()
         adapter = LoggingDebugAdapter(logger=logger)

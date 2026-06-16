@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from types import SimpleNamespace
 from typing import cast
 from unittest.mock import MagicMock, patch
@@ -69,6 +70,59 @@ class TestChemblPublicationTermBranch:
         mock_publication_term_data_source.assert_called_once_with(mock_base_adapter)
         mock_wrap_with_filter.assert_called_once()
         assert result is mock_filtered_adapter
+
+
+@pytest.mark.unit
+class TestChemblTargetProteinClassificationBranch:
+    """Covers snapshot-backed target protein classification registration."""
+
+    @patch("bioetl.composition.providers.registration_bio._wrap_with_filter")
+    @patch(
+        "bioetl.composition.providers.registration_bio."
+        "TargetProteinClassificationSnapshotDataSource"
+    )
+    @patch("bioetl.composition.providers.registration_bio.DeltaReader")
+    def test_uses_snapshot_source_without_http_adapter(
+        self,
+        mock_delta_reader_cls: MagicMock,
+        mock_snapshot_source_cls: MagicMock,
+        mock_wrap_with_filter: MagicMock,
+    ) -> None:
+        support = MagicMock()
+        logger = MagicMock()
+        settings = SimpleNamespace(data_dir="/tmp/bioetl-data")
+        pipeline_config = MagicMock()
+        pipeline_config.entity_type = "target_protein_classification"
+        pipeline_config.extraction_params = {
+            "target_type": "SINGLE PROTEIN",
+            "organism__isnull": "false",
+            "tax_id__isnull": "false",
+        }
+        delta_reader = MagicMock(name="delta_reader")
+        snapshot_source = MagicMock(name="snapshot_source")
+        filtered_source = MagicMock(name="filtered_source")
+        mock_delta_reader_cls.return_value = delta_reader
+        mock_snapshot_source_cls.return_value = snapshot_source
+        mock_wrap_with_filter.return_value = filtered_source
+
+        result = _create_chembl_data_source(
+            settings=settings,
+            pipeline_config=pipeline_config,
+            logger=logger,
+            assembly_support=support,
+        )
+
+        assert result is filtered_source
+        mock_delta_reader_cls.assert_called_once_with(
+            base_path=Path("/tmp/bioetl-data") / "output",
+            logger=logger,
+        )
+        mock_snapshot_source_cls.assert_called_once_with(
+            delta_reader=delta_reader,
+            logger=logger,
+        )
+        support.create_http_client.assert_not_called()
+        support.create_adapter.assert_not_called()
 
 
 @pytest.mark.unit

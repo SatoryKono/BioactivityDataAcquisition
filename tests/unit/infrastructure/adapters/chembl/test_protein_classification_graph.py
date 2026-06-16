@@ -96,6 +96,42 @@ def test_graph_resolves_multiple_classifications_with_replaced_by_redirect() -> 
     assert hierarchies[1].level_ids == (10, None, None, None, None)
 
 
+def test_graph_keeps_full_path_when_hierarchy_exceeds_legacy_l5_projection() -> None:
+    graph = ChEMBLProteinClassificationGraph.from_rows(
+        protein_class_rows=[
+            {
+                "protein_class_id": level,
+                "parent_id": level - 1 if level > 1 else None,
+                "class_level": level,
+                "pref_name": f"Level {level}",
+            }
+            for level in range(1, 8)
+        ],
+        target_component_rows=[
+            {
+                "component_id": 111,
+                "protein_classification_ids": "[7]",
+            }
+        ],
+    )
+
+    hierarchy = graph.get_component_classifications(111)[0]
+
+    assert hierarchy.level_ids == (1, 2, 3, 4, 5)
+    assert hierarchy.path_ids == (1, 2, 3, 4, 5, 6, 7)
+    assert hierarchy.path_names == (
+        "Level 1",
+        "Level 2",
+        "Level 3",
+        "Level 4",
+        "Level 5",
+        "Level 6",
+        "Level 7",
+    )
+    assert hierarchy.depth == 6
+    assert hierarchy.root_id == 1
+
+
 def test_graph_uses_forensic_classifications_when_flat_ids_are_missing() -> None:
     graph = ChEMBLProteinClassificationGraph.from_rows(
         protein_class_rows=[
@@ -221,7 +257,7 @@ def test_graph_rejects_malformed_json_payloads(
             "missing class_level",
         ),
         (
-            [{"protein_class_id": 8, "class_level": 7}],
+            [{"protein_class_id": 8, "class_level": 11}],
             "[8]",
             "exceeds supported provider range",
         ),

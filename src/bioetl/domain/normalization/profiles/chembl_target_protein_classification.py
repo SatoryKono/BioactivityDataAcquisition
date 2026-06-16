@@ -37,6 +37,11 @@ _META_FIELDS = frozenset(
 _INT_FIELDS = frozenset(
     {
         "component_id",
+        "depth",
+        "root_id",
+        "target_snapshot_row_count",
+        "target_component_snapshot_row_count",
+        "protein_class_snapshot_row_count",
     }
 )
 _TITLE_FIELDS = frozenset(

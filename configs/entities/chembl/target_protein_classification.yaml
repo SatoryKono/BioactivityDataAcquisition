@@ -1,4 +1,4 @@
-version: 2.0.0
+version: 2.1.0
 provider: chembl
 entity: target_protein_classification
 pipeline:
@@ -58,6 +58,12 @@ schema:
     - target_id
     - component_id
     - leaf_id
+    - path_ids
+    - path_names
+    - path_labels
+    - depth
+    - root_id
+    - is_leaf
     - l1_id
     - l1_name
     - l1_desc
@@ -73,6 +79,15 @@ schema:
     - l5_id
     - l5_name
     - l5_desc
+    - dataset_version
+    - source_url
+    - chembl_release
+    - chembl_api_version
+    - source_manifest_status
+    - source_snapshot_fingerprint
+    - target_snapshot_row_count
+    - target_component_snapshot_row_count
+    - protein_class_snapshot_row_count
     - classification_status
   - name: dq
     pattern: ^_dq_
@@ -130,7 +145,7 @@ quality:
         subcellular_fraction: Store the canonical normalized subcellular-fraction label used for downstream Silver/Gold
           semantics; unknown reviewed labels are preserved after canonical text normalization instead of being
           discarded.
-  version: 2.0.0
+  version: 2.1.0
   provider: chembl
   entity: target_protein_classification
   entity_field_validations:
@@ -146,6 +161,40 @@ quality:
     - quarantined
     nullable: false
     error_message: classification_status must be a valid status
+  - field: dataset_version
+    type: required
+    nullable: false
+    error_message: dataset_version is required for dictionary manifest traceability
+  - field: source_snapshot_fingerprint
+    type: pattern
+    pattern: ^[a-f0-9]{64}$
+    nullable: false
+    error_message: source_snapshot_fingerprint must be a SHA-256 hex digest
+  - field: depth
+    type: range
+    min: 0
+    nullable: true
+    error_message: depth must be non-negative when present
+  - field: root_id
+    type: range
+    min: 1
+    nullable: true
+    error_message: root_id must be positive when present
+  - field: target_snapshot_row_count
+    type: range
+    min: 0
+    nullable: true
+    error_message: target_snapshot_row_count must be non-negative
+  - field: target_component_snapshot_row_count
+    type: range
+    min: 0
+    nullable: true
+    error_message: target_component_snapshot_row_count must be non-negative
+  - field: protein_class_snapshot_row_count
+    type: range
+    min: 0
+    nullable: true
+    error_message: protein_class_snapshot_row_count must be non-negative
   entity_cross_field_validations: []
   entity_conditional_validations: []
   key_nullability:
@@ -156,7 +205,7 @@ quality:
     key_type: partition
     nullable: false
 filters:
-  version: 2.0.0
+  version: 2.1.0
   provider: chembl
   entity: target_protein_classification
   input_filter:
@@ -173,6 +222,8 @@ filters:
     required_fields:
     - target_id
     - classification_status
+    - dataset_version
+    - source_snapshot_fingerprint
   gold_filters:
     list_contains: {}
     list_lengths: {}
@@ -181,6 +232,8 @@ filters:
     required_fields:
     - target_id
     - classification_status
+    - dataset_version
+    - source_snapshot_fingerprint
     exclude_if_present: []
   metadata:
     publication_filter_policy:
@@ -199,8 +252,8 @@ hash_policy:
   provider: chembl
   entity: target_protein_classification
   contract:
-    version: 2.0.0
-    migration_note: 'Stable relation-key contract after removing hierarchy_index from the normalized ChEMBL target_protein_classification Silver surface.'
+    version: 2.1.0
+    migration_note: 'Path-first relation contract: path_ids/path_names/path_labels are canonical; L1-L5 fields remain backward-compatible projections.'
   hash_policy:
     algorithm: sha256
     canonicalization: provider + canonical_json_dumps(normalized_record)
@@ -209,6 +262,12 @@ hash_policy:
     - classification_status
     - component_id
     - leaf_id
+    - path_ids
+    - path_names
+    - path_labels
+    - depth
+    - root_id
+    - is_leaf
     - l1_id
     - l1_name
     - l1_desc

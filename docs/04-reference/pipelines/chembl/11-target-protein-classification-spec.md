@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: Active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-01'
+  Last verified: '2026-06-16'
 
 ______________________________________________________________________
 
@@ -26,12 +26,23 @@ Current canonical summary:
 - The pipeline publishes derived ChEMBL target-to-protein-classification relation rows.
 - Business identity is governed by `target_id`, `classification_status`, `component_id`, and `leaf_id`.
 - Strict classification status values are governed by the active entity config and Gold contract.
-- Its deterministic target-level collapse policy is the canonical summary rule
-  reused by `composite_target` and by standalone `chembl_target`.
+- Path-first fields `path_ids`, `path_names`, `path_labels`, `depth`,
+  `root_id`, and `is_leaf` are the canonical hierarchy representation.
+- Legacy `l1_*` through `l5_*` fields remain backward-compatible projections
+  derived from the path fields; they are not the source of truth.
 - Standalone `chembl_target` does not rely on raw `/target` carrying nested
-  classification hierarchies; composition-owned ChEMBL data-source enrichment
-  prepares the same relation-like rows from `/target_component` and
-  `/protein_classification`.
+  classification hierarchies and does not own classification summary fields in
+  its hash contract.
+- Composition-owned snapshot enrichment prepares relation rows from local
+  `chembl.target`, `chembl.target_component`, and `chembl.protein_class` tables
+  before Silver hashing. It must not perform runtime HTTP lookups against the
+  external `/protein_classification` resource.
+- Source manifest fields (`dataset_version`, `source_url`, `chembl_release`,
+  `chembl_api_version`, `source_manifest_status`,
+  `source_snapshot_fingerprint`, and snapshot row counts) make the dictionary
+  build auditable. If the local snapshot lacks ChEMBL status metadata, the
+  release/API fields are explicitly `unknown` and
+  `source_manifest_status=release_metadata_unavailable`.
 - Use the live entity config and contract export as the source of truth for current field, hash, and loading behavior.
 
 ## Contract References
@@ -40,7 +51,7 @@ Current canonical summary:
 | -------------------- | ----------------------------------------------------------------------------------------------------------- |
 | Target reference     | [target.md](../../providers/chembl/target.md)                                                               |
 | Protein class reference | [protein-class.md](../../providers/chembl/protein-class.md)                                              |
-| Gold contract export | [chembl_target_protein_classification_v2.0.json](../../contracts/gold/chembl_target_protein_classification_v2.0.json) |
+| Gold contract export | [chembl_target_protein_classification_v2.1.json](../../contracts/gold/chembl_target_protein_classification_v2.1.json) |
 | Gold schemas index   | [gold-schemas.md](../../contracts/gold-schemas.md)                                                          |
 | Versioning policy    | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md)                    |
 
@@ -50,5 +61,5 @@ Current canonical summary:
 | ----------------------------- | ------ | ----------------------------------------------------------------------------------------------------------- |
 | Metadata                      | Pass   | YAML header contains `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified`                    |
 | Canonical source traceability | Pass   | Page delegates current contract to the linked canonical source and active config surface                    |
-| Contract linkage              | Pass   | [chembl_target_protein_classification_v2.0.json](../../contracts/gold/chembl_target_protein_classification_v2.0.json) |
+| Contract linkage              | Pass   | [chembl_target_protein_classification_v2.1.json](../../contracts/gold/chembl_target_protein_classification_v2.1.json) |
 | Published-page role           | Pass   | Canonical compact summary is explicitly bounded by current canonical sources                                |

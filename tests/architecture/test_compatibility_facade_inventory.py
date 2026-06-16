@@ -20,6 +20,9 @@ if _SKIP_REASON is not None:
 
 ROOT = Path(__file__).resolve().parents[2]
 REGISTRY_YAML = ROOT / "configs" / "quality" / "compatibility_facade_inventory.yaml"
+CONFIG_COMPATIBILITY_REGISTRY = (
+    ROOT / "configs" / "quality" / "config_compatibility_registry.yaml"
+)
 POLICY_REVIEW_DATE = date(2026, 5, 15)
 INVENTORY_DOC = (
     ROOT / "docs" / "02-architecture" / "07-compatibility-facade-inventory.md"
@@ -211,6 +214,44 @@ def test_registry_yaml_has_expected_shape() -> None:
         registry.measured_only_review_workflow.review_cadence
         in mod.ALLOWED_MEASURED_ONLY_REVIEW_CADENCES
     )
+
+
+@pytest.mark.architecture
+def test_compatibility_review_and_remove_dates_are_not_expired() -> None:
+    """Mandatory compatibility review/remove dates must fail when stale."""
+    today = date(2026, 6, 16)
+    payload = yaml.safe_load(REGISTRY_YAML.read_text(encoding="utf-8"))
+    assert isinstance(payload, dict)
+    rows = [
+        *(payload.get("transition_debt") or []),
+        *(payload.get("retained_entrypoints") or []),
+        *(payload.get("measured_only_modules") or []),
+    ]
+    stale: list[str] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        for field_name in ("review_date", "remove_after"):
+            raw_value = row.get(field_name)
+            if raw_value is None:
+                continue
+            if date.fromisoformat(str(raw_value)) < today:
+                stale.append(f"{row.get('path', '<unknown>')}:{field_name}={raw_value}")
+
+    config_payload = yaml.safe_load(
+        CONFIG_COMPATIBILITY_REGISTRY.read_text(encoding="utf-8")
+    )
+    assert isinstance(config_payload, dict)
+    default_remove_after = config_payload.get("default_remove_after")
+    if default_remove_after is not None and (
+        date.fromisoformat(str(default_remove_after)) < today
+    ):
+        stale.append(
+            "configs/quality/config_compatibility_registry.yaml:"
+            f"default_remove_after={default_remove_after}"
+        )
+
+    assert stale == []
 
 
 @pytest.mark.architecture

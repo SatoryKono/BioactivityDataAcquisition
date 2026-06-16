@@ -23,6 +23,9 @@ ALLOWLIST_PATH = (
 EVIDENCE_PATH = (
     ROOT / "reports" / "observability" / "runtime_cardinality_inventory.json"
 )
+LIVE_REVIEW_PATH = (
+    ROOT / "reports" / "observability" / "runtime_cardinality_review.json"
+)
 REGENERATION_COMMAND = (
     "python -m scripts.engineering.qa.report_observability_metric_inventory "
     "--repo-root . "
@@ -324,3 +327,22 @@ def test_runtime_cardinality_evidence_artifact_is_committed_and_governed() -> No
         "Regenerate it with:\n"
         f"{REGENERATION_COMMAND}"
     )
+
+
+@pytest.mark.architecture
+def test_runtime_cardinality_live_review_artifact_is_release_grade() -> None:
+    """Release cardinality review evidence must not rely on local fallback."""
+    assert LIVE_REVIEW_PATH.exists(), (
+        "Missing live runtime cardinality review artifact: "
+        "reports/observability/runtime_cardinality_review.json"
+    )
+
+    payload = json.loads(LIVE_REVIEW_PATH.read_text(encoding="utf-8"))
+
+    assert payload["mode"] == "live_review"
+    assert payload["status"] == "passed"
+    assert payload["local_cardinality_fallback_allowed"] is False
+    assert payload["degraded_reasons"] == []
+    assert payload["query_errors"] == {}
+    assert payload["live_threshold_violations"] == []
+    assert payload["static_threshold_violations"] == []

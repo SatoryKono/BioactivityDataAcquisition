@@ -381,8 +381,8 @@ hash_policy:
   provider: chembl
   entity: target
   contract:
-    version: 2.0.0
-    migration_note: 'Explicit config-level hash contract for the normalized ChEMBL target Silver surface.'
+    version: 2.1.0
+    migration_note: 'Standalone ChEMBL target hash excludes protein-classification summary fields; target_protein_classification/composite_target own that surface.'
   hash_policy:
     algorithm: sha256
     canonicalization: provider + canonical_json_dumps(normalized_record)
@@ -406,22 +406,6 @@ hash_policy:
     - target_xref_reactome_ids
     - target_xref_uniprot_ids
     - primary_component_id
-    - protein_classifications
-    - target_protein_class_id_L1
-    - target_protein_class_name_L1
-    - target_protein_class_desc_L1
-    - target_protein_class_id_L2
-    - target_protein_class_name_L2
-    - target_protein_class_desc_L2
-    - target_protein_class_id_L3
-    - target_protein_class_name_L3
-    - target_protein_class_desc_L3
-    - target_protein_class_id_L4
-    - target_protein_class_name_L4
-    - target_protein_class_desc_L4
-    - target_protein_class_id_L5
-    - target_protein_class_name_L5
-    - target_protein_class_desc_L5
     - component_accessions
     - component_descriptions
     - component_ids

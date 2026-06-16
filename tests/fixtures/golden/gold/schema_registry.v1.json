@@ -1949,7 +1949,7 @@
       "strict": true
     },
     "chembl_target_protein_classification": {
-      "contract_version": "2.0.0",
+      "contract_version": "2.1.0",
       "fields": {
         "_dq_error": {
           "description": "Hard data-quality error flag.",
@@ -1966,6 +1966,16 @@
           "dtype": "int64",
           "nullable": false
         },
+        "chembl_api_version": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "chembl_release": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "classification_status": {
           "description": "",
           "dtype": "str",
@@ -1981,10 +1991,25 @@
           "dtype": "str",
           "nullable": false
         },
+        "dataset_version": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "depth": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
         "entity_id": {
           "description": "",
           "dtype": "str",
           "nullable": false
+        },
+        "is_leaf": {
+          "description": "",
+          "dtype": "bool",
+          "nullable": true
         },
         "l1_desc": {
           "description": "",
@@ -2066,13 +2091,63 @@
           "dtype": "float64",
           "nullable": true
         },
+        "path_ids": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "path_labels": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "path_names": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "protein_class_snapshot_row_count": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "root_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "source_manifest_status": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "source_snapshot_fingerprint": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "source_url": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_component_snapshot_row_count": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
         "target_id": {
           "description": "",
           "dtype": "str",
           "nullable": false
+        },
+        "target_snapshot_row_count": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
         }
       },
-      "published_contract_path": "docs/04-reference/contracts/gold/chembl_target_protein_classification_v2.0.json",
+      "published_contract_path": "docs/04-reference/contracts/gold/chembl_target_protein_classification_v2.1.json",
       "schema_class": "ChEMBLTargetProteinClassificationGoldSchema",
       "strict": true
     },

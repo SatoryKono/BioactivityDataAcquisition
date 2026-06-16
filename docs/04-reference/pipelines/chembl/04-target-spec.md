@@ -29,6 +29,9 @@ Current specification summary:
 - Derived projections now publish `target_protein_synonyms`, `target_gene_synonyms`, `target_ec_numbers`,
   and xref-derived fields `target_xref_pdb_ids`, `target_xref_go_component`, `target_xref_go_function`, `target_xref_go_process`, `target_xref_hgnc_ids`, `target_xref_reactome_ids`, `target_xref_uniprot_ids`.
 - `chembl_target` no longer publishes `protein_classifications` or `target_protein_class_*` summary fields.
+- The standalone `chembl_target` Silver hash contract excludes
+  `protein_classifications` and `target_protein_class_*_L1..L5`; those fields
+  are relation/composite-owned and must not affect target-only content hashes.
 - `chembl_target_protein_classification` is the authoritative target-level protein-class relation surface.
 - `composite_target` remains the canonical fully enriched target surface because
   it projects flattened protein-class summary only after joining the dedicated
