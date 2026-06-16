@@ -28,6 +28,7 @@ from bioetl.domain.control_plane.run_ledger import (
 from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
 from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
+from bioetl.interfaces.http import _health_server_identity_support
 from bioetl.interfaces.http import _health_server_identity_evidence
 from bioetl.interfaces.http import _health_server_routing_support
 from bioetl.interfaces.http.control_plane_selector_context import (
@@ -37,6 +38,7 @@ from bioetl.interfaces.http.control_plane_identity import (
     IDENTITY_EVIDENCE_CONTRACT,
     build_control_plane_identity_evidence_payload,
 )
+from bioetl.interfaces.http.control_plane_identity import formatting
 from bioetl.interfaces.http.control_plane_identity.checkpoint import (
     build_checkpoint_compare,
 )
@@ -51,6 +53,7 @@ from bioetl.interfaces.http.control_plane_identity.specs import (
     OVERVIEW_NAMES,
     SPEC_BY_NAME,
 )
+from bioetl.interfaces.http.control_plane_identity.types import AnchorSpec
 from bioetl.interfaces.http.health_server import HealthServer
 from tests.helpers.control_plane import InMemoryRunLedgerStore, InMemoryRunManifestStore
 from tests.helpers.clock import fixed_test_clock
@@ -138,6 +141,62 @@ def test_control_plane_identity_evidence_static_contract_is_frozen() -> None:
         "bronze_batch_ids",
     }
     assert forbidden_label_names.isdisjoint(ALLOWED_LOW_CARDINALITY_LABELS)
+
+
+def test_control_plane_identity_formatting_helpers_cover_edge_values() -> None:
+    """Formatting helpers should handle absent, nested, and legacy contract values."""
+    assert formatting.stable_hash(None) is None
+    assert formatting.stable_hash({"b": 2, "a": 1}) == formatting.stable_hash(
+        {"a": 1, "b": 2}
+    )
+    assert formatting.short_value(["a", "b", "", None]) == "2 items"
+    assert formatting.short_value("123456789012345") == "123456789012"
+    assert formatting.format_full_value({"b": 2, "a": 1}) == '{"a": 1, "b": 2}'
+    assert formatting.is_present(" null ") is False
+    assert formatting.is_present([]) is False
+    assert formatting.is_present({"anchor": "value"}) is True
+
+    values: list[str] = []
+    formatting.append_value(values, ["run-1", ("run-2", "", None)])
+    assert values == ["run-1", "run-2"]
+    assert formatting.dedupe(["a", " a ", "b", None, ""]) == ["a", "b"]
+    assert formatting.join_non_empty([" run ", None, "manifest"], " / ") == (
+        "run / manifest"
+    )
+    assert formatting.join_non_empty(["", None], " / ") is None
+    assert formatting.mapping_value({"a": 1, "b": {"x": 2}}, "a", "b") == {"x": 2}
+    assert formatting.validate_manifest_id_format("manifest-") is False
+    assert formatting.validate_provider_entity_format("Chembl.activity") is False
+
+
+def test_anchor_spec_accepts_legacy_aliases_and_reports_missing_fields() -> None:
+    """AnchorSpec keeps old HTTP contract names but remains strict and immutable."""
+    spec = AnchorSpec(
+        priority="P1",
+        anchor_name="resolved_config_hash",
+        display_name="Resolved config hash",
+        source_location="manifest.resolved_config",
+        data_type="sha256",
+        description="Tracks resolved config identity.",
+        display_mode="short",
+        is_identifier=True,
+        usage_locations="identity evidence",
+        implementation_status="WARNING",
+    )
+
+    assert spec.name == "resolved_config_hash"
+    assert spec.anchor_name == "resolved_config_hash"
+    assert spec.display_name == "Resolved config hash"
+    assert spec.source_location == "manifest.resolved_config"
+    assert spec.data_type == "sha256"
+    assert spec.description == "Tracks resolved config identity."
+    assert spec.display_mode == "short"
+    assert spec.is_identifier is True
+    assert spec.usage_locations == "identity evidence"
+    assert spec.implementation_status == "DEGRADED"
+
+    with pytest.raises(TypeError, match="missing required AnchorSpec fields"):
+        AnchorSpec(priority="P0", name="run_id")
 
 
 def test_control_plane_identity_checkpoint_compare_classifies_partial() -> None:

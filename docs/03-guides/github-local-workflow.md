@@ -70,10 +70,18 @@ Daily local hooks intentionally stay narrow:
 - `pre-commit` runs fast formatting, file hygiene, config/schema path guards,
   root cleanliness, diagram checks when diagrams are touched, and a blocker for
   secret-bearing `.env` files.
-- `commit-msg` performs a local Conventional Commit header fast-fail compatible
-  with the CI `commit-lint` policy.
+- `commit-msg` performs a strict local Conventional Commit header fast-fail for
+  newly authored commits. CI `commit-lint` remains tolerant of historical
+  non-conventional and merge commits.
 - `pre-push` runs the heavier local gates already configured for strict typing,
   architecture smoke, Bandit, and Gitleaks.
+
+If hook execution fails with `git-lfs filter-process` errors, fix checkout
+health before treating `--all-files` results as actionable:
+
+```bash
+python -m scripts.engineering.qa.check_test_audit_preflight --strict
+```
 
 Run the baseline hook suites explicitly when needed:
 
@@ -89,7 +97,7 @@ moving CI-scale checks into `pre-commit`:
 make lint
 make test-fast
 make test-architecture
-python3 scripts/engineering/dev/run_project_python.py -m pre_commit run smoke-lane --hook-stage manual --all-files
+python -m pre_commit run smoke-lane --hook-stage manual --all-files
 ```
 
 Do not add full coverage, full architecture governance, documentation link
