@@ -3,19 +3,23 @@
 This registry provides a comprehensive index of all Architecture Decision Records
 with metadata, status, and relationships.
 
-**Total ADRs**: 48
-**Last Updated**: 2026-05-30
+Canonical live ADR index: `docs/02-architecture/decisions/README.md`.
+This page is a generated governance mirror and MUST be regenerated via
+`python3 scripts/generate_adr_registry.py` after ADR additions or metadata changes.
+
+**Total ADRs**: 50
+**Last Updated**: 2026-06-16
 
 ## 📊 Status Summary
 
 | Status | Count | Percentage |
 |--------|-------|------------|
-| `accepted` | 46 | 95.8% |
-| `superseded` | 2 | 4.2% |
+| `accepted` | 48 | 96.0% |
+| `superseded` | 2 | 4.0% |
 
 ## 🟢 Accepted ADRs
 
-### 46 decisions
+### 48 decisions
 
 ### ADR-001: Delta Lake vs Parquet
 
@@ -183,7 +187,8 @@ with metadata, status, and relationships.
 
 **Relationships**: Related: ADR-035
 
-**Context**: Gold-слой должен гарантировать качество данных для downstream consumers. Текущая реализация позволяет пайплайнам работать без определённой Gold-схемы,...
+**Context**: Gold-слой должен гарантировать качество данных для downstream consumers.
+Исторически ADR вводила feature flag для контролируемой миграции существующих...
 
 [📄 View Full ADR](../decisions/ADR-018-gold-strict-validation.md)
 
@@ -569,6 +574,26 @@ they are data contracts for Silver and Gold records, not infrastructure ...
 
 ---
 
+### ADR-049: Context-Aware LOC Target Policy
+
+**Status**: `accepted` | **Category**: `Architecture` | **Owner**: `BioETL Team`
+
+**Context**: During refactoring work on GitHub issues #5056 and #5057 (LOC reduction targets), we identified that a blanket 250 LOC target for all files is not app...
+
+[📄 View Full ADR](../decisions/ADR-049-context-aware-loc-target-policy.md)
+
+---
+
+### ADR-050: Silver Structural and Gold Semantic Filter Boundary
+
+**Status**: `accepted` | **Category**: `Data Quality` | **Owner**: `BioETL Team`
+
+**Relationships**: Related: ADR-002, ADR-014, ADR-017, ADR-018, ADR-028, ADR-042, ADR-044, ADR-045, ADR-046, ADR-047
+
+[📄 View Full ADR](../decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md)
+
+---
+
 ## 🔵 Superseded ADRs
 
 ### 2 decisions
@@ -579,10 +604,6 @@ they are data contracts for Silver and Gold records, not infrastructure ...
 
 **Source status text**: `Superseded (revised 2025-12-23; see ADR-010)`
 
-**Relationships**: Superseded by: ADR-010, Related: ADR-010
-
-**Context**: Система требует механизм блокировок для предотвращения одновременного запуска одного пайплайна (например, `chembl_activity`). Это защищает от race con...
-
 [📄 View Full ADR](../decisions/ADR-003-in-memory-locking-strategy.md)
 
 ---
@@ -590,10 +611,6 @@ they are data contracts for Silver and Gold records, not infrastructure ...
 ### ADR-008: Graceful Shutdown Strategy
 
 **Status**: `superseded` | **Category**: `Lifecycle` | **Owner**: `BioETL Team`
-
-**Source status text**: `Superseded (signal handlers removed; shutdown handled in canonical CLI domain command modules and application/core/lifecycle/shutdown.py)`
-
-**Context**: ETL pipelines process large datasets in batches, maintaining state via checkpoints and holding runtime locks. An abrupt shutdown (kill -9, OOM, etc.) ...
 
 [📄 View Full ADR](../decisions/ADR-008-graceful-shutdown-strategy.md)
 

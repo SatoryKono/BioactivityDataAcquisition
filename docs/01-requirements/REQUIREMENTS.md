@@ -7,13 +7,13 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-22'
+  Last verified: '2026-06-16'
 
 ______________________________________________________________________
 
 # BioETL: Требования к Проекту
 
-*Синхронизировано с RULES.md v6.1.3 (2026-04-29); ADR registry verified through ADR-048 (2026-05-26).*
+*Синхронизировано с RULES.md v6.1.3 (2026-06-16); ADR registry verified through ADR-050 (2026-06-15).*
 
 ______________________________________________________________________
 
@@ -125,8 +125,8 @@ ______________________________________________________________________
 #### REQ-DATA-008
 
 - **Уровень**: MUST
-- **Описание**: Silver использует строго типизированные режимы записи `MERGE`, `APPEND` или `DELETE` в зависимости от семантики сущности
-- **Проверка**: Конфиг пайплайна и код записи используют только поддерживаемые режимы `SilverWriteMode`
+- **Описание**: Silver использует строго типизированные режимы записи `MERGE`, `APPEND` или `DELETE` в зависимости от семантики сущности. По [ADR-050](../02-architecture/decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md) `filters.silver_filters` остаётся только structural admission surface; semantic buckets (`columns`, `ranges`, `list_lengths`, `list_contains`) в active entity config под Silver запрещены.
+- **Проверка**: Конфиг пайплайна и код записи используют только поддерживаемые режимы `SilverWriteMode`; архитектурные проверки подтверждают отсутствие semantic bucket keys в active `silver_filters`.
 
 ### 2.3 Gold Layer
 
@@ -1094,6 +1094,7 @@ ______________________________________________________________________
 
 ## История Изменений
 
+- **1.10** (2026-06-16): ADR-050 governance sync. Header verification marker обновлён через ADR-050; REQ-DATA-008 теперь явно закрепляет structural-only Silver filter boundary и запрет semantic bucket keys под `filters.silver_filters`.
 - **1.9** (2026-05-26): ADR-048 alignment. Зафиксирована граница Domain schema boundary: Pandera/Pandas разрешены только в `domain/schemas` + `domain/contracts`; runtime Pandera compatibility patching закреплён только за seam `apply_runtime_compatibility_patches` в composition/bootstrap и implementation в infrastructure. Обновлены формулировки REQ-ARCH-003 и REQ-STACK-003, добавлены прямые cross-reference на ADR-048.
 - **1.8** (2026-03-13): Уточнён REQ-DOC-001: docs guardrails и generated-doc checks синхронизированы с текущей publication/navigation governance.
 - **1.7** (2026-03-02): Pre-v6.1 dependency policy update. Обновлена REQ-DEP-001: mixed strategy (`pyproject.toml` ranges + `uv.lock`) вместо требования глобального `==` pinning.

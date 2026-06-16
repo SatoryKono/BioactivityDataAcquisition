@@ -16,7 +16,7 @@ from bioetl.application.services.control_plane.manifest.diagnostics.ledger_proce
 from bioetl.application.services.control_plane.manifest.diagnostics.main_helpers import (
     _build_unified_reproducibility_diagnostics,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
+from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_summary import (
     merge_ledger_input_snapshots_into_summary,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.source_refs import (

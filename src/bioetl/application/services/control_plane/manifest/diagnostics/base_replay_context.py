@@ -15,7 +15,7 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay_proje
     _build_replay_projection_bundle,
     _build_replay_projection_context_kwargs,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
+from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_refs import (
     collect_input_snapshot_refs as _collect_input_snapshot_refs,
 )
 from bioetl.application.services.control_plane.manifest.replay_family_contract_payload import (

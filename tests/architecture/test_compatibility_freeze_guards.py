@@ -1427,6 +1427,10 @@ def test_cli_run_orchestration_singleton_stays_private_compat_owner() -> None:
     assert "service = get_cli_run_orchestration_service()" not in run_source, (
         "Runtime CLI run command must not use the retained compatibility singleton."
     )
+    assert "get_cli_run_orchestration_service()." not in run_source, (
+        "First-party run-command helpers must use fresh orchestration services; "
+        "the retained get_cli_run_orchestration_service accessor is compatibility-only."
+    )
 
 
 @pytest.mark.architecture

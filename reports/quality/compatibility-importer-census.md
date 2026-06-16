@@ -6,7 +6,7 @@
 - removed_compatibility_surfaces_with_src_importers: 0
 - removed_compatibility_surfaces_with_test_importers: 0
 - removed_compatibility_surfaces_still_present: 0
-- twin_pair_count: 1
+- twin_pair_count: 0
 - tracked_twin_family_count: 0
 - config_root_symbol_count: 3
 - config_root_src_importer_count: 0
@@ -29,7 +29,7 @@
 | `src/bioetl/composition/entrypoints.py` | 0 | 3 |
 | `src/bioetl/composition/health_api.py` | 4 | 2 |
 | `src/bioetl/composition/maintenance_api.py` | 1 | 1 |
-| `src/bioetl/infrastructure/config/__init__.py` | 0 | 4 |
+| `src/bioetl/infrastructure/config/__init__.py` | 0 | 5 |
 | `src/bioetl/domain/composite/config.py` | 80 | 39 |
 | `src/bioetl/domain/value_objects/activity_values.py` | 0 | 1 |
 | `src/bioetl/application/composite/merger.py` | 5 | 5 |
@@ -75,7 +75,6 @@
 
 | Public module | Public src | Private src |
 | --- | ---: | ---: |
-| `bioetl.composition.lazy_exports` | 8 | 1 |
 
 ## Tracked Twin Family Ratchet
 

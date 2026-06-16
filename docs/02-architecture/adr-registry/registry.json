@@ -1,6 +1,6 @@
 {
-  "generated": "2026-05-30T14:37:15.034720",
-  "total_adrs": 48,
+  "generated": "2026-06-16T19:05:56.429832",
+  "total_adrs": 50,
   "adrs": [
     {
       "adr_number": "001",
@@ -46,18 +46,14 @@
       "source_status": "Superseded (revised 2025-12-23; see ADR-010)",
       "category": "Locking",
       "owner": "BioETL Team",
-      "decision_date": "2025-05-20",
-      "last_reviewed": "2026-03-30",
-      "context": "Система требует механизм блокировок для предотвращения одновременного запуска одного пайплайна (например, `chembl_activity`). Это защищает от race conditions, повреждения данных и избыточных API-вы...",
-      "decision": "**ОТКАЗ ОТ REDIS**. Использование **MemoryLock** для всех блокировок в рамках Local-Only архитектуры.\n### Strict Single Instance Constraint\n- **ЗАПРЕЩЕНО** запускать несколько экземпляров одного па...",
-      "consequences": "### Positive\n1. **Простота**: Нет внешних зависимостей и конфигурации\n1. **Быстрый старт**: `make install && make test` — всё работает\n1. **Тестируемость**: Unit тесты без моков внешних сервисов\n1....",
+      "decision_date": "2025-12-23",
+      "last_reviewed": "2026-06-04",
+      "context": "",
+      "decision": "",
+      "consequences": "",
       "supersedes": [],
-      "superseded_by": [
-        "ADR-010"
-      ],
-      "related": [
-        "ADR-010"
-      ],
+      "superseded_by": [],
+      "related": [],
       "tags": []
     },
     {
@@ -137,14 +133,14 @@
       "title": "Graceful Shutdown Strategy",
       "file_path": "ADR-008-graceful-shutdown-strategy.md",
       "status": "superseded",
-      "source_status": "Superseded (signal handlers removed; shutdown handled in canonical CLI domain command modules and application/core/lifecycle/shutdown.py)",
+      "source_status": "Superseded",
       "category": "Lifecycle",
       "owner": "BioETL Team",
       "decision_date": "2025-12-22",
-      "last_reviewed": "2026-03-30",
-      "context": "ETL pipelines process large datasets in batches, maintaining state via checkpoints and holding runtime locks. An abrupt shutdown (kill -9, OOM, etc.) can leave the system in an inconsistent state: ...",
-      "decision": "We have implemented a **two-layer shutdown coordination system**:\n1. **`ShutdownSignal`** (`application/core/lifecycle/shutdown.py`): Application-level signal object shared across components\n1. **O...",
-      "consequences": "### Positive\n- Clean shutdown with checkpoint preservation\n- Resumable pipelines after interruption\n- Lock safety guaranteed\n- Works with Kubernetes graceful termination\n- Testable via signal injec...",
+      "last_reviewed": "2026-06-04",
+      "context": "",
+      "decision": "",
+      "consequences": "",
       "supersedes": [],
       "superseded_by": [],
       "related": [],
@@ -324,8 +320,8 @@
       "owner": "BioETL Team",
       "decision_date": "2025-12-26",
       "last_reviewed": "2026-03-30",
-      "context": "Gold-слой должен гарантировать качество данных для downstream consumers. Текущая реализация позволяет пайплайнам работать без определённой Gold-схемы, что может привести к несогласованности данных ...",
-      "decision": "Мы вводим **строгую валидацию Gold-схем** с feature flag для контролируемой миграции существующих пайплайнов.\n**Operationalization note (2026-05-14):** for semantic field unification,\nGold-facing s...",
+      "context": "Gold-слой должен гарантировать качество данных для downstream consumers.\nИсторически ADR вводила feature flag для контролируемой миграции существующих\nпайплайнов. Этот миграционный этап завершён: т...",
+      "decision": "BioETL использует **обязательную строгую валидацию Gold-схем**. Текущий\nисточник истины для runtime enforcement:\n- `src/bioetl/domain/config/runtime.py`: `RuntimeConfig.strict_gold_validation`\n  по...",
       "consequences": "### Positive\n- **Гарантия качества**: Gold-схема явно определена и проверена\n- **Раннее обнаружение**: Ошибки видны до записи в хранилище\n- **Документация**: Схема служит контрактом с consumers\n- *...",
       "supersedes": [],
       "superseded_by": [],
@@ -927,16 +923,63 @@
         "ADR-037"
       ],
       "tags": []
+    },
+    {
+      "adr_number": "049",
+      "title": "Context-Aware LOC Target Policy",
+      "file_path": "ADR-049-context-aware-loc-target-policy.md",
+      "status": "accepted",
+      "source_status": "Accepted",
+      "category": "Architecture",
+      "owner": "BioETL Team",
+      "decision_date": "2026-05-26",
+      "last_reviewed": "2026-05-26",
+      "context": "During refactoring work on GitHub issues #5056 and #5057 (LOC reduction targets), we identified that a blanket 250 LOC target for all files is not appropriate. Certain file types are legitimately l...",
+      "decision": "We adopt a **context-aware LOC target policy** that excludes certain file types from the 250 LOC target.\n### Files EXCLUDED from 250 LOC target:\n#### 1. Import Facade Files\n**Pattern**: Files that ...",
+      "consequences": "### Positive\n1. **Focused refactoring efforts** on files that actually benefit from decomposition\n2. **Preserves legitimate architectural patterns** (import facades, schema definitions)\n3. **Reduce...",
+      "supersedes": [],
+      "superseded_by": [],
+      "related": [],
+      "tags": []
+    },
+    {
+      "adr_number": "050",
+      "title": "Silver Structural and Gold Semantic Filter Boundary",
+      "file_path": "ADR-050-silver-structural-gold-semantic-filter-boundary.md",
+      "status": "accepted",
+      "source_status": "Accepted",
+      "category": "Data Quality",
+      "owner": "BioETL Team",
+      "decision_date": "2026-06-15",
+      "last_reviewed": "2026-06-15",
+      "context": "",
+      "decision": "",
+      "consequences": "",
+      "supersedes": [],
+      "superseded_by": [],
+      "related": [
+        "ADR-002",
+        "ADR-014",
+        "ADR-017",
+        "ADR-018",
+        "ADR-028",
+        "ADR-042",
+        "ADR-044",
+        "ADR-045",
+        "ADR-046",
+        "ADR-047"
+      ],
+      "tags": []
     }
   ],
   "stats": {
     "by_status": {
-      "accepted": 46,
+      "accepted": 48,
       "superseded": 2
     },
     "by_category": {
       "Storage": 3,
-      "Architecture": 8,
+      "Architecture": 9,
       "Locking": 1,
       "Data Modeling": 3,
       "Observability": 5,
@@ -946,7 +989,7 @@
       "Deployment": 1,
       "Data Loading": 2,
       "Reproducibility": 4,
-      "Data Quality": 5,
+      "Data Quality": 6,
       "Domain Model": 1,
       "Configuration": 4,
       "HTTP/Networking": 1,

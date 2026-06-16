@@ -116,10 +116,10 @@ def test_module_coverage_inventory_source_tree_hash_is_current() -> None:
     if sys.platform.startswith("win"):
         pytest.skip("Skipped on Windows due to filesystem performance")
     try:
-        with open("/proc/version", "r") as f:
+        with open("/proc/version") as f:
             if "microsoft" in f.read().lower():
                 pytest.skip("Skipped on WSL due to filesystem performance")
-    except (OSError, IOError):
+    except OSError:
         pass
 
     committed = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
@@ -157,6 +157,34 @@ def test_module_coverage_inventory_reports_measured_hotspot_family_evidence() ->
             family_row["covered_line_percent"] >= thresholds["min_covered_line_percent"]
         )
         assert family_row["threshold_status"] == "pass", family_name
+
+
+@pytest.mark.architecture
+def test_retained_entrypoint_modules_have_measured_coverage() -> None:
+    """Retained module entrypoints must not silently remain coverage-unmeasured."""
+    committed = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
+    rows_by_path = {str(row["path"]): row for row in committed["modules"]}
+
+    retained_entrypoint_paths = {
+        "src/bioetl/__main__.py",
+        "src/bioetl/interfaces/cli/__main__.py",
+    }
+    missing = sorted(retained_entrypoint_paths - set(rows_by_path))
+    assert not missing, (
+        "Retained entrypoint modules must be present in module coverage inventory:\n"
+        + "\n".join(missing)
+    )
+
+    unmeasured = [
+        path
+        for path in sorted(retained_entrypoint_paths)
+        if rows_by_path[path]["coverage_status"] == "unmeasured"
+    ]
+    assert not unmeasured, (
+        "Retained entrypoint modules must be measured by coverage-verify or "
+        "explicitly owner-exempted before they can remain retained:\n"
+        + "\n".join(unmeasured)
+    )
 
 
 @pytest.mark.architecture

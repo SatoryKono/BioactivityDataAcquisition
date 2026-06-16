@@ -53,6 +53,26 @@ class TestCliMainModule:
 
         assert calls == ["main"]
 
+    def test_cli_package_module_entrypoint_delegates_to_cli_main(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """The retained python -m bioetl.interfaces.cli seam must stay a thin CLI delegate."""
+        calls: list[str] = []
+        monkeypatch.delitem(
+            sys.modules,
+            "bioetl.interfaces.cli.__main__",
+            raising=False,
+        )
+
+        with patch(
+            "bioetl.interfaces.cli.main.main",
+            side_effect=lambda: calls.append("main"),
+        ):
+            runpy.run_module("bioetl.interfaces.cli", run_name="__main__")
+
+        assert calls == ["main"]
+
     def test_lazy_command_loader_resolves_only_requested_public_command(self) -> None:
         """Lazy command loading should keep the CLI entrypoint as a thin seam."""
         from bioetl.interfaces.cli.main import _load_cli_command

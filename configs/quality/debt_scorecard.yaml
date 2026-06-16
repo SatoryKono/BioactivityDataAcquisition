@@ -523,18 +523,18 @@ hotspot_family_ratchets:
       max_internal_fan_in: 5
     metrics:
       duplication_clusters: 0
-      files: 100
-      total_loc: 14894
-      files_ge_250_loc: 20
-      helper_function_ratio: 0.499
+      files: 105
+      total_loc: 14845
+      files_ge_250_loc: 18
+      helper_function_ratio: 0.478
       max_internal_fan_in: 5
-      max_internal_fan_in_module: bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support
+      max_internal_fan_in_module: bioetl.application.services.control_plane.manifest.diagnostics.snapshot_refs
     trend:
-      status: reduced_2026-06-16_issue_5235
-      next_action: 2026-06-16 extracts composite execution-context classification
-        into the domain control-plane surface and splits base diagnostics helpers into
-        narrower replay, provenance, and effective-config modules; max_internal_fan_in
-        is ratcheted down to 5 while files_ge_250_loc remains 20 and duplication
+      status: reduced_2026-06-16_issue_5267
+      next_action: 2026-06-16 splits input-snapshot diagnostics coordination into
+        dedicated refs, ledger, materialization, and summary modules while retaining
+        the compatibility facade; files_ge_250_loc drops to 18, total LOC drops to
+        14845, max_internal_fan_in remains at the existing budget of 5, and duplication
         remains zero.
   - name: composition_runtime_builders
     owner: '@bioetl-platform'

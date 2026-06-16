@@ -140,7 +140,7 @@ def _exit_with_code(code: int | str | None = None) -> NoReturn:
 
 def validate_options(start_offset: int | None, run_type: str, resume: bool) -> None:
     """Validate --start-offset constraints; sys.exit on error."""
-    validation = get_cli_run_orchestration_service().validate_start_offset(
+    validation = create_cli_run_orchestration_service().validate_start_offset(
         start_offset=start_offset,
         run_type=run_type,
         resume=resume,
@@ -154,7 +154,7 @@ def validate_options(start_offset: int | None, run_type: str, resume: bool) -> N
 
 def build_run_options(options_input: CliRunOptionsInput) -> RunOptions:
     """Build RunOptions from CLI parameters."""
-    return get_cli_run_orchestration_service().build_options(options_input)
+    return create_cli_run_orchestration_service().build_options(options_input)
 
 
 def execute_run(
@@ -162,7 +162,7 @@ def execute_run(
     registry: PipelineRegistry | None = None,
 ) -> RunResult:
     """Execute run and flush metrics at command boundary."""
-    return get_cli_run_orchestration_service().execute_pipeline(
+    return create_cli_run_orchestration_service().execute_pipeline(
         request=request,
         run_pipeline_async=_build_run_pipeline_callable(
             registry=registry,

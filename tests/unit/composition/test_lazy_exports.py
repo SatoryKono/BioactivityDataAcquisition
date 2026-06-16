@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 import pytest
 
-from bioetl.composition._lazy_exports import (
+from bioetl.composition.lazy_exports import (
     install_lazy_exports,
     lazy_export_dir,
     resolve_lazy_export,
@@ -21,7 +21,7 @@ def test_resolve_lazy_export_returns_value_without_caching() -> None:
     public_exports = {"demo": "bioetl.fake.module"}
     expected = object()
 
-    with patch("bioetl.composition._lazy_exports.import_module") as mock_import_module:
+    with patch("bioetl.composition.lazy_exports.import_module") as mock_import_module:
         mock_import_module.return_value = type("FakeModule", (), {"demo": expected})()
 
         result = resolve_lazy_export(
@@ -40,7 +40,7 @@ def test_resolve_lazy_export_caches_value_when_requested() -> None:
     public_exports = {"demo": "bioetl.fake.module"}
     expected = object()
 
-    with patch("bioetl.composition._lazy_exports.import_module") as mock_import_module:
+    with patch("bioetl.composition.lazy_exports.import_module") as mock_import_module:
         mock_import_module.return_value = type("FakeModule", (), {"demo": expected})()
 
         result = resolve_lazy_export(
@@ -60,7 +60,7 @@ def test_resolve_lazy_export_supports_explicit_target_attribute() -> None:
     public_exports = {"public_name": ("bioetl.fake.module", "internal_name")}
     expected = object()
 
-    with patch("bioetl.composition._lazy_exports.import_module") as mock_import_module:
+    with patch("bioetl.composition.lazy_exports.import_module") as mock_import_module:
         mock_import_module.return_value = type(
             "FakeModule", (), {"internal_name": expected}
         )()
@@ -110,7 +110,7 @@ def test_install_lazy_exports_installs_stable_hooks_without_eager_imports() -> N
         cache=True,
     )
 
-    with patch("bioetl.composition._lazy_exports.import_module") as mock_import_module:
+    with patch("bioetl.composition.lazy_exports.import_module") as mock_import_module:
         mock_import_module.return_value = type(
             "FakeModule", (), {"lazy_export": expected}
         )()

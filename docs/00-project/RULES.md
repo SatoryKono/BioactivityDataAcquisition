@@ -1,7 +1,7 @@
 ______________________________________________________________________
 
 Version: 6.1.3
-Last verified: 2026-04-29
+Last verified: 2026-06-16
 Status: active
 Class: published
 Owner: BioETL Team
@@ -1950,9 +1950,12 @@ fields:
 | [ADR-046](../02-architecture/decisions/ADR-046-checkpoint-vs-ledger-resume.md)        | Checkpoint Versus Ledger-Based Resume      | Accepted                                | 2026-05-06 |
 | [ADR-047](../02-architecture/decisions/ADR-047-workflow-control-plane.md)             | Workflow Control Plane for Declarative Workflows | Accepted                           | 2026-05-08 |
 | [ADR-048](../02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md) | Domain Schema Boundary and Runtime Pandera Compatibility | Accepted | 2026-05-26 |
+| [ADR-049](../02-architecture/decisions/ADR-049-context-aware-loc-target-policy.md) | Context-Aware LOC Target Policy | Accepted | 2026-05-26 |
+| [ADR-050](../02-architecture/decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md) | Silver Structural and Gold Semantic Filter Boundary | Accepted | 2026-06-15 |
 
 ## История Изменений (Changelog)
 
+- **5.28** (2026-06-16): ADR Registry Governance Sync. Приложение F и generated ADR registry mirrors синхронизированы через ADR-050; published appendix теперь перечисляет ADR-049/050, а generated registry surfaces явно помечены как derived mirrors с canonical owner в `decisions/README.md`.
 - **5.27** (2026-05-26): Domain Schema Boundary Sync. Добавлен ADR-048 и закреплено, что Pandera/Pandas допустимы в domain только как schema-contract representation под `domain/schemas` и `domain/contracts`; Pandera compatibility patching перенесено в явный runtime bootstrap seam без package import side effects.
 - **5.26** (2026-05-15): ADR Governance Sync. Приложение F синхронизировано с ADR-046/047 и теперь явно делегирует canonical live registry в `decisions/README.md` и `adr-registry.md`. Исправлен generated ADR registry status parsing для explicit `Status:` metadata; `mkdocs.yml` синхронизирован с активной `scripts.docs check-links` guardrail surface.
 - **5.25** (2026-04-29): Documentation Audit Stop-Loss. Исправлен published readiness endpoint (`/health/ready`), синхронизирован ADR registry с ADR-044/045, а Medallion write-mode terminology закреплена как policy-owned surface в §2.1.1-§2.1.2.

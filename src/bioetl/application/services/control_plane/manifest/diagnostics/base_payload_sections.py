@@ -22,13 +22,13 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay_invar
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_projection import (
     _build_replay_projection_bundle,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
+from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_refs import (
     collect_input_snapshot_content_hashes as _collect_input_snapshot_content_hashes,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
+from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_refs import (
     collect_input_snapshot_ids as _collect_input_snapshot_ids,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
+from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_refs import (
     compute_input_snapshot_identity_fingerprint as _compute_input_snapshot_identity_fingerprint,
 )
 from bioetl.application.services.control_plane.manifest.replay_family_contract_payload import (
