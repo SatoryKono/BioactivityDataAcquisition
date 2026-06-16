@@ -15,6 +15,8 @@ from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
     FallbackFetchRequest,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _normalize_strip_lower(value: str) -> str:
     return value.strip().lower()

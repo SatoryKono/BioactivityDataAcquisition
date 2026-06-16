@@ -14,6 +14,8 @@ from bioetl.application.services.control_plane.workflow.inspection_service impor
 from bioetl.domain.control_plane import WorkflowExecutionState, WorkflowStepState
 from bioetl.domain.types import RunID
 
+pytestmark = pytest.mark.unit
+
 
 def _make_state() -> WorkflowExecutionState:
     return WorkflowExecutionState(

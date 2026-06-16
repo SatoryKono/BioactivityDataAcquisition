@@ -1361,7 +1361,7 @@
         },
         {
           "path": "scripts/ai/gemini/README.md",
-          "line": 59,
+          "line": 64,
           "source_group": "scripts",
           "text": "bash scripts/ai/gemini/headless.sh exec \"...\"      # Launch without MCP sync"
         },
@@ -5943,7 +5943,7 @@
         },
         {
           "path": "tests/architecture/test_compatibility_facade_inventory.py",
-          "line": 64,
+          "line": 59,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"_compatibility_registry.py\","
         },

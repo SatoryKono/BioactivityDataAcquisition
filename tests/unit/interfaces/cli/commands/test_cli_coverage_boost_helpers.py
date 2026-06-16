@@ -369,7 +369,7 @@ def test_apply_cli_overrides_and_status_render_helpers_cover_branchy_paths() -> 
     assert no_history["execution_history_available"] is False
     assert workflow_support._render_history_lines(no_history) == ["history: unavailable"]
     assert workflow_support._render_status_steps("invalid") == []
-    assert "- reconcile [transform] transform=reconcile_foreign_keys depends_on=publish" in workflow_support._render_status_step(
+    rendered_step = workflow_support._render_status_step(
         {
             "step_id": "reconcile",
             "kind": "transform",
@@ -377,6 +377,7 @@ def test_apply_cli_overrides_and_status_render_helpers_cover_branchy_paths() -> 
             "depends_on": ["publish"],
         }
     )
+    assert "- reconcile [transform] transform=reconcile_foreign_keys depends_on=publish" in rendered_step
 
 
 def test_build_status_payload_with_history_uses_inspection_snapshot() -> None:
@@ -1080,7 +1081,11 @@ def test_run_manifest_commands_cover_error_and_persisted_artifact_paths(
     monkeypatch.setattr(
         run_manifest_cmd,
         "get_historical_replay_closure_service",
-        lambda: SimpleNamespace(build_closure_report=lambda residual_dispositions: SimpleNamespace(to_dict=lambda: {"closure": residual_dispositions})),
+        lambda: SimpleNamespace(
+            build_closure_report=lambda residual_dispositions: SimpleNamespace(
+                to_dict=lambda: {"closure": residual_dispositions}
+            )
+        ),
     )
     monkeypatch.setattr(
         run_manifest_cmd,
@@ -1093,9 +1098,21 @@ def test_run_manifest_commands_cover_error_and_persisted_artifact_paths(
             )
         ),
     )
-    monkeypatch.setattr(run_manifest_cmd, "_coerce_bulk_certification_specs", lambda payload: ("spec", payload))
-    monkeypatch.setattr(run_manifest_cmd, "_load_residual_dispositions", lambda path: {"source": str(path) if path else "none"})
-    monkeypatch.setattr(run_manifest_cmd, "_load_universe_external_records", lambda paths: [{"path_count": len(paths)}])
+    monkeypatch.setattr(
+        run_manifest_cmd,
+        "_coerce_bulk_certification_specs",
+        lambda payload: ("spec", payload),
+    )
+    monkeypatch.setattr(
+        run_manifest_cmd,
+        "_load_residual_dispositions",
+        lambda path: {"source": str(path) if path else "none"},
+    )
+    monkeypatch.setattr(
+        run_manifest_cmd,
+        "_load_universe_external_records",
+        lambda paths: [{"path_count": len(paths)}],
+    )
 
     api_module = SimpleNamespace(
         persist_historical_replay_closure_report=lambda report: tmp_path / "closure.json",
@@ -1153,17 +1170,29 @@ def test_run_manifest_commands_cover_failure_paths(
     monkeypatch.setattr(
         run_manifest_cmd,
         "get_historical_replay_corpus_service",
-        lambda: SimpleNamespace(certify_retained_corpus=lambda specs: (_ for _ in ()).throw(ValueError("bad bulk"))),
+        lambda: SimpleNamespace(
+            certify_retained_corpus=lambda specs: (_ for _ in ()).throw(
+                ValueError("bad bulk")
+            )
+        ),
     )
     monkeypatch.setattr(
         run_manifest_cmd,
         "get_historical_replay_closure_service",
-        lambda: SimpleNamespace(build_closure_report=lambda residual_dispositions: (_ for _ in ()).throw(ValueError("bad closure"))),
+        lambda: SimpleNamespace(
+            build_closure_report=lambda residual_dispositions: (_ for _ in ()).throw(
+                ValueError("bad closure")
+            )
+        ),
     )
     monkeypatch.setattr(
         run_manifest_cmd,
         "get_historical_replay_universe_service",
-        lambda: SimpleNamespace(build_universe_closure_report=lambda external_records: (_ for _ in ()).throw(ValueError("bad universe"))),
+        lambda: SimpleNamespace(
+            build_universe_closure_report=lambda external_records: (
+                _ for _ in ()
+            ).throw(ValueError("bad universe"))
+        ),
     )
     monkeypatch.setattr(run_manifest_cmd, "_coerce_bulk_certification_specs", lambda payload: payload)
     monkeypatch.setattr(run_manifest_cmd, "_load_residual_dispositions", lambda path: {})

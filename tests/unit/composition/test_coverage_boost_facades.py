@@ -78,7 +78,9 @@ def test_cli_bootstrap_lazy_exports_and_unknown_attribute(
     monkeypatch.setattr(
         cli_bootstrap,
         "import_module",
-        lambda name: fake_health if name == "bioetl.composition.bootstrap.cli.health" else (_ for _ in ()).throw(KeyError(name)),
+        lambda name: fake_health
+        if name == "bioetl.composition.bootstrap.cli.health"
+        else (_ for _ in ()).throw(KeyError(name)),
     )
 
     assert cli_bootstrap.__getattr__("bootstrap_health_service") is mock.sentinel.health_service
