@@ -46,6 +46,7 @@ class _StartedBackendProcess(Protocol):
     args: object
     pid: int | None
 
+
 DEFAULT_OBSERVABILITY_BACKEND_PROBE_HOST = "127.0.0.1"
 DEFAULT_OBSERVABILITY_BACKEND_BIND_HOST = "0.0.0.0"
 _SELECTOR_CATALOG_PROBE_PATH = (

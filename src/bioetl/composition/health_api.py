@@ -97,4 +97,3 @@ def get_runtime_settings() -> object:
     from bioetl.composition.runtime_builders.config_access import get_settings
 
     return get_settings()
-

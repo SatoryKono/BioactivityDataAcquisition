@@ -175,9 +175,7 @@ def build_replay_bundle(
 ) -> dict[str, object]:
     return {
         "control_plane": _build_control_plane_bundle(result, diagnostics),
-        "code_provenance": _build_code_provenance_dict(
-            result.manifest.code_provenance
-        ),
+        "code_provenance": _build_code_provenance_dict(result.manifest.code_provenance),
         "replay_parentage": dict_or_empty(diagnostics.get("replay_parentage")),
         "input_snapshots": _list_of_dicts(diagnostics.get("input_snapshots")),
         "artifact_refs": _list_of_dicts(diagnostics.get("artifact_refs")),

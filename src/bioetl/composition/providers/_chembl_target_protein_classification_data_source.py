@@ -30,6 +30,8 @@ __all__ = ["TargetProteinClassificationSnapshotDataSource"]
 _TARGET_TABLE = "chembl.target"
 _TARGET_COMPONENT_TABLE = "chembl.target_component"
 _PROTEIN_CLASS_TABLE = "chembl.protein_class"
+
+
 class TargetProteinClassificationSnapshotDataSource:
     """Expose relation rows from materialized local ChEMBL snapshot tables."""
 
@@ -293,7 +295,7 @@ class TargetProteinClassificationSnapshotDataSource:
                     for issue in result.dq_issues
                 ],
                 resolution_policy=self._invalid_record_policy,
-        )
+            )
         return tuple(
             with_source_manifest(row.to_dict(), self._source_manifest)
             for row in result.rows
