@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-15T17:22:12.087887+00:00",
+  "generated_at": "2026-06-16T05:47:09.520037+00:00",
   "summary": {
     "total_scripts": 429,
     "status_counts": {
@@ -3189,13 +3189,13 @@
       "references": [
         {
           "path": ".pre-commit-config.yaml",
-          "line": 215,
+          "line": 243,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py -m scripts.diagrams lint"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 222,
+          "line": 250,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py -m scripts.diagrams fix-orphans --check"
         },
@@ -4674,13 +4674,13 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 231,
+          "line": 259,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py -m scripts.docs sync-repo-identity --check"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 261,
+          "line": 289,
           "source_group": "ci",
           "text": "python scripts/engineering/dev/run_project_python.py -m scripts.docs"
         }
@@ -4946,7 +4946,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 258,
+          "line": 286,
           "source_group": "ci",
           "text": "- id: docs-check-links"
         },
@@ -4964,7 +4964,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1271,
+          "line": 1273,
           "source_group": "docs",
           "text": "автоматические docs-проверки (`python -m scripts.docs check-links` и"
         },
@@ -5943,7 +5943,7 @@
         },
         {
           "path": "tests/architecture/test_compatibility_facade_inventory.py",
-          "line": 53,
+          "line": 64,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"_compatibility_registry.py\","
         },
@@ -6922,55 +6922,55 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 22,
+      "reference_count": 26,
       "references": [
         {
           "path": ".pre-commit-config.yaml",
-          "line": 117,
+          "line": 118,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py -m pip_audit --cache-dir .cache/pip-audit --skip-editable --strict"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 125,
+          "line": 126,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py -m mypy --config-file pyproject.toml --strict --no-incremental src/bioetl"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 133,
+          "line": 134,
           "source_group": "ci",
           "text": "python scripts/engineering/dev/run_project_python.py -m pytest"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 153,
+          "line": 154,
           "source_group": "ci",
           "text": "python scripts/engineering/dev/run_project_python.py -m pytest"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 180,
+          "line": 164,
+          "source_group": "ci",
+          "text": "python scripts/engineering/dev/run_project_python.py -m"
+        },
+        {
+          "path": ".pre-commit-config.yaml",
+          "line": 208,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py -m scripts.schema validate-configs"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 188,
+          "line": 216,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py -m scripts.engineering.repo check-cleanliness"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 195,
+          "line": 223,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py -m scripts.schema check-config-paths"
-        },
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 205,
-          "source_group": "ci",
-          "text": "entry: python scripts/engineering/dev/run_project_python.py -m scripts.schema check-invariants"
         }
       ]
     },
@@ -8305,7 +8305,7 @@
         },
         {
           "path": "tests/architecture/test_test_governance_audit.py",
-          "line": 182,
+          "line": 212,
           "source_group": "tests",
           "text": "command = \"scripts/engineering/qa/check_test_audit_preflight.py --strict\""
         }
@@ -8523,13 +8523,13 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 306,
+          "line": 335,
           "source_group": "ci",
-          "text": "python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
+          "text": "scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1485,
+          "line": 1487,
           "source_group": "docs",
           "text": "- `python scripts/engineering/qa/generate_architecture_dependency_map.py --update`"
         },
@@ -9173,7 +9173,7 @@
         },
         {
           "path": "tests/architecture/test_observability_metric_governance.py",
-          "line": 63,
+          "line": 97,
           "source_group": "tests",
           "text": "== \"scripts/engineering/qa/report_observability_metric_inventory.py\""
         }
@@ -9544,13 +9544,13 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 288,
+          "line": 316,
           "source_group": "ci",
           "text": "python scripts/engineering/dev/run_project_python.py -m scripts.engineering.qa.vcr"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 297,
+          "line": 325,
           "source_group": "ci",
           "text": "python scripts/engineering/dev/run_project_python.py -m scripts.engineering.qa.vcr"
         },
@@ -9589,7 +9589,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 289,
+          "line": 317,
           "source_group": "ci",
           "text": "check-placement"
         },
@@ -9646,7 +9646,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 298,
+          "line": 326,
           "source_group": "ci",
           "text": "check-naming"
         },
@@ -9984,7 +9984,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 253,
+          "line": 281,
           "source_group": "ci",
           "text": "check-catalog --catalog scripts/engineering/repo/catalog.yaml"
         },
@@ -10041,7 +10041,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 240,
+          "line": 268,
           "source_group": "ci",
           "text": "check-inventory --check"
         },
@@ -11661,7 +11661,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 627,
+          "line": 655,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/audit_live_grafana_panels.py\","
         }
@@ -11801,13 +11801,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 529,
+          "line": 544,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` to install repo-local \""
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 610,
+          "line": 625,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` or \""
         },

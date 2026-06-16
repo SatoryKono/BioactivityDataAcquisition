@@ -80,7 +80,7 @@ If hook execution fails with `git-lfs filter-process` errors, fix checkout
 health before treating `--all-files` results as actionable:
 
 ```bash
-python -m scripts.engineering.qa.check_test_audit_preflight --strict
+python3 scripts/engineering/dev/run_project_python.py -m scripts.engineering.qa.check_test_audit_preflight --strict
 ```
 
 Run the baseline hook suites explicitly when needed:
@@ -97,7 +97,7 @@ moving CI-scale checks into `pre-commit`:
 make lint
 make test-fast
 make test-architecture
-python -m pre_commit run smoke-lane --hook-stage manual --all-files
+python3 scripts/engineering/dev/run_project_python.py -m pre_commit run smoke-lane --hook-stage manual --all-files
 ```
 
 Do not add full coverage, full architecture governance, documentation link

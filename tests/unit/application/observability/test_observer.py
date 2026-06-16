@@ -411,7 +411,7 @@ def test_observer_metric_label_normalization_replaces_special_characters(
         1,
         labels={
             "event": "phase_completed_test_event",
-            "provider": "chembl",
+            "provider": "chembl_activity",
             "pipeline": "chembl_activity",
             "severity": "warning",
             "error_type": "none",
