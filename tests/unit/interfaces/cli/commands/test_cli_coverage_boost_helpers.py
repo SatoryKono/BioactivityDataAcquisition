@@ -868,8 +868,11 @@ def test_backend_process_helpers_cover_listener_parsing_and_detached_start(
             ]
         )
     )
-    monkeypatch.setattr(backend_process.subprocess, "run", lambda *args, **kwargs: windows_result)
-    monkeypatch.setattr(backend_process.os, "name", "nt")
+    import os as os_module
+    import subprocess as subprocess_module
+    monkeypatch.setattr(subprocess_module, "run", lambda *args, **kwargs: windows_result)
+    monkeypatch.setattr(os_module, "name", "nt")
+    monkeypatch.setattr(backend_process, "_resolve_system_executable", lambda x: "netstat")
     assert backend_process._find_listening_backend_pids_by_port(8080) == (321,)
 
 
