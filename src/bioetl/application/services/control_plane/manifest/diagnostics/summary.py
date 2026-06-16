@@ -25,13 +25,13 @@ from bioetl.application.services.control_plane.manifest.diagnostics.persistence 
     build_next_steps,
     build_persistence_profile,
 )
-from bioetl.domain.control_plane.execution_context import (
-    is_composite_execution_context as _is_composite_execution_context,
-)
 from bioetl.application.services.control_plane.manifest.identity_graph_assembly import (
     RunManifestIdentityGraphAssembler,
 )
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
+from bioetl.domain.control_plane.execution_context import (
+    is_composite_execution_context as _is_composite_execution_context,
+)
 
 
 @dataclass(frozen=True, slots=True)

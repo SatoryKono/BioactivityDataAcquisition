@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import cast
 
-from bioetl.application.services.control_plane.manifest.diagnostics.base_summary_helpers import (
+from bioetl.application.services.control_plane.manifest.diagnostics.base_effective_config_diagnostics import (
     _build_effective_config_diagnostics,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_projection import (

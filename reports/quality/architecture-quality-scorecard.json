@@ -8,8 +8,8 @@
     },
     "module_coverage_inventory": {
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "494e484430d0b87e824ddc338d93d622cda4e129e4f0008e49150616a16f81d7",
-      "coverage_xml_sha256": "ef55970da67cb408ed530b436b7610160ccae0959366d9cd29c41018cd5f8adb"
+      "source_tree_sha256": "229d2378069861b4e7f3a68f008d545b5194db9aff10cc99f641c239e70b0f7a",
+      "coverage_xml_sha256": "bfae2e6b12b1431ce3b5103504fcb655910516e93d4ec492b7eff2832804a6f2"
     },
     "compatibility_importer_census": {
       "path": "reports/quality/compatibility-importer-census.json",
@@ -17,7 +17,7 @@
     },
     "dead_code_inventory": {
       "path": "reports/quality/dead-code-inventory.json",
-      "snapshot_date": "2026-06-02"
+      "snapshot_date": "2026-06-16"
     },
     "contract_registry_diagnostics": {
       "path": "reports/quality/contract-registry-diagnostics.json",
@@ -60,7 +60,7 @@
       "score": 8.0,
       "weighted_score": 0.72,
       "evidence_metrics": {
-        "source_module_count": 2134,
+        "source_module_count": 2137,
         "uncovered_module_count": 125
       }
     },
@@ -82,7 +82,7 @@
       "score": 7.0,
       "weighted_score": 0.98,
       "evidence_metrics": {
-        "source_module_count": 2134,
+        "source_module_count": 2137,
         "hotspot_family_count": 5
       }
     },
@@ -144,7 +144,7 @@
   ],
   "metrics": {
     "layer_violations": 0,
-    "source_module_count": 2134,
+    "source_module_count": 2137,
     "unmeasured_module_count": 2,
     "uncovered_module_count": 125,
     "hotspot_family_count": 5,

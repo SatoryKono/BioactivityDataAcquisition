@@ -445,15 +445,15 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 176
-      total_loc: 21902
+      total_loc: 21898
       files_ge_250_loc: 7
       helper_function_ratio: 0.344
       max_internal_fan_in: 14
       max_internal_fan_in_module: bioetl.application.core.batch_runtime_failure_policy
     trend:
-      status: updated_2026-06-04_live_metric_sync_to_21902
-      next_action: 2026-06-04 syncs application/core actual metrics to the current
-        live collector value of 21902 LOC; bounded-growth budgets remain at 13
+      status: updated_2026-06-16_live_metric_sync_to_21898
+      next_action: 2026-06-16 syncs application/core actual metrics to the current
+        live collector value of 21898 LOC; bounded-growth budgets remain at 13
         files_ge_250_loc and max_internal_fan_in 14.
   - name: composition_bootstrap_runtime
     owner: '@bioetl-platform'
@@ -521,22 +521,22 @@ hotspot_family_ratchets:
     - src/bioetl/application/services/control_plane/
     bounded_growth_budgets:
       files_ge_250_loc: 22
-      max_internal_fan_in: 6
+      max_internal_fan_in: 5
     metrics:
       duplication_clusters: 0
-      files: 91
-      total_loc: 14332
+      files: 100
+      total_loc: 14896
       files_ge_250_loc: 20
-      helper_function_ratio: 0.496
-      max_internal_fan_in: 6
-      max_internal_fan_in_module: bioetl.application.services.control_plane.manifest.diagnostics.replay_helpers
+      helper_function_ratio: 0.499
+      max_internal_fan_in: 5
+      max_internal_fan_in_module: bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support
     trend:
-      status: reviewed_baseline_2026-06-01_issue_4547
-      next_action: 2026-05-30 consolidates execution-identity payloads, lazy-export
-        facades, ledger diagnostic requests, replay projection inputs, and historical
-        record payloads, ratcheting application/services/control_plane duplication
-        clusters to zero; 2026-06-01 records the clean snapshot as a reviewed-baseline
-        family while files_ge_250_loc and max_internal_fan_in remain non-growing.
+      status: reduced_2026-06-16_issue_5235
+      next_action: 2026-06-16 extracts composite execution-context classification
+        into the domain control-plane surface and splits base diagnostics helpers into
+        narrower replay, provenance, and effective-config modules; max_internal_fan_in
+        is ratcheted down to 5 while files_ge_250_loc remains 20 and duplication
+        remains zero.
   - name: composition_runtime_builders
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -897,25 +897,24 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless a reviewed triage recalibration
         updates the tracked debt budget intentionally.
     repo_wide_zero_import_candidate_count:
-      current_count: 13
-      max_count: 13
+      current_count: 2
+      max_count: 2
       linked_issue: '#4541'
       owner: '@bioetl-architecture'
       rationale: Repo-wide zero-import candidates now reflect the reviewed policy-bound
-        residue plus the separately tracked composition registry facade. The governed
-        surface fell from 14 to 13 after bioetl.domain.ports.serialization gained
-        direct test coverage and no longer qualifies as a repo-wide zero-import candidate.
+        residue only for the sanctioned package entrypoint and the reviewed composition
+        registry facade. Package-root-governed domain port owner modules no longer
+        qualify after live importer evidence was revalidated on 2026-06-16.
       ratchet_policy: Non-growth fail-fast unless a reviewed dead-code inventory refresh
         updates the classified candidate set intentionally.
     repo_wide_classified_zero_import_candidate_count:
-      current_count: 13
-      max_count: 13
+      current_count: 2
+      max_count: 2
       linked_issue: '#4541'
       owner: '@bioetl-architecture'
       rationale: Every repo-wide zero-import candidate remains covered by an explicit
-        disposition ledger entry. The classified residue is src/bioetl/__main__.py,
-        src/bioetl/composition/registry.py, and the 11 package-root-governed domain.ports
-        owner modules that still have zero first-party static importers.
+        disposition ledger entry. The classified residue is now limited to
+        src/bioetl/__main__.py and src/bioetl/composition/registry.py.
       ratchet_policy: Non-growth fail-fast unless the repo-wide classification ledger
         is intentionally rebaselined during review.
     repo_wide_untriaged_zero_import_candidate_count:
@@ -925,6 +924,49 @@ retirement_governance_metrics:
       owner: '@bioetl-architecture'
       rationale: Untriaged repo-wide zero-import candidates are not allowed to persist
         after review.
+      ratchet_policy: Zero-budget fail-fast metric.
+    repo_wide_owner_test_anchored_candidate_count:
+      current_count: 2
+      max_count: 2
+      linked_issue: '#4654'
+      owner: '@bioetl-architecture'
+      rationale: Every retained repo-wide zero-import candidate must stay backed by
+        explicit owner-test evidence, not only by static-import triage prose.
+      ratchet_policy: Non-growth fail-fast unless the reviewed candidate set intentionally
+        shrinks and the owner-test evidence is regenerated in lockstep.
+    repo_wide_candidates_without_owner_tests_count:
+      current_count: 0
+      max_count: 0
+      linked_issue: '#4654'
+      owner: '@bioetl-architecture'
+      rationale: Retained repo-wide zero-import candidates without owner tests are
+        not allowed to persist after review.
+      ratchet_policy: Zero-budget fail-fast metric.
+    repo_wide_non_static_reachability_candidate_count:
+      current_count: 2
+      max_count: 2
+      linked_issue: '#4541'
+      owner: '@bioetl-architecture'
+      rationale: Non-static reachability residue is limited to the package module
+        entrypoint and the reviewed registry facade and must not grow silently.
+      ratchet_policy: Non-growth fail-fast unless a reviewed dead-code inventory refresh
+        intentionally expands the classified non-static residue.
+    triaged_retained_owner_test_anchored_count:
+      current_count: 14
+      max_count: 14
+      linked_issue: '#4654'
+      owner: '@bioetl-architecture'
+      rationale: Every retained retirement-triage entry must stay anchored by explicit
+        owner-test evidence while the reviewed extracted seams remain live.
+      ratchet_policy: Non-growth fail-fast unless a reviewed triage refresh intentionally
+        removes retained entries and regenerates owner-test evidence.
+    triaged_retained_without_owner_tests_count:
+      current_count: 0
+      max_count: 0
+      linked_issue: '#4654'
+      owner: '@bioetl-architecture'
+      rationale: Reviewed retained retirement-triage entries without owner tests
+        are not allowed to persist.
       ratchet_policy: Zero-budget fail-fast metric.
 quarterly_targets:
 - quarter: 2026-Q1

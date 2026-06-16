@@ -14,18 +14,32 @@ from bioetl.application.services.control_plane import RunLedgerService
 from bioetl.application.services.control_plane.manifest.diagnostics import (
     build_diagnostics_summary,
 )
+from bioetl.application.services.control_plane.manifest.diagnostics.base_effective_config_diagnostics import (
+    _build_effective_config_diagnostics,
+)
 from bioetl.application.services.control_plane.manifest.diagnostics.base_payload_sections import (
     _build_base_summary_core_payload,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.base_provenance_payloads import (
+    _build_code_provenance_state,
+    _build_planned_artifact_refs,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context import (
     _resolve_base_summary_replay_context,
 )
+from bioetl.application.services.control_plane.manifest.diagnostics.base_replay_labels import (
+    _resolve_operator_replay_mode,
+    _resolve_snapshot_status,
+    _resolve_source_posture,
+)
 from bioetl.domain.control_plane import (
     ReplayCapability,
+    RunArtifactRef,
     RunInputSnapshotRef,
     RunLedgerEntry,
     RunManifest,
     RunSourceRef,
+    assess_reproducibility_policy,
 )
 from bioetl.domain.types import RunID
 from tests.helpers.control_plane import InMemoryRunLedgerStore
@@ -129,6 +143,187 @@ def test_base_summary_payload_sections_preserve_replay_and_snapshot_contract() -
     assert payload["input_snapshot_content_hashes"] == []
     assert payload["input_snapshot_count"] == 0
     assert payload["planned_artifacts"] == []
+
+
+def test_effective_config_diagnostics_preserve_legacy_alias_contract() -> None:
+    summary = {
+        "config_hash": "legacy-hash",
+        "effective_config_artifact_id": "eca-1",
+        "resolved_config_hash": "resolved-hash",
+        "effective_config_hash": "effective-hash",
+        "source_fingerprint": "source-fingerprint",
+        "run_id": "run-1",
+        "manifest_id": "manifest-1",
+        "manifest_created_at": "2026-01-01T12:00:00+00:00",
+    }
+
+    payload = _build_effective_config_diagnostics(summary)
+
+    assert payload == {
+        "semantic": {
+            "legacy_config_hash": "legacy-hash",
+            "legacy_config_hash_alias_of": "resolved_config_hash",
+            "effective_config_artifact_id": "eca-1",
+            "resolved_config_hash": "resolved-hash",
+            "effective_config_hash": "effective-hash",
+            "source_fingerprint": "source-fingerprint",
+            "config_hash_compatibility_anchor": "legacy-hash",
+            "config_hash_legacy_alias_of": "resolved_config_hash",
+        },
+        "occurrence": {
+            "run_id": "run-1",
+            "manifest_id": "manifest-1",
+            "manifest_created_at": "2026-01-01T12:00:00+00:00",
+        },
+        "diff_policy": {
+            "semantic_anchor": "effective_config_hash",
+            "occurrence_fields": ["run_id", "manifest_id", "manifest_created_at"],
+            "config_hash_policy": "deprecated_legacy_alias_for_resolved_config_hash",
+            "legacy_config_hash_display_only": True,
+            "legacy_config_hash_replay_identity_anchor": False,
+        },
+    }
+
+
+def test_code_provenance_state_reports_ready_and_blocked_shapes() -> None:
+    ready_manifest = _build_manifest(
+        manifest_id="ready-provenance",
+        overrides=RunManifestOverrides(dependency_lock_hash="sha256:deps"),
+    )
+
+    ready_state = _build_code_provenance_state(ready_manifest)
+
+    assert ready_state == {
+        "git_commit": "abc1234",
+        "source_revision_state": "clean",
+        "dependency_lock_state": "present",
+        "strict_code_provenance_ready": True,
+        "strict_code_provenance_blockers": [],
+        "dependency_lock_hash": "sha256:deps",
+    }
+
+    blocked_manifest = replace(
+        ready_manifest,
+        code_provenance=replace(
+            ready_manifest.code_provenance,
+            git_commit=None,
+            source_revision_state="dirty",
+            dependency_lock_hash=None,
+        ),
+    )
+
+    blocked_state = _build_code_provenance_state(blocked_manifest)
+
+    assert blocked_state == {
+        "git_commit": None,
+        "source_revision_state": "dirty",
+        "dependency_lock_state": "missing",
+        "strict_code_provenance_ready": False,
+        "strict_code_provenance_blockers": [
+            "git_commit_missing",
+            "source_revision_state_not_clean",
+            "dependency_lock_hash_missing",
+        ],
+    }
+
+
+def test_planned_artifact_refs_project_manifest_artifacts_into_summary_shape() -> None:
+    manifest = replace(
+        _make_manifest(),
+        planned_artifacts=(
+            RunArtifactRef(layer="silver", path="data/output/silver/chembl/activity"),
+            RunArtifactRef(layer="gold", path="data/output/gold/chembl/activity"),
+        ),
+    )
+
+    assert _build_planned_artifact_refs(manifest) == [
+        {"layer": "silver", "path": "data/output/silver/chembl/activity"},
+        {"layer": "gold", "path": "data/output/gold/chembl/activity"},
+    ]
+
+
+@pytest.mark.parametrize(
+    ("input_snapshots", "exact_replay_eligible", "replay_mode", "expected"),
+    [
+        ([], False, "rebuild_only", "none"),
+        ([{"snapshot_id": "snapshot-1"}], True, "rebuild_only", "full"),
+        ([{"snapshot_id": "snapshot-1"}], False, "same_data_state_recovery", "full"),
+        ([{"snapshot_id": "snapshot-1"}], False, "rebuild_only", "partial"),
+    ],
+)
+def test_snapshot_status_labels_follow_operator_expectation(
+    input_snapshots: list[dict[str, object]],
+    exact_replay_eligible: bool,
+    replay_mode: str,
+    expected: str,
+) -> None:
+    assert (
+        _resolve_snapshot_status(
+            input_snapshots=input_snapshots,
+            exact_replay_eligible=exact_replay_eligible,
+            replay_mode=replay_mode,
+        )
+        == expected
+    )
+
+
+def test_source_posture_distinguishes_full_partial_and_live_inputs() -> None:
+    full_policy = assess_reproducibility_policy(
+        source_refs=build_source_refs(immutable_uri="file:///bronze/full.jsonl"),
+        required_persistence_profile="replay_ready",
+        strict_exact_replay_supported=True,
+        replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,
+    )
+    partial_policy = assess_reproducibility_policy(
+        source_refs=(
+            *build_source_refs(immutable_uri="file:///bronze/partial.jsonl"),
+            RunSourceRef(
+                provider="chembl",
+                entity="assay",
+                pipeline_name="chembl_assay",
+            ),
+        ),
+        required_persistence_profile="replay_ready",
+        strict_exact_replay_supported=True,
+        replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,
+    )
+    live_policy = assess_reproducibility_policy(
+        source_refs=(),
+        required_persistence_profile="degraded_observable",
+        strict_exact_replay_supported=False,
+    )
+
+    assert _resolve_source_posture(full_policy) == "immutable_snapshot_envelope"
+    assert _resolve_source_posture(partial_policy) == "partial_snapshot_envelope"
+    assert _resolve_source_posture(live_policy) == "live_or_unknown_inputs"
+
+
+@pytest.mark.parametrize(
+    ("replay_mode", "continuation_mode", "replay_readiness_verdict", "expected"),
+    [
+        ("rebuild_only", "none", "exact_replay_blocked", "Exact Replay Blocked"),
+        ("rebuild_only", "none", "lifecycle_projection_only", "Lifecycle Projection"),
+        ("rebuild_only", "none", "incremental_new_run", "Incremental New Run"),
+        ("rebuild_only", "none", "debug_only", "Debug Only"),
+        ("exact_replay", "none", "ready", "Exact Replay"),
+        ("rebuild_only", "resume_from_checkpoint", "ready", "Resume"),
+        ("rebuild_only", "none", "ready", "Rebuild"),
+    ],
+)
+def test_operator_replay_mode_labels_prioritize_verdicts_then_mode(
+    replay_mode: str,
+    continuation_mode: str,
+    replay_readiness_verdict: str,
+    expected: str,
+) -> None:
+    assert (
+        _resolve_operator_replay_mode(
+            replay_mode=replay_mode,
+            continuation_mode=continuation_mode,
+            replay_readiness_verdict=replay_readiness_verdict,
+        )
+        == expected
+    )
 
 
 def _build_ledger_entries(

@@ -18,15 +18,14 @@ from bioetl.application.services.control_plane.run_manifest_exact_replay_blocker
     snapshot_exact_replay_blockers as _snapshot_exact_replay_blockers,
 )
 from bioetl.domain.control_plane import ReplayCapability, RunManifest
+from bioetl.domain.control_plane.execution_context import (
+    is_composite_execution_context as _is_composite_execution_context,
+)
 from bioetl.domain.control_plane.reproducibility_policy import (
     ReproducibilityPolicyAssessment,
 )
 from bioetl.domain.control_plane.reproducibility_profiles import (
     resolve_reproducibility_family_profile,
-)
-
-from bioetl.domain.control_plane.execution_context import (
-    is_composite_execution_context as _is_composite_execution_context,
 )
 
 

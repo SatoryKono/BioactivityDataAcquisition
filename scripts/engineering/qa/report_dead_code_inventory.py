@@ -21,6 +21,164 @@ if str(SRC_ROOT) not in sys.path:
 DEFAULT_JSON_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "dead-code-inventory.json"
 DEFAULT_MD_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "dead-code-inventory.md"
 
+DOMAIN_PORT_OWNER_TESTS = (
+    "tests/architecture/test_domain_public_api.py",
+    "tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py",
+    "tests/architecture/test_port_contracts.py",
+)
+
+ZERO_IMPORT_OWNER_TEST_EVIDENCE: dict[str, dict[str, object]] = {
+    "src/bioetl/__main__.py": {
+        "evidence_lane": "module_entrypoint_owner_suite",
+        "owner_tests": (
+            "tests/unit/interfaces/cli/test_cli_commands_basic.py",
+            "tests/unit/interfaces/cli/test_cli_helpers.py",
+        ),
+    },
+    "src/bioetl/composition/registry.py": {
+        "evidence_lane": "compatibility_facade_contract",
+        "owner_tests": (
+            "tests/architecture/test_compatibility_freeze_guards.py",
+            "tests/unit/composition/test_canonical_module_paths.py",
+        ),
+    },
+    "src/bioetl/domain/ports/data_normalization.py": {
+        "evidence_lane": "canonical_owner_contract",
+        "owner_tests": DOMAIN_PORT_OWNER_TESTS,
+    },
+    "src/bioetl/domain/ports/data_source.py": {
+        "evidence_lane": "canonical_owner_contract",
+        "owner_tests": DOMAIN_PORT_OWNER_TESTS,
+    },
+    "src/bioetl/domain/ports/delta_reader.py": {
+        "evidence_lane": "canonical_owner_contract",
+        "owner_tests": DOMAIN_PORT_OWNER_TESTS,
+    },
+    "src/bioetl/domain/ports/export.py": {
+        "evidence_lane": "canonical_owner_contract",
+        "owner_tests": DOMAIN_PORT_OWNER_TESTS,
+    },
+    "src/bioetl/domain/ports/filtering.py": {
+        "evidence_lane": "canonical_owner_contract",
+        "owner_tests": DOMAIN_PORT_OWNER_TESTS,
+    },
+    "src/bioetl/domain/ports/idmapping.py": {
+        "evidence_lane": "canonical_owner_contract",
+        "owner_tests": DOMAIN_PORT_OWNER_TESTS,
+    },
+    "src/bioetl/domain/ports/logger_port.py": {
+        "evidence_lane": "canonical_owner_contract",
+        "owner_tests": DOMAIN_PORT_OWNER_TESTS,
+    },
+    "src/bioetl/domain/ports/pii.py": {
+        "evidence_lane": "canonical_owner_contract",
+        "owner_tests": DOMAIN_PORT_OWNER_TESTS,
+    },
+    "src/bioetl/domain/ports/protein_classification.py": {
+        "evidence_lane": "canonical_owner_contract",
+        "owner_tests": DOMAIN_PORT_OWNER_TESTS,
+    },
+    "src/bioetl/domain/ports/publication_strategy.py": {
+        "evidence_lane": "canonical_owner_contract",
+        "owner_tests": DOMAIN_PORT_OWNER_TESTS,
+    },
+    "src/bioetl/domain/ports/resilience.py": {
+        "evidence_lane": "canonical_owner_contract",
+        "owner_tests": DOMAIN_PORT_OWNER_TESTS,
+    },
+    "src/bioetl/infrastructure/adapters/_cached_bronze_support.py": {
+        "evidence_lane": "retained_module_owner_suite",
+        "owner_tests": (
+            "tests/architecture/test_wave4_complexity_closeout.py",
+            "tests/unit/infrastructure/adapters/test_cached_bronze_data_source.py",
+        ),
+    },
+    "src/bioetl/infrastructure/adapters/_error_handling_support.py": {
+        "evidence_lane": "retained_module_owner_suite",
+        "owner_tests": ("tests/architecture/test_wave3_adapter_facade_closeout.py",),
+    },
+    "src/bioetl/infrastructure/adapters/_health_check_observability.py": {
+        "evidence_lane": "retained_module_owner_suite",
+        "owner_tests": ("tests/architecture/test_wave3_adapter_facade_closeout.py",),
+    },
+    "src/bioetl/infrastructure/adapters/_health_check_policy.py": {
+        "evidence_lane": "retained_module_owner_suite",
+        "owner_tests": ("tests/architecture/test_wave3_adapter_facade_closeout.py",),
+    },
+    "src/bioetl/application/composite/fsm_helper.py": {
+        "evidence_lane": "retained_module_owner_suite",
+        "owner_tests": (
+            "tests/unit/application/composite/test_fsm_helper.py",
+            "tests/unit/application/composite/test_runner_fsm.py",
+        ),
+    },
+    "src/bioetl/application/composite/column_priority_orderer.py": {
+        "evidence_lane": "retained_module_owner_suite",
+        "owner_tests": (
+            "tests/unit/application/composite/test_column_priority_orderer.py",
+        ),
+    },
+    "src/bioetl/application/composite/merger_input_mixin.py": {
+        "evidence_lane": "retained_module_owner_suite",
+        "owner_tests": ("tests/unit/application/composite/test_merger_input_mixin.py",),
+    },
+    "src/bioetl/application/composite/runner_pkg/runner_support_flow.py": {
+        "evidence_lane": "retained_module_owner_suite",
+        "owner_tests": (
+            "tests/architecture/test_tracing_enforcement.py",
+            "tests/unit/application/composite/test_runner.py",
+        ),
+    },
+    "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py": {
+        "evidence_lane": "retained_module_owner_suite",
+        "owner_tests": (
+            "tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py",
+        ),
+    },
+    "src/bioetl/application/composite/runner_pkg/runner_support_policy.py": {
+        "evidence_lane": "retained_module_owner_suite",
+        "owner_tests": (
+            "tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py",
+            "tests/unit/application/composite/test_runner.py",
+        ),
+    },
+    "src/bioetl/application/composite/runner_pkg/runner_support_runtime.py": {
+        "evidence_lane": "retained_module_owner_suite",
+        "owner_tests": (
+            "tests/architecture/test_replay_time_seam_inventory.py",
+            "tests/unit/application/composite/test_runner_checkpoint_resume.py",
+        ),
+    },
+    "src/bioetl/application/composite/runner_pkg/runner_support_types.py": {
+        "evidence_lane": "retained_module_owner_suite",
+        "owner_tests": (
+            "tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py",
+            "tests/unit/application/composite/test_runner.py",
+        ),
+    },
+    "src/bioetl/application/composite/runtime_models.py": {
+        "evidence_lane": "retained_module_owner_suite",
+        "owner_tests": ("tests/unit/application/composite/test_runtime_models.py",),
+    },
+    "src/bioetl/application/composite/runtime_wiring_api.py": {
+        "evidence_lane": "retained_module_owner_suite",
+        "owner_tests": (
+            "tests/architecture/test_composite_canonical_surfaces.py",
+            "tests/architecture/test_column_ordering_family.py",
+            "tests/unit/composition/bootstrap/runtime/test_composite_support_service_builders.py",
+        ),
+    },
+}
+
+NON_STATIC_REACHABILITY_DISPOSITIONS = frozenset(
+    {
+        "retain_module_entrypoint",
+        "retain_dynamic_entrypoint",
+        "retain_public_facade",
+        "retain_compat_shim",
+    }
+)
+
 
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -122,6 +280,41 @@ def _load_repo_wide_zero_import_classifications(
     return classification_by_path, {str(item) for item in allowed}
 
 
+def _default_evidence_lane(disposition: str | None) -> str | None:
+    lane_by_disposition = {
+        "retain_module_entrypoint": "module_entrypoint_owner_suite",
+        "retain_dynamic_entrypoint": "dynamic_runtime_entrypoint",
+        "retain_public_facade": "compatibility_facade_contract",
+        "retain_compat_shim": "compatibility_shim_contract",
+        "retain_canonical_owner_module": "canonical_owner_contract",
+        "retain_active": "retained_module_owner_suite",
+    }
+    return lane_by_disposition.get(disposition)
+
+
+def _owner_test_evidence(
+    repo_root: Path,
+    *,
+    module_path: str,
+    disposition: str | None,
+) -> dict[str, object]:
+    evidence = ZERO_IMPORT_OWNER_TEST_EVIDENCE.get(module_path, {})
+    raw_tests = evidence.get("owner_tests", ())
+    owner_tests = [
+        str(path) for path in raw_tests if isinstance(path, str) and path.strip()
+    ]
+    existing_tests = [path for path in owner_tests if (repo_root / path).exists()]
+    evidence_lane = evidence.get("evidence_lane")
+    if not isinstance(evidence_lane, str) or not evidence_lane.strip():
+        evidence_lane = _default_evidence_lane(disposition)
+    return {
+        "evidence_lane": evidence_lane,
+        "owner_tests": owner_tests,
+        "owner_test_count": len(owner_tests),
+        "owner_test_paths_exist_count": len(existing_tests),
+    }
+
+
 def _review_window_is_stale(review_window: dict[str, object]) -> bool:
     next_review_by = review_window.get("next_review_by")
     if not isinstance(next_review_by, str):
@@ -149,6 +342,7 @@ def build_dead_code_inventory(
     )
 
     triaged_rows: list[dict[str, object]] = []
+    triaged_retained_evidence_lane_counts: dict[str, int] = {}
     families = triage_payload.get("families", [])
     assert isinstance(families, list)
     for family in families:
@@ -184,22 +378,39 @@ def build_dead_code_inventory(
                 verification_status = (
                     "satisfied" if src_count >= min_src_importers else "below_min"
                 )
+            disposition = entry.get("disposition")
+            evidence = _owner_test_evidence(
+                repo_root,
+                module_path=module_path,
+                disposition=disposition if isinstance(disposition, str) else None,
+            )
+            evidence_lane = evidence.get("evidence_lane")
+            if (
+                disposition == "retain_active"
+                and isinstance(evidence_lane, str)
+                and evidence_lane
+            ):
+                triaged_retained_evidence_lane_counts[evidence_lane] = (
+                    triaged_retained_evidence_lane_counts.get(evidence_lane, 0) + 1
+                )
             triaged_rows.append(
                 {
                     "family": family_name,
                     "entry_id": entry.get("id"),
-                    "disposition": entry.get("disposition"),
+                    "disposition": disposition,
                     "module_path": module_path,
                     "module_name": module_name,
                     "src_importer_count": src_count,
                     "test_importer_count": len(importers.get("tests", ())),
                     "min_src_importers": min_src_importers,
                     "verification_status": verification_status,
+                    **evidence,
                 }
             )
 
     repo_wide_zero_import_candidates: list[dict[str, object]] = []
     repo_wide_disposition_counts: dict[str, int] = {}
+    repo_wide_evidence_lane_counts: dict[str, int] = {}
     untriaged_candidates: list[dict[str, object]] = []
     for row in collect_zero_import_bioetl_modules(repo_root):
         module_path = str(row["path"])
@@ -236,6 +447,17 @@ def build_dead_code_inventory(
                 "rationale": classification.get("rationale"),
             }
         )
+        evidence = _owner_test_evidence(
+            repo_root,
+            module_path=module_path,
+            disposition=disposition,
+        )
+        enriched.update(evidence)
+        evidence_lane = evidence.get("evidence_lane")
+        if isinstance(evidence_lane, str) and evidence_lane:
+            repo_wide_evidence_lane_counts[evidence_lane] = (
+                repo_wide_evidence_lane_counts.get(evidence_lane, 0) + 1
+            )
         repo_wide_zero_import_candidates.append(enriched)
 
     resolved_snapshot_date = _resolve_snapshot_date(
@@ -245,6 +467,28 @@ def build_dead_code_inventory(
     review_window = _build_review_window(
         triage_payload,
         snapshot_date=resolved_snapshot_date,
+    )
+    triaged_retained_rows = [
+        row for row in triaged_rows if row.get("disposition") == "retain_active"
+    ]
+    repo_wide_owner_test_anchored_count = sum(
+        1
+        for row in repo_wide_zero_import_candidates
+        if int(row.get("owner_test_count", 0)) > 0
+        and int(row.get("owner_test_count", 0))
+        == int(row.get("owner_test_paths_exist_count", 0))
+    )
+    triaged_retained_owner_test_anchored_count = sum(
+        1
+        for row in triaged_retained_rows
+        if int(row.get("owner_test_count", 0)) > 0
+        and int(row.get("owner_test_count", 0))
+        == int(row.get("owner_test_paths_exist_count", 0))
+    )
+    repo_wide_non_static_reachability_candidate_count = sum(
+        1
+        for row in repo_wide_zero_import_candidates
+        if row.get("disposition") in NON_STATIC_REACHABILITY_DISPOSITIONS
     )
 
     return {
@@ -267,8 +511,29 @@ def build_dead_code_inventory(
             "repo_wide_untriaged_zero_import_candidate_count": len(
                 untriaged_candidates
             ),
+            "repo_wide_owner_test_anchored_candidate_count": (
+                repo_wide_owner_test_anchored_count
+            ),
+            "repo_wide_candidates_without_owner_tests_count": len(
+                repo_wide_zero_import_candidates
+            )
+            - repo_wide_owner_test_anchored_count,
+            "repo_wide_non_static_reachability_candidate_count": (
+                repo_wide_non_static_reachability_candidate_count
+            ),
             "repo_wide_disposition_counts": dict(
                 sorted(repo_wide_disposition_counts.items())
+            ),
+            "repo_wide_evidence_lane_counts": dict(
+                sorted(repo_wide_evidence_lane_counts.items())
+            ),
+            "triaged_retained_owner_test_anchored_count": (
+                triaged_retained_owner_test_anchored_count
+            ),
+            "triaged_retained_without_owner_tests_count": len(triaged_retained_rows)
+            - triaged_retained_owner_test_anchored_count,
+            "triaged_retained_evidence_lane_counts": dict(
+                sorted(triaged_retained_evidence_lane_counts.items())
             ),
         },
         "triaged_entries": triaged_rows,
@@ -299,6 +564,16 @@ def _render_markdown(payload: dict[str, object]) -> str:
         f"{summary['repo_wide_classified_zero_import_candidate_count']}",
         "- repo_wide_untriaged_zero_import_candidate_count: "
         f"{summary['repo_wide_untriaged_zero_import_candidate_count']}",
+        "- repo_wide_owner_test_anchored_candidate_count: "
+        f"{summary['repo_wide_owner_test_anchored_candidate_count']}",
+        "- repo_wide_candidates_without_owner_tests_count: "
+        f"{summary['repo_wide_candidates_without_owner_tests_count']}",
+        "- repo_wide_non_static_reachability_candidate_count: "
+        f"{summary['repo_wide_non_static_reachability_candidate_count']}",
+        "- triaged_retained_owner_test_anchored_count: "
+        f"{summary['triaged_retained_owner_test_anchored_count']}",
+        "- triaged_retained_without_owner_tests_count: "
+        f"{summary['triaged_retained_without_owner_tests_count']}",
         "- note: zero static importer count is a review signal, not automatic removal proof",
         f"- guardrail: {review_window['guardrail_note']}",
         "",
@@ -328,6 +603,50 @@ def _render_markdown(payload: dict[str, object]) -> str:
         assert isinstance(row, dict)
         lines.append(
             f"| `{row['module_name']}` | `{row.get('disposition', 'untriaged')}` | `{row['path']}` |"
+        )
+    retained_owner_rows = [
+        row
+        for row in triaged_rows + zero_rows
+        if isinstance(row, dict) and int(row.get("owner_test_count", 0)) > 0
+    ]
+    lines.extend(
+        [
+            "",
+            "## Retained Owner-Test Evidence",
+            "",
+            "| Scope | Module | Evidence Lane | Owner Tests |",
+            "| --- | --- | --- | --- |",
+        ]
+    )
+    for row in retained_owner_rows:
+        scope = "triaged_retained"
+        if row in zero_rows:
+            scope = "repo_wide_zero_import"
+        owner_tests = ", ".join(f"`{path}`" for path in row["owner_tests"])
+        lines.append(
+            f"| `{scope}` | `{row['path'] if 'path' in row else row['module_path']}` | "
+            f"`{row['evidence_lane']}` | {owner_tests} |"
+        )
+    non_static_rows = [
+        row
+        for row in zero_rows
+        if isinstance(row, dict)
+        and row.get("disposition") in NON_STATIC_REACHABILITY_DISPOSITIONS
+    ]
+    lines.extend(
+        [
+            "",
+            "## Non-Static Reachability Evidence",
+            "",
+            "| Module | Disposition | Evidence Lane | Owner Tests |",
+            "| --- | --- | --- | --- |",
+        ]
+    )
+    for row in non_static_rows:
+        owner_tests = ", ".join(f"`{path}`" for path in row["owner_tests"])
+        lines.append(
+            f"| `{row['module_name']}` | `{row['disposition']}` | "
+            f"`{row['evidence_lane']}` | {owner_tests} |"
         )
     lines.append("")
     return "\n".join(lines)

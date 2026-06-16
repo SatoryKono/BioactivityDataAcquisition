@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.manifest.diagnostics.base_summary_helpers import (
+from bioetl.application.services.control_plane.manifest.diagnostics.base_replay_labels import (
     _resolve_source_posture,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.persistence_profile import (
