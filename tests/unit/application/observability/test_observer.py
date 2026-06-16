@@ -361,6 +361,88 @@ def test_pipeline_result_timestamp_requires_wall_start_time() -> None:
         PipelineObserver._build_pipeline_result_timestamp(None, 1.0)
 
 
+def test_observer_derives_provider_and_entity_names(metrics_mock, logger_mock, run_id):
+    observer = PipelineObserver(
+        pipeline_name="chembl_activity",
+        run_id=run_id,
+        run_type=RunType.INCREMENTAL,
+        metrics=metrics_mock,
+        logger=logger_mock,
+    )
+
+    assert observer.provider_name == "chembl"
+    assert observer.entity == "activity"
+
+
+def test_observer_event_mixin_normalizes_unknown_severity(metrics_mock, logger_mock, run_id):
+    observer = PipelineObserver(
+        pipeline_name="chembl_activity",
+        run_id=run_id,
+        run_type=RunType.INCREMENTAL,
+        metrics=metrics_mock,
+        logger=logger_mock,
+    )
+
+    observer.emit_event("custom_event", LifecyclePhase.EXECUTION, level=" TRACE ")
+
+    logger_mock.info.assert_called_once()
+    assert logger_mock.info.call_args.kwargs["severity"] == "info"
+
+
+def test_observer_metric_label_normalization_replaces_special_characters(
+    metrics_mock, logger_mock, run_id
+):
+    observer = PipelineObserver(
+        pipeline_name="chembl activity",
+        run_id=run_id,
+        run_type=RunType.INCREMENTAL,
+        metrics=metrics_mock,
+        logger=logger_mock,
+    )
+
+    observer.emit_event(
+        "phase:completed/test.event",
+        LifecyclePhase.POSTRUN,
+        level="warning",
+    )
+
+    metrics_mock.increment_counter.assert_called_once_with(
+        "bioetl_observability_events_total",
+        1,
+        labels={
+            "event": "phase_completed_test_event",
+            "provider": "chembl",
+            "pipeline": "chembl_activity",
+            "severity": "warning",
+            "error_type": "none",
+        },
+    )
+
+
+def test_emit_health_check_result_invalid_status_falls_back_to_health_flag(
+    metrics_mock, logger_mock, run_id
+):
+    observer = PipelineObserver(
+        pipeline_name="test_pipeline",
+        run_id=run_id,
+        run_type=RunType.INCREMENTAL,
+        metrics=metrics_mock,
+        logger=logger_mock,
+    )
+
+    observer.emit_health_check_result(
+        component="storage",
+        healthy=False,
+        health_status="not-a-status",
+    )
+
+    metrics_mock.set_gauge.assert_any_call(
+        "bioetl_health_check_status",
+        0.0,
+        {"component": "storage"},
+    )
+
+
 @patch(
     "bioetl.application.observability.observer_context_mixin.capture_runtime_timing_anchor"
 )

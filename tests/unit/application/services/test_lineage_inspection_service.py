@@ -123,6 +123,13 @@ def test_show_fragment_semantic_lookup_is_explicit() -> None:
     assert result.fragment == fragment
 
 
+def test_show_fragment_raises_when_identifier_missing() -> None:
+    service = LineageInspectionService(lineage_store=_InMemoryLineageStore())
+
+    with pytest.raises(ValueError, match="Lineage fragment not found"):
+        service.show_fragment("silver:missing")
+
+
 def test_trace_returns_upstream_and_downstream_relations() -> None:
     store = _InMemoryLineageStore()
     run_id = deterministic_run_uuid_from_callsite("test_lineage_inspection_service")
@@ -243,3 +250,60 @@ def test_explain_run_resolves_manifest_and_aggregates_outputs() -> None:
     assert result.produced_datasets[0].node_id == silver_node.node_id
     assert result.transforms[0].node_id == transform_node.node_id
     assert result.source_systems[0].node_id == source_node.node_id
+
+
+def test_explain_run_resolves_direct_manifest_index_without_manifest_store() -> None:
+    store = _InMemoryLineageStore()
+    run_id = deterministic_run_uuid_from_callsite("lineage-direct-manifest")
+    dataset_node = DatasetRef(
+        layer="silver",
+        logical_name="chembl.activity",
+        version=13,
+    ).to_node_ref()
+    fragment = LineageGraphFragment(
+        fragment_id="silver:fragment-direct",
+        stored_fragment_id="silver:fragment-direct:occurrence",
+        nodes=(dataset_node,),
+        run_id=str(run_id),
+        manifest_id="manifest-direct",
+    )
+    store.save(fragment)
+
+    result = LineageInspectionService(lineage_store=store).explain_run("manifest-direct")
+
+    assert result.manifest_id == "manifest-direct"
+    assert result.run_id is None
+    assert result.fragment_ids == ("silver:fragment-direct",)
+
+
+def test_explain_run_resolves_direct_run_index_without_manifest_store() -> None:
+    store = _InMemoryLineageStore()
+    run_id = deterministic_run_uuid_from_callsite("lineage-direct-run")
+    bronze_node = LineageNodeRef(
+        node_type=LineageNodeType.BRONZE_BATCH,
+        node_id="bronze_batch:run-direct",
+    )
+    fragment = LineageGraphFragment(
+        fragment_id="bronze:fragment-direct",
+        stored_fragment_id="bronze:fragment-direct:occurrence",
+        nodes=(bronze_node,),
+        run_id=str(run_id),
+    )
+    store.save(fragment)
+
+    result = LineageInspectionService(lineage_store=store).explain_run(str(run_id))
+
+    assert result.manifest_id is None
+    assert result.run_id == str(run_id)
+    assert result.produced_bronze_batches[0].node_id == bronze_node.node_id
+
+
+def test_explain_run_raises_when_identifier_cannot_be_resolved() -> None:
+    service = LineageInspectionService(lineage_store=_InMemoryLineageStore())
+
+    with pytest.raises(ValueError, match="Lineage run explanation not found"):
+        service.explain_run("missing-run")
+
+
+def test_parse_run_id_returns_none_for_invalid_identifier() -> None:
+    assert LineageInspectionService._parse_run_id("not-a-uuid") is None

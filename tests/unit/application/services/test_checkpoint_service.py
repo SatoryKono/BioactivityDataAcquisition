@@ -264,6 +264,107 @@ class TestCheckpointServiceGetCheckpoint:
 
 
 @pytest.mark.unit
+class TestCheckpointServiceExtendedLookupCoverage:
+    """Additional coverage for run/manifest lookup and tracing helpers."""
+
+    @pytest.mark.asyncio
+    async def test_get_checkpoint_for_run_found(
+        self, checkpoint_service, mock_checkpoint_port
+    ) -> None:
+        run_id = str(deterministic_uuid_from_callsite("checkpoint-service-for-run"))
+        mock_checkpoint_port.load_for_run = AsyncMock(
+            return_value=(run_id, {"records_processed": 12})
+        )
+
+        result = await checkpoint_service.get_checkpoint_for_run("pipeline1", run_id)
+
+        assert result is not None
+        assert result.pipeline_name == "pipeline1"
+        assert result.run_id == run_id
+        assert result.metadata == {"records_processed": 12}
+        _assert_metric_labels(
+            checkpoint_service,
+            operation="get_for_run",
+            status="success",
+        )
+
+    @pytest.mark.asyncio
+    async def test_get_checkpoint_for_run_missing(
+        self, checkpoint_service, mock_checkpoint_port
+    ) -> None:
+        run_id = str(deterministic_uuid_from_callsite("checkpoint-service-for-run"))
+        mock_checkpoint_port.load_for_run = AsyncMock(return_value=None)
+
+        result = await checkpoint_service.get_checkpoint_for_run("pipeline1", run_id)
+
+        assert result is None
+        _assert_metric_labels(
+            checkpoint_service,
+            operation="get_for_run",
+            status="missing",
+        )
+
+    @pytest.mark.asyncio
+    async def test_get_checkpoint_for_manifest_id_found(
+        self, checkpoint_service, mock_checkpoint_port
+    ) -> None:
+        run_id = str(deterministic_uuid_from_callsite("checkpoint-service-manifest"))
+        mock_checkpoint_port.load_for_manifest_id = AsyncMock(
+            return_value=(run_id, {"records_processed": 9})
+        )
+
+        result = await checkpoint_service.get_checkpoint_for_manifest_id(
+            "pipeline1",
+            "manifest-1",
+        )
+
+        assert result is not None
+        assert result.pipeline_name == "pipeline1"
+        assert result.run_id == run_id
+        _assert_metric_labels(
+            checkpoint_service,
+            operation="get_for_manifest_id",
+            status="success",
+        )
+
+    def test_trace_attributes_include_pipeline_and_extras(
+        self,
+        checkpoint_service,
+    ) -> None:
+        attributes = checkpoint_service._trace_attributes(
+            operation="get",
+            pipeline="chembl_activity",
+            **{"bioetl.run_id": "run-1"},
+        )
+
+        assert attributes == {
+            "bioetl.component": "checkpoint_service",
+            "bioetl.operation": "get",
+            "bioetl.pipeline": "chembl_activity",
+            "bioetl.run_id": "run-1",
+        }
+
+    def test_set_trace_result_sets_success_and_extra_attributes(
+        self,
+        checkpoint_service,
+    ) -> None:
+        span = MagicMock()
+
+        checkpoint_service._set_trace_result(
+            span,
+            success=False,
+            attributes={
+                "bioetl.checkpoint_found": True,
+                "bioetl.count": 3,
+            },
+        )
+
+        span.set_attribute.assert_any_call("bioetl.success", False)
+        span.set_attribute.assert_any_call("bioetl.checkpoint_found", True)
+        span.set_attribute.assert_any_call("bioetl.count", 3)
+
+
+@pytest.mark.unit
 class TestCheckpointServiceDeleteCheckpoint:
     """Test CheckpointService.delete_checkpoint method."""
 
