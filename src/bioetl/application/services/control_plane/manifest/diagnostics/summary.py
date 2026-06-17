@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections import Counter
 from dataclasses import dataclass
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.services.control_plane.manifest.diagnostics.artifact_support import (
     apply_artifact_publication_closure_policy,
@@ -13,9 +13,6 @@ from bioetl.application.services.control_plane.manifest.diagnostics.artifact_sup
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.composite_projection import (
     build_composite_dossier_projection,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.dq_details import (
-    DQDetailsSummary,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.ledger_processing import (
     _resolve_policy_value,
@@ -32,6 +29,11 @@ from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.control_plane.execution_context import (
     is_composite_execution_context as _is_composite_execution_context,
 )
+
+if TYPE_CHECKING:
+    from bioetl.application.services.control_plane.manifest.diagnostics.dq_details import (
+        DQDetailsSummary,
+    )
 
 
 @dataclass(frozen=True, slots=True)

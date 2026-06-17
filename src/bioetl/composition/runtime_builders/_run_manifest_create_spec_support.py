@@ -8,12 +8,14 @@ from bioetl.application.services.control_plane.manifest.service import (
     RunManifestCreateSpec,
 )
 from bioetl.composition.runtime_builders._run_manifest_attr_support import read_attr
-from bioetl.composition.runtime_builders._run_manifest_refs import build_planned_artifacts
 from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
     to_serializable_mapping,
 )
 from bioetl.composition.runtime_builders._silver_filter_compatibility_support import (
     current_silver_filter_compatibility_mode,
+)
+from bioetl.composition.runtime_builders._run_manifest_data_roots import (
+    build_planned_artifacts,
 )
 from bioetl.composition.services.versioning import get_pipeline_version
 from bioetl.domain.control_plane import ReplayCapability

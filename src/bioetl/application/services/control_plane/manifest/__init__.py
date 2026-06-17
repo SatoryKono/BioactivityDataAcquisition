@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.manifest.diagnostics import (
-    build_diagnostics_summary,
-)
 from bioetl.application.services.control_plane.manifest.inspection_models import (
     RunManifestDiffEntry,
     RunManifestDiffResult,
@@ -29,5 +26,4 @@ __all__ = [
     "RunManifestInspectionService",
     "RunManifestService",
     "RunManifestVerifyResult",
-    "build_diagnostics_summary",
 ]

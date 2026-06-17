@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family import (
-    _resolve_reproducibility_profile,
-)
+from typing import Literal
+
 from bioetl.domain.control_plane import ReplayCapability, RunManifest
 from bioetl.domain.control_plane.execution_context import (
     is_composite_execution_context as _is_composite_execution_context,
@@ -14,6 +13,24 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     ReproducibilityPolicyAssessment,
     resolve_replay_readiness_verdict,
 )
+from bioetl.domain.control_plane.reproducibility_profiles import (
+    ReproducibilityFamilyProfile,
+    resolve_reproducibility_family_profile,
+)
+
+
+def _resolve_readiness_reproducibility_profile(
+    manifest: RunManifest,
+) -> ReproducibilityFamilyProfile:
+    execution_context: Literal["source", "composite"] = (
+        "composite" if _is_composite_execution_context(manifest) else "source"
+    )
+    return resolve_reproducibility_family_profile(
+        provider=manifest.provider,
+        entity=manifest.entity,
+        contract_ref=manifest.code_provenance.contract_ref,
+        execution_context=execution_context,
+    )
 
 
 def _resolve_manifest_replay_readiness_verdict(
@@ -30,7 +47,7 @@ def _resolve_manifest_replay_readiness_verdict(
         and "ledger_suffix" in continuation_mode
         and manifest.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED
     )
-    profile = _resolve_reproducibility_profile(manifest)
+    profile = _resolve_readiness_reproducibility_profile(manifest)
     runtime_blocking_gaps = list(policy_assessment.blocking_gaps)
     if (
         profile.strict_exact_replay_supported

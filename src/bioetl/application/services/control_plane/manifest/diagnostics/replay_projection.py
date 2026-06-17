@@ -27,9 +27,6 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay_state
     _resolve_replay_capability_reason,
     _resolve_replay_mode,
 )
-from bioetl.application.services.control_plane.manifest.replay_family_contract_payload import (
-    build_replay_family_contract_payload,
-)
 from bioetl.application.services.control_plane.manifest.replay_taxonomy import (
     build_replay_taxonomy_projection,
     resolve_replay_next_action,
@@ -124,6 +121,7 @@ def _build_operator_replay_projection_payload(
     resume_requested: bool,
     policy_assessment: ReproducibilityPolicyAssessment,
     replay_family_contract: dict[str, object],
+    replay_family_contract_payload: dict[str, object],
     replay_inputs: dict[str, object],
 ) -> dict[str, object]:
     """Return kwargs payload for the operator-facing replay taxonomy projection."""
@@ -140,7 +138,7 @@ def _build_operator_replay_projection_payload(
             manifest
         ),
         "replay_family_contract": replay_family_contract,
-        **build_replay_family_contract_payload(replay_family_contract),
+        **replay_family_contract_payload,
         "broader_historical_exact_replay_state": replay_inputs[
             "broader_historical_exact_replay_state"
         ],
@@ -188,6 +186,7 @@ def _build_operator_replay_projection(
     requested_exact_replay: bool,
     resume_requested: bool,
     policy_assessment: ReproducibilityPolicyAssessment,
+    replay_family_contract_payload: dict[str, object],
 ) -> dict[str, object]:
     """Return canonical operator-facing replay projection fields."""
     replay_family_contract = _resolve_replay_family_contract(manifest)
@@ -205,6 +204,7 @@ def _build_operator_replay_projection(
         **_build_operator_replay_projection_payload(
             **replay_projection_context,
             replay_family_contract=replay_family_contract,
+            replay_family_contract_payload=replay_family_contract_payload,
             replay_inputs=replay_inputs,
         )
     )
@@ -241,14 +241,16 @@ def _build_replay_projection_bundle(
     replay_family_contract_payload: dict[str, object],
 ) -> _ReplayProjectionBundle:
     """Assemble the canonical replay projection bundle for diagnostics callers."""
+    replay_projection_context = _build_replay_projection_context_kwargs(
+        manifest,
+        input_snapshots,
+        requested_exact_replay,
+        resume_requested,
+        policy_assessment,
+    )
     operator_projection = _build_operator_replay_projection(
-        **_build_replay_projection_context_kwargs(
-            manifest,
-            input_snapshots,
-            requested_exact_replay,
-            resume_requested,
-            policy_assessment,
-        )
+        **replay_projection_context,
+        replay_family_contract_payload=replay_family_contract_payload,
     )
     replay_state_projection = _build_replay_state_projection(
         manifest=manifest,

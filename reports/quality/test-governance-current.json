@@ -3688,13 +3688,13 @@
     },
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
-    "markerless_test_functions": 0,
+    "markerless_test_functions": 4,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "root": ".",
     "top_duplicate_test_names": [],
-    "total_test_files": 1798,
-    "total_test_functions": 20805,
+    "total_test_files": 1803,
+    "total_test_functions": 20828,
     "uuid4_call_sites": 0
   }
 }
