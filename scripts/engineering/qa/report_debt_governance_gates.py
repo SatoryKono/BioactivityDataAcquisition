@@ -7,6 +7,7 @@ import argparse
 import json
 import sys
 from dataclasses import asdict, dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -33,6 +34,7 @@ from scripts.engineering.qa import (  # noqa: E402
 
 DEFAULT_JSON_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "debt-governance-gates.json"
 DEFAULT_MD_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "debt-governance-gates.md"
+RELEASE_REVIEW_MAX_AGE_DAYS = 30
 
 
 @dataclass(frozen=True)
@@ -136,6 +138,52 @@ def _artifact_matches(
     except FileNotFoundError:
         return False
     return committed == live_payload
+
+
+def _parse_generated_at(value: object) -> datetime | None:
+    if not isinstance(value, str) or not value.strip():
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=UTC)
+    return parsed.astimezone(UTC)
+
+
+def _release_review_freshness_gate(
+    runtime_review: dict[str, Any],
+    *,
+    now: datetime | None = None,
+) -> Gate:
+    generated_at = _parse_generated_at(runtime_review.get("generated_at"))
+    if generated_at is None:
+        return Gate(
+            name="observability_release_review_freshness",
+            status="fail",
+            metric="generated_at_age_days",
+            current="missing_or_invalid",
+            limit=RELEASE_REVIEW_MAX_AGE_DAYS,
+            source_artifact="reports/observability/runtime_cardinality_review.json",
+            remediation="Regenerate live runtime cardinality review evidence.",
+        )
+
+    current_time = (now or datetime.now(UTC)).astimezone(UTC)
+    age_days = (current_time - generated_at).days
+    return Gate(
+        name="observability_release_review_freshness",
+        status=(
+            "pass"
+            if 0 <= age_days <= RELEASE_REVIEW_MAX_AGE_DAYS
+            else "fail"
+        ),
+        metric="generated_at_age_days",
+        current=age_days,
+        limit=RELEASE_REVIEW_MAX_AGE_DAYS,
+        source_artifact="reports/observability/runtime_cardinality_review.json",
+        remediation="Regenerate live runtime cardinality review evidence.",
+    )
 
 
 def _debt_scorecard_gates() -> list[Gate]:
@@ -443,6 +491,7 @@ def build_payload(*, repo_root: Path = PROJECT_ROOT) -> dict[str, object]:
             remediation="Run live observability cardinality review without degraded release evidence.",
         )
     )
+    gates.append(_release_review_freshness_gate(runtime_review))
 
     adr_summary = adr_matrix["summary"]
     gates.append(

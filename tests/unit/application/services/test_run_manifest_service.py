@@ -646,12 +646,21 @@ def test_execution_fingerprint_matches_golden_value() -> None:
         manifest_port=_InMemoryRunManifestStore(),
         _manifest_id_factory=lambda: "manifest-golden",
     )
+    request = _make_request()
 
-    manifest = service.create_manifest(_make_request())
+    manifest = service.create_manifest(request)
+    identity_payload = service._build_execution_identity_payload(
+        request=request,
+        code_provenance=service._build_code_provenance(request),
+        run_type=service._normalize_run_type(request.run_type),
+    )
 
+    assert identity_payload["silver_filter_compatibility_mode"] == (
+        "structural_only_compat"
+    )
     assert (
         manifest.execution_fingerprint
-        == "3514ee10054e6134aa9ba82962d6fc4c91b4b01a174bbcc8d9c84745179fc96e"
+        == "3fb7206bb92c159f0922222f742d75f67ab8efb93d8ec47d7eed4467585caf6d"
     )
 
 
