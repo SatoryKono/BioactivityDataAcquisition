@@ -18093,7 +18093,7 @@
       "missing_lines": 7,
       "module": "bioetl.infrastructure.quality.architecture_quality_scorecard",
       "path": "src/bioetl/infrastructure/quality/architecture_quality_scorecard.py",
-      "source_lines": 359
+      "source_lines": 366
     },
     {
       "coverage_percent": 92.68,

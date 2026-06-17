@@ -55,7 +55,7 @@ architecture section focuses on structure, boundaries, and design rationale.
 
 See [decisions/README.md](decisions/README.md) for full index with categories.
 
-49 ADRs documenting key architectural decisions:
+50 ADRs documenting key architectural decisions:
 
 | ADR                                                                | Topic                                     | RULES.md Reference |
 | ------------------------------------------------------------------ | ----------------------------------------- | ------------------ |
@@ -108,6 +108,7 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 | [ADR-047](decisions/ADR-047-workflow-control-plane.md)             | Workflow Control Plane for Declarative Workflows | -           |
 | [ADR-048](decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md) | Domain Schema Boundary and Runtime Pandera Compatibility | - |
 | [ADR-049](decisions/ADR-049-context-aware-loc-target-policy.md)     | Context-Aware LOC Target Policy           | -                  |
+| [ADR-050](decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md) | Silver Structural and Gold Semantic Filter Boundary | §2.1, App D |
 
 ______________________________________________________________________
 
