@@ -18,7 +18,6 @@ from scripts.engineering.qa.check_test_audit_preflight import (
 )
 from scripts.engineering.qa.report_test_governance_audit import (
     collect_test_governance_report,
-    evaluate_budgets,
 )
 
 ROOT = Path(__file__).resolve().parents[2]
