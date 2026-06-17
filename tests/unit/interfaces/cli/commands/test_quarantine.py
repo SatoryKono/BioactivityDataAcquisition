@@ -100,6 +100,7 @@ class TestQuarantineInspect:
     def test_inspect_help_displays_options(self, cli_runner: CliRunner) -> None:
         """Test that quarantine inspect --help displays options."""
         result = cli_runner.invoke(cli, ["quarantine", "inspect", "--help"])
+        normalized_output = " ".join(result.output.split())
 
         assert result.exit_code == 0
         assert "--pipeline" in result.output
@@ -110,8 +111,8 @@ class TestQuarantineInspect:
         assert "Deprecated legacy alias" in result.output
         assert "FILTERED_OUT_SILVER" in result.output
         assert "sunset 2026-09-30" in result.output
-        assert "not Gold" in result.output
-        assert "contract/semantic rejects" in result.output
+        assert "not Gold" in normalized_output
+        assert "contract/semantic rejects" in normalized_output
 
     def test_inspect_requires_pipeline(self, cli_runner: CliRunner) -> None:
         """Test that quarantine inspect requires --pipeline option."""
@@ -299,6 +300,7 @@ class TestQuarantineStats:
     def test_stats_help_displays_options(self, cli_runner: CliRunner) -> None:
         """Test that quarantine stats --help displays options."""
         result = cli_runner.invoke(cli, ["quarantine", "stats", "--help"])
+        normalized_output = " ".join(result.output.split())
 
         assert result.exit_code == 0
         assert "--pipeline" in result.output
@@ -309,8 +311,8 @@ class TestQuarantineStats:
         assert "Deprecated legacy alias" in result.output
         assert "FILTERED_OUT_SILVER" in result.output
         assert "sunset 2026-09-30" in result.output
-        assert "not Gold" in result.output
-        assert "contract/semantic rejects" in result.output
+        assert "not Gold" in normalized_output
+        assert "contract/semantic rejects" in normalized_output
         assert "--group-by" in result.output
         assert "--top" in result.output
 

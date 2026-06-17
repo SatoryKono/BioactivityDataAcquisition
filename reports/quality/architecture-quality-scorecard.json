@@ -8,12 +8,12 @@
     },
     "module_coverage_inventory": {
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "efa1037d52f80281116bffb826d0fecfcffd5d0d93e84b9edd573b9c8a1fb0d2",
-      "coverage_xml_sha256": "b467574a3609d2eb04943efd074a2d2f3700cdc788fbcfc785c3a2b34244009b"
+      "source_tree_sha256": "ae9b2a655d5621a56e44f0e5ecdd0c94f8370be7e4a9cdfa66153e41836b2d25",
+      "coverage_xml_sha256": "2bf9d220aa37d58297b69fe6f549d285bb63371ef79064ee041b0ee69c0f452e"
     },
     "compatibility_importer_census": {
       "path": "reports/quality/compatibility-importer-census.json",
-      "snapshot_date": "2026-06-16"
+      "snapshot_date": "2026-06-17"
     },
     "dead_code_inventory": {
       "path": "reports/quality/dead-code-inventory.json",
