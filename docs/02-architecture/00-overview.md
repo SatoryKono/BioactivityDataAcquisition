@@ -7,13 +7,13 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-02'
+  Last verified: '2026-06-17'
 
 ______________________________________________________________________
 
 # Architecture Overview
 
-*Synced with RULES.md v6.1.3 (2026-04-29)*
+*Synced with RULES.md v6.1.3 (2026-06-17)*
 
 ## Quick Navigation
 
