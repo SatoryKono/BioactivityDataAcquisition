@@ -171,7 +171,7 @@ Observed facts:
 
 | Surface | File | Current behavior | Layer |
 | --- | --- | --- | --- |
-| Compatibility mode | `src/bioetl/infrastructure/config/silver_filter_migration.py` | Default mode is `structural_only_auto_promote`. | Infrastructure |
+| Compatibility mode | `src/bioetl/infrastructure/config/silver_filter_migration.py` | Default mode is `structural_only_compat`; `structural_only_auto_promote` is a historical persisted identity alias only. | Infrastructure |
 | Filter file schema | `src/bioetl/infrastructure/schemas/filter_config.py` | Legacy semantic Silver keys fail validation at the file boundary. | Infrastructure |
 | Entity pipeline schema | `src/bioetl/infrastructure/schemas/pipeline_config.py` | Entity YAML payloads fail validation when semantic keys appear under `silver_filters`. | Infrastructure |
 | Domain Silver filter projection | `src/bioetl/infrastructure/schemas/filter_config.py`, `src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py` | Domain Silver filter receives only `required_fields` and `exclude_if_present`. | Infrastructure -> Domain boundary |

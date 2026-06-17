@@ -11,9 +11,11 @@ import pytest
 from bioetl.application.composite.checkpoint import CompositeCheckpointService
 from bioetl.application.composite.runtime_wiring_api import (
     CompositeCheckpointServiceContext,
+    JoinHow,
 )
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.composition.bootstrap.runtime.composite_merge_service_builder import (
+    _resolve_join_how,
     build_composite_merge_service,
 )
 from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
@@ -79,6 +81,27 @@ def _make_factory(
         create_dq_report_service=lambda _logger, _settings, _metrics: MagicMock(),
         checkpoint_manager_cls=checkpoint_manager_cls,
     )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ("strategy", "expected"),
+    [
+        (MergeStrategy.LEFT_OUTER, "left"),
+        (MergeStrategy.INNER, "inner"),
+        (MergeStrategy.UNION, "full"),
+    ],
+)
+def test_resolve_join_how_maps_supported_merge_strategies(
+    strategy: MergeStrategy,
+    expected: JoinHow,
+) -> None:
+    assert _resolve_join_how(strategy) == expected
+
+
+@pytest.mark.unit
+def test_resolve_join_how_defaults_unknown_strategy_to_left_join() -> None:
+    assert _resolve_join_how(cast(MergeStrategy, object())) == "left"
 
 
 @pytest.mark.unit

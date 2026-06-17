@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from bioetl.domain.config.runtime import CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE
 from bioetl.domain.normalization import (
     build_execution_identity_payload,
     compute_execution_identity_fingerprint,
@@ -37,7 +38,9 @@ class IdentityDetailsSpec:
     exact_replay: bool | None = None
     input_snapshot_fingerprint: str | None = None
     dependency_lock_hash: str | None = None
-    silver_filter_compatibility_mode: str | None = "structural_only_auto_promote"
+    silver_filter_compatibility_mode: str | None = (
+        CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE
+    )
 
 
 def _identity_detail_value(value: str | None) -> str:
@@ -67,7 +70,9 @@ def _canonical_execution_identity_payload(
     effective_config_artifact_id: str | None,
     exact_replay: bool | None,
     input_snapshot_fingerprint: str | None,
-    silver_filter_compatibility_mode: str | None = "structural_only_auto_promote",
+    silver_filter_compatibility_mode: str | None = (
+        CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE
+    ),
 ) -> JsonDict:
     """Return canonical execution-identity payload with nulls removed."""
     if all(

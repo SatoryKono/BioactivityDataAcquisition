@@ -102,7 +102,7 @@ def test_checkpoint_metadata_emits_canonical_execution_identity_fingerprint() ->
         effective_config_artifact_id=" artifact-42 ",
         exact_replay=True,
         input_snapshot_fingerprint=" FACE ",
-        silver_filter_compatibility_mode=" structural_only_auto_promote ",
+        silver_filter_compatibility_mode=" structural_only_compat ",
     )
 
     expected_payload = build_execution_identity_payload(
@@ -117,7 +117,7 @@ def test_checkpoint_metadata_emits_canonical_execution_identity_fingerprint() ->
         effective_config_artifact_id=" artifact-42 ",
         exact_replay=True,
         input_snapshot_fingerprint=" FACE ",
-        silver_filter_compatibility_mode=" structural_only_auto_promote ",
+        silver_filter_compatibility_mode=" structural_only_compat ",
     )
 
     assert metadata.checkpoint_execution_identity_payload() == {

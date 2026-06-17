@@ -615,17 +615,17 @@ bioetl quarantine inspect --pipeline chembl_activity --limit 50
 # Фильтрация по коду ошибки
 bioetl quarantine inspect --pipeline chembl_activity --error-code DQ-MISSING-FIELD
 
-# Только Silver filter rejects
-bioetl quarantine stats --pipeline chembl_activity --silver-filter-only
-bioetl quarantine stats --pipeline chembl_activity --silver-filter-only --group-by reason-code-field
-bioetl quarantine inspect --pipeline chembl_activity --silver-filter-only --limit 20
+# Только Silver structural rejects
+bioetl quarantine stats --pipeline chembl_activity --error-code FILTERED_OUT_SILVER
+bioetl quarantine stats --pipeline chembl_activity --error-code FILTERED_OUT_SILVER --group-by reason-code-field
+bioetl quarantine inspect --pipeline chembl_activity --error-code FILTERED_OUT_SILVER --limit 20
 
 # Один конкретный run со справедливым Bronze denominator
-bioetl quarantine stats --pipeline chembl_activity --silver-filter-only --run-id <run-id>
-bioetl quarantine inspect --pipeline chembl_activity --silver-filter-only --run-id <run-id> --limit 20
+bioetl quarantine stats --pipeline chembl_activity --error-code FILTERED_OUT_SILVER --run-id <run-id>
+bioetl quarantine inspect --pipeline chembl_activity --error-code FILTERED_OUT_SILVER --run-id <run-id> --limit 20
 ```
 
-`bioetl quarantine stats --silver-filter-only` показывает:
+`bioetl quarantine stats --error-code FILTERED_OUT_SILVER` показывает:
 
 - общее количество Silver rejects в quarantine;
 - breakdown по `reason_code`;
@@ -640,18 +640,18 @@ bioetl quarantine inspect --pipeline chembl_activity --silver-filter-only --run-
 
 Для focused operator grouping можно использовать:
 
-- `bioetl quarantine stats --pipeline chembl_activity --silver-filter-only --group-by reason-code`
-- `bioetl quarantine stats --pipeline chembl_activity --silver-filter-only --group-by field`
-- `bioetl quarantine stats --pipeline chembl_activity --silver-filter-only --group-by rule-type`
-- `bioetl quarantine stats --pipeline chembl_activity --silver-filter-only --group-by operator`
-- `bioetl quarantine stats --pipeline chembl_activity --silver-filter-only --group-by reason-code-field`
-- `bioetl quarantine stats --pipeline chembl_activity --silver-filter-only --group-by reason-signature`
+- `bioetl quarantine stats --pipeline chembl_activity --error-code FILTERED_OUT_SILVER --group-by reason-code`
+- `bioetl quarantine stats --pipeline chembl_activity --error-code FILTERED_OUT_SILVER --group-by field`
+- `bioetl quarantine stats --pipeline chembl_activity --error-code FILTERED_OUT_SILVER --group-by rule-type`
+- `bioetl quarantine stats --pipeline chembl_activity --error-code FILTERED_OUT_SILVER --group-by operator`
+- `bioetl quarantine stats --pipeline chembl_activity --error-code FILTERED_OUT_SILVER --group-by reason-code-field`
+- `bioetl quarantine stats --pipeline chembl_activity --error-code FILTERED_OUT_SILVER --group-by reason-signature`
 
 `reason-signature` строится только из structured fields
 `reason_code | rule_type | field | operator`.
 Текст `Reason` / `message` удобен для чтения, но не считается stable analytics key.
 
-`bioetl quarantine inspect --silver-filter-only` показывает для каждой записи:
+`bioetl quarantine inspect --error-code FILTERED_OUT_SILVER` показывает для каждой записи:
 
 - `payload_hash`, `dq_status`, `ingestion_ts`;
 - human-readable `Reason`;
@@ -671,9 +671,9 @@ bioetl quarantine inspect --pipeline chembl_activity --silver-filter-only --run-
 Рекомендуемый workflow:
 
 1. Сначала проверить summary и trend в Grafana.
-1. Затем перейти к `bioetl quarantine stats --silver-filter-only`.
+1. Затем перейти к `bioetl quarantine stats --error-code FILTERED_OUT_SILVER`.
 1. Если нужна причина конкретной записи, использовать
-   `bioetl quarantine inspect --silver-filter-only`.
+   `bioetl quarantine inspect --error-code FILTERED_OUT_SILVER`.
 
 ### Повторная обработка
 

@@ -12,12 +12,26 @@ from typing import Literal
 from bioetl.domain.types import RunType
 
 __all__ = [
+    "CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE",
+    "LEGACY_SILVER_FILTER_COMPATIBILITY_MODE",
+    "SILVER_FILTER_COMPATIBILITY_MODES",
     "RuntimeConfig",
     "SilverFilterCompatibilityMode",
 ]
 
 HealthCheckMode = Literal["strict", "probe"]
-SilverFilterCompatibilityMode = Literal["structural_only_auto_promote",]
+CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE = "structural_only_compat"
+LEGACY_SILVER_FILTER_COMPATIBILITY_MODE = "structural_only_auto_promote"
+SILVER_FILTER_COMPATIBILITY_MODES = frozenset(
+    {
+        CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE,
+        LEGACY_SILVER_FILTER_COMPATIBILITY_MODE,
+    }
+)
+SilverFilterCompatibilityMode = Literal[
+    "structural_only_compat",
+    "structural_only_auto_promote",
+]
 
 
 @dataclass(frozen=True, slots=True)
@@ -85,7 +99,7 @@ class RuntimeConfig:
 
     # Silver filter migration behavior captured for run-manifest identity.
     silver_filter_compatibility_mode: SilverFilterCompatibilityMode = (
-        "structural_only_auto_promote"
+        CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE
     )
 
     def __post_init__(self) -> None:
@@ -146,10 +160,10 @@ class RuntimeConfig:
 
     def _validate_silver_filter_compatibility_mode(self) -> None:
         """Validate the Silver-filter migration compatibility mode."""
-        if self.silver_filter_compatibility_mode != "structural_only_auto_promote":
+        if self.silver_filter_compatibility_mode not in SILVER_FILTER_COMPATIBILITY_MODES:
             raise ValueError(
-                "silver_filter_compatibility_mode must be "
-                "'structural_only_auto_promote', "
+                "silver_filter_compatibility_mode must be one of "
+                f"{sorted(SILVER_FILTER_COMPATIBILITY_MODES)!r}, "
                 f"got {self.silver_filter_compatibility_mode!r}"
             )
 

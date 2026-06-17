@@ -107,8 +107,9 @@ class TestQuarantineInspect:
         assert "--error-code" in result.output
         assert "--run-id" in result.output
         assert "--silver-filter-only" in result.output
-        assert "Legacy alias" in result.output
+        assert "Deprecated legacy alias" in result.output
         assert "FILTERED_OUT_SILVER" in result.output
+        assert "sunset 2026-09-30" in result.output
         assert "not Gold" in result.output
         assert "contract/semantic rejects" in result.output
 
@@ -305,8 +306,9 @@ class TestQuarantineStats:
         assert "--error-code" in result.output
         assert "--run-id" in result.output
         assert "--silver-filter-only" in result.output
-        assert "Legacy alias" in result.output
+        assert "Deprecated legacy alias" in result.output
         assert "FILTERED_OUT_SILVER" in result.output
+        assert "sunset 2026-09-30" in result.output
         assert "not Gold" in result.output
         assert "contract/semantic rejects" in result.output
         assert "--group-by" in result.output

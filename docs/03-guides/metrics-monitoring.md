@@ -281,8 +281,8 @@ or raw error messages as Prometheus labels.
   `bioetl_stage_lag_seconds` формируют canonical stage-model surface для
   `input`, `ingestion`, `transform`, `validation`, `storage`, `output`.
 - Record-level drilldown для Silver rejects остаётся задачей quarantine CLI:
-  `bioetl quarantine stats --pipeline <name> --silver-filter-only`
-  и `bioetl quarantine inspect --pipeline <name> --silver-filter-only`.
+  `bioetl quarantine stats --pipeline <name> --error-code FILTERED_OUT_SILVER`
+  и `bioetl quarantine inspect --pipeline <name> --error-code FILTERED_OUT_SILVER`.
 
 #### Circuit Breaker Metrics
 

@@ -239,7 +239,7 @@ def expected_canonical_execution_identity(
         silver_filter_compatibility_mode=str(
             manifest.runtime_config.get(
                 "silver_filter_compatibility_mode",
-                "structural_only_auto_promote",
+                "structural_only_compat",
             )
         ),
     )

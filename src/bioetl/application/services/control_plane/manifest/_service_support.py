@@ -13,6 +13,7 @@ from bioetl.application.services.control_plane.manifest.execution_identity_suppo
 from bioetl.application.services.control_plane.manifest.snapshot_payloads import (
     source_refs_payload,
 )
+from bioetl.domain.config.runtime import CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE
 from bioetl.domain.control_plane import (
     RunArtifactRef,
     RunCodeProvenance,
@@ -258,7 +259,7 @@ class RunManifestPayloadMixin:
             silver_filter_compatibility_mode=str(
                 request.runtime_config.get(
                     "silver_filter_compatibility_mode",
-                    "structural_only_auto_promote",
+                    CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE,
                 )
             ),
         )

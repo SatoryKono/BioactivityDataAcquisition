@@ -13,7 +13,7 @@ from bioetl.application.services.debug_export_service import (
     DebugExportResult,
     DebugExportService,
 )
-from bioetl.domain.types import ErrorType
+from bioetl.domain.types import ErrorType, GoldRejectReason, GoldRejectReasonCode
 
 pytestmark = pytest.mark.unit
 
@@ -263,3 +263,123 @@ def test_debug_export_service_preserves_structured_silver_quarantine_diagnostics
     assert row["failed_field"] == "target_chembl_id"
     assert row["failed_value"] == "None"
     assert row["expected_constraint"] == "non-empty"
+
+
+def test_debug_export_service_records_gold_filter_rows_with_canonical_reason() -> None:
+    service = DebugExportService(
+        config=DebugExportConfig(enabled=True, formats=("csv",)),
+        run_id=_RUN_ID,
+        pipeline_id="chembl_activity",
+        provider_id="chembl",
+    )
+
+    service.record_gold_filter(
+        records=[
+            {
+                "activity_id": "ACT-88",
+                "content_hash": "gold-h88",
+                "contract_version": "1.2.3",
+            }
+        ],
+        reason_code="legacy_business_filter",
+        reason_message="Excluded by business rule",
+        created_at=datetime(2026, 6, 17, 11, 0, tzinfo=UTC),
+    )
+
+    row = service.build_pack(status="failed").tables["gold_rejected"][0]
+
+    assert row["reason_code"] == "gold_semantic_business_exclusion"
+    assert row["action"] == "gold_semantic_business_exclusion"
+    assert row["reason_message"] == "Excluded by business rule"
+    assert row["contract_version"] == "1.2.3"
+
+
+def test_debug_export_service_records_structured_gold_validation_reason() -> None:
+    service = DebugExportService(
+        config=DebugExportConfig(enabled=True, formats=("csv",)),
+        run_id=_RUN_ID,
+        pipeline_id="chembl_activity",
+        provider_id="chembl",
+    )
+    errors = Mock(
+        reject_reason=GoldRejectReason(
+            reason_code=GoldRejectReasonCode.CONTRACT_REQUIRED_FAILURE,
+            contract_version="2.0.0",
+            rule_id="required_fields",
+            message="target_chembl_id is required",
+            field="target_chembl_id",
+        )
+    )
+
+    service.record_gold_validation_failure(
+        records=[
+            {
+                "activity_id": "ACT-89",
+                "target_chembl_id": None,
+                "content_hash": "gold-h89",
+            }
+        ],
+        errors=errors,
+        created_at=datetime(2026, 6, 17, 11, 5, tzinfo=UTC),
+    )
+
+    row = service.build_pack(status="failed").tables["gold_rejected"][0]
+
+    assert row["reason_code"] == "gold_contract_required_failure"
+    assert row["reason_message"] == "target_chembl_id is required"
+    assert row["rule_id"] == "required_fields"
+    assert row["failed_field"] == "target_chembl_id"
+    assert row["contract_version"] == "2.0.0"
+
+
+def test_debug_export_service_falls_back_for_unstructured_gold_validation_error() -> (
+    None
+):
+    service = DebugExportService(
+        config=DebugExportConfig(enabled=True, formats=("csv",)),
+        run_id=_RUN_ID,
+        pipeline_id="chembl_activity",
+        provider_id="chembl",
+    )
+
+    service.record_gold_validation_failure(
+        records=[
+            {
+                "activity_id": "ACT-90",
+                "target_chembl_id": None,
+                "content_hash": "gold-h90",
+            }
+        ],
+        errors=ValueError("Gold contract validation failed for target_chembl_id"),
+        created_at=datetime(2026, 6, 17, 11, 10, tzinfo=UTC),
+    )
+
+    row = service.build_pack(status="failed").tables["gold_rejected"][0]
+
+    assert row["reason_code"] == "gold_contract_schema_failure"
+    assert "target_chembl_id" in row["reason_message"]
+    assert row["contract_version"] == "0.0.0"
+
+
+def test_debug_export_service_records_lineage_rows() -> None:
+    service = DebugExportService(
+        config=DebugExportConfig(enabled=True, formats=("csv",)),
+        run_id=_RUN_ID,
+        pipeline_id="chembl_activity",
+        provider_id="chembl",
+    )
+
+    service.record_lineage(
+        fragment_id="fragment-1",
+        edge_type="derived_from",
+        node_id="node-1",
+        raw_record={"activity_id": "ACT-91", "content_hash": "bronze-h91"},
+        created_at=datetime(2026, 6, 17, 11, 15, tzinfo=UTC),
+    )
+
+    row = service.build_pack(status="success").tables["lineage"][0]
+
+    assert row["fragment_id"] == "fragment-1"
+    assert row["edge_type"] == "derived_from"
+    assert row["node_id"] == "node-1"
+    assert row["payload_hash"] == "bronze-h91"

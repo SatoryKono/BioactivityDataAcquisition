@@ -1271,7 +1271,7 @@ def _checkpoint_metadata_from_summary(
             str(item) for item in summary.get("input_snapshot_ids", [])
         ),
         input_snapshot_fingerprint=str(summary["input_snapshot_identity_fingerprint"]),
-        silver_filter_compatibility_mode="structural_only_auto_promote",
+        silver_filter_compatibility_mode="structural_only_compat",
     )
 
 

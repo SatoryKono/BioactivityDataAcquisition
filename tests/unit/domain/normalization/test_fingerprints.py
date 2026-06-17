@@ -34,7 +34,7 @@ def _build_payload() -> dict[str, str | None]:
         input_snapshot_fingerprint=(
             "b9b909fbc69f111484ed86aa0d8ec6f6390b76739145b2b2d6404fa17f6e05f8"
         ),
-        silver_filter_compatibility_mode="structural_only_auto_promote",
+        silver_filter_compatibility_mode="structural_only_compat",
     )
 
 

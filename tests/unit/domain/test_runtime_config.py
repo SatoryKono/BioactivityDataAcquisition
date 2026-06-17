@@ -32,6 +32,7 @@ class TestRuntimeConfig:
         assert config.strict_validation is False
         assert config.strict_gold_validation is True
         assert config.health_check_mode == "strict"
+        assert config.silver_filter_compatibility_mode == "structural_only_compat"
 
     def test_config_runtime_config__custom_values__c572811c(self) -> None:
         """Test custom configuration values."""
@@ -176,8 +177,17 @@ class TestRuntimeConfig:
                 replay_anchor_date="2026/04/10",
             )
 
-    def test_noncanonical_silver_filter_mode_raises(self) -> None:
-        """RuntimeConfig only accepts the canonical Silver filter mode."""
+    def test_historical_silver_filter_mode_is_still_accepted(self) -> None:
+        """RuntimeConfig accepts persisted historical Silver filter identity."""
+        config = RuntimeConfig(
+            run_type=RunType.INCREMENTAL,
+            silver_filter_compatibility_mode="structural_only_auto_promote",
+        )
+
+        assert config.silver_filter_compatibility_mode == "structural_only_auto_promote"
+
+    def test_unsupported_silver_filter_mode_raises(self) -> None:
+        """RuntimeConfig only accepts reviewed Silver filter modes."""
         with pytest.raises(
             ValueError,
             match="silver_filter_compatibility_mode must be",

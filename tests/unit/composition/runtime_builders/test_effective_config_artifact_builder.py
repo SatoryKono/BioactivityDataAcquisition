@@ -301,19 +301,19 @@ def test_runtime_overrides_snapshot_materializes_silver_filter_compatibility() -
     )
 
     assert snapshot["cli"]["silver_filter_compatibility_mode"] == (
-        "structural_only_auto_promote"
+        "structural_only_compat"
     )
     assert snapshot["runtime"]["silver_filter_compatibility_mode"] == (
-        "structural_only_auto_promote"
+        "structural_only_compat"
     )
     assert snapshot["runtime"]["silver_filter_compatibility"] == {
         "schema_version": "silver-filter-compatibility-v1",
-        "mode": "structural_only_auto_promote",
+        "mode": "structural_only_compat",
         "source": "default",
     }
     assert (
         snapshot["runtime"]["settings_snapshot"]["silver_filter_compatibility"]["mode"]
-        == "structural_only_auto_promote"
+        == "structural_only_compat"
     )
 
 
