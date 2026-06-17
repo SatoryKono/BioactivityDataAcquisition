@@ -77,6 +77,11 @@ def _canonical_json(payload: YamlMap) -> str:
     return json.dumps(payload, indent=2, sort_keys=True) + "\n"
 
 
+def _load_json(path: Path) -> YamlMap:
+    with path.open(encoding="utf-8") as handle:
+        return cast(YamlMap, json.load(handle))
+
+
 def _issue_ids(payload: YamlMap) -> set[str]:
     return {
         str(entry["id"])
@@ -156,7 +161,6 @@ def test_current_test_audit_issue_closeout_tracks_live_evidence() -> None:
 
 
 @pytest.mark.architecture
-@pytest.mark.skip(reason="Live collection hangs - requires investigation")
 def test_rf_009_test_governance_closeout_tracks_live_zero_debt_metrics() -> None:
     payload = _load_yaml(CONFIG_PATH)
     closeout = cast(YamlMap, payload["rf_009_closeout"])
@@ -187,7 +191,6 @@ def test_rf_009_test_governance_closeout_tracks_live_zero_debt_metrics() -> None
 
 
 @pytest.mark.architecture
-@pytest.mark.skip(reason="Live collection hangs - requires investigation")
 def test_static_test_governance_report_stays_within_committed_budgets() -> None:
     payload = _load_yaml(CONFIG_PATH)
     report = collect_test_governance_report(ROOT)

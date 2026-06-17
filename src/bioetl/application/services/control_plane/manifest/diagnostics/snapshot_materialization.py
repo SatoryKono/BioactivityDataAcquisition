@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
-from bioetl.application.services.control_plane.replay._historical_snapshot_materialization_modes import (
+from bioetl.application.services.control_plane.replay.historical_certification import (
     MIXED_POST_MANIFEST_SNAPSHOT_MATERIALIZATION,
 )
 

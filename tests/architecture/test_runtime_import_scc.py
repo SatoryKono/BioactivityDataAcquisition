@@ -35,21 +35,6 @@ ACCEPTED_RUNTIME_SCCS: dict[frozenset[str], dict[str, str]] = {
     },
     frozenset(
         {
-            "bioetl.application.services.control_plane.manifest",
-            "bioetl.application.services.control_plane.manifest.inspection_service",
-        }
-    ): {
-        "owner": "application.services.control_plane",
-        "review_date": "2026-12-31",
-        "linked_issue": "#4820",
-        "rationale": (
-            "Package __init__.py re-exports from inspection_service.py, which imports "
-            "from other manifest submodules. This is a standard package seam pattern "
-            "for control plane manifest services."
-        ),
-    },
-    frozenset(
-        {
             "bioetl.interfaces.http.control_plane_identity.anchor_values",
             "bioetl.interfaces.http.control_plane_identity.checkpoint_extractors",
             "bioetl.interfaces.http.control_plane_identity.ledger_extractors",

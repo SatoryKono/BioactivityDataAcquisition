@@ -63,7 +63,7 @@ budgets:
   duplicate_test_names_max: 0
   duplicate_test_name_occurrences_max: 0
   compatibility_test_file_max: 32
-  markerless_test_functions_max: 4
+  markerless_test_functions_max: 0
   uuid4_call_sites_max: 0
   date_today_call_sites_max: 0
 budget_ratchet:
@@ -369,7 +369,7 @@ rf_009_closeout:
     duplicate_test_names: 0
     duplicate_test_name_occurrences: 0
     compatibility_test_files: 32
-    markerless_test_functions: 4
+    markerless_test_functions: 0
     uuid4_call_sites: 0
     date_today_call_sites: 0
 preflight:

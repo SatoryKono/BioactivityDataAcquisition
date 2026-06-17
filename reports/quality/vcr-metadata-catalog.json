@@ -9,13 +9,24 @@
     "duplicate_scenario_stem_count": 0,
     "direct_reachable_cassette_count": 135,
     "generated_reachable_cassette_count": 60,
-    "metadata_review_required_cassette_count": 0,
+    "metadata_review_required_cassette_count": 10,
     "unowned_cassette_count": 0
   },
   "pruning": {
     "duplicate_scenario_stems": {},
     "orphan_metadata_sidecar_count": 0,
-    "metadata_review_required_cassettes": [],
+    "metadata_review_required_cassettes": [
+      "tests/fixtures/vcr/chembl/test_chembl_subcellular_fraction_full_cycle.yaml",
+      "tests/fixtures/vcr/chembl/test_pipeline_matrix__chembl_tissue.yaml",
+      "tests/fixtures/vcr/chembl/TestChEMBLIntegration.test_chembl_extract_transform_load.yaml",
+      "tests/fixtures/vcr/crossref/test_crossref_batch_fetch.yaml",
+      "tests/fixtures/vcr/crossref/test_crossref_fetch_by_doi.yaml",
+      "tests/fixtures/vcr/crossref/test_crossref_health_check.yaml",
+      "tests/fixtures/vcr/uniprot/TestUniProtAdapterIntegration.test_health_check.yaml",
+      "tests/fixtures/vcr/uniprot/TestUniProtClientIntegration.test_fetch_proteins.yaml",
+      "tests/fixtures/vcr/uniprot/TestUniProtClientIntegration.test_health_check.yaml",
+      "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_health_check.yaml"
+    ],
     "unowned_cassettes": []
   },
   "providers": {
@@ -280,7 +291,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/chembl/test_chembl_subcellular_fraction_full_cycle_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_reviewed",
+      "reachability_status": "metadata_review_required",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/chembl/test_chembl_subcellular_fraction_full_cycle_meta.yaml"
       ]
@@ -464,7 +475,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_matrix__chembl_tissue_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_reviewed",
+      "reachability_status": "metadata_review_required",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/chembl/test_pipeline_matrix__chembl_tissue_meta.yaml"
       ]
@@ -701,7 +712,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/chembl/TestChEMBLIntegration.test_chembl_extract_transform_load_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_reviewed",
+      "reachability_status": "metadata_review_required",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/chembl/TestChEMBLIntegration.test_chembl_extract_transform_load_meta.yaml"
       ]
@@ -1056,7 +1067,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/crossref/test_crossref_batch_fetch_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_reviewed",
+      "reachability_status": "metadata_review_required",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/crossref/test_crossref_batch_fetch_meta.yaml"
       ]
@@ -1069,7 +1080,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/crossref/test_crossref_fetch_by_doi_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_reviewed",
+      "reachability_status": "metadata_review_required",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/crossref/test_crossref_fetch_by_doi_meta.yaml"
       ]
@@ -1082,7 +1093,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/crossref/test_crossref_health_check_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_reviewed",
+      "reachability_status": "metadata_review_required",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/crossref/test_crossref_health_check_meta.yaml"
       ]
@@ -2150,7 +2161,6 @@
       "reachability_owner_paths": [
         "tests/contract/_provider_contract_replay.py",
         "tests/e2e/conftest.py",
-        "tests/integration/adapters/openalex/test_adapter.py",
         "tests/integration/adapters/test_chembl.py",
         "tests/integration/adapters/test_crossref.py",
         "tests/integration/adapters/test_pubchem.py",
@@ -2663,7 +2673,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtAdapterIntegration.test_health_check_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_reviewed",
+      "reachability_status": "metadata_review_required",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/uniprot/TestUniProtAdapterIntegration.test_health_check_meta.yaml"
       ]
@@ -2689,7 +2699,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtClientIntegration.test_fetch_proteins_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_reviewed",
+      "reachability_status": "metadata_review_required",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/uniprot/TestUniProtClientIntegration.test_fetch_proteins_meta.yaml"
       ]
@@ -2702,7 +2712,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtClientIntegration.test_health_check_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_reviewed",
+      "reachability_status": "metadata_review_required",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/uniprot/TestUniProtClientIntegration.test_health_check_meta.yaml"
       ]
@@ -2715,7 +2725,7 @@
       "has_metadata_sidecar": true,
       "metadata_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_health_check_meta.yaml",
       "metadata_status": "managed_inventory",
-      "reachability_status": "metadata_reviewed",
+      "reachability_status": "metadata_review_required",
       "reachability_owner_paths": [
         "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_health_check_meta.yaml"
       ]
