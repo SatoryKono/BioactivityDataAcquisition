@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-17T06:24:36.878539+00:00",
+  "generated_at": "2026-06-17T06:26:35.072118+00:00",
   "summary": {
-    "total_scripts": 431,
+    "total_scripts": 432,
     "status_counts": {
       "active": 364,
-      "orphan": 1,
+      "orphan": 2,
       "supporting": 66
     },
     "reference_group_coverage": {
@@ -8891,6 +8891,14 @@
     },
     {
       "path": "scripts/engineering/qa/report_adr_enforcement_matrix.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/engineering/qa/report_architecture_debt_remote_main_baseline.py",
       "type": "py",
       "status": "orphan",
       "agent_usage": [],

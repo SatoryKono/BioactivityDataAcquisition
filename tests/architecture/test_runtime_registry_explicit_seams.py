@@ -81,7 +81,9 @@ def test_runtime_registry_hot_path_seams_keep_explicit_registry_parameter() -> N
                 missing.append(f"{relative_path}:{function_name} missing function")
                 continue
             if "registry" not in params:
-                missing.append(f"{relative_path}:{function_name} missing registry param")
+                missing.append(
+                    f"{relative_path}:{function_name} missing registry param"
+                )
 
     assert not missing, (
         "Runtime registry hot paths must keep explicit registry injection seams:\n"

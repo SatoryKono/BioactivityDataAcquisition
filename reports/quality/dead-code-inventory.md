@@ -6,12 +6,12 @@
 - next_review_by: 2026-09-14
 - review_cycle_days: 90
 - triaged_entry_count: 18
-- repo_wide_zero_import_candidate_count: 11
-- repo_wide_classified_zero_import_candidate_count: 11
+- repo_wide_zero_import_candidate_count: 10
+- repo_wide_classified_zero_import_candidate_count: 10
 - repo_wide_untriaged_zero_import_candidate_count: 0
-- repo_wide_owner_test_anchored_candidate_count: 11
+- repo_wide_owner_test_anchored_candidate_count: 10
 - repo_wide_candidates_without_owner_tests_count: 0
-- repo_wide_non_static_reachability_candidate_count: 2
+- repo_wide_non_static_reachability_candidate_count: 1
 - triaged_retained_owner_test_anchored_count: 14
 - triaged_retained_without_owner_tests_count: 0
 - note: zero static importer count is a review signal, not automatic removal proof
@@ -45,7 +45,6 @@
 | Module | Disposition | Path |
 | --- | --- | --- |
 | `bioetl.__main__` | `retain_module_entrypoint` | `src/bioetl/__main__.py` |
-| `bioetl.composition.registry` | `retain_public_facade` | `src/bioetl/composition/registry.py` |
 | `bioetl.domain.ports.data_normalization` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/data_normalization.py` |
 | `bioetl.domain.ports.data_source` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/data_source.py` |
 | `bioetl.domain.ports.delta_reader` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/delta_reader.py` |
@@ -75,7 +74,6 @@
 | `triaged_retained` | `src/bioetl/application/composite/runtime_models.py` | `retained_module_owner_suite` | `tests/unit/application/composite/test_runtime_models.py` |
 | `triaged_retained` | `src/bioetl/application/composite/runtime_wiring_api.py` | `retained_module_owner_suite` | `tests/architecture/test_composite_canonical_surfaces.py`, `tests/architecture/test_column_ordering_family.py`, `tests/unit/composition/bootstrap/runtime/test_composite_support_service_builders.py` |
 | `repo_wide_zero_import` | `src/bioetl/__main__.py` | `module_entrypoint_owner_suite` | `tests/unit/interfaces/cli/test_cli_commands_basic.py`, `tests/unit/interfaces/cli/test_cli_helpers.py` |
-| `repo_wide_zero_import` | `src/bioetl/composition/registry.py` | `compatibility_facade_contract` | `tests/architecture/test_compatibility_freeze_guards.py`, `tests/unit/composition/test_canonical_module_paths.py` |
 | `repo_wide_zero_import` | `src/bioetl/domain/ports/data_normalization.py` | `canonical_owner_contract` | `tests/architecture/test_domain_public_api.py`, `tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py`, `tests/architecture/test_port_contracts.py` |
 | `repo_wide_zero_import` | `src/bioetl/domain/ports/data_source.py` | `canonical_owner_contract` | `tests/architecture/test_domain_public_api.py`, `tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py`, `tests/architecture/test_port_contracts.py` |
 | `repo_wide_zero_import` | `src/bioetl/domain/ports/delta_reader.py` | `canonical_owner_contract` | `tests/architecture/test_domain_public_api.py`, `tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py`, `tests/architecture/test_port_contracts.py` |
@@ -91,4 +89,3 @@
 | Module | Disposition | Evidence Lane | Owner Tests |
 | --- | --- | --- | --- |
 | `bioetl.__main__` | `retain_module_entrypoint` | `module_entrypoint_owner_suite` | `tests/unit/interfaces/cli/test_cli_commands_basic.py`, `tests/unit/interfaces/cli/test_cli_helpers.py` |
-| `bioetl.composition.registry` | `retain_public_facade` | `compatibility_facade_contract` | `tests/architecture/test_compatibility_freeze_guards.py`, `tests/unit/composition/test_canonical_module_paths.py` |
