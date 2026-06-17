@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-17T16:24:46.047719+00:00",
+  "generated_at": "2026-06-17T17:02:14.614235+00:00",
   "summary": {
     "total_scripts": 433,
     "status_counts": {
@@ -8337,7 +8337,7 @@
         },
         {
           "path": "tests/architecture/test_test_governance_audit.py",
-          "line": 216,
+          "line": 218,
           "source_group": "tests",
           "text": "command = \"scripts/engineering/qa/check_test_audit_preflight.py --strict\""
         }
