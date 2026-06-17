@@ -1,6 +1,6 @@
 # Compatibility Importer Census
 
-- snapshot_date: 2026-06-16
+- snapshot_date: 2026-06-17
 - retained_entrypoint_count: 13
 - removed_compatibility_surface_count: 23
 - removed_compatibility_surfaces_with_src_importers: 0

@@ -3,7 +3,7 @@
     "snapshot_date": "2026-06-01",
     "families": 5,
     "scorecard": "configs/quality/debt_scorecard.yaml",
-    "budget_warnings": 7
+    "budget_warnings": 6
   },
   "families": [
     {
@@ -41,8 +41,8 @@
       ],
       "duplication_clusters": 0,
       "files": 48,
-      "total_loc": 5905,
-      "files_ge_250_loc": 2,
+      "total_loc": 5840,
+      "files_ge_250_loc": 1,
       "helper_function_ratio": 0.326,
       "max_internal_fan_in": 3,
       "max_internal_fan_in_module": "bioetl.composition.bootstrap.runtime.observability",
@@ -50,9 +50,7 @@
         "files_ge_250_loc": 2,
         "max_internal_fan_in": 5
       },
-      "budget_warnings": [
-        "at_budget:files_ge_250_loc=2/2"
-      ]
+      "budget_warnings": []
     },
     {
       "name": "composition_factories_pipeline",
