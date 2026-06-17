@@ -54,12 +54,12 @@ function Ensure-ExternalNetwork {
 }
 
 if (-not (Test-Path ".env")) {
-    if ($AllowEnvFileCreate -or $env:BIOETL_ALLOW_ENV_FILE_CREATE -eq "1") {
+    if ($AllowEnvFileCreate -or $env:BIOETL_CREATE_LOCAL_ENV_FILES -eq "1") {
         if (-not (Test-Path ".env.example")) {
             Write-Host "❌ .env.example не найден; .env не создан" -ForegroundColor Red
             exit 2
         }
-        Write-Host "⚠ .env файл не найден; явный opt-in разрешает создание из примера" -ForegroundColor Yellow
+        Write-Host "⚠ .env файл не найден; BIOETL_CREATE_LOCAL_ENV_FILES=1 или явный opt-in разрешает создание из примера" -ForegroundColor Yellow
         Copy-Item ".env.example" ".env"
         Write-Host "✓ Создан .env файл (отредактируйте перед запуском с секретами)" -ForegroundColor Green
     }
@@ -67,7 +67,7 @@ if (-not (Test-Path ".env")) {
         Write-Host "❌ .env файл не найден" -ForegroundColor Red
         Write-Host "   Guardrail: Docker helper не создает .env автоматически." -ForegroundColor Yellow
         Write-Host "   Создайте его вручную после явного решения: Copy-Item .env.example .env" -ForegroundColor Yellow
-        Write-Host "   Или запустите с явным opt-in: .\scripts\ops\docker-setup.ps1 -AllowEnvFileCreate" -ForegroundColor Yellow
+        Write-Host "   Или задайте `$env:BIOETL_CREATE_LOCAL_ENV_FILES=`"1`" и запустите .\scripts\ops\docker-setup.ps1 -AllowEnvFileCreate" -ForegroundColor Yellow
         exit 2
     }
 }

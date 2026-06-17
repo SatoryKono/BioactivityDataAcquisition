@@ -6,7 +6,7 @@ Ports & Adapters architecture (RULES.md).
 
 Components:
     bootstrap: Pipeline bootstrapping and factory functions.
-    registry: Pipeline registry for dynamic pipeline discovery.
+    registry_api: Public pipeline registry API.
     builders: Builder classes for constructing pipelines.
     types: Type definitions for composition layer.
     observability: Observability setup (tracing, metrics, logging).
@@ -34,11 +34,4 @@ _LAZY_MODULE_EXPORTS = {
     "registry_api",
     "resources_api",
     "types",
-}
-
-_LAZY_ATTR_EXPORTS = {
-    "PipelineDefinition",
-    "PipelineRegistry",
-    "create_registry",
-    "get_default_registry",
 }

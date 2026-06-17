@@ -250,8 +250,8 @@ docker compose up --build -d
 ---
 
 **Автоматизированные скрипты:**
-- `.\scripts\ops\docker-setup.ps1` - Canonical интерактивная настройка Docker для Windows; `.env` создается только с `-AllowEnvFileCreate`
-- `scripts/ops/docker-setup.sh` - Canonical Bash версия для WSL/Linux; `.env` создается только с `BIOETL_ALLOW_ENV_FILE_CREATE=1`
+- `.\scripts\ops\docker-setup.ps1` - Canonical интерактивная настройка Docker для Windows; `.env` создается только с `-AllowEnvFileCreate` или `BIOETL_CREATE_LOCAL_ENV_FILES=1`
+- `scripts/ops/docker-setup.sh` - Canonical Bash версия для WSL/Linux; `.env` создается только с `BIOETL_CREATE_LOCAL_ENV_FILES=1`
 - Extra reviewed compose files for Alertmanager / MinIO / Redis / SonarQube
   остаются manual-only helper surfaces и не запускаются canonical helper script
   по умолчанию

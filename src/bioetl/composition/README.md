@@ -132,9 +132,9 @@ StorageFactory
 - Resource helpers should come from `composition.resources_api`.
 - Registry consumers should use `composition.registry_api` instead of importing
   the `composition` package root.
-- Interfaces must not import `composition.registry` or
-  `composition.registry` directly; `composition.registry_api` is the
-  only sanctioned registry seam outside composition internals.
+- Interfaces must not import the retired `composition.registry` module;
+  `composition.registry_api` is the only sanctioned registry seam outside
+  composition internals.
 - Pipeline registration from interface entrypoints must also go through
   `composition.registry_api.register_all_pipelines`, not
   `composition.factories.pipeline.registry`.

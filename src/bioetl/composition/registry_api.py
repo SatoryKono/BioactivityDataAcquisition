@@ -11,19 +11,19 @@ if TYPE_CHECKING:
 
 _PUBLIC_EXPORTS = {
     "PipelineDefinition": (
-        "bioetl.composition.registry",
+        "bioetl.composition.factories.pipeline.registry_core",
         "PipelineDefinition",
     ),
     "PipelineRegistry": (
-        "bioetl.composition.registry",
+        "bioetl.composition.factories.pipeline.registry_core",
         "PipelineRegistry",
     ),
     "create_registry": (
-        "bioetl.composition.registry",
+        "bioetl.composition.factories.pipeline.registry_core",
         "create_registry",
     ),
     "get_default_registry": (
-        "bioetl.composition.registry",
+        "bioetl.composition.factories.pipeline.registry_core",
         "get_default_registry",
     ),
     "register_all_pipelines": (

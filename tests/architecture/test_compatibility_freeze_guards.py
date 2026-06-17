@@ -242,6 +242,7 @@ CANONICAL_PROVIDER_SURFACE_DOC_FILES = frozenset(
     }
 )
 REMOVED_COMPAT_MODULES: dict[str, Path] = {
+    "composition registry public facade": Path("src/bioetl/composition/registry.py"),
     "application services cli_run_orchestration_service facade": Path(
         "src/bioetl/application/services/cli_run_orchestration_service.py"
     ),
@@ -722,17 +723,8 @@ ALLOWED_CLI_REGISTRY_HELPER_SRC_FILES = frozenset(
     }
 )
 ALLOWED_CLI_GET_DEFAULT_REGISTRY_TEST_FILES: frozenset[Path] = frozenset()
-ALLOWED_COMPOSITION_DEFAULT_REGISTRY_SRC_FILES = frozenset(
-    {
-        ROOT / "src" / "bioetl" / "composition" / "__init__.py",
-    }
-)
-ALLOWED_COMPOSITION_REGISTRY_MODULE_SRC_FILES = frozenset(
-    {
-        ROOT / "src" / "bioetl" / "composition" / "__init__.py",
-        ROOT / "src" / "bioetl" / "composition" / "registry_api.py",
-    }
-)
+ALLOWED_COMPOSITION_DEFAULT_REGISTRY_SRC_FILES: frozenset[Path] = frozenset()
+ALLOWED_COMPOSITION_REGISTRY_MODULE_SRC_FILES: frozenset[Path] = frozenset()
 ALLOWED_COMPOSITION_REGISTRY_MODULE_TEST_FILES = frozenset({})
 ALLOWED_COMPOSITION_DEFAULT_REGISTRY_TEST_FILES = frozenset({})
 ALLOWED_CONFIG_LOADER_SRC_FILES: frozenset[Path] = frozenset()
