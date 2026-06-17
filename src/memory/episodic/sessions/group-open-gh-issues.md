@@ -2,13 +2,13 @@
 id: group-open-gh-issues
 title: Group open GitHub issues by theme
 task_id: group-open-gh-issues
-created_at: '2026-06-16T06:37:46Z'
+created_at: '2026-06-17T14:13:22Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- <add-source-ref>
+- https://github.com/SatoryKono/BioactivityDataAcquisition/issues
 summary: Active task session context.
-query: open GitHub issues grouped by theme BioactivityDataAcquisition
+query: open GitHub issues themes labels BioactivityDataAcquisition
 ---
 
 # Session note
@@ -16,7 +16,7 @@ query: open GitHub issues grouped by theme BioactivityDataAcquisition
 ## Task
 
 - Title: Group open GitHub issues by theme
-- Retrieval query: open GitHub issues grouped by theme BioactivityDataAcquisition
+- Retrieval query: open GitHub issues themes labels BioactivityDataAcquisition
 
 ## Retrieved context
 

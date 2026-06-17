@@ -444,16 +444,18 @@ hotspot_family_ratchets:
       max_internal_fan_in: 14
     metrics:
       duplication_clusters: 0
-      files: 176
-      total_loc: 21902
-      files_ge_250_loc: 7
-      helper_function_ratio: 0.344
+      files: 178
+      total_loc: 22141
+      files_ge_250_loc: 6
+      helper_function_ratio: 0.353
       max_internal_fan_in: 14
       max_internal_fan_in_module: bioetl.application.core.batch_runtime_failure_policy
     trend:
-      status: reviewed_baseline_2026-06-16
-      next_action: 2026-06-16 reverts total_loc to 21902 after port facade refactoring;
-        the LOC decrease to 21898 was a transient artifact of import consolidation.
+      status: synced_2026-06-17_tracked_core_helper_split
+      next_action: 2026-06-17 syncs application_core metrics after BatchExecutor
+        runtime-state and record-normalization finalization helpers became tracked;
+        files_ge_250_loc remains ratcheted down at 6 while max fan-in stays at
+        the existing 14 budget.
   - name: composition_bootstrap_runtime
     owner: '@bioetl-platform'
     linked_rf: RF-023
