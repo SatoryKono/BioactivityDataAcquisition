@@ -30,7 +30,7 @@ from bioetl.composition.runtime_builders._silver_filter_compatibility_support im
 from bioetl.composition.runtime_builders._runtime_launch_context_fields import (
     build_runtime_launch_field_snapshot,
 )
-from bioetl.composition.runtime_builders.run_manifest_support import (
+from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
     to_serializable_mapping as _to_serializable_mapping,
 )
 from bioetl.composition.services.versioning import get_dependency_lock_hash

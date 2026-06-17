@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.core.base_transformer import FilteredOutError
 from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
-from bioetl.application.core.batch_runtime_failure_policy import OPERATION_ERRORS
+from bioetl.application.core.batch_operation_errors import OPERATION_ERRORS
 from bioetl.application.core.batch_transformer_attempt_failures import (
     handle_filtered_out_error,
     handle_transform_processing_error,

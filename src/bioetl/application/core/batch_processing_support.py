@@ -21,7 +21,7 @@ from bioetl.application.core.batch_processing_runtime import (
     execute_with_layer_span,
     get_source_metadata,
 )
-from bioetl.application.core.batch_runtime_failure_policy import (
+from bioetl.application.core.batch_operation_errors import (
     OPERATION_ERRORS as _RF005_OPERATION_ERRORS,
 )
 from bioetl.application.core.batch_runtime_failure_policy import (

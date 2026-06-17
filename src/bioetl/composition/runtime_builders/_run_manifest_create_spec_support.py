@@ -4,12 +4,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import bioetl.composition.runtime_builders.run_manifest_support as _manifest_support
 from bioetl.application.services.control_plane.manifest.service import (
     RunManifestCreateSpec,
 )
-from bioetl.composition.runtime_builders._run_manifest_attr_support import (
-    read_attr as _read_attr,
+from bioetl.composition.runtime_builders._run_manifest_attr_support import read_attr
+from bioetl.composition.runtime_builders._run_manifest_refs import build_planned_artifacts
+from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
+    to_serializable_mapping,
 )
 from bioetl.composition.runtime_builders._silver_filter_compatibility_support import (
     current_silver_filter_compatibility_mode,
@@ -36,24 +37,24 @@ def build_manifest_create_spec(
     """Build one manifest creation spec from resolved runtime inputs."""
     ctx = request_inputs.ctx
     inputs = request_inputs.inputs
-    runtime_config = _manifest_support.to_serializable_mapping(inputs.runtime_config)
+    runtime_config = to_serializable_mapping(inputs.runtime_config)
     runtime_config.setdefault(
         "silver_filter_compatibility_mode",
         current_silver_filter_compatibility_mode(),
     )
     return RunManifestCreateSpec(
         run_id=ctx.run_id,
-        run_type=_read_attr(ctx, "run_type", "incremental"),
+        run_type=read_attr(ctx, "run_type", "incremental"),
         pipeline_name=ctx.pipeline_name,
         provider=request_inputs.provider,
         entity=request_inputs.entity,
         launch_context=launch_context,
         runtime_config=runtime_config,
-        resolved_config=_manifest_support.to_serializable_mapping(inputs.yaml_config),
+        resolved_config=to_serializable_mapping(inputs.yaml_config),
         replay_of_run_id=replay_of_run_id,
         replay_of_manifest_id=replay_of_manifest_id,
         source_refs=source_refs,
-        planned_artifacts=_manifest_support.build_planned_artifacts(
+        planned_artifacts=build_planned_artifacts(
             settings=inputs.settings,
             provider=request_inputs.provider,
             entity=request_inputs.entity,

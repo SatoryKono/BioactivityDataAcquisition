@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.application.core.batch_runtime_failure_policy import OPERATION_ERRORS
+from bioetl.application.core.batch_operation_errors import OPERATION_ERRORS
 from bioetl.application.core.batch_transformer_state import (
     RecordTransformOutcome,
     TransformedRecord,

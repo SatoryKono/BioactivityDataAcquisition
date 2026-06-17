@@ -10,7 +10,7 @@ from bioetl.application.services.control_plane.replay._historical_certification_
     HistoricalReplayCertificationResultAssembler,
     HistoricalReplayCertificationValidator,
 )
-from bioetl.application.services.control_plane.replay.historical_certification import (
+from bioetl.application.services.control_plane.replay._historical_snapshot_certification_modes import (
     HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED,
     HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED,
 )

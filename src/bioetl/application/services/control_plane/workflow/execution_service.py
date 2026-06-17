@@ -10,6 +10,9 @@ from functools import partial
 from bioetl.application.services.control_plane.workflow.execution_preparation import (
     prepare_workflow_execution,
 )
+from bioetl.application.services.control_plane.workflow.execution_incremental_metadata import (
+    extract_incremental_metadata,
+)
 from bioetl.application.services.control_plane.workflow.execution_recording import (
     WorkflowExecutionRecorder,
     record_step_completed,
@@ -36,10 +39,7 @@ from bioetl.domain.ports import (
     WorkflowLedgerPort,
 )
 from bioetl.domain.types import RunID
-from bioetl.domain.workflow import (
-    WorkflowConfig,
-    WorkflowStepConfig,
-)
+from bioetl.domain.workflow import WorkflowConfig
 
 __all__ = ["WorkflowExecutionService", "WorkflowLedgerFactory"]
 
@@ -164,20 +164,6 @@ def _workflow_lock_key(config: WorkflowConfig) -> str:
     return f"workflow:{config.name}"
 
 
-def _extract_incremental_metadata(
-    config: WorkflowConfig,
-) -> tuple[int | None, int | None]:
-    """Extract incremental state from the first pipeline step."""
-    for step in config.steps:
-        if isinstance(step, WorkflowStepConfig):
-            offset = step.run_options.start_offset
-            # Treat None as 0 for incremental tracking
-            if offset is None:
-                offset = 0
-            return (offset, step.run_options.limit)
-    return (None, None)
-
-
 async def _acquire_workflow_lock(
     *,
     lock_port: LockPort,
@@ -232,7 +218,7 @@ async def _run_locked_workflow(
     # Extract offset/limit for saving only if incremental is enabled
     last_offset, last_limit = (None, None)
     if incremental:
-        last_offset, last_limit = _extract_incremental_metadata(config)
+        last_offset, last_limit = extract_incremental_metadata(config)
 
     record_workflow_finished(
         recorder,

@@ -5,12 +5,15 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-import bioetl.composition.runtime_builders.run_manifest_support as _manifest_support
 from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
     resolve_manifest_reproducibility_context,
 )
+from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
+    resolve_provider_entity,
+)
 from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
     RunManifestContractIdentity,
+    resolve_contract_identity,
 )
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
@@ -50,7 +53,7 @@ def resolve_manifest_publication_context(
     contract_identity: RunManifestContractIdentity | None = None,
 ) -> ResolvedManifestPublicationContext:
     """Resolve provider, reproducibility context, and contract identity."""
-    provider, entity = _manifest_support.resolve_provider_entity(
+    provider, entity = resolve_provider_entity(
         pipeline_name=ctx.pipeline_name,
         yaml_config=inputs.yaml_config,
     )
@@ -64,7 +67,7 @@ def resolve_manifest_publication_context(
             contract_ref=contract_ref,
         )
     if contract_identity is None:
-        contract_identity = _manifest_support.resolve_contract_identity(
+        contract_identity = resolve_contract_identity(
             provider=provider,
             entity=entity,
             strict=contract_identity_requires_strict_resolution(
@@ -102,7 +105,7 @@ def ensure_manifest_publication_identity(
             contract_ref=contract_ref,
         )
     if contract_identity is None:
-        contract_identity = _manifest_support.resolve_contract_identity(
+        contract_identity = resolve_contract_identity(
             provider=provider,
             entity=entity,
             strict=contract_identity_requires_strict_resolution(

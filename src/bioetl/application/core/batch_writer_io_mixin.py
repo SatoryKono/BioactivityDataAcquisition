@@ -10,7 +10,7 @@ from unittest.mock import Mock
 
 import orjson
 
-from bioetl.application.core.batch_runtime_failure_policy import OPERATION_ERRORS
+from bioetl.application.core.batch_operation_errors import OPERATION_ERRORS
 from bioetl.domain.exceptions import SchemaViolationError
 
 if TYPE_CHECKING:
