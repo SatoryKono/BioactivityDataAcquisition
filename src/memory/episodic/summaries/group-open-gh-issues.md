@@ -2,14 +2,14 @@
 id: group-open-gh-issues
 title: Group open GitHub issues by theme
 task_id: group-open-gh-issues
-created_at: '2026-06-16T06:38:11Z'
+created_at: '2026-06-17T14:14:56Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- <add-source-ref>
-summary: 'Queried open GitHub issues for SatoryKono/BioactivityDataAcquisition and
-  found 8 open issues, all grouped under per-module coverage/testing program: epic
-  5153, tranches 5222-5226, closeout 5227.'
+- https://github.com/SatoryKono/BioactivityDataAcquisition/issues
+summary: 'Checked GitHub open issues for SatoryKono/BioactivityDataAcquisition via
+  REST API on 2026-06-17. Excluding PR issue-like records, only #5244 remains open;
+  grouped under testing/coverage epic.'
 ---
 
 # Episodic summary
@@ -20,7 +20,7 @@ summary: 'Queried open GitHub issues for SatoryKono/BioactivityDataAcquisition a
 
 ## Outcome
 
-- Queried open GitHub issues for SatoryKono/BioactivityDataAcquisition and found 8 open issues, all grouped under per-module coverage/testing program: epic 5153, tranches 5222-5226, closeout 5227.
+- Checked GitHub open issues for SatoryKono/BioactivityDataAcquisition via REST API on 2026-06-17. Excluding PR issue-like records, only #5244 remains open; grouped under testing/coverage epic.
 
 ## Lessons learned
 
