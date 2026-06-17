@@ -1004,7 +1004,7 @@ def write_markdown(
             section = _render_md_entity_section(plan)
             buf.write(section)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(buf.getvalue(), encoding="utf-8")
+    path.write_text(buf.getvalue().rstrip() + "\n", encoding="utf-8")
 
 
 def main() -> int:

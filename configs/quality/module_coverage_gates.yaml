@@ -4,6 +4,51 @@ enforcement:
   # Phase B (current): block coverage regressions vs committed inventory; tier gaps warn only.
   default_mode: block-regression
   tier_violation_mode: warn
+branch_coverage:
+  # Branch measurement is enabled in pyproject.toml, but hard enforcement stays
+  # advisory until the low-tail branches are burned down enough to avoid
+  # converting known technical debt into a broad CI blocker.
+  measurement: enabled
+  policy: advisory
+  decision_date: '2026-06-17'
+  source: reports/coverage/coverage.xml#branch-rate
+  promotion_criteria:
+    - branch-rate remains at or above 85% for three consecutive coverage-verify runs
+    - no module is unmeasured or uncovered in module-coverage-inventory
+    - top-ranked low-tail modules have focused branch/error-path owner tests
+coverage_tail:
+  ranked_targets:
+    - rank: 1
+      path: src/bioetl/infrastructure/observability/tracing.py
+      risk: observability_exporter_configuration
+      target_test_type: focused_unit_branch_error_paths
+      owner_tests:
+        - tests/unit/infrastructure/observability/test_tracing.py
+      status: first_slice_in_progress
+    - rank: 2
+      path: src/bioetl/infrastructure/storage/metadata/builder_base.py
+      risk: storage_metadata_builder_branching
+      target_test_type: focused_unit_builder_error_paths
+      owner_tests: []
+      status: queued
+    - rank: 3
+      path: src/bioetl/infrastructure/storage/support/checkpoint_writer.py
+      risk: checkpoint_write_recovery_paths
+      target_test_type: focused_unit_storage_failure_paths
+      owner_tests: []
+      status: queued
+    - rank: 4
+      path: src/bioetl/infrastructure/storage/silver/metadata_write_models.py
+      risk: silver_metadata_write_model_validation
+      target_test_type: focused_unit_validation_branches
+      owner_tests: []
+      status: queued
+    - rank: 5
+      path: src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py
+      risk: maintenance_cli_service_access
+      target_test_type: focused_unit_composition_error_paths
+      owner_tests: []
+      status: queued
 regression:
   fail_on_decrease: true
   # Ignore sub-point noise from coverage XML rounding across platforms.
