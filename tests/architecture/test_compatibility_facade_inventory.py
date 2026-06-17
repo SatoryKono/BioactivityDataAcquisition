@@ -46,6 +46,12 @@ NAMING_AUDIT_SCRIPT = ROOT / "scripts" / "engineering" / "qa" / "naming_audit.py
 COMPOSITION_DOC = ROOT / "docs" / "02-architecture" / "05-composition-layer.md"
 REGISTRY_GUIDE = ROOT / "docs" / "03-guides" / "registry-pattern.md"
 INVENTORY_ROW_CELL_COUNT = 10
+MAINTENANCE_API_MODULE = "bioetl.composition.maintenance_api"
+MAINTENANCE_API_ALLOWED_SRC_IMPORTERS = frozenset(
+    {
+        "src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py",
+    }
+)
 
 
 def _load_module(path: Path, module_name: str) -> ModuleType:
@@ -158,6 +164,29 @@ def _iter_cli_public_entrypoint_paths() -> set[str]:
             _iter_public_cli_paths_for_wrapper(path, commands_root=commands_root)
         )
     return paths
+
+
+def _first_party_src_importers_of_exact_module(module_name: str) -> tuple[str, ...]:
+    mod = _load_registry_module()
+    src_root = ROOT / "src" / "bioetl"
+    importers: set[str] = set()
+
+    for path in mod._candidate_import_paths(
+        src_root=src_root,
+        measured_module_names={module_name},
+    ):
+        relative_path = path.resolve().relative_to(ROOT).as_posix()
+        current_module = (
+            relative_path.removeprefix("src/")
+            .removesuffix(".py")
+            .replace("/", ".")
+        )
+        if current_module == module_name:
+            continue
+        if module_name in mod._iter_imported_modules(path):
+            importers.add(relative_path)
+
+    return tuple(sorted(importers))
 
 
 @pytest.mark.architecture
@@ -629,6 +658,22 @@ def test_internal_callers_zero_rows_have_no_first_party_src_imports() -> None:
             f"{module} <- {', '.join(importers)}"
             for module, importers in sorted(violations.items())
         )
+    )
+
+
+@pytest.mark.architecture
+def test_maintenance_api_first_party_importers_stay_confined_to_cli_owner() -> None:
+    """Retained maintenance API must not regain broad first-party caller burden."""
+    importers = frozenset(
+        _first_party_src_importers_of_exact_module(MAINTENANCE_API_MODULE)
+    )
+
+    assert importers == MAINTENANCE_API_ALLOWED_SRC_IMPORTERS, (
+        "bioetl.composition.maintenance_api is a retained public entrypoint; "
+        "first-party runtime callers must stay confined to the maintenance CLI "
+        "service-access owner.\n"
+        f"Expected: {sorted(MAINTENANCE_API_ALLOWED_SRC_IMPORTERS)}\n"
+        f"Actual: {sorted(importers)}"
     )
 
 

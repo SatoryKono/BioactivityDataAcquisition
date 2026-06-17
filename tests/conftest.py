@@ -199,8 +199,8 @@ def _restore_runtime_bootstrap_pipeline_after_repo_backed_tests(
 
 
 pytest_plugins = (
-    "tests.helpers.metadata_fixtures",
-    "tests.integration.chembl.extraction_params_support",
+    # "tests.helpers.metadata_fixtures",
+    # "tests.integration.chembl.extraction_params_support",
 )
 
 

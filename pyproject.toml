@@ -228,9 +228,6 @@ timeout = 60
 # Timeout method: thread works on all platforms (signal only on Unix)
 timeout_method = "thread"
 asyncio_mode = "auto"
-asyncio_default_fixture_loop_scope = "module"
-# Relative cache keeps local/IDE runs portable; run_pytest.{ps1,sh} may override on CI/WSL.
-cache_dir = ".pytest_cache"
 filterwarnings = [
     "error",
     # Deprecation warnings must fail by default; dedicated compatibility tests

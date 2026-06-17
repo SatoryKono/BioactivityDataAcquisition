@@ -35,13 +35,6 @@ ZERO_IMPORT_OWNER_TEST_EVIDENCE: dict[str, dict[str, object]] = {
             "tests/unit/interfaces/cli/test_cli_helpers.py",
         ),
     },
-    "src/bioetl/composition/registry.py": {
-        "evidence_lane": "compatibility_facade_contract",
-        "owner_tests": (
-            "tests/architecture/test_compatibility_freeze_guards.py",
-            "tests/unit/composition/test_canonical_module_paths.py",
-        ),
-    },
     "src/bioetl/domain/ports/data_normalization.py": {
         "evidence_lane": "canonical_owner_contract",
         "owner_tests": DOMAIN_PORT_OWNER_TESTS,

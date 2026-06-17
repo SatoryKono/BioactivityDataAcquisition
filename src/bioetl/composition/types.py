@@ -7,9 +7,9 @@ that work with composition-layer constructs.
 For actual runtime imports, use the specific modules:
 - ObservabilityBundle: from bioetl.composition.observability
 - StorageBundle: from bioetl.composition.factories.storage.storage_factory
-- PipelineRegistry: from bioetl.composition
-- create_registry: from bioetl.composition (isolated instance for tests)
-- get_default_registry: shared default-registry export from the package root
+- PipelineRegistry: from bioetl.composition.registry_api
+- create_registry: from bioetl.composition.registry_api (isolated instance for tests)
+- get_default_registry: shared default-registry export from registry_api
 
 Typed contexts for bootstrap functions (replacing untyped tuples):
 - PipelineCallbacksContext: transform, gold_filter, gold_transform callbacks

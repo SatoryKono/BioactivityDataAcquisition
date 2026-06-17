@@ -14,7 +14,6 @@ ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = ROOT / "src" / "bioetl"
 
 ALLOWED_DEFAULT_REGISTRY_CALLERS = {
-    "src/bioetl/composition/registry.py",
     "src/bioetl/composition/factories/pipeline/registry.py",
 }
 

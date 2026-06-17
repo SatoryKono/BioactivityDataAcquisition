@@ -63,15 +63,10 @@ def bootstrap_pipeline_runner(
     load_pipeline_config_fn: Callable[[str], PipelineYamlConfig] | None = None,
 ) -> PipelineRunner:
     """Build one ready-to-run pipeline runner from runtime context and registry."""
-    apply_runtime_compatibility_patches()
-    effective_registry = prepare_runtime_registry(
+    phases = build_runtime_bootstrap_phases(
+        ctx=ctx,
         registry=registry,
-        pipeline_name=ctx.pipeline_name,
-    )
-    phases = build_runtime_bootstrap_phases_with_registry(
-        registry=effective_registry,
         load_pipeline_config_fn=load_pipeline_config_fn,
-        resolve_configs_root_fn=resolve_configs_root,
     )
     from bioetl.composition.runtime_builders.runner_builder_wiring import (
         RunnerBuilderWiring,

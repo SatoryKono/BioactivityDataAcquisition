@@ -48,6 +48,7 @@ REGISTRY_PUBLIC_EXPORTS: tuple[str, ...] = (
     "create_registry",
     "crossref_publication_factory",
     "get_factory",
+    "get_default_registry",
     "is_registered",
     "list_available_pipelines",
     "openalex_publication_factory",

@@ -4,10 +4,15 @@ from __future__ import annotations
 
 import threading
 from collections.abc import Iterator, Mapping
-from importlib import import_module
 from typing import Protocol, cast
 
 from bioetl.composition.factories.pipeline.contract_validator import create_factory
+from bioetl.composition.factories.pipeline.registry_core import (
+    PipelineDefinition as PipelineDefinition,
+    PipelineRegistry as PipelineRegistry,
+    create_registry as create_registry,
+    get_default_registry as get_default_registry,
+)
 from bioetl.composition.factories.pipeline.registry_exports import (
     FACTORY_EXPORTS,
     REGISTRY_PUBLIC_EXPORTS,
@@ -16,11 +21,6 @@ from bioetl.composition.factories.pipeline.registry_manifest import (
     PIPELINE_CONFIGS,
 )
 from bioetl.domain.ports import PipelineFactoryPort
-
-_registry_module = import_module("bioetl.composition.registry")
-PipelineDefinition = _registry_module.PipelineDefinition
-PipelineRegistry = _registry_module.PipelineRegistry
-create_registry = _registry_module.create_registry
 
 
 class PipelineRegistryProtocol(Protocol):
@@ -121,8 +121,6 @@ def _register_default_registry_once(
     with registration_state._lock:
         if registration_state._registered:
             return
-        from bioetl.composition.registry_api import get_default_registry
-
         _register_factories_to(get_default_registry())
         registration_state._registered = True
 
@@ -222,8 +220,6 @@ def reset_registration(
         else _get_default_registration_state()
     )
     if registry is None:
-        from bioetl.composition.registry_api import get_default_registry
-
         target_registry = get_default_registry()
     else:
         target_registry = registry

@@ -16,8 +16,9 @@ ______________________________________________________________________
 BioETL uses several registry-style APIs, but they do not all have the same
 runtime shape.
 
-- `PipelineRegistry` is an instance-based registry in
-  `src/bioetl/composition/registry.py`.
+- `PipelineRegistry` is an instance-based registry owned by
+  `src/bioetl/composition/factories/pipeline/registry_core.py` and exposed through
+  `bioetl.composition.registry_api`.
 - `ProviderRegistry` is an instance-scoped provider registry in
   `src/bioetl/composition/providers/provider_registry.py`, with a shared
   default-registry compatibility facade exposed through class-level methods.
@@ -28,14 +29,17 @@ runtime shape.
 
 | Surface                                           | Kind                                   | Canonical Import                                              | Notes                                                                                                       |
 | ------------------------------------------------- | -------------------------------------- | ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `PipelineRegistry`                                | Instance-based                         | `bioetl.composition.registry`                                 | Prefer `create_registry()` for tests and isolated flows.                                                    |
+| `PipelineRegistry`                                | Instance-based                         | `bioetl.composition.registry_api`                              | Prefer `create_registry()` for tests and isolated flows.                                                    |
 | `ProviderRegistry`                                | Instance-scoped + compatibility facade | `bioetl.composition.providers`                                | Prefer explicit instances for isolated/local seams; class-level methods target the shared default registry. |
 | `get_data_source_creator()` / `DataSourceFactory` | Canonical creator path                 | `bioetl.composition.factories.datasource.data_source_factory` | Preferred for data-source assembly; backed by `ProviderRegistry`.                                           |
 
-Governance status for the two transition-heavy surfaces:
+Governance status for the transition-heavy surfaces:
 
-- `bioetl.composition.registry` is currently a `mixed-module` (canonical instance API +
-  narrow compatibility helper kept only for tests and public-facade coverage).
+- `bioetl.composition.registry` has been retired. Use
+  `bioetl.composition.registry_api` for public imports and
+  `bioetl.composition.factories.pipeline.registry_core` for registry owner work.
+  Pipeline factory registration remains owned by
+  `bioetl.composition.factories.pipeline.registry`.
 - pipeline config loading is now canonical through `bioetl.infrastructure.config` and
   `bioetl.infrastructure.config.pipeline_config_api`; the historical
   `bioetl.infrastructure.config_loader` shim has been removed.
@@ -77,7 +81,7 @@ Avoid `get_default_registry()` in production runtime/bootstrap code. It remains
 only as a compatibility helper for tests and narrow public-facade coverage.
 
 ```python
-from bioetl.composition.registry import get_default_registry
+from bioetl.composition.registry_api import get_default_registry
 
 registry = get_default_registry()
 ```
@@ -169,8 +173,7 @@ is tracked in
 
 ## Protocols And Types
 
-There is no generic `RegistryProtocol` defined in
-`src/bioetl/composition/registry.py`.
+There is no generic `RegistryProtocol` defined for the composition registry.
 
 The current canonical protocol surfaces are:
 

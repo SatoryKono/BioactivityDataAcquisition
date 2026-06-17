@@ -39,7 +39,7 @@ ______________________________________________________________________
 | `composition.providers`        | Provider registration and discovery                         | `ProviderRegistry`, `create_provider_registry`, `ensure_providers_loaded`                                                                                                          |
 | `composition.runtime_builders` | Leaf runtime assembly helpers                               | `build_pipeline_runner`                                                                                                                                                            |
 | `composition.services`         | Thin re-exports for metadata/version helpers                | `MetadataCoordinator`, `compute_config_hash`, `get_code_revision_provenance`, `get_git_commit`, `get_pipeline_version`                                                             |
-| `composition` (top-level)      | Narrow package-root facade                                  | `PipelineDefinition`, `PipelineRegistry`, `create_registry`, `get_default_registry`; broader APIs live in submodules                                                               |
+| `composition.registry_api`     | Narrow public registry API                                  | `PipelineDefinition`, `PipelineRegistry`, `create_registry`, `get_default_registry`, `register_all_pipelines`                                                                      |
 
 ______________________________________________________________________
 
@@ -166,12 +166,12 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-## Registry (`composition.registry`)
+## Registry (`composition.registry_api`)
 
 | Class                | Description                                                             |
 | -------------------- | ----------------------------------------------------------------------- |
 | `PipelineRegistry`   | Registry for pipeline definitions and lookup                            |
-| `PipelineDefinition` | Named tuple: (provider, entity_type, pipeline_class, transformer_class) |
+| `PipelineDefinition` | Named tuple: factory plus Silver/Gold schema validation metadata        |
 
 ______________________________________________________________________
 

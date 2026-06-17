@@ -302,7 +302,7 @@ src/bioetl/composition/factories/transformer-factory.py
 src/bioetl/composition/factories/dq-factory.py
 src/bioetl/composition/providers/provider-registry.py
 src/bioetl/composition/providers/registration.py
-src/bioetl/composition/registry.py
+src/bioetl/composition/registry_api.py
 
 # Interfaces Layer
 src/bioetl/interfaces/cli/main.py
