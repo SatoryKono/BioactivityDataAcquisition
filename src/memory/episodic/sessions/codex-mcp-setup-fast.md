@@ -1,8 +1,8 @@
 ---
-id: codex-mcp-setup
+id: codex-mcp-setup-fast
 title: Set up MCP runtime
-task_id: codex-mcp-setup
-created_at: '2026-06-17T05:57:54Z'
+task_id: codex-mcp-setup-fast
+created_at: '2026-06-17T05:57:56Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
