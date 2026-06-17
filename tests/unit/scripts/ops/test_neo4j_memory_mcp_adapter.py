@@ -7,7 +7,9 @@ import pytest
 
 from scripts.ai.mcp.neo4j_memory_mcp_smoke import run_smoke_command
 
-pytestmark = pytest.mark.repo_backed
+# This module launches nested subprocess transports. Keep it out of parallel
+# lanes to avoid Windows runner/socket-pressure setup failures.
+pytestmark = [pytest.mark.repo_backed, pytest.mark.serial]
 
 
 def test_adapter_bridges_framed_client_to_line_delimited_server(tmp_path: Path) -> None:

@@ -4813,7 +4813,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family",
       "path": "src/bioetl/application/services/control_plane/manifest/diagnostics/replay_invariants/replay_family.py",
-      "source_lines": 13
+      "source_lines": 15
     },
     {
       "coverage_percent": 92.86,
@@ -21477,8 +21477,8 @@
     }
   ],
   "schema_version": 1,
-  "snapshot_date": "2026-06-16",
-  "source_tree_sha256": "70b6365c71829c91475665daf0c632fe4e6ac81a2ae1669ebb51467bd508af29",
+  "snapshot_date": "2026-06-17",
+  "source_tree_sha256": "dd5eb0fb780c5c3e361ecc2d2277d8f90f535c103923d5530b2450430ed3e89f",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
