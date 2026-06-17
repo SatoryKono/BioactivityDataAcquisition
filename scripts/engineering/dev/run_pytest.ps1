@@ -125,6 +125,24 @@ function Test-XdistPluginNeeded {
     return $false
 }
 
+function Test-XdistAutoRequested {
+    param(
+        [string[]]$Args
+    )
+
+    $PreviousArg = $null
+    foreach ($Arg in $Args) {
+        if (($PreviousArg -eq "-n" -or $PreviousArg -eq "--numprocesses") -and $Arg -eq "auto") {
+            return $true
+        }
+        if ($Arg -eq "-nauto" -or $Arg -eq "--numprocesses=auto") {
+            return $true
+        }
+        $PreviousArg = $Arg
+    }
+    return $false
+}
+
 function Test-PytestCacheDirSpecified {
     param(
         [string[]]$Args
@@ -326,6 +344,19 @@ if ($PytestNarrow) {
 if ($env:OS -eq "Windows_NT" -and -not (Test-PytestCacheDirSpecified -Args $PytestArgs)) {
     $WindowsPytestCacheDir = Join-Path $env:TEMP "bioetl-pytest-cache"
     $PytestArgs = @("-o", "cache_dir=$WindowsPytestCacheDir") + $PytestArgs
+}
+
+if (
+    $env:OS -eq "Windows_NT" -and
+    (Test-XdistPluginNeeded -Args $PytestArgs) -and
+    (Test-XdistAutoRequested -Args $PytestArgs) -and
+    -not $env:PYTEST_XDIST_AUTO_NUM_WORKERS
+) {
+    $env:PYTEST_XDIST_AUTO_NUM_WORKERS = if ($env:BIOETL_PYTEST_WINDOWS_XDIST_WORKERS) {
+        $env:BIOETL_PYTEST_WINDOWS_XDIST_WORKERS
+    } else {
+        "2"
+    }
 }
 
 $WindowsVenvPython = Join-Path $RepoRoot ".venv-win/Scripts/python.exe"

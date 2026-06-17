@@ -54,22 +54,10 @@ COMMANDS: dict[str, CommandSpec] = {
             "-q",
         ],
     ),
-    "parallel": CommandSpec("All Tests (parallel)", [TESTS_ROOT, "-n", "auto", "-q"]),
     "failed": CommandSpec("Re-run Failed", [TESTS_ROOT, "--lf", "-x", "-v"]),
 }
 UNIT_QUICK_ARGS = [UNIT_TESTS_ROOT, "-x", "-q"]
 SMOKE_QUICK_ARGS = ["tests/smoke/", "-x", "-q"]
-FAST_UNIT_FALLBACK_ARGS = [
-    UNIT_TESTS_ROOT,
-    "-m",
-    "not slow and not serial",
-    "-n",
-    "auto",
-    "--dist",
-    "loadscope",
-    "-q",
-    SHORT_TRACEBACK,
-]
 
 
 def _project_root() -> Path:
@@ -113,6 +101,53 @@ Commands:
   file <path>   Run a specific test file
   help          Show this message
 """
+
+
+def _default_parallel_workers() -> str:
+    """Return a safe default pytest-xdist worker count for the current OS."""
+    explicit = os.getenv("BIOETL_PYTEST_PARALLEL_WORKERS")
+    if explicit:
+        return explicit
+    if os.name == "nt":
+        return os.getenv("BIOETL_PYTEST_WINDOWS_XDIST_WORKERS", "2")
+    return "auto"
+
+
+def _parallel_args() -> list[str]:
+    """Build the default parallel test command arguments."""
+    return [TESTS_ROOT, "-n", _default_parallel_workers(), "-q"]
+
+
+def _fast_unit_fallback_args() -> list[str]:
+    """Build the fast unit fallback command with OS-aware worker limits."""
+    return [
+        UNIT_TESTS_ROOT,
+        "-m",
+        "not slow and not serial",
+        "-n",
+        _default_parallel_workers(),
+        "--dist",
+        "loadscope",
+        "-q",
+        SHORT_TRACEBACK,
+    ]
+
+
+def _changed_source_keyword_args(keyword_expression: str) -> list[str]:
+    """Build the changed-source keyword test command with OS-aware worker limits."""
+    return [
+        TESTS_ROOT,
+        "-k",
+        keyword_expression,
+        "-n",
+        _default_parallel_workers(),
+        "--dist",
+        "loadscope",
+        "-v",
+        SHORT_TRACEBACK,
+        "--ignore=tests/e2e/",
+        "--ignore=tests/benchmarks/",
+    ]
 
 
 def _run_pytest(
@@ -221,7 +256,7 @@ def _run_changed(args: list[str]) -> int:
             )
             return _run_pytest(
                 "Changed fallback: unit tests",
-                FAST_UNIT_FALLBACK_ARGS,
+                _fast_unit_fallback_args(),
                 extra,
                 env_overrides=env_overrides,
             )
@@ -242,19 +277,7 @@ def _run_changed(args: list[str]) -> int:
     _print_info(f"Running tests matching: {keyword_expression}")
     rc = _run_pytest(
         "Changed-source keyword tests",
-        [
-            TESTS_ROOT,
-            "-k",
-            keyword_expression,
-            "-n",
-            "auto",
-            "--dist",
-            "loadscope",
-            "-v",
-            SHORT_TRACEBACK,
-            "--ignore=tests/e2e/",
-            "--ignore=tests/benchmarks/",
-        ],
+        _changed_source_keyword_args(keyword_expression),
         extra,
         env_overrides=env_overrides,
     )
@@ -264,10 +287,14 @@ def _run_changed(args: list[str]) -> int:
     _print_info("Keyword-selected changed tests failed or matched nothing.")
     return _run_pytest(
         "Changed fallback: unit tests",
-        FAST_UNIT_FALLBACK_ARGS,
+        _fast_unit_fallback_args(),
         extra,
         env_overrides=env_overrides,
     )
+
+
+def _run_parallel(extra: list[str]) -> int:
+    return _run_pytest("All Tests (parallel)", _parallel_args(), extra)
 
 
 def _custom_command_handlers() -> dict[str, Callable[[list[str]], int]]:
@@ -277,6 +304,7 @@ def _custom_command_handlers() -> dict[str, Callable[[list[str]], int]]:
         "file": _run_file,
         "quick": _run_quick,
         "changed": _run_changed,
+        "parallel": _run_parallel,
     }
 
 
