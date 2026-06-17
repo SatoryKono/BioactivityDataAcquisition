@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.application.core.batch_runtime_failure_policy import (
+from bioetl.application.core.batch_operation_errors import (
     OPERATION_ERRORS as _RF005_OPERATION_ERRORS,
 )
 from bioetl.application.core.lifecycle._checkpoint_types import (

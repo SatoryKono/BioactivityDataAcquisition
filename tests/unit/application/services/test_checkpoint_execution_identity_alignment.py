@@ -12,6 +12,10 @@ import yaml
 from bioetl.application.core.lifecycle.checkpoint_runtime import (
     enrich_metadata_with_execution_identity,
 )
+from bioetl.application.services._checkpoint_execution_identity_payload import (
+    build_checkpoint_execution_identity_payload,
+    has_canonical_checkpoint_execution_identity_fields,
+)
 from bioetl.application.services._checkpoint_compatibility_runtime_identity_details import (
     IdentityDetailsSpec,
     build_identity_details,
@@ -163,6 +167,71 @@ def test_checkpoint_execution_identity_payload_excludes_occurrence_only_identifi
 
     for field in forbidden_fields:
         assert field not in payload
+
+
+def test_checkpoint_execution_identity_payload_helper_filters_none_fields() -> None:
+    payload = build_checkpoint_execution_identity_payload(
+        pipeline_name="chembl_activity",
+        run_type="incremental",
+        pipeline_version=None,
+        git_commit="abc1234",
+        dependency_lock_hash=None,
+        effective_config_hash="a" * 64,
+        dq_contract_compatibility_hash=None,
+        contract_ref="chembl.activity",
+        contract_version="1.0.0",
+        normalization_profile_ref=None,
+        normalization_profile_version=None,
+        normalization_profile_hash=None,
+        effective_config_artifact_id="effective-config-1",
+        exact_replay=True,
+        input_snapshot_fingerprint="snapshot-fp",
+    )
+
+    assert payload == {
+        "contract_ref": "chembl.activity",
+        "contract_version": "1.0.0",
+        "effective_config_artifact_id": "effective-config-1",
+        "effective_config_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "exact_replay": "true",
+        "git_commit": "abc1234",
+        "input_snapshot_fingerprint": "snapshot-fp",
+        "pipeline_name": "chembl_activity",
+        "run_type": "incremental",
+        "silver_filter_compatibility_mode": "structural_only_compat",
+    }
+
+
+def test_checkpoint_execution_identity_payload_helper_can_fail_closed_empty() -> None:
+    assert build_checkpoint_execution_identity_payload(
+        pipeline_name=None,
+        run_type=None,
+        pipeline_version=None,
+        git_commit=None,
+        dependency_lock_hash=None,
+        effective_config_hash=None,
+        dq_contract_compatibility_hash=None,
+        contract_ref=None,
+        contract_version=None,
+        normalization_profile_ref=None,
+        normalization_profile_version=None,
+        normalization_profile_hash=None,
+        effective_config_artifact_id=None,
+        exact_replay=None,
+        input_snapshot_fingerprint=None,
+        silver_filter_compatibility_mode=None,
+    ) == {}
+
+
+def test_has_canonical_checkpoint_execution_identity_fields_detects_resume_fields() -> (
+    None
+):
+    assert has_canonical_checkpoint_execution_identity_fields(
+        {"silver_filter_compatibility_mode": "structural_only_compat"}
+    )
+    assert not has_canonical_checkpoint_execution_identity_fields(
+        {"effective_config_hash": "a" * 64}
+    )
 
 
 def test_enrich_metadata_with_execution_identity_backfills_canonical_resume_anchors() -> (

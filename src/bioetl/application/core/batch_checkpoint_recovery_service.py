@@ -7,7 +7,7 @@ __all__ = ["BatchCheckpointRecoveryService"]
 import time
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.core.batch_runtime_failure_policy import OPERATION_ERRORS
+from bioetl.application.core.batch_operation_errors import OPERATION_ERRORS
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
 if TYPE_CHECKING:

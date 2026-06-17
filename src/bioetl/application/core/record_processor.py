@@ -19,7 +19,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.batch_executor import BatchResult
-from bioetl.application.core.batch_runtime_failure_policy import OPERATION_ERRORS
+from bioetl.application.core.batch_operation_errors import OPERATION_ERRORS
 from bioetl.application.core.span_helpers import close_span
 
 if TYPE_CHECKING:

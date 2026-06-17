@@ -2,21 +2,14 @@
 
 from __future__ import annotations
 
-LIVE_CAPTURE_SNAPSHOT_MATERIALIZED = "live_capture_snapshot_materialized"
-HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED = "historical_source_snapshot_certified"
-HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED = (
-    "historical_composite_replay_envelope_certified"
+from bioetl.application.services.control_plane.replay._historical_snapshot_certification_modes import (
+    HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED,
+    HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED,
 )
-MIXED_POST_MANIFEST_SNAPSHOT_MATERIALIZATION = (
-    "mixed_post_manifest_snapshot_materialization"
-)
-
-POST_MANIFEST_SNAPSHOT_MATERIALIZATION_MODES = frozenset(
-    {
-        LIVE_CAPTURE_SNAPSHOT_MATERIALIZED,
-        HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED,
-        HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED,
-    }
+from bioetl.application.services.control_plane.replay._historical_snapshot_materialization_modes import (
+    LIVE_CAPTURE_SNAPSHOT_MATERIALIZED,
+    MIXED_POST_MANIFEST_SNAPSHOT_MATERIALIZATION,
+    POST_MANIFEST_SNAPSHOT_MATERIALIZATION_MODES,
 )
 
 __all__ = [

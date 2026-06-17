@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, replace
+from dataclasses import replace
 from datetime import datetime
 
+from bioetl.application.services.control_plane.workflow.execution_recording_context import (
+    WorkflowExecutionRecorder,
+)
 from bioetl.application.services.control_plane.workflow.execution_recording_payloads import (
     _build_result_summary,
     _find_failed_step,
@@ -20,16 +23,12 @@ from bioetl.application.services.control_plane.workflow.execution_recording_stat
     _record_step_state,
     _remove_step_ids,
 )
-from bioetl.application.services.control_plane.workflow.ledger_service import (
-    WorkflowLedgerService,
-)
 from bioetl.application.services.workflow_runner_service import (
     WorkflowRunExecutionResult,
     WorkflowStepExecutionResult,
     WorkflowTransformDestructiveCommit,
 )
-from bioetl.domain.control_plane import WorkflowExecutionState, WorkflowStepState
-from bioetl.domain.ports import WorkflowExecutionStatePort
+from bioetl.domain.control_plane import WorkflowStepState
 from bioetl.domain.workflow import TransformStepConfig, WorkflowStepConfig
 
 __all__ = [
@@ -40,15 +39,6 @@ __all__ = [
     "record_workflow_finished",
     "record_workflow_started",
 ]
-
-
-@dataclass(slots=True)
-class WorkflowExecutionRecorder:
-    """Mutable recording context for one locked workflow execution."""
-
-    ledger: WorkflowLedgerService
-    state_port: WorkflowExecutionStatePort
-    state: WorkflowExecutionState
 
 
 def record_workflow_started(

@@ -5,7 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-import bioetl.composition.runtime_builders.run_manifest_support as _manifest_support
+from bioetl.composition.runtime_builders._run_manifest_sink_policy import (
+    validate_reproducible_sink_modes,
+)
 from bioetl.composition.services.versioning import (
     CodeRevisionProvenance,
     get_code_revision_provenance,
@@ -113,7 +115,7 @@ def resolve_manifest_reproducibility_context(
         critical_runtime=critical_runtime,
         allow_degraded_opt_down=degraded_opt_down_requested,
     )
-    _manifest_support.validate_reproducible_sink_modes(
+    validate_reproducible_sink_modes(
         yaml_config=inputs.yaml_config,
         strict_replay_requested=bool(getattr(ctx, "exact_replay", False))
         or required_persistence_profile in STRICT_PERSISTENCE_PROFILES,

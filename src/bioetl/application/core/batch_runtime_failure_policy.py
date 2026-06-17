@@ -8,14 +8,8 @@ __all__ = [
     "SOURCE_METADATA_ERRORS",
 ]
 
-from bioetl.domain.exceptions import BioETLError
-
-OPERATION_ERRORS = (
-    BioETLError,
-    OSError,
-    RuntimeError,
-    ValueError,
-    TypeError,
+from bioetl.application.core.batch_operation_errors import (
+    OPERATION_ERRORS,
 )
 
 PIPELINE_EXECUTION_ERRORS = (
