@@ -223,6 +223,7 @@ nav:
                     -   "ADR-047 Workflow Control Plane": 02-architecture/decisions/ADR-047-workflow-control-plane.md
                     -   "ADR-048 Domain Schema Boundary and Runtime Pandera Compatibility": 02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md
                     -   "ADR-049 Context-Aware LOC Target Policy": 02-architecture/decisions/ADR-049-context-aware-loc-target-policy.md
+                    -   "ADR-050 Silver Structural and Gold Semantic Filter Boundary": 02-architecture/decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md
                     -   "Quality Gates Stabilization Notes": 02-architecture/decisions/notes/2026-03-04-quality-gates-stabilization.md
     -   Guides:
             -   "Overview": 03-guides/index.md
@@ -337,7 +338,7 @@ nav:
                             -   "Publication": 04-reference/providers/semanticscholar/publication.md
             -   Pipelines:
                     -   "Overview": 04-reference/pipelines/README.md
-                    -   "Publication Pipelines": 04-reference/pipelines/INDEX.md
+                    -   "Pipeline Operational Coverage": 04-reference/pipelines/INDEX.md
                     -   ChEMBL:
                             -   "Protein Class": 04-reference/pipelines/chembl/01-protein-class-spec.md
                             -   "Cell Line": 04-reference/pipelines/chembl/02-cell-line-spec.md
