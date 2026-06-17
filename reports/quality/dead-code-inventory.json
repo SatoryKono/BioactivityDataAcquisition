@@ -15,20 +15,18 @@
   "summary": {
     "triaged_entry_count": 18,
     "triaged_entries_below_min_importers": 0,
-    "repo_wide_zero_import_candidate_count": 11,
-    "repo_wide_classified_zero_import_candidate_count": 11,
+    "repo_wide_zero_import_candidate_count": 10,
+    "repo_wide_classified_zero_import_candidate_count": 10,
     "repo_wide_untriaged_zero_import_candidate_count": 0,
-    "repo_wide_owner_test_anchored_candidate_count": 11,
+    "repo_wide_owner_test_anchored_candidate_count": 10,
     "repo_wide_candidates_without_owner_tests_count": 0,
-    "repo_wide_non_static_reachability_candidate_count": 2,
+    "repo_wide_non_static_reachability_candidate_count": 1,
     "repo_wide_disposition_counts": {
       "retain_canonical_owner_module": 9,
-      "retain_module_entrypoint": 1,
-      "retain_public_facade": 1
+      "retain_module_entrypoint": 1
     },
     "repo_wide_evidence_lane_counts": {
       "canonical_owner_contract": 9,
-      "compatibility_facade_contract": 1,
       "module_entrypoint_owner_suite": 1
     },
     "triaged_retained_owner_test_anchored_count": 14,
@@ -362,26 +360,6 @@
       "owner_tests": [
         "tests/unit/interfaces/cli/test_cli_commands_basic.py",
         "tests/unit/interfaces/cli/test_cli_helpers.py"
-      ],
-      "owner_test_count": 2,
-      "owner_test_paths_exist_count": 2
-    },
-    {
-      "module_name": "bioetl.composition.registry",
-      "path": "src/bioetl/composition/registry.py",
-      "is_private_module": false,
-      "src_importer_count": 0,
-      "test_importer_count": 0,
-      "classification_status": "classified",
-      "disposition": "retain_public_facade",
-      "reviewed_on": "2026-06-16",
-      "review_by": "2026-09-14",
-      "linked_issue": "#5037",
-      "rationale": "Registry module remains a reviewed public facade while explicit-registry runtime hot-path narrowing is completed under issue",
-      "evidence_lane": "compatibility_facade_contract",
-      "owner_tests": [
-        "tests/architecture/test_compatibility_freeze_guards.py",
-        "tests/unit/composition/test_canonical_module_paths.py"
       ],
       "owner_test_count": 2,
       "owner_test_paths_exist_count": 2

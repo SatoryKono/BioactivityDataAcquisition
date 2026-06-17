@@ -46,6 +46,9 @@ Commands:
     report-normalization-fallback-inventory Generate report-only fallback normalization inventory
     report-chembl-observed-value-inventory Generate/check observed-value inventory from tracked ChEMBL Bronze fixtures
     report-observability-metric-inventory Generate registry/runtime/docs observability metric inventory
+    report-adr-enforcement-matrix Generate/check accepted ADR enforcement coverage matrix
+    report-architecture-debt-remote-main-baseline Generate/check clean remote-main architecture debt baseline
+    report-debt-governance-gates Generate/check debt-reduction fail-fast gate rollup
     analyze-duplicate-functions Analyze duplicate function names across selected code areas
     calibrate-hotspots   Calibrate hotspot budgets
     run-tests            Run a named test-health lane and emit JUnit/JSON artifacts
@@ -102,6 +105,11 @@ COMMAND_MODULES: dict[str, str] = {
     "report-normalization-fallback-inventory": "scripts.engineering.qa.report_normalization_fallback_inventory",
     "report-chembl-observed-value-inventory": "scripts.engineering.qa.report_chembl_observed_value_inventory",
     "report-observability-metric-inventory": "scripts.engineering.qa.report_observability_metric_inventory",
+    "report-adr-enforcement-matrix": "scripts.engineering.qa.report_adr_enforcement_matrix",
+    "report-architecture-debt-remote-main-baseline": (
+        "scripts.engineering.qa.report_architecture_debt_remote_main_baseline"
+    ),
+    "report-debt-governance-gates": "scripts.engineering.qa.report_debt_governance_gates",
     "analyze-duplicate-functions": "scripts.engineering.qa.analyze_duplicate_functions",
     "calibrate-hotspots": "scripts.engineering.qa.calibrate_hotspot_budgets",
     "check-dashboard-visual-semantics": "scripts.engineering.qa.check_dashboard_visual_semantics",

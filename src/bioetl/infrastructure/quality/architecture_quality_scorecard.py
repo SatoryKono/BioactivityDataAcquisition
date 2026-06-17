@@ -68,14 +68,24 @@ _CATEGORY_BASELINES: tuple[dict[str, object], ...] = (
         "name": "Config / contracts / entrypoints",
         "weight": 0.09,
         "score": 8.5,
-        "metric_keys": ("contract_blocking_issue_count", "dq_blocking_issue_count"),
+        "metric_keys": (
+            "contract_blocking_issue_count",
+            "dq_blocking_issue_count",
+            "adr_enforcement_blocking_gap_count",
+        ),
     },
     {
         "id": "determinism_replay_observability",
         "name": "Determinism / replay / observability",
         "weight": 0.08,
         "score": 8.2,
-        "metric_keys": ("layer_violations", "contract_blocking_issue_count"),
+        "metric_keys": (
+            "layer_violations",
+            "contract_blocking_issue_count",
+            "dashboarded_without_emission_count",
+            "runtime_cardinality_review_required_count",
+            "runtime_cardinality_threshold_violation_count",
+        ),
     },
     {
         "id": "debt_burden_evolution_friction",
@@ -148,6 +158,8 @@ def _load_scorecard_inputs(
     dict[str, Any],  # Any: JSON artifacts can have any value type
     dict[str, Any],  # Any: JSON artifacts can have any value type
     dict[str, Any],  # Any: JSON artifacts can have any value type
+    dict[str, Any],  # Any: JSON artifacts can have any value type
+    dict[str, Any],  # Any: JSON artifacts can have any value type
 ]:
     return (
         _load_json(
@@ -162,6 +174,8 @@ def _load_scorecard_inputs(
             repo_root,
             "reports/quality/contract-registry-dq-diagnostics.json",
         ),
+        _load_json(repo_root, "reports/observability/runtime_cardinality_inventory.json"),
+        _load_json(repo_root, "reports/quality/adr-enforcement-matrix.json"),
         _load_yaml(repo_root, "configs/quality/debt_scorecard.yaml"),
     )
 
@@ -173,6 +187,8 @@ def _build_source_artifacts(
     dead_code_inventory: dict[str, Any],  # Any: JSON artifact can have any value type
     contract_diagnostics: dict[str, Any],  # Any: JSON artifact can have any value type
     dq_diagnostics: dict[str, Any],  # Any: JSON artifact can have any value type
+    observability_inventory: dict[str, Any],  # Any: JSON artifact can have any value type
+    adr_enforcement_matrix: dict[str, Any],  # Any: JSON artifact can have any value type
 ) -> dict[str, object]:
     return {
         "dependency_map": {
@@ -200,6 +216,18 @@ def _build_source_artifacts(
             "path": "reports/quality/contract-registry-dq-diagnostics.json",
             "valid": dq_diagnostics["valid"],
         },
+        "observability_runtime_cardinality_inventory": {
+            "path": "reports/observability/runtime_cardinality_inventory.json",
+            "dashboarded_without_emission_count": len(
+                observability_inventory.get("dashboarded_without_emission", [])
+            ),
+        },
+        "adr_enforcement_matrix": {
+            "path": "reports/quality/adr-enforcement-matrix.json",
+            "blocking_gap_count": adr_enforcement_matrix["summary"][
+                "blocking_gap_count"
+            ],
+        },
     }
 
 
@@ -225,6 +253,8 @@ def build_architecture_quality_scorecard(
         dead_code_inventory,
         contract_diagnostics,
         dq_diagnostics,
+        observability_inventory,
+        adr_enforcement_matrix,
         scorecard,
     ) = _load_scorecard_inputs(repo_root)
 
@@ -233,6 +263,7 @@ def build_architecture_quality_scorecard(
     compatibility_summary = compatibility_census["summary"]
     dead_code_summary = dead_code_inventory["summary"]
     hotspot_family_coverage = coverage_summary["hotspot_family_coverage"]
+    adr_summary = adr_enforcement_matrix["summary"]
 
     metrics: dict[str, object] = {
         "layer_violations": len(dependency_map.get("violations", [])),
@@ -250,6 +281,18 @@ def build_architecture_quality_scorecard(
         ],
         "contract_blocking_issue_count": contract_diagnostics["blocking_issue_count"],
         "dq_blocking_issue_count": dq_diagnostics["blocking_issue_count"],
+        "dashboarded_without_emission_count": len(
+            observability_inventory.get("dashboarded_without_emission", [])
+        ),
+        "runtime_cardinality_review_required_count": len(
+            observability_inventory.get("runtime_cardinality_review_required", [])
+        ),
+        "runtime_cardinality_threshold_violation_count": len(
+            observability_inventory.get("runtime_cardinality_threshold_violations", [])
+        ),
+        "accepted_adr_count": adr_summary["accepted_adr_count"],
+        "adr_enforcement_blocking_gap_count": adr_summary["blocking_gap_count"],
+        "adr_enforcement_manual_exception_count": adr_summary["manual_exception_count"],
     }
 
     categories = _build_categories(metrics)
@@ -269,6 +312,8 @@ def build_architecture_quality_scorecard(
         dead_code_inventory,
         contract_diagnostics,
         dq_diagnostics,
+        observability_inventory,
+        adr_enforcement_matrix,
     )
 
     return {

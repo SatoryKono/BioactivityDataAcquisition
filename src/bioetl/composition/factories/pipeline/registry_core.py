@@ -124,5 +124,5 @@ def get_default_registry() -> PipelineRegistry:
     global _compat_default_registry
     if _compat_default_registry is None:
         _compat_default_registry = create_registry()
-        setattr(_compat_default_registry, "_bioetl_shared_default_registry", True)
+        _compat_default_registry._bioetl_shared_default_registry = True
     return _compat_default_registry

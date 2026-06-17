@@ -29,6 +29,9 @@ python -m scripts.engineering.qa <command> [args...]
 | `report-provider-contract-drift` | `report_provider_contract_drift.py`                   | Generate provider contract drift diagnostics from replay cassettes                                |
 | `report-dashboard-inventory`     | `report_dashboard_inventory.py`                       | Generate/check dashboard inventory parity, provisioning drift, deployed drift, and local health   |
 | `report-family-baseline`         | `report_hotspot_family_baseline.py`                   | Generate/check RF-06 hotspot-family baseline artifacts                                            |
+| `report-adr-enforcement-matrix`  | `report_adr_enforcement_matrix.py`                    | Generate/check accepted ADR enforcement coverage matrix                                           |
+| `report-architecture-debt-remote-main-baseline` | `report_architecture_debt_remote_main_baseline.py` | Generate/check clean remote-main architecture debt baseline artifacts                             |
+| `report-debt-governance-gates`   | `report_debt_governance_gates.py`                     | Generate/check normalized debt-reduction fail-fast gate rollup                                    |
 | `report-hotspots`                | `generate_hotspot_degradation_report.py`              | Generate performance hotspot degradation report                                                   |
 | `report-duplication-baseline`    | `report_duplication_baseline.py`                      | Generate report-only duplication baseline for `composition`/`application`                         |
 | `analyze-duplicate-functions`    | `analyze_duplicate_functions.py`                      | Compatibility wrapper for the legacy AST duplicate-function analyzer                              |
@@ -57,6 +60,9 @@ python -m scripts.engineering.qa <command> [args...]
 | `report-provider-contract-drift` | When reviewing provider-facing API drift in PR/CI; writes a machine-readable replay report and can fail on warnings/breaking drift               | Provider contract replay CI gate           |
 | `report-dashboard-inventory`     | When validating shipped Grafana dashboards against docs, provisioning, or exported/deployed snapshots; use `--health-summary` for a local rollup | Dashboard governance / drift check         |
 | `report-family-baseline`         | When reviewing RF-06 hotspot-family budgets or checking that the committed family baseline artifacts still match the code                        | Manual, preflight / CI drift check         |
+| `report-adr-enforcement-matrix`  | When accepted ADR coverage must be mapped to implementation owners and enforcement owners                                                        | Architecture governance / CI drift check   |
+| `report-architecture-debt-remote-main-baseline` | Before debt closeout; records clean `origin/main` architecture debt evidence from Git tree blobs                                      | Architecture debt closeout / CI drift check |
+| `report-debt-governance-gates`   | Before debt-reduction closeout; aggregates quality artifacts into normalized pass/fail/warn fail-fast gates                                      | Architecture debt closeout / CI gate       |
 | `report-hotspots`                | After performance benchmark runs; generates degradation report from JSONL observations                                                           | Manual, on-demand                          |
 | `report-duplication-baseline`    | When reviewing duplication pressure in `composition` or `application`; generates report-only baseline artifacts without creating a blocking gate | Manual, on-demand                          |
 | `analyze-duplicate-functions`    | When you need the older duplicate-function AST report through the canonical QA entrypoint                                                        | Manual, audit/reporting                    |
@@ -93,6 +99,12 @@ python scripts/engineering/qa/report_vcr_metadata_catalog.py --update
 python scripts/engineering/qa/report_provider_contract_drift.py --output reports/quality/provider-contract-drift-report.json --fail-on breaking
 python -m scripts.engineering.qa report-family-baseline --check
 python -m scripts.engineering.qa report-family-baseline --update
+python -m scripts.engineering.qa report-adr-enforcement-matrix --check
+python -m scripts.engineering.qa report-adr-enforcement-matrix --update
+python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --check
+python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --update
+python -m scripts.engineering.qa report-debt-governance-gates --check
+python -m scripts.engineering.qa report-debt-governance-gates --update
 python -m scripts.engineering.qa run-tests --suite unit-fast --skip-preflight -- --no-cov
 python -m scripts.engineering.qa run-tests --suite unit-parallel-safe --skip-preflight -- --no-cov
 python -m scripts.engineering.qa summarize-junit --suite unit-fast --junit-glob 'reports/test-telemetry/*.xml'

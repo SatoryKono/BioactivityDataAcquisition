@@ -125,6 +125,9 @@ _STATIC_RUNTIME_EMITTERS: Final[dict[str, tuple[str, ...]]] = {
     "bioetl_metrics_publication_events_total": (
         "src/bioetl/infrastructure/observability/server.py",
     ),
+    "bioetl_gold_lifecycle_state_total": (
+        "src/bioetl/composition/factories/services/pipeline_batch_executor_builder.py",
+    ),
 }
 _PROMETHEUS_FAMILY_SUFFIXES: Final[frozenset[str]] = frozenset(
     {

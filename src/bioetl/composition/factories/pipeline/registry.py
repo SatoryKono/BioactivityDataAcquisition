@@ -219,10 +219,7 @@ def reset_registration(
         if registration_state is not None
         else _get_default_registration_state()
     )
-    if registry is None:
-        target_registry = get_default_registry()
-    else:
-        target_registry = registry
+    target_registry = get_default_registry() if registry is None else registry
     with state._lock:
         target_registry.clear()
         state._registered = False
