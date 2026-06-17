@@ -4,7 +4,11 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
+import pytest
+
 from scripts.engineering.qa import report_debt_governance_gates as gates
+
+pytestmark = pytest.mark.unit
 
 
 def test_release_review_freshness_gate_passes_for_recent_live_review() -> None:

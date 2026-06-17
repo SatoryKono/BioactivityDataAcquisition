@@ -7,11 +7,11 @@ from dataclasses import dataclass, replace
 from datetime import datetime
 from functools import partial
 
-from bioetl.application.services.control_plane.workflow.execution_preparation import (
-    prepare_workflow_execution,
-)
 from bioetl.application.services.control_plane.workflow.execution_incremental_metadata import (
     extract_incremental_metadata,
+)
+from bioetl.application.services.control_plane.workflow.execution_preparation import (
+    prepare_workflow_execution,
 )
 from bioetl.application.services.control_plane.workflow.execution_recording import (
     WorkflowExecutionRecorder,

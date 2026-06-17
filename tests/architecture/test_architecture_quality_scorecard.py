@@ -7,25 +7,24 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.infrastructure.quality.architecture_quality_scorecard import (
-    build_architecture_quality_scorecard,
-)
-
 ROOT = Path(__file__).resolve().parents[2]
 ARTIFACT = ROOT / "reports" / "quality" / "architecture-quality-scorecard.json"
 
-pytestmark = pytest.mark.architecture
 
-
+@pytest.mark.architecture
 def test_architecture_quality_scorecard_artifact_matches_live_collector() -> None:
     assert ARTIFACT.exists()
 
     committed = json.loads(ARTIFACT.read_text(encoding="utf-8"))
+    from bioetl.infrastructure.quality.architecture_quality_scorecard import (
+        build_architecture_quality_scorecard,
+    )
     live = build_architecture_quality_scorecard(repo_root=ROOT)
 
     assert committed == live
 
 
+@pytest.mark.architecture
 def test_architecture_quality_scorecard_blocks_debt_budget_growth_policy() -> None:
     committed = json.loads(ARTIFACT.read_text(encoding="utf-8"))
 
@@ -34,6 +33,7 @@ def test_architecture_quality_scorecard_blocks_debt_budget_growth_policy() -> No
     assert len(committed["categories"]) == 10
 
 
+@pytest.mark.architecture
 def test_architecture_quality_scorecard_includes_adr_and_observability_gates() -> None:
     committed = json.loads(ARTIFACT.read_text(encoding="utf-8"))
 
