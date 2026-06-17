@@ -4,9 +4,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from bioetl.application.services._checkpoint_execution_identity_payload import (
+    build_checkpoint_execution_identity_payload,
+)
 from bioetl.domain.config.runtime import CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE
 from bioetl.domain.normalization import (
-    build_execution_identity_payload,
     compute_execution_identity_fingerprint,
     normalize_runtime_anchor_payload,
 )
@@ -53,70 +55,6 @@ def _identity_detail_bool(value: bool | None) -> str:
     return "" if value is None else str(value).lower()
 
 
-def _canonical_execution_identity_payload(
-    *,
-    pipeline_name: str | None,
-    run_type: str | None,
-    pipeline_version: str | None,
-    git_commit: str | None,
-    dependency_lock_hash: str | None,
-    effective_config_hash: str,
-    dq_contract_compatibility_hash: str | None,
-    contract_ref: str | None,
-    contract_version: str | None,
-    normalization_profile_ref: str | None,
-    normalization_profile_version: str | None,
-    normalization_profile_hash: str | None,
-    effective_config_artifact_id: str | None,
-    exact_replay: bool | None,
-    input_snapshot_fingerprint: str | None,
-    silver_filter_compatibility_mode: str | None = (
-        CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE
-    ),
-) -> JsonDict:
-    """Return canonical execution-identity payload with nulls removed."""
-    if all(
-        value is None
-        for value in (
-            pipeline_name,
-            run_type,
-            pipeline_version,
-            git_commit,
-            dependency_lock_hash,
-            dq_contract_compatibility_hash,
-            normalization_profile_ref,
-            normalization_profile_version,
-            normalization_profile_hash,
-            exact_replay,
-            input_snapshot_fingerprint,
-            silver_filter_compatibility_mode,
-        )
-    ):
-        return {}
-    return {
-        key: value
-        for key, value in build_execution_identity_payload(
-            pipeline_name=pipeline_name,
-            run_type=run_type,
-            pipeline_version=pipeline_version,
-            git_commit=git_commit,
-            dependency_lock_hash=dependency_lock_hash,
-            effective_config_hash=effective_config_hash,
-            dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-            contract_ref=contract_ref,
-            contract_version=contract_version,
-            normalization_profile_ref=normalization_profile_ref,
-            normalization_profile_version=normalization_profile_version,
-            normalization_profile_hash=normalization_profile_hash,
-            effective_config_artifact_id=effective_config_artifact_id,
-            exact_replay=exact_replay,
-            input_snapshot_fingerprint=input_snapshot_fingerprint,
-            silver_filter_compatibility_mode=silver_filter_compatibility_mode,
-        ).items()
-        if value is not None
-    }
-
-
 def _checkpoint_execution_identity_fallback_detail(payload: JsonDict) -> str:
     """Return canonical checkpoint fallback fingerprint for diagnostics."""
     if not payload:
@@ -154,7 +92,7 @@ def _degraded_runtime_anchor_detail(
 
 def build_identity_details(request: IdentityDetailsSpec) -> JsonDict:
     """Build canonical identity details payload."""
-    canonical_fallback_payload = _canonical_execution_identity_payload(
+    canonical_fallback_payload = build_checkpoint_execution_identity_payload(
         pipeline_name=request.pipeline_name,
         run_type=request.run_type,
         pipeline_version=request.pipeline_version,

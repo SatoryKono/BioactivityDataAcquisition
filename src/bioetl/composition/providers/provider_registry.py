@@ -7,7 +7,10 @@ from functools import partial
 from importlib import import_module
 from typing import TYPE_CHECKING
 
-from bioetl.composition.providers._creation import ProviderCreator
+from bioetl.composition.providers._creation import (
+    ProviderCreator,
+    ProviderDataSourceCreationRequest,
+)
 from bioetl.composition.providers._default_registry import (
     DefaultRegistryMethod,
     ProvidersDescriptor,
@@ -173,14 +176,16 @@ class ProviderRegistry:
         config = self._get_registered_config(name)
         assert config is not None
         return self._creator.create_data_source(
-            name=name,
-            config=config,
-            settings=settings,
-            pipeline_config=pipeline_config,
-            logger=logger,
-            filter_config=filter_config,
-            metrics=metrics,
-            pipeline_name=pipeline_name,
+            ProviderDataSourceCreationRequest(
+                name=name,
+                config=config,
+                settings=settings,
+                pipeline_config=pipeline_config,
+                logger=logger,
+                filter_config=filter_config,
+                metrics=metrics,
+                pipeline_name=pipeline_name,
+            )
         )
 
     @DefaultRegistryMethod

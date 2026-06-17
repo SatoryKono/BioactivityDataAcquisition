@@ -5,9 +5,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Final, cast
 
+from bioetl.application.services._checkpoint_execution_identity_payload import (
+    build_checkpoint_execution_identity_payload,
+    has_canonical_checkpoint_execution_identity_fields,
+)
 from bioetl.domain.config.runtime import CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE
 from bioetl.domain.normalization import (
-    build_execution_identity_payload,
     compute_execution_identity_fingerprint,
     normalize_runtime_anchor_payload,
 )
@@ -15,23 +18,6 @@ from bioetl.domain.types import JsonDict
 
 _SEVERITY_MAJOR: Final[str] = "major"
 _SEVERITY_NONE: Final[str] = "none"
-
-_CANONICAL_ONLY_IDENTITY_FIELDS: Final[frozenset[str]] = frozenset(
-    {
-        "pipeline_name",
-        "run_type",
-        "pipeline_version",
-        "git_commit",
-        "dependency_lock_hash",
-        "dq_contract_compatibility_hash",
-        "normalization_profile_ref",
-        "normalization_profile_version",
-        "normalization_profile_hash",
-        "exact_replay",
-        "input_snapshot_fingerprint",
-        "silver_filter_compatibility_mode",
-    }
-)
 
 
 @dataclass(frozen=True, slots=True)
@@ -134,74 +120,11 @@ def _compare_optional_identity_fingerprints(
     )
 
 
-def _build_checkpoint_execution_identity_payload(
-    *,
-    pipeline_name: str | None,
-    run_type: str | None,
-    pipeline_version: str | None,
-    git_commit: str | None,
-    dependency_lock_hash: str | None,
-    effective_config_hash: str | None,
-    dq_contract_compatibility_hash: str | None,
-    contract_ref: str | None,
-    contract_version: str | None,
-    normalization_profile_ref: str | None,
-    normalization_profile_version: str | None,
-    normalization_profile_hash: str | None,
-    effective_config_artifact_id: str | None,
-    exact_replay: bool | None,
-    input_snapshot_fingerprint: str | None,
-    silver_filter_compatibility_mode: str | None = (
-        CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE
-    ),
-) -> JsonDict:
-    """Build the canonical checkpoint execution-identity fallback payload."""
-    if all(
-        value is None
-        for value in (
-            pipeline_name,
-            run_type,
-            pipeline_version,
-            git_commit,
-            dependency_lock_hash,
-            dq_contract_compatibility_hash,
-            normalization_profile_ref,
-            normalization_profile_version,
-            normalization_profile_hash,
-            exact_replay,
-            input_snapshot_fingerprint,
-            silver_filter_compatibility_mode,
-        )
-    ):
-        return {}
-    normalized_payload = build_execution_identity_payload(
-        pipeline_name=pipeline_name,
-        run_type=run_type,
-        pipeline_version=pipeline_version,
-        git_commit=git_commit,
-        dependency_lock_hash=dependency_lock_hash,
-        effective_config_hash=effective_config_hash,
-        dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-        contract_ref=contract_ref,
-        contract_version=contract_version,
-        normalization_profile_ref=normalization_profile_ref,
-        normalization_profile_version=normalization_profile_version,
-        normalization_profile_hash=normalization_profile_hash,
-        effective_config_artifact_id=effective_config_artifact_id,
-        exact_replay=exact_replay,
-        input_snapshot_fingerprint=input_snapshot_fingerprint,
-        silver_filter_compatibility_mode=silver_filter_compatibility_mode,
-    )
-    return {
-        key: value for key, value in normalized_payload.items() if value is not None
-    }
-
-
 def _compute_checkpoint_execution_identity_fallback_fingerprint(
     request: CheckpointExecutionIdentityFallbackContext,
 ) -> str | None:
     """Build the canonical checkpoint execution-identity fallback fingerprint."""
-    payload = _build_checkpoint_execution_identity_payload(
+    payload = build_checkpoint_execution_identity_payload(
         pipeline_name=request.pipeline_name,
         run_type=request.run_type,
         pipeline_version=request.pipeline_version,
@@ -219,9 +142,7 @@ def _compute_checkpoint_execution_identity_fallback_fingerprint(
         input_snapshot_fingerprint=request.input_snapshot_fingerprint,
         silver_filter_compatibility_mode=request.silver_filter_compatibility_mode,
     )
-    if not payload or not any(
-        field in payload for field in _CANONICAL_ONLY_IDENTITY_FIELDS
-    ):
+    if not payload or not has_canonical_checkpoint_execution_identity_fields(payload):
         return None
     return compute_execution_identity_fingerprint(payload)
 

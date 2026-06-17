@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.composition.providers._models import (
@@ -15,6 +16,20 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+
+
+@dataclass(frozen=True, slots=True)
+class ProviderDataSourceCreationRequest:
+    """Canonical request object for provider data-source creation."""
+
+    name: str
+    config: ProviderConfig
+    settings: ProviderSettingsProtocol
+    pipeline_config: PipelineYamlConfig
+    logger: LoggerPort
+    filter_config: InputFilterConfig | None = None
+    metrics: MetricsPort | None = None
+    pipeline_name: str = "unknown"
 
 
 class ProviderCreator:
@@ -42,27 +57,10 @@ class ProviderCreator:
 
     def create_data_source(
         self,
-        *,
-        name: str,
-        config: ProviderConfig,
-        settings: ProviderSettingsProtocol,
-        pipeline_config: PipelineYamlConfig,
-        logger: LoggerPort,
-        filter_config: InputFilterConfig | None = None,
-        metrics: MetricsPort | None = None,
-        pipeline_name: str = "unknown",
+        request: ProviderDataSourceCreationRequest,
     ) -> DataSourcePort:
         """Create a fully configured provider data source."""
-        return create_provider_data_source(
-            name=name,
-            config=config,
-            settings=settings,
-            pipeline_config=pipeline_config,
-            logger=logger,
-            filter_config=filter_config,
-            metrics=metrics,
-            pipeline_name=pipeline_name,
-        )
+        return create_provider_data_source(request)
 
     def has_data_source_creator(self, config: ProviderConfig) -> bool:
         """Return whether the provider config exposes a data-source creator."""
@@ -123,30 +121,22 @@ def create_provider_adapter(
 
 
 def create_provider_data_source(
-    *,
-    name: str,
-    config: ProviderConfig,
-    settings: ProviderSettingsProtocol,
-    pipeline_config: PipelineYamlConfig,
-    logger: LoggerPort,
-    filter_config: InputFilterConfig | None = None,
-    metrics: MetricsPort | None = None,
-    pipeline_name: str = "unknown",
+    request: ProviderDataSourceCreationRequest,
 ) -> DataSourcePort:
     """Create a fully configured provider data source from registry metadata."""
-    if config.data_source_creator is None:
+    if request.config.data_source_creator is None:
         raise ValueError(
-            f"Provider '{name}' does not have a data_source_creator configured. "
+            f"Provider '{request.name}' does not have a data_source_creator configured. "
             "Register the provider with a data_source_creator in registration.py."
         )
 
-    return config.data_source_creator(
-        settings=settings,
-        pipeline_config=pipeline_config,
-        logger=logger,
-        filter_config=filter_config,
-        metrics=metrics,
-        pipeline_name=pipeline_name,
+    return request.config.data_source_creator(
+        settings=request.settings,
+        pipeline_config=request.pipeline_config,
+        logger=request.logger,
+        filter_config=request.filter_config,
+        metrics=request.metrics,
+        pipeline_name=request.pipeline_name,
     )
 
 
