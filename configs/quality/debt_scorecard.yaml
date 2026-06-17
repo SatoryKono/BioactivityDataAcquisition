@@ -497,17 +497,18 @@ hotspot_family_ratchets:
       max_internal_fan_in: 4
     metrics:
       duplication_clusters: 0
-      files: 33
-      total_loc: 4585
+      files: 34
+      total_loc: 4707
       files_ge_250_loc: 4
-      helper_function_ratio: 0.46
+      helper_function_ratio: 0.435
       max_internal_fan_in: 4
       max_internal_fan_in_module: bioetl.composition.factories.pipeline.config_types
     trend:
-      status: reduced_2026-06-15_issue_4477_live_metric_sync_to_4585
-      next_action: 2026-06-15 syncs composition/factories/pipeline actual metrics
-        to the current live collector value of 4585 LOC; bounded-growth budgets
-        remain at 4 files_ge_250_loc and max_internal_fan_in 4.
+      status: reduced_2026-06-17_issue_4477_helper_ratio_to_0_435
+      next_action: 2026-06-17 records the registry_core split in composition/factories/pipeline
+        actual metrics; helper_function_ratio drops from 0.46 to 0.435 while
+        duplication remains zero and bounded-growth budgets remain unchanged at
+        4 files_ge_250_loc and max_internal_fan_in 4.
   - name: application_services_control_plane
     owner: '@bioetl-platform'
     linked_rf: RF-023

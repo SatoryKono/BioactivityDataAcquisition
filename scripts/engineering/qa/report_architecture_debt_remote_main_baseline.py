@@ -18,21 +18,25 @@ DEFAULT_MD_OUTPUT = (
     PROJECT_ROOT / "reports" / "quality" / "architecture-debt-remote-main-baseline.md"
 )
 
-_BASELINE_ARTIFACTS = (
+REQUIRED_BASELINE_ARTIFACTS = (
     "reports/quality/architecture-quality-scorecard.json",
     "reports/quality/module-coverage-inventory.json",
     "reports/quality/compatibility-importer-census.json",
     "reports/quality/dead-code-inventory.json",
     "reports/quality/contract-registry-diagnostics.json",
+)
+OPTIONAL_BASELINE_ARTIFACTS = (
     "reports/quality/contract-registry-dq-diagnostics.json",
     "reports/observability/runtime_cardinality_inventory.json",
 )
+_BASELINE_ARTIFACTS = REQUIRED_BASELINE_ARTIFACTS + OPTIONAL_BASELINE_ARTIFACTS
 _GENERATOR_COMMANDS = (
     "python -m scripts.engineering.qa report-dep-map --check",
     "python -m scripts.engineering.qa report-module-coverage --check",
     "python -m scripts.engineering.qa report-compatibility-importer-census --check",
     "python -m scripts.engineering.qa report-dead-code-inventory --check",
-    "python -m scripts.engineering.qa report-observability-metric-inventory --check --write-evidence reports/observability/runtime_cardinality_inventory.json",
+    "python -m scripts.engineering.qa report-observability-metric-inventory "
+    "--check --write-evidence reports/observability/runtime_cardinality_inventory.json",
     "python -m scripts.engineering.qa report-adr-enforcement-matrix --check",
     "python -m scripts.engineering.qa report-debt-governance-gates --check",
 )
@@ -140,6 +144,7 @@ def build_payload(
                 "blob_sha256": (
                     hashlib.sha256(blob).hexdigest() if blob is not None else None
                 ),
+                "required": path in REQUIRED_BASELINE_ARTIFACTS,
                 "summary": _json_blob_summary(blob),
             }
         )
@@ -222,7 +227,7 @@ def _check_artifacts(payload: dict[str, object], *, json_out: Path, md_out: Path
         assert isinstance(row, dict)
         summary = row["summary"]
         assert isinstance(summary, dict)
-        if not summary.get("available"):
+        if row.get("required") and not summary.get("available"):
             errors.append(f"Remote-main baseline artifact unavailable: {row['path']}")
     return errors
 

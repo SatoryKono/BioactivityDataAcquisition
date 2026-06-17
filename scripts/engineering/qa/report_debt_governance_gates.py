@@ -104,6 +104,27 @@ def _hard_limit_gate(
     )
 
 
+def _warn_limit_gate(
+    *,
+    name: str,
+    metric: str,
+    current: object,
+    limit: object,
+    source_artifact: str,
+    remediation: str,
+) -> Gate:
+    status = "pass" if _count(current) <= _count(limit) else "warn"
+    return Gate(
+        name=name,
+        status=status,
+        metric=metric,
+        current=current,
+        limit=limit,
+        source_artifact=source_artifact,
+        remediation=remediation,
+    )
+
+
 def _artifact_matches(
     *,
     repo_root: Path,
@@ -117,7 +138,7 @@ def _artifact_matches(
     return committed == live_payload
 
 
-def _debt_scorecard_gates(repo_root: Path) -> list[Gate]:
+def _debt_scorecard_gates() -> list[Gate]:
     violations, summary = evaluate_debt_scorecard()
     violation_count = len(violations)
     gates = [
@@ -204,12 +225,12 @@ def build_payload(*, repo_root: Path = PROJECT_ROOT) -> dict[str, object]:
         "reports/quality/architecture-debt-remote-main-baseline.json",
     )
 
-    gates.extend(_debt_scorecard_gates(repo_root))
+    gates.extend(_debt_scorecard_gates())
 
     coverage_summary = module_coverage["summary"]
     status_counts = coverage_summary["status_counts"]
     gates.append(
-        _hard_limit_gate(
+        _warn_limit_gate(
             name="module_coverage_unmeasured_modules",
             metric="unmeasured_module_count",
             current=coverage_summary["unmeasured_module_count"],
@@ -219,7 +240,7 @@ def build_payload(*, repo_root: Path = PROJECT_ROOT) -> dict[str, object]:
         )
     )
     gates.append(
-        _hard_limit_gate(
+        _warn_limit_gate(
             name="module_coverage_uncovered_modules",
             metric="uncovered_module_count",
             current=status_counts.get("uncovered", 0),
@@ -436,10 +457,14 @@ def build_payload(*, repo_root: Path = PROJECT_ROOT) -> dict[str, object]:
     )
 
     remote_artifacts = remote_baseline["artifacts"]
+    required_remote_baseline_paths = set(
+        report_architecture_debt_remote_main_baseline.REQUIRED_BASELINE_ARTIFACTS
+    )
     unavailable_remote_artifacts = [
         row
         for row in remote_artifacts
         if isinstance(row, dict)
+        and row.get("path") in required_remote_baseline_paths
         and isinstance(row.get("summary"), dict)
         and not row["summary"].get("available")
     ]

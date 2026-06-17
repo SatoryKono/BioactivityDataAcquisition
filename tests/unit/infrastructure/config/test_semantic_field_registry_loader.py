@@ -16,13 +16,32 @@ pytestmark = pytest.mark.unit
 
 
 def _write_registry(tmp_path: Path, clusters: list[dict[str, object]]) -> None:
+    _write_registry_payload(tmp_path, {"version": "1.0.0", "clusters": clusters})
+
+
+def _write_registry_payload(tmp_path: Path, payload: dict[str, object]) -> None:
     registry_dir = tmp_path / "field_registry"
     registry_dir.mkdir(parents=True)
-    payload = {"version": "1.0.0", "clusters": clusters}
     (registry_dir / "canonical_registry.json").write_text(
         json.dumps(payload),
         encoding="utf-8",
     )
+
+
+def _valid_cluster(**overrides: object) -> dict[str, object]:
+    cluster: dict[str, object] = {
+        "cluster_id": "example_identifier",
+        "semantic_name": "Example identifier",
+        "canonical_name": "example_id",
+        "legacy_names": ["legacy_example_id"],
+        "raw_provider_names": ["provider_example_id"],
+        "pipelines": ["example_pipeline"],
+        "affected_paths": ["configs/entities/example.yaml"],
+        "migration_status": "manual_review",
+        "notes": "Example registry entry.",
+    }
+    cluster.update(overrides)
+    return cluster
 
 
 def test_loader_reads_registry_and_supports_lookups(tmp_path: Path) -> None:
@@ -116,4 +135,69 @@ def test_loader_rejects_duplicate_raw_provider_names(tmp_path: Path) -> None:
     )
 
     with pytest.raises(ValueError, match="duplicate raw_provider_name"):
+        SemanticFieldRegistryLoader(tmp_path).load()
+
+
+def test_loader_defaults_missing_list_fields_to_empty_tuples(tmp_path: Path) -> None:
+    cluster_payload = _valid_cluster()
+    for field_name in (
+        "legacy_names",
+        "raw_provider_names",
+        "pipelines",
+        "affected_paths",
+    ):
+        cluster_payload.pop(field_name)
+    _write_registry(tmp_path, [cluster_payload])
+
+    registry = SemanticFieldRegistryLoader(tmp_path).load()
+
+    cluster = registry.get_by_cluster_id("example_identifier")
+    assert cluster is not None
+    assert cluster.legacy_names == ()
+    assert cluster.raw_provider_names == ()
+    assert cluster.pipelines == ()
+    assert cluster.affected_paths == ()
+
+
+def test_loader_rejects_non_list_clusters_payload(tmp_path: Path) -> None:
+    _write_registry_payload(tmp_path, {"clusters": {"cluster_id": "not-a-list"}})
+
+    with pytest.raises(ValueError, match="clusters must be a list"):
+        SemanticFieldRegistryLoader(tmp_path).load()
+
+
+def test_loader_rejects_non_object_cluster_entry(tmp_path: Path) -> None:
+    _write_registry_payload(tmp_path, {"clusters": ["not-an-object"]})
+
+    with pytest.raises(ValueError, match="cluster entries must be objects"):
+        SemanticFieldRegistryLoader(tmp_path).load()
+
+
+@pytest.mark.parametrize(
+    ("field_name", "value", "message"),
+    [
+        ("legacy_names", "legacy_example_id", "legacy_names must be a list"),
+        (
+            "raw_provider_names",
+            [""],
+            "raw_provider_names must contain non-empty strings",
+        ),
+    ],
+)
+def test_loader_rejects_malformed_string_list_fields(
+    field_name: str,
+    value: object,
+    message: str,
+    tmp_path: Path,
+) -> None:
+    _write_registry(tmp_path, [_valid_cluster(**{field_name: value})])
+
+    with pytest.raises(ValueError, match=message):
+        SemanticFieldRegistryLoader(tmp_path).load()
+
+
+def test_loader_rejects_missing_required_string_field(tmp_path: Path) -> None:
+    _write_registry(tmp_path, [_valid_cluster(cluster_id=" ")])
+
+    with pytest.raises(ValueError, match="cluster_id must be a non-empty string"):
         SemanticFieldRegistryLoader(tmp_path).load()

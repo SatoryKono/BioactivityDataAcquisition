@@ -59,6 +59,18 @@ def test_tests_workflow_runs_ci_quality_integral_gate() -> None:
     assert 'QUALITY_SUMMARY_OUT="$GITHUB_STEP_SUMMARY"' in workflow
 
 
+def test_tests_workflow_runs_debt_governance_closeout_gates() -> None:
+    """Merge pipeline must validate ADR, remote-main, and debt-governance artifacts."""
+    workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")
+    assert "Validate ADR enforcement matrix artifacts" in workflow
+    assert "report-adr-enforcement-matrix --check" in workflow
+    assert "Validate remote-main architecture debt baseline" in workflow
+    assert "git fetch --no-tags --depth=1 origin main:refs/remotes/origin/main" in workflow
+    assert "report-architecture-debt-remote-main-baseline --check" in workflow
+    assert "Validate debt-governance fail-fast gates" in workflow
+    assert "report-debt-governance-gates --check" in workflow
+
+
 def test_tests_workflow_enforces_dead_code_inventory_drift_gate() -> None:
     """Merge pipeline must fail fast when dead-code evidence artifacts drift."""
     workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")

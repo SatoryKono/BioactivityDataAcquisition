@@ -8,8 +8,8 @@
     },
     "module_coverage_inventory": {
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "70b6365c71829c91475665daf0c632fe4e6ac81a2ae1669ebb51467bd508af29",
-      "coverage_xml_sha256": "f0a834c96aa6d2c3c6faf100e960d3ea6d39cdc2def9c54d10b6ab35fdd108c6"
+      "source_tree_sha256": "efa1037d52f80281116bffb826d0fecfcffd5d0d93e84b9edd573b9c8a1fb0d2",
+      "coverage_xml_sha256": "b467574a3609d2eb04943efd074a2d2f3700cdc788fbcfc785c3a2b34244009b"
     },
     "compatibility_importer_census": {
       "path": "reports/quality/compatibility-importer-census.json",
@@ -26,6 +26,15 @@
     "contract_registry_dq_diagnostics": {
       "path": "reports/quality/contract-registry-dq-diagnostics.json",
       "valid": true
+    },
+    "observability_runtime_cardinality_inventory": {
+      "path": "reports/observability/runtime_cardinality_inventory.json",
+      "dashboarded_without_emission_count": 0,
+      "dashboarded_without_declaration_count": 0
+    },
+    "adr_enforcement_matrix": {
+      "path": "reports/quality/adr-enforcement-matrix.json",
+      "blocking_gap_count": 0
     }
   },
   "weights_sum": 1.0,
@@ -116,7 +125,8 @@
       "weighted_score": 0.765,
       "evidence_metrics": {
         "contract_blocking_issue_count": 0,
-        "dq_blocking_issue_count": 0
+        "dq_blocking_issue_count": 0,
+        "adr_enforcement_blocking_gap_count": 0
       }
     },
     {
@@ -127,7 +137,11 @@
       "weighted_score": 0.656,
       "evidence_metrics": {
         "layer_violations": 0,
-        "contract_blocking_issue_count": 0
+        "contract_blocking_issue_count": 0,
+        "dashboarded_without_emission_count": 0,
+        "dashboarded_without_declaration_count": 0,
+        "runtime_cardinality_review_required_count": 0,
+        "runtime_cardinality_threshold_violation_count": 0
       }
     },
     {
@@ -153,7 +167,14 @@
     "twin_pair_count": 0,
     "repo_wide_untriaged_zero_import_candidate_count": 0,
     "contract_blocking_issue_count": 0,
-    "dq_blocking_issue_count": 0
+    "dq_blocking_issue_count": 0,
+    "dashboarded_without_emission_count": 0,
+    "dashboarded_without_declaration_count": 0,
+    "runtime_cardinality_review_required_count": 0,
+    "runtime_cardinality_threshold_violation_count": 0,
+    "accepted_adr_count": 48,
+    "adr_enforcement_blocking_gap_count": 0,
+    "adr_enforcement_manual_exception_count": 0
   },
   "debt_budget_policy": {
     "budget_growth_allowed": false,

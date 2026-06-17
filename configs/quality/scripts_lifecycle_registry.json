@@ -122,6 +122,18 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as a bounded manual test-governance report utility while testing guidance still references the direct script path; promote it into the canonical scripts.engineering.qa surface or retire it after the broader test-governance workflow is consolidated."
     },
+    "scripts/engineering/qa/report_adr_enforcement_matrix.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a bounded ADR enforcement matrix reporter while architecture governance tests and generated QA evidence still depend on this surface; promote it into the canonical scripts.engineering.qa command router or retire it after ADR evidence generation consolidates."
+    },
+    "scripts/engineering/qa/report_architecture_debt_remote_main_baseline.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a bounded remote-main baseline comparison utility for architecture-debt governance while closure campaigns still need reproducible baseline evidence; promote or retire it when the debt baseline workflow is consolidated under the canonical QA report surface."
+    },
     "scripts/engineering/qa/apply_universal_entity_filter_stubs.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",

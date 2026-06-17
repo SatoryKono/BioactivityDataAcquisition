@@ -1,49 +1,46 @@
-# BioETL Alerts SLO - Panels Documentation
+# BioETL Alerts & SLO - Panels Documentation
 
-**Dashboard File:** `grafana/dashboards/bioetl-alerts-slo.json`
+**Dashboard file:** `grafana/dashboards/bioetl-alerts-slo.json`
 
 ## Обзор
 
-Dashboard мониторит SLO (Service Level Objectives) и alerting правила для BioETL.
+Dashboard `6. Alerts & SLO` is an alert-triage surface. Shipped dashboard JSON
+is the source of truth; this mirror lists only the currently declared data
+signals so stale metric names do not become governance drift.
 
-## Ключевые панели
+## Key Panels
 
-### 1. Pipeline Success SLO
-- **Тип:** Gauge
-- **Назначение:** SLO успешного выполнения pipeline
-- **Источники данных:** `bioetl_slo_pipeline_success`
-- **Пороги:** Green (>99%), Yellow (95-99%), Red (<95%)
+### 1. Active Alert Status
+- **Type:** Stat
+- **Purpose:** Show whether any alert condition is active for the selected
+  operator scope.
+- **Data sources:** Grafana alert state; no standalone BioETL Prometheus metric
+  family is declared for this panel.
 
-### 2. Data Freshness SLO
-- **Тип:** Graph
-- **Назначение:** SLO свежести данных
-- **Источники данных:** `bioetl_slo_data_freshness_seconds`
-- **Описание:** Время между доступностью данных и обработкой
+### 2. Firing Alerts / Range
+- **Type:** Stat
+- **Purpose:** Count firing alerts in the selected range.
+- **Data sources:** Grafana alert state.
 
-### 3. Error Budget
-- **Тип:** Stat
-- **Назначение:** Error budget для SLO
-- **Источники данных:** `bioetl_error_budget_remaining`
-- **Описание:** Оставшийся error budget в процентах
+### 3. Critical/Page Alerts
+- **Type:** Stat
+- **Purpose:** Highlight page-worthy alert pressure.
+- **Data sources:** Grafana alert state.
 
-### 4. Alert Fire Rate
-- **Тип:** Graph
-- **Назначение:** Частота срабатывания алертов
-- **Источники данных:** `bioetl_alerts_fired_total`
-- **Фильтры:** `alert_name`, `severity`
+### 4. SLO/SLA Alert Pressure
+- **Type:** Stat
+- **Purpose:** Summarize SLO/SLA-related alert pressure.
+- **Data sources:** Grafana alert state.
 
-### 5. Alert Resolution Time
-- **Тип:** Graph
-- **Назначение:** Время разрешения алертов
-- **Источники данных:** `bioetl_alert_resolution_duration_seconds`
-- **Фильтры:** `alert_name`
+### 5. Firing Alert Details
+- **Type:** Table
+- **Purpose:** Inspect active alert labels, annotations, and runbook handoffs.
+- **Data sources:** Grafana alert state.
 
-## Переменные Dashboard
+## Notes
 
-- `slo_type` - Тип SLO (pipeline_success, data_freshness, availability)
-- `severity` - Уровень серьезности (critical, warning, info)
-
-## Примечания
-
-- Dashboard использует Prometheus alerting rules из `grafana/prometheus-rules/`
-- SLO конфигурируются согласно операционным требованиям
+- The dashboard keeps Prometheus metric-family drift at zero by avoiding legacy
+  SLO placeholder names in panel documentation.
+- Runtime throughput context is still available elsewhere through
+  `bioetl_records_processed_total`; alert-state panels do not redefine that
+  metric as an SLO signal.

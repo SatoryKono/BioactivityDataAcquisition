@@ -23,6 +23,8 @@ def test_polars_join_adapter_is_join_executor_service() -> None:
     # Adapter is now a wrapper around JoinExecutorService, not an instance of it
     assert hasattr(adapter, "get_polars_join_type")
     assert hasattr(adapter, "execute_polars_join")
+    assert adapter.get_polars_join_type() == "left"
+    mock_join_service.get_polars_join_type.assert_called_once_with()
 
 
 @pytest.mark.unit
@@ -52,3 +54,33 @@ def test_polars_join_adapter_executes_inherited_join_logic() -> None:
 
     assert result.height == 1
     assert "dep_value" in result.columns
+
+
+@pytest.mark.unit
+def test_polars_join_adapter_delegates_composite_key_join() -> None:
+    """Composite-key joins should stay delegated to JoinExecutorService."""
+    expected_result = pl.DataFrame({"seed_id": ["A"], "dep_value": [2]})
+    mock_join_service = MagicMock(spec=JoinExecutorService)
+    mock_join_service.execute_composite_key_join.return_value = expected_result
+
+    adapter = PolarsJoinBridge(join_service=mock_join_service)
+    left_df = pl.DataFrame({"seed_id": ["A"]})
+    right_df = pl.DataFrame({"dep_id": ["A"]})
+
+    assert (
+        adapter.execute_composite_key_join(
+            left_df=left_df,
+            right_df=right_df,
+            left_keys=["seed_id"],
+            right_keys=["dep_id"],
+            pipeline_name="pubmed_publication",
+        )
+        is expected_result
+    )
+    mock_join_service.execute_composite_key_join.assert_called_once_with(
+        left_df,
+        right_df,
+        ["seed_id"],
+        ["dep_id"],
+        "pubmed_publication",
+    )

@@ -125,6 +125,21 @@ def test_runtime_facade_does_not_apply_pandera_patch_at_import_time() -> None:
 
 
 @pytest.mark.unit
+def test_runtime_facade_lazy_module_export_and_dir_are_stable() -> None:
+    """Module-level lazy exports should resolve once and appear in dir()."""
+    runtime_facade.__dict__.pop("composite_control_plane_builder", None)
+
+    module = runtime_facade.__getattr__("composite_control_plane_builder")
+
+    assert module.__name__.endswith(".composite_control_plane_builder")
+    assert runtime_facade.composite_control_plane_builder is module
+    assert "composite_control_plane_builder" in runtime_facade.__dir__()
+
+    with pytest.raises(AttributeError, match="does_not_exist"):
+        runtime_facade.__getattr__("does_not_exist")
+
+
+@pytest.mark.unit
 def test_observability_runtime_public_exports_stable() -> None:
     """Observability runtime facade should preserve stable public __all__."""
     assert observability_runtime.__all__ == [

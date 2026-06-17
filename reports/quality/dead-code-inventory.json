@@ -358,11 +358,10 @@
       "rationale": "Module entrypoint for `python -m bioetl`; static import scans stay at zero because the interpreter dispatches the module directly.",
       "evidence_lane": "module_entrypoint_owner_suite",
       "owner_tests": [
-        "tests/unit/interfaces/cli/test_cli_commands_basic.py",
-        "tests/unit/interfaces/cli/test_cli_helpers.py"
+        "tests/unit/interfaces/cli/test_cli_main_module.py"
       ],
-      "owner_test_count": 2,
-      "owner_test_paths_exist_count": 2
+      "owner_test_count": 1,
+      "owner_test_paths_exist_count": 1
     },
     {
       "module_name": "bioetl.domain.ports.data_normalization",

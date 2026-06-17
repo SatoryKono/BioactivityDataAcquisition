@@ -1,6 +1,11 @@
 # BioETL Docker Makefile
 
 .PHONY: help docker-check docker-build docker-start docker-stop docker-logs docker-health docker-clean docker-compose-check
+.PHONY: precommit-install qa-arch-fast quarantine-inspect quarantine-replay quarantine-purge release-lock
+
+RUN ?= uv run
+PIPELINE ?= chembl_activity
+RUN_ID ?=
 
 # Default target
 help:
@@ -135,5 +140,24 @@ docker-dev: docker-start
 	@echo "  BioETL:     http://localhost:8081"
 	@echo "  Metrics:    http://localhost:8000"
 	@echo "  Warp Proxy: http://localhost:9999"
+
+# Local governance and live-ops shortcuts
+precommit-install:
+	bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only
+
+qa-arch-fast:
+	$(RUN) pytest tests/architecture/ -m "not slow and not serial and not memory"
+
+quarantine-inspect:
+	$(RUN) bioetl quarantine inspect --pipeline $(PIPELINE)
+
+quarantine-replay:
+	$(RUN) bioetl quarantine replay --pipeline $(PIPELINE)
+
+quarantine-purge:
+	$(RUN) bioetl quarantine purge --pipeline $(PIPELINE)
+
+release-lock:
+	$(RUN) bioetl lock release --pipeline $(PIPELINE) --run-id $(RUN_ID)
 
 .PHONY: docker-dev

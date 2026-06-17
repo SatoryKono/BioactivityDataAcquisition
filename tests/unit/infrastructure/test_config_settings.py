@@ -11,6 +11,9 @@ from pydantic import ValidationError
 
 from bioetl.domain.config import DQConfig as DomainDQConfig
 from bioetl.domain.config import PipelineConfig
+from bioetl.infrastructure.config._settings_validation import (
+    coerce_silver_dedup_timeout_seconds,
+)
 from bioetl.infrastructure.config._base import (
     ObservabilitySettings,
     PipelineSettings,
@@ -148,6 +151,23 @@ class TestPipelineSettings:
                     "required_persistence_profile": "forensic_grade",
                 }
             )
+
+    @pytest.mark.parametrize(
+        ("value", "expected"),
+        [
+            (None, 60.0),
+            ("", 60.0),
+            (False, 60.0),
+            (0, 60.0),
+            (-1.0, 60.0),
+            ("2.5", 2.5),
+            (object(), 60.0),
+        ],
+    )
+    def test_silver_dedup_timeout_coercion_bounds_unsafe_values(
+        self, value: object, expected: float
+    ) -> None:
+        assert coerce_silver_dedup_timeout_seconds(value) == pytest.approx(expected)
 
     @pytest.mark.parametrize(
         ("required_profile", "policy"),

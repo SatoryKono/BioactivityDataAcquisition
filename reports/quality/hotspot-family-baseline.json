@@ -64,10 +64,10 @@
         "src/bioetl/composition/factories/pipeline/"
       ],
       "duplication_clusters": 0,
-      "files": 33,
-      "total_loc": 4585,
+      "files": 34,
+      "total_loc": 4707,
       "files_ge_250_loc": 4,
-      "helper_function_ratio": 0.46,
+      "helper_function_ratio": 0.435,
       "max_internal_fan_in": 4,
       "max_internal_fan_in_module": "bioetl.composition.factories.pipeline.config_types",
       "bounded_growth_budgets": {

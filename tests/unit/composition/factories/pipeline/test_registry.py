@@ -12,9 +12,27 @@ from bioetl.composition.factories.pipeline.registry import (
     register_all_pipelines,
     reset_registration,
 )
+from bioetl.composition.factories.pipeline.registry_core import (
+    create_registry as create_core_registry,
+)
 
 
 pytestmark = pytest.mark.unit
+
+
+class _DummyPipelineFactory:
+    silver_schema = None
+    pandera_silver_schema = None
+
+    def __init__(self, pipeline_name: str, *, gold_schema: object | None) -> None:
+        self.pipeline_name = pipeline_name
+        self.gold_schema = gold_schema
+
+    def create_with_services(self, request: object) -> object:
+        raise NotImplementedError
+
+    def create_runner(self, request: object) -> object:
+        raise NotImplementedError
 
 
 @pytest.fixture(autouse=True)
@@ -184,3 +202,28 @@ def test_explicit_registration_state_tracks_registration_independently():
     register_all_pipelines(registration_state=registration_state)
 
     assert is_registered(registration_state=registration_state)
+
+
+def test_core_registry_contract_edges_are_explicit():
+    """Core registry should expose deterministic validation and lookup behavior."""
+    registry = create_core_registry()
+    factory = _DummyPipelineFactory("demo", gold_schema=object())
+
+    assert registry.contains("demo") is False
+    registry.register("demo", factory)
+
+    assert registry.contains("demo") is True
+    assert registry.list_keys() == ["demo"]
+    assert registry.get("demo").factory is factory
+
+    with pytest.raises(ValueError, match="Unknown pipeline name"):
+        registry.get("missing")
+    with pytest.raises(ValueError, match="Pipeline already registered"):
+        registry.register("demo", factory)
+    with pytest.raises(ValueError, match="does not match"):
+        registry.register("other", factory)
+    with pytest.raises(ValueError, match="must have gold_schema"):
+        registry.register(
+            "missing_gold",
+            _DummyPipelineFactory("missing_gold", gold_schema=None),
+        )

@@ -30,10 +30,7 @@ DOMAIN_PORT_OWNER_TESTS = (
 ZERO_IMPORT_OWNER_TEST_EVIDENCE: dict[str, dict[str, object]] = {
     "src/bioetl/__main__.py": {
         "evidence_lane": "module_entrypoint_owner_suite",
-        "owner_tests": (
-            "tests/unit/interfaces/cli/test_cli_commands_basic.py",
-            "tests/unit/interfaces/cli/test_cli_helpers.py",
-        ),
+        "owner_tests": ("tests/unit/interfaces/cli/test_cli_main_module.py",),
     },
     "src/bioetl/domain/ports/data_normalization.py": {
         "evidence_lane": "canonical_owner_contract",
