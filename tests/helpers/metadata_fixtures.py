@@ -197,67 +197,67 @@ def build_gold_metadata(
     )
 
 
-@pytest.fixture
-def metadata_writer(noop_logger: object) -> MetadataWriter:
-    """Create MetadataWriter instance."""
-    return MetadataWriter(logger=noop_logger)
+# @pytest.fixture
+# def metadata_writer(noop_logger: object) -> MetadataWriter:
+#     """Create MetadataWriter instance."""
+#     return MetadataWriter(logger=noop_logger)
 
 
-@pytest.fixture
-def runtime_metadata() -> RuntimeMetadata:
-    """Create sample runtime metadata."""
-    return build_runtime_metadata()
-
-
-@pytest.fixture
-def pipeline_metadata() -> PipelineMetadata:
-    """Create sample pipeline metadata."""
-    return build_pipeline_metadata()
-
-
-@pytest.fixture
-def environment_metadata() -> EnvironmentMetadata:
-    """Create sample environment metadata."""
-    return build_environment_metadata()
-
-
-@pytest.fixture
-def bronze_metadata(
-    runtime_metadata: RuntimeMetadata,
-    pipeline_metadata: PipelineMetadata,
-    environment_metadata: EnvironmentMetadata,
-) -> BronzeMetadata:
-    """Create sample Bronze metadata."""
-    return build_bronze_metadata(
-        runtime=runtime_metadata,
-        pipeline=pipeline_metadata,
-        environment=environment_metadata,
-    )
-
-
-@pytest.fixture
-def silver_metadata(
-    runtime_metadata: RuntimeMetadata,
-    pipeline_metadata: PipelineMetadata,
-    environment_metadata: EnvironmentMetadata,
-) -> SilverMetadata:
-    """Create sample Silver metadata."""
-    return build_silver_metadata(
-        runtime=runtime_metadata,
-        pipeline=pipeline_metadata,
-        environment=environment_metadata,
-    )
-
-
-@pytest.fixture
-def gold_metadata(
-    runtime_metadata: RuntimeMetadata,
-    pipeline_metadata: PipelineMetadata,
-    environment_metadata: EnvironmentMetadata,
-) -> GoldMetadata:
-    """Create sample Gold metadata."""
-    return build_gold_metadata(
-        runtime=runtime_metadata,
-        pipeline=pipeline_metadata,
-        environment=environment_metadata,
-    )
+# @pytest.fixture
+# def runtime_metadata() -> RuntimeMetadata:
+#     """Create sample runtime metadata."""
+#     return build_runtime_metadata()
+#
+#
+# @pytest.fixture
+# def pipeline_metadata() -> PipelineMetadata:
+#     """Create sample pipeline metadata."""
+#     return build_pipeline_metadata()
+#
+#
+# @pytest.fixture
+# def environment_metadata() -> EnvironmentMetadata:
+#     """Create sample environment metadata."""
+#     return build_environment_metadata()
+#
+#
+# @pytest.fixture
+# def bronze_metadata(
+#     runtime_metadata: RuntimeMetadata,
+#     pipeline_metadata: PipelineMetadata,
+#     environment_metadata: EnvironmentMetadata,
+# ) -> BronzeMetadata:
+#     """Create sample Bronze metadata."""
+#     return build_bronze_metadata(
+#         runtime=runtime_metadata,
+#         pipeline=pipeline_metadata,
+#         environment=environment_metadata,
+#     )
+#
+#
+# @pytest.fixture
+# def silver_metadata(
+#     runtime_metadata: RuntimeMetadata,
+#     pipeline_metadata: PipelineMetadata,
+#     environment_metadata: EnvironmentMetadata,
+# ) -> SilverMetadata:
+#     """Create sample Silver metadata."""
+#     return build_silver_metadata(
+#         runtime=runtime_metadata,
+#         pipeline=pipeline_metadata,
+#         environment=environment_metadata,
+#     )
+#
+#
+# @pytest.fixture
+# def gold_metadata(
+#     runtime_metadata: RuntimeMetadata,
+#     pipeline_metadata: PipelineMetadata,
+#     environment_metadata: EnvironmentMetadata,
+# ) -> GoldMetadata:
+#     """Create sample Gold metadata."""
+#     return build_gold_metadata(
+#         runtime=runtime_metadata,
+#         pipeline=pipeline_metadata,
+#         environment=environment_metadata,
+#     )
