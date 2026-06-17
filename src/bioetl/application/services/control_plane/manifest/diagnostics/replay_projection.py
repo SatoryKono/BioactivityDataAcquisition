@@ -10,12 +10,12 @@ from bioetl.application.services.control_plane.manifest.diagnostics.operator_rep
 from bioetl.application.services.control_plane.manifest.diagnostics.persistence import (
     build_lineage_closure_boundary,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_blockers import (
-    _collect_append_mode_semantic_sinks,
-)
 from bioetl.application.services.control_plane.manifest.diagnostics.replay import (
     _resolve_exact_replay_support_boundary,
     _resolve_replay_family_contract,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_blockers import (
+    _collect_append_mode_semantic_sinks,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_readiness import (
     _resolve_manifest_replay_readiness_verdict,
