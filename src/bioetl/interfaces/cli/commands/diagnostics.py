@@ -2,42 +2,36 @@
 
 from __future__ import annotations
 
-import asyncio
 import json
 from typing import TYPE_CHECKING, cast
 
 import click
 
-from bioetl.interfaces.cli.commands._run_manifest_output import render_text_payload
-from bioetl.interfaces.cli.commands.checkpoint import _render_checkpoint_payload
 from bioetl.interfaces.cli.commands.domains.diagnostics.contract_checks import (
     render_contract_check_report,
     run_observability_contract_checks,
 )
+from bioetl.interfaces.cli.commands.domains.diagnostics.operations import (
+    emit_checkpoint_diagnostics,
+    emit_forensic_run_diff,
+    emit_manifest_payload,
+    emit_metrics_profile,
+    emit_quarantine_stats,
+    emit_run_dossier,
+    run_health_diagnostics,
+)
 from bioetl.interfaces.cli.commands.domains.diagnostics.rendering import (
     build_diagnostics_guide_lines,
-    build_metrics_profile_lines,
-    echo_health_results,
     render_guide_lines,
-    render_run_dossier_payload,
-)
-from bioetl.interfaces.cli.commands.domains.health.rendering import (
-    all_health_results_healthy,
 )
 from bioetl.interfaces.cli.commands.domains.quarantine.support import (
     _QuarantineRuntimeService,
-    _show_quarantine_stats,
 )
 from bioetl.interfaces.cli.commands.domains.shared.inspection_commands import (
     add_audit_run_options,
     add_checkpoint_workflow_options,
-    run_async_inspection_command,
-)
-from bioetl.interfaces.cli.commands.domains.shared.inspection_output import (
-    emit_inspection_payload,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
-from bioetl.interfaces.cli.formatters import echo_error
 
 if TYPE_CHECKING:
     from bioetl.application.services.control_plane.forensic_diff_service import (
@@ -50,7 +44,6 @@ if TYPE_CHECKING:
         MetricsOperatorProfile,
         ObservabilityDiagnosticsBundle,
     )
-    from bioetl.domain.types import JsonDict
 
 __all__ = [
     "COMMANDS",
@@ -142,30 +135,18 @@ def diagnostics_guide() -> None:
 )
 def diagnostics_health(provider: tuple[str, ...], output_json: bool) -> None:
     """Run provider health diagnostics from the unified operator entrypoint."""
-    bundle = get_observability_diagnostics_bundle()
-
-    async def _run() -> JsonDict:
-        providers_list = list(provider) if provider else None
-        summary = await bundle.health_service.check_providers(providers=providers_list)
-        return summary.to_dict()
-
-    results = asyncio.run(_run())
-    echo_health_results(results, output_json=output_json)
-    if output_json:
-        return
-    if not all_health_results_healthy(results):
-        raise SystemExit(ExitCode.FAIL)
+    run_health_diagnostics(
+        get_observability_diagnostics_bundle(),
+        provider=provider,
+        output_json=output_json,
+    )
 
 
 @diagnostics.command("metrics")
 @click.option("--json", "output_json", is_flag=True, help="Output as JSON")
 def diagnostics_metrics(output_json: bool) -> None:
     """Show the canonical metrics/admin observability workflow summary."""
-    profile = get_metrics_operator_profile()
-    if output_json:
-        click.echo(json.dumps(profile.to_dict(), indent=2, default=str))
-        return
-    render_guide_lines(build_metrics_profile_lines(profile))
+    emit_metrics_profile(get_metrics_operator_profile(), output_json=output_json)
 
 
 def _emit_run_dossier(
@@ -176,31 +157,12 @@ def _emit_run_dossier(
     output_format: str,
 ) -> None:
     """Emit one-run dossier using the canonical workflow service."""
-    if bool(run_id) == bool(manifest_id):
-        raise click.UsageError("Provide exactly one of --run-id or --manifest-id")
-    bundle = get_observability_diagnostics_bundle()
-
-    async def _inspect_by_manifest_id() -> object:
-        assert manifest_id is not None
-        return await bundle.workflow_service.inspect_manifest_dossier(
-            manifest_id,
-            audit_limit=limit,
-        )
-
-    async def _inspect_by_run_id() -> object:
-        assert run_id is not None
-        return await bundle.workflow_service.inspect_run_dossier(
-            run_id,
-            audit_limit=limit,
-        )
-
-    action = _inspect_by_manifest_id if manifest_id else _inspect_by_run_id
-
-    run_async_inspection_command(
-        action,
-        error_title="Run diagnostics failed",
+    emit_run_dossier(
+        get_observability_diagnostics_bundle(),
+        run_id=run_id,
+        manifest_id=manifest_id,
+        limit=limit,
         output_format=output_format,
-        text_renderer=render_run_dossier_payload,
     )
 
 
@@ -269,17 +231,12 @@ def diagnostics_checkpoint(
     output_format: str,
 ) -> None:
     """Inspect checkpoint state with correlated audit and run-manifest context."""
-    bundle = get_observability_diagnostics_bundle()
-
-    run_async_inspection_command(
-        lambda: bundle.workflow_service.inspect_checkpoint_workflow(
-            pipeline,
-            run_id=run_id,
-            audit_limit=audit_limit,
-        ),
-        error_title="Checkpoint diagnostics failed",
+    emit_checkpoint_diagnostics(
+        get_observability_diagnostics_bundle(),
+        pipeline=pipeline,
+        run_id=run_id,
+        audit_limit=audit_limit,
         output_format=output_format,
-        text_renderer=_render_checkpoint_payload,
     )
 
 
@@ -295,7 +252,7 @@ def diagnostics_checkpoint(
 def diagnostics_manifest(identifier: str, output_format: str) -> None:
     """Inspect one run manifest and its ledger diagnostics."""
     bundle = get_observability_diagnostics_bundle()
-    _emit_manifest_payload(
+    emit_manifest_payload(
         bundle.run_manifest_service,
         identifier=identifier,
         output_format=output_format,
@@ -309,16 +266,7 @@ def _emit_manifest_payload(
     output_format: str,
 ) -> None:
     """Resolve one manifest and emit it using the canonical renderer."""
-    try:
-        result = service.show(identifier)
-    except ValueError as exc:
-        echo_error("Run-manifest diagnostics failed", str(exc))
-        return
-    emit_inspection_payload(
-        result.to_dict(),
-        output_format,
-        text_renderer=render_text_payload,
-    )
+    emit_manifest_payload(service, identifier=identifier, output_format=output_format)
 
 
 @diagnostics.command("forensic-diff")
@@ -337,16 +285,11 @@ def diagnostics_forensic_diff(
     output_format: str,
 ) -> None:
     """Compare two runs or manifests across forensic evidence surfaces."""
-    service = get_forensic_run_diff_service()
-    try:
-        result = service.compare(left_identifier, right_identifier)
-    except ValueError as exc:
-        echo_error("Forensic run diff failed", str(exc))
-        return
-    emit_inspection_payload(
-        result.to_dict(),
-        output_format,
-        text_renderer=render_text_payload,
+    emit_forensic_run_diff(
+        get_forensic_run_diff_service(),
+        left_identifier=left_identifier,
+        right_identifier=right_identifier,
+        output_format=output_format,
     )
 
 
@@ -394,7 +337,8 @@ def diagnostics_quarantine(
     """Inspect quarantine statistics from the unified operator entrypoint."""
     bundle = get_observability_diagnostics_bundle()
     resolved_error_code = SILVER_FILTER_ERROR_CODE if silver_filter_only else error_code
-    _show_quarantine_stats(
+    emit_quarantine_stats(
+        bundle,
         get_quarantine_runtime_service(pipeline),
         pipeline=pipeline,
         output_json=output_json,
@@ -402,7 +346,6 @@ def diagnostics_quarantine(
         top=top,
         group_by=group_by,
         run_id=run_id,
-        run_manifest_service=bundle.run_manifest_service if run_id else None,
     )
 
 

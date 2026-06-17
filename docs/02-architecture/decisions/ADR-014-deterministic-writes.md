@@ -46,20 +46,23 @@ ______________________________________________________________________
 ```python
 @dataclass
 class RetryConfig:
-    max-attempts: int = 3
-    base-delay: float = 1.0
+    max_attempts: int = 3
+    base_delay: float = 1.0
     jitter: float = 0.1
     deterministic: bool = False  # NEW
-    jitter-seed: int | None = None  # NEW
+    jitter_seed: int | None = None  # NEW
 
-    def calculate-delay(self, attempt: int, url: str = "") -> float:
-        delay = self.base-delay * (self.multiplier ** attempt)
+    def calculate_delay(self, attempt: int, url: str = "") -> float:
+        delay = self.base_delay * (self.multiplier ** attempt)
 
         if self.deterministic:
-            # Hash-based deterministic jitter
-            hash-input = f"{attempt}:{url}:{self.jitter-seed or 0}"
-            jitter-factor = (hash(hash-input) % 1000) / 1000.0
-            delay += delay * self.jitter * (jitter-factor * 2 - 1)
+            # Hash-based deterministic jitter; do not use Python's salted hash().
+            import hashlib
+
+            hash_input = f"{attempt}:{url}:{self.jitter_seed or 0}".encode("utf-8")
+            jitter_raw = int(hashlib.md5(hash_input, usedforsecurity=False).hexdigest()[:8], 16)
+            jitter_factor = (jitter_raw % 1000) / 1000.0
+            delay += delay * self.jitter * (jitter_factor * 2 - 1)
         else:
             delay += random.uniform(-delay * self.jitter, delay * self.jitter)
 
@@ -106,6 +109,13 @@ Domain business paths не должны создавать текущее вре
 - read-model расчёты используют либо сохранённый terminal timestamp, либо explicit `reference_time`
 - operational/reporting structures получают `checked_at` / `execution_timestamp` из application/runtime seam
 - replay-critical application/composition surfaces (runtime timing helper, composite checkpoint state transitions, manifest creation, and composition entrypoints) MUST принимать `ClockPort` или explicit timestamp/reference time, а не читать локальный wall-clock внутри helper'ов
+
+`ClockPort` ownership is intentionally split:
+
+- the contract is owned by `bioetl.domain.ports.ClockPort`;
+- application services and helpers accept `ClockPort` or explicit timestamp/reference-time inputs and may use `bioetl.application.runtime_clock.resolve_runtime_clock` to fail closed when a required clock is missing;
+- `bioetl.infrastructure.time.SystemClock` is the concrete system-time adapter;
+- composition/bootstrap modules wire `SystemClock` into application services, while `domain`, `application`, and `interfaces` must not instantiate infrastructure clocks directly.
 
 ### 4. Deterministic Domain Identities
 

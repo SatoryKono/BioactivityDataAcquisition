@@ -176,6 +176,57 @@ class TestOpenTelemetryTracerClose:
 class TestTelemetryExporterSelection:
     """Tests for telemetry exporter configuration safety."""
 
+    def test_extract_endpoint_host_handles_urls_ipv6_and_host_port(self) -> None:
+        """Endpoint host extraction should normalize common OTLP endpoint forms."""
+        from bioetl.infrastructure.observability import tracing
+
+        assert tracing._extract_endpoint_host("http://localhost:4317") == "localhost"
+        assert tracing._extract_endpoint_host("[::1]:4317") == "::1"
+        assert tracing._extract_endpoint_host("tempo:4317") == "tempo"
+
+    def test_otlp_endpoint_prefers_trace_specific_env(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Trace-specific OTLP endpoint must take precedence over generic endpoint."""
+        from bioetl.infrastructure.observability import tracing
+
+        monkeypatch.setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://generic:4317")
+        monkeypatch.setenv(
+            "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT",
+            "http://traces:4317",
+        )
+
+        assert tracing._get_otlp_endpoint() == "http://traces:4317"
+
+    def test_otlp_insecure_prefers_trace_specific_env(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Trace-specific insecure override must take precedence."""
+        from bioetl.infrastructure.observability import tracing
+
+        monkeypatch.setenv("OTEL_EXPORTER_OTLP_INSECURE", "false")
+        monkeypatch.setenv("OTEL_EXPORTER_OTLP_TRACES_INSECURE", "true")
+
+        assert tracing._get_otlp_insecure_setting() == "true"
+
+    def test_build_exporter_falls_back_to_console_when_otlp_unavailable(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Console exporter is used when OTLP exporter support is unavailable."""
+        from bioetl.infrastructure.observability import tracing
+
+        console_exporter = object()
+        monkeypatch.setattr(tracing, "OTLP_AVAILABLE", False)
+        monkeypatch.setattr(tracing, "_OtlpExporterClass", None)
+        monkeypatch.setattr(
+            tracing, "ConsoleSpanExporter", MagicMock(return_value=console_exporter)
+        )
+
+        assert tracing._build_telemetry_exporter() is console_exporter
+
     def test_local_otlp_endpoint_defaults_to_insecure(
         self,
         monkeypatch: pytest.MonkeyPatch,
@@ -197,6 +248,49 @@ class TestTelemetryExporterSelection:
             endpoint="http://localhost:4317",
             insecure=True,
         )
+
+    def test_explicit_insecure_override_wins_for_local_endpoint(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Explicit insecure override should not be replaced by local endpoint default."""
+        from bioetl.infrastructure.observability import tracing
+
+        exporter_factory = MagicMock(return_value=object())
+        monkeypatch.setattr(tracing, "OTLP_AVAILABLE", True)
+        monkeypatch.setattr(tracing, "_OtlpExporterClass", exporter_factory)
+        monkeypatch.setenv(
+            "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", "http://localhost:4317"
+        )
+        monkeypatch.setenv("OTEL_EXPORTER_OTLP_TRACES_INSECURE", "false")
+        monkeypatch.delenv("OTEL_EXPORTER_OTLP_ENDPOINT", raising=False)
+        monkeypatch.delenv("OTEL_EXPORTER_OTLP_INSECURE", raising=False)
+
+        tracing._build_telemetry_exporter()
+
+        exporter_factory.assert_called_once_with(
+            endpoint="http://localhost:4317",
+            insecure=False,
+        )
+
+    def test_insecure_override_without_endpoint_is_forwarded(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """An insecure override without endpoint is still passed to the OTLP exporter."""
+        from bioetl.infrastructure.observability import tracing
+
+        exporter_factory = MagicMock(return_value=object())
+        monkeypatch.setattr(tracing, "OTLP_AVAILABLE", True)
+        monkeypatch.setattr(tracing, "_OtlpExporterClass", exporter_factory)
+        monkeypatch.delenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", raising=False)
+        monkeypatch.delenv("OTEL_EXPORTER_OTLP_ENDPOINT", raising=False)
+        monkeypatch.setenv("OTEL_EXPORTER_OTLP_INSECURE", "yes")
+        monkeypatch.delenv("OTEL_EXPORTER_OTLP_TRACES_INSECURE", raising=False)
+
+        tracing._build_telemetry_exporter()
+
+        exporter_factory.assert_called_once_with(insecure=True)
 
 
 class TestOpenTelemetryTracerSpanAdapter:

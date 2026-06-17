@@ -6,6 +6,9 @@ import pytest
 
 from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.application.core.pre_silver_adapter_mixin import PreSilverAdapterMixin
+from bioetl.application.core.record_normalization_finalization import (
+    finalize_pre_silver_record,
+)
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.filtering.column_filter import GoldColumnFilter
 from bioetl.domain.filtering.silver_config import SilverFilterConfig
@@ -25,6 +28,27 @@ class _PreSilverFilterTransformer(PreSilverAdapterMixin, BaseTransformer):
     async def _transform_impl(self, context, record, index):
         del context, record, index
         return None
+
+
+class _PreSilverFinalizerHarness:
+    content_hash_policy_by_version = None
+
+    def normalize_business_data(self, business_data):
+        return {"normalized": business_data["raw"].strip()}
+
+    def compute_content_hashes_by_version(self, record):
+        del record
+        return {}
+
+    def compute_content_hash(self, record):
+        return f"hash:{record['normalized']}"
+
+    def project_normalization_findings(self, record, *, context=None, index=None):
+        del context
+        return {**record, "projected_index": index}
+
+    def _should_project_hashes_by_version(self):
+        return False
 
 
 def _pipeline_context() -> PipelineContext:
@@ -68,6 +92,34 @@ def test_normalize_record_applies_identifier_date_json_and_hash_rules() -> None:
             exclude_fields={"entity_id", "content_hash"},
         )
     )
+
+
+def test_finalize_pre_silver_record_helper_orchestrates_the_finalization_seam() -> None:
+    pre_silver = PreSilverRecord(
+        entity_id="entity:1",
+        business_data={"raw": " value "},
+        build_silver_record=lambda _context, entity_id, content_hash, index, business: {
+            "entity_id": entity_id,
+            "content_hash": content_hash,
+            "index": index,
+            **business,
+        },
+    )
+
+    silver_record = finalize_pre_silver_record(
+        _PreSilverFinalizerHarness(),
+        pre_silver,
+        context=cast("PipelineContext", object()),
+        index=3,
+    )
+
+    assert silver_record == {
+        "entity_id": "entity:1",
+        "content_hash": "hash:value",
+        "index": 3,
+        "normalized": "value",
+        "projected_index": 3,
+    }
 
 
 def test_compute_content_hash_is_idempotent_for_normalized_payload() -> None:
