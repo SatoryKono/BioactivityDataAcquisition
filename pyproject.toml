@@ -240,6 +240,9 @@ filterwarnings = [
     # pytest-benchmark warning when xdist is active (expected in parallel mode)
     "ignore:Benchmarks are automatically disabled",
 ]
+
+# ============ PYTEST-ASYNCIO ============
+[tool.pytest-asyncio]
 asyncio_mode = "auto"
 
 # ============ COVERAGE ============

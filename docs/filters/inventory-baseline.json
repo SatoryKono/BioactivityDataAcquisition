@@ -12,11 +12,11 @@
     "conflict": 0
   },
   "surface_totals": {
-    "surfaces_total": 113,
+    "surfaces_total": 112,
     "by_category": {
       "consumer_alias": 32,
       "observability": 11,
-      "runtime_gate": 12,
+      "runtime_gate": 11,
       "silver_config": 11,
       "source_profile": 47
     },
@@ -31,7 +31,7 @@
       "_apply_pre_silver_filter": 2,
       "_silver_filters.evaluate": 1,
       "_silver_filters.should_include": 1,
-      "apply_silver_filter": 7,
+      "apply_silver_filter": 6,
       "bioetl_silver_filter_reject_total_mismatch_15m": 2,
       "bioetl_silver_filter_rejections_total": 9,
       "extraction_params": 8,
@@ -1489,7 +1489,7 @@
       "symbol": "--silver-filter-only",
       "path": "src/bioetl/interfaces/cli/commands/diagnostics.py",
       "occurrence_count": 1,
-      "first_line": 359,
+      "first_line": 302,
       "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
       "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
       "notes": ""
@@ -1676,7 +1676,7 @@
       "symbol": "FILTERED_OUT_SILVER",
       "path": "src/bioetl/interfaces/cli/commands/diagnostics.py",
       "occurrence_count": 2,
-      "first_line": 73,
+      "first_line": 66,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""
@@ -1974,17 +1974,6 @@
       "path": "src/bioetl/application/core/pre_silver_staging_flow.py",
       "occurrence_count": 1,
       "first_line": 25,
-      "role": "Runtime Silver filter application callsite",
-      "migration_relevance": "Any new runtime application gate must remain structural-only or be inventoried.",
-      "notes": ""
-    },
-    {
-      "category": "runtime_gate",
-      "surface": "silver_filter_application",
-      "symbol": "apply_silver_filter",
-      "path": "src/bioetl/application/core/record_normalization_processor.py",
-      "occurrence_count": 2,
-      "first_line": 143,
       "role": "Runtime Silver filter application callsite",
       "migration_relevance": "Any new runtime application gate must remain structural-only or be inventoried.",
       "notes": ""

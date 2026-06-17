@@ -14,6 +14,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the shared CLI dispatch helper for canonical scripts.engineering and adjacent routers; promote it to active inventory once helper modules receive explicit catalog classification."
     },
+    "scripts/docs/common/markdown.py": {
+      "owner": "@bioetl-docs",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a shared markdown parsing helper imported by docs checks and docs KPI reporting; keep it non-active unless it is promoted to a standalone docs command surface."
+    },
     "scripts/ai/mcp/mcp_ast_grep_wrapper.ps1": {
       "owner": "@bioetl-platform",
       "decision": "windows_compatibility_wrapper",

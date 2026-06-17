@@ -599,7 +599,7 @@ oversized_source_module_inventory:
     owner: '@bioetl-reproducibility'
     target_split: separate score-card policy rules from manifest projection helpers
   - path: src/bioetl/interfaces/cli/commands/domains/health/server_integration.py
-    lines: 369
+    lines: 354
     owner: '@bioetl-interfaces'
     target_split: split health server integration, metrics server wiring, and quarantine
       service helpers
