@@ -15,10 +15,13 @@ from __future__ import annotations
 
 __all__ = ["PublicationTermTransformer"]
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.entity_id import compute_publication_term_entity_id
 from bioetl.application.core.pre_silver_record import PreSilverRecord
+from bioetl.application.core.publication_term_runtime import (
+    extract_terms_from_publication,
+)
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
@@ -126,76 +129,10 @@ class PublicationTermTransformer(BaseChemblTransformer):
         self, record: BronzeRecord, publication_id: str
     ) -> list[GoldRecord]:
         """Extract every flattened term payload from one publication record."""
-        terms: list[GoldRecord] = []
-
-        raw_mesh_terms = record.get("mesh_terms")
-        mesh_terms: list[Any] = (  # Any: untyped ChEMBL API JSON list elements
-            raw_mesh_terms if isinstance(raw_mesh_terms, list) else []
-        )
-        for mesh in mesh_terms:
-            if not isinstance(mesh, dict):
-                continue
-
-            mesh_heading = mesh.get("mesh_heading")
-            if mesh_heading:
-                terms.append(
-                    self._create_term_data(
-                        publication_id=publication_id,
-                        term=mesh_heading,
-                        term_type="MESH_HEADING",
-                        mesh_id=mesh.get("mesh_id"),
-                        qualifier=mesh.get("mesh_qualifier"),
-                    )
-                )
-
-            mesh_qualifier = mesh.get("mesh_qualifier")
-            if mesh_qualifier:
-                terms.append(
-                    self._create_term_data(
-                        publication_id=publication_id,
-                        term=mesh_qualifier,
-                        term_type="MESH_QUALIFIER",
-                        mesh_id=mesh.get("mesh_id"),
-                        qualifier=None,
-                    )
-                )
-
-        raw_keywords = record.get("keywords")
-        keywords: list[Any] = (  # Any: untyped ChEMBL API JSON
-            raw_keywords if isinstance(raw_keywords, list) else []
-        )
-        for keyword in keywords:
-            if isinstance(keyword, str):
-                stripped = keyword.strip()
-                if stripped:
-                    terms.append(
-                        self._create_term_data(
-                            publication_id=publication_id,
-                            term=stripped,
-                            term_type="KEYWORD",
-                            mesh_id=None,
-                            qualifier=None,
-                        )
-                    )
-
-        return terms
-
-    def _create_term_data(
-        self,
-        publication_id: str,
-        term: str,
-        term_type: str,
-        mesh_id: str | None,
-        qualifier: str | None,
-    ) -> GoldRecord:
-        """Build one normalized term payload."""
-        return {
-            "publication_id": publication_id,
-            "term": term.strip() if term else term,
-            "term_type": term_type,
-            "mesh_id": mesh_id,
-            "qualifier": qualifier,
-        }
+        return [
+            _publication_term_business_data(term_record)
+            for term_record in extract_terms_from_publication(record, publication_id)
+        ]
 
     def compute_term_entity_id(
         self, publication_id: str, term_type: str, term: str
@@ -211,6 +148,13 @@ def _prepare_publication_term_record(record: BronzeRecord) -> BronzeRecord:
         normalized_record["publication_id"] = record.get("document_chembl_id")
         return normalized_record
     return record
+
+
+def _publication_term_business_data(term_record: BronzeRecord) -> GoldRecord:
+    """Convert runtime term records into transformer business payload shape."""
+    business_data = dict(term_record)
+    business_data.pop("entity_id", None)
+    return cast(GoldRecord, business_data)
 
 
 def _resolve_publication_term_entity_id(

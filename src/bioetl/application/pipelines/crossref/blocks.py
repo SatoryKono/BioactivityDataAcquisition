@@ -5,6 +5,9 @@ from __future__ import annotations
 from collections.abc import Callable, Sequence
 
 from bioetl.application.core.base_transformer_helpers_mixin import ScalarValue
+from bioetl.application.pipelines.crossref._business_data_builder import (
+    extract_publication_year_candidate,
+)
 from bioetl.application.pipelines.crossref.extractors import (
     extract_author_details,
     extract_author_orcids,
@@ -21,31 +24,6 @@ from bioetl.application.pipelines.crossref.extractors import (
 from bioetl.domain.normalization import extract_first_string
 from bioetl.domain.ports import DataNormalizationPort
 from bioetl.domain.types import BronzeRecord, JsonDict
-
-
-def _extract_crossref_publication_year_candidate(
-    record: BronzeRecord,
-) -> int | None:
-    """Extract the first available CrossRef year from date-parts payloads."""
-    for date_field in ("published-print", "published-online", "issued"):
-        date_info = record.get(date_field)
-        if not isinstance(date_info, dict):
-            continue
-
-        date_parts = date_info.get("date-parts")
-        if not isinstance(date_parts, list) or not date_parts:
-            continue
-
-        first_part = date_parts[0]
-        if not isinstance(first_part, list) or not first_part:
-            continue
-
-        year_raw = first_part[0]
-        if isinstance(year_raw, int):
-            return year_raw
-        if isinstance(year_raw, str) and year_raw.isdigit():
-            return int(year_raw)
-    return None
 
 
 class _CrossRefCoreBlock:
@@ -160,7 +138,7 @@ class _CrossRefDateBlock:
     ) -> tuple[int | None, str | None]:
         dates = extract_dates(record)
         pub_date = dates.get("published_print") or dates.get("published_online")
-        return _extract_crossref_publication_year_candidate(record), pub_date
+        return extract_publication_year_candidate(record), pub_date
 
     def extract(self, record: BronzeRecord) -> JsonDict:
         raw_year, publication_date = self._extract_common_date(record)
