@@ -86,12 +86,12 @@ ______________________________________________________________________
      - `bioetl-dq-v2`
   1. Получите агрегаты по причинам:
      ```bash
-     bioetl quarantine stats --pipeline your-pipeline-name --silver-filter-only
-     bioetl quarantine stats --pipeline your-pipeline-name --silver-filter-only --group-by reason-code-field
+     bioetl quarantine stats --pipeline your-pipeline-name --error-code FILTERED_OUT_SILVER
+     bioetl quarantine stats --pipeline your-pipeline-name --error-code FILTERED_OUT_SILVER --group-by reason-code-field
      ```
   1. Посмотрите конкретные записи и точную причину исключения:
      ```bash
-     bioetl quarantine inspect --pipeline your-pipeline-name --silver-filter-only --limit 20
+     bioetl quarantine inspect --pipeline your-pipeline-name --error-code FILTERED_OUT_SILVER --limit 20
      ```
   1. Ориентируйтесь прежде всего на structured поля `reason_code`, `field`,
      `rule_type`, `operator`, `expected`, `actual`, а не только на текст `Reason`.

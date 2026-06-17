@@ -252,8 +252,9 @@ Summary of phases:
 
 - Phased: Domain → Infrastructure → Configs → Tests → Observability →
   Hardening.
-- Runtime identity stays pinned to `structural_only_auto_promote`; the
-  temporary rollback branch used during migration rollout has been retired.
+- Runtime identity stays pinned to `structural_only_compat`; historical
+  snapshots with `structural_only_auto_promote` remain readable only as a
+  compatibility alias.
 - Auto-promotion period: 1-2 release cycles before hardening CI invariant
   from warning to error.
 

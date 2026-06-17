@@ -187,7 +187,7 @@ def test_checkpoint_execution_identity_payload_matches_domain_contract() -> None
         "effective_config_artifact_id": " artifact-42 ",
         "exact_replay": True,
         "input_snapshot_fingerprint": " FACE ",
-        "silver_filter_compatibility_mode": " structural_only_auto_promote ",
+        "silver_filter_compatibility_mode": " structural_only_compat ",
     }
     expected_payload = build_execution_identity_payload(**raw_inputs)
 

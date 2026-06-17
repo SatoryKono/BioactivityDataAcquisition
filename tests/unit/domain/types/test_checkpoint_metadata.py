@@ -468,7 +468,7 @@ class TestCheckpointMetadata:
             contract_ref="chembl.activity",
             contract_version="1.0.0",
             effective_config_hash="a" * 64,
-            silver_filter_compatibility_mode="structural_only_auto_promote",
+            silver_filter_compatibility_mode="structural_only_compat",
         )
         drifted = CheckpointMetadata(
             records_processed=100,
@@ -483,11 +483,32 @@ class TestCheckpointMetadata:
 
         assert (
             payload["silver_filter_compatibility_mode"]
-            == "structural_only_auto_promote"
+            == "structural_only_compat"
         )
         assert (
             metadata.checkpoint_execution_identity_fingerprint()
             != drifted.checkpoint_execution_identity_fingerprint()
+        )
+
+    def test_checkpoint_execution_identity_accepts_historical_silver_filter_mode(
+        self,
+    ) -> None:
+        """Persisted historical Silver mode remains part of replay identity."""
+        metadata = CheckpointMetadata(
+            records_processed=100,
+            pipeline_name="chembl_activity",
+            run_type="incremental",
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            effective_config_hash="a" * 64,
+            silver_filter_compatibility_mode="structural_only_auto_promote",
+        )
+
+        payload = metadata.checkpoint_execution_identity_payload()
+
+        assert (
+            payload["silver_filter_compatibility_mode"]
+            == "structural_only_auto_promote"
         )
 
     def test_checkpoint_execution_identity_uses_snapshot_refs_when_present(

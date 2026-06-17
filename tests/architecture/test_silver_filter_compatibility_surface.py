@@ -21,6 +21,18 @@ FORBIDDEN_DUPLICATE_IDENTITY_TOKENS = (
     "silver_filter_semantic_mode",
     "silver_filter_execution_mode",
 )
+HISTORICAL_AUTO_PROMOTE_MODE_TOKEN = "structural_only_auto_promote"
+HISTORICAL_AUTO_PROMOTE_ALLOWED_SOURCE_PATHS = frozenset(
+    {
+        ROOT / "src" / "bioetl" / "domain" / "config" / "runtime.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "infrastructure"
+        / "config"
+        / "silver_filter_migration.py",
+    }
+)
 GUARDED_RUNTIME_CONFIG_ROOTS = (
     ROOT / "src" / "bioetl",
     ROOT / "configs",
@@ -142,6 +154,23 @@ def test_runtime_config_and_ci_surfaces_do_not_reintroduce_retired_silver_semant
     assert not violations, (
         "Retired Silver semantic compatibility aliases or duplicate mode fields "
         "returned in runtime/config/CI surfaces:\n" + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_historical_auto_promote_mode_is_alias_only_in_source() -> None:
+    """Old mode name is readable history, not current runtime identity."""
+    violations: list[str] = []
+
+    for path in (ROOT / "src" / "bioetl").rglob("*.py"):
+        if path in HISTORICAL_AUTO_PROMOTE_ALLOWED_SOURCE_PATHS:
+            continue
+        if HISTORICAL_AUTO_PROMOTE_MODE_TOKEN in path.read_text(encoding="utf-8"):
+            violations.append(path.relative_to(ROOT).as_posix())
+
+    assert not violations, (
+        "structural_only_auto_promote may only appear in explicit historical "
+        "alias handling:\n" + "\n".join(violations)
     )
 
 

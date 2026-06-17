@@ -9,6 +9,7 @@ from bioetl.application.services.control_plane.manifest.execution_identity_suppo
 from bioetl.application.services.control_plane.manifest.replay_taxonomy import (
     resolve_replay_taxonomy_projection,
 )
+from bioetl.domain.config.runtime import CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE
 from bioetl.domain.control_plane import RunCodeProvenance, RunManifest
 from bioetl.domain.normalization import compute_execution_identity_fingerprint
 
@@ -104,7 +105,7 @@ class RunManifestIdentityGraphAssembler:
             silver_filter_compatibility_mode=str(
                 manifest.runtime_config.get(
                     "silver_filter_compatibility_mode",
-                    "structural_only_auto_promote",
+                    CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE,
                 )
             ),
         )

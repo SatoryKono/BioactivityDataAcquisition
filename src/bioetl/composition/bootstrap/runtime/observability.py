@@ -68,12 +68,7 @@ def _create_runtime_audit_port(
     metrics: MetricsPort,
     tracing: TracingPort,
 ) -> AuditPort:
-    """Resolve the canonical runtime audit factory lazily.
-
-    Importing the broader ``bioetl.composition.factories`` package at module load
-    time can pull in unrelated assembly surfaces. Keep the audit factory import
-    at bootstrap time so runtime observability stays a thin entrypoint.
-    """
+    """Resolve the canonical runtime audit factory lazily."""
     from bioetl.composition.factories.storage.audit import (
         create_audit_port as create_audit_port_impl,
     )
@@ -99,14 +94,7 @@ def validate_observability_preflight(
     yaml_config: object | None = None,
     skip_gold: bool = False,
 ) -> None:
-    """Validate observability components for production readiness.
-
-    Args:
-        tracer: TracingPort to validate; checked for NoOp in production.
-        metrics: MetricsPort to validate; checked for NoOp in production.
-        environment: Deployment environment name (e.g., 'prod', 'staging').
-        logger: LoggerPort used to emit preflight validation warnings.
-    """
+    """Validate observability components for production readiness."""
     _validate_observability_preflight_impl(
         tracer=tracer,
         metrics=metrics,
@@ -126,17 +114,7 @@ def bootstrap_logger(
     run_id: UUID | None = None,
     log_level: str = "INFO",
 ) -> LoggerPort:
-    """Create a logger port implementation for pipeline execution.
-
-    Args:
-        pipeline: Pipeline name used as a structured log field.
-        run_id: Run UUID for log correlation; a new UUID is generated if None.
-        log_level: Minimum log level string (e.g., 'INFO', 'DEBUG').
-
-    Returns:
-        Configured LoggerPort for structured pipeline logging.
-    """
-
+    """Create a logger port implementation for pipeline execution."""
     return _bootstrap_logger_impl(
         pipeline=pipeline,
         run_id=run_id,
@@ -148,16 +126,7 @@ def bootstrap_tracer(
     settings: Settings,
     service_name: str = "bioetl",
 ) -> TracingPort:
-    """Create a tracing port implementation for distributed tracing.
-
-    Args:
-        settings: Application settings used to check whether tracing is enabled.
-        service_name: OpenTelemetry service name for span identification.
-            Defaults to 'bioetl'.
-
-    Returns:
-        Configured TracingPort for distributed tracing.
-    """
+    """Create a tracing port implementation for distributed tracing."""
     return _bootstrap_tracer_impl(
         settings=settings,
         service_name=service_name,
@@ -165,28 +134,14 @@ def bootstrap_tracer(
 
 
 def bootstrap_metrics(settings: Settings) -> MetricsPort:
-    """Create a metrics port implementation.
-
-    Args:
-        settings: Application settings used to determine if metrics are enabled.
-
-    Returns:
-        Configured MetricsPort for pipeline metrics collection.
-    """
+    """Create a metrics port implementation."""
     return _bootstrap_metrics_impl(
         settings=settings,
     )
 
 
 def maybe_start_metrics_server(settings: Settings) -> bool:
-    """Start metrics server if enabled in settings.
-
-    Args:
-        settings: Application settings providing metrics port, address, and feature flags.
-
-    Returns:
-        True if the metrics server was started, False otherwise.
-    """
+    """Start metrics server if enabled in settings."""
     return _maybe_start_metrics_server_impl(
         settings=settings,
     )
@@ -196,16 +151,7 @@ def bootstrap_dq_monitor(
     settings: Settings,
     logger: LoggerPort | None = None,
 ) -> DQMonitorPort | None:
-    """Create a data quality monitor port implementation.
-
-    Args:
-        settings: Application settings used to check whether DQ monitoring is enabled.
-        logger: Optional LoggerPort for structured DQ monitor logging; uses NoOpLogger
-            if None.
-
-    Returns:
-        DQMonitorPort if DQ monitoring is enabled, None otherwise.
-    """
+    """Create a data quality monitor port implementation."""
     return _bootstrap_dq_monitor_impl(
         settings=settings,
         logger=logger,
@@ -220,18 +166,7 @@ def bootstrap_observability_bundle(
     yaml_config: object | None = None,
     skip_gold: bool = False,
 ) -> ObservabilityBundle:
-    """Build validated logger/metrics/tracer/DQ-monitor bundle for a pipeline run.
-
-    Args:
-        pipeline: Pipeline name used for logger and tracer context.
-        run_id: Run UUID used for log correlation across all observability components.
-        settings: Application settings driving feature flags for each component.
-        log_level: Minimum log level string (e.g., 'INFO', 'DEBUG').
-
-    Returns:
-        Validated ObservabilityBundle with logger, metrics, tracer, and DQ monitor.
-    """
-
+    """Build validated logger/metrics/tracer/DQ-monitor bundle for a pipeline run."""
     return _bootstrap_observability_bundle_impl(
         pipeline=pipeline,
         run_id=run_id,

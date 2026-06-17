@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Final, cast
 
+from bioetl.domain.config.runtime import CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE
 from bioetl.domain.normalization import (
     build_execution_identity_payload,
     compute_execution_identity_fingerprint,
@@ -51,7 +52,9 @@ class CheckpointExecutionIdentityFallbackContext:
     effective_config_artifact_id: str | None
     exact_replay: bool | None
     input_snapshot_fingerprint: str | None
-    silver_filter_compatibility_mode: str | None = "structural_only_auto_promote"
+    silver_filter_compatibility_mode: str | None = (
+        CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE
+    )
     dependency_lock_hash: str | None = None
 
 
@@ -148,7 +151,9 @@ def _build_checkpoint_execution_identity_payload(
     effective_config_artifact_id: str | None,
     exact_replay: bool | None,
     input_snapshot_fingerprint: str | None,
-    silver_filter_compatibility_mode: str | None = "structural_only_auto_promote",
+    silver_filter_compatibility_mode: str | None = (
+        CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE
+    ),
 ) -> JsonDict:
     """Build the canonical checkpoint execution-identity fallback payload."""
     if all(

@@ -27,9 +27,11 @@ from bioetl.interfaces.cli.commands.domains.quarantine.support import (
 )
 
 SILVER_FILTER_ERROR_CODE = "FILTERED_OUT_SILVER"
+SILVER_FILTER_ALIAS_SUNSET_DATE = "2026-09-30"
 SILVER_FILTER_ALIAS_HELP = (
-    "Legacy alias for --error-code FILTERED_OUT_SILVER; Silver structural "
-    "rejects only, not Gold contract/semantic rejects."
+    "Deprecated legacy alias for --error-code FILTERED_OUT_SILVER; sunset "
+    f"{SILVER_FILTER_ALIAS_SUNSET_DATE}. Silver structural rejects only, "
+    "not Gold contract/semantic rejects."
 )
 
 

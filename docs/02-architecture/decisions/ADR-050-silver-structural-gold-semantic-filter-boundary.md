@@ -87,7 +87,9 @@ configuration rather than a separate runtime identity field.
 
 During the compatibility window, infrastructure may accept legacy semantic keys
 under `filters.silver_filters` only at configuration boundaries. The accepted
-runtime mode is `structural_only_auto_promote`:
+runtime mode is `structural_only_compat`; the old
+`structural_only_auto_promote` value is only a historical persisted identity
+alias:
 
 1. Semantic Silver rules are promoted into Gold filter payloads before domain
    conversion.
@@ -95,7 +97,7 @@ runtime mode is `structural_only_auto_promote`:
    direct construction or legacy compatibility surfaces still carry semantic
    buckets.
 1. Effective config, run manifest, execution fingerprint, and checkpoint
-   compatibility payloads must record the compatibility mode.
+   compatibility payloads must record the canonical compatibility mode.
 1. Gold wins when a legacy Silver semantic rule conflicts with an explicit Gold
    semantic rule.
 

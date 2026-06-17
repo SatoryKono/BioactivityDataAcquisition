@@ -131,7 +131,10 @@ infrastructure schema → domain config. Это сохраняет чистот�
 
 Добавить явное поле `silver_filter_compatibility_mode`:
 
-- `structural_only_auto_promote` — canonical runtime mode; semantic Silver rules поднимаются в Gold
+- `structural_only_compat` — canonical runtime mode; Silver rules stay
+  structural-only, and semantic/business rules are owned by Gold.
+- `structural_only_auto_promote` — historical persisted identity alias only;
+  new runtime payloads must not emit it.
 
 Поле должно попадать в effective config, run manifest, execution fingerprint и
 checkpoint compatibility payload, иначе structural-only behavior не будет

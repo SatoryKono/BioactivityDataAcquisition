@@ -1005,13 +1005,14 @@ bioetl quarantine inspect --pipeline <NAME> [OPTIONS]
 | `--limit`              | int  | 100          | Максимум записей                                |
 | `--error-code`         | str  | None         | Фильтр по коду ошибки                           |
 | `--run-id`             | str  | None         | Ограничить просмотр одним run                   |
-| `--silver-filter-only` | flag | False        | Legacy alias для `--error-code FILTERED_OUT_SILVER`; только Silver structural rejects, не Gold contract/semantic rejects |
+| `--silver-filter-only` | flag | False        | Deprecated legacy alias для `--error-code FILTERED_OUT_SILVER`; sunset 2026-09-30; только Silver structural rejects, не Gold contract/semantic rejects |
 
 **Примеры:**
 
 ```bash
 bioetl quarantine inspect --pipeline chembl_activity
 bioetl quarantine inspect --pipeline chembl_activity --error-code DQ-MISSING-FIELD
+bioetl quarantine inspect --pipeline chembl_activity --error-code FILTERED_OUT_SILVER
 ```
 
 #### `quarantine stats` — Статистика
@@ -1026,7 +1027,7 @@ bioetl quarantine stats --pipeline <NAME> [--json]
 | `--json`               | flag | False        | Вывод в JSON                                                                                                           |
 | `--error-code`         | str  | None         | Ограничить статистику одним кодом ошибки                                                                               |
 | `--run-id`             | str  | None         | Ограничить статистику одним run                                                                                        |
-| `--silver-filter-only` | flag | False        | Legacy alias для `--error-code FILTERED_OUT_SILVER`; только Silver structural rejects, не Gold contract/semantic rejects |
+| `--silver-filter-only` | flag | False        | Deprecated legacy alias для `--error-code FILTERED_OUT_SILVER`; sunset 2026-09-30; только Silver structural rejects, не Gold contract/semantic rejects |
 | `--group-by`           | str  | None         | Фокусная Silver-группировка (`reason-code`, `field`, `rule-type`, `operator`, `reason-code-field`, `reason-signature`) |
 | `--top`                | int  | 10           | Лимит элементов в группировках                                                                                         |
 

@@ -52,31 +52,33 @@ ______________________________________________________________________
 bioetl quarantine inspect --pipeline {pipeline-name} --limit 50
 ```
 
-- For Silver structural triage, start with:
+- For Silver structural triage, prefer the explicit non-legacy error-code path:
 
 ```bash
-bioetl quarantine stats --pipeline {pipeline-name} --silver-filter-only
-bioetl quarantine stats --pipeline {pipeline-name} --silver-filter-only --group-by reason-code-field
-bioetl quarantine inspect --pipeline {pipeline-name} --silver-filter-only --limit 20
+bioetl quarantine stats --pipeline {pipeline-name} --error-code FILTERED_OUT_SILVER
+bioetl quarantine stats --pipeline {pipeline-name} --error-code FILTERED_OUT_SILVER --group-by reason-code-field
+bioetl quarantine inspect --pipeline {pipeline-name} --error-code FILTERED_OUT_SILVER --limit 20
 ```
 
 - If you are investigating one concrete run and need a trustworthy Bronze denominator,
   use run-scoped mode:
 
 ```bash
-bioetl quarantine stats --pipeline {pipeline-name} --silver-filter-only --run-id {run-id}
-bioetl quarantine inspect --pipeline {pipeline-name} --silver-filter-only --run-id {run-id} --limit 20
+bioetl quarantine stats --pipeline {pipeline-name} --error-code FILTERED_OUT_SILVER --run-id {run-id}
+bioetl quarantine inspect --pipeline {pipeline-name} --error-code FILTERED_OUT_SILVER --run-id {run-id} --limit 20
 ```
 
-- `stats --silver-filter-only` is the fastest legacy-alias way to see Silver
-  structural rejects:
+- `--silver-filter-only` remains as a deprecated compatibility alias until
+  2026-09-30. New runbooks and operator examples should use
+  `--error-code FILTERED_OUT_SILVER` so the Silver structural reject scope is
+  explicit:
 
   - total Silver rejects;
   - top `reason_code`;
   - top rejected `field`;
   - `rule_type` / `operator` distribution.
 
-- `stats --silver-filter-only --run-id ...` additionally shows
+- `stats --error-code FILTERED_OUT_SILVER --run-id ...` additionally shows
   `Silver Rejects vs Bronze` when the control-plane ledger contains
   `records_bronze` for that run. The ratio is intentionally omitted outside
   run-scoped mode to avoid misleading cross-run denominators.
@@ -99,8 +101,8 @@ bioetl quarantine inspect --pipeline {pipeline-name} --silver-filter-only --run-
   Human-readable `Reason` / `message` остаётся display-only текстом и не должен
   использоваться как aggregation key.
 
-- `inspect --silver-filter-only` is the right drilldown when you need the exact
-  Silver structural reason for one record. The CLI renders `Reason`,
+- `inspect --error-code FILTERED_OUT_SILVER` is the right drilldown when you
+  need the exact Silver structural reason for one record. The CLI renders `Reason`,
   `reason_code`, `rule_type`, `field`, `operator`, `expected`, `actual`, and
   the original payload. For Gold contract/semantic rejects, start from the
   `4. Data Quality` Gold reject panel/processed-records surfaces.
@@ -156,7 +158,7 @@ bioetl quarantine purge --pipeline {pipeline-name}
 1. Pivot to `4. Data Quality` and inspect `Top Silver Reject Reasons` plus
    `Top Silver Reject Fields` to reduce the issue to a bounded cause summary.
 1. Open `Silver Reject Explorer` for exact record-level evidence and selected-record context.
-1. Run `bioetl quarantine inspect ... --silver-filter-only` /
+1. Run `bioetl quarantine inspect ... --error-code FILTERED_OUT_SILVER` /
    `bioetl quarantine resolve ...` when you need operator action in CLI.
 1. For Gold contract/semantic rejects, stay in `4. Data Quality` and inspect
    `Inspect: Gold Reject Outcomes by Pipeline` plus processed-records surfaces.
