@@ -46,7 +46,7 @@
           "pipeline_name": "chembl_activity",
           "pipeline_version": "1.0.0",
           "run_type": "incremental",
-          "silver_filter_compatibility_mode": "structural_only_auto_promote"
+          "silver_filter_compatibility_mode": "structural_only_compat"
         }
       },
       "checkpoint_identity": {
@@ -313,7 +313,7 @@
             "pipeline_name": "chembl_activity",
             "pipeline_version": "1.0.0",
             "run_type": "incremental",
-            "silver_filter_compatibility_mode": "structural_only_auto_promote"
+            "silver_filter_compatibility_mode": "structural_only_compat"
           }
         },
         "checkpoint_identity": {
@@ -374,7 +374,7 @@
           "pipeline_name": "chembl_activity",
           "pipeline_version": "1.0.0",
           "run_type": "incremental",
-          "silver_filter_compatibility_mode": "structural_only_auto_promote"
+          "silver_filter_compatibility_mode": "structural_only_compat"
         }
       },
       "code_provenance_state": {
@@ -1476,7 +1476,7 @@
           "pipeline_name": "chembl_activity",
           "pipeline_version": "1.0.0",
           "run_type": "incremental",
-          "silver_filter_compatibility_mode": "structural_only_auto_promote"
+          "silver_filter_compatibility_mode": "structural_only_compat"
         }
       },
       "checkpoint_identity": {
@@ -1537,7 +1537,7 @@
         "pipeline_name": "chembl_activity",
         "pipeline_version": "1.0.0",
         "run_type": "incremental",
-        "silver_filter_compatibility_mode": "structural_only_auto_promote"
+        "silver_filter_compatibility_mode": "structural_only_compat"
       }
     },
     "code_provenance_state": {
