@@ -1,12 +1,4 @@
-"""Health server integration for CLI commands.
-
-Provides utilities for running the health server alongside long-running
-pipeline operations. The health server exposes Kubernetes-compatible
-health probes while pipelines execute.
-
-This module follows the thin controller pattern - it delegates to
-composition entrypoints for dependency injection.
-"""
+"""Health server integration for CLI commands."""
 
 from __future__ import annotations
 
@@ -43,7 +35,6 @@ if TYPE_CHECKING:
     from bioetl.interfaces.http.health_server import HealthServer
 
 
-# Default port for health server during pipeline operations
 DEFAULT_HEALTH_SERVER_PORT = 8081
 
 _HEALTH_SERVER_DOMAIN_ERROR_TITLE = "Health server failed with domain error"
@@ -103,7 +94,6 @@ def _start_metrics_server_via_interface(
     )
 
 
-# Backward-compatible patch point for existing tests and callers.
 start_metrics_server = _start_metrics_server_via_interface
 
 
@@ -145,6 +135,46 @@ def build_health_server_pycache_prefix() -> Path:
     return Path(tempfile.gettempdir()) / "bioetl-pycache"
 
 
+def _get_optional_health_server_quarantine_service() -> QuarantineService | None:
+    """Return quarantine service when available without failing health probes."""
+    try:
+        return get_health_server_quarantine_service()
+    except CLI_ENTRYPOINT_TYPED_ERRORS:
+        return None
+
+
+def build_health_server(
+    *,
+    host: str,
+    port: int,
+    deps: HealthServerDependenciesProtocol,
+    quarantine_service: QuarantineService | None,
+) -> HealthServer:
+    """Construct the HTTP health server from composition dependencies."""
+    from bioetl.interfaces.http.health_server import HealthServer
+
+    return HealthServer(
+        host=host,
+        port=port,
+        health_monitor=deps.health_monitor,
+        quarantine_service=quarantine_service,
+        checkpoint_port=deps.checkpoint_port,
+        run_manifest_port=deps.run_manifest_port,
+        run_ledger_port=deps.run_ledger_port,
+    )
+
+
+async def close_health_server_resources(
+    *,
+    deps: HealthServerDependenciesProtocol,
+    quarantine_service: QuarantineService | None,
+) -> None:
+    """Close resources shared by health-server execution modes."""
+    await deps.checkpoint_port.aclose()
+    if quarantine_service is not None:
+        await quarantine_service.aclose()
+
+
 def _start_health_observability(logger: LoggerPort | None = None) -> None:
     """Start the Prometheus metrics server for long-lived health mode."""
     settings = get_runtime_settings()
@@ -179,27 +209,16 @@ def _start_health_observability(logger: LoggerPort | None = None) -> None:
 
 async def _run_health_server(host: str, port: int) -> None:
     """Start and keep the health server alive until interrupted."""
-    from bioetl.interfaces.http.health_server import HealthServer
-
     if sys.pycache_prefix is None:
         sys.pycache_prefix = str(build_health_server_pycache_prefix())
     deps = get_health_server_dependencies()
     _start_health_observability()
-    quarantine_service: QuarantineService | None = None
-    try:
-        quarantine_service = get_health_server_quarantine_service()
-    except CLI_ENTRYPOINT_TYPED_ERRORS:
-        # Why: Health probes must stay available even when quarantine storage
-        # setup fails; explorer endpoints remain disabled in that case.
-        quarantine_service = None
-    server = HealthServer(
+    quarantine_service = _get_optional_health_server_quarantine_service()
+    server = build_health_server(
         host=host,
         port=port,
-        health_monitor=deps.health_monitor,
+        deps=deps,
         quarantine_service=quarantine_service,
-        checkpoint_port=deps.checkpoint_port,
-        run_manifest_port=deps.run_manifest_port,
-        run_ledger_port=deps.run_ledger_port,
     )
     try:
         await server.start()
@@ -207,9 +226,10 @@ async def _run_health_server(host: str, port: int) -> None:
             await asyncio.sleep(1)
     finally:
         await server.stop()
-        await deps.checkpoint_port.aclose()
-        if quarantine_service is not None:
-            await quarantine_service.aclose()
+        await close_health_server_resources(
+            deps=deps,
+            quarantine_service=quarantine_service,
+        )
         click.echo("\nHealth server stopped.")
 
 
@@ -253,47 +273,27 @@ async def health_server_context(
     host: str = "127.0.0.1",
     port: int = DEFAULT_HEALTH_SERVER_PORT,
 ) -> AsyncIterator[HealthServer | None]:
-    """Run health server for the context lifetime when enabled.
-
-    Yields the running HealthServer for the duration of the async context,
-    then stops it on exit. If the server fails to bind (port in use), a
-    warning is printed and None is yielded so the pipeline continues.
-
-    Args:
-        enabled: When False, yields None immediately without starting a server.
-        host: IP address to bind to. Defaults to localhost.
-        port: TCP port to listen on. Defaults to DEFAULT_HEALTH_SERVER_PORT.
-    """
+    """Run the health server for the context lifetime when enabled."""
     if not enabled:
         yield None
         return
 
-    from bioetl.interfaces.http.health_server import HealthServer
-
-    # Get dependencies from composition root (proper DI)
     deps = get_health_server_dependencies()
-    try:
-        quarantine_service = get_health_server_quarantine_service()
-    except CLI_ENTRYPOINT_TYPED_ERRORS:
-        # Why: keep health probes available during pipeline runs even if
-        # quarantine explorer dependencies are temporarily unavailable.
-        quarantine_service = None
-    server = HealthServer(
+    quarantine_service = _get_optional_health_server_quarantine_service()
+    server = build_health_server(
         host=host,
         port=port,
-        health_monitor=deps.health_monitor,
+        deps=deps,
         quarantine_service=quarantine_service,
-        checkpoint_port=deps.checkpoint_port,
-        run_manifest_port=deps.run_manifest_port,
-        run_ledger_port=deps.run_ledger_port,
     )
 
     try:
         await server.start()
     except OSError:
-        await deps.checkpoint_port.aclose()
-        if quarantine_service is not None:
-            await quarantine_service.aclose()
+        await close_health_server_resources(
+            deps=deps,
+            quarantine_service=quarantine_service,
+        )
         click.echo(
             f"Warning: Health server failed to bind to {host}:{port} "
             f"(port in use). Pipeline will continue without health server.",
@@ -306,23 +306,14 @@ async def health_server_context(
         yield server
     finally:
         await server.stop()
-        await deps.checkpoint_port.aclose()
-        if quarantine_service is not None:
-            await quarantine_service.aclose()
+        await close_health_server_resources(
+            deps=deps,
+            quarantine_service=quarantine_service,
+        )
 
 
 def add_health_server_options(cmd: click.Command) -> click.Command:
-    """Add health server options to a Click command.
-
-    Adds --health-server/--no-health-server and --health-port options
-    to the given command.
-
-    Args:
-        cmd: Click command to add options to.
-
-    Returns:
-        Modified command with health server options.
-    """
+    """Add health server options to a Click command."""
     cmd = click.option(
         "--health-server/--no-health-server",
         default=True,
@@ -342,13 +333,7 @@ def add_health_server_options(cmd: click.Command) -> click.Command:
 
 
 def echo_health_server_info(enabled: bool, port: int, host: str = "127.0.0.1") -> None:
-    """Output health server status information.
-
-    Args:
-        enabled: Whether health server is enabled.
-        port: Port the server is listening on.
-        host: Host the server is bound to (default: 127.0.0.1 for security).
-    """
+    """Output health server status information."""
     if enabled:
         click.echo(f"Health server: http://{host}:{port}/health")
 

@@ -30,6 +30,9 @@ from bioetl.application.core.normalization_fallbacks import (
 )
 from bioetl.application.core.normalization_rules import NormalizationRulesPolicy
 from bioetl.application.core.pre_silver_record import PreSilverRecord
+from bioetl.application.core.record_normalization_finalization import (
+    finalize_pre_silver_record,
+)
 from bioetl.application.core.record_processor_config import ContentHashPolicyByVersion
 from bioetl.domain.normalization.json import serialize_json_canonical
 
@@ -104,45 +107,12 @@ class RecordNormalizationProcessor(RecordNormalizationHashSupportMixin):
         index: int,
     ) -> JsonDict | None:
         """Finalize an intermediate pre-silver payload into a Silver record."""
-        normalized_business_data = self.normalize_business_data(
-            pre_silver.business_data
-        )
-        version_hashes = self.compute_content_hashes_by_version(
-            normalized_business_data
-        )
-        content_hash = (
-            version_hashes.get(self.content_hash_policy_by_version.active_version)
-            if self.content_hash_policy_by_version is not None
-            else None
-        )
-        if content_hash is None:
-            content_hash = self.compute_content_hash(normalized_business_data)
-        silver_record = pre_silver.build_silver_record(
-            context,
-            pre_silver.entity_id,
-            content_hash,
-            index,
-            normalized_business_data,
-        )
-        silver_record = self.project_normalization_findings(
-            silver_record,
+        return finalize_pre_silver_record(
+            self,
+            pre_silver,
             context=context,
             index=index,
         )
-        if self._should_project_hashes_by_version():
-            silver_record["_content_hashes_by_version"] = version_hashes
-        if pre_silver.apply_structural_policy is not None:
-            projected_record = pre_silver.apply_structural_policy(
-                context,
-                silver_record,
-                index,
-            )
-            if projected_record is None:
-                return None
-            silver_record = projected_record
-        if pre_silver.apply_silver_filter is not None:
-            pre_silver.apply_silver_filter(context, silver_record, index)
-        return silver_record
 
     def _normalize_mapping(self, record: JsonDict) -> JsonDict:
         object.__setattr__(self, "_normalization_findings", ())

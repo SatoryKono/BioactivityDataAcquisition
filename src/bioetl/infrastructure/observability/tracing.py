@@ -172,7 +172,11 @@ def _extract_endpoint_host(endpoint: str) -> str:
     normalized = endpoint.strip()
     if "://" in normalized:
         return (urlparse(normalized).hostname or "").lower()
-    return normalized.split(":", 1)[0].strip("[]").lower()
+    if normalized.startswith("[") and "]" in normalized:
+        return normalized[1:].split("]", 1)[0].lower()
+    if normalized.count(":") == 1:
+        normalized = normalized.rsplit(":", 1)[0]
+    return normalized.strip("[]").lower()
 
 
 def _get_otlp_endpoint() -> str | None:

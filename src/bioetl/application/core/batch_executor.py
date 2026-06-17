@@ -6,6 +6,7 @@ __all__ = ["BatchExecutor", "BatchResult"]
 
 
 import asyncio
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -17,6 +18,10 @@ from bioetl.application.core.batch_executor_dq_mixin import _BatchExecutorDQMixi
 from bioetl.application.core.batch_executor_protocols import (
     BatchStateCommitProtocol,
     PipelineProcessingProtocol,
+)
+from bioetl.application.core.batch_executor_runtime_state import (
+    BatchExecutorRuntimeState,
+    BatchExecutorRuntimeStateMixin,
 )
 from bioetl.application.core.batch_executor_state_flow import (
     execute_batch_run,
@@ -38,7 +43,7 @@ from bioetl.application.core.lifecycle.batch_fsm import (
 from bioetl.domain.constants import (
     DEFAULT_CHECKPOINT_INTERVAL as _DOMAIN_DEFAULT_CHECKPOINT_INTERVAL,
 )
-from bioetl.domain.types import BronzeRecord, GoldRecord, JsonDict
+from bioetl.domain.types import BronzeRecord, JsonDict
 
 _SHARED_FAILURE_POLICY = _RF005_SHARED_FAILURE_POLICY
 
@@ -62,6 +67,9 @@ class BatchExecutorDependencies:
     execution_state_service: BatchStateCommitProtocol
     processing_port: PipelineProcessingProtocol
     fsm: BatchExecutionFSM
+    runtime_state_factory: Callable[[], BatchExecutorRuntimeState] = (
+        BatchExecutorRuntimeState
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -74,7 +82,7 @@ class BatchResult:
     quarantined_count: int
 
 
-class BatchExecutor(_BatchExecutorDQMixin):
+class BatchExecutor(BatchExecutorRuntimeStateMixin, _BatchExecutorDQMixin):
     """Unified executor for ETL batches: fetch -> transform -> write with tracing."""
 
     DEFAULT_BATCH_SIZE = 1000
@@ -114,21 +122,7 @@ class BatchExecutor(_BatchExecutorDQMixin):
         )
 
         self._memory = dependencies.memory_manager
-
-        self.records_fetched = 0
-        self.records_bronze = 0
-        self.records_silver = 0
-        self.records_gold = 0
-        self.records_gold_excluded_by_contract = 0
-        self.records_quarantined = 0
-        self.records_filtered_out = 0
-
-        self._bronze_records_for_dq: list[bytes] = []
-        self._silver_records_for_dq: list[BronzeRecord] = []
-        self._gold_records_for_dq: list[GoldRecord] = []
-        self._dq_total_seen: int = 0
-        self._source_batch_ids: list[str] = []
-        self._last_bronze_path: str | None = None
+        self._runtime_state = dependencies.runtime_state_factory()
 
         self._execution_run_service = dependencies.execution_run_service
         self._extraction_loop_service = dependencies.extraction_loop_service
@@ -142,10 +136,6 @@ class BatchExecutor(_BatchExecutorDQMixin):
             "debug_export_service",
             None,
         )
-        self._debug_export_result = None
-
-        self._resume_offset = 0
-        self._query_string: str | None = None
 
     @property
     def entity_type(self) -> str:

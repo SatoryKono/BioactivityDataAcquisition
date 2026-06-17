@@ -705,17 +705,19 @@ class TestAdapterPortCompliance:
         )
 
     def test_filtered_data_source_uses_isinstance(self, src_dir: Path) -> None:
-        """FilteredDataSource MUST use isinstance() for Protocol check.
+        """Current FilteredDataSource MUST use isinstance() for Protocol check.
 
         REQ-ARCH-026: Replace hasattr() duck-typing with isinstance() check
         for FilterableDataSourcePort. This enables proper type checking and
         IDE support.
         """
         filtered_source = (
-            src_dir / "bioetl" / "application" / "core" / "filtered_data_source.py"
+            src_dir / "bioetl" / "application" / "core" / "data_sources" / "filtered.py"
         )
-        if not filtered_source.exists():
-            pytest.skip("FilteredDataSource not found")
+        assert filtered_source.exists(), (
+            "FilteredDataSource canonical module moved or disappeared; update the "
+            "architecture guard to the new canonical path instead of skipping it."
+        )
 
         content = filtered_source.read_text(encoding="utf-8")
 
