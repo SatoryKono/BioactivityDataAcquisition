@@ -1,125 +1,139 @@
-.PHONY: install test-deps setup-plugins precommit-install lint lint-fix lint-scripts-advisory quality-fast quality-pre-push quality-full clean clean-all clean-preflight clean-local-artifacts test test-fast test-unit test-integration test-architecture test-smoke test-serial test-cov-fast-stable test-ci run-local qa-arch-fast qa-arch-full qa-debt quarantine-inspect quarantine-replay quarantine-purge release-lock
+# BioETL Docker Makefile
 
-PYTHON ?= python3
-RUN ?= $(PYTHON) -m
-PIPELINE ?=
-RUN_ID ?=
-RUN_LOCAL_PIPELINE ?= chembl_activity
-RUN_LOCAL_LIMIT ?= 10
-DRY_RUN ?= 0
-PURGE_WORKTREES ?= 0
-LOCAL_COV_FAIL_UNDER ?= 80
+.PHONY: help docker-check docker-build docker-start docker-stop docker-logs docker-health docker-clean docker-compose-check
 
-ifeq ($(filter 1 true yes TRUE YES,$(DRY_RUN)),)
-	CLEAN_APPLY_FLAG := --apply
-else
-	CLEAN_APPLY_FLAG :=
-endif
+# Default target
+help:
+	@echo "BioETL Docker Commands"
+	@echo ""
+	@echo "Setup:"
+	@echo "  make docker-check           Check Docker installation"
+	@echo "  make docker-build           Build BioETL image"
+	@echo ""
+	@echo "Services:"
+	@echo "  make docker-start           Start main services (bioetl + warp)"
+	@echo "  make docker-start-full      Start all services (+ Neo4j, Redis, MinIO, monitoring)"
+	@echo "  make docker-stop            Stop main services"
+	@echo "  make docker-stop-full       Stop all services"
+	@echo ""
+	@echo "Debugging:"
+	@echo "  make docker-logs            View logs (all services)"
+	@echo "  make docker-logs-bioetl     View BioETL logs only"
+	@echo "  make docker-logs-warp       View Warp logs only"
+	@echo "  make docker-health          Check service health"
+	@echo ""
+	@echo "Maintenance:"
+	@echo "  make docker-clean           Remove containers, volumes, images"
+	@echo "  make docker-compose-check   Validate docker-compose.yml"
+	@echo "  make docker-shell-bioetl    Open shell in bioetl container"
+	@echo "  make docker-shell-warp      Open shell in warp container"
 
-ifeq ($(filter 1 true yes TRUE YES,$(PURGE_WORKTREES)),)
-	PURGE_WORKTREES_CMD :=
-else
-	PURGE_WORKTREES_CMD := rm -rf .worktrees .rollback
-endif
+# Check Docker
+docker-check:
+	@echo "Checking Docker installation..."
+	@docker --version
+	@docker compose version
+	@echo "✓ Docker is ready"
 
-install:
-	@if command -v uv >/dev/null 2>&1; then \
-		uv sync --extra dev --extra tests --extra tracing; \
-	else \
-		$(RUN) pip install -e ".[dev,tests,tracing]"; \
-	fi
+# Build BioETL image
+docker-build: docker-check
+	@echo "Building BioETL image..."
+	docker build -t bioetl:latest -f Dockerfile.bioetl . \
+		--build-arg BUILDKIT_INLINE_CACHE=1 \
+		--progress=plain
+	@echo "✓ BioETL image built"
 
-test-deps:
-	bash scripts/ops/launchers/codex/setup_plugins.sh --pytest-only
+# Start services (main only)
+docker-start: docker-check
+	@echo "Starting main services..."
+	docker compose up -d
+	@sleep 3
+	@docker compose ps
+	@echo "✓ Services started"
 
-setup-plugins:
-	bash scripts/ops/launchers/codex/setup_plugins.sh
+# Start full stack
+docker-start-full: docker-check docker-build
+	@echo "Starting full stack..."
+	docker compose -f docker-compose.neo4j.yml up -d
+	docker compose -f docker-compose.redis.yml up -d
+	docker compose -f docker-compose.minio.yml up -d
+	docker compose -f docker-compose.monitoring.yml up -d
+	docker compose up -d
+	@echo "Waiting for services to be ready..."
+	@sleep 5
+	@docker compose ps
+	@echo "✓ Full stack started"
 
-precommit-install:
-	bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only
+# Stop services (main only)
+docker-stop: docker-check
+	@echo "Stopping services..."
+	docker compose down
+	@echo "✓ Services stopped"
 
-lint:
-	$(RUN) ruff check src tests
-	$(RUN) ruff format --check src tests
-	$(RUN) mypy --config-file pyproject.toml --strict --no-incremental src/bioetl
+# Stop full stack
+docker-stop-full: docker-check
+	@echo "Stopping full stack..."
+	docker compose down
+	docker compose -f docker-compose.neo4j.yml down 2>/dev/null || true
+	docker compose -f docker-compose.redis.yml down 2>/dev/null || true
+	docker compose -f docker-compose.minio.yml down 2>/dev/null || true
+	docker compose -f docker-compose.monitoring.yml down 2>/dev/null || true
+	@echo "✓ Full stack stopped"
 
-lint-fix:
-	$(RUN) ruff check --fix src tests
-	$(RUN) ruff format src tests
+# View logs
+docker-logs: docker-check
+	docker compose logs -f
 
-lint-scripts-advisory:
-	$(RUN) ruff check scripts --exit-zero
+docker-logs-bioetl: docker-check
+	docker compose logs -f bioetl
 
-quality-fast:
-	$(RUN) pre_commit run --hook-stage pre-commit --all-files
+docker-logs-warp: docker-check
+	docker compose logs -f warp
 
-quality-pre-push:
-	$(RUN) pre_commit run --hook-stage pre-push --all-files
+# Health check
+docker-health: docker-check
+	@echo "Checking service status..."
+	@docker compose ps
+	@echo ""
+	@echo "Checking BioETL health..."
+	@docker compose exec -T bioetl curl -f http://127.0.0.1:8081/health/ready 2>/dev/null && echo "✓ BioETL is healthy" || echo "⚠ BioETL health check failed"
 
-quality-full:
-	$(RUN) pre_commit run --all-files
+# Validate compose files
+docker-compose-check: docker-check
+	@echo "Validating docker-compose.yml..."
+	docker compose config > /dev/null
+	@echo "✓ docker-compose.yml is valid"
+	@echo ""
+	@echo "Validating other compose files..."
+	docker compose -f docker-compose.neo4j.yml config > /dev/null && echo "✓ neo4j valid" || true
+	docker compose -f docker-compose.redis.yml config > /dev/null && echo "✓ redis valid" || true
+	docker compose -f docker-compose.minio.yml config > /dev/null && echo "✓ minio valid" || true
+	docker compose -f docker-compose.monitoring.yml config > /dev/null && echo "✓ monitoring valid" || true
 
-clean:
-	$(RUN) scripts.engineering.diagnostics cleanup $(CLEAN_APPLY_FLAG)
+# Shell access
+docker-shell-bioetl: docker-check
+	docker compose exec bioetl /bin/bash
 
-clean-all:
-	$(RUN) scripts.engineering.diagnostics cleanup $(CLEAN_APPLY_FLAG) --purge-logs
+docker-shell-warp: docker-check
+	docker compose exec warp /bin/bash
 
-clean-preflight:
-	$(RUN) scripts.engineering.repo preflight-cleanup $(if $(filter 1 true yes TRUE YES,$(DRY_RUN)),--dry-run)
+# Clean up
+docker-clean: docker-check
+	@echo "Removing Docker resources..."
+	docker compose down --volumes
+	docker compose -f docker-compose.neo4j.yml down --volumes 2>/dev/null || true
+	docker compose -f docker-compose.redis.yml down --volumes 2>/dev/null || true
+	docker compose -f docker-compose.minio.yml down --volumes 2>/dev/null || true
+	docker compose -f docker-compose.monitoring.yml down --volumes 2>/dev/null || true
+	docker rmi bioetl:latest 2>/dev/null || true
+	@echo "✓ Cleanup complete"
 
-clean-local-artifacts:
-	$(RUN) scripts.engineering.diagnostics cleanup $(CLEAN_APPLY_FLAG) --purge-logs
-	@$(if $(PURGE_WORKTREES_CMD),$(PURGE_WORKTREES_CMD),:)
+# Development shortcuts
+docker-dev: docker-start
+	@echo "Development environment ready"
+	@echo "Available endpoints:"
+	@echo "  BioETL:     http://localhost:8081"
+	@echo "  Metrics:    http://localhost:8000"
+	@echo "  Warp Proxy: http://localhost:9999"
 
-test:
-	$(RUN) scripts.engineering.qa run-tests --suite coverage-verify --skip-preflight
-
-test-fast:
-	$(RUN) scripts.engineering.qa run-tests --suite unit-fast --skip-preflight
-
-test-unit: test-fast
-
-test-integration:
-	$(RUN) scripts.engineering.qa run-tests --suite integration-replay --skip-preflight
-
-test-architecture: qa-arch-full
-
-test-smoke:
-	$(RUN) scripts.engineering.qa run-tests --suite smoke --skip-preflight
-
-test-serial:
-	$(RUN) pytest tests/ -m "serial and not e2e and not benchmark and not memory" -q --tb=short -p no:xdist
-
-test-cov-fast-stable:
-	BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -m "not e2e and not benchmark and not memory" --cov=src/bioetl --cov-report=term-missing --cov-fail-under=$(LOCAL_COV_FAIL_UNDER)
-
-test-ci:
-	$(RUN) scripts.engineering.ci run-tests
-
-run-local:
-	$(RUN) bioetl run --pipeline $(RUN_LOCAL_PIPELINE) --run-type incremental --limit $(RUN_LOCAL_LIMIT)
-
-qa-arch-fast:
-	$(RUN) pytest tests/architecture/ -m "not slow and not serial and not memory" -q --tb=short
-
-qa-arch-full:
-	$(RUN) pytest tests/architecture/ -m "not slow and not benchmark and not memory" -q --tb=short
-
-qa-debt:
-	$(RUN) scripts.engineering.qa.check_quality_exemptions --trend-report on
-
-quarantine-inspect:
-	$(RUN) bioetl quarantine inspect --pipeline $(PIPELINE)
-
-quarantine-replay:
-	$(RUN) bioetl quarantine replay --pipeline $(PIPELINE)
-
-quarantine-purge:
-	$(RUN) bioetl quarantine purge --pipeline $(PIPELINE)
-
-release-lock:
-	$(RUN) bioetl lock release --pipeline $(PIPELINE) --run-id $(RUN_ID)
-
-antigravity:
-	@export BROWSER='/mnt/c/Windows/System32/cmd.exe /c start' && $(RUN) antigravity
+.PHONY: docker-dev

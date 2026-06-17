@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 import re
 import subprocess
-import sys
 from pathlib import Path
 from typing import Any, cast
 
@@ -19,6 +18,7 @@ from scripts.engineering.qa.check_test_audit_preflight import (
 )
 from scripts.engineering.qa.report_test_governance_audit import (
     collect_test_governance_report,
+    evaluate_budgets,
 )
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -71,6 +71,10 @@ YamlMap = dict[str, Any]
 def _load_yaml(path: Path) -> YamlMap:
     with path.open(encoding="utf-8") as handle:
         return cast(YamlMap, yaml.safe_load(handle))
+
+
+def _canonical_json(payload: YamlMap) -> str:
+    return json.dumps(payload, indent=2, sort_keys=True) + "\n"
 
 
 def _issue_ids(payload: YamlMap) -> set[str]:
@@ -220,28 +224,33 @@ def test_tests_workflow_runs_strict_test_audit_preflight_before_governance_close
 @pytest.mark.architecture
 def test_test_governance_artifacts_match_live_collector() -> None:
     """Committed governance snapshots must fail fast on collector drift."""
-    result = subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "scripts.engineering.qa.report_test_governance_audit",
-            "--check",
-            "--json-out",
-            str(TEST_GOVERNANCE_ARTIFACT_PATH),
-            "--duplicate-name-inventory-out",
-            str(DUPLICATE_NAME_INVENTORY_PATH),
-        ],
-        cwd=ROOT,
-        check=False,
-        capture_output=True,
-        text=True,
-        timeout=180,
-    )
+    config = _load_yaml(CONFIG_PATH)
+    report = collect_test_governance_report(ROOT)
+    governance_payload: YamlMap = {
+        "budget_violations": evaluate_budgets(report, config),
+        "report": report,
+    }
+    duplicate_inventory_payload: YamlMap = {
+        "inventory": report["duplicate_test_name_inventory"],
+        "summary": report["duplicate_test_name_inventory_summary"],
+    }
 
-    assert result.returncode == 0, (
+    mismatches = [
+        path.relative_to(ROOT).as_posix()
+        for path, payload in (
+            (TEST_GOVERNANCE_ARTIFACT_PATH, governance_payload),
+            (DUPLICATE_NAME_INVENTORY_PATH, duplicate_inventory_payload),
+        )
+        if path.read_text(encoding="utf-8") != _canonical_json(payload)
+    ]
+
+    assert not mismatches, (
         "Committed test-governance artifacts drifted from live collector output.\n"
-        f"stdout:\n{result.stdout}\n"
-        f"stderr:\n{result.stderr}"
+        "Run: python -m scripts.engineering.qa.report_test_governance_audit "
+        "--check --json-out reports/quality/test-governance-current.json "
+        "--duplicate-name-inventory-out "
+        "reports/quality/test-duplicate-name-inventory.json\n"
+        + "\n".join(mismatches)
     )
 
 
