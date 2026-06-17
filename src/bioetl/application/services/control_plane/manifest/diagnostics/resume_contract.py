@@ -4,10 +4,8 @@ from __future__ import annotations
 
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.persistence_policy import (
     _resolve_applied_checkpoint_compatibility_policy,
-    _resolve_requested_checkpoint_compatibility_policy,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family import (
     _resolve_reproducibility_profile,
+    _resolve_requested_checkpoint_compatibility_policy,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_state import (
     _resolve_continuation_mode,

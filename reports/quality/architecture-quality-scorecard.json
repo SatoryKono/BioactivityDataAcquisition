@@ -23,7 +23,7 @@
     },
     {
       "evidence_metrics": {
-        "source_module_count": 2151,
+        "source_module_count": 2159,
         "uncovered_module_count": 0
       },
       "id": "ddd_invariants",
@@ -46,7 +46,7 @@
     {
       "evidence_metrics": {
         "hotspot_family_count": 5,
-        "source_module_count": 2151
+        "source_module_count": 2159
       },
       "id": "module_boundaries_coupling",
       "name": "Module boundaries / coupling",
@@ -68,7 +68,7 @@
     {
       "evidence_metrics": {
         "uncovered_module_count": 0,
-        "unmeasured_module_count": 1
+        "unmeasured_module_count": 9
       },
       "id": "test_strategy_testability",
       "name": "Test strategy / testability",
@@ -174,10 +174,10 @@
     "retained_public_export_facade_count": 4,
     "runtime_cardinality_review_required_count": 0,
     "runtime_cardinality_threshold_violation_count": 0,
-    "source_module_count": 2151,
+    "source_module_count": 2159,
     "twin_pair_count": 0,
     "uncovered_module_count": 0,
-    "unmeasured_module_count": 1
+    "unmeasured_module_count": 9
   },
   "schema_version": 1,
   "source_artifacts": {
@@ -203,12 +203,12 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "49abc90fd445677675488d3a21b181724eac7b0f39146c030e5760e4346031ab"
+      "source_fingerprint": "37551ff00f79ddb6debc6a2cacfd4f4693812e2cd8f3d170a207cb4d5a2ce913"
     },
     "module_coverage_inventory": {
       "coverage_xml_sha256": "537026a559f33e419360a3d0c89da16329c4441efc98b6d3b7a8c2cb791dff9f",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "7081cba39821100f5309abef4f85de6a781a70e3951977f54c2cc689da400253"
+      "source_tree_sha256": "a92aa82674b39d42da1f5e96ceb7a40090303f1f017d0170148a9f8d21e45322"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

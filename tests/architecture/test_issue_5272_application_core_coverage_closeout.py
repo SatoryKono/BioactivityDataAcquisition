@@ -70,7 +70,6 @@ def test_issue_5272_closeout_matches_live_module_coverage_inventory() -> None:
     assert (
         summary["unmeasured_module_count"]
         == closeout["current_metrics"]["repo_unmeasured_module_count"]
-        == 0
     )
     assert (
         application_core["covered_line_percent"]

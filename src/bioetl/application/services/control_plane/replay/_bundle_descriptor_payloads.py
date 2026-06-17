@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass
 
-from bioetl.application.services.control_plane.manifest.inspection_models import (
+from bioetl.application.services.control_plane.manifest.inspection_result_model import (
     RunManifestInspectionResult,
 )
 from bioetl.application.services.control_plane.manifest.replay_taxonomy import (

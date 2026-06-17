@@ -1,8 +1,6 @@
-"""Base-summary helpers for run manifest diagnostics."""
+"""Base run-manifest diagnostics helper aggregation seam."""
 
 from __future__ import annotations
-
-from dataclasses import dataclass
 
 from bioetl.application.services.control_plane.manifest.diagnostics.artifact_support import (
     build_produced_artifact_trace as _build_produced_artifact_trace,
@@ -10,9 +8,12 @@ from bioetl.application.services.control_plane.manifest.diagnostics.artifact_sup
 from bioetl.application.services.control_plane.manifest.diagnostics.base_effective_config_diagnostics import (
     _build_effective_config_diagnostics,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.base_provenance_payloads import (
-    _build_code_provenance_state,
-    _build_planned_artifact_refs,
+from bioetl.application.services.control_plane.manifest.diagnostics.base_payload_sections import (
+    _build_base_summary_core_payload,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.base_replay_context import (
+    _BaseSummaryReplayContext,
+    _resolve_base_summary_replay_context,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_projection import (
     build_checkpoint_anchor_projection as _build_checkpoint_anchor_projection,
@@ -26,158 +27,21 @@ from bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_p
 from bioetl.application.services.control_plane.manifest.diagnostics.checkpoint_projection import (
     resolve_resume_identity_maps as _resolve_resume_identity_maps,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.operator_replay_mode import (
-    _resolve_operator_replay_mode,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.replay import (
-    _resolve_replay_family_contract,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_blockers import (
-    _collect_append_mode_semantic_sinks,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_parentage import (
-    _build_replay_parentage,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_projection import (
-    _build_replay_projection_bundle,
-    _build_replay_projection_context_kwargs,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.reproducibility_assessment import (
-    _assess_manifest_reproducibility_policy,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.resume_contract import (
-    _build_resume_contract,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_status import (
-    _resolve_snapshot_status,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
-    collect_input_snapshot_content_hashes as _collect_input_snapshot_content_hashes,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
-    collect_input_snapshot_ids as _collect_input_snapshot_ids,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
-    collect_input_snapshot_refs as _collect_input_snapshot_refs,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
-    compute_input_snapshot_identity_fingerprint as _compute_input_snapshot_identity_fingerprint,
-)
 from bioetl.application.services.control_plane.manifest.diagnostics.summary import (
     _build_exact_replay_anchors,
 )
-from bioetl.application.services.control_plane.manifest.replay_family_contract_payload import (
-    build_replay_family_contract_payload as _build_replay_family_contract_payload,
-)
 from bioetl.domain.control_plane import RunManifest
-from bioetl.domain.control_plane.reproducibility_policy import (
-    ReproducibilityPolicyAssessment,
-)
-
-
-@dataclass(frozen=True, slots=True)
-class _BaseSummaryReplayContext:
-    """Replay- and resume-related inputs reused by base summary assembly."""
-
-    requested_exact_replay: bool
-    resume_requested: bool
-    input_snapshots: list[dict[str, object]]
-    replay_mode: str
-    continuation_mode: str
-    replay_capability_reason: str
-    replay_readiness_verdict: str
-    replay_resume_rebuild_verdict: str
-    replay_next_action: str
-    exact_replay_support_boundary: str
-    exact_replay_blockers: list[str]
-    resume_contract: dict[str, object]
-    replay_family_contract: dict[str, object]
-    policy_assessment: ReproducibilityPolicyAssessment
-    operator_replay_projection: dict[str, object]
-
-
-def _resolve_base_summary_replay_context(
-    manifest: RunManifest,
-) -> _BaseSummaryReplayContext:
-    requested_exact_replay = bool(manifest.launch_context.get("exact_replay"))
-    resume_requested = bool(manifest.launch_context.get("resume"))
-    input_snapshots = _collect_input_snapshot_refs(manifest)
-    replay_family_contract = _resolve_replay_family_contract(manifest)
-    policy_assessment = _assess_manifest_reproducibility_policy(
-        manifest=manifest,
-        requested_exact_replay=requested_exact_replay,
-        resume_requested=resume_requested,
-        replay_family_contract=replay_family_contract,
-    )
-    replay_projection_context = _build_replay_projection_context_kwargs(
-        manifest,
-        input_snapshots,
-        requested_exact_replay,
-        resume_requested,
-        policy_assessment,
-    )
-    replay_projection_bundle = _build_replay_projection_bundle(
-        **replay_projection_context,
-        replay_family_contract_payload=_build_replay_family_contract_payload(
-            replay_family_contract
-        ),
-    )
-    operator_replay_projection = replay_projection_bundle.operator_projection
-    return _BaseSummaryReplayContext(
-        requested_exact_replay=requested_exact_replay,
-        resume_requested=resume_requested,
-        input_snapshots=input_snapshots,
-        replay_mode=str(operator_replay_projection["replay_mode"]),
-        continuation_mode=str(operator_replay_projection["continuation_mode"]),
-        replay_capability_reason=str(
-            operator_replay_projection["replay_capability_reason"]
-        ),
-        replay_readiness_verdict=str(
-            operator_replay_projection["replay_readiness_verdict"]
-        ),
-        replay_resume_rebuild_verdict=str(
-            operator_replay_projection["replay_resume_rebuild_verdict"]
-        ),
-        replay_next_action=str(operator_replay_projection["replay_next_action"]),
-        exact_replay_support_boundary=str(
-            operator_replay_projection["exact_replay_support_boundary"]
-        ),
-        exact_replay_blockers=list(operator_replay_projection["exact_replay_blockers"]),
-        resume_contract=_build_resume_contract(
-            manifest=manifest,
-            requested_exact_replay=requested_exact_replay,
-            resume_requested=resume_requested,
-            policy_assessment=policy_assessment,
-        ),
-        replay_family_contract=replay_family_contract,
-        policy_assessment=policy_assessment,
-        operator_replay_projection=operator_replay_projection,
-    )
-
-
-def _is_exact_replay_eligible(
-    manifest: RunManifest,
-    replay_context: _BaseSummaryReplayContext,
-) -> bool:
-    """Return whether manifest identity has enough anchors for exact replay."""
-    del manifest
-    return bool(replay_context.operator_replay_projection["exact_replay_eligible"])
 
 
 def _build_base_summary_payload(
     manifest: RunManifest,
     replay_context: _BaseSummaryReplayContext,
 ) -> dict[str, object]:
+    """Build the base diagnostics payload and attach artifact defaults."""
     code_provenance = manifest.code_provenance
-    code_provenance_state = _build_code_provenance_state(manifest)
-    dependency_lock_state = code_provenance_state["dependency_lock_state"]
-    exact_replay_eligible = _is_exact_replay_eligible(manifest, replay_context)
     summary = _build_base_summary_core_payload(
         manifest=manifest,
         replay_context=replay_context,
-        exact_replay_eligible=exact_replay_eligible,
-        code_provenance_state=code_provenance_state,
-        dependency_lock_state=dependency_lock_state,
     )
     if code_provenance.dependency_lock_hash is not None:
         summary["dependency_lock_hash"] = code_provenance.dependency_lock_hash
@@ -185,164 +49,6 @@ def _build_base_summary_payload(
         manifest=manifest,
         summary=summary,
     )
-
-
-def _build_base_summary_code_provenance_payload(
-    code_provenance: object,
-    dependency_lock_state: object,
-    code_provenance_state: dict[str, object],
-) -> dict[str, object]:
-    """Build code provenance section of base summary payload."""
-    return {
-        "config_hash": code_provenance.config_hash,
-        "resolved_config_hash": code_provenance.resolved_config_hash,
-        "effective_config_hash": code_provenance.effective_config_hash,
-        "source_fingerprint": code_provenance.source_fingerprint,
-        "pipeline_version": code_provenance.pipeline_version,
-        "git_commit": code_provenance.git_commit,
-        "source_revision_state": code_provenance.source_revision_state,
-        "dependency_lock_state": dependency_lock_state,
-        "code_provenance_state": code_provenance_state,
-        "contract_ref": code_provenance.contract_ref,
-        "contract_version": code_provenance.contract_version,
-        "normalization_profile_ref": code_provenance.normalization_profile_ref,
-        "normalization_profile_version": (
-            code_provenance.normalization_profile_version
-        ),
-        "normalization_profile_hash": code_provenance.normalization_profile_hash,
-        "dq_policy_ref": code_provenance.dq_policy_ref,
-        "rule_bundle_version": code_provenance.rule_bundle_version,
-        "dq_contract_compatibility_hash": (
-            code_provenance.dq_contract_compatibility_hash
-        ),
-        "effective_config_artifact_id": code_provenance.effective_config_artifact_id,
-    }
-
-
-def _build_base_summary_replay_payload(
-    manifest: RunManifest,
-    replay_context: _BaseSummaryReplayContext,
-    exact_replay_eligible: bool,
-    replay_family_contract_payload: dict[str, object],
-) -> dict[str, object]:
-    """Build replay-related fields for base summary payload."""
-    replay_projection_bundle = _build_replay_projection_bundle(
-        manifest=manifest,
-        input_snapshots=replay_context.input_snapshots,
-        requested_exact_replay=replay_context.requested_exact_replay,
-        resume_requested=replay_context.resume_requested,
-        policy_assessment=replay_context.policy_assessment,
-        replay_family_contract_payload=replay_family_contract_payload,
-    )
-    operator_replay_projection = replay_projection_bundle.operator_projection
-    return {
-        "replay_of_run_id": manifest.replay_of_run_id,
-        "replay_of_manifest_id": manifest.replay_of_manifest_id,
-        "replay_parentage": _build_replay_parentage(manifest),
-        "replay_capability": manifest.replay_capability.value,
-        "replay_control_plane_state": replay_projection_bundle.replay_control_plane_state,
-        "required_persistence_profile": (
-            replay_context.policy_assessment.required_persistence_profile
-        ),
-        "requested_exact_replay": replay_context.requested_exact_replay,
-        "exact_replay_support_boundary": replay_context.exact_replay_support_boundary,
-        "replay_capability_reason": replay_context.replay_capability_reason,
-        **replay_family_contract_payload,
-        **replay_projection_bundle.replay_state_projection,
-        "exact_replay_eligible": replay_projection_bundle.exact_replay_eligible,
-        "exact_replay_blockers": replay_context.exact_replay_blockers,
-        "replay_readiness_verdict": replay_context.replay_readiness_verdict,
-        "replay_resume_rebuild_verdict": (replay_context.replay_resume_rebuild_verdict),
-        "replay_next_action": replay_context.replay_next_action,
-        "replay_mode": replay_context.replay_mode,
-        "operator_replay_mode": _resolve_operator_replay_mode(
-            replay_mode=replay_context.replay_mode,
-            continuation_mode=replay_context.continuation_mode,
-            replay_readiness_verdict=replay_context.replay_readiness_verdict,
-        ),
-        "continuation_mode": replay_context.continuation_mode,
-        "replay_family_contract": replay_context.replay_family_contract,
-        "replay_capability_assessment": (replay_context.policy_assessment.to_dict()),
-        "resume_contract": replay_context.resume_contract,
-        "resume_diagnostics": None,
-        "lineage_closure_boundary": operator_replay_projection[
-            "lineage_closure_boundary"
-        ],
-    }
-
-
-def _build_base_summary_snapshot_payload(
-    manifest: RunManifest,
-    replay_context: _BaseSummaryReplayContext,
-    exact_replay_eligible: bool,
-) -> dict[str, object]:
-    """Build snapshot-related fields for base summary payload."""
-    return {
-        "append_mode_semantic_sinks": _collect_append_mode_semantic_sinks(manifest),
-        "input_snapshot_ids": _collect_input_snapshot_ids(
-            replay_context.input_snapshots
-        ),
-        "input_snapshot_content_hashes": _collect_input_snapshot_content_hashes(
-            replay_context.input_snapshots
-        ),
-        "input_snapshot_identity_fingerprint": (
-            _compute_input_snapshot_identity_fingerprint(replay_context.input_snapshots)
-        ),
-        "input_snapshot_count": len(replay_context.input_snapshots),
-        "snapshot_status": _resolve_snapshot_status(
-            input_snapshots=replay_context.input_snapshots,
-            exact_replay_eligible=exact_replay_eligible,
-            replay_mode=replay_context.replay_mode,
-        ),
-        "input_snapshots": replay_context.input_snapshots,
-    }
-
-
-def _build_base_summary_core_payload(
-    *,
-    manifest: RunManifest,
-    replay_context: _BaseSummaryReplayContext,
-    exact_replay_eligible: bool,
-    code_provenance_state: dict[str, object],
-    dependency_lock_state: object,
-) -> dict[str, object]:
-    code_provenance = manifest.code_provenance
-    code_provenance_payload = _build_base_summary_code_provenance_payload(
-        code_provenance=code_provenance,
-        dependency_lock_state=dependency_lock_state,
-        code_provenance_state=code_provenance_state,
-    )
-    replay_family_contract_payload = _build_replay_family_contract_payload(
-        replay_context.replay_family_contract
-    )
-    replay_payload = _build_base_summary_replay_payload(
-        manifest=manifest,
-        replay_context=replay_context,
-        exact_replay_eligible=exact_replay_eligible,
-        replay_family_contract_payload=replay_family_contract_payload,
-    )
-    snapshot_payload = _build_base_summary_snapshot_payload(
-        manifest=manifest,
-        replay_context=replay_context,
-        exact_replay_eligible=exact_replay_eligible,
-    )
-    return {
-        "manifest_id": manifest.manifest_id,
-        "manifest_created_at": manifest.created_at.isoformat(),
-        "run_id": str(manifest.run_id),
-        "pipeline_name": manifest.pipeline_name,
-        "provider": manifest.provider,
-        "entity": manifest.entity,
-        "execution_fingerprint": manifest.execution_fingerprint,
-        **code_provenance_payload,
-        **replay_payload,
-        "input_snapshot_missing_source_refs": list(
-            replay_context.policy_assessment.snapshot_envelope.missing_snapshot_source_refs
-        ),
-        **snapshot_payload,
-        "planned_artifacts": _build_planned_artifact_refs(manifest),
-        "occurrence_only_diagnostics": [],
-    }
 
 
 def _attach_base_summary_artifact_defaults(

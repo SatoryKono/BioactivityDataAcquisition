@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
+from bioetl.application.services.control_plane.manifest.inspection_result_model import (
+    RunManifestInspectionResult,
+)
 
 
 class RunManifestInspectionCorruptionError(ValueError):
@@ -16,25 +18,6 @@ class RunManifestInspectionCorruptionError(ValueError):
         super().__init__(
             f"Run manifest store corruption while resolving {identifier!r}: {reason}"
         )
-
-
-@dataclass(frozen=True, slots=True)
-class RunManifestInspectionResult:
-    """Resolved control-plane view for one manifest and its ledger history."""
-
-    manifest: RunManifest
-    ledger_entries: tuple[RunLedgerEntry, ...] = ()
-    diagnostics: dict[str, object] = field(default_factory=dict)
-    identity_graph: dict[str, object] = field(default_factory=dict)
-
-    def to_dict(self) -> dict[str, object]:
-        """Return JSON/YAML-safe payload for CLI presentation."""
-        return {
-            "manifest": self.manifest.to_dict(),
-            "ledger_entries": [entry.to_dict() for entry in self.ledger_entries],
-            "diagnostics": self.diagnostics,
-            "identity_graph": self.identity_graph,
-        }
 
 
 @dataclass(frozen=True, slots=True)

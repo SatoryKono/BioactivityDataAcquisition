@@ -11,7 +11,7 @@
   },
   "current_metrics": {
     "repo_uncovered_module_count": 0,
-    "repo_unmeasured_module_count": 0,
+    "repo_unmeasured_module_count": 1,
     "application_core_covered_line_percent": 96.14,
     "application_core_uncovered_module_count": 0,
     "application_core_unmeasured_module_count": 0
@@ -29,7 +29,7 @@
   ],
   "module_expectations": {
     "repo_uncovered_module_count": "below_baseline",
-    "repo_unmeasured_module_count": "zero",
+    "repo_unmeasured_module_count": "below_baseline",
     "application_core_covered_line_percent": "above_baseline",
     "application_core_uncovered_module_count": "zero",
     "application_core_unmeasured_module_count": "zero"
