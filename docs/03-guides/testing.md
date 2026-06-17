@@ -728,6 +728,7 @@ bash scripts/engineering/dev/run_pytest_sharded.sh \
   - `python -m scripts.engineering.qa.vcr check-placement`
   - `python -m scripts.engineering.qa.vcr check-naming`
   - `python -m scripts.engineering.qa.vcr check-secrets`
+  - `python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90`
   - `python -m scripts.engineering.qa report-vcr-metadata --check`
 
 ### 4.4. Provider contract drift runbook

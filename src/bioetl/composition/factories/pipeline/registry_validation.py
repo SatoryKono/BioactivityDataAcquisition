@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 import yaml
 
@@ -136,52 +136,6 @@ def _validate_entity_config_against_registry(
     registered_key = (provider, entity)
     errors: list[str] = []
 
-    errors.extend(
-        _validate_entity_registry_binding(
-            display_entity_path=display_entity_path,
-            derived_pipeline_name=derived_pipeline_name,
-            provider=provider,
-            entity=entity,
-            registered_key=registered_key,
-            registered_pipeline_names=registered_pipeline_names,
-            registered_provider_entities=registered_provider_entities,
-        )
-    )
-    errors.extend(
-        _validate_entity_path_identity(
-            display_entity_path=display_entity_path,
-            payload=payload,
-            provider=provider,
-            entity=entity,
-        )
-    )
-    errors.extend(
-        _validate_entity_pipeline_name(
-            display_entity_path=display_entity_path,
-            payload=payload,
-            derived_pipeline_name=derived_pipeline_name,
-        )
-    )
-    errors.extend(
-        _validate_entity_contracts(
-            display_entity_path=display_entity_path,
-            payload=payload,
-        )
-    )
-    return errors
-
-
-def _validate_entity_registry_binding(
-    *,
-    display_entity_path: str,
-    derived_pipeline_name: str,
-    provider: str,
-    entity: str,
-    registered_key: tuple[str, str],
-    registered_pipeline_names: set[str],
-    registered_provider_entities: set[tuple[str, str]],
-) -> list[str]:
-    errors: list[str] = []
     if derived_pipeline_name not in registered_pipeline_names:
         errors.append(
             "entity config has no pipeline registry binding: "
@@ -192,17 +146,7 @@ def _validate_entity_registry_binding(
             "entity config has no provider/entity registry binding: "
             f"{display_entity_path} -> {provider}/{entity}"
         )
-    return errors
 
-
-def _validate_entity_path_identity(
-    *,
-    display_entity_path: str,
-    payload: dict[str, object],
-    provider: str,
-    entity: str,
-) -> list[str]:
-    errors: list[str] = []
     top_level_provider = payload.get("provider")
     if isinstance(top_level_provider, str) and top_level_provider != provider:
         errors.append(
@@ -213,32 +157,25 @@ def _validate_entity_path_identity(
         errors.append(
             f"{display_entity_path}: top-level entity '{top_level_entity}' does not match path '{entity}'"
         )
-    return errors
 
-
-def _validate_entity_pipeline_name(
-    *,
-    display_entity_path: str,
-    payload: dict[str, object],
-    derived_pipeline_name: str,
-) -> list[str]:
-    pipeline_payload = cast(dict[str, object] | None, payload.get("pipeline"))
+    pipeline_payload = payload.get("pipeline")
     if isinstance(pipeline_payload, dict):
         declared_pipeline_name = pipeline_payload.get("pipeline_name")
         if (
             isinstance(declared_pipeline_name, str)
             and declared_pipeline_name != derived_pipeline_name
         ):
-            return [
+            errors.append(
                 f"{display_entity_path}: pipeline.pipeline_name "
                 f"'{declared_pipeline_name}' does not match derived registry "
                 f"name '{derived_pipeline_name}'"
-            ]
-    return []
+            )
+
+    errors.extend(_validate_entity_contract_fields(display_entity_path, payload))
+    return errors
 
 
-def _validate_entity_contracts(
-    *,
+def _validate_entity_contract_fields(
     display_entity_path: str,
     payload: dict[str, object],
 ) -> list[str]:

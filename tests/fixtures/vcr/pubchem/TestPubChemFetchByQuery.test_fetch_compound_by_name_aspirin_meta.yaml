@@ -6,9 +6,3 @@ source: backfill_vcr_metadata_sidecars.py
 cassette_sha256: e8680e16125e571fad4f00a2d534dbe43fb70f9f0adcd35c38e91c88e7ba45f3
 recorded_at: '2026-04-28'
 staleness_ready: true
-reachability_review_status: reviewed_unreferenced
-reachability_review_date: '2026-05-22'
-reachability_review_ref: '#4509'
-reachability_review_rationale: Cassette retained as managed VCR fixture with a validated
-  metadata sidecar; no direct test-token reference is required for this provider fixture
-  surface.

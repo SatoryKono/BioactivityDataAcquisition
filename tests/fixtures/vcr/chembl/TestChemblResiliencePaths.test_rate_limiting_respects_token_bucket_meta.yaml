@@ -1,6 +1,6 @@
 schema_version: 1
 provider: chembl
-cassette_rel_path: tests/fixtures/vcr/chembl/test_chembl_target_full_cycle.yaml
+cassette_rel_path: tests/fixtures/vcr/chembl/TestChemblResiliencePaths.test_rate_limiting_respects_token_bucket.yaml
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
 cassette_sha256: 07e7179f91ddffa776a50d6d33813125270475d18c32b68b23b7a36cdf1724f0

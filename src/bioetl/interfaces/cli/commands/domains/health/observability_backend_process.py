@@ -25,54 +25,75 @@ def _resolve_system_executable(command: str) -> str | None:
     return which(command)
 
 
-def _find_listening_backend_pids_by_port(port: int) -> tuple[int, ...]:
-    if os.name == "nt":
-        netstat = _resolve_system_executable("netstat")
-        if netstat is None:
-            return ()
-        result = subprocess.run(
-            [netstat, "-ano", "-p", "tcp"],  # nosec B603
-            check=False,
-            capture_output=True,
-            text=True,
-        )
-        suffix = f":{port}"
-        pids: set[int] = set()
-        for line in result.stdout.splitlines():
-            normalized = line.split()
-            if len(normalized) < 5:
-                continue
-            local_address, state, pid_text = normalized[1], normalized[3], normalized[4]
-            if state.upper() != "LISTENING" or not local_address.endswith(suffix):
-                continue
-            try:
-                pids.add(int(pid_text))
-            except ValueError:
-                continue
-        return tuple(sorted(pids))
+def _as_sorted_pid_tuple(values: set[int]) -> tuple[int, ...]:
+    return tuple(sorted(values))
 
-    ss = _resolve_system_executable("ss")
-    if ss is None:
-        return ()
-    result = subprocess.run(
-        [ss, "-ltnp"],  # nosec B603
+
+def _try_parse_pid(pid_text: str) -> int | None:
+    try:
+        return int(pid_text)
+    except ValueError:
+        return None
+
+
+def _parse_windows_netstat_listener_pids(output: str, port: int) -> tuple[int, ...]:
+    suffix = f":{port}"
+    pids: set[int] = set()
+    for line in output.splitlines():
+        normalized = line.split()
+        if len(normalized) < 5:
+            continue
+        local_address, state, pid_text = normalized[1], normalized[3], normalized[4]
+        if state.upper() != "LISTENING" or not local_address.endswith(suffix):
+            continue
+        if (pid := _try_parse_pid(pid_text)) is not None:
+            pids.add(pid)
+    return _as_sorted_pid_tuple(pids)
+
+
+def _parse_posix_ss_listener_pids(output: str, port: int) -> tuple[int, ...]:
+    suffix = f":{port}"
+    pids: set[int] = set()
+    for line in output.splitlines():
+        if suffix not in line or "LISTEN" not in line:
+            continue
+        for remainder in line.split("pid=")[1:]:
+            pid_text = remainder.split(",", maxsplit=1)[0].split(")", maxsplit=1)[0]
+            if (pid := _try_parse_pid(pid_text)) is not None:
+                pids.add(pid)
+    return _as_sorted_pid_tuple(pids)
+
+
+def _run_listener_probe(command: list[str]) -> str:
+    result = subprocess.run(  # nosec B603
+        command,
         check=False,
         capture_output=True,
         text=True,
     )
-    suffix = f":{port}"
-    pids: set[int] = set()
-    for line in result.stdout.splitlines():
-        if suffix not in line or "LISTEN" not in line:
-            continue
-        pid_marker = "pid="
-        for remainder in line.split(pid_marker)[1:]:
-            pid_text = remainder.split(",", maxsplit=1)[0].split(")", maxsplit=1)[0]
-            try:
-                pids.add(int(pid_text))
-            except ValueError:
-                continue
-    return tuple(sorted(pids))
+    return result.stdout
+
+
+def _find_windows_listener_pids_by_port(port: int) -> tuple[int, ...]:
+    netstat = _resolve_system_executable("netstat")
+    if netstat is None:
+        return ()
+    output = _run_listener_probe([netstat, "-ano", "-p", "tcp"])
+    return _parse_windows_netstat_listener_pids(output, port)
+
+
+def _find_posix_listener_pids_by_port(port: int) -> tuple[int, ...]:
+    ss = _resolve_system_executable("ss")
+    if ss is None:
+        return ()
+    output = _run_listener_probe([ss, "-ltnp"])
+    return _parse_posix_ss_listener_pids(output, port)
+
+
+def _find_listening_backend_pids_by_port(port: int) -> tuple[int, ...]:
+    if os.name == "nt":
+        return _find_windows_listener_pids_by_port(port)
+    return _find_posix_listener_pids_by_port(port)
 
 
 def _find_listening_backend_pid_by_port(port: int) -> int | None:
@@ -89,35 +110,50 @@ def drop_listening_backend_on_port(
     pids = _find_listening_backend_pids_by_port(port)
     if not pids:
         return True
-    if os.name == "nt":
-        taskkill = _resolve_system_executable("taskkill")
-        for pid in pids:
-            if taskkill is None:
-                result = subprocess.CompletedProcess(args=(), returncode=1)
-            else:
-                result = subprocess.run(
-                    [taskkill, "/PID", str(pid), "/T", "/F"],  # nosec B603
-                    check=False,
-                    capture_output=True,
-                    text=True,
-                )
-            remaining_pids = _find_listening_backend_pids_by_port(port)
-            if result.returncode == 0 or pid not in remaining_pids:
-                continue
-            try:
-                os.kill(pid, signal.SIGTERM)
-            except OSError:
-                if pid in _find_listening_backend_pids_by_port(port):
-                    return False
-    else:
-        for pid in pids:
-            try:
-                os.kill(pid, signal.SIGTERM)
-            except OSError:
-                if pid in _find_listening_backend_pids_by_port(port):
-                    return False
+    if not _drop_listener_pids(port, pids):
+        return False
     sleep_fn(0.5)
     return not _find_listening_backend_pids_by_port(port)
+
+
+def _drop_listener_pids(port: int, pids: tuple[int, ...]) -> bool:
+    drop_pid = _drop_windows_listener_pid if os.name == "nt" else _drop_posix_listener_pid
+    return all(drop_pid(port, pid) for pid in pids)
+
+
+def _drop_windows_listener_pid(port: int, pid: int) -> bool:
+    taskkill_result = _run_taskkill(pid)
+    if taskkill_result.returncode == 0 or not _pid_still_listening(port, pid):
+        return True
+    return _terminate_pid_with_sigterm(port, pid)
+
+
+def _run_taskkill(pid: int) -> subprocess.CompletedProcess[object]:
+    taskkill = _resolve_system_executable("taskkill")
+    if taskkill is None:
+        return subprocess.CompletedProcess(args=(), returncode=1)
+    return subprocess.run(  # nosec B603
+        [taskkill, "/PID", str(pid), "/T", "/F"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+
+def _drop_posix_listener_pid(port: int, pid: int) -> bool:
+    return _terminate_pid_with_sigterm(port, pid)
+
+
+def _terminate_pid_with_sigterm(port: int, pid: int) -> bool:
+    try:
+        os.kill(pid, signal.SIGTERM)
+    except OSError:
+        return not _pid_still_listening(port, pid)
+    return True
+
+
+def _pid_still_listening(port: int, pid: int) -> bool:
+    return pid in _find_listening_backend_pids_by_port(port)
 
 
 def _build_detached_backend_popen_kwargs(

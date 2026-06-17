@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-17T12:24:45.303807+00:00",
+  "generated_at": "2026-06-17T16:17:50.479841+00:00",
   "summary": {
     "total_scripts": 433,
     "status_counts": {
@@ -7151,7 +7151,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 783,
+          "line": 784,
           "source_group": "docs",
           "text": "| 6   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing` | В"
         },
@@ -9617,7 +9617,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 24,
+      "reference_count": 25,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -9788,7 +9788,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 9,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -9801,6 +9801,12 @@
           "line": 267,
           "source_group": "docs",
           "text": "- `vcr_cassette_max_age_days: 90` является blocking stale-age threshold: CI теперь валидирует managed metadata inventory через `scripts/engineering/qa/vcr/check_vcr_metadata_age.py --max-age-days 90`"
+        },
+        {
+          "path": "docs/03-guides/testing.md",
+          "line": 731,
+          "source_group": "docs",
+          "text": "- `python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90`"
         },
         {
           "path": "scripts/engineering/qa/vcr/__main__.py",
@@ -9831,12 +9837,6 @@
           "line": 197,
           "source_group": "tests",
           "text": "\"python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90\""
-        },
-        {
-          "path": "tests/architecture/test_vcr_metadata_inventory.py",
-          "line": 72,
-          "source_group": "tests",
-          "text": "== \"scripts/engineering/qa/vcr/check_vcr_metadata_age.py\""
         }
       ]
     },

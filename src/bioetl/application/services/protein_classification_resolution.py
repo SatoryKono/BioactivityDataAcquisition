@@ -14,10 +14,8 @@ from bioetl.domain.value_objects.protein_class_hierarchy import (
 
 __all__ = [
     "ProteinClassificationDQIssue",
-    "ProteinClassificationResolution",
     "ProteinClassificationResolutionResult",
     "ProteinClassificationResolutionService",
-    "ResolveProteinClassificationUseCase",
     "TargetProteinClassificationRecord",
 ]
 
