@@ -3,7 +3,7 @@
     "snapshot_date": "2026-06-01",
     "families": 5,
     "scorecard": "configs/quality/debt_scorecard.yaml",
-    "budget_warnings": 6
+    "budget_warnings": 4
   },
   "families": [
     {
@@ -63,19 +63,16 @@
       ],
       "duplication_clusters": 0,
       "files": 34,
-      "total_loc": 4707,
-      "files_ge_250_loc": 4,
-      "helper_function_ratio": 0.435,
-      "max_internal_fan_in": 4,
-      "max_internal_fan_in_module": "bioetl.composition.factories.pipeline.config_types",
+      "total_loc": 4644,
+      "files_ge_250_loc": 3,
+      "helper_function_ratio": 0.424,
+      "max_internal_fan_in": 3,
+      "max_internal_fan_in_module": "bioetl.composition.factories.pipeline.registry_manifest",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 4,
         "max_internal_fan_in": 4
       },
-      "budget_warnings": [
-        "at_budget:files_ge_250_loc=4/4",
-        "at_budget:max_internal_fan_in=4/4"
-      ]
+      "budget_warnings": []
     },
     {
       "name": "application_services_control_plane",

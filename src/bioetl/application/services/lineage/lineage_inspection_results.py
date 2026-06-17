@@ -98,7 +98,6 @@ class LineageRunExplanationResult:
 
 __all__ = [
     "LineageFragmentInspectionResult",
-    "LineageNodeRelation",
     "LineageNodeRelationResult",
     "LineageRunExplanationResult",
     "LineageTraceResult",

@@ -29,26 +29,30 @@ coverage_tail:
       path: src/bioetl/infrastructure/storage/metadata/builder_base.py
       risk: storage_metadata_builder_branching
       target_test_type: focused_unit_builder_error_paths
-      owner_tests: []
-      status: queued
+      owner_tests:
+        - tests/unit/infrastructure/storage/metadata/test_builder_base.py
+      status: focused_owner_tests_added
     - rank: 3
       path: src/bioetl/infrastructure/storage/support/checkpoint_writer.py
       risk: checkpoint_write_recovery_paths
       target_test_type: focused_unit_storage_failure_paths
-      owner_tests: []
-      status: queued
+      owner_tests:
+        - tests/unit/infrastructure/storage/support/test_checkpoint_writer.py
+      status: focused_owner_tests_added
     - rank: 4
       path: src/bioetl/infrastructure/storage/silver/metadata_write_models.py
       risk: silver_metadata_write_model_validation
       target_test_type: focused_unit_validation_branches
-      owner_tests: []
-      status: queued
+      owner_tests:
+        - tests/unit/infrastructure/storage/silver/test_metadata_write_models.py
+      status: focused_owner_tests_added
     - rank: 5
       path: src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py
       risk: maintenance_cli_service_access
       target_test_type: focused_unit_composition_error_paths
-      owner_tests: []
-      status: queued
+      owner_tests:
+        - tests/unit/interfaces/cli/commands/domains/maintenance/test_service_access.py
+      status: focused_owner_tests_added
 regression:
   fail_on_decrease: true
   # Ignore sub-point noise from coverage XML rounding across platforms.

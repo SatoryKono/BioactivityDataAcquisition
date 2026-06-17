@@ -4,5 +4,5 @@ cassette_rel_path: tests/fixtures/vcr/multi_provider/test_chembl_and_uniprot_seq
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
 cassette_sha256: ec3e4eee24888da3a88871c114efd773a7aab571b9e354e7cc080474b4dadfc0
-recorded_at: '2026-06-01'
+recorded_at: '2026-04-28'
 staleness_ready: true

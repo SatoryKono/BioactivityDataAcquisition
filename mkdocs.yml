@@ -303,9 +303,9 @@ nav:
             -   Engineering:
                     -   "Overview": 05-engineering/README.md
                     -   "Normalization Plan P0-P6": 05-engineering/normalization_plan_P0_P6.md
-                    -   "Compatibility Test Files Reduction Plan": 05-engineering/compatibility_test_files_reduction_plan.md
-                    -   "Test Coverage Issues": 05-engineering/test_coverage_issues.md
-                    -   "Test Coverage Roadmap Actualized": 05-engineering/test_coverage_roadmap_actualized.md
+                    -   "Compatibility Test Files Reduction Plan": 05-engineering/compatibility-test-files-reduction-plan.md
+                    -   "Test Coverage Issues": 05-engineering/test-coverage-issues.md
+                    -   "Test Coverage Roadmap Actualized": 05-engineering/test-coverage-roadmap-actualized.md
             -   Providers:
                     -   "Overview": 04-reference/providers/README.md
                     -   ChEMBL:
