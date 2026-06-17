@@ -1,49 +1,57 @@
 # BioETL Silver Reject Explorer - Panels Documentation
 
-**Dashboard File:** `grafana/dashboards/bioetl-silver-reject-explorer.json`
+**Dashboard file:** `grafana/dashboards/bioetl-silver-reject-explorer.json`
 
 ## Обзор
 
-Dashboard обеспечивает детальный анализ отклонённых записей на слое Silver (Medallion Architecture).
+Silver Reject Explorer is a forensic HTTP-backed dashboard for rejected records.
+It does not use Prometheus Silver reject metric families directly. The Data
+Quality dashboard owns Prometheus Silver/Gold reject summary metrics and hands
+off bounded filters into this explorer.
 
-## Ключевые панели
+## Key Panels
 
-### 1. Silver Reject Rate
-- **Тип:** Graph
-- **Назначение:** Процент отклонённых записей
-- **Источники данных:** `bioetl_silver_reject_rate`
-- **Фильтры:** `pipeline_name`, `provider`
+### 1. Inspect Explorer Scope
+- **Type:** Text
+- **Purpose:** Explain the bounded forensic scope and zero-reject semantics.
+- **Data sources:** Dashboard variables and operator copy.
 
-### 2. Reject Reasons Breakdown
-- **Тип:** Pie Chart
-- **Назначение:** Распределение причин отклонения
-- **Источники данных:** `bioetl_silver_reject_by_reason`
-- **Описание:** schema_violation, null_violation, duplicate, out_of_range
+### 2. Monitor Explorer Backend Health
+- **Type:** Table
+- **Purpose:** Distinguish backend failure from an intentionally empty
+  zero-reject result set.
+- **Data sources:** `/ops/quarantine/health`
 
-### 3. Rejects by Field
-- **Тип:** Table
-- **Назначение:** Отклонения по полям
-- **Источники данных:** `bioetl_silver_rejects_by_field`
-- **Фильтры:** `table_name`, `field_name`
+### 3. Summary and Trend Panels
+- **Type:** Table / Timeseries
+- **Purpose:** Show filtered reject totals, reject ratio versus Bronze, and
+  selected-range trend.
+- **Data sources:** `/ops/quarantine/filtered-stats`,
+  `/ops/quarantine/filtered-timeseries`
 
-### 4. Rejects Over Time
-- **Тип:** Graph
-- **Назначение:** Динамика отклонений во времени
-- **Источники данных:** `bioetl_silver_rejects_total`
-- **Фильтры:** `pipeline_name`
+### 4. Reject Breakdown Panels
+- **Type:** Table
+- **Purpose:** Inspect top reject reasons, fields, reason signatures, and
+  filtered records.
+- **Data sources:** `/ops/quarantine/filtered-stats`,
+  `/ops/quarantine/records`
 
-### 5. Quarantine from Silver
-- **Тип:** Stat
-- **Назначение:** Записи отправленные в карантин из Silver
-- **Источники данных:** `bioetl_quarantine_from_silver_total`
+### 5. Selected Record Details
+- **Type:** Table
+- **Purpose:** Inspect a selected payload and copy CLI resolve commands.
+- **Data sources:** `/ops/quarantine/records`
 
-## Переменные Dashboard
+## Variables
 
-- `pipeline_name` - Выбор pipeline
-- `provider` - Выбор провайдера
-- `table_name` - Выбор таблицы Silver
+- `pipeline` is single-select and fail-closed.
+- `run_type`, `reason_code`, `field`, `quarantine_run_id`, and `payload_hash`
+  are forensic selectors owned by this explorer.
 
-## Примечания
+## Notes
 
-- Dashboard отражает strict validation на слое Gold
-- Использует Pandera data contracts для валидации
+- Generic primary-dashboard `run_id` must not be mapped into
+  `quarantine_run_id` except through explicit forensic record/payload
+  handoffs.
+- This dashboard intentionally avoids legacy Prometheus Silver reject rate or
+  quarantine placeholder metric names; the DQ dashboard documents the current
+  Prometheus summary families.

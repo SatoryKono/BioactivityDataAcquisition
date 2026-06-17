@@ -83,6 +83,7 @@ _CATEGORY_BASELINES: tuple[dict[str, object], ...] = (
             "layer_violations",
             "contract_blocking_issue_count",
             "dashboarded_without_emission_count",
+            "dashboarded_without_declaration_count",
             "runtime_cardinality_review_required_count",
             "runtime_cardinality_threshold_violation_count",
         ),
@@ -221,6 +222,9 @@ def _build_source_artifacts(
             "dashboarded_without_emission_count": len(
                 observability_inventory.get("dashboarded_without_emission", [])
             ),
+            "dashboarded_without_declaration_count": len(
+                observability_inventory.get("dashboarded_without_declaration", [])
+            ),
         },
         "adr_enforcement_matrix": {
             "path": "reports/quality/adr-enforcement-matrix.json",
@@ -283,6 +287,9 @@ def build_architecture_quality_scorecard(
         "dq_blocking_issue_count": dq_diagnostics["blocking_issue_count"],
         "dashboarded_without_emission_count": len(
             observability_inventory.get("dashboarded_without_emission", [])
+        ),
+        "dashboarded_without_declaration_count": len(
+            observability_inventory.get("dashboarded_without_declaration", [])
         ),
         "runtime_cardinality_review_required_count": len(
             observability_inventory.get("runtime_cardinality_review_required", [])

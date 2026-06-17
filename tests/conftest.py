@@ -199,8 +199,8 @@ def _restore_runtime_bootstrap_pipeline_after_repo_backed_tests(
 
 
 pytest_plugins = (
-    # "tests.helpers.metadata_fixtures",
-    # "tests.integration.chembl.extraction_params_support",
+    "tests.helpers.metadata_fixtures",
+    "tests.integration.chembl.extraction_params_support",
 )
 
 
@@ -265,6 +265,35 @@ def pytest_runtest_call(item: pytest.Item):
             timeout_diagnostic_stop.set()
 
 
+def _configured_asyncio_mode(config: pytest.Config) -> str | None:
+    try:
+        return str(config.getini("asyncio_mode")).lower()
+    except (ValueError, TypeError):
+        return None
+
+
+@pytest.hookimpl(tryfirst=True)
+def pytest_pyfunc_call(pyfuncitem: pytest.Function) -> bool | None:
+    """Run coroutine tests if pytest-asyncio auto mode was not applied."""
+    if _configured_asyncio_mode(pyfuncitem.config) == "auto":
+        return None
+    if pyfuncitem.get_closest_marker("asyncio") is not None:
+        return None
+    if pyfuncitem.get_closest_marker("anyio") is not None:
+        return None
+
+    test_object = getattr(pyfuncitem, "obj", None)
+    if not inspect.iscoroutinefunction(test_object):
+        return None
+
+    testargs = {
+        argname: pyfuncitem.funcargs[argname]
+        for argname in pyfuncitem._fixtureinfo.argnames
+    }
+    asyncio.run(test_object(**testargs))
+    return True
+
+
 def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:
     """Treat `--last-failed` empty selections as a successful no-op run.
 
@@ -310,9 +339,8 @@ def _configure_windows_pycharm_traceback_style(config: pytest.Config) -> None:
 def _is_wsl() -> bool:
     """Detect if running under WSL (Windows Subsystem for Linux)."""
     try:
-        with open("/proc/version", "r") as f:
-            return "microsoft" in f.read().lower()
-    except (OSError, IOError):
+        return "microsoft" in Path("/proc/version").read_text(encoding="utf-8").lower()
+    except OSError:
         return False
 
 
@@ -401,6 +429,7 @@ def _supports_pytest_asyncio_loop_factories_hook() -> bool:
 
 # pytest-asyncio < 1.4 rejects unknown hook implementations during collection.
 if _supports_pytest_asyncio_loop_factories_hook():
+
     def pytest_asyncio_loop_factories(
         config: pytest.Config,
         item: pytest.Item,

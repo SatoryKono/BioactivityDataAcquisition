@@ -35,3 +35,22 @@ _LAZY_MODULE_EXPORTS = {
     "resources_api",
     "types",
 }
+
+_LAZY_ATTR_EXPORTS = {
+    "PipelineDefinition": (
+        "bioetl.composition.registry_api",
+        "PipelineDefinition",
+    ),
+    "PipelineRegistry": (
+        "bioetl.composition.registry_api",
+        "PipelineRegistry",
+    ),
+    "create_registry": (
+        "bioetl.composition.registry_api",
+        "create_registry",
+    ),
+    "get_default_registry": (
+        "bioetl.composition.registry_api",
+        "get_default_registry",
+    ),
+}

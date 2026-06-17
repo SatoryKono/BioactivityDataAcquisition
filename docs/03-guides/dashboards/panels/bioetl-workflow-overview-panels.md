@@ -1,42 +1,48 @@
 # BioETL Workflow Overview - Panels Documentation
 
-**Dashboard File:** `grafana/dashboards/bioetl-workflow-overview.json`
+**Dashboard file:** `grafana/dashboards/bioetl-workflow-overview.json`
 
 ## Обзор
 
-Dashboard обеспечивает обзор выполнения workflow и их компонентов.
+Dashboard `5. Workflow` monitors workflow and pipeline verdicts, failed runs,
+step failures, skipped steps, and step duration trends. Shipped dashboard JSON
+is the source of truth.
 
-## Ключевые панели
+## Key Panels
 
-### 1. Workflow Execution Status
-- **Тип:** Table
-- **Назначение:** Статус выполнения workflow
-- **Источники данных:** `bioetl_workflow_execution_status`
-- **Фильтры:** `workflow_name`, `workflow_state`
+### 1. Status
+- **Type:** Stat
+- **Purpose:** Summarize workflow run and step-event status.
+- **Data sources:** `bioetl_workflow_runs_total`,
+  `bioetl_workflow_step_events_total`
 
-### 2. Workflow Duration
-- **Тип:** Graph
-- **Назначение:** Время выполнения workflow
-- **Источники данных:** `bioetl_workflow_duration_seconds`
-- **Фильтры:** `workflow_name`
+### 2. Pipeline Status
+- **Type:** Stat
+- **Purpose:** Compare runtime status with workflow pipeline verdict.
+- **Data sources:** `bioetl_runtime_current_status`,
+  `bioetl_workflow_pipeline_verdict_status`
 
-### 3. Workflow Success Rate
-- **Тип:** Stat
-- **Назначение:** Процент успешных выполнений workflow
-- **Источники данных:** `bioetl_workflow_success_rate`
-- **Пороги:** Green (>95), Yellow (90-95), Red (<90)
+### 3. Failed Runs and Steps
+- **Type:** Stat
+- **Purpose:** Count failed workflow runs, failed entity pipeline runs, failed
+  pipeline steps, transform failures, and skipped events.
+- **Data sources:** `bioetl_workflow_runs_total`,
+  `bioetl_pipeline_runs_total`, `bioetl_workflow_step_events_total`
 
-### 4. Active Workflows
-- **Тип:** Stat
-- **Назначение:** Количество активных workflow
-- **Источники данных:** `bioetl_workflow_active_count`
+### 4. Workflow Outcomes and Step Trends
+- **Type:** Bargauge / Timeseries
+- **Purpose:** Inspect workflow outcomes, step outcomes, and step duration p95.
+- **Data sources:** `bioetl_workflow_runs_total`,
+  `bioetl_workflow_step_events_total`,
+  `bioetl_workflow_step_duration_seconds_bucket`
 
-## Переменные Dashboard
+## Variables
 
-- `workflow_name` - Выбор workflow
-- `time_range` - Временной диапазон
+- `workflow`, `pipeline`, `run_type`, and `run_id` are the shared primary
+  dashboard context shell.
 
-## Примечания
+## Notes
 
-- Dashboard отражает состояние Workflow Control Plane (ADR-047)
-- Интегрирован с RunManifest/RunLedger
+- Legacy workflow execution/status/rate placeholder metrics are intentionally
+  not documented. Current panels use workflow run, pipeline run, runtime status,
+  and workflow step metric families.

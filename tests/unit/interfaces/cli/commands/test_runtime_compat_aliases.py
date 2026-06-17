@@ -96,3 +96,33 @@ def test_commands_package_does_not_advertise_removed_plan_facade() -> None:
 
     assert "plan" not in commands_package.__all__
     assert "plan" not in dir(commands_package)
+
+
+@pytest.mark.unit
+def test_diagnostics_domain_package_lazy_exports_command() -> None:
+    """Diagnostics domain package should lazily expose its command group."""
+    package = importlib.import_module(
+        "bioetl.interfaces.cli.commands.domains.diagnostics"
+    )
+    command_module = importlib.import_module(
+        "bioetl.interfaces.cli.commands.domains.diagnostics.command"
+    )
+
+    assert package.__getattr__("diagnostics") is command_module.diagnostics
+
+    with pytest.raises(AttributeError, match="unknown"):
+        package.__getattr__("unknown")
+
+
+@pytest.mark.unit
+def test_maintenance_domain_package_lazy_exports_public_group() -> None:
+    """Maintenance domain package should bridge to the public maintenance module."""
+    package = importlib.import_module(
+        "bioetl.interfaces.cli.commands.domains.maintenance"
+    )
+    public_module = importlib.import_module("bioetl.interfaces.cli.commands.maintenance")
+
+    assert package.__getattr__("maintenance") is public_module.maintenance
+
+    with pytest.raises(AttributeError, match="unknown"):
+        package.__getattr__("unknown")

@@ -11,6 +11,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
+import pytest_asyncio
 
 if TYPE_CHECKING:
     from click.testing import CliRunner
@@ -136,7 +137,7 @@ class TestCliCheckpointList:
 class TestCliCheckpointListWithFake:
     """Test CLI checkpoint list using InMemoryCheckpoint fake."""
 
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def populated_checkpoint(self) -> InMemoryCheckpoint:
         """Create a checkpoint fake with pre-populated data."""
         checkpoint = _create_in_memory_checkpoint()

@@ -8,6 +8,9 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.application.core.filtered_data_source import FilteredDataSource
+from bioetl.application.core.filtered_data_source_mixins import (
+    _FilteredDataSourceStateMixin,
+)
 from bioetl.domain.filtering import FilterLoadResult, InputFilterConfig
 from bioetl.domain.ports.health_check import HealthCheckResult
 from bioetl.domain.ports import FilterableDataSourcePort
@@ -444,6 +447,96 @@ class TestFilteredDataSourceFetch:
             TypeError, match="does not implement FilterableDataSourcePort"
         ):
             await _drain_async_iter(filtered.fetch("activity"))
+
+    def test_state_mixin_requires_concrete_filterable_adapter_guard(self) -> None:
+        """Base state mixin documents the required adapter guard contract."""
+        with pytest.raises(NotImplementedError):
+            _FilteredDataSourceStateMixin()._ensure_filterable_adapter("Filtering")
+
+    @pytest.mark.asyncio
+    async def test_internal_single_column_fetch_wrapper_yields_records(
+        self,
+        mock_data_source_with_filtered,
+    ):
+        """The single-column mixin wrapper should delegate to fetch support."""
+        config = InputFilterConfig(
+            enabled=True,
+            filter_field="molecule_id",
+            direct_filter_ids=("CHEMBL1", "CHEMBL2"),
+        )
+        filtered = FilteredDataSource(
+            data_source=mock_data_source_with_filtered,
+            filter_reader=None,
+            filter_config=config,
+        )
+        await filtered.__aenter__()
+
+        records = [
+            record
+            async for record in filtered._fetch_single_column("activity", limit=1)
+        ]
+
+        assert records == [{"id": "filtered_1"}, {"id": "filtered_2"}]
+
+    @pytest.mark.asyncio
+    async def test_internal_multi_column_fetch_wrapper_yields_records(
+        self,
+    ):
+        """The multi-column mixin wrapper should delegate to fetch support."""
+        from bioetl.domain.filtering.input_config import FilterColumn
+
+        multi_column_filter_config = InputFilterConfig(
+            enabled=True,
+            source_path="data/multi.csv",
+            columns=(FilterColumn("molecule_id", "molecule_id"),),
+        )
+        data_source = MockFilterableDataSource()
+        filtered = FilteredDataSource(
+            data_source=data_source,
+            filter_reader=None,
+            filter_config=multi_column_filter_config,
+        )
+        filtered._multi_filter_ids = {"molecule_id": ["CHEMBL1"]}
+        filtered._valid_combinations = None
+        filtered._filter_fields = ("molecule_id",)
+
+        records = [
+            record async for record in filtered._fetch_multi_column("activity", limit=1)
+        ]
+
+        assert records == [{"id": "multi_1"}]
+        assert data_source.fetch_multi_filtered_calls[-1]["limit"] is None
+
+    @pytest.mark.asyncio
+    async def test_internal_unfiltered_fetch_wrapper_returns_adapter_iterator(
+        self,
+        mock_data_source,
+        disabled_filter_config,
+    ):
+        """The unfiltered wrapper should preserve adapter fetch kwargs."""
+        filtered = FilteredDataSource(
+            data_source=mock_data_source,
+            filter_reader=None,
+            filter_config=disabled_filter_config,
+        )
+
+        records = [
+            record
+            async for record in filtered._fetch_without_internal_filters(
+                "activity",
+                limit=2,
+                query="kinase",
+                offset=4,
+            )
+        ]
+
+        assert records == [{"id": "1"}, {"id": "2"}, {"id": "3"}]
+        assert mock_data_source.fetch_calls[-1]["kwargs"] == {
+            "entity_type": "activity",
+            "limit": 2,
+            "query": "kinase",
+            "offset": 4,
+        }
 
 
 @pytest.mark.unit

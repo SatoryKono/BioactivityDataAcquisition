@@ -39,6 +39,9 @@ from bioetl.domain.normalization.chemical_standardization_contract import (
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
+from bioetl.domain.normalization.profiles._profile_numeric_normalizers import (
+    coerce_profile_quasi_enum_numeric,
+)
 from bioetl.domain.normalization.profiles._chembl_profile_helpers import (
     CHEMBL_META_FIELDS,
     ChemblProfileFieldGroups,
@@ -589,6 +592,12 @@ def test_chembl_molecule_max_phase_preserves_quasi_enum_numeric_codes() -> None:
     assert max_phase_rule.apply("4.0") == 4
     assert max_phase_rule.apply("5") is None
     assert "quasi-enum" in (max_phase_rule.notes or "")
+
+
+def test_quasi_enum_numeric_helper_rejects_blank_invalid_and_unknown_values() -> None:
+    assert coerce_profile_quasi_enum_numeric(object()) is None
+    assert coerce_profile_quasi_enum_numeric("   ") is None
+    assert coerce_profile_quasi_enum_numeric("not-a-number") is None
 
 
 def test_chembl_molecule_reviewed_flag_provider_codes_fail_closed_outside_tristate() -> (

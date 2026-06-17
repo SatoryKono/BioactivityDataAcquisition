@@ -291,6 +291,17 @@ jobs:
                       --review-json-out reports/observability/runtime_cardinality_review_pr.json \
                       --allow-local-cardinality-fallback
 
+            -   name: Validate ADR enforcement matrix artifacts
+                run: uv run python -m scripts.engineering.qa report-adr-enforcement-matrix --check
+
+            -   name: Validate remote-main architecture debt baseline
+                run: |
+                    git fetch --no-tags --depth=1 origin main:refs/remotes/origin/main
+                    uv run python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --check
+
+            -   name: Validate debt-governance fail-fast gates
+                run: uv run python -m scripts.engineering.qa report-debt-governance-gates --check
+
             -   name: Dashboard navigation contract sync gate
                 run: |
                     uv run pytest \

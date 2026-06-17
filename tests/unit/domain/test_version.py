@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+from importlib.metadata import PackageNotFoundError
+
 import pytest
 
+import bioetl.domain.version as version_module
 from bioetl.domain.version import get_version
 
 
@@ -27,3 +30,17 @@ class TestGetVersion:
         # Should not raise even if package is not installed
         result = get_version()
         assert result is not None
+
+    def test_returns_unknown_when_declared_and_installed_versions_absent(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Version lookup should fail closed when neither source is present."""
+        import bioetl
+
+        def missing_package_version(_: str) -> str:
+            raise PackageNotFoundError("bioetl")
+
+        monkeypatch.delattr(bioetl, "__version__", raising=True)
+        monkeypatch.setattr(version_module, "_pkg_version", missing_package_version)
+
+        assert version_module.get_version() == "unknown"

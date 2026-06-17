@@ -46,8 +46,7 @@ def build_runtime_bootstrap_phases(
     """Resolve explicit runtime bootstrap phases before runner construction."""
     apply_runtime_compatibility_patches()
     effective_registry = prepare_runtime_registry(
-        registry=registry,
-        pipeline_name=ctx.pipeline_name,
+        registry=registry, pipeline_name=ctx.pipeline_name
     )
     return build_runtime_bootstrap_phases_with_registry(
         registry=effective_registry,
@@ -63,20 +62,19 @@ def bootstrap_pipeline_runner(
     load_pipeline_config_fn: Callable[[str], PipelineYamlConfig] | None = None,
 ) -> PipelineRunner:
     """Build one ready-to-run pipeline runner from runtime context and registry."""
-    phases = build_runtime_bootstrap_phases(
-        ctx=ctx,
+    apply_runtime_compatibility_patches()
+    registry = prepare_runtime_registry(
+        registry=registry, pipeline_name=ctx.pipeline_name
+    )
+    phases = build_runtime_bootstrap_phases_with_registry(
         registry=registry,
         load_pipeline_config_fn=load_pipeline_config_fn,
+        resolve_configs_root_fn=resolve_configs_root,
     )
-    from bioetl.composition.runtime_builders.runner_builder_wiring import (
-        RunnerBuilderWiring,
-    )
+    from bioetl.composition.runtime_builders import runner_builder_wiring as wiring_api
 
-    wiring = RunnerBuilderWiring(
-        factory=phases.factory_wiring,
-        inputs=phases.input_wiring,
+    wiring = wiring_api.RunnerBuilderWiring(
+        factory=phases.factory_wiring, inputs=phases.input_wiring
     )
-    return cast(
-        "PipelineRunner",
-        _build_pipeline_runner(ctx=ctx, registry=phases.registry, wiring=wiring),
-    )
+    runner = _build_pipeline_runner(ctx=ctx, registry=phases.registry, wiring=wiring)
+    return cast("PipelineRunner", runner)

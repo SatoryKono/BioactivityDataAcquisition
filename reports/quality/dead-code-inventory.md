@@ -73,7 +73,7 @@
 | `triaged_retained` | `src/bioetl/application/composite/runner_pkg/runner_support_types.py` | `retained_module_owner_suite` | `tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py`, `tests/unit/application/composite/test_runner.py` |
 | `triaged_retained` | `src/bioetl/application/composite/runtime_models.py` | `retained_module_owner_suite` | `tests/unit/application/composite/test_runtime_models.py` |
 | `triaged_retained` | `src/bioetl/application/composite/runtime_wiring_api.py` | `retained_module_owner_suite` | `tests/architecture/test_composite_canonical_surfaces.py`, `tests/architecture/test_column_ordering_family.py`, `tests/unit/composition/bootstrap/runtime/test_composite_support_service_builders.py` |
-| `repo_wide_zero_import` | `src/bioetl/__main__.py` | `module_entrypoint_owner_suite` | `tests/unit/interfaces/cli/test_cli_commands_basic.py`, `tests/unit/interfaces/cli/test_cli_helpers.py` |
+| `repo_wide_zero_import` | `src/bioetl/__main__.py` | `module_entrypoint_owner_suite` | `tests/unit/interfaces/cli/test_cli_main_module.py` |
 | `repo_wide_zero_import` | `src/bioetl/domain/ports/data_normalization.py` | `canonical_owner_contract` | `tests/architecture/test_domain_public_api.py`, `tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py`, `tests/architecture/test_port_contracts.py` |
 | `repo_wide_zero_import` | `src/bioetl/domain/ports/data_source.py` | `canonical_owner_contract` | `tests/architecture/test_domain_public_api.py`, `tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py`, `tests/architecture/test_port_contracts.py` |
 | `repo_wide_zero_import` | `src/bioetl/domain/ports/delta_reader.py` | `canonical_owner_contract` | `tests/architecture/test_domain_public_api.py`, `tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py`, `tests/architecture/test_port_contracts.py` |
@@ -88,4 +88,4 @@
 
 | Module | Disposition | Evidence Lane | Owner Tests |
 | --- | --- | --- | --- |
-| `bioetl.__main__` | `retain_module_entrypoint` | `module_entrypoint_owner_suite` | `tests/unit/interfaces/cli/test_cli_commands_basic.py`, `tests/unit/interfaces/cli/test_cli_helpers.py` |
+| `bioetl.__main__` | `retain_module_entrypoint` | `module_entrypoint_owner_suite` | `tests/unit/interfaces/cli/test_cli_main_module.py` |

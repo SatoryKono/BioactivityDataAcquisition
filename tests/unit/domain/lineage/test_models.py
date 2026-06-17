@@ -15,6 +15,12 @@ from bioetl.domain.lineage import (
     SchemaRef,
     TransformRef,
 )
+from bioetl.domain.lineage._shared import (
+    load_attributes,
+    load_mapping,
+    load_optional_int,
+    load_optional_version,
+)
 from bioetl.domain.medallion import Layer
 
 
@@ -105,3 +111,10 @@ def test_lineage_edge_and_fragment_roundtrip() -> None:
     assert restored.edges[0].edge_type == LineageEdgeType.PRODUCED_BY
     assert restored.edges[0].attributes["validation"] == "strict"
     assert restored.edges[0].source.node_id == "gold:chembl.activity@11"
+
+
+def test_lineage_shared_helpers_normalize_edge_case_payloads() -> None:
+    assert load_attributes(["not", "a", "mapping"]) == {}
+    assert load_mapping("not-a-mapping") == {}
+    assert load_optional_version({"version": 3.5}, "version") is None
+    assert load_optional_int({"step_index": "7"}, "step_index") == 7

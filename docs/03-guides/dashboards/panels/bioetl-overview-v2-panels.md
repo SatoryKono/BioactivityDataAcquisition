@@ -1,79 +1,56 @@
 # BioETL Overview v2 - Panels Documentation
 
-**Dashboard File:** `grafana/dashboards/bioetl-overview-v2.json`
+**Dashboard file:** `grafana/dashboards/bioetl-overview-v2.json`
 
 ## Обзор
 
-Dashboard обеспечивает комплексный обзор состояния BioETL системы, включая pipeline запуски, производительность и качество данных.
+Dashboard `1. Overview` is the L0 operator entry surface. It answers current
+system status, first action, and drilldown routing across Runtime, DQ, Gold,
+Control Plane, Provider, and Workflow dashboards.
 
-## Панели
+## Key Panels
 
-### 1. Pipeline Runs Overview
-- **Тип:** Stat / Timeseries
-- **Назначение:** Обзор количества pipeline запусков по состояниям
-- **Источники данных:** `bioetl_pipeline_run_total{status="..."}`
-- **Фильтры:** `pipeline_name`, `provider`, `time_range`
-- **Описание:** Показывает распределение pipeline запусков по статусам (PENDING, RUNNING, COMPLETED, FAILED, SHUTDOWN)
+### 1. Status
+- **Type:** Stat
+- **Purpose:** Current L0 severity for the selected scope.
+- **Data sources:** `bioetl_l0_status`
 
-### 2. Pipeline Duration
-- **Тип:** Graph
-- **Назначение:** Время выполнения pipeline
-- **Источники данных:** `bioetl_pipeline_run_duration_seconds`
-- **Фильтры:** `pipeline_name`, `provider`
-- **Описание:** Гистограмма времени выполнения pipeline, разбитая по квантилям (p50, p95, p99)
+### 2. First Action
+- **Type:** Table
+- **Purpose:** Route the operator to the highest-priority next dashboard.
+- **Data sources:** `bioetl_l0_next_action_route`,
+  `bioetl_overview_pipeline_run_type_universe`
 
-### 3. Records Processed
-- **Тип:** Stat
-- **Назначение:** Общее количество обработанных записей
-- **Источники данных:** `bioetl_records_processed_total`
-- **Фильтры:** `pipeline_name`, `provider`, `stage`
-- **Описание:** Суммарное количество записей, обработанных за выбранный период
+### 3. Inputs
+- **Type:** Table
+- **Purpose:** Show per-domain L0 input status.
+- **Data sources:** `bioetl_l0_input_status_selected`
 
-### 4. Data Quality Score
-- **Тип:** Gauge
-- **Назначение:** Общий показатель качества данных
-- **Источники данных:** `bioetl_dq_score`
-- **Фильтры:** `pipeline_name`, `provider`
-- **Пороги:** Green (>90), Yellow (70-90), Red (<70)
-- **Описание:** Агрегированный показатель качества данных на основе DQ проверок
+### 4. Domain Scorecards
+- **Type:** Table / Timeseries
+- **Purpose:** Expose current and historical status for Runtime, DQ, Gold,
+  Control Plane, Provider, and Workflow.
+- **Data sources:** `bioetl_l1_runtime_blocker_status`,
+  `bioetl_l1_dq_status`, `bioetl_l1_gold_lifecycle_status`,
+  `bioetl_l1_control_plane_current_status`,
+  `bioetl_l1_provider_global_status`, `bioetl_l1_workflow_global_status`
 
-### 5. Provider Health
-- **Тип:** Table
-- **Назначение:** Состояние провайдеров данных
-- **Источники данных:** `bioetl_provider_success_rate`, `bioetl_provider_latency_seconds`
-- **Фильтры:** `provider`
-- **Описание:** Таблица с показателями успеха и задержки для каждого провайдера
+### 5. Historical Runs and Silver Reject Summary
+- **Type:** Table / Stat
+- **Purpose:** Show recent terminal pipeline runs and selected-range Silver
+  reject summary.
+- **Data sources:** `bioetl_pipeline_runs_total`,
+  `bioetl_records_processed_total`
 
-### 6. Error Rate
-- **Тип:** Graph
-- **Назначение:** Частота ошибок
-- **Источники данных:** `bioetl_errors_total`
-- **Фильтры:** `pipeline_name`, `provider`, `error_type`
-- **Описание:** График количества ошибок во времени
+## Variables
 
-### 7. Quarantine Rate
-- **Тип:** Stat
-- **Назначение:** Процент записей в карантине
-- **Источники данных:** `bioetl_quarantine_rate`
-- **Фильтры:** `pipeline_name`, `provider`
-- **Описание:** Процент записей, отправленных в карантин из-за проблем с качеством
+- `workflow`, `pipeline`, `run_type`, and `run_id` are the shared primary
+  dashboard context shell.
+- Overview defaults to `Workflow=All`, `Pipeline=All`, `Run Type=All`, and
+  `Run ID=-`.
 
-### 8. Active Batches
-- **Тип:** Stat
-- **Назначение:** Количество активных батчей
-- **Источники данных:** `bioetl_batch_active`
-- **Фильтры:** `status`
-- **Описание:** Текущее количество батчей в каждом состоянии (OPEN, SEALED, WRITING)
+## Notes
 
-## Переменные Dashboard
-
-- `pipeline_name` - Выбор pipeline для фильтрации
-- `provider` - Выбор провайдера данных
-- `time_range` - Временной диапазон (1h, 6h, 24h, 7d)
-- `environment` - Окружение (local, dev, prod)
-
-## Примечания
-
-- Dashboard использует aggregation по времени для улучшения производительности
-- Данные обновляются каждые 15 секунд
-- Для детального анализа используйте специализированные dashboards (DQ, Provider Health, etc.)
+- Overview does not own provider latency, generic DQ score, quarantine-rate, or
+  legacy singular pipeline-run metrics. Those stale names were removed from this
+  mirror so the dashboarded/declaration inventory reflects the shipped JSON.

@@ -70,7 +70,6 @@ __all__ = [
     "get_quarantine_runtime_service",
 ]
 
-_UNAVAILABLE_LINE = "  - unavailable"
 SILVER_FILTER_ERROR_CODE = "FILTERED_OUT_SILVER"
 SILVER_FILTER_ALIAS_HELP = (
     "Legacy alias for --error-code FILTERED_OUT_SILVER; Silver structural "

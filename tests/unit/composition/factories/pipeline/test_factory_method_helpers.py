@@ -19,9 +19,61 @@ from bioetl.composition.factories.pipeline.factory_method_helpers import (
     create_pipeline_instance_with_services,
     create_transformer_instance,
 )
+from bioetl.composition.factories.pipeline._factory_method_control_plane import (
+    apply_optional_control_plane_kwargs,
+    resolve_strict_gold_validation,
+)
 from bioetl.domain.ports.noop import NoOpAudit
 
 _STARTED_AT = datetime(2026, 4, 24, 12, 0, tzinfo=UTC)
+
+
+@pytest.mark.unit
+class TestFactoryMethodControlPlaneHelpers:
+    """Tests for private control-plane helper seams used by factory methods."""
+
+    def test_apply_optional_control_plane_kwargs_omits_none_values(self) -> None:
+        kwargs: dict[str, object] = {"existing": "kept"}
+
+        apply_optional_control_plane_kwargs(
+            kwargs,
+            manifest_id="manifest-1",
+            execution_fingerprint=None,
+            config_hash="config-hash",
+            resolved_config_hash=None,
+            effective_config_hash="effective-hash",
+        )
+
+        assert kwargs == {
+            "existing": "kept",
+            "manifest_id": "manifest-1",
+            "config_hash": "config-hash",
+            "effective_config_hash": "effective-hash",
+        }
+
+    @pytest.mark.parametrize(
+        ("env", "test_mode", "runtime_flag", "expected"),
+        [
+            ("prod", False, False, True),
+            ("prod", True, False, False),
+            ("dev", False, True, True),
+            ("dev", False, False, False),
+        ],
+    )
+    def test_resolve_strict_gold_validation_combines_env_and_runtime_flag(
+        self,
+        env: str,
+        test_mode: bool,
+        runtime_flag: bool,
+        expected: bool,
+    ) -> None:
+        assert (
+            resolve_strict_gold_validation(
+                runtime=SimpleNamespace(strict_gold_validation=runtime_flag),
+                settings=SimpleNamespace(env=env, test_mode=test_mode),
+            )
+            is expected
+        )
 
 
 @pytest.mark.unit

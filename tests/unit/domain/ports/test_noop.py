@@ -8,12 +8,19 @@ from __future__ import annotations
 import pytest
 
 from bioetl.domain.ports.noop import (
+    NoOpDebug,
     NoOpMemoryMonitor,
     NoOpMetrics,
     NoOpPiiHasher,
     NoOpTracing,
     _NoOpOtelTracer,
     _NoOpSpan,
+)
+from bioetl.domain.ports.runtime.pipeline_debug import (
+    BreakpointHit,
+    DebugAction,
+    PipelineSnapshot,
+    StageBreakpoint,
 )
 
 
@@ -96,6 +103,30 @@ class TestNoOpTracing:
         """Test flush is a no-op."""
         tracing = NoOpTracing()
         tracing.flush()
+
+
+@pytest.mark.unit
+class TestNoOpDebug:
+    """Test NoOpDebug class."""
+
+    def test_breakpoints_are_disabled_and_continue(self) -> None:
+        """No-op debugger should never pause execution."""
+        debugger = NoOpDebug()
+        snapshot = PipelineSnapshot(stage="silver")
+        hit = BreakpointHit(
+            breakpoint=StageBreakpoint.AFTER_SILVER,
+            snapshot=snapshot,
+            message="inspect",
+        )
+
+        assert debugger.is_breakpoint_enabled(StageBreakpoint.AFTER_SILVER) is False
+        assert debugger.on_breakpoint(hit) == DebugAction.CONTINUE
+
+    def test_on_snapshot_discards_snapshot(self) -> None:
+        """Snapshot recording is intentionally a no-op."""
+        debugger = NoOpDebug()
+
+        assert debugger.on_snapshot(PipelineSnapshot(stage="gold")) is None
 
 
 @pytest.mark.unit

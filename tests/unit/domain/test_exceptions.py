@@ -32,6 +32,7 @@ from bioetl.domain.exceptions import (
     UploadError,
     ValidationError,
 )
+from bioetl.domain.exceptions.network.timeout import TimeoutError as DomainTimeoutError
 from bioetl.domain.types import ErrorType
 
 pytestmark = pytest.mark.unit
@@ -81,6 +82,17 @@ class TestExceptions:
         assert e.run_id is None
         assert "Lock lost: my_key" in str(e)
         assert "run_id" not in str(e)
+
+    def test_timeout_error_preserves_timeout_context(self) -> None:
+        """Timeout exceptions should expose the exceeded timeout duration."""
+        error = DomainTimeoutError("request timed out", timeout_seconds=30.0)
+        default_error = DomainTimeoutError("request timed out")
+
+        assert error.timeout_seconds == pytest.approx(30.0)
+        assert error.error_type == ErrorType.TIMEOUT
+        assert str(error) == "request timed out (timeout: 30.0s)"
+        assert default_error.timeout_seconds is None
+        assert str(default_error) == "request timed out"
 
     def test_lock_acquisition_error_without_owner(self) -> None:
         """Test LockAcquisitionError without owner."""

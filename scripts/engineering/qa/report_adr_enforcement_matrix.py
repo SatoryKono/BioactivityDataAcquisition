@@ -5,9 +5,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -15,10 +17,14 @@ from typing import Any
 from scripts.generate_adr_registry import ADRMetadata, ADRRegistryGenerator
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_JSON_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "adr-enforcement-matrix.json"
+DEFAULT_JSON_OUTPUT = (
+    PROJECT_ROOT / "reports" / "quality" / "adr-enforcement-matrix.json"
+)
 DEFAULT_MD_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "adr-enforcement-matrix.md"
 
-_TEXT_SUFFIXES = frozenset({".cfg", ".ini", ".json", ".md", ".py", ".toml", ".yaml", ".yml"})
+_TEXT_SUFFIXES = frozenset(
+    {".cfg", ".ini", ".json", ".md", ".py", ".toml", ".yaml", ".yml"}
+)
 _SCAN_PREFIXES = (
     ".github/workflows/",
     "configs/",
@@ -57,6 +63,8 @@ _IMPLEMENTATION_PREFIXES = (
     "tests/",
 )
 _MANUAL_EXCEPTION_PREFIX = "manual-exception:"
+_ADR_REFERENCE_RE = re.compile(r"\bADR-\d{3}\b", flags=re.IGNORECASE)
+_ADR_REFERENCE_BYTES_RE = re.compile(rb"\bADR-\d{3}\b", flags=re.IGNORECASE)
 
 
 @dataclass(frozen=True)
@@ -136,38 +144,180 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def _repo_relative(repo_root: Path, path: Path) -> str:
-    return path.resolve().relative_to(repo_root.resolve()).as_posix()
-
-
-def _tracked_files(repo_root: Path) -> tuple[str, ...]:
-    result = subprocess.run(
-        ["git", "ls-files"],
-        cwd=repo_root,
-        check=True,
-        capture_output=True,
-        text=True,
+def _should_scan_path(rel_path: str) -> bool:
+    """Return whether a repo-relative text path belongs to the ADR reference scan."""
+    return (
+        rel_path.startswith(_SCAN_PREFIXES)
+        and not rel_path.startswith(_EXCLUDED_PREFIXES)
+        and Path(rel_path).suffix in _TEXT_SUFFIXES
     )
-    files = []
-    for raw_path in result.stdout.splitlines():
-        path = raw_path.strip()
-        if not path:
+
+
+def _git_grep_reference_lines(repo_root: Path) -> list[tuple[str, str]] | None:
+    """Return ADR reference lines from git-grep, or None when git-grep is unavailable."""
+    try:
+        result = subprocess.run(
+            [
+                "git",
+                "grep",
+                "--untracked",
+                "-I",
+                "-E",
+                "-i",
+                "-n",
+                "-e",
+                r"ADR-[0-9]{3}",
+                "--",
+                *_SCAN_PREFIXES,
+                ":(exclude)tests/fixtures/",
+            ],
+            cwd=repo_root,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+    except OSError:
+        return None
+    if result.returncode not in (0, 1):
+        return None
+    lines: list[tuple[str, str]] = []
+    for raw_line in result.stdout.splitlines():
+        try:
+            path, _line_number, text = raw_line.split(":", 2)
+        except ValueError:
             continue
-        if not path.startswith(_SCAN_PREFIXES):
+        lines.append((path, text))
+    return lines
+
+
+def _ripgrep_reference_lines(repo_root: Path) -> list[tuple[str, str]] | None:
+    """Return ADR reference lines from ripgrep, or None when it is unavailable."""
+    try:
+        result = subprocess.run(
+            [
+                "rg",
+                "--hidden",
+                "--line-number",
+                "--ignore-case",
+                "--with-filename",
+                "--no-heading",
+                "--color",
+                "never",
+                "--glob",
+                "!tests/fixtures/**",
+                "-e",
+                r"ADR-[0-9]{3}",
+                "--",
+                *_SCAN_PREFIXES,
+            ],
+            cwd=repo_root,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+    except OSError:
+        return None
+    if result.returncode not in (0, 1):
+        return None
+
+    lines: list[tuple[str, str]] = []
+    for raw_line in result.stdout.splitlines():
+        try:
+            path, _line_number, text = raw_line.split(":", 2)
+        except ValueError:
             continue
-        if path.startswith(_EXCLUDED_PREFIXES):
+        lines.append((path, text))
+    return lines
+
+
+def _python_reference_lines(repo_root: Path) -> list[tuple[str, str]]:
+    """Fallback ADR reference scan for environments where Git commands fail."""
+    scan_paths = _python_scan_paths(repo_root)
+    max_workers = min(32, (os.cpu_count() or 1) + 4)
+    lines: list[tuple[str, str]] = []
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        for file_lines in executor.map(
+            lambda rel_path: _read_python_reference_lines(
+                repo_root=repo_root,
+                rel_path=rel_path,
+            ),
+            scan_paths,
+        ):
+            lines.extend(file_lines)
+    return lines
+
+
+def _read_python_reference_lines(
+    *, repo_root: Path, rel_path: str
+) -> tuple[tuple[str, str], ...]:
+    """Read only ADR-bearing lines from one text candidate."""
+    reference_lines: list[tuple[str, str]] = []
+    try:
+        with (repo_root / rel_path).open("rb") as handle:
+            for raw_line in handle:
+                if not _ADR_REFERENCE_BYTES_RE.search(raw_line):
+                    continue
+                line = raw_line.decode("utf-8", errors="ignore").rstrip("\r\n")
+                reference_lines.append((rel_path, line))
+    except OSError:
+        return ()
+    return tuple(reference_lines)
+
+
+def _python_scan_paths(repo_root: Path) -> tuple[str, ...]:
+    """Return repo-relative scan paths without relying on Git discovery."""
+    discovered: set[str] = set()
+    for prefix in _SCAN_PREFIXES:
+        prefix_path = repo_root / prefix
+        if not prefix_path.exists():
             continue
-        if Path(path).suffix not in _TEXT_SUFFIXES:
+        candidates = prefix_path.rglob("*") if prefix_path.is_dir() else (prefix_path,)
+        for path in candidates:
+            if not path.is_file():
+                continue
+            try:
+                rel_path = path.relative_to(repo_root).as_posix()
+            except ValueError:
+                continue
+            if _should_scan_path(rel_path):
+                discovered.add(rel_path)
+    return tuple(sorted(discovered))
+
+
+def _reference_index(
+    repo_root: Path,
+) -> tuple[dict[str, set[str]], dict[str, dict[str, str]]]:
+    reference_lines = _git_grep_reference_lines(repo_root)
+    if reference_lines is None:
+        reference_lines = _ripgrep_reference_lines(repo_root)
+    if reference_lines is None:
+        reference_lines = _python_reference_lines(repo_root)
+
+    paths_by_adr: dict[str, set[str]] = {}
+    manual_exceptions: dict[str, dict[str, str]] = {}
+    for path, text in reference_lines:
+        if not _should_scan_path(path):
             continue
-        files.append(path)
-    return tuple(sorted(files))
+        for raw_adr_id in _ADR_REFERENCE_RE.findall(text):
+            adr_id = raw_adr_id.upper()
+            paths_by_adr.setdefault(adr_id, set()).add(path)
+            manual_exception = _manual_exception_from_text(
+                adr_id=adr_id,
+                rel_path=path,
+                text=text,
+            )
+            if manual_exception is not None:
+                manual_exceptions.setdefault(adr_id, manual_exception)
+    return paths_by_adr, manual_exceptions
 
 
 def _accepted_adrs(repo_root: Path) -> tuple[ADRMetadata, ...]:
     generator = ADRRegistryGenerator()
     generator.adr_dir = repo_root / "docs" / "02-architecture" / "decisions"
     generator.output_dir = repo_root / "docs" / "02-architecture" / "adr-registry"
-    generator.navigator_registry_file = repo_root / "docs" / "02-architecture" / "adr-registry.md"
+    generator.navigator_registry_file = (
+        repo_root / "docs" / "02-architecture" / "adr-registry.md"
+    )
     generator.adr_index_file = generator.adr_dir / "README.md"
     generator.adr_index_metadata = generator._load_adr_index_metadata()
 
@@ -177,10 +327,6 @@ def _accepted_adrs(repo_root: Path) -> tuple[ADRMetadata, ...]:
         if metadata is not None and metadata.status == "accepted":
             adrs.append(metadata)
     return tuple(sorted(adrs, key=lambda adr: int(adr.adr_number)))
-
-
-def _read_text(repo_root: Path, rel_path: str) -> str:
-    return (repo_root / rel_path).read_text(encoding="utf-8", errors="ignore")
 
 
 def _manual_exception_from_text(
@@ -203,25 +349,13 @@ def _manual_exception_from_text(
 
 
 def _collect_references(
-    repo_root: Path,
-    tracked_files: tuple[str, ...],
-    adr_id: str,
+    reference_paths: set[str],
+    manual_exception: dict[str, str] | None,
 ) -> tuple[tuple[str, ...], tuple[str, ...], dict[str, str] | None]:
-    pattern = re.compile(rf"\b{re.escape(adr_id)}\b", flags=re.IGNORECASE)
     implementation_paths: list[str] = []
     enforcement_paths: list[str] = []
-    manual_exception: dict[str, str] | None = None
 
-    for rel_path in tracked_files:
-        text = _read_text(repo_root, rel_path)
-        if not pattern.search(text):
-            continue
-        if manual_exception is None:
-            manual_exception = _manual_exception_from_text(
-                adr_id=adr_id,
-                rel_path=rel_path,
-                text=text,
-            )
+    for rel_path in reference_paths:
         if rel_path.startswith(_IMPLEMENTATION_PREFIXES):
             implementation_paths.append(rel_path)
         if rel_path.startswith(_ENFORCEMENT_PREFIXES):
@@ -237,23 +371,20 @@ def _collect_references(
 def build_payload(*, repo_root: Path = PROJECT_ROOT) -> dict[str, object]:
     """Build the deterministic ADR enforcement matrix payload."""
     repo_root = repo_root.resolve()
-    tracked_files = _tracked_files(repo_root)
+    reference_paths_by_adr, manual_exceptions = _reference_index(repo_root)
     rows: list[AdrCoverage] = []
 
     for adr in _accepted_adrs(repo_root):
         adr_id = f"ADR-{adr.adr_number}"
         implementation_paths, enforcement_paths, manual_exception = _collect_references(
-            repo_root,
-            tracked_files,
-            adr_id,
+            reference_paths_by_adr.get(adr_id, set()),
+            manual_exceptions.get(adr_id),
         )
         rows.append(
             AdrCoverage(
                 adr_id=adr_id,
                 title=adr.title,
-                decision_path=(
-                    "docs/02-architecture/decisions/" + adr.file_path
-                ),
+                decision_path=("docs/02-architecture/decisions/" + adr.file_path),
                 category=adr.category,
                 owner=adr.owner,
                 decision_date=adr.decision_date,
@@ -272,7 +403,7 @@ def build_payload(*, repo_root: Path = PROJECT_ROOT) -> dict[str, object]:
         "generated_by": "scripts.engineering.qa.report_adr_enforcement_matrix",
         "source": {
             "adr_decisions_dir": "docs/02-architecture/decisions",
-            "tracked_file_discovery": "git ls-files",
+            "tracked_file_discovery": "git grep --untracked with python fallback",
             "manual_exception_marker_prefix": _MANUAL_EXCEPTION_PREFIX,
         },
         "summary": {
@@ -327,7 +458,9 @@ def render_markdown(payload: dict[str, object]) -> str:
     return "\n".join(lines)
 
 
-def _write_artifacts(payload: dict[str, object], *, json_out: Path, md_out: Path) -> None:
+def _write_artifacts(
+    payload: dict[str, object], *, json_out: Path, md_out: Path
+) -> None:
     json_out.parent.mkdir(parents=True, exist_ok=True)
     md_out.parent.mkdir(parents=True, exist_ok=True)
     json_out.write_text(
@@ -337,7 +470,9 @@ def _write_artifacts(payload: dict[str, object], *, json_out: Path, md_out: Path
     md_out.write_text(render_markdown(payload), encoding="utf-8")
 
 
-def _check_artifacts(payload: dict[str, object], *, json_out: Path, md_out: Path) -> list[str]:
+def _check_artifacts(
+    payload: dict[str, object], *, json_out: Path, md_out: Path
+) -> list[str]:
     errors: list[str] = []
     expected_json = json.dumps(payload, indent=2, sort_keys=True) + "\n"
     expected_md = render_markdown(payload)

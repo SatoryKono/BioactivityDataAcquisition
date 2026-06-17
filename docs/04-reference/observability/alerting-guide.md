@@ -2,40 +2,54 @@
 
 ## Overview
 
-BioETL использует Prometheus alerting rules для мониторинга системы и уведомлений о проблемах.
+BioETL использует Prometheus recording/alert rules для мониторинга системы и
+уведомлений о проблемах. Shipped rule files and dashboard JSON are the source
+of truth for metric names.
 
 ## Alerting Rules Location
 
 Alerting rules определены в следующих файлах:
 
-- `grafana/prometheus-rules/bioetl_observability.yml` - Основные observability правила (pipeline, DQ, provider, system alerts)
-- `grafana/prometheus-rules/bioetl_control_plane_current_status.yml` - Control Plane status alerts (workflow, run ledger, checkpoint alerts)
+- `grafana/prometheus-rules/bioetl_observability.yml` - основные runtime,
+  DQ, provider, workflow, Silver/Gold reject, and dashboard status rules.
+- the control-plane status rules file under `grafana/prometheus-rules/` -
+  replay safety, manifest/ledger integrity, checkpoint freshness, and lineage
+  evidence rules.
 
 ## Key Alert Rules
 
 ### Pipeline Alerts
 
-- `PipelineFailureRate`: Высокий процент failed pipeline runs
-- `PipelineDurationHigh`: Pipeline выполняется слишком долго
-- `PipelineStuck`: Pipeline застрял в RUNNING состоянии
+- `bioetl_runtime_alert_condition_pipeline_runs_failed_15m`: failed pipeline
+  runs detected in the selected window.
+- `bioetl_runtime_alert_condition_stage_lag_high_15m`: stage lag is above the
+  operational threshold.
+- `bioetl_runtime_alert_condition_no_terminal_run_30m`: source activity exists
+  without a terminal run.
 
 ### Data Quality Alerts
 
-- `DQScoreLow`: Низкий показатель качества данных
-- `QuarantineRateHigh`: Высокий процент записей в карантине
-- `SilverRejectRateHigh`: Высокий процент отклонений на Silver
+- `bioetl_dq_current_status`: current DQ severity.
+- `bioetl_runtime_alert_condition_dq_hard_fail_15m`: hard validation failures.
+- `bioetl_runtime_alert_condition_silver_validation_failures_30m`: Silver
+  validation failures.
+- `bioetl_silver_filter_reject_total_mismatch_15m`: Silver reject accounting
+  reconciliation mismatch.
 
 ### Provider Alerts
 
-- `ProviderDown`: Provider недоступен
-- `ProviderHighLatency`: Высокая задержка provider
-- `ProviderRateLimited`: Provider rate limiting активен
+- `bioetl_provider_current_status`: current provider severity.
+- `bioetl_runtime_alert_condition_provider_failure_rate_high_15m`: high
+  provider failure rate.
+- `bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m`: high
+  rate-limiter wait.
 
 ### System Alerts
 
-- `HighMemoryUsage`: Высокое использование памяти
-- `HighCPUUsage**: Высокое использование CPU
-- `DiskSpaceLow`: Мало места на диске
+- `bioetl_runtime_current_status`: current runtime severity.
+- `bioetl_runtime_current_blocker_reason`: current runtime blocker reason.
+- `bioetl_runtime_alert_condition_runtime_error_rate_high_30m`: high runtime
+  error rate.
 
 ## Alert Severity Levels
 
@@ -48,8 +62,8 @@ Alerting rules определены в следующих файлах:
 Пороги настроены в alerting rules:
 
 ```yaml
-- alert: PipelineFailureRate
-  expr: rate(bioetl_pipeline_run_failed_total[5m]) > 0.1
+- alert: PipelineRunsFailed
+  expr: sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{status="failed"}[15m])) > bool 0
   for: 5m
   labels:
     severity: critical
@@ -63,11 +77,8 @@ Recording rules используются для pre-computation агрегаци
 groups:
   - name: bioetl_recording
     rules:
-      - record: bioetl_pipeline_success_rate_5m
-        expr: |
-          sum(rate(bioetl_pipeline_run_completed_total[5m]))
-          /
-          sum(rate(bioetl_pipeline_run_total[5m]))
+      - record: bioetl_l0_status
+        expr: max by (pipeline, run_type) (bioetl_l0_input_status_selected)
 ```
 
 ## Alert Routing

@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
 
+import bioetl.infrastructure.control_plane._file_lineage_index as lineage_index_module
 import bioetl.infrastructure.control_plane.file_lineage_store as lineage_store_module
 from bioetl.domain.lineage import (
     DatasetRef,
@@ -319,3 +321,198 @@ def test_lineage_store_append_jsonl_payload_uses_control_plane_flush_policy(
 
     assert checkpoint_offset == 0
     assert len(flush_calls) == 1
+
+
+def test_lineage_index_build_stored_fragment_id_preserves_semantic_id_without_occurrence_anchors() -> (
+    None
+):
+    fragment = LineageGraphFragment(fragment_id="semantic-only")
+
+    assert lineage_index_module.build_stored_fragment_id(fragment) == "semantic-only"
+
+
+def test_lineage_index_load_fragment_ids_handles_blank_and_duplicate_entries(
+    tmp_path,
+) -> None:
+    index_path = tmp_path / "lineage" / "index.jsonl"
+    index_path.parent.mkdir(parents=True)
+
+    assert lineage_index_module.load_fragment_ids(index_path, key="dataset-1") == []
+
+    index_path.write_text("   \n", encoding="utf-8")
+    assert lineage_index_module.load_fragment_ids(index_path, key="dataset-1") == []
+
+    index_path.write_text(
+        '{"key":"dataset-1","fragment_id":"fragment-1"}\n'
+        "\n"
+        '{"key":"dataset-1","fragment_id":"fragment-1"}\n',
+        encoding="utf-8",
+    )
+
+    assert lineage_index_module.load_fragment_ids(index_path, key="dataset-1") == [
+        "fragment-1"
+    ]
+
+
+@pytest.mark.parametrize(
+    ("payload", "message"),
+    (
+        ('{"key":"dataset-1","fragment_id":"fragment-1"}\nnot-json\n', "line 2"),
+        ("[]\n", "payload must be a JSON object"),
+        ('{"key":"other","fragment_id":"fragment-1"}\n', "unexpected key"),
+        ('{"key":"dataset-1"}\n', "missing fragment_id"),
+        ('{"key":"dataset-1","fragment_id":"   "}\n', "missing fragment_id"),
+    ),
+)
+def test_lineage_index_load_fragment_ids_rejects_malformed_records(
+    tmp_path,
+    payload: str,
+    message: str,
+) -> None:
+    index_path = tmp_path / "lineage" / "index.jsonl"
+    index_path.parent.mkdir(parents=True)
+    index_path.write_text(payload, encoding="utf-8")
+
+    with pytest.raises(
+        lineage_index_module.LineageIndexCorruptionError,
+        match=message,
+    ):
+        lineage_index_module.load_fragment_ids(index_path, key="dataset-1")
+
+
+class _RecordingTruncateOs:
+    O_RDWR = 2
+
+    def __init__(self) -> None:
+        self.calls: list[tuple[str, object]] = []
+
+    def open(self, path: Path, flags: int) -> int:
+        self.calls.append(("open", path))
+        assert flags == self.O_RDWR
+        return 11
+
+    def ftruncate(self, file_descriptor: int, offset: int) -> None:
+        self.calls.append(("ftruncate", (file_descriptor, offset)))
+
+    def close(self, file_descriptor: int) -> None:
+        self.calls.append(("close", file_descriptor))
+
+
+def test_lineage_index_truncate_to_offset_is_noop_for_missing_path(tmp_path) -> None:
+    recording_os = _RecordingTruncateOs()
+    flush_calls: list[int] = []
+
+    lineage_index_module.truncate_index_to_offset(
+        tmp_path / "missing.jsonl",
+        offset=7,
+        os_module=recording_os,
+        flush_file_descriptor=flush_calls.append,
+    )
+
+    assert recording_os.calls == []
+    assert flush_calls == []
+
+
+def test_lineage_index_truncate_to_offset_truncates_and_flushes_existing_path(
+    tmp_path,
+) -> None:
+    index_path = tmp_path / "lineage" / "index.jsonl"
+    index_path.parent.mkdir(parents=True)
+    index_path.write_text("existing\npayload\n", encoding="utf-8")
+    recording_os = _RecordingTruncateOs()
+    flush_calls: list[int] = []
+
+    lineage_index_module.truncate_index_to_offset(
+        index_path,
+        offset=8,
+        os_module=recording_os,
+        flush_file_descriptor=flush_calls.append,
+    )
+
+    assert recording_os.calls == [
+        ("open", index_path),
+        ("ftruncate", (11, 8)),
+        ("close", 11),
+    ]
+    assert flush_calls == [11]
+
+
+class _FakeAppendStat:
+    st_size = 5
+
+
+class _ZeroWriteOs:
+    def __init__(self) -> None:
+        self.closed: list[int] = []
+
+    def open(self, path: Path, flags: int, mode: int) -> int:
+        return 17
+
+    def fstat(self, file_descriptor: int) -> _FakeAppendStat:
+        return _FakeAppendStat()
+
+    def write(self, file_descriptor: int, payload: bytes) -> int:
+        return 0
+
+    def close(self, file_descriptor: int) -> None:
+        self.closed.append(file_descriptor)
+
+
+def test_lineage_index_append_jsonl_payload_rejects_empty_write(tmp_path) -> None:
+    fake_os = _ZeroWriteOs()
+
+    with pytest.raises(OSError, match="empty write"):
+        lineage_index_module.append_jsonl_payload(
+            tmp_path / "lineage" / "index.jsonl",
+            b"payload\n",
+            open_flags=0,
+            os_module=fake_os,
+            flush_file_descriptor=lambda file_descriptor: None,
+        )
+
+    assert fake_os.closed == [17]
+
+
+class _PartialWriteFailingOs:
+    def __init__(self) -> None:
+        self.truncations: list[tuple[int, int]] = []
+        self.closed: list[int] = []
+        self.write_calls = 0
+
+    def open(self, path: Path, flags: int, mode: int) -> int:
+        return 19
+
+    def fstat(self, file_descriptor: int) -> _FakeAppendStat:
+        return _FakeAppendStat()
+
+    def write(self, file_descriptor: int, payload: bytes) -> int:
+        self.write_calls += 1
+        if self.write_calls == 1:
+            return 2
+        raise OSError("simulated write failure")
+
+    def ftruncate(self, file_descriptor: int, offset: int) -> None:
+        self.truncations.append((file_descriptor, offset))
+
+    def close(self, file_descriptor: int) -> None:
+        self.closed.append(file_descriptor)
+
+
+def test_lineage_index_append_jsonl_payload_rolls_back_partial_write(
+    tmp_path,
+) -> None:
+    fake_os = _PartialWriteFailingOs()
+    flush_calls: list[int] = []
+
+    with pytest.raises(OSError, match="simulated write failure"):
+        lineage_index_module.append_jsonl_payload(
+            tmp_path / "lineage" / "index.jsonl",
+            b"payload\n",
+            open_flags=0,
+            os_module=fake_os,
+            flush_file_descriptor=flush_calls.append,
+        )
+
+    assert fake_os.truncations == [(19, 5)]
+    assert fake_os.closed == [19]
+    assert flush_calls == [19]

@@ -1,48 +1,68 @@
 # BioETL Data Quality v2 - Panels Documentation
 
-**Dashboard File:** `grafana/dashboards/bioetl-dq-v2.json`
+**Dashboard file:** `grafana/dashboards/bioetl-dq-v2.json`
 
 ## Обзор
 
-Dashboard обеспечивает детальный мониторинг качества данных (DQ) для всех pipelines.
+Dashboard `4. Data Quality` monitors DQ current status, validation score,
+freshness, quarantine, Silver structural rejects, and Gold contract-semantic
+reject outcomes. Shipped dashboard JSON is the source of truth.
 
-## Ключевые панели
+## Key Panels
 
-### 1. Overall DQ Score
-- **Тип:** Gauge
-- **Назначение:** Агрегированный показатель качества данных
-- **Источники данных:** `bioetl_dq_score`
-- **Пороги:** Green (>90), Yellow (70-90), Red (<70)
+### 1. Monitor DQ Current Status
+- **Type:** Stat / Table
+- **Purpose:** Show current DQ severity and reason details.
+- **Data sources:** `bioetl_dq_current_status`, `bioetl_dq_current_reason`
 
-### 2. DQ Rule Pass Rate
-- **Тип:** Graph
-- **Назначение:** Процент прохождения DQ правил
-- **Источники данных:** `bioetl_dq_rule_pass_rate`
-- **Фильтры:** `rule_name`, `pipeline_name`
+### 2. Data Quality Score
+- **Type:** Gauge / Timeseries
+- **Purpose:** Volume-weighted DQ score and trend.
+- **Data sources:** `bioetl_dq_validation_score`,
+  `bioetl_dq_validation_record_count`
 
-### 3. Quarantine by Reason
-- **Тип:** Pie Chart
-- **Назначение:** Распределение карантинных записей по причинам
-- **Источники данных:** `bioetl_quarantine_by_reason`
+### 3. Bronze -> Silver -> Gold Range Evidence
+- **Type:** Timeseries / Stat
+- **Purpose:** Compare selected-range record flow and invariant status.
+- **Data sources:** `bioetl_records_processed_total`,
+  `bioetl_record_flow_invariants_total`
 
-### 4. Silver Reject Rate
-- **Тип:** Graph
-- **Назначение:** Процент отклонённых записей на слое Silver
-- **Источники данных:** `bioetl_silver_reject_rate`
+### 4. Silver Structural Rejects
+- **Type:** Stat / Bargauge
+- **Purpose:** Track records filtered out before Gold semantics and inspect
+  reject reason/field breakdowns.
+- **Data sources:** `bioetl_records_processed_total`,
+  `bioetl_silver_filter_rejections_total`,
+  `bioetl_silver_filter_reject_total_mismatch_15m`
 
-### 5. Validation Errors
-- **Тип:** Table
-- **Назначение:** Детали ошибок валидации
-- **Источники данных:** `bioetl_validation_errors_total`
-- **Фильтры:** `error_code`, `field_name`
+### 5. Gold Contract-Semantic Reject Outcomes
+- **Type:** Bargauge / Stat
+- **Purpose:** Keep Gold contract outcomes separate from Silver structural
+  rejects.
+- **Data sources:** `bioetl_processed_records_gold_quarantined_current`,
+  `bioetl_processed_records_gold_excluded_by_contract_current`,
+  `bioetl_dq_validation_failures_total`
 
-## Переменные Dashboard
+### 6. Quarantine and Freshness
+- **Type:** Stat / Gauge / Bargauge
+- **Purpose:** Surface quarantined records, freshness lag, anomalies, and DQ
+  threshold events.
+- **Data sources:** `bioetl_dq_records_quarantined_total`,
+  `bioetl_data_freshness_seconds`, `bioetl_dq_anomaly_detected`,
+  `bioetl_dq_soft_threshold_exceeded`, `bioetl_silver_validation_failures_total`
 
-- `pipeline_name` - Выбор pipeline
-- `provider` - Выбор провайдера
-- `rule_type` - Тип DQ правила (schema, value, cross)
+## Variables
 
-## Примечания
+- `workflow`, `pipeline`, `run_type`, and `run_id` are the shared primary
+  dashboard context shell.
+- `stage` narrows medallion-stage range evidence where the panel owns that
+  selector.
 
-- Dashboard отражает состояние DQ фреймворка Pandera
-- Использует composite validation для cross-field проверок
+## Notes
+
+- Silver and Gold reject observability are intentionally distinct:
+  `bioetl_silver_filter_rejections_total` and filtered-out stage accounting
+  represent Silver structural rejects, while Gold uses Gold outcome recording
+  rules and validation failure metrics.
+- Legacy aggregate names for generic DQ scores, rule pass rates, Silver reject
+  rates, and validation errors are intentionally not documented here.

@@ -10,6 +10,7 @@ from pathlib import Path
 
 import yaml
 
+from bioetl.infrastructure.quality import architecture_debt_task_generation as tasks
 from bioetl.infrastructure.quality.architecture_debt_task_generation import (
     generate_architecture_debt_tasks_payload,
 )
@@ -119,3 +120,100 @@ def test_generate_tasks_payload_resolves_function_symbol(tmp_path: Path) -> None
     assert task["symbol_name"] == "long_worker"
     assert task["current_value"] == 5
     assert task["status"] == "within_limit"
+
+
+def test_default_output_path_uses_quality_reports_directory(tmp_path: Path) -> None:
+    generated_at = datetime(2026, 4, 4, 10, 5, tzinfo=UTC)
+
+    output_path = tasks._default_output_path(
+        project_root=tmp_path,
+        generated_at=generated_at,
+    )
+
+    assert output_path == (
+        tmp_path
+        / "reports"
+        / "quality"
+        / "tasks_architecture_metric_exemptions_2026-04-04-10-05.json"
+    )
+
+
+def test_project_root_resolves_repository_root() -> None:
+    assert (tasks._project_root() / "pyproject.toml").exists()
+
+
+def test_generate_tasks_payload_requires_explicit_generated_at(
+    tmp_path: Path,
+) -> None:
+    registry_path = tmp_path / "registry.yaml"
+    _write_registry(registry_path, registries={})
+
+    with pytest.raises(ValueError, match="generated_at must be provided"):
+        generate_architecture_debt_tasks_payload(
+            registry_path=registry_path,
+            project_root=tmp_path,
+        )
+
+
+@pytest.mark.parametrize(
+    ("registry_name", "goal_fragment", "expected_check_fragment"),
+    [
+        (
+            "function_complexity",
+            "cyclomatic complexity",
+            "TestFunctionComplexity",
+        ),
+        (
+            "domain_complexity",
+            "cyclomatic complexity",
+            "TestFunctionComplexity",
+        ),
+        (
+            "class_size",
+            "размер класса",
+            "test_class_size_registry_has_no_stale_entries",
+        ),
+        (
+            "class_method_count",
+            "число методов класса",
+            "TestClassSize",
+        ),
+        (
+            "god_object",
+            "god object",
+            "TestGodObjectDetection",
+        ),
+    ],
+)
+def test_generated_tasks_include_registry_specific_goals_and_checks(
+    registry_name: str,
+    goal_fragment: str,
+    expected_check_fragment: str,
+    tmp_path: Path,
+) -> None:
+    registry_path = tmp_path / "registry.yaml"
+    _write_registry(
+        registry_path,
+        registries={
+            registry_name: {
+                "MissingSymbol": {
+                    "value": 3,
+                    "owner": "@bioetl-architecture",
+                    "reason": "exercise registry-specific task metadata",
+                    "expires_on": "2026-06-30",
+                    "removal_step": "reduce metric",
+                }
+            }
+        },
+    )
+
+    payload = generate_architecture_debt_tasks_payload(
+        registry_path=registry_path,
+        project_root=tmp_path,
+        generated_at=datetime(2026, 4, 4, 10, 15, tzinfo=UTC),
+    )
+
+    task = payload["tasks"][0]
+    assert goal_fragment in task["goal"]
+    assert any(expected_check_fragment in check for check in task["checks"])
+    assert task["status"] == "target_not_found"

@@ -227,7 +227,6 @@ markers = [
 timeout = 60
 # Timeout method: thread works on all platforms (signal only on Unix)
 timeout_method = "thread"
-asyncio_mode = "auto"
 filterwarnings = [
     "error",
     # Deprecation warnings must fail by default; dedicated compatibility tests
@@ -241,6 +240,7 @@ filterwarnings = [
     # pytest-benchmark warning when xdist is active (expected in parallel mode)
     "ignore:Benchmarks are automatically disabled",
 ]
+asyncio_mode = "auto"
 
 # ============ COVERAGE ============
 [tool.coverage.run]
