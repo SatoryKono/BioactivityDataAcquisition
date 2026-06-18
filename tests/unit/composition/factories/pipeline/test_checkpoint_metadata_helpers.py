@@ -25,6 +25,7 @@ from bioetl.composition.factories.pipeline.checkpoint_metadata_helpers import (
 from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.control_plane import (
     ReplayCapability,
+    RunArtifactRef,
     RunInputSnapshotRef,
     RunSourceRef,
 )
@@ -141,6 +142,9 @@ def test_checkpoint_metadata_execution_fingerprint_matches_manifest_contract(
         manifest_id="manifest-1",
         contract_ref="chembl.activity",
         contract_version="1.0.0",
+        contract_schema_hash="schema-deadbeef",
+        dq_policy_ref="chembl.activity.policy",
+        rule_bundle_version="2026.04",
         normalization_profile_ref="chembl.activity",
         normalization_profile_version="2.0.0",
         normalization_profile_hash="p" * 64,
@@ -185,10 +189,19 @@ def test_checkpoint_metadata_execution_fingerprint_matches_manifest_contract(
                     input_snapshots=snapshot_refs,
                 ),
             ),
+            planned_artifacts=(
+                RunArtifactRef(
+                    layer="bronze",
+                    path="data/output/bronze/chembl/activity",
+                ),
+            ),
             pipeline_version="1.2.3",
             effective_config_hash=run_context.effective_config_hash,
             contract_ref="chembl.activity",
             contract_version="1.0.0",
+            contract_schema_hash="schema-deadbeef",
+            dq_policy_ref="chembl.activity.policy",
+            rule_bundle_version="2026.04",
             dq_contract_compatibility_hash="dq-hash",
             effective_config_artifact_id="artifact-1",
             replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,

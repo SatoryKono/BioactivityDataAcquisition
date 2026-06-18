@@ -15,6 +15,12 @@ import pytest
 from bioetl.application.services.control_plane.manifest.service import (
     RunManifestCreateSpec,
 )
+from bioetl.composition.runtime_builders import (
+    _run_manifest_creation_support_helpers as creation_helper_module,
+)
+from bioetl.composition.runtime_builders import (
+    _run_manifest_replay_support as replay_helper_module,
+)
 from bioetl.composition.runtime_builders._run_manifest_creation_support import (
     _RunManifestCreateRequestInputs,
     build_manifest_create_request,
@@ -226,6 +232,236 @@ def test_build_manifest_create_request_uses_supplied_reproducibility_context(
     assert captured["assemble_request_inputs"].source_fingerprint == (
         "source-fingerprint-1"
     )
+
+
+@pytest.mark.unit
+def test_creation_helper_build_manifest_source_refs_forwards_runtime_profile() -> None:
+    manifest_support = MagicMock()
+    manifest_support.build_run_source_refs.return_value = ("source-ref",)
+    ctx = _make_run_context()
+    inputs = SimpleNamespace(
+        cached_bronze="cached-bronze",
+        settings=SimpleNamespace(test_mode=False, debug=False),
+    )
+
+    result = creation_helper_module.build_manifest_source_refs(
+        manifest_support=manifest_support,
+        ctx=ctx,
+        inputs=inputs,
+        provider="chembl",
+        entity="activity",
+        required_persistence_profile="replay_ready",
+    )
+
+    assert result == ("source-ref",)
+    manifest_support.build_run_source_refs.assert_called_once_with(
+        ctx=ctx,
+        cached_bronze="cached-bronze",
+        settings=inputs.settings,
+        provider="chembl",
+        entity="activity",
+        required_persistence_profile="replay_ready",
+    )
+
+
+@pytest.mark.unit
+def test_creation_helper_assemble_manifest_create_spec_populates_contract_and_debug_export(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        creation_helper_module,
+        "current_silver_filter_compatibility_mode",
+        lambda: "compat-mode-test",
+    )
+    ctx = cast(
+        PipelineRunContext,
+        SimpleNamespace(
+            run_id=deterministic_run_uuid_from_callsite("manifest_create_spec"),
+            run_type="incremental",
+            pipeline_name="chembl_activity",
+            workflow_id="wf-123",
+            debug_export_enabled=True,
+            debug_export_dir="artifacts/debug_exports",
+        ),
+    )
+    inputs = SimpleNamespace(
+        runtime_config={"existing": "value"},
+        yaml_config={"version": "9.9.9"},
+        settings=_make_settings(data_dir=Path("/tmp/bioetl-data")),
+    )
+    request_inputs = creation_helper_module.RunManifestCreateRequestInputs(
+        ctx=ctx,
+        inputs=inputs,
+        provider="chembl",
+        entity="activity",
+        reproducibility_context=SimpleNamespace(),
+        run_type_value="incremental",
+        execution_context_value="isolated",
+        config_hash="config-hash",
+        resolved_config_hash="resolved-config-hash",
+        effective_config_hash="effective-config-hash",
+        source_fingerprint="source-fingerprint",
+        contract_identity=RunManifestContractIdentity(
+            contract_ref="chembl.activity",
+            contract_version="1.2.3",
+            contract_schema_hash="schema-hash",
+            dq_policy_ref="chembl.activity.policy",
+            rule_bundle_version="2026.06",
+            normalization_profile_ref="chembl.activity.norm",
+            normalization_profile_version="1.0.0",
+            normalization_profile_hash="f" * 64,
+        ),
+        dq_contract_compatibility_hash="dq-compat-hash",
+        effective_config_artifact_id="artifact-123",
+    )
+    code_revision = CodeRevisionProvenance(
+        git_commit="a" * 40,
+        source_revision_state="clean",
+        dependency_lock_hash="sha256:test-lock",
+    )
+
+    request = creation_helper_module.assemble_manifest_create_spec(
+        request_inputs=request_inputs,
+        source_refs=("source-ref",),
+        replay_of_run_id="parent-run",
+        replay_of_manifest_id="parent-manifest",
+        code_revision=code_revision,
+        replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,
+        launch_context={"exact_replay": True},
+    )
+
+    assert request.runtime_config["existing"] == "value"
+    assert request.runtime_config["silver_filter_compatibility_mode"] == (
+        "compat-mode-test"
+    )
+    assert request.pipeline_version == "9.9.9"
+    assert request.contract_ref == "chembl.activity"
+    assert request.contract_schema_hash == "schema-hash"
+    assert request.effective_config_artifact_id == "artifact-123"
+    assert request.replay_capability is ReplayCapability.EXACT_REPLAY_SUPPORTED
+    debug_export = next(
+        artifact for artifact in request.planned_artifacts if artifact.layer == "debug_export"
+    )
+    assert debug_export.path.endswith(
+        "artifacts/debug_exports/wf-123/chembl_activity/" f"{ctx.run_id}"
+    )
+
+
+@pytest.mark.unit
+def test_creation_helper_create_ledger_service_uses_runtime_factories(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    sentinel_store = object()
+    monkeypatch.setattr(
+        "bioetl.composition.bootstrap.control_plane_store_builders.create_run_ledger_store",
+        lambda **kwargs: sentinel_store,
+    )
+    monkeypatch.setattr(
+        "bioetl.composition.occurrence_identity.create_runtime_occurrence_id",
+        lambda prefix: f"{prefix}-001",
+    )
+    inputs = SimpleNamespace(
+        settings=_make_settings(),
+        observability=SimpleNamespace(metrics="metrics-service"),
+    )
+    ctx = cast(
+        PipelineRunContext,
+        SimpleNamespace(run_id=deterministic_run_uuid_from_callsite("ledger_service")),
+    )
+
+    service = creation_helper_module.create_ledger_service(inputs, ctx)
+
+    assert service is not None
+    assert service.ledger_port is sentinel_store
+    assert service.run_id == ctx.run_id
+    assert service.manifest_id == "pending"
+    assert service._entry_id_factory() == "run_ledger_entry-001"
+
+
+@pytest.mark.unit
+def test_replay_support_helpers_cover_boundary_launch_context_and_assessment(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    replay_helper_module.validate_exact_replay_boundary(
+        SimpleNamespace(exact_replay=False),
+        SimpleNamespace(strict_exact_replay_supported=False),
+    )
+
+    with pytest.raises(RuntimeError, match="strict exact-replay support boundary"):
+        replay_helper_module.validate_exact_replay_boundary(
+            SimpleNamespace(exact_replay=True),
+            SimpleNamespace(strict_exact_replay_supported=False),
+        )
+
+    manifest_support = MagicMock()
+    manifest_support.build_launch_context_snapshot.return_value = {"seed": "value"}
+    request_inputs = SimpleNamespace(
+        ctx=SimpleNamespace(),
+        run_type_value="incremental",
+        execution_context_value="isolated",
+        inputs=SimpleNamespace(settings=SimpleNamespace(debug=True)),
+    )
+    reproducibility_context = SimpleNamespace(
+        configured_required_persistence_profile="degraded_observable",
+        required_persistence_profile="replay_ready",
+        required_persistence_profile_opt_down=True,
+        strict_exact_replay_supported=True,
+        family="strict",
+        replay_family_contract="strict",
+        strict_replay_runtime_verdict="exact_replay_ready",
+        support_scope="supported",
+        reason="fixture",
+    )
+    launch_context = replay_helper_module.build_manifest_launch_context(
+        manifest_support=manifest_support,
+        request_inputs=request_inputs,
+        reproducibility_context=reproducibility_context,
+    )
+
+    manifest_support.build_launch_context_snapshot.assert_called_once()
+    assert launch_context == {"seed": "value"}
+
+    captured: dict[str, object] = {}
+    monkeypatch.setattr(
+        replay_helper_module,
+        "assess_reproducibility_policy",
+        lambda **kwargs: captured.setdefault("kwargs", kwargs) or SimpleNamespace(),
+    )
+    replay_helper_module.build_replay_assessment(
+        request_inputs=SimpleNamespace(
+            ctx=SimpleNamespace(exact_replay=True, resume=False),
+            inputs=SimpleNamespace(settings=SimpleNamespace(debug=True)),
+            run_type_value="incremental",
+        ),
+        reproducibility_context=reproducibility_context,
+        source_refs=("source-ref",),
+        replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,
+    )
+
+    assert captured["kwargs"] == {
+        "source_refs": ("source-ref",),
+        "required_persistence_profile": "replay_ready",
+        "strict_exact_replay_supported": True,
+        "exact_replay_requested": True,
+        "resume_requested": False,
+        "replay_capability": ReplayCapability.EXACT_REPLAY_SUPPORTED,
+        "run_type": "incremental",
+        "debug_only": True,
+    }
+
+    replay_context: dict[str, object] = {}
+    replay_helper_module.apply_replay_assessment(
+        replay_context,
+        SimpleNamespace(
+            replay_readiness_verdict=SimpleNamespace(value="exact_replay_ready"),
+            blocking_gaps=("missing_snapshot",),
+        ),
+    )
+    assert replay_context == {
+        "replay_readiness_verdict": "exact_replay_ready",
+        "exact_replay_ready": True,
+        "replay_blockers": ["missing_snapshot"],
+    }
 
 
 @pytest.mark.unit

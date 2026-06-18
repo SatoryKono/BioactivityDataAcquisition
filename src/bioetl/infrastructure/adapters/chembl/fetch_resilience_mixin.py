@@ -26,7 +26,6 @@ from bioetl.infrastructure.adapters.chembl._fetch_resilience_fallback import (
 )
 from bioetl.infrastructure.adapters.common import is_retry_exhausted_error
 from bioetl.infrastructure.adapters.common.fetch_resilience_template import (
-    FilteredBatchRecoveryHost,
     fetch_batch_with_reduction,
     retry_with_split_batches,
     yield_retry_exhausted_recovery,
@@ -99,31 +98,6 @@ class ChemblFetchResilienceMixin:
             record_id,
         )
 
-    async def _retry_with_split_batches(
-        self,
-        entity_type: str,
-        id_batch: list[str],
-        filter_field: str,
-        limit: int | None,
-        seen_ids: set[str],
-        pk_field: str,
-        error: Exception,
-        pk_fields: tuple[str, ...] | None = None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Recover retry-exhausted batch via shared split-or-single policy."""
-        async for record in retry_with_split_batches(
-            cast(FilteredBatchRecoveryHost, self),
-            entity_type,
-            id_batch,
-            filter_field,
-            limit,
-            seen_ids,
-            pk_field,
-            error,
-            pk_fields,
-        ):
-            yield record
-
     def _mark_record_as_seen(
         self,
         record: BronzeRecord,
@@ -141,6 +115,9 @@ class ChemblFetchResilienceMixin:
                 pk_fields,
             )
         )
+
+    # Keep legacy Chembl method names bound to the shared recovery template.
+    _retry_with_split_batches = retry_with_split_batches
 
     async def _yield_deduplicated_filtered_records(
         self,
@@ -188,53 +165,8 @@ class ChemblFetchResilienceMixin:
         ):
             yield record
 
-    async def _yield_retry_exhausted_recovery(
-        self,
-        entity_type: str,
-        id_batch: list[str],
-        filter_field: str,
-        limit: int | None,
-        seen_ids: set[str],
-        pk_field: str,
-        error: Exception,
-        pk_fields: tuple[str, ...] | None = None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Recover from RetryExhaustedError using shared policy orchestrator."""
-        async for record in yield_retry_exhausted_recovery(
-            cast(FilteredBatchRecoveryHost, self),
-            entity_type,
-            id_batch,
-            filter_field,
-            limit,
-            seen_ids,
-            pk_field,
-            error,
-            pk_fields,
-        ):
-            yield record
-
-    async def _fetch_batch_with_reduction(
-        self,
-        entity_type: str,
-        id_batch: list[str],
-        filter_field: str,
-        limit: int | None,
-        seen_ids: set[str],
-        pk_field: str,
-        pk_fields: tuple[str, ...] | None = None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Fetch filtered batch and recover from retry-exhausted failures."""
-        async for record in fetch_batch_with_reduction(
-            cast(FilteredBatchRecoveryHost, self),
-            entity_type,
-            id_batch,
-            filter_field,
-            limit,
-            seen_ids,
-            pk_field,
-            pk_fields,
-        ):
-            yield record
+    _yield_retry_exhausted_recovery = yield_retry_exhausted_recovery
+    _fetch_batch_with_reduction = fetch_batch_with_reduction
 
 
 __all__ = ["CHEMBL_ADAPTER_ERRORS", "ChemblFetchResilienceMixin"]
