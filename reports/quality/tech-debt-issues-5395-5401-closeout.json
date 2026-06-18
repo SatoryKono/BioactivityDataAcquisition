@@ -1,0 +1,100 @@
+{
+  "schema_version": "tech-debt-issues-5395-5401-closeout-v1",
+  "snapshot_date": "2026-06-18",
+  "status": "implemented_local_closeable",
+  "budget_policy": "no_growth_ratchet_only",
+  "debt_budget_outcome": "flat",
+  "issues": [
+    {
+      "number": 5395,
+      "theme": "Replay-critical wall-clock seam classification",
+      "status": "closed_by_architecture_registry",
+      "evidence": [
+        "configs/quality/time_seam_classification.yaml",
+        "tests/architecture/test_time_seam_classification.py",
+        "tests/architecture/test_replay_critical_time_seams.py",
+        "tests/architecture/test_replay_time_seam_inventory.py"
+      ],
+      "outcome": "Direct wall-clock calls in src/bioetl are classified as operator_time_allowed or runtime_clock_adapter; replay_time_forbidden has no active exceptions."
+    },
+    {
+      "number": 5396,
+      "theme": "Bounded representative Gold replay golden tests",
+      "status": "closed_by_no_network_golden_fixture",
+      "evidence": [
+        "tests/fixtures/golden/reproducibility/gold_replay_representative_v1.json",
+        "tests/contract/test_gold_replay_golden_fixtures.py",
+        "tests/fixtures/golden/gold/chembl_activity_dq_bundle_v1.json",
+        "tests/fixtures/golden/gold/pubmed_publication_dq_bundle_v1.json",
+        "tests/fixtures/golden/gold/composite_publication_dq_bundle_v1.json"
+      ],
+      "outcome": "Provider, publication, and composite Gold representatives have deterministic output hashes plus manifest, checkpoint, and ledger anchors without live API access."
+    },
+    {
+      "number": 5397,
+      "theme": "Generated artifact drift workflow hardening",
+      "status": "closed_by_workflow_guard",
+      "evidence": [
+        "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
+        "tests/architecture/test_generated_artifact_drift_workflow.py",
+        "configs/quality/generated_artifact_routing.yaml",
+        "tests/architecture/test_generated_artifact_routing.py"
+      ],
+      "outcome": "Generated-artifact closeout now requires local/CI command parity, a decreased|flat|increased debt outcome, and architecture review rather than budget growth for increases."
+    },
+    {
+      "number": 5398,
+      "theme": "Bronze/Silver/Gold layer contract coverage matrix",
+      "status": "closed_by_layer_matrix",
+      "evidence": [
+        "reports/quality/layer-contract-coverage-matrix.json",
+        "reports/quality/layer-contract-coverage-matrix.md",
+        "tests/architecture/test_layer_contract_coverage_matrix.py",
+        "reports/quality/contract-coverage-matrix.json",
+        "tests/architecture/test_contract_coverage_matrix_integrity.py"
+      ],
+      "outcome": "Each active entity config has Bronze, Silver, and Gold layer rows with strict, moderate, structural_only, or not_applicable coverage classification."
+    },
+    {
+      "number": 5399,
+      "theme": "Quarantine storage payload immutability and status audit trail",
+      "status": "closed_by_storage_level_contract_test",
+      "evidence": [
+        "tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineUpdateStatus::test_update_status_only_mutates_status_column",
+        "tests/architecture/test_quarantine_immutability.py",
+        "src/bioetl/infrastructure/quarantine/unified.py"
+      ],
+      "outcome": "Status transitions update only dq_status by payload_hash predicate; stored payload bytes and payload_hash are not rewritten."
+    },
+    {
+      "number": 5400,
+      "theme": "Hotspot family coupling and metrics-driven decomposition",
+      "status": "closed_by_hotspot_family_ratchets",
+      "evidence": [
+        "reports/quality/hotspot-family-baseline.json",
+        "reports/quality/hotspot-family-baseline.md",
+        "tests/architecture/test_hotspot_growth_family_ratchets.py",
+        "tests/architecture/test_hotspot_fan_in_family_ratchets.py",
+        "tests/architecture/test_hotspot_duplication_family_ratchets.py"
+      ],
+      "outcome": "Hotspot-family decomposition remains metrics-driven: budget_warnings=0, no duplicate clusters, and file-growth/fan-in limits are enforced without budget increases."
+    },
+    {
+      "number": 5401,
+      "theme": "Architecture governance mirror synchronization",
+      "status": "closed_by_mirror_evidence_index",
+      "evidence": [
+        "docs/02-architecture/governance-audit-evidence.md",
+        "tests/architecture/test_generated_artifact_drift_workflow.py::test_architecture_governance_evidence_doc_is_mirror_only",
+        "reports/quality/architecture-quality-scorecard.json",
+        "reports/quality/hotspot-family-baseline.json"
+      ],
+      "outcome": "Architecture governance docs point to machine-readable evidence artifacts and explicitly remain mirror-only rather than redefining runtime behavior."
+    }
+  ],
+  "notes": [
+    "No technical-debt budgets were increased.",
+    "New evidence is bounded to docs, tests, configs, and reports; no src/bioetl production code was changed.",
+    "Layer matrix supplements the existing strict Gold contract matrix without replacing its generator or drift gate."
+  ]
+}

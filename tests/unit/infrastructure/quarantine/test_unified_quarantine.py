@@ -562,6 +562,38 @@ class TestUnifiedQuarantineUpdateStatus:
         assert result is True
         mock_table.update.assert_called_once()
 
+    def test_update_status_only_mutates_status_column(
+        self, quarantine, mock_delta_table
+    ):
+        """Status transitions must not rewrite stored payload bytes or hash."""
+        mock_table = MagicMock()
+        mock_arrow_table = MagicMock()
+        mock_arrow_table.__len__ = MagicMock(return_value=1)
+        mock_arrow_table.to_pylist.return_value = [
+            {
+                "payload": '{"id": 1, "canonical_smiles": "CCO"}',
+                "payload_hash": "sha256:stable-payload",
+                "dq_status": QuarantineRecordStatus.NEW.value,
+            }
+        ]
+        mock_table.to_pyarrow_table.return_value = mock_arrow_table
+        mock_delta_table.return_value = mock_table
+
+        result = quarantine.update_status(
+            "sha256:stable-payload", QuarantineRecordStatus.REPROCESSED
+        )
+
+        assert result is True
+        mock_table.to_pyarrow_table.assert_called_once_with(
+            filters=[("payload_hash", "=", "sha256:stable-payload")]
+        )
+        mock_table.update.assert_called_once_with(
+            updates={
+                "dq_status": quote_literal(QuarantineRecordStatus.REPROCESSED.value)
+            },
+            predicate="payload_hash = 'sha256:stable-payload'",
+        )
+
 
 @pytest.mark.unit
 class TestUnifiedQuarantineGetStats:

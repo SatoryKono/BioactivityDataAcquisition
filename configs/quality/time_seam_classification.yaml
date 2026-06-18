@@ -1,0 +1,79 @@
+schema_version: 1
+description: >
+  Classification registry for direct wall-clock seams in src/bioetl. Replay-critical
+  paths must use ClockPort or explicit timestamp parameters; direct wall-clock
+  reads are only allowed when classified here.
+allowed_categories:
+  operator_time_allowed:
+    description: Operator, debug, or governance tooling time that is outside replay identity.
+  runtime_clock_adapter:
+    description: ClockPort/current-time adapter seam that centralizes system time.
+  replay_time_forbidden:
+    description: Replay-critical time read; no active source call may use this category.
+seams:
+  - path: src/bioetl/application/runtime_clock.py
+    scope: RuntimeClockService.now
+    call: datetime.now
+    category: runtime_clock_adapter
+    replay_critical: false
+    rationale: Application ClockPort implementation used only when runtime wiring injects a clock.
+  - path: src/bioetl/infrastructure/time/system_clock.py
+    scope: SystemClock.now
+    call: time.time
+    category: runtime_clock_adapter
+    replay_critical: false
+    rationale: Infrastructure ClockPort adapter backed by system UTC time.
+  - path: src/bioetl/domain/context.py
+    scope: current_utc_time
+    call: datetime.now
+    category: runtime_clock_adapter
+    replay_critical: false
+    rationale: Legacy shared timestamp adapter; replay-critical callers are guarded separately.
+  - path: src/bioetl/application/services/debug_export_helpers.py
+    scope: _utc_now
+    call: datetime.now
+    category: operator_time_allowed
+    replay_critical: false
+    rationale: Operator/debug export timestamp factory, not a replay identity anchor.
+  - path: src/bioetl/application/services/export_manifest_identity.py
+    scope: utc_now
+    call: datetime.now
+    category: operator_time_allowed
+    replay_critical: false
+    rationale: Non-deterministic export manifest fallback requires explicit operator opt-in.
+  - path: src/bioetl/infrastructure/quality/debt_scorecard.py
+    scope: validate_scorecard_registry_sync
+    call: date.today
+    category: operator_time_allowed
+    replay_critical: false
+    rationale: Quality-governance CLI default date; callers can inject today for tests.
+  - path: src/bioetl/infrastructure/quality/debt_scorecard.py
+    scope: evaluate_debt_scorecard
+    call: date.today
+    category: operator_time_allowed
+    replay_critical: false
+    rationale: Quality-governance CLI default date; callers can inject today for tests.
+  - path: src/bioetl/infrastructure/quality/exemptions_registry_policy.py
+    scope: validate_exemptions_registry
+    call: date.today
+    category: operator_time_allowed
+    replay_critical: false
+    rationale: Quality-governance CLI default date; callers can inject today for tests.
+  - path: src/bioetl/infrastructure/quality/_governance_validation.py
+    scope: _validate_warn_until_by_section
+    call: date.today
+    category: operator_time_allowed
+    replay_critical: false
+    rationale: Quality-governance rollout validation date; callers can inject today.
+  - path: src/bioetl/infrastructure/quality/inventory.py
+    scope: build_exemption_inventory
+    call: date.today
+    category: operator_time_allowed
+    replay_critical: false
+    rationale: Quality-governance inventory date; callers can inject today.
+  - path: src/bioetl/infrastructure/quality/report_formatter.py
+    scope: split_growth_violations_by_severity
+    call: date.today
+    category: operator_time_allowed
+    replay_critical: false
+    rationale: Quality-governance report formatting date; callers can inject today.
