@@ -56,6 +56,13 @@ ______________________________________________________________________
 | ------------------------- | ------------ | ----------------------- |
 | `protein_classifications` | `list[dict]` | Классификация по ChEMBL |
 
+`protein_classifications` is provider evidence for target-component class
+paths. BioETL does not derive composite target semantics directly from this raw
+nested payload; `chembl_target_protein_classification` resolves it against the
+local `chembl.protein_class` hierarchy and publishes normalized
+`canonical_l1` evidence before `composite_target` derives
+`target_protein_class_type`.
+
 `target_component_xrefs` persists as a canonical JSON string surface in Silver,
 and nested `xref_src_db` namespaces are validated against the shared registry
 `configs/vocab/chembl_reference_sources.yaml`.

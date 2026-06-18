@@ -322,7 +322,7 @@
       "config_path": "configs/entities/chembl/target_protein_classification.yaml",
       "contract_ref": "chembl.target_protein_classification",
       "contract_yaml_contract_ref": "chembl.target_protein_classification",
-      "contract_yaml_contract_version": "2.1.0",
+      "contract_yaml_contract_version": "2.2.0",
       "contract_yaml_exists": true,
       "contract_yaml_path": "configs/contracts/chembl/target_protein_classification.yaml",
       "entity": "target_protein_classification",
@@ -336,9 +336,9 @@
       "provider": "chembl",
       "published_artifact_missing_paths": [],
       "published_artifact_paths": [
-        "../../docs/04-reference/contracts/gold/chembl_target_protein_classification_v2.1.json"
+        "../../docs/04-reference/contracts/gold/chembl_target_protein_classification_v2.2.json"
       ],
-      "registry_contract_version": "2.1.0",
+      "registry_contract_version": "2.2.0",
       "registry_entry_exists": true,
       "registry_status": "active"
     },
@@ -655,5 +655,5 @@
       "registry_status": "active"
     }
   ],
-  "snapshot_date": "2026-06-17"
+  "snapshot_date": "2026-06-18"
 }

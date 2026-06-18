@@ -94,6 +94,30 @@ def test_entity_residual_backlog_matches_live_metrics_and_scorecard() -> None:
     assert backlog["entity_effective"]["actionable_partial_key_count"] == 0
 
 
+def test_config_surface_duplication_audit_matches_live_backlog() -> None:
+    """Structured config duplication audit must stay committed and CI-visible."""
+    committed = _load_json(BACKLOG_PATH)
+    live = build_backlog()
+
+    assert committed["duplication_audit"] == live["duplication_audit"]
+
+    audit = committed["duplication_audit"]
+    scope = audit["scope"]
+    summary = audit["summary"]
+
+    assert scope["root"] == "configs"
+    assert "**/configs/**" in scope["ignored_by_jscpd_patterns"]
+    assert "**/*.yaml" in scope["ignored_by_jscpd_patterns"]
+    assert "**/*.json" in scope["ignored_by_jscpd_patterns"]
+    assert scope["files_scanned"] > 0
+    assert summary["duplicate_cluster_count"] >= summary["reported_cluster_count"] >= 0
+
+    for cluster in audit["clusters"]:
+        assert cluster["occurrence_count"] >= 2
+        assert len(cluster["occurrences"]) == cluster["occurrence_count"]
+        assert cluster["serialized_bytes"] >= scope["structured_block_min_bytes"]
+
+
 def test_entity_residual_partial_keys_are_intentional_only() -> None:
     """Residual entity drift must fall into documented intentional categories."""
     backlog = _load_json(BACKLOG_PATH)

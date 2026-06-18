@@ -8,6 +8,14 @@ from typing import Final
 
 import polars as pl
 
+from bioetl.domain.mapping.protein_class_target_type import (
+    MAJOR_FAMILY_RULE_VERSION,
+    ProteinClassTargetTypeMappingData,
+    current_protein_class_target_type_mapping,
+    derive_major_families,
+    derive_protein_class_target_type,
+)
+
 __all__ = [
     "MULTIFUNCTIONAL_TARGET_NAME",
     "TARGET_PROTEIN_CLASSIFICATION_PIPELINE",
@@ -27,6 +35,18 @@ _SUMMARY_SCHEMA: Final[dict[str, pl.DataType]] = {
     **{f"target_protein_class_id_L{level}": pl.Utf8 for level in _LEVELS},
     **{f"target_protein_class_name_L{level}": pl.Utf8 for level in _LEVELS},
     **{f"target_protein_class_desc_L{level}": pl.Utf8 for level in _LEVELS},
+    "target_protein_class_type": pl.Utf8,
+    "top_level_count": pl.Int64,
+    "canonical_top_levels": pl.Utf8,
+    "counted_top_levels": pl.Utf8,
+    "ignored_top_levels": pl.Utf8,
+    "primary_top_level": pl.Utf8,
+    "target_type_reason_code": pl.Utf8,
+    "multifunctional_origin": pl.Utf8,
+    "major_family": pl.Utf8,
+    "major_family_rule_version": pl.Utf8,
+    "target_type_rule_version": pl.Utf8,
+    "l1_mapping_version": pl.Utf8,
 }
 
 
@@ -60,12 +80,20 @@ def summarize_target_protein_classification_rows(
     """Summarize relation-like classification rows for one target."""
     summary = empty_target_protein_classification_summary(target_id)
     resolved_rows = _deduplicate_resolved_rows([dict(row) for row in rows])
+    mapping_data = current_protein_class_target_type_mapping()
+    _populate_target_type_summary(summary, resolved_rows, mapping_data)
     if not resolved_rows:
         return summary
 
     summary["protein_classifications"] = _serialize_classifications(resolved_rows)
-    if len(resolved_rows) == 1:
-        _copy_single_hierarchy(summary, resolved_rows[0])
+    primary_top_level = _text_or_none(summary.get("primary_top_level"))
+    if primary_top_level is not None:
+        representative_row = _representative_row_for_primary_top_level(
+            rows=resolved_rows,
+            primary_top_level=primary_top_level,
+            mapping_data=mapping_data,
+        )
+        _copy_single_hierarchy(summary, representative_row)
         return summary
 
     _mark_multifunctional(summary)
@@ -78,7 +106,65 @@ def empty_target_protein_classification_summary(target_id: str) -> dict[str, obj
         column: None for column in _SUMMARY_SCHEMA if column != "target_id"
     }
     row["target_id"] = target_id
+    row["target_protein_class_type"] = "unknown"
+    row["top_level_count"] = 0
+    row["canonical_top_levels"] = "[]"
+    row["counted_top_levels"] = "[]"
+    row["ignored_top_levels"] = "[]"
+    row["major_family"] = "[]"
+    row["major_family_rule_version"] = MAJOR_FAMILY_RULE_VERSION
     return row
+
+
+def _populate_target_type_summary(
+    summary: dict[str, object],
+    resolved_rows: list[dict[str, object]],
+    mapping_data: ProteinClassTargetTypeMappingData,
+) -> None:
+    result = derive_protein_class_target_type(resolved_rows, mapping_data)
+    major_family = derive_major_families(resolved_rows)
+    summary["target_protein_class_type"] = result.target_protein_class_type
+    summary["top_level_count"] = result.top_level_count
+    summary["canonical_top_levels"] = _serialize_string_tuple(
+        result.canonical_top_levels
+    )
+    summary["counted_top_levels"] = _serialize_string_tuple(result.counted_top_levels)
+    summary["ignored_top_levels"] = _serialize_string_tuple(result.ignored_top_levels)
+    summary["primary_top_level"] = result.primary_top_level
+    summary["target_type_reason_code"] = result.reason_code
+    summary["multifunctional_origin"] = (
+        _multifunctional_origin(resolved_rows)
+        if result.target_protein_class_type == "multifunctional"
+        else None
+    )
+    summary["major_family"] = _serialize_string_tuple(major_family)
+    summary["major_family_rule_version"] = MAJOR_FAMILY_RULE_VERSION
+    summary["target_type_rule_version"] = result.rule_version
+    summary["l1_mapping_version"] = result.mapping_version
+
+
+def _representative_row_for_primary_top_level(
+    *,
+    rows: list[dict[str, object]],
+    primary_top_level: str,
+    mapping_data: ProteinClassTargetTypeMappingData,
+) -> dict[str, object]:
+    for row in rows:
+        result = derive_protein_class_target_type((row,), mapping_data)
+        if result.counted_top_levels == (primary_top_level,):
+            return row
+    return rows[0]
+
+
+def _multifunctional_origin(rows: list[dict[str, object]]) -> str:
+    component_ids = {
+        component_id
+        for row in rows
+        if (component_id := _positive_int_or_none(row.get("component_id"))) is not None
+    }
+    if len(component_ids) > 1:
+        return "multi_component_heterogeneity"
+    return "multiple_informative_top_levels"
 
 
 def _deduplicate_resolved_rows(
@@ -138,6 +224,10 @@ def _mark_multifunctional(summary: dict[str, object]) -> None:
 def _serialize_classifications(rows: list[dict[str, object]]) -> str:
     payload = [_classification_payload(row) for row in rows]
     return json.dumps(payload, sort_keys=False, separators=(",", ":"))
+
+
+def _serialize_string_tuple(values: tuple[str, ...]) -> str:
+    return json.dumps(values, sort_keys=False, separators=(",", ":"))
 
 
 def _classification_payload(row: Mapping[str, object]) -> dict[str, object]:

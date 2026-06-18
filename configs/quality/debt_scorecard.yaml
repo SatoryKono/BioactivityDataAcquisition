@@ -445,15 +445,16 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 179
-      total_loc: 22150
+      total_loc: 22086
       files_ge_250_loc: 6
-      helper_function_ratio: 0.353
-      max_internal_fan_in: 11
+      helper_function_ratio: 0.35
+      max_internal_fan_in: 10
       max_internal_fan_in_module: bioetl.application.core.batch_operation_errors
     trend:
-      status: reduced_2026-06-17_issue_5306_operation_errors_split
-      next_action: 2026-06-17 splits operation-error constants out of
-        batch_runtime_failure_policy, reducing max_internal_fan_in to 11 while
+      status: reduced_2026-06-18_application_core_ratchet_sync
+      next_action: 2026-06-18 keeps application_core at the lower reviewed
+        live baseline after record-processing support compaction, with max_internal_fan_in
+        reduced to 10 while
         bounded-growth budgets remain unchanged at 13 files_ge_250_loc and
         max_internal_fan_in 14.
   - name: composition_bootstrap_runtime
@@ -473,17 +474,17 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 48
-      total_loc: 5840
+      total_loc: 5839
       files_ge_250_loc: 1
       helper_function_ratio: 0.326
       max_internal_fan_in: 3
       max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.observability
     trend:
-      status: reduced_2026-06-17_files_ge_250_loc_2_to_1
-      next_action: 2026-06-17 compacts observability runtime docstrings without
-        behavior changes, reducing live metrics to 5840 LOC and 1 file >=250 LOC;
-        bounded-growth budgets remain at 2 files_ge_250_loc and max_internal_fan_in
-        5.
+      status: reduced_2026-06-18_runtime_mapping_init_compaction
+      next_action: 2026-06-18 folds protein-class mapping initialization into the
+        runtime classification bootstrap without increasing the family LOC baseline;
+        live metrics are 5839 LOC and 1 file >=250 LOC while bounded-growth budgets
+        remain at 2 files_ge_250_loc and max_internal_fan_in 5.
   - name: composition_factories_pipeline
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -556,17 +557,17 @@ hotspot_family_ratchets:
       max_internal_fan_in: 10
     metrics:
       duplication_clusters: 0
-      files: 46
-      total_loc: 6427
-      files_ge_250_loc: 2
-      helper_function_ratio: 0.404
+      files: 44
+      total_loc: 6307
+      files_ge_250_loc: 3
+      helper_function_ratio: 0.422
       max_internal_fan_in: 7
       max_internal_fan_in_module: bioetl.composition.runtime_builders._run_manifest_refs
     trend:
-      status: reduced_2026-06-17_issue_5306_5312_runtime_builder_fan_in_clear
-      next_action: 2026-06-17 routes create-spec and effective-config builders to
-        narrower manifest data-root/snapshot owner modules; max_internal_fan_in
-        drops to 7 while bounded-growth budgets remain unchanged at 7 files_ge_250_loc
+      status: reduced_2026-06-18_issue_5343_manifest_creation_support_consolidated
+      next_action: 2026-06-18 consolidates run-manifest creation support policy/create-spec
+        helpers into one owner module, reducing live family size to 44 files / 6307
+        LOC while keeping bounded-growth budgets unchanged at 7 files_ge_250_loc
         and max_internal_fan_in 10.
 oversized_source_module_inventory:
   linked_issue: '#4679'
