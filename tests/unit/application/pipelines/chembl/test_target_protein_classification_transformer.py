@@ -57,6 +57,12 @@ async def test_transform_preserves_shaped_relation_row_identity(
         "is_leaf": "true",
         "l1_id": "1",
         "l1_name": "Membrane receptor",
+        "canonical_l1": "membrane_receptor",
+        "l1_counts_for_target_type": "true",
+        "l1_mapping_version": "protein_class_l1_map_v1",
+        "target_type_rule_version": "target_type_rule_v1",
+        "l1_normalization_status": "ok",
+        "l1_normalization_notes": "",
         "dataset_version": "target-protein-classification-path-v2.1.0",
         "source_url": "https://www.ebi.ac.uk/chembl/api/data/protein_classification",
         "chembl_release": "unknown",
@@ -80,6 +86,12 @@ async def test_transform_preserves_shaped_relation_row_identity(
     assert result["depth"] == 2
     assert result["root_id"] == "1"
     assert result["is_leaf"] is True
+    assert result["canonical_l1"] == "membrane_receptor"
+    assert result["l1_counts_for_target_type"] is True
+    assert result["l1_mapping_version"] == "protein_class_l1_map_v1"
+    assert result["target_type_rule_version"] == "target_type_rule_v1"
+    assert result["l1_normalization_status"] == "ok"
+    assert result["l1_normalization_notes"] is None
     assert result["dataset_version"] == "target-protein-classification-path-v2.1.0"
     assert result["source_snapshot_fingerprint"] == "a" * 64
     assert result["target_snapshot_row_count"] == 2

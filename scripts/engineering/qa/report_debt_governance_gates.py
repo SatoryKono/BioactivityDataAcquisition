@@ -186,6 +186,15 @@ def _release_review_freshness_gate(
     )
 
 
+def _release_gate_status(status_counts: dict[str, int]) -> str:
+    """Return the release-gate status implied by normalized fail-fast gates."""
+    if status_counts["fail"] > 0:
+        return "failing"
+    if status_counts["warn"] > 0:
+        return "warning"
+    return "passing"
+
+
 def _debt_scorecard_gates() -> list[Gate]:
     violations, summary = evaluate_debt_scorecard()
     violation_count = len(violations)
@@ -573,6 +582,8 @@ def build_payload(*, repo_root: Path = PROJECT_ROOT) -> dict[str, object]:
         "warn": sum(1 for gate in gates if gate.status == "warn"),
         "fail": sum(1 for gate in gates if gate.status == "fail"),
     }
+    failing_gates = [gate.name for gate in gates if gate.status == "fail"]
+    warning_gates = [gate.name for gate in gates if gate.status == "warn"]
     return {
         "schema_version": 1,
         "generated_by": "scripts.engineering.qa.report_debt_governance_gates",
@@ -581,6 +592,15 @@ def build_payload(*, repo_root: Path = PROJECT_ROOT) -> dict[str, object]:
             "pass_count": status_counts["pass"],
             "warn_count": status_counts["warn"],
             "fail_count": status_counts["fail"],
+            "release_gate_status": _release_gate_status(status_counts),
+            "architecture_quality_scorecard_integral_score": architecture_scorecard[
+                "integral_score"
+            ],
+            "architecture_quality_scorecard_interpretation": architecture_scorecard[
+                "interpretation"
+            ],
+            "failing_gates": failing_gates,
+            "warning_gates": warning_gates,
         },
         "status_counts": status_counts,
         "stale_artifacts": stale_artifacts,
@@ -602,6 +622,11 @@ def render_markdown(payload: dict[str, object]) -> str:
         f"- pass_count: {summary['pass_count']}",
         f"- warn_count: {summary['warn_count']}",
         f"- fail_count: {summary['fail_count']}",
+        f"- release_gate_status: `{summary['release_gate_status']}`",
+        "- architecture_quality_scorecard_integral_score: "
+        f"`{summary['architecture_quality_scorecard_integral_score']}`",
+        "- architecture_quality_scorecard_interpretation: "
+        f"`{summary['architecture_quality_scorecard_interpretation']}`",
         "",
         "| gate | status | metric | current | limit | source |",
         "| --- | --- | --- | ---: | ---: | --- |",

@@ -62,7 +62,7 @@ budgets:
   refined_assertless_max: 0
   duplicate_test_names_max: 0
   duplicate_test_name_occurrences_max: 0
-  compatibility_test_file_max: 32
+  compatibility_test_file_max: 31
   markerless_test_functions_max: 0
   uuid4_call_sites_max: 0
   date_today_call_sites_max: 0
@@ -70,7 +70,7 @@ budget_ratchet:
   linked_issue: '#4901'
   mode: fail-fast-no-growth
   expected_direction: downward
-  refreshed_on: '2026-06-15'
+  refreshed_on: '2026-06-18'
   stream_g_owner_notes:
   - issue: '#5200'
     owner: test-governance
@@ -262,6 +262,14 @@ budget_ratchet:
       contracts have been cleaned up. Retained test_gold_nullable_numeric_compatibility.py
       as it validates important governance for nullable numeric compatibility in Gold
       contracts. compatibility_test_file_max ratcheted from 33 to 32.'
+  - issue: '#5345'
+    owner: test-governance
+    status: compatibility_test_file_max_ratcheted_to_31
+    note: Gold nullable numeric governance remains an active contract gate, not a
+      retained compatibility shim. Renamed test_gold_nullable_numeric_compatibility.py
+      to test_gold_nullable_numeric_contract.py, removed it from compatibility filename
+      inventory, and ratcheted compatibility_test_file_max from 32 to 31 without
+      reducing coverage.
   - issue: '#5107'
     owner: test-governance
     status: architecture_shim_guards_retained_with_rationale
@@ -368,7 +376,7 @@ rf_009_closeout:
     refined_assertless_tests: 0
     duplicate_test_names: 0
     duplicate_test_name_occurrences: 0
-    compatibility_test_files: 32
+    compatibility_test_files: 31
     markerless_test_functions: 0
     uuid4_call_sites: 0
     date_today_call_sites: 0
@@ -516,7 +524,7 @@ oversized_test_module_inventory:
     owner: application-services
 compatibility_test_inventory:
   review_cadence: quarterly
-  total_files: 32
+  total_files: 31
   default_review_date: '2026-09-30'
   entries:
   - path: tests/architecture/test_application_composite_compat_surface_usage.py
@@ -716,14 +724,6 @@ compatibility_test_inventory:
     decision: retained_compatibility_contract
     owner: architecture-governance
     protected_surface: architecture/silver filter compatibility surface
-    policy_ref: '#4209'
-    review_date: '2026-09-30'
-    rationale: Tracked compatibility test surface; retained only while the referenced
-      public or migration contract remains supported.
-  - path: tests/integration/config/test_gold_nullable_numeric_compatibility.py
-    decision: retained_compatibility_contract
-    owner: integration-governance
-    protected_surface: integration/config/gold nullable numeric compatibility
     policy_ref: '#4209'
     review_date: '2026-09-30'
     rationale: Tracked compatibility test surface; retained only while the referenced

@@ -81,7 +81,7 @@ def build_silver_filter_compatibility_snapshot() -> JsonDict:
 
 
 def forbidden_semantic_silver_filter_keys(
-    silver_filters: Mapping[str, Any],
+    silver_filters: Mapping[str, Any],  # Any: generic filter mapping from config source
 ) -> tuple[str, ...]:
     """Return semantic Silver keys present in a Silver filter payload."""
     return tuple(
@@ -94,7 +94,7 @@ def forbidden_semantic_silver_filter_keys(
 
 
 def validate_structural_silver_filter_payload(
-    silver_filters: Mapping[str, Any],
+    silver_filters: Mapping[str, Any],  # Any: generic filter mapping from config source
     *,
     path: str = "silver_filters",
 ) -> None:

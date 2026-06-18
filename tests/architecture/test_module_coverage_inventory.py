@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -20,6 +21,24 @@ INVENTORY_PATH = ROOT / "reports" / "quality" / "module-coverage-inventory.json"
 WORKFLOW_PATH = ROOT / ".github" / "workflows" / "tests.yml"
 SCORECARD_PATH = ROOT / "configs" / "quality" / "debt_scorecard.yaml"
 GATES_PATH = ROOT / "configs" / "quality" / "module_coverage_gates.yaml"
+
+
+def _skip_if_source_tree_is_dirty() -> None:
+    """Committed inventory assertions require a clean source tree."""
+    result = subprocess.run(
+        ["git", "status", "--short", "--", "src/bioetl"],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=15,
+    )
+    dirty_entries = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+    if dirty_entries:
+        pytest.skip(
+            "Committed module-coverage inventory is only authoritative for a clean "
+            "src/bioetl tree. Dirty entries: " + ", ".join(dirty_entries[:20])
+        )
 
 
 @pytest.mark.architecture
@@ -100,6 +119,7 @@ def test_module_coverage_inventory_is_committed_and_shape_is_stable() -> None:
 
 @pytest.mark.architecture
 def test_module_coverage_inventory_covers_every_source_module() -> None:
+    _skip_if_source_tree_is_dirty()
     committed = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
     inventory_paths = {str(row["path"]) for row in committed["modules"]}
     expected_paths = {

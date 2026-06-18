@@ -374,6 +374,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded manual GitHub issue update utility after removing the scripts.ops router command; prefer the governed issue lifecycle workflow or GitHub API client paths before re-exposing it as an active ops command."
     },
+    "scripts/schema/generate_protein_class_l1_target_type_artifacts.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the deterministic protein-class L1 target-type artifact generator consumed by generated-artifact drift tests; promote to an active scripts.schema command only if it becomes a documented public schema generation surface."
+    },
     "scripts/ops/support/load_repo_env.sh": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
