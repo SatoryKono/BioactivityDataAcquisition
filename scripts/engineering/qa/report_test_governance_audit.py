@@ -329,7 +329,12 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
             compatibility_files.append(relative)
 
         try:
-            tree = ast.parse(path.read_text(encoding="utf-8"), filename=relative)
+            source = path.read_text(encoding="utf-8")
+        except OSError:
+            continue
+
+        try:
+            tree = ast.parse(source, filename=relative)
         except SyntaxError as exc:
             parse_errors.append({"path": relative, "error": str(exc)})
             continue
