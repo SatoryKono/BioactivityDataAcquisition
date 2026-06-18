@@ -298,6 +298,29 @@ test_lanes:
         junit_xml: true
         json_summary: true
 
+    architecture-read-only-audit:
+      suite_name: architecture-read-only-audit
+      description: "Diagnostic read-only architecture evidence lane; runs check-only gates without dev-wrapper pretest sync or artifact writes."
+      runner_backend: engineering_qa
+      runner: python -m scripts.engineering.qa run-architecture-audit-read-only
+      paths:
+        - tests/architecture/test_runtime_import_scc.py
+        - reports/quality/
+        - configs/quality/
+      marker_expression: "architecture and not benchmark and not memory"
+      pytest_args:
+        - tests/architecture/test_runtime_import_scc.py
+        - -p
+        - no:cacheprovider
+        - -q
+      replay_mode: not_applicable
+      coverage_gate: none
+      read_only: true
+      mutates_artifacts: false
+      expected_artifacts:
+        junit_xml: false
+        json_summary: false
+
     e2e:
       suite_name: e2e
       description: "Slow end-to-end lane; kept separate from fast feedback and coverage verification."

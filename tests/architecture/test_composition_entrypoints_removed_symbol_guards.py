@@ -1,4 +1,4 @@
-"""Guardrails for deprecated symbols on ``bioetl.composition.entrypoints``."""
+"""Guardrails for removed symbols on ``bioetl.composition.entrypoints``."""
 
 from __future__ import annotations
 

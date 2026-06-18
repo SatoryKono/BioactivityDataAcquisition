@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-28'
+  Last verified: '2026-06-18'
 
 ______________________________________________________________________
 
@@ -48,6 +48,9 @@ must use these `suite_name` values for comparable local and CI runs:
 - `architecture`: layer boundary, contract, and governance checks;
 - `architecture-fast-boundary`: fast local architecture boundary lane;
 - `architecture-slow-governance`: slow repo-wide architecture governance lane;
+- `architecture-read-only-audit`: diagnostic check-only architecture evidence
+  lane that bypasses dev-wrapper pretest sync and fails if tracked governance
+  surfaces mutate;
 - `e2e`: dedicated slow end-to-end lane;
 - `memory`: dedicated Neo4j project-memory and MCP lane, outside coverage;
 - `performance`: benchmark-backed hotspot/performance-budget lane;
@@ -60,7 +63,7 @@ governance artifacts.
 
 | Test family | Primary purpose | Canonical lane(s) | Main artifact / governance anchor |
 | --- | --- | --- | --- |
-| `tests/architecture/**` | Architecture boundaries, governance budgets, generated artifact drift, docs/code sync | `architecture`, `architecture-fast-boundary`, `architecture-slow-governance` | `configs/quality/test_matrix.yaml`, `configs/quality/test_governance_audit.yaml` |
+| `tests/architecture/**` | Architecture boundaries, governance budgets, generated artifact drift, docs/code sync | `architecture`, `architecture-fast-boundary`, `architecture-slow-governance`, `architecture-read-only-audit` | `configs/quality/test_matrix.yaml`, `configs/quality/test_governance_audit.yaml` |
 | `tests/contract/**` | Live/provider contracts, schema snapshots, provider-facing compatibility | `contracts` | provider contract fixtures, schema snapshots, live-network policy |
 | `tests/integration/**` | Replay-backed integration between adapters, pipelines, configs, runtime, and CI artifacts | `integration-replay` | VCR policy, metadata inventory, replay determinism |
 | `tests/e2e/**` | Slow end-to-end pipeline and scenario flows | `e2e` | end-to-end scenario coverage and operator-facing behavior |
@@ -120,6 +123,22 @@ checkouts, do not treat root-wide filesystem scans as the first diagnostic path:
 use the named lanes or targeted files, prefer git-index-backed governance helpers
 for architecture inventories, and report WSL startup/filesystem timeouts as
 environment-limited validation rather than weakening assertions.
+
+For read-only architecture evidence collection, prefer:
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 python -m scripts.engineering.qa run-architecture-audit-read-only
+```
+
+This diagnostic lane runs import-linter, the runtime SCC guard, module coverage
+inventory drift, hotspot-family baseline, remote-main debt baseline, and
+debt-governance gates in check-only mode. It does not replace the normal
+developer wrappers or CI lanes; its purpose is audit evidence collection on a
+dirty or mounted checkout where `scripts/engineering/dev/run_pytest.sh` pretest
+sync could update generated artifacts. The command compares tracked status for
+`.github`, `configs/quality`, `docs`, `reports/quality`, `scripts`,
+`src/bioetl`, and `tests` before and after execution and fails if those surfaces
+change.
 
 Marker-only commands such as `pytest -m unit` are not canonical lanes and must
 not be compared as if they were `unit-fast`, `unit-parallel-safe`, or

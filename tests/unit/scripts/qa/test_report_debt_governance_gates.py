@@ -88,3 +88,41 @@ def test_render_markdown_separates_weighted_score_from_release_gate_status() -> 
 
     assert "release_gate_status: `failing`" in markdown
     assert "architecture_quality_scorecard_integral_score: `7.98`" in markdown
+
+
+def test_observability_touched_metric_review_gate_passes_without_metric_changes() -> (
+    None
+):
+    gate = gates._observability_touched_metric_review_gate(
+        {"generated_at": "2026-06-04T15:01:29Z", "status": "passed"},
+        changed_paths={"src/bioetl/interfaces/cli/main.py"},
+        trigger_paths={"src/bioetl/infrastructure/observability/server.py"},
+        now=datetime(2026, 6, 17, 15, 1, 29, tzinfo=UTC),
+    )
+
+    assert gate.status == "pass"
+    assert gate.current == 0
+
+
+def test_observability_touched_metric_review_gate_fails_for_stale_review() -> None:
+    gate = gates._observability_touched_metric_review_gate(
+        {"generated_at": "2026-06-04T15:01:29Z", "status": "passed"},
+        changed_paths={"src/bioetl/infrastructure/observability/server.py"},
+        trigger_paths={"src/bioetl/infrastructure/observability/server.py"},
+        now=datetime(2026, 7, 6, 15, 1, 29, tzinfo=UTC),
+    )
+
+    assert gate.status == "fail"
+    assert gate.current == 1
+
+
+def test_observability_touched_metric_review_gate_fails_for_degraded_review() -> None:
+    gate = gates._observability_touched_metric_review_gate(
+        {"generated_at": "2026-06-04T15:01:29Z", "status": "degraded"},
+        changed_paths={"configs/quality/observability_metric_declarations.yaml"},
+        trigger_paths={"configs/quality/observability_metric_declarations.yaml"},
+        now=datetime(2026, 6, 17, 15, 1, 29, tzinfo=UTC),
+    )
+
+    assert gate.status == "fail"
+    assert gate.current == 1

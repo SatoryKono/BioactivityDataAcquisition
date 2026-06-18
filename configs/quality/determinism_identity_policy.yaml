@@ -166,48 +166,6 @@ content_hash_datetime_policy:
       distinguish same-day changes when represented as datetime values.
   date_only_entity_inventory:
   - provider: chembl
-    entity: activity
-    configured_policy: v1_date
-    status: documented_date_only
-    rationale: Legacy v1_date hash datetime compatibility retained for chembl.activity
-      until migration to v2_datetime_utc.
-  - provider: chembl
-    entity: assay
-    configured_policy: v1_date
-    status: documented_date_only
-    rationale: Legacy v1_date hash datetime compatibility retained for chembl.assay
-      until migration to v2_datetime_utc.
-  - provider: chembl
-    entity: assay_parameters
-    configured_policy: v1_date
-    status: documented_date_only
-    rationale: Legacy v1_date hash datetime compatibility retained for chembl.assay_parameters
-      until migration to v2_datetime_utc.
-  - provider: chembl
-    entity: cell_line
-    configured_policy: v1_date
-    status: documented_date_only
-    rationale: Legacy v1_date hash datetime compatibility retained for chembl.cell_line
-      until migration to v2_datetime_utc.
-  - provider: chembl
-    entity: compound_record
-    configured_policy: v1_date
-    status: documented_date_only
-    rationale: Legacy v1_date hash datetime compatibility retained for chembl.compound_record
-      until migration to v2_datetime_utc.
-  - provider: chembl
-    entity: molecule
-    configured_policy: v1_date
-    status: documented_date_only
-    rationale: Legacy v1_date hash datetime compatibility retained for chembl.molecule
-      until migration to v2_datetime_utc.
-  - provider: chembl
-    entity: protein_class
-    configured_policy: v1_date
-    status: documented_date_only
-    rationale: Legacy v1_date hash datetime compatibility retained for chembl.protein_class
-      until migration to v2_datetime_utc.
-  - provider: chembl
     entity: publication
     fields:
     - creation_date
@@ -215,54 +173,6 @@ content_hash_datetime_policy:
     status: documented_date_only
     rationale: ChEMBL publication creation_date is a source date, not a sub-day timestamp
       identity.
-  - provider: chembl
-    entity: publication_similarity
-    configured_policy: v1_date
-    status: documented_date_only
-    rationale: Legacy v1_date hash datetime compatibility retained for chembl.publication_similarity
-      until migration to v2_datetime_utc.
-  - provider: chembl
-    entity: publication_term
-    configured_policy: v1_date
-    status: documented_date_only
-    rationale: Legacy v1_date hash datetime compatibility retained for chembl.publication_term
-      until migration to v2_datetime_utc.
-  - provider: chembl
-    entity: subcellular_fraction
-    configured_policy: v1_date
-    status: documented_date_only
-    rationale: Legacy v1_date hash datetime compatibility retained for chembl.subcellular_fraction
-      until migration to v2_datetime_utc.
-  - provider: chembl
-    entity: target
-    configured_policy: v1_date
-    status: documented_date_only
-    rationale: Legacy v1_date hash datetime compatibility retained for chembl.target
-      until migration to v2_datetime_utc.
-  - provider: chembl
-    entity: target_component
-    configured_policy: v1_date
-    status: documented_date_only
-    rationale: Legacy v1_date hash datetime compatibility retained for chembl.target_component
-      until migration to v2_datetime_utc.
-  - provider: chembl
-    entity: target_protein_classification
-    configured_policy: v1_date
-    status: documented_date_only
-    rationale: Legacy v1_date hash datetime compatibility retained for chembl.target_protein_classification
-      until migration to v2_datetime_utc.
-  - provider: chembl
-    entity: tissue
-    configured_policy: v1_date
-    status: documented_date_only
-    rationale: Legacy v1_date hash datetime compatibility retained for chembl.tissue
-      until migration to v2_datetime_utc.
-  - provider: pubchem
-    entity: compound
-    configured_policy: v1_date
-    status: documented_date_only
-    rationale: Legacy v1_date hash datetime compatibility retained for pubchem.compound
-      until migration to v2_datetime_utc.
   - provider: pubmed
     entity: publication
     configured_policy: v1_date

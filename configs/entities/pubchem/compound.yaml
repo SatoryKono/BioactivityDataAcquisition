@@ -294,7 +294,7 @@ contracts:
   - molecule_id
   hash_include: []
   hash_exclude: []
-  hash_datetime_policy: v1_date
+  hash_datetime_policy: v2_datetime_utc
 hash_policy:
   provider: pubchem
   entity: compound

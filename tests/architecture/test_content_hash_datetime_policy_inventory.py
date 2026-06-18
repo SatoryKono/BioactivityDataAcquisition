@@ -5,6 +5,7 @@ from __future__ import annotations
 import pytest
 
 from pathlib import Path
+import re
 from typing import cast
 
 import yaml
@@ -13,6 +14,7 @@ pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
 POLICY_PATH = ROOT / "configs" / "quality" / "determinism_identity_policy.yaml"
+DATE_FIELD_RE = re.compile(r"(date|time|timestamp|revis|creat|modif|updat)", re.I)
 
 
 def _load_yaml(path: Path) -> dict[str, object]:
@@ -123,9 +125,24 @@ def test_low_risk_date_only_surfaces_stay_migrated_to_v2_default() -> None:
         )
     }
     migrated = {
+        ("chembl", "activity"),
+        ("chembl", "assay"),
+        ("chembl", "assay_parameters"),
+        ("chembl", "cell_line"),
+        ("chembl", "compound_record"),
+        ("chembl", "molecule"),
+        ("chembl", "protein_class"),
         ("crossref", "publication"),
         ("openalex", "publication"),
+        ("chembl", "publication_similarity"),
+        ("chembl", "publication_term"),
+        ("pubchem", "compound"),
         ("semanticscholar", "publication"),
+        ("chembl", "subcellular_fraction"),
+        ("chembl", "target"),
+        ("chembl", "target_component"),
+        ("chembl", "target_protein_classification"),
+        ("chembl", "tissue"),
         ("uniprot", "idmapping"),
     }
 
@@ -137,4 +154,31 @@ def test_low_risk_date_only_surfaces_stay_migrated_to_v2_default() -> None:
         assert contracts.get("hash_datetime_policy") == "v2_datetime_utc", (
             f"{provider}.{entity} must stay on the v2 default once removed from "
             "date-only compatibility inventory"
+        )
+
+
+def test_residual_v1_date_inventory_requires_date_like_hash_fields() -> None:
+    """Residual v1_date inventory must be limited to real date-bearing hashes."""
+    policy = _load_yaml(POLICY_PATH)
+    hash_policy = cast(dict[str, object], policy["content_hash_datetime_policy"])
+    inventory = cast(
+        list[dict[str, object]],
+        hash_policy.get("date_only_entity_inventory", []),
+    )
+
+    for item in inventory:
+        provider = str(item["provider"])
+        entity = str(item["entity"])
+        config = _load_yaml(ROOT / "configs" / "entities" / provider / f"{entity}.yaml")
+        hash_policy_block = cast(dict[str, object], config.get("hash_policy", {}))
+        policy_config = cast(
+            dict[str, object], hash_policy_block.get("hash_policy", {})
+        )
+        include_fields = cast(list[object], policy_config.get("include_fields", []))
+        assert any(
+            isinstance(field, str) and DATE_FIELD_RE.search(field)
+            for field in include_fields
+        ), (
+            f"{provider}.{entity} must not stay in the residual v1_date inventory "
+            "unless its content hash includes explicit date-like fields"
         )

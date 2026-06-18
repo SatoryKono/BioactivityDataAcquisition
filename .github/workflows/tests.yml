@@ -300,7 +300,7 @@ jobs:
                     uv run python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --check
 
             -   name: Validate debt-governance fail-fast gates
-                run: uv run python -m scripts.engineering.qa report-debt-governance-gates --check
+                run: uv run python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref refs/remotes/origin/main
 
             -   name: Dashboard navigation contract sync gate
                 run: |
