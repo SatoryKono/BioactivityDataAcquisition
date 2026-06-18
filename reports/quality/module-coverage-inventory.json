@@ -14923,7 +14923,7 @@
       "missing_lines": 3,
       "module": "bioetl.infrastructure.adapters.chembl.fetch_resilience_mixin",
       "path": "src/bioetl/infrastructure/adapters/chembl/fetch_resilience_mixin.py",
-      "source_lines": 240
+      "source_lines": 172
     },
     {
       "coverage_percent": 96.63,
@@ -21708,7 +21708,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-06-18",
-  "source_tree_sha256": "d425bbc95b656030e3be7d0edb3cfca062dded21ee3fe41d8c9516d511dae385",
+  "source_tree_sha256": "55612c60c2b509d04b6ea7e8dd80fd4784cb808ab255a3a8f81a053fec8cd03f",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

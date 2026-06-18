@@ -9,6 +9,11 @@ from typing import Any, cast
 
 import pytest
 
+from scripts.schema.generate_config_matrix import (
+    _classify_parameter_key,
+    _collect_family_configs,
+)
+
 
 pytestmark = pytest.mark.architecture
 
@@ -24,6 +29,19 @@ def _load_json(path: Path) -> dict[str, Any]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
     return payload
+
+
+def _live_compatibility_legacy_keys_by_family() -> dict[str, list[str]]:
+    """Return exact live taxonomy keys so legacy drift cannot hide behind counts."""
+    result: dict[str, list[str]] = {}
+    for family_name, configs in _collect_family_configs().items():
+        family_keys = sorted({key for values in configs.values() for key in values})
+        result[family_name] = [
+            key
+            for key in family_keys
+            if _classify_parameter_key(key) == "compatibility_legacy"
+        ]
+    return result
 
 
 def test_config_compatibility_legacy_taxonomy_review_matches_live_baseline() -> None:
@@ -60,6 +78,28 @@ def test_config_compatibility_legacy_taxonomy_review_matches_live_baseline() -> 
             6,
             16,
         )
+
+
+def test_config_compatibility_legacy_review_freezes_exact_key_set() -> None:
+    """Reviewed legacy taxonomy keys must not grow or rotate without review."""
+    review = _load_json(REVIEW_PATH)
+    review_families = cast(dict[str, Any], review["families"])
+    live_keys_by_family = _live_compatibility_legacy_keys_by_family()
+
+    assert set(live_keys_by_family) == REQUIRED_FAMILIES
+    for family_name in sorted(REQUIRED_FAMILIES):
+        review_family = cast(dict[str, Any], review_families[family_name])
+        reviewed_keys = review_family.get("compatibility_legacy_keys")
+        assert isinstance(reviewed_keys, list), (
+            f"{family_name} must publish reviewed compatibility_legacy_keys"
+        )
+        assert reviewed_keys == sorted(reviewed_keys), (
+            f"{family_name} compatibility_legacy_keys must be sorted"
+        )
+        assert reviewed_keys == live_keys_by_family[family_name], (
+            f"{family_name} compatibility_legacy taxonomy changed without review"
+        )
+        assert review_family["compatibility_legacy_count"] == len(reviewed_keys)
 
 
 def test_config_compatibility_legacy_taxonomy_has_ci_guard_links() -> None:

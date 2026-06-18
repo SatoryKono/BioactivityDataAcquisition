@@ -5,6 +5,7 @@ from __future__ import annotations
 import pytest
 
 from bioetl.domain.mapping import protein_class_target_type as mapping_module
+from bioetl.domain.mapping import protein_class_target_type_helpers as helper_module
 from bioetl.domain.mapping.protein_class_target_type import (
     ProteinClassTargetTypeMappingData,
     ProteinClassTopLevelMappingEntry,
@@ -227,3 +228,69 @@ def test_canonical_rows_drive_counting_defaults_and_bool_coercion() -> None:
         "transporter",
         "unclassified_protein",
     )
+
+
+@pytest.mark.unit
+def test_helper_module_covers_decision_and_normalization_edges() -> None:
+    assert helper_module.target_type_decision(
+        (),
+        multifunctional_class=helper_module.MULTIFUNCTIONAL_CLASS,
+        unknown_target_type=helper_module.UNKNOWN_TARGET_TYPE,
+    ) == ("unknown", None, "no_informative_top_level")
+    assert helper_module.target_type_decision(
+        ("enzyme",),
+        multifunctional_class=helper_module.MULTIFUNCTIONAL_CLASS,
+        unknown_target_type=helper_module.UNKNOWN_TARGET_TYPE,
+    ) == ("enzyme", "enzyme", "single_informative_top_level")
+    assert helper_module.target_type_decision(
+        ("enzyme", "ion_channel"),
+        multifunctional_class=helper_module.MULTIFUNCTIONAL_CLASS,
+        unknown_target_type=helper_module.UNKNOWN_TARGET_TYPE,
+    ) == ("multifunctional", None, "multiple_informative_top_levels")
+
+    rows = (
+        {"l2": " Family A G protein-coupled receptor "},
+        {"level_3": "Serine/threonine kinase"},
+        {"level_4": "Nuclear receptor"},
+    )
+    assert helper_module.normalized_deeper_level_labels(
+        rows,
+        normalize_label=normalize_protein_class_label,
+    ) == (
+        "family a g protein-coupled receptor",
+        "nuclear receptor",
+        "serine/threonine kinase",
+    )
+    assert helper_module.matching_major_families(
+        "family a g protein-coupled receptor"
+    ) == ("gpcr",)
+    assert helper_module.matching_major_families("nuclear receptor kinase") == (
+        "kinase",
+        "nuclear_receptor",
+    )
+    assert (
+        helper_module.first_normalized_label(
+            {"l1": "  Ion   channel "},
+            ("l1", "l2"),
+            normalize_label=normalize_protein_class_label,
+        )
+        == "ion channel"
+    )
+    assert helper_module.first_present_value(
+        {"l1": None, "level_1": "Transporter"},
+        ("l1", "level_1"),
+    ) == "Transporter"
+    assert helper_module.coerce_counts_for_target_type(
+        "yes",
+        default=False,
+        normalize_label=normalize_protein_class_label,
+    ) is True
+    assert helper_module.coerce_counts_for_target_type(
+        "unknown-token",
+        default=False,
+        normalize_label=normalize_protein_class_label,
+    ) is False
+    assert helper_module.normalized_status(
+        " ",
+        normalize_label=normalize_protein_class_label,
+    ) == "ok"
