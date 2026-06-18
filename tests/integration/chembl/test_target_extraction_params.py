@@ -35,6 +35,7 @@ class TestTargetExtractionParams(InputFilterExtractionParamsSuiteBase):
 
     CASE = TARGET_CASE
 
+    @pytest.mark.asyncio(loop_scope="module")
     @pytest.mark.vcr
     async def test_target_filtered_api_request(
         self,
