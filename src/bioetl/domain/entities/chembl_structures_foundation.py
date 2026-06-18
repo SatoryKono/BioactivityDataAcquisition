@@ -144,6 +144,12 @@ class TargetProteinClassification(BaseEntity):
     l5_id: int | None = None
     l5_name: str | None = None
     l5_desc: str | None = None
+    canonical_l1: str | None = None
+    l1_counts_for_target_type: bool | None = None
+    l1_mapping_version: str | None = None
+    target_type_rule_version: str | None = None
+    l1_normalization_status: str | None = None
+    l1_normalization_notes: str | None = None
     dataset_version: str | None = None
     source_url: str | None = None
     chembl_release: str | None = None

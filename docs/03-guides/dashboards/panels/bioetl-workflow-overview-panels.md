@@ -8,41 +8,51 @@ Dashboard `5. Workflow` monitors workflow and pipeline verdicts, failed runs,
 step failures, skipped steps, and step duration trends. Shipped dashboard JSON
 is the source of truth.
 
-## Key Panels
+## Variable contract
 
-### 1. Status
-- **Type:** Stat
-- **Purpose:** Summarize workflow run and step-event status.
-- **Data sources:** `bioetl_workflow_runs_total`,
-  `bioetl_workflow_step_events_total`
+- All panels inherit the shared shell selectors: `workflow`, `pipeline`,
+  `run_type`, `run_id`.
+- Workflow-specific drilldown selectors add `status`, `workflow_context`,
+  `pipeline_context`, `pipeline_context_exact`, `run_type_context`,
+  `run_type_context_exact`, `provider_context`, `provider_context_exact`,
+  `step_status`, and `step_kind`.
+- `ID` and `Processed Records` use the detached `Quarantine Explorer`
+  datasource; the rest of the dashboard is Prometheus-backed.
 
-### 2. Pipeline Status
-- **Type:** Stat
-- **Purpose:** Compare runtime status with workflow pipeline verdict.
-- **Data sources:** `bioetl_runtime_current_status`,
-  `bioetl_workflow_pipeline_verdict_status`
+## Panel inventory
 
-### 3. Failed Runs and Steps
-- **Type:** Stat
-- **Purpose:** Count failed workflow runs, failed entity pipeline runs, failed
-  pipeline steps, transform failures, and skipped events.
-- **Data sources:** `bioetl_workflow_runs_total`,
-  `bioetl_pipeline_runs_total`, `bioetl_workflow_step_events_total`
+### Dashboard shell
 
-### 4. Workflow Outcomes and Step Trends
-- **Type:** Bargauge / Timeseries
-- **Purpose:** Inspect workflow outcomes, step outcomes, and step duration p95.
-- **Data sources:** `bioetl_workflow_runs_total`,
-  `bioetl_workflow_step_events_total`,
-  `bioetl_workflow_step_duration_seconds_bucket`
+| ID | Title | Type | Datasource | Query / purpose | Variables | Thresholds / drilldown |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1000 | Review Dashboard Navigation | text | Static | Static navigation handoff into related runtime, provider, and pipeline dashboards. | shared shell | No thresholds; operator routing only. |
+| 9400 | Provenance | text | Static | Static explanation of selector context, datasource posture, and workflow evidence boundaries. | shared shell | No thresholds; provenance note only. |
+| 9401 | Status | stat | Prometheus | Current workflow severity synthesized from failed workflow runs and skipped step events in the selected range. | shared shell | Value mapping expresses current workflow severity. |
+| 9404 | Pipeline Status | stat | Prometheus | Workflow pipeline verdict status with fallback to runtime current status. | shared shell + context selectors | Value mapping expresses current pipeline severity. |
+| 9402 | ID | table | Quarantine Explorer | Identity anchors for the selected workflow/pipeline/run scope. | shared shell | Forensic handoff table. |
+| 9403 | Processed Records | table | Quarantine Explorer | Processed-record evidence for the selected workflow/pipeline/run scope. | shared shell | Evidence table; no numeric threshold. |
+| 2 | Failed Workflow Runs / Range | stat | Prometheus | Failed workflow-run count over the selected range. | shared shell | Count panel. |
+| 3 | Failed Pipeline Steps / Range | stat | Prometheus | Failed workflow step events with `step_kind="pipeline"`. | shared shell | Count panel. |
+| 9410 | Failed Entity Pipeline Runs / Range | stat | Prometheus | Failed entity pipeline runs over the selected range. | shared shell + context selectors | Count panel. |
+| 6 | Failed Transform Steps / Range | stat | Prometheus | Failed workflow step events with `step_kind="transform"`. | shared shell | Count panel. |
+| 7 | Skipped Step Events / Range | stat | Prometheus | Skipped workflow step events over the selected range. | shared shell | Count panel. |
+| 4 | Workflow Run Outcomes / Range | bargauge | Prometheus | Workflow run outcomes grouped by `status` across the selected range. | shared shell + `status` | Value bars map workflow status families. |
+| 9 | First Action | text | Static | Static triage guidance for the first workflow drilldown action. | shared shell | No thresholds; operator routing only. |
 
-## Variables
+### Step Diagnostics
 
-- `workflow`, `pipeline`, `run_type`, and `run_id` are the shared primary
-  dashboard context shell.
+| ID | Title | Type | Datasource | Query / purpose | Variables | Thresholds / drilldown |
+| --- | --- | --- | --- | --- | --- | --- |
+| 10 | Step Diagnostics | row | Static | Collapsible workflow step-diagnostics section. | shared shell + step/context selectors | Groups step drilldown panels; no direct metric. |
+| 5 | Step Outcomes by Kind / Step Status / Range | timeseries | Prometheus | Workflow step-event outcomes by `step_kind` and `status`. | shared shell + `step_kind` + `step_status` | Series legend is the key mapping. |
+| 8 | Step Duration p95 by Kind / Step Status / Range | timeseries | Prometheus | Histogram-quantile `p95` workflow step duration by `step_kind` and `status`. | shared shell + `step_kind` + `step_status` | Quantile family and legend are the key mapping. |
 
 ## Notes
 
-- Legacy workflow execution/status/rate placeholder metrics are intentionally
-  not documented. Current panels use workflow run, pipeline run, runtime status,
-  and workflow step metric families.
+- `Pipeline Status` intentionally merges workflow verdict status with runtime
+  current status so workflow-only gaps still surface a pipeline state.
+- `ID` and `Processed Records` are HTTP-backed evidence panels rather than
+  Prometheus metric panels.
+- Thresholds and value mappings not spelled out above should be taken from the
+  shipped panel JSON; this page documents the panel inventory, datasource
+  family, and operator purpose 1:1.

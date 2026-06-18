@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-17T17:02:14.614235+00:00",
+  "generated_at": "2026-06-18T07:31:09.917723+00:00",
   "summary": {
-    "total_scripts": 433,
+    "total_scripts": 434,
     "status_counts": {
       "active": 364,
-      "supporting": 69
+      "supporting": 70
     },
     "reference_group_coverage": {
       "agents": 4,
@@ -14,7 +14,7 @@
       "docs": 150,
       "scripts": 333,
       "skills": 11,
-      "tests": 175
+      "tests": 176
     }
   },
   "scripts": [
@@ -4658,7 +4658,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 128,
+      "reference_count": 130,
       "references": [
         {
           "path": ".github/workflows/docs-kpi-weekly.yml",
@@ -4960,7 +4960,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 31,
+      "reference_count": 32,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -7696,7 +7696,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 205,
+      "reference_count": 212,
       "references": [
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
@@ -7853,7 +7853,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 12,
       "references": [
         {
           "path": ".github/workflows/import-linter.yml",
@@ -7892,16 +7892,16 @@
           "text": "python -m scripts.engineering.qa check-c901 --mode report"
         },
         {
+          "path": "docs/05-engineering/architecture-refactoring-rf-001-008-closeout-2026-06-17.md",
+          "line": 173,
+          "source_group": "docs",
+          "text": "- `python -m scripts.engineering.qa check-c901`"
+        },
+        {
           "path": "scripts/engineering/qa/README.md",
           "line": 20,
           "source_group": "scripts",
           "text": "| `check-c901`                     | `check_c901_baseline.py`                              | C901 complexity baseline enforcement                                                              |"
-        },
-        {
-          "path": "scripts/engineering/qa/__main__.py",
-          "line": 13,
-          "source_group": "scripts",
-          "text": "check-c901           C901 complexity baseline enforcement"
         }
       ]
     },
@@ -8337,7 +8337,7 @@
         },
         {
           "path": "tests/architecture/test_test_governance_audit.py",
-          "line": 218,
+          "line": 220,
           "source_group": "tests",
           "text": "command = \"scripts/engineering/qa/check_test_audit_preflight.py --strict\""
         }
@@ -8527,7 +8527,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 28,
+      "reference_count": 29,
       "references": [
         {
           "path": ".github/workflows/architecture-docs-nightly.yml",
@@ -8766,13 +8766,13 @@
         },
         {
           "path": "docs/00-project/glossary.md",
-          "line": 550,
+          "line": 554,
           "source_group": "docs",
           "text": "A terminology linter is available at `scripts/engineering/qa/lint_terminology.py`:"
         },
         {
           "path": "docs/00-project/glossary.md",
-          "line": 554,
+          "line": 558,
           "source_group": "docs",
           "text": "python scripts/engineering/qa/lint_terminology.py src/bioetl/"
         },
@@ -12812,6 +12812,27 @@
           "line": 35,
           "source_group": "scripts",
           "text": "\"generate-pipeline\": \"scripts.schema.generate_pipeline_schema\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/schema/generate_protein_class_l1_target_type_artifacts.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "tests/architecture/test_protein_class_target_type_codegen_contract.py",
+          "line": 23,
+          "source_group": "tests",
+          "text": "/ \"generate_protein_class_l1_target_type_artifacts.py\""
+        },
+        {
+          "path": "tests/architecture/test_protein_class_target_type_codegen_contract.py",
+          "line": 58,
+          "source_group": "tests",
+          "text": "\"Run: python scripts/schema/generate_protein_class_l1_target_type_artifacts.py\""
         }
       ]
     },

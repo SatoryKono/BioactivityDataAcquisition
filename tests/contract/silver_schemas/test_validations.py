@@ -207,7 +207,9 @@ class TestEnumValidations:
 
         for field_pattern in enum_field_patterns:
             matching_fields = [
-                field for field in fields.keys() if field_pattern in field.lower()
+                field
+                for field in fields.keys()
+                if field_pattern in field.lower() and not field.lower().endswith("_version")
             ]
 
             for field in matching_fields:

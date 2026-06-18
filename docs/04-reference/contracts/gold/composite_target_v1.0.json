@@ -218,6 +218,102 @@
       ],
       "nullable": true,
       "description": "L5 target protein class description."
+    },
+    "target_protein_class_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Deterministic target-level protein class type from informative L1 values."
+    },
+    "top_level_count": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Count of unique informative canonical L1 protein classes."
+    },
+    "canonical_top_levels": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "JSON array of unique canonical L1 values observed for the target."
+    },
+    "counted_top_levels": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "JSON array of canonical L1 values used for target type aggregation."
+    },
+    "ignored_top_levels": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "JSON array of non-counting canonical L1 values preserved for audit."
+    },
+    "primary_top_level": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Single informative canonical L1 when exactly one is present."
+    },
+    "target_type_reason_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Reason code explaining target_protein_class_type derivation."
+    },
+    "multifunctional_origin": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Origin code for multifunctional target classification."
+    },
+    "major_family": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "JSON array of independent L2+ major family classifications."
+    },
+    "major_family_rule_version": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Version of the L2+ major family derivation rule."
+    },
+    "target_type_rule_version": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Version of the target_protein_class_type aggregation rule."
+    },
+    "l1_mapping_version": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Version of the canonical L1 mapping used for aggregation."
     }
   },
   "required": [

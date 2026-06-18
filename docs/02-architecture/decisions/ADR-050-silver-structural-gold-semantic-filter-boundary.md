@@ -1,19 +1,20 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-15'
+  Last verified: '2026-06-18'
 
 ______________________________________________________________________
 
 # ADR-050: Silver Structural and Gold Semantic Filter Boundary
 
 **Date:** 2026-06-15
+**Amended:** 2026-06-18
 **Status:** Accepted
 **Decision makers:** @BioETL-Team
 **Related:** ADR-002, ADR-014, ADR-017, ADR-018, ADR-028, ADR-042, ADR-044, ADR-045, ADR-046, ADR-047
@@ -37,10 +38,11 @@ filter rules into the unified configuration hierarchy, but historical
 `columns`, `ranges`, `list_lengths`, and `list_contains`.
 
 That overlap left the boundary ambiguous. Historical entity configs carried
-legacy semantic rules under `filters.silver_filters`; current infrastructure
-normalizes those rules through
-`src/bioetl/infrastructure/config/silver_filter_migration.py`, and active YAML
-no longer carries semantic Silver buckets.
+legacy semantic rules under `filters.silver_filters`, and earlier migration
+designs kept a compatibility-window narrative around boundary normalization.
+Current production infrastructure no longer accepts those semantic keys at the
+config boundary: active YAML is structural-only at Silver, and semantic Silver
+payloads fail closed before domain conversion.
 
 The retired working draft
 `docs/filters/ADR-048-silver-filters-structural-scope.md` captured the original
@@ -83,26 +85,28 @@ profiles are versioned under `filters.source_profile` with an
 extraction-parameter SHA-256; the metadata is part of the validated effective
 configuration rather than a separate runtime identity field.
 
-## Compatibility Window (ADR-014, ADR-044, ADR-046, ADR-047)
+## Compatibility Identity And Historical Alias (ADR-014, ADR-044, ADR-046, ADR-047)
 
-During the compatibility window, infrastructure may accept legacy semantic keys
-under `filters.silver_filters` only at configuration boundaries. The accepted
-runtime mode is `structural_only_compat`; the old
-`structural_only_auto_promote` value is only a historical persisted identity
-alias:
+Current production behavior is fail-closed at the configuration boundary:
+infrastructure rejects semantic keys under `filters.silver_filters` before
+strict validation and before domain conversion.
 
-1. Semantic Silver rules are promoted into Gold filter payloads before domain
-   conversion.
-1. Domain Silver filter runtime evaluation uses only structural rules, even if
-   direct construction or legacy compatibility surfaces still carry semantic
-   buckets.
+The accepted runtime mode remains `structural_only_compat`, and the old
+`structural_only_auto_promote` value remains only a historical persisted
+identity alias:
+
+1. Domain Silver filter runtime evaluation uses only structural rules.
 1. Effective config, run manifest, execution fingerprint, and checkpoint
-   compatibility payloads must record the canonical compatibility mode.
-1. Gold wins when a legacy Silver semantic rule conflicts with an explicit Gold
-   semantic rule.
+   compatibility payloads record the canonical compatibility mode for
+   deterministic replay and historical continuity.
+1. Direct-construction test doubles, historical parity tooling, or persisted
+   historical artifacts may still reference compatibility helpers, but
+   production config/file loaders do not accept semantic Silver payloads.
+1. New semantic Silver rules under `filters.silver_filters` are governance
+   violations.
 
-The compatibility window exists to support deterministic migration of current
-YAML configs; it is not permission to add new semantic Silver rules.
+The remaining cleanup scope is therefore identity, observability wording, and
+historical alias retirement rather than config-boundary acceptance.
 
 ## Reject Taxonomy And Operator Surfaces (ADR-017, ADR-018, ADR-045)
 
@@ -138,25 +142,27 @@ export surfaces.
 Operator-facing text may retain legacy names only while it clearly describes the
 narrowed structural meaning and has a cleanup path.
 
-## Cleanup Criteria (ADR-028, ADR-042, ADR-044, ADR-047)
+## Remaining Cleanup Criteria (ADR-028, ADR-042, ADR-044, ADR-047)
 
-The compatibility window can close only after all criteria below are met:
+The semantic-YAML cleanup is complete for active entity configs. Remaining
+follow-up work can close only after all criteria below are met:
 
 1. Current inventory includes config, runtime, source-profile, and observability
    surfaces for the Silver/Gold filter boundary.
-1. Entity configs no longer contain semantic keys under
-   `filters.silver_filters`, or every remaining legacy key has an explicit
-   reviewed exception.
-1. A parity harness proves that promoted legacy Silver semantic rules and
-   canonical Gold semantic rules produce equivalent Gold eligibility decisions
-   for representative entities.
+1. Active entity configs continue to carry no semantic keys under
+   `filters.silver_filters`, or any temporary exception is explicitly reviewed.
+1. Historical parity tooling preserves evidence that the removed semantic Silver
+   rules and canonical Gold semantic rules produce equivalent Gold eligibility
+   decisions for representative entities.
 1. Run manifest, checkpoint, and effective-config identity surfaces preserve the
-   filter compatibility mode.
+   canonical compatibility mode and historical alias handling.
 1. Observability and CLI wording no longer imply that semantic/business rejects
    are Silver rejects.
-1. CI guardrails fail new semantic keys under `filters.silver_filters`.
+1. CI guardrails continue to fail new semantic keys under
+   `filters.silver_filters`.
 
-After cleanup, new semantic Silver rules are governance violations.
+After this cleanup, the historical alias may be retired from identity surfaces
+when a separate compatibility decision approves that removal.
 
 ## Consequences (ADR-002, ADR-018, ADR-028, ADR-045)
 
@@ -164,7 +170,10 @@ After cleanup, new semantic Silver rules are governance violations.
 
 - The Medallion boundary is explicit: Silver structural quality is separate from
   Gold semantic/business eligibility.
-- Existing compatibility code has a canonical ADR and a bounded cleanup path.
+- The production config boundary is unambiguous: semantic Silver keys fail
+  closed before validation and domain conversion.
+- Remaining compatibility concerns have a bounded cleanup path focused on
+  identity and wording rather than active YAML acceptance.
 - `extraction_params` remain source-profile policy instead of being folded into
   Silver filtering semantics.
 - Operator-facing reject categories can be cleaned up without changing Gold
@@ -172,13 +181,11 @@ After cleanup, new semantic Silver rules are governance violations.
 
 ### Negative
 
-- Compatibility normalization remains necessary for historical payloads and
-  file-level compatibility surfaces, even though active YAML is now
-  structural-only at Silver.
-- Metrics, dashboards, and CLI wording need follow-up work because historical
-  names imply broader Silver reject semantics.
-- The compatibility window adds temporary complexity to config identity and
-  migration testing.
+- Metrics, dashboards, and CLI wording still need follow-up work because
+  historical names imply broader Silver reject semantics.
+- Historical alias handling keeps temporary complexity in config identity,
+  replay, and migration verification surfaces even though production config
+  boundaries already fail closed.
 
 ### Neutral
 
@@ -221,8 +228,10 @@ Implementation and follow-up work must verify:
 - Targeted search finds no stale references that cite the retired ADR-048 draft
   as accepted Silver-filter governance.
 - Active entity YAML does not carry semantic buckets under
-  `filters.silver_filters`, and non-empty `extraction_params` carry matching
-  `filters.source_profile` baseline metadata.
+  `filters.silver_filters`, and production loaders reject semantic Silver keys
+  at file/pipeline boundaries before domain conversion.
+- Non-empty `extraction_params` carry matching `filters.source_profile`
+  baseline metadata.
 - The compatibility-surface guardrail includes this ADR.
 - Documentation link checks pass or report pre-existing unrelated failures.
 

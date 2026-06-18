@@ -86,30 +86,27 @@ def get_settings() -> object:
 
 
 def initialize_chembl_policy_registry(configs_root: Path) -> None:
-    """Lazy wrapper for ChEMBL normalization policy initialization."""
-    from bioetl.composition.bootstrap.runtime.normalization_policy_init import (
-        initialize_chembl_policy_registry as _initialize_chembl_policy_registry,
-    )
+    from bioetl.composition.bootstrap.runtime import normalization_policy_init
 
-    _initialize_chembl_policy_registry(configs_root)
+    normalization_policy_init.initialize_chembl_policy_registry(configs_root)
 
 
 def initialize_publication_controlled_vocabulary(configs_root: Path) -> None:
-    """Lazy wrapper for publication controlled vocabulary initialization."""
-    from bioetl.composition.bootstrap.runtime.publication_vocab_init import (
-        initialize_publication_controlled_vocabulary as _initialize_publication_controlled_vocabulary,
-    )
+    from bioetl.composition.bootstrap.runtime import publication_vocab_init
 
-    _initialize_publication_controlled_vocabulary(configs_root)
+    publication_vocab_init.initialize_publication_controlled_vocabulary(configs_root)
 
 
 def initialize_publication_type_classification(configs_root: Path) -> None:
-    """Lazy wrapper for publication type classification initialization."""
-    from bioetl.composition.bootstrap.runtime.classification_init import (
-        initialize_publication_type_classification as _initialize_publication_type_classification,
-    )
+    from bioetl.composition.bootstrap.runtime import classification_init
 
-    _initialize_publication_type_classification(configs_root)
+    classification_init.initialize_publication_type_classification(configs_root)
+
+
+def initialize_protein_class_target_type_mapping(configs_root: Path) -> None:
+    from bioetl.composition.bootstrap.runtime import classification_init
+
+    classification_init.initialize_protein_class_target_type_mapping(configs_root)
 
 
 def register_all_pipelines(*args: object, **kwargs: object) -> object:
@@ -139,6 +136,7 @@ def initialize_runtime_policy_sources(configs_root: Path) -> None:
     """Initialize runtime policy/vocabulary registries from the config root."""
     initialize_chembl_policy_registry(configs_root)
     initialize_publication_type_classification(configs_root)
+    initialize_protein_class_target_type_mapping(configs_root)
     initialize_publication_controlled_vocabulary(configs_root)
 
 

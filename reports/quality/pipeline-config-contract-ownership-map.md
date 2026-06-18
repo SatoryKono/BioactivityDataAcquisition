@@ -1,6 +1,6 @@
 # Pipeline Config Contract Ownership Map
 
-- snapshot_date: 2026-06-17
+- snapshot_date: 2026-06-18
 - row_count: 27
 
 | pipeline_name | contract_ref | config_path | registry_status | contract_config_path | published_artifact_path | gold_schema_title | pipeline_code_owner | gold_enabled | coverage_status |
@@ -18,7 +18,7 @@
 | `chembl_subcellular_fraction` | `chembl.subcellular_fraction` | `configs/entities/chembl/subcellular_fraction.yaml` | `active` | `configs/contracts/chembl/subcellular_fraction.yaml` | `docs/04-reference/contracts/gold/chembl_subcellular_fraction_v1.0.json` | `ChEMBLSubcellularFractionGoldSchema Contract` | `src/bioetl/application/pipelines/chembl/subcellular_fraction_transformer.py` | True | `covered` |
 | `chembl_target` | `chembl.target` | `configs/entities/chembl/target.yaml` | `active` | `configs/contracts/chembl/target.yaml` | `docs/04-reference/contracts/gold/chembl_target_v3.0.json` | `ChEMBLTargetGoldSchema Contract` | `src/bioetl/application/pipelines/chembl/target_transformer.py` | True | `covered` |
 | `chembl_target_component` | `chembl.target_component` | `configs/entities/chembl/target_component.yaml` | `active` | `configs/contracts/chembl/target_component.yaml` | `docs/04-reference/contracts/gold/chembl_target_component_v1.0.json` | `ChEMBLTargetComponentGoldSchema Contract` | `src/bioetl/application/pipelines/chembl/target_component_transformer.py` | True | `covered` |
-| `chembl_target_protein_classification` | `chembl.target_protein_classification` | `configs/entities/chembl/target_protein_classification.yaml` | `active` | `configs/contracts/chembl/target_protein_classification.yaml` | `docs/04-reference/contracts/gold/chembl_target_protein_classification_v2.1.json` | `ChEMBLTargetProteinClassificationGoldSchema Contract` | `src/bioetl/application/pipelines/chembl/target_protein_classification_transformer.py` | True | `covered` |
+| `chembl_target_protein_classification` | `chembl.target_protein_classification` | `configs/entities/chembl/target_protein_classification.yaml` | `active` | `configs/contracts/chembl/target_protein_classification.yaml` | `docs/04-reference/contracts/gold/chembl_target_protein_classification_v2.2.json` | `ChEMBLTargetProteinClassificationGoldSchema Contract` | `src/bioetl/application/pipelines/chembl/target_protein_classification_transformer.py` | True | `covered` |
 | `chembl_tissue` | `chembl.tissue` | `configs/entities/chembl/tissue.yaml` | `active` | `configs/contracts/chembl/tissue.yaml` | `docs/04-reference/contracts/gold/chembl_tissue_v1.0.json` | `ChEMBLTissueGoldSchema Contract` | `src/bioetl/application/pipelines/chembl/tissue_transformer.py` | True | `covered` |
 | `composite_activity` | `composite.activity` | `configs/entities/composite/activity.yaml` | `active` | `configs/contracts/composite/activity.yaml` | `docs/04-reference/contracts/gold/composite_activity_v1.0.json` | `CompositeActivityGoldSchema Contract` | `src/bioetl/application/composite/runner_pkg/runner.py` | True | `covered` |
 | `composite_assay` | `composite.assay` | `configs/entities/composite/assay.yaml` | `active` | `configs/contracts/composite/assay.yaml` | `docs/04-reference/contracts/gold/composite_assay_v1.0.json` | `CompositeAssayGoldSchema Contract` | `src/bioetl/application/composite/runner_pkg/runner.py` | True | `covered` |

@@ -161,3 +161,53 @@ class CompositeTargetGoldSchema(CompositeLookupLineageSchema):
     target_protein_class_desc_L5: Series[str] = pa.Field(
         nullable=True, description="L5 target protein class description."
     )
+    target_protein_class_type: Series[str] = pa.Field(
+        nullable=True,
+        description="Deterministic target-level protein class type from informative L1 values.",
+    )
+    top_level_count: Series[float] = pa.Field(
+        nullable=True,
+        ge=0,
+        coerce=True,
+        description="Count of unique informative canonical L1 protein classes.",
+    )
+    canonical_top_levels: Series[str] = pa.Field(
+        nullable=True,
+        description="JSON array of unique canonical L1 values observed for the target.",
+    )
+    counted_top_levels: Series[str] = pa.Field(
+        nullable=True,
+        description="JSON array of canonical L1 values used for target type aggregation.",
+    )
+    ignored_top_levels: Series[str] = pa.Field(
+        nullable=True,
+        description="JSON array of non-counting canonical L1 values preserved for audit.",
+    )
+    primary_top_level: Series[str] = pa.Field(
+        nullable=True,
+        description="Single informative canonical L1 when exactly one is present.",
+    )
+    target_type_reason_code: Series[str] = pa.Field(
+        nullable=True,
+        description="Reason code explaining target_protein_class_type derivation.",
+    )
+    multifunctional_origin: Series[str] = pa.Field(
+        nullable=True,
+        description="Origin code for multifunctional target classification.",
+    )
+    major_family: Series[str] = pa.Field(
+        nullable=True,
+        description="JSON array of independent L2+ major family classifications.",
+    )
+    major_family_rule_version: Series[str] = pa.Field(
+        nullable=True,
+        description="Version of the L2+ major family derivation rule.",
+    )
+    target_type_rule_version: Series[str] = pa.Field(
+        nullable=True,
+        description="Version of the target_protein_class_type aggregation rule.",
+    )
+    l1_mapping_version: Series[str] = pa.Field(
+        nullable=True,
+        description="Version of the canonical L1 mapping used for aggregation.",
+    )
