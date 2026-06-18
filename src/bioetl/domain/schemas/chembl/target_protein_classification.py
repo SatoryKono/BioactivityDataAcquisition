@@ -98,6 +98,32 @@ class TargetProteinClassificationSchema(ETLRecordSchema):
     l5_desc: Series[str] | None = pa.Field(
         nullable=True, description="Level 5 protein classification description."
     )
+    canonical_l1: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Versioned canonical Level 1 class used for target type aggregation.",
+    )
+    l1_counts_for_target_type: Series[bool] | None = pa.Field(
+        nullable=True,
+        isin=[True, False],
+        description="Whether canonical_l1 participates in target_protein_class_type.",
+    )
+    l1_mapping_version: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Version of the protein-class L1 canonical mapping.",
+    )
+    target_type_rule_version: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Version of the target_protein_class_type aggregation rule.",
+    )
+    l1_normalization_status: Series[str] | None = pa.Field(
+        nullable=True,
+        isin=["ok", "non_counting", "missing", "fallback", "failed"],
+        description="Normalization status for Level 1 protein class evidence.",
+    )
+    l1_normalization_notes: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Optional notes for fallback or non-counting L1 normalization.",
+    )
     dataset_version: Series[str] | None = pa.Field(
         nullable=True,
         description="Version of the local target classification dictionary build.",

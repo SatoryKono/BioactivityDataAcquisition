@@ -132,7 +132,7 @@ repo-wide reorganization wave.
 - **Python**: Version 3.12 (baseline).
 - **Make**: For running automation commands.
 - **uv**: Recommended package manager ([install](https://docs.astral.sh/uv/getting-started/installation/)).
-- **Docker**: Optional, only for `docker-compose` extras such as Neo4j and monitoring; not required for the Local-Only runtime.
+- **Docker**: Optional, only for `docker-compose` extras such as Neo4j and monitoring; not required for the Local-Only runtime. See [Docker Quick Start](docs/DOCKER_QUICKSTART.md) and [Docker Setup](docs/DOCKER_SETUP.md) for adjunct helper usage.
 - **Node.js**: Optional, for Mermaid diagram rendering and related docs tooling.
 
 The supported dependency/bootstrap path is uv-first. `pip` remains a manual

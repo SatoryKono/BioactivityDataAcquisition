@@ -12,6 +12,12 @@ from bioetl.application.services.checkpoint_service import CheckpointInfo
 from bioetl.application.services.observability_workflow_service import (
     ObservabilityWorkflowService,
 )
+from bioetl.application.services._observability_workflow_lookup_support import (
+    resolve_checkpoint_for_run,
+    resolve_lineage_for_run,
+    resolve_pipeline_name,
+    resolve_run_manifest,
+)
 from bioetl.domain.ports.noop import NoOpTracing
 
 
@@ -120,6 +126,51 @@ def _make_checkpoint_manifest_result(
         },
         to_dict=lambda: {"manifest": {"pipeline_name": "chembl_activity"}},
     )
+
+
+class _FailingLineageService:
+    def explain_run(self, run_id: str) -> object:
+        raise ValueError(run_id)
+
+
+class _FailingManifestService:
+    def show(self, identifier: str) -> object:
+        raise ValueError(identifier)
+
+
+@pytest.mark.asyncio
+async def test_observability_lookup_support_fail_closed_paths() -> None:
+    checkpoint_service = mock.AsyncMock()
+    checkpoint_service.get_checkpoint_for_run.return_value = None
+    checkpoint_service.get_checkpoint.return_value = CheckpointInfo(
+        pipeline_name="chembl_activity",
+        run_id="other-run",
+        metadata=object(),
+    )
+
+    assert resolve_pipeline_name(None) is None
+    assert (
+        await resolve_checkpoint_for_run(
+            checkpoint_service=checkpoint_service,
+            run_id="run-123",
+            pipeline_name=None,
+        )
+        is None
+    )
+
+    checkpoint = await resolve_checkpoint_for_run(
+        checkpoint_service=checkpoint_service,
+        run_id="run-123",
+        pipeline_name="chembl_activity",
+    )
+
+    assert checkpoint is not None
+    assert checkpoint.run_id == "other-run"
+    assert checkpoint.metadata == {"status": "mismatched_run_context"}
+    assert resolve_lineage_for_run(None, "run-123") is None
+    assert resolve_lineage_for_run(_FailingLineageService(), "run-123") is None
+    assert resolve_run_manifest(None, "manifest-1") is None
+    assert resolve_run_manifest(_FailingManifestService(), "manifest-1") is None
 
 
 @pytest.mark.asyncio

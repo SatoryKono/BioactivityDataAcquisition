@@ -9,6 +9,9 @@ from types import TracebackType
 from bioetl.application.services.protein_classification_resolution import (
     ProteinClassificationResolutionService,
 )
+from bioetl.domain.mapping.protein_class_target_type import (
+    ProteinClassTargetTypeMappingData,
+)
 from bioetl.domain.ports import DeltaReaderPort, LoggerPort
 from bioetl.domain.types import HealthStatus, JsonDict
 from bioetl.infrastructure.adapters.chembl.protein_classification_graph import (
@@ -43,10 +46,12 @@ class TargetProteinClassificationSnapshotDataSource:
         delta_reader: DeltaReaderPort,
         logger: LoggerPort,
         invalid_record_policy: str = "quarantine",
+        target_type_mapping_data: ProteinClassTargetTypeMappingData | None = None,
     ) -> None:
         self._delta_reader = delta_reader
         self._logger = logger
         self._invalid_record_policy = invalid_record_policy
+        self._target_type_mapping_data = target_type_mapping_data
         self._load_lock = asyncio.Lock()
         self._loaded = False
         self._target_component_ids: dict[str, tuple[int, ...]] = {}
@@ -247,6 +252,7 @@ class TargetProteinClassificationSnapshotDataSource:
                     target_component_rows=target_component_rows,
                 ),
                 invalid_record_policy=self._invalid_record_policy,
+                target_type_mapping_data=self._target_type_mapping_data,
             )
             self._loaded = True
             self._logger.info(

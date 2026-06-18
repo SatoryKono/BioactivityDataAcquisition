@@ -1949,7 +1949,7 @@
       "strict": true
     },
     "chembl_target_protein_classification": {
-      "contract_version": "2.1.0",
+      "contract_version": "2.2.0",
       "fields": {
         "_dq_error": {
           "description": "Hard data-quality error flag.",
@@ -1965,6 +1965,11 @@
           "description": "",
           "dtype": "int64",
           "nullable": false
+        },
+        "canonical_l1": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
         },
         "chembl_api_version": {
           "description": "",
@@ -2011,6 +2016,11 @@
           "dtype": "bool",
           "nullable": true
         },
+        "l1_counts_for_target_type": {
+          "description": "",
+          "dtype": "bool",
+          "nullable": true
+        },
         "l1_desc": {
           "description": "",
           "dtype": "str",
@@ -2021,7 +2031,22 @@
           "dtype": "float64",
           "nullable": true
         },
+        "l1_mapping_version": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "l1_name": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "l1_normalization_notes": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "l1_normalization_status": {
           "description": "",
           "dtype": "str",
           "nullable": true
@@ -2145,9 +2170,14 @@
           "description": "",
           "dtype": "float64",
           "nullable": true
+        },
+        "target_type_rule_version": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
         }
       },
-      "published_contract_path": "docs/04-reference/contracts/gold/chembl_target_protein_classification_v2.1.json",
+      "published_contract_path": "docs/04-reference/contracts/gold/chembl_target_protein_classification_v2.2.json",
       "schema_class": "ChEMBLTargetProteinClassificationGoldSchema",
       "strict": true
     },
@@ -2604,6 +2634,16 @@
           "dtype": "str",
           "nullable": false
         },
+        "canonical_top_levels": {
+          "description": "JSON array of unique canonical L1 values observed for the target.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "counted_top_levels": {
+          "description": "JSON array of canonical L1 values used for target type aggregation.",
+          "dtype": "str",
+          "nullable": true
+        },
         "description": {
           "description": "Target description retained as source-scoped metadata.",
           "dtype": "str",
@@ -2613,6 +2653,36 @@
           "description": "",
           "dtype": "str",
           "nullable": false
+        },
+        "ignored_top_levels": {
+          "description": "JSON array of non-counting canonical L1 values preserved for audit.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "l1_mapping_version": {
+          "description": "Version of the canonical L1 mapping used for aggregation.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "major_family": {
+          "description": "JSON array of independent L2+ major family classifications.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "major_family_rule_version": {
+          "description": "Version of the L2+ major family derivation rule.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "multifunctional_origin": {
+          "description": "Origin code for multifunctional target classification.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "primary_top_level": {
+          "description": "Single informative canonical L1 when exactly one is present.",
+          "dtype": "str",
+          "nullable": true
         },
         "protein_classifications": {
           "description": "Deterministic JSON provenance for target protein classifications.",
@@ -2699,9 +2769,29 @@
           "dtype": "str",
           "nullable": true
         },
+        "target_protein_class_type": {
+          "description": "Deterministic target-level protein class type from informative L1 values.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_type_reason_code": {
+          "description": "Reason code explaining target_protein_class_type derivation.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_type_rule_version": {
+          "description": "Version of the target_protein_class_type aggregation rule.",
+          "dtype": "str",
+          "nullable": true
+        },
         "taxonomy_id": {
           "description": "NCBI taxonomy identifier retained as organism lineage metadata.",
           "dtype": "int64",
+          "nullable": true
+        },
+        "top_level_count": {
+          "description": "Count of unique informative canonical L1 protein classes.",
+          "dtype": "float64",
           "nullable": true
         },
         "uniprot_accession": {

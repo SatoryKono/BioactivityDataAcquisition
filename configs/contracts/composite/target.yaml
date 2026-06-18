@@ -11,6 +11,17 @@ soft_fail_threshold: 0.10
 hard_fail_threshold: 0.30
 strict_dq_validation: true
 invalid_record_policy: "quarantine"
+disposition_overrides:
+  TT-001: "fail"
+  TT-002: "fail"
+  TT-003: "fail"
+  TT-004: "fail"
+  TT-005: "fail"
+  TT-006: "warn"
+  TT-007: "warn"
+  TT-008: "fail"
+  TT-009: "warn"
+  TT-010: "warn"
 report:
   enabled: true
   format: "json"

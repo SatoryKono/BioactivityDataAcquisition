@@ -2490,7 +2490,7 @@
       "symbol": "filters.extraction_params",
       "path": "configs/entities/chembl/target_protein_classification.yaml",
       "occurrence_count": 1,
-      "first_line": 219,
+      "first_line": 250,
       "role": "Entity source-profile policy for chembl.target_protein_classification",
       "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
       "notes": "empty; parameter_count=0"

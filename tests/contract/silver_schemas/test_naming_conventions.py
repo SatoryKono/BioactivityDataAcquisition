@@ -209,6 +209,7 @@ class TestFieldNaming:
             "abstract_structured",
             "content_domain_crossmark_restriction",
             "downgraded",
+            "l1_counts_for_target_type",
             "oral",
             "parenteral",
             "reviewed",
