@@ -15,9 +15,14 @@ def test_architecture_audit_checks_are_check_only() -> None:
     commands = {check.name: check.command for check in checks}
 
     assert set(commands) == {
+        "contract_coverage_matrix",
+        "domain_aggregate_invariant_registry",
+        "domain_io_taint_inventory",
         "import_linter_contracts",
         "runtime_import_scc",
         "module_coverage_inventory",
+        "observability_metric_inventory",
+        "port_adapter_factory_coverage",
         "hotspot_family_baseline",
         "remote_main_debt_baseline",
         "debt_governance_gates",
