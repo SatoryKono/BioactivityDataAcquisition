@@ -37,13 +37,15 @@ Current committed quality artifacts agree on the following architecture evidence
 | --- | ---: | --- |
 | Architecture quality score | `7.98` (`satisfactory_system_refactoring_required`) | `reports/quality/architecture-quality-scorecard.json` |
 | Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
-| Source modules in module coverage inventory | `2167` | `reports/quality/module-coverage-inventory.json` |
-| Unmeasured / uncovered modules | `0` / `0` | `reports/quality/module-coverage-inventory.json` |
+| Source modules in module coverage inventory | `2168` | `reports/quality/module-coverage-inventory.json` |
+| Unmeasured / uncovered modules | `1` / `0` | `reports/quality/module-coverage-inventory.json` |
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
-| Debt-governance gates | `27` pass, `0` warn, `0` fail | `reports/quality/debt-governance-gates.json` |
+| Debt-governance gates | `26` pass, `1` warn, `0` fail | `reports/quality/debt-governance-gates.json` |
 | Duplication baseline | `127` clusters (`application=97`, `composition=30`) | `reports/quality/duplication-baseline.json` |
 
-Generated artifact drift is currently clear (`stale_artifacts` are all false in
+The remaining debt-governance warning is
+`module_coverage_unmeasured_modules=1`; generated artifact drift is currently
+clear (`stale_artifacts` are all false in
 `reports/quality/debt-governance-gates.json`). Read-only audit evidence should
 use `python -m scripts.engineering.qa run-architecture-audit-read-only`, which
 runs check-only architecture diagnostics and fails if tracked governance
@@ -261,9 +263,9 @@ by storage technology. Current owner boundaries:
 
 ## Open Questions
 
-- Module coverage currently has no unmeasured or uncovered source modules in
-  `reports/quality/module-coverage-inventory.json`; keep this as a regression
-  gate through `report-module-coverage --check` and
+- Module coverage currently has one unmeasured source module and no uncovered
+  source modules in `reports/quality/module-coverage-inventory.json`; keep this
+  as a regression gate through `report-module-coverage --check` and
   `report-debt-governance-gates --check`.
 - Existing historical diagram bundles still contain legacy `PipelineStorageProtocol`
   references. They are retained as historical/generated diagram material until a
