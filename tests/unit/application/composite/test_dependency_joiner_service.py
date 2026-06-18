@@ -8,6 +8,29 @@ import polars as pl
 import pytest
 
 from bioetl.application.composite.dependency_joiner import DependencyJoinerService
+from bioetl.domain.mapping.protein_class_target_type import (
+    ProteinClassTargetTypeMappingData,
+    ProteinClassTopLevelMappingEntry,
+    initialize_protein_class_target_type_mapping,
+)
+
+
+@pytest.fixture(autouse=True)
+def _init_protein_class_mapping() -> None:
+    initialize_protein_class_target_type_mapping(
+        ProteinClassTargetTypeMappingData(
+            mapping_version="protein_class_l1_map_v1",
+            entries=(
+                ProteinClassTopLevelMappingEntry("Enzyme", "enzyme", True),
+                ProteinClassTopLevelMappingEntry("Transporter", "transporter", True),
+                ProteinClassTopLevelMappingEntry(
+                    "Unclassified protein",
+                    "unclassified_protein",
+                    False,
+                ),
+            ),
+        )
+    )
 
 
 def _no_field_aliases(_pipeline: str) -> None:
@@ -136,3 +159,6 @@ def test_apply_dependency_joins_summarizes_target_classification_dependency() ->
     row = called_df.to_dicts()[0]
     assert row["target_protein_class_name_L1"] == "Multifunctional target"
     assert row["target_protein_class_id_L1"] is None
+    assert row["target_protein_class_type"] == "multifunctional"
+    assert row["top_level_count"] == 2
+    assert row["counted_top_levels"] == '["enzyme","transporter"]'

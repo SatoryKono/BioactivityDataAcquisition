@@ -91,8 +91,8 @@ _EXPECTED_CHEMBL_CONTRACT_SURFACE: dict[str, dict[str, str]] = {
     },
     "chembl.target_protein_classification": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
-        "artifact": "../../docs/04-reference/contracts/gold/chembl_target_protein_classification_v2.1.json",
-        "contract_version": "2.1.0",
+        "artifact": "../../docs/04-reference/contracts/gold/chembl_target_protein_classification_v2.2.json",
+        "contract_version": "2.2.0",
     },
     "chembl.tissue": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
@@ -128,6 +128,20 @@ _EXPECTED_CHEMBL_SEMANTIC_DQ_RULES: dict[str, frozenset[str]] = {
             "first_in_class_boolean",
             "prodrug_boolean",
             "natural_product_boolean",
+        }
+    ),
+    "chembl_target_protein_classification": frozenset(
+        {
+            "TT-001",
+            "TT-002",
+            "TT-003",
+            "TT-004",
+            "TT-005",
+            "TT-006",
+            "TT-007",
+            "TT-008",
+            "TT-009",
+            "TT-010",
         }
     ),
 }

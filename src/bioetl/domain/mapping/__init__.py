@@ -10,6 +10,14 @@ from bioetl.domain.mapping.organism_classification import (
     classify_organism,
     normalize_organism_name,
 )
+from bioetl.domain.mapping.protein_class_target_type import (
+    ProteinClassTargetTypeMappingData,
+    ProteinClassTargetTypeResult,
+    ProteinClassTopLevelMappingEntry,
+    derive_major_families,
+    derive_protein_class_target_type,
+    initialize_protein_class_target_type_mapping,
+)
 from bioetl.domain.mapping.publication_fields import (
     PUBLICATION_FIELD_MAPPING,
     UNIFIED_TO_PROVIDER,
@@ -40,14 +48,20 @@ __all__ = [
     "UNIFIED_TO_PROVIDER",
     "ClassificationData",
     "OrganismClassificationResult",
+    "ProteinClassTargetTypeMappingData",
+    "ProteinClassTargetTypeResult",
+    "ProteinClassTopLevelMappingEntry",
     "PublicationTypeEntry",
     "apply_field_mapping",
     "build_pubmed_publication_type_fields",
     "classify_organism",
     "classify_publication_type",
+    "derive_major_families",
+    "derive_protein_class_target_type",
     "get_provider_name",
     "get_unified_name",
     "initialize_classification",
+    "initialize_protein_class_target_type_mapping",
     "normalize_organism_name",
     "normalize_publication_type",
 ]

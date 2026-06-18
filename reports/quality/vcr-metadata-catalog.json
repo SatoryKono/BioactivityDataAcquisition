@@ -2161,6 +2161,7 @@
       "reachability_owner_paths": [
         "tests/contract/_provider_contract_replay.py",
         "tests/e2e/conftest.py",
+        "tests/integration/adapters/openalex/test_adapter.py",
         "tests/integration/adapters/test_chembl.py",
         "tests/integration/adapters/test_crossref.py",
         "tests/integration/adapters/test_pubchem.py",

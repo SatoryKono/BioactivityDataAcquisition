@@ -51,3 +51,40 @@ def test_release_review_freshness_gate_fails_for_future_generated_at() -> None:
 
     assert gate.status == "fail"
     assert gate.current == -1
+
+
+def test_release_gate_status_prioritizes_failures_over_warnings() -> None:
+    assert gates._release_gate_status({"pass": 25, "warn": 0, "fail": 1}) == "failing"
+    assert gates._release_gate_status({"pass": 25, "warn": 1, "fail": 0}) == "warning"
+    assert gates._release_gate_status({"pass": 26, "warn": 0, "fail": 0}) == "passing"
+
+
+def test_render_markdown_separates_weighted_score_from_release_gate_status() -> None:
+    payload = {
+        "summary": {
+            "gate_count": 1,
+            "pass_count": 0,
+            "warn_count": 0,
+            "fail_count": 1,
+            "release_gate_status": "failing",
+            "architecture_quality_scorecard_integral_score": 7.98,
+            "architecture_quality_scorecard_interpretation": (
+                "satisfactory_system_refactoring_required"
+            ),
+        },
+        "gates": [
+            {
+                "name": "generated_artifact_drift",
+                "status": "fail",
+                "metric": "stale_artifact_count",
+                "current": 1,
+                "limit": 0,
+                "source_artifact": "reports/quality/*.json",
+            }
+        ],
+    }
+
+    markdown = gates.render_markdown(payload)
+
+    assert "release_gate_status: `failing`" in markdown
+    assert "architecture_quality_scorecard_integral_score: `7.98`" in markdown

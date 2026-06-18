@@ -257,18 +257,6 @@ content_hash_datetime_policy:
     status: documented_date_only
     rationale: Legacy v1_date hash datetime compatibility retained for chembl.tissue
       until migration to v2_datetime_utc.
-  - provider: crossref
-    entity: publication
-    configured_policy: v1_date
-    status: documented_date_only
-    rationale: Legacy v1_date hash datetime compatibility retained for crossref.publication
-      until migration to v2_datetime_utc.
-  - provider: openalex
-    entity: publication
-    configured_policy: v1_date
-    status: documented_date_only
-    rationale: Legacy v1_date hash datetime compatibility retained for openalex.publication
-      until migration to v2_datetime_utc.
   - provider: pubchem
     entity: compound
     configured_policy: v1_date
@@ -280,16 +268,4 @@ content_hash_datetime_policy:
     configured_policy: v1_date
     status: documented_date_only
     rationale: Legacy v1_date hash datetime compatibility retained for pubmed.publication
-      until migration to v2_datetime_utc.
-  - provider: semanticscholar
-    entity: publication
-    configured_policy: v1_date
-    status: documented_date_only
-    rationale: Legacy v1_date hash datetime compatibility retained for semanticscholar.publication
-      until migration to v2_datetime_utc.
-  - provider: uniprot
-    entity: idmapping
-    configured_policy: v1_date
-    status: documented_date_only
-    rationale: Legacy v1_date hash datetime compatibility retained for uniprot.idmapping
       until migration to v2_datetime_utc.

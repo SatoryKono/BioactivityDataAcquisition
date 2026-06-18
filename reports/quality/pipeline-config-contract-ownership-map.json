@@ -235,8 +235,8 @@
       "pipeline_code_owner": "src/bioetl/application/pipelines/chembl/target_protein_classification_transformer.py",
       "pipeline_name": "chembl_target_protein_classification",
       "provider": "chembl",
-      "published_artifact_path": "docs/04-reference/contracts/gold/chembl_target_protein_classification_v2.1.json",
-      "registry_contract_version": "2.1.0",
+      "published_artifact_path": "docs/04-reference/contracts/gold/chembl_target_protein_classification_v2.2.json",
+      "registry_contract_version": "2.2.0",
       "registry_source_path": "src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
       "registry_status": "active"
     },
@@ -467,5 +467,5 @@
       "registry_status": "active"
     }
   ],
-  "snapshot_date": "2026-06-17"
+  "snapshot_date": "2026-06-18"
 }
