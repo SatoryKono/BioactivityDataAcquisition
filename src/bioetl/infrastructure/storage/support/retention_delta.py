@@ -7,6 +7,7 @@ from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
 from bioetl.domain.exceptions import TableNotFoundError
 from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.storage.delta.schema_ops import delta_schema_to_pyarrow
 
 
 def get_table_path(base_path: str, table_name: str) -> str:
@@ -27,7 +28,7 @@ def build_table_info(table: DeltaTable) -> JsonDict:
     return {
         "version": table.version(),
         "num_files": len(table.file_uris()),
-        "schema": table.schema().to_arrow(),
+        "schema": delta_schema_to_pyarrow(table.schema()),
         "metadata": table.metadata(),
     }
 

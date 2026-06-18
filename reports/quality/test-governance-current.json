@@ -3671,10 +3671,125 @@
       "tests/unit/infrastructure/adapters/crossref/test_compatibility.py",
       "tests/unit/infrastructure/adapters/pubchem/test_fetch_strategies_compat.py",
       "tests/unit/infrastructure/adapters/pubmed/test_models_compat.py",
-      "tests/unit/interfaces/cli/commands/test_runtime_compat_aliases.py",
       "tests/unit/scripts/ops/test_memory_legacy_aliases.py"
     ],
-    "compatibility_test_files": 30,
+    "compatibility_test_files": 29,
+    "critical_behavior_envelope_assertion_gap_count": 0,
+    "critical_behavior_envelope_count": 5,
+    "critical_behavior_envelopes": {
+      "control_plane_replay": {
+        "assertion_backed_tests": 53,
+        "assertion_examples": [
+          "tests/architecture/test_determinism_identity_policy.py:166",
+          "tests/architecture/test_determinism_identity_policy.py:320",
+          "tests/architecture/test_determinism_identity_policy.py:348",
+          "tests/architecture/test_determinism_identity_policy.py:385",
+          "tests/architecture/test_determinism_identity_policy.py:435",
+          "tests/architecture/test_determinism_identity_policy.py:456",
+          "tests/architecture/test_replay_time_seam_inventory.py:104",
+          "tests/architecture/test_replay_time_seam_inventory.py:114",
+          "tests/unit/application/services/test_checkpoint_execution_identity_alignment.py:96",
+          "tests/unit/application/services/test_checkpoint_execution_identity_alignment.py:135"
+        ],
+        "assertless_tests": [],
+        "intentional_no_exception_tests": 0,
+        "paths": [
+          "tests/unit/application/services/test_run_manifest_service.py",
+          "tests/unit/application/services/test_checkpoint_execution_identity_alignment.py",
+          "tests/architecture/test_determinism_identity_policy.py",
+          "tests/architecture/test_replay_time_seam_inventory.py"
+        ],
+        "test_count": 53
+      },
+      "gold_strict_contracts": {
+        "assertion_backed_tests": 11,
+        "assertion_examples": [
+          "tests/contract/test_gold_dq_golden_snapshots.py:37",
+          "tests/contract/test_gold_entity_coverage_complete.py:20",
+          "tests/contract/test_gold_entity_coverage_complete.py:28",
+          "tests/contract/test_gold_entity_coverage_complete.py:39",
+          "tests/contract/test_gold_entity_coverage_complete.py:53",
+          "tests/contract/test_gold_pk_consistency.py:31",
+          "tests/contract/test_gold_pk_consistency.py:63",
+          "tests/contract/test_gold_schema_strict_violations.py:64",
+          "tests/contract/test_gold_schema_strict_violations.py:75",
+          "tests/contract/test_gold_schema_strict_violations.py:80"
+        ],
+        "assertless_tests": [],
+        "intentional_no_exception_tests": 0,
+        "paths": [
+          "tests/contract/test_gold_entity_coverage_complete.py",
+          "tests/contract/test_gold_pk_consistency.py",
+          "tests/contract/test_gold_schema_strict_violations.py",
+          "tests/contract/test_gold_dq_golden_snapshots.py"
+        ],
+        "test_count": 11
+      },
+      "medallion_storage": {
+        "assertion_backed_tests": 9,
+        "assertion_examples": [
+          "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py:42",
+          "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py:93",
+          "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py:130",
+          "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py:191",
+          "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py:38",
+          "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py:67",
+          "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py:85",
+          "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py:104",
+          "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py:130"
+        ],
+        "assertless_tests": [],
+        "intentional_no_exception_tests": 0,
+        "paths": [
+          "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py",
+          "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py"
+        ],
+        "test_count": 9
+      },
+      "quarantine_replay": {
+        "assertion_backed_tests": 44,
+        "assertion_examples": [
+          "tests/unit/domain/aggregates/test_quarantine_entry.py:67",
+          "tests/unit/domain/aggregates/test_quarantine_entry.py:75",
+          "tests/unit/domain/aggregates/test_quarantine_entry.py:84",
+          "tests/unit/domain/aggregates/test_quarantine_entry.py:94",
+          "tests/unit/domain/aggregates/test_quarantine_entry.py:112",
+          "tests/unit/domain/aggregates/test_quarantine_entry.py:126",
+          "tests/unit/domain/aggregates/test_quarantine_entry.py:140",
+          "tests/unit/domain/aggregates/test_quarantine_entry.py:154",
+          "tests/unit/domain/aggregates/test_quarantine_entry.py:177",
+          "tests/unit/domain/aggregates/test_quarantine_entry.py:182"
+        ],
+        "assertless_tests": [],
+        "intentional_no_exception_tests": 0,
+        "paths": [
+          "tests/unit/domain/aggregates/test_quarantine_entry.py",
+          "tests/unit/domain/aggregates/test_quarantine_entry_invariant_properties.py"
+        ],
+        "test_count": 44
+      },
+      "test_governance": {
+        "assertion_backed_tests": 32,
+        "assertion_examples": [
+          "tests/architecture/test_test_governance_audit.py:93",
+          "tests/architecture/test_test_governance_audit.py:111",
+          "tests/architecture/test_test_governance_audit.py:122",
+          "tests/architecture/test_test_governance_audit.py:163",
+          "tests/architecture/test_test_governance_audit.py:193",
+          "tests/architecture/test_test_governance_audit.py:214",
+          "tests/architecture/test_test_governance_audit.py:229",
+          "tests/architecture/test_test_governance_audit.py:242",
+          "tests/architecture/test_test_governance_audit.py:274",
+          "tests/architecture/test_test_governance_audit.py:303"
+        ],
+        "assertless_tests": [],
+        "intentional_no_exception_tests": 0,
+        "paths": [
+          "tests/architecture/test_test_governance_audit.py"
+        ],
+        "test_count": 32
+      }
+    },
     "date_today_call_sites": 0,
     "duplicate_test_name_inventory": [],
     "duplicate_test_name_inventory_summary": {
@@ -3691,8 +3806,8 @@
     "refined_assertless_tests": 0,
     "root": ".",
     "top_duplicate_test_names": [],
-    "total_test_files": 1813,
-    "total_test_functions": 20888,
+    "total_test_files": 1817,
+    "total_test_functions": 20916,
     "uuid4_call_sites": 0
   }
 }

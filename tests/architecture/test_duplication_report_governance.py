@@ -30,6 +30,16 @@ SPECIALIZED_DUPLICATION_ARTIFACTS = (
         "md_path": PROJECT_ROOT / "reports/quality/runtime-builders-duplication.md",
     },
 )
+FULL_APP_DUPLICATION_ARTIFACT = {
+    "json_path": PROJECT_ROOT / "reports/quality/full-app-duplication-baseline.json",
+    "md_path": PROJECT_ROOT / "reports/quality/full-app-duplication-baseline.md",
+    "targets": {
+        "src/bioetl/infrastructure/adapters",
+        "src/bioetl/application/pipelines",
+        "src/bioetl/composition/bootstrap",
+        "src/bioetl/interfaces/cli",
+    },
+}
 
 
 def _load_json(path: Path) -> dict[str, object]:
@@ -99,6 +109,14 @@ def _single_report_from_payload(payload: dict[str, object]) -> TargetDuplication
         raw_duplicate_count=raw_duplicate_count,
         clusters=tuple(clusters),
     )
+
+
+def _reports_from_payload(payload: dict[str, object]) -> list[TargetDuplicationReport]:
+    reports: list[TargetDuplicationReport] = []
+    for row in _target_rows(payload):
+        single_payload = {**payload, "targets": [row]}
+        reports.append(_single_report_from_payload(single_payload))
+    return reports
 
 
 def test_specialized_duplication_reports_match_hotspot_baseline_targets() -> None:
@@ -176,3 +194,45 @@ def test_hotspot_duplication_baseline_is_clean_zero_ratchet() -> None:
 
     assert summary.get("total_duplicate_clusters") == 0
     assert summary.get("total_raw_duplicate_clusters") == 0
+
+
+def test_full_app_duplication_baseline_covers_audit_visibility_scope() -> None:
+    payload = _load_json(FULL_APP_DUPLICATION_ARTIFACT["json_path"])
+    summary = payload.get("summary", {})
+    assert isinstance(summary, dict)
+    rows = _target_rows(payload)
+
+    assert summary.get("targets") == len(FULL_APP_DUPLICATION_ARTIFACT["targets"])
+    assert {row["target"] for row in rows} == FULL_APP_DUPLICATION_ARTIFACT["targets"]
+    assert summary["total_duplicate_clusters"] == sum(
+        int(row["duplicate_count"]) for row in rows
+    )
+    assert summary["total_raw_duplicate_clusters"] == sum(
+        int(row["raw_duplicate_count"]) for row in rows
+    )
+    assert payload.get("trend") == {
+        "status": "no_prior_snapshot",
+        "snapshot_date": summary["snapshot_date"],
+    }
+
+
+def test_full_app_duplication_markdown_matches_json_payload() -> None:
+    payload = _load_json(FULL_APP_DUPLICATION_ARTIFACT["json_path"])
+    normalization = payload.get("normalization", {})
+    assert isinstance(normalization, dict)
+    exclude_patterns = normalization.get("exclude_module_patterns", [])
+    assert isinstance(exclude_patterns, list)
+
+    expected_markdown = _render_markdown(
+        _reports_from_payload(payload),
+        exclude_module_patterns=tuple(
+            pattern for pattern in exclude_patterns if isinstance(pattern, str)
+        ),
+        trend_summary=payload.get("trend")
+        if isinstance(payload.get("trend"), dict)
+        else None,
+    )
+    actual_markdown = FULL_APP_DUPLICATION_ARTIFACT["md_path"].read_text(
+        encoding="utf-8"
+    )
+    assert actual_markdown == expected_markdown

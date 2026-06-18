@@ -12,6 +12,7 @@ from deltalake.exceptions import (
     TableNotFoundError as DeltaTableNotFoundError,
 )
 
+from bioetl.infrastructure.storage.delta.schema_ops import delta_schema_to_pyarrow
 from bioetl.infrastructure.storage.delta_reader_helpers import (
     FULL_READ_HEAD_LIMIT as _FULL_READ_HEAD_LIMIT,
 )
@@ -180,7 +181,7 @@ class DeltaReader:
                 raise FileNotFoundError(
                     f"Delta table not found: {resolved_path}"
                 ) from e
-            return dt.schema().to_arrow()
+            return delta_schema_to_pyarrow(dt.schema())
 
         return await loop.run_in_executor(None, _get_schema)
 

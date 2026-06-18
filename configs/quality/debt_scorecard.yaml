@@ -120,6 +120,27 @@ compatibility_debt_metrics:
         without review.
       ratchet_policy: Fail on growth; ratchet max_count downward only after retained
         public entrypoints are removed or first-party callers are narrowed.
+    retained_public_export_facade_burden:
+      current_count: 4
+      max_count: 4
+      owner: '@bioetl-architecture'
+      linked_issue: '5374'
+      rationale: Retained public export facades are stable package-root API, but each
+        retained lazy/export facade remains an explicit compatibility surface that
+        must not grow without architecture review.
+      ratchet_policy: Fail on growth; ratchet max_count downward only after export
+        facades are collapsed, converted to owner imports, or otherwise removed from
+        the compatibility census.
+    retained_public_export_facade_conflict_count:
+      current_count: 0
+      max_count: 0
+      owner: '@bioetl-architecture'
+      linked_issue: '5374'
+      rationale: Duplicate exports and resolution conflicts inside retained public
+        export facades are not allowed because they make public API ownership
+        ambiguous.
+      ratchet_policy: Zero-budget fail-fast metric; any non-zero census conflict
+        requires removing or explicitly re-owning the export facade before merge.
     sunset_compat_count:
       current_count: 0
       max_count: 0
@@ -367,6 +388,37 @@ config_surface_ratchet:
           rationale: Raw composite partial-key drift is fully retired in the committed
             baseline.
           ratchet_policy: Zero-budget fail-fast for composite runtime configs.
+  parameter_taxonomy:
+    linked_issue: '#5377'
+    owner: '@bioetl-config'
+    mode: fail-fast-no-growth
+    artifact: reports/quality/config-discrepancy-baseline.json
+    rationale: Compatibility-legacy config parameters are still present in entity
+      effective and composite runtime config surfaces; they are intentionally bounded
+      here so cleanup can only reduce the legacy taxonomy count.
+    groups:
+      entity_effective:
+        compatibility_legacy:
+          current_count: 17
+          max_count: 17
+          target_count: 0
+          owner: '@bioetl-config'
+          rationale: Entity effective configs still expose legacy compatibility
+            parameter taxonomy entries that must be retired through schema/config
+            migration rather than relabeled as sanctioned drift.
+          ratchet_policy: Non-growth fail-fast; reduce only by migrating configs and
+            schemas to canonical parameters.
+      composite_runtime:
+        compatibility_legacy:
+          current_count: 16
+          max_count: 16
+          target_count: 0
+          owner: '@bioetl-config'
+          rationale: Composite runtime configs still expose legacy compatibility
+            parameter taxonomy entries that must be burned down without adding new
+            compatibility keys.
+          ratchet_policy: Non-growth fail-fast; reduce only by migrating composite
+            runtime configs and validation contracts to canonical parameters.
 registry_groups:
   size_metrics:
     registries:
@@ -1037,13 +1089,13 @@ test_governance_debt_metrics:
     inventory, assertion-strength debt, or deterministic test-seam counts change.
   metrics:
     compatibility_test_file_count:
-      current_count: 30
-      max_count: 30
-      target_count: 30
-      ratchet_policy: Downward ratchet only; keep max_count at 30 unless a future
+      current_count: 29
+      max_count: 29
+      target_count: 29
+      ratchet_policy: Downward ratchet only; keep max_count at 29 unless a future
         owner-approved reduction lowers the live compatibility test inventory.
       rationale: 'Issues #4925, #4967, #5023, #5034, #5101, #5102, #5104, #5106, #5107,
-        #5345, and #5351 reduced compatibility test inventory from 37 to 30 by removing obsolete guards,
+        #5345, #5351, and #5372 reduced compatibility test inventory from 37 to 29 by removing obsolete guards,
         renaming tests out of compatibility classification, and cleaning up deprecated
         contracts. Live compatibility debt count is now limited to compat, legacy,
         deprecated, shim, and sunset surfaces.'

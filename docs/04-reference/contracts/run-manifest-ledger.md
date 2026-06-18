@@ -215,7 +215,7 @@ Certified historical replay is therefore bounded but operationalized:
 - `bioetl run-manifest certify-historical-bulk <plan.json>` applies a
   deterministic source-first certification pass across retained manifests using
   explicit immutable snapshot evidence from the provided plan;
-- `bioetl run-manifest closure-report --write` persists one retained-corpus
+- `bioetl run-manifest closure-report --write` persists one retained-corpus artifact
   closure artifact with a deterministic `report_id`, global claim gate, and
   explicit residual resolution queue for any blocked historical manifests;
 - `bioetl run-manifest universe-report --external-pack ... --write` persists
@@ -235,7 +235,7 @@ Certified historical replay is therefore bounded but operationalized:
   a full-universe closure artifact by merging the local retained corpus with
   one or more authoritative external universe packs for archived/offline runs;
 - `scripts/engineering/qa/run_historical_replay_closure_campaign.py --require-global-claim`
-  fails closed when the retained-corpus closure artifact still cannot make the
+  fails closed when the retained-corpus artifact closure artifact still cannot make the
   published global replay claim;
 - `scripts/engineering/qa/run_historical_replay_universe_campaign.py --require-universal-claim`
   fails closed unless `governed_full_corpus_gate.satisfied=true`, preventing
@@ -265,8 +265,8 @@ Certified historical replay is therefore bounded but operationalized:
   `outside_universal_claim_scope` remove those legacy occurrences from the
   strong claim scope instead of silently treating them as replayable.
 - a literal universal exact replay claim for **any historical run** is only
-  supported from the full-universe artifact, not from the retained-corpus
-  artifact alone. That artifact must merge locally retained runs with
+  supported from the full-universe artifact, not from the retained-corpus artifact
+  alone. That artifact must merge locally retained runs with
   authoritative archived/offline historical records and publish
   `authoritative_truth_surface`, `universal_claim`, and
   `durable_evidence_coverage_claim`.

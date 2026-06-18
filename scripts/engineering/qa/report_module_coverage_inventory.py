@@ -623,6 +623,15 @@ def build_module_coverage_inventory(
         for row in rows
         if str(row["coverage_status"]) == "unmeasured"
     ]
+    uncovered_modules = [
+        {
+            "module": str(row["module"]),
+            "path": str(row["path"]),
+            "reason": "coverage_xml_reports_zero_executed_lines",
+        }
+        for row in rows
+        if str(row["coverage_status"]) == "uncovered"
+    ]
 
     return {
         "schema_version": 1,
@@ -641,6 +650,8 @@ def build_module_coverage_inventory(
             "status_counts": status_counts,
             "unmeasured_module_count": len(unmeasured_modules),
             "unmeasured_modules": unmeasured_modules,
+            "uncovered_module_count": len(uncovered_modules),
+            "uncovered_modules": uncovered_modules,
             "hotspot_family_coverage": hotspot_family_coverage,
         },
         "modules": rows,

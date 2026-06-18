@@ -7,6 +7,25 @@ import pyarrow as pa
 from bioetl.domain.constants import NONDETERMINISTIC_PERSISTED_FIELDS
 
 
+def delta_schema_to_pyarrow(delta_schema: object) -> pa.Schema:
+    """Convert a delta-rs Schema to PyArrow across API renames."""
+    for method_name in ("to_arrow", "to_pyarrow"):
+        converter = getattr(delta_schema, method_name, None)
+        if not callable(converter):
+            continue
+        schema = converter()
+        if isinstance(schema, pa.Schema):
+            return schema
+        try:
+            return pa.schema(schema)
+        except (TypeError, ValueError, pa.ArrowException):
+            continue
+    raise TypeError(
+        f"Unsupported delta schema type {type(delta_schema)!r}: "
+        "expected to_arrow() or to_pyarrow()"
+    )
+
+
 def coerce_null_types_for_delta(table: pa.Table) -> pa.Table:
     """Coerce Null-typed columns to concrete types for Delta Lake compatibility."""
     for field in table.schema:

@@ -29,6 +29,14 @@ async def _read_bronze_payloads(writer: BronzeWriter, relative_path: str) -> lis
     return payloads
 
 
+def _meta_path(tmp_path: Path, relative_path: str) -> Path:
+    return (tmp_path / relative_path).with_suffix(".zst.meta.json")
+
+
+def _json_copy_path(tmp_path: Path, relative_path: str) -> Path:
+    return (tmp_path / relative_path).with_suffix("")
+
+
 @pytest.mark.unit
 @pytest.mark.asyncio
 async def test_bronze_append_only_writes_keep_prior_batches_readable(
@@ -39,6 +47,7 @@ async def test_bronze_append_only_writes_keep_prior_batches_readable(
         base_path=tmp_path,
         logger=NoOpLogger(),
         metrics=NoOpMetrics(),
+        save_json=True,
     )
     date = datetime(2024, 1, 15, tzinfo=UTC)
     ingestion_ts = datetime(2024, 1, 15, 12, 0, tzinfo=UTC)
@@ -89,6 +98,7 @@ async def test_bronze_write_captures_raw_payload_before_caller_mutation(
         base_path=tmp_path,
         logger=NoOpLogger(),
         metrics=NoOpMetrics(),
+        save_json=True,
     )
     date = datetime(2024, 1, 15, tzinfo=UTC)
     ingestion_ts = datetime(2024, 1, 15, 12, 0, tzinfo=UTC)
@@ -112,4 +122,119 @@ async def test_bronze_write_captures_raw_payload_before_caller_mutation(
     assert await _read_bronze_payloads(writer, result.relative_path) == [
         {"id": 1, "name": "original"},
         {"id": 2, "name": "stable"},
+    ]
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_bronze_same_batch_retry_with_same_payload_is_noop(
+    tmp_path: Path,
+) -> None:
+    """Same batch retries may succeed only when raw data and metadata are identical."""
+    writer = BronzeWriter(
+        base_path=tmp_path,
+        logger=NoOpLogger(),
+        metrics=NoOpMetrics(),
+        save_json=True,
+    )
+    date = datetime(2024, 1, 15, tzinfo=UTC)
+    ingestion_ts = datetime(2024, 1, 15, 12, 0, tzinfo=UTC)
+    batch_id = _batch_id("same-batch-retry")
+    run_id = _run_id("same-batch-retry")
+    records = [
+        b'{"id": 1, "name": "stable"}\n',
+        b'{"id": 2, "name": "retry-safe"}\n',
+    ]
+
+    first = await writer.write_bronze(
+        records=iter(records),
+        provider="chembl",
+        entity="activity",
+        date=date,
+        batch_id=batch_id,
+        run_id=run_id,
+        run_type=RunType.INCREMENTAL,
+        ingestion_ts=ingestion_ts,
+    )
+    first_data_bytes = (tmp_path / first.relative_path).read_bytes()
+    first_meta_bytes = _meta_path(tmp_path, first.relative_path).read_bytes()
+    first_json_bytes = _json_copy_path(tmp_path, first.relative_path).read_bytes()
+
+    second = await writer.write_bronze(
+        records=iter(records),
+        provider="chembl",
+        entity="activity",
+        date=date,
+        batch_id=batch_id,
+        run_id=run_id,
+        run_type=RunType.INCREMENTAL,
+        ingestion_ts=ingestion_ts,
+    )
+
+    listed_batches = await writer.list_batches("chembl", "activity", date=date)
+    assert second.relative_path == first.relative_path
+    assert listed_batches == [first.relative_path]
+    assert (tmp_path / first.relative_path).read_bytes() == first_data_bytes
+    assert _meta_path(tmp_path, first.relative_path).read_bytes() == first_meta_bytes
+    assert (
+        _json_copy_path(tmp_path, first.relative_path).read_bytes()
+        == first_json_bytes
+    )
+    assert await _read_bronze_payloads(writer, first.relative_path) == [
+        {"id": 1, "name": "stable"},
+        {"id": 2, "name": "retry-safe"},
+    ]
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_bronze_same_batch_retry_with_different_payload_is_rejected(
+    tmp_path: Path,
+) -> None:
+    """Same batch retries must not replace immutable raw Bronze payloads."""
+    writer = BronzeWriter(
+        base_path=tmp_path,
+        logger=NoOpLogger(),
+        metrics=NoOpMetrics(),
+        save_json=True,
+    )
+    date = datetime(2024, 1, 15, tzinfo=UTC)
+    ingestion_ts = datetime(2024, 1, 15, 12, 0, tzinfo=UTC)
+    batch_id = _batch_id("same-batch-conflict")
+    run_id = _run_id("same-batch-conflict")
+
+    first = await writer.write_bronze(
+        records=iter([b'{"id": 1, "name": "original"}\n']),
+        provider="chembl",
+        entity="activity",
+        date=date,
+        batch_id=batch_id,
+        run_id=run_id,
+        run_type=RunType.INCREMENTAL,
+        ingestion_ts=ingestion_ts,
+    )
+    first_data_bytes = (tmp_path / first.relative_path).read_bytes()
+    first_meta_bytes = _meta_path(tmp_path, first.relative_path).read_bytes()
+    first_json_bytes = _json_copy_path(tmp_path, first.relative_path).read_bytes()
+
+    with pytest.raises(FileExistsError):
+        await writer.write_bronze(
+            records=iter([b'{"id": 1, "name": "mutated"}\n']),
+            provider="chembl",
+            entity="activity",
+            date=date,
+            batch_id=batch_id,
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            ingestion_ts=ingestion_ts,
+        )
+
+    assert (tmp_path / first.relative_path).read_bytes() == first_data_bytes
+    assert _meta_path(tmp_path, first.relative_path).read_bytes() == first_meta_bytes
+    assert (
+        _json_copy_path(tmp_path, first.relative_path).read_bytes()
+        == first_json_bytes
+    )
+    assert await _read_bronze_payloads(writer, first.relative_path) == [
+        {"id": 1, "name": "original"},
     ]

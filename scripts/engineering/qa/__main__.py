@@ -34,6 +34,7 @@ Commands:
     report-compatibility-importer-census Generate deterministic importer census for sanctioned seams and twin modules
     report-pipeline-config-contract-ownership-map Generate/check pipeline-config-contract ownership traces
     report-contract-coverage-matrix Generate/check contract coverage matrix for active entity configs
+    report-domain-io-taint-inventory Generate/check semantic Domain I/O taint inventory
     report-port-adapter-factory-coverage Generate/check core port-adapter-factory coverage matrix
     report-module-coverage Generate/check module-level coverage inventory
     report-dead-code-inventory Generate repo-local static dead-code review inventory
@@ -95,6 +96,9 @@ COMMAND_MODULES: dict[str, str] = {
     "report-compatibility-importer-census": "scripts.engineering.qa.report_compatibility_importer_census",
     "report-pipeline-config-contract-ownership-map": "scripts.engineering.qa.report_pipeline_config_contract_ownership",
     "report-contract-coverage-matrix": "scripts.engineering.qa.report_contract_coverage_matrix",
+    "report-domain-io-taint-inventory": (
+        "scripts.engineering.qa.report_domain_io_taint_inventory"
+    ),
     "report-port-adapter-factory-coverage": (
         "scripts.engineering.qa.report_port_adapter_factory_coverage"
     ),

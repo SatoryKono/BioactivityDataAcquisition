@@ -116,6 +116,55 @@ def test_contract_coverage_matrix_gold_enabled_rows_have_layer_pandera_details()
 
 
 @pytest.mark.architecture
+def test_contract_coverage_matrix_tracks_constraint_and_golden_evidence() -> None:
+    """Gold-enabled rows must expose constraint completeness and golden-test evidence."""
+    payload = _load_payload()
+    rows = _load_rows()
+    gold_rows = [row for row in rows if row.get("gold_enabled") is True]
+
+    assert payload.get("constraint_completeness_review_count") == len(gold_rows)
+    assert payload.get("constraint_completeness_missing_count") == 0
+
+    violations: list[str] = []
+    for row in gold_rows:
+        pipeline_name = row.get("pipeline_name")
+        assert isinstance(pipeline_name, str)
+        if row.get("constraint_completeness_status") != "covered":
+            violations.append(
+                f"{pipeline_name}: constraint completeness is not covered"
+            )
+        if row.get("missing_constraint_surfaces") != []:
+            violations.append(
+                f"{pipeline_name}: unexpected missing constraints "
+                f"{row.get('missing_constraint_surfaces')!r}"
+            )
+        surfaces = row.get("constraint_completeness_surfaces")
+        if not isinstance(surfaces, list):
+            violations.append(f"{pipeline_name}: missing completeness surfaces")
+            continue
+        for required_surface in (
+            "pandera_fields",
+            "nullable_policy",
+            "required_fields",
+            "primary_key_required_fields",
+            "contract_tests",
+            "golden_tests",
+        ):
+            if required_surface not in surfaces:
+                violations.append(
+                    f"{pipeline_name}: missing {required_surface} evidence"
+                )
+        if row.get("published_contract_nullable_policy_declared") is not True:
+            violations.append(f"{pipeline_name}: nullable policy not declared")
+        if row.get("golden_test_evidence_declared") is not True:
+            violations.append(f"{pipeline_name}: golden test evidence not declared")
+        golden_paths = row.get("golden_test_paths")
+        if not isinstance(golden_paths, list) or not golden_paths:
+            violations.append(f"{pipeline_name}: missing golden_test_paths")
+    assert not violations, "\n".join(violations)
+
+
+@pytest.mark.architecture
 def test_contract_coverage_matrix_exclusions_are_explicit() -> None:
     """Excluded rows must carry an explicit justification and payload summary parity."""
     payload = _load_payload()

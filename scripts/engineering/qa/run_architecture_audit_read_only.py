@@ -121,6 +121,16 @@ def architecture_audit_checks(repo_root: Path = PROJECT_ROOT) -> tuple[Architect
             ),
         ),
         ArchitectureAuditCheck(
+            name="domain_io_taint_inventory",
+            command=(
+                python,
+                "-m",
+                "scripts.engineering.qa",
+                "report-domain-io-taint-inventory",
+                "--check",
+            ),
+        ),
+        ArchitectureAuditCheck(
             name="port_adapter_factory_coverage",
             command=(
                 python,

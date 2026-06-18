@@ -1,23 +1,23 @@
 ---
 id: arch-audit-20260618
-title: Evidence-based architecture and refactoring audit
+title: Evidence-based architecture code quality refactoring audit for BioETL
 task_id: ARCH-AUDIT-20260618
-created_at: '2026-06-18T09:24:00Z'
+created_at: '2026-06-18T12:31:50Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - <add-source-ref>
 summary: Active task session context.
-query: BioETL architecture audit layer boundaries DDD medallion Pandera quarantine
-  replay determinism idempotency technical debt tests documentation
+query: architecture audit BioETL hexagonal DDD medallion Pandera quarantine replay
+  determinism idempotency RunManifest RunLedger checkpoints hotspot debt scorecard
 ---
 
 # Session note
 
 ## Task
 
-- Title: Evidence-based architecture and refactoring audit
-- Retrieval query: BioETL architecture audit layer boundaries DDD medallion Pandera quarantine replay determinism idempotency technical debt tests documentation
+- Title: Evidence-based architecture code quality refactoring audit for BioETL
+- Retrieval query: architecture audit BioETL hexagonal DDD medallion Pandera quarantine replay determinism idempotency RunManifest RunLedger checkpoints hotspot debt scorecard
 
 ## Retrieved context
 

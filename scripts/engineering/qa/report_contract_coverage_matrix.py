@@ -25,6 +25,10 @@ GENERIC_GOLD_CONTRACT_TEST_PATHS = (
     "tests/contract/test_gold_pk_consistency.py",
     "tests/contract/test_gold_schema_strict_violations.py",
 )
+GENERIC_GOLDEN_CONTRACT_TEST_PATHS = (
+    "tests/contract/test_gold_dq_golden_snapshots.py",
+    "tests/fixtures/golden/gold/schema_registry.v1.json",
+)
 PANDERA_CONSTRAINT_KEYS = frozenset(
     {
         "enum",
@@ -128,6 +132,7 @@ def _contract_artifact_summary(paths: list[str]) -> dict[str, Any]:
             "published_contract_nullable_count": 0,
             "published_contract_non_nullable_count": 0,
             "published_contract_check_constraint_count": 0,
+            "published_contract_nullable_policy_declared": False,
             "published_contract_required_fields": [],
         }
 
@@ -163,6 +168,9 @@ def _contract_artifact_summary(paths: list[str]) -> dict[str, Any]:
         "published_contract_nullable_count": nullable_count,
         "published_contract_non_nullable_count": non_nullable_count,
         "published_contract_check_constraint_count": check_constraint_count,
+        "published_contract_nullable_policy_declared": (
+            bool(properties) and nullable_count + non_nullable_count == len(properties)
+        ),
         "published_contract_required_fields": sorted(required_fields),
     }
 
@@ -239,6 +247,68 @@ def _contract_test_paths(
     return sorted(paths)
 
 
+def _golden_contract_test_paths(contract_test_paths: list[str]) -> list[str]:
+    paths = {
+        path
+        for path in contract_test_paths
+        if "golden" in path.lower()
+    }
+    paths.update(
+        path
+        for path in GENERIC_GOLDEN_CONTRACT_TEST_PATHS
+        if (PROJECT_ROOT / path).is_file()
+    )
+    return sorted(paths)
+
+
+def _constraint_completeness(
+    *,
+    gold_enabled: bool,
+    schema_source_summary: dict[str, Any],
+    contract_artifact_summary: dict[str, Any],
+    primary_keys_required: bool,
+    contract_test_paths: list[str],
+    golden_test_paths: list[str],
+) -> tuple[str, list[str], list[str]]:
+    if not gold_enabled:
+        return "excluded", [], []
+
+    missing: list[str] = []
+    if schema_source_summary["pandera_field_count_in_source"] <= 0:
+        missing.append("pandera_fields")
+    if contract_artifact_summary["published_contract_property_count"] <= 0:
+        missing.append("published_contract_properties")
+    if not contract_artifact_summary["published_contract_nullable_policy_declared"]:
+        missing.append("nullable_policy")
+    if contract_artifact_summary["published_contract_required_count"] <= 0:
+        missing.append("required_fields")
+    if not primary_keys_required:
+        missing.append("primary_key_required_fields")
+    if not contract_test_paths:
+        missing.append("contract_tests")
+    if not golden_test_paths:
+        missing.append("golden_tests")
+
+    surfaces: list[str] = []
+    if schema_source_summary["pandera_field_count_in_source"] > 0:
+        surfaces.append("pandera_fields")
+    if schema_source_summary["pandera_check_count_in_source"] > 0:
+        surfaces.append("pandera_checks")
+    if contract_artifact_summary["published_contract_nullable_policy_declared"]:
+        surfaces.append("nullable_policy")
+    if contract_artifact_summary["published_contract_required_count"] > 0:
+        surfaces.append("required_fields")
+    if primary_keys_required:
+        surfaces.append("primary_key_required_fields")
+    if contract_test_paths:
+        surfaces.append("contract_tests")
+    if golden_test_paths:
+        surfaces.append("golden_tests")
+
+    status = "covered" if not missing else "missing_constraint_evidence"
+    return status, sorted(surfaces), sorted(missing)
+
+
 def _build_row(
     *,
     config_path: Path,
@@ -290,9 +360,22 @@ def _build_row(
     contract_artifact_summary = _contract_artifact_summary(published_artifacts)
     schema_source_summary = _schema_source_summary(source_path)
     contract_test_paths = _contract_test_paths(provider, entity, test_index)
+    golden_test_paths = _golden_contract_test_paths(contract_test_paths)
     required_fields = contract_artifact_summary["published_contract_required_fields"]
     primary_keys_required = all(
         field in required_fields for field in primary_key_fields
+    )
+    (
+        constraint_completeness_status,
+        constraint_completeness_surfaces,
+        missing_constraint_surfaces,
+    ) = _constraint_completeness(
+        gold_enabled=gold_enabled,
+        schema_source_summary=schema_source_summary,
+        contract_artifact_summary=contract_artifact_summary,
+        primary_keys_required=primary_keys_required,
+        contract_test_paths=contract_test_paths,
+        golden_test_paths=golden_test_paths,
     )
 
     missing_surfaces: list[str] = []
@@ -395,6 +478,15 @@ def _build_row(
             "pipeline.business_primary_keys" if primary_key_fields else ""
         ),
         "contract_test_paths": contract_test_paths,
+        "golden_test_paths": golden_test_paths,
+        "golden_test_evidence_declared": bool(golden_test_paths),
+        "constraint_completeness_status": constraint_completeness_status,
+        "constraint_completeness_surfaces": constraint_completeness_surfaces,
+        "missing_constraint_surfaces": missing_constraint_surfaces,
+        "pandera_check_constraint_evidence_declared": (
+            schema_source_summary["pandera_check_count_in_source"] > 0
+            or contract_artifact_summary["published_contract_check_constraint_count"] > 0
+        ),
         "published_artifact_paths": published_artifacts,
         "published_artifact_missing_paths": published_artifact_missing_paths,
         **contract_artifact_summary,
@@ -425,12 +517,23 @@ def build_payload() -> dict[str, Any]:
     )
     gold_enabled_count = sum(1 for row in rows if row["gold_enabled"])
     excluded_rows = [row for row in rows if row["parity_status"] == "excluded"]
+    constraint_missing_rows = [
+        row
+        for row in rows
+        if row["gold_enabled"]
+        and row["constraint_completeness_status"] != "covered"
+    ]
     return {
         "snapshot_date": date.today().isoformat(),
         "row_count": len(rows),
         "gold_enabled_count": gold_enabled_count,
         "covered_gold_enabled_count": covered_gold_enabled_count,
         "missing_gold_enabled_count": gold_enabled_count - covered_gold_enabled_count,
+        "constraint_completeness_review_count": gold_enabled_count,
+        "constraint_completeness_missing_count": len(constraint_missing_rows),
+        "golden_test_evidence_count": sum(
+            1 for row in rows if row["golden_test_evidence_declared"]
+        ),
         "excluded_count": len(excluded_rows),
         "exclusions": [
             {
@@ -454,27 +557,37 @@ def _render_markdown(payload: dict[str, Any]) -> str:
         f"- gold_enabled_count: {payload['gold_enabled_count']}",
         f"- covered_gold_enabled_count: {payload['covered_gold_enabled_count']}",
         f"- missing_gold_enabled_count: {payload['missing_gold_enabled_count']}",
+        "- constraint_completeness_missing_count: "
+        f"{payload['constraint_completeness_missing_count']}",
+        f"- golden_test_evidence_count: {payload['golden_test_evidence_count']}",
         f"- excluded_count: {payload['excluded_count']}",
         "",
         "| pipeline_name | layer | contract_ref | gold_enabled | parity_status | "
-        "strict | properties | required | pk_fields | tests | missing_surfaces |",
-        "| --- | --- | --- | ---: | --- | ---: | ---: | ---: | --- | ---: | --- |",
+        "constraint_status | strict | properties | required | checks | pk_fields | "
+        "tests | golden | missing_surfaces | missing_constraints |",
+        "| --- | --- | --- | ---: | --- | --- | ---: | ---: | ---: | ---: | --- | ---: | ---: | --- | --- |",
     ]
     for row in rows:
         render_row = dict(row)
         render_row["missing_surfaces_rendered"] = (
             ", ".join(row["missing_surfaces"]) or "-"
         )
+        render_row["missing_constraints_rendered"] = (
+            ", ".join(row["missing_constraint_surfaces"]) or "-"
+        )
         render_row["primary_keys_rendered"] = (
             ", ".join(row["primary_key_fields"]) or "-"
         )
         lines.append(
             "| `{pipeline_name}` | `{dataset_layer}` | `{contract_ref}` | "
-            "{gold_enabled} | `{parity_status}` | {gold_strict_validation_declared} | "
-            "{published_contract_property_count} | {published_contract_required_count} | "
-            "`{primary_keys_rendered}` | {contract_test_count} | {missing_surfaces_rendered} |".format(
+            "{gold_enabled} | `{parity_status}` | `{constraint_completeness_status}` | "
+            "{gold_strict_validation_declared} | {published_contract_property_count} | "
+            "{published_contract_required_count} | {published_contract_check_constraint_count} | "
+            "`{primary_keys_rendered}` | {contract_test_count} | {golden_test_count} | "
+            "{missing_surfaces_rendered} | {missing_constraints_rendered} |".format(
                 **render_row,
                 contract_test_count=len(row["contract_test_paths"]),
+                golden_test_count=len(row["golden_test_paths"]),
             )
         )
     lines.append("")

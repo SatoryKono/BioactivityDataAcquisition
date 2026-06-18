@@ -49,24 +49,10 @@ def test_date_only_hash_policy_inventory_matches_entity_configs() -> None:
         list[dict[str, object]],
         hash_policy.get("date_only_entity_inventory", []),
     )
-    assert inventory, "Date-only content-hash compatibility inventory is empty"
-
-    for item in inventory:
-        provider = str(item["provider"])
-        entity = str(item["entity"])
-        expected_policy = str(item["configured_policy"])
-        assert expected_policy == "v1_date", (
-            f"{provider}.{entity} date-only compatibility must declare v1_date"
-        )
-        assert str(item.get("rationale", "")).strip(), (
-            f"{provider}.{entity} date-only compatibility requires a rationale"
-        )
-        config = _load_yaml(ROOT / "configs" / "entities" / provider / f"{entity}.yaml")
-        contracts = cast(dict[str, object], config.get("contracts", {}))
-        assert contracts.get("hash_datetime_policy") == expected_policy, (
-            f"{provider}.{entity} must declare explicit "
-            f"contracts.hash_datetime_policy={expected_policy}"
-        )
+    assert inventory == [], (
+        "Residual date-only content-hash compatibility inventory must stay empty "
+        "after the final v2_datetime_utc migration closeout"
+    )
 
 
 def test_hash_datetime_policy_values_are_known() -> None:
@@ -165,6 +151,8 @@ def test_residual_v1_date_inventory_requires_date_like_hash_fields() -> None:
         list[dict[str, object]],
         hash_policy.get("date_only_entity_inventory", []),
     )
+
+    assert inventory == []
 
     for item in inventory:
         provider = str(item["provider"])

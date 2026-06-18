@@ -239,6 +239,38 @@ def test_test_governance_artifacts_match_live_collector() -> None:
 
 
 @pytest.mark.architecture
+def test_critical_behavior_envelopes_have_assertion_evidence() -> None:
+    """Critical envelopes may include no-exception tests but need assertion evidence."""
+    report = collect_test_governance_report(ROOT)
+    envelopes = cast(YamlMap, report["critical_behavior_envelopes"])
+
+    assert set(envelopes) == {
+        "control_plane_replay",
+        "gold_strict_contracts",
+        "medallion_storage",
+        "quarantine_replay",
+        "test_governance",
+    }
+    assert report["critical_behavior_envelope_assertion_gap_count"] == 0
+
+    violations: list[str] = []
+    for name, envelope_obj in envelopes.items():
+        envelope = cast(YamlMap, envelope_obj)
+        paths = cast(list[str], envelope["paths"])
+        for path in paths:
+            assert (ROOT / path).exists(), (
+                f"Critical behavior envelope {name} references missing path: {path}"
+            )
+        if int(cast(int, envelope["test_count"])) <= 0:
+            violations.append(f"{name}: no tests discovered")
+        if int(cast(int, envelope["assertion_backed_tests"])) <= 0:
+            violations.append(f"{name}: no assertion-backed tests discovered")
+        assert isinstance(envelope["assertless_tests"], list)
+
+    assert not violations, "\n".join(violations)
+
+
+@pytest.mark.architecture
 def test_compatibility_test_file_max_follows_stream_g_downward_ratchet() -> None:
     """#4925: compatibility_test_file_max may only ratchet down to live inventory."""
     payload = _load_yaml(CONFIG_PATH)
@@ -248,22 +280,22 @@ def test_compatibility_test_file_max_follows_stream_g_downward_ratchet() -> None
 
     live_count = int(report["compatibility_test_files"])
     budget_max = int(budgets["compatibility_test_file_max"])
-    target_count = 30
+    target_count = 29
 
     owner_notes = cast(list[YamlMap], ratchet.get("stream_g_owner_notes", []))
-    issue_notes = [note for note in owner_notes if note.get("issue") == "#5351"]
-    assert issue_notes, "Stream G owner note for #5351 must be recorded"
+    issue_notes = [note for note in owner_notes if note.get("issue") == "#5372"]
+    assert issue_notes, "Stream G owner note for #5372 must be recorded"
 
     assert live_count <= budget_max
     if live_count <= target_count:
         assert budget_max == target_count, (
-            "compatibility_test_file_max must ratchet down to 30 when live inventory "
+            "compatibility_test_file_max must ratchet down to 29 when live inventory "
             f"is at or below target; live={live_count}, budget={budget_max}"
         )
     else:
         assert budget_max == live_count, (
             "compatibility_test_file_max must pin to the live inventory while count "
-            f"exceeds target 30; live={live_count}, budget={budget_max}"
+            f"exceeds target 29; live={live_count}, budget={budget_max}"
         )
 
 

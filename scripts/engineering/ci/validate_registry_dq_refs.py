@@ -374,6 +374,27 @@ def _diagnostics_payload(
     }
 
 
+def build_diagnostics_payload(repo_root: Path) -> dict[str, Any]:
+    """Build registry<->DQ diagnostics without writing the generated artifact."""
+    registry_path = repo_root / "configs" / "base" / "contract_registry.yaml"
+    if not registry_path.exists():
+        return _missing_registry_payload(registry_path)
+
+    registry_data = _load_yaml(registry_path)
+    entries = registry_data.get("entries")
+    if not isinstance(entries, dict):
+        raise ValueError("contract registry entries must be a mapping")
+
+    known_refs = set(entries.keys())
+    issues, checked_entries = _validate_registry_entries(
+        repo_root=repo_root,
+        registry_path=registry_path,
+        entries=entries,
+    )
+    issues.extend(_collect_orphan_contract_files(repo_root, known_refs))
+    return _diagnostics_payload(checked_entries=checked_entries, issues=issues)
+
+
 def main() -> int:
     """Run registry<->DQ consistency validation."""
     repo_root = Path(__file__).resolve().parents[3]
@@ -396,19 +417,8 @@ def main() -> int:
         print("::error::Contract registry file not found")
         return 1
 
-    registry_data = _load_yaml(registry_path)
-    entries = registry_data.get("entries")
-    if not isinstance(entries, dict):
-        raise ValueError("contract registry entries must be a mapping")
-
-    known_refs = set(entries.keys())
-    issues, checked_entries = _validate_registry_entries(
-        repo_root=repo_root,
-        registry_path=registry_path,
-        entries=entries,
-    )
-    issues.extend(_collect_orphan_contract_files(repo_root, known_refs))
-    payload = _diagnostics_payload(checked_entries=checked_entries, issues=issues)
+    payload = build_diagnostics_payload(repo_root)
+    issues = list(payload["issues"])
     blocking_issues = [issue for issue in issues if issue["severity"] == "blocking"]
     diagnostics_path.write_text(
         json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
