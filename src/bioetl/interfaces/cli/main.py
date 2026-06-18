@@ -22,6 +22,7 @@ from bioetl.interfaces.cli.registry_helpers import (
 )
 
 __all__ = [
+    "build_cli_registry",
     "cli",
     "main",
 ]
@@ -188,6 +189,11 @@ def _build_main_registry() -> object:
     runtime commands share one explicit-registry bootstrap path while retaining
     the historical patch seam for CLI unit tests.
     """
+    return build_cli_registry()
+
+
+def build_cli_registry() -> object:
+    """Compatibility seam for tests patching CLI registry bootstrap in main."""
     registry = create_registry()
     register_all_pipelines(registry=registry)
     return registry

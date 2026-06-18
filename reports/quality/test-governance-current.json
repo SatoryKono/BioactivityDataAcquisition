@@ -3627,7 +3627,6 @@
       "tests/architecture/test_compatibility_freeze_guards_provider_datasource.py",
       "tests/architecture/test_compatibility_importer_census_governance.py",
       "tests/architecture/test_compatibility_telemetry_reporting.py",
-      "tests/architecture/test_composition_entrypoints_deprecated_imports.py",
       "tests/architecture/test_config_compatibility_registry.py",
       "tests/architecture/test_config_schema_legacy_status.py",
       "tests/architecture/test_degraded_runtime_anchor_legacy_boundary.py",
@@ -3640,7 +3639,8 @@
       "tests/architecture/test_project_legacy_compatibility_remediation_evidence_surface.py",
       "tests/architecture/test_root_script_compatibility_surfaces.py",
       "tests/architecture/test_run_execution_context_compat_shim_usage.py",
-      "tests/architecture/test_silver_filter_compatibility_surface.py"
+      "tests/architecture/test_silver_filter_compatibility_surface.py",
+      "tests/unit/composition/factories/pipeline/test_runner_request_compat.py"
     ],
     "compatibility_files": [
       "tests/architecture/test_application_composite_compat_surface_usage.py",
@@ -3654,7 +3654,6 @@
       "tests/architecture/test_compatibility_freeze_guards_provider_datasource.py",
       "tests/architecture/test_compatibility_importer_census_governance.py",
       "tests/architecture/test_compatibility_telemetry_reporting.py",
-      "tests/architecture/test_composition_entrypoints_deprecated_imports.py",
       "tests/architecture/test_config_compatibility_registry.py",
       "tests/architecture/test_config_schema_legacy_status.py",
       "tests/architecture/test_degraded_runtime_anchor_legacy_boundary.py",
@@ -3675,7 +3674,7 @@
       "tests/unit/interfaces/cli/commands/test_runtime_compat_aliases.py",
       "tests/unit/scripts/ops/test_memory_legacy_aliases.py"
     ],
-    "compatibility_test_files": 31,
+    "compatibility_test_files": 30,
     "date_today_call_sites": 0,
     "duplicate_test_name_inventory": [],
     "duplicate_test_name_inventory_summary": {
@@ -3692,8 +3691,8 @@
     "refined_assertless_tests": 0,
     "root": ".",
     "top_duplicate_test_names": [],
-    "total_test_files": 1810,
-    "total_test_functions": 20868,
+    "total_test_files": 1812,
+    "total_test_functions": 20878,
     "uuid4_call_sites": 0
   }
 }
