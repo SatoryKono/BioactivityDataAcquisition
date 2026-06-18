@@ -31,14 +31,6 @@ _UNKNOWN_NONEMPTY_CLASS: Final = "other_classified_protein"
 _MISSING_CLASS: Final = "missing"
 _MULTIFUNCTIONAL_CLASS: Final = "multifunctional"
 _UNKNOWN_TARGET_TYPE: Final = "unknown"
-_BOOL_STRING_VALUES: Final = {
-    "true": True,
-    "1": True,
-    "yes": True,
-    "false": False,
-    "0": False,
-    "no": False,
-}
 _TOP_LEVEL_KEYS: Final = ("level_1", "l1", "level1", "l1_name")
 _MAJOR_FAMILY_MATCHERS: Final[tuple[tuple[str, tuple[str, ...]], ...]] = (
     ("abc_transporter", ("atp-binding cassette", "abc transporter")),
@@ -52,6 +44,14 @@ _MAJOR_FAMILY_MATCHERS: Final[tuple[tuple[str, tuple[str, ...]], ...]] = (
         ("voltage-gated ion channel", "voltage gated ion channel"),
     ),
 )
+_BOOL_STRING_VALUES: Final[dict[str, bool]] = {
+    "true": True,
+    "1": True,
+    "yes": True,
+    "false": False,
+    "0": False,
+    "no": False,
+}
 
 
 @dataclass(frozen=True, slots=True)
@@ -216,7 +216,10 @@ def derive_major_families(
     """Derive major scientific families from L2+ labels only."""
     families = {
         family
-        for label in _normalized_deeper_level_labels(rows)
+        for label in _normalized_deeper_level_labels(
+            rows,
+            normalize_label=normalize_protein_class_label,
+        )
         for family in _matching_major_families(label)
     }
     return tuple(sorted(families))
@@ -333,6 +336,8 @@ def _target_type_decision(
 
 def _normalized_deeper_level_labels(
     rows: Iterable[Mapping[str, object]],
+    *,
+    normalize_label: Callable[[object], str | None],
 ) -> Sequence[str]:
     """Extract all L2+ labels from rows for family matching."""
     labels = []
@@ -340,9 +345,19 @@ def _normalized_deeper_level_labels(
         labels.extend(
             normalized
             for label in _deeper_level_labels(row)
-            if (normalized := normalize_protein_class_label(label)) is not None
+            if (normalized := normalize_label(label)) is not None
         )
     return tuple(labels)
+
+
+def _matching_major_families(label: str) -> tuple[str, ...]:
+    """Match a label against major family patterns."""
+    matches = [
+        family
+        for family, patterns in _MAJOR_FAMILY_MATCHERS
+        if any(pattern in label for pattern in patterns)
+    ]
+    return tuple(matches)
 
 
 def _deeper_level_labels(row: Mapping[str, object]) -> Sequence[object]:
@@ -364,16 +379,6 @@ def _deeper_level_labels(row: Mapping[str, object]) -> Sequence[object]:
         row.get("l5"),
         row.get("level5"),
     )
-
-
-def _matching_major_families(label: str) -> tuple[str, ...]:
-    """Match a label against major family patterns."""
-    matches = [
-        family
-        for family, patterns in _MAJOR_FAMILY_MATCHERS
-        if any(pattern in label for pattern in patterns)
-    ]
-    return tuple(matches)
 
 
 def _first_present(row: Mapping[str, object], keys: Sequence[str]) -> object:
