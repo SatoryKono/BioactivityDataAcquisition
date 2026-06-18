@@ -106,6 +106,15 @@ class ChEMBLTargetProteinClassificationGoldSchema(StrictGoldContractSchema):
     l5_id: Series[float] = pa.Field(nullable=True, ge=1, coerce=True)
     l5_name: Series[str] = pa.Field(nullable=True)
     l5_desc: Series[str] = pa.Field(nullable=True)
+    canonical_l1: Series[str] = pa.Field(nullable=True)
+    l1_counts_for_target_type: Series[bool] = pa.Field(nullable=True)
+    l1_mapping_version: Series[str] = pa.Field(nullable=True)
+    target_type_rule_version: Series[str] = pa.Field(nullable=True)
+    l1_normalization_status: Series[str] = pa.Field(
+        nullable=True,
+        isin=["ok", "non_counting", "missing", "fallback", "failed"],
+    )
+    l1_normalization_notes: Series[str] = pa.Field(nullable=True)
     dataset_version: Series[str] = pa.Field(nullable=True)
     source_url: Series[str] = pa.Field(nullable=True)
     chembl_release: Series[str] = pa.Field(nullable=True)

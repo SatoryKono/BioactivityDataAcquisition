@@ -137,10 +137,17 @@ Protein classification contract boundary:
 
 - standalone `chembl_target` больше не публикует `protein_classifications` и
   `target_protein_class_*` summary-поля.
+- `target_type` в `chembl_target` остается ChEMBL provider-facing entity type
+  (`SINGLE PROTEIN`, `PROTEIN COMPLEX` и т.п.) и не является
+  protein-class-derived semantic type.
 - authoritative relation surface для target-level classification —
   `chembl_target_protein_classification`.
 - flattened `protein_classifications` и `target_protein_class_*` поля
   публикуются только downstream projection-слоем `composite_target`.
+- Composite `target_protein_class_type` вычисляется отдельно из normalized
+  informative `canonical_l1` relation evidence. Значения
+  `unclassified_protein`, `unknown` и missing L1 сохраняются для аудита, но не
+  участвуют в подсчете multifunctional.
 
 Документация не фиксирует literal-формулу `entity_id`; identity/content hash
 вычисляются базовым ChEMBL transformer/runtime слоем.

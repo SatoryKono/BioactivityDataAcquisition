@@ -21,7 +21,6 @@ import os
 import shutil
 import tempfile
 import re
-from urllib.parse import unquote, urlparse
 from collections.abc import Callable, Generator
 from contextlib import contextmanager
 from dataclasses import replace
@@ -122,37 +121,17 @@ def _load_delta_table() -> type[Any]:
 
 
 @cache
-def _load_pyarrow_parquet() -> Any:
-    """Import pyarrow.parquet lazily for direct Parquet reads in E2E assertions."""
-    import pyarrow.parquet as pq
+def _load_delta_record_reader() -> Callable[[Any, list[str] | None], list[dict[str, Any]]]:
+    """Import the shared Delta read helper lazily for E2E assertions."""
+    from bioetl.infrastructure.storage.delta.table_ops import read_delta_records
 
-    return pq
-
-
-def _delta_file_path_from_uri(uri: str) -> Path:
-    """Normalize one Delta file URI to a local filesystem path."""
-    if uri.startswith("file://"):
-        parsed = urlparse(uri)
-        normalized_path = unquote(parsed.path)
-        if (
-            len(normalized_path) >= 3
-            and normalized_path[0] == "/"
-            and normalized_path[2] == ":"
-        ):
-            normalized_path = normalized_path[1:]
-        return Path(normalized_path)
-    return Path(uri)
+    return read_delta_records
 
 
 def _read_delta_records(table_path: Path) -> list[dict[str, Any]]:
-    """Read active Delta rows via file URIs, avoiding full snapshot materialization."""
+    """Read active Delta rows via the shared Delta scanner helper."""
     dt = _load_delta_table()(str(table_path))
-    pq = _load_pyarrow_parquet()
-    records: list[dict[str, Any]] = []
-    for uri in dt.file_uris():
-        parquet_path = _delta_file_path_from_uri(uri)
-        records.extend(pq.ParquetFile(parquet_path).read().to_pylist())
-    return records
+    return _load_delta_record_reader()(dt)
 
 
 def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:

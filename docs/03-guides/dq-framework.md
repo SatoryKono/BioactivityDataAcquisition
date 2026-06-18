@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.0.1
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-03'
+  Last verified: '2026-06-18'
 
 ______________________________________________________________________
 
@@ -78,8 +78,10 @@ Silver filters as structural-only:
   consumption.
 
 This means documentation and dashboards should describe current Silver rejects
-as structural Silver filter rejects, while noting that entity YAML still
-contains legacy semantic keys during the compatibility window.
+as structural Silver filter rejects. Active entity YAML no longer carries
+non-empty semantic buckets under `filters.silver_filters`; the remaining
+compatibility concern is historical identity/wording cleanup rather than active
+config acceptance.
 
 ## Operational Surfaces
 

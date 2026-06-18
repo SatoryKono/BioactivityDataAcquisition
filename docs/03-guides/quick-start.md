@@ -20,7 +20,11 @@ TL;DR for setting up and running BioETL locally.
 >
 > **Boundary**: this page is the fastest supported bootstrap path. For the full
 > onboarding walkthrough, environment/config details, and broader first-time
-> troubleshooting, use [Getting Started](getting-started.md).
+> troubleshooting, use [Getting Started](getting-started.md). If you
+> intentionally use optional Docker helper stacks, see
+> [Docker Quick Start](../DOCKER_QUICKSTART.md) and
+> [Docker Setup](../DOCKER_SETUP.md); they are adjunct tooling, not the
+> canonical application bootstrap path.
 
 ## Runtime compatibility policy
 

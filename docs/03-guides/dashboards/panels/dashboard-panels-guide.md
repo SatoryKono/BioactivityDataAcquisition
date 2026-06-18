@@ -29,5 +29,11 @@
 
 ## Примечание
 
-Полная документация всех панелей требует анализа JSON файлов dashboards в `grafana/dashboards/`.
-Текущая документация предоставляет базовую информацию для ключевых dashboards.
+Shipped dashboard JSON in `grafana/dashboards/` remains the source of truth.
+Panel-doc coverage can vary by dashboard family:
+
+- `bioetl-control-plane-v1-panels.md` and
+  `bioetl-workflow-overview-panels.md` now provide 1:1 panel inventory
+  coverage for the shipped JSON pages;
+- other dashboard pages may still be summary-level and should be expanded with
+  the same template when forensic panel-by-panel documentation is required.
