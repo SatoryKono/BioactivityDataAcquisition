@@ -3,36 +3,36 @@
 - snapshot_date: 2026-06-18
 - row_count: 27
 - gold_enabled_count: 27
-- covered_gold_enabled_count: 27
-- missing_gold_enabled_count: 0
+- covered_gold_enabled_count: 18
+- missing_gold_enabled_count: 9
 - excluded_count: 0
 
-| pipeline_name | contract_ref | gold_enabled | parity_status | contract_yaml_path | registry_status | missing_surfaces |
-| --- | --- | ---: | --- | --- | --- | --- |
-| `chembl_activity` | `chembl.activity` | True | `covered` | `configs/contracts/chembl/activity.yaml` | `active` | - |
-| `chembl_assay` | `chembl.assay` | True | `covered` | `configs/contracts/chembl/assay.yaml` | `active` | - |
-| `chembl_assay_parameters` | `chembl.assay_parameters` | True | `covered` | `configs/contracts/chembl/assay_parameters.yaml` | `active` | - |
-| `chembl_cell_line` | `chembl.cell_line` | True | `covered` | `configs/contracts/chembl/cell_line.yaml` | `active` | - |
-| `chembl_compound_record` | `chembl.compound_record` | True | `covered` | `configs/contracts/chembl/compound_record.yaml` | `active` | - |
-| `chembl_molecule` | `chembl.molecule` | True | `covered` | `configs/contracts/chembl/molecule.yaml` | `active` | - |
-| `chembl_protein_class` | `chembl.protein_class` | True | `covered` | `configs/contracts/chembl/protein_class.yaml` | `active` | - |
-| `chembl_publication` | `chembl.publication` | True | `covered` | `configs/contracts/chembl/publication.yaml` | `active` | - |
-| `chembl_publication_similarity` | `chembl.publication_similarity` | True | `covered` | `configs/contracts/chembl/publication_similarity.yaml` | `active` | - |
-| `chembl_publication_term` | `chembl.publication_term` | True | `covered` | `configs/contracts/chembl/publication_term.yaml` | `active` | - |
-| `chembl_subcellular_fraction` | `chembl.subcellular_fraction` | True | `covered` | `configs/contracts/chembl/subcellular_fraction.yaml` | `active` | - |
-| `chembl_target` | `chembl.target` | True | `covered` | `configs/contracts/chembl/target.yaml` | `active` | - |
-| `chembl_target_component` | `chembl.target_component` | True | `covered` | `configs/contracts/chembl/target_component.yaml` | `active` | - |
-| `chembl_target_protein_classification` | `chembl.target_protein_classification` | True | `covered` | `configs/contracts/chembl/target_protein_classification.yaml` | `active` | - |
-| `chembl_tissue` | `chembl.tissue` | True | `covered` | `configs/contracts/chembl/tissue.yaml` | `active` | - |
-| `composite_activity` | `composite.activity` | True | `covered` | `configs/contracts/composite/activity.yaml` | `active` | - |
-| `composite_assay` | `composite.assay` | True | `covered` | `configs/contracts/composite/assay.yaml` | `active` | - |
-| `composite_molecule` | `composite.molecule` | True | `covered` | `configs/contracts/composite/molecule.yaml` | `active` | - |
-| `composite_publication` | `composite.publication` | True | `covered` | `configs/contracts/composite/publication.yaml` | `active` | - |
-| `composite_target` | `composite.target` | True | `covered` | `configs/contracts/composite/target.yaml` | `active` | - |
-| `crossref_publication` | `crossref.publication` | True | `covered` | `configs/contracts/crossref/publication.yaml` | `active` | - |
-| `openalex_publication` | `openalex.publication` | True | `covered` | `configs/contracts/openalex/publication.yaml` | `active` | - |
-| `pubchem_compound` | `pubchem.compound` | True | `covered` | `configs/contracts/pubchem/compound.yaml` | `active` | - |
-| `pubmed_publication` | `pubmed.publication` | True | `covered` | `configs/contracts/pubmed/publication.yaml` | `active` | - |
-| `semanticscholar_publication` | `semanticscholar.publication` | True | `covered` | `configs/contracts/semanticscholar/publication.yaml` | `active` | - |
-| `uniprot_idmapping` | `uniprot.idmapping` | True | `covered` | `configs/contracts/uniprot/idmapping.yaml` | `active` | - |
-| `uniprot_protein` | `uniprot.protein` | True | `covered` | `configs/contracts/uniprot/protein.yaml` | `active` | - |
+| pipeline_name | layer | contract_ref | gold_enabled | parity_status | strict | properties | required | pk_fields | tests | missing_surfaces |
+| --- | --- | --- | ---: | --- | ---: | ---: | ---: | --- | ---: | --- |
+| `chembl_activity` | `gold` | `chembl.activity` | True | `covered` | True | 72 | 7 | `activity_id` | 37 | - |
+| `chembl_assay` | `gold` | `chembl.assay` | True | `covered` | True | 42 | 6 | `assay_id` | 24 | - |
+| `chembl_assay_parameters` | `gold` | `chembl.assay_parameters` | True | `covered` | True | 26 | 8 | `assay_param_id` | 12 | - |
+| `chembl_cell_line` | `gold` | `chembl.cell_line` | True | `covered` | True | 16 | 7 | `cell_id` | 11 | - |
+| `chembl_compound_record` | `gold` | `chembl.compound_record` | True | `covered` | True | 12 | 9 | `record_id` | 7 | - |
+| `chembl_molecule` | `gold` | `chembl.molecule` | True | `covered` | True | 57 | 6 | `molecule_id` | 20 | - |
+| `chembl_protein_class` | `gold` | `chembl.protein_class` | True | `covered` | True | 15 | 6 | `protein_class_id` | 18 | - |
+| `chembl_publication` | `gold` | `chembl.publication` | True | `covered` | True | 30 | 7 | `publication_id` | 79 | - |
+| `chembl_publication_similarity` | `gold` | `chembl.publication_similarity` | True | `covered` | True | 14 | 8 | `sim_id` | 6 | - |
+| `chembl_publication_term` | `gold` | `chembl.publication_term` | True | `covered` | True | 10 | 8 | `publication_id, term, term_type` | 13 | - |
+| `chembl_subcellular_fraction` | `gold` | `chembl.subcellular_fraction` | True | `covered` | True | 8 | 6 | `subcellular_fraction` | 8 | - |
+| `chembl_target` | `gold` | `chembl.target` | True | `covered` | True | 32 | 6 | `target_id` | 30 | - |
+| `chembl_target_component` | `gold` | `chembl.target_component` | True | `covered` | True | 16 | 6 | `component_id` | 10 | - |
+| `chembl_target_protein_classification` | `gold` | `chembl.target_protein_classification` | True | `covered` | True | 45 | 7 | `entity_id` | 8 | - |
+| `chembl_tissue` | `gold` | `chembl.tissue` | True | `covered` | True | 11 | 7 | `tissue_id` | 13 | - |
+| `composite_activity` | `gold` | `composite.activity` | True | `missing_surfaces` | False | 21 | 6 | `entity_id` | 37 | gold_strict_validation, pandera_contract_source |
+| `composite_assay` | `gold` | `composite.assay` | True | `missing_surfaces` | False | 15 | 6 | `entity_id` | 24 | gold_strict_validation, pandera_contract_source |
+| `composite_molecule` | `gold` | `composite.molecule` | True | `missing_surfaces` | False | 12 | 6 | `entity_id` | 20 | gold_strict_validation |
+| `composite_publication` | `gold` | `composite.publication` | True | `missing_surfaces` | False | 15 | 7 | `entity_id` | 79 | gold_strict_validation, pandera_contract_source |
+| `composite_target` | `gold` | `composite.target` | True | `missing_surfaces` | False | 41 | 6 | `entity_id` | 30 | gold_strict_validation, pandera_contract_source |
+| `crossref_publication` | `gold` | `crossref.publication` | True | `missing_surfaces` | False | 51 | 9 | `doi` | 79 | gold_strict_validation, pandera_contract_source |
+| `openalex_publication` | `gold` | `openalex.publication` | True | `missing_surfaces` | False | 53 | 10 | `openalex_id` | 79 | gold_strict_validation, pandera_contract_source |
+| `pubchem_compound` | `gold` | `pubchem.compound` | True | `covered` | True | 39 | 6 | `molecule_id` | 16 | - |
+| `pubmed_publication` | `gold` | `pubmed.publication` | True | `missing_surfaces` | False | 66 | 9 | `pmid` | 79 | gold_strict_validation, pandera_contract_source |
+| `semanticscholar_publication` | `gold` | `semanticscholar.publication` | True | `missing_surfaces` | False | 54 | 9 | `paper_id` | 79 | gold_strict_validation, pandera_contract_source |
+| `uniprot_idmapping` | `gold` | `uniprot.idmapping` | True | `covered` | True | 19 | 7 | `target_id` | 18 | - |
+| `uniprot_protein` | `gold` | `uniprot.protein` | True | `covered` | True | 97 | 6 | `accession` | 27 | - |

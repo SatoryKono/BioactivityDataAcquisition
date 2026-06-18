@@ -1,20 +1,20 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.0.1
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-03'
+  Last verified: '2026-06-18'
 
 ______________________________________________________________________
 
 # Current State Inventory
 
 This inventory is synchronized against the current `main` worktree on
-2026-06-03. Code, configs, domain contracts, ADRs, and tests are the source of
+2026-06-18. Code, configs, domain contracts, ADRs, and tests are the source of
 truth; existing documentation is evidence only when it matches those sources.
 
 ## Scope
@@ -28,6 +28,28 @@ truth; existing documentation is evidence only when it matches those sources.
 | Provider configs | 7 | `configs/providers/*.yaml` | ChEMBL, CrossRef, OpenAlex, PubChem, PubMed, Semantic Scholar, UniProt. |
 | Grafana dashboards | 8 | `grafana/dashboards/*.json` | Overview, runtime, provider health, DQ, workflow, control-plane, alerts/SLO, silver reject explorer. |
 | Domain port files | 73 | `src/bioetl/domain/ports/**/*.py` | 18 top-level files plus nested config, control-plane, metadata, observability, quality, runtime, and storage packages. |
+
+## Architecture Quality Evidence
+
+Current committed quality artifacts agree on the following architecture evidence:
+
+| Artifact | Current value | Source |
+| --- | ---: | --- |
+| Architecture quality score | `7.98` (`satisfactory_system_refactoring_required`) | `reports/quality/architecture-quality-scorecard.json` |
+| Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
+| Source modules in module coverage inventory | `2169` | `reports/quality/module-coverage-inventory.json` |
+| Unmeasured / uncovered modules | `2` / `0` | `reports/quality/module-coverage-inventory.json` |
+| Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
+| Debt-governance gates | `26` pass, `1` warn, `0` fail | `reports/quality/debt-governance-gates.json` |
+| Duplication baseline | `127` clusters (`application=97`, `composition=30`) | `reports/quality/duplication-baseline.json` |
+
+The remaining debt-governance warning is
+`module_coverage_unmeasured_modules=2`; generated artifact drift is currently
+clear (`stale_artifacts` are all false in
+`reports/quality/debt-governance-gates.json`). Read-only audit evidence should
+use `python -m scripts.engineering.qa run-architecture-audit-read-only`, which
+runs check-only architecture diagnostics and fails if tracked governance
+surfaces mutate.
 
 ## Workflow Inventory
 
@@ -208,10 +230,30 @@ Observed facts:
 | Workflow stores | `src/bioetl/infrastructure/control_plane/file_workflow_*_store.py` | File-backed workflow manifest, ledger, and state stores. | Infrastructure |
 | CLI inspection | `src/bioetl/interfaces/cli/commands/run_manifest.py` | Operator-facing manifest/ledger inspection command. | Interfaces |
 
+### Control-Plane Application Role Map
+
+The application control-plane package is organized by use-case role rather than
+by storage technology. Current owner boundaries:
+
+| Role | Source files | Responsibility |
+| --- | --- | --- |
+| Manifest service orchestration | `src/bioetl/application/services/control_plane/manifest/service.py`, `models.py`, `validation.py` | Create/inspect immutable run manifests and enforce application-level manifest validation. |
+| Manifest diagnostics aggregation | `src/bioetl/application/services/control_plane/manifest/diagnostics/base.py`, `summary.py`, `finalization.py` | Aggregate operator-facing diagnostics by delegating to narrower projection/materialization helpers. |
+| Provenance projection | `src/bioetl/application/services/control_plane/manifest/diagnostics/base_provenance_payloads.py` | Build code-provenance state and code-provenance payload sections for diagnostics summaries. |
+| Replay context and projection | `src/bioetl/application/services/control_plane/manifest/diagnostics/base_replay_context.py`, `replay_projection.py`, `replay_invariants/**` | Resolve replay/resume context, exact-replay blockers, and operator replay projections. |
+| Snapshot materialization | `src/bioetl/application/services/control_plane/manifest/diagnostics/snapshot_*.py` | Project input-snapshot IDs, hashes, materialization mode, and ledger-derived snapshot summaries. |
+| Ledger recording | `src/bioetl/application/services/control_plane/ledger/**` | Append and inspect run-ledger events through domain control-plane ports. |
+| Historical replay services | `src/bioetl/application/services/control_plane/replay/**` | Historical replay closure, corpus/universe policy, certification, and reproducibility scorecards. |
+| Workflow control-plane services | `src/bioetl/application/services/control_plane/workflow/**` | Workflow manifest, ledger, execution-state preparation, recording, and inspection. |
+
 ## Documentation Drift Resolved In This Update
 
 | Drift | Evidence | Current source of truth | Action |
 | --- | --- | --- | --- |
+| Quality evidence artifacts were stale after source-tree and remote-main drift | `report-module-coverage --check` and `report-debt-governance-gates --check` were previously failing in local audit evidence. | `reports/quality/module-coverage-inventory.json`, `reports/quality/architecture-quality-scorecard.json`, `reports/quality/architecture-debt-remote-main-baseline.json`, `reports/quality/debt-governance-gates.json`. | Refreshed canonical artifacts; debt-governance now has `0` failing gates and `0` stale generated artifacts. |
+| Architecture audit read-only path was implicit | Existing dev pytest wrappers can run pretest sync before evidence collection. | `python -m scripts.engineering.qa run-architecture-audit-read-only`; `configs/quality/test_matrix.yaml` lane `architecture-read-only-audit`. | Added a diagnostic check-only command and documented its mutation guard in the testing guide. |
+| Control-plane diagnostics role ownership was too implicit | `base_payload_sections.py` mixed code-provenance payload assembly with replay/snapshot payload assembly. | `base_provenance_payloads.py` owns provenance state and payload sections; `base_payload_sections.py` composes provenance, replay, and snapshot payloads. | Moved code-provenance payload assembly into the provenance role module and documented the control-plane role map. |
+| Duplication baseline still reflected the older manifest-diagnostics cluster shape | `reports/quality/duplication-baseline.md` previously reported `129` total clusters with `application=99`. | `reports/quality/duplication-baseline.json` generated on 2026-06-18 reports `127` total clusters with `application=97`, `composition=30`. | Regenerated the report-only duplication baseline after the targeted control-plane diagnostics split. |
 | ADR-048 was missing from MkDocs decision nav before this update | `mkdocs.yml` listed through ADR-047 only. | `docs/02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md`. | Added ADR-048 to nav and overview. |
 | Composite pipeline docs understated entity-config surface | `docs/04-reference/pipelines/README.md` described composite configs only through `configs/composites/*.yaml`. | `configs/entities/composite/*.yaml` plus `configs/composites/*.yaml`. | Documented both entity and merge config surfaces. |
 | Domain storage port wording mixed application aggregate protocol into domain ports | `docs/02-architecture/01-domain-layer.md` listed `PipelineStorageProtocol` with domain storage ports. | `src/bioetl/application/core/pipeline_runtime_service_protocols.py`. | Described it as application-owned aggregate protocol. |
@@ -221,10 +263,9 @@ Observed facts:
 
 ## Open Questions
 
-- The committed `reports/quality/module-coverage-inventory.json` source tree
-  hash was observed stale during the current audit; documentation changes in
-  this task do not refresh source-code quality artifacts because no
-  `src/bioetl/**/*.py` files are changed.
+- Module coverage still has two measured-evidence gaps recorded as the
+  debt-governance warning `module_coverage_unmeasured_modules`; this is a
+  warning gate, not a failing stale-artifact gate.
 - Existing historical diagram bundles still contain legacy `PipelineStorageProtocol`
   references. They are retained as historical/generated diagram material until a
   dedicated diagram regeneration pass refreshes rendered `.mmd`, SVG, and PNG
