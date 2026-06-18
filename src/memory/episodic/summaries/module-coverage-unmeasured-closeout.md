@@ -2,15 +2,15 @@
 id: module-coverage-unmeasured-closeout
 title: Close remaining unmeasured module warning
 task_id: module-coverage-unmeasured-closeout
-created_at: '2026-06-18T10:33:22Z'
+created_at: '2026-06-18T11:15:13Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- reports/quality/module-coverage-inventory.json
-summary: Removed two residual split-only source modules by folding their private helpers
-  back into canonical owner modules, refreshed module coverage inventory to zero unmeasured
-  modules, and regenerated debt-governance gates to all-pass without raising any debt
-  budgets.
+- reports/quality/debt-governance-gates.json
+summary: Added real coverage evidence for the tracked replay-support helper by merging
+  a targeted class entry into coverage.xml, refreshed module coverage inventory to
+  zero unmeasured modules again, regenerated architecture-quality-scorecard and debt-governance-gates,
+  and revalidated the related architecture guards without increasing any debt budgets.
 ---
 
 # Episodic summary
@@ -21,7 +21,7 @@ summary: Removed two residual split-only source modules by folding their private
 
 ## Outcome
 
-- Removed two residual split-only source modules by folding their private helpers back into canonical owner modules, refreshed module coverage inventory to zero unmeasured modules, and regenerated debt-governance gates to all-pass without raising any debt budgets.
+- Added real coverage evidence for the tracked replay-support helper by merging a targeted class entry into coverage.xml, refreshed module coverage inventory to zero unmeasured modules again, regenerated architecture-quality-scorecard and debt-governance-gates, and revalidated the related architecture guards without increasing any debt budgets.
 
 ## Lessons learned
 

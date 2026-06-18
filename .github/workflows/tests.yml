@@ -252,6 +252,15 @@ jobs:
             -   name: Validate hotspot-family baseline artifacts
                 run: uv run python -m scripts.engineering.qa report-family-baseline --check
 
+            -   name: Validate contract coverage matrix artifact
+                run: uv run python -m scripts.engineering.qa report-contract-coverage-matrix --check
+
+            -   name: Validate port-adapter-factory coverage map artifact
+                run: uv run python -m scripts.engineering.qa report-port-adapter-factory-coverage --check
+
+            -   name: Validate domain aggregate invariant registry
+                run: uv run pytest tests/architecture/test_domain_aggregate_invariant_registry.py -q --tb=short
+
             -   name: Validate compatibility importer census artifacts
                 run: uv run python -m scripts.engineering.qa report-compatibility-importer-census --check
 
