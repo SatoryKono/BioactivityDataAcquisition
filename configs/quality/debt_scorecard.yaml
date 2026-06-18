@@ -1037,13 +1037,13 @@ test_governance_debt_metrics:
     inventory, assertion-strength debt, or deterministic test-seam counts change.
   metrics:
     compatibility_test_file_count:
-      current_count: 32
-      max_count: 32
-      target_count: 32
-      ratchet_policy: Downward ratchet only; keep max_count at 32 unless a future
+      current_count: 31
+      max_count: 31
+      target_count: 31
+      ratchet_policy: Downward ratchet only; keep max_count at 31 unless a future
         owner-approved reduction lowers the live compatibility test inventory.
-      rationale: 'Issues #4925, #4967, #5023, #5034, #5101, #5102, #5104, #5106, and #5107
-        reduced compatibility test inventory from 37 to 32 by removing obsolete guards,
+      rationale: 'Issues #4925, #4967, #5023, #5034, #5101, #5102, #5104, #5106, #5107,
+        and #5345 reduced compatibility test inventory from 37 to 31 by removing obsolete guards,
         renaming tests out of compatibility classification, and cleaning up deprecated
         contracts. Live compatibility debt count is now limited to compat, legacy,
         deprecated, shim, and sunset surfaces.'
