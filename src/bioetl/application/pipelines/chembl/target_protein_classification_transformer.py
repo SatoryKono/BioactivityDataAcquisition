@@ -98,6 +98,20 @@ class TargetProteinClassificationTransformer(BaseChemblTransformer):
             "l5_id": _optional_id_text(record.get("l5_id")),
             "l5_name": _optional_text(record.get("l5_name")),
             "l5_desc": _optional_text(record.get("l5_desc")),
+            "canonical_l1": _optional_text(record.get("canonical_l1")),
+            "l1_counts_for_target_type": _optional_bool(
+                record.get("l1_counts_for_target_type")
+            ),
+            "l1_mapping_version": _optional_text(record.get("l1_mapping_version")),
+            "target_type_rule_version": _optional_text(
+                record.get("target_type_rule_version")
+            ),
+            "l1_normalization_status": _optional_text(
+                record.get("l1_normalization_status")
+            ),
+            "l1_normalization_notes": _optional_text(
+                record.get("l1_normalization_notes")
+            ),
             "dataset_version": _optional_text(record.get("dataset_version")),
             "source_url": _optional_text(record.get("source_url")),
             "chembl_release": _optional_text(record.get("chembl_release")),

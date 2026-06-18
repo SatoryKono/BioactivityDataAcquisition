@@ -31,6 +31,8 @@ _ORIGINAL_SYS_PLATFORM = sys.platform
 _ORIGINAL_PATH = pathlib.Path
 _ASYNC_TIMEOUT_DIAGNOSTIC_MARGIN_SECONDS = 5.0
 _DISABLED_ENV_VALUES = frozenset({"0", "false", "no", "off"})
+_WINDOWS_XDIST_WORKER_CAP_ENV = "BIOETL_PYTEST_WINDOWS_XDIST_WORKERS"
+_DEFAULT_WINDOWS_XDIST_WORKER_CAP = 2
 _RUNTIME_BOOTSTRAP_PIPELINE_PATH = (
     Path(__file__).resolve().parents[1]
     / "src"
@@ -239,6 +241,7 @@ def pytest_configure(config):
     _normalize_enum_option(config.option, "diff_mode")
     _reset_last_failed_collection_state(config)
     _auto_enable_benchmark_selection_for_explicit_benchmark_runs(config)
+    _configure_windows_xdist(config)
     _configure_windows_asyncio(config)
     _configure_windows_pycharm_traceback_style(config)
     _configure_wsl_timeout(config)
@@ -320,6 +323,52 @@ def _configure_windows_asyncio(config: pytest.Config) -> None:
     # async tests can exhaust socket buffers during socketpair() setup.
     config.inicfg["asyncio_default_test_loop_scope"] = "module"
     config.inicfg["asyncio_default_fixture_loop_scope"] = "module"
+
+
+def _windows_xdist_worker_cap() -> int:
+    """Return the safe Windows xdist worker cap for local pytest runs."""
+    raw_value = os.environ.get(_WINDOWS_XDIST_WORKER_CAP_ENV)
+    if raw_value is None:
+        return _DEFAULT_WINDOWS_XDIST_WORKER_CAP
+    try:
+        return max(1, int(raw_value))
+    except ValueError:
+        return _DEFAULT_WINDOWS_XDIST_WORKER_CAP
+
+
+def _configure_windows_xdist(config: pytest.Config) -> None:
+    """Cap Windows xdist workers even when tests bypass repo wrapper scripts."""
+    if not sys.platform.startswith("win"):
+        return
+
+    option_namespace = getattr(config, "option", None)
+    if option_namespace is None or not hasattr(option_namespace, "numprocesses"):
+        return
+
+    requested = getattr(option_namespace, "numprocesses", None)
+    if requested in (None, 0):
+        return
+
+    cap = _windows_xdist_worker_cap()
+    if isinstance(requested, str):
+        normalized = requested.strip().lower()
+        if normalized == "auto":
+            option_namespace.numprocesses = cap
+            return
+        try:
+            requested_count = int(normalized)
+        except ValueError:
+            return
+    elif isinstance(requested, bool):
+        return
+    else:
+        try:
+            requested_count = int(requested)
+        except (TypeError, ValueError):
+            return
+
+    if requested_count > cap:
+        option_namespace.numprocesses = cap
 
 
 def _configure_windows_pycharm_traceback_style(config: pytest.Config) -> None:

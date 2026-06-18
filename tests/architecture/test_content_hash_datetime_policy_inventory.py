@@ -110,3 +110,31 @@ def test_v1_date_hash_policy_is_inventory_gated() -> None:
         "determinism_identity_policy.yaml date_only_entity_inventory:\n"
         + "\n".join(undeclared)
     )
+
+
+def test_low_risk_date_only_surfaces_stay_migrated_to_v2_default() -> None:
+    policy = _load_yaml(POLICY_PATH)
+    hash_policy = cast(dict[str, object], policy["content_hash_datetime_policy"])
+    date_only_inventory = {
+        (str(item["provider"]), str(item["entity"]))
+        for item in cast(
+            list[dict[str, object]],
+            hash_policy.get("date_only_entity_inventory", []),
+        )
+    }
+    migrated = {
+        ("crossref", "publication"),
+        ("openalex", "publication"),
+        ("semanticscholar", "publication"),
+        ("uniprot", "idmapping"),
+    }
+
+    assert migrated.isdisjoint(date_only_inventory)
+
+    for provider, entity in migrated:
+        config = _load_yaml(ROOT / "configs" / "entities" / provider / f"{entity}.yaml")
+        contracts = cast(dict[str, object], config.get("contracts", {}))
+        assert contracts.get("hash_datetime_policy") == "v2_datetime_utc", (
+            f"{provider}.{entity} must stay on the v2 default once removed from "
+            "date-only compatibility inventory"
+        )

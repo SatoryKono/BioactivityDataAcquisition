@@ -14,6 +14,10 @@ from bioetl.composition.providers._chembl_target_protein_classification_manifest
     source_manifest,
     with_source_manifest,
 )
+from bioetl.domain.mapping.protein_class_target_type import (
+    ProteinClassTargetTypeMappingData,
+    ProteinClassTopLevelMappingEntry,
+)
 from bioetl.domain.types import HealthStatus
 
 
@@ -83,6 +87,17 @@ def data_source() -> TargetProteinClassificationSnapshotDataSource:
     return TargetProteinClassificationSnapshotDataSource(
         delta_reader=_FakeDeltaReader(),
         logger=logger,
+        target_type_mapping_data=ProteinClassTargetTypeMappingData(
+            mapping_version="protein_class_l1_map_v1",
+            entries=(
+                ProteinClassTopLevelMappingEntry("Enzyme", "enzyme", True),
+                ProteinClassTopLevelMappingEntry(
+                    "Unclassified protein",
+                    "unclassified_protein",
+                    False,
+                ),
+            ),
+        ),
     )
 
 
@@ -112,6 +127,11 @@ async def test_relation_data_source_derives_rows_from_local_snapshot_tables(
             "l1_id",
             "l2_id",
             "l3_id",
+            "canonical_l1",
+            "l1_counts_for_target_type",
+            "l1_mapping_version",
+            "target_type_rule_version",
+            "l1_normalization_status",
         )
     } == {
         "target_id": "CHEMBL_T1",
@@ -127,6 +147,11 @@ async def test_relation_data_source_derives_rows_from_local_snapshot_tables(
         "l1_id": 1,
         "l2_id": 2,
         "l3_id": 3,
+        "canonical_l1": "enzyme",
+        "l1_counts_for_target_type": True,
+        "l1_mapping_version": "protein_class_l1_map_v1",
+        "target_type_rule_version": "target_type_rule_v1",
+        "l1_normalization_status": "ok",
     }
     assert {
         key: rows[1][key]
@@ -331,9 +356,7 @@ def test_source_manifest_prefers_release_metadata_and_stable_fingerprint() -> No
     assert first["chembl_release"] == "35"
     assert first["chembl_api_version"] == "v1"
     assert first["source_manifest_status"] == "release_metadata_available"
-    assert first["source_snapshot_fingerprint"] == second[
-        "source_snapshot_fingerprint"
-    ]
+    assert first["source_snapshot_fingerprint"] == second["source_snapshot_fingerprint"]
 
 
 def test_with_source_manifest_overlays_relation_row_metadata() -> None:

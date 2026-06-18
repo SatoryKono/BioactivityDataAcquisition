@@ -15,6 +15,7 @@ pytestmark = pytest.mark.unit
 class _FakeOptionNamespace:
     lf: bool = False
     tbstyle: str | None = None
+    numprocesses: object | None = None
 
 
 @dataclass
@@ -149,3 +150,50 @@ def test_windows_pycharm_traceback_policy_detects_jetbrains_runner_path(
     root_conftest._configure_windows_pycharm_traceback_style(config)
 
     assert config.option.tbstyle == "line"
+
+
+def test_windows_xdist_policy_caps_auto_workers(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config = _FakeConfig(option=_FakeOptionNamespace(numprocesses="auto"))
+    monkeypatch.setattr(root_conftest.sys, "platform", "win32")
+    monkeypatch.delenv("BIOETL_PYTEST_WINDOWS_XDIST_WORKERS", raising=False)
+
+    root_conftest._configure_windows_xdist(config)
+
+    assert config.option.numprocesses == 2
+
+
+def test_windows_xdist_policy_caps_explicit_worker_count(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config = _FakeConfig(option=_FakeOptionNamespace(numprocesses=8))
+    monkeypatch.setattr(root_conftest.sys, "platform", "win32")
+    monkeypatch.delenv("BIOETL_PYTEST_WINDOWS_XDIST_WORKERS", raising=False)
+
+    root_conftest._configure_windows_xdist(config)
+
+    assert config.option.numprocesses == 2
+
+
+def test_windows_xdist_policy_respects_env_override(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config = _FakeConfig(option=_FakeOptionNamespace(numprocesses="auto"))
+    monkeypatch.setattr(root_conftest.sys, "platform", "win32")
+    monkeypatch.setenv("BIOETL_PYTEST_WINDOWS_XDIST_WORKERS", "1")
+
+    root_conftest._configure_windows_xdist(config)
+
+    assert config.option.numprocesses == 1
+
+
+def test_windows_xdist_policy_skips_non_windows(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config = _FakeConfig(option=_FakeOptionNamespace(numprocesses="auto"))
+    monkeypatch.setattr(root_conftest.sys, "platform", "linux")
+
+    root_conftest._configure_windows_xdist(config)
+
+    assert config.option.numprocesses == "auto"

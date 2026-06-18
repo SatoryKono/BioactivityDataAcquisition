@@ -1,5 +1,18 @@
 {
-  "budget_violations": [],
+  "budget_violations": [
+    {
+      "actual": 2,
+      "budget": "duplicate_test_names_max",
+      "expected_max": 0,
+      "metric": "duplicate_test_names"
+    },
+    {
+      "actual": 4,
+      "budget": "duplicate_test_name_occurrences_max",
+      "expected_max": 0,
+      "metric": "duplicate_test_name_occurrences"
+    }
+  ],
   "report": {
     "assertless_candidates": [
       {
@@ -3668,7 +3681,6 @@
       "tests/architecture/test_root_script_compatibility_surfaces.py",
       "tests/architecture/test_run_execution_context_compat_shim_usage.py",
       "tests/architecture/test_silver_filter_compatibility_surface.py",
-      "tests/integration/config/test_gold_nullable_numeric_compatibility.py",
       "tests/unit/composition/factories/pipeline/test_runner_request_compat.py",
       "tests/unit/infrastructure/adapters/crossref/test_compatibility.py",
       "tests/unit/infrastructure/adapters/pubchem/test_fetch_strategies_compat.py",
@@ -3676,25 +3688,69 @@
       "tests/unit/interfaces/cli/commands/test_runtime_compat_aliases.py",
       "tests/unit/scripts/ops/test_memory_legacy_aliases.py"
     ],
-    "compatibility_test_files": 32,
+    "compatibility_test_files": 31,
     "date_today_call_sites": 0,
-    "duplicate_test_name_inventory": [],
+    "duplicate_test_name_inventory": [
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "architecture": 2
+        },
+        "locations": [
+          "tests/architecture/test_tech_debt_issues_5253_5264_closeout.py:35",
+          "tests/architecture/test_tech_debt_issues_5343_5346_closeout.py:33"
+        ],
+        "name": "test_tech_debt_issue_closeout_covers_exact_issue_set",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "architecture": 2
+        },
+        "locations": [
+          "tests/architecture/test_tech_debt_issues_5253_5264_closeout.py:51",
+          "tests/architecture/test_tech_debt_issues_5343_5346_closeout.py:42"
+        ],
+        "name": "test_tech_debt_issue_closeout_evidence_paths_exist",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      }
+    ],
     "duplicate_test_name_inventory_summary": {
-      "cross_file_groups": 0,
-      "duplicate_occurrences": 0,
+      "cross_file_groups": 2,
+      "duplicate_occurrences": 4,
       "mixed_groups": 0,
       "same_file_groups": 0,
-      "total_duplicate_names": 0
+      "total_duplicate_names": 2
     },
-    "duplicate_test_name_occurrences": 0,
-    "duplicate_test_names": 0,
-    "markerless_test_functions": 4,
+    "duplicate_test_name_occurrences": 4,
+    "duplicate_test_names": 2,
+    "markerless_test_functions": 0,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "root": ".",
-    "top_duplicate_test_names": [],
-    "total_test_files": 1803,
-    "total_test_functions": 20828,
+    "top_duplicate_test_names": [
+      {
+        "count": 2,
+        "examples": [
+          "tests/architecture/test_tech_debt_issues_5253_5264_closeout.py:35",
+          "tests/architecture/test_tech_debt_issues_5343_5346_closeout.py:33"
+        ],
+        "name": "test_tech_debt_issue_closeout_covers_exact_issue_set"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/architecture/test_tech_debt_issues_5253_5264_closeout.py:51",
+          "tests/architecture/test_tech_debt_issues_5343_5346_closeout.py:42"
+        ],
+        "name": "test_tech_debt_issue_closeout_evidence_paths_exist"
+      }
+    ],
+    "total_test_files": 1810,
+    "total_test_functions": 20868,
     "uuid4_call_sites": 0
   }
 }

@@ -6,6 +6,12 @@ import json
 from collections.abc import Iterable
 from dataclasses import dataclass
 
+from bioetl.domain.mapping.protein_class_target_type import (
+    PROTEIN_CLASS_TARGET_TYPE_RULE_VERSION,
+    ProteinClassTargetTypeMappingData,
+    current_protein_class_target_type_mapping,
+    normalize_protein_class_top_level,
+)
 from bioetl.domain.ports import ProteinClassificationPort
 from bioetl.domain.value_objects.protein_class_hierarchy import (
     ProteinClassHierarchy,
@@ -62,24 +68,49 @@ class TargetProteinClassificationRecord:
     l5_id: int | None = None
     l5_name: str | None = None
     l5_desc: str | None = None
+    canonical_l1: str | None = None
+    l1_counts_for_target_type: bool | None = None
+    l1_mapping_version: str | None = None
+    target_type_rule_version: str | None = None
+    l1_normalization_status: str | None = None
+    l1_normalization_notes: str | None = None
 
     @classmethod
-    def missing(cls, target_id: str) -> TargetProteinClassificationRecord:
+    def missing(
+        cls,
+        target_id: str,
+        *,
+        mapping_version: str | None = None,
+    ) -> TargetProteinClassificationRecord:
         """Build a sentinel row for targets without classification evidence."""
         return cls(
             target_id=target_id,
             classification_status=_STATUS_MISSING,
+            canonical_l1="missing",
+            l1_counts_for_target_type=False,
+            l1_mapping_version=mapping_version,
+            target_type_rule_version=PROTEIN_CLASS_TARGET_TYPE_RULE_VERSION,
+            l1_normalization_status="missing",
+            l1_normalization_notes="no resolved protein classification evidence",
         )
 
     @classmethod
     def quarantined(
         cls,
         target_id: str,
+        *,
+        mapping_version: str | None = None,
     ) -> TargetProteinClassificationRecord:
         """Build a sentinel row for targets whose classification failed DQ."""
         return cls(
             target_id=target_id,
             classification_status=_STATUS_QUARANTINED,
+            canonical_l1="missing",
+            l1_counts_for_target_type=False,
+            l1_mapping_version=mapping_version,
+            target_type_rule_version=PROTEIN_CLASS_TARGET_TYPE_RULE_VERSION,
+            l1_normalization_status="failed",
+            l1_normalization_notes="classification hierarchy failed DQ resolution",
         )
 
     @classmethod
@@ -89,9 +120,14 @@ class TargetProteinClassificationRecord:
         target_id: str,
         component_id: int,
         hierarchy: ProteinClassHierarchy,
+        mapping_data: ProteinClassTargetTypeMappingData,
     ) -> TargetProteinClassificationRecord:
         """Project a hierarchy into a Gold relation row."""
         levels = hierarchy.levels
+        normalized_l1 = normalize_protein_class_top_level(
+            levels[0].name,
+            mapping_data,
+        )
         return cls(
             target_id=target_id,
             component_id=component_id,
@@ -118,6 +154,12 @@ class TargetProteinClassificationRecord:
             l5_id=levels[4].id,
             l5_name=levels[4].name,
             l5_desc=levels[4].desc,
+            canonical_l1=normalized_l1.canonical_l1,
+            l1_counts_for_target_type=normalized_l1.counts_for_target_type,
+            l1_mapping_version=mapping_data.mapping_version,
+            target_type_rule_version=PROTEIN_CLASS_TARGET_TYPE_RULE_VERSION,
+            l1_normalization_status=normalized_l1.normalization_status,
+            l1_normalization_notes=normalized_l1.normalization_notes,
         )
 
     def to_dict(self) -> dict[str, object]:
@@ -148,6 +190,12 @@ class TargetProteinClassificationRecord:
             "l5_id": self.l5_id,
             "l5_name": self.l5_name,
             "l5_desc": self.l5_desc,
+            "canonical_l1": self.canonical_l1,
+            "l1_counts_for_target_type": self.l1_counts_for_target_type,
+            "l1_mapping_version": self.l1_mapping_version,
+            "target_type_rule_version": self.target_type_rule_version,
+            "l1_normalization_status": self.l1_normalization_status,
+            "l1_normalization_notes": self.l1_normalization_notes,
         }
 
 
@@ -173,9 +221,13 @@ class ProteinClassificationResolutionService:
         classification_port: ProteinClassificationPort,
         *,
         invalid_record_policy: str = "quarantine",
+        target_type_mapping_data: ProteinClassTargetTypeMappingData | None = None,
     ) -> None:
         self._classification_port = classification_port
         self._invalid_record_policy = invalid_record_policy
+        self._target_type_mapping_data = (
+            target_type_mapping_data or current_protein_class_target_type_mapping()
+        )
 
     def resolve_target(
         self,
@@ -186,7 +238,10 @@ class ProteinClassificationResolutionService:
         """Resolve all protein classifications for one target."""
         normalized_component_ids = _normalize_component_ids(component_ids)
         if not normalized_component_ids:
-            return _missing_resolution(target_id)
+            return _missing_resolution(
+                target_id,
+                mapping_version=self._target_type_mapping_data.mapping_version,
+            )
 
         by_leaf_id, dq_issues = _collect_target_hierarchies(
             classification_port=self._classification_port,
@@ -194,12 +249,18 @@ class ProteinClassificationResolutionService:
         )
 
         if by_leaf_id:
-            return _resolved_resolution(target_id, by_leaf_id, dq_issues)
+            return _resolved_resolution(
+                target_id,
+                by_leaf_id,
+                dq_issues,
+                mapping_data=self._target_type_mapping_data,
+            )
 
         return _unresolved_resolution(
             target_id=target_id,
             dq_issues=dq_issues,
             invalid_record_policy=self._invalid_record_policy,
+            mapping_version=self._target_type_mapping_data.mapping_version,
         )
 
 
@@ -214,11 +275,20 @@ def _normalize_component_ids(component_ids: Iterable[int | None]) -> tuple[int, 
     return tuple(sorted(normalized))
 
 
-def _missing_resolution(target_id: str) -> ProteinClassificationResolutionResult:
+def _missing_resolution(
+    target_id: str,
+    *,
+    mapping_version: str | None,
+) -> ProteinClassificationResolutionResult:
     """Build a resolution for targets without any classification candidates."""
     return ProteinClassificationResolutionResult(
         target_id=target_id,
-        rows=(TargetProteinClassificationRecord.missing(target_id),),
+        rows=(
+            TargetProteinClassificationRecord.missing(
+                target_id,
+                mapping_version=mapping_version,
+            ),
+        ),
     )
 
 
@@ -292,6 +362,8 @@ def _resolved_resolution(
     target_id: str,
     by_leaf_id: dict[int, tuple[int, ProteinClassHierarchy]],
     dq_issues: list[ProteinClassificationDQIssue],
+    *,
+    mapping_data: ProteinClassTargetTypeMappingData,
 ) -> ProteinClassificationResolutionResult:
     """Build resolved relation rows from deduplicated hierarchy candidates."""
     rows = tuple(
@@ -299,6 +371,7 @@ def _resolved_resolution(
             target_id=target_id,
             component_id=component_id,
             hierarchy=hierarchy,
+            mapping_data=mapping_data,
         )
         for _leaf_id, (component_id, hierarchy) in sorted(by_leaf_id.items())
     )
@@ -314,6 +387,7 @@ def _unresolved_resolution(
     target_id: str,
     dq_issues: list[ProteinClassificationDQIssue],
     invalid_record_policy: str,
+    mapping_version: str | None,
 ) -> ProteinClassificationResolutionResult:
     """Build missing/quarantined fallback rows when no hierarchy was resolved."""
     row_factory = (
@@ -323,7 +397,7 @@ def _unresolved_resolution(
     )
     return ProteinClassificationResolutionResult(
         target_id=target_id,
-        rows=(row_factory(target_id),),
+        rows=(row_factory(target_id, mapping_version=mapping_version),),
         dq_issues=tuple(dq_issues),
     )
 

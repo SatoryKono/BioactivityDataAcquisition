@@ -594,6 +594,18 @@ composite:
       - target_protein_class_id_L5
       - target_protein_class_name_L5
       - target_protein_class_desc_L5
+      - target_protein_class_type
+      - top_level_count
+      - canonical_top_levels
+      - counted_top_levels
+      - ignored_top_levels
+      - primary_top_level
+      - target_type_reason_code
+      - multifunctional_origin
+      - major_family
+      - major_family_rule_version
+      - target_type_rule_version
+      - l1_mapping_version
       provider_order: [chembl]
       # === UniProt protein functional annotations ===
     - name: protein_function

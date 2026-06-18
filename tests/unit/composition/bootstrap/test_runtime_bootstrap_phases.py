@@ -69,6 +69,10 @@ def test_initialize_runtime_policy_sources_bootstraps_all_registries() -> None:
         ) as mock_classification,
         patch.object(
             phases,
+            "initialize_protein_class_target_type_mapping",
+        ) as mock_protein_class_mapping,
+        patch.object(
+            phases,
             "initialize_publication_controlled_vocabulary",
         ) as mock_vocab,
     ):
@@ -76,4 +80,5 @@ def test_initialize_runtime_policy_sources_bootstraps_all_registries() -> None:
 
     mock_chembl.assert_called_once_with(configs_root)
     mock_classification.assert_called_once_with(configs_root)
+    mock_protein_class_mapping.assert_called_once_with(configs_root)
     mock_vocab.assert_called_once_with(configs_root)

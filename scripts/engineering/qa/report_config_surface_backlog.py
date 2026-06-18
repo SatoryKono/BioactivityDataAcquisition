@@ -8,6 +8,7 @@ import os
 import sys
 from collections import Counter, defaultdict
 from datetime import date
+from hashlib import sha256
 from pathlib import Path
 from typing import Any
 
@@ -24,6 +25,12 @@ from scripts.schema.generate_config_matrix import (  # noqa: E402
 )
 
 BACKLOG_PATH = ROOT / "reports/quality/config-surface-backlog.json"
+DUPLICATION_SURFACE_ROOT = ROOT / "configs"
+DUPLICATION_FILE_SUFFIXES = (".yaml", ".yml", ".json")
+JSCPD_IGNORED_PATTERNS = ("**/configs/**", "**/*.yaml", "**/*.yml", "**/*.json")
+MIN_DUPLICATE_BLOCK_BYTES = 200
+MAX_DUPLICATION_BLOCK_DEPTH = 2
+MAX_REPORTED_DUPLICATION_CLUSTERS = 25
 
 CATEGORY_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("hash_policy_chembl_only", ("hash_policy.",)),
@@ -89,6 +96,161 @@ CATEGORY_GOVERNANCE: dict[str, dict[str, str]] = {
 }
 
 
+def _duplication_surface_kind(path: Path) -> str:
+    relative = path.relative_to(ROOT).as_posix()
+    if relative.startswith("configs/quality/"):
+        return "quality_registry"
+    if relative.startswith("configs/entities/"):
+        return "entity_config"
+    if relative.startswith("configs/composite/"):
+        return "composite_config"
+    if relative.startswith("configs/base/"):
+        return "base_config"
+    if relative.startswith("configs/enums/"):
+        return "enum_registry"
+    return "other_config"
+
+
+def _load_structured_config(path: Path) -> Any:
+    if path.suffix == ".json":
+        return json.loads(path.read_text(encoding="utf-8"))
+    import yaml
+
+    return yaml.safe_load(path.read_text(encoding="utf-8"))
+
+
+def _canonical_json_text(value: Any) -> str:
+    return json.dumps(value, sort_keys=True, ensure_ascii=False, default=str)
+
+
+def _iter_duplication_surface_files() -> list[Path]:
+    files = [
+        path
+        for path in DUPLICATION_SURFACE_ROOT.rglob("*")
+        if path.is_file() and path.suffix in DUPLICATION_FILE_SUFFIXES
+    ]
+    return sorted(files)
+
+
+def _iter_structured_blocks(
+    payload: Any,
+    *,
+    path: tuple[str, ...] = (),
+    depth: int = 0,
+) -> list[tuple[tuple[str, ...], Any]]:
+    blocks: list[tuple[tuple[str, ...], Any]] = []
+    if not isinstance(payload, dict):
+        return blocks
+    for key, value in sorted(payload.items()):
+        block_path = (*path, str(key))
+        if isinstance(value, (dict, list)):
+            rendered = _canonical_json_text(value)
+            if len(rendered) >= MIN_DUPLICATE_BLOCK_BYTES:
+                blocks.append((block_path, value))
+        if depth < MAX_DUPLICATION_BLOCK_DEPTH and isinstance(value, dict):
+            blocks.extend(
+                _iter_structured_blocks(value, path=block_path, depth=depth + 1)
+            )
+    return blocks
+
+
+def _build_duplication_audit() -> dict[str, Any]:
+    clusters: dict[str, dict[str, Any]] = {}
+
+    for path in _iter_duplication_surface_files():
+        payload = _load_structured_config(path)
+        if not isinstance(payload, dict):
+            continue
+        relative_path = path.relative_to(ROOT).as_posix()
+        surface_kind = _duplication_surface_kind(path)
+        for block_path, block in _iter_structured_blocks(payload):
+            rendered = _canonical_json_text(block)
+            if len(rendered) < MIN_DUPLICATE_BLOCK_BYTES:
+                continue
+            fingerprint = sha256(rendered.encode("utf-8")).hexdigest()
+            cluster = clusters.setdefault(
+                fingerprint,
+                {
+                    "fingerprint": fingerprint[:12],
+                    "serialized_bytes": len(rendered),
+                    "block_path": ".".join(block_path),
+                    "occurrences": [],
+                },
+            )
+            cluster["occurrences"].append(
+                {
+                    "path": relative_path,
+                    "surface_kind": surface_kind,
+                    "block_path": ".".join(block_path),
+                }
+            )
+
+    duplicate_clusters: list[dict[str, Any]] = []
+    affected_files: set[str] = set()
+    for cluster in clusters.values():
+        occurrences = cluster["occurrences"]
+        unique_locations = {
+            (entry["path"], entry["block_path"]) for entry in occurrences
+        }
+        if len(unique_locations) < 2:
+            continue
+        by_kind = Counter(entry["surface_kind"] for entry in occurrences)
+        affected_files.update(entry["path"] for entry in occurrences)
+        duplicate_clusters.append(
+            {
+                "fingerprint": cluster["fingerprint"],
+                "serialized_bytes": cluster["serialized_bytes"],
+                "block_path": cluster["block_path"],
+                "occurrence_count": len(occurrences),
+                "surface_kind_counts": {
+                    kind: by_kind[kind] for kind in sorted(by_kind)
+                },
+                "occurrences": sorted(
+                    occurrences,
+                    key=lambda entry: (
+                        str(entry["path"]),
+                        str(entry["block_path"]),
+                        str(entry["surface_kind"]),
+                    ),
+                ),
+            }
+        )
+
+    duplicate_clusters.sort(
+        key=lambda cluster: (
+            -int(cluster["occurrence_count"]),
+            -int(cluster["serialized_bytes"]),
+            str(cluster["block_path"]),
+        )
+    )
+    trimmed_clusters = duplicate_clusters[:MAX_REPORTED_DUPLICATION_CLUSTERS]
+
+    return {
+        "scope": {
+            "root": DUPLICATION_SURFACE_ROOT.relative_to(ROOT).as_posix(),
+            "file_suffixes": list(DUPLICATION_FILE_SUFFIXES),
+            "files_scanned": len(_iter_duplication_surface_files()),
+            "ignored_by_jscpd_patterns": list(JSCPD_IGNORED_PATTERNS),
+            "structured_block_min_bytes": MIN_DUPLICATE_BLOCK_BYTES,
+            "max_traversal_depth": MAX_DUPLICATION_BLOCK_DEPTH,
+        },
+        "summary": {
+            "duplicate_cluster_count": len(duplicate_clusters),
+            "reported_cluster_count": len(trimmed_clusters),
+            "duplicate_occurrence_count": sum(
+                int(cluster["occurrence_count"]) for cluster in duplicate_clusters
+            ),
+            "affected_file_count": len(affected_files),
+        },
+        "clusters": trimmed_clusters,
+        "notes": [
+            "This audit covers structured config/contract/registry surfaces under configs/** that JSCPD intentionally ignores.",
+            "Clusters report exact canonical JSON subtree duplicates only; near-duplicate prose and comment drift stay out of scope.",
+            "The audit is report-only and exists to make YAML/JSON governance duplication reviewable in CI-visible artifacts.",
+        ],
+    }
+
+
 def _partial_keys(family_configs: dict[str, dict[str, str]]) -> list[tuple[int, str]]:
     all_keys = sorted({key for values in family_configs.values() for key in values})
     if not family_configs:
@@ -152,6 +314,7 @@ def build_backlog() -> dict[str, Any]:
         "families": {
             name: _family_metrics(configs) for name, configs in families.items()
         },
+        "duplication_audit": _build_duplication_audit(),
         "entity_effective": {
             **entity_metrics,
             "partial_key_count": len(ranked),
