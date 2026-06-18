@@ -76,6 +76,13 @@ Composition bootstrap may call the sanctioned seam before building runtime
 pipelines. Infrastructure owns the third-party patch implementation because it is
 library/runtime compatibility, not domain semantics.
 
+The Python 3.14 Pandera typing shim carries explicit sunset metadata in
+`bioetl.infrastructure.compat.pandera_compat.PANDERA_TYPING_COMPAT_SUNSET_POLICY`.
+The patch is reviewed by `infrastructure-compat` by `2026-09-30` and must be
+removed once the supported Python/Pandera matrix proves Pandera dispatcher typing
+works on Python 3.14+ without the `typing_inspect.get_origin` and
+`Dispatcher.__call__` patches.
+
 ## Consequences
 
 ### Positive

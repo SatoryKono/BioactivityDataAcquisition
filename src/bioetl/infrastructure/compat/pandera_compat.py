@@ -4,13 +4,28 @@ from __future__ import annotations
 
 import sys
 import typing
+from collections.abc import Mapping
+from types import MappingProxyType
 
 _PATCH_APPLIED = False
+_PANDERA_TYPING_COMPAT_PYTHON_MIN = (3, 14)
+PANDERA_TYPING_COMPAT_SUNSET_POLICY: Mapping[str, str] = MappingProxyType(
+    {
+        "owner": "infrastructure-compat",
+        "review_date": "2026-09-30",
+        "python_min": "3.14",
+        "upstream_exit_condition": (
+            "Remove this shim after the supported Python/Pandera matrix proves "
+            "Pandera dispatcher typing works on Python 3.14+ without the "
+            "typing_inspect.get_origin and Dispatcher.__call__ patches."
+        ),
+    }
+)
 
 
 def _requires_pandera_typing_compat() -> bool:
     """Return whether the current interpreter needs the Pandera typing patch."""
-    return sys.version_info >= (3, 14)
+    return sys.version_info >= _PANDERA_TYPING_COMPAT_PYTHON_MIN
 
 
 def _patch_typing_inspect_get_origin(
@@ -134,4 +149,7 @@ def apply_pandera_typing_compat_if_needed() -> bool:
     return True
 
 
-__all__ = ["apply_pandera_typing_compat_if_needed"]
+__all__ = [
+    "PANDERA_TYPING_COMPAT_SUNSET_POLICY",
+    "apply_pandera_typing_compat_if_needed",
+]

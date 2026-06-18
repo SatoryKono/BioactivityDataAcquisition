@@ -1,23 +1,23 @@
-"""Pure helper logic for protein-class target type derivation."""
+"""Internal helpers for deterministic protein-class target type derivation."""
 
 from __future__ import annotations
 
 from collections.abc import Callable, Iterable, Mapping
-from typing import TYPE_CHECKING, Any, Final, Protocol
+from typing import Final
 
-if TYPE_CHECKING:
-    from bioetl.domain.mapping.protein_class_target_type import (
-        ProteinClassTargetTypeMappingData,
-    )
-
-_TOP_LEVEL_KEYS: Final[tuple[str, ...]] = (
+NON_COUNTING_CLASSES: Final = frozenset({"missing", "unknown", "unclassified_protein"})
+UNKNOWN_NONEMPTY_CLASS: Final = "other_classified_protein"
+MISSING_CLASS: Final = "missing"
+MULTIFUNCTIONAL_CLASS: Final = "multifunctional"
+UNKNOWN_TARGET_TYPE: Final = "unknown"
+TOP_LEVEL_KEYS: Final[tuple[str, ...]] = (
     "canonical_l1",
     "l1",
     "level_1",
     "level1",
     "l1_name",
 )
-_DEEPER_LEVEL_KEYS: Final[tuple[str, ...]] = (
+DEEPER_LEVEL_KEYS: Final[tuple[str, ...]] = (
     "l2",
     "l3",
     "l4",
@@ -25,13 +25,13 @@ _DEEPER_LEVEL_KEYS: Final[tuple[str, ...]] = (
     "level_3",
     "level_4",
 )
-_MAJOR_FAMILY_RULES: Final[tuple[tuple[str, str], ...]] = (
+MAJOR_FAMILY_RULES: Final[tuple[tuple[str, str], ...]] = (
     ("g protein-coupled receptor", "gpcr"),
     ("gpcr", "gpcr"),
     ("nuclear receptor", "nuclear_receptor"),
     ("kinase", "kinase"),
 )
-_BOOL_BY_TOKEN: Final[dict[str, bool]] = {
+BOOL_BY_TOKEN: Final[dict[str, bool]] = {
     "0": False,
     "1": True,
     "false": False,
@@ -41,86 +41,6 @@ _BOOL_BY_TOKEN: Final[dict[str, bool]] = {
     "y": True,
     "yes": True,
 }
-
-
-class _NormalizedTopLevelLike(Protocol):
-    canonical_l1: str
-    counts_for_target_type: bool
-
-
-def normalized_top_level_from_row(
-    row: Mapping[str, object],
-    mapping_data: ProteinClassTargetTypeMappingData,
-    *,
-    normalized_top_level_cls: type[Any],
-    normalize_top_level: Callable[
-        [object, ProteinClassTargetTypeMappingData | None],
-        Any,
-    ],
-    normalize_label: Callable[[object], str | None],
-    non_counting_classes: frozenset[str],
-) -> Any:
-    """Resolve one source row into canonical top-level evidence."""
-    canonical_l1 = normalize_label(row.get("canonical_l1"))
-    if canonical_l1 is not None:
-        counts_for_target_type = _coerce_counts_for_target_type(
-            row.get("l1_counts_for_target_type"),
-            default=canonical_l1 not in non_counting_classes,
-            normalize_label=normalize_label,
-        )
-        normalization_status = _normalized_status(
-            row.get("l1_normalization_status"),
-            normalize_label=normalize_label,
-        )
-        raw_l1 = _first_normalized_label(
-            row,
-            _TOP_LEVEL_KEYS[1:],
-            normalize_label=normalize_label,
-        )
-        return normalized_top_level_cls(
-            raw_l1=raw_l1,
-            canonical_l1=canonical_l1,
-            counts_for_target_type=counts_for_target_type,
-            normalization_status=normalization_status,
-            normalization_notes=None,
-        )
-
-    return normalize_top_level(
-        _first_present_value(row, _TOP_LEVEL_KEYS[1:]), mapping_data
-    )
-
-
-def canonical_top_levels(
-    normalized_rows: Iterable[_NormalizedTopLevelLike],
-) -> tuple[str, ...]:
-    """Return sorted unique canonical L1 classes from normalized rows."""
-    return tuple(sorted({row.canonical_l1 for row in normalized_rows}))
-
-
-def counted_top_levels(
-    normalized_rows: Iterable[_NormalizedTopLevelLike],
-) -> tuple[str, ...]:
-    """Return sorted unique counted top-level classes."""
-    return tuple(
-        sorted(
-            {row.canonical_l1 for row in normalized_rows if row.counts_for_target_type}
-        )
-    )
-
-
-def ignored_top_levels(
-    normalized_rows: Iterable[_NormalizedTopLevelLike],
-) -> tuple[str, ...]:
-    """Return sorted unique non-counted top-level classes."""
-    return tuple(
-        sorted(
-            {
-                row.canonical_l1
-                for row in normalized_rows
-                if not row.counts_for_target_type
-            }
-        )
-    )
 
 
 def target_type_decision(
@@ -149,7 +69,7 @@ def normalized_deeper_level_labels(
             {
                 normalized
                 for row in rows
-                for key in _DEEPER_LEVEL_KEYS
+                for key in DEEPER_LEVEL_KEYS
                 for normalized in [normalize_label(row.get(key))]
                 if normalized is not None
             }
@@ -159,11 +79,49 @@ def normalized_deeper_level_labels(
 
 def matching_major_families(label: str) -> tuple[str, ...]:
     """Return reviewed major-family tags matching one normalized deeper label."""
-    matches = [family for needle, family in _MAJOR_FAMILY_RULES if needle in label]
+    matches = [family for needle, family in MAJOR_FAMILY_RULES if needle in label]
     return tuple(sorted(set(matches)))
 
 
-def _coerce_counts_for_target_type(
+def missing_top_level(normalized_top_level_cls: type[object]) -> object:
+    return normalized_top_level_cls(
+        raw_l1=None,
+        canonical_l1=MISSING_CLASS,
+        counts_for_target_type=False,
+        normalization_status="missing",
+        normalization_notes="top-level protein class is absent",
+    )
+
+
+def fallback_top_level(
+    raw_l1: str,
+    normalized_top_level_cls: type[object],
+) -> object:
+    return normalized_top_level_cls(
+        raw_l1=raw_l1,
+        canonical_l1=UNKNOWN_NONEMPTY_CLASS,
+        counts_for_target_type=True,
+        normalization_status="fallback",
+        normalization_notes="unmapped non-empty top-level protein class",
+    )
+
+
+def mapped_top_level(
+    raw_l1: str,
+    entry: object,
+    normalized_top_level_cls: type[object],
+) -> object:
+    status = "ok" if entry.counts_for_target_type else "non_counting"
+    return normalized_top_level_cls(
+        raw_l1=raw_l1,
+        canonical_l1=entry.canonical_l1,
+        counts_for_target_type=entry.counts_for_target_type,
+        normalization_status=status,
+        normalization_notes=None,
+    )
+
+
+def coerce_counts_for_target_type(
     value: object,
     *,
     default: bool,
@@ -176,10 +134,10 @@ def _coerce_counts_for_target_type(
     normalized = normalize_label(value)
     if normalized is None:
         return default
-    return _BOOL_BY_TOKEN.get(normalized, default)
+    return BOOL_BY_TOKEN.get(normalized, default)
 
 
-def _normalized_status(
+def normalized_status(
     value: object,
     *,
     normalize_label: Callable[[object], str | None],
@@ -188,7 +146,7 @@ def _normalized_status(
     return normalized or "ok"
 
 
-def _first_normalized_label(
+def first_normalized_label(
     row: Mapping[str, object],
     keys: Iterable[str],
     *,
@@ -201,7 +159,7 @@ def _first_normalized_label(
     return None
 
 
-def _first_present_value(
+def first_present_value(
     row: Mapping[str, object],
     keys: Iterable[str],
 ) -> object:

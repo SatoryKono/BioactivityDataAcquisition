@@ -286,7 +286,7 @@ Certified historical replay is therefore bounded but operationalized:
 - `durable_evidence_coverage_claim` is the permanence gate for guarantees that
   must survive retained, archived, and future history rather than a one-off
   closure campaign snapshot.
-- the retained-corpus closure artifact may still persist while the claim gate
+- the retained-corpus artifact closure artifact may still persist while the claim gate
   is blocked. In that state, operators must either certify more immutable
   evidence or attach explicit residual dispositions such as
   `reconstruct_immutable_evidence`,

@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-import pytest
-
 import importlib
 import sys
 import typing
-from types import ModuleType
+from datetime import date
+from types import MappingProxyType, ModuleType
+
+import pytest
 
 
 pytestmark = pytest.mark.unit
@@ -82,6 +83,20 @@ def test_apply_pandera_typing_compat_is_noop_when_not_required(
     monkeypatch.setattr(module, "_PATCH_APPLIED", False)
 
     assert module.apply_pandera_typing_compat_if_needed() is False
+
+
+def test_pandera_typing_compat_declares_sunset_policy() -> None:
+    module = importlib.reload(
+        importlib.import_module("bioetl.infrastructure.compat.pandera_compat")
+    )
+    policy = module.PANDERA_TYPING_COMPAT_SUNSET_POLICY
+
+    assert isinstance(policy, MappingProxyType)
+    assert policy["owner"] == "infrastructure-compat"
+    assert date.fromisoformat(policy["review_date"]) >= date(2026, 9, 30)
+    assert policy["python_min"] == "3.14"
+    assert "supported Python/Pandera matrix" in policy["upstream_exit_condition"]
+    assert "Dispatcher.__call__" in policy["upstream_exit_condition"]
 
 
 def test_apply_pandera_typing_compat_patches_dispatcher_when_forced(

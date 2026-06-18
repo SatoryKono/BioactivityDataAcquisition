@@ -3,19 +3,11 @@
 from __future__ import annotations
 
 import unicodedata
-from collections.abc import Iterable, Mapping
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
-from typing import Final
+from typing import Any, Final, Protocol
 
-from bioetl.domain.mapping.protein_class_target_type_helpers import (
-    canonical_top_levels,
-    counted_top_levels,
-    ignored_top_levels,
-    matching_major_families,
-    normalized_deeper_level_labels,
-    normalized_top_level_from_row,
-    target_type_decision,
-)
+from bioetl.domain.mapping import protein_class_target_type_helpers as helpers
 
 __all__ = [
     "MAJOR_FAMILY_RULE_VERSION",
@@ -35,13 +27,6 @@ __all__ = [
 
 PROTEIN_CLASS_TARGET_TYPE_RULE_VERSION: Final = "target_type_rule_v1"
 MAJOR_FAMILY_RULE_VERSION: Final = "major_family_rule_v1"
-
-_NON_COUNTING_CLASSES: Final = frozenset({"missing", "unknown", "unclassified_protein"})
-_UNKNOWN_NONEMPTY_CLASS: Final = "other_classified_protein"
-_MISSING_CLASS: Final = "missing"
-_MULTIFUNCTIONAL_CLASS: Final = "multifunctional"
-_UNKNOWN_TARGET_TYPE: Final = "unknown"
-
 
 @dataclass(frozen=True, slots=True)
 class ProteinClassTopLevelMappingEntry:
@@ -66,7 +51,7 @@ class ProteinClassTargetTypeMappingData:
 
     mapping_version: str
     entries: tuple[ProteinClassTopLevelMappingEntry, ...]
-    non_counting_classes: frozenset[str] = _NON_COUNTING_CLASSES
+    non_counting_classes: frozenset[str] = helpers.NON_COUNTING_CLASSES
 
     def __post_init__(self) -> None:
         if not self.mapping_version.strip():
@@ -112,6 +97,11 @@ class ProteinClassTargetTypeResult:
 _mapping_data: ProteinClassTargetTypeMappingData | None = None
 
 
+class _NormalizedTopLevelLike(Protocol):
+    canonical_l1: str
+    counts_for_target_type: bool
+
+
 def initialize_protein_class_target_type_mapping(
     data: ProteinClassTargetTypeMappingData,
 ) -> None:
@@ -153,13 +143,92 @@ def normalize_protein_class_top_level(
     data = mapping_data or current_protein_class_target_type_mapping()
     normalized = normalize_protein_class_label(raw_l1)
     if normalized is None:
-        return _missing_top_level()
+        return helpers.missing_top_level(NormalizedProteinClassTopLevel)
 
     entry = data.by_raw_key.get(normalized)
     if entry is None:
-        return _fallback_top_level(normalized)
+        return helpers.fallback_top_level(normalized, NormalizedProteinClassTopLevel)
 
-    return _mapped_top_level(normalized, entry)
+    return helpers.mapped_top_level(
+        normalized,
+        entry,
+        NormalizedProteinClassTopLevel,
+    )
+
+
+def normalized_top_level_from_row(
+    row: Mapping[str, object],
+    mapping_data: ProteinClassTargetTypeMappingData,
+    *,
+    normalized_top_level_cls: type[Any],
+    normalize_top_level: Callable[
+        [object, ProteinClassTargetTypeMappingData | None],
+        Any,
+    ],
+    normalize_label: Callable[[object], str | None],
+    non_counting_classes: frozenset[str],
+) -> Any:
+    """Resolve one source row into canonical top-level evidence."""
+    canonical_l1 = normalize_label(row.get("canonical_l1"))
+    if canonical_l1 is not None:
+        counts_for_target_type = helpers.coerce_counts_for_target_type(
+            row.get("l1_counts_for_target_type"),
+            default=canonical_l1 not in non_counting_classes,
+            normalize_label=normalize_label,
+        )
+        normalization_status = helpers.normalized_status(
+            row.get("l1_normalization_status"),
+            normalize_label=normalize_label,
+        )
+        raw_l1 = helpers.first_normalized_label(
+            row,
+            helpers.TOP_LEVEL_KEYS[1:],
+            normalize_label=normalize_label,
+        )
+        return normalized_top_level_cls(
+            raw_l1=raw_l1,
+            canonical_l1=canonical_l1,
+            counts_for_target_type=counts_for_target_type,
+            normalization_status=normalization_status,
+            normalization_notes=None,
+        )
+
+    return normalize_top_level(
+        helpers.first_present_value(row, helpers.TOP_LEVEL_KEYS[1:]), mapping_data
+    )
+
+
+def canonical_top_levels(
+    normalized_rows: Iterable[_NormalizedTopLevelLike],
+) -> tuple[str, ...]:
+    """Return sorted unique canonical L1 classes from normalized rows."""
+    return tuple(sorted({row.canonical_l1 for row in normalized_rows}))
+
+
+def counted_top_levels(
+    normalized_rows: Iterable[_NormalizedTopLevelLike],
+) -> tuple[str, ...]:
+    """Return sorted unique counted top-level classes."""
+    return tuple(
+        sorted(
+            {row.canonical_l1 for row in normalized_rows if row.counts_for_target_type}
+        )
+    )
+
+
+def ignored_top_levels(
+    normalized_rows: Iterable[_NormalizedTopLevelLike],
+) -> tuple[str, ...]:
+    """Return sorted unique non-counted top-level classes."""
+    return tuple(
+        sorted(
+            {
+                row.canonical_l1
+                for row in normalized_rows
+                if not row.counts_for_target_type
+            }
+        )
+    )
 
 
 def derive_protein_class_target_type(
@@ -182,10 +251,10 @@ def derive_protein_class_target_type(
     canonical_levels = canonical_top_levels(normalized)
     counted_levels = counted_top_levels(normalized)
     ignored_levels = ignored_top_levels(normalized)
-    target_type, primary_top_level, reason_code = target_type_decision(
+    target_type, primary_top_level, reason_code = helpers.target_type_decision(
         counted_levels,
-        multifunctional_class=_MULTIFUNCTIONAL_CLASS,
-        unknown_target_type=_UNKNOWN_TARGET_TYPE,
+        multifunctional_class=helpers.MULTIFUNCTIONAL_CLASS,
+        unknown_target_type=helpers.UNKNOWN_TARGET_TYPE,
     )
 
     top_level_count = len(counted_levels)
@@ -207,44 +276,10 @@ def derive_major_families(
     """Derive major scientific families from L2+ labels only."""
     families = {
         family
-        for label in normalized_deeper_level_labels(
+        for label in helpers.normalized_deeper_level_labels(
             rows,
             normalize_label=normalize_protein_class_label,
         )
-        for family in matching_major_families(label)
+        for family in helpers.matching_major_families(label)
     }
     return tuple(sorted(families))
-
-
-def _missing_top_level() -> NormalizedProteinClassTopLevel:
-    return NormalizedProteinClassTopLevel(
-        raw_l1=None,
-        canonical_l1=_MISSING_CLASS,
-        counts_for_target_type=False,
-        normalization_status="missing",
-        normalization_notes="top-level protein class is absent",
-    )
-
-
-def _fallback_top_level(raw_l1: str) -> NormalizedProteinClassTopLevel:
-    return NormalizedProteinClassTopLevel(
-        raw_l1=raw_l1,
-        canonical_l1=_UNKNOWN_NONEMPTY_CLASS,
-        counts_for_target_type=True,
-        normalization_status="fallback",
-        normalization_notes="unmapped non-empty top-level protein class",
-    )
-
-
-def _mapped_top_level(
-    raw_l1: str,
-    entry: ProteinClassTopLevelMappingEntry,
-) -> NormalizedProteinClassTopLevel:
-    status = "ok" if entry.counts_for_target_type else "non_counting"
-    return NormalizedProteinClassTopLevel(
-        raw_l1=raw_l1,
-        canonical_l1=entry.canonical_l1,
-        counts_for_target_type=entry.counts_for_target_type,
-        normalization_status=status,
-        normalization_notes=None,
-    )

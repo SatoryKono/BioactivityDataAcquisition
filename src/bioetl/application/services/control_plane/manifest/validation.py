@@ -30,6 +30,7 @@ def validate_run_manifest_request(
     _validate_replay_capable_profile_floor(request)
     _validate_exact_replay_snapshot_claim(request)
     _validate_strict_input_snapshots(request)
+    _validate_strict_replay_provenance(request, code_provenance)
     _validate_executable_code_provenance(request, code_provenance)
 
 
@@ -126,15 +127,7 @@ def _validate_documented_code_provenance(
 
 def _validate_strict_input_snapshots(request: RunManifestCreateSpec) -> None:
     """Fail closed when strict replay contexts lack immutable input snapshots."""
-    required_profile = str(
-        request.launch_context.get("required_persistence_profile")
-        or "degraded_observable"
-    )
-    strict_context = (
-        bool(request.launch_context.get("exact_replay"))
-        or required_profile in STRICT_PERSISTENCE_PROFILES
-    )
-    if not strict_context:
+    if not _is_strict_replay_context(request):
         return
     launch_time_snapshot_envelope_present = bool(request.source_refs) and all(
         source_ref.input_snapshots for source_ref in request.source_refs
@@ -145,6 +138,50 @@ def _validate_strict_input_snapshots(request: RunManifestCreateSpec) -> None:
         "Run manifest requires immutable input snapshots for exact "
         "replay, replay_ready, and forensic_grade contexts"
     )
+
+
+def _is_strict_replay_context(request: RunManifestCreateSpec) -> bool:
+    """Return whether manifest construction must satisfy strict replay invariants."""
+    required_profile = str(
+        request.launch_context.get("required_persistence_profile")
+        or "degraded_observable"
+    )
+    normalized_profile = normalize_required_persistence_profile(required_profile)
+    return (
+        bool(request.launch_context.get("exact_replay"))
+        or normalized_profile in STRICT_PERSISTENCE_PROFILES
+    )
+
+
+def _validate_strict_replay_provenance(
+    request: RunManifestCreateSpec,
+    code_provenance: RunCodeProvenance,
+) -> None:
+    """Require canonical provenance anchors before strict manifest persistence."""
+    if not _is_strict_replay_context(request):
+        return
+    missing_fields = [
+        field_name
+        for field_name in (
+            "contract_ref",
+            "contract_version",
+            "contract_schema_hash",
+            "dq_policy_ref",
+            "rule_bundle_version",
+            "effective_config_artifact_id",
+        )
+        if not str(getattr(code_provenance, field_name) or "").strip()
+    ]
+    if missing_fields:
+        raise RuntimeError(
+            "Run manifest strict replay construction requires complete "
+            "contract, DQ policy, and effective config provenance "
+            f"(missing: {', '.join(missing_fields)})"
+        )
+    if not request.planned_artifacts:
+        raise RuntimeError(
+            "Run manifest strict replay construction requires planned_artifacts"
+        )
 
 
 def _validate_exact_replay_snapshot_claim(request: RunManifestCreateSpec) -> None:
