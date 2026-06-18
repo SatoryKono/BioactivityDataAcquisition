@@ -9,6 +9,7 @@ import pyarrow as pa
 from deltalake import DeltaTable
 
 from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.storage.delta.schema_ops import delta_schema_to_pyarrow
 
 
 def read_delta_records(
@@ -55,7 +56,7 @@ def resolve_delta_table_path(
 
 def get_delta_table_arrow_schema(table: DeltaTable) -> pa.Schema:
     """Extract the PyArrow schema from an opened Delta table."""
-    return table.schema().to_arrow()
+    return delta_schema_to_pyarrow(table.schema())
 
 
 def clear_delta_tables(

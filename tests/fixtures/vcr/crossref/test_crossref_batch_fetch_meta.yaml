@@ -2,6 +2,10 @@ schema_version: 1
 provider: crossref
 cassette_rel_path: tests/fixtures/vcr/crossref/test_crossref_batch_fetch.yaml
 metadata_status: managed_inventory
+reachability_review_status: reviewed_unreferenced
+reachability_review_ref: '#5378'
+reachability_review_rationale: Managed cassette retained for VCR inventory coverage;
+  no direct test literal reference is required for this legacy scenario.
 source: backfill_vcr_metadata_sidecars.py
 cassette_sha256: 91b4a413446a025b162ef3bc2ae70a76611dbdfe993eeab811307383e08ad489
 recorded_at: '2026-04-28'

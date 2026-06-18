@@ -329,12 +329,26 @@ def test_debt_scorecard_declares_compatibility_debt_kpis() -> None:
 
     sunset_count = len(transition_debt)
     expired_count = 0
+    census_path = ROOT / "reports/quality/compatibility-importer-census.json"
+    census_payload = json.loads(census_path.read_text(encoding="utf-8"))
+    census_summary = census_payload["summary"]
 
     expected_counts = {
         "transition_compat_count": len(transition_debt),
         "retained_public_entrypoint_burden": len(retained_entrypoints),
         "sunset_compat_count": sunset_count,
         "expired_compat_count": expired_count,
+        "retained_public_export_facade_burden": int(
+            census_summary["retained_public_export_facade_count"]
+        ),
+        "retained_public_export_facade_conflict_count": (
+            int(census_summary["retained_public_export_facades_with_duplicate_exports"])
+            + int(
+                census_summary[
+                    "retained_public_export_facades_with_resolution_conflicts"
+                ]
+            )
+        ),
     }
     for metric_name, expected_count in expected_counts.items():
         metric = metrics.get(metric_name)
@@ -358,6 +372,13 @@ def test_debt_scorecard_declares_compatibility_debt_kpis() -> None:
 
     expired_metric = metrics["expired_compat_count"]
     assert expired_metric.get("max_count") == 0
+
+    export_facade_metric = metrics["retained_public_export_facade_burden"]
+    assert export_facade_metric.get("max_count") == int(
+        census_summary["retained_public_export_facade_count"]
+    )
+    export_conflict_metric = metrics["retained_public_export_facade_conflict_count"]
+    assert export_conflict_metric.get("max_count") == 0
 
 
 def test_debt_scorecard_declares_public_entrypoint_governance_kpis() -> None:
@@ -572,6 +593,25 @@ def test_debt_scorecard_config_surface_ratchet_matches_baseline() -> None:
             assert isinstance(metric, dict)
             assert metric.get("current_count") == baseline_count
             assert metric.get("max_count") == baseline_count
+
+    taxonomy = baseline_payload["parameter_taxonomy"]
+    assert isinstance(taxonomy, dict)
+    taxonomy_policy = ratchet.get("parameter_taxonomy")
+    assert isinstance(taxonomy_policy, dict)
+    assert taxonomy_policy["linked_issue"] == "#5377"
+    assert taxonomy_policy["mode"] == "fail-fast-no-growth"
+    taxonomy_groups = taxonomy_policy["groups"]
+    assert isinstance(taxonomy_groups, dict)
+    for family_name, family_taxonomy in taxonomy["families"].items():
+        assert isinstance(family_taxonomy, dict)
+        baseline_groups = family_taxonomy["groups"]
+        assert isinstance(baseline_groups, dict)
+        family_policy = taxonomy_groups[family_name]
+        assert isinstance(family_policy, dict)
+        legacy_policy = family_policy["compatibility_legacy"]
+        assert legacy_policy["current_count"] == baseline_groups["compatibility_legacy"]
+        assert legacy_policy["max_count"] == baseline_groups["compatibility_legacy"]
+        assert legacy_policy["target_count"] == 0
 
 
 def test_debt_scorecard_hotspot_family_metrics_match_committed_baseline() -> None:

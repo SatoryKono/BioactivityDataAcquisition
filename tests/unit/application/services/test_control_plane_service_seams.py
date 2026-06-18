@@ -28,9 +28,18 @@ from bioetl.application.services.control_plane.replay import (
 from bioetl.application.services.control_plane.workflow import (
     WorkflowExecutionService as WorkflowSeamExecutionService,
 )
+import bioetl.application.services.control_plane as control_plane_root
 
 
 pytestmark = pytest.mark.unit
+
+EXPECTED_RESPONSIBILITY_SEAMS = {
+    "effective_config",
+    "ledger",
+    "manifest",
+    "replay",
+    "workflow",
+}
 
 
 def test_control_plane_responsibility_facades_preserve_canonical_exports() -> None:
@@ -66,6 +75,34 @@ def test_control_plane_services_live_under_ownership_packages() -> None:
         "bioetl.application.services.control_plane.replay.historical_certification_service",
         "bioetl.application.services.control_plane.workflow.execution_service",
     }
+
+
+def test_control_plane_root_documents_explicit_responsibility_seams() -> None:
+    """The package root must stay a compatibility facade over explicit use cases."""
+    doc = control_plane_root.__doc__ or ""
+
+    for seam in EXPECTED_RESPONSIBILITY_SEAMS:
+        assert seam in doc
+
+
+def test_control_plane_root_lazy_exports_target_responsibility_seams() -> None:
+    """Root lazy exports must route to use-case owner packages, not flat wrappers."""
+    lazy_exports = control_plane_root._LAZY_ATTR_EXPORTS
+    allowed_module_prefixes = (
+        *(
+            f"bioetl.application.services.control_plane.{seam}."
+            for seam in EXPECTED_RESPONSIBILITY_SEAMS
+        ),
+        "bioetl.application.services.control_plane.forensic_diff_service",
+    )
+
+    assert lazy_exports
+    for export_name, target in lazy_exports.items():
+        target_module = target[0]
+        assert target_module.startswith(allowed_module_prefixes), (
+            f"{export_name} must point to an explicit control-plane owner seam, "
+            f"not {target_module}"
+        )
 
 
 def test_removed_flat_control_plane_compatibility_wrappers_stay_absent() -> None:

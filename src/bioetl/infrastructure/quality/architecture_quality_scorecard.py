@@ -7,6 +7,12 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from scripts.engineering.ci.validate_registry_dq_refs import (
+    build_diagnostics_payload as build_contract_registry_dq_diagnostics,
+)
+from scripts.engineering.qa.report_adr_enforcement_matrix import (
+    build_payload as build_adr_enforcement_matrix,
+)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[4]
 DEFAULT_OUTPUT = (
@@ -171,12 +177,11 @@ def _load_scorecard_inputs(
         _load_json(repo_root, "reports/quality/compatibility-importer-census.json"),
         _load_json(repo_root, "reports/quality/dead-code-inventory.json"),
         _load_json(repo_root, "reports/quality/contract-registry-diagnostics.json"),
+        build_contract_registry_dq_diagnostics(repo_root),
         _load_json(
-            repo_root,
-            "reports/quality/contract-registry-dq-diagnostics.json",
+            repo_root, "reports/observability/runtime_cardinality_inventory.json"
         ),
-        _load_json(repo_root, "reports/observability/runtime_cardinality_inventory.json"),
-        _load_json(repo_root, "reports/quality/adr-enforcement-matrix.json"),
+        build_adr_enforcement_matrix(repo_root=repo_root),
         _load_yaml(repo_root, "configs/quality/debt_scorecard.yaml"),
     )
 
@@ -188,8 +193,12 @@ def _build_source_artifacts(
     dead_code_inventory: dict[str, Any],  # Any: JSON artifact can have any value type
     contract_diagnostics: dict[str, Any],  # Any: JSON artifact can have any value type
     dq_diagnostics: dict[str, Any],  # Any: JSON artifact can have any value type
-    observability_inventory: dict[str, Any],  # Any: JSON artifact can have any value type
-    adr_enforcement_matrix: dict[str, Any],  # Any: JSON artifact can have any value type
+    observability_inventory: dict[
+        str, Any
+    ],  # Any: JSON artifact can have any value type
+    adr_enforcement_matrix: dict[
+        str, Any
+    ],  # Any: JSON artifact can have any value type
 ) -> dict[str, object]:
     return {
         "dependency_map": {
@@ -214,8 +223,13 @@ def _build_source_artifacts(
             "valid": contract_diagnostics["valid"],
         },
         "contract_registry_dq_diagnostics": {
-            "path": "reports/quality/contract-registry-dq-diagnostics.json",
+            "path": (
+                "scripts/engineering/ci/validate_registry_dq_refs.py"
+                "::build_diagnostics_payload"
+            ),
+            "generated_artifact": "reports/quality/contract-registry-dq-diagnostics.json",
             "valid": dq_diagnostics["valid"],
+            "blocking_issue_count": dq_diagnostics["blocking_issue_count"],
         },
         "observability_runtime_cardinality_inventory": {
             "path": "reports/observability/runtime_cardinality_inventory.json",
@@ -227,7 +241,13 @@ def _build_source_artifacts(
             ),
         },
         "adr_enforcement_matrix": {
-            "path": "reports/quality/adr-enforcement-matrix.json",
+            "path": (
+                "scripts/engineering/qa/report_adr_enforcement_matrix.py::build_payload"
+            ),
+            "generated_artifact": "reports/quality/adr-enforcement-matrix.json",
+            "accepted_adr_count": adr_enforcement_matrix["summary"][
+                "accepted_adr_count"
+            ],
             "blocking_gap_count": adr_enforcement_matrix["summary"][
                 "blocking_gap_count"
             ],

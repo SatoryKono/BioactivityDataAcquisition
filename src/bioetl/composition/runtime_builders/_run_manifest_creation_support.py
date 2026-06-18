@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -22,15 +23,14 @@ from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
 from bioetl.composition.runtime_builders._run_manifest_data_roots import (
     build_planned_artifacts,
 )
-from bioetl.composition.runtime_builders._run_manifest_replay_support import (
+from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
+    to_serializable_mapping,
+)
+from bioetl.composition.runtime_builders._run_manifest_replay_request_support import (
     _apply_replay_assessment,
     _build_manifest_launch_context,
     _build_replay_assessment,
     _validate_exact_replay_boundary,
-    emit_replay_reconstructability_metric as _emit_replay_reconstructability_metric,
-)
-from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
-    to_serializable_mapping,
 )
 from bioetl.composition.runtime_builders._silver_filter_compatibility_support import (
     current_silver_filter_compatibility_mode,
@@ -40,6 +40,10 @@ from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
 )
 from bioetl.composition.services.versioning import get_pipeline_version
 from bioetl.domain.control_plane import ReplayCapability
+from bioetl.domain.control_plane.reproducibility_policy import (
+    DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
+    STRICT_PERSISTENCE_PROFILES,
+)
 
 if TYPE_CHECKING:
     from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
@@ -203,6 +207,7 @@ def build_manifest_create_request(
         resume_requested=bool(_read_attr(ctx, "resume", False)),
     )
     launch_context = _build_manifest_launch_context(
+        manifest_support=_manifest_support,
         request_inputs=request_inputs,
         reproducibility_context=reproducibility_context,
     )
@@ -243,9 +248,71 @@ def emit_replay_reconstructability_metric(
     strict_exact_replay_supported: bool,
     metrics: object,
 ) -> None:
-    """Creation-support ownership seam for replay reconstructability metrics."""
-    _emit_replay_reconstructability_metric(
-        request=request,
-        strict_exact_replay_supported=strict_exact_replay_supported,
-        metrics=metrics,
+    """Emit replay reconstructability metrics for one manifest request."""
+    increment_counter = _read_attr(metrics, "increment_counter", None)
+    if not callable(increment_counter):
+        return
+    set_gauge = _read_attr(metrics, "set_gauge", None)
+    launch_context = request.launch_context
+    strict_replay_requested = bool(
+        launch_context.get("exact_replay", False)
+        if isinstance(launch_context, Mapping)
+        else _read_attr(launch_context, "exact_replay", False)
     )
+    required_persistence_profile = str(
+        (
+            launch_context.get("required_persistence_profile")
+            if isinstance(launch_context, Mapping)
+            else _read_attr(launch_context, "required_persistence_profile")
+        )
+        or DEFAULT_REQUIRED_PERSISTENCE_PROFILE
+    )
+    strict_requirement = (
+        strict_replay_requested
+        or required_persistence_profile in STRICT_PERSISTENCE_PROFILES
+    )
+    status = "reconstructable"
+    if strict_requirement and (
+        not strict_exact_replay_supported
+        or request.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED
+    ):
+        status = "not_reconstructable"
+    raw_run_type = _read_attr(request.run_type, "value", request.run_type)
+    run_type = str(raw_run_type or "unknown").strip().lower().replace(" ", "_")
+    bounded_run_type = run_type or "unknown"
+    increment_counter(
+        "bioetl_replay_reconstructability_events_total",
+        value=1,
+        labels={
+            "pipeline": request.pipeline_name,
+            "replay_capability": request.replay_capability.value,
+            "strict_requirement": "true" if strict_requirement else "false",
+            "status": status,
+        },
+    )
+    lag_status = "not_requested"
+    if status == "not_reconstructable":
+        lag_status = "blocked"
+    elif strict_replay_requested:
+        lag_status = "ready"
+    replay_labels = {
+        "pipeline": request.pipeline_name,
+        "run_type": bounded_run_type,
+        "replay_capability": request.replay_capability.value,
+    }
+    if callable(set_gauge):
+        set_gauge(
+            "bioetl_replay_lag_seconds",
+            value=0.0,
+            labels={**replay_labels, "status": lag_status},
+        )
+    if status == "not_reconstructable":
+        increment_counter(
+            "bioetl_replay_drift_events_total",
+            value=1,
+            labels={
+                **replay_labels,
+                "drift_type": "strict_replay_not_reconstructable",
+                "status": "detected",
+            },
+        )

@@ -231,6 +231,36 @@ data_source = DataSourceFactory.create("chembl", settings=settings, logger=logge
 
 Предоставляет механизмы для динамического поиска и регистрации пайплайнов. Это позволяет CLI находить доступные пайплайны по их именам (например, `chembl_activity`).
 
+### 2.5. DI Ownership Map: CLI → Composition → Factories → Adapters
+
+Composition владеет runtime dependency injection от CLI entrypoints до конкретных
+адаптеров. `Interfaces` выбирает команду и валидирует operator input, но не
+создаёт infrastructure adapters напрямую; `Application` получает ports/use-case
+services через constructor injection; `Infrastructure` содержит реализации
+ports, но не принимает решения о runtime wiring.
+
+| Runtime path | Entry point / owner | DI seam | Factory / builder owner | Adapter owner |
+| --- | --- | --- | --- | --- |
+| Pipeline run CLI | `src/bioetl/interfaces/cli/commands/run.py` delegates into `bioetl.composition.entrypoints` / execution API seams | `src/bioetl/composition/bootstrap/runtime/pipeline.py::bootstrap_pipeline_runner()` | `src/bioetl/composition/runtime_builders/runner_builder.py::build_pipeline_runner()` and `src/bioetl/composition/factories/pipeline/runner.py::create_runner_factory()` | Provider/storage implementations under `src/bioetl/infrastructure/adapters/**` and `src/bioetl/infrastructure/storage/**` |
+| Pipeline runner service | `src/bioetl/composition/_services.py` compatibility dispatch for stable public imports | `src/bioetl/composition/bootstrap/runtime/runner.py::bootstrap_pipeline_runner_service()` | `src/bioetl/composition/factories/pipeline/runner.py::RunnerFactory` | Runtime services and adapters injected through composition-owned factory callbacks |
+| CLI storage previews / maintenance | `src/bioetl/composition/bootstrap/cli/storage.py` owns CLI-specific storage bootstrap | `src/bioetl/composition/bootstrap/assembly/storage.py::bootstrap_storage_adapter()` | `src/bioetl/composition/factories/storage/factory.py::StorageFactory` and `src/bioetl/composition/factories/storage/adapter.py::StorageBundle` | `BronzeWriter`, `SilverWriter`, `GoldWriter`, Delta/table operations under `src/bioetl/infrastructure/storage/**` |
+| Composite runtime | `src/bioetl/composition/bootstrap/runtime/composite.py::bootstrap_composite_runner()` | Composite runtime storage bootstrapping via `bootstrap_storage_adapter` callback | `src/bioetl/composition/bootstrap/runtime/composite_bootstrap_builders.py` and `src/bioetl/composition/runtime_builders/**` | Composite pipeline storage/data-source adapters injected through explicit builder inputs |
+| Provider data source creation | `src/bioetl/composition/providers/**` owns provider registration lifecycle | `src/bioetl/composition/factories/datasource/data_source_factory.py::DataSourceFactory` | `src/bioetl/composition/factories/datasource/http_client.py::HttpClientFactory` and provider creator callbacks | Concrete HTTP/source adapters under `src/bioetl/infrastructure/adapters/**` |
+
+Generated evidence for this map is maintained by
+`reports/quality/port-adapter-factory-coverage.json` and
+`reports/quality/port-adapter-factory-coverage.md`; drift is checked by
+`python -m scripts.engineering.qa report-port-adapter-factory-coverage --check`.
+The read-only architecture bundle also runs this gate from
+`scripts/engineering/qa/run_architecture_audit_read_only.py`.
+
+**Ownership rule:** new DI decisions must be added in `src/bioetl/composition/**`
+or a composition-owned factory/builder. CLI modules may call composition seams;
+application modules may request Domain ports; infrastructure modules may
+implement ports. Direct CLI/Application construction of concrete infrastructure
+adapters is an architecture drift and must be covered by a new ADR before it is
+accepted.
+
 ## 3. Принципы Работы
 
 - **Composition Root:** Вся логика создания объектов должна находиться как можно ближе к точке входа в приложение. В BioETL это `src/bioetl/composition/`.

@@ -155,7 +155,14 @@ async def write_bronze_data_and_sidecar(
             prepared.full_path,
         )
         meta_bytes = orjson.dumps(prepared.metadata, option=orjson.OPT_SORT_KEYS)
-        atomic_write_bytes(prepared.meta_path, meta_bytes)
+        if prepared.meta_path.exists():
+            if prepared.meta_path.read_bytes() != meta_bytes:
+                raise FileExistsError(
+                    "Bronze metadata sidecar already exists with different payload: "
+                    f"{prepared.meta_path}"
+                )
+        else:
+            atomic_write_bytes(prepared.meta_path, meta_bytes)
         return count, size
 
     record_count, uncompressed_size = await asyncio.to_thread(_write_task)

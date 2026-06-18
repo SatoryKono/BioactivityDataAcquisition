@@ -1,4 +1,4 @@
-"""Runtime coverage for retained public CLI compatibility wrappers."""
+"""Runtime coverage for retained public CLI wrapper contracts."""
 
 from __future__ import annotations
 
@@ -120,7 +120,9 @@ def test_maintenance_domain_package_lazy_exports_public_group() -> None:
     package = importlib.import_module(
         "bioetl.interfaces.cli.commands.domains.maintenance"
     )
-    public_module = importlib.import_module("bioetl.interfaces.cli.commands.maintenance")
+    public_module = importlib.import_module(
+        "bioetl.interfaces.cli.commands.maintenance"
+    )
 
     assert package.__getattr__("maintenance") is public_module.maintenance
 

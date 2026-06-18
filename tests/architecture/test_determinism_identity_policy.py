@@ -263,8 +263,15 @@ def test_determinism_identity_policy_has_expected_shape() -> None:
         seen_semantic_artifacts.add(artifact)
         required_fields = entry.get("required_fields")
         forbidden_fields = entry.get("forbidden_occurrence_identity_fields")
+        forbidden_runtime_timestamp_fields = entry.get(
+            "forbidden_runtime_timestamp_fields"
+        )
         assert isinstance(required_fields, list) and required_fields
         assert isinstance(forbidden_fields, list) and forbidden_fields
+        assert (
+            isinstance(forbidden_runtime_timestamp_fields, list)
+            and forbidden_runtime_timestamp_fields
+        )
         assert not set(required_fields) & set(forbidden_fields), (
             "Semantic identity contract cannot require and forbid the same field: "
             f"{artifact}"
@@ -282,7 +289,9 @@ def test_determinism_identity_policy_has_expected_shape() -> None:
     backfill_plan = datetime_policy.get("datetime_hash_backfill_plan")
     assert isinstance(backfill_plan, dict)
     assert backfill_plan.get("issue") == "#4587"
-    assert backfill_plan.get("status") == "deterministic_default_switched"
+    assert backfill_plan.get("status") == (
+        "deterministic_default_switched_backfill_complete"
+    )
     assert backfill_plan.get("default_switch_target") == "v2_datetime_utc"
     phases = backfill_plan.get("phases")
     assert isinstance(phases, list)
@@ -292,6 +301,19 @@ def test_determinism_identity_policy_has_expected_shape() -> None:
         "backfill",
         "ratchet",
     ]
+
+    runtime_timestamp_contract = payload.get("runtime_timestamp_identity_contract")
+    assert isinstance(runtime_timestamp_contract, dict)
+    assert runtime_timestamp_contract["replay_identity_anchor"] is False
+    assert runtime_timestamp_contract.get("forbidden_semantic_identity_fields")
+    allowed_surfaces = runtime_timestamp_contract.get("allowed_non_identity_surfaces")
+    assert isinstance(allowed_surfaces, list) and allowed_surfaces
+    for surface in allowed_surfaces:
+        assert isinstance(surface, dict)
+        assert str(surface.get("artifact", "")).strip()
+        assert surface.get("replay_identity_anchor") is False
+        assert surface.get("fields")
+        assert str(surface.get("rationale", "")).strip()
 
 
 @pytest.mark.architecture
@@ -357,6 +379,56 @@ def test_semantic_identity_anchors_forbid_all_occurrence_fields() -> None:
         "Semantic identity anchors must forbid all operational occurrence fields:\n"
         + "\n".join(missing_forbidden_fields)
     )
+
+
+@pytest.mark.architecture
+def test_runtime_timestamps_and_durations_are_excluded_from_identity() -> None:
+    """Runtime duration and debug/export timestamps must stay non-semantic."""
+    payload = _load_policy()
+    runtime_timestamp_contract = payload["runtime_timestamp_identity_contract"]
+    assert isinstance(runtime_timestamp_contract, dict)
+    forbidden_runtime_fields = {
+        str(field)
+        for field in runtime_timestamp_contract["forbidden_semantic_identity_fields"]
+    }
+    assert {
+        "duration_seconds",
+        "duration_ms",
+        "debug_export_created_at",
+        "export_manifest_created_at",
+    } <= forbidden_runtime_fields
+
+    artifact_contract = payload["artifact_identity_contract"]
+    assert isinstance(artifact_contract, dict)
+    semantic_anchors = artifact_contract["semantic_identity_anchors"]
+    assert isinstance(semantic_anchors, list)
+    missing_runtime_fields: list[str] = []
+    for anchor in semantic_anchors:
+        assert isinstance(anchor, dict)
+        forbidden_fields = {
+            str(field)
+            for field in anchor.get("forbidden_runtime_timestamp_fields", [])
+        }
+        missing = sorted(forbidden_runtime_fields - forbidden_fields)
+        if missing:
+            missing_runtime_fields.append(f"{anchor['artifact']}: {', '.join(missing)}")
+
+    assert not missing_runtime_fields, (
+        "Semantic identity anchors must forbid runtime duration/debug/export "
+        "timestamp fields:\n" + "\n".join(missing_runtime_fields)
+    )
+
+    execution_identity_params = set(
+        signature(build_execution_identity_payload).parameters
+    )
+    assert not forbidden_runtime_fields & execution_identity_params
+
+    allowed_surfaces = runtime_timestamp_contract["allowed_non_identity_surfaces"]
+    assert isinstance(allowed_surfaces, list)
+    for surface in allowed_surfaces:
+        assert isinstance(surface, dict)
+        assert surface["replay_identity_anchor"] is False
+        assert set(surface["fields"]) <= forbidden_runtime_fields
 
 
 @pytest.mark.architecture

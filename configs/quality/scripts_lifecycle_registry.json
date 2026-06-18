@@ -320,6 +320,24 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the shared first-party import-graph helper consumed by QA inventory reports; fold it into a broader canonical graph helper surface only if the inventory/reporting pipeline is consolidated."
     },
+    "scripts/engineering/qa/report_domain_io_taint_inventory.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded architecture-audit evidence helper consumed by the read-only architecture audit lane; keep it non-active unless it becomes a separately documented public QA command surface."
+    },
+    "scripts/engineering/qa/report_port_adapter_factory_coverage.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded architecture-audit evidence helper consumed by the read-only architecture audit lane; keep it non-active unless it becomes a separately documented public QA command surface."
+    },
+    "scripts/engineering/qa/run_architecture_audit_read_only.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the bounded read-only architecture-audit coordinator; keep it non-active while it is a governance helper rather than a general developer bootstrap entrypoint."
+    },
     "scripts/docs/generate_pipeline_normalization_validation_table.py": {
       "owner": "@bioetl-docs",
       "decision": "legacy_manual_utility",

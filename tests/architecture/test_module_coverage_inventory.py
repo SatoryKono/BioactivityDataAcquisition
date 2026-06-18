@@ -21,6 +21,9 @@ INVENTORY_PATH = ROOT / "reports" / "quality" / "module-coverage-inventory.json"
 WORKFLOW_PATH = ROOT / ".github" / "workflows" / "tests.yml"
 SCORECARD_PATH = ROOT / "configs" / "quality" / "debt_scorecard.yaml"
 GATES_PATH = ROOT / "configs" / "quality" / "module_coverage_gates.yaml"
+COVERAGE_TAIL_CLOSEOUT_PATH = (
+    ROOT / "reports" / "quality" / "issue-5376-coverage-tail-closeout.json"
+)
 
 
 def _skip_if_source_tree_is_dirty() -> None:
@@ -39,7 +42,9 @@ def _skip_if_source_tree_is_dirty() -> None:
             "Committed module-coverage inventory dirty-tree guard is not "
             "authoritative on this checkout."
         )
-    dirty_entries = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+    dirty_entries = [
+        line.strip() for line in result.stdout.splitlines() if line.strip()
+    ]
     if dirty_entries:
         pytest.skip(
             "Committed module-coverage inventory is only authoritative for a clean "
@@ -139,6 +144,7 @@ def test_module_coverage_inventory_covers_every_source_module() -> None:
 def test_module_coverage_inventory_source_tree_hash_is_current() -> None:
     # Skip on WSL and Windows due to filesystem performance causing hash computation timeout
     import sys
+
     if sys.platform.startswith("win"):
         pytest.skip("Skipped on Windows due to filesystem performance")
     try:
@@ -239,6 +245,35 @@ def test_hotspot_refactor_targets_have_authoritative_module_coverage_gates() -> 
 
 
 @pytest.mark.architecture
+def test_issue_5376_coverage_tail_closeout_matches_live_inventory() -> None:
+    """#5376 must reduce the below-85 tail without reintroducing zero-coverage debt."""
+    committed = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
+    closeout = json.loads(COVERAGE_TAIL_CLOSEOUT_PATH.read_text(encoding="utf-8"))
+
+    below_85 = [
+        row
+        for row in committed["modules"]
+        if row["coverage_percent"] is not None and row["coverage_percent"] < 85
+    ]
+    below_85_paths = {row["path"] for row in below_85}
+    delta = int(
+        closeout["coverage_inventory_delta"]["after_below_85_module_count"]
+    ) - int(closeout["coverage_inventory_delta"]["before_below_85_module_count"])
+
+    assert closeout["issue"]["number"] == 5376
+    assert closeout["coverage_inventory_delta"]["after_below_85_module_count"] == len(
+        below_85
+    )
+    assert closeout["coverage_inventory_delta"]["below_85_module_count_delta"] == delta
+    assert delta < 0
+    assert committed["summary"]["uncovered_module_count"] == 0
+    assert committed["summary"]["unmeasured_module_count"] == 0
+    assert closeout["coverage_inventory_delta"]["after_uncovered_module_count"] == 0
+    assert closeout["coverage_inventory_delta"]["after_unmeasured_module_count"] == 0
+    assert closeout["removed_low_tail_module"]["path"] not in below_85_paths
+
+
+@pytest.mark.architecture
 def test_module_coverage_inventory_check_requires_coverage_xml_by_default(
     tmp_path: Path,
 ) -> None:
@@ -300,7 +335,10 @@ def test_module_coverage_gates_policy_is_committed() -> None:
     assert gates["enforcement"]["default_mode"] == "block-regression"
     assert gates["branch_coverage"]["measurement"] == "enabled"
     assert gates["branch_coverage"]["policy"] == "advisory"
-    assert gates["branch_coverage"]["source"] == "reports/coverage/coverage.xml#branch-rate"
+    assert (
+        gates["branch_coverage"]["source"]
+        == "reports/coverage/coverage.xml#branch-rate"
+    )
     assert "aggregates_and_contracts" in gates["tiers"]
     assert gates["tiers"]["aggregates_and_contracts"]["line_min_percent"] == 95
 

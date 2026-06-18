@@ -84,12 +84,38 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
             if record_count == 0:
                 temp_path.unlink()
                 raise ValueError("No records to write")
+            if target_path.exists():
+                if self._compressed_payload_matches(target_path, temp_path):
+                    temp_path.unlink()
+                    return record_count, uncompressed_size
+                temp_path.unlink()
+                raise FileExistsError(
+                    f"Bronze target already exists with different payload: {target_path}"
+                )
             temp_path.replace(target_path)
         except BRONZE_WRITE_ERRORS:
             if temp_path.exists():
                 temp_path.unlink()
             raise
         return record_count, uncompressed_size
+
+    def _compressed_payload_matches(self, left: Path, right: Path) -> bool:
+        """Compare compressed Bronze payloads by decompressed bytes."""
+        left_dctx = zstd.ZstdDecompressor()
+        right_dctx = zstd.ZstdDecompressor()
+        with (
+            left.open("rb") as left_file,
+            right.open("rb") as right_file,
+            left_dctx.stream_reader(left_file) as left_reader,
+            right_dctx.stream_reader(right_file) as right_reader,
+        ):
+            while True:
+                left_chunk = left_reader.read(65536)
+                right_chunk = right_reader.read(65536)
+                if left_chunk != right_chunk:
+                    return False
+                if not left_chunk:
+                    return True
 
     async def _calculate_checksum(self, file_path: Path) -> str:
         """Calculate BLAKE2b checksum of a file asynchronously."""
@@ -122,6 +148,12 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
 
         json_full_path = self.base_path / json_relative_path
         json_full_path.parent.mkdir(parents=True, exist_ok=True)
+        if json_full_path.exists():
+            if json_full_path.read_bytes() == jsonl_content:
+                return
+            raise FileExistsError(
+                f"Bronze JSON copy already exists with different payload: {json_full_path}"
+            )
 
         loop = asyncio.get_running_loop()
         await loop.run_in_executor(

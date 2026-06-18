@@ -1,13 +1,26 @@
 {
+  "constraint_completeness_missing_count": 0,
+  "constraint_completeness_review_count": 27,
   "covered_gold_enabled_count": 27,
   "excluded_count": 0,
   "exclusions": [],
   "gold_enabled_count": 27,
+  "golden_test_evidence_count": 27,
   "missing_gold_enabled_count": 0,
   "row_count": 27,
   "rows": [
     {
       "config_path": "configs/entities/chembl/activity.yaml",
+      "constraint_completeness_status": "covered",
+      "constraint_completeness_surfaces": [
+        "contract_tests",
+        "golden_tests",
+        "nullable_policy",
+        "pandera_checks",
+        "pandera_fields",
+        "primary_key_required_fields",
+        "required_fields"
+      ],
       "contract_ref": "chembl.activity",
       "contract_test_paths": [
         "tests/contract/test_chembl_activity_flag_policy.py",
@@ -44,7 +57,14 @@
       "gold_schema_source_path": "../../src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py",
       "gold_schema_source_resolved_path": "src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py",
       "gold_strict_validation_declared": true,
+      "golden_test_evidence_declared": true,
+      "golden_test_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "missing_constraint_surfaces": [],
       "missing_surfaces": [],
+      "pandera_check_constraint_evidence_declared": true,
       "pandera_check_count_in_source": 131,
       "pandera_contract_declared": true,
       "pandera_field_count_in_source": 131,
@@ -62,6 +82,7 @@
       "published_contract_check_constraint_count": 0,
       "published_contract_non_nullable_count": 7,
       "published_contract_nullable_count": 65,
+      "published_contract_nullable_policy_declared": true,
       "published_contract_property_count": 72,
       "published_contract_required_count": 7,
       "published_contract_required_fields": [
@@ -81,6 +102,16 @@
     },
     {
       "config_path": "configs/entities/chembl/assay.yaml",
+      "constraint_completeness_status": "covered",
+      "constraint_completeness_surfaces": [
+        "contract_tests",
+        "golden_tests",
+        "nullable_policy",
+        "pandera_checks",
+        "pandera_fields",
+        "primary_key_required_fields",
+        "required_fields"
+      ],
       "contract_ref": "chembl.assay",
       "contract_test_paths": [
         "tests/contract/test_gold_entity_coverage_complete.py",
@@ -108,7 +139,14 @@
       "gold_schema_source_path": "../../src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py",
       "gold_schema_source_resolved_path": "src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py",
       "gold_strict_validation_declared": true,
+      "golden_test_evidence_declared": true,
+      "golden_test_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "missing_constraint_surfaces": [],
       "missing_surfaces": [],
+      "pandera_check_constraint_evidence_declared": true,
       "pandera_check_count_in_source": 131,
       "pandera_contract_declared": true,
       "pandera_field_count_in_source": 131,
@@ -126,6 +164,7 @@
       "published_contract_check_constraint_count": 0,
       "published_contract_non_nullable_count": 6,
       "published_contract_nullable_count": 36,
+      "published_contract_nullable_policy_declared": true,
       "published_contract_property_count": 42,
       "published_contract_required_count": 6,
       "published_contract_required_fields": [
@@ -144,6 +183,16 @@
     },
     {
       "config_path": "configs/entities/chembl/assay_parameters.yaml",
+      "constraint_completeness_status": "covered",
+      "constraint_completeness_surfaces": [
+        "contract_tests",
+        "golden_tests",
+        "nullable_policy",
+        "pandera_checks",
+        "pandera_fields",
+        "primary_key_required_fields",
+        "required_fields"
+      ],
       "contract_ref": "chembl.assay_parameters",
       "contract_test_paths": [
         "tests/contract/test_gold_entity_coverage_complete.py",
@@ -165,7 +214,14 @@
       "gold_schema_source_path": "../../src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py",
       "gold_schema_source_resolved_path": "src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py",
       "gold_strict_validation_declared": true,
+      "golden_test_evidence_declared": true,
+      "golden_test_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "missing_constraint_surfaces": [],
       "missing_surfaces": [],
+      "pandera_check_constraint_evidence_declared": true,
       "pandera_check_count_in_source": 131,
       "pandera_contract_declared": true,
       "pandera_field_count_in_source": 131,
@@ -183,6 +239,7 @@
       "published_contract_check_constraint_count": 0,
       "published_contract_non_nullable_count": 8,
       "published_contract_nullable_count": 18,
+      "published_contract_nullable_policy_declared": true,
       "published_contract_property_count": 26,
       "published_contract_required_count": 8,
       "published_contract_required_fields": [
@@ -203,6 +260,16 @@
     },
     {
       "config_path": "configs/entities/chembl/cell_line.yaml",
+      "constraint_completeness_status": "covered",
+      "constraint_completeness_surfaces": [
+        "contract_tests",
+        "golden_tests",
+        "nullable_policy",
+        "pandera_checks",
+        "pandera_fields",
+        "primary_key_required_fields",
+        "required_fields"
+      ],
       "contract_ref": "chembl.cell_line",
       "contract_test_paths": [
         "tests/contract/test_gold_entity_coverage_complete.py",
@@ -223,7 +290,14 @@
       "gold_schema_source_path": "../../src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py",
       "gold_schema_source_resolved_path": "src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py",
       "gold_strict_validation_declared": true,
+      "golden_test_evidence_declared": true,
+      "golden_test_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "missing_constraint_surfaces": [],
       "missing_surfaces": [],
+      "pandera_check_constraint_evidence_declared": true,
       "pandera_check_count_in_source": 75,
       "pandera_contract_declared": true,
       "pandera_field_count_in_source": 67,
@@ -241,6 +315,7 @@
       "published_contract_check_constraint_count": 0,
       "published_contract_non_nullable_count": 7,
       "published_contract_nullable_count": 9,
+      "published_contract_nullable_policy_declared": true,
       "published_contract_property_count": 16,
       "published_contract_required_count": 7,
       "published_contract_required_fields": [
@@ -260,6 +335,16 @@
     },
     {
       "config_path": "configs/entities/chembl/compound_record.yaml",
+      "constraint_completeness_status": "covered",
+      "constraint_completeness_surfaces": [
+        "contract_tests",
+        "golden_tests",
+        "nullable_policy",
+        "pandera_checks",
+        "pandera_fields",
+        "primary_key_required_fields",
+        "required_fields"
+      ],
       "contract_ref": "chembl.compound_record",
       "contract_test_paths": [
         "tests/contract/test_gold_entity_coverage_complete.py",
@@ -280,7 +365,14 @@
       "gold_schema_source_path": "../../src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py",
       "gold_schema_source_resolved_path": "src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py",
       "gold_strict_validation_declared": true,
+      "golden_test_evidence_declared": true,
+      "golden_test_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "missing_constraint_surfaces": [],
       "missing_surfaces": [],
+      "pandera_check_constraint_evidence_declared": true,
       "pandera_check_count_in_source": 75,
       "pandera_contract_declared": true,
       "pandera_field_count_in_source": 67,
@@ -298,6 +390,7 @@
       "published_contract_check_constraint_count": 0,
       "published_contract_non_nullable_count": 9,
       "published_contract_nullable_count": 3,
+      "published_contract_nullable_policy_declared": true,
       "published_contract_property_count": 12,
       "published_contract_required_count": 9,
       "published_contract_required_fields": [
@@ -319,6 +412,16 @@
     },
     {
       "config_path": "configs/entities/chembl/molecule.yaml",
+      "constraint_completeness_status": "covered",
+      "constraint_completeness_surfaces": [
+        "contract_tests",
+        "golden_tests",
+        "nullable_policy",
+        "pandera_checks",
+        "pandera_fields",
+        "primary_key_required_fields",
+        "required_fields"
+      ],
       "contract_ref": "chembl.molecule",
       "contract_test_paths": [
         "tests/contract/test_gold_entity_coverage_complete.py",
@@ -340,7 +443,14 @@
       "gold_schema_source_path": "../../src/bioetl/domain/contracts/gold/_chembl_molecule_protein_schemas.py",
       "gold_schema_source_resolved_path": "src/bioetl/domain/contracts/gold/_chembl_molecule_protein_schemas.py",
       "gold_strict_validation_declared": true,
+      "golden_test_evidence_declared": true,
+      "golden_test_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "missing_constraint_surfaces": [],
       "missing_surfaces": [],
+      "pandera_check_constraint_evidence_declared": true,
       "pandera_check_count_in_source": 72,
       "pandera_contract_declared": true,
       "pandera_field_count_in_source": 66,
@@ -358,6 +468,7 @@
       "published_contract_check_constraint_count": 0,
       "published_contract_non_nullable_count": 6,
       "published_contract_nullable_count": 51,
+      "published_contract_nullable_policy_declared": true,
       "published_contract_property_count": 57,
       "published_contract_required_count": 6,
       "published_contract_required_fields": [
@@ -376,6 +487,16 @@
     },
     {
       "config_path": "configs/entities/chembl/protein_class.yaml",
+      "constraint_completeness_status": "covered",
+      "constraint_completeness_surfaces": [
+        "contract_tests",
+        "golden_tests",
+        "nullable_policy",
+        "pandera_checks",
+        "pandera_fields",
+        "primary_key_required_fields",
+        "required_fields"
+      ],
       "contract_ref": "chembl.protein_class",
       "contract_test_paths": [
         "tests/architecture/test_chembl_protein_classification_contracts.py",
@@ -406,7 +527,14 @@
       "gold_schema_source_path": "../../src/bioetl/domain/contracts/gold/_chembl_molecule_protein_schemas.py",
       "gold_schema_source_resolved_path": "src/bioetl/domain/contracts/gold/_chembl_molecule_protein_schemas.py",
       "gold_strict_validation_declared": true,
+      "golden_test_evidence_declared": true,
+      "golden_test_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "missing_constraint_surfaces": [],
       "missing_surfaces": [],
+      "pandera_check_constraint_evidence_declared": true,
       "pandera_check_count_in_source": 72,
       "pandera_contract_declared": true,
       "pandera_field_count_in_source": 66,
@@ -424,6 +552,7 @@
       "published_contract_check_constraint_count": 0,
       "published_contract_non_nullable_count": 6,
       "published_contract_nullable_count": 9,
+      "published_contract_nullable_policy_declared": true,
       "published_contract_property_count": 15,
       "published_contract_required_count": 6,
       "published_contract_required_fields": [
@@ -442,6 +571,16 @@
     },
     {
       "config_path": "configs/entities/chembl/publication.yaml",
+      "constraint_completeness_status": "covered",
+      "constraint_completeness_surfaces": [
+        "contract_tests",
+        "golden_tests",
+        "nullable_policy",
+        "pandera_checks",
+        "pandera_fields",
+        "primary_key_required_fields",
+        "required_fields"
+      ],
       "contract_ref": "chembl.publication",
       "contract_test_paths": [
         "tests/architecture/test_chembl_publication_subset_policy.py",
@@ -519,7 +658,14 @@
       "gold_schema_source_path": "../../src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py",
       "gold_schema_source_resolved_path": "src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py",
       "gold_strict_validation_declared": true,
+      "golden_test_evidence_declared": true,
+      "golden_test_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "missing_constraint_surfaces": [],
       "missing_surfaces": [],
+      "pandera_check_constraint_evidence_declared": true,
       "pandera_check_count_in_source": 75,
       "pandera_contract_declared": true,
       "pandera_field_count_in_source": 67,
@@ -537,6 +683,7 @@
       "published_contract_check_constraint_count": 0,
       "published_contract_non_nullable_count": 7,
       "published_contract_nullable_count": 23,
+      "published_contract_nullable_policy_declared": true,
       "published_contract_property_count": 30,
       "published_contract_required_count": 7,
       "published_contract_required_fields": [
@@ -556,6 +703,16 @@
     },
     {
       "config_path": "configs/entities/chembl/publication_similarity.yaml",
+      "constraint_completeness_status": "covered",
+      "constraint_completeness_surfaces": [
+        "contract_tests",
+        "golden_tests",
+        "nullable_policy",
+        "pandera_checks",
+        "pandera_fields",
+        "primary_key_required_fields",
+        "required_fields"
+      ],
       "contract_ref": "chembl.publication_similarity",
       "contract_test_paths": [
         "tests/contract/test_gold_entity_coverage_complete.py",
@@ -575,7 +732,14 @@
       "gold_schema_source_path": "../../src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py",
       "gold_schema_source_resolved_path": "src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py",
       "gold_strict_validation_declared": true,
+      "golden_test_evidence_declared": true,
+      "golden_test_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "missing_constraint_surfaces": [],
       "missing_surfaces": [],
+      "pandera_check_constraint_evidence_declared": true,
       "pandera_check_count_in_source": 75,
       "pandera_contract_declared": true,
       "pandera_field_count_in_source": 67,
@@ -593,6 +757,7 @@
       "published_contract_check_constraint_count": 0,
       "published_contract_non_nullable_count": 8,
       "published_contract_nullable_count": 6,
+      "published_contract_nullable_policy_declared": true,
       "published_contract_property_count": 14,
       "published_contract_required_count": 8,
       "published_contract_required_fields": [
@@ -613,6 +778,16 @@
     },
     {
       "config_path": "configs/entities/chembl/publication_term.yaml",
+      "constraint_completeness_status": "covered",
+      "constraint_completeness_surfaces": [
+        "contract_tests",
+        "golden_tests",
+        "nullable_policy",
+        "pandera_checks",
+        "pandera_fields",
+        "primary_key_required_fields",
+        "required_fields"
+      ],
       "contract_ref": "chembl.publication_term",
       "contract_test_paths": [
         "tests/contract/test_gold_entity_coverage_complete.py",
@@ -636,7 +811,14 @@
       "gold_schema_source_path": "../../src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py",
       "gold_schema_source_resolved_path": "src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py",
       "gold_strict_validation_declared": true,
+      "golden_test_evidence_declared": true,
+      "golden_test_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "missing_constraint_surfaces": [],
       "missing_surfaces": [],
+      "pandera_check_constraint_evidence_declared": true,
       "pandera_check_count_in_source": 75,
       "pandera_contract_declared": true,
       "pandera_field_count_in_source": 67,
@@ -656,6 +838,7 @@
       "published_contract_check_constraint_count": 0,
       "published_contract_non_nullable_count": 8,
       "published_contract_nullable_count": 2,
+      "published_contract_nullable_policy_declared": true,
       "published_contract_property_count": 10,
       "published_contract_required_count": 8,
       "published_contract_required_fields": [
@@ -676,6 +859,16 @@
     },
     {
       "config_path": "configs/entities/chembl/subcellular_fraction.yaml",
+      "constraint_completeness_status": "covered",
+      "constraint_completeness_surfaces": [
+        "contract_tests",
+        "golden_tests",
+        "nullable_policy",
+        "pandera_checks",
+        "pandera_fields",
+        "primary_key_required_fields",
+        "required_fields"
+      ],
       "contract_ref": "chembl.subcellular_fraction",
       "contract_test_paths": [
         "tests/contract/test_gold_entity_coverage_complete.py",
@@ -697,7 +890,14 @@
       "gold_schema_source_path": "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
       "gold_schema_source_resolved_path": "src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
       "gold_strict_validation_declared": true,
+      "golden_test_evidence_declared": true,
+      "golden_test_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "missing_constraint_surfaces": [],
       "missing_surfaces": [],
+      "pandera_check_constraint_evidence_declared": true,
       "pandera_check_count_in_source": 117,
       "pandera_contract_declared": true,
       "pandera_field_count_in_source": 97,
@@ -715,6 +915,7 @@
       "published_contract_check_constraint_count": 0,
       "published_contract_non_nullable_count": 6,
       "published_contract_nullable_count": 2,
+      "published_contract_nullable_policy_declared": true,
       "published_contract_property_count": 8,
       "published_contract_required_count": 6,
       "published_contract_required_fields": [
@@ -733,6 +934,16 @@
     },
     {
       "config_path": "configs/entities/chembl/target.yaml",
+      "constraint_completeness_status": "covered",
+      "constraint_completeness_surfaces": [
+        "contract_tests",
+        "golden_tests",
+        "nullable_policy",
+        "pandera_checks",
+        "pandera_fields",
+        "primary_key_required_fields",
+        "required_fields"
+      ],
       "contract_ref": "chembl.target",
       "contract_test_paths": [
         "tests/architecture/test_protein_class_target_type_codegen_contract.py",
@@ -763,7 +974,14 @@
       "gold_schema_source_path": "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
       "gold_schema_source_resolved_path": "src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
       "gold_strict_validation_declared": true,
+      "golden_test_evidence_declared": true,
+      "golden_test_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "missing_constraint_surfaces": [],
       "missing_surfaces": [],
+      "pandera_check_constraint_evidence_declared": true,
       "pandera_check_count_in_source": 117,
       "pandera_contract_declared": true,
       "pandera_field_count_in_source": 97,
@@ -781,6 +999,7 @@
       "published_contract_check_constraint_count": 0,
       "published_contract_non_nullable_count": 6,
       "published_contract_nullable_count": 26,
+      "published_contract_nullable_policy_declared": true,
       "published_contract_property_count": 32,
       "published_contract_required_count": 6,
       "published_contract_required_fields": [
@@ -799,6 +1018,16 @@
     },
     {
       "config_path": "configs/entities/chembl/target_component.yaml",
+      "constraint_completeness_status": "covered",
+      "constraint_completeness_surfaces": [
+        "contract_tests",
+        "golden_tests",
+        "nullable_policy",
+        "pandera_checks",
+        "pandera_fields",
+        "primary_key_required_fields",
+        "required_fields"
+      ],
       "contract_ref": "chembl.target_component",
       "contract_test_paths": [
         "tests/contract/test_gold_entity_coverage_complete.py",
@@ -818,7 +1047,14 @@
       "gold_schema_source_path": "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
       "gold_schema_source_resolved_path": "src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
       "gold_strict_validation_declared": true,
+      "golden_test_evidence_declared": true,
+      "golden_test_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "missing_constraint_surfaces": [],
       "missing_surfaces": [],
+      "pandera_check_constraint_evidence_declared": true,
       "pandera_check_count_in_source": 117,
       "pandera_contract_declared": true,
       "pandera_field_count_in_source": 97,
@@ -836,6 +1072,7 @@
       "published_contract_check_constraint_count": 0,
       "published_contract_non_nullable_count": 6,
       "published_contract_nullable_count": 10,
+      "published_contract_nullable_policy_declared": true,
       "published_contract_property_count": 16,
       "published_contract_required_count": 6,
       "published_contract_required_fields": [
@@ -854,6 +1091,16 @@
     },
     {
       "config_path": "configs/entities/chembl/target_protein_classification.yaml",
+      "constraint_completeness_status": "covered",
+      "constraint_completeness_surfaces": [
+        "contract_tests",
+        "golden_tests",
+        "nullable_policy",
+        "pandera_checks",
+        "pandera_fields",
+        "primary_key_required_fields",
+        "required_fields"
+      ],
       "contract_ref": "chembl.target_protein_classification",
       "contract_test_paths": [
         "tests/contract/test_gold_entity_coverage_complete.py",
@@ -876,7 +1123,14 @@
       "gold_schema_source_path": "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
       "gold_schema_source_resolved_path": "src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
       "gold_strict_validation_declared": true,
+      "golden_test_evidence_declared": true,
+      "golden_test_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "missing_constraint_surfaces": [],
       "missing_surfaces": [],
+      "pandera_check_constraint_evidence_declared": true,
       "pandera_check_count_in_source": 117,
       "pandera_contract_declared": true,
       "pandera_field_count_in_source": 97,
@@ -894,6 +1148,7 @@
       "published_contract_check_constraint_count": 0,
       "published_contract_non_nullable_count": 7,
       "published_contract_nullable_count": 38,
+      "published_contract_nullable_policy_declared": true,
       "published_contract_property_count": 45,
       "published_contract_required_count": 7,
       "published_contract_required_fields": [
@@ -913,6 +1168,16 @@
     },
     {
       "config_path": "configs/entities/chembl/tissue.yaml",
+      "constraint_completeness_status": "covered",
+      "constraint_completeness_surfaces": [
+        "contract_tests",
+        "golden_tests",
+        "nullable_policy",
+        "pandera_checks",
+        "pandera_fields",
+        "primary_key_required_fields",
+        "required_fields"
+      ],
       "contract_ref": "chembl.tissue",
       "contract_test_paths": [
         "tests/contract/test_gold_entity_coverage_complete.py",
@@ -934,7 +1199,14 @@
       "gold_schema_source_path": "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
       "gold_schema_source_resolved_path": "src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
       "gold_strict_validation_declared": true,
+      "golden_test_evidence_declared": true,
+      "golden_test_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "missing_constraint_surfaces": [],
       "missing_surfaces": [],
+      "pandera_check_constraint_evidence_declared": true,
       "pandera_check_count_in_source": 117,
       "pandera_contract_declared": true,
       "pandera_field_count_in_source": 97,
@@ -952,6 +1224,7 @@
       "published_contract_check_constraint_count": 0,
       "published_contract_non_nullable_count": 7,
       "published_contract_nullable_count": 4,
+      "published_contract_nullable_policy_declared": true,
       "published_contract_property_count": 11,
       "published_contract_required_count": 7,
       "published_contract_required_fields": [
@@ -971,6 +1244,16 @@
     },
     {
       "config_path": "configs/entities/composite/activity.yaml",
+      "constraint_completeness_status": "covered",
+      "constraint_completeness_surfaces": [
+        "contract_tests",
+        "golden_tests",
+        "nullable_policy",
+        "pandera_checks",
+        "pandera_fields",
+        "primary_key_required_fields",
+        "required_fields"
+      ],
       "contract_ref": "composite.activity",
       "contract_test_paths": [
         "tests/contract/test_chembl_activity_flag_policy.py",
@@ -1007,7 +1290,14 @@
       "gold_schema_source_path": "../../src/bioetl/domain/contracts/gold/composite_bioassay.py",
       "gold_schema_source_resolved_path": "src/bioetl/domain/contracts/gold/composite_bioassay.py",
       "gold_strict_validation_declared": true,
+      "golden_test_evidence_declared": true,
+      "golden_test_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "missing_constraint_surfaces": [],
       "missing_surfaces": [],
+      "pandera_check_constraint_evidence_declared": true,
       "pandera_check_count_in_source": 51,
       "pandera_contract_declared": true,
       "pandera_field_count_in_source": 50,
@@ -1025,6 +1315,7 @@
       "published_contract_check_constraint_count": 0,
       "published_contract_non_nullable_count": 6,
       "published_contract_nullable_count": 15,
+      "published_contract_nullable_policy_declared": true,
       "published_contract_property_count": 21,
       "published_contract_required_count": 6,
       "published_contract_required_fields": [
@@ -1043,6 +1334,16 @@
     },
     {
       "config_path": "configs/entities/composite/assay.yaml",
+      "constraint_completeness_status": "covered",
+      "constraint_completeness_surfaces": [
+        "contract_tests",
+        "golden_tests",
+        "nullable_policy",
+        "pandera_checks",
+        "pandera_fields",
+        "primary_key_required_fields",
+        "required_fields"
+      ],
       "contract_ref": "composite.assay",
       "contract_test_paths": [
         "tests/contract/test_gold_entity_coverage_complete.py",
@@ -1070,7 +1371,14 @@
       "gold_schema_source_path": "../../src/bioetl/domain/contracts/gold/composite_bioassay.py",
       "gold_schema_source_resolved_path": "src/bioetl/domain/contracts/gold/composite_bioassay.py",
       "gold_strict_validation_declared": true,
+      "golden_test_evidence_declared": true,
+      "golden_test_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "missing_constraint_surfaces": [],
       "missing_surfaces": [],
+      "pandera_check_constraint_evidence_declared": true,
       "pandera_check_count_in_source": 51,
       "pandera_contract_declared": true,
       "pandera_field_count_in_source": 50,
@@ -1088,6 +1396,7 @@
       "published_contract_check_constraint_count": 0,
       "published_contract_non_nullable_count": 6,
       "published_contract_nullable_count": 9,
+      "published_contract_nullable_policy_declared": true,
       "published_contract_property_count": 15,
       "published_contract_required_count": 6,
       "published_contract_required_fields": [
@@ -1106,6 +1415,16 @@
     },
     {
       "config_path": "configs/entities/composite/molecule.yaml",
+      "constraint_completeness_status": "covered",
+      "constraint_completeness_surfaces": [
+        "contract_tests",
+        "golden_tests",
+        "nullable_policy",
+        "pandera_checks",
+        "pandera_fields",
+        "primary_key_required_fields",
+        "required_fields"
+      ],
       "contract_ref": "composite.molecule",
       "contract_test_paths": [
         "tests/contract/test_gold_entity_coverage_complete.py",
@@ -1127,7 +1446,14 @@
       "gold_schema_source_path": "../../src/bioetl/domain/contracts/gold/composite_molecule.py",
       "gold_schema_source_resolved_path": "src/bioetl/domain/contracts/gold/composite_molecule.py",
       "gold_strict_validation_declared": true,
+      "golden_test_evidence_declared": true,
+      "golden_test_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "missing_constraint_surfaces": [],
       "missing_surfaces": [],
+      "pandera_check_constraint_evidence_declared": true,
       "pandera_check_count_in_source": 6,
       "pandera_contract_declared": true,
       "pandera_field_count_in_source": 6,
@@ -1145,6 +1471,7 @@
       "published_contract_check_constraint_count": 0,
       "published_contract_non_nullable_count": 6,
       "published_contract_nullable_count": 6,
+      "published_contract_nullable_policy_declared": true,
       "published_contract_property_count": 12,
       "published_contract_required_count": 6,
       "published_contract_required_fields": [
@@ -1163,6 +1490,16 @@
     },
     {
       "config_path": "configs/entities/composite/publication.yaml",
+      "constraint_completeness_status": "covered",
+      "constraint_completeness_surfaces": [
+        "contract_tests",
+        "golden_tests",
+        "nullable_policy",
+        "pandera_checks",
+        "pandera_fields",
+        "primary_key_required_fields",
+        "required_fields"
+      ],
       "contract_ref": "composite.publication",
       "contract_test_paths": [
         "tests/architecture/test_chembl_publication_subset_policy.py",
@@ -1240,7 +1577,14 @@
       "gold_schema_source_path": "../../src/bioetl/domain/contracts/gold/composite_publication.py",
       "gold_schema_source_resolved_path": "src/bioetl/domain/contracts/gold/composite_publication.py",
       "gold_strict_validation_declared": true,
+      "golden_test_evidence_declared": true,
+      "golden_test_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "missing_constraint_surfaces": [],
       "missing_surfaces": [],
+      "pandera_check_constraint_evidence_declared": true,
       "pandera_check_count_in_source": 7,
       "pandera_contract_declared": true,
       "pandera_field_count_in_source": 7,
@@ -1258,6 +1602,7 @@
       "published_contract_check_constraint_count": 0,
       "published_contract_non_nullable_count": 7,
       "published_contract_nullable_count": 8,
+      "published_contract_nullable_policy_declared": true,
       "published_contract_property_count": 15,
       "published_contract_required_count": 7,
       "published_contract_required_fields": [
@@ -1277,6 +1622,16 @@
     },
     {
       "config_path": "configs/entities/composite/target.yaml",
+      "constraint_completeness_status": "covered",
+      "constraint_completeness_surfaces": [
+        "contract_tests",
+        "golden_tests",
+        "nullable_policy",
+        "pandera_checks",
+        "pandera_fields",
+        "primary_key_required_fields",
+        "required_fields"
+      ],
       "contract_ref": "composite.target",
       "contract_test_paths": [
         "tests/architecture/test_protein_class_target_type_codegen_contract.py",
@@ -1307,7 +1662,14 @@
       "gold_schema_source_path": "../../src/bioetl/domain/contracts/gold/composite_bioassay.py",
       "gold_schema_source_resolved_path": "src/bioetl/domain/contracts/gold/composite_bioassay.py",
       "gold_strict_validation_declared": true,
+      "golden_test_evidence_declared": true,
+      "golden_test_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "missing_constraint_surfaces": [],
       "missing_surfaces": [],
+      "pandera_check_constraint_evidence_declared": true,
       "pandera_check_count_in_source": 51,
       "pandera_contract_declared": true,
       "pandera_field_count_in_source": 50,
@@ -1325,6 +1687,7 @@
       "published_contract_check_constraint_count": 0,
       "published_contract_non_nullable_count": 6,
       "published_contract_nullable_count": 35,
+      "published_contract_nullable_policy_declared": true,
       "published_contract_property_count": 41,
       "published_contract_required_count": 6,
       "published_contract_required_fields": [
@@ -1343,6 +1706,16 @@
     },
     {
       "config_path": "configs/entities/crossref/publication.yaml",
+      "constraint_completeness_status": "covered",
+      "constraint_completeness_surfaces": [
+        "contract_tests",
+        "golden_tests",
+        "nullable_policy",
+        "pandera_checks",
+        "pandera_fields",
+        "primary_key_required_fields",
+        "required_fields"
+      ],
       "contract_ref": "crossref.publication",
       "contract_test_paths": [
         "tests/architecture/test_chembl_publication_subset_policy.py",
@@ -1420,7 +1793,14 @@
       "gold_schema_source_path": "../../src/bioetl/domain/contracts/gold/publications_crossref.py",
       "gold_schema_source_resolved_path": "src/bioetl/domain/contracts/gold/publications_crossref.py",
       "gold_strict_validation_declared": true,
+      "golden_test_evidence_declared": true,
+      "golden_test_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "missing_constraint_surfaces": [],
       "missing_surfaces": [],
+      "pandera_check_constraint_evidence_declared": true,
       "pandera_check_count_in_source": 28,
       "pandera_contract_declared": true,
       "pandera_field_count_in_source": 26,
@@ -1438,6 +1818,7 @@
       "published_contract_check_constraint_count": 0,
       "published_contract_non_nullable_count": 9,
       "published_contract_nullable_count": 42,
+      "published_contract_nullable_policy_declared": true,
       "published_contract_property_count": 51,
       "published_contract_required_count": 9,
       "published_contract_required_fields": [
@@ -1459,6 +1840,16 @@
     },
     {
       "config_path": "configs/entities/openalex/publication.yaml",
+      "constraint_completeness_status": "covered",
+      "constraint_completeness_surfaces": [
+        "contract_tests",
+        "golden_tests",
+        "nullable_policy",
+        "pandera_checks",
+        "pandera_fields",
+        "primary_key_required_fields",
+        "required_fields"
+      ],
       "contract_ref": "openalex.publication",
       "contract_test_paths": [
         "tests/architecture/test_chembl_publication_subset_policy.py",
@@ -1536,7 +1927,14 @@
       "gold_schema_source_path": "../../src/bioetl/domain/contracts/gold/publications_openalex.py",
       "gold_schema_source_resolved_path": "src/bioetl/domain/contracts/gold/publications_openalex.py",
       "gold_strict_validation_declared": true,
+      "golden_test_evidence_declared": true,
+      "golden_test_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "missing_constraint_surfaces": [],
       "missing_surfaces": [],
+      "pandera_check_constraint_evidence_declared": true,
       "pandera_check_count_in_source": 29,
       "pandera_contract_declared": true,
       "pandera_field_count_in_source": 26,
@@ -1554,6 +1952,7 @@
       "published_contract_check_constraint_count": 0,
       "published_contract_non_nullable_count": 10,
       "published_contract_nullable_count": 43,
+      "published_contract_nullable_policy_declared": true,
       "published_contract_property_count": 53,
       "published_contract_required_count": 10,
       "published_contract_required_fields": [
@@ -1576,6 +1975,16 @@
     },
     {
       "config_path": "configs/entities/pubchem/compound.yaml",
+      "constraint_completeness_status": "covered",
+      "constraint_completeness_surfaces": [
+        "contract_tests",
+        "golden_tests",
+        "nullable_policy",
+        "pandera_checks",
+        "pandera_fields",
+        "primary_key_required_fields",
+        "required_fields"
+      ],
       "contract_ref": "pubchem.compound",
       "contract_test_paths": [
         "tests/contract/test_gold_entity_coverage_complete.py",
@@ -1598,7 +2007,14 @@
       "gold_schema_source_path": "../../src/bioetl/domain/contracts/gold/pubchem.py",
       "gold_schema_source_resolved_path": "src/bioetl/domain/contracts/gold/pubchem.py",
       "gold_strict_validation_declared": true,
+      "golden_test_evidence_declared": true,
+      "golden_test_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "missing_constraint_surfaces": [],
       "missing_surfaces": [],
+      "pandera_check_constraint_evidence_declared": true,
       "pandera_check_count_in_source": 36,
       "pandera_contract_declared": true,
       "pandera_field_count_in_source": 36,
@@ -1616,6 +2032,7 @@
       "published_contract_check_constraint_count": 0,
       "published_contract_non_nullable_count": 6,
       "published_contract_nullable_count": 33,
+      "published_contract_nullable_policy_declared": true,
       "published_contract_property_count": 39,
       "published_contract_required_count": 6,
       "published_contract_required_fields": [
@@ -1634,6 +2051,16 @@
     },
     {
       "config_path": "configs/entities/pubmed/publication.yaml",
+      "constraint_completeness_status": "covered",
+      "constraint_completeness_surfaces": [
+        "contract_tests",
+        "golden_tests",
+        "nullable_policy",
+        "pandera_checks",
+        "pandera_fields",
+        "primary_key_required_fields",
+        "required_fields"
+      ],
       "contract_ref": "pubmed.publication",
       "contract_test_paths": [
         "tests/architecture/test_chembl_publication_subset_policy.py",
@@ -1711,7 +2138,14 @@
       "gold_schema_source_path": "../../src/bioetl/domain/contracts/gold/publications_pubmed.py",
       "gold_schema_source_resolved_path": "src/bioetl/domain/contracts/gold/publications_pubmed.py",
       "gold_strict_validation_declared": true,
+      "golden_test_evidence_declared": true,
+      "golden_test_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "missing_constraint_surfaces": [],
       "missing_surfaces": [],
+      "pandera_check_constraint_evidence_declared": true,
       "pandera_check_count_in_source": 40,
       "pandera_contract_declared": true,
       "pandera_field_count_in_source": 40,
@@ -1729,6 +2163,7 @@
       "published_contract_check_constraint_count": 0,
       "published_contract_non_nullable_count": 9,
       "published_contract_nullable_count": 57,
+      "published_contract_nullable_policy_declared": true,
       "published_contract_property_count": 66,
       "published_contract_required_count": 9,
       "published_contract_required_fields": [
@@ -1750,6 +2185,16 @@
     },
     {
       "config_path": "configs/entities/semanticscholar/publication.yaml",
+      "constraint_completeness_status": "covered",
+      "constraint_completeness_surfaces": [
+        "contract_tests",
+        "golden_tests",
+        "nullable_policy",
+        "pandera_checks",
+        "pandera_fields",
+        "primary_key_required_fields",
+        "required_fields"
+      ],
       "contract_ref": "semanticscholar.publication",
       "contract_test_paths": [
         "tests/architecture/test_chembl_publication_subset_policy.py",
@@ -1827,7 +2272,14 @@
       "gold_schema_source_path": "../../src/bioetl/domain/contracts/gold/publications_semanticscholar.py",
       "gold_schema_source_resolved_path": "src/bioetl/domain/contracts/gold/publications_semanticscholar.py",
       "gold_strict_validation_declared": true,
+      "golden_test_evidence_declared": true,
+      "golden_test_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "missing_constraint_surfaces": [],
       "missing_surfaces": [],
+      "pandera_check_constraint_evidence_declared": true,
       "pandera_check_count_in_source": 29,
       "pandera_contract_declared": true,
       "pandera_field_count_in_source": 26,
@@ -1845,6 +2297,7 @@
       "published_contract_check_constraint_count": 0,
       "published_contract_non_nullable_count": 9,
       "published_contract_nullable_count": 45,
+      "published_contract_nullable_policy_declared": true,
       "published_contract_property_count": 54,
       "published_contract_required_count": 9,
       "published_contract_required_fields": [
@@ -1866,6 +2319,16 @@
     },
     {
       "config_path": "configs/entities/uniprot/idmapping.yaml",
+      "constraint_completeness_status": "covered",
+      "constraint_completeness_surfaces": [
+        "contract_tests",
+        "golden_tests",
+        "nullable_policy",
+        "pandera_checks",
+        "pandera_fields",
+        "primary_key_required_fields",
+        "required_fields"
+      ],
       "contract_ref": "uniprot.idmapping",
       "contract_test_paths": [
         "tests/contract/test_gold_entity_coverage_complete.py",
@@ -1893,7 +2356,14 @@
       "gold_schema_source_path": "../../src/bioetl/domain/contracts/gold/uniprot.py",
       "gold_schema_source_resolved_path": "src/bioetl/domain/contracts/gold/uniprot.py",
       "gold_strict_validation_declared": true,
+      "golden_test_evidence_declared": true,
+      "golden_test_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "missing_constraint_surfaces": [],
       "missing_surfaces": [],
+      "pandera_check_constraint_evidence_declared": true,
       "pandera_check_count_in_source": 110,
       "pandera_contract_declared": true,
       "pandera_field_count_in_source": 110,
@@ -1911,6 +2381,7 @@
       "published_contract_check_constraint_count": 0,
       "published_contract_non_nullable_count": 7,
       "published_contract_nullable_count": 12,
+      "published_contract_nullable_policy_declared": true,
       "published_contract_property_count": 19,
       "published_contract_required_count": 7,
       "published_contract_required_fields": [
@@ -1930,6 +2401,16 @@
     },
     {
       "config_path": "configs/entities/uniprot/protein.yaml",
+      "constraint_completeness_status": "covered",
+      "constraint_completeness_surfaces": [
+        "contract_tests",
+        "golden_tests",
+        "nullable_policy",
+        "pandera_checks",
+        "pandera_fields",
+        "primary_key_required_fields",
+        "required_fields"
+      ],
       "contract_ref": "uniprot.protein",
       "contract_test_paths": [
         "tests/architecture/test_chembl_protein_classification_contracts.py",
@@ -1961,7 +2442,14 @@
       "gold_schema_source_path": "../../src/bioetl/domain/contracts/gold/uniprot.py",
       "gold_schema_source_resolved_path": "src/bioetl/domain/contracts/gold/uniprot.py",
       "gold_strict_validation_declared": true,
+      "golden_test_evidence_declared": true,
+      "golden_test_paths": [
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+        "tests/fixtures/golden/gold/schema_registry.v1.json"
+      ],
+      "missing_constraint_surfaces": [],
       "missing_surfaces": [],
+      "pandera_check_constraint_evidence_declared": true,
       "pandera_check_count_in_source": 110,
       "pandera_contract_declared": true,
       "pandera_field_count_in_source": 110,
@@ -1979,6 +2467,7 @@
       "published_contract_check_constraint_count": 0,
       "published_contract_non_nullable_count": 6,
       "published_contract_nullable_count": 91,
+      "published_contract_nullable_policy_declared": true,
       "published_contract_property_count": 97,
       "published_contract_required_count": 6,
       "published_contract_required_fields": [

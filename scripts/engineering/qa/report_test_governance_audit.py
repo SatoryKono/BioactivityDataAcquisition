@@ -106,6 +106,31 @@ BUDGET_TO_METRIC = {
     "uuid4_call_sites_max": "uuid4_call_sites",
     "date_today_call_sites_max": "date_today_call_sites",
 }
+CRITICAL_BEHAVIOR_ENVELOPES = {
+    "control_plane_replay": (
+        "tests/unit/application/services/test_run_manifest_service.py",
+        "tests/unit/application/services/test_checkpoint_execution_identity_alignment.py",
+        "tests/architecture/test_determinism_identity_policy.py",
+        "tests/architecture/test_replay_time_seam_inventory.py",
+    ),
+    "gold_strict_contracts": (
+        "tests/contract/test_gold_entity_coverage_complete.py",
+        "tests/contract/test_gold_pk_consistency.py",
+        "tests/contract/test_gold_schema_strict_violations.py",
+        "tests/contract/test_gold_dq_golden_snapshots.py",
+    ),
+    "medallion_storage": (
+        "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py",
+        "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py",
+    ),
+    "quarantine_replay": (
+        "tests/unit/domain/aggregates/test_quarantine_entry.py",
+        "tests/unit/domain/aggregates/test_quarantine_entry_invariant_properties.py",
+    ),
+    "test_governance": (
+        "tests/architecture/test_test_governance_audit.py",
+    ),
+}
 
 
 def _lane_from_test_path(relative_path: str) -> str:
@@ -162,6 +187,28 @@ def _build_duplicate_name_inventory(
         "mixed_groups": classification_counts["mixed"],
     }
     return inventory, summary
+
+
+def _critical_envelope_template() -> dict[str, dict[str, Any]]:
+    return {
+        name: {
+            "paths": list(paths),
+            "test_count": 0,
+            "assertion_backed_tests": 0,
+            "intentional_no_exception_tests": 0,
+            "assertless_tests": [],
+            "assertion_examples": [],
+        }
+        for name, paths in CRITICAL_BEHAVIOR_ENVELOPES.items()
+    }
+
+
+def _matching_critical_envelopes(relative_path: str) -> tuple[str, ...]:
+    return tuple(
+        name
+        for name, paths in CRITICAL_BEHAVIOR_ENVELOPES.items()
+        if relative_path in paths
+    )
 
 
 def _iter_test_files(root: Path) -> list[Path]:
@@ -315,6 +362,7 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
     assertless_category_counts: Counter[str] = Counter()
     compatibility_files: list[str] = []
     parse_errors: list[dict[str, str]] = []
+    critical_behavior_envelopes = _critical_envelope_template()
 
     total_functions = 0
     assertless_total_candidates = 0
@@ -349,28 +397,49 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
             visitor.visit(function)
             uuid4_call_sites += visitor.uuid4_call_sites
             date_today_call_sites += visitor.date_today_call_sites
+            matched_envelopes = _matching_critical_envelopes(relative)
+            assertless_category: str | None = None
 
             if not visitor.has_assertion_signal:
                 assertless_total_candidates += 1
-                category = _classify_assertless_candidate(
+                assertless_category = _classify_assertless_candidate(
                     relative_path=relative,
                     function=function,
                     visitor=visitor,
                 )
-                assertless_category_counts[category] += 1
-                if category == "weak_no_value":
+                assertless_category_counts[assertless_category] += 1
+                if assertless_category == "weak_no_value":
                     refined_assertless_tests += 1
                 assertless_candidates.append(
                     {
                         "path": relative,
                         "line": str(function.lineno),
                         "test_name": function.name,
-                        "category": category,
-                        "rationale": ASSERTLESS_CATEGORY_RULES[category],
+                        "category": assertless_category,
+                        "rationale": ASSERTLESS_CATEGORY_RULES[assertless_category],
                     }
                 )
                 if len(assertless_examples) < 25:
                     assertless_examples.append(location)
+
+            for envelope_name in matched_envelopes:
+                envelope = critical_behavior_envelopes[envelope_name]
+                envelope["test_count"] += 1
+                if visitor.has_assertion_signal:
+                    envelope["assertion_backed_tests"] += 1
+                    if len(envelope["assertion_examples"]) < 10:
+                        envelope["assertion_examples"].append(location)
+                else:
+                    if assertless_category == "intentional_no_exception_contract":
+                        envelope["intentional_no_exception_tests"] += 1
+                    envelope["assertless_tests"].append(
+                        {
+                            "path": relative,
+                            "line": str(function.lineno),
+                            "test_name": function.name,
+                            "category": assertless_category or "unknown",
+                        }
+                    )
 
             if (
                 not module_has_mark
@@ -398,6 +467,12 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
     duplicate_inventory, duplicate_inventory_summary = _build_duplicate_name_inventory(
         duplicate_names
     )
+    assertion_gap_count = sum(
+        1
+        for envelope in critical_behavior_envelopes.values()
+        if int(envelope["test_count"]) <= 0
+        or int(envelope["assertion_backed_tests"]) <= 0
+    )
 
     return {
         "root": ".",
@@ -424,6 +499,9 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
         "markerless_test_functions": markerless_test_functions,
         "uuid4_call_sites": uuid4_call_sites,
         "date_today_call_sites": date_today_call_sites,
+        "critical_behavior_envelope_count": len(critical_behavior_envelopes),
+        "critical_behavior_envelope_assertion_gap_count": assertion_gap_count,
+        "critical_behavior_envelopes": critical_behavior_envelopes,
         "parse_errors": parse_errors,
     }
 

@@ -11,6 +11,7 @@ from deltalake.exceptions import TableNotFoundError
 
 from bioetl.infrastructure.storage.delta.arrow_converter import ArrowDataConverter
 from bioetl.infrastructure.storage.delta.schema_ops import (
+    delta_schema_to_pyarrow,
     drop_nondeterministic_persisted_fields,
 )
 from bioetl.infrastructure.storage.delta.table_ops import (
@@ -66,7 +67,7 @@ async def get_table_schema(base_path: str | Path, table_name: str) -> pa.Schema 
         try:
             # Load the Delta table
             dt = DeltaTable(table_path)
-            return dt.schema().to_arrow()
+            return delta_schema_to_pyarrow(dt.schema())
         except TableNotFoundError:
             return None
         except Exception:

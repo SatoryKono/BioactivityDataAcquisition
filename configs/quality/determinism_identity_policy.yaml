@@ -59,6 +59,18 @@ artifact_identity_contract:
     - log_correlation_run_id
     - cli_preview_run_id
     - metrics_gateway_correlation_run_id
+    forbidden_runtime_timestamp_fields:
+    - created_at
+    - updated_at
+    - completed_at
+    - duration_seconds
+    - duration_ms
+    - elapsed_seconds
+    - metric_duration_seconds
+    - debug_created_at
+    - debug_export_created_at
+    - export_created_at
+    - export_manifest_created_at
   - artifact: control_plane.run_manifest.exact_replay_anchors
     required_fields:
     - semantic_identity_anchor
@@ -77,6 +89,18 @@ artifact_identity_contract:
     - log_correlation_run_id
     - cli_preview_run_id
     - metrics_gateway_correlation_run_id
+    forbidden_runtime_timestamp_fields:
+    - created_at
+    - updated_at
+    - completed_at
+    - duration_seconds
+    - duration_ms
+    - elapsed_seconds
+    - metric_duration_seconds
+    - debug_created_at
+    - debug_export_created_at
+    - export_created_at
+    - export_manifest_created_at
   - artifact: runtime.checkpoint_execution_identity
     required_fields:
     - pipeline_name
@@ -97,6 +121,56 @@ artifact_identity_contract:
     - log_correlation_run_id
     - cli_preview_run_id
     - metrics_gateway_correlation_run_id
+    forbidden_runtime_timestamp_fields:
+    - created_at
+    - updated_at
+    - completed_at
+    - duration_seconds
+    - duration_ms
+    - elapsed_seconds
+    - metric_duration_seconds
+    - debug_created_at
+    - debug_export_created_at
+    - export_created_at
+    - export_manifest_created_at
+runtime_timestamp_identity_contract:
+  replay_identity_anchor: false
+  forbidden_semantic_identity_fields:
+  - created_at
+  - updated_at
+  - completed_at
+  - duration_seconds
+  - duration_ms
+  - elapsed_seconds
+  - metric_duration_seconds
+  - debug_created_at
+  - debug_export_created_at
+  - export_created_at
+  - export_manifest_created_at
+  allowed_non_identity_surfaces:
+  - artifact: runtime.metrics.duration_observations
+    fields:
+    - duration_seconds
+    - duration_ms
+    - elapsed_seconds
+    replay_identity_anchor: false
+    rationale: Runtime durations are operator-facing performance evidence and must
+      not participate in content hashes, execution fingerprints, or checkpoint
+      execution identity.
+  - artifact: operator.debug_export.metadata
+    fields:
+    - debug_created_at
+    - debug_export_created_at
+    replay_identity_anchor: false
+    rationale: Debug export timestamps describe when an operator artifact was
+      generated; replay must compare semantic inputs and outputs instead.
+  - artifact: operator.export_manifest.metadata
+    fields:
+    - export_created_at
+    - export_manifest_created_at
+    replay_identity_anchor: false
+    rationale: Export manifest creation times are correlation metadata and are
+      excluded from deterministic content identity.
 allowed_occurrence_identity_generators: []
 legacy_config_hash_policy:
   field: config_hash
@@ -135,11 +209,11 @@ content_hash_datetime_policy:
   datetime_hash_backfill_plan:
     issue: '#4587'
     owner: architecture-governance
-    status: deterministic_default_switched
+    status: deterministic_default_switched_backfill_complete
     default_switch_target: v2_datetime_utc
     default_switch_gate: Active default is v2_datetime_utc; historical v1_date hashes
-      remain readable only through explicit compatibility metadata and date-only entity
-      config declarations.
+      remain readable only through explicit compatibility metadata and must not
+      expand through new entity-level date-only declarations.
     phases:
     - id: inventory
       exit_criteria: Enumerate fields whose source values can carry sub-day timestamp
@@ -164,18 +238,4 @@ content_hash_datetime_policy:
     status: migrated
     rationale: UniProt revision timestamps participate in business identity and must
       distinguish same-day changes when represented as datetime values.
-  date_only_entity_inventory:
-  - provider: chembl
-    entity: publication
-    fields:
-    - creation_date
-    configured_policy: v1_date
-    status: documented_date_only
-    rationale: ChEMBL publication creation_date is a source date, not a sub-day timestamp
-      identity.
-  - provider: pubmed
-    entity: publication
-    configured_policy: v1_date
-    status: documented_date_only
-    rationale: Legacy v1_date hash datetime compatibility retained for pubmed.publication
-      until migration to v2_datetime_utc.
+  date_only_entity_inventory: []

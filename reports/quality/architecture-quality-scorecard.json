@@ -8,7 +8,7 @@
     },
     "module_coverage_inventory": {
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "3101fc68cc11ee805935d42db0b6b7708e96997406f0645cb5b0242d012116a1",
+      "source_tree_sha256": "86d4d08a8bae0ba9f8600a19088ebcb8799c2cc4ea97ed0e6633de704381b4b1",
       "coverage_xml_sha256": "9155abf0be5b2cf329b76fa3a79d1e0ffd6a1da227eb20e4e55ffeafb337c442"
     },
     "compatibility_importer_census": {
@@ -24,8 +24,10 @@
       "valid": true
     },
     "contract_registry_dq_diagnostics": {
-      "path": "reports/quality/contract-registry-dq-diagnostics.json",
-      "valid": true
+      "path": "scripts/engineering/ci/validate_registry_dq_refs.py::build_diagnostics_payload",
+      "generated_artifact": "reports/quality/contract-registry-dq-diagnostics.json",
+      "valid": true,
+      "blocking_issue_count": 0
     },
     "observability_runtime_cardinality_inventory": {
       "path": "reports/observability/runtime_cardinality_inventory.json",
@@ -33,7 +35,9 @@
       "dashboarded_without_declaration_count": 0
     },
     "adr_enforcement_matrix": {
-      "path": "reports/quality/adr-enforcement-matrix.json",
+      "path": "scripts/engineering/qa/report_adr_enforcement_matrix.py::build_payload",
+      "generated_artifact": "reports/quality/adr-enforcement-matrix.json",
+      "accepted_adr_count": 48,
       "blocking_gap_count": 0
     }
   },
@@ -69,7 +73,7 @@
       "score": 8.0,
       "weighted_score": 0.72,
       "evidence_metrics": {
-        "source_module_count": 2168,
+        "source_module_count": 2167,
         "uncovered_module_count": 0
       }
     },
@@ -91,7 +95,7 @@
       "score": 7.0,
       "weighted_score": 0.98,
       "evidence_metrics": {
-        "source_module_count": 2168,
+        "source_module_count": 2167,
         "hotspot_family_count": 5
       }
     },
@@ -158,7 +162,7 @@
   ],
   "metrics": {
     "layer_violations": 0,
-    "source_module_count": 2168,
+    "source_module_count": 2167,
     "unmeasured_module_count": 0,
     "uncovered_module_count": 0,
     "hotspot_family_count": 5,
@@ -196,6 +200,22 @@
         "linked_issue": "4575",
         "rationale": "Retained public entrypoints are stable external API, but their size and first-party dependency burden are blocking governance debt when they grow without review.",
         "ratchet_policy": "Fail on growth; ratchet max_count downward only after retained public entrypoints are removed or first-party callers are narrowed."
+      },
+      "retained_public_export_facade_burden": {
+        "current_count": 4,
+        "max_count": 4,
+        "owner": "@bioetl-architecture",
+        "linked_issue": "5374",
+        "rationale": "Retained public export facades are stable package-root API, but each retained lazy/export facade remains an explicit compatibility surface that must not grow without architecture review.",
+        "ratchet_policy": "Fail on growth; ratchet max_count downward only after export facades are collapsed, converted to owner imports, or otherwise removed from the compatibility census."
+      },
+      "retained_public_export_facade_conflict_count": {
+        "current_count": 0,
+        "max_count": 0,
+        "owner": "@bioetl-architecture",
+        "linked_issue": "5374",
+        "rationale": "Duplicate exports and resolution conflicts inside retained public export facades are not allowed because they make public API ownership ambiguous.",
+        "ratchet_policy": "Zero-budget fail-fast metric; any non-zero census conflict requires removing or explicitly re-owning the export facade before merge."
       },
       "sunset_compat_count": {
         "current_count": 0,

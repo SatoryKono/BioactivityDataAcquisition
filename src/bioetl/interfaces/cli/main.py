@@ -17,14 +17,17 @@ from bioetl.interfaces.cli.commands.config_dq import dq as dq_command
 from bioetl.interfaces.cli.commands.debug import debug as debug_command
 from bioetl.interfaces.cli.commands.lock import lock as lock_command
 from bioetl.interfaces.cli.registry_helpers import (
-    create_registry,
-    register_all_pipelines,
+    create_registry as _create_registry,
+)
+from bioetl.interfaces.cli.registry_helpers import (
+    register_all_pipelines as _register_all_pipelines,
 )
 
 __all__ = [
     "build_cli_registry",
     "cli",
     "main",
+    "register_all_pipelines",
 ]
 
 _LAZY_COMMAND_SPECS: dict[str, tuple[str, str, str]] = {
@@ -192,9 +195,14 @@ def _build_main_registry() -> object:
     return build_cli_registry()
 
 
+def register_all_pipelines(*, registry: object | None = None) -> None:
+    """Historical CLI patch seam for pipeline registration."""
+    _register_all_pipelines(registry=registry)
+
+
 def build_cli_registry() -> object:
-    """Compatibility seam for tests patching CLI registry bootstrap in main."""
-    registry = create_registry()
+    """Build a fresh CLI registry through local test seams."""
+    registry = _create_registry()
     register_all_pipelines(registry=registry)
     return registry
 

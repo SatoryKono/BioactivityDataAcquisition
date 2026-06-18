@@ -3,7 +3,7 @@
 Thin CLI wrappers should use the shared boundary-test families before adding a
 dedicated suite.
 
-- `test_runtime_compat_aliases.py`
+- `test_runtime_wrapper_contracts.py`
   Use for top-level public wrapper modules that re-export canonical command
   symbols from their owning domain module.
 - `test_boundary_families.py`
