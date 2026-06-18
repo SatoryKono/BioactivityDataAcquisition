@@ -444,17 +444,17 @@ hotspot_family_ratchets:
       max_internal_fan_in: 14
     metrics:
       duplication_clusters: 0
-      files: 179
-      total_loc: 22086
+      files: 180
+      total_loc: 22186
       files_ge_250_loc: 6
-      helper_function_ratio: 0.35
-      max_internal_fan_in: 10
+      helper_function_ratio: 0.351
+      max_internal_fan_in: 11
       max_internal_fan_in_module: bioetl.application.core.batch_operation_errors
     trend:
-      status: reduced_2026-06-18_application_core_ratchet_sync
-      next_action: 2026-06-18 keeps application_core at the lower reviewed
-        live baseline after record-processing support compaction, with max_internal_fan_in
-        reduced to 10 while
+      status: confirmed_2026-06-18_application_core_ratchet_sync
+      next_action: 2026-06-18 confirms application_core against the tracked
+        reviewed baseline artifact and live family census at 180 files, 22186
+        LOC, helper_function_ratio 0.351, and max_internal_fan_in 11 while
         bounded-growth budgets remain unchanged at 13 files_ge_250_loc and
         max_internal_fan_in 14.
   - name: composition_bootstrap_runtime
@@ -742,6 +742,7 @@ hotspot_family_coverage_thresholds:
       - src/bioetl/composition/runtime_builders/_effective_config_secret_support.py
       - src/bioetl/composition/runtime_builders/_effective_config_source_refs_support.py
       - src/bioetl/composition/runtime_builders/_run_manifest_data_roots.py
+      - src/bioetl/composition/runtime_builders/_run_manifest_request_spec_support.py
       - src/bioetl/composition/runtime_builders/_run_manifest_sink_policy.py
       - src/bioetl/composition/runtime_builders/_runner_control_plane_policy_support.py
       - src/bioetl/composition/runtime_builders/inputs_runtime_assembly.py

@@ -2512,7 +2512,7 @@
       "symbol": "filters.extraction_params",
       "path": "configs/entities/crossref/publication.yaml",
       "occurrence_count": 1,
-      "first_line": 342,
+      "first_line": 337,
       "role": "Entity source-profile policy for crossref.publication",
       "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
       "notes": "empty; parameter_count=0"
@@ -2523,7 +2523,7 @@
       "symbol": "filters.extraction_params",
       "path": "configs/entities/openalex/publication.yaml",
       "occurrence_count": 1,
-      "first_line": 395,
+      "first_line": 390,
       "role": "Entity source-profile policy for openalex.publication",
       "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
       "notes": "empty; parameter_count=0"
@@ -2556,7 +2556,7 @@
       "symbol": "filters.extraction_params",
       "path": "configs/entities/semanticscholar/publication.yaml",
       "occurrence_count": 1,
-      "first_line": 360,
+      "first_line": 355,
       "role": "Entity source-profile policy for semanticscholar.publication",
       "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
       "notes": "empty; parameter_count=0"
@@ -2567,7 +2567,7 @@
       "symbol": "filters.extraction_params",
       "path": "configs/entities/uniprot/idmapping.yaml",
       "occurrence_count": 1,
-      "first_line": 216,
+      "first_line": 211,
       "role": "Entity source-profile policy for uniprot.idmapping",
       "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
       "notes": "empty; parameter_count=0"

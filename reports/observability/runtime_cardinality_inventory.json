@@ -735,7 +735,6 @@
     ],
     "bioetl_audit_query_events_total": [
       "docs/02-architecture/observability-layers.md",
-      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -749,7 +748,6 @@
     ],
     "bioetl_audit_write_events_total": [
       "docs/02-architecture/observability-layers.md",
-      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -799,7 +797,6 @@
       "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_checkpoint_age_seconds": [
-      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
     "bioetl_checkpoint_compatibility_events_total": [
@@ -909,7 +906,6 @@
       "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_control_plane_ledger_appends_total": [
-      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -932,7 +928,6 @@
       "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_control_plane_manifest_writes_total": [
-      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -945,7 +940,6 @@
     ],
     "bioetl_control_plane_reads_total": [
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
-      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -1269,7 +1263,6 @@
       "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
     "bioetl_lineage_refs_missing_total": [
-      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -1343,7 +1336,6 @@
     "bioetl_pipeline_runs_total": [
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
-      "docs/03-guides/dashboards/panels/bioetl-workflow-overview-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/alerting-guide.md",
@@ -1510,7 +1502,6 @@
       "docs/03-guides/dashboards/dashboard-checklist-per-dashboard.md",
       "docs/03-guides/dashboards/dashboard-requirements-comprehensive.md",
       "docs/03-guides/dashboards/design-system.md",
-      "docs/03-guides/dashboards/panels/bioetl-workflow-overview-panels.md",
       "docs/04-reference/observability/alerting-guide.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-runtime.json",
@@ -1631,7 +1622,6 @@
       "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_workflow_pipeline_verdict_status": [
-      "docs/03-guides/dashboards/panels/bioetl-workflow-overview-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "grafana/dashboards/bioetl-workflow-overview.json"
@@ -1648,7 +1638,6 @@
     "bioetl_workflow_runs_total": [
       "docs/03-guides/dashboards/dashboard-requirements-comprehensive.md",
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
-      "docs/03-guides/dashboards/panels/bioetl-workflow-overview-panels.md",
       "docs/03-guides/dashboards/variable-reference.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "docs/05-operations/01-monitoring-guide.md",
@@ -1665,7 +1654,6 @@
       "docs/05-operations/01-monitoring-guide.md"
     ],
     "bioetl_workflow_step_events_total": [
-      "docs/03-guides/dashboards/panels/bioetl-workflow-overview-panels.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-workflow-overview.json"

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-18T07:31:09.917723+00:00",
+  "generated_at": "2026-06-18T09:16:42.238503+00:00",
   "summary": {
     "total_scripts": 434,
     "status_counts": {
@@ -9200,13 +9200,13 @@
         },
         {
           "path": "tests/architecture/test_module_coverage_inventory.py",
-          "line": 31,
+          "line": 50,
           "source_group": "tests",
           "text": "assert committed[\"generated_by\"].endswith(\"report_module_coverage_inventory.py\")"
         },
         {
           "path": "tests/architecture/test_module_coverage_inventory.py",
-          "line": 307,
+          "line": 327,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_module_coverage_inventory.py\""
         }
