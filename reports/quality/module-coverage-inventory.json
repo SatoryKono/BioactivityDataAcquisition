@@ -8723,7 +8723,7 @@
       "missing_lines": 1,
       "module": "bioetl.composition.runtime_builders._run_manifest_creation_support",
       "path": "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py",
-      "source_lines": 398
+      "source_lines": 245
     },
     {
       "coverage_percent": 98.51,
@@ -8754,6 +8754,16 @@
       "module": "bioetl.composition.runtime_builders._run_manifest_refs",
       "path": "src/bioetl/composition/runtime_builders/_run_manifest_refs.py",
       "source_lines": 264
+    },
+    {
+      "coverage_percent": null,
+      "coverage_status": "unmeasured",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
+      "module": "bioetl.composition.runtime_builders._run_manifest_request_spec_support",
+      "path": "src/bioetl/composition/runtime_builders/_run_manifest_request_spec_support.py",
+      "source_lines": 182
     },
     {
       "coverage_percent": 95.38,
@@ -21698,7 +21708,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-06-18",
-  "source_tree_sha256": "606d0c73fff930670d95908cadc90b7f566f6cdcf0232a94c92392239a1f2c55",
+  "source_tree_sha256": "4efda1a51688be27aedc8a70c57bb771cd00ad51aa200cc8c6aa23550b93e5e9",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -21908,22 +21918,24 @@
         "unmeasured_module_count": 0
       },
       "composition_runtime_builders": {
-        "allowlisted_unmeasured_module_count": 0,
-        "allowlisted_unmeasured_modules": [],
+        "allowlisted_unmeasured_module_count": 1,
+        "allowlisted_unmeasured_modules": [
+          "src/bioetl/composition/runtime_builders/_run_manifest_request_spec_support.py"
+        ],
         "coverage_percent_avg": 96.2,
         "coverage_percent_min": 77.78,
         "covered_line_percent": 95.6,
         "covered_module_count": 44,
         "measured_module_count": 44,
-        "measured_percent": 100.0,
-        "module_count": 44,
+        "measured_percent": 97.78,
+        "module_count": 45,
         "status_counts": {
           "coverage_xml_missing": 0,
           "fully_covered": 19,
           "no_executable_lines": 0,
           "partially_covered": 25,
           "uncovered": 0,
-          "unmeasured": 0
+          "unmeasured": 1
         },
         "threshold_status": "pass",
         "thresholds": {
@@ -21931,6 +21943,7 @@
             "src/bioetl/composition/runtime_builders/_effective_config_secret_support.py",
             "src/bioetl/composition/runtime_builders/_effective_config_source_refs_support.py",
             "src/bioetl/composition/runtime_builders/_run_manifest_data_roots.py",
+            "src/bioetl/composition/runtime_builders/_run_manifest_request_spec_support.py",
             "src/bioetl/composition/runtime_builders/_run_manifest_sink_policy.py",
             "src/bioetl/composition/runtime_builders/_runner_control_plane_policy_support.py",
             "src/bioetl/composition/runtime_builders/inputs_runtime_assembly.py",
@@ -21946,20 +21959,25 @@
         },
         "unexpected_unmeasured_module_count": 0,
         "unexpected_unmeasured_modules": [],
-        "unmeasured_module_count": 0
+        "unmeasured_module_count": 1
       }
     },
-    "source_module_count": 2169,
+    "source_module_count": 2170,
     "status_counts": {
       "coverage_xml_missing": 0,
       "fully_covered": 1313,
       "no_executable_lines": 0,
       "partially_covered": 855,
       "uncovered": 0,
-      "unmeasured": 1
+      "unmeasured": 2
     },
-    "unmeasured_module_count": 1,
+    "unmeasured_module_count": 2,
     "unmeasured_modules": [
+      {
+        "module": "bioetl.composition.runtime_builders._run_manifest_request_spec_support",
+        "path": "src/bioetl/composition/runtime_builders/_run_manifest_request_spec_support.py",
+        "reason": "coverage_xml_has_no_class_entry"
+      },
       {
         "module": "bioetl.domain.mapping.protein_class_target_type_helpers",
         "path": "src/bioetl/domain/mapping/protein_class_target_type_helpers.py",
