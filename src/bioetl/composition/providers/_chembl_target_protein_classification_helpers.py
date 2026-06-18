@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 from collections import defaultdict
 from collections.abc import Iterable, Mapping
-from typing import Any
 
 from bioetl.domain.value_objects.protein_class_hierarchy import (
     ProteinClassificationResolutionError,
@@ -186,8 +185,8 @@ def coerce_text(value: object) -> str | None:
 
 
 def canonical_json(
-    value: Any,
-) -> str:  # Any: JSON can be any serializable type (str, int, dict, list, etc.)
+    value: object,
+) -> str:
     """Serialize a deterministic JSON payload for graph lookup helpers."""
     return json.dumps(value, sort_keys=True, separators=(",", ":"))
 

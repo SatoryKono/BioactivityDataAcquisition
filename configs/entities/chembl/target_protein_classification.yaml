@@ -1,4 +1,4 @@
-version: 2.1.0
+version: 2.2.0
 provider: chembl
 entity: target_protein_classification
 pipeline:
@@ -79,6 +79,12 @@ schema:
     - l5_id
     - l5_name
     - l5_desc
+    - canonical_l1
+    - l1_counts_for_target_type
+    - l1_mapping_version
+    - target_type_rule_version
+    - l1_normalization_status
+    - l1_normalization_notes
     - dataset_version
     - source_url
     - chembl_release
@@ -145,7 +151,7 @@ quality:
         subcellular_fraction: Store the canonical normalized subcellular-fraction label used for downstream Silver/Gold
           semantics; unknown reviewed labels are preserved after canonical text normalization instead of being
           discarded.
-  version: 2.1.0
+  version: 2.2.0
   provider: chembl
   entity: target_protein_classification
   entity_field_validations:
@@ -195,6 +201,31 @@ quality:
     min: 0
     nullable: true
     error_message: protein_class_snapshot_row_count must be non-negative
+  - field: canonical_l1
+    type: pattern
+    pattern: ^[a-z][a-z0-9_]*$
+    nullable: true
+    error_message: canonical_l1 must be a stable snake_case token when present
+  - field: l1_mapping_version
+    type: pattern
+    pattern: ^protein_class_l1_map_v[0-9]+$
+    nullable: true
+    error_message: l1_mapping_version must identify the versioned L1 mapping
+  - field: target_type_rule_version
+    type: pattern
+    pattern: ^target_type_rule_v[0-9]+$
+    nullable: true
+    error_message: target_type_rule_version must identify the target type rule version
+  - field: l1_normalization_status
+    type: enum
+    allowed:
+    - ok
+    - non_counting
+    - missing
+    - fallback
+    - failed
+    nullable: true
+    error_message: l1_normalization_status must be a reviewed normalization status
   entity_cross_field_validations: []
   entity_conditional_validations: []
   key_nullability:
@@ -205,7 +236,7 @@ quality:
     key_type: partition
     nullable: false
 filters:
-  version: 2.1.0
+  version: 2.2.0
   provider: chembl
   entity: target_protein_classification
   input_filter:
@@ -252,8 +283,8 @@ hash_policy:
   provider: chembl
   entity: target_protein_classification
   contract:
-    version: 2.1.0
-    migration_note: 'Path-first relation contract: path_ids/path_names/path_labels are canonical; L1-L5 fields remain backward-compatible projections.'
+    version: 2.2.0
+    migration_note: 'Path-first relation contract: path_ids/path_names/path_labels are canonical; L1-L5 fields remain backward-compatible projections; canonical_l1 fields add deterministic target_protein_class_type evidence.'
   hash_policy:
     algorithm: sha256
     canonicalization: provider + canonical_json_dumps(normalized_record)
@@ -283,6 +314,12 @@ hash_policy:
     - l5_id
     - l5_name
     - l5_desc
+    - canonical_l1
+    - l1_counts_for_target_type
+    - l1_mapping_version
+    - target_type_rule_version
+    - l1_normalization_status
+    - l1_normalization_notes
     exclude_fields:
     - _ingestion_ts
     - _run_id

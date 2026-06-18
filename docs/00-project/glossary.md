@@ -82,6 +82,10 @@ ______________________________________________________________________
 | -------------------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------- | ------------------------- | -------------------------------------- |
 | **Target**           | A biological entity (protein, complex, organism) that is the subject of activity measurement | ChEMBL: `Target`, **UniProt: `UniprotTarget`** | `Target`, `UniprotTarget` | `receptor`, `gene` (in target context) |
 | **Target Component** | A molecular component of a multi-component target                                            | ChEMBL: `TargetComponent`                      | `TargetComponent`         | `subunit`                              |
+| **Target Entity Type** | Provider-facing ChEMBL target category stored as `target_type`, for example `SINGLE PROTEIN` or `PROTEIN COMPLEX` | ChEMBL: `target_type` | `Target.target_type` | `target_protein_class_type` |
+| **Canonical Protein-Class L1** | Versioned normalized top-level protein-class evidence derived from ChEMBL hierarchy paths | ChEMBL: `protein_classifications[].l1_name` | `TargetProteinClassification.canonical_l1` | raw `l1_name` as semantic enum |
+| **Target Protein Class Type** | Composite semantic target type derived from unique informative `canonical_l1` values | BioETL composite: `target_protein_class_type` | `CompositeTarget.target_protein_class_type` | ChEMBL `target_type`, `major_family` |
+| **Major Protein Family** | Separate L2+ family signal such as `gpcr`, `kinase`, or `nuclear_receptor`; not a replacement for top-level target class type | ChEMBL protein-class L2+ path labels | `CompositeTarget.major_family` | `target_protein_class_type` |
 
 > **Migration Note (v2.0)**: UniProt `Protein` entity renamed to `UniprotTarget`.
 > Migration complete — deprecated `Protein` alias removed.

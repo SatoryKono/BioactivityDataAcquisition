@@ -77,6 +77,15 @@
     "required": false,
     "unique": false
   },
+  "canonical_l1": {
+    "checks": [],
+    "coerce": false,
+    "description": "Versioned canonical Level 1 class used for target type aggregation.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "chembl_api_version": {
     "checks": [],
     "coerce": false,
@@ -173,6 +182,20 @@
     "required": false,
     "unique": false
   },
+  "l1_counts_for_target_type": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Whether canonical_l1 participates in target_protein_class_type.",
+    "dtype": "bool",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "l1_desc": {
     "checks": [],
     "coerce": false,
@@ -191,10 +214,42 @@
     "required": false,
     "unique": false
   },
+  "l1_mapping_version": {
+    "checks": [],
+    "coerce": false,
+    "description": "Version of the protein-class L1 canonical mapping.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "l1_name": {
     "checks": [],
     "coerce": false,
     "description": "Level 1 protein classification name.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "l1_normalization_notes": {
+    "checks": [],
+    "coerce": false,
+    "description": "Optional notes for fallback or non-counting L1 normalization.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "l1_normalization_status": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Normalization status for Level 1 protein class evidence.",
     "dtype": "str",
     "nullable": true,
     "required": false,
@@ -432,6 +487,15 @@
     "coerce": false,
     "description": "Source target snapshot row count used to build the relation.",
     "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "target_type_rule_version": {
+    "checks": [],
+    "coerce": false,
+    "description": "Version of the target_protein_class_type aggregation rule.",
+    "dtype": "str",
     "nullable": true,
     "required": false,
     "unique": false
