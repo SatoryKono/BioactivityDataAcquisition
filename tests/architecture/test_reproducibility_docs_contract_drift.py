@@ -218,6 +218,46 @@ def test_run_manifest_docs_define_replay_equivalence_levels() -> None:
     assert "executable_run_contract_claim" in runbook
     assert "retained_corpus_claim" in runbook
     assert "irrecoverable_missing_immutable_evidence" in runbook
+
+
+@pytest.mark.architecture
+def test_universal_exact_replay_claims_are_bound_to_full_universe_evidence() -> None:
+    """Universal exact-replay wording must remain gated by certified evidence."""
+    contract = _read("docs/04-reference/contracts/run-manifest-ledger.md")
+    runbook = _read("docs/05-operations/runbooks/run-manifest-inspection.md")
+
+    for text, doc_name in (
+        (contract, "run-manifest-ledger.md"),
+        (runbook, "run-manifest-inspection.md"),
+    ):
+        assert "full-universe artifact" in text, doc_name
+        assert "`universal_claim`" in text or "`universal_claim.claimed=true`" in text
+        assert "`durable_evidence_coverage_claim`" in text, doc_name
+        assert "all_known_historical_runs" in text, doc_name
+        assert "retained-corpus artifact" in text, doc_name
+
+    allowed_docs = {
+        "docs/04-reference/contracts/run-manifest-ledger.md",
+        "docs/05-operations/runbooks/run-manifest-inspection.md",
+    }
+    risky_phrases = (
+        "universal exact replay",
+        "universal historical exact replay",
+    )
+    violations: list[str] = []
+    for path in sorted((ROOT / "docs").rglob("*.md")):
+        relative_path = path.relative_to(ROOT).as_posix()
+        if relative_path in allowed_docs:
+            continue
+        lowered = path.read_text(encoding="utf-8").lower()
+        for phrase in risky_phrases:
+            if phrase in lowered:
+                violations.append(f"{relative_path}: {phrase}")
+
+    assert not violations, (
+        "Universal exact-replay claims must stay in evidence-gated docs:\n"
+        + "\n".join(violations)
+    )
     assert "claim_scope_mode" in runbook
     assert "retained_certifiable_historical_runs" in runbook
     assert "run_historical_replay_universe_campaign.py" in runbook

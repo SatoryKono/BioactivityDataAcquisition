@@ -103,6 +103,26 @@ def test_debug_export_service_hashes_records_without_content_hash() -> None:
     assert payload_hash
 
 
+def test_debug_export_service_uses_created_at_factory_for_bronze_rows() -> None:
+    fixed_created_at = datetime(2026, 6, 18, 9, 30, tzinfo=UTC)
+    service = DebugExportService(
+        config=DebugExportConfig(enabled=True, formats=("csv",)),
+        run_id=_RUN_ID,
+        pipeline_id="chembl_activity",
+        provider_id="chembl",
+        created_at_factory=lambda: fixed_created_at,
+    )
+
+    service.record_bronze_batch(
+        records=[{"activity_id": "ACT-1"}],
+        batch_id=_BATCH_ID,
+        start_index=0,
+    )
+
+    row = service.build_pack().tables["bronze_index"][0]
+    assert row["created_at"] == "2026-06-18T09:30:00+00:00"
+
+
 def test_debug_export_service_finalize_persists_pack_with_manifest_id() -> None:
     writer = Mock()
     writer.write_pack.return_value = DebugExportResult(

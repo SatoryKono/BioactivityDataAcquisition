@@ -27,6 +27,7 @@ class DebugExportServiceRecordingMixin:
             records=records,
             batch_id=batch_id,
             start_index=start_index,
+            created_at=self._created_at_factory(),
             source_metadata=source_metadata,
         )
 

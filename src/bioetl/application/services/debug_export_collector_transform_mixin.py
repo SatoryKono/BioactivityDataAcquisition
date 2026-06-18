@@ -36,6 +36,7 @@ class DebugExportTransformRowsMixin:
         records: Sequence[BronzeRecord],
         batch_id: BatchID,
         start_index: int,
+        created_at: datetime,
         source_metadata: object | None = None,
     ) -> None:
         source_attrs = source_metadata_attrs(source_metadata)
@@ -52,7 +53,7 @@ class DebugExportTransformRowsMixin:
                 normalized_record=raw_payload,
                 status="included",
                 action="extract",
-                created_at=datetime.now(),
+                created_at=created_at,
             )
             row["batch_id"] = str(batch_id)
             row["source_metadata"] = _jsonable_payload(source_attrs)

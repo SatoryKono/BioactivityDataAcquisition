@@ -16,6 +16,7 @@ Consistency Boundary:
 
 from __future__ import annotations
 
+from copy import deepcopy
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -113,14 +114,14 @@ class QuarantineEntry(QuarantineEntryTransitionsMixin, QuarantineEntryProperties
         self._entry_id = entry_id
         self._pipeline_name = pipeline_name
         self._error_code = error_code
-        # Deep copy to ensure immutability
-        self._payload = dict(payload)
+        # Nested API payloads must not remain aliased to caller-owned objects.
+        self._payload = deepcopy(payload)
         self._payload_hash = payload_hash
         self._run_id = run_id
         self._batch_id = batch_id
         self._status = QuarantineStatus.NEW
         self._created_at = created_at
-        self._metadata: MetaDict = dict(metadata) if metadata else {}
+        self._metadata: MetaDict = deepcopy(metadata) if metadata else {}
         self._resolution_info: ResolutionInfo | None = None
         self._events: list[DomainEvent] = []
 

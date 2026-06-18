@@ -345,6 +345,56 @@ class TestQuarantineEntryEncapsulation:
 
         assert "new_key" not in quarantine_entry.payload
 
+    def test_nested_payload_is_detached_from_constructor_and_accessor(
+        self,
+        run_id: RunID,
+        batch_id: BatchID,
+    ) -> None:
+        """Invariant: nested quarantine payload objects cannot mutate after capture."""
+        source_payload = {
+            "id": "bad-record",
+            "nested": {"values": ["original"]},
+        }
+        entry = QuarantineEntry.create(
+            pipeline_name="test_pipeline",
+            error_code="SCHEMA_VIOLATION",
+            payload=source_payload,
+            run_id=run_id,
+            batch_id=batch_id,
+            created_at=_ts(0),
+        )
+        expected_hash = entry.payload_hash
+
+        source_payload["nested"]["values"].append("mutated")  # type: ignore[index, union-attr]
+        payload_view = entry.payload
+        payload_view["nested"]["values"].append("accessor-mutation")  # type: ignore[index, union-attr]
+
+        assert entry.payload == {"id": "bad-record", "nested": {"values": ["original"]}}
+        assert entry.payload_hash == expected_hash
+
+    def test_nested_metadata_is_detached_from_constructor_and_accessor(
+        self,
+        run_id: RunID,
+        batch_id: BatchID,
+    ) -> None:
+        """Invariant: metadata access is defensive for nested replay diagnostics."""
+        metadata = {"diagnostics": {"fields": ["target_id"]}}
+        entry = QuarantineEntry.create(
+            pipeline_name="test_pipeline",
+            error_code="SCHEMA_VIOLATION",
+            payload={"id": "bad-record"},
+            run_id=run_id,
+            batch_id=batch_id,
+            created_at=_ts(0),
+            metadata=metadata,
+        )
+
+        metadata["diagnostics"]["fields"].append("mutated")  # type: ignore[index, union-attr]
+        metadata_view = entry.metadata
+        metadata_view["diagnostics"]["fields"].append("view-mutation")  # type: ignore[index, union-attr]
+
+        assert entry.metadata == {"diagnostics": {"fields": ["target_id"]}}
+
     def test_payload_hash_is_immutable(self, quarantine_entry: QuarantineEntry) -> None:
         """Invariant: payload_hash cannot be changed."""
         with pytest.raises(AttributeError):
@@ -497,3 +547,28 @@ class TestQuarantineEntryFactory:
         )
 
         assert entry1.payload_hash == entry2.payload_hash
+
+    def test_nested_payload_hash_is_replay_stable_across_mapping_order(
+        self,
+        run_id: RunID,
+        batch_id: BatchID,
+    ) -> None:
+        """Replay envelope: canonical payload hashing ignores mapping insertion order."""
+        first = QuarantineEntry.create(
+            pipeline_name="test",
+            error_code="ERR",
+            payload={"id": "1", "nested": {"b": [2, 1], "a": 1}},
+            run_id=run_id,
+            batch_id=batch_id,
+            created_at=_ts(0),
+        )
+        second = QuarantineEntry.create(
+            pipeline_name="test",
+            error_code="ERR",
+            payload={"nested": {"a": 1, "b": [2, 1]}, "id": "1"},
+            run_id=run_id,
+            batch_id=batch_id,
+            created_at=_ts(1),
+        )
+
+        assert first.payload_hash == second.payload_hash

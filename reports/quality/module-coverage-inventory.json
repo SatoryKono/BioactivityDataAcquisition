@@ -1763,7 +1763,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.core.batch_operation_errors",
       "path": "src/bioetl/application/core/batch_operation_errors.py",
-      "source_lines": 15
+      "source_lines": 33
     },
     {
       "coverage_percent": 100.0,
@@ -2733,7 +2733,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.core.runner_execution_flow",
       "path": "src/bioetl/application/core/runner_execution_flow.py",
-      "source_lines": 232
+      "source_lines": 235
     },
     {
       "coverage_percent": 97.26,
@@ -4723,7 +4723,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.control_plane.manifest.diagnostics.base_payload_sections",
       "path": "src/bioetl/application/services/control_plane/manifest/diagnostics/base_payload_sections.py",
-      "source_lines": 216
+      "source_lines": 185
     },
     {
       "coverage_percent": 100.0,
@@ -4733,7 +4733,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.control_plane.manifest.diagnostics.base_provenance_payloads",
       "path": "src/bioetl/application/services/control_plane/manifest/diagnostics/base_provenance_payloads.py",
-      "source_lines": 42
+      "source_lines": 75
     },
     {
       "coverage_percent": 100.0,
@@ -8343,7 +8343,7 @@
       "missing_lines": 0,
       "module": "bioetl.composition.observability",
       "path": "src/bioetl/composition/observability.py",
-      "source_lines": 144
+      "source_lines": 198
     },
     {
       "coverage_percent": 100.0,
@@ -9014,16 +9014,6 @@
       "module": "bioetl.composition.runtime_builders.runner_builder",
       "path": "src/bioetl/composition/runtime_builders/runner_builder.py",
       "source_lines": 99
-    },
-    {
-      "coverage_percent": 87.88,
-      "coverage_status": "partially_covered",
-      "covered_lines": 29,
-      "executable_lines": 33,
-      "missing_lines": 4,
-      "module": "bioetl.composition.runtime_builders.runner_builder_support",
-      "path": "src/bioetl/composition/runtime_builders/runner_builder_support.py",
-      "source_lines": 70
     },
     {
       "coverage_percent": 98.78,
@@ -21313,7 +21303,7 @@
       "missing_lines": 5,
       "module": "bioetl.interfaces.cli.main",
       "path": "src/bioetl/interfaces/cli/main.py",
-      "source_lines": 212
+      "source_lines": 216
     },
     {
       "coverage_percent": 100.0,
@@ -21708,7 +21698,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-06-18",
-  "source_tree_sha256": "4efda1a51688be27aedc8a70c57bb771cd00ad51aa200cc8c6aa23550b93e5e9",
+  "source_tree_sha256": "26b96f817614495e6329e615126a389e258f9d7600c1b498efd086df07d58643",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -21922,18 +21912,18 @@
         "allowlisted_unmeasured_modules": [
           "src/bioetl/composition/runtime_builders/_run_manifest_request_spec_support.py"
         ],
-        "coverage_percent_avg": 96.2,
+        "coverage_percent_avg": 96.4,
         "coverage_percent_min": 77.78,
-        "covered_line_percent": 95.6,
-        "covered_module_count": 44,
-        "measured_module_count": 44,
-        "measured_percent": 97.78,
-        "module_count": 45,
+        "covered_line_percent": 95.74,
+        "covered_module_count": 43,
+        "measured_module_count": 43,
+        "measured_percent": 97.73,
+        "module_count": 44,
         "status_counts": {
           "coverage_xml_missing": 0,
           "fully_covered": 19,
           "no_executable_lines": 0,
-          "partially_covered": 25,
+          "partially_covered": 24,
           "uncovered": 0,
           "unmeasured": 1
         },
@@ -21962,12 +21952,12 @@
         "unmeasured_module_count": 1
       }
     },
-    "source_module_count": 2170,
+    "source_module_count": 2169,
     "status_counts": {
       "coverage_xml_missing": 0,
       "fully_covered": 1313,
       "no_executable_lines": 0,
-      "partially_covered": 855,
+      "partially_covered": 854,
       "uncovered": 0,
       "unmeasured": 2
     },

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -47,7 +48,7 @@ class QuarantineEntryPropertiesMixin:
     @property
     def payload(self) -> BronzeRecord:
         """Copy of the failed record payload (immutable access)."""
-        return dict(self._payload)
+        return deepcopy(self._payload)
 
     @property
     def payload_hash(self) -> ContentHash:
@@ -77,7 +78,7 @@ class QuarantineEntryPropertiesMixin:
     @property
     def metadata(self) -> MetaDict:
         """Copy of additional error context."""
-        return dict(self._metadata)
+        return deepcopy(self._metadata)
 
     @property
     def resolution_info(self) -> ResolutionInfo | None:
