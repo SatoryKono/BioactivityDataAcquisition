@@ -41,6 +41,7 @@ class TestAssayExtractionParams(InputFilterExtractionParamsSuiteBase):
 
     CASE = ASSAY_CASE
 
+    @pytest.mark.asyncio(loop_scope="module")
     @pytest.mark.vcr
     async def test_assay_filtered_api_request(
         self,

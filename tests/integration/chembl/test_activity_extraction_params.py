@@ -68,6 +68,7 @@ class TestActivityExtractionParams(ExtractionParamsSuiteBase):
         metadata = adapter.get_source_metadata()
         assert metadata.query_string is None
 
+    @pytest.mark.asyncio(loop_scope="module")
     @pytest.mark.vcr
     async def test_filtered_api_request(
         self,

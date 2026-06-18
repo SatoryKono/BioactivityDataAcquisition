@@ -35,6 +35,7 @@ class TestMoleculeExtractionParams(InputFilterExtractionParamsSuiteBase):
 
     CASE = MOLECULE_CASE
 
+    @pytest.mark.asyncio(loop_scope="module")
     @pytest.mark.vcr
     async def test_molecule_filtered_api_request(
         self,
