@@ -20,6 +20,24 @@ DEFAULT_JSON_OUTPUT = (
     PROJECT_ROOT / "reports" / "quality" / "contract-coverage-matrix.json"
 )
 DEFAULT_MD_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "contract-coverage-matrix.md"
+GENERIC_GOLD_CONTRACT_TEST_PATHS = (
+    "tests/contract/test_gold_entity_coverage_complete.py",
+    "tests/contract/test_gold_pk_consistency.py",
+    "tests/contract/test_gold_schema_strict_violations.py",
+)
+PANDERA_CONSTRAINT_KEYS = frozenset(
+    {
+        "enum",
+        "exclusiveMaximum",
+        "exclusiveMinimum",
+        "format",
+        "maximum",
+        "maxLength",
+        "minimum",
+        "minLength",
+        "pattern",
+    }
+)
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
@@ -69,6 +87,138 @@ def _string_list(value: object) -> list[str]:
     return [item for item in value if isinstance(item, str)]
 
 
+def _relative_if_project_path(path: Path) -> str:
+    try:
+        return _relativize(path)
+    except ValueError:
+        return path.as_posix()
+
+
+def _load_json_if_exists(path: Path) -> dict[str, Any]:
+    if not path.is_file():
+        return {}
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    return payload if isinstance(payload, dict) else {}
+
+
+def _contract_artifact_summary(paths: list[str]) -> dict[str, Any]:
+    artifacts = [_load_json_if_exists(_resolve_registry_relative(path)) for path in paths]
+    artifacts = [artifact for artifact in artifacts if artifact]
+    if not artifacts:
+        return {
+            "published_contract_schema_version": "",
+            "published_contract_property_count": 0,
+            "published_contract_required_count": 0,
+            "published_contract_nullable_count": 0,
+            "published_contract_non_nullable_count": 0,
+            "published_contract_check_constraint_count": 0,
+            "published_contract_required_fields": [],
+        }
+
+    properties: dict[str, Any] = {}
+    required_fields: set[str] = set()
+    schema_versions: set[str] = set()
+    for artifact in artifacts:
+        schema_version = artifact.get("$version")
+        if isinstance(schema_version, str) and schema_version:
+            schema_versions.add(schema_version)
+        artifact_properties = artifact.get("properties")
+        if isinstance(artifact_properties, dict):
+            properties.update(artifact_properties)
+        required_fields.update(_string_list(artifact.get("required")))
+
+    nullable_count = 0
+    non_nullable_count = 0
+    check_constraint_count = 0
+    for property_payload in properties.values():
+        if not isinstance(property_payload, dict):
+            continue
+        if property_payload.get("nullable") is True:
+            nullable_count += 1
+        else:
+            non_nullable_count += 1
+        if PANDERA_CONSTRAINT_KEYS.intersection(property_payload):
+            check_constraint_count += 1
+
+    return {
+        "published_contract_schema_version": ",".join(sorted(schema_versions)),
+        "published_contract_property_count": len(properties),
+        "published_contract_required_count": len(required_fields),
+        "published_contract_nullable_count": nullable_count,
+        "published_contract_non_nullable_count": non_nullable_count,
+        "published_contract_check_constraint_count": check_constraint_count,
+        "published_contract_required_fields": sorted(required_fields),
+    }
+
+
+def _schema_source_summary(source_path: str) -> dict[str, Any]:
+    source_file = _resolve_registry_relative(source_path) if source_path else None
+    source_text = (
+        source_file.read_text(encoding="utf-8")
+        if source_file is not None and source_file.is_file()
+        else ""
+    )
+    return {
+        "pandera_contract_declared": (
+            "pa.DataFrameModel" in source_text
+            or "StrictGoldContractSchema" in source_text
+            or "CompositeGoldCommonSchema" in source_text
+        ),
+        "gold_strict_validation_declared": (
+            "StrictGoldContractSchema" in source_text
+            or "strict = True" in source_text
+        ),
+        "pandera_field_count_in_source": source_text.count("pa.Field("),
+        "pandera_check_count_in_source": sum(
+            source_text.count(token)
+            for token in (
+                "str_matches=",
+                "isin=",
+                "ge=",
+                "gt=",
+                "le=",
+                "lt=",
+                "@pa.check",
+            )
+        ),
+    }
+
+
+def _primary_key_fields(pipeline: dict[str, Any]) -> list[str]:
+    business_primary_keys = _string_list(pipeline.get("business_primary_keys"))
+    technical_primary_key = pipeline.get("technical_primary_key")
+    fields = list(business_primary_keys)
+    if isinstance(technical_primary_key, str) and technical_primary_key:
+        fields.insert(0, technical_primary_key)
+    return sorted(set(fields))
+
+
+def _contract_test_paths(provider: str, entity: str) -> list[str]:
+    needles = {
+        f"{provider}_{entity}",
+        f"{provider}.{entity}",
+        entity,
+    }
+    paths: set[str] = {
+        path
+        for path in GENERIC_GOLD_CONTRACT_TEST_PATHS
+        if (PROJECT_ROOT / path).is_file()
+    }
+    for test_path in sorted((PROJECT_ROOT / "tests").rglob("test*.py")):
+        relative_path = _relativize(test_path)
+        if relative_path in paths:
+            continue
+        lowered_path = relative_path.lower()
+        if any(needle.lower() in lowered_path for needle in needles):
+            paths.add(relative_path)
+            continue
+        if relative_path.startswith(("tests/contract/", "tests/unit/domain/schemas/")):
+            text = test_path.read_text(encoding="utf-8").lower()
+            if any(needle.lower() in text for needle in needles):
+                paths.add(relative_path)
+    return sorted(paths)
+
+
 def _build_row(
     *,
     config_path: Path,
@@ -83,6 +233,7 @@ def _build_row(
     pipeline_name = str(pipeline.get("pipeline_name") or f"{provider}_{entity}")
     contract_ref = f"{provider}.{entity}"
     gold_enabled = _gold_runtime_enabled(pipeline)
+    primary_key_fields = _primary_key_fields(pipeline)
 
     contract_yaml_path = CONFIGS_ROOT / "contracts" / provider / f"{entity}.yaml"
     contract_yaml_exists = contract_yaml_path.is_file()
@@ -115,6 +266,11 @@ def _build_row(
         for artifact in published_artifacts
         if not _resolve_registry_relative(artifact).is_file()
     ]
+    contract_artifact_summary = _contract_artifact_summary(published_artifacts)
+    schema_source_summary = _schema_source_summary(source_path)
+    contract_test_paths = _contract_test_paths(provider, entity)
+    required_fields = contract_artifact_summary["published_contract_required_fields"]
+    primary_keys_required = all(field in required_fields for field in primary_key_fields)
 
     missing_surfaces: list[str] = []
     if not contract_yaml_exists:
@@ -129,6 +285,21 @@ def _build_row(
         missing_surfaces.append("published_artifact")
     elif published_artifact_missing_paths:
         missing_surfaces.append("published_artifact_file")
+    if gold_enabled:
+        if not schema_source_summary["pandera_contract_declared"]:
+            missing_surfaces.append("pandera_contract_source")
+        if not schema_source_summary["gold_strict_validation_declared"]:
+            missing_surfaces.append("gold_strict_validation")
+        if not primary_key_fields:
+            missing_surfaces.append("primary_key_contract")
+        elif not primary_keys_required:
+            missing_surfaces.append("primary_key_required_fields")
+        if contract_artifact_summary["published_contract_property_count"] <= 0:
+            missing_surfaces.append("published_contract_properties")
+        if contract_artifact_summary["published_contract_required_count"] <= 0:
+            missing_surfaces.append("published_contract_required_fields")
+        if not contract_test_paths:
+            missing_surfaces.append("contract_tests")
 
     yaml_contract_ref = contract_payload.get("contract_ref")
     yaml_contract_version = contract_payload.get("contract_version")
@@ -152,6 +323,7 @@ def _build_row(
         "provider": provider,
         "entity": entity,
         "contract_ref": contract_ref,
+        "dataset_layer": "gold",
         "config_path": _relativize(config_path),
         "gold_enabled": gold_enabled,
         "parity_status": parity_status,
@@ -179,8 +351,32 @@ def _build_row(
         ),
         "gold_schema_source_path": source_path,
         "gold_schema_source_exists": source_exists,
+        "gold_schema_source_resolved_path": (
+            _relative_if_project_path(_resolve_registry_relative(source_path))
+            if source_path
+            else ""
+        ),
+        "pandera_contract_declared": schema_source_summary[
+            "pandera_contract_declared"
+        ],
+        "gold_strict_validation_declared": schema_source_summary[
+            "gold_strict_validation_declared"
+        ],
+        "pandera_field_count_in_source": schema_source_summary[
+            "pandera_field_count_in_source"
+        ],
+        "pandera_check_count_in_source": schema_source_summary[
+            "pandera_check_count_in_source"
+        ],
+        "primary_key_fields": primary_key_fields,
+        "primary_key_required_in_published_contract": primary_keys_required,
+        "uniqueness_constraint_source": (
+            "pipeline.business_primary_keys" if primary_key_fields else ""
+        ),
+        "contract_test_paths": contract_test_paths,
         "published_artifact_paths": published_artifacts,
         "published_artifact_missing_paths": published_artifact_missing_paths,
+        **contract_artifact_summary,
         "missing_surfaces": sorted(set(missing_surfaces)),
     }
 
@@ -237,18 +433,24 @@ def _render_markdown(payload: dict[str, Any]) -> str:
         f"- missing_gold_enabled_count: {payload['missing_gold_enabled_count']}",
         f"- excluded_count: {payload['excluded_count']}",
         "",
-        "| pipeline_name | contract_ref | gold_enabled | parity_status | contract_yaml_path | registry_status | missing_surfaces |",
-        "| --- | --- | ---: | --- | --- | --- | --- |",
+        "| pipeline_name | layer | contract_ref | gold_enabled | parity_status | strict | properties | required | pk_fields | tests | missing_surfaces |",
+        "| --- | --- | --- | ---: | --- | ---: | ---: | ---: | --- | ---: | --- |",
     ]
     for row in rows:
         render_row = dict(row)
         render_row["missing_surfaces_rendered"] = (
             ", ".join(row["missing_surfaces"]) or "-"
         )
+        render_row["primary_keys_rendered"] = (
+            ", ".join(row["primary_key_fields"]) or "-"
+        )
         lines.append(
-            "| `{pipeline_name}` | `{contract_ref}` | {gold_enabled} | "
-            "`{parity_status}` | `{contract_yaml_path}` | `{registry_status}` | {missing_surfaces_rendered} |".format(
+            "| `{pipeline_name}` | `{dataset_layer}` | `{contract_ref}` | "
+            "{gold_enabled} | `{parity_status}` | {gold_strict_validation_declared} | "
+            "{published_contract_property_count} | {published_contract_required_count} | "
+            "`{primary_keys_rendered}` | {contract_test_count} | {missing_surfaces_rendered} |".format(
                 **render_row,
+                contract_test_count=len(row["contract_test_paths"]),
             )
         )
     lines.append("")

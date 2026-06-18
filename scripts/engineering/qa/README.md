@@ -32,6 +32,7 @@ python -m scripts.engineering.qa <command> [args...]
 | `report-adr-enforcement-matrix`  | `report_adr_enforcement_matrix.py`                    | Generate/check accepted ADR enforcement coverage matrix                                           |
 | `report-architecture-debt-remote-main-baseline` | `report_architecture_debt_remote_main_baseline.py` | Generate/check clean remote-main architecture debt baseline artifacts                             |
 | `report-debt-governance-gates`   | `report_debt_governance_gates.py`                     | Generate/check normalized debt-reduction fail-fast gate rollup                                    |
+| `run-architecture-audit-read-only` | `run_architecture_audit_read_only.py`                | Run check-only architecture evidence diagnostics without pretest sync or artifact writes          |
 | `report-hotspots`                | `generate_hotspot_degradation_report.py`              | Generate performance hotspot degradation report                                                   |
 | `report-duplication-baseline`    | `report_duplication_baseline.py`                      | Generate report-only duplication baseline for `composition`/`application`                         |
 | `analyze-duplicate-functions`    | `analyze_duplicate_functions.py`                      | Compatibility wrapper for the legacy AST duplicate-function analyzer                              |
@@ -63,6 +64,7 @@ python -m scripts.engineering.qa <command> [args...]
 | `report-adr-enforcement-matrix`  | When accepted ADR coverage must be mapped to implementation owners and enforcement owners                                                        | Architecture governance / CI drift check   |
 | `report-architecture-debt-remote-main-baseline` | Before debt closeout; records clean `origin/main` architecture debt evidence from Git tree blobs                                      | Architecture debt closeout / CI drift check |
 | `report-debt-governance-gates`   | Before debt-reduction closeout; aggregates quality artifacts into normalized pass/fail/warn fail-fast gates                                      | Architecture debt closeout / CI gate       |
+| `run-architecture-audit-read-only` | When collecting architecture audit evidence without allowing dev-wrapper pretest sync or generated-artifact writes                         | Manual, read-only audit                    |
 | `report-hotspots`                | After performance benchmark runs; generates degradation report from JSONL observations                                                           | Manual, on-demand                          |
 | `report-duplication-baseline`    | When reviewing duplication pressure in `composition` or `application`; generates report-only baseline artifacts without creating a blocking gate | Manual, on-demand                          |
 | `analyze-duplicate-functions`    | When you need the older duplicate-function AST report through the canonical QA entrypoint                                                        | Manual, audit/reporting                    |
@@ -86,6 +88,7 @@ Important distinction:
 Direct script path:
 
 - `scripts/engineering/qa/report_duplication_baseline.py` (`python -m scripts.engineering.qa report-duplication-baseline`) generates report-only duplication baseline artifacts for governance review.
+- `scripts/engineering/qa/run_architecture_audit_read_only.py` (`python -m scripts.engineering.qa run-architecture-audit-read-only`) runs check-only architecture diagnostics and fails if tracked governance surfaces mutate.
 - `scripts/engineering/qa/generate_architecture_debt_tasks.py` (`python -m scripts.engineering.qa generate-debt-tasks`) generates the canonical architecture debt task backlog.
 - `scripts/engineering/qa/reduce_architecture_debt.py` (`python -m scripts.engineering.qa reduce-architecture-debt`) builds the orchestration plan consumed by the architecture-debt agent.
 
@@ -105,6 +108,7 @@ python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline -
 python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --update
 python -m scripts.engineering.qa report-debt-governance-gates --check
 python -m scripts.engineering.qa report-debt-governance-gates --update
+python -m scripts.engineering.qa run-architecture-audit-read-only
 python -m scripts.engineering.qa run-tests --suite unit-fast --skip-preflight -- --no-cov
 python -m scripts.engineering.qa run-tests --suite unit-parallel-safe --skip-preflight -- --no-cov
 python -m scripts.engineering.qa summarize-junit --suite unit-fast --junit-glob 'reports/test-telemetry/*.xml'

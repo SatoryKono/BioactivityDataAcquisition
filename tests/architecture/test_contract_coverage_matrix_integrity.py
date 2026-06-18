@@ -71,6 +71,51 @@ def test_contract_coverage_matrix_gold_enabled_rows_have_full_governance_surface
 
 
 @pytest.mark.architecture
+def test_contract_coverage_matrix_gold_enabled_rows_have_layer_pandera_details() -> (
+    None
+):
+    """Dataset-layer rows must expose machine-readable Pandera contract evidence."""
+    violations: list[str] = []
+    for row in _load_rows():
+        pipeline_name = row.get("pipeline_name")
+        if not isinstance(pipeline_name, str) or row.get("gold_enabled") is not True:
+            continue
+        if row.get("dataset_layer") != "gold":
+            violations.append(f"{pipeline_name}: expected dataset_layer='gold'")
+        if row.get("pandera_contract_declared") is not True:
+            violations.append(f"{pipeline_name}: missing Pandera contract source")
+        if row.get("gold_strict_validation_declared") is not True:
+            violations.append(f"{pipeline_name}: missing strict Gold validation")
+        if not isinstance(row.get("primary_key_fields"), list) or not row.get(
+            "primary_key_fields"
+        ):
+            violations.append(f"{pipeline_name}: missing primary_key_fields")
+        if row.get("primary_key_required_in_published_contract") is not True:
+            violations.append(
+                f"{pipeline_name}: primary keys are not required in published contract"
+            )
+        if not isinstance(row.get("contract_test_paths"), list) or not row.get(
+            "contract_test_paths"
+        ):
+            violations.append(f"{pipeline_name}: missing contract_test_paths")
+        for count_field in (
+            "published_contract_property_count",
+            "published_contract_required_count",
+            "published_contract_non_nullable_count",
+            "pandera_field_count_in_source",
+        ):
+            value = row.get(count_field)
+            if not isinstance(value, int) or value <= 0:
+                violations.append(f"{pipeline_name}: invalid {count_field}={value!r}")
+        check_count = row.get("published_contract_check_constraint_count")
+        if not isinstance(check_count, int):
+            violations.append(
+                f"{pipeline_name}: invalid published_contract_check_constraint_count"
+            )
+    assert not violations, "\n".join(violations)
+
+
+@pytest.mark.architecture
 def test_contract_coverage_matrix_exclusions_are_explicit() -> None:
     """Excluded rows must carry an explicit justification and payload summary parity."""
     payload = _load_payload()
