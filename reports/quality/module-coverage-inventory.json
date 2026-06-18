@@ -8723,7 +8723,7 @@
       "missing_lines": 1,
       "module": "bioetl.composition.runtime_builders._run_manifest_creation_support",
       "path": "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py",
-      "source_lines": 407
+      "source_lines": 237
     },
     {
       "coverage_percent": 98.51,
@@ -11543,7 +11543,7 @@
       "missing_lines": 2,
       "module": "bioetl.domain.mapping.protein_class_target_type",
       "path": "src/bioetl/domain/mapping/protein_class_target_type.py",
-      "source_lines": 406
+      "source_lines": 411
     },
     {
       "coverage_percent": 88.24,
@@ -21678,7 +21678,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-06-18",
-  "source_tree_sha256": "133939282de13271266554ed4392f42272b1e17f06cf8a725dd40a5f1f3c583e",
+  "source_tree_sha256": "525e15300ee8c226b611040c26f8de2d6c8e1b4c2ac17b3a83fde95904121dfe",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
