@@ -71,6 +71,30 @@ def test_tests_workflow_runs_debt_governance_closeout_gates() -> None:
     assert "report-debt-governance-gates --check" in workflow
 
 
+def test_tests_workflow_runs_generated_architecture_evidence_gates() -> None:
+    """Merge pipeline must validate generated architecture evidence artifacts."""
+    workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")
+    assert "Validate contract coverage matrix artifact" in workflow
+    assert "report-contract-coverage-matrix --check" in workflow
+    assert "Validate port-adapter-factory coverage map artifact" in workflow
+    assert "report-port-adapter-factory-coverage --check" in workflow
+    assert "Validate domain aggregate invariant registry" in workflow
+    assert "tests/architecture/test_domain_aggregate_invariant_registry.py" in workflow
+
+
+def test_read_only_architecture_audit_covers_generated_evidence_gates() -> None:
+    """Read-only architecture audit must include generated evidence drift gates."""
+    from scripts.engineering.qa.run_architecture_audit_read_only import (
+        architecture_audit_checks,
+    )
+
+    check_names = {check.name for check in architecture_audit_checks()}
+    assert "contract_coverage_matrix" in check_names
+    assert "port_adapter_factory_coverage" in check_names
+    assert "observability_metric_inventory" in check_names
+    assert "domain_aggregate_invariant_registry" in check_names
+
+
 def test_tests_workflow_enforces_dead_code_inventory_drift_gate() -> None:
     """Merge pipeline must fail fast when dead-code evidence artifacts drift."""
     workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")

@@ -3409,13 +3409,13 @@
       "src/bioetl/application/core/batch_metrics.py"
     ],
     "bioetl_replay_drift_events_total": [
-      "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py"
+      "src/bioetl/composition/runtime_builders/_run_manifest_replay_support.py"
     ],
     "bioetl_replay_lag_seconds": [
-      "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py"
+      "src/bioetl/composition/runtime_builders/_run_manifest_replay_support.py"
     ],
     "bioetl_replay_reconstructability_events_total": [
-      "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py"
+      "src/bioetl/composition/runtime_builders/_run_manifest_replay_support.py"
     ],
     "bioetl_shutdown_completed": [
       "src/bioetl/application/services/shutdown_service.py"

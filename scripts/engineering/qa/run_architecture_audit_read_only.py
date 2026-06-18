@@ -111,6 +111,50 @@ def architecture_audit_checks(repo_root: Path = PROJECT_ROOT) -> tuple[Architect
             ),
         ),
         ArchitectureAuditCheck(
+            name="contract_coverage_matrix",
+            command=(
+                python,
+                "-m",
+                "scripts.engineering.qa",
+                "report-contract-coverage-matrix",
+                "--check",
+            ),
+        ),
+        ArchitectureAuditCheck(
+            name="port_adapter_factory_coverage",
+            command=(
+                python,
+                "-m",
+                "scripts.engineering.qa",
+                "report-port-adapter-factory-coverage",
+                "--check",
+            ),
+        ),
+        ArchitectureAuditCheck(
+            name="observability_metric_inventory",
+            command=(
+                python,
+                "-m",
+                "scripts.engineering.qa",
+                "report-observability-metric-inventory",
+                "--check",
+                "--json",
+                "--allow-local-cardinality-fallback",
+            ),
+        ),
+        ArchitectureAuditCheck(
+            name="domain_aggregate_invariant_registry",
+            command=(
+                python,
+                "-m",
+                "pytest",
+                "-p",
+                "no:cacheprovider",
+                "tests/architecture/test_domain_aggregate_invariant_registry.py",
+                "-q",
+            ),
+        ),
+        ArchitectureAuditCheck(
             name="remote_main_debt_baseline",
             command=(
                 python,

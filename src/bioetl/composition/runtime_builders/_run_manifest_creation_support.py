@@ -27,7 +27,7 @@ from bioetl.composition.runtime_builders._run_manifest_replay_support import (
     _build_manifest_launch_context,
     _build_replay_assessment,
     _validate_exact_replay_boundary,
-    emit_replay_reconstructability_metric,
+    emit_replay_reconstructability_metric as _emit_replay_reconstructability_metric,
 )
 from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
     to_serializable_mapping,
@@ -235,3 +235,17 @@ def build_manifest_create_request(
         ),
     )
     return request
+
+
+def emit_replay_reconstructability_metric(
+    *,
+    request: RunManifestCreateSpec,
+    strict_exact_replay_supported: bool,
+    metrics: object,
+) -> None:
+    """Creation-support ownership seam for replay reconstructability metrics."""
+    _emit_replay_reconstructability_metric(
+        request=request,
+        strict_exact_replay_supported=strict_exact_replay_supported,
+        metrics=metrics,
+    )

@@ -101,6 +101,32 @@ class TestSilverWriterMergedMixin:
 
         assert prepared.arrow_table.column("id").to_pylist() == [1, 2, 3]
 
+    def test_prepare_merged_silver_write_is_stable_for_reordered_inputs(self) -> None:
+        """Merged write prep should produce identical Arrow rows for input reorderings."""
+        host = _MergedHost()
+        records = [
+            {"source": "chembl", "id": 2, "name": "b"},
+            {"source": "chembl", "id": 1, "name": "a"},
+            {"source": "pubchem", "id": 1, "name": "c"},
+        ]
+
+        first = host._prepare_merged_silver_write(
+            request=_MergedSilverWriteRequest(
+                table_name="test.table",
+                records=records,
+                primary_keys=["source", "id"],
+            )
+        )
+        second = host._prepare_merged_silver_write(
+            request=_MergedSilverWriteRequest(
+                table_name="test.table",
+                records=list(reversed(records)),
+                primary_keys=["source", "id"],
+            )
+        )
+
+        assert first.arrow_table.to_pylist() == second.arrow_table.to_pylist()
+
     def test_prepare_merged_silver_write_validates_against_schema_when_provided(
         self,
     ) -> None:
