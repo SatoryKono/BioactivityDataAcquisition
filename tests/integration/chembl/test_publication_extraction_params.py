@@ -41,6 +41,7 @@ class TestPublicationExtractionParams(InputFilterExtractionParamsSuiteBase):
 
     CASE = PUBLICATION_CASE
 
+    @pytest.mark.asyncio(loop_scope="module")
     @pytest.mark.vcr
     async def test_publication_filtered_api_request(
         self,
