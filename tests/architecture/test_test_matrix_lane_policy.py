@@ -96,6 +96,7 @@ class TestCanonicalTestLanes:
         "architecture",
         "architecture-fast-boundary",
         "architecture-slow-governance",
+        "architecture-read-only-audit",
         "e2e",
         "memory",
         "performance",
@@ -129,6 +130,7 @@ class TestCanonicalTestLanes:
             assert lane.get("marker_expression")
             assert lane.get("pytest_args")
             assert lane.get("runner_backend") in {
+                "engineering_qa",
                 "run_pytest",
                 "run_pytest_sharded",
             }
@@ -141,8 +143,13 @@ class TestCanonicalTestLanes:
                 "vcr_replay_only",
             }
             artifacts = lane.get("expected_artifacts", {})
-            assert artifacts.get("junit_xml") is True
-            assert artifacts.get("json_summary") is True
+            if lane.get("read_only") is True:
+                assert artifacts.get("junit_xml") is False
+                assert artifacts.get("json_summary") is False
+                assert lane.get("mutates_artifacts") is False
+            else:
+                assert artifacts.get("junit_xml") is True
+                assert artifacts.get("json_summary") is True
 
     def test_canonical_test_lane_paths_and_runners_exist(self) -> None:
         matrix = load_matrix()
@@ -243,6 +250,14 @@ class TestCanonicalTestLanes:
             "--shard",
             "S7-architecture-slow-governance",
         ]
+        assert lanes["architecture-read-only-audit"]["runner_backend"] == (
+            "engineering_qa"
+        )
+        assert lanes["architecture-read-only-audit"]["read_only"] is True
+        assert lanes["architecture-read-only-audit"]["mutates_artifacts"] is False
+        assert lanes["architecture-read-only-audit"]["runner"] == (
+            "scripts/engineering/qa/run_architecture_audit_read_only.py"
+        )
         assert lanes["memory"]["marker_expression"] == "memory and not benchmark"
         assert lanes["memory"]["paths"] == [
             "tests/smoke/test_neo4j_memory_mcp_smoke.py"

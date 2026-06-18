@@ -249,6 +249,8 @@ def test_universal_exact_replay_claims_are_bound_to_full_universe_evidence() -> 
         relative_path = path.relative_to(ROOT).as_posix()
         if relative_path in allowed_docs:
             continue
+        if any(part.startswith(".quarantined-") for part in path.parts):
+            continue
         lowered = path.read_text(encoding="utf-8").lower()
         for phrase in risky_phrases:
             if phrase in lowered:

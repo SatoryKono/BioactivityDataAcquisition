@@ -14,6 +14,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
+GIT_STATUS_TIMEOUT_SECONDS = 120
 
 MUTATION_GUARD_PATHS = (
     ".github",
@@ -136,15 +137,16 @@ def _git_tracked_status(
     repo_root: Path,
     *,
     paths: tuple[str, ...] = MUTATION_GUARD_PATHS,
+    timeout_seconds: int = GIT_STATUS_TIMEOUT_SECONDS,
 ) -> tuple[str, ...]:
     try:
         result = subprocess.run(
-            ["git", "status", "--short", "--untracked-files=no", "--", *paths],
+            list(_git_status_command(paths)),
             cwd=repo_root,
             check=False,
             capture_output=True,
             text=True,
-            timeout=30,
+            timeout=timeout_seconds,
         )
     except subprocess.TimeoutExpired as exc:
         return (
@@ -154,6 +156,31 @@ def _git_tracked_status(
     if result.returncode != 0:
         return (f"<git-status-failed:{result.returncode}>", _tail(result.stderr))
     return tuple(line for line in result.stdout.splitlines() if line.strip())
+
+
+def _git_status_unavailable(status: tuple[str, ...]) -> bool:
+    """Return whether the mutation guard failed to inspect tracked status."""
+    return bool(status) and status[0].startswith("<git-status-")
+
+
+def _git_status_command(paths: tuple[str, ...]) -> tuple[str, ...]:
+    """Build a tracked-status command that cannot invoke Git LFS clean filters."""
+    return (
+        "git",
+        "-c",
+        "filter.lfs.clean=",
+        "-c",
+        "filter.lfs.smudge=",
+        "-c",
+        "filter.lfs.process=",
+        "-c",
+        "filter.lfs.required=false",
+        "status",
+        "--short",
+        "--untracked-files=no",
+        "--",
+        *paths,
+    )
 
 
 def _run_check(
@@ -217,15 +244,20 @@ def run_architecture_audit_read_only(
     ]
     after_status = _git_tracked_status(repo_root)
     mutation_detected = before_status != after_status
+    mutation_status_unavailable = _git_status_unavailable(
+        before_status
+    ) or _git_status_unavailable(after_status)
+    mutation_guard_failed = mutation_status_unavailable or mutation_detected
     return {
         "schema_version": 1,
         "generated_by": "scripts.engineering.qa.run_architecture_audit_read_only",
         "read_only": True,
         "mutation_guard_paths": list(MUTATION_GUARD_PATHS),
         "mutation_guard": {
-            "status": "fail" if mutation_detected else "pass",
+            "status": "fail" if mutation_guard_failed else "pass",
             "before": list(before_status),
             "after": list(after_status),
+            "status_unavailable": mutation_status_unavailable,
         },
         "checks": [
             {**asdict(result), "status": result.status} for result in results
@@ -235,6 +267,7 @@ def run_architecture_audit_read_only(
             "pass_count": sum(1 for result in results if result.returncode == 0),
             "fail_count": sum(1 for result in results if result.returncode != 0),
             "mutation_detected": mutation_detected,
+            "mutation_status_unavailable": mutation_status_unavailable,
         },
     }
 
@@ -274,7 +307,9 @@ def main(argv: list[str] | None = None) -> int:
             )
     summary = payload["summary"]
     assert isinstance(summary, dict)
-    return 0 if summary["fail_count"] == 0 and not summary["mutation_detected"] else 1
+    mutation_guard = payload["mutation_guard"]
+    assert isinstance(mutation_guard, dict)
+    return 0 if summary["fail_count"] == 0 and mutation_guard["status"] == "pass" else 1
 
 
 if __name__ == "__main__":

@@ -204,7 +204,7 @@ Protected-reference rules are fail-closed:
 
 Certified historical replay is therefore bounded but operationalized:
 
-- `bioetl run-manifest inventory` emits a retained-corpus certifiability
+- `bioetl run-manifest inventory` emits a retained-corpus artifact certifiability
   inventory so operators can see which manifests are already replayable,
   already certified, awaiting source snapshot certification, or awaiting
   certified source lineage;
@@ -270,6 +270,9 @@ Certified historical replay is therefore bounded but operationalized:
   authoritative archived/offline historical records and publish
   `authoritative_truth_surface`, `universal_claim`, and
   `durable_evidence_coverage_claim`.
+- the retained-corpus artifact is a bounded local evidence artifact: it can
+  certify retained runs and expose residual gaps, but it cannot by itself
+  authorize universal exact replay wording for non-retained historical runs.
 - the full-universe artifact uses `scope=all_known_historical_runs`. It is the
   only published scope that may back literal wording about **any historical
   run** rather than retained-only or retained-certifiable subsets.

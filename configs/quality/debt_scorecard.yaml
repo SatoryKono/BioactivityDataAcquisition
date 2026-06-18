@@ -742,7 +742,6 @@ hotspot_family_coverage_thresholds:
       - src/bioetl/composition/runtime_builders/_effective_config_secret_support.py
       - src/bioetl/composition/runtime_builders/_effective_config_source_refs_support.py
       - src/bioetl/composition/runtime_builders/_run_manifest_data_roots.py
-      - src/bioetl/composition/runtime_builders/_run_manifest_request_spec_support.py
       - src/bioetl/composition/runtime_builders/_run_manifest_sink_policy.py
       - src/bioetl/composition/runtime_builders/_runner_control_plane_policy_support.py
       - src/bioetl/composition/runtime_builders/inputs_runtime_assembly.py

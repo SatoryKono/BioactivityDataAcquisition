@@ -302,7 +302,7 @@ test_lanes:
       suite_name: architecture-read-only-audit
       description: "Diagnostic read-only architecture evidence lane; runs check-only gates without dev-wrapper pretest sync or artifact writes."
       runner_backend: engineering_qa
-      runner: python -m scripts.engineering.qa run-architecture-audit-read-only
+      runner: scripts/engineering/qa/run_architecture_audit_read_only.py
       paths:
         - tests/architecture/test_runtime_import_scc.py
         - reports/quality/
