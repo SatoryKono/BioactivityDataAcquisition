@@ -1,5 +1,5 @@
 {
-  "snapshot_date": "2026-06-17",
+  "snapshot_date": "2026-06-18",
   "issue": "#5272",
   "parent_epic": "#5244",
   "title": "Burn down application_core coverage and zero-uncovered module debt",
@@ -11,8 +11,8 @@
   },
   "current_metrics": {
     "repo_uncovered_module_count": 0,
-    "repo_unmeasured_module_count": 0,
-    "application_core_covered_line_percent": 96.14,
+    "repo_unmeasured_module_count": 2,
+    "application_core_covered_line_percent": 96.15,
     "application_core_uncovered_module_count": 0,
     "application_core_unmeasured_module_count": 0
   },

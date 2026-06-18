@@ -1,0 +1,160 @@
+{
+  "columns": [
+    {
+      "name": "run_id",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "workflow_id",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "pipeline_id",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "provider_id",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "stage",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "record_index",
+      "types": [
+        "int"
+      ]
+    },
+    {
+      "name": "source_record_id",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "primary_key",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "payload_hash",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "input_payload_hash",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "output_payload_hash",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "status",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "reason_code",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "reason_message",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "rule_id",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "rule_layer",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "failed_field",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "failed_value",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "expected_constraint",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "contract_version",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "action",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "created_at",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "raw_payload",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "normalized_payload",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "batch_id",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "source_metadata",
+      "types": [
+        "str"
+      ]
+    }
+  ]
+}

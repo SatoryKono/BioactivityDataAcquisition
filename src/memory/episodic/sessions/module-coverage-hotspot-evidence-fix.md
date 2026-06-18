@@ -1,23 +1,22 @@
 ---
 id: module-coverage-hotspot-evidence-fix
-title: Fix module coverage hotspot evidence
+title: Fix module coverage hotspot family evidence drift
 task_id: module-coverage-hotspot-evidence-fix
-created_at: '2026-06-01T05:26:46Z'
+created_at: '2026-06-18T09:19:47Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - tests/architecture/test_module_coverage_inventory.py
 summary: Active task session context.
-query: test_module_coverage_inventory_reports_measured_hotspot_family_evidence module
-  coverage inventory hotspot evidence
+query: module coverage inventory hotspot family evidence drift composition_runtime_builders
 ---
 
 # Session note
 
 ## Task
 
-- Title: Fix module coverage hotspot evidence
-- Retrieval query: test_module_coverage_inventory_reports_measured_hotspot_family_evidence module coverage inventory hotspot evidence
+- Title: Fix module coverage hotspot family evidence drift
+- Retrieval query: module coverage inventory hotspot family evidence drift composition_runtime_builders
 
 ## Retrieved context
 
