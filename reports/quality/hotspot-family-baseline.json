@@ -16,11 +16,11 @@
         "src/bioetl/application/core/"
       ],
       "duplication_clusters": 0,
-      "files": 179,
-      "total_loc": 22086,
+      "files": 180,
+      "total_loc": 22186,
       "files_ge_250_loc": 6,
-      "helper_function_ratio": 0.35,
-      "max_internal_fan_in": 10,
+      "helper_function_ratio": 0.351,
+      "max_internal_fan_in": 11,
       "max_internal_fan_in_module": "bioetl.application.core.batch_operation_errors",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 13,
