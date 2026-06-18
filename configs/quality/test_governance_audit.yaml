@@ -62,7 +62,7 @@ budgets:
   refined_assertless_max: 0
   duplicate_test_names_max: 0
   duplicate_test_name_occurrences_max: 0
-  compatibility_test_file_max: 31
+  compatibility_test_file_max: 30
   markerless_test_functions_max: 0
   uuid4_call_sites_max: 0
   date_today_call_sites_max: 0
@@ -270,6 +270,15 @@ budget_ratchet:
       to test_gold_nullable_numeric_contract.py, removed it from compatibility filename
       inventory, and ratcheted compatibility_test_file_max from 32 to 31 without
       reducing coverage.
+  - issue: '#5351'
+    owner: test-governance
+    status: compatibility_test_file_max_ratcheted_to_30
+    note: Composition entrypoints removed-symbol enforcement is a current architecture
+      guard, not retained deprecated-import compatibility behavior. Renamed
+      test_composition_entrypoints_deprecated_imports.py to
+      test_composition_entrypoints_removed_symbol_guards.py, removed it from the
+      compatibility filename inventory, and ratcheted compatibility_test_file_max
+      from 31 to 30 without reducing coverage.
   - issue: '#5107'
     owner: test-governance
     status: architecture_shim_guards_retained_with_rationale
@@ -376,7 +385,7 @@ rf_009_closeout:
     refined_assertless_tests: 0
     duplicate_test_names: 0
     duplicate_test_name_occurrences: 0
-    compatibility_test_files: 31
+    compatibility_test_files: 30
     markerless_test_functions: 0
     uuid4_call_sites: 0
     date_today_call_sites: 0
@@ -524,7 +533,7 @@ oversized_test_module_inventory:
     owner: application-services
 compatibility_test_inventory:
   review_cadence: quarterly
-  total_files: 31
+  total_files: 30
   default_review_date: '2026-09-30'
   entries:
   - path: tests/architecture/test_application_composite_compat_surface_usage.py
@@ -611,14 +620,6 @@ compatibility_test_inventory:
     decision: retained_compatibility_contract
     owner: architecture-governance
     protected_surface: architecture/compatibility telemetry reporting
-    policy_ref: '#4209'
-    review_date: '2026-09-30'
-    rationale: Tracked compatibility test surface; retained only while the referenced
-      public or migration contract remains supported.
-  - path: tests/architecture/test_composition_entrypoints_deprecated_imports.py
-    decision: retained_governance_guard
-    owner: architecture-governance
-    protected_surface: architecture/composition entrypoints deprecated imports
     policy_ref: '#4209'
     review_date: '2026-09-30'
     rationale: Tracked compatibility test surface; retained only while the referenced

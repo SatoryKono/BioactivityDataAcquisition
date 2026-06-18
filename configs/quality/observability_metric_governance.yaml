@@ -58,6 +58,21 @@ runtime_cardinality_review:
       Pre-release quality CI must emit an explicit passed, failed, or degraded
       runtime-cardinality review artifact, and release gates fail on degraded
       live evidence so unavailable Prometheus review cannot silently pass.
+    touched_metric_change_gate:
+      mode: changed_paths_require_fresh_release_review
+      changed_from_ref: refs/remotes/origin/main
+      changed_path_trigger_fields:
+      - runtime_emitters
+      - helper_backed_emitters
+      - alias_emitters
+      changed_path_trigger_static_paths:
+      - configs/quality/observability_metric_inventory_allowlist.yaml
+      - configs/quality/observability_metric_declarations.yaml
+      rationale: >
+        Metric emitter and declaration changes must not merge behind stale or
+        degraded live cardinality evidence. Governance-only policy text may
+        evolve separately, but touched metric surfaces must see a fresh passed
+        release-grade review artifact in CI.
   local_fallback_evidence:
     workflow: .github/workflows/tests.yml::governance-preflight
     artifact: reports/observability/runtime_cardinality_review_pr.json

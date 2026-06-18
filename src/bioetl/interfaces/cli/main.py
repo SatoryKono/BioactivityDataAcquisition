@@ -17,7 +17,6 @@ from bioetl.interfaces.cli.commands.config_dq import dq as dq_command
 from bioetl.interfaces.cli.commands.debug import debug as debug_command
 from bioetl.interfaces.cli.commands.lock import lock as lock_command
 from bioetl.interfaces.cli.registry_helpers import (
-    _build_registered_registry,
     create_registry,
     register_all_pipelines,
 )
@@ -185,14 +184,13 @@ class _LazyCliGroup(Group):
 def _build_main_registry() -> object:
     """Build an explicit registry for the canonical process entrypoint.
 
-    Uses interface-layer registry helpers so the CLI entry module does not
-    import composition modules directly while preserving historical patch
-    points used by tests.
+    Uses the canonical interface-layer helper so the process entrypoint and
+    runtime commands share one explicit-registry bootstrap path while retaining
+    the historical patch seam for CLI unit tests.
     """
-    return _build_registered_registry(
-        create_registry_fn=create_registry,
-        register_all_pipelines_fn=register_all_pipelines,
-    )
+    registry = create_registry()
+    register_all_pipelines(registry=registry)
+    return registry
 
 
 @click.group(cls=_LazyCliGroup)

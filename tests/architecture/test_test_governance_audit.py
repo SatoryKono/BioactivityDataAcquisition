@@ -248,22 +248,22 @@ def test_compatibility_test_file_max_follows_stream_g_downward_ratchet() -> None
 
     live_count = int(report["compatibility_test_files"])
     budget_max = int(budgets["compatibility_test_file_max"])
-    target_count = 31
+    target_count = 30
 
     owner_notes = cast(list[YamlMap], ratchet.get("stream_g_owner_notes", []))
-    issue_notes = [note for note in owner_notes if note.get("issue") == "#5345"]
-    assert issue_notes, "Stream G owner note for #5345 must be recorded"
+    issue_notes = [note for note in owner_notes if note.get("issue") == "#5351"]
+    assert issue_notes, "Stream G owner note for #5351 must be recorded"
 
     assert live_count <= budget_max
     if live_count <= target_count:
         assert budget_max == target_count, (
-            "compatibility_test_file_max must ratchet down to 31 when live inventory "
+            "compatibility_test_file_max must ratchet down to 30 when live inventory "
             f"is at or below target; live={live_count}, budget={budget_max}"
         )
     else:
         assert budget_max == live_count, (
             "compatibility_test_file_max must pin to the live inventory while count "
-            f"exceeds target 31; live={live_count}, budget={budget_max}"
+            f"exceeds target 30; live={live_count}, budget={budget_max}"
         )
 
 

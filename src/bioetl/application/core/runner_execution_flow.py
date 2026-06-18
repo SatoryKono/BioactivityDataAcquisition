@@ -20,6 +20,9 @@ from bioetl.application.core._runner_observability import (
 from bioetl.application.core.batch_operation_errors import (
     OPERATION_ERRORS as _RF005_OPERATION_ERRORS,
 )
+from bioetl.application.core.batch_operation_errors import (
+    operation_error_type_name as _operation_error_type_name,
+)
 from bioetl.application.core.preflight.service import validate_infrastructure
 from bioetl.application.observability.observer import LifecyclePhase
 from bioetl.domain.control_plane.run_ledger import ORDINARY_RUN_LEDGER_STAGE_NAMES
@@ -114,7 +117,7 @@ async def _run_tracked_stage(
             start_time,
             success=False,
             runner_stage=stage_name,
-            error_type=type(exc).__name__,
+            error_type=_operation_error_type_name(exc),
         )
         raise
     host._record_stage_completed(stage_name)

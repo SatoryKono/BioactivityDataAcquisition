@@ -49,6 +49,7 @@ Commands:
     report-adr-enforcement-matrix Generate/check accepted ADR enforcement coverage matrix
     report-architecture-debt-remote-main-baseline Generate/check clean remote-main architecture debt baseline
     report-debt-governance-gates Generate/check debt-reduction fail-fast gate rollup
+    run-architecture-audit-read-only Run check-only architecture evidence diagnostics
     analyze-duplicate-functions Analyze duplicate function names across selected code areas
     calibrate-hotspots   Calibrate hotspot budgets
     run-tests            Run a named test-health lane and emit JUnit/JSON artifacts
@@ -110,6 +111,9 @@ COMMAND_MODULES: dict[str, str] = {
         "scripts.engineering.qa.report_architecture_debt_remote_main_baseline"
     ),
     "report-debt-governance-gates": "scripts.engineering.qa.report_debt_governance_gates",
+    "run-architecture-audit-read-only": (
+        "scripts.engineering.qa.run_architecture_audit_read_only"
+    ),
     "analyze-duplicate-functions": "scripts.engineering.qa.analyze_duplicate_functions",
     "calibrate-hotspots": "scripts.engineering.qa.calibrate_hotspot_budgets",
     "check-dashboard-visual-semantics": "scripts.engineering.qa.check_dashboard_visual_semantics",

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
@@ -32,7 +33,9 @@ from scripts.engineering.qa import (  # noqa: E402
     report_architecture_debt_remote_main_baseline,
 )
 
-DEFAULT_JSON_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "debt-governance-gates.json"
+DEFAULT_JSON_OUTPUT = (
+    PROJECT_ROOT / "reports" / "quality" / "debt-governance-gates.json"
+)
 DEFAULT_MD_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "debt-governance-gates.md"
 RELEASE_REVIEW_MAX_AGE_DAYS = 30
 
@@ -58,6 +61,14 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--repo-root", default=str(PROJECT_ROOT))
     parser.add_argument("--json-out", default=str(DEFAULT_JSON_OUTPUT))
     parser.add_argument("--md-out", default=str(DEFAULT_MD_OUTPUT))
+    parser.add_argument(
+        "--changed-from-ref",
+        help=(
+            "Optional git base ref for changed-path gating. When set, the report "
+            "computes repo-relative changed files from <ref>...HEAD and enables "
+            "touched-surface governance gates."
+        ),
+    )
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--update", action="store_true")
     return parser.parse_args(argv)
@@ -173,11 +184,7 @@ def _release_review_freshness_gate(
     age_days = (current_time - generated_at).days
     return Gate(
         name="observability_release_review_freshness",
-        status=(
-            "pass"
-            if 0 <= age_days <= RELEASE_REVIEW_MAX_AGE_DAYS
-            else "fail"
-        ),
+        status=("pass" if 0 <= age_days <= RELEASE_REVIEW_MAX_AGE_DAYS else "fail"),
         metric="generated_at_age_days",
         current=age_days,
         limit=RELEASE_REVIEW_MAX_AGE_DAYS,
@@ -193,6 +200,104 @@ def _release_gate_status(status_counts: dict[str, int]) -> str:
     if status_counts["warn"] > 0:
         return "warning"
     return "passing"
+
+
+def _collect_changed_paths(
+    repo_root: Path, *, changed_from_ref: str | None
+) -> set[str]:
+    if not changed_from_ref:
+        return set()
+    result = subprocess.run(
+        [
+            "git",
+            "-C",
+            repo_root.as_posix(),
+            "diff",
+            "--name-only",
+            f"{changed_from_ref}...HEAD",
+        ],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
+    )
+    if result.returncode != 0:
+        return set()
+    return {line.strip() for line in result.stdout.splitlines() if line.strip()}
+
+
+def _collect_metric_change_trigger_paths(
+    runtime_cardinality: dict[str, Any],
+    observability_governance: dict[str, Any],
+) -> set[str]:
+    runtime_review = observability_governance.get("runtime_cardinality_review", {})
+    if not isinstance(runtime_review, dict):
+        return set()
+    live_evidence = runtime_review.get("live_evidence", {})
+    if not isinstance(live_evidence, dict):
+        return set()
+    change_gate = live_evidence.get("touched_metric_change_gate", {})
+    if not isinstance(change_gate, dict):
+        return set()
+
+    trigger_paths = {
+        str(path)
+        for path in change_gate.get("changed_path_trigger_static_paths", [])
+        if isinstance(path, str) and path.strip()
+    }
+    for field_name in change_gate.get("changed_path_trigger_fields", []):
+        if not isinstance(field_name, str):
+            continue
+        field_mapping = runtime_cardinality.get(field_name, {})
+        if not isinstance(field_mapping, dict):
+            continue
+        for emitters in field_mapping.values():
+            if not isinstance(emitters, list):
+                continue
+            for emitter_path in emitters:
+                if isinstance(emitter_path, str) and emitter_path.strip():
+                    trigger_paths.add(emitter_path)
+    return trigger_paths
+
+
+def _observability_touched_metric_review_gate(
+    runtime_review: dict[str, Any],
+    *,
+    changed_paths: set[str],
+    trigger_paths: set[str],
+    now: datetime | None = None,
+) -> Gate:
+    relevant_paths = sorted(changed_paths & trigger_paths)
+    if not relevant_paths:
+        return Gate(
+            name="observability_touched_metric_review_freshness",
+            status="pass",
+            metric="changed_metric_surface_count",
+            current=0,
+            limit=0,
+            source_artifact="reports/observability/runtime_cardinality_review.json",
+            remediation=(
+                "Refresh live runtime cardinality review evidence before merging "
+                "metric emitter or declaration changes."
+            ),
+        )
+
+    freshness_gate = _release_review_freshness_gate(runtime_review, now=now)
+    review_status = str(runtime_review.get("status", "missing"))
+    healthy_review = freshness_gate.status == "pass" and review_status == "passed"
+    return Gate(
+        name="observability_touched_metric_review_freshness",
+        status="pass" if healthy_review else "fail",
+        metric="changed_metric_surface_count",
+        current=len(relevant_paths),
+        limit=0,
+        source_artifact="reports/observability/runtime_cardinality_review.json",
+        remediation=(
+            "Refresh live runtime cardinality review evidence before merging "
+            "metric emitter or declaration changes."
+        ),
+    )
 
 
 def _debt_scorecard_gates() -> list[Gate]:
@@ -249,7 +354,11 @@ def _debt_scorecard_gates() -> list[Gate]:
     return gates
 
 
-def build_payload(*, repo_root: Path = PROJECT_ROOT) -> dict[str, object]:
+def build_payload(
+    *,
+    repo_root: Path = PROJECT_ROOT,
+    changed_from_ref: str | None = None,
+) -> dict[str, object]:
     """Build normalized debt-governance gate payload."""
     repo_root = repo_root.resolve()
     gates: list[Gate] = []
@@ -258,18 +367,38 @@ def build_payload(*, repo_root: Path = PROJECT_ROOT) -> dict[str, object]:
         repo_root,
         "reports/quality/architecture-quality-scorecard.json",
     )
-    module_coverage = _load_json(repo_root, "reports/quality/module-coverage-inventory.json")
-    hotspot_family = _load_json(repo_root, "reports/quality/hotspot-family-baseline.json")
-    compatibility = _load_json(repo_root, "reports/quality/compatibility-importer-census.json")
+    module_coverage = _load_json(
+        repo_root, "reports/quality/module-coverage-inventory.json"
+    )
+    hotspot_family = _load_json(
+        repo_root, "reports/quality/hotspot-family-baseline.json"
+    )
+    compatibility = _load_json(
+        repo_root, "reports/quality/compatibility-importer-census.json"
+    )
     dead_code = _load_json(repo_root, "reports/quality/dead-code-inventory.json")
-    contract_matrix = _load_json(repo_root, "reports/quality/contract-coverage-matrix.json")
-    contract_diagnostics = _load_json(repo_root, "reports/quality/contract-registry-diagnostics.json")
-    dq_diagnostics = _load_json(repo_root, "reports/quality/contract-registry-dq-diagnostics.json")
-    config_discrepancy = _load_json(repo_root, "reports/quality/config-discrepancy-baseline.json")
-    test_governance = _load_json(repo_root, "reports/quality/test-governance-current.json")
+    contract_matrix = _load_json(
+        repo_root, "reports/quality/contract-coverage-matrix.json"
+    )
+    contract_diagnostics = _load_json(
+        repo_root, "reports/quality/contract-registry-diagnostics.json"
+    )
+    dq_diagnostics = _load_json(
+        repo_root, "reports/quality/contract-registry-dq-diagnostics.json"
+    )
+    config_discrepancy = _load_json(
+        repo_root, "reports/quality/config-discrepancy-baseline.json"
+    )
+    test_governance = _load_json(
+        repo_root, "reports/quality/test-governance-current.json"
+    )
     runtime_cardinality = _load_json(
         repo_root,
         "reports/observability/runtime_cardinality_inventory.json",
+    )
+    observability_governance = _load_yaml(
+        repo_root,
+        "configs/quality/observability_metric_governance.yaml",
     )
     runtime_review = _load_json(
         repo_root,
@@ -280,6 +409,10 @@ def build_payload(*, repo_root: Path = PROJECT_ROOT) -> dict[str, object]:
     remote_baseline = _load_json(
         repo_root,
         "reports/quality/architecture-debt-remote-main-baseline.json",
+    )
+    changed_paths = _collect_changed_paths(
+        repo_root,
+        changed_from_ref=changed_from_ref,
     )
 
     gates.extend(_debt_scorecard_gates())
@@ -350,7 +483,9 @@ def build_payload(*, repo_root: Path = PROJECT_ROOT) -> dict[str, object]:
         _hard_limit_gate(
             name="dead_code_untriaged_zero_import_candidates",
             metric="repo_wide_untriaged_zero_import_candidate_count",
-            current=dead_code_summary["repo_wide_untriaged_zero_import_candidate_count"],
+            current=dead_code_summary[
+                "repo_wide_untriaged_zero_import_candidate_count"
+            ],
             limit=0,
             source_artifact="reports/quality/dead-code-inventory.json",
             remediation="Classify zero-import candidates and attach owner tests before closeout.",
@@ -437,7 +572,9 @@ def build_payload(*, repo_root: Path = PROJECT_ROOT) -> dict[str, object]:
         _hard_limit_gate(
             name="production_uuid4_seams",
             metric="seams",
-            current=len(runtime_uuid_seams) if isinstance(runtime_uuid_seams, list) else 0,
+            current=len(runtime_uuid_seams)
+            if isinstance(runtime_uuid_seams, list)
+            else 0,
             limit=0,
             source_artifact="configs/quality/runtime_uuid_seams.yaml",
             remediation="Remove production uuid4 seams; replay identity must be explicit or deterministic.",
@@ -478,7 +615,9 @@ def build_payload(*, repo_root: Path = PROJECT_ROOT) -> dict[str, object]:
         _hard_limit_gate(
             name="observability_runtime_cardinality_threshold_violations",
             metric="runtime_cardinality_threshold_violations",
-            current=len(runtime_cardinality["runtime_cardinality_threshold_violations"]),
+            current=len(
+                runtime_cardinality["runtime_cardinality_threshold_violations"]
+            ),
             limit=0,
             source_artifact="reports/observability/runtime_cardinality_inventory.json",
             remediation="Reduce label cardinality or explicitly approve bounded thresholds.",
@@ -501,6 +640,16 @@ def build_payload(*, repo_root: Path = PROJECT_ROOT) -> dict[str, object]:
         )
     )
     gates.append(_release_review_freshness_gate(runtime_review))
+    gates.append(
+        _observability_touched_metric_review_gate(
+            runtime_review,
+            changed_paths=changed_paths,
+            trigger_paths=_collect_metric_change_trigger_paths(
+                runtime_cardinality,
+                observability_governance,
+            ),
+        )
+    )
 
     adr_summary = adr_matrix["summary"]
     gates.append(
@@ -553,7 +702,9 @@ def build_payload(*, repo_root: Path = PROJECT_ROOT) -> dict[str, object]:
         "adr_enforcement_matrix": not _artifact_matches(
             repo_root=repo_root,
             rel_path="reports/quality/adr-enforcement-matrix.json",
-            live_payload=report_adr_enforcement_matrix.build_payload(repo_root=repo_root),
+            live_payload=report_adr_enforcement_matrix.build_payload(
+                repo_root=repo_root
+            ),
         ),
         "remote_main_baseline": not _artifact_matches(
             repo_root=repo_root,
@@ -647,7 +798,9 @@ def render_markdown(payload: dict[str, object]) -> str:
     return "\n".join(lines)
 
 
-def _write_artifacts(payload: dict[str, object], *, json_out: Path, md_out: Path) -> None:
+def _write_artifacts(
+    payload: dict[str, object], *, json_out: Path, md_out: Path
+) -> None:
     json_out.parent.mkdir(parents=True, exist_ok=True)
     md_out.parent.mkdir(parents=True, exist_ok=True)
     json_out.write_text(
@@ -657,7 +810,9 @@ def _write_artifacts(payload: dict[str, object], *, json_out: Path, md_out: Path
     md_out.write_text(render_markdown(payload), encoding="utf-8")
 
 
-def _check_artifacts(payload: dict[str, object], *, json_out: Path, md_out: Path) -> list[str]:
+def _check_artifacts(
+    payload: dict[str, object], *, json_out: Path, md_out: Path
+) -> list[str]:
     errors: list[str] = []
     expected_json = json.dumps(payload, indent=2, sort_keys=True) + "\n"
     expected_md = render_markdown(payload)
@@ -668,14 +823,19 @@ def _check_artifacts(payload: dict[str, object], *, json_out: Path, md_out: Path
     summary = payload["summary"]
     assert isinstance(summary, dict)
     if int(summary["fail_count"]) > 0:
-        errors.append(f"Debt governance gates have {summary['fail_count']} failing gate(s)")
+        errors.append(
+            f"Debt governance gates have {summary['fail_count']} failing gate(s)"
+        )
     return errors
 
 
 def main(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
     repo_root = Path(args.repo_root).resolve()
-    payload = build_payload(repo_root=repo_root)
+    payload = build_payload(
+        repo_root=repo_root,
+        changed_from_ref=args.changed_from_ref,
+    )
     json_out = Path(args.json_out)
     md_out = Path(args.md_out)
 

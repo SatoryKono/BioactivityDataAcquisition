@@ -177,6 +177,22 @@ def test_observability_metric_governance_declares_required_views_and_evidence_pa
     assert "--review-json-out" in live_evidence["command"]
     assert "--summary-out" in live_evidence["command"]
     assert "--fail-on-degraded-live-review" in live_evidence["command"]
+    touched_metric_change_gate = live_evidence["touched_metric_change_gate"]
+    assert (
+        touched_metric_change_gate["mode"]
+        == "changed_paths_require_fresh_release_review"
+    )
+    assert touched_metric_change_gate["changed_from_ref"] == "refs/remotes/origin/main"
+    assert touched_metric_change_gate["changed_path_trigger_fields"] == [
+        "runtime_emitters",
+        "helper_backed_emitters",
+        "alias_emitters",
+    ]
+    assert touched_metric_change_gate["changed_path_trigger_static_paths"] == [
+        "configs/quality/observability_metric_inventory_allowlist.yaml",
+        "configs/quality/observability_metric_declarations.yaml",
+    ]
+    assert str(touched_metric_change_gate["rationale"]).strip()
 
     local_fallback_evidence = runtime_cardinality_review["local_fallback_evidence"]
     assert (
@@ -207,6 +223,23 @@ def test_tests_workflow_keeps_local_cardinality_fallback_out_of_release_gate() -
     )[1]
     assert "--fail-on-degraded-live-review" in release_gate
     assert "--allow-local-cardinality-fallback" not in release_gate
+
+
+@pytest.mark.architecture
+def test_tests_workflow_blocks_touched_metric_changes_on_stale_or_degraded_review() -> (
+    None
+):
+    workflow = (ROOT / ".github" / "workflows" / "tests.yml").read_text(
+        encoding="utf-8"
+    )
+    command = (
+        "uv run python -m scripts.engineering.qa report-debt-governance-gates "
+        "--check --changed-from-ref refs/remotes/origin/main"
+    )
+
+    assert command in workflow
+    fetch_command = "git fetch --no-tags --depth=1 origin main:refs/remotes/origin/main"
+    assert workflow.index(fetch_command) < workflow.index(command)
 
 
 @pytest.mark.architecture

@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Protocol
 
 from bioetl.composition.observability import ObservabilityContractError
-from bioetl.composition.runtime_builders.runner_builder_support import (
+from bioetl.composition.runtime_builders._runner_control_plane_policy import (
     resolve_required_artifact_lineage_layers,
     validate_required_persistence_profile,
 )
