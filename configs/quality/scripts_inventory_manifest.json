@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-18T14:06:31.173130+00:00",
+  "generated_at": "2026-06-18T17:23:17.108401+00:00",
   "summary": {
     "total_scripts": 437,
     "status_counts": {
@@ -7702,7 +7702,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 224,
+      "reference_count": 230,
       "references": [
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
@@ -12583,7 +12583,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 70,
+      "reference_count": 73,
       "references": [
         {
           "path": ".github/workflows/chembl-baseline-smoke.yml",
