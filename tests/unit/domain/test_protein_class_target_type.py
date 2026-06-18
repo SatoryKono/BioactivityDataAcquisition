@@ -14,6 +14,7 @@ from bioetl.domain.mapping.protein_class_target_type import (
     derive_protein_class_target_type,
     initialize_protein_class_target_type_mapping,
     is_protein_class_target_type_mapping_initialized,
+    normalize_protein_class_label,
     normalize_protein_class_top_level,
 )
 

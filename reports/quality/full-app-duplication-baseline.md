@@ -2,7 +2,7 @@
 
 - mode: report-only
 - targets: 4
-- total_duplicate_clusters: 125
+- total_duplicate_clusters: 121
 
 > Interpretation note: this is a visibility baseline. `R0801` can over-report
 > around facades, export barrels, and compatibility shims, so use it as
@@ -10,39 +10,39 @@
 
 | Target | Duplicate clusters |
 | --- | ---: |
-| `src/bioetl/infrastructure/adapters` | 78 |
+| `src/bioetl/infrastructure/adapters` | 74 |
 | `src/bioetl/application/pipelines` | 25 |
 | `src/bioetl/composition/bootstrap` | 2 |
 | `src/bioetl/interfaces/cli` | 20 |
 
 ## src/bioetl/infrastructure/adapters
 
-- duplicate clusters: 78
+- duplicate clusters: 74
 
 | Top recurring module pairs | Duplicate clusters |
 | --- | ---: |
-| `bioetl.infrastructure.adapters.chembl.fetch_resilience_mixin` <-> `bioetl.infrastructure.adapters.common.fetch_resilience_template` | 6 |
 | `bioetl.infrastructure.adapters.crossref._doi_batch_processor` <-> `bioetl.infrastructure.adapters.crossref._search_paginator` | 3 |
 | `bioetl.infrastructure.adapters.crossref.client` <-> `bioetl.infrastructure.adapters.crossref.client_fetch_helpers` | 3 |
 | `bioetl.infrastructure.adapters.chembl.__init__` <-> `bioetl.infrastructure.adapters.chembl.models` | 2 |
-| `bioetl.infrastructure.adapters.chembl.fetch_adapter_mixin` <-> `bioetl.infrastructure.adapters.chembl.fetch_resilience_mixin` | 2 |
+| `bioetl.infrastructure.adapters.chembl.fetch_adapter_mixin` <-> `bioetl.infrastructure.adapters.common.fetch_resilience_template` | 2 |
+| `bioetl.infrastructure.adapters.chembl.fetch_resilience_mixin` <-> `bioetl.infrastructure.adapters.common.fetch_resilience_template` | 2 |
 
 | Cluster path | Compared modules |
 | --- | --- |
-| `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.chembl.fetch_paging_mixin`[22:50], `bioetl.infrastructure.adapters.chembl.fetch_resilience_mixin`[34:62] |
+| `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.chembl.fetch_paging_mixin`[22:50], `bioetl.infrastructure.adapters.chembl.fetch_resilience_mixin`[33:61] |
 | `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.chembl._fetch_resilience_fallback`[58:81], `bioetl.infrastructure.adapters.chembl.fetch_paging_mixin`[36:50] |
 | `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.pubmed._fetch`[47:69], `bioetl.infrastructure.adapters.pubmed._search`[46:63] |
 | `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.chembl.__init__`[43:54], `bioetl.infrastructure.adapters.chembl.models`[58:69] |
 | `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.crossref._doi_batch_processor`[138:150], `bioetl.infrastructure.adapters.crossref._search_paginator`[64:76] |
 | `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.health_check_contract`[12:22], `bioetl.infrastructure.adapters.uniprot.client`[54:64] |
-| `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.chembl.fetch_resilience_mixin`[115:134], `bioetl.infrastructure.adapters.common.fetch_resilience_template`[169:192] |
 | `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.crossref.client`[75:87], `bioetl.infrastructure.adapters.semanticscholar.adapter`[61:93] |
-| `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.chembl.fetch_adapter_mixin`[57:66], `bioetl.infrastructure.adapters.chembl.fetch_resilience_mixin`[157:178] |
-| `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.chembl.fetch_resilience_mixin`[228:239], `bioetl.infrastructure.adapters.common.fetch_resilience_template`[195:204] |
+| `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.chembl.fetch_adapter_mixin`[57:66], `bioetl.infrastructure.adapters.chembl.fetch_resilience_mixin`[134:155] |
 | `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.chembl.models_common`[112:123], `bioetl.infrastructure.adapters.chembl.models_compound`[100:109] |
 | `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.crossref.fallback`[24:36], `bioetl.infrastructure.adapters.pubmed.fallback`[26:37] |
+| `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.pubmed._fetch`[33:44], `bioetl.infrastructure.adapters.pubmed._search`[32:43] |
+| `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.chembl.client`[245:254], `bioetl.infrastructure.adapters.pubchem.client_model_mixin`[88:97] |
 
-- … truncated 66 additional clusters for brevity
+- … truncated 62 additional clusters for brevity
 
 ## src/bioetl/application/pipelines
 
