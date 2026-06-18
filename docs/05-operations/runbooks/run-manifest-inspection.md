@@ -271,7 +271,7 @@ Interpretation:
   and reclassifies runs into
   `historical_source_replay_certified_parent` or
   `historical_composite_replay_certified_parent`.
-- `closure-report --write` persists one retained-corpus closure artifact under
+- `closure-report --write` persists one retained-corpus artifact closure artifact under
   `data/output/control/historical_replay_closure/{report_id}.json`.
 - `universe-report --external-pack ... --write` is the supported operator path
   for persisting a full-universe artifact from retained local evidence plus one

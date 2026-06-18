@@ -12,8 +12,8 @@
   },
   "coverage_inventory_delta": {
     "before_below_85_module_count": 106,
-    "after_below_85_module_count": 105,
-    "below_85_module_count_delta": -1,
+    "after_below_85_module_count": 104,
+    "below_85_module_count_delta": -2,
     "after_uncovered_module_count": 0,
     "after_unmeasured_module_count": 0
   },
@@ -31,7 +31,7 @@
   "closeout": {
     "status": "bounded_shard_complete",
     "residual_tail_remains": true,
-    "residual_below_85_module_count": 105,
+    "residual_below_85_module_count": 104,
     "rationale": "The issue reduces the audited low-coverage tail without reintroducing uncovered or unmeasured production modules; broader tail burn-down remains incremental work."
   }
 }

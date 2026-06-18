@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from itertools import permutations
-from datetime import UTC, datetime
 from dataclasses import replace
+from datetime import UTC, datetime
+from itertools import permutations
 from uuid import UUID
 
 import pytest
@@ -93,6 +93,7 @@ def _make_request() -> RunManifestCreateRequest:
         normalization_profile_ref="chembl.activity",
         normalization_profile_version="1.0.0",
         normalization_profile_hash="d" * 64,
+        effective_config_artifact_id="effective-config-artifact-001",
         replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,
     )
 
@@ -419,6 +420,51 @@ def test_create_manifest_requires_dependency_lock_for_explicit_exact_replay() ->
     assert store.get("manifest-missing-lock") is None
 
 
+def test_create_manifest_requires_contract_identity_for_explicit_exact_replay() -> (
+    None
+):
+    store = _InMemoryRunManifestStore()
+    service = RunManifestService(
+        manifest_port=store,
+        _manifest_id_factory=lambda: "manifest-missing-contract-identity",
+    )
+
+    with pytest.raises(RuntimeError, match="contract_ref, contract_version"):
+        service.create_manifest(
+            replace(
+                _make_request(),
+                contract_ref=None,
+                contract_version=None,
+                launch_context={"limit": 100, "resume": False, "exact_replay": True},
+            )
+        )
+
+    assert store.get("manifest-missing-contract-identity") is None
+
+
+def test_create_manifest_requires_effective_config_artifact_for_replay_ready() -> None:
+    store = _InMemoryRunManifestStore()
+    service = RunManifestService(
+        manifest_port=store,
+        _manifest_id_factory=lambda: "manifest-missing-effective-config-artifact",
+    )
+
+    with pytest.raises(RuntimeError, match="effective_config_artifact_id"):
+        service.create_manifest(
+            replace(
+                _make_request(),
+                effective_config_artifact_id=None,
+                launch_context={
+                    "limit": 100,
+                    "resume": False,
+                    "required_persistence_profile": "replay_ready",
+                },
+            )
+        )
+
+    assert store.get("manifest-missing-effective-config-artifact") is None
+
+
 def test_create_manifest_rejects_undocumented_source_revision_state() -> None:
     store = _InMemoryRunManifestStore()
     service = RunManifestService(
@@ -660,7 +706,7 @@ def test_execution_fingerprint_matches_golden_value() -> None:
     )
     assert (
         manifest.execution_fingerprint
-        == "3fb7206bb92c159f0922222f742d75f67ab8efb93d8ec47d7eed4467585caf6d"
+        == "fd1efe74f82712f4f3d74db19f16007e324eba548ab6610a7942f16bbaf07673"
     )
 
 
