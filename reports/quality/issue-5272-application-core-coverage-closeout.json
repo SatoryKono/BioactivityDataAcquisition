@@ -18,7 +18,7 @@
   },
   "parent_epic_status": {
     "status": "not_closeable_under_current_definition_of_done",
-    "remaining_below_85_module_count": 104,
+    "remaining_below_85_module_count": 105,
     "reason": "Issue #5244 requires zero below-tier production modules; the current inventory still has below-tier modules even though #5272 acceptance criteria are met."
   },
   "evidence": [
