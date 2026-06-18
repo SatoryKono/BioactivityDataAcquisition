@@ -86,7 +86,7 @@ def test_date_only_inventory_burn_down_is_bounded_to_remaining_reviewed_surfaces
     hash_policy = cast(dict[str, Any], policy["content_hash_datetime_policy"])
     inventory = cast(list[dict[str, Any]], hash_policy["date_only_entity_inventory"])
 
-    assert len(inventory) == 17
+    assert len(inventory) == 2
     migrated = {
         ("crossref", "publication"),
         ("openalex", "publication"),

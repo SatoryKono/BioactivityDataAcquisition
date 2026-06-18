@@ -12,9 +12,9 @@ from bioetl.composition.observability import (
     bind_manifest_logger_context as _bind_manifest_logger_context,
 )
 from bioetl.composition.runtime_builders._runner_control_plane_policy import (
+    resolve_required_artifact_lineage_layers,
     resolve_runner_control_plane_policy as _resolve_runner_control_plane_policy,
-)
-from bioetl.composition.runtime_builders._runner_control_plane_policy import (
+    validate_required_persistence_profile,
     validate_strict_data_root_policy as _validate_strict_data_root_policy,
 )
 from bioetl.composition.runtime_builders.control_plane import (
@@ -31,7 +31,12 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.context import PipelineRunContext
 
-__all__ = ["ControlPlaneSetupResult", "assemble_runner_control_plane"]
+__all__ = [
+    "ControlPlaneSetupResult",
+    "assemble_runner_control_plane",
+    "resolve_required_artifact_lineage_layers",
+    "validate_required_persistence_profile",
+]
 
 
 def _set_context_attribute(ctx: object, attr_name: str, attr_value: object) -> object:

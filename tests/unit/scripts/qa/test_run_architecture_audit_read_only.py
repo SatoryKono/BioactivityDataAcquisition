@@ -51,3 +51,20 @@ def test_mutation_guard_scope_is_limited_to_tracked_governance_surfaces() -> Non
         "src/bioetl",
         "tests",
     )
+
+
+def test_mutation_guard_status_timeout_is_unavailable() -> None:
+    assert audit_lane.GIT_STATUS_TIMEOUT_SECONDS == 120
+    assert audit_lane._git_status_unavailable(("<git-status-timeout>", "")) is True
+    assert audit_lane._git_status_unavailable((" M src/bioetl/example.py",)) is False
+
+
+def test_mutation_guard_git_status_disables_lfs_filters() -> None:
+    command = audit_lane._git_status_command(("src/bioetl", "tests"))
+
+    assert command[:2] == ("git", "-c")
+    assert "filter.lfs.clean=" in command
+    assert "filter.lfs.smudge=" in command
+    assert "filter.lfs.process=" in command
+    assert "filter.lfs.required=false" in command
+    assert command[-3:] == ("--", "src/bioetl", "tests")

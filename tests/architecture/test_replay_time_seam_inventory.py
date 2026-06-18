@@ -120,10 +120,7 @@ def test_application_wall_clock_seams_are_classified_and_bounded() -> None:
             observed[path.relative_to(ROOT).as_posix()] = seams
 
     normalized = {
-        relative_path: {
-            seam.split(":", maxsplit=1)[0]
-            for seam in seams
-        }
+        relative_path: {seam.split(":", maxsplit=1)[0] for seam in seams}
         for relative_path, seams in observed.items()
     }
     expected = {

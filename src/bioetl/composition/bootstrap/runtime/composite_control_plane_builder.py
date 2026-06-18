@@ -49,7 +49,7 @@ from bioetl.composition.bootstrap.runtime.composite_control_plane_bundle import 
     CompositeControlPlaneBundle,
 )
 from bioetl.composition.occurrence_identity import create_runtime_occurrence_id
-from bioetl.composition.runtime_builders.runner_control_plane_policy import (
+from bioetl.composition.runtime_builders.runner_control_plane_assembly import (
     validate_required_persistence_profile,
 )
 from bioetl.composition.services.versioning import get_code_revision_provenance

@@ -38,6 +38,20 @@ PANDERA_CONSTRAINT_KEYS = frozenset(
         "pattern",
     }
 )
+PANDERA_CONTRACT_BASE_MARKERS = (
+    "pa.DataFrameModel",
+    "StrictGoldContractSchema",
+    "CompositeGoldCommonSchema",
+    "CompositeLookupLineageSchema",
+    "PublicationGoldCommonSchema",
+)
+STRICT_GOLD_VALIDATION_MARKERS = (
+    "StrictGoldContractSchema",
+    "CompositeGoldCommonSchema",
+    "CompositeLookupLineageSchema",
+    "PublicationGoldCommonSchema",
+    "strict = True",
+)
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
@@ -102,7 +116,9 @@ def _load_json_if_exists(path: Path) -> dict[str, Any]:
 
 
 def _contract_artifact_summary(paths: list[str]) -> dict[str, Any]:
-    artifacts = [_load_json_if_exists(_resolve_registry_relative(path)) for path in paths]
+    artifacts = [
+        _load_json_if_exists(_resolve_registry_relative(path)) for path in paths
+    ]
     artifacts = [artifact for artifact in artifacts if artifact]
     if not artifacts:
         return {
@@ -158,16 +174,15 @@ def _schema_source_summary(source_path: str) -> dict[str, Any]:
         if source_file is not None and source_file.is_file()
         else ""
     )
+    pandera_contract_declared = any(
+        marker in source_text for marker in PANDERA_CONTRACT_BASE_MARKERS
+    )
+    gold_strict_validation_declared = any(
+        marker in source_text for marker in STRICT_GOLD_VALIDATION_MARKERS
+    )
     return {
-        "pandera_contract_declared": (
-            "pa.DataFrameModel" in source_text
-            or "StrictGoldContractSchema" in source_text
-            or "CompositeGoldCommonSchema" in source_text
-        ),
-        "gold_strict_validation_declared": (
-            "StrictGoldContractSchema" in source_text
-            or "strict = True" in source_text
-        ),
+        "pandera_contract_declared": pandera_contract_declared,
+        "gold_strict_validation_declared": gold_strict_validation_declared,
         "pandera_field_count_in_source": source_text.count("pa.Field("),
         "pandera_check_count_in_source": sum(
             source_text.count(token)
@@ -193,7 +208,19 @@ def _primary_key_fields(pipeline: dict[str, Any]) -> list[str]:
     return sorted(set(fields))
 
 
-def _contract_test_paths(provider: str, entity: str) -> list[str]:
+def _contract_test_index() -> list[tuple[str, str]]:
+    indexed_paths: list[tuple[str, str]] = []
+    for test_path in sorted((PROJECT_ROOT / "tests").rglob("test*.py")):
+        relative_path = _relativize(test_path)
+        indexed_paths.append((relative_path, relative_path.lower()))
+    return indexed_paths
+
+
+def _contract_test_paths(
+    provider: str,
+    entity: str,
+    test_index: list[tuple[str, str]],
+) -> list[str]:
     needles = {
         f"{provider}_{entity}",
         f"{provider}.{entity}",
@@ -204,18 +231,11 @@ def _contract_test_paths(provider: str, entity: str) -> list[str]:
         for path in GENERIC_GOLD_CONTRACT_TEST_PATHS
         if (PROJECT_ROOT / path).is_file()
     }
-    for test_path in sorted((PROJECT_ROOT / "tests").rglob("test*.py")):
-        relative_path = _relativize(test_path)
+    for relative_path, lowered_path in test_index:
         if relative_path in paths:
             continue
-        lowered_path = relative_path.lower()
         if any(needle.lower() in lowered_path for needle in needles):
             paths.add(relative_path)
-            continue
-        if relative_path.startswith(("tests/contract/", "tests/unit/domain/schemas/")):
-            text = test_path.read_text(encoding="utf-8").lower()
-            if any(needle.lower() in text for needle in needles):
-                paths.add(relative_path)
     return sorted(paths)
 
 
@@ -224,6 +244,7 @@ def _build_row(
     config_path: Path,
     config_payload: dict[str, Any],
     registry_entries: dict[str, dict[str, Any]],
+    test_index: list[tuple[str, str]],
 ) -> dict[str, Any]:
     provider = str(config_payload.get("provider") or config_path.parent.name)
     entity = str(config_payload.get("entity") or config_path.stem)
@@ -268,9 +289,11 @@ def _build_row(
     ]
     contract_artifact_summary = _contract_artifact_summary(published_artifacts)
     schema_source_summary = _schema_source_summary(source_path)
-    contract_test_paths = _contract_test_paths(provider, entity)
+    contract_test_paths = _contract_test_paths(provider, entity, test_index)
     required_fields = contract_artifact_summary["published_contract_required_fields"]
-    primary_keys_required = all(field in required_fields for field in primary_key_fields)
+    primary_keys_required = all(
+        field in required_fields for field in primary_key_fields
+    )
 
     missing_surfaces: list[str] = []
     if not contract_yaml_exists:
@@ -356,9 +379,7 @@ def _build_row(
             if source_path
             else ""
         ),
-        "pandera_contract_declared": schema_source_summary[
-            "pandera_contract_declared"
-        ],
+        "pandera_contract_declared": schema_source_summary["pandera_contract_declared"],
         "gold_strict_validation_declared": schema_source_summary[
             "gold_strict_validation_declared"
         ],
@@ -383,6 +404,7 @@ def _build_row(
 
 def _collect_rows() -> list[dict[str, Any]]:
     registry_entries = _registry_entries()
+    test_index = _contract_test_index()
     rows: list[dict[str, Any]] = []
     for config_path in sorted(ENTITIES_ROOT.glob("*/*.yaml")):
         rows.append(
@@ -390,6 +412,7 @@ def _collect_rows() -> list[dict[str, Any]]:
                 config_path=config_path,
                 config_payload=_load_yaml(config_path),
                 registry_entries=registry_entries,
+                test_index=test_index,
             )
         )
     return rows
@@ -433,7 +456,8 @@ def _render_markdown(payload: dict[str, Any]) -> str:
         f"- missing_gold_enabled_count: {payload['missing_gold_enabled_count']}",
         f"- excluded_count: {payload['excluded_count']}",
         "",
-        "| pipeline_name | layer | contract_ref | gold_enabled | parity_status | strict | properties | required | pk_fields | tests | missing_surfaces |",
+        "| pipeline_name | layer | contract_ref | gold_enabled | parity_status | "
+        "strict | properties | required | pk_fields | tests | missing_surfaces |",
         "| --- | --- | --- | ---: | --- | ---: | ---: | ---: | --- | ---: | --- |",
     ]
     for row in rows:
@@ -457,7 +481,7 @@ def _render_markdown(payload: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def write_artifacts(*, json_out: Path, md_out: Path) -> None:
+def write_artifacts(*, json_out: Path, md_out: Path) -> dict[str, Any]:
     payload = build_payload()
     json_out.parent.mkdir(parents=True, exist_ok=True)
     md_out.parent.mkdir(parents=True, exist_ok=True)
@@ -466,6 +490,7 @@ def write_artifacts(*, json_out: Path, md_out: Path) -> None:
         encoding="utf-8",
     )
     md_out.write_text(_render_markdown(payload), encoding="utf-8")
+    return payload
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -504,8 +529,7 @@ def main(argv: list[str] | None = None) -> int:
         print("[ok] contract coverage matrix is up to date")
         return 0
 
-    write_artifacts(json_out=args.json_out, md_out=args.md_out)
-    payload = build_payload()
+    payload = write_artifacts(json_out=args.json_out, md_out=args.md_out)
     print(
         "[contract-coverage-matrix] "
         f"rows={payload['row_count']}; gold_enabled={payload['gold_enabled_count']}; "

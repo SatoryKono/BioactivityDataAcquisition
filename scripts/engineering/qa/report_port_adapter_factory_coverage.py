@@ -98,22 +98,25 @@ TRACKED_PORTS: tuple[PortCoverageSpec, ...] = (
         ),
         test_paths=(
             "tests/architecture/test_strict_architecture_contracts.py",
-            "tests/unit/infrastructure/control_plane/test_file_contract_registry_store.py",
-            "tests/unit/application/services/test_run_manifest_diagnostics.py",
+            "tests/unit/composition/bootstrap/test_control_plane_store_builders.py",
+            "tests/unit/infrastructure/control_plane/test_file_run_manifest_store.py",
         ),
     ),
     PortCoverageSpec(
         port_name="RunLedgerPort",
         port_path="src/bioetl/domain/ports/control_plane/run_ledger.py",
         adapter_symbols=("FileRunLedgerStore",),
-        adapter_paths=("src/bioetl/infrastructure/control_plane/file_run_ledger_store.py",),
+        adapter_paths=(
+            "src/bioetl/infrastructure/control_plane/file_run_ledger_store.py",
+        ),
         factory_paths=(
             "src/bioetl/composition/bootstrap/control_plane_store_builders.py",
             "src/bioetl/composition/bootstrap/assembly/health_server.py",
         ),
         test_paths=(
             "tests/architecture/test_strict_architecture_contracts.py",
-            "tests/unit/application/services/test_run_manifest_diagnostics.py",
+            "tests/unit/composition/bootstrap/test_control_plane_store_builders.py",
+            "tests/unit/infrastructure/control_plane/test_file_run_ledger_store.py",
         ),
     ),
     PortCoverageSpec(
@@ -216,12 +219,24 @@ def _path_mentions(path: str, symbol: str) -> bool:
     return target.is_file() and symbol in target.read_text(encoding="utf-8")
 
 
-def _missing_symbol_mentions(paths: tuple[str, ...], symbols: tuple[str, ...]) -> list[str]:
+def _missing_symbol_mentions(
+    paths: tuple[str, ...], symbols: tuple[str, ...]
+) -> list[str]:
     missing: list[str] = []
     for symbol in symbols:
         if not any(_path_mentions(path, symbol) for path in paths):
             missing.append(symbol)
     return missing
+
+
+def _missing_test_evidence(spec: PortCoverageSpec) -> list[str]:
+    evidence_symbols = (spec.port_name, *spec.adapter_symbols)
+    has_contract_evidence = any(
+        _path_mentions(path, symbol)
+        for path in spec.test_paths
+        for symbol in evidence_symbols
+    )
+    return [] if has_contract_evidence else [spec.port_name]
 
 
 def _build_row(spec: PortCoverageSpec) -> dict[str, Any]:
@@ -241,7 +256,7 @@ def _build_row(spec: PortCoverageSpec) -> dict[str, Any]:
     missing_factory_symbols = _missing_symbol_mentions(
         spec.factory_paths, spec.adapter_symbols
     )
-    missing_test_symbols = _missing_symbol_mentions(spec.test_paths, (spec.port_name,))
+    missing_test_symbols = _missing_test_evidence(spec)
 
     missing_surfaces: list[str] = []
     if missing_paths:

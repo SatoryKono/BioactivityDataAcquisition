@@ -25,14 +25,20 @@ GATES_PATH = ROOT / "configs" / "quality" / "module_coverage_gates.yaml"
 
 def _skip_if_source_tree_is_dirty() -> None:
     """Committed inventory assertions require a clean source tree."""
-    result = subprocess.run(
-        ["git", "status", "--short", "--", "src/bioetl"],
-        cwd=ROOT,
-        capture_output=True,
-        text=True,
-        check=False,
-        timeout=15,
-    )
+    try:
+        result = subprocess.run(
+            ["git", "status", "--short", "--", "src/bioetl"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=15,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        pytest.skip(
+            "Committed module-coverage inventory dirty-tree guard is not "
+            "authoritative on this checkout."
+        )
     dirty_entries = [line.strip() for line in result.stdout.splitlines() if line.strip()]
     if dirty_entries:
         pytest.skip(
