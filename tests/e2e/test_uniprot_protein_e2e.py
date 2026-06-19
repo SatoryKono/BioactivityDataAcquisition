@@ -46,13 +46,13 @@ async def test_uniprot_protein_full_cycle(e2e_data_dir: Path):
     assert len(bronze_files) >= 1
 
     # Assert - Silver layer
-    silver_count = assert_silver_table_has_records(
+    silver_count = await assert_silver_table_has_records(
         e2e_data_dir, "uniprot_protein", expected_min=1
     )
     assert silver_count <= 5
 
     # Assert - Schema validation
-    records = get_silver_records(e2e_data_dir, "uniprot_protein")
+    records = await get_silver_records(e2e_data_dir, "uniprot_protein")
     required_fields = ["accession"]
     for record in records:
         for field in required_fields:
@@ -75,7 +75,7 @@ async def test_uniprot_protein_metadata_fields(e2e_data_dir: Path):
     await runner.run()
 
     # Assert - Check metadata fields
-    records = get_silver_records(e2e_data_dir, "uniprot_protein")
+    records = await get_silver_records(e2e_data_dir, "uniprot_protein")
 
     for record in records:
         # Accession must always be present
@@ -107,7 +107,7 @@ async def test_uniprot_protein_sequence_fields(e2e_data_dir: Path):
     await runner.run()
 
     # Assert - Check sequence fields
-    records = get_silver_records(e2e_data_dir, "uniprot_protein")
+    records = await get_silver_records(e2e_data_dir, "uniprot_protein")
 
     for record in records:
         # Accession must always be present

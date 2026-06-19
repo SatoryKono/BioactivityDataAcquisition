@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import platform
 from collections.abc import Sequence
 
 from deltalake.exceptions import CommitFailedError
@@ -17,6 +18,16 @@ from bioetl.infrastructure.config.settings_api import get_settings
 
 DEFAULT_DEDUPLICATION_TIMEOUT_SECONDS = 60.0
 TEST_MODE_DEDUPLICATION_TIMEOUT_SECONDS = 10.0
+WINDOWS_TEST_MODE_DEDUPLICATION_TIMEOUT_SECONDS = 20.0
+
+
+def resolve_test_mode_deduplication_timeout_seconds() -> float:
+    """Return the platform-aware test-mode timeout budget for Silver dedup."""
+    # Windows delta-rs overwrite paths can exceed the Linux/WSL budget for the
+    # same tiny test tables under suite load.
+    if platform.system().lower() == "windows":
+        return WINDOWS_TEST_MODE_DEDUPLICATION_TIMEOUT_SECONDS
+    return TEST_MODE_DEDUPLICATION_TIMEOUT_SECONDS
 
 
 def resolve_deduplication_timeout_seconds() -> float:
@@ -33,7 +44,7 @@ def resolve_deduplication_timeout_seconds() -> float:
         getattr(settings, "test_mode", False)
         and configured_timeout >= DEFAULT_DEDUPLICATION_TIMEOUT_SECONDS
     ):
-        return TEST_MODE_DEDUPLICATION_TIMEOUT_SECONDS
+        return resolve_test_mode_deduplication_timeout_seconds()
     return configured_timeout
 
 
@@ -114,8 +125,11 @@ def deduplicate_delta_rows(
 
 __all__ = [
     "DEFAULT_DEDUPLICATION_TIMEOUT_SECONDS",
+    "TEST_MODE_DEDUPLICATION_TIMEOUT_SECONDS",
+    "WINDOWS_TEST_MODE_DEDUPLICATION_TIMEOUT_SECONDS",
     "content_identity",
     "deduplicate_delta_rows",
     "primary_key_tuple",
     "resolve_deduplication_timeout_seconds",
+    "resolve_test_mode_deduplication_timeout_seconds",
 ]

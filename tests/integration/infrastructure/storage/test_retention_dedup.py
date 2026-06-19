@@ -296,18 +296,43 @@ def test_content_identity_fallback_uses_canonical_hash_identity_contract() -> No
 def test_dedup_timeout_is_clamped_in_test_mode(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Test mode should shrink the default dedup budget to fail fast in CI."""
+    """Non-Windows test mode should keep the tighter default dedup budget."""
 
     class _Settings:
         test_mode = True
         silver_dedup_timeout_seconds = 60.0
 
     monkeypatch.setattr(
+        "bioetl.infrastructure.storage.support.retention_dedup.platform.system",
+        lambda: "Linux",
+    )
+    monkeypatch.setattr(
         "bioetl.infrastructure.storage.support.retention.get_settings",
         lambda: _Settings(),
     )
 
     assert _resolve_deduplication_timeout_seconds() == pytest.approx(10.0)
+
+
+def test_dedup_timeout_is_relaxed_in_windows_test_mode(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Windows test mode should allow a larger dedup budget for delta-rs writes."""
+
+    class _Settings:
+        test_mode = True
+        silver_dedup_timeout_seconds = 60.0
+
+    monkeypatch.setattr(
+        "bioetl.infrastructure.storage.support.retention_dedup.platform.system",
+        lambda: "Windows",
+    )
+    monkeypatch.setattr(
+        "bioetl.infrastructure.storage.support.retention.get_settings",
+        lambda: _Settings(),
+    )
+
+    assert _resolve_deduplication_timeout_seconds() == pytest.approx(20.0)
 
 
 @pytest.mark.asyncio

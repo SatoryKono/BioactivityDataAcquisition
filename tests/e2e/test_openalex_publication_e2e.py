@@ -62,12 +62,12 @@ async def test_openalex_publication_full_cycle(e2e_data_dir: Path) -> None:
     bronze_files = assert_bronze_files_exist(e2e_data_dir, "openalex", "publication")
     assert len(bronze_files) >= 1
 
-    silver_count = assert_silver_table_has_records(
+    silver_count = await assert_silver_table_has_records(
         e2e_data_dir, "openalex_publication", expected_min=1
     )
     assert silver_count <= 10
 
-    records = get_silver_records(e2e_data_dir, "openalex_publication")
+    records = await get_silver_records(e2e_data_dir, "openalex_publication")
     for record in records:
         doi = record.get("publication_doi") or record.get("doi")
         assert doi is not None, "OpenAlex records must have a DOI"
@@ -91,7 +91,7 @@ async def test_openalex_publication_metadata_fields(e2e_data_dir: Path) -> None:
     runner = bootstrap_pipeline_runner(ctx)
     await runner.run()
 
-    records = get_silver_records(e2e_data_dir, "openalex_publication")
+    records = await get_silver_records(e2e_data_dir, "openalex_publication")
     assert len(records) >= 1, "Should have at least one OpenAlex record"
 
     metadata_fields = ["title", "publication_year"]
@@ -116,7 +116,7 @@ async def test_openalex_publication_citation_fields(e2e_data_dir: Path) -> None:
     runner = bootstrap_pipeline_runner(ctx)
     await runner.run()
 
-    records = get_silver_records(e2e_data_dir, "openalex_publication")
+    records = await get_silver_records(e2e_data_dir, "openalex_publication")
     for record in records:
         citations = record.get("citations_received")
         if citations is not None:

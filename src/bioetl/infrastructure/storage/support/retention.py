@@ -15,9 +15,9 @@ from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.settings_api import get_settings
 from bioetl.infrastructure.storage.support.retention_dedup import (
     DEFAULT_DEDUPLICATION_TIMEOUT_SECONDS,
-    TEST_MODE_DEDUPLICATION_TIMEOUT_SECONDS,
     content_identity,
     deduplicate_delta_rows,
+    resolve_test_mode_deduplication_timeout_seconds,
 )
 from bioetl.infrastructure.storage.support.retention_delta import (
     build_table_info,
@@ -47,7 +47,7 @@ def _resolve_deduplication_timeout_seconds() -> float:
         getattr(settings, "test_mode", False)
         and configured >= DEFAULT_DEDUPLICATION_TIMEOUT_SECONDS
     ):
-        return TEST_MODE_DEDUPLICATION_TIMEOUT_SECONDS
+        return resolve_test_mode_deduplication_timeout_seconds()
     return configured
 
 

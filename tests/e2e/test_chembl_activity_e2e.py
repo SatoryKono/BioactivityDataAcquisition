@@ -48,13 +48,13 @@ async def test_chembl_activity_full_cycle(e2e_data_dir: Path):
     assert len(bronze_files) >= 1, "At least one Bronze file should exist"
 
     # Assert - Silver layer
-    silver_count = assert_silver_table_has_records(
+    silver_count = await assert_silver_table_has_records(
         e2e_data_dir, "chembl_activity", expected_min=1
     )
     assert silver_count <= 10, f"Expected <= 10 records (limit), got {silver_count}"
 
     # Assert - Schema validation
-    records = get_silver_records(e2e_data_dir, "chembl_activity")
+    records = await get_silver_records(e2e_data_dir, "chembl_activity")
     required_fields = ["activity_id", "molecule_id", "target_id"]
     for record in records:
         for field in required_fields:
@@ -78,7 +78,7 @@ async def test_pipeline_idempotency(e2e_data_dir: Path):
     # Act - First run
     runner1 = bootstrap_pipeline_runner(ctx1)
     await runner1.run()
-    count_after_first = assert_silver_table_has_records(
+    count_after_first = await assert_silver_table_has_records(
         e2e_data_dir, "chembl_activity", expected_min=1
     )
 
@@ -86,7 +86,7 @@ async def test_pipeline_idempotency(e2e_data_dir: Path):
     ctx2 = create_test_context("chembl_activity", limit=5)
     runner2 = bootstrap_pipeline_runner(ctx2)
     await runner2.run()
-    count_after_second = assert_silver_table_has_records(
+    count_after_second = await assert_silver_table_has_records(
         e2e_data_dir, "chembl_activity", expected_min=1
     )
 
@@ -115,7 +115,7 @@ async def test_pipeline_resume_from_checkpoint(e2e_data_dir: Path):
     runner1 = bootstrap_pipeline_runner(ctx1)
     await runner1.run()
 
-    first_count = assert_silver_table_has_records(
+    first_count = await assert_silver_table_has_records(
         e2e_data_dir, "chembl_activity", expected_min=1
     )
 
@@ -124,7 +124,7 @@ async def test_pipeline_resume_from_checkpoint(e2e_data_dir: Path):
     runner2 = bootstrap_pipeline_runner(ctx2)
     await runner2.run()
 
-    second_count = assert_silver_table_has_records(
+    second_count = await assert_silver_table_has_records(
         e2e_data_dir, "chembl_activity", expected_min=first_count
     )
 
