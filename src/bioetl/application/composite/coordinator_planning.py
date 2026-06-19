@@ -9,7 +9,7 @@ from typing import Protocol
 
 import polars as pl
 
-from bioetl.domain.composite.config import EnricherConfig
+from bioetl.domain.composite.config_models import EnricherConfig
 from bioetl.domain.composite.result import EnrichmentResult
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.ports import ExecutionMetricsRunnerPort, LoggerPort

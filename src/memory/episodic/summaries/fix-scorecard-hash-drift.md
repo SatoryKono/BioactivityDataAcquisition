@@ -2,16 +2,15 @@
 id: fix-scorecard-hash-drift
 title: Fix scorecard coverage evidence hash drift
 task_id: fix-scorecard-hash-drift
-created_at: '2026-06-19T18:02:39Z'
+created_at: '2026-06-19T19:21:46Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- tests/architecture/test_vcr_metadata_inventory.py
-summary: Resolved remaining targeted guard failures by making composition.bootstrap.__all__
-  a literal frozen surface, routing split composite config imports through bioetl.domain.composite.config,
-  regenerating ADR-050 silver filter inventory baselines, refreshing VCR metadata
-  catalog, and updating managed VCR provider counts in test_matrix.yaml. Targeted
-  architecture guards now pass without xdist.
+- src/bioetl/domain/aggregates/_batch_mixins.py
+summary: Also resolved the domain file-size regression by extracting shared Batch
+  aggregate private attrs into src/bioetl/domain/aggregates/_batch_attrs.py, reducing
+  _batch_mixins.py from 321 LOC to 290 LOC without changing behavior or debt limits;
+  targeted code-metrics and aggregate-internal tests pass.
 ---
 
 # Episodic summary
@@ -22,7 +21,7 @@ summary: Resolved remaining targeted guard failures by making composition.bootst
 
 ## Outcome
 
-- Resolved remaining targeted guard failures by making composition.bootstrap.__all__ a literal frozen surface, routing split composite config imports through bioetl.domain.composite.config, regenerating ADR-050 silver filter inventory baselines, refreshing VCR metadata catalog, and updating managed VCR provider counts in test_matrix.yaml. Targeted architecture guards now pass without xdist.
+- Also resolved the domain file-size regression by extracting shared Batch aggregate private attrs into src/bioetl/domain/aggregates/_batch_attrs.py, reducing _batch_mixins.py from 321 LOC to 290 LOC without changing behavior or debt limits; targeted code-metrics and aggregate-internal tests pass.
 
 ## Lessons learned
 
