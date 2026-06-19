@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-03'
+  Last verified: '2026-06-19'
 
 ______________________________________________________________________
 
@@ -36,11 +36,11 @@ Detailed monitoring setup remains in `grafana/README.md` and
 
 | Surface | File |
 | --- | --- |
-| Dashboard provisioning | `grafana/provisioning/dashboards/bioetl.yml` |
-| Prometheus datasource | `grafana/provisioning/datasources/prometheus.yml` |
-| Loki datasource | `grafana/provisioning/datasources/loki.yml` |
-| Tempo datasource | `grafana/provisioning/datasources/tempo.yml` |
-| Quarantine Explorer datasource | `grafana/provisioning/datasources/quarantine-explorer.yml` |
+| Dashboard provisioning | `grafana/provisioning/dashboards/bioetl.yaml` |
+| Prometheus datasource | `grafana/provisioning/datasources-core/prometheus.yml` |
+| Quarantine Explorer datasource | `grafana/provisioning/datasources-core/quarantine-explorer.yml` |
+| Loki datasource | `grafana/provisioning/datasources-tracing/loki.yml` |
+| Tempo datasource | `grafana/provisioning/datasources-tracing/tempo.yml` |
 | Prometheus rules | `grafana/prometheus-rules/*.yml` |
 
 ## Validation

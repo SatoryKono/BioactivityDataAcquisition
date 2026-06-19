@@ -195,14 +195,18 @@ $HOME/.venvs/bioetl  # WSL/Linux by default
 Then use the OS-specific wrappers:
 
 ```powershell
-.\scripts\engineering\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+.\scripts\engineering\dev\run_pytest.ps1 tests\ --timeout=120 -n 1 --lf
 .\scripts\engineering\dev\run_mypy.ps1
 ```
 
 ```bash
-bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n auto --lf
 bash scripts/engineering/dev/run_mypy.sh
 ```
+
+On mixed Windows + WSL checkouts, keep the PowerShell wrapper at `-n 1` unless
+you intentionally override `BIOETL_PYTEST_WINDOWS_XDIST_WORKERS`; the Windows
+runtime caps the safe default worker count to avoid socket buffer exhaustion.
 
 #### Option B: Manual Setup Without `make`
 

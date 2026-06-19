@@ -1,5 +1,5 @@
 {
-  "snapshot_date": "2026-06-16",
+  "snapshot_date": "2026-06-19",
   "source_artifact": "reports/quality/config-discrepancy-baseline.json",
   "status": "reviewed_no_growth",
   "budget_policy": "no_growth_ratchet_only",
@@ -31,7 +31,7 @@
       "risk": "medium"
     },
     "entity_effective": {
-      "compatibility_legacy_count": 17,
+      "compatibility_legacy_count": 15,
       "compatibility_legacy_keys": [
         "schema.field_aliases",
         "schema.field_aliases.affiliations",
@@ -47,9 +47,7 @@
         "schema.field_aliases.source_type",
         "schema.field_aliases.structured_affiliations",
         "schema.field_aliases.subjects",
-        "schema.field_aliases.topics",
-        "schema.gold.alias_policy",
-        "schema.silver.alias_policy"
+        "schema.field_aliases.topics"
       ],
       "owner": "config-governance",
       "review_date": "2026-09-30",

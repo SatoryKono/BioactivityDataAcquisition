@@ -136,7 +136,6 @@ schema:
     - issn_list
     - language
     - publication_date
-    alias_policy: preserve
   gold:
     include_groups:
     - system
@@ -168,7 +167,6 @@ schema:
     - issn_list
     - language
     - publication_date
-    alias_policy: canonical
 quality:
   version: 1.0.0
   provider: chembl

@@ -163,13 +163,13 @@ uv run python -m scripts.engineering.dev setup-mcp
 
 ```powershell
 .\scripts\engineering\dev\setup_env_windows.ps1
-.\scripts\engineering\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+.\scripts\engineering\dev\run_pytest.ps1 tests\ --timeout=120 -n 1 --lf
 .\scripts\engineering\dev\run_mypy.ps1
 ```
 
 ```bash
 bash scripts/engineering/dev/setup_env_wsl.sh
-bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n auto --lf
 bash scripts/engineering/dev/run_mypy.sh
 ```
 

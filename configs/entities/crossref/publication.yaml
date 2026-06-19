@@ -148,7 +148,6 @@ schema:
     - license
     - dq
     exclude_fields: []
-    alias_policy: preserve
   gold:
     include_groups:
     - system
@@ -167,7 +166,6 @@ schema:
     - _index
     - _lookup_method
     - _original_id
-    alias_policy: canonical
 quality:
   metadata:
     assay_parameter_type_policy:

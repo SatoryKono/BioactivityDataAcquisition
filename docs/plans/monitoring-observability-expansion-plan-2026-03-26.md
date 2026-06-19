@@ -70,7 +70,7 @@ The implementation must follow these constraints:
 - Existing alert rules:
   - `grafana/prometheus-rules/bioetl_observability.yml`
 - Existing datasource and Prometheus provisioning:
-  - `grafana/provisioning/datasources/prometheus.yml`
+  - `grafana/provisioning/datasources-core/prometheus.yml`
   - `grafana/prometheus.yml`
 
 ### Existing traceability/control-plane surfaces

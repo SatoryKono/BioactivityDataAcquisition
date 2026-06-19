@@ -103,7 +103,6 @@ schema:
     - business
     - dq
     exclude_fields: []
-    alias_policy: preserve
   gold:
     include_groups:
     - system
@@ -112,7 +111,6 @@ schema:
     - _dq_*
     - _source_batch_id
     - _index
-    alias_policy: canonical
 quality:
   metadata:
     assay_parameter_type_policy:

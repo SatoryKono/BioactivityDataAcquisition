@@ -73,6 +73,65 @@ def _install_fake_pandera_modules(monkeypatch) -> tuple[ModuleType, type]:
     return typing_inspect_module, FakeDispatcher
 
 
+def _install_fixed_fake_pandera_modules(monkeypatch) -> tuple[ModuleType, type]:
+    typing_inspect_module = ModuleType("typing_inspect")
+    typing_inspect_module.get_origin = typing.get_origin
+    typing_inspect_module.get_args = typing.get_args
+
+    pandera_module = ModuleType("pandera")
+    pandera_backends = ModuleType("pandera.backends")
+    pandera_backends_pandas = ModuleType("pandera.backends.pandas")
+    pandera_builtin_checks = ModuleType("pandera.backends.pandas.builtin_checks")
+    pandera_api = ModuleType("pandera.api")
+    pandera_function_dispatch = ModuleType("pandera.api.function_dispatch")
+
+    class FixedDispatcher:
+        def __init__(self) -> None:
+            self._function_registry: dict[object, object] = {}
+
+        def register(self, fn: object) -> None:
+            data_type = typing.get_type_hints(fn).get("value")
+            if (
+                typing.get_origin(data_type) is typing.get_origin(int | str)
+                and typing.get_args(data_type) == typing.get_args(int | str)
+            ):
+                self._function_registry[int] = fn
+                self._function_registry[str] = fn
+            elif data_type is typing.Any:
+                self._function_registry[typing.Any] = fn
+            else:
+                raise TypeError(f"Unsupported probe annotation: {data_type!r}")
+
+        def __call__(self, *args: object, **kwargs: object) -> object:
+            value = args[0]
+            fn = self._function_registry.get(type(value))
+            if fn is None:
+                fn = self._function_registry.get(typing.Any)
+            if fn is None:
+                raise KeyError(type(value))
+            return fn(*args, **kwargs)
+
+    pandera_function_dispatch.Dispatcher = FixedDispatcher
+
+    monkeypatch.setitem(sys.modules, "typing_inspect", typing_inspect_module)
+    monkeypatch.setitem(sys.modules, "pandera", pandera_module)
+    monkeypatch.setitem(sys.modules, "pandera.backends", pandera_backends)
+    monkeypatch.setitem(sys.modules, "pandera.backends.pandas", pandera_backends_pandas)
+    monkeypatch.setitem(
+        sys.modules,
+        "pandera.backends.pandas.builtin_checks",
+        pandera_builtin_checks,
+    )
+    monkeypatch.setitem(sys.modules, "pandera.api", pandera_api)
+    monkeypatch.setitem(
+        sys.modules,
+        "pandera.api.function_dispatch",
+        pandera_function_dispatch,
+    )
+
+    return typing_inspect_module, FixedDispatcher
+
+
 def test_apply_pandera_typing_compat_is_noop_when_not_required(
     monkeypatch,
 ) -> None:
@@ -128,6 +187,27 @@ def test_apply_pandera_typing_compat_patches_dispatcher_when_forced(
         FakeUnionType: _format_union_value,
     }
     assert dispatcher(1) == "union:1"
+
+
+def test_apply_pandera_typing_compat_skips_healthy_upstream_runtime(
+    monkeypatch,
+) -> None:
+    module = importlib.reload(
+        importlib.import_module("bioetl.infrastructure.compat.pandera_compat")
+    )
+    monkeypatch.setattr(module, "_requires_pandera_typing_compat", _compat_enabled)
+    monkeypatch.setattr(module, "_PATCH_APPLIED", False)
+
+    typing_inspect_module, fixed_dispatcher_cls = _install_fixed_fake_pandera_modules(
+        monkeypatch
+    )
+    original_get_origin = typing_inspect_module.get_origin
+    original_dispatcher_call = fixed_dispatcher_cls.__call__
+
+    assert module.apply_pandera_typing_compat_if_needed() is False
+    assert module._PATCH_APPLIED is False
+    assert typing_inspect_module.get_origin is original_get_origin
+    assert fixed_dispatcher_cls.__call__ is original_dispatcher_call
 
 
 def test_importing_bioetl_version_does_not_trigger_compat(monkeypatch) -> None:

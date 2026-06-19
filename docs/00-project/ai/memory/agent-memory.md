@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-03'
+  Last verified: '2026-06-19'
 
 ______________________________________________________________________
 
@@ -142,13 +142,13 @@ make run-local     # Сэмпловый pipeline-run (chembl_activity, limit=10)
 
 ```powershell
 .\scripts\engineering\dev\setup_env_windows.ps1
-.\scripts\engineering\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+.\scripts\engineering\dev\run_pytest.ps1 tests\ --timeout=120 -n 1 --lf
 .\scripts\engineering\dev\run_mypy.ps1
 ```
 
 ```bash
 bash scripts/engineering/dev/setup_env_wsl.sh
-bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n auto --lf
 bash scripts/engineering/dev/run_mypy.sh
 ```
 
@@ -158,6 +158,9 @@ bash scripts/engineering/dev/run_mypy.sh
 После `uv sync` предпочитай запуск через `uv run python -m scripts.<group> <command>`.
 Для mixed Windows + WSL checkout используй OS-specific окружение:
 `.venv-win` в PowerShell и `${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}` в WSL.
+На Windows PowerShell mixed-checkout wrappers поддерживаемый дефолт `-n 1`;
+использовать больше воркеров допускается только через явный
+`BIOETL_PYTEST_WINDOWS_XDIST_WORKERS=<n>` override.
 При активированном подходящем окружении допускается и прямой `python -m ...`.
 
 | Group                             | Entry Point                                        | Назначение                                  |

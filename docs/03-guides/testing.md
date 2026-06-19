@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-18'
+  Last verified: '2026-06-19'
 
 ______________________________________________________________________
 
@@ -535,6 +535,10 @@ integration replay по-прежнему должен задавать `--vcr-re
 - **Сценарий**: `Run ID` -> `Fetch` -> `Bronze` -> `Silver` -> `Gold`.
 - **Архитектура**: Local-Only (MemoryLock, LocalCheckpoint, FileSystem Storage).
 - **Запуск**: `uv run python -m pytest tests/e2e/ -m e2e -v`.
+- **Maintenance carve-out**: E2E intentionally patches out Bronze retention
+  cleanup and postrun Silver compaction so replay assertions stay deterministic;
+  maintenance fidelity belongs to dedicated maintenance-focused unit/integration
+  suites, not the canonical E2E lane.
 
 #### 2.3.1. Supported E2E families
 
@@ -695,10 +699,10 @@ make test-ci
 uv run python -m pytest tests/e2e/ -m e2e -v
 
 # Mixed Windows + WSL checkout (PowerShell)
-.\scripts\engineering\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+.\scripts\engineering\dev\run_pytest.ps1 tests\ --timeout=120 -n 1 --lf
 
 # Mixed Windows + WSL checkout (WSL/Linux)
-bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n auto --lf
 
 # Запуск только архитектурных тестов
 make test-architecture
@@ -849,6 +853,9 @@ uv run pytest tests/ -m "not serial" -n auto --dist loadscope --max-worker-resta
 - тесты с `@pytest.mark.serial` не смешиваются с parallel-safe subset;
 - для worker grouping используется `--dist loadscope`;
 - для прозрачной диагностики worker crashes используется `--max-worker-restart=0`;
+- Windows mixed-checkout wrappers по умолчанию держат `-n 1`; поднимать лимит
+  нужно только через `BIOETL_PYTEST_WINDOWS_XDIST_WORKERS=<n>` после
+  подтверждения, что хост не ловит `WinError 10055`;
 - benchmark runs выполняются отдельно и без `xdist`.
 
 Репозиторий не использует hard-coded performance SLA в документации, потому что

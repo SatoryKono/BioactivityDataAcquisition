@@ -5,8 +5,8 @@
 Domain Control Plane Artifacts обеспечивают immutable provenance tracking и reproducibility для выполнения пайплайнов. Эти domain models представляют собой control-plane контракты для orchestrating pipeline и workflow executions с полной отслеживаемостью происхождения данных (provenance).
 
 **Связанные ADR:**
-- ADR-044 (Workflow Control Plane)
-- ADR-047 (Control Plane Architecture)
+- ADR-044 (Run Manifest and Run Ledger Control Plane)
+- ADR-047 (Workflow Control Plane for Declarative Workflows)
 
 ## Архитектура
 
@@ -352,8 +352,8 @@ src/bioetl/domain/control_plane/
 
 ## Связанные ADR
 
-- **ADR-044:** Workflow Control Plane - архитектура workflow control plane
-- **ADR-047:** Control Plane Architecture - детальная архитектура control plane
+- **ADR-044:** Run Manifest and Run Ledger Control Plane - контракт run lifecycle и persistence semantics
+- **ADR-047:** Workflow Control Plane for Declarative Workflows - архитектура workflow control plane
 
 ## Зависимости
 

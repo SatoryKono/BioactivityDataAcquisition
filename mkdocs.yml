@@ -297,6 +297,7 @@ nav:
                     -   "Aggregates": 04-reference/domain/aggregates.md
                     -   "Value Objects": 04-reference/domain/value-objects.md
                     -   "Events": 04-reference/domain/events.md
+                    -   "Control Plane": 04-reference/domain/control-plane.md
                     -   "Ports": 04-reference/domain/ports.md
                     -   "Invariants": 04-reference/domain/invariants.md
                     -   "Workflow State Machine": 04-reference/domain/workflow-state-machine.md

@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-04'
+  Last verified: '2026-06-19'
 
 ______________________________________________________________________
 
@@ -83,18 +83,21 @@ each OS separately instead of sharing one `.venv`:
 
 ```powershell
 .\scripts\engineering\dev\setup_env_windows.ps1
-.\scripts\engineering\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+.\scripts\engineering\dev\run_pytest.ps1 tests\ --timeout=120 -n 1 --lf
 .\scripts\engineering\dev\run_mypy.ps1
 ```
 
 ```bash
 bash scripts/engineering/dev/setup_env_wsl.sh
-bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n auto --lf
 bash scripts/engineering/dev/run_mypy.sh
 ```
 
 This path creates `.venv-win` for PowerShell and
 `${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}` for WSL/Linux by default.
+Keep the PowerShell wrapper at `-n 1` unless you intentionally raise
+`BIOETL_PYTEST_WINDOWS_XDIST_WORKERS`; Windows mixed-checkout runs otherwise
+hit the known socket-buffer ceiling sooner than WSL/Linux.
 
 ### 2.3. Manual Fallback Without `make`
 
@@ -173,12 +176,12 @@ make test
 For mixed-checkout day-to-day verification, prefer the OS-specific wrappers:
 
 ```powershell
-.\scripts\engineering\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+.\scripts\engineering\dev\run_pytest.ps1 tests\ --timeout=120 -n 1 --lf
 .\scripts\engineering\dev\run_mypy.ps1
 ```
 
 ```bash
-bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n auto --lf
 bash scripts/engineering/dev/run_mypy.sh
 ```
 

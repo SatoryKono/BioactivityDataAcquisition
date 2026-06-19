@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-06-19'
 
 ______________________________________________________________________
 
@@ -62,11 +62,14 @@ source .venv/bin/activate  # Linux/Mac
 
 **Запуск:**
 ```bash
-# Запуск pipeline
-python -m bioetl run <pipeline-name>
+# Список доступных pipeline surface
+bioetl config list-pipelines
 
-# Запуск с конфигурацией
-python -m bioetl run <pipeline-name> --config <config-file>
+# Канонический запуск pipeline
+bioetl run --pipeline chembl_activity
+
+# Module-form entrypoint также поддерживается после активации окружения
+python -m bioetl run --pipeline chembl_activity
 ```
 
 Для детальной информации о командной интерфейсе см. [CLI Reference](../../04-reference/cli.md).

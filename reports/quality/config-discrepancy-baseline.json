@@ -12,7 +12,7 @@
       "inconsistent_parameter_count": 0,
       "raw_inconsistent_parameter_count": 0,
       "sanctioned_partial_parameter_count": 0,
-      "unique_parameter_count": 304
+      "unique_parameter_count": 302
     }
   },
   "metrics": {
@@ -20,7 +20,7 @@
     "inconsistent_parameter_count": 0,
     "raw_inconsistent_parameter_count": 0,
     "sanctioned_partial_parameter_count": 0,
-    "unique_parameter_count": 507
+    "unique_parameter_count": 505
   },
   "parameter_taxonomy": {
     "classification_mode": "derived_from_flattened_config_parameter_paths",
@@ -141,7 +141,7 @@
           ]
         },
         "groups": {
-          "compatibility_legacy": 17,
+          "compatibility_legacy": 15,
           "domain_entity_contract": 39,
           "dq_validation": 78,
           "medallion_write_policy": 106,
@@ -150,12 +150,12 @@
           "runtime_control_plane": 27
         },
         "owner": "BioETL Team",
-        "parameter_count": 304,
+        "parameter_count": 302,
         "unclassified_parameter_count": 0,
         "unclassified_parameters": []
       }
     },
     "owner": "BioETL Team"
   },
-  "snapshot_date": "2026-06-18"
+  "snapshot_date": "2026-06-19"
 }
