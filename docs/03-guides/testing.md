@@ -351,13 +351,16 @@ Supported policy slice for issue `#2598`:
 #### 2.1.1. Repo-backed Path Naming and Reclassification
 
 Путь `tests/unit/` в BioETL обозначает прежде всего layer ownership, а не
-абсолютный запрет на чтение checked-in repository artifacts.
+абсолютный запрет на чтение checked-in repository artifacts. Но canonical pure-unit
+surface теперь отделён от repo-backed contract tests через dedicated subtree
+`tests/unit/repo_backed/`.
 
-Repo-backed contract tests могут оставаться под `tests/unit/` только если:
+Repo-backed contract tests могут оставаться в unit ownership surface только если:
 
 - checked-in artifact сам является contract surface под тестом;
 - выполнение остаётся local-only и deterministic;
-- тест изолирован в lane `repo-backed-unit`, а не в `unit-fast`;
+- тест живёт под `tests/unit/repo_backed/` и изолирован в lane `repo-backed-unit`,
+  а не в `unit-fast`;
 - файл явно перечислен в `configs/quality/test_governance_audit.yaml` и помечен
   `pytest.mark.repo_backed`.
 
@@ -373,7 +376,8 @@ Canonical keep-vs-move inventory живёт в
 `configs/quality/test_governance_audit.yaml`:
 
 - `repo_backed_unit_test_exceptions` — retained repo-backed tests, которые
-  intentionally остаются под `tests/unit/`;
+  intentionally остаются в unit ownership surface, но только под
+  `tests/unit/repo_backed/`;
 - `file_backed_domain_contract_tests` — domain/file-backed contract surfaces,
   которые routed в `contracts` lane;
 - `mixed_scope_unit_path_policy` — explicit naming/reclassification policy и

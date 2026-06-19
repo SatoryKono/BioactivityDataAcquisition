@@ -25,7 +25,7 @@ class _ColumnPriorityProvider(Protocol):
     def collect_field_columns(
         self,
         field: str,
-        enrichers: Sequence[Any],
+        enrichers: Sequence[Any],  # Any: Enrichers can be of any type implementing the enrichment protocol
         available_columns: set[str],
         seed_pipeline: str | None,
     ) -> list[str]: ...
@@ -40,10 +40,10 @@ class _ColumnPriorityProvider(Protocol):
 
     def filter_compatible_columns(
         self,
-        df: Any,
+        df: Any,  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
         field: str,
         ordered_cols: list[str],
-        _can_coalesce_fn: Callable[[Any, str, str], bool],
+        _can_coalesce_fn: Callable[[Any, str, str], bool],  # Any: DataFrame can be of any type
     ) -> tuple[list[str], list[str]]: ...
 
 
@@ -55,7 +55,11 @@ def extract_field_from_qualified(column: str) -> str:
     return column
 
 
-def can_coalesce(df: Any, col1: str, col2: str) -> bool:
+def can_coalesce(
+    df: Any,  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
+    col1: str,
+    col2: str,
+) -> bool:
     """Check if two columns can be coalesced without type breakage."""
     import polars as pl
 
@@ -69,7 +73,9 @@ def can_coalesce(df: Any, col1: str, col2: str) -> bool:
     return isinstance(type1, pl.List) == isinstance(type2, pl.List)
 
 
-def build_field_groups(df: Any) -> dict[str, list[str]]:
+def build_field_groups(
+    df: Any,  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
+) -> dict[str, list[str]]:
     """Group non-system columns by field name."""
     field_groups: dict[str, list[str]] = {}
     for col in df.columns:
@@ -97,7 +103,10 @@ def sort_columns(
     return sorted(columns, key=sort_key)
 
 
-def compatible_columns(df: Any, ordered_cols: list[str]) -> list[str]:
+def compatible_columns(
+    df: Any,  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
+    ordered_cols: list[str],
+) -> list[str]:
     """Keep the leading column and all columns type-compatible with it."""
     if not ordered_cols:
         return []
@@ -110,7 +119,10 @@ def compatible_columns(df: Any, ordered_cols: list[str]) -> list[str]:
     return result
 
 
-def coalesce_and_drop(df: Any, compatible_cols: list[str]) -> Any:
+def coalesce_and_drop(
+    df: Any,  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
+    compatible_cols: list[str],
+) -> Any:  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
     """Coalesce compatible columns into first and drop the rest."""
     import polars as pl
 
@@ -151,16 +163,16 @@ def resolve_priority_provider(
 
 
 def apply_field_priority(
-    df: Any,
+    df: Any,  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
     *,
     provider: _ColumnPriorityProvider,
     field: str,
     priorities: tuple[str, ...],
-    enrichers: Sequence[Any],
+    enrichers: Sequence[Any],  # Any: Enrichers can be of any type implementing the enrichment protocol
     available_columns: set[str],
     seed_pipeline: str | None,
-    can_coalesce_fn: Callable[[Any, str, str], bool],
-) -> Any:
+    can_coalesce_fn: Callable[[Any, str, str], bool],  # Any: DataFrame can be of any type
+) -> Any:  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
     """Apply one explicit field-priority rule and return updated DataFrame."""
     columns = provider.collect_field_columns(
         field,
@@ -220,11 +232,11 @@ def timestamp_sort_key(value: object) -> tuple[int, float | str]:
 
 def update_fallback_candidate(
     *,
-    value: Any,
+    value: Any,  # Any: Can hold any row value type during comparison
     rank: int,
-    fallback_value: Any,
+    fallback_value: Any,  # Any: Can hold any row value type during comparison
     fallback_rank: int | None,
-) -> tuple[Any, int | None]:
+) -> tuple[Any, int | None]:  # Any: Return type matches the polymorphic row value type
     """Keep the highest-priority non-null value as deterministic fallback."""
     if fallback_rank is None or rank < fallback_rank:
         return value, rank
@@ -233,7 +245,7 @@ def update_fallback_candidate(
 
 def resolve_row_timestamp_key(
     *,
-    row: dict[str, Any],
+    row: dict[str, Any],  # Any: Row values can be of any type (str, int, float, etc.)
     column: str,
     timestamp_columns: dict[str, str | None],
 ) -> tuple[int, float | str] | None:
@@ -266,15 +278,15 @@ def should_replace_latest_candidate(
 
 def pick_latest_timestamp_value(
     *,
-    row: dict[str, Any],
+    row: dict[str, Any],  # Any: Row values can be of any type (str, int, float, etc.)
     compatible_cols: list[str],
     timestamp_columns: dict[str, str | None],
     priority_rank: dict[str, int],
-) -> Any:
+) -> Any:  # Any: Return type matches the polymorphic row value type
     """Pick the newest non-null field value from one row deterministically."""
-    fallback_value: Any = None
+    fallback_value: Any = None  # Any: Can hold any row value type during comparison
     fallback_rank: int | None = None
-    best_value: Any = None
+    best_value: Any = None  # Any: Can hold any row value type during comparison
     best_rank: int | None = None
     best_timestamp_key: tuple[int, float | str] | None = None
 
@@ -336,19 +348,19 @@ def build_latest_timestamp_row_fields(
 
 
 def drop_coalesced_columns(
-    df: Any,
+    df: Any,  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
     compatible_cols: list[str],
-) -> Any:
+) -> Any:  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
     """Drop redundant compatible columns after coalescing into the target."""
     cols_to_drop = [column for column in compatible_cols[1:] if column in df.columns]
     return df.drop(cols_to_drop) if cols_to_drop else df
 
 
 def coalesce_by_latest_timestamp(
-    df: Any,
+    df: Any,  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
     *,
     ordered_cols: list[str],
-) -> Any:
+) -> Any:  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
     """Coalesce compatible columns using companion timestamps when present."""
     import polars as pl
 

@@ -68,6 +68,40 @@ def _find_dataclass_definitions(file_path: Path) -> list[dict[str, object]]:
     return dataclasses
 
 
+def _find_class_method(tree: ast.AST, class_name: str, method_name: str) -> ast.FunctionDef:
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ClassDef) and node.name == class_name:
+            for child in node.body:
+                if isinstance(child, ast.FunctionDef) and child.name == method_name:
+                    return child
+    raise AssertionError(f"Could not find {class_name}.{method_name}")
+
+
+def _attribute_path(node: ast.AST) -> tuple[str, ...] | None:
+    parts: list[str] = []
+    current = node
+    while isinstance(current, ast.Attribute):
+        parts.append(current.attr)
+        current = current.value
+    if isinstance(current, ast.Name):
+        parts.append(current.id)
+        return tuple(reversed(parts))
+    return None
+
+
+def _calls_deepcopy_with_arg(node: ast.AST, expected_arg: tuple[str, ...]) -> bool:
+    for child in ast.walk(node):
+        if not isinstance(child, ast.Call):
+            continue
+        if not isinstance(child.func, ast.Name) or child.func.id != "deepcopy":
+            continue
+        if not child.args:
+            continue
+        if _attribute_path(child.args[0]) == expected_arg:
+            return True
+    return False
+
+
 def test_quarantine_payload_dataclasses_are_frozen() -> None:
     """Test that all quarantine payload dataclasses are frozen (immutable)."""
     src_path = Path("src/bioetl")
@@ -86,3 +120,27 @@ def test_quarantine_payload_dataclasses_are_frozen() -> None:
             f"All quarantine payload dataclasses must be frozen=True to ensure "
             f"immutability as per architectural requirements."
         )
+
+
+def test_quarantine_entry_defensively_copies_constructor_and_accessor_payloads() -> None:
+    """Constructor and accessors must preserve payload immutability via defensive copies."""
+    aggregate_path = Path("src/bioetl/domain/aggregates/_quarantine_aggregate.py")
+    aggregate_tree = ast.parse(aggregate_path.read_text(encoding="utf-8"))
+    init_method = _find_class_method(aggregate_tree, "QuarantineEntry", "__init__")
+
+    assert _calls_deepcopy_with_arg(init_method, ("payload",))
+    assert _calls_deepcopy_with_arg(init_method, ("metadata",))
+
+    properties_path = Path(
+        "src/bioetl/domain/aggregates/_quarantine_entry_properties_mixin.py"
+    )
+    properties_tree = ast.parse(properties_path.read_text(encoding="utf-8"))
+    payload_property = _find_class_method(
+        properties_tree, "QuarantineEntryPropertiesMixin", "payload"
+    )
+    metadata_property = _find_class_method(
+        properties_tree, "QuarantineEntryPropertiesMixin", "metadata"
+    )
+
+    assert _calls_deepcopy_with_arg(payload_property, ("self", "_payload"))
+    assert _calls_deepcopy_with_arg(metadata_property, ("self", "_metadata"))

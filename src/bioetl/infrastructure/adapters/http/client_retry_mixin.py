@@ -8,10 +8,7 @@ from typing import Any
 
 import httpx
 
-from bioetl.domain.exceptions import (
-    BioETLError,
-    CircuitBreakerOpenError,
-)
+from bioetl.domain.exceptions import BioETLError, CircuitBreakerOpenError
 from bioetl.domain.ports import (
     CircuitBreakerPort,
     LoggerPort,
@@ -201,23 +198,15 @@ class HTTPClientRetryMixin:
         )
 
         try:
-            # Main retry loop with clearer structure
             for attempt in range(self.retry_config.max_attempts):
                 retry_state.record_attempt(attempt)
-
-                # Execute the attempt and get result
                 result = await self._attempt_request(
                     client, method, url, attempt, retry_state.retries, span, kwargs
                 )
-
-                # Determine if we should continue or return/break
                 if not self._should_continue_retry(result, retry_state):
                     if isinstance(result, httpx.Response):
                         return result
-                    else:
-                        break  # Retry outcome says to stop
-
-            # Exhausted all attempts
+                    break
             raise_retry_exhausted(url, retry_state, span)
         finally:
             finalize_request_observability(

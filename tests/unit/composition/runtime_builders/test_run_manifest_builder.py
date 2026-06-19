@@ -8,7 +8,7 @@ from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 from types import SimpleNamespace
 
 from bioetl.composition.runtime_builders import run_manifest_builder
-from bioetl.composition.runtime_builders._run_manifest_refs import (
+from bioetl.composition.runtime_builders.run_manifest_support import (
     RunManifestProvenanceBundle,
 )
 from bioetl.composition.runtime_builders.run_manifest_support import (

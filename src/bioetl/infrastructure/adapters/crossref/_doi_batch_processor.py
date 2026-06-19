@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import time
 from typing import TYPE_CHECKING, cast
 
 from httpx import Response
@@ -15,7 +14,7 @@ from bioetl.infrastructure.adapters.crossref._batch_support import (
     BaseMetrics,
     HeadersProvider,
     HttpTransport,
-    record_response_timing,
+    perform_timed_crossref_get,
 )
 from bioetl.infrastructure.adapters.crossref.exceptions import CrossRefApiError
 
@@ -56,14 +55,13 @@ class DoiBatchProcessor:
         response: Response | None = None
 
         try:
-            start_time = time.perf_counter()
-            with self._metrics.measure_request("/works/{doi}"):
-                response = await self._http.get(url, headers=self._headers_fn())
-            duration_ms = (time.perf_counter() - start_time) * 1000
-            record_response_timing(
-                self._request_collector,
-                response,
-                duration_ms,
+            response = await perform_timed_crossref_get(
+                http=self._http,
+                metrics=self._metrics,
+                route="/works/{doi}",
+                url=url,
+                headers=self._headers_fn(),
+                request_collector=self._request_collector,
             )
 
             if response is None:
@@ -132,23 +130,15 @@ class DoiBatchProcessor:
             "rows": str(len(normalized_dois)),
             "mailto": self._mailto,
         }
-        response: Response | None = None
-
-        start_time = time.perf_counter()
-        with self._metrics.measure_request("/works?filter=doi"):
-            response = await self._http.get(
-                url,
-                params=params,
-                headers=self._headers_fn(),
-            )
-        duration_ms = (time.perf_counter() - start_time) * 1000
-        record_response_timing(
-            self._request_collector,
-            response,
-            duration_ms,
+        return await perform_timed_crossref_get(
+            http=self._http,
+            metrics=self._metrics,
+            route="/works?filter=doi",
+            url=url,
+            params=params,
+            headers=self._headers_fn(),
+            request_collector=self._request_collector,
         )
-
-        return response
 
     async def fetch_batch(self, dois: list[str]) -> AsyncIterator[BronzeRecord]:
         """Fetch multiple publications by DOI batch."""

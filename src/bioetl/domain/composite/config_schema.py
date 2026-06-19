@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+
 from bioetl.domain.composite.config_merge import ColumnGroupConfig
 from bioetl.domain.composite.config_validators import (
     _coerce_to_tuple,

@@ -240,7 +240,7 @@ def _collect_fixture_asset_duplication(root: Path) -> dict[str, Any]:
                 "file_count": len(paths),
                 "total_bytes": total_bytes_by_hash[digest],
                 "scope_counts": dict(sorted(group_scope_counts.items())),
-                "paths": paths,
+                "paths": sorted(paths, key=str.lower),
             }
         )
 

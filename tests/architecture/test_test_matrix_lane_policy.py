@@ -204,7 +204,7 @@ class TestCanonicalTestLanes:
             lanes["repo-backed-unit"]["marker_expression"]
             == "repo_backed and not slow and not benchmark and not memory"
         )
-        assert lanes["repo-backed-unit"]["paths"] == ["tests/unit/"]
+        assert lanes["repo-backed-unit"]["paths"] == ["tests/unit/repo_backed/"]
         assert lanes["unit-parallel-safe"]["runner_backend"] == "run_pytest_sharded"
         assert (
             lanes["unit-parallel-safe"]["marker_expression"]

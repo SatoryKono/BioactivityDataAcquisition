@@ -11,15 +11,10 @@ mixin methods directly and covering stage transformation scenarios.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 
 import pytest
 
-from bioetl.domain.aggregates._pipeline_run_mixins import _PipelineRunLifecycleMixin
-from bioetl.domain.aggregates._pipeline_run_read_model_mixin import (
-    _PipelineRunAttrs,
-    _PipelineRunReadModelMixin,
-)
 from bioetl.domain.aggregates.pipeline_run import PipelineRun
 from bioetl.domain.aggregates.pipeline_run_stage_result import (
     StageResult,
@@ -396,6 +391,15 @@ class TestPipelineRunLifecycleMixin:
 
         with pytest.raises(InvalidStateError, match="Cannot complete"):
             pipeline_run.complete(_ts(10))
+
+    def test_complete_blocks_when_any_stage_is_not_success(
+        self, started_run: PipelineRun
+    ) -> None:
+        """complete should reject RUNNING stage entries that have not reached SUCCESS."""
+        started_run.record_stage_start("bronze", started_at=_ts(1))
+
+        with pytest.raises(InvalidStateError, match="must be SUCCESS"):
+            started_run.complete(_ts(10))
 
     def test_complete_validates_running_status(self, pipeline_run: PipelineRun):
         """complete should only work from RUNNING status."""

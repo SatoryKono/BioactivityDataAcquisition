@@ -44,6 +44,7 @@ Commands:
     report-family-baseline Generate/check RF-06 hotspot-family baseline artifacts
     report-hotspots      Generate hotspot degradation report
     report-duplication-baseline  Generate report-only duplication baseline
+    report-artifact-duplication-audit  Generate/check JSCPD-excluded governance artifact duplication audit
     report-function-length-inventory Generate report-only near-threshold function length inventory
     report-normalization-fallback-inventory Generate report-only fallback normalization inventory
     report-chembl-observed-value-inventory Generate/check observed-value inventory from tracked ChEMBL Bronze fixtures
@@ -110,6 +111,9 @@ COMMAND_MODULES: dict[str, str] = {
     "report-family-baseline": "scripts.engineering.qa.report_hotspot_family_baseline",
     "report-hotspots": "scripts.engineering.qa.generate_hotspot_degradation_report",
     "report-duplication-baseline": "scripts.engineering.qa.report_duplication_baseline",
+    "report-artifact-duplication-audit": (
+        "scripts.engineering.qa.report_artifact_duplication_audit"
+    ),
     "report-function-length-inventory": "scripts.engineering.qa.report_function_length_inventory",
     "report-normalization-fallback-inventory": "scripts.engineering.qa.report_normalization_fallback_inventory",
     "report-chembl-observed-value-inventory": "scripts.engineering.qa.report_chembl_observed_value_inventory",

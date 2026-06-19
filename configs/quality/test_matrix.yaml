@@ -52,7 +52,7 @@ test_lanes:
 
     unit-fast:
       suite_name: unit-fast
-      description: "Fast unit lane; excludes slow, benchmark, repo-backed, and Neo4j/MCP memory tests."
+      description: "Fast unit lane over canonical pure-unit paths; excludes slow, benchmark, repo-backed, and Neo4j/MCP memory tests."
       runner_backend: run_pytest
       runner: scripts/engineering/dev/run_pytest.sh
       paths:
@@ -70,14 +70,14 @@ test_lanes:
 
     repo-backed-unit:
       suite_name: repo-backed-unit
-      description: "Repository-file-backed unit-path contract checks isolated from unit-fast."
+      description: "Repository-file-backed unit-path contract checks isolated in tests/unit/repo_backed/."
       runner_backend: run_pytest
       runner: scripts/engineering/dev/run_pytest.sh
       paths:
-        - tests/unit/
+        - tests/unit/repo_backed/
       marker_expression: "repo_backed and not slow and not benchmark and not memory"
       pytest_args:
-        - tests/unit/
+        - tests/unit/repo_backed/
         - -m
         - repo_backed and not slow and not benchmark and not memory
       replay_mode: not_applicable
@@ -88,7 +88,7 @@ test_lanes:
 
     unit-parallel-safe:
       suite_name: unit-parallel-safe
-      description: "Deterministic unit lane routed through the maintained shard inventory; excludes repo-backed, slow, serial, benchmark, and memory tests."
+      description: "Deterministic canonical pure-unit lane routed through the maintained shard inventory; excludes repo-backed, slow, serial, benchmark, and memory tests."
       runner_backend: run_pytest_sharded
       runner: scripts/engineering/dev/run_pytest_sharded.sh
       runner_options:
@@ -825,6 +825,23 @@ fixture_governance:
       - fixture
       - golden
       - vcr
+  config_contract_registry_duplication_inventory_contract:
+    scope: exact_byte_duplicate_visibility_for_jscpd_excluded_governance_artifacts
+    generator: scripts/engineering/qa/report_artifact_duplication_audit.py
+    command: python -m scripts.engineering.qa report-artifact-duplication-audit
+    inventory_location: reports/quality/config-contract-registry-artifact-duplication.json
+    jscpd_blind_spot_source: .jscpd.json
+    tracked_extensions:
+      - .csv
+      - .json
+      - .md
+      - .toml
+      - .yaml
+      - .yml
+    required_scopes:
+      - config
+      - contract
+      - registry
   interoperability_drift_gates:
     scope: provider_contract_and_export_interoperability_surfaces
     workflow: .github/workflows/provider-contract-drift.yml

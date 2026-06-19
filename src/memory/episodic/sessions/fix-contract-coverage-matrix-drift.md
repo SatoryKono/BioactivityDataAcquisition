@@ -1,22 +1,22 @@
 ---
 id: fix-contract-coverage-matrix-drift
-title: Fix contract coverage matrix drift
-task_id: fix_contract_coverage_matrix_drift
-created_at: '2026-06-16T04:26:09Z'
+title: Fix contract coverage matrix drift and missing contract test paths
+task_id: fix-contract-coverage-matrix-drift
+created_at: '2026-06-19T15:14:20Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - <add-source-ref>
 summary: Active task session context.
-query: Fix contract coverage matrix drift
+query: Fix contract coverage matrix drift and missing contract test paths
 ---
 
 # Session note
 
 ## Task
 
-- Title: Fix contract coverage matrix drift
-- Retrieval query: Fix contract coverage matrix drift
+- Title: Fix contract coverage matrix drift and missing contract test paths
+- Retrieval query: Fix contract coverage matrix drift and missing contract test paths
 
 ## Retrieved context
 

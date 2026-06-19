@@ -347,6 +347,11 @@ def test_narrow_first_party_retained_entrypoints_do_not_gain_src_importers() -> 
     }
     expected_src_importers = {
         "src/bioetl/interfaces/cli/commands/maintenance.py": set(),
+        "src/bioetl/composition/health_api.py": {
+            "src/bioetl/interfaces/cli/commands/domains/health/server_integration.py",
+            "src/bioetl/interfaces/cli/commands/domains/quarantine/runtime_access.py",
+            "src/bioetl/interfaces/cli/commands/health.py",
+        },
         "src/bioetl/composition/maintenance_api.py": {
             "src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py",
         },

@@ -152,14 +152,6 @@ COMMAND_DELEGATION_CASES: tuple[
         True,
     ),
     (
-        "bioetl.interfaces.cli.commands.run",
-        "get_pipeline_runner_service",
-        "bioetl.composition.execution_api.get_pipeline_runner_service",
-        _registry_kwarg,
-        object(),
-        "identity",
-    ),
-    (
         "bioetl.interfaces.cli.commands.run_all",
         "get_pipeline_runner_service",
         "bioetl.composition.execution_api.get_pipeline_runner_service",
@@ -254,7 +246,6 @@ CLI_MAIN_LAZY_COMMAND_CASES = (
         "health-server-deps",
         "lock-service",
         "metrics-server-start",
-        "run-runner-service",
         "run-all-runner-service",
         "run-composite-config",
         "run-composite-bootstrap",

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
-from dataclasses import dataclass
+from collections.abc import Callable, Mapping
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Protocol
 from urllib.parse import quote
@@ -45,6 +45,15 @@ class _StartedBackendProcess(Protocol):
 
     args: object
     pid: int | None
+
+
+class _ObservabilityBackendCliInput(Protocol):
+    """Minimal dataclass-like CLI payload supporting backend attachment."""
+
+    ensure_observability_backend: bool
+    observability_backend_port: int
+    health_server: bool
+    health_port: int
 
 
 DEFAULT_OBSERVABILITY_BACKEND_PROBE_HOST = "127.0.0.1"
@@ -96,6 +105,61 @@ def build_observability_backend_required_probe_paths(
             f"/ops/control-plane/checkpoint-freshness?pipeline={encoded_pipeline}"
         )
     return tuple(paths)
+
+
+def resolve_observability_backend_cli_options(
+    options: Mapping[str, object],
+    *,
+    default_port: int = DEFAULT_HEALTH_SERVER_PORT,
+) -> tuple[bool, int]:
+    """Read backend auto-start options from raw Click kwargs mapping."""
+    return (
+        bool(options.get("ensure_observability_backend", True)),
+        int(options.get("observability_backend_port", default_port)),
+    )
+
+
+def build_observability_backend_cli_kwargs(
+    *,
+    ensure_observability_backend: bool,
+    observability_backend_port: int,
+) -> dict[str, object]:
+    """Return normalized CLI kwargs shared by run-oriented command inputs."""
+    return {
+        "ensure_observability_backend": ensure_observability_backend,
+        "observability_backend_port": observability_backend_port,
+    }
+
+
+def attach_observability_backend_to_cli_input(
+    cli_input: _ObservabilityBackendCliInput,
+    *,
+    required_probe_paths: tuple[str, ...],
+    ensure_backend_started_fn: Callable[
+        ..., ObservabilityBackendEnsureResult
+    ] | None = None,
+    disable_transient_health_server_fn: Callable[..., bool] | None = None,
+) -> _ObservabilityBackendCliInput:
+    """Ensure backend startup and disable the transient health server when replaced."""
+    ensure_backend_started = (
+        ensure_backend_started_fn or ensure_observability_backend_started
+    )
+    disable_transient_health_server = (
+        disable_transient_health_server_fn or should_disable_transient_health_server
+    )
+    backend_result = ensure_backend_started(
+        enabled=cli_input.ensure_observability_backend,
+        port=cli_input.observability_backend_port,
+        required_probe_paths=required_probe_paths,
+    )
+    if disable_transient_health_server(
+        health_server_enabled=cli_input.health_server,
+        health_port=cli_input.health_port,
+        observability_backend_port=cli_input.observability_backend_port,
+        backend_result=backend_result,
+    ):
+        return replace(cli_input, health_server=False)
+    return cli_input
 
 
 def _reuse_observability_backend_if_ready(
@@ -319,13 +383,16 @@ __all__ = [
     "_build_detached_backend_env",
     "_build_detached_backend_popen_kwargs",
     "_build_observability_backend_probe_urls",
+    "attach_observability_backend_to_cli_input",
     "build_detached_backend_log_path",
+    "build_observability_backend_cli_kwargs",
     "build_observability_backend_health_url",
     "build_observability_backend_required_probe_paths",
     "ensure_observability_backend_started",
     "probe_observability_backend",
     "probe_observability_backend_required_paths",
     "python_executable_to_tuple",
+    "resolve_observability_backend_cli_options",
     "should_disable_transient_health_server",
     "start_detached_quarantine_backend",
     "wait_for_observability_backend_ready",

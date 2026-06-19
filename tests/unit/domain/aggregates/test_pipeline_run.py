@@ -307,6 +307,13 @@ class TestPipelineRunCompletionInvariants:
         assert started_run.ended_at is not None
         assert started_run.total_records_processed == 1000
 
+    def test_cannot_complete_with_running_stage(self, started_run: PipelineRun) -> None:
+        """Invariant: COMPLETED requires terminal SUCCESS for every recorded stage."""
+        started_run.record_stage_start("preflight", started_at=_ts(1))
+
+        with pytest.raises(InvalidStateError, match="must be SUCCESS"):
+            started_run.complete(_ts(2))
+
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Encapsulation Tests

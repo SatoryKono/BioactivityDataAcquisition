@@ -171,7 +171,7 @@ class TestCliGracefulShutdownExitCode:
 
         with (
             patch(
-                "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service",
+                "bioetl.interfaces.cli.commands.domains.run.runtime_helpers.get_pipeline_runner_service",
                 return_value=mock_service,
             ),
             patch(

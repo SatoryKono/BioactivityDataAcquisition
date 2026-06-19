@@ -6,12 +6,11 @@ from collections.abc import Callable, Sequence
 
 from bioetl.application.core.base_transformer_helpers_mixin import ScalarValue
 from bioetl.application.pipelines.crossref._business_data_builder import (
+    build_crossref_author_block_fields,
+    build_crossref_core_block_fields,
     extract_publication_year_candidate,
 )
 from bioetl.application.pipelines.crossref.extractors import (
-    extract_author_details,
-    extract_author_orcids,
-    extract_authors,
     extract_content_domain,
     extract_dates,
     extract_issn_by_type,
@@ -42,29 +41,12 @@ class _CrossRefCoreBlock:
     def extract(self, record: BronzeRecord) -> JsonDict:
         doi = self.validate_doi(record.get("DOI"))
         assert doi is not None, "DOI should be validated in _pre_extract_validation"
-        raw_type = record.get("type")
-
-        return {
-            "doi": doi,
-            "pmid": None,
-            "pmc_id": None,
-            "abstract": None,
-            "title": extract_first_string(record.get("title", [])),
-            **self.classify_pub_type(raw_type),
-            "language": record.get("language"),
-            "_source": "crossref",
-            "is_oa": None,
-            "_lookup_method": record.get("_lookup_method", "doi"),
-            "_original_id": record.get("_original_id"),
-            "alternative_id": self.serialize_json_list(
-                record.get("alternative-id", []) or []
-            ),
-            "subject_keywords": self.serialize_json_list(
-                record.get("subject", []) or []
-            ),
-            "_dq_warn": False,
-            "_dq_error": False,
-        }
+        return build_crossref_core_block_fields(
+            record=record,
+            doi=doi,
+            classify_publication_type=self.classify_pub_type,
+            serialize_json_list=self.serialize_json_list,
+        )
 
 
 class _CrossRefJournalBlock:
@@ -166,82 +148,14 @@ class _CrossRefAuthorBlock:
         self.serialize_json = serialize_json
         self.serialize_json_list = serialize_json_list
 
-    def _hash_author_detail(self, author: JsonDict) -> JsonDict:
-        hashed_author: JsonDict = {}
-        for pii_field in ("given", "family", "name"):
-            val = author.get(pii_field)
-            hashed_author[pii_field] = (
-                self.hash_pii_value(val) if isinstance(val, str) and val else None
-            )
-        hashed_author["orcid"] = author.get("orcid")
-        hashed_author["authenticated_orcid"] = author.get("authenticated_orcid")
-        hashed_author["sequence"] = author.get("sequence")
-
-        affs = author.get("affiliations", [])
-        hashed_author["affiliations"] = affs
-        return hashed_author
-
-    def _extract_affiliations(
-        self,
-        raw_author_details: list[JsonDict],
-    ) -> list[str] | list[JsonDict] | None:
-        affiliation_strings: list[str] = []
-        affiliation_dicts: list[JsonDict] = []
-
-        for author in raw_author_details:
-            affs = author.get("affiliations", [])
-            if isinstance(affs, list):
-                for aff in affs:
-                    if isinstance(aff, str):
-                        affiliation_strings.append(aff)
-                    elif isinstance(aff, dict):
-                        affiliation_dicts.append(aff)
-
-        if affiliation_dicts:
-            return affiliation_dicts
-        if affiliation_strings:
-            return affiliation_strings
-        return None
-
     def extract(self, record: BronzeRecord) -> JsonDict:
-        raw_authors = extract_authors(record)
-        authors_json = self.data_normalizer.normalize_author_list(raw_authors)
-        author_keys = self.data_normalizer.normalize_author_keys(raw_authors)
-
-        raw_author_details = extract_author_details(record)
-        hashed_details = [self._hash_author_detail(a) for a in raw_author_details]
-        affiliations_input = self._extract_affiliations(raw_author_details)
-
-        author_details_raw_json = self.serialize_json(raw_author_details)
-        author_details_canonical_json = self.serialize_json(hashed_details)
-        author_orcids = extract_author_orcids(record)
-        serialized_orcids = self.serialize_json_list(author_orcids)
-
-        affiliations_json = self.data_normalizer.normalize_affiliations(
-            affiliations_input
+        return build_crossref_author_block_fields(
+            record,
+            data_normalizer=self.data_normalizer,
+            hash_pii_value=self.hash_pii_value,
+            serialize_json=self.serialize_json,
+            serialize_json_list=self.serialize_json_list,
         )
-
-        return {
-            "authors": authors_json,
-            "author_keys": author_keys,
-            "author_orcids": serialized_orcids,
-            "author_details": (
-                author_details_canonical_json
-                if isinstance(author_details_canonical_json, str)
-                else None
-            ),
-            "author_details_raw_json": (
-                author_details_raw_json
-                if isinstance(author_details_raw_json, str)
-                else None
-            ),
-            "author_details_canonical_json": (
-                author_details_canonical_json
-                if isinstance(author_details_canonical_json, str)
-                else None
-            ),
-            "affiliation_list": affiliations_json,
-        }
 
 
 __all__ = [

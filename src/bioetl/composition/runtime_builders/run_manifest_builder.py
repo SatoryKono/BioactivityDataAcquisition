@@ -24,9 +24,6 @@ from bioetl.composition.runtime_builders._run_manifest_publication_support impor
     create_manifest_record,
     create_manifest_store,
 )
-from bioetl.composition.runtime_builders._run_manifest_refs import (
-    RunManifestProvenanceBundle,
-)
 from bioetl.composition.runtime_builders._runner_control_plane_policy import (
     validate_manifest_persistence_requirements,
 )
@@ -35,6 +32,8 @@ from bioetl.domain.normalization import compute_input_snapshot_identity_fingerpr
 if TYPE_CHECKING:
     from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
     from bioetl.domain.context import PipelineRunContext
+
+RunManifestProvenanceBundle = _manifest_support.RunManifestProvenanceBundle
 
 
 def _create_control_plane_refs(

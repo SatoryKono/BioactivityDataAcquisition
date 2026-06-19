@@ -150,3 +150,12 @@ class TestPipelineRunInvariantProperties:
 
         with pytest.raises(InvalidStateError, match="no stages recorded"):
             run.complete(_ts(1))
+
+    def test_regression_cannot_complete_with_non_terminal_stage(self) -> None:
+        """A RUNNING run with non-SUCCESS stages must not transition to COMPLETED."""
+        run = _make_run()
+        run.start(_ts(0))
+        run.record_stage_start("preflight", _ts(1))
+
+        with pytest.raises(InvalidStateError, match="must be SUCCESS"):
+            run.complete(_ts(2))

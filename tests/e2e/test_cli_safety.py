@@ -40,7 +40,7 @@ def test_cli_rebuild_requires_confirmation(cli_runner, mock_registry):
     """Test that rebuild requires confirmation without --yes."""
     with (
         patch(
-            "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service"
+            "bioetl.interfaces.cli.commands.domains.run.runtime_helpers.get_pipeline_runner_service"
         ) as mock_get_service,
         patch(
             "bioetl.interfaces.cli.commands.domains.run.support.build_cli_registry",
@@ -65,7 +65,9 @@ def test_cli_rebuild_with_yes(cli_runner, mock_registry):
     )
 
     with (
-        patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service"),
+        patch(
+            "bioetl.interfaces.cli.commands.domains.run.runtime_helpers.get_pipeline_runner_service"
+        ),
         patch("bioetl.interfaces.cli.commands.run.asyncio.run") as mock_asyncio_run,
         patch(
             "bioetl.interfaces.cli.commands.domains.run.support.build_cli_registry",
@@ -91,7 +93,7 @@ def test_cli_dry_run_flag(cli_runner, mock_registry):
     """Test that --dry-run flag shows preview and does NOT execute pipeline."""
     with (
         patch(
-            "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service"
+            "bioetl.interfaces.cli.commands.domains.run.runtime_helpers.get_pipeline_runner_service"
         ) as mock_get_service,
         patch(
             "bioetl.interfaces.cli.commands.domains.run.support.show_cleanup_preview"

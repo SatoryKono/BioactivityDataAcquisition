@@ -319,14 +319,14 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "521",
+        "line": "525",
         "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_stage_name_accepts_valid"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "540",
+        "line": "544",
         "path": "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_stage_completion_running_allows_none_timestamp"
@@ -3063,20 +3063,6 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "43",
-        "path": "tests/unit/infrastructure/test_observability.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_record_processed_increments_counter"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "52",
-        "path": "tests/unit/infrastructure/test_observability.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_record_error_increments_counter"
-      },
-      {
-        "category": "intentional_no_exception_contract",
         "line": "775",
         "path": "tests/unit/infrastructure/test_storage_factory.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
@@ -3584,7 +3570,7 @@
       "architecture_helper_guard": 14,
       "benchmark_or_performance": 0,
       "helper_asserted": 0,
-      "intentional_no_exception_contract": 497,
+      "intentional_no_exception_contract": 495,
       "weak_no_value": 0
     },
     "assertless_examples": [
@@ -3614,7 +3600,7 @@
       "tests/contract/schemas/test_uniprot_shard_validation.py:47",
       "tests/contract/schemas/test_uniprot_shard_validation.py:65"
     ],
-    "assertless_total_candidates": 511,
+    "assertless_total_candidates": 509,
     "compatibility_examples": [
       "tests/architecture/test_application_composite_compat_surface_usage.py",
       "tests/architecture/test_application_core_lifecycle_shim_usage.py",
@@ -3766,25 +3752,25 @@
         "test_count": 44
       },
       "test_governance": {
-        "assertion_backed_tests": 32,
+        "assertion_backed_tests": 34,
         "assertion_examples": [
-          "tests/architecture/test_test_governance_audit.py:93",
-          "tests/architecture/test_test_governance_audit.py:111",
-          "tests/architecture/test_test_governance_audit.py:122",
-          "tests/architecture/test_test_governance_audit.py:163",
-          "tests/architecture/test_test_governance_audit.py:193",
-          "tests/architecture/test_test_governance_audit.py:214",
-          "tests/architecture/test_test_governance_audit.py:229",
-          "tests/architecture/test_test_governance_audit.py:242",
-          "tests/architecture/test_test_governance_audit.py:274",
-          "tests/architecture/test_test_governance_audit.py:303"
+          "tests/architecture/test_test_governance_audit.py:97",
+          "tests/architecture/test_test_governance_audit.py:115",
+          "tests/architecture/test_test_governance_audit.py:126",
+          "tests/architecture/test_test_governance_audit.py:167",
+          "tests/architecture/test_test_governance_audit.py:230",
+          "tests/architecture/test_test_governance_audit.py:260",
+          "tests/architecture/test_test_governance_audit.py:281",
+          "tests/architecture/test_test_governance_audit.py:296",
+          "tests/architecture/test_test_governance_audit.py:312",
+          "tests/architecture/test_test_governance_audit.py:344"
         ],
         "assertless_tests": [],
         "intentional_no_exception_tests": 0,
         "paths": [
           "tests/architecture/test_test_governance_audit.py"
         ],
-        "test_count": 32
+        "test_count": 34
       }
     },
     "date_today_call_sites": 0,
@@ -3798,13 +3784,72 @@
     },
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
+    "fixture_asset_duplication": {
+      "duplicate_files": 10,
+      "duplicate_groups": 3,
+      "groups": [
+        {
+          "file_count": 6,
+          "paths": [
+            "tests/fixtures/vcr/chembl/test_chembl_target_full_cycle.yaml",
+            "tests/fixtures/vcr/chembl/TestChemblResiliencePaths.test_circuit_breaker_on_persistent_failures.yaml",
+            "tests/fixtures/vcr/chembl/TestChemblResiliencePaths.test_rate_limiting_respects_token_bucket.yaml",
+            "tests/fixtures/vcr/chembl/TestChemblResiliencePaths.test_retry_on_transient_errors.yaml",
+            "tests/fixtures/vcr/chembl/TestChemblResiliencePaths.test_single_id_fallback_on_batch_failure.yaml",
+            "tests/fixtures/vcr/chembl/TestChemblResiliencePaths.test_timeout_handling.yaml"
+          ],
+          "scope_counts": {
+            "vcr": 6
+          },
+          "sha256": "07e7179f91ddffa776a50d6d33813125270475d18c32b68b23b7a36cdf1724f0",
+          "total_bytes": 6876336
+        },
+        {
+          "file_count": 2,
+          "paths": [
+            "tests/fixtures/vcr/uniprot/test_uniprot_protein_metadata_fields.yaml",
+            "tests/fixtures/vcr/uniprot/test_uniprot_protein_sequence_fields.yaml"
+          ],
+          "scope_counts": {
+            "vcr": 2
+          },
+          "sha256": "871d6b5d39fa3e5bd8f30859dfaacad2b47c6ae929525243ad5fa786767e1098",
+          "total_bytes": 138550
+        },
+        {
+          "file_count": 2,
+          "paths": [
+            "tests/fixtures/vcr/chembl/test_chembl_target_cross_references.yaml",
+            "tests/fixtures/vcr/chembl/test_chembl_target_projects_derived_synonym_fields.yaml"
+          ],
+          "scope_counts": {
+            "vcr": 2
+          },
+          "sha256": "9eee3a70f85cea465e400bf876a081e514bd50834393f7e4bb94913bf7430a3a",
+          "total_bytes": 2272654
+        }
+      ],
+      "max_group_size": 6,
+      "scan_root": "tests/fixtures",
+      "scope_file_counts": {
+        "fixture": 21,
+        "golden": 21,
+        "vcr": 410
+      },
+      "total_files": 452,
+      "tracked_extensions": [
+        ".json",
+        ".yaml",
+        ".yml"
+      ]
+    },
     "markerless_test_functions": 0,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "root": ".",
     "top_duplicate_test_names": [],
-    "total_test_files": 1828,
-    "total_test_functions": 20966,
+    "total_test_files": 1829,
+    "total_test_functions": 20975,
     "uuid4_call_sites": 0
   }
 }

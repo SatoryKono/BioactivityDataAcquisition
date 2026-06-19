@@ -209,6 +209,7 @@ def test_run_module_declares_expected_seam_inventory() -> None:
         is run_module._ensure_metrics_server_started_impl
     )
     assert run_module.health_server_context is run_module._health_server_context_impl
+    assert not hasattr(run_module, "get_pipeline_runner_service")
 
 
 @pytest.mark.unit
