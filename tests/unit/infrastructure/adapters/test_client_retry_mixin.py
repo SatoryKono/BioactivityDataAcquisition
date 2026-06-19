@@ -273,6 +273,7 @@ def test_record_retry_budget_exhausted_logs_warning(
     call_kwargs = mock_logger.warning.call_args
     # First positional arg is the log event name
     assert call_kwargs[0][0] == "http_retry_budget_exhausted"
+    assert call_kwargs[1]["run_id"] == "test-run-001"
 
 
 def test_record_retry_budget_exhausted_silent_without_logger(
@@ -382,6 +383,7 @@ def test_log_retry_emits_structured_warning(
     args, kwargs = mock_logger.warning.call_args
     assert args[0] == "Retrying request"
     assert kwargs.get("provider") == "chembl"
+    assert kwargs.get("run_id") == "test-run-001"
     assert kwargs.get("attempt") == 1  # 0-indexed → displayed as 1
 
 
@@ -525,6 +527,13 @@ async def test_request_with_retry_honors_retry_after_in_full_flow(
         1,
         {"provider": "chembl", "method": "GET"},
     )
+    attributes = (
+        tracing.get_tracer.return_value.start_as_current_span.call_args.kwargs[
+            "attributes"
+        ]
+    )
+    assert attributes["bioetl.provider"] == "chembl"
+    assert attributes["bioetl.run_id"] == "test-run-001"
     span.__enter__.assert_called_once()
     span.__exit__.assert_called_once()
     span_calls = [call.args for call in span.set_attribute.call_args_list]
@@ -603,6 +612,7 @@ async def test_request_with_retry_records_retry_budget_exhaustion_end_to_end(
     mock_logger.warning.assert_any_call(
         "http_retry_budget_exhausted",
         provider="chembl",
+        run_id="test-run-001",
         method="GET",
         url="https://api.example.com/data",
         retry_budget=1,
@@ -668,3 +678,4 @@ async def test_attempt_request_circuit_breaker_open_marks_span_and_logs(
     mock_span.record_exception.assert_called_once()
     mock_logger.warning.assert_called_once()
     assert mock_logger.warning.call_args.args[0] == "http_circuit_breaker_open"
+    assert mock_logger.warning.call_args.kwargs["run_id"] == "test-run-001"

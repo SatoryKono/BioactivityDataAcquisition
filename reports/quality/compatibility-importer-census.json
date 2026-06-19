@@ -1,5 +1,5 @@
 {
-  "snapshot_date": "2026-06-17",
+  "snapshot_date": "2026-06-19",
   "inventory_source": "configs/quality/compatibility_facade_inventory.yaml",
   "twin_ratchet_source": "configs/quality/compatibility_twin_module_ratchet.yaml",
   "config_root_facade_source": "configs/quality/infrastructure_config_root_facade_inventory.yaml",
@@ -14,7 +14,7 @@
     "twin_pairs_without_public_src_importers": 0,
     "tracked_twin_family_count": 0,
     "config_root_symbol_count": 3,
-    "config_root_src_importer_count": 0,
+    "config_root_src_importer_count": 1,
     "retained_public_export_facade_count": 4,
     "retained_public_export_facades_with_duplicate_exports": 0,
     "retained_public_export_facades_with_resolution_conflicts": 0
@@ -140,17 +140,12 @@
       "status": "public-entrypoint",
       "canonical_target": "bioetl.composition.health_api",
       "owner": "bioetl.composition",
-      "src_importers": [
-        "src/bioetl/interfaces/cli/commands/diagnostics.py",
-        "src/bioetl/interfaces/cli/commands/domains/health/server_integration.py",
-        "src/bioetl/interfaces/cli/commands/domains/quarantine/runtime_access.py",
-        "src/bioetl/interfaces/cli/commands/health.py"
-      ],
+      "src_importers": [],
       "test_importers": [
         "tests/unit/composition/test_canonical_module_paths.py",
         "tests/unit/composition/test_health_api.py"
       ],
-      "src_importer_count": 4,
+      "src_importer_count": 0,
       "test_importer_count": 2
     },
     {
@@ -159,13 +154,11 @@
       "status": "public-entrypoint",
       "canonical_target": "bioetl.composition.maintenance_api",
       "owner": "bioetl.composition",
-      "src_importers": [
-        "src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py"
-      ],
+      "src_importers": [],
       "test_importers": [
         "tests/unit/composition/test_canonical_module_paths.py"
       ],
-      "src_importer_count": 1,
+      "src_importer_count": 0,
       "test_importer_count": 1
     },
     {
@@ -174,7 +167,9 @@
       "status": "public-entrypoint",
       "canonical_target": "bioetl.infrastructure.config",
       "owner": "bioetl.infrastructure.config",
-      "src_importers": [],
+      "src_importers": [
+        "src/bioetl/composition/bootstrap/runtime/classification_init.py"
+      ],
       "test_importers": [
         "tests/unit/infrastructure/config/test_composite_config_api.py",
         "tests/unit/infrastructure/config/test_config_ci_contract.py",
@@ -182,7 +177,7 @@
         "tests/unit/infrastructure/config/test_public_config_surfaces.py",
         "tests/unit/infrastructure/config/test_workflow_config_api.py"
       ],
-      "src_importer_count": 0,
+      "src_importer_count": 1,
       "test_importer_count": 5
     },
     {
@@ -205,7 +200,6 @@
         "src/bioetl/application/composite/coordinator_planning.py",
         "src/bioetl/application/composite/coordinator_result_mixin.py",
         "src/bioetl/application/composite/cross_validator.py",
-        "src/bioetl/application/composite/cross_validator_helpers.py",
         "src/bioetl/application/composite/dependency_coordinator.py",
         "src/bioetl/application/composite/dependency_join_context_builders.py",
         "src/bioetl/application/composite/dependency_joiner.py",
@@ -314,7 +308,7 @@
         "tests/unit/domain/composite/test_data_schema_config.py",
         "tests/unit/infrastructure/schemas/test_composite_config_invariants_source_of_truth.py"
       ],
-      "src_importer_count": 80,
+      "src_importer_count": 79,
       "test_importer_count": 39
     },
     {

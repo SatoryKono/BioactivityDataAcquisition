@@ -132,7 +132,7 @@ def _pipeline_provider_entity(pipeline_name: str) -> tuple[str, str] | None:
     return provider, entity
 
 
-def _materialize_pipeline_silver_harness_fallback(
+async def _materialize_pipeline_silver_harness_fallback(
     data_dir: Path,
     pipeline_name: str,
     *,
@@ -190,14 +190,14 @@ def _materialize_pipeline_silver_harness_fallback(
         pa.Table.from_pylist(silver_rows),
         mode="overwrite",
     )
-    return assert_silver_table_has_records(
+    return await assert_silver_table_has_records(
         data_dir,
         pipeline_name,
         expected_min=expected_min,
     )
 
 
-def _materialize_chembl_activity_silver_harness_fallback(
+async def _materialize_chembl_activity_silver_harness_fallback(
     data_dir: Path,
     *,
     expected_min: int = 1,
@@ -244,7 +244,7 @@ def _materialize_chembl_activity_silver_harness_fallback(
         pa.Table.from_pylist(silver_rows),
         mode="overwrite",
     )
-    return assert_silver_table_has_records(
+    return await assert_silver_table_has_records(
         data_dir,
         "chembl_activity",
         expected_min=expected_min,
@@ -261,7 +261,7 @@ async def _seed_chembl_activity_silver(data_dir: Path, *, limit: int = 3) -> int
         ctx = _create_advanced_harness_context("chembl_activity", limit=candidate_limit)
         await _run_pipeline_or_skip_policy_envelope(ctx, data_dir=data_dir)
         try:
-            return assert_silver_table_has_records(
+            return await assert_silver_table_has_records(
                 data_dir,
                 "chembl_activity",
                 expected_min=1,
@@ -270,7 +270,7 @@ async def _seed_chembl_activity_silver(data_dir: Path, *, limit: int = 3) -> int
             last_error = exc
 
     detail = str(last_error) if last_error is not None else "no detail captured"
-    fallback_count = _materialize_chembl_activity_silver_harness_fallback(
+    fallback_count = await _materialize_chembl_activity_silver_harness_fallback(
         data_dir,
         expected_min=1,
         max_rows=max(1, limit),
@@ -284,20 +284,20 @@ async def _seed_chembl_activity_silver(data_dir: Path, *, limit: int = 3) -> int
     )
 
 
-def _assert_chembl_activity_silver_or_skip(
+async def _assert_chembl_activity_silver_or_skip(
     data_dir: Path,
     *,
     expected_min: int = 1,
 ) -> int:
     """Return chembl_activity Silver count or skip when no Delta table exists."""
     try:
-        return assert_silver_table_has_records(
+        return await assert_silver_table_has_records(
             data_dir,
             "chembl_activity",
             expected_min=expected_min,
         )
     except AssertionError as exc:
-        fallback_count = _materialize_chembl_activity_silver_harness_fallback(
+        fallback_count = await _materialize_chembl_activity_silver_harness_fallback(
             data_dir,
             expected_min=expected_min,
         )
@@ -310,7 +310,7 @@ def _assert_chembl_activity_silver_or_skip(
         )
 
 
-def _assert_pipeline_silver_or_skip(
+async def _assert_pipeline_silver_or_skip(
     data_dir: Path,
     pipeline_name: str,
     *,
@@ -318,19 +318,19 @@ def _assert_pipeline_silver_or_skip(
 ) -> int:
     """Return one pipeline Silver count or skip when Bronze fallback cannot recover it."""
     if pipeline_name == "chembl_activity":
-        return _assert_chembl_activity_silver_or_skip(
+        return await _assert_chembl_activity_silver_or_skip(
             data_dir,
             expected_min=expected_min,
         )
 
     try:
-        return assert_silver_table_has_records(
+        return await assert_silver_table_has_records(
             data_dir,
             pipeline_name,
             expected_min=expected_min,
         )
     except AssertionError as exc:
-        fallback_count = _materialize_pipeline_silver_harness_fallback(
+        fallback_count = await _materialize_pipeline_silver_harness_fallback(
             data_dir,
             pipeline_name,
             expected_min=expected_min,
@@ -376,7 +376,7 @@ async def test_vacuum_runs_after_successful_pipeline(e2e_data_dir: Path):
     await _run_pipeline_or_skip_policy_envelope(ctx, data_dir=e2e_data_dir)
 
     # Verify Silver table exists
-    _assert_chembl_activity_silver_or_skip(e2e_data_dir, expected_min=1)
+    await _assert_chembl_activity_silver_or_skip(e2e_data_dir, expected_min=1)
 
     # Check Delta table has proper metadata (VACUUM ran)
     table_path = _resolve_silver_table_path(e2e_data_dir, "chembl_activity")
@@ -407,7 +407,7 @@ async def test_vacuum_respects_retention_days(
     await _run_pipeline_or_skip_policy_envelope(ctx, data_dir=e2e_data_dir)
 
     # Verify table has records
-    count = _assert_chembl_activity_silver_or_skip(
+    count = await _assert_chembl_activity_silver_or_skip(
         e2e_data_dir,
         expected_min=1,
     )
@@ -490,7 +490,7 @@ async def test_chembl_and_uniprot_sequential_run(e2e_data_dir: Path):
     chembl_ctx = _create_advanced_harness_context("chembl_target", limit=3)
     await _run_pipeline_or_skip_policy_envelope(chembl_ctx, data_dir=e2e_data_dir)
 
-    chembl_count = _assert_pipeline_silver_or_skip(
+    chembl_count = await _assert_pipeline_silver_or_skip(
         e2e_data_dir,
         "chembl_target",
         expected_min=1,
@@ -500,7 +500,7 @@ async def test_chembl_and_uniprot_sequential_run(e2e_data_dir: Path):
     uniprot_ctx = _create_advanced_harness_context("uniprot_protein", limit=3)
     await _run_pipeline_or_skip_policy_envelope(uniprot_ctx, data_dir=e2e_data_dir)
 
-    uniprot_count = _assert_pipeline_silver_or_skip(
+    uniprot_count = await _assert_pipeline_silver_or_skip(
         e2e_data_dir,
         "uniprot_protein",
         expected_min=1,
@@ -511,8 +511,8 @@ async def test_chembl_and_uniprot_sequential_run(e2e_data_dir: Path):
     assert uniprot_count >= 1, "UniProt should have records"
 
     # Verify they're in different tables
-    chembl_records = get_silver_records(e2e_data_dir, "chembl_target")
-    uniprot_records = get_silver_records(e2e_data_dir, "uniprot_protein")
+    chembl_records = await get_silver_records(e2e_data_dir, "chembl_target")
+    uniprot_records = await get_silver_records(e2e_data_dir, "uniprot_protein")
 
     assert len(chembl_records) >= 1
     assert len(uniprot_records) >= 1
@@ -538,12 +538,12 @@ async def test_multiple_chembl_entities_parallel_safe(e2e_data_dir: Path):
     # Verify all tables exist with data
     for pipeline_name in pipelines:
         if pipeline_name == "chembl_activity":
-            count = _assert_chembl_activity_silver_or_skip(
+            count = await _assert_chembl_activity_silver_or_skip(
                 e2e_data_dir,
                 expected_min=1,
             )
         else:
-            count = _assert_pipeline_silver_or_skip(
+            count = await _assert_pipeline_silver_or_skip(
                 e2e_data_dir,
                 pipeline_name,
                 expected_min=1,
@@ -611,7 +611,7 @@ async def test_failed_run_preserves_partial_data(
     await _run_pipeline_or_skip_policy_envelope(ctx2, data_dir=e2e_data_dir)
 
     # Data should be preserved/incremented
-    final_count = _assert_chembl_activity_silver_or_skip(
+    final_count = await _assert_chembl_activity_silver_or_skip(
         e2e_data_dir,
         expected_min=initial_count,
     )
@@ -647,7 +647,7 @@ async def test_rebuild_clears_existing_data(
     await _run_pipeline_or_skip_policy_envelope(ctx2, data_dir=e2e_data_dir)
 
     # After rebuild, count should be from the new run only
-    rebuild_count = _assert_chembl_activity_silver_or_skip(
+    rebuild_count = await _assert_chembl_activity_silver_or_skip(
         e2e_data_dir,
         expected_min=1,
     )
@@ -680,7 +680,7 @@ async def test_backfill_clears_silver_only(
     await _run_pipeline_or_skip_policy_envelope(ctx2, data_dir=e2e_data_dir)
 
     # Silver should be recreated from the bounded backfill run, not accumulated.
-    backfill_count = _assert_chembl_activity_silver_or_skip(
+    backfill_count = await _assert_chembl_activity_silver_or_skip(
         e2e_data_dir,
         expected_min=1,
     )

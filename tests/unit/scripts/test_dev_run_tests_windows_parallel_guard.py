@@ -17,7 +17,7 @@ def test_default_parallel_workers_are_capped_on_windows(
     monkeypatch.delenv("BIOETL_PYTEST_PARALLEL_WORKERS", raising=False)
     monkeypatch.delenv("BIOETL_PYTEST_WINDOWS_XDIST_WORKERS", raising=False)
 
-    assert run_tests._default_parallel_workers() == "2"
+    assert run_tests._default_parallel_workers() == "1"
 
 
 def test_default_parallel_workers_respect_explicit_override(
@@ -68,7 +68,7 @@ def test_changed_fallback_uses_windows_worker_cap(
         "-m",
         "not slow and not serial",
         "-n",
-        "2",
+        "1",
         "--dist",
         "loadscope",
         "-q",

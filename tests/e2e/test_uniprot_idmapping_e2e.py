@@ -43,12 +43,12 @@ async def test_uniprot_idmapping_full_cycle_normalizes_mapping_gate_fields(
     bronze_files = assert_bronze_files_exist(e2e_data_dir, "uniprot", "idmapping")
     assert len(bronze_files) >= 1
 
-    silver_count = assert_silver_table_has_records(
+    silver_count = await assert_silver_table_has_records(
         e2e_data_dir, "uniprot_idmapping", expected_min=1
     )
     assert silver_count >= 1
 
-    records = get_silver_records(e2e_data_dir, "uniprot_idmapping")
+    records = await get_silver_records(e2e_data_dir, "uniprot_idmapping")
     matched = [record for record in records if record.get("target_id") == "CHEMBL204"]
     assert matched, "Expected CHEMBL204 row in uniprot_idmapping Silver output"
 

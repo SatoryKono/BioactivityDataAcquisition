@@ -539,7 +539,7 @@ async def test_pipeline_matrix_smoke(
         )
         assert len(bronze_files) >= 1
         if not silver_validation_skipped:
-            assert_silver_table_has_records(
+            await assert_silver_table_has_records(
                 e2e_data_dir, pipeline_case.pipeline_name, 1
             )
     except (AssertionError, DeltaError, TableNotFoundError) as exc:

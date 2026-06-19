@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-18T18:05:17.948685+00:00",
+  "generated_at": "2026-06-19T09:50:16.098166+00:00",
   "summary": {
     "total_scripts": 437,
     "status_counts": {
@@ -4631,7 +4631,7 @@
       "reference_count": 1,
       "references": [
         {
-          "path": "tests/architecture/test_root_script_compatibility_surfaces.py",
+          "path": "tests/architecture/test_root_script_wrapper_surfaces.py",
           "line": 15,
           "source_group": "tests",
           "text": "\"scripts/docker-setup.ps1\","
@@ -4646,7 +4646,7 @@
       "reference_count": 1,
       "references": [
         {
-          "path": "tests/architecture/test_root_script_compatibility_surfaces.py",
+          "path": "tests/architecture/test_root_script_wrapper_surfaces.py",
           "line": 16,
           "source_group": "tests",
           "text": "\"scripts/docker-setup.sh\","
@@ -5972,7 +5972,7 @@
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"_compatibility_registry.py\","
         },
         {
-          "path": "tests/architecture/test_compatibility_telemetry_reporting.py",
+          "path": "tests/architecture/test_curated_surface_telemetry_reporting.py",
           "line": 35,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"_compatibility_registry.py\","
@@ -5993,7 +5993,7 @@
           "text": "| `scripts/engineering/ci/_compatibility_telemetry.py`      | Compatibility inventory telemetry helper used by architecture reporting flows |"
         },
         {
-          "path": "tests/architecture/test_compatibility_telemetry_reporting.py",
+          "path": "tests/architecture/test_curated_surface_telemetry_reporting.py",
           "line": 28,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"_compatibility_telemetry.py\","
@@ -13129,13 +13129,13 @@
       "reference_count": 2,
       "references": [
         {
-          "path": "tests/architecture/test_root_script_compatibility_surfaces.py",
+          "path": "tests/architecture/test_root_script_wrapper_surfaces.py",
           "line": 19,
           "source_group": "tests",
           "text": "\"scripts/shutdown.ps1\","
         },
         {
-          "path": "tests/architecture/test_root_script_compatibility_surfaces.py",
+          "path": "tests/architecture/test_root_script_wrapper_surfaces.py",
           "line": 31,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"shutdown.ps1\","
@@ -13150,13 +13150,13 @@
       "reference_count": 2,
       "references": [
         {
-          "path": "tests/architecture/test_root_script_compatibility_surfaces.py",
+          "path": "tests/architecture/test_root_script_wrapper_surfaces.py",
           "line": 20,
           "source_group": "tests",
           "text": "\"scripts/shutdown.sh\","
         },
         {
-          "path": "tests/architecture/test_root_script_compatibility_surfaces.py",
+          "path": "tests/architecture/test_root_script_wrapper_surfaces.py",
           "line": 32,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"shutdown.sh\","
@@ -13171,13 +13171,13 @@
       "reference_count": 2,
       "references": [
         {
-          "path": "tests/architecture/test_root_script_compatibility_surfaces.py",
+          "path": "tests/architecture/test_root_script_wrapper_surfaces.py",
           "line": 17,
           "source_group": "tests",
           "text": "\"scripts/startup.ps1\","
         },
         {
-          "path": "tests/architecture/test_root_script_compatibility_surfaces.py",
+          "path": "tests/architecture/test_root_script_wrapper_surfaces.py",
           "line": 29,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"startup.ps1\","
@@ -13192,13 +13192,13 @@
       "reference_count": 2,
       "references": [
         {
-          "path": "tests/architecture/test_root_script_compatibility_surfaces.py",
+          "path": "tests/architecture/test_root_script_wrapper_surfaces.py",
           "line": 18,
           "source_group": "tests",
           "text": "\"scripts/startup.sh\","
         },
         {
-          "path": "tests/architecture/test_root_script_compatibility_surfaces.py",
+          "path": "tests/architecture/test_root_script_wrapper_surfaces.py",
           "line": 30,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"startup.sh\","

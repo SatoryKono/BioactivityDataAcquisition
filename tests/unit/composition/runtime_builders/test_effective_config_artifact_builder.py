@@ -317,6 +317,82 @@ def test_runtime_overrides_snapshot_materializes_silver_filter_compatibility() -
     )
 
 
+def test_effective_config_identity_ignores_machine_local_runtime_paths(
+    tmp_path: Path,
+) -> None:
+    """Semantic identity must not drift across replay-equivalent local roots."""
+    service = create_effective_config_service()
+    left_settings = Settings(
+        env="prod",
+        data_dir=tmp_path / "left-runtime-data",
+        debug=True,
+    )
+    right_settings = Settings(
+        env="prod",
+        data_dir=tmp_path / "right-runtime-data",
+        debug=True,
+    )
+    left_context = PipelineRunContext(
+        pipeline_name="chembl_activity",
+        run_id=deterministic_run_uuid_from_callsite(
+            "test_effective_config_artifact_builder"
+        ),
+        run_type=RunType.INCREMENTAL,
+        exact_replay=True,
+        cached_bronze=CachedBronzeContext.from_options(
+            path=str(tmp_path / "left-cached-bronze"),
+            date="2026-03-25",
+        ),
+    )
+    right_context = PipelineRunContext(
+        pipeline_name="chembl_activity",
+        run_id=deterministic_run_uuid_from_callsite(
+            "test_effective_config_artifact_builder"
+        ),
+        run_type=RunType.INCREMENTAL,
+        exact_replay=True,
+        cached_bronze=CachedBronzeContext.from_options(
+            path=str(tmp_path / "right-cached-bronze"),
+            date="2026-03-25",
+        ),
+    )
+
+    left_overrides = _build_runtime_overrides_snapshot(left_context, left_settings)
+    right_overrides = _build_runtime_overrides_snapshot(right_context, right_settings)
+    assert (
+        left_overrides["runtime"]["settings_snapshot"]["settings"]["data_dir"]
+        != right_overrides["runtime"]["settings_snapshot"]["settings"]["data_dir"]
+    )
+    assert (
+        left_overrides["runtime"]["cached_bronze"]["bronze_path"]
+        != right_overrides["runtime"]["cached_bronze"]["bronze_path"]
+    )
+
+    artifact_left = service.create_effective_config_artifact(
+        pipeline_name="chembl_activity",
+        pipeline_kind="standard",
+        resolved_config={"pipeline": {"name": "chembl_activity"}},
+        runtime_overrides=left_overrides,
+        source_refs=[],
+        required_persistence_profile="replay_ready",
+    )
+    artifact_right = service.create_effective_config_artifact(
+        pipeline_name="chembl_activity",
+        pipeline_kind="standard",
+        resolved_config={"pipeline": {"name": "chembl_activity"}},
+        runtime_overrides=right_overrides,
+        source_refs=[],
+        required_persistence_profile="replay_ready",
+    )
+
+    assert artifact_left.artifact_id == artifact_right.artifact_id
+    assert artifact_left.effective_config_hash == artifact_right.effective_config_hash
+    assert (
+        artifact_left.execution_environment.environment_hash
+        == artifact_right.execution_environment.environment_hash
+    )
+
+
 def test_build_effective_config_source_refs_is_stable_across_equivalent_calls(
     tmp_path: Path,
 ) -> None:

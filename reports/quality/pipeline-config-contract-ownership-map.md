@@ -1,6 +1,6 @@
 # Pipeline Config Contract Ownership Map
 
-- snapshot_date: 2026-06-18
+- snapshot_date: 2026-06-19
 - row_count: 27
 
 | pipeline_name | contract_ref | config_path | registry_status | contract_config_path | published_artifact_path | gold_schema_title | pipeline_code_owner | gold_enabled | coverage_status |

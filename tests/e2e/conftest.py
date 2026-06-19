@@ -128,10 +128,26 @@ def _load_delta_record_reader() -> Callable[[Any, list[str] | None], list[dict[s
     return read_delta_records
 
 
-def _read_delta_records(table_path: Path) -> list[dict[str, Any]]:
-    """Read active Delta rows via the shared Delta scanner helper."""
-    dt = _load_delta_table()(str(table_path))
-    return _load_delta_record_reader()(dt)
+async def _read_delta_records(table_path: Path) -> list[dict[str, Any]]:
+    """Read active Delta rows via the shared Delta scanner helper with timeout protection."""
+    loop = asyncio.get_running_loop()
+    
+    # Use a shorter timeout for delta reads to prevent indefinite hangs
+    # The default E2E timeout (120s) is for the whole test, but individual reads should be faster
+    DELTA_READ_TIMEOUT = 30
+    try:
+        return await asyncio.wait_for(
+            loop.run_in_executor(
+                None,
+                lambda: _load_delta_record_reader()(_load_delta_table()(str(table_path)))
+            ),
+            timeout=DELTA_READ_TIMEOUT
+        )
+    except asyncio.TimeoutError:
+        raise TimeoutError(
+            f"Delta table read timed out after {DELTA_READ_TIMEOUT}s at {table_path}. "
+            "This may indicate a corrupted Delta table or PyArrow scanner issue."
+        )
 
 
 def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
@@ -1267,7 +1283,7 @@ def _resolve_silver_table_path(data_dir: Path, table_name: str) -> Path:
     )
 
 
-def assert_silver_table_has_records(
+async def assert_silver_table_has_records(
     data_dir: Path, table_name: str, expected_min: int = 1
 ) -> int:
     """Проверка наличия записей в Silver Delta таблице.
@@ -1291,7 +1307,7 @@ def assert_silver_table_has_records(
     """
     table_path = _resolve_silver_table_path(data_dir, table_name)
 
-    count = len(_read_delta_records(table_path))
+    count = len(await _read_delta_records(table_path))
 
     if count < expected_min:
         raise AssertionError(
@@ -1301,7 +1317,7 @@ def assert_silver_table_has_records(
     return count
 
 
-def assert_gold_table_has_records(
+async def assert_gold_table_has_records(
     data_dir: Path, table_name: str, expected_min: int = 1
 ) -> int:
     """Проверка наличия записей в Gold Delta таблице.
@@ -1345,7 +1361,7 @@ def assert_gold_table_has_records(
             f"flat={', '.join(str(base) for base in gold_bases)}"
         )
 
-    count = len(_read_delta_records(table_path))
+    count = len(await _read_delta_records(table_path))
 
     if count < expected_min:
         raise AssertionError(
@@ -1355,7 +1371,7 @@ def assert_gold_table_has_records(
     return count
 
 
-def get_silver_records(data_dir: Path, table_name: str) -> list[dict]:
+async def get_silver_records(data_dir: Path, table_name: str) -> list[dict]:
     """Получить все записи из Silver таблицы.
 
     Args:
@@ -1370,7 +1386,7 @@ def get_silver_records(data_dir: Path, table_name: str) -> list[dict]:
     """
     table_path = _resolve_silver_table_path(data_dir, table_name)
 
-    records = _read_delta_records(table_path)
+    records = await _read_delta_records(table_path)
 
     # Validate that records are dictionaries
     for i, record in enumerate(records):
@@ -1383,7 +1399,7 @@ def get_silver_records(data_dir: Path, table_name: str) -> list[dict]:
     return records
 
 
-def get_gold_records(data_dir: Path, table_name: str) -> list[dict]:
+async def get_gold_records(data_dir: Path, table_name: str) -> list[dict]:
     """Получить все записи из Gold таблицы.
 
     Args:
@@ -1405,7 +1421,7 @@ def get_gold_records(data_dir: Path, table_name: str) -> list[dict]:
         if flat_path.exists() and (flat_path / "_delta_log").exists():
             table_path = flat_path
 
-    records = _read_delta_records(table_path)
+    records = await _read_delta_records(table_path)
 
     # Validate that records are dictionaries
     for i, record in enumerate(records):

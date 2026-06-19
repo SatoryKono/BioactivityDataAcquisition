@@ -170,8 +170,7 @@ class ConflictResolverService:
                     seed_pipeline,
                 )
             case ConflictResolution.LATEST_TIMESTAMP:
-                # Timestamp coalescing is not implemented yet; fallback to seed-priority.
-                return lambda: self._coalesce_policy.coalesce_prefer_seed(
+                return lambda: self._coalesce_policy.coalesce_prefer_latest_timestamp(
                     df,
                     enrichers,
                     seed_pipeline,

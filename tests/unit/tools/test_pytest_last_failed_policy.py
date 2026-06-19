@@ -161,7 +161,7 @@ def test_windows_xdist_policy_caps_auto_workers(
 
     root_conftest._configure_windows_xdist(config)
 
-    assert config.option.numprocesses == 2
+    assert config.option.numprocesses == 1
 
 
 def test_windows_xdist_policy_caps_explicit_worker_count(
@@ -173,7 +173,7 @@ def test_windows_xdist_policy_caps_explicit_worker_count(
 
     root_conftest._configure_windows_xdist(config)
 
-    assert config.option.numprocesses == 2
+    assert config.option.numprocesses == 1
 
 
 def test_windows_xdist_policy_respects_env_override(

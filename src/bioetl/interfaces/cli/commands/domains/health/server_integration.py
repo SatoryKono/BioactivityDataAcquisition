@@ -26,11 +26,8 @@ from bioetl.interfaces.cli.exit_codes import ExitCode
 
 if TYPE_CHECKING:
     from bioetl.application.services.quarantine_service import QuarantineService
-    from bioetl.composition.health_api import (
-        HealthServerDependenciesProtocol,
-        QuarantineRuntimeServiceProtocol,
-        RuntimeSettingsProtocol,
-    )
+    from bioetl.composition._resource_management import QuarantineRuntimeServiceProtocol
+    from bioetl.composition._service_protocols import HealthServerDependenciesProtocol
     from bioetl.domain.ports import LoggerPort
     from bioetl.interfaces.http.health_server import HealthServer
 
@@ -44,14 +41,14 @@ _HEALTH_SERVER_INTERRUPTED_MESSAGE = "Health server interrupted by user (Ctrl+C)
 
 def get_health_server_dependencies() -> HealthServerDependenciesProtocol:
     """Load health-listener dependencies from the canonical composition seam."""
-    from bioetl.composition.health_api import get_health_server_dependencies as _impl
+    from bioetl.composition._services import get_health_server_dependencies as _impl
 
     return _impl()
 
 
 def get_health_server_quarantine_service() -> QuarantineService:
     """Load read-only quarantine service for health listener endpoints."""
-    from bioetl.composition.health_api import get_quarantine_service as _impl
+    from bioetl.composition._services import get_quarantine_service as _impl
 
     return _impl()
 
@@ -60,16 +57,18 @@ def get_quarantine_runtime_service(
     pipeline: str,
 ) -> QuarantineRuntimeServiceProtocol:
     """Load one pipeline-scoped quarantine runtime service from composition."""
-    from bioetl.composition.health_api import get_quarantine_runtime_service as _impl
+    from bioetl.composition._resource_management import (
+        get_quarantine_runtime_service as _impl,
+    )
 
     return cast("QuarantineRuntimeServiceProtocol", _impl(pipeline))
 
 
-def get_runtime_settings() -> RuntimeSettingsProtocol:
+def get_runtime_settings() -> object:
     """Load runtime settings through the composition boundary."""
-    from bioetl.composition.health_api import get_runtime_settings as _impl
+    from bioetl.composition.runtime_builders.config_access import get_settings as _impl
 
-    return cast("RuntimeSettingsProtocol", _impl())
+    return _impl()
 
 
 def _start_metrics_server_via_interface(

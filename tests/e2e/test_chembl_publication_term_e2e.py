@@ -179,7 +179,7 @@ def _extract_publication_term_rows(
     return rows
 
 
-def _materialize_publication_term_silver_harness_fallback(
+async def _materialize_publication_term_silver_harness_fallback(
     data_dir: Path,
     *,
     expected_min: int = 1,
@@ -214,36 +214,36 @@ def _materialize_publication_term_silver_harness_fallback(
         pa.Table.from_pylist(silver_rows),
         mode="overwrite",
     )
-    return assert_silver_table_has_records(
+    return await assert_silver_table_has_records(
         data_dir,
         "chembl_publication_term",
         expected_min=expected_min,
     )
 
 
-def _get_publication_term_records_or_skip(
+async def _get_publication_term_records_or_skip(
     data_dir: Path,
     *,
     expected_min: int = 1,
 ) -> list[dict[str, object]]:
     try:
-        assert_silver_table_has_records(
+        await assert_silver_table_has_records(
             data_dir,
             "chembl_publication_term",
             expected_min=expected_min,
         )
-        return get_silver_records(data_dir, "chembl_publication_term")
+        return await get_silver_records(data_dir, "chembl_publication_term")
     except AssertionError as exc:
         detail = exc
     except SILVER_READ_SKIP_ERRORS as exc:
         detail = exc
 
-    fallback_count = _materialize_publication_term_silver_harness_fallback(
+    fallback_count = await _materialize_publication_term_silver_harness_fallback(
         data_dir,
         expected_min=expected_min,
     )
     if fallback_count >= expected_min:
-        return get_silver_records(data_dir, "chembl_publication_term")
+        return await get_silver_records(data_dir, "chembl_publication_term")
     pytest.skip(
         "No Silver publication_term table for cassette sample, and Bronze fallback could not recover it: "
         f"{detail}"
@@ -280,7 +280,7 @@ async def test_chembl_publication_term_full_cycle(e2e_data_dir: Path):
     assert len(bronze_files) >= 1
 
     # Assert - Silver layer and schema validation
-    records = _get_publication_term_records_or_skip(
+    records = await _get_publication_term_records_or_skip(
         e2e_data_dir,
         expected_min=1,
     )
@@ -313,7 +313,7 @@ async def test_chembl_publication_term_types(e2e_data_dir: Path):
     await runner.run()
 
     # Assert - Check term types
-    records = _get_publication_term_records_or_skip(
+    records = await _get_publication_term_records_or_skip(
         e2e_data_dir,
         expected_min=1,
     )
@@ -347,7 +347,7 @@ async def test_chembl_publication_term_mesh_fields(e2e_data_dir: Path):
     await runner.run()
 
     # Assert - Check MeSH fields presence
-    records = _get_publication_term_records_or_skip(
+    records = await _get_publication_term_records_or_skip(
         e2e_data_dir,
         expected_min=1,
     )

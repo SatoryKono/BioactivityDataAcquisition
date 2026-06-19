@@ -282,7 +282,7 @@ def test_resolve_conflicts_dispatches_explicit_rules(
 
 
 @pytest.mark.unit
-def test_resolve_conflicts_latest_timestamp_falls_back_to_seed_priority(
+def test_resolve_conflicts_dispatches_latest_timestamp_policy(
     logger: MagicMock, coalesce_policy: MagicMock
 ) -> None:
     service = _build_service(
@@ -292,13 +292,13 @@ def test_resolve_conflicts_latest_timestamp_falls_back_to_seed_priority(
     )
     df = pl.DataFrame({"title": ["x"]})
     enrichers = _build_enrichers()
-    expected = pl.DataFrame({"title": ["seed-fallback"]})
-    coalesce_policy.coalesce_prefer_seed.return_value = expected
+    expected = pl.DataFrame({"title": ["latest"]})
+    coalesce_policy.coalesce_prefer_latest_timestamp.return_value = expected
 
     result = service.resolve_conflicts(df, {}, enrichers, "chembl_publication")
 
     assert result is expected
-    coalesce_policy.coalesce_prefer_seed.assert_called_once_with(
+    coalesce_policy.coalesce_prefer_latest_timestamp.assert_called_once_with(
         df,
         enrichers,
         "chembl_publication",

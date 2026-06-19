@@ -77,14 +77,14 @@ async def test_semanticscholar_publication_full_cycle(
     )
     assert len(bronze_files) >= 1
 
-    silver_count = assert_silver_table_has_records(
+    silver_count = await assert_silver_table_has_records(
         e2e_data_dir,
         "semanticscholar_publication",
         expected_min=1,
     )
     assert silver_count <= 10
 
-    records = get_silver_records(e2e_data_dir, "semanticscholar_publication")
+    records = await get_silver_records(e2e_data_dir, "semanticscholar_publication")
     for record in records:
         doi = record.get("publication_doi") or record.get("doi")
         assert doi is not None, "Semantic Scholar records must have a DOI"
@@ -109,7 +109,7 @@ async def test_semanticscholar_publication_metadata_fields(
 
     await run_pipeline_or_skip_transient(ctx)
 
-    records = get_silver_records(e2e_data_dir, "semanticscholar_publication")
+    records = await get_silver_records(e2e_data_dir, "semanticscholar_publication")
     assert len(records) >= 1, "Should have at least one S2 record"
 
     metadata_fields = ["title", "publication_year"]
@@ -135,7 +135,7 @@ async def test_semanticscholar_publication_citation_fields(
 
     await run_pipeline_or_skip_transient(ctx)
 
-    records = get_silver_records(e2e_data_dir, "semanticscholar_publication")
+    records = await get_silver_records(e2e_data_dir, "semanticscholar_publication")
     for record in records:
         citations = record.get("citations_received")
         if citations is not None:

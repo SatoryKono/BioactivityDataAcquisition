@@ -155,6 +155,7 @@ def handle_circuit_breaker_trip(
     url: str,
     span: SpanLike,
     provider: str,
+    run_id: str,
     logger: LoggerPort | None,
 ) -> None:
     """Record circuit-breaker open state without altering propagation semantics."""
@@ -165,5 +166,6 @@ def handle_circuit_breaker_trip(
             url=url,
             method=method,
             provider=provider,
+            run_id=run_id,
             retry_after=exc.retry_after,
         )

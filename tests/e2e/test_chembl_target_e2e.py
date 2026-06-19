@@ -47,7 +47,7 @@ async def test_chembl_target_full_cycle(e2e_data_dir: Path):
     assert len(bronze_files) >= 1
 
     # Assert - Silver layer
-    silver_count = assert_silver_table_has_records(
+    silver_count = await assert_silver_table_has_records(
         e2e_data_dir, "chembl_target", expected_min=1
     )
     assert silver_count <= 5
@@ -72,7 +72,7 @@ async def test_chembl_target_full_cycle(e2e_data_dir: Path):
     )
 
     # Assert - Schema validation
-    records = get_silver_records(e2e_data_dir, "chembl_target")
+    records = await get_silver_records(e2e_data_dir, "chembl_target")
     required_fields = ["target_id", "pref_name", "target_type"]
     for record in records:
         for field in required_fields:
@@ -99,7 +99,7 @@ async def test_chembl_target_cross_references(e2e_data_dir: Path):
     await runner.run()
 
     # Assert - Get records and check cross_references
-    records = get_silver_records(e2e_data_dir, "chembl_target")
+    records = await get_silver_records(e2e_data_dir, "chembl_target")
 
     # At least some targets should have cross_references
     targets_with_xrefs = [
@@ -128,7 +128,7 @@ async def test_chembl_target_projects_derived_synonym_fields(e2e_data_dir: Path)
     runner = bootstrap_pipeline_runner(ctx)
     await runner.run()
 
-    records = get_silver_records(e2e_data_dir, "chembl_target")
+    records = await get_silver_records(e2e_data_dir, "chembl_target")
     projected_records = [
         record
         for record in records

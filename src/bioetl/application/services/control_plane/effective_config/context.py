@@ -15,6 +15,7 @@ from bioetl.application.services.control_plane.effective_config.support import (
     build_semantic_identity_payload,
     compute_source_fingerprint,
     extract_contract_refs,
+    normalize_runtime_overrides_for_semantic_identity,
     resolve_resolution_policy,
 )
 from bioetl.domain.config.dq import DQConfig
@@ -48,13 +49,19 @@ def build_effective_config_context(
         resolved_config=resolved_config,
     )
     overrides_snapshot = build_runtime_override_snapshot(runtime_overrides)
+    semantic_runtime_overrides = normalize_runtime_overrides_for_semantic_identity(
+        runtime_overrides
+    )
+    semantic_overrides_snapshot = build_runtime_override_snapshot(
+        semantic_runtime_overrides
+    )
     execution_environment = build_execution_environment_snapshot(
-        runtime_overrides,
+        semantic_runtime_overrides,
         required_persistence_profile=required_persistence_profile,
     )
     effective_snapshot = build_effective_execution_config(
         resolved_config=resolved_config,
-        runtime_overrides=runtime_overrides,
+        runtime_overrides=semantic_runtime_overrides,
     )
     dq_policy_refs, dq_policy_snapshots, dq_rule_bundle_versions = build_dq_components(
         dq_config
@@ -82,7 +89,7 @@ def build_effective_config_context(
             source_class_provenance=source_class_provenance,
             resolution_policy=resolved_policy,
             resolved_config=resolved_snapshot,
-            runtime_overrides=overrides_snapshot,
+            runtime_overrides=semantic_overrides_snapshot,
             execution_environment=execution_environment,
             effective_execution_config=effective_snapshot,
             resolved_config_hash=resolved_snapshot.config_hash,

@@ -109,7 +109,7 @@ def _default_parallel_workers() -> str:
     if explicit:
         return explicit
     if os.name == "nt":
-        return os.getenv("BIOETL_PYTEST_WINDOWS_XDIST_WORKERS", "2")
+        return os.getenv("BIOETL_PYTEST_WINDOWS_XDIST_WORKERS", "1")
     return "auto"
 
 

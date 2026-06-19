@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 
 import pytest
@@ -41,7 +42,7 @@ def test_read_delta_records_uses_shared_delta_reader(
         _fake_load_delta_record_reader,
     )
 
-    result = e2e_conftest._read_delta_records(tmp_path / "silver" / "chembl_activity")
+    result = asyncio.run(e2e_conftest._read_delta_records(tmp_path / "silver" / "chembl_activity"))
 
     assert result == expected
     assert observed == {

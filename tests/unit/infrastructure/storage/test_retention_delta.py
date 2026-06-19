@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import pyarrow as pa
 import pytest
 
 from bioetl.domain.exceptions import TableNotFoundError
@@ -19,8 +20,8 @@ class _FakeDeltaTable:
 
     def schema(self) -> object:
         class _Schema:
-            def to_arrow(self) -> str:
-                return "arrow-schema"
+            def to_arrow(self) -> pa.Schema:
+                return pa.schema([("id", pa.string())])
 
         return _Schema()
 
@@ -40,7 +41,7 @@ def test_retention_delta_helpers_build_paths_and_table_info(monkeypatch) -> None
     assert retention_delta.build_table_info(table) == {
         "version": 7,
         "num_files": 2,
-        "schema": "arrow-schema",
+        "schema": pa.schema([("id", pa.string())]),
         "metadata": {"name": "chembl.activity"},
     }
 
