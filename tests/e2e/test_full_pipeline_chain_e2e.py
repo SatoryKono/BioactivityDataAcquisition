@@ -59,7 +59,7 @@ async def test_chembl_target_then_activity_chain(e2e_data_dir: Path):
     target_runner = bootstrap_pipeline_runner(target_ctx)
     await target_runner.run()
 
-    target_count = assert_silver_table_has_records(
+    target_count = await assert_silver_table_has_records(
         e2e_data_dir, "chembl_target", expected_min=1
     )
 
@@ -68,7 +68,7 @@ async def test_chembl_target_then_activity_chain(e2e_data_dir: Path):
     activity_runner = bootstrap_pipeline_runner(activity_ctx)
     await activity_runner.run()
 
-    activity_count = assert_silver_table_has_records(
+    activity_count = await assert_silver_table_has_records(
         e2e_data_dir, "chembl_activity", expected_min=1
     )
 
@@ -90,7 +90,7 @@ async def test_chembl_molecule_then_activity_chain(e2e_data_dir: Path):
     molecule_runner = bootstrap_pipeline_runner(molecule_ctx)
     await molecule_runner.run()
 
-    molecule_count = assert_silver_table_has_records(
+    molecule_count = await assert_silver_table_has_records(
         e2e_data_dir, "chembl_molecule", expected_min=1
     )
 
@@ -99,7 +99,7 @@ async def test_chembl_molecule_then_activity_chain(e2e_data_dir: Path):
     activity_runner = bootstrap_pipeline_runner(activity_ctx)
     await activity_runner.run()
 
-    activity_count = assert_silver_table_has_records(
+    activity_count = await assert_silver_table_has_records(
         e2e_data_dir, "chembl_activity", expected_min=1
     )
 
@@ -137,7 +137,7 @@ async def test_all_chembl_pipelines_chain(e2e_data_dir: Path):
         runner = bootstrap_pipeline_runner(ctx)
         await runner.run()
 
-        count = assert_silver_table_has_records(
+        count = await assert_silver_table_has_records(
             e2e_data_dir, table_name, expected_min=1
         )
         results[pipeline_name] = count
@@ -160,7 +160,7 @@ async def test_parallel_independent_pipelines(e2e_data_dir: Path):
     uniprot_runner = bootstrap_pipeline_runner(uniprot_ctx)
     await uniprot_runner.run()
 
-    uniprot_count = assert_silver_table_has_records(
+    uniprot_count = await assert_silver_table_has_records(
         e2e_data_dir, "uniprot_protein", expected_min=1
     )
 
@@ -188,15 +188,17 @@ async def test_pipeline_isolation(e2e_data_dir: Path):
 
     # Some cassette snapshots contain only bronze-valid molecule payloads.
     # In that case Silver table may be absent; skip isolation assertions explicitly.
-    assert_silver_table_has_records(e2e_data_dir, "chembl_target", expected_min=1)
+    await assert_silver_table_has_records(e2e_data_dir, "chembl_target", expected_min=1)
     try:
-        assert_silver_table_has_records(e2e_data_dir, "chembl_molecule", expected_min=1)
+        await assert_silver_table_has_records(
+            e2e_data_dir, "chembl_molecule", expected_min=1
+        )
     except (AssertionError, DeltaError, TableNotFoundError) as exc:
         pytest.skip(f"No Silver molecule records in cassette sample: {exc}")
 
     # Get records from both tables
-    target_records = get_silver_records(e2e_data_dir, "chembl_target")
-    molecule_records = get_silver_records(e2e_data_dir, "chembl_molecule")
+    target_records = await get_silver_records(e2e_data_dir, "chembl_target")
+    molecule_records = await get_silver_records(e2e_data_dir, "chembl_molecule")
 
     # Verify data isolation - targets should have target_id
     for record in target_records:
@@ -224,10 +226,10 @@ async def test_rerun_same_pipeline_twice(e2e_data_dir: Path):
     runner1 = bootstrap_pipeline_runner(ctx1)
     await runner1.run()
 
-    first_count = assert_silver_table_has_records(
+    first_count = await assert_silver_table_has_records(
         e2e_data_dir, "chembl_target", expected_min=1
     )
-    first_records = get_silver_records(e2e_data_dir, "chembl_target")
+    first_records = await get_silver_records(e2e_data_dir, "chembl_target")
     first_identity = sorted(
         (str(record["target_id"]), str(record["content_hash"]))
         for record in first_records
@@ -238,10 +240,10 @@ async def test_rerun_same_pipeline_twice(e2e_data_dir: Path):
     runner2 = bootstrap_pipeline_runner(ctx2)
     await runner2.run()
 
-    second_count = assert_silver_table_has_records(
+    second_count = await assert_silver_table_has_records(
         e2e_data_dir, "chembl_target", expected_min=1
     )
-    second_records = get_silver_records(e2e_data_dir, "chembl_target")
+    second_records = await get_silver_records(e2e_data_dir, "chembl_target")
     second_identity = sorted(
         (str(record["target_id"]), str(record["content_hash"]))
         for record in second_records

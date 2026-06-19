@@ -47,13 +47,13 @@ async def test_chembl_assay_full_cycle(e2e_data_dir: Path):
     assert len(bronze_files) >= 1
 
     # Assert - Silver layer
-    silver_count = assert_silver_table_has_records(
+    silver_count = await assert_silver_table_has_records(
         e2e_data_dir, "chembl_assay", expected_min=1
     )
     assert silver_count <= 5
 
     # Assert - Schema validation
-    records = get_silver_records(e2e_data_dir, "chembl_assay")
+    records = await get_silver_records(e2e_data_dir, "chembl_assay")
     required_fields = ["assay_id", "assay_type"]
     for record in records:
         for field in required_fields:
@@ -78,7 +78,7 @@ async def test_chembl_assay_metadata_fields(e2e_data_dir: Path):
     await run_pipeline_or_skip_transient(ctx)
 
     # Assert - Check metadata fields
-    records = get_silver_records(e2e_data_dir, "chembl_assay")
+    records = await get_silver_records(e2e_data_dir, "chembl_assay")
 
     for record in records:
         # assay_id must always be present
@@ -103,7 +103,7 @@ async def test_chembl_assay_confidence_score(e2e_data_dir: Path):
     await run_pipeline_or_skip_transient(ctx)
 
     # Assert - Check confidence score range
-    records = get_silver_records(e2e_data_dir, "chembl_assay")
+    records = await get_silver_records(e2e_data_dir, "chembl_assay")
 
     for record in records:
         confidence = record.get("confidence_score")
