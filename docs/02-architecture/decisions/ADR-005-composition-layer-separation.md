@@ -50,6 +50,12 @@ src/bioetl/
 
 Composition Root has a unique privilege: it is the **only place** that knows about concrete infrastructure implementations and how to assemble them. The active import policy also forbids `composition -> interfaces`, so interface adapters consume composition-owned entrypoints; wiring does not reach back into adapters.
 
+Composition Root does **not** own business lifecycle publication or domain event
+construction. Runtime builders may assemble observers, ledgers, ports, adapters,
+and application services, but lifecycle event creation remains in domain
+aggregates/application use-case seams and is guarded by
+`tests/architecture/test_composition_runtime_boundary_policy.py`.
+
 ### 2. Import Matrix Preservation
 
 Current import rules (enforced by `import-linter`):

@@ -32,6 +32,9 @@ from scripts.engineering.qa import (  # noqa: E402
     report_adr_enforcement_matrix,
     report_architecture_debt_remote_main_baseline,
 )
+from scripts.engineering.qa.report_module_coverage_inventory import (  # noqa: E402
+    compute_source_tree_sha256,
+)
 
 DEFAULT_JSON_OUTPUT = (
     PROJECT_ROOT / "reports" / "quality" / "debt-governance-gates.json"
@@ -200,6 +203,27 @@ def _release_gate_status(status_counts: dict[str, int]) -> str:
     if status_counts["warn"] > 0:
         return "warning"
     return "passing"
+
+
+def _module_coverage_source_tree_hash_gate(
+    module_coverage: dict[str, Any],
+    *,
+    repo_root: Path,
+) -> Gate:
+    expected_hash = str(module_coverage.get("source_tree_sha256") or "")
+    current_hash = compute_source_tree_sha256(repo_root=repo_root)
+    is_current = bool(expected_hash) and expected_hash == current_hash
+    return Gate(
+        name="module_coverage_source_tree_hash_current",
+        status="pass" if is_current else "fail",
+        metric="source_tree_sha256",
+        current=current_hash,
+        limit=expected_hash or "missing",
+        source_artifact="reports/quality/module-coverage-inventory.json",
+        remediation=(
+            "Regenerate module coverage inventory before release gate closeout."
+        ),
+    )
 
 
 def _collect_changed_paths(
@@ -419,6 +443,11 @@ def build_payload(
 
     coverage_summary = module_coverage["summary"]
     status_counts = coverage_summary["status_counts"]
+    module_coverage_hash_gate = _module_coverage_source_tree_hash_gate(
+        module_coverage,
+        repo_root=repo_root,
+    )
+    gates.append(module_coverage_hash_gate)
     gates.append(
         _warn_limit_gate(
             name="module_coverage_unmeasured_modules",
@@ -694,6 +723,7 @@ def build_payload(
     )
 
     stale_artifacts = {
+        "module_coverage_inventory": module_coverage_hash_gate.status != "pass",
         "architecture_quality_scorecard": not _artifact_matches(
             repo_root=repo_root,
             rel_path="reports/quality/architecture-quality-scorecard.json",

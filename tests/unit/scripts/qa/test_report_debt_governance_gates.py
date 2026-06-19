@@ -59,6 +59,43 @@ def test_release_gate_status_prioritizes_failures_over_warnings() -> None:
     assert gates._release_gate_status({"pass": 26, "warn": 0, "fail": 0}) == "passing"
 
 
+def test_module_coverage_source_tree_hash_gate_fails_for_stale_inventory(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        gates,
+        "compute_source_tree_sha256",
+        lambda *, repo_root: "live-source-hash",
+    )
+
+    gate = gates._module_coverage_source_tree_hash_gate(
+        {"source_tree_sha256": "committed-source-hash"},
+        repo_root=gates.PROJECT_ROOT,
+    )
+
+    assert gate.name == "module_coverage_source_tree_hash_current"
+    assert gate.status == "fail"
+    assert gate.current == "live-source-hash"
+    assert gate.limit == "committed-source-hash"
+
+
+def test_module_coverage_source_tree_hash_gate_passes_for_current_inventory(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        gates,
+        "compute_source_tree_sha256",
+        lambda *, repo_root: "live-source-hash",
+    )
+
+    gate = gates._module_coverage_source_tree_hash_gate(
+        {"source_tree_sha256": "live-source-hash"},
+        repo_root=gates.PROJECT_ROOT,
+    )
+
+    assert gate.status == "pass"
+
+
 def test_render_markdown_separates_weighted_score_from_release_gate_status() -> None:
     payload = {
         "summary": {
