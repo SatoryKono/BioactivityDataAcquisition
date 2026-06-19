@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 from typing import Protocol, cast
 
-from bioetl.domain.context import current_utc_time
+from bioetl.application.runtime_clock import current_utc_time
 from bioetl.interfaces.http._health_server_checkpoint_freshness_payloads import (
     build_checkpoint_freshness_ok_payload,
     build_checkpoint_freshness_unknown_payload,

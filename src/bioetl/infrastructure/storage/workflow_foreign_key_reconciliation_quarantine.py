@@ -10,10 +10,10 @@ from uuid import UUID
 
 import pyarrow as pa
 
-from bioetl.domain.context import current_utc_time
 from bioetl.domain.deterministic_identity import deterministic_uuid
 from bioetl.domain.ports import ForeignKeyReconciliationRequest, QuarantinePort
 from bioetl.domain.types import BatchID
+from bioetl.infrastructure.time.system_clock import current_utc_time
 
 FOREIGN_KEY_ORPHAN_ERROR_CODE = "FILTERED_OUT_SILVER"
 FOREIGN_KEY_ORPHAN_QUARANTINE_CATEGORY = "foreign_key_reconciliation"

@@ -8,7 +8,6 @@ from dataclasses import replace
 from pathlib import Path
 from typing import Any, Protocol
 
-from bioetl.domain.context import current_utc_time
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.ports import (
     LoggerPort,
@@ -34,6 +33,7 @@ from bioetl.infrastructure.storage.writer_common import (
     iterate_write_targets,
     validate_write_versions,
 )
+from bioetl.infrastructure.time.system_clock import current_utc_time
 
 
 class _SilverWriterDispatchHost(Protocol):

@@ -6,7 +6,7 @@ import asyncio
 from typing import TYPE_CHECKING, Protocol, cast
 from urllib.parse import parse_qs, urlsplit
 
-from bioetl.domain.context import current_utc_time
+from bioetl.application.runtime_clock import current_utc_time
 from bioetl.domain.types import HealthStatus, JsonDict
 from bioetl.interfaces.http._health_server_routing_support import (
     dispatch_control_plane_request,

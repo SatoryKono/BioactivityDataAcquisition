@@ -34,11 +34,8 @@ def _normalize_utc(value: datetime) -> datetime:
     return value.astimezone(UTC)
 
 
-def _current_utc_time() -> datetime:
-    """Resolve the sanctioned domain time source lazily to avoid import cycles."""
-    from bioetl.domain.context import current_utc_time
-
-    return current_utc_time()
+MISSING_EFFECTIVE_CONFIG_TIMESTAMP = datetime(1970, 1, 1, tzinfo=UTC)
+"""Deterministic sentinel for direct domain effective-config construction."""
 
 
 @dataclass(frozen=True)
@@ -86,7 +83,7 @@ class ResolvedConfigSnapshot:
     config_type: str  # "standard" | "composite"
     config_data: JsonDict
     config_hash: str
-    timestamp: datetime = field(default_factory=_current_utc_time)
+    timestamp: datetime = field(default=MISSING_EFFECTIVE_CONFIG_TIMESTAMP)
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "timestamp", _normalize_utc(self.timestamp))
@@ -119,7 +116,7 @@ class EffectiveExecutionConfig:
 
     config_data: JsonDict
     effective_hash: str
-    timestamp: datetime = field(default_factory=_current_utc_time)
+    timestamp: datetime = field(default=MISSING_EFFECTIVE_CONFIG_TIMESTAMP)
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "timestamp", _normalize_utc(self.timestamp))
@@ -158,7 +155,7 @@ class EffectiveConfigArtifact:
     )
     source_class_provenance: tuple[SourceClassProvenance, ...] = ()
     schema_version: str = "1.0"
-    created_at: datetime = field(default_factory=_current_utc_time)
+    created_at: datetime = field(default=MISSING_EFFECTIVE_CONFIG_TIMESTAMP)
     contract_refs: list[str] = field(default_factory=list)
     normalization_profile_ref: str | None = None
     normalization_profile_version: str | None = None

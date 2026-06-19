@@ -12,12 +12,17 @@
 | --- | ---: |
 | `src/bioetl/infrastructure/adapters` | 72 |
 | `src/bioetl/application/pipelines` | 22 |
-| `src/bioetl/composition/bootstrap` | 1 |
-| `src/bioetl/interfaces/cli` | 17 |
+| `src/bioetl/composition/bootstrap` | 2 |
+| `src/bioetl/interfaces/cli` | 16 |
 
 ## src/bioetl/infrastructure/adapters
 
 - duplicate clusters: 72
+
+| Actionability category | Duplicate clusters |
+| --- | ---: |
+| `export_facade_or_package_barrel` | 56 |
+| `adapter_resilience_or_contract_template` | 16 |
 
 | Top recurring module pairs | Duplicate clusters |
 | --- | ---: |
@@ -48,6 +53,10 @@
 
 - duplicate clusters: 22
 
+| Actionability category | Duplicate clusters |
+| --- | ---: |
+| `pipeline_transformer_contract_pattern` | 22 |
+
 | Top recurring module pairs | Duplicate clusters |
 | --- | ---: |
 | `bioetl.application.pipelines.chembl.target_protein_classification_summary` <-> `bioetl.application.pipelines.chembl.target_protein_classification_transformer` | 2 |
@@ -75,19 +84,29 @@
 
 ## src/bioetl/composition/bootstrap
 
-- duplicate clusters: 1
+- duplicate clusters: 2
+
+| Actionability category | Duplicate clusters |
+| --- | ---: |
+| `composition_runtime_wiring_pattern` | 2 |
 
 | Top recurring module pairs | Duplicate clusters |
 | --- | ---: |
+| `bioetl.composition.bootstrap` <-> `bioetl.composition.bootstrap.runtime.__init__` | 1 |
 | `bioetl.composition.bootstrap.composite_infrastructure_context` <-> `bioetl.composition.bootstrap.runtime._composite_plan_runtime_support` | 1 |
 
 | Cluster path | Compared modules |
 | --- | --- |
+| `src/bioetl/composition/bootstrap/runtime/__init__.py:1` | `bioetl.composition.bootstrap.runtime.__init__`[33:39], `bioetl.composition.bootstrap`[79:85] |
 | `src/bioetl/composition/bootstrap/runtime/__init__.py:1` | `bioetl.composition.bootstrap.composite_infrastructure_context`[27:32], `bioetl.composition.bootstrap.runtime._composite_plan_runtime_support`[40:45] |
 
 ## src/bioetl/interfaces/cli
 
-- duplicate clusters: 17
+- duplicate clusters: 16
+
+| Actionability category | Duplicate clusters |
+| --- | ---: |
+| `cli_command_contract_shell` | 16 |
 
 | Top recurring module pairs | Duplicate clusters |
 | --- | ---: |
@@ -110,6 +129,6 @@
 | `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands.domains.run_all.public_runtime`[176:183], `bioetl.interfaces.cli.commands.run`[284:291] |
 | `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands._run_manifest_output_support`[45:52], `bioetl.interfaces.cli.commands.domains.maintenance.plan`[50:57] |
 | `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands.domains.shared.execution_policy`[57:62], `bioetl.interfaces.cli.exit_codes`[73:79] |
-| `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands.maintenance`[101:112], `bioetl.interfaces.cli.main`[164:175] |
+| `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands.health`[86:91], `bioetl.interfaces.cli.commands.vacuum`[58:63] |
 
-- … truncated 5 additional clusters for brevity
+- … truncated 4 additional clusters for brevity

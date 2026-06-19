@@ -111,8 +111,8 @@ compatibility_debt_metrics:
       ratchet_policy: Fail on growth; ratchet current/max_count toward target_count
         zero as transition-only compatibility shims are removed.
     retained_public_entrypoint_burden:
-      current_count: 13
-      max_count: 13
+      current_count: 12
+      max_count: 12
       owner: '@bioetl-architecture'
       linked_issue: '4575'
       rationale: Retained public entrypoints are stable external API, but their size
@@ -163,7 +163,7 @@ sanctioned_public_entrypoint_governance:
   inventory_source: configs/quality/compatibility_facade_inventory.yaml
   metrics:
     public_entrypoint_count:
-      current_count: 13
+      current_count: 12
       owner: '@bioetl-architecture'
       linked_issue: '4565'
       rationale: Permanent public entrypoints remain governed as sanctioned public
@@ -174,7 +174,7 @@ sanctioned_public_entrypoint_governance:
         completion gates whenever the compatibility inventory changes or quarterly
         lifecycle review runs.
     stable_public_api_count:
-      current_count: 12
+      current_count: 11
       owner: '@bioetl-architecture'
       linked_issue: '4565'
       rationale: Stable public entrypoints intentionally remain external patch/import

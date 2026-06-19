@@ -7,6 +7,7 @@ from dataclasses import dataclass, replace
 from datetime import datetime
 from functools import partial
 
+from bioetl.application.runtime_clock import current_utc_time
 from bioetl.application.services.control_plane.workflow.execution_incremental_metadata import (
     extract_incremental_metadata,
 )
@@ -31,7 +32,6 @@ from bioetl.application.services.workflow_runner_service import (
     WorkflowRunExecutionResult,
     WorkflowRunnerService,
 )
-from bioetl.domain.context import current_utc_time
 from bioetl.domain.control_plane import WorkflowManifest
 from bioetl.domain.ports import (
     LockPort,

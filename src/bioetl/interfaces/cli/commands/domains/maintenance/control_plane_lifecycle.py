@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Protocol, cast
 
 import click
 
-from bioetl.domain.context import current_utc_time
+from bioetl.application.runtime_clock import current_utc_time
 from bioetl.domain.control_plane import (
     ControlPlaneArtifactLifecyclePlan,
     ControlPlaneArtifactLifecyclePolicy,

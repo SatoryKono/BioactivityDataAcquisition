@@ -20,4 +20,9 @@ class SystemClock(ClockPort):
         return datetime.fromtimestamp(time.time(), UTC)
 
 
-__all__ = ["SystemClock"]
+def current_utc_time() -> datetime:
+    """Return current UTC time through the infrastructure system clock adapter."""
+    return SystemClock().now()
+
+
+__all__ = ["SystemClock", "current_utc_time"]
