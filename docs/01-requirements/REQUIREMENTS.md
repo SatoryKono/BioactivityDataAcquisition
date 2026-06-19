@@ -1024,9 +1024,11 @@ ______________________________________________________________________
 
 #### REQ-DX-004
 
-- **Уровень**: MUST
-- **Описание**: Docker Compose для локальных зависимостей
-- **Проверка**: docker-compose.yml допускается как legacy, но не требуется для Local-Only.
+- **Уровень**: MAY
+- **Описание**: Docker Compose допускается только как optional local helper для
+  adjunct services; canonical runtime остаётся Local-Only Python/venv flow.
+- **Проверка**: docker-compose.yml может существовать как legacy/helper surface,
+  но не является обязательным для Local-Only разработки, тестирования или запуска.
 
 #### REQ-DX-005
 

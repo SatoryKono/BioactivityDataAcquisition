@@ -1,6 +1,6 @@
 # Evidence Index
 
-Status: refreshed on 2026-03-27
+Status: reviewed subset refreshed on 2026-06-19
 
 This directory contains the project's evidence packages. The canonical path is `docs/reports/evidence` (not `docs/results/evidence`).
 
@@ -34,6 +34,12 @@ this page when you specifically need evidence-pack navigation.
   mark that fact in the top summary instead of rewriting the whole pack.
 
 ## Package Inventory
+
+This table is a curated reviewed subset, not a full filesystem inventory. The
+current `docs/reports/evidence/` root contains 50 top-level evidence packages as
+of the 2026-06-19 architecture-quality audit. Use this index for reviewed
+navigation and use the filesystem inventory when exhaustive package accounting
+is required.
 
 | Package                                            | Summary | Orchestration | Synthesis | Decisions | Risks |
 | -------------------------------------------------- | ------- | ------------- | --------- | --------- | ----- |
