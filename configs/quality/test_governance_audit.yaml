@@ -62,7 +62,7 @@ budgets:
   refined_assertless_max: 0
   duplicate_test_names_max: 0
   duplicate_test_name_occurrences_max: 0
-  compatibility_test_file_max: 29
+  compatibility_test_file_max: 26
   markerless_test_functions_max: 0
   uuid4_call_sites_max: 0
   date_today_call_sites_max: 0
@@ -70,8 +70,18 @@ budget_ratchet:
   linked_issue: '#4901'
   mode: fail-fast-no-growth
   expected_direction: downward
-  refreshed_on: '2026-06-18'
+  refreshed_on: '2026-06-19'
   stream_g_owner_notes:
+  - issue: '#5435'
+    owner: test-governance
+    status: compatibility_test_file_max_ratcheted_to_26
+    note: >-
+      Renamed three governance-oriented architecture tests out of compatibility-style
+      filenames because they validate curated telemetry, remediation evidence, and
+      root-script wrapper surfaces rather than active backward-compat behavior.
+      The live compatibility filename inventory dropped from 29 to 26 and the
+      fail-fast budget ratcheted down accordingly. No technical-debt budget was
+      increased.
   - issue: '#5200'
     owner: test-governance
     status: rf_009_closeout_zero_ratchet

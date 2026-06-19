@@ -82,7 +82,7 @@ COMMAND_DELEGATION_CASES: tuple[
     (
         "bioetl.interfaces.cli.commands.archive",
         "get_lifecycle_service",
-        "bioetl.composition.maintenance_api.get_lifecycle_service",
+        "bioetl.interfaces.cli.commands.domains.maintenance.service_access.get_lifecycle_service",
         _no_args,
         object(),
         "identity",
@@ -122,7 +122,7 @@ COMMAND_DELEGATION_CASES: tuple[
     (
         "bioetl.interfaces.cli.commands.health",
         "get_health_service",
-        "bioetl.composition.health_api.get_health_service",
+        "bioetl.composition._services.get_health_service",
         _no_args,
         object(),
         "identity",
@@ -130,7 +130,7 @@ COMMAND_DELEGATION_CASES: tuple[
     (
         "bioetl.interfaces.cli.commands.health",
         "get_health_server_dependencies",
-        "bioetl.composition.health_api.get_health_server_dependencies",
+        "bioetl.interfaces.cli.commands.domains.health.server_integration.get_health_server_dependencies",
         _no_args,
         object(),
         "identity",
@@ -272,7 +272,7 @@ def test_cli_command_wrappers_delegate_to_public_facades(
     patched_return_value: object,
     expected_result: object,
 ) -> None:
-    """Thin command wrappers should stay as lazy delegates to public facades."""
+    """Thin command wrappers should stay as lazy delegates to sanctioned seams."""
     module = importlib.import_module(module_name)
     args, kwargs = call_factory(module)
 

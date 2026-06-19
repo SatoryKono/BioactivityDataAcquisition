@@ -1,4 +1,4 @@
-"""Architecture guardrails for compatibility telemetry reporting."""
+"""Architecture guardrails for curated surface telemetry reporting."""
 
 from __future__ import annotations
 
