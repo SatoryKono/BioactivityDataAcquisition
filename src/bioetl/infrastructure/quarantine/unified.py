@@ -302,11 +302,22 @@ class UnifiedQuarantineAdapter(UnifiedQuarantineFilteredMixin):
         if pipeline:
             partitions = [("pipeline", "=", pipeline)]
 
-        arrow_table = dt.to_pyarrow_table(
-            partitions=partitions,
-            filters=filters,
-        )
-        records: list[JsonDict] = arrow_table.to_pylist()
+        try:
+            arrow_table = dt.to_pyarrow_table(
+                partitions=partitions,
+                filters=filters,
+            )
+            records: list[JsonDict] = arrow_table.to_pylist()
+        except pa.ArrowNotImplementedError:
+            # Delta updates can materialize string_view columns that pyarrow cannot
+            # filter directly on some local versions. Fall back to a read-only scan
+            # and keep payload filtering in process so status updates remain inspectable.
+            records = [
+                row
+                for row in dt.to_pyarrow_table().to_pylist()
+                if str(row.get("payload_hash", "")) == payload_hash
+                and (pipeline is None or str(row.get("pipeline", "")) == pipeline)
+            ]
         if not records:
             return None
         records.sort(key=lambda row: str(row.get("ingestion_ts", "")), reverse=True)

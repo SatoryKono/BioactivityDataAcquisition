@@ -4,7 +4,7 @@
   "twin_ratchet_source": "configs/quality/compatibility_twin_module_ratchet.yaml",
   "config_root_facade_source": "configs/quality/infrastructure_config_root_facade_inventory.yaml",
   "summary": {
-    "retained_entrypoint_count": 12,
+    "retained_entrypoint_count": 13,
     "removed_compatibility_surface_count": 23,
     "removed_compatibility_surfaces_with_src_importers": 0,
     "removed_compatibility_surfaces_with_test_importers": 0,
@@ -106,6 +106,17 @@
       ],
       "test_importers": [],
       "src_importer_count": 1,
+      "test_importer_count": 0
+    },
+    {
+      "path": "src/bioetl/interfaces/cli/commands/maintenance.py",
+      "module_name": "bioetl.interfaces.cli.commands.maintenance",
+      "status": "public-entrypoint",
+      "canonical_target": "bioetl.interfaces.cli.commands.maintenance",
+      "owner": "bioetl.interfaces.cli.commands",
+      "src_importers": [],
+      "test_importers": [],
+      "src_importer_count": 0,
       "test_importer_count": 0
     },
     {
