@@ -5,29 +5,24 @@
   "budget_policy": "no_growth_ratchet_only",
   "families": {
     "composite_runtime": {
-      "compatibility_legacy_count": 16,
+      "compatibility_legacy_count": 11,
       "compatibility_legacy_keys": [
         "composite.field_aliases",
         "composite.field_aliases.hba_count",
-        "composite.field_aliases.hba_count.chembl",
         "composite.field_aliases.hba_count.pubchem",
         "composite.field_aliases.hbd_count",
-        "composite.field_aliases.hbd_count.chembl",
         "composite.field_aliases.hbd_count.pubchem",
         "composite.field_aliases.logp",
-        "composite.field_aliases.logp.chembl",
         "composite.field_aliases.logp.pubchem",
         "composite.field_aliases.polar_surface_area",
-        "composite.field_aliases.polar_surface_area.chembl",
         "composite.field_aliases.polar_surface_area.pubchem",
         "composite.field_aliases.standard_inchi",
-        "composite.field_aliases.standard_inchi.chembl",
         "composite.field_aliases.standard_inchi.pubchem"
       ],
       "owner": "config-governance",
       "review_date": "2026-09-30",
-      "rationale": "Composite compatibility_legacy paths are retained field_aliases for provider-to-composite joins. They are compatibility aliases over active composite contracts, not a sanctioned path for new schema shapes.",
-      "action": "Keep aliases explicit, migrate touched joins toward canonical field-registry ownership, and reject growth in the derived compatibility_legacy group.",
+      "rationale": "Composite compatibility_legacy paths are retained field_aliases for provider-to-composite joins. Identity ChEMBL aliases were removed; remaining keys are cross-provider aliases over active composite contracts, not a sanctioned path for new schema shapes.",
+      "action": "Keep remaining cross-provider aliases explicit, migrate touched joins toward canonical field-registry ownership, and reject growth in the derived compatibility_legacy group.",
       "risk": "medium"
     },
     "entity_effective": {
