@@ -6,7 +6,7 @@ from collections.abc import Callable
 from datetime import datetime
 from typing import TYPE_CHECKING, cast
 
-from bioetl.domain.context import current_utc_time
+from bioetl.application.runtime_clock import current_utc_time
 
 if TYPE_CHECKING:
     from bioetl.application.core.runner_flow import _PipelineRunnerFlowHostProtocol

@@ -17,7 +17,7 @@ import json
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
-from bioetl.domain.context import current_utc_time
+from bioetl.application.runtime_clock import current_utc_time
 
 if TYPE_CHECKING:
     from bioetl.application.core.record_processor_config import RecordProcessorConfig

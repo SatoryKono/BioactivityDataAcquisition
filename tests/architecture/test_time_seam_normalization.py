@@ -52,3 +52,16 @@ def test_context_module_no_longer_uses_wall_clock_defaults_for_runtime_contexts(
         "started_at: datetime = field(default_factory=current_utc_time)" not in contents
     )
     assert "started_at or current_utc_time()" not in contents
+    assert "def current_utc_time(" not in contents
+    assert "datetime.now(" not in contents
+
+
+@pytest.mark.architecture
+def test_effective_config_domain_artifact_uses_deterministic_timestamp_defaults() -> (
+    None
+):
+    contents = _read("src/bioetl/domain/control_plane/effective_config_artifact.py")
+
+    assert "default_factory=_current_utc_time" not in contents
+    assert "from bioetl.domain.context import current_utc_time" not in contents
+    assert "datetime.now(" not in contents
