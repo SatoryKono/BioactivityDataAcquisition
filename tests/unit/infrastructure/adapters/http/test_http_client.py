@@ -106,6 +106,16 @@ class TestUnifiedHTTPClientContextManager:
         assert http_client._client is None
 
     @pytest.mark.asyncio
+    async def test_nested_context_reuses_single_async_client(self, http_client):
+        """Nested enters on the same client should not create extra AsyncClient instances."""
+        async with http_client:
+            first_client = http_client._client
+            async with http_client:
+                assert http_client._client is first_client
+            assert http_client._client is first_client
+        assert http_client._client is None
+
+    @pytest.mark.asyncio
     async def test_aenter_with_run_id_sets_header(
         self, mock_rate_limiter, mock_circuit_breaker
     ):

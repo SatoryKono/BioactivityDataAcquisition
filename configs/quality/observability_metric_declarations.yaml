@@ -31,6 +31,7 @@ recording_rule_metrics:
   - bioetl_runtime_current_status
   - bioetl_workflow_pipeline_verdict_status
 declared_label_contract_metrics:
+  - bioetl_adapter_batch_size
   - bioetl_adapter_fallback_attempts_total
   - bioetl_adapter_fallback_hit_rate
   - bioetl_adapter_fallback_hits_total
@@ -57,6 +58,11 @@ declared_label_contract_metrics:
   - bioetl_dq_monitor_enabled
   - bioetl_dq_validation_record_count
   - bioetl_dq_validation_score
+  - bioetl_gold_lifecycle_state_total
+  - bioetl_gold_validation_failures_total
+  - bioetl_gold_write_attempts_total
+  - bioetl_gold_write_duration_seconds
+  - bioetl_gold_write_outcomes_total
   - bioetl_health_check_degraded_total
   - bioetl_health_check_failures_total
   - bioetl_health_check_latency_seconds
@@ -75,6 +81,11 @@ declared_label_contract_metrics:
   - bioetl_rate_limiter_wait_seconds
   - bioetl_replay_drift_events_total
   - bioetl_replay_lag_seconds
+  - bioetl_silver_csv_export_failures_total
+  - bioetl_silver_csv_export_start_total
+  - bioetl_silver_csv_export_success_total
+  - bioetl_silver_validation_failures_total
+  - bioetl_vacuum_files_removed_total
   - bioetl_workflow_current_status
   - bioetl_workflow_runs_total
   - bioetl_workflow_step_duration_seconds

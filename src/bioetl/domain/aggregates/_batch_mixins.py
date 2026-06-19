@@ -240,14 +240,35 @@ class _BatchLifecycleMixin(_BatchReadModelMixin):
         Args:
             sealed_at: Explicit seal timestamp.
         """
+        self.seal_with_counts(
+            record_count=self.record_count,
+            valid_count=self.valid_count,
+            quarantined_count=self.quarantined_count,
+            sealed_at=sealed_at,
+        )
+
+    def seal_with_counts(
+        self,
+        *,
+        record_count: int,
+        valid_count: int,
+        quarantined_count: int,
+        sealed_at: datetime,
+    ) -> None:
+        """Seal the batch using runtime-computed transform result counts.
+
+        Batch processing can filter or quarantine records outside the aggregate
+        record collection. The transition still belongs to the aggregate; the
+        runtime supplies the counts observed at the transform boundary.
+        """
         self._status, self._sealed_at = lifecycle.seal(
             self._status,
             self._events,
             self._run_id,
             self._batch_id,
-            self.record_count,
-            self.valid_count,
-            self.quarantined_count,
+            record_count,
+            valid_count,
+            quarantined_count,
             sealed_at,
         )
 

@@ -2,7 +2,7 @@
 
 - mode: report-only
 - targets: 4
-- total_duplicate_clusters: 113
+- total_duplicate_clusters: 112
 
 > Interpretation note: this is a visibility baseline. `R0801` can over-report
 > around facades, export barrels, and compatibility shims, so use it as
@@ -12,7 +12,7 @@
 | --- | ---: |
 | `src/bioetl/infrastructure/adapters` | 72 |
 | `src/bioetl/application/pipelines` | 22 |
-| `src/bioetl/composition/bootstrap` | 2 |
+| `src/bioetl/composition/bootstrap` | 1 |
 | `src/bioetl/interfaces/cli` | 17 |
 
 ## src/bioetl/infrastructure/adapters
@@ -75,16 +75,14 @@
 
 ## src/bioetl/composition/bootstrap
 
-- duplicate clusters: 2
+- duplicate clusters: 1
 
 | Top recurring module pairs | Duplicate clusters |
 | --- | ---: |
-| `bioetl.composition.bootstrap` <-> `bioetl.composition.bootstrap.runtime.__init__` | 1 |
 | `bioetl.composition.bootstrap.composite_infrastructure_context` <-> `bioetl.composition.bootstrap.runtime._composite_plan_runtime_support` | 1 |
 
 | Cluster path | Compared modules |
 | --- | --- |
-| `src/bioetl/composition/bootstrap/runtime/__init__.py:1` | `bioetl.composition.bootstrap.runtime.__init__`[33:39], `bioetl.composition.bootstrap`[79:85] |
 | `src/bioetl/composition/bootstrap/runtime/__init__.py:1` | `bioetl.composition.bootstrap.composite_infrastructure_context`[27:32], `bioetl.composition.bootstrap.runtime._composite_plan_runtime_support`[40:45] |
 
 ## src/bioetl/interfaces/cli

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 from dataclasses import dataclass
 
 from bioetl.domain.models.metadata import CompositeOutputExt
@@ -181,9 +183,19 @@ def _resolve_record_id(record: JsonDict) -> str:
         record.get("_record_id")
         or record.get("id")
         or record.get("molecule_id")
-        or str(hash(str(record)))
+        or _deterministic_record_id(record)
     )
     return str(candidate)
+
+
+def _deterministic_record_id(record: JsonDict) -> str:
+    payload = json.dumps(
+        record,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
 def _empty_explainability_summary() -> JsonDict:

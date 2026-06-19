@@ -131,6 +131,29 @@ class TestBatchStateTransitions:
         assert batch.status == BatchStatus.OPEN
         assert batch.sealed_at is None
 
+    def test_open_with_id_uses_external_identity_and_emits_created_count(
+        self,
+        run_id: RunID,
+    ) -> None:
+        """Runtime-assigned batch IDs still enter through aggregate events."""
+        batch_id = BatchID(deterministic_uuid_value("unit.batch.external_id"))
+
+        batch = Batch.open_with_id(
+            batch_id=batch_id,
+            run_id=run_id,
+            records=[{"id": "1"}, {"id": "2"}],
+            start_index=10,
+            created_at=_ts(0),
+        )
+
+        events = batch.collect_events()
+        assert batch.batch_id == batch_id
+        assert batch.record_count == 2
+        assert batch.next_index == 12
+        assert events[0].__class__.__name__ == "BatchCreated"
+        assert events[0].batch_id == batch_id
+        assert events[0].record_count == 2
+
     def test_seal_transitions_to_sealed(self, batch: Batch) -> None:
         """seal() should transition OPEN -> SEALED."""
         batch.add_record({"id": "1"})
@@ -138,6 +161,33 @@ class TestBatchStateTransitions:
 
         assert batch.status == BatchStatus.SEALED
         assert batch.sealed_at == _ts(10)
+
+    def test_seal_with_counts_uses_runtime_transform_summary(
+        self,
+        run_id: RunID,
+    ) -> None:
+        """Transform boundary counts are sealed through the aggregate."""
+        batch = Batch.open_with_id(
+            batch_id=BatchID(deterministic_uuid_value("unit.batch.seal_counts")),
+            run_id=run_id,
+            records=[{"id": "1"}, {"id": "2"}, {"id": "3"}],
+            created_at=_ts(0),
+        )
+        batch.collect_events()
+
+        batch.seal_with_counts(
+            record_count=3,
+            valid_count=1,
+            quarantined_count=1,
+            sealed_at=_ts(10),
+        )
+
+        events = batch.collect_events()
+        assert batch.status == BatchStatus.SEALED
+        assert events[0].__class__.__name__ == "BatchSealed"
+        assert events[0].record_count == 3
+        assert events[0].valid_count == 1
+        assert events[0].quarantined_count == 1
 
     def test_cannot_seal_already_sealed(self, batch: Batch) -> None:
         """Invariant: Cannot seal an already sealed batch."""

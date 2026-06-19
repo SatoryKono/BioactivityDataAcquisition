@@ -10,7 +10,8 @@ __all__ = ["dq_overrides_to_domain", "yaml_config_to_domain"]
 
 from typing import Literal
 
-from bioetl.domain.composite.config import ColumnGroupConfig, DataSchemaConfig
+from bioetl.domain.composite.config import ColumnGroupConfig
+from bioetl.domain.composite.config_schema import DataSchemaConfig
 from bioetl.domain.config import (
     DQConfig,
     FieldPolicyConfig,

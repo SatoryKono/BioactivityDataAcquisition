@@ -34,6 +34,7 @@ def emit_batch_created(
     occurred_at: datetime,
     run_id: RunID,
     batch_id: BatchID,
+    record_count: int = 0,
 ) -> None:
     """Append a BatchCreated event.
 
@@ -42,13 +43,14 @@ def emit_batch_created(
         occurred_at: Timestamp when the batch was created.
         run_id: Pipeline run identifier that owns the batch.
         batch_id: Unique identifier assigned to the new batch.
+        record_count: Number of records already associated with the batch.
     """
     events.append(
         BatchCreated(
             occurred_at=occurred_at,
             run_id=run_id,
             batch_id=batch_id,
-            record_count=0,
+            record_count=record_count,
         )
     )
 

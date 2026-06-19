@@ -122,21 +122,6 @@ schema:
     - language
   - name: dq
     pattern: ^_dq_
-  field_aliases:
-    affiliations: affiliation_list
-    citation_count: citations_received
-    reference_count: citations_made
-    topics: subject_topics
-    keywords: subject_keywords
-    mesh_terms: subject_mesh
-    source_type: publication_type
-    pages: page_range
-    fields_of_study: subject_fields
-    journal_abbrev: journal_name_short
-    journal_title: journal_name
-    short_container_title: journal_name_short
-    structured_affiliations: affiliation_structured
-    subjects: subject_keywords
   silver:
     include_groups:
     - system

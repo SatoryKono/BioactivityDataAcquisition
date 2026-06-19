@@ -24,6 +24,14 @@ from .conftest import (
 pytestmark = pytest.mark.usefixtures("relaxed_dq_env")
 
 
+@pytest.fixture
+def vcr_cassette_name(request: pytest.FixtureRequest) -> str:
+    """Reuse one equivalent target cassette for duplicate E2E payloads."""
+    if request.node.name == "test_chembl_target_projects_derived_synonym_fields":
+        return "test_chembl_target_cross_references"
+    return request.node.name
+
+
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio

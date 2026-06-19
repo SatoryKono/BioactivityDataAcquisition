@@ -18,6 +18,7 @@ if TYPE_CHECKING:
 from bioetl.domain.deterministic_identity import deterministic_uuid
 from bioetl.domain.types import (
     BatchID,
+    BronzeRecord,
     MetaDict,
     RunID,
 )
@@ -95,4 +96,38 @@ class Batch(_BatchMutationMixin, _BatchLifecycleMixin):
             metadata=metadata,
         )
         lifecycle.emit_batch_created(batch._events, batch._created_at, run_id, batch_id)
+        return batch
+
+    @classmethod
+    def open_with_id(
+        cls,
+        *,
+        batch_id: BatchID,
+        run_id: RunID,
+        records: list[BronzeRecord],
+        start_index: int = 0,
+        created_at: datetime,
+        metadata: MetaDict | None = None,
+    ) -> Batch:
+        """Open a batch around an externally assigned identifier.
+
+        Runtime processing owns batch ID generation through ``BatchIdGeneratorPort``.
+        This constructor keeps that identity seam while ensuring lifecycle events
+        are still emitted by the aggregate boundary rather than application code.
+        """
+        batch = cls(
+            batch_id=batch_id,
+            run_id=run_id,
+            start_index=start_index,
+            created_at=created_at,
+            metadata=metadata,
+        )
+        batch.add_records(records)
+        lifecycle.emit_batch_created(
+            batch._events,
+            batch._created_at,
+            run_id,
+            batch_id,
+            record_count=batch.record_count,
+        )
         return batch

@@ -30,21 +30,6 @@ pipeline:
   batch_size: 1000
   checkpoint_interval: 1000
 schema:
-  field_aliases:
-    reference_count: citations_made
-    affiliations: affiliation_list
-    citation_count: citations_received
-    keywords: subject_keywords
-    mesh_terms: subject_mesh
-    pages: page_range
-    source_type: publication_type
-    fields_of_study: subject_fields
-    journal_abbrev: journal_name_short
-    journal_title: journal_name
-    short_container_title: journal_name_short
-    structured_affiliations: affiliation_structured
-    subjects: subject_keywords
-    topics: subject_topics
   content_hash:
     include: []
     exclude: []

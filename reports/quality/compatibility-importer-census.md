@@ -9,7 +9,7 @@
 - twin_pair_count: 0
 - tracked_twin_family_count: 0
 - config_root_symbol_count: 3
-- config_root_src_importer_count: 1
+- config_root_src_importer_count: 0
 - retained_public_export_facade_count: 4
 - retained_public_export_facades_with_duplicate_exports: 0
 - retained_public_export_facades_with_resolution_conflicts: 0
@@ -29,8 +29,8 @@
 | `src/bioetl/composition/entrypoints.py` | 0 | 3 |
 | `src/bioetl/composition/health_api.py` | 3 | 2 |
 | `src/bioetl/composition/maintenance_api.py` | 1 | 1 |
-| `src/bioetl/infrastructure/config/__init__.py` | 1 | 5 |
-| `src/bioetl/domain/composite/config.py` | 79 | 39 |
+| `src/bioetl/infrastructure/config/__init__.py` | 0 | 5 |
+| `src/bioetl/domain/composite/config.py` | 72 | 39 |
 | `src/bioetl/application/composite/merger.py` | 5 | 5 |
 
 ## Retained Public Export Facades

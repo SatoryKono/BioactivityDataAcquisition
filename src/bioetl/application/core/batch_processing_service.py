@@ -20,7 +20,7 @@ from bioetl.application.core.batch_processing_runtime import (
 from bioetl.application.core.batch_processing_support import (
     BatchProcessingSupportService,
 )
-from bioetl.domain.aggregates.events import BatchCreated, BatchSealed
+from bioetl.domain.aggregates.batch import Batch
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.ports import BatchIdGeneratorPort
 from bioetl.domain.types import BatchID, BronzeRecord
@@ -118,18 +118,18 @@ class BatchProcessingService:
         """
         batch_id = self._batch_id_factory.create()
         ingestion_ts = self._context.started_at
+        batch = Batch.open_with_id(
+            batch_id=batch_id,
+            run_id=self._context.run_id,
+            records=records,
+            start_index=start_index,
+            created_at=ingestion_ts,
+        )
         source_metadata = self._get_source_metadata(query_string)
         span = self._tracing.start_batch_span(batch_id, len(records), start_index)
         self._batch_metrics.track_records_fetched(len(records))
         self._batch_metrics.track_batch_created(stage="bronze", count=len(records))
-        self._support.emit_domain_event(
-            BatchCreated(
-                occurred_at=ingestion_ts,
-                run_id=self._context.run_id,
-                batch_id=batch_id,
-                record_count=len(records),
-            )
-        )
+        self._publish_batch_events(batch)
 
         return cast(
             "BatchProcessingOutcome",
@@ -139,6 +139,7 @@ class BatchProcessingService:
                 work_coro=self._process_batch_work(
                     records=records,
                     batch_id=batch_id,
+                    batch=batch,
                     start_index=start_index,
                     ingestion_ts=ingestion_ts,
                     source_metadata=source_metadata,
@@ -164,6 +165,7 @@ class BatchProcessingService:
         *,
         records: list[BronzeRecord],
         batch_id: BatchID,
+        batch: Batch,
         start_index: int,
         ingestion_ts: datetime,
         source_metadata: SourceMetadata | None,
@@ -182,21 +184,18 @@ class BatchProcessingService:
             batch_id=batch_id,
             start_index=start_index,
         )
-        self._support.emit_domain_event(
-            BatchSealed(
-                occurred_at=ingestion_ts,
-                run_id=self._context.run_id,
-                batch_id=batch_id,
-                record_count=len(records),
-                valid_count=max(
-                    len(records)
-                    - transform_result.quarantined_count
-                    - transform_result.filtered_out_count,
-                    0,
-                ),
-                quarantined_count=transform_result.quarantined_count,
-            )
+        batch.seal_with_counts(
+            record_count=len(records),
+            valid_count=max(
+                len(records)
+                - transform_result.quarantined_count
+                - transform_result.filtered_out_count,
+                0,
+            ),
+            quarantined_count=transform_result.quarantined_count,
+            sealed_at=ingestion_ts,
         )
+        self._publish_batch_events(batch)
         await self._support.write_silver_gold_concurrent(
             transform_result=transform_result,
             batch_id=batch_id,
@@ -222,3 +221,8 @@ class BatchProcessingService:
                 transform_result.gold_excluded_by_contract_count
             ),
         )
+
+    def _publish_batch_events(self, batch: Batch) -> None:
+        """Publish domain events collected from the Batch aggregate."""
+        for event in batch.collect_events():
+            self._support.emit_domain_event(event)

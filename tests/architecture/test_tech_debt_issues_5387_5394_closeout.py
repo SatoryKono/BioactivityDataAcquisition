@@ -145,7 +145,7 @@ def test_issue_5391_config_compatibility_legacy_taxonomy_is_no_growth() -> None:
     for family_name, family_review in review["families"].items():
         group_count = baseline["parameter_taxonomy"]["families"][family_name][
             "groups"
-        ]["compatibility_legacy"]
+        ].get("compatibility_legacy", 0)
         legacy_policy = taxonomy_policy[family_name]["compatibility_legacy"]
 
         assert family_review["compatibility_legacy_count"] == group_count

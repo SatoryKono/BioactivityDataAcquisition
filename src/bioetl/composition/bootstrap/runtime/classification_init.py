@@ -11,11 +11,9 @@ from bioetl.domain.mapping.classification_data import ClassificationData
 @cache
 def _load_publication_type_classification_data(configs_root_key: str) -> ClassificationData:
     """Load classification data once per configs root key."""
-    from bioetl.infrastructure.config import (
-        publication_type_classification_loader as loader_module,
-    )
+    import bioetl.infrastructure.config.publication_type_classification_loader as publication_type_classification_loader
 
-    return loader_module.PublicationTypeClassificationLoader(
+    return publication_type_classification_loader.PublicationTypeClassificationLoader(
         Path(configs_root_key)
     ).load()
 
@@ -31,7 +29,7 @@ def initialize_publication_type_classification(configs_root: Path) -> None:
 @cache
 def _load_protein_class_target_type_mapping_data(configs_root_key: str) -> object:
     """Load protein-class target type mapping once per configs root key."""
-    from bioetl.infrastructure.config import protein_class_target_type_loader
+    import bioetl.infrastructure.config.protein_class_target_type_loader as protein_class_target_type_loader
 
     return protein_class_target_type_loader.ProteinClassTargetTypeMappingLoader(
         Path(configs_root_key)

@@ -65,9 +65,10 @@ def test_config_compatibility_legacy_taxonomy_review_matches_live_baseline() -> 
         review_family = cast(dict[str, Any], review_families[family_name])
         groups = cast(dict[str, int], baseline_family["groups"])
 
-        assert review_family["compatibility_legacy_count"] == groups[
-            "compatibility_legacy"
-        ]
+        assert review_family["compatibility_legacy_count"] == groups.get(
+            "compatibility_legacy",
+            0,
+        )
         assert baseline_family["unclassified_parameter_count"] == 0
         assert cast(str, review_family["owner"]).strip()
         assert cast(str, review_family["rationale"]).strip()

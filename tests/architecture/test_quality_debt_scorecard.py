@@ -609,8 +609,9 @@ def test_debt_scorecard_config_surface_ratchet_matches_baseline() -> None:
         family_policy = taxonomy_groups[family_name]
         assert isinstance(family_policy, dict)
         legacy_policy = family_policy["compatibility_legacy"]
-        assert legacy_policy["current_count"] == baseline_groups["compatibility_legacy"]
-        assert legacy_policy["max_count"] == baseline_groups["compatibility_legacy"]
+        compatibility_legacy_count = baseline_groups.get("compatibility_legacy", 0)
+        assert legacy_policy["current_count"] == compatibility_legacy_count
+        assert legacy_policy["max_count"] == compatibility_legacy_count
         assert legacy_policy["target_count"] == 0
 
 

@@ -31,29 +31,13 @@
       "risk": "medium"
     },
     "entity_effective": {
-      "compatibility_legacy_count": 15,
-      "compatibility_legacy_keys": [
-        "schema.field_aliases",
-        "schema.field_aliases.affiliations",
-        "schema.field_aliases.citation_count",
-        "schema.field_aliases.fields_of_study",
-        "schema.field_aliases.journal_abbrev",
-        "schema.field_aliases.journal_title",
-        "schema.field_aliases.keywords",
-        "schema.field_aliases.mesh_terms",
-        "schema.field_aliases.pages",
-        "schema.field_aliases.reference_count",
-        "schema.field_aliases.short_container_title",
-        "schema.field_aliases.source_type",
-        "schema.field_aliases.structured_affiliations",
-        "schema.field_aliases.subjects",
-        "schema.field_aliases.topics"
-      ],
+      "compatibility_legacy_count": 0,
+      "compatibility_legacy_keys": [],
       "owner": "config-governance",
       "review_date": "2026-09-30",
-      "rationale": "Entity compatibility_legacy paths are retained schema.field_aliases for provider payload normalization. They preserve active provider ingestion while canonical contract fields remain authoritative.",
-      "action": "Keep aliases explicit, require owner review before adding field_aliases, and migrate touched aliases into canonical contract or semantic registry entries.",
-      "risk": "medium"
+      "rationale": "Entity schema.field_aliases compatibility_legacy paths were retired from effective entity configs; provider normalization now remains under canonical domain profile and contract ownership.",
+      "action": "Keep entity compatibility_legacy keys at zero and reject reintroduction of schema.field_aliases in entity configs without architecture review.",
+      "risk": "low"
     }
   },
   "guards": [
