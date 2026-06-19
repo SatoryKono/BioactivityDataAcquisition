@@ -14,6 +14,9 @@ BASELINE_YAML = ROOT / "configs" / "quality" / "test_telemetry_baseline.yaml"
 BASELINE_MD = ROOT / "docs" / "05-engineering" / "test-telemetry-baseline.md"
 ENGINEERING_README = ROOT / "docs" / "05-engineering" / "README.md"
 WORKFLOW = ROOT / ".github" / "workflows" / "tests.yml"
+SLOWEST_JSON = ROOT / "reports" / "test-telemetry" / "slowest-tests.json"
+SLOWEST_MD = ROOT / "reports" / "test-telemetry" / "slowest-tests.md"
+COVERAGE_SUMMARY_JSON = ROOT / "reports" / "test-telemetry" / "coverage-summary.json"
 
 
 def _load_yaml(path: Path) -> dict[str, object]:
@@ -38,6 +41,12 @@ def test_test_telemetry_baseline_doc_is_published_from_engineering_index() -> No
     assert BASELINE_MD.exists()
     readme = ENGINEERING_README.read_text(encoding="utf-8")
     assert "test-telemetry-baseline.md" in readme
+
+
+def test_branch_consumable_test_telemetry_reports_exist() -> None:
+    assert SLOWEST_JSON.exists()
+    assert SLOWEST_MD.exists()
+    assert COVERAGE_SUMMARY_JSON.exists()
 
 
 def test_tests_workflow_and_baseline_contract_use_same_artifact_paths() -> None:

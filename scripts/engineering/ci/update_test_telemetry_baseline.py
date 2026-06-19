@@ -12,6 +12,8 @@ from pathlib import Path
 
 import yaml
 
+BRANCH_TELEMETRY_DIR = Path("reports/test-telemetry")
+
 
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -314,11 +316,93 @@ def render_baseline_markdown(payload: dict[str, object]) -> str:
             "3. Run `python -m scripts.engineering.ci.update_test_telemetry_baseline "
             "--source-commit <sha> --source-run-id <run-id> ...` with either direct "
             "artifacts or fallback diagnostics inputs.",
-            "4. Commit the updated YAML and Markdown baseline together.",
+            "4. Commit the updated baseline and branch-consumable telemetry "
+            "summary layer together.",
             "",
         ]
     )
     return "\n".join(lines)
+
+
+def render_branch_telemetry_markdown(payload: dict[str, object]) -> str:
+    """Render committed slow-test summary as a lightweight branch-readable report."""
+    duration = payload["duration_telemetry"]
+    total_cases = duration["total_cases"]
+    rows = duration["top_slowest"]
+    total_cases_display = "pending" if total_cases is None else str(total_cases)
+
+    lines = [
+        "# Slowest Tests",
+        "",
+        f"Source commit: `{payload.get('source_commit') or 'pending'}`",
+        f"Source run id: `{payload.get('source_run_id') or 'pending'}`",
+        f"Refresh status: `{payload['refresh_status']}`",
+        f"Collected test cases: `{total_cases_display}`",
+        "",
+    ]
+    if isinstance(rows, list) and rows:
+        lines.extend(
+            [
+                "| Rank | Duration (s) | Test | Source |",
+                "|---:|---:|---|---|",
+            ]
+        )
+        for index, row in enumerate(rows[:25], start=1):
+            if not isinstance(row, dict):
+                continue
+            lines.append(
+                f"| {index} | {row.get('duration_s', 'unknown')} | "
+                f"`{row.get('test', 'unknown')}` | `{row.get('source', 'unknown')}` |"
+            )
+    else:
+        lines.append("No committed slow-test telemetry is available yet.")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def build_branch_telemetry_reports(payload: dict[str, object]) -> dict[str, str]:
+    """Build committed branch-readable telemetry report payloads."""
+    coverage = payload["coverage"]
+    duration = payload["duration_telemetry"]
+    return {
+        "coverage-summary.json": json.dumps(
+            {
+                "source_branch": payload["source_branch"],
+                "source_commit": payload.get("source_commit"),
+                "source_run_id": payload.get("source_run_id"),
+                "refreshed_at_utc": payload["refreshed_at_utc"],
+                "refresh_status": payload["refresh_status"],
+                "coverage": coverage,
+            },
+            indent=2,
+        )
+        + "\n",
+        "slowest-tests.json": json.dumps(
+            {
+                "source_branch": payload["source_branch"],
+                "source_commit": payload.get("source_commit"),
+                "source_run_id": payload.get("source_run_id"),
+                "refreshed_at_utc": payload["refreshed_at_utc"],
+                "refresh_status": payload["refresh_status"],
+                "total_cases": duration["total_cases"],
+                "top_slowest": duration["top_slowest"],
+            },
+            indent=2,
+        )
+        + "\n",
+        "slowest-tests.md": render_branch_telemetry_markdown(payload) + "\n",
+    }
+
+
+def write_branch_telemetry_reports(
+    *,
+    payload: dict[str, object],
+    output_dir: Path = BRANCH_TELEMETRY_DIR,
+) -> None:
+    """Write committed branch-readable telemetry summaries under reports/."""
+    output_dir.mkdir(parents=True, exist_ok=True)
+    for relative_name, text in build_branch_telemetry_reports(payload).items():
+        (output_dir / relative_name).write_text(text, encoding="utf-8")
 
 
 def write_baseline_outputs(
@@ -326,6 +410,7 @@ def write_baseline_outputs(
     payload: dict[str, object],
     output_yaml_path: Path,
     output_md_path: Path,
+    branch_reports_dir: Path = BRANCH_TELEMETRY_DIR,
 ) -> None:
     output_yaml_path.parent.mkdir(parents=True, exist_ok=True)
     output_md_path.parent.mkdir(parents=True, exist_ok=True)
@@ -337,6 +422,7 @@ def write_baseline_outputs(
         render_baseline_markdown(payload),
         encoding="utf-8",
     )
+    write_branch_telemetry_reports(payload=payload, output_dir=branch_reports_dir)
 
 
 def main() -> int:

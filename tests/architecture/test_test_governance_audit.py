@@ -25,6 +25,9 @@ CONFIG_PATH = ROOT / "configs" / "quality" / "test_governance_audit.yaml"
 DUPLICATE_NAME_INVENTORY_PATH = (
     ROOT / "reports" / "quality" / "test-duplicate-name-inventory.json"
 )
+FIXTURE_DUPLICATION_INVENTORY_PATH = (
+    ROOT / "reports" / "quality" / "test-fixture-asset-duplication.json"
+)
 TEST_GOVERNANCE_ARTIFACT_PATH = (
     ROOT / "reports" / "quality" / "test-governance-current.json"
 )
@@ -231,11 +234,14 @@ def test_test_governance_artifacts_match_live_collector() -> None:
     # Just verify artifacts exist and are valid JSON - live collection hangs
     governance_payload = _load_json(TEST_GOVERNANCE_ARTIFACT_PATH)
     duplicate_inventory_payload = _load_json(DUPLICATE_NAME_INVENTORY_PATH)
+    fixture_duplication_payload = _load_json(FIXTURE_DUPLICATION_INVENTORY_PATH)
 
     # Verify basic structure
     assert "report" in governance_payload
     assert "inventory" in duplicate_inventory_payload
     assert "summary" in duplicate_inventory_payload
+    assert fixture_duplication_payload["scan_root"] == "tests/fixtures"
+    assert "groups" in fixture_duplication_payload
 
 
 @pytest.mark.architecture
@@ -403,6 +409,18 @@ def test_duplicate_name_inventory_artifact_matches_static_report() -> None:
 
     assert payload["summary"] == report["duplicate_test_name_inventory_summary"]
     assert payload["inventory"] == report["duplicate_test_name_inventory"]
+
+
+@pytest.mark.architecture
+def test_fixture_asset_duplication_inventory_artifact_matches_static_report() -> None:
+    payload = json.loads(
+        FIXTURE_DUPLICATION_INVENTORY_PATH.read_text(encoding="utf-8")
+    )
+    report = collect_test_governance_report(ROOT)
+
+    assert payload == report["fixture_asset_duplication"]
+    assert {"golden", "vcr"}.issubset(payload["scope_file_counts"])
+    assert payload["duplicate_groups"] == len(payload["groups"])
 
 
 @pytest.mark.architecture

@@ -286,8 +286,8 @@ config_surface_ratchet:
       ratchet_policy: Non-growth fail-fast unless a reviewed pipeline addition updates
         the budget.
     unique_parameter_count:
-      current_count: 507
-      max_count: 507
+      current_count: 505
+      max_count: 505
       owner: '@bioetl-config'
       linked_issue: '#4818'
       rationale: Flattened parameter vocabulary must not expand silently across the
@@ -332,8 +332,8 @@ config_surface_ratchet:
           rationale: Effective entity pipeline surface after base defaults merge.
           ratchet_policy: Non-growth fail-fast for governed entity configs.
         unique_parameter_count:
-          current_count: 304
-          max_count: 304
+          current_count: 302
+          max_count: 302
           rationale: Effective flattened vocabulary for entity configs only.
           ratchet_policy: Non-growth fail-fast unless reviewed schema expansion updates
             budget.
@@ -399,8 +399,8 @@ config_surface_ratchet:
     groups:
       entity_effective:
         compatibility_legacy:
-          current_count: 17
-          max_count: 17
+          current_count: 15
+          max_count: 15
           target_count: 0
           owner: '@bioetl-config'
           rationale: Entity effective configs still expose legacy compatibility
@@ -1089,8 +1089,8 @@ test_governance_debt_metrics:
     inventory, assertion-strength debt, or deterministic test-seam counts change.
   metrics:
     compatibility_test_file_count:
-      current_count: 29
-      max_count: 29
+      current_count: 26
+      max_count: 26
       target_count: 29
       ratchet_policy: Downward ratchet only; keep max_count at 29 unless a future
         owner-approved reduction lowers the live compatibility test inventory.
