@@ -24,7 +24,7 @@ from bioetl.application.core.runner_flow_metrics import (
 from bioetl.application.core.runner_flow_metrics import (
     record_output_ready as _record_output_ready_impl,
 )
-from bioetl.domain.context import current_utc_time
+from bioetl.application.runtime_clock import current_utc_time
 from bioetl.domain.events import PipelineEvent
 from bioetl.domain.types import JsonDict
 

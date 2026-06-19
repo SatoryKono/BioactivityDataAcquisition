@@ -1,22 +1,22 @@
 ---
 id: full-test-fix-loop
-title: Run full test suite and fix failures
+title: "\u041F\u043E\u043B\u043D\u044B\u0439 test/fix \u0446\u0438\u043A\u043B"
 task_id: full-test-fix-loop
-created_at: '2026-05-16T13:19:34Z'
+created_at: '2026-06-19T19:32:45Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - scripts/engineering/dev/run_pytest.sh
 summary: Active task session context.
-query: full pytest suite fix failures
+query: full pytest run failures fix loop
 ---
 
 # Session note
 
 ## Task
 
-- Title: Run full test suite and fix failures
-- Retrieval query: full pytest suite fix failures
+- Title: Полный test/fix цикл
+- Retrieval query: full pytest run failures fix loop
 
 ## Retrieved context
 

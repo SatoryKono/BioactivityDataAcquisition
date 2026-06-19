@@ -22,7 +22,7 @@ from bioetl.infrastructure.storage.delta.schema_ops import (
 from bioetl.infrastructure.storage.silver.merged_request_support import (
     _build_merged_write_request_from_mapping,
 )
-from bioetl.infrastructure.validation.pandera_validator import PanderaGoldValidator
+from bioetl.infrastructure.validation.pandera_validator import PanderaSilverValidator
 
 __all__ = [
     "_MergedSilverMetadataWriterProtocol",
@@ -141,7 +141,7 @@ def _prepare_merged_silver_write(
         schema = request.schema
         if hasattr(schema, "to_schema"):
             schema = schema.to_schema()
-        result = PanderaGoldValidator(schema=schema, strict=False).validate(
+        result = PanderaSilverValidator(schema=schema, strict=False).validate(
             request.records
         )
         if not result.valid:

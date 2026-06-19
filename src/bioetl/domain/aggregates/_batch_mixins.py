@@ -5,17 +5,21 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from bioetl.domain.aggregates._batch_attrs import _BatchAttrs
 import bioetl.domain.aggregates._batch_lifecycle as lifecycle
+from bioetl.domain.aggregates._batch_attrs import _BatchAttrs
 from bioetl.domain.aggregates._batch_record import BatchRecord
 from bioetl.domain.aggregates._batch_status import BatchStatus
 from bioetl.domain.exceptions import InvalidStateError
 
 if TYPE_CHECKING:
     from bioetl.domain.types import (
+        BatchID,
         BronzeRecord,
         ContentHash,
+        DomainEvent,
         EntityID,
+        MetaDict,
+        RunID,
     )
 
 
