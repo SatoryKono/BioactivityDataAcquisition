@@ -126,6 +126,8 @@ log_test.txt
 !/reports/quality/port-adapter-factory-coverage.json
 !/reports/quality/port-adapter-factory-coverage.md
 !/reports/quality/domain-aggregate-invariant-registry.json
+!/reports/quality/invariant-audit-rebaseline-2026-06-19.json
+!/reports/quality/invariant-audit-rebaseline-2026-06-19.md
 !/reports/quality/silver-gold-filter-parity-report.json
 !/reports/test-telemetry/
 /reports/test-telemetry/*

@@ -50,6 +50,7 @@ Commands:
     report-chembl-observed-value-inventory Generate/check observed-value inventory from tracked ChEMBL Bronze fixtures
     report-observability-metric-inventory Generate registry/runtime/docs observability metric inventory
     report-adr-enforcement-matrix Generate/check accepted ADR enforcement coverage matrix
+    report-invariant-audit-rebaseline Generate/check stale invariant-audit rebaseline matrix
     report-architecture-debt-remote-main-baseline Generate/check clean remote-main architecture debt baseline
     report-debt-governance-gates Generate/check debt-reduction fail-fast gate rollup
     run-architecture-audit-read-only Run check-only architecture evidence diagnostics
@@ -119,6 +120,9 @@ COMMAND_MODULES: dict[str, str] = {
     "report-chembl-observed-value-inventory": "scripts.engineering.qa.report_chembl_observed_value_inventory",
     "report-observability-metric-inventory": "scripts.engineering.qa.report_observability_metric_inventory",
     "report-adr-enforcement-matrix": "scripts.engineering.qa.report_adr_enforcement_matrix",
+    "report-invariant-audit-rebaseline": (
+        "scripts.engineering.qa.report_invariant_audit_rebaseline"
+    ),
     "report-architecture-debt-remote-main-baseline": (
         "scripts.engineering.qa.report_architecture_debt_remote_main_baseline"
     ),

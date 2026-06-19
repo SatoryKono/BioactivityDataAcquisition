@@ -140,6 +140,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as a bounded ADR enforcement matrix reporter while architecture governance tests and generated QA evidence still depend on this surface; promote it into the canonical scripts.engineering.qa command router or retire it after ADR evidence generation consolidates."
     },
+    "scripts/engineering/qa/report_invariant_audit_rebaseline.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a bounded invariant-audit rebaseline reporter while issue triage needs stale-path, current-anchor, and duplicate-issue evidence; retire or fold it into a broader audit-to-issue workflow after the June 2026 stale-audit closeout."
+    },
     "scripts/engineering/qa/report_architecture_debt_remote_main_baseline.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
