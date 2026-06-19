@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 
@@ -11,8 +11,10 @@ from bioetl.application.services.control_plane.ledger.entry_support import (
     append_run_ledger_entry,
     append_run_outcome,
 )
+from bioetl.application.services.control_plane.ledger.rich_event_recording import (
+    RunLedgerRichEventRecordingMixin,
+)
 import bioetl.application.services.control_plane.ledger.core_events as _core_events
-import bioetl.application.services.control_plane.ledger.rich_events as _rich_events
 from bioetl.domain.context import current_utc_time
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.control_plane.run_ledger import (
@@ -36,7 +38,7 @@ def _missing_entry_id_factory() -> str:
 
 
 @dataclass(slots=True)
-class RunLedgerService:
+class RunLedgerService(RunLedgerRichEventRecordingMixin):
     """Append immutable control-plane lifecycle entries for one manifest."""
 
     ledger_port: RunLedgerPort
@@ -199,70 +201,6 @@ class RunLedgerService:
             rule_id=rule_id,
             disposition=disposition,
             dq_report_path=dq_report_path,
-            details=details,
-        )
-
-    def record_composite_dependency_completed(
-        self,
-        *,
-        dependency_name: str,
-        result: Mapping[str, object],
-    ) -> RunLedgerEntry:
-        """Record bounded dependency result evidence for rich composite replay."""
-        return _rich_events.record_composite_dependency_completed(
-            self,
-            dependency_name=dependency_name,
-            result=result,
-        )
-
-    def record_composite_enricher_completed(
-        self,
-        *,
-        enricher_name: str,
-        result: Mapping[str, object],
-    ) -> RunLedgerEntry:
-        """Record bounded enricher result evidence for rich composite replay."""
-        return _rich_events.record_composite_enricher_completed(
-            self,
-            enricher_name=enricher_name,
-            result=result,
-        )
-
-    def record_composite_merge_completed(
-        self,
-        *,
-        result: Mapping[str, object],
-    ) -> RunLedgerEntry:
-        """Record bounded merge result evidence for rich composite replay."""
-        return _rich_events.record_composite_merge_completed(
-            self,
-            result=result,
-        )
-
-    def record_input_snapshot_published(
-        self,
-        *,
-        provider: str,
-        entity: str,
-        pipeline_name: str,
-        snapshot_id: str,
-        content_hash: str,
-        immutable_uri: str,
-        bronze_batch_ref: str,
-        query_fingerprint: str | None = None,
-        details: Mapping[str, object] | None = None,
-    ) -> RunLedgerEntry:
-        """Record immutable input snapshot evidence published after Bronze write."""
-        return _rich_events.record_input_snapshot_published(
-            self,
-            provider=provider,
-            entity=entity,
-            pipeline_name=pipeline_name,
-            snapshot_id=snapshot_id,
-            content_hash=content_hash,
-            immutable_uri=immutable_uri,
-            bronze_batch_ref=bronze_batch_ref,
-            query_fingerprint=query_fingerprint,
             details=details,
         )
 

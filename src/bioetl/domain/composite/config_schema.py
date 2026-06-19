@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Literal
-
 from bioetl.domain.composite.config_merge import ColumnGroupConfig
 from bioetl.domain.composite.config_validators import (
     _coerce_to_tuple,
@@ -28,7 +26,6 @@ class LayerColumnConfig:
     include_groups: tuple[str, ...] | None = None
     exclude_fields: tuple[str, ...] | None = None
     rename_fields: dict[str, str] = field(default_factory=dict)
-    alias_policy: Literal["preserve", "canonical"] | None = None
 
     def __post_init__(self) -> None:
         _coerce_to_tuple(self, "columns")

@@ -1,7 +1,7 @@
 # Config Discrepancies Report
 
 Total configs: 27
-Total unique parameters: 507
+Total unique parameters: 505
 Actionable inconsistent parameters: 0
 Sanctioned partial variance parameters: 0
 Raw partial parameter count: 0
@@ -37,9 +37,9 @@ Parameters: 203
 ### entity_effective
 
 Owner: BioETL Team
-Parameters: 304
+Parameters: 302
 
-- `compatibility_legacy`: 17
+- `compatibility_legacy`: 15
 - `domain_entity_contract`: 39
 - `dq_validation`: 78
 - `medallion_write_policy`: 106

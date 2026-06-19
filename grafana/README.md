@@ -421,7 +421,7 @@ Prometheus сохраняет каждый скрейп как набор time s
 Grafana подключается к Prometheus как datasource и выполняет PromQL-запросы для визуализации данных:
 
 ```yaml
-# grafana/provisioning/datasources/prometheus.yml
+# grafana/provisioning/datasources-core/prometheus.yml
 datasources:
   - name: Prometheus
     type: prometheus

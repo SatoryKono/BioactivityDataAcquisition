@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-04'
+  Last verified: '2026-06-19'
 
 ______________________________________________________________________
 
@@ -150,12 +150,12 @@ Mixed Windows + WSL checkout shortcuts:
 
 ```powershell
 .\scripts\engineering\dev\setup_env_windows.ps1
-.\scripts\engineering\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+.\scripts\engineering\dev\run_pytest.ps1 tests\ --timeout=120 -n 1 --lf
 ```
 
 ```bash
 bash scripts/engineering/dev/setup_env_wsl.sh
-bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n auto --lf
 ```
 
 ______________________________________________________________________

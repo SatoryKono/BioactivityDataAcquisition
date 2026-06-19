@@ -64,11 +64,9 @@ schema:
   silver:
     include_groups: [system, business, dq]
     exclude_fields: []
-    alias_policy: preserve
   gold:
     include_groups: [system, business]
     exclude_fields: [_dq_*, _index]
-    alias_policy: canonical
 
 quality:
   version: 1.0.0

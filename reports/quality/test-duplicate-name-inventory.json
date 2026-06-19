@@ -1,89 +1,10 @@
 {
-  "inventory": [
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "architecture": 2
-      },
-      "locations": [
-        "tests/architecture/test_project_legacy_compatibility_remediation_evidence_surface.py:29",
-        "tests/architecture/test_project_remediation_evidence_surface.py:29"
-      ],
-      "name": "test_canonical_cross_synthesis_is_readable",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    },
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "architecture": 2
-      },
-      "locations": [
-        "tests/architecture/test_compatibility_telemetry_reporting.py:41",
-        "tests/architecture/test_curated_surface_telemetry_reporting.py:41"
-      ],
-      "name": "test_compatibility_surface_snapshot_matches_registry_status_counts",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    },
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "architecture": 2
-      },
-      "locations": [
-        "tests/architecture/test_compatibility_telemetry_reporting.py:63",
-        "tests/architecture/test_curated_surface_telemetry_reporting.py:63"
-      ],
-      "name": "test_compatibility_surface_summary_section_lists_required_metrics",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    },
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "architecture": 2
-      },
-      "locations": [
-        "tests/architecture/test_project_legacy_compatibility_remediation_evidence_surface.py:72",
-        "tests/architecture/test_project_remediation_evidence_surface.py:72"
-      ],
-      "name": "test_curated_evidence_surface_has_no_unreadable_visible_entries",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    },
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "architecture": 2
-      },
-      "locations": [
-        "tests/architecture/test_root_script_compatibility_surfaces.py:89",
-        "tests/architecture/test_root_script_wrapper_surfaces.py:89"
-      ],
-      "name": "test_legacy_root_script_wrapper_mentions_are_confined_to_sanctioned_surfaces",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    },
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "architecture": 2
-      },
-      "locations": [
-        "tests/architecture/test_project_legacy_compatibility_remediation_evidence_surface.py:39",
-        "tests/architecture/test_project_remediation_evidence_surface.py:39"
-      ],
-      "name": "test_recovered_cross_synthesis_checksum_matches_provenance",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    }
-  ],
+  "inventory": [],
   "summary": {
-    "cross_file_groups": 6,
-    "duplicate_occurrences": 12,
+    "cross_file_groups": 0,
+    "duplicate_occurrences": 0,
     "mixed_groups": 0,
     "same_file_groups": 0,
-    "total_duplicate_names": 6
+    "total_duplicate_names": 0
   }
 }

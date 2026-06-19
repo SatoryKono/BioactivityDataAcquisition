@@ -45,6 +45,18 @@ def _patch_typing_inspect_get_origin(
     typing_inspect_module.get_origin = _get_origin_with_union_fix
 
 
+def _typing_inspect_origin_needs_patch(
+    typing_inspect_module: typing.Any,  # Any: imported module is runtime-defined
+) -> bool:
+    """Return whether typing_inspect still misses ``types.UnionType`` origins."""
+    try:
+        return typing_inspect_module.get_origin(int | str) is None and (
+            typing.get_origin(int | str) is not None
+        )
+    except (AttributeError, TypeError, ValueError):
+        return True
+
+
 def _find_fn_by_subclass_or_union(
     registry: dict[
         typing.Any,  # Any: multipledispatch requires erased types
@@ -129,6 +141,40 @@ def _patch_dispatcher_call(
     dispatcher_cls.__call__ = _dispatcher_call_with_any_fallback  # type: ignore[method-assign]
 
 
+def _dispatcher_probe_union_handler(value: int | str) -> object:
+    """Return probe input unchanged so dispatcher sanity checks stay deterministic."""
+    return value
+
+
+def _dispatcher_probe_any_handler(value: typing.Any) -> object:
+    """Return probe input unchanged so fallback dispatch can be verified."""
+    return value
+
+
+def _pandera_dispatcher_needs_patch(dispatcher_cls: type) -> bool:
+    """Return whether Pandera's dispatcher still needs union/Any fallback patching."""
+    try:
+        dispatcher = dispatcher_cls()
+        dispatcher.register(_dispatcher_probe_union_handler)
+        dispatcher.register(_dispatcher_probe_any_handler)
+        registry = getattr(dispatcher, "_function_registry")
+        if not isinstance(registry, dict):
+            return True
+        if registry.get(int) is not _dispatcher_probe_union_handler:
+            return True
+        if registry.get(str) is not _dispatcher_probe_union_handler:
+            return True
+        if registry.get(typing.Any) is not _dispatcher_probe_any_handler:
+            return True
+        return not (
+            dispatcher(1) == 1
+            and dispatcher("union") == "union"
+            and dispatcher(1.5) == 1.5
+        )
+    except (AttributeError, KeyError, TypeError, ValueError, RuntimeError):
+        return True
+
+
 def apply_pandera_typing_compat_if_needed() -> bool:
     """Apply the Python 3.14 Pandera typing compat patch once when required."""
     global _PATCH_APPLIED
@@ -143,8 +189,15 @@ def apply_pandera_typing_compat_if_needed() -> bool:
     except (ImportError, AttributeError, TypeError, ValueError, RuntimeError):
         return False
 
-    _patch_typing_inspect_get_origin(typing_inspect)
-    _patch_dispatcher_call(Dispatcher, typing_inspect)
+    origin_needs_patch = _typing_inspect_origin_needs_patch(typing_inspect)
+    dispatcher_needs_patch = _pandera_dispatcher_needs_patch(Dispatcher)
+    if not origin_needs_patch and not dispatcher_needs_patch:
+        return False
+
+    if origin_needs_patch:
+        _patch_typing_inspect_get_origin(typing_inspect)
+    if dispatcher_needs_patch:
+        _patch_dispatcher_call(Dispatcher, typing_inspect)
     _PATCH_APPLIED = True
     return True
 

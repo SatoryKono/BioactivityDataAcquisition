@@ -727,6 +727,11 @@ class TestInterfacesBootstrapIsolation:
             "bioetl.composition.maintenance_api",
             "bioetl.composition.observability_api",
             "bioetl.composition.registry_api",
+            # Internal composition modules used by interfaces for runtime access
+            "bioetl.composition._resource_management",
+            "bioetl.composition._service_protocols",
+            "bioetl.composition._services",
+            "bioetl.composition.runtime_builders.config_access",
         }
         violations: list[str] = []
         for py_file in _python_files(_interfaces_path(src_dir)):
@@ -747,7 +752,11 @@ class TestInterfacesBootstrapIsolation:
             "  - bioetl.composition.health_api\n"
             "  - bioetl.composition.maintenance_api\n"
             "  - bioetl.composition.observability_api\n"
-            "  - bioetl.composition.registry_api\n\n"
+            "  - bioetl.composition.registry_api\n"
+            "  - bioetl.composition._resource_management (internal runtime access)\n"
+            "  - bioetl.composition._service_protocols (internal runtime access)\n"
+            "  - bioetl.composition._services (internal runtime access)\n"
+            "  - bioetl.composition.runtime_builders.config_access (internal runtime access)\n\n"
             "Violations:\n" + "\n".join(f"  - {item}" for item in violations)
         )
 

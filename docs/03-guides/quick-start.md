@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-02'
+  Last verified: '2026-06-19'
 
 ______________________________________________________________________
 
@@ -64,18 +64,21 @@ environments separate:
 
 ```powershell
 .\scripts\engineering\dev\setup_env_windows.ps1
-.\scripts\engineering\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+.\scripts\engineering\dev\run_pytest.ps1 tests\ --timeout=120 -n 1 --lf
 .\scripts\engineering\dev\run_mypy.ps1
 ```
 
 ```bash
 bash scripts/engineering/dev/setup_env_wsl.sh
-bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n auto --lf
 bash scripts/engineering/dev/run_mypy.sh
 ```
 
 This bootstrap creates `.venv-win` for PowerShell and
 `${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}` for WSL/Linux by default.
+The supported Windows default is `-n 1`; raise
+`BIOETL_PYTEST_WINDOWS_XDIST_WORKERS` only when you have verified the machine
+can sustain more workers without `WinError 10055`.
 
 ### Option C: Manual Fallback
 
@@ -129,7 +132,7 @@ bioetl run --pipeline chembl_activity --limit 100 --no-cached-bronze
 make test
 
 # WSL mixed-checkout wrappers
-bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n auto --lf
 bash scripts/engineering/dev/run_mypy.sh
 
 # Check linting / typing
@@ -138,7 +141,7 @@ make lint
 
 ```powershell
 # PowerShell mixed-checkout wrappers
-.\scripts\engineering\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+.\scripts\engineering\dev\run_pytest.ps1 tests\ --timeout=120 -n 1 --lf
 .\scripts\engineering\dev\run_mypy.ps1
 ```
 

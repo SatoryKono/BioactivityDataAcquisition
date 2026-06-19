@@ -7,14 +7,14 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-18'
+  Last verified: '2026-06-19'
 
 ______________________________________________________________________
 
 # Current State Inventory
 
 This inventory is synchronized against the current `main` worktree on
-2026-06-18. Code, configs, domain contracts, ADRs, and tests are the source of
+2026-06-19. Code, configs, domain contracts, ADRs, and tests are the source of
 truth; existing documentation is evidence only when it matches those sources.
 
 ## Scope
@@ -37,7 +37,7 @@ Current committed quality artifacts agree on the following architecture evidence
 | --- | ---: | --- |
 | Architecture quality score | `7.98` (`satisfactory_system_refactoring_required`) | `reports/quality/architecture-quality-scorecard.json` |
 | Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
-| Source modules in module coverage inventory | `2168` | `reports/quality/module-coverage-inventory.json` |
+| Source modules in module coverage inventory | `2170` | `reports/quality/module-coverage-inventory.json` |
 | Unmeasured / uncovered modules | `0` / `0` | `reports/quality/module-coverage-inventory.json` |
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
 | Debt-governance gates | `27` pass, `0` warn, `0` fail | `reports/quality/debt-governance-gates.json` |
@@ -211,7 +211,7 @@ Observed facts:
 | Alerts/SLO | `grafana/dashboards/bioetl-alerts-slo.json` | Alert and SLO status. | Observability |
 | Silver Reject Explorer | `grafana/dashboards/bioetl-silver-reject-explorer.json` | Quarantine/silver reject drilldown. | Observability |
 | Prometheus rules | `grafana/prometheus-rules/*.yml` | Recording and alerting rules. | Observability |
-| Datasource provisioning | `grafana/provisioning/datasources/*.yml` | Prometheus, Loki, Tempo, Quarantine Explorer datasources. | Observability |
+| Datasource provisioning | `grafana/provisioning/{datasources-core,datasources-tracing}/*.yml` | Prometheus and Quarantine Explorer core datasources plus Loki and Tempo tracing datasources. | Observability |
 
 ## Control Plane Components
 

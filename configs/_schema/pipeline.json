@@ -1313,22 +1313,6 @@
           },
           "title": "Rename Fields",
           "type": "object"
-        },
-        "alias_policy": {
-          "anyOf": [
-            {
-              "enum": [
-                "preserve",
-                "canonical"
-              ],
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Alias Policy"
         }
       },
       "title": "LayerColumnConfig",
@@ -1492,7 +1476,7 @@
       "type": "object"
     },
     "SilverFiltersConfig": {
-      "description": "Schema for structural Silver filters in YAML.\n\nCanonical Silver accepts ``required_fields`` and ``exclude_if_present``.\nSemantic Gold-style keys remain parseable only for legacy boundary\ncompatibility and are promoted before domain conversion.",
+      "description": "Schema for structural Silver filters in YAML.\n\nCanonical Silver accepts ``required_fields`` and ``exclude_if_present``.\nSemantic Gold-style keys are rejected at the schema boundary.",
       "properties": {
         "columns": {
           "additionalProperties": {
