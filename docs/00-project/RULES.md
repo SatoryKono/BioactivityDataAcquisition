@@ -1628,7 +1628,7 @@ make run-local    # запуск сэмплового пайплайна (chembl
 - **Storage**: Локальная файловая система (`data/output/bronze`, `data/output/silver`, `data/output/gold`)
 - **Locking**: In-memory (`MemoryLock`)
 - **Checkpoints**: Локальные файлы (`data/output/checkpoints`)
-- **Зависимости**: Python 3.11+; `uv` является preferred package/environment manager, `pip` допустим как manual fallback
+- **Зависимости**: Python 3.12 baseline; Python 3.12 and 3.13 are the supported runtime versions. `uv` является preferred package/environment manager, `pip` допустим как manual fallback
 
 **Optional local helper tooling (не canonical runtime):**
 

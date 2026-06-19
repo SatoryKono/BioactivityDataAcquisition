@@ -17,6 +17,20 @@ test_lanes:
     Canonical named pytest lanes for comparable local and CI test-health runs.
     Later test-health wrappers must emit these values as suite names instead of
     treating ad hoc pytest commands as comparable runs.
+  authority_model:
+    hard_merge_truth:
+      - live_ci_status
+      - coverage-verify
+    advisory_telemetry:
+      - branch_coverage
+      - mutation_testing
+      - local_test_health_rollups
+    historical_evidence:
+      - reports/quality/test-runs/rollup.md
+    dirty_tree_policy: >
+      Committed coverage inventory source-tree hashes are authoritative only for
+      a clean src/bioetl tree; dirty-tree runs may be useful diagnostics but must
+      not be treated as merge-blocking coverage truth.
   execution_defaults:
     pythonpath: src
     direct_runner: scripts/engineering/dev/run_pytest.sh

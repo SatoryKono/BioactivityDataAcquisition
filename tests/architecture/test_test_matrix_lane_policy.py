@@ -191,6 +191,21 @@ class TestCanonicalTestLanes:
             "combined coverage is computed"
         )
 
+    def test_test_quality_authority_model_is_explicit(self) -> None:
+        matrix = load_matrix()
+        authority = matrix["test_lanes"].get("authority_model", {})
+
+        assert authority.get("hard_merge_truth") == [
+            "live_ci_status",
+            "coverage-verify",
+        ]
+        assert "reports/quality/test-runs/rollup.md" in authority.get(
+            "historical_evidence",
+            [],
+        )
+        assert "local_test_health_rollups" in authority.get("advisory_telemetry", [])
+        assert "clean src/bioetl tree" in authority.get("dirty_tree_policy", "")
+
     def test_lane_marker_boundaries_match_current_policy(self) -> None:
         matrix = load_matrix()
         lanes = matrix["test_lanes"]["lanes"]

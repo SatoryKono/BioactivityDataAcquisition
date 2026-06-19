@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.2
+Version: 1.0.3
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-26'
+  Last verified: '2026-06-19'
 
 ______________________________________________________________________
 
@@ -66,8 +66,8 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-045](ADR-045-dq-contract-system.md)                 | Data Quality Contract System               | Accepted                                | Data Quality    | 2026-03-26 |
 | [ADR-046](ADR-046-checkpoint-vs-ledger-resume.md)        | Checkpoint Versus Ledger-Based Resume      | Accepted                                | Reproducibility | 2026-05-06 |
 | [ADR-047](ADR-047-workflow-control-plane.md)             | Workflow Control Plane for Declarative Workflows | Accepted                           | Reproducibility | 2026-05-08 |
-| [ADR-048](ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md) | Domain Schema Boundary and Runtime Pandera Compatibility | accepted | Architecture | 2026-05-26 |
-| [ADR-049](ADR-049-context-aware-loc-target-policy.md) | Context-Aware LOC Target Policy | accepted | Architecture | 2026-05-26 |
+| [ADR-048](ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md) | Domain Schema Boundary and Runtime Pandera Compatibility | Accepted | Architecture | 2026-05-26 |
+| [ADR-049](ADR-049-context-aware-loc-target-policy.md) | Context-Aware LOC Target Policy | Accepted | Architecture | 2026-05-26 |
 | [ADR-050](ADR-050-silver-structural-gold-semantic-filter-boundary.md) | Silver Structural and Gold Semantic Filter Boundary | Accepted | Data Quality | 2026-06-15 |
 
 ## ADRs by Category

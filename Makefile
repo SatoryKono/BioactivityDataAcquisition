@@ -1,4 +1,4 @@
-# BioETL Docker Makefile
+# BioETL local-first Makefile
 
 .PHONY: help docker-check docker-build docker-start docker-stop docker-logs docker-health docker-clean docker-compose-check
 .PHONY: precommit-install qa-arch-fast quarantine-inspect quarantine-replay quarantine-purge release-lock
@@ -9,25 +9,29 @@ RUN_ID ?=
 
 # Default target
 help:
-	@echo "BioETL Docker Commands"
+	@echo "BioETL Local-First Commands"
 	@echo ""
-	@echo "Setup:"
+	@echo "Local governance:"
+	@echo "  make precommit-install      Install local pre-commit hooks"
+	@echo "  make qa-arch-fast           Run fast architecture checks"
+	@echo ""
+	@echo "Local operations:"
+	@echo "  make quarantine-inspect     Inspect quarantine state for PIPELINE=$(PIPELINE)"
+	@echo "  make quarantine-replay      Replay quarantine state for PIPELINE=$(PIPELINE)"
+	@echo "  make quarantine-purge       Purge quarantine state for PIPELINE=$(PIPELINE)"
+	@echo "  make release-lock           Release lock for PIPELINE=$(PIPELINE) RUN_ID=$(RUN_ID)"
+	@echo ""
+	@echo "Optional Docker helper commands:"
 	@echo "  make docker-check           Check Docker installation"
 	@echo "  make docker-build           Build BioETL image"
-	@echo ""
-	@echo "Services:"
 	@echo "  make docker-start           Start main services (bioetl + warp)"
 	@echo "  make docker-start-full      Start all services (+ Neo4j, Redis, MinIO, monitoring)"
 	@echo "  make docker-stop            Stop main services"
 	@echo "  make docker-stop-full       Stop all services"
-	@echo ""
-	@echo "Debugging:"
 	@echo "  make docker-logs            View logs (all services)"
 	@echo "  make docker-logs-bioetl     View BioETL logs only"
 	@echo "  make docker-logs-warp       View Warp logs only"
 	@echo "  make docker-health          Check service health"
-	@echo ""
-	@echo "Maintenance:"
 	@echo "  make docker-clean           Remove containers, volumes, images"
 	@echo "  make docker-compose-check   Validate docker-compose.yml"
 	@echo "  make docker-shell-bioetl    Open shell in bioetl container"
