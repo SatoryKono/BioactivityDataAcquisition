@@ -15,7 +15,8 @@ pytestmark = [pytest.mark.contracts, pytest.mark.no_api]
 def test_pubmed_silver_schema_accepts_minimal_fixture(
     minimal_pubmed_publication_df: pd.DataFrame,
 ) -> None:
-    PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+    validated = PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+    assert validated["pmid"].iloc[0] == "12345678"
 
 
 def test_pubmed_silver_schema_rejects_invalid_pmid(

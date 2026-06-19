@@ -22,25 +22,34 @@ pytestmark = [pytest.mark.contracts, pytest.mark.no_api]
 
 
 def test_pubchem_identity_shard_accepts_minimal_valid_row() -> None:
-    PubchemIdentitySchema.validate(dataframe_from_row(pubchem_identity_row()))
+    validated = PubchemIdentitySchema.validate(dataframe_from_row(pubchem_identity_row()))
+    assert validated["molecule_id"].iloc[0] == "2244"
 
 
 def test_pubchem_identity_shard_accepts_row_with_all_optional_checks() -> None:
-    PubchemIdentitySchema.validate(pubchem_identity_valid_dataframe())
+    validated = PubchemIdentitySchema.validate(pubchem_identity_valid_dataframe())
+    assert validated["inchi"].iloc[0].startswith("InChI=")
 
 
 def test_pubchem_physchem_shard_accepts_row_exercising_all_checks() -> None:
-    PubchemPhysChemSchema.validate(
+    validated = PubchemPhysChemSchema.validate(
         pubchem_shard_checks_dataframe(PubchemPhysChemSchema)
     )
+    assert float(validated["molecular_weight"].iloc[0]) > 0
 
 
 def test_pubchem_stereo_shard_accepts_row_exercising_all_checks() -> None:
-    PubchemStereoSchema.validate(pubchem_shard_checks_dataframe(PubchemStereoSchema))
+    validated = PubchemStereoSchema.validate(
+        pubchem_shard_checks_dataframe(PubchemStereoSchema)
+    )
+    assert int(validated["atom_stereo_count"].iloc[0]) >= 0
 
 
 def test_pubchem_three_d_shard_accepts_row_exercising_all_checks() -> None:
-    PubchemThreeDSchema.validate(pubchem_shard_checks_dataframe(PubchemThreeDSchema))
+    validated = PubchemThreeDSchema.validate(
+        pubchem_shard_checks_dataframe(PubchemThreeDSchema)
+    )
+    assert float(validated["volume_3d"].iloc[0]) >= 0
 
 
 @pytest.mark.parametrize("molecule_id", ["0", "-1", "abc", ""])
@@ -89,7 +98,8 @@ def test_pubchem_molecule_schema_accepts_composed_minimal_row() -> None:
         atom_stereo_count=0,
         volume_3d=100.0,
     )
-    PubchemMoleculeSchema.validate(dataframe_from_row(row))
+    validated = PubchemMoleculeSchema.validate(dataframe_from_row(row))
+    assert validated["molecule_id"].iloc[0] == "2244"
 
 
 @pytest.mark.parametrize(

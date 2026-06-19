@@ -11,6 +11,7 @@ from uuid import UUID
 import pytest
 
 from bioetl.domain.types import BatchID, QuarantineRecordStatus
+from bioetl.domain.serialization import serialize_to_json
 from bioetl.infrastructure.quarantine import UnifiedQuarantineAdapter, quote_literal
 from bioetl.infrastructure.quarantine.record_encoding import calculate_hash
 
@@ -593,6 +594,50 @@ class TestUnifiedQuarantineUpdateStatus:
             },
             predicate="payload_hash = 'sha256:stable-payload'",
         )
+
+    @pytest.mark.asyncio
+    async def test_update_status_preserves_persisted_payload_and_hash(
+        self,
+        quarantine,
+        batch_id,
+    ):
+        """Persisted status transitions must not mutate payload bytes or hash."""
+        payload = {
+            "id": 1,
+            "canonical_smiles": "CCO",
+            "nested": {"z": 2, "a": 1},
+        }
+        metadata = {"error_details": {"reason": "schema_violation"}}
+        payload_json = serialize_to_json(payload, ensure_ascii=True)
+        payload_hash = calculate_hash(payload_json)
+
+        await quarantine.write(
+            pipeline="test",
+            error_code="SCHEMA_VIOLATION",
+            payload=payload,
+            bronze_batch_id=batch_id,
+            metadata=metadata,
+            ingestion_ts=TEST_INGESTION_TS,
+        )
+
+        before = quarantine.get_record(payload_hash=payload_hash, pipeline="test")
+        assert before is not None
+        assert before["payload"] == payload_json
+        assert before["payload_hash"] == payload_hash
+        assert before["dq_status"] == QuarantineRecordStatus.NEW.value
+
+        result = quarantine.update_status(
+            payload_hash,
+            QuarantineRecordStatus.REPROCESSED,
+        )
+
+        assert result is True
+        after = quarantine.get_record(payload_hash=payload_hash, pipeline="test")
+        assert after is not None
+        assert after["payload"] == before["payload"]
+        assert after["payload_hash"] == before["payload_hash"]
+        assert after["metadata"] == before["metadata"]
+        assert after["dq_status"] == QuarantineRecordStatus.REPROCESSED.value
 
 
 @pytest.mark.unit

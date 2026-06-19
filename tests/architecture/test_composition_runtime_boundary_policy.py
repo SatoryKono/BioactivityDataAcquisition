@@ -24,6 +24,8 @@ FORBIDDEN_LIFECYCLE_EVENTS = {
     "PipelineCompleted",
     "PipelineFailed",
 }
+FORBIDDEN_LIFECYCLE_EMITTERS = {"emit_domain_event"}
+FORBIDDEN_LIFECYCLE_EMITTER_PREFIXES = ("emit_batch_", "emit_pipeline_")
 
 
 def _called_name(node: ast.Call) -> str | None:
@@ -33,6 +35,14 @@ def _called_name(node: ast.Call) -> str | None:
     if isinstance(func, ast.Attribute):
         return func.attr
     return None
+
+
+def _is_forbidden_lifecycle_emitter(called_name: str | None) -> bool:
+    if called_name is None:
+        return False
+    return called_name in FORBIDDEN_LIFECYCLE_EMITTERS or called_name.startswith(
+        FORBIDDEN_LIFECYCLE_EMITTER_PREFIXES
+    )
 
 
 def _composition_runtime_policy_violations() -> list[str]:
@@ -49,7 +59,7 @@ def _composition_runtime_policy_violations() -> list[str]:
                         f"{py_file.relative_to(ROOT)}:{node.lineno} constructs "
                         f"{called_name}; lifecycle events belong to domain/application"
                     )
-                if called_name and called_name.startswith("emit_"):
+                if _is_forbidden_lifecycle_emitter(called_name):
                     violations.append(
                         f"{py_file.relative_to(ROOT)}:{node.lineno} calls "
                         f"{called_name}; runtime event emission belongs to application"
