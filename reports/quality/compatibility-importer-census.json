@@ -14,7 +14,7 @@
     "twin_pairs_without_public_src_importers": 0,
     "tracked_twin_family_count": 0,
     "config_root_symbol_count": 3,
-    "config_root_src_importer_count": 1,
+    "config_root_src_importer_count": 0,
     "retained_public_export_facade_count": 4,
     "retained_public_export_facades_with_duplicate_exports": 0,
     "retained_public_export_facades_with_resolution_conflicts": 0
@@ -173,9 +173,7 @@
       "status": "public-entrypoint",
       "canonical_target": "bioetl.infrastructure.config",
       "owner": "bioetl.infrastructure.config",
-      "src_importers": [
-        "src/bioetl/composition/bootstrap/runtime/classification_init.py"
-      ],
+      "src_importers": [],
       "test_importers": [
         "tests/unit/infrastructure/config/test_composite_config_api.py",
         "tests/unit/infrastructure/config/test_config_ci_contract.py",
@@ -183,7 +181,7 @@
         "tests/unit/infrastructure/config/test_public_config_surfaces.py",
         "tests/unit/infrastructure/config/test_workflow_config_api.py"
       ],
-      "src_importer_count": 1,
+      "src_importer_count": 0,
       "test_importer_count": 5
     },
     {
@@ -240,8 +238,6 @@
         "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
         "src/bioetl/application/composite/runner_pkg/runner_support_policy.py",
         "src/bioetl/application/composite/runner_pkg/runner_support_types.py",
-        "src/bioetl/application/core/batch_writer.py",
-        "src/bioetl/application/core/record_processor_config.py",
         "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_builder_support.py",
         "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_payloads.py",
         "src/bioetl/composition/bootstrap/runtime/_composite_plan_runtime_support.py",
@@ -263,13 +259,8 @@
         "src/bioetl/composition/bootstrap/runtime/runtime_basics.py",
         "src/bioetl/composition/factories/services/_builder_record_processor_support.py",
         "src/bioetl/domain/composite/__init__.py",
-        "src/bioetl/domain/config/pipeline.py",
         "src/bioetl/infrastructure/config/composite_config_api.py",
-        "src/bioetl/infrastructure/config/converters.py",
-        "src/bioetl/infrastructure/schemas/_composite_config_merge_schema.py",
         "src/bioetl/infrastructure/schemas/composite_config.py",
-        "src/bioetl/infrastructure/schemas/composite_config_base.py",
-        "src/bioetl/infrastructure/schemas/composite_validation.py",
         "src/bioetl/interfaces/cli/commands/domains/composite/execution.py",
         "src/bioetl/interfaces/cli/commands/run_composite.py"
       ],
@@ -314,7 +305,7 @@
         "tests/unit/domain/composite/test_data_schema_config.py",
         "tests/unit/infrastructure/schemas/test_composite_config_invariants_source_of_truth.py"
       ],
-      "src_importer_count": 79,
+      "src_importer_count": 72,
       "test_importer_count": 39
     },
     {

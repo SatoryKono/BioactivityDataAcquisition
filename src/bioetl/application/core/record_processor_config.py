@@ -17,7 +17,7 @@ from bioetl.domain.types import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.domain.composite.config import DataSchemaConfig
+    from bioetl.domain.composite.config_schema import DataSchemaConfig
 
 
 @dataclass(frozen=True, slots=True)

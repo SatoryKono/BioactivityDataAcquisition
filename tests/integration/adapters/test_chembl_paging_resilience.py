@@ -229,7 +229,6 @@ class TestChemblResiliencePaths:
 
         return ChemblAdapter(http_client=chembl_client, logger=mock_logger)
 
-    @pytest.mark.vcr
     async def test_retry_on_transient_errors(
         self, chembl_client: Any, mock_logger: MagicMock
     ) -> None:
@@ -252,7 +251,6 @@ class TestChemblResiliencePaths:
             # For now, verify the adapter accepts retry configuration
             assert adapter._adapter_config.max_retries == 3
 
-    @pytest.mark.vcr
     async def test_rate_limiting_respects_token_bucket(
         self, chembl_client: Any, mock_logger: MagicMock, token_bucket: Any
     ) -> None:
@@ -274,7 +272,6 @@ class TestChemblResiliencePaths:
             assert token_bucket is not None
             assert adapter._adapter_config.rate_limit_requests_per_second == 3
 
-    @pytest.mark.vcr
     async def test_circuit_breaker_on_persistent_failures(
         self, chembl_client: Any, mock_logger: MagicMock, circuit_breaker: Any
     ) -> None:
@@ -297,7 +294,6 @@ class TestChemblResiliencePaths:
             assert circuit_breaker is not None
             assert adapter._adapter_config.circuit_breaker_failure_threshold == 5
 
-    @pytest.mark.vcr
     async def test_single_id_fallback_on_batch_failure(
         self, chembl_client: Any, mock_logger: MagicMock
     ) -> None:
@@ -318,7 +314,6 @@ class TestChemblResiliencePaths:
             # Verify single-ID fallback is enabled
             assert adapter._adapter_config.enable_single_id_fallback
 
-    @pytest.mark.vcr
     async def test_timeout_handling(
         self, chembl_client: Any, mock_logger: MagicMock
     ) -> None:

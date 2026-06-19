@@ -15,7 +15,7 @@ pytestmark = pytest.mark.unit
 
 def _write(path: Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(text, encoding="utf-8")
+    path.write_text(text, encoding="utf-8", newline="\n")
 
 
 def test_collect_artifact_duplication_report_groups_exact_byte_duplicates(

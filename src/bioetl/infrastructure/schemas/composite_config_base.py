@@ -22,7 +22,11 @@ from bioetl.domain.composite.aggregation import (
     AggregationFunction,
     EnricherCardinality,
 )
-from bioetl.domain.composite.config import DependencyConfig, EnricherConfig, SeedConfig
+from bioetl.domain.composite.config import (
+    DependencyConfig,
+    EnricherConfig,
+    SeedConfig,
+)
 from bioetl.domain.composite.strategy import FallbackStrategy
 
 

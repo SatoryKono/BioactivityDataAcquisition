@@ -1,56 +1,15 @@
 {
-  "duplicate_files": 10,
-  "duplicate_groups": 3,
-  "groups": [
-    {
-      "file_count": 6,
-      "paths": [
-        "tests/fixtures/vcr/chembl/test_chembl_target_full_cycle.yaml",
-        "tests/fixtures/vcr/chembl/TestChemblResiliencePaths.test_circuit_breaker_on_persistent_failures.yaml",
-        "tests/fixtures/vcr/chembl/TestChemblResiliencePaths.test_rate_limiting_respects_token_bucket.yaml",
-        "tests/fixtures/vcr/chembl/TestChemblResiliencePaths.test_retry_on_transient_errors.yaml",
-        "tests/fixtures/vcr/chembl/TestChemblResiliencePaths.test_single_id_fallback_on_batch_failure.yaml",
-        "tests/fixtures/vcr/chembl/TestChemblResiliencePaths.test_timeout_handling.yaml"
-      ],
-      "scope_counts": {
-        "vcr": 6
-      },
-      "sha256": "07e7179f91ddffa776a50d6d33813125270475d18c32b68b23b7a36cdf1724f0",
-      "total_bytes": 6876336
-    },
-    {
-      "file_count": 2,
-      "paths": [
-        "tests/fixtures/vcr/uniprot/test_uniprot_protein_metadata_fields.yaml",
-        "tests/fixtures/vcr/uniprot/test_uniprot_protein_sequence_fields.yaml"
-      ],
-      "scope_counts": {
-        "vcr": 2
-      },
-      "sha256": "871d6b5d39fa3e5bd8f30859dfaacad2b47c6ae929525243ad5fa786767e1098",
-      "total_bytes": 138550
-    },
-    {
-      "file_count": 2,
-      "paths": [
-        "tests/fixtures/vcr/chembl/test_chembl_target_cross_references.yaml",
-        "tests/fixtures/vcr/chembl/test_chembl_target_projects_derived_synonym_fields.yaml"
-      ],
-      "scope_counts": {
-        "vcr": 2
-      },
-      "sha256": "9eee3a70f85cea465e400bf876a081e514bd50834393f7e4bb94913bf7430a3a",
-      "total_bytes": 2272654
-    }
-  ],
-  "max_group_size": 6,
+  "duplicate_files": 0,
+  "duplicate_groups": 0,
+  "groups": [],
+  "max_group_size": 0,
   "scan_root": "tests/fixtures",
   "scope_file_counts": {
     "fixture": 21,
     "golden": 21,
-    "vcr": 410
+    "vcr": 396
   },
-  "total_files": 452,
+  "total_files": 438,
   "tracked_extensions": [
     ".json",
     ".yaml",

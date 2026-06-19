@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+import subprocess
+import sys
+import textwrap
+
 import pytest
 
 from bioetl.domain.behavior.merged_metadata_explainability import (
@@ -88,6 +92,45 @@ def test_generate_explainability_metadata_resolves_record_ids() -> None:
         "CHEMBL25",
     ]
     assert explanations[3].record_id
+
+
+def test_record_id_fallback_is_stable_for_equivalent_record_order() -> None:
+    explainer = MergedMetadataExplainer()
+
+    first = explainer.generate_explainability_metadata(
+        [{"title": "D", "doi": "10.1/example"}],
+        _metadata(),
+    )
+    second = explainer.generate_explainability_metadata(
+        [{"doi": "10.1/example", "title": "D"}],
+        _metadata(),
+    )
+
+    assert first[0].record_id == second[0].record_id
+    assert len(first[0].record_id) == 64
+
+
+def test_record_id_fallback_is_stable_across_python_processes() -> None:
+    code = textwrap.dedent(
+        """
+        from bioetl.domain.behavior.merged_metadata_explainability import (
+            MergedMetadataExplainer,
+        )
+        from bioetl.domain.models.metadata import CompositeOutputExt
+
+        explanation = MergedMetadataExplainer().generate_explainability_metadata(
+            [{"doi": "10.1/example", "title": "D"}],
+            CompositeOutputExt(composite_run_id="run-1"),
+        )[0]
+        print(explanation.record_id)
+        """
+    )
+
+    first = subprocess.check_output([sys.executable, "-c", code], text=True).strip()
+    second = subprocess.check_output([sys.executable, "-c", code], text=True).strip()
+
+    assert first == second
+    assert len(first) == 64
 
 
 def test_summary_reports_empty_and_non_empty_distributions() -> None:

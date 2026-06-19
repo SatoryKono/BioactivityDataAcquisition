@@ -113,21 +113,6 @@ schema:
     - license_url
   - name: dq
     pattern: ^_dq_
-  field_aliases:
-    short_container_title: journal_name_short
-    citation_count: citations_received
-    reference_count: citations_made
-    subjects: subject_keywords
-    source_type: publication_type
-    affiliations: affiliation_list
-    keywords: subject_keywords
-    mesh_terms: subject_mesh
-    pages: page_range
-    fields_of_study: subject_fields
-    journal_abbrev: journal_name_short
-    journal_title: journal_name
-    structured_affiliations: affiliation_structured
-    topics: subject_topics
   silver:
     include_groups:
     - system

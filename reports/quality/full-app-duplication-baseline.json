@@ -2,8 +2,8 @@
   "summary": {
     "snapshot_date": "2026-06-19",
     "targets": 4,
-    "total_duplicate_clusters": 113,
-    "total_raw_duplicate_clusters": 113,
+    "total_duplicate_clusters": 112,
+    "total_raw_duplicate_clusters": 112,
     "total_excluded_duplicate_clusters": 0
   },
   "normalization": {
@@ -1613,17 +1613,10 @@
     {
       "target": "src/bioetl/composition/bootstrap",
       "returncode": 8,
-      "duplicate_count": 2,
-      "raw_duplicate_count": 2,
+      "duplicate_count": 1,
+      "raw_duplicate_count": 1,
       "excluded_duplicate_count": 0,
       "top_pairs": [
-        {
-          "modules": [
-            "bioetl.composition.bootstrap",
-            "bioetl.composition.bootstrap.runtime.__init__"
-          ],
-          "duplicate_clusters": 1
-        },
         {
           "modules": [
             "bioetl.composition.bootstrap.composite_infrastructure_context",
@@ -1633,22 +1626,6 @@
         }
       ],
       "clusters": [
-        {
-          "path": "src/bioetl/composition/bootstrap/runtime/__init__.py",
-          "line": 1,
-          "modules": [
-            {
-              "module": "bioetl.composition.bootstrap.runtime.__init__",
-              "start_line": 33,
-              "end_line": 39
-            },
-            {
-              "module": "bioetl.composition.bootstrap",
-              "start_line": 79,
-              "end_line": 85
-            }
-          ]
-        },
         {
           "path": "src/bioetl/composition/bootstrap/runtime/__init__.py",
           "line": 1,

@@ -78,6 +78,31 @@ def _referenced_names_from_tree(tree: ast.Module) -> set[str]:
     return referenced_names
 
 
+def _called_name(node: ast.Call) -> str | None:
+    func = node.func
+    if isinstance(func, ast.Name):
+        return func.id
+    if isinstance(func, ast.Attribute):
+        return func.attr
+    return None
+
+
+def _forbidden_batch_lifecycle_event_constructors(
+    application_dir: Path,
+) -> list[str]:
+    forbidden_events = {"BatchCreated", "BatchSealed"}
+    violations: list[str] = []
+    for py_file in sorted(application_dir.rglob("*.py")):
+        tree = ast.parse(py_file.read_text(encoding="utf-8"), filename=str(py_file))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Call) and _called_name(node) in forbidden_events:
+                violations.append(
+                    f"{py_file.relative_to(application_dir)}:{node.lineno} "
+                    f"constructs {_called_name(node)} outside aggregate boundary"
+                )
+    return violations
+
+
 def _iter_aggregate_files(aggregates_dir: Path) -> list[Path]:
     return [
         py_file
@@ -506,6 +531,19 @@ class TestDomainEventsForCoordination:
         }
 
         _assert_aggregate_event_references(aggregates_dir, required_events)
+
+    def test_batch_creation_and_sealing_events_are_aggregate_owned(
+        self,
+        src_dir: Path,
+    ) -> None:
+        """Application code must not construct BatchCreated/BatchSealed directly."""
+        application_dir = src_dir / "bioetl" / "application"
+        violations = _forbidden_batch_lifecycle_event_constructors(application_dir)
+
+        assert not violations, (
+            "Batch creation/sealing lifecycle events must be emitted by the "
+            "Batch aggregate boundary.\n" + "\n".join(f"  - {v}" for v in violations)
+        )
 
     def test_aggregates_have_collect_events_method(self, src_dir: Path) -> None:
         """All aggregates should have collect_events() method.
