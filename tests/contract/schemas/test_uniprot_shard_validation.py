@@ -20,7 +20,8 @@ pytestmark = [pytest.mark.contracts, pytest.mark.no_api]
 
 
 def test_uniprot_core_shard_accepts_minimal_valid_row() -> None:
-    UniprotCoreSchema.validate(minimal_schema_dataframe(UniprotCoreSchema))
+    validated = UniprotCoreSchema.validate(minimal_schema_dataframe(UniprotCoreSchema))
+    assert validated["accession"].iloc[0]
 
 
 @pytest.mark.parametrize("accession", ["BAD", "123", ""])
@@ -45,7 +46,8 @@ def test_uniprot_feature_shard_rejects_negative_feature_count() -> None:
 
 
 def test_id_mapping_shard_accepts_found_mapping() -> None:
-    IDMappingSchema.validate(dataframe_from_row(id_mapping_row()))
+    validated = IDMappingSchema.validate(dataframe_from_row(id_mapping_row()))
+    assert validated["mapping_status"].iloc[0] == "found"
 
 
 def test_id_mapping_shard_rejects_invalid_target_id() -> None:
@@ -63,7 +65,10 @@ def test_id_mapping_shard_rejects_invalid_mapping_status() -> None:
 
 
 def test_uniprot_target_schema_accepts_composed_minimal_row() -> None:
-    UniprotTargetSchema.validate(minimal_schema_dataframe(UniprotTargetSchema))
+    validated = UniprotTargetSchema.validate(
+        minimal_schema_dataframe(UniprotTargetSchema)
+    )
+    assert validated["accession"].iloc[0]
 
 
 @pytest.mark.parametrize(
@@ -106,7 +111,7 @@ def test_uniprot_feature_shard_rejects_additional_negative_counts(field: str) ->
 
 
 def test_id_mapping_shard_accepts_not_found_without_accession() -> None:
-    IDMappingSchema.validate(
+    validated = IDMappingSchema.validate(
         dataframe_from_row(
             id_mapping_row(
                 uniprot_accession=None,
@@ -114,6 +119,7 @@ def test_id_mapping_shard_accepts_not_found_without_accession() -> None:
             )
         )
     )
+    assert validated["mapping_status"].iloc[0] == "not_found"
 
 
 def test_id_mapping_shard_rejects_invalid_uniprot_accession() -> None:

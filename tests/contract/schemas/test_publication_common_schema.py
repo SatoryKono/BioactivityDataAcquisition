@@ -32,7 +32,8 @@ def _minimal_publication_common_df() -> pd.DataFrame:
 
 
 def test_publication_common_schema_accepts_minimal_row() -> None:
-    PublicationGoldCommonSchema.validate(_minimal_publication_common_df())
+    validated = PublicationGoldCommonSchema.validate(_minimal_publication_common_df())
+    assert validated["entity_id"].iloc[0] == "publication:test"
 
 
 def test_publication_common_schema_accepts_loaded_taxonomy_values() -> None:

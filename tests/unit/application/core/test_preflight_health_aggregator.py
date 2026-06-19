@@ -12,7 +12,8 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.application.core.preflight.health_aggregator import _HealthAggregator
-from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP, current_utc_time
+from bioetl.application.runtime_clock import current_utc_time
+from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP
 from bioetl.domain.exceptions import InfrastructureError
 from bioetl.domain.ports.health_check import HealthCheckResult
 from bioetl.domain.types import ComponentHealthResult, HealthReport, HealthStatus
