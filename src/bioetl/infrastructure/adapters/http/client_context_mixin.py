@@ -15,6 +15,7 @@ class HTTPClientContextMixin:
     """Async context lifecycle and client-access helpers."""
 
     _client: httpx.AsyncClient | None
+    _client_enter_depth: int
     user_agent: str
     contact_email: str | None
     run_id: object | None
@@ -28,6 +29,15 @@ class HTTPClientContextMixin:
         self,
     ) -> Self:
         """Enter async context manager."""
+        current_depth = int(getattr(self, "_client_enter_depth", 0))
+        if self._client is not None and current_depth > 0:
+            self._client_enter_depth = current_depth + 1
+            return self
+        if self._client is not None:
+            # Recover from inconsistent lifecycle state before opening a new client.
+            await self._client.aclose()
+            self._client = None
+
         user_agent = self.user_agent
         if self.contact_email:
             user_agent = f"{user_agent} ({self.contact_email})"
@@ -51,6 +61,7 @@ class HTTPClientContextMixin:
             ),
             trust_env=self.trust_env,
         )
+        self._client_enter_depth = 1
         return self
 
     async def __aexit__(
@@ -61,6 +72,11 @@ class HTTPClientContextMixin:
     ) -> None:
         """Exit async context manager."""
         del exc_type, exc_val, exc_tb
+        current_depth = int(getattr(self, "_client_enter_depth", 0))
+        if current_depth > 1:
+            self._client_enter_depth = current_depth - 1
+            return
+        self._client_enter_depth = 0
         if self._client:
             await self._client.aclose()
             self._client = None
