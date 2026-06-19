@@ -128,6 +128,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as a bounded manual test-governance report utility while testing guidance still references the direct script path; promote it into the canonical scripts.engineering.qa surface or retire it after the broader test-governance workflow is consolidated."
     },
+    "scripts/engineering/qa/report_artifact_duplication_audit.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a bounded manual artifact-duplication audit utility while architecture governance tests and generated quality artifacts still depend on this exact surface; promote it into the canonical scripts.engineering.qa reporting lane or retire it after duplication governance consolidates elsewhere."
+    },
     "scripts/engineering/qa/report_adr_enforcement_matrix.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
@@ -157,6 +163,12 @@
       "decision": "legacy_manual_utility",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded historical backlog-report utility for the Stream B config-surface burn-down; either route it through a governed reporting workflow or retire it once the burn-down campaign is formally closed."
+    },
+    "scripts/engineering/qa/analyze_duplicate_functions.py": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as the compatibility wrapper for the legacy AST duplicate-function analyzer under src/tools/scripts/duplicate_function_analyzer.py; remove the wrapper when documented callers move to the canonical implementation or the analyzer is retired."
     },
     "scripts/engineering/qa/report_dashboard_promql_scope.py": {
       "owner": "@bioetl-platform",

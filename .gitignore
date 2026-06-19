@@ -116,6 +116,7 @@ log_test.txt
 !/reports/quality/test-governance-current.json
 !/reports/quality/test-duplicate-name-inventory.json
 !/reports/quality/test-fixture-asset-duplication.json
+!/reports/quality/config-contract-registry-artifact-duplication.json
 !/reports/quality/pipeline-config-contract-ownership-map.json
 !/reports/quality/pipeline-config-contract-ownership-map.md
 !/reports/quality/contract-coverage-matrix.json

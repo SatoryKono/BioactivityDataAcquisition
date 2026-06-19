@@ -53,6 +53,7 @@ def test_artifact_duplication_audit_is_registered_for_jscpd_blind_spot() -> None
     )
 
     assert set(JSCPD_BLIND_SPOT_ANCHORS).issubset(set(jscpd["ignore"]))
+    assert policy["issue_ref"] == "#5409"
     assert policy["generator"] == (
         "scripts/engineering/qa/report_artifact_duplication_audit.py"
     )
