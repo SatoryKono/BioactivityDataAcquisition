@@ -1,4 +1,4 @@
-"""Governance checks for the legacy compatibility remediation evidence pack."""
+"""Governance checks for the project remediation evidence pack."""
 
 from __future__ import annotations
 

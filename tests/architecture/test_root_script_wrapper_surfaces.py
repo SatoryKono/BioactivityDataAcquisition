@@ -1,4 +1,4 @@
-"""Architecture guardrails for legacy root script compatibility wrappers."""
+"""Architecture guardrails for legacy root script wrapper surfaces."""
 
 from __future__ import annotations
 
