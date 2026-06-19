@@ -25,6 +25,7 @@ class _ContextHarness(HTTPClientContextMixin):
         trust_env: bool = True,
     ) -> None:
         self._client = None
+        self._client_enter_depth = 0
         self.user_agent = user_agent
         self.contact_email = contact_email
         self.run_id = run_id
@@ -72,6 +73,7 @@ async def test_aexit_closes_client_and_resets_reference() -> None:
     await harness.__aexit__(None, None, None)
 
     assert harness._client is None
+    assert harness._client_enter_depth == 0
 
 
 def test_get_client_raises_when_context_not_entered() -> None:
@@ -116,3 +118,26 @@ async def test_aenter_passes_explicit_trust_env_flag_to_httpx() -> None:
     assert client._trust_env is False
 
     await harness.__aexit__(None, None, None)
+
+
+@pytest.mark.asyncio
+async def test_reentrant_aenter_reuses_existing_client_until_outer_exit() -> None:
+    harness = _ContextHarness()
+
+    await harness.__aenter__()
+    first_client = harness._get_client()
+    await harness.__aenter__()
+    second_client = harness._get_client()
+
+    assert second_client is first_client
+    assert harness._client_enter_depth == 2
+
+    await harness.__aexit__(None, None, None)
+
+    assert harness._client is first_client
+    assert harness._client_enter_depth == 1
+
+    await harness.__aexit__(None, None, None)
+
+    assert harness._client is None
+    assert harness._client_enter_depth == 0
