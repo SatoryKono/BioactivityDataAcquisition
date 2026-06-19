@@ -204,6 +204,10 @@ unique and retained only as historical compatibility during a rename batch.
 `report_test_governance_audit --duplicate-name-inventory-out <path>` writes the
 full duplicate-name inventory used to ratchet
 `duplicate_test_names_max` and `duplicate_test_name_occurrences_max` toward zero.
+The same collector also publishes the exact-byte fixture duplication inventory at
+`reports/quality/test-fixture-asset-duplication.json` so VCR cassettes, golden
+JSON, and other tracked fixture payloads stay visible even though `jscpd` does
+not scan those artifact classes directly.
 
 Failure classifications are informational and come from
 `configs/quality/test_health_classifiers.yaml`; pytest exit codes and quality

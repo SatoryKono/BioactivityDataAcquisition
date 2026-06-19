@@ -6,6 +6,7 @@ import pytest
 
 from pathlib import Path
 
+import json
 import yaml
 
 
@@ -44,6 +45,32 @@ def test_testing_docs_distinguish_authoritative_baseline_from_historical_rollup(
     assert "Current Authoritative Baseline" in baseline_doc
     assert "historical `test-health` rollups remain non-blocking" in baseline_doc
     assert "historical lane history" in qa_readme
+
+
+def test_branch_consumable_test_telemetry_reports_match_committed_baseline() -> None:
+    payload = yaml.safe_load(
+        Path("configs/quality/test_telemetry_baseline.yaml").read_text(encoding="utf-8")
+    )
+    slowest = json.loads(
+        Path("reports/test-telemetry/slowest-tests.json").read_text(encoding="utf-8")
+    )
+    coverage = json.loads(
+        Path("reports/test-telemetry/coverage-summary.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    slowest_md = Path("reports/test-telemetry/slowest-tests.md").read_text(
+        encoding="utf-8"
+    )
+
+    assert slowest["source_commit"] == payload["source_commit"]
+    assert slowest["source_run_id"] == payload["source_run_id"]
+    assert slowest["total_cases"] == payload["duration_telemetry"]["total_cases"]
+    assert slowest["top_slowest"] == payload["duration_telemetry"]["top_slowest"]
+    assert coverage["source_commit"] == payload["source_commit"]
+    assert coverage["source_run_id"] == payload["source_run_id"]
+    assert coverage["coverage"] == payload["coverage"]
+    assert "Slowest Tests" in slowest_md
 
 
 def test_slow_governance_cache_probe_is_captured_and_isolated() -> None:

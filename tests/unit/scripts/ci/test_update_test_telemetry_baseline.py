@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from scripts.engineering.ci.update_test_telemetry_baseline import (
+    build_branch_telemetry_reports,
     _read_coverage_percent,
     _read_coverage_percent_from_log,
     _derive_slowest_summary_from_junit_paths,
@@ -156,12 +157,27 @@ def test_render_and_write_baseline_outputs(tmp_path: Path) -> None:
         payload=payload,
         output_yaml_path=output_yaml,
         output_md_path=output_md,
+        branch_reports_dir=tmp_path / "reports" / "test-telemetry",
     )
 
     assert output_yaml.exists()
     assert output_md.exists()
     assert "test_telemetry_baseline" in output_yaml.read_text(encoding="utf-8")
     assert "Test Telemetry Baseline" in output_md.read_text(encoding="utf-8")
+    slowest_json = tmp_path / "reports" / "test-telemetry" / "slowest-tests.json"
+    coverage_summary = (
+        tmp_path / "reports" / "test-telemetry" / "coverage-summary.json"
+    )
+    slowest_md = tmp_path / "reports" / "test-telemetry" / "slowest-tests.md"
+    assert slowest_json.exists()
+    assert coverage_summary.exists()
+    assert slowest_md.exists()
+    slowest_payload = json.loads(slowest_json.read_text(encoding="utf-8"))
+    assert slowest_payload["total_cases"] == 321
+    assert slowest_payload["top_slowest"][0]["test"] == "tests.example::test_case"
+    coverage_payload = json.loads(coverage_summary.read_text(encoding="utf-8"))
+    assert coverage_payload["coverage"]["actual_percent"] == pytest.approx(91.23)
+    assert "Slowest Tests" in slowest_md.read_text(encoding="utf-8")
 
 
 def test_build_baseline_payload_marks_duration_only_refresh_as_captured(
@@ -227,3 +243,37 @@ def test_build_baseline_payload_uses_fallback_coverage_and_junit(
     assert payload["coverage"]["threshold_satisfied"] is True
     assert payload["duration_telemetry"]["total_cases"] == 2
     assert payload["artifact_inputs"]["junit_inputs"] == [str(junit_path)]
+
+
+def test_build_branch_telemetry_reports_preserves_baseline_snapshot() -> None:
+    payload = {
+        "source_branch": "main",
+        "source_commit": "abc123",
+        "source_run_id": "run-42",
+        "refreshed_at_utc": "2026-04-29T12:00:00+00:00",
+        "refresh_status": "captured",
+        "coverage": {
+            "threshold_percent": 85.0,
+            "actual_percent": 91.23,
+            "threshold_satisfied": True,
+        },
+        "duration_telemetry": {
+            "total_cases": 321,
+            "top_slowest": [
+                {
+                    "source": "junit-fast.xml",
+                    "test": "tests.example::test_case",
+                    "duration_s": 12.345,
+                }
+            ],
+        },
+    }
+
+    reports = build_branch_telemetry_reports(payload)
+
+    coverage_summary = json.loads(reports["coverage-summary.json"])
+    slowest_summary = json.loads(reports["slowest-tests.json"])
+    assert coverage_summary["coverage"]["actual_percent"] == pytest.approx(91.23)
+    assert slowest_summary["total_cases"] == 321
+    assert slowest_summary["top_slowest"][0]["test"] == "tests.example::test_case"
+    assert "Slowest Tests" in reports["slowest-tests.md"]

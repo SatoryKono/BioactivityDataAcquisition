@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import hashlib
 import json
 import re
 import sys
@@ -23,7 +24,12 @@ from scripts.engineering.qa.file_discovery import discover_files  # noqa: E402
 DEFAULT_CONFIG = Path("configs/quality/test_governance_audit.yaml")
 DEFAULT_JSON_ARTIFACT = Path("reports/quality/test-governance-current.json")
 DEFAULT_DUPLICATE_NAME_ARTIFACT = Path("reports/quality/test-duplicate-name-inventory.json")
+DEFAULT_FIXTURE_DUPLICATION_ARTIFACT = Path(
+    "reports/quality/test-fixture-asset-duplication.json"
+)
 TEST_FUNCTION_PREFIX = "test_"
+FIXTURE_DUPLICATION_SCAN_ROOT = Path("tests/fixtures")
+FIXTURE_DUPLICATION_EXTENSIONS = frozenset({".json", ".yaml", ".yml"})
 COMPATIBILITY_FILE_RE = re.compile(
     r"(compat|compatibility|legacy|deprecated|shim|sunset)",
     re.IGNORECASE,
@@ -187,6 +193,70 @@ def _build_duplicate_name_inventory(
         "mixed_groups": classification_counts["mixed"],
     }
     return inventory, summary
+
+
+def _fixture_duplication_scope(relative_path: str) -> str:
+    normalized = relative_path.replace("\\", "/")
+    if normalized.startswith("tests/fixtures/vcr/"):
+        return "vcr"
+    if normalized.startswith("tests/fixtures/golden/"):
+        return "golden"
+    return "fixture"
+
+
+def _collect_fixture_asset_duplication(root: Path) -> dict[str, Any]:
+    fixtures_root = root / FIXTURE_DUPLICATION_SCAN_ROOT
+    scope_file_counts: Counter[str] = Counter()
+    groups_by_hash: dict[str, list[str]] = defaultdict(list)
+    total_bytes_by_hash: dict[str, int] = defaultdict(int)
+
+    if fixtures_root.exists():
+        for path in sorted(fixtures_root.rglob("*")):
+            if not path.is_file():
+                continue
+            if path.suffix.lower() not in FIXTURE_DUPLICATION_EXTENSIONS:
+                continue
+
+            relative = path.relative_to(root).as_posix()
+            scope_file_counts[_fixture_duplication_scope(relative)] += 1
+            payload = path.read_bytes()
+            digest = hashlib.sha256(payload).hexdigest()
+            groups_by_hash[digest].append(relative)
+            total_bytes_by_hash[digest] += len(payload)
+
+    duplicate_groups: list[dict[str, Any]] = []
+    duplicate_file_count = 0
+    for digest, paths in sorted(
+        groups_by_hash.items(),
+        key=lambda item: (-len(item[1]), item[0]),
+    ):
+        if len(paths) < 2:
+            continue
+        duplicate_file_count += len(paths)
+        group_scope_counts = Counter(_fixture_duplication_scope(path) for path in paths)
+        duplicate_groups.append(
+            {
+                "sha256": digest,
+                "file_count": len(paths),
+                "total_bytes": total_bytes_by_hash[digest],
+                "scope_counts": dict(sorted(group_scope_counts.items())),
+                "paths": paths,
+            }
+        )
+
+    return {
+        "scan_root": FIXTURE_DUPLICATION_SCAN_ROOT.as_posix(),
+        "tracked_extensions": sorted(FIXTURE_DUPLICATION_EXTENSIONS),
+        "total_files": sum(scope_file_counts.values()),
+        "scope_file_counts": dict(sorted(scope_file_counts.items())),
+        "duplicate_groups": len(duplicate_groups),
+        "duplicate_files": duplicate_file_count,
+        "max_group_size": max(
+            (int(group["file_count"]) for group in duplicate_groups),
+            default=0,
+        ),
+        "groups": duplicate_groups,
+    }
 
 
 def _critical_envelope_template() -> dict[str, dict[str, Any]]:
@@ -502,6 +572,7 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
         "critical_behavior_envelope_count": len(critical_behavior_envelopes),
         "critical_behavior_envelope_assertion_gap_count": assertion_gap_count,
         "critical_behavior_envelopes": critical_behavior_envelopes,
+        "fixture_asset_duplication": _collect_fixture_asset_duplication(root),
         "parse_errors": parse_errors,
     }
 
@@ -570,6 +641,14 @@ def main(argv: list[str] | None = None) -> int:
             "standalone JSON artifact."
         ),
     )
+    parser.add_argument(
+        "--fixture-duplication-out",
+        type=Path,
+        help=(
+            "Write the tracked exact-byte duplication inventory for "
+            "tests/fixtures/**/*.{json,yaml,yml}."
+        ),
+    )
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args(argv)
 
@@ -577,6 +656,7 @@ def main(argv: list[str] | None = None) -> int:
     payload: dict[str, Any] = {"report": report}
     json_out = args.json_out
     duplicate_name_inventory_out = args.duplicate_name_inventory_out
+    fixture_duplication_out = args.fixture_duplication_out
     if args.check and json_out is None:
         candidate = args.root / DEFAULT_JSON_ARTIFACT
         if candidate.exists():
@@ -585,6 +665,10 @@ def main(argv: list[str] | None = None) -> int:
         candidate = args.root / DEFAULT_DUPLICATE_NAME_ARTIFACT
         if candidate.exists():
             duplicate_name_inventory_out = candidate
+    if args.check and fixture_duplication_out is None:
+        candidate = args.root / DEFAULT_FIXTURE_DUPLICATION_ARTIFACT
+        if candidate.exists():
+            fixture_duplication_out = candidate
     exit_code = 0
 
     if args.config.exists():
@@ -598,6 +682,7 @@ def main(argv: list[str] | None = None) -> int:
         "summary": report["duplicate_test_name_inventory_summary"],
         "inventory": report["duplicate_test_name_inventory"],
     }
+    fixture_duplication_payload = report["fixture_asset_duplication"]
     output = _canonical_json(payload)
     if args.check:
         if json_out is not None and not _check_json_artifact(json_out, payload):
@@ -605,6 +690,11 @@ def main(argv: list[str] | None = None) -> int:
         if duplicate_name_inventory_out is not None and not _check_json_artifact(
             duplicate_name_inventory_out,
             duplicate_inventory_payload,
+        ):
+            exit_code = 1
+        if fixture_duplication_out is not None and not _check_json_artifact(
+            fixture_duplication_out,
+            fixture_duplication_payload,
         ):
             exit_code = 1
     elif json_out:
@@ -616,6 +706,12 @@ def main(argv: list[str] | None = None) -> int:
         duplicate_name_inventory_out.parent.mkdir(parents=True, exist_ok=True)
         duplicate_name_inventory_out.write_text(
             _canonical_json(duplicate_inventory_payload),
+            encoding="utf-8",
+        )
+    if fixture_duplication_out and not args.check:
+        fixture_duplication_out.parent.mkdir(parents=True, exist_ok=True)
+        fixture_duplication_out.write_text(
+            _canonical_json(fixture_duplication_payload),
             encoding="utf-8",
         )
     return exit_code

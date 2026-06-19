@@ -196,7 +196,7 @@ markers = [
     "unit: Unit tests (fast, no I/O)",
     "integration: Integration tests (may use I/O)",
     "relaxed_dq: Integration tests that explicitly opt in to relaxed DQ thresholds for replay stability",
-    "e2e: End-to-end tests (slow, requires Docker)",
+    "e2e: End-to-end tests (slow, Local-Only runtime; maintenance paths intentionally carved out)",
     "asyncio: Async IO tests powered by pytest-asyncio",
     "slow: Slow tests (hypothesis, long-running)",
     "network: Tests requiring outbound network access",

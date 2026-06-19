@@ -1,8 +1,8 @@
 ---
 id: mcp-setup
-title: Configure MCP
+title: "\u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0430 MCP"
 task_id: mcp-setup
-created_at: '2026-06-04T16:25:50Z'
+created_at: '2026-06-19T10:39:36Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
@@ -15,7 +15,7 @@ query: mcp
 
 ## Task
 
-- Title: Configure MCP
+- Title: Настройка MCP
 - Retrieval query: mcp
 
 ## Retrieved context

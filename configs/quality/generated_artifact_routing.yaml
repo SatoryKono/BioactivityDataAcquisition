@@ -198,6 +198,16 @@ routes:
     notes: Reviewed full-app duplication baseline for adapters, pipelines, bootstrap,
       and CLI visibility route to reports/quality.
 
+  - id: test-governance-quality-baseline
+    generator: scripts/engineering/qa/report_test_governance_audit.py
+    output_kind: working_report
+    commit_policy: tracked_quality_baseline
+    outputs:
+      - reports/quality/test-governance-current.json
+      - reports/quality/test-duplicate-name-inventory.json
+      - reports/quality/test-fixture-asset-duplication.json
+    notes: Test-governance tracked artifacts include duplicate-name and fixture-asset visibility inventories.
+
   - id: weekly-quality-debt-report
     generator: scripts/engineering/ci/report_quality_debt_weekly.py
     output_kind: working_report
@@ -264,6 +274,16 @@ routes:
     outputs:
       - reports/quality/test-runs/
     notes: Test-health JUnit XML and JSON run summaries are runtime and CI artifacts.
+
+  - id: committed-test-telemetry-baseline-summary-layer
+    generator: scripts/engineering/ci/update_test_telemetry_baseline.py
+    output_kind: test_report
+    commit_policy: tracked_quality_baseline
+    outputs:
+      - reports/test-telemetry/coverage-summary.json
+      - reports/test-telemetry/slowest-tests.json
+      - reports/test-telemetry/slowest-tests.md
+    notes: Branch-consumable telemetry summaries are regenerated alongside the committed baseline refresh workflow.
 
   - id: architecture-debt-task-backlog-quality-report
     generator: scripts/engineering/qa/generate_architecture_debt_tasks.py
