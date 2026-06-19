@@ -18,6 +18,7 @@ import json
 import re
 import subprocess
 import sys
+from collections import Counter
 from dataclasses import asdict, dataclass
 from datetime import date
 from pathlib import Path
@@ -55,6 +56,46 @@ class TargetDuplicationReport:
     duplicate_count: int
     clusters: tuple[DuplicateCluster, ...]
     raw_duplicate_count: int | None = None
+
+
+def _cluster_actionability_category(cluster: DuplicateCluster) -> str:
+    """Classify duplicate-code findings by likely remediation path."""
+    module_names = [module.module for module in cluster.modules]
+    normalized_path = cluster.path.replace("\\", "/")
+    if any(
+        token in module
+        for module in module_names
+        for token in ("fallback", "resilience", "health_check_contract")
+    ):
+        return "adapter_resilience_or_contract_template"
+    if any(".interfaces.cli." in module for module in module_names):
+        return "cli_command_contract_shell"
+    if any(".application.pipelines." in module for module in module_names):
+        return "pipeline_transformer_contract_pattern"
+    if any(".composition." in module for module in module_names):
+        return "composition_runtime_wiring_pattern"
+    if normalized_path.endswith("/__init__.py") or any(
+        module.endswith(".__init__") for module in module_names
+    ):
+        return "export_facade_or_package_barrel"
+    return "behavior_bearing_candidate"
+
+
+def _actionability_summary(
+    clusters: tuple[DuplicateCluster, ...],
+) -> list[dict[str, object]]:
+    """Return deterministic actionability counts for report triage."""
+    counts = Counter(_cluster_actionability_category(cluster) for cluster in clusters)
+    return [
+        {
+            "category": category,
+            "duplicate_clusters": count,
+        }
+        for category, count in sorted(
+            counts.items(),
+            key=lambda item: (-item[1], item[0]),
+        )
+    ]
 
 
 def _top_duplicate_pairs(
@@ -369,11 +410,15 @@ def _build_payload(
                     )
                     - report.duplicate_count
                 ),
+                "actionability": _actionability_summary(report.clusters),
                 "top_pairs": _top_duplicate_pairs(report.clusters),
                 "clusters": [
                     {
                         "path": cluster.path,
                         "line": cluster.line,
+                        "actionability_category": _cluster_actionability_category(
+                            cluster
+                        ),
                         "modules": [asdict(module) for module in cluster.modules],
                     }
                     for cluster in report.clusters
@@ -472,6 +517,24 @@ def _markdown_summary_lines(
     return lines
 
 
+def _actionability_markdown_section(report: TargetDuplicationReport) -> list[str]:
+    """Render actionability counts for one target."""
+    summary = _actionability_summary(report.clusters)
+    if not summary:
+        return []
+    lines = [
+        "",
+        "| Actionability category | Duplicate clusters |",
+        "| --- | ---: |",
+    ]
+    for row in summary:
+        category = row.get("category")
+        count = row.get("duplicate_clusters")
+        if isinstance(category, str) and isinstance(count, int):
+            lines.append(f"| `{category}` | {count} |")
+    return lines
+
+
 def _top_pairs_markdown_section(report: TargetDuplicationReport) -> list[str]:
     """Render top recurring pair table when available."""
     top_pairs = _top_duplicate_pairs(report.clusters)
@@ -517,6 +580,7 @@ def _report_markdown_section(report: TargetDuplicationReport) -> list[str]:
                 f"{raw_duplicate_count - report.duplicate_count}",
             ]
         )
+    lines.extend(_actionability_markdown_section(report))
     lines.extend(_top_pairs_markdown_section(report))
     if not report.clusters:
         lines.append("- no `R0801` findings")

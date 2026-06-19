@@ -57,7 +57,6 @@ composite:
       rationale: Non-publication composite; publication join policy not applicable.
   field_aliases:
     hba_count:
-      chembl: hba_count
       pubchem: h_bond_acceptor_count
   # ---------------------------------------------------------------------------
   # Seed Pipeline Configuration
@@ -66,16 +65,12 @@ composite:
   # Its output provides join keys (molecule_id, publication_id)
   # for dependency dual-key filtering and composite join.
     hbd_count:
-      chembl: hbd_count
       pubchem: h_bond_donor_count
     logp:
-      chembl: logp
       pubchem: xlogp
     polar_surface_area:
-      chembl: polar_surface_area
       pubchem: tpsa
     standard_inchi:
-      chembl: standard_inchi
       pubchem: inchi
 
   # ---------------------------------------------------------------------------

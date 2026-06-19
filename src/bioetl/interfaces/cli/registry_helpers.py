@@ -7,8 +7,9 @@ populated ``PipelineRegistry`` instance.
 
 from __future__ import annotations
 
-from collections.abc import Callable
-from typing import TYPE_CHECKING
+from collections.abc import Callable, Mapping, Sequence
+from contextlib import AbstractContextManager
+from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
     from bioetl.composition.registry_api import PipelineRegistry
@@ -16,8 +17,19 @@ if TYPE_CHECKING:
 __all__ = [
     "build_cli_registry",
     "create_registry",
+    "format_command_help_rows",
     "register_all_pipelines",
 ]
+
+LazyCommandSpec = tuple[str, str, str]
+
+
+class CommandHelpFormatter(Protocol):
+    """Minimal Click help-formatter surface used by lazy CLI groups."""
+
+    def section(self, name: str) -> AbstractContextManager[None]: ...
+
+    def write_dl(self, rows: Sequence[tuple[str, str]]) -> None: ...
 
 
 def create_registry() -> PipelineRegistry:
@@ -32,6 +44,25 @@ def register_all_pipelines(*, registry: PipelineRegistry | None = None) -> None:
     from bioetl.composition.registry_api import register_all_pipelines as _impl
 
     _impl(registry=registry)
+
+
+def format_command_help_rows(
+    *,
+    formatter: CommandHelpFormatter,
+    eager_commands: Mapping[str, tuple[object, str]],
+    lazy_commands: Mapping[str, LazyCommandSpec],
+    section_title: str = "Commands",
+) -> None:
+    """Render deterministic help rows for eager plus lazy CLI commands."""
+    rows = [
+        (name, help_text) for name, (_command, help_text) in eager_commands.items()
+    ] + [
+        (name, help_text)
+        for name, (_module_name, _attribute_name, help_text) in lazy_commands.items()
+    ]
+    if rows:
+        with formatter.section(section_title):
+            formatter.write_dl(rows)
 
 
 def _build_registered_registry(

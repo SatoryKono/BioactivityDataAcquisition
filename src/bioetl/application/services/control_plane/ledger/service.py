@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 import bioetl.application.services.control_plane.ledger.core_events as _core_events
+from bioetl.application.runtime_clock import current_utc_time
 from bioetl.application.services.control_plane.ledger.entry_support import (
     RunLedgerEntryRequest,
     append_run_ledger_entry,
@@ -15,7 +16,6 @@ from bioetl.application.services.control_plane.ledger.entry_support import (
 from bioetl.application.services.control_plane.ledger.rich_events import (
     RunLedgerRichEventRecordingMixin,
 )
-from bioetl.domain.context import current_utc_time
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.control_plane.run_ledger import (
     RUN_FAILED_EVENT,

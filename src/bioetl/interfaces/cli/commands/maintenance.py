@@ -26,6 +26,7 @@ from bioetl.interfaces.cli.commands.domains.maintenance.service_access import (
     preview_cleanup,
 )
 from bioetl.interfaces.cli.commands.vacuum import vacuum_all_command, vacuum_command
+from bioetl.interfaces.cli.registry_helpers import format_command_help_rows
 
 __all__ = [
     "get_bronze_cleanup_service",
@@ -109,18 +110,11 @@ class _LazyMaintenanceGroup(click.Group):
         formatter: click.HelpFormatter,
     ) -> None:
         del ctx
-        rows = [
-            (name, help_text)
-            for name, (_command, help_text) in _EAGER_MAINTENANCE_COMMANDS.items()
-        ] + [
-            (name, help_text)
-            for name, (_module_name, _attribute_name, help_text) in (
-                _LAZY_MAINTENANCE_COMMANDS.items()
-            )
-        ]
-        if rows:
-            with formatter.section("Commands"):
-                formatter.write_dl(rows)
+        format_command_help_rows(
+            formatter=formatter,
+            eager_commands=_EAGER_MAINTENANCE_COMMANDS,
+            lazy_commands=_LAZY_MAINTENANCE_COMMANDS,
+        )
 
 
 @click.group(cls=_LazyMaintenanceGroup)

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
+from bioetl.application.runtime_clock import current_utc_time
 from bioetl.application.services.lineage.metadata_lineage_anchor_nodes import (
     manifest_edges,
     manifest_node,
@@ -29,7 +30,6 @@ from bioetl.application.services.lineage.metadata_lineage_transform_nodes import
     transform_edges,
     transform_nodes,
 )
-from bioetl.domain.context import current_utc_time
 
 
 def fragment_timestamp(*values: datetime | None) -> datetime:

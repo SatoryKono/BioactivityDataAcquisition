@@ -345,6 +345,100 @@ def test_top_duplicate_pairs_ranks_repeated_pairs() -> None:
     assert ranked[1]["duplicate_clusters"] == 1
 
 
+def test_build_payload_includes_actionability_classification() -> None:
+    report = TargetDuplicationReport(
+        target="src/bioetl/infrastructure/adapters",
+        returncode=8,
+        duplicate_count=2,
+        raw_duplicate_count=2,
+        clusters=(
+            DuplicateCluster(
+                path="src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+                line=1,
+                modules=(
+                    DuplicateModuleRef(
+                        module="bioetl.infrastructure.adapters.chembl.__init__",
+                        start_line=1,
+                        end_line=5,
+                    ),
+                    DuplicateModuleRef(
+                        module="bioetl.infrastructure.adapters.chembl.models",
+                        start_line=10,
+                        end_line=15,
+                    ),
+                ),
+            ),
+            DuplicateCluster(
+                path="src/bioetl/infrastructure/adapters/chembl/fallback.py",
+                line=20,
+                modules=(
+                    DuplicateModuleRef(
+                        module="bioetl.infrastructure.adapters.chembl.fetch_resilience_mixin",
+                        start_line=20,
+                        end_line=25,
+                    ),
+                    DuplicateModuleRef(
+                        module="bioetl.infrastructure.adapters.common.fetch_resilience_template",
+                        start_line=30,
+                        end_line=35,
+                    ),
+                ),
+            ),
+        ),
+    )
+
+    payload = _build_payload(
+        [report],
+        snapshot_date="2026-06-19",
+        exclude_module_patterns=[],
+        trend_summary={"status": "no_prior_snapshot"},
+    )
+
+    row = payload["targets"][0]
+    assert row["actionability"] == [
+        {
+            "category": "adapter_resilience_or_contract_template",
+            "duplicate_clusters": 1,
+        },
+        {"category": "export_facade_or_package_barrel", "duplicate_clusters": 1},
+    ]
+    assert row["clusters"][0]["actionability_category"] == (
+        "export_facade_or_package_barrel"
+    )
+
+
+def test_render_markdown_includes_actionability_table() -> None:
+    report = TargetDuplicationReport(
+        target="src/bioetl/interfaces/cli",
+        returncode=8,
+        duplicate_count=1,
+        raw_duplicate_count=1,
+        clusters=(
+            DuplicateCluster(
+                path="src/bioetl/interfaces/cli/commands/workflow.py",
+                line=100,
+                modules=(
+                    DuplicateModuleRef(
+                        module="bioetl.interfaces.cli.commands.workflow",
+                        start_line=100,
+                        end_line=110,
+                    ),
+                    DuplicateModuleRef(
+                        module="bioetl.interfaces.cli.commands._workflow_support",
+                        start_line=120,
+                        end_line=130,
+                    ),
+                ),
+            ),
+        ),
+    )
+
+    markdown = _render_markdown([report])
+
+    assert "| Actionability category | Duplicate clusters |" in markdown
+    assert "| `cli_command_contract_shell` | 1 |" in markdown
+
+
 def test_build_payload_includes_top_pairs() -> None:
     report = TargetDuplicationReport(
         target="src/bioetl/composition/factories/pipeline",

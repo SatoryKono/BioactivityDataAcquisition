@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 
 from bioetl.domain.ports import ClockPort
 
-__all__ = ["RuntimeClock", "resolve_runtime_clock"]
+__all__ = ["RuntimeClock", "current_utc_time", "resolve_runtime_clock"]
 
 
 class RuntimeClockService(ClockPort):
@@ -18,6 +18,11 @@ class RuntimeClockService(ClockPort):
 
 
 RuntimeClock = RuntimeClockService
+
+
+def current_utc_time() -> datetime:
+    """Return current UTC time through the application runtime clock seam."""
+    return RuntimeClock().now()
 
 
 def resolve_runtime_clock(clock: ClockPort | None) -> ClockPort:

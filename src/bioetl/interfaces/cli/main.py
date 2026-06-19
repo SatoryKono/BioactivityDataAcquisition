@@ -20,6 +20,9 @@ from bioetl.interfaces.cli.registry_helpers import (
     create_registry as _create_registry,
 )
 from bioetl.interfaces.cli.registry_helpers import (
+    format_command_help_rows as _format_command_help_rows,
+)
+from bioetl.interfaces.cli.registry_helpers import (
     register_all_pipelines as _register_all_pipelines,
 )
 
@@ -172,17 +175,11 @@ class _LazyCliGroup(Group):
         formatter: HelpFormatter,
     ) -> None:
         del ctx
-        rows = [
-            (name, help_text) for name, (_command, help_text) in _EAGER_COMMANDS.items()
-        ] + [
-            (name, help_text)
-            for name, (_module_name, _attribute_name, help_text) in (
-                _LAZY_COMMAND_SPECS.items()
-            )
-        ]
-        if rows:
-            with formatter.section("Commands"):
-                formatter.write_dl(rows)
+        _format_command_help_rows(
+            formatter=formatter,
+            eager_commands=_EAGER_COMMANDS,
+            lazy_commands=_LAZY_COMMAND_SPECS,
+        )
 
 
 def _build_main_registry() -> object:

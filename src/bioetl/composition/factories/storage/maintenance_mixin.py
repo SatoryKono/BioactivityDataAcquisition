@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
-from bioetl.domain.context import current_utc_time
+from bioetl.application.runtime_clock import current_utc_time
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.storage.bronze_writer import BronzeWriter

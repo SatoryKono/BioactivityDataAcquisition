@@ -39,7 +39,7 @@ from bioetl.composition.bootstrap.cli.noop import (
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.composition.registry_api import create_registry
 from bioetl.composition.runtime_builders.config_access import get_settings
-from bioetl.domain.context import current_utc_time
+from bioetl.application.runtime_clock import current_utc_time
 from bioetl.domain.ports import BronzeStoragePort
 from bioetl.domain.types import RunID, RunType
 from bioetl.domain.value_objects.run_context import RunContext

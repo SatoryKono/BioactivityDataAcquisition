@@ -8,11 +8,11 @@ from typing import Any
 
 import pyarrow as pa
 
-from bioetl.domain.context import current_utc_time
 from bioetl.domain.ports import AuditPort, MetricsPort
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterProtocol
 from bioetl.infrastructure.storage.support.retention import RetentionPolicy
+from bioetl.infrastructure.time.system_clock import current_utc_time
 
 
 class SilverMaintenanceOperations:
