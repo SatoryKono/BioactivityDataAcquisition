@@ -1,0 +1,69 @@
+{
+  "duplicate_files": 0,
+  "duplicate_groups": 0,
+  "exclude_patterns": [
+    "reports/quality/config-contract-registry-artifact-duplication.json"
+  ],
+  "groups": [],
+  "include_patterns": [
+    "configs/**/*.csv",
+    "configs/**/*.json",
+    "configs/**/*.toml",
+    "configs/**/*.yaml",
+    "configs/**/*.yml",
+    "docs/04-reference/contracts/**/*.md",
+    "reports/quality/*contract*.json",
+    "reports/quality/*contract*.md",
+    "reports/quality/*matrix*.json",
+    "reports/quality/*matrix*.md",
+    "reports/quality/*ownership*.json",
+    "reports/quality/*ownership*.md",
+    "reports/quality/*registry*.json",
+    "reports/quality/*registry*.md",
+    "tests/fixtures/contracts/**/*.json",
+    "tests/fixtures/contracts/**/*.yaml",
+    "tests/fixtures/contracts/**/*.yml",
+    "tests/fixtures/golden/**/*.json",
+    "tests/fixtures/golden/**/*.yaml",
+    "tests/fixtures/golden/**/*.yml"
+  ],
+  "jscpd_blind_spot_anchors": [
+    "**/configs/**",
+    "**/*.yaml",
+    "**/*.yml",
+    "**/*.json",
+    "**/*.md"
+  ],
+  "max_group_size": 0,
+  "pattern_file_counts": {
+    "configs/**/*.csv": 2,
+    "configs/**/*.json": 9,
+    "configs/**/*.yaml": 116,
+    "reports/quality/*contract*.json": 7,
+    "reports/quality/*contract*.md": 3,
+    "reports/quality/*matrix*.json": 1,
+    "reports/quality/*matrix*.md": 1,
+    "reports/quality/*registry*.json": 1,
+    "tests/fixtures/contracts/**/*.json": 7,
+    "tests/fixtures/golden/**/*.json": 21
+  },
+  "policy_scope": "config_contract_registry_artifact_duplication",
+  "scan_root": ".",
+  "schema_version": 1,
+  "scope_file_counts": {
+    "config": 150,
+    "contract": 42,
+    "golden": 20,
+    "quality_report": 10,
+    "registry": 16
+  },
+  "total_files": 238,
+  "tracked_extensions": [
+    ".csv",
+    ".json",
+    ".md",
+    ".toml",
+    ".yaml",
+    ".yml"
+  ]
+}

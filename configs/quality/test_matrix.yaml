@@ -826,6 +826,7 @@ fixture_governance:
       - golden
       - vcr
   config_contract_registry_duplication_inventory_contract:
+    issue_ref: '#5409'
     scope: exact_byte_duplicate_visibility_for_jscpd_excluded_governance_artifacts
     generator: scripts/engineering/qa/report_artifact_duplication_audit.py
     command: python -m scripts.engineering.qa report-artifact-duplication-audit

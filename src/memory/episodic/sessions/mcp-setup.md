@@ -1,12 +1,12 @@
 ---
 id: mcp-setup
-title: "\u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0430 MCP"
+title: Setup MCP local runtime config
 task_id: mcp-setup
-created_at: '2026-06-19T10:39:36Z'
+created_at: '2026-06-19T16:04:15Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- AGENTS.md
+- docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md
 summary: Active task session context.
 query: mcp
 ---
@@ -15,7 +15,7 @@ query: mcp
 
 ## Task
 
-- Title: Настройка MCP
+- Title: Setup MCP local runtime config
 - Retrieval query: mcp
 
 ## Retrieved context
