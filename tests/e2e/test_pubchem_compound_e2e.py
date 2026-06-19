@@ -82,13 +82,13 @@ async def test_pubchem_compound_full_cycle(e2e_data_dir: Path):
     assert len(bronze_metadata_files) >= 1
 
     # Assert - Silver layer
-    silver_count = assert_silver_table_has_records(
+    silver_count = await assert_silver_table_has_records(
         e2e_data_dir, "pubchem_compound", expected_min=1
     )
     assert silver_count <= 5
 
     # Assert - Schema validation
-    records = get_silver_records(e2e_data_dir, "pubchem_compound")
+    records = await get_silver_records(e2e_data_dir, "pubchem_compound")
     required_fields = ["molecule_id"]
     for record in records:
         for field in required_fields:
@@ -111,7 +111,7 @@ async def test_pubchem_compound_structural_fields(e2e_data_dir: Path):
     await runner.run()
 
     # Assert - Check structural fields
-    records = get_silver_records(e2e_data_dir, "pubchem_compound")
+    records = await get_silver_records(e2e_data_dir, "pubchem_compound")
 
     for record in records:
         # CID must always be present
@@ -146,13 +146,13 @@ async def test_pubchem_compound_query_filter(e2e_data_dir: Path):
     await runner.run()
 
     # Assert - Silver layer should have records
-    silver_count = assert_silver_table_has_records(
+    silver_count = await assert_silver_table_has_records(
         e2e_data_dir, "pubchem_compound", expected_min=1
     )
     assert silver_count >= 1
 
     # Get records - should be related to ibuprofen
-    records = get_silver_records(e2e_data_dir, "pubchem_compound")
+    records = await get_silver_records(e2e_data_dir, "pubchem_compound")
 
     assert len(records) >= 1
 

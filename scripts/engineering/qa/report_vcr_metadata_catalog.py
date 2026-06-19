@@ -220,15 +220,20 @@ def _run_python_reference_scan(
     if not tokens:
         return owners_by_token
 
+    # Mirror ripgrep's "prefer the longest overlapping token" behavior closely
+    # enough to keep fallback results stable on platforms where rg is unavailable.
+    ordered_tokens = sorted(set(tokens), key=lambda token: (-len(token), token))
+    token_pattern = re.compile("|".join(re.escape(token) for token in ordered_tokens))
+
     for path in _iter_reachability_scan_files(repo_root):
         try:
             content = path.read_text(encoding="utf-8")
         except OSError:
             continue
         owner = path.relative_to(repo_root).as_posix()
-        for token in tokens:
-            if token in content:
-                owners_by_token.setdefault(token, set()).add(owner)
+        matched_tokens = {match.group(0) for match in token_pattern.finditer(content)}
+        for token in matched_tokens:
+            owners_by_token.setdefault(token, set()).add(owner)
 
     return owners_by_token
 

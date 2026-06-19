@@ -194,10 +194,10 @@ def _build_source_artifacts(
     contract_diagnostics: dict[str, Any],  # Any: JSON artifact can have any value type
     dq_diagnostics: dict[str, Any],  # Any: JSON artifact can have any value type
     observability_inventory: dict[
-        str, Any
+        str, Any  # Any: JSON artifact can have any value type
     ],  # Any: JSON artifact can have any value type
     adr_enforcement_matrix: dict[
-        str, Any
+        str, Any  # Any: JSON artifact can have any value type
     ],  # Any: JSON artifact can have any value type
 ) -> dict[str, object]:
     return {

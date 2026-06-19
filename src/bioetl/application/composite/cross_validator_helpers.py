@@ -10,7 +10,7 @@ from bioetl.domain.composite.cross_validation import ComparisonMethod
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.domain.composite.config import EnricherFieldPairing
+    from bioetl.domain.composite.cross_validation import EnricherFieldPairing
     from bioetl.domain.ports import LoggerPort
 
 

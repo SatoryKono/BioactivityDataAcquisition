@@ -355,7 +355,7 @@ if (
     $env:PYTEST_XDIST_AUTO_NUM_WORKERS = if ($env:BIOETL_PYTEST_WINDOWS_XDIST_WORKERS) {
         $env:BIOETL_PYTEST_WINDOWS_XDIST_WORKERS
     } else {
-        "2"
+        "1"
     }
 }
 

@@ -56,6 +56,10 @@ class HTTPClientRetryMixin:
     _tracer: TracingPort | None
     run_id: RunID | None
 
+    def _observability_run_id(self) -> str:
+        """Return a stable run identifier for retry logs and spans."""
+        return str(self.run_id) if self.run_id is not None else "unknown"
+
     def _get_client(self) -> httpx.AsyncClient:
         """Provided by HTTPClientContextMixin in UnifiedHTTPClient."""
         raise NotImplementedError
@@ -94,6 +98,7 @@ class HTTPClientRetryMixin:
             self.logger.warning(
                 "http_retry_budget_exhausted",
                 provider=self.provider,
+                run_id=self._observability_run_id(),
                 method=method,
                 url=url,
                 retry_budget=self.retry_config.effective_retry_budget(),
@@ -142,6 +147,7 @@ class HTTPClientRetryMixin:
             url=url,
             method=method,
             provider=self.provider,
+            run_id=self._observability_run_id(),
         )
 
     async def _execute_single_attempt(
@@ -256,6 +262,7 @@ class HTTPClientRetryMixin:
                 url=url,
                 span=span,
                 provider=self.provider,
+                run_id=self._observability_run_id(),
                 logger=self.logger,
             )
             raise

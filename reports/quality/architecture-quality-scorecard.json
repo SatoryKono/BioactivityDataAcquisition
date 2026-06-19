@@ -8,8 +8,8 @@
     },
     "module_coverage_inventory": {
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "55612c60c2b509d04b6ea7e8dd80fd4784cb808ab255a3a8f81a053fec8cd03f",
-      "coverage_xml_sha256": "d0efebedc50814e266c232819d61f805a939632bbd21c63136ad2c353c08dd60"
+      "source_tree_sha256": "f6fe96a59126d0141d88adedb2341fa91d134a115ec85cf01122ab335a0dbd4d",
+      "coverage_xml_sha256": "6bf4347ce7eea58c2495e1ee948ac879c062b9f3b84b560f82e2614776151764"
     },
     "compatibility_importer_census": {
       "path": "reports/quality/compatibility-importer-census.json",
@@ -117,7 +117,7 @@
       "score": 7.4,
       "weighted_score": 0.888,
       "evidence_metrics": {
-        "unmeasured_module_count": 2,
+        "unmeasured_module_count": 0,
         "uncovered_module_count": 0
       }
     },
@@ -163,7 +163,7 @@
   "metrics": {
     "layer_violations": 0,
     "source_module_count": 2170,
-    "unmeasured_module_count": 2,
+    "unmeasured_module_count": 0,
     "uncovered_module_count": 0,
     "hotspot_family_count": 5,
     "retained_entrypoint_count": 13,

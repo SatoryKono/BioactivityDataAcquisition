@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from unittest.mock import MagicMock
 
 import polars as pl
@@ -117,6 +118,54 @@ def test_coalesce_prefer_enricher_prioritizes_non_seed_column(
     assert "crossref.publication.title" in result.columns
     assert "chembl.publication.title" not in result.columns
     assert result["crossref.publication.title"][0] == "crossref"
+
+
+@pytest.mark.unit
+def test_coalesce_prefer_latest_timestamp_prefers_newest_timestamped_source(
+    policy: CoalescePolicyService,
+) -> None:
+    older = datetime(2026, 4, 1, tzinfo=UTC)
+    newer = datetime(2026, 4, 2, tzinfo=UTC)
+    df = pl.DataFrame(
+        {
+            "chembl.publication.title": ["seed-title"],
+            "chembl.publication.updated_at": [older],
+            "crossref.publication.title": ["crossref-title"],
+            "crossref.publication.updated_at": [newer],
+        }
+    )
+
+    result = policy.coalesce_prefer_latest_timestamp(
+        df,
+        _enrichers=(),
+        seed_pipeline="chembl_publication",
+    )
+
+    assert "chembl.publication.title" in result.columns
+    assert "crossref.publication.title" not in result.columns
+    assert result["chembl.publication.title"][0] == "crossref-title"
+
+
+@pytest.mark.unit
+def test_coalesce_prefer_latest_timestamp_falls_back_to_seed_priority_without_companions(
+    policy: CoalescePolicyService,
+) -> None:
+    df = pl.DataFrame(
+        {
+            "chembl.publication.title": ["seed-title"],
+            "crossref.publication.title": ["crossref-title"],
+        }
+    )
+
+    result = policy.coalesce_prefer_latest_timestamp(
+        df,
+        _enrichers=(),
+        seed_pipeline="chembl_publication",
+    )
+
+    assert "chembl.publication.title" in result.columns
+    assert "crossref.publication.title" not in result.columns
+    assert result["chembl.publication.title"][0] == "seed-title"
 
 
 @pytest.mark.unit

@@ -55,21 +55,6 @@ ACCEPTED_RUNTIME_SCCS: dict[frozenset[str], dict[str, str]] = {
     },
     frozenset(
         {
-            "bioetl.application.services.control_plane.ledger",
-            "bioetl.application.services.control_plane.ledger.service",
-        }
-    ): {
-        "owner": "application.services.control_plane",
-        "review_date": "2026-12-31",
-        "linked_issue": "#4820",
-        "rationale": (
-            "Package __init__.py re-exports from service.py, which imports from "
-            "other ledger submodules. This is a standard package seam pattern for "
-            "control plane ledger services."
-        ),
-    },
-    frozenset(
-        {
             "bioetl.infrastructure.storage.support.atomic_group",
             "bioetl.infrastructure.storage.support.atomic_ops",
         }

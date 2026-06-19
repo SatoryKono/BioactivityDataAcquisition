@@ -7,7 +7,7 @@ from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
 from typing import Any, Final, Protocol
 
-from bioetl.domain.mapping import protein_class_target_type_helpers as helpers
+from . import protein_class_target_type_helpers as helpers
 
 __all__ = [
     "MAJOR_FAMILY_RULE_VERSION",
@@ -160,14 +160,14 @@ def normalized_top_level_from_row(
     row: Mapping[str, object],
     mapping_data: ProteinClassTargetTypeMappingData,
     *,
-    normalized_top_level_cls: type[Any],
+    normalized_top_level_cls: type[Any],  # Any: Polymorphic class type for normalized top-level objects
     normalize_top_level: Callable[
         [object, ProteinClassTargetTypeMappingData | None],
-        Any,
+        Any,  # Any: Return type matches polymorphic normalized object type
     ],
     normalize_label: Callable[[object], str | None],
     non_counting_classes: frozenset[str],
-) -> Any:
+) -> Any:  # Any: Return type matches polymorphic normalized object type
     """Resolve one source row into canonical top-level evidence."""
     canonical_l1 = normalize_label(row.get("canonical_l1"))
     if canonical_l1 is not None:

@@ -277,21 +277,99 @@ def test_helper_module_covers_decision_and_normalization_edges() -> None:
         )
         == "ion channel"
     )
-    assert helper_module.first_present_value(
-        {"l1": None, "level_1": "Transporter"},
-        ("l1", "level_1"),
-    ) == "Transporter"
-    assert helper_module.coerce_counts_for_target_type(
-        "yes",
-        default=False,
-        normalize_label=normalize_protein_class_label,
-    ) is True
-    assert helper_module.coerce_counts_for_target_type(
-        "unknown-token",
-        default=False,
-        normalize_label=normalize_protein_class_label,
-    ) is False
-    assert helper_module.normalized_status(
-        " ",
-        normalize_label=normalize_protein_class_label,
-    ) == "ok"
+    assert (
+        helper_module.first_present_value(
+            {"l1": None, "level_1": "Transporter"},
+            ("l1", "level_1"),
+        )
+        == "Transporter"
+    )
+    assert (
+        helper_module.coerce_counts_for_target_type(
+            "yes",
+            default=False,
+            normalize_label=normalize_protein_class_label,
+        )
+        is True
+    )
+    assert (
+        helper_module.coerce_counts_for_target_type(
+            "unknown-token",
+            default=False,
+            normalize_label=normalize_protein_class_label,
+        )
+        is False
+    )
+    assert (
+        helper_module.normalized_status(
+            " ",
+            normalize_label=normalize_protein_class_label,
+        )
+        == "ok"
+    )
+
+
+@pytest.mark.unit
+def test_helper_module_covers_fallback_and_none_paths() -> None:
+    missing = helper_module.missing_top_level(
+        mapping_module.NormalizedProteinClassTopLevel
+    )
+    assert missing.canonical_l1 == helper_module.MISSING_CLASS
+    assert missing.counts_for_target_type is False
+    assert missing.normalization_status == "missing"
+
+    fallback = helper_module.fallback_top_level(
+        "Scaffold protein",
+        mapping_module.NormalizedProteinClassTopLevel,
+    )
+    assert fallback.canonical_l1 == helper_module.UNKNOWN_NONEMPTY_CLASS
+    assert fallback.counts_for_target_type is True
+    assert fallback.normalization_status == "fallback"
+
+    non_counting_entry = ProteinClassTopLevelMappingEntry(
+        "Unclassified protein",
+        "unclassified_protein",
+        False,
+    )
+    mapped = helper_module.mapped_top_level(
+        "Unclassified protein",
+        non_counting_entry,
+        mapping_module.NormalizedProteinClassTopLevel,
+    )
+    assert mapped.canonical_l1 == "unclassified_protein"
+    assert mapped.counts_for_target_type is False
+    assert mapped.normalization_status == "non_counting"
+
+    assert (
+        helper_module.coerce_counts_for_target_type(
+            None,
+            default=True,
+            normalize_label=normalize_protein_class_label,
+        )
+        is True
+    )
+    assert (
+        helper_module.coerce_counts_for_target_type(
+            True,
+            default=False,
+            normalize_label=normalize_protein_class_label,
+        )
+        is True
+    )
+    assert (
+        helper_module.coerce_counts_for_target_type(
+            " ",
+            default=False,
+            normalize_label=normalize_protein_class_label,
+        )
+        is False
+    )
+    assert (
+        helper_module.first_normalized_label(
+            {"l1": " ", "l2": None},
+            ("l1", "l2"),
+            normalize_label=normalize_protein_class_label,
+        )
+        is None
+    )
+    assert helper_module.first_present_value({"l1": None}, ("l1", "l2")) is None

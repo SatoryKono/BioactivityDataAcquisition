@@ -78,13 +78,13 @@ async def test_pubmed_publication_full_cycle(e2e_data_dir: Path):
     assert len(bronze_files) >= 1
 
     # Assert - Silver layer
-    silver_count = assert_silver_table_has_records(
+    silver_count = await assert_silver_table_has_records(
         e2e_data_dir, "pubmed_publication", expected_min=1
     )
     assert silver_count <= 5
 
     # Assert - Schema validation
-    records = get_silver_records(e2e_data_dir, "pubmed_publication")
+    records = await get_silver_records(e2e_data_dir, "pubmed_publication")
     required_fields = ["pmid", "title"]
     for record in records:
         for field in required_fields:
@@ -114,7 +114,7 @@ async def test_pubmed_publication_date_fields(e2e_data_dir: Path):
     await runner.run()
 
     # Assert - Check date fields
-    records = get_silver_records(e2e_data_dir, "pubmed_publication")
+    records = await get_silver_records(e2e_data_dir, "pubmed_publication")
 
     for record in records:
         pmid = record.get("pmid")
@@ -156,7 +156,7 @@ async def test_pubmed_publication_journal_fields(e2e_data_dir: Path):
     await runner.run()
 
     # Assert - Check journal fields
-    records = get_silver_records(e2e_data_dir, "pubmed_publication")
+    records = await get_silver_records(e2e_data_dir, "pubmed_publication")
 
     # Verify records were extracted
     assert len(records) >= 1, "Should have at least one publication record"
@@ -181,7 +181,7 @@ async def test_pubmed_publication_classification_fields(e2e_data_dir: Path):
     await runner.run()
 
     # Assert - Check classification fields
-    records = get_silver_records(e2e_data_dir, "pubmed_publication")
+    records = await get_silver_records(e2e_data_dir, "pubmed_publication")
 
     for record in records:
         # Silver stores structured classification payloads as JSON arrays.
@@ -233,7 +233,7 @@ async def test_pubmed_publication_identifier_fields(e2e_data_dir: Path):
     await runner.run()
 
     # Assert - Check identifier fields
-    records = get_silver_records(e2e_data_dir, "pubmed_publication")
+    records = await get_silver_records(e2e_data_dir, "pubmed_publication")
 
     for record in records:
         # PMID is always required

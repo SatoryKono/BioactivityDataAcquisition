@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+from datetime import date, datetime
 from collections.abc import Callable, Sequence
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
 
 from bioetl.application.composite.column_service import ColumnOrderService
 from bioetl.application.composite.join_planner_helpers import parse_pipeline_name
@@ -16,6 +17,15 @@ if TYPE_CHECKING:
 
 
 __all__ = ["CoalescePolicyService"]
+
+_TIMESTAMP_FIELD_SUFFIXES = (
+    "updated_at",
+    "modified_at",
+    "last_updated",
+    "timestamp",
+    "publication_date",
+    "created_at",
+)
 
 
 class _ColumnPriorityProvider(Protocol):
@@ -264,6 +274,34 @@ class CoalescePolicyService:
         """
         return self.coalesce_prefer_seed(df, enrichers, seed_pipeline)
 
+    def coalesce_prefer_latest_timestamp(
+        self,
+        df: pl.DataFrame,
+        _enrichers: Sequence[EnricherConfig],
+        seed_pipeline: str | None = None,
+    ) -> pl.DataFrame:
+        """Coalesce grouped columns by the newest available companion timestamp.
+
+        When no sufficient timestamp companions are available for a field group,
+        the method falls back to the same deterministic seed-priority ordering
+        used by the standard coalesce path.
+        """
+        result = df
+        seed_prefix_value = self._seed_prefix(seed_pipeline)
+        for columns in self._build_field_groups(result).values():
+            if len(columns) <= 1:
+                continue
+            ordered_cols = self._sort_columns(
+                columns,
+                seed_prefix_value,
+                prefer_seed=True,
+            )
+            result = self._coalesce_by_latest_timestamp(
+                result,
+                ordered_cols=ordered_cols,
+            )
+        return result
+
     def apply_explicit_rules(
         self,
         df: pl.DataFrame,
@@ -371,6 +409,133 @@ class CoalescePolicyService:
     ) -> pl.DataFrame:
         """Coalesce compatible columns into first and drop the rest."""
         return coalesce_and_drop(df, compatible_cols)
+
+    @classmethod
+    def _coalesce_by_latest_timestamp(
+        cls,
+        df: pl.DataFrame,
+        *,
+        ordered_cols: list[str],
+    ) -> pl.DataFrame:
+        """Coalesce compatible columns using companion timestamps when present."""
+        import polars as pl
+
+        compatible_cols = cls._compatible_columns(df, ordered_cols)
+        if len(compatible_cols) <= 1:
+            return df
+
+        timestamp_columns = {
+            column: cls._resolve_timestamp_companion(column, set(df.columns))
+            for column in compatible_cols
+        }
+        if sum(1 for value in timestamp_columns.values() if value is not None) < 2:
+            return cls._coalesce_and_drop(df, compatible_cols)
+
+        target_col = compatible_cols[0]
+        row_fields = list(
+            dict.fromkeys(
+                [
+                    *compatible_cols,
+                    *(
+                        timestamp_col
+                        for timestamp_col in timestamp_columns.values()
+                        if timestamp_col is not None
+                    ),
+                ]
+            )
+        )
+        priority_rank = {column: index for index, column in enumerate(compatible_cols)}
+
+        result = df.with_columns(
+            pl.struct(row_fields).map_elements(
+                lambda row: cls._pick_latest_timestamp_value(
+                    row=row,
+                    compatible_cols=compatible_cols,
+                    timestamp_columns=timestamp_columns,
+                    priority_rank=priority_rank,
+                ),
+                return_dtype=df.schema[target_col],
+            ).alias(target_col)
+        )
+        cols_to_drop = [column for column in compatible_cols[1:] if column in result.columns]
+        return result.drop(cols_to_drop) if cols_to_drop else result
+
+    @staticmethod
+    def _resolve_timestamp_companion(
+        column: str,
+        available_columns: set[str],
+    ) -> str | None:
+        """Resolve the companion timestamp column for one qualified value column."""
+        parts = column.split(".")
+        if len(parts) < 3:
+            return None
+        prefix = ".".join(parts[:-1])
+        for suffix in _TIMESTAMP_FIELD_SUFFIXES:
+            candidate = f"{prefix}.{suffix}"
+            if candidate != column and candidate in available_columns:
+                return candidate
+        return None
+
+    @classmethod
+    def _pick_latest_timestamp_value(
+        cls,
+        *,
+        row: dict[str, Any],  # Any: Row values can be of any type (str, int, float, etc.)
+        compatible_cols: list[str],
+        timestamp_columns: dict[str, str | None],
+        priority_rank: dict[str, int],
+    ) -> Any:  # Any: Return type matches the polymorphic row value type
+        """Pick the newest non-null field value from one row deterministically."""
+        fallback_value: Any = None  # Any: Can hold any row value type during comparison
+        fallback_rank: int | None = None
+        best_value: Any = None  # Any: Can hold any row value type during comparison
+        best_rank: int | None = None
+        best_timestamp_key: tuple[int, float | str] | None = None
+
+        for column in compatible_cols:
+            value = row.get(column)
+            if value is None:
+                continue
+            rank = priority_rank[column]
+            if fallback_rank is None or rank < fallback_rank:
+                fallback_value = value
+                fallback_rank = rank
+
+            timestamp_column = timestamp_columns.get(column)
+            if timestamp_column is None:
+                continue
+            timestamp_value = row.get(timestamp_column)
+            if timestamp_value is None:
+                continue
+
+            timestamp_key = cls._timestamp_sort_key(timestamp_value)
+            if best_timestamp_key is None or timestamp_key > best_timestamp_key:
+                best_value = value
+                best_rank = rank
+                best_timestamp_key = timestamp_key
+                continue
+            if (
+                timestamp_key == best_timestamp_key
+                and best_rank is not None
+                and rank < best_rank
+            ):
+                best_value = value
+                best_rank = rank
+
+        return best_value if best_value is not None else fallback_value
+
+    @staticmethod
+    def _timestamp_sort_key(value: object) -> tuple[int, float | str]:
+        """Normalize mixed timestamp-like values into a deterministic sort key."""
+        if isinstance(value, datetime):
+            return (3, value.timestamp())
+        if isinstance(value, date):
+            return (3, float(value.toordinal()))
+        if isinstance(value, int | float):
+            return (2, float(value))
+        if isinstance(value, str):
+            return (1, value)
+        return (0, "")
 
     @staticmethod
     def _seed_prefix(seed_pipeline: str | None) -> str | None:

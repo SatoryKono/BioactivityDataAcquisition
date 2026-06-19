@@ -67,13 +67,13 @@ async def test_chembl_publication_full_cycle(e2e_data_dir: Path):
     assert len(bronze_files) >= 1
 
     # Assert - Silver layer
-    silver_count = assert_silver_table_has_records(
+    silver_count = await assert_silver_table_has_records(
         e2e_data_dir, "chembl_publication", expected_min=1
     )
     assert silver_count <= 100
 
     # Assert - Schema validation
-    records = get_silver_records(e2e_data_dir, "chembl_publication")
+    records = await get_silver_records(e2e_data_dir, "chembl_publication")
     required_fields = ["publication_id", "publication_type", "title"]
     for record in records:
         for field in required_fields:
@@ -104,7 +104,7 @@ async def test_chembl_publication_metadata_fields(e2e_data_dir: Path):
     await runner.run()
 
     # Assert - Check publication fields
-    records = get_silver_records(e2e_data_dir, "chembl_publication")
+    records = await get_silver_records(e2e_data_dir, "chembl_publication")
 
     # Publication pipeline records should always have core metadata populated.
     for record in records:
