@@ -146,7 +146,9 @@ def _dispatcher_probe_union_handler(value: int | str) -> object:
     return value
 
 
-def _dispatcher_probe_any_handler(value: typing.Any) -> object:
+def _dispatcher_probe_any_handler(
+    value: typing.Any,
+) -> object:  # Any: typing.Any is used for Pandera dispatcher type system compatibility
     """Return probe input unchanged so fallback dispatch can be verified."""
     return value
 
@@ -157,13 +159,14 @@ def _pandera_dispatcher_needs_patch(dispatcher_cls: type) -> bool:
         dispatcher = dispatcher_cls()
         dispatcher.register(_dispatcher_probe_union_handler)
         dispatcher.register(_dispatcher_probe_any_handler)
-        registry = getattr(dispatcher, "_function_registry")
+        registry = dispatcher._function_registry
         if not isinstance(registry, dict):
             return True
         if registry.get(int) is not _dispatcher_probe_union_handler:
             return True
         if registry.get(str) is not _dispatcher_probe_union_handler:
             return True
+        # Any: typing.Any is used for Pandera dispatcher type system compatibility
         if registry.get(typing.Any) is not _dispatcher_probe_any_handler:
             return True
         return not (

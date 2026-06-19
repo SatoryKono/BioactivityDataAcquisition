@@ -6,15 +6,15 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 
+import bioetl.application.services.control_plane.ledger.core_events as _core_events
 from bioetl.application.services.control_plane.ledger.entry_support import (
     RunLedgerEntryRequest,
     append_run_ledger_entry,
     append_run_outcome,
 )
-from bioetl.application.services.control_plane.ledger.rich_event_recording import (
+from bioetl.application.services.control_plane.ledger.rich_events import (
     RunLedgerRichEventRecordingMixin,
 )
-import bioetl.application.services.control_plane.ledger.core_events as _core_events
 from bioetl.domain.context import current_utc_time
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.control_plane.run_ledger import (

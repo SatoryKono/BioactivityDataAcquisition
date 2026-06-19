@@ -35,6 +35,7 @@ python -m scripts.engineering.qa <command> [args...]
 | `run-architecture-audit-read-only` | `run_architecture_audit_read_only.py`                | Run check-only architecture evidence diagnostics without pretest sync or artifact writes          |
 | `report-hotspots`                | `generate_hotspot_degradation_report.py`              | Generate performance hotspot degradation report                                                   |
 | `report-duplication-baseline`    | `report_duplication_baseline.py`                      | Generate report-only duplication baseline for `composition`/`application`                         |
+| `report-artifact-duplication-audit` | `report_artifact_duplication_audit.py`              | Generate/check exact-byte duplication audit for JSCPD-excluded config, contract, and registry artifacts |
 | `analyze-duplicate-functions`    | `analyze_duplicate_functions.py`                      | Compatibility wrapper for the legacy AST duplicate-function analyzer                              |
 | `calibrate-hotspots`             | `scripts/engineering/qa/calibrate_hotspot_budgets.py` | Calibrate hotspot budgets                                                                         |
 | `run-tests`                      | `test_health.py`                                      | Run a named test-health lane and emit JUnit XML plus JSON summary                                 |
@@ -77,6 +78,9 @@ Important distinction:
 
 - `report-hotspots` is for benchmark-backed performance hotspots.
 - `report-duplication-baseline` is for structural duplication visibility in `src/bioetl/composition` and `src/bioetl/application`.
+- `report-artifact-duplication-audit` is for exact-byte duplication visibility
+  in non-Python governance artifacts excluded by JSCPD, especially `configs/**`,
+  contract snapshots/docs, and registry-backed quality artifacts.
 - `reports/quality/hotspot-duplication-baseline.{json,md}` is the canonical
   multi-target duplication evidence surface. Specialized single-target artifacts
   such as `control-plane-duplication.*` and `runtime-builders-duplication.*`
@@ -117,6 +121,7 @@ python -m scripts.engineering.qa test-health --suite coverage-verify --run-id co
 python -m scripts.engineering.qa report-dashboard-inventory --health-summary --json
 python -m scripts.engineering.qa report-dashboard-inventory --deployed-dir /path/to/grafana-exports --check --json
 python scripts/engineering/qa/report_duplication_baseline.py
+python -m scripts.engineering.qa report-artifact-duplication-audit --check
 python -m scripts.engineering.qa check-architecture
 python -m scripts.engineering.qa check-app-deps
 python -m scripts.engineering.qa check-constructor-args -- --warn-only

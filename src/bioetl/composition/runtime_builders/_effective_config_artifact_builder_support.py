@@ -12,7 +12,6 @@ from bioetl.composition.runtime_builders._effective_config_graph_support import 
 )
 from bioetl.composition.runtime_builders._run_manifest_refs import (
     resolve_data_root_mode,
-    resolve_run_context_values,
 )
 from bioetl.composition.runtime_builders._effective_config_source_refs_support import (
     build_effective_config_source_refs as _build_effective_config_source_refs,
@@ -32,6 +31,9 @@ from bioetl.composition.runtime_builders._runtime_launch_context_fields import (
 )
 from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
     to_serializable_mapping as _to_serializable_mapping,
+)
+from bioetl.composition.runtime_builders.run_manifest_support import (
+    resolve_run_context_values,
 )
 from bioetl.composition.services.versioning import get_dependency_lock_hash
 from bioetl.domain.control_plane.effective_config_environment import (

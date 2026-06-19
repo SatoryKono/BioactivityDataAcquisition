@@ -5,7 +5,6 @@ from __future__ import annotations
 import asyncio
 import sys
 from collections.abc import Callable, Mapping
-from dataclasses import replace
 from functools import partial
 from typing import TYPE_CHECKING, NoReturn, cast
 
@@ -18,7 +17,10 @@ from bioetl.interfaces.cli.commands.domains.health.metrics_server_integration im
     ensure_metrics_server_started as _ensure_metrics_server_started_impl,
 )
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
+    attach_observability_backend_to_cli_input,
+    build_observability_backend_cli_kwargs,
     build_observability_backend_required_probe_paths,
+    resolve_observability_backend_cli_options,
     should_disable_transient_health_server,
 )
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
@@ -32,6 +34,9 @@ from bioetl.interfaces.cli.commands.domains.health.server_integration import (
 )
 from bioetl.interfaces.cli.commands.domains.health.server_integration import (
     health_server_context as _health_server_context_impl,
+)
+from bioetl.interfaces.cli.commands.domains.run import (
+    runtime_helpers as _run_runtime_helpers,
 )
 from bioetl.interfaces.cli.commands.domains.run.command_entrypoint import (
     build_run_click_command,
@@ -52,16 +57,10 @@ from bioetl.interfaces.cli.commands.domains.run.result_presenter import (
     echo_run_result as _echo_run_result,
 )
 from bioetl.interfaces.cli.commands.domains.run.runtime_helpers import (
-    PipelineRunnerService,
-)
-from bioetl.interfaces.cli.commands.domains.run.runtime_helpers import (
     build_run_command_input as _build_run_command_input_impl,
 )
 from bioetl.interfaces.cli.commands.domains.run.runtime_helpers import (
     build_run_pipeline_callable as _build_run_pipeline_callable_impl,
-)
-from bioetl.interfaces.cli.commands.domains.run.runtime_helpers import (
-    get_pipeline_runner_service as _get_pipeline_runner_service_impl,
 )
 from bioetl.interfaces.cli.commands.domains.run.runtime_helpers import (
     run_pipeline_async as _run_pipeline_async_impl,
@@ -176,7 +175,6 @@ def execute_run(
 _build_run_command_input = _build_run_command_input_impl
 _map_status_to_exit_code = map_status_to_exit_code
 _build_run_pipeline_callable = _build_run_pipeline_callable_impl
-get_pipeline_runner_service = _get_pipeline_runner_service_impl
 
 
 def _present_run_health_info(request: RunExecutionRequest) -> None:
@@ -202,20 +200,17 @@ def _run_command_with_cli_policy(
     cli_input: RunCommandInput,
 ) -> None:
     """Execute the prepared run command through the canonical CLI policy path."""
-    backend_result = ensure_observability_backend_started(
-        enabled=cli_input.ensure_observability_backend,
-        port=cli_input.observability_backend_port,
-        required_probe_paths=build_observability_backend_required_probe_paths(
-            pipelines=(cli_input.pipeline,)
+    cli_input = cast(
+        "RunCommandInput",
+        attach_observability_backend_to_cli_input(
+            cli_input,
+            required_probe_paths=build_observability_backend_required_probe_paths(
+                pipelines=(cli_input.pipeline,)
+            ),
+            ensure_backend_started_fn=ensure_observability_backend_started,
+            disable_transient_health_server_fn=should_disable_transient_health_server,
         ),
     )
-    if should_disable_transient_health_server(
-        health_server_enabled=cli_input.health_server,
-        health_port=cli_input.health_port,
-        observability_backend_port=cli_input.observability_backend_port,
-        backend_result=backend_result,
-    ):
-        cli_input = replace(cli_input, health_server=False)
 
     registry = resolve_context_registry(ctx)
     service = create_cli_run_orchestration_service()
@@ -246,8 +241,8 @@ async def _run_pipeline_async(
         metrics_starter=ensure_metrics_server_started,
         health_context_factory=health_server_context,
         runner_service_factory=cast(
-            "Callable[..., PipelineRunnerService]",
-            get_pipeline_runner_service,
+            "Callable[..., object]",
+            _run_runtime_helpers.get_pipeline_runner_service,
         ),
     )
 
@@ -268,6 +263,12 @@ def _build_run_command_input_from_options(
     options: Mapping[str, object],
 ) -> RunCommandInput:
     """Build typed run-command input from Click's object-valued kwargs mapping."""
+    ensure_observability_backend, observability_backend_port = (
+        resolve_observability_backend_cli_options(
+            options,
+            default_port=DEFAULT_HEALTH_SERVER_PORT,
+        )
+    )
     return RunCommandInput(
         pipeline=cast("str", options["pipeline"]),
         run_type=cast("str", options["run_type"]),
@@ -284,11 +285,9 @@ def _build_run_command_input_from_options(
         debug=cast("bool", options["debug"]),
         health_server=cast("bool", options["health_server"]),
         health_port=cast("int", options["health_port"]),
-        ensure_observability_backend=cast(
-            "bool", options.get("ensure_observability_backend", True)
-        ),
-        observability_backend_port=cast(
-            "int", options.get("observability_backend_port", DEFAULT_HEALTH_SERVER_PORT)
+        **build_observability_backend_cli_kwargs(
+            ensure_observability_backend=ensure_observability_backend,
+            observability_backend_port=observability_backend_port,
         ),
         enable_tracing=cast("bool | None", options["enable_tracing"]),
         use_cached_bronze=cast("bool", options["use_cached_bronze"]),

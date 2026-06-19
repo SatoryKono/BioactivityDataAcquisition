@@ -202,6 +202,48 @@ def _build_crossref_identity_fields(
     }
 
 
+def build_crossref_core_block_fields(
+    *,
+    record: JsonDict,
+    doi: str,
+    classify_publication_type: Callable[[str | None], dict[str, str | None]],
+    serialize_json_list: Callable[[Sequence[object] | None], str | None],
+) -> GoldRecord:
+    """Build the declarative core-block field set from shared business helpers."""
+    return {
+        **_build_crossref_identity_fields(
+            record=record,
+            doi=doi,
+            author_bundle={},
+        ),
+        **classify_publication_type(record.get("type")),
+        "language": record.get("language"),
+        "is_oa": None,
+        "alternative_id": serialize_json_list(record.get("alternative-id", []) or []),
+        "subject_keywords": serialize_json_list(record.get("subject", []) or []),
+        "_dq_warn": False,
+        "_dq_error": False,
+    }
+
+
+def build_crossref_author_block_fields(
+    record: JsonDict,
+    *,
+    data_normalizer: DataNormalizationPort,
+    hash_pii_value: Callable[[str | None], str | None],
+    serialize_json: Callable[[object], ScalarValue],
+    serialize_json_list: Callable[[Sequence[object] | None], str | None],
+) -> dict[str, str | None]:
+    """Build the declarative author-block field set from shared business helpers."""
+    return _extract_author_bundle(
+        record,
+        data_normalizer=data_normalizer,
+        hash_pii_value=hash_pii_value,
+        serialize_json=serialize_json,
+        serialize_json_list=serialize_json_list,
+    )
+
+
 def _build_crossref_metadata_fields(
     *,
     record: JsonDict,

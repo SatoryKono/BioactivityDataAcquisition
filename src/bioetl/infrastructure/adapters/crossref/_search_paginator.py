@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-import time
 from typing import TYPE_CHECKING, cast
-
-from httpx import Response
 
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.crossref._batch_support import (
@@ -13,7 +10,7 @@ from bioetl.infrastructure.adapters.crossref._batch_support import (
     BaseMetrics,
     HeadersProvider,
     HttpTransport,
-    record_response_timing,
+    perform_timed_crossref_get,
 )
 from bioetl.infrastructure.adapters.crossref.exceptions import CrossRefApiError
 
@@ -58,20 +55,14 @@ class SearchPaginator:
             "cursor": cursor,
             "mailto": self._mailto,
         }
-        response: Response | None = None
-
-        start_time = time.perf_counter()
-        with self._metrics.measure_request("/works?query"):
-            response = await self._http.get(
-                url,
-                params=params,
-                headers=self._headers_fn(),
-            )
-        duration_ms = (time.perf_counter() - start_time) * 1000
-        record_response_timing(
-            self._request_collector,
-            response,
-            duration_ms,
+        response = await perform_timed_crossref_get(
+            http=self._http,
+            metrics=self._metrics,
+            route="/works?query",
+            url=url,
+            params=params,
+            headers=self._headers_fn(),
+            request_collector=self._request_collector,
         )
 
         if response is None:

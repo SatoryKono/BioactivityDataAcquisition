@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import contextlib
+import time
 from contextlib import AbstractContextManager
 from typing import TYPE_CHECKING, Protocol
 
@@ -70,3 +71,31 @@ def record_response_timing(
     if request_collector and response is not None:
         with contextlib.suppress(Exception):
             request_collector.record_from_response(response, duration_ms)
+
+
+async def perform_timed_crossref_get(
+    *,
+    http: HttpTransport,
+    metrics: BaseMetrics,
+    route: str,
+    url: str,
+    headers: dict[str, str],
+    params: dict[str, str] | None = None,
+    request_collector: APIRequestCollector | None = None,
+) -> Response | None:
+    """Execute one timed CrossRef GET request and record response timing."""
+    response: Response | None = None
+    start_time = time.perf_counter()
+    with metrics.measure_request(route):
+        response = await http.get(
+            url,
+            params=params,
+            headers=headers,
+        )
+    duration_ms = (time.perf_counter() - start_time) * 1000
+    record_response_timing(
+        request_collector,
+        response,
+        duration_ms,
+    )
+    return response

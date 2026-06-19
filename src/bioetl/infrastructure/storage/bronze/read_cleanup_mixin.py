@@ -69,7 +69,7 @@ class BronzeWriterReadCleanupMixin:
 
         pattern = "batch_*.jsonl.zst" if date else "**/*.jsonl.zst"
         files = list(search_path.glob(pattern))
-        return sorted(str(p.relative_to(self.base_path)) for p in files)
+        return sorted(p.relative_to(self.base_path).as_posix() for p in files)
 
     async def list_batches(
         self,

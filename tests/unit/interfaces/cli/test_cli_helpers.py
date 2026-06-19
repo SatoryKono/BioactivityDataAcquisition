@@ -334,7 +334,9 @@ class TestCliCommands:
         mock_asyncio_run.assert_called_once()
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
-    @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
+    @patch(
+        "bioetl.interfaces.cli.commands.domains.run.runtime_helpers.get_pipeline_runner_service"
+    )
     @patch("bioetl.interfaces.cli.commands.run.ensure_metrics_server_started")
     def test_run_with_limit(
         self,
@@ -390,7 +392,9 @@ class TestCliCommands:
         assert options.limit == 100
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
-    @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
+    @patch(
+        "bioetl.interfaces.cli.commands.domains.run.runtime_helpers.get_pipeline_runner_service"
+    )
     @patch("bioetl.interfaces.cli.commands.run.ensure_metrics_server_started")
     def test_run_with_resume_flag(
         self,
@@ -445,7 +449,9 @@ class TestCliCommands:
         assert options.resume is True
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
-    @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
+    @patch(
+        "bioetl.interfaces.cli.commands.domains.run.runtime_helpers.get_pipeline_runner_service"
+    )
     @patch("bioetl.interfaces.cli.commands.run.ensure_metrics_server_started")
     def test_run_with_resume_manifest_id(
         self,
@@ -497,7 +503,9 @@ class TestCliCommands:
         assert options.resume_manifest_id == "manifest-123"
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
-    @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
+    @patch(
+        "bioetl.interfaces.cli.commands.domains.run.runtime_helpers.get_pipeline_runner_service"
+    )
     @patch("bioetl.interfaces.cli.commands.run.ensure_metrics_server_started")
     def test_run_with_resume_run_id(
         self,

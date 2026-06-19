@@ -14,6 +14,7 @@ from bioetl.domain.control_plane.run_ledger import (
 )
 
 __all__ = [
+    "RunLedgerRichEventRecordingMixin",
     "record_composite_dependency_completed",
     "record_composite_enricher_completed",
     "record_composite_merge_completed",
@@ -30,6 +31,70 @@ class _RunLedgerAppender(Protocol):
         stage: str | None = None,
         details: dict[str, object] | None = None,
     ) -> RunLedgerEntry: ...
+
+
+class RunLedgerRichEventRecordingMixin:
+    """Thin service mixin delegating rich ledger events to bounded helpers."""
+
+    def record_composite_dependency_completed(
+        self,
+        *,
+        dependency_name: str,
+        result: Mapping[str, object],
+    ) -> RunLedgerEntry:
+        return record_composite_dependency_completed(
+            self,
+            dependency_name=dependency_name,
+            result=result,
+        )
+
+    def record_composite_enricher_completed(
+        self,
+        *,
+        enricher_name: str,
+        result: Mapping[str, object],
+    ) -> RunLedgerEntry:
+        return record_composite_enricher_completed(
+            self,
+            enricher_name=enricher_name,
+            result=result,
+        )
+
+    def record_composite_merge_completed(
+        self,
+        *,
+        result: Mapping[str, object],
+    ) -> RunLedgerEntry:
+        return record_composite_merge_completed(
+            self,
+            result=result,
+        )
+
+    def record_input_snapshot_published(
+        self,
+        *,
+        provider: str,
+        entity: str,
+        pipeline_name: str,
+        snapshot_id: str,
+        content_hash: str,
+        immutable_uri: str,
+        bronze_batch_ref: str,
+        query_fingerprint: str | None = None,
+        details: Mapping[str, object] | None = None,
+    ) -> RunLedgerEntry:
+        return record_input_snapshot_published(
+            self,
+            provider=provider,
+            entity=entity,
+            pipeline_name=pipeline_name,
+            snapshot_id=snapshot_id,
+            content_hash=content_hash,
+            immutable_uri=immutable_uri,
+            bronze_batch_ref=bronze_batch_ref,
+            query_fingerprint=query_fingerprint,
+            details=details,
+        )
 
 
 def _required_text(value: object, field_name: str) -> str:

@@ -4,12 +4,16 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable, Mapping
-from dataclasses import replace
 from typing import TYPE_CHECKING, cast
 
 import click
 
 from bioetl.application.services.execution.pipeline_runner_models import RunOptions
+from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
+    attach_observability_backend_to_cli_input,
+    build_observability_backend_cli_kwargs,
+    resolve_observability_backend_cli_options,
+)
 from bioetl.interfaces.cli.commands.domains.run_all.command_policy import (
     RunAllCommandInput,
     build_run_all_command_input,
@@ -160,6 +164,9 @@ def build_run_all_command_input_from_options(
     *,
     build_input: Callable[..., RunAllCommandInput] = build_run_all_command_input,
 ) -> RunAllCommandInput:
+    ensure_observability_backend, observability_backend_port = (
+        resolve_observability_backend_cli_options(options)
+    )
     return build_input(
         source=cast("str", options["source"]),
         run_type=cast("str", options["run_type"]),
@@ -170,11 +177,9 @@ def build_run_all_command_input_from_options(
         debug=cast("bool", options["debug"]),
         health_server=cast("bool", options["health_server"]),
         health_port=cast("int", options["health_port"]),
-        ensure_observability_backend=cast(
-            "bool", options.get("ensure_observability_backend", True)
-        ),
-        observability_backend_port=cast(
-            "int", options.get("observability_backend_port", 8081)
+        **build_observability_backend_cli_kwargs(
+            ensure_observability_backend=ensure_observability_backend,
+            observability_backend_port=observability_backend_port,
         ),
     )
 
@@ -191,18 +196,15 @@ def run_all_callback_runtime(
         build_input=runtime.build_input,
     )
     if not cli_input.list_only and not cli_input.dry_run:
-        backend_result = runtime.ensure_observability_backend_started(
-            enabled=cli_input.ensure_observability_backend,
-            port=cli_input.observability_backend_port,
-            required_probe_paths=runtime.build_probe_paths(),
+        cli_input = cast(
+            "RunAllCommandInput",
+            attach_observability_backend_to_cli_input(
+                cli_input,
+                required_probe_paths=runtime.build_probe_paths(),
+                ensure_backend_started_fn=runtime.ensure_observability_backend_started,
+                disable_transient_health_server_fn=runtime.disable_transient_health_server,
+            ),
         )
-        if runtime.disable_transient_health_server(
-            health_server_enabled=cli_input.health_server,
-            health_port=cli_input.health_port,
-            observability_backend_port=cli_input.observability_backend_port,
-            backend_result=backend_result,
-        ):
-            cli_input = replace(cli_input, health_server=False)
     dispatch_cli_callback(
         click_context,
         build_cli_input=lambda: cli_input,

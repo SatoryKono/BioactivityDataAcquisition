@@ -657,7 +657,7 @@ oversized_source_module_inventory:
     owner: '@bioetl-reproducibility'
     target_split: separate score-card policy rules from manifest projection helpers
   - path: src/bioetl/interfaces/cli/commands/domains/health/server_integration.py
-    lines: 354
+    lines: 353
     owner: '@bioetl-interfaces'
     target_split: split health server integration, metrics server wiring, and quarantine
       service helpers
@@ -1091,11 +1091,11 @@ test_governance_debt_metrics:
     compatibility_test_file_count:
       current_count: 26
       max_count: 26
-      target_count: 29
-      ratchet_policy: Downward ratchet only; keep max_count at 29 unless a future
+      target_count: 26
+      ratchet_policy: Downward ratchet only; keep max_count at 26 unless a future
         owner-approved reduction lowers the live compatibility test inventory.
       rationale: 'Issues #4925, #4967, #5023, #5034, #5101, #5102, #5104, #5106, #5107,
-        #5345, #5351, and #5372 reduced compatibility test inventory from 37 to 29 by removing obsolete guards,
+        #5345, #5351, and #5372 reduced compatibility test inventory from 37 to 26 by removing obsolete guards,
         renaming tests out of compatibility classification, and cleaning up deprecated
         contracts. Live compatibility debt count is now limited to compat, legacy,
         deprecated, shim, and sunset surfaces.'

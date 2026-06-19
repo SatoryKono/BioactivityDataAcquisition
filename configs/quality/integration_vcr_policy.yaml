@@ -126,6 +126,7 @@ tracked_suite_inventory:
       pubchem_compound: tests/integration/test_pubchem_pipeline.py
       uniprot_protein: tests/integration/test_uniprot_pipeline.py
     normalization_and_pipeline_support:
+    - tests/integration/application/core/test_postrun_compact_service.py
     - tests/integration/grafana/test_silver_reject_explorer_copy.py
     - tests/integration/grafana/test_workflow_dashboard_json_valid.py
     - tests/integration/memory/test_timeline_ingest.py

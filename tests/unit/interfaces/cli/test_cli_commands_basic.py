@@ -155,7 +155,9 @@ class TestRunCommand:
         assert result.exit_code == 0, f"Command failed: {result.output}"
         mock_asyncio_run.assert_called_once()
 
-    @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
+    @patch(
+        "bioetl.interfaces.cli.commands.domains.run.runtime_helpers.get_pipeline_runner_service"
+    )
     @patch("bioetl.interfaces.cli.commands.run.ensure_metrics_server_started")
     def test_run_command_passes_context_registry_to_service(
         self,
@@ -394,7 +396,9 @@ class TestRunCommandAdvanced:
         # File not found maps to EX_NOINPUT in _map_status_to_exit_code
         assert result.exit_code == ExitCode.EX_NOINPUT
 
-    @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
+    @patch(
+        "bioetl.interfaces.cli.commands.domains.run.runtime_helpers.get_pipeline_runner_service"
+    )
     @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
     def test_run_command_bootstrap_generic_error(
         self, mock_asyncio_run, mock_get_service, runner

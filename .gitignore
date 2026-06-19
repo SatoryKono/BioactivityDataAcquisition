@@ -115,6 +115,7 @@ log_test.txt
 !/reports/quality/total-tech-debt-audit-main-2026-06-16.md
 !/reports/quality/test-governance-current.json
 !/reports/quality/test-duplicate-name-inventory.json
+!/reports/quality/test-fixture-asset-duplication.json
 !/reports/quality/pipeline-config-contract-ownership-map.json
 !/reports/quality/pipeline-config-contract-ownership-map.md
 !/reports/quality/contract-coverage-matrix.json
@@ -125,6 +126,11 @@ log_test.txt
 !/reports/quality/port-adapter-factory-coverage.md
 !/reports/quality/domain-aggregate-invariant-registry.json
 !/reports/quality/silver-gold-filter-parity-report.json
+!/reports/test-telemetry/
+/reports/test-telemetry/*
+!/reports/test-telemetry/coverage-summary.json
+!/reports/test-telemetry/slowest-tests.json
+!/reports/test-telemetry/slowest-tests.md
 !/reports/observability/
 /reports/observability/*
 !/reports/observability/runtime_cardinality_inventory.json

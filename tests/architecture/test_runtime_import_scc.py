@@ -16,6 +16,7 @@ SRC_ROOT = Path("src/bioetl")
 _MIN_PARALLEL_READ_FILES = 64
 _DEFAULT_READ_WORKERS = 8
 _MAX_READ_WORKERS = 16
+REVIEWED_RUNTIME_SCC_BUDGET_MAX = 3
 ACCEPTED_RUNTIME_SCCS: dict[frozenset[str], dict[str, str]] = {
     frozenset(
         {
@@ -314,3 +315,23 @@ def test_runtime_import_graph_has_no_unreviewed_sccs() -> None:
         "breaking the cycles:\n"
         + "\n".join(f"- {', '.join(component)}" for component in stale_acceptances)
     )
+
+
+@pytest.mark.architecture
+def test_runtime_import_scc_review_inventory_is_ratcheted_for_5427() -> None:
+    """#5427: reviewed runtime import SCC inventory must not grow silently."""
+    assert len(ACCEPTED_RUNTIME_SCCS) <= REVIEWED_RUNTIME_SCC_BUDGET_MAX
+
+    for component, metadata in ACCEPTED_RUNTIME_SCCS.items():
+        assert component
+        assert len(component) > 1
+        assert set(metadata) >= {
+            "owner",
+            "review_date",
+            "linked_issue",
+            "rationale",
+        }
+        assert metadata["owner"].strip()
+        assert metadata["linked_issue"].startswith("#")
+        assert metadata["review_date"].strip()
+        assert metadata["rationale"].strip()

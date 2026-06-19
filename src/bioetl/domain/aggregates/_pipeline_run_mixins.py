@@ -229,6 +229,11 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
         )
 
     def _assert_can_complete(self) -> None:
+        self._assert_no_failed_stages()
+        self._assert_has_recorded_stages()
+        self._assert_all_stages_successful()
+
+    def _assert_no_failed_stages(self) -> None:
         failed_stage_names = [
             stage.stage for stage in self._stages if stage.status == StageStatus.FAILED
         ]
@@ -239,9 +244,26 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
                 current_state=self._status.value,
                 attempted_operation="complete",
             )
+
+    def _assert_has_recorded_stages(self) -> None:
         if not self._stages:
             raise InvalidStateError(
                 "Cannot complete run: no stages recorded",
+                current_state=self._status.value,
+                attempted_operation="complete",
+            )
+
+    def _assert_all_stages_successful(self) -> None:
+        incomplete_stage_names = [
+            f"{stage.stage}:{stage.status.value}"
+            for stage in self._stages
+            if stage.status != StageStatus.SUCCESS
+        ]
+        if incomplete_stage_names:
+            raise InvalidStateError(
+                "Cannot complete run: "
+                "all recorded stages must be SUCCESS before terminal completion; "
+                f"found {incomplete_stage_names}",
                 current_state=self._status.value,
                 attempted_operation="complete",
             )

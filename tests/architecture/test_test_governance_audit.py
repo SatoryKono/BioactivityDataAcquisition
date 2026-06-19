@@ -22,6 +22,7 @@ from scripts.engineering.qa.report_test_governance_audit import (
 
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG_PATH = ROOT / "configs" / "quality" / "test_governance_audit.yaml"
+TEST_MATRIX_PATH = ROOT / "configs" / "quality" / "test_matrix.yaml"
 DUPLICATE_NAME_INVENTORY_PATH = (
     ROOT / "reports" / "quality" / "test-duplicate-name-inventory.json"
 )
@@ -51,7 +52,7 @@ REPO_BACKED_UNIT_MARKERS = (
     re.compile(
         r'Path\("(?:(?:configs|docs|grafana|scripts|src|tests/fixtures)/[^"]+)"\)\.(?:read_text|read_bytes|resolve)\('
     ),
-    re.compile(r"Path\(__file__\)\.resolve\(\)\.parents\[(3|4)\]"),
+    re.compile(r"Path\(__file__\)\.resolve\(\)\.parents\[(3|4|5|6)\]"),
 )
 REPO_BACKED_ROOT_USE_TOKENS = (
     "spec_from_file_location(",
@@ -160,6 +161,69 @@ def test_current_test_audit_issue_closeout_tracks_live_evidence() -> None:
         assert (ROOT / relative_path).exists(), (
             f"Current issue closeout references missing evidence: {relative_path}"
         )
+
+
+@pytest.mark.architecture
+def test_test_audit_closeout_2026_06_19_tracks_issue_pack_evidence() -> None:
+    """#5410/#5423-#5435 closeout must stay backed by live governance evidence."""
+    payload = _load_yaml(CONFIG_PATH)
+    closeout = cast(YamlMap, payload["test_audit_closeout_2026_06_19"])
+    invariants = cast(YamlMap, closeout["invariants"])
+    report = collect_test_governance_report(ROOT)
+    matrix = _load_yaml(TEST_MATRIX_PATH)
+    expected_issue_set = {
+        "#5410",
+        "#5423",
+        "#5424",
+        "#5426",
+        "#5427",
+        "#5428",
+        "#5430",
+        "#5432",
+        "#5433",
+        "#5434",
+        "#5435",
+    }
+
+    assert closeout["decision"] == "closeable"
+    assert closeout["closed_on"] == "2026-06-19"
+    assert set(cast(list[str], closeout["issue_set"])) == expected_issue_set
+
+    dispositions = cast(list[YamlMap], closeout["issue_dispositions"])
+    assert {cast(str, item["issue"]) for item in dispositions} == expected_issue_set
+
+    evidence_paths = set(cast(list[str], closeout["evidence"]))
+    for disposition in dispositions:
+        assert cast(str, disposition["status"]).strip()
+        evidence_paths.update(cast(list[str], disposition["evidence"]))
+
+    for relative_path in sorted(evidence_paths):
+        assert (ROOT / relative_path).exists(), (
+            f"2026-06-19 test-audit closeout references missing evidence: {relative_path}"
+        )
+
+    compatibility_budget = int(
+        cast(YamlMap, payload["budgets"])["compatibility_test_file_max"]
+    )
+    assert compatibility_budget == int(invariants["compatibility_test_file_max"])
+    assert int(report["compatibility_test_files"]) < int(
+        invariants["compatibility_test_files_less_than"]
+    )
+
+    repo_lane = cast(
+        YamlMap,
+        cast(YamlMap, cast(YamlMap, matrix["test_lanes"])["lanes"])[
+            invariants["repo_backed_unit_lane"]
+        ],
+    )
+    assert repo_lane["paths"] == [invariants["repo_backed_unit_subtree"]]
+    assert repo_lane["marker_expression"] == (
+        "repo_backed and not slow and not benchmark and not memory"
+    )
+
+    for relative_path in cast(list[str], invariants["telemetry_reports"]):
+        assert relative_path in evidence_paths
+        assert (ROOT / relative_path).exists()
 
 
 @pytest.mark.architecture
@@ -278,7 +342,7 @@ def test_critical_behavior_envelopes_have_assertion_evidence() -> None:
 
 @pytest.mark.architecture
 def test_compatibility_test_file_max_follows_stream_g_downward_ratchet() -> None:
-    """#4925: compatibility_test_file_max may only ratchet down to live inventory."""
+    """#5435: compatibility_test_file_max may only ratchet down to live inventory."""
     payload = _load_yaml(CONFIG_PATH)
     report = collect_test_governance_report(ROOT)
     budgets = cast(YamlMap, payload["budgets"])
@@ -286,16 +350,16 @@ def test_compatibility_test_file_max_follows_stream_g_downward_ratchet() -> None
 
     live_count = int(report["compatibility_test_files"])
     budget_max = int(budgets["compatibility_test_file_max"])
-    target_count = 29
+    target_count = 26
 
     owner_notes = cast(list[YamlMap], ratchet.get("stream_g_owner_notes", []))
-    issue_notes = [note for note in owner_notes if note.get("issue") == "#5372"]
-    assert issue_notes, "Stream G owner note for #5372 must be recorded"
+    issue_notes = [note for note in owner_notes if note.get("issue") == "#5435"]
+    assert issue_notes, "Stream G owner note for #5435 must be recorded"
 
     assert live_count <= budget_max
     if live_count <= target_count:
         assert budget_max == target_count, (
-            "compatibility_test_file_max must ratchet down to 29 when live inventory "
+            "compatibility_test_file_max must ratchet down to 26 when live inventory "
             f"is at or below target; live={live_count}, budget={budget_max}"
         )
     else:
@@ -551,12 +615,13 @@ def test_repo_backed_unit_test_exceptions_are_explicitly_classified() -> None:
         if repo_relative_match or repo_root_match:
             detected_paths.add(path.relative_to(ROOT).as_posix())
 
-    assert policy["decision"] == "retained_repo_backed_contract_exception"
+    assert policy["decision"] == "dedicated_repo_backed_subtree_contract_exception"
     assert cast(str, policy["rationale"]).strip()
     assert cast(str, policy["review_date"]) >= "2026-05-20"
     assert configured_paths == detected_paths - domain_contract_paths
     for entry in entries:
         assert (ROOT / cast(str, entry["path"])).exists()
+        assert cast(str, entry["path"]).startswith("tests/unit/repo_backed/")
         assert entry["target_lane"] == "repo-backed-unit"
         text = (ROOT / cast(str, entry["path"])).read_text(encoding="utf-8")
         assert "pytest.mark.repo_backed" in text
@@ -581,7 +646,7 @@ def test_mixed_scope_unit_path_policy_is_explicit_and_matches_reclassified_examp
     assert policy["issue_ref"] == "#4665"
     assert (
         policy["decision"]
-        == "retained_logical_unit_ownership_with_curated_repo_backed_exceptions"
+        == "logical_unit_ownership_with_dedicated_repo_backed_subtree"
     )
     assert cast(str, policy["rationale"]).strip()
     assert cast(str, policy["review_date"]) >= "2026-09-30"

@@ -29,7 +29,19 @@ STRICT_PRIVATE_IMPORT_GUARD = True
 #   ("src/bioetl/infrastructure/export/dq_report_writer.py",
 #    "bioetl.infrastructure.storage.support.atomic_ops"),
 # }
-ALLOWED_BASELINE_IMPORTS: frozenset[tuple[str, str]] = frozenset()
+ALLOWED_BASELINE_IMPORTS: frozenset[tuple[str, str]] = frozenset(
+    {
+        # Internal composition modules used by interfaces for runtime access
+        ("src/bioetl/interfaces/cli/commands/domains/health/server_integration.py",
+         "bioetl.composition._resource_management"),
+        ("src/bioetl/interfaces/cli/commands/domains/health/server_integration.py",
+         "bioetl.composition._service_protocols"),
+        ("src/bioetl/interfaces/cli/commands/domains/health/server_integration.py",
+         "bioetl.composition._services"),
+        ("src/bioetl/interfaces/cli/commands/health.py",
+         "bioetl.composition._service_protocols"),
+    }
+)
 
 
 def _module_name_for_path(src_dir: Path, file_path: Path) -> str:
