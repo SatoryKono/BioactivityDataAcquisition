@@ -30,6 +30,7 @@ python -m scripts.engineering.qa <command> [args...]
 | `report-dashboard-inventory`     | `report_dashboard_inventory.py`                       | Generate/check dashboard inventory parity, provisioning drift, deployed drift, and local health   |
 | `report-family-baseline`         | `report_hotspot_family_baseline.py`                   | Generate/check RF-06 hotspot-family baseline artifacts                                            |
 | `report-adr-enforcement-matrix`  | `report_adr_enforcement_matrix.py`                    | Generate/check accepted ADR enforcement coverage matrix                                           |
+| `report-invariant-audit-rebaseline` | `report_invariant_audit_rebaseline.py`              | Generate/check stale invariant-audit evidence matrix and duplicate-issue gates                    |
 | `report-architecture-debt-remote-main-baseline` | `report_architecture_debt_remote_main_baseline.py` | Generate/check clean remote-main architecture debt baseline artifacts                             |
 | `report-debt-governance-gates`   | `report_debt_governance_gates.py`                     | Generate/check normalized debt-reduction fail-fast gate rollup                                    |
 | `run-architecture-audit-read-only` | `run_architecture_audit_read_only.py`                | Run check-only architecture evidence diagnostics without pretest sync or artifact writes          |
@@ -63,6 +64,7 @@ python -m scripts.engineering.qa <command> [args...]
 | `report-dashboard-inventory`     | When validating shipped Grafana dashboards against docs, provisioning, or exported/deployed snapshots; use `--health-summary` for a local rollup | Dashboard governance / drift check         |
 | `report-family-baseline`         | When reviewing RF-06 hotspot-family budgets or checking that the committed family baseline artifacts still match the code                        | Manual, preflight / CI drift check         |
 | `report-adr-enforcement-matrix`  | When accepted ADR coverage must be mapped to implementation owners and enforcement owners                                                        | Architecture governance / CI drift check   |
+| `report-invariant-audit-rebaseline` | When converting architecture/invariant audits into GitHub issues; validates stale paths, current anchors, and duplicate issue evidence        | Audit governance / issue triage gate       |
 | `report-architecture-debt-remote-main-baseline` | Before debt closeout; records clean `origin/main` architecture debt evidence from Git tree blobs                                      | Architecture debt closeout / CI drift check |
 | `report-debt-governance-gates`   | Before debt-reduction closeout; aggregates quality artifacts into normalized pass/fail/warn fail-fast gates                                      | Architecture debt closeout / CI gate       |
 | `run-architecture-audit-read-only` | When collecting architecture audit evidence without allowing dev-wrapper pretest sync or generated-artifact writes                         | Manual, read-only audit                    |
@@ -108,6 +110,8 @@ python -m scripts.engineering.qa report-family-baseline --check
 python -m scripts.engineering.qa report-family-baseline --update
 python -m scripts.engineering.qa report-adr-enforcement-matrix --check
 python -m scripts.engineering.qa report-adr-enforcement-matrix --update
+python -m scripts.engineering.qa report-invariant-audit-rebaseline --check
+python -m scripts.engineering.qa report-invariant-audit-rebaseline --update
 python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --check
 python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --update
 python -m scripts.engineering.qa report-debt-governance-gates --check

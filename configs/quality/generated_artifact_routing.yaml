@@ -217,6 +217,16 @@ routes:
     notes: Exact-byte duplication visibility for config, contract, and registry
       artifacts excluded from JSCPD routing lives under reports/quality.
 
+  - id: invariant-audit-rebaseline-quality-report
+    generator: scripts/engineering/qa/report_invariant_audit_rebaseline.py
+    output_kind: working_report
+    commit_policy: tracked_quality_baseline
+    outputs:
+      - reports/quality/invariant-audit-rebaseline-2026-06-19.json
+      - reports/quality/invariant-audit-rebaseline-2026-06-19.md
+    notes: Stale invariant-audit findings are rebaselined against current source,
+      test, and GitHub issue anchors before new remediation issues are opened.
+
   - id: weekly-quality-debt-report
     generator: scripts/engineering/ci/report_quality_debt_weekly.py
     output_kind: working_report
