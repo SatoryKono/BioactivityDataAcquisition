@@ -146,7 +146,8 @@ class MergeMetricsRecorderMixin:
         any_enriched = pl.any_horizontal(
             [pl.col(col).is_not_null() for col in enricher_cols]
         )
-        return len(df.filter(any_enriched))
+        # ⚡ Bolt optimization: sum the boolean mask directly to avoid memory overhead of creating a filtered DataFrame.
+        return df.select(any_enriched.sum()).item()
 
     def _count_fully_enriched(
         self,
@@ -180,13 +181,17 @@ class MergeMetricsRecorderMixin:
         if len(df) == 0:
             return {}
 
-        coverage: dict[str, float] = {}
-        for col in df.columns:
-            if not col.startswith("_"):
-                non_null = len(df.filter(df[col].is_not_null()))
-                coverage[col] = non_null / len(df)
+        # ⚡ Bolt optimization: evaluate all column non-null sums simultaneously in a single select
+        # rather than materializing filtered DataFrames per column in a python loop.
+        cols = [col for col in df.columns if not col.startswith("_")]
+        if not cols:
+            return {}
 
-        return coverage
+        exprs = [pl.col(col).is_not_null().sum().alias(col) for col in cols]
+        counts = df.select(exprs).row(0, named=True)
+        total = len(df)
+
+        return {col: counts[col] / total for col in cols}
 
 
 __all__ = ["MergeMetricsRecorderMixin"]
