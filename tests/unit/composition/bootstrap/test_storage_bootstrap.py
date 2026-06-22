@@ -5,7 +5,7 @@ Tests the bootstrap functions for storage components used by CLI operations.
 
 from __future__ import annotations
 
-import tempfile
+from tests.helpers.synthetic_paths import synthetic_test_root
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
@@ -29,7 +29,7 @@ from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.time import SystemClock
 
-TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-storage-bootstrap-"))
+TEST_ROOT = synthetic_test_root("bioetl-storage-bootstrap")
 BRONZE_PATH = TEST_ROOT / "bronze"
 SILVER_PATH = TEST_ROOT / "silver"
 GOLD_PATH = TEST_ROOT / "gold"

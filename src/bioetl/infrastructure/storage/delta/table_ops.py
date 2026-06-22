@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import shutil
+import sys
 from pathlib import Path
 
 import pyarrow as pa
@@ -10,6 +11,13 @@ from deltalake import DeltaTable
 
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.storage.delta.schema_ops import delta_schema_to_pyarrow
+
+
+def _can_use_pyarrow_dataset_scanner(*, platform: str = sys.platform) -> bool:
+    """Return whether Delta reads should use the PyArrow dataset scanner path."""
+    # On Windows, importing ``pyarrow.dataset`` through ``to_pyarrow_dataset()``
+    # can hang long enough to trip E2E timeout guards on local mixed checkouts.
+    return platform != "win32"
 
 
 def read_delta_records(
@@ -22,7 +30,7 @@ def read_delta_records(
     materializing a full Arrow table before conversion.
     """
     to_dataset = getattr(table, "to_pyarrow_dataset", None)
-    if callable(to_dataset):
+    if _can_use_pyarrow_dataset_scanner() and callable(to_dataset):
         dataset = to_dataset()
         scanner = dataset.scanner(columns=columns)
         to_reader = getattr(scanner, "to_reader", None)

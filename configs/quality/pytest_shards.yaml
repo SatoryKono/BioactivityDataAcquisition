@@ -97,6 +97,7 @@ shards:
       - --ignore=tests/architecture/test_check_doc_links_guardrails.py
       - --ignore=tests/architecture/test_compatibility_facade_inventory.py
       - --ignore=tests/architecture/test_compatibility_importer_census_governance.py
+      - --ignore=tests/architecture/test_contract_coverage_matrix_drift.py
   - name: S7-crosscutting-architecture-a3
     wave: 2
     paths:
@@ -194,6 +195,7 @@ shards:
       - tests/architecture/test_check_doc_links_guardrails.py
       - tests/architecture/test_compatibility_facade_inventory.py
       - tests/architecture/test_compatibility_importer_census_governance.py
+      - tests/architecture/test_contract_coverage_matrix_drift.py
       - tests/architecture/test_docs_version_sync.py
       - tests/architecture/test_documentation_sync.py
       - tests/architecture/test_code_metrics.py

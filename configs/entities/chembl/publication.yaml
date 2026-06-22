@@ -428,9 +428,52 @@ contracts:
   - publication_id
   merge_keys:
   - publication_id
-  hash_include: []
-  hash_exclude: []
+  hash_include:
+  - publication_id
+  - publication_doi
+  - publication_pmid
+  - publication_pmc_id
+  - title
+  - abstract
+  - authors
+  - journal
+  - publication_year
+  - volume
+  - issue
+  - page_first
+  - page_last
+  - publication_type_raw
+  - publication_type
+  - publication_type_unified
+  - publication_subclass
+  - publication_class
+  - oa_status
+  - citations_received
+  - citations_made
+  - src_id
+  - chembl_release
+  - creation_date
+  hash_exclude:
+  - _ingestion_ts
+  - _run_id
+  - _run_type
+  - _dq_warn
+  - _dq_error
+  - _source_batch_id
+  - _index
+  - _lookup_method
+  - _original_id
+  - _source
   hash_datetime_policy: v2_datetime_utc
+  contract_ref: chembl.publication
+  active_version: 1.0.0
+  rollout:
+    mode: single
+    read_order:
+    - 1.0.0
+    write_versions:
+    - 1.0.0
+    affects_hash: false
 hash_policy:
   provider: chembl
   entity: publication

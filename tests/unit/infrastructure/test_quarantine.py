@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-import tempfile
+from tests.helpers.synthetic_paths import synthetic_test_root
 from datetime import UTC, datetime
-from pathlib import Path
 from unittest.mock import patch
 from uuid import UUID
 
@@ -15,7 +14,7 @@ from bioetl.infrastructure.quarantine.unified import UnifiedQuarantineAdapter
 
 # Fixed timestamp for test reproducibility
 TEST_INGESTION_TS = datetime(2024, 1, 15, 12, 0, 0, tzinfo=UTC)
-TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-quarantine-"))
+TEST_ROOT = synthetic_test_root("bioetl-quarantine")
 QUARANTINE_ROOT = str(TEST_ROOT / "quarantine")
 
 

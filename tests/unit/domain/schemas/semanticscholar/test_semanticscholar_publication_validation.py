@@ -14,6 +14,9 @@ from typing import Any
 from bioetl.domain.schemas.semanticscholar.publication import (
     SemanticScholarPublicationSchema,
 )
+from tests.unit.domain.schemas._schema_validation_assertions import (
+    assert_schema_validates_frame,
+)
 
 
 @pytest.mark.unit
@@ -24,8 +27,8 @@ class TestPmidBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid pmid value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_pmid_base_validation__pmid_null_allowed__08ce86f4(
@@ -34,7 +37,7 @@ class TestPmidBaseValidation:
         """SKIP: pmid is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["pmid"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
     @pytest.mark.parametrize("invalid_value", ["-1", "abc", ""])
     def test_pmid_base_validation__pmid_invalid_format__17bfbf82(
@@ -55,8 +58,8 @@ class TestDoiBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid doi value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_doi_base_validation__doi_null_allowed__5ba82159(
@@ -65,7 +68,7 @@ class TestDoiBaseValidation:
         """SKIP: doi is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["doi"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
     @pytest.mark.parametrize(
         "invalid_value", ["doi:10.1234", "10.123/x", "not-a-doi", ""]
@@ -88,8 +91,8 @@ class TestPmcIdBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid pmc_id value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_pmc_id_base_validation__pmc_id_null_allowed__bdd6f1f5(
@@ -98,7 +101,7 @@ class TestPmcIdBaseValidation:
         """SKIP: pmc_id is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["pmc_id"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
     @pytest.mark.parametrize("invalid_value", ["pmc123", "PMC", "123", ""])
     def test_pmc_id_base_validation__id_invalid_format__cb3cec42(
@@ -119,8 +122,8 @@ class TestTitleBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid title value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_title_base_validation__title_null_allowed__4596e9c7(
@@ -129,7 +132,7 @@ class TestTitleBaseValidation:
         """SKIP: title is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["title"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -140,8 +143,8 @@ class TestAbstractBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid abstract value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_base_validation__null_allowed__c89132cb(
@@ -150,7 +153,7 @@ class TestAbstractBaseValidation:
         """SKIP: abstract is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["abstract"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -161,8 +164,8 @@ class TestAuthorsBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid authors value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_base_validation__authors_null_allowed__44cb58cc(
@@ -171,7 +174,7 @@ class TestAuthorsBaseValidation:
         """SKIP: authors is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["authors"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -182,8 +185,8 @@ class TestAffiliationListBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid affiliation_list value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_list_base_validation__list_null_allowed__f7caea03(
@@ -192,7 +195,7 @@ class TestAffiliationListBaseValidation:
         """SKIP: affiliation_list is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["affiliation_list"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -203,8 +206,8 @@ class TestJournalBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid journal value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_base_validation__journal_null_allowed__61ac788f(
@@ -213,7 +216,7 @@ class TestJournalBaseValidation:
         """SKIP: journal is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["journal"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -224,8 +227,8 @@ class TestPublicationYearBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid publication_year value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_year_base_validation__year_null_allowed__27880e52(
@@ -234,7 +237,7 @@ class TestPublicationYearBaseValidation:
         """SKIP: publication_year is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["publication_year"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -245,8 +248,8 @@ class TestPublicationDateBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid publication_date value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_date_base_validation__date_null_allowed__f5a159cb(
@@ -255,7 +258,7 @@ class TestPublicationDateBaseValidation:
         """SKIP: publication_date is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["publication_date"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -266,8 +269,8 @@ class TestPublicationTypeBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid publication_type value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_type_base_validation__type_null_allowed__c9b934c4(
@@ -276,7 +279,7 @@ class TestPublicationTypeBaseValidation:
         """SKIP: publication_type is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["publication_type"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -287,8 +290,8 @@ class TestLanguageBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid language value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_base_validation__null_allowed__ba822ca3(
@@ -297,7 +300,7 @@ class TestLanguageBaseValidation:
         """SKIP: language is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["language"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -308,8 +311,8 @@ class TestPageFirstBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid page_first value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_first_base_validation__first_null_allowed__4170b325(
@@ -318,7 +321,7 @@ class TestPageFirstBaseValidation:
         """SKIP: page_first is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["page_first"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -329,8 +332,8 @@ class TestPageLastBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid page_last value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_last_base_validation__last_null_allowed__e8dff6ab(
@@ -339,7 +342,7 @@ class TestPageLastBaseValidation:
         """SKIP: page_last is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["page_last"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -350,8 +353,8 @@ class TestCitationsReceivedBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid citations_received value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_base_validation__null_allowed__21d6a4e2(
@@ -360,7 +363,7 @@ class TestCitationsReceivedBaseValidation:
         """SKIP: citations_received is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["citations_received"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -371,8 +374,8 @@ class TestCitationsMadeBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid citations_made value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_made_base_validation__made_null_allowed__02d97dde(
@@ -381,7 +384,7 @@ class TestCitationsMadeBaseValidation:
         """SKIP: citations_made is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["citations_made"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -392,8 +395,8 @@ class TestIsOaBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid is_oa value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_is_oa_base_validation__is_oa_null_allowed__f88d84f5(
@@ -402,7 +405,7 @@ class TestIsOaBaseValidation:
         """SKIP: is_oa is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["is_oa"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -413,8 +416,8 @@ class TestLookupMethodBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid lookup_method value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_method_base_validation__method_null_allowed__74840504(
@@ -423,7 +426,7 @@ class TestLookupMethodBaseValidation:
         """SKIP: lookup_method is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["lookup_method"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -434,8 +437,8 @@ class TestOriginalIdBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid original_id value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_id_base_validation__id_null_allowed__ed51fd14(
@@ -444,7 +447,7 @@ class TestOriginalIdBaseValidation:
         """SKIP: original_id is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["original_id"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -455,8 +458,8 @@ class TestSourceBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid _source value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_source_base_validation__source_null_allowed__910440cc(
@@ -465,7 +468,7 @@ class TestSourceBaseValidation:
         """SKIP: _source is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["_source"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -476,8 +479,8 @@ class TestPaperIdBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid paper_id value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_paper_id_null_fails(
@@ -510,8 +513,8 @@ class TestDblpIdBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid dblp_id value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_dblp_id_null_allowed(
@@ -520,7 +523,7 @@ class TestDblpIdBaseValidation:
         """SKIP: dblp_id is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["dblp_id"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -531,8 +534,8 @@ class TestCorpusIdBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid corpus_id value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_corpus_id_null_allowed(
@@ -541,7 +544,7 @@ class TestCorpusIdBaseValidation:
         """SKIP: corpus_id is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["corpus_id"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
     @pytest.mark.parametrize("invalid_value", [-1])
     def test_corpus_id_invalid_format(
@@ -562,8 +565,8 @@ class TestTldrBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid tldr value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_tldr_null_allowed(
@@ -572,7 +575,7 @@ class TestTldrBaseValidation:
         """SKIP: tldr is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["tldr"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -583,8 +586,8 @@ class TestVolumeBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid volume value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_volume_base_validation__volume_null_allowed__f06d7e56(
@@ -593,7 +596,7 @@ class TestVolumeBaseValidation:
         """SKIP: volume is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["volume"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -604,8 +607,8 @@ class TestPageRangeBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid page_range value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_range_base_validation__range_null_allowed__e4646ac3(
@@ -614,7 +617,7 @@ class TestPageRangeBaseValidation:
         """SKIP: page_range is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["page_range"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -625,8 +628,8 @@ class TestInfluentialCitationCountBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid influential_citation_count value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_influential_citation_count_null_allowed(
@@ -635,7 +638,7 @@ class TestInfluentialCitationCountBaseValidation:
         """SKIP: influential_citation_count is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["influential_citation_count"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -646,8 +649,8 @@ class TestOpenAccessUrlBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid open_access_url value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_open_access_url_null_allowed(
@@ -656,7 +659,7 @@ class TestOpenAccessUrlBaseValidation:
         """SKIP: open_access_url is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["open_access_url"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -667,8 +670,8 @@ class TestOaStatusBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid oa_status value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_status_base_validation__status_null_allowed__d89abc4b(
@@ -677,7 +680,7 @@ class TestOaStatusBaseValidation:
         """SKIP: oa_status is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["oa_status"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -688,8 +691,8 @@ class TestSubjectFieldsBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid subject_fields value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_subject_fields_null_allowed(
@@ -698,7 +701,7 @@ class TestSubjectFieldsBaseValidation:
         """SKIP: subject_fields is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["subject_fields"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -709,8 +712,8 @@ class TestPublicationTypesBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid publication_types value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_types_base_validation__types_null_allowed__8c792f04(
@@ -719,7 +722,7 @@ class TestPublicationTypesBaseValidation:
         """SKIP: publication_types is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["publication_types"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -730,8 +733,8 @@ class TestAuthorS2IdsBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid author_s2_ids value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_author_s2_ids_null_allowed(
@@ -740,7 +743,7 @@ class TestAuthorS2IdsBaseValidation:
         """SKIP: author_s2_ids is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["author_s2_ids"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -751,8 +754,8 @@ class TestAuthorHIndicesBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid author_h_indices value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_author_h_indices_null_allowed(
@@ -761,7 +764,7 @@ class TestAuthorHIndicesBaseValidation:
         """SKIP: author_h_indices is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["author_h_indices"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -772,8 +775,8 @@ class TestCitationContextsBaseValidation:
         self, minimal_semanticscholar_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid citation_contexts value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
+        assert_schema_validates_frame(
+            SemanticScholarPublicationSchema, minimal_semanticscholar_publication_df
         )
 
     def test_citation_contexts_null_allowed(
@@ -782,4 +785,4 @@ class TestCitationContextsBaseValidation:
         """SKIP: citation_contexts is nullable."""
         df = minimal_semanticscholar_publication_df.copy()
         df["citation_contexts"] = None
-        SemanticScholarPublicationSchema.validate(df)
+        assert_schema_validates_frame(SemanticScholarPublicationSchema, df)

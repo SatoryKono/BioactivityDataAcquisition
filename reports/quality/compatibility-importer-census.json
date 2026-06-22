@@ -9,8 +9,8 @@
     "removed_compatibility_surfaces_with_src_importers": 0,
     "removed_compatibility_surfaces_with_test_importers": 0,
     "removed_compatibility_surfaces_still_present": 0,
-    "twin_pair_count": 0,
-    "twin_pairs_with_private_src_importers": 0,
+    "twin_pair_count": 1,
+    "twin_pairs_with_private_src_importers": 1,
     "twin_pairs_without_public_src_importers": 0,
     "tracked_twin_family_count": 0,
     "config_root_symbol_count": 3,
@@ -145,10 +145,11 @@
       "test_importers": [
         "tests/architecture/test_interfaces_no_infrastructure.py",
         "tests/smoke/test_smoke.py",
+        "tests/unit/composition/test_canonical_module_paths.py",
         "tests/unit/composition/test_entrypoints.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 3,
+      "test_importer_count": 4,
       "surface_classification": "external-facing"
     },
     {
@@ -182,15 +183,13 @@
       "external_breaking_change_required": true,
       "internal_callers_zero": false,
       "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
-      "src_importers": [
-        "src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py"
-      ],
+      "src_importers": [],
       "test_importers": [
         "tests/unit/composition/test_canonical_module_paths.py"
       ],
-      "src_importer_count": 1,
+      "src_importer_count": 0,
       "test_importer_count": 1,
-      "surface_classification": "first-party-active"
+      "surface_classification": "external-facing"
     },
     {
       "path": "src/bioetl/infrastructure/config/__init__.py",
@@ -223,84 +222,7 @@
       "internal_callers_zero": false,
       "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
       "src_importers": [
-        "src/bioetl/application/composite/_preflight_orchestration.py",
-        "src/bioetl/application/composite/_preflight_reporting.py",
-        "src/bioetl/application/composite/coalesce_policy.py",
-        "src/bioetl/application/composite/column_orderer_group_flow.py",
-        "src/bioetl/application/composite/column_priority_orderer.py",
-        "src/bioetl/application/composite/column_service.py",
-        "src/bioetl/application/composite/column_service_priority.py",
-        "src/bioetl/application/composite/column_service_support.py",
-        "src/bioetl/application/composite/conflict_resolver.py",
-        "src/bioetl/application/composite/coordinator.py",
-        "src/bioetl/application/composite/coordinator_planning.py",
-        "src/bioetl/application/composite/coordinator_result_mixin.py",
-        "src/bioetl/application/composite/cross_validator.py",
-        "src/bioetl/application/composite/dependency_coordinator.py",
-        "src/bioetl/application/composite/dependency_join_context_builders.py",
-        "src/bioetl/application/composite/dependency_joiner.py",
-        "src/bioetl/application/composite/dependency_key_resolvers.py",
-        "src/bioetl/application/composite/dependency_progress_tracker.py",
-        "src/bioetl/application/composite/dependency_result_mapper.py",
-        "src/bioetl/application/composite/enricher_join_execution.py",
-        "src/bioetl/application/composite/fsm_helper.py",
-        "src/bioetl/application/composite/join_key_normalization.py",
-        "src/bioetl/application/composite/join_planner.py",
-        "src/bioetl/application/composite/join_planner_delegation_mixin.py",
-        "src/bioetl/application/composite/merger.py",
-        "src/bioetl/application/composite/merger_input_mixin.py",
-        "src/bioetl/application/composite/merger_io_mixin.py",
-        "src/bioetl/application/composite/merger_metrics_mixin.py",
-        "src/bioetl/application/composite/merger_orchestration.py",
-        "src/bioetl/application/composite/merger_output_mixin.py",
-        "src/bioetl/application/composite/merger_post_join.py",
-        "src/bioetl/application/composite/preflight_validator.py",
-        "src/bioetl/application/composite/protocols.py",
-        "src/bioetl/application/composite/runner_pkg/runner.py",
-        "src/bioetl/application/composite/runner_pkg/runner_control_plane_lifecycle.py",
-        "src/bioetl/application/composite/runner_pkg/runner_merge_stage_mixin.py",
-        "src/bioetl/application/composite/runner_pkg/runner_merge_stage_types.py",
-        "src/bioetl/application/composite/runner_pkg/runner_mergeability_helpers.py",
-        "src/bioetl/application/composite/runner_pkg/runner_observability_mixin.py",
-        "src/bioetl/application/composite/runner_pkg/runner_stage_enrichment_types.py",
-        "src/bioetl/application/composite/runner_pkg/runner_stage_start_flow.py",
-        "src/bioetl/application/composite/runner_pkg/runner_stage_support_mixin.py",
-        "src/bioetl/application/composite/runner_pkg/runner_stage_support_types.py",
-        "src/bioetl/application/composite/runner_pkg/runner_stage_types.py",
-        "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
-        "src/bioetl/application/composite/runner_pkg/runner_support_policy.py",
-        "src/bioetl/application/composite/runner_pkg/runner_support_types.py",
-        "src/bioetl/application/core/record_processor_config.py",
-        "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_builder_support.py",
-        "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_payloads.py",
-        "src/bioetl/composition/bootstrap/runtime/_composite_plan_runtime_support.py",
-        "src/bioetl/composition/bootstrap/runtime/_composite_plan_support.py",
-        "src/bioetl/composition/bootstrap/runtime/_dependency_runner_support.py",
-        "src/bioetl/composition/bootstrap/runtime/_runner_assembly_support.py",
-        "src/bioetl/composition/bootstrap/runtime/composite.py",
-        "src/bioetl/composition/bootstrap/runtime/composite_control_plane_builder.py",
-        "src/bioetl/composition/bootstrap/runtime/composite_execution_support_builder.py",
-        "src/bioetl/composition/bootstrap/runtime/composite_filter_extraction_service.py",
-        "src/bioetl/composition/bootstrap/runtime/composite_merge_dependency_builder.py",
-        "src/bioetl/composition/bootstrap/runtime/composite_merge_service_builder.py",
-        "src/bioetl/composition/bootstrap/runtime/composite_runtime_management_builder.py",
-        "src/bioetl/composition/bootstrap/runtime/composite_support_runtime_context.py",
-        "src/bioetl/composition/bootstrap/runtime/composite_support_services_factory.py",
-        "src/bioetl/composition/bootstrap/runtime/runner_assembly.py",
-        "src/bioetl/composition/bootstrap/runtime/runner_bootstrap_wiring.py",
-        "src/bioetl/composition/bootstrap/runtime/runner_factory_builder_service.py",
-        "src/bioetl/composition/bootstrap/runtime/runtime_basics.py",
-        "src/bioetl/composition/factories/services/_builder_record_processor_support.py",
-        "src/bioetl/domain/composite/__init__.py",
-        "src/bioetl/domain/config/pipeline.py",
-        "src/bioetl/infrastructure/config/composite_config_api.py",
-        "src/bioetl/infrastructure/config/converters.py",
-        "src/bioetl/infrastructure/schemas/_composite_config_merge_schema.py",
-        "src/bioetl/infrastructure/schemas/composite_config.py",
-        "src/bioetl/infrastructure/schemas/composite_config_base.py",
-        "src/bioetl/infrastructure/schemas/composite_validation.py",
-        "src/bioetl/interfaces/cli/commands/domains/composite/execution.py",
-        "src/bioetl/interfaces/cli/commands/run_composite.py"
+        "src/bioetl/domain/composite/__init__.py"
       ],
       "test_importers": [
         "tests/contract/test_composite_merge_golden.py",
@@ -343,7 +265,7 @@
         "tests/unit/domain/composite/test_data_schema_config.py",
         "tests/unit/infrastructure/schemas/test_composite_config_invariants_source_of_truth.py"
       ],
-      "src_importer_count": 78,
+      "src_importer_count": 1,
       "test_importer_count": 39,
       "surface_classification": "first-party-active"
     },
@@ -501,10 +423,11 @@
       "test_importers": [
         "tests/architecture/test_interfaces_no_infrastructure.py",
         "tests/smoke/test_smoke.py",
+        "tests/unit/composition/test_canonical_module_paths.py",
         "tests/unit/composition/test_entrypoints.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 3,
+      "test_importer_count": 4,
       "surface_classification": "external-facing"
     },
     {
@@ -538,15 +461,13 @@
       "external_breaking_change_required": true,
       "internal_callers_zero": false,
       "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
-      "src_importers": [
-        "src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py"
-      ],
+      "src_importers": [],
       "test_importers": [
         "tests/unit/composition/test_canonical_module_paths.py"
       ],
-      "src_importer_count": 1,
+      "src_importer_count": 0,
       "test_importer_count": 1,
-      "surface_classification": "first-party-active"
+      "surface_classification": "external-facing"
     },
     {
       "path": "src/bioetl/infrastructure/config/__init__.py",
@@ -579,84 +500,7 @@
       "internal_callers_zero": false,
       "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
       "src_importers": [
-        "src/bioetl/application/composite/_preflight_orchestration.py",
-        "src/bioetl/application/composite/_preflight_reporting.py",
-        "src/bioetl/application/composite/coalesce_policy.py",
-        "src/bioetl/application/composite/column_orderer_group_flow.py",
-        "src/bioetl/application/composite/column_priority_orderer.py",
-        "src/bioetl/application/composite/column_service.py",
-        "src/bioetl/application/composite/column_service_priority.py",
-        "src/bioetl/application/composite/column_service_support.py",
-        "src/bioetl/application/composite/conflict_resolver.py",
-        "src/bioetl/application/composite/coordinator.py",
-        "src/bioetl/application/composite/coordinator_planning.py",
-        "src/bioetl/application/composite/coordinator_result_mixin.py",
-        "src/bioetl/application/composite/cross_validator.py",
-        "src/bioetl/application/composite/dependency_coordinator.py",
-        "src/bioetl/application/composite/dependency_join_context_builders.py",
-        "src/bioetl/application/composite/dependency_joiner.py",
-        "src/bioetl/application/composite/dependency_key_resolvers.py",
-        "src/bioetl/application/composite/dependency_progress_tracker.py",
-        "src/bioetl/application/composite/dependency_result_mapper.py",
-        "src/bioetl/application/composite/enricher_join_execution.py",
-        "src/bioetl/application/composite/fsm_helper.py",
-        "src/bioetl/application/composite/join_key_normalization.py",
-        "src/bioetl/application/composite/join_planner.py",
-        "src/bioetl/application/composite/join_planner_delegation_mixin.py",
-        "src/bioetl/application/composite/merger.py",
-        "src/bioetl/application/composite/merger_input_mixin.py",
-        "src/bioetl/application/composite/merger_io_mixin.py",
-        "src/bioetl/application/composite/merger_metrics_mixin.py",
-        "src/bioetl/application/composite/merger_orchestration.py",
-        "src/bioetl/application/composite/merger_output_mixin.py",
-        "src/bioetl/application/composite/merger_post_join.py",
-        "src/bioetl/application/composite/preflight_validator.py",
-        "src/bioetl/application/composite/protocols.py",
-        "src/bioetl/application/composite/runner_pkg/runner.py",
-        "src/bioetl/application/composite/runner_pkg/runner_control_plane_lifecycle.py",
-        "src/bioetl/application/composite/runner_pkg/runner_merge_stage_mixin.py",
-        "src/bioetl/application/composite/runner_pkg/runner_merge_stage_types.py",
-        "src/bioetl/application/composite/runner_pkg/runner_mergeability_helpers.py",
-        "src/bioetl/application/composite/runner_pkg/runner_observability_mixin.py",
-        "src/bioetl/application/composite/runner_pkg/runner_stage_enrichment_types.py",
-        "src/bioetl/application/composite/runner_pkg/runner_stage_start_flow.py",
-        "src/bioetl/application/composite/runner_pkg/runner_stage_support_mixin.py",
-        "src/bioetl/application/composite/runner_pkg/runner_stage_support_types.py",
-        "src/bioetl/application/composite/runner_pkg/runner_stage_types.py",
-        "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
-        "src/bioetl/application/composite/runner_pkg/runner_support_policy.py",
-        "src/bioetl/application/composite/runner_pkg/runner_support_types.py",
-        "src/bioetl/application/core/record_processor_config.py",
-        "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_builder_support.py",
-        "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_payloads.py",
-        "src/bioetl/composition/bootstrap/runtime/_composite_plan_runtime_support.py",
-        "src/bioetl/composition/bootstrap/runtime/_composite_plan_support.py",
-        "src/bioetl/composition/bootstrap/runtime/_dependency_runner_support.py",
-        "src/bioetl/composition/bootstrap/runtime/_runner_assembly_support.py",
-        "src/bioetl/composition/bootstrap/runtime/composite.py",
-        "src/bioetl/composition/bootstrap/runtime/composite_control_plane_builder.py",
-        "src/bioetl/composition/bootstrap/runtime/composite_execution_support_builder.py",
-        "src/bioetl/composition/bootstrap/runtime/composite_filter_extraction_service.py",
-        "src/bioetl/composition/bootstrap/runtime/composite_merge_dependency_builder.py",
-        "src/bioetl/composition/bootstrap/runtime/composite_merge_service_builder.py",
-        "src/bioetl/composition/bootstrap/runtime/composite_runtime_management_builder.py",
-        "src/bioetl/composition/bootstrap/runtime/composite_support_runtime_context.py",
-        "src/bioetl/composition/bootstrap/runtime/composite_support_services_factory.py",
-        "src/bioetl/composition/bootstrap/runtime/runner_assembly.py",
-        "src/bioetl/composition/bootstrap/runtime/runner_bootstrap_wiring.py",
-        "src/bioetl/composition/bootstrap/runtime/runner_factory_builder_service.py",
-        "src/bioetl/composition/bootstrap/runtime/runtime_basics.py",
-        "src/bioetl/composition/factories/services/_builder_record_processor_support.py",
-        "src/bioetl/domain/composite/__init__.py",
-        "src/bioetl/domain/config/pipeline.py",
-        "src/bioetl/infrastructure/config/composite_config_api.py",
-        "src/bioetl/infrastructure/config/converters.py",
-        "src/bioetl/infrastructure/schemas/_composite_config_merge_schema.py",
-        "src/bioetl/infrastructure/schemas/composite_config.py",
-        "src/bioetl/infrastructure/schemas/composite_config_base.py",
-        "src/bioetl/infrastructure/schemas/composite_validation.py",
-        "src/bioetl/interfaces/cli/commands/domains/composite/execution.py",
-        "src/bioetl/interfaces/cli/commands/run_composite.py"
+        "src/bioetl/domain/composite/__init__.py"
       ],
       "test_importers": [
         "tests/contract/test_composite_merge_golden.py",
@@ -699,7 +543,7 @@
         "tests/unit/domain/composite/test_data_schema_config.py",
         "tests/unit/infrastructure/schemas/test_composite_config_invariants_source_of_truth.py"
       ],
-      "src_importer_count": 78,
+      "src_importer_count": 1,
       "test_importer_count": 39,
       "surface_classification": "first-party-active"
     },
@@ -736,7 +580,7 @@
       "path": "src/bioetl/composition/entrypoints.py",
       "module_name": "bioetl.composition.entrypoints",
       "canonical_target": "bioetl.composition.entrypoints",
-      "max_public_exports": 15,
+      "max_public_exports": 14,
       "public_exports": [
         "ArchiveOptions",
         "PipelineRunResult",
@@ -751,10 +595,9 @@
         "load_pipeline_config",
         "maybe_start_metrics_server",
         "push_metrics_to_gateway",
-        "run_pipeline",
-        "start_metrics_server"
+        "run_pipeline"
       ],
-      "public_export_count": 15,
+      "public_export_count": 14,
       "duplicate_public_exports": [],
       "lazy_export_table": "_PUBLIC_SYMBOL_TARGETS",
       "lazy_export_keys": [
@@ -771,8 +614,7 @@
         "load_pipeline_config",
         "maybe_start_metrics_server",
         "push_metrics_to_gateway",
-        "run_pipeline",
-        "start_metrics_server"
+        "run_pipeline"
       ],
       "duplicate_lazy_export_keys": [],
       "orphan_lazy_export_keys": [],
@@ -786,13 +628,13 @@
       "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
       "surface_classification": "external-facing",
       "src_importer_count": 0,
-      "test_importer_count": 3
+      "test_importer_count": 4
     },
     {
       "path": "src/bioetl/composition/health_api.py",
       "module_name": "bioetl.composition.health_api",
       "canonical_target": "bioetl.composition.health_api",
-      "max_public_exports": 8,
+      "max_public_exports": 7,
       "public_exports": [
         "HealthServerDependencies",
         "HealthServerDependenciesProtocol",
@@ -800,10 +642,9 @@
         "get_health_service",
         "get_quarantine_port",
         "get_quarantine_runtime_service",
-        "get_quarantine_service",
-        "get_runtime_settings"
+        "get_quarantine_service"
       ],
-      "public_export_count": 8,
+      "public_export_count": 7,
       "duplicate_public_exports": [],
       "lazy_export_table": "_PUBLIC_EXPORTS",
       "lazy_export_keys": [
@@ -832,29 +673,21 @@
       "path": "src/bioetl/composition/maintenance_api.py",
       "module_name": "bioetl.composition.maintenance_api",
       "canonical_target": "bioetl.composition.maintenance_api",
-      "max_public_exports": 8,
+      "max_public_exports": 4,
       "public_exports": [
-        "archive_table",
         "cleanup_bronze",
         "get_bronze_cleanup_service",
         "get_contract_migration_service",
-        "get_lifecycle_service",
-        "get_vacuum_service",
-        "preview_cleanup",
-        "vacuum_table"
+        "get_vacuum_service"
       ],
-      "public_export_count": 8,
+      "public_export_count": 4,
       "duplicate_public_exports": [],
       "lazy_export_table": "_PUBLIC_EXPORTS",
       "lazy_export_keys": [
-        "archive_table",
         "cleanup_bronze",
         "get_bronze_cleanup_service",
         "get_contract_migration_service",
-        "get_lifecycle_service",
-        "get_vacuum_service",
-        "preview_cleanup",
-        "vacuum_table"
+        "get_vacuum_service"
       ],
       "duplicate_lazy_export_keys": [],
       "orphan_lazy_export_keys": [],
@@ -866,8 +699,8 @@
       "external_breaking_change_required": true,
       "internal_callers_zero": false,
       "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
-      "surface_classification": "first-party-active",
-      "src_importer_count": 1,
+      "surface_classification": "external-facing",
+      "src_importer_count": 0,
       "test_importer_count": 1
     },
     {
@@ -925,7 +758,7 @@
       "path": "src/bioetl/composition/entrypoints.py",
       "module_name": "bioetl.composition.entrypoints",
       "canonical_target": "bioetl.composition.entrypoints",
-      "max_public_exports": 15,
+      "max_public_exports": 14,
       "public_exports": [
         "ArchiveOptions",
         "PipelineRunResult",
@@ -940,10 +773,9 @@
         "load_pipeline_config",
         "maybe_start_metrics_server",
         "push_metrics_to_gateway",
-        "run_pipeline",
-        "start_metrics_server"
+        "run_pipeline"
       ],
-      "public_export_count": 15,
+      "public_export_count": 14,
       "duplicate_public_exports": [],
       "lazy_export_table": "_PUBLIC_SYMBOL_TARGETS",
       "lazy_export_keys": [
@@ -960,8 +792,7 @@
         "load_pipeline_config",
         "maybe_start_metrics_server",
         "push_metrics_to_gateway",
-        "run_pipeline",
-        "start_metrics_server"
+        "run_pipeline"
       ],
       "duplicate_lazy_export_keys": [],
       "orphan_lazy_export_keys": [],
@@ -975,13 +806,13 @@
       "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
       "surface_classification": "external-facing",
       "src_importer_count": 0,
-      "test_importer_count": 3
+      "test_importer_count": 4
     },
     {
       "path": "src/bioetl/composition/health_api.py",
       "module_name": "bioetl.composition.health_api",
       "canonical_target": "bioetl.composition.health_api",
-      "max_public_exports": 8,
+      "max_public_exports": 7,
       "public_exports": [
         "HealthServerDependencies",
         "HealthServerDependenciesProtocol",
@@ -989,10 +820,9 @@
         "get_health_service",
         "get_quarantine_port",
         "get_quarantine_runtime_service",
-        "get_quarantine_service",
-        "get_runtime_settings"
+        "get_quarantine_service"
       ],
-      "public_export_count": 8,
+      "public_export_count": 7,
       "duplicate_public_exports": [],
       "lazy_export_table": "_PUBLIC_EXPORTS",
       "lazy_export_keys": [
@@ -1021,29 +851,21 @@
       "path": "src/bioetl/composition/maintenance_api.py",
       "module_name": "bioetl.composition.maintenance_api",
       "canonical_target": "bioetl.composition.maintenance_api",
-      "max_public_exports": 8,
+      "max_public_exports": 4,
       "public_exports": [
-        "archive_table",
         "cleanup_bronze",
         "get_bronze_cleanup_service",
         "get_contract_migration_service",
-        "get_lifecycle_service",
-        "get_vacuum_service",
-        "preview_cleanup",
-        "vacuum_table"
+        "get_vacuum_service"
       ],
-      "public_export_count": 8,
+      "public_export_count": 4,
       "duplicate_public_exports": [],
       "lazy_export_table": "_PUBLIC_EXPORTS",
       "lazy_export_keys": [
-        "archive_table",
         "cleanup_bronze",
         "get_bronze_cleanup_service",
         "get_contract_migration_service",
-        "get_lifecycle_service",
-        "get_vacuum_service",
-        "preview_cleanup",
-        "vacuum_table"
+        "get_vacuum_service"
       ],
       "duplicate_lazy_export_keys": [],
       "orphan_lazy_export_keys": [],
@@ -1055,8 +877,8 @@
       "external_breaking_change_required": true,
       "internal_callers_zero": false,
       "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
-      "surface_classification": "first-party-active",
-      "src_importer_count": 1,
+      "surface_classification": "external-facing",
+      "src_importer_count": 0,
       "test_importer_count": 1
     },
     {
@@ -1434,7 +1256,26 @@
       "test_importer_count": 0
     }
   ],
-  "twin_pairs": [],
+  "twin_pairs": [
+    {
+      "private_path": "src/bioetl/interfaces/cli/commands/_run_manifest_output_support.py",
+      "public_path": "src/bioetl/interfaces/cli/commands/run_manifest_output_support.py",
+      "private_module": "bioetl.interfaces.cli.commands._run_manifest_output_support",
+      "public_module": "bioetl.interfaces.cli.commands.run_manifest_output_support",
+      "public_src_importer_count": 1,
+      "public_test_importer_count": 0,
+      "private_src_importer_count": 3,
+      "private_test_importer_count": 0,
+      "public_src_importers": [
+        "src/bioetl/interfaces/cli/commands/domains/maintenance/plan.py"
+      ],
+      "private_src_importers": [
+        "src/bioetl/interfaces/cli/commands/_run_manifest_output.py",
+        "src/bioetl/interfaces/cli/commands/_run_manifest_output_diagnostics.py",
+        "src/bioetl/interfaces/cli/commands/run_manifest_output_support.py"
+      ]
+    }
+  ],
   "tracked_twin_families": [],
   "config_root_facade": {
     "target_module": "bioetl.infrastructure.config",

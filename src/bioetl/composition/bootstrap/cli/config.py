@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from functools import partial
 from pathlib import Path
 from typing import cast
@@ -16,22 +15,16 @@ from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.composition.bootstrap.cli.service_builders import build_cli_config_service
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.composition.registry_api import PipelineRegistry, create_registry
-from bioetl.composition.runtime_builders.config_access import get_settings
+from bioetl.composition.runtime_builders.config_access import (
+    create_pipeline_config_loader,
+    get_settings,
+    resolve_configs_root,
+)
 from bioetl.domain.ports import DomainConfigMapperPort, SettingsLoaderPort
-from bioetl.infrastructure.config.config_root import resolve_configs_root
 from bioetl.infrastructure.config.converters import yaml_config_to_domain
 from bioetl.infrastructure.config.dq_contract_config_loader import (
     load_dq_config_for_pipeline,
 )
-from bioetl.infrastructure.config.pipeline_config_api import (
-    load_pipeline_config_from_root,
-)
-
-
-def create_pipeline_config_loader(configs_root: Path) -> Callable[[str], object]:
-    return lambda pipeline_name: load_pipeline_config_from_root(
-        pipeline_name, configs_root=configs_root
-    )
 
 
 def create_registered_pipeline_registry(

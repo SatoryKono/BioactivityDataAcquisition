@@ -46,10 +46,10 @@ def _gates() -> dict[str, object]:
 
 def test_block_regression_detects_coverage_decrease() -> None:
     payload = {
-        "modules": [_row("src/bioetl/domain/aggregates/_batch_lifecycle.py", 90.0)]
+        "modules": [_row("src/bioetl/domain/aggregates/_other_aggregate.py", 90.0)]
     }
     baseline = {
-        "modules": [_row("src/bioetl/domain/aggregates/_batch_lifecycle.py", 95.0)]
+        "modules": [_row("src/bioetl/domain/aggregates/_other_aggregate.py", 95.0)]
     }
 
     violations = evaluate_module_coverage_gates(
@@ -65,10 +65,10 @@ def test_block_regression_detects_coverage_decrease() -> None:
 
 def test_block_regression_ignores_tier_gaps() -> None:
     payload = {
-        "modules": [_row("src/bioetl/domain/aggregates/_batch_lifecycle.py", 90.0)]
+        "modules": [_row("src/bioetl/domain/aggregates/_other_aggregate.py", 90.0)]
     }
     baseline = {
-        "modules": [_row("src/bioetl/domain/aggregates/_batch_lifecycle.py", 90.0)]
+        "modules": [_row("src/bioetl/domain/aggregates/_other_aggregate.py", 90.0)]
     }
 
     violations = evaluate_module_coverage_gates(

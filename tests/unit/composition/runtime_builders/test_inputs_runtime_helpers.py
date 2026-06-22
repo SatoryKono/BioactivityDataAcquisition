@@ -2,15 +2,14 @@
 
 from __future__ import annotations
 
-import tempfile
-from pathlib import Path
+from tests.helpers.synthetic_paths import synthetic_test_root
 from types import SimpleNamespace
 
 import pytest
 
 from bioetl.composition.runtime_builders import inputs_runtime_helpers
 
-TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-inputs-runtime-"))
+TEST_ROOT = synthetic_test_root("bioetl-inputs-runtime")
 BRONZE_DISABLED_PATH = str(TEST_ROOT / "bronze-disabled")
 BRONZE_ENABLED_PATH = str(TEST_ROOT / "bronze-enabled")
 

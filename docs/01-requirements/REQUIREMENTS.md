@@ -685,7 +685,7 @@ ______________________________________________________________________
 #### REQ-STACK-003
 
 - **Уровень**: MUST
-- **Описание**: Валидация DataFrame-контрактов выполняется через Pandera строго в boundary, определённой [ADR-048](../02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md): domain schema/contracts описываются в `src/bioetl/domain/schemas/` и `src/bioetl/domain/contracts/`, а runtime-совместимость Pandera активируется только через `bioetl.composition.bootstrap.runtime.pipeline.apply_runtime_compatibility_patches` (ownership: composition orchestration seam + infrastructure implementation).
+- **Описание**: Валидация DataFrame-контрактов выполняется через Pandera строго в boundary, определённой [ADR-048](../02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md): domain schema/contracts описываются в `src/bioetl/domain/schemas/` и `src/bioetl/domain/contracts/`, а runtime-поддержка Pandera проверяется только через `bioetl.composition.bootstrap.runtime.pipeline.apply_runtime_compatibility_patches`, который делегирует validation-only guard в `bioetl.infrastructure.compat.pandera_compat.validate_supported_pandera_runtime` (ownership: composition orchestration seam + infrastructure implementation).
 - **Проверка**: Проверить использование Pandera schema/contracts в разрешённых пакетах и отсутствие import-time patching в package `__init__` entrypoints.
 
 #### REQ-STACK-004
@@ -1097,7 +1097,7 @@ ______________________________________________________________________
 ## История Изменений
 
 - **1.10** (2026-06-16): ADR-050 governance sync. Header verification marker обновлён через ADR-050; REQ-DATA-008 теперь явно закрепляет structural-only Silver filter boundary и запрет semantic bucket keys под `filters.silver_filters`.
-- **1.9** (2026-05-26): ADR-048 alignment. Зафиксирована граница Domain schema boundary: Pandera/Pandas разрешены только в `domain/schemas` + `domain/contracts`; runtime Pandera compatibility patching закреплён только за seam `apply_runtime_compatibility_patches` в composition/bootstrap и implementation в infrastructure. Обновлены формулировки REQ-ARCH-003 и REQ-STACK-003, добавлены прямые cross-reference на ADR-048.
+- **1.9** (2026-05-26, updated 2026-06-22): ADR-048 alignment. Зафиксирована граница Domain schema boundary: Pandera/Pandas разрешены только в `domain/schemas` + `domain/contracts`; runtime Pandera monkeypatching retired, а seam `apply_runtime_compatibility_patches` в composition/bootstrap теперь выполняет только explicit validation через infrastructure implementation. Обновлены формулировки REQ-ARCH-003 и REQ-STACK-003, добавлены прямые cross-reference на ADR-048.
 - **1.8** (2026-03-13): Уточнён REQ-DOC-001: docs guardrails и generated-doc checks синхронизированы с текущей publication/navigation governance.
 - **1.7** (2026-03-02): Pre-v6.1 dependency policy update. Обновлена REQ-DEP-001: mixed strategy (`pyproject.toml` ranges + `uv.lock`) вместо требования глобального `==` pinning.
 - **1.6** (2026-02-27): Pre-v6.1 terminology cleanup. Исправлена терминология требований (`health_check`, `from __future__ import annotations`, формат env vars `BIOETL_{PROVIDER}_{KEY}`).

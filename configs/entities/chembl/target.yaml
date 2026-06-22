@@ -357,14 +357,57 @@ contracts:
   - target_id
   merge_keys:
   - target_id
-  hash_include: []
-  hash_exclude: []
+  hash_include:
+  - target_id
+  - target_type
+  - pref_name
+  - taxonomy_id
+  - organism
+  - organism_class
+  - species_group_flag
+  - target_description
+  - target_protein_synonyms
+  - target_gene_synonyms
+  - target_ec_numbers
+  - target_xref_pdb_ids
+  - target_xref_go_component
+  - target_xref_go_function
+  - target_xref_go_process
+  - target_xref_hgnc_ids
+  - target_xref_reactome_ids
+  - target_xref_uniprot_ids
+  - primary_component_id
+  - component_accessions
+  - component_descriptions
+  - component_ids
+  - component_types
+  - component_relationships
+  - target_components
+  - cross_references
+  - target_component_synonyms
+  hash_exclude:
+  - _ingestion_ts
+  - _run_id
+  - _run_type
+  - _dq_warn
+  - _dq_error
+  - _source_batch_id
+  - _index
   hash_datetime_policy: v2_datetime_utc
+  contract_ref: chembl.target
+  active_version: 3.0.0
+  rollout:
+    mode: single
+    read_order:
+    - 3.0.0
+    write_versions:
+    - 3.0.0
+    affects_hash: false
 hash_policy:
   provider: chembl
   entity: target
   contract:
-    version: 2.1.0
+    version: 3.0.0
     migration_note: 'Standalone ChEMBL target hash excludes protein-classification summary fields; target_protein_classification/composite_target own that surface.'
   hash_policy:
     algorithm: sha256

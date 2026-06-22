@@ -97,7 +97,7 @@ def test_control_plane_root_lazy_exports_target_responsibility_seams() -> None:
     seams = control_plane_root.RESPONSIBILITY_SEAMS
     allowed_module_prefixes = (
         *(
-            f"bioetl.application.services.control_plane.{seam}."
+            f"bioetl.application.services.control_plane.{seam}"
             for seam in EXPECTED_RESPONSIBILITY_SEAMS
         ),
     )

@@ -164,10 +164,10 @@ def test_domain_schema_contract_hotspot_ownership_is_documented() -> None:
             assert marker in text
 
 
-def test_runtime_pandera_compatibility_patch_is_not_package_import_side_effect() -> (
+def test_runtime_pandera_validation_is_not_package_import_side_effect() -> (
     None
 ):
-    """Pandera compatibility patching must remain an explicit runtime bootstrap call."""
+    """Pandera runtime validation must remain an explicit bootstrap call."""
     top_level_init = (ROOT / "src" / "bioetl" / "__init__.py").read_text(
         encoding="utf-8"
     )
@@ -208,10 +208,10 @@ def test_runtime_pandera_compatibility_patch_is_not_package_import_side_effect()
         / "pandera_runtime.py"
     )
 
-    assert "apply_pandera_typing_compat_if_needed()" not in top_level_init
-    assert "apply_pandera_typing_compat_if_needed()" not in runtime_init
+    assert "validate_supported_pandera_runtime()" not in top_level_init
+    assert "validate_supported_pandera_runtime()" not in runtime_init
     assert "apply_runtime_compatibility_patches" in runtime_init
-    assert "apply_pandera_typing_compat_if_needed" in runtime_patch
+    assert "validate_supported_pandera_runtime" in runtime_patch
     assert not retired_runtime_compat.exists()
     assert not retired_pandera_runtime.exists()
 
@@ -227,7 +227,8 @@ def test_adr_048_records_schema_boundary_and_runtime_patch_decisions() -> None:
         "schema-contract hotspot",
         "split on touch",
         "not adapter implementations",
-        "No import-time compatibility patching",
+        "No import-time runtime validation",
         "apply_runtime_compatibility_patches",
+        "validate_supported_pandera_runtime",
     ):
         assert expected in normalized_text

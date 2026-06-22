@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-import tempfile
-from pathlib import Path
+from tests.helpers.synthetic_paths import synthetic_test_root
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
@@ -15,7 +14,7 @@ from bioetl.composition.factories.services.pipeline_builder import (
     create_batch_executor_from_pipeline,
 )
 
-TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-pipeline-batch-executor-"))
+TEST_ROOT = synthetic_test_root("bioetl-pipeline-batch-executor")
 BRONZE_ROOT = str(TEST_ROOT / "bronze")
 SILVER_ROOT = str(TEST_ROOT / "silver")
 GOLD_ROOT = str(TEST_ROOT / "gold")

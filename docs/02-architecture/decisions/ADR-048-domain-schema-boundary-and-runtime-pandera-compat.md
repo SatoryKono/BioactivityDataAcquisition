@@ -26,10 +26,10 @@ That policy was documented in several places, but two boundaries needed one
 accepted decision:
 
 - where Pandera/Pandas imports are allowed inside `src/bioetl/domain`;
-- where Python-version compatibility patches for Pandera are applied.
+- where Python-version runtime validation for Pandera is applied.
 
 Without an explicit rule, schema-contract imports can be misclassified as domain
-I/O, and runtime compatibility patches can drift back into package import side
+I/O, and runtime compatibility handling can drift back into package import side
 effects.
 
 ## Decision
@@ -58,30 +58,30 @@ Domain behavior, services, entities, aggregates, value objects, ports, and
 normalization code must stay free of direct Pandera/Pandas imports unless a
 future ADR narrows and tests an explicit exception.
 
-### Runtime compatibility patching
+### Runtime compatibility validation
 
-No import-time compatibility patching is allowed for Pandera runtime
-compatibility in `bioetl.__init__` or
+No import-time runtime validation is allowed for Pandera runtime support in
+`bioetl.__init__` or
 `bioetl.composition.bootstrap.runtime.__init__`.
 
-The only sanctioned runtime activation seam is:
+The retained runtime activation seam is:
 
 - `bioetl.composition.bootstrap.runtime.pipeline.apply_runtime_compatibility_patches`
 
-That function delegates to the infrastructure-owned implementation:
+That function now delegates to the infrastructure-owned validation surface:
 
-- `bioetl.infrastructure.compat.pandera_compat.apply_pandera_typing_compat_if_needed`
+- `bioetl.infrastructure.compat.pandera_compat.validate_supported_pandera_runtime`
 
 Composition bootstrap may call the sanctioned seam before building runtime
-pipelines. Infrastructure owns the third-party patch implementation because it is
-library/runtime compatibility, not domain semantics.
+pipelines. Infrastructure owns the third-party runtime support validation
+because it is library/runtime compatibility, not domain semantics.
 
-The Python 3.14 Pandera typing shim carries explicit sunset metadata in
-`bioetl.infrastructure.compat.pandera_compat.PANDERA_TYPING_COMPAT_SUNSET_POLICY`.
-The patch is reviewed by `infrastructure-compat` by `2026-09-30` and must be
-removed once the supported Python/Pandera matrix proves Pandera dispatcher typing
-works on Python 3.14+ without the `typing_inspect.get_origin` and
-`Dispatcher.__call__` patches.
+BioETL no longer applies runtime monkeypatches for Python 3.14+ Pandera typing
+breakage. The Python 3.14 support shim carries explicit review metadata in
+`bioetl.infrastructure.compat.pandera_compat.PANDERA_RUNTIME_SUPPORT_POLICY`.
+If the supported Python/Pandera matrix still needs fallback monkeypatching, the
+validator must fail fast with an explicit runtime error instead of mutating
+third-party behavior at bootstrap time.
 
 ## Consequences
 
@@ -90,13 +90,13 @@ works on Python 3.14+ without the `typing_inspect.get_origin` and
 1. Domain schema contracts remain explicit without weakening the no-I/O domain rule.
 1. Pandera/Pandas imports cannot spread into domain behavior or application logic.
 1. Runtime import side effects stay deterministic and testable.
-1. The compatibility patch remains idempotent and explicitly owned by composition bootstrap.
+1. Unsupported Python/Pandera matrices fail fast instead of mutating third-party behavior at bootstrap time.
 
 ### Negative
 
 1. Domain schema packages remain coupled to Pandera as a contract representation.
 1. Tests must distinguish schema-contract imports from forbidden runtime imports.
-1. Python-version compatibility logic remains present until upstream Pandera no longer needs it.
+1. Python-version compatibility validation remains present until upstream Pandera no longer needs it.
 
 ## Compliance
 
@@ -104,7 +104,8 @@ works on Python 3.14+ without the `typing_inspect.get_origin` and
   `domain/schemas` or `domain/contracts`.
 - Architecture tests must fail if domain schema-contract hotspots import runtime
   layers or perform I/O instead of remaining pure schema/catalog surfaces.
-- Architecture tests must fail if package import initialization applies the
-  Pandera compatibility patch directly.
+- Architecture tests must fail if package import initialization applies
+  Pandera runtime validation directly.
 - Runtime bootstrap tests must preserve the explicit
-  `apply_runtime_compatibility_patches` activation seam.
+  `apply_runtime_compatibility_patches` activation seam and its delegation to
+  `validate_supported_pandera_runtime`.

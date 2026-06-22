@@ -6,7 +6,7 @@ used by CLI inspection operations.
 
 from __future__ import annotations
 
-import tempfile
+from tests.helpers.synthetic_paths import synthetic_test_root
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 from uuid import UUID
@@ -45,7 +45,7 @@ from bioetl.infrastructure.storage.support.checkpoint_writer import (
     FileCompositeCheckpointWriter,
 )
 
-TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-checkpoint-bootstrap-"))
+TEST_ROOT = synthetic_test_root("bioetl-checkpoint-bootstrap")
 CHECKPOINT_PATH = TEST_ROOT / "checkpoints"
 QUARANTINE_PATH = TEST_ROOT / "quarantine"
 

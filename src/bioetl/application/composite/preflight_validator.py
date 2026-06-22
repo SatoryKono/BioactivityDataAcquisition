@@ -28,8 +28,8 @@ from bioetl.application.composite._preflight_types import (
     SchemaFields,
     ValidationIssue,
 )
-from bioetl.domain.composite.aggregation import AggregationFunction
 from bioetl.domain.composite import CompositeConfig
+from bioetl.domain.composite.aggregation import AggregationFunction
 from bioetl.domain.ports import LoggerPort
 
 __all__ = [

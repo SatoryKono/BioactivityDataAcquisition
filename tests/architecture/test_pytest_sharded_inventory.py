@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 import subprocess
 import sys
+from fnmatch import fnmatch
 from pathlib import Path
 
 import pytest
@@ -35,6 +36,32 @@ def _bash_runner_path(path: Path) -> str:
 
 def _load_inventory() -> dict[str, object]:
     return yaml.safe_load(INVENTORY_PATH.read_text(encoding="utf-8"))
+
+
+def _shard_map(inventory: dict[str, object]) -> dict[str, dict[str, object]]:
+    shards = inventory["shards"]
+    assert isinstance(shards, list)
+    return {str(entry["name"]): entry for entry in shards if isinstance(entry, dict)}
+
+
+def _alias_members(inventory: dict[str, object], alias_name: str) -> set[str]:
+    aliases = inventory["aliases"]
+    assert isinstance(aliases, dict)
+    alias = aliases[alias_name]
+    assert isinstance(alias, dict)
+    expands_to = alias["expands_to"]
+    assert isinstance(expands_to, list)
+    return {str(name) for name in expands_to}
+
+
+def _is_ignored_by_args(path: str, args: list[object]) -> bool:
+    for arg in args:
+        text = str(arg)
+        if text == f"--ignore={path}":
+            return True
+        if text.startswith("--ignore-glob=") and fnmatch(path, text.split("=", 1)[1]):
+            return True
+    return False
 
 
 @pytest.mark.architecture
@@ -104,11 +131,53 @@ def test_sharded_runner_loads_declarative_inventory_and_documents_path() -> None
 @pytest.mark.architecture
 def test_application_observability_unit_tests_are_tracked_in_app_shards() -> None:
     inventory = _load_inventory()
-    shard_map = {entry["name"]: entry for entry in inventory["shards"]}
+    shard_map = _shard_map(inventory)
 
     foundation_paths = shard_map["S3-app-foundation"]["paths"]
 
     assert "tests/unit/application/observability" in foundation_paths
+
+
+@pytest.mark.architecture
+def test_subprocess_heavy_architecture_tests_stay_in_slow_governance_shard() -> None:
+    """Repo-wide scanner/generator tests must not leak into fast boundary shards."""
+    inventory = _load_inventory()
+    shards = _shard_map(inventory)
+    fast_shards = _alias_members(inventory, "S7-architecture-fast-boundary")
+    slow_shards = _alias_members(inventory, "S7-architecture-slow-governance")
+    slow_paths = {
+        "tests/architecture/test_antipatterns.py",
+        "tests/architecture/test_code_metrics.py",
+        "tests/architecture/test_contract_coverage_matrix_drift.py",
+        "tests/architecture/test_layer_dependencies.py",
+        "tests/architecture/test_lint_terminology_script.py",
+        "tests/architecture/test_regression_metrics.py",
+        "tests/architecture/test_scripts_deprecation_backlog.py",
+        "tests/architecture/test_scripts_inventory_manifest.py",
+        "tests/architecture/test_scripts_lifecycle_registry.py",
+        "tests/architecture/test_test_structural_debt.py",
+    }
+
+    declared_slow_paths: set[str] = set()
+    for shard_name in slow_shards:
+        paths = shards[shard_name]["paths"]
+        assert isinstance(paths, list)
+        declared_slow_paths.update(str(path) for path in paths)
+    assert slow_paths <= declared_slow_paths
+
+    for shard_name in fast_shards:
+        args = shards[shard_name].get("extra_pytest_args", [])
+        assert isinstance(args, list)
+        missing_ignores = [
+            path
+            for path in slow_paths
+            if not _is_ignored_by_args(path, args)
+            and path not in shards[shard_name].get("paths", [])
+        ]
+        assert not missing_ignores, (
+            f"{shard_name} must ignore subprocess-heavy slow governance tests: "
+            f"{missing_ignores}"
+        )
 
 
 @pytest.mark.architecture

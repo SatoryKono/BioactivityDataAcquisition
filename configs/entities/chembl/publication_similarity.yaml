@@ -223,9 +223,34 @@ contracts:
   - sim_id
   merge_keys:
   - sim_id
-  hash_include: []
-  hash_exclude: []
+  hash_include:
+  - sim_id
+  - doc_1
+  - doc_2
+  - pubmed_id1
+  - pubmed_id2
+  - tid_tani
+  - mol_tani
+  - avg_tani
+  - max_tani
+  hash_exclude:
+  - _ingestion_ts
+  - _run_id
+  - _run_type
+  - _dq_warn
+  - _dq_error
+  - _source_batch_id
+  - _index
   hash_datetime_policy: v2_datetime_utc
+  contract_ref: chembl.publication_similarity
+  active_version: 1.0.0
+  rollout:
+    mode: single
+    read_order:
+    - 1.0.0
+    write_versions:
+    - 1.0.0
+    affects_hash: false
 hash_policy:
   provider: chembl
   entity: publication_similarity

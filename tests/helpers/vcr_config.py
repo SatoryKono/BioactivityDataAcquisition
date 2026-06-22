@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from contextlib import suppress
 from fnmatch import fnmatch
 import os
@@ -34,6 +35,7 @@ QUERY_IGNORE_EMAIL_MATCH_ON: tuple[str, ...] = (
 
 _GIT_LFS_POINTER_PREFIX = b"version https://git-lfs.github.com/spec/v1"
 _VCR_IGNORED_QUERY_KEYS = {"email", "api_key", "key"}
+_TRANSIENT_HTML_CONTENT_TYPE = "text/html"
 STRICT_LFS_POINTER_BLOCKER_PATTERNS: tuple[str, ...] = (
     "tests/fixtures/vcr/*/provider_contract_*.yaml",
     "tests/fixtures/vcr/*/test_*_full_cycle.yaml",
@@ -148,6 +150,7 @@ def build_base_vcr_config(
     )
     if before_record_request is not None:
         config["before_record_request"] = before_record_request
+    config["before_record_response"] = _build_before_record_response_filter()
     if ignore_localhost:
         config["ignore_localhost"] = True
     return config
@@ -207,6 +210,53 @@ def _build_before_record_request_sanitizer(
         return sanitized
 
     return before_record_request
+
+
+def _build_before_record_response_filter() -> Callable[[Any], Any]:
+    """Skip transient upstream HTML error pages during cassette recording."""
+
+    def before_record_response(response: Any) -> Any:
+        if _is_transient_html_server_error(response):
+            return None
+        return response
+
+    return before_record_response
+
+
+def _is_transient_html_server_error(response: Any) -> bool:
+    """Return whether one VCR response looks like a transient upstream HTML 5xx."""
+    if not isinstance(response, Mapping):
+        return False
+
+    status = response.get("status")
+    if not isinstance(status, Mapping):
+        return False
+
+    try:
+        status_code = int(status.get("code"))
+    except (TypeError, ValueError):
+        return False
+
+    if status_code < 500:
+        return False
+
+    headers = response.get("headers")
+    if not isinstance(headers, Mapping):
+        return False
+
+    content_type = _get_header_value(headers, "content-type")
+    return _TRANSIENT_HTML_CONTENT_TYPE in content_type.lower()
+
+
+def _get_header_value(headers: Mapping[Any, Any], name: str) -> str:
+    """Return one normalized VCR header value."""
+    for key, value in headers.items():
+        if str(key).lower() != name:
+            continue
+        if isinstance(value, (list, tuple)):
+            return str(value[0]) if value else ""
+        return str(value)
+    return ""
 
 
 def query_ignore_email(request_1: Any, request_2: Any) -> bool:

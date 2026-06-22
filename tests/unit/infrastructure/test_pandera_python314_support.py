@@ -20,16 +20,16 @@ def _get_args_stub(tp: object) -> tuple[object, ...]:
     return getattr(tp, "__union_args__", ())
 
 
-def _compat_disabled() -> bool:
+def _validation_disabled() -> bool:
     return False
 
 
-def _compat_enabled() -> bool:
+def _validation_enabled() -> bool:
     return True
 
 
 def _record_and_return_false(calls: list[str]) -> bool:
-    calls.append("applied")
+    calls.append("validated")
     return False
 
 
@@ -51,6 +51,9 @@ def _install_fake_pandera_modules(monkeypatch) -> tuple[ModuleType, type]:
 
         def __call__(self, *args: object, **kwargs: object) -> object:
             return ("original", args, kwargs)
+
+        def register(self, fn: object) -> None:
+            self._function_registry[object()] = fn
 
     pandera_function_dispatch.Dispatcher = FakeDispatcher
 
@@ -132,40 +135,48 @@ def _install_fixed_fake_pandera_modules(monkeypatch) -> tuple[ModuleType, type]:
     return typing_inspect_module, FixedDispatcher
 
 
-def test_apply_pandera_typing_compat_is_noop_when_not_required(
+def test_validate_supported_pandera_runtime_is_noop_when_not_required(
     monkeypatch,
 ) -> None:
     module = importlib.reload(
         importlib.import_module("bioetl.infrastructure.compat.pandera_compat")
     )
-    monkeypatch.setattr(module, "_requires_pandera_typing_compat", _compat_disabled)
-    monkeypatch.setattr(module, "_PATCH_APPLIED", False)
+    monkeypatch.setattr(
+        module,
+        "_requires_pandera_runtime_validation",
+        _validation_disabled,
+    )
+    monkeypatch.setattr(module, "_RUNTIME_VALIDATED", False)
 
-    assert module.apply_pandera_typing_compat_if_needed() is False
+    assert module.validate_supported_pandera_runtime() is False
 
 
-def test_pandera_typing_compat_declares_sunset_policy() -> None:
+def test_pandera_runtime_support_policy_declares_fail_fast_contract() -> None:
     module = importlib.reload(
         importlib.import_module("bioetl.infrastructure.compat.pandera_compat")
     )
-    policy = module.PANDERA_TYPING_COMPAT_SUNSET_POLICY
+    policy = module.PANDERA_RUNTIME_SUPPORT_POLICY
 
     assert isinstance(policy, MappingProxyType)
     assert policy["owner"] == "infrastructure-compat"
     assert date.fromisoformat(policy["review_date"]) >= date(2026, 9, 30)
     assert policy["python_min"] == "3.14"
+    assert policy["failure_policy"] == "fail_fast_no_runtime_monkeypatch"
     assert "supported Python/Pandera matrix" in policy["upstream_exit_condition"]
-    assert "Dispatcher.__call__" in policy["upstream_exit_condition"]
 
 
-def test_apply_pandera_typing_compat_patches_dispatcher_when_forced(
+def test_validate_supported_pandera_runtime_raises_on_unhealthy_matrix(
     monkeypatch,
 ) -> None:
     module = importlib.reload(
         importlib.import_module("bioetl.infrastructure.compat.pandera_compat")
     )
-    monkeypatch.setattr(module, "_requires_pandera_typing_compat", _compat_enabled)
-    monkeypatch.setattr(module, "_PATCH_APPLIED", False)
+    monkeypatch.setattr(
+        module,
+        "_requires_pandera_runtime_validation",
+        _validation_enabled,
+    )
+    monkeypatch.setattr(module, "_RUNTIME_VALIDATED", False)
 
     typing_inspect_module, fake_dispatcher_cls = _install_fake_pandera_modules(
         monkeypatch
@@ -173,30 +184,29 @@ def test_apply_pandera_typing_compat_patches_dispatcher_when_forced(
     original_get_origin = typing_inspect_module.get_origin
     original_dispatcher_call = fake_dispatcher_cls.__call__
 
-    assert module.apply_pandera_typing_compat_if_needed() is True
-    assert module.apply_pandera_typing_compat_if_needed() is False
-    assert typing_inspect_module.get_origin is not original_get_origin
-    assert fake_dispatcher_cls.__call__ is not original_dispatcher_call
-    assert typing_inspect_module.get_origin(int | str) == typing.get_origin(int | str)
+    with pytest.raises(
+        module.UnsupportedPanderaRuntimeError,
+        match="Unsupported Pandera runtime",
+    ):
+        module.validate_supported_pandera_runtime()
 
-    class FakeUnionType:
-        __union_args__ = (int,)
-
-    dispatcher = fake_dispatcher_cls()
-    dispatcher._function_registry = {
-        FakeUnionType: _format_union_value,
-    }
-    assert dispatcher(1) == "union:1"
+    assert module._RUNTIME_VALIDATED is False
+    assert typing_inspect_module.get_origin is original_get_origin
+    assert fake_dispatcher_cls.__call__ is original_dispatcher_call
 
 
-def test_apply_pandera_typing_compat_skips_healthy_upstream_runtime(
+def test_validate_supported_pandera_runtime_accepts_healthy_upstream_runtime(
     monkeypatch,
 ) -> None:
     module = importlib.reload(
         importlib.import_module("bioetl.infrastructure.compat.pandera_compat")
     )
-    monkeypatch.setattr(module, "_requires_pandera_typing_compat", _compat_enabled)
-    monkeypatch.setattr(module, "_PATCH_APPLIED", False)
+    monkeypatch.setattr(
+        module,
+        "_requires_pandera_runtime_validation",
+        _validation_enabled,
+    )
+    monkeypatch.setattr(module, "_RUNTIME_VALIDATED", False)
 
     typing_inspect_module, fixed_dispatcher_cls = _install_fixed_fake_pandera_modules(
         monkeypatch
@@ -204,13 +214,15 @@ def test_apply_pandera_typing_compat_skips_healthy_upstream_runtime(
     original_get_origin = typing_inspect_module.get_origin
     original_dispatcher_call = fixed_dispatcher_cls.__call__
 
-    assert module.apply_pandera_typing_compat_if_needed() is False
-    assert module._PATCH_APPLIED is False
+    assert module.validate_supported_pandera_runtime() is False
+    assert module._RUNTIME_VALIDATED is True
     assert typing_inspect_module.get_origin is original_get_origin
     assert fixed_dispatcher_cls.__call__ is original_dispatcher_call
 
 
-def test_importing_bioetl_version_does_not_trigger_compat(monkeypatch) -> None:
+def test_importing_bioetl_version_does_not_trigger_runtime_validation(
+    monkeypatch,
+) -> None:
     typing_inspect_module, fake_dispatcher_cls = _install_fake_pandera_modules(
         monkeypatch
     )
@@ -224,29 +236,21 @@ def test_importing_bioetl_version_does_not_trigger_compat(monkeypatch) -> None:
     assert fake_dispatcher_cls.__call__ is original_dispatcher_call
 
 
-def test_runtime_bootstrap_package_applies_compat_on_import(monkeypatch) -> None:
-    """Runtime facade must not patch on import; it delegates via owner module."""
+def test_runtime_bootstrap_package_does_not_validate_on_import(monkeypatch) -> None:
+    """Runtime facade must not validate on import; it delegates explicitly."""
     calls: list[str] = []
 
-    def apply_compat_and_record() -> bool:
+    def validate_and_record() -> bool:
         return _record_and_return_false(calls)
 
-    # Patch the owner module binding: it imports the helper once at
-    # module load, so patching pandera_compat alone is not enough when the
-    # owner module was already imported earlier in the pytest session.
     monkeypatch.setattr(
-        "bioetl.composition.bootstrap.runtime.pipeline.apply_pandera_typing_compat_if_needed",
-        apply_compat_and_record,
+        "bioetl.composition.bootstrap.runtime.pipeline.validate_supported_pandera_runtime",
+        validate_and_record,
     )
 
     sys.modules.pop("bioetl.composition.bootstrap.runtime", None)
     runtime_bootstrap = importlib.import_module("bioetl.composition.bootstrap.runtime")
 
     assert calls == []
-
     assert runtime_bootstrap.apply_runtime_compatibility_patches() is False
-    assert calls == ["applied"]
-
-
-def _format_union_value(value: object) -> str:
-    return f"union:{value}"
+    assert calls == ["validated"]

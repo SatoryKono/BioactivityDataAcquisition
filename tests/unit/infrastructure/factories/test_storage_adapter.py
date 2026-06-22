@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import tempfile
+from tests.helpers.synthetic_paths import synthetic_test_root
 from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
@@ -20,7 +20,7 @@ from bioetl.domain.ports import (
 )
 from bioetl.domain.types import RunType
 
-TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-storage-adapter-"))
+TEST_ROOT = synthetic_test_root("bioetl-storage-adapter")
 BRONZE_ROOT = str(TEST_ROOT / "bronze")
 SILVER_ROOT = str(TEST_ROOT / "silver")
 GOLD_ROOT = str(TEST_ROOT / "gold")

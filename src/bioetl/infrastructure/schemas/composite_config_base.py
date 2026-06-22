@@ -16,16 +16,16 @@ from typing import Literal, Self
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+from bioetl.domain.composite import (
+    DependencyConfig,
+    EnricherConfig,
+    SeedConfig,
+)
 from bioetl.domain.composite.aggregation import (
     AggregationConfig,
     AggregationFieldSpec,
     AggregationFunction,
     EnricherCardinality,
-)
-from bioetl.domain.composite import (
-    DependencyConfig,
-    EnricherConfig,
-    SeedConfig,
 )
 from bioetl.domain.composite.strategy import FallbackStrategy
 

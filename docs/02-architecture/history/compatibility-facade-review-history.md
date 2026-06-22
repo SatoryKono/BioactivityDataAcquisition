@@ -27,8 +27,8 @@ Completed in this cycle:
   `src/bioetl/domain/schemas/` and `src/bioetl/domain/contracts/`.
 - Locked runtime compatibility ownership to the explicit composition seam
   `bioetl.composition.bootstrap.runtime.pipeline.apply_runtime_compatibility_patches`,
-  with implementation delegated to
-  `bioetl.infrastructure.compat.pandera_compat.apply_pandera_typing_compat_if_needed`.
+  with validation delegated to
+  `bioetl.infrastructure.compat.pandera_compat.validate_supported_pandera_runtime`.
 - Reworded requirements/glossary surfaces to remove ambiguity between domain
   contracts and infrastructure mapping responsibilities.
 
@@ -37,8 +37,7 @@ Operational implication:
 - Domain schema contracts remain part of domain semantics and MUST NOT drift
   into infrastructure adapter ownership language.
 - Import-time compatibility side effects in package `__init__` remain forbidden;
-  compatibility activation is explicit and testable at composition runtime
-  bootstrap only.
+  runtime validation is explicit and testable at composition bootstrap only.
 
 ## Public Entrypoint Review Wave (2026-05-20)
 
