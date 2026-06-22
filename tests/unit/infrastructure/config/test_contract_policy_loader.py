@@ -296,10 +296,10 @@ def test_entity_contract_values_override_base_defaults(
 
 
 @pytest.mark.unit
-def test_loader_uses_root_hash_policy_for_effective_hash_selectors(
+def test_loader_keeps_contract_hash_selectors_explicit_only(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Root hash_policy should supply the runtime-effective hash selectors."""
+    """Root hash_policy must not project runtime hash selectors into contracts."""
     load_pipeline_contract_policy.cache_clear()
     monkeypatch.chdir(tmp_path)
 
@@ -364,7 +364,7 @@ def test_loader_uses_root_hash_policy_for_effective_hash_selectors(
 
     policy = load_pipeline_contract_policy("chembl", "activity")
 
-    assert policy.hash_include == ["activity_id"]
+    assert policy.hash_include == []
     assert policy.hash_exclude == ["_ingestion_ts", "_run_id"]
 
 

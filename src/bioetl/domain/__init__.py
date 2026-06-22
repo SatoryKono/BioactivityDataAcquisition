@@ -16,7 +16,11 @@ if TYPE_CHECKING:
     import bioetl.domain.composite as composite
     import bioetl.domain.constants as constants
     import bioetl.domain.context_cached_bronze as context_cached_bronze
+    import bioetl.domain.context_correlation as context_correlation
     import bioetl.domain.context_filtering as context_filtering
+    import bioetl.domain.context_run as context_run
+    import bioetl.domain.context_time as context_time
+    import bioetl.domain.context_validation as context_validation
     import bioetl.domain.contracts as contracts
     import bioetl.domain.control_plane as control_plane
     import bioetl.domain.deterministic_identity as deterministic_identity
@@ -50,7 +54,11 @@ __all__ = [
     "composite",
     "constants",
     "context_cached_bronze",
+    "context_correlation",
     "context_filtering",
+    "context_run",
+    "context_time",
+    "context_validation",
     "contracts",
     "control_plane",
     "deterministic_identity",
@@ -74,7 +82,11 @@ _MODULE_EXPORTS = {
     "composite": "bioetl.domain.composite",
     "constants": "bioetl.domain.constants",
     "context_cached_bronze": "bioetl.domain.context_cached_bronze",
+    "context_correlation": "bioetl.domain.context_correlation",
     "context_filtering": "bioetl.domain.context_filtering",
+    "context_run": "bioetl.domain.context_run",
+    "context_time": "bioetl.domain.context_time",
+    "context_validation": "bioetl.domain.context_validation",
     "contracts": "bioetl.domain.contracts",
     "control_plane": "bioetl.domain.control_plane",
     "deterministic_identity": "bioetl.domain.deterministic_identity",
