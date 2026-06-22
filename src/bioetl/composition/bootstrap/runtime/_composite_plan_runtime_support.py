@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Protocol, TypeGuard
+from typing import TYPE_CHECKING, Protocol, TypeGuard, cast
 
 from pydantic import ValidationError
 
@@ -38,15 +38,39 @@ if TYPE_CHECKING:
 class BootstrapRuntimeResources:
     """Resolved runtime-basics bundle shared by bootstrap orchestration."""
 
-    run_id: str
-    settings: Settings
-    logger: LoggerPort
-    metrics: MetricsPort
-    tracer: TracingPort
-    storage: object
-    lock: LockPort
-    clock: ClockPort | None = None
-    infra_context: object | None = None
+    infra_context: CompositeInfrastructureContext
+
+    @property
+    def run_id(self) -> str:
+        return self.infra_context.run_id
+
+    @property
+    def settings(self) -> Settings:
+        return self.infra_context.settings
+
+    @property
+    def logger(self) -> LoggerPort:
+        return self.infra_context.logger
+
+    @property
+    def metrics(self) -> MetricsPort:
+        return self.infra_context.metrics
+
+    @property
+    def tracer(self) -> TracingPort:
+        return self.infra_context.tracer
+
+    @property
+    def storage(self) -> object:
+        return self.infra_context.storage
+
+    @property
+    def lock(self) -> LockPort:
+        return self.infra_context.lock
+
+    @property
+    def clock(self) -> ClockPort | None:
+        return self.infra_context.clock
 
 
 class _NamedRuntimeBundle(Protocol):
@@ -85,20 +109,21 @@ def build_bootstrap_runtime_resources(
 ) -> BootstrapRuntimeResources:
     """Resolve the canonical runtime-basics resource bundle."""
     resolved_bundle = bootstrap_runtime_basics_fn(config=config, run_id=run_id)
-    if isinstance(resolved_bundle, CompositeInfrastructureContext) or _has_named_bundle(
-        resolved_bundle
-    ):
+    if isinstance(resolved_bundle, CompositeInfrastructureContext):
+        return BootstrapRuntimeResources(infra_context=resolved_bundle)
+    if _has_named_bundle(resolved_bundle):
         named_bundle = resolved_bundle
         return BootstrapRuntimeResources(
-            run_id=named_bundle.run_id,
-            settings=named_bundle.settings,
-            logger=named_bundle.logger,
-            metrics=named_bundle.metrics,
-            tracer=named_bundle.tracer,
-            storage=named_bundle.storage,
-            lock=named_bundle.lock,
-            clock=getattr(named_bundle, "clock", None),
-            infra_context=named_bundle,
+            infra_context=CompositeInfrastructureContext(
+                run_id=named_bundle.run_id,
+                settings=named_bundle.settings,
+                logger=named_bundle.logger,
+                metrics=named_bundle.metrics,
+                tracer=named_bundle.tracer,
+                storage=cast("CompositeRuntimeStorageProtocol", named_bundle.storage),
+                lock=named_bundle.lock,
+                clock=getattr(named_bundle, "clock", None),
+            )
         )
     raise TypeError(
         "bootstrap_runtime_basics_fn must return CompositeInfrastructureContext "
@@ -115,8 +140,6 @@ def build_bootstrap_support_services(
     resources: BootstrapRuntimeResources,
 ) -> object:
     """Resolve support services from the shared resource bundle."""
-    if resources.infra_context is None:
-        raise TypeError("bootstrap runtime resources must carry infra_context")
     return build_support_services_fn(
         config=config,
         runtime=runtime,

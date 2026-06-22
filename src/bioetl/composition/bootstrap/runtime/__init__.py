@@ -17,56 +17,20 @@ from __future__ import annotations
 from importlib import import_module
 from typing import Any
 
-_RUNTIME_OBSERVABILITY_MODULE = "bioetl.composition.bootstrap.runtime.observability"
-_RUNTIME_ASSEMBLY_MODULE = "bioetl.composition.bootstrap.runtime.assembly"
+from bioetl.composition.bootstrap._runtime_public_exports import (
+    RUNTIME_PACKAGE_EXPORT_NAMES,
+    RUNTIME_PACKAGE_PUBLIC_EXPORTS,
+)
+
 _RUNTIME_MODULE_EXPORTS: dict[str, str] = {
     "composite_control_plane_builder": (
         "bioetl.composition.bootstrap.runtime.composite_control_plane_builder"
     ),
 }
 
-__all__ = [
-    "MetricsServerError",
-    "apply_runtime_compatibility_patches",
-    "assemble_filter_config",
-    "assemble_runtime_config",
-    "assemble_vacuum_settings",
-    "bootstrap_composite_runner",
-    "bootstrap_dq_monitor",
-    "bootstrap_logger",
-    "bootstrap_metrics",
-    "bootstrap_observability_bundle",
-    "bootstrap_pipeline_runner",
-    "bootstrap_pipeline_runner_service",
-    "bootstrap_tracer",
-    "composite_control_plane_builder",
-    "load_composite_config",
-    "maybe_start_metrics_server",
-    "validate_observability_preflight",
-]
+__all__ = list(RUNTIME_PACKAGE_EXPORT_NAMES)
 
-_PUBLIC_EXPORTS: dict[str, str] = {
-    "MetricsServerError": _RUNTIME_OBSERVABILITY_MODULE,
-    "assemble_filter_config": _RUNTIME_ASSEMBLY_MODULE,
-    "assemble_runtime_config": _RUNTIME_ASSEMBLY_MODULE,
-    "apply_runtime_compatibility_patches": (
-        "bioetl.composition.bootstrap.runtime.pipeline"
-    ),
-    "assemble_vacuum_settings": _RUNTIME_ASSEMBLY_MODULE,
-    "bootstrap_composite_runner": "bioetl.composition.bootstrap.runtime.composite",
-    "bootstrap_dq_monitor": _RUNTIME_OBSERVABILITY_MODULE,
-    "bootstrap_logger": _RUNTIME_OBSERVABILITY_MODULE,
-    "bootstrap_metrics": _RUNTIME_OBSERVABILITY_MODULE,
-    "bootstrap_observability_bundle": _RUNTIME_OBSERVABILITY_MODULE,
-    "bootstrap_pipeline_runner": "bioetl.composition.bootstrap.runtime.pipeline",
-    "bootstrap_pipeline_runner_service": (
-        "bioetl.composition.bootstrap.runtime.pipeline_runner_service_bootstrap"
-    ),
-    "bootstrap_tracer": _RUNTIME_OBSERVABILITY_MODULE,
-    "load_composite_config": "bioetl.composition.bootstrap.runtime.composite",
-    "maybe_start_metrics_server": _RUNTIME_OBSERVABILITY_MODULE,
-    "validate_observability_preflight": _RUNTIME_OBSERVABILITY_MODULE,
-}
+_PUBLIC_EXPORTS: dict[str, str] = RUNTIME_PACKAGE_PUBLIC_EXPORTS
 
 
 def __getattr__(
