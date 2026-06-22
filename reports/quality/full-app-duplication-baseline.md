@@ -2,7 +2,7 @@
 
 - mode: report-only
 - targets: 4
-- total_duplicate_clusters: 108
+- total_duplicate_clusters: 105
 
 > Interpretation note: this is a visibility baseline. `R0801` can over-report
 > around facades, export barrels, and compatibility shims, so use it as
@@ -12,8 +12,8 @@
 | --- | ---: |
 | `src/bioetl/infrastructure/adapters` | 72 |
 | `src/bioetl/application/pipelines` | 22 |
-| `src/bioetl/composition/bootstrap` | 2 |
-| `src/bioetl/interfaces/cli` | 12 |
+| `src/bioetl/composition/bootstrap` | 1 |
+| `src/bioetl/interfaces/cli` | 10 |
 
 ## src/bioetl/infrastructure/adapters
 
@@ -84,29 +84,27 @@
 
 ## src/bioetl/composition/bootstrap
 
-- duplicate clusters: 2
+- duplicate clusters: 1
 
 | Actionability category | Duplicate clusters |
 | --- | ---: |
-| `composition_runtime_wiring_pattern` | 2 |
+| `composition_runtime_wiring_pattern` | 1 |
 
 | Top recurring module pairs | Duplicate clusters |
 | --- | ---: |
-| `bioetl.composition.bootstrap` <-> `bioetl.composition.bootstrap.runtime.__init__` | 1 |
 | `bioetl.composition.bootstrap.composite_infrastructure_context` <-> `bioetl.composition.bootstrap.runtime._composite_plan_runtime_support` | 1 |
 
 | Cluster path | Compared modules |
 | --- | --- |
-| `src/bioetl/composition/bootstrap/runtime/__init__.py:1` | `bioetl.composition.bootstrap.runtime.__init__`[33:39], `bioetl.composition.bootstrap`[79:85] |
-| `src/bioetl/composition/bootstrap/runtime/__init__.py:1` | `bioetl.composition.bootstrap.composite_infrastructure_context`[27:32], `bioetl.composition.bootstrap.runtime._composite_plan_runtime_support`[40:45] |
+| `src/bioetl/composition/bootstrap/runtime/__init__.py:1` | `bioetl.composition.bootstrap.composite_infrastructure_context`[27:32], `bioetl.composition.bootstrap.runtime._composite_plan_runtime_support`[76:81] |
 
 ## src/bioetl/interfaces/cli
 
-- duplicate clusters: 12
+- duplicate clusters: 10
 
 | Actionability category | Duplicate clusters |
 | --- | ---: |
-| `cli_command_contract_shell` | 12 |
+| `cli_command_contract_shell` | 10 |
 
 | Top recurring module pairs | Duplicate clusters |
 | --- | ---: |
@@ -127,22 +125,20 @@
 | `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands.diagnostics`[343:350], `bioetl.interfaces.cli.commands.quarantine`[167:174] |
 | `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands.domains.run_all.public_runtime`[176:183], `bioetl.interfaces.cli.commands.run`[284:291] |
 | `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands.health`[86:91], `bioetl.interfaces.cli.commands.vacuum`[58:63] |
-| `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands.domains.health.command`[12:17], `bioetl.interfaces.cli.commands.health`[259:264] |
-| `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands.domains.maintenance.service_access`[24:29], `bioetl.interfaces.cli.commands.maintenance`[29:34] |
 | `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands._run_manifest_output`[137:142], `bioetl.interfaces.cli.commands._run_manifest_output_support`[53:66] |
 
 ## Reduction Leverage Ranking
 
 | Target | Duplicate clusters | Dominant actionability | Low-risk share | Recommended first wave |
 | --- | ---: | --- | ---: | --- |
-| `src/bioetl/interfaces/cli` | 12 | `cli_command_contract_shell` | 1.00 | yes |
-| `src/bioetl/composition/bootstrap` | 2 | `composition_runtime_wiring_pattern` | 1.00 | yes |
+| `src/bioetl/interfaces/cli` | 10 | `cli_command_contract_shell` | 1.00 | yes |
+| `src/bioetl/composition/bootstrap` | 1 | `composition_runtime_wiring_pattern` | 1.00 | yes |
 | `src/bioetl/infrastructure/adapters` | 72 | `export_facade_or_package_barrel` | 0.78 | no |
 | `src/bioetl/application/pipelines` | 22 | `pipeline_transformer_contract_pattern` | 0.00 | no |
 
 ## First Wave Selection
 
 - target: `src/bioetl/interfaces/cli`
-- duplicate_clusters: 12
+- duplicate_clusters: 10
 - dominant_actionability_category: `cli_command_contract_shell`
 - selection_rule: prefer low-risk actionability families with bounded cluster counts, then maximize duplicate reduction leverage

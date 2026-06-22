@@ -30,6 +30,7 @@ from bioetl.composition.factories.pipeline.factory_method_helpers import (
     _CreatePipelineWithServicesRequest,
     build_create_factory_runner_request,
     create_factory_data_source,
+    resolve_data_source_creator,
     create_transformer_instance,
 )
 from bioetl.composition.factories.pipeline.factory_method_helpers import (
@@ -77,40 +78,6 @@ def _public_assembler_callable(name: str) -> Callable[..., object]:
     return cast(Callable[..., object], _public_assembler_seam(name))
 
 
-def _lazy_data_source_creator(
-    *,
-    provider: str,
-    provider_registry: ProviderDataSourceAccessProtocol | None,
-) -> DataSourceCreatorProtocol:
-    """Build a data-source creator without importing the assembler facade now."""
-
-    def _create_data_source(
-        settings: Settings,
-        pipeline_config: PipelineYamlConfig,
-        logger: LoggerPort,
-        filter_config: InputFilterConfig | None = None,
-        *,
-        pipeline_name: str,
-    ) -> DataSourcePort:
-        get_data_source_creator = cast(
-            Callable[..., DataSourceCreatorProtocol],
-            _public_assembler_seam("get_data_source_creator"),
-        )
-        creator = get_data_source_creator(
-            provider,
-            provider_registry=provider_registry,
-        )
-        return creator(
-            settings,
-            pipeline_config,
-            logger,
-            filter_config,
-            pipeline_name=pipeline_name,
-        )
-
-    return _create_data_source
-
-
 def _optional_string_kwarg(kwargs: dict[str, object], key: str) -> str | None:
     """Return one optional string kwarg with explicit typing for runner shims."""
     return cast(str | None, kwargs.get(key))
@@ -150,9 +117,14 @@ class GenericPipelineFactory[TPipeline: "BasePipeline"]:
             transformer_class,
             provider_registry,
         )
-        self._create_data_source = data_source_creator or _lazy_data_source_creator(
+        self._create_data_source = resolve_data_source_creator(
+            data_source_creator=data_source_creator,
             provider=provider,
             provider_registry=provider_registry,
+            get_data_source_creator_fn=cast(
+                Callable[..., DataSourceCreatorProtocol],
+                _public_assembler_callable("get_data_source_creator"),
+            ),
         )
 
     def create_transformer(

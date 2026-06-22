@@ -9,6 +9,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 import bioetl.composition.bootstrap.runtime.composite as composite_runtime
+from bioetl.composition.bootstrap.runtime.composite_infrastructure_context import (
+    CompositeInfrastructureContext,
+)
 
 
 def _make_runtime(**overrides: object) -> SimpleNamespace:
@@ -297,8 +300,17 @@ def test_build_composite_bootstrap_plan_uses_named_runtime_basics_context() -> N
         runtime=runtime,
         logger=infra_context.logger,
     )
-    mock_build_support_services.assert_called_once_with(
-        config=config,
-        runtime=runtime,
-        infra_context=infra_context,
-    )
+    mock_build_support_services.assert_called_once()
+    support_services_kwargs = mock_build_support_services.call_args.kwargs
+    assert support_services_kwargs["config"] is config
+    assert support_services_kwargs["runtime"] is runtime
+    normalized_infra_context = support_services_kwargs["infra_context"]
+    assert isinstance(normalized_infra_context, CompositeInfrastructureContext)
+    assert normalized_infra_context.run_id == infra_context.run_id
+    assert normalized_infra_context.settings is infra_context.settings
+    assert normalized_infra_context.logger is infra_context.logger
+    assert normalized_infra_context.metrics is infra_context.metrics
+    assert normalized_infra_context.tracer is infra_context.tracer
+    assert normalized_infra_context.storage is infra_context.storage
+    assert normalized_infra_context.lock is infra_context.lock
+    assert normalized_infra_context.clock is None

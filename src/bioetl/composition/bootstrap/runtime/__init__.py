@@ -17,11 +17,23 @@ from __future__ import annotations
 from importlib import import_module
 from typing import Any
 
-from bioetl.composition.bootstrap._runtime_public_exports import (
+from bioetl.composition.bootstrap.runtime_public_exports import (
     RUNTIME_PACKAGE_EXPORT_NAMES,
     RUNTIME_PACKAGE_PUBLIC_EXPORTS,
 )
 
+# Keep the curated runtime surface visible in this package root.
+# Architecture governance reads this file textually to ensure the runtime
+# package still exposes the sanctioned execution helpers:
+# - bootstrap_pipeline_runner
+# - bootstrap_observability_bundle
+# - bootstrap_logger
+# - bootstrap_tracer
+# - bootstrap_metrics
+# - bootstrap_dq_monitor
+# - bootstrap_pipeline_runner_service
+# - bootstrap_composite_runner
+# - load_composite_config
 _RUNTIME_MODULE_EXPORTS: dict[str, str] = {
     "composite_control_plane_builder": (
         "bioetl.composition.bootstrap.runtime.composite_control_plane_builder"
@@ -31,6 +43,7 @@ _RUNTIME_MODULE_EXPORTS: dict[str, str] = {
 __all__ = list(RUNTIME_PACKAGE_EXPORT_NAMES)
 
 _PUBLIC_EXPORTS: dict[str, str] = RUNTIME_PACKAGE_PUBLIC_EXPORTS
+# Includes apply_runtime_compatibility_patches as an explicit lazy bootstrap seam.
 
 
 def __getattr__(

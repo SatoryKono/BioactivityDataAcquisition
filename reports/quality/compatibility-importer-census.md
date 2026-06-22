@@ -10,6 +10,7 @@
 - tracked_twin_family_count: 0
 - config_root_symbol_count: 3
 - config_root_src_importer_count: 0
+- control_plane_root_src_importer_count: 0
 - retained_public_export_facade_count: 4
 - retained_public_export_facades_with_duplicate_exports: 0
 - retained_public_export_facades_with_resolution_conflicts: 0
@@ -21,10 +22,10 @@
 | --- | ---: | ---: |
 | `src/bioetl/interfaces/cli/commands/run.py` | 0 | 2 |
 | `src/bioetl/interfaces/cli/commands/run_all.py` | 0 | 5 |
-| `src/bioetl/interfaces/cli/commands/run_composite.py` | 1 | 1 |
-| `src/bioetl/interfaces/cli/commands/health.py` | 1 | 0 |
-| `src/bioetl/interfaces/cli/commands/diagnostics.py` | 1 | 2 |
-| `src/bioetl/interfaces/cli/commands/quarantine.py` | 1 | 0 |
+| `src/bioetl/interfaces/cli/commands/run_composite.py` | 0 | 1 |
+| `src/bioetl/interfaces/cli/commands/health.py` | 0 | 0 |
+| `src/bioetl/interfaces/cli/commands/diagnostics.py` | 0 | 2 |
+| `src/bioetl/interfaces/cli/commands/quarantine.py` | 0 | 0 |
 | `src/bioetl/composition/entrypoints.py` | 0 | 4 |
 | `src/bioetl/composition/health_api.py` | 3 | 2 |
 | `src/bioetl/composition/maintenance_api.py` | 0 | 1 |
@@ -38,10 +39,10 @@
 | --- | --- | --- | --- | --- | --- | ---: | ---: |
 | `src/bioetl/interfaces/cli/commands/run.py` | `bioetl.interfaces.cli.commands` | `stable_public_api_with_reviewed_first_party_usage` | `external-facing` | no | yes | 0 | 2 |
 | `src/bioetl/interfaces/cli/commands/run_all.py` | `bioetl.interfaces.cli.commands` | `stable_public_api_with_reviewed_first_party_usage` | `external-facing` | no | yes | 0 | 5 |
-| `src/bioetl/interfaces/cli/commands/run_composite.py` | `bioetl.interfaces.cli.commands` | `stable_public_api_with_reviewed_first_party_usage` | `first-party-active` | no | yes | 1 | 1 |
-| `src/bioetl/interfaces/cli/commands/health.py` | `bioetl.interfaces.cli.commands` | `stable_public_api_with_reviewed_first_party_usage` | `first-party-active` | no | yes | 1 | 0 |
-| `src/bioetl/interfaces/cli/commands/diagnostics.py` | `bioetl.interfaces.cli.commands` | `stable_public_api_with_reviewed_first_party_usage` | `first-party-active` | no | yes | 1 | 2 |
-| `src/bioetl/interfaces/cli/commands/quarantine.py` | `bioetl.interfaces.cli.commands` | `stable_public_api_with_reviewed_first_party_usage` | `first-party-active` | no | yes | 1 | 0 |
+| `src/bioetl/interfaces/cli/commands/run_composite.py` | `bioetl.interfaces.cli.commands` | `stable_public_api_with_reviewed_first_party_usage` | `external-facing` | no | yes | 0 | 1 |
+| `src/bioetl/interfaces/cli/commands/health.py` | `bioetl.interfaces.cli.commands` | `stable_public_api_with_reviewed_first_party_usage` | `external-facing` | no | yes | 0 | 0 |
+| `src/bioetl/interfaces/cli/commands/diagnostics.py` | `bioetl.interfaces.cli.commands` | `stable_public_api_with_reviewed_first_party_usage` | `external-facing` | no | yes | 0 | 2 |
+| `src/bioetl/interfaces/cli/commands/quarantine.py` | `bioetl.interfaces.cli.commands` | `stable_public_api_with_reviewed_first_party_usage` | `external-facing` | no | yes | 0 | 0 |
 | `src/bioetl/composition/entrypoints.py` | `bioetl.composition` | `stable_public_api_with_reviewed_first_party_usage` | `external-facing` | no | yes | 0 | 4 |
 | `src/bioetl/composition/health_api.py` | `bioetl.composition` | `stable_public_api_with_reviewed_first_party_usage` | `first-party-active` | no | yes | 3 | 2 |
 | `src/bioetl/composition/maintenance_api.py` | `bioetl.composition` | `stable_public_api_with_reviewed_first_party_usage` | `external-facing` | no | yes | 0 | 1 |
@@ -129,3 +130,10 @@ Migration prerequisites for `src/bioetl/interfaces/cli/commands/maintenance.py`:
 | `Settings` | 0 | 0 | `bioetl.infrastructure.config._base.Settings` |
 | `get_settings` | 0 | 0 | `bioetl.infrastructure.config._base.get_settings` |
 | `load_pipeline_contract_policy` | 0 | 0 | `bioetl.infrastructure.config.contract_policy_loader.load_pipeline_contract_policy` |
+
+## Application Control-Plane Root Facade
+
+- inventory_source: `configs/quality/application_control_plane_root_facade_inventory.yaml`
+- target_module: `bioetl.application.services.control_plane`
+- new_src_import_policy: `external_only_zero_first_party_growth`
+- src_importer_count: 0

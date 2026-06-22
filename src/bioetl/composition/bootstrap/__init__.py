@@ -11,10 +11,6 @@ from __future__ import annotations
 from importlib import import_module
 from typing import TYPE_CHECKING
 
-from bioetl.composition.bootstrap._runtime_public_exports import (
-    BOOTSTRAP_ROOT_EXPORT_NAMES,
-    BOOTSTRAP_ROOT_PUBLIC_EXPORTS,
-)
 from bioetl.composition.lazy_exports import build_lazy_export_hooks
 
 if TYPE_CHECKING:
@@ -37,9 +33,61 @@ if TYPE_CHECKING:
     )
     from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 
-_PUBLIC_EXPORTS = BOOTSTRAP_ROOT_PUBLIC_EXPORTS
+_PUBLIC_EXPORTS = {
+    "bootstrap_composite_runner": (
+        "bioetl.composition.bootstrap.runtime.composite",
+        "bootstrap_composite_runner",
+    ),
+    "bootstrap_dq_monitor": (
+        "bioetl.composition.bootstrap.runtime.observability",
+        "bootstrap_dq_monitor",
+    ),
+    "bootstrap_logger": (
+        "bioetl.composition.bootstrap.runtime.observability",
+        "bootstrap_logger",
+    ),
+    "bootstrap_metrics": (
+        "bioetl.composition.bootstrap.runtime.observability",
+        "bootstrap_metrics",
+    ),
+    "bootstrap_observability_bundle": (
+        "bioetl.composition.bootstrap.runtime.observability",
+        "bootstrap_observability_bundle",
+    ),
+    "bootstrap_pipeline_runner": (
+        "bioetl.composition.bootstrap.runtime.pipeline",
+        "bootstrap_pipeline_runner",
+    ),
+    "bootstrap_tracer": (
+        "bioetl.composition.bootstrap.runtime.observability",
+        "bootstrap_tracer",
+    ),
+    "load_composite_config": (
+        "bioetl.composition.bootstrap.runtime.composite",
+        "load_composite_config",
+    ),
+    "load_pipeline_config": (
+        "bioetl.infrastructure.config.pipeline_config_api",
+        "load_pipeline_config",
+    ),
+    "maybe_start_metrics_server": (
+        "bioetl.composition.bootstrap.runtime.observability",
+        "maybe_start_metrics_server",
+    ),
+}
 
-__all__: list[str] = list(BOOTSTRAP_ROOT_EXPORT_NAMES)
+__all__: list[str] = [
+    "bootstrap_composite_runner",
+    "bootstrap_dq_monitor",
+    "bootstrap_logger",
+    "bootstrap_metrics",
+    "bootstrap_observability_bundle",
+    "bootstrap_pipeline_runner",
+    "bootstrap_tracer",
+    "load_composite_config",
+    "load_pipeline_config",
+    "maybe_start_metrics_server",
+]
 
 
 def __getattr__(name: str) -> object:
