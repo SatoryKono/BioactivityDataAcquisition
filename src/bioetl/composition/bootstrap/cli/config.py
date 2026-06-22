@@ -22,14 +22,11 @@ from bioetl.composition.runtime_builders.config_access import (
 )
 from bioetl.domain.ports import DomainConfigMapperPort, SettingsLoaderPort
 from bioetl.infrastructure.config.converters import yaml_config_to_domain
-from bioetl.infrastructure.config.dq_contract_config_loader import (
-    load_dq_config_for_pipeline,
-)
+from bioetl.infrastructure.config.dq_contract_config_loader import load_dq_config_for_pipeline
+from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config_from_root as _load_pipeline_config_from_root
 
 
-def create_registered_pipeline_registry(
-    registry: PipelineRegistry | None = None,
-) -> PipelineRegistry:
+def create_registered_pipeline_registry(registry: PipelineRegistry | None = None) -> PipelineRegistry:
     effective_registry = create_registry() if registry is None else registry
     register_all_pipelines(registry=effective_registry)
     return effective_registry
@@ -42,6 +39,7 @@ def bootstrap_config_service(
 ) -> ConfigService:
     resolved_configs_root = resolve_configs_root(configs_root)
     pipeline_config_loader = create_pipeline_config_loader(resolved_configs_root)
+
     return build_cli_config_service(
         registry=create_registered_pipeline_registry(registry),
         logger_factory=create_noop_logger,

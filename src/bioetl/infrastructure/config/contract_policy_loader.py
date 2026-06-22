@@ -7,6 +7,7 @@ __all__ = ["load_pipeline_contract_policy"]
 from functools import lru_cache
 from pathlib import Path
 
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.base_config_loader import _load_yaml_file
 from bioetl.infrastructure.config.contract_policy_validation import (
     validate_contract_policy_registry_alignment,
