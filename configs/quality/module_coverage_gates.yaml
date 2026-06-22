@@ -4,6 +4,7 @@ enforcement:
   # Phase B (current): block coverage regressions vs committed inventory; tier gaps warn only.
   default_mode: block-regression
   tier_violation_mode: warn
+  ranked_target_tier_violation_mode: block
 branch_coverage:
   # Branch measurement is enabled in pyproject.toml, but hard enforcement stays
   # advisory until the low-tail branches are burned down enough to avoid

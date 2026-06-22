@@ -103,7 +103,14 @@ def test_issue_5388_compatibility_facade_counts_stay_within_ratchets() -> None:
 
 def test_issue_5389_control_plane_use_case_seams_remain_explicit() -> None:
     control_plane_root = ROOT / "src" / "bioetl" / "application" / "services" / "control_plane"
-    for package in ("manifest", "ledger", "replay", "effective_config", "workflow"):
+    for package in (
+        "manifest",
+        "ledger",
+        "replay",
+        "effective_config",
+        "forensic",
+        "workflow",
+    ):
         assert (control_plane_root / package / "__init__.py").exists(), package
 
     duplication = _load_json(CONTROL_PLANE_DUPLICATION)

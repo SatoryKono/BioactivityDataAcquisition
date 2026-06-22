@@ -22,7 +22,7 @@ from bioetl.domain.composite.aggregation import (
     AggregationFunction,
     EnricherCardinality,
 )
-from bioetl.domain.composite.config import (
+from bioetl.domain.composite import (
     DependencyConfig,
     EnricherConfig,
     SeedConfig,

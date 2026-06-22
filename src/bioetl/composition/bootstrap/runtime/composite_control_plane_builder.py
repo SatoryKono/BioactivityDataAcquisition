@@ -60,7 +60,7 @@ from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
     from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
-    from bioetl.domain.composite.config import CompositeConfig
+    from bioetl.domain.composite import CompositeConfig
     from bioetl.domain.ports import LoggerPort
 
 __all__ = [

@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from bioetl.application.composite.runtime_wiring_api import (
         EnrichmentCrossValidator,
     )
-    from bioetl.domain.composite.config import CompositeConfig
+    from bioetl.domain.composite import CompositeConfig
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.ports import ClockPort, LoggerPort
     from bioetl.infrastructure.storage.delta_reader import DeltaReader

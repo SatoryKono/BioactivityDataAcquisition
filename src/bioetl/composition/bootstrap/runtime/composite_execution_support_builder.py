@@ -20,7 +20,7 @@ from bioetl.composition.bootstrap.runtime.composite_execution_support_bundle imp
 )
 
 if TYPE_CHECKING:
-    from bioetl.domain.composite.config import CompositeConfig
+    from bioetl.domain.composite import CompositeConfig
     from bioetl.domain.ports import ClockPort, LoggerPort
     from bioetl.infrastructure.storage.delta_reader import DeltaReader
 

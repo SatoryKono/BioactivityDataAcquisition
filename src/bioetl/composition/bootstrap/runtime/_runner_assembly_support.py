@@ -39,7 +39,7 @@ if TYPE_CHECKING:
     from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
         CompositeSupportServices,
     )
-    from bioetl.domain.composite.config import CompositeConfig
+    from bioetl.domain.composite import CompositeConfig
     from bioetl.domain.ports import (
         ClockPort,
         LockPort,

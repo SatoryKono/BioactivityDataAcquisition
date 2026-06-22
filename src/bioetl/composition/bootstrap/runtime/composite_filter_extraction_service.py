@@ -14,7 +14,7 @@ from bioetl.application.composite.runtime_wiring_api import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.domain.composite.config import DependencyConfig, EnricherConfig
+    from bioetl.domain.composite import DependencyConfig, EnricherConfig
     from bioetl.domain.ports import LoggerPort
 
 

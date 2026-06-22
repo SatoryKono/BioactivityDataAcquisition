@@ -9,7 +9,7 @@ from bioetl.application.composite._preflight_types import (
     ProfileInfo,
     SchemaFields,
 )
-from bioetl.domain.composite.config import CompositeConfig
+from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.exceptions import BioETLError, DataQualityError
 from bioetl.domain.normalization.profiles import resolve_normalization_profile
 from bioetl.domain.ports import LoggerPort

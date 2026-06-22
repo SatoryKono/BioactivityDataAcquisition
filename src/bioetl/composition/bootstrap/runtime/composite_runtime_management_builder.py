@@ -36,7 +36,7 @@ if TYPE_CHECKING:
         CompositeCheckpointService,
     )
     from bioetl.application.services.dq_report_service import DQReportService
-    from bioetl.domain.composite.config import CompositeConfig
+    from bioetl.domain.composite import CompositeConfig
     from bioetl.domain.ports import (
         ClockPort,
         CompositeCheckpointPort,

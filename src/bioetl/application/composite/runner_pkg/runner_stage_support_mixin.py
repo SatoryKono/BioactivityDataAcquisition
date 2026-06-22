@@ -29,7 +29,7 @@ from bioetl.application.composite.runner_pkg.runner_stage_support_types import (
     _CompositeRunnerStageSupportHostProtocol,
 )
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
-from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
+from bioetl.domain.composite import CompositeConfig, EnricherConfig
 from bioetl.domain.composite.result import (
     DependencyResult,
     EnrichmentResult,

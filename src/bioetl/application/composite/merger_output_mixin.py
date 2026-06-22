@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
     import polars as pl
 
-    from bioetl.domain.composite.config import MergeConfig
+    from bioetl.domain.composite import MergeConfig
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.ports import LoggerPort, MergedStoragePort
 

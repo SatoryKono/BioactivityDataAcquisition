@@ -32,7 +32,7 @@ from bioetl.composition.bootstrap.runtime._composite_plan_support import (
 from bioetl.composition.bootstrap.runtime.pipeline import (
     apply_runtime_compatibility_patches,
 )
-from bioetl.domain.composite.config import CompositeConfig
+from bioetl.domain.composite import CompositeConfig
 from bioetl.infrastructure.config.composite_config_api import (
     DEFAULT_COMPOSITE_CONFIG_DIR,
     DEFAULT_COMPOSITE_GOLD_SCHEMA_REGISTRY,

@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     from bioetl.composition.bootstrap.composite_infrastructure_context import (
         CompositeInfrastructureContext,
     )
-    from bioetl.domain.composite.config import CompositeConfig
+    from bioetl.domain.composite import CompositeConfig
 
 
 @dataclass(frozen=True, slots=True)

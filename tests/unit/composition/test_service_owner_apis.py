@@ -59,7 +59,6 @@ def test_retired_services_api_module_stays_absent() -> None:
                 "cleanup_bronze",
                 "get_bronze_cleanup_service",
                 "get_contract_migration_service",
-                "get_lifecycle_service",
                 "get_vacuum_service",
             },
         ),

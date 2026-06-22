@@ -37,7 +37,7 @@ if TYPE_CHECKING:
         RunLedgerService,
     )
     from bioetl.application.services.dq_report_service import DQReportService
-    from bioetl.domain.composite.config import CompositeConfig
+    from bioetl.domain.composite import CompositeConfig
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.ports import (
         LoggerPort,

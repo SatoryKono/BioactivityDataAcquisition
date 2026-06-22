@@ -59,7 +59,6 @@ __all__ = [
     "get_quarantine_port",
     "get_quarantine_runtime_service",
     "get_quarantine_service",
-    "get_runtime_settings",
 ]
 
 _SERVICES_MODULE = "bioetl.composition._services"

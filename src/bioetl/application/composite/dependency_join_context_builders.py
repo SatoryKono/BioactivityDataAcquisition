@@ -13,7 +13,7 @@ from bioetl.application.composite.join_planner_helpers import (
     prepare_join_frames,
 )
 from bioetl.application.composite.protocols import JoinKeyResolverProtocol
-from bioetl.domain.composite.config import DependencyConfig
+from bioetl.domain.composite import DependencyConfig
 from bioetl.domain.ports import LoggerPort
 
 from .dependency_join_models import (

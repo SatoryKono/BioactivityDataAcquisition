@@ -15,6 +15,9 @@ from bioetl.application.services.control_plane import (
 from bioetl.application.services.control_plane.effective_config import (
     EffectiveConfigService as EffectiveConfigSeamService,
 )
+from bioetl.application.services.control_plane.forensic import (
+    ForensicRunDiffService as ForensicSeamService,
+)
 from bioetl.application.services.control_plane.ledger import (
     RunLedgerService as LedgerSeamService,
 )
@@ -35,6 +38,7 @@ pytestmark = pytest.mark.unit
 
 EXPECTED_RESPONSIBILITY_SEAMS = {
     "effective_config",
+    "forensic",
     "ledger",
     "manifest",
     "replay",
@@ -62,6 +66,7 @@ def test_control_plane_services_live_under_ownership_packages() -> None:
     """Canonical service modules must not remain in the flat package surface."""
     ownership_modules = {
         EffectiveConfigSeamService.__module__,
+        ForensicSeamService.__module__,
         LedgerSeamService.__module__,
         ManifestSeamService.__module__,
         HistoricalReplayCertificationService.__module__,
@@ -70,6 +75,7 @@ def test_control_plane_services_live_under_ownership_packages() -> None:
 
     assert ownership_modules == {
         "bioetl.application.services.control_plane.effective_config.service",
+        "bioetl.application.services.control_plane.forensic_diff_service",
         "bioetl.application.services.control_plane.ledger.service",
         "bioetl.application.services.control_plane.manifest.service",
         "bioetl.application.services.control_plane.replay.historical_certification_service",
@@ -88,14 +94,15 @@ def test_control_plane_root_documents_explicit_responsibility_seams() -> None:
 def test_control_plane_root_lazy_exports_target_responsibility_seams() -> None:
     """Root lazy exports must route to use-case owner packages, not flat wrappers."""
     lazy_exports = control_plane_root._LAZY_ATTR_EXPORTS
+    seams = control_plane_root.RESPONSIBILITY_SEAMS
     allowed_module_prefixes = (
         *(
             f"bioetl.application.services.control_plane.{seam}."
             for seam in EXPECTED_RESPONSIBILITY_SEAMS
         ),
-        "bioetl.application.services.control_plane.forensic_diff_service",
     )
 
+    assert set(seams) == EXPECTED_RESPONSIBILITY_SEAMS
     assert lazy_exports
     for export_name, target in lazy_exports.items():
         target_module = target[0]

@@ -14,7 +14,7 @@ from bioetl.composition.bootstrap.runtime._composite_plan_support import (
 from bioetl.composition.bootstrap.runtime._runner_assembly_support import (
     create_composite_runner_service_from_inputs,
 )
-from bioetl.domain.composite.config import CompositeConfig
+from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
 
 if TYPE_CHECKING:

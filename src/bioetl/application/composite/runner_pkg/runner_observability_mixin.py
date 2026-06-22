@@ -11,7 +11,7 @@ from bioetl.application.composite.runner_pkg.runner_constants import (
 )
 from bioetl.application.observability.pipeline_metrics import PipelineMetricsRecorder
 from bioetl.application.services.dq_report_service import DQReportService
-from bioetl.domain.composite.config import CompositeConfig
+from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.composite.result import MergeResult
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.ports import LoggerPort, MetricsPort, QuarantinePort

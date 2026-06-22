@@ -16,7 +16,7 @@ from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.lifecycle_observer_service import (
     CompositeLifecycleObserverService,
 )
-from bioetl.domain.composite.config import CompositeConfig
+from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.composite.result import DependencyResult, SeedResult
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.ports import ClockPort, ExecutionMetricsRunnerPort, LoggerPort

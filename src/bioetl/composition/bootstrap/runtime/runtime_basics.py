@@ -40,7 +40,7 @@ if TYPE_CHECKING:
         BronzeRunOptions,
         RunnerFactoryBuilder,
     )
-    from bioetl.domain.composite.config import CompositeConfig
+    from bioetl.domain.composite import CompositeConfig
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.context import PipelineRunContext
     from bioetl.domain.ports import LockPort, LoggerPort, MetricsPort, TracingPort

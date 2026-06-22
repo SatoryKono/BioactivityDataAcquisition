@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     import polars as pl
 
     from bioetl.application.composite.join_execution import JoinHow
-    from bioetl.domain.composite.config import DependencyConfig
+    from bioetl.domain.composite import DependencyConfig
 
 __all__ = [
     "DependencyJoinerProtocol",

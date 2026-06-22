@@ -167,3 +167,15 @@ def test_maintenance_api_reexports_canonical_maintenance_services() -> None:
     assert canonical_get_bronze_cleanup_service is get_bronze_cleanup_service
     assert canonical_preview_cleanup is preview_cleanup
     assert canonical_get_vacuum_service is get_vacuum_service
+
+
+def test_entrypoints_start_metrics_server_stays_a_wrapper_over_observability_api() -> (
+    None
+):
+    """Entry-point compatibility wrapper must preserve the observability owner."""
+    from bioetl.composition.entrypoints import start_metrics_server
+    from bioetl.composition.observability_api import (
+        start_metrics_server as canonical_start_metrics_server,
+    )
+
+    assert start_metrics_server is not canonical_start_metrics_server

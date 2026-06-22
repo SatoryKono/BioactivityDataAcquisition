@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from bioetl.application.services.control_plane.ledger.service import (
         RunLedgerService,
     )
-    from bioetl.domain.composite.config import CompositeConfig
+    from bioetl.domain.composite import CompositeConfig
     from bioetl.domain.ports import MetricsPort
 
 

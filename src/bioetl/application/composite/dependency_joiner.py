@@ -39,7 +39,7 @@ if TYPE_CHECKING:
     from bioetl.application.composite.column_renamer import ColumnRenamer
     from bioetl.application.composite.conflict_resolver import ConflictResolverService
     from bioetl.application.composite.deduplication import EnricherDeduplicatorService
-    from bioetl.domain.composite.config import DependencyConfig
+    from bioetl.domain.composite import DependencyConfig
     from bioetl.domain.ports import LoggerPort
 
 __all__ = ["DependencyJoinerService"]

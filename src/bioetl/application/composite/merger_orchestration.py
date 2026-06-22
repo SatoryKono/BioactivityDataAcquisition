@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
     from bioetl.application.composite.join_planner import JoinPlannerService
     from bioetl.application.composite.merger_input_mixin import _PreparedSeedDataframe
-    from bioetl.domain.composite.config import DependencyConfig, EnricherConfig
+    from bioetl.domain.composite import DependencyConfig, EnricherConfig
     from bioetl.domain.composite.result import (
         DependencyResult,
         EnrichmentResult,

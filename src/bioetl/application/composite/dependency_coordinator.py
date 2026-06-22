@@ -39,7 +39,7 @@ from bioetl.domain.ports import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.domain.composite.config import DependencyConfig
+    from bioetl.domain.composite import DependencyConfig
 
 
 _DEPENDENCY_EXECUTION_ERRORS = (

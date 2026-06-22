@@ -64,14 +64,14 @@ BioETL uses two-level error thresholds (RULES.md §3.1.2):
 | Threshold   | Default    | Behavior                            |
 | ----------- | ---------- | ----------------------------------- |
 | `soft_fail` | 0.05 (5%)  | Warning emitted, pipeline continues |
-| `hard_fail` | 0.20 (20%) | Batch fails, records quarantined    |
+| `hard_fail` | 0.25 (25%) | Batch fails, records quarantined    |
 
 Configure in `configs/base/quality.yaml`:
 
 ```yaml
 thresholds:
   soft_fail: 0.05      # >5% errors -> Warning
-  hard_fail: 0.20      # >20% errors -> Fail Batch
+  hard_fail: 0.25      # >25% errors -> Fail Batch
 ```
 
 **Invariant**: `soft_fail` must be strictly less than `hard_fail`.
@@ -82,14 +82,14 @@ thresholds:
 | -------------------------------- | ------ | -------------- | -------------------------------------------------------------- |
 | `version`                        | string | `"1.0.0"`      | Schema version of the DQ config                                |
 | `thresholds.soft_fail`           | float  | `0.05`         | Error rate (>5%) that triggers a warning                       |
-| `thresholds.hard_fail`           | float  | `0.20`         | Error rate (>20%) that fails the batch                         |
+| `thresholds.hard_fail`           | float  | `0.25`         | Error rate (>25%) that fails the batch                         |
 | `strict_validation`              | bool   | `false`        | Runtime flag for stricter validation/error-handling paths      |
 | `invalid_record_policy`          | string | `"quarantine"` | How to handle invalid records: `quarantine`, `skip`, or `fail` |
 | `report.enabled`                 | bool   | `true`         | Enable DQ report generation                                    |
 | `report.format`                  | string | `"json"`       | Report format: `json`, `yaml`, or `csv`                        |
-| `report.include-sample-failures` | bool   | `true`         | Include sample of failed records in report                     |
-| `report.sample-size`             | int    | `10`           | Number of failed records to include in sample                  |
-| `report.output-path`             | string | `null`         | Custom output path (null = pipeline output dir)                |
+| `report.include_sample_failures` | bool   | `true`         | Include sample of failed records in report                     |
+| `report.sample_size`             | int    | `10`           | Number of failed records to include in sample                  |
+| `report.output_path`             | string | `null`         | Custom output path (null = pipeline output dir)                |
 | `common_field_validations`       | list   | see below      | Field validations applied to ALL entities                      |
 | `common_cross_field_validations` | list   | `[]`           | Cross-field validations applied to ALL entities                |
 
@@ -225,10 +225,10 @@ entity_field_validations:
 
 | Condition              | Description                                          |
 | ---------------------- | ---------------------------------------------------- |
-| `all-present`          | All specified fields must have values                |
-| `any-present`          | At least one field must have value                   |
-| `mutually-exclusive`   | Only one field can have value                        |
-| `conditional-required` | `required_field` needed when `trigger_field` present |
+| `all_present`          | All specified fields must have values                |
+| `any_present`          | At least one field must have value                   |
+| `mutually_exclusive`   | Only one field can have value                        |
+| `conditional_required` | `required_field` needed when `trigger_field` present |
 | `custom`               | Custom validator function                            |
 
 **Examples:**
@@ -240,7 +240,7 @@ entity_cross_field_validations:
     fields:
       - standard_value
       - standard_units
-    condition: conditional-required
+    condition: conditional_required
     trigger_field: standard_value
     required_field: standard_units
     error_message: "Units required when value is present"
@@ -248,10 +248,10 @@ entity_cross_field_validations:
   # At least one identifier must be present
   - name: need-identifier
     fields:
-      - chembl-id
-      - inchi-key
+      - chembl_id
+      - inchi_key
       - smiles
-    condition: any-present
+    condition: any_present
     error_message: "At least one identifier required"
 ```
 
@@ -263,7 +263,7 @@ Apply validations only when a condition is met.
 | -------------------- | ----------------------------------------------------------------------- |
 | `condition_field`    | Field to check for condition                                            |
 | `condition_value`    | Value(s) that trigger the validation                                    |
-| `condition_operator` | Comparison operator: `eq`, `ne`, `in`, `not-in`, `gt`, `lt`, `ge`, `le` |
+| `condition_operator` | Comparison operator: `eq`, `ne`, `in`, `not_in` |
 | `then_validations`   | List of validations to apply when condition is true                     |
 
 **Example:**
@@ -318,7 +318,7 @@ quality:
       nullable: true
       error_message: "Standard value must be non-negative"
 
-    - field: pchembl-value
+    - field: pchembl_value
       type: range
       min: 0
       max: 15
@@ -334,7 +334,7 @@ quality:
   entity_cross_field_validations:
     - name: value-requires-units
       fields: [standard_value, standard_units]
-      condition: conditional-required
+      condition: conditional_required
       trigger_field: standard_value
       required_field: standard_units
       error_message: "standard_units required when standard_value is present"
@@ -364,7 +364,7 @@ pipeline:
   dq_overrides:
     hard_fail_threshold: 0.30  # Higher tolerance during migration
     field_validations:
-      - field: legacy-id
+      - field: legacy_id
         type: required
         nullable: false
 ```

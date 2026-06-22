@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.core.normalization_rules import NormalizationRulesPolicy
 from bioetl.application.services.debug_export_service import DebugExportConfig
-from bioetl.domain.composite.config import ColumnGroupConfig
+from bioetl.domain.composite import ColumnGroupConfig
 from bioetl.domain.config import DQConfig, MemoryConfig, TableConfig
 from bioetl.domain.types import (
     ArrowSchema,
@@ -17,7 +17,7 @@ from bioetl.domain.types import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.domain.composite.config import DataSchemaConfig
+    from bioetl.domain.composite import DataSchemaConfig
 
 
 @dataclass(frozen=True, slots=True)

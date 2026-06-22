@@ -15,7 +15,7 @@ from typing import Self
 
 from pydantic import BaseModel, Field, model_validator
 
-from bioetl.domain.composite.config import CompositeConfig
+from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.schemas._composite_config_merge_schema import (
     ColumnGroupSchema,

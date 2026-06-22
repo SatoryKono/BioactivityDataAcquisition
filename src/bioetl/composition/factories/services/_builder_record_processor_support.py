@@ -24,7 +24,7 @@ if TYPE_CHECKING:
         TransformCallback,
     )
     from bioetl.application.services.debug_export_service import DebugExportConfig
-    from bioetl.domain.composite.config import ColumnGroupConfig, DataSchemaConfig
+    from bioetl.domain.composite import ColumnGroupConfig, DataSchemaConfig
     from bioetl.domain.config import DQConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode

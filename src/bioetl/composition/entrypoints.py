@@ -29,7 +29,6 @@ if TYPE_CHECKING:
         push_metrics_to_gateway,
         run_pipeline,
     )
-    from bioetl.composition.observability_api import start_metrics_server
 
 _COMPOSITION_EXECUTION_API_MODULE = "bioetl.composition.execution_api"
 _COMPOSITION_COMPOSITE_API_MODULE = "bioetl.composition.composite_api"
@@ -48,7 +47,6 @@ __all__ = [
     "maybe_start_metrics_server",
     "push_metrics_to_gateway",
     "run_pipeline",
-    "start_metrics_server",
 ]
 
 _PUBLIC_SYMBOL_TARGETS: dict[str, str] = {
@@ -66,10 +64,16 @@ _PUBLIC_SYMBOL_TARGETS: dict[str, str] = {
     "maybe_start_metrics_server": _COMPOSITION_EXECUTION_API_MODULE,
     "push_metrics_to_gateway": _COMPOSITION_EXECUTION_API_MODULE,
     "run_pipeline": _COMPOSITION_EXECUTION_API_MODULE,
-    "start_metrics_server": "bioetl.composition.observability_api",
 }
 install_lazy_exports(
     module_globals=globals(),
     public_exports=_PUBLIC_SYMBOL_TARGETS,
     module_name=__name__,
 )
+
+
+def start_metrics_server(*args: object, **kwargs: object) -> object:
+    """Retained compatibility wrapper for observability-owned metrics startup."""
+    from bioetl.composition.observability_api import start_metrics_server as _impl
+
+    return _impl(*args, **kwargs)

@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from bioetl.application.composite.conflict_resolver import ConflictResolverService
     from bioetl.application.composite.deduplication import EnricherDeduplicatorService
     from bioetl.application.composite.protocols import JoinKeyResolverProtocol
-    from bioetl.domain.composite.config import EnricherConfig
+    from bioetl.domain.composite import EnricherConfig
     from bioetl.domain.ports import LoggerPort
 
 

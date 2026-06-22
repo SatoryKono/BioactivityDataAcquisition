@@ -7,7 +7,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from bioetl.domain.composite.config import ColumnGroupConfig, MergeConfig
+from bioetl.domain.composite import ColumnGroupConfig, MergeConfig
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 
 __all__ = [

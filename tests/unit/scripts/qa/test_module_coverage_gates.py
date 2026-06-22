@@ -19,6 +19,10 @@ def _row(path: str, percent: float) -> dict[str, object]:
 
 def _gates() -> dict[str, object]:
     return {
+        "enforcement": {
+            "tier_violation_mode": "warn",
+            "ranked_target_tier_violation_mode": "block",
+        },
         "tiers": {
             "default_module": {
                 "line_min_percent": 85,
@@ -31,6 +35,11 @@ def _gates() -> dict[str, object]:
         },
         "tier_resolution_order": ["aggregates_and_contracts", "default_module"],
         "regression": {"min_delta_points": 0.01},
+        "coverage_tail": {
+            "ranked_targets": [
+                {"rank": 1, "path": "src/bioetl/domain/aggregates/_batch_lifecycle.py"}
+            ]
+        },
         "exemptions": [],
     }
 
@@ -70,6 +79,25 @@ def test_block_regression_ignores_tier_gaps() -> None:
     )
 
     assert violations == []
+
+
+def test_block_regression_blocks_ranked_target_tier_gap() -> None:
+    payload = {
+        "modules": [_row("src/bioetl/domain/aggregates/_batch_lifecycle.py", 90.0)]
+    }
+    baseline = {
+        "modules": [_row("src/bioetl/domain/aggregates/_batch_lifecycle.py", 90.0)]
+    }
+
+    violations = evaluate_module_coverage_gates(
+        payload,
+        baseline_payload=baseline,
+        gates=_gates(),
+        enforcement_mode="block-regression",
+    )
+
+    assert len(violations) == 1
+    assert violations[0].kind == "tier"
 
 
 def test_block_all_reports_tier_gap() -> None:

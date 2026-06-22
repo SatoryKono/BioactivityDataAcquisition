@@ -33,7 +33,7 @@ __all__ = [
 
 def get_lifecycle_service() -> MedallionLifecycleService:
     """Load the lifecycle service through composition on demand."""
-    from bioetl.composition.maintenance_api import get_lifecycle_service as _impl
+    from bioetl.composition.resources_api import get_lifecycle_service as _impl
 
     return _impl()
 
@@ -65,7 +65,7 @@ def get_contract_migration_service() -> ContractMigrationService:
 
 async def preview_cleanup(pipeline: str) -> CleanupPreview:
     """Preview pipeline cleanup through the maintenance composition seam."""
-    from bioetl.composition.maintenance_api import preview_cleanup as _impl
+    from bioetl.composition.resources_api import preview_cleanup as _impl
 
     impl = cast("Callable[[str], Awaitable[CleanupPreview]]", _impl)
     return await impl(pipeline)
