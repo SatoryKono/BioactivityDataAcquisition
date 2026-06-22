@@ -95,6 +95,8 @@ def test_acceptance_baseline_code_anchors_match_current_runtime_contract() -> No
     criteria = {row["id"]: row for row in payload["criteria"]}
 
     context_source = _read("src/bioetl/domain/context.py")
+    context_run_source = _read("src/bioetl/domain/context_run.py")
+    runtime_context_source = "\n".join([context_source, context_run_source])
     manifest_source = _read("src/bioetl/domain/control_plane/run_manifest.py")
     ledger_source = "\n".join(
         [
@@ -111,7 +113,7 @@ def test_acceptance_baseline_code_anchors_match_current_runtime_contract() -> No
     )
 
     for anchor in criteria["canonical_runtime_contexts"]["code_anchors"]:
-        assert anchor in context_source
+        assert anchor in runtime_context_source
 
     for anchor in criteria["control_plane_run_manifest_provenance"]["code_anchors"]:
         assert anchor in manifest_source
@@ -129,7 +131,7 @@ def test_acceptance_baseline_code_anchors_match_current_runtime_contract() -> No
         assert anchor in load_service_source
 
     for anchor in criteria["logger_port_only_correlation_contract"]["code_anchors"]:
-        assert anchor in context_source or anchor in runner_service_source
+        assert anchor in runtime_context_source or anchor in runner_service_source
 
     for anchor in criteria["storage_checkpoint_error_consistency"]["code_anchors"]:
         assert anchor in load_service_source or anchor in _read(

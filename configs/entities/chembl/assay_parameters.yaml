@@ -428,37 +428,8 @@ contracts:
   - assay_param_id
   merge_keys:
   - assay_param_id
-  hash_include:
-  - assay_param_id
-  - assay_id
-  - type_raw
-  - parameter_type
-  - parameter_relation
-  - parameter_value
-  - qudt_units
-  - qudt_unit_iri
-  - qudt_unit_mapping_status
-  - qudt_ontology_version
-  - units
-  - text_value
-  - comments
-  - standard_type
-  - standard_relation
-  - standard_value
-  - standard_units
-  - standard_text_value
-  - uo_units
-  - uo_unit_iri
-  - uo_unit_mapping_status
-  - uo_ontology_version
-  hash_exclude:
-  - _ingestion_ts
-  - _run_id
-  - _run_type
-  - _dq_warn
-  - _dq_error
-  - _source_batch_id
-  - _index
+  hash_include: []
+  hash_exclude: []
   hash_datetime_policy: v2_datetime_utc
   contract_ref: chembl.assay_parameters
   active_version: 1.0.0

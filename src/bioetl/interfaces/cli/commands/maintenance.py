@@ -18,22 +18,10 @@ from bioetl.interfaces.cli.commands.cleanup import (
 from bioetl.interfaces.cli.commands.domains.maintenance.control_plane_lifecycle import (
     control_plane_lifecycle_command,
 )
-from bioetl.interfaces.cli.commands.domains.maintenance.service_access import (
-    get_bronze_cleanup_service,
-    get_contract_migration_service,
-    get_lifecycle_service,
-    get_vacuum_service,
-    preview_cleanup,
-)
 from bioetl.interfaces.cli.commands.vacuum import vacuum_all_command, vacuum_command
 
 __all__ = [
-    "get_bronze_cleanup_service",
-    "get_contract_migration_service",
-    "get_lifecycle_service",
-    "get_vacuum_service",
     "maintenance",
-    "preview_cleanup",
 ]
 
 _LAZY_MAINTENANCE_COMMANDS: dict[str, tuple[str, str, str]] = {

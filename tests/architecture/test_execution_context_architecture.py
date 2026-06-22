@@ -11,6 +11,7 @@ from pathlib import Path
 pytestmark = pytest.mark.architecture
 
 CONTEXT_MODULE = Path("src/bioetl/domain/context.py")
+RUN_CONTEXT_MODULE = Path("src/bioetl/domain/context_run.py")
 CONTROL_PLANE_MANIFEST_MODULE = Path("src/bioetl/domain/control_plane/run_manifest.py")
 VALUE_OBJECT_MANIFEST_MODULE = Path("src/bioetl/domain/value_objects/run_manifest.py")
 
@@ -39,7 +40,10 @@ def test_context_module_documents_split_runtime_model() -> None:
 
 def test_pipeline_context_roles_are_explicit() -> None:
     pipeline_context_doc = _class_docstring(CONTEXT_MODULE, "PipelineContext")
-    pipeline_run_context_doc = _class_docstring(CONTEXT_MODULE, "PipelineRunContext")
+    pipeline_run_context_doc = _class_docstring(
+        RUN_CONTEXT_MODULE,
+        "PipelineRunContext",
+    )
 
     assert "In-run processing context" in pipeline_context_doc
     assert "Launch/execution descriptor" in pipeline_run_context_doc

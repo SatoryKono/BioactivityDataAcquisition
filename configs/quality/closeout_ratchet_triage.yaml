@@ -77,6 +77,11 @@ entries:
     classification: budget_closeout_ratchet
     live_guard: "debt issue batch #5490-#5499 remains closed with no budget growth."
     rationale: Keeps the current issue batch tied to live facade, config, and module coverage evidence.
+  - path: tests/architecture/test_tech_debt_issues_5507_5509_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "debt issue batch #5507-#5509 remains closed with no budget growth."
+    rationale: Preserves the closeout ratchet for the config-owner seam and contract-policy cleanup without expanding debt budgets.
   - path: tests/architecture/test_wave3_adapter_facade_closeout.py
     disposition: retain_active
     classification: active_architecture_guard

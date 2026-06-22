@@ -368,6 +368,45 @@ class TestPipelineContextEquality:
 class TestRunContextValidationAndProperties:
     """Coverage tests for context dataclasses used by orchestration."""
 
+    def test_pipeline_run_context_create_uses_injected_clock(self) -> None:
+        """Replay-safe creation should resolve started_at through ClockPort."""
+        fixed_time = datetime(2026, 6, 22, 12, 0, tzinfo=UTC)
+
+        ctx = PipelineRunContext.create(
+            pipeline_name="chembl_activity",
+            run_id=deterministic_uuid_from_callsite("test_pipeline_context"),
+            run_type=RunType.INCREMENTAL,
+            clock=FixedClock(fixed_time),
+        )
+
+        assert ctx.started_at == fixed_time
+
+    def test_pipeline_run_context_create_prefers_explicit_started_at(self) -> None:
+        """Explicit timestamps must beat the clock seam during replay assembly."""
+        explicit_time = datetime(2026, 6, 22, 13, 0, tzinfo=UTC)
+
+        ctx = PipelineRunContext.create(
+            pipeline_name="chembl_activity",
+            run_id=deterministic_uuid_from_callsite("test_pipeline_context"),
+            run_type=RunType.INCREMENTAL,
+            started_at=explicit_time,
+            clock=FixedClock(datetime(2026, 6, 22, 12, 0, tzinfo=UTC)),
+        )
+
+        assert ctx.started_at == explicit_time
+
+    def test_pipeline_run_context_create_uses_deterministic_sentinel_without_clock(
+        self,
+    ) -> None:
+        """Direct compatibility construction keeps the deterministic sentinel."""
+        ctx = PipelineRunContext.create(
+            pipeline_name="chembl_activity",
+            run_id=deterministic_uuid_from_callsite("test_pipeline_context"),
+            run_type=RunType.INCREMENTAL,
+        )
+
+        assert ctx.started_at == MISSING_RUNTIME_TIMESTAMP
+
     def test_pipeline_run_context_log_correlation_fields_without_manifest(self) -> None:
         ctx = PipelineRunContext(
             pipeline_name="chembl_activity",

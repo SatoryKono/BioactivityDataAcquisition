@@ -239,26 +239,8 @@ contracts:
   - component_id
   merge_keys:
   - component_id
-  hash_include:
-  - component_id
-  - accession
-  - component_type
-  - component_description
-  - organism
-  - taxonomy_id
-  - target_component_synonyms
-  - target_component_xrefs
-  - protein_classifications
-  - protein_classification_id
-  - protein_classification_ids
-  hash_exclude:
-  - _ingestion_ts
-  - _run_id
-  - _run_type
-  - _dq_warn
-  - _dq_error
-  - _source_batch_id
-  - _index
+  hash_include: []
+  hash_exclude: []
   hash_datetime_policy: v2_datetime_utc
   contract_ref: chembl.target_component
   active_version: 1.0.0

@@ -2,7 +2,7 @@
 
 - mode: report-only
 - targets: 4
-- total_duplicate_clusters: 109
+- total_duplicate_clusters: 108
 
 > Interpretation note: this is a visibility baseline. `R0801` can over-report
 > around facades, export barrels, and compatibility shims, so use it as
@@ -13,7 +13,7 @@
 | `src/bioetl/infrastructure/adapters` | 72 |
 | `src/bioetl/application/pipelines` | 22 |
 | `src/bioetl/composition/bootstrap` | 2 |
-| `src/bioetl/interfaces/cli` | 13 |
+| `src/bioetl/interfaces/cli` | 12 |
 
 ## src/bioetl/infrastructure/adapters
 
@@ -102,11 +102,11 @@
 
 ## src/bioetl/interfaces/cli
 
-- duplicate clusters: 13
+- duplicate clusters: 12
 
 | Actionability category | Duplicate clusters |
 | --- | ---: |
-| `cli_command_contract_shell` | 13 |
+| `cli_command_contract_shell` | 12 |
 
 | Top recurring module pairs | Duplicate clusters |
 | --- | ---: |
@@ -126,18 +126,16 @@
 | `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands._workflow_command_runtime`[65:75], `bioetl.interfaces.cli.commands.workflow`[323:333] |
 | `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands.diagnostics`[343:350], `bioetl.interfaces.cli.commands.quarantine`[167:174] |
 | `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands.domains.run_all.public_runtime`[176:183], `bioetl.interfaces.cli.commands.run`[284:291] |
-| `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands.domains.shared.execution_policy`[57:62], `bioetl.interfaces.cli.exit_codes`[73:79] |
 | `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands.health`[86:91], `bioetl.interfaces.cli.commands.vacuum`[58:63] |
 | `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands.domains.health.command`[12:17], `bioetl.interfaces.cli.commands.health`[259:264] |
-| `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands.domains.maintenance.service_access`[24:29], `bioetl.interfaces.cli.commands.maintenance`[30:35] |
-
-- … truncated 1 additional clusters for brevity
+| `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands.domains.maintenance.service_access`[24:29], `bioetl.interfaces.cli.commands.maintenance`[29:34] |
+| `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands._run_manifest_output`[137:142], `bioetl.interfaces.cli.commands._run_manifest_output_support`[53:66] |
 
 ## Reduction Leverage Ranking
 
 | Target | Duplicate clusters | Dominant actionability | Low-risk share | Recommended first wave |
 | --- | ---: | --- | ---: | --- |
-| `src/bioetl/interfaces/cli` | 13 | `cli_command_contract_shell` | 1.00 | yes |
+| `src/bioetl/interfaces/cli` | 12 | `cli_command_contract_shell` | 1.00 | yes |
 | `src/bioetl/composition/bootstrap` | 2 | `composition_runtime_wiring_pattern` | 1.00 | yes |
 | `src/bioetl/infrastructure/adapters` | 72 | `export_facade_or_package_barrel` | 0.78 | no |
 | `src/bioetl/application/pipelines` | 22 | `pipeline_transformer_contract_pattern` | 0.00 | no |
@@ -145,6 +143,6 @@
 ## First Wave Selection
 
 - target: `src/bioetl/interfaces/cli`
-- duplicate_clusters: 13
+- duplicate_clusters: 12
 - dominant_actionability_category: `cli_command_contract_shell`
 - selection_rule: prefer low-risk actionability families with bounded cluster counts, then maximize duplicate reduction leverage

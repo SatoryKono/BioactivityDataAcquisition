@@ -326,30 +326,8 @@ contracts:
   - tissue_id
   merge_keys:
   - tissue_id
-  hash_include:
-  - tissue_id
-  - pref_name
-  - bto_id
-  - bto_iri
-  - bto_mapping_status
-  - bto_ontology_version
-  - caloha_id
-  - efo_id
-  - efo_iri
-  - efo_mapping_status
-  - efo_ontology_version
-  - uberon_id
-  - uberon_iri
-  - uberon_mapping_status
-  - uberon_ontology_version
-  hash_exclude:
-  - _ingestion_ts
-  - _run_id
-  - _run_type
-  - _dq_warn
-  - _dq_error
-  - _source_batch_id
-  - _index
+  hash_include: []
+  hash_exclude: []
   hash_datetime_policy: v2_datetime_utc
   contract_ref: chembl.tissue
   active_version: 1.0.0

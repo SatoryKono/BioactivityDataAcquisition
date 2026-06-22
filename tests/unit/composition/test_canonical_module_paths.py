@@ -158,7 +158,7 @@ def test_maintenance_api_reexports_canonical_maintenance_services() -> None:
         get_bronze_cleanup_service,
         get_vacuum_service,
     )
-    from bioetl.composition._resource_management import (
+    from bioetl.composition.resources_api import (
         get_lifecycle_service,
         preview_cleanup,
     )
@@ -181,7 +181,7 @@ def test_maintenance_service_access_routes_to_canonical_owner_seams() -> None:
         get_bronze_cleanup_service,
         get_vacuum_service,
     )
-    from bioetl.composition._resource_management import (
+    from bioetl.composition.resources_api import (
         get_lifecycle_service,
         preview_cleanup,
     )

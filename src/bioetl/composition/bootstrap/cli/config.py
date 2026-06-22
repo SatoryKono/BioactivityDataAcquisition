@@ -15,16 +15,13 @@ from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.composition.bootstrap.cli.service_builders import build_cli_config_service
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.composition.registry_api import PipelineRegistry, create_registry
-from bioetl.composition.runtime_builders.config_access import (
-    create_pipeline_config_loader,
-    get_settings,
-    resolve_configs_root,
-)
+from bioetl.composition.runtime_builders.config_access import get_settings, resolve_configs_root
 from bioetl.domain.ports import DomainConfigMapperPort, SettingsLoaderPort
 from bioetl.infrastructure.config.converters import yaml_config_to_domain
 from bioetl.infrastructure.config.dq_contract_config_loader import (
     load_dq_config_for_pipeline,
 )
+from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config_from_root
 
 
 def create_registered_pipeline_registry(
@@ -33,6 +30,10 @@ def create_registered_pipeline_registry(
     effective_registry = create_registry() if registry is None else registry
     register_all_pipelines(registry=effective_registry)
     return effective_registry
+
+
+def create_pipeline_config_loader(configs_root: Path):
+    return partial(load_pipeline_config_from_root, configs_root=configs_root)
 
 
 def bootstrap_config_service(

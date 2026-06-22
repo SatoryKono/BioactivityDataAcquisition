@@ -12,6 +12,7 @@ criteria:
     description: PipelineRunContext and PipelineContext remain the canonical runtime contexts.
     source_paths:
       - src/bioetl/domain/context.py
+      - src/bioetl/domain/context_run.py
     verification_tests:
       - tests/architecture/test_execution_context_architecture.py
       - tests/unit/domain/test_pipeline_context.py
@@ -85,6 +86,7 @@ criteria:
     description: Correlation logging stays sourced from PipelineRunContext through LoggerPort seams.
     source_paths:
       - src/bioetl/domain/context.py
+      - src/bioetl/domain/context_run.py
       - src/bioetl/application/services/execution/pipeline_runner_service.py
     verification_tests:
       - tests/architecture/test_logging_correlation_contract.py

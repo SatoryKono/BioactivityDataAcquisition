@@ -351,9 +351,7 @@ def test_narrow_first_party_retained_entrypoints_do_not_gain_src_importers() -> 
             "src/bioetl/interfaces/cli/commands/domains/quarantine/runtime_access.py",
             "src/bioetl/interfaces/cli/commands/health.py",
         },
-        "src/bioetl/composition/maintenance_api.py": {
-            "src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py",
-        },
+        "src/bioetl/composition/maintenance_api.py": set(),
     }
 
     violations: list[str] = []
@@ -386,8 +384,8 @@ def test_retained_entrypoint_owner_usage_map_is_published() -> None:
     assert maintenance_api["usage_classification"] == (
         "stable_public_api_with_reviewed_first_party_usage"
     )
-    assert maintenance_api["surface_classification"] == "first-party-active"
-    assert maintenance_api["src_importer_count"] == 1
+    assert maintenance_api["surface_classification"] == "external-facing"
+    assert maintenance_api["src_importer_count"] == 0
     assert maintenance_api["test_importer_count"] == 1
 
 

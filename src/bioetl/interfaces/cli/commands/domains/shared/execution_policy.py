@@ -24,7 +24,7 @@ from bioetl.interfaces.cli.commands.domains.shared._execution_failure_support im
     handle_cli_failure,
     render_failure_context,
 )
-from bioetl.interfaces.cli.exit_codes import ExitCode
+from bioetl.interfaces.cli.exit_codes import EXCEPTION_EXIT_CODES, ExitCode
 
 __all__ = [
     "CLI_ENTRYPOINT_TYPED_ERRORS",
@@ -54,18 +54,21 @@ CLI_ENTRYPOINT_TYPED_ERRORS = (
     TimeoutError,
 )
 
+_FAILED_STATUS_EXIT_OVERRIDE_NAMES = (
+    "ValueError",
+    "FileNotFoundError",
+    "ConfigValidationError",
+    "DataQualityError",
+    "DataQualityThresholdError",
+    "LockAcquisitionError",
+    "LockLostError",
+    "StorageError",
+    "NetworkError",
+    "RateLimitError",
+    "CircuitBreakerOpenError",
+)
 _FAILED_STATUS_EXIT_OVERRIDES: Mapping[str, ExitCode] = {
-    "ValueError": ExitCode.CONFIG_ERROR,
-    "FileNotFoundError": ExitCode.EX_NOINPUT,
-    "ConfigValidationError": ExitCode.CONFIG_ERROR,
-    "DataQualityError": ExitCode.DATA_QUALITY_ERROR,
-    "DataQualityThresholdError": ExitCode.DATA_QUALITY_ERROR,
-    "LockAcquisitionError": ExitCode.LOCK_ERROR,
-    "LockLostError": ExitCode.LOCK_ERROR,
-    "StorageError": ExitCode.STORAGE_ERROR,
-    "NetworkError": ExitCode.NETWORK_ERROR,
-    "RateLimitError": ExitCode.NETWORK_ERROR,
-    "CircuitBreakerOpenError": ExitCode.NETWORK_ERROR,
+    name: EXCEPTION_EXIT_CODES[name] for name in _FAILED_STATUS_EXIT_OVERRIDE_NAMES
 }
 
 
