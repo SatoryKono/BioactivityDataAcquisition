@@ -12,6 +12,9 @@ import pandera as pa
 from typing import Any
 
 from bioetl.domain.schemas.openalex.publication import OpenAlexPublicationSchema
+from tests.unit.domain.schemas._schema_validation_assertions import (
+    assert_schema_validates_frame,
+)
 
 
 @pytest.mark.unit
@@ -22,7 +25,9 @@ class TestPmidBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid pmid value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_pmid_base_validation__pmid_null_allowed__34f0c769(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -30,7 +35,7 @@ class TestPmidBaseValidation:
         """SKIP: pmid is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["pmid"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
     @pytest.mark.parametrize("invalid_value", ["-1", "abc", ""])
     def test_pmid_base_validation__pmid_invalid_format__147db229(
@@ -51,7 +56,9 @@ class TestDoiBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid doi value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_doi_base_validation__doi_null_allowed__1c563d77(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -59,7 +66,7 @@ class TestDoiBaseValidation:
         """SKIP: doi is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["doi"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
     @pytest.mark.parametrize(
         "invalid_value", ["doi:10.1234", "10.123/x", "not-a-doi", ""]
@@ -82,7 +89,9 @@ class TestPmcIdBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid pmc_id value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_pmc_id_base_validation__pmc_id_null_allowed__e69600a9(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -90,7 +99,7 @@ class TestPmcIdBaseValidation:
         """SKIP: pmc_id is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["pmc_id"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
     @pytest.mark.parametrize("invalid_value", ["pmc123", "PMC", "123", ""])
     def test_pmc_id_base_validation__id_invalid_format__d060aeb5(
@@ -111,7 +120,9 @@ class TestTitleBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid title value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_title_base_validation__title_null_allowed__a020dcb9(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -119,7 +130,7 @@ class TestTitleBaseValidation:
         """SKIP: title is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["title"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -130,7 +141,9 @@ class TestAbstractBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid abstract value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_base_validation__null_allowed__83f71059(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -138,7 +151,7 @@ class TestAbstractBaseValidation:
         """SKIP: abstract is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["abstract"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -149,7 +162,9 @@ class TestAuthorsBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid authors value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_base_validation__authors_null_allowed__17e42ec1(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -157,7 +172,7 @@ class TestAuthorsBaseValidation:
         """SKIP: authors is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["authors"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -168,7 +183,9 @@ class TestAffiliationListBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid affiliation_list value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_list_base_validation__list_null_allowed__2f66c351(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -176,7 +193,7 @@ class TestAffiliationListBaseValidation:
         """SKIP: affiliation_list is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["affiliation_list"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -187,7 +204,9 @@ class TestJournalBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid journal value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_base_validation__journal_null_allowed__30841956(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -195,7 +214,7 @@ class TestJournalBaseValidation:
         """SKIP: journal is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["journal"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -206,7 +225,9 @@ class TestPublicationYearBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid publication_year value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_year_base_validation__year_null_allowed__00ab813b(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -214,7 +235,7 @@ class TestPublicationYearBaseValidation:
         """SKIP: publication_year is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["publication_year"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -225,7 +246,9 @@ class TestPublicationDateBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid publication_date value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_date_base_validation__date_null_allowed__a3b45b35(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -233,7 +256,7 @@ class TestPublicationDateBaseValidation:
         """SKIP: publication_date is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["publication_date"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -244,7 +267,9 @@ class TestPublicationTypeBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid publication_type value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_type_base_validation__type_null_allowed__b5c1169e(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -252,7 +277,7 @@ class TestPublicationTypeBaseValidation:
         """SKIP: publication_type is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["publication_type"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -263,7 +288,9 @@ class TestLanguageBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid language value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_base_validation__null_allowed__d48d098f(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -271,7 +298,7 @@ class TestLanguageBaseValidation:
         """SKIP: language is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["language"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -282,7 +309,9 @@ class TestPageFirstBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid page_first value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_first_base_validation__first_null_allowed__801b7eb4(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -290,7 +319,7 @@ class TestPageFirstBaseValidation:
         """SKIP: page_first is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["page_first"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -301,7 +330,9 @@ class TestPageLastBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid page_last value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_last_base_validation__last_null_allowed__d68f2bd9(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -309,7 +340,7 @@ class TestPageLastBaseValidation:
         """SKIP: page_last is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["page_last"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -320,7 +351,9 @@ class TestCitationsReceivedBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid citations_received value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_base_validation__null_allowed__c9b96145(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -328,7 +361,7 @@ class TestCitationsReceivedBaseValidation:
         """SKIP: citations_received is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["citations_received"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -339,7 +372,9 @@ class TestCitationsMadeBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid citations_made value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_made_base_validation__made_null_allowed__5a5f2487(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -347,7 +382,7 @@ class TestCitationsMadeBaseValidation:
         """SKIP: citations_made is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["citations_made"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -358,7 +393,9 @@ class TestIsOaBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid is_oa value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_is_oa_base_validation__is_oa_null_allowed__b03e1c4d(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -366,7 +403,7 @@ class TestIsOaBaseValidation:
         """SKIP: is_oa is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["is_oa"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -377,7 +414,9 @@ class TestLookupMethodBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid lookup_method value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_method_base_validation__method_null_allowed__ae4a964f(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -385,7 +424,7 @@ class TestLookupMethodBaseValidation:
         """SKIP: lookup_method is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["lookup_method"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -396,7 +435,9 @@ class TestOriginalIdBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid original_id value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_id_base_validation__id_null_allowed__b2e9e81e(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -404,7 +445,7 @@ class TestOriginalIdBaseValidation:
         """SKIP: original_id is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["original_id"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -415,7 +456,9 @@ class TestSourceBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid _source value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_source_base_validation__source_null_allowed__33eee906(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -423,7 +466,7 @@ class TestSourceBaseValidation:
         """SKIP: _source is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["_source"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -434,7 +477,9 @@ class TestOpenalexIdBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid openalex_id value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_openalex_id_null_fails(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -464,7 +509,9 @@ class TestIssnBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid issn value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_issn_base_validation__issn_null_allowed__4c88c228(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -472,7 +519,7 @@ class TestIssnBaseValidation:
         """SKIP: issn is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["issn"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
     def test_issn_base_validation__accepts_any_string__b5453d66(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -480,7 +527,7 @@ class TestIssnBaseValidation:
         """PASS: issn has no format validation in OpenAlex schema."""
         df = minimal_openalex_publication_df.copy()
         df["issn"] = "1234-5678"
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -491,7 +538,9 @@ class TestPublisherBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid publisher value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_base_validation__null_allowed__0914d52c(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -499,7 +548,7 @@ class TestPublisherBaseValidation:
         """SKIP: publisher is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["publisher"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -510,7 +559,9 @@ class TestOaStatusBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid oa_status value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_oa_status_null_allowed(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -518,7 +569,7 @@ class TestOaStatusBaseValidation:
         """SKIP: oa_status is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["oa_status"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -529,7 +580,9 @@ class TestVolumeBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid volume value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_volume_base_validation__volume_null_allowed__2b6917a6(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -537,7 +590,7 @@ class TestVolumeBaseValidation:
         """SKIP: volume is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["volume"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -548,7 +601,9 @@ class TestIssueBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid issue value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_issue_base_validation__issue_null_allowed__08cd8c32(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -556,7 +611,7 @@ class TestIssueBaseValidation:
         """SKIP: issue is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["issue"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -565,7 +620,9 @@ class TestFwciBaseValidation:
 
     def test_fwci_valid(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
         """PASS: valid fwci value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_fwci_null_allowed(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -573,7 +630,7 @@ class TestFwciBaseValidation:
         """SKIP: fwci is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["fwci"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -584,7 +641,9 @@ class TestIsRetractedBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid is_retracted value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_is_retracted_null_allowed(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -592,7 +651,7 @@ class TestIsRetractedBaseValidation:
         """SKIP: is_retracted is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["is_retracted"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -603,7 +662,9 @@ class TestSubjectTopicsBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid subject_topics value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_subject_topics_null_allowed(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -611,7 +672,7 @@ class TestSubjectTopicsBaseValidation:
         """SKIP: subject_topics is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["subject_topics"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -622,7 +683,9 @@ class TestPrimaryTopicBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid primary_topic value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_primary_topic_null_allowed(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -630,7 +693,7 @@ class TestPrimaryTopicBaseValidation:
         """SKIP: primary_topic is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["primary_topic"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -639,7 +702,9 @@ class TestGrantsBaseValidation:
 
     def test_grants_valid(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
         """PASS: valid grants value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_grants_null_allowed(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -647,7 +712,7 @@ class TestGrantsBaseValidation:
         """SKIP: grants is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["grants"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -658,7 +723,9 @@ class TestSubjectMeshBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid subject_mesh value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_subject_mesh_null_allowed(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -666,7 +733,7 @@ class TestSubjectMeshBaseValidation:
         """SKIP: subject_mesh is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["subject_mesh"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -677,7 +744,9 @@ class TestSubjectKeywordsBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid subject_keywords value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_base_validation__null_allowed__8d218e85(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -685,7 +754,7 @@ class TestSubjectKeywordsBaseValidation:
         """SKIP: subject_keywords is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["subject_keywords"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -694,7 +763,9 @@ class TestMagIdBaseValidation:
 
     def test_mag_id_valid(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
         """PASS: valid mag_id value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_mag_id_null_allowed(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -702,7 +773,7 @@ class TestMagIdBaseValidation:
         """SKIP: mag_id is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["mag_id"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -713,7 +784,9 @@ class TestAuthorOpenalexIdsBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid author_openalex_ids value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_author_openalex_ids_null_allowed(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -721,7 +794,7 @@ class TestAuthorOpenalexIdsBaseValidation:
         """SKIP: author_openalex_ids is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["author_openalex_ids"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -732,7 +805,9 @@ class TestInstitutionIdsBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid institution_ids value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_institution_ids_null_allowed(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -740,7 +815,7 @@ class TestInstitutionIdsBaseValidation:
         """SKIP: institution_ids is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["institution_ids"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -751,7 +826,9 @@ class TestInstitutionCountryCodesBaseValidation:
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid institution_country_codes value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_institution_country_codes_null_allowed(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -759,7 +836,7 @@ class TestInstitutionCountryCodesBaseValidation:
         """SKIP: institution_country_codes is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["institution_country_codes"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -768,7 +845,9 @@ class TestRorIdsBaseValidation:
 
     def test_ror_ids_valid(self, minimal_openalex_publication_df: pd.DataFrame) -> None:
         """PASS: valid ror_ids value."""
-        OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
+        assert_schema_validates_frame(
+            OpenAlexPublicationSchema, minimal_openalex_publication_df
+        )
 
     def test_ror_ids_null_allowed(
         self, minimal_openalex_publication_df: pd.DataFrame
@@ -776,4 +855,4 @@ class TestRorIdsBaseValidation:
         """SKIP: ror_ids is nullable."""
         df = minimal_openalex_publication_df.copy()
         df["ror_ids"] = None
-        OpenAlexPublicationSchema.validate(df)
+        assert_schema_validates_frame(OpenAlexPublicationSchema, df)

@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-import tempfile
-from pathlib import Path
+from tests.helpers.synthetic_paths import synthetic_test_root
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -11,7 +10,7 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-silver-writer-schema-"))
+TEST_ROOT = synthetic_test_root("bioetl-silver-writer-schema")
 SILVER_BASE_PATH = TEST_ROOT / "silver"
 
 

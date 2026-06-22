@@ -569,7 +569,7 @@ assertless_triage:
         calls.
       next_review: '2026-09-30'
     intentional_no_exception_contract:
-      count: 483
+      count: 115
       decision: retained-with-rationale
       rationale: No-op, close/aclose, smoke, or does-not-raise behavior is the contract
         under test.

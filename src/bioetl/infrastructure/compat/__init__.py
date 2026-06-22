@@ -3,7 +3,13 @@
 from __future__ import annotations
 
 from bioetl.infrastructure.compat.pandera_compat import (
-    apply_pandera_typing_compat_if_needed,
+    PANDERA_RUNTIME_SUPPORT_POLICY,
+    UnsupportedPanderaRuntimeError,
+    validate_supported_pandera_runtime,
 )
 
-__all__ = ["apply_pandera_typing_compat_if_needed"]
+__all__ = [
+    "PANDERA_RUNTIME_SUPPORT_POLICY",
+    "UnsupportedPanderaRuntimeError",
+    "validate_supported_pandera_runtime",
+]

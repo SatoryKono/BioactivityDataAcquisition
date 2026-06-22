@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import tempfile
+from tests.helpers.synthetic_paths import synthetic_test_root
 from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
@@ -20,7 +20,7 @@ from bioetl.infrastructure.storage.silver.validation_operations import (
     _PreparedSilverWritePayload,
 )
 
-TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-silver-postwrite-"))
+TEST_ROOT = synthetic_test_root("bioetl-silver-postwrite")
 SILVER_ROOT = str(TEST_ROOT / "silver")
 SILVER_TABLE_PATH = str(TEST_ROOT / "silver" / "test.table")
 SILVER_EXPORT_PATH = str(TEST_ROOT / "silver" / "test.table.csv")

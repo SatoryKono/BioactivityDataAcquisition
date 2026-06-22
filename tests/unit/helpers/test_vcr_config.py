@@ -73,3 +73,40 @@ def test_build_base_vcr_config_before_record_request_noops_on_unexpected_request
     request = "unexpected-request-surface"
 
     assert before_record_request(request) == request
+
+
+def test_build_base_vcr_config_filters_transient_html_server_errors() -> None:
+    config = build_base_vcr_config()
+    before_record_response = config["before_record_response"]
+
+    response = {
+        "status": {"code": 500, "message": "Internal Server Error"},
+        "headers": {"Content-Type": ["text/html"]},
+        "body": {"string": b"<html>Error: 500</html>"},
+    }
+
+    assert before_record_response(response) is None
+
+
+def test_build_base_vcr_config_preserves_successful_json_response() -> None:
+    config = build_base_vcr_config()
+    before_record_response = config["before_record_response"]
+
+    response = {
+        "status": {"code": 200, "message": "OK"},
+        "headers": {"Content-Type": ["application/json"]},
+        "body": {"string": b'{"status":"UP"}'},
+    }
+
+    assert before_record_response(response) == response
+
+
+def test_build_base_vcr_config_before_record_response_noops_on_unexpected_response() -> (
+    None
+):
+    config = build_base_vcr_config()
+    before_record_response = config["before_record_response"]
+
+    response = "unexpected-response-surface"
+
+    assert before_record_response(response) == response

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import tempfile
+from tests.helpers.synthetic_paths import synthetic_test_root
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
@@ -26,7 +26,7 @@ from bioetl.infrastructure.schemas.dq_report_config import (
     SilverSinkConfig,
 )
 
-TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-pipeline-factory-"))
+TEST_ROOT = synthetic_test_root("bioetl-pipeline-factory")
 CUSTOM_BRONZE_PATH = str(TEST_ROOT / "custom-bronze")
 CACHED_BRONZE_PATH = str(TEST_ROOT / "bronze")
 

@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-import tempfile
-from pathlib import Path
+from tests.helpers.synthetic_paths import synthetic_test_root
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -19,7 +18,7 @@ from .test_silver_writer import mock_metadata_coordinator, noop_logger, valid_re
 # Re-export shared fixtures for pytest discovery in this module.
 _FIXTURE_IMPORTS = (noop_logger, valid_records, mock_metadata_coordinator)
 
-TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-silver-writer-dq-metrics-"))
+TEST_ROOT = synthetic_test_root("bioetl-silver-writer-dq-metrics")
 SILVER_BASE_PATH = TEST_ROOT / "silver"
 
 

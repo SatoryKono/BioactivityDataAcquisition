@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import os
 import socket
+import threading
 from functools import lru_cache
 
 import pytest
@@ -24,6 +25,7 @@ _NETWORK_PROBE_HOSTS = (
 )
 _NETWORK_PROBE_PORT = 443
 _NETWORK_PROBE_TIMEOUT_SECONDS = 2.0
+_NETWORK_PROBE_WALL_CLOCK_TIMEOUT_SECONDS = 2.5
 _TRUTHY_ENV_VALUES = frozenset({"1", "true", "yes", "on"})
 
 
@@ -61,18 +63,45 @@ def _is_truthy_env_var(name: str) -> bool:
     return normalized_value in _TRUTHY_ENV_VALUES
 
 
+def _probe_host_connectivity(host: str) -> bool:
+    try:
+        with socket.create_connection(
+            (host, _NETWORK_PROBE_PORT),
+            timeout=_NETWORK_PROBE_TIMEOUT_SECONDS,
+        ):
+            return True
+    except OSError:
+        return False
+
+
+def _probe_host_connectivity_bounded(host: str) -> bool:
+    """Run one host probe with a hard wall-clock timeout.
+
+    ``socket.create_connection`` bounds connect/read timeouts, but name
+    resolution may still block in ``getaddrinfo`` on some platforms. Run the
+    probe in a daemon thread so contract-test setup fail-closes quickly instead
+    of hanging the whole suite.
+    """
+
+    outcome: list[bool] = []
+
+    def _worker() -> None:
+        outcome.append(_probe_host_connectivity(host))
+
+    thread = threading.Thread(target=_worker, daemon=True)
+    thread.start()
+    thread.join(_NETWORK_PROBE_WALL_CLOCK_TIMEOUT_SECONDS)
+    if thread.is_alive():
+        return False
+    return outcome[0] if outcome else False
+
+
 @lru_cache(maxsize=1)
 def _has_outbound_connectivity() -> bool:
     """Best-effort outbound connectivity probe for contract tests."""
     for host in _NETWORK_PROBE_HOSTS:
-        try:
-            with socket.create_connection(
-                (host, _NETWORK_PROBE_PORT),
-                timeout=_NETWORK_PROBE_TIMEOUT_SECONDS,
-            ):
-                return True
-        except OSError:
-            continue
+        if _probe_host_connectivity_bounded(host):
+            return True
     return False
 
 

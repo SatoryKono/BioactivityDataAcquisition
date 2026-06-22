@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import tempfile
+from tests.helpers.synthetic_paths import synthetic_test_root
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
@@ -14,7 +14,7 @@ from bioetl.composition.factories.storage.health_mixin import (
 )
 from bioetl.domain.types import HealthStatus
 
-TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-health-mixin-"))
+TEST_ROOT = synthetic_test_root("bioetl-health-mixin")
 BRONZE_ROOT = str(TEST_ROOT / "bronze")
 SILVER_ROOT = str(TEST_ROOT / "silver")
 GOLD_ROOT = str(TEST_ROOT / "gold")

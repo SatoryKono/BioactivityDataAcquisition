@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-import tempfile
-from pathlib import Path
+from tests.helpers.synthetic_paths import synthetic_test_root
 from unittest.mock import AsyncMock, MagicMock
 from tests.helpers.deterministic_ids import (
     deterministic_batch_uuid_from_callsite,
@@ -15,7 +14,7 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-silver-writer-core-"))
+TEST_ROOT = synthetic_test_root("bioetl-silver-writer-core")
 SILVER_ROOT = str(TEST_ROOT / "silver")
 SILVER_TABLE_PATH = str(TEST_ROOT / "silver" / "test" / "table")
 

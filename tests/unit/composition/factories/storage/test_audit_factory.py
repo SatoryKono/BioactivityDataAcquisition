@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import tempfile
+from tests.helpers.synthetic_paths import synthetic_test_root
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock
@@ -13,7 +13,7 @@ from bioetl.composition.factories.storage.audit import create_audit_port
 from bioetl.domain.ports.noop import NoOpAudit
 from bioetl.infrastructure.audit.file_audit import FileAuditAdapter
 
-TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-audit-factory-"))
+TEST_ROOT = synthetic_test_root("bioetl-audit-factory")
 DATA_ROOT = TEST_ROOT / "bioetl"
 CUSTOM_AUDIT_ROOT = TEST_ROOT / "custom-audit"
 

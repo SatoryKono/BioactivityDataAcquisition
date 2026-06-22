@@ -5,9 +5,8 @@ from __future__ import annotations
 import asyncio
 import io
 import json
-import tempfile
+from tests.helpers.synthetic_paths import synthetic_test_root
 from datetime import UTC, datetime
-from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import UUID
 
@@ -25,7 +24,7 @@ TEST_RUN_ID: RunID = UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
 TEST_RUN_TYPE = RunType.INCREMENTAL
 # Fixed timestamp for deterministic tests (see ADR-014)
 TEST_INGESTION_TS = datetime(2024, 1, 15, 12, 0, 0, tzinfo=UTC)
-TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-storage-tests-"))
+TEST_ROOT = synthetic_test_root("bioetl-storage-tests")
 SILVER_DELTA_ROOT = str(TEST_ROOT / "delta")
 GOLD_ROOT = str(TEST_ROOT / "gold")
 

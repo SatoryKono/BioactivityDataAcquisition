@@ -4,8 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-import tempfile
-from pathlib import Path
+from tests.helpers.synthetic_paths import synthetic_test_root
 from types import SimpleNamespace
 from typing import cast
 from unittest.mock import MagicMock
@@ -19,7 +18,7 @@ from bioetl.composition.factories.services.pipeline_record_processor_builder imp
 
 pytestmark = pytest.mark.unit
 
-TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-record-processor-builder-"))
+TEST_ROOT = synthetic_test_root("bioetl-record-processor-builder")
 BRONZE_ROOT = str(TEST_ROOT / "bronze")
 SILVER_ROOT = str(TEST_ROOT / "silver")
 GOLD_ROOT = str(TEST_ROOT / "gold")

@@ -12,6 +12,9 @@ import pandera as pa
 from typing import Any
 
 from bioetl.domain.schemas.pubmed.publication import PubMedPublicationSchema
+from tests.unit.domain.schemas._schema_validation_assertions import (
+    assert_schema_validates_frame,
+)
 
 
 @pytest.mark.unit
@@ -22,7 +25,9 @@ class TestPmidBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid pmid value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_pmid_null_fails(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
         """FAIL: pmid is non-nullable(PK)."""
@@ -50,7 +55,9 @@ class TestDoiBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid doi value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_doi_base_validation__doi_null_allowed__30060bb5(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -58,7 +65,7 @@ class TestDoiBaseValidation:
         """SKIP: doi is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["doi"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
     @pytest.mark.parametrize(
         "invalid_value", ["doi:10.1234", "10.123/x", "not-a-doi", ""]
@@ -81,7 +88,9 @@ class TestPmcIdBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid pmc_id value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_pmc_id_base_validation__pmc_id_null_allowed__aba8ecb8(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -89,7 +98,7 @@ class TestPmcIdBaseValidation:
         """SKIP: pmc_id is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["pmc_id"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
     @pytest.mark.parametrize("invalid_value", ["pmc123", "PMC", "123", ""])
     def test_pmc_id_base_validation__id_invalid_format__625d71b6(
@@ -110,7 +119,9 @@ class TestTitleBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid title value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_title_base_validation__title_null_fails__7f8e50c6(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -130,7 +141,9 @@ class TestAbstractBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid abstract value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_base_validation__null_allowed__27d2ba8a(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -138,7 +151,7 @@ class TestAbstractBaseValidation:
         """SKIP: abstract is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["abstract"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -149,7 +162,9 @@ class TestAuthorsBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid authors value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_base_validation__authors_null_allowed__36c5b6e1(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -157,7 +172,7 @@ class TestAuthorsBaseValidation:
         """SKIP: authors is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["authors"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -168,7 +183,9 @@ class TestAffiliationListBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid affiliation_list value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_list_base_validation__list_null_allowed__ea1161fb(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -176,7 +193,7 @@ class TestAffiliationListBaseValidation:
         """SKIP: affiliation_list is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["affiliation_list"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -187,7 +204,9 @@ class TestJournalBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid journal value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_base_validation__journal_null_allowed__8309eae6(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -195,7 +214,7 @@ class TestJournalBaseValidation:
         """SKIP: journal is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["journal"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -206,7 +225,9 @@ class TestPublicationYearBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid publication_year value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_year_base_validation__year_null_allowed__d6491317(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -214,7 +235,7 @@ class TestPublicationYearBaseValidation:
         """SKIP: publication_year is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["publication_year"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -225,7 +246,9 @@ class TestPublicationDateBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid publication_date value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_date_base_validation__date_null_allowed__cd8c9572(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -233,7 +256,7 @@ class TestPublicationDateBaseValidation:
         """SKIP: publication_date is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["publication_date"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -244,7 +267,9 @@ class TestPublicationTypeBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid publication_type value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_type_base_validation__type_null_allowed__e5fd4415(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -252,7 +277,7 @@ class TestPublicationTypeBaseValidation:
         """SKIP: publication_type is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["publication_type"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -263,7 +288,9 @@ class TestLanguageBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid language value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_base_validation__null_allowed__ef9bc013(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -271,7 +298,7 @@ class TestLanguageBaseValidation:
         """SKIP: language is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["language"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -282,7 +309,9 @@ class TestPageFirstBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid page_first value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_first_base_validation__first_null_allowed__c5182f9d(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -290,7 +319,7 @@ class TestPageFirstBaseValidation:
         """SKIP: page_first is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["page_first"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -301,7 +330,9 @@ class TestPageLastBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid page_last value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_last_base_validation__last_null_allowed__3985bf16(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -309,7 +340,7 @@ class TestPageLastBaseValidation:
         """SKIP: page_last is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["page_last"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -320,7 +351,9 @@ class TestCitationsReceivedBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid citations_received value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_base_validation__null_allowed__ae01aa38(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -328,7 +361,7 @@ class TestCitationsReceivedBaseValidation:
         """SKIP: citations_received is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["citations_received"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -339,7 +372,9 @@ class TestCitationsMadeBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid citations_made value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_made_base_validation__made_null_allowed__417f0f4b(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -347,7 +382,7 @@ class TestCitationsMadeBaseValidation:
         """SKIP: citations_made is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["citations_made"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -358,7 +393,9 @@ class TestIsOaBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid is_oa value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_is_oa_base_validation__is_oa_null_allowed__9322d77e(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -366,7 +403,7 @@ class TestIsOaBaseValidation:
         """SKIP: is_oa is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["is_oa"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -377,7 +414,9 @@ class TestLookupMethodBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid lookup_method value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_method_base_validation__method_null_allowed__063eb503(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -385,7 +424,7 @@ class TestLookupMethodBaseValidation:
         """SKIP: lookup_method is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["lookup_method"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -396,7 +435,9 @@ class TestOriginalIdBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid original_id value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_id_base_validation__id_null_allowed__f6f6c5a8(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -404,7 +445,7 @@ class TestOriginalIdBaseValidation:
         """SKIP: original_id is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["original_id"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -415,7 +456,9 @@ class TestSourceBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid _source value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_source_base_validation__source_null_allowed__c856f10e(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -423,7 +466,7 @@ class TestSourceBaseValidation:
         """SKIP: _source is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["_source"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -432,7 +475,9 @@ class TestPiiBaseValidation:
 
     def test_pii_valid(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
         """PASS: valid pii value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_pii_null_allowed(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -440,7 +485,7 @@ class TestPiiBaseValidation:
         """SKIP: pii is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["pii"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -449,7 +494,9 @@ class TestMidBaseValidation:
 
     def test_mid_valid(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
         """PASS: valid mid value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_mid_null_allowed(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -457,7 +504,7 @@ class TestMidBaseValidation:
         """SKIP: mid is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["mid"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -468,7 +515,9 @@ class TestPublisherIdBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid publisher_id value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_publisher_id_null_allowed(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -476,7 +525,7 @@ class TestPublisherIdBaseValidation:
         """SKIP: publisher_id is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["publisher_id"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -487,7 +536,9 @@ class TestAbstractStructuredBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid abstract_structured value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_abstract_structured_null_allowed(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -495,7 +546,7 @@ class TestAbstractStructuredBaseValidation:
         """SKIP: abstract_structured is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["abstract_structured"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -506,7 +557,9 @@ class TestJournalNameShortBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid journal_name_short value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_short_base_validation__short_null_allowed__d2f8ee24(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -514,7 +567,7 @@ class TestJournalNameShortBaseValidation:
         """SKIP: journal_name_short is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["journal_name_short"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -525,7 +578,9 @@ class TestJournalIsoAbbrevBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid journal_iso_abbrev value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_journal_iso_abbrev_null_allowed(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -533,7 +588,7 @@ class TestJournalIsoAbbrevBaseValidation:
         """SKIP: journal_iso_abbrev is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["journal_iso_abbrev"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -544,7 +599,9 @@ class TestIssnBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid issn value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_issn_base_validation__issn_null_allowed__e1a4a438(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -552,7 +609,7 @@ class TestIssnBaseValidation:
         """SKIP: issn is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["issn"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
     @pytest.mark.parametrize("invalid_value", ["12345678", "1234-567", ""])
     def test_issn_invalid_format(
@@ -573,7 +630,9 @@ class TestJournalIssnTypeBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid journal_issn_type value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_journal_issn_type_null_allowed(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -581,7 +640,7 @@ class TestJournalIssnTypeBaseValidation:
         """SKIP: journal_issn_type is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["journal_issn_type"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -592,7 +651,9 @@ class TestNlmUniqueIdBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid nlm_unique_id value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_nlm_unique_id_null_allowed(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -600,7 +661,7 @@ class TestNlmUniqueIdBaseValidation:
         """SKIP: nlm_unique_id is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["nlm_unique_id"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -609,7 +670,9 @@ class TestCountryBaseValidation:
 
     def test_country_valid(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
         """PASS: valid country value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_country_null_allowed(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -617,7 +680,7 @@ class TestCountryBaseValidation:
         """SKIP: country is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["country"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -628,7 +691,9 @@ class TestMedlinePgnBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid medline_pgn value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_medline_pgn_null_allowed(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -636,7 +701,7 @@ class TestMedlinePgnBaseValidation:
         """SKIP: medline_pgn is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["medline_pgn"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -647,7 +712,9 @@ class TestPageRangeBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid page_range value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_page_range_null_allowed(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -655,7 +722,7 @@ class TestPageRangeBaseValidation:
         """SKIP: page_range is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["page_range"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -664,7 +731,9 @@ class TestPubMonthBaseValidation:
 
     def test_pub_month_valid(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
         """PASS: valid pub_month value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_pub_month_null_allowed(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -672,7 +741,7 @@ class TestPubMonthBaseValidation:
         """SKIP: pub_month is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["pub_month"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -681,7 +750,9 @@ class TestPubDayBaseValidation:
 
     def test_pub_day_valid(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
         """PASS: valid pub_day value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_pub_day_null_allowed(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -689,7 +760,7 @@ class TestPubDayBaseValidation:
         """SKIP: pub_day is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["pub_day"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -700,7 +771,9 @@ class TestPublicationStatusBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid publication_status value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_publication_status_null_allowed(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -708,7 +781,7 @@ class TestPublicationStatusBaseValidation:
         """SKIP: publication_status is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["publication_status"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -719,7 +792,9 @@ class TestDateCompletedBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid date_completed value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_date_completed_null_allowed(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -727,7 +802,7 @@ class TestDateCompletedBaseValidation:
         """SKIP: date_completed is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["date_completed"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -738,7 +813,9 @@ class TestDateRevisedBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid date_revised value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_date_revised_null_allowed(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -746,7 +823,7 @@ class TestDateRevisedBaseValidation:
         """SKIP: date_revised is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["date_revised"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -757,7 +834,9 @@ class TestCitationSubsetBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid citation_subset value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_citation_subset_null_allowed(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -765,7 +844,7 @@ class TestCitationSubsetBaseValidation:
         """SKIP: citation_subset is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["citation_subset"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -776,7 +855,9 @@ class TestAffiliationStructuredBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid affiliation_structured value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_affiliation_structured_null_allowed(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -784,7 +865,7 @@ class TestAffiliationStructuredBaseValidation:
         """SKIP: affiliation_structured is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["affiliation_structured"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -795,7 +876,9 @@ class TestAuthorCountBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid author_count value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_author_count_null_allowed(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -803,7 +886,7 @@ class TestAuthorCountBaseValidation:
         """SKIP: author_count is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["author_count"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -814,7 +897,9 @@ class TestMeshHeadingCountBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid mesh_heading_count value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_mesh_heading_count_null_allowed(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -822,7 +907,7 @@ class TestMeshHeadingCountBaseValidation:
         """SKIP: mesh_heading_count is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["mesh_heading_count"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -833,7 +918,9 @@ class TestKeywordCountBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid keyword_count value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_keyword_count_null_allowed(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -841,7 +928,7 @@ class TestKeywordCountBaseValidation:
         """SKIP: keyword_count is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["keyword_count"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -852,7 +939,9 @@ class TestGrantCountBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid grant_count value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_grant_count_null_allowed(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -860,7 +949,7 @@ class TestGrantCountBaseValidation:
         """SKIP: grant_count is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["grant_count"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -871,7 +960,9 @@ class TestChemicalCountBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid chemical_count value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_chemical_count_null_allowed(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -879,7 +970,7 @@ class TestChemicalCountBaseValidation:
         """SKIP: chemical_count is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["chemical_count"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -890,7 +981,9 @@ class TestSubjectMeshBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid subject_mesh value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_mesh_base_validation__mesh_null_allowed__7bb5fa77(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -898,7 +991,7 @@ class TestSubjectMeshBaseValidation:
         """SKIP: subject_mesh is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["subject_mesh"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -907,7 +1000,9 @@ class TestChemicalsBaseValidation:
 
     def test_chemicals_valid(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
         """PASS: valid chemicals value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_chemicals_null_allowed(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -915,7 +1010,7 @@ class TestChemicalsBaseValidation:
         """SKIP: chemicals is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["chemicals"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -926,7 +1021,9 @@ class TestSubjectKeywordsBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid subject_keywords value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_base_validation__null_allowed__2890d6af(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -934,7 +1031,7 @@ class TestSubjectKeywordsBaseValidation:
         """SKIP: subject_keywords is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["subject_keywords"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -943,7 +1040,9 @@ class TestDatabanksBaseValidation:
 
     def test_databanks_valid(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
         """PASS: valid databanks value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_databanks_null_allowed(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -951,7 +1050,7 @@ class TestDatabanksBaseValidation:
         """SKIP: databanks is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["databanks"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -962,7 +1061,9 @@ class TestGeneSymbolsBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid gene_symbols value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_gene_symbols_null_allowed(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -970,7 +1071,7 @@ class TestGeneSymbolsBaseValidation:
         """SKIP: gene_symbols is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["gene_symbols"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -981,7 +1082,9 @@ class TestPublicationTypesBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid publication_types value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_publication_types_null_allowed(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -989,7 +1092,7 @@ class TestPublicationTypesBaseValidation:
         """SKIP: publication_types is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["publication_types"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)
 
 
 @pytest.mark.unit
@@ -1000,7 +1103,9 @@ class TestAuthorsWithAffiliationsBaseValidation:
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
         """PASS: valid authors_with_affiliations value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
+        assert_schema_validates_frame(
+            PubMedPublicationSchema, minimal_pubmed_publication_df
+        )
 
     def test_authors_with_affiliations_null_allowed(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -1008,4 +1113,4 @@ class TestAuthorsWithAffiliationsBaseValidation:
         """SKIP: authors_with_affiliations is nullable."""
         df = minimal_pubmed_publication_df.copy()
         df["authors_with_affiliations"] = None
-        PubMedPublicationSchema.validate(df)
+        assert_schema_validates_frame(PubMedPublicationSchema, df)

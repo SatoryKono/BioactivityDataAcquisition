@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-import tempfile
+from tests.helpers.synthetic_paths import synthetic_test_root
 from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -19,7 +19,7 @@ from bioetl.infrastructure.adapters.cached_bronze_data_source import (
     CachedBronzeDataSource,
 )
 
-TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-cached-bronze-data-source-"))
+TEST_ROOT = synthetic_test_root("bioetl-cached-bronze-data-source")
 BRONZE_ROOT = TEST_ROOT / "bronze"
 BRONZE_ACTIVITY_ROOT = BRONZE_ROOT / "chembl" / "activity"
 

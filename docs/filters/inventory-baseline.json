@@ -1434,7 +1434,7 @@
       "symbol": "--silver-filter-only",
       "path": "docs/03-guides/dashboards/monitoring-index.md",
       "occurrence_count": 2,
-      "first_line": 32,
+      "first_line": 33,
       "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
       "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
       "notes": ""

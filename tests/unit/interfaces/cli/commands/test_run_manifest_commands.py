@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import inspect
-import tempfile
+from tests.helpers.synthetic_paths import synthetic_test_root
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -31,7 +31,7 @@ from bioetl.interfaces.cli.main import cli
 _SNAPSHOT_IDENTITY_FINGERPRINT = (
     "f29f1a5c18e94a4fe614b59ae8e68c5c65afd078155b95d1e7c4aa32f6291dcd"
 )
-TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-run-manifest-cli-"))
+TEST_ROOT = synthetic_test_root("bioetl-run-manifest-cli")
 BRONZE_BATCH_URI = (TEST_ROOT / "bronze" / "batch_1.jsonl.zst").as_uri()
 GOLD_ARTIFACT_PATH = str(TEST_ROOT / "output" / "gold" / "chembl" / "activity")
 GOLD_METADATA_PATH = str(Path(GOLD_ARTIFACT_PATH) / "_metadata.yaml")

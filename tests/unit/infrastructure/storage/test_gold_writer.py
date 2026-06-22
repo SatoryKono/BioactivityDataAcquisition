@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-import tempfile
+from tests.helpers.synthetic_paths import synthetic_test_root
 from datetime import UTC, datetime
 from functools import cache
-from pathlib import Path
 from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock, patch
 from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
@@ -34,7 +33,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.storage.gold_writer import GoldWriter
 
 
-TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-gold-writer-"))
+TEST_ROOT = synthetic_test_root("bioetl-gold-writer")
 GOLD_ROOT = str(TEST_ROOT / "gold")
 
 

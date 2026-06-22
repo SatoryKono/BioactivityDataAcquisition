@@ -16,7 +16,7 @@ from bioetl.composition.runtime_builders.runner_builder import (
     build_pipeline_runner as _build_pipeline_runner,
 )
 from bioetl.infrastructure.compat.pandera_compat import (
-    apply_pandera_typing_compat_if_needed,
+    validate_supported_pandera_runtime,
 )
 
 if TYPE_CHECKING:
@@ -33,8 +33,8 @@ __all__ = [
 
 
 def apply_runtime_compatibility_patches() -> bool:
-    """Apply the idempotent third-party Pandera runtime patch."""
-    return apply_pandera_typing_compat_if_needed()
+    """Run the retained bootstrap seam as a validation-only runtime gate."""
+    return validate_supported_pandera_runtime()
 
 
 def build_runtime_bootstrap_phases(

@@ -156,8 +156,9 @@ def _iter_structured_blocks(
 
 def _build_duplication_audit() -> dict[str, Any]:
     clusters: dict[str, dict[str, Any]] = {}
+    surface_files = _iter_duplication_surface_files()
 
-    for path in _iter_duplication_surface_files():
+    for path in surface_files:
         payload = _load_structured_config(path)
         if not isinstance(payload, dict):
             continue
@@ -189,10 +190,15 @@ def _build_duplication_audit() -> dict[str, Any]:
     affected_files: set[str] = set()
     for cluster in clusters.values():
         occurrences = cluster["occurrences"]
+        unique_paths = {entry["path"] for entry in occurrences}
         unique_locations = {
             (entry["path"], entry["block_path"]) for entry in occurrences
         }
         if len(unique_locations) < 2:
+            continue
+        if cluster["block_path"].startswith("contracts.hash_") and len(unique_paths) == 1:
+            # Ignore same-file contract/hash_policy mirrors; the audit tracks
+            # reviewable config-surface duplication, not intentional hash aliases.
             continue
         by_kind = Counter(entry["surface_kind"] for entry in occurrences)
         affected_files.update(entry["path"] for entry in occurrences)
@@ -229,7 +235,7 @@ def _build_duplication_audit() -> dict[str, Any]:
         "scope": {
             "root": DUPLICATION_SURFACE_ROOT.relative_to(ROOT).as_posix(),
             "file_suffixes": list(DUPLICATION_FILE_SUFFIXES),
-            "files_scanned": len(_iter_duplication_surface_files()),
+            "files_scanned": len(surface_files),
             "ignored_by_jscpd_patterns": list(JSCPD_IGNORED_PATTERNS),
             "structured_block_min_bytes": MIN_DUPLICATE_BLOCK_BYTES,
             "max_traversal_depth": MAX_DUPLICATION_BLOCK_DEPTH,

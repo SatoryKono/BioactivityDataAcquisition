@@ -259,9 +259,56 @@ contracts:
   - entity_id
   merge_keys:
   - entity_id
-  hash_include: []
-  hash_exclude: []
+  hash_include:
+  - target_id
+  - classification_status
+  - component_id
+  - leaf_id
+  - path_ids
+  - path_names
+  - path_labels
+  - depth
+  - root_id
+  - is_leaf
+  - l1_id
+  - l1_name
+  - l1_desc
+  - l2_id
+  - l2_name
+  - l2_desc
+  - l3_id
+  - l3_name
+  - l3_desc
+  - l4_id
+  - l4_name
+  - l4_desc
+  - l5_id
+  - l5_name
+  - l5_desc
+  - canonical_l1
+  - l1_counts_for_target_type
+  - l1_mapping_version
+  - target_type_rule_version
+  - l1_normalization_status
+  - l1_normalization_notes
+  hash_exclude:
+  - _ingestion_ts
+  - _run_id
+  - _run_type
+  - _dq_warn
+  - _dq_error
+  - _source_batch_id
+  - _index
   hash_datetime_policy: v2_datetime_utc
+  contract_ref: chembl.target_protein_classification
+  active_version: 2.2.0
+  rollout:
+    mode: single
+    read_order:
+    - 2.2.0
+    write_versions:
+    - 2.2.0
+    affects_hash: false
 hash_policy:
   provider: chembl
   entity: target_protein_classification

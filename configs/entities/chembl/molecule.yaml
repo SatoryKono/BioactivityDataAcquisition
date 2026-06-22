@@ -420,9 +420,77 @@ contracts:
   - molecule_id
   merge_keys:
   - molecule_id
-  hash_include: []
-  hash_exclude: []
+  hash_include:
+  - molecule_id
+  - pref_name
+  - max_phase
+  - structure_type
+  - molecule_type
+  - first_approval
+  - therapeutic_flag
+  - oral
+  - parenteral
+  - topical
+  - black_box_warning
+  - natural_product
+  - first_in_class
+  - prodrug
+  - inorganic_flag
+  - polymer_flag
+  - withdrawn_flag
+  - chirality
+  - dosed_ingredient
+  - availability_type
+  - usan_year
+  - usan_stem
+  - usan_substem
+  - usan_stem_definition
+  - helm_notation
+  - molecule_species
+  - hierarchy_parent_chembl_id
+  - hierarchy_active_chembl_id
+  - hierarchy_child_chembl_id
+  - logp
+  - logp_method
+  - mw_freebase
+  - molecular_weight
+  - hba_count
+  - hbd_count
+  - polar_surface_area
+  - rotatable_bond_count
+  - ro5_violation_count
+  - heavy_atom_count
+  - aromatic_ring_count
+  - qed_score
+  - molecular_formula
+  - ro3_pass
+  - canonical_smiles
+  - standard_inchi
+  - inchi_key
+  - molecule_hierarchy
+  - molecule_properties
+  - molecule_structures
+  - molecule_synonyms
+  - cross_references
+  - atc_classifications
+  hash_exclude:
+  - _ingestion_ts
+  - _run_id
+  - _run_type
+  - _dq_warn
+  - _dq_error
+  - _source_batch_id
+  - _index
   hash_datetime_policy: v2_datetime_utc
+  contract_ref: chembl.molecule
+  active_version: 1.0.0
+  rollout:
+    mode: single
+    read_order:
+    - 1.0.0
+    write_versions:
+    - 1.0.0
+    affects_hash: false
 hash_policy:
   provider: chembl
   entity: molecule

@@ -6,8 +6,7 @@ preview, and export execution helpers.
 
 from __future__ import annotations
 
-import tempfile
-from pathlib import Path
+from tests.helpers.synthetic_paths import synthetic_test_root
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -28,7 +27,7 @@ from bioetl.interfaces.cli.commands.export_support import (
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
 
-TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-export-support-"))
+TEST_ROOT = synthetic_test_root("bioetl-export-support")
 DELTA_TABLE_PATH = TEST_ROOT / "delta" / "silver" / "chembl_activity"
 EXPORT_OUTPUT_PATH = TEST_ROOT / "output.csv"
 

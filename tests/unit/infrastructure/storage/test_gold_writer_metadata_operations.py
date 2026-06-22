@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-import tempfile
+from tests.helpers.synthetic_paths import synthetic_test_root
 from datetime import UTC, datetime
-from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, call
 
@@ -26,7 +25,7 @@ from tests.unit.infrastructure.storage._lineage_fragment_helpers import (
     make_produced_artifact_fragment,
 )
 
-TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-gold-writer-metadata-ops-"))
+TEST_ROOT = synthetic_test_root("bioetl-gold-writer-metadata-ops")
 GOLD_CHEMBL_COMPOUND_PATH = str(TEST_ROOT / "gold" / "chembl_compound")
 GOLD_COMPOSITE_PUBLICATION_PATH = str(TEST_ROOT / "gold" / "composite" / "publication")
 GOLD_MERGED_PATH = str(TEST_ROOT / "gold" / "merged")

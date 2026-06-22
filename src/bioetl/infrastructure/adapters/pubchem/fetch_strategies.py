@@ -255,15 +255,13 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
         self,
         chunk: list[str],
     ) -> AsyncIterator[BronzeRecord]:
-        tasks = [self._fetch_single_inchikey(inchikey) for inchikey in chunk]
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-        for cleaned, result in zip(chunk, results, strict=True):
-            if isinstance(result, self.FETCH_STRATEGY_ERRORS):
-                self._warn_inchikey_fetch_error(cleaned, result)
+        for cleaned in chunk:
+            try:
+                records = await self._fetch_single_inchikey(cleaned)
+            except self.FETCH_STRATEGY_ERRORS as error:
+                self._warn_inchikey_fetch_error(cleaned, error)
                 continue
-            if isinstance(result, BaseException):
-                raise result
-            for record in result:
+            for record in records:
                 yield record
 
     async def fetch_by_inchikey(

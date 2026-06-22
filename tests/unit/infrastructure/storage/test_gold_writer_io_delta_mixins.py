@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-import tempfile
-from pathlib import Path
+from tests.helpers.synthetic_paths import synthetic_test_root
 from unittest.mock import AsyncMock, MagicMock
 
 import pyarrow as pa
@@ -19,7 +18,7 @@ from bioetl.infrastructure.storage.gold.io_delta_mixins import (
 )
 from datetime import UTC
 
-TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-gold-io-delta-"))
+TEST_ROOT = synthetic_test_root("bioetl-gold-io-delta")
 GOLD_TEST_PATH = str(TEST_ROOT / "gold" / "test")
 GOLD_SCD2_PATH = str(TEST_ROOT / "gold" / "scd2")
 

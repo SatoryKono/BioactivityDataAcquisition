@@ -12,6 +12,37 @@ from bioetl.infrastructure.config.contract_policy_loader import (
 )
 
 
+def _explicit_contracts(
+    *,
+    provider: str,
+    entity: str,
+    primary_key: list[str],
+    merge_keys: list[str],
+    hash_include: list[str] | None = None,
+    hash_exclude: list[str] | None = None,
+    extra: dict[str, object] | None = None,
+) -> dict[str, object]:
+    contracts: dict[str, object] = {
+        "primary_key": primary_key,
+        "merge_keys": merge_keys,
+        "contract_ref": f"{provider}.{entity}",
+        "active_version": "1.0.0",
+        "rollout": {
+            "mode": "single",
+            "read_order": ["1.0.0"],
+            "write_versions": ["1.0.0"],
+            "affects_hash": False,
+        },
+    }
+    if hash_include is not None:
+        contracts["hash_include"] = hash_include
+    if hash_exclude is not None:
+        contracts["hash_exclude"] = hash_exclude
+    if extra:
+        contracts.update(extra)
+    return contracts
+
+
 @pytest.mark.unit
 def test_load_contracts_from_unified_entity_with_base_defaults(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
@@ -41,10 +72,12 @@ def test_load_contracts_from_unified_entity_with_base_defaults(
     (entity_dir / "test_entity.yaml").write_text(
         yaml.safe_dump(
             {
-                "contracts": {
-                    "primary_key": ["id"],
-                    "merge_keys": ["id"],
-                }
+                "contracts": _explicit_contracts(
+                    provider="test_provider",
+                    entity="test_entity",
+                    primary_key=["id"],
+                    merge_keys=["id"],
+                )
             },
             sort_keys=False,
         ),
@@ -106,10 +139,12 @@ def test_no_base_defaults_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
     (entity_dir / "test_entity.yaml").write_text(
         yaml.safe_dump(
             {
-                "contracts": {
-                    "primary_key": ["id"],
-                    "merge_keys": ["id"],
-                }
+                "contracts": _explicit_contracts(
+                    provider="test_provider",
+                    entity="test_entity",
+                    primary_key=["id"],
+                    merge_keys=["id"],
+                )
             },
             sort_keys=False,
         ),
@@ -140,10 +175,12 @@ def test_base_defaults_no_contract_defaults_key(
     (entity_dir / "entity2.yaml").write_text(
         yaml.safe_dump(
             {
-                "contracts": {
-                    "primary_key": ["pk"],
-                    "merge_keys": ["pk"],
-                }
+                "contracts": _explicit_contracts(
+                    provider="test_provider",
+                    entity="entity2",
+                    primary_key=["pk"],
+                    merge_keys=["pk"],
+                )
             },
             sort_keys=False,
         ),
@@ -174,10 +211,12 @@ def test_base_defaults_contract_defaults_not_dict(
     (entity_dir / "entity3.yaml").write_text(
         yaml.safe_dump(
             {
-                "contracts": {
-                    "primary_key": ["pk"],
-                    "merge_keys": ["pk"],
-                }
+                "contracts": _explicit_contracts(
+                    provider="test_provider",
+                    entity="entity3",
+                    primary_key=["pk"],
+                    merge_keys=["pk"],
+                )
             },
             sort_keys=False,
         ),
@@ -236,12 +275,14 @@ def test_entity_contract_values_override_base_defaults(
     (entity_dir / "entity5.yaml").write_text(
         yaml.safe_dump(
             {
-                "contracts": {
-                    "primary_key": ["pk"],
-                    "merge_keys": ["pk"],
-                    "rename_map": {"custom": "_custom"},
-                    "hash_exclude": ["_custom_meta"],
-                }
+                "contracts": _explicit_contracts(
+                    provider="test_provider",
+                    entity="entity5",
+                    primary_key=["pk"],
+                    merge_keys=["pk"],
+                    hash_exclude=["_custom_meta"],
+                    extra={"rename_map": {"custom": "_custom"}},
+                )
             },
             sort_keys=False,
         ),
@@ -255,10 +296,10 @@ def test_entity_contract_values_override_base_defaults(
 
 
 @pytest.mark.unit
-def test_root_hash_policy_requires_empty_contract_hash_shims(
+def test_loader_does_not_backfill_hash_selectors_from_root_hash_policy(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Root hash_policy must be the only non-empty entity-level hash selector."""
+    """contracts hash selectors must stay self-contained when root hash_policy exists."""
     load_pipeline_contract_policy.cache_clear()
     monkeypatch.chdir(tmp_path)
 
@@ -267,17 +308,20 @@ def test_root_hash_policy_requires_empty_contract_hash_shims(
     (entity_dir / "activity.yaml").write_text(
         yaml.safe_dump(
             {
-                "contracts": {
-                    "primary_key": ["activity_id"],
-                    "merge_keys": ["activity_id"],
-                    "hash_include": ["activity_id"],
-                },
+                "contracts": _explicit_contracts(
+                    provider="chembl",
+                    entity="activity",
+                    primary_key=["activity_id"],
+                    merge_keys=["activity_id"],
+                    hash_include=[],
+                    hash_exclude=[],
+                ),
                 "hash_policy": {
                     "provider": "chembl",
                     "entity": "activity",
                     "contract": {
                         "version": "1.0.0",
-                        "migration_note": "Promote root hash_policy to authority.",
+                        "migration_note": "Root hash_policy stays informational here.",
                     },
                     "hash_policy": {
                         "algorithm": "sha256",
@@ -285,7 +329,7 @@ def test_root_hash_policy_requires_empty_contract_hash_shims(
                             "provider + canonical_json_dumps(normalized_record)"
                         ),
                         "include_fields": ["activity_id"],
-                        "exclude_fields": [],
+                        "exclude_fields": ["_ingestion_ts"],
                         "normalization": {
                             "trim_strings": True,
                             "round_floats": {"enabled": True, "precision": 10},
@@ -303,15 +347,17 @@ def test_root_hash_policy_requires_empty_contract_hash_shims(
         encoding="utf-8",
     )
 
-    with pytest.raises(ValueError, match=r"contracts.hash_include must be empty"):
-        load_pipeline_contract_policy("chembl", "activity")
+    policy = load_pipeline_contract_policy("chembl", "activity")
+
+    assert policy.hash_include == []
+    assert policy.hash_exclude == []
 
 
 @pytest.mark.unit
-def test_rollout_defaults_and_registry_alignment(
+def test_explicit_rollout_and_registry_alignment(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Loader should hydrate rollout defaults and validate supported versions."""
+    """Loader should validate explicitly configured rollout metadata."""
     load_pipeline_contract_policy.cache_clear()
     monkeypatch.chdir(tmp_path)
 
@@ -338,18 +384,22 @@ def test_rollout_defaults_and_registry_alignment(
     (entity_dir / "entity6.yaml").write_text(
         yaml.safe_dump(
             {
-                "contracts": {
-                    "primary_key": ["pk"],
-                    "merge_keys": ["pk"],
-                    "contract_ref": "test_provider.entity6",
-                    "active_version": "2.0.0",
-                    "rollout": {
-                        "mode": "dual_read_write",
-                        "read_order": ["2.0.0", "1.0.0"],
-                        "write_versions": ["1.0.0", "2.0.0"],
-                        "affects_hash": True,
+                "contracts": _explicit_contracts(
+                    provider="test_provider",
+                    entity="entity6",
+                    primary_key=["pk"],
+                    merge_keys=["pk"],
+                    extra={
+                        "contract_ref": "test_provider.entity6",
+                        "active_version": "2.0.0",
+                        "rollout": {
+                            "mode": "dual_read_write",
+                            "read_order": ["2.0.0", "1.0.0"],
+                            "write_versions": ["1.0.0", "2.0.0"],
+                            "affects_hash": True,
+                        },
                     },
-                }
+                )
             },
             sort_keys=False,
         ),

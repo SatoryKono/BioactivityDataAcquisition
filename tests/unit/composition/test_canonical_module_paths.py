@@ -147,7 +147,7 @@ def test_health_api_reexports_canonical_health_services() -> None:
 
 
 def test_maintenance_api_reexports_canonical_maintenance_services() -> None:
-    """Maintenance API should expose the canonical maintenance service seams."""
+    """Maintenance API should keep thin compatibility wrappers over owner seams."""
     from bioetl.composition.maintenance_api import (
         get_lifecycle_service as canonical_get_lifecycle_service,
         get_bronze_cleanup_service as canonical_get_bronze_cleanup_service,
@@ -158,7 +158,30 @@ def test_maintenance_api_reexports_canonical_maintenance_services() -> None:
         get_bronze_cleanup_service,
         get_vacuum_service,
     )
-    from bioetl.composition.resources_api import (
+    from bioetl.composition._resource_management import (
+        get_lifecycle_service,
+        preview_cleanup,
+    )
+
+    assert canonical_get_lifecycle_service is not get_lifecycle_service
+    assert canonical_get_bronze_cleanup_service is get_bronze_cleanup_service
+    assert canonical_preview_cleanup is not preview_cleanup
+    assert canonical_get_vacuum_service is get_vacuum_service
+
+
+def test_maintenance_service_access_routes_to_canonical_owner_seams() -> None:
+    """First-party maintenance access should bypass the retained public facade."""
+    from bioetl.composition.maintenance_service_access import (
+        get_bronze_cleanup_service as canonical_get_bronze_cleanup_service,
+        get_lifecycle_service as canonical_get_lifecycle_service,
+        get_vacuum_service as canonical_get_vacuum_service,
+        preview_cleanup as canonical_preview_cleanup,
+    )
+    from bioetl.composition._services import (
+        get_bronze_cleanup_service,
+        get_vacuum_service,
+    )
+    from bioetl.composition._resource_management import (
         get_lifecycle_service,
         preview_cleanup,
     )

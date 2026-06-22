@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 from pathlib import Path
 from typing import Any, cast
 
@@ -34,6 +35,15 @@ def _iter_helper_targets(payload: YamlMap) -> list[YamlMap]:
         if isinstance(entries, list):
             targets.extend(entry for entry in entries if isinstance(entry, dict))
     return targets
+
+
+def _call_name(node: ast.Call) -> str | None:
+    func = node.func
+    if isinstance(func, ast.Name):
+        return func.id
+    if isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name):
+        return f"{func.value.id}.{func.attr}"
+    return None
 
 
 @pytest.mark.architecture
@@ -88,3 +98,29 @@ def test_curated_helper_contract_targets_use_shared_hardening_helpers() -> None:
                 f"{relative_path} must not contain forbidden hardening token "
                 f"{forbidden!r}"
             )
+
+
+@pytest.mark.architecture
+def test_unit_tests_do_not_create_temp_roots_at_import_time() -> None:
+    """Unit modules must use pytest-managed tmp fixtures, not import-time mkdtemp."""
+    violations: list[str] = []
+    for test_file in sorted((ROOT / "tests" / "unit").rglob("test_*.py")):
+        tree = ast.parse(test_file.read_text(encoding="utf-8"))
+        for node in tree.body:
+            value: ast.AST | None = None
+            if isinstance(node, ast.Assign):
+                value = node.value
+            elif isinstance(node, ast.AnnAssign):
+                value = node.value
+            if value is None:
+                continue
+
+            for call in ast.walk(value):
+                if not isinstance(call, ast.Call):
+                    continue
+                if _call_name(call) == "tempfile.mkdtemp":
+                    violations.append(
+                        f"{test_file.relative_to(ROOT).as_posix()}:{call.lineno}"
+                    )
+
+    assert violations == []
