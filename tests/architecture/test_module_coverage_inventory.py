@@ -412,7 +412,7 @@ def test_module_coverage_tail_targets_are_ranked_and_owner_anchored() -> None:
     assert [target["rank"] for target in targets] == list(range(1, len(targets) + 1))
     first_slice = targets[0]
     assert first_slice["path"] == "src/bioetl/infrastructure/observability/tracing.py"
-    assert first_slice["status"] == "first_slice_in_progress"
+    assert first_slice["status"] == "focused_owner_tests_added"
     assert first_slice["owner_tests"] == [
         "tests/unit/infrastructure/observability/test_tracing.py"
     ]

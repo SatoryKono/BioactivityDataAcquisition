@@ -32,6 +32,12 @@ TWIN_RATCHET = ROOT / "configs" / "quality" / "compatibility_twin_module_ratchet
 CONFIG_ROOT_FACADE = (
     ROOT / "configs" / "quality" / "infrastructure_config_root_facade_inventory.yaml"
 )
+CONTROL_PLANE_ROOT_FACADE = (
+    ROOT
+    / "configs"
+    / "quality"
+    / "application_control_plane_root_facade_inventory.yaml"
+)
 REMOVED_COMPATIBILITY_MODULES = {
     "bioetl.application.services.control_plane.historical_replay_certification_service",
     "bioetl.application.services.control_plane.historical_replay_closure_models",
@@ -320,6 +326,24 @@ def test_infrastructure_config_root_facade_inventory_matches_live_src_importers(
 
 
 @pytest.mark.architecture
+def test_application_control_plane_root_facade_stays_zero_first_party_src() -> None:
+    """The control-plane package root must stay external-only for first-party code."""
+    inventory = _load_yaml(CONTROL_PLANE_ROOT_FACADE)
+    assert inventory.get("linked_issue") == "#5510"
+    assert inventory.get("new_src_import_policy") == (
+        "external_only_zero_first_party_growth"
+    )
+    target_module = inventory.get("target_module")
+    assert isinstance(target_module, str)
+
+    usage = collect_exact_module_import_usage(ROOT, target_module)
+    assert usage["src"] == {}, (
+        "New first-party imports of the control-plane package root were detected: "
+        f"{sorted(usage['src'])}"
+    )
+
+
+@pytest.mark.architecture
 def test_removed_compatibility_surfaces_remain_absent_and_unimported() -> None:
     """Removed compatibility surfaces must stay absent from src and static imports."""
     payload = build_compatibility_importer_census(ROOT, snapshot_date="2026-05-21")
@@ -387,6 +411,7 @@ def test_retained_entrypoint_owner_usage_map_is_published() -> None:
     assert maintenance_api["surface_classification"] == "external-facing"
     assert maintenance_api["src_importer_count"] == 0
     assert maintenance_api["test_importer_count"] == 1
+    assert payload["summary"]["control_plane_root_src_importer_count"] == 0
 
 
 @pytest.mark.architecture

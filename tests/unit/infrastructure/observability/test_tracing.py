@@ -273,6 +273,74 @@ class TestTelemetryExporterSelection:
             insecure=False,
         )
 
+    def test_parse_bool_env_rejects_falsey_values(self) -> None:
+        """Only conventional truthy values should evaluate to True."""
+        from bioetl.infrastructure.observability import tracing
+
+        assert tracing._parse_bool_env("false") is False
+        assert tracing._parse_bool_env("0") is False
+        assert tracing._parse_bool_env("off") is False
+
+    def test_get_otlp_endpoint_returns_none_when_env_is_unset(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """OTLP endpoint helper should return None without configured env vars."""
+        from bioetl.infrastructure.observability import tracing
+
+        monkeypatch.delenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", raising=False)
+        monkeypatch.delenv("OTEL_EXPORTER_OTLP_ENDPOINT", raising=False)
+
+        assert tracing._get_otlp_endpoint() is None
+
+    def test_explicit_insecure_override_without_endpoint_is_honored(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Explicit insecure mode should be forwarded even without an endpoint."""
+        from bioetl.infrastructure.observability import tracing
+
+        exporter_factory = MagicMock(return_value=object())
+        monkeypatch.setattr(tracing, "OTLP_AVAILABLE", True)
+        monkeypatch.setattr(tracing, "_OtlpExporterClass", exporter_factory)
+        monkeypatch.delenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", raising=False)
+        monkeypatch.delenv("OTEL_EXPORTER_OTLP_ENDPOINT", raising=False)
+        monkeypatch.setenv("OTEL_EXPORTER_OTLP_TRACES_INSECURE", "true")
+
+        tracing._build_telemetry_exporter()
+
+        exporter_factory.assert_called_once_with(insecure=True)
+
+
+class TestOpenTelemetryTracerErrorPaths:
+    """Tests for best-effort tracing cleanup/error swallowing paths."""
+
+    def test_flush_swallows_provider_errors(self) -> None:
+        """flush() must not raise when provider force-flush fails."""
+        from bioetl.infrastructure.observability import tracing
+
+        tracer = object.__new__(tracing.OpenTelemetryTracer)
+        tracer._closed = False
+        tracer._provider = MagicMock()
+        tracer._provider.force_flush.side_effect = RuntimeError("boom")
+
+        tracer.flush()
+
+    def test_close_marks_tracer_closed_when_shutdown_fails(self) -> None:
+        """close() should remain idempotent even if provider shutdown fails."""
+        from bioetl.infrastructure.observability import tracing
+
+        tracer = object.__new__(tracing.OpenTelemetryTracer)
+        tracer._closed = False
+        tracer._provider = MagicMock()
+        tracer.flush = MagicMock()
+        tracer._provider.shutdown.side_effect = OSError("boom")
+
+        tracer.close()
+
+        assert tracer._closed is True
+        tracer.flush.assert_called_once_with()
+
     def test_insecure_override_without_endpoint_is_forwarded(
         self,
         monkeypatch: pytest.MonkeyPatch,

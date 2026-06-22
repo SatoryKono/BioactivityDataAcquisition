@@ -3,7 +3,7 @@ linked_issue: '#5161'
 enforcement:
   # Phase B (current): block coverage regressions vs committed inventory; tier gaps warn only.
   default_mode: block-regression
-  tier_violation_mode: warn
+  tier_violation_mode: block
   ranked_target_tier_violation_mode: block
 branch_coverage:
   # Branch measurement is enabled in pyproject.toml, but hard enforcement stays
@@ -25,7 +25,7 @@ coverage_tail:
       target_test_type: focused_unit_branch_error_paths
       owner_tests:
         - tests/unit/infrastructure/observability/test_tracing.py
-      status: first_slice_in_progress
+      status: focused_owner_tests_added
     - rank: 2
       path: src/bioetl/infrastructure/storage/metadata/builder_base.py
       risk: storage_metadata_builder_branching

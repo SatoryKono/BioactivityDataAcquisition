@@ -35,6 +35,12 @@ DEFAULT_CONFIG_FACADE_RATCHET = (
     / "quality"
     / "infrastructure_config_root_facade_inventory.yaml"
 )
+DEFAULT_CONTROL_PLANE_ROOT_FACADE = (
+    PROJECT_ROOT
+    / "configs"
+    / "quality"
+    / "application_control_plane_root_facade_inventory.yaml"
+)
 REMOVED_COMPATIBILITY_SURFACES: tuple[dict[str, str], ...] = (
     {
         "issue_id": "4541",
@@ -302,6 +308,12 @@ def _load_config_root_facade_inventory(path: Path) -> dict[str, Any]:
     return payload
 
 
+def _load_root_facade_inventory(path: Path) -> dict[str, Any]:
+    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    assert isinstance(payload, dict)
+    return payload
+
+
 def _usage_classification(row: dict[str, Any]) -> str:
     external_breaking_change_required = bool(
         row.get("external_breaking_change_required")
@@ -529,9 +541,19 @@ def build_compatibility_importer_census(
     config_root_facade_inventory = _load_config_root_facade_inventory(
         config_root_facade_path
     )
+    control_plane_root_facade_path = _resolve_inventory_path(
+        repo_root, DEFAULT_CONTROL_PLANE_ROOT_FACADE
+    )
+    control_plane_root_facade_inventory = _load_root_facade_inventory(
+        control_plane_root_facade_path
+    )
     config_root_usage = collect_exact_module_import_usage(
         repo_root,
         str(config_root_facade_inventory["target_module"]),
+    )
+    control_plane_root_usage = collect_exact_module_import_usage(
+        repo_root,
+        str(control_plane_root_facade_inventory["target_module"]),
     )
     removed_surface_rows: list[dict[str, object]] = []
     for row in REMOVED_COMPATIBILITY_SURFACES:
@@ -692,6 +714,10 @@ def build_compatibility_importer_census(
             config_root_facade_path,
             repo_root,
         ),
+        "control_plane_root_facade_source": _repo_relative_posix(
+            control_plane_root_facade_path,
+            repo_root,
+        ),
         "summary": {
             "retained_entrypoint_count": len(retained_rows),
             "removed_compatibility_surface_count": len(removed_surface_rows),
@@ -714,6 +740,7 @@ def build_compatibility_importer_census(
             "tracked_twin_family_count": len(tracked_twin_rows),
             "config_root_symbol_count": len(config_symbol_rows),
             "config_root_src_importer_count": len(config_src_usage),
+            "control_plane_root_src_importer_count": len(control_plane_root_usage["src"]),
             "retained_public_export_facade_count": len(retained_public_export_rows),
             "retained_public_export_facades_with_duplicate_exports": sum(
                 1
@@ -742,6 +769,15 @@ def build_compatibility_importer_census(
                 "new_src_import_policy"
             ],
             "symbols": config_symbol_rows,
+        },
+        "control_plane_root_facade": {
+            "target_module": control_plane_root_facade_inventory["target_module"],
+            "new_src_import_policy": control_plane_root_facade_inventory[
+                "new_src_import_policy"
+            ],
+            "owner": control_plane_root_facade_inventory.get("owner"),
+            "src_importers": sorted(control_plane_root_usage["src"]),
+            "src_importer_count": len(control_plane_root_usage["src"]),
         },
     }
 
@@ -779,6 +815,8 @@ def _render_markdown(payload: dict[str, object]) -> str:
         f"- tracked_twin_family_count: {summary['tracked_twin_family_count']}",
         f"- config_root_symbol_count: {summary['config_root_symbol_count']}",
         f"- config_root_src_importer_count: {summary['config_root_src_importer_count']}",
+        "- control_plane_root_src_importer_count: "
+        f"{summary['control_plane_root_src_importer_count']}",
         f"- retained_public_export_facade_count: {summary['retained_public_export_facade_count']}",
         "- retained_public_export_facades_with_duplicate_exports: "
         f"{summary['retained_public_export_facades_with_duplicate_exports']}",
@@ -968,6 +1006,20 @@ def _render_markdown(payload: dict[str, object]) -> str:
             f"| `{row['symbol']}` | {row['current_src_importer_count']} | "
             f"{row['max_src_importers']} | `{row['canonical_target']}` |"
         )
+    control_plane_root_facade = payload["control_plane_root_facade"]
+    assert isinstance(control_plane_root_facade, dict)
+    lines.extend(
+        [
+            "",
+            "## Application Control-Plane Root Facade",
+            "",
+            f"- inventory_source: `{payload['control_plane_root_facade_source']}`",
+            f"- target_module: `{control_plane_root_facade['target_module']}`",
+            "- new_src_import_policy: "
+            f"`{control_plane_root_facade['new_src_import_policy']}`",
+            f"- src_importer_count: {control_plane_root_facade['src_importer_count']}",
+        ]
+    )
     lines.append("")
     return "\n".join(lines)
 
