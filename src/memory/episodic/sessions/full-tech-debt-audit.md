@@ -1,22 +1,22 @@
 ---
 id: full-tech-debt-audit
-title: Full technical debt and debt governance audit
+title: Full BioETL technical debt audit
 task_id: full-tech-debt-audit
-created_at: '2026-05-24T12:15:24Z'
+created_at: '2026-06-22T09:02:56Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - AGENTS.md
 summary: Active task session context.
-query: technical debt governance compatibility determinism contracts observability
+query: technical debt scorecard compatibility facade architecture governance determinism
 ---
 
 # Session note
 
 ## Task
 
-- Title: Full technical debt and debt governance audit
-- Retrieval query: technical debt governance compatibility determinism contracts observability
+- Title: Full BioETL technical debt audit
+- Retrieval query: technical debt scorecard compatibility facade architecture governance determinism
 
 ## Retrieved context
 

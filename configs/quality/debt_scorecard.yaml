@@ -497,18 +497,18 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 180
-      total_loc: 22211
-      files_ge_250_loc: 6
-      helper_function_ratio: 0.35
+      total_loc: 22333
+      files_ge_250_loc: 7
+      helper_function_ratio: 0.355
       max_internal_fan_in: 11
       max_internal_fan_in_module: bioetl.application.core.batch_operation_errors
     trend:
-      status: confirmed_2026-06-18_application_core_ratchet_sync
-      next_action: 2026-06-18 confirms application_core against the tracked
-        reviewed baseline artifact and live family census at 180 files, 22186
-        LOC, helper_function_ratio 0.351, and max_internal_fan_in 11 while
-        bounded-growth budgets remain unchanged at 13 files_ge_250_loc and
-        max_internal_fan_in 14.
+      status: confirmed_2026-06-22_application_core_ratchet_sync
+      next_action: 2026-06-22 confirms application_core against the tracked
+        reviewed baseline artifact and live family census at 180 files, 22333
+        LOC, 7 files_ge_250_loc, helper_function_ratio 0.355, and
+        max_internal_fan_in 11 while bounded-growth budgets remain unchanged
+        at 13 files_ge_250_loc and max_internal_fan_in 14.
   - name: composition_bootstrap_runtime
     owner: '@bioetl-platform'
     linked_rf: RF-023

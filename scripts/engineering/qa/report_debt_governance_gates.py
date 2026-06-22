@@ -7,6 +7,7 @@ import argparse
 import json
 import subprocess
 import sys
+from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -152,6 +153,26 @@ def _artifact_matches(
     except FileNotFoundError:
         return False
     return committed == live_payload
+
+
+def _artifact_matches_builder(
+    *,
+    repo_root: Path,
+    rel_path: str,
+    payload_builder: Callable[[], dict[str, object]],
+) -> bool:
+    """Return False when a live artifact builder cannot be evaluated locally."""
+    try:
+        live_payload = payload_builder()
+    except Exception:
+        return False
+    if not isinstance(live_payload, dict):
+        return False
+    return _artifact_matches(
+        repo_root=repo_root,
+        rel_path=rel_path,
+        live_payload=live_payload,
+    )
 
 
 def _parse_generated_at(value: object) -> datetime | None:
@@ -724,22 +745,24 @@ def build_payload(
 
     stale_artifacts = {
         "module_coverage_inventory": module_coverage_hash_gate.status != "pass",
-        "architecture_quality_scorecard": not _artifact_matches(
+        "architecture_quality_scorecard": not _artifact_matches_builder(
             repo_root=repo_root,
             rel_path="reports/quality/architecture-quality-scorecard.json",
-            live_payload=build_architecture_quality_scorecard(repo_root=repo_root),
-        ),
-        "adr_enforcement_matrix": not _artifact_matches(
-            repo_root=repo_root,
-            rel_path="reports/quality/adr-enforcement-matrix.json",
-            live_payload=report_adr_enforcement_matrix.build_payload(
+            payload_builder=lambda: build_architecture_quality_scorecard(
                 repo_root=repo_root
             ),
         ),
-        "remote_main_baseline": not _artifact_matches(
+        "adr_enforcement_matrix": not _artifact_matches_builder(
+            repo_root=repo_root,
+            rel_path="reports/quality/adr-enforcement-matrix.json",
+            payload_builder=lambda: report_adr_enforcement_matrix.build_payload(
+                repo_root=repo_root
+            ),
+        ),
+        "remote_main_baseline": not _artifact_matches_builder(
             repo_root=repo_root,
             rel_path="reports/quality/architecture-debt-remote-main-baseline.json",
-            live_payload=report_architecture_debt_remote_main_baseline.build_payload(
+            payload_builder=lambda: report_architecture_debt_remote_main_baseline.build_payload(
                 repo_root=repo_root,
             ),
         ),

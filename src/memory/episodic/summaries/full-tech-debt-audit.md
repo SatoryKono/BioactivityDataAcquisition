@@ -1,31 +1,29 @@
 ---
 id: full-tech-debt-audit
-title: Full technical debt and debt governance audit
+title: Full BioETL technical debt audit
 task_id: full-tech-debt-audit
-created_at: '2026-05-24T12:25:25Z'
+created_at: '2026-06-22T09:11:14Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - AGENTS.md
-summary: Audited BioETL technical debt governance, compatibility facades, duplication
-  hotspots, determinism policies, config/contract compatibility, test enforcement
-  gaps, and observability governance. Confirmed zero explicit transition-debt budget
-  but significant retained public facades, legacy tuple/bootstrap compatibility, duplication
-  concentrated in control-plane/runtime builders, documented replay/hash compatibility
-  aliases, selective golden-master coverage, three remaining architecture skipif tests,
-  and heuristic-only cardinality review. Validated a focused architecture test slice
-  passed.
+summary: 'Audited committed main for BioETL technical debt governance. Primary remaining
+  debt is controlled structural debt: 12 retained compatibility entrypoints, 4 public
+  export facades, 109 duplication clusters, hotspot concentration in control-plane/application-core/runtime
+  builders, and 104 modules below 85 percent coverage. Governance is mature: zero
+  layer violations, zero uncovered/unmeasured modules, zero config-contract drift,
+  zero DQ blocking issues, zero active exemptions.'
 ---
 
 # Episodic summary
 
 ## Task
 
-- Title: Full technical debt and debt governance audit
+- Title: Full BioETL technical debt audit
 
 ## Outcome
 
-- Audited BioETL technical debt governance, compatibility facades, duplication hotspots, determinism policies, config/contract compatibility, test enforcement gaps, and observability governance. Confirmed zero explicit transition-debt budget but significant retained public facades, legacy tuple/bootstrap compatibility, duplication concentrated in control-plane/runtime builders, documented replay/hash compatibility aliases, selective golden-master coverage, three remaining architecture skipif tests, and heuristic-only cardinality review. Validated a focused architecture test slice passed.
+- Audited committed main for BioETL technical debt governance. Primary remaining debt is controlled structural debt: 12 retained compatibility entrypoints, 4 public export facades, 109 duplication clusters, hotspot concentration in control-plane/application-core/runtime builders, and 104 modules below 85 percent coverage. Governance is mature: zero layer violations, zero uncovered/unmeasured modules, zero config-contract drift, zero DQ blocking issues, zero active exemptions.
 
 ## Lessons learned
 

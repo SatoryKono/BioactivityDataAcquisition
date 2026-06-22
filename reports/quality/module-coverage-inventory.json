@@ -21286,6 +21286,16 @@
       "source_lines": 410
     },
     {
+      "coverage_percent": null,
+      "coverage_status": "no_executable_lines",
+      "covered_lines": 0,
+      "executable_lines": 0,
+      "missing_lines": 0,
+      "module": "bioetl.interfaces.cli.commands.run_manifest_output_support",
+      "path": "src/bioetl/interfaces/cli/commands/run_manifest_output_support.py",
+      "source_lines": 20
+    },
+    {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
       "covered_lines": 48,
@@ -21728,7 +21738,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-06-22",
-  "source_tree_sha256": "297dc2b9c89d41a6d3c0511c2da2c87b0c8430a5df4f6fb3d1c5b080008d32a9",
+  "source_tree_sha256": "169d8f09e85d3954685422ad579f8d4c69b61ef1a3279ed661ab693d69c62a18",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -21979,11 +21989,11 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2172,
+    "source_module_count": 2173,
     "status_counts": {
       "coverage_xml_missing": 0,
       "fully_covered": 1314,
-      "no_executable_lines": 1,
+      "no_executable_lines": 2,
       "partially_covered": 857,
       "uncovered": 0,
       "unmeasured": 0

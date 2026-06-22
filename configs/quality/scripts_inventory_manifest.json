@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-19T17:08:32.921761+00:00",
+  "generated_at": "2026-06-22T10:29:16.251003+00:00",
   "summary": {
     "total_scripts": 439,
     "status_counts": {
@@ -11,7 +11,7 @@
       "agents": 4,
       "build": 2,
       "ci": 62,
-      "docs": 151,
+      "docs": 152,
       "scripts": 338,
       "skills": 11,
       "tests": 179
@@ -6577,7 +6577,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 150,
+          "line": 166,
           "source_group": "docs",
           "text": "`python -m scripts.engineering.dev run-tests`, and"
         },
@@ -7139,25 +7139,25 @@
       "references": [
         {
           "path": "docs/03-guides/testing.md",
-          "line": 101,
+          "line": 117,
           "source_group": "docs",
           "text": "BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 114,
+          "line": 130,
           "source_group": "docs",
           "text": "ignore/deselect inventory for `run_pytest_sharded.sh` lives in"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 723,
+          "line": 739,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/run_pytest_sharded.sh \\"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 815,
+          "line": 831,
           "source_group": "docs",
           "text": "| 6   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing` | В"
         },
@@ -7229,7 +7229,7 @@
       "references": [
         {
           "path": "docs/03-guides/testing.md",
-          "line": 149,
+          "line": 165,
           "source_group": "docs",
           "text": "Developer wrappers such as `scripts/engineering/dev/run_tests.py`,"
         },
@@ -7286,7 +7286,7 @@
       "references": [
         {
           "path": "docs/03-guides/testing.md",
-          "line": 151,
+          "line": 167,
           "source_group": "docs",
           "text": "`scripts/engineering/dev/run_tests.sh` are convenience entry points for local"
         },
@@ -7321,7 +7321,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 28,
+      "reference_count": 29,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -7378,7 +7378,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 27,
+      "reference_count": 28,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -7702,7 +7702,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 234,
+      "reference_count": 236,
       "references": [
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
@@ -9121,8 +9121,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
+        {
+          "path": "docs/02-architecture/current-state-inventory.md",
+          "line": 266,
+          "source_group": "docs",
+          "text": "| Generated artifact drift gate did not include module coverage source-tree hash freshness | `report-module-coverage --check` could fail stale source-tree evidence while `report-debt-governance-gates "
+        },
         {
           "path": "scripts/engineering/qa/README.md",
           "line": 35,
@@ -9275,13 +9281,13 @@
         },
         {
           "path": "tests/architecture/test_module_coverage_inventory.py",
-          "line": 61,
+          "line": 62,
           "source_group": "tests",
           "text": "assert committed[\"generated_by\"].endswith(\"report_module_coverage_inventory.py\")"
         },
         {
           "path": "tests/architecture/test_module_coverage_inventory.py",
-          "line": 371,
+          "line": 432,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_module_coverage_inventory.py\""
         }
@@ -9453,7 +9459,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 292,
+          "line": 308,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadat"
         },
@@ -9552,7 +9558,7 @@
         },
         {
           "path": "tests/architecture/test_test_matrix_lane_policy.py",
-          "line": 259,
+          "line": 274,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/run_architecture_audit_read_only.py\""
         }
@@ -9837,7 +9843,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 756,
+          "line": 772,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-placement`"
         },
@@ -9900,7 +9906,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 757,
+          "line": 773,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-naming`"
         },
@@ -9927,13 +9933,13 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 290,
+          "line": 306,
           "source_group": "docs",
           "text": "- `vcr_cassette_max_age_days: 90` является blocking stale-age threshold: CI теперь валидирует managed metadata inventory через `scripts/engineering/qa/vcr/check_vcr_metadata_age.py --max-age-days 90`"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 762,
+          "line": 778,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90`"
         },
@@ -10529,13 +10535,13 @@
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 46,
+          "line": 45,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py`"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 52,
+          "line": 51,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py` — external breaking change required: `true`, internal callers zero: `false`"
         },
@@ -11573,19 +11579,19 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 146,
+          "line": 150,
           "source_group": "build",
           "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 247,
+          "line": 263,
           "source_group": "docs",
           "text": "`scripts/ops/launchers/codex/setup_plugins.sh --pytest-only` перед запуском pytest."
         },
         {
           "path": "makefile",
-          "line": 146,
+          "line": 150,
           "source_group": "build",
           "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only"
         },
@@ -11786,7 +11792,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 292,
+          "line": 308,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadat"
         },
