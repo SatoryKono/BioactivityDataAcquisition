@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+import subprocess
 
 import pytest
 
@@ -114,6 +115,34 @@ def test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stal
     assert "module_coverage_source_tree_hash_current" in failing_gates
     assert "generated_artifact_drift" in failing_gates
     assert summary["release_gate_status"] == "failing"
+
+
+def test_build_payload_treats_remote_main_baseline_builder_failure_as_stale_artifact(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        gates,
+        "compute_source_tree_sha256",
+        lambda *, repo_root: "live-source-hash",
+    )
+    monkeypatch.setattr(
+        gates.report_architecture_debt_remote_main_baseline,
+        "build_payload",
+        lambda **kwargs: (_ for _ in ()).throw(
+            subprocess.CalledProcessError(
+                returncode=1,
+                cmd=["git", "ls-remote", "origin", "refs/heads/main"],
+            )
+        ),
+    )
+
+    payload = gates.build_payload(repo_root=gates.PROJECT_ROOT)
+    summary = payload["summary"]
+    assert isinstance(summary, dict)
+
+    failing_gates = summary["failing_gates"]
+    assert isinstance(failing_gates, list)
+    assert "generated_artifact_drift" in failing_gates
 
 
 def test_render_markdown_separates_weighted_score_from_release_gate_status() -> None:

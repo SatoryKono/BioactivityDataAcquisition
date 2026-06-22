@@ -6,10 +6,6 @@ import json
 
 import click
 
-from bioetl.interfaces.cli.commands._run_manifest_output_support import (  # noqa: N812
-    append_section,
-    format_scalar,
-)
 from bioetl.interfaces.cli.commands.domains.maintenance.service_access import (
     get_contract_migration_service,
 )
@@ -19,6 +15,10 @@ from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
 )
 from bioetl.interfaces.cli.commands.domains.shared.inspection_output import (
     emit_inspection_payload,
+)
+from bioetl.interfaces.cli.commands.run_manifest_output_support import (
+    append_section,
+    format_scalar,
 )
 
 __all__ = ["get_contract_migration_service", "plan_command"]
