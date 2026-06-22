@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any
 
 import polars as pl
 
-from bioetl.domain.composite.config import DependencyConfig, EnricherConfig
+from bioetl.domain.composite import DependencyConfig, EnricherConfig
 from bioetl.domain.composite.result import (
     DependencyResult,
     DependencyStatus,

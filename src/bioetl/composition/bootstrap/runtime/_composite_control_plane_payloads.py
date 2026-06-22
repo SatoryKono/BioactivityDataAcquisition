@@ -13,7 +13,7 @@ from bioetl.composition.runtime_builders.input_snapshot_resolution import (
 from bioetl.composition.runtime_builders.run_manifest_support import (
     to_serializable_mapping,
 )
-from bioetl.domain.composite.config import CompositeConfig
+from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.control_plane import (
     RunArtifactRef,
     RunInputSnapshotRef,

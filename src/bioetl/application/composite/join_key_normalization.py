@@ -17,7 +17,7 @@ from bioetl.domain.normalization.join_keys import (
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.domain.composite.config import CompositeConfig
+    from bioetl.domain.composite import CompositeConfig
 
 
 def iter_configured_join_keys(config: CompositeConfig) -> Iterable[str]:

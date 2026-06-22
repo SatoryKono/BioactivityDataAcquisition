@@ -3,7 +3,7 @@ policy_scope: infrastructure_config_root_facade
 review_date: "2026-05-29"
 target_module: bioetl.infrastructure.config
 new_src_import_policy: external_only_zero_first_party_growth
-linked_issue: "#4745"
+linked_issue: "#5490"
 symbols:
   - symbol: Settings
     owner: bioetl.infrastructure.config

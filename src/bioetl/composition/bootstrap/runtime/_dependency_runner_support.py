@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.domain.composite.config import DependencyConfig
+    from bioetl.domain.composite import DependencyConfig
 
 
 __all__ = [

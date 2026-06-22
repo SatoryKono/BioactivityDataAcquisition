@@ -42,7 +42,7 @@ from bioetl.application.composite.runner_pkg.runner_merge_stage_types import (
     _PreparedMergeInputs,
 )
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
-from bioetl.domain.composite.config import CompositeConfig
+from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.composite.result import (
     DependencyResult,
     EnrichmentResult,

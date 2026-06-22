@@ -49,7 +49,7 @@ from bioetl.application.composite.runtime_models import (
     CompositeExecutionContext,
     CompositeRuntimeConfig,
 )
-from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
+from bioetl.domain.composite import CompositeConfig, EnricherConfig
 from bioetl.domain.composite.result import CompositeResult, EnrichmentResult, SeedResult
 from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.ports import (

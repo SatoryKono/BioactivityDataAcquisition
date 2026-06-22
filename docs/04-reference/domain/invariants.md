@@ -26,6 +26,13 @@ workflow orchestration, control-plane ownership, and domain/schema boundaries.
 | `PipelineRun` | Runs start from `PENDING`; terminal states block further transitions; success requires stage evidence; failure/shutdown stay explicit. |
 | `QuarantineEntry` | Entry identity and payload evidence are mandatory; resolution transitions are explicit; reprocessing requires replacement identity evidence. |
 
+## Replay-Critical Value Object Invariants
+
+| Surface | Invariants |
+| --- | --- |
+| `RunContext` | `started_at` must be timezone-aware; `pipeline_name`, `provider`, and `entity` cannot be empty; replay/provenance anchors such as `execution_fingerprint`, `required_persistence_profile`, `replay_of_run_id`, `replay_of_manifest_id`, and `input_snapshot_fingerprint` stay explicit fields on the immutable context rather than being inferred from wall-clock state. |
+| `StageResult` | `stage` cannot be empty; `records_processed` cannot be negative; `FAILED` requires `error`; `SUCCESS` and `FAILED` require `completed_at`. |
+
 ## Workflow DAG Invariants
 
 Current source of truth: `src/bioetl/domain/workflow/dag.py`

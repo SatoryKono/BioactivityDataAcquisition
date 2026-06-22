@@ -4,7 +4,7 @@
 # and contract metadata. This file enables drift detection and audibility.
 #
 # Version: 1.0.0
-# Last updated: 2025-06-03
+# Last updated: 2026-06-22
 # Source: grafana/dashboards/*.json
 #
 # Schema:
@@ -30,7 +30,7 @@ dashboards:
     data_sources:
       - Prometheus
       - HTTP (control-plane backend)
-    panel_count: 60
+    panel_count: 55
     key_panels:
       - id: 891
         title: "Monitor: Replay Safety State"
@@ -49,7 +49,9 @@ dashboards:
         type: stat
         description: "Shared shell panel for Bronze/Silver/Gold accounting"
     selector_variables:
+      - workflow
       - pipeline
+      - run_id
       - run_type
 
   - uid: bioetl-overview-v2
@@ -59,7 +61,7 @@ dashboards:
     data_sources:
       - Prometheus
       - HTTP (control-plane backend)
-    panel_count: 50
+    panel_count: 25
     key_panels:
       - id: 214
         title: "Status"
@@ -74,9 +76,10 @@ dashboards:
         type: text
         description: "Primary navigation bus (0-5)"
     selector_variables:
-      - pipeline
-      - run_type
       - workflow
+      - pipeline
+      - run_id
+      - run_type
 
   - uid: bioetl-runtime
     title: "2. Runtime"
@@ -84,7 +87,7 @@ dashboards:
     navigation_id: 2
     data_sources:
       - Prometheus
-    panel_count: 40
+    panel_count: 42
     key_panels:
       - id: 205
         title: "Runtime Status"
@@ -95,7 +98,10 @@ dashboards:
         type: table
         description: "Provider alert conditions across all pipelines"
     selector_variables:
+      - workflow
       - pipeline
+      - provider_hint
+      - run_id
       - run_type
       - stage
 
@@ -105,7 +111,7 @@ dashboards:
     navigation_id: 3
     data_sources:
       - Prometheus
-    panel_count: 35
+    panel_count: 29
     key_panels:
       - id: 1
         title: "Monitor GLOBAL Provider Severity Matrix"
@@ -116,6 +122,10 @@ dashboards:
         type: table
         description: "Top causes of provider failures"
     selector_variables:
+      - workflow
+      - pipeline
+      - run_type
+      - run_id
       - provider
       - pipeline_context
       - adapter
@@ -126,7 +136,7 @@ dashboards:
     navigation_id: 4
     data_sources:
       - Prometheus
-    panel_count: 40
+    panel_count: 36
     key_panels:
       - id: 9100
         title: "Monitor DQ Current Status"
@@ -141,7 +151,9 @@ dashboards:
         type: table
         description: "Current DQ violation reasons breakdown"
     selector_variables:
+      - workflow
       - pipeline
+      - run_id
       - run_type
       - stage
 
@@ -151,7 +163,7 @@ dashboards:
     navigation_id: 5
     data_sources:
       - Prometheus
-    panel_count: 30
+    panel_count: 16
     key_panels:
       - id: 1
         title: "Workflow Status"
@@ -162,9 +174,20 @@ dashboards:
         type: table
         description: "Step-by-step workflow execution results"
     selector_variables:
-      - pipeline
-      - run_type
       - workflow
+      - pipeline
+      - run_id
+      - run_type
+      - status
+      - step_status
+      - step_kind
+      - workflow_context
+      - pipeline_context
+      - pipeline_context_exact
+      - run_type_context
+      - run_type_context_exact
+      - provider_context
+      - provider_context_exact
 
   - uid: bioetl-silver-reject-explorer
     title: "Silver Reject Explorer"
@@ -172,7 +195,7 @@ dashboards:
     navigation_id: null
     data_sources:
       - HTTP (quarantine backend)
-    panel_count: 25
+    panel_count: 14
     key_panels:
       - id: 1
         title: "Main records table"
@@ -181,6 +204,10 @@ dashboards:
     selector_variables:
       - pipeline
       - run_type
+      - reason_code
+      - field
+      - quarantine_run_id
+      - payload_hash
 
   - uid: bioetl-alerts-slo
     title: "6. Alerts & SLO"
@@ -188,20 +215,21 @@ dashboards:
     navigation_id: null
     data_sources:
       - Prometheus
-    panel_count: 20
+    panel_count: 7
     key_panels:
       - id: 1
-        title: "Alert State Summary"
+        title: "Active Alert Status"
         type: stat
-        description: "Current Prometheus alert state summary"
+        description: "Fail-closed firing-alert status from the ALERTS metric family"
     selector_variables:
-      - alert_state
-      - severity
+      - workflow
+      - pipeline
+      - run_type
 
 # Contract metadata
 contract_metadata:
   version: "1.0.0"
-  last_updated: "2025-06-03"
+  last_updated: "2026-06-22"
   source_files:
     - "grafana/dashboards/bioetl-control-plane-v1.json"
     - "grafana/dashboards/bioetl-overview-v2.json"

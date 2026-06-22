@@ -59,7 +59,7 @@ if TYPE_CHECKING:
 
     from bioetl.application.composite.checkpoint import CompositeCheckpointState
     from bioetl.application.composite.key_extractor import KeyExtractorService
-    from bioetl.domain.composite.config import CompositeConfig
+    from bioetl.domain.composite import CompositeConfig
     from bioetl.domain.ports import ClockPort, LockPort, TracingPort
 
 

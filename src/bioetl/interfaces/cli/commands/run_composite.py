@@ -56,7 +56,7 @@ from bioetl.interfaces.cli.formatters import echo_info, echo_warning
 
 if TYPE_CHECKING:
     from bioetl.application.composite.runner_pkg import CompositePipelineRunner
-    from bioetl.domain.composite.config import CompositeConfig
+    from bioetl.domain.composite import CompositeConfig
 
 __all__ = ["run_composite"]
 

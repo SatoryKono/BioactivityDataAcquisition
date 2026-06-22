@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from bioetl.application.composite.cross_validator import (
         EnrichmentCrossValidator,
     )
-    from bioetl.domain.composite.config import (
+    from bioetl.domain.composite import (
         DependencyConfig,
         EnricherConfig,
         MergeConfig,

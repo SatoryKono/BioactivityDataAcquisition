@@ -20,7 +20,7 @@ from bioetl.application.composite.lifecycle_observer_service import (
     CompositeLifecycleObserverService,
 )
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
-from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
+from bioetl.domain.composite import CompositeConfig, EnricherConfig
 from bioetl.domain.composite.result import (
     EnrichmentResult,
     SeedResult,

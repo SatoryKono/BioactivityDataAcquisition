@@ -32,7 +32,7 @@ from bioetl.domain.composite.strategy import MergeStrategy
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from bioetl.domain.composite.config import CompositeConfig
+    from bioetl.domain.composite import CompositeConfig
     from bioetl.domain.ports import LoggerPort
 
 

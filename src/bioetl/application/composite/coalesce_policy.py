@@ -23,7 +23,7 @@ from bioetl.application.composite.column_service import ColumnOrderService
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.domain.composite.config import EnricherConfig
+    from bioetl.domain.composite import EnricherConfig
     from bioetl.domain.ports import LoggerPort
 
 

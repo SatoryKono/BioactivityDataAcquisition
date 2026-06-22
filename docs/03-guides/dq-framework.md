@@ -25,7 +25,7 @@ This guide describes the current DQ execution model from code and config.
 | DQ value objects | `src/bioetl/domain/value_objects/dq_*.py` |
 | DQ ports | `src/bioetl/domain/ports/quality/*.py`, `src/bioetl/domain/ports/observability/dq_monitor.py` |
 | DQ config loaders | `src/bioetl/infrastructure/config/dq_config_loader.py`, `dq_contract_config_loader.py` |
-| DQ config | `configs/base/dq.yaml`, `configs/quality/*.yaml`, DQ sections in entity/contract configs |
+| DQ config | `configs/base/quality.yaml`, `configs/quality/*.yaml`, DQ sections in entity/contract configs |
 
 ## Lifecycle
 

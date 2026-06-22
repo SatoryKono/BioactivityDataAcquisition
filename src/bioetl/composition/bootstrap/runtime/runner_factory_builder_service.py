@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
     from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
     from bioetl.application.composite.runtime_wiring_api import PipelineRunner
-    from bioetl.domain.composite.config import DependencyConfig, EnricherConfig
+    from bioetl.domain.composite import DependencyConfig, EnricherConfig
     from bioetl.domain.context import PipelineRunContext
     from bioetl.domain.ports import LoggerPort
 

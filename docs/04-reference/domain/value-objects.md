@@ -45,7 +45,45 @@ typed semantic helpers that keep validation close to the domain boundary.
 | `OpenAlexId` | Accepts URL form but normalizes to `W<digits>`. |
 | `SemanticScholarId` | Requires a 40-character hexadecimal identifier. |
 | `UniProtId` | Restricts to supported accession patterns and lengths. |
-| `StageResult` | Requires coherent timestamps and failure metadata for failed stages. |
+| `RunContext` | Requires timezone-aware `started_at`, non-empty `pipeline_name` / `provider` / `entity`, and carries replay-critical identity fields such as `execution_fingerprint`, `required_persistence_profile`, `replay_of_run_id`, `replay_of_manifest_id`, and `input_snapshot_fingerprint`. |
+| `StageResult` | Requires non-empty stage name, non-negative `records_processed`, and explicit error/completion evidence for failed stages. |
+
+## Replay-Critical Runtime Value Objects
+
+### `RunContext`
+
+Source of truth: `src/bioetl/domain/value_objects/run_context.py`
+
+`RunContext` is the domain-safe execution envelope shared across Medallion
+layers. The current implementation keeps replay-sensitive identity outside of
+wall-clock lookup at use sites by carrying the already-resolved `started_at`
+timestamp and replay anchors inside the immutable value object.
+
+Current invariants from code:
+
+- `started_at` must be timezone-aware.
+- `pipeline_name`, `provider`, and `entity` must be non-empty strings.
+- replay- and provenance-related fields are explicit optional slots on the
+  value object, including `manifest_id`, `execution_fingerprint`,
+  `required_persistence_profile`, `replay_of_run_id`,
+  `replay_of_manifest_id`, and `input_snapshot_fingerprint`.
+- `RunContext.create(...)` derives `pipeline_name` from the provided
+  `provider` and `entity`, so callers do not hand-assemble a second naming
+  convention.
+
+### `StageResult`
+
+Source of truth:
+`src/bioetl/domain/aggregates/pipeline_run_stage_result.py`
+
+Although `StageResult` currently lives under `domain/aggregates/`, it behaves
+as the immutable stage-outcome value object consumed by run aggregates.
+Validated invariants are:
+
+- `stage` must not be empty.
+- `records_processed` must not be negative.
+- `FAILED` status requires both `error` and `completed_at`.
+- `SUCCESS` and `FAILED` statuses require `completed_at`.
 
 ## Related References
 

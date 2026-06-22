@@ -35,7 +35,7 @@ from bioetl.application.runtime_timestamps import (
     capture_runtime_timing_anchor,
     derive_completion_timestamp,
 )
-from bioetl.domain.composite.config import CompositeDQConfig, EnricherConfig
+from bioetl.domain.composite import CompositeDQConfig, EnricherConfig
 from bioetl.domain.composite.result import EnrichmentResult
 from bioetl.domain.exceptions import (
     BioETLError,

@@ -61,12 +61,12 @@ The BioETL DQ Contract System defines four primary contract types that govern da
 **Contract Fields**:
 
 - `field`: Target field name (snake_case)
-- `validation_type`: Validation rule type (`required`, `not_null`, `range`, `pattern`, `enum`, `max_length`, `not_empty_list`, `custom`)
+- `type`: Validation rule type (`required`, `not_null`, `range`, `pattern`, `enum`, `max_length`, `not_empty_list`, `custom`)
 - `nullable`: Boolean nullability constraint
 - `severity`: Severity level ("error" or "warn", default: "error")
 - `severity_enricher`: Override severity for enricher context (optional)
 - `error_message`: Human-readable error message
-- Rule-specific parameters (`min_value`, `max_value`, `pattern`, `allowed`, `max_length`, `validator`)
+- Rule-specific parameters (`min`, `max`, `pattern`, `allowed`, `max_length`, `validator`)
 
 **Example**:
 
@@ -74,43 +74,43 @@ The BioETL DQ Contract System defines four primary contract types that govern da
 quality:
   entity_field_validations:
     - field: activity_id
-      validation_type: required
+      type: required
       nullable: false
       error_message: "Activity ID is required for all records"
 
     - field: standard_value
-      validation_type: range
+      type: range
       nullable: true
-      min_value: 0
-      max_value: 1000000000
+      min: 0
+      max: 1000000000
       error_message: "standard_value must be non-negative and below 1B"
 
     - field: assay_type
-      validation_type: enum
+      type: enum
       nullable: false
       allowed: ["B", "F", "A", "T", "P", "U"]
       error_message: "assay_type must be one of B, F, A, T, P, U"
 
     - field: inchi_key
-      validation_type: pattern
+      type: pattern
       nullable: true
       pattern: "^[A-Z]{14}-[A-Z]{10}-[A-Z]$"
       error_message: "InChI key must match standard format"
 
     - field: comment
-      validation_type: max_length
+      type: max_length
       nullable: true
       max_length: 500
       error_message: "Comment must not exceed 500 characters"
 
     - field: custom_validation_field
-      validation_type: custom
+      type: custom
       nullable: true
       validator: "custom_validation_function"
       error_message: "Field failed custom validation"
 
     - field: required_field
-      validation_type: not_null
+      type: not_null
       nullable: false
       error_message: "This field cannot be null"
 ```
@@ -182,7 +182,7 @@ quality:
       condition_operator: eq
       then_validations:
         - field: standard_type
-          validation_type: enum
+          type: enum
           allowed: ["IC50", "EC50", "Ki"]
           error_message: "Binding assays require IC50, EC50, or Ki standard types"
 ```
@@ -199,6 +199,7 @@ quality:
 **Contract Fields**:
 
 - `field`: Field name
+- `key_type`: Key role (`merge` or `partition`)
 - `nullable`: Boolean nullability constraint
 
 **Example**:
@@ -207,10 +208,13 @@ quality:
 quality:
   key_nullability:
     - field: activity_id
+      key_type: merge
       nullable: false
     - field: assay_id
+      key_type: partition
       nullable: true
     - field: molecule_id
+      key_type: merge
       nullable: false
 ```
 
@@ -221,7 +225,7 @@ BioETL uses two-level error thresholds for batch-level DQ evaluation:
 | Threshold   | Default  | Behavior                                                                 |
 | ----------- | -------- | ------------------------------------------------------------------------ |
 | `soft_fail` | 5%       | Warning emitted, pipeline continues                                      |
-| `hard_fail` | 20%      | Batch fails, records quarantined                                           |
+| `hard_fail` | 25%      | Batch fails, records quarantined                                           |
 
 **Invariant**: `soft_fail` must be strictly less than `hard_fail`.
 
@@ -407,19 +411,19 @@ quality:
   # Field-level validations
   entity_field_validations:
     - field: activity_id
-      validation_type: required
+      type: required
       nullable: false
       error_message: "Activity ID is required for all records"
 
     - field: standard_value
-      validation_type: range
+      type: range
       nullable: true
-      min_value: 0
-      max_value: 1000000000
+      min: 0
+      max: 1000000000
       error_message: "standard_value must be non-negative and below 1B"
 
     - field: assay_type
-      validation_type: enum
+      type: enum
       nullable: false
       allowed: ["B", "F", "A", "T", "P", "U"]
       error_message: "assay_type must be one of B, F, A, T, P, U"
@@ -447,17 +451,20 @@ quality:
       condition_operator: eq
       then_validations:
         - field: standard_type
-          validation_type: enum
+          type: enum
           allowed: ["IC50", "EC50", "Ki"]
           error_message: "Binding assays require IC50, EC50, or Ki standard types"
 
   # Nullability constraints
   key_nullability:
     - field: activity_id
+      key_type: merge
       nullable: false
     - field: assay_id
+      key_type: partition
       nullable: true
     - field: molecule_id
+      key_type: merge
       nullable: false
 ```
 
@@ -467,13 +474,13 @@ quality:
 
 | Rule Type        | Parameters                      | Example                              | Use Case                |
 | ---------------- | ------------------------------- | ------------------------------------ | ----------------------- |
-| `required`       | `nullable: false`               | `validation_type: required`          | Mandatory fields        |
-| `not_null`       | `nullable: false`               | `validation_type: not_null`          | Field must not be null  |
-| `range`          | `min_value`, `max_value`        | `min_value: 0, max_value: 1000`      | Numeric boundaries      |
+| `required`       | `nullable: false`               | `type: required`                     | Mandatory fields        |
+| `not_null`       | `nullable: false`               | `type: not_null`                     | Field must not be null  |
+| `range`          | `min`, `max`                    | `min: 0, max: 1000`                  | Numeric boundaries      |
 | `enum`           | `allowed: [...]`                 | `allowed: ["A", "B"]`                | Enumerated values       |
 | `pattern`        | `pattern: "regex"`               | `pattern: "^CHEMBL\\d+$"`            | Regex validation        |
 | `max_length`     | `max_length: N`                  | `max_length: 100`                     | Maximum string length   |
-| `not_empty_list` | (no min_items parameter)        | `validation_type: not_empty_list`    | Non-empty list/array    |
+| `not_empty_list` | (no min_items parameter)        | `type: not_empty_list`               | Non-empty list/array    |
 | `custom`         | `validator: function_name`       | `validator: custom_validator`        | Custom validation logic |
 
 #### Cross-Field Validation Patterns

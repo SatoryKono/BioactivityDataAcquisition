@@ -12,7 +12,7 @@ __all__ = [
 from collections.abc import Callable, Sequence
 from fnmatch import fnmatch
 
-from bioetl.domain.composite.config import ColumnGroupConfig, LayerColumnConfig
+from bioetl.domain.composite import ColumnGroupConfig, LayerColumnConfig
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.schemas.column_order import DQ_FIELDS_SUFFIX
 

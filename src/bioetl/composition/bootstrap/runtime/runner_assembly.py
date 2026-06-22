@@ -20,7 +20,7 @@ from bioetl.composition.bootstrap.runtime._runner_assembly_support import (
 from bioetl.composition.bootstrap.runtime._runner_assembly_support import (
     invoke_composite_runner_factory as _invoke_composite_runner_factory_impl,
 )
-from bioetl.domain.composite.config import CompositeConfig
+from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.ports import LoggerPort
 
 if TYPE_CHECKING:

@@ -18,7 +18,7 @@ from bioetl.domain.composite.cross_validation import (
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.domain.composite.config import (
+    from bioetl.domain.composite import (
         CrossValidationConfig,
         EnricherFieldPairing,
     )

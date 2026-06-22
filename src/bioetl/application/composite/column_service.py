@@ -29,7 +29,7 @@ from bioetl.application.composite.column_service_support import (
     sort_columns_by_provider,
 )
 from bioetl.application.composite.join_planner_helpers import parse_pipeline_name
-from bioetl.domain.composite.config import (
+from bioetl.domain.composite import (
     ColumnGroupConfig,
     EnricherConfig,
     LayerColumnConfig,

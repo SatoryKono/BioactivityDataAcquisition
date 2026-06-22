@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable
 
     from bioetl.application.composite.runner_pkg import CompositePipelineRunner
-    from bioetl.domain.composite.config import CompositeConfig
+    from bioetl.domain.composite import CompositeConfig
     from bioetl.domain.composite.result import CompositeResult
 
 

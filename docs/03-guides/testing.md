@@ -73,6 +73,22 @@ governance artifacts.
 | `tests/security/**` | Secret hygiene, security regressions, policy enforcement | `security` | security-focused policy checks |
 | `tests/fixtures/golden/**` plus golden-backed tests | Frozen compatibility bundles and deterministic output baselines | usually exercised via `contracts`, `integration-replay`, or targeted unit/integration selectors | golden registries, snapshots, bounded output bundles |
 
+Supporting top-level test directories that are part of the live tree but do not
+map 1:1 to a canonical lane:
+
+| Directory | Role in the live tree | Typical consumer |
+| --- | --- | --- |
+| `tests/fakes/**` | reusable in-memory doubles and helper test assets | unit/integration tests |
+| `tests/fixtures/**` | shared fixture payloads, including VCR/golden support inputs | contract, integration, repo-backed unit |
+| `tests/golden/**` | standalone golden payload bundles referenced by tests outside `tests/fixtures/golden/**` | contracts, integration, targeted regression tests |
+| `tests/helpers/**` | test helper APIs and process wrappers | all lanes via imports |
+| `tests/infrastructure/**` | infra-adjacent behavior that stays separate from `tests/unit/**` and `tests/integration/**` | targeted infra validation |
+| `tests/snapshots/**` | snapshot artifacts and snapshot-backed assertions | contracts, repo-backed unit |
+| `tests/testing_support/**` | repo-backed testing utilities and meta-test support code | governance, memory, repo-backed unit |
+
+Ignore `tests/__pycache__/` when reasoning about topology; it is a local Python
+cache, not a governed test family.
+
 Interpretation rules:
 
 - A directory family and a lane are related but not identical concepts.

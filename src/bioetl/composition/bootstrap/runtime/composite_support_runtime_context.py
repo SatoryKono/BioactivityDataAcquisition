@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from bioetl.composition.bootstrap.runtime.composite_control_plane_bundle import (
         CompositeControlPlaneBundle,
     )
-    from bioetl.domain.composite.config import CompositeConfig
+    from bioetl.domain.composite import CompositeConfig
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.ports import LoggerPort
 

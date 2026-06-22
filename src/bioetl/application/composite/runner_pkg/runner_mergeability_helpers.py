@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Set
 
-from bioetl.domain.composite.config import DependencyConfig, EnricherConfig
+from bioetl.domain.composite import DependencyConfig, EnricherConfig
 from bioetl.domain.composite.result import (
     DependencyResult,
     DependencyStatus,

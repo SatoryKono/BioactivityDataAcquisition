@@ -7,7 +7,7 @@ from typing import Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from bioetl.domain.composite.config import (
+from bioetl.domain.composite import (
     CompositeDQConfig,
     CrossValidationConfig,
     DQOverrideConfig,

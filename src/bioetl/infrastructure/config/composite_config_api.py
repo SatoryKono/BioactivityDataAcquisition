@@ -9,7 +9,7 @@ from typing import cast
 import yaml
 from pydantic import ValidationError
 
-from bioetl.domain.composite.config import CompositeConfig
+from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config._composite_dq_externalization import (
     merge_external_dq_overrides,

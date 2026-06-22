@@ -197,6 +197,17 @@ dashboard_families:
       backend API parameter can still be `run_id`; the Grafana variable name is
       deliberately not `run_id` to avoid colliding with the Control Plane
       identity shell.
+  alert_triage:
+    uids:
+      - bioetl-alerts-slo
+    allowed_visible_selectors:
+      - workflow
+      - pipeline
+      - run_type
+    notes: |
+      Alerts & SLO is a Prometheus-backed alert-triage surface. It reuses the
+      shared workflow/pipeline/run_type context shell for alert evidence only
+      and intentionally does not expose `run_id` or forensic selectors.
 
 shipped_selector_registry:
   bioetl-control-plane-v1:
@@ -376,6 +387,22 @@ shipped_selector_registry:
       field: quarantine_filter_options_api
       quarantine_run_id: quarantine_filter_options_api
       payload_hash: textbox_forensic_selector
+  bioetl-alerts-slo:
+    family: alert_triage
+    visible_selectors:
+      - workflow
+      - pipeline
+      - run_type
+    hidden_context_selectors: []
+    hidden_detail_selectors: []
+    top_bar_order:
+      - workflow
+      - pipeline
+      - run_type
+    query_source_families:
+      workflow: prometheus_workflow_runs_total
+      pipeline: prometheus_records_processed_total
+      run_type: prometheus_records_processed_total
 
 ship_now_selector_contract_by_uid:
   bioetl-control-plane-v1:
@@ -446,6 +473,12 @@ ship_now_selector_contract_by_uid:
       - field
       - quarantine_run_id
       - payload_hash
+    time_range: grafana_builtin
+  bioetl-alerts-slo:
+    visible_selectors:
+      - workflow
+      - pipeline
+      - run_type
     time_range: grafana_builtin
 
 hidden_handoff_contract:

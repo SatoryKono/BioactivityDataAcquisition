@@ -37,42 +37,26 @@ BioETL's supported runtime profile remains:
 - no Kubernetes, Redis, or Docker-based runtime orchestration in the standard
   development/operations path
 
-### Local Installation
+### Supported Bootstrap Path
 
-Для локальной установки и разработки используйте [Quick Start](../../../README.md#quick-start) в главном README:
+Этот subtree не дублирует поддерживаемый bootstrap. Для локальной установки и
+первого запуска используйте только основные entrypoints:
 
-**Требования:**
-- Python 3.12 или 3.13
-- uv (Python package manager)
+- [Quick Start](../../../README.md#quick-start) в корневом `README.md`
+- [Running Pipelines](../../03-guides/running-pipelines.md)
+- [CLI Reference](../../04-reference/cli.md)
 
-**Установка:**
-```bash
-# Клонирование репозитория
-git clone https://github.com/SatoryKono/BioactivityDataAcquisition.git
-cd BioactivityDataAcquisition
+Поддерживаемый bootstrap path на текущей ветке:
 
-# Установка зависимостей через uv
-uv sync
+- `make install`
+- `make test-deps`
+- `make setup-plugins`
+- для mixed Windows + WSL: `scripts/engineering/dev/setup_env_windows.ps1` или
+  `scripts/engineering/dev/setup_env_wsl.sh`
 
-# Активация виртуального окружения
-source .venv/bin/activate  # Linux/Mac
-# или
-.venv\Scripts\activate  # Windows
-```
-
-**Запуск:**
-```bash
-# Список доступных pipeline surface
-bioetl config list-pipelines
-
-# Канонический запуск pipeline
-bioetl run --pipeline chembl_activity
-
-# Module-form entrypoint также поддерживается после активации окружения
-python -m bioetl run --pipeline chembl_activity
-```
-
-Для детальной информации о командной интерфейсе см. [CLI Reference](../../04-reference/cli.md).
+Прямой ad-hoc путь `uv sync` + ручная активация окружения здесь намеренно не
+нормируется второй раз, чтобы этот experimental subtree не расходился с
+основным README и guide'ом запуска.
 
 ### Supported Runbooks
 

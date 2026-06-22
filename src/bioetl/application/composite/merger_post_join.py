@@ -12,7 +12,7 @@ import polars as pl
 from bioetl.application.composite.column_service import ColumnOrderService
 from bioetl.application.composite.conflict_resolver import ConflictResolverService
 from bioetl.application.runtime_timestamps import derive_completion_timestamp
-from bioetl.domain.composite.config import EnricherConfig
+from bioetl.domain.composite import EnricherConfig
 from bioetl.domain.composite.cross_validation import CrossValidationStats
 from bioetl.domain.composite.result import (
     DependencyResult,

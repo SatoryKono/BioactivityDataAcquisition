@@ -7,7 +7,7 @@ from bioetl.application.composite._preflight_types import (
     ProfileInfo,
     SchemaFields,
 )
-from bioetl.domain.composite.config import CompositeConfig
+from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.ports import LoggerPort
 
 

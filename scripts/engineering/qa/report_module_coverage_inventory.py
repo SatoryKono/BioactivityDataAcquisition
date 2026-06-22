@@ -823,10 +823,29 @@ def evaluate_module_coverage_gates(
 
     enforcement_cfg = gates.get("enforcement", {})
     tier_mode = "warn"
+    ranked_target_tier_mode = "warn"
     if isinstance(enforcement_cfg, dict):
         raw_tier_mode = enforcement_cfg.get("tier_violation_mode", tier_mode)
         if isinstance(raw_tier_mode, str):
             tier_mode = raw_tier_mode
+        raw_ranked_target_tier_mode = enforcement_cfg.get(
+            "ranked_target_tier_violation_mode",
+            ranked_target_tier_mode,
+        )
+        if isinstance(raw_ranked_target_tier_mode, str):
+            ranked_target_tier_mode = raw_ranked_target_tier_mode
+
+    ranked_target_paths: set[str] = set()
+    coverage_tail_cfg = gates.get("coverage_tail", {})
+    if isinstance(coverage_tail_cfg, dict):
+        ranked_targets = coverage_tail_cfg.get("ranked_targets", [])
+        if isinstance(ranked_targets, list):
+            for row in ranked_targets:
+                if not isinstance(row, dict):
+                    continue
+                path = row.get("path")
+                if isinstance(path, str) and path:
+                    ranked_target_paths.add(path)
 
     baseline_by_path = _baseline_coverage_by_path(baseline_payload)
     violations: list[_ModuleCoverageViolation] = []
@@ -880,7 +899,16 @@ def evaluate_module_coverage_gates(
             )
 
     if enforcement_mode == "block-regression":
-        return [violation for violation in violations if violation.kind == "regression"]
+        return [
+            violation
+            for violation in violations
+            if violation.kind == "regression"
+            or (
+                violation.kind == "tier"
+                and violation.path in ranked_target_paths
+                and ranked_target_tier_mode == "block"
+            )
+        ]
     if enforcement_mode == "warn" and tier_mode != "warn":
         return violations
     return violations

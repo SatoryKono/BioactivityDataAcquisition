@@ -28,6 +28,7 @@ APPROVED_FLAT_CONTROL_PLANE_MODULES = frozenset(
 REQUIRED_RESPONSIBILITY_PACKAGES = frozenset(
     {
         "effective_config",
+        "forensic",
         "ledger",
         "manifest",
         "replay",
@@ -60,6 +61,13 @@ def test_control_plane_responsibility_packages_are_present() -> None:
     ]
 
     assert missing == []
+
+
+@pytest.mark.architecture
+def test_forensic_diff_service_is_published_through_forensic_package() -> None:
+    """Operator-facing forensic APIs must stay behind the forensic seam."""
+    assert (CONTROL_PLANE_ROOT / "forensic" / "__init__.py").is_file()
+    assert (CONTROL_PLANE_ROOT / "forensic_diff_service.py").is_file()
 
 
 @pytest.mark.architecture

@@ -9,7 +9,7 @@ from datetime import datetime
 import polars as pl
 
 from bioetl.application.composite.join_planner_helpers import parse_pipeline_name
-from bioetl.domain.composite.config import EnricherConfig, MergeConfig
+from bioetl.domain.composite import EnricherConfig, MergeConfig
 from bioetl.domain.composite.result import DependencyResult, EnrichmentResult
 from bioetl.domain.ports import LoggerPort
 
