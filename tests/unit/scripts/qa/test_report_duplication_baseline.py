@@ -5,6 +5,9 @@ import pytest
 import re
 
 from scripts.engineering.qa.report_duplication_baseline import _build_payload
+from scripts.engineering.qa.report_duplication_baseline import (
+    _build_reduction_leverage_ranking,
+)
 from scripts.engineering.qa.report_duplication_baseline import _build_trend_summary
 from scripts.engineering.qa.report_duplication_baseline import (
     _filter_clusters_by_module_patterns,
@@ -496,6 +499,67 @@ def test_build_payload_includes_top_pairs() -> None:
     assert top_pairs[0]["duplicate_clusters"] == 2
 
 
+def test_build_reduction_leverage_ranking_prefers_low_risk_bounded_targets() -> None:
+    reports = [
+        TargetDuplicationReport(
+            target="src/bioetl/interfaces/cli",
+            returncode=8,
+            duplicate_count=13,
+            raw_duplicate_count=13,
+            clusters=(
+                DuplicateCluster(
+                    path="cli.py",
+                    line=1,
+                    modules=(
+                        DuplicateModuleRef(
+                            module="bioetl.interfaces.cli.commands.workflow",
+                            start_line=1,
+                            end_line=5,
+                        ),
+                        DuplicateModuleRef(
+                            module="bioetl.interfaces.cli.commands._workflow_support",
+                            start_line=10,
+                            end_line=15,
+                        ),
+                    ),
+                ),
+            )
+            * 13,
+        ),
+        TargetDuplicationReport(
+            target="src/bioetl/infrastructure/adapters",
+            returncode=8,
+            duplicate_count=72,
+            raw_duplicate_count=72,
+            clusters=(
+                DuplicateCluster(
+                    path="adapter.py",
+                    line=1,
+                    modules=(
+                        DuplicateModuleRef(
+                            module="bioetl.infrastructure.adapters.chembl.__init__",
+                            start_line=1,
+                            end_line=5,
+                        ),
+                        DuplicateModuleRef(
+                            module="bioetl.infrastructure.adapters.chembl.models",
+                            start_line=10,
+                            end_line=15,
+                        ),
+                    ),
+                ),
+            )
+            * 72,
+        ),
+    ]
+
+    ranking = _build_reduction_leverage_ranking(reports)
+
+    assert ranking[0]["target"] == "src/bioetl/interfaces/cli"
+    assert ranking[0]["recommended_first_wave"] is True
+    assert ranking[1]["recommended_first_wave"] is False
+
+
 def test_render_markdown_includes_top_recurring_pairs_table() -> None:
     report = TargetDuplicationReport(
         target="src/bioetl/composition/factories/pipeline",
@@ -529,3 +593,36 @@ def test_render_markdown_includes_top_recurring_pairs_table() -> None:
         "`bioetl.composition.factories.pipeline.assembler` <-> "
         "`bioetl.composition.factories.pipeline.factory_method_helpers`"
     ) in markdown
+
+
+def test_render_markdown_includes_reduction_ranking_and_first_wave() -> None:
+    report = TargetDuplicationReport(
+        target="src/bioetl/interfaces/cli",
+        returncode=8,
+        duplicate_count=1,
+        raw_duplicate_count=1,
+        clusters=(
+            DuplicateCluster(
+                path="workflow.py",
+                line=100,
+                modules=(
+                    DuplicateModuleRef(
+                        module="bioetl.interfaces.cli.commands.workflow",
+                        start_line=100,
+                        end_line=110,
+                    ),
+                    DuplicateModuleRef(
+                        module="bioetl.interfaces.cli.commands._workflow_support",
+                        start_line=120,
+                        end_line=130,
+                    ),
+                ),
+            ),
+        ),
+    )
+
+    markdown = _render_markdown([report])
+
+    assert "## Reduction Leverage Ranking" in markdown
+    assert "## First Wave Selection" in markdown
+    assert "- target: `src/bioetl/interfaces/cli`" in markdown

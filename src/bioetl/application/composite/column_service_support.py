@@ -6,7 +6,7 @@ import re
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
-from bioetl.domain.composite.config_merge import ColumnGroupConfig
+from bioetl.domain.composite.config import ColumnGroupConfig
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort

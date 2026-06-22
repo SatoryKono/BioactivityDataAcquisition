@@ -2,11 +2,19 @@
 
 from __future__ import annotations
 
-from collections.abc import AsyncIterator, Callable
+from collections.abc import AsyncIterator, Callable, Mapping
 
 from bioetl.domain.types import JsonDict
 
 _UNSET_FETCH_ARG = object()
+_FORWARDED_FETCH_KWARG_NAMES = (
+    "entity_type",
+    "limit",
+    "query",
+    "filter_ids",
+    "filter_field",
+    "offset",
+)
 
 
 def build_forwarded_fetch_kwargs(
@@ -30,6 +38,18 @@ def build_forwarded_fetch_kwargs(
     if filter_field is not _UNSET_FETCH_ARG:
         fetch_kwargs["filter_field"] = filter_field
     return fetch_kwargs
+
+
+def build_forwarded_fetch_kwargs_from_mapping(
+    values: Mapping[str, object],
+) -> dict[str, object | None]:
+    """Build forwarded fetch kwargs from a same-named locals()/mapping payload."""
+    return build_forwarded_fetch_kwargs(
+        **{
+            field_name: values.get(field_name, _UNSET_FETCH_ARG)
+            for field_name in _FORWARDED_FETCH_KWARG_NAMES
+        }
+    )
 
 
 async def forward_fetch_records(

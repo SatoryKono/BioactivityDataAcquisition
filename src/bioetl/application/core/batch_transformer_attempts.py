@@ -8,6 +8,7 @@ from bioetl.application.core.base_transformer import FilteredOutError
 from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
 from bioetl.application.core.batch_operation_errors import OPERATION_ERRORS
 from bioetl.application.core.batch_transformer_attempt_failures import (
+    _build_filtered_out_handling_context_from_mapping,
     handle_filtered_out_error,
     handle_transform_processing_error,
 )
@@ -88,11 +89,7 @@ async def transform_record_attempt(
     except FilteredOutError as error:
         return handle_filtered_out_error(
             error,
-            batch_metrics=batch_metrics,
-            dq_config=dq_config,
-            raw_record=raw_record,
-            debug_export_service=debug_export_service,
-            index=index,
+            _build_filtered_out_handling_context_from_mapping(locals()),
         )
     except TRANSFORM_PROCESSING_ERRORS as error:
         return handle_transform_processing_error(

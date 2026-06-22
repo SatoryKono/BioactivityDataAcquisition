@@ -58,6 +58,15 @@ class TargetDuplicationReport:
     raw_duplicate_count: int | None = None
 
 
+_LOW_RISK_ACTIONABILITY_CATEGORIES = frozenset(
+    {
+        "cli_command_contract_shell",
+        "composition_runtime_wiring_pattern",
+        "export_facade_or_package_barrel",
+    }
+)
+
+
 def _cluster_actionability_category(cluster: DuplicateCluster) -> str:
     """Classify duplicate-code findings by likely remediation path."""
     module_names = [module.module for module in cluster.modules]
@@ -123,6 +132,81 @@ def _top_duplicate_pairs(
         }
         for (left, right), count in ranked[:limit]
     ]
+
+
+def _build_reduction_leverage_ranking(
+    reports: list[TargetDuplicationReport],
+) -> list[dict[str, object]]:
+    """Rank targets by first-wave reduction leverage using current report evidence."""
+    ranking_rows: list[dict[str, object]] = []
+    for report in reports:
+        category_counts = Counter(
+            _cluster_actionability_category(cluster) for cluster in report.clusters
+        )
+        dominant_category = None
+        dominant_count = 0
+        if category_counts:
+            dominant_category, dominant_count = sorted(
+                category_counts.items(),
+                key=lambda item: (-item[1], item[0]),
+            )[0]
+        low_risk_cluster_count = sum(
+            count
+            for category, count in category_counts.items()
+            if category in _LOW_RISK_ACTIONABILITY_CATEGORIES
+        )
+        low_risk_share = (
+            round(low_risk_cluster_count / report.duplicate_count, 4)
+            if report.duplicate_count
+            else 0.0
+        )
+        recommended_first_wave = (
+            report.duplicate_count > 0
+            and dominant_category in _LOW_RISK_ACTIONABILITY_CATEGORIES
+            and report.duplicate_count <= 25
+        )
+        ranking_rows.append(
+            {
+                "target": report.target,
+                "duplicate_clusters": report.duplicate_count,
+                "dominant_actionability_category": dominant_category,
+                "dominant_actionability_cluster_count": dominant_count,
+                "low_risk_cluster_count": low_risk_cluster_count,
+                "low_risk_cluster_share": low_risk_share,
+                "recommended_first_wave": recommended_first_wave,
+            }
+        )
+    return sorted(
+        ranking_rows,
+        key=lambda row: (
+            not bool(row["recommended_first_wave"]),
+            -float(row["low_risk_cluster_share"]),
+            -int(row["duplicate_clusters"]),
+            str(row["target"]),
+        ),
+    )
+
+
+def _build_first_wave_selection(
+    ranking_rows: list[dict[str, object]],
+) -> dict[str, object]:
+    """Select the best current first-wave target from the reduction ranking."""
+    if not ranking_rows:
+        return {"status": "no_targets"}
+
+    selected = ranking_rows[0]
+    return {
+        "status": "selected",
+        "target": selected["target"],
+        "duplicate_clusters": selected["duplicate_clusters"],
+        "dominant_actionability_category": selected[
+            "dominant_actionability_category"
+        ],
+        "selection_rule": (
+            "prefer low-risk actionability families with bounded cluster counts, "
+            "then maximize duplicate reduction leverage"
+        ),
+    }
 
 
 def _parse_pylint_duplicate_output(stdout: str) -> list[DuplicateCluster]:
@@ -386,12 +470,15 @@ def _build_payload(
         "total_excluded_duplicate_clusters": total_raw_duplicate_clusters
         - total_duplicate_clusters,
     }
+    reduction_ranking = _build_reduction_leverage_ranking(reports)
     return {
         "summary": summary,
         "normalization": {
             "exclude_module_patterns": exclude_module_patterns,
         },
         "trend": trend_summary or {"status": "no_prior_snapshot"},
+        "reduction_leverage_ranking": reduction_ranking,
+        "first_wave": _build_first_wave_selection(reduction_ranking),
         "targets": [
             {
                 "target": report.target,
@@ -459,6 +546,7 @@ def _render_markdown(
         lines.extend(_report_markdown_section(report))
 
     lines.extend(_trend_markdown_section(trend_summary))
+    lines.extend(_reduction_ranking_markdown_section(reports))
 
     lines.append("")
     return "\n".join(lines)
@@ -532,6 +620,41 @@ def _actionability_markdown_section(report: TargetDuplicationReport) -> list[str
         count = row.get("duplicate_clusters")
         if isinstance(category, str) and isinstance(count, int):
             lines.append(f"| `{category}` | {count} |")
+    return lines
+
+
+def _reduction_ranking_markdown_section(
+    reports: list[TargetDuplicationReport],
+) -> list[str]:
+    ranking_rows = _build_reduction_leverage_ranking(reports)
+    first_wave = _build_first_wave_selection(ranking_rows)
+    lines = [
+        "",
+        "## Reduction Leverage Ranking",
+        "",
+        "| Target | Duplicate clusters | Dominant actionability | Low-risk share | Recommended first wave |",
+        "| --- | ---: | --- | ---: | --- |",
+    ]
+    for row in ranking_rows:
+        lines.append(
+            f"| `{row['target']}` | {row['duplicate_clusters']} | "
+            f"`{row['dominant_actionability_category'] or 'n/a'}` | "
+            f"{float(row['low_risk_cluster_share']):.2f} | "
+            f"{'yes' if row['recommended_first_wave'] else 'no'} |"
+        )
+    if first_wave.get("status") == "selected":
+        lines.extend(
+            [
+                "",
+                "## First Wave Selection",
+                "",
+                f"- target: `{first_wave['target']}`",
+                f"- duplicate_clusters: {first_wave['duplicate_clusters']}",
+                "- dominant_actionability_category: "
+                f"`{first_wave['dominant_actionability_category']}`",
+                f"- selection_rule: {first_wave['selection_rule']}",
+            ]
+        )
     return lines
 
 

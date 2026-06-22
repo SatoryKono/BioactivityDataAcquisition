@@ -111,9 +111,10 @@ async def execute_transform_with_span(
         input_count=True,
     )
     try:
-        result = await transformer.transform_batch(
-            records,
-            batch_id,
+        result = await _run_transform_batch(
+            transformer=transformer,
+            records=records,
+            batch_id=batch_id,
             start_index=start_index,
         )
         tracing.set_transform_result(
@@ -127,6 +128,21 @@ async def execute_transform_with_span(
     except PIPELINE_EXECUTION_ERRORS as error:
         tracing.end_span(span, error)
         raise
+
+
+async def _run_transform_batch(
+    *,
+    transformer: BatchTransformer,
+    records: list[BronzeRecord],
+    batch_id: BatchID,
+    start_index: int,
+) -> TransformResult:
+    """Execute one transformer batch with the canonical call signature."""
+    return await transformer.transform_batch(
+        records,
+        batch_id,
+        start_index=start_index,
+    )
 
 
 def build_bronze_refs(

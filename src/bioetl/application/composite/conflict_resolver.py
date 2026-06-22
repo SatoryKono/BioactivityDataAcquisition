@@ -7,8 +7,7 @@ from collections.abc import Callable, Sequence
 import polars as pl
 
 from bioetl.application.composite.coalesce_policy import CoalescePolicyService
-from bioetl.domain.composite.config_merge import MergeConfig
-from bioetl.domain.composite.config_models import EnricherConfig
+from bioetl.domain.composite.config import EnricherConfig, MergeConfig
 from bioetl.domain.composite.strategy import ConflictResolution
 from bioetl.domain.ports import LoggerPort
 

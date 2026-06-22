@@ -40,7 +40,7 @@ def _minimal_pubmed_gold_df(
             if column.dtype == "bool":
                 row[column_name] = False
             elif column.dtype == "int64":
-                row[column_name] = int(0)
+                row[column_name] = 0
             elif column.dtype == "float64":
                 row[column_name] = 0.0
             else:
@@ -51,7 +51,7 @@ def _minimal_pubmed_gold_df(
         {
             "entity_id": "pubmed:12345678",
             "content_hash": "a" * 64,
-            "_index": int(0),
+            "_index": 0,
             "_dq_warn": False,
             "_dq_error": False,
             "_source": "pubmed",

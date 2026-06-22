@@ -96,6 +96,26 @@ def test_module_coverage_source_tree_hash_gate_passes_for_current_inventory(
     assert gate.status == "pass"
 
 
+def test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stale(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        gates,
+        "compute_source_tree_sha256",
+        lambda *, repo_root: "stale-source-hash",
+    )
+
+    payload = gates.build_payload(repo_root=gates.PROJECT_ROOT)
+    summary = payload["summary"]
+    assert isinstance(summary, dict)
+
+    failing_gates = summary["failing_gates"]
+    assert isinstance(failing_gates, list)
+    assert "module_coverage_source_tree_hash_current" in failing_gates
+    assert "generated_artifact_drift" in failing_gates
+    assert summary["release_gate_status"] == "failing"
+
+
 def test_render_markdown_separates_weighted_score_from_release_gate_status() -> None:
     payload = {
         "summary": {

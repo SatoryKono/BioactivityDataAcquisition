@@ -286,8 +286,8 @@ config_surface_ratchet:
       ratchet_policy: Non-growth fail-fast unless a reviewed pipeline addition updates
         the budget.
     unique_parameter_count:
-      current_count: 490
-      max_count: 490
+      current_count: 483
+      max_count: 483
       owner: '@bioetl-config'
       linked_issue: '#4818'
       rationale: Flattened parameter vocabulary must not expand silently across the
@@ -366,8 +366,8 @@ config_surface_ratchet:
           rationale: Composite runtime configs under configs/composites/*.yaml.
           ratchet_policy: Non-growth fail-fast for composite runtime surface.
         unique_parameter_count:
-          current_count: 203
-          max_count: 203
+          current_count: 196
+          max_count: 196
           rationale: Flattened vocabulary for composite runtime configs only.
           ratchet_policy: Non-growth fail-fast unless composite schema expansion updates
             budget.
@@ -410,8 +410,8 @@ config_surface_ratchet:
             schemas to canonical parameters.
       composite_runtime:
         compatibility_legacy:
-          current_count: 16
-          max_count: 16
+          current_count: 9
+          max_count: 9
           target_count: 0
           owner: '@bioetl-config'
           rationale: Composite runtime configs still expose legacy compatibility
@@ -497,7 +497,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 180
-      total_loc: 22207
+      total_loc: 22211
       files_ge_250_loc: 6
       helper_function_ratio: 0.35
       max_internal_fan_in: 11

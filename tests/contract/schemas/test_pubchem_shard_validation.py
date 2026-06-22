@@ -22,7 +22,9 @@ pytestmark = [pytest.mark.contracts, pytest.mark.no_api]
 
 
 def test_pubchem_identity_shard_accepts_minimal_valid_row() -> None:
-    validated = PubchemIdentitySchema.validate(dataframe_from_row(pubchem_identity_row()))
+    validated = PubchemIdentitySchema.validate(
+        dataframe_from_row(pubchem_identity_row())
+    )
     assert validated["molecule_id"].iloc[0] == "2244"
 
 

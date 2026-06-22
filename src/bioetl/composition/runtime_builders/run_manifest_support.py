@@ -11,6 +11,7 @@ from bioetl.composition.runtime_builders.input_snapshot_resolution import (
 )
 from bioetl.composition.runtime_builders._run_manifest_refs import (
     ManifestControlPlaneRefs,
+    build_control_plane_identity_ref_values,
     build_planned_artifacts,
     control_plane_root,
     create_control_plane_refs,
@@ -28,7 +29,8 @@ from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
 from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
     CONTRACT_IDENTITY_FIELD_NAMES,
     RunManifestContractIdentity,
-    build_contract_identity_field_values,
+    build_contract_identity_field_values,  # noqa: F401
+    build_contract_identity_field_values_from_mapping,
     resolve_contract_identity,
 )
 from bioetl.domain.control_plane import ReplayCapability, RunSourceRef
@@ -115,6 +117,9 @@ def iter_optional_control_plane_updates(
     normalization_profile_hash: str | None = None,
 ) -> tuple[tuple[str, str], ...]:
     """Return non-empty control-plane context updates for runner attachment."""
+    contract_identity_values = build_contract_identity_field_values_from_mapping(
+        locals()
+    )
     values = normalize_runtime_anchor_payload(
         {
             "execution_fingerprint": execution_fingerprint,
@@ -127,15 +132,9 @@ def iter_optional_control_plane_updates(
             "replay_of_run_id": replay_of_run_id,
             "replay_of_manifest_id": replay_of_manifest_id,
             "input_snapshot_fingerprint": input_snapshot_fingerprint,
-            **build_contract_identity_field_values(
-                contract_ref=contract_ref,
-                contract_version=contract_version,
-                contract_schema_hash=contract_schema_hash,
-                dq_policy_ref=dq_policy_ref,
-                rule_bundle_version=rule_bundle_version,
-                normalization_profile_ref=normalization_profile_ref,
-                normalization_profile_version=normalization_profile_version,
-                normalization_profile_hash=normalization_profile_hash,
+            **build_control_plane_identity_ref_values(
+                contract_identity_values=contract_identity_values,
+                required_persistence_profile=None,
             ),
         }
     )

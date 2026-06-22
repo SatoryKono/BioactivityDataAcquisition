@@ -153,18 +153,12 @@ def resolve_control_plane_flags(
             "Pipeline execution requires run manifests; set "
             "pipeline.control_plane.run_manifest_enabled=true"
         )
-    _active_layers, missing_artifact_lineage_layers = (
-        resolve_required_artifact_lineage_layers(
-            yaml_config=yaml_config,
-            skip_gold=skip_gold,
-        )
-    )
-    validate_required_persistence_profile(
-        manifest_enabled=manifest_enabled,
+    _validate_manifest_persistence_requirements(
+        yaml_config=yaml_config,
+        skip_gold=skip_gold,
         ledger_enabled=ledger_enabled,
         required_profile=required_profile,
-        execution_label="Pipeline execution",
-        missing_artifact_lineage_layers=missing_artifact_lineage_layers,
+        strict_exact_replay_supported=True,
     )
     return True, ledger_enabled
 

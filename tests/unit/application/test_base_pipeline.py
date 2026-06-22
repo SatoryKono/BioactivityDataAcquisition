@@ -16,6 +16,7 @@ from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP, PipelineContext
 from bioetl.domain.types import RunID, RunType
+from tests.helpers.clock import FixedClock
 from tests.helpers.transformer_dependencies import (
     build_test_transformer_dependencies,
 )
@@ -155,6 +156,48 @@ def test_base_pipeline_accepts_five_params():
     assert pipeline.services == services
     assert pipeline.run_id == run_id
     assert pipeline.transformer == transformer
+
+
+def test_base_pipeline_uses_injected_clock_for_context_started_at():
+    """BasePipeline should route replay-sensitive context time through ClockPort."""
+    config = PipelineConfig(
+        pipeline_name="test",
+        provider="test",
+        entity_type="entity",
+        table=TableConfig(
+            primary_keys=["id"],
+            silver_table="test.entity",
+        ),
+    )
+    runtime = RuntimeConfig(run_type=RunType.INCREMENTAL)
+    mock_logger = MagicMock()
+    mock_logger.bind = MagicMock(return_value=mock_logger)
+    services = PipelineService(
+        data_source=AsyncMock(),
+        storage=AsyncMock(),
+        lock=AsyncMock(),
+        checkpoint=AsyncMock(),
+        quarantine=AsyncMock(),
+        metrics=MagicMock(),
+        tracing=MagicMock(),
+        logger=mock_logger,
+    )
+    run_id = _stable_run_id(4)
+    transformer = MockTransformer()
+    shutdown_signal = ShutdownSignal()
+    fixed_time = datetime(2026, 6, 22, 12, 0, tzinfo=UTC)
+
+    pipeline = ConcretePipeline(
+        config,
+        runtime,
+        services,
+        run_id,
+        shutdown_signal=shutdown_signal,
+        clock=FixedClock(fixed_time),
+        transformer=transformer,
+    )
+
+    assert pipeline.context.started_at == fixed_time
 
 
 def test_base_pipeline_properties(mock_pipeline):

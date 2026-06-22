@@ -88,11 +88,16 @@ def test_read_only_architecture_audit_covers_generated_evidence_gates() -> None:
         architecture_audit_checks,
     )
 
-    check_names = {check.name for check in architecture_audit_checks()}
+    checks = {check.name: check for check in architecture_audit_checks()}
+    check_names = set(checks)
+    module_coverage_command = checks["module_coverage_inventory"].command
     assert "contract_coverage_matrix" in check_names
     assert "port_adapter_factory_coverage" in check_names
     assert "observability_metric_inventory" in check_names
     assert "domain_aggregate_invariant_registry" in check_names
+    assert "module_coverage_inventory" in check_names
+    assert "debt_governance_gates" in check_names
+    assert "--allow-missing-coverage-xml" in module_coverage_command
 
 
 def test_tests_workflow_enforces_dead_code_inventory_drift_gate() -> None:

@@ -64,8 +64,6 @@ composite:
       pubchem: xlogp
     polar_surface_area:
       pubchem: tpsa
-    standard_inchi:
-      pubchem: inchi
 
   # ---------------------------------------------------------------------------
   # Merge Configuration

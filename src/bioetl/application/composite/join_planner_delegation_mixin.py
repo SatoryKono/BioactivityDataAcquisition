@@ -16,7 +16,7 @@ if TYPE_CHECKING:
         JoinExecutorProtocol,
         JoinKeyResolverProtocol,
     )
-    from bioetl.domain.composite.config_models import DependencyConfig
+    from bioetl.domain.composite.config import DependencyConfig
 
 
 class JoinPlannerDelegationMixin:

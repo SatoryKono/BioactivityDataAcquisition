@@ -214,6 +214,12 @@ def test_full_app_duplication_baseline_covers_audit_visibility_scope() -> None:
         "status": "no_prior_snapshot",
         "snapshot_date": summary["snapshot_date"],
     }
+    ranking = payload.get("reduction_leverage_ranking")
+    assert isinstance(ranking, list) and ranking
+    first_wave = payload.get("first_wave")
+    assert isinstance(first_wave, dict)
+    assert first_wave.get("status") == "selected"
+    assert first_wave.get("target") in FULL_APP_DUPLICATION_ARTIFACT["targets"]
 
 
 def test_full_app_duplication_markdown_matches_json_payload() -> None:

@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING, Self
 
 from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
 from bioetl.domain.context import PipelineContext
+from bioetl.domain.ports import ClockPort
 
 if TYPE_CHECKING:
     from bioetl.application.core.base_transformer import BaseTransformer
@@ -62,6 +63,7 @@ class BasePipeline(ABC):  # noqa: B024
         config: PipelineConfig,
         shutdown_signal: ShutdownSignal,
         started_at: datetime | None = None,
+        clock: ClockPort | None = None,
         transformer: BaseTransformer | None = None,
     ) -> Self:
         """Create pipeline instance.
@@ -75,6 +77,8 @@ class BasePipeline(ABC):  # noqa: B024
             config: Pipeline configuration.
             shutdown_signal: Injected shutdown signal instance.
             started_at: Explicit runtime anchor captured by the caller.
+            clock: Optional replay-safe clock seam used when ``started_at`` is
+                omitted.
             transformer: Injected transformer for Bronze→Silver transformation (DI).
                 If provided, the pipeline will use this transformer instead of
                 creating one internally. This is the preferred DI approach.
@@ -89,6 +93,7 @@ class BasePipeline(ABC):  # noqa: B024
             run_id,
             shutdown_signal=shutdown_signal,
             started_at=started_at,
+            clock=clock,
             transformer=transformer,
         )
 
@@ -100,6 +105,7 @@ class BasePipeline(ABC):  # noqa: B024
         run_id: RunID,
         shutdown_signal: ShutdownSignal,
         started_at: datetime | None = None,
+        clock: ClockPort | None = None,
         transformer: BaseTransformer | None = None,
     ) -> None:
         """Initialize pipeline definition.
@@ -112,6 +118,8 @@ class BasePipeline(ABC):  # noqa: B024
                     MUST be passed from CLI/orchestrator to ensure consistency.
             shutdown_signal: Injected shutdown signal instance for graceful stop.
             started_at: Explicit runtime anchor captured by the caller.
+            clock: Optional replay-safe clock seam used when ``started_at`` is
+                omitted.
             transformer: Injected transformer for Bronze→Silver transformation.
                 MUST be provided via DI from GenericPipelineFactory.
                 If None, transform_bronze_to_silver() will raise NotImplementedError.
@@ -134,6 +142,7 @@ class BasePipeline(ABC):  # noqa: B024
             run_type=runtime.run_type,
             logger=self._logger,
             started_at=started_at,
+            clock=clock,
             replay_timestamp_anchor=replay_timestamp_anchor,
             pipeline_name=config.pipeline_name,
             workflow_id=runtime.workflow_id,

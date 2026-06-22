@@ -11,6 +11,9 @@ from bioetl.composition.runtime_builders._run_manifest_data_roots import (
     is_explicit_data_root_configured as is_explicit_data_root_configured,
     resolve_data_root_mode as resolve_data_root_mode,
 )
+from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
+    build_contract_identity_field_values_from_mapping,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -39,6 +42,18 @@ class ManifestControlPlaneRefs:
     required_persistence_profile: str | None = None
 
 
+def build_control_plane_identity_ref_values(
+    *,
+    contract_identity_values: dict[str, str | None],
+    required_persistence_profile: str | None,
+) -> dict[str, str | None]:
+    """Return reusable control-plane identity kwargs shared by ref builders."""
+    return {
+        **contract_identity_values,
+        "required_persistence_profile": required_persistence_profile,
+    }
+
+
 def create_control_plane_refs(
     manifest_id: str,
     execution_fingerprint: str,
@@ -61,6 +76,9 @@ def create_control_plane_refs(
     required_persistence_profile: str | None,
 ) -> ManifestControlPlaneRefs:
     """Build the compact control-plane refs bundle returned to callers."""
+    contract_identity_values = build_contract_identity_field_values_from_mapping(
+        locals()
+    )
     return ManifestControlPlaneRefs(
         manifest_id=manifest_id,
         execution_fingerprint=execution_fingerprint,
@@ -73,13 +91,8 @@ def create_control_plane_refs(
         replay_of_run_id=replay_of_run_id,
         replay_of_manifest_id=replay_of_manifest_id,
         input_snapshot_fingerprint=input_snapshot_fingerprint,
-        contract_ref=contract_ref,
-        contract_version=contract_version,
-        contract_schema_hash=contract_schema_hash,
-        dq_policy_ref=dq_policy_ref,
-        rule_bundle_version=rule_bundle_version,
-        normalization_profile_ref=normalization_profile_ref,
-        normalization_profile_version=normalization_profile_version,
-        normalization_profile_hash=normalization_profile_hash,
-        required_persistence_profile=required_persistence_profile,
+        **build_control_plane_identity_ref_values(
+            contract_identity_values=contract_identity_values,
+            required_persistence_profile=required_persistence_profile,
+        ),
     )

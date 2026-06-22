@@ -98,6 +98,7 @@ def architecture_audit_checks(repo_root: Path = PROJECT_ROOT) -> tuple[Architect
                 "scripts.engineering.qa",
                 "report-module-coverage",
                 "--check",
+                "--allow-missing-coverage-xml",
             ),
         ),
         ArchitectureAuditCheck(

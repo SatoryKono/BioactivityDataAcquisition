@@ -54,6 +54,7 @@ def test_context_module_no_longer_uses_wall_clock_defaults_for_runtime_contexts(
     assert "started_at or current_utc_time()" not in contents
     assert "def current_utc_time(" not in contents
     assert "datetime.now(" not in contents
+    assert "clock.now()" in contents
 
 
 @pytest.mark.architecture

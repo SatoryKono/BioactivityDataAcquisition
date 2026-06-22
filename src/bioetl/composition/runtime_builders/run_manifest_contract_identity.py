@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass, fields
 from pathlib import Path
+from typing import cast
 
 from bioetl.infrastructure.config.contract_registry_loader import (
     DEFAULT_CONTRACT_REGISTRY_PATH,
@@ -53,6 +54,28 @@ def build_contract_identity_field_values(
         "normalization_profile_version": normalization_profile_version,
         "normalization_profile_hash": normalization_profile_hash,
     }
+
+
+def build_contract_identity_field_values_from_mapping(
+    values: Mapping[str, object],
+) -> dict[str, str | None]:
+    """Build contract-identity field values from a same-named locals() mapping."""
+    return build_contract_identity_field_values(
+        contract_ref=cast("str", values["contract_ref"]),
+        contract_version=cast("str | None", values.get("contract_version")),
+        contract_schema_hash=cast("str | None", values.get("contract_schema_hash")),
+        dq_policy_ref=cast("str | None", values.get("dq_policy_ref")),
+        rule_bundle_version=cast("str | None", values.get("rule_bundle_version")),
+        normalization_profile_ref=cast(
+            "str | None", values.get("normalization_profile_ref")
+        ),
+        normalization_profile_version=cast(
+            "str | None", values.get("normalization_profile_version")
+        ),
+        normalization_profile_hash=cast(
+            "str | None", values.get("normalization_profile_hash")
+        ),
+    )
 
 
 def resolve_contract_identity(

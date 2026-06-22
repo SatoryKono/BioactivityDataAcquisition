@@ -18,6 +18,7 @@ Run the same commands locally and in CI:
 | Config comparison matrix | `python -m scripts.schema generate-config-matrix --check` | `python -m scripts.schema generate-config-matrix --update` |
 | Config duplication/backlog audit | `pytest tests/architecture/test_config_surface_entity_residual_plateau.py` | `python -m scripts.engineering.qa.report_config_surface_backlog` |
 | Config discrepancy drift | `pytest tests/architecture/test_config_discrepancy_report_drift.py tests/architecture/test_config_discrepancy_metrics_ratchets.py` | `python -m scripts.schema generate-config-matrix --update` |
+| Module coverage inventory | `python -m scripts.engineering.qa report-module-coverage --check --allow-missing-coverage-xml` | `python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml` |
 | VCR metadata catalog | `python -m scripts.engineering.qa report-vcr-metadata --check` | `python -m scripts.engineering.qa report-vcr-metadata --update` |
 | Date-only content-hash inventory | `pytest tests/architecture/test_content_hash_datetime_policy_inventory.py` | Edit `configs/quality/determinism_identity_policy.yaml`; do not add budget. |
 | Debt closeout inventory | `pytest tests/architecture/test_tech_debt_issues_5343_5346_closeout.py tests/architecture/test_tech_debt_issues_5387_5394_closeout.py` | Add issue-specific closeout evidence and guard tests. |

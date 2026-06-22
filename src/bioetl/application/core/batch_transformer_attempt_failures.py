@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.base_transformer import FilteredOutError
@@ -37,6 +39,48 @@ def _transform_failure_entity_id(raw_record: BronzeRecord) -> object:
     )
 
 
+@dataclass(frozen=True, slots=True)
+class _FilteredOutHandlingContext:
+    """Captured state needed to apply the filtered-out handling policy."""
+
+    batch_metrics: BatchMetricsRecorderService
+    dq_config: DQConfig | None
+    raw_record: BronzeRecord
+    debug_export_service: DebugExportService | None
+    index: int
+
+
+def _build_filtered_out_handling_context(
+    *,
+    batch_metrics: BatchMetricsRecorderService,
+    dq_config: DQConfig | None,
+    raw_record: BronzeRecord,
+    debug_export_service: DebugExportService | None,
+    index: int,
+) -> _FilteredOutHandlingContext:
+    """Capture filtered-out handling inputs for reuse at call sites."""
+    return _FilteredOutHandlingContext(
+        batch_metrics=batch_metrics,
+        dq_config=dq_config,
+        raw_record=raw_record,
+        debug_export_service=debug_export_service,
+        index=index,
+    )
+
+
+def _build_filtered_out_handling_context_from_mapping(
+    values: Mapping[str, object],
+) -> _FilteredOutHandlingContext:
+    """Capture filtered-out handling inputs from a same-named locals() mapping."""
+    return _build_filtered_out_handling_context(
+        batch_metrics=values["batch_metrics"],
+        dq_config=values["dq_config"],
+        raw_record=values["raw_record"],
+        debug_export_service=values["debug_export_service"],
+        index=values["index"],
+    )
+
+
 def _log_transform_record_failure(
     *,
     context: PipelineContext,
@@ -62,14 +106,14 @@ def _log_transform_record_failure(
 
 def handle_filtered_out_error(
     error: FilteredOutError,
-    *,
-    batch_metrics: BatchMetricsRecorderService,
-    dq_config: DQConfig | None,
-    raw_record: BronzeRecord,
-    debug_export_service: DebugExportService | None,
-    index: int,
+    handling_context: _FilteredOutHandlingContext,
 ) -> RecordTransformOutcome:
     """Handle a Silver filter rejection according to invalid-record policy."""
+    batch_metrics = handling_context.batch_metrics
+    dq_config = handling_context.dq_config
+    raw_record = handling_context.raw_record
+    debug_export_service = handling_context.debug_export_service
+    index = handling_context.index
     batch_metrics.track_processed_records("filtered_out", 1)
     batch_metrics.track_silver_filter_rejection(error.details or None)
     policy = _resolve_invalid_record_policy(dq_config)

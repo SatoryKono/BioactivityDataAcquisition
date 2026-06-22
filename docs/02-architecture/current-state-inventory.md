@@ -37,14 +37,19 @@ Current committed quality artifacts agree on the following architecture evidence
 | --- | ---: | --- |
 | Architecture quality score | `7.98` (`satisfactory_system_refactoring_required`) | `reports/quality/architecture-quality-scorecard.json` |
 | Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
-| Source modules in module coverage inventory | `2170` | `reports/quality/module-coverage-inventory.json` |
-| Unmeasured / uncovered modules | `0` / `0` | `reports/quality/module-coverage-inventory.json` |
+| Source modules in module coverage inventory | `2172` | `reports/quality/module-coverage-inventory.json` |
+| Unmeasured / uncovered modules | `1` / `0` | `reports/quality/module-coverage-inventory.json` |
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
-| Debt-governance gates | `27` pass, `0` warn, `0` fail | `reports/quality/debt-governance-gates.json` |
-| Duplication baseline | `127` clusters (`application=97`, `composition=30`) | `reports/quality/duplication-baseline.json` |
+| Debt-governance gates | `27` pass, `1` warn, `0` fail | `reports/quality/debt-governance-gates.json` |
+| Full-app duplication hotspot baseline | `109` clusters (`adapters=72`, `pipelines=22`, `bootstrap=2`, `CLI=13`) | `reports/quality/full-app-duplication-baseline.json` |
 
 Generated artifact drift is currently clear (`stale_artifacts` are all false in
-`reports/quality/debt-governance-gates.json`). Read-only audit evidence should
+`reports/quality/debt-governance-gates.json`). The debt gate rollup now includes
+`module_coverage_source_tree_hash_current`, so stale
+`reports/quality/module-coverage-inventory.json` source-tree hashes are fail-fast
+release-gate failures rather than hidden warning-only coverage drift. The single
+current warning is `module_coverage_unmeasured_modules` for
+`src/bioetl/domain/aggregates/_batch_attrs.py`. Read-only audit evidence should
 use `python -m scripts.engineering.qa run-architecture-audit-read-only`, which
 runs check-only architecture diagnostics and fails if tracked governance
 surfaces mutate.
@@ -258,6 +263,13 @@ by storage technology. Current owner boundaries:
 | Docs guardrail command used obsolete module wording | `docs/00-project/governance/07-doc-nav-policy.md` and `docs/00-project/RULES.md` used the historical `check_doc_links` name. | `python -m scripts.docs check-links`; dispatch in `scripts/docs/__main__.py`. | Updated active policy wording to the current command/module. |
 | README architecture sketch used outdated single-bootstrap wording | `README.md` architecture sketch referenced `bootstrap_pipeline_runner() -> Factories`. | Composition public APIs and runtime bootstrap files under `src/bioetl/composition/`. | Updated README sketch to current composition APIs. |
 | Filter migration folder reused the ADR-048 number after canonical ADR-048 was accepted for another decision | `docs/filters/ADR-048-silver-filters-structural-scope.md` was a draft; canonical accepted ADR-048 is `docs/02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md`. | Filter compatibility is implemented in `src/bioetl/infrastructure/config/silver_filter_migration.py`; future filter decisions need a new ADR number. | Marked the filter draft as retired/non-canonical and updated the filter migration docs to describe current code reality. |
+| Generated artifact drift gate did not include module coverage source-tree hash freshness | `report-module-coverage --check` could fail stale source-tree evidence while `report-debt-governance-gates --check` still passed. | `scripts/engineering/qa/report_debt_governance_gates.py`; `reports/quality/debt-governance-gates.json`. | Added `module_coverage_source_tree_hash_current` as a fail-fast debt-governance gate. |
+| Compatibility retained entrypoint inventory still tracked a zero-import maintenance CLI seam | `reports/quality/compatibility-importer-census.json` now reports `retained_entrypoint_count=12` and no retained row for `src/bioetl/interfaces/cli/commands/maintenance.py`. | `configs/quality/compatibility_facade_inventory.yaml`, `configs/quality/debt_scorecard.yaml`. | Removed the zero-import maintenance CLI command from retained-entrypoint debt tracking while leaving normal CLI lazy discovery intact. |
+| Composite config compatibility taxonomy retained identity `standard_inchi` alias leaves | `reports/quality/config-compatibility-legacy-taxonomy-review.json` now reports `composite_runtime.compatibility_legacy_count=9`. | `configs/composites/*.yaml`; `reports/quality/config-discrepancy-baseline.json`. | Removed identity `standard_inchi` leaves from composite `field_aliases` and retained only classified cross-provider legacy aliases. |
+| Domain context exposed direct wall-clock creation | `src/bioetl/domain/context.py` no longer defines `current_utc_time`; effective-config domain artifacts use deterministic sentinel defaults. | `src/bioetl/application/runtime_clock.py`, `src/bioetl/infrastructure/time/system_clock.py`, `tests/architecture/test_time_seam_normalization.py`. | Moved runtime clock helpers to application/infrastructure seams and guarded domain defaults against wall-clock regressions. |
+| Runtime Gold Pandera strictness had no production-path non-strict guard | `tests/architecture/test_gold_validator_strict_runtime_paths.py` scans `src/bioetl` for `PanderaGoldValidator(..., strict=False)` and `ContractAwareGoldValidator(..., strict=False)`. | `src/bioetl/infrastructure/storage/silver/merged_operations.py`; `src/bioetl/infrastructure/validation/pandera_validator.py`. | Replaced the Silver merged-write non-strict Gold validator with `PanderaSilverValidator(strict=False)` and added the runtime guard. |
+| Quarantine payload immutability evidence stopped at aggregate/mock level | `tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineUpdateStatus::test_update_status_preserves_persisted_payload_and_hash` writes a real Delta table, updates status, and checks persisted `payload`, `payload_hash`, and `metadata`. | `src/bioetl/infrastructure/quarantine/unified.py`. | Added persisted immutability coverage and a read fallback for Delta string-view filter failures after status updates. |
+| Test governance assertless acceptance tests were implicit no-exception checks | `reports/quality/test-governance-current.json` now reports `assertless_total_candidates=497` with zero budget violations. | Contract schema tests under `tests/contract/**`. | Added observable assertions to selected contract acceptance tests, reducing the assertless candidate count from `509` to `497`. |
 
 ## Open Questions
 

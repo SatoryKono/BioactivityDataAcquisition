@@ -16,6 +16,7 @@ from bioetl.application.services.control_plane.manifest.inspection_helpers impor
     build_authoritative_replay_dossier,
 )
 from bioetl.application.services.control_plane.manifest.inspection_models import (
+    _RUN_MANIFEST_INSPECTION_MODEL_EXPORTS,
     RunManifestDiffEntry,
     RunManifestDiffResult,
     RunManifestInspectionCorruptionError,
@@ -40,12 +41,8 @@ from bioetl.domain.ports import (
 )
 
 __all__ = [
-    "RunManifestDiffEntry",
-    "RunManifestDiffResult",
-    "RunManifestInspectionCorruptionError",
-    "RunManifestInspectionResult",
+    *_RUN_MANIFEST_INSPECTION_MODEL_EXPORTS,
     "RunManifestInspectionService",
-    "RunManifestVerifyResult",
 ]
 
 

@@ -24,10 +24,8 @@ pytestmark = pytest.mark.architecture
 
 DOMAIN_DIR = Path("src/bioetl/domain")
 
-# Only the canonical pipeline context seam may create the current time internally.
-ALLOWED_PATHS: set[str] = {
-    "context.py",
-}
+# Domain-layer datetime creation is now fully disallowed.
+ALLOWED_PATHS: set[str] = set()
 
 
 def _domain_base() -> Path:
@@ -71,8 +69,8 @@ class TestNoDatetimeNowInDomain:
             "datetime.now()/utcnow() found in domain layer:\n"
             + "\n".join(f"  - {v}" for v in violations)
             + "\n\nDomain business paths should receive timestamps explicitly. "
-            "Only the canonical PipelineContext time-source seam may create the "
-            "current time inside domain/context.py. See ADR-014."
+            "Domain business paths must not create implicit current timestamps. "
+            "See ADR-014."
         )
 
     def test_allowed_paths_still_exist_and_are_unambiguous(

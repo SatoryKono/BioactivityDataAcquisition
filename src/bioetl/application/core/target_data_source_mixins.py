@@ -8,9 +8,12 @@ __all__ = [
     "_TargetEntityFetchDelegationMixin",
 ]
 
-from functools import partial
+from collections.abc import Callable
 from typing import TYPE_CHECKING, Protocol, TypeVar, cast
 
+from bioetl.application.core._fetch_forwarding import (
+    build_forwarded_fetch_kwargs_from_mapping,
+)
 from bioetl.application.core._target_data_source_fetch_support import (
     ensure_filterable_data_source,
     yield_target_or_delegate_records,
@@ -26,6 +29,17 @@ if TYPE_CHECKING:
 
 RecordT = TypeVar("RecordT")
 RecordOutT = TypeVar("RecordOutT", covariant=True)
+
+
+def _invoke_target_fetch[RecordT](
+    fetch_target_records: Callable[
+        [int | None, str | None, list[str] | None, str | None, int | None],
+        AsyncIterator[RecordT],
+    ],
+    fetch_args: tuple[int | None, str | None, list[str] | None, str | None, int | None],
+) -> AsyncIterator[RecordT]:
+    """Call a target-record fetcher through a canonical tuple payload."""
+    return fetch_target_records(*fetch_args)
 
 
 class _TargetEntityFetchWrapper(Protocol[RecordOutT]):
@@ -53,25 +67,18 @@ class _TargetEntityFetchDelegationMixin:
         offset: int | None = None,
     ) -> AsyncIterator[RecordT]:
         """Fetch derived target records or delegate to the wrapped adapter."""
+        fetch_kwargs = build_forwarded_fetch_kwargs_from_mapping(locals())
+        target_fetch_args = (limit, query, filter_ids, filter_field, offset)
         return yield_target_or_delegate_records(
             entity_type=entity_type,
             target_entity_type=self.TARGET_ENTITY_TYPE,
-            target_factory=partial(
+            target_factory=lambda: _invoke_target_fetch(
                 self._fetch_target_records,
-                limit,
-                query,
-                filter_ids,
-                filter_field,
-                offset,
+                target_fetch_args,
             ),
             delegate_factory=lambda: yield_wrapped_fetch_records(
                 self._data_source,
-                entity_type,
-                limit,
-                query,
-                filter_ids,
-                filter_field,
-                offset,
+                **fetch_kwargs,
             ),
         )
 

@@ -14,7 +14,7 @@ from bioetl.application.composite.join_key_normalization import (
     JoinKeyNormalizationPolicy,
     normalize_join_key_dataframe_columns,
 )
-from bioetl.domain.composite.config_models import DependencyConfig
+from bioetl.domain.composite.config import DependencyConfig
 from bioetl.domain.exceptions import (
     BioETLError,
     CheckpointConflictError,
