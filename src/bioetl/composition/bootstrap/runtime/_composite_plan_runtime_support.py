@@ -23,6 +23,9 @@ if TYPE_CHECKING:
     from bioetl.composition.bootstrap.runtime._composite_plan_support import (
         CompositeBootstrapPlan,
     )
+    from bioetl.composition.bootstrap.composite_infrastructure_context import (
+        CompositeRuntimeStorageProtocol,
+    )
     from bioetl.domain.composite import CompositeConfig
     from bioetl.domain.ports import (
         ClockPort,
