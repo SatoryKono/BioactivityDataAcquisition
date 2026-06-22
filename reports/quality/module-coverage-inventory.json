@@ -21818,7 +21818,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-06-22",
-  "source_tree_sha256": "435aad8d506c81a87f8ea529405e340ba7677bd298fcb56892c0bc22c17a514b",
+  "source_tree_sha256": "cc36f833733c26e16bd9c495630280bfc430571b60b2b3069f295d571c778ea3",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

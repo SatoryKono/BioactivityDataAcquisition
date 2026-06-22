@@ -32,12 +32,28 @@ def _load_base_contract_defaults() -> dict[str, object]:
     return defaults if isinstance(defaults, dict) else {}
 
 
+def _normalized_string_list(value: object) -> list[str] | None:
+    """Normalize YAML string collections when present."""
+    if not isinstance(value, list):
+        return None
+    return [str(item) for item in value]
+
+
 def _merge_contract_sections(
     base_defaults: dict[str, object],
     contracts_section: dict[str, object],
 ) -> dict[str, object]:
     """Merge base defaults and entity contract config, including nested rollout."""
     merged = {**base_defaults, **contracts_section}
+    for key in ("hash_include", "hash_exclude"):
+        explicit = _normalized_string_list(contracts_section.get(key))
+        if explicit is None:
+            continue
+        if explicit:
+            merged[key] = explicit
+            continue
+        default_values = _normalized_string_list(base_defaults.get(key))
+        merged[key] = default_values if default_values is not None else []
     base_rollout = base_defaults.get("rollout")
     entity_rollout = contracts_section.get("rollout")
     if isinstance(base_rollout, dict) or isinstance(entity_rollout, dict):
