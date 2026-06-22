@@ -7,6 +7,9 @@ from dataclasses import dataclass, replace
 from datetime import datetime
 from uuid import UUID
 
+from bioetl.application.services.control_plane.workflow.execution_preparation_incremental import (
+    _apply_incremental_offset,
+)
 from bioetl.application.services.control_plane.workflow.manifest_models import (
     WorkflowManifestCreateSpec,
 )
@@ -22,7 +25,6 @@ from bioetl.domain.ports import WorkflowExecutionStatePort
 from bioetl.domain.types import RunID
 from bioetl.domain.workflow import (
     WorkflowConfig,
-    WorkflowStepConfig,
 )
 
 __all__ = ["WorkflowExecutionPreparationResult", "prepare_workflow_execution"]
@@ -302,61 +304,4 @@ def _build_initial_state(manifest: WorkflowManifest) -> WorkflowExecutionState:
         selected_step_ids=manifest.selected_step_ids,
         steps=steps,
         completed_transform_fingerprints={},
-    )
-
-
-def _apply_incremental_offset(
-    *,
-    config: WorkflowConfig,
-    workflow_state_port: WorkflowExecutionStatePort,
-) -> WorkflowConfig:
-    """Apply incremental offset from last successful execution.
-
-    Semantics:
-    - Loads last state by workflow name
-    - Uses offset only if status="success" and both fields are populated
-    - Treats None start_offset as 0 for incremental tracking
-    - Otherwise leaves configuration unchanged (first run or error)
-    """
-    new_offset = _next_incremental_start_offset(
-        workflow_state_port=workflow_state_port,
-        workflow_name=config.name,
-    )
-    if new_offset is None:
-        return config
-
-    return replace(
-        config,
-        defaults=replace(config.defaults, start_offset=new_offset),
-        steps=tuple(
-            _workflow_step_with_start_offset(step, new_offset)
-            if isinstance(step, WorkflowStepConfig)
-            else step
-            for step in config.steps
-        ),
-    )
-
-
-def _next_incremental_start_offset(
-    *,
-    workflow_state_port: WorkflowExecutionStatePort,
-    workflow_name: str,
-) -> int | None:
-    """Resolve the next start offset from the latest successful workflow state."""
-    latest_state = workflow_state_port.get_latest(workflow_name)
-    if latest_state is None or latest_state.status != "success":
-        return None
-    if latest_state.last_limit is None:
-        return None
-    return (latest_state.last_start_offset or 0) + latest_state.last_limit
-
-
-def _workflow_step_with_start_offset(
-    step: WorkflowStepConfig,
-    start_offset: int,
-) -> WorkflowStepConfig:
-    """Return a workflow step with its run-options offset overridden."""
-    return replace(
-        step,
-        run_options=replace(step.run_options, start_offset=start_offset),
     )

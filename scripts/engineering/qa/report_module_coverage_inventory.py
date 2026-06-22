@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import hashlib
 import json
 import time
@@ -103,6 +104,50 @@ class _SourceModuleSnapshot:
     path: Path
     repo_path: str
     source_lines: int
+    declaration_only: bool
+
+
+def _module_is_declaration_only(source_text: str) -> bool:
+    """Return True when a module contains only declarations/type-only scaffolding."""
+    try:
+        module = ast.parse(source_text)
+    except SyntaxError:
+        return False
+    return all(_statement_is_declaration_only(node) for node in module.body)
+
+
+def _statement_is_declaration_only(node: ast.stmt) -> bool:
+    """Identify statements that do not contribute runtime behavior worth covering."""
+    if isinstance(node, ast.Expr):
+        return isinstance(getattr(node, "value", None), ast.Constant) and isinstance(
+            getattr(node.value, "value", None), str
+        )
+    if isinstance(node, (ast.Import, ast.ImportFrom, ast.Pass)):
+        return True
+    if isinstance(node, ast.AnnAssign):
+        return True
+    if isinstance(node, ast.Assign):
+        return _assign_targets_are_declaration_only(node.targets)
+    if isinstance(node, ast.If):
+        return _if_is_type_checking_only(node)
+    if isinstance(node, ast.ClassDef):
+        return all(_statement_is_declaration_only(child) for child in node.body)
+    return False
+
+
+def _assign_targets_are_declaration_only(targets: list[ast.expr]) -> bool:
+    """Allow sentinel export/slot assignments in declaration-only modules."""
+    allowed_names = {"__all__", "__slots__"}
+    return all(isinstance(target, ast.Name) and target.id in allowed_names for target in targets)
+
+
+def _if_is_type_checking_only(node: ast.If) -> bool:
+    """Return True when an if-block is guarded only by TYPE_CHECKING."""
+    test = node.test
+    is_type_checking_guard = isinstance(test, ast.Name) and test.id == "TYPE_CHECKING"
+    if not is_type_checking_guard:
+        return False
+    return all(_statement_is_declaration_only(child) for child in node.body + node.orelse)
 
 
 def _read_source_module_snapshots(
@@ -130,11 +175,13 @@ def _read_source_module_snapshots(
         digest.update(b"\0")
         digest.update(str(stat.st_mtime_ns).encode("utf-8"))
         digest.update(b"\0")
+        source_text = raw_source.decode("utf-8")
         snapshots.append(
             _SourceModuleSnapshot(
                 path=path,
                 repo_path=relative,
-                source_lines=len(raw_source.decode("utf-8").splitlines()),
+                source_lines=len(source_text.splitlines()),
+                declaration_only=_module_is_declaration_only(source_text),
             )
         )
     return snapshots, digest.hexdigest()
@@ -588,6 +635,12 @@ def build_module_coverage_inventory(
 
     for source_snapshot in source_snapshots:
         coverage_entry = coverage_by_path.get(source_snapshot.repo_path)
+        if coverage_entry is None and coverage_xml_exists and source_snapshot.declaration_only:
+            coverage_entry = {
+                "executable_lines": 0,
+                "covered_lines": 0,
+                "missing_lines": 0,
+            }
         status = _coverage_status(
             coverage_xml_exists=coverage_xml_exists,
             coverage_entry=coverage_entry,

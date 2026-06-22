@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import json
-from collections.abc import Iterable
 
 import click
 
+from bioetl.interfaces.cli.commands._run_manifest_output_support import (  # noqa: N812
+    append_section,
+    format_scalar,
+)
 from bioetl.interfaces.cli.commands.domains.maintenance.service_access import (
     get_contract_migration_service,
 )
@@ -23,44 +26,8 @@ __all__ = ["get_contract_migration_service", "plan_command"]
 _NONE_LINE = "  none"
 
 
-def _format_scalar(value: object) -> str:
-    if value is None:
-        return "null"
-    if isinstance(value, bool):
-        return "true" if value else "false"
-    return str(value)
-
-
-def _format_block(value: object) -> list[str]:
-    if isinstance(value, dict):
-        if not value:
-            return ["{}"]
-        return json.dumps(value, indent=2, sort_keys=True, default=str).splitlines()
-    if isinstance(value, list):
-        if not value:
-            return ["[]"]
-        return json.dumps(value, indent=2, sort_keys=True, default=str).splitlines()
-    return [_format_scalar(value)]
-
-
-def _append_section(
-    lines: list[str],
-    title: str,
-    items: Iterable[tuple[str, object]],
-) -> None:
-    filtered = [(label, value) for label, value in items if value not in (None, [], {})]
-    if not filtered:
-        return
-    if lines:
-        lines.append("")
-    lines.append(title)
-    for label, value in filtered:
-        rendered = _format_block(value)
-        if len(rendered) == 1:
-            lines.append(f"  {label}: {rendered[0]}")
-            continue
-        lines.append(f"  {label}:")
-        lines.extend(f"    {line}" for line in rendered)
+def _render_json_block(value: object) -> list[str]:
+    return json.dumps(value, indent=2, sort_keys=True, default=str).splitlines()
 
 
 def _append_transitions(lines: list[str], transitions: object) -> None:
@@ -74,15 +41,15 @@ def _append_transitions(lines: list[str], transitions: object) -> None:
         return
     for entry in transitions:
         if not isinstance(entry, dict):
-            lines.append(f"  - {_format_scalar(entry)}")
+            lines.append(f"  - {format_scalar(entry)}")
             continue
         line = (
             "  - "
-            f"{_format_scalar(entry.get('from_version'))} -> "
-            f"{_format_scalar(entry.get('to_version'))}"
+            f"{format_scalar(entry.get('from_version'))} -> "
+            f"{format_scalar(entry.get('to_version'))}"
         )
         if entry.get("migration_guide") is not None:
-            line += f" (guide: {_format_scalar(entry.get('migration_guide'))})"
+            line += f" (guide: {format_scalar(entry.get('migration_guide'))})"
         if entry.get("affects_hash") is True:
             line += " [affects_hash]"
         lines.append(line)
@@ -99,11 +66,11 @@ def _append_required_actions(lines: list[str], required_actions: object) -> None
         return
     for action in required_actions:
         if not isinstance(action, dict):
-            lines.append(f"  - {_format_scalar(action)}")
+            lines.append(f"  - {format_scalar(action)}")
             continue
-        title = _format_scalar(action.get("title"))
-        code = _format_scalar(action.get("code"))
-        description = _format_scalar(action.get("description"))
+        title = format_scalar(action.get("title"))
+        code = format_scalar(action.get("code"))
+        description = format_scalar(action.get("description"))
         lines.append(f"  - {title} [{code}]")
         lines.append(f"    {description}")
 
@@ -118,12 +85,12 @@ def _append_notes(lines: list[str], notes: object) -> None:
         lines.append(_NONE_LINE)
         return
     for note in notes:
-        lines.append(f"  - {_format_scalar(note)}")
+        lines.append(f"  - {format_scalar(note)}")
 
 
 def _render_plan_payload(payload: dict[str, object]) -> str:
     lines: list[str] = []
-    _append_section(
+    append_section(
         lines,
         "Contract Migration Plan",
         (
@@ -139,6 +106,7 @@ def _render_plan_payload(payload: dict[str, object]) -> str:
             ("shadow_versions", payload.get("shadow_versions")),
             ("supported_versions", payload.get("supported_versions")),
         ),
+        json_renderer=_render_json_block,
     )
     _append_transitions(lines, payload.get("transitions"))
     _append_required_actions(lines, payload.get("required_actions"))

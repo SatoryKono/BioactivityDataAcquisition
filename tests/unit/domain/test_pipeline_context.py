@@ -20,7 +20,7 @@ from bioetl.domain.context import (
     VacuumSettings,
 )
 from bioetl.domain.types import RunID, RunType
-from tests.helpers.clock import FIXED_TEST_TIME
+from tests.helpers.clock import FIXED_TEST_TIME, FixedClock
 
 pytestmark = pytest.mark.unit
 
@@ -176,6 +176,21 @@ class TestPipelineContextStartedAt:
         )
 
         assert ctx.started_at == MISSING_RUNTIME_TIMESTAMP
+
+    def test_context_create_factory_uses_injected_clock(self) -> None:
+        """create() should derive replay-safe timestamps from the existing clock seam."""
+        run_id = deterministic_uuid_from_callsite("test_pipeline_context")
+        logger = MagicMock()
+        fixed_time = datetime(2026, 6, 22, 12, 0, tzinfo=UTC)
+
+        ctx = PipelineContext.create(
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            logger=logger,
+            clock=FixedClock(fixed_time),
+        )
+
+        assert ctx.started_at == fixed_time
 
     def test_context_create_factory_explicit_timestamp(self) -> None:
         """create() factory should use provided started_at."""

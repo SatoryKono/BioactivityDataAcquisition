@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from bioetl.application.services.control_plane.manifest.inspection_result_model import (
+from bioetl.application.services.control_plane.manifest.inspection_result_model import (  # noqa: F401
     RunManifestInspectionResult,
 )
 
@@ -107,11 +107,12 @@ class RunManifestVerifyResult:
             ),
         }
 
-
-__all__ = [
+_RUN_MANIFEST_INSPECTION_MODEL_EXPORTS = (
     "RunManifestDiffEntry",
     "RunManifestDiffResult",
     "RunManifestInspectionCorruptionError",
     "RunManifestInspectionResult",
     "RunManifestVerifyResult",
-]
+)
+
+__all__ = list(_RUN_MANIFEST_INSPECTION_MODEL_EXPORTS)

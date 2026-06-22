@@ -22,8 +22,9 @@ from bioetl.domain.types.contract_identity import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import ClockPort, LoggerPort
 else:
+    ClockPort = import_module("bioetl.domain.ports.runtime.clock").ClockPort
     LoggerPort = import_module("bioetl.domain.ports.observability.logging").LoggerPort
 
 __all__ = [
@@ -44,6 +45,19 @@ def _normalize_correlation_value(value: object | None) -> str | None:
         return None
     text = str(value).strip()
     return text or None
+
+
+def _resolve_context_started_at(
+    *,
+    started_at: datetime | None,
+    clock: ClockPort | None,
+) -> datetime:
+    """Resolve replay-sensitive context time through explicit inputs first."""
+    if started_at is not None:
+        return started_at
+    if clock is not None:
+        return clock.now()
+    return MISSING_RUNTIME_TIMESTAMP
 
 
 def _validate_dq_contract_alignment(
@@ -120,6 +134,7 @@ class PipelineContext:
         run_type: RunType,
         logger: LoggerPort,
         started_at: datetime | None = None,
+        clock: ClockPort | None = None,
         source_batch_id: BatchID | None = None,
         replay_timestamp_anchor: datetime | None = None,
         pipeline_name: str | None = None,
@@ -130,8 +145,9 @@ class PipelineContext:
             run_id=run_id,
             run_type=run_type,
             logger=logger,
-            started_at=(
-                started_at if started_at is not None else MISSING_RUNTIME_TIMESTAMP
+            started_at=_resolve_context_started_at(
+                started_at=started_at,
+                clock=clock,
             ),
             source_batch_id=source_batch_id,
             replay_timestamp_anchor=replay_timestamp_anchor,

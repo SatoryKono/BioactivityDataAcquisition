@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 
 from bioetl.application.composite.join_planner_helpers import parse_pipeline_name
-from bioetl.domain.composite.config_models import EnricherConfig
+from bioetl.domain.composite.config import EnricherConfig
 
 __all__ = [
     "collect_priority_field_columns",

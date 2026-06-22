@@ -94,7 +94,6 @@ composite.field_aliases.hba_count,(dict),(dict),(dict),(dict),(dict),—,—,—
 composite.field_aliases.hbd_count,(dict),(dict),(dict),(dict),(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.field_aliases.logp,(dict),(dict),(dict),(dict),(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.field_aliases.polar_surface_area,(dict),(dict),(dict),(dict),(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.field_aliases.standard_inchi,(dict),(dict),(dict),(dict),(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.lineage.provider_lookup_fields,(dict),(dict),(dict),(dict),(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.lineage.track_field_sources,True,True,True,True,True,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.lineage.track_source_for_fields,"[""molecule_id"", ""publication_id"", ""src_id""]","[""cell_chembl_id"", ""tissue_chembl_id""]","[""canonical_smiles"", ""inchi_key"", ""molecular_weight"", ""logp"", ""polar_surface_area"", ""hba_count"", ""hbd_count""]","[""title"", ""abstract"", ""citations_received"", ""citations_made"", ""subject_mesh"", ""affiliation_list"", ""author_orcids"", ""is_oa"", ""oa_status"", ""subject_keywords""]","[""target_id"", ""primary_component_id"", ""taxonomy_id"", ""organism""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
@@ -212,7 +211,6 @@ composite.field_aliases.hba_count.pubchem,h_bond_acceptor_count,h_bond_acceptor_
 composite.field_aliases.hbd_count.pubchem,h_bond_donor_count,h_bond_donor_count,h_bond_donor_count,h_bond_donor_count,h_bond_donor_count,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.field_aliases.logp.pubchem,xlogp,xlogp,xlogp,xlogp,xlogp,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.field_aliases.polar_surface_area.pubchem,tpsa,tpsa,tpsa,tpsa,tpsa,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.field_aliases.standard_inchi.pubchem,inchi,inchi,inchi,inchi,inchi,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.lineage.provider_lookup_fields.chembl,(dict),(dict),(dict),(dict),(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.lineage.provider_lookup_fields.crossref,(dict),(dict),(dict),(dict),(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.lineage.provider_lookup_fields.openalex,(dict),(dict),(dict),(dict),(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—

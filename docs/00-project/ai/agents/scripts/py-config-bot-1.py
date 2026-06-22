@@ -97,11 +97,15 @@ def _validate_contract_alignment(
     business_keys = pipeline_config.get("business_primary_keys")
     if contract_pk is None:
         critical.append("Missing MUST field: contracts.primary_key")
-    elif isinstance(business_keys, list) and isinstance(contract_pk, list):
-        if sorted(str(v) for v in business_keys) != sorted(str(v) for v in contract_pk):
-            medium.append(
-                "Mismatch between pipeline.business_primary_keys and contracts.primary_key"
-            )
+    elif (
+        isinstance(business_keys, list)
+        and isinstance(contract_pk, list)
+        and sorted(str(v) for v in business_keys)
+        != sorted(str(v) for v in contract_pk)
+    ):
+        medium.append(
+            "Mismatch between pipeline.business_primary_keys and contracts.primary_key"
+        )
     return critical, medium, []
 
 
@@ -357,7 +361,9 @@ def generate_report(all_gaps: list[ConfigGaps]) -> str:
         "# Config Gap Analysis Report",
         "",
         f"**Date**: {date.today()}",
-        "**Baseline**: ADR-014 (Deterministic Writes), ADR-025 (Config Unification), ADR-027/028 (Unified DQ/Filter Hierarchy), ADR-029 (Convention-based Resolution)",
+        "**Baseline**: ADR-014 (Deterministic Writes), ADR-025 (Config "
+        "Unification), ADR-027/028 (Unified DQ/Filter Hierarchy), ADR-029 "
+        "(Convention-based Resolution)",
         "",
         "## Summary",
         "",
@@ -410,7 +416,8 @@ def generate_report(all_gaps: list[ConfigGaps]) -> str:
             "## Recommended Actions",
             "",
             "### Priority 0 (Critical - Blocks CI)",
-            "1. Add missing required pipeline fields (`pipeline_name`, `provider`, `entity_type`, `business_primary_keys`)",
+            "1. Add missing required pipeline fields (`pipeline_name`, `provider`, "
+            "`entity_type`, `business_primary_keys`)",
             "2. Ensure `contracts.primary_key` exists and is aligned with `pipeline.business_primary_keys`",
             "3. Add missing unified sections (`pipeline`, `schema`, `quality`, `filters`, `contracts`)",
             "",
@@ -421,16 +428,20 @@ def generate_report(all_gaps: list[ConfigGaps]) -> str:
             "",
             "### Priority 2 (Low - Nice to Have)",
             "1. Unify `sink.*.path` to end with `{provider}/{entity}`",
-            "2. Remove legacy explicit path overrides such as `dq_config_file` / `filter_config_file` unless a compatibility case is documented",
+            "2. Remove legacy explicit path overrides such as `dq_config_file` / "
+            "`filter_config_file` unless a compatibility case is documented",
             "3. Add `filters.gold_filters.required_fields` where missing",
             "",
             "## ADR References",
             "",
             "- [ADR-014](docs/02-architecture/decisions/ADR-014-deterministic-writes.md): Deterministic Writes",
-            "- [ADR-025](docs/02-architecture/decisions/ADR-025-pipeline-config-unification.md): Pipeline Config Unification",
+            "- [ADR-025](docs/02-architecture/decisions/"
+            "ADR-025-pipeline-config-unification.md): Pipeline Config Unification",
             "- [ADR-027](docs/02-architecture/decisions/ADR-027-dq-rules-externalization.md): DQ Rules Externalization",
-            "- [ADR-028](docs/02-architecture/decisions/ADR-028-filter-rules-externalization.md): Filter Rules Externalization",
-            "- [ADR-029](docs/02-architecture/decisions/ADR-029-convention-based-configuration.md): Convention-based Configuration",
+            "- [ADR-028](docs/02-architecture/decisions/"
+            "ADR-028-filter-rules-externalization.md): Filter Rules Externalization",
+            "- [ADR-029](docs/02-architecture/decisions/"
+            "ADR-029-convention-based-configuration.md): Convention-based Configuration",
             "",
         ]
     )
@@ -453,7 +464,7 @@ def _print_verbose_config_status(cfg: Path, gaps: ConfigGaps) -> None:
     """Print one verbose config status line."""
     rel = _relative_config_path(cfg)
     status = _status_for_gaps(gaps)
-    print(
+    print(  # noqa: T201
         f"{status} {rel}: {len(gaps.critical)} critical, "
         f"{len(gaps.medium)} medium, {len(gaps.low)} low"
     )
@@ -461,9 +472,12 @@ def _print_verbose_config_status(cfg: Path, gaps: ConfigGaps) -> None:
 
 def _iter_config_files() -> list[Path]:
     """Return all config files participating in the audit."""
-    return sorted(ENTITY_CONFIGS_DIR.rglob("*.yaml")) + sorted(
-        COMPOSITES_DIR.glob("*.yaml")
-    )
+    entity_configs = [
+        path
+        for path in sorted(ENTITY_CONFIGS_DIR.rglob("*.yaml"))
+        if path.relative_to(ENTITY_CONFIGS_DIR).parts[:1] != ("composite",)
+    ]
+    return entity_configs + sorted(COMPOSITES_DIR.glob("*.yaml"))
 
 
 def main() -> int:
@@ -493,20 +507,20 @@ def main() -> int:
     if args.output:
         Path(args.output).parent.mkdir(parents=True, exist_ok=True)
         Path(args.output).write_text(report)
-        print(f"Report written to: {args.output}")
+        print(f"Report written to: {args.output}")  # noqa: T201
     else:
-        print(report)
+        print(report)  # noqa: T201
 
     # Summary
     critical_count = sum(len(g.critical) for g in all_gaps)
     medium_count = sum(len(g.medium) for g in all_gaps)
     low_count = sum(len(g.low) for g in all_gaps)
 
-    print(f"\n{'=' * 60}")
-    print(
+    print(f"\n{'=' * 60}")  # noqa: T201
+    print(  # noqa: T201
         f"Summary: {critical_count} critical, {medium_count} medium, {low_count} low issues"
     )
-    print(f"{'=' * 60}")
+    print(f"{'=' * 60}")  # noqa: T201
 
     # Exit code based on critical issues
     return 1 if critical_count else 0

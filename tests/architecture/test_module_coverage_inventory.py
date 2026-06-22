@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -156,6 +157,66 @@ def test_module_coverage_inventory_source_tree_hash_is_current() -> None:
 
     committed = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
     assert committed["source_tree_sha256"] == compute_source_tree_sha256(repo_root=ROOT)
+
+
+@pytest.mark.architecture
+def test_module_coverage_inventory_check_fails_for_stale_source_tree_hash(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo"
+    source_root = repo_root / "src" / "bioetl"
+    quality_root = repo_root / "configs" / "quality"
+    source_root.mkdir(parents=True)
+    quality_root.mkdir(parents=True)
+    (repo_root / "reports" / "quality").mkdir(parents=True)
+
+    shutil.copy2(SCORECARD_PATH, quality_root / SCORECARD_PATH.name)
+    shutil.copy2(GATES_PATH, quality_root / GATES_PATH.name)
+
+    module_path = source_root / "example.py"
+    module_path.write_text(
+        "def example() -> int:\n"
+        "    return 1\n",
+        encoding="utf-8",
+    )
+    json_out = repo_root / "reports" / "quality" / "module-coverage-inventory.json"
+    coverage_xml = repo_root / "reports" / "coverage" / "coverage.xml"
+
+    create_exit = module_coverage_inventory_main(
+        [
+            "--repo-root",
+            str(repo_root),
+            "--coverage-xml",
+            str(coverage_xml),
+            "--json-out",
+            str(json_out),
+            "--allow-missing-coverage-xml",
+            "--snapshot-date",
+            "2026-06-19",
+        ]
+    )
+    assert create_exit == 0
+
+    module_path.write_text(
+        "def example() -> int:\n"
+        "    value = 2\n"
+        "    return value\n",
+        encoding="utf-8",
+    )
+
+    check_exit = module_coverage_inventory_main(
+        [
+            "--repo-root",
+            str(repo_root),
+            "--coverage-xml",
+            str(coverage_xml),
+            "--json-out",
+            str(json_out),
+            "--allow-missing-coverage-xml",
+            "--check",
+        ]
+    )
+    assert check_exit == 1
 
 
 @pytest.mark.architecture

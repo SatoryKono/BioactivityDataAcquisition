@@ -25,6 +25,7 @@ def test_generated_artifact_drift_workflow_declares_canonical_commands() -> None
     required_commands = {
         "python -m scripts.schema generate-config-matrix --check",
         "pytest tests/architecture/test_config_surface_entity_residual_plateau.py",
+        "python -m scripts.engineering.qa report-module-coverage --check --allow-missing-coverage-xml",
         "python -m scripts.engineering.qa report-vcr-metadata --check",
         "pytest tests/architecture/test_content_hash_datetime_policy_inventory.py",
         "python -m scripts.engineering.qa report-family-baseline --check",

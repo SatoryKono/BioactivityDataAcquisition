@@ -346,7 +346,6 @@ def test_narrow_first_party_retained_entrypoints_do_not_gain_src_importers() -> 
         if isinstance(row, dict)
     }
     expected_src_importers = {
-        "src/bioetl/interfaces/cli/commands/maintenance.py": set(),
         "src/bioetl/composition/health_api.py": {
             "src/bioetl/interfaces/cli/commands/domains/health/server_integration.py",
             "src/bioetl/interfaces/cli/commands/domains/quarantine/runtime_access.py",
@@ -371,6 +370,60 @@ def test_narrow_first_party_retained_entrypoints_do_not_gain_src_importers() -> 
         "Narrow-first-party retained entrypoint importer budget drifted:\n"
         + "\n".join(f"  - {item}" for item in violations)
     )
+
+
+@pytest.mark.architecture
+def test_retained_entrypoint_owner_usage_map_is_published() -> None:
+    payload = build_compatibility_importer_census(ROOT, snapshot_date="2026-06-19")
+    rows = payload["retained_entrypoint_owner_usage_map"]
+    assert isinstance(rows, list) and rows
+
+    by_path = {str(row["path"]): row for row in rows if isinstance(row, dict)}
+    config_root = by_path["src/bioetl/infrastructure/config/__init__.py"]
+    assert config_root["surface_classification"] == "external-facing"
+    maintenance_api = by_path["src/bioetl/composition/maintenance_api.py"]
+    assert maintenance_api["owner"] == "bioetl.composition"
+    assert maintenance_api["usage_classification"] == (
+        "stable_public_api_with_reviewed_first_party_usage"
+    )
+    assert maintenance_api["surface_classification"] == "first-party-active"
+    assert maintenance_api["src_importer_count"] == 1
+    assert maintenance_api["test_importer_count"] == 1
+
+
+@pytest.mark.architecture
+def test_retained_public_export_owner_usage_map_is_published() -> None:
+    payload = build_compatibility_importer_census(ROOT, snapshot_date="2026-06-19")
+    rows = payload["retained_public_export_owner_usage_map"]
+    assert isinstance(rows, list) and rows
+
+    by_path = {str(row["path"]): row for row in rows if isinstance(row, dict)}
+    entrypoints = by_path["src/bioetl/composition/entrypoints.py"]
+    assert entrypoints["owner"] == "bioetl.composition"
+    assert entrypoints["usage_classification"] == (
+        "stable_public_api_with_reviewed_first_party_usage"
+    )
+    assert entrypoints["public_export_count"] > 0
+
+
+@pytest.mark.architecture
+def test_first_safe_removal_wave_is_published() -> None:
+    payload = build_compatibility_importer_census(ROOT, snapshot_date="2026-06-19")
+    first_wave = payload["first_safe_removal_wave"]
+    assert isinstance(first_wave, dict)
+    assert first_wave["linked_issue"] == "#5485"
+    assert first_wave["review_date"] == "2026-06-19"
+
+    rows = first_wave["rows"]
+    assert isinstance(rows, list) and rows
+    by_path = {str(row["path"]): row for row in rows if isinstance(row, dict)}
+    maintenance = by_path["src/bioetl/interfaces/cli/commands/maintenance.py"]
+    assert maintenance["owner"] == "bioetl.interfaces.cli.commands"
+    assert maintenance["surface_classification"] == "confirmed-unused"
+    assert maintenance["src_importer_count"] == 0
+    assert maintenance["test_importer_count"] == 0
+    assert maintenance["action"] == "remove_from_retained_entrypoint_debt_inventory"
+    assert maintenance["migration_prerequisites"]
 
 
 @pytest.mark.architecture

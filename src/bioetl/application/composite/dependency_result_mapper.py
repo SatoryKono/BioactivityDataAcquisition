@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 
-from bioetl.domain.composite.config_models import DependencyConfig
+from bioetl.domain.composite.config import DependencyConfig
 from bioetl.domain.composite.result import DependencyResult
 from bioetl.domain.ports import ExecutionMetricsReadablePort, LoggerPort
 

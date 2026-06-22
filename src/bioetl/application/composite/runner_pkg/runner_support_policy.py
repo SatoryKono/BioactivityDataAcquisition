@@ -17,7 +17,7 @@ from bioetl.application.composite.runner_pkg.runner_support_types import (
 from bioetl.application.composite.runtime_models import (
     CompositeExecutionContext,
 )
-from bioetl.domain.composite.config_models import EnricherConfig
+from bioetl.domain.composite.config import EnricherConfig
 from bioetl.domain.composite.result import EnrichmentResult
 
 __all__ = [

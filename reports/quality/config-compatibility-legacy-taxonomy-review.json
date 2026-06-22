@@ -1,11 +1,11 @@
 {
-  "snapshot_date": "2026-06-19",
+  "snapshot_date": "2026-06-22",
   "source_artifact": "reports/quality/config-discrepancy-baseline.json",
   "status": "reviewed_no_growth",
   "budget_policy": "no_growth_ratchet_only",
   "families": {
     "composite_runtime": {
-      "compatibility_legacy_count": 11,
+      "compatibility_legacy_count": 9,
       "compatibility_legacy_keys": [
         "composite.field_aliases",
         "composite.field_aliases.hba_count",
@@ -15,13 +15,80 @@
         "composite.field_aliases.logp",
         "composite.field_aliases.logp.pubchem",
         "composite.field_aliases.polar_surface_area",
-        "composite.field_aliases.polar_surface_area.pubchem",
-        "composite.field_aliases.standard_inchi",
-        "composite.field_aliases.standard_inchi.pubchem"
+        "composite.field_aliases.polar_surface_area.pubchem"
       ],
+      "alias_families": [
+        {
+          "family_name": "hba_count",
+          "owner": "config-governance",
+          "usage_classification": "first_party_active_cross_provider_join_alias",
+          "compatibility_legacy_keys": [
+            "composite.field_aliases.hba_count",
+            "composite.field_aliases.hba_count.pubchem"
+          ],
+          "removal_preconditions": [
+            "Promote the shared HBA mapping into canonical composite contract ownership.",
+            "Retire the pubchem-specific alias only after join consumers read canonical hba_count directly."
+          ]
+        },
+        {
+          "family_name": "hbd_count",
+          "owner": "config-governance",
+          "usage_classification": "first_party_active_cross_provider_join_alias",
+          "compatibility_legacy_keys": [
+            "composite.field_aliases.hbd_count",
+            "composite.field_aliases.hbd_count.pubchem"
+          ],
+          "removal_preconditions": [
+            "Promote the shared HBD mapping into canonical composite contract ownership.",
+            "Retire the pubchem-specific alias only after join consumers read canonical hbd_count directly."
+          ]
+        },
+        {
+          "family_name": "logp",
+          "owner": "config-governance",
+          "usage_classification": "first_party_active_cross_provider_join_alias",
+          "compatibility_legacy_keys": [
+            "composite.field_aliases.logp",
+            "composite.field_aliases.logp.pubchem"
+          ],
+          "removal_preconditions": [
+            "Promote the shared logp mapping into canonical composite contract ownership.",
+            "Retire the pubchem xlogp alias only after all composite joins read canonical logp directly."
+          ]
+        },
+        {
+          "family_name": "polar_surface_area",
+          "owner": "config-governance",
+          "usage_classification": "first_party_active_cross_provider_join_alias",
+          "compatibility_legacy_keys": [
+            "composite.field_aliases.polar_surface_area",
+            "composite.field_aliases.polar_surface_area.pubchem"
+          ],
+          "removal_preconditions": [
+            "Promote the shared polar-surface-area mapping into canonical composite contract ownership.",
+            "Retire the pubchem tpsa alias only after all composite joins read canonical polar_surface_area directly."
+          ]
+        }
+      ],
+      "first_safe_removal_wave": {
+        "family_name": "standard_inchi",
+        "owner": "config-governance",
+        "usage_classification": "confirmed_unused_config_duplicate",
+        "state": "removed",
+        "compatibility_legacy_keys_removed": [
+          "composite.field_aliases.standard_inchi",
+          "composite.field_aliases.standard_inchi.pubchem"
+        ],
+        "removal_preconditions_satisfied": [
+          "Runtime field-alias resolution already maps PubChem inchi through bioetl.domain.registry.field_aliases.MOLECULE_FIELD_ALIASES.",
+          "Composite YAML no longer owns a duplicate compatibility_legacy field_aliases entry for standard_inchi."
+        ],
+        "remediation": "Keep standard_inchi canonical-only and block reintroduction of provider-specific alias leaves."
+      },
       "owner": "config-governance",
       "review_date": "2026-09-30",
-      "rationale": "Composite compatibility_legacy paths are retained field_aliases for provider-to-composite joins. Identity ChEMBL aliases were removed; remaining keys are cross-provider aliases over active composite contracts, not a sanctioned path for new schema shapes.",
+      "rationale": "Composite compatibility_legacy paths are retained field_aliases for provider-to-composite joins. Identity standard_inchi aliases were removed; remaining classified keys are cross-provider aliases over active composite contracts, not a sanctioned path for new schema shapes.",
       "action": "Keep remaining cross-provider aliases explicit, migrate touched joins toward canonical field-registry ownership, and reject growth in the derived compatibility_legacy group.",
       "risk": "medium"
     },

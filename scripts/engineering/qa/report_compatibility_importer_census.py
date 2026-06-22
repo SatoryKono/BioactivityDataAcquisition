@@ -274,6 +274,20 @@ def _load_retained_entrypoints(path: Path) -> list[dict[str, Any]]:
     return [row for row in rows if isinstance(row, dict)]
 
 
+def _load_first_safe_removal_wave(path: Path) -> dict[str, Any]:
+    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    assert isinstance(payload, dict)
+    first_wave = payload.get("first_safe_removal_wave", {})
+    assert isinstance(first_wave, dict)
+    rows = first_wave.get("rows", [])
+    assert isinstance(rows, list)
+    return {
+        "linked_issue": first_wave.get("linked_issue"),
+        "review_date": first_wave.get("review_date"),
+        "rows": [row for row in rows if isinstance(row, dict)],
+    }
+
+
 def _load_tracked_twin_families(path: Path) -> list[dict[str, Any]]:
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
@@ -286,6 +300,32 @@ def _load_config_root_facade_inventory(path: Path) -> dict[str, Any]:
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
     return payload
+
+
+def _usage_classification(row: dict[str, Any]) -> str:
+    external_breaking_change_required = bool(
+        row.get("external_breaking_change_required")
+    )
+    internal_callers_zero = bool(row.get("internal_callers_zero"))
+    if external_breaking_change_required and internal_callers_zero:
+        return "stable_public_api_zero_first_party_src"
+    if external_breaking_change_required:
+        return "stable_public_api_with_reviewed_first_party_usage"
+    return "compatibility_surface_under_active_migration"
+
+
+def _surface_classification(
+    row: dict[str, Any],
+    *,
+    src_importer_count: int,
+) -> str:
+    if str(row.get("status")) != "public-entrypoint":
+        return "transitional"
+    if src_importer_count > 0:
+        return "first-party-active"
+    if bool(row.get("external_breaking_change_required")):
+        return "external-facing"
+    return "confirmed-unused"
 
 
 def _module_name_from_repo_path(repo_path: str) -> str:
@@ -477,6 +517,9 @@ def build_compatibility_importer_census(
     retained_entrypoints = _load_retained_entrypoints(
         repo_root / "configs" / "quality" / "compatibility_facade_inventory.yaml"
     )
+    first_safe_removal_wave = _load_first_safe_removal_wave(
+        repo_root / "configs" / "quality" / "compatibility_facade_inventory.yaml"
+    )
     twin_pairs = find_public_private_twin_modules(repo_root)
     twin_ratchet_path = _resolve_inventory_path(repo_root, DEFAULT_TWIN_RATCHET)
     tracked_twin_families = _load_tracked_twin_families(twin_ratchet_path)
@@ -512,24 +555,69 @@ def build_compatibility_importer_census(
         repo_path = str(row["path"])
         module_name = _module_name_from_repo_path(repo_path)
         importers = importer_map.get(module_name, {"src": (), "tests": ()})
-        retained_rows.append(
+        retained_row = {
+            "path": repo_path,
+            "module_name": module_name,
+            "status": row.get("status"),
+            "canonical_target": row.get("canonical_target"),
+            "owner": row.get("owner"),
+            "external_breaking_change_required": bool(
+                row.get("external_breaking_change_required")
+            ),
+            "internal_callers_zero": bool(row.get("internal_callers_zero")),
+            "usage_classification": _usage_classification(row),
+            "src_importers": list(importers.get("src", ())),
+            "test_importers": list(importers.get("tests", ())),
+            "src_importer_count": len(importers.get("src", ())),
+            "test_importer_count": len(importers.get("tests", ())),
+        }
+        retained_row["surface_classification"] = _surface_classification(
+            row,
+            src_importer_count=int(retained_row["src_importer_count"]),
+        )
+        retained_rows.append(retained_row)
+        export_contract = row.get("public_export_contract")
+        if isinstance(export_contract, dict):
+            retained_public_export_rows.append(
+                {
+                    **_build_public_export_contract_row(repo_root / repo_path, row),
+                    "owner": retained_row["owner"],
+                    "status": retained_row["status"],
+                    "external_breaking_change_required": retained_row[
+                        "external_breaking_change_required"
+                    ],
+                    "internal_callers_zero": retained_row["internal_callers_zero"],
+                    "usage_classification": retained_row["usage_classification"],
+                    "surface_classification": retained_row["surface_classification"],
+                    "src_importer_count": retained_row["src_importer_count"],
+                    "test_importer_count": retained_row["test_importer_count"],
+                }
+            )
+
+    first_safe_removal_wave_rows: list[dict[str, object]] = []
+    for row in first_safe_removal_wave["rows"]:
+        repo_path = str(row["path"])
+        module_name = _module_name_from_repo_path(repo_path)
+        importers = importer_map.get(module_name, {"src": (), "tests": ()})
+        first_safe_removal_wave_rows.append(
             {
                 "path": repo_path,
                 "module_name": module_name,
-                "status": row.get("status"),
-                "canonical_target": row.get("canonical_target"),
                 "owner": row.get("owner"),
+                "previous_status": row.get("previous_status"),
+                "surface_classification": row.get(
+                    "surface_classification",
+                    "confirmed-unused",
+                ),
+                "action": row.get("action"),
+                "rationale": row.get("rationale"),
+                "migration_prerequisites": list(row.get("migration_prerequisites", [])),
                 "src_importers": list(importers.get("src", ())),
                 "test_importers": list(importers.get("tests", ())),
                 "src_importer_count": len(importers.get("src", ())),
                 "test_importer_count": len(importers.get("tests", ())),
             }
         )
-        export_contract = row.get("public_export_contract")
-        if isinstance(export_contract, dict):
-            retained_public_export_rows.append(
-                _build_public_export_contract_row(repo_root / repo_path, row)
-            )
 
     twin_rows: list[dict[str, object]] = []
     for pair in twin_pairs:
@@ -637,7 +725,14 @@ def build_compatibility_importer_census(
             ),
         },
         "retained_entrypoints": retained_rows,
+        "retained_entrypoint_owner_usage_map": retained_rows,
         "retained_public_export_facades": retained_public_export_rows,
+        "retained_public_export_owner_usage_map": retained_public_export_rows,
+        "first_safe_removal_wave": {
+            "linked_issue": first_safe_removal_wave["linked_issue"],
+            "review_date": first_safe_removal_wave["review_date"],
+            "rows": first_safe_removal_wave_rows,
+        },
         "removed_compatibility_surfaces": removed_surface_rows,
         "twin_pairs": twin_rows,
         "tracked_twin_families": tracked_twin_rows,
@@ -654,12 +749,18 @@ def build_compatibility_importer_census(
 def _render_markdown(payload: dict[str, object]) -> str:
     summary = payload["summary"]
     retained_rows = payload["retained_entrypoints"]
+    retained_owner_usage_rows = payload["retained_entrypoint_owner_usage_map"]
     public_export_rows = payload["retained_public_export_facades"]
+    public_export_owner_usage_rows = payload["retained_public_export_owner_usage_map"]
+    first_safe_removal_wave = payload["first_safe_removal_wave"]
     removed_rows = payload["removed_compatibility_surfaces"]
     twin_rows = payload["twin_pairs"]
     assert isinstance(summary, dict)
     assert isinstance(retained_rows, list)
+    assert isinstance(retained_owner_usage_rows, list)
     assert isinstance(public_export_rows, list)
+    assert isinstance(public_export_owner_usage_rows, list)
+    assert isinstance(first_safe_removal_wave, dict)
     assert isinstance(removed_rows, list)
     assert isinstance(twin_rows, list)
 
@@ -699,6 +800,26 @@ def _render_markdown(payload: dict[str, object]) -> str:
     lines.extend(
         [
             "",
+            "## Retained Entrypoint Owner/Usage Map",
+            "",
+            "| Path | Owner | Usage classification | Surface classification | Internal callers zero | "
+            "External breaking change required | src importers | test importers |",
+            "| --- | --- | --- | --- | --- | --- | ---: | ---: |",
+        ]
+    )
+    for row in retained_owner_usage_rows:
+        assert isinstance(row, dict)
+        lines.append(
+            f"| `{row['path']}` | `{row['owner']}` | `{row['usage_classification']}` | "
+            f"`{row['surface_classification']}` | "
+            f"{'yes' if row['internal_callers_zero'] else 'no'} | "
+            f"{'yes' if row['external_breaking_change_required'] else 'no'} | "
+            f"{row['src_importer_count']} | {row['test_importer_count']} |"
+        )
+
+    lines.extend(
+        [
+            "",
             "## Retained Public Export Facades",
             "",
             "| Path | Public exports | Lazy exports | Duplicate exports | Resolution conflicts |",
@@ -718,6 +839,53 @@ def _render_markdown(payload: dict[str, object]) -> str:
             f"{', '.join(duplicate_exports) if duplicate_exports else 'none'} | "
             f"{', '.join(conflicts) if conflicts else 'none'} |"
         )
+
+    lines.extend(
+        [
+            "",
+            "## Retained Public Export Facade Owner/Usage Map",
+            "",
+            "| Path | Owner | Usage classification | Surface classification | src importers | test importers | Public exports |",
+            "| --- | --- | --- | --- | ---: | ---: | ---: |",
+        ]
+    )
+    for row in public_export_owner_usage_rows:
+        assert isinstance(row, dict)
+        lines.append(
+            f"| `{row['path']}` | `{row['owner']}` | `{row['usage_classification']}` | "
+            f"`{row['surface_classification']}` | "
+            f"{row['src_importer_count']} | {row['test_importer_count']} | "
+            f"{row['public_export_count']} |"
+        )
+
+    lines.extend(
+        [
+            "",
+            "## First Safe Removal Wave",
+            "",
+            f"- linked_issue: {first_safe_removal_wave['linked_issue']}",
+            f"- review_date: {first_safe_removal_wave['review_date']}",
+            "",
+            "| Path | Owner | Previous status | Surface classification | src importers | test importers | Action |",
+            "| --- | --- | --- | --- | ---: | ---: | --- |",
+        ]
+    )
+    removal_rows = first_safe_removal_wave["rows"]
+    assert isinstance(removal_rows, list)
+    for row in removal_rows:
+        assert isinstance(row, dict)
+        lines.append(
+            f"| `{row['path']}` | `{row['owner']}` | `{row['previous_status']}` | "
+            f"`{row['surface_classification']}` | {row['src_importer_count']} | "
+            f"{row['test_importer_count']} | `{row['action']}` |"
+        )
+        prerequisites = row.get("migration_prerequisites", [])
+        assert isinstance(prerequisites, list)
+        if prerequisites:
+            lines.append(
+                f"Migration prerequisites for `{row['path']}`: "
+                + "; ".join(str(item) for item in prerequisites)
+            )
 
     lines.extend(
         [

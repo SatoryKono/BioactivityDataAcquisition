@@ -112,3 +112,52 @@ def test_config_compatibility_legacy_taxonomy_has_ci_guard_links() -> None:
     for guard in guards:
         assert isinstance(guard, str) and guard
         assert (ROOT / guard).exists(), f"Missing config compatibility guard: {guard}"
+
+
+def test_composite_runtime_alias_family_inventory_is_published() -> None:
+    """Composite compatibility_legacy review must inventory active alias families."""
+    review = _load_json(REVIEW_PATH)
+    review_families = cast(dict[str, Any], review["families"])
+    composite_runtime = cast(dict[str, Any], review_families["composite_runtime"])
+    live_keys_by_family = _live_compatibility_legacy_keys_by_family()
+    live_composite_keys = set(live_keys_by_family["composite_runtime"])
+
+    alias_families = composite_runtime.get("alias_families")
+    assert isinstance(alias_families, list) and alias_families
+
+    family_names = {
+        str(row["family_name"]) for row in alias_families if isinstance(row, dict)
+    }
+    assert family_names == {"hba_count", "hbd_count", "logp", "polar_surface_area"}
+
+    for row in alias_families:
+        assert isinstance(row, dict)
+        assert row["owner"] == "config-governance"
+        assert row["usage_classification"] == (
+            "first_party_active_cross_provider_join_alias"
+        )
+        keys = row.get("compatibility_legacy_keys")
+        assert isinstance(keys, list) and keys == sorted(keys)
+        assert set(keys) <= live_composite_keys
+        preconditions = row.get("removal_preconditions")
+        assert isinstance(preconditions, list) and preconditions
+
+
+def test_composite_runtime_first_safe_removal_wave_is_recorded() -> None:
+    """The first confirmed-unused alias family removal must stay explicit."""
+    review = _load_json(REVIEW_PATH)
+    review_families = cast(dict[str, Any], review["families"])
+    composite_runtime = cast(dict[str, Any], review_families["composite_runtime"])
+    first_wave = composite_runtime.get("first_safe_removal_wave")
+    assert isinstance(first_wave, dict)
+
+    assert first_wave["family_name"] == "standard_inchi"
+    assert first_wave["owner"] == "config-governance"
+    assert first_wave["usage_classification"] == "confirmed_unused_config_duplicate"
+    assert first_wave["state"] == "removed"
+    assert first_wave["compatibility_legacy_keys_removed"] == [
+        "composite.field_aliases.standard_inchi",
+        "composite.field_aliases.standard_inchi.pubchem",
+    ]
+    satisfied = first_wave.get("removal_preconditions_satisfied")
+    assert isinstance(satisfied, list) and satisfied

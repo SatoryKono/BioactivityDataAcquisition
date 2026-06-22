@@ -12,7 +12,7 @@ from bioetl.application.composite.column_priority_orderer import (
     get_enricher_prefix,
     order_priority_columns,
 )
-from bioetl.domain.composite.config_models import EnricherConfig
+from bioetl.domain.composite.config import EnricherConfig
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort

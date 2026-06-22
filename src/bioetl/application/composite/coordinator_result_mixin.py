@@ -4,8 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from bioetl.domain.composite.config_dq import CompositeDQConfig
-from bioetl.domain.composite.config_models import EnricherConfig
+from bioetl.domain.composite.config import CompositeDQConfig, EnricherConfig
 from bioetl.domain.composite.result import EnrichmentResult, EnrichmentStatus
 from bioetl.domain.ports import ExecutionMetricsReadablePort, LoggerPort
 from bioetl.domain.types import JsonDict

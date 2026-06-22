@@ -161,15 +161,15 @@
       ]
     },
     "pubmed": {
-      "command": "pwsh",
+      "command": "bash",
       "args": [
-        "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\scripts\\ai\\mcp\\mcp_pubmed_wrapper.ps1"
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_pubmed_wrapper.sh"
       ]
     },
     "mermaid": {
-      "command": "pwsh",
+      "command": "bash",
       "args": [
-        "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\scripts\\ai\\mcp\\mcp_mermaid_wrapper.ps1"
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_mermaid_wrapper.sh"
       ]
     },
     "biomoltechDocs": {

@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
-import json
 import hashlib
+import json
+from dataclasses import replace
+from datetime import UTC, datetime
 from typing import Any
 
 import pytest
@@ -20,6 +22,9 @@ from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.control_plane.effective_config_artifact import (
     ConfigSourceRef,
     EffectiveConfigArtifact,
+    EffectiveExecutionConfig,
+    MISSING_EFFECTIVE_CONFIG_TIMESTAMP,
+    ResolvedConfigSnapshot,
 )
 from bioetl.domain.types.dq_contracts import DQDisposition
 
@@ -511,7 +516,40 @@ class TestEffectiveConfigService:
         artifact1 = self.service.create_effective_config_artifact(**kwargs)
         artifact2 = self.service.create_effective_config_artifact(**kwargs)
 
-        assert artifact1.created_at != artifact2.created_at
+        assert artifact1.created_at == MISSING_EFFECTIVE_CONFIG_TIMESTAMP
+        assert artifact2.created_at == MISSING_EFFECTIVE_CONFIG_TIMESTAMP
+
+        artifact1 = replace(
+            artifact1,
+            created_at=datetime(2024, 1, 1, 12, 0, tzinfo=UTC),
+            resolved_config=ResolvedConfigSnapshot(
+                config_type=artifact1.resolved_config.config_type,
+                config_data=artifact1.resolved_config.config_data,
+                config_hash=artifact1.resolved_config.config_hash,
+                timestamp=datetime(2024, 1, 1, 12, 0, tzinfo=UTC),
+            ),
+            effective_execution_config=EffectiveExecutionConfig(
+                config_data=artifact1.effective_execution_config.config_data,
+                effective_hash=artifact1.effective_execution_config.effective_hash,
+                timestamp=datetime(2024, 1, 1, 12, 0, tzinfo=UTC),
+            ),
+        )
+        artifact2 = replace(
+            artifact2,
+            created_at=datetime(2025, 1, 1, 12, 0, tzinfo=UTC),
+            resolved_config=ResolvedConfigSnapshot(
+                config_type=artifact2.resolved_config.config_type,
+                config_data=artifact2.resolved_config.config_data,
+                config_hash=artifact2.resolved_config.config_hash,
+                timestamp=datetime(2025, 1, 1, 12, 0, tzinfo=UTC),
+            ),
+            effective_execution_config=EffectiveExecutionConfig(
+                config_data=artifact2.effective_execution_config.config_data,
+                effective_hash=artifact2.effective_execution_config.effective_hash,
+                timestamp=datetime(2025, 1, 1, 12, 0, tzinfo=UTC),
+            ),
+        )
+
         assert self.service.serialize_semantic_artifact(
             artifact1
         ) == self.service.serialize_semantic_artifact(artifact2)

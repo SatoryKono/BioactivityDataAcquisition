@@ -266,3 +266,69 @@ def test_build_dead_code_inventory_flags_zero_import_candidates(tmp_path: Path) 
             "test_importer_count": 0,
         }
     ]
+
+
+def test_build_dead_code_inventory_excludes_lazy_cli_command_entrypoints(
+    tmp_path: Path,
+) -> None:
+    _write(
+        tmp_path / "configs/quality/compatibility_facade_inventory.yaml",
+        "\n".join(
+            [
+                "version: 1",
+                "policy_scope: compatibility_facades",
+                "transition_debt: []",
+                "retained_entrypoints:",
+                "  - path: src/bioetl/interfaces/cli/main.py",
+            ]
+        )
+        + "\n",
+    )
+    _write(
+        tmp_path / "configs/quality/retirement_candidate_triage.yaml",
+        "\n".join(
+            [
+                "schema_version: 1",
+                "policy:",
+                "  review_cycle_days: 90",
+                "repo_wide_zero_import_review:",
+                "  linked_issue: '#4541'",
+                "  mode: fail-fast-zero-untriaged",
+                "  max_untriaged_zero_import_candidates: 0",
+                "  last_reviewed: '2026-05-22'",
+                "  next_review_by: '2026-08-20'",
+                "repo_wide_zero_import_classification:",
+                "  linked_issue: '#4541'",
+                "  review_date: '2026-05-22'",
+                "  allowed_dispositions:",
+                "    - retain_dynamic_entrypoint",
+                "  entries: []",
+                "families: []",
+            ]
+        )
+        + "\n",
+    )
+    _write(
+        tmp_path / "src/bioetl/interfaces/cli/main.py",
+        "\n".join(
+            [
+                "_LAZY_COMMAND_SPECS = {",
+                '    "maintenance": (',
+                '        "bioetl.interfaces.cli.commands.maintenance",',
+                '        "maintenance",',
+                '        "Maintenance operations",',
+                "    ),",
+                "}",
+            ]
+        )
+        + "\n",
+    )
+    _write(
+        tmp_path / "src/bioetl/interfaces/cli/commands/maintenance.py",
+        "def maintenance():\n    return None\n",
+    )
+
+    payload = build_dead_code_inventory(tmp_path)
+
+    assert payload["summary"]["repo_wide_zero_import_candidate_count"] == 0
+    assert payload["repo_wide_zero_import_candidates"] == []

@@ -9,7 +9,6 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay impor
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_projection import (
     _build_replay_projection_bundle,
-    _build_replay_projection_context_kwargs,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.reproducibility_assessment import (
     _assess_manifest_reproducibility_policy,
@@ -63,15 +62,12 @@ def _resolve_base_summary_replay_context(
         resume_requested=resume_requested,
         replay_family_contract=replay_family_contract,
     )
-    replay_projection_context = _build_replay_projection_context_kwargs(
-        manifest,
-        input_snapshots,
-        requested_exact_replay,
-        resume_requested,
-        policy_assessment,
-    )
     replay_projection_bundle = _build_replay_projection_bundle(
-        **replay_projection_context,
+        manifest=manifest,
+        input_snapshots=input_snapshots,
+        requested_exact_replay=requested_exact_replay,
+        resume_requested=resume_requested,
+        policy_assessment=policy_assessment,
         replay_family_contract_payload=_build_replay_family_contract_payload(
             replay_family_contract
         ),

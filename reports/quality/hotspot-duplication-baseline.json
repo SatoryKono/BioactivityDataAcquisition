@@ -47,6 +47,60 @@
       }
     ]
   },
+  "reduction_leverage_ranking": [
+    {
+      "target": "src/bioetl/application/core",
+      "duplicate_clusters": 0,
+      "dominant_actionability_category": null,
+      "dominant_actionability_cluster_count": 0,
+      "low_risk_cluster_count": 0,
+      "low_risk_cluster_share": 0.0,
+      "recommended_first_wave": false
+    },
+    {
+      "target": "src/bioetl/application/services/control_plane",
+      "duplicate_clusters": 0,
+      "dominant_actionability_category": null,
+      "dominant_actionability_cluster_count": 0,
+      "low_risk_cluster_count": 0,
+      "low_risk_cluster_share": 0.0,
+      "recommended_first_wave": false
+    },
+    {
+      "target": "src/bioetl/composition/bootstrap/runtime",
+      "duplicate_clusters": 0,
+      "dominant_actionability_category": null,
+      "dominant_actionability_cluster_count": 0,
+      "low_risk_cluster_count": 0,
+      "low_risk_cluster_share": 0.0,
+      "recommended_first_wave": false
+    },
+    {
+      "target": "src/bioetl/composition/factories/pipeline",
+      "duplicate_clusters": 0,
+      "dominant_actionability_category": null,
+      "dominant_actionability_cluster_count": 0,
+      "low_risk_cluster_count": 0,
+      "low_risk_cluster_share": 0.0,
+      "recommended_first_wave": false
+    },
+    {
+      "target": "src/bioetl/composition/runtime_builders",
+      "duplicate_clusters": 0,
+      "dominant_actionability_category": null,
+      "dominant_actionability_cluster_count": 0,
+      "low_risk_cluster_count": 0,
+      "low_risk_cluster_share": 0.0,
+      "recommended_first_wave": false
+    }
+  ],
+  "first_wave": {
+    "status": "selected",
+    "target": "src/bioetl/application/core",
+    "duplicate_clusters": 0,
+    "dominant_actionability_category": null,
+    "selection_rule": "prefer low-risk actionability families with bounded cluster counts, then maximize duplicate reduction leverage"
+  },
   "targets": [
     {
       "target": "src/bioetl/application/core",
@@ -54,6 +108,7 @@
       "duplicate_count": 0,
       "raw_duplicate_count": 0,
       "excluded_duplicate_count": 0,
+      "actionability": [],
       "top_pairs": [],
       "clusters": []
     },
@@ -63,6 +118,7 @@
       "duplicate_count": 0,
       "raw_duplicate_count": 0,
       "excluded_duplicate_count": 0,
+      "actionability": [],
       "top_pairs": [],
       "clusters": []
     },
@@ -72,6 +128,7 @@
       "duplicate_count": 0,
       "raw_duplicate_count": 0,
       "excluded_duplicate_count": 0,
+      "actionability": [],
       "top_pairs": [],
       "clusters": []
     },
@@ -81,6 +138,7 @@
       "duplicate_count": 0,
       "raw_duplicate_count": 0,
       "excluded_duplicate_count": 0,
+      "actionability": [],
       "top_pairs": [],
       "clusters": []
     },
@@ -90,6 +148,7 @@
       "duplicate_count": 0,
       "raw_duplicate_count": 0,
       "excluded_duplicate_count": 0,
+      "actionability": [],
       "top_pairs": [],
       "clusters": []
     }

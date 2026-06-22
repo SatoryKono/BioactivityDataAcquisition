@@ -112,7 +112,6 @@ composite:
     # hbd_count              | hbd_count            | h_bond_donor_count
     # polar_surface_area     | polar_surface_area   | tpsa
     # logp                   | logp                 | xlogp
-    # standard_inchi         | standard_inchi       | inchi
     hba_count:
       pubchem: h_bond_acceptor_count
     hbd_count:
@@ -121,8 +120,6 @@ composite:
       pubchem: tpsa
     logp:
       pubchem: xlogp
-    standard_inchi:
-      pubchem: inchi
 
   # ---------------------------------------------------------------------------
   # Merge Configuration

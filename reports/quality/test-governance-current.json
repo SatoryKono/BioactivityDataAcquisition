@@ -102,90 +102,6 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "15",
-        "path": "tests/contract/test_publication_schema_strict_contracts.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_pubmed_silver_schema_accepts_minimal_fixture"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "24",
-        "path": "tests/contract/schemas/test_pubchem_shard_validation.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_pubchem_identity_shard_accepts_minimal_valid_row"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "28",
-        "path": "tests/contract/schemas/test_pubchem_shard_validation.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_pubchem_identity_shard_accepts_row_with_all_optional_checks"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "32",
-        "path": "tests/contract/schemas/test_pubchem_shard_validation.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_pubchem_physchem_shard_accepts_row_exercising_all_checks"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "38",
-        "path": "tests/contract/schemas/test_pubchem_shard_validation.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_pubchem_stereo_shard_accepts_row_exercising_all_checks"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "42",
-        "path": "tests/contract/schemas/test_pubchem_shard_validation.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_pubchem_three_d_shard_accepts_row_exercising_all_checks"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "85",
-        "path": "tests/contract/schemas/test_pubchem_shard_validation.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_pubchem_molecule_schema_accepts_composed_minimal_row"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "34",
-        "path": "tests/contract/schemas/test_publication_common_schema.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_publication_common_schema_accepts_minimal_row"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "22",
-        "path": "tests/contract/schemas/test_uniprot_shard_validation.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_uniprot_core_shard_accepts_minimal_valid_row"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "47",
-        "path": "tests/contract/schemas/test_uniprot_shard_validation.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_id_mapping_shard_accepts_found_mapping"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "65",
-        "path": "tests/contract/schemas/test_uniprot_shard_validation.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_uniprot_target_schema_accepts_composed_minimal_row"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "108",
-        "path": "tests/contract/schemas/test_uniprot_shard_validation.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_id_mapping_shard_accepts_not_found_without_accession"
-      },
-      {
-        "category": "intentional_no_exception_contract",
         "line": "74",
         "path": "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
@@ -3308,7 +3224,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "1142",
+        "line": "1187",
         "path": "tests/unit/infrastructure/quarantine/test_unified_quarantine.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_aclose_does_nothing"
@@ -3570,7 +3486,7 @@
       "architecture_helper_guard": 14,
       "benchmark_or_performance": 0,
       "helper_asserted": 0,
-      "intentional_no_exception_contract": 495,
+      "intentional_no_exception_contract": 483,
       "weak_no_value": 0
     },
     "assertless_examples": [
@@ -3588,19 +3504,19 @@
       "tests/architecture/test_port_contracts_hypothesis.py:587",
       "tests/architecture/test_port_contracts_resilience_concurrency.py:183",
       "tests/architecture/test_strict_architecture_contracts.py:918",
-      "tests/contract/test_publication_schema_strict_contracts.py:15",
-      "tests/contract/schemas/test_pubchem_shard_validation.py:24",
-      "tests/contract/schemas/test_pubchem_shard_validation.py:28",
-      "tests/contract/schemas/test_pubchem_shard_validation.py:32",
-      "tests/contract/schemas/test_pubchem_shard_validation.py:38",
-      "tests/contract/schemas/test_pubchem_shard_validation.py:42",
-      "tests/contract/schemas/test_pubchem_shard_validation.py:85",
-      "tests/contract/schemas/test_publication_common_schema.py:34",
-      "tests/contract/schemas/test_uniprot_shard_validation.py:22",
-      "tests/contract/schemas/test_uniprot_shard_validation.py:47",
-      "tests/contract/schemas/test_uniprot_shard_validation.py:65"
+      "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:74",
+      "tests/integration/infrastructure/storage/test_delta_reader.py:576",
+      "tests/unit/application/core/test_batch_metrics.py:138",
+      "tests/unit/application/core/test_batch_metrics.py:495",
+      "tests/unit/application/core/test_batch_metrics.py:555",
+      "tests/unit/application/core/test_batch_tracing.py:110",
+      "tests/unit/application/core/test_batch_writer_tracing_mixin.py:79",
+      "tests/unit/application/core/test_batch_writer_tracing_mixin.py:255",
+      "tests/unit/application/core/test_dq_metrics.py:33",
+      "tests/unit/application/core/test_otel_spans.py:301",
+      "tests/unit/application/core/test_otel_spans.py:553"
     ],
-    "assertless_total_candidates": 509,
+    "assertless_total_candidates": 497,
     "compatibility_examples": [
       "tests/architecture/test_application_composite_compat_surface_usage.py",
       "tests/architecture/test_application_core_lifecycle_shim_usage.py",
@@ -3807,8 +3723,8 @@
     "refined_assertless_tests": 0,
     "root": ".",
     "top_duplicate_test_names": [],
-    "total_test_files": 1832,
-    "total_test_functions": 20988,
+    "total_test_files": 1834,
+    "total_test_functions": 21006,
     "uuid4_call_sites": 0
   }
 }

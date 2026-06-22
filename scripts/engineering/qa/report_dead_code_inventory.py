@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import sys
 from datetime import date
@@ -206,6 +207,53 @@ def _load_retained_entrypoint_paths(repo_root: Path) -> set[str]:
     return {str(row["path"]) for row in rows if isinstance(row, dict) and "path" in row}
 
 
+def _module_name_to_repo_path(module_name: str) -> str:
+    """Convert a bioetl module name into its source path."""
+    if not module_name.startswith("bioetl."):
+        raise ValueError(f"Unsupported module name outside bioetl package: {module_name}")
+    relative = "/".join(module_name.split(".")[1:])
+    return f"src/bioetl/{relative}.py"
+
+
+def _load_lazy_cli_command_entrypoint_paths(repo_root: Path) -> set[str]:
+    """Return CLI modules that are imported dynamically from main command specs."""
+    main_path = repo_root / "src" / "bioetl" / "interfaces" / "cli" / "main.py"
+    if not main_path.exists():
+        return set()
+
+    tree = ast.parse(main_path.read_text(encoding="utf-8"), filename=str(main_path))
+    for node in tree.body:
+        value_node: ast.AST | None = None
+        if isinstance(node, ast.Assign) and any(
+            isinstance(target, ast.Name) and target.id == "_LAZY_COMMAND_SPECS"
+            for target in node.targets
+        ):
+            value_node = node.value
+        elif (
+            isinstance(node, ast.AnnAssign)
+            and isinstance(node.target, ast.Name)
+            and node.target.id == "_LAZY_COMMAND_SPECS"
+        ):
+            value_node = node.value
+        if value_node is None:
+            continue
+        if not isinstance(value_node, ast.Dict):
+            return set()
+
+        paths: set[str] = set()
+        for value in value_node.values:
+            if not isinstance(value, ast.Tuple) or not value.elts:
+                continue
+            module_node = value.elts[0]
+            if not isinstance(module_node, ast.Constant) or not isinstance(
+                module_node.value, str
+            ):
+                continue
+            paths.add(_module_name_to_repo_path(module_node.value))
+        return paths
+    return set()
+
+
 def _resolve_snapshot_date(
     triage_payload: dict[str, Any],
     *,
@@ -326,7 +374,9 @@ def build_dead_code_inventory(
     triage_payload = _load_yaml(
         repo_root / "configs" / "quality" / "retirement_candidate_triage.yaml"
     )
-    retained_entrypoint_paths = _load_retained_entrypoint_paths(repo_root)
+    retained_entrypoint_paths = _load_retained_entrypoint_paths(
+        repo_root
+    ) | _load_lazy_cli_command_entrypoint_paths(repo_root)
     repo_wide_classifications, allowed_repo_wide_dispositions = (
         _load_repo_wide_zero_import_classifications(triage_payload)
     )

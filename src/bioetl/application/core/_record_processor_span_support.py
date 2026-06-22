@@ -6,6 +6,9 @@ from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.batch_operation_errors import OPERATION_ERRORS
+from bioetl.application.core.batch_processing_runtime import (
+    _run_transform_batch,
+)
 from bioetl.application.core.span_helpers import close_span
 from bioetl.domain.types import JsonDict
 
@@ -58,11 +61,12 @@ class RecordProcessorSpanExecutor:
         start_index: int,
     ) -> TransformResult:
         """Execute transformation with extended span attributes."""
-        span = self._start_span("transform", batch_id, len(records), input_count=True)
+        span = self._start_transform_span(batch_id, len(records))
         try:
-            result = await transformer.transform_batch(
-                records,
-                batch_id,
+            result = await self._transform_records(
+                transformer=transformer,
+                records=records,
+                batch_id=batch_id,
                 start_index=start_index,
             )
             if span:
@@ -94,6 +98,35 @@ class RecordProcessorSpanExecutor:
         typed_span = cast("Span", span)
         typed_span.__enter__()
         return typed_span
+
+    def _start_transform_span(
+        self,
+        batch_id: BatchID,
+        record_count: int,
+    ) -> Span | None:
+        """Start the canonical transform-stage span for one record batch."""
+        return self._start_span(
+            "transform",
+            batch_id,
+            record_count,
+            input_count=True,
+        )
+
+    async def _transform_records(
+        self,
+        *,
+        transformer: BatchTransformer,
+        records: list[JsonDict],
+        batch_id: BatchID,
+        start_index: int,
+    ) -> TransformResult:
+        """Execute the canonical transform-batch call for one record batch."""
+        return await _run_transform_batch(
+            transformer=transformer,
+            records=records,
+            batch_id=batch_id,
+            start_index=start_index,
+        )
 
     def _end_span(self, span: Span | None, error: Exception | None = None) -> None:
         """End a tracing span."""

@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+import importlib.util
+import sys
+from types import ModuleType
+
 import pytest
 
 from pathlib import Path
@@ -30,6 +34,15 @@ def _load_inventory() -> dict[str, object]:
     payload = yaml.safe_load(INVENTORY_PATH.read_text(encoding="utf-8"))
     assert isinstance(payload, dict), "config validation inventory must be a mapping"
     return payload
+
+
+def _load_module(path: Path, module_name: str) -> ModuleType:
+    spec = importlib.util.spec_from_file_location(module_name, str(path.resolve()))
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    return module
 
 
 def _tracked_config_files() -> list[str]:
@@ -147,6 +160,32 @@ def test_ai_docs_validate_configs_script_is_wrapper_only() -> None:
 
     assert 'import_module("scripts.schema.validate_pipeline_configs")' in wrapper
     assert "def validate_config_tree" not in wrapper
+
+
+def test_py_config_bot_gap_analysis_uses_canonical_composite_runtime_configs(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Legacy entity composite stubs must not be re-audited as standard configs."""
+    monkeypatch.chdir(ROOT)
+    module = _load_module(
+        ROOT
+        / "docs"
+        / "00-project"
+        / "ai"
+        / "agents"
+        / "scripts"
+        / "py-config-bot-1.py",
+        "py_config_bot_1_runtime",
+    )
+
+    config_paths = {
+        path.as_posix() for path in module._iter_config_files()  # type: ignore[attr-defined]
+    }
+
+    assert "configs/composites/molecule.yaml" in config_paths
+    assert not any(
+        path.startswith("configs/entities/composite/") for path in config_paths
+    )
 
 
 def test_high_risk_runtime_config_families_require_cross_file_validation() -> None:
