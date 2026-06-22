@@ -108,7 +108,7 @@ def build_pipeline_context(
         started_at=started_at,
     )
     cached_bronze = _build_cached_bronze_context(options)
-    return PipelineRunContext(
+    return PipelineRunContext.create(
         pipeline_name=name,
         run_id=_resolve_pipeline_run_id(
             options=options,

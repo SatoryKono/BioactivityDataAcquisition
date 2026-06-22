@@ -65,7 +65,7 @@ def _collect_exact_importers(target_module: str) -> set[str]:
     return importers
 
 
-def test_closeout_artifact_covers_requested_issues() -> None:
+def test_closeout_artifact_covers_requested_issues__5507_5509() -> None:
     payload = _load_json(CLOSEOUT)
     issues = payload["issues"]
     assert payload["schema_version"] == "tech-debt-issues-5507-5509-closeout-v1"
@@ -96,7 +96,7 @@ def test_issue_5509_contract_policy_loader_no_longer_contains_compat_backfills()
     assert "_validate_root_hash_policy_compatibility" not in source
 
 
-def test_issue_5509_entity_contracts_are_self_contained() -> None:
+def test_issue_5509_entity_contract_identity_stays_explicit() -> None:
     for path in sorted(ENTITY_CONFIGS_ROOT.rglob("*.yaml")):
         payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
         if not isinstance(payload, dict):
@@ -115,8 +115,8 @@ def test_issue_5509_entity_contracts_are_self_contained() -> None:
 
         assert contracts.get("contract_ref") == f"{provider}.{entity}", path
         assert contracts.get("active_version") == active_version, path
-        assert contracts.get("hash_include"), path
-        assert contracts.get("hash_exclude"), path
+        assert contracts.get("hash_include") == [], path
+        assert contracts.get("hash_exclude") == [], path
 
         rollout = contracts.get("rollout")
         assert rollout == {

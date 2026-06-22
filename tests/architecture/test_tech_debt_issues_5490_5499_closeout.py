@@ -50,7 +50,7 @@ def _collect_exact_importers(target_module: str) -> set[str]:
     return importers
 
 
-def test_closeout_artifact_covers_requested_issues() -> None:
+def test_closeout_artifact_covers_requested_issues__5490_5499() -> None:
     payload = _load_json(CLOSEOUT)
     issues = payload["issues"]
     assert payload["schema_version"] == "tech-debt-issues-5490-5499-closeout-v1"

@@ -77,7 +77,7 @@ class PipelineRunContextService:
         )
         cached_bronze = self._build_cached_bronze(options)
 
-        return PipelineRunContext(
+        return PipelineRunContext.create(
             pipeline_name=pipeline_name,
             run_id=run_id,
             run_type=RunType(options.run_type),

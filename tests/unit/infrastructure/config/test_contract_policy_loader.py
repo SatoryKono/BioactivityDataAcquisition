@@ -296,12 +296,27 @@ def test_entity_contract_values_override_base_defaults(
 
 
 @pytest.mark.unit
-def test_loader_does_not_backfill_hash_selectors_from_root_hash_policy(
+def test_loader_uses_root_hash_policy_for_effective_hash_selectors(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """contracts hash selectors must stay self-contained when root hash_policy exists."""
+    """Root hash_policy should supply the runtime-effective hash selectors."""
     load_pipeline_contract_policy.cache_clear()
     monkeypatch.chdir(tmp_path)
+
+    base_dir = tmp_path / "configs" / "base"
+    base_dir.mkdir(parents=True)
+    (base_dir / "pipeline.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "contract_defaults": {
+                    "hash_exclude": ["_ingestion_ts", "_run_id"],
+                    "hash_include": [],
+                }
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
 
     entity_dir = tmp_path / "configs" / "entities" / "chembl"
     entity_dir.mkdir(parents=True)
@@ -349,8 +364,8 @@ def test_loader_does_not_backfill_hash_selectors_from_root_hash_policy(
 
     policy = load_pipeline_contract_policy("chembl", "activity")
 
-    assert policy.hash_include == []
-    assert policy.hash_exclude == []
+    assert policy.hash_include == ["activity_id"]
+    assert policy.hash_exclude == ["_ingestion_ts", "_run_id"]
 
 
 @pytest.mark.unit

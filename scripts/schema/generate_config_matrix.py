@@ -78,6 +78,11 @@ _TAXONOMY_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
         ),
     ),
 )
+_DERIVED_ENTITY_PARAMETER_PREFIXES: tuple[str, ...] = (
+    "contracts.contract_ref",
+    "contracts.active_version",
+    "contracts.rollout",
+)
 
 
 def flatten_dict(d: dict[str, Any], parent_key: str = "") -> dict[str, Any]:
@@ -93,6 +98,26 @@ def flatten_dict(d: dict[str, Any], parent_key: str = "") -> dict[str, Any]:
         else:
             items[new_key] = str(value) if value is not None else "null"
     return items
+
+
+def _exclude_derived_entity_parameters(
+    flattened: dict[str, Any],
+) -> dict[str, Any]:
+    """Drop deterministic contract mirror fields from config-surface debt metrics.
+
+    These fields remain explicit in entity YAML for runtime identity validation, but
+    they are derived from other governed sources (`provider`, `entity`,
+    `hash_policy.contract.version`) and should not inflate discrepancy-budget
+    parameter counts.
+    """
+    return {
+        key: value
+        for key, value in flattened.items()
+        if not any(
+            key == prefix or key.startswith(f"{prefix}.")
+            for prefix in _DERIVED_ENTITY_PARAMETER_PREFIXES
+        )
+    }
 
 
 def load_config(path: Path) -> dict[str, Any]:
@@ -285,7 +310,9 @@ def _collect_configs() -> dict[str, dict[str, Any]]:
             continue
         rel = yaml_file.relative_to(entities_dir)
         name = f"entity/{rel.parent.name}/{rel.stem}"
-        configs[name] = flatten_dict(_entity_config_effective(yaml_file))
+        configs[name] = _exclude_derived_entity_parameters(
+            flatten_dict(_entity_config_effective(yaml_file))
+        )
 
     composites_dir = Path("configs/composites")
     for yaml_file in sorted(composites_dir.glob("*.yaml")):

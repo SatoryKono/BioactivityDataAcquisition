@@ -47,11 +47,7 @@ COMPOSITION_DOC = ROOT / "docs" / "02-architecture" / "05-composition-layer.md"
 REGISTRY_GUIDE = ROOT / "docs" / "03-guides" / "registry-pattern.md"
 INVENTORY_ROW_CELL_COUNT = 10
 MAINTENANCE_API_MODULE = "bioetl.composition.maintenance_api"
-MAINTENANCE_API_ALLOWED_SRC_IMPORTERS = frozenset(
-    {
-        "src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py",
-    }
-)
+MAINTENANCE_API_ALLOWED_SRC_IMPORTERS = frozenset()
 
 
 def _load_module(path: Path, module_name: str) -> ModuleType:

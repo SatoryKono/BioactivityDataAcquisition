@@ -29,6 +29,7 @@ class TestGoldPkConsistency:
 
     @pytest.mark.parametrize("schema_name", sorted(SILVER_SCHEMAS.keys()))
     def test_pk_fields_exist_in_gold_and_silver(self, schema_name: str) -> None:
+        load_pipeline_config.cache_clear()
         config = load_pipeline_config(schema_name)
 
         business_pks = list(config.business_primary_keys)
@@ -86,8 +87,31 @@ class TestGoldPkConsistency:
             # Ensure resolved config still has technical primary key from defaults.
             provider = path.parent.name
             entity = path.stem
+            load_pipeline_config.cache_clear()
             resolved = load_pipeline_config(f"{provider}_{entity}")
             if not resolved.technical_primary_key:
                 violations.append(f"{path}: missing technical_primary_key")
+
+        assert not violations, "\n".join(violations)
+
+    def test_root_hash_policy_uses_empty_legacy_contract_hash_shims(self) -> None:
+        """Root hash_policy remains the only runtime-authoritative hash selector."""
+        pipeline_files = sorted(
+            p for p in ENTITIES_DIR.rglob("*.yaml") if not p.name.startswith("_")
+        )
+        violations: list[str] = []
+
+        for path in pipeline_files:
+            raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+            if not isinstance(raw.get("hash_policy"), dict):
+                continue
+            contracts = raw.get("contracts")
+            if not isinstance(contracts, dict):
+                violations.append(f"{path}: missing contracts section")
+                continue
+            if contracts.get("hash_include") != []:
+                violations.append(f"{path}: contracts.hash_include must be []")
+            if contracts.get("hash_exclude") != []:
+                violations.append(f"{path}: contracts.hash_exclude must be []")
 
         assert not violations, "\n".join(violations)

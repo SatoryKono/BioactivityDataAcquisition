@@ -165,6 +165,9 @@ CONTRACT_ALLOWED_KEYS: Final[frozenset[str]] = frozenset(
         "hash_include",
         "hash_exclude",
         "hash_datetime_policy",
+        "contract_ref",
+        "active_version",
+        "rollout",
         "scd_type",
         "gold_business_rules",
     }
