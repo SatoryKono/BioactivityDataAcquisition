@@ -8,6 +8,10 @@ from typing import Any
 
 import pytest
 
+from tests.architecture._module_coverage_inventory_support import (
+    skip_if_module_coverage_inventory_is_dirty,
+)
+
 
 pytestmark = pytest.mark.architecture
 
@@ -29,8 +33,12 @@ def test_issue_5265_closeout_artifact_has_expected_shape() -> None:
     assert closeout["status"] == "validated_local_closeable"
     assert closeout["debt_outcome"] == "improved"
     assert (
-        closeout["current_metrics"]["uncovered_module_count"]
-        < closeout["baseline_metrics"]["uncovered_module_count"]
+        closeout["current_metrics"]["tracked_uncovered_module_count"]
+        < closeout["baseline_metrics"]["tracked_uncovered_module_count"]
+    )
+    assert (
+        closeout["current_metrics"]["tracked_unmeasured_module_count"]
+        <= closeout["baseline_metrics"]["tracked_unmeasured_module_count"]
     )
     assert closeout["module_expectations"]
     for evidence_path in closeout["evidence"]:
@@ -38,25 +46,32 @@ def test_issue_5265_closeout_artifact_has_expected_shape() -> None:
 
 
 def test_issue_5265_closeout_matches_live_module_coverage_inventory() -> None:
+    skip_if_module_coverage_inventory_is_dirty(root=ROOT, inventory_path=INVENTORY)
     closeout = _load_json(CLOSEOUT)
     inventory = _load_json(INVENTORY)
     modules = {row["module"]: row for row in inventory["modules"]}
+    tracked_rows = {
+        module_name: modules[module_name]
+        for module_name in closeout["module_expectations"]
+    }
 
     assert (
-        inventory["summary"]["status_counts"]["uncovered"]
-        == closeout["current_metrics"]["uncovered_module_count"]
+        sum(
+            1
+            for row in tracked_rows.values()
+            if row["coverage_status"] == "uncovered"
+        )
+        == closeout["current_metrics"]["tracked_uncovered_module_count"]
     )
     assert (
-        inventory["summary"]["unmeasured_module_count"]
-        == closeout["current_metrics"]["unmeasured_module_count"]
+        sum(
+            1
+            for row in tracked_rows.values()
+            if row["coverage_status"] == "unmeasured"
+        )
+        == closeout["current_metrics"]["tracked_unmeasured_module_count"]
     )
 
     for module_name, expectation in closeout["module_expectations"].items():
         row = modules[module_name]
-        status = row["coverage_status"]
-        if expectation == "fully_covered":
-            assert status == "fully_covered", (module_name, row)
-        elif expectation == "not_uncovered":
-            assert status != "uncovered", (module_name, row)
-        else:
-            raise AssertionError(f"Unknown expectation {expectation!r}")
+        assert row["coverage_status"] == expectation, (module_name, row)

@@ -359,15 +359,6 @@ filters:
     - entry_name
     - organism_scientific
     exclude_if_present: []
-  metadata:
-    publication_filter_policy:
-      scope: source_specific
-      description: SOURCE-SPECIFIC ChEMBL publication filter policy. Silver and Gold filters intentionally constrain 
-        this pipeline to the reviewed ChEMBL publication subset and do not redefine the global publication taxonomy.
-    # Source-specific filter policy:
-    # - Silver and Gold are intentionally scoped to journal-article for the
-    #   current ChEMBL publication pipeline.
-    # - This is pipeline scope, not global publication type truth.
 contracts:
   primary_key:
   - accession

@@ -14,6 +14,10 @@ from typing import Any
 
 import yaml
 
+from bioetl.infrastructure.config.entity_filter_metadata_registry import (
+    apply_shared_filter_metadata,
+)
+from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
 from scripts.engineering.qa.config_surface_governance import is_sanctioned_partial_key
 
 DEFAULT_BASELINE_JSON = Path("reports/quality/config-discrepancy-baseline.json")
@@ -154,10 +158,24 @@ def _load_quality_defaults() -> dict[str, Any]:
     return payload
 
 
+def _load_effective_filters(
+    *,
+    provider: str,
+    entity: str,
+) -> dict[str, Any]:
+    return FilterConfigLoader(Path("configs")).load_as_dict(provider, entity)
+
+
 def _entity_config_effective(path: Path) -> dict[str, Any]:
     """Return entity YAML with runtime-applied defaults merged for governance."""
-    raw = load_config(path)
+    raw = apply_shared_filter_metadata(
+        configs_root=Path("configs"),
+        config_path=path,
+        payload=load_config(path),
+    )
     effective = dict(raw)
+    provider = str(raw.get("provider", "")).strip()
+    entity = str(raw.get("entity", "")).strip()
     pipeline = raw.get("pipeline")
     if isinstance(pipeline, dict):
         effective["pipeline"] = _deep_merge(_load_pipeline_defaults(), pipeline)
@@ -169,6 +187,10 @@ def _entity_config_effective(path: Path) -> dict[str, Any]:
             quality_defaults,
             quality if isinstance(quality, dict) else {},
         )
+    if provider and entity:
+        effective_filters = _load_effective_filters(provider=provider, entity=entity)
+        if effective_filters:
+            effective["filters"] = effective_filters
     return effective
 
 

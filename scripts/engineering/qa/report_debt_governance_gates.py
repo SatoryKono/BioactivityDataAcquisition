@@ -247,6 +247,26 @@ def _module_coverage_source_tree_hash_gate(
     )
 
 
+def _module_coverage_aggregate_residual_limits(
+    policy: dict[str, Any],
+) -> dict[str, int] | None:
+    ratchets = policy.get("aggregate_residual_ratchets")
+    if not isinstance(ratchets, dict):
+        return None
+    unmeasured = ratchets.get("unmeasured_module_count")
+    uncovered = ratchets.get("uncovered_module_count")
+    if not isinstance(unmeasured, dict) or not isinstance(uncovered, dict):
+        return None
+    unmeasured_limit = unmeasured.get("max_count")
+    uncovered_limit = uncovered.get("max_count")
+    if not isinstance(unmeasured_limit, int) or not isinstance(uncovered_limit, int):
+        return None
+    return {
+        "unmeasured_module_count": unmeasured_limit,
+        "uncovered_module_count": uncovered_limit,
+    }
+
+
 def _collect_changed_paths(
     repo_root: Path, *, changed_from_ref: str | None
 ) -> set[str]:
@@ -415,6 +435,9 @@ def build_payload(
     module_coverage = _load_json(
         repo_root, "reports/quality/module-coverage-inventory.json"
     )
+    module_coverage_policy = _load_yaml(
+        repo_root, "configs/quality/module_coverage_gates.yaml"
+    )
     hotspot_family = _load_json(
         repo_root, "reports/quality/hotspot-family-baseline.json"
     )
@@ -469,26 +492,51 @@ def build_payload(
         repo_root=repo_root,
     )
     gates.append(module_coverage_hash_gate)
-    gates.append(
-        _warn_limit_gate(
-            name="module_coverage_unmeasured_modules",
-            metric="unmeasured_module_count",
-            current=coverage_summary["unmeasured_module_count"],
-            limit=0,
-            source_artifact="reports/quality/module-coverage-inventory.json",
-            remediation="Refresh coverage evidence and add coverage owner tests for unmeasured modules.",
-        )
+    aggregate_residual_limits = _module_coverage_aggregate_residual_limits(
+        module_coverage_policy
     )
-    gates.append(
-        _warn_limit_gate(
-            name="module_coverage_uncovered_modules",
-            metric="uncovered_module_count",
-            current=status_counts.get("uncovered", 0),
-            limit=0,
-            source_artifact="reports/quality/module-coverage-inventory.json",
-            remediation="Add coverage or classify modules before closeout.",
+    if aggregate_residual_limits is None:
+        gates.append(
+            _warn_limit_gate(
+                name="module_coverage_unmeasured_modules",
+                metric="unmeasured_module_count",
+                current=coverage_summary["unmeasured_module_count"],
+                limit=0,
+                source_artifact="reports/quality/module-coverage-inventory.json",
+                remediation="Refresh coverage evidence and add coverage owner tests for unmeasured modules.",
+            )
         )
-    )
+        gates.append(
+            _warn_limit_gate(
+                name="module_coverage_uncovered_modules",
+                metric="uncovered_module_count",
+                current=status_counts.get("uncovered", 0),
+                limit=0,
+                source_artifact="reports/quality/module-coverage-inventory.json",
+                remediation="Add coverage or classify modules before closeout.",
+            )
+        )
+    else:
+        gates.append(
+            _hard_limit_gate(
+                name="module_coverage_unmeasured_modules",
+                metric="unmeasured_module_count",
+                current=coverage_summary["unmeasured_module_count"],
+                limit=aggregate_residual_limits["unmeasured_module_count"],
+                source_artifact="configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets",
+                remediation="Keep reviewed unmeasured-module residual at or below the committed no-growth ratchet.",
+            )
+        )
+        gates.append(
+            _hard_limit_gate(
+                name="module_coverage_uncovered_modules",
+                metric="uncovered_module_count",
+                current=status_counts.get("uncovered", 0),
+                limit=aggregate_residual_limits["uncovered_module_count"],
+                source_artifact="configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets",
+                remediation="Keep reviewed uncovered-module residual at or below the committed no-growth ratchet.",
+            )
+        )
 
     hotspot_summary = hotspot_family["summary"]
     budget_warnings = int(hotspot_summary.get("budget_warnings", 0))

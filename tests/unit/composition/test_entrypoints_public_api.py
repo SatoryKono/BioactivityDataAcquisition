@@ -31,14 +31,13 @@ def test_entrypoints_all_is_execution_focused_budget() -> None:
         "create_pipeline_runner",
         "ensure_metrics_server_started",
         "load_composite_config",
-        "load_pipeline_config",
         "maybe_start_metrics_server",
         "push_metrics_to_gateway",
         "run_pipeline",
     }
 
     assert set(entrypoints.__all__) == expected
-    assert len(entrypoints.__all__) <= 15
+    assert len(entrypoints.__all__) <= 14
 
 
 @pytest.mark.unit
@@ -50,6 +49,17 @@ def test_entrypoints_retains_start_metrics_server_only_as_compatibility_wrapper(
 
     assert "start_metrics_server" not in entrypoints.__all__
     assert callable(entrypoints.start_metrics_server)
+
+
+@pytest.mark.unit
+def test_entrypoints_retains_load_pipeline_config_only_as_compatibility_wrapper() -> (
+    None
+):
+    """Pipeline config loading stays callable but drops out of the official export budget."""
+    entrypoints = _reload_entrypoints_module()
+
+    assert "load_pipeline_config" not in entrypoints.__all__
+    assert callable(entrypoints.load_pipeline_config)
 
 
 @pytest.mark.unit

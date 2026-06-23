@@ -296,35 +296,6 @@ filters:
   version: 1.0.0
   provider: chembl
   entity: publication
-  metadata:
-    publication_filter_policy:
-      scope: source_specific
-      description: SOURCE-SPECIFIC ChEMBL publication filter policy. Silver and Gold filters intentionally constrain 
-        this pipeline to the reviewed ChEMBL publication subset and do not redefine the global publication taxonomy.
-    # Source-specific filter policy:
-
-
-
-    # - Silver and Gold are intentionally scoped to journal-article for the
-
-
-
-    #   current ChEMBL publication pipeline.
-
-
-
-    # - This is pipeline scope, not global publication type truth.
-
-
-
-  input_filter:
-    enabled: false
-    source_path: data/input/publication.csv
-    column_name: publication_id
-    filter_field: publication_id
-    batch_size: 16
-    checkpoint_interval: 1000
-    fallback_column: title
   extraction_params:
     doc_type: PUBLICATION
     year__gte: 1950
@@ -334,7 +305,7 @@ filters:
     version: 1.0.0
     status: baseline
     extraction_params_sha256: d9dec3600fd2f00e1c7b639e53ca8e8a80c6f8af6eb6a7ab957399196dba3975
-    description: Baseline curated ChEMBL publication extraction profile; no widening in ADR-050 cleanup.
+    description: Baseline curated ChEMBL publication extraction profile; keeps VCR-backed E2E requests bounded to publication documents.
   silver_filters:
     exclude_if_present: []
     required_fields:
@@ -344,20 +315,11 @@ filters:
   gold_filters:
     list_contains: {}
     list_lengths: {}
-    # Source-specific filter: ChEMBL Gold dataset restricted to journal-article
-    # for canonical publication scope. This is NOT a global publication type constraint.
-    columns:
-      publication_type:
-      - journal-article
-    ranges:
-      publication_year:
-        min: 1950
-        max: 2050
+    ranges: {}
+    columns: {}
     exclude_if_present: []
     required_fields:
     - publication_id
-    - publication_type
-    - title
 contracts:
   primary_key:
   - publication_id

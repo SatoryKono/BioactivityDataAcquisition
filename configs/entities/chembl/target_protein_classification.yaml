@@ -212,11 +212,6 @@ filters:
     - dataset_version
     - source_snapshot_fingerprint
     exclude_if_present: []
-  metadata:
-    publication_filter_policy:
-      scope: source_specific
-      description: SOURCE-SPECIFIC ChEMBL publication filter policy. Silver and Gold filters intentionally constrain
-        this pipeline to the reviewed ChEMBL publication subset and do not redefine the global publication taxonomy.
 contracts:
   primary_key:
   - entity_id

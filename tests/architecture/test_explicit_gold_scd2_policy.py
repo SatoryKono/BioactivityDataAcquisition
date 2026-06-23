@@ -7,10 +7,11 @@ REQ-ARCH-052: SCD2-candidate entity configs MUST explicitly declare
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
 
 import pytest
 import yaml
+
+from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config_from_root
 
 pytestmark = pytest.mark.architecture
 
@@ -57,7 +58,7 @@ LEGACY_SCD_CONFIG_ALIAS_KEYS = frozenset(
 )
 
 
-def _load_yaml(path: str) -> dict[str, Any]:
+def _load_yaml(path: str) -> dict[str, object]:
     config_path = PROJECT_ROOT / path
     with config_path.open(encoding="utf-8") as handle:
         data = yaml.safe_load(handle) or {}
@@ -68,10 +69,15 @@ def _load_yaml(path: str) -> dict[str, Any]:
 
 def _load_pipeline_gold_config(path: str) -> dict[str, Any]:
     config = _load_yaml(path)
-    pipeline_cfg = config.get("pipeline")
-    if not isinstance(pipeline_cfg, dict):
-        pytest.fail(f"{path} must contain a pipeline mapping")
+    provider = str(config.get("provider", "")).strip()
+    entity = str(config.get("entity", "")).strip()
+    if not provider or not entity:
+        pytest.fail(f"{path} must declare provider/entity for effective config loading")
 
+    pipeline_cfg = load_pipeline_config_from_root(
+        f"{provider}_{entity}",
+        configs_root=PROJECT_ROOT / "configs",
+    ).model_dump(mode="python")
     sink_cfg = pipeline_cfg.get("sink")
     if not isinstance(sink_cfg, dict):
         pytest.fail(f"{path} must contain pipeline.sink")

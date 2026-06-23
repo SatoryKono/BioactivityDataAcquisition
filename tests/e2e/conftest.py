@@ -18,15 +18,17 @@ import asyncio
 import hashlib
 import json
 import os
-import shutil
-import tempfile
 import re
+import shutil
+import sys
+import tempfile
 from collections.abc import Callable, Generator
 from contextlib import contextmanager
 from dataclasses import replace
 from functools import cache
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
+from urllib.parse import unquote, urlparse
 from uuid import UUID, uuid5
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
@@ -121,17 +123,64 @@ def _load_delta_table() -> type[Any]:
 
 
 @cache
-def _load_delta_record_reader() -> Callable[[Any, list[str] | None], list[dict[str, Any]]]:
+def _load_delta_record_reader() -> Callable[
+    [Any, list[str] | None], list[dict[str, Any]]
+]:
     """Import the shared Delta read helper lazily for E2E assertions."""
     from bioetl.infrastructure.storage.delta.table_ops import read_delta_records
 
     return read_delta_records
 
 
+@cache
+def _load_pyarrow_parquet() -> Any:
+    """Import pyarrow.parquet lazily for the Windows E2E fallback reader."""
+    import pyarrow.parquet as pq
+
+    return pq
+
+
+def _prefer_active_parquet_delta_reads(*, platform: str = sys.platform) -> bool:
+    """Return whether E2E Delta assertions should bypass DeltaTable Arrow scans."""
+    return platform == "win32"
+
+
+def _resolve_parquet_file_uri(file_uri: str) -> str:
+    """Resolve a Delta file URI to a local path string when needed."""
+    if not file_uri.startswith("file://"):
+        return file_uri
+    parsed_path = unquote(urlparse(file_uri).path)
+    if re.match(r"^/[A-Za-z]:/", parsed_path):
+        return parsed_path[1:]
+    return parsed_path
+
+
+def _read_active_parquet_records(
+    table: Any,
+    columns: list[str] | None = None,
+) -> list[dict[str, Any]]:
+    """Read Delta rows from active parquet files without using Arrow dataset scans."""
+    file_uris = list(table.file_uris())
+    if not file_uris:
+        return []
+
+    pq = _load_pyarrow_parquet()
+    tables = [
+        pq.read_table(_resolve_parquet_file_uri(file_uri), columns=columns)
+        for file_uri in file_uris
+    ]
+    if len(tables) == 1:
+        return cast(list[dict[str, Any]], tables[0].to_pylist())
+
+    import pyarrow as pa
+
+    return cast(list[dict[str, Any]], pa.concat_tables(tables).to_pylist())
+
+
 async def _read_delta_records(table_path: Path) -> list[dict[str, Any]]:
     """Read active Delta rows via the shared Delta scanner helper with timeout protection."""
     loop = asyncio.get_running_loop()
-    
+
     # Use a shorter timeout for delta reads to prevent indefinite hangs
     # The default E2E timeout (120s) is for the whole test, but individual reads should be faster
     DELTA_READ_TIMEOUT = 30
@@ -139,15 +188,23 @@ async def _read_delta_records(table_path: Path) -> list[dict[str, Any]]:
         return await asyncio.wait_for(
             loop.run_in_executor(
                 None,
-                lambda: _load_delta_record_reader()(_load_delta_table()(str(table_path)))
+                lambda: (
+                    (
+                        _read_active_parquet_records(table)
+                        if _prefer_active_parquet_delta_reads()
+                        else _load_delta_record_reader()(table)
+                    )
+                    if (table := _load_delta_table()(str(table_path)))
+                    else []
+                ),
             ),
-            timeout=DELTA_READ_TIMEOUT
+            timeout=DELTA_READ_TIMEOUT,
         )
-    except asyncio.TimeoutError:
+    except TimeoutError as exc:
         raise TimeoutError(
             f"Delta table read timed out after {DELTA_READ_TIMEOUT}s at {table_path}. "
             "This may indicate a corrupted Delta table or PyArrow scanner issue."
-        )
+        ) from exc
 
 
 def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
@@ -474,6 +531,21 @@ def clone_e2e_data_dir_snapshot(snapshot_dir: Path, target_dir: Path) -> None:
     shutil.copytree(snapshot_dir, target_dir)
 
 
+def _resolve_e2e_temp_root(
+    *,
+    platform: str = sys.platform,
+    posix_tmp: Path = Path("/tmp"),
+    fallback_tmp: str | None = None,
+) -> Path:
+    """Resolve a local temp root that avoids Windows drive-relative ``/tmp``."""
+    fallback = Path(fallback_tmp or tempfile.gettempdir())
+    if platform == "win32":
+        return fallback
+    if posix_tmp.exists():
+        return posix_tmp
+    return fallback
+
+
 @pytest.fixture
 def e2e_data_dir(tmp_path: Path, monkeypatch) -> Generator[Path, None, None]:
     """Создание временной директории данных с настройкой окружения.
@@ -484,7 +556,7 @@ def e2e_data_dir(tmp_path: Path, monkeypatch) -> Generator[Path, None, None]:
     del tmp_path  # mounted pytest temp may point to a slow Windows/network drive
     del monkeypatch  # kept for backward-compatible fixture signature
 
-    temp_root = Path("/tmp") if Path("/tmp").exists() else Path(tempfile.gettempdir())
+    temp_root = _resolve_e2e_temp_root()
     sandbox_dir = Path(tempfile.mkdtemp(prefix="bioetl-e2e-", dir=str(temp_root)))
     data_dir = sandbox_dir / "bioetl_data"
     try:

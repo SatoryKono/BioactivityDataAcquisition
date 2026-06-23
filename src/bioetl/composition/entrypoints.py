@@ -14,7 +14,6 @@ if TYPE_CHECKING:
     from bioetl.composition.composite_api import (
         bootstrap_composite_runner,
         load_composite_config,
-        load_pipeline_config,
     )
     from bioetl.composition.execution_api import (
         ArchiveOptions,
@@ -43,7 +42,6 @@ __all__ = [
     "create_pipeline_runner",
     "ensure_metrics_server_started",
     "load_composite_config",
-    "load_pipeline_config",
     "maybe_start_metrics_server",
     "push_metrics_to_gateway",
     "run_pipeline",
@@ -60,7 +58,6 @@ _PUBLIC_SYMBOL_TARGETS: dict[str, str] = {
     "create_pipeline_runner": _COMPOSITION_EXECUTION_API_MODULE,
     "ensure_metrics_server_started": _COMPOSITION_EXECUTION_API_MODULE,
     "load_composite_config": _COMPOSITION_COMPOSITE_API_MODULE,
-    "load_pipeline_config": _COMPOSITION_COMPOSITE_API_MODULE,
     "maybe_start_metrics_server": _COMPOSITION_EXECUTION_API_MODULE,
     "push_metrics_to_gateway": _COMPOSITION_EXECUTION_API_MODULE,
     "run_pipeline": _COMPOSITION_EXECUTION_API_MODULE,
@@ -75,5 +72,12 @@ install_lazy_exports(
 def start_metrics_server(*args: object, **kwargs: object) -> object:
     """Retained compatibility wrapper for observability-owned metrics startup."""
     from bioetl.composition.observability_api import start_metrics_server as _impl
+
+    return _impl(*args, **kwargs)
+
+
+def load_pipeline_config(*args: object, **kwargs: object) -> object:
+    """Retained compatibility wrapper for composite-owned pipeline config loading."""
+    from bioetl.composition.composite_api import load_pipeline_config as _impl
 
     return _impl(*args, **kwargs)

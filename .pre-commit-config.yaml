@@ -27,16 +27,6 @@ repos:
         files: ^(src|tests)/.*\.py$
         stages: [pre-commit]
 
-  # Secret scanning in pre-push. CI keeps the canonical detect-secrets baseline
-  # check via tests/architecture/test_antipatterns.py::test_no_hardcoded_secrets.
-  - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.21.2
-    hooks:
-      - id: gitleaks
-        args: ['--config', '.gitleaks.toml', '--no-banner']
-        pass_filenames: false
-        stages: [pre-push]
-
   # General file checks
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -103,6 +93,16 @@ repos:
   # Local hooks
   - repo: local
     hooks:
+      - id: detect-secrets-baseline
+        name: Detect hardcoded secrets against baseline
+        entry: >
+          python3 scripts/engineering/dev/run_project_python.py -m pytest
+          tests/architecture/test_antipatterns.py::test_no_hardcoded_secrets
+          -q -o addopts= -o filterwarnings= -o timeout=0
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+
       - id: pip-audit
         name: Check for known vulnerabilities in dependencies
         entry: python scripts/engineering/dev/run_project_python.py -m pip_audit --cache-dir .cache/pip-audit --skip-editable --strict
@@ -113,22 +113,22 @@ repos:
 
       - id: mypy-strict
         name: Run strict mypy gate on src/bioetl
-        entry: python scripts/engineering/dev/run_project_python.py -m mypy --config-file pyproject.toml --strict --no-incremental src/bioetl
-        language: python
+        entry: python3 scripts/engineering/dev/run_project_python.py -m mypy --config-file pyproject.toml --strict --no-incremental src/bioetl
+        language: system
         pass_filenames: false
         stages: [pre-push]
 
       - id: bandit
         name: Run Bandit security scan on src/bioetl
-        entry: python scripts/engineering/dev/run_project_python.py -m bandit -c pyproject.toml -r src/bioetl
-        language: python
+        entry: python3 scripts/engineering/dev/run_project_python.py -m bandit -c pyproject.toml -r src/bioetl
+        language: system
         pass_filenames: false
         stages: [pre-push]
 
       - id: architecture-smoke
         name: Fast architecture smoke checks
         entry: >
-          python scripts/engineering/dev/run_project_python.py -m pytest
+          python3 scripts/engineering/dev/run_project_python.py -m pytest
           tests/architecture/test_future_annotations_policy.py
           tests/architecture/test_naming_conventions.py
           tests/architecture/test_no_structlog_in_application_interfaces.py
@@ -141,7 +141,7 @@ repos:
           tests/architecture/test_domain_normalization_guardrails.py::test_domain_normalization_modules_have_no_disallowed_runtime_imports
           tests/architecture/test_domain_normalization_guardrails.py::test_domain_normalization_modules_do_not_call_open
           -q --tb=short
-        language: python
+        language: system
         pass_filenames: false
         stages: [pre-push]
 

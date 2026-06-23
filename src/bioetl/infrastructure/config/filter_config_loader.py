@@ -22,6 +22,9 @@ from bioetl.domain.filtering import (
 from bioetl.domain.models.filter import ExtractionParams
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.base_config_loader import BaseConfigLoader
+from bioetl.infrastructure.config.entity_filter_metadata_registry import (
+    apply_shared_filter_metadata,
+)
 from bioetl.infrastructure.config.silver_filter_migration import (
     validate_no_semantic_silver_filter_payload,
 )
@@ -250,7 +253,11 @@ class FilterConfigLoader(
             self._configs_root / "entities" / provider / f"{entity}.yaml"
         )
         if unified_entity_path.exists():
-            unified_raw = self._load_yaml(unified_entity_path)
+            unified_raw = apply_shared_filter_metadata(
+                configs_root=self._configs_root,
+                config_path=unified_entity_path,
+                payload=self._load_yaml(unified_entity_path),
+            )
 
             filters_section = unified_raw.get("filters")
             if isinstance(filters_section, dict):

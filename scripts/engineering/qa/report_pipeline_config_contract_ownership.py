@@ -157,12 +157,16 @@ def _load_registry_entries() -> dict[str, dict[str, Any]]:
 def _gold_exclusion_reason(pipeline: dict[str, Any]) -> str:
     sink = pipeline.get("sink")
     if not isinstance(sink, dict):
-        return ""
+        return "gold_runtime_disabled"
     gold = sink.get("gold")
     if not isinstance(gold, dict):
-        return ""
+        return "gold_runtime_disabled"
     reason = gold.get("exclusion_reason")
-    return reason if isinstance(reason, str) else ""
+    if isinstance(reason, str) and reason:
+        return reason
+    if gold.get("enabled") is False:
+        return "gold_runtime_disabled"
+    return ""
 
 
 def _collect_entity_rows() -> list[dict[str, Any]]:

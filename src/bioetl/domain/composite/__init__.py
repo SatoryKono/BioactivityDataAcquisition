@@ -20,6 +20,7 @@ from bioetl.domain.composite.aggregation import (
     AggregationFunction,
     EnricherCardinality,
 )
+from bioetl.domain.composite.config_dq import DQOverrideConfig
 from bioetl.domain.composite.config_merge import ColumnGroupConfig, MergeConfig
 from bioetl.domain.composite.config_models import (
     CompositeConfig,
@@ -29,7 +30,6 @@ from bioetl.domain.composite.config_models import (
     EnricherConfig,
     SeedConfig,
 )
-from bioetl.domain.composite.config_dq import DQOverrideConfig
 from bioetl.domain.composite.config_runtime import ExecutionConfig, LineageConfig
 from bioetl.domain.composite.config_schema import DataSchemaConfig, LayerColumnConfig
 from bioetl.domain.composite.cross_validation import (

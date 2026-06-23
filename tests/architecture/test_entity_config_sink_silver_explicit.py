@@ -7,6 +7,8 @@ from pathlib import Path
 import pytest
 import yaml
 
+from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config_from_root
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 ENTITIES_DIR = PROJECT_ROOT / "configs" / "entities"
 
@@ -34,8 +36,15 @@ def test_entity_config_declares_explicit_sink_silver_section(
     """Unified entity configs must declare pipeline.sink.silver explicitly."""
     payload = yaml.safe_load(config_path.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
-    pipeline = payload.get("pipeline")
-    assert isinstance(pipeline, dict), f"{config_path.as_posix()}: missing pipeline"
+    provider = str(payload.get("provider", "")).strip()
+    entity = str(payload.get("entity", "")).strip()
+    assert provider and entity, (
+        f"{config_path.as_posix()}: missing provider/entity for effective config loading"
+    )
+    pipeline = load_pipeline_config_from_root(
+        f"{provider}_{entity}",
+        configs_root=PROJECT_ROOT / "configs",
+    ).model_dump(mode="python")
     sink = pipeline.get("sink")
     assert isinstance(sink, dict), f"{config_path.as_posix()}: missing pipeline.sink"
     silver = sink.get("silver")

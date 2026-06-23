@@ -8,7 +8,7 @@
     },
     "module_coverage_inventory": {
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "9d1db044c7990667b198d9fdaa952f09b0e89b5f3c4524c91ffa67fd2a47507b",
+      "source_tree_sha256": "e0cc1cc597312ec6b218b961d96c8795733a05df72d9bcd4e587b579d4ef4a1e",
       "coverage_xml_sha256": "688fdd5cf7e086bb0ac2178265406f9e8395532fb1067e9e6e2fc0c7b5e1632a"
     },
     "compatibility_importer_census": {
@@ -73,7 +73,7 @@
       "score": 8.0,
       "weighted_score": 0.72,
       "evidence_metrics": {
-        "source_module_count": 2181,
+        "source_module_count": 2182,
         "uncovered_module_count": 0
       }
     },
@@ -95,7 +95,7 @@
       "score": 7.0,
       "weighted_score": 0.98,
       "evidence_metrics": {
-        "source_module_count": 2181,
+        "source_module_count": 2182,
         "hotspot_family_count": 5
       }
     },
@@ -162,7 +162,7 @@
   ],
   "metrics": {
     "layer_violations": 0,
-    "source_module_count": 2181,
+    "source_module_count": 2182,
     "unmeasured_module_count": 0,
     "uncovered_module_count": 0,
     "hotspot_family_count": 5,

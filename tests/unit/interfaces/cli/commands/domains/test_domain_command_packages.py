@@ -17,7 +17,7 @@ import pytest
         (
             "src/bioetl/interfaces/cli/commands/domains/composite/__init__.py",
             "run_composite",
-            "bioetl.interfaces.cli.commands.domains.composite.command",
+            "bioetl.interfaces.cli.commands.run_composite",
         ),
         (
             "src/bioetl/interfaces/cli/commands/domains/health/__init__.py",
