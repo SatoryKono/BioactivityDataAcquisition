@@ -13,7 +13,7 @@ from bioetl.application.composite.column_priority_orderer import (
     resolve_priority_column,
 )
 from bioetl.application.composite.join_planner_helpers import parse_pipeline_name
-from bioetl.domain.composite.config_models import EnricherConfig
+from bioetl.domain.composite.config import EnricherConfig
 
 
 pytestmark = pytest.mark.unit

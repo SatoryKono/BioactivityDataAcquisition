@@ -31,7 +31,9 @@ __all__ = [
 
 def get_config_service() -> ConfigService:
     """Load the config service through composition on demand."""
-    from bioetl.composition.control_plane_api import get_config_service as _impl
+    from bioetl.composition.control_plane_service_access import (
+        get_config_service as _impl,
+    )
 
     return _impl()
 

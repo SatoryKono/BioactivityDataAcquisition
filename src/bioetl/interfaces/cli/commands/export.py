@@ -35,7 +35,9 @@ _scrub_helper_module_binding()
 
 def get_export_service() -> ExportService:
     """Load the export service through composition on demand."""
-    from bioetl.composition.control_plane_api import get_export_service as _impl
+    from bioetl.composition.control_plane_service_access import (
+        get_export_service as _impl,
+    )
 
     return _impl()
 

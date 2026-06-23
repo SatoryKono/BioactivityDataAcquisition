@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.domain.composite.config_merge import MergeConfig
-from bioetl.domain.composite.config_models import (
+from bioetl.domain.composite.config import (
     CompositeConfig,
     DependencyConfig,
     EnricherConfig,
+    MergeConfig,
     SeedConfig,
 )
 

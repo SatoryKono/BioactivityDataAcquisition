@@ -263,12 +263,16 @@ class TestCheckpointManagerLoadCheckpoint:
             clock=_FixedClock(),
         )
 
-        result = await manager.load_checkpoint()
-
-        assert result is None
+        with pytest.raises(
+            ValueError,
+            match="fails closed when that context is incomplete",
+        ):
+            await manager.load_checkpoint()
         warning_extra = mock_logger.warning.call_args.kwargs
         assert warning_extra["resume_rejected"] is True
-        assert warning_extra["compatibility_disposition"] == ("missing_context_blocked")
+        assert warning_extra["compatibility_disposition"] == (
+            "missing_context_hard_fail_raised"
+        )
         assert warning_extra["compatibility_service_available"] is False
         assert warning_extra["current_identity"]["manifest_id"] is None
         assert any(
@@ -284,7 +288,7 @@ class TestCheckpointManagerLoadCheckpoint:
             1,
             {
                 "pipeline": "test_pipeline",
-                "status": "missing_compatibility_context",
+                "status": "missing_compatibility_context_hard_fail",
             },
         )
 
@@ -1040,7 +1044,7 @@ class TestCheckpointManagerCompatibilityPolicy:
         assert warning_extra["checkpoint_identity"]["manifest_id"] == "manifest-old"
         assert warning_extra["checkpoint_identity"]["exact_replay"] is True
 
-    async def test_soft_fail_resume_blocks_when_current_metadata_is_missing(
+    async def test_soft_fail_resume_raises_when_current_metadata_is_missing(
         self, mock_checkpoint_port, mock_logger, mock_metrics
     ) -> None:
         saved_run_id = deterministic_uuid_from_callsite("replay-sensitive")
@@ -1061,13 +1065,17 @@ class TestCheckpointManagerCompatibilityPolicy:
             compatibility_policy="soft_fail",
         )
 
-        result = await manager.load_checkpoint()
-
-        assert result is None
+        with pytest.raises(
+            ValueError,
+            match="fails closed when that context is incomplete",
+        ):
+            await manager.load_checkpoint()
         compatibility_service.validate_checkpoint_compatibility.assert_not_called()
         warning_extra = mock_logger.warning.call_args.kwargs
         assert warning_extra["resume_rejected"] is True
-        assert warning_extra["compatibility_disposition"] == ("missing_context_blocked")
+        assert warning_extra["compatibility_disposition"] == (
+            "missing_context_hard_fail_raised"
+        )
         assert warning_extra["compatibility_service_available"] is True
         assert any(
             "Missing current checkpoint metadata" in message
@@ -1078,7 +1086,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             1,
             {
                 "pipeline": "chembl_activity",
-                "status": "missing_compatibility_context",
+                "status": "missing_compatibility_context_hard_fail",
             },
         )
 
@@ -1103,10 +1111,12 @@ class TestCheckpointManagerCompatibilityPolicy:
 
         with pytest.raises(
             ValueError,
-            match="requires compatibility context",
+            match="fails closed when that context is incomplete",
         ):
             await manager.load_checkpoint()
-        mock_logger.warning.assert_not_called()
+        warning_extra = mock_logger.warning.call_args.kwargs
+        assert warning_extra["resume_rejected"] is True
+        assert warning_extra["compatibility_service_available"] is False
         mock_metrics.increment_counter.assert_called_once_with(
             "bioetl_checkpoint_load_events_total",
             1,

@@ -20,8 +20,8 @@ from bioetl.composition.runtime_builders._run_manifest_data_roots import (
 from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
     to_serializable_mapping,
 )
-from bioetl.composition.runtime_builders._silver_filter_compatibility_support import (
-    current_silver_filter_compatibility_mode,
+from bioetl.infrastructure.config.silver_filter_migration import (
+    resolve_silver_filter_compatibility_mode,
 )
 from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
     RunManifestContractIdentity,
@@ -87,7 +87,7 @@ def assemble_manifest_create_spec(
     runtime_config = to_serializable_mapping(_read_attr(inputs, "runtime_config"))
     runtime_config.setdefault(
         "silver_filter_compatibility_mode",
-        current_silver_filter_compatibility_mode(),
+        resolve_silver_filter_compatibility_mode(),
     )
     contract_identity = _read_attr(request_inputs, "contract_identity")
     provider = _read_attr(request_inputs, "provider")

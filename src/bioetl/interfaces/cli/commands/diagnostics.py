@@ -100,7 +100,7 @@ def get_quarantine_runtime_service(pipeline: str) -> _QuarantineRuntimeService:
 
 def get_forensic_run_diff_service() -> ForensicRunDiffService:
     """Load the canonical forensic diff service on demand."""
-    from bioetl.composition.control_plane_api import (
+    from bioetl.composition.control_plane_service_access import (
         get_forensic_run_diff_service as _impl,
     )
 

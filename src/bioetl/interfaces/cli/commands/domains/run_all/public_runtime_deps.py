@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, NoReturn
 
@@ -26,7 +26,9 @@ class RunAllCallbackRuntime:
     """Dependencies used by the public run-all Click callback."""
 
     build_probe_paths: Callable[[], tuple[str, ...]]
+    build_cli_input_from_options: Callable[[Mapping[str, object]], RunAllCommandInput]
     build_input: Callable[..., RunAllCommandInput]
+    dispatch_cli_callback: Callable[..., None]
     disable_transient_health_server: Callable[..., bool]
     ensure_observability_backend_started: Callable[..., object]
     run_with_cli_policy: Callable[[click.Context, RunAllCommandInput], None]
@@ -40,8 +42,12 @@ class RunAllPolicyRuntime:
     destructive_confirmation: Callable[[str, list[str], bool, bool], bool]
     determine_exit_code: Callable[[BatchRunResult], ExitCode]
     execute_batch: Callable[..., BatchRunResult | None]
+    exit_func: Callable[[int | str | None], NoReturn]
     health_info_presenter: Callable[[bool, int], None]
+    listing_emitter: Callable[..., None]
+    preview_emitter: Callable[..., None]
     resolve_context_registry: Callable[[click.Context], PipelineRegistry | None]
+    run_all_command_flow: Callable[..., None]
     summary_presenter: Callable[[BatchRunResult, bool], None]
 
 

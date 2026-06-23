@@ -15,7 +15,6 @@ APPROVED_FLAT_CONTROL_PLANE_MODULES = frozenset(
     {
         "__init__.py",
         "_lazy_export_facade.py",
-        "effective_config_support.py",
         "forensic_diff_service.py",
         "run_manifest_exact_replay_blockers.py",
         "run_manifest_reproducibility_claims.py",

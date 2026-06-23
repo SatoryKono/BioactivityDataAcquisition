@@ -41,7 +41,7 @@ def bootstrap_control_plane_lifecycle_store() -> (
     ControlPlaneArtifactLifecycleStoreProtocol
 ):
     """Build the lifecycle store through the composition boundary."""
-    from bioetl.composition.control_plane_api import (
+    from bioetl.composition.control_plane_service_access import (
         bootstrap_control_plane_lifecycle_store as _impl,
     )
 

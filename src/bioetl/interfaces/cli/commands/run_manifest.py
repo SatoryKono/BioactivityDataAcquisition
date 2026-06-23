@@ -316,7 +316,7 @@ def closure_report_command(
         )
         payload = report.to_dict()
         if write_artifact:
-            from bioetl.composition.control_plane_api import (
+            from bioetl.composition.control_plane_service_access import (
                 persist_historical_replay_closure_report,
             )
 
@@ -375,7 +375,7 @@ def universe_report_command(
         )
         payload = report.to_dict()
         if write_artifact:
-            from bioetl.composition.control_plane_api import (
+            from bioetl.composition.control_plane_service_access import (
                 persist_historical_replay_universe_report,
             )
 

@@ -126,6 +126,30 @@ def test_control_plane_api_reexports_canonical_control_plane_services() -> None:
     assert canonical_get_config_service is get_config_service
 
 
+def test_control_plane_service_access_routes_to_canonical_owner_seams() -> None:
+    """First-party control-plane access should bind directly to owner seams."""
+    from bioetl.composition._resource_management import get_checkpoint_runtime_service
+    from bioetl.composition._services import get_config_service
+    from bioetl.composition._workflow_services import (
+        get_workflow_execution_service,
+        load_workflow_config,
+    )
+    from bioetl.composition.control_plane_service_access import (
+        get_checkpoint_runtime_service as canonical_get_checkpoint_runtime_service,
+        get_config_service as canonical_get_config_service,
+        get_workflow_execution_service as canonical_get_workflow_execution_service,
+        list_configured_pipeline_names as canonical_list_configured_pipeline_names,
+        load_workflow_config as canonical_load_workflow_config,
+    )
+    from bioetl.composition.config_catalog import list_configured_pipeline_names
+
+    assert canonical_get_checkpoint_runtime_service is get_checkpoint_runtime_service
+    assert canonical_get_config_service is get_config_service
+    assert canonical_get_workflow_execution_service is get_workflow_execution_service
+    assert canonical_list_configured_pipeline_names is list_configured_pipeline_names
+    assert canonical_load_workflow_config is load_workflow_config
+
+
 def test_health_api_reexports_canonical_health_services() -> None:
     """Health API should expose the canonical health and quarantine seams."""
     from bioetl.composition.bootstrap.cli.health import (

@@ -151,15 +151,13 @@ def handle_missing_compatibility_context(
         "checkpoint_identity": checkpoint_identity_payload(checkpoint_metadata),
         "compatibility_service_available": service_available,
     }
-    if disposition == "missing_context_blocked":
-        logger.warning(
-            "Checkpoint compatibility context missing; resume blocked.",
-            **payload,
-        )
-        return None
+    logger.warning(
+        "Checkpoint compatibility context missing; resume rejected.",
+        **payload,
+    )
     raise ValueError(
-        "Checkpoint resume requires compatibility context and hard_fail policy "
-        "is enabled: " + "; ".join(messages)
+        "Checkpoint resume requires compatibility context and fails closed when "
+        "that context is incomplete: " + "; ".join(messages)
     )
 
 

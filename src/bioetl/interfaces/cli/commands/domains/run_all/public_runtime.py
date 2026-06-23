@@ -17,9 +17,7 @@ from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime
 from bioetl.interfaces.cli.commands.domains.run_all.command_policy import (
     RunAllCommandInput,
     build_run_all_command_input,
-    exit_with_code,
     handle_run_all_cli_failure,
-    run_all_command_flow,
 )
 from bioetl.interfaces.cli.commands.domains.run_all.execution import (
     RunAllBatchExecutionRequest,
@@ -37,8 +35,6 @@ from bioetl.interfaces.cli.commands.domains.run_all.public_runtime_deps import (
 )
 from bioetl.interfaces.cli.commands.domains.run_all.support import (
     BatchRunResult,
-    emit_run_all_listing,
-    emit_run_all_preview,
     should_prompt_for_destructive_run,
 )
 from bioetl.interfaces.cli.commands.domains.run_all.support import (
@@ -46,9 +42,6 @@ from bioetl.interfaces.cli.commands.domains.run_all.support import (
 )
 from bioetl.interfaces.cli.commands.domains.run_all.support import (
     handle_destructive_confirmation as handle_destructive_confirmation_impl,
-)
-from bioetl.interfaces.cli.commands.domains.shared.callback_dispatch import (
-    dispatch_cli_callback,
 )
 
 if TYPE_CHECKING:
@@ -191,10 +184,7 @@ def run_all_callback_runtime(
     options: Mapping[str, object],
     runtime: RunAllCallbackRuntime,
 ) -> None:
-    cli_input = build_run_all_command_input_from_options(
-        options,
-        build_input=runtime.build_input,
-    )
+    cli_input = runtime.build_cli_input_from_options(options)
     if not cli_input.list_only and not cli_input.dry_run:
         cli_input = cast(
             "RunAllCommandInput",
@@ -205,7 +195,7 @@ def run_all_callback_runtime(
                 disable_transient_health_server_fn=runtime.disable_transient_health_server,
             ),
         )
-    dispatch_cli_callback(
+    runtime.dispatch_cli_callback(
         click_context,
         build_cli_input=lambda: cli_input,
         run_with_cli_policy=runtime.run_with_cli_policy,
@@ -221,17 +211,17 @@ def run_all_with_cli_policy_runtime(
     registry = (
         runtime.resolve_context_registry(click_context) or runtime.build_cli_registry()
     )
-    run_all_command_flow(
+    runtime.run_all_command_flow(
         cli_input=cli_input,
         registry=registry,
         destructive_confirmation=runtime.destructive_confirmation,
-        listing_emitter=emit_run_all_listing,
-        preview_emitter=emit_run_all_preview,
+        listing_emitter=runtime.listing_emitter,
+        preview_emitter=runtime.preview_emitter,
         health_info_presenter=runtime.health_info_presenter,
         execute_batch=runtime.execute_batch,
         summary_presenter=runtime.summary_presenter,
         determine_exit_code=runtime.determine_exit_code,
-        exit_func=exit_with_code,
+        exit_func=runtime.exit_func,
     )
 
 

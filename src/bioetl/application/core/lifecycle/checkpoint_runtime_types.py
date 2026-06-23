@@ -12,7 +12,6 @@ CheckpointCompatibilityDisposition = Literal[
     "hard_fail_raised",
 ]
 CheckpointMissingContextDisposition = Literal[
-    "missing_context_blocked",
     "missing_context_hard_fail_raised",
 ]
 

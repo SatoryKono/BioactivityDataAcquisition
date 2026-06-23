@@ -43,7 +43,7 @@ def get_quarantine_runtime_service(pipeline: str) -> _QuarantineRuntimeService:
 
 def get_run_manifest_service() -> RunManifestInspectionServiceProtocol:
     """Load the run manifest service through composition on demand."""
-    from bioetl.composition.control_plane_api import (
+    from bioetl.composition.control_plane_service_access import (
         get_run_manifest_service as _impl,
     )
 

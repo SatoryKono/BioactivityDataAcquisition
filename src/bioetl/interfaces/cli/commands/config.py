@@ -29,14 +29,16 @@ __all__ = [
 
 def get_config_service() -> ConfigService:
     """Load the config service through composition on demand."""
-    from bioetl.composition.control_plane_api import get_config_service as _impl
+    from bioetl.composition.control_plane_service_access import (
+        get_config_service as _impl,
+    )
 
     return _impl()
 
 
 def get_configured_pipeline_names() -> list[str]:
     """Load configured pipeline names through the lightweight composition seam."""
-    from bioetl.composition.control_plane_api import (
+    from bioetl.composition.control_plane_service_access import (
         list_configured_pipeline_names as _impl,
     )
 

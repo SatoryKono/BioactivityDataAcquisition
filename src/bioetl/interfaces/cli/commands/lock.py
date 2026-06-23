@@ -33,7 +33,9 @@ def lock() -> None:
 
 def get_lock_service() -> LockService:
     """Load the lock service through composition on demand."""
-    from bioetl.composition.control_plane_api import get_lock_service as _impl
+    from bioetl.composition.control_plane_service_access import (
+        get_lock_service as _impl,
+    )
 
     return _impl()
 
