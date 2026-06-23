@@ -228,9 +228,9 @@ CHEMBL_ENUM_CATALOG: dict[tuple[str, str], frozenset[str]] = {
     ("molecule", "ro3_pass"): RO3_PASS_VALUES,
     ("molecule", "structure_type"): STRUCTURE_TYPES,
     ("publication", "oa_status"): frozenset(OA_STATUS_VALUES),
-    ("publication", "publication_type"): frozenset(
-        ["journal-article", "book", "dataset", "patent"]
-    ),  # ChEMBL-specific subset
+    # publication_type is the reviewed global cross-provider taxonomy.
+    # ChEMBL-specific ingestion subsets live in entity config/DQ policy, not here.
+    ("publication", "publication_type"): PUBLICATION_TYPES,
     ("publication_term", "term_type"): PUBLICATION_TERM_TYPES,
     ("target", "component_relationships"): TARGET_COMPONENT_RELATIONSHIPS,
     ("target", "component_types"): TARGET_COMPONENT_TYPES,

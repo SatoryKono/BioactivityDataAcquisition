@@ -17,7 +17,7 @@
 - Missing allowlisted measured-only modules: `0`
 - First-party src imports targeting measured-only modules: `0`
 - Curated rows requiring external breaking change process: `12`
-- Curated rows marked internal-callers-zero: `2`
+- Curated rows marked internal-callers-zero: `5`
 - First-party src imports targeting internal-callers-zero rows: `0`
 - Ratchet violations: `0`
 
@@ -50,11 +50,11 @@
 
 - `src/bioetl/interfaces/cli/commands/run.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/interfaces/cli/commands/run_all.py` — external breaking change required: `true`, internal callers zero: `false`
-- `src/bioetl/interfaces/cli/commands/run_composite.py` — external breaking change required: `true`, internal callers zero: `false`
-- `src/bioetl/interfaces/cli/commands/health.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/interfaces/cli/commands/run_composite.py` — external breaking change required: `true`, internal callers zero: `true`
+- `src/bioetl/interfaces/cli/commands/health.py` — external breaking change required: `true`, internal callers zero: `true`
 - `src/bioetl/interfaces/cli/commands/diagnostics.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/interfaces/cli/commands/quarantine.py` — external breaking change required: `true`, internal callers zero: `false`
-- `src/bioetl/composition/entrypoints.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/composition/entrypoints.py` — external breaking change required: `true`, internal callers zero: `true`
 - `src/bioetl/composition/health_api.py` — external breaking change required: `true`, internal callers zero: `true`
 - `src/bioetl/composition/maintenance_api.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/infrastructure/config/__init__.py` — external breaking change required: `true`, internal callers zero: `true`

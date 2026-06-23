@@ -35,6 +35,40 @@ def workflow_pipeline_probe_paths(config: WorkflowConfig) -> tuple[str, ...]:
     return build_observability_backend_required_probe_paths(pipelines=pipelines)
 
 
+def build_workflow_execution_kwargs(
+    *,
+    get_workflow_execution_service_fn: Callable[..., WorkflowExecutionService],
+    ensure_metrics_server_started_fn: Callable[[], object],
+    publish_metrics_safely_fn: Callable[..., object],
+    config: WorkflowConfig,
+    registry: PipelineRegistry | None,
+    dry_run: bool,
+    only_steps: str | None,
+    resume_last: bool,
+    resume_manifest_id: str | None,
+    resume_run_id: UUID | None,
+    force_steps: str | None,
+    repair_steps: str | None,
+    incremental: bool,
+) -> dict[str, object]:
+    """Bundle workflow execution kwargs for shared CLI/runtime call sites."""
+    return {
+        "get_workflow_execution_service_fn": get_workflow_execution_service_fn,
+        "ensure_metrics_server_started_fn": ensure_metrics_server_started_fn,
+        "publish_metrics_safely_fn": publish_metrics_safely_fn,
+        "config": config,
+        "registry": registry,
+        "dry_run": dry_run,
+        "only_steps": only_steps,
+        "resume_last": resume_last,
+        "resume_manifest_id": resume_manifest_id,
+        "resume_run_id": resume_run_id,
+        "force_steps": force_steps,
+        "repair_steps": repair_steps,
+        "incremental": incremental,
+    }
+
+
 def execute_workflow_with_backend(
     *,
     config: WorkflowConfig,
@@ -60,19 +94,21 @@ def execute_workflow_with_backend(
         required_probe_paths=workflow_pipeline_probe_paths(config),
     )
     result = _execute_workflow_and_publish_metrics(
-        get_workflow_execution_service_fn=get_workflow_execution_service_fn,
-        ensure_metrics_server_started_fn=ensure_metrics_server_started_fn,
-        publish_metrics_safely_fn=publish_metrics_safely_fn,
-        config=config,
-        registry=registry,
-        dry_run=dry_run,
-        only_steps=only_steps,
-        resume_last=resume_last,
-        resume_manifest_id=resume_manifest_id,
-        resume_run_id=resume_run_id,
-        force_steps=force_steps,
-        repair_steps=repair_steps,
-        incremental=incremental,
+        **build_workflow_execution_kwargs(
+            get_workflow_execution_service_fn=get_workflow_execution_service_fn,
+            ensure_metrics_server_started_fn=ensure_metrics_server_started_fn,
+            publish_metrics_safely_fn=publish_metrics_safely_fn,
+            config=config,
+            registry=registry,
+            dry_run=dry_run,
+            only_steps=only_steps,
+            resume_last=resume_last,
+            resume_manifest_id=resume_manifest_id,
+            resume_run_id=resume_run_id,
+            force_steps=force_steps,
+            repair_steps=repair_steps,
+            incremental=incremental,
+        )
     )
     render_run_result(
         config,
@@ -84,4 +120,8 @@ def execute_workflow_with_backend(
     _handle_workflow_result(result)
 
 
-__all__ = ["execute_workflow_with_backend", "workflow_pipeline_probe_paths"]
+__all__ = [
+    "build_workflow_execution_kwargs",
+    "execute_workflow_with_backend",
+    "workflow_pipeline_probe_paths",
+]

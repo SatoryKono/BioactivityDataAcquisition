@@ -26,6 +26,7 @@ from bioetl.interfaces.cli.commands.domains.diagnostics.rendering import (
 )
 from bioetl.interfaces.cli.commands.domains.quarantine.support import (
     _QuarantineRuntimeService,
+    _resolve_silver_filter_error_code,
 )
 from bioetl.interfaces.cli.commands.domains.shared.inspection_commands import (
     add_audit_run_options,
@@ -338,7 +339,11 @@ def diagnostics_quarantine(
 ) -> None:
     """Inspect quarantine statistics from the unified operator entrypoint."""
     bundle = get_observability_diagnostics_bundle()
-    resolved_error_code = SILVER_FILTER_ERROR_CODE if silver_filter_only else error_code
+    resolved_error_code = _resolve_silver_filter_error_code(
+        silver_filter_only=silver_filter_only,
+        error_code=error_code,
+        silver_filter_error_code=SILVER_FILTER_ERROR_CODE,
+    )
     emit_quarantine_stats(
         bundle,
         get_quarantine_runtime_service(pipeline),
