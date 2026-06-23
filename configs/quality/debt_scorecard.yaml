@@ -287,8 +287,8 @@ config_surface_ratchet:
       ratchet_policy: Non-growth fail-fast unless a reviewed pipeline addition updates
         the budget.
     unique_parameter_count:
-      current_count: 483
-      max_count: 483
+      current_count: 462
+      max_count: 462
       owner: '@bioetl-config'
       linked_issue: '#4818'
       rationale: Flattened parameter vocabulary must not expand silently across the
@@ -333,8 +333,8 @@ config_surface_ratchet:
           rationale: Effective entity pipeline surface after base defaults merge.
           ratchet_policy: Non-growth fail-fast for governed entity configs.
         unique_parameter_count:
-          current_count: 287
-          max_count: 287
+          current_count: 266
+          max_count: 266
           rationale: Effective flattened vocabulary for entity configs only.
           ratchet_policy: Non-growth fail-fast unless reviewed schema expansion updates
             budget.
@@ -527,16 +527,16 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 48
-      total_loc: 5837
+      total_loc: 5840
       files_ge_250_loc: 1
-      helper_function_ratio: 0.326
+      helper_function_ratio: 0.312
       max_internal_fan_in: 3
       max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.observability
     trend:
       status: reduced_2026-06-18_runtime_mapping_init_compaction
       next_action: 2026-06-18 folds protein-class mapping initialization into the
         runtime classification bootstrap without increasing the family LOC baseline;
-        live metrics are 5837 LOC and 1 file >=250 LOC while bounded-growth budgets
+        live metrics are 5840 LOC and 1 file >=250 LOC while bounded-growth budgets
         remain at 2 files_ge_250_loc and max_internal_fan_in 5.
   - name: composition_factories_pipeline
     owner: '@bioetl-platform'
