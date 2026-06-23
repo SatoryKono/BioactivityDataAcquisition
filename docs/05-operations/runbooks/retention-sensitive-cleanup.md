@@ -21,6 +21,7 @@ Use this runbook before any cleanup that touches a retention-sensitive or
 reproducibility-sensitive surface:
 
 - `data/**`
+- `data/debug_exports/**`
 - `data/output/control/**`
 - `data/output/checkpoints/**`
 - cached Bronze snapshots under `data/output/bronze/**`
@@ -81,6 +82,7 @@ used operationally.
 | `data/output/control/**` | Protected | Use [Control-Plane Lifecycle](../control-plane-lifecycle.md); preserve retained manifests, ledgers, effective configs, lineage, and protected references. |
 | `data/output/checkpoints/**` | Protected | Use [Control-Plane Lifecycle](../control-plane-lifecycle.md) or a checkpoint-specific runbook; preserve resume/replay anchors. |
 | cached Bronze snapshots | Protected | Use [Control-Plane Lifecycle](../control-plane-lifecycle.md); retain snapshots referenced by retained manifests. |
+| `data/debug_exports/**` | Owner-reviewed replay-adjacent evidence | Require debug-export inventory review, retention reason, and restore/regenerate path before purge; do not broad-delete export bundles. |
 | `data/**` outside control-plane | Separate retention | Require owner approval, backup/restore path, and path-specific retention note. |
 | `tests/fixtures/**` | Fixture-governed | Require fixture owner review and targeted test verification. |
 | `tests/fixtures/vcr/**` | VCR-governed | Use the VCR recording/validation workflow; never blanket-delete cassettes. |
@@ -169,6 +171,10 @@ replay-impact checklist:
 - if the candidate is under `data/output/control/**`,
   `data/output/checkpoints/**`, or cached Bronze, use
   `bioetl maintenance control-plane-lifecycle` and review `replay_impact`;
+- if the candidate is under `data/debug_exports/**`, review the exact export
+  bundle contents, confirm no active investigation or replay/debug workflow
+  still depends on them, and record the regenerate or archive path before
+  deletion;
 - `strict_replay_evidence_protected` means deletion would violate a
   `replay_ready` or `forensic_grade` evidence floor unless a separate override
   review explicitly accepts that loss;

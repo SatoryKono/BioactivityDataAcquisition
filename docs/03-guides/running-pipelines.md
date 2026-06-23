@@ -31,9 +31,8 @@ ______________________________________________________________________
 
    ```bash
    # CI / single-OS checkout
-   make install
-   make test-deps
-   make setup-plugins
+   uv sync --extra dev --extra tests --extra tracing
+   uv run python -m scripts.ops setup-plugins
    ```
 
    ```powershell
@@ -51,8 +50,8 @@ ______________________________________________________________________
 1. **Bootstrap проверен локальным smoke/stable run:**
 
    ```bash
-   # Stable local suite
-   make test
+   # Smoke / stable local verification
+   uv run python -m scripts.engineering.dev run-tests smoke
    ```
 
    `scripts/engineering/dev/dev_setup.sh` остаётся legacy placeholder и не является

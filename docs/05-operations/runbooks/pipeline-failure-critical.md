@@ -55,7 +55,8 @@ ______________________________________________________________________
 ## Verification
 
 - `bioetl run-manifest show <run_id>` status is `SUCCESS`.
-- `make test-integration` for the specific provider passes.
+- `uv run python -m scripts.engineering.dev run-tests integration -- -k <provider>`
+  for the affected provider slice passes.
 
 ## Recovery
 

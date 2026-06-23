@@ -74,6 +74,16 @@ entries:
     protection: owner-reviewed-retention-sensitive-cleanup
     replay_impact_required: false
     runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
+  - id: debug_exports
+    path: data/debug_exports/**
+    classification: debug_export_cleanup
+    replay_anchor: quality_exception_evidence
+    touches_replay_evidence: true
+    dry_run_required: true
+    canonical_tool: debug export inventory review before purge
+    protection: owner-reviewed-retention-sensitive-cleanup
+    replay_impact_required: false
+    runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
   - id: quarantine_records
     path: data/output/quarantine/**
     classification: quarantine_cleanup

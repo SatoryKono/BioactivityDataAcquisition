@@ -1040,7 +1040,8 @@ class LegacyAdapter(BaseSyncAdapter):
 
 ```bash
 # Для разработки (полный набор)
-make install  # Эквивалент: pip install -e ".[dev]"
+uv sync --extra dev --extra tests --extra tracing
+uv run python -m scripts.ops setup-plugins
 
 # Только для запуска тестов (CI/lightweight)
 pip install -e ".[tests]"
@@ -1612,11 +1613,13 @@ ______________________________________________________________________
 ### 9.1. Локальная настройка
 
 ```bash
-make install      # создание venv, установка зависимостей
-make setup-plugins  # локальная настройка pytest/pre-commit tooling
-make test         # локальный стабильный suite с coverage (без E2E)
-make lint         # ruff + mypy
-make run-local    # запуск сэмплового пайплайна (chembl_activity, limit=10)
+uv sync --extra dev --extra tests --extra tracing
+uv run python -m scripts.ops setup-plugins
+uv run python -m scripts.engineering.dev run-tests cov
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy src tests
+uv run python -m bioetl run --pipeline chembl_activity --limit 10 --no-cached-bronze
 ```
 
 ### 9.2. Окружение

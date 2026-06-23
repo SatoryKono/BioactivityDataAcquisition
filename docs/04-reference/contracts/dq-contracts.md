@@ -220,21 +220,32 @@ quality:
 
 ## Threshold Semantics
 
-BioETL uses two-level error thresholds for batch-level DQ evaluation:
+BioETL does **not** currently have one universal hard-fail default shared by
+every DQ surface.
 
-| Threshold   | Default  | Behavior                                                                 |
-| ----------- | -------- | ------------------------------------------------------------------------ |
-| `soft_fail` | 5%       | Warning emitted, pipeline continues                                      |
-| `hard_fail` | 25%      | Batch fails, records quarantined                                           |
+### Default matrix
 
-**Invariant**: `soft_fail` must be strictly less than `hard_fail`.
+| Surface | Source | Default | Meaning |
+| --- | --- | --- | --- |
+| Hierarchical `quality:` config | `configs/base/quality.yaml` | `soft_fail=0.05`, `hard_fail=0.25` | Base provider/entity DQ hierarchy |
+| Contract-backed DQ runtime fallback | `configs/contracts/**`, `src/bioetl/infrastructure/config/dq_contract_config_loader.py` | `soft_fail=0.05`, `hard_fail=0.20` | Used when a contract-backed config omits explicit threshold values |
+| Inline pipeline DQ override normalization | `src/bioetl/infrastructure/config/pipeline_dq_resolution.py` | `soft_fail=0.05`, `hard_fail=0.20` | Baseline used to detect whether inline `pipeline.dq_overrides` changed the defaults |
+| Silver DQ request contract | `src/bioetl/domain/ports/quality/silver_dq_request.py` | `soft_fail=0.05`, `hard_fail=0.20` | Request-shape default for Silver DQ analysis |
 
-**Configuration**:
-- Global defaults: `configs/base/quality.yaml` → `thresholds.soft_fail`, `thresholds.hard_fail`
-- Entity overrides: `configs/entities/{provider}/{entity}.yaml` → `quality.thresholds`
-- Inline overrides: Pipeline YAML → `pipeline.dq_overrides.hard_fail_threshold`
+**Invariant**: `soft_fail` must be strictly less than `hard_fail` on every
+surface.
 
-**Evaluation**: When error rate exceeds `soft_fail`, a warning is logged. When error rate exceeds `hard_fail`, the batch is rejected and records are quarantined according to the disposition policy.
+**Configuration routing**:
+
+- Hierarchical defaults: `configs/base/quality.yaml`
+- Entity/provider overrides: `configs/entities/{provider}/{entity}.yaml`,
+  `configs/providers/{provider}.yaml`
+- Contract DQ routing: `configs/contracts/**`
+- Inline overrides: pipeline YAML → `pipeline.dq_overrides.*`
+
+**Evaluation**: when error rate exceeds `soft_fail`, runtime emits a warning.
+When it exceeds `hard_fail`, the batch is rejected or quarantined according to
+the active disposition policy and the concrete config surface in effect.
 
 ## Validation Layer Matrix
 

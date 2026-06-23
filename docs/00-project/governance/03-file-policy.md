@@ -215,7 +215,8 @@ Machine-readable каталог для structure hygiene хранится в
 - `tests/fixtures/**`, `tests/fixtures/vcr/**` — reproducibility fixtures
 - `docs/reports/**` — curated repo-only reports
 - `reports/**` — generated/working outputs с отдельной cleanup policy
-- `data/**` — runtime/control-plane/data retention surface
+- `data/**` — runtime/control-plane/data retention surface, including
+  `data/debug_exports/**` debug evidence bundles
 
 Для этих зон допустим только bounded cleanup по специализированным процедурам.
 Blanket cleanup команды и broad deletion waves для них запрещены.

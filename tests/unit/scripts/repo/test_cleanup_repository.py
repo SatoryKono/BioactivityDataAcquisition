@@ -404,6 +404,51 @@ def test_collect_root_review_evidence_marks_directory_with_tracked_descendant(
     assert evidence[0].review_status == "present_owner_decision_required"
 
 
+def test_collect_root_review_evidence_skips_expensive_probes_for_local_only_surface(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    _write_governance_files(tmp_path)
+    _write_review_registry(
+        tmp_path,
+        [
+            {
+                "lane_id": "local_runtime_root_dirs",
+                "classification": "review_required",
+                "verification": ["git ls-files .cache"],
+                "candidates": [
+                    {
+                        "path": ".cache",
+                        "current_live_state": "present_local_only_root_surface",
+                        "canonical_path": None,
+                        "action_if_reintroduced": "keep_untracked",
+                    }
+                ],
+            }
+        ],
+    )
+    (tmp_path / ".cache").mkdir()
+
+    monkeypatch.setattr(module, "_tracked_paths", lambda repo_root: [])
+    monkeypatch.setattr(
+        module,
+        "_git_path_has_history",
+        lambda repo_root, path: (_ for _ in ()).throw(AssertionError("history probe")),
+    )
+    monkeypatch.setattr(
+        module,
+        "_count_reference_hits",
+        lambda repo_root, path: (_ for _ in ()).throw(AssertionError("reference probe")),
+    )
+
+    evidence = module.collect_root_review_evidence(tmp_path)
+
+    assert len(evidence) == 1
+    assert evidence[0].review_status == "present_untracked_surface"
+    assert evidence[0].has_history is False
+    assert evidence[0].reference_hits == 0
+
+
 def test_build_cleanup_classification_report_distinguishes_policy_classes(
     tmp_path: Path,
     monkeypatch,
@@ -617,6 +662,33 @@ def test_collect_reports_workspace_evidence_retains_fresh_ttl_artifacts(
         by_path["reports/quality/pretest_guardrails_20990101_000000.json"].ttl_expired
         is False
     )
+
+
+def test_collect_reports_workspace_evidence_skips_expensive_probes_for_local_prune_candidates(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    _write_governance_files(tmp_path)
+    (tmp_path / "reports" / "docs-audit").mkdir(parents=True)
+
+    monkeypatch.setattr(module, "_tracked_paths", lambda repo_root: [])
+    monkeypatch.setattr(
+        module,
+        "_git_path_has_history",
+        lambda repo_root, path: (_ for _ in ()).throw(AssertionError("history probe")),
+    )
+    monkeypatch.setattr(
+        module,
+        "_count_reference_hits",
+        lambda repo_root, path: (_ for _ in ()).throw(AssertionError("reference probe")),
+    )
+
+    evidence = module.collect_reports_workspace_evidence(tmp_path)
+    by_path = {row.rel_path: row for row in evidence}
+
+    assert by_path["reports/docs-audit"].classification == "PRUNE_CANDIDATE"
+    assert by_path["reports/docs-audit"].has_history is False
+    assert by_path["reports/docs-audit"].reference_hits == 0
 
 
 def test_build_root_review_and_reports_workspace_reports_include_new_sections(

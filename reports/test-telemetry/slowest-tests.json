@@ -1,197 +1,197 @@
 {
   "source_branch": "main",
-  "source_commit": "52353e5e833ce815c0d6c3a581405ce80f488471",
-  "source_run_id": "22890216064",
-  "refreshed_at_utc": "2026-06-23T09:23:09.436295+00:00",
+  "source_commit": "281a0ed48ad70bb108fb90ada50a6a6cdd77f409",
+  "source_run_id": "local-current-main-telemetry-20260623",
+  "refreshed_at_utc": "2026-06-23T09:51:39.091871+00:00",
   "refresh_status": "captured",
-  "total_cases": 14859,
+  "total_cases": 8507,
   "top_slowest": [
     {
-      "source": "junit_parallel.xml",
-      "test": "tests.architecture.test_regression_metrics::test_mypy_error_count",
-      "duration_s": 19.186
+      "source": "S7-crosscutting-architecture-a2.xml",
+      "test": "tests.architecture.test_checkpoint_compatibility_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_tests",
+      "duration_s": 42.785
     },
     {
-      "source": "junit_parallel.xml",
-      "test": "tests.architecture.test_antipatterns::test_no_hardcoded_secrets",
-      "duration_s": 15.867
+      "source": "S7-crosscutting-architecture-a2.xml",
+      "test": "tests.architecture.test_checkpoint_compatibility_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_src",
+      "duration_s": 28.12
     },
     {
-      "source": "junit_parallel.xml",
-      "test": "tests.unit.interfaces.cli.test_cli_main_module.TestCliMainModule::test_module_runnable_with_help",
-      "duration_s": 5.741
+      "source": "S7-crosscutting-architecture-a2.xml",
+      "test": "tests.architecture.test_config_discrepancy_metrics_ratchets::test_config_discrepancy_baseline_matches_live_generator",
+      "duration_s": 24.051
     },
     {
-      "source": "junit_parallel.xml",
-      "test": "tests.unit.infrastructure.validation.test_pandera_validator.TestPanderaValidatorPropertyBased::test_noop_validators_always_return_valid",
-      "duration_s": 4.541
+      "source": "S7-crosscutting-architecture-a2.xml",
+      "test": "tests.architecture.test_config_discrepancy_report_drift::test_config_discrepancy_report_matches_deterministic_generator",
+      "duration_s": 23.018
     },
     {
-      "source": "junit_parallel.xml",
-      "test": "tests.architecture.test_test_structural_debt::test_no_test_functions_over_200_loc",
-      "duration_s": 4.29
+      "source": "S2-comp-iface.xml",
+      "test": "tests.unit.composition.runtime_builders.test_runner_builder_runtime_modes::test_build_pipeline_runner_uses_configured_mode_outside_test_mode",
+      "duration_s": 21.493
     },
     {
-      "source": "junit_parallel.xml",
-      "test": "tests.architecture.test_layer_dependencies::test_dead_code_vulture",
-      "duration_s": 4.204
+      "source": "S7-crosscutting-architecture-a2.xml",
+      "test": "tests.architecture.test_cli_command_import_guards::test_non_cli_source_keeps_retained_public_cli_seams_outside_runtime_code",
+      "duration_s": 16.084
     },
     {
-      "source": "junit_parallel.xml",
-      "test": "tests.architecture.test_scripts_lifecycle_registry::test_scripts_lifecycle_registry_check_passes",
-      "duration_s": 4.108
+      "source": "S7-crosscutting-architecture-a2.xml",
+      "test": "tests.architecture.test_config_root_governance::test_runtime_config_discovery_does_not_use_source_parent_arithmetic",
+      "duration_s": 15.28
     },
     {
-      "source": "junit_parallel.xml",
-      "test": "tests.architecture.test_scripts_deprecation_backlog::test_scripts_deprecation_report_generation",
-      "duration_s": 4.051
+      "source": "S7-crosscutting-architecture-a2.xml",
+      "test": "tests.architecture.test_cli_command_import_guards::test_non_cli_source_avoids_interfaces_package_root_convenience_imports",
+      "duration_s": 14.498
     },
     {
-      "source": "junit_parallel.xml",
-      "test": "tests.architecture.test_scripts_inventory_manifest::test_scripts_inventory_manifest_drift_check_passes",
-      "duration_s": 3.948
+      "source": "S7-crosscutting-architecture-a.xml",
+      "test": "tests.architecture.test_adr_enforcement_matrix::test_adr_enforcement_matrix_artifact_matches_live_generator",
+      "duration_s": 14.129
     },
     {
-      "source": "junit_parallel.xml",
-      "test": "tests.architecture.test_antipatterns::test_no_blocking_io_in_async",
-      "duration_s": 3.757
+      "source": "S7-crosscutting-architecture-a.xml",
+      "test": "tests.architecture.test_add_svg_text_fallback::test_build_fallback_text_emits_multiline_tspans",
+      "duration_s": 13.15
     },
     {
-      "source": "junit_parallel.xml",
-      "test": "tests.architecture.test_lint_terminology_script::test_lint_terminology_supports_check_without_paths",
-      "duration_s": 3.514
+      "source": "S7-crosscutting-architecture-a2.xml",
+      "test": "tests.architecture.test_compatibility_freeze_guards::test_cli_run_orchestration_singleton_stays_private_compat_owner",
+      "duration_s": 12.274
     },
     {
-      "source": "junit_parallel.xml",
-      "test": "tests.unit.domain.test_exceptions.TestErrorClassifier::test_classify_unknown_exception",
-      "duration_s": 3.493
+      "source": "S7-crosscutting-architecture-a2.xml",
+      "test": "tests.architecture.test_config_discrepancy_metrics_ratchets::test_config_discrepancy_metrics_within_scorecard_budget",
+      "duration_s": 11.328
     },
     {
-      "source": "junit_parallel.xml",
-      "test": "tests.architecture.test_di_compliance.TestDICompliance::test_factories_only_in_composition",
-      "duration_s": 3.291
+      "source": "S7-crosscutting-architecture-a.xml",
+      "test": "tests.architecture.test_adapter_contracts.TestAdapterMixinPolicy::test_src_does_not_import_legacy_adapter_mixin_modules",
+      "duration_s": 8.951
     },
     {
-      "source": "junit_parallel.xml",
-      "test": "tests.architecture.test_regression_metrics::test_architecture_skip_count",
-      "duration_s": 3.192
+      "source": "S7-crosscutting-architecture-a2.xml",
+      "test": "tests.architecture.test_contract_registry_loader_boundary::test_contract_registry_path_literal_is_confined_to_reviewed_surfaces",
+      "duration_s": 8.577
     },
     {
-      "source": "junit_parallel.xml",
-      "test": "tests.test_architecture::test_no_unsafe_functions",
-      "duration_s": 2.912
+      "source": "S7-crosscutting-architecture-a.xml",
+      "test": "tests.architecture.test_adapter_contracts.TestAdapterHealthCheck::test_adapters_have_health_check",
+      "duration_s": 8.48
     },
     {
-      "source": "junit_parallel.xml",
-      "test": "tests.test_architecture::test_observability_library_isolation",
-      "duration_s": 2.87
+      "source": "S7-crosscutting-architecture-a2.xml",
+      "test": "tests.architecture.test_config_ci_invariants.TestEffectiveOptionalityResolution::test_resolved_optionality_matches_current_config_surface",
+      "duration_s": 8.158
     },
     {
-      "source": "junit_parallel.xml",
-      "test": "tests.architecture.test_code_metrics.TestFunctionLength::test_functions_under_100_lines",
-      "duration_s": 2.419
+      "source": "S7-crosscutting-architecture-a2.xml",
+      "test": "tests.architecture.test_config_ci_invariants.TestConfigFilesExist::test_runtime_config_primary_keys_match_contract_policy",
+      "duration_s": 7.149
     },
     {
-      "source": "junit_parallel.xml",
-      "test": "tests.architecture.test_deterministic_sort_policy_coverage::test_entity_pipeline_sink_sort_policy_coverage_is_full",
-      "duration_s": 2.415
+      "source": "S7-crosscutting-architecture-a2.xml",
+      "test": "tests.architecture.test_config_surface_entity_residual_plateau::test_entity_residual_backlog_matches_live_metrics_and_scorecard",
+      "duration_s": 7.029
     },
     {
-      "source": "junit_parallel.xml",
-      "test": "tests.architecture.test_regression_metrics::test_cross_layer_group_edges_budget",
-      "duration_s": 2.378
+      "source": "S1-domain-core.xml",
+      "test": "tests.unit.domain.schemas.openalex.test_openalex_publication_validation.TestPmcIdBaseValidation::test_pmc_id_base_validation__id_invalid_format__d060aeb5[]",
+      "duration_s": 6.109
     },
     {
-      "source": "junit_parallel.xml",
-      "test": "tests.unit.cli.test_registry_consistency.TestRegistryConfigConsistency::test_all_registered_pipelines_have_config_files",
-      "duration_s": 2.342
+      "source": "S2-comp-iface.xml",
+      "test": "tests.unit.composition.test_canonical_module_paths::test_execution_api_reexports_pipeline_runner_service",
+      "duration_s": 5.742
     },
     {
-      "source": "junit_parallel.xml",
-      "test": "tests.architecture.test_code_metrics.TestGodObjectDetection::test_large_classes_have_delegation",
-      "duration_s": 2.311
+      "source": "S7-crosscutting-architecture-a.xml",
+      "test": "tests.architecture.test_adapter_contracts.TestAdapterPortCompliance::test_primary_adapter_classes_use_package_root_imports",
+      "duration_s": 5.141
     },
     {
-      "source": "junit_parallel.xml",
-      "test": "tests.architecture.test_quality_burndown_priorities::test_function_length_registry_has_no_stale_entries",
-      "duration_s": 2.191
+      "source": "S2-comp-iface.xml",
+      "test": "tests.unit.interfaces.cli.commands.test_observability_backend_runtime::test_ensure_backend_fails_when_required_paths_never_become_ready",
+      "duration_s": 5.019
     },
     {
-      "source": "junit_parallel.xml",
-      "test": "tests.architecture.test_domain_purity.TestDomainImmutability::test_no_mutable_defaults_in_frozen_dataclasses",
-      "duration_s": 2.165
+      "source": "S7-crosscutting-architecture-a2.xml",
+      "test": "tests.architecture.test_config_surface_entity_residual_plateau::test_config_surface_duplication_audit_matches_live_backlog",
+      "duration_s": 4.691
     },
     {
-      "source": "junit_parallel.xml",
-      "test": "tests.unit.infrastructure.validation.test_pandera_validator.TestPanderaValidatorPropertyBased::test_silver_validator_never_raises_on_arbitrary_input",
-      "duration_s": 2.146
+      "source": "S2-comp-iface.xml",
+      "test": "tests.unit.composition.bootstrap.test_bootstrap_entrypoints.TestBootstrapPipeline::test_bootstrap_pipeline_creates_runner_without_starting_server",
+      "duration_s": 4.272
     },
     {
-      "source": "junit_parallel.xml",
-      "test": "tests.unit.infrastructure.validation.test_pandera_validator.TestPanderaValidatorPropertyBased::test_strict_mode_without_schema_always_fails",
-      "duration_s": 2.127
+      "source": "S2-comp-iface.xml",
+      "test": "tests.unit.composition.factories.pipeline.test_registry_consistency.TestRegistryConfigConsistency::test_all_registered_pipelines_have_config_files",
+      "duration_s": 3.464
     }
   ],
   "top_slowest_zones": [
     {
-      "zone": "tests.architecture.test_regression_metrics",
-      "test_count": 3,
-      "total_duration_s": 24.756,
-      "max_duration_s": 19.186
-    },
-    {
-      "zone": "tests.architecture.test_antipatterns",
+      "zone": "tests.architecture.test_checkpoint_compatibility_runtime_facade_usage",
       "test_count": 2,
-      "total_duration_s": 19.624,
-      "max_duration_s": 15.867
+      "total_duration_s": 70.905,
+      "max_duration_s": 42.785
     },
     {
-      "zone": "tests.unit.infrastructure.validation.test_pandera_validator.TestPanderaValidatorPropertyBased",
-      "test_count": 3,
-      "total_duration_s": 8.814,
-      "max_duration_s": 4.541
-    },
-    {
-      "zone": "tests.test_architecture",
+      "zone": "tests.architecture.test_config_discrepancy_metrics_ratchets",
       "test_count": 2,
-      "total_duration_s": 5.782,
-      "max_duration_s": 2.912
+      "total_duration_s": 35.379,
+      "max_duration_s": 24.051
     },
     {
-      "zone": "tests.unit.interfaces.cli.test_cli_main_module.TestCliMainModule",
-      "test_count": 1,
-      "total_duration_s": 5.741,
-      "max_duration_s": 5.741
+      "zone": "tests.architecture.test_cli_command_import_guards",
+      "test_count": 2,
+      "total_duration_s": 30.582,
+      "max_duration_s": 16.084
     },
     {
-      "zone": "tests.architecture.test_test_structural_debt",
+      "zone": "tests.architecture.test_config_discrepancy_report_drift",
       "test_count": 1,
-      "total_duration_s": 4.29,
-      "max_duration_s": 4.29
+      "total_duration_s": 23.018,
+      "max_duration_s": 23.018
     },
     {
-      "zone": "tests.architecture.test_layer_dependencies",
+      "zone": "tests.unit.composition.runtime_builders.test_runner_builder_runtime_modes",
       "test_count": 1,
-      "total_duration_s": 4.204,
-      "max_duration_s": 4.204
+      "total_duration_s": 21.493,
+      "max_duration_s": 21.493
     },
     {
-      "zone": "tests.architecture.test_scripts_lifecycle_registry",
+      "zone": "tests.architecture.test_config_root_governance",
       "test_count": 1,
-      "total_duration_s": 4.108,
-      "max_duration_s": 4.108
+      "total_duration_s": 15.28,
+      "max_duration_s": 15.28
     },
     {
-      "zone": "tests.architecture.test_scripts_deprecation_backlog",
+      "zone": "tests.architecture.test_adr_enforcement_matrix",
       "test_count": 1,
-      "total_duration_s": 4.051,
-      "max_duration_s": 4.051
+      "total_duration_s": 14.129,
+      "max_duration_s": 14.129
     },
     {
-      "zone": "tests.architecture.test_scripts_inventory_manifest",
+      "zone": "tests.architecture.test_add_svg_text_fallback",
       "test_count": 1,
-      "total_duration_s": 3.948,
-      "max_duration_s": 3.948
+      "total_duration_s": 13.15,
+      "max_duration_s": 13.15
+    },
+    {
+      "zone": "tests.architecture.test_compatibility_freeze_guards",
+      "test_count": 1,
+      "total_duration_s": 12.274,
+      "max_duration_s": 12.274
+    },
+    {
+      "zone": "tests.architecture.test_config_surface_entity_residual_plateau",
+      "test_count": 2,
+      "total_duration_s": 11.72,
+      "max_duration_s": 7.029
     }
   ]
 }

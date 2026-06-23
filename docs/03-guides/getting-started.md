@@ -57,12 +57,11 @@ The supported setup path depends on how you use the checkout.
 
 ### 2.1. CI / Single-OS Checkout
 
-Use the maintained Make-based bootstrap:
+Use the maintained uv + script bootstrap:
 
 ```bash
-make install
-make test-deps
-make setup-plugins
+uv sync --extra dev --extra tests --extra tracing
+uv run python -m scripts.ops setup-plugins
 ```
 
 If you use Codex or GitHub Copilot MCP, add the optional tooling setup after install:
@@ -99,9 +98,9 @@ Keep the PowerShell wrapper at `-n 1` unless you intentionally raise
 `BIOETL_PYTEST_WINDOWS_XDIST_WORKERS`; Windows mixed-checkout runs otherwise
 hit the known socket-buffer ceiling sooner than WSL/Linux.
 
-### 2.3. Manual Fallback Without `make`
+### 2.3. Manual Fallback
 
-Manual fallback without `make`:
+Manual fallback when you do not use the recommended bootstrap helper:
 
 ```bash
 uv sync --extra dev --extra tracing
@@ -121,8 +120,9 @@ python3.12 -m venv .venv
 pip install -e .[dev,tracing,docs]
 ```
 
-For the supported aggregate setup flow, run `make install`, `make test-deps`,
-and `make setup-plugins`. The repository-local
+For the supported aggregate setup flow, run
+`uv sync --extra dev --extra tests --extra tracing` and
+`uv run python -m scripts.ops setup-plugins`. The repository-local
 `scripts/engineering/dev/dev_setup.sh` is not part of the supported path.
 
 ## 3. Configuration
@@ -161,16 +161,17 @@ runs; `BIOETL_OPENALEX_EMAIL` is optional attribution metadata.
 
 ## 4. Verify Installation
 
-We recommend running a dependency check before starting the full test suite to ensure all critical runtime packages (`pandas`, `pandera`, `polars`, etc.) are correctly installed.
+We recommend running a quick smoke lane before the full test suite to ensure
+critical runtime packages are available.
 
 ```bash
-make test-deps
+uv run python -m scripts.engineering.dev run-tests smoke
 ```
 
 Then run the full test suite:
 
 ```bash
-make test
+uv run python -m scripts.engineering.dev run-tests cov
 ```
 
 For mixed-checkout day-to-day verification, prefer the OS-specific wrappers:

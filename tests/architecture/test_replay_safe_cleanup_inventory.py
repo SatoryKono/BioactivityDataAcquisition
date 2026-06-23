@@ -87,6 +87,7 @@ def test_retention_sensitive_runbook_points_to_replay_safe_inventory() -> None:
 
     assert "configs/quality/replay_safe_cleanup_inventory.yaml" in runbook
     assert "replay-impact checklist" in runbook
+    assert "data/debug_exports/**" in runbook
     assert "reports/quality/_tmp_*" in runbook
     assert "pretest_guardrails_*.json" in runbook
 
@@ -155,3 +156,20 @@ def test_control_plane_lifecycle_runbook_publishes_evidence_retention_matrix() -
     missing = [fragment for fragment in required_fragments if fragment not in text]
 
     assert not missing
+
+
+@pytest.mark.architecture
+def test_debug_exports_cleanup_surface_is_inventory_backed() -> None:
+    payload = _inventory()
+    entries = payload["entries"]
+    assert isinstance(entries, list)
+
+    by_id = {str(entry["id"]): entry for entry in entries if isinstance(entry, dict)}
+    entry = by_id["debug_exports"]
+
+    assert entry["path"] == "data/debug_exports/**"
+    assert entry["classification"] == "debug_export_cleanup"
+    assert entry["touches_replay_evidence"] is True
+    assert entry["dry_run_required"] is True
+    assert entry["protection"] == "owner-reviewed-retention-sensitive-cleanup"
+    assert Path(str(entry["runbook"])).name == "retention-sensitive-cleanup.md"

@@ -47,12 +47,14 @@ FORBIDDEN_TRACKED_ROOT_FILES: frozenset[str] = frozenset(
         "contract-registry-diagnostics.json",
         "contract-registry-dq-diagnostics.json",
         "contract-schema-classifier-diagnostics.json",
+        "coverage.html",
         "coverage.json",
         "coverage.xml",
         "contract-results.xml",
         "hypothesis-contracts-results.xml",
         "port-contracts-results.xml",
         "provider-contract-drift-report.json",
+        "Test Results - Pytest_All.html",
         "trivy-results.sarif",
     }
 )
@@ -220,6 +222,8 @@ def _is_forbidden_tracked_artifact(path: str) -> bool:
     if path.startswith(".coverage"):
         return True
     if path.startswith("coverage-") and path.endswith(".xml"):
+        return True
+    if path.startswith("coverage_") and path.endswith(".xml"):
         return True
     if path.startswith("tasks_architecture_metric_exemptions_") and path.endswith(
         ".json"
