@@ -55,12 +55,17 @@ coverage_tail:
         - tests/unit/interfaces/cli/commands/domains/maintenance/test_service_access.py
       status: focused_owner_tests_added
 aggregate_residual_ratchets:
-  linked_issue: '#5553'
-  mode: fail-fast-no-growth
+  linked_issue: '#5559'
+  mode: fail-fast-current-inventory
+  live_source: reports/quality/module-coverage-inventory.json#summary
+  historical_baseline:
+    linked_issue: '#5553'
+    unmeasured_module_count: 36
+    uncovered_module_count: 1611
   unmeasured_module_count:
-    max_count: 36
+    max_count: 0
   uncovered_module_count:
-    max_count: 1611
+    max_count: 0
 regression:
   fail_on_decrease: true
   # Ignore sub-point noise from coverage XML rounding across platforms.

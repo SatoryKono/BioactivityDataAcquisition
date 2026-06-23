@@ -75,6 +75,12 @@ def test_test_skip_inventory_tracks_current_live_skip_surfaces() -> None:
     for path, entry in tracked.items():
         assert entry["suite"] in {"contract", "integration"}, path
         assert entry["category"] in allowed_categories, path
+        assert str(entry["owner"]).startswith("@bioetl-"), path
+        assert str(entry["linked_issue"]).startswith("#"), path
+        lifecycle = entry["lifecycle"]
+        assert lifecycle in {"permanent_policy", "temporary_debt"}, path
+        if lifecycle == "temporary_debt":
+            assert str(entry.get("expires_on", "")).strip(), path
         assert isinstance(entry["vcr_related"], bool), path
         assert str(entry["review_date"]).strip(), path
         assert str(entry["rationale"]).strip(), path

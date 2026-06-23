@@ -496,7 +496,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 180
-      total_loc: 22333
+      total_loc: 22328
       files_ge_250_loc: 7
       helper_function_ratio: 0.355
       max_internal_fan_in: 11
@@ -504,7 +504,7 @@ hotspot_family_ratchets:
     trend:
       status: confirmed_2026-06-22_application_core_ratchet_sync
       next_action: 2026-06-22 confirms application_core against the tracked
-        reviewed baseline artifact and live family census at 180 files, 22333
+        reviewed baseline artifact and live family census at 180 files, 22328
         LOC, 7 files_ge_250_loc, helper_function_ratio 0.355, and
         max_internal_fan_in 11 while bounded-growth budgets remain unchanged
         at 13 files_ge_250_loc and max_internal_fan_in 14.
@@ -580,12 +580,12 @@ hotspot_family_ratchets:
       max_internal_fan_in: 4
     metrics:
       duplication_clusters: 0
-      files: 118
-      total_loc: 14775
+      files: 115
+      total_loc: 14630
       files_ge_250_loc: 16
-      helper_function_ratio: 0.47
-      max_internal_fan_in: 4
-      max_internal_fan_in_module: bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.persistence_policy
+      helper_function_ratio: 0.472
+      max_internal_fan_in: 3
+      max_internal_fan_in_module: bioetl.application.services.control_plane.workflow.manifest_service
     trend:
       status: reduced_2026-06-23_issue_5555_control_plane_wrapper_retirement
       next_action: 2026-06-23 removes the transitional effective_config_support

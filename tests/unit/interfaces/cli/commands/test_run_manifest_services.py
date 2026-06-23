@@ -6,7 +6,7 @@ from collections.abc import Callable
 
 import pytest
 
-from bioetl.composition import control_plane_api
+from bioetl.composition import control_plane_service_access
 from bioetl.interfaces.cli.commands import _run_manifest_services as services
 
 pytestmark = pytest.mark.unit
@@ -37,13 +37,17 @@ pytestmark = pytest.mark.unit
         ),
     ],
 )
-def test_lazy_service_getters_delegate_to_composition_api(
+def test_lazy_service_getters_delegate_to_control_plane_service_access(
     monkeypatch: pytest.MonkeyPatch,
     getter: Callable[[], object],
     composition_getter: str,
 ) -> None:
     sentinel = object()
 
-    monkeypatch.setattr(control_plane_api, composition_getter, lambda: sentinel)
+    monkeypatch.setattr(
+        control_plane_service_access,
+        composition_getter,
+        lambda: sentinel,
+    )
 
     assert getter() is sentinel

@@ -20,6 +20,9 @@ DEFAULT_MD_OUTPUT = (
     PROJECT_ROOT / "reports" / "quality" / "pipeline-config-contract-ownership-map.md"
 )
 CONTRACT_REGISTRY_PATH = PROJECT_ROOT / "configs" / "base" / "contract_registry.yaml"
+EXCLUSION_POLICY_PATH = (
+    PROJECT_ROOT / "configs" / "quality" / "pipeline_contract_exclusion_policy.yaml"
+)
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
@@ -154,6 +157,18 @@ def _load_registry_entries() -> dict[str, dict[str, Any]]:
     }
 
 
+def _load_exclusion_policies() -> dict[str, dict[str, Any]]:
+    payload = _load_yaml(EXCLUSION_POLICY_PATH)
+    exclusions = payload.get("exclusions")
+    if not isinstance(exclusions, dict):
+        return {}
+    return {
+        str(contract_ref): policy
+        for contract_ref, policy in exclusions.items()
+        if isinstance(policy, dict)
+    }
+
+
 def _gold_exclusion_reason(pipeline: dict[str, Any]) -> str:
     sink = pipeline.get("sink")
     if not isinstance(sink, dict):
@@ -173,6 +188,7 @@ def _collect_entity_rows() -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     entities_root = PROJECT_ROOT / "configs" / "entities"
     registry_entries = _load_registry_entries()
+    exclusion_policies = _load_exclusion_policies()
     for config_path in sorted(entities_root.glob("*/*.yaml")):
         payload = _load_yaml(config_path)
         provider = str(payload.get("provider") or config_path.parent.name)
@@ -226,6 +242,8 @@ def _collect_entity_rows() -> list[dict[str, Any]]:
             registry_source_path=registry_source_path,
             gold_schema_title=gold_schema_title,
         )
+        if not gold_enabled:
+            row["gold_exclusion_policy"] = exclusion_policies.get(contract_ref, {})
         if provider == "composite":
             row["composite_runtime_config_path"] = (
                 composite_runtime_config.relative_to(PROJECT_ROOT).as_posix()
@@ -269,6 +287,7 @@ def build_payload() -> dict[str, Any]:
             "contract_ref": row["contract_ref"],
             "config_path": row["config_path"],
             "reason": row["gold_exclusion_reason"],
+            "policy": row.get("gold_exclusion_policy", {}),
         }
         for row in rows
         if not row["gold_enabled"]

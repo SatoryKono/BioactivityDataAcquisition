@@ -4,54 +4,126 @@
       "config_path": "configs/entities/chembl/cell_line.yaml",
       "contract_ref": "chembl.cell_line",
       "pipeline_name": "chembl_cell_line",
+      "policy": {
+        "decision": "retain_non_gold_runtime",
+        "expected_reason": "gold_runtime_disabled",
+        "linked_issue": "#5563",
+        "owner": "@bioetl-contracts",
+        "rationale": "Cell-line contract metadata is published for traceability while Gold runtime remains disabled.",
+        "reentry_condition": "Enable Gold runtime or formally retire the published contract artifact."
+      },
       "reason": "gold_runtime_disabled"
     },
     {
       "config_path": "configs/entities/chembl/compound_record.yaml",
       "contract_ref": "chembl.compound_record",
       "pipeline_name": "chembl_compound_record",
+      "policy": {
+        "decision": "retain_non_gold_runtime",
+        "expected_reason": "gold_runtime_disabled",
+        "linked_issue": "#5563",
+        "owner": "@bioetl-contracts",
+        "rationale": "Compound-record contract metadata is published for traceability while Gold runtime remains disabled.",
+        "reentry_condition": "Enable Gold runtime or formally retire the published contract artifact."
+      },
       "reason": "gold_runtime_disabled"
     },
     {
       "config_path": "configs/entities/chembl/subcellular_fraction.yaml",
       "contract_ref": "chembl.subcellular_fraction",
       "pipeline_name": "chembl_subcellular_fraction",
+      "policy": {
+        "decision": "retain_non_gold_runtime",
+        "expected_reason": "gold_runtime_disabled",
+        "linked_issue": "#5563",
+        "owner": "@bioetl-contracts",
+        "rationale": "Subcellular-fraction contract metadata is published for traceability while Gold runtime remains disabled.",
+        "reentry_condition": "Enable Gold runtime or formally retire the published contract artifact."
+      },
       "reason": "gold_runtime_disabled"
     },
     {
       "config_path": "configs/entities/chembl/tissue.yaml",
       "contract_ref": "chembl.tissue",
       "pipeline_name": "chembl_tissue",
+      "policy": {
+        "decision": "retain_non_gold_runtime",
+        "expected_reason": "gold_runtime_disabled",
+        "linked_issue": "#5563",
+        "owner": "@bioetl-contracts",
+        "rationale": "Tissue contract metadata is published for traceability while Gold runtime remains disabled.",
+        "reentry_condition": "Enable Gold runtime or formally retire the published contract artifact."
+      },
       "reason": "gold_runtime_disabled"
     },
     {
       "config_path": "configs/entities/crossref/publication.yaml",
       "contract_ref": "crossref.publication",
       "pipeline_name": "crossref_publication",
+      "policy": {
+        "decision": "retain_non_gold_runtime",
+        "expected_reason": "gold_runtime_disabled",
+        "linked_issue": "#5563",
+        "owner": "@bioetl-contracts",
+        "rationale": "CrossRef publication contract metadata is published for traceability while Gold runtime remains disabled.",
+        "reentry_condition": "Enable Gold runtime or formally retire the published contract artifact."
+      },
       "reason": "gold_runtime_disabled"
     },
     {
       "config_path": "configs/entities/openalex/publication.yaml",
       "contract_ref": "openalex.publication",
       "pipeline_name": "openalex_publication",
+      "policy": {
+        "decision": "retain_non_gold_runtime",
+        "expected_reason": "gold_runtime_disabled",
+        "linked_issue": "#5563",
+        "owner": "@bioetl-contracts",
+        "rationale": "OpenAlex publication contract metadata is published for traceability while Gold runtime remains disabled.",
+        "reentry_condition": "Enable Gold runtime or formally retire the published contract artifact."
+      },
       "reason": "gold_runtime_disabled"
     },
     {
       "config_path": "configs/entities/pubchem/compound.yaml",
       "contract_ref": "pubchem.compound",
       "pipeline_name": "pubchem_compound",
+      "policy": {
+        "decision": "retain_non_gold_runtime",
+        "expected_reason": "gold_runtime_disabled",
+        "linked_issue": "#5563",
+        "owner": "@bioetl-contracts",
+        "rationale": "PubChem compound contract metadata is published for traceability while Gold runtime remains disabled.",
+        "reentry_condition": "Enable Gold runtime or formally retire the published contract artifact."
+      },
       "reason": "gold_runtime_disabled"
     },
     {
       "config_path": "configs/entities/semanticscholar/publication.yaml",
       "contract_ref": "semanticscholar.publication",
       "pipeline_name": "semanticscholar_publication",
+      "policy": {
+        "decision": "retain_non_gold_runtime",
+        "expected_reason": "gold_runtime_disabled",
+        "linked_issue": "#5563",
+        "owner": "@bioetl-contracts",
+        "rationale": "Semantic Scholar publication contract metadata is published for traceability while Gold runtime remains disabled.",
+        "reentry_condition": "Enable Gold runtime or formally retire the published contract artifact."
+      },
       "reason": "gold_runtime_disabled"
     },
     {
       "config_path": "configs/entities/uniprot/idmapping.yaml",
       "contract_ref": "uniprot.idmapping",
       "pipeline_name": "uniprot_idmapping",
+      "policy": {
+        "decision": "retain_non_gold_runtime",
+        "expected_reason": "gold_runtime_disabled",
+        "linked_issue": "#5563",
+        "owner": "@bioetl-contracts",
+        "rationale": "UniProt ID mapping contract metadata is published for traceability while Gold runtime remains disabled.",
+        "reentry_condition": "Enable Gold runtime or formally retire the published contract artifact."
+      },
       "reason": "gold_runtime_disabled"
     }
   ],
@@ -115,6 +187,14 @@
       "coverage_status": "excluded_non_gold",
       "entity": "cell_line",
       "gold_enabled": false,
+      "gold_exclusion_policy": {
+        "decision": "retain_non_gold_runtime",
+        "expected_reason": "gold_runtime_disabled",
+        "linked_issue": "#5563",
+        "owner": "@bioetl-contracts",
+        "rationale": "Cell-line contract metadata is published for traceability while Gold runtime remains disabled.",
+        "reentry_condition": "Enable Gold runtime or formally retire the published contract artifact."
+      },
       "gold_exclusion_reason": "gold_runtime_disabled",
       "gold_schema_title": "ChEMBLCellLineGoldSchema Contract",
       "pipeline_code_owner": "src/bioetl/application/pipelines/chembl/cell_line_transformer.py",
@@ -132,6 +212,14 @@
       "coverage_status": "excluded_non_gold",
       "entity": "compound_record",
       "gold_enabled": false,
+      "gold_exclusion_policy": {
+        "decision": "retain_non_gold_runtime",
+        "expected_reason": "gold_runtime_disabled",
+        "linked_issue": "#5563",
+        "owner": "@bioetl-contracts",
+        "rationale": "Compound-record contract metadata is published for traceability while Gold runtime remains disabled.",
+        "reentry_condition": "Enable Gold runtime or formally retire the published contract artifact."
+      },
       "gold_exclusion_reason": "gold_runtime_disabled",
       "gold_schema_title": "ChEMBLCompoundRecordGoldSchema Contract",
       "pipeline_code_owner": "src/bioetl/application/pipelines/chembl/compound_record_transformer.py",
@@ -234,6 +322,14 @@
       "coverage_status": "excluded_non_gold",
       "entity": "subcellular_fraction",
       "gold_enabled": false,
+      "gold_exclusion_policy": {
+        "decision": "retain_non_gold_runtime",
+        "expected_reason": "gold_runtime_disabled",
+        "linked_issue": "#5563",
+        "owner": "@bioetl-contracts",
+        "rationale": "Subcellular-fraction contract metadata is published for traceability while Gold runtime remains disabled.",
+        "reentry_condition": "Enable Gold runtime or formally retire the published contract artifact."
+      },
       "gold_exclusion_reason": "gold_runtime_disabled",
       "gold_schema_title": "ChEMBLSubcellularFractionGoldSchema Contract",
       "pipeline_code_owner": "src/bioetl/application/pipelines/chembl/subcellular_fraction_transformer.py",
@@ -302,6 +398,14 @@
       "coverage_status": "excluded_non_gold",
       "entity": "tissue",
       "gold_enabled": false,
+      "gold_exclusion_policy": {
+        "decision": "retain_non_gold_runtime",
+        "expected_reason": "gold_runtime_disabled",
+        "linked_issue": "#5563",
+        "owner": "@bioetl-contracts",
+        "rationale": "Tissue contract metadata is published for traceability while Gold runtime remains disabled.",
+        "reentry_condition": "Enable Gold runtime or formally retire the published contract artifact."
+      },
       "gold_exclusion_reason": "gold_runtime_disabled",
       "gold_schema_title": "ChEMBLTissueGoldSchema Contract",
       "pipeline_code_owner": "src/bioetl/application/pipelines/chembl/tissue_transformer.py",
@@ -409,6 +513,14 @@
       "coverage_status": "excluded_non_gold",
       "entity": "publication",
       "gold_enabled": false,
+      "gold_exclusion_policy": {
+        "decision": "retain_non_gold_runtime",
+        "expected_reason": "gold_runtime_disabled",
+        "linked_issue": "#5563",
+        "owner": "@bioetl-contracts",
+        "rationale": "CrossRef publication contract metadata is published for traceability while Gold runtime remains disabled.",
+        "reentry_condition": "Enable Gold runtime or formally retire the published contract artifact."
+      },
       "gold_exclusion_reason": "gold_runtime_disabled",
       "gold_schema_title": "CrossRefPublicationGoldSchema Contract",
       "pipeline_code_owner": "src/bioetl/application/pipelines/crossref/transformer.py",
@@ -426,6 +538,14 @@
       "coverage_status": "excluded_non_gold",
       "entity": "publication",
       "gold_enabled": false,
+      "gold_exclusion_policy": {
+        "decision": "retain_non_gold_runtime",
+        "expected_reason": "gold_runtime_disabled",
+        "linked_issue": "#5563",
+        "owner": "@bioetl-contracts",
+        "rationale": "OpenAlex publication contract metadata is published for traceability while Gold runtime remains disabled.",
+        "reentry_condition": "Enable Gold runtime or formally retire the published contract artifact."
+      },
       "gold_exclusion_reason": "gold_runtime_disabled",
       "gold_schema_title": "OpenAlexPublicationGoldSchema Contract",
       "pipeline_code_owner": "src/bioetl/application/pipelines/openalex/transformer.py",
@@ -443,6 +563,14 @@
       "coverage_status": "excluded_non_gold",
       "entity": "compound",
       "gold_enabled": false,
+      "gold_exclusion_policy": {
+        "decision": "retain_non_gold_runtime",
+        "expected_reason": "gold_runtime_disabled",
+        "linked_issue": "#5563",
+        "owner": "@bioetl-contracts",
+        "rationale": "PubChem compound contract metadata is published for traceability while Gold runtime remains disabled.",
+        "reentry_condition": "Enable Gold runtime or formally retire the published contract artifact."
+      },
       "gold_exclusion_reason": "gold_runtime_disabled",
       "gold_schema_title": "PubChemCompoundGoldSchema Contract",
       "pipeline_code_owner": "src/bioetl/application/pipelines/pubchem/transformer.py",
@@ -477,6 +605,14 @@
       "coverage_status": "excluded_non_gold",
       "entity": "publication",
       "gold_enabled": false,
+      "gold_exclusion_policy": {
+        "decision": "retain_non_gold_runtime",
+        "expected_reason": "gold_runtime_disabled",
+        "linked_issue": "#5563",
+        "owner": "@bioetl-contracts",
+        "rationale": "Semantic Scholar publication contract metadata is published for traceability while Gold runtime remains disabled.",
+        "reentry_condition": "Enable Gold runtime or formally retire the published contract artifact."
+      },
       "gold_exclusion_reason": "gold_runtime_disabled",
       "gold_schema_title": "SemanticScholarPublicationGoldSchema Contract",
       "pipeline_code_owner": "src/bioetl/application/pipelines/semanticscholar/transformer.py",
@@ -494,6 +630,14 @@
       "coverage_status": "excluded_non_gold",
       "entity": "idmapping",
       "gold_enabled": false,
+      "gold_exclusion_policy": {
+        "decision": "retain_non_gold_runtime",
+        "expected_reason": "gold_runtime_disabled",
+        "linked_issue": "#5563",
+        "owner": "@bioetl-contracts",
+        "rationale": "UniProt ID mapping contract metadata is published for traceability while Gold runtime remains disabled.",
+        "reentry_condition": "Enable Gold runtime or formally retire the published contract artifact."
+      },
       "gold_exclusion_reason": "gold_runtime_disabled",
       "gold_schema_title": "UniProtIDMappingGoldSchema Contract",
       "pipeline_code_owner": "src/bioetl/application/pipelines/uniprot/idmapping_transformer.py",

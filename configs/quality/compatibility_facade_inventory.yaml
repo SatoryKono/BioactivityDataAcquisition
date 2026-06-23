@@ -224,12 +224,14 @@ retained_entrypoints:
   introduced_in: 2026-03 merge collaborator migration
   review_date: '2026-09-30'
   external_breaking_change_required: true
-  internal_callers_zero: false
-  allowed_call_sites: '`src`: all wiring passes `collaborators=MergeCollaboratorGroup(...)`; `tests`: `tests/unit/application/composite/test_merger.py`,
-    `tests/unit/application/composite/merge_test_support.py`, `tests/unit/composition/bootstrap/runtime/test_composite_support_services_factory.py`'
-  migration_path: Use `bioetl.application.composite.merger` as the sanctioned public seam with `collaborators=MergeCollaboratorGroup(...)`.
-  exit_criteria: The merge module remains the sanctioned public seam and all composition paths use collaborator bundles with
-    only the canonical `order_service` ordering collaborator.
+  internal_callers_zero: true
+  allowed_call_sites: '`src`: no first-party source imports; owner code imports `MergeService` from `bioetl.application.composite.merge_service`
+    and `MergeCollaboratorGroup` from `bioetl.application.composite.merger_collaborators`. `tests`: public seam coverage
+    may import `bioetl.application.composite.merger` to protect external compatibility.'
+  migration_path: Use owner modules for first-party runtime wiring and keep `bioetl.application.composite.merger` as the
+    sanctioned public compatibility seam for external callers.
+  exit_criteria: The merge module remains the sanctioned public seam, first-party source importers stay at zero, and all
+    composition paths use collaborator bundles with only the canonical `order_service` ordering collaborator.
 measured_only_ratchet:
   max_total_modules: 0
   scoped_limits:

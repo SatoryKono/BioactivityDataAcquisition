@@ -386,12 +386,9 @@
       "canonical_target": "bioetl.application.composite.merger",
       "owner": "bioetl.application.composite",
       "external_breaking_change_required": true,
-      "internal_callers_zero": false,
-      "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
-      "src_importers": [
-        "src/bioetl/application/composite/__init__.py",
-        "src/bioetl/application/composite/runtime_wiring_api.py"
-      ],
+      "internal_callers_zero": true,
+      "usage_classification": "stable_public_api_zero_first_party_src",
+      "src_importers": [],
       "test_importers": [
         "tests/unit/application/composite/merge_test_support.py",
         "tests/unit/application/composite/test_coalesce_qualified.py",
@@ -399,9 +396,9 @@
         "tests/unit/application/composite/test_merger_golden_snapshots.py",
         "tests/unit/composite/test_merge_golden.py"
       ],
-      "src_importer_count": 2,
+      "src_importer_count": 0,
       "test_importer_count": 5,
-      "surface_classification": "first-party-active"
+      "surface_classification": "external-facing"
     }
   ],
   "retained_entrypoint_owner_usage_map": [
@@ -769,12 +766,9 @@
       "canonical_target": "bioetl.application.composite.merger",
       "owner": "bioetl.application.composite",
       "external_breaking_change_required": true,
-      "internal_callers_zero": false,
-      "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
-      "src_importers": [
-        "src/bioetl/application/composite/__init__.py",
-        "src/bioetl/application/composite/runtime_wiring_api.py"
-      ],
+      "internal_callers_zero": true,
+      "usage_classification": "stable_public_api_zero_first_party_src",
+      "src_importers": [],
       "test_importers": [
         "tests/unit/application/composite/merge_test_support.py",
         "tests/unit/application/composite/test_coalesce_qualified.py",
@@ -782,9 +776,9 @@
         "tests/unit/application/composite/test_merger_golden_snapshots.py",
         "tests/unit/composite/test_merge_golden.py"
       ],
-      "src_importer_count": 2,
+      "src_importer_count": 0,
       "test_importer_count": 5,
-      "surface_classification": "first-party-active"
+      "surface_classification": "external-facing"
     }
   ],
   "retained_public_export_facades": [

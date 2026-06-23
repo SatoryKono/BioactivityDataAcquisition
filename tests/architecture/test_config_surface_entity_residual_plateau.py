@@ -116,6 +116,21 @@ def test_config_surface_duplication_audit_matches_live_backlog() -> None:
         assert cluster["occurrence_count"] >= 2
         assert len(cluster["occurrences"]) == cluster["occurrence_count"]
         assert cluster["serialized_bytes"] >= scope["structured_block_min_bytes"]
+        governance = cluster.get("governance")
+        assert isinstance(governance, dict)
+        assert str(governance.get("owner", "")).startswith("@bioetl-")
+        assert str(governance.get("linked_issue", "")).startswith("#")
+        assert str(governance.get("decision", "")).strip()
+        assert str(governance.get("rationale", "")).strip()
+
+    composite_clusters = [
+        cluster
+        for cluster in audit["clusters"]
+        if str(cluster["block_path"]).startswith("composite.")
+    ]
+    assert composite_clusters
+    for cluster in composite_clusters:
+        assert "composite_config" in cluster["surface_kind_counts"]
 
 
 def test_entity_residual_partial_keys_are_intentional_only() -> None:

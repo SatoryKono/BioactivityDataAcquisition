@@ -112,3 +112,13 @@ entries:
     classification: budget_closeout_ratchet
     live_guard: "debt issue batch #5524-#5528 remains aligned with live config, coverage, and compatibility closeout evidence without budget growth."
     rationale: Keeps the current issue batch tied to live inventory-backed closeout artifacts and no-growth debt ratchets.
+  - path: tests/architecture/test_tech_debt_issues_5553_5558_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "debt issue batch #5553-#5558 remains aligned with live governance, hotspot, compatibility, and PR-hygiene closeout evidence without budget growth."
+    rationale: Keeps the current issue batch tied to executable live closeout invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.
+  - path: tests/architecture/test_tech_debt_issues_5559_5563_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "debt issue batch #5559-#5563 remains aligned with live coverage-gate, compatibility, config, skip-inventory, and contract-ownership evidence without budget growth."
+    rationale: Keeps the current issue batch tied to executable live closeout invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.

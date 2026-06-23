@@ -94,6 +94,37 @@ def _skip_if_source_tree_is_dirty() -> None:
         )
 
 
+def _write_minimal_coverage_xml(
+    path: Path,
+    *,
+    repo_root: Path,
+    hits: int,
+) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    source_root = repo_root.as_posix()
+    path.write_text(
+        "<?xml version=\"1.0\" ?>\n"
+        "<coverage>\n"
+        "  <sources>\n"
+        f"    <source>{source_root}</source>\n"
+        "  </sources>\n"
+        "  <packages>\n"
+        "    <package name=\"bioetl\">\n"
+        "      <classes>\n"
+        "        <class name=\"bioetl.example\" filename=\"src/bioetl/example.py\">\n"
+        "          <lines>\n"
+        f"            <line number=\"1\" hits=\"{hits}\" />\n"
+        f"            <line number=\"2\" hits=\"{hits}\" />\n"
+        "          </lines>\n"
+        "        </class>\n"
+        "      </classes>\n"
+        "    </package>\n"
+        "  </packages>\n"
+        "</coverage>\n",
+        encoding="utf-8",
+    )
+
+
 @pytest.mark.architecture
 def test_module_coverage_inventory_is_committed_and_shape_is_stable() -> None:
     assert INVENTORY_PATH.exists()
@@ -258,6 +289,138 @@ def test_module_coverage_inventory_check_fails_for_stale_source_tree_hash(
         ]
     )
     assert check_exit == 1
+
+
+@pytest.mark.architecture
+def test_allow_missing_coverage_xml_preserves_existing_inventory_rows(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo"
+    source_root = repo_root / "src" / "bioetl"
+    quality_root = repo_root / "configs" / "quality"
+    source_root.mkdir(parents=True)
+    quality_root.mkdir(parents=True)
+    (repo_root / "reports" / "quality").mkdir(parents=True)
+
+    shutil.copy2(SCORECARD_PATH, quality_root / SCORECARD_PATH.name)
+    shutil.copy2(GATES_PATH, quality_root / GATES_PATH.name)
+
+    (source_root / "example.py").write_text(
+        "def example() -> int:\n"
+        "    return 1\n",
+        encoding="utf-8",
+    )
+    json_out = repo_root / "reports" / "quality" / "module-coverage-inventory.json"
+    coverage_xml = repo_root / "reports" / "coverage" / "coverage.xml"
+    _write_minimal_coverage_xml(coverage_xml, repo_root=repo_root, hits=1)
+
+    create_exit = module_coverage_inventory_main(
+        [
+            "--repo-root",
+            str(repo_root),
+            "--coverage-xml",
+            str(coverage_xml),
+            "--json-out",
+            str(json_out),
+            "--snapshot-date",
+            "2026-06-19",
+        ]
+    )
+    assert create_exit == 0
+    committed = json.loads(json_out.read_text(encoding="utf-8"))
+    committed_row = committed["modules"][0]
+    assert committed_row["coverage_status"] == "fully_covered"
+    assert committed_row["coverage_percent"] == 100.0
+
+    _write_minimal_coverage_xml(coverage_xml, repo_root=repo_root, hits=0)
+    refresh_exit = module_coverage_inventory_main(
+        [
+            "--repo-root",
+            str(repo_root),
+            "--coverage-xml",
+            str(coverage_xml),
+            "--json-out",
+            str(json_out),
+            "--allow-missing-coverage-xml",
+        ]
+    )
+    assert refresh_exit == 0
+
+    refreshed = json.loads(json_out.read_text(encoding="utf-8"))
+    assert refreshed["coverage_xml_sha256"] == committed["coverage_xml_sha256"]
+    assert refreshed["measurement_mode"] == "coverage_xml"
+    assert refreshed["modules"] == committed["modules"]
+
+
+@pytest.mark.architecture
+def test_existing_inventory_refresh_preserves_rows_unless_xml_refresh_is_explicit(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo"
+    source_root = repo_root / "src" / "bioetl"
+    quality_root = repo_root / "configs" / "quality"
+    source_root.mkdir(parents=True)
+    quality_root.mkdir(parents=True)
+    (repo_root / "reports" / "quality").mkdir(parents=True)
+
+    shutil.copy2(SCORECARD_PATH, quality_root / SCORECARD_PATH.name)
+    shutil.copy2(GATES_PATH, quality_root / GATES_PATH.name)
+
+    (source_root / "example.py").write_text(
+        "def example() -> int:\n"
+        "    return 1\n",
+        encoding="utf-8",
+    )
+    json_out = repo_root / "reports" / "quality" / "module-coverage-inventory.json"
+    coverage_xml = repo_root / "reports" / "coverage" / "coverage.xml"
+    _write_minimal_coverage_xml(coverage_xml, repo_root=repo_root, hits=1)
+
+    create_exit = module_coverage_inventory_main(
+        [
+            "--repo-root",
+            str(repo_root),
+            "--coverage-xml",
+            str(coverage_xml),
+            "--json-out",
+            str(json_out),
+            "--snapshot-date",
+            "2026-06-19",
+        ]
+    )
+    assert create_exit == 0
+    committed = json.loads(json_out.read_text(encoding="utf-8"))
+
+    _write_minimal_coverage_xml(coverage_xml, repo_root=repo_root, hits=0)
+    safe_refresh_exit = module_coverage_inventory_main(
+        [
+            "--repo-root",
+            str(repo_root),
+            "--coverage-xml",
+            str(coverage_xml),
+            "--json-out",
+            str(json_out),
+        ]
+    )
+    assert safe_refresh_exit == 0
+    safe_refreshed = json.loads(json_out.read_text(encoding="utf-8"))
+    assert safe_refreshed["coverage_xml_sha256"] == committed["coverage_xml_sha256"]
+    assert safe_refreshed["modules"] == committed["modules"]
+
+    xml_refresh_exit = module_coverage_inventory_main(
+        [
+            "--repo-root",
+            str(repo_root),
+            "--coverage-xml",
+            str(coverage_xml),
+            "--json-out",
+            str(json_out),
+            "--refresh-from-coverage-xml",
+        ]
+    )
+    assert xml_refresh_exit == 0
+    xml_refreshed = json.loads(json_out.read_text(encoding="utf-8"))
+    assert xml_refreshed["coverage_xml_sha256"] != committed["coverage_xml_sha256"]
+    assert xml_refreshed["modules"][0]["coverage_status"] == "uncovered"
 
 
 @pytest.mark.architecture
@@ -431,6 +594,7 @@ def test_coverage_verify_workflow_generates_module_coverage_inventory() -> None:
     assert "coverage xml -o reports/coverage/coverage.xml" in workflow
     assert "report-module-coverage" in workflow
     assert "reports/quality/module-coverage-inventory.json" in workflow
+    assert "--refresh-from-coverage-xml" in workflow
 
 
 @pytest.mark.architecture
@@ -475,6 +639,10 @@ def test_test_matrix_declares_module_coverage_inventory_contract() -> None:
     assert inventory["canonical_lane"] == "coverage-verify"
     assert inventory["generator"] == (
         "scripts/engineering/qa/report_module_coverage_inventory.py"
+    )
+    assert inventory["command"] == (
+        "python -m scripts.engineering.qa report-module-coverage "
+        "--refresh-from-coverage-xml"
     )
     assert inventory["authoritative_status_source"] == "live_ci_coverage_verify"
     assert (
