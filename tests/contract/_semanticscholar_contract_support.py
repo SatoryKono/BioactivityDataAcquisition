@@ -71,7 +71,7 @@ async def _request_or_skip(
         if response.status_code == 429 and attempt < (MAX_RATE_LIMIT_ATTEMPTS - 1):
             await asyncio.sleep(_backoff_seconds(response, attempt))
             continue
-        if response.status_code in {429, 502, 503, 504}:
+        if response.status_code in {429, 500, 502, 503, 504}:
             pytest.skip(
                 f"Semantic Scholar temporary server error: HTTP {response.status_code}"
             )

@@ -950,15 +950,93 @@ def _report_gate_violations(
     return 0
 
 
+def _source_tree_only_row(source_snapshot: _SourceModuleSnapshot, repo_root: Path) -> dict[str, Any]:
+    return {
+        "module": _module_name(source_snapshot.path, repo_root),
+        "path": source_snapshot.repo_path,
+        "source_lines": source_snapshot.source_lines,
+        "coverage_status": "no_executable_lines",
+        "coverage_percent": None,
+        "executable_lines": 0,
+        "covered_lines": 0,
+        "missing_lines": 0,
+    }
+
+
+def _refresh_existing_inventory_source_tree(
+    payload: dict[str, Any],
+    *,
+    repo_root: Path,
+) -> dict[str, Any]:
+    source_snapshots, _ = _read_stable_source_module_snapshots(repo_root)
+    rows = payload.get("modules", [])
+    rows_by_path = {
+        str(row.get("path")): row
+        for row in rows
+        if isinstance(row, dict) and isinstance(row.get("path"), str)
+    }
+
+    refreshed_rows: list[dict[str, Any]] = []
+    for source_snapshot in source_snapshots:
+        existing = rows_by_path.get(source_snapshot.repo_path)
+        row = (
+            dict(existing)
+            if existing is not None
+            else _source_tree_only_row(source_snapshot, repo_root)
+        )
+        row["module"] = _module_name(source_snapshot.path, repo_root)
+        row["path"] = source_snapshot.repo_path
+        row["source_lines"] = source_snapshot.source_lines
+        refreshed_rows.append(row)
+
+    status_counts = _coverage_status_counts(refreshed_rows)
+    unmeasured_modules = [
+        {
+            "module": str(row["module"]),
+            "path": str(row["path"]),
+            "reason": "coverage_xml_has_no_class_entry",
+        }
+        for row in refreshed_rows
+        if str(row["coverage_status"]) == "unmeasured"
+    ]
+    uncovered_modules = [
+        {
+            "module": str(row["module"]),
+            "path": str(row["path"]),
+            "reason": "coverage_xml_reports_zero_executed_lines",
+        }
+        for row in refreshed_rows
+        if str(row["coverage_status"]) == "uncovered"
+    ]
+
+    refreshed = dict(payload)
+    summary = dict(refreshed.get("summary", {}))
+    summary.update(
+        {
+            "source_module_count": len(refreshed_rows),
+            "status_counts": status_counts,
+            "unmeasured_module_count": len(unmeasured_modules),
+            "unmeasured_modules": unmeasured_modules,
+            "uncovered_module_count": len(uncovered_modules),
+            "uncovered_modules": uncovered_modules,
+            "hotspot_family_coverage": _build_hotspot_family_coverage(
+                refreshed_rows,
+                repo_root=repo_root,
+            ),
+        }
+    )
+    refreshed["modules"] = refreshed_rows
+    refreshed["summary"] = summary
+    refreshed["source_tree_sha256"] = compute_source_tree_sha256(repo_root=repo_root)
+    return refreshed
+
+
 def _payload_for_check(args: argparse.Namespace) -> dict[str, Any]:
     if args.json_out.exists() and not args.refresh_from_coverage_xml:
         current = json.loads(args.json_out.read_text(encoding="utf-8"))
         if not isinstance(current, dict):
             raise ValueError(f"Invalid module coverage inventory: {args.json_out}")
-        current["source_tree_sha256"] = compute_source_tree_sha256(
-            repo_root=args.repo_root,
-        )
-        return current
+        return _refresh_existing_inventory_source_tree(current, repo_root=args.repo_root)
 
     snapshot_date = args.snapshot_date
     if args.check and args.json_out.exists() and snapshot_date is None:

@@ -29,7 +29,6 @@ from .conftest import (
     assert_bronze_files_exist,
     assert_silver_table_has_records,
     build_e2e_run_context,
-    get_silver_records,
     is_strict_persistence_snapshot_gap,
     run_pipeline_or_skip_transient,
 )
@@ -510,12 +509,13 @@ async def test_chembl_and_uniprot_sequential_run(e2e_data_dir: Path):
     assert chembl_count >= 1, "ChEMBL should have records"
     assert uniprot_count >= 1, "UniProt should have records"
 
-    # Verify they're in different tables
-    chembl_records = await get_silver_records(e2e_data_dir, "chembl_target")
-    uniprot_records = await get_silver_records(e2e_data_dir, "uniprot_protein")
+    # The count assertions above already proved both tables can be read.
+    # Only assert here that the provider/entity outputs resolve to distinct
+    # Silver locations so the sequential run does not alias storage paths.
+    chembl_table_path = _resolve_silver_table_path(e2e_data_dir, "chembl_target")
+    uniprot_table_path = _resolve_silver_table_path(e2e_data_dir, "uniprot_protein")
 
-    assert len(chembl_records) >= 1
-    assert len(uniprot_records) >= 1
+    assert chembl_table_path != uniprot_table_path
 
 
 @pytest.mark.e2e

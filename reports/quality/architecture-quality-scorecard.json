@@ -73,7 +73,7 @@
       "score": 8.0,
       "weighted_score": 0.72,
       "evidence_metrics": {
-        "source_module_count": 2182,
+        "source_module_count": 2181,
         "uncovered_module_count": 0
       }
     },
@@ -95,7 +95,7 @@
       "score": 7.0,
       "weighted_score": 0.98,
       "evidence_metrics": {
-        "source_module_count": 2182,
+        "source_module_count": 2181,
         "hotspot_family_count": 5
       }
     },
@@ -162,7 +162,7 @@
   ],
   "metrics": {
     "layer_violations": 0,
-    "source_module_count": 2182,
+    "source_module_count": 2181,
     "unmeasured_module_count": 0,
     "uncovered_module_count": 0,
     "hotspot_family_count": 5,

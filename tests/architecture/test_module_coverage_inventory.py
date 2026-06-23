@@ -424,6 +424,80 @@ def test_existing_inventory_refresh_preserves_rows_unless_xml_refresh_is_explici
 
 
 @pytest.mark.architecture
+def test_existing_inventory_refresh_reconciles_source_module_paths(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo_root = tmp_path / "repo"
+    source_root = repo_root / "src" / "bioetl"
+    quality_root = repo_root / "configs" / "quality"
+    source_root.mkdir(parents=True)
+    quality_root.mkdir(parents=True)
+    (repo_root / "reports" / "quality").mkdir(parents=True)
+
+    shutil.copy2(SCORECARD_PATH, quality_root / SCORECARD_PATH.name)
+    shutil.copy2(GATES_PATH, quality_root / GATES_PATH.name)
+
+    (source_root / "example.py").write_text(
+        "def example() -> int:\n"
+        "    return 1\n",
+        encoding="utf-8",
+    )
+    example_path = source_root / "example.py"
+    json_out = repo_root / "reports" / "quality" / "module-coverage-inventory.json"
+    coverage_xml = repo_root / "reports" / "coverage" / "coverage.xml"
+    _write_minimal_coverage_xml(coverage_xml, repo_root=repo_root, hits=1)
+    monkeypatch.setattr(
+        "scripts.engineering.qa.report_module_coverage_inventory._iter_source_modules",
+        lambda repo_root: [example_path],
+    )
+
+    create_exit = module_coverage_inventory_main(
+        [
+            "--repo-root",
+            str(repo_root),
+            "--coverage-xml",
+            str(coverage_xml),
+            "--json-out",
+            str(json_out),
+            "--snapshot-date",
+            "2026-06-19",
+        ]
+    )
+    assert create_exit == 0
+
+    (source_root / "added.py").write_text(
+        "def added() -> int:\n"
+        "    return 2\n",
+        encoding="utf-8",
+    )
+    added_path = source_root / "added.py"
+    monkeypatch.setattr(
+        "scripts.engineering.qa.report_module_coverage_inventory._iter_source_modules",
+        lambda repo_root: [added_path, example_path],
+    )
+    refresh_exit = module_coverage_inventory_main(
+        [
+            "--repo-root",
+            str(repo_root),
+            "--coverage-xml",
+            str(coverage_xml),
+            "--json-out",
+            str(json_out),
+        ]
+    )
+    assert refresh_exit == 0
+
+    refreshed = json.loads(json_out.read_text(encoding="utf-8"))
+    paths = {str(row["path"]) for row in refreshed["modules"]}
+    assert paths == {"src/bioetl/added.py", "src/bioetl/example.py"}
+    added_row = next(
+        row for row in refreshed["modules"] if row["path"] == "src/bioetl/added.py"
+    )
+    assert added_row["coverage_status"] == "no_executable_lines"
+
+
+@pytest.mark.architecture
 def test_module_coverage_inventory_reports_measured_hotspot_family_evidence() -> None:
     committed = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
     hotspot_family_coverage = committed["summary"]["hotspot_family_coverage"]
