@@ -32,9 +32,10 @@ Before opening a PR, run the project checks expected by the repository:
 
 ```bash
 # CI / single-OS checkout
-make lint
-make test
-uv run python -m mypy --strict src/bioetl/
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy src tests
+uv run python -m scripts.engineering.dev run-tests cov
 ```
 
 For mixed Windows + WSL checkout, prefer the OS-specific wrappers instead of a
@@ -52,21 +53,21 @@ bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n auto --lf
 bash scripts/engineering/dev/run_mypy.sh
 ```
 
-`make lint` and `make test` remain valid repository checks. The wrappers are
-the preferred route when the same checkout is used from both PowerShell and
-WSL. For Windows PowerShell, keep the wrapper at `-n 1` unless you explicitly
-raise `BIOETL_PYTEST_WINDOWS_XDIST_WORKERS`.
+The direct uv commands above are the canonical single-OS checks. The wrappers
+remain the preferred route when the same checkout is used from both
+PowerShell and WSL. For Windows PowerShell, keep the wrapper at `-n 1` unless
+you explicitly raise `BIOETL_PYTEST_WINDOWS_XDIST_WORKERS`.
 
 ## Local Git hooks
 
-Install the repository hooks through the hook-only Make target so `pre-commit`,
-`pre-push`, and `commit-msg` stay aligned:
+Install the repository hooks through the maintained setup helper so
+`pre-commit`, `pre-push`, and `commit-msg` stay aligned:
 
 ```bash
-make precommit-install
+uv run python -m scripts.ops setup-plugins
 
-# or bootstrap pytest + hooks together
-make setup-plugins
+# hook-only reinstall
+bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only
 ```
 
 Daily local hooks intentionally stay narrow:
@@ -90,17 +91,19 @@ python3 scripts/engineering/dev/run_project_python.py -m scripts.engineering.qa.
 Run the baseline hook suites explicitly when needed:
 
 ```bash
-make quality-fast
-make quality-pre-push
+uv run python -m pre_commit run smoke-lane --hook-stage manual --all-files
+uv run python -m pre_commit run --hook-stage pre-push --all-files
 ```
 
 For a stricter pre-PR pass, use the maintained repository commands instead of
 moving CI-scale checks into `pre-commit`:
 
 ```bash
-make lint
-make test-fast
-make test-architecture
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy src tests
+uv run python -m scripts.engineering.dev run-tests quick
+uv run python -m scripts.engineering.dev run-tests arch
 python3 scripts/engineering/dev/run_project_python.py -m pre_commit run smoke-lane --hook-stage manual --all-files
 ```
 

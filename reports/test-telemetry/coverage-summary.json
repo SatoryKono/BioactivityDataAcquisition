@@ -1,8 +1,8 @@
 {
   "source_branch": "main",
-  "source_commit": "52353e5e833ce815c0d6c3a581405ce80f488471",
-  "source_run_id": "22890216064",
-  "refreshed_at_utc": "2026-06-23T09:23:09.436295+00:00",
+  "source_commit": "281a0ed48ad70bb108fb90ada50a6a6cdd77f409",
+  "source_run_id": "local-current-main-telemetry-20260623",
+  "refreshed_at_utc": "2026-06-23T09:51:39.091871+00:00",
   "refresh_status": "captured",
   "coverage": {
     "threshold_percent": 85.0,

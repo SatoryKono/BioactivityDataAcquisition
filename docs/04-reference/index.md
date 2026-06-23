@@ -42,6 +42,7 @@ design rationale and layer structure.
 | ----------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
 | CLI               | Supported command-line surface                                                               | [cli.md](cli.md)                                       |
 | Workflow Catalog  | Current declarative workflow DAG catalog                                                     | [workflow-catalog.md](workflow-catalog.md)             |
+| GitHub Actions Workflows | Current CI / nightly / release workflow inventory under `.github/workflows/`        | [github-actions-workflows.md](github-actions-workflows.md) |
 | Pipeline Catalog  | Current provider and composite pipeline config catalog                                       | [pipeline-catalog.md](pipeline-catalog.md)             |
 | Domain            | Canonical published catalog for aggregates, value objects, events, ports, invariants, and workflow lifecycle semantics | [domain/README.md](domain/README.md) |
 | Contracts         | Published contract pack for Gold, DQ, control-plane, and observability surfaces             | [contracts/README.md](contracts/README.md)             |
@@ -69,7 +70,9 @@ design rationale and layer structure.
 - [Data Contracts Current State](contracts/data-contracts-current.md)
 - [Pipeline Catalog](pipeline-catalog.md)
 - [Workflow Catalog](workflow-catalog.md)
+- [GitHub Actions Workflows](github-actions-workflows.md)
 - [Domain Reference](domain/README.md)
+- [Domain Contexts](domain/contexts.md)
 - [Workflow State Machine](domain/workflow-state-machine.md)
 - [Observability Metrics](contracts/observability.md)
 - [CLI Reference](cli.md)

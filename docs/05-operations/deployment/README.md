@@ -48,9 +48,8 @@ BioETL's supported runtime profile remains:
 
 Поддерживаемый bootstrap path на текущей ветке:
 
-- `make install`
-- `make test-deps`
-- `make setup-plugins`
+- `uv sync --extra dev --extra tests --extra tracing`
+- `uv run python -m scripts.ops setup-plugins`
 - для mixed Windows + WSL: `scripts/engineering/dev/setup_env_windows.ps1` или
   `scripts/engineering/dev/setup_env_wsl.sh`
 

@@ -42,13 +42,10 @@ git clone https://github.com/SatoryKono/BioactivityDataAcquisition.git
 cd BioactivityDataAcquisition
 
 # Install dependencies and create/refresh the local environment
-make install
+uv sync --extra dev --extra tests --extra tracing
 
-# Verify runtime dependencies
-make test-deps
-
-# Optional: configure pytest/pre-commit plugins
-make setup-plugins
+# Configure pytest + pre-commit tooling
+uv run python -m scripts.ops setup-plugins
 ```
 
 `scripts/engineering/dev/dev_setup.sh` is currently a legacy placeholder and is not the supported onboarding path.
@@ -128,15 +125,17 @@ bioetl run --pipeline chembl_activity --limit 100 --no-cached-bronze
 ## Verify
 
 ```bash
-# Stable local suite
-make test
+# Stable local suite with coverage gate
+uv run python -m scripts.engineering.dev run-tests cov
 
 # WSL mixed-checkout wrappers
 bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n auto --lf
 bash scripts/engineering/dev/run_mypy.sh
 
 # Check linting / typing
-make lint
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy src tests
 ```
 
 ```powershell
@@ -149,15 +148,15 @@ make lint
 
 | Task                     | Command                                                               |
 | ------------------------ | --------------------------------------------------------------------- |
-| Install dependencies     | `make install`                                                        |
+| Install dependencies     | `uv sync --extra dev --extra tests --extra tracing`                   |
 | Mixed-checkout bootstrap | `setup_env_windows.ps1` / `setup_env_wsl.sh`                          |
-| Configure plugins        | `make setup-plugins`                                                  |
-| Verify dependencies      | `make test-deps`                                                      |
+| Configure plugins        | `uv run python -m scripts.ops setup-plugins`                          |
+| Verify dependencies      | `uv run python -m scripts.engineering.dev run-tests smoke`            |
 | Run tests via wrappers   | `run_pytest.ps1` / `run_pytest.sh`                                    |
-| Run all tests            | `make test`                                                           |
-| Run linting              | `make lint`                                                           |
+| Run all tests            | `uv run python -m scripts.engineering.dev run-tests cov`              |
+| Run linting              | `uv run ruff check . && uv run ruff format --check . && uv run mypy src tests` |
 | Verify docs surface      | `uv run python -m scripts.docs check-links --links --specs --configs` |
-| Run sample pipeline      | `make run-local`                                                      |
+| Run sample pipeline      | `uv run python -m bioetl run --pipeline chembl_activity --limit 10 --no-cached-bronze` |
 | List pipelines           | `bioetl config list-pipelines`                                        |
 | Full rebuild             | `bioetl run --pipeline <name> --run-type rebuild`                     |
 | Resume from checkpoint   | `bioetl run --pipeline <name> --resume`                               |

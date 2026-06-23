@@ -245,8 +245,8 @@ Git LFS recovery notes:
 
 Canonical local execution paths:
 
-- **CI / single-OS checkout**: `uv run python -m ...` или поддерживаемые
-  Make targets (`make test`, `make test-fast`, `make test-architecture`).
+- **CI / single-OS checkout**: `uv run python -m ...`, прежде всего
+  `uv run python -m scripts.engineering.dev run-tests quick|cov|arch|smoke`.
 - **Mixed Windows + WSL checkout (PowerShell)**:
   `.\scripts\engineering\dev\setup_env_windows.ps1`,
   `.\scripts\engineering\dev\run_pytest.ps1`, `.\scripts\engineering\dev\run_mypy.ps1`.
@@ -489,8 +489,9 @@ bash scripts/engineering/dev/run_pytest.sh tests/architecture/test_domain_unit_t
 ```
 
 Если изменение затрагивает только pure transformation logic, такой targeted run
-считается поддерживаемым local feedback path до более широкого `make test-fast`
-или полного `make test`.
+считается поддерживаемым local feedback path до более широкого
+`uv run python -m scripts.engineering.dev run-tests quick` или полного
+`uv run python -m scripts.engineering.dev run-tests cov`.
 
 ### 2.2. Integration Tests (`tests/integration/`)
 
@@ -707,17 +708,14 @@ pytest tests/contract/test_gold_dq_golden_snapshots.py --update-golden
 ## 4. Как запускать тесты
 
 ```bash
-# Запуск локального стабильного test suite (без E2E)
-make test
+# Запуск локального стабильного test suite с coverage gate
+uv run python -m scripts.engineering.dev run-tests cov
 
 # Быстрый локальный feedback loop
-make test-fast
+uv run python -m scripts.engineering.dev run-tests quick
 
-# Быстрый и стабильный coverage-run (parallel non-serial + serial pass)
-make test-cov-fast-stable
-
-# CI-подобный устойчивый прогон (parallel + fallback + serial pass)
-make test-ci
+# CI-подобный устойчивый прогон coverage/shards
+BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream
 
 # Запуск E2E в Local-Only режиме
 uv run python -m pytest tests/e2e/ -m e2e -v
@@ -729,7 +727,7 @@ uv run python -m pytest tests/e2e/ -m e2e -v
 bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n auto --lf
 
 # Запуск только архитектурных тестов
-make test-architecture
+uv run python -m scripts.engineering.dev run-tests arch
 
 # Точечное обновление VCR кассет
 uv run python -m pytest tests/integration/adapters/test_pubmed.py --vcr-record=new_episodes -v
@@ -823,20 +821,20 @@ actionable in CI artifacts.
 
 | Шаг | Команда                                            | Назначение                                                                               |
 | --- | -------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| 1   | `make install`                                     | CI/single-OS bootstrap через `uv sync` или `.venv` fallback                              |
+| 1   | `uv sync --extra dev --extra tests --extra tracing` | CI/single-OS bootstrap                                                                   |
 | 2   | `setup_env_windows.ps1` / `setup_env_wsl.sh`       | Mixed-checkout bootstrap в `.venv-win` или `${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}` |
-| 3   | `make test-fast`                                   | Получить быстрый feedback для unit + architecture                                        |
-| 4   | `make test`                                        | Выполнить стабильный локальный прогон с coverage gate 85%                                |
-| 5   | `make test-cov-fast-stable`                        | Выполнить ускоренный split-run для локального coverage анализа                           |
+| 3   | `uv run python -m scripts.engineering.dev run-tests quick` | Получить быстрый feedback для unit + smoke                                      |
+| 4   | `uv run python -m scripts.engineering.dev run-tests cov` | Выполнить стабильный локальный прогон с coverage gate 85%                         |
+| 5   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream` | Выполнить ускоренный coverage/sharded прогон |
 | 6   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing` | Выполнить sharded coverage-run c сохранением `reports/coverage/coverage.xml` и `reports/coverage/htmlcov/` |
 | 7   | `uv run python -m pytest tests/e2e/ -m e2e -v`     | Отдельно запустить E2E в Local-Only режиме                                               |
 
 **Примечания:**
 
-- Если нужен быстрый coverage-run без полного serial suite, используйте `make test-cov-fast-stable`.
+- Если нужен быстрый coverage-run без полного serial suite, используйте sharded runner с `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1`.
 - Для корректного прохождения трассировки и мониторинга установите опциональные зависимости (`psutil`, `opentelemetry-*`).
-- `make test` по-прежнему не генерирует `reports/coverage/htmlcov/` автоматически; для persisted local coverage artifacts используйте sharded runner с `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1` или `--force-mounted-coverage`.
-- В CI используется `.github/workflows/tests.yml`, а локальный `make test-ci` служит способом воспроизвести resilient flow вручную.
+- Локальный `run-tests cov` по-прежнему не генерирует `reports/coverage/htmlcov/` автоматически; для persisted local coverage artifacts используйте sharded runner с `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1` или `--force-mounted-coverage`.
+- В CI используется `.github/workflows/tests.yml`; для локального rehearsal используйте sharded runner и явные architecture/config slices вместо удалённых legacy CI wrappers.
 - В mixed Windows + WSL checkout `.venv` не должен быть общим между PowerShell и WSL: используйте `.venv-win` и внешний WSL venv через `setup_env_windows.ps1` / `setup_env_wsl.sh`.
 
 ## 5. План по устранению избыточности (ChEMBL Target Component)
@@ -855,20 +853,20 @@ actionable in CI artifacts.
 дефолт остаётся serial для стабильности. Каноническая стратегия такая:
 
 ```bash
-# Локальный стабильный дефолт (serial)
-make test
+# Локальный стабильный дефолт
+uv run python -m scripts.engineering.dev run-tests cov
 
-# Быстрый локальный feedback loop (parallel-safe subset)
-make test-fast
+# Быстрый локальный feedback loop
+uv run python -m scripts.engineering.dev run-tests quick
 
-# Быстрый split coverage run
-make test-cov-fast-stable
+# Архитектурный slice
+uv run python -m scripts.engineering.dev run-tests arch
 
-# Serial execution (для отладки)
-make test-serial
+# Persisted sharded coverage artifacts
+BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded
 
 # Явный параллельный запуск вручную
-uv run pytest tests/ -m "not serial" -n auto --dist loadscope --max-worker-restart=0
+uv run python -m scripts.engineering.dev run-tests parallel -m "not serial" --dist loadscope --max-worker-restart=0
 ```
 
 Текущие правила:
@@ -884,7 +882,8 @@ uv run pytest tests/ -m "not serial" -n auto --dist loadscope --max-worker-resta
 
 Репозиторий не использует hard-coded performance SLA в документации, потому что
 timings зависят от hardware, Python version, coverage mode и состава shard-ов.
-Для актуального baseline используйте `make test-profile` и фиксируйте команду,
+Для актуального baseline фиксируйте точную команду
+(`run-tests cov`, `run-tests quick`, sharded runner или explicit `pytest`),
 дату и окружение.
 
 ### 6.2. Hypothesis Профили
@@ -924,7 +923,7 @@ uv run python -m pytest tests/ -m "unit"
 uv run python -m pytest tests/ -m "hypothesis"
 
 # Быстрый smoke
-make test-smoke
+uv run python -m scripts.engineering.dev run-tests smoke
 ```
 
 **Доступные маркеры**:
@@ -992,17 +991,17 @@ provider-contract-drift.yml
 
 ```bash
 # Канонический локальный bootstrap
-make install
-make test-deps
-make setup-plugins
+uv sync --extra dev --extra tests --extra tracing
+uv run python -m scripts.ops setup-plugins
 
 # Mixed Windows + WSL checkout
 .\scripts\engineering\dev\setup_env_windows.ps1
 bash scripts/engineering/dev/setup_env_wsl.sh
 ```
 
-Поддерживаемый aggregate flow для локального окружения: `make install`,
-`make test-deps`, `make setup-plugins`. `scripts/engineering/dev/dev_setup.sh`
+Поддерживаемый aggregate flow для локального окружения:
+`uv sync --extra dev --extra tests --extra tracing`,
+`uv run python -m scripts.ops setup-plugins`. `scripts/engineering/dev/dev_setup.sh`
 — legacy placeholder и не является поддерживаемым onboarding/testing path.
 
 ### 7.2. Smoke-check зависимостей и инструментов
@@ -1012,15 +1011,19 @@ bash scripts/engineering/dev/setup_env_wsl.sh
 **Runtime зависимости:**
 
 ```bash
-make test-deps
+uv run python -m scripts.engineering.dev run-tests smoke
 ```
 
-Проверяет доступность `pandas`, `pandera`, `polars` и др. Локально это быстрый smoke-check перед `make test`; в CI аналогичная проверка выполняется отдельным `smoke-check` job в `.github/workflows/tests.yml`.
+Проверяет доступность критических runtime dependencies через живой smoke lane.
+В CI аналогичная проверка выполняется отдельным `smoke-check` job в
+`.github/workflows/tests.yml`.
 
 **Инструменты разработки:**
 
 ```bash
-make lint
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy src tests
 ```
 
 Проверяет доступность repo-supported lint/type toolchain (`ruff`, `mypy`) и
@@ -1031,11 +1034,11 @@ make lint
 
 Если аудит или CI падают с ошибками `ModuleNotFoundError`:
 
-1. Выполните `make install`, затем `make test-deps` и `make setup-plugins`.
+1. Выполните `uv sync --extra dev --extra tests --extra tracing`, затем `uv run python -m scripts.ops setup-plugins`.
 1. В mixed Windows + WSL checkout пересоберите правильное OS-specific окружение через `setup_env_windows.ps1` или `setup_env_wsl.sh`, а затем запускайте `run_pytest.ps1|.sh` / `run_mypy.ps1|.sh`.
-1. Проверьте статус инструментов через `make lint`.
+1. Проверьте статус инструментов через `uv run ruff check . && uv run ruff format --check . && uv run mypy src tests`.
 
-В CI для этого используется не `make test`, а отдельный набор шагов в
+В CI для этого используется не legacy `make` wrapper, а отдельный набор шагов в
 `.github/workflows/tests.yml`: короткий `smoke-check`, затем независимые
 `governance-preflight` и `config-schema-preflight`, после чего стартуют
 `test-fast` / `test-matrix`, а в финале `coverage-verify` объединяет coverage

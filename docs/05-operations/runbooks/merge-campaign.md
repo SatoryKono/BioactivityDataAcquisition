@@ -29,8 +29,8 @@ ______________________________________________________________________
 
 - Ветка `main` обновлена (`git checkout main && git pull --ff-only`).
 - Есть локальный `uv` environment:
-  - `make install`
-  - `make test-deps`
+  - `uv sync --extra dev --extra tests --extra tracing`
+  - `uv run python -m scripts.ops setup-plugins`
 - Доступны артефакты из `.github/workflows/consolidation-gates.yml` и `.github/workflows/nightly-replay-parity.yml`.
 
 ## Procedure

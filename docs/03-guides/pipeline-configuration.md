@@ -415,7 +415,7 @@ DQ правила загружаются в порядке приоритета 
 # configs/base/quality.yaml
 thresholds:
   soft_fail: 0.05      # >5% errors → Warning
-  hard_fail: 0.20      # >20% errors → Fail Batch
+  hard_fail: 0.25      # >25% errors → Fail Batch in the hierarchical quality default
 
 strict_validation: false
 invalid_record_policy: quarantine  # quarantine | skip | fail
@@ -433,6 +433,9 @@ common_field_validations:
   - field: _ingestion_ts
     type: pattern
     pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}'
+
+# Note: contract/runtime fallback defaults still normalize
+# hard_fail_threshold at 0.20 when no explicit override is present.
 ```
 
 ### Entity-specific DQ правила

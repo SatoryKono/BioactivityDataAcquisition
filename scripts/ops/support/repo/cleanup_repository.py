@@ -23,6 +23,7 @@ import subprocess  # nosec B404
 import sys
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from functools import lru_cache
 from pathlib import Path
 
 import yaml
@@ -235,6 +236,7 @@ def _git_path_has_history(repo_root: Path, path: Path) -> bool:
     return bool(completed.stdout.strip())
 
 
+@lru_cache(maxsize=None)
 def _tracked_paths(repo_root: Path) -> list[str]:
     completed = _run_git(repo_root, "ls-files", "-z")
     return [
@@ -244,6 +246,7 @@ def _tracked_paths(repo_root: Path) -> list[str]:
     ]
 
 
+@lru_cache(maxsize=None)
 def _tracked_path_set(repo_root: Path) -> set[str]:
     return set(_tracked_paths(repo_root))
 
@@ -261,18 +264,27 @@ def _path_is_tracked_or_has_tracked_descendants(
     )
 
 
+@lru_cache(maxsize=None)
 def _local_status_paths(repo_root: Path) -> list[str] | None:
     try:
-        completed = _run_git(
-            repo_root,
-            "ls-files",
-            "--others",
-            "--ignored",
-            "--exclude-standard",
-            "--directory",
-            "-z",
+        completed = subprocess.run(  # nosec
+            [
+                "git",
+                "-C",
+                str(repo_root),
+                "ls-files",
+                "--others",
+                "--ignored",
+                "--exclude-standard",
+                "--directory",
+                "-z",
+            ],
+            check=True,
+            capture_output=True,
+            text=False,
+            timeout=2,
         )
-    except subprocess.CalledProcessError:
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, OSError):
         return None
     return [
         path
@@ -286,6 +298,9 @@ def _is_venv_path(path: Path) -> bool:
 
 
 def _count_reference_hits(repo_root: Path, path: Path) -> int:
+    absolute_path = repo_root / path
+    if absolute_path.is_dir():
+        return 0
     filename = path.name
     path_pattern = re.escape(path.as_posix())
     filename_pattern = re.escape(filename)
@@ -303,6 +318,21 @@ def _count_reference_hits(repo_root: Path, path: Path) -> int:
     if completed.returncode not in {0, 1}:
         return 0
     return 0 if not completed.stdout else len(completed.stdout.splitlines())
+
+
+def _history_signal_for_path(
+    repo_root: Path,
+    path: Path,
+    *,
+    tracked: bool,
+    exists: bool,
+) -> bool:
+    if tracked:
+        return True
+    absolute_path = repo_root / path
+    if not exists or absolute_path.is_dir():
+        return False
+    return _git_path_has_history(repo_root, path)
 
 
 def _cmp_status(repo_root: Path, path: Path, canonical_path: Path | None) -> str | None:
@@ -565,6 +595,7 @@ def _tracked_policy_candidates(repo_root: Path) -> list[CleanupCandidate]:
     return candidates
 
 
+@lru_cache(maxsize=None)
 def _load_root_review_registry(repo_root: Path) -> dict[str, object]:
     return _load_yaml_object(repo_root / ROOT_HYGIENE_REVIEW_REGISTRY)
 
@@ -614,16 +645,30 @@ def _review_evidence_from_candidate(
         if isinstance(canonical_raw, str) and canonical_raw
         else None
     )
+    current_live_state = str(candidate.get("current_live_state", ""))
     exists = (repo_root / path).exists()
     tracked = _path_is_tracked_or_has_tracked_descendants(path, tracked_paths)
-    cmp_status = _cmp_status(repo_root, path, canonical_path) if exists else None
-    reference_hits = _count_reference_hits(repo_root, path) if exists else 0
+    skip_local_review_probes = (
+        exists
+        and not tracked
+        and current_live_state == "present_local_only_root_surface"
+    )
+    cmp_status = (
+        None
+        if skip_local_review_probes or not exists
+        else _cmp_status(repo_root, path, canonical_path)
+    )
+    reference_hits = (
+        0
+        if skip_local_review_probes or not exists
+        else _count_reference_hits(repo_root, path)
+    )
 
     return ReviewLaneEvidence(
         lane_id=lane_id,
         classification=classification,
         path=path,
-        current_live_state=str(candidate.get("current_live_state", "")),
+        current_live_state=current_live_state,
         canonical_path=canonical_path,
         action_if_reintroduced=(
             str(candidate.get("action_if_reintroduced"))
@@ -632,13 +677,22 @@ def _review_evidence_from_candidate(
         ),
         exists=exists,
         tracked=tracked,
-        has_history=_git_path_has_history(repo_root, path),
+        has_history=(
+            False
+            if skip_local_review_probes
+            else _history_signal_for_path(
+                repo_root,
+                path,
+                tracked=tracked,
+                exists=exists,
+            )
+        ),
         canonical_exists=bool(canonical_path and (repo_root / canonical_path).exists()),
         cmp_status=cmp_status,
         reference_hits=reference_hits,
         review_status=_review_status_for_evidence(
             classification=classification,
-            current_live_state=str(candidate.get("current_live_state", "")),
+            current_live_state=current_live_state,
             exists=exists,
             tracked=tracked,
             cmp_status=cmp_status,
@@ -679,19 +733,22 @@ def collect_root_review_evidence(repo_root: Path) -> list[ReviewLaneEvidence]:
 
 
 def collect_root_policy_mismatches(repo_root: Path) -> list[RootPolicyMismatch]:
-    layout_state = collect_root_layout_state(repo_root)
+    # Root-hygiene evidence export does not need a second full untracked-root scan:
+    # the workflow already runs strict cleanliness checks separately, and the
+    # cleanup candidate inventory covers local-only prune surfaces directly.
+    layout_state = collect_root_layout_state(repo_root, include_untracked=False)
     mismatches: list[RootPolicyMismatch] = []
     mismatch_specs = (
         ("unexpected_tracked_root_file", layout_state["unexpected_root_files"], True),
         ("unexpected_tracked_root_dir", layout_state["unexpected_root_dirs"], True),
         (
             "unexpected_untracked_root_file",
-            layout_state["unexpected_untracked_root_files"],
+            layout_state.get("unexpected_untracked_root_files", []),
             False,
         ),
         (
             "unexpected_untracked_root_dir",
-            layout_state["unexpected_untracked_root_dirs"],
+            layout_state.get("unexpected_untracked_root_dirs", []),
             False,
         ),
     )
@@ -708,6 +765,7 @@ def collect_root_policy_mismatches(repo_root: Path) -> list[RootPolicyMismatch]:
     return sorted(mismatches, key=lambda item: (item.mismatch_type, item.rel_path))
 
 
+@lru_cache(maxsize=None)
 def _load_generated_artifact_routes(repo_root: Path) -> list[dict[str, object]]:
     routing_path = repo_root / "configs" / "quality" / "generated_artifact_routing.yaml"
     if not routing_path.exists():
@@ -719,6 +777,7 @@ def _load_generated_artifact_routes(repo_root: Path) -> list[dict[str, object]]:
     return [route for route in routes if isinstance(route, dict)]
 
 
+@lru_cache(maxsize=None)
 def _load_replay_safe_cleanup_entries(repo_root: Path) -> list[dict[str, object]]:
     inventory_path = repo_root / REPLAY_SAFE_CLEANUP_INVENTORY
     if not inventory_path.exists():
@@ -886,8 +945,9 @@ def _reports_workspace_row(
             break
     exists = (repo_root / path).exists()
     tracked = _path_is_tracked_or_has_tracked_descendants(path, tracked_paths)
-    skip_transient_local_scan = (
-        exists and not tracked and _is_reports_retained_dir_transient_path(path)
+    skip_local_review_probes = exists and not tracked and (
+        classification == "PRUNE_CANDIDATE"
+        or _is_reports_retained_dir_transient_path(path)
     )
     age_days = (
         _artifact_age_days(repo_root / path, now=datetime.now(tz=UTC))
@@ -901,12 +961,17 @@ def _reports_workspace_row(
         exists=exists,
         has_history=(
             False
-            if skip_transient_local_scan
-            else _git_path_has_history(repo_root, path)
+            if skip_local_review_probes
+            else _history_signal_for_path(
+                repo_root,
+                path,
+                tracked=tracked,
+                exists=exists,
+            )
         ),
         reference_hits=(
             0
-            if skip_transient_local_scan
+            if skip_local_review_probes
             else _count_reference_hits(repo_root, path)
             if exists
             else 0

@@ -291,6 +291,7 @@ nav:
             -   "Reference Index": 04-reference/index.md
             -   CLI: 04-reference/cli.md
             -   "Workflow Catalog": 04-reference/workflow-catalog.md
+            -   "GitHub Actions Workflows": 04-reference/github-actions-workflows.md
             -   "Pipeline Catalog": 04-reference/pipeline-catalog.md
             -   Domain:
                     -   "Overview": 04-reference/domain/README.md
@@ -299,6 +300,7 @@ nav:
                     -   "Events": 04-reference/domain/events.md
                     -   "Control Plane": 04-reference/domain/control-plane.md
                     -   "Ports": 04-reference/domain/ports.md
+                    -   "Contexts": 04-reference/domain/contexts.md
                     -   "Invariants": 04-reference/domain/invariants.md
                     -   "Workflow State Machine": 04-reference/domain/workflow-state-machine.md
             -   Engineering:

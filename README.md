@@ -147,25 +147,22 @@ fallback when `uv` is unavailable.
 
 ### Installation
 
-#### Option A: Supported Make-Based Setup (Recommended)
+#### Option A: Supported uv / Script-Based Setup (Recommended)
 
-Use the maintained Make targets for local bootstrap:
+Use the maintained uv + script entrypoints for local bootstrap:
 
 ```bash
 git clone https://github.com/SatoryKono/BioactivityDataAcquisition.git
 cd BioactivityDataAcquisition
-make install
-make test-deps
-make setup-plugins
+uv sync --extra dev --extra tests --extra tracing
+uv run python -m scripts.ops setup-plugins
 ```
 
 Notes:
 
-- `make install` uses `uv sync --extra dev --extra tests --extra tracing` when `uv` is available; otherwise it installs the editable package with dev, tests, and tracing extras.
 - Documentation site commands require the separate `docs` extra: `uv sync --extra dev --extra tests --extra tracing --extra docs` or `pip install -e ".[dev,tests,tracing,docs]"`.
-- `make test-deps` configures local pytest tooling.
-- `make setup-plugins` configures local pre-commit tooling.
-- `make precommit-install` reinstalls only the Git hooks through the same maintained hook installer.
+- `uv run python -m scripts.ops setup-plugins` configures local pytest and pre-commit tooling.
+- Hook-only reinstall remains available through `bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only`.
 - If you use Codex or GitHub Copilot MCP, run `uv run python -m scripts.engineering.dev setup-mcp` after install. If you activated the OS-appropriate environment instead of using `uv`, `python -m scripts.engineering.dev setup-mcp` is also valid.
 - For docs verification and strict site builds, use the published [Docs Verification Guide](docs/03-guides/docs-verification.md).
 
@@ -295,7 +292,10 @@ uv sync --extra dev --extra tests --extra tracing
    Run tests to ensure everything works.
 
    ```bash
-   make lint && make test
+   uv run ruff check .
+   uv run ruff format --check .
+   uv run mypy src tests
+   uv run python -m scripts.engineering.dev run-tests cov
    ```
 
 > **Note**: BioETL uses local file storage by default (`data/` directory). No Docker or external services required. See [Local Storage Layout](docs/03-guides/local-storage-layout.md) and [ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md) for details.
@@ -473,11 +473,12 @@ The project uses `pytest` for testing with a formalized test matrix covering Uni
 - **Setup Plugins (pytest + pre-commit):**
 
   ```bash
-  make setup-plugins
+  uv run python -m scripts.ops setup-plugins
   ```
 
   This command validates required pytest plugins and installs pre-commit hooks.
-  Use `make precommit-install` when you only need to reinstall hooks.
+  Use `bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only` when you
+  only need to reinstall hooks.
 
 - **Quick Check (with dependencies auto-synced and coverage):**
 
@@ -492,7 +493,8 @@ The project uses `pytest` for testing with a formalized test matrix covering Uni
   ```
 
   The helpers assume you already bootstrapped the OS-appropriate environment with
-  `make install` / `make setup-plugins` or `scripts/engineering/dev/setup_env_windows.ps1` /
+  `uv sync --extra dev --extra tests --extra tracing` /
+  `uv run python -m scripts.ops setup-plugins` or `scripts/engineering/dev/setup_env_windows.ps1` /
   `scripts/engineering/dev/setup_env_wsl.sh`. By default they run `pytest` with
   `--cov=src/bioetl --cov-report=term -q --maxfail=1`.
 
@@ -542,25 +544,25 @@ The project uses `pytest` for testing with a formalized test matrix covering Uni
 - **Run All Tests**:
 
   ```bash
-  make test
+  uv run python -m scripts.engineering.dev run-tests cov
   ```
 
 - **Run Unit Tests Only** (Fast, no I/O):
 
   ```bash
-  make test-unit
+  uv run python -m scripts.engineering.dev run-tests unit
   ```
 
 - **Run Integration Tests** (Uses VCR.py cassettes, no network required):
 
   ```bash
-  make test-integration
+  uv run python -m scripts.engineering.dev run-tests integration
   ```
 
 - **Run Architecture Tests**:
 
   ```bash
-  make test-architecture
+  uv run python -m scripts.engineering.dev run-tests arch
   ```
 
 ### Local Tooling
@@ -568,7 +570,7 @@ The project uses `pytest` for testing with a formalized test matrix covering Uni
 - **Configure project plugin/test tooling**:
 
   ```bash
-  make setup-plugins
+  uv run python -m scripts.ops setup-plugins
   ```
 
   This runs the supported local setup launcher for project plugin and test tooling.
@@ -580,17 +582,19 @@ Strict quality standards are enforced using `ruff`, `mypy`, and other tools.
 - **Linting & Formatting**:
 
   ```bash
-  make lint      # Check only
-  make lint-fix  # Auto-fix and format
+  uv run ruff check .
+  uv run ruff format --check .
+  uv run mypy src tests
   ```
 
 - **Debt and complexity guardrails**:
 
   ```bash
-  make qa-debt
+  uv run python -m scripts.engineering.qa report-debt-governance-gates --check
   ```
 
-  `make lint` includes strict mypy and ruff checks; `make qa-debt` runs the published quality exemption/debt trend guardrail.
+  The lint path uses the live Ruff + mypy toolchain directly; the debt command
+  runs the published fail-fast debt-governance rollup.
 
 ### Documentation
 
@@ -711,8 +715,8 @@ Please review our **[Security Policy](.github/SECURITY.md)** for:
 
 Please read **[RULES.md](docs/00-project/RULES.md)** before contributing.
 
-1. Ensure all tests pass: `make test`
-1. Check types and linting: `make lint`
+1. Ensure tests pass: `uv run python -m scripts.engineering.dev run-tests cov`
+1. Check types and linting: `uv run ruff check . && uv run ruff format --check . && uv run mypy src tests`
 1. Follow the **RFC 2119** keywords in requirements.
 
 ## License
