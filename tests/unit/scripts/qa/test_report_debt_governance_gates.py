@@ -97,6 +97,28 @@ def test_module_coverage_source_tree_hash_gate_passes_for_current_inventory(
     assert gate.status == "pass"
 
 
+def test_module_coverage_aggregate_residual_limits_returns_none_without_ratchets() -> (
+    None
+):
+    assert gates._module_coverage_aggregate_residual_limits({}) is None
+
+
+def test_module_coverage_aggregate_residual_limits_reads_reviewed_limits() -> None:
+    limits = gates._module_coverage_aggregate_residual_limits(
+        {
+            "aggregate_residual_ratchets": {
+                "unmeasured_module_count": {"max_count": 2},
+                "uncovered_module_count": {"max_count": 5},
+            }
+        }
+    )
+
+    assert limits == {
+        "unmeasured_module_count": 2,
+        "uncovered_module_count": 5,
+    }
+
+
 def test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stale(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

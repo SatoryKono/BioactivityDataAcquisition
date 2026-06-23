@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-23T05:13:53.219200+00:00",
+  "generated_at": "2026-06-23T06:55:50.636435+00:00",
   "summary": {
     "total_scripts": 439,
     "status_counts": {
@@ -5568,13 +5568,13 @@
         },
         {
           "path": "docs/filters/inventory-baseline.csv",
-          "line": 176,
+          "line": 173,
           "source_group": "docs",
           "text": ",,,,,,inventory,,surface,source_profile,extraction_params,config_source_profile_policy,scripts/docs/matrix/generate_pipeline_normalization_matrix.py,5,1573,Source-profile extraction policy,extraction_"
         },
         {
           "path": "docs/filters/inventory-baseline.json",
-          "line": 2271,
+          "line": 2240,
           "source_group": "docs",
           "text": "\"path\": \"scripts/docs/matrix/generate_pipeline_normalization_matrix.py\","
         },
@@ -6960,8 +6960,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 28,
+      "reference_count": 29,
       "references": [
+        {
+          "path": ".pre-commit-config.yaml",
+          "line": 99,
+          "source_group": "ci",
+          "text": "python3 scripts/engineering/dev/run_project_python.py -m pytest"
+        },
         {
           "path": ".pre-commit-config.yaml",
           "line": 108,
@@ -6972,19 +6978,19 @@
           "path": ".pre-commit-config.yaml",
           "line": 116,
           "source_group": "ci",
-          "text": "entry: python scripts/engineering/dev/run_project_python.py -m mypy --config-file pyproject.toml --strict --no-incremental src/bioetl"
+          "text": "entry: python3 scripts/engineering/dev/run_project_python.py -m mypy --config-file pyproject.toml --strict --no-incremental src/bioetl"
         },
         {
           "path": ".pre-commit-config.yaml",
           "line": 123,
           "source_group": "ci",
-          "text": "entry: python scripts/engineering/dev/run_project_python.py -m bandit -c pyproject.toml -r src/bioetl"
+          "text": "entry: python3 scripts/engineering/dev/run_project_python.py -m bandit -c pyproject.toml -r src/bioetl"
         },
         {
           "path": ".pre-commit-config.yaml",
           "line": 131,
           "source_group": "ci",
-          "text": "python scripts/engineering/dev/run_project_python.py -m pytest"
+          "text": "python3 scripts/engineering/dev/run_project_python.py -m pytest"
         },
         {
           "path": ".pre-commit-config.yaml",
@@ -7003,12 +7009,6 @@
           "line": 197,
           "source_group": "ci",
           "text": "python scripts/engineering/dev/run_project_python.py -m"
-        },
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 205,
-          "source_group": "ci",
-          "text": "entry: python scripts/engineering/dev/run_project_python.py -m scripts.schema validate-configs"
         }
       ]
     },
@@ -8399,13 +8399,13 @@
       "references": [
         {
           "path": "docs/filters/inventory-baseline.csv",
-          "line": 177,
+          "line": 174,
           "source_group": "docs",
           "text": ",,,,,,inventory,,surface,source_profile,extraction_params,config_source_profile_policy,scripts/engineering/qa/config_surface_governance.py,1,8,Source-profile extraction policy,extraction_params are pr"
         },
         {
           "path": "docs/filters/inventory-baseline.json",
-          "line": 2282,
+          "line": 2251,
           "source_group": "docs",
           "text": "\"path\": \"scripts/engineering/qa/config_surface_governance.py\","
         },

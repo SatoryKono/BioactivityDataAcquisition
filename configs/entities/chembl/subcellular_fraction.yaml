@@ -12,17 +12,6 @@ pipeline:
   business_primary_keys:
   - subcellular_fraction
 
-  sink:
-    silver:
-      partition_by: []
-    gold:
-      mode: scd2
-      idempotency_contract: scd2
-      scd_config:
-        valid_from_col: _valid_from
-        valid_to_col: _valid_to
-        current_flag_col: _is_current
-        version_col: _version
   batch_size: 1000
   checkpoint_interval: 1000
 schema:
@@ -125,27 +114,6 @@ filters:
     - subcellular_fraction
     columns: {}
     exclude_if_present: []
-  metadata:
-    publication_filter_policy:
-      scope: source_specific
-      description: SOURCE-SPECIFIC ChEMBL publication filter policy. Silver and Gold filters intentionally constrain 
-        this pipeline to the reviewed ChEMBL publication subset and do not redefine the global publication taxonomy.
-    # Source-specific filter policy:
-
-
-
-    # - Silver and Gold are intentionally scoped to journal-article for the
-
-
-
-    #   current ChEMBL publication pipeline.
-
-
-
-    # - This is pipeline scope, not global publication type truth.
-
-
-
 contracts:
   primary_key:
   - subcellular_fraction

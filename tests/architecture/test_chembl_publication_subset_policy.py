@@ -22,6 +22,9 @@ from bioetl.domain.schemas.constants import PUBLICATION_TYPES
 from tests.architecture._entity_contract_metadata_registry import (
     load_shared_quality_metadata,
 )
+from tests.architecture._entity_filter_metadata_registry import (
+    load_shared_filter_metadata,
+)
 
 pytestmark = [pytest.mark.architecture]
 
@@ -205,11 +208,10 @@ class TestChEMBLSourceSpecificSubset:
 
     def test_chembl_filter_policy_metadata_exists(
         self,
-        chembl_publication_entity_config: dict[str, Any],
     ) -> None:
         """ChEMBL filter config must have metadata documenting source-specific policy."""
-        filters_metadata = chembl_publication_entity_config.get("filters", {}).get(
-            "metadata", {}
+        filters_metadata = load_shared_filter_metadata(
+            "configs/entities/chembl/publication.yaml"
         )
 
         assert "publication_filter_policy" in filters_metadata, (
@@ -332,22 +334,16 @@ class TestFilterSubsetGovernance:
 
     def test_filter_comments_document_source_specific_scope(
         self,
-        _chembl_publication_entity_config: dict[str, Any],
     ) -> None:
-        """Filter config YAML must have comments documenting source-specific scope."""
-        yaml_path = Path("configs/entities/chembl/publication.yaml")
-        yaml_content = yaml_path.read_text(encoding="utf-8")
+        """Shared filter policy registry must document source-specific scope."""
+        policy = load_shared_filter_metadata("configs/entities/chembl/publication.yaml")[
+            "publication_filter_policy"
+        ]
+        description = str(policy.get("description", ""))
 
-        # Check for comments near silver_filters and gold_filters
-        assert (
-            "Source-specific" in yaml_content
-            or "source-specific" in yaml_content.lower()
-        ), (
-            "Publication entity config YAML must document source-specific filter scope in comments"
+        assert "source-specific" in description.lower(), (
+            "Publication filter policy must document source-specific scope"
         )
-
-        assert (
-            "NOT a global" in yaml_content or "not the global" in yaml_content.lower()
-        ), (
-            "Publication entity config YAML must explicitly state filters are NOT global constraints"
+        assert "global" in description.lower(), (
+            "Publication filter policy must explicitly reference the global taxonomy boundary"
         )

@@ -5,7 +5,10 @@ from __future__ import annotations
 INTENTIONAL_PREFIXES: tuple[str, ...] = (
     "hash_policy",
     "hash_policy.",
+    "filters.extraction_params",
     "filters.extraction_params.",
+    "filters.input_filter",
+    "filters.input_filter.",
     "filters.metadata",
     "filters.metadata.",
     "filters.gold_filters.columns",
@@ -21,6 +24,7 @@ INTENTIONAL_PREFIXES: tuple[str, ...] = (
     "filters.silver_filters.ranges",
     "filters.silver_filters.ranges.",
     "filters.source_profile",
+    "pipeline.sink.silver.partition_by",
     "pipeline.page_size_override",
     "pipeline.field_policy.therapeutic_flag",
     "pipeline.source.",

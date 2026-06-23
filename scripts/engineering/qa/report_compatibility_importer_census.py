@@ -597,12 +597,41 @@ def build_compatibility_importer_census(
             row,
             src_importer_count=int(retained_row["src_importer_count"]),
         )
-        retained_rows.append(retained_row)
         export_contract = row.get("public_export_contract")
+        if isinstance(export_contract, dict):
+            export_row = _build_public_export_contract_row(repo_root / repo_path, row)
+            retained_row.update(
+                {
+                    key: value
+                    for key, value in export_row.items()
+                    if key not in {"path", "module_name", "canonical_target"}
+                }
+            )
+        retained_rows.append(retained_row)
         if isinstance(export_contract, dict):
             retained_public_export_rows.append(
                 {
-                    **_build_public_export_contract_row(repo_root / repo_path, row),
+                    **{
+                        key: value
+                        for key, value in retained_row.items()
+                        if key
+                        in {
+                            "path",
+                            "module_name",
+                            "canonical_target",
+                            "max_public_exports",
+                            "public_exports",
+                            "public_export_count",
+                            "duplicate_public_exports",
+                            "lazy_export_table",
+                            "lazy_export_keys",
+                            "duplicate_lazy_export_keys",
+                            "orphan_lazy_export_keys",
+                            "dunder_getattr_exports",
+                            "orphan_dunder_getattr_exports",
+                            "resolution_conflicts",
+                        }
+                    },
                     "owner": retained_row["owner"],
                     "status": retained_row["status"],
                     "external_breaking_change_required": retained_row[

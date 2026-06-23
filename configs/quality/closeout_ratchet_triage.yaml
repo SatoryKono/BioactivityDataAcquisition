@@ -102,3 +102,13 @@ entries:
     classification: active_architecture_guard
     live_guard: Wave 4 complexity budget and extracted seams remain enforced.
     rationale: Retains a live complexity ratchet instead of historical-only closeout evidence.
+  - path: tests/architecture/test_tech_debt_issues_5518_5523_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "debt issue batch #5518-#5523 remains closed with no budget growth."
+    rationale: Keeps the current issue batch tied to live closeout evidence without expanding debt budgets.
+  - path: tests/architecture/test_tech_debt_issues_5524_5528_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "debt issue batch #5524-#5528 remains aligned with live config, coverage, and compatibility closeout evidence without budget growth."
+    rationale: Keeps the current issue batch tied to live inventory-backed closeout artifacts and no-growth debt ratchets.

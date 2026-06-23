@@ -10,6 +10,9 @@ import yaml
 
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.config_root import resolve_configs_root
+from bioetl.infrastructure.config.entity_filter_metadata_registry import (
+    apply_shared_filter_metadata,
+)
 from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
 from bioetl.infrastructure.config.pipeline_payload_normalization import (
     PipelineConfigReadPayload,
@@ -68,14 +71,20 @@ def _assert_legacy_pipeline_config_surface_absent(configs_root: Path) -> None:
         )
 
 
-def _load_unified_entity_raw(path: Path) -> JsonDict:
+def _load_unified_entity_raw(path: Path, *, configs_root: Path) -> JsonDict:
     """Load unified entity YAML file, returning empty dict when absent."""
     if not path.exists():
         return {}
 
     with open(path, encoding="utf-8") as handle:
         raw = yaml.safe_load(handle) or {}
-    return raw if isinstance(raw, dict) else {}
+    if not isinstance(raw, dict):
+        return {}
+    return apply_shared_filter_metadata(
+        configs_root=configs_root,
+        config_path=path,
+        payload=raw,
+    )
 
 
 def _get_unified_section(
@@ -103,7 +112,10 @@ def read_pipeline_config_payload(
     _assert_legacy_pipeline_config_surface_absent(resolved_configs_root)
     config_path = resolved_configs_root / "entities" / provider / f"{entity}.yaml"
 
-    unified_raw = _load_unified_entity_raw(config_path)
+    unified_raw = _load_unified_entity_raw(
+        config_path,
+        configs_root=resolved_configs_root,
+    )
     unified_pipeline = _get_unified_section(unified_raw, "pipeline")
     unified_schema = _get_unified_section(unified_raw, "schema")
     unified_contracts = _get_unified_section(unified_raw, "contracts")

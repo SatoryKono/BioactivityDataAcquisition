@@ -8,13 +8,14 @@ from bioetl.domain.composite.aggregation import (
     AggregationFunction,
     EnricherCardinality,
 )
+from bioetl.domain.composite.config_merge import ColumnGroupConfig
 from bioetl.domain.composite.config_models import (
     CompositeConfig,
     CompositeDQConfig,
     CrossValidationConfig,
-    DQOverrideConfig,
     DataSchemaConfig,
     DependencyConfig,
+    DQOverrideConfig,
     EnricherConfig,
     ExecutionConfig,
     LayerColumnConfig,
@@ -22,7 +23,6 @@ from bioetl.domain.composite.config_models import (
     MergeConfig,
     SeedConfig,
 )
-from bioetl.domain.composite.config_merge import ColumnGroupConfig
 from bioetl.domain.composite.cross_validation import EnricherFieldPairing
 
 __all__ = [

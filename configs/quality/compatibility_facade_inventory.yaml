@@ -43,22 +43,22 @@ retained_entrypoints:
   exit_criteria: The top-level module remains the sanctioned public CLI patch/import seam and the retired `domains.run_all.command`
     wrapper stays absent.
 - path: src/bioetl/interfaces/cli/commands/run_composite.py
-  compatibility_role: Permanent public run-composite command seam over the internal owner module `bioetl.interfaces.cli.commands.domains.composite.command`.
+  compatibility_role: Permanent public run-composite command seam over split owner modules under `bioetl.interfaces.cli.commands.domains.composite`.
   canonical_target: bioetl.interfaces.cli.commands.run_composite
   status: public-entrypoint
   owner: bioetl.interfaces.cli.commands
   introduced_in: 2026-03 RF-024
   review_date: '2026-09-30'
   external_breaking_change_required: true
-  internal_callers_zero: false
-  allowed_call_sites: '`src`: use `bioetl.interfaces.cli.commands.run_composite` as the public seam; direct internal-owner
-    imports stay confined to `src/bioetl/interfaces/cli/commands/domains/composite/__init__.py`; `tests`: patch/import coverage
-    may target `bioetl.interfaces.cli.commands.run_composite`, while direct `bioetl.interfaces.cli.commands.domains.composite.command`
-    imports stay confined to dedicated boundary coverage'
-  migration_path: Use `bioetl.interfaces.cli.commands.run_composite` for public CLI wiring and patch targets; do not import
-    `bioetl.interfaces.cli.commands.domains.composite.command` directly outside the owning package or dedicated boundary tests.
-  exit_criteria: The top-level module remains the sanctioned public CLI patch/import seam, and direct internal-owner imports
-    remain confined to the owning package plus dedicated boundary tests.
+  internal_callers_zero: true
+  allowed_call_sites: '`src`: use `bioetl.interfaces.cli.commands.run_composite` as the public seam; the retired wrapper
+    module `bioetl.interfaces.cli.commands.domains.composite.command` must stay absent. `tests`: patch/import coverage may
+    target `bioetl.interfaces.cli.commands.run_composite`, while focused owner coverage may import narrower `domains.composite.*`
+    helper modules directly.'
+  migration_path: Use `bioetl.interfaces.cli.commands.run_composite` for public CLI wiring and patch targets; do not reintroduce
+    `bioetl.interfaces.cli.commands.domains.composite.command` as an internal wrapper.
+  exit_criteria: The top-level module remains the sanctioned public CLI patch/import seam and the retired `domains.composite.command`
+    wrapper stays absent.
 - path: src/bioetl/interfaces/cli/commands/health.py
   compatibility_role: Permanent public health command seam over the internal owner module `bioetl.interfaces.cli.commands.domains.health.command`.
   canonical_target: bioetl.interfaces.cli.commands.health
@@ -67,7 +67,7 @@ retained_entrypoints:
   introduced_in: 2026-03 RF-024
   review_date: '2026-09-30'
   external_breaking_change_required: true
-  internal_callers_zero: false
+  internal_callers_zero: true
   allowed_call_sites: '`src`: use `bioetl.interfaces.cli.commands.health` as the public seam; direct internal-owner imports
     stay confined to `src/bioetl/interfaces/cli/commands/domains/health/__init__.py`; `tests`: patch/import coverage may target
     `bioetl.interfaces.cli.commands.health`, while direct `bioetl.interfaces.cli.commands.domains.health.command` imports
@@ -120,7 +120,7 @@ retained_entrypoints:
   introduced_in: 2026-03 entrypoint freeze
   review_date: '2026-09-30'
   external_breaking_change_required: true
-  internal_callers_zero: false
+  internal_callers_zero: true
   allowed_call_sites: '`src`: only explicit execution-focused public symbols from `__all__` may be imported from `bioetl.composition.entrypoints`;
     removed service/resource compatibility symbols must stay absent from first-party source. `tests`: public entrypoint imports
     may appear in interface/composition boundary coverage, but direct internal-module patch targets stay confined to `tests/unit/composition/test_entrypoints.py`,
@@ -132,7 +132,7 @@ retained_entrypoints:
     at zero, internal implementation-module imports outside `composition/` stay at zero, and internal-module patch coverage
     remains confined to the dedicated entrypoint-boundary tests.
   public_export_contract:
-    max_public_exports: 14
+    max_public_exports: 13
     lazy_export_table: _PUBLIC_SYMBOL_TARGETS
 - path: src/bioetl/composition/health_api.py
   compatibility_role: Permanent public health composition facade that intentionally shields split services/bootstrap/resource

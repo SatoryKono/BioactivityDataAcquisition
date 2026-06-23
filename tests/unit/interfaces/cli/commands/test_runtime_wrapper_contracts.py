@@ -29,11 +29,6 @@ CLI_INTERNAL_WRAPPER_CASES = (
         "bioetl.interfaces.cli.commands.quarantine",
         ("quarantine", "get_quarantine_runtime_service", "get_quarantine_service"),
     ),
-    (
-        "bioetl.interfaces.cli.commands.domains.composite.command",
-        "bioetl.interfaces.cli.commands.run_composite",
-        ("run_composite", "load_composite_config", "bootstrap_composite_runner"),
-    ),
 )
 
 
@@ -86,6 +81,15 @@ def test_removed_maintenance_command_wrapper_stays_absent() -> None:
     with pytest.raises(ModuleNotFoundError):
         importlib.import_module(
             "bioetl.interfaces.cli.commands.domains.maintenance.command"
+        )
+
+
+@pytest.mark.unit
+def test_removed_composite_command_wrapper_stays_absent() -> None:
+    """Retired composite wrapper must not return under the domains package."""
+    with pytest.raises(ModuleNotFoundError):
+        importlib.import_module(
+            "bioetl.interfaces.cli.commands.domains.composite.command"
         )
 
 

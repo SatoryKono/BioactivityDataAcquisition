@@ -1082,15 +1082,25 @@ class TestPipelineNameConvention:
 class TestExplicitGoldScd2Policy:
     """INV-CFG-007: SCD2 candidates must declare explicit canonical Gold policy."""
 
+    @staticmethod
+    def _load_effective_pipeline(config_path: Path) -> dict[str, Any]:
+        data = _load_yaml(config_path)
+        provider = str(data.get("provider", "")).strip()
+        entity = str(data.get("entity", "")).strip()
+        if not provider or not entity:
+            pytest.fail(
+                f"{_rel(config_path)}: missing provider/entity for effective config load"
+            )
+        return load_pipeline_config_from_root(
+            f"{provider}_{entity}",
+            configs_root=CONFIGS_DIR,
+        ).model_dump(mode="python")
+
     @pytest.mark.parametrize("config_path", SCD2_CANDIDATE_CONFIGS, ids=_rel)
     def test_scd2_candidates_use_explicit_gold_scd2_policy(
         self, config_path: Path
     ) -> None:
-        data = _load_yaml(config_path)
-        pipeline_cfg = data.get("pipeline")
-        if not isinstance(pipeline_cfg, dict):
-            pytest.fail(f"{_rel(config_path)}: missing pipeline section")
-
+        pipeline_cfg = self._load_effective_pipeline(config_path)
         sink_cfg = pipeline_cfg.get("sink")
         if not isinstance(sink_cfg, dict):
             pytest.fail(f"{_rel(config_path)}: missing pipeline.sink section")
