@@ -51,19 +51,9 @@ composite:
       primary_join_keys: []
       fallback_join_keys: []
       rationale: Non-publication composite; publication join policy not applicable.
-  field_aliases:
-    hba_count:
-      pubchem: h_bond_acceptor_count
   # ---------------------------------------------------------------------------
   # Seed Pipeline Configuration
   # ---------------------------------------------------------------------------
-    hbd_count:
-      pubchem: h_bond_donor_count
-    logp:
-      pubchem: xlogp
-    polar_surface_area:
-      pubchem: tpsa
-
   # ---------------------------------------------------------------------------
   # Merge Configuration
   # ---------------------------------------------------------------------------

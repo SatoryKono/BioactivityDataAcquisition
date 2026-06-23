@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Protocol
+from typing import Protocol
 
 from bioetl.application.composite.checkpoint import (
     CompositeCheckpointService,
@@ -16,7 +16,10 @@ from bioetl.application.composite.lifecycle_observer_service import (
 from bioetl.application.composite.merger_orchestration import (
     MergeExecutionRequest,
 )
-from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
+from bioetl.application.composite.runtime_models import (
+    CompositeMergerPort,
+    CompositeRuntimeConfig,
+)
 from bioetl.domain.composite import (
     CompositeConfig,
     DependencyConfig,
@@ -38,7 +41,7 @@ class _CompositeRunnerMergeStageHostProtocol(Protocol):
     _config: CompositeConfig
     _run_id_str: str
     _clock: ClockPort | None
-    _merger: Any
+    _merger: CompositeMergerPort
     _checkpoint_manager: CompositeCheckpointService
 
     async def _save_checkpoint_safe(

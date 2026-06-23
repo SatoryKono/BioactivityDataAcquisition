@@ -23,7 +23,7 @@ def test_semantic_registry_drift_gate_passes_current_repo() -> None:
     )
 
 
-def test_generated_exact_candidates_cover_mapping_and_composite_alias_surfaces() -> (
+def test_generated_exact_candidates_cover_mapping_and_domain_alias_surfaces() -> (
     None
 ):
     candidates = discover_exact_registry_candidates(Path("."))
@@ -48,10 +48,24 @@ def test_generated_exact_candidates_cover_mapping_and_composite_alias_surfaces()
         "hba_count",
     ) in candidate_keys
     assert (
-        "configs/composites/molecule.yaml:field_aliases[pubchem]",
-        "h_bond_acceptor_count",
-        "hba_count",
+        "MOLECULE_FIELD_ALIASES[pubchem]",
+        "h_bond_donor_count",
+        "hbd_count",
     ) in candidate_keys
+    assert (
+        "MOLECULE_FIELD_ALIASES[pubchem]",
+        "tpsa",
+        "polar_surface_area",
+    ) in candidate_keys
+    assert (
+        "MOLECULE_FIELD_ALIASES[pubchem]",
+        "xlogp",
+        "logp",
+    ) in candidate_keys
+    assert not any(
+        source.startswith("configs/composites/") and "field_aliases" in source
+        for source, _, _ in candidate_keys
+    )
 
 
 def test_reviewed_audit_clusters_are_suppressed_from_runtime_warnings() -> None:

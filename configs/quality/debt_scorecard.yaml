@@ -287,8 +287,8 @@ config_surface_ratchet:
       ratchet_policy: Non-growth fail-fast unless a reviewed pipeline addition updates
         the budget.
     unique_parameter_count:
-      current_count: 458
-      max_count: 458
+      current_count: 449
+      max_count: 449
       owner: '@bioetl-config'
       linked_issue: '#4818'
       rationale: Flattened parameter vocabulary must not expand silently across the
@@ -367,8 +367,8 @@ config_surface_ratchet:
           rationale: Composite runtime configs under configs/composites/*.yaml.
           ratchet_policy: Non-growth fail-fast for composite runtime surface.
         unique_parameter_count:
-          current_count: 196
-          max_count: 196
+          current_count: 187
+          max_count: 187
           rationale: Flattened vocabulary for composite runtime configs only.
           ratchet_policy: Non-growth fail-fast unless composite schema expansion updates
             budget.
@@ -394,10 +394,9 @@ config_surface_ratchet:
     owner: '@bioetl-config'
     mode: fail-fast-no-growth
     artifact: reports/quality/config-discrepancy-baseline.json
-    rationale: Compatibility-legacy config parameters were retired from entity
-      effective configs and remain only in composite runtime config surfaces; they
-      are intentionally bounded here so cleanup can only reduce the legacy taxonomy
-      count.
+    rationale: Compatibility-legacy config parameters are retired from entity
+      effective and composite runtime config surfaces; zero-count guards block
+      reintroduction while keeping cleanup monotonic.
     groups:
       entity_effective:
         compatibility_legacy:
@@ -411,15 +410,14 @@ config_surface_ratchet:
             schemas to canonical parameters.
       composite_runtime:
         compatibility_legacy:
-          current_count: 9
-          max_count: 9
+          current_count: 0
+          max_count: 0
           target_count: 0
           owner: '@bioetl-config'
-          rationale: Composite runtime configs still expose legacy compatibility
-            parameter taxonomy entries that must be burned down without adding new
-            compatibility keys.
-          ratchet_policy: Non-growth fail-fast; reduce only by migrating composite
-            runtime configs and validation contracts to canonical parameters.
+          rationale: Composite runtime configs no longer expose composite.field_aliases
+            compatibility_legacy taxonomy entries; keep this family at zero.
+          ratchet_policy: Zero-budget fail-fast; any reintroduction of composite
+            field_aliases requires removal, not budget growth.
 registry_groups:
   size_metrics:
     registries:
@@ -527,7 +525,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 48
-      total_loc: 5840
+      total_loc: 5832
       files_ge_250_loc: 1
       helper_function_ratio: 0.312
       max_internal_fan_in: 3
@@ -536,7 +534,7 @@ hotspot_family_ratchets:
       status: reduced_2026-06-18_runtime_mapping_init_compaction
       next_action: 2026-06-18 folds protein-class mapping initialization into the
         runtime classification bootstrap without increasing the family LOC baseline;
-        live metrics are 5840 LOC and 1 file >=250 LOC while bounded-growth budgets
+        live metrics are 5832 LOC and 1 file >=250 LOC while bounded-growth budgets
         remain at 2 files_ge_250_loc and max_internal_fan_in 5.
   - name: composition_factories_pipeline
     owner: '@bioetl-platform'
