@@ -41,7 +41,7 @@ DEFAULT_JSON_OUTPUT = (
     PROJECT_ROOT / "reports" / "quality" / "debt-governance-gates.json"
 )
 DEFAULT_MD_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "debt-governance-gates.md"
-RELEASE_REVIEW_MAX_AGE_DAYS = 30
+RELEASE_REVIEW_MAX_AGE_DAYS = 21
 
 
 @dataclass(frozen=True)

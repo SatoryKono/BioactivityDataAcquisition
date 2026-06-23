@@ -122,4 +122,4 @@ def test_issue_5497_pandera_runtime_monkeypatching_stays_retired() -> None:
 def test_issue_5499_first_party_config_facade_imports_stay_collapsed() -> None:
     importers = _collect_exact_importers("bioetl.domain.composite.config")
 
-    assert importers == {"src/bioetl/domain/composite/__init__.py"}
+    assert importers == set()

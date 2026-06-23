@@ -30,7 +30,7 @@ from bioetl.interfaces.cli.exit_codes import ExitCode
 if TYPE_CHECKING:
     from bioetl.application.services.health_service import HealthService
     from bioetl.application.services.quarantine_service import QuarantineService
-    from bioetl.composition.health_api import HealthServerDependenciesProtocol
+    from bioetl.composition.health_service_access import HealthServerDependencies
 
 _HEALTH_SERVER_DOMAIN_ERROR_TITLE = "Health server failed with domain error"
 _HEALTH_SERVER_UNEXPECTED_ERROR_TITLE = "Unexpected error in health server command"
@@ -41,14 +41,14 @@ _HEALTH_CHECKS_INTERRUPTED_MESSAGE = "Health checks interrupted by user (Ctrl+C)
 
 def get_health_service() -> HealthService:
     """Load the health service through composition on demand."""
-    from bioetl.composition.health_api import get_health_service as _impl
+    from bioetl.composition.health_service_access import get_health_service as _impl
 
     return _impl()
 
 
-def get_health_server_dependencies() -> HealthServerDependenciesProtocol:
+def get_health_server_dependencies() -> HealthServerDependencies:
     """Load health server dependencies through the sanctioned health facade."""
-    from bioetl.composition.health_api import (
+    from bioetl.composition.health_service_access import (
         get_health_server_dependencies as _impl,
     )
 
@@ -57,7 +57,7 @@ def get_health_server_dependencies() -> HealthServerDependenciesProtocol:
 
 def get_quarantine_service() -> QuarantineService:
     """Load quarantine service through composition on demand."""
-    from bioetl.composition.health_api import get_quarantine_service as _impl
+    from bioetl.composition.health_service_access import get_quarantine_service as _impl
 
     return _impl()
 

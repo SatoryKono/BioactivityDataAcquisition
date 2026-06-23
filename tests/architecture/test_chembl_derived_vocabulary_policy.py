@@ -8,6 +8,10 @@ from typing import Any
 import pytest
 import yaml
 
+from tests.architecture._entity_contract_metadata_registry import (
+    load_shared_quality_metadata,
+)
+
 pytestmark = [pytest.mark.architecture]
 
 
@@ -44,7 +48,7 @@ def test_derived_vocabulary_policy_metadata_exists_and_documents_sidecars(
     canonical_field: str,
 ) -> None:
     config = _load_yaml(config_path)
-    metadata = config.get("quality", {}).get("metadata", {})
+    metadata = load_shared_quality_metadata(config_path)
 
     assert policy_key in metadata
     policy = metadata[policy_key]

@@ -31,8 +31,8 @@ COMPOSITION_BOOTSTRAP_RATCHETS: dict[str, tuple[int, set[str]]] = {
         65,
         {
             "bioetl.composition.bootstrap.cli.noop",
+            "bioetl.composition.runtime_builders.config_access",
             "bioetl.infrastructure.config.converters",
-            "bioetl.infrastructure.config.pipeline_config_api",
         },
     ),
 }

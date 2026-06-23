@@ -45,13 +45,19 @@ def load_source_config(provider: str) -> object:
     return _load_source_config(provider)
 
 
-def load_dq_config_for_pipeline(pipeline_name: str) -> object:
+def load_dq_config_for_pipeline(
+    pipeline_name: str,
+    *,
+    configs_root: Path | None = None,
+) -> object:
     """Load DQ config through the canonical infrastructure entrypoint."""
     from bioetl.infrastructure.config.dq_contract_config_loader import (
         load_dq_config_for_pipeline as _load_dq_config_for_pipeline,
     )
 
-    return _load_dq_config_for_pipeline(pipeline_name)
+    if configs_root is None:
+        configs_root = resolve_configs_root(None)
+    return _load_dq_config_for_pipeline(pipeline_name, configs_root=configs_root)
 
 
 def create_pipeline_config_loader(

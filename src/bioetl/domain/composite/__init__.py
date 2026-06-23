@@ -14,25 +14,24 @@ See ADR-026 for architectural decisions.
 
 from __future__ import annotations
 
-from bioetl.domain.composite.config import (
+from bioetl.domain.composite.aggregation import (
     AggregationConfig,
     AggregationFieldSpec,
     AggregationFunction,
-    ColumnGroupConfig,
+    EnricherCardinality,
+)
+from bioetl.domain.composite.config_merge import ColumnGroupConfig, MergeConfig
+from bioetl.domain.composite.config_models import (
     CompositeConfig,
     CompositeDQConfig,
     CrossValidationConfig,
-    DataSchemaConfig,
     DependencyConfig,
-    DQOverrideConfig,
-    EnricherCardinality,
     EnricherConfig,
-    ExecutionConfig,
-    LayerColumnConfig,
-    LineageConfig,
-    MergeConfig,
     SeedConfig,
 )
+from bioetl.domain.composite.config_dq import DQOverrideConfig
+from bioetl.domain.composite.config_runtime import ExecutionConfig, LineageConfig
+from bioetl.domain.composite.config_schema import DataSchemaConfig, LayerColumnConfig
 from bioetl.domain.composite.cross_validation import (
     ComparisonMethod,
     CrossValidationStats,

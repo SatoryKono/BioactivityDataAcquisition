@@ -143,16 +143,16 @@ retained_entrypoints:
   introduced_in: 2026-05 public export review
   review_date: '2026-09-30'
   external_breaking_change_required: true
-  internal_callers_zero: false
-  allowed_call_sites: '`src`: import only the explicit health/quarantine symbols exposed by `bioetl.composition.health_api`;
-    do not bypass this facade to patch `_services`, bootstrap health wiring, or `_resource_management` outside the reviewed
-    owner paths. `tests`: public facade imports may appear in CLI/composition coverage, while direct internal patch targets
-    stay confined to dedicated boundary tests.'
+  internal_callers_zero: true
+  allowed_call_sites: '`src`: do not add new first-party imports of `bioetl.composition.health_api`; owner-only runtime callers
+    must stay on `bioetl.composition.health_service_access`, while direct internal patch targets stay confined to dedicated
+    boundary tests. `tests`: public facade imports may appear in CLI/composition coverage only when validating the public seam
+    itself.'
   migration_path: Use `bioetl.composition.health_api` as the sanctioned health-facing composition seam; do not add new first-party
     imports from `bioetl.composition._services`, `bioetl.composition._resource_management`, or `bioetl.composition.bootstrap.cli.health`
     when the public facade export already exists.
-  exit_criteria: The public health facade remains the sanctioned import seam, its reviewed export budget stays bounded, and
-    internal owner modules remain hidden behind the facade for ordinary first-party callers.
+  exit_criteria: The public health facade remains the sanctioned external import seam, its reviewed export budget stays bounded,
+    and first-party runtime callers remain at zero behind the owner-only `health_service_access` seam.
   public_export_contract:
     max_public_exports: 7
     lazy_export_table: _PUBLIC_EXPORTS

@@ -122,7 +122,7 @@ COMMAND_DELEGATION_CASES: tuple[
     (
         "bioetl.interfaces.cli.commands.health",
         "get_health_service",
-        "bioetl.composition.health_api.get_health_service",
+        "bioetl.composition.health_service_access.get_health_service",
         _no_args,
         object(),
         "identity",
@@ -130,7 +130,7 @@ COMMAND_DELEGATION_CASES: tuple[
     (
         "bioetl.interfaces.cli.commands.health",
         "get_health_server_dependencies",
-        "bioetl.composition.health_api.get_health_server_dependencies",
+        "bioetl.composition.health_service_access.get_health_server_dependencies",
         _no_args,
         object(),
         "identity",

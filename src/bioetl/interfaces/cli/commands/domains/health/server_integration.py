@@ -18,21 +18,18 @@ from bioetl.interfaces.cli.commands.domains.health.rendering import (
 )
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,
-)
-from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     handle_cli_failure as handle_cli_execution_failure,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
 
 if TYPE_CHECKING:
     from bioetl.application.services.quarantine_service import QuarantineService
-    from bioetl.composition.health_api import (
+    from bioetl.composition.health_service_access import (
         HealthServerDependenciesProtocol,
         QuarantineRuntimeServiceProtocol,
     )
     from bioetl.domain.ports import LoggerPort
     from bioetl.interfaces.http.health_server import HealthServer
-
 
 DEFAULT_HEALTH_SERVER_PORT = 8081
 
@@ -40,17 +37,18 @@ _HEALTH_SERVER_DOMAIN_ERROR_TITLE = "Health server failed with domain error"
 _HEALTH_SERVER_UNEXPECTED_ERROR_TITLE = "Unexpected error in health server command"
 _HEALTH_SERVER_INTERRUPTED_MESSAGE = "Health server interrupted by user (Ctrl+C)"
 
-
 def get_health_server_dependencies() -> HealthServerDependenciesProtocol:
     """Load health-listener dependencies from the canonical composition seam."""
-    from bioetl.composition.health_api import get_health_server_dependencies as _impl
+    from bioetl.composition.health_service_access import (
+        get_health_server_dependencies as _impl,
+    )
 
     return _impl()
 
 
 def get_health_server_quarantine_service() -> QuarantineService:
     """Load read-only quarantine service for health listener endpoints."""
-    from bioetl.composition.health_api import get_quarantine_service as _impl
+    from bioetl.composition.health_service_access import get_quarantine_service as _impl
 
     return _impl()
 
@@ -59,7 +57,9 @@ def get_quarantine_runtime_service(
     pipeline: str,
 ) -> QuarantineRuntimeServiceProtocol:
     """Load one pipeline-scoped quarantine runtime service from composition."""
-    from bioetl.composition.health_api import get_quarantine_runtime_service as _impl
+    from bioetl.composition.health_service_access import (
+        get_quarantine_runtime_service as _impl,
+    )
 
     return cast("QuarantineRuntimeServiceProtocol", _impl(pipeline))
 
