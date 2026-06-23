@@ -8,7 +8,7 @@ from bioetl.interfaces.cli.commands._run_manifest_output_diagnostics import (
     render_diagnostics_section,
     render_identity_graph_section,
 )
-from bioetl.interfaces.cli.commands._run_manifest_output_support import (
+from bioetl.interfaces.cli.commands.run_manifest_output_support import (
     format_block,
     format_scalar,
     render_ledger_section,

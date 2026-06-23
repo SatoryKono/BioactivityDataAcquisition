@@ -145,25 +145,25 @@ class TestBootstrapConfigService:
         assert result._registry_accessor() is registry
         mock_register.assert_called_once_with(registry=registry)
 
-    @patch("bioetl.composition.bootstrap.cli.config.load_dq_config_for_pipeline")
+    @patch("bioetl.composition.bootstrap.cli.config.create_dq_config_loader")
     @patch("bioetl.composition.bootstrap.cli.config.register_all_pipelines")
     def test_dq_loader_receives_explicit_configs_root(
         self,
         mock_register: MagicMock,
-        mock_load_dq_config: MagicMock,
+        mock_create_dq_loader: MagicMock,
     ) -> None:
         """DQ contract loader wiring must not depend on process CWD."""
         configs_root = Path("/tmp/bioetl-configs")
-        mock_load_dq_config.return_value = DQConfig(contract_ref="chembl.activity")
+        bound_loader = MagicMock(name="dq_config_loader")
+        bound_loader.return_value = DQConfig(contract_ref="chembl.activity")
+        mock_create_dq_loader.return_value = bound_loader
 
         result = bootstrap_config_service(configs_root=configs_root)
         dq_config = result._dq_service._dq_config_loader("chembl_activity")
 
         assert dq_config.contract_ref == "chembl.activity"
-        mock_load_dq_config.assert_called_once_with(
-            "chembl_activity",
-            configs_root=configs_root,
-        )
+        mock_create_dq_loader.assert_called_once_with(configs_root)
+        bound_loader.assert_called_once_with("chembl_activity")
 
     @patch("bioetl.composition.bootstrap.cli.config.create_pipeline_config_loader")
     @patch("bioetl.composition.bootstrap.cli.config.resolve_configs_root")

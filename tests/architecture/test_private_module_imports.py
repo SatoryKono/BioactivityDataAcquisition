@@ -40,9 +40,6 @@ ALLOWED_BASELINE_IMPORTS: frozenset[tuple[str, str]] = frozenset(
          "bioetl.composition._services"),
         ("src/bioetl/interfaces/cli/commands/health.py",
          "bioetl.composition._service_protocols"),
-        # Internal CLI support modules used by maintenance commands
-        ("src/bioetl/interfaces/cli/commands/domains/maintenance/plan.py",
-         "bioetl.interfaces.cli.commands._run_manifest_output_support"),
     }
 )
 

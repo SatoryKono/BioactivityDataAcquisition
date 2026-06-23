@@ -184,11 +184,12 @@ sanctioned_public_entrypoint_governance:
       review_policy: Keep the sanctioned public API set explicit and block reversion
         to internal-owner imports outside approved boundary coverage.
     narrow_first_party_callers_count:
-      current_count: 1
+      current_count: 0
       owner: '@bioetl-architecture'
       linked_issue: '4565'
-      rationale: A small subset of sanctioned public entrypoints still needs first-party
-        caller narrowing even though the public API itself remains stable.
+      rationale: Sanctioned public entrypoints no longer require first-party caller
+        narrowing after the health composition facade migration closed the last tracked
+        internal caller wave.
       review_cadence: quarterly
       review_policy: Ratchet first-party callers toward reviewed facade exports and
         keep deeper owner modules hidden behind the sanctioned public seam.

@@ -8,12 +8,12 @@
     },
     "module_coverage_inventory": {
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "2520ab7921a647e8e26a01ab80ca27cb672cb2207aa5c29df16d4ed17b1cb722",
+      "source_tree_sha256": "9d1db044c7990667b198d9fdaa952f09b0e89b5f3c4524c91ffa67fd2a47507b",
       "coverage_xml_sha256": "688fdd5cf7e086bb0ac2178265406f9e8395532fb1067e9e6e2fc0c7b5e1632a"
     },
     "compatibility_importer_census": {
       "path": "reports/quality/compatibility-importer-census.json",
-      "snapshot_date": "2026-06-22"
+      "snapshot_date": "2026-06-23"
     },
     "dead_code_inventory": {
       "path": "reports/quality/dead-code-inventory.json",
@@ -107,7 +107,7 @@
       "weighted_score": 0.6,
       "evidence_metrics": {
         "retained_entrypoint_count": 12,
-        "twin_pair_count": 1
+        "twin_pair_count": 0
       }
     },
     {
@@ -168,7 +168,7 @@
     "hotspot_family_count": 5,
     "retained_entrypoint_count": 12,
     "retained_public_export_facade_count": 4,
-    "twin_pair_count": 1,
+    "twin_pair_count": 0,
     "repo_wide_untriaged_zero_import_candidate_count": 0,
     "contract_blocking_issue_count": 0,
     "dq_blocking_issue_count": 0,

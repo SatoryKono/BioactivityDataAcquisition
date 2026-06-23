@@ -19,6 +19,9 @@ import pytest
 import yaml
 
 from bioetl.domain.schemas.constants import PUBLICATION_TYPES
+from tests.architecture._entity_contract_metadata_registry import (
+    load_shared_quality_metadata,
+)
 
 pytestmark = [pytest.mark.architecture]
 
@@ -168,8 +171,8 @@ class TestChEMBLSourceSpecificSubset:
         chembl_publication_entity_config: dict[str, Any],
     ) -> None:
         """ChEMBL entity config must have metadata documenting source-specific policy."""
-        quality_metadata = chembl_publication_entity_config.get("quality", {}).get(
-            "metadata", {}
+        quality_metadata = load_shared_quality_metadata(
+            "configs/entities/chembl/publication.yaml"
         )
 
         assert "publication_type_policy" in quality_metadata, (
@@ -234,8 +237,8 @@ class TestChEMBLSourceSpecificSubset:
         chembl_publication_entity_config: dict[str, Any],
     ) -> None:
         """ChEMBL entity config must document publication_type_raw vs publication_type semantics."""
-        quality_metadata = chembl_publication_entity_config.get("quality", {}).get(
-            "metadata", {}
+        quality_metadata = load_shared_quality_metadata(
+            "configs/entities/chembl/publication.yaml"
         )
         policy = quality_metadata.get("publication_type_policy", {})
 
