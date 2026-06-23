@@ -1,0 +1,93 @@
+schema_version: 1
+policy_scope: internal_compatibility_shim_inventory
+linked_issue: "#5573"
+reviewed_on: "2026-06-23"
+review_by: "2026-09-30"
+owner: "@bioetl-architecture"
+new_src_import_policy: fail_fast_review_required
+rationale: >-
+  Internal storage/config compatibility shims may remain only while importer
+  proof shows they are still part of a reviewed migration path. Zero-import
+  private helpers must be removed instead of retained as latent aliases.
+shims:
+  - id: silver-metadata-request-models-reexport
+    module: bioetl.infrastructure.storage.silver.metadata_request_models
+    path: src/bioetl/infrastructure/storage/silver/metadata_request_models.py
+    lifecycle: retained_internal_reexport_shim
+    owner: "@bioetl-storage"
+    disposition: retain_until_split-importers-migrate
+    canonical_target: bioetl.infrastructure.storage.silver.{finalization_models,metadata_write_models,prepared_operation_models}
+    max_src_importer_count: 12
+    allowed_src_importers:
+      - src/bioetl/infrastructure/storage/silver/metadata_mixin.py
+      - src/bioetl/infrastructure/storage/silver/metadata_mixin_protocols.py
+      - src/bioetl/infrastructure/storage/silver/metadata_operations.py
+      - src/bioetl/infrastructure/storage/silver/metadata_result_finalization.py
+      - src/bioetl/infrastructure/storage/silver/metadata_write_execution.py
+      - src/bioetl/infrastructure/storage/silver/metadata_write_preparation.py
+      - src/bioetl/infrastructure/storage/silver/operations/metadata_finalization_operations.py
+      - src/bioetl/infrastructure/storage/silver/operations/metadata_finalization_support.py
+      - src/bioetl/infrastructure/storage/silver/operations/metadata_write_facade.py
+      - src/bioetl/infrastructure/storage/silver/operations/metadata_write_operations.py
+      - src/bioetl/infrastructure/storage/silver/writer_metadata_facade.py
+      - src/bioetl/infrastructure/storage/silver/writer_runtime_invocation.py
+    owner_tests:
+      - tests/unit/infrastructure/storage/test_strict_metadata_lineage_publication.py
+    exit_criteria: >-
+      Migrate first-party storage importers to the split owner modules, then
+      remove metadata_request_models.py when src_importer_count reaches zero.
+  - id: silver-metadata-mixin-build-result-helper
+    module: bioetl.infrastructure.storage.silver.metadata_mixin
+    path: src/bioetl/infrastructure/storage/silver/metadata_mixin.py
+    symbol: _build_silver_write_result
+    lifecycle: removed_internal_private_shim
+    owner: "@bioetl-storage"
+    disposition: removed_in_5573
+    canonical_target: bioetl.infrastructure.storage.silver.metadata_result_finalization._build_silver_write_result
+    max_src_importer_count: 0
+    allowed_src_importers: []
+    owner_tests:
+      - tests/unit/infrastructure/storage/test_silver_writer_dq_metrics.py
+      - tests/unit/infrastructure/storage/test_silver_metadata_mixin_boost.py
+    exit_criteria: >-
+      The private helper must remain absent from metadata_mixin.py; tests and
+      storage code use metadata_result_finalization as the canonical owner.
+  - id: silver-filter-migration-runtime-identity
+    module: bioetl.infrastructure.config.silver_filter_migration
+    path: src/bioetl/infrastructure/config/silver_filter_migration.py
+    lifecycle: retained_runtime_identity_adapter
+    owner: "@bioetl-config"
+    disposition: retain_until-runtime-identity-migration
+    canonical_target: bioetl.infrastructure.config.silver_filter_migration
+    max_src_importer_count: 9
+    allowed_src_importers:
+      - src/bioetl/composition/bootstrap/runtime/assembly.py
+      - src/bioetl/composition/factories/pipeline/checkpoint_metadata_helpers.py
+      - src/bioetl/composition/runtime_builders/_effective_config_artifact_builder_support.py
+      - src/bioetl/composition/runtime_builders/_inputs_resolution_support.py
+      - src/bioetl/composition/runtime_builders/_run_manifest_creation_support_helpers.py
+      - src/bioetl/infrastructure/config/filter_config_loader.py
+      - src/bioetl/infrastructure/schemas/filter_config.py
+      - src/bioetl/infrastructure/schemas/pipeline_config.py
+      - src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py
+    owner_tests:
+      - tests/architecture/test_silver_filter_compatibility_surface.py
+      - tests/unit/infrastructure/config/test_silver_filter_migration.py
+    exit_criteria: >-
+      Remove only after manifest/effective-config identity no longer needs the
+      legacy Silver structural-filter compatibility mode.
+  - id: infrastructure-config-package-root
+    module: bioetl.infrastructure.config
+    path: src/bioetl/infrastructure/config/__init__.py
+    lifecycle: retained_external_package_root_facade
+    owner: "@bioetl-config"
+    disposition: retain_external_public_api_zero_first_party_src
+    canonical_target: split infrastructure config owner modules
+    max_src_importer_count: 0
+    allowed_src_importers: []
+    owner_tests:
+      - tests/unit/infrastructure/config/test_config_package_root_contract.py
+      - tests/unit/infrastructure/config/test_public_config_surfaces.py
+    exit_criteria: >-
+      Package-root convenience exports remain for external imports only; any
+      first-party src importer requires architecture review before merge.
