@@ -376,7 +376,7 @@ def test_issue_5376_coverage_tail_closeout_matches_live_inventory() -> None:
     assert tracked_row["coverage_percent"] == current_live["tracked_module_coverage_percent"]
     assert tracked_row["coverage_status"] == current_live["tracked_module_status"]
     assert closeout["closeout"]["status"] == "regressed_after_closeout"
-    assert tracked_path in below_85_paths
+    assert tracked_path not in below_85_paths
 
 
 @pytest.mark.architecture

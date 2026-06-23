@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-23T11:31:14.823498+00:00",
+  "generated_at": "2026-06-23T14:22:40.663492+00:00",
   "summary": {
     "total_scripts": 439,
     "status_counts": {
@@ -8007,7 +8007,7 @@
         },
         {
           "path": "docs/04-reference/contracts/canonical-field-registry.md",
-          "line": 223,
+          "line": 227,
           "source_group": "docs",
           "text": "`python3 scripts/engineering/qa/check_generic_field_ownership.py --check`"
         },
@@ -8118,13 +8118,13 @@
         },
         {
           "path": "docs/04-reference/contracts/canonical-field-registry.md",
-          "line": 198,
+          "line": 202,
           "source_group": "docs",
           "text": "`scripts/engineering/qa/check_ontology_unit_semantics.py --check` validates"
         },
         {
           "path": "docs/04-reference/contracts/canonical-field-registry.md",
-          "line": 225,
+          "line": 229,
           "source_group": "docs",
           "text": "`python3 scripts/engineering/qa/check_ontology_unit_semantics.py --check`"
         },
@@ -8196,7 +8196,7 @@
         },
         {
           "path": "docs/04-reference/contracts/canonical-field-registry.md",
-          "line": 221,
+          "line": 225,
           "source_group": "docs",
           "text": "`python3 scripts/engineering/qa/check_semantic_anchor_parity.py --check`"
         },
@@ -8217,7 +8217,7 @@
       "references": [
         {
           "path": "docs/04-reference/contracts/canonical-field-registry.md",
-          "line": 215,
+          "line": 219,
           "source_group": "docs",
           "text": "- QA check: `python3 scripts/engineering/qa/check_semantic_field_registry.py --check`"
         },
@@ -8277,13 +8277,13 @@
         },
         {
           "path": "docs/04-reference/contracts/canonical-field-registry.md",
-          "line": 165,
+          "line": 169,
           "source_group": "docs",
           "text": "`scripts/engineering/qa/check_semantic_pair_matrix_budget.py --check` validates"
         },
         {
           "path": "docs/04-reference/contracts/canonical-field-registry.md",
-          "line": 219,
+          "line": 223,
           "source_group": "docs",
           "text": "`python3 scripts/engineering/qa/check_semantic_pair_matrix_budget.py --check`"
         },
@@ -8322,7 +8322,7 @@
         },
         {
           "path": "docs/04-reference/contracts/canonical-field-registry.md",
-          "line": 217,
+          "line": 221,
           "source_group": "docs",
           "text": "`python3 scripts/engineering/qa/check_semantic_registry_drift.py --check`"
         },

@@ -40,6 +40,7 @@ __all__ = [
     "_purge_quarantine",
     "_replay_quarantine",
     "_resolve_quarantine_record",
+    "_resolve_silver_filter_error_code",
     "_show_quarantine_stats",
 ]
 
@@ -168,6 +169,16 @@ def _render_stats_dashboard(
         group_by=group_by,
     ):
         click.echo(line)
+
+
+def _resolve_silver_filter_error_code(
+    *,
+    silver_filter_only: bool,
+    error_code: str | None,
+    silver_filter_error_code: str,
+) -> str | None:
+    """Resolve the effective quarantine error code for the legacy silver alias."""
+    return silver_filter_error_code if silver_filter_only else error_code
 
 
 def _inspect_quarantine(

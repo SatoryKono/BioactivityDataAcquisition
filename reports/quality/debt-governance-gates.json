@@ -28,8 +28,8 @@
       "status": "pass"
     },
     {
-      "current": "8078c944b362a0840ca2c1b0817b47f55b1670a0ed765b49b40437febf8028c4",
-      "limit": "8078c944b362a0840ca2c1b0817b47f55b1670a0ed765b49b40437febf8028c4",
+      "current": "437e5deb2c1e40a8e764cf5e0f2bb93e82fc8beaf7c4e796bfc324a3b1dd9756",
+      "limit": "437e5deb2c1e40a8e764cf5e0f2bb93e82fc8beaf7c4e796bfc324a3b1dd9756",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -37,7 +37,7 @@
       "status": "pass"
     },
     {
-      "current": 36,
+      "current": 0,
       "limit": 36,
       "metric": "unmeasured_module_count",
       "name": "module_coverage_unmeasured_modules",
@@ -46,7 +46,7 @@
       "status": "pass"
     },
     {
-      "current": 1614,
+      "current": 0,
       "limit": 1614,
       "metric": "uncovered_module_count",
       "name": "module_coverage_uncovered_modules",
@@ -235,7 +235,7 @@
       "status": "pass"
     },
     {
-      "current": "8a55069508869bbe368f1a3a880f6f979387574f",
+      "current": "ac4b113ad36795d8201143e8126d4ebcc86cc3cc",
       "limit": "clean remote-main tree evidence",
       "metric": "remote_main_sha",
       "name": "remote_main_architecture_debt_baseline",
@@ -244,13 +244,13 @@
       "status": "pass"
     },
     {
-      "current": 1,
+      "current": 0,
       "limit": 0,
       "metric": "stale_artifact_count",
       "name": "generated_artifact_drift",
       "remediation": "Regenerate stale quality artifacts with their canonical QA commands.",
       "source_artifact": "reports/quality/*.json",
-      "status": "fail"
+      "status": "pass"
     }
   ],
   "generated_by": "scripts.engineering.qa.report_debt_governance_gates",
@@ -259,23 +259,21 @@
     "adr_enforcement_matrix": false,
     "architecture_quality_scorecard": false,
     "module_coverage_inventory": false,
-    "remote_main_baseline": true
+    "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 1,
-    "pass": 27,
+    "fail": 0,
+    "pass": 28,
     "warn": 0
   },
   "summary": {
     "architecture_quality_scorecard_integral_score": 7.98,
     "architecture_quality_scorecard_interpretation": "satisfactory_system_refactoring_required",
-    "fail_count": 1,
-    "failing_gates": [
-      "generated_artifact_drift"
-    ],
+    "fail_count": 0,
+    "failing_gates": [],
     "gate_count": 28,
-    "pass_count": 27,
-    "release_gate_status": "failing",
+    "pass_count": 28,
+    "release_gate_status": "passing",
     "warn_count": 0,
     "warning_gates": []
   }

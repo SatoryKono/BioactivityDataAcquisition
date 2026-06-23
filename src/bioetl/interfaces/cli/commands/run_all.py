@@ -29,7 +29,9 @@ from bioetl.interfaces.cli.commands.domains.run_all.public_runtime import (
     echo_batch_summary_with_runtime,
     handle_destructive_confirmation_with_runtime,
     load_pipeline_runner_service,
+    run_all_callback_runtime,
     run_all_pipelines_async_with_runtime,
+    run_all_with_cli_policy_runtime,
     run_batch_with_policy_runtime,
 )
 from bioetl.interfaces.cli.commands.domains.run_all.public_runtime import (
@@ -168,7 +170,9 @@ def _callback_runtime() -> RunAllCallbackRuntime:
     """Build callback runtime from public patchable seams."""
     return RunAllCallbackRuntime(
         build_probe_paths=build_observability_backend_required_probe_paths,
+        build_cli_input_from_options=_build_run_all_command_input_from_options,
         build_input=build_run_all_command_input,
+        dispatch_cli_callback=dispatch_cli_callback,
         disable_transient_health_server=should_disable_transient_health_server,
         ensure_observability_backend_started=ensure_observability_backend_started,
         run_with_cli_policy=_run_all_with_cli_policy,
@@ -181,25 +185,10 @@ def _run_all_callback(
     **options: object,
 ) -> None:
     """Canonical callback implementation for the run-all Click command."""
-    cli_input = _build_run_all_command_input_from_options(options)
-    if not cli_input.list_only and not cli_input.dry_run:
-        backend_result = ensure_observability_backend_started(
-            enabled=cli_input.ensure_observability_backend,
-            port=cli_input.observability_backend_port,
-            required_probe_paths=build_observability_backend_required_probe_paths(),
-        )
-        if should_disable_transient_health_server(
-            health_server_enabled=cli_input.health_server,
-            health_port=cli_input.health_port,
-            observability_backend_port=cli_input.observability_backend_port,
-            backend_result=backend_result,
-        ):
-            cli_input = replace(cli_input, health_server=False)
-
-    dispatch_cli_callback(
+    run_all_callback_runtime(
         click_context,
-        build_cli_input=lambda: cli_input,
-        run_with_cli_policy=_run_all_with_cli_policy,
+        options=options,
+        runtime=_callback_runtime(),
     )
 
 
@@ -210,8 +199,12 @@ def _policy_runtime() -> RunAllPolicyRuntime:
         destructive_confirmation=_handle_destructive_confirmation,
         determine_exit_code=run_all_support.determine_batch_exit_code,
         execute_batch=_run_batch_with_policy,
+        exit_func=exit_with_code,
         health_info_presenter=echo_health_server_info,
+        listing_emitter=emit_run_all_listing,
+        preview_emitter=emit_run_all_preview,
         resolve_context_registry=resolve_context_registry,
+        run_all_command_flow=run_all_command_flow,
         summary_presenter=_echo_batch_summary,
     )
 
@@ -221,18 +214,10 @@ def _run_all_with_cli_policy(
     cli_input: RunAllCommandInput,
 ) -> None:
     """Resolve registry and execute the prepared run-all policy flow."""
-    registry = resolve_context_registry(click_context) or build_cli_registry()
-    run_all_command_flow(
-        cli_input=cli_input,
-        registry=registry,
-        destructive_confirmation=_handle_destructive_confirmation,
-        listing_emitter=emit_run_all_listing,
-        preview_emitter=emit_run_all_preview,
-        health_info_presenter=echo_health_server_info,
-        execute_batch=_run_batch_with_policy,
-        summary_presenter=_echo_batch_summary,
-        determine_exit_code=run_all_support.determine_batch_exit_code,
-        exit_func=exit_with_code,
+    run_all_with_cli_policy_runtime(
+        click_context,
+        cli_input,
+        runtime=_policy_runtime(),
     )
 
 
