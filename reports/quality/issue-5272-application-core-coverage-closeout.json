@@ -1,5 +1,5 @@
 {
-  "snapshot_date": "2026-06-18",
+  "snapshot_date": "2026-06-23",
   "issue": "#5272",
   "parent_epic": "#5244",
   "title": "Burn down application_core coverage and zero-uncovered module debt",
@@ -19,7 +19,7 @@
   "parent_epic_status": {
     "status": "not_closeable_under_current_definition_of_done",
     "remaining_below_85_module_count": 104,
-    "reason": "Issue #5244 requires zero below-tier production modules; the current inventory still has below-tier modules even though #5272 acceptance criteria are met."
+    "reason": "Issue #5244 requires zero below-tier production modules; #5272 is locally closeable, but the parent epic remains open while 104 production modules are still below the default floor."
   },
   "evidence": [
     "reports/quality/module-coverage-inventory.json",

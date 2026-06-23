@@ -38,5 +38,5 @@
 | `observability_release_review_freshness` | `pass` | `generated_at_age_days` | `19` | `21` | `reports/observability/runtime_cardinality_review.json` |
 | `observability_touched_metric_review_freshness` | `pass` | `changed_metric_surface_count` | `0` | `0` | `reports/observability/runtime_cardinality_review.json` |
 | `adr_enforcement_blocking_gaps` | `pass` | `blocking_gap_count` | `0` | `0` | `reports/quality/adr-enforcement-matrix.json` |
-| `remote_main_architecture_debt_baseline` | `pass` | `remote_main_sha` | `ac4b113ad36795d8201143e8126d4ebcc86cc3cc` | `clean remote-main tree evidence` | `reports/quality/architecture-debt-remote-main-baseline.json` |
+| `remote_main_architecture_debt_baseline` | `pass` | `remote_main_sha` | `f986ed34d82f14ce61da758493be621f4007f0d6` | `clean remote-main tree evidence` | `reports/quality/architecture-debt-remote-main-baseline.json` |
 | `generated_artifact_drift` | `pass` | `stale_artifact_count` | `0` | `0` | `reports/quality/*.json` |

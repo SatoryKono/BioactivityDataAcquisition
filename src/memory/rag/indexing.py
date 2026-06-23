@@ -233,9 +233,11 @@ def write_rag_manifests(
     )
     catalog_path = output_dir / "corpus_catalog.json"
     chunks_path = output_dir / "chunks.jsonl"
+    catalog_path.parent.mkdir(parents=True, exist_ok=True)
     catalog_path.write_text(
         json.dumps(catalog, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
+    chunks_path.parent.mkdir(parents=True, exist_ok=True)
     with chunks_path.open("w", encoding="utf-8") as handle:
         for chunk in chunks:
             handle.write(json.dumps(chunk, sort_keys=True, ensure_ascii=True))

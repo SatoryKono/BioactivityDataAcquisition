@@ -240,10 +240,10 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     ),
     (
         "class_surface",
-        "src.bioetl.application.composite.merger.MergeService",
+        "src.bioetl.application.composite.merge_service.MergeService",
         "DECLARES",
         "method_surface",
-        "src.bioetl.application.composite.merger.MergeService.merge",
+        "src.bioetl.application.composite.merge_service.MergeService.merge",
     ),
     ("project", "BioETL", "HAS_PORT", "port_surface", "bioetl.domain.ports"),
     (
