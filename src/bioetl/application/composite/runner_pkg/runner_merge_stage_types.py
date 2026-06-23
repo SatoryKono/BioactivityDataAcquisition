@@ -17,7 +17,7 @@ from bioetl.application.composite.merger_orchestration import (
     MergeExecutionRequest,
 )
 from bioetl.application.composite.runtime_models import (
-    CompositeMergerPort,
+    CompositeMergerProtocol,
     CompositeRuntimeConfig,
 )
 from bioetl.domain.composite import (
@@ -41,7 +41,7 @@ class _CompositeRunnerMergeStageHostProtocol(Protocol):
     _config: CompositeConfig
     _run_id_str: str
     _clock: ClockPort | None
-    _merger: CompositeMergerPort
+    _merger: CompositeMergerProtocol
     _checkpoint_manager: CompositeCheckpointService
 
     async def _save_checkpoint_safe(

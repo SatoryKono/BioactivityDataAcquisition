@@ -159,7 +159,7 @@ def test_issue_5526_module_coverage_warning_debt_is_replaced_with_reviewed_ratch
 
     assert aggregate_ratchets["mode"] == "fail-fast-no-growth"
     assert aggregate_ratchets["unmeasured_module_count"]["max_count"] == 36
-    assert aggregate_ratchets["uncovered_module_count"]["max_count"] == 1614
+    assert aggregate_ratchets["uncovered_module_count"]["max_count"] == 1611
     assert gate_rows["module_coverage_unmeasured_modules"]["status"] == "pass"
     assert gate_rows["module_coverage_uncovered_modules"]["status"] == "pass"
     assert (

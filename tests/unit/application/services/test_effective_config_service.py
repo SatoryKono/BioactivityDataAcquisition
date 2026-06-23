@@ -10,7 +10,7 @@ from typing import Any
 
 import pytest
 
-from bioetl.application.services.control_plane.effective_config_support import (
+from bioetl.application.services.control_plane.effective_config.support import (
     stable_hash,
 )
 from bioetl.application.services.control_plane.effective_config.service import (

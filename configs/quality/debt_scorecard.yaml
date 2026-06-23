@@ -580,19 +580,18 @@ hotspot_family_ratchets:
       max_internal_fan_in: 4
     metrics:
       duplication_clusters: 0
-      files: 115
-      total_loc: 14630
-      files_ge_250_loc: 17
-      helper_function_ratio: 0.472
-      max_internal_fan_in: 3
-      max_internal_fan_in_module: bioetl.application.services.control_plane.workflow.manifest_service
+      files: 118
+      total_loc: 14775
+      files_ge_250_loc: 16
+      helper_function_ratio: 0.47
+      max_internal_fan_in: 4
+      max_internal_fan_in_module: bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.persistence_policy
     trend:
-      status: reduced_2026-06-17_issue_5306_5312_fan_in_warning_clear
-      next_action: 2026-06-17 folds manifest diagnostics base into split helper
-        owners, narrows replay-readiness profile imports, and removes an unused
-        manifest package diagnostics re-export; files_ge_250_loc drops to 17 and
-        max_internal_fan_in drops to 3 while bounded-growth budgets remain at 22
-        files_ge_250_loc and max_internal_fan_in 4.
+      status: reduced_2026-06-23_issue_5555_control_plane_wrapper_retirement
+      next_action: 2026-06-23 removes the transitional effective_config_support
+        wrapper and refreshes the reviewed family snapshot; files_ge_250_loc drops
+        from 17 to 16 while bounded-growth budgets remain unchanged at 22 files_ge_250_loc
+        and max_internal_fan_in 4.
   - name: composition_runtime_builders
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -608,18 +607,18 @@ hotspot_family_ratchets:
       max_internal_fan_in: 10
     metrics:
       duplication_clusters: 0
-      files: 44
-      total_loc: 6307
+      files: 43
+      total_loc: 6320
       files_ge_250_loc: 3
-      helper_function_ratio: 0.422
-      max_internal_fan_in: 7
-      max_internal_fan_in_module: bioetl.composition.runtime_builders._run_manifest_refs
+      helper_function_ratio: 0.403
+      max_internal_fan_in: 5
+      max_internal_fan_in_module: bioetl.composition.runtime_builders.run_manifest_contract_identity
     trend:
-      status: reduced_2026-06-18_issue_5343_manifest_creation_support_consolidated
-      next_action: 2026-06-18 consolidates run-manifest creation support policy/create-spec
-        helpers into one owner module, reducing live family size to 44 files / 6307
-        LOC while keeping bounded-growth budgets unchanged at 7 files_ge_250_loc
-        and max_internal_fan_in 10.
+      status: reduced_2026-06-23_issue_5555_runtime_builder_compatibility_collapse
+      next_action: 2026-06-23 removes compatibility-only runner and silver-filter
+        support wrappers, reducing the reviewed family to 43 files and max_internal_fan_in
+        5 while bounded-growth budgets remain unchanged at 7 files_ge_250_loc and
+        max_internal_fan_in 10.
 oversized_source_module_inventory:
   linked_issue: '#4679'
   split_on_touch: true

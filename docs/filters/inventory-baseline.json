@@ -1489,7 +1489,7 @@
       "symbol": "--silver-filter-only",
       "path": "src/bioetl/interfaces/cli/commands/diagnostics.py",
       "occurrence_count": 1,
-      "first_line": 304,
+      "first_line": 305,
       "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
       "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
       "notes": ""
@@ -1500,7 +1500,7 @@
       "symbol": "--silver-filter-only",
       "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
       "occurrence_count": 2,
-      "first_line": 91,
+      "first_line": 92,
       "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
       "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
       "notes": ""
@@ -1676,7 +1676,7 @@
       "symbol": "FILTERED_OUT_SILVER",
       "path": "src/bioetl/interfaces/cli/commands/diagnostics.py",
       "occurrence_count": 2,
-      "first_line": 66,
+      "first_line": 67,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""
@@ -1687,7 +1687,7 @@
       "symbol": "FILTERED_OUT_SILVER",
       "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
       "occurrence_count": 2,
-      "first_line": 29,
+      "first_line": 30,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""
@@ -2270,7 +2270,7 @@
       "symbol": "extraction_params",
       "path": "scripts/docs/matrix/generate_pipeline_normalization_matrix.py",
       "occurrence_count": 5,
-      "first_line": 1573,
+      "first_line": 1571,
       "role": "Source-profile extraction policy",
       "migration_relevance": "extraction_params are provider request policy and must not be treated as Silver filters.",
       "notes": ""

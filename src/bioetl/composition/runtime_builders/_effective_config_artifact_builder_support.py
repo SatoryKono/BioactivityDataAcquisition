@@ -21,10 +21,9 @@ from bioetl.composition.runtime_builders.config_access import resolve_configs_ro
 from bioetl.composition.runtime_builders._effective_config_secret_support import (
     build_secret_surface_inventory,
 )
-from bioetl.composition.runtime_builders._silver_filter_compatibility_support import (
-    add_silver_filter_compatibility_defaults,
-    current_silver_filter_compatibility_mode,
-    current_silver_filter_compatibility_snapshot,
+from bioetl.infrastructure.config.silver_filter_migration import (
+    build_silver_filter_compatibility_snapshot,
+    resolve_silver_filter_compatibility_mode,
 )
 from bioetl.composition.runtime_builders._runtime_launch_context_fields import (
     build_runtime_launch_field_snapshot,
@@ -48,6 +47,25 @@ if TYPE_CHECKING:
 _EXECUTION_AFFECTING_SETTINGS_SURFACES = semantic_runtime_env_dependencies()
 
 
+def _current_silver_filter_compatibility_mode() -> str:
+    return resolve_silver_filter_compatibility_mode()
+
+
+def _current_silver_filter_compatibility_snapshot() -> dict[str, object]:
+    return build_silver_filter_compatibility_snapshot()
+
+
+def _add_silver_filter_compatibility_defaults(payload: dict[str, object]) -> None:
+    payload.setdefault(
+        "silver_filter_compatibility_mode",
+        _current_silver_filter_compatibility_mode(),
+    )
+    payload.setdefault(
+        "silver_filter_compatibility",
+        _current_silver_filter_compatibility_snapshot(),
+    )
+
+
 def _setting_attr(host: object, name: str, default: object = None) -> object:
     return getattr(host, name, default)
 
@@ -68,7 +86,7 @@ def build_execution_settings_snapshot(settings: Settings) -> dict[str, object]:
     snapshot: dict[str, object] = {
         "schema_version": "execution-settings-v1",
         "materialized_surfaces": list(_EXECUTION_AFFECTING_SETTINGS_SURFACES),
-        "silver_filter_compatibility": current_silver_filter_compatibility_snapshot(),
+        "silver_filter_compatibility": _current_silver_filter_compatibility_snapshot(),
         "settings": {
             "env": _setting_attr(settings, "env"),
             "debug": _setting_attr(settings, "debug", False),
@@ -168,10 +186,10 @@ def build_runtime_overrides_snapshot(
             "vacuum": _to_serializable_mapping(getattr(ctx, "vacuum", None)),
             "replay_of_run_id": getattr(ctx, "replay_of_run_id", None),
             "replay_of_manifest_id": getattr(ctx, "replay_of_manifest_id", None),
-            "silver_filter_compatibility_mode": current_silver_filter_compatibility_mode(),
+            "silver_filter_compatibility_mode": _current_silver_filter_compatibility_mode(),
         }
     )
-    silver_filter_compatibility = current_silver_filter_compatibility_snapshot()
+    silver_filter_compatibility = _current_silver_filter_compatibility_snapshot()
     runtime_fields = build_runtime_launch_field_snapshot(
         ctx,
         run_type_value=run_type_value,
@@ -220,7 +238,7 @@ def build_composite_runtime_overrides_snapshot(
     runtime_payload.setdefault(
         "settings_snapshot", build_execution_settings_snapshot(settings)
     )
-    add_silver_filter_compatibility_defaults(runtime_payload)
+    _add_silver_filter_compatibility_defaults(runtime_payload)
     return {
         "cli": dict(runtime_payload),
         "env": {

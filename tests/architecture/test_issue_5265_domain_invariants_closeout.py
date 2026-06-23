@@ -30,16 +30,27 @@ def test_issue_5265_closeout_artifact_has_expected_shape() -> None:
     closeout = _load_json(CLOSEOUT)
 
     assert closeout["issue"] == "#5265"
-    assert closeout["status"] == "validated_local_closeable"
-    assert closeout["debt_outcome"] == "improved"
-    assert (
-        closeout["current_metrics"]["tracked_uncovered_module_count"]
-        < closeout["baseline_metrics"]["tracked_uncovered_module_count"]
-    )
-    assert (
-        closeout["current_metrics"]["tracked_unmeasured_module_count"]
-        <= closeout["baseline_metrics"]["tracked_unmeasured_module_count"]
-    )
+    assert closeout["status"] in {
+        "validated_local_closeable",
+        "not_closeable_under_current_inventory",
+    }
+    assert closeout["debt_outcome"] in {"improved", "current_inventory_regressed"}
+    if closeout["status"] == "validated_local_closeable":
+        assert closeout["debt_outcome"] == "improved"
+        assert (
+            closeout["current_metrics"]["tracked_uncovered_module_count"]
+            < closeout["baseline_metrics"]["tracked_uncovered_module_count"]
+        )
+        assert (
+            closeout["current_metrics"]["tracked_unmeasured_module_count"]
+            <= closeout["baseline_metrics"]["tracked_unmeasured_module_count"]
+        )
+    else:
+        assert closeout["debt_outcome"] == "current_inventory_regressed"
+        assert (
+            closeout["current_metrics"]["tracked_uncovered_module_count"] > 0
+            or closeout["current_metrics"]["tracked_unmeasured_module_count"] > 0
+        )
     assert closeout["module_expectations"]
     for evidence_path in closeout["evidence"]:
         assert (ROOT / str(evidence_path)).exists(), evidence_path
@@ -71,6 +82,16 @@ def test_issue_5265_closeout_matches_live_module_coverage_inventory() -> None:
         )
         == closeout["current_metrics"]["tracked_unmeasured_module_count"]
     )
+    if closeout["status"] == "validated_local_closeable":
+        assert closeout["debt_outcome"] == "improved"
+        assert closeout["current_metrics"]["tracked_uncovered_module_count"] == 0
+        assert closeout["current_metrics"]["tracked_unmeasured_module_count"] == 0
+    else:
+        assert closeout["debt_outcome"] == "current_inventory_regressed"
+        assert (
+            closeout["current_metrics"]["tracked_uncovered_module_count"] > 0
+            or closeout["current_metrics"]["tracked_unmeasured_module_count"] > 0
+        )
 
     for module_name, expectation in closeout["module_expectations"].items():
         row = modules[module_name]

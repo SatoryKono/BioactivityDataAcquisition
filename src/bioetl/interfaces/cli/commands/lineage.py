@@ -30,7 +30,9 @@ _NONE_BULLET = "  - none"
 
 def get_lineage_service() -> LineageInspectionService:
     """Load the lineage inspection service through composition on demand."""
-    from bioetl.composition.control_plane_api import get_lineage_service as _impl
+    from bioetl.composition.control_plane_service_access import (
+        get_lineage_service as _impl,
+    )
 
     return _impl()
 

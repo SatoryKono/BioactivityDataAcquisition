@@ -13,7 +13,7 @@ from bioetl.application.composite.dependency_key_resolvers import (
     create_chained_key_resolver,
     create_seed_key_resolver,
 )
-from bioetl.domain.composite.config_models import DependencyConfig
+from bioetl.domain.composite.config import DependencyConfig
 
 
 def _dep_config(

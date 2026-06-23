@@ -9,8 +9,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.domain.composite.config_merge import MergeConfig
-from bioetl.domain.composite.config_models import DependencyConfig, EnricherConfig
+from bioetl.domain.composite.config import DependencyConfig, EnricherConfig, MergeConfig
 from bioetl.domain.composite.result import (
     DependencyResult,
     DependencyStatus,

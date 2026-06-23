@@ -939,7 +939,7 @@ def test_config_dq_helpers_cover_lazy_import_and_error_branches(
     api_module = SimpleNamespace(get_config_service=lambda: "config-service")
     monkeypatch.setitem(
         __import__("sys").modules,
-        "bioetl.composition.control_plane_api",
+        "bioetl.composition.control_plane_service_access",
         api_module,
     )
     assert config_dq.get_config_service() == "config-service"
@@ -1126,7 +1126,7 @@ def test_run_manifest_commands_cover_error_and_persisted_artifact_paths(
     )
     monkeypatch.setitem(
         __import__("sys").modules,
-        "bioetl.composition.control_plane_api",
+        "bioetl.composition.control_plane_service_access",
         api_module,
     )
 

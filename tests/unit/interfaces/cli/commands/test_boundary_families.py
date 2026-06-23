@@ -74,7 +74,7 @@ COMMAND_DELEGATION_CASES: tuple[
     (
         "bioetl.interfaces.cli.commands.adr",
         "get_adr_service",
-        "bioetl.composition.control_plane_api.get_adr_service",
+        "bioetl.composition.control_plane_service_access.get_adr_service",
         _no_args,
         object(),
         "identity",
@@ -90,7 +90,7 @@ COMMAND_DELEGATION_CASES: tuple[
     (
         "bioetl.interfaces.cli.commands.config",
         "get_config_service",
-        "bioetl.composition.control_plane_api.get_config_service",
+        "bioetl.composition.control_plane_service_access.get_config_service",
         _no_args,
         object(),
         "identity",
@@ -114,7 +114,7 @@ COMMAND_DELEGATION_CASES: tuple[
     (
         "bioetl.interfaces.cli.commands.export",
         "get_export_service",
-        "bioetl.composition.control_plane_api.get_export_service",
+        "bioetl.composition.control_plane_service_access.get_export_service",
         _no_args,
         object(),
         "identity",
@@ -138,7 +138,7 @@ COMMAND_DELEGATION_CASES: tuple[
     (
         "bioetl.interfaces.cli.commands.lock",
         "get_lock_service",
-        "bioetl.composition.control_plane_api.get_lock_service",
+        "bioetl.composition.control_plane_service_access.get_lock_service",
         _no_args,
         object(),
         "identity",

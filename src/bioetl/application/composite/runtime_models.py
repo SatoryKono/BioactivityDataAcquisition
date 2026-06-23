@@ -62,7 +62,7 @@ __all__ = [
 _DEFAULT_COMPOSITE_LOCK_TTL_SECONDS = 3600
 
 
-class CompositeMergerPort(Protocol):
+class CompositeMergerProtocol(Protocol):
     """Runtime merger dependency required by ``CompositePipelineRunner``."""
 
     async def execute_request(self, request: MergeExecutionRequest) -> MergeResult: ...
@@ -107,7 +107,7 @@ class CompositeRunnerDependencies:
     enricher_runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort]
     key_extractor: KeyExtractorService
     coordinator: EnrichmentCoordinatorService
-    merger: CompositeMergerPort
+    merger: CompositeMergerProtocol
     checkpoint_manager: CompositeCheckpointService
     logger: LoggerPort
     lock: LockPort

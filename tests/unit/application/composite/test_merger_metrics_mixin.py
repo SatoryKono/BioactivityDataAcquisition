@@ -9,7 +9,7 @@ import polars as pl
 import pytest
 
 from bioetl.application.composite.merger_metrics_mixin import MergeMetricsRecorderMixin
-from bioetl.domain.composite.config_models import EnricherConfig
+from bioetl.domain.composite.config import EnricherConfig
 from bioetl.domain.composite.result import (
     DependencyResult,
     DependencyStatus,

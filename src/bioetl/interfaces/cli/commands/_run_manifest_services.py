@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 def get_run_manifest_service() -> RunManifestInspectionService:
     """Load the run-manifest inspection service through composition on demand."""
-    from bioetl.composition.control_plane_api import (
+    from bioetl.composition.control_plane_service_access import (
         get_run_manifest_service as _impl,
     )
 
@@ -33,7 +33,7 @@ def get_run_manifest_service() -> RunManifestInspectionService:
 
 def get_forensic_run_diff_service() -> ForensicRunDiffService:
     """Load the forensic run-diff service through composition on demand."""
-    from bioetl.composition.control_plane_api import (
+    from bioetl.composition.control_plane_service_access import (
         get_forensic_run_diff_service as _impl,
     )
 
@@ -42,7 +42,7 @@ def get_forensic_run_diff_service() -> ForensicRunDiffService:
 
 def get_historical_replay_corpus_service() -> HistoricalReplayCorpusService:
     """Load retained-corpus replay workflows through composition on demand."""
-    from bioetl.composition.control_plane_api import (
+    from bioetl.composition.control_plane_service_access import (
         get_historical_replay_corpus_service as _impl,
     )
 
@@ -51,7 +51,7 @@ def get_historical_replay_corpus_service() -> HistoricalReplayCorpusService:
 
 def get_historical_replay_closure_service() -> HistoricalReplayClosureService:
     """Load retained-corpus closure workflows through composition on demand."""
-    from bioetl.composition.control_plane_api import (
+    from bioetl.composition.control_plane_service_access import (
         get_historical_replay_closure_service as _impl,
     )
 
@@ -60,7 +60,7 @@ def get_historical_replay_closure_service() -> HistoricalReplayClosureService:
 
 def get_historical_replay_universe_service() -> HistoricalReplayUniverseService:
     """Load full-universe historical replay workflows through composition on demand."""
-    from bioetl.composition.control_plane_api import (
+    from bioetl.composition.control_plane_service_access import (
         get_historical_replay_universe_service as _impl,
     )
 

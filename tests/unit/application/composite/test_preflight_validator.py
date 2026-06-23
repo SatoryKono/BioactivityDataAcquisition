@@ -24,12 +24,12 @@ from bioetl.domain.composite.aggregation import (
     AggregationFunction,
     EnricherCardinality,
 )
-from bioetl.domain.composite.config_merge import MergeConfig
-from bioetl.domain.composite.config_models import (
+from bioetl.domain.composite.config import (
     CompositeConfig,
     CompositeDQConfig,
     DependencyConfig,
     EnricherConfig,
+    MergeConfig,
     SeedConfig,
 )
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy

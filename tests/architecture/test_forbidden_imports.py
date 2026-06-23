@@ -593,7 +593,7 @@ class TestInterfacesBootstrapIsolation:
             "Use sanctioned modules such as:\n"
             "  - bioetl.composition.execution_api\n"
             "  - bioetl.composition.registry_api\n"
-            "  - bioetl.composition.control_plane_api\n"
+            "  - bioetl.composition.control_plane_service_access\n"
             "  - bioetl.composition.health_api\n"
             "  - bioetl.composition.maintenance_api\n"
             "  - bioetl.composition.composite_api\n"
@@ -618,7 +618,7 @@ class TestInterfacesBootstrapIsolation:
             "Use specialized public APIs instead:\n"
             "  - bioetl.composition.execution_api\n"
             "  - bioetl.composition.registry_api\n"
-            "  - bioetl.composition.control_plane_api\n"
+            "  - bioetl.composition.control_plane_service_access\n"
             "  - bioetl.composition.health_api\n"
             "  - bioetl.composition.maintenance_api\n"
             "  - bioetl.composition.composite_api\n"
@@ -642,7 +642,7 @@ class TestInterfacesBootstrapIsolation:
             "Interfaces layer must not import bioetl.composition.services_api.\n"
             "Use narrow public APIs instead:\n"
             "  - bioetl.composition.execution_api\n"
-            "  - bioetl.composition.control_plane_api\n"
+            "  - bioetl.composition.control_plane_service_access\n"
             "  - bioetl.composition.health_api\n"
             "  - bioetl.composition.maintenance_api\n"
             "  - bioetl.composition.registry_api\n"
@@ -666,9 +666,31 @@ class TestInterfacesBootstrapIsolation:
         assert not violations, (
             "Interfaces layer must not import bioetl.composition.resources_api.\n"
             "Use owner-focused public APIs instead:\n"
-            "  - bioetl.composition.control_plane_api\n"
+            "  - bioetl.composition.control_plane_service_access\n"
             "  - bioetl.composition.health_api\n"
             "  - bioetl.composition.maintenance_api\n\n"
+            "Violations:\n" + "\n".join(f"  - {item}" for item in violations)
+        )
+
+    def test_interfaces_no_direct_control_plane_api_imports(
+        self, src_dir: Path
+    ) -> None:
+        """Interfaces must use the first-party control-plane access seam."""
+        violations: list[str] = []
+        for py_file in _python_files(_interfaces_path(src_dir)):
+            violations.extend(
+                _module_import_violations(
+                    py_file,
+                    src_dir,
+                    exact_modules={"bioetl.composition.control_plane_api"},
+                )
+            )
+
+        assert not violations, (
+            "Interfaces layer must not import bioetl.composition.control_plane_api.\n"
+            "Use bioetl.composition.control_plane_service_access for first-party "
+            "CLI/service wiring and keep control_plane_api as the stable public "
+            "compatibility facade.\n\n"
             "Violations:\n" + "\n".join(f"  - {item}" for item in violations)
         )
 
@@ -721,7 +743,7 @@ class TestInterfacesBootstrapIsolation:
         """Interfaces may import only the approved composition public API modules."""
         allowed_modules = {
             "bioetl.composition.composite_api",
-            "bioetl.composition.control_plane_api",
+            "bioetl.composition.control_plane_service_access",
             "bioetl.composition.execution_api",
             "bioetl.composition.health_api",
             "bioetl.composition.health_service_access",
@@ -749,7 +771,7 @@ class TestInterfacesBootstrapIsolation:
             "Interfaces layer imported non-sanctioned composition modules.\n"
             "Allowed modules:\n"
             "  - bioetl.composition.composite_api\n"
-            "  - bioetl.composition.control_plane_api\n"
+            "  - bioetl.composition.control_plane_service_access\n"
             "  - bioetl.composition.execution_api\n"
             "  - bioetl.composition.health_api\n"
             "  - bioetl.composition.health_service_access\n"

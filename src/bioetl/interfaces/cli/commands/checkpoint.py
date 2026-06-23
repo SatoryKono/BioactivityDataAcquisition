@@ -45,7 +45,7 @@ def checkpoint() -> None:
 
 def get_checkpoint_runtime_service(pipeline: str) -> CheckpointRuntimeService:
     """Load the checkpoint runtime service through composition on demand."""
-    from bioetl.composition.control_plane_api import (
+    from bioetl.composition.control_plane_service_access import (
         get_checkpoint_runtime_service as _impl,
     )
 

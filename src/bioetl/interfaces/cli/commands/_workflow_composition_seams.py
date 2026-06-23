@@ -23,7 +23,9 @@ __all__ = [
 
 def load_workflow_config(name: str) -> WorkflowConfig:
     """Load one declarative workflow config through composition seams."""
-    from bioetl.composition.control_plane_api import load_workflow_config as _impl
+    from bioetl.composition.control_plane_service_access import (
+        load_workflow_config as _impl,
+    )
 
     return _impl(name)
 
@@ -32,7 +34,7 @@ def get_workflow_execution_service(
     registry: PipelineRegistry | None = None,
 ) -> WorkflowExecutionService:
     """Resolve workflow execution orchestration through composition seams."""
-    from bioetl.composition.control_plane_api import (
+    from bioetl.composition.control_plane_service_access import (
         get_workflow_execution_service as _impl,
     )
 
@@ -41,7 +43,7 @@ def get_workflow_execution_service(
 
 def get_workflow_inspection_service() -> WorkflowInspectionService:
     """Resolve workflow inspection through composition seams."""
-    from bioetl.composition.control_plane_api import (
+    from bioetl.composition.control_plane_service_access import (
         get_workflow_inspection_service as _impl,
     )
 
