@@ -18,6 +18,7 @@ This document describes the current active ChEMBL Target Protein Classification 
 Canonical sources:
 
 - [ChEMBL target provider reference](../../providers/chembl/target.md)
+- [ChEMBL target protein classification provider reference](../../providers/chembl/target-protein-classification.md)
 - [ChEMBL protein class provider reference](../../providers/chembl/protein-class.md)
 - `configs/entities/chembl/target_protein_classification.yaml`
 

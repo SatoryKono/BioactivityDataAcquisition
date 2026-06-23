@@ -141,7 +141,7 @@ Protein classification contract boundary:
   (`SINGLE PROTEIN`, `PROTEIN COMPLEX` и т.п.) и не является
   protein-class-derived semantic type.
 - authoritative relation surface для target-level classification —
-  `chembl_target_protein_classification`.
+  [`chembl_target_protein_classification`](target-protein-classification.md).
 - flattened `protein_classifications` и `target_protein_class_*` поля
   публикуются только downstream projection-слоем `composite_target`.
 - Composite `target_protein_class_type` вычисляется отдельно из normalized

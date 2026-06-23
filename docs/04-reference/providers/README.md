@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-03'
+  Last verified: '2026-06-23'
 
 ______________________________________________________________________
 
@@ -46,6 +46,7 @@ ChEMBL provides comprehensive bioactivity data with multiple entity types:
 | [Protein Class](chembl/protein-class.md)                   | Protein classification          | Active          |
 | [Subcellular Fraction](chembl/subcellular-fraction.md)     | Subcellular fraction vocabulary | Active          |
 | [Target Component](chembl/target-component.md)             | Target components               | Active          |
+| [Target Protein Classification](chembl/target-protein-classification.md) | Target-to-protein-class relation rows | Active |
 | [Tissue](chembl/tissue.md)                                 | Tissue and anatomical context   | Active          |
 
 ## Provider Configuration
