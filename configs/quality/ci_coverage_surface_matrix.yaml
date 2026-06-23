@@ -1,0 +1,154 @@
+version: 1
+policy_scope: ci_coverage_surface_mapping
+workflow_path: .github/workflows/tests.yml
+threshold_policy:
+  hard_coverage_threshold: 85
+  enforced_in_job: coverage-verify
+  notes: >-
+    Coverage enforcement is centralized in the dedicated coverage-verify job.
+    Other jobs may contribute shard data or execution confidence without
+    directly enforcing the threshold.
+confidence_accounting:
+  first_class_confidence: true
+  hard_threshold_gate: coverage-verify
+  blocking_confidence_lanes:
+    - contract-confidence
+    - control-plane-e2e
+    - memory-tests
+  notes: >-
+    Repo health is determined by both the hard coverage threshold and the
+    blocking confidence lanes that deliberately stay outside the coverage
+    combine path.
+confidence_lane_policy:
+  notes: >-
+    Contract, e2e, and memory confidence lanes are blocking pass/fail gates even
+    when they do not emit coverage shards and do not participate in the hard 85
+    percent aggregate coverage threshold.
+  required_blocking_jobs:
+    - contract-confidence
+    - control-plane-e2e
+    - memory-tests
+lanes:
+  - job: smoke-check
+    lane_type: execution_only
+    emits_coverage_artifact: false
+    participates_in_hard_threshold: false
+    threshold_enforced_in_job: false
+    execution_confidence_role: dependency_smoke
+    notes: >-
+      Smoke check provides minimal dependency/import confidence before heavier
+      lanes start, excludes memory-marked smoke tests, and it no longer emits
+      coverage data into the hard gate.
+  - job: control-plane-e2e
+    lane_type: execution_only
+    blocking_confidence_lane: true
+    emits_coverage_artifact: false
+    participates_in_hard_threshold: false
+    threshold_enforced_in_job: false
+    execution_confidence_role: e2e_control_plane
+    blocking_assertions:
+      command_contains:
+        - tests/e2e/test_pubchem_compound_e2e.py::test_pubchem_compound_full_cycle
+        - --junitxml=reports/e2e/control-plane-completeness.xml
+      required_artifacts:
+        - control-plane-completeness
+        - reports/e2e/control-plane-completeness.xml
+    notes: >-
+      Control-plane completeness smoke is a blocking execution-confidence lane.
+      It does not feed the combined hard coverage threshold, but failure blocks
+      the workflow independently from the percentage gate.
+  - job: contract-confidence
+    lane_type: execution_only
+    blocking_confidence_lane: true
+    emits_coverage_artifact: false
+    participates_in_hard_threshold: false
+    threshold_enforced_in_job: false
+    execution_confidence_role: offline_contract_confidence
+    blocking_assertions:
+      command_contains:
+        - tests/contract/
+        - tests/unit/contracts/
+        - -m "no_api or not network"
+        - --junitxml=reports/test-telemetry/junit-contract-confidence.xml
+      required_artifacts:
+        - test-telemetry-contract-confidence
+        - reports/test-telemetry/junit-contract-confidence.xml
+    notes: >-
+      Offline contract assertions are a blocking confidence lane for schema,
+      snapshot, and replay-contract drift. Live provider contracts remain in the
+      scheduled contract workflow, while this lane protects PRs without adding
+      network dependence to the coverage threshold path.
+  - job: track-d-gates
+    lane_type: execution_only
+    emits_coverage_artifact: false
+    participates_in_hard_threshold: false
+    threshold_enforced_in_job: false
+    execution_confidence_role: fixture_and_linkage_gate
+    notes: >-
+      Track D linkage and fixture gates are execution-focused and remain outside
+      the hard coverage combine path.
+  - job: memory-tests
+    lane_type: execution_only
+    blocking_confidence_lane: true
+    emits_coverage_artifact: false
+    participates_in_hard_threshold: false
+    threshold_enforced_in_job: false
+    execution_confidence_role: neo4j_memory_isolated_execution
+    blocking_assertions:
+      command_contains:
+        - tests/smoke/test_neo4j_memory_mcp_smoke.py
+        - -m "memory"
+        - --junitxml=reports/test-telemetry/junit-memory.xml
+      required_artifacts:
+        - test-telemetry-memory
+        - reports/test-telemetry/junit-memory.xml
+    notes: >-
+      Neo4j project-memory and MCP tests run in a dedicated blocking execution
+      lane so the main coverage-enforced path excludes environment-sensitive
+      memory tooling without losing regression visibility.
+  - job: test-fast
+    lane_type: execution_only
+    emits_coverage_artifact: false
+    participates_in_hard_threshold: false
+    threshold_enforced_in_job: false
+    execution_confidence_role: fast_parallel_feedback
+    notes: >-
+      Fast unit and architecture execution stays as quick feedback only; the
+      authoritative hard coverage path no longer depends on this duplicate lane.
+  - job: test-matrix
+    lane_type: coverage_shard
+    emits_coverage_artifact: true
+    coverage_artifact: coverage-data-${matrix.test-group.name}
+    coverage_python_versions:
+      - "3.12"
+    participates_in_hard_threshold: true
+    threshold_enforced_in_job: false
+    execution_confidence_role: breadth_parallel_execution
+    notes: >-
+      The matrix broadens execution confidence across unit, integration, and
+      security suites, but only Python 3.12 legs emit coverage shards for the
+      combined threshold.
+  - job: coverage-verify
+    lane_type: hard_threshold_gate
+    emits_coverage_artifact: false
+    downloads_coverage_artifacts: true
+    participates_in_hard_threshold: true
+    threshold_enforced_in_job: true
+    execution_confidence_role: serial_plus_combined_threshold
+    known_exclusions:
+      - tests/e2e
+      - tests/contract
+    notes: >-
+      Coverage verification combines shard artifacts, runs the canonical serial
+      subset, and is the only lane that enforces the hard 85 percent coverage
+      threshold. Contract, e2e, and dedicated memory tests are explicitly
+      excluded from the serial pass here.
+  - job: duration-telemetry
+    lane_type: telemetry_only
+    emits_coverage_artifact: false
+    participates_in_hard_threshold: false
+    threshold_enforced_in_job: false
+    execution_confidence_role: slow_test_reporting
+    notes: >-
+      Duration telemetry consumes JUnit artifacts to build slow-test reports; it
+      is informational and does not change hard coverage semantics.

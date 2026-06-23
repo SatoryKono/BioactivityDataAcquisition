@@ -1,0 +1,52 @@
+{
+  "columns": [
+    {
+      "name": "run_id",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "workflow_id",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "pipeline_id",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "stage",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "status",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "reason_code",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "action",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "record_count",
+      "types": [
+        "int"
+      ]
+    }
+  ]
+}

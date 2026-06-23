@@ -1,0 +1,9 @@
+{
+  "content_hash": "7d38ba0cb2d6f358d52dfc3dc927a0acde64d2173ce49aac074550c29cfa4c98",
+  "normalized": {
+    "component_relationships": "[\"RNA\",\"PROTEIN SUBUNIT\"]",
+    "component_types": "[\"DNA\",\"PROTEIN\"]",
+    "pref_name": "Example Target",
+    "target_type": "SINGLE PROTEIN"
+  }
+}

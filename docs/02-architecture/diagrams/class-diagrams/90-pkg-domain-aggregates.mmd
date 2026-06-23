@@ -1,0 +1,104 @@
+%% Title: Package Family: domain/aggregates
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/aggregates; modules: events, _batch_mixins, _pipeline_run_read_model_mixin, _quarantine_value_objects, pipeline_run_state, _batch_aggregate.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-03-27
+%% @level   Package Family / Inventory Slice
+%% @nodes   30
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace events {
+        class BatchCreated
+        class BatchFailed
+        class BatchSealed
+        class BatchWritten
+        class DomainEvent
+        class PipelineCompleted
+        class PipelineFailed
+        class PipelineShutdown
+        class QuarantineEntryCreated
+        class QuarantineEntryResolved
+        class RecordQuarantined
+    }
+
+    namespace batch_mixins {
+        class _BatchAttrs
+        class _BatchLifecycleMixin
+        class _BatchMutationMixin
+        class _BatchReadModelMixin
+    }
+
+    namespace pipeline_run_read_model_mixin {
+        class _PipelineRunAttrs
+        class _PipelineRunReadModelMixin
+    }
+
+    namespace quarantine_value_objects {
+        class QuarantineStatus
+        class ResolutionInfo
+    }
+
+    namespace pipeline_run_state {
+        class PipelineRunState
+        class StageStatus
+    }
+
+    namespace batch_aggregate {
+        class Batch
+    }
+
+    namespace batch_record {
+        class BatchRecord
+    }
+
+    namespace batch_status {
+        class BatchStatus
+    }
+
+    namespace pipeline_run_mixins {
+        class _PipelineRunLifecycleMixin
+    }
+
+    namespace quarantine_aggregate {
+        class QuarantineEntry
+    }
+
+    namespace quarantine_entry_properties_mixin {
+        class QuarantineEntryPropertiesMixin
+    }
+
+    namespace quarantine_entry_transitions_mixin {
+        class QuarantineEntryTransitionsMixin
+    }
+
+    namespace pipeline_run {
+        class PipelineRun
+    }
+
+    namespace pipeline_run_stage_result {
+        class StageResult
+    }
+
+    DomainEvent <|-- BatchCreated
+    DomainEvent <|-- BatchFailed
+    DomainEvent <|-- BatchSealed
+    DomainEvent <|-- BatchWritten
+    DomainEvent <|-- PipelineCompleted
+    DomainEvent <|-- PipelineFailed
+    DomainEvent <|-- PipelineShutdown
+    DomainEvent <|-- QuarantineEntryCreated
+    DomainEvent <|-- QuarantineEntryResolved
+    DomainEvent <|-- RecordQuarantined
+    QuarantineEntryPropertiesMixin <|-- QuarantineEntry
+    QuarantineEntryTransitionsMixin <|-- QuarantineEntry
+    _BatchAttrs <|-- _BatchReadModelMixin
+    _BatchLifecycleMixin <|-- Batch
+    _BatchMutationMixin <|-- Batch
+    _BatchReadModelMixin <|-- _BatchLifecycleMixin
+    _BatchReadModelMixin <|-- _BatchMutationMixin
+    _PipelineRunAttrs <|-- _PipelineRunLifecycleMixin
+    _PipelineRunAttrs <|-- _PipelineRunReadModelMixin
+    _PipelineRunLifecycleMixin <|-- PipelineRun
+    _PipelineRunReadModelMixin <|-- PipelineRun

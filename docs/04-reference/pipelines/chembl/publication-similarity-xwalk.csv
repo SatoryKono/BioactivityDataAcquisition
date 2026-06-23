@@ -1,0 +1,10 @@
+field,doc_spec,cfg_pipeline,cfg_schema,code_transformer,code_entity,code_silver_schema,code_gold_schema,json_type,nullable,primary_key,notes
+sim_id,S2.1,YES,EMPTY,publication_similarity_transformer.py:74,MISSING,publication_similarity.py:25,chembl.py:381,integer,false,true,OK
+doc_1,S2.2,YES,EMPTY,publication_similarity_transformer.py:76,MISSING,publication_similarity.py:32,chembl.py:384,integer,false,false,OK
+doc_2,S2.2,YES,EMPTY,publication_similarity_transformer.py:77,MISSING,publication_similarity.py:38,chembl.py:385,integer,false,false,OK
+pubmed_id1,S2.3,YES,EMPTY,publication_similarity_transformer.py:79,MISSING,publication_similarity.py:44,chembl.py:388,string,true,false,OK
+pubmed_id2,S2.3,YES,EMPTY,publication_similarity_transformer.py:80,MISSING,publication_similarity.py:49,chembl.py:389,string,true,false,OK
+tid_tani,S2.4,YES,EMPTY,publication_similarity_transformer.py:82,MISSING,publication_similarity.py:55,chembl.py:392,number,true,false,OK
+mol_tani,S2.4,YES,EMPTY,publication_similarity_transformer.py:83,MISSING,publication_similarity.py:62,chembl.py:393,number,true,false,OK
+avg_tani,S2.5,YES,EMPTY,publication_similarity_transformer.py:85,MISSING,publication_similarity.py:69,chembl.py:396,number,true,false,DERIVED
+max_tani,S2.5,YES,EMPTY,publication_similarity_transformer.py:86,MISSING,publication_similarity.py:76,chembl.py:397,number,true,false,DERIVED

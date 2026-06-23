@@ -1,0 +1,17 @@
+# CLI Boundary Test Families
+
+Thin CLI wrappers should use the shared boundary-test families before adding a
+dedicated suite.
+
+- `test_runtime_wrapper_contracts.py`
+  Use for top-level public wrapper modules that re-export canonical command
+  symbols from their owning domain module.
+- `test_boundary_families.py`
+  Use for command-layer lazy delegation into composition/interface facades and
+  for `bioetl.interfaces.cli.main` lazy registration checks.
+- `../test_wrapper_families.py`
+  Use for package-level convenience exports such as `bioetl.interfaces.cli` and
+  `bioetl.interfaces.cli.registry_helpers`.
+
+Create a standalone boundary file only when the wrapper has behavior that does
+not fit one of those families.

@@ -1,0 +1,17 @@
+{
+  "threshold": 5,
+  "reporters": ["console"],
+  "ignore": [
+    "**/node_modules/**",
+    "**/.git/**",
+    "**/configs/**",
+    "**/tests/fixtures/**",
+    "**/*.yaml",
+    "**/*.yml",
+    "**/*.json",
+    "**/*.md",
+    "**/__snapshots__/**"
+  ],
+  "format": ["python"],
+  "absolute": true
+}

@@ -1,0 +1,90 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$version": "1.0.0",
+  "title": "ChEMBLTissueGoldSchema Contract",
+  "description": "Gold layer data contract for chembl_tissue. Auto-generated from Pandera schema ChEMBLTissueGoldSchema.",
+  "type": "object",
+  "properties": {
+    "_dq_warn": {
+      "type": "boolean",
+      "nullable": false,
+      "description": "Soft data-quality warning flag."
+    },
+    "_dq_error": {
+      "type": "boolean",
+      "nullable": false,
+      "description": "Hard data-quality error flag."
+    },
+    "_index": {
+      "type": "integer",
+      "nullable": false,
+      "description": ""
+    },
+    "entity_id": {
+      "type": "string",
+      "nullable": false,
+      "description": ""
+    },
+    "content_hash": {
+      "type": "string",
+      "nullable": false,
+      "description": ""
+    },
+    "tissue_id": {
+      "type": "string",
+      "nullable": false,
+      "description": "ChEMBL tissue ID"
+    },
+    "pref_name": {
+      "type": "string",
+      "nullable": false,
+      "description": "Preferred tissue name"
+    },
+    "bto_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "BRENDA Tissue Ontology ID"
+    },
+    "caloha_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "CALIPHO ID"
+    },
+    "efo_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Experimental Factor Ontology ID"
+    },
+    "uberon_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Uberon Ontology ID"
+    }
+  },
+  "required": [
+    "_dq_error",
+    "_dq_warn",
+    "_index",
+    "content_hash",
+    "entity_id",
+    "pref_name",
+    "tissue_id"
+  ],
+  "normalization_profile": {
+    "ref": "chembl.tissue",
+    "version": "1.0.0",
+    "hash": "5746649efe9c35ac82619405d18ff99b16d1ed869ef6cfd52666d720bfd9d03f"
+  }
+}

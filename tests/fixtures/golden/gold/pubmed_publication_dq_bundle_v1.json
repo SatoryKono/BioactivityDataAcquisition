@@ -1,0 +1,43 @@
+{
+  "snapshot_name": "pubmed_publication_dq_bundle",
+  "entity": "pubmed_publication",
+  "row_count": 2,
+  "bundle_columns": [
+    "entity_id",
+    "pmid",
+    "title",
+    "publication_year",
+    "_source",
+    "_lookup_method",
+    "_original_id",
+    "_dq_warn",
+    "_dq_error",
+    "_index"
+  ],
+  "rows": [
+    {
+      "entity_id": "pubmed:12345678",
+      "pmid": "12345678",
+      "title": "Canonical PubMed publication snapshot",
+      "publication_year": 2024,
+      "_source": "pubmed",
+      "_lookup_method": "pmid",
+      "_original_id": "12345678",
+      "_dq_warn": false,
+      "_dq_error": false,
+      "_index": 0
+    },
+    {
+      "entity_id": "pubmed:23456789",
+      "pmid": "23456789",
+      "title": "PubMed publication with soft DQ warning",
+      "publication_year": 2023,
+      "_source": "pubmed",
+      "_lookup_method": "title_fallback",
+      "_original_id": "soft-warning-23456789",
+      "_dq_warn": true,
+      "_dq_error": false,
+      "_index": 1
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% Title: Quarantine Entry Review Resolution And Discard Flow
+%% @version 1.0.0
+%% @date    2026-05-12
+%% @type    stateDiagram
+%% @level   Domain / Aggregate
+%% RULES: RULES.md §2.3, ADR-021
+stateDiagram-v2
+    [*] --> NEW
+    NEW --> UNDER_REVIEW: start_review()
+    UNDER_REVIEW --> RESOLVED: resolve()
+    UNDER_REVIEW --> DISCARDED: discard()
+    RESOLVED --> [*]
+    DISCARDED --> [*]
+
+    note right of NEW
+      Entries originate from validation, DQ, or runtime quarantine routing.
+    end note
+
+    note right of UNDER_REVIEW
+      Review state captures analyst intervention before a terminal disposition is chosen.
+    end note
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget

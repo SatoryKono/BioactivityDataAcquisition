@@ -1,0 +1,298 @@
+version: 1.0.0
+status: active
+owner: Engineering / Architecture
+last_verified: "2026-05-20"
+
+current_live_root_baseline:
+  tracked_root_audit_status: pass
+  strict_untracked_root_audit_status: pass
+  verification_command: >-
+    .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py
+    --strict-untracked
+  note: >-
+    The current local repository root satisfies the published allowlist and
+    approved-root policy. Local AI/editor/cache root directories may exist as
+    untracked local-only surfaces; this registry tracks their live state so the
+    review gate does not drift from the current workspace.
+
+review_lanes:
+  - lane_id: root_env_security
+    classification: security_review_required
+    scope: tracked root env-like files
+    verification:
+      - git ls-files .env.local
+      - git log -- .env.local
+      - rg -n "^\\.env\\.local$|\\.env\\.local" .gitignore .dockerignore docs scripts .github
+    candidates:
+      - path: .env.local
+        current_live_state: absent_from_root_baseline
+        canonical_path: .env.example
+        action_if_reintroduced: security_review_then_untrack_or_replace_with_example
+
+  - lane_id: root_helper_duplicates
+    classification: review_required
+    scope: duplicate root helpers with canonical owners under scripts/engineering/dev
+    verification:
+      - git ls-files
+      - cmp -s <root-copy> <canonical-path>
+      - rg -n "<root-helper-name>" .github docs scripts tests configs README.md Makefile pyproject.toml
+    candidates:
+      - path: legacy-root-helper-placeholder
+        current_live_state: absent_from_root_baseline
+        canonical_path: null
+        action_if_reintroduced: require fresh canonical owner decision before any reintroduced root helper duplicate is retained
+
+  - lane_id: root_transient_helpers_and_outputs
+    classification: review_required
+    scope: observed transient root helpers, raw test dumps, and forbidden root artifact routing
+    verification:
+      - git ls-files temp_analyze_conflicting.py temp_get_hash.py test_output.txt tests.txt logs artifacts
+      - rg -n "temp_analyze_conflicting\\.py|temp_get_hash\\.py|test_output\\.txt|tests\\.txt|logs/|reports/logs/|reports/observability/runtime_cardinality_inventory\\.json|artifacts/observability/runtime_cardinality_inventory\\.json" .github docs scripts tests configs README.md Makefile pyproject.toml
+      - .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked
+    candidates:
+      - path: artifacts
+        current_live_state: absent_from_root_baseline
+        canonical_path: reports/observability/runtime_cardinality_inventory.json
+        action_if_reintroduced: rehome generated evidence or diagnostics into approved reports surfaces instead of reintroducing a root artifacts tree
+      - path: temp_analyze_conflicting.py
+        current_live_state: absent_from_root_baseline
+        canonical_path: null
+        action_if_reintroduced: delete transient root analysis helper or move it under scripts/ with an explicit maintained owner
+      - path: temp_get_hash.py
+        current_live_state: absent_from_root_baseline
+        canonical_path: null
+        action_if_reintroduced: delete transient root hash helper or move it under scripts/ with an explicit maintained owner
+      - path: test_output.txt
+        current_live_state: absent_from_root_baseline
+        canonical_path: null
+        action_if_reintroduced: remove raw root test output or route retained diagnostics into reports/pytest or another approved reports surface
+      - path: tests.txt
+        current_live_state: absent_from_root_baseline
+        canonical_path: null
+        action_if_reintroduced: remove raw root test inventory dump or move curated evidence into approved reports or archive surfaces instead of reintroducing a tracked root txt file
+      - path: logs
+        current_live_state: absent_from_root_baseline
+        canonical_path: reports/logs
+        action_if_reintroduced: remove root runtime log tree or route retained local logs into reports/logs instead of reintroducing a root logs/ surface
+
+  - lane_id: root_tooling_transitions
+    classification: owner_decision_required
+    scope: AI/editor/tooling root surfaces with transitional or owned status
+    verification:
+      - git ls-files .claude .vibe .ai .gemini .jules
+      - rg -n "\\.claude/|\\.vibe|\\.ai/|\\.gemini/|\\.jules/" .github docs scripts tests configs README.md pyproject.toml
+      - .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked
+    candidates:
+      - path: .ai
+        current_live_state: present_local_only_root_surface
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
+      - path: .claude
+        current_live_state: absent_from_root_baseline
+        canonical_path: .codex
+        action_if_reintroduced: migrate_to_codex_or_remove_root_surface
+      - path: .gemini
+        current_live_state: present_curated_root_surface
+        canonical_path: GEMINI.md
+        action_if_reintroduced: keep_curated_runtime_surface_and_preserve_local_generated_state_as_untracked
+      - path: .jules
+        current_live_state: absent_from_root_baseline
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
+      - path: .vibe
+        current_live_state: present_curated_root_surface
+        canonical_path: .vibe
+        action_if_reintroduced: keep_only_with_documented_owner_and_transition_note
+
+  - lane_id: local_runtime_root_dirs
+    classification: review_required
+    scope: local runtime/cache roots that may exist in the working tree but must remain untracked
+    verification:
+      - git ls-files .agent-work .agentbridge .agents .benchmarks .cache .codex_tmp .hypothesis .import_linter_cache node_modules .npm-cache .pytest_cache .ruff_cache test-output .venv caddy
+      - git check-ignore -v .agent-work .agentbridge .agents .benchmarks .cache .codex_tmp .hypothesis .import_linter_cache node_modules .npm-cache .pytest_cache .ruff_cache test-output .venv caddy
+      - rg -n "\\.agent-work/|\\.agentbridge/|\\.agents/|\\.benchmarks/|\\.cache/|\\.codex_tmp/|\\.hypothesis/|\\.import_linter_cache/|node_modules/|\\.npm-cache/|\\.pytest_cache/|\\.ruff_cache/|test-output/|\\.venv/|caddy/" .gitignore docs scripts .github tests configs README.md
+    candidates:
+      - path: .agent-work
+        current_live_state: present_local_only_root_surface
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
+      - path: .agentbridge
+        current_live_state: absent_from_root_baseline
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
+      - path: .agents
+        current_live_state: present_local_only_root_surface
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
+      - path: .benchmarks
+        current_live_state: present_local_only_root_surface
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_as_local_benchmark_workspace_or_reclassify_through_explicit_structure_governance
+      - path: .cache
+        current_live_state: present_local_only_root_surface
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_or_scope_to_a_documented_cache_surface
+      - path: .codex_tmp
+        current_live_state: present_local_only_root_surface
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_as_local_codex_scratch_or_reclassify_through_explicit_structure_governance
+      - path: .hypothesis
+        current_live_state: present_local_only_root_surface
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_as_local_property_test_cache_or_scope_to_a_documented_cache_surface
+      - path: .import_linter_cache
+        current_live_state: present_local_only_root_surface
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_as_local_import_linter_cache_or_scope_to_a_documented_cache_surface
+      - path: node_modules
+        current_live_state: present_local_only_root_surface
+        canonical_path: package-lock.json
+        action_if_reintroduced: keep_untracked_as_local_dependency_tree_and rebuild from package manifests
+      - path: .npm-cache
+        current_live_state: present_local_only_root_surface
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_or_scope_to_a_documented_cache_surface
+      - path: .pytest_cache
+        current_live_state: present_local_only_root_surface
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_as_local_pytest_cache_or_scope_to_a_documented_cache_surface
+      - path: .ruff_cache
+        current_live_state: present_local_only_root_surface
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_as_local_lint_cache_or_scope_to_a_documented_cache_surface
+      - path: test-output
+        current_live_state: present_local_only_root_surface
+        canonical_path: reports
+        action_if_reintroduced: keep_untracked_as_local_test_output_or route retained diagnostics into approved reports surfaces
+      - path: .venv
+        current_live_state: present_local_only_root_surface
+        canonical_path: pyproject.toml
+        action_if_reintroduced: keep_untracked_as_primary_local_virtualenv_or rebuild from project metadata
+      - path: caddy
+        current_live_state: present_local_only_root_surface
+        canonical_path: docker-compose.codex.yml
+        action_if_reintroduced: keep_runtime_state_untracked_and_rebuild_from_the_documented_compose_stack
+
+  - lane_id: local_vendor_tooling_roots
+    classification: review_required
+    scope: local vendor/editor tooling roots that must remain untracked unless explicitly promoted
+    verification:
+      - git ls-files .junie .qodo .sonarlint .windsurf
+      - git check-ignore -v .junie .qodo .sonarlint .windsurf
+      - rg -n "\\.junie/|\\.qodo/|\\.sonarlint/|\\.windsurf/" .gitignore docs scripts .github tests configs
+    candidates:
+      - path: .junie
+        current_live_state: present_local_only_root_surface
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_or_move_curated_shared_content_to_an_approved_root_surface
+      - path: .qodo
+        current_live_state: present_local_only_root_surface
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_as_local_vendor_tooling_workspace_or reclassify_through_explicit_owner_review
+      - path: .sonarlint
+        current_live_state: present_local_only_root_surface
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_owner_review
+      - path: .windsurf
+        current_live_state: present_local_only_root_surface
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_or_move_curated_shared_content_to_an_approved_root_surface
+
+  - lane_id: root_ad_hoc_docs_and_diagnostics
+    classification: review_required
+    scope: non-canonical root notes, diagnostics, and ad-hoc tests
+    verification:
+      - git ls-files AGENT.md QUICK_START.md MCP_SETUP.md dashboard-audit-report.md query_test_docs_memory.js seed_test_docs_memory.js test_neo4j_memory.py Dockerfile entrypoint.sh requirements.txt conftest.py
+      - rg -n "AGENT\\.md|QUICK_START\\.md|MCP_SETUP\\.md|dashboard-audit-report\\.md|query_test_docs_memory|seed_test_docs_memory|test_neo4j_memory|Dockerfile|requirements\\.txt|tests/conftest\\.py|conftest\\.py" .github docs scripts tests configs README.md Makefile pyproject.toml package.json
+    candidates:
+      - path: AGENT.md
+        current_live_state: absent_from_root_baseline
+        canonical_path: AGENTS.md
+        action_if_reintroduced: move_to_canonical_docs_or_remove
+      - path: domain.types
+        current_live_state: absent_from_root_baseline
+        canonical_path: null
+        action_if_reintroduced: require explicit owner decision or remove root leftover
+      - path: MCP_SETUP.md
+        current_live_state: absent_from_root_baseline
+        canonical_path: docs/99-archive/mcp-codex-stable-startup-guide.md
+        action_if_reintroduced: move_to_docs_or_archive_surface_or_remove
+      - path: QUICK_START.md
+        current_live_state: absent_from_root_baseline
+        canonical_path: docs/03-guides
+        action_if_reintroduced: move_to_docs_or_remove
+      - path: dashboard-audit-report.md
+        current_live_state: absent_from_root_baseline
+        canonical_path: docs/reports/audits/dashboard-audit-report-2026-05-08.md
+        action_if_reintroduced: move_to_curated_report_surface_or_remove
+      - path: query_test_docs_memory.js
+        current_live_state: absent_from_root_baseline
+        canonical_path: tests
+        action_if_reintroduced: move_to_tests_or_remove
+      - path: seed_test_docs_memory.js
+        current_live_state: absent_from_root_baseline
+        canonical_path: tests
+        action_if_reintroduced: move_to_tests_or_remove
+      - path: test_neo4j_memory.py
+        current_live_state: absent_from_root_baseline
+        canonical_path: tests
+        action_if_reintroduced: move_to_tests_or_remove
+      - path: tmp_git_status.txt
+        current_live_state: absent_from_root_baseline
+        canonical_path: null
+        action_if_reintroduced: remove transient root diagnostic or catalog a maintained owner
+      - path: test_print.py
+        current_live_state: absent_from_root_baseline
+        canonical_path: null
+        action_if_reintroduced: remove transient root ad-hoc test file or move the check under tests/** with an explicit owner
+      - path: Dockerfile
+        current_live_state: absent_from_root_baseline
+        canonical_path: Dockerfile.bioetl
+        action_if_reintroduced: move_to_named_runtime_surface_or_remove
+      - path: conftest.py
+        current_live_state: absent_from_root_baseline
+        canonical_path: tests/conftest.py
+        action_if_reintroduced: move_to_tests_bootstrap_surface_or_remove_root_copy
+      - path: requirements.txt
+        current_live_state: absent_from_root_baseline
+        canonical_path: pyproject.toml
+        action_if_reintroduced: justify_runtime_need_or_remove
+
+  - lane_id: retention_sensitive_boundaries
+    classification: blocked_cleanup_zone
+    scope: runtime, fixture, archive, and curated-report surfaces
+    verification:
+      - git ls-files data docs/99-archive docs/reports reports tests/fixtures tests/fixtures/vcr
+      - .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked
+      - docs/05-operations/runbooks/retention-sensitive-cleanup.md
+    candidates:
+      - path: data
+        current_live_state: present_blocked_cleanup_zone
+        canonical_path: null
+        cleanup_runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
+        action_if_reintroduced: cleanup_only_via_retention_driven_procedure
+      - path: docs/99-archive
+        current_live_state: present_blocked_cleanup_zone
+        canonical_path: null
+        cleanup_runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
+        action_if_reintroduced: cleanup_only_via_retention_driven_procedure
+      - path: docs/reports
+        current_live_state: present_blocked_cleanup_zone
+        canonical_path: null
+        cleanup_runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
+        action_if_reintroduced: cleanup_only_via_retention_driven_procedure
+      - path: reports
+        current_live_state: present_blocked_cleanup_zone
+        canonical_path: null
+        cleanup_runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
+        action_if_reintroduced: cleanup_only_via_retention_driven_procedure
+      - path: tests/fixtures
+        current_live_state: present_blocked_cleanup_zone
+        canonical_path: null
+        cleanup_runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
+        action_if_reintroduced: cleanup_only_via_retention_driven_procedure
+      - path: tests/fixtures/vcr
+        current_live_state: present_blocked_cleanup_zone
+        canonical_path: null
+        cleanup_runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
+        action_if_reintroduced: cleanup_only_via_retention_driven_procedure

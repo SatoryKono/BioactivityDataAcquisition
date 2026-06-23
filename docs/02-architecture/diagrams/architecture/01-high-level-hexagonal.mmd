@@ -1,0 +1,142 @@
+%% BioETL — High-Level Hexagonal Architecture
+%% Shows the Ports & Adapters (Hexagonal) pattern across all layers.
+
+%% @version 1.1.0
+%% @date    2026-02-24
+%% @type    flowchart
+%% @level   System / Component
+%% @nodes   46
+%% @reference  Decomposed into 01a, 01b, 01c sub-diagrams
+%% Legend: docs/02-architecture/diagrams/views/00-legend.mermaid
+
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+%% @uniform width=208 height=72 max_title_len=21 max_desc_lines=2
+graph TB
+%% keep-orphan: CFG, EXCEPTIONS, OBSERVER, PROVIDERS, SCHEMAS, TYPES, VALIDATION
+    subgraph External["External Systems"]
+        subgraph ExternalAPIs["External APIs"]
+            CHEMBL_API["ChEMBL<br/><br/>"]:::size-md
+            PUBMED_API["PubMed<br/><br/>"]:::size-md
+            UNIPROT_API["UniProt<br/><br/>"]:::size-md
+            PUBCHEM_API["PubChem<br/><br/>"]:::size-md
+            CROSSREF_API["CrossRef<br/><br/>"]:::size-md
+            OPENALEX_API["OpenAlex<br/><br/>"]:::size-md
+            SEMSCHOLAR_API["Semantic Scholar<br/><br/>"]:::size-md
+        end
+        FS["File System<br/>(Delta Lake / Parquet / JSONL)<br/>"]:::size-md
+        PROM["Prometheus<br/><br/>"]:::size-md
+        OTEL["OpenTelemetry<br/><br/>"]:::size-md
+    end
+
+    subgraph Interfaces["interfaces layer"]
+        CLI["CLI Commands<br/>(Click)<br/>"]:::size-md
+        HTTP_IF["HTTP Interface<br/><br/>"]:::size-md
+        ORCH["Orchestration<br/><br/>"]:::size-md
+    end
+
+    subgraph Composition["composition layer"]
+        BOOTSTRAP["Bootstrap / Assembly<br/><br/>"]:::size-md
+        FACTORIES["Factories<br/><br/>"]:::size-md
+        PROVIDERS["Provider Registry<br/><br/>"]:::size-md
+        RT_BUILDERS["Runtime Builders<br/><br/>"]:::size-md
+    end
+
+    subgraph Application["application layer"]
+        CORE["Core<br/>(Runner, BatchExecutor,<br/>Transformer, Writer)"]:::size-md
+        SERVICES["Services<br/>(DQ, Export, Health,<br/>Medallion Lifecycle)"]:::size-md
+        COMPOSITE["Composite Pipeline<br/>(Coordinator, Merger,<br/>FSM)"]:::size-md
+        PIPELINES["Pipeline Transformers<br/>(per provider)<br/>"]:::size-md
+        OBSERVER["Observability<br/>(PipelineObserver)<br/>"]:::size-md
+    end
+
+    subgraph Domain["domain layer (pure, no I/O)"]
+        PORTS["Port Protocols<br/>(DataSourcePort, Bronze/Silver/Gold/MergedStoragePorts,<br/>LockPort, MetricsPort, ...)"]:::size-md
+        ENTITIES["Entities & Aggregates<br/>(Batch, PipelineRun,<br/>BaseEntity)"]:::size-md
+        VO["Value Objects<br/>(BronzeWriteResult,<br/>SilverWriteResult, ...)"]:::size-md
+        CFG["Configuration<br/>(PipelineConfig,<br/>RuntimeConfig, DQConfig)"]:::size-md
+        DOM_SVC["Domain Services<br/>(Identity, Normalization,<br/>UnitConverter)"]:::size-md
+        TYPES["Types & Enums<br/>(RunType, HealthStatus,<br/>PublicationType)"]:::size-md
+        EXCEPTIONS["Exception Hierarchy<br/>(BioETLError tree)<br/>"]:::size-md
+        SCHEMAS["Schemas<br/>(Pandera DataFrameModel)<br/>"]:::size-md
+    end
+
+    subgraph Infrastructure["infrastructure layer"]
+        ADAPTERS["HTTP Adapters<br/>(ChEMBL, PubMed, UniProt,<br/>CrossRef, OpenAlex, S2, PubChem)"]:::size-md
+        STORAGE["Storage<br/>(BronzeWriter, SilverWriter,<br/>GoldWriter, DeltaReader)"]:::size-md
+        OBS_INFRA["Observability Infra<br/>(UnifiedLogger, Metrics,<br/>Tracing)"]:::size-md
+        RESILIENCE["Resilience<br/>(CircuitBreaker,<br/>TokenBucket, Retry)"]:::size-md
+        SECURITY["Security<br/>(PII Hasher)<br/>"]:::size-md
+        CHECKPOINT["Checkpoint<br/>(LocalCheckpoint)<br/>"]:::size-md
+        LOCKING["Locking<br/>(MemoryLock)<br/>"]:::size-md
+        AUDIT["Audit<br/>(FileAuditAdapter)<br/>"]:::size-md
+        VALIDATION["Validation<br/>(Pandera Validators)<br/>"]:::size-md
+    end
+
+    %% External → Infrastructure
+    ExternalAPIs -.->|REST/HTTP| ADAPTERS
+    FS -.-> STORAGE
+    PROM -.-> OBS_INFRA
+    OTEL -.-> OBS_INFRA
+
+    %% Interfaces → Composition
+    CLI --> BOOTSTRAP
+    HTTP_IF --> BOOTSTRAP
+    ORCH --> BOOTSTRAP
+
+    %% Composition → Application
+    BOOTSTRAP --> CORE
+    FACTORIES --> CORE
+    FACTORIES --> PIPELINES
+    RT_BUILDERS --> CORE
+
+    %% Composition → Infrastructure
+    BOOTSTRAP --> ADAPTERS
+    BOOTSTRAP --> STORAGE
+    BOOTSTRAP --> OBS_INFRA
+
+    %% Application → Domain
+    CORE --> PORTS
+    CORE --> ENTITIES
+    CORE --> VO
+    SERVICES --> PORTS
+    COMPOSITE --> PORTS
+    PIPELINES --> ENTITIES
+    PIPELINES --> DOM_SVC
+
+    %% Infrastructure → Domain (implements Ports)
+    ADAPTERS -->|implements| PORTS
+    STORAGE -->|implements| PORTS
+    OBS_INFRA -->|implements| PORTS
+    RESILIENCE -->|implements| PORTS
+    CHECKPOINT -->|implements| PORTS
+    LOCKING -->|implements| PORTS
+    AUDIT -->|implements| PORTS
+    SECURITY -->|implements| PORTS
+
+    classDef domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    classDef infra fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    classDef comp fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    classDef iface fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    classDef ext fill:#f1f5f9,stroke:#64748b,stroke-width:1px
+
+    class PORTS,ENTITIES,VO,CFG,DOM_SVC,TYPES,EXCEPTIONS,SCHEMAS domain
+    class CORE,SERVICES,COMPOSITE,PIPELINES,OBSERVER app
+    class ADAPTERS,STORAGE,OBS_INFRA,RESILIENCE,SECURITY,CHECKPOINT,LOCKING,AUDIT,VALIDATION infra
+    class BOOTSTRAP,FACTORIES,PROVIDERS,RT_BUILDERS comp
+    class CLI,HTTP_IF,ORCH iface
+    class CHEMBL_API,PUBMED_API,UNIPROT_API,PUBCHEM_API,CROSSREF_API,OPENALEX_API,SEMSCHOLAR_API,FS,PROM,OTEL ext
+
+    linkStyle default stroke:#666,stroke-width:1px,color:#666
+    linkStyle 0,1,2,3 stroke-dasharray: 5 5
+    linkStyle 21,22,23,24,25,26,27,28 stroke:#dc2626,stroke-width:2px

@@ -1,0 +1,95 @@
+version: 1.0.0
+provider: chembl
+source:
+    provider_config:
+        provider: chembl
+        base_url: https://www.ebi.ac.uk/chembl/api/data
+        auth_type: public
+        client:
+            timeout_sec: 120.0
+            max_retries: 8
+            trust_env: false
+        pagination:
+            page_size: 1000
+            id_batch_size: 20
+            strategy: offset
+            max_url_length: 2000
+        api_version: null
+    circuit_breaker:
+        failure_threshold: 3
+        recovery_timeout: 3000
+    rate_limit:
+        requests_per_second: 0.1
+        burst: 1
+    health_check:
+        endpoint: null
+        timeout: 15
+    retry:
+        use_retry_after: false
+entities:
+    - activity
+    - assay
+    - assay_parameters
+    - cell_line
+    - compound_record
+    - publication
+    - publication_similarity
+    - publication_term
+    - molecule
+    - protein_class
+    - subcellular_fraction
+    - target
+    - target_component
+    - target_protein_classification
+    - tissue
+entity_notes:
+    activity:
+        description: Primary bioactivity data with IC50, Ki, etc.
+        typical_volume: ~20M records
+    assay:
+        description: Bioassay definitions and metadata
+        typical_volume: ~1.5M records
+    molecule:
+        description: Chemical compounds with structures
+        typical_volume: ~2.5M records
+    target:
+        description: Biological targets (proteins, genes)
+        typical_volume: ~15K records
+    protein_class:
+        description: Reference table for protein classification
+        typical_volume: ~1.5K records
+    publication_term:
+        description: Derived entity - extracted from document records
+        derived_from: publication
+quality:
+    version: 1.0.0
+    provider: chembl
+    thresholds:
+        soft_fail: 0.05
+        hard_fail: 0.25
+    provider_field_validations:
+        -   field: molecule_id
+            type: pattern
+            pattern: ^CHEMBL\d+$
+            nullable: true
+            error_message: Invalid ChEMBL molecule ID format
+        -   field: target_id
+            type: pattern
+            pattern: ^CHEMBL\d+$
+            nullable: true
+            error_message: Invalid ChEMBL target ID format
+        -   field: assay_id
+            type: pattern
+            pattern: ^CHEMBL\d+$
+            nullable: true
+            error_message: Invalid ChEMBL assay ID format
+        -   field: publication_id
+            type: pattern
+            pattern: ^CHEMBL\d+$
+            nullable: true
+            error_message: Invalid ChEMBL document ID format
+filters:
+    version: 1.0.0
+    provider: chembl
+    input_filter:
+        batch_size: 1000

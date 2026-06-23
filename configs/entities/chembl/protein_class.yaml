@@ -1,0 +1,198 @@
+version: 1.0.0
+provider: chembl
+entity: protein_class
+pipeline:
+  pipeline_name: chembl_protein_class
+  provider: chembl
+  entity_type: protein_class
+  description: ChEMBL Protein Classification hierarchy (enzyme classes, receptor types, etc.)
+  field_policy: {}
+  business_primary_keys:
+  - protein_class_id
+  batch_size: 500
+  checkpoint_interval: 500
+
+  sink:
+    silver:
+      partition_by:
+      - class_level
+    gold:
+      mode: scd2
+      idempotency_contract: scd2
+      scd_config:
+        valid_from_col: _valid_from
+        valid_to_col: _valid_to
+        current_flag_col: _is_current
+        version_col: _version
+schema:
+  content_hash:
+    include: []
+    exclude: []
+  column_groups:
+  - name: system
+    fields:
+    - entity_id
+    - content_hash
+    - _run_id
+    - _run_type
+    - _source_batch_id
+    - _ingestion_ts
+    - _index
+  - name: business
+    fields:
+    - protein_class_id
+    - parent_id
+    - replaced_by
+    - pref_name
+    - short_name
+    - protein_class_desc
+    - definition
+    - class_level
+    - sort_order
+    - downgraded
+  - name: dq
+    pattern: ^_dq_
+  silver:
+    include_groups:
+    - system
+    - business
+    - dq
+    exclude_fields: []
+  gold:
+    include_groups:
+    - system
+    - business
+    exclude_fields:
+    - _dq_*
+    - _source_batch_id
+    - _index
+quality:
+  version: 1.0.0
+  provider: chembl
+  entity: protein_class
+  entity_field_validations:
+  - field: protein_class_id
+    type: range
+    min: 1
+    nullable: false
+    error_message: Protein class ID is required and must be positive
+  - field: class_level
+    type: range
+    min: 1
+    max: 10
+    nullable: true
+    error_message: Class level must be between 1 and 10
+  - field: pref_name
+    type: pattern
+    pattern: ^.{1,500}$
+    nullable: false
+    error_message: pref_name is required
+  - field: parent_id
+    type: range
+    min: 1
+    nullable: true
+    error_message: parent_id must be positive when present
+  entity_cross_field_validations:
+  - name: hierarchy_valid
+    fields:
+    - protein_class_id
+    - parent_id
+    condition: custom
+    validator: validate_hierarchy_no_self_reference
+    error_message: parent_id cannot equal protein_class_id
+  entity_conditional_validations: []
+  key_nullability:
+  - field: protein_class_id
+    key_type: merge
+    nullable: false
+  - field: class_level
+    key_type: partition
+    nullable: false
+filters:
+  version: 1.0.0
+  provider: chembl
+  entity: protein_class
+  input_filter:
+    enabled: false
+    source_path: data/input/protein_class.csv
+    column_name: protein_class_id
+    filter_field: protein_class_id
+    batch_size: 1000
+    checkpoint_interval: 1000
+    fallback_column: title
+  extraction_params: {}
+  silver_filters:
+    exclude_if_present: []
+    required_fields:
+    - class_level
+    - pref_name
+    - protein_class_id
+  gold_filters:
+    list_contains: {}
+    list_lengths: {}
+    ranges:
+      publication_year:
+        min: 1950
+        max: 2050
+    columns: {}
+    required_fields:
+    - pref_name
+    exclude_if_present: []
+contracts:
+  primary_key:
+  - protein_class_id
+  merge_keys:
+  - protein_class_id
+  hash_include: []
+  hash_exclude: []
+  hash_datetime_policy: v2_datetime_utc
+  contract_ref: chembl.protein_class
+  active_version: 1.0.0
+  rollout:
+    mode: single
+    read_order:
+    - 1.0.0
+    write_versions:
+    - 1.0.0
+    affects_hash: false
+hash_policy:
+  provider: chembl
+  entity: protein_class
+  contract:
+    version: 1.0.0
+    migration_note: 'Explicit config-level hash contract for the normalized ChEMBL protein_class Silver surface.'
+  hash_policy:
+    algorithm: sha256
+    canonicalization: provider + canonical_json_dumps(normalized_record)
+    include_fields:
+    - protein_class_id
+    - parent_id
+    - replaced_by
+    - pref_name
+    - short_name
+    - protein_class_desc
+    - definition
+    - class_level
+    - sort_order
+    - downgraded
+    exclude_fields:
+    - _ingestion_ts
+    - _run_id
+    - _run_type
+    - _dq_warn
+    - _dq_error
+    - _source_batch_id
+    - _index
+    exclude_patterns:
+    - ^_dq_
+    normalization:
+      trim_strings: true
+      round_floats:
+        enabled: true
+        precision: 10
+      dates:
+        enabled: true
+        format: YYYY-MM-DD
+      null_handling:
+        nan_to_null: true
+        inf_to_null: true

@@ -1,0 +1,67 @@
+---
+description: BioETL Patterns — Adapters, Pipelines, Composites
+globs: ["src/**/*.py", "configs/**/*.yaml"]
+---
+
+# Creating HTTP Adapter
+
+```python
+from bioetl.infrastructure.adapters.base import BaseHttpAdapter
+from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+
+class NewAdapter(BaseHttpAdapter):
+    def __init__(self, http_client: UnifiedHTTPClient, logger: LoggerPort):
+        super().__init__(http_client, logger)
+        self.provider_name = "new-provider"
+```
+
+# Creating Sync Adapter (Legacy)
+
+```python
+from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
+
+class LegacyAdapter(BaseSyncAdapter):
+    provider_name = "legacy"
+
+    def __init__(self, logger: LoggerPort, rate_limiter: TokenBucket,
+                 circuit_breaker: CircuitBreaker, thread_pool: ThreadPoolExecutor):
+        super().__init__(logger, rate_limiter, circuit_breaker, thread_pool)
+
+    async def fetch(self, ...):
+        result = await self._run_in_executor(sync_lib.fetch, query)
+```
+
+# UnifiedHTTPClient Components
+
+- **TokenBucket**: Rate limiting per provider
+- **Circuit Breaker**: Cascade failure protection
+- **Retry**: Exponential backoff + jitter
+- **Metrics**: Automatic via `MetricsPort`
+
+# Composite Pipelines
+
+Structure:
+1. **Seed** — extract primary entities
+2. **Dependencies** — fill Silver tables (optional)
+3. **Enrichers** — add data from other sources
+4. **Merge** — combine into Gold entity
+
+**Merge Config**:
+```yaml
+merge:
+  strategy: left_outer | inner | union
+  conflict_resolution: seed_priority | enricher_priority | coalesce | explicit_rules
+  preserve_all_sources: true | false  # Keep all provider columns
+```
+
+**Field Groups**:
+- ID-AND-STATUS, BIBLIOGRAPHY, AUTHOR-AND-AFFILIATIONS
+- TERMS-AND-KEYWORDS, CITATIONS-AND-REFERENCE
+- DATE-AND-PLACES, PUBLICATION-TYPES
+- **TRASH** — excluded from Gold output
+
+# Configuration Location
+
+Unified format: `configs/entities/{provider}/{entity}.yaml`
+
+Contains: pipeline, schema, quality, filters, contracts, hash-policy

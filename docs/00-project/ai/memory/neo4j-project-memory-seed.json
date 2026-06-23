@@ -1,0 +1,132 @@
+{
+  "project": "BioETL",
+  "version": "1.1.0",
+  "verified_at": "2026-04-08",
+  "phases": [
+    {
+      "id": "project-architecture",
+      "title": "Project + Architecture",
+      "facts": [
+        "BioETL is a Python ETL framework for bioactivity data acquisition.",
+        "BioETL uses Hexagonal Architecture with Ports and Adapters.",
+        "BioETL uses Medallion Architecture with Bronze, Silver, and Gold layers.",
+        "BioETL follows a Local-Only runtime policy.",
+        "BioETL has five runtime layers: domain, application, infrastructure, composition, interfaces.",
+        "Silver layer must use Delta Lake.",
+        "Pandera is used for dataframe validation."
+      ],
+      "sources": [
+        "docs/00-project/ai/memory/agent-memory.md",
+        "docs/02-architecture/00-overview.md",
+        "docs/00-project/RULES.md",
+        "AGENTS.md"
+      ]
+    },
+    {
+      "id": "runtime-bootstrap",
+      "title": "Runtime + Bootstrap",
+      "facts": [
+        "PipelineRunner orchestrates pipeline lifecycle.",
+        "PreflightService validates infrastructure and medallion policy before execution.",
+        "PostrunService handles DQ, reports, compaction, and vacuum.",
+        "PipelineService is the injected service bundle for runtime execution.",
+        "composition/bootstrap/runtime/pipeline.py is the main runtime bootstrap entrypoint.",
+        "runtime_builders prepares runner inputs, observability, and control-plane attachments.",
+        "composition/bootstrap/runtime/composite.py bootstraps composite execution.",
+        "runner_assembly builds composite runner dependency bundles."
+      ],
+      "sources": [
+        "docs/02-architecture/02-application-layer.md",
+        "docs/02-architecture/05-composition-layer.md",
+        "docs/reports/knowledge-graphs/bioetl-runtime-detail-graph.json"
+      ]
+    },
+    {
+      "id": "providers-config",
+      "title": "Providers + Config",
+      "facts": [
+        "BioETL providers are ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, and Semantic Scholar.",
+        "Provider entity configs live under configs/entities/{provider}/{entity}.yaml.",
+        "Composite configs live under configs/composites/{entity}.yaml.",
+        "infrastructure.config is the canonical owner for YAML loading and normalization.",
+        "ProviderRegistry keeps deterministic provider and pipeline registration state.",
+        "ensure_providers_loaded is the canonical provider loading boundary."
+      ],
+      "sources": [
+        "docs/00-project/ai/memory/agent-memory.md",
+        "README.md",
+        "docs/02-architecture/05-composition-layer.md"
+      ]
+    },
+    {
+      "id": "operations-wsl-mcp",
+      "title": "Operational Memory",
+      "facts": [
+        "neo4j-memory MCP is registered in Codex through the project wrapper.",
+        "The wrapper runs @knowall-ai/mcp-neo4j-agent-memory@0.2.5.",
+        "In WSL, Neo4j is accessed via bolt://host.docker.internal:7687.",
+        "Docker container name is bioetl-neo4j.",
+        ".env provides base local overrides.",
+        ".env.local provides machine-specific overrides.",
+        "Shell-provided env vars override repo env files."
+      ],
+      "sources": [
+        "scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh",
+        "scripts/memory/setup/wsl_startup.sh",
+        "scripts/ai/mcp/support/load_repo_env.sh",
+        "docs/05-operations/deployment/WSL-NEO4J-SETUP.md"
+      ]
+    },
+    {
+      "id": "domain-provider-semantics",
+      "title": "Domain Model + Provider Semantics",
+      "facts": [
+        "The domain layer contains the semantic model and must remain pure with no concrete I/O.",
+        "Main domain families are ports, value_objects, entities, aggregates, services, schemas, validation, mapping, config, types, exceptions, registry, filtering, transformations, control_plane, composite, and lineage.",
+        "PipelineRun is the aggregate root for pipeline execution lifecycle tracking.",
+        "RunManifest is the immutable provenance snapshot for one launched run.",
+        "RunLedgerEntry is the append-only control-plane event linked to one manifest/run pair.",
+        "QuarantineEntry is the aggregate for quarantined data and its resolution lifecycle.",
+        "PipelineConfig is the immutable pipeline configuration object.",
+        "MedallionPolicy and LoadingStrategy are domain policy objects.",
+        "Canonical identifier concepts include ChemblId, DOI, PubMedId, OpenAlexId, SemanticScholarId, PubChemCid, UniProtId, InChIKey, SMILES, and TaxonomyId.",
+        "ChEMBL uses public auth with offset pagination and CHEMBL identifiers as primary upstream identity.",
+        "PubChem uses public auth with offset pagination and PubChem CID identity for compound enrichment.",
+        "PubMed uses api_key plus email auth with offset pagination and PMID identity.",
+        "CrossRef uses email auth with cursor pagination and DOI identity.",
+        "OpenAlex uses email auth with cursor pagination and OpenAlexId identity.",
+        "Semantic Scholar uses api_key auth with offset pagination and SemanticScholarId identity.",
+        "UniProt uses api_key auth with offset pagination and UniProt accession identity."
+      ],
+      "sources": [
+        "src/bioetl/domain/README.md",
+        "src/bioetl/domain/__init__.py",
+        "src/bioetl/domain/control_plane/run_manifest.py",
+        "src/bioetl/domain/control_plane/run_ledger.py",
+        "src/bioetl/domain/aggregates/pipeline_run.py",
+        "src/bioetl/domain/aggregates/quarantine_entry.py",
+        "src/bioetl/domain/value_objects/__init__.py",
+        "src/bioetl/domain/entities/__init__.py",
+        "src/bioetl/domain/medallion.py",
+        "src/bioetl/domain/config/pipeline.py",
+        "configs/providers/chembl.yaml",
+        "configs/providers/pubchem.yaml",
+        "configs/providers/pubmed.yaml",
+        "configs/providers/crossref.yaml",
+        "configs/providers/openalex.yaml",
+        "configs/providers/semanticscholar.yaml",
+        "configs/providers/uniprot.yaml",
+        "configs/entities/chembl/activity.yaml",
+        "configs/entities/chembl/molecule.yaml",
+        "configs/entities/chembl/target.yaml",
+        "configs/entities/pubmed/publication.yaml",
+        "configs/entities/crossref/publication.yaml",
+        "configs/entities/openalex/publication.yaml",
+        "configs/entities/semanticscholar/publication.yaml",
+        "configs/entities/pubchem/compound.yaml",
+        "configs/entities/uniprot/idmapping.yaml",
+        "configs/entities/uniprot/protein.yaml"
+      ]
+    }
+  ]
+}

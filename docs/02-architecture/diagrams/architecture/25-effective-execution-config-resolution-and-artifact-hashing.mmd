@@ -1,0 +1,35 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% Title: Effective Execution Config Resolution And Artifact Hashing
+%% @version 1.0.0
+%% @date    2026-05-12
+%% @type    sequenceDiagram
+%% @level   System / Interaction
+%% RULES: RULES.md §2.6, §2.8, ADR-025, ADR-044
+sequenceDiagram
+    autonumber
+    participant CLI as CLI run command
+    participant Bootstrap as bootstrap.runtime.assembly
+    participant Loader as PipelineConfigLoader
+    participant DQ as DQConfigLoader
+    participant Filter as FilterConfigLoader
+    participant Resolver as domain_config_resolver
+    participant Builder as effective_config_artifact_builder
+    participant Artifact as EffectiveConfigArtifact
+    participant Hashes as EffectiveConfigHashes
+
+    CLI->>Bootstrap: load_pipeline_config(...)
+    Bootstrap->>Loader: load pipeline YAML
+    Bootstrap->>DQ: load dq policy YAML
+    Bootstrap->>Filter: load filter YAML
+    Loader-->>Resolver: pipeline config payload
+    DQ-->>Resolver: dq policy payload
+    Filter-->>Resolver: filter payload
+    Bootstrap->>Resolver: collect runtime settings + env
+    Resolver-->>Builder: resolved snapshots
+    Builder->>Artifact: build artifact payload
+    Builder->>Hashes: compute stable hashes
+    Hashes-->>Artifact: attach hash set
+    Artifact-->>Bootstrap: effective config artifact
+    Bootstrap-->>CLI: artifact ref + config identity
+
+    Note over Resolver,Builder: RuntimeOverrideSnapshot and ExecutionEnvironmentSnapshot become durable provenance.

@@ -1,0 +1,146 @@
+%% View: Full | Parent: (root)
+%% Parent source: docs/02-architecture/diagrams/foundation/21-activity-entity-data-flow.mmd
+%% Full reference diagram retained after decomposition.
+%% Title: Activity Entity Data Flow (Extract → Transform → Load)
+%% Covers: RULES.md §2.8 (Transformation), §4.1 (ChEMBL Activity)
+%% Updated: 2026-02-17
+%% Components: Activity entity, ActivityTransformer, BronzeWriter, SilverWriter, GoldWriter, Pandera schemas
+%% Legend: see 00-legend.mermaid
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    flowchart
+%% @level   Mixed (System / Component / Class)
+%% @png-scale 6
+%% @png-dpi   600
+
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+%% @uniform width=264 height=72 max_title_len=28 max_desc_lines=2
+flowchart LR
+%% keep-orphan: LocalFS, S1, S10, S11, S12, S2, S4, S5, S6, S7, S8, S9
+    subgraph External["External API"]
+        API["🌐 ChEMBL API<br/>/activities endpoint<br/>"]
+    end
+
+    subgraph Extract["Extract Phase"]
+        E1["📥 Fetch activity_id batch<br/>(ChemblAdapter)<br/>"]
+        E2["🔗 Fetch related entities<br/>assay_id, molecule_id, target_id<br/>"]
+        E3["💾 Write Bronze<br/>JSONL + zstd<br/>"]
+        E4["📊 Record Lineage<br/>batch_id, paths<br/>"]
+    end
+
+    subgraph Transform["Transform Phase"]
+        T1["🔧 Normalize units<br/>nM → μM standardization<br/>"]
+        T2["📝 Add metadata<br/>_run_id, _run_type, _ingestion_ts<br/>"]
+        T3["🔐 Compute content_hash<br/>sha256(provider + canonical_json)<br/>"]
+        T4["🏗️ Create Activity entity<br/><br/>"]
+    end
+
+    subgraph Validate["Validate Phase"]
+        V1["📋 ActivityTableSchema<br/>(Pandera)<br/>"]
+        V2["✅ Check standard_value range<br/>0 < value < 1e12<br/>"]
+        V3["🧪 Validate SMILES if present<br/>(optional field)<br/>"]
+        V4{{"📊 Error Rate Check<br/><br/>"}}
+    end
+
+    subgraph Load["Load Phase"]
+        L1[("🥈 Silver Layer<br/>silver/chembl/activity/<br/>year=/month=/")]
+        L2[("🥇 Gold Layer<br/>gold/activity_by_target/<br/>target_id=/")]
+    end
+
+    subgraph Related["Related Entities (Silver)"]
+        Assay[("📊 Assay<br/>silver/chembl/assay/"<br/>)]
+        Molecule[("🧬 Molecule<br/>silver/chembl/molecule/"<br/>)]
+        Target[("🎯 Target<br/>silver/chembl/target/"<br/>)]
+    end
+
+    subgraph Quarantine["DQ Failures"]
+        Q[("🗑️ Quarantine<br/>quarantine/chembl_activity/"<br/>)]
+    end
+
+    %% Extract flow
+    API --> E1
+    E1 --> E2
+    E2 --> E3
+    E3 --> E4
+
+    %% Transform flow
+    E4 --> T1
+    T1 --> T2
+    T2 --> T3
+    T3 --> T4
+
+    %% Validate flow
+    T4 --> V1
+    V1 --> V2
+    V2 --> V3
+    V3 --> V4
+
+    %% Load flow
+    V4 -->|"✅ Pass"| L1
+    V4 -->|"❌ Fail"| Q
+    L1 --> L2
+
+    %% Foreign key relationships
+    L1 -.->|K03| Assay
+    L1 -.->|K04| Molecule
+    L1 -.->|K05| Target
+
+    %% Styling
+    style API fill:#eff6ff
+    style E3 fill:#CD7F32,color:#fff
+    style L1 fill:#C0C0C0,color:#000
+    style L2 fill:#FFD700,color:#000
+    style Q fill:#e11d48,color:#fff
+
+    %% Activity Schema annotation
+    subgraph Schema["Activity Silver Schema"]
+        direction TB
+        S1["activity_id: str (PK)<br/><br/>"]
+        S2["assay_id: str (FK)<br/><br/>"]
+        LocalFS["molecule_id: str (FK)<br/><br/>"]
+        S4["target_id: str | None (FK)<br/><br/>"]
+        S5["standard_type: str<br/><br/>"]
+        S6["standard_value: float | None<br/><br/>"]
+        S7["standard_units: str | None<br/><br/>"]
+        S8["pchembl_value: float | None<br/><br/>"]
+        S9["_content_hash: str<br/><br/>"]
+        S10["_run_id: UUID<br/><br/>"]
+        S11["_run_type: str<br/><br/>"]
+        S12["_ingestion_ts: datetime<br/><br/>"]
+    end
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 4 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 5 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 6 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 7 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 8 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 9 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 10 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 11 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 12 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 13 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 14 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 15 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 16 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 17 stroke:#475569,stroke-width:2px,stroke-dasharray:5

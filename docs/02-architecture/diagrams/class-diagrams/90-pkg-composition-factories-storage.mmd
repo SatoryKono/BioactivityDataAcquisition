@@ -1,0 +1,50 @@
+%% Title: Package Family: composition/factories/storage
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/composition/factories/storage; modules: factory, merged_mixin, _helpers, adapter, clear_mixin, health_mixin.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-03-27
+%% @level   Package Family / Inventory Slice
+%% @nodes   10
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace factory {
+        class StorageContext
+        class StorageFactory
+    }
+
+    namespace merged_mixin {
+        class StorageAdapterMergedMixin
+        class _SilverMergedWriteProtocol
+    }
+
+    namespace helpers {
+        class StorageCreationContext
+    }
+
+    namespace adapter {
+        class StorageAdapter
+    }
+
+    namespace clear_mixin {
+        class StorageAdapterClearMixin
+    }
+
+    namespace health_mixin {
+        class StorageAdapterHealthMixin
+    }
+
+    namespace maintenance_mixin {
+        class StorageAdapterMaintenanceMixin
+    }
+
+    namespace write_mixin {
+        class StorageAdapterWriteMixin
+    }
+
+    StorageAdapterClearMixin <|-- StorageAdapter
+    StorageAdapterHealthMixin <|-- StorageAdapter
+    StorageAdapterMaintenanceMixin <|-- StorageAdapter
+    StorageAdapterMergedMixin <|-- StorageAdapter
+    StorageAdapterWriteMixin <|-- StorageAdapter

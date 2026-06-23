@@ -1,0 +1,29 @@
+%% Title: Package Family: composition/runtime_builders
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/composition/runtime_builders; modules: inputs_resolver, inputs_runtime_helpers, run_manifest_builder, runner_builder.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-03-27
+%% @level   Package Family / Inventory Slice
+%% @nodes   7
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace inputs_resolver {
+        class ResolvedVacuumSettings
+        class RunnerInputs
+        class _PaginationConfigLike
+        class _SourceConfigLike
+    }
+
+    namespace inputs_runtime_helpers {
+        class ResolvedRuntimeProjection
+    }
+
+    namespace run_manifest_builder {
+        class _ManifestControlPlaneRefs
+    }
+
+    namespace runner_builder {
+        class _LoggerBindableObservability
+    }

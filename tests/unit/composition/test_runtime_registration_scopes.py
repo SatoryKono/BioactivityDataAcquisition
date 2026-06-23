@@ -1,0 +1,80 @@
+"""Unit tests for composition runtime registration scopes."""
+
+from __future__ import annotations
+
+from typing import Any, cast
+from unittest.mock import patch
+
+import pytest
+
+from bioetl.composition import _registration
+from bioetl.composition._registration import RuntimeRegistrationScope
+
+pytestmark = pytest.mark.unit
+
+
+class _PopulatedRegistry:
+    def list_pipelines(self) -> list[str]:
+        return ["chembl_activity"]
+
+
+class _EmptyRegistry:
+    def list_pipelines(self) -> list[str]:
+        return []
+
+
+def test_provider_scope_loads_providers_without_registering_pipelines() -> None:
+    with (
+        patch.object(_registration, "ensure_providers_loaded") as ensure_providers,
+        patch.object(_registration, "register_all_pipelines") as register_pipelines,
+    ):
+        _registration.ensure_runtime_registrations(
+            scope=RuntimeRegistrationScope.PROVIDERS
+        )
+
+    ensure_providers.assert_called_once_with()
+    register_pipelines.assert_not_called()
+
+
+def test_pipeline_scope_loads_providers_and_registers_missing_pipelines() -> None:
+    registry = cast(Any, _EmptyRegistry())
+
+    with (
+        patch.object(_registration, "ensure_providers_loaded") as ensure_providers,
+        patch.object(_registration, "register_all_pipelines") as register_pipelines,
+    ):
+        _registration.ensure_runtime_registrations(
+            registry=registry,
+            scope=RuntimeRegistrationScope.PIPELINES,
+        )
+
+    ensure_providers.assert_called_once_with()
+    register_pipelines.assert_called_once_with(registry=registry)
+
+
+def test_pipeline_scope_skips_registration_when_registry_is_populated() -> None:
+    registry = cast(Any, _PopulatedRegistry())
+
+    with (
+        patch.object(_registration, "ensure_providers_loaded") as ensure_providers,
+        patch.object(_registration, "register_all_pipelines") as register_pipelines,
+    ):
+        _registration.ensure_runtime_registrations(
+            registry=registry,
+            scope="pipelines",
+        )
+
+    ensure_providers.assert_called_once_with()
+    register_pipelines.assert_not_called()
+
+
+def test_unknown_registration_scope_is_rejected_before_side_effects() -> None:
+    with (
+        patch.object(_registration, "ensure_providers_loaded") as ensure_providers,
+        patch.object(_registration, "register_all_pipelines") as register_pipelines,
+        pytest.raises(ValueError),
+    ):
+        _registration.ensure_runtime_registrations(scope="everything")
+
+    ensure_providers.assert_not_called()
+    register_pipelines.assert_not_called()

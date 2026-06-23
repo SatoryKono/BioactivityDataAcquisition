@@ -1,0 +1,57 @@
+services:
+  postgres-sonarqube:
+    image: postgres:15-alpine
+    container_name: bioetl-postgres-sonarqube
+    environment:
+      POSTGRES_DB: sonarqube
+      POSTGRES_USER: sonarqube
+      POSTGRES_PASSWORD: ${SONARQUBE_DB_PASSWORD:?Set SONARQUBE_DB_PASSWORD before starting docker-compose.sonarqube.yml}
+    volumes:
+      - postgres-sonarqube-data:/var/lib/postgresql/data
+    networks:
+      - monitoring
+    restart: unless-stopped
+
+  sonarqube:
+    image: sonarqube:10-community
+    container_name: bioetl-sonarqube
+    depends_on:
+      - postgres-sonarqube
+    ports:
+      - "127.0.0.1:9010:9000"
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://postgres-sonarqube:5432/sonarqube
+      SONAR_JDBC_USERNAME: sonarqube
+      SONAR_JDBC_PASSWORD: ${SONARQUBE_DB_PASSWORD:?Set SONARQUBE_DB_PASSWORD before starting docker-compose.sonarqube.yml}
+      SONAR_WEB_JAVAOPTS: "-Xmx2048m -Xms1024m"
+      SONAR_CE_JAVAOPTS: "-Xmx2048m -Xms512m"
+      SONAR_WEB_SYSTEMPASSCODE: ${SONARQUBE_SYSTEM_PASSCODE:?Set SONARQUBE_SYSTEM_PASSCODE before starting docker-compose.sonarqube.yml}
+      SONAR_FORCEAUTHENTICATION: "true"
+    volumes:
+      - sonarqube-data:/opt/sonarqube/data
+      - sonarqube-logs:/opt/sonarqube/logs
+      - sonarqube-extensions:/opt/sonarqube/extensions
+      - sonarqube-temp:/opt/sonarqube/temp
+    ulimits:
+      memlock: -1
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9000/api/system/status"]
+      interval: 15s
+      timeout: 5s
+      retries: 6
+      start_period: 60s
+    restart: unless-stopped
+
+volumes:
+  postgres-sonarqube-data:
+  sonarqube-data:
+  sonarqube-logs:
+  sonarqube-extensions:
+  sonarqube-temp:
+
+networks:
+  monitoring:
+    external: true
+    name: bioetl-monitoring

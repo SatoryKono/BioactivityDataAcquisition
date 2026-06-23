@@ -1,0 +1,25 @@
+{
+  "$schema": "https://raw.githubusercontent.com/grafana/grafana/main/docs/sources/developers/plugins/plugin.schema.json",
+  "type": "panel",
+  "name": "Selector-Shell",
+  "id": "bioetl-selectorshell-panel",
+  "info": {
+    "keywords": ["panel"],
+    "description": "Exact-run selector shell that resolves workflow/pipeline/run_type from run_id and writes them back into dashboard variables.",
+    "author": {
+      "name": "Bioetl"
+    },
+    "logos": {
+      "small": "img/logo.svg",
+      "large": "img/logo.svg"
+    },
+    "links": [],
+    "screenshots": [],
+    "version": "%VERSION%",
+    "updated": "%TODAY%"
+  },
+  "dependencies": {
+    "grafanaDependency": ">=12.3.0",
+    "plugins": []
+  }
+}

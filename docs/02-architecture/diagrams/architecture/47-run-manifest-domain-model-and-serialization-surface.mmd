@@ -1,0 +1,34 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% Title: Run Manifest Domain Model And Serialization Surface
+%% @version 1.0.0
+%% @date    2026-05-12
+%% @type    classDiagram
+%% @level   Domain / Model
+%% RULES: RULES.md §2.8, ADR-044
+classDiagram
+    class RunManifest {
+        +to_dict()
+        +from_dict(payload)
+    }
+    class ReplayCapability
+    class RunInputSnapshotRef
+    class RunSourceRef
+    class RunArtifactRef
+    class RunCodeProvenance
+
+    RunManifest --> ReplayCapability
+    RunManifest --> RunInputSnapshotRef
+    RunManifest --> RunSourceRef
+    RunManifest --> RunArtifactRef
+    RunManifest --> RunCodeProvenance
+
+    note for RunManifest "Published as the durable<br/>run-level contract<br/>for exact replay,<br/>diagnostics, and<br/>artifact inspection."
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget

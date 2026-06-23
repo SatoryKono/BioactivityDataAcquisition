@@ -1,0 +1,199 @@
+"""Canonical DQ and diagnostic extraction support owned by manifest diagnostics."""
+
+from __future__ import annotations
+
+from typing import TypedDict
+
+from bioetl.domain.control_plane import RunLedgerEntry
+
+
+class DQDetailsSummary(TypedDict):
+    rule_ids: set[str]
+    dispositions: set[str]
+    report_paths: set[str]
+    violation_kinds: set[str]
+    cross_validation_rule_ids: set[str]
+    cross_validation_config_paths: set[str]
+    cross_validation_quarantine_policies: set[str]
+    cross_validation_replay_contracts: set[str]
+    occurrence_only_diagnostic_scopes: set[str]
+    has_signal: bool
+    has_cross_validation_signal: bool
+
+
+def collect_dq_values(
+    details: dict[str, object],
+    *,
+    single_key: str | None = None,
+    collection_keys: tuple[str, ...] = (),
+) -> set[str]:
+    values: set[str] = set()
+    if single_key is not None:
+        single_value = details.get(single_key)
+        if single_value is not None:
+            values.add(str(single_value))
+    for key in collection_keys:
+        values.update(load_str_collection(details.get(key)))
+    return values
+
+
+def extract_cross_validation_sets(
+    rule_ids: set[str],
+    config_paths: set[str],
+) -> tuple[set[str], set[str]]:
+    cross_validation_rule_ids = {
+        rule_id
+        for rule_id in rule_ids
+        if rule_id.startswith("composite.cross_validation.")
+    }
+    cross_validation_config_paths = {
+        config_path for config_path in config_paths if config_path == "cross_validation"
+    }
+    return cross_validation_rule_ids, cross_validation_config_paths
+
+
+def has_dq_signal(
+    entry: RunLedgerEntry,
+    *,
+    rule_ids: set[str],
+    dispositions: set[str],
+    report_paths: set[str],
+) -> bool:
+    return (
+        entry.event_family == "dq"
+        or entry.event_type.startswith("dq_")
+        or bool(rule_ids)
+        or bool(dispositions)
+        or bool(report_paths)
+    )
+
+
+def extract_dq_details(entry: RunLedgerEntry) -> DQDetailsSummary:
+    details = entry.details or {}
+    rule_ids = collect_dq_values(
+        details,
+        single_key="rule_id",
+        collection_keys=("dq_rule_ids", "rule_ids"),
+    )
+    dispositions = collect_dq_values(
+        details,
+        single_key="disposition",
+        collection_keys=("dq_dispositions", "dispositions"),
+    )
+    report_paths = collect_dq_values(details, single_key="dq_report_path")
+    violation_kinds = collect_dq_values(
+        details,
+        single_key="violation_kind",
+        collection_keys=("violation_kinds",),
+    )
+    config_paths = collect_dq_values(
+        details,
+        single_key="config_path",
+        collection_keys=("config_paths",),
+    )
+    cross_validation_rule_ids, cross_validation_config_paths = (
+        extract_cross_validation_sets(rule_ids, config_paths)
+    )
+    quarantine_policies = collect_dq_values(
+        details,
+        single_key="artifact_policy",
+        collection_keys=("artifact_policies",),
+    )
+    replay_contracts = collect_dq_values(
+        details,
+        single_key="replay_contract",
+        collection_keys=("replay_contracts",),
+    )
+    occurrence_only_diagnostic_scopes = collect_dq_values(
+        details,
+        single_key="diagnostic_scope",
+        collection_keys=("diagnostic_scopes",),
+    )
+    has_cross_validation_signal = (
+        bool(cross_validation_rule_ids)
+        or "cross_validation_mismatch" in violation_kinds
+        or bool(cross_validation_config_paths)
+    )
+    has_signal = has_dq_signal(
+        entry,
+        rule_ids=rule_ids,
+        dispositions=dispositions,
+        report_paths=report_paths,
+    )
+    return {
+        "rule_ids": rule_ids,
+        "dispositions": dispositions,
+        "report_paths": report_paths,
+        "violation_kinds": violation_kinds,
+        "cross_validation_rule_ids": cross_validation_rule_ids,
+        "cross_validation_config_paths": cross_validation_config_paths,
+        "cross_validation_quarantine_policies": quarantine_policies,
+        "cross_validation_replay_contracts": replay_contracts,
+        "occurrence_only_diagnostic_scopes": occurrence_only_diagnostic_scopes,
+        "has_signal": has_signal,
+        "has_cross_validation_signal": has_cross_validation_signal,
+    }
+
+
+def load_str_collection(raw_value: object) -> set[str]:
+    if not isinstance(raw_value, list):
+        return set()
+    return {str(item) for item in raw_value}
+
+
+def build_dq_details_summary(
+    *,
+    rule_ids: set[str],
+    dispositions: set[str],
+    report_paths: set[str],
+    violation_kinds: set[str],
+    cross_validation_rule_ids: set[str],
+    cross_validation_config_paths: set[str],
+    cross_validation_quarantine_policies: set[str],
+    cross_validation_replay_contracts: set[str],
+    occurrence_only_diagnostic_scopes: set[str],
+    has_signal: bool,
+    has_cross_validation_signal: bool,
+) -> DQDetailsSummary:
+    return DQDetailsSummary(
+        rule_ids=rule_ids,
+        dispositions=dispositions,
+        report_paths=report_paths,
+        violation_kinds=violation_kinds,
+        cross_validation_rule_ids=cross_validation_rule_ids,
+        cross_validation_config_paths=cross_validation_config_paths,
+        cross_validation_quarantine_policies=cross_validation_quarantine_policies,
+        cross_validation_replay_contracts=cross_validation_replay_contracts,
+        occurrence_only_diagnostic_scopes=occurrence_only_diagnostic_scopes,
+        has_signal=has_signal,
+        has_cross_validation_signal=has_cross_validation_signal,
+    )
+
+
+def build_dq_details_summary_kwargs(
+    *,
+    rule_ids: set[str],
+    dispositions: set[str],
+    report_paths: set[str],
+    violation_kinds: set[str],
+    cross_validation_rule_ids: set[str],
+    cross_validation_config_paths: set[str],
+    cross_validation_quarantine_policies: set[str],
+    cross_validation_replay_contracts: set[str],
+    occurrence_only_diagnostic_scopes: set[str],
+    has_signal: bool,
+    has_cross_validation_signal: bool,
+) -> dict[str, object]:
+    return {
+        "rule_ids": rule_ids,
+        "dispositions": dispositions,
+        "report_paths": report_paths,
+        "violation_kinds": violation_kinds,
+        "cross_validation_rule_ids": cross_validation_rule_ids,
+        "cross_validation_config_paths": cross_validation_config_paths,
+        "cross_validation_quarantine_policies": cross_validation_quarantine_policies,
+        "cross_validation_replay_contracts": cross_validation_replay_contracts,
+        "occurrence_only_diagnostic_scopes": occurrence_only_diagnostic_scopes,
+        "has_signal": has_signal,
+        "has_cross_validation_signal": has_cross_validation_signal,
+    }

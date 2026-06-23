@@ -1,0 +1,17 @@
+version: 1
+triggers:
+  - id: source_deleted
+    applies_to: [rag_manifest, graph_export, curated_note, episodic_note]
+    action: "invalidate_or_remove"
+  - id: source_moved
+    applies_to: [rag_manifest, graph_export, curated_note]
+    action: "rewrite_refs_or_rebuild"
+  - id: content_hash_changed
+    applies_to: [rag_manifest, graph_export, curated_note]
+    action: "regenerate"
+  - id: policy_version_changed
+    applies_to: [rag_manifest, graph_export, timeline_event]
+    action: "full_refresh"
+  - id: ttl_expired
+    applies_to: [episodic_note]
+    action: "prune"

@@ -1,0 +1,28 @@
+# serializer version: 1
+# name: TestListPipelinesCommandSnapshot.test_list_pipelines_command_output
+  '''
+  Available pipelines:
+    - chembl_activity
+    - chembl_assay
+    - chembl_assay_parameters
+    - chembl_cell_line
+    - chembl_compound_record
+    - chembl_molecule
+    - chembl_protein_class
+    - chembl_publication
+    - chembl_publication_similarity
+    - chembl_publication_term
+    - chembl_subcellular_fraction
+    - chembl_target
+    - chembl_target_component
+    - chembl_tissue
+    - crossref_publication
+    - openalex_publication
+    - pubchem_compound
+    - pubmed_publication
+    - semanticscholar_publication
+    - uniprot_idmapping
+    - uniprot_protein
+
+  '''
+# ---

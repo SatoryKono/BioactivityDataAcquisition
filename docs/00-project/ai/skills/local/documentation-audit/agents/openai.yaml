@@ -1,0 +1,5 @@
+interface:
+  display_name: "Documentation Audit"
+  short_description: "Audit and update BioETL docs to v5.23+"
+  default_prompt: "Use $documentation-audit to audit and update BioETL documentation to v5.23+."
+  brand_color: "#2563EB"

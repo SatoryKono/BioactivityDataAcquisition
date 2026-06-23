@@ -1,0 +1,376 @@
+version: 1
+policy_scope: compatibility_facades
+tracked_docstring_prefixes:
+- 'Backward-compatible '
+- 'Compatibility '
+- Compatibility-
+- Deprecated compatibility
+- Composition-level compatibility
+- Pipeline factory compatibility-only facade
+- Storage compatibility-only facade
+transition_debt: []
+retained_entrypoints:
+- path: src/bioetl/interfaces/cli/commands/run.py
+  compatibility_role: Permanent public run command seam over the retained domain helper modules under `bioetl.interfaces.cli.commands.domains.run`.
+  canonical_target: bioetl.interfaces.cli.commands.run
+  status: public-entrypoint
+  owner: bioetl.interfaces.cli.commands
+  introduced_in: 2026-03 RF-024
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
+  allowed_call_sites: '`src`: use `bioetl.interfaces.cli.commands.run` as the public seam. `tests`: patch/import coverage may target
+    `bioetl.interfaces.cli.commands.run`; retired wrapper module `bioetl.interfaces.cli.commands.domains.run.command` must stay absent'
+  migration_path: Use `bioetl.interfaces.cli.commands.run` for public CLI wiring and patch targets; do not reintroduce `bioetl.interfaces.cli.commands.domains.run.command`
+    as an internal owner wrapper.
+  exit_criteria: The top-level module remains the sanctioned public CLI patch/import seam and the retired `domains.run.command`
+    wrapper stays absent.
+- path: src/bioetl/interfaces/cli/commands/run_all.py
+  compatibility_role: Permanent public run-all command seam over split internal owner modules under `bioetl.interfaces.cli.commands.domains.run_all`.
+  canonical_target: bioetl.interfaces.cli.commands.run_all
+  status: public-entrypoint
+  owner: bioetl.interfaces.cli.commands
+  introduced_in: 2026-03 RF-024
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
+  allowed_call_sites: '`src`: use `bioetl.interfaces.cli.commands.run_all` as the public seam; retired wrapper module
+    `bioetl.interfaces.cli.commands.domains.run_all.command` must stay absent. `tests`: patch/import coverage may target
+    `bioetl.interfaces.cli.commands.run_all`, while focused owner tests may import narrower `domains.run_all.*` helper
+    modules.'
+  migration_path: Use `bioetl.interfaces.cli.commands.run_all` for public CLI wiring and patch targets; do not reintroduce
+    `bioetl.interfaces.cli.commands.domains.run_all.command` as an internal owner wrapper.
+  exit_criteria: The top-level module remains the sanctioned public CLI patch/import seam and the retired `domains.run_all.command`
+    wrapper stays absent.
+- path: src/bioetl/interfaces/cli/commands/run_composite.py
+  compatibility_role: Permanent public run-composite command seam over split owner modules under `bioetl.interfaces.cli.commands.domains.composite`.
+  canonical_target: bioetl.interfaces.cli.commands.run_composite
+  status: public-entrypoint
+  owner: bioetl.interfaces.cli.commands
+  introduced_in: 2026-03 RF-024
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: true
+  allowed_call_sites: '`src`: use `bioetl.interfaces.cli.commands.run_composite` as the public seam; the retired wrapper
+    module `bioetl.interfaces.cli.commands.domains.composite.command` must stay absent. `tests`: patch/import coverage may
+    target `bioetl.interfaces.cli.commands.run_composite`, while focused owner coverage may import narrower `domains.composite.*`
+    helper modules directly.'
+  migration_path: Use `bioetl.interfaces.cli.commands.run_composite` for public CLI wiring and patch targets; do not reintroduce
+    `bioetl.interfaces.cli.commands.domains.composite.command` as an internal wrapper.
+  exit_criteria: The top-level module remains the sanctioned public CLI patch/import seam and the retired `domains.composite.command`
+    wrapper stays absent.
+- path: src/bioetl/interfaces/cli/commands/health.py
+  compatibility_role: Permanent public health command seam over the internal owner module `bioetl.interfaces.cli.commands.domains.health.command`.
+  canonical_target: bioetl.interfaces.cli.commands.health
+  status: public-entrypoint
+  owner: bioetl.interfaces.cli.commands
+  introduced_in: 2026-03 RF-024
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: true
+  allowed_call_sites: '`src`: use `bioetl.interfaces.cli.commands.health` as the public seam; direct internal-owner imports
+    stay confined to `src/bioetl/interfaces/cli/commands/domains/health/__init__.py`; `tests`: patch/import coverage may target
+    `bioetl.interfaces.cli.commands.health`, while direct `bioetl.interfaces.cli.commands.domains.health.command` imports
+    stay confined to dedicated boundary coverage'
+  migration_path: Use `bioetl.interfaces.cli.commands.health` for public CLI wiring and patch targets; do not import `bioetl.interfaces.cli.commands.domains.health.command`
+    directly outside the owning package or dedicated boundary tests.
+  exit_criteria: The top-level module remains the sanctioned public CLI patch/import seam, and direct internal-owner imports
+    remain confined to the owning package plus dedicated boundary tests.
+- path: src/bioetl/interfaces/cli/commands/diagnostics.py
+  compatibility_role: Permanent public diagnostics command seam over the internal owner module `bioetl.interfaces.cli.commands.domains.diagnostics.command`.
+  canonical_target: bioetl.interfaces.cli.commands.diagnostics
+  status: public-entrypoint
+  owner: bioetl.interfaces.cli.commands
+  introduced_in: 2026-03 RF-024
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
+  allowed_call_sites: '`src`: use `bioetl.interfaces.cli.commands.diagnostics` as the public seam; direct internal-owner imports
+    stay confined to `src/bioetl/interfaces/cli/commands/domains/diagnostics/__init__.py`; `tests`: patch/import coverage
+    may target `bioetl.interfaces.cli.commands.diagnostics`, while direct `bioetl.interfaces.cli.commands.domains.diagnostics.command`
+    imports stay confined to dedicated boundary coverage'
+  migration_path: Use `bioetl.interfaces.cli.commands.diagnostics` for public CLI wiring and patch targets; do not import
+    `bioetl.interfaces.cli.commands.domains.diagnostics.command` directly outside the owning package or dedicated boundary
+    tests.
+  exit_criteria: The top-level module remains the sanctioned public CLI patch/import seam, and direct internal-owner imports
+    remain confined to the owning package plus dedicated boundary tests.
+- path: src/bioetl/interfaces/cli/commands/quarantine.py
+  compatibility_role: Permanent public quarantine command seam over the internal owner module `bioetl.interfaces.cli.commands.domains.quarantine.command`.
+  canonical_target: bioetl.interfaces.cli.commands.quarantine
+  status: public-entrypoint
+  owner: bioetl.interfaces.cli.commands
+  introduced_in: 2026-03 RF-024
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
+  allowed_call_sites: '`src`: use `bioetl.interfaces.cli.commands.quarantine` as the public seam; direct internal-owner imports
+    stay confined to `src/bioetl/interfaces/cli/commands/domains/quarantine/__init__.py`; `tests`: patch/import coverage may
+    target `bioetl.interfaces.cli.commands.quarantine`, while direct `bioetl.interfaces.cli.commands.domains.quarantine.command`
+    imports stay confined to dedicated boundary coverage'
+  migration_path: Use `bioetl.interfaces.cli.commands.quarantine` for public CLI wiring and patch targets; do not import `bioetl.interfaces.cli.commands.domains.quarantine.command`
+    directly outside the owning package or dedicated boundary tests.
+  exit_criteria: The top-level module remains the sanctioned public CLI patch/import seam, and direct internal-owner imports
+    remain confined to the owning package plus dedicated boundary tests.
+- path: src/bioetl/composition/entrypoints.py
+  compatibility_role: Permanent public composition entrypoint that intentionally shields internal `_pipeline_execution`, `_resource_management`,
+    and `_services` module paths.
+  canonical_target: bioetl.composition.entrypoints
+  status: public-entrypoint
+  owner: bioetl.composition
+  introduced_in: 2026-03 entrypoint freeze
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: true
+  allowed_call_sites: '`src`: only explicit execution-focused public symbols from `__all__` may be imported from `bioetl.composition.entrypoints`;
+    removed service/resource compatibility symbols must stay absent from first-party source. `tests`: public entrypoint imports
+    may appear in interface/composition boundary coverage, but direct internal-module patch targets stay confined to `tests/unit/composition/test_entrypoints.py`,
+    `tests/unit/composition/test_resource_management.py`, and `tests/unit/composition/test_services_entrypoints.py`'
+  migration_path: Use `bioetl.composition.entrypoints` as the sanctioned public seam; do not import `bioetl.composition._pipeline_execution`,
+    `bioetl.composition._resource_management`, or `bioetl.composition._services` directly outside dedicated entrypoint-boundary
+    coverage.
+  exit_criteria: The public entrypoint remains sanctioned, removed service/resource symbol imports in first-party source stay
+    at zero, internal implementation-module imports outside `composition/` stay at zero, and internal-module patch coverage
+    remains confined to the dedicated entrypoint-boundary tests.
+  public_export_contract:
+    max_public_exports: 13
+    lazy_export_table: _PUBLIC_SYMBOL_TARGETS
+- path: src/bioetl/composition/health_api.py
+  compatibility_role: Permanent public health composition facade that intentionally shields split services/bootstrap/resource
+    seams while keeping a reviewed export budget.
+  canonical_target: bioetl.composition.health_api
+  status: public-entrypoint
+  owner: bioetl.composition
+  introduced_in: 2026-05 public export review
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: true
+  allowed_call_sites: '`src`: do not add new first-party imports of `bioetl.composition.health_api`; owner-only runtime callers
+    must stay on `bioetl.composition.health_service_access`, while direct internal patch targets stay confined to dedicated
+    boundary tests. `tests`: public facade imports may appear in CLI/composition coverage only when validating the public seam
+    itself.'
+  migration_path: Use `bioetl.composition.health_api` as the sanctioned health-facing composition seam; do not add new first-party
+    imports from `bioetl.composition._services`, `bioetl.composition._resource_management`, or `bioetl.composition.bootstrap.cli.health`
+    when the public facade export already exists.
+  exit_criteria: The public health facade remains the sanctioned external import seam, its reviewed export budget stays bounded,
+    and first-party runtime callers remain at zero behind the owner-only `health_service_access` seam.
+  public_export_contract:
+    max_public_exports: 7
+    lazy_export_table: _PUBLIC_EXPORTS
+- path: src/bioetl/composition/maintenance_api.py
+  compatibility_role: Permanent public maintenance composition facade that intentionally shields maintenance/resource wiring
+    behind a reviewed export budget.
+  canonical_target: bioetl.composition.maintenance_api
+  status: public-entrypoint
+  owner: bioetl.composition
+  introduced_in: 2026-05 public export review
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
+  allowed_call_sites: '`src`: import maintenance lifecycle/archive/cleanup/vacuum helpers only through `bioetl.composition.maintenance_api`;
+    direct imports from `_resource_management` and `_services` stay confined to owner implementation paths. `tests`: public
+    facade imports may appear in CLI/composition coverage, while direct internal patch targets stay confined to dedicated
+    boundary tests.'
+  migration_path: Use `bioetl.composition.maintenance_api` as the sanctioned maintenance-facing composition seam; do not add
+    new first-party imports from `bioetl.composition._resource_management` or `bioetl.composition._services` when the public
+    facade export already exists.
+  exit_criteria: The public maintenance facade remains the sanctioned import seam, its reviewed export budget stays bounded,
+    and internal owner modules remain hidden behind the facade for ordinary first-party callers.
+  public_export_contract:
+    max_public_exports: 4
+    lazy_export_table: _PUBLIC_EXPORTS
+- path: src/bioetl/infrastructure/config/__init__.py
+  compatibility_role: Permanent public infrastructure config package-root convenience facade that intentionally shields split
+    config loader APIs behind a reviewed export budget.
+  canonical_target: bioetl.infrastructure.config
+  status: public-entrypoint
+  owner: bioetl.infrastructure.config
+  introduced_in: legacy-pre-2026-05
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: true
+  allowed_call_sites: '`src`: ordinary first-party imports should prefer owner config modules; the package-root facade stays
+    reserved for reviewed convenience/contract coverage only. `tests`: public package-root imports may appear in runtime/config
+    contract coverage, while deeper loader modules remain the owner path for focused implementation tests.'
+  migration_path: Keep `bioetl.infrastructure.config` as the sanctioned external convenience seam, but route first-party runtime
+    code through owner modules whenever no reviewed package-root convenience symbol is explicitly required.
+  exit_criteria: The package-root convenience facade remains the sanctioned public import seam, first-party `src/` imports
+    stay at zero, and symbol-level import growth remains governed by the dedicated root-facade inventory.
+  public_export_contract:
+    max_public_exports: 18
+    parse_dunder_getattr_string_branches: true
+- path: src/bioetl/domain/composite/config.py
+  compatibility_role: Permanent public entrypoint for composite config models that shields split config internals.
+  canonical_target: bioetl.domain.composite.config
+  status: public-entrypoint
+  owner: bioetl.domain.composite
+  introduced_in: legacy-pre-2026-03
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
+  allowed_call_sites: '`src`: canonical entrypoint usage allowed; internal split modules stay inside `src/bioetl/domain/composite/`;
+    `tests`: direct split-internal coverage stays confined to `tests/unit/domain/composite/test_composite_config_facade.py`
+    and `tests/unit/domain/composite/test_composite_config_edge_cases.py`, while ordinary tests keep importing the root config
+    entrypoint'
+  migration_path: Use `bioetl.domain.composite.config` as the sanctioned public seam; do not import split `config_*` internals
+    outside the owning package or the dedicated composite-config coverage tests.
+  exit_criteria: The root config entrypoint remains the sanctioned public path and direct imports of split config internals
+    stay confined to the owning package plus the dedicated composite-config coverage tests.
+- path: src/bioetl/application/composite/merger.py
+  compatibility_role: Permanent public composite merge module that requires `MergeCollaboratorGroup` bundle; legacy per-collaborator
+    keyword wiring removed in RF-009.2.
+  canonical_target: bioetl.application.composite.merger
+  status: public-entrypoint
+  owner: bioetl.application.composite
+  introduced_in: 2026-03 merge collaborator migration
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
+  allowed_call_sites: '`src`: all wiring passes `collaborators=MergeCollaboratorGroup(...)`; `tests`: `tests/unit/application/composite/test_merger.py`,
+    `tests/unit/application/composite/merge_test_support.py`, `tests/unit/composition/bootstrap/runtime/test_composite_support_services_factory.py`'
+  migration_path: Use `bioetl.application.composite.merger` as the sanctioned public seam with `collaborators=MergeCollaboratorGroup(...)`.
+  exit_criteria: The merge module remains the sanctioned public seam and all composition paths use collaborator bundles with
+    only the canonical `order_service` ordering collaborator.
+measured_only_ratchet:
+  max_total_modules: 0
+  scoped_limits:
+  - path_prefix: src/bioetl/application/core/
+    max_modules: 0
+  - path_prefix: src/bioetl/application/services/
+    max_modules: 0
+  - path_prefix: src/bioetl/composition/factories/storage/
+    max_modules: 0
+  - path_prefix: src/bioetl/domain/normalization/profiles/
+    max_modules: 0
+  - path_prefix: src/bioetl/domain/value_objects/
+    max_modules: 0
+  - path_prefix: src/bioetl/infrastructure/adapters/
+    max_modules: 0
+  - path_prefix: src/bioetl/interfaces/cli/commands/
+    max_modules: 0
+measured_only_review_workflow:
+  review_cadence: quarterly
+  required_checks:
+  - verify no first-party src imports remain
+  - confirm measured-only docstring tracking stays aligned with the YAML allowlist
+  - run targeted owner tests before deciding retain, promote, or remove
+  - refresh the generated compatibility snapshot after lifecycle changes
+  allowed_outcomes:
+  - retain
+  - promote
+  - remove
+  promotion_requires_curated_row: true
+retained_public_entrypoint_burden_policy:
+  linked_issue: '#4575'
+  blocking_metric: retained_public_entrypoint_burden
+  first_party_growth_policy: fail_fast_on_growth
+  tracked_facades:
+  - bioetl.composition.entrypoints
+  - bioetl.composition.health_api
+  - bioetl.infrastructure.config
+  - bioetl.application.services.control_plane
+  rationale: Retained public entrypoints are stable external API, but first-party imports through those facades remain architectural
+    burden and must be visible as blocking governance debt when the reviewed surface grows.
+retained_entrypoint_burn_down_plan:
+  review_date: '2026-09-30'
+  linked_issue: '#4565'
+  allowed_phases:
+  - visibility
+  - narrow-first-party-callers
+  - enforce
+  allowed_target_states:
+  - retain_as_stable_public_api
+  - narrow_first_party_callers
+  rows:
+  - path: src/bioetl/interfaces/cli/commands/run.py
+    phase: enforce
+    target_state: retain_as_stable_public_api
+    rationale: Public CLI command seam; removal would be an external breaking change.
+    completion_gate: Keep the top-level CLI command as the sanctioned patch/import seam and block new direct owner-module
+      imports outside approved boundary coverage.
+  - path: src/bioetl/interfaces/cli/commands/run_all.py
+    phase: enforce
+    target_state: retain_as_stable_public_api
+    rationale: Public CLI command seam; removal would be an external breaking change.
+    completion_gate: Keep the top-level CLI command as the sanctioned patch/import seam and block new direct owner-module
+      imports outside approved boundary coverage.
+  - path: src/bioetl/interfaces/cli/commands/run_composite.py
+    phase: enforce
+    target_state: retain_as_stable_public_api
+    rationale: Public CLI command seam; removal would be an external breaking change.
+    completion_gate: Keep the top-level CLI command as the sanctioned patch/import seam and block new direct owner-module
+      imports outside approved boundary coverage.
+  - path: src/bioetl/interfaces/cli/commands/health.py
+    phase: enforce
+    target_state: retain_as_stable_public_api
+    rationale: Public CLI command seam; removal would be an external breaking change.
+    completion_gate: Keep the top-level CLI command as the sanctioned patch/import seam and block new direct owner-module
+      imports outside approved boundary coverage.
+  - path: src/bioetl/interfaces/cli/commands/diagnostics.py
+    phase: enforce
+    target_state: retain_as_stable_public_api
+    rationale: Public CLI command seam; removal would be an external breaking change.
+    completion_gate: Keep the top-level CLI command as the sanctioned patch/import seam and block new direct owner-module
+      imports outside approved boundary coverage.
+  - path: src/bioetl/interfaces/cli/commands/quarantine.py
+    phase: enforce
+    target_state: retain_as_stable_public_api
+    rationale: Public CLI command seam; removal would be an external breaking change.
+    completion_gate: Keep the top-level CLI command as the sanctioned patch/import seam and block new direct owner-module
+      imports outside approved boundary coverage.
+  - path: src/bioetl/composition/entrypoints.py
+    phase: enforce
+    target_state: retain_as_stable_public_api
+    rationale: Public composition entrypoint; retained as stable integration API.
+    completion_gate: Reduce first-party imports to the explicit execution-facing exports only and keep `_pipeline_execution`,
+      `_resource_management`, and `_services` hidden behind the public seam.
+  - path: src/bioetl/composition/health_api.py
+    phase: enforce
+    target_state: retain_as_stable_public_api
+    rationale: Public composition health facade; retained as stable integration API.
+    completion_gate: Route first-party health and quarantine call sites through the reviewed facade exports only and keep
+      deeper composition owner modules as implementation details.
+  - path: src/bioetl/composition/maintenance_api.py
+    phase: narrow-first-party-callers
+    target_state: narrow_first_party_callers
+    rationale: Public composition maintenance facade stays stable, but ordinary first-party CLI/runtime callers should narrow
+      to one owner seam instead of importing the facade broadly.
+    completion_gate: Keep the public maintenance facade stable while confining first-party runtime imports to
+      `src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py` and preventing growth of ad hoc
+      maintenance-api callers.
+  - path: src/bioetl/infrastructure/config/__init__.py
+    phase: enforce
+    target_state: retain_as_stable_public_api
+    rationale: Public package-root facade remains as a stable external convenience seam after first-party callers were eliminated.
+    completion_gate: Keep the package-root convenience facade stable, hold first-party `src/` imports at zero, and block regression
+      back to internal runtime usage through the dedicated root-facade inventory.
+  - path: src/bioetl/domain/composite/config.py
+    phase: enforce
+    target_state: retain_as_stable_public_api
+    rationale: Public domain config model entrypoint; retained as stable integration API.
+    completion_gate: Keep the root domain config entrypoint stable and block new imports of split config internals outside
+      the owner package and dedicated boundary tests.
+  - path: src/bioetl/application/composite/merger.py
+    phase: enforce
+    target_state: retain_as_stable_public_api
+    rationale: Public composite merge module; retained while collaborator bundle API is canonical.
+    completion_gate: Keep the sanctioned merge entrypoint stable and prevent first-party callers from bypassing the collaborator
+      bundle/canonical merge surface.
+first_safe_removal_wave:
+  linked_issue: '#5485'
+  review_date: '2026-06-19'
+  rows:
+  - path: src/bioetl/interfaces/cli/commands/maintenance.py
+    owner: bioetl.interfaces.cli.commands
+    previous_status: public-entrypoint
+    surface_classification: confirmed-unused
+    action: remove_from_retained_entrypoint_debt_inventory
+    rationale: The top-level maintenance command no longer has first-party `src/`
+      or test importers in the compatibility importer census, so it no longer needs
+      retained-entrypoint debt tracking.
+    migration_prerequisites:
+    - Keep public CLI discovery wired through `bioetl.interfaces.cli.commands.maintenance`
+      without reintroducing new first-party importer debt.
+    - Keep ordinary runtime maintenance access narrowed to `src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py`.
+    - Treat any future retirement of the public maintenance command itself as a
+      separate external-breaking-change review, not part of this debt ratchet wave.
+measured_only_modules: []

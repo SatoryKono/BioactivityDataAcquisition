@@ -1,0 +1,78 @@
+{
+  "aggregate_root_count": 3,
+  "aggregates": [
+    {
+      "aggregate": "Batch",
+      "implementation_modules": [
+        "src/bioetl/domain/aggregates/_batch_aggregate.py",
+        "src/bioetl/domain/aggregates/_batch_lifecycle.py",
+        "src/bioetl/domain/aggregates/_batch_mixins.py",
+        "src/bioetl/domain/aggregates/_batch_record.py",
+        "src/bioetl/domain/aggregates/_batch_status.py"
+      ],
+      "invariants": [
+        "batch_id and run_id are assigned at creation and exposed read-only",
+        "record indices are deterministic and monotonically allocated from start_index",
+        "sealed or terminal batches reject further record mutation",
+        "batch lifecycle transitions emit deterministic domain events"
+      ],
+      "root_module": "src/bioetl/domain/aggregates/batch.py",
+      "test_paths": [
+        "tests/unit/domain/aggregates/test_batch.py",
+        "tests/unit/domain/aggregates/test_batch_determinism.py",
+        "tests/unit/domain/aggregates/test_batch_internal_modules.py",
+        "tests/unit/domain/aggregates/test_batch_invariant_properties.py"
+      ]
+    },
+    {
+      "aggregate": "PipelineRun",
+      "implementation_modules": [
+        "src/bioetl/domain/aggregates/pipeline_run.py",
+        "src/bioetl/domain/aggregates/pipeline_run_stage_result.py",
+        "src/bioetl/domain/aggregates/_pipeline_run_mixins.py"
+      ],
+      "invariants": [
+        "run_id is assigned at creation and exposed read-only",
+        "completed runs require at least one successful stage and no failed stages",
+        "failed stages transition the run to failed and block later stage mutation",
+        "terminal runs expose immutable stage history and terminal timestamps"
+      ],
+      "root_module": "src/bioetl/domain/aggregates/pipeline_run.py",
+      "test_paths": [
+        "tests/unit/domain/aggregates/test_pipeline_run.py",
+        "tests/unit/domain/aggregates/test_pipeline_run_events.py",
+        "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py",
+        "tests/unit/domain/aggregates/test_pipeline_run_invariant_properties.py"
+      ]
+    },
+    {
+      "aggregate": "QuarantineEntry",
+      "implementation_modules": [
+        "src/bioetl/domain/aggregates/_quarantine_aggregate.py",
+        "src/bioetl/domain/aggregates/_quarantine_entry_properties_mixin.py",
+        "src/bioetl/domain/aggregates/_quarantine_entry_transitions_mixin.py",
+        "src/bioetl/domain/aggregates/_quarantine_value_objects.py"
+      ],
+      "invariants": [
+        "payload is defensively copied at capture and exposed without caller aliasing",
+        "payload_hash is computed canonically from payload and remains immutable",
+        "status transitions follow new to under_review to ignored, reprocessed, or expired",
+        "terminal quarantine entries reject metadata and resolution mutation"
+      ],
+      "root_module": "src/bioetl/domain/aggregates/quarantine_entry.py",
+      "test_paths": [
+        "tests/unit/domain/aggregates/test_quarantine_entry.py",
+        "tests/unit/domain/aggregates/test_quarantine_entry_internal_mixins.py",
+        "tests/unit/domain/aggregates/test_quarantine_entry_invariant_properties.py",
+        "tests/unit/domain/aggregates/test_deterministic_identity.py"
+      ]
+    }
+  ],
+  "generated_by": "tests/architecture/test_domain_aggregate_invariant_registry.py",
+  "schema_version": 1,
+  "summary": {
+    "aggregates_with_invariant_tests": 3,
+    "missing_source_paths": [],
+    "missing_test_paths": []
+  }
+}

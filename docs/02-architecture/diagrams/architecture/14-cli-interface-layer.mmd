@@ -1,0 +1,89 @@
+%% BioETL — CLI / Interface Layer
+%% Shows current CLI routing through registry helpers, narrow composition APIs, and inspection/admin services.
+
+%% @version 1.3.0
+%% @date    2026-03-28
+%% @type    flowchart
+%% @level   System / Component
+%% @nodes   18
+%% @reference  Decomposed into 14a-cli-commands, 14b-cli-routing
+
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+%% @uniform width=248 height=72 max_title_len=25 max_desc_lines=3
+graph LR
+    TERM["Terminal user"]:::size-md
+
+    subgraph CLI["interfaces/cli"]
+        MAIN["cli.main<br/>Click group"]:::size-md
+        REG["registry_helpers<br/>fresh explicit PipelineRegistry"]:::size-md
+        RUN["run / run-all"]:::size-md
+        RC["run-composite"]:::size-md
+        INS["run-manifest / lineage"]:::size-md
+        OPS["checkpoint / config / dq / lock<br/>health / export / quarantine / maintenance"]:::size-lg
+    end
+
+    subgraph Composition["composition boundary"]
+        EXEC["execution_api<br/>run / composite runtime"]:::size-md
+        CTRL["control_plane_api<br/>inspection + admin services"]:::size-md
+        HEALTH["health_api / maintenance_api<br/>health + service maintenance"]:::size-md
+        RES["resources_api<br/>cleanup / quarantine / lifecycle"]:::size-md
+        ENTRY["entrypoints<br/>retained broad public seam"]:::size-md
+        PIPE["PipelineRegistry"]:::size-md
+    end
+
+    subgraph Runtime["Created runtime services"]
+        PRUN["PipelineRunnerService"]:::size-md
+        CRUN["CompositePipelineRunner"]:::size-md
+        ISVC["Inspection services<br/>run-manifest / lineage"]:::size-md
+        ASVC["Admin services<br/>health / export / checkpoint / vacuum"]:::size-md
+        HSRV["HTTP HealthServer<br/>optional command mode"]:::size-md
+    end
+
+    TERM --> MAIN
+    MAIN --> RUN
+    MAIN --> RC
+    MAIN --> INS
+    MAIN --> OPS
+
+    RUN --> REG --> PIPE
+    RUN --> EXEC
+    RUN --> CTRL
+    RC --> EXEC
+    INS --> CTRL
+    OPS --> CTRL
+    OPS --> HEALTH
+    OPS --> RES
+
+    EXEC --> PRUN
+    EXEC --> CRUN
+    CTRL --> PRUN
+    CTRL --> ISVC
+    CTRL --> ASVC
+    HEALTH --> ASVC
+    RES --> ASVC
+    OPS -.->|"server mode"| HSRV
+    HEALTH -.->|"health deps"| HSRV
+
+    NOTE["CLI prefers narrow APIs.<br/>Use execution_api, control_plane_api,<br/>health_api, maintenance_api,<br/>and resources_api for command paths.<br/>entrypoints kept for broad callers/tests."]:::size-md
+    ENTRY -.-> NOTE
+    REG -.-> NOTE
+
+    classDef user fill:#f1f5f9,stroke:#64748b
+    classDef cli fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    classDef comp fill:#fff7ed,stroke:#f59e0b
+    classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+
+    class TERM user
+    class MAIN,REG,RUN,RC,INS,OPS cli
+    class EXEC,CTRL,HEALTH,RES,ENTRY,PIPE comp
+    class PRUN,CRUN,ISVC,ASVC,HSRV,NOTE app

@@ -1,0 +1,28 @@
+"""Shared types for preflight governance services."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from enum import Enum
+
+from bioetl.domain.types.validation_severity import ValidationSeverity
+
+
+class GovernancePolicy(Enum):
+    """Execution governance policies."""
+
+    BLOCK_ON_ANY_ISSUE = "block_on_any_issue"
+    BLOCK_ON_BLOCKERS_ONLY = "block_on_blockers_only"
+    WARNING_ONLY = "warning_only"
+    CI_STRICT = "ci_strict"
+    CI_RELAXED = "ci_relaxed"
+
+
+@dataclass(frozen=True)
+class PreflightGovernanceConfig:
+    """Configuration for preflight governance."""
+
+    policy: GovernancePolicy
+    ci_integration: bool = False
+    fail_fast: bool = True
+    issue_code_overrides: dict[str, ValidationSeverity] | None = None

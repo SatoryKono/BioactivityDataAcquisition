@@ -1,0 +1,197 @@
+{
+  "source_branch": "main",
+  "source_commit": "52353e5e833ce815c0d6c3a581405ce80f488471",
+  "source_run_id": "22890216064",
+  "refreshed_at_utc": "2026-06-23T09:23:09.436295+00:00",
+  "refresh_status": "captured",
+  "total_cases": 14859,
+  "top_slowest": [
+    {
+      "source": "junit_parallel.xml",
+      "test": "tests.architecture.test_regression_metrics::test_mypy_error_count",
+      "duration_s": 19.186
+    },
+    {
+      "source": "junit_parallel.xml",
+      "test": "tests.architecture.test_antipatterns::test_no_hardcoded_secrets",
+      "duration_s": 15.867
+    },
+    {
+      "source": "junit_parallel.xml",
+      "test": "tests.unit.interfaces.cli.test_cli_main_module.TestCliMainModule::test_module_runnable_with_help",
+      "duration_s": 5.741
+    },
+    {
+      "source": "junit_parallel.xml",
+      "test": "tests.unit.infrastructure.validation.test_pandera_validator.TestPanderaValidatorPropertyBased::test_noop_validators_always_return_valid",
+      "duration_s": 4.541
+    },
+    {
+      "source": "junit_parallel.xml",
+      "test": "tests.architecture.test_test_structural_debt::test_no_test_functions_over_200_loc",
+      "duration_s": 4.29
+    },
+    {
+      "source": "junit_parallel.xml",
+      "test": "tests.architecture.test_layer_dependencies::test_dead_code_vulture",
+      "duration_s": 4.204
+    },
+    {
+      "source": "junit_parallel.xml",
+      "test": "tests.architecture.test_scripts_lifecycle_registry::test_scripts_lifecycle_registry_check_passes",
+      "duration_s": 4.108
+    },
+    {
+      "source": "junit_parallel.xml",
+      "test": "tests.architecture.test_scripts_deprecation_backlog::test_scripts_deprecation_report_generation",
+      "duration_s": 4.051
+    },
+    {
+      "source": "junit_parallel.xml",
+      "test": "tests.architecture.test_scripts_inventory_manifest::test_scripts_inventory_manifest_drift_check_passes",
+      "duration_s": 3.948
+    },
+    {
+      "source": "junit_parallel.xml",
+      "test": "tests.architecture.test_antipatterns::test_no_blocking_io_in_async",
+      "duration_s": 3.757
+    },
+    {
+      "source": "junit_parallel.xml",
+      "test": "tests.architecture.test_lint_terminology_script::test_lint_terminology_supports_check_without_paths",
+      "duration_s": 3.514
+    },
+    {
+      "source": "junit_parallel.xml",
+      "test": "tests.unit.domain.test_exceptions.TestErrorClassifier::test_classify_unknown_exception",
+      "duration_s": 3.493
+    },
+    {
+      "source": "junit_parallel.xml",
+      "test": "tests.architecture.test_di_compliance.TestDICompliance::test_factories_only_in_composition",
+      "duration_s": 3.291
+    },
+    {
+      "source": "junit_parallel.xml",
+      "test": "tests.architecture.test_regression_metrics::test_architecture_skip_count",
+      "duration_s": 3.192
+    },
+    {
+      "source": "junit_parallel.xml",
+      "test": "tests.test_architecture::test_no_unsafe_functions",
+      "duration_s": 2.912
+    },
+    {
+      "source": "junit_parallel.xml",
+      "test": "tests.test_architecture::test_observability_library_isolation",
+      "duration_s": 2.87
+    },
+    {
+      "source": "junit_parallel.xml",
+      "test": "tests.architecture.test_code_metrics.TestFunctionLength::test_functions_under_100_lines",
+      "duration_s": 2.419
+    },
+    {
+      "source": "junit_parallel.xml",
+      "test": "tests.architecture.test_deterministic_sort_policy_coverage::test_entity_pipeline_sink_sort_policy_coverage_is_full",
+      "duration_s": 2.415
+    },
+    {
+      "source": "junit_parallel.xml",
+      "test": "tests.architecture.test_regression_metrics::test_cross_layer_group_edges_budget",
+      "duration_s": 2.378
+    },
+    {
+      "source": "junit_parallel.xml",
+      "test": "tests.unit.cli.test_registry_consistency.TestRegistryConfigConsistency::test_all_registered_pipelines_have_config_files",
+      "duration_s": 2.342
+    },
+    {
+      "source": "junit_parallel.xml",
+      "test": "tests.architecture.test_code_metrics.TestGodObjectDetection::test_large_classes_have_delegation",
+      "duration_s": 2.311
+    },
+    {
+      "source": "junit_parallel.xml",
+      "test": "tests.architecture.test_quality_burndown_priorities::test_function_length_registry_has_no_stale_entries",
+      "duration_s": 2.191
+    },
+    {
+      "source": "junit_parallel.xml",
+      "test": "tests.architecture.test_domain_purity.TestDomainImmutability::test_no_mutable_defaults_in_frozen_dataclasses",
+      "duration_s": 2.165
+    },
+    {
+      "source": "junit_parallel.xml",
+      "test": "tests.unit.infrastructure.validation.test_pandera_validator.TestPanderaValidatorPropertyBased::test_silver_validator_never_raises_on_arbitrary_input",
+      "duration_s": 2.146
+    },
+    {
+      "source": "junit_parallel.xml",
+      "test": "tests.unit.infrastructure.validation.test_pandera_validator.TestPanderaValidatorPropertyBased::test_strict_mode_without_schema_always_fails",
+      "duration_s": 2.127
+    }
+  ],
+  "top_slowest_zones": [
+    {
+      "zone": "tests.architecture.test_regression_metrics",
+      "test_count": 3,
+      "total_duration_s": 24.756,
+      "max_duration_s": 19.186
+    },
+    {
+      "zone": "tests.architecture.test_antipatterns",
+      "test_count": 2,
+      "total_duration_s": 19.624,
+      "max_duration_s": 15.867
+    },
+    {
+      "zone": "tests.unit.infrastructure.validation.test_pandera_validator.TestPanderaValidatorPropertyBased",
+      "test_count": 3,
+      "total_duration_s": 8.814,
+      "max_duration_s": 4.541
+    },
+    {
+      "zone": "tests.test_architecture",
+      "test_count": 2,
+      "total_duration_s": 5.782,
+      "max_duration_s": 2.912
+    },
+    {
+      "zone": "tests.unit.interfaces.cli.test_cli_main_module.TestCliMainModule",
+      "test_count": 1,
+      "total_duration_s": 5.741,
+      "max_duration_s": 5.741
+    },
+    {
+      "zone": "tests.architecture.test_test_structural_debt",
+      "test_count": 1,
+      "total_duration_s": 4.29,
+      "max_duration_s": 4.29
+    },
+    {
+      "zone": "tests.architecture.test_layer_dependencies",
+      "test_count": 1,
+      "total_duration_s": 4.204,
+      "max_duration_s": 4.204
+    },
+    {
+      "zone": "tests.architecture.test_scripts_lifecycle_registry",
+      "test_count": 1,
+      "total_duration_s": 4.108,
+      "max_duration_s": 4.108
+    },
+    {
+      "zone": "tests.architecture.test_scripts_deprecation_backlog",
+      "test_count": 1,
+      "total_duration_s": 4.051,
+      "max_duration_s": 4.051
+    },
+    {
+      "zone": "tests.architecture.test_scripts_inventory_manifest",
+      "test_count": 1,
+      "total_duration_s": 3.948,
+      "max_duration_s": 3.948
+    }
+  ]
+}

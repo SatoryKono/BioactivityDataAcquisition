@@ -1,0 +1,96 @@
+name: Architecture Metrics
+
+permissions:
+    contents: read
+
+on:
+    schedule:
+        -   cron: "20 2 * * *"
+    workflow_dispatch:
+        inputs:
+            run_heavy:
+                description: "Run heavy architecture and resilience nightly profile"
+                required: false
+                default: false
+                type: boolean
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+env:
+    # Use CI hypothesis profile for faster property-based tests
+    HYPOTHESIS_PROFILE: ci
+    PYTHONDONTWRITEBYTECODE: 1
+    PYTHONUNBUFFERED: 1
+
+jobs:
+    architecture-fast-baseline:
+        if: >
+            github.event_name == 'workflow_dispatch' &&
+            github.event.inputs.run_heavy != 'true'
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        steps:
+            -   uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+            -   name: Setup Python + uv
+                uses: ./.github/actions/setup-python-uv
+                with:
+                    enable-pytest-cache: "true"
+                    pytest-cache-prefix: "arch-metrics"
+                    pytest-cache-fingerprint: ${{ hashFiles('tests/architecture/**/*.py', 'tests/conftest.py', 'Makefile', 'pyproject.toml') }}
+
+            -   name: Run canonical fast architecture gate
+                run: |
+                    # Manual fast profile. PR/push fast architecture coverage now
+                    # lives in tests.yml test-fast to avoid duplicate pytest work.
+                    make qa-arch-fast
+
+    architecture-heavy-nightly:
+        if: >
+            github.event_name == 'schedule' ||
+            (github.event_name == 'workflow_dispatch' && github.event.inputs.run_heavy == 'true')
+        runs-on: ubuntu-latest
+        timeout-minutes: 25
+        steps:
+            -   uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+            -   name: Setup Python + uv
+                uses: ./.github/actions/setup-python-uv
+                with:
+                    uv-extras: "dev tracing performance"
+                    enable-pytest-cache: "true"
+                    pytest-cache-prefix: "arch-metrics-nightly"
+                    pytest-cache-fingerprint: ${{ hashFiles('tests/**/*.py', 'tests/conftest.py', 'pyproject.toml') }}
+
+            -   name: Cyclomatic complexity check
+                run: uv run radon cc src/bioetl --min C --show-closures
+
+            -   name: Run heavy scan with coverage
+                run: |
+                    uv run pytest tests/ -m "not e2e and not benchmark and not serial" \
+                      --ignore=tests/e2e --ignore=tests/contract \
+                      -n auto --dist loadscope --max-worker-restart=0 \
+                      --cov=src/bioetl \
+                      --cov-report=term-missing \
+                      --cov-fail-under=85
+
+    windows-atomic-write-stress-nightly:
+        if: >
+            github.event_name == 'schedule' ||
+            (github.event_name == 'workflow_dispatch' && github.event.inputs.run_heavy == 'true')
+        runs-on: windows-latest
+        timeout-minutes: 15
+        steps:
+            -   uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+            -   name: Setup Python + uv
+                uses: ./.github/actions/setup-python-uv
+
+            -   name: Run Windows atomic lock stress tests
+                run: |
+                    uv run pytest tests/unit/infrastructure/storage/test_atomic.py \
+                      -k "windows_lock_stress" \
+                      -m "slow and serial" \
+                      -q --tb=short

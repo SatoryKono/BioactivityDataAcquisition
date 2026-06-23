@@ -1,0 +1,16 @@
+schema_version: "1.0.0"
+workflow:
+  name: uniprot_support_pack
+  version: "1.0.0"
+  defaults:
+    run_options:
+      run_type: backfill
+      dry_run: false
+      log_level: INFO
+  steps:
+    - kind: pipeline
+      step_id: run_uniprot_protein
+      pipeline_name: uniprot_protein
+    - kind: pipeline
+      step_id: run_uniprot_idmapping
+      pipeline_name: uniprot_idmapping

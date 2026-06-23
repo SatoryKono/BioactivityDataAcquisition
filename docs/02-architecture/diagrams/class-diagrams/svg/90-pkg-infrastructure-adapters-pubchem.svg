@@ -1,0 +1,495 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="my-svg" width="100%" class="classDiagram" style="max-width: 2424.3px; background-color: white;" viewBox="-8 0 2424.296875 1045" role="graphics-document document" aria-roledescription="class"><style>#my-svg{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;fill:#212121;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#my-svg .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#my-svg .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#my-svg .error-icon{fill:#f0fdf4;}#my-svg .error-text{fill:#212121;stroke:#212121;}#my-svg .edge-thickness-normal{stroke-width:1px;}#my-svg .edge-thickness-thick{stroke-width:3.5px;}#my-svg .edge-pattern-solid{stroke-dasharray:0;}#my-svg .edge-thickness-invisible{stroke-width:0;fill:none;}#my-svg .edge-pattern-dashed{stroke-dasharray:3;}#my-svg .edge-pattern-dotted{stroke-dasharray:2;}#my-svg .marker{fill:#475569;stroke:#475569;}#my-svg .marker.cross{stroke:#475569;}#my-svg svg{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;}#my-svg p{margin:0;}#my-svg g.classGroup text{fill:#2563eb;stroke:none;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;font-size:10px;}#my-svg g.classGroup text .title{font-weight:bolder;}#my-svg .cluster-label text{fill:#1e40af;}#my-svg .cluster-label span{color:#1e40af;}#my-svg .cluster-label span p{background-color:transparent;}#my-svg .cluster rect{fill:#f8fafc;stroke:#94a3b8;stroke-width:1px;}#my-svg .cluster text{fill:#1e40af;}#my-svg .cluster span{color:#1e40af;}#my-svg .nodeLabel,#my-svg .edgeLabel{color:#212121;}#my-svg .noteLabel .nodeLabel,#my-svg .noteLabel .edgeLabel{color:#212121;}#my-svg .edgeLabel .label rect{fill:#eff6ff;}#my-svg .label text{fill:#212121;}#my-svg .labelBkg{background:#eff6ff;}#my-svg .edgeLabel .label span{background:#eff6ff;}#my-svg .classTitle{font-weight:bolder;}#my-svg .node rect,#my-svg .node circle,#my-svg .node ellipse,#my-svg .node polygon,#my-svg .node path{fill:#eff6ff;stroke:#2563eb;stroke-width:1;}#my-svg .divider{stroke:#2563eb;stroke-width:1;}#my-svg g.clickable{cursor:pointer;}#my-svg g.classGroup rect{fill:#eff6ff;stroke:#2563eb;}#my-svg g.classGroup line{stroke:#2563eb;stroke-width:1;}#my-svg .classLabel .box{stroke:none;stroke-width:0;fill:#eff6ff;opacity:0.5;}#my-svg .classLabel .label{fill:#2563eb;font-size:10px;}#my-svg .relation{stroke:#475569;stroke-width:1;fill:none;}#my-svg .dashed-line{stroke-dasharray:3;}#my-svg .dotted-line{stroke-dasharray:1 2;}#my-svg [id$="-compositionStart"],#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-compositionEnd"],#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-dependencyStart"],#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-dependencyEnd"],#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-extensionStart"],#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-extensionEnd"],#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-aggregationStart"],#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-aggregationEnd"],#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-lollipopStart"],#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg [id$="-lollipopEnd"],#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg .edgeTerminals{font-size:11px;line-height:initial;}#my-svg .classTitleText{text-anchor:middle;font-size:18px;fill:#212121;}#my-svg .edgeLabel[data-look="neo"]{background-color:#ffffff;text-align:center;}#my-svg .edgeLabel[data-look="neo"] p{background-color:#ffffff;}#my-svg .edgeLabel[data-look="neo"] rect{opacity:0.5;background-color:#ffffff;fill:#ffffff;}#my-svg .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#my-svg .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#my-svg .node .neo-node{stroke:#2563eb;}#my-svg [data-look="neo"].node rect,#my-svg [data-look="neo"].cluster rect,#my-svg [data-look="neo"].node polygon{stroke:url(#my-svg-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg [data-look="neo"].node path{stroke:url(#my-svg-gradient);stroke-width:1px;}#my-svg [data-look="neo"].node .outer-path{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg [data-look="neo"].node .neo-line path{stroke:#2563eb;filter:none;}#my-svg [data-look="neo"].node circle{stroke:url(#my-svg-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg [data-look="neo"].node circle .state-start{fill:#000000;}#my-svg [data-look="neo"].icon-shape .icon{fill:url(#my-svg-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg [data-look="neo"].icon-shape .icon-neo path{stroke:url(#my-svg-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}/* bioetl-inject */#my-svg .edgeLabel rect{opacity:1!important;fill:#ffffff!important}#my-svg .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel{font-size:12px;line-height:1.1;padding:1px 3px}#my-svg .edgeLabel span{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg .edgeLabel p{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg text.fo-fallback{color:#111827!important;fill:#111827!important;opacity:1!important}</style><g><defs><marker id="my-svg_class-aggregationStart" class="marker aggregation class" refX="18" refY="7" markerWidth="190" markerHeight="240" orient="auto"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker id="my-svg_class-aggregationEnd" class="marker aggregation class" refX="1" refY="7" markerWidth="20" markerHeight="28" orient="auto"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker id="my-svg_class-aggregationStart-margin" class="marker aggregation class" refX="15" refY="7" markerWidth="190" markerHeight="240" orient="auto" markerUnits="userSpaceOnUse"><path d="M 18,7 L9,13 L1,7 L9,1 Z" style="stroke-width: 2;" /></marker></defs><defs><marker id="my-svg_class-aggregationEnd-margin" class="marker aggregation class" refX="1" refY="7" markerWidth="20" markerHeight="28" orient="auto" markerUnits="userSpaceOnUse"><path d="M 18,7 L9,13 L1,7 L9,1 Z" style="stroke-width: 2;" /></marker></defs><defs><marker id="my-svg_class-extensionStart" class="marker extension class" refX="18" refY="7" markerWidth="20" markerHeight="28" orient="auto" markerUnits="userSpaceOnUse"><path d="M 1,7 L18,13 V 1 Z" /></marker></defs><defs><marker id="my-svg_class-extensionEnd" class="marker extension class" refX="1" refY="7" markerWidth="20" markerHeight="28" orient="auto"><path d="M 1,1 V 13 L18,7 Z" /></marker></defs><marker id="my-svg_class-extensionStart-margin" class="marker extension class" refX="18" refY="7" markerWidth="20" markerHeight="28" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 20 14"><polygon points="10,7 18,13 18,1" style="stroke-width: 2; stroke-dasharray: 0;" /></marker><defs><marker id="my-svg_class-extensionEnd-margin" class="marker extension class" refX="9" refY="7" markerWidth="20" markerHeight="28" orient="auto" markerUnits="userSpaceOnUse" viewBox="0 0 20 14"><polygon points="10,1 10,13 18,7" style="stroke-width: 2; stroke-dasharray: 0;" /></marker></defs><defs><marker id="my-svg_class-compositionStart" class="marker composition class" refX="18" refY="7" markerWidth="190" markerHeight="240" orient="auto"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker id="my-svg_class-compositionEnd" class="marker composition class" refX="1" refY="7" markerWidth="20" markerHeight="28" orient="auto"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker id="my-svg_class-compositionStart-margin" class="marker composition class" refX="15" refY="7" markerWidth="190" markerHeight="240" orient="auto" markerUnits="userSpaceOnUse"><path viewBox="0 0 15 15" d="M 18,7 L9,13 L1,7 L9,1 Z" style="stroke-width: 0;" /></marker></defs><defs><marker id="my-svg_class-compositionEnd-margin" class="marker composition class" refX="3.5" refY="7" markerWidth="20" markerHeight="28" orient="auto" markerUnits="userSpaceOnUse"><path d="M 18,7 L9,13 L1,7 L9,1 Z" style="stroke-width: 0;" /></marker></defs><defs><marker id="my-svg_class-dependencyStart" class="marker dependency class" refX="6" refY="7" markerWidth="190" markerHeight="240" orient="auto"><path d="M 5,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker id="my-svg_class-dependencyEnd" class="marker dependency class" refX="13" refY="7" markerWidth="20" markerHeight="28" orient="auto"><path d="M 18,7 L9,13 L14,7 L9,1 Z" /></marker></defs><defs><marker id="my-svg_class-dependencyStart-margin" class="marker dependency class" refX="4" refY="7" markerWidth="190" markerHeight="240" orient="auto" markerUnits="userSpaceOnUse"><path d="M 5,7 L9,13 L1,7 L9,1 Z" style="stroke-width: 0;" /></marker></defs><defs><marker id="my-svg_class-dependencyEnd-margin" class="marker dependency class" refX="16" refY="7" markerWidth="20" markerHeight="28" orient="auto" markerUnits="userSpaceOnUse"><path d="M 18,7 L9,13 L14,7 L9,1 Z" style="stroke-width: 0;" /></marker></defs><defs><marker id="my-svg_class-lollipopStart" class="marker lollipop class" refX="13" refY="7" markerWidth="190" markerHeight="240" orient="auto"><circle fill="transparent" cx="7" cy="7" r="6" /></marker></defs><defs><marker id="my-svg_class-lollipopEnd" class="marker lollipop class" refX="1" refY="7" markerWidth="190" markerHeight="240" orient="auto"><circle fill="transparent" cx="7" cy="7" r="6" /></marker></defs><defs><marker id="my-svg_class-lollipopStart-margin" class="marker lollipop class" refX="13" refY="7" markerWidth="190" markerHeight="240" orient="auto" markerUnits="userSpaceOnUse"><circle fill="transparent" cx="7" cy="7" r="6" stroke-width="2" /></marker></defs><defs><marker id="my-svg_class-lollipopEnd-margin" class="marker lollipop class" refX="1" refY="7" markerWidth="190" markerHeight="240" orient="auto" markerUnits="userSpaceOnUse"><circle fill="transparent" cx="7" cy="7" r="6" stroke-width="2" /></marker></defs><g class="root"><g class="clusters"><g class="cluster undefined" id="my-svg-client_fetch_surface" data-look="classic"><rect style="" x="1763.125" y="8" width="309.75" height="835" /><g class="cluster-label" transform="translate(1845.046875, 8)"><text x="72.953" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="72.953">client_fetch_surfa</tspan><tspan x="72.953" dy="16.8">ce</tspan></text></g></g><g class="cluster undefined" id="my-svg-fetch_strategy_search" data-look="classic"><rect style="" x="2092.875" y="8" width="315.421875" height="835" /><g class="cluster-label" transform="translate(2170.8046875, 8)"><text x="79.781" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="79.781">fetch_strategy_sea</tspan><tspan x="79.781" dy="16.8">rch</tspan></text></g></g><g class="cluster undefined" id="my-svg-client" data-look="classic"><rect style="" x="821.31640625" y="888" width="1165.453125" height="149" /><g class="cluster-label" transform="translate(1384.15234375, 888)"><text x="19.891" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="19.891">client</tspan></text></g></g><g class="cluster undefined" id="my-svg-client_model_mixin" data-look="classic"><rect style="" x="738.203125" y="8" width="323.765625" height="835" /><g class="cluster-label" transform="translate(830.1640625, 8)"><text x="69.922" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="69.922">client_model_mixin</tspan></text></g></g><g class="cluster undefined" id="my-svg-fetch_strategies" data-look="classic"><rect style="" x="2103.9609375" y="888" width="293.25" height="149" /><g class="cluster-label" transform="translate(2192.0546875, 888)"><text x="58.531" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="58.531">fetch_strategies</tspan></text></g></g></g><g class="edgePaths"><path d="M900.086,494.75L900.086,494.75L900.086,843L900.086,843L900.086,865.5L900.086,865.5L900.086,888L1113.295,888L1113.295,950.418L1326.504,950.418" id="my-svg-id_PubChemAdapterModelMixin_PubChemAdapter_1" class="edge-thickness-normal edge-pattern-solid relation" style=";;;" data-edge="true" data-et="edge" data-id="id_PubChemAdapterModelMixin_PubChemAdapter_1" data-points="W3sieCI6OTAwLjA4NTkzNzUsInkiOjQ3Ny41fSx7IngiOjkwMC4wODU5Mzc1LCJ5Ijo4NDN9LHsieCI6OTAwLjA4NTkzNzUsInkiOjg2NS41fSx7IngiOjkwMC4wODU5Mzc1LCJ5Ijo4ODh9LHsieCI6MTMyNi41MDM5MDYyNSwieSI6OTUwLjQxODExNTMyNDY5MTN9XQ==" data-look="classic" marker-start="url(#my-svg_class-extensionStart)" /><path d="M1918,494.75L1918,494.75L1918,843L1918,843L1918,865.5L1918,865.5L1918,888L1704.791,888L1704.791,950.418L1491.582,950.418" id="my-svg-id__PubChemClientFetchMixin_PubChemAdapter_2" class="edge-thickness-normal edge-pattern-solid relation" style=";;;" data-edge="true" data-et="edge" data-id="id__PubChemClientFetchMixin_PubChemAdapter_2" data-points="W3sieCI6MTkxOCwieSI6NDc3LjV9LHsieCI6MTkxOCwieSI6ODQzfSx7IngiOjE5MTgsInkiOjg2NS41fSx7IngiOjE5MTgsInkiOjg4OH0seyJ4IjoxNDkxLjU4MjAzMTI1LCJ5Ijo5NTAuNDE4MTE1MzI0NjkxM31d" data-look="classic" marker-start="url(#my-svg_class-extensionStart)" /><path d="M2250.586,494.75L2250.586,494.75L2250.586,843L2250.586,843L2250.586,865.5L2250.586,865.5L2250.586,888L2250.586,888L2250.586,910.5L2250.586,910.5" id="my-svg-id__PubChemSearchFetchMixin_PubChemFetchStrategies_3" class="edge-thickness-normal edge-pattern-solid relation" style=";;;" data-edge="true" data-et="edge" data-id="id__PubChemSearchFetchMixin_PubChemFetchStrategies_3" data-points="W3sieCI6MjI1MC41ODU5Mzc1LCJ5Ijo0NzcuNX0seyJ4IjoyMjUwLjU4NTkzNzUsInkiOjg0M30seyJ4IjoyMjUwLjU4NTkzNzUsInkiOjg2NS41fSx7IngiOjIyNTAuNTg1OTM3NSwieSI6ODg4fSx7IngiOjIyNTAuNTg1OTM3NSwieSI6OTEwLjV9XQ==" data-look="classic" marker-start="url(#my-svg_class-extensionStart)" /></g><g class="edgeLabels" /><g class="nodes"><g class="root" transform="translate(-8, 22.5)"><g class="clusters"><g class="cluster undefined" id="my-svg-models" data-look="classic"><rect style="" x="8" y="8" width="338.640625" height="790" /><g class="cluster-label" transform="translate(151.0703125, 8)"><text x="26.25" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="26.25">models</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g class="node default" id="my-svg-classId-PubChemAssayRecord-0" data-look="classic" transform="translate(177.3203125, 95)"><g class="basic label-container outer-path"><path d="M-99.9140625 -52 L99.9140625 -52 L99.9140625 52 L-99.9140625 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-99.9140625 -52 C-24.238635633020138 -52, 51.436791233959724 -52, 99.9140625 -52 M-99.9140625 -52 C-34.79824401183721 -52, 30.317574476325575 -52, 99.9140625 -52 M99.9140625 -52 C99.9140625 -20.634158308771383, 99.9140625 10.731683382457234, 99.9140625 52 M99.9140625 -52 C99.9140625 -29.058706053655744, 99.9140625 -6.1174121073114875, 99.9140625 52 M99.9140625 52 C36.65617621460454 52, -26.601710070790915 52, -99.9140625 52 M99.9140625 52 C23.790499444480886 52, -52.33306361103823 52, -99.9140625 52 M-99.9140625 52 C-99.9140625 23.790312351082388, -99.9140625 -4.419375297835224, -99.9140625 -52 M-99.9140625 52 C-99.9140625 26.56216872530453, -99.9140625 1.1243374506090618, -99.9140625 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-83.9140625, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="83.914" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="83.914">PubChemAssayRecord</tspan></text></g></g><g class="members-group text" transform="translate(-83.9140625, 36)" /><g class="methods-group text" transform="translate(-83.9140625, 76)" /><g class="divider" style=""><path d="M-99.9140625 4 C-38.71608749474233 4.000306253061251, 22.481887510515335 4.0006125061225015, 99.9140625 4.001 M-99.9140625 4 C-25.650007879087966 4.00037163965093, 48.61404674182407 4.00074327930186, 99.9140625 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-99.9140625 28 C-41.735849873278845 28.000291141262657, 16.44236275344231 28.000582282525315, 99.9140625 28.001 M-99.9140625 28 C-26.595078160337522 28.000366910235183, 46.723906179324956 28.000733820470366, 99.9140625 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-PubChemBioactivityRecord-1" data-look="classic" transform="translate(177.3203125, 249)"><g class="basic label-container outer-path"><path d="M-118.59375 -52 L118.59375 -52 L118.59375 52 L-118.59375 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-118.59375 -52 C-28.505050958475252 -52, 61.583648083049496 -52, 118.59375 -52 M-118.59375 -52 C-60.68278597513623 -52, -2.7718219502724537 -52, 118.59375 -52 M118.59375 -52 C118.59375 -16.522237286156347, 118.59375 18.955525427687306, 118.59375 52 M118.59375 -52 C118.59375 -11.29548560853626, 118.59375 29.40902878292748, 118.59375 52 M118.59375 52 C34.89541548386292 52, -48.80291903227416 52, -118.59375 52 M118.59375 52 C54.65241736436693 52, -9.288915271266134 52, -118.59375 52 M-118.59375 52 C-118.59375 27.064385705724852, -118.59375 2.128771411449705, -118.59375 -52 M-118.59375 52 C-118.59375 25.95033509887588, -118.59375 -0.09932980224824206, -118.59375 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-102.59375, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="102.594" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="102.594">PubChemBioactivityRecor</tspan><tspan x="102.594" dy="16.8">d</tspan></text></g></g><g class="members-group text" transform="translate(-102.59375, 36)" /><g class="methods-group text" transform="translate(-102.59375, 76)" /><g class="divider" style=""><path d="M-118.59375 4 C-36.36684370709196 4.000346674703739, 45.86006258581608 4.000693349407476, 118.59375 4.001 M-118.59375 4 C-35.58036943287034 4.0003499905373054, 47.43301113425932 4.000699981074611, 118.59375 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-118.59375 28 C-38.40717298972557 28.000338072524944, 41.77940402054887 28.00067614504989, 118.59375 28.001 M-118.59375 28 C-50.37437326603697 28.000287617925625, 17.845003467926063 28.000575235851247, 118.59375 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-PubChemSubstanceRecord-2" data-look="classic" transform="translate(177.3203125, 403)"><g class="basic label-container outer-path"><path d="M-116.6640625 -52 L116.6640625 -52 L116.6640625 52 L-116.6640625 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-116.6640625 -52 C-26.80846730787566 -52, 63.04712788424868 -52, 116.6640625 -52 M-116.6640625 -52 C-49.31358145001147 -52, 18.036899599977062 -52, 116.6640625 -52 M116.6640625 -52 C116.6640625 -29.073403786033246, 116.6640625 -6.146807572066493, 116.6640625 52 M116.6640625 -52 C116.6640625 -29.1638867580227, 116.6640625 -6.327773516045397, 116.6640625 52 M116.6640625 52 C49.050109627608805 52, -18.56384324478239 52, -116.6640625 52 M116.6640625 52 C65.66301007140356 52, 14.661957642807124 52, -116.6640625 52 M-116.6640625 52 C-116.6640625 25.09333549659217, -116.6640625 -1.813329006815657, -116.6640625 -52 M-116.6640625 52 C-116.6640625 23.036789213940338, -116.6640625 -5.926421572119324, -116.6640625 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-100.6640625, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="100.664" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="100.664">PubChemSubstanceRecord</tspan></text></g></g><g class="members-group text" transform="translate(-100.6640625, 36)" /><g class="methods-group text" transform="translate(-100.6640625, 76)" /><g class="divider" style=""><path d="M-116.6640625 4 C-27.945175246187958 4.000380232289844, 60.773712007624084 4.000760464579689, 116.6640625 4.001 M-116.6640625 4 C-27.572917680346848 4.0003818277150245, 61.518227139306305 4.000763655430049, 116.6640625 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-116.6640625 28 C-44.75977226959641 28.000308168122597, 27.14451796080718 28.000616336245194, 116.6640625 28.001 M-116.6640625 28 C-66.06010258203744 28.000216878954983, -15.45614266407489 28.000433757909963, 116.6640625 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-PubchemMoleculeApiRecord-3" data-look="classic" transform="translate(177.3203125, 557)"><g class="basic label-container outer-path"><path d="M-124.203125 -52 L124.203125 -52 L124.203125 52 L-124.203125 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-124.203125 -52 C-39.727552772797324 -52, 44.74801945440535 -52, 124.203125 -52 M-124.203125 -52 C-65.32332020380201 -52, -6.443515407604025 -52, 124.203125 -52 M124.203125 -52 C124.203125 -14.715670240682343, 124.203125 22.568659518635314, 124.203125 52 M124.203125 -52 C124.203125 -11.062233210224491, 124.203125 29.875533579551018, 124.203125 52 M124.203125 52 C47.80993587088477 52, -28.583253258230457 52, -124.203125 52 M124.203125 52 C33.951274996849335 52, -56.30057500630133 52, -124.203125 52 M-124.203125 52 C-124.203125 23.354074001140418, -124.203125 -5.291851997719164, -124.203125 -52 M-124.203125 52 C-124.203125 11.383768872543556, -124.203125 -29.23246225491289, -124.203125 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-108.203125, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="108.203" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="108.203">PubchemMoleculeApiRecord</tspan></text></g></g><g class="members-group text" transform="translate(-108.203125, 36)" /><g class="methods-group text" transform="translate(-108.203125, 76)" /><g class="divider" style=""><path d="M-124.203125 4 C-54.55982791066468 4.0002803604864585, 15.08346917867064 4.000560720972917, 124.203125 4.001 M-124.203125 4 C-34.37936725369411 4.000361600232467, 55.444390492611774 4.000723200464934, 124.203125 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-124.203125 28 C-55.72373789012374 28.000275674976415, 12.755649219752513 28.00055134995283, 124.203125 28.001 M-124.203125 28 C-57.5268871599323 28.000268416104024, 9.149350680135399 28.00053683220805, 124.203125 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-PubchemMoleculeDetailRecord-4" data-look="classic" transform="translate(177.3203125, 711)"><g class="basic label-container outer-path"><path d="M-134.3203125 -52 L134.3203125 -52 L134.3203125 52 L-134.3203125 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-134.3203125 -52 C-59.88948976071782 -52, 14.541332978564355 -52, 134.3203125 -52 M-134.3203125 -52 C-71.74796097416997 -52, -9.17560944833994 -52, 134.3203125 -52 M134.3203125 -52 C134.3203125 -29.60377777241963, 134.3203125 -7.207555544839259, 134.3203125 52 M134.3203125 -52 C134.3203125 -14.72210799874744, 134.3203125 22.55578400250512, 134.3203125 52 M134.3203125 52 C57.54449317036746 52, -19.23132615926508 52, -134.3203125 52 M134.3203125 52 C28.03564603470602 52, -78.24902043058796 52, -134.3203125 52 M-134.3203125 52 C-134.3203125 28.311236264879355, -134.3203125 4.62247252975871, -134.3203125 -52 M-134.3203125 52 C-134.3203125 15.16166479392814, -134.3203125 -21.67667041214372, -134.3203125 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-118.3203125, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="118.32" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="118.32">PubchemMoleculeDetailRecor</tspan><tspan x="118.32" dy="16.8">d</tspan></text></g></g><g class="members-group text" transform="translate(-118.3203125, 36)" /><g class="methods-group text" transform="translate(-118.3203125, 76)" /><g class="divider" style=""><path d="M-134.3203125 4 C-78.37133702627436 4.000208266994144, -22.422361552548722 4.000416533988288, 134.3203125 4.001 M-134.3203125 4 C-65.8476252203407 4.000254885824806, 2.6250620593185943 4.000509771649613, 134.3203125 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-134.3203125 28 C-36.36118959502939 28.00036464746501, 61.597933309941226 28.00072929493002, 134.3203125 28.001 M-134.3203125 28 C-61.58251348689079 28.000270762469427, 11.155285526218421 28.000541524938853, 134.3203125 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g></g></g><g class="root" transform="translate(380.640625, 253.5)"><g class="clusters"><g class="cluster undefined" id="my-svg-fetch_flow" data-look="classic"><rect style="" x="8" y="8" width="306.5625" height="328" /><g class="cluster-label" transform="translate(122.453125, 8)"><text x="38.828" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="38.828">fetch_flow</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g class="node default" id="my-svg-classId-PubChemFetchFlowService-5" data-look="classic" transform="translate(161.28125, 95)"><g class="basic label-container outer-path"><path d="M-118.28125 -52 L118.28125 -52 L118.28125 52 L-118.28125 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-118.28125 -52 C-23.962144992375357 -52, 70.35696001524929 -52, 118.28125 -52 M-118.28125 -52 C-46.001746973192056 -52, 26.27775605361589 -52, 118.28125 -52 M118.28125 -52 C118.28125 -17.720325875364715, 118.28125 16.55934824927057, 118.28125 52 M118.28125 -52 C118.28125 -11.194100583436537, 118.28125 29.611798833126926, 118.28125 52 M118.28125 52 C32.623948545188995 52, -53.03335290962201 52, -118.28125 52 M118.28125 52 C59.064860815325986 52, -0.1515283693480285 52, -118.28125 52 M-118.28125 52 C-118.28125 18.913587945692903, -118.28125 -14.172824108614194, -118.28125 -52 M-118.28125 52 C-118.28125 20.18923997805289, -118.28125 -11.621520043894222, -118.28125 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-102.28125, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="102.281" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="102.281">PubChemFetchFlowServic</tspan><tspan x="102.281" dy="16.8">e</tspan></text></g></g><g class="members-group text" transform="translate(-102.28125, 36)" /><g class="methods-group text" transform="translate(-102.28125, 76)" /><g class="divider" style=""><path d="M-118.28125 4 C-54.9645332378818 4.0002676532280566, 8.352183524236395 4.000535306456113, 118.28125 4.001 M-118.28125 4 C-62.175842783265146 4.000237169488895, -6.070435566530293 4.00047433897779, 118.28125 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-118.28125 28 C-43.87079456792344 28.00031454882085, 30.53966086415312 28.0006290976417, 118.28125 28.001 M-118.28125 28 C-34.949318670483706 28.000352261796902, 48.38261265903259 28.000704523593804, 118.28125 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-_RequestRecorder-6" data-look="classic" transform="translate(161.28125, 249)"><g class="basic label-container outer-path"><path d="M-85.1953125 -52 L85.1953125 -52 L85.1953125 52 L-85.1953125 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-85.1953125 -52 C-40.394470473297226 -52, 4.406371553405549 -52, 85.1953125 -52 M-85.1953125 -52 C-32.613741223182586 -52, 19.967830053634827 -52, 85.1953125 -52 M85.1953125 -52 C85.1953125 -24.581413213733075, 85.1953125 2.8371735725338496, 85.1953125 52 M85.1953125 -52 C85.1953125 -18.143363562119248, 85.1953125 15.713272875761504, 85.1953125 52 M85.1953125 52 C46.893517145118516 52, 8.591721790237031 52, -85.1953125 52 M85.1953125 52 C19.19904685062845 52, -46.7972187987431 52, -85.1953125 52 M-85.1953125 52 C-85.1953125 11.867447831761211, -85.1953125 -28.265104336477577, -85.1953125 -52 M-85.1953125 52 C-85.1953125 10.51641204102551, -85.1953125 -30.96717591794898, -85.1953125 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-69.1953125, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="69.195" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="69.195">_RequestRecorder</tspan></text></g></g><g class="members-group text" transform="translate(-69.1953125, 36)" /><g class="methods-group text" transform="translate(-69.1953125, 76)" /><g class="divider" style=""><path d="M-85.1953125 4 C-45.65373593115682 4.000232064273306, -6.112159362313633 4.0004641285466125, 85.1953125 4.001 M-85.1953125 4 C-35.82430840959992 4.000289751880953, 13.546695680800156 4.000579503761905, 85.1953125 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-85.1953125 28 C-30.642299006521043 28.00032016440748, 23.910714486957914 28.000640328814963, 85.1953125 28.001 M-85.1953125 28 C-34.662439990959705 28.000296570732743, 15.870432518080591 28.00059314146549, 85.1953125 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g></g></g><g class="root" transform="translate(1080.96875, 330.5)"><g class="clusters"><g class="cluster undefined" id="my-svg-entity_mapper" data-look="classic"><rect style="" x="8" y="8" width="277.296875" height="174" /><g class="cluster-label" transform="translate(93.8125, 8)"><text x="52.836" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="52.836">entity_mapper</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g class="node default" id="my-svg-classId-PubChemEntityMapper-11" data-look="classic" transform="translate(146.6484375, 95)"><g class="basic label-container outer-path"><path d="M-103.6484375 -52 L103.6484375 -52 L103.6484375 52 L-103.6484375 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-103.6484375 -52 C-46.93585713607189 -52, 9.776723227856223 -52, 103.6484375 -52 M-103.6484375 -52 C-58.1515122044807 -52, -12.654586908961406 -52, 103.6484375 -52 M103.6484375 -52 C103.6484375 -11.370716820499645, 103.6484375 29.25856635900071, 103.6484375 52 M103.6484375 -52 C103.6484375 -13.517552356688086, 103.6484375 24.96489528662383, 103.6484375 52 M103.6484375 52 C56.09549901113131 52, 8.542560522262619 52, -103.6484375 52 M103.6484375 52 C29.474716413866076 52, -44.69900467226785 52, -103.6484375 52 M-103.6484375 52 C-103.6484375 21.729015722402917, -103.6484375 -8.541968555194167, -103.6484375 -52 M-103.6484375 52 C-103.6484375 16.850159589640768, -103.6484375 -18.299680820718464, -103.6484375 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-87.6484375, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="87.648" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="87.648">PubChemEntityMapper</tspan></text></g></g><g class="members-group text" transform="translate(-87.6484375, 36)" /><g class="methods-group text" transform="translate(-87.6484375, 76)" /><g class="divider" style=""><path d="M-103.6484375 4 C-34.91787965225453 4.000331556169614, 33.812678195490946 4.000663112339226, 103.6484375 4.001 M-103.6484375 4 C-54.75889803957957 4.000235843108877, -5.86935857915914 4.000471686217754, 103.6484375 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-103.6484375 28 C-58.200592962839195 28.000219240374644, -12.75274842567839 28.000438480749285, 103.6484375 28.001 M-103.6484375 28 C-45.27133577059556 28.000281611103542, 13.105765958808874 28.000563222207084, 103.6484375 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g></g></g><g class="root" transform="translate(1408.265625, 330.5)"><g class="clusters"><g class="cluster undefined" id="my-svg-response_mapper" data-look="classic"><rect style="" x="8" y="8" width="303.859375" height="174" /><g class="cluster-label" transform="translate(95.4453125, 8)"><text x="64.484" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="64.484">response_mapper</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g class="node default" id="my-svg-classId-PubChemResponseMapper-13" data-look="classic" transform="translate(159.9296875, 95)"><g class="basic label-container outer-path"><path d="M-116.9296875 -52 L116.9296875 -52 L116.9296875 52 L-116.9296875 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-116.9296875 -52 C-57.12560279422234 -52, 2.6784819115553233 -52, 116.9296875 -52 M-116.9296875 -52 C-36.243807506741106 -52, 44.44207248651779 -52, 116.9296875 -52 M116.9296875 -52 C116.9296875 -31.181856876518506, 116.9296875 -10.363713753037011, 116.9296875 52 M116.9296875 -52 C116.9296875 -16.80959952359096, 116.9296875 18.380800952818078, 116.9296875 52 M116.9296875 52 C54.63926331846028 52, -7.65116086307944 52, -116.9296875 52 M116.9296875 52 C57.85218970982172 52, -1.2253080803565553 52, -116.9296875 52 M-116.9296875 52 C-116.9296875 18.011901216120854, -116.9296875 -15.976197567758291, -116.9296875 -52 M-116.9296875 52 C-116.9296875 21.098900131875162, -116.9296875 -9.802199736249676, -116.9296875 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-100.9296875, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="100.93" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="100.93">PubChemResponseMapper</tspan></text></g></g><g class="members-group text" transform="translate(-100.9296875, 36)" /><g class="methods-group text" transform="translate(-100.9296875, 76)" /><g class="divider" style=""><path d="M-116.9296875 4 C-52.44618201658065 4.000275736243131, 12.0373234668387 4.000551472486261, 116.9296875 4.001 M-116.9296875 4 C-55.177375526790115 4.000264057457493, 6.57493644641977 4.000528114914984, 116.9296875 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-116.9296875 28 C-24.25978420703629 28.00039626336679, 68.41011908592742 28.00079252673358, 116.9296875 28.001 M-116.9296875 28 C-33.46235266847812 28.000356912502788, 50.00498216304376 28.000713825005576, 116.9296875 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g></g></g><g class="node default" id="my-svg-classId-_PubChemClientFetchMixin-7" data-look="classic" transform="translate(1918, 425.5)"><g class="basic label-container outer-path"><path d="M-119.875 -52 L119.875 -52 L119.875 52 L-119.875 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-119.875 -52 C-56.60570818713737 -52, 6.663583625725266 -52, 119.875 -52 M-119.875 -52 C-61.060024280519585 -52, -2.2450485610391695 -52, 119.875 -52 M119.875 -52 C119.875 -17.739467033253, 119.875 16.521065933494, 119.875 52 M119.875 -52 C119.875 -22.17016920744043, 119.875 7.659661585119139, 119.875 52 M119.875 52 C61.63720227725734 52, 3.3994045545146747 52, -119.875 52 M119.875 52 C46.107207038830055 52, -27.66058592233989 52, -119.875 52 M-119.875 52 C-119.875 19.28542359166518, -119.875 -13.429152816669642, -119.875 -52 M-119.875 52 C-119.875 27.193636567639786, -119.875 2.387273135279571, -119.875 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-103.875, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="103.875" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="103.875">_PubChemClientFetch</tspan><tspan x="103.875" dy="16.8">Mixin</tspan></text></g></g><g class="members-group text" transform="translate(-103.875, 36)" /><g class="methods-group text" transform="translate(-103.875, 76)" /><g class="divider" style=""><path d="M-119.875 4 C-36.282408516885965 4.000348665657906, 47.31018296622807 4.000697331315814, 119.875 4.001 M-119.875 4 C-64.80317896087186 4.000229705197244, -9.731357921743722 4.0004594103944875, 119.875 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-119.875 28 C-33.530579752273184 28.00036014356725, 52.81384049545363 28.0007202871345, 119.875 28.001 M-119.875 28 C-70.57842354681895 28.00020561658583, -21.28184709363792 28.000411233171665, 119.875 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-_PubChemSearchFetchMixin-8" data-look="classic" transform="translate(2250.5859375, 425.5)"><g class="basic label-container outer-path"><path d="M-122.7109375 -52 L122.7109375 -52 L122.7109375 52 L-122.7109375 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-122.7109375 -52 C-51.88969079459923 -52, 18.931555910801535 -52, 122.7109375 -52 M-122.7109375 -52 C-35.47898540609103 -52, 51.752966687817946 -52, 122.7109375 -52 M122.7109375 -52 C122.7109375 -17.197809216486533, 122.7109375 17.604381567026934, 122.7109375 52 M122.7109375 -52 C122.7109375 -22.4900722505187, 122.7109375 7.019855498962599, 122.7109375 52 M122.7109375 52 C65.30351455390841 52, 7.896091607816828 52, -122.7109375 52 M122.7109375 52 C33.674618149036746 52, -55.36170120192651 52, -122.7109375 52 M-122.7109375 52 C-122.7109375 30.597823383354054, -122.7109375 9.195646766708109, -122.7109375 -52 M-122.7109375 52 C-122.7109375 26.101746287754523, -122.7109375 0.20349257550904554, -122.7109375 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-106.7109375, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="106.711" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="106.711">_PubChemSearchFetch</tspan><tspan x="106.711" dy="16.8">Mixin</tspan></text></g></g><g class="members-group text" transform="translate(-106.7109375, 36)" /><g class="methods-group text" transform="translate(-106.7109375, 76)" /><g class="divider" style=""><path d="M-122.7109375 4 C-25.727147682259016 4.0003951717417925, 71.25664213548197 4.000790343483585, 122.7109375 4.001 M-122.7109375 4 C-35.886582362701546 4.0003537759424965, 50.93777277459691 4.000707551884992, 122.7109375 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-122.7109375 28 C-65.40461558196142 28.000233501279858, -8.09829366392286 28.00046700255972, 122.7109375 28.001 M-122.7109375 28 C-46.50839650024615 28.000310496124275, 29.6941444995077 28.00062099224855, 122.7109375 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-PubChemAdapter-9" data-look="classic" transform="translate(1409.04296875, 962.5)"><g class="basic label-container outer-path"><path d="M-82.5390625 -52 L82.5390625 -52 L82.5390625 52 L-82.5390625 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-82.5390625 -52 C-37.31425796847936 -52, 7.9105465630412795 -52, 82.5390625 -52 M-82.5390625 -52 C-20.257324484410105 -52, 42.02441353117979 -52, 82.5390625 -52 M82.5390625 -52 C82.5390625 -11.082374264719498, 82.5390625 29.835251470561005, 82.5390625 52 M82.5390625 -52 C82.5390625 -25.431764006516424, 82.5390625 1.1364719869671518, 82.5390625 52 M82.5390625 52 C28.498410549864452 52, -25.542241400271095 52, -82.5390625 52 M82.5390625 52 C21.50052809114643 52, -39.53800631770714 52, -82.5390625 52 M-82.5390625 52 C-82.5390625 14.783852876793524, -82.5390625 -22.43229424641295, -82.5390625 -52 M-82.5390625 52 C-82.5390625 16.900214778144978, -82.5390625 -18.199570443710044, -82.5390625 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-66.5390625, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="66.539" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="66.539">PubChemAdapter</tspan></text></g></g><g class="members-group text" transform="translate(-66.5390625, 36)" /><g class="methods-group text" transform="translate(-66.5390625, 76)" /><g class="divider" style=""><path d="M-82.5390625 4 C-18.969016966693076 4.000385090668636, 44.60102856661385 4.000770181337271, 82.5390625 4.001 M-82.5390625 4 C-34.575714510633055 4.000290549386779, 13.387633478733889 4.000581098773558, 82.5390625 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-82.5390625 28 C-32.83360460223901 28.00030110263185, 16.871853295521987 28.000602205263693, 82.5390625 28.001 M-82.5390625 28 C-35.173359755684686 28.000286929008578, 12.192342988630628 28.00057385801716, 82.5390625 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-PubChemAdapterModelMixin-10" data-look="classic" transform="translate(900.0859375, 425.5)"><g class="basic label-container outer-path"><path d="M-126.8828125 -52 L126.8828125 -52 L126.8828125 52 L-126.8828125 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-126.8828125 -52 C-67.36362739652097 -52, -7.844442293041951 -52, 126.8828125 -52 M-126.8828125 -52 C-39.04039269228397 -52, 48.802027115432054 -52, 126.8828125 -52 M126.8828125 -52 C126.8828125 -22.861462593804042, 126.8828125 6.277074812391916, 126.8828125 52 M126.8828125 -52 C126.8828125 -28.646655468513103, 126.8828125 -5.293310937026206, 126.8828125 52 M126.8828125 52 C64.2981179154519 52, 1.7134233309037938 52, -126.8828125 52 M126.8828125 52 C41.85976555112636 52, -43.163281397747284 52, -126.8828125 52 M-126.8828125 52 C-126.8828125 28.99453384394648, -126.8828125 5.9890676878929625, -126.8828125 -52 M-126.8828125 52 C-126.8828125 27.538609404899937, -126.8828125 3.0772188097998736, -126.8828125 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-110.8828125, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="110.883" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="110.883">PubChemAdapterModelMixin</tspan></text></g></g><g class="members-group text" transform="translate(-110.8828125, 36)" /><g class="methods-group text" transform="translate(-110.8828125, 76)" /><g class="divider" style=""><path d="M-126.8828125 4 C-75.4543429828183 4.000202661292353, -24.025873465636607 4.000405322584705, 126.8828125 4.001 M-126.8828125 4 C-60.81339886441512 4.0002603560416645, 5.25601477116976 4.00052071208333, 126.8828125 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-126.8828125 28 C-53.6105864692787 28.000288739761466, 19.6616395614426 28.00057747952293, 126.8828125 28.001 M-126.8828125 28 C-62.1273273209319 28.00025517831731, 2.6281578581362055 28.000510356634624, 126.8828125 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g><g class="node default" id="my-svg-classId-PubChemFetchStrategies-12" data-look="classic" transform="translate(2250.5859375, 962.5)"><g class="basic label-container outer-path"><path d="M-111.625 -52 L111.625 -52 L111.625 52 L-111.625 52" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M-111.625 -52 C-31.892325232673045 -52, 47.84034953465391 -52, 111.625 -52 M-111.625 -52 C-40.69485037150572 -52, 30.235299256988554 -52, 111.625 -52 M111.625 -52 C111.625 -12.532659558917473, 111.625 26.934680882165054, 111.625 52 M111.625 -52 C111.625 -15.25240162683184, 111.625 21.49519674633632, 111.625 52 M111.625 52 C22.45849415553883 52, -66.70801168892234 52, -111.625 52 M111.625 52 C65.52259595860076 52, 19.42019191720152 52, -111.625 52 M-111.625 52 C-111.625 17.256099689304847, -111.625 -17.487800621390306, -111.625 -52 M-111.625 52 C-111.625 22.05834971562858, -111.625 -7.88330056874284, -111.625 -52" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="annotation-group text" transform="translate(0, -20)" /><g class="label-group text" transform="translate(-95.625, -20)"><g class="label" style="font-weight: bolder" transform="translate(0,-12)"><text x="95.625" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="95.625">PubChemFetchStrategie</tspan><tspan x="95.625" dy="16.8">s</tspan></text></g></g><g class="members-group text" transform="translate(-95.625, 36)" /><g class="methods-group text" transform="translate(-95.625, 76)" /><g class="divider" style=""><path d="M-111.625 4 C-48.279835154058304 4.00028374093996, 15.065329691883392 4.000567481879919, 111.625 4.001 M-111.625 4 C-29.353017266199217 4.000368519519524, 52.918965467601566 4.000737039039048, 111.625 4.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="divider" style=""><path d="M-111.625 28 C-55.99387688898547 28.00024918756153, -0.3627537779709371 28.000498375123055, 111.625 28.001 M-111.625 28 C-54.91098202463377 28.000254038154424, 1.8030359507324647 28.00050807630885, 111.625 28.001" stroke="#2563eb" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g></g></g></g></g><defs><filter id="my-svg-drop-shadow" height="130%" width="130%"><feDropShadow dx="4" dy="4" stdDeviation="0" flood-opacity="0.06" flood-color="#000000" /></filter></defs><defs><filter id="my-svg-drop-shadow-small" height="150%" width="150%"><feDropShadow dx="2" dy="2" stdDeviation="0" flood-opacity="0.06" flood-color="#000000" /></filter></defs><linearGradient id="my-svg-gradient" gradientUnits="objectBoundingBox" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#7c3aed" stop-opacity="1" /><stop offset="100%" stop-color="#dc2626" stop-opacity="1" /></linearGradient><style>/*
+ * Пользовательские стили диаграмм BioETL (структурированная копия)
+ * Источник: custom.css
+ * Цель: сгруппировать правила по типам элементов и документировать назначение каждого CSS-параметра.
+ */
+
+/* =========================================================
+ * 1) Глобальная типографика и базовое поведение текста
+ * ========================================================= */
+svg {
+    /* Задаёт основной стек шрифтов для всего текста в SVG. */
+    font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Oxygen, Ubuntu, sans-serif;
+}
+
+
+
+/* =========================================================
+ * 2) Общая геометрия узлов (для нескольких типов диаграмм)
+ * ========================================================= */
+.node rect,
+.node circle,
+.node ellipse,
+.node polygon,
+.node path {
+    /* Единая толщина контура для фигур узлов. */
+    stroke-width: 1.5px !important;
+    /* Скругляет углы по горизонтали для более мягкого вида. */
+    rx: 8;
+    /* Скругляет углы по вертикали в паре с rx. */
+    ry: 8;
+    /* Добавляет лёгкую тень и отделяет узлы от фона. */
+    filter:  none; /*  drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.05));*/
+}
+
+/* =========================================================
+ * 3) Контейнеры subgraph / cluster
+ * ========================================================= */
+.cluster rect,
+.cluster path {
+    /* Увеличивает радиус углов у контейнеров-групп. */
+    rx: 10;
+    /* Поддерживает симметрию скругления по вертикали. */
+    ry: 10;
+    /* Нейтральная заливка контейнера для снижения визуального шума. */
+    fill: #f8fafc;
+    /* Приглушённая обводка, чтобы границы были заметны, но не доминировали. */
+    stroke: #94a3b8;
+    /* Толщина границы контейнера в тон большинству узлов. */
+    stroke-width: 1.5px;
+    /* Убирает пунктир у рамок контейнеров. */
+    stroke-dasharray: none;
+    /* Делает фон контейнера полностью непрозрачным. */
+    fill-opacity: 1;
+    /* Отключает тень контейнера, чтобы акцент оставался на узлах. */
+    filter: none;
+}
+
+.cluster text {
+    /* Нормальный вес шрифта для заголовков групп. */
+    font-weight: 400;
+    /* Увеличенный размер заголовка относительно текста узлов. */
+    font-size: 16px;
+}
+
+/* =========================================================
+ * 4) Стили линий связей (edges/links)
+ * ========================================================= */
+.edgePath .path {
+    /* Делает основные ребра более заметными в плотных графах. */
+    stroke-width: 2.5px;
+    /* Скругляет соединения сегментов линий. */
+    stroke-linejoin: round;
+    /* Скругляет окончания линий. */
+    stroke-linecap: round;
+}
+
+.edgePath path,
+.flowchart-link,
+.relation,
+.messageLine0,
+.messageLine1,
+.transition path {
+    /* Унифицированные скруглённые соединения для всех типов линий. */
+    stroke-linejoin: round;
+    /* Унифицированные скруглённые окончания для всех типов линий. */
+    stroke-linecap: round;
+}
+
+.transition path {
+    /* Выравнивает толщину переходов state diagram с основными ребрами. */
+    stroke-width: 2.5px;
+}
+
+/* =========================================================
+ * 5) Подписи ребер и fallback-текст
+ * ========================================================= */
+.edgeLabel {
+    /* Компактный размер шрифта для подписей на связях. */
+    font-size: 12px;
+    /* Плотная межстрочность для экономии места. */
+    line-height: 1.1;
+    /* Базовый непрозрачный фон под подписью. */
+    background-color: #ffffff;
+    /* Небольшие внутренние отступы вокруг текста. */
+    padding: 1px 3px;
+    /* Мягкое скругление фона подписи. */
+    border-radius: 2px;
+}
+
+.edgeLabel span,
+.edgeLabel p,
+text.fo-fallback {
+    /* Принудительный тёмный fill для контраста в SVG-рендерах. */
+    fill: #111827 !important;
+    /* Принудительный тёмный цвет для HTML-подписей. */
+    color: #111827 !important;
+    /* Полная непрозрачность текста. */
+    opacity: 1 !important;
+    /* Компактная межстрочность для многострочных подписей. */
+    line-height: 1.1;
+    /* Убирает стандартные внешние отступы HTML-параграфов. */
+    margin: 0;
+    /* Убирает стандартные внутренние отступы HTML-параграфов. */
+    padding: 0;
+}
+
+.edgeLabel .labelBkg,
+.labelBkg {
+    /* Жёстко задаёт белый фон под текстом подписей. */
+    background-color: #ffffff !important;
+    /* Делает фон полностью непрозрачным во всех просмотрщиках. */
+    opacity: 1 !important;
+}
+
+.edgeLabel rect {
+    /* Переопределяет полупрозрачный фон по умолчанию у Mermaid. */
+    opacity: 1 !important;
+    /* Жёстко фиксирует белую заливку прямоугольника под подписью. */
+    fill: #ffffff !important;
+}
+
+/* =========================================================
+ * 6) Элементы sequence diagram
+ * ========================================================= */
+.actor {
+    /* Толщина границы actor-блоков. */
+    stroke-width: 1.5px;
+    /* Скругление углов actor-блоков по горизонтали. */
+    rx: 4;
+    /* Скругление углов actor-блоков по вертикали. */
+    ry: 4;
+}
+
+.messageLine0,
+.messageLine1 {
+    /* Толщина линий сообщений в sequence diagram. */
+    stroke-width: 1.6px;
+}
+
+.messageText {
+    /* Базовый размер текста сообщений. */
+    font-size: 13px;
+}
+
+.activation0 {
+    /* Более тонкая линия activation bar, чтобы не перегружать схему. */
+    stroke-width: 1px;
+}
+
+.note {
+    /* Скругление углов заметки по горизонтали. */
+    rx: 4;
+    /* Скругление углов заметки по вертикали. */
+    ry: 4;
+    /* Тонкая граница для вторичных блоков. */
+    stroke-width: 1px;
+    /* Лёгкая тень для визуального отделения заметок. */
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+/* =========================================================
+ * 7) Базовые элементы class diagram
+ * ========================================================= */
+g.classGroup rect {
+    /* Скругление углов class box по горизонтали. */
+    rx: 10;
+    /* Скругление углов class box по вертикали. */
+    ry: 10;
+    /* Толщина границы class box. */
+    stroke-width: 1.5px;
+    /* Мягкая тень у class box без агрессивного контраста. */
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+g.classGroup text {
+    /* Базовый размер текста внутри class diagram. */
+    font-size: 14px;
+    padding: 10px 10px;
+}
+
+g.classGroup line {
+    /* Толщина внутренних разделителей класса. */
+    stroke-width: 1px;
+}
+
+.relation {
+    /* Толщина связей между классами на уровне основных ребер. */
+    stroke-width: 2.5px;
+}
+
+/* =========================================================
+ * 8) Типографика HTML-лейблов class diagram
+ * ========================================================= */
+g.label-group .nodeLabel {
+    /* Увеличенный размер названия класса для иерархии. */
+    font-size: 16px !important;
+    /* Полужирный акцент на имени класса. */
+    font-weight: 200 !important;
+    /* Лёгкое межбуквенное расстояние для читаемости заголовка. */
+    letter-spacing: 0.01em;
+}
+
+g.annotation-group .nodeLabel {
+    /* Уменьшенный размер для стереотипов/аннотаций. */
+    font-size: 11px !important;
+    /* Курсив для визуального отделения аннотаций. */
+    font-style: italic !important;
+    /* Небольшое ослабление контраста вторичного текста. */
+    opacity: 0.8;
+}
+
+g.members-group .nodeLabel,
+g.methods-group .nodeLabel {
+    /* Компактный размер для атрибутов и методов. */
+    font-size: 12px !important;
+    /* Нормальный вес шрифта для плотного структурного текста. */
+    font-weight: 400 !important;
+}
+
+/* =========================================================
+ * 9) Помощники размеров foreignObject (class/flowchart)
+ * ========================================================= */
+g.members-group foreignObject,
+g.methods-group foreignObject {
+    /* Минимальная высота областей members/methods. */
+    min-height: 40px;
+}
+
+.node foreignObject &gt; div,
+g.classGroup foreignObject &gt; div {
+    /* Стабилизирует вычисление размеров с учётом отступов/границ. */
+    box-sizing: border-box;
+}
+
+.node.size-sm foreignObject &gt; div {
+    /* Минимальная высота для малого размерного уровня узла. */
+    min-height: 80px;
+    /* Минимальная ширина для малого размерного уровня узла. */
+    min-width: 180px;
+}
+
+.node.size-md foreignObject &gt; div {
+    /* Минимальная высота для среднего размерного уровня узла. */
+    min-height: 140px;
+    /* Минимальная ширина для среднего размерного уровня узла. */
+    min-width: 260px;
+}
+
+.node.size-lg foreignObject &gt; div {
+    /* Минимальная высота для большого размерного уровня узла. */
+    min-height: 200px;
+    /* Минимальная ширина для большого размерного уровня узла. */
+    min-width: 340px;
+}
+
+/* =========================================================
+ * 10) Элементы state diagram
+ * ========================================================= */
+g.stateGroup rect {
+    /* Скругление углов контейнеров состояний по горизонтали. */
+    rx: 8;
+    /* Скругление углов контейнеров состояний по вертикали. */
+    ry: 8;
+}
+
+.statediagram-state rect {
+    /* Скругление углов узлов состояния по горизонтали. */
+    rx: 8;
+    /* Скругление углов узлов состояния по вертикали. */
+    ry: 8;
+    /* Толщина границы узла состояния. */
+    stroke-width: 1.5px;
+    /* Лёгкая тень для визуального отделения state box. */
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+}
+
+/* =========================================================
+ * 11) Элементы ER diagram
+ * ========================================================= */
+.er.entityBox {
+    /* Толщина границы сущности ER-диаграммы. */
+    stroke-width: 1.5px;
+    /* Скругление углов сущности по горизонтали. */
+    rx: 4;
+    /* Скругление углов сущности по вертикали. */
+    ry: 4;
+    /* Лёгкая тень для отделения блоков сущностей. */
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+}
+
+/* =========================================================
+ * 12) Узлы mindmap
+ * ========================================================= */
+.mindmap-node rect,
+.mindmap-node circle {
+    /* Толщина контура узлов mindmap. */
+    stroke-width: 1.5px;
+    /* Чуть более выраженная тень для плотных радиальных веток. */
+    filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* =========================================================
+ * 13) Маркеры стрелок
+ * ========================================================= */
+marker path {
+    /* Единый нейтральный цвет наконечников стрелок. */
+    fill: #475569;
+}
+
+/* =========================================================
+ * 14) Цветовая карта архитектурных слоёв (fallback-селекторы)
+ * ========================================================= */
+[id*="Domain"] &gt; rect,
+[id*="Domain"] &gt; path {
+    /* Цвет фона для доменного слоя. */
+    fill: #f5f3ff !important;
+    /* Цвет границы для доменного слоя. */
+    stroke: #7c3aed !important;
+}
+
+.cluster[id*="Domain"] &gt; rect,
+.cluster[id*="Domain"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Application"] &gt; rect,
+[id*="Application"] &gt; path {
+    /* Цвет фона для application-слоя. */
+    fill: #f0fdf4 !important;
+    /* Цвет границы для application-слоя. */
+    stroke: #16a34a !important;
+}
+
+.cluster[id*="Application"] &gt; rect,
+.cluster[id*="Application"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Infrastructure"] &gt; rect,
+[id*="Infrastructure"] &gt; path {
+    /* Цвет фона для infrastructure-слоя. */
+    fill: #fff1f2 !important;
+    /* Цвет границы для infrastructure-слоя. */
+    stroke: #dc2626 !important;
+}
+
+.cluster[id*="Infrastructure"] &gt; rect,
+.cluster[id*="Infrastructure"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Composition"] &gt; rect,
+[id*="Composition"] &gt; path {
+    /* Цвет фона для composition-слоя. */
+    fill: #fff7ed !important;
+    /* Цвет границы для composition-слоя. */
+    stroke: #f59e0b !important;
+}
+
+.cluster[id*="Composition"] &gt; rect,
+.cluster[id*="Composition"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Interfaces"] &gt; rect,
+[id*="Interfaces"] &gt; path {
+    /* Цвет фона для слоя интерфейсов. */
+    fill: #eff6ff !important;
+    /* Цвет границы для слоя интерфейсов. */
+    stroke: #2563eb !important;
+}
+
+.cluster[id*="Interfaces"] &gt; rect,
+.cluster[id*="Interfaces"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="External"] &gt; rect,
+[id*="External"] &gt; path {
+    /* Цвет фона для внешних систем. */
+    fill: #f1f5f9 !important;
+    /* Цвет границы для внешних систем. */
+    stroke: #64748b !important;
+}
+
+.cluster[id*="External"] &gt; rect,
+.cluster[id*="External"] &gt; path {
+    fill: #ffffff !important;
+}
+
+/* Белая подложка под подписи всех архитектурных/medallion слоёв */
+g.cluster[id*="Domain"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Application"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Infrastructure"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Composition"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Interfaces"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="External"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Bronze"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Silver"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Gold"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Quarantine"] .cluster-label foreignObject &gt; div {
+    background: #ffffff !important;
+    padding: 0 6px !important;
+    border-radius: 4px;
+}
+
+/* Fallback для рендеров без foreignObject: не рисуем толстую обводку */
+g.cluster[id*="Domain"] .cluster-label text.fo-fallback,
+g.cluster[id*="Application"] .cluster-label text.fo-fallback,
+g.cluster[id*="Infrastructure"] .cluster-label text.fo-fallback,
+g.cluster[id*="Composition"] .cluster-label text.fo-fallback,
+g.cluster[id*="Interfaces"] .cluster-label text.fo-fallback,
+g.cluster[id*="External"] .cluster-label text.fo-fallback,
+g.cluster[id*="Bronze"] .cluster-label text.fo-fallback,
+g.cluster[id*="Silver"] .cluster-label text.fo-fallback,
+g.cluster[id*="Gold"] .cluster-label text.fo-fallback,
+g.cluster[id*="Quarantine"] .cluster-label text.fo-fallback {
+    fill: #111827 !important;
+    stroke: none !important;
+}
+
+/* =========================================================
+ * 15) Цветовая карта слоёв Medallion
+ * ========================================================= */
+[id*="Bronze"] &gt; rect,
+[id*="Bronze"] &gt; path {
+    /* Цвет фона Bronze-слоя. */
+    fill: #fff7ed !important;
+    /* Цвет границы Bronze-слоя. */
+    stroke: #f59e0b !important;
+}
+
+[id*="Silver"] &gt; rect,
+[id*="Silver"] &gt; path {
+    /* Цвет фона Silver-слоя. */
+    fill: #f8fafc !important;
+    /* Цвет границы Silver-слоя. */
+    stroke: #475569 !important;
+}
+
+[id*="Gold"] &gt; rect,
+[id*="Gold"] &gt; path {
+    /* Цвет фона Gold-слоя. */
+    fill: #fefce8 !important;
+    /* Цвет границы Gold-слоя. */
+    stroke: #ca8a04 !important;
+}
+
+[id*="Quarantine"] &gt; rect,
+[id*="Quarantine"] &gt; path {
+    /* Цвет фона для карантинных/проблемных потоков данных. */
+    fill: #ffe4e6 !important;
+    /* Цвет границы для карантинных/проблемных потоков данных. */
+    stroke: #e11d48 !important;
+}
+/* Нормализует вес текста в узлах и заголовках слоёв (без полужирного акцента). */
+.node .label text,
+.node .label tspan,
+.node .label .nodeLabel,
+text.fo-fallback {
+    stroke: none !important;
+    stroke-width: 0 !important;
+    fill: #111827 !important;
+    font-weight: 400 !important;
+}
+/* Single text layer (fallback-only) */
+text.fo-fallback {
+    display: inline !important;
+}
+
+foreignObject {
+    display: none !important;
+}
+</style></svg>

@@ -1,0 +1,164 @@
+%% BioETL — Class Diagram: Domain Port Method Catalog (L2)
+%% Detailed method surface extracted from 01-domain-ports L1 overview.
+
+%% @version 1.0.0
+%% @date    2026-03-02
+%% @type    classDiagram
+%% @level   Class / Interface
+%% @nodes   13
+
+classDiagram
+    direction TB
+
+    class DataSourcePort {
+        <<Protocol>>
+        +fetch(entity_type, limit, query, filter_ids, filter_field): AsyncIterator~dict~
+        +health_check(): HealthCheckResult
+        +aclose(): None
+        +\_\_aenter\_\_(): Self
+        +\_\_aexit\_\_(...): None
+    }
+
+    class FilterableDataSourcePort {
+        <<Protocol>>
+        +fetch_filtered(entity_type, filter_ids, filter_field, limit): AsyncIterator~dict~
+        +fetch_multi_filtered(entity_type, filters, limit): AsyncIterator~dict~
+        +fetch_filtered_with_fallback(entity_type, ids, field, limit): AsyncIterator~dict~
+    }
+
+    class StorageLifecyclePort {
+        <<Protocol>>
+        +aclose(): None
+        +health_check(): HealthCheckResult
+    }
+
+    class BronzeStoragePort {
+        <<Protocol>>
+        +write_bronze(records, provider, entity, date, batch_id, run_id, run_type, ingestion_ts): BronzeWriteResult
+        +cleanup_bronze(cutoff_date, dry_run): dict~str, int~
+    }
+
+    class SilverStoragePort {
+        <<Protocol>>
+        +write_silver(request): SilverWriteResult
+        +read_silver(table_name, columns, limit): DataFrame
+        +clear_silver(table_name): None
+    }
+
+    class GoldStoragePort {
+        <<Protocol>>
+        +write_gold(records, table_name, schema): None
+        +clear_gold(table_name): None
+    }
+
+    class MergedStoragePort {
+        <<Protocol>>
+        +write_silver(records, table_name, metadata): SilverWriteResult
+        +write_gold(records, table_name, schema): None
+        +vacuum(table_name, retention_hours): None
+        +archive(table_name, target_path): None
+    }
+
+    class LockPort {
+        <<Protocol>>
+        +acquire(key, owner_id, ttl): FencingToken
+        +release(key, owner_id): None
+        +heartbeat(key, owner_id): None
+        +validate_owner(key, owner_id): bool
+        +validate_fencing_token(token): bool
+    }
+
+    class CheckpointPort {
+        <<Protocol>>
+        +save(key, data): None
+        +load(key): dict | None
+        +list_all(): list
+        +delete(key): None
+    }
+
+    class QuarantinePort {
+        <<Protocol>>
+        +write(records, pipeline, error_code): None
+        +inspect(pipeline, limit): list
+        +get_stats(pipeline): dict
+        +replay(pipeline, filter_fn): int
+        +purge(pipeline, before): int
+        +update_status(payload_hash, status): None
+    }
+
+    class LoggerPort {
+        <<Protocol>>
+        +bind(**kwargs): LoggerPort
+        +info(msg, **fields): None
+        +warning(msg, **fields): None
+        +error(msg, **fields): None
+        +debug(msg, **fields): None
+        +exception(msg, **fields): None
+    }
+
+    class MetricsPort {
+        <<Protocol>>
+        +observe_histogram(name, value, labels): None
+        +increment_counter(name, labels): None
+        +set_gauge(name, value, labels): None
+        +close(): None
+    }
+
+    class DeltaReaderPort {
+        <<Protocol>>
+        +read_table(path, columns, limit): DataFrame
+        +get_schema(path): Schema
+        +get_row_count(path): int
+    }
+
+    class InputFilterPort {
+        <<Protocol>>
+        +load_filter_ids(path, column): FilterLoadResult
+        +load_multi_column_filter(path, columns): FilterLoadResult
+        +load_filter_with_fallback(path, column, fallback): FilterLoadResult
+    }
+
+    class DQMonitorPort {
+        <<Protocol>>
+        +add_metric(name, value): None
+        +check_quality(): DQResult
+        +update_baseline_from_metrics(): None
+        +get_baseline_stats(): dict
+    }
+
+    class CircuitBreakerPort {
+        <<Protocol>>
+        +get_state(): CircuitBreakerState
+        +get_failure_count(): int
+        +call(fn): T
+        +reset(): None
+    }
+
+    class RateLimiterPort {
+        <<Protocol>>
+        +acquire(tokens): None
+        +try_acquire(): bool
+        +available_tokens(): int
+    }
+
+    DataSourcePort <|-- FilterableDataSourcePort
+
+    note for DataSourcePort "L2 catalog complements 01-domain-ports.mmd"
+
+    style DataSourcePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style FilterableDataSourcePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style StorageLifecyclePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style BronzeStoragePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style SilverStoragePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style GoldStoragePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style MergedStoragePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style LockPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style CheckpointPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style QuarantinePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style LoggerPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style MetricsPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style DeltaReaderPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style InputFilterPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style DQMonitorPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style CircuitBreakerPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style RateLimiterPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px

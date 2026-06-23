@@ -1,0 +1,87 @@
+%% Title: Full Medallion Data Flow with Lineage and DQ
+%% Covers: RULES.md §2.1 (Medallion Architecture), §2.3 (Quarantine), §3.1 (DQ)
+%% Updated: 2026-02-17
+%% Components: BronzeWriter, SilverWriter, GoldWriter, DQMonitorPort, QuarantineManager, LineageLog
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    flowchart
+%% @level   Mixed (System / Component / Class)
+%% @nodes   16
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+%% @uniform width=336 height=168 max_title_len=20 max_desc_lines=7
+flowchart LR
+    subgraph Sources["External Sources"]
+        ChEMBL["ChEMBL API"]
+        PubChem["PubChem API"]
+        UniProt["UniProt API"]
+        PubMed["PubMed API"]
+        CrossRef["CrossRef API"]
+        OpenAlex["OpenAlex API"]
+        S2["Semantic Scholar API"]
+    end
+
+    subgraph Bronze_Layer["Bronze Layer"]
+        direction TB
+        BronzeWriter["BronzeWriter"]
+        Bronze[("Bronze Storage<br/>JSONL + zstd<br/>retention: 90d<br/>path: bronze/v1/{provider}/{entity}/{date}")]
+    end
+
+    subgraph Silver_Layer["Silver Layer"]
+        direction TB
+        SilverWriter["SilverWriter"]
+        Silver[("Silver Storage<br/>Delta Lake<br/>validation: Pandera soft<br/>merge/upsert by content_hash")]
+    end
+
+    subgraph Gold_Layer["Gold Layer"]
+        direction TB
+        GoldWriter["GoldWriter"]
+        Gold[("Gold Storage<br/>Delta/Parquet<br/>validation: Pandera strict<br/>strategy: SCD2/append")]
+    end
+
+    subgraph DQ_Branch["Data Quality Branch"]
+        DQValidator["DQ Validator<br/>━━━━━━━━━━━━━━━<br/>⚠️ Soft: >5% errors<br/>❌ Hard: >20% errors"]
+    end
+
+    subgraph Lineage["Lineage Tracking"]
+    end
+
+    %% Main flow
+    ChEMBL --> BronzeWriter
+    PubChem --> BronzeWriter
+    UniProt --> BronzeWriter
+    PubMed --> BronzeWriter
+    CrossRef --> BronzeWriter
+    OpenAlex --> BronzeWriter
+    S2 --> BronzeWriter
+
+    BronzeWriter --> Bronze
+    Bronze --> SilverWriter
+
+    SilverWriter --> DQValidator
+    DQValidator -->|"✅ Pass"| Silver
+    DQValidator -->|"❌ Fail"| Quarantine
+
+    Silver --> GoldWriter
+    GoldWriter --> Gold
+
+    %% Lineage tracking
+    Bronze -.->|"batch_id"| LineageLog
+    Silver -.->|"version"| LineageLog
+
+    %% Styling
+    style Bronze fill:#fff7ed,stroke:#f59e0b,color:#212121
+    style Silver fill:#f1f5f9,stroke:#475569,color:#212121
+    style Gold fill:#fefce8,stroke:#ca8a04,color:#212121
+    style Quarantine fill:#ffe4e6,stroke:#dc2626,color:#212121
+    style LineageLog fill:#eff6ff,stroke:#2563eb,color:#212121
