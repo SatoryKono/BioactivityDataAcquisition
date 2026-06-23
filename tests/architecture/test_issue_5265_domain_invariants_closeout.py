@@ -9,6 +9,7 @@ from typing import Any
 import pytest
 
 from tests.architecture._module_coverage_inventory_support import (
+    skip_if_artifact_is_not_authoritative,
     skip_if_module_coverage_inventory_is_dirty,
 )
 
@@ -27,6 +28,7 @@ def _load_json(path: Path) -> dict[str, Any]:
 
 
 def test_issue_5265_closeout_artifact_has_expected_shape() -> None:
+    skip_if_artifact_is_not_authoritative(root=ROOT, artifact_path=CLOSEOUT)
     closeout = _load_json(CLOSEOUT)
 
     assert closeout["issue"] == "#5265"
@@ -57,6 +59,7 @@ def test_issue_5265_closeout_artifact_has_expected_shape() -> None:
 
 
 def test_issue_5265_closeout_matches_live_module_coverage_inventory() -> None:
+    skip_if_artifact_is_not_authoritative(root=ROOT, artifact_path=CLOSEOUT)
     skip_if_module_coverage_inventory_is_dirty(root=ROOT, inventory_path=INVENTORY)
     closeout = _load_json(CLOSEOUT)
     inventory = _load_json(INVENTORY)

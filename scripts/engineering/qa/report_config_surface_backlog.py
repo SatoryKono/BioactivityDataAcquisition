@@ -97,6 +97,140 @@ CATEGORY_GOVERNANCE: dict[str, dict[str, str]] = {
 
 DUPLICATION_CLUSTER_GOVERNANCE: tuple[tuple[str, dict[str, str]], ...] = (
     (
+        "pipelines",
+        {
+            "owner": "@bioetl-dq",
+            "decision": "retain_shared_quality_shadow_analysis_policy",
+            "linked_issue": "#5568",
+            "review_date": "2026-09-30",
+            "rationale": (
+                "Quality-registry shadow-analysis blocks intentionally share "
+                "provider-family boundary policy; retained duplication stays "
+                "visible in the config backlog and must not grow without review."
+            ),
+        },
+    ),
+    (
+        "$defs.FieldValidationConfig",
+        {
+            "owner": "@bioetl-contracts",
+            "decision": "retain_generated_schema_contract",
+            "linked_issue": "#5568",
+            "review_date": "2026-09-30",
+            "rationale": (
+                "Field validation definitions are duplicated by generated schema "
+                "artifacts; retention is contract-owned rather than unresolved "
+                "review-required debt."
+            ),
+        },
+    ),
+    (
+        "$defs.CrossFieldValidationConfig",
+        {
+            "owner": "@bioetl-contracts",
+            "decision": "retain_generated_schema_contract",
+            "linked_issue": "#5568",
+            "review_date": "2026-09-30",
+            "rationale": (
+                "Cross-field validation definitions are generated schema "
+                "contract mirrors and remain explicit contract-owned duplication."
+            ),
+        },
+    ),
+    (
+        "$defs.ConditionalValidationConfig",
+        {
+            "owner": "@bioetl-contracts",
+            "decision": "retain_generated_schema_contract",
+            "linked_issue": "#5568",
+            "review_date": "2026-09-30",
+            "rationale": (
+                "Conditional validation definitions are generated schema "
+                "contract mirrors and remain explicit contract-owned duplication."
+            ),
+        },
+    ),
+    (
+        "$defs.DQReportYamlConfig",
+        {
+            "owner": "@bioetl-dq",
+            "decision": "retain_generated_dq_schema_contract",
+            "linked_issue": "#5568",
+            "review_date": "2026-09-30",
+            "rationale": (
+                "DQ report YAML schema definitions are duplicated by generated "
+                "contract artifacts and remain DQ-owned until schema generation "
+                "is consolidated."
+            ),
+        },
+    ),
+    (
+        "$defs.ColumnGroupSchema",
+        {
+            "owner": "@bioetl-contracts",
+            "decision": "retain_generated_schema_contract",
+            "linked_issue": "#5568",
+            "review_date": "2026-09-30",
+            "rationale": (
+                "Column-group schema definitions are generated contract mirrors; "
+                "the backlog keeps them visible without leaving them review-free."
+            ),
+        },
+    ),
+    (
+        "$defs.GoldFiltersConfig",
+        {
+            "owner": "@bioetl-contracts",
+            "decision": "retain_generated_gold_filter_schema_contract",
+            "linked_issue": "#5568",
+            "review_date": "2026-09-30",
+            "rationale": (
+                "Gold filter schema properties are generated contract surfaces "
+                "and stay contract-owned until the generated definitions collapse."
+            ),
+        },
+    ),
+    (
+        "pipeline.sink.gold",
+        {
+            "owner": "@bioetl-config",
+            "decision": "retain_shared_entity_gold_sink_policy",
+            "linked_issue": "#5568",
+            "review_date": "2026-09-30",
+            "rationale": (
+                "Gold sink settings are shared intentionally across matching "
+                "entity configs to preserve deterministic sink layout policy."
+            ),
+        },
+    ),
+    (
+        "entries.scripts/engineering/qa/report_domain_io_taint_inventory.py",
+        {
+            "owner": "@bioetl-architecture",
+            "decision": "retain_shared_lifecycle_registry_entry",
+            "linked_issue": "#5568",
+            "review_date": "2026-09-30",
+            "rationale": (
+                "The duplicated script-inventory lifecycle row is a quality "
+                "registry mirror and stays explicitly architecture-owned."
+            ),
+        },
+    ),
+    (
+        "aliases.S7-architecture-fast-boundary",
+        {
+            "owner": "@bioetl-test-platform",
+            "decision": "retain_shared_test_shard_alias",
+            "linked_issue": "#5568",
+            "review_date": "2026-09-30",
+            "rationale": (
+                "The S7 architecture shard alias is intentionally mirrored "
+                "between quality registries so local and CI shard routing stay "
+                "deterministic."
+            ),
+        },
+    ),
+    (
         "composite.merge.field_priorities",
         {
             "owner": "@bioetl-composite",
