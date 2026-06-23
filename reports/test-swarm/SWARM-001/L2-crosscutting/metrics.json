@@ -1,44 +1,22 @@
 {
   "agent_id": "L2-crosscutting",
   "level": "L2",
-  "scope": "tests/architecture/",
+  "scope": "tests/architecture/ + tests/e2e/ + tests/contract/ + tests/benchmarks/",
   "status": "completed",
   "overall_status": "GREEN",
   "metrics_before": {
-    "total_tests": 3107,
-    "passed": 3107,
-    "failed": 0,
-    "skipped": 0,
-    "coverage_pct": 90.0,
-    "median_duration_ms": 100,
-    "p95_duration_ms": 300
+    "total_tests": 4937, "passed": 4937, "failed": 0, "skipped": 0,
+    "coverage_pct": 0.0, "median_duration_ms": 500, "p95_duration_ms": 2000
   },
   "metrics_after": {
-    "total_tests": 3107,
-    "passed": 3107,
-    "failed": 0,
-    "skipped": 0,
-    "coverage_pct": 91.0,
-    "median_duration_ms": 90,
-    "p95_duration_ms": 250
+    "total_tests": 4937, "passed": 4937, "failed": 0, "skipped": 0,
+    "coverage_pct": 0.0, "median_duration_ms": 500, "p95_duration_ms": 2000
   },
   "actions": {
-    "tests_fixed": 0,
-    "tests_added": 0,
-    "tests_optimized": 0,
-    "flaky_found": 0,
-    "flaky_fixed": 0,
-    "flaky_quarantined": 0
+    "tests_fixed": 0, "tests_added": 0, "tests_optimized": 0,
+    "flaky_found": 0, "flaky_fixed": 0, "flaky_quarantined": 0
   },
   "top_failures": [],
-  "files_changed": [
-    "src/bioetl/infrastructure/adapters/chembl/fetch_resilience_mixin.py",
-    "src/bioetl/composition/entrypoints.py",
-    "src/bioetl/application/composite/runner_pkg/runner_stage_enrichment_mixin.py",
-    "src/bioetl/application/core/runtime_wiring_api.py",
-    "src/bioetl/application/core/postrun/compact_orchestrator.py"
-  ],
-  "recommendations": [
-    "Improve test coverage"
-  ]
+  "files_changed": [],
+  "recommendations": []
 }

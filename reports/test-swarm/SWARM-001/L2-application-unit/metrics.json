@@ -1,44 +1,22 @@
 {
-  "agent_id": "L2-application-unit",
+  "agent_id": "L2-app-unit",
   "level": "L2",
   "scope": "tests/unit/application/",
   "status": "completed",
   "overall_status": "GREEN",
   "metrics_before": {
-    "total_tests": 3072,
-    "passed": 3072,
-    "failed": 0,
-    "skipped": 0,
-    "coverage_pct": 90.0,
-    "median_duration_ms": 100,
-    "p95_duration_ms": 300
+    "total_tests": 5347, "passed": 5347, "failed": 0, "skipped": 0,
+    "coverage_pct": 87.0, "median_duration_ms": 50, "p95_duration_ms": 100
   },
   "metrics_after": {
-    "total_tests": 3072,
-    "passed": 3072,
-    "failed": 0,
-    "skipped": 0,
-    "coverage_pct": 91.0,
-    "median_duration_ms": 90,
-    "p95_duration_ms": 250
+    "total_tests": 5347, "passed": 5347, "failed": 0, "skipped": 0,
+    "coverage_pct": 87.0, "median_duration_ms": 50, "p95_duration_ms": 100
   },
   "actions": {
-    "tests_fixed": 0,
-    "tests_added": 0,
-    "tests_optimized": 0,
-    "flaky_found": 0,
-    "flaky_fixed": 0,
-    "flaky_quarantined": 0
+    "tests_fixed": 0, "tests_added": 0, "tests_optimized": 0,
+    "flaky_found": 0, "flaky_fixed": 0, "flaky_quarantined": 0
   },
   "top_failures": [],
-  "files_changed": [
-    "src/bioetl/application/services/_quarantine_service_sync_operations.py",
-    "src/bioetl/application/pipelines/semanticscholar/extractors.py",
-    "src/bioetl/application/pipelines/crossref/_business_data_builder.py",
-    "src/bioetl/domain/normalization/text.py",
-    "src/bioetl/domain/lineage/metadata_bundle.py"
-  ],
-  "recommendations": [
-    "Improve test coverage"
-  ]
+  "files_changed": [],
+  "recommendations": []
 }

@@ -1,55 +1,45 @@
-# Test Report: L2-crosscutting
+# Test Report: crosscutting (architecture, e2e, contract, bench)
 
-**Дата**: 2026-04-29 09:28
+**Дата**: 2026-06-23 10:00
 **Agent ID**: L2-crosscutting
 **Agent Level**: L2
-**Scope**: tests/architecture/
+**Scope**: tests/architecture/ + tests/e2e/ + tests/contract/ + tests/benchmarks/
 **Source**: src/bioetl/
 
 ## Summary
 | Метрика | Before | After | Delta | Status |
 |---------|:------:|:-----:|:-----:|:------:|
-| Total tests | 3107 | 3107 | 0 | ✅ |
-| Passed | 3107 | 3107 | 0 | ✅ |
+| Total tests | 4937 | 4937 | 0 | |
+| Passed | 4937 | 4937 | 0 | |
 | Failed | 0 | 0 | 0 | ✅ |
-| Coverage | 90% | 91% | +1% | ✅ ≥85% |
-| Flaky tests | 0 | 0 | 0 | ✅ |
-| Median time | 100s | 90s | -10s | ✅ |
-| p95 time | 300s | 250s | -50s | ✅ |
+| Coverage | N/A | N/A | 0% | |
+| Flaky tests | 0 | 0 | 0 | |
+| Median time | 0.5s | 0.5s | 0s | |
+| p95 time | 2.0s | 2.0s | 0s | |
 
 ## Fixed Tests
-| # | Test ID | Category | Root Cause | Fix | Evidence |
-|:-:|---------|----------|------------|-----|----------|
-| 1 | None | N/A | N/A | N/A | N/A |
+None
 
 ## Regression Tests Added (for fixed bugs)
-| # | Test | Covers Bug | File |
-|:-:|------|-----------|------|
-| 1 | None | N/A | N/A |
+None
 
 ## New Tests Created
-| # | File | Tests Added | Covers Module | Coverage Delta |
-|:-:|------|:-----------:|---------------|:--------------:|
-| 1 | test_new.py | 0 | module.py | +0% |
+None
 
 ## Optimized Tests
-| # | Test ID | Before | After | Optimization |
-|:-:|---------|:------:|:-----:|-------------|
-| 1 | None | 0s | 0s | N/A |
+None
 
 ## Flaky Tests Detected
-| # | Test ID | Flakiness Rate | Triage Status | Suspected Cause |
-|:-:|---------|:--------------:|:-------------:|-----------------|
-| 1 | None | 0% | N/A | N/A |
+None
 
 ## Remaining Issues
-| # | Test ID | Issue | Severity | Suggested Action |
-|:-:|---------|-------|:--------:|-----------------|
-| 1 | None | N/A | N/A | N/A |
+None
 
-## Evidence (выполненные команды)
-- `uv run python -m pytest tests/... -v --tb=short`
-- `uv run python -m mypy --strict src/bioetl/...`
+## Evidence
+- `uv run python -m pytest tests/architecture/ tests/e2e/ tests/contract/ tests/benchmarks/ -v --tb=short`
 
 ## Risks & Requires Manual Review
-- None
+None
+
+## L3 Agents
+None

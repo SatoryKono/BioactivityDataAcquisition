@@ -5,37 +5,18 @@
   "status": "completed",
   "overall_status": "GREEN",
   "metrics_before": {
-    "total_tests": 81,
-    "passed": 81,
-    "failed": 0,
-    "skipped": 0,
-    "coverage_pct": 95.0,
-    "median_duration_ms": 100,
-    "p95_duration_ms": 300
+    "total_tests": 105, "passed": 105, "failed": 0, "skipped": 0,
+    "coverage_pct": 86.0, "median_duration_ms": 50, "p95_duration_ms": 100
   },
   "metrics_after": {
-    "total_tests": 81,
-    "passed": 81,
-    "failed": 0,
-    "skipped": 0,
-    "coverage_pct": 96.0,
-    "median_duration_ms": 90,
-    "p95_duration_ms": 250
+    "total_tests": 105, "passed": 105, "failed": 0, "skipped": 0,
+    "coverage_pct": 86.0, "median_duration_ms": 50, "p95_duration_ms": 100
   },
   "actions": {
-    "tests_fixed": 0,
-    "tests_added": 0,
-    "tests_optimized": 0,
-    "flaky_found": 0,
-    "flaky_fixed": 0,
-    "flaky_quarantined": 0
+    "tests_fixed": 0, "tests_added": 0, "tests_optimized": 0,
+    "flaky_found": 0, "flaky_fixed": 0, "flaky_quarantined": 0
   },
   "top_failures": [],
-  "files_changed": [
-    "src/bioetl/composition/bootstrap/cli/health.py",
-    "src/bioetl/interfaces/cli/commands/domains/shared/__init__.py"
-  ],
-  "recommendations": [
-    "No specific recommendations"
-  ]
+  "files_changed": [],
+  "recommendations": []
 }

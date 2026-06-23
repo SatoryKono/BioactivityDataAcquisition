@@ -1,64 +1,50 @@
-# Test Report: L2-domain-unit
+# Test Report: domain unit
 
-**Дата**: 2026-04-29 09:28
+**Дата**: 2026-06-23 10:00
 **Agent ID**: L2-domain-unit
 **Agent Level**: L2
 **Scope**: tests/unit/domain/
-**Source**: src/bioetl/
+**Source**: src/bioetl/domain/
 
 ## Summary
 | Метрика | Before | After | Delta | Status |
 |---------|:------:|:-----:|:-----:|:------:|
-| Total tests | 5381 | 5381 | 0 | ✅ |
-| Passed | 5381 | 5381 | 0 | ✅ |
+| Total tests | 7370 | 7370 | 0 | |
+| Passed | 7370 | 7370 | 0 | |
 | Failed | 0 | 0 | 0 | ✅ |
-| Coverage | 90% | 91% | +1% | ✅ ≥85% |
-| Flaky tests | 0 | 0 | 0 | ✅ |
-| Median time | 100s | 90s | -10s | ✅ |
-| p95 time | 300s | 250s | -50s | ✅ |
+| Coverage | 92% | 92% | 0% | ✅ ≥90% |
+| Flaky tests | 0 | 0 | 0 | |
+| Median time | 0.05s | 0.05s | 0s | |
+| p95 time | 0.1s | 0.1s | 0s | |
 
 ## Fixed Tests
-| # | Test ID | Category | Root Cause | Fix | Evidence |
-|:-:|---------|----------|------------|-----|----------|
-| 1 | None | N/A | N/A | N/A | N/A |
+None
 
 ## Regression Tests Added (for fixed bugs)
-| # | Test | Covers Bug | File |
-|:-:|------|-----------|------|
-| 1 | None | N/A | N/A |
+None
 
 ## New Tests Created
-| # | File | Tests Added | Covers Module | Coverage Delta |
-|:-:|------|:-----------:|---------------|:--------------:|
-| 1 | test_new.py | 0 | module.py | +0% |
+None
 
 ## Optimized Tests
-| # | Test ID | Before | After | Optimization |
-|:-:|---------|:------:|:-----:|-------------|
-| 1 | None | 0s | 0s | N/A |
+None
 
 ## Flaky Tests Detected
-| # | Test ID | Flakiness Rate | Triage Status | Suspected Cause |
-|:-:|---------|:--------------:|:-------------:|-----------------|
-| 1 | None | 0% | N/A | N/A |
+None
 
 ## Remaining Issues
-| # | Test ID | Issue | Severity | Suggested Action |
-|:-:|---------|-------|:--------:|-----------------|
-| 1 | None | N/A | N/A | N/A |
+None
 
-## Evidence (выполненные команды)
-- `uv run python -m pytest tests/... -v --tb=short`
-- `uv run python -m mypy --strict src/bioetl/...`
+## Evidence
+- `uv run python -m pytest tests/unit/domain/ -v --tb=short`
+- `uv run python -m mypy --strict src/bioetl/domain/`
 
 ## Risks & Requires Manual Review
-- None
+None
 
-## L3 Agents (если оркестратор)
+## L3 Agents
 | # | L3 Agent | Scope | Status | Key Findings |
 |:-:|----------|-------|:------:|-------------|
-| 1 | L3-schemas | tests/unit/domain/schemas/ | DONE | 100% pass rate |
-| 2 | L3-services | tests/unit/domain/services/ | DONE | 100% pass rate |
-| 3 | L3-value-objects | tests/unit/domain/value_objects/ | DONE | 100% pass rate |
-| 4 | L3-entities | tests/unit/domain/entities/ | DONE | 100% pass rate |
-| 5 | L3-ports | tests/unit/domain/ports/ | DONE | 100% pass rate |
+| 1 | L3-schemas | tests/unit/domain/schemas/ | DONE | 815 tests, 0 fails |
+| 2 | L3-services | tests/unit/domain/services/ | DONE | 679 tests, 0 fails |
+| 3 | L3-value-objects | tests/unit/domain/value_objects/ | DONE | 962 tests, 0 fails |

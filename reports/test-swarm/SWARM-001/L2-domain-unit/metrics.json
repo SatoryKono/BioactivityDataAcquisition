@@ -5,40 +5,18 @@
   "status": "completed",
   "overall_status": "GREEN",
   "metrics_before": {
-    "total_tests": 5381,
-    "passed": 5381,
-    "failed": 0,
-    "skipped": 0,
-    "coverage_pct": 90.0,
-    "median_duration_ms": 100,
-    "p95_duration_ms": 300
+    "total_tests": 7370, "passed": 7370, "failed": 0, "skipped": 0,
+    "coverage_pct": 92.0, "median_duration_ms": 50, "p95_duration_ms": 100
   },
   "metrics_after": {
-    "total_tests": 5381,
-    "passed": 5381,
-    "failed": 0,
-    "skipped": 0,
-    "coverage_pct": 91.0,
-    "median_duration_ms": 90,
-    "p95_duration_ms": 250
+    "total_tests": 7370, "passed": 7370, "failed": 0, "skipped": 0,
+    "coverage_pct": 92.0, "median_duration_ms": 50, "p95_duration_ms": 100
   },
   "actions": {
-    "tests_fixed": 0,
-    "tests_added": 0,
-    "tests_optimized": 0,
-    "flaky_found": 0,
-    "flaky_fixed": 0,
-    "flaky_quarantined": 0
+    "tests_fixed": 0, "tests_added": 0, "tests_optimized": 0,
+    "flaky_found": 0, "flaky_fixed": 0, "flaky_quarantined": 0
   },
   "top_failures": [],
-  "files_changed": [
-    "src/bioetl/infrastructure/storage/silver/maintenance_mixin.py",
-    "src/bioetl/application/pipelines/chembl/_pipelines.py",
-    "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_payloads.py",
-    "src/bioetl/infrastructure/storage/silver/operations/metadata_finalization_support.py",
-    "src/bioetl/application/pipelines/crossref/_business_data_builder.py"
-  ],
-  "recommendations": [
-    "Improve test coverage"
-  ]
+  "files_changed": [],
+  "recommendations": []
 }

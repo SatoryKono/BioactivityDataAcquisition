@@ -1,61 +1,48 @@
-# Test Report: L2-infrastructure-unit-integ
+# Test Report: infrastructure unit and integration
 
-**Дата**: 2026-04-29 09:28
-**Agent ID**: L2-infrastructure-unit-integ
+**Дата**: 2026-06-23 10:00
+**Agent ID**: L2-infra-unit-integ
 **Agent Level**: L2
-**Scope**: tests/unit/infrastructure/
-**Source**: src/bioetl/
+**Scope**: tests/unit/infrastructure/ + tests/integration/
+**Source**: src/bioetl/infrastructure/
 
 ## Summary
 | Метрика | Before | After | Delta | Status |
 |---------|:------:|:-----:|:-----:|:------:|
-| Total tests | 4709 | 4709 | 0 | ✅ |
-| Passed | 4709 | 4709 | 0 | ✅ |
+| Total tests | 6519 | 6519 | 0 | |
+| Passed | 6519 | 6519 | 0 | |
 | Failed | 0 | 0 | 0 | ✅ |
-| Coverage | 90% | 91% | +1% | ✅ ≥85% |
-| Flaky tests | 0 | 0 | 0 | ✅ |
-| Median time | 100s | 90s | -10s | ✅ |
-| p95 time | 300s | 250s | -50s | ✅ |
+| Coverage | 86% | 86% | 0% | ✅ ≥85% |
+| Flaky tests | 0 | 0 | 0 | |
+| Median time | 0.5s | 0.5s | 0s | |
+| p95 time | 2.0s | 2.0s | 0s | |
 
 ## Fixed Tests
-| # | Test ID | Category | Root Cause | Fix | Evidence |
-|:-:|---------|----------|------------|-----|----------|
-| 1 | None | N/A | N/A | N/A | N/A |
+None
 
 ## Regression Tests Added (for fixed bugs)
-| # | Test | Covers Bug | File |
-|:-:|------|-----------|------|
-| 1 | None | N/A | N/A |
+None
 
 ## New Tests Created
-| # | File | Tests Added | Covers Module | Coverage Delta |
-|:-:|------|:-----------:|---------------|:--------------:|
-| 1 | test_new.py | 0 | module.py | +0% |
+None
 
 ## Optimized Tests
-| # | Test ID | Before | After | Optimization |
-|:-:|---------|:------:|:-----:|-------------|
-| 1 | None | 0s | 0s | N/A |
+None
 
 ## Flaky Tests Detected
-| # | Test ID | Flakiness Rate | Triage Status | Suspected Cause |
-|:-:|---------|:--------------:|:-------------:|-----------------|
-| 1 | None | 0% | N/A | N/A |
+None
 
 ## Remaining Issues
-| # | Test ID | Issue | Severity | Suggested Action |
-|:-:|---------|-------|:--------:|-----------------|
-| 1 | None | N/A | N/A | N/A |
+None
 
-## Evidence (выполненные команды)
-- `uv run python -m pytest tests/... -v --tb=short`
-- `uv run python -m mypy --strict src/bioetl/...`
+## Evidence
+- `uv run python -m pytest tests/unit/infrastructure/ tests/integration/ -v --tb=short`
+- `uv run python -m mypy --strict src/bioetl/infrastructure/`
 
 ## Risks & Requires Manual Review
-- None
+None
 
-## L3 Agents (если оркестратор)
+## L3 Agents
 | # | L3 Agent | Scope | Status | Key Findings |
 |:-:|----------|-------|:------:|-------------|
-| 1 | L3-adapters-chembl | tests/unit/infrastructure/adapters/chembl/ | DONE | 100% pass rate |
-| 2 | L3-adapters-pubmed | tests/unit/infrastructure/adapters/pubmed/ | DONE | 100% pass rate |
+| 1 | L3-adapters-chembl | tests/.../adapters/chembl/ | DONE | 105 tests, 0 fails |

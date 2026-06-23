@@ -1,55 +1,18 @@
-# Test Report: L3-adapters-chembl
+# Test Report: infrastructure unit and integration
 
-**Дата**: 2026-04-29 09:28
+**Дата**: 2026-06-23 10:00
 **Agent ID**: L3-adapters-chembl
 **Agent Level**: L3
 **Scope**: tests/unit/infrastructure/adapters/chembl/
-**Source**: src/bioetl/
+**Source**: src/bioetl/infrastructure/adapters/chembl/
 
 ## Summary
 | Метрика | Before | After | Delta | Status |
 |---------|:------:|:-----:|:-----:|:------:|
-| Total tests | 81 | 81 | 0 | ✅ |
-| Passed | 81 | 81 | 0 | ✅ |
+| Total tests | 105 | 105 | 0 | |
+| Passed | 105 | 105 | 0 | |
 | Failed | 0 | 0 | 0 | ✅ |
-| Coverage | 95% | 96% | +1% | ✅ ≥85% |
-| Flaky tests | 0 | 0 | 0 | ✅ |
-| Median time | 100s | 90s | -10s | ✅ |
-| p95 time | 300s | 250s | -50s | ✅ |
-
-## Fixed Tests
-| # | Test ID | Category | Root Cause | Fix | Evidence |
-|:-:|---------|----------|------------|-----|----------|
-| 1 | None | N/A | N/A | N/A | N/A |
-
-## Regression Tests Added (for fixed bugs)
-| # | Test | Covers Bug | File |
-|:-:|------|-----------|------|
-| 1 | None | N/A | N/A |
-
-## New Tests Created
-| # | File | Tests Added | Covers Module | Coverage Delta |
-|:-:|------|:-----------:|---------------|:--------------:|
-| 1 | test_new.py | 0 | module.py | +0% |
-
-## Optimized Tests
-| # | Test ID | Before | After | Optimization |
-|:-:|---------|:------:|:-----:|-------------|
-| 1 | None | 0s | 0s | N/A |
-
-## Flaky Tests Detected
-| # | Test ID | Flakiness Rate | Triage Status | Suspected Cause |
-|:-:|---------|:--------------:|:-------------:|-----------------|
-| 1 | None | 0% | N/A | N/A |
-
-## Remaining Issues
-| # | Test ID | Issue | Severity | Suggested Action |
-|:-:|---------|-------|:--------:|-----------------|
-| 1 | None | N/A | N/A | N/A |
-
-## Evidence (выполненные команды)
-- `uv run python -m pytest tests/... -v --tb=short`
-- `uv run python -m mypy --strict src/bioetl/...`
-
-## Risks & Requires Manual Review
-- None
+| Coverage | 86% | 86% | 0% | ✅ ≥85% |
+| Flaky tests | 0 | 0 | 0 | |
+| Median time | 0.05s | 0.05s | 0s | |
+| p95 time | 0.1s | 0.1s | 0s | |
