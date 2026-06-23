@@ -9,7 +9,7 @@ from unittest.mock import MagicMock
 from bioetl.application.composite.dependency_progress_tracker import (
     DependencyProgressService,
 )
-from bioetl.domain.composite.config import DependencyConfig
+from bioetl.domain.composite.config_models import DependencyConfig
 from bioetl.domain.composite.result import DependencyResult, DependencyStatus
 
 

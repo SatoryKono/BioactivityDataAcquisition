@@ -8,8 +8,8 @@
     },
     "module_coverage_inventory": {
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "e0cc1cc597312ec6b218b961d96c8795733a05df72d9bcd4e587b579d4ef4a1e",
-      "coverage_xml_sha256": "688fdd5cf7e086bb0ac2178265406f9e8395532fb1067e9e6e2fc0c7b5e1632a"
+      "source_tree_sha256": "8078c944b362a0840ca2c1b0817b47f55b1670a0ed765b49b40437febf8028c4",
+      "coverage_xml_sha256": "55573be5140f97222b292cca9088459ae2cd5a0fa85bb65529e751154bab6fff"
     },
     "compatibility_importer_census": {
       "path": "reports/quality/compatibility-importer-census.json",
@@ -74,7 +74,7 @@
       "weighted_score": 0.72,
       "evidence_metrics": {
         "source_module_count": 2182,
-        "uncovered_module_count": 0
+        "uncovered_module_count": 1614
       }
     },
     {
@@ -117,8 +117,8 @@
       "score": 7.4,
       "weighted_score": 0.888,
       "evidence_metrics": {
-        "unmeasured_module_count": 0,
-        "uncovered_module_count": 0
+        "unmeasured_module_count": 36,
+        "uncovered_module_count": 1614
       }
     },
     {
@@ -163,8 +163,8 @@
   "metrics": {
     "layer_violations": 0,
     "source_module_count": 2182,
-    "unmeasured_module_count": 0,
-    "uncovered_module_count": 0,
+    "unmeasured_module_count": 36,
+    "uncovered_module_count": 1614,
     "hotspot_family_count": 5,
     "retained_entrypoint_count": 12,
     "retained_public_export_facade_count": 4,

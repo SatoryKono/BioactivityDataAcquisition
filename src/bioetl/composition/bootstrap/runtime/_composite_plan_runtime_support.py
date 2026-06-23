@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Protocol, TypeGuard, cast
+from typing import TYPE_CHECKING, cast
 
 from pydantic import ValidationError
 
@@ -76,16 +76,6 @@ class BootstrapRuntimeResources:
         return self.infra_context.clock
 
 
-class _NamedRuntimeBundle(Protocol):
-    run_id: str
-    settings: Settings
-    logger: LoggerPort
-    metrics: MetricsPort
-    tracer: TracingPort
-    storage: object
-    lock: LockPort
-
-
 def load_runtime_composite_config_impl(
     name: str,
     *,
@@ -114,20 +104,9 @@ def build_bootstrap_runtime_resources(
     resolved_bundle = bootstrap_runtime_basics_fn(config=config, run_id=run_id)
     if isinstance(resolved_bundle, CompositeInfrastructureContext):
         return BootstrapRuntimeResources(infra_context=resolved_bundle)
-    if _has_named_bundle(resolved_bundle):
-        named_bundle = resolved_bundle
-        return BootstrapRuntimeResources(
-            infra_context=CompositeInfrastructureContext(
-                run_id=named_bundle.run_id,
-                settings=named_bundle.settings,
-                logger=named_bundle.logger,
-                metrics=named_bundle.metrics,
-                tracer=named_bundle.tracer,
-                storage=cast("CompositeRuntimeStorageProtocol", named_bundle.storage),
-                lock=named_bundle.lock,
-                clock=getattr(named_bundle, "clock", None),
-            )
-        )
+    named_context = _coerce_named_runtime_bundle(resolved_bundle)
+    if named_context is not None:
+        return BootstrapRuntimeResources(infra_context=named_context)
     raise TypeError(
         "bootstrap_runtime_basics_fn must return CompositeInfrastructureContext "
         "or another named runtime bundle exposing run_id/settings/logger/"
@@ -175,16 +154,29 @@ def create_composite_runner_from_plan_impl(
     )
 
 
-def _has_named_bundle(resolved_bundle: object) -> TypeGuard[_NamedRuntimeBundle]:
-    return all(
-        hasattr(resolved_bundle, field_name)
-        for field_name in (
-            "run_id",
-            "settings",
-            "logger",
-            "metrics",
-            "tracer",
-            "storage",
-            "lock",
-        )
+def _coerce_named_runtime_bundle(
+    resolved_bundle: object,
+) -> CompositeInfrastructureContext | None:
+    field_names = (
+        "run_id",
+        "settings",
+        "logger",
+        "metrics",
+        "tracer",
+        "storage",
+        "lock",
+    )
+    if not all(hasattr(resolved_bundle, field_name) for field_name in field_names):
+        return None
+    bundle = cast("CompositeInfrastructureContext", resolved_bundle)
+    clock = bundle.clock if hasattr(bundle, "clock") else None
+    return CompositeInfrastructureContext(
+        run_id=bundle.run_id,
+        settings=bundle.settings,
+        logger=bundle.logger,
+        metrics=bundle.metrics,
+        tracer=bundle.tracer,
+        storage=cast("CompositeRuntimeStorageProtocol", bundle.storage),
+        lock=bundle.lock,
+        clock=clock,
     )

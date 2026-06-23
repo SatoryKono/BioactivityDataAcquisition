@@ -43,7 +43,14 @@ class _FakeArrowTable:
         return list(self._rows)
 
 
-def test_read_delta_records_uses_dataset_scanner_off_windows() -> None:
+def test_read_delta_records_uses_dataset_scanner_off_windows(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        table_ops,
+        "_can_use_pyarrow_dataset_scanner",
+        lambda: True,
+    )
     rows = [{"entity_id": "row-1"}]
     dataset = _FakeDataset(rows)
 

@@ -108,6 +108,35 @@ def test_run_audit_allows_cataloged_docs_code_zones_and_tolerated_hidden_roots(
     assert not result.should_violations
 
 
+def test_run_audit_allows_cataloged_visible_local_root_dirs(tmp_path: Path) -> None:
+    _write_governance_files(tmp_path)
+    _write_minimal_repo_tree(tmp_path)
+
+    catalog_path = tmp_path / "configs" / "quality" / "repo_structure_catalog.yaml"
+    catalog = yaml.safe_load(catalog_path.read_text(encoding="utf-8"))
+    local_roots = catalog["local_tolerated_root_dirs"]["approved_roots"]
+    local_roots.extend(
+        [
+            {"path": "tmp"},
+            {"path": "~"},
+            {"path": ".coverage-sharded-current-main"},
+        ]
+    )
+    catalog_path.write_text(
+        yaml.safe_dump(catalog, sort_keys=False),
+        encoding="utf-8",
+    )
+
+    (tmp_path / "tmp").mkdir()
+    (tmp_path / "~").mkdir()
+    (tmp_path / ".coverage-sharded-current-main").mkdir()
+
+    result = module.run_audit(tmp_path)
+
+    assert not result.must_violations
+    assert not result.should_violations
+
+
 def test_run_audit_rejects_unapproved_root_directory(tmp_path: Path) -> None:
     _write_governance_files(tmp_path)
     _write_minimal_repo_tree(tmp_path)

@@ -310,6 +310,7 @@ src/bioetl/
 │   ├── control_plane/   # Run/workflow provenance models
 │   ├── lineage/         # Domain lineage models
 │   ├── ports/           # Sanctioned transport-neutral port facade
+│   │   ├── observability/       # Observability port package
 │   ├── schemas/         # Domain schema contracts and helpers
 │   ├── types/           # Typed contract families
 │   ├── value_objects/   # Immutable domain primitives

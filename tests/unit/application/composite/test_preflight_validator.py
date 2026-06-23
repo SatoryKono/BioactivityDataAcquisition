@@ -18,16 +18,18 @@ from bioetl.application.composite.preflight_validator import (
     PreflightValidationResult,
     ValidationIssue,
 )
-from bioetl.domain.composite.config import (
+from bioetl.domain.composite.aggregation import (
     AggregationConfig,
     AggregationFieldSpec,
     AggregationFunction,
+    EnricherCardinality,
+)
+from bioetl.domain.composite.config_merge import MergeConfig
+from bioetl.domain.composite.config_models import (
     CompositeConfig,
     CompositeDQConfig,
     DependencyConfig,
     EnricherConfig,
-    EnricherCardinality,
-    MergeConfig,
     SeedConfig,
 )
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy

@@ -2,8 +2,8 @@
   "summary": {
     "snapshot_date": "2026-06-22",
     "targets": 4,
-    "total_duplicate_clusters": 105,
-    "total_raw_duplicate_clusters": 105,
+    "total_duplicate_clusters": 104,
+    "total_raw_duplicate_clusters": 104,
     "total_excluded_duplicate_clusters": 0
   },
   "normalization": {
@@ -24,15 +24,6 @@
       "recommended_first_wave": true
     },
     {
-      "target": "src/bioetl/composition/bootstrap",
-      "duplicate_clusters": 1,
-      "dominant_actionability_category": "composition_runtime_wiring_pattern",
-      "dominant_actionability_cluster_count": 1,
-      "low_risk_cluster_count": 1,
-      "low_risk_cluster_share": 1.0,
-      "recommended_first_wave": true
-    },
-    {
       "target": "src/bioetl/infrastructure/adapters",
       "duplicate_clusters": 72,
       "dominant_actionability_category": "export_facade_or_package_barrel",
@@ -46,6 +37,15 @@
       "duplicate_clusters": 22,
       "dominant_actionability_category": "pipeline_transformer_contract_pattern",
       "dominant_actionability_cluster_count": 22,
+      "low_risk_cluster_count": 0,
+      "low_risk_cluster_share": 0.0,
+      "recommended_first_wave": false
+    },
+    {
+      "target": "src/bioetl/composition/bootstrap",
+      "duplicate_clusters": 0,
+      "dominant_actionability_category": null,
+      "dominant_actionability_cluster_count": 0,
       "low_risk_cluster_count": 0,
       "low_risk_cluster_share": 0.0,
       "recommended_first_wave": false
@@ -1767,44 +1767,13 @@
     },
     {
       "target": "src/bioetl/composition/bootstrap",
-      "returncode": 8,
-      "duplicate_count": 1,
-      "raw_duplicate_count": 1,
+      "returncode": 0,
+      "duplicate_count": 0,
+      "raw_duplicate_count": 0,
       "excluded_duplicate_count": 0,
-      "actionability": [
-        {
-          "category": "composition_runtime_wiring_pattern",
-          "duplicate_clusters": 1
-        }
-      ],
-      "top_pairs": [
-        {
-          "modules": [
-            "bioetl.composition.bootstrap.composite_infrastructure_context",
-            "bioetl.composition.bootstrap.runtime._composite_plan_runtime_support"
-          ],
-          "duplicate_clusters": 1
-        }
-      ],
-      "clusters": [
-        {
-          "path": "src/bioetl/composition/bootstrap/runtime/__init__.py",
-          "line": 1,
-          "actionability_category": "composition_runtime_wiring_pattern",
-          "modules": [
-            {
-              "module": "bioetl.composition.bootstrap.composite_infrastructure_context",
-              "start_line": 27,
-              "end_line": 32
-            },
-            {
-              "module": "bioetl.composition.bootstrap.runtime._composite_plan_runtime_support",
-              "start_line": 76,
-              "end_line": 81
-            }
-          ]
-        }
-      ]
+      "actionability": [],
+      "top_pairs": [],
+      "clusters": []
     },
     {
       "target": "src/bioetl/interfaces/cli",
@@ -1822,7 +1791,7 @@
         {
           "modules": [
             "bioetl.interfaces.cli.commands._run_manifest_output",
-            "bioetl.interfaces.cli.commands._run_manifest_output_support"
+            "bioetl.interfaces.cli.commands.run_manifest_output_support"
           ],
           "duplicate_clusters": 1
         },
@@ -1931,8 +1900,8 @@
           "modules": [
             {
               "module": "bioetl.interfaces.cli.commands.domains.health.server_integration",
-              "start_line": 113,
-              "end_line": 127
+              "start_line": 115,
+              "end_line": 129
             },
             {
               "module": "bioetl.interfaces.cli.commands.health",
@@ -2020,7 +1989,7 @@
               "end_line": 142
             },
             {
-              "module": "bioetl.interfaces.cli.commands._run_manifest_output_support",
+              "module": "bioetl.interfaces.cli.commands.run_manifest_output_support",
               "start_line": 53,
               "end_line": 66
             }

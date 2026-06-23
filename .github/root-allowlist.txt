@@ -31,6 +31,8 @@ docker-compose.neo4j.yml
 docker-compose.redis.yml
 docker-compose.sonarqube.yml
 docker-compose.yml
+docker-setup.ps1
+docker-setup.sh
 Dockerfile.bioetl
 Dockerfile.mcp-fetch
 Dockerfile.mcp-filesystem

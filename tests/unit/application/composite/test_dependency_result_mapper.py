@@ -10,7 +10,7 @@ import pytest
 from bioetl.application.composite.dependency_result_mapper import (
     DependencyResultService,
 )
-from bioetl.domain.composite.config import DependencyConfig
+from bioetl.domain.composite.config_models import DependencyConfig
 from bioetl.domain.composite.result import DependencyStatus
 
 

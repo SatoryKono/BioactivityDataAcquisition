@@ -9,7 +9,7 @@ import pytest
 
 from bioetl.application.composite.conflict_resolver import ConflictResolverService
 from bioetl.application.composite.coalesce_policy import CoalescePolicyService
-from bioetl.domain.composite.config import MergeConfig
+from bioetl.domain.composite.config_merge import MergeConfig
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 
 pytestmark = pytest.mark.unit

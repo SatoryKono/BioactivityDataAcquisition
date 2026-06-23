@@ -1533,7 +1533,7 @@
       "symbol": "FILTERED_OUT_SILVER",
       "path": "docs/03-guides/running-pipelines.md",
       "occurrence_count": 15,
-      "first_line": 619,
+      "first_line": 618,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""

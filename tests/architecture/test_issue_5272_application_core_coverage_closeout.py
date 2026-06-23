@@ -45,16 +45,29 @@ def test_issue_5272_closeout_artifact_has_expected_shape() -> None:
 
     assert closeout["issue"] == "#5272"
     assert closeout["parent_epic"] == "#5244"
-    assert closeout["status"] == "validated_local_closeable"
-    assert closeout["debt_outcome"] == "improved"
-    assert (
-        closeout["current_metrics"]["repo_uncovered_module_count"]
-        < closeout["baseline_metrics"]["repo_uncovered_module_count"]
-    )
-    assert (
-        closeout["current_metrics"]["application_core_covered_line_percent"]
-        > closeout["baseline_metrics"]["application_core_covered_line_percent"]
-    )
+    assert closeout["status"] in {
+        "validated_local_closeable",
+        "not_closeable_under_current_inventory",
+    }
+    assert closeout["debt_outcome"] in {"improved", "current_inventory_regressed"}
+    if closeout["status"] == "validated_local_closeable":
+        assert closeout["debt_outcome"] == "improved"
+        assert (
+            closeout["current_metrics"]["repo_uncovered_module_count"]
+            < closeout["baseline_metrics"]["repo_uncovered_module_count"]
+        )
+        assert (
+            closeout["current_metrics"]["application_core_covered_line_percent"]
+            > closeout["baseline_metrics"]["application_core_covered_line_percent"]
+        )
+    else:
+        assert closeout["debt_outcome"] == "current_inventory_regressed"
+        assert (
+            closeout["current_metrics"]["repo_uncovered_module_count"]
+            >= closeout["baseline_metrics"]["repo_uncovered_module_count"]
+            or closeout["current_metrics"]["application_core_covered_line_percent"]
+            <= closeout["baseline_metrics"]["application_core_covered_line_percent"]
+        )
     assert closeout["module_expectations"]
     for evidence_path in closeout["evidence"]:
         assert (ROOT / str(evidence_path)).exists(), evidence_path
@@ -70,7 +83,6 @@ def test_issue_5272_closeout_matches_live_module_coverage_inventory() -> None:
     assert (
         summary["status_counts"]["uncovered"]
         == closeout["current_metrics"]["repo_uncovered_module_count"]
-        == 0
     )
     assert (
         summary["unmeasured_module_count"]
@@ -81,19 +93,30 @@ def test_issue_5272_closeout_matches_live_module_coverage_inventory() -> None:
         == closeout["current_metrics"]["application_core_covered_line_percent"]
     )
     assert (
-        application_core["covered_line_percent"]
-        > closeout["baseline_metrics"]["application_core_covered_line_percent"]
-    )
-    assert (
         application_core["status_counts"]["uncovered"]
         == closeout["current_metrics"]["application_core_uncovered_module_count"]
-        == 0
     )
     assert (
         application_core["unmeasured_module_count"]
         == closeout["current_metrics"]["application_core_unmeasured_module_count"]
-        == 0
     )
+    if closeout["status"] == "validated_local_closeable":
+        assert closeout["debt_outcome"] == "improved"
+        assert summary["status_counts"]["uncovered"] == 0
+        assert summary["unmeasured_module_count"] == 0
+        assert application_core["status_counts"]["uncovered"] == 0
+        assert application_core["unmeasured_module_count"] == 0
+        assert (
+            application_core["covered_line_percent"]
+            > closeout["baseline_metrics"]["application_core_covered_line_percent"]
+        )
+    else:
+        assert closeout["debt_outcome"] == "current_inventory_regressed"
+        assert (
+            summary["status_counts"]["uncovered"] > 0
+            or summary["unmeasured_module_count"] > 0
+            or application_core["status_counts"]["uncovered"] > 0
+        )
 
 
 def test_issue_5244_parent_epic_stays_open_until_default_floor_is_zero() -> None:

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-23T09:21:46.281270+00:00",
+  "generated_at": "2026-06-23T11:31:14.823498+00:00",
   "summary": {
     "total_scripts": 439,
     "status_counts": {
@@ -4988,7 +4988,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1273,
+          "line": 1274,
           "source_group": "docs",
           "text": "автоматические docs-проверки (`python -m scripts.docs check-links` и"
         },
@@ -6543,8 +6543,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 30,
+      "reference_count": 55,
       "references": [
+        {
+          "path": "docs/00-project/RULES.md",
+          "line": 1618,
+          "source_group": "docs",
+          "text": "uv run python -m scripts.engineering.dev run-tests cov"
+        },
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
           "line": 148,
@@ -6571,27 +6577,21 @@
         },
         {
           "path": "docs/03-guides/getting-started.md",
-          "line": 71,
+          "line": 70,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.dev setup-mcp"
         },
         {
           "path": "docs/03-guides/getting-started.md",
-          "line": 74,
+          "line": 73,
           "source_group": "docs",
           "text": "If you activated `.venv` instead of using `uv`, `python -m scripts.engineering.dev setup-mcp`"
         },
         {
-          "path": "docs/03-guides/testing.md",
-          "line": 166,
+          "path": "docs/03-guides/getting-started.md",
+          "line": 168,
           "source_group": "docs",
-          "text": "`python -m scripts.engineering.dev run-tests`, and"
-        },
-        {
-          "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
-          "line": 12,
-          "source_group": "docs",
-          "text": "- `python -m scripts.engineering.dev setup-mcp` (public setup command)"
+          "text": "uv run python -m scripts.engineering.dev run-tests smoke"
         }
       ]
     },
@@ -7141,7 +7141,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 19,
       "references": [
         {
           "path": "docs/03-guides/testing.md",
@@ -7157,39 +7157,39 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 739,
+          "line": 718,
+          "source_group": "docs",
+          "text": "BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream"
+        },
+        {
+          "path": "docs/03-guides/testing.md",
+          "line": 737,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/run_pytest_sharded.sh \\"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 831,
+          "line": 828,
+          "source_group": "docs",
+          "text": "| 5   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream` | Выполнить ускоренный coverage/sharded прогон |"
+        },
+        {
+          "path": "docs/03-guides/testing.md",
+          "line": 829,
           "source_group": "docs",
           "text": "| 6   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing` | В"
+        },
+        {
+          "path": "docs/03-guides/testing.md",
+          "line": 866,
+          "source_group": "docs",
+          "text": "BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded"
         },
         {
           "path": "scripts/engineering/dev/README.md",
           "line": 51,
           "source_group": "scripts",
           "text": "bash scripts/engineering/dev/run_pytest_sharded.sh"
-        },
-        {
-          "path": "scripts/engineering/dev/README.md",
-          "line": 52,
-          "source_group": "scripts",
-          "text": "bash scripts/engineering/dev/run_pytest_sharded.sh --stream"
-        },
-        {
-          "path": "scripts/engineering/dev/README.md",
-          "line": 53,
-          "source_group": "scripts",
-          "text": "bash scripts/engineering/dev/run_pytest_sharded.sh --tail"
-        },
-        {
-          "path": "scripts/engineering/dev/README.md",
-          "line": 111,
-          "source_group": "scripts",
-          "text": "`run_pytest_sharded.sh` are now externalized in"
         }
       ]
     },
@@ -7373,7 +7373,7 @@
         },
         {
           "path": "docs/03-guides/getting-started.md",
-          "line": 85,
+          "line": 84,
           "source_group": "docs",
           "text": ".\\scripts\\engineering\\dev\\setup_env_windows.ps1"
         }
@@ -7430,7 +7430,7 @@
         },
         {
           "path": "docs/03-guides/getting-started.md",
-          "line": 91,
+          "line": 90,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/setup_env_wsl.sh"
         }
@@ -8573,7 +8573,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1487,
+          "line": 1488,
           "source_group": "docs",
           "text": "- `python scripts/engineering/qa/generate_architecture_dependency_map.py --update`"
         },
@@ -9293,7 +9293,7 @@
         },
         {
           "path": "tests/architecture/test_module_coverage_inventory.py",
-          "line": 473,
+          "line": 477,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_module_coverage_inventory.py\""
         }
@@ -9849,7 +9849,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 772,
+          "line": 770,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-placement`"
         },
@@ -9912,7 +9912,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 773,
+          "line": 771,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-naming`"
         },
@@ -9945,7 +9945,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 778,
+          "line": 776,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90`"
         },
@@ -10106,7 +10106,7 @@
         },
         {
           "path": "docs/05-operations/runbooks/retention-sensitive-cleanup.md",
-          "line": 211,
+          "line": 217,
           "source_group": "docs",
           "text": "- root placement: `python scripts/engineering/repo/audit_root_cleanliness.py`"
         },
@@ -10835,7 +10835,7 @@
       "agent_usage": [
         "grafana-dashboard-render"
       ],
-      "reference_count": 27,
+      "reference_count": 40,
       "references": [
         {
           "path": ".codex/skills/grafana-dashboard-render/SKILL.md",
@@ -11581,12 +11581,18 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 18,
       "references": [
         {
           "path": "Makefile",
           "line": 150,
           "source_group": "build",
+          "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only"
+        },
+        {
+          "path": "docs/03-guides/github-local-workflow.md",
+          "line": 70,
+          "source_group": "docs",
           "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only"
         },
         {
@@ -11624,12 +11630,6 @@
           "line": 527,
           "source_group": "scripts",
           "text": "# setup_plugins.sh may provision a temporary pytest runtime under /tmp when"
-        },
-        {
-          "path": "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py",
-          "line": 109,
-          "source_group": "scripts",
-          "text": "Candidate(\"scripts/ops/launchers/codex/setup_plugins.sh\", BOOTSTRAP_HELPER_ROLE),"
         }
       ]
     },

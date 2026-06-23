@@ -10,7 +10,6 @@ from bioetl.application.composite.checkpoint import (
     CompositeCheckpointState,
 )
 from bioetl.application.composite.fsm_helper import FSMStateHelperService
-from bioetl.application.composite.merger import MergeService
 from bioetl.application.composite.merger_orchestration import (
     MergeExecutionRequest,
     build_merge_execution_request,
@@ -75,7 +74,7 @@ class CompositeRunnerMergeStageMixin:
     _logger: LoggerPort
     _config: CompositeConfig
     _run_id_str: str
-    _merger: MergeService
+    _merger: Any
     _checkpoint_manager: CompositeCheckpointService
 
     async def _save_checkpoint_safe(

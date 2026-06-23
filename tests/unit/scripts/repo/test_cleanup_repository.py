@@ -520,13 +520,28 @@ def test_collect_root_policy_mismatches_includes_live_root_violation(
     _write_governance_files(tmp_path)
     monkeypatch.setattr(
         module,
-        "collect_root_layout_state",
-        lambda repo_root: {
-            "unexpected_root_files": ["conftest.py"],
-            "unexpected_root_dirs": [],
-            "unexpected_untracked_root_files": [],
-            "unexpected_untracked_root_dirs": [],
-        },
+        "_tracked_paths",
+        lambda repo_root: ["README.md", "pyproject.toml", "conftest.py"],
+    )
+    monkeypatch.setattr(
+        module.root_cleanliness,
+        "_load_allowed_root_files",
+        lambda repo_root: frozenset({"README.md", "pyproject.toml"}),
+    )
+    monkeypatch.setattr(
+        module.root_cleanliness,
+        "_load_structure_catalog",
+        lambda repo_root: {},
+    )
+    monkeypatch.setattr(
+        module.root_cleanliness,
+        "_approved_root_directories",
+        lambda catalog: frozenset({"configs"}),
+    )
+    monkeypatch.setattr(
+        module.root_cleanliness,
+        "_collect_tracked_root_entries",
+        lambda tracked_paths: ({"README.md", "pyproject.toml", "conftest.py"}, set()),
     )
 
     mismatches = module.collect_root_policy_mismatches(tmp_path)
