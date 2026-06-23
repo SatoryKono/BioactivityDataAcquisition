@@ -15,6 +15,7 @@ from bioetl.application.services.health_service import HealthService
 from bioetl.composition.bootstrap.cli.health import (
     HealthServerDependencies,
     bootstrap_health_server_dependencies,
+    bootstrap_health_server_quarantine_service,
     bootstrap_health_service,
 )
 from bioetl.domain.ports import (
@@ -222,3 +223,19 @@ class TestBootstrapHealthServerDependencies:
 
         assert result is expected_dependencies
         mock_create.assert_called_once()
+
+    def test_quarantine_service_delegates_to_cli_service_builder(self):
+        """Health-server quarantine wiring should reuse canonical CLI assembly."""
+        expected_service = MagicMock()
+
+        with patch(
+            "bioetl.composition.bootstrap.cli.health.build_cli_quarantine_service",
+            return_value=expected_service,
+        ) as mock_build:
+            result = bootstrap_health_server_quarantine_service()
+
+        assert result is expected_service
+        mock_build.assert_called_once()
+        kwargs = mock_build.call_args.kwargs
+        assert kwargs["run_manifest_service_factory"] is None
+        assert kwargs["clock_factory"] is SystemClock

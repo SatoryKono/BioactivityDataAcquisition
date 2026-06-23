@@ -596,7 +596,7 @@ class TestSilverWriterDQMetrics:
 
     def test_build_silver_write_result_uses_version_after(self):
         """Final result helper should return None or a SilverWriteResult by version."""
-        from bioetl.infrastructure.storage.silver.metadata_mixin import (
+        from bioetl.infrastructure.storage.silver.metadata_result_finalization import (
             _build_silver_write_result,
         )
 

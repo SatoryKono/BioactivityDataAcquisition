@@ -33,3 +33,16 @@ def test_canonical_wiring_owner_modules_remain_importable() -> None:
     assert isinstance(ActivityTransformer, type)
     assert isinstance(PipelineRunner, type)
     assert isinstance(BaseTransformer, type)
+
+
+def test_canonical_wiring_package_lazy_exports_owner_symbols() -> None:
+    """The package facade exposes owner modules without reintroducing flat APIs."""
+    import bioetl.application.core.wiring as wiring
+
+    assert isinstance(wiring.PipelineRunner, type)
+    assert isinstance(wiring.ActivityTransformer, type)
+    assert "PipelineRunner" in dir(wiring)
+    assert "ActivityTransformer" in dir(wiring)
+
+    with pytest.raises(AttributeError, match="does_not_exist"):
+        getattr(wiring, "does_not_exist")

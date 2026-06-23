@@ -39,6 +39,21 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     return payload
 
 
+def _composite_duplication_clusters(
+    backlog: dict[str, Any],
+) -> list[dict[str, Any]]:
+    clusters = backlog["duplication_audit"]["clusters"]
+    assert isinstance(clusters, list)
+    return [
+        cluster
+        for cluster in clusters
+        if all(
+            surface_kind == "composite_config"
+            for surface_kind in cluster["surface_kind_counts"]
+        )
+    ]
+
+
 def test_closeout_artifact_covers_requested_issues__5559_5563() -> None:
     payload = _load_json(CLOSEOUT)
     issues = payload["issues"]
@@ -93,17 +108,22 @@ def test_issue_5560_public_merge_entrypoint_has_zero_first_party_importers() -> 
 def test_issue_5561_config_duplication_clusters_are_owner_addressable() -> None:
     backlog = _load_json(CONFIG_BACKLOG)
     clusters = backlog["duplication_audit"]["clusters"]
+    composite_clusters = _composite_duplication_clusters(backlog)
 
     assert backlog["duplication_audit"]["summary"]["duplicate_cluster_count"] == 24
     assert backlog["duplication_audit"]["summary"]["duplicate_occurrence_count"] == 75
     assert clusters
+    assert composite_clusters
 
     for cluster in clusters:
         governance = cluster["governance"]
-        assert governance["linked_issue"] == "#5561"
         assert governance["owner"].startswith("@bioetl-")
         assert governance["decision"]
         assert governance["rationale"]
+
+    for cluster in composite_clusters:
+        governance = cluster["governance"]
+        assert governance["linked_issue"] == "#5568"
 
 
 def test_issue_5562_skip_inventory_entries_are_individually_accountable() -> None:

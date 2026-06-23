@@ -14,6 +14,8 @@ from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.infrastructure.storage.silver.metadata_mixin import (
     SilverWriterMetadataMixin,
+)
+from bioetl.infrastructure.storage.silver.metadata_result_finalization import (
     _build_silver_write_result,
 )
 
