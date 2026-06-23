@@ -1,0 +1,105 @@
+%% View: Full | Parent: (root)
+%% Parent source: docs/02-architecture/diagrams/foundation/01-high-level.mmd
+%% Full reference diagram retained after decomposition.
+%% Title: High-Level System Architecture
+%% Covers: RULES.md §1.1 (Five-Layer Architecture)
+%% Updated: 2026-02-17
+%% Components: CLI, Bootstrap, PipelineFactory, PipelineRunner, BatchExecutor, BaseTransformer, BaseHttpAdapter, BronzeStoragePort, SilverStoragePort, GoldStoragePort
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    flowchart
+%% @level   Mixed (System / Component / Class)
+
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+%% @uniform width=200 height=56 max_title_len=20 max_desc_lines=1
+flowchart TD
+    subgraph Sources["External Data Sources"]
+        A1[ChEMBL API<br/>]
+        A2[PubChem API<br/>]
+        A3[UniProt API<br/>]
+        A4[PubMed API<br/>]
+        A5[CrossRef API<br/>]
+        A6[OpenAlex API<br/>]
+        A7[Semantic Scholar API<br/>]
+    end
+
+    subgraph Interfaces["Interfaces Layer"]
+        CLI["CLI (Click)<br/>"]
+    end
+
+    subgraph Composition["Composition Layer"]
+        Boot[bootstrap_pipeline<br/>]
+        Factory[PipelineFactory<br/>]
+    end
+
+    subgraph Application["Application Layer"]
+        Runner[PipelineRunner<br/>]
+        Executor[BatchExecutor<br/>]
+        Trans[BaseTransformer<br/>]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        Adapters[Provider Adapters<br/>7 APIs + ID mapping]
+        Storage[Storage Writers<br/>]
+    end
+
+    subgraph Lake["Data Lake — Local Storage"]
+        Bronze["Bronze Layer<br/>(JSONL + zstd)"]
+        Silver["Silver Layer<br/>(Delta Lake)"]
+        Gold["Gold Layer<br/>(Delta Lake)"]
+        Quarantine["Quarantine<br/>(failed records)"]
+    end
+
+    Sources --> Adapters
+    CLI --> Boot
+    Boot --> Factory
+    Factory --> Runner
+    Runner --> Executor
+    Executor --> Trans
+    Trans --> Adapters
+    Storage --> Bronze
+    Storage --> Silver
+    Storage --> Gold
+    Trans -.->|DQ failure| Quarantine
+    Executor --> Storage
+
+    %% Styling — Medallion color scheme per diagramming policy §4.3
+    classDef source fill:#eff6ff,stroke:#2563eb,color:#1e40af
+    classDef iface fill:#eff6ff,stroke:#2563eb,color:#1e40af
+    classDef comp fill:#fff7ed,stroke:#f59e0b,color:#bf360c
+    classDef app fill:#f0fdf4,stroke:#16a34a,color:#212121
+    classDef infra fill:#fff1f2,stroke:#dc2626,color:#dc2626
+    classDef bronze fill:#fff7ed,stroke:#f59e0b,color:#212121
+    classDef silver fill:#f8fafc,stroke:#475569,color:#212121
+    classDef gold fill:#fefce8,stroke:#ca8a04,color:#212121
+    classDef quarantine fill:#ffe4e6,stroke:#e11d48,color:#dc2626
+
+    class A1,A2,A3,A4,A5,A6,A7 source
+    class CLI iface
+    class Boot,Factory comp
+    class Runner,Executor,Trans app
+    class Adapters,Storage infra
+    class Bronze bronze
+    class Silver silver
+    class Gold gold
+    class Quarantine quarantine
+
+    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style Composition fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style Interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+
+    linkStyle 0,1,2,3,4,5,6,11 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 7,8,9 stroke:#1E293B,stroke-width:4px
+    linkStyle 10 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4

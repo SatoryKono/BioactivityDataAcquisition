@@ -1,0 +1,31 @@
+# RF-017 Constructor Waivers
+# Policy:
+# - Max TTL for waivers is 6 months from current date.
+# - All out-of-scope classes must have a documented reason, owner, and expiry.
+# - Temporary waivers for Wave 1 classes will be removed at the end of RF-017.
+
+# --- Wave 2: Out-of-Scope (Infrastructure & Domain Aggregates) ---
+
+QuarantineEntry:
+  allowed_args: 9
+  reason: "Domain aggregate; wide state constructor is valid."
+  owner: "@core-team"
+  expiry_date: "2026-09-15"
+
+PubChemAdapter:
+  allowed_args: 10
+  reason: "Requires separate infrastructure wave."
+  owner: "@bioetl-platform"
+  expiry_date: "2026-06-01"
+
+PubChemFetchStrategies:
+  allowed_args: 9
+  reason: "Adapter refactoring out of scope."
+  owner: "@bioetl-platform"
+  expiry_date: "2026-06-01"
+
+UniProtAdapter:
+  allowed_args: 10
+  reason: "Adapter refactoring out of scope."
+  owner: "@bioetl-platform"
+  expiry_date: "2026-06-01"

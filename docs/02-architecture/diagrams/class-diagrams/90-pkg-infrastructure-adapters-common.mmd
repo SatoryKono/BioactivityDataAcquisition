@@ -1,0 +1,51 @@
+%% Title: Package Family: infrastructure/adapters/common
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/adapters/common; modules: fallback_fetch_service, composable_fallback, dependency_context, api_request_collector, base_title_fallback, fallback_policy_mixin.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-03-27
+%% @level   Package Family / Inventory Slice
+%% @nodes   17
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace fallback_fetch_service {
+        class DefaultFallbackExecution
+        class ExtractRecordIdPort
+        class FallbackExecutionPort
+        class FallbackFetchOrchestratorService
+        class FallbackFetchRequest
+        class NormalizeIdPort
+        class Phase1SummaryLoggerPort
+        class PrimaryRecordFetchPort
+    }
+
+    namespace composable_fallback {
+        class ComposableFallbackDecorator
+        class FallbackDecoratorConfig
+    }
+
+    namespace dependency_context {
+        class HttpAdapterDependencyContext
+        class SyncAdapterDependencyContext
+    }
+
+    namespace api_request_collector {
+        class APIRequestCollector
+    }
+
+    namespace base_title_fallback {
+        class BaseTitleFallbackHandler
+    }
+
+    namespace fallback_policy_mixin {
+        class FallbackPolicyMixin
+    }
+
+    namespace fetch_retry_policy {
+        class _FetchState
+    }
+
+    namespace source_metadata_capability {
+        class SourceMetadataCollectorProtocol
+    }

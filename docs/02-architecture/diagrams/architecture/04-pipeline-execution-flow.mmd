@@ -1,0 +1,114 @@
+%% BioETL — Pipeline Execution Lifecycle
+%% Sequence of phases in a single pipeline run.
+
+%% @version 1.1.0
+%% @date    2026-02-24
+%% @type    sequenceDiagram
+%% @level   System / Component
+%% @nodes   12
+%% @uniform sequence width=168 max_title_len=16
+
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'elk': {
+    'mergeEdges': true
+  }
+}}%%
+
+sequenceDiagram
+    participant CLI as CLI / Interfaces
+    participant Boot as Bootstrap
+    participant Runner as PipelineRunner
+    participant Preflight as PreflightService
+    participant Lock as LockRuntimeService
+    participant Exec as BatchExecutor
+    participant Trans as BatchTransformer
+    participant Writer as BatchWriter
+    participant Postrun as PostrunService
+    participant Observer as PipelineObserver
+    participant DS as DataSourcePort
+    participant Storage as Storage Port Family
+
+    CLI->>Boot: create_pipeline(config, runtime)
+    Boot->>Boot: assemble DI container
+    Boot->>Runner: inject(services, config, runtime)
+
+    Runner->>Observer: __enter__() — start root span
+    Runner->>Observer: emit(PIPELINE_STARTED)
+
+    rect rgb(232, 245, 233)
+        Note over Runner,Preflight: Phase 1: PREFLIGHT
+        Runner->>Preflight: execute(config, runtime, services)
+        Preflight->>DS: health_check()
+        DS-->>Preflight: HealthCheckResult
+        Preflight->>Storage: health_check()
+        Storage-->>Preflight: HealthCheckResult
+        Preflight-->>Runner: PreflightReport
+    end
+
+    rect rgb(227, 242, 253)
+        Note over Runner,Lock: Phase 2: LOCK ACQUISITION
+        Runner->>Lock: acquire(timeout)
+        Lock->>Lock: heartbeat loop started
+        Lock-->>Runner: FencingToken
+    end
+
+    rect rgb(255, 243, 224)
+        Note over Runner,Storage: Phase 3: MEDALLION LIFECYCLE (clear)
+        Runner->>Storage: clear_silver() [if REBUILD/BACKFILL]
+        Runner->>Storage: clear_gold() [if REBUILD/BACKFILL]
+    end
+
+    rect rgb(253, 231, 236)
+        Note over Runner,Writer: Phase 4: EXECUTION
+        Runner->>Exec: execute(limit, query, offset)
+
+        loop For each API page
+            Exec->>DS: fetch() → AsyncIterator[dict]
+            DS-->>Exec: page of records
+
+            loop For each batch
+                Exec->>Trans: transform_batch(records, batch_id)
+
+                loop For each record
+                    Trans->>Trans: transform_single(record)
+                    Note over Trans: Bronze → Silver transformation
+                end
+
+                Trans-->>Exec: TransformResult(silver[], quarantined[])
+
+                Exec->>Writer: write_bronze(records, batch_id)
+                Writer->>Storage: write_bronze(...)
+                Writer-->>Exec: BronzeWriteResult
+
+                Exec->>Writer: write_silver(records, batch_id)
+                Writer->>Writer: validate_lock() — Safety Guard
+                Writer->>Storage: write_silver(...)
+                Writer-->>Exec: SilverWriteResult
+
+                Exec->>Writer: write_gold(records)
+                Writer->>Storage: write_gold(...)
+            end
+
+            Exec->>Exec: save_checkpoint(offset)
+        end
+    end
+
+    rect rgb(243, 229, 245)
+        Note over Runner,Postrun: Phase 5: POSTRUN
+        Runner->>Postrun: execute(config, runtime, context, executor)
+        Postrun->>Postrun: run DQ checks
+        Postrun->>Postrun: generate DQ reports
+        Postrun->>Storage: vacuum() [if configured]
+        Postrun-->>Runner: PostrunResult
+    end
+
+    rect rgb(232, 245, 233)
+        Note over Runner,Lock: Phase 6: CLEANUP
+        Runner->>Lock: release()
+        Runner->>Exec: delete_checkpoint()
+        Runner->>Observer: emit(PIPELINE_COMPLETED)
+        Runner->>Observer: __exit__() — close root span
+    end

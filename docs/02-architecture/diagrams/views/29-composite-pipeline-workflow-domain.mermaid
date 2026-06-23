@@ -1,0 +1,16 @@
+%% View: Domain-Focus | Parent: 29-composite-pipeline-workflow-full.mermaid
+%% @uniform width=168 height=56 max_title_len=16 max_desc_lines=1
+flowchart TB
+    BOOT["runtime bootstrap + control-plane deps"] -.-> SP["Seed runner"]
+    SP ==> KE["KeyExtractorService"]
+    SP --> DC["DependencyCoordinatorService"]
+    KE ==> EC["EnrichmentCoordinator"]
+    EC --> DD["EnricherDeduplicator"]
+    DD ==> MS["MergeService"]
+    MS --> XV["EnrichmentCrossValidator"]
+    XV ==> GW["GoldWriter"]
+
+    classDef comp fill:#fff7ed,stroke:#f59e0b,stroke-width:1.8px;
+    classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:1.8px;
+    class BOOT comp;
+    class SP,KE,DC,EC,DD,MS,XV,GW app;

@@ -1,0 +1,81 @@
+%% BioETL — Data Operations Observability
+%% Shows how logs, metrics, tracing, and control-plane signals stay correlated without high-cardinality metric labels.
+
+%% @version 1.0.0
+%% @date    2026-03-28
+%% @type    flowchart
+%% @level   System / Runtime
+%% @nodes   18
+%% @reference  Complements 09-observability-stack, 20-data-traceability-runtime, and observability.md
+
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+%% @uniform width=252 height=156 max_title_len=27 max_desc_lines=6
+flowchart LR
+    subgraph Runtime["Runtime event producers"]
+        OBS["PipelineObserver"]:::app
+        RUN["PipelineRunner / CompositeRunner"]:::app
+        HTTP["HTTP adapters + health checks"]:::app
+        CTRL["Manifest / ledger / lineage events"]:::app
+    end
+
+    subgraph Contracts["Application observability contracts"]
+        LOGP["LoggerPort"]:::port
+        METP["MetricsPort"]:::port
+        TRCP["TracingPort"]:::port
+        CORR["Correlation anchors<br/>run_id + pipeline + stage"]:::artifact
+    end
+
+    subgraph Infra["Infrastructure observability"]
+        ULOG["UnifiedLogger / structlog"]:::infra
+        PMET["PrometheusMetrics"]:::infra
+        OTR["OpenTelemetryTracer"]:::infra
+    end
+
+    subgraph Signals["Published signals"]
+        LOGS["Structured logs<br/>timestamp + event + trace_id/span_id"]:::artifact
+        METRICS["Low-cardinality metrics<br/>pipeline / run_type / status / layer"]:::artifact
+        TRACES["Trace spans + span events"]:::artifact
+    end
+
+    subgraph Ops["Monitoring and diagnosis"]
+        PROM["Prometheus scrape"]:::iface
+        GRAF["Grafana / alerts / runbooks"]:::iface
+        CLI["run-manifest + lineage inspection"]:::iface
+    end
+
+    RUN --> OBS
+    HTTP --> OBS
+    CTRL --> OBS
+
+    OBS --> LOGP --> ULOG --> LOGS
+    OBS --> METP --> PMET --> METRICS
+    OBS --> TRCP --> OTR --> TRACES
+    OBS --> CORR
+    CORR --> LOGS
+    CORR -.->|"run-level drill-down"| CLI
+
+    METRICS --> PROM --> GRAF
+    LOGS --> GRAF
+    TRACES --> GRAF
+
+    classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    classDef infra fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    classDef artifact fill:#f1f5f9,stroke:#64748b,stroke-width:2px
+    classDef iface fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+
+    class OBS,RUN,HTTP,CTRL app
+    class LOGP,METP,TRCP port
+    class ULOG,PMET,OTR infra
+    class CORR,LOGS,METRICS,TRACES artifact
+    class PROM,GRAF,CLI iface

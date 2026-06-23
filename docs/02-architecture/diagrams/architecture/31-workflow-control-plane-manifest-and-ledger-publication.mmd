@@ -1,0 +1,34 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% Title: Workflow Control Plane Manifest And Ledger Publication
+%% @version 1.0.0
+%% @date    2026-05-12
+%% @type    flowchart
+%% @level   System / Control Plane
+%% RULES: RULES.md §2.1, §2.8, ADR-044, ADR-047
+flowchart TB
+    workflow_cmd[workflow CLI command]
+    state[workflow execution state]
+    step[WorkflowManifestStep]
+    manifest[WorkflowManifest]
+    ledger[WorkflowLedger]
+    run_refs[child run manifests]
+    checkpoints[workflow checkpoints]
+    diagnostics[workflow diagnostics]
+    maintenance[maintenance commands]
+
+    workflow_cmd --> state
+    state --> step
+    step ==> manifest
+    step ==> ledger
+    manifest -.-> run_refs
+    ledger -.-> run_refs
+    manifest --> checkpoints
+    ledger --> diagnostics
+    checkpoints --> maintenance
+    run_refs --> diagnostics
+
+    class workflow_cmd,diagnostics,maintenance iface;
+    class state,step,manifest,ledger domain;
+    class run_refs,checkpoints app;
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget

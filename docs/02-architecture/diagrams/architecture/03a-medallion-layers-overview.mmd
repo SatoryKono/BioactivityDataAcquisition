@@ -1,0 +1,53 @@
+%% BioETL — Medallion Layers Overview
+%% Compact decomposition view for 03-medallion-data-flow.mmd (layer-level semantics)
+
+%% @version 1.0.0
+%% @date    2026-02-27
+%% @type    flowchart
+%% @level   System / Component
+%% @nodes   12
+%% @adr     ADR-002, ADR-040
+
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+flowchart LR
+    subgraph Ingest["Ingestion"]
+        Sources["Provider APIs"]
+        Bronze["Bronze Layer\nRaw JSON"]
+    end
+
+    subgraph Process["Processing"]
+        Normalize["Normalize + Validate"]
+        Silver["Silver Layer\nDelta Tables"]
+        DQ["DQ Checks"]
+        Quarantine["Quarantine"]
+    end
+
+    subgraph Serve["Serving"]
+        Enrich["Entity Enrichment"]
+        Gold["Gold Layer\nServing Tables"]
+        Exports["Exports / Analytics"]
+    end
+
+    Sources --> Bronze
+    Bronze --> Normalize
+    Normalize --> Silver
+    Silver --> DQ
+    DQ --> Gold
+    DQ -.->|"failed records"| Quarantine
+    Silver --> Enrich
+    Enrich --> Gold
+    Gold --> Exports
+
+    style Ingest fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style Process fill:#f8fafc,stroke:#475569,stroke-width:2px
+    style Serve fill:#fefce8,stroke:#ca8a04,stroke-width:2px

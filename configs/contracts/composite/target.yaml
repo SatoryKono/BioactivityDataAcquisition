@@ -1,0 +1,29 @@
+# Composite Target Data Quality Contract
+# Aligned with configs/base/contract_registry.yaml identity tuple.
+
+contract_ref: "composite.target"
+contract_version: "1.0.0"
+dq_policy_ref: "composite.dq.v1"
+rule_bundle_version: "dq-rules.v1.0"
+default_disposition_policy: "warn"
+strictness_mode: "moderate"
+soft_fail_threshold: 0.10
+hard_fail_threshold: 0.30
+strict_dq_validation: true
+invalid_record_policy: "quarantine"
+disposition_overrides:
+  TT-001: "fail"
+  TT-002: "fail"
+  TT-003: "fail"
+  TT-004: "fail"
+  TT-005: "fail"
+  TT-006: "warn"
+  TT-007: "warn"
+  TT-008: "fail"
+  TT-009: "warn"
+  TT-010: "warn"
+report:
+  enabled: true
+  format: "json"
+  include_sample_failures: true
+  sample_size: 1000

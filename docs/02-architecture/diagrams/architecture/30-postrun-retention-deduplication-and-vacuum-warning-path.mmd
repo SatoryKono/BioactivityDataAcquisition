@@ -1,0 +1,36 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% Title: Postrun Retention Deduplication And Vacuum Warning Path
+%% @version 1.0.0
+%% @date    2026-05-12
+%% @type    sequenceDiagram
+%% @level   System / Interaction
+%% RULES: RULES.md §2.1, §2.8, ADR-013, ADR-014
+sequenceDiagram
+    autonumber
+    participant Runner as PipelineRunner / postrun
+    participant Builder as build_postrun_service
+    participant Service as postrun service
+    participant Retention as retention.py
+    participant Delta as runtime_delta_table
+    participant Warn as warning allowlist
+
+    Runner->>Builder: build_postrun_service(...)
+    Builder-->>Runner: service
+    Runner->>Service: execute postrun tasks
+    Service->>Retention: apply retention + dedup
+    Retention->>Retention: _resolve_deduplication_timeout_seconds(settings)
+    alt test_mode with default timeout
+        Retention->>Retention: clamp to 10 seconds
+    else custom timeout
+        Retention->>Retention: keep configured value
+    end
+    Retention->>Delta: to_pyarrow_table()
+    alt dedup succeeds
+        Delta-->>Retention: rows
+        Retention-->>Service: compacted result
+    else TimeoutError
+        Delta-->>Retention: timeout
+        Service->>Warn: check allowlist
+        Warn-->>Service: degrade to warning
+    end
+    Service-->>Runner: success or warning outcome

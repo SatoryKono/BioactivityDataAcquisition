@@ -1,0 +1,82 @@
+version: 1.0.0
+provider: pubmed
+source:
+    provider_config:
+        provider: pubmed
+        base_url: https://eutils.ncbi.nlm.nih.gov/entrez/eutils
+        auth_type: api_key
+        api_key_env: BIOETL_PUBMED_API_KEY
+        email_env: BIOETL_PUBMED_EMAIL
+        client:
+            timeout_sec: 60.0
+            max_retries: 3
+        pagination:
+            page_size: 100
+            id_batch_size: 100
+            strategy: offset
+        default_email: bioetl-bot@example.com
+        fallback:
+            enabled: true
+            supported_filter_field: null
+            unsupported_filter_event: unsupported_filter_field_for_fallback
+            unsupported_filter_message: PubMed fallback accepts any field and resolves via
+                PMID/title phases
+            skip_on_unsupported_filter_field: false
+            primary_lookup_method: pmid
+            trim_primary_ids_to_limit: false
+            fallback_operation: fetch_filtered_with_fallback
+    circuit_breaker:
+        failure_threshold: 5
+        recovery_timeout: 300
+    rate_limit:
+        requests_per_second: 3.0
+        burst: 5
+        with_api_key:
+            requests_per_second: 10
+            burst: 20
+    health_check:
+        endpoint: /einfo.fcgi
+        timeout: 10
+    retry:
+        use_retry_after: true
+entities:
+    - publication
+entity_notes:
+    publication:
+        description: PubMed article metadata via Entrez
+        input_mode: Search term or PMID list
+        search_syntax: PubMed boolean queries supported
+quality:
+    version: 1.0.0
+    provider: pubmed
+    thresholds:
+        soft_fail: 0.05
+        hard_fail: 0.15
+    provider_field_validations:
+        -   field: pmid
+            type: range
+            min: 1
+            max: 10000000000
+            nullable: true
+            error_message: PMID must be a positive integer
+        -   field: pmc_id
+            type: pattern
+            pattern: ^PMC\d+$
+            nullable: true
+            error_message: PMC ID must start with PMC followed by digits
+        -   field: doi
+            type: pattern
+            pattern: ^10\.\d{4,}/\S+$
+            nullable: true
+            error_message: Invalid DOI format (must match 10.XXXX/suffix, no whitespace)
+        -   field: publication_year
+            type: range
+            min: 1500
+            max: 2100
+            nullable: true
+            error_message: Publication year out of valid range
+filters:
+    version: 1.0.0
+    provider: pubmed
+    input_filter:
+        batch_size: 100

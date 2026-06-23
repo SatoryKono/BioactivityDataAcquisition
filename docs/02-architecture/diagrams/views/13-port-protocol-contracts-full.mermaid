@@ -1,0 +1,32 @@
+%% View: Full | Parent: 13-port-protocol-contracts.mmd
+%% Parent source: docs/02-architecture/diagrams/architecture/13-port-protocol-contracts.mmd
+%% Full reference diagram retained after decomposition.
+%% @uniform width=220 height=72 max_title_len=20 max_desc_lines=1
+flowchart LR
+
+    subgraph P["Port Groups"]
+        P1["Data Source Ports"]:::port
+        P2["Storage + Validation Ports"]:::port
+        P3["Observability Ports"]:::port
+        P4["Operational Ports"]:::port
+    end
+
+    subgraph I["Implementations"]
+        I1["Provider Adapters"]:::adapter
+        I2["Writers + Readers"]:::adapter
+        I3["Logger / Metrics / Tracing"]:::adapter
+        I4["Lock / Checkpoint / Monitor"]:::adapter
+        I5["DQ Services"]:::service
+    end
+
+    P1 --> I1
+    P2 --> I2
+    P2 --> I5
+    P3 --> I3
+    P4 --> I4
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;

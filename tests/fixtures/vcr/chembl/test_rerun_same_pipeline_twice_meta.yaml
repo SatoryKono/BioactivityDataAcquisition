@@ -1,0 +1,8 @@
+schema_version: 1
+provider: chembl
+cassette_rel_path: tests/fixtures/vcr/chembl/test_rerun_same_pipeline_twice.yaml
+metadata_status: managed_inventory
+source: backfill_vcr_metadata_sidecars.py
+cassette_sha256: 3c2639763dea1fa38a0268f80946dc86a9f22c0c28c50bfad0737e0cea11be33
+recorded_at: '2026-04-28'
+staleness_ready: true

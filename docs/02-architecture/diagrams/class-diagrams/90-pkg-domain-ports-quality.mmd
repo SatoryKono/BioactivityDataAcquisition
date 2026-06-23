@@ -1,0 +1,49 @@
+%% Title: Package Family: domain/ports/quality
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/ports/quality; modules: dq_report, dq_config, quarantine, validation, contract_policy, error_classifier.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-03-27
+%% @level   Package Family / Inventory Slice
+%% @nodes   15
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace dq_report {
+        class BronzeDQAnalyzerPort
+        class DQReportWriterPort
+        class GoldDQAnalyzerPort
+        class SilverDQAnalyzerPort
+    }
+
+    namespace dq_config {
+        class BronzeDQConfigPort
+        class GoldDQConfigPort
+        class SilverDQConfigPort
+    }
+
+    namespace quarantine {
+        class QuarantinePort
+        class QuarantineWriteRequest
+    }
+
+    namespace validation {
+        class GoldValidatorPort
+        class SilverValidatorPort
+    }
+
+    namespace contract_policy {
+        class ContractPolicyPort
+    }
+
+    namespace error_classifier {
+        class ErrorClassifierPort
+    }
+
+    namespace error_handler {
+        class ErrorHandlerPort
+    }
+
+    namespace fallback_policy {
+        class FallbackPolicyPort
+    }

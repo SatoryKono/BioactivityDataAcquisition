@@ -1,0 +1,50 @@
+schema_version: "1.0.0"
+workflow:
+  name: chembl_reference_pack
+  version: "1.0.0"
+  defaults:
+    run_options:
+      run_type: backfill
+      dry_run: false
+      log_level: INFO
+  steps:
+    - kind: pipeline
+      step_id: run_chembl_target
+      pipeline_name: chembl_target
+    - kind: pipeline
+      step_id: run_chembl_target_component
+      pipeline_name: chembl_target_component
+      depends_on:
+        - run_chembl_target
+    - kind: pipeline
+      step_id: run_chembl_protein_class
+      pipeline_name: chembl_protein_class
+    - kind: pipeline
+      step_id: run_chembl_target_protein_classification
+      pipeline_name: chembl_target_protein_classification
+      depends_on:
+        - run_chembl_target
+        - run_chembl_target_component
+        - run_chembl_protein_class
+    - kind: pipeline
+      step_id: run_chembl_tissue
+      pipeline_name: chembl_tissue
+    - kind: pipeline
+      step_id: run_chembl_subcellular_fraction
+      pipeline_name: chembl_subcellular_fraction
+    - kind: pipeline
+      step_id: run_chembl_cell_line
+      pipeline_name: chembl_cell_line
+    - kind: pipeline
+      step_id: run_chembl_publication
+      pipeline_name: chembl_publication
+    - kind: pipeline
+      step_id: run_chembl_publication_term
+      pipeline_name: chembl_publication_term
+      depends_on:
+        - run_chembl_publication
+    - kind: pipeline
+      step_id: run_chembl_publication_similarity
+      pipeline_name: chembl_publication_similarity
+      depends_on:
+        - run_chembl_publication

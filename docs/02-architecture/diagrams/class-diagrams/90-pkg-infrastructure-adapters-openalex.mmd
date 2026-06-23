@@ -1,0 +1,66 @@
+%% Title: Package Family: infrastructure/adapters/openalex
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/adapters/openalex; modules: _filter_fetch_requests, health_adapter_mixin, _filter_fetch_flow, client, client_helpers_adapter_mixin, client_runtime_helpers.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-03-27
+%% @level   Package Family / Inventory Slice
+%% @nodes   16
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace filter_fetch_requests {
+        class _FallbackFetchRequest
+        class _FetchRequest
+        class _FilteredFetchRequest
+        class _OpenAlexRequestHost
+    }
+
+    namespace health_adapter_mixin {
+        class OpenAlexAdapterHealthMixin
+        class _OpenAlexHealthHost
+    }
+
+    namespace filter_fetch_flow {
+        class _OpenAlexFilterFetchHost
+    }
+
+    namespace client {
+        class OpenAlexAdapter
+    }
+
+    namespace client_helpers_adapter_mixin {
+        class OpenAlexAdapterHelpersMixin
+    }
+
+    namespace client_runtime_helpers {
+        class OpenAlexRuntimeServices
+    }
+
+    namespace cursor_flow {
+        class OpenAlexCursorFlowService
+    }
+
+    namespace fallback {
+        class OpenAlexTitleFallbackHandler
+    }
+
+    namespace fallback_orchestrator {
+        class OpenAlexFallbackOrchestrator
+    }
+
+    namespace filter_fetch_adapter_mixin {
+        class OpenAlexAdapterFilterFetchMixin
+    }
+
+    namespace query_execution {
+        class OpenAlexQueryExecutor
+    }
+
+    namespace response_mapping {
+        class OpenAlexResponseMapper
+    }
+
+    OpenAlexAdapterFilterFetchMixin <|-- OpenAlexAdapter
+    OpenAlexAdapterHealthMixin <|-- OpenAlexAdapter
+    OpenAlexAdapterHelpersMixin <|-- OpenAlexAdapter

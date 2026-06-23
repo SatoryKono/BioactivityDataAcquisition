@@ -1,0 +1,931 @@
+# Test Coverage Matrix — ADR-042
+# Tracks required test types per provider and layer.
+# CI uses this to validate minimum test coverage requirements.
+#
+# Levels: MUST (required), SHOULD (recommended), MAY (optional)
+# Types: unit, integration, contract, property, e2e, smoke
+
+version: "1.0.0"
+adr_ref: ADR-042
+
+# ── Canonical test-health lanes ─────────────────────────────
+
+test_lanes:
+  schema_version: 1
+  source: configs/quality/test_matrix.yaml
+  summary: >
+    Canonical named pytest lanes for comparable local and CI test-health runs.
+    Later test-health wrappers must emit these values as suite names instead of
+    treating ad hoc pytest commands as comparable runs.
+  authority_model:
+    hard_merge_truth:
+      - live_ci_status
+      - coverage-verify
+    advisory_telemetry:
+      - branch_coverage
+      - mutation_testing
+      - local_test_health_rollups
+    historical_evidence:
+      - reports/quality/test-runs/rollup.md
+    dirty_tree_policy: >
+      Committed coverage inventory source-tree hashes are authoritative only for
+      a clean src/bioetl tree; dirty-tree runs may be useful diagnostics but must
+      not be treated as merge-blocking coverage truth.
+  execution_defaults:
+    pythonpath: src
+    direct_runner: scripts/engineering/dev/run_pytest.sh
+    sharded_runner: scripts/engineering/dev/run_pytest_sharded.sh
+    default_sharded_options:
+      - --stream
+      - --keep-coverage-files
+      - --coverage-dir
+      - .coverage-sharded
+    default_pytest_passthrough:
+      - -vv
+      - --cov-report=html
+    powershell_env_example: '$env:PYTHONPATH="src"'
+    bash_env_example: PYTHONPATH=src
+  lanes:
+    smoke:
+      suite_name: smoke
+      description: "Minimal dependency and import smoke lane aligned with the CI smoke-check job and excluding dedicated memory smoke."
+      runner_backend: run_pytest
+      runner: scripts/engineering/dev/run_pytest.sh
+      paths:
+        - tests/smoke/
+      marker_expression: "not benchmark and not memory"
+      pytest_args:
+        - tests/smoke/
+        - -m
+        - not benchmark and not memory
+      replay_mode: not_applicable
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    unit-fast:
+      suite_name: unit-fast
+      description: "Fast unit lane over canonical pure-unit paths; excludes slow, benchmark, repo-backed, and Neo4j/MCP memory tests."
+      runner_backend: run_pytest
+      runner: scripts/engineering/dev/run_pytest.sh
+      paths:
+        - tests/unit/
+      marker_expression: "not repo_backed and not slow and not benchmark and not memory"
+      pytest_args:
+        - tests/unit/
+        - -m
+        - not repo_backed and not slow and not benchmark and not memory
+      replay_mode: not_applicable
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    repo-backed-unit:
+      suite_name: repo-backed-unit
+      description: "Repository-file-backed unit-path contract checks isolated in tests/unit/repo_backed/."
+      runner_backend: run_pytest
+      runner: scripts/engineering/dev/run_pytest.sh
+      paths:
+        - tests/unit/repo_backed/
+      marker_expression: "repo_backed and not slow and not benchmark and not memory"
+      pytest_args:
+        - tests/unit/repo_backed/
+        - -m
+        - repo_backed and not slow and not benchmark and not memory
+      replay_mode: not_applicable
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    unit-parallel-safe:
+      suite_name: unit-parallel-safe
+      description: "Deterministic canonical pure-unit lane routed through the maintained shard inventory; excludes repo-backed, slow, serial, benchmark, and memory tests."
+      runner_backend: run_pytest_sharded
+      runner: scripts/engineering/dev/run_pytest_sharded.sh
+      runner_options:
+        - --shard
+        - S1-domain-core
+        - --shard
+        - S1-domain-services
+        - --shard
+        - S2-comp-iface
+        - --shard
+        - S3-app-foundation
+        - --shard
+        - S4-app-services
+        - --shard
+        - S6-crosscutting-unit
+      paths:
+        - tests/unit/
+      marker_expression: "not repo_backed and not slow and not serial and not benchmark and not memory"
+      pytest_args:
+        - tests/unit/
+        - -m
+        - not repo_backed and not slow and not serial and not benchmark and not memory
+      replay_mode: not_applicable
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    integration-replay:
+      suite_name: integration-replay
+      description: "Integration lane in VCR/replay mode; live network access is not part of this lane."
+      runner_backend: run_pytest
+      runner: scripts/engineering/dev/run_pytest.sh
+      paths:
+        - tests/integration/
+      marker_expression: "not slow and not benchmark and not memory"
+      pytest_args:
+        - tests/integration/
+        - -m
+        - not slow and not benchmark and not memory
+        - --vcr-record=none
+      environment:
+        VCR_RECORD_MODE: none
+      replay_mode: vcr_replay_only
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    integration-determinism:
+      suite_name: integration-determinism
+      description: "Determinism contract checks over deterministic replay envelopes."
+      runner_backend: run_pytest
+      runner: scripts/engineering/dev/run_pytest.sh
+      paths:
+        - tests/integration/determinism/
+      marker_expression: "integration and not slow and not benchmark and not memory"
+      pytest_args:
+        - tests/integration/determinism/
+        - -m
+        - integration and not slow and not benchmark and not memory
+        - --maxfail=1
+      replay_mode: mixed
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    integration-idempotency:
+      suite_name: integration-idempotency
+      description: "Idempotency contract checks for manifest/control-plane contracts."
+      runner_backend: run_pytest
+      runner: scripts/engineering/dev/run_pytest.sh
+      paths:
+        - tests/integration/idempotency/
+      marker_expression: "integration and not slow and not benchmark and not memory"
+      pytest_args:
+        - tests/integration/idempotency/
+        - -m
+        - integration and not slow and not benchmark and not memory
+        - --maxfail=1
+      replay_mode: mixed
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    integration-composite-resume:
+      suite_name: integration-composite-resume
+      description: "Composite resume/checkpoint safety contract checks."
+      runner_backend: run_pytest
+      runner: scripts/engineering/dev/run_pytest.sh
+      paths:
+        - tests/integration/composite_resume/
+      marker_expression: "integration and not slow and not benchmark and not memory"
+      pytest_args:
+        - tests/integration/composite_resume/
+        - -m
+        - integration and not slow and not benchmark and not memory
+        - --maxfail=1
+      replay_mode: mixed
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    security:
+      suite_name: security
+      description: "Dedicated security policy and secret-hygiene lane outside repo-wide coverage enforcement."
+      runner_backend: run_pytest
+      runner: scripts/engineering/dev/run_pytest.sh
+      paths:
+        - tests/security/
+      marker_expression: "security and not benchmark and not memory"
+      pytest_args:
+        - tests/security/
+        - -m
+        - security and not benchmark and not memory
+      replay_mode: not_applicable
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    contracts:
+      suite_name: contracts
+      description: "Schema, provider-contract, and snapshot drift tests."
+      runner_backend: run_pytest
+      runner: scripts/engineering/dev/run_pytest.sh
+      paths:
+        - tests/contract/
+        - tests/unit/contracts/
+      marker_expression: "not slow and not benchmark and not memory"
+      pytest_args:
+        - tests/contract/
+        - tests/unit/contracts/
+        - -m
+        - not slow and not benchmark and not memory
+      replay_mode: replay_or_no_api
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    architecture:
+      suite_name: architecture
+      description: "Layer boundary, import-linter contract, governance, and repository policy checks split into fast-boundary and slow-governance shards; CI also runs lint-imports directly in .github/workflows/import-linter.yml."
+      runner_backend: run_pytest_sharded
+      runner: scripts/engineering/dev/run_pytest_sharded.sh
+      runner_options:
+        - --shard
+        - S7-architecture-fast-boundary
+        - --shard
+        - S7-architecture-slow-governance
+      paths:
+        - tests/architecture/
+      marker_expression: "not slow and not benchmark and not memory"
+      pytest_args:
+        - tests/architecture/
+        - -m
+        - not slow and not benchmark and not memory
+      replay_mode: not_applicable
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    architecture-fast-boundary:
+      suite_name: architecture-fast-boundary
+      description: "Fast architecture boundary lane for local feedback; excludes slow repo-wide governance scans."
+      runner_backend: run_pytest_sharded
+      runner: scripts/engineering/dev/run_pytest_sharded.sh
+      runner_options:
+        - --shard
+        - S7-architecture-fast-boundary
+      paths:
+        - tests/architecture/
+      marker_expression: "architecture and not slow and not benchmark and not memory"
+      pytest_args:
+        - tests/architecture/
+        - -m
+        - architecture and not slow and not benchmark and not memory
+      replay_mode: not_applicable
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    architecture-slow-governance:
+      suite_name: architecture-slow-governance
+      description: "Slow repo-wide architecture governance lane for CI/full audit runs."
+      runner_backend: run_pytest_sharded
+      runner: scripts/engineering/dev/run_pytest_sharded.sh
+      runner_options:
+        - --shard
+        - S7-architecture-slow-governance
+      paths:
+        - tests/architecture/
+      marker_expression: "architecture and not benchmark and not memory"
+      pytest_args:
+        - tests/architecture/
+        - -m
+        - architecture and not benchmark and not memory
+      replay_mode: not_applicable
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    architecture-read-only-audit:
+      suite_name: architecture-read-only-audit
+      description: "Diagnostic read-only architecture evidence lane; runs check-only gates without dev-wrapper pretest sync or artifact writes."
+      runner_backend: engineering_qa
+      runner: scripts/engineering/qa/run_architecture_audit_read_only.py
+      paths:
+        - tests/architecture/test_runtime_import_scc.py
+        - reports/quality/
+        - configs/quality/
+      marker_expression: "architecture and not benchmark and not memory"
+      pytest_args:
+        - tests/architecture/test_runtime_import_scc.py
+        - -p
+        - no:cacheprovider
+        - -q
+      replay_mode: not_applicable
+      coverage_gate: none
+      read_only: true
+      mutates_artifacts: false
+      expected_artifacts:
+        junit_xml: false
+        json_summary: false
+
+    e2e:
+      suite_name: e2e
+      description: "Slow end-to-end lane; kept separate from fast feedback and coverage verification."
+      runner_backend: run_pytest
+      runner: scripts/engineering/dev/run_pytest.sh
+      paths:
+        - tests/e2e/
+      marker_expression: "e2e and not benchmark and not memory"
+      pytest_args:
+        - tests/e2e/
+        - -m
+        - e2e and not benchmark and not memory
+      replay_mode: mixed
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    memory:
+      suite_name: memory
+      description: "Dedicated Neo4j project-memory and MCP lane; excluded from coverage verification."
+      runner_backend: run_pytest
+      runner: scripts/engineering/dev/run_pytest.sh
+      paths:
+        - tests/smoke/test_neo4j_memory_mcp_smoke.py
+      marker_expression: "memory and not benchmark"
+      pytest_args:
+        - tests/smoke/test_neo4j_memory_mcp_smoke.py
+        - -m
+        - memory and not benchmark
+      replay_mode: not_applicable
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    performance:
+      suite_name: performance
+      description: "Benchmark-backed hotspot and performance budget lane kept outside fast feedback and coverage verification."
+      runner_backend: run_pytest
+      runner: scripts/engineering/dev/run_pytest.sh
+      paths:
+        - tests/performance/
+      marker_expression: "benchmark and performance"
+      pytest_args:
+        - tests/performance/
+        - -m
+        - benchmark and performance
+        - -p
+        - no:xdist
+      replay_mode: not_applicable
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    coverage-verify:
+      suite_name: coverage-verify
+      description: "The only lane allowed to enforce the repo-wide coverage gate."
+      runner_backend: run_pytest_sharded
+      runner: scripts/engineering/dev/run_pytest_sharded.sh
+      runner_options:
+        - --stream
+        - --keep-coverage-files
+        - --coverage-dir
+        - .coverage-sharded
+      paths:
+        - tests/
+      marker_expression: "not e2e and not benchmark and not memory"
+      pytest_args:
+        - tests/
+        - -m
+        - not e2e and not benchmark and not memory
+        - --cov=src/bioetl
+        - --cov-report=term-missing
+      replay_mode: replay_or_no_api
+      coverage_gate: repo-wide
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+        coverage_xml: reports/coverage/coverage.xml
+        module_coverage_inventory: reports/quality/module-coverage-inventory.json
+
+# ── Layer-level requirements ─────────────────────────────────
+
+layers:
+  domain:
+    unit: MUST
+    property: SHOULD
+    description: "Pure logic, value objects, ports. No I/O."
+
+  application:
+    unit: MUST
+    integration: SHOULD
+    property: SHOULD  # transformers, normalization only
+    description: "Pipelines, services, orchestration."
+
+  infrastructure:
+    unit: MUST
+    integration: MUST  # VCR-backed
+    contract: MUST
+    description: "HTTP adapters, storage, observability."
+
+  composition:
+    unit: SHOULD
+    integration: SHOULD
+    e2e: MUST
+    description: "DI wiring, factories, bootstrap."
+
+  interfaces:
+    unit: SHOULD
+    e2e: MUST
+    description: "CLI commands, entry points."
+
+# ── Provider-level requirements ──────────────────────────────
+
+providers:
+  chembl:
+    entities:
+      [
+        activity,
+        assay,
+        assay_parameters,
+        cell_line,
+        compound_record,
+        publication,
+        publication_similarity,
+        publication_term,
+        molecule,
+        protein_class,
+        subcellular_fraction,
+        target,
+        target_component,
+        tissue,
+      ]
+    vcr_cassettes: MUST
+    contract_tests: MUST
+    golden_masters: MUST
+
+  pubchem:
+    entities: [compound]
+    vcr_cassettes: MUST
+    contract_tests: MUST
+    golden_masters: MUST
+
+  uniprot:
+    entities: [protein, idmapping]
+    vcr_cassettes: MUST
+    contract_tests: MUST
+    golden_masters: MUST
+
+  pubmed:
+    entities: [publication]
+    vcr_cassettes: MUST
+    contract_tests: MUST
+    golden_masters: MUST
+
+  crossref:
+    entities: [publication]
+    vcr_cassettes: MUST
+    contract_tests: MUST
+    golden_masters: MUST
+
+  openalex:
+    entities: [publication]
+    vcr_cassettes: MUST
+    contract_tests: MUST
+    golden_masters: MUST
+
+  semanticscholar:
+    entities: [publication]
+    vcr_cassettes: MUST
+    contract_tests: SHOULD
+    golden_masters: MUST
+
+# ── Entity-level test ownership ──────────────────────────────
+
+entity_test_ownership:
+  composite.activity:
+    - tests/unit/application/composite/test_composite_activity.py
+  composite.assay:
+    - tests/e2e/test_chembl_assay_e2e.py
+  composite.molecule:
+    - tests/integration/composite/test_molecule_pipeline.py
+  composite.publication:
+    - tests/unit/application/composite/test_publication_schema_columns.py
+  composite.target:
+    - tests/unit/composition/bootstrap/runtime/test_composite_helpers.py
+  chembl.activity:
+    - tests/integration/pipelines/test_chembl_activity.py
+  chembl.assay:
+    - tests/e2e/test_chembl_assay_e2e.py
+  chembl.assay_parameters:
+    - tests/unit/application/pipelines/test_chembl_assay_parameters.py
+  chembl.cell_line:
+    - tests/integration/pipelines/test_chembl_cell_line.py
+  chembl.compound_record:
+    - tests/integration/pipelines/test_chembl_compound_record.py
+  chembl.molecule:
+    - tests/e2e/test_chembl_molecule_e2e.py
+  chembl.protein_class:
+    - tests/unit/application/pipelines/test_chembl_pipelines.py
+  chembl.publication:
+    - tests/e2e/test_chembl_publication_e2e.py
+  chembl.publication_similarity:
+    - tests/unit/application/pipelines/test_chembl_pipelines.py
+  chembl.publication_term:
+    - tests/e2e/test_chembl_publication_term_e2e.py
+  chembl.subcellular_fraction:
+    - tests/unit/application/pipelines/chembl/test_subcellular_fraction_transformer.py
+  chembl.target:
+    - tests/e2e/test_chembl_target_e2e.py
+  chembl.target_component:
+    - tests/integration/pipelines/test_chembl_target_component.py
+  chembl.target_protein_classification:
+    - tests/unit/application/pipelines/chembl/test_target_protein_classification_transformer.py
+  chembl.tissue:
+    - tests/unit/application/pipelines/chembl/test_tissue_transformer.py
+  crossref.publication:
+    - tests/e2e/test_crossref_publication_e2e.py
+  openalex.publication:
+    - tests/e2e/test_openalex_publication_e2e.py
+  pubchem.compound:
+    - tests/e2e/test_pubchem_compound_e2e.py
+  pubmed.publication:
+    - tests/e2e/test_pubmed_publication_e2e.py
+  semanticscholar.publication:
+    - tests/e2e/test_semanticscholar_publication_e2e.py
+  uniprot.idmapping:
+    - tests/integration/adapters/test_uniprot_idmapping.py
+  uniprot.protein:
+    - tests/e2e/test_uniprot_protein_e2e.py
+
+# ── Canonical regression suites for shared provider capabilities ─────────────
+
+provider_regression_suites:
+  metadata_request_capability:
+    description: "Canonical provider suites for request-metadata snapshot, clear, and count paths."
+    providers:
+      chembl: tests/unit/infrastructure/adapters/chembl/test_request_metadata.py
+      crossref: tests/unit/infrastructure/adapters/crossref/test_request_metadata.py
+      openalex: tests/unit/infrastructure/adapters/openalex/test_request_metadata.py
+      pubchem: tests/unit/infrastructure/adapters/pubchem/test_request_metadata.py
+      pubmed: tests/unit/infrastructure/adapters/pubmed/test_request_metadata.py
+      semanticscholar: tests/unit/infrastructure/adapters/semanticscholar/test_request_metadata.py
+      uniprot: tests/unit/infrastructure/adapters/uniprot/test_request_metadata.py
+
+  slow_health_probe_policy:
+    description: "Canonical provider suites for shared slow-health degradation policy."
+    providers:
+      crossref: tests/unit/infrastructure/adapters/crossref/test_crossref_client.py
+      openalex: tests/unit/infrastructure/adapters/openalex/test_adapter.py
+      pubmed: tests/unit/infrastructure/adapters/pubmed/test_pubmed_client.py
+      semanticscholar: tests/unit/infrastructure/adapters/semanticscholar/test_adapter.py
+
+# ── Test-health confidence assertions ───────────────────────
+
+test_health_confidence:
+  lane_absence_skip_classes:
+    - lane: contracts
+      skip_class: contract_lane_not_run
+      reason: Current quality-gate run does not execute the canonical contracts lane.
+    - lane: e2e
+      skip_class: e2e_lane_not_run
+      reason: Current quality-gate run does not execute the canonical e2e lane.
+    - lane: memory
+      skip_class: memory_lane_not_run
+      reason: Current quality-integral gate slice runs architecture checks only; the dedicated CI memory-tests lane remains separate and is not represented in this local classification.
+
+# ── Test boundaries (ADR-042 §Property-Based Testing) ───────
+
+property_test_boundaries:
+  allowed:
+    - domain/aggregates
+    - domain/entities
+    - domain/policies
+    - domain/value_objects
+    - application/pipelines/*/transformer*
+    - application/core/normalization*
+    - domain/behavior/schema*
+  forbidden:
+    - infrastructure/storage  # Use fixtures instead
+    - interfaces/cli  # Use e2e instead
+  # Note: infrastructure/adapters/common is exempt — retry/fallback
+  # policies are pure logic tested with property-based approaches.
+
+# ── Mutation testing (ADR-042 §Mutation Gate) ────────────────
+
+mutation_testing:
+  enabled: true
+  workflow_present: true
+  ci_gate_mode: partial  # Domain and curated application slices enforced; broad application target staged
+  governance_ledger_location: configs/quality/mutation_testing_rollout_ledger.yaml
+  tool: mutmut
+  targets:
+    domain:
+      paths_to_mutate: src/bioetl/domain/
+      tests_dir: tests/
+      min_score: 70
+      enforced: true
+    application_control_plane:
+      paths_to_mutate: src/bioetl/application/services/control_plane/
+      tests_dir: tests/unit/application/services/control_plane/
+      min_score: 60
+      enforced: true
+    application_export_manifests:
+      paths_to_mutate: src/bioetl/application/services/export_manifests.py
+      tests_dir: tests/unit/application/services/
+      min_score: 60
+      enforced: true
+    application_workflow_runner:
+      paths_to_mutate: src/bioetl/application/services/workflow_runner_service.py
+      tests_dir: tests/unit/application/services/
+      min_score: 60
+      enforced: true
+    application:
+      paths_to_mutate: src/bioetl/application/
+      min_score: 60
+      enforced: false
+  excluded:
+    - infrastructure  # I/O-heavy, low mutation value
+    - composition  # Wiring code, tested via e2e
+    - interfaces  # CLI tested via e2e
+
+# ── Coverage inventory ───────────────────────────────────────
+
+module_coverage_inventory:
+  enabled: true
+  canonical_lane: coverage-verify
+  authoritative_status_source: live_ci_coverage_verify
+  committed_artifact_refresh_policy: green_coverage_verify_run_only
+  generator: scripts/engineering/qa/report_module_coverage_inventory.py
+  command: python -m scripts.engineering.qa report-module-coverage
+  artifact: reports/quality/module-coverage-inventory.json
+  coverage_xml: reports/coverage/coverage.xml
+  canonical_generation_requires_coverage_xml: true
+  source_scope: src/bioetl/**/*.py
+  schema_version: 1
+  per_module_gates:
+    enabled: true
+    policy: configs/quality/module_coverage_gates.yaml
+    enforcement_mode: block-regression
+    fail_on_regression: true
+
+# ── Fixture governance ───────────────────────────────────────
+
+fixture_governance:
+  governance_ledger_location: configs/quality/fixture_governance_ledger.yaml
+  vcr_cassette_max_age_days: 90
+  golden_master_location: tests/fixtures/golden/{provider}/
+  current_silver_schema_snapshot_location: tests/contract/silver_schemas/snapshots/
+  contract_snapshot_location: tests/fixtures/contracts/{provider}/v{version}.json
+  cassette_metadata_catalog_location: reports/quality/vcr-metadata-catalog.json
+  cassette_metadata_catalog_script: scripts/engineering/qa/report_vcr_metadata_catalog.py
+  cassette_metadata_required: true
+  cassette_staleness_requires_metadata: true
+  canonical_vcr_location: tests/fixtures/vcr/{provider}/
+  extensionless_allowlist: .github/vcr-noext-allowlist.txt
+  root_vcr_policy_enforced: true
+  cassette_metadata_backfill_workflow_present: false
+  cassette_metadata_backfill_script: scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py
+  cassette_metadata_inventory_contract:
+    scope: managed_vcr_inventory
+    metadata_catalog_location: reports/quality/vcr-metadata-catalog.json
+    stale_age_checker: scripts/engineering/qa/vcr/check_vcr_metadata_age.py
+    provider_expected_sidecar_counts:
+      chembl: 52
+      crossref: 24
+      multi_provider: 1
+      openalex: 25
+      pubchem: 31
+      pubmed: 24
+      semanticscholar: 24
+      uniprot: 17
+  rollout:
+    cassette_metadata: enforced
+    cassette_staleness_age: enforced
+    cassette_metadata_catalog: enforced
+    cassette_metadata_backfill: enforced
+    bronze_replay_fixtures: enforced
+    contract_snapshots: enforced
+    golden_masters: enforced
+    extensionless_filenames: enforced
+  golden_master_registry:
+    scope: representative_provider_baseline
+    documentation: tests/fixtures/golden
+    update_env_var: UPDATE_SNAPSHOTS
+    providers:
+      chembl:
+        pipelines:
+          - chembl_activity
+          - chembl_molecule
+          - chembl_publication_term
+        rationale: Representative ChEMBL baseline spans activity, molecule, and a derived publication surface.
+      crossref:
+        pipelines:
+          - crossref_publication
+        rationale: CrossRef keeps one representative publication golden master in the enforced baseline.
+      openalex:
+        pipelines:
+          - openalex_publication
+        rationale: OpenAlex keeps one representative publication golden master in the enforced baseline.
+      pubchem:
+        pipelines:
+          - pubchem_compound
+        rationale: PubChem compound remains the representative compound baseline.
+      pubmed:
+        pipelines:
+          - pubmed_publication
+        rationale: PubMed publication remains the representative publication baseline.
+      semanticscholar:
+        pipelines:
+          - semanticscholar_publication
+        rationale: Semantic Scholar publication remains a bounded representative golden-master baseline despite live fixture scarcity elsewhere.
+      uniprot:
+        pipelines:
+          - uniprot_protein
+          - uniprot_idmapping
+        rationale: UniProt keeps protein plus idmapping representative golden masters because both surfaces are active and behaviorally distinct.
+  contract_snapshot_registry:
+    scope: bounded_live_provider_baseline
+    documentation: tests/fixtures/contracts/README.md
+    helper_module: tests/contract/_provider_contract_drift.py
+    replay_registry_module: tests/contract/_provider_contract_replay.py
+    registry_test_module: tests/contract/test_provider_contract_snapshot_registry.py
+    replay_test_module: tests/contract/test_provider_contract_drift_replay.py
+    replay_report_command: python -m scripts.engineering.qa report-provider-contract-drift
+    update_env_var: UPDATE_SNAPSHOTS
+    providers:
+      chembl:
+        version: 1
+        test_module: tests/contract/test_chembl_contract.py
+        required_probes:
+          - activity_endpoint_schema
+          - molecule_endpoint_schema
+          - target_endpoint_schema
+      crossref:
+        version: 1
+        test_module: tests/contract/test_crossref_contract.py
+        required_probes:
+          - work_lookup_by_doi
+          - works_query_endpoint
+          - agency_lookup_for_doi
+      openalex:
+        version: 1
+        test_module: tests/contract/test_openalex_contract.py
+        required_probes:
+          - works_filter_by_doi
+          - works_search_endpoint
+          - health_probe_shape
+      pubchem:
+        version: 1
+        test_module: tests/contract/test_pubchem_contract.py
+        required_probes:
+          - compound_by_molecule_id
+          - compound_property_endpoint
+          - smiles_search
+      pubmed:
+        version: 1
+        test_module: tests/contract/test_pubmed_contract.py
+        required_probes:
+          - esearch_endpoint
+          - esummary_endpoint
+          - einfo_database_list
+      semanticscholar:
+        version: 1
+        test_module: tests/contract/test_semanticscholar_contract.py
+        required_probes:
+          - paper_search_endpoint
+          - paper_batch_lookup_by_doi
+      uniprot:
+        version: 1
+        test_module: tests/contract/test_uniprot_contract.py
+        required_probes:
+          - uniprotkb_search_endpoint
+          - specific_protein_lookup
+          - taxonomy_endpoint
+  gold_snapshot_registry:
+    scope: bounded_contract_and_dq_sensitive_gold_baseline
+    documentation: docs/04-reference/contracts/gold-schemas.md
+    registry_path: tests/fixtures/golden/gold/schema_registry.v1.json
+    helper_module: tests/contract/_gold_schema_snapshot_registry.py
+    registry_test_module: tests/contract/test_gold_schema_snapshot_registry.py
+    dq_snapshot_test_module: tests/contract/test_gold_dq_golden_snapshots.py
+    update_env_var: UPDATE_SNAPSHOTS
+    tracked_snapshot_paths:
+      - tests/fixtures/golden/gold/chembl_activity_dq_bundle_v1.json
+      - tests/fixtures/golden/gold/chembl_assay_dq_bundle_v1.json
+      - tests/fixtures/golden/gold/composite_molecule_dq_bundle_v1.json
+      - tests/fixtures/golden/gold/composite_publication_dq_bundle_v1.json
+      - tests/fixtures/golden/gold/pubchem_compound_dq_bundle_v1.json
+      - tests/fixtures/golden/gold/pubmed_publication_dq_bundle_v1.json
+  fixture_duplication_inventory_contract:
+    scope: exact_byte_duplicate_visibility_for_tracked_fixture_assets
+    generator: scripts/engineering/qa/report_test_governance_audit.py
+    inventory_location: reports/quality/test-fixture-asset-duplication.json
+    tracked_extensions:
+      - .json
+      - .yaml
+      - .yml
+    required_scopes:
+      - fixture
+      - golden
+      - vcr
+  config_contract_registry_duplication_inventory_contract:
+    issue_ref: '#5409'
+    scope: exact_byte_duplicate_visibility_for_jscpd_excluded_governance_artifacts
+    generator: scripts/engineering/qa/report_artifact_duplication_audit.py
+    command: python -m scripts.engineering.qa report-artifact-duplication-audit
+    inventory_location: reports/quality/config-contract-registry-artifact-duplication.json
+    jscpd_blind_spot_source: .jscpd.json
+    tracked_extensions:
+      - .csv
+      - .json
+      - .md
+      - .toml
+      - .yaml
+      - .yml
+    required_scopes:
+      - config
+      - contract
+      - registry
+  interoperability_drift_gates:
+    scope: provider_contract_and_export_interoperability_surfaces
+    workflow: .github/workflows/provider-contract-drift.yml
+    fast_path_mode: replay_or_snapshot_only
+    live_network_mode: monthly_contract_tests_only
+    required_gate_commands:
+      - python -m scripts.engineering.qa check-xwalk-missing-backlog
+      - python -m scripts.docs generate-pipeline-normalization-matrix --check
+      - pytest tests/unit/application/services/test_export_manifests.py
+    required_surfaces:
+      openalex_provider_config:
+        evidence:
+          - configs/providers/openalex.yaml
+          - tests/unit/infrastructure/adapters/openalex/test_adapter.py
+        expectations:
+          - auth_type
+          - api_key_env
+          - credit_model
+          - rate_limit_headers
+          - primary_lookup_method
+      chembl_activity_publication_identifiers:
+        evidence:
+          - docs/04-reference/pipelines/chembl/activity-xwalk.csv
+          - tests/unit/application/pipelines/chembl/test_activity_transformer.py
+        expectations:
+          - publication_doi
+          - publication_pmid
+          - publication_pmc_id
+      pubchem_chemical_standardization:
+        evidence:
+          - src/bioetl/domain/behavior/chemical_standardization.py
+          - tests/unit/domain/services/test_chemical_standardization.py
+        expectations:
+          - chemical_standardization_status
+          - chemical_standardization_policy_version
+          - structure_parent_key
+      chembl_activity_ontology_companions:
+        evidence:
+          - src/bioetl/domain/normalization/chembl.py
+          - tests/unit/domain/normalization/test_chembl_ontology_companions.py
+        expectations:
+          - bao_endpoint_iri
+          - bao_format_iri
+          - uo_unit_iri
+          - qudt_unit_iri
+      export_snapshot_manifests:
+        evidence:
+          - src/bioetl/application/services/export_manifests.py
+          - tests/unit/application/services/test_export_manifests.py
+        expectations:
+          - provenance_manifest
+          - licensing_manifest
+          - checksum_manifest
+
+contract_testing:
+  workflow_present: true
+  replay_gate_workflow: .github/workflows/provider-contract-drift.yml
+  live_api_gate_mode: scheduled
+  replay_gate_mode: ci
+  network_opt_in_required: true
+  live_api_minimum_baseline:
+    enforced_providers: [chembl, pubchem, uniprot, pubmed, crossref, openalex, semanticscholar]
+    pilot_providers: []
+    vcr_only_providers: []
+  provider_live_api:
+    chembl: enforced
+    pubchem: enforced
+    uniprot: enforced
+    pubmed: enforced
+    crossref: enforced
+    openalex: enforced
+    semanticscholar: enforced

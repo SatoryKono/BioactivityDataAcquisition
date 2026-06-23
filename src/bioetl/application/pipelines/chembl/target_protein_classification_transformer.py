@@ -1,0 +1,199 @@
+"""ChEMBL target protein-classification relation transformer."""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from bioetl.application.core.pre_silver_record import PreSilverRecord
+from bioetl.application.pipelines.chembl.base_chembl_transformer import (
+    BaseChemblTransformer,
+)
+from bioetl.domain.entities import TargetProteinClassification
+from bioetl.domain.types import JsonDict
+
+if TYPE_CHECKING:
+    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.types import BronzeRecord, PrimaryId, SilverRecord
+
+_CLASSIFICATION_STATUS_VALUES = {
+    "missing_classification",
+    "quarantined",
+    "resolved",
+}
+
+
+class TargetProteinClassificationTransformer(BaseChemblTransformer):
+    """Transforms shaped target classification rows to Silver records."""
+
+    entity_class = TargetProteinClassification
+    primary_id_field = "target_id"
+    default_entity_type = "target_protein_classification"
+
+    async def transform_pre_silver(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> PreSilverRecord | None:
+        """Build an intermediate target-classification relation payload."""
+        del context, index
+        business_data = self._extract_business_data(
+            record,
+            self._resolve_primary_id(record),
+        )
+        return self._stage_optional_normalized_business_data(
+            business_data=business_data,
+            resolve_entity_id=_target_classification_entity_id,
+        )
+
+    async def _transform_impl(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> SilverRecord | None:
+        """Build a stable Silver row keyed by target_id + status + component/leaf."""
+        business_data = self._extract_business_data(
+            record,
+            self._resolve_primary_id(record),
+        )
+        return self._transform_optional_normalized_business_data(
+            context=context,
+            index=index,
+            business_data=business_data,
+            resolve_entity_id=_target_classification_entity_id,
+        )
+
+    def _extract_business_data(
+        self,
+        record: BronzeRecord,
+        primary_id: PrimaryId,
+    ) -> JsonDict:
+        """Extract shaped target protein-classification relation fields."""
+        return {
+            "target_id": str(primary_id),
+            "classification_status": _classification_status(
+                record.get("classification_status")
+            ),
+            "component_id": _optional_int(record.get("component_id")),
+            "leaf_id": _optional_id_text(record.get("leaf_id")),
+            "path_ids": _optional_text(record.get("path_ids")),
+            "path_names": _optional_text(record.get("path_names")),
+            "path_labels": _optional_text(record.get("path_labels")),
+            "depth": _optional_int(record.get("depth")),
+            "root_id": _optional_id_text(record.get("root_id")),
+            "is_leaf": _optional_bool(record.get("is_leaf")),
+            "l1_id": _optional_id_text(record.get("l1_id")),
+            "l1_name": _optional_text(record.get("l1_name")),
+            "l1_desc": _optional_text(record.get("l1_desc")),
+            "l2_id": _optional_id_text(record.get("l2_id")),
+            "l2_name": _optional_text(record.get("l2_name")),
+            "l2_desc": _optional_text(record.get("l2_desc")),
+            "l3_id": _optional_id_text(record.get("l3_id")),
+            "l3_name": _optional_text(record.get("l3_name")),
+            "l3_desc": _optional_text(record.get("l3_desc")),
+            "l4_id": _optional_id_text(record.get("l4_id")),
+            "l4_name": _optional_text(record.get("l4_name")),
+            "l4_desc": _optional_text(record.get("l4_desc")),
+            "l5_id": _optional_id_text(record.get("l5_id")),
+            "l5_name": _optional_text(record.get("l5_name")),
+            "l5_desc": _optional_text(record.get("l5_desc")),
+            "canonical_l1": _optional_text(record.get("canonical_l1")),
+            "l1_counts_for_target_type": _optional_bool(
+                record.get("l1_counts_for_target_type")
+            ),
+            "l1_mapping_version": _optional_text(record.get("l1_mapping_version")),
+            "target_type_rule_version": _optional_text(
+                record.get("target_type_rule_version")
+            ),
+            "l1_normalization_status": _optional_text(
+                record.get("l1_normalization_status")
+            ),
+            "l1_normalization_notes": _optional_text(
+                record.get("l1_normalization_notes")
+            ),
+            "dataset_version": _optional_text(record.get("dataset_version")),
+            "source_url": _optional_text(record.get("source_url")),
+            "chembl_release": _optional_text(record.get("chembl_release")),
+            "chembl_api_version": _optional_text(record.get("chembl_api_version")),
+            "source_manifest_status": _optional_text(
+                record.get("source_manifest_status")
+            ),
+            "source_snapshot_fingerprint": _optional_text(
+                record.get("source_snapshot_fingerprint")
+            ),
+            "target_snapshot_row_count": _optional_int(
+                record.get("target_snapshot_row_count")
+            ),
+            "target_component_snapshot_row_count": _optional_int(
+                record.get("target_component_snapshot_row_count")
+            ),
+            "protein_class_snapshot_row_count": _optional_int(
+                record.get("protein_class_snapshot_row_count")
+            ),
+        }
+
+
+def _target_classification_entity_id(record: JsonDict) -> str:
+    target_id = str(record["target_id"])
+    status = str(record["classification_status"])
+    component_id = _optional_int(record.get("component_id"))
+    leaf_id = _optional_int(record.get("leaf_id"))
+    if status == "resolved" and component_id is not None and leaf_id is not None:
+        return f"{target_id}:{component_id}:{leaf_id}"
+    return f"{target_id}:{status}"
+
+
+def _classification_status(value: object) -> str:
+    if value is None:
+        return "missing_classification"
+    normalized = str(value).strip()
+    if normalized not in _CLASSIFICATION_STATUS_VALUES:
+        raise ValueError(f"Invalid classification_status: {normalized}")
+    return normalized
+
+
+def _optional_int(value: object) -> int | None:
+    if value is None or isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        return int(value) if value.is_integer() else None
+    if isinstance(value, str):
+        stripped = value.strip()
+        if not stripped:
+            return None
+        try:
+            return int(stripped)
+        except ValueError:
+            return None
+    return None
+
+
+def _optional_text(value: object) -> str | None:
+    if value is None:
+        return None
+    stripped = str(value).strip()
+    return stripped or None
+
+
+def _optional_bool(value: object) -> bool | None:
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, int):
+        return bool(value)
+    if isinstance(value, str):
+        stripped = value.strip().lower()
+        if stripped in {"true", "1", "yes"}:
+            return True
+        if stripped in {"false", "0", "no"}:
+            return False
+    return None
+
+
+def _optional_id_text(value: object) -> str | None:
+    coerced = _optional_int(value)
+    return str(coerced) if coerced is not None else None

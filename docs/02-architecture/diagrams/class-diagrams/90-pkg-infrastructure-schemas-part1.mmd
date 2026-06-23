@@ -1,0 +1,50 @@
+%% Title: Package Family: infrastructure/schemas (Part 1/3)
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 1/3; modules: pipeline_config_common_schemas, base_schemas_chembl, composite_validation.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-03-27
+%% @level   Package Family / Inventory Slice
+%% @nodes   29
+%% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
+classDiagram
+
+    namespace pipeline_config_common_schemas {
+        class ContentHashConfig
+        class FilterColumnSchema
+        class GoldColumnFilterConfig
+        class GoldFiltersConfig
+        class GoldListContainsFilterConfig
+        class GoldListLengthFilterConfig
+        class GoldRangeFilterConfig
+        class InputFilterYamlConfig
+        class MaintenanceConfig
+        class ScdConfigYamlConfig
+        class SinkDQReportConfig
+        class SinkLayerConfig
+        class TransformConfig
+    }
+
+    namespace base_schemas_chembl {
+        class BaseApiConfig
+        class BaseCircuitBreakerConfig
+        class BaseCsvExportConfig
+        class BaseDQConfig
+        class BaseDQThresholds
+        class BaseMaintenanceConfig
+        class BaseRateLimitConfig
+        class HttpClientConfig
+    }
+
+    namespace composite_validation {
+        class CompositeDQSchema
+        class CrossValidationSchema
+        class DQOverrideSchema
+        class EnricherFieldPairingSchema
+        class ExecutionSchema
+        class FieldComparisonSpecSchema
+        class LineageSchema
+        class RetrySchema
+    }
+
+    BaseDQThresholds <|-- BaseDQConfig

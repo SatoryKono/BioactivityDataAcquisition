@@ -1,0 +1,18 @@
+# Composite Assay Data Quality Contract
+# Aligned with configs/base/contract_registry.yaml identity tuple.
+
+contract_ref: "composite.assay"
+contract_version: "1.0.0"
+dq_policy_ref: "composite.dq.v1"
+rule_bundle_version: "dq-rules.v1.0"
+default_disposition_policy: "warn"
+strictness_mode: "moderate"
+soft_fail_threshold: 0.10
+hard_fail_threshold: 0.30
+strict_dq_validation: true
+invalid_record_policy: "quarantine"
+report:
+  enabled: true
+  format: "json"
+  include_sample_failures: true
+  sample_size: 1000

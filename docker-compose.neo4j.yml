@@ -1,0 +1,25 @@
+services:
+  neo4j:
+    image: neo4j:5.15-community
+    container_name: bioetl-neo4j
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      NEO4J_AUTH: neo4j/bioetl_secure_password
+      NEO4J_ACCEPT_LICENSE_AGREEMENT: "yes"
+      # Heap memory configuration (initial and max)
+      NEO4J_server_memory_heap_initial__size: 512m
+      NEO4J_server_memory_heap_max__size: 2g
+      # Page cache for graph data
+      NEO4J_server_memory_pagecache_size: 1g
+      # JVM GC tuning
+      NEO4J_server_jvm_additional: "-XX:+UseG1GC -XX:G1HeapRegionSize=16m"
+    restart: unless-stopped
+    volumes:
+      - neo4j_data:/var/lib/neo4j/data
+      - neo4j_logs:/var/lib/neo4j/logs
+
+volumes:
+  neo4j_data:
+  neo4j_logs:

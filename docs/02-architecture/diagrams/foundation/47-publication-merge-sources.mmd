@@ -1,0 +1,84 @@
+%% Title: Publication Composite — Merge All Sources
+%% Covers: application/composite/merger.py, composite/coordinator.py, composite configs
+%% Rank: 22 (Score 7.38) — Multi-source publication enrichment and merge workflow
+%% Updated: 2026-03-16
+
+%% @version 1.1.0
+%% @date    2026-03-16
+%% @type    sequenceDiagram
+%% @level   Mixed (System / Component / Class)
+%% @nodes   13
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
+%% @uniform sequence width=224 max_title_len=23
+sequenceDiagram
+    participant CLI as CLI<br/>(run-composite)
+    participant CPR as CompositePipelineRunner
+    participant FSM as FSMStateHelperService
+    participant Seed as PipelineRunner<br/>(chembl_publication)
+    participant KE as KeyExtractorService
+    participant EC as EnrichmentCoordinator
+    participant PM as PipelineRunner<br/>(pubmed_publication)
+    participant CR as PipelineRunner<br/>(crossref_publication)
+    participant OA as PipelineRunner<br/>(openalex_publication)
+    participant SS as PipelineRunner<br/>(semanticscholar_publication)
+    participant MS as MergeService
+    participant Alias as publication_aliases<br/>(compat registry)
+    participant GW as GoldWriter
+
+    CLI->>CPR: run(composite="publication")
+
+    Note over CPR,FSM: Default composition assembly still injects the legacy FSM adapter path.
+    Note over CPR,FSM: Phase 1: Seed pipeline
+    CPR->>FSM: transition(NOT_STARTED → SEED_RUNNING)
+    CPR->>Seed: run() — extract ChEMBL publications
+    Seed-->>CPR: SeedResult(records=N, silver_path)
+    CPR->>FSM: transition(SEED_RUNNING → SEED_COMPLETED)
+
+    Note over CPR,KE: Phase 2: Key Extraction
+    CPR->>KE: extract_keys(silver_path, join_keys=["doi","pmid","title"])
+    KE-->>CPR: keys_df (doi, pmid, title columns)
+
+    Note over CPR,SS: Phase 3: Fan-out enrichment via asyncio.gather(return_exceptions=True)
+    Note over CPR,SS: All publication enrichers are optional in current config.<br/>Failures are collected and execution continues.
+    CPR->>FSM: transition(SEED_COMPLETED → ENRICHING)
+    CPR->>EC: run_enrichers(keys_df)
+
+    par PubMed enrichment
+        EC->>PM: run(filter_keys=pmid_list)
+        PM-->>EC: EnrichmentResult(status=COMPLETED, records=M1)
+    and CrossRef enrichment
+        EC->>CR: run(filter_keys=doi_list)
+        CR-->>EC: EnrichmentResult(status=COMPLETED, records=M2)
+    and OpenAlex enrichment
+        EC->>OA: run(filter_keys=doi_list)
+        OA-->>EC: EnrichmentResult(status=COMPLETED, records=M3)
+    and Semantic Scholar enrichment
+        EC->>SS: run(filter_keys=doi_list)
+        SS-->>EC: EnrichmentResult(status=PARTIAL, records=M4)
+    end
+
+    EC-->>CPR: enrichment_results[4]
+    CPR->>FSM: transition(ENRICHING → ENRICHMENT_COMPLETED)
+
+    Note over CPR,GW: Phase 4: Merge → Gold
+    CPR->>FSM: transition(ENRICHMENT_COMPLETED → MERGING)
+    CPR->>MS: merge(seed_silver, enricher_silvers)
+
+    Note over MS: Step 4a: Read Silver tables
+    MS->>MS: _read_silver_tables()<br/>DeltaReader for each source
+
+    Note over MS: Step 4b: Join on DOI / PMID / title
+    MS->>MS: _resolve_composite_join_keys()<br/>DOI/PMID matching + title fallback
+
+    Note over MS,Alias: Step 4c: Preserve provider-qualified columns and apply field_priorities
+    MS->>Alias: read legacy publication aliases<br/>cutoff=2026-06-30
+    Alias-->>MS: publication_doi / publication_pmid / page_* aliases
+    MS->>MS: _resolve_conflicts()<br/>field_priorities + preserve_all_sources
+
+    Note over MS: Step 4d: Validate & write Gold
+    MS->>GW: write_gold(merged_df)
+    GW-->>MS: MergeResult(records=K, conflicts_resolved=C)
+
+    MS-->>CPR: MergeResult
+    CPR->>FSM: transition(MERGING → COMPLETED)
+    CPR-->>CLI: CompositeResult(state=COMPLETED)

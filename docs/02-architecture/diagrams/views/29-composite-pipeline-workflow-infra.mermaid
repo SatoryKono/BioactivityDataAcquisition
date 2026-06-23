@@ -1,0 +1,14 @@
+%% View: Infrastructure-Mapping | Parent: 29-composite-pipeline-workflow-full.mermaid
+%% @uniform width=168 height=56 max_title_len=16 max_desc_lines=1
+flowchart TB
+    SB["Seed Silver table"] --> EOUT["Enriched silver outputs"]
+    DOUT["Dependency silver outputs"] --> MS["MergeService"]
+    EOUT --> MS
+    MS --> GT["Gold table"]
+    CKP["CompositeCheckpointService"] -.->|"current or latest matching file"| SB
+    LOCK["LockPort with fixed TTL"] -.-> MS
+
+    classDef infra fill:#fff1f2,stroke:#dc2626,stroke-width:1.8px;
+    classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:1.8px;
+    class MS app;
+    class SB,DOUT,EOUT,GT,CKP,LOCK infra;

@@ -1,0 +1,4761 @@
+{
+  "contract_version": "1.0.0",
+  "dq_sensitive_outputs": {
+    "chembl_activity_dq_bundle": {
+      "entity": "chembl_activity",
+      "purpose": "Bounded ChEMBL activity output bundle for DQ- and unit-sensitive downstream checks.",
+      "required_columns": [
+        "entity_id",
+        "activity_id",
+        "_dq_warn",
+        "_dq_error",
+        "_index",
+        "standard_type",
+        "standard_units",
+        "target_id"
+      ],
+      "snapshot_path": "tests/fixtures/golden/gold/chembl_activity_dq_bundle_v1.json"
+    },
+    "chembl_assay_dq_bundle": {
+      "entity": "chembl_assay",
+      "purpose": "Bounded ChEMBL assay output bundle for DQ-sensitive assay identity, type, and confidence checks.",
+      "required_columns": [
+        "entity_id",
+        "assay_id",
+        "assay_type",
+        "confidence_score",
+        "_dq_warn",
+        "_dq_error",
+        "_index"
+      ],
+      "snapshot_path": "tests/fixtures/golden/gold/chembl_assay_dq_bundle_v1.json"
+    },
+    "composite_molecule_dq_bundle": {
+      "entity": "composite_molecule",
+      "purpose": "Bounded composite molecule output bundle for persisted DQ and enrichment provenance.",
+      "required_columns": [
+        "entity_id",
+        "_dq_warn",
+        "_dq_error",
+        "_index",
+        "_source_providers",
+        "_enrichment_status"
+      ],
+      "snapshot_path": "tests/fixtures/golden/gold/composite_molecule_dq_bundle_v1.json"
+    },
+    "composite_publication_dq_bundle": {
+      "entity": "composite_publication",
+      "purpose": "Bounded composite publication output bundle for DQ flags and source-resolution provenance.",
+      "required_columns": [
+        "entity_id",
+        "_dq_warn",
+        "_dq_error",
+        "_index",
+        "_source",
+        "_lookup_method",
+        "_original_id",
+        "_source_providers",
+        "_enrichment_status"
+      ],
+      "snapshot_path": "tests/fixtures/golden/gold/composite_publication_dq_bundle_v1.json"
+    },
+    "pubchem_compound_dq_bundle": {
+      "entity": "pubchem_compound",
+      "purpose": "Bounded PubChem compound output bundle for DQ- and chemical-standardization-sensitive Gold checks.",
+      "required_columns": [
+        "entity_id",
+        "molecule_id",
+        "canonical_smiles",
+        "molecular_formula",
+        "molecular_weight",
+        "chemical_standardization_status",
+        "_dq_warn",
+        "_dq_error",
+        "_index"
+      ],
+      "snapshot_path": "tests/fixtures/golden/gold/pubchem_compound_dq_bundle_v1.json"
+    },
+    "pubmed_publication_dq_bundle": {
+      "entity": "pubmed_publication",
+      "purpose": "Bounded strict Gold publication output bundle for DQ-sensitive publication inspection paths.",
+      "required_columns": [
+        "entity_id",
+        "pmid",
+        "title",
+        "publication_year",
+        "_source",
+        "_lookup_method",
+        "_original_id",
+        "_dq_warn",
+        "_dq_error",
+        "_index"
+      ],
+      "snapshot_path": "tests/fixtures/golden/gold/pubmed_publication_dq_bundle_v1.json"
+    }
+  },
+  "entities": {
+    "chembl_activity": {
+      "contract_version": "1.0.0",
+      "fields": {
+        "_dq_error": {
+          "description": "Hard data-quality error flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_dq_warn": {
+          "description": "Soft data-quality warning flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_index": {
+          "description": "",
+          "dtype": "int64",
+          "nullable": false
+        },
+        "action_type": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "action_type_description": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "action_type_parent_type": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "activity_comment": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "activity_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "activity_properties": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "assay_description": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "assay_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "assay_type": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "assay_variant_accession": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "assay_variant_mutation": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "bao_endpoint": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "bao_endpoint_iri": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "bao_endpoint_mapping_status": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "bao_format": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "bao_format_iri": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "bao_format_mapping_status": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "bao_label": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "bao_ontology_version": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "canonical_smiles": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "content_hash": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "data_validity_comment": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "data_validity_description": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "entity_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "journal": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "ligand_efficiency_bei": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "ligand_efficiency_le": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "ligand_efficiency_lle": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "ligand_efficiency_sei": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "manual_curation_flag": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "molecule_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "molecule_pref_name": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "original_activity_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "parent_molecule_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "pchembl_value": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "potential_duplicate": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "publication_doi": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_pmc_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_pmid": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_year": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "qudt_ontology_version": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "qudt_unit_iri": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "qudt_unit_mapping_status": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "qudt_units": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "record_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "relation": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "src_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "standard_flag": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "standard_relation": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "standard_text_value": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "standard_type": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "standard_units": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "standard_upper_value": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "standard_value": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "target_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_organism": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_pref_name": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_taxonomy_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "text_value": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "toid": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "type": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "units": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "uo_ontology_version": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "uo_unit_iri": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "uo_unit_mapping_status": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "uo_units": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "upper_value": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "value": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        }
+      },
+      "published_contract_path": "docs/04-reference/contracts/gold/chembl_activity_v1.0.json",
+      "schema_class": "ChEMBLActivityGoldSchema",
+      "strict": true
+    },
+    "chembl_assay": {
+      "contract_version": "1.0.0",
+      "fields": {
+        "_dq_error": {
+          "description": "Hard data-quality error flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_dq_warn": {
+          "description": "Soft data-quality warning flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_index": {
+          "description": "",
+          "dtype": "int64",
+          "nullable": false
+        },
+        "aidx": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "assay_category": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "assay_cell_type": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "assay_classifications": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "assay_group": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "assay_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "assay_organism": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "assay_parameters": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "assay_pref_name": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "assay_strain": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "assay_subcellular_fraction": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "assay_taxonomy_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "assay_test_type": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "assay_tissue": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "assay_type": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "assay_type_description": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "bao_format": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "bao_label": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "cell_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "confidence_description": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "confidence_score": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "content_hash": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "description": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "entity_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "publication_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "relationship_description": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "relationship_type": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "score": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "src_assay_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "src_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "target_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "tissue_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "variant_accession": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "variant_isoform": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "variant_mutation": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "variant_organism": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "variant_sequence": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "variant_sequence_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "variant_taxonomy_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        }
+      },
+      "published_contract_path": "docs/04-reference/contracts/gold/chembl_assay_v1.0.json",
+      "schema_class": "ChEMBLAssayGoldSchema",
+      "strict": true
+    },
+    "chembl_assay_parameters": {
+      "contract_version": "1.0.0",
+      "fields": {
+        "_dq_error": {
+          "description": "Hard data-quality error flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_dq_warn": {
+          "description": "Soft data-quality warning flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_index": {
+          "description": "",
+          "dtype": "int64",
+          "nullable": false
+        },
+        "assay_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "assay_param_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": false
+        },
+        "comments": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "content_hash": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "entity_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "qudt_ontology_version": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "qudt_unit_iri": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "qudt_unit_mapping_status": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "qudt_units": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "relation": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "standard_relation": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "standard_text_value": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "standard_type": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "standard_units": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "standard_value": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "text_value": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "type": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "units": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "uo_ontology_version": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "uo_unit_iri": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "uo_unit_mapping_status": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "uo_units": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "value": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        }
+      },
+      "published_contract_path": "docs/04-reference/contracts/gold/chembl_assay_parameters_v1.0.json",
+      "schema_class": "ChEMBLAssayParametersGoldSchema",
+      "strict": true
+    },
+    "chembl_cell_line": {
+      "contract_version": "1.0.0",
+      "fields": {
+        "_dq_error": {
+          "description": "Hard data-quality error flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_dq_warn": {
+          "description": "Soft data-quality warning flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_index": {
+          "description": "",
+          "dtype": "int64",
+          "nullable": false
+        },
+        "cell_description": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "cell_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "cell_name": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "cell_source_organism": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "cell_source_taxonomy_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "cell_source_tissue": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "cell_type": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "cellosaurus_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "cl_lincs_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "clo_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "content_hash": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "efo_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "entity_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        }
+      },
+      "published_contract_path": "docs/04-reference/contracts/gold/chembl_cell_line_v1.0.json",
+      "schema_class": "ChEMBLCellLineGoldSchema",
+      "strict": true
+    },
+    "chembl_compound_record": {
+      "contract_version": "1.0.0",
+      "fields": {
+        "_dq_error": {
+          "description": "Hard data-quality error flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_dq_warn": {
+          "description": "Soft data-quality warning flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_index": {
+          "description": "",
+          "dtype": "int64",
+          "nullable": false
+        },
+        "compound_key": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "compound_name": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "content_hash": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "entity_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "molecule_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "publication_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "record_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": false
+        },
+        "src_compound_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "src_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": false
+        }
+      },
+      "published_contract_path": "docs/04-reference/contracts/gold/chembl_compound_record_v1.0.json",
+      "schema_class": "ChEMBLCompoundRecordGoldSchema",
+      "strict": true
+    },
+    "chembl_molecule": {
+      "contract_version": "1.0.0",
+      "fields": {
+        "_dq_error": {
+          "description": "Hard data-quality error flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_dq_warn": {
+          "description": "Soft data-quality warning flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_index": {
+          "description": "",
+          "dtype": "int64",
+          "nullable": false
+        },
+        "aromatic_ring_count": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "atc_classifications": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "availability_type": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "black_box_warning": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "canonical_smiles": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "chirality": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "content_hash": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "cross_references": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "dosed_ingredient": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "entity_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "first_approval": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "first_in_class": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "hba_count": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "hbd_count": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "heavy_atom_count": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "helm_notation": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "hierarchy_active_chembl_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "hierarchy_child_chembl_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "hierarchy_parent_chembl_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "inchi_key": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "inorganic_flag": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "logp": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "logp_method": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "max_phase": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "molecular_formula": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "molecular_weight": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "molecule_hierarchy": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "molecule_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "molecule_properties": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "molecule_species": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "molecule_structures": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "molecule_synonyms": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "molecule_type": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "mw_freebase": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "natural_product": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "oral": {
+          "description": "",
+          "dtype": "bool",
+          "nullable": true
+        },
+        "parenteral": {
+          "description": "",
+          "dtype": "bool",
+          "nullable": true
+        },
+        "polar_surface_area": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "polymer_flag": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "pref_name": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "prodrug": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "qed_score": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "ro3_pass": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "ro5_violation_count": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "rotatable_bond_count": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "standard_inchi": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "structure_type": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "therapeutic_flag": {
+          "description": "",
+          "dtype": "bool",
+          "nullable": true
+        },
+        "topical": {
+          "description": "",
+          "dtype": "bool",
+          "nullable": true
+        },
+        "usan_stem": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "usan_stem_definition": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "usan_substem": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "usan_year": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "withdrawn_flag": {
+          "description": "",
+          "dtype": "bool",
+          "nullable": true
+        }
+      },
+      "published_contract_path": "docs/04-reference/contracts/gold/chembl_molecule_v1.0.json",
+      "schema_class": "ChEMBLMoleculeGoldSchema",
+      "strict": true
+    },
+    "chembl_protein_class": {
+      "contract_version": "1.0.0",
+      "fields": {
+        "_dq_error": {
+          "description": "Hard data-quality error flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_dq_warn": {
+          "description": "Soft data-quality warning flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_index": {
+          "description": "",
+          "dtype": "int64",
+          "nullable": false
+        },
+        "class_level": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "content_hash": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "definition": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "downgraded": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "entity_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "parent_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "pref_name": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "protein_class_desc": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "protein_class_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": false
+        },
+        "replaced_by": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "short_name": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "sort_order": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        }
+      },
+      "published_contract_path": "docs/04-reference/contracts/gold/chembl_protein_class_v1.0.json",
+      "schema_class": "ChEMBLProteinClassGoldSchema",
+      "strict": true
+    },
+    "chembl_publication": {
+      "contract_version": "1.0.0",
+      "fields": {
+        "_dq_error": {
+          "description": "Hard data-quality error flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_dq_warn": {
+          "description": "Soft data-quality warning flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_index": {
+          "description": "",
+          "dtype": "int64",
+          "nullable": false
+        },
+        "_lookup_method": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "_original_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "_source": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "abstract": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "author_keys": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "authors": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "chembl_release": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "citations_made": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "citations_received": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "content_hash": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "creation_date": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "doi": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "entity_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "issue": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "journal": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "page_first": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "page_last": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "pmid": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_doi": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "publication_pmc_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_pmid": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_type": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_year": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "src_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "title": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "volume": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        }
+      },
+      "published_contract_path": "docs/04-reference/contracts/gold/chembl_publication_v1.0.json",
+      "schema_class": "ChEMBLPublicationGoldSchema",
+      "strict": true
+    },
+    "chembl_publication_similarity": {
+      "contract_version": "1.0.0",
+      "fields": {
+        "_dq_error": {
+          "description": "Hard data-quality error flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_dq_warn": {
+          "description": "Soft data-quality warning flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_index": {
+          "description": "",
+          "dtype": "int64",
+          "nullable": false
+        },
+        "avg_tani": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "content_hash": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "doc_1": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": false
+        },
+        "doc_2": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": false
+        },
+        "entity_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "max_tani": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "mol_tani": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "pubmed_id1": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "pubmed_id2": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "sim_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": false
+        },
+        "tid_tani": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        }
+      },
+      "published_contract_path": "docs/04-reference/contracts/gold/chembl_publication_similarity_v1.0.json",
+      "schema_class": "ChEMBLPublicationSimilarityGoldSchema",
+      "strict": true
+    },
+    "chembl_publication_term": {
+      "contract_version": "1.0.0",
+      "fields": {
+        "_dq_error": {
+          "description": "Hard data-quality error flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_dq_warn": {
+          "description": "Soft data-quality warning flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_index": {
+          "description": "",
+          "dtype": "int64",
+          "nullable": false
+        },
+        "content_hash": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "entity_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "mesh_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "qualifier": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "term": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "term_type": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        }
+      },
+      "published_contract_path": "docs/04-reference/contracts/gold/chembl_publication_term_v1.0.json",
+      "schema_class": "ChEMBLPublicationTermGoldSchema",
+      "strict": true
+    },
+    "chembl_subcellular_fraction": {
+      "contract_version": "1.0.0",
+      "fields": {
+        "_dq_error": {
+          "description": "Hard data-quality error flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_dq_warn": {
+          "description": "Soft data-quality warning flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_index": {
+          "description": "",
+          "dtype": "int64",
+          "nullable": false
+        },
+        "assay_count": {
+          "description": "Number of assays using this fraction",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "content_hash": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "entity_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "example_assay_id": {
+          "description": "Example assay ChEMBL ID",
+          "dtype": "str",
+          "nullable": true
+        },
+        "subcellular_fraction": {
+          "description": "Subcellular fraction name",
+          "dtype": "str",
+          "nullable": false
+        }
+      },
+      "published_contract_path": "docs/04-reference/contracts/gold/chembl_subcellular_fraction_v1.0.json",
+      "schema_class": "ChEMBLSubcellularFractionGoldSchema",
+      "strict": true
+    },
+    "chembl_target": {
+      "contract_version": "3.0.0",
+      "fields": {
+        "_dq_error": {
+          "description": "Hard data-quality error flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_dq_warn": {
+          "description": "Soft data-quality warning flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_index": {
+          "description": "",
+          "dtype": "int64",
+          "nullable": false
+        },
+        "component_accessions": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "component_descriptions": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "component_ids": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "component_relationships": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "component_types": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "content_hash": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "cross_references": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "description": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "entity_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "organism": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "organism_class": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "pref_name": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "primary_component_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "species_group_flag": {
+          "description": "",
+          "dtype": "bool",
+          "nullable": true
+        },
+        "target_component_synonyms": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_components": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_ec_numbers": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_gene_synonyms": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "target_protein_synonyms": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_type": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_xref_go_component": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_xref_go_function": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_xref_go_process": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_xref_hgnc_ids": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_xref_pdb_ids": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_xref_reactome_ids": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_xref_uniprot_ids": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "taxonomy_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        }
+      },
+      "published_contract_path": "docs/04-reference/contracts/gold/chembl_target_v3.0.json",
+      "schema_class": "ChEMBLTargetGoldSchema",
+      "strict": true
+    },
+    "chembl_target_component": {
+      "contract_version": "1.0.0",
+      "fields": {
+        "_dq_error": {
+          "description": "Hard data-quality error flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_dq_warn": {
+          "description": "Soft data-quality warning flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_index": {
+          "description": "",
+          "dtype": "int64",
+          "nullable": false
+        },
+        "accession": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "component_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": false
+        },
+        "component_type": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "content_hash": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "description": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "entity_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "organism": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "protein_classification_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "protein_classification_ids": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "protein_classifications": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_component_synonyms": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_component_xrefs": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "taxonomy_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        }
+      },
+      "published_contract_path": "docs/04-reference/contracts/gold/chembl_target_component_v1.0.json",
+      "schema_class": "ChEMBLTargetComponentGoldSchema",
+      "strict": true
+    },
+    "chembl_target_protein_classification": {
+      "contract_version": "2.2.0",
+      "fields": {
+        "_dq_error": {
+          "description": "Hard data-quality error flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_dq_warn": {
+          "description": "Soft data-quality warning flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_index": {
+          "description": "",
+          "dtype": "int64",
+          "nullable": false
+        },
+        "canonical_l1": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "chembl_api_version": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "chembl_release": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "classification_status": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "component_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "content_hash": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "dataset_version": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "depth": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "entity_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "is_leaf": {
+          "description": "",
+          "dtype": "bool",
+          "nullable": true
+        },
+        "l1_counts_for_target_type": {
+          "description": "",
+          "dtype": "bool",
+          "nullable": true
+        },
+        "l1_desc": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "l1_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "l1_mapping_version": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "l1_name": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "l1_normalization_notes": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "l1_normalization_status": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "l2_desc": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "l2_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "l2_name": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "l3_desc": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "l3_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "l3_name": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "l4_desc": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "l4_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "l4_name": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "l5_desc": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "l5_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "l5_name": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "leaf_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "path_ids": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "path_labels": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "path_names": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "protein_class_snapshot_row_count": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "root_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "source_manifest_status": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "source_snapshot_fingerprint": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "source_url": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_component_snapshot_row_count": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "target_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "target_snapshot_row_count": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "target_type_rule_version": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        }
+      },
+      "published_contract_path": "docs/04-reference/contracts/gold/chembl_target_protein_classification_v2.2.json",
+      "schema_class": "ChEMBLTargetProteinClassificationGoldSchema",
+      "strict": true
+    },
+    "chembl_tissue": {
+      "contract_version": "1.0.0",
+      "fields": {
+        "_dq_error": {
+          "description": "Hard data-quality error flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_dq_warn": {
+          "description": "Soft data-quality warning flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_index": {
+          "description": "",
+          "dtype": "int64",
+          "nullable": false
+        },
+        "bto_id": {
+          "description": "BRENDA Tissue Ontology ID",
+          "dtype": "str",
+          "nullable": true
+        },
+        "caloha_id": {
+          "description": "CALIPHO ID",
+          "dtype": "str",
+          "nullable": true
+        },
+        "content_hash": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "efo_id": {
+          "description": "Experimental Factor Ontology ID",
+          "dtype": "str",
+          "nullable": true
+        },
+        "entity_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "pref_name": {
+          "description": "Preferred tissue name",
+          "dtype": "str",
+          "nullable": false
+        },
+        "tissue_id": {
+          "description": "ChEMBL tissue ID",
+          "dtype": "str",
+          "nullable": false
+        },
+        "uberon_id": {
+          "description": "Uberon Ontology ID",
+          "dtype": "str",
+          "nullable": true
+        }
+      },
+      "published_contract_path": "docs/04-reference/contracts/gold/chembl_tissue_v1.0.json",
+      "schema_class": "ChEMBLTissueGoldSchema",
+      "strict": true
+    },
+    "composite_activity": {
+      "contract_version": "1.0.0",
+      "fields": {
+        "_dq_error": {
+          "description": "Hard data-quality error flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_dq_warn": {
+          "description": "Soft data-quality warning flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_enrichment_status": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "_index": {
+          "description": "",
+          "dtype": "int64",
+          "nullable": false
+        },
+        "_lookup_method": {
+          "description": "Lookup strategy retained as inherited provider/composite lineage metadata.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "_original_id": {
+          "description": "Original provider lookup identifier retained as lineage metadata.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "_source": {
+          "description": "Source-family lineage marker retained as composite metadata.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "_source_providers": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "activity_id": {
+          "description": "ChEMBL activity identifier retained as activity lineage anchor.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "assay_id": {
+          "description": "ChEMBL assay identifier used as activity-to-assay lineage anchor.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "canonical_smiles": {
+          "description": "Inherited molecule structure identifier retained for activity context.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "entity_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "molecule_id": {
+          "description": "ChEMBL molecule identifier used as activity-to-molecule lineage anchor.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_id": {
+          "description": "ChEMBL publication identifier used as activity-to-publication lineage anchor.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "record_id": {
+          "description": "ChEMBL compound record identifier retained as source-scoped lineage.",
+          "dtype": "int64",
+          "nullable": true
+        },
+        "relation": {
+          "description": "ChEMBL raw activity measurement relation, not a generic canonical relation.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "src_id": {
+          "description": "Provider source identifier retained as source-scoped lineage metadata.",
+          "dtype": "int64",
+          "nullable": true
+        },
+        "target_id": {
+          "description": "ChEMBL target identifier used as activity-to-target lineage anchor.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "taxonomy_id": {
+          "description": "NCBI taxonomy identifier retained as inherited target lineage metadata.",
+          "dtype": "int64",
+          "nullable": true
+        },
+        "type": {
+          "description": "ChEMBL raw activity measurement type, not a generic canonical type.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "value": {
+          "description": "ChEMBL raw activity measurement value, not a generic canonical value.",
+          "dtype": "float64",
+          "nullable": true
+        }
+      },
+      "published_contract_path": "docs/04-reference/contracts/gold/composite_activity_v1.0.json",
+      "schema_class": "CompositeActivityGoldSchema",
+      "strict": true
+    },
+    "composite_assay": {
+      "contract_version": "1.0.0",
+      "fields": {
+        "_dq_error": {
+          "description": "Hard data-quality error flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_dq_warn": {
+          "description": "Soft data-quality warning flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_enrichment_status": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "_index": {
+          "description": "",
+          "dtype": "int64",
+          "nullable": false
+        },
+        "_lookup_method": {
+          "description": "Lookup strategy retained as inherited provider/composite lineage metadata.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "_original_id": {
+          "description": "Original provider lookup identifier retained as lineage metadata.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "_source": {
+          "description": "Source-family lineage marker retained as composite metadata.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "_source_providers": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "assay_id": {
+          "description": "ChEMBL assay identifier retained as assay lineage anchor.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "description": {
+          "description": "ChEMBL assay description retained as source-scoped metadata.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "entity_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "publication_id": {
+          "description": "ChEMBL publication identifier used as assay-to-publication lineage anchor.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "score": {
+          "description": "ChEMBL assay confidence score retained as source-scoped metadata.",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "src_id": {
+          "description": "Provider source identifier retained as source-scoped lineage metadata.",
+          "dtype": "int64",
+          "nullable": true
+        },
+        "target_id": {
+          "description": "ChEMBL target identifier used as assay-to-target lineage anchor.",
+          "dtype": "str",
+          "nullable": true
+        }
+      },
+      "published_contract_path": "docs/04-reference/contracts/gold/composite_assay_v1.0.json",
+      "schema_class": "CompositeAssayGoldSchema",
+      "strict": true
+    },
+    "composite_molecule": {
+      "contract_version": "1.0.0",
+      "fields": {
+        "_dq_error": {
+          "description": "Hard data-quality error flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_dq_warn": {
+          "description": "Soft data-quality warning flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_enrichment_status": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "_index": {
+          "description": "",
+          "dtype": "int64",
+          "nullable": false
+        },
+        "_source": {
+          "description": "Source-family lineage marker retained as composite metadata.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "_source_providers": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "canonical_smiles": {
+          "description": "Canonical SMILES string retained for structure-level joins.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "entity_id": {
+          "description": "Stable business identifier for merged molecule entity.",
+          "dtype": "str",
+          "nullable": false
+        },
+        "inchi_key": {
+          "description": "Canonical InChIKey retained for cross-provider structure joins.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "molecule_id": {
+          "description": "Canonical ChEMBL molecule identifier retained as seed lineage anchor.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "standardized_inchi_key": {
+          "description": "Provider-standardized InChIKey retained as source-scoped identifier.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "structure_parent_key": {
+          "description": "Structure parent key retained for PubChem/ChEMBL hierarchy lineage.",
+          "dtype": "str",
+          "nullable": true
+        }
+      },
+      "published_contract_path": "docs/04-reference/contracts/gold/composite_molecule_v1.0.json",
+      "schema_class": "CompositeMoleculeGoldSchema",
+      "strict": true
+    },
+    "composite_publication": {
+      "contract_version": "1.0.0",
+      "fields": {
+        "_dq_error": {
+          "description": "Hard data-quality error flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_dq_warn": {
+          "description": "Soft data-quality warning flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_enrichment_status": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "_index": {
+          "description": "",
+          "dtype": "int64",
+          "nullable": false
+        },
+        "_lookup_method": {
+          "description": "Lookup strategy retained as inherited provider/composite lineage metadata.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "_original_id": {
+          "description": "Original provider lookup identifier retained as lineage metadata.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "_source": {
+          "description": "Source-family lineage marker retained as composite metadata.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "_source_providers": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "doi": {
+          "description": "Canonical publication DOI used for cross-provider publication joins.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "entity_id": {
+          "description": "Stable business identifier for merged publication entity.",
+          "dtype": "str",
+          "nullable": false
+        },
+        "pmc_id": {
+          "description": "Canonical PubMed Central identifier retained for publication lineage.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "pmid": {
+          "description": "Canonical PubMed identifier used for cross-provider publication joins.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_id": {
+          "description": "Source ChEMBL publication identifier retained as lineage anchor.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "src_id": {
+          "description": "Provider source identifier retained as source-scoped lineage metadata.",
+          "dtype": "int64",
+          "nullable": true
+        },
+        "title": {
+          "description": "Canonical-cleaned publication title retained as fallback join evidence.",
+          "dtype": "str",
+          "nullable": false
+        }
+      },
+      "published_contract_path": "docs/04-reference/contracts/gold/composite_publication_v1.0.json",
+      "schema_class": "CompositePublicationGoldSchema",
+      "strict": true
+    },
+    "composite_target": {
+      "contract_version": "1.0.0",
+      "fields": {
+        "_dq_error": {
+          "description": "Hard data-quality error flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_dq_warn": {
+          "description": "Soft data-quality warning flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_enrichment_status": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "_index": {
+          "description": "",
+          "dtype": "int64",
+          "nullable": false
+        },
+        "_lookup_method": {
+          "description": "Lookup strategy retained as inherited provider/composite lineage metadata.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "_original_id": {
+          "description": "Original provider lookup identifier retained as lineage metadata.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "_source": {
+          "description": "Source-family lineage marker retained as composite metadata.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "_source_providers": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "canonical_top_levels": {
+          "description": "JSON array of unique canonical L1 values observed for the target.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "counted_top_levels": {
+          "description": "JSON array of canonical L1 values used for target type aggregation.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "description": {
+          "description": "Target description retained as source-scoped metadata.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "entity_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "ignored_top_levels": {
+          "description": "JSON array of non-counting canonical L1 values preserved for audit.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "l1_mapping_version": {
+          "description": "Version of the canonical L1 mapping used for aggregation.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "major_family": {
+          "description": "JSON array of independent L2+ major family classifications.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "major_family_rule_version": {
+          "description": "Version of the L2+ major family derivation rule.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "multifunctional_origin": {
+          "description": "Origin code for multifunctional target classification.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "primary_top_level": {
+          "description": "Single informative canonical L1 when exactly one is present.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "protein_classifications": {
+          "description": "Deterministic JSON provenance for target protein classifications.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_id": {
+          "description": "ChEMBL target identifier retained as target lineage anchor.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_protein_class_desc_L1": {
+          "description": "L1 target protein class description.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_protein_class_desc_L2": {
+          "description": "L2 target protein class description.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_protein_class_desc_L3": {
+          "description": "L3 target protein class description.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_protein_class_desc_L4": {
+          "description": "L4 target protein class description.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_protein_class_desc_L5": {
+          "description": "L5 target protein class description.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_protein_class_id_L1": {
+          "description": "L1 target protein class ID.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_protein_class_id_L2": {
+          "description": "L2 target protein class ID.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_protein_class_id_L3": {
+          "description": "L3 target protein class ID.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_protein_class_id_L4": {
+          "description": "L4 target protein class ID.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_protein_class_id_L5": {
+          "description": "L5 target protein class ID.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_protein_class_name_L1": {
+          "description": "L1 target protein class name.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_protein_class_name_L2": {
+          "description": "L2 target protein class name.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_protein_class_name_L3": {
+          "description": "L3 target protein class name.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_protein_class_name_L4": {
+          "description": "L4 target protein class name.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_protein_class_name_L5": {
+          "description": "L5 target protein class name.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_protein_class_type": {
+          "description": "Deterministic target-level protein class type from informative L1 values.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_type_reason_code": {
+          "description": "Reason code explaining target_protein_class_type derivation.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "target_type_rule_version": {
+          "description": "Version of the target_protein_class_type aggregation rule.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "taxonomy_id": {
+          "description": "NCBI taxonomy identifier retained as organism lineage metadata.",
+          "dtype": "int64",
+          "nullable": true
+        },
+        "top_level_count": {
+          "description": "Count of unique informative canonical L1 protein classes.",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "uniprot_accession": {
+          "description": "UniProt accession retained as partial cross-source protein lineage anchor.",
+          "dtype": "str",
+          "nullable": true
+        }
+      },
+      "published_contract_path": "docs/04-reference/contracts/gold/composite_target_v1.0.json",
+      "schema_class": "CompositeTargetGoldSchema",
+      "strict": true
+    },
+    "crossref_publication": {
+      "contract_version": "1.0.0",
+      "fields": {
+        "_dq_error": {
+          "description": "Hard data-quality error flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_dq_warn": {
+          "description": "Soft data-quality warning flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_index": {
+          "description": "",
+          "dtype": "int64",
+          "nullable": false
+        },
+        "_lookup_method": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "_original_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "_source": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "abstract": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "affiliation_list": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "alternative_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "author_details": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "author_details_canonical_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "author_details_raw_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "author_keys": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "author_orcids": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "authors": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "citations_made": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "citations_received": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "content_domain_crossmark_restriction": {
+          "description": "",
+          "dtype": "bool",
+          "nullable": true
+        },
+        "content_domain_domains": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "content_hash": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "doi": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "entity_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "issn": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "issn_electronic": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "issn_list": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "issn_print": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "issue": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "journal": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "journal_name_short": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "language": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "license_url": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "page_first": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "page_last": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "pmc_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "pmid": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_class": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_date": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_subclass": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_type": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_type_unified": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_year": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "published": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "published_online": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "published_print": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publisher": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "references": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "references_canonical_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "references_raw_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "subject_keywords": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "title": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "volume": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        }
+      },
+      "published_contract_path": "docs/04-reference/contracts/gold/crossref_publication_v1.0.json",
+      "schema_class": "CrossRefPublicationGoldSchema",
+      "strict": true
+    },
+    "openalex_publication": {
+      "contract_version": "1.0.0",
+      "fields": {
+        "_dq_error": {
+          "description": "Hard data-quality error flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_dq_warn": {
+          "description": "Soft data-quality warning flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_index": {
+          "description": "",
+          "dtype": "int64",
+          "nullable": false
+        },
+        "_lookup_method": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "_original_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "_source": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "abstract": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "affiliation_list": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "author_keys": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "author_openalex_ids": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "author_orcids": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "authors": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "citations_made": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "citations_received": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "content_hash": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "doi": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "entity_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "fwci": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "grants": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "grants_canonical_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "grants_raw_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "institution_country_codes": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "institution_ids": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "is_oa": {
+          "description": "",
+          "dtype": "bool",
+          "nullable": true
+        },
+        "is_retracted": {
+          "description": "",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "issn": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "issn_list": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "issue": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "journal": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "language": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "mag_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "oa_status": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "openalex_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "page_first": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "page_last": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "pmc_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "pmid": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "primary_topic": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "primary_topic_canonical_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "primary_topic_raw_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_class": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_date": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_subclass": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_type": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_type_unified": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_year": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "publisher": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "ror_ids": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "subject_keywords": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "subject_mesh": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "subject_topics": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "title": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "volume": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        }
+      },
+      "published_contract_path": "docs/04-reference/contracts/gold/openalex_publication_v1.0.json",
+      "schema_class": "OpenAlexPublicationGoldSchema",
+      "strict": true
+    },
+    "pubchem_compound": {
+      "contract_version": "1.0.0",
+      "fields": {
+        "_dq_error": {
+          "description": "Hard data-quality error flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_dq_warn": {
+          "description": "Soft data-quality warning flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_index": {
+          "description": "",
+          "dtype": "int64",
+          "nullable": false
+        },
+        "canonical_smiles": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "chemical_standardization_policy_version": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "chemical_standardization_status": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "chemical_standardization_warnings": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "complexity": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "conformer_count_3d": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "conformer_rmsd_3d": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "content_hash": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "effective_rotor_count_3d": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "entity_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "exact_mass": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "feature_acceptor_count_3d": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "feature_anion_count_3d": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "feature_cation_count_3d": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "feature_count_3d": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "feature_donor_count_3d": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "feature_hydrophobe_count_3d": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "feature_ring_count_3d": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "inchi": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "inchi_key": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "isomeric_smiles": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "iupac_name": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "molecular_formula": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "molecular_weight": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "molecule_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "monoisotopic_mass": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "standardized_canonical_smiles": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "standardized_inchi": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "standardized_inchi_key": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "standardized_isomeric_smiles": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "structure_parent_key": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "tpsa": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "x_steric_quadrupole_3d": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "xlogp": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "y_steric_quadrupole_3d": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "z_steric_quadrupole_3d": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        }
+      },
+      "published_contract_path": "docs/04-reference/contracts/gold/pubchem_compound_v1.0.json",
+      "schema_class": "PubChemCompoundGoldSchema",
+      "strict": true
+    },
+    "pubmed_publication": {
+      "contract_version": "1.0.0",
+      "fields": {
+        "_dq_error": {
+          "description": "Hard data-quality error flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_dq_warn": {
+          "description": "Soft data-quality warning flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_index": {
+          "description": "",
+          "dtype": "int64",
+          "nullable": false
+        },
+        "_lookup_method": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "_original_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "_source": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "abstract": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "abstract_structured": {
+          "description": "",
+          "dtype": "bool",
+          "nullable": true
+        },
+        "affiliation_list": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "affiliation_structured": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "affiliation_structured_canonical_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "affiliation_structured_raw_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "author_count": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "author_keys": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "authors": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "authors_with_affiliations": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "authors_with_affiliations_canonical_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "authors_with_affiliations_raw_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "chemical_count": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "chemicals": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "citation_subset": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "citations_made": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "content_hash": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "country": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "databanks": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "date_completed": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "date_revised": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "doi": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "entity_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "gene_symbols": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "grant_count": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "issn": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "issn_list": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "issue": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "journal": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "journal_iso_abbrev": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "journal_issn_type": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "journal_name_short": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "keyword_count": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "language": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "medline_pgn": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "mesh_heading_count": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "mid": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "nlm_unique_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "page_first": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "page_last": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "page_range": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "pii": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "pmc_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "pmid": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "pub_date": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "pub_day": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "pub_month": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "publication_class": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_date": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_status": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_subclass": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_type": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_type_unified": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_types": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_year": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "publisher_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "subject_keywords": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "subject_mesh": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "title": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "volume": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        }
+      },
+      "published_contract_path": "docs/04-reference/contracts/gold/pubmed_publication_v1.0.json",
+      "schema_class": "PubMedPublicationGoldSchema",
+      "strict": true
+    },
+    "semanticscholar_publication": {
+      "contract_version": "1.0.0",
+      "fields": {
+        "_dq_error": {
+          "description": "Hard data-quality error flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_dq_warn": {
+          "description": "Soft data-quality warning flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_index": {
+          "description": "",
+          "dtype": "int64",
+          "nullable": false
+        },
+        "_lookup_method": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "_original_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "_source": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "abstract": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "affiliation_list": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "author_h_indices": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "author_h_indices_canonical_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "author_h_indices_raw_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "author_keys": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "author_orcids": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "author_s2_ids": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "authors": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "citation_contexts": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "citation_contexts_canonical_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "citation_contexts_raw_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "citations_made": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "citations_received": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "content_hash": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "corpus_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "dblp_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "doi": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "entity_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "influential_citation_count": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "is_oa": {
+          "description": "",
+          "dtype": "bool",
+          "nullable": true
+        },
+        "issn": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "issn_list": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "issue": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "journal": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "oa_status": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "open_access_url": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "page_first": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "page_last": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "page_range": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "paper_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "pmc_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "pmid": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_class": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_date": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_subclass": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_type": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_type_unified": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_types": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_types_canonical_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_types_raw_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_year": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "subject_fields": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "subject_fields_canonical_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "subject_fields_raw_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "title": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "tldr": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "volume": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        }
+      },
+      "published_contract_path": "docs/04-reference/contracts/gold/semanticscholar_publication_v1.0.json",
+      "schema_class": "SemanticScholarPublicationGoldSchema",
+      "strict": true
+    },
+    "uniprot_idmapping": {
+      "contract_version": "1.0.0",
+      "fields": {
+        "_dq_error": {
+          "description": "Hard data-quality error flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_dq_warn": {
+          "description": "Soft data-quality warning flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_index": {
+          "description": "",
+          "dtype": "int64",
+          "nullable": false
+        },
+        "all_mappings": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "annotation_score": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "content_hash": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "entity_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "gene_primary": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "mapping_status": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "organism_common": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "organism_scientific": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "protein_name": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "reviewed": {
+          "description": "",
+          "dtype": "bool",
+          "nullable": true
+        },
+        "sequence_length": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "sequence_mass": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "target_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "taxonomy_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "uniprot_accession": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "uniprot_entry_name": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        }
+      },
+      "published_contract_path": "docs/04-reference/contracts/gold/uniprot_idmapping_v1.0.json",
+      "schema_class": "UniProtIDMappingGoldSchema",
+      "strict": true
+    },
+    "uniprot_protein": {
+      "contract_version": "1.0.0",
+      "fields": {
+        "_dq_error": {
+          "description": "Hard data-quality error flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_dq_warn": {
+          "description": "Soft data-quality warning flag.",
+          "dtype": "bool",
+          "nullable": false
+        },
+        "_index": {
+          "description": "",
+          "dtype": "int64",
+          "nullable": false
+        },
+        "accession": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "acetylation": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "active_sites": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "activity_regulation": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "alternative_products": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "alternative_products_canonical_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "alternative_products_raw_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "annotation_score": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "binding_sites": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "biophysicochemical_properties": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "biophysicochemical_properties_canonical_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "biophysicochemical_properties_raw_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "catalytic_activity": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "caution": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "cellular_component": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "chembl_ids": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "cofactors": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "cofactors_canonical_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "cofactors_raw_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "content_hash": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "cross_reference_count": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "disease_involvement": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "disulfide_bond": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "domains": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "drugbank_ids": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "entity_id": {
+          "description": "",
+          "dtype": "str",
+          "nullable": false
+        },
+        "entry_created": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "entry_modified": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "entry_name": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "entry_type": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "entry_version": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "feature_count": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "features_canonical_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "features_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "features_raw_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "flag": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "function_comment": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "gene_orf_names": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "gene_primary": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "gene_synonyms": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "genus": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "glycosylation": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "go_terms": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "guidetopharmacology_ids": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "induction": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "interpro_xrefs": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "intramembrane": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "isoform_count": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "isoform_ids": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "isoform_names": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "isoform_synonyms": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "keyword_count": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "keywords": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "lineage": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "lipidation": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "modified_residue": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "molecular_function": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "organism_common": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "organism_scientific": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "pathway": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "pdb_xrefs": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "pfam_xrefs": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "pharmaceutical_use": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "phosphorylation": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "phylum": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "propeptide": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "protein_alternative_names": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "protein_ec_numbers": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "protein_existence": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "protein_name": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "protein_short_names": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_count": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "reaction_ec_numbers": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "reactions": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "reactions_canonical_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "reactions_raw_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "reactome_xrefs": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "reviewed": {
+          "description": "",
+          "dtype": "bool",
+          "nullable": true
+        },
+        "secondary_accessions": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "sequence": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "sequence_checksum": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "sequence_length": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "sequence_mass": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "sequence_modified": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "signal_peptide": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "similarity_comment": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "subcellular_location": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "subunit": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "superkingdom": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "taxonomy_id": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "tissue_specificity": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "topology": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "transmembrane": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "ubiquitination": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        }
+      },
+      "published_contract_path": "docs/04-reference/contracts/gold/uniprot_protein_v1.0.json",
+      "schema_class": "UniProtProteinGoldSchema",
+      "strict": true
+    }
+  },
+  "surface": "gold_schema_snapshots",
+  "version": 1
+}

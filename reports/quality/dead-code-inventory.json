@@ -1,0 +1,556 @@
+{
+  "snapshot_date": "2026-06-16",
+  "triage_source": "configs/quality/retirement_candidate_triage.yaml",
+  "static_inventory_scope": "src/bioetl",
+  "review_window": {
+    "linked_issue": "#4541",
+    "mode": "fail-fast-zero-untriaged",
+    "last_reviewed": "2026-06-16",
+    "next_review_by": "2026-09-14",
+    "review_cycle_days": 90,
+    "max_untriaged_zero_import_candidates": 0,
+    "snapshot_matches_last_reviewed": true,
+    "guardrail_note": "Zero static importer count is a review signal only; removals must still verify public entrypoints and dynamic/plugin import paths."
+  },
+  "summary": {
+    "triaged_entry_count": 18,
+    "triaged_entries_below_min_importers": 0,
+    "repo_wide_zero_import_candidate_count": 10,
+    "repo_wide_classified_zero_import_candidate_count": 10,
+    "repo_wide_untriaged_zero_import_candidate_count": 0,
+    "repo_wide_owner_test_anchored_candidate_count": 10,
+    "repo_wide_candidates_without_owner_tests_count": 0,
+    "repo_wide_non_static_reachability_candidate_count": 1,
+    "repo_wide_disposition_counts": {
+      "retain_canonical_owner_module": 9,
+      "retain_module_entrypoint": 1
+    },
+    "repo_wide_evidence_lane_counts": {
+      "canonical_owner_contract": 9,
+      "module_entrypoint_owner_suite": 1
+    },
+    "triaged_retained_owner_test_anchored_count": 14,
+    "triaged_retained_without_owner_tests_count": 0,
+    "triaged_retained_evidence_lane_counts": {
+      "retained_module_owner_suite": 14
+    }
+  },
+  "triaged_entries": [
+    {
+      "family": "adapter_layer",
+      "entry_id": "cached_bronze_support_active",
+      "disposition": "retain_active",
+      "module_path": "src/bioetl/infrastructure/adapters/_cached_bronze_support.py",
+      "module_name": "bioetl.infrastructure.adapters._cached_bronze_support",
+      "src_importer_count": 1,
+      "test_importer_count": 2,
+      "min_src_importers": 1,
+      "verification_status": "satisfied",
+      "evidence_lane": "retained_module_owner_suite",
+      "owner_tests": [
+        "tests/architecture/test_wave4_complexity_closeout.py",
+        "tests/unit/infrastructure/adapters/test_cached_bronze_data_source.py"
+      ],
+      "owner_test_count": 2,
+      "owner_test_paths_exist_count": 2
+    },
+    {
+      "family": "adapter_layer",
+      "entry_id": "error_handling_support_active",
+      "disposition": "retain_active",
+      "module_path": "src/bioetl/infrastructure/adapters/_error_handling_support.py",
+      "module_name": "bioetl.infrastructure.adapters._error_handling_support",
+      "src_importer_count": 1,
+      "test_importer_count": 0,
+      "min_src_importers": 1,
+      "verification_status": "satisfied",
+      "evidence_lane": "retained_module_owner_suite",
+      "owner_tests": [
+        "tests/architecture/test_wave3_adapter_facade_closeout.py"
+      ],
+      "owner_test_count": 1,
+      "owner_test_paths_exist_count": 1
+    },
+    {
+      "family": "adapter_layer",
+      "entry_id": "health_check_observability_active",
+      "disposition": "retain_active",
+      "module_path": "src/bioetl/infrastructure/adapters/_health_check_observability.py",
+      "module_name": "bioetl.infrastructure.adapters._health_check_observability",
+      "src_importer_count": 1,
+      "test_importer_count": 1,
+      "min_src_importers": 1,
+      "verification_status": "satisfied",
+      "evidence_lane": "retained_module_owner_suite",
+      "owner_tests": [
+        "tests/architecture/test_wave3_adapter_facade_closeout.py"
+      ],
+      "owner_test_count": 1,
+      "owner_test_paths_exist_count": 1
+    },
+    {
+      "family": "adapter_layer",
+      "entry_id": "health_check_policy_active",
+      "disposition": "retain_active",
+      "module_path": "src/bioetl/infrastructure/adapters/_health_check_policy.py",
+      "module_name": "bioetl.infrastructure.adapters._health_check_policy",
+      "src_importer_count": 1,
+      "test_importer_count": 0,
+      "min_src_importers": 1,
+      "verification_status": "satisfied",
+      "evidence_lane": "retained_module_owner_suite",
+      "owner_tests": [
+        "tests/architecture/test_wave3_adapter_facade_closeout.py"
+      ],
+      "owner_test_count": 1,
+      "owner_test_paths_exist_count": 1
+    },
+    {
+      "family": "composite_layer",
+      "entry_id": "preflight_rules_removed",
+      "disposition": "removed",
+      "module_path": "src/bioetl/application/composite/_preflight_rules.py",
+      "module_name": null,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "min_src_importers": null,
+      "verification_status": "not_applicable",
+      "evidence_lane": null,
+      "owner_tests": [],
+      "owner_test_count": 0,
+      "owner_test_paths_exist_count": 0
+    },
+    {
+      "family": "composite_layer",
+      "entry_id": "checkpoint_service_support_removed",
+      "disposition": "removed",
+      "module_path": "src/bioetl/application/composite/checkpoint/_service_support.py",
+      "module_name": null,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "min_src_importers": null,
+      "verification_status": "not_applicable",
+      "evidence_lane": null,
+      "owner_tests": [],
+      "owner_test_count": 0,
+      "owner_test_paths_exist_count": 0
+    },
+    {
+      "family": "composite_layer",
+      "entry_id": "checkpoint_state_codec_removed",
+      "disposition": "removed",
+      "module_path": "src/bioetl/application/composite/checkpoint/_state_codec.py",
+      "module_name": "bioetl.application.composite.checkpoint._state_codec",
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "min_src_importers": null,
+      "verification_status": "not_applicable",
+      "evidence_lane": null,
+      "owner_tests": [],
+      "owner_test_count": 0,
+      "owner_test_paths_exist_count": 0
+    },
+    {
+      "family": "composite_layer",
+      "entry_id": "fsm_helper_active",
+      "disposition": "retain_active",
+      "module_path": "src/bioetl/application/composite/fsm_helper.py",
+      "module_name": "bioetl.application.composite.fsm_helper",
+      "src_importer_count": 10,
+      "test_importer_count": 5,
+      "min_src_importers": 5,
+      "verification_status": "satisfied",
+      "evidence_lane": "retained_module_owner_suite",
+      "owner_tests": [
+        "tests/unit/application/composite/test_fsm_helper.py",
+        "tests/unit/application/composite/test_runner_fsm.py"
+      ],
+      "owner_test_count": 2,
+      "owner_test_paths_exist_count": 2
+    },
+    {
+      "family": "composite_layer",
+      "entry_id": "runner_merge_stage_flow_removed",
+      "disposition": "removed",
+      "module_path": "src/bioetl/application/composite/runner_pkg/runner_merge_stage_flow.py",
+      "module_name": null,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "min_src_importers": null,
+      "verification_status": "not_applicable",
+      "evidence_lane": null,
+      "owner_tests": [],
+      "owner_test_count": 0,
+      "owner_test_paths_exist_count": 0
+    },
+    {
+      "family": "composite_layer",
+      "entry_id": "column_priority_orderer_active",
+      "disposition": "retain_active",
+      "module_path": "src/bioetl/application/composite/column_priority_orderer.py",
+      "module_name": "bioetl.application.composite.column_priority_orderer",
+      "src_importer_count": 2,
+      "test_importer_count": 2,
+      "min_src_importers": 1,
+      "verification_status": "satisfied",
+      "evidence_lane": "retained_module_owner_suite",
+      "owner_tests": [
+        "tests/unit/application/composite/test_column_priority_orderer.py"
+      ],
+      "owner_test_count": 1,
+      "owner_test_paths_exist_count": 1
+    },
+    {
+      "family": "composite_layer",
+      "entry_id": "merger_input_mixin_active",
+      "disposition": "retain_active",
+      "module_path": "src/bioetl/application/composite/merger_input_mixin.py",
+      "module_name": "bioetl.application.composite.merger_input_mixin",
+      "src_importer_count": 2,
+      "test_importer_count": 2,
+      "min_src_importers": 2,
+      "verification_status": "satisfied",
+      "evidence_lane": "retained_module_owner_suite",
+      "owner_tests": [
+        "tests/unit/application/composite/test_merger_input_mixin.py"
+      ],
+      "owner_test_count": 1,
+      "owner_test_paths_exist_count": 1
+    },
+    {
+      "family": "composite_layer",
+      "entry_id": "runner_support_flow_active",
+      "disposition": "retain_active",
+      "module_path": "src/bioetl/application/composite/runner_pkg/runner_support_flow.py",
+      "module_name": "bioetl.application.composite.runner_pkg.runner_support_flow",
+      "src_importer_count": 1,
+      "test_importer_count": 0,
+      "min_src_importers": 1,
+      "verification_status": "satisfied",
+      "evidence_lane": "retained_module_owner_suite",
+      "owner_tests": [
+        "tests/architecture/test_tracing_enforcement.py",
+        "tests/unit/application/composite/test_runner.py"
+      ],
+      "owner_test_count": 2,
+      "owner_test_paths_exist_count": 2
+    },
+    {
+      "family": "composite_layer",
+      "entry_id": "runner_support_mixin_active",
+      "disposition": "retain_active",
+      "module_path": "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py",
+      "module_name": "bioetl.application.composite.runner_pkg.runner_support_mixin",
+      "src_importer_count": 1,
+      "test_importer_count": 1,
+      "min_src_importers": 1,
+      "verification_status": "satisfied",
+      "evidence_lane": "retained_module_owner_suite",
+      "owner_tests": [
+        "tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py"
+      ],
+      "owner_test_count": 1,
+      "owner_test_paths_exist_count": 1
+    },
+    {
+      "family": "composite_layer",
+      "entry_id": "runner_support_policy_active",
+      "disposition": "retain_active",
+      "module_path": "src/bioetl/application/composite/runner_pkg/runner_support_policy.py",
+      "module_name": "bioetl.application.composite.runner_pkg.runner_support_policy",
+      "src_importer_count": 1,
+      "test_importer_count": 0,
+      "min_src_importers": 1,
+      "verification_status": "satisfied",
+      "evidence_lane": "retained_module_owner_suite",
+      "owner_tests": [
+        "tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py",
+        "tests/unit/application/composite/test_runner.py"
+      ],
+      "owner_test_count": 2,
+      "owner_test_paths_exist_count": 2
+    },
+    {
+      "family": "composite_layer",
+      "entry_id": "runner_support_runtime_active",
+      "disposition": "retain_active",
+      "module_path": "src/bioetl/application/composite/runner_pkg/runner_support_runtime.py",
+      "module_name": "bioetl.application.composite.runner_pkg.runner_support_runtime",
+      "src_importer_count": 1,
+      "test_importer_count": 0,
+      "min_src_importers": 1,
+      "verification_status": "satisfied",
+      "evidence_lane": "retained_module_owner_suite",
+      "owner_tests": [
+        "tests/architecture/test_replay_time_seam_inventory.py",
+        "tests/unit/application/composite/test_runner_checkpoint_resume.py"
+      ],
+      "owner_test_count": 2,
+      "owner_test_paths_exist_count": 2
+    },
+    {
+      "family": "composite_layer",
+      "entry_id": "runner_support_types_active",
+      "disposition": "retain_active",
+      "module_path": "src/bioetl/application/composite/runner_pkg/runner_support_types.py",
+      "module_name": "bioetl.application.composite.runner_pkg.runner_support_types",
+      "src_importer_count": 4,
+      "test_importer_count": 0,
+      "min_src_importers": 1,
+      "verification_status": "satisfied",
+      "evidence_lane": "retained_module_owner_suite",
+      "owner_tests": [
+        "tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py",
+        "tests/unit/application/composite/test_runner.py"
+      ],
+      "owner_test_count": 2,
+      "owner_test_paths_exist_count": 2
+    },
+    {
+      "family": "composite_layer",
+      "entry_id": "runtime_models_active",
+      "disposition": "retain_active",
+      "module_path": "src/bioetl/application/composite/runtime_models.py",
+      "module_name": "bioetl.application.composite.runtime_models",
+      "src_importer_count": 38,
+      "test_importer_count": 11,
+      "min_src_importers": 3,
+      "verification_status": "satisfied",
+      "evidence_lane": "retained_module_owner_suite",
+      "owner_tests": [
+        "tests/unit/application/composite/test_runtime_models.py"
+      ],
+      "owner_test_count": 1,
+      "owner_test_paths_exist_count": 1
+    },
+    {
+      "family": "composite_layer",
+      "entry_id": "runtime_wiring_api_active",
+      "disposition": "retain_active",
+      "module_path": "src/bioetl/application/composite/runtime_wiring_api.py",
+      "module_name": "bioetl.application.composite.runtime_wiring_api",
+      "src_importer_count": 18,
+      "test_importer_count": 4,
+      "min_src_importers": 2,
+      "verification_status": "satisfied",
+      "evidence_lane": "retained_module_owner_suite",
+      "owner_tests": [
+        "tests/architecture/test_composite_canonical_surfaces.py",
+        "tests/architecture/test_column_ordering_family.py",
+        "tests/unit/composition/bootstrap/runtime/test_composite_support_service_builders.py"
+      ],
+      "owner_test_count": 3,
+      "owner_test_paths_exist_count": 3
+    }
+  ],
+  "repo_wide_zero_import_candidates": [
+    {
+      "module_name": "bioetl.__main__",
+      "path": "src/bioetl/__main__.py",
+      "is_private_module": true,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "classification_status": "classified",
+      "disposition": "retain_module_entrypoint",
+      "reviewed_on": "2026-06-16",
+      "review_by": "2026-09-14",
+      "linked_issue": "#4541",
+      "rationale": "Module entrypoint for `python -m bioetl`; static import scans stay at zero because the interpreter dispatches the module directly.",
+      "evidence_lane": "module_entrypoint_owner_suite",
+      "owner_tests": [
+        "tests/unit/interfaces/cli/test_cli_main_module.py"
+      ],
+      "owner_test_count": 1,
+      "owner_test_paths_exist_count": 1
+    },
+    {
+      "module_name": "bioetl.domain.ports.data_normalization",
+      "path": "src/bioetl/domain/ports/data_normalization.py",
+      "is_private_module": false,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "classification_status": "classified",
+      "disposition": "retain_canonical_owner_module",
+      "reviewed_on": "2026-06-16",
+      "review_by": "2026-09-14",
+      "linked_issue": "#4541",
+      "rationale": "Port owner module for data_normalization; imports now go through bioetl.domain.ports facade per REQ-ARCH-027",
+      "evidence_lane": "canonical_owner_contract",
+      "owner_tests": [
+        "tests/architecture/test_domain_public_api.py",
+        "tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py",
+        "tests/architecture/test_port_contracts.py"
+      ],
+      "owner_test_count": 3,
+      "owner_test_paths_exist_count": 3
+    },
+    {
+      "module_name": "bioetl.domain.ports.data_source",
+      "path": "src/bioetl/domain/ports/data_source.py",
+      "is_private_module": false,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "classification_status": "classified",
+      "disposition": "retain_canonical_owner_module",
+      "reviewed_on": "2026-06-16",
+      "review_by": "2026-09-14",
+      "linked_issue": "#4541",
+      "rationale": "Port owner module for data_source; imports now go through bioetl.domain.ports facade per REQ-ARCH-027",
+      "evidence_lane": "canonical_owner_contract",
+      "owner_tests": [
+        "tests/architecture/test_domain_public_api.py",
+        "tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py",
+        "tests/architecture/test_port_contracts.py"
+      ],
+      "owner_test_count": 3,
+      "owner_test_paths_exist_count": 3
+    },
+    {
+      "module_name": "bioetl.domain.ports.delta_reader",
+      "path": "src/bioetl/domain/ports/delta_reader.py",
+      "is_private_module": false,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "classification_status": "classified",
+      "disposition": "retain_canonical_owner_module",
+      "reviewed_on": "2026-06-16",
+      "review_by": "2026-09-14",
+      "linked_issue": "#4541",
+      "rationale": "Port owner module for delta_reader; imports now go through bioetl.domain.ports facade per REQ-ARCH-027",
+      "evidence_lane": "canonical_owner_contract",
+      "owner_tests": [
+        "tests/architecture/test_domain_public_api.py",
+        "tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py",
+        "tests/architecture/test_port_contracts.py"
+      ],
+      "owner_test_count": 3,
+      "owner_test_paths_exist_count": 3
+    },
+    {
+      "module_name": "bioetl.domain.ports.export",
+      "path": "src/bioetl/domain/ports/export.py",
+      "is_private_module": false,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "classification_status": "classified",
+      "disposition": "retain_canonical_owner_module",
+      "reviewed_on": "2026-06-16",
+      "review_by": "2026-09-14",
+      "linked_issue": "#4541",
+      "rationale": "Port owner module for export; imports now go through bioetl.domain.ports facade per REQ-ARCH-027",
+      "evidence_lane": "canonical_owner_contract",
+      "owner_tests": [
+        "tests/architecture/test_domain_public_api.py",
+        "tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py",
+        "tests/architecture/test_port_contracts.py"
+      ],
+      "owner_test_count": 3,
+      "owner_test_paths_exist_count": 3
+    },
+    {
+      "module_name": "bioetl.domain.ports.filtering",
+      "path": "src/bioetl/domain/ports/filtering.py",
+      "is_private_module": false,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "classification_status": "classified",
+      "disposition": "retain_canonical_owner_module",
+      "reviewed_on": "2026-06-16",
+      "review_by": "2026-09-14",
+      "linked_issue": "#4541",
+      "rationale": "Port owner module for filtering; imports now go through bioetl.domain.ports facade per REQ-ARCH-027",
+      "evidence_lane": "canonical_owner_contract",
+      "owner_tests": [
+        "tests/architecture/test_domain_public_api.py",
+        "tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py",
+        "tests/architecture/test_port_contracts.py"
+      ],
+      "owner_test_count": 3,
+      "owner_test_paths_exist_count": 3
+    },
+    {
+      "module_name": "bioetl.domain.ports.idmapping",
+      "path": "src/bioetl/domain/ports/idmapping.py",
+      "is_private_module": false,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "classification_status": "classified",
+      "disposition": "retain_canonical_owner_module",
+      "reviewed_on": "2026-06-16",
+      "review_by": "2026-09-14",
+      "linked_issue": "#4541",
+      "rationale": "Port owner module for idmapping; imports now go through bioetl.domain.ports facade per REQ-ARCH-027",
+      "evidence_lane": "canonical_owner_contract",
+      "owner_tests": [
+        "tests/architecture/test_domain_public_api.py",
+        "tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py",
+        "tests/architecture/test_port_contracts.py"
+      ],
+      "owner_test_count": 3,
+      "owner_test_paths_exist_count": 3
+    },
+    {
+      "module_name": "bioetl.domain.ports.pii",
+      "path": "src/bioetl/domain/ports/pii.py",
+      "is_private_module": false,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "classification_status": "classified",
+      "disposition": "retain_canonical_owner_module",
+      "reviewed_on": "2026-06-16",
+      "review_by": "2026-09-14",
+      "linked_issue": "#4541",
+      "rationale": "Port owner module for pii; imports now go through bioetl.domain.ports facade per REQ-ARCH-027",
+      "evidence_lane": "canonical_owner_contract",
+      "owner_tests": [
+        "tests/architecture/test_domain_public_api.py",
+        "tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py",
+        "tests/architecture/test_port_contracts.py"
+      ],
+      "owner_test_count": 3,
+      "owner_test_paths_exist_count": 3
+    },
+    {
+      "module_name": "bioetl.domain.ports.protein_classification",
+      "path": "src/bioetl/domain/ports/protein_classification.py",
+      "is_private_module": false,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "classification_status": "classified",
+      "disposition": "retain_canonical_owner_module",
+      "reviewed_on": "2026-06-16",
+      "review_by": "2026-09-14",
+      "linked_issue": "#4541",
+      "rationale": "Port owner module for protein_classification; imports now go through bioetl.domain.ports facade per REQ-ARCH-027",
+      "evidence_lane": "canonical_owner_contract",
+      "owner_tests": [
+        "tests/architecture/test_domain_public_api.py",
+        "tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py",
+        "tests/architecture/test_port_contracts.py"
+      ],
+      "owner_test_count": 3,
+      "owner_test_paths_exist_count": 3
+    },
+    {
+      "module_name": "bioetl.domain.ports.resilience",
+      "path": "src/bioetl/domain/ports/resilience.py",
+      "is_private_module": false,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "classification_status": "classified",
+      "disposition": "retain_canonical_owner_module",
+      "reviewed_on": "2026-06-16",
+      "review_by": "2026-09-14",
+      "linked_issue": "#4541",
+      "rationale": "Port owner module for resilience; imports now go through bioetl.domain.ports facade per REQ-ARCH-027",
+      "evidence_lane": "canonical_owner_contract",
+      "owner_tests": [
+        "tests/architecture/test_domain_public_api.py",
+        "tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py",
+        "tests/architecture/test_port_contracts.py"
+      ],
+      "owner_test_count": 3,
+      "owner_test_paths_exist_count": 3
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+%% BioETL — Class Diagram: Factories & Bootstrap
+%% Current composition-layer factories, provider registry, and runtime assembly.
+
+%% @version 1.1.0
+%% @date    2026-03-16
+%% @type    classDiagram
+%% @level   Class / Interface
+%% @nodes   9
+%% @uniform class width=208 height=138 max_title_len=22 max_desc_lines=6
+
+classDiagram
+    direction LR
+    class ProviderRegistry {
+        +ensure_loaded(): None
+        +create_adapter(provider, **kwargs): DataSourcePort
+        +build_data_source_creator(provider): DataSourceCreatorProtocol
+        +list_providers(): list~str~
+    }
+
+    class ProviderDataSourceCatalog {
+        <<Facade>>
+        +get(provider): DataSourceCreatorProtocol
+        +list_providers(): list~str~
+    }
+
+    class DataSourceFactory {
+        +create(provider, **kwargs): DataSourcePort
+        +list_providers(): list~str~
+    }
+
+    class PipelineRegistry {
+        +list_pipelines(): list~str~
+        +contains(name): bool
+    }
+
+    class RunnerFactory {
+        +create(context): ExecutionMetricsRunnerPort
+        +list_pipelines(): list~str~
+        +contains(name): bool
+    }
+
+    class RunnerFactoryBuilderService {
+        +build_seed_factory(...): Callable
+        +build_enricher_factory(...): Callable
+        +build_dependency_factory(...): Callable
+    }
+
+    class CompositeFilterExtractionService {
+        +extract_enricher_filters(...): tuple
+        +extract_dependency_filters(...): tuple
+    }
+
+    class CompositeSupportServices {
+        +checkpoint_manager: CompositeCheckpointService
+        +coordinator: EnrichmentCoordinatorService
+        +merger: MergeService
+    }
+
+    class CompositeSupportServicesFactory {
+        +create(...): CompositeSupportServices
+    }
+
+    class CompositePipelineRunner {
+        +run(): CompositeResult
+    }
+
+    ProviderDataSourceCatalog --> ProviderRegistry : delegates to
+    DataSourceFactory --> ProviderRegistry : delegates
+    RunnerFactory --> PipelineRegistry : resolves pipelines
+    RunnerFactory ..> ProviderRegistry : ensure providers loaded
+    RunnerFactoryBuilderService --> CompositeFilterExtractionService
+    CompositeSupportServicesFactory --> CompositeSupportServices : builds
+    CompositeSupportServices --> CompositePipelineRunner : injects collaborators
+    RunnerFactoryBuilderService --> CompositePipelineRunner : runner factories
+
+    style ProviderRegistry fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style ProviderDataSourceCatalog fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style DataSourceFactory fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style PipelineRegistry fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style RunnerFactory fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style RunnerFactoryBuilderService fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style CompositeFilterExtractionService fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style CompositeSupportServices fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style CompositeSupportServicesFactory fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style CompositePipelineRunner fill:#f0fdf4,stroke:#16a34a,stroke-width:2px

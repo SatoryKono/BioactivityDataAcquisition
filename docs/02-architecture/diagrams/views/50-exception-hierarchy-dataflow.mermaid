@@ -1,0 +1,56 @@
+%% View: Data-Flow | Parent: 50-exception-hierarchy-full.mermaid
+%% @uniform width=176 height=56 max_title_len=17 max_desc_lines=0
+flowchart TB
+%% keep-orphan: N7, N8
+
+    subgraph Domain["Domain Layer"]
+        direction TB
+        N3["DELTA_SCHEMA_V"]
+        N4["BRONZE_VALID"]
+        N7["record_id"]
+    end
+
+    subgraph Application["Application Layer"]
+        direction TB
+        N1["MERGE_CONFLICT"]
+        N12["EXT_SERVICE"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        N2["DELTA_TX"]
+        N5["DELTA_WRITE"]
+        N6["DELTA_OPT"]
+        N8["ACTION_QUARANTINE"]
+        N9["CRITICAL"]
+        N10["STORAGE_ERR"]
+        N11["RECOVERABLE"]
+    end
+
+    N9 ==> N1
+    N9 --> N2
+    N9 --> N3
+    N11 --> N12
+    N11 --> N10
+    N10 --> N4
+    N10 --> N5
+    N10 --> N6
+
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle 0 stroke:#1E293B,stroke-width:4px
+    linkStyle 1 stroke:#1E293B,stroke-width:4px
+    linkStyle 2 stroke:#1E293B,stroke-width:4px
+    linkStyle 3 stroke:#1E293B,stroke-width:4px
+    linkStyle 4 stroke:#1E293B,stroke-width:4px
+    linkStyle 5 stroke:#1E293B,stroke-width:4px
+    linkStyle 6 stroke:#1E293B,stroke-width:4px
+    linkStyle 7 stroke:#1E293B,stroke-width:4px

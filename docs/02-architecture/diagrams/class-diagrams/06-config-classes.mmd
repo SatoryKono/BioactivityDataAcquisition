@@ -1,0 +1,176 @@
+%% BioETL — Class Diagram: Configuration Classes
+%% Domain and application configuration hierarchy.
+
+%% @version 1.1.0
+%% @date    2026-02-26
+%% @type    classDiagram
+%% @level   Class / Interface
+%% @nodes   14
+%% @uniform-group core      nodes=RuntimeConfig,PipelineConfig
+%% @uniform-group composite nodes=CompositeConfig,SeedConfig,DependencyConfig,EnricherConfig,MergeConfig
+%% @uniform-group support   nodes=RecordProcessorConfig,TableConfig,DQConfig,SilverFilterConfig,GoldFilterConfig,LockConfig,KeyNullabilityRule
+
+%% @uniform-width group
+%% @uniform class width=296 groups=3 width_strategy=group
+%% @uniform-stats core         width=296 height=344 max_desc_lines=17
+%% @uniform-stats composite    width=296 height=144 max_desc_lines=6
+%% @uniform-stats support      width=216 height=128 max_desc_lines=5
+classDiagram
+    direction LR
+    class RuntimeConfig {
+        <<frozen dataclass>>
+        +run_type
+        +resume
+        +limit
+        +dry_run
+        +lock_ttl
+        +strict_validation
+        +skip_gold
+        +effective_lock_ttl
+        +... : Runtime flags
+    }
+
+    class PipelineConfig {
+        <<frozen dataclass>>
+        +pipeline_name
+        +provider
+        +entity_type
+        +table
+        +batch_size
+        +checkpoint_interval
+        +fields
+        +dq
+        +loading_strategy
+        +silver_filters
+        +gold_filters
+        +... : Schema and transform options
+    }
+
+    class TableConfig {
+        <<dataclass>>
+        +silver_table
+        +gold_table
+
+
+    }
+
+    class DQConfig {
+        <<dataclass>>
+        +soft_error_threshold
+        +hard_error_threshold
+
+
+    }
+
+    class SilverFilterConfig {
+        <<dataclass>>
+        +source_path
+        +column_name
+
+
+    }
+
+    class GoldFilterConfig {
+        <<dataclass>>
+        +source_path
+        +column_name
+
+
+    }
+
+    class RecordProcessorConfig {
+        <<dataclass>>
+        +table_config
+        +silver_schema
+        +gold_schema
+        +dq_config
+    }
+
+    class LockConfig {
+        <<dataclass>>
+        +timeout
+        +heartbeat_interval
+        +max_retries
+
+    }
+
+    class CompositeConfig {
+        <<frozen dataclass>>
+        +name
+        +seed
+        +dependencies
+        +enrichers
+        +merge
+    }
+
+    class SeedConfig {
+        <<frozen dataclass>>
+        +pipeline
+        +output_keys
+        +silver_table
+        +limit
+
+    }
+
+    class DependencyConfig {
+        <<frozen dataclass>>
+        +pipeline
+        +depends_on
+
+
+
+    }
+
+    class EnricherConfig {
+        <<frozen dataclass>>
+        +pipeline
+        +primary_key
+        +enricher_cardinality
+
+
+    }
+
+    class MergeConfig {
+        <<frozen dataclass>>
+        +merge_strategy
+        +conflict_resolution
+
+
+
+    }
+
+    class KeyNullabilityRule {
+        <<dataclass>>
+        +table_name
+        +key_columns
+        +allow_nulls
+
+    }
+
+    PipelineConfig *-- TableConfig
+    PipelineConfig *-- DQConfig
+    PipelineConfig *-- SilverFilterConfig
+    PipelineConfig *-- GoldFilterConfig
+
+    RecordProcessorConfig *-- TableConfig
+    RecordProcessorConfig *-- DQConfig
+
+    CompositeConfig *-- SeedConfig
+    CompositeConfig *-- DependencyConfig
+    CompositeConfig *-- EnricherConfig
+    CompositeConfig *-- MergeConfig
+
+    style RuntimeConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+    style PipelineConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+    style TableConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+    style DQConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+    style SilverFilterConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+    style GoldFilterConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+    style RecordProcessorConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+    style LockConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+    style CompositeConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+    style SeedConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+    style DependencyConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+    style EnricherConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+    style MergeConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+    style KeyNullabilityRule fill:#fefce8,stroke:#ca8a04,stroke-width:2px

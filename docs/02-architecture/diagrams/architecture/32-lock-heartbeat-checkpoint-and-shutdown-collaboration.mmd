@@ -1,0 +1,38 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% Title: Lock Heartbeat Checkpoint And Shutdown Collaboration
+%% @version 1.0.0
+%% @date    2026-05-12
+%% @type    sequenceDiagram
+%% @level   System / Interaction
+%% RULES: RULES.md §2.1, ADR-003, ADR-008, ADR-046
+sequenceDiagram
+    autonumber
+    participant Runner as PipelineRunner
+    participant Lock as MemoryLock
+    participant Heartbeat as heartbeat service
+    participant Checkpoint as LocalCheckpointPort
+    participant Shutdown as ShutdownPort
+    participant Ledger as attached run ledger service
+
+    Runner->>Lock: acquire lock:chembl_activity
+    Lock-->>Runner: fencing sequence
+    Runner->>Heartbeat: start periodic heartbeat
+    Runner->>Checkpoint: load checkpoint state
+    Checkpoint-->>Runner: resume marker or empty state
+    opt ledger attached
+        Runner->>Ledger: attach_run_ledger_service(service)
+    end
+    loop every heartbeat interval
+        Heartbeat-->>Runner: alive signal
+        Runner->>Shutdown: check shutdown requested
+    end
+    alt graceful stop
+        Shutdown-->>Runner: cancellation requested
+        Runner->>Checkpoint: persist checkpoint
+        Runner->>Heartbeat: stop
+        Runner->>Lock: release
+    else normal completion
+        Runner->>Checkpoint: finalize progress
+        Runner->>Heartbeat: stop
+        Runner->>Lock: release
+    end

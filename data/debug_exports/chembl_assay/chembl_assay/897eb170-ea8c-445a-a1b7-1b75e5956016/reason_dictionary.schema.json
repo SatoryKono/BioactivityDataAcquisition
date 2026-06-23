@@ -1,0 +1,28 @@
+{
+  "columns": [
+    {
+      "name": "reason_code",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "rule_layer",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "action",
+      "types": [
+        "str"
+      ]
+    },
+    {
+      "name": "reason_message",
+      "types": [
+        "str"
+      ]
+    }
+  ]
+}

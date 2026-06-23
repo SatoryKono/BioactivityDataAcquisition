@@ -1,0 +1,8 @@
+schema_version: 1
+provider: pubchem
+cassette_rel_path: tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_by_name_aspirin.yaml
+metadata_status: managed_inventory
+source: backfill_vcr_metadata_sidecars.py
+cassette_sha256: e8680e16125e571fad4f00a2d534dbe43fb70f9f0adcd35c38e91c88e7ba45f3
+recorded_at: '2026-04-28'
+staleness_ready: true

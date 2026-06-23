@@ -1,0 +1,68 @@
+# Multi-stage build for bioetl: dependencies → runtime
+# Stage 1: Builder (install dependencies with uv)
+FROM python:3.12-slim AS builder
+
+WORKDIR /app
+
+# Install build dependencies and uv
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libssl-dev \
+    libffi-dev \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install uv for fast dependency resolution
+RUN pip install --no-cache-dir uv
+
+# Copy package metadata and source required by setuptools/uv build resolution.
+COPY pyproject.toml uv.lock ./
+COPY src/ ./src/
+RUN printf '# BioETL\n' > README.md
+
+# Sync production dependencies into venv
+RUN uv sync --no-dev --frozen --directory /app
+
+# Stage 2: Runtime (minimal image)
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Install runtime dependencies and create non-root user for security
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    && groupadd -r bioetl \
+    && useradd -r -g bioetl bioetl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy virtual environment from builder
+COPY --from=builder /app/.venv /app/.venv
+
+# Copy application source code read-only to avoid writable runtime assets.
+COPY --chown=bioetl:bioetl --chmod=0444 src/ ./src/
+COPY --chown=bioetl:bioetl --chmod=0444 configs/ ./configs/
+
+# Create logs directory
+RUN mkdir -p /app/logs && chown bioetl:bioetl /app/logs
+
+# Enable the venv
+ENV PATH="/app/.venv/bin:$PATH"
+ENV PYTHONPATH="/app/src"
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Switch to non-root user
+USER bioetl
+
+# Expose metrics ports
+EXPOSE 8000 8081
+
+# Canonical CLI entrypoint so docker-compose can pass subcommands only.
+ENTRYPOINT ["bioetl"]
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=10s \
+    CMD python -c "import sys; sys.exit(0)"
+
+# Default command (override via docker-compose)
+CMD ["health", "server", "--host", "0.0.0.0", "--port", "8000"]

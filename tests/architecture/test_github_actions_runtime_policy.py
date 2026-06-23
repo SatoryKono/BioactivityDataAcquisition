@@ -1,0 +1,71 @@
+"""Architecture guardrails for GitHub Actions supply-chain policy."""
+
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Any, cast
+
+import pytest
+import yaml
+
+from scripts.engineering.repo import check_github_actions_runtime_policy as policy
+
+pytestmark = pytest.mark.architecture
+
+ROOT = Path(__file__).resolve().parents[2]
+CONTRACT_TESTS_WORKFLOW = ROOT / ".github" / "workflows" / "contract-tests.yml"
+
+
+def _load_yaml(path: Path) -> dict[str, Any]:
+    return cast(dict[str, Any], yaml.safe_load(path.read_text(encoding="utf-8")))
+
+
+def test_runtime_policy_scans_workflows_and_composite_actions() -> None:
+    scanned = {path.relative_to(ROOT).as_posix() for path in policy.iter_yaml_files()}
+
+    assert ".github/workflows/contract-tests.yml" in scanned
+    assert ".github/workflows/labeler.yml" in scanned
+    assert ".github/actions/setup-python-uv/action.yml" in scanned
+
+
+def test_runtime_policy_rejects_mutable_external_action_refs() -> None:
+    violation = policy._validate_allowed_uses_ref(
+        "actions/github-script@v7", "actions/github-script"
+    )
+
+    assert violation is not None
+    assert "full 40-character SHA" in violation
+
+
+def test_runtime_policy_rejects_unrecognized_external_actions() -> None:
+    violation = policy._validate_allowed_uses_ref(
+        "example/action@0123456789abcdef0123456789abcdef01234567",
+        "example/action",
+    )
+
+    assert violation is not None
+    assert "unrecognized external action" in violation
+
+
+def test_runtime_policy_accepts_only_approved_sha_refs() -> None:
+    allowed = next(iter(policy.ALLOWED_USES["actions/github-script"]))
+
+    assert (
+        policy._validate_allowed_uses_ref(
+            f"actions/github-script@{allowed}",
+            "actions/github-script",
+        )
+        is None
+    )
+
+
+def test_contract_tests_workflow_uses_least_privilege_issue_permissions() -> None:
+    workflow = _load_yaml(CONTRACT_TESTS_WORKFLOW)
+    jobs = cast(dict[str, dict[str, Any]], workflow["jobs"])
+
+    assert workflow["permissions"] == {"contents": "read"}
+    assert jobs["contract-tests"]["permissions"] == {
+        "contents": "read",
+        "issues": "write",
+    }
+    assert jobs["notify-success"]["permissions"] == {"contents": "read"}

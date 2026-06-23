@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RagChunk",
+  "type": "object",
+  "required": ["id", "source_path", "source_type", "content", "content_hash"],
+  "properties": {
+    "id": {"type": "string"},
+    "source_path": {"type": "string"},
+    "source_type": {"type": "string"},
+    "symbol": {"type": ["string", "null"]},
+    "symbol_kind": {"type": ["string", "null"]},
+    "owner": {"type": ["string", "null"]},
+    "domain": {"type": ["string", "null"]},
+    "repo_zone": {"type": ["string", "null"]},
+    "content": {"type": "string"},
+    "content_hash": {"type": "string"},
+    "commit_sha": {"type": ["string", "null"]},
+    "freshness_class": {"type": ["string", "null"]},
+    "graph_node_refs": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "related_refs": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  },
+  "additionalProperties": true
+}

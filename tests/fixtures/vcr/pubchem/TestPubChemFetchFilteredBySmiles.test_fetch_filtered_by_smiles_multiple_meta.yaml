@@ -1,0 +1,8 @@
+schema_version: 1
+provider: pubchem
+cassette_rel_path: tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_multiple.yaml
+metadata_status: managed_inventory
+source: backfill_vcr_metadata_sidecars.py
+cassette_sha256: 44d164bd3d72dfb6e3d5b23a1d5017a6719b3be49627664d7c4a0d26933556f9
+recorded_at: '2026-04-28'
+staleness_ready: true

@@ -1,0 +1,43 @@
+from __future__ import annotations
+
+import pytest
+
+from bioetl.domain.composite.config_cross_validation import CrossValidationConfig
+from bioetl.domain.composite.cross_validation import (
+    ComparisonMethod,
+    EnricherFieldPairing,
+    FieldComparisonSpec,
+)
+
+
+pytestmark = pytest.mark.unit
+
+
+def test_get_pairing_returns_matching_pipeline_pairing() -> None:
+    pairing = EnricherFieldPairing(
+        enricher_pipeline="crossref_publication",
+        fields=(
+            FieldComparisonSpec(
+                field_name="title",
+                method=ComparisonMethod.EXACT,
+            ),
+        ),
+    )
+    config = CrossValidationConfig(enricher_pairings=(pairing,))
+
+    assert config.get_pairing("crossref_publication") == pairing
+
+
+def test_get_pairing_returns_none_when_pipeline_is_not_configured() -> None:
+    pairing = EnricherFieldPairing(
+        enricher_pipeline="crossref_publication",
+        fields=(
+            FieldComparisonSpec(
+                field_name="title",
+                method=ComparisonMethod.EXACT,
+            ),
+        ),
+    )
+    config = CrossValidationConfig(enricher_pairings=(pairing,))
+
+    assert config.get_pairing("openalex_publication") is None

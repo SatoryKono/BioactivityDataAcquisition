@@ -1,0 +1,34 @@
+%% Title: Package Family: domain/ports/noop
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/ports/noop; modules: _tracing, _audit_pii, _memory_metadata, _debug, _metrics.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-03-27
+%% @level   Package Family / Inventory Slice
+%% @nodes   9
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace tracing {
+        class NoOpTracing
+        class _NoOpOtelTracer
+        class _NoOpSpan
+    }
+
+    namespace audit_pii {
+        class NoOpAudit
+        class NoOpPiiHasher
+    }
+
+    namespace memory_metadata {
+        class NoOpMemoryMonitor
+        class NoOpMetadataWriter
+    }
+
+    namespace debug {
+        class NoOpDebug
+    }
+
+    namespace metrics {
+        class NoOpMetrics
+    }

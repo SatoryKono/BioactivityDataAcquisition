@@ -1,0 +1,70 @@
+%% View: Domain-Focus | Parent: 36-architecture-principles-mindmap-full.mermaid
+%% @uniform width=216 height=56 max_title_len=22 max_desc_lines=0
+flowchart TB
+%% keep-orphan: N12, N13, N14, N15, N16, N20
+
+    subgraph Domain["Domain Layer"]
+        direction TB
+        N1["24 Domain Ports"]
+        N2["Domain"]
+        N3["DDD Aggregates"]
+        N6["DataSourcePort"]
+        N7["Bronze/Silver/Gold/MergedStoragePorts"]
+        N8["LockPort"]
+        N9["MetricsPort"]
+        N10["LoggerPort"]
+        N11["TracingPort"]
+        N12["HealthServer"]
+        N17["Ports"]
+        N18["Aggregates"]
+        N19["Domain Events"]
+    end
+
+    subgraph Application["Application Layer"]
+        direction TB
+        N4["PipelineRun"]
+        N14["PipelineRunner"]
+        N15["BatchExecutor"]
+        N16["23 Transformers"]
+        N5["Batch"]
+    end
+
+    subgraph Composition["Composition Layer"]
+        direction TB
+        N13["PipelineRegistry"]
+        N20["GenericPipelineFactory"]
+    end
+
+    N1 ==> N6
+    N1 --> N7
+    N1 --> N8
+    N1 --> N9
+    N1 --> N10
+    N1 --> N11
+    N2 --> N17
+    N2 --> N18
+    N3 --> N4
+    N4 --> N19
+    N3 --> N5
+
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Composition fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 4 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 5 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 6 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 7 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 8 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 9 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 10 stroke:#475569,stroke-width:2px,stroke-dasharray:5

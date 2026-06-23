@@ -1,0 +1,47 @@
+version: "1.0.0"
+policy_scope: "thin_packages"
+description: >
+  Machine-readable exceptions for source-to-test same-path ownership policy.
+  Thin packages under src/bioetl/ MUST have a same-path tests/unit/.../test_<module>.py
+  sibling unless explicitly exempted here with canonical owner tests.
+
+exemptions:
+  - source: src/bioetl/__main__.py
+    policy: aggregate_owner
+    reason: >
+      Package entrypoint is exercised through CLI-facing tests rather than a
+      mirrored unit module. It stays exempt from same-path thin-package policy.
+    owner_tests:
+      - tests/unit/interfaces/cli/test_cli_helpers.py
+      - tests/unit/interfaces/cli/test_cli_commands_basic.py
+  - source: src/bioetl/infrastructure/compat/pandera_compat.py
+    policy: aggregate_owner
+    reason: >
+      Pandera compat seam is exercised through the infrastructure owner test
+      module rather than a mirrored thin-package sibling test file.
+    owner_tests:
+      - tests/unit/infrastructure/test_pandera_python314_support.py
+      - tests/unit/composition/bootstrap/test_runtime_patch.py
+  - source: src/bioetl/application/composite/helpers/resolver_helper.py
+    policy: aggregate_owner
+    reason: >
+      Resolver helper coverage lives in the composite owner test module rather
+      than a same-path thin-package sibling.
+    owner_tests:
+      - tests/unit/application/composite/test_resolver_helper.py
+  - source: src/bioetl/domain/schemas/generated/registry.py
+    policy: aggregate_owner
+    reason: >
+      The generated schema registry is exercised by generated-schema owner tests
+      instead of a mirrored same-path sibling module.
+    owner_tests:
+      - tests/unit/domain/schemas/generated/test_schema_registry.py
+      - tests/unit/domain/schemas/test_generated_registry.py
+  - source: src/bioetl/domain/control_plane/ledger/core_events.py
+    policy: aggregate_owner
+    reason: >
+      Legacy ledger event value object for storage contract compatibility is exercised
+      through RunManifest domain owner tests rather than a mirrored thin-package sibling.
+    owner_tests:
+      - tests/unit/domain/control_plane/test_run_manifest_dq.py
+      - tests/unit/domain/control_plane/test_run_manifest_immutability.py

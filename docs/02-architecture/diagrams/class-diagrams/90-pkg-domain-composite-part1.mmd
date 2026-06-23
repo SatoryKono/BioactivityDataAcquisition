@@ -1,0 +1,63 @@
+%% Title: Package Family: domain/composite (Part 1/2)
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/domain/composite; part 1/2; modules: cross_validation, aggregation, config_models, lineage, result_seed_dependency, strategy.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-03-27
+%% @level   Package Family / Inventory Slice
+%% @nodes   29
+%% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
+classDiagram
+
+    namespace cross_validation {
+        class ComparisonMethod
+        class CrossValidationStats
+        class CrossValidationVerdict
+        class EnricherCVStats
+        class EnricherFieldPairing
+        class FieldComparisonSpec
+        class FieldMismatch
+        class RecordCrossValidationResult
+    }
+
+    namespace aggregation {
+        class AggregationConfig
+        class AggregationFieldSpec
+        class AggregationFunction
+        class EnricherCardinality
+    }
+
+    namespace config_models {
+        class CrossValidationConfig
+        class DependencyConfig
+        class EnricherConfig
+        class SeedConfig
+    }
+
+    namespace lineage {
+        class CompositeLineageMetadata
+        class EnrichmentStatusRecord
+        class FieldSource
+    }
+
+    namespace result_seed_dependency {
+        class DependencyResult
+        class DependencyStatus
+        class SeedResult
+    }
+
+    namespace strategy {
+        class ConflictResolution
+        class FallbackStrategy
+        class MergeStrategy
+    }
+
+    namespace config_dq {
+        class CompositeDQConfig
+        class DQOverrideConfig
+    }
+
+    namespace config_merge {
+        class ColumnGroupConfig
+        class MergeConfig
+    }

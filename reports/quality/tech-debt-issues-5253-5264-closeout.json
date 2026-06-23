@@ -1,0 +1,148 @@
+{
+  "snapshot_date": "2026-06-16",
+  "status": "implemented_local_closeable",
+  "budget_policy": "no_growth_ratchet_only",
+  "issues": [
+    {
+      "issue": "#5253",
+      "theme": "Domain DQ determinism and invariants",
+      "debt_types": ["Determinism risk", "Architectural violation", "Test debt"],
+      "action": "Added deterministic DQ outcome-order and value-coercion tests for field, cross-field, and conditional rules.",
+      "risk": "low",
+      "evidence": [
+        "tests/unit/domain/behavior/test_dq_rule_evaluator.py::test_rule_outcomes_are_deterministic_and_ordered_by_rule_family",
+        "tests/unit/domain/behavior/test_dq_rule_evaluators.py::test_condition_options_and_membership_matchers_are_tuple_stable",
+        "tests/unit/domain/behavior/test_dq_rule_evaluators.py::test_value_coercion_rejects_bool_numeric_and_decodes_json_lists"
+      ]
+    },
+    {
+      "issue": "#5254",
+      "theme": "Contract registry and ledger aggregate invariants",
+      "debt_types": ["Contract drift", "Determinism risk", "Test debt"],
+      "action": "Added hash-stability, DQ identity-drift, ledger immutability, and JSON-safe serialization regression tests.",
+      "risk": "low",
+      "evidence": [
+        "tests/unit/domain/control_plane/test_contract_registry_service.py::test_registry_hash_is_stable_across_insertion_order",
+        "tests/unit/domain/control_plane/test_contract_registry_service.py::test_registry_validation_blocks_dq_identity_drift",
+        "tests/unit/domain/control_plane/test_ledger_core_events.py::test_ledger_event_is_immutable_after_creation",
+        "tests/unit/domain/control_plane/test_ledger_core_events.py::test_run_ledger_entry_serialization_is_json_safe_and_deterministic"
+      ]
+    },
+    {
+      "issue": "#5255",
+      "theme": "Domain composite config dependency map",
+      "debt_types": ["Compatibility debt", "Dependency map", "Architectural violation"],
+      "action": "Added a reviewed importer map for domain composite config and a no-growth architecture guard for public/split importer counts.",
+      "risk": "medium",
+      "evidence": [
+        "reports/quality/domain-composite-config-importer-map.md",
+        "tests/architecture/test_domain_composite_config_importer_map.py"
+      ]
+    },
+    {
+      "issue": "#5256",
+      "theme": "Control-plane replay bundle descriptor hotspot split",
+      "debt_types": ["Hotspot", "Duplication", "Maintainability debt"],
+      "action": "Split replay bundle payload construction out of bundle_descriptor_service.py while preserving the public descriptor API.",
+      "risk": "medium",
+      "evidence": [
+        "src/bioetl/application/services/control_plane/replay/bundle_descriptor_service.py",
+        "src/bioetl/application/services/control_plane/replay/_bundle_descriptor_payloads.py",
+        "tests/architecture/test_tech_debt_issues_5253_5264_closeout.py::test_replay_bundle_descriptor_split_stays_below_hotspot_budget"
+      ]
+    },
+    {
+      "issue": "#5257",
+      "theme": "Runtime builder registry explicitness",
+      "debt_types": ["Composition debt", "Runtime hot path", "Dependency injection drift"],
+      "action": "Added a static guard that keeps runtime registry wiring explicit and blocks default-registry singleton calls from runtime hot paths.",
+      "risk": "medium",
+      "evidence": [
+        "tests/architecture/test_runtime_registry_explicit_seams.py",
+        "tests/unit/composition/runtime_builders/test_runner_builder_contracts.py",
+        "tests/unit/composition/bootstrap/test_runtime_bootstrap_phases.py"
+      ]
+    },
+    {
+      "issue": "#5258",
+      "theme": "Lazy exports and alias module compatibility",
+      "debt_types": ["Compatibility debt", "Lazy export facade", "Test debt"],
+      "action": "Added lazy-export resolver and installer contract tests, including explicit target-attribute resolution and stable hook installation.",
+      "risk": "low",
+      "evidence": [
+        "tests/unit/composition/test_lazy_exports.py::test_resolve_lazy_export_supports_explicit_target_attribute",
+        "tests/unit/composition/test_lazy_exports.py::test_install_lazy_exports_installs_stable_hooks_without_eager_imports",
+        "tests/architecture/test_compatibility_facade_inventory.py::test_compatibility_review_and_remove_dates_are_not_expired"
+      ]
+    },
+    {
+      "issue": "#5259",
+      "theme": "Config compatibility legacy taxonomy",
+      "debt_types": ["Compatibility debt", "Config drift", "Governance gap"],
+      "action": "Added owner/rationale mapping for derived compatibility_legacy config taxonomy counts and a drift guard against unreviewed growth.",
+      "risk": "medium",
+      "evidence": [
+        "reports/quality/config-compatibility-legacy-taxonomy-review.json",
+        "tests/architecture/test_config_taxonomy_review.py"
+      ]
+    },
+    {
+      "issue": "#5260",
+      "theme": "Observability cardinality live review",
+      "debt_types": ["Observability gap", "Governance gap"],
+      "action": "Made the live runtime cardinality review artifact tracked and enforced release-grade status without local fallback.",
+      "risk": "medium",
+      "evidence": [
+        "reports/observability/runtime_cardinality_review.json",
+        "tests/architecture/test_observability_metric_governance.py::test_runtime_cardinality_live_review_artifact_is_release_grade"
+      ]
+    },
+    {
+      "issue": "#5261",
+      "theme": "CLI module entrypoint compatibility seam",
+      "debt_types": ["Compatibility debt", "Runtime vs CLI duplication", "Test debt"],
+      "action": "Added a top-level `python -m bioetl` contract test that proves the retained module entrypoint delegates to the canonical CLI main seam.",
+      "risk": "low",
+      "evidence": [
+        "tests/unit/interfaces/cli/test_cli_main_module.py::TestCliMainModule::test_top_level_module_entrypoint_delegates_to_cli_main"
+      ]
+    },
+    {
+      "issue": "#5262",
+      "theme": "Compatibility test inventory mapping",
+      "debt_types": ["Test debt", "Compatibility debt", "Governance gap"],
+      "action": "Pinned closeout to the existing live compatibility test inventory map and no-growth architecture guard.",
+      "risk": "low",
+      "evidence": [
+        "configs/quality/test_governance_audit.yaml::compatibility_test_inventory",
+        "tests/architecture/test_test_governance_audit.py::test_compatibility_inventory_covers_every_detected_compatibility_test_file",
+        "reports/quality/test-governance-current.json"
+      ]
+    },
+    {
+      "issue": "#5263",
+      "theme": "Infrastructure config and observability contracts",
+      "debt_types": ["Test debt", "Observability gap", "Compatibility debt"],
+      "action": "Added stronger unit contracts for config package lazy exports, structured logging event sanitization, debug adapter low-cardinality payloads, and local OTLP exporter safety.",
+      "risk": "low",
+      "evidence": [
+        "tests/unit/infrastructure/config/test_config_package_root_contract.py",
+        "tests/unit/infrastructure/observability/test_logging.py::TestStructlogLogger::test_logger_methods_sanitize_event_kwarg_collision",
+        "tests/unit/infrastructure/observability/test_debug_adapters.py::TestLoggingDebugAdapter::test_on_breakpoint_logs_low_cardinality_payload",
+        "tests/unit/infrastructure/observability/test_tracing.py::TestTelemetryExporterSelection::test_local_otlp_endpoint_defaults_to_insecure"
+      ]
+    },
+    {
+      "issue": "#5264",
+      "theme": "Compatibility/debt governance expiry enforcement",
+      "debt_types": ["Governance gap", "Compatibility debt", "Enforcement"],
+      "action": "Added a date-sensitive architecture guard for compatibility review/remove dates and linked closeout evidence to the no-growth budget policy.",
+      "risk": "medium",
+      "evidence": [
+        "tests/architecture/test_compatibility_facade_inventory.py::test_compatibility_review_and_remove_dates_are_not_expired",
+        "configs/quality/compatibility_facade_inventory.yaml",
+        "configs/quality/config_compatibility_registry.yaml"
+      ]
+    }
+  ]
+}

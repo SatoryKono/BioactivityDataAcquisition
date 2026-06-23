@@ -1,0 +1,2653 @@
+{
+  "schema_version": "2.0.0",
+  "generated_by": "scripts/data_quality/inventory_silver_filters_migration.py",
+  "totals": {
+    "entities_total": 27,
+    "entities_with_silver_filters": 22,
+    "entities_with_gold_filters": 22,
+    "rules_total": 97,
+    "keep_in_silver": 97,
+    "move_to_gold": 0,
+    "duplicate": 0,
+    "conflict": 0
+  },
+  "surface_totals": {
+    "surfaces_total": 112,
+    "by_category": {
+      "consumer_alias": 32,
+      "observability": 11,
+      "runtime_gate": 11,
+      "silver_config": 11,
+      "source_profile": 47
+    },
+    "by_symbol": {
+      "--silver-filter-only": 8,
+      "FILTERED_OUT_SILVER": 17,
+      "FORBIDDEN_SILVER_SEMANTIC_FILTER_KEYS": 1,
+      "SilverFilterConfig": 1,
+      "SilverFilterConfig(": 1,
+      "SilverFiltersConfig": 1,
+      "SilverFiltersFileConfig": 1,
+      "_apply_pre_silver_filter": 2,
+      "_silver_filters.evaluate": 1,
+      "_silver_filters.should_include": 1,
+      "apply_silver_filter": 6,
+      "bioetl_silver_filter_reject_total_mismatch_15m": 2,
+      "bioetl_silver_filter_rejections_total": 9,
+      "extraction_params": 8,
+      "filters.extraction_params": 22,
+      "filters.source_profile": 6,
+      "should_write_silver": 1,
+      "silver_filter_compatibility_mode": 2,
+      "silver_filter_rejects": 7,
+      "source_profile": 11,
+      "validate_no_semantic_silver_filter_payload": 4
+    }
+  },
+  "entities": [
+    {
+      "provider": "chembl",
+      "entity": "activity",
+      "path": "configs/entities/chembl/activity.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 29,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "activity_id",
+          "silver_value": "\"activity_id\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "molecule_id",
+          "silver_value": "\"molecule_id\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "assay_id",
+          "silver_value": "\"assay_id\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "target_id",
+          "silver_value": "\"target_id\"",
+          "gold_value": "\"target_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "publication_id",
+          "silver_value": "\"publication_id\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "record_id",
+          "silver_value": "\"record_id\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "src_id",
+          "silver_value": "\"src_id\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "canonical_smiles",
+          "silver_value": "\"canonical_smiles\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "target_organism",
+          "silver_value": "\"target_organism\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "assay_description",
+          "silver_value": "\"assay_description\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "bao_endpoint",
+          "silver_value": "\"bao_endpoint\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "bao_format",
+          "silver_value": "\"bao_format\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "bao_label",
+          "silver_value": "\"bao_label\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "activity_relation",
+          "silver_value": "\"activity_relation\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "activity_value",
+          "silver_value": "\"activity_value\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "units",
+          "silver_value": "\"units\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "standard_value",
+          "silver_value": "\"standard_value\"",
+          "gold_value": "\"standard_value\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "standard_units",
+          "silver_value": "\"standard_units\"",
+          "gold_value": "\"standard_units\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "standard_type",
+          "silver_value": "\"standard_type\"",
+          "gold_value": "\"standard_type\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "standard_flag",
+          "silver_value": "\"standard_flag\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "pchembl_value",
+          "silver_value": "\"pchembl_value\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "uo_units",
+          "silver_value": "\"uo_units\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "journal",
+          "silver_value": "\"journal\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "publication_year",
+          "silver_value": "\"publication_year\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "_state",
+          "silver_value": "\"_state\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "assay_type",
+          "silver_value": "\"assay_type\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "potential_duplicate",
+          "silver_value": "\"potential_duplicate\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "standard_relation",
+          "silver_value": "\"standard_relation\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "exclude_if_present",
+          "field": "data_validity_comment",
+          "silver_value": "\"data_validity_comment\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        }
+      ]
+    },
+    {
+      "provider": "chembl",
+      "entity": "assay",
+      "path": "configs/entities/chembl/assay.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 9,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "chembl",
+          "entity": "assay",
+          "rule_type": "required_fields",
+          "field": "assay_id",
+          "silver_value": "\"assay_id\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "assay",
+          "rule_type": "required_fields",
+          "field": "assay_type",
+          "silver_value": "\"assay_type\"",
+          "gold_value": "\"assay_type\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "assay",
+          "rule_type": "required_fields",
+          "field": "assay_description",
+          "silver_value": "\"assay_description\"",
+          "gold_value": "\"assay_description\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "assay",
+          "rule_type": "required_fields",
+          "field": "target_id",
+          "silver_value": "\"target_id\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "assay",
+          "rule_type": "required_fields",
+          "field": "publication_id",
+          "silver_value": "\"publication_id\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "assay",
+          "rule_type": "required_fields",
+          "field": "bao_format",
+          "silver_value": "\"bao_format\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "assay",
+          "rule_type": "required_fields",
+          "field": "assay_type_description",
+          "silver_value": "\"assay_type_description\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "assay",
+          "rule_type": "required_fields",
+          "field": "relationship_type",
+          "silver_value": "\"relationship_type\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "assay",
+          "rule_type": "required_fields",
+          "field": "confidence_score",
+          "silver_value": "\"confidence_score\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        }
+      ]
+    },
+    {
+      "provider": "chembl",
+      "entity": "assay_parameters",
+      "path": "configs/entities/chembl/assay_parameters.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 4,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "chembl",
+          "entity": "assay_parameters",
+          "rule_type": "required_fields",
+          "field": "assay_id",
+          "silver_value": "\"assay_id\"",
+          "gold_value": "\"assay_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "assay_parameters",
+          "rule_type": "required_fields",
+          "field": "assay_param_id",
+          "silver_value": "\"assay_param_id\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "assay_parameters",
+          "rule_type": "required_fields",
+          "field": "parameter_type",
+          "silver_value": "\"parameter_type\"",
+          "gold_value": "\"parameter_type\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "assay_parameters",
+          "rule_type": "required_fields",
+          "field": "type",
+          "silver_value": "\"type\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        }
+      ]
+    },
+    {
+      "provider": "chembl",
+      "entity": "cell_line",
+      "path": "configs/entities/chembl/cell_line.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 2,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "chembl",
+          "entity": "cell_line",
+          "rule_type": "required_fields",
+          "field": "cell_id",
+          "silver_value": "\"cell_id\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "cell_line",
+          "rule_type": "required_fields",
+          "field": "cell_name",
+          "silver_value": "\"cell_name\"",
+          "gold_value": "\"cell_name\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        }
+      ]
+    },
+    {
+      "provider": "chembl",
+      "entity": "compound_record",
+      "path": "configs/entities/chembl/compound_record.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 3,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "chembl",
+          "entity": "compound_record",
+          "rule_type": "required_fields",
+          "field": "molecule_id",
+          "silver_value": "\"molecule_id\"",
+          "gold_value": "\"molecule_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "compound_record",
+          "rule_type": "required_fields",
+          "field": "publication_id",
+          "silver_value": "\"publication_id\"",
+          "gold_value": "\"publication_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "compound_record",
+          "rule_type": "required_fields",
+          "field": "record_id",
+          "silver_value": "\"record_id\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        }
+      ]
+    },
+    {
+      "provider": "chembl",
+      "entity": "molecule",
+      "path": "configs/entities/chembl/molecule.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 2,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "chembl",
+          "entity": "molecule",
+          "rule_type": "required_fields",
+          "field": "molecule_id",
+          "silver_value": "\"molecule_id\"",
+          "gold_value": "\"molecule_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "molecule",
+          "rule_type": "required_fields",
+          "field": "molecule_type",
+          "silver_value": "\"molecule_type\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        }
+      ]
+    },
+    {
+      "provider": "chembl",
+      "entity": "protein_class",
+      "path": "configs/entities/chembl/protein_class.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 3,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "chembl",
+          "entity": "protein_class",
+          "rule_type": "required_fields",
+          "field": "class_level",
+          "silver_value": "\"class_level\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "protein_class",
+          "rule_type": "required_fields",
+          "field": "pref_name",
+          "silver_value": "\"pref_name\"",
+          "gold_value": "\"pref_name\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "protein_class",
+          "rule_type": "required_fields",
+          "field": "protein_class_id",
+          "silver_value": "\"protein_class_id\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        }
+      ]
+    },
+    {
+      "provider": "chembl",
+      "entity": "publication",
+      "path": "configs/entities/chembl/publication.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 3,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "chembl",
+          "entity": "publication",
+          "rule_type": "required_fields",
+          "field": "publication_id",
+          "silver_value": "\"publication_id\"",
+          "gold_value": "\"publication_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "publication",
+          "rule_type": "required_fields",
+          "field": "publication_type",
+          "silver_value": "\"publication_type\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "publication",
+          "rule_type": "required_fields",
+          "field": "title",
+          "silver_value": "\"title\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        }
+      ]
+    },
+    {
+      "provider": "chembl",
+      "entity": "publication_similarity",
+      "path": "configs/entities/chembl/publication_similarity.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 3,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "chembl",
+          "entity": "publication_similarity",
+          "rule_type": "required_fields",
+          "field": "sim_id",
+          "silver_value": "\"sim_id\"",
+          "gold_value": "\"sim_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "publication_similarity",
+          "rule_type": "required_fields",
+          "field": "doc_1",
+          "silver_value": "\"doc_1\"",
+          "gold_value": "\"doc_1\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "publication_similarity",
+          "rule_type": "required_fields",
+          "field": "doc_2",
+          "silver_value": "\"doc_2\"",
+          "gold_value": "\"doc_2\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        }
+      ]
+    },
+    {
+      "provider": "chembl",
+      "entity": "publication_term",
+      "path": "configs/entities/chembl/publication_term.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 3,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "chembl",
+          "entity": "publication_term",
+          "rule_type": "required_fields",
+          "field": "publication_id",
+          "silver_value": "\"publication_id\"",
+          "gold_value": "\"publication_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "publication_term",
+          "rule_type": "required_fields",
+          "field": "term",
+          "silver_value": "\"term\"",
+          "gold_value": "\"term\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "publication_term",
+          "rule_type": "required_fields",
+          "field": "term_type",
+          "silver_value": "\"term_type\"",
+          "gold_value": "\"term_type\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        }
+      ]
+    },
+    {
+      "provider": "chembl",
+      "entity": "subcellular_fraction",
+      "path": "configs/entities/chembl/subcellular_fraction.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 1,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "chembl",
+          "entity": "subcellular_fraction",
+          "rule_type": "required_fields",
+          "field": "subcellular_fraction",
+          "silver_value": "\"subcellular_fraction\"",
+          "gold_value": "\"subcellular_fraction\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        }
+      ]
+    },
+    {
+      "provider": "chembl",
+      "entity": "target",
+      "path": "configs/entities/chembl/target.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 14,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "chembl",
+          "entity": "target",
+          "rule_type": "required_fields",
+          "field": "target_id",
+          "silver_value": "\"target_id\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target",
+          "rule_type": "required_fields",
+          "field": "pref_name",
+          "silver_value": "\"pref_name\"",
+          "gold_value": "\"pref_name\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target",
+          "rule_type": "required_fields",
+          "field": "organism",
+          "silver_value": "\"organism\"",
+          "gold_value": "\"organism\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target",
+          "rule_type": "required_fields",
+          "field": "target_type",
+          "silver_value": "\"target_type\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target",
+          "rule_type": "required_fields",
+          "field": "target_protein_synonyms",
+          "silver_value": "\"target_protein_synonyms\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target",
+          "rule_type": "required_fields",
+          "field": "target_gene_synonyms",
+          "silver_value": "\"target_gene_synonyms\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target",
+          "rule_type": "required_fields",
+          "field": "target_ec_numbers",
+          "silver_value": "\"target_ec_numbers\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target",
+          "rule_type": "required_fields",
+          "field": "target_xref_pdb_ids",
+          "silver_value": "\"target_xref_pdb_ids\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target",
+          "rule_type": "required_fields",
+          "field": "target_xref_go_component",
+          "silver_value": "\"target_xref_go_component\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target",
+          "rule_type": "required_fields",
+          "field": "target_xref_go_function",
+          "silver_value": "\"target_xref_go_function\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target",
+          "rule_type": "required_fields",
+          "field": "target_xref_go_process",
+          "silver_value": "\"target_xref_go_process\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target",
+          "rule_type": "required_fields",
+          "field": "target_xref_hgnc_ids",
+          "silver_value": "\"target_xref_hgnc_ids\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target",
+          "rule_type": "required_fields",
+          "field": "target_xref_reactome_ids",
+          "silver_value": "\"target_xref_reactome_ids\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target",
+          "rule_type": "required_fields",
+          "field": "target_xref_uniprot_ids",
+          "silver_value": "\"target_xref_uniprot_ids\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        }
+      ]
+    },
+    {
+      "provider": "chembl",
+      "entity": "target_component",
+      "path": "configs/entities/chembl/target_component.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 2,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "chembl",
+          "entity": "target_component",
+          "rule_type": "required_fields",
+          "field": "component_id",
+          "silver_value": "\"component_id\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target_component",
+          "rule_type": "required_fields",
+          "field": "organism",
+          "silver_value": "\"organism\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        }
+      ]
+    },
+    {
+      "provider": "chembl",
+      "entity": "target_protein_classification",
+      "path": "configs/entities/chembl/target_protein_classification.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 4,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "chembl",
+          "entity": "target_protein_classification",
+          "rule_type": "required_fields",
+          "field": "target_id",
+          "silver_value": "\"target_id\"",
+          "gold_value": "\"target_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target_protein_classification",
+          "rule_type": "required_fields",
+          "field": "classification_status",
+          "silver_value": "\"classification_status\"",
+          "gold_value": "\"classification_status\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target_protein_classification",
+          "rule_type": "required_fields",
+          "field": "dataset_version",
+          "silver_value": "\"dataset_version\"",
+          "gold_value": "\"dataset_version\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target_protein_classification",
+          "rule_type": "required_fields",
+          "field": "source_snapshot_fingerprint",
+          "silver_value": "\"source_snapshot_fingerprint\"",
+          "gold_value": "\"source_snapshot_fingerprint\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        }
+      ]
+    },
+    {
+      "provider": "chembl",
+      "entity": "tissue",
+      "path": "configs/entities/chembl/tissue.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 2,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "chembl",
+          "entity": "tissue",
+          "rule_type": "required_fields",
+          "field": "tissue_id",
+          "silver_value": "\"tissue_id\"",
+          "gold_value": "\"tissue_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "tissue",
+          "rule_type": "required_fields",
+          "field": "pref_name",
+          "silver_value": "\"pref_name\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        }
+      ]
+    },
+    {
+      "provider": "composite",
+      "entity": "activity",
+      "path": "configs/entities/composite/activity.yaml",
+      "has_silver_filters": false,
+      "has_gold_filters": false,
+      "counts_by_action": {
+        "keep_in_silver": 0,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": []
+    },
+    {
+      "provider": "composite",
+      "entity": "assay",
+      "path": "configs/entities/composite/assay.yaml",
+      "has_silver_filters": false,
+      "has_gold_filters": false,
+      "counts_by_action": {
+        "keep_in_silver": 0,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": []
+    },
+    {
+      "provider": "composite",
+      "entity": "molecule",
+      "path": "configs/entities/composite/molecule.yaml",
+      "has_silver_filters": false,
+      "has_gold_filters": false,
+      "counts_by_action": {
+        "keep_in_silver": 0,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": []
+    },
+    {
+      "provider": "composite",
+      "entity": "publication",
+      "path": "configs/entities/composite/publication.yaml",
+      "has_silver_filters": false,
+      "has_gold_filters": false,
+      "counts_by_action": {
+        "keep_in_silver": 0,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": []
+    },
+    {
+      "provider": "composite",
+      "entity": "target",
+      "path": "configs/entities/composite/target.yaml",
+      "has_silver_filters": false,
+      "has_gold_filters": false,
+      "counts_by_action": {
+        "keep_in_silver": 0,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": []
+    },
+    {
+      "provider": "crossref",
+      "entity": "publication",
+      "path": "configs/entities/crossref/publication.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 2,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "crossref",
+          "entity": "publication",
+          "rule_type": "required_fields",
+          "field": "doi",
+          "silver_value": "\"doi\"",
+          "gold_value": "\"doi\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "crossref",
+          "entity": "publication",
+          "rule_type": "required_fields",
+          "field": "title",
+          "silver_value": "\"title\"",
+          "gold_value": "\"title\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        }
+      ]
+    },
+    {
+      "provider": "openalex",
+      "entity": "publication",
+      "path": "configs/entities/openalex/publication.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 2,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "openalex",
+          "entity": "publication",
+          "rule_type": "required_fields",
+          "field": "openalex_id",
+          "silver_value": "\"openalex_id\"",
+          "gold_value": "\"openalex_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "openalex",
+          "entity": "publication",
+          "rule_type": "required_fields",
+          "field": "title",
+          "silver_value": "\"title\"",
+          "gold_value": "\"title\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        }
+      ]
+    },
+    {
+      "provider": "pubchem",
+      "entity": "compound",
+      "path": "configs/entities/pubchem/compound.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 1,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "pubchem",
+          "entity": "compound",
+          "rule_type": "required_fields",
+          "field": "molecule_id",
+          "silver_value": "\"molecule_id\"",
+          "gold_value": "\"molecule_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        }
+      ]
+    },
+    {
+      "provider": "pubmed",
+      "entity": "publication",
+      "path": "configs/entities/pubmed/publication.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 2,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "pubmed",
+          "entity": "publication",
+          "rule_type": "required_fields",
+          "field": "pmid",
+          "silver_value": "\"pmid\"",
+          "gold_value": "\"pmid\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "pubmed",
+          "entity": "publication",
+          "rule_type": "required_fields",
+          "field": "title",
+          "silver_value": "\"title\"",
+          "gold_value": "\"title\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        }
+      ]
+    },
+    {
+      "provider": "semanticscholar",
+      "entity": "publication",
+      "path": "configs/entities/semanticscholar/publication.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 2,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "semanticscholar",
+          "entity": "publication",
+          "rule_type": "required_fields",
+          "field": "paper_id",
+          "silver_value": "\"paper_id\"",
+          "gold_value": "\"paper_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "semanticscholar",
+          "entity": "publication",
+          "rule_type": "required_fields",
+          "field": "title",
+          "silver_value": "\"title\"",
+          "gold_value": "\"title\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        }
+      ]
+    },
+    {
+      "provider": "uniprot",
+      "entity": "idmapping",
+      "path": "configs/entities/uniprot/idmapping.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 2,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "uniprot",
+          "entity": "idmapping",
+          "rule_type": "required_fields",
+          "field": "target_id",
+          "silver_value": "\"target_id\"",
+          "gold_value": "\"target_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "uniprot",
+          "entity": "idmapping",
+          "rule_type": "required_fields",
+          "field": "mapping_status",
+          "silver_value": "\"mapping_status\"",
+          "gold_value": "\"mapping_status\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        }
+      ]
+    },
+    {
+      "provider": "uniprot",
+      "entity": "protein",
+      "path": "configs/entities/uniprot/protein.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 2,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "uniprot",
+          "entity": "protein",
+          "rule_type": "required_fields",
+          "field": "accession",
+          "silver_value": "\"accession\"",
+          "gold_value": "\"accession\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "uniprot",
+          "entity": "protein",
+          "rule_type": "required_fields",
+          "field": "organism_scientific",
+          "silver_value": "\"organism_scientific\"",
+          "gold_value": "\"organism_scientific\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        }
+      ]
+    }
+  ],
+  "surface_inventory": [
+    {
+      "category": "consumer_alias",
+      "surface": "cli_silver_filter_shortcut",
+      "symbol": "--silver-filter-only",
+      "path": "docs/03-guides/dashboards/dashboard-v2-usage.md",
+      "occurrence_count": 1,
+      "first_line": 367,
+      "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
+      "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "cli_silver_filter_shortcut",
+      "symbol": "--silver-filter-only",
+      "path": "docs/03-guides/dashboards/monitoring-index.md",
+      "occurrence_count": 2,
+      "first_line": 33,
+      "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
+      "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "cli_silver_filter_shortcut",
+      "symbol": "--silver-filter-only",
+      "path": "docs/04-reference/cli.md",
+      "occurrence_count": 2,
+      "first_line": 1008,
+      "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
+      "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "cli_silver_filter_shortcut",
+      "symbol": "--silver-filter-only",
+      "path": "docs/05-operations/01-monitoring-guide.md",
+      "occurrence_count": 1,
+      "first_line": 497,
+      "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
+      "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "cli_silver_filter_shortcut",
+      "symbol": "--silver-filter-only",
+      "path": "docs/05-operations/runbooks/quarantine-management.md",
+      "occurrence_count": 1,
+      "first_line": 71,
+      "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
+      "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "cli_silver_filter_shortcut",
+      "symbol": "--silver-filter-only",
+      "path": "grafana/dashboards/bioetl-silver-reject-explorer.json",
+      "occurrence_count": 1,
+      "first_line": 764,
+      "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
+      "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "cli_silver_filter_shortcut",
+      "symbol": "--silver-filter-only",
+      "path": "src/bioetl/interfaces/cli/commands/diagnostics.py",
+      "occurrence_count": 1,
+      "first_line": 304,
+      "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
+      "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "cli_silver_filter_shortcut",
+      "symbol": "--silver-filter-only",
+      "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "occurrence_count": 2,
+      "first_line": 91,
+      "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
+      "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "legacy_silver_error_code",
+      "symbol": "FILTERED_OUT_SILVER",
+      "path": "docs/03-guides/dashboards/dashboard-requirements-comprehensive.md",
+      "occurrence_count": 1,
+      "first_line": 569,
+      "role": "Temporary legacy Silver reject alias",
+      "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "legacy_silver_error_code",
+      "symbol": "FILTERED_OUT_SILVER",
+      "path": "docs/03-guides/dashboards/dashboard-v2-usage.md",
+      "occurrence_count": 2,
+      "first_line": 56,
+      "role": "Temporary legacy Silver reject alias",
+      "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "legacy_silver_error_code",
+      "symbol": "FILTERED_OUT_SILVER",
+      "path": "docs/03-guides/running-pipelines.md",
+      "occurrence_count": 15,
+      "first_line": 619,
+      "role": "Temporary legacy Silver reject alias",
+      "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "legacy_silver_error_code",
+      "symbol": "FILTERED_OUT_SILVER",
+      "path": "docs/03-guides/troubleshooting.md",
+      "occurrence_count": 3,
+      "first_line": 89,
+      "role": "Temporary legacy Silver reject alias",
+      "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "legacy_silver_error_code",
+      "symbol": "FILTERED_OUT_SILVER",
+      "path": "docs/04-reference/cli.md",
+      "occurrence_count": 3,
+      "first_line": 1008,
+      "role": "Temporary legacy Silver reject alias",
+      "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "legacy_silver_error_code",
+      "symbol": "FILTERED_OUT_SILVER",
+      "path": "docs/05-operations/01-monitoring-guide.md",
+      "occurrence_count": 3,
+      "first_line": 408,
+      "role": "Temporary legacy Silver reject alias",
+      "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "legacy_silver_error_code",
+      "symbol": "FILTERED_OUT_SILVER",
+      "path": "docs/05-operations/runbooks/quarantine-management.md",
+      "occurrence_count": 12,
+      "first_line": 39,
+      "role": "Temporary legacy Silver reject alias",
+      "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "legacy_silver_error_code",
+      "symbol": "FILTERED_OUT_SILVER",
+      "path": "docs/plans/silver-filter-rejects-observability-plan.md",
+      "occurrence_count": 5,
+      "first_line": 44,
+      "role": "Temporary legacy Silver reject alias",
+      "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "legacy_silver_error_code",
+      "symbol": "FILTERED_OUT_SILVER",
+      "path": "grafana/dashboards/bioetl-silver-reject-explorer.json",
+      "occurrence_count": 8,
+      "first_line": 15,
+      "role": "Temporary legacy Silver reject alias",
+      "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "legacy_silver_error_code",
+      "symbol": "FILTERED_OUT_SILVER",
+      "path": "src/bioetl/application/core/_quarantine_metrics_support.py",
+      "occurrence_count": 3,
+      "first_line": 20,
+      "role": "Temporary legacy Silver reject alias",
+      "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "legacy_silver_error_code",
+      "symbol": "FILTERED_OUT_SILVER",
+      "path": "src/bioetl/application/core/_quarantine_request_builders.py",
+      "occurrence_count": 2,
+      "first_line": 7,
+      "role": "Temporary legacy Silver reject alias",
+      "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "legacy_silver_error_code",
+      "symbol": "FILTERED_OUT_SILVER",
+      "path": "src/bioetl/application/core/_quarantine_support.py",
+      "occurrence_count": 3,
+      "first_line": 10,
+      "role": "Temporary legacy Silver reject alias",
+      "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "legacy_silver_error_code",
+      "symbol": "FILTERED_OUT_SILVER",
+      "path": "src/bioetl/infrastructure/quarantine/filtered_reads.py",
+      "occurrence_count": 2,
+      "first_line": 64,
+      "role": "Temporary legacy Silver reject alias",
+      "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "legacy_silver_error_code",
+      "symbol": "FILTERED_OUT_SILVER",
+      "path": "src/bioetl/infrastructure/quarantine/statistics_support.py",
+      "occurrence_count": 1,
+      "first_line": 135,
+      "role": "Temporary legacy Silver reject alias",
+      "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "legacy_silver_error_code",
+      "symbol": "FILTERED_OUT_SILVER",
+      "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_quarantine.py",
+      "occurrence_count": 1,
+      "first_line": 18,
+      "role": "Temporary legacy Silver reject alias",
+      "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "legacy_silver_error_code",
+      "symbol": "FILTERED_OUT_SILVER",
+      "path": "src/bioetl/interfaces/cli/commands/diagnostics.py",
+      "occurrence_count": 2,
+      "first_line": 66,
+      "role": "Temporary legacy Silver reject alias",
+      "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "legacy_silver_error_code",
+      "symbol": "FILTERED_OUT_SILVER",
+      "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
+      "occurrence_count": 2,
+      "first_line": 29,
+      "role": "Temporary legacy Silver reject alias",
+      "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "silver_filter_rejects_summary_alias",
+      "symbol": "silver_filter_rejects",
+      "path": "grafana/prometheus-rules/bioetl_observability.yml",
+      "occurrence_count": 4,
+      "first_line": 626,
+      "role": "Operator summary alias for Silver rejects",
+      "migration_relevance": "Summary key is a compatibility alias while semantic/business rejects move to Gold taxonomy.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "silver_filter_rejects_summary_alias",
+      "symbol": "silver_filter_rejects",
+      "path": "src/bioetl/application/services/_observability_workflow_quarantine_support.py",
+      "occurrence_count": 1,
+      "first_line": 51,
+      "role": "Operator summary alias for Silver rejects",
+      "migration_relevance": "Summary key is a compatibility alias while semantic/business rejects move to Gold taxonomy.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "silver_filter_rejects_summary_alias",
+      "symbol": "silver_filter_rejects",
+      "path": "src/bioetl/infrastructure/quarantine/_statistics.py",
+      "occurrence_count": 1,
+      "first_line": 109,
+      "role": "Operator summary alias for Silver rejects",
+      "migration_relevance": "Summary key is a compatibility alias while semantic/business rejects move to Gold taxonomy.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "silver_filter_rejects_summary_alias",
+      "symbol": "silver_filter_rejects",
+      "path": "src/bioetl/infrastructure/quarantine/statistics_support.py",
+      "occurrence_count": 1,
+      "first_line": 212,
+      "role": "Operator summary alias for Silver rejects",
+      "migration_relevance": "Summary key is a compatibility alias while semantic/business rejects move to Gold taxonomy.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "silver_filter_rejects_summary_alias",
+      "symbol": "silver_filter_rejects",
+      "path": "src/bioetl/interfaces/cli/commands/domains/diagnostics/rendering.py",
+      "occurrence_count": 2,
+      "first_line": 235,
+      "role": "Operator summary alias for Silver rejects",
+      "migration_relevance": "Summary key is a compatibility alias while semantic/business rejects move to Gold taxonomy.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "silver_filter_rejects_summary_alias",
+      "symbol": "silver_filter_rejects",
+      "path": "src/bioetl/interfaces/cli/commands/domains/quarantine/_run_scope_stats.py",
+      "occurrence_count": 1,
+      "first_line": 66,
+      "role": "Operator summary alias for Silver rejects",
+      "migration_relevance": "Summary key is a compatibility alias while semantic/business rejects move to Gold taxonomy.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "silver_filter_rejects_summary_alias",
+      "symbol": "silver_filter_rejects",
+      "path": "src/bioetl/interfaces/cli/commands/domains/quarantine/rendering.py",
+      "occurrence_count": 1,
+      "first_line": 208,
+      "role": "Operator summary alias for Silver rejects",
+      "migration_relevance": "Summary key is a compatibility alias while semantic/business rejects move to Gold taxonomy.",
+      "notes": ""
+    },
+    {
+      "category": "observability",
+      "surface": "silver_filter_metric",
+      "symbol": "bioetl_silver_filter_rejections_total",
+      "path": "docs/03-guides/metrics-monitoring.md",
+      "occurrence_count": 1,
+      "first_line": 271,
+      "role": "Silver filter rejection metric",
+      "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
+      "notes": ""
+    },
+    {
+      "category": "observability",
+      "surface": "silver_filter_metric",
+      "symbol": "bioetl_silver_filter_rejections_total",
+      "path": "docs/04-reference/observability/metrics-catalog.md",
+      "occurrence_count": 1,
+      "first_line": 82,
+      "role": "Silver filter rejection metric",
+      "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
+      "notes": ""
+    },
+    {
+      "category": "observability",
+      "surface": "silver_filter_metric",
+      "symbol": "bioetl_silver_filter_rejections_total",
+      "path": "grafana/README.md",
+      "occurrence_count": 5,
+      "first_line": 701,
+      "role": "Silver filter rejection metric",
+      "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
+      "notes": ""
+    },
+    {
+      "category": "observability",
+      "surface": "silver_filter_metric",
+      "symbol": "bioetl_silver_filter_rejections_total",
+      "path": "grafana/dashboards/bioetl-dq-v2.json",
+      "occurrence_count": 2,
+      "first_line": 2327,
+      "role": "Silver filter rejection metric",
+      "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
+      "notes": ""
+    },
+    {
+      "category": "observability",
+      "surface": "silver_filter_metric",
+      "symbol": "bioetl_silver_filter_rejections_total",
+      "path": "grafana/prometheus-rules/bioetl_observability.yml",
+      "occurrence_count": 3,
+      "first_line": 583,
+      "role": "Silver filter rejection metric",
+      "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
+      "notes": ""
+    },
+    {
+      "category": "observability",
+      "surface": "silver_filter_metric",
+      "symbol": "bioetl_silver_filter_rejections_total",
+      "path": "src/bioetl/application/observability/pipeline_metrics.py",
+      "occurrence_count": 1,
+      "first_line": 87,
+      "role": "Silver filter rejection metric",
+      "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
+      "notes": ""
+    },
+    {
+      "category": "observability",
+      "surface": "silver_filter_metric",
+      "symbol": "bioetl_silver_filter_rejections_total",
+      "path": "src/bioetl/infrastructure/observability/_metrics_defs_core.py",
+      "occurrence_count": 1,
+      "first_line": 207,
+      "role": "Silver filter rejection metric",
+      "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
+      "notes": ""
+    },
+    {
+      "category": "observability",
+      "surface": "silver_filter_metric",
+      "symbol": "bioetl_silver_filter_rejections_total",
+      "path": "src/bioetl/infrastructure/observability/_prometheus_metric_label_dispatch_policy.py",
+      "occurrence_count": 1,
+      "first_line": 114,
+      "role": "Silver filter rejection metric",
+      "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
+      "notes": ""
+    },
+    {
+      "category": "observability",
+      "surface": "silver_filter_metric",
+      "symbol": "bioetl_silver_filter_rejections_total",
+      "path": "src/bioetl/infrastructure/observability/prometheus_metric_registries.py",
+      "occurrence_count": 1,
+      "first_line": 150,
+      "role": "Silver filter rejection metric",
+      "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
+      "notes": ""
+    },
+    {
+      "category": "observability",
+      "surface": "silver_filter_reconciliation_rule",
+      "symbol": "bioetl_silver_filter_reject_total_mismatch_15m",
+      "path": "grafana/README.md",
+      "occurrence_count": 2,
+      "first_line": 1093,
+      "role": "Silver reject accounting reconciliation",
+      "migration_relevance": "Recording rule reconciles stage totals with bounded Silver reject breakdowns.",
+      "notes": ""
+    },
+    {
+      "category": "observability",
+      "surface": "silver_filter_reconciliation_rule",
+      "symbol": "bioetl_silver_filter_reject_total_mismatch_15m",
+      "path": "grafana/prometheus-rules/bioetl_observability.yml",
+      "occurrence_count": 2,
+      "first_line": 716,
+      "role": "Silver reject accounting reconciliation",
+      "migration_relevance": "Recording rule reconciles stage totals with bounded Silver reject breakdowns.",
+      "notes": ""
+    },
+    {
+      "category": "runtime_gate",
+      "surface": "legacy_silver_write_decision",
+      "symbol": "should_write_silver",
+      "path": "src/bioetl/application/core/base_transformer/base.py",
+      "occurrence_count": 1,
+      "first_line": 123,
+      "role": "Legacy Silver write decision helper",
+      "migration_relevance": "Any active semantic use of should_write_silver must be explicit in this inventory.",
+      "notes": ""
+    },
+    {
+      "category": "runtime_gate",
+      "surface": "pre_silver_filter_adapter",
+      "symbol": "_apply_pre_silver_filter",
+      "path": "src/bioetl/application/core/pre_silver_adapter_mixin.py",
+      "occurrence_count": 1,
+      "first_line": 88,
+      "role": "Pre-Silver adapter filter callsite",
+      "migration_relevance": "Pre-Silver path still delegates to the structural Silver filter gate.",
+      "notes": ""
+    },
+    {
+      "category": "runtime_gate",
+      "surface": "pre_silver_filter_adapter",
+      "symbol": "_apply_pre_silver_filter",
+      "path": "src/bioetl/application/core/pre_silver_staging_flow.py",
+      "occurrence_count": 1,
+      "first_line": 25,
+      "role": "Pre-Silver adapter filter callsite",
+      "migration_relevance": "Pre-Silver path still delegates to the structural Silver filter gate.",
+      "notes": ""
+    },
+    {
+      "category": "runtime_gate",
+      "surface": "silver_filter_application",
+      "symbol": "apply_silver_filter",
+      "path": "src/bioetl/application/core/_base_transformer_structural_support.py",
+      "occurrence_count": 1,
+      "first_line": 57,
+      "role": "Runtime Silver filter application callsite",
+      "migration_relevance": "Any new runtime application gate must remain structural-only or be inventoried.",
+      "notes": ""
+    },
+    {
+      "category": "runtime_gate",
+      "surface": "silver_filter_application",
+      "symbol": "apply_silver_filter",
+      "path": "src/bioetl/application/core/base_transformer_execution_mixin.py",
+      "occurrence_count": 4,
+      "first_line": 16,
+      "role": "Runtime Silver filter application callsite",
+      "migration_relevance": "Any new runtime application gate must remain structural-only or be inventoried.",
+      "notes": ""
+    },
+    {
+      "category": "runtime_gate",
+      "surface": "silver_filter_application",
+      "symbol": "apply_silver_filter",
+      "path": "src/bioetl/application/core/pre_silver_adapter_mixin.py",
+      "occurrence_count": 1,
+      "first_line": 94,
+      "role": "Runtime Silver filter application callsite",
+      "migration_relevance": "Any new runtime application gate must remain structural-only or be inventoried.",
+      "notes": ""
+    },
+    {
+      "category": "runtime_gate",
+      "surface": "silver_filter_application",
+      "symbol": "apply_silver_filter",
+      "path": "src/bioetl/application/core/pre_silver_record.py",
+      "occurrence_count": 1,
+      "first_line": 64,
+      "role": "Runtime Silver filter application callsite",
+      "migration_relevance": "Any new runtime application gate must remain structural-only or be inventoried.",
+      "notes": ""
+    },
+    {
+      "category": "runtime_gate",
+      "surface": "silver_filter_application",
+      "symbol": "apply_silver_filter",
+      "path": "src/bioetl/application/core/pre_silver_staging_flow.py",
+      "occurrence_count": 1,
+      "first_line": 25,
+      "role": "Runtime Silver filter application callsite",
+      "migration_relevance": "Any new runtime application gate must remain structural-only or be inventoried.",
+      "notes": ""
+    },
+    {
+      "category": "runtime_gate",
+      "surface": "silver_filter_application",
+      "symbol": "apply_silver_filter",
+      "path": "src/bioetl/application/pipelines/common/publication_transformer_records.py",
+      "occurrence_count": 2,
+      "first_line": 98,
+      "role": "Runtime Silver filter application callsite",
+      "migration_relevance": "Any new runtime application gate must remain structural-only or be inventoried.",
+      "notes": ""
+    },
+    {
+      "category": "runtime_gate",
+      "surface": "silver_filter_evaluation",
+      "symbol": "_silver_filters.evaluate",
+      "path": "src/bioetl/application/core/_base_transformer_structural_support.py",
+      "occurrence_count": 2,
+      "first_line": 73,
+      "role": "Runtime Silver filter evaluator",
+      "migration_relevance": "Evaluator sites are migration-sensitive because they can reject records before Gold.",
+      "notes": ""
+    },
+    {
+      "category": "runtime_gate",
+      "surface": "silver_filter_should_include",
+      "symbol": "_silver_filters.should_include",
+      "path": "src/bioetl/application/core/base_transformer/base.py",
+      "occurrence_count": 1,
+      "first_line": 131,
+      "role": "Runtime Silver include predicate",
+      "migration_relevance": "Predicate sites are migration-sensitive and must not add semantic Silver gating.",
+      "notes": ""
+    },
+    {
+      "category": "silver_config",
+      "surface": "direct_silver_config_construction",
+      "symbol": "SilverFilterConfig(",
+      "path": "src/bioetl/infrastructure/config/silver_filter_migration.py",
+      "occurrence_count": 1,
+      "first_line": 37,
+      "role": "Direct SilverFilterConfig construction",
+      "migration_relevance": "New direct construction sites must not bypass structural-only projection helpers.",
+      "notes": ""
+    },
+    {
+      "category": "silver_config",
+      "surface": "domain_silver_config",
+      "symbol": "SilverFilterConfig",
+      "path": "src/bioetl/domain/filtering/silver_config.py",
+      "occurrence_count": 2,
+      "first_line": 17,
+      "role": "Domain Silver filter object",
+      "migration_relevance": "Domain Silver config must remain structural-only after schema validation.",
+      "notes": ""
+    },
+    {
+      "category": "silver_config",
+      "surface": "runtime_identity",
+      "symbol": "silver_filter_compatibility_mode",
+      "path": "src/bioetl/application/core/lifecycle/checkpoint_identity_overrides.py",
+      "occurrence_count": 3,
+      "first_line": 131,
+      "role": "Execution identity compatibility mode",
+      "migration_relevance": "Run manifest/checkpoint/effective config identity must preserve compatibility mode.",
+      "notes": ""
+    },
+    {
+      "category": "silver_config",
+      "surface": "runtime_identity",
+      "symbol": "silver_filter_compatibility_mode",
+      "path": "src/bioetl/domain/config/runtime.py",
+      "occurrence_count": 6,
+      "first_line": 101,
+      "role": "Execution identity compatibility mode",
+      "migration_relevance": "Run manifest/checkpoint/effective config identity must preserve compatibility mode.",
+      "notes": ""
+    },
+    {
+      "category": "silver_config",
+      "surface": "schema_silver_projection",
+      "symbol": "SilverFiltersFileConfig",
+      "path": "src/bioetl/infrastructure/schemas/filter_config.py",
+      "occurrence_count": 4,
+      "first_line": 71,
+      "role": "Filter-file Silver schema",
+      "migration_relevance": "Rejects legacy semantic keys at the infrastructure boundary.",
+      "notes": ""
+    },
+    {
+      "category": "silver_config",
+      "surface": "schema_silver_projection",
+      "symbol": "SilverFiltersConfig",
+      "path": "src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py",
+      "occurrence_count": 2,
+      "first_line": 48,
+      "role": "Pipeline Silver schema",
+      "migration_relevance": "Projects YAML Silver filters to structural-only domain config.",
+      "notes": ""
+    },
+    {
+      "category": "silver_config",
+      "surface": "semantic_silver_guard",
+      "symbol": "validate_no_semantic_silver_filter_payload",
+      "path": "src/bioetl/infrastructure/config/filter_config_loader.py",
+      "occurrence_count": 3,
+      "first_line": 29,
+      "role": "Fail-fast Silver semantic key guard",
+      "migration_relevance": "Boundary hook that rejects semantic Silver keys before domain conversion.",
+      "notes": ""
+    },
+    {
+      "category": "silver_config",
+      "surface": "semantic_silver_guard",
+      "symbol": "FORBIDDEN_SILVER_SEMANTIC_FILTER_KEYS",
+      "path": "src/bioetl/infrastructure/config/silver_filter_migration.py",
+      "occurrence_count": 3,
+      "first_line": 28,
+      "role": "Forbidden semantic Silver key set",
+      "migration_relevance": "Defines semantic keys that fail validation when present under silver_filters.",
+      "notes": ""
+    },
+    {
+      "category": "silver_config",
+      "surface": "semantic_silver_guard",
+      "symbol": "validate_no_semantic_silver_filter_payload",
+      "path": "src/bioetl/infrastructure/config/silver_filter_migration.py",
+      "occurrence_count": 2,
+      "first_line": 114,
+      "role": "Fail-fast Silver semantic key guard",
+      "migration_relevance": "Boundary hook that rejects semantic Silver keys before domain conversion.",
+      "notes": ""
+    },
+    {
+      "category": "silver_config",
+      "surface": "semantic_silver_guard",
+      "symbol": "validate_no_semantic_silver_filter_payload",
+      "path": "src/bioetl/infrastructure/schemas/filter_config.py",
+      "occurrence_count": 2,
+      "first_line": 192,
+      "role": "Fail-fast Silver semantic key guard",
+      "migration_relevance": "Boundary hook that rejects semantic Silver keys before domain conversion.",
+      "notes": ""
+    },
+    {
+      "category": "silver_config",
+      "surface": "semantic_silver_guard",
+      "symbol": "validate_no_semantic_silver_filter_payload",
+      "path": "src/bioetl/infrastructure/schemas/pipeline_config.py",
+      "occurrence_count": 2,
+      "first_line": 277,
+      "role": "Fail-fast Silver semantic key guard",
+      "migration_relevance": "Boundary hook that rejects semantic Silver keys before domain conversion.",
+      "notes": ""
+    },
+    {
+      "category": "source_profile",
+      "surface": "config_source_profile_metadata",
+      "symbol": "source_profile",
+      "path": "configs/_schema/pipeline.json",
+      "occurrence_count": 1,
+      "first_line": 2145,
+      "role": "Versioned source-profile metadata",
+      "migration_relevance": "Explicit source-profile metadata anchors extraction_params widening separately from Silver/Gold filter migration.",
+      "notes": ""
+    },
+    {
+      "category": "source_profile",
+      "surface": "config_source_profile_metadata",
+      "symbol": "source_profile",
+      "path": "src/bioetl/infrastructure/config/config_ci_contract.py",
+      "occurrence_count": 2,
+      "first_line": 62,
+      "role": "Versioned source-profile metadata",
+      "migration_relevance": "Explicit source-profile metadata anchors extraction_params widening separately from Silver/Gold filter migration.",
+      "notes": ""
+    },
+    {
+      "category": "source_profile",
+      "surface": "config_source_profile_metadata",
+      "symbol": "source_profile",
+      "path": "src/bioetl/infrastructure/config/converters.py",
+      "occurrence_count": 2,
+      "first_line": 211,
+      "role": "Versioned source-profile metadata",
+      "migration_relevance": "Explicit source-profile metadata anchors extraction_params widening separately from Silver/Gold filter migration.",
+      "notes": ""
+    },
+    {
+      "category": "source_profile",
+      "surface": "config_source_profile_metadata",
+      "symbol": "source_profile",
+      "path": "src/bioetl/infrastructure/config/filter_config_loader.py",
+      "occurrence_count": 2,
+      "first_line": 237,
+      "role": "Versioned source-profile metadata",
+      "migration_relevance": "Explicit source-profile metadata anchors extraction_params widening separately from Silver/Gold filter migration.",
+      "notes": ""
+    },
+    {
+      "category": "source_profile",
+      "surface": "config_source_profile_metadata",
+      "symbol": "source_profile",
+      "path": "src/bioetl/infrastructure/config/silver_filter_migration.py",
+      "occurrence_count": 1,
+      "first_line": 110,
+      "role": "Versioned source-profile metadata",
+      "migration_relevance": "Explicit source-profile metadata anchors extraction_params widening separately from Silver/Gold filter migration.",
+      "notes": ""
+    },
+    {
+      "category": "source_profile",
+      "surface": "config_source_profile_metadata",
+      "symbol": "source_profile",
+      "path": "src/bioetl/infrastructure/schemas/__init__.py",
+      "occurrence_count": 1,
+      "first_line": 66,
+      "role": "Versioned source-profile metadata",
+      "migration_relevance": "Explicit source-profile metadata anchors extraction_params widening separately from Silver/Gold filter migration.",
+      "notes": ""
+    },
+    {
+      "category": "source_profile",
+      "surface": "config_source_profile_metadata",
+      "symbol": "source_profile",
+      "path": "src/bioetl/infrastructure/schemas/filter_config.py",
+      "occurrence_count": 4,
+      "first_line": 37,
+      "role": "Versioned source-profile metadata",
+      "migration_relevance": "Explicit source-profile metadata anchors extraction_params widening separately from Silver/Gold filter migration.",
+      "notes": ""
+    },
+    {
+      "category": "source_profile",
+      "surface": "config_source_profile_metadata",
+      "symbol": "source_profile",
+      "path": "src/bioetl/infrastructure/schemas/pipeline_config.py",
+      "occurrence_count": 2,
+      "first_line": 240,
+      "role": "Versioned source-profile metadata",
+      "migration_relevance": "Explicit source-profile metadata anchors extraction_params widening separately from Silver/Gold filter migration.",
+      "notes": ""
+    },
+    {
+      "category": "source_profile",
+      "surface": "config_source_profile_metadata",
+      "symbol": "source_profile",
+      "path": "src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py",
+      "occurrence_count": 1,
+      "first_line": 31,
+      "role": "Versioned source-profile metadata",
+      "migration_relevance": "Explicit source-profile metadata anchors extraction_params widening separately from Silver/Gold filter migration.",
+      "notes": ""
+    },
+    {
+      "category": "source_profile",
+      "surface": "config_source_profile_metadata",
+      "symbol": "source_profile",
+      "path": "src/bioetl/infrastructure/schemas/source_profile_config.py",
+      "occurrence_count": 4,
+      "first_line": 53,
+      "role": "Versioned source-profile metadata",
+      "migration_relevance": "Explicit source-profile metadata anchors extraction_params widening separately from Silver/Gold filter migration.",
+      "notes": ""
+    },
+    {
+      "category": "source_profile",
+      "surface": "config_source_profile_metadata",
+      "symbol": "source_profile",
+      "path": "tests/architecture/test_config_ci_invariants.py",
+      "occurrence_count": 14,
+      "first_line": 778,
+      "role": "Versioned source-profile metadata",
+      "migration_relevance": "Explicit source-profile metadata anchors extraction_params widening separately from Silver/Gold filter migration.",
+      "notes": ""
+    },
+    {
+      "category": "source_profile",
+      "surface": "config_source_profile_policy",
+      "symbol": "extraction_params",
+      "path": "configs/_schema/pipeline.json",
+      "occurrence_count": 4,
+      "first_line": 1795,
+      "role": "Source-profile extraction policy",
+      "migration_relevance": "extraction_params are provider request policy and must not be treated as Silver filters.",
+      "notes": ""
+    },
+    {
+      "category": "source_profile",
+      "surface": "config_source_profile_policy",
+      "symbol": "extraction_params",
+      "path": "scripts/docs/matrix/generate_pipeline_normalization_matrix.py",
+      "occurrence_count": 5,
+      "first_line": 1573,
+      "role": "Source-profile extraction policy",
+      "migration_relevance": "extraction_params are provider request policy and must not be treated as Silver filters.",
+      "notes": ""
+    },
+    {
+      "category": "source_profile",
+      "surface": "config_source_profile_policy",
+      "symbol": "extraction_params",
+      "path": "scripts/engineering/qa/config_surface_governance.py",
+      "occurrence_count": 2,
+      "first_line": 8,
+      "role": "Source-profile extraction policy",
+      "migration_relevance": "extraction_params are provider request policy and must not be treated as Silver filters.",
+      "notes": ""
+    },
+    {
+      "category": "source_profile",
+      "surface": "config_source_profile_policy",
+      "symbol": "extraction_params",
+      "path": "src/bioetl/infrastructure/config/config_ci_contract.py",
+      "occurrence_count": 2,
+      "first_line": 61,
+      "role": "Source-profile extraction policy",
+      "migration_relevance": "extraction_params are provider request policy and must not be treated as Silver filters.",
+      "notes": ""
+    },
+    {
+      "category": "source_profile",
+      "surface": "config_source_profile_policy",
+      "symbol": "extraction_params",
+      "path": "src/bioetl/infrastructure/config/filter_config_loader.py",
+      "occurrence_count": 2,
+      "first_line": 236,
+      "role": "Source-profile extraction policy",
+      "migration_relevance": "extraction_params are provider request policy and must not be treated as Silver filters.",
+      "notes": ""
+    },
+    {
+      "category": "source_profile",
+      "surface": "config_source_profile_policy",
+      "symbol": "extraction_params",
+      "path": "src/bioetl/infrastructure/schemas/filter_config.py",
+      "occurrence_count": 8,
+      "first_line": 20,
+      "role": "Source-profile extraction policy",
+      "migration_relevance": "extraction_params are provider request policy and must not be treated as Silver filters.",
+      "notes": ""
+    },
+    {
+      "category": "source_profile",
+      "surface": "config_source_profile_policy",
+      "symbol": "extraction_params",
+      "path": "src/bioetl/infrastructure/schemas/pipeline_config.py",
+      "occurrence_count": 4,
+      "first_line": 235,
+      "role": "Source-profile extraction policy",
+      "migration_relevance": "extraction_params are provider request policy and must not be treated as Silver filters.",
+      "notes": ""
+    },
+    {
+      "category": "source_profile",
+      "surface": "config_source_profile_policy",
+      "symbol": "extraction_params",
+      "path": "src/bioetl/infrastructure/schemas/source_profile_config.py",
+      "occurrence_count": 14,
+      "first_line": 12,
+      "role": "Source-profile extraction policy",
+      "migration_relevance": "extraction_params are provider request policy and must not be treated as Silver filters.",
+      "notes": ""
+    },
+    {
+      "category": "source_profile",
+      "surface": "entity_config_extraction_params",
+      "symbol": "filters.extraction_params",
+      "path": "configs/entities/chembl/activity.yaml",
+      "occurrence_count": 1,
+      "first_line": 434,
+      "role": "Entity source-profile policy for chembl.activity",
+      "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
+      "notes": "non_empty; parameter_count=9"
+    },
+    {
+      "category": "source_profile",
+      "surface": "entity_config_extraction_params",
+      "symbol": "filters.extraction_params",
+      "path": "configs/entities/chembl/assay.yaml",
+      "occurrence_count": 1,
+      "first_line": 257,
+      "role": "Entity source-profile policy for chembl.assay",
+      "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
+      "notes": "non_empty; parameter_count=4"
+    },
+    {
+      "category": "source_profile",
+      "surface": "entity_config_extraction_params",
+      "symbol": "filters.extraction_params",
+      "path": "configs/entities/chembl/assay_parameters.yaml",
+      "occurrence_count": 1,
+      "first_line": 328,
+      "role": "Entity source-profile policy for chembl.assay_parameters",
+      "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
+      "notes": "empty; parameter_count=0"
+    },
+    {
+      "category": "source_profile",
+      "surface": "entity_config_extraction_params",
+      "symbol": "filters.extraction_params",
+      "path": "configs/entities/chembl/cell_line.yaml",
+      "occurrence_count": 1,
+      "first_line": 185,
+      "role": "Entity source-profile policy for chembl.cell_line",
+      "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
+      "notes": "empty; parameter_count=0"
+    },
+    {
+      "category": "source_profile",
+      "surface": "entity_config_extraction_params",
+      "symbol": "filters.extraction_params",
+      "path": "configs/entities/chembl/compound_record.yaml",
+      "occurrence_count": 1,
+      "first_line": 102,
+      "role": "Entity source-profile policy for chembl.compound_record",
+      "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
+      "notes": "empty; parameter_count=0"
+    },
+    {
+      "category": "source_profile",
+      "surface": "entity_config_extraction_params",
+      "symbol": "filters.extraction_params",
+      "path": "configs/entities/chembl/molecule.yaml",
+      "occurrence_count": 1,
+      "first_line": 306,
+      "role": "Entity source-profile policy for chembl.molecule",
+      "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
+      "notes": "non_empty; parameter_count=3"
+    },
+    {
+      "category": "source_profile",
+      "surface": "entity_config_extraction_params",
+      "symbol": "filters.extraction_params",
+      "path": "configs/entities/chembl/protein_class.yaml",
+      "occurrence_count": 1,
+      "first_line": 123,
+      "role": "Entity source-profile policy for chembl.protein_class",
+      "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
+      "notes": "empty; parameter_count=0"
+    },
+    {
+      "category": "source_profile",
+      "surface": "entity_config_extraction_params",
+      "symbol": "filters.extraction_params",
+      "path": "configs/entities/chembl/publication.yaml",
+      "occurrence_count": 1,
+      "first_line": 299,
+      "role": "Entity source-profile policy for chembl.publication",
+      "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
+      "notes": "non_empty; parameter_count=3"
+    },
+    {
+      "category": "source_profile",
+      "surface": "entity_config_extraction_params",
+      "symbol": "filters.extraction_params",
+      "path": "configs/entities/chembl/publication_similarity.yaml",
+      "occurrence_count": 1,
+      "first_line": 120,
+      "role": "Entity source-profile policy for chembl.publication_similarity",
+      "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
+      "notes": "empty; parameter_count=0"
+    },
+    {
+      "category": "source_profile",
+      "surface": "entity_config_extraction_params",
+      "symbol": "filters.extraction_params",
+      "path": "configs/entities/chembl/publication_term.yaml",
+      "occurrence_count": 1,
+      "first_line": 122,
+      "role": "Entity source-profile policy for chembl.publication_term",
+      "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
+      "notes": "non_empty; parameter_count=3"
+    },
+    {
+      "category": "source_profile",
+      "surface": "entity_config_extraction_params",
+      "symbol": "filters.extraction_params",
+      "path": "configs/entities/chembl/subcellular_fraction.yaml",
+      "occurrence_count": 1,
+      "first_line": 101,
+      "role": "Entity source-profile policy for chembl.subcellular_fraction",
+      "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
+      "notes": "empty; parameter_count=0"
+    },
+    {
+      "category": "source_profile",
+      "surface": "entity_config_extraction_params",
+      "symbol": "filters.extraction_params",
+      "path": "configs/entities/chembl/target.yaml",
+      "occurrence_count": 1,
+      "first_line": 232,
+      "role": "Entity source-profile policy for chembl.target",
+      "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
+      "notes": "non_empty; parameter_count=3"
+    },
+    {
+      "category": "source_profile",
+      "surface": "entity_config_extraction_params",
+      "symbol": "filters.extraction_params",
+      "path": "configs/entities/chembl/target_component.yaml",
+      "occurrence_count": 1,
+      "first_line": 131,
+      "role": "Entity source-profile policy for chembl.target_component",
+      "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
+      "notes": "empty; parameter_count=0"
+    },
+    {
+      "category": "source_profile",
+      "surface": "entity_config_extraction_params",
+      "symbol": "filters.extraction_params",
+      "path": "configs/entities/chembl/target_protein_classification.yaml",
+      "occurrence_count": 1,
+      "first_line": 196,
+      "role": "Entity source-profile policy for chembl.target_protein_classification",
+      "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
+      "notes": "empty; parameter_count=0"
+    },
+    {
+      "category": "source_profile",
+      "surface": "entity_config_extraction_params",
+      "symbol": "filters.extraction_params",
+      "path": "configs/entities/chembl/tissue.yaml",
+      "occurrence_count": 1,
+      "first_line": 218,
+      "role": "Entity source-profile policy for chembl.tissue",
+      "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
+      "notes": "empty; parameter_count=0"
+    },
+    {
+      "category": "source_profile",
+      "surface": "entity_config_extraction_params",
+      "symbol": "filters.extraction_params",
+      "path": "configs/entities/crossref/publication.yaml",
+      "occurrence_count": 1,
+      "first_line": 267,
+      "role": "Entity source-profile policy for crossref.publication",
+      "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
+      "notes": "empty; parameter_count=0"
+    },
+    {
+      "category": "source_profile",
+      "surface": "entity_config_extraction_params",
+      "symbol": "filters.extraction_params",
+      "path": "configs/entities/openalex/publication.yaml",
+      "occurrence_count": 1,
+      "first_line": 320,
+      "role": "Entity source-profile policy for openalex.publication",
+      "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
+      "notes": "empty; parameter_count=0"
+    },
+    {
+      "category": "source_profile",
+      "surface": "entity_config_extraction_params",
+      "symbol": "filters.extraction_params",
+      "path": "configs/entities/pubchem/compound.yaml",
+      "occurrence_count": 1,
+      "first_line": 194,
+      "role": "Entity source-profile policy for pubchem.compound",
+      "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
+      "notes": "empty; parameter_count=0"
+    },
+    {
+      "category": "source_profile",
+      "surface": "entity_config_extraction_params",
+      "symbol": "filters.extraction_params",
+      "path": "configs/entities/pubmed/publication.yaml",
+      "occurrence_count": 1,
+      "first_line": 297,
+      "role": "Entity source-profile policy for pubmed.publication",
+      "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
+      "notes": "empty; parameter_count=0"
+    },
+    {
+      "category": "source_profile",
+      "surface": "entity_config_extraction_params",
+      "symbol": "filters.extraction_params",
+      "path": "configs/entities/semanticscholar/publication.yaml",
+      "occurrence_count": 1,
+      "first_line": 285,
+      "role": "Entity source-profile policy for semanticscholar.publication",
+      "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
+      "notes": "empty; parameter_count=0"
+    },
+    {
+      "category": "source_profile",
+      "surface": "entity_config_extraction_params",
+      "symbol": "filters.extraction_params",
+      "path": "configs/entities/uniprot/idmapping.yaml",
+      "occurrence_count": 1,
+      "first_line": 141,
+      "role": "Entity source-profile policy for uniprot.idmapping",
+      "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
+      "notes": "empty; parameter_count=0"
+    },
+    {
+      "category": "source_profile",
+      "surface": "entity_config_extraction_params",
+      "symbol": "filters.extraction_params",
+      "path": "configs/entities/uniprot/protein.yaml",
+      "occurrence_count": 1,
+      "first_line": 341,
+      "role": "Entity source-profile policy for uniprot.protein",
+      "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
+      "notes": "empty; parameter_count=0"
+    },
+    {
+      "category": "source_profile",
+      "surface": "entity_config_source_profile",
+      "symbol": "filters.source_profile",
+      "path": "configs/entities/chembl/activity.yaml",
+      "occurrence_count": 1,
+      "first_line": 444,
+      "role": "Entity source-profile metadata for chembl.activity",
+      "migration_relevance": "Versioned source-profile metadata must change before source-side extraction widening.",
+      "notes": "profile_id=chembl.activity.curated; version=1.0.0; status=baseline"
+    },
+    {
+      "category": "source_profile",
+      "surface": "entity_config_source_profile",
+      "symbol": "filters.source_profile",
+      "path": "configs/entities/chembl/assay.yaml",
+      "occurrence_count": 1,
+      "first_line": 262,
+      "role": "Entity source-profile metadata for chembl.assay",
+      "migration_relevance": "Versioned source-profile metadata must change before source-side extraction widening.",
+      "notes": "profile_id=chembl.assay.curated; version=1.0.0; status=baseline"
+    },
+    {
+      "category": "source_profile",
+      "surface": "entity_config_source_profile",
+      "symbol": "filters.source_profile",
+      "path": "configs/entities/chembl/molecule.yaml",
+      "occurrence_count": 1,
+      "first_line": 310,
+      "role": "Entity source-profile metadata for chembl.molecule",
+      "migration_relevance": "Versioned source-profile metadata must change before source-side extraction widening.",
+      "notes": "profile_id=chembl.molecule.curated; version=1.0.0; status=baseline"
+    },
+    {
+      "category": "source_profile",
+      "surface": "entity_config_source_profile",
+      "symbol": "filters.source_profile",
+      "path": "configs/entities/chembl/publication.yaml",
+      "occurrence_count": 1,
+      "first_line": 303,
+      "role": "Entity source-profile metadata for chembl.publication",
+      "migration_relevance": "Versioned source-profile metadata must change before source-side extraction widening.",
+      "notes": "profile_id=chembl.publication.curated; version=1.0.0; status=baseline"
+    },
+    {
+      "category": "source_profile",
+      "surface": "entity_config_source_profile",
+      "symbol": "filters.source_profile",
+      "path": "configs/entities/chembl/publication_term.yaml",
+      "occurrence_count": 1,
+      "first_line": 126,
+      "role": "Entity source-profile metadata for chembl.publication_term",
+      "migration_relevance": "Versioned source-profile metadata must change before source-side extraction widening.",
+      "notes": "profile_id=chembl.publication_term.curated; version=1.0.0; status=baseline"
+    },
+    {
+      "category": "source_profile",
+      "surface": "entity_config_source_profile",
+      "symbol": "filters.source_profile",
+      "path": "configs/entities/chembl/target.yaml",
+      "occurrence_count": 1,
+      "first_line": 236,
+      "role": "Entity source-profile metadata for chembl.target",
+      "migration_relevance": "Versioned source-profile metadata must change before source-side extraction widening.",
+      "notes": "profile_id=chembl.target.curated; version=1.0.0; status=baseline"
+    }
+  ]
+}

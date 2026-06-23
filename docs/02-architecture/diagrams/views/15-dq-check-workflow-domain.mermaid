@@ -1,0 +1,53 @@
+%% View: Domain-Focus | Parent: 15-dq-check-workflow-full.mermaid
+%% @uniform width=220 height=64 max_title_len=24 max_desc_lines=1
+flowchart TB
+
+    N1["Schema Validation"]
+    N2["Required Fields"]
+    N3["Error Rate"]
+    N4["Type Checks"]
+    N5["Value Rules"]
+    N6["Relation Checks"]
+    N7["Input Records"]
+    N8["dq_validation_score"]
+    N9["record_error_rate"]
+    N10["dq_duration_ms"]
+    N11["Pass + Warnings"]
+    N12["Quarantine"]
+    N13["Pass + Quarantine"]
+    N14["Silver Layer"]
+    N15["Fail Batch"]
+    N16["All Pass"]
+    N17["0% Errors"]
+    N18["<5% Errors"]
+    N19["5-20% Errors"]
+    N20[">20% Errors"]
+
+    N1 --> N2
+    N1 --> N4
+    N1 --> N5
+    N1 --> N6
+    N7 --> N1
+    N2 --> N3
+    N4 --> N3
+    N5 --> N3
+    N6 --> N3
+    N17 --> N16
+    N18 --> N13
+    N19 --> N11
+    N20 --> N15
+    N16 --> N14
+    N13 --> N14
+    N13 --> N12
+    N11 --> N14
+    N11 --> N12
+    N15 --> N12
+    N1 --> N8
+    N1 --> N9
+    N1 --> N10
+
+    classDef process fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    classDef service fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+
+    linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20 stroke:#1E293B,stroke-width:4px
+    linkStyle 21 stroke:#1E293B,stroke-width:4px,opacity:0.85

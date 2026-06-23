@@ -1,0 +1,8 @@
+schema_version: 1
+provider: chembl
+cassette_rel_path: tests/fixtures/vcr/chembl/test_multiple_chembl_entities_parallel_safe.yaml
+metadata_status: managed_inventory
+source: backfill_vcr_metadata_sidecars.py
+cassette_sha256: e3122e25de305e89601e46c6cb6d9e3b2a3f4afbee17409551194ecfb49fe6f2
+recorded_at: '2026-04-28'
+staleness_ready: true

@@ -1,0 +1,112 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$version": "1.0.0",
+  "title": "ChEMBLPublicationSimilarityGoldSchema Contract",
+  "description": "Gold layer data contract for chembl_publication_similarity. Auto-generated from Pandera schema ChEMBLPublicationSimilarityGoldSchema.",
+  "type": "object",
+  "properties": {
+    "_dq_warn": {
+      "type": "boolean",
+      "nullable": false,
+      "description": "Soft data-quality warning flag."
+    },
+    "_dq_error": {
+      "type": "boolean",
+      "nullable": false,
+      "description": "Hard data-quality error flag."
+    },
+    "_index": {
+      "type": "integer",
+      "nullable": false,
+      "description": ""
+    },
+    "entity_id": {
+      "type": "string",
+      "nullable": false,
+      "description": ""
+    },
+    "content_hash": {
+      "type": "string",
+      "nullable": false,
+      "description": ""
+    },
+    "sim_id": {
+      "type": "number",
+      "nullable": false,
+      "description": ""
+    },
+    "doc_1": {
+      "type": "number",
+      "nullable": false,
+      "description": ""
+    },
+    "doc_2": {
+      "type": "number",
+      "nullable": false,
+      "description": ""
+    },
+    "pubmed_id1": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "pubmed_id2": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "tid_tani": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "mol_tani": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "avg_tani": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "max_tani": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    }
+  },
+  "required": [
+    "_dq_error",
+    "_dq_warn",
+    "_index",
+    "content_hash",
+    "doc_1",
+    "doc_2",
+    "entity_id",
+    "sim_id"
+  ],
+  "normalization_profile": {
+    "ref": "chembl.publication_similarity",
+    "version": "1.0.0",
+    "hash": "4c172bb982f79069dd3f4a89895905b7ea8412c8760c19175414530c86a993b4"
+  }
+}

@@ -1,0 +1,64 @@
+%% BioETL — Hexagonal Infrastructure and Composition
+%% Covers infrastructure adapters and composition-root wiring points.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @view    infra-comp
+%% @parent  01-high-level-hexagonal.mmd
+%% @nodes   14
+%% @uniform width=200 height=56 max_title_len=20 max_desc_lines=1
+
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+graph TB
+%% keep-orphan: FACTORIES, PROVIDERS, RT_BUILDERS, VALIDATION
+    subgraph Composition["Composition Layer"]
+        BOOTSTRAP["Bootstrap / Assembly"]:::size-sm
+        FACTORIES["Factories"]:::size-sm
+        PROVIDERS["Provider Registry"]:::size-sm
+        RT_BUILDERS["Runtime Builders"]:::size-sm
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        ADAPTERS["HTTP Adapters"]:::size-sm
+        STORAGE["Storage"]:::size-sm
+        OBS_INFRA["Observability Infra"]:::size-sm
+        RESILIENCE["Resilience"]:::size-sm
+        SECURITY["Security"]:::size-sm
+        CHECKPOINT["Checkpoint"]:::size-sm
+        LOCKING["Locking"]:::size-sm
+        AUDIT["Audit"]:::size-sm
+        VALIDATION["Validation"]:::size-sm
+    end
+
+    subgraph Domain["Domain Layer"]
+    end
+
+    BOOTSTRAP ==> ADAPTERS
+    BOOTSTRAP --> STORAGE
+    BOOTSTRAP --> OBS_INFRA
+    ADAPTERS -->|implements| PORTS
+    STORAGE -->|implements| PORTS
+    OBS_INFRA -->|implements| PORTS
+    RESILIENCE -->|implements| PORTS
+    SECURITY -->|implements| PORTS
+    CHECKPOINT -->|implements| PORTS
+    LOCKING -->|implements| PORTS
+    AUDIT -->|implements| PORTS
+
+    classDef infra fill:#fff1f2,stroke:#dc2626
+    classDef comp fill:#fff7ed,stroke:#f59e0b
+
+    class BOOTSTRAP,FACTORIES,PROVIDERS,RT_BUILDERS comp
+    class ADAPTERS,STORAGE,OBS_INFRA,RESILIENCE,SECURITY,CHECKPOINT,LOCKING,AUDIT,VALIDATION infra
