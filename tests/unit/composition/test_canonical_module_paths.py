@@ -128,9 +128,8 @@ def test_control_plane_api_reexports_canonical_control_plane_services() -> None:
 
 def test_control_plane_service_access_routes_to_canonical_owner_seams() -> None:
     """First-party control-plane access should bind directly to owner seams."""
-    from bioetl.composition._resource_management import get_checkpoint_runtime_service
     from bioetl.composition._services import get_config_service
-    from bioetl.composition._workflow_services import (
+    from bioetl.composition.control_plane_api import (
         get_workflow_execution_service,
         load_workflow_config,
     )
@@ -142,6 +141,7 @@ def test_control_plane_service_access_routes_to_canonical_owner_seams() -> None:
         load_workflow_config as canonical_load_workflow_config,
     )
     from bioetl.composition.config_catalog import list_configured_pipeline_names
+    from bioetl.composition.resources_api import get_checkpoint_runtime_service
 
     assert canonical_get_checkpoint_runtime_service is get_checkpoint_runtime_service
     assert canonical_get_config_service is get_config_service

@@ -55,7 +55,8 @@ from bioetl.application.composite.key_extractor import KeyExtractorService
 from bioetl.application.composite.lifecycle_observer_service import (
     CompositeLifecycleObserverService,
 )
-from bioetl.application.composite.merger import MergeCollaboratorGroup, MergeService
+from bioetl.application.composite.merge_service import MergeService
+from bioetl.application.composite.merger_collaborators import MergeCollaboratorGroup
 from bioetl.application.composite.preflight_validator import (
     CompositePreflightValidationService,
 )

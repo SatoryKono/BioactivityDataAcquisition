@@ -17,6 +17,9 @@ entries:
   - path: tests/contract/_gold_schema_snapshot_registry.py
     suite: contract
     category: snapshot_refresh_write_mode
+    owner: "@bioetl-contracts"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
     reviewed_skip_calls: 1
     vcr_related: false
     review_date: "2026-06-02"
@@ -24,6 +27,9 @@ entries:
   - path: tests/contract/_provider_contract_drift.py
     suite: contract
     category: snapshot_refresh_write_mode
+    owner: "@bioetl-contracts"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
     reviewed_skip_calls: 1
     vcr_related: false
     review_date: "2026-06-02"
@@ -31,6 +37,9 @@ entries:
   - path: tests/contract/_provider_contract_replay.py
     suite: contract
     category: replay_fixture_pointer_guard
+    owner: "@bioetl-contracts"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
     reviewed_skip_calls: 1
     vcr_related: true
     review_date: "2026-06-02"
@@ -38,6 +47,9 @@ entries:
   - path: tests/contract/_semanticscholar_contract_support.py
     suite: contract
     category: live_endpoint_unavailability
+    owner: "@bioetl-contracts"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
     reviewed_skip_calls: 3
     vcr_related: false
     review_date: "2026-06-02"
@@ -45,6 +57,9 @@ entries:
   - path: tests/contract/conftest.py
     suite: contract
     category: live_network_opt_in_guard
+    owner: "@bioetl-contracts"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
     reviewed_skip_calls: 1
     vcr_related: false
     review_date: "2026-06-02"
@@ -52,6 +67,9 @@ entries:
   - path: tests/contract/silver_schemas/conftest.py
     suite: contract
     category: snapshot_refresh_write_mode
+    owner: "@bioetl-contracts"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
     reviewed_skip_calls: 2
     vcr_related: false
     review_date: "2026-06-02"
@@ -59,6 +77,9 @@ entries:
   - path: tests/contract/test_chembl_contract.py
     suite: contract
     category: live_endpoint_unavailability
+    owner: "@bioetl-contracts"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
     reviewed_skip_calls: 4
     vcr_related: false
     review_date: "2026-06-02"
@@ -66,6 +87,9 @@ entries:
   - path: tests/contract/test_crossref_contract.py
     suite: contract
     category: live_endpoint_unavailability
+    owner: "@bioetl-contracts"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
     reviewed_skip_calls: 2
     vcr_related: false
     review_date: "2026-06-02"
@@ -73,6 +97,9 @@ entries:
   - path: tests/contract/test_openalex_contract.py
     suite: contract
     category: live_endpoint_unavailability
+    owner: "@bioetl-contracts"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
     reviewed_skip_calls: 2
     vcr_related: false
     review_date: "2026-06-02"
@@ -80,6 +107,9 @@ entries:
   - path: tests/contract/test_pubchem_contract.py
     suite: contract
     category: live_endpoint_unavailability
+    owner: "@bioetl-contracts"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
     reviewed_skip_calls: 2
     vcr_related: false
     review_date: "2026-06-02"
@@ -87,6 +117,9 @@ entries:
   - path: tests/contract/test_uniprot_contract.py
     suite: contract
     category: live_endpoint_unavailability
+    owner: "@bioetl-contracts"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
     reviewed_skip_calls: 2
     vcr_related: false
     review_date: "2026-06-02"
@@ -94,6 +127,9 @@ entries:
   - path: tests/integration/config/test_dq_config_loading.py
     suite: integration
     category: optional_local_fixture_absence
+    owner: "@bioetl-config"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
     reviewed_skip_calls: 2
     vcr_related: false
     review_date: "2026-06-02"
@@ -101,6 +137,9 @@ entries:
   - path: tests/integration/test_dashboard_ux_report_freshness.py
     suite: integration
     category: git_diff_scope_guard
+    owner: "@bioetl-observability"
+    linked_issue: "#5562"
+    lifecycle: permanent_policy
     reviewed_skip_calls: 1
     vcr_related: false
     review_date: "2026-06-02"

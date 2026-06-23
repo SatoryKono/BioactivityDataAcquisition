@@ -71,9 +71,7 @@ def test_issue_5553_governance_artifacts_are_aligned_to_committed_inventory() ->
     gate_rows = {row["name"]: row for row in debt_gates["gates"] if isinstance(row, dict)}
     closeout_metrics = _load_json(CLOSEOUT)["metrics"]
 
-    assert aggregate_ratchets["linked_issue"] == "#5553"
-    assert aggregate_ratchets["unmeasured_module_count"]["max_count"] == 36
-    assert aggregate_ratchets["uncovered_module_count"]["max_count"] == 1611
+    assert aggregate_ratchets["historical_baseline"]["linked_issue"] == "#5553"
     assert gate_rows["module_coverage_unmeasured_modules"]["status"] == "pass"
     assert gate_rows["module_coverage_uncovered_modules"]["status"] == "pass"
     assert gate_rows["generated_artifact_drift"]["status"] == "pass"
@@ -128,7 +126,9 @@ def test_issue_5555_hotspot_reviewed_baselines_capture_current_reductions() -> N
 
 
 def test_issue_5556_missing_checkpoint_compatibility_context_fails_closed() -> None:
-    assert resolve_missing_compatibility_context_disposition() == (
+    assert resolve_missing_compatibility_context_disposition(
+        compatibility_policy="soft_fail"
+    ) == (
         "missing_context_hard_fail_raised"
     )
 

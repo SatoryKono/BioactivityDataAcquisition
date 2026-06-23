@@ -95,6 +95,72 @@ CATEGORY_GOVERNANCE: dict[str, dict[str, str]] = {
     },
 }
 
+DUPLICATION_CLUSTER_GOVERNANCE: tuple[tuple[str, dict[str, str]], ...] = (
+    (
+        "composite.merge.field_priorities",
+        {
+            "owner": "@bioetl-composite",
+            "decision": "retain_shared_composite_policy",
+            "linked_issue": "#5561",
+            "review_date": "2026-09-30",
+            "rationale": (
+                "Composite field-priority blocks intentionally share conflict "
+                "resolution policy across the five composite runtime configs."
+            ),
+        },
+    ),
+    (
+        "composite.normalized_anchor_policy",
+        {
+            "owner": "@bioetl-composite",
+            "decision": "retain_shared_composite_policy",
+            "linked_issue": "#5561",
+            "review_date": "2026-09-30",
+            "rationale": (
+                "Composite normalized-anchor policy is shared to keep join-key "
+                "normalization deterministic across composite entities."
+            ),
+        },
+    ),
+    (
+        "composite.lineage.provider_lookup_fields",
+        {
+            "owner": "@bioetl-lineage",
+            "decision": "retain_shared_lineage_policy",
+            "linked_issue": "#5561",
+            "review_date": "2026-09-30",
+            "rationale": (
+                "Provider lookup fields are duplicated intentionally while "
+                "composite lineage policy remains entity-config-local."
+            ),
+        },
+    ),
+    (
+        "composite.merge.field_mappings",
+        {
+            "owner": "@bioetl-composite",
+            "decision": "retain_shared_composite_policy",
+            "linked_issue": "#5561",
+            "review_date": "2026-09-30",
+            "rationale": (
+                "Composite field mappings stay colocated with each composite "
+                "runtime config until a schema-owned shared policy object exists."
+            ),
+        },
+    ),
+)
+
+DEFAULT_DUPLICATION_CLUSTER_GOVERNANCE: dict[str, str] = {
+    "owner": "@bioetl-architecture",
+    "decision": "review_required",
+    "linked_issue": "#5561",
+    "review_date": "2026-09-30",
+    "rationale": (
+        "Exact structured config duplication is measured and requires explicit "
+        "owner review before it can be retained or removed."
+    ),
+}
+
 
 def _duplication_surface_kind(path: Path) -> str:
     relative = path.relative_to(ROOT).as_posix()
@@ -102,7 +168,7 @@ def _duplication_surface_kind(path: Path) -> str:
         return "quality_registry"
     if relative.startswith("configs/entities/"):
         return "entity_config"
-    if relative.startswith("configs/composite/"):
+    if relative.startswith("configs/composites/"):
         return "composite_config"
     if relative.startswith("configs/base/"):
         return "base_config"
@@ -117,6 +183,13 @@ def _load_structured_config(path: Path) -> Any:
     import yaml
 
     return yaml.safe_load(path.read_text(encoding="utf-8"))
+
+
+def _duplication_cluster_governance(block_path: str) -> dict[str, str]:
+    for prefix, governance in DUPLICATION_CLUSTER_GOVERNANCE:
+        if block_path == prefix or block_path.startswith(f"{prefix}."):
+            return dict(governance)
+    return dict(DEFAULT_DUPLICATION_CLUSTER_GOVERNANCE)
 
 
 def _canonical_json_text(value: Any) -> str:
@@ -196,7 +269,10 @@ def _build_duplication_audit() -> dict[str, Any]:
         }
         if len(unique_locations) < 2:
             continue
-        if cluster["block_path"].startswith("contracts.hash_") and len(unique_paths) == 1:
+        if (
+            cluster["block_path"].startswith("contracts.hash_")
+            and len(unique_paths) == 1
+        ):
             # Ignore same-file contract/hash_policy mirrors; the audit tracks
             # reviewable config-surface duplication, not intentional hash aliases.
             continue
@@ -208,6 +284,9 @@ def _build_duplication_audit() -> dict[str, Any]:
                 "serialized_bytes": cluster["serialized_bytes"],
                 "block_path": cluster["block_path"],
                 "occurrence_count": len(occurrences),
+                "governance": _duplication_cluster_governance(
+                    str(cluster["block_path"])
+                ),
                 "surface_kind_counts": {
                     kind: by_kind[kind] for kind in sorted(by_kind)
                 },
@@ -250,9 +329,22 @@ def _build_duplication_audit() -> dict[str, Any]:
         },
         "clusters": trimmed_clusters,
         "notes": [
-            "This audit covers structured config/contract/registry surfaces under configs/** that JSCPD intentionally ignores.",
-            "Clusters report exact canonical JSON subtree duplicates only; near-duplicate prose and comment drift stay out of scope.",
-            "The audit is report-only and exists to make YAML/JSON governance duplication reviewable in CI-visible artifacts.",
+            (
+                "This audit covers structured config/contract/registry surfaces "
+                "under configs/** that JSCPD intentionally ignores."
+            ),
+            (
+                "Clusters report exact canonical JSON subtree duplicates only; "
+                "near-duplicate prose and comment drift stay out of scope."
+            ),
+            (
+                "The audit is report-only and exists to make YAML/JSON governance "
+                "duplication reviewable in CI-visible artifacts."
+            ),
+            (
+                "Every reported duplicate cluster carries owner/rationale metadata "
+                "so retained duplication is explicit debt rather than implicit residue."
+            ),
         ],
     }
 

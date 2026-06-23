@@ -812,7 +812,7 @@
         "src/bioetl/application/composite/dependency_key_resolvers.py",
         "src/bioetl/application/composite/join_planner.py",
         "src/bioetl/application/composite/key_extractor.py",
-        "src/bioetl/application/composite/merger.py",
+        "src/bioetl/application/composite/merge_service.py",
         "src/bioetl/application/composite/preflight_validator.py",
         "src/bioetl/domain/composite/__init__.py",
         "src/bioetl/domain/composite/aggregation.py",

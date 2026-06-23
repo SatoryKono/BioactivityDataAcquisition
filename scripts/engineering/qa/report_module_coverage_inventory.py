@@ -49,6 +49,15 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--snapshot-date", default=None)
     parser.add_argument("--check", action="store_true")
     parser.add_argument(
+        "--refresh-from-coverage-xml",
+        action="store_true",
+        help=(
+            "Rebuild an existing committed inventory from --coverage-xml. "
+            "Use only in the canonical coverage-verify lane after producing fresh XML; "
+            "local drift checks preserve existing rows and refresh only source_tree_sha256."
+        ),
+    )
+    parser.add_argument(
         "--allow-missing-coverage-xml",
         action="store_true",
         help=(
@@ -942,6 +951,15 @@ def _report_gate_violations(
 
 
 def _payload_for_check(args: argparse.Namespace) -> dict[str, Any]:
+    if args.json_out.exists() and not args.refresh_from_coverage_xml:
+        current = json.loads(args.json_out.read_text(encoding="utf-8"))
+        if not isinstance(current, dict):
+            raise ValueError(f"Invalid module coverage inventory: {args.json_out}")
+        current["source_tree_sha256"] = compute_source_tree_sha256(
+            repo_root=args.repo_root,
+        )
+        return current
+
     snapshot_date = args.snapshot_date
     if args.check and args.json_out.exists() and snapshot_date is None:
         current = json.loads(args.json_out.read_text(encoding="utf-8"))

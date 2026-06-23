@@ -31,7 +31,7 @@
 | `src/bioetl/composition/maintenance_api.py` | 0 | 1 |
 | `src/bioetl/infrastructure/config/__init__.py` | 0 | 5 |
 | `src/bioetl/domain/composite/config.py` | 0 | 39 |
-| `src/bioetl/application/composite/merger.py` | 2 | 5 |
+| `src/bioetl/application/composite/merger.py` | 0 | 5 |
 
 ## Retained Entrypoint Owner/Usage Map
 
@@ -48,7 +48,7 @@
 | `src/bioetl/composition/maintenance_api.py` | `bioetl.composition` | `stable_public_api_with_reviewed_first_party_usage` | `external-facing` | no | yes | 0 | 1 |
 | `src/bioetl/infrastructure/config/__init__.py` | `bioetl.infrastructure.config` | `stable_public_api_zero_first_party_src` | `external-facing` | yes | yes | 0 | 5 |
 | `src/bioetl/domain/composite/config.py` | `bioetl.domain.composite` | `stable_public_api_with_reviewed_first_party_usage` | `external-facing` | no | yes | 0 | 39 |
-| `src/bioetl/application/composite/merger.py` | `bioetl.application.composite` | `stable_public_api_with_reviewed_first_party_usage` | `first-party-active` | no | yes | 2 | 5 |
+| `src/bioetl/application/composite/merger.py` | `bioetl.application.composite` | `stable_public_api_zero_first_party_src` | `external-facing` | yes | yes | 0 | 5 |
 
 ## Retained Public Export Facades
 

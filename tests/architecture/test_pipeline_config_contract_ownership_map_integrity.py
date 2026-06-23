@@ -100,6 +100,35 @@ def test_pipeline_config_contract_ownership_map_has_full_gold_coverage() -> None
                 violations.append(
                     f"{pipeline_name}: non-Gold exclusions require an explicit reason"
                 )
+            policy = row.get("gold_exclusion_policy")
+            if not isinstance(policy, dict) or not policy:
+                violations.append(
+                    f"{pipeline_name}: non-Gold exclusions require governance policy"
+                )
+            else:
+                expected_reason = policy.get("expected_reason")
+                if expected_reason != reason:
+                    violations.append(
+                        f"{pipeline_name}: exclusion policy reason mismatch "
+                        f"policy={expected_reason!r} row={reason!r}"
+                    )
+                for field in (
+                    "owner",
+                    "linked_issue",
+                    "decision",
+                    "rationale",
+                    "reentry_condition",
+                ):
+                    value = policy.get(field)
+                    if not isinstance(value, str) or not value.strip():
+                        violations.append(
+                            f"{pipeline_name}: exclusion policy missing {field}"
+                        )
+                linked_issue = policy.get("linked_issue")
+                if isinstance(linked_issue, str) and not linked_issue.startswith("#"):
+                    violations.append(
+                        f"{pipeline_name}: exclusion linked_issue must start with #"
+                    )
             continue
 
         if coverage_status != "covered":

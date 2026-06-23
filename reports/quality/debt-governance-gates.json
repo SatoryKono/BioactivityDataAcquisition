@@ -28,8 +28,8 @@
       "status": "pass"
     },
     {
-      "current": "8e0fb59bcb32f0f67d6e699c7ce1010f932601d997c5bcb40a22388371b9a7ca",
-      "limit": "8e0fb59bcb32f0f67d6e699c7ce1010f932601d997c5bcb40a22388371b9a7ca",
+      "current": "c1d0ec8652e23d05c687afc8a2101aedd32d0e3b9cac3f61e41ee6e940804685",
+      "limit": "c1d0ec8652e23d05c687afc8a2101aedd32d0e3b9cac3f61e41ee6e940804685",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -37,22 +37,22 @@
       "status": "pass"
     },
     {
-      "current": 37,
+      "current": 0,
       "limit": 0,
       "metric": "unmeasured_module_count",
       "name": "module_coverage_unmeasured_modules",
       "remediation": "Keep reviewed unmeasured-module residual at or below the committed no-growth ratchet.",
       "source_artifact": "configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets",
-      "status": "fail"
+      "status": "pass"
     },
     {
-      "current": 1611,
+      "current": 0,
       "limit": 0,
       "metric": "uncovered_module_count",
       "name": "module_coverage_uncovered_modules",
       "remediation": "Keep reviewed uncovered-module residual at or below the committed no-growth ratchet.",
       "source_artifact": "configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "current": 0,
@@ -244,40 +244,36 @@
       "status": "pass"
     },
     {
-      "current": 1,
+      "current": 0,
       "limit": 0,
       "metric": "stale_artifact_count",
       "name": "generated_artifact_drift",
       "remediation": "Regenerate stale quality artifacts with their canonical QA commands.",
       "source_artifact": "reports/quality/*.json",
-      "status": "fail"
+      "status": "pass"
     }
   ],
   "generated_by": "scripts.engineering.qa.report_debt_governance_gates",
   "schema_version": 1,
   "stale_artifacts": {
     "adr_enforcement_matrix": false,
-    "architecture_quality_scorecard": true,
+    "architecture_quality_scorecard": false,
     "module_coverage_inventory": false,
     "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 3,
-    "pass": 25,
+    "fail": 0,
+    "pass": 28,
     "warn": 0
   },
   "summary": {
     "architecture_quality_scorecard_integral_score": 7.98,
     "architecture_quality_scorecard_interpretation": "satisfactory_system_refactoring_required",
-    "fail_count": 3,
-    "failing_gates": [
-      "module_coverage_unmeasured_modules",
-      "module_coverage_uncovered_modules",
-      "generated_artifact_drift"
-    ],
+    "fail_count": 0,
+    "failing_gates": [],
     "gate_count": 28,
-    "pass_count": 25,
-    "release_gate_status": "failing",
+    "pass_count": 28,
+    "release_gate_status": "passing",
     "warn_count": 0,
     "warning_gates": []
   }

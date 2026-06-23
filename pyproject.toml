@@ -23,7 +23,7 @@ dependencies = [
     "polars>=1.0",
     "deltalake>=0.18",
     "arro3-core==0.6.5",  # Pin for Windows compatibility with deltalake 1.4.x (exposes arro3.core.types)
-    "pyarrow>=15.0",
+    "pyarrow>=15.0,<24.0",
     "zstandard>=0.22",
     "pandas>=2.0,<2.3",  # Pin to 2.2.x series for reliable pre-built wheels on Windows (2.3.x requires Meson build)
     # Validation

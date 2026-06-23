@@ -52,6 +52,11 @@ class RunManifestCreateRequestInputs:
     effective_config_artifact_id: str
 
 
+def current_silver_filter_compatibility_mode() -> str:
+    """Expose a stable patch seam for run-manifest silver-filter compatibility."""
+    return resolve_silver_filter_compatibility_mode()
+
+
 def build_manifest_source_refs(
     *,
     manifest_support: object,
@@ -87,7 +92,7 @@ def assemble_manifest_create_spec(
     runtime_config = to_serializable_mapping(_read_attr(inputs, "runtime_config"))
     runtime_config.setdefault(
         "silver_filter_compatibility_mode",
-        resolve_silver_filter_compatibility_mode(),
+        current_silver_filter_compatibility_mode(),
     )
     contract_identity = _read_attr(request_inputs, "contract_identity")
     provider = _read_attr(request_inputs, "provider")
