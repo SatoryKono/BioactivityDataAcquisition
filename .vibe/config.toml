@@ -1,5 +1,0 @@
-active_model = "devstral-2"
-enable_auto_update = false
-installed_agents = [
-    "lean",
-]

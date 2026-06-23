@@ -1,8 +1,0 @@
-schema_version: 1
-provider: pubchem
-cassette_rel_path: tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_smiles_http_503_is_handled.yaml
-metadata_status: managed_inventory
-source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: 169054814394060a23488da2460e1e25b65b328c32329a10e048b12d8ef9e43e
-recorded_at: '2026-04-28'
-staleness_ready: true

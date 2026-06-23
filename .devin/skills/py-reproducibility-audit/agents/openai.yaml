@@ -1,7 +1,0 @@
-interface:
-  display_name: "Py Reproducibility Audit"
-  short_description: "Audit BioETL replay determinism"
-  default_prompt: "Use $py-reproducibility-audit to audit BioETL reproducibility. By default audit the `chembl_assay` pipeline with two fresh bounded runs, or override `target_type`, `target_name`, `execution_mode`, and `run_count` for another pipeline or workflow."
-
-policy:
-  allow_implicit_invocation: true

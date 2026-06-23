@@ -1,8 +1,0 @@
-schema_version: 1
-provider: openalex
-cassette_rel_path: tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_fetch_filtered_by_doi.yaml
-metadata_status: managed_inventory
-source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: 40c3da031c106f7b3733d64af9e80ed1c31ef1012eb557db66df2530616f905e
-recorded_at: '2026-04-28'
-staleness_ready: true
