@@ -204,9 +204,24 @@ def _fixture_duplication_scope(relative_path: str) -> str:
     return "fixture"
 
 
+def _sha256_file(path: Path, *, chunk_size: int = 1024 * 1024) -> tuple[str, int]:
+    """Return the SHA-256 digest and byte size for a file path."""
+    digest = hashlib.sha256()
+    total_bytes = 0
+    with path.open("rb") as handle:
+        while True:
+            chunk = handle.read(chunk_size)
+            if not chunk:
+                break
+            digest.update(chunk)
+            total_bytes += len(chunk)
+    return digest.hexdigest(), total_bytes
+
+
 def _collect_fixture_asset_duplication(root: Path) -> dict[str, Any]:
     fixtures_root = root / FIXTURE_DUPLICATION_SCAN_ROOT
     scope_file_counts: Counter[str] = Counter()
+    paths_by_size: dict[int, list[tuple[Path, str]]] = defaultdict(list)
     groups_by_hash: dict[str, list[str]] = defaultdict(list)
     total_bytes_by_hash: dict[str, int] = defaultdict(int)
 
@@ -219,10 +234,19 @@ def _collect_fixture_asset_duplication(root: Path) -> dict[str, Any]:
 
             relative = path.relative_to(root).as_posix()
             scope_file_counts[_fixture_duplication_scope(relative)] += 1
-            payload = path.read_bytes()
-            digest = hashlib.sha256(payload).hexdigest()
+            try:
+                file_size = path.stat().st_size
+            except OSError:
+                continue
+            paths_by_size[file_size].append((path, relative))
+
+    for file_size, rows in sorted(paths_by_size.items()):
+        if len(rows) < 2:
+            continue
+        for path, relative in rows:
+            digest, total_bytes = _sha256_file(path)
             groups_by_hash[digest].append(relative)
-            total_bytes_by_hash[digest] += len(payload)
+            total_bytes_by_hash[digest] += total_bytes
 
     duplicate_groups: list[dict[str, Any]] = []
     duplicate_file_count = 0

@@ -39,7 +39,6 @@ DEFAULT_AUDIT_CLUSTER_REGISTRY = (
 DEFAULT_REVIEW_REGISTRY = (
     REPO_ROOT / "configs" / "field_registry" / "semantic_audit_review_registry.yaml"
 )
-MOLECULE_COMPOSITE_CONFIG = REPO_ROOT / "configs" / "composites" / "molecule.yaml"
 NON_BLOCKING_AUDIT_STATUSES = frozenset({"PARTIAL", "WEAK", "CONFLICTING"})
 MAX_WARNING_LINES = 20
 
@@ -192,49 +191,15 @@ def _iter_molecule_alias_candidates() -> tuple[DriftCandidate, ...]:
     return tuple(candidates)
 
 
-def _iter_composite_molecule_alias_candidates(
-    repo_root: Path,
-) -> tuple[DriftCandidate, ...]:
-    config_path = repo_root / MOLECULE_COMPOSITE_CONFIG.relative_to(REPO_ROOT)
-    if not config_path.exists():
-        return ()
-
-    payload = _load_yaml(config_path)
-    composite = payload.get("composite", {})
-    field_aliases = (
-        composite.get("field_aliases", {}) if isinstance(composite, dict) else {}
-    )
-    if not isinstance(field_aliases, dict):
-        return ()
-
-    candidates: list[DriftCandidate] = []
-    for canonical_name, provider_aliases in field_aliases.items():
-        if not isinstance(canonical_name, str) or not isinstance(
-            provider_aliases, dict
-        ):
-            continue
-        for provider, raw_name in provider_aliases.items():
-            if not isinstance(provider, str) or not isinstance(raw_name, str):
-                continue
-            candidates.append(
-                _candidate(
-                    canonical_name=canonical_name,
-                    raw_name=raw_name,
-                    source=f"configs/composites/molecule.yaml:field_aliases[{provider}]",
-                )
-            )
-    return tuple(candidates)
-
-
 def discover_exact_registry_candidates(
     repo_root: Path = REPO_ROOT,
 ) -> tuple[DriftCandidate, ...]:
-    """Return exact alias/identity candidates generated from authoritative surfaces."""
+    """Return exact candidates from runtime mappings and the domain alias registry."""
+    _ = repo_root  # Kept for CLI/test API compatibility.
     candidates: list[DriftCandidate] = []
     candidates.extend(_iter_publication_mapping_candidates())
     candidates.extend(_iter_molecule_mapping_candidates())
     candidates.extend(_iter_molecule_alias_candidates())
-    candidates.extend(_iter_composite_molecule_alias_candidates(repo_root))
     return tuple(candidates)
 
 

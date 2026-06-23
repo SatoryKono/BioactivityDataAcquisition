@@ -29,17 +29,17 @@
     "tests/architecture/test_module_coverage_inventory.py"
   ],
   "current_live_metrics": {
-    "below_85_module_count": 1913,
-    "uncovered_module_count": 1614,
-    "unmeasured_module_count": 36,
-    "tracked_module_coverage_percent": 0.0,
-    "tracked_module_status": "uncovered"
+    "below_85_module_count": 104,
+    "uncovered_module_count": 0,
+    "unmeasured_module_count": 0,
+    "tracked_module_coverage_percent": 94.12,
+    "tracked_module_status": "partially_covered"
   },
   "closeout": {
     "status": "regressed_after_closeout",
     "historical_status": "bounded_shard_complete",
     "residual_tail_remains": true,
-    "residual_below_85_module_count": 1913,
-    "rationale": "The original shard reduction landed, but current canonical coverage evidence regressed and the tracked runtime-builder helper module is now uncovered again."
+    "residual_below_85_module_count": 104,
+    "rationale": "The bounded shard reduction remains reflected in the current canonical coverage inventory; residual below-floor modules stay tracked under the parent epic."
   }
 }

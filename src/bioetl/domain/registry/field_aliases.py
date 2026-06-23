@@ -25,7 +25,7 @@ Requirements:
 
 See Also:
     - ``application/composite/column_renamer.py``: Consumer of alias maps
-    - ``configs/composites/molecule.yaml``: YAML field_aliases section
+    - ``configs/field_registry/canonical_registry.json``: canonical field ownership
     - ``domain/mapping/molecule_fields.py``: Legacy flat mapping (to be superseded)
 """
 

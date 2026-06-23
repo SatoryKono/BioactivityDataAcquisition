@@ -40,7 +40,10 @@ from bioetl.application.composite.runner_pkg.runner_merge_stage_types import (
     _CompositeRunnerMergeStageHostProtocol,
     _PreparedMergeInputs,
 )
-from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
+from bioetl.application.composite.runtime_models import (
+    CompositeMergerPort,
+    CompositeRuntimeConfig,
+)
 from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.composite.result import (
     DependencyResult,
@@ -74,7 +77,7 @@ class CompositeRunnerMergeStageMixin:
     _logger: LoggerPort
     _config: CompositeConfig
     _run_id_str: str
-    _merger: Any
+    _merger: CompositeMergerPort
     _checkpoint_manager: CompositeCheckpointService
 
     async def _save_checkpoint_safe(

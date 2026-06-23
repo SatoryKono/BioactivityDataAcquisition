@@ -55,22 +55,12 @@ composite:
       primary_join_keys: []
       fallback_join_keys: []
       rationale: Non-publication composite; publication join policy not applicable.
-  field_aliases:
-    hba_count:
-      pubchem: h_bond_acceptor_count
   # ---------------------------------------------------------------------------
   # Seed Pipeline Configuration
   # ---------------------------------------------------------------------------
   # The seed pipeline extracts bioactivity data from ChEMBL.
   # Its output provides join keys (molecule_id, publication_id)
   # for dependency dual-key filtering and composite join.
-    hbd_count:
-      pubchem: h_bond_donor_count
-    logp:
-      pubchem: xlogp
-    polar_surface_area:
-      pubchem: tpsa
-
   # ---------------------------------------------------------------------------
   # Merge Configuration
   # ---------------------------------------------------------------------------

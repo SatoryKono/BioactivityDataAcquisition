@@ -125,7 +125,11 @@ Blocking sources:
 - `src/bioetl/domain/mapping/publication_fields.py`
 - `src/bioetl/domain/mapping/molecule_fields.py`
 - `src/bioetl/domain/registry/field_aliases.py`
-- `configs/composites/molecule.yaml#composite.field_aliases`
+
+Retired composite YAML `field_aliases` compatibility leaves are no longer an
+authoritative semantic registry source; reintroduction is blocked by
+`reports/quality/config-compatibility-legacy-taxonomy-review.json` and the
+config-surface taxonomy ratchet.
 
 The gate intentionally treats `PARTIAL`, `WEAK`, or `CONFLICTING` clusters from
 the exhaustive semantic audit registry as non-blocking only when they are

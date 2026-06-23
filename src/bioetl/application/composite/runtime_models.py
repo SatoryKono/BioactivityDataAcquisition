@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING, Protocol
 
+from bioetl.application.composite.merger_orchestration import MergeExecutionRequest
 from bioetl.application.runtime_clock import RuntimeClock
 from bioetl.domain.composite.result import (
     DependencyResult,
@@ -64,7 +65,7 @@ _DEFAULT_COMPOSITE_LOCK_TTL_SECONDS = 3600
 class CompositeMergerPort(Protocol):
     """Runtime merger dependency required by ``CompositePipelineRunner``."""
 
-    async def execute_request(self, request: Any) -> MergeResult: ...
+    async def execute_request(self, request: MergeExecutionRequest) -> MergeResult: ...
 
 
 @dataclass(frozen=True, slots=True)

@@ -49,7 +49,7 @@ def test_config_compatibility_legacy_taxonomy_review_matches_live_baseline() -> 
     baseline = _load_json(BASELINE_PATH)
     review = _load_json(REVIEW_PATH)
 
-    assert review["status"] == "reviewed_no_growth"
+    assert review["status"] == "reviewed_burned_down"
     assert review["budget_policy"] == "no_growth_ratchet_only"
     assert review["source_artifact"] == "reports/quality/config-discrepancy-baseline.json"
 
@@ -114,32 +114,69 @@ def test_config_compatibility_legacy_taxonomy_has_ci_guard_links() -> None:
         assert (ROOT / guard).exists(), f"Missing config compatibility guard: {guard}"
 
 
-def test_composite_runtime_alias_family_inventory_is_published() -> None:
-    """Composite compatibility_legacy review must inventory active alias families."""
+def test_composite_runtime_alias_family_removal_is_published() -> None:
+    """Composite compatibility_legacy review must publish retired alias families."""
     review = _load_json(REVIEW_PATH)
     review_families = cast(dict[str, Any], review["families"])
     composite_runtime = cast(dict[str, Any], review_families["composite_runtime"])
     live_keys_by_family = _live_compatibility_legacy_keys_by_family()
     live_composite_keys = set(live_keys_by_family["composite_runtime"])
 
-    alias_families = composite_runtime.get("alias_families")
-    assert isinstance(alias_families, list) and alias_families
+    assert composite_runtime["compatibility_legacy_count"] == 0
+    assert composite_runtime["compatibility_legacy_keys"] == []
+    assert live_composite_keys == set()
+    assert composite_runtime.get("alias_families") == []
 
+    retired_alias_families = composite_runtime.get("retired_alias_families")
+    assert isinstance(retired_alias_families, list) and retired_alias_families
     family_names = {
-        str(row["family_name"]) for row in alias_families if isinstance(row, dict)
+        str(row["family_name"])
+        for row in retired_alias_families
+        if isinstance(row, dict)
     }
     assert family_names == {"hba_count", "hbd_count", "logp", "polar_surface_area"}
 
-    for row in alias_families:
+    final_wave = composite_runtime.get("final_removal_wave")
+    assert isinstance(final_wave, dict)
+    removed_keys = final_wave.get("compatibility_legacy_keys_removed")
+    assert isinstance(removed_keys, list) and removed_keys == sorted(removed_keys)
+    assert removed_keys == [
+        "composite.field_aliases",
+        "composite.field_aliases.hba_count",
+        "composite.field_aliases.hba_count.pubchem",
+        "composite.field_aliases.hbd_count",
+        "composite.field_aliases.hbd_count.pubchem",
+        "composite.field_aliases.logp",
+        "composite.field_aliases.logp.pubchem",
+        "composite.field_aliases.polar_surface_area",
+        "composite.field_aliases.polar_surface_area.pubchem",
+    ]
+    canonical_ownership = final_wave.get("canonical_ownership")
+    assert isinstance(canonical_ownership, list) and canonical_ownership
+    assert any(
+        "configs/field_registry/canonical_registry.json" in str(item)
+        for item in canonical_ownership
+    )
+    assert any(
+        "bioetl.domain.registry.field_aliases.MOLECULE_FIELD_ALIASES" in str(item)
+        for item in canonical_ownership
+    )
+    final_preconditions = final_wave.get("removal_preconditions_satisfied")
+    assert isinstance(final_preconditions, list) and final_preconditions
+
+    for row in retired_alias_families:
         assert isinstance(row, dict)
         assert row["owner"] == "config-governance"
         assert row["usage_classification"] == (
-            "first_party_active_cross_provider_join_alias"
+            "retired_canonical_registry_owned_cross_provider_alias"
         )
+        assert row["state"] == "removed"
         keys = row.get("compatibility_legacy_keys")
         assert isinstance(keys, list) and keys == sorted(keys)
-        assert set(keys) <= live_composite_keys
-        preconditions = row.get("removal_preconditions")
+        assert set(keys) <= set(removed_keys)
+        row_ownership = row.get("canonical_ownership")
+        assert isinstance(row_ownership, list) and row_ownership
+        preconditions = row.get("removal_preconditions_satisfied")
         assert isinstance(preconditions, list) and preconditions
 
 

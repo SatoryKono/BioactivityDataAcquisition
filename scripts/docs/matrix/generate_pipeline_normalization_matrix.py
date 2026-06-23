@@ -87,11 +87,11 @@ from bioetl.domain.normalization.profiles import (
     NORMALIZATION_PROFILE_REGISTRY,
     resolve_normalization_profile,
 )
-from bioetl.domain.normalization.profiles.chembl_policy_registry import (
-    chembl_policy_surface,
-)
 from bioetl.domain.normalization.profiles.chembl_json_ordering_policy import (
     chembl_json_fields,
+)
+from bioetl.domain.normalization.profiles.chembl_policy_registry import (
+    chembl_policy_surface,
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_json_string,
@@ -632,11 +632,9 @@ ENUM_REGISTRY_PATHS: dict[tuple[str, str, str], tuple[str, ...]] = {
     ("chembl", "molecule", "structure_type"): ("molecule", "structure_types"),
     ("chembl", "publication", "doc_type"): ("publication", "native_doc_types"),
     ("chembl", "publication", "oa_status"): ("publication", "oa_status_values"),
-    # publication_type uses ChEMBL-specific DQ subset
-    ("chembl", "publication", "publication_type"): (
-        "publication",
-        "chembl_specific_types",
-    ),
+    # publication_type compares the ChEMBL-specific DQ subset against the
+    # cross-provider global taxonomy.
+    ("chembl", "publication", "publication_type"): ("publication", "types"),
     ("chembl", "publication_term", "term_type"): ("publication_term", "term_types"),
     ("chembl", "subcellular_fraction", "subcellular_fraction"): ("assay", "subcellular_fractions"),
     ("chembl", "target", "component_relationships"): ("target", "component_relationships"),

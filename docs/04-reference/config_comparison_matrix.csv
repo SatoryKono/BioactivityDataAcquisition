@@ -14,7 +14,6 @@ composite.dependencies,"[{""pipeline"": ""chembl_compound_record"", ""join_keys"
 composite.dq_overrides,(dict),(dict),(dict),(dict),(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.enrichers,[],"[{""pipeline"": ""chembl_cell_line"", ""join_keys"": [""cell_id""], ""required"": false, ""filter_condition"": ""cell_id IS NOT NULL"", ""timeout_seconds"": 300, ""silver_table"": ""silver/chembl/cell_line""}, {""pipeline"": ""chembl_tissue"", ""join_keys"": [""tissue_id""], ""required"": false, ""filter_condition"": ""tissue_id IS NOT NULL"", ""timeout_seconds"": 300, ""silver_table"": ""silver/chembl/tissue""}]","[{""pipeline"": ""pubchem_compound"", ""join_keys"": [""inchi_key"", ""canonical_smiles""], ""required"": false, ""filter_condition"": ""inchi_key IS NOT NULL"", ""timeout_seconds"": 3600, ""silver_table"": ""silver/pubchem/compound""}]","[{""pipeline"": ""crossref_publication"", ""join_keys"": [""doi"", ""title""], ""required"": false, ""filter_condition"": ""doi IS NOT NULL"", ""timeout_seconds"": 3600, ""silver_table"": ""silver/crossref/publication""}, {""pipeline"": ""openalex_publication"", ""join_keys"": [""doi"", ""title""], ""required"": false, ""filter_condition"": ""doi IS NOT NULL OR pmid IS NOT NULL"", ""timeout_seconds"": 3600, ""silver_table"": ""silver/openalex/publication""}, {""pipeline"": ""pubmed_publication"", ""join_keys"": [""pmid"", ""doi""], ""required"": false, ""filter_condition"": ""pmid IS NOT NULL"", ""timeout_seconds"": 3600, ""silver_table"": ""silver/pubmed/publication""}, {""pipeline"": ""semanticscholar_publication"", ""join_keys"": [""doi"", ""title""], ""required"": false, ""filter_condition"": ""doi IS NOT NULL OR title IS NOT NULL"", ""timeout_seconds"": 7200, ""silver_table"": ""silver/semanticscholar/publication""}]",[],—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.execution,(dict),(dict),(dict),(dict),(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.field_aliases,(dict),(dict),(dict),(dict),(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.lineage,(dict),(dict),(dict),(dict),(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.merge,(dict),(dict),(dict),(dict),(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.name,composite_activity,composite_assay,composite_molecule,composite_publication,composite_target,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
@@ -89,10 +88,6 @@ composite.dq_overrides.enricher_overrides,(dict),(dict),(dict),(dict),(dict),—
 composite.execution.checkpoint_enabled,True,True,True,True,True,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.execution.max_concurrency,2,2,1,4,2,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.execution.retry,(dict),(dict),(dict),(dict),(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.field_aliases.hba_count,(dict),(dict),(dict),(dict),(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.field_aliases.hbd_count,(dict),(dict),(dict),(dict),(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.field_aliases.logp,(dict),(dict),(dict),(dict),(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.field_aliases.polar_surface_area,(dict),(dict),(dict),(dict),(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.lineage.provider_lookup_fields,(dict),(dict),(dict),(dict),(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.lineage.track_field_sources,True,True,True,True,True,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.lineage.track_source_for_fields,"[""molecule_id"", ""publication_id"", ""src_id""]","[""cell_chembl_id"", ""tissue_chembl_id""]","[""canonical_smiles"", ""inchi_key"", ""molecular_weight"", ""logp"", ""polar_surface_area"", ""hba_count"", ""hbd_count""]","[""title"", ""abstract"", ""citations_received"", ""citations_made"", ""subject_mesh"", ""affiliation_list"", ""author_orcids"", ""is_oa"", ""oa_status"", ""subject_keywords""]","[""target_id"", ""primary_component_id"", ""taxonomy_id"", ""organism""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
@@ -202,10 +197,6 @@ composite.dq_overrides.enricher_overrides.uniprot_idmapping,(dict),(dict),(dict)
 composite.dq_overrides.enricher_overrides.uniprot_protein,(dict),(dict),(dict),(dict),(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.execution.retry.backoff_multiplier,2.0,2.0,2.0,2.0,2.0,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.execution.retry.max_attempts,3,3,3,3,3,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.field_aliases.hba_count.pubchem,h_bond_acceptor_count,h_bond_acceptor_count,h_bond_acceptor_count,h_bond_acceptor_count,h_bond_acceptor_count,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.field_aliases.hbd_count.pubchem,h_bond_donor_count,h_bond_donor_count,h_bond_donor_count,h_bond_donor_count,h_bond_donor_count,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.field_aliases.logp.pubchem,xlogp,xlogp,xlogp,xlogp,xlogp,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-composite.field_aliases.polar_surface_area.pubchem,tpsa,tpsa,tpsa,tpsa,tpsa,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.lineage.provider_lookup_fields.chembl,(dict),(dict),(dict),(dict),(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.lineage.provider_lookup_fields.crossref,(dict),(dict),(dict),(dict),(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.lineage.provider_lookup_fields.openalex,(dict),(dict),(dict),(dict),(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—

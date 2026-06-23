@@ -68,8 +68,8 @@ def _dispatcher_probe_union_handler(value: int | str) -> object:
 
 
 def _dispatcher_probe_any_handler(
-    value: typing.Any,
-) -> object:  # Any: typing.Any is used for Pandera dispatcher type system compatibility
+    value: typing.Any,  # Any: Pandera dispatcher catch-all probe requires typing.Any.
+) -> object:
     """Return probe input unchanged so fallback dispatch can be verified."""
     return value
 
@@ -87,8 +87,7 @@ def _pandera_dispatcher_needs_patch(dispatcher_cls: type) -> bool:
             return True
         if registry.get(str) is not _dispatcher_probe_union_handler:
             return True
-        # Any: typing.Any is used for Pandera dispatcher type system compatibility
-        if registry.get(typing.Any) is not _dispatcher_probe_any_handler:
+        if registry.get(typing.Any) is not _dispatcher_probe_any_handler:  # Any: Pandera catch-all key.
             return True
         if dispatcher(1) != 1 or dispatcher("union") != "union":
             return True
@@ -108,7 +107,9 @@ def _unsupported_runtime_message(
     if origin_needs_patch:
         reasons.append("typing_inspect.get_origin lacks Python 3.14 union support")
     if dispatcher_needs_patch:
-        reasons.append("Pandera Dispatcher still requires union/Any fallback patching")
+        reasons.append(
+            "Pandera Dispatcher still requires union/catch-all fallback patching"
+        )
     reason_text = "; ".join(reasons) if reasons else "unsupported Pandera runtime"
     return (
         "Unsupported Pandera runtime for Python 3.14+ detected: "
