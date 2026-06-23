@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-__all__ = ["SilverWriterMetadataMixin", "_build_silver_write_result", "time"]
+__all__ = ["SilverWriterMetadataMixin", "time"]
 
 import asyncio
 import time
@@ -41,21 +41,6 @@ from bioetl.infrastructure.storage.silver.operations.metadata_write_support impo
     _log_silver_audit_event,
     _SilverMetadataAuditSupportRequest,
 )
-
-
-def _build_silver_write_result(
-    *,
-    table_name: str,
-    table_path: str,
-    version_after: int | None,
-    records_count: int,
-) -> SilverWriteResult | None:
-    """Compatibility shim for legacy imports from this module."""
-    return (
-        None
-        if version_after is None
-        else SilverWriteResult(table_name, table_path, version_after, records_count)
-    )
 
 
 class SilverWriterMetadataMixin:

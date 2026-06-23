@@ -298,13 +298,11 @@ class UnifiedQuarantineAdapter(UnifiedQuarantineFilteredMixin):
             return None
 
         filters: list[tuple[str, str, object]] = [("payload_hash", "=", payload_hash)]
-        partitions: list[tuple[str, str, object]] | None = None
         if pipeline:
-            partitions = [("pipeline", "=", pipeline)]
+            filters.append(("pipeline", "=", pipeline))
 
         try:
             arrow_table = dt.to_pyarrow_table(
-                partitions=partitions,
                 filters=filters,
             )
             records: list[JsonDict] = arrow_table.to_pylist()
