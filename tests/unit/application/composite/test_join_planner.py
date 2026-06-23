@@ -19,7 +19,8 @@ from bioetl.domain.composite.aggregation import (
     AggregationFunction,
     EnricherCardinality,
 )
-from bioetl.domain.composite.config import DependencyConfig, EnricherConfig, MergeConfig
+from bioetl.domain.composite.config_merge import MergeConfig
+from bioetl.domain.composite.config_models import DependencyConfig, EnricherConfig
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 
 

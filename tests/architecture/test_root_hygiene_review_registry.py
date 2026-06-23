@@ -188,6 +188,10 @@ def test_root_hygiene_review_registry_classifies_codex_tmp_as_local_only_surface
         == "present_local_only_root_surface"
     )
     assert (
+        by_path[".coverage-sharded-current-main"]["current_live_state"]
+        == "present_local_only_root_surface"
+    )
+    assert (
         by_path["node_modules"]["current_live_state"]
         == "present_local_only_root_surface"
     )
@@ -203,6 +207,8 @@ def test_root_hygiene_review_registry_classifies_codex_tmp_as_local_only_surface
         by_path["test-output"]["current_live_state"]
         == "present_local_only_root_surface"
     )
+    assert by_path["tmp"]["current_live_state"] == "present_local_only_root_surface"
+    assert by_path["~"]["current_live_state"] == "present_local_only_root_surface"
     assert by_path[".venv"]["current_live_state"] == "present_local_only_root_surface"
 
 
@@ -245,7 +251,8 @@ def test_root_hygiene_review_registry_tracks_absent_root_logs_and_test_print() -
         if isinstance(candidate, dict) and isinstance(candidate.get("path"), str)
     }
     assert (
-        transient_by_path["logs"]["current_live_state"] == "absent_from_root_baseline"
+        transient_by_path["logs"]["current_live_state"]
+        == "present_local_only_root_surface"
     )
     assert transient_by_path["logs"]["canonical_path"] == "reports/logs"
 

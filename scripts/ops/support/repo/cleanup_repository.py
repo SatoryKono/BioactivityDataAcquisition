@@ -31,14 +31,12 @@ import yaml
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
+from scripts.engineering.repo import audit_root_cleanliness as root_cleanliness
 from scripts.engineering.repo._root_governance import (
     is_within_blocked_cleanup_zone,
     load_root_governance_policy,
 )
-from scripts.engineering.repo.audit_root_cleanliness import (
-    _is_forbidden_tracked_artifact,
-    collect_root_layout_state,
-)
+from scripts.engineering.repo.audit_root_cleanliness import _is_forbidden_tracked_artifact
 
 logging.basicConfig(
     level=logging.INFO,
@@ -251,13 +249,30 @@ def _tracked_path_set(repo_root: Path) -> set[str]:
     return set(_tracked_paths(repo_root))
 
 
+@lru_cache(maxsize=None)
+def _tracked_ancestor_dirs(repo_root: Path) -> set[str]:
+    ancestors: set[str] = set()
+    for tracked_path in _tracked_paths(repo_root):
+        parts = tracked_path.split("/")
+        if len(parts) <= 1:
+            continue
+        current: list[str] = []
+        for segment in parts[:-1]:
+            current.append(segment)
+            ancestors.add("/".join(current))
+    return ancestors
+
+
 def _path_is_tracked_or_has_tracked_descendants(
     path: Path,
     tracked_paths: set[str],
+    tracked_ancestor_dirs: set[str] | None = None,
 ) -> bool:
     path_text = path.as_posix().rstrip("/")
     if path_text in tracked_paths:
         return True
+    if tracked_ancestor_dirs is not None:
+        return path_text in tracked_ancestor_dirs
     descendant_prefix = f"{path_text}/"
     return any(
         tracked_path.startswith(descendant_prefix) for tracked_path in tracked_paths
@@ -418,6 +433,29 @@ def _discover_local_dir_candidates_in_base(
     return candidates
 
 
+def _iter_root_local_dir_candidates(
+    repo_root: Path,
+    *,
+    blocked_paths: frozenset[str],
+) -> list[CleanupCandidate]:
+    candidates: list[CleanupCandidate] = []
+    for child in repo_root.iterdir():
+        if not child.is_dir():
+            continue
+        if _is_venv_path(child.relative_to(repo_root)):
+            continue
+        if not _is_safe_local_dir_name(child.name):
+            continue
+        candidate = _safe_local_dir_candidate(
+            child,
+            repo_root=repo_root,
+            blocked_paths=blocked_paths,
+        )
+        if candidate is not None:
+            candidates.append(candidate)
+    return candidates
+
+
 def _iter_local_dir_candidates(
     repo_root: Path,
     *,
@@ -489,6 +527,25 @@ def _local_file_candidate(
         apply_allowed=True,
         reason="exact local artifact file outside blocked cleanup zones",
     )
+
+
+def _iter_root_local_file_candidates(
+    repo_root: Path,
+    *,
+    blocked_paths: frozenset[str],
+) -> list[CleanupCandidate]:
+    candidates: list[CleanupCandidate] = []
+    for child in repo_root.iterdir():
+        if not child.is_file():
+            continue
+        candidate = _local_file_candidate(
+            child,
+            repo_root=repo_root,
+            blocked_paths=blocked_paths,
+        )
+        if candidate is not None:
+            candidates.append(candidate)
+    return candidates
 
 
 def _iter_local_file_candidates(
@@ -629,6 +686,7 @@ def _review_status_for_evidence(
 def _review_evidence_from_candidate(
     repo_root: Path,
     tracked_paths: set[str],
+    tracked_ancestor_dirs: set[str],
     *,
     lane_id: str,
     classification: str,
@@ -647,7 +705,9 @@ def _review_evidence_from_candidate(
     )
     current_live_state = str(candidate.get("current_live_state", ""))
     exists = (repo_root / path).exists()
-    tracked = _path_is_tracked_or_has_tracked_descendants(path, tracked_paths)
+    tracked = _path_is_tracked_or_has_tracked_descendants(
+        path, tracked_paths, tracked_ancestor_dirs
+    )
     skip_local_review_probes = (
         exists
         and not tracked
@@ -708,6 +768,7 @@ def collect_root_review_evidence(repo_root: Path) -> list[ReviewLaneEvidence]:
         return []
 
     tracked_paths = _tracked_path_set(repo_root)
+    tracked_ancestor_dirs = _tracked_ancestor_dirs(repo_root)
     evidence: list[ReviewLaneEvidence] = []
     for lane in lanes:
         if not isinstance(lane, dict):
@@ -723,6 +784,7 @@ def collect_root_review_evidence(repo_root: Path) -> list[ReviewLaneEvidence]:
             row = _review_evidence_from_candidate(
                 repo_root,
                 tracked_paths,
+                tracked_ancestor_dirs,
                 lane_id=lane_id,
                 classification=classification,
                 candidate=candidate,
@@ -733,23 +795,24 @@ def collect_root_review_evidence(repo_root: Path) -> list[ReviewLaneEvidence]:
 
 
 def collect_root_policy_mismatches(repo_root: Path) -> list[RootPolicyMismatch]:
-    # Root-hygiene evidence export does not need a second full untracked-root scan:
-    # the workflow already runs strict cleanliness checks separately, and the
-    # cleanup candidate inventory covers local-only prune surfaces directly.
-    layout_state = collect_root_layout_state(repo_root, include_untracked=False)
+    tracked_paths = _tracked_paths(repo_root)
+    allowed_root_files = root_cleanliness._load_allowed_root_files(repo_root)
+    structure_catalog = root_cleanliness._load_structure_catalog(repo_root)
+    allowed_root_dirs = root_cleanliness._approved_root_directories(structure_catalog)
+    tracked_root_files, tracked_root_dirs = root_cleanliness._collect_tracked_root_entries(
+        tracked_paths
+    )
     mismatches: list[RootPolicyMismatch] = []
     mismatch_specs = (
-        ("unexpected_tracked_root_file", layout_state["unexpected_root_files"], True),
-        ("unexpected_tracked_root_dir", layout_state["unexpected_root_dirs"], True),
         (
-            "unexpected_untracked_root_file",
-            layout_state.get("unexpected_untracked_root_files", []),
-            False,
+            "unexpected_tracked_root_file",
+            sorted(tracked_root_files - allowed_root_files),
+            True,
         ),
         (
-            "unexpected_untracked_root_dir",
-            layout_state.get("unexpected_untracked_root_dirs", []),
-            False,
+            "unexpected_tracked_root_dir",
+            sorted(tracked_root_dirs - allowed_root_dirs),
+            True,
         ),
     )
     for mismatch_type, raw_paths, tracked in mismatch_specs:
@@ -841,7 +904,7 @@ def _iter_reports_retained_dir_transient_candidates(repo_root: Path) -> set[Path
         if not root.exists():
             continue
         for pattern in REPORTS_RETAINED_DIR_TRANSIENT_PATTERNS:
-            for match in root.rglob(pattern):
+            for match in root.glob(pattern):
                 candidates.add(match.relative_to(repo_root))
     return candidates
 
@@ -927,6 +990,7 @@ def _iter_reports_top_level_uncurated_surfaces(repo_root: Path) -> set[Path]:
 def _reports_workspace_row(
     repo_root: Path,
     tracked_paths: set[str],
+    tracked_ancestor_dirs: set[str],
     *,
     path: Path,
     classification: str,
@@ -944,7 +1008,9 @@ def _reports_workspace_row(
             retention_entry_id, retention_owner, retention_ttl_days = values
             break
     exists = (repo_root / path).exists()
-    tracked = _path_is_tracked_or_has_tracked_descendants(path, tracked_paths)
+    tracked = _path_is_tracked_or_has_tracked_descendants(
+        path, tracked_paths, tracked_ancestor_dirs
+    )
     skip_local_review_probes = exists and not tracked and (
         classification == "PRUNE_CANDIDATE"
         or _is_reports_retained_dir_transient_path(path)
@@ -959,23 +1025,8 @@ def _reports_workspace_row(
         classification=classification,
         tracked=tracked,
         exists=exists,
-        has_history=(
-            False
-            if skip_local_review_probes
-            else _history_signal_for_path(
-                repo_root,
-                path,
-                tracked=tracked,
-                exists=exists,
-            )
-        ),
-        reference_hits=(
-            0
-            if skip_local_review_probes
-            else _count_reference_hits(repo_root, path)
-            if exists
-            else 0
-        ),
+        has_history=False if skip_local_review_probes else tracked,
+        reference_hits=0,
         generator=generator,
         commit_policy=commit_policy,
         retention_entry_id=retention_entry_id,
@@ -995,17 +1046,19 @@ def collect_reports_workspace_evidence(
     repo_root: Path,
 ) -> list[ReportsWorkspaceEvidence]:
     tracked_paths = _tracked_path_set(repo_root)
+    tracked_ancestor_dirs = _tracked_ancestor_dirs(repo_root)
     route_metadata = _reports_registered_route_metadata(repo_root)
     retention_metadata = _reports_retention_metadata(repo_root)
     rows: dict[str, ReportsWorkspaceEvidence] = {}
 
     for path in REPORTS_RETAINED_FILES:
         if (repo_root / path).exists() or _path_is_tracked_or_has_tracked_descendants(
-            path, tracked_paths
+            path, tracked_paths, tracked_ancestor_dirs
         ):
             rows[path.as_posix()] = _reports_workspace_row(
                 repo_root,
                 tracked_paths,
+                tracked_ancestor_dirs,
                 path=path,
                 classification="RETAIN",
                 route_metadata=route_metadata,
@@ -1015,7 +1068,7 @@ def collect_reports_workspace_evidence(
 
     for path in REPORTS_RETAINED_DIRS:
         if (repo_root / path).exists() or _path_is_tracked_or_has_tracked_descendants(
-            path, tracked_paths
+            path, tracked_paths, tracked_ancestor_dirs
         ):
             reason = "governed reports workspace surface retained by docs or tracked evidence"
             if path == Path("reports/logs"):
@@ -1023,6 +1076,7 @@ def collect_reports_workspace_evidence(
             rows[path.as_posix()] = _reports_workspace_row(
                 repo_root,
                 tracked_paths,
+                tracked_ancestor_dirs,
                 path=path,
                 classification="RETAIN",
                 route_metadata=route_metadata,
@@ -1032,10 +1086,13 @@ def collect_reports_workspace_evidence(
 
     for path in REPORTS_LOCAL_PRUNE_DIRS:
         if (repo_root / path).exists():
-            tracked = _path_is_tracked_or_has_tracked_descendants(path, tracked_paths)
+            tracked = _path_is_tracked_or_has_tracked_descendants(
+                path, tracked_paths, tracked_ancestor_dirs
+            )
             rows[path.as_posix()] = _reports_workspace_row(
                 repo_root,
                 tracked_paths,
+                tracked_ancestor_dirs,
                 path=path,
                 classification="REVIEW_REQUIRED" if tracked else "PRUNE_CANDIDATE",
                 route_metadata=route_metadata,
@@ -1053,11 +1110,14 @@ def collect_reports_workspace_evidence(
             continue
         if path in REPORTS_RETAINED_FILES or path in REPORTS_RETAINED_DIRS:
             continue
-        tracked = _path_is_tracked_or_has_tracked_descendants(path, tracked_paths)
+        tracked = _path_is_tracked_or_has_tracked_descendants(
+            path, tracked_paths, tracked_ancestor_dirs
+        )
         classification = "REVIEW_REQUIRED" if tracked else "PRUNE_CANDIDATE"
         rows[path.as_posix()] = _reports_workspace_row(
             repo_root,
             tracked_paths,
+            tracked_ancestor_dirs,
             path=path,
             classification=classification,
             route_metadata=route_metadata,
@@ -1072,10 +1132,13 @@ def collect_reports_workspace_evidence(
     for path in _iter_reports_root_prune_candidates(repo_root):
         if path.as_posix() in rows:
             continue
-        tracked = _path_is_tracked_or_has_tracked_descendants(path, tracked_paths)
+        tracked = _path_is_tracked_or_has_tracked_descendants(
+            path, tracked_paths, tracked_ancestor_dirs
+        )
         rows[path.as_posix()] = _reports_workspace_row(
             repo_root,
             tracked_paths,
+            tracked_ancestor_dirs,
             path=path,
             classification="REVIEW_REQUIRED" if tracked else "PRUNE_CANDIDATE",
             route_metadata=route_metadata,
@@ -1090,10 +1153,13 @@ def collect_reports_workspace_evidence(
     for path in _iter_reports_retained_dir_transient_candidates(repo_root):
         if path.as_posix() in rows:
             continue
-        tracked = _path_is_tracked_or_has_tracked_descendants(path, tracked_paths)
+        tracked = _path_is_tracked_or_has_tracked_descendants(
+            path, tracked_paths, tracked_ancestor_dirs
+        )
         candidate_row = _reports_workspace_row(
             repo_root,
             tracked_paths,
+            tracked_ancestor_dirs,
             path=path,
             classification="PRUNE_CANDIDATE",
             route_metadata=route_metadata,
@@ -1109,6 +1175,7 @@ def collect_reports_workspace_evidence(
         rows[path.as_posix()] = _reports_workspace_row(
             repo_root,
             tracked_paths,
+            tracked_ancestor_dirs,
             path=path,
             classification=classification,
             route_metadata=route_metadata,
@@ -1129,10 +1196,13 @@ def collect_reports_workspace_evidence(
     for path in _iter_reports_top_level_uncurated_surfaces(repo_root):
         if path.as_posix() in rows:
             continue
-        tracked = _path_is_tracked_or_has_tracked_descendants(path, tracked_paths)
+        tracked = _path_is_tracked_or_has_tracked_descendants(
+            path, tracked_paths, tracked_ancestor_dirs
+        )
         rows[path.as_posix()] = _reports_workspace_row(
             repo_root,
             tracked_paths,
+            tracked_ancestor_dirs,
             path=path,
             classification="REVIEW_REQUIRED" if tracked else "PRUNE_CANDIDATE",
             route_metadata=route_metadata,
@@ -1362,27 +1432,44 @@ def collect_cleanup_candidates(
     include_cache: bool = True,
     include_temp: bool = True,
     include_root_review: bool = True,
+    root_only_local_scan: bool = False,
 ) -> list[CleanupCandidate]:
     policy = load_root_governance_policy(repo_root)
     candidates: list[CleanupCandidate] = []
-    status_paths = _local_status_paths(repo_root)
+    status_paths = None if root_only_local_scan else _local_status_paths(repo_root)
 
     if include_cache:
-        candidates.extend(
-            _iter_local_dir_candidates(
-                repo_root,
-                blocked_paths=policy.blocked_cleanup_paths,
-                status_paths=status_paths,
+        if root_only_local_scan:
+            candidates.extend(
+                _iter_root_local_dir_candidates(
+                    repo_root,
+                    blocked_paths=policy.blocked_cleanup_paths,
+                )
             )
-        )
+        else:
+            candidates.extend(
+                _iter_local_dir_candidates(
+                    repo_root,
+                    blocked_paths=policy.blocked_cleanup_paths,
+                    status_paths=status_paths,
+                )
+            )
     if include_temp:
-        candidates.extend(
-            _iter_local_file_candidates(
-                repo_root,
-                blocked_paths=policy.blocked_cleanup_paths,
-                status_paths=status_paths,
+        if root_only_local_scan:
+            candidates.extend(
+                _iter_root_local_file_candidates(
+                    repo_root,
+                    blocked_paths=policy.blocked_cleanup_paths,
+                )
             )
-        )
+        else:
+            candidates.extend(
+                _iter_local_file_candidates(
+                    repo_root,
+                    blocked_paths=policy.blocked_cleanup_paths,
+                    status_paths=status_paths,
+                )
+            )
     if include_root_review:
         candidates.extend(_tracked_policy_candidates(repo_root))
 
@@ -1664,11 +1751,19 @@ def main() -> int:
         logger.error("Use --dry-run without apply modes.")
         return 2
 
+    root_hygiene_fast_local_scan = (
+        args.dry_run
+        and not args.apply
+        and not args.apply_reports_prune
+        and args.detail_limit == 0
+    )
+
     candidates = collect_cleanup_candidates(
         repo_root,
         include_cache=args.cache,
         include_temp=args.temp,
         include_root_review=args.root,
+        root_only_local_scan=root_hygiene_fast_local_scan,
     )
     _log_candidates(candidates, detail_limit=max(args.detail_limit, 0))
     review_evidence = collect_root_review_evidence(repo_root) if args.root else []

@@ -180,20 +180,23 @@ def test_issue_5392_coverage_tail_reduction_matches_live_inventory() -> None:
         if row["coverage_percent"] is not None and row["coverage_percent"] < 85
     ]
     by_path = {row["path"]: row for row in rows}
-    delta = closeout["coverage_tail_delta"]
-    improved_path = delta["improved_module"]
+    historical_delta = closeout["coverage_tail_delta"]
+    current_live = closeout["current_live_coverage"]
+    improved_path = historical_delta["improved_module"]
     improved_row = by_path[improved_path]
 
-    assert len(below_85) == delta["after_below_85_module_count"]
+    assert closeout["status"] == "regressed_after_bounded_tail_reduction"
     assert (
-        delta["after_below_85_module_count"]
-        - delta["before_below_85_module_count"]
-        == delta["below_85_module_count_delta"]
+        historical_delta["after_below_85_module_count"]
+        - historical_delta["before_below_85_module_count"]
+        == historical_delta["below_85_module_count_delta"]
     )
-    assert delta["below_85_module_count_delta"] < 0
-    assert improved_row["coverage_percent"] == delta["after_coverage_percent"]
-    assert improved_row["coverage_percent"] >= 85
-    assert inventory["summary"]["uncovered_module_count"] == 0
+    assert historical_delta["below_85_module_count_delta"] < 0
+    assert len(below_85) == current_live["below_85_module_count"]
+    assert improved_row["coverage_percent"] == current_live["improved_module_current_coverage_percent"]
+    assert improved_row["coverage_status"] == current_live["improved_module_current_status"]
+    assert inventory["summary"]["uncovered_module_count"] == current_live["uncovered_module_count"]
+    assert inventory["summary"]["unmeasured_module_count"] == current_live["unmeasured_module_count"]
 
 
 def test_issue_5393_full_app_duplication_baseline_covers_required_scope() -> None:

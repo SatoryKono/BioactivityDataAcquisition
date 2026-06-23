@@ -102,6 +102,8 @@ plans:
       lifecycle: supporting_context
     - path: docs/plans/chembl-baseline-refactor-plan-2026-06-01.md
       lifecycle: supporting_context
+    - path: docs/plans/tech-debt-eradication-blueprint-v4-2026-05-31.md
+      lifecycle: supporting_context
 
 src_sidecars:
   path_prefix: src/
@@ -159,6 +161,8 @@ local_tolerated_root_dirs:
       role: local_compose_runtime_state_untracked
     - path: .coverage-sharded
       role: local_coverage_shards_untracked
+    - path: .coverage-sharded-current-main
+      role: local_coverage_merge_workspace_untracked
     - path: .hypothesis
       role: local_property_test_cache_untracked
     - path: .import_linter_cache
@@ -167,6 +171,8 @@ local_tolerated_root_dirs:
       role: local_vendor_workspace_state_untracked
     - path: .junie
       role: local_vendor_editor_state_untracked
+    - path: logs
+      role: local_runtime_log_workspace_untracked
     - path: node_modules
       role: local_node_dependency_tree_untracked
     - path: .npm-cache
@@ -183,6 +189,10 @@ local_tolerated_root_dirs:
       role: local_sonarlint_state_untracked
     - path: test-output
       role: local_test_output_surface_untracked
+    - path: tmp
+      role: local_temp_workspace_untracked
+    - path: "~"
+      role: local_external_tool_mirror_untracked
     - path: .venv
       role: local_primary_virtualenv_untracked
     - path: .venv-docs

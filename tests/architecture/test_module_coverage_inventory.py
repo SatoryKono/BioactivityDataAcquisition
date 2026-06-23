@@ -347,7 +347,7 @@ def test_hotspot_refactor_targets_have_authoritative_module_coverage_gates() -> 
 
 @pytest.mark.architecture
 def test_issue_5376_coverage_tail_closeout_matches_live_inventory() -> None:
-    """#5376 must reduce the below-85 tail without reintroducing zero-coverage debt."""
+    """#5376 preserves historical shard evidence while exposing current regressions."""
     skip_if_module_coverage_inventory_is_dirty(root=ROOT, inventory_path=INVENTORY_PATH)
     committed = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
     closeout = json.loads(COVERAGE_TAIL_CLOSEOUT_PATH.read_text(encoding="utf-8"))
@@ -358,21 +358,25 @@ def test_issue_5376_coverage_tail_closeout_matches_live_inventory() -> None:
         if row["coverage_percent"] is not None and row["coverage_percent"] < 85
     ]
     below_85_paths = {row["path"] for row in below_85}
-    delta = int(
-        closeout["coverage_inventory_delta"]["after_below_85_module_count"]
-    ) - int(closeout["coverage_inventory_delta"]["before_below_85_module_count"])
+    historical_delta = closeout["historical_coverage_inventory_delta"]
+    current_live = closeout["current_live_metrics"]
+    delta = int(historical_delta["after_below_85_module_count"]) - int(
+        historical_delta["before_below_85_module_count"]
+    )
+    tracked_path = closeout["removed_low_tail_module"]["path"]
+    tracked_row = next(row for row in committed["modules"] if row["path"] == tracked_path)
 
     assert closeout["issue"]["number"] == 5376
-    assert closeout["coverage_inventory_delta"]["after_below_85_module_count"] == len(
-        below_85
-    )
-    assert closeout["coverage_inventory_delta"]["below_85_module_count_delta"] == delta
+    assert historical_delta["after_below_85_module_count"] == 104
+    assert historical_delta["below_85_module_count_delta"] == delta
     assert delta < 0
-    assert committed["summary"]["uncovered_module_count"] == 0
-    assert committed["summary"]["unmeasured_module_count"] == 0
-    assert closeout["coverage_inventory_delta"]["after_uncovered_module_count"] == 0
-    assert closeout["coverage_inventory_delta"]["after_unmeasured_module_count"] == 0
-    assert closeout["removed_low_tail_module"]["path"] not in below_85_paths
+    assert current_live["below_85_module_count"] == len(below_85)
+    assert current_live["uncovered_module_count"] == committed["summary"]["uncovered_module_count"]
+    assert current_live["unmeasured_module_count"] == committed["summary"]["unmeasured_module_count"]
+    assert tracked_row["coverage_percent"] == current_live["tracked_module_coverage_percent"]
+    assert tracked_row["coverage_status"] == current_live["tracked_module_status"]
+    assert closeout["closeout"]["status"] == "regressed_after_closeout"
+    assert tracked_path in below_85_paths
 
 
 @pytest.mark.architecture

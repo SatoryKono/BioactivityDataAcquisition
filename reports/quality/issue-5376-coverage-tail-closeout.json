@@ -1,7 +1,7 @@
 {
   "schema_version": "issue-5376-coverage-tail-closeout-v1",
   "generated_by": "codex",
-  "snapshot_date": "2026-06-18",
+  "snapshot_date": "2026-06-23",
   "issue": {
     "number": 5376,
     "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5376"
@@ -10,7 +10,7 @@
     "description": "Bounded low-coverage-tail reduction shard after runtime-builder helper consolidation.",
     "strategy": "Remove one low-tail runtime-builder helper module by merging its replay helper responsibilities into the owner run-manifest creation support module."
   },
-  "coverage_inventory_delta": {
+  "historical_coverage_inventory_delta": {
     "before_below_85_module_count": 106,
     "after_below_85_module_count": 104,
     "below_85_module_count_delta": -2,
@@ -28,10 +28,18 @@
     "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py",
     "tests/architecture/test_module_coverage_inventory.py"
   ],
+  "current_live_metrics": {
+    "below_85_module_count": 1913,
+    "uncovered_module_count": 1614,
+    "unmeasured_module_count": 36,
+    "tracked_module_coverage_percent": 0.0,
+    "tracked_module_status": "uncovered"
+  },
   "closeout": {
-    "status": "bounded_shard_complete",
+    "status": "regressed_after_closeout",
+    "historical_status": "bounded_shard_complete",
     "residual_tail_remains": true,
-    "residual_below_85_module_count": 104,
-    "rationale": "The issue reduces the audited low-coverage tail without reintroducing uncovered or unmeasured production modules; broader tail burn-down remains incremental work."
+    "residual_below_85_module_count": 1913,
+    "rationale": "The original shard reduction landed, but current canonical coverage evidence regressed and the tracked runtime-builder helper module is now uncovered again."
   }
 }

@@ -84,14 +84,16 @@ def test_collect_forbidden_local_output_roots_detects_ignored_root_outputs() -> 
         [
             "logs/",
             "test-output/results.xml",
+            "output/run/result.json",
             "reports/logs/bioetl.log",
             "data/output/control/run_manifest/manifest.json",
         ],
         forbidden_roots=("logs", "test-output", "output"),
         blocked_cleanup_paths=frozenset({"data", "reports"}),
+        tolerated_local_root_dirs=frozenset({"logs", "test-output"}),
     )
 
-    assert violations == ["logs", "test-output"]
+    assert violations == ["output"]
 
 
 def test_collect_forbidden_local_output_roots_allows_routed_reports_logs() -> None:
@@ -99,6 +101,7 @@ def test_collect_forbidden_local_output_roots_allows_routed_reports_logs() -> No
         ["reports/logs/bioetl.log"],
         forbidden_roots=("logs", "test-output"),
         blocked_cleanup_paths=frozenset({"reports"}),
+        tolerated_local_root_dirs=frozenset({"logs", "test-output"}),
     )
 
     assert violations == []

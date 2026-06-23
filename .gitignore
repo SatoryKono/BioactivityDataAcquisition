@@ -107,6 +107,14 @@ log_test.txt
 !/reports/quality/dead-code-inventory.md
 !/reports/quality/module-coverage-inventory.json
 !/reports/quality/architecture-quality-scorecard.json
+!/reports/quality/adr-enforcement-matrix.json
+!/reports/quality/adr-enforcement-matrix.md
+!/reports/quality/architecture-debt-remote-main-baseline.json
+!/reports/quality/architecture-debt-remote-main-baseline.md
+!/reports/quality/debt-governance-gates.json
+!/reports/quality/debt-governance-gates.md
+!/reports/quality/contract-registry-diagnostics.json
+!/reports/quality/vcr-metadata-catalog.json
 !/reports/quality/domain-composite-config-importer-map.md
 !/reports/quality/config-compatibility-legacy-taxonomy-review.json
 !/reports/quality/tech-debt-issues-5253-5264-closeout.json

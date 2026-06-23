@@ -18,7 +18,7 @@ from bioetl.domain.composite.aggregation import (
     AggregationFunction,
     EnricherCardinality,
 )
-from bioetl.domain.composite.config import EnricherConfig
+from bioetl.domain.composite.config_models import EnricherConfig
 
 
 @pytest.mark.unit

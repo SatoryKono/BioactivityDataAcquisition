@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Protocol
 
 from bioetl.application.runtime_clock import RuntimeClock
 from bioetl.domain.composite.result import (
@@ -35,9 +35,6 @@ if TYPE_CHECKING:
     from bioetl.application.composite.lifecycle_observer_service import (
         CompositeLifecycleObserverService,
     )
-    from bioetl.application.composite.merger import (
-        MergeService,
-    )
     from bioetl.application.composite.preflight_validator import (
         CompositePreflightValidationService,
     )
@@ -62,6 +59,12 @@ __all__ = [
 ]
 
 _DEFAULT_COMPOSITE_LOCK_TTL_SECONDS = 3600
+
+
+class CompositeMergerPort(Protocol):
+    """Runtime merger dependency required by ``CompositePipelineRunner``."""
+
+    async def execute_request(self, request: Any) -> MergeResult: ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -103,7 +106,7 @@ class CompositeRunnerDependencies:
     enricher_runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort]
     key_extractor: KeyExtractorService
     coordinator: EnrichmentCoordinatorService
-    merger: MergeService
+    merger: CompositeMergerPort
     checkpoint_manager: CompositeCheckpointService
     logger: LoggerPort
     lock: LockPort

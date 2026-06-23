@@ -2,7 +2,7 @@
 
 - mode: report-only
 - targets: 4
-- total_duplicate_clusters: 105
+- total_duplicate_clusters: 104
 
 > Interpretation note: this is a visibility baseline. `R0801` can over-report
 > around facades, export barrels, and compatibility shims, so use it as
@@ -12,7 +12,7 @@
 | --- | ---: |
 | `src/bioetl/infrastructure/adapters` | 72 |
 | `src/bioetl/application/pipelines` | 22 |
-| `src/bioetl/composition/bootstrap` | 1 |
+| `src/bioetl/composition/bootstrap` | 0 |
 | `src/bioetl/interfaces/cli` | 10 |
 
 ## src/bioetl/infrastructure/adapters
@@ -84,19 +84,8 @@
 
 ## src/bioetl/composition/bootstrap
 
-- duplicate clusters: 1
-
-| Actionability category | Duplicate clusters |
-| --- | ---: |
-| `composition_runtime_wiring_pattern` | 1 |
-
-| Top recurring module pairs | Duplicate clusters |
-| --- | ---: |
-| `bioetl.composition.bootstrap.composite_infrastructure_context` <-> `bioetl.composition.bootstrap.runtime._composite_plan_runtime_support` | 1 |
-
-| Cluster path | Compared modules |
-| --- | --- |
-| `src/bioetl/composition/bootstrap/runtime/__init__.py:1` | `bioetl.composition.bootstrap.composite_infrastructure_context`[27:32], `bioetl.composition.bootstrap.runtime._composite_plan_runtime_support`[76:81] |
+- duplicate clusters: 0
+- no `R0801` findings
 
 ## src/bioetl/interfaces/cli
 
@@ -108,7 +97,7 @@
 
 | Top recurring module pairs | Duplicate clusters |
 | --- | ---: |
-| `bioetl.interfaces.cli.commands._run_manifest_output` <-> `bioetl.interfaces.cli.commands._run_manifest_output_support` | 1 |
+| `bioetl.interfaces.cli.commands._run_manifest_output` <-> `bioetl.interfaces.cli.commands.run_manifest_output_support` | 1 |
 | `bioetl.interfaces.cli.commands._workflow_command_runtime` <-> `bioetl.interfaces.cli.commands.workflow` | 1 |
 | `bioetl.interfaces.cli.commands._workflow_run_support` <-> `bioetl.interfaces.cli.commands.workflow` | 1 |
 | `bioetl.interfaces.cli.commands._workflow_support` <-> `bioetl.interfaces.cli.commands.workflow` | 1 |
@@ -120,21 +109,21 @@
 | `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands._workflow_support`[101:122], `bioetl.interfaces.cli.commands.workflow`[295:316] |
 | `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands.run_all`[185:198], `bioetl.interfaces.cli.commands.run_composite`[318:330] |
 | `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands.domains.composite.command_input`[20:31], `bioetl.interfaces.cli.commands.domains.composite.runtime`[19:42] |
-| `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands.domains.health.server_integration`[113:127], `bioetl.interfaces.cli.commands.health`[83:97] |
+| `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands.domains.health.server_integration`[115:129], `bioetl.interfaces.cli.commands.health`[83:97] |
 | `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands._workflow_command_runtime`[65:75], `bioetl.interfaces.cli.commands.workflow`[323:333] |
 | `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands.diagnostics`[343:350], `bioetl.interfaces.cli.commands.quarantine`[167:174] |
 | `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands.domains.run_all.public_runtime`[176:183], `bioetl.interfaces.cli.commands.run`[284:291] |
 | `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands.health`[86:91], `bioetl.interfaces.cli.commands.vacuum`[58:63] |
-| `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands._run_manifest_output`[137:142], `bioetl.interfaces.cli.commands._run_manifest_output_support`[53:66] |
+| `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands._run_manifest_output`[137:142], `bioetl.interfaces.cli.commands.run_manifest_output_support`[53:66] |
 
 ## Reduction Leverage Ranking
 
 | Target | Duplicate clusters | Dominant actionability | Low-risk share | Recommended first wave |
 | --- | ---: | --- | ---: | --- |
 | `src/bioetl/interfaces/cli` | 10 | `cli_command_contract_shell` | 1.00 | yes |
-| `src/bioetl/composition/bootstrap` | 1 | `composition_runtime_wiring_pattern` | 1.00 | yes |
 | `src/bioetl/infrastructure/adapters` | 72 | `export_facade_or_package_barrel` | 0.78 | no |
 | `src/bioetl/application/pipelines` | 22 | `pipeline_transformer_contract_pattern` | 0.00 | no |
+| `src/bioetl/composition/bootstrap` | 0 | `n/a` | 0.00 | no |
 
 ## First Wave Selection
 

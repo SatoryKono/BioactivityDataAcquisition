@@ -10,7 +10,7 @@ from unittest.mock import MagicMock
 import polars as pl
 
 from bioetl.application.composite.merger import MergeService
-from bioetl.domain.composite.config import MergeConfig
+from bioetl.domain.composite.config_merge import MergeConfig
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 from tests.helpers.golden_files import load_json_fixture
 from tests.unit.application.composite.merge_test_support import build_merge_service

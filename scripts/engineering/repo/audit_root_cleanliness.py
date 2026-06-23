@@ -270,6 +270,7 @@ def _collect_forbidden_local_output_roots(
     *,
     forbidden_roots: tuple[str, ...],
     blocked_cleanup_paths: frozenset[str],
+    tolerated_local_root_dirs: frozenset[str] = frozenset(),
 ) -> list[str]:
     """Return forbidden local output roots present outside blocked cleanup zones."""
     violations: set[str] = set()
@@ -284,6 +285,8 @@ def _collect_forbidden_local_output_roots(
             continue
         for forbidden_root in forbidden_roots:
             if _path_matches_root(normalized, forbidden_root):
+                if forbidden_root in tolerated_local_root_dirs:
+                    continue
                 violations.add(forbidden_root)
     return sorted(violations)
 
@@ -775,6 +778,7 @@ def main() -> int:
             blocked_cleanup_paths=root_governance.blocked_cleanup_paths(
                 structure_catalog
             ),
+            tolerated_local_root_dirs=tolerated_local_root_dirs,
         )
         forbidden_local_output_exit = _report_forbidden_local_output_roots(
             forbidden_local_outputs

@@ -1,25 +1,25 @@
 {
-  "snapshot_date": "2026-06-18",
+  "snapshot_date": "2026-06-23",
   "issue": "#5272",
   "parent_epic": "#5244",
   "title": "Burn down application_core coverage and zero-uncovered module debt",
-  "status": "validated_local_closeable",
-  "debt_outcome": "improved",
+  "status": "not_closeable_under_current_inventory",
+  "debt_outcome": "current_inventory_regressed",
   "baseline_metrics": {
     "repo_uncovered_module_count": 68,
     "application_core_covered_line_percent": 49.09
   },
   "current_metrics": {
-    "repo_uncovered_module_count": 0,
-    "repo_unmeasured_module_count": 0,
-    "application_core_covered_line_percent": 96.15,
-    "application_core_uncovered_module_count": 0,
+    "repo_uncovered_module_count": 1614,
+    "repo_unmeasured_module_count": 36,
+    "application_core_covered_line_percent": 5.25,
+    "application_core_uncovered_module_count": 159,
     "application_core_unmeasured_module_count": 0
   },
   "parent_epic_status": {
     "status": "not_closeable_under_current_definition_of_done",
-    "remaining_below_85_module_count": 104,
-    "reason": "Issue #5244 requires zero below-tier production modules; the current inventory still has below-tier modules even though #5272 acceptance criteria are met."
+    "remaining_below_85_module_count": 1913,
+    "reason": "Issue #5244 requires zero below-tier production modules; the current inventory still has below-tier modules. Issue #5272 is not closeable until repo and application_core module coverage gates return to their acceptance thresholds."
   },
   "evidence": [
     "reports/quality/module-coverage-inventory.json",
@@ -28,10 +28,10 @@
     "tests/architecture/test_module_coverage_inventory.py"
   ],
   "module_expectations": {
-    "repo_uncovered_module_count": "below_baseline",
-    "repo_unmeasured_module_count": "below_baseline",
-    "application_core_covered_line_percent": "above_baseline",
-    "application_core_uncovered_module_count": "zero",
-    "application_core_unmeasured_module_count": "zero"
+    "repo_uncovered_module_count": "matches_live_inventory",
+    "repo_unmeasured_module_count": "matches_live_inventory",
+    "application_core_covered_line_percent": "matches_live_inventory",
+    "application_core_uncovered_module_count": "matches_live_inventory",
+    "application_core_unmeasured_module_count": "matches_live_inventory"
   }
 }

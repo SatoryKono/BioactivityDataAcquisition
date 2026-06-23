@@ -343,28 +343,16 @@
         "tests/unit/application/composite/test_coalesce_qualified.py",
         "tests/unit/application/composite/test_column_orderer.py",
         "tests/unit/application/composite/test_column_orderer_renames.py",
-        "tests/unit/application/composite/test_column_priority_orderer.py",
         "tests/unit/application/composite/test_composite_activity.py",
-        "tests/unit/application/composite/test_composite_merge_conflicts.py",
-        "tests/unit/application/composite/test_composite_phase_ordering.py",
         "tests/unit/application/composite/test_conflict_resolver.py",
         "tests/unit/application/composite/test_cross_validator.py",
         "tests/unit/application/composite/test_dependency_coordinator.py",
-        "tests/unit/application/composite/test_dependency_key_resolvers.py",
-        "tests/unit/application/composite/test_dependency_progress_tracker.py",
-        "tests/unit/application/composite/test_dependency_result_mapper.py",
-        "tests/unit/application/composite/test_enricher_join_execution.py",
         "tests/unit/application/composite/test_helper_module_coverage.py",
-        "tests/unit/application/composite/test_join_planner.py",
-        "tests/unit/application/composite/test_merger.py",
-        "tests/unit/application/composite/test_merger_golden_snapshots.py",
         "tests/unit/application/composite/test_merger_input_mixin.py",
         "tests/unit/application/composite/test_merger_io_mixin.py",
         "tests/unit/application/composite/test_merger_many_to_one_aggregation.py",
-        "tests/unit/application/composite/test_merger_metrics_mixin.py",
         "tests/unit/application/composite/test_merger_orchestration.py",
         "tests/unit/application/composite/test_merger_post_join.py",
-        "tests/unit/application/composite/test_preflight_validator.py",
         "tests/unit/application/composite/test_publication_schema_columns.py",
         "tests/unit/composite/test_merge_golden.py",
         "tests/unit/composition/bootstrap/runtime/test_runtime_basics.py",
@@ -376,7 +364,7 @@
         "tests/unit/infrastructure/schemas/test_composite_config_invariants_source_of_truth.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 39,
+      "test_importer_count": 27,
       "surface_classification": "external-facing"
     },
     {
@@ -390,9 +378,6 @@
       "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
       "src_importers": [
         "src/bioetl/application/composite/__init__.py",
-        "src/bioetl/application/composite/runner_pkg/runner_merge_stage_mixin.py",
-        "src/bioetl/application/composite/runner_pkg/runner_merge_stage_types.py",
-        "src/bioetl/application/composite/runtime_models.py",
         "src/bioetl/application/composite/runtime_wiring_api.py"
       ],
       "test_importers": [
@@ -402,7 +387,7 @@
         "tests/unit/application/composite/test_merger_golden_snapshots.py",
         "tests/unit/composite/test_merge_golden.py"
       ],
-      "src_importer_count": 5,
+      "src_importer_count": 2,
       "test_importer_count": 5,
       "surface_classification": "first-party-active"
     }
@@ -729,28 +714,16 @@
         "tests/unit/application/composite/test_coalesce_qualified.py",
         "tests/unit/application/composite/test_column_orderer.py",
         "tests/unit/application/composite/test_column_orderer_renames.py",
-        "tests/unit/application/composite/test_column_priority_orderer.py",
         "tests/unit/application/composite/test_composite_activity.py",
-        "tests/unit/application/composite/test_composite_merge_conflicts.py",
-        "tests/unit/application/composite/test_composite_phase_ordering.py",
         "tests/unit/application/composite/test_conflict_resolver.py",
         "tests/unit/application/composite/test_cross_validator.py",
         "tests/unit/application/composite/test_dependency_coordinator.py",
-        "tests/unit/application/composite/test_dependency_key_resolvers.py",
-        "tests/unit/application/composite/test_dependency_progress_tracker.py",
-        "tests/unit/application/composite/test_dependency_result_mapper.py",
-        "tests/unit/application/composite/test_enricher_join_execution.py",
         "tests/unit/application/composite/test_helper_module_coverage.py",
-        "tests/unit/application/composite/test_join_planner.py",
-        "tests/unit/application/composite/test_merger.py",
-        "tests/unit/application/composite/test_merger_golden_snapshots.py",
         "tests/unit/application/composite/test_merger_input_mixin.py",
         "tests/unit/application/composite/test_merger_io_mixin.py",
         "tests/unit/application/composite/test_merger_many_to_one_aggregation.py",
-        "tests/unit/application/composite/test_merger_metrics_mixin.py",
         "tests/unit/application/composite/test_merger_orchestration.py",
         "tests/unit/application/composite/test_merger_post_join.py",
-        "tests/unit/application/composite/test_preflight_validator.py",
         "tests/unit/application/composite/test_publication_schema_columns.py",
         "tests/unit/composite/test_merge_golden.py",
         "tests/unit/composition/bootstrap/runtime/test_runtime_basics.py",
@@ -762,7 +735,7 @@
         "tests/unit/infrastructure/schemas/test_composite_config_invariants_source_of_truth.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 39,
+      "test_importer_count": 27,
       "surface_classification": "external-facing"
     },
     {
@@ -776,9 +749,6 @@
       "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
       "src_importers": [
         "src/bioetl/application/composite/__init__.py",
-        "src/bioetl/application/composite/runner_pkg/runner_merge_stage_mixin.py",
-        "src/bioetl/application/composite/runner_pkg/runner_merge_stage_types.py",
-        "src/bioetl/application/composite/runtime_models.py",
         "src/bioetl/application/composite/runtime_wiring_api.py"
       ],
       "test_importers": [
@@ -788,7 +758,7 @@
         "tests/unit/application/composite/test_merger_golden_snapshots.py",
         "tests/unit/composite/test_merge_golden.py"
       ],
-      "src_importer_count": 5,
+      "src_importer_count": 2,
       "test_importer_count": 5,
       "surface_classification": "first-party-active"
     }
