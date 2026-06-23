@@ -1,8 +1,0 @@
-schema_version: 1
-provider: chembl
-cassette_rel_path: tests/fixtures/vcr/chembl/TestTargetExtractionParams.test_target_filtered_api_request.yaml
-metadata_status: managed_inventory
-source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: a36aa80c435f85a9897d7be65a5629ea67061595efc99a8ce806ebfa2fa4f7a5
-recorded_at: '2026-04-28'
-staleness_ready: true
