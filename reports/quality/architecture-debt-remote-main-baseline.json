@@ -1,10 +1,10 @@
 {
   "artifacts": [
     {
-      "blob_sha256": "cbde25b49865b9bd86b7311a133537be991187dd9c1deb504b148c9ee160ae6a",
+      "blob_sha256": "aa1df74dc3b87871304fd0a943760a85e420b76909699a1a5c2f3a65ef05f74e",
       "path": "reports/quality/architecture-quality-scorecard.json",
       "required": true,
-      "source_revision": "ac4b113ad36795d8201143e8126d4ebcc86cc3cc",
+      "source_revision": "f986ed34d82f14ce61da758493be621f4007f0d6",
       "summary": {
         "available": true,
         "integral_score": 7.98,
@@ -13,25 +13,25 @@
       }
     },
     {
-      "blob_sha256": "a9db9dd172db289666df2b4e4984c6917f8e64975dddf6fb0b11535001405857",
+      "blob_sha256": "5ab5ee065be569d6079878c56edeccff1199b48da496f562aea23936e33fd204",
       "path": "reports/quality/module-coverage-inventory.json",
       "required": true,
-      "source_revision": "ac4b113ad36795d8201143e8126d4ebcc86cc3cc",
+      "source_revision": "f986ed34d82f14ce61da758493be621f4007f0d6",
       "summary": {
         "available": true,
         "coverage_xml_sha256": "688fdd5cf7e086bb0ac2178265406f9e8395532fb1067e9e6e2fc0c7b5e1632a",
         "schema_version": 1,
         "snapshot_date": "2026-06-22",
         "source_module_count": 2182,
-        "source_tree_sha256": "3f3ad60678fbda25364e68b3ef640112a3a2f3e22b2043bfb166ad6a8d40a50e",
+        "source_tree_sha256": "c1d0ec8652e23d05c687afc8a2101aedd32d0e3b9cac3f61e41ee6e940804685",
         "unmeasured_module_count": 0
       }
     },
     {
-      "blob_sha256": "766e2426d28104fdd3447def0d672c8b121ea221dee2563480c1e9961daf045a",
+      "blob_sha256": "a8c58141355b5a47d7de612fab105f46e8669a8108388a58d94b6a5764919d38",
       "path": "reports/quality/compatibility-importer-census.json",
       "required": true,
-      "source_revision": "ac4b113ad36795d8201143e8126d4ebcc86cc3cc",
+      "source_revision": "f986ed34d82f14ce61da758493be621f4007f0d6",
       "summary": {
         "available": true,
         "retained_entrypoint_count": 12,
@@ -42,7 +42,7 @@
       "blob_sha256": "07c07f94675318dd1c3bb6071d7107d4b50d057079399903b24818a713e58831",
       "path": "reports/quality/dead-code-inventory.json",
       "required": true,
-      "source_revision": "ac4b113ad36795d8201143e8126d4ebcc86cc3cc",
+      "source_revision": "f986ed34d82f14ce61da758493be621f4007f0d6",
       "summary": {
         "available": true,
         "repo_wide_untriaged_zero_import_candidate_count": 0,
@@ -53,7 +53,7 @@
       "blob_sha256": "691ae784ed4f90f7835fed4706fbb586e7d7184b8ddc965a7fd5cab6ef3a2dce",
       "path": "reports/quality/contract-registry-diagnostics.json",
       "required": true,
-      "source_revision": "ac4b113ad36795d8201143e8126d4ebcc86cc3cc",
+      "source_revision": "f986ed34d82f14ce61da758493be621f4007f0d6",
       "summary": {
         "available": true,
         "blocking_issue_count": 0,
@@ -64,7 +64,7 @@
       "blob_sha256": null,
       "path": "reports/quality/contract-registry-dq-diagnostics.json",
       "required": false,
-      "source_revision": "ac4b113ad36795d8201143e8126d4ebcc86cc3cc",
+      "source_revision": "f986ed34d82f14ce61da758493be621f4007f0d6",
       "summary": {
         "available": false
       }
@@ -73,7 +73,7 @@
       "blob_sha256": "66710127e0d8e48ac9b602ed491a92582a6fbf8754db1cf72e8ae7d1ce183d7f",
       "path": "reports/observability/runtime_cardinality_inventory.json",
       "required": false,
-      "source_revision": "ac4b113ad36795d8201143e8126d4ebcc86cc3cc",
+      "source_revision": "f986ed34d82f14ce61da758493be621f4007f0d6",
       "summary": {
         "available": true
       }
@@ -98,9 +98,9 @@
   ],
   "local_tracking_ref": "origin/main",
   "local_tracking_ref_matches_remote": true,
-  "local_tracking_ref_sha": "ac4b113ad36795d8201143e8126d4ebcc86cc3cc",
+  "local_tracking_ref_sha": "f986ed34d82f14ce61da758493be621f4007f0d6",
   "remote": "origin",
   "remote_main_ref": "refs/heads/main",
-  "remote_main_sha": "ac4b113ad36795d8201143e8126d4ebcc86cc3cc",
+  "remote_main_sha": "f986ed34d82f14ce61da758493be621f4007f0d6",
   "schema_version": 1
 }

@@ -21,7 +21,7 @@ dependencies = [
     "pydantic-settings>=2.0",
     "pyyaml>=6.0",
     "polars>=1.0",
-    "deltalake>=0.18",
+    "deltalake>=0.18,<1.0",
     "arro3-core==0.6.5",  # Pin for Windows compatibility with deltalake 1.4.x (exposes arro3.core.types)
     "pyarrow>=15.0,<24.0",
     "zstandard>=0.22",

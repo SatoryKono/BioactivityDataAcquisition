@@ -68,7 +68,7 @@ def _assert_core_node_surfaces(
             ),
             (
                 "method_surface",
-                "src.bioetl.application.composite.merger.MergeService.merge",
+                "src.bioetl.application.composite.merge_service.MergeService.merge",
             ),
             ("provider_surface", "chembl"),
             ("entity_config", "chembl_activity"),

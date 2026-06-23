@@ -835,6 +835,7 @@ jobs:
                     uv run python -m scripts.engineering.qa report-module-coverage \
                       --coverage-xml reports/coverage/coverage.xml \
                       --json-out reports/quality/module-coverage-inventory.json \
+                      --refresh-from-coverage-xml \
                       --enforce-module-thresholds block-regression \
                       --fail-on-regression
 
@@ -843,6 +844,7 @@ jobs:
                     uv run python -m scripts.engineering.qa report-module-coverage \
                       --coverage-xml reports/coverage/coverage.xml \
                       --json-out reports/quality/module-coverage-inventory.json \
+                      --refresh-from-coverage-xml \
                       --check \
                       --enforce-module-thresholds block-regression \
                       --fail-on-regression

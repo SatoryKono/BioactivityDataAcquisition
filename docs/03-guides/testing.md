@@ -328,8 +328,11 @@ Supported policy slice for issue `#2598`:
 - Module-level coverage inventory теперь является committed artifact:
   `reports/quality/module-coverage-inventory.json` генерируется из
   `reports/coverage/coverage.xml` через
-  `python -m scripts.engineering.qa report-module-coverage` в lane
-  `coverage-verify`. Artifact должен перечислять каждый `src/bioetl/**/*.py`
+  `python -m scripts.engineering.qa report-module-coverage --refresh-from-coverage-xml`
+  в lane `coverage-verify`. Локальные drift-проверки без fresh coverage XML
+  должны использовать hash-only режим
+  `python -m scripts.engineering.qa report-module-coverage --check --allow-missing-coverage-xml`.
+  Artifact должен перечислять каждый `src/bioetl/**/*.py`
   module и явно фиксировать coverage status. Поле `source_tree_sha256` MUST
   обновляться после любых изменений под `src/bioetl/**/*.py` через
   `python _refresh_module_coverage_inventory.py` (см.
@@ -688,7 +691,7 @@ pytest tests/contract/test_gold_dq_golden_snapshots.py --update-golden
 - **Module Coverage Inventory**: `coverage-verify` генерирует
   `reports/quality/module-coverage-inventory.json` после
   `reports/coverage/coverage.xml`; локальная проверка drift:
-  `uv run python -m scripts.engineering.qa report-module-coverage --check`.
+  `uv run python -m scripts.engineering.qa report-module-coverage --check --allow-missing-coverage-xml`.
   Per-module gates (`configs/quality/module_coverage_gates.yaml`): lane
   `coverage-verify` также запускает
   `--enforce-module-thresholds block-regression --fail-on-regression`, чтобы
