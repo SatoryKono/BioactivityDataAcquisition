@@ -324,6 +324,7 @@ nav:
                             -   "Publication Term": 04-reference/providers/chembl/publication-term.md
                             -   "Target": 04-reference/providers/chembl/target.md
                             -   "Target Component": 04-reference/providers/chembl/target-component.md
+                            -   "Target Protein Classification": 04-reference/providers/chembl/target-protein-classification.md
                             -   "Subcellular Fraction": 04-reference/providers/chembl/subcellular-fraction.md
                             -   "Tissue": 04-reference/providers/chembl/tissue.md
                     -   PubChem:

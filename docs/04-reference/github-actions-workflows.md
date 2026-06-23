@@ -37,7 +37,6 @@ Use it when you need to answer:
 
 | File | Workflow name | Triggers | Primary purpose |
 | --- | --- | --- | --- |
-| `architecture.yml` | `Architecture Metrics` | `schedule`, `workflow_dispatch` | Heavy architecture metrics and periodic boundary baselines |
 | `chembl-baseline-smoke.yml` | `ChemblBaseline Smoke` | `push`, `pull_request`, `workflow_dispatch` | ChEMBL baseline smoke and reconciliation checks |
 | `commit-lint.yml` | `Commit Lint` | `pull_request` | Conventional-commit policy gate |
 | `compiled-artifacts-block.yml` | `Block Compiled Python Artifacts` | `push`, `pull_request` | Blocks checked-in `.pyc` and similar compiled artifacts |
@@ -64,12 +63,14 @@ Use it when you need to answer:
 | File | Workflow name | Triggers | Primary purpose |
 | --- | --- | --- | --- |
 | `architecture-docs-nightly.yml` | `Architecture Docs Nightly` | `schedule`, `workflow_dispatch` | Regenerates architecture dependency-doc artifacts |
+| `architecture.yml` | `Architecture Metrics` | `schedule`, `workflow_dispatch` | Heavy architecture metrics and periodic boundary baselines |
 | `contract-tests.yml` | `Monthly Contract Tests` | `schedule`, `workflow_dispatch` | Scheduled full contract-test lane |
 | `diagram-nightly.yml` | `Diagram Nightly Regression` | `schedule`, `workflow_dispatch` | Diagram regression/nightly canary |
 | `docs-kpi-weekly.yml` | `Docs KPI Weekly` | `schedule`, `workflow_dispatch` | Weekly docs KPI/reporting lane |
 | `mutation-testing.yml` | `Mutation Testing` | `push`, `pull_request`, `schedule`, `workflow_dispatch` | Mutation-testing lane with scheduled coverage |
 | `nightly-replay-parity.yml` | `nightly-replay-parity` | `schedule`, `workflow_dispatch` | Replay/determinism parity validation |
 | `performance-nightly.yml` | `Performance Nightly` | `schedule`, `workflow_dispatch` | Performance-regression gate |
+| `pr-hygiene.yml` | `PR Hygiene` | `schedule`, `workflow_dispatch` | Stale report-noise draft PR cleanup under repository hygiene policy |
 | `quality-debt-weekly.yml` | _(unnamed in YAML)_ | `schedule`, `workflow_dispatch` | Weekly quality-debt scorecard/report lane |
 | `stale.yml` | `Stale` | `schedule` | Issue/PR staleness automation |
 | `vacuum.yml` | `Weekly VACUUM` | `schedule`, `workflow_dispatch` | Scheduled Delta VACUUM maintenance |
@@ -98,6 +99,7 @@ Use it when you need to answer:
 | Schema and generated-artifact drift | `schema-governance.yml` |
 | Security scans | `security.yml` |
 | Nightly replay / determinism parity | `nightly-replay-parity.yml` |
+| Stale report-noise draft PR cleanup | `pr-hygiene.yml` |
 | Weekly debt governance | `quality-debt-weekly.yml` |
 | Release build/publish flow | `release.yml` |
 

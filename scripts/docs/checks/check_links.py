@@ -6,8 +6,9 @@ Checks:
   2. Pipeline specs referenced in docs/04-reference/pipelines/README.md exist
   3. Config files referenced in pipeline YAML configs exist
   4. Gold contracts index matches exported JSON contracts
-  5. ChEMBL provider overview matches provider docs inventory
-  6. Doc drift guardrails are enforced in mkdocs nav docs:
+  5. GitHub Actions workflow inventory matches live workflow files
+  6. ChEMBL provider overview matches active entity-config inventory
+  7. Doc drift guardrails are enforced in mkdocs nav docs:
      - canonical Delta token (`_delta_log`)
      - legacy config/script tokens
      - outdated `bioetl run <pipeline>` syntax
@@ -19,13 +20,13 @@ Checks:
      - invalid env var style (`BIOETL-...`)
      - invalid kebab-case Python snippets in fenced `python` blocks
      - path contracts for REQUIREMENTS and governance links
-  7. Provider specs contain required API governance sections
-  8. Runbooks contain required operational sections
-  9. Published control-plane contract specs contain required contract sections
- 10. Provider specs / runbooks / published control-plane contracts contain
+  8. Provider specs contain required API governance sections
+  9. Runbooks contain required operational sections
+ 10. Published control-plane contract specs contain required contract sections
+ 11. Provider specs / runbooks / published control-plane contracts contain
      required governance metadata
- 11. Version frontmatter uses SemVer format
- 12. Local skill mirror pages are explicitly classified via mkdocs `nav` or
+ 12. Version frontmatter uses SemVer format
+ 13. Local skill mirror pages are explicitly classified via mkdocs `nav` or
      `not_in_nav`
 
 Usage:
@@ -33,6 +34,7 @@ Usage:
     python -m scripts.docs check-links --specs            # Only spec file check
     python -m scripts.docs check-links --links            # Only broken link check
     python -m scripts.docs check-links --contracts-index  # Gold contract index parity
+    python -m scripts.docs check-links --workflow-inventory  # Workflow inventory parity
     python -m scripts.docs check-links --provider-overview  # Provider overview parity
     python -m scripts.docs check-links --doc-governance   # Provider/runbook/control-plane governance checks
     python -m scripts.docs check-links --not-in-nav-growth  # Only not-in-nav growth guard
@@ -93,6 +95,9 @@ CONTRACTS_DOC_DIR = DOCS_DIR / "04-reference" / "contracts"
 PROVIDERS_OVERVIEW_DOC = DOCS_DIR / "04-reference" / "providers" / README_FILENAME
 PROVIDERS_SPECS_DIR = DOCS_DIR / "04-reference" / "providers"
 CHEMBL_PROVIDERS_DIR = DOCS_DIR / "04-reference" / "providers" / "chembl"
+CHEMBL_ENTITY_CONFIGS_DIR = PROJECT_ROOT / "configs" / "entities" / "chembl"
+WORKFLOW_INVENTORY_DOC = DOCS_DIR / "04-reference" / "github-actions-workflows.md"
+GITHUB_WORKFLOWS_DIR = PROJECT_ROOT / ".github" / "workflows"
 RUNBOOKS_DIR = DOCS_DIR / "05-operations" / "runbooks"
 CANONICAL_REQUIREMENTS_FILE = DOCS_DIR / "01-requirements" / "REQUIREMENTS.md"
 CANONICAL_GOVERNANCE_DIR = DOCS_DIR / "00-project" / "governance"
@@ -122,6 +127,7 @@ SKIP_DIRS = frozenset(
 
 GOLD_CONTRACT_RE = re.compile(r"`([\w]+_v\d+\.\d+\.json)`")
 CHEMBL_PROVIDER_LINK_RE = re.compile(r"\(chembl/([a-z0-9-]+)\.md\)")
+WORKFLOW_FILE_RE = re.compile(r"`([A-Za-z0-9._-]+\.yml)`")
 
 DRIFT_SKIP_DIRS = frozenset({"99-archive", "reports", "plans", "skills"})
 NOT_IN_NAV_GROWTH_EXCLUDED_PREFIXES = ("reports/",)
@@ -960,14 +966,32 @@ def check_gold_contract_index() -> tuple[list[str], list[str]]:
 
 
 def check_chembl_provider_overview() -> tuple[list[str], list[str]]:
-    if not PROVIDERS_OVERVIEW_DOC.exists() or not CHEMBL_PROVIDERS_DIR.exists():
+    if not PROVIDERS_OVERVIEW_DOC.exists() or not CHEMBL_ENTITY_CONFIGS_DIR.exists():
         return [], []
 
     readme_text = PROVIDERS_OVERVIEW_DOC.read_text(encoding="utf-8", errors="replace")
     listed = set(CHEMBL_PROVIDER_LINK_RE.findall(readme_text))
-    available = {path.stem for path in CHEMBL_PROVIDERS_DIR.glob("*.md")}
+    expected = {
+        path.stem.replace("_", "-")
+        for path in CHEMBL_ENTITY_CONFIGS_DIR.glob("*.yaml")
+        if not path.stem.startswith("_")
+    }
 
-    return sorted(available - listed), sorted(listed - available)
+    return sorted(expected - listed), sorted(listed - expected)
+
+
+def check_github_actions_workflow_inventory() -> tuple[list[str], list[str]]:
+    if not WORKFLOW_INVENTORY_DOC.exists() or not GITHUB_WORKFLOWS_DIR.exists():
+        return [], []
+
+    inventory_text = WORKFLOW_INVENTORY_DOC.read_text(
+        encoding="utf-8",
+        errors="replace",
+    )
+    documented = set(WORKFLOW_FILE_RE.findall(inventory_text))
+    live = {path.name for path in GITHUB_WORKFLOWS_DIR.glob("*.yml")}
+
+    return sorted(live - documented), sorted(documented - live)
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -985,9 +1009,14 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Only check Gold contract index parity (gold-schemas.md vs JSON exports)",
     )
     parser.add_argument(
+        "--workflow-inventory",
+        action="store_true",
+        help="Only check GitHub Actions workflow inventory parity (published doc vs .github/workflows)",
+    )
+    parser.add_argument(
         "--provider-overview",
         action="store_true",
-        help="Only check provider overview parity (providers README vs docs inventory)",
+        help="Only check provider overview parity (providers README vs active ChEMBL entity configs)",
     )
     parser.add_argument(
         "--doc-governance",
@@ -1161,19 +1190,40 @@ def _run_contracts_index_check() -> int:
     return len(missing_in_doc) + len(extra_in_doc)
 
 
+def _run_workflow_inventory_check() -> int:
+    missing_in_doc, extra_in_doc = check_github_actions_workflow_inventory()
+    if not (missing_in_doc or extra_in_doc):
+        print("Workflow inventory: OK (published workflow doc matches .github/workflows)")
+        return 0
+
+    _print_section_header("GITHUB ACTIONS WORKFLOW INVENTORY MISMATCH")
+    if missing_in_doc:
+        print("  Missing in docs/04-reference/github-actions-workflows.md:")
+        for item in missing_in_doc:
+            print(f"    - {item}")
+    if extra_in_doc:
+        print("  Documented but missing on disk:")
+        for item in extra_in_doc:
+            print(f"    - {item}")
+    return len(missing_in_doc) + len(extra_in_doc)
+
+
 def _run_provider_overview_check() -> int:
     missing_in_readme, extra_in_readme = check_chembl_provider_overview()
     if not (missing_in_readme or extra_in_readme):
-        print("ChEMBL provider overview: OK (README links match provider docs)")
+        print(
+            "ChEMBL provider overview: OK "
+            "(README links match active entity-config inventory)"
+        )
         return 0
 
     _print_section_header("CHEMBL PROVIDER OVERVIEW MISMATCH")
     if missing_in_readme:
-        print("  Missing in docs/04-reference/providers/README.md:")
+        print("  Active ChEMBL entity configs missing in docs/04-reference/providers/README.md:")
         for item in missing_in_readme:
             print(f"    - chembl/{item}.md")
     if extra_in_readme:
-        print("  Linked in README but missing on disk:")
+        print("  Linked in README but not backed by an active ChEMBL entity config:")
         for item in extra_in_readme:
             print(f"    - chembl/{item}.md")
     return len(missing_in_readme) + len(extra_in_readme)
@@ -1309,6 +1359,10 @@ def _check_runner_table(
         "specs": (args.specs, _run_specs_check),
         "configs": (args.configs, _run_configs_check),
         "contracts_index": (args.contracts_index, _run_contracts_index_check),
+        "workflow_inventory": (
+            args.workflow_inventory,
+            _run_workflow_inventory_check,
+        ),
         "provider_overview": (args.provider_overview, _run_provider_overview_check),
         "doc_governance": (args.doc_governance, _run_doc_governance_check),
         "not_in_nav_growth": (args.not_in_nav_growth, _run_not_in_nav_growth_check),
@@ -1357,6 +1411,7 @@ def main() -> int:
         or args.specs
         or args.configs
         or args.contracts_index
+        or args.workflow_inventory
         or args.provider_overview
         or args.doc_governance
         or args.not_in_nav_growth
