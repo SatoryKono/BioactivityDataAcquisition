@@ -20,19 +20,17 @@ from bioetl.domain.composite.config_composite_validation import (
 from bioetl.domain.composite.config_composite_validation import (
     validate_composite_config as _validate_composite_config,
 )
-from bioetl.domain.composite.config_dq import CompositeDQConfig
-from bioetl.domain.composite.config_dq import DQOverrideConfig
+from bioetl.domain.composite.config_cross_validation import CrossValidationConfig
+from bioetl.domain.composite.config_dq import CompositeDQConfig, DQOverrideConfig
 from bioetl.domain.composite.config_merge import MergeConfig
-from bioetl.domain.composite.config_schema import DataSchemaConfig, LayerColumnConfig
 from bioetl.domain.composite.config_runtime import ExecutionConfig, LineageConfig
+from bioetl.domain.composite.config_schema import DataSchemaConfig, LayerColumnConfig
 from bioetl.domain.composite.config_validators import (
     _coerce_to_tuple,
-    _coerce_to_typed_tuple,
     _require_non_empty,
     _validate_positive,
     _validate_positive_limit,
 )
-from bioetl.domain.composite.cross_validation import EnricherFieldPairing
 from bioetl.domain.composite.strategy import FallbackStrategy
 
 __all__ = [
@@ -196,80 +194,6 @@ class EnricherConfig:
     def is_many_to_one(self) -> bool:
         """Return True if this enricher has many-to-one cardinality (requires aggregation)."""
         return self.cardinality == EnricherCardinality.MANY_TO_ONE
-
-
-def _validate_cross_validation_thresholds(
-    warning_threshold: int,
-    error_threshold: int,
-    quarantine_threshold: int,
-) -> None:
-    if warning_threshold < 1:
-        raise ValueError(f"warning_threshold must be >= 1, got {warning_threshold}")
-    if error_threshold < 2:
-        raise ValueError(f"error_threshold must be >= 2, got {error_threshold}")
-    if warning_threshold >= error_threshold:
-        raise ValueError("warning_threshold must be < error_threshold")
-    if quarantine_threshold < 1:
-        raise ValueError(
-            f"quarantine_threshold must be >= 1, got {quarantine_threshold}"
-        )
-
-
-def _validate_cross_validation_tolerances(
-    fuzzy_threshold: float,
-    numeric_tolerance: float,
-) -> None:
-    if not 0.0 < fuzzy_threshold <= 1.0:
-        raise ValueError(
-            f"fuzzy_threshold must be in (0.0, 1.0], got {fuzzy_threshold}"
-        )
-    if not 0.0 < numeric_tolerance <= 1.0:
-        raise ValueError(
-            f"numeric_tolerance must be in (0.0, 1.0], got {numeric_tolerance}"
-        )
-
-
-@dataclass(frozen=True, slots=True)
-class CrossValidationConfig:
-    """Configuration for cross-enricher data validation."""
-
-    enabled: bool = True
-    warning_threshold: int = 1
-    error_threshold: int = 2
-    quarantine_threshold: int = 2
-    fuzzy_threshold: float = 0.8
-    numeric_tolerance: float = 0.10
-    enricher_pairings: tuple[EnricherFieldPairing, ...] = ()
-
-    def __post_init__(self) -> None:
-        _coerce_to_typed_tuple(self, "enricher_pairings", EnricherFieldPairing)
-        self._validate()
-
-    def _validate(self) -> None:
-        _validate_cross_validation_thresholds(
-            self.warning_threshold,
-            self.error_threshold,
-            self.quarantine_threshold,
-        )
-        _validate_cross_validation_tolerances(
-            self.fuzzy_threshold,
-            self.numeric_tolerance,
-        )
-
-    def get_pairing(self, enricher_pipeline: str) -> EnricherFieldPairing | None:
-        """Look up field pairing config for the given enricher pipeline.
-
-        Args:
-            enricher_pipeline: Pipeline name to look up in the enricher_pairings list.
-
-        Returns:
-            Matching EnricherFieldPairing if found, otherwise None.
-        """
-        for pairing in self.enricher_pairings:
-            if pairing.enricher_pipeline == enricher_pipeline:
-                return pairing
-        return None
-
 
 @dataclass(frozen=True, slots=True)
 class CompositeConfig:
