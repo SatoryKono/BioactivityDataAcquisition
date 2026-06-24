@@ -1,0 +1,2 @@
+test_nodeid,total_runs,intermittent_fails,flaky_index,triage_status,suspected_cause
+tests/unit/infrastructure/test_y.py::test_flaky,5,2,0.4,quarantined,shared_state
