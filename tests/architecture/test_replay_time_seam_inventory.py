@@ -6,24 +6,18 @@ import ast
 from pathlib import Path
 
 import pytest
+import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
+TIME_SEAM_REGISTRY = ROOT / "configs/quality/time_seam_classification.yaml"
 REPLAY_CRITICAL_FILES = (
     ROOT / "src/bioetl/application/core/lifecycle/checkpoint_manager.py",
     ROOT / "src/bioetl/application/composite/runner_pkg/runner_support_runtime.py",
     ROOT / "src/bioetl/infrastructure/checkpoint/local_checkpoint.py",
 )
-APPLICATION_WALL_CLOCK_ALLOWLIST: dict[str, dict[str, str]] = {
-    "src/bioetl/application/runtime_clock.py": {
-        "RuntimeClockService.now": "ClockPort implementation seam",
-    },
-    "src/bioetl/application/services/debug_export_helpers.py": {
-        "_utc_now": "operator debug-export default created_at factory",
-    },
-    "src/bioetl/application/services/export_manifest_identity.py": {
-        "utc_now": "operator-only export manifest timestamp fallback",
-    },
-}
+_APPLICATION_TIME_SEAM_CATEGORIES = frozenset(
+    {"operator_time_allowed", "runtime_clock_adapter"}
+)
 
 pytestmark = pytest.mark.architecture
 
@@ -101,6 +95,33 @@ def _application_wall_clock_seams(path: Path) -> list[str]:
     return visitor.calls
 
 
+def _load_application_wall_clock_allowlist() -> dict[str, set[str]]:
+    payload = yaml.safe_load(TIME_SEAM_REGISTRY.read_text(encoding="utf-8"))
+    assert isinstance(payload, dict)
+    seams = payload.get("seams", [])
+    assert isinstance(seams, list)
+
+    allowlist: dict[str, set[str]] = {}
+    for row in seams:
+        assert isinstance(row, dict)
+        path = row.get("path")
+        call = row.get("call")
+        scope = row.get("scope")
+        category = row.get("category")
+        replay_critical = row.get("replay_critical")
+        if not (
+            isinstance(path, str)
+            and path.startswith("src/bioetl/application/")
+            and call in {"datetime.now", "datetime.utcnow", "time.time"}
+        ):
+            continue
+        assert isinstance(scope, str) and scope
+        assert category in _APPLICATION_TIME_SEAM_CATEGORIES
+        assert replay_critical is False
+        allowlist.setdefault(path, set()).add(scope)
+    return allowlist
+
+
 def test_replay_critical_checkpoint_surfaces_do_not_call_wall_clock_directly() -> None:
     violations = {
         path.relative_to(ROOT).as_posix(): _forbidden_wall_clock_calls(path)
@@ -125,7 +146,7 @@ def test_application_wall_clock_seams_are_classified_and_bounded() -> None:
     }
     expected = {
         relative_path: set(functions)
-        for relative_path, functions in APPLICATION_WALL_CLOCK_ALLOWLIST.items()
+        for relative_path, functions in _load_application_wall_clock_allowlist().items()
     }
     assert normalized == expected, (
         "Application wall-clock seams drifted. Inject ClockPort or explicit "

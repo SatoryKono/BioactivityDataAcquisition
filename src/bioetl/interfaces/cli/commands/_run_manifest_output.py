@@ -9,6 +9,7 @@ from bioetl.interfaces.cli.commands._run_manifest_output_diagnostics import (
     render_identity_graph_section,
 )
 from bioetl.interfaces.cli.commands.run_manifest_output_support import (
+    append_rendered_field,
     format_block,
     format_scalar,
     render_ledger_section,
@@ -134,12 +135,12 @@ def render_diff_payload(payload: dict[str, object]) -> str:
         value = payload.get(label)
         if value in (None, [], ()):
             continue
-        rendered = format_block(value, json_renderer=_render_jsonish_block)
-        if len(rendered) == 1:
-            lines.append(f"  {label}: {rendered[0]}")
-            continue
-        lines.append(f"  {label}:")
-        lines.extend(f"    {line}" for line in rendered)
+        append_rendered_field(
+            lines,
+            label,
+            value,
+            json_renderer=_render_jsonish_block,
+        )
     if not isinstance(differences, list) or not differences:
         lines.append("  differences: 0")
         return "\n".join(lines)
@@ -182,12 +183,12 @@ def render_verify_payload(payload: dict[str, object]) -> str:
         "left_authoritative_replay_dossier",
         "right_authoritative_replay_dossier",
     ):
-        rendered = format_block(payload.get(label), json_renderer=_render_jsonish_block)
-        if len(rendered) == 1:
-            lines.append(f"  {label}: {rendered[0]}")
-            continue
-        lines.append(f"  {label}:")
-        lines.extend(f"    {line}" for line in rendered)
+        append_rendered_field(
+            lines,
+            label,
+            payload.get(label),
+            json_renderer=_render_jsonish_block,
+        )
     return "\n".join(lines)
 
 
@@ -211,12 +212,12 @@ def render_forensic_diff_payload(payload: dict[str, object]) -> str:
         "lineage_closure",
         "missing_evidence",
     ):
-        rendered = format_block(payload.get(label), json_renderer=_render_jsonish_block)
-        if len(rendered) == 1:
-            lines.append(f"  {label}: {rendered[0]}")
-            continue
-        lines.append(f"  {label}:")
-        lines.extend(f"    {line}" for line in rendered)
+        append_rendered_field(
+            lines,
+            label,
+            payload.get(label),
+            json_renderer=_render_jsonish_block,
+        )
     return "\n".join(lines)
 
 

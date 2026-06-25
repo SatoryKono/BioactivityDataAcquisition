@@ -2,8 +2,8 @@
   "summary": {
     "snapshot_date": "2026-06-23",
     "targets": 4,
-    "total_duplicate_clusters": 102,
-    "total_raw_duplicate_clusters": 102,
+    "total_duplicate_clusters": 101,
+    "total_raw_duplicate_clusters": 101,
     "total_excluded_duplicate_clusters": 0
   },
   "normalization": {
@@ -16,10 +16,10 @@
   "reduction_leverage_ranking": [
     {
       "target": "src/bioetl/interfaces/cli",
-      "duplicate_clusters": 8,
+      "duplicate_clusters": 7,
       "dominant_actionability_category": "cli_command_contract_shell",
-      "dominant_actionability_cluster_count": 8,
-      "low_risk_cluster_count": 8,
+      "dominant_actionability_cluster_count": 7,
+      "low_risk_cluster_count": 7,
       "low_risk_cluster_share": 1.0,
       "recommended_first_wave": true
     },
@@ -54,7 +54,7 @@
   "first_wave": {
     "status": "selected",
     "target": "src/bioetl/interfaces/cli",
-    "duplicate_clusters": 8,
+    "duplicate_clusters": 7,
     "dominant_actionability_category": "cli_command_contract_shell",
     "selection_rule": "prefer low-risk actionability families with bounded cluster counts, then maximize duplicate reduction leverage"
   },
@@ -1778,23 +1778,16 @@
     {
       "target": "src/bioetl/interfaces/cli",
       "returncode": 8,
-      "duplicate_count": 8,
-      "raw_duplicate_count": 8,
+      "duplicate_count": 7,
+      "raw_duplicate_count": 7,
       "excluded_duplicate_count": 0,
       "actionability": [
         {
           "category": "cli_command_contract_shell",
-          "duplicate_clusters": 8
+          "duplicate_clusters": 7
         }
       ],
       "top_pairs": [
-        {
-          "modules": [
-            "bioetl.interfaces.cli.commands._run_manifest_output",
-            "bioetl.interfaces.cli.commands.run_manifest_output_support"
-          ],
-          "duplicate_clusters": 1
-        },
         {
           "modules": [
             "bioetl.interfaces.cli.commands._workflow_command_runtime",
@@ -1820,6 +1813,13 @@
           "modules": [
             "bioetl.interfaces.cli.commands.domains.composite.command_input",
             "bioetl.interfaces.cli.commands.domains.composite.runtime"
+          ],
+          "duplicate_clusters": 1
+        },
+        {
+          "modules": [
+            "bioetl.interfaces.cli.commands.domains.health.server_integration",
+            "bioetl.interfaces.cli.commands.health"
           ],
           "duplicate_clusters": 1
         }
@@ -1865,6 +1865,23 @@
           "actionability_category": "cli_command_contract_shell",
           "modules": [
             {
+              "module": "bioetl.interfaces.cli.commands.diagnostics",
+              "start_line": 340,
+              "end_line": 350
+            },
+            {
+              "module": "bioetl.interfaces.cli.commands.quarantine",
+              "start_line": 167,
+              "end_line": 177
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/interfaces/cli/commands/domains/shared/__init__.py",
+          "line": 1,
+          "actionability_category": "cli_command_contract_shell",
+          "modules": [
+            {
               "module": "bioetl.interfaces.cli.commands.domains.health.server_integration",
               "start_line": 115,
               "end_line": 129
@@ -1899,26 +1916,9 @@
           "actionability_category": "cli_command_contract_shell",
           "modules": [
             {
-              "module": "bioetl.interfaces.cli.commands.diagnostics",
-              "start_line": 348,
-              "end_line": 355
-            },
-            {
-              "module": "bioetl.interfaces.cli.commands.quarantine",
-              "start_line": 176,
-              "end_line": 183
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/interfaces/cli/commands/domains/shared/__init__.py",
-          "line": 1,
-          "actionability_category": "cli_command_contract_shell",
-          "modules": [
-            {
               "module": "bioetl.interfaces.cli.commands.domains.run_all.public_runtime",
-              "start_line": 176,
-              "end_line": 183
+              "start_line": 169,
+              "end_line": 176
             },
             {
               "module": "bioetl.interfaces.cli.commands.run",
@@ -1941,23 +1941,6 @@
               "module": "bioetl.interfaces.cli.commands.vacuum",
               "start_line": 58,
               "end_line": 63
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/interfaces/cli/commands/domains/shared/__init__.py",
-          "line": 1,
-          "actionability_category": "cli_command_contract_shell",
-          "modules": [
-            {
-              "module": "bioetl.interfaces.cli.commands._run_manifest_output",
-              "start_line": 137,
-              "end_line": 142
-            },
-            {
-              "module": "bioetl.interfaces.cli.commands.run_manifest_output_support",
-              "start_line": 53,
-              "end_line": 66
             }
           ]
         }

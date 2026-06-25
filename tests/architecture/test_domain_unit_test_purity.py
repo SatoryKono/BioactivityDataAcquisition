@@ -152,8 +152,12 @@ _ALLOWED_RUNTIME_SEAMS: dict[tuple[str, str], str] = {
     ): "organism classification contract reads checked-in target.csv coverage fixture",
     (
         "tests/unit/domain/behavior/test_merged_metadata_explainability.py",
-        "subprocess.check_output",
+        "subprocess.run",
     ): "cross-process determinism contract validates stable fallback record IDs",
+}
+
+_SUBPROCESS_EXCEPTION_PATHS = {
+    "tests/unit/domain/behavior/test_merged_metadata_explainability.py",
 }
 
 
@@ -377,6 +381,34 @@ def test_domain_surfaces_do_not_use_filesystem_wall_clock_or_yaml_seams(
         + ", ".join(label for label, _reason in DISALLOWED_RUNTIME_SEAMS)
         + "\n\nAllowed exceptions must be explicit in _ALLOWED_RUNTIME_SEAMS."
     )
+
+
+def test_subprocess_backed_domain_unit_tests_are_explicitly_marked_and_allowlisted(
+    project_root: Path,
+) -> None:
+    """Subprocess-backed domain tests must remain an explicit reviewed exception."""
+    root = project_root / "tests" / "unit" / "domain"
+    detected_paths: set[str] = set()
+
+    for py_file in sorted(root.rglob("test_*.py")):
+        violations = _collect_disallowed_runtime_seams(py_file)
+        if not any(
+            violation.seam.startswith("subprocess.") for violation in violations
+        ):
+            continue
+        relative_path = _relative_repo_path(project_root, py_file)
+        detected_paths.add(relative_path)
+        text = py_file.read_text(encoding="utf-8")
+        assert "pytest.mark.subprocess_backed" in text, (
+            f"{relative_path} spawns a child process but is not explicitly marked "
+            "pytest.mark.subprocess_backed"
+        )
+
+    assert detected_paths == _SUBPROCESS_EXCEPTION_PATHS
+    allowed_subprocess_paths = {
+        path for path, seam in _ALLOWED_RUNTIME_SEAMS if seam.startswith("subprocess.")
+    }
+    assert allowed_subprocess_paths == _SUBPROCESS_EXCEPTION_PATHS
 
 
 def test_runtime_seam_detector_catches_representative_violations(

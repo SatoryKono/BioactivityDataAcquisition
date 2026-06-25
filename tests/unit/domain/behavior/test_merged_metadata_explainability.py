@@ -149,6 +149,8 @@ def test_record_id_fallback_is_stable_for_equivalent_record_order() -> None:
     assert len(first[0].record_id) == 64
 
 
+@pytest.mark.unit
+@pytest.mark.subprocess_backed
 def test_record_id_fallback_is_stable_across_python_processes() -> None:
     code = textwrap.dedent(
         """

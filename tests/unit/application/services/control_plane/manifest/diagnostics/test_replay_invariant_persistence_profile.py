@@ -19,6 +19,8 @@ def _manifest() -> SimpleNamespace:
     return SimpleNamespace(
         provider="chembl",
         entity="activity",
+        launch_context={},
+        runtime_config={},
         code_provenance=SimpleNamespace(contract_ref="gold.chembl_activity"),
     )
 
@@ -113,3 +115,52 @@ def test_persistence_policy_facade_reexports_policy_helpers() -> None:
     for name in helper_names:
         helper: Any = getattr(persistence_policy, name)
         assert callable(helper)
+
+
+@pytest.mark.parametrize(
+    ("runtime_config", "expected"),
+    [
+        (
+            {
+                "pipeline": {
+                    "control_plane": {"checkpoint_compatibility_policy": "soft_fail"}
+                }
+            },
+            "soft_fail",
+        ),
+        ({"control_plane": {"checkpoint_compatibility_policy": "observe"}}, "observe"),
+    ],
+)
+def test_resolve_requested_checkpoint_policy_reads_canonical_runtime_config_paths(
+    runtime_config: dict[str, Any],
+    expected: str,
+) -> None:
+    manifest = _manifest()
+    manifest.runtime_config = runtime_config
+
+    assert (
+        persistence_policy._resolve_requested_checkpoint_compatibility_policy(manifest)
+        == expected
+    )
+
+
+def test_resolve_requested_checkpoint_policy_ignores_retired_top_level_runtime_config_alias() -> (
+    None
+):
+    manifest = _manifest()
+    manifest.runtime_config = {"checkpoint_compatibility_policy": "soft_fail"}
+
+    assert (
+        persistence_policy._resolve_requested_checkpoint_compatibility_policy(manifest)
+        is None
+    )
+
+
+def test_resolve_requested_checkpoint_policy_still_accepts_launch_context() -> None:
+    manifest = _manifest()
+    manifest.launch_context = {"checkpoint_compatibility_policy": "hard_fail"}
+
+    assert (
+        persistence_policy._resolve_requested_checkpoint_compatibility_policy(manifest)
+        == "hard_fail"
+    )

@@ -212,6 +212,7 @@ markers = [
     "smoke: Smoke tests (quick sanity checks for local development)",
     "serial: Tests that must run serially (not parallel-safe, e.g., shared state)",
     "repo_backed: Unit-path tests that read repository files and run outside the unit-fast lane",
+    "subprocess_backed: Explicitly reviewed child-process tests retained under unit governance",
     "no_api: Tests that do not require external API access",
     "chembl: ChEMBL provider-specific tests",
     "pubchem: PubChem provider-specific tests",

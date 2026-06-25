@@ -4,12 +4,12 @@
 
 - evidence_source: `remote_main_git_tree`
 - remote_main_ref: `refs/heads/main`
-- remote_main_sha: `be4d8f0c449fff5525e00e2dee90f70c2eddd190`
+- remote_main_sha: `a8d669d61f51ca966b467ba8179acfdb484d34bd`
 - local_tracking_ref_matches_remote: `True`
 
 | artifact | blob_sha256 | available |
 | --- | --- | --- |
-| `reports/quality/architecture-quality-scorecard.json` | `9456023ba2fcf27c8ab8c7d7288dbf2055ef38badf2ea9e28a453edecd6dea77` | `True` |
+| `reports/quality/architecture-quality-scorecard.json` | `41f77a52a80bcb7cc8119fc312c7fd952b1ec17e7e7957895d97805e348747e1` | `True` |
 | `reports/quality/module-coverage-inventory.json` | `07888b0ebc08c6c7455cf85bd42666027c33775688023eb50a839a95eeba545a` | `True` |
 | `reports/quality/compatibility-importer-census.json` | `a8c58141355b5a47d7de612fab105f46e8669a8108388a58d94b6a5764919d38` | `True` |
 | `reports/quality/dead-code-inventory.json` | `07c07f94675318dd1c3bb6071d7107d4b50d057079399903b24818a713e58831` | `True` |
