@@ -42,7 +42,7 @@ REBUILD_ONLY_DIRS = (
     "src/memory/timeline/events",
 )
 DEFAULT_EPISODIC_NOTE_SCAN_LIMIT = 200
-VALIDATION_NOTE_READ_TIMEOUT_SECONDS = max(NOTE_READ_TIMEOUT_SECONDS, 5.0)
+VALIDATION_NOTE_READ_TIMEOUT_SECONDS = max(NOTE_READ_TIMEOUT_SECONDS, 15.0)
 
 
 @dataclass(frozen=True, slots=True)
@@ -59,8 +59,7 @@ def _should_force_threaded_note_reads_for_validation() -> bool:
     Cloud-synced Windows drive letters can block on plain file reads while still
     looking like local volumes, so the validator should prefer the guarded path.
     """
-    # Temporarily disable forced threading on Windows to avoid timeout issues
-    # return os.name == "nt"
+    # Temporarily disable forced threading to avoid Windows threading issues
     return False
 
 

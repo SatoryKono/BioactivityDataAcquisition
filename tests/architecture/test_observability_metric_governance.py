@@ -187,10 +187,16 @@ def test_observability_metric_governance_declares_required_views_and_evidence_pa
         "runtime_emitters",
         "helper_backed_emitters",
         "alias_emitters",
+        "docs_mentions",
+        "rules_mentions",
     ]
     assert touched_metric_change_gate["changed_path_trigger_static_paths"] == [
         "configs/quality/observability_metric_inventory_allowlist.yaml",
         "configs/quality/observability_metric_declarations.yaml",
+    ]
+    assert touched_metric_change_gate["changed_path_trigger_prefixes"] == [
+        "grafana/dashboards/",
+        "grafana/prometheus-rules/",
     ]
     assert str(touched_metric_change_gate["rationale"]).strip()
 

@@ -16,7 +16,6 @@ from bioetl.interfaces.cli.commands.domains.diagnostics.operations import (
     emit_forensic_run_diff,
     emit_manifest_payload,
     emit_metrics_profile,
-    emit_quarantine_stats,
     emit_run_dossier,
     run_health_diagnostics,
 )
@@ -26,7 +25,7 @@ from bioetl.interfaces.cli.commands.domains.diagnostics.rendering import (
 )
 from bioetl.interfaces.cli.commands.domains.quarantine.support import (
     _QuarantineRuntimeService,
-    _resolve_silver_filter_error_code,
+    _show_quarantine_stats_for_cli_options,
 )
 from bioetl.interfaces.cli.commands.domains.shared.inspection_commands import (
     add_audit_run_options,
@@ -339,20 +338,17 @@ def diagnostics_quarantine(
 ) -> None:
     """Inspect quarantine statistics from the unified operator entrypoint."""
     bundle = get_observability_diagnostics_bundle()
-    resolved_error_code = _resolve_silver_filter_error_code(
-        silver_filter_only=silver_filter_only,
-        error_code=error_code,
-        silver_filter_error_code=SILVER_FILTER_ERROR_CODE,
-    )
-    emit_quarantine_stats(
-        bundle,
+    _show_quarantine_stats_for_cli_options(
         get_quarantine_runtime_service(pipeline),
         pipeline=pipeline,
         output_json=output_json,
-        error_code=resolved_error_code,
+        error_code=error_code,
+        silver_filter_only=silver_filter_only,
+        silver_filter_error_code=SILVER_FILTER_ERROR_CODE,
         top=top,
         group_by=group_by,
         run_id=run_id,
+        run_manifest_service=bundle.run_manifest_service if run_id else None,
     )
 
 

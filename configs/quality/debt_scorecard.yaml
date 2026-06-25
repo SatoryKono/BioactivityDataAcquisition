@@ -496,7 +496,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 180
-      total_loc: 22328
+      total_loc: 22325
       files_ge_250_loc: 7
       helper_function_ratio: 0.355
       max_internal_fan_in: 11
@@ -504,7 +504,7 @@ hotspot_family_ratchets:
     trend:
       status: confirmed_2026-06-22_application_core_ratchet_sync
       next_action: 2026-06-22 confirms application_core against the tracked
-        reviewed baseline artifact and live family census at 180 files, 22328
+        reviewed baseline artifact and live family census at 180 files, 22325
         LOC, 7 files_ge_250_loc, helper_function_ratio 0.355, and
         max_internal_fan_in 11 while bounded-growth budgets remain unchanged
         at 13 files_ge_250_loc and max_internal_fan_in 14.

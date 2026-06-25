@@ -35,6 +35,23 @@ def format_block(
     return [format_scalar(value)]
 
 
+def append_rendered_field(
+    lines: list[str],
+    label: str,
+    value: object,
+    *,
+    json_renderer: _JsonRenderer,
+    indent: str = "  ",
+) -> None:
+    """Append one formatted field, preserving nested indentation."""
+    rendered = format_block(value, json_renderer=json_renderer)
+    if len(rendered) == 1:
+        lines.append(f"{indent}{label}: {rendered[0]}")
+        return
+    lines.append(f"{indent}{label}:")
+    lines.extend(f"{indent}  {line}" for line in rendered)
+
+
 def append_section(
     lines: list[str],
     title: str,
@@ -50,12 +67,12 @@ def append_section(
         lines.append("")
     lines.append(title)
     for label, value in filtered:
-        rendered = format_block(value, json_renderer=json_renderer)
-        if len(rendered) == 1:
-            lines.append(f"  {label}: {rendered[0]}")
-            continue
-        lines.append(f"  {label}:")
-        lines.extend(f"    {line}" for line in rendered)
+        append_rendered_field(
+            lines,
+            label,
+            value,
+            json_renderer=json_renderer,
+        )
 
 
 def render_manifest_section(
@@ -251,7 +268,9 @@ def render_reproducibility_compact_section(
     )
     return lines
 
+
 __all__ = [
+    "append_rendered_field",
     "append_section",
     "format_block",
     "format_scalar",

@@ -112,10 +112,6 @@ def _resolve_requested_checkpoint_compatibility_policy(
             "control_plane",
             "checkpoint_compatibility_policy",
         ),
-        lookup_mapping_path(
-            manifest.runtime_config,
-            "checkpoint_compatibility_policy",
-        ),
     )
     for candidate in candidates:
         if isinstance(candidate, str):

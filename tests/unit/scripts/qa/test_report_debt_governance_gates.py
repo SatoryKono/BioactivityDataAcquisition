@@ -212,6 +212,94 @@ def test_observability_touched_metric_review_gate_passes_without_metric_changes(
     assert gate.current == 0
 
 
+def test_collect_metric_change_trigger_paths_includes_dashboard_and_alert_surfaces() -> (
+    None
+):
+    trigger_paths = gates._collect_metric_change_trigger_paths(
+        {
+            "runtime_emitters": {
+                "bioetl_example_total": ["src/bioetl/observability/example.py"]
+            },
+            "docs_mentions": {
+                "bioetl_example_total": ["grafana/dashboards/example.json"]
+            },
+            "rules_mentions": {
+                "bioetl_example_total": ["grafana/prometheus-rules/example.yml"]
+            },
+        },
+        {
+            "runtime_cardinality_review": {
+                "live_evidence": {
+                    "touched_metric_change_gate": {
+                        "changed_path_trigger_fields": [
+                            "runtime_emitters",
+                            "docs_mentions",
+                            "rules_mentions",
+                        ],
+                        "changed_path_trigger_static_paths": [
+                            "configs/quality/observability_metric_declarations.yaml"
+                        ],
+                        "changed_path_trigger_prefixes": [
+                            "grafana/dashboards/",
+                            "grafana/prometheus-rules/",
+                        ],
+                    }
+                }
+            }
+        },
+    )
+
+    assert {
+        "src/bioetl/observability/example.py",
+        "grafana/dashboards/example.json",
+        "grafana/prometheus-rules/example.yml",
+        "configs/quality/observability_metric_declarations.yaml",
+        "grafana/dashboards/",
+        "grafana/prometheus-rules/",
+    } <= trigger_paths
+
+
+def test_observability_touched_metric_review_gate_matches_static_prefixes() -> None:
+    gate = gates._observability_touched_metric_review_gate(
+        {"generated_at": "2026-06-04T15:01:29Z", "status": "passed"},
+        changed_paths={"grafana/dashboards/new-metric.json"},
+        trigger_paths={"grafana/dashboards/"},
+        now=datetime(2026, 7, 6, 15, 1, 29, tzinfo=UTC),
+    )
+
+    assert gate.status == "fail"
+    assert gate.current == 1
+
+
+def test_observability_touched_metric_inventory_gate_passes_without_metric_changes() -> (
+    None
+):
+    gate = gates._observability_touched_metric_inventory_gate(
+        {"declared_metrics": []},
+        changed_paths={"docs/README.md"},
+        trigger_paths={"grafana/dashboards/"},
+        repo_root=gates.PROJECT_ROOT,
+        current_inventory={"declared_metrics": []},
+    )
+
+    assert gate.status == "pass"
+    assert gate.current == 0
+
+
+def test_observability_touched_metric_inventory_gate_fails_for_stale_artifact() -> None:
+    gate = gates._observability_touched_metric_inventory_gate(
+        {"declared_metrics": ["bioetl_old_total"]},
+        changed_paths={"grafana/prometheus-rules/new-rule.yml"},
+        trigger_paths={"grafana/prometheus-rules/"},
+        repo_root=gates.PROJECT_ROOT,
+        current_inventory={"declared_metrics": ["bioetl_new_total"]},
+    )
+
+    assert gate.status == "fail"
+    assert gate.current is False
+    assert gate.limit is True
+
+
 def test_observability_touched_metric_review_gate_fails_for_stale_review() -> None:
     gate = gates._observability_touched_metric_review_gate(
         {"generated_at": "2026-06-04T15:01:29Z", "status": "passed"},

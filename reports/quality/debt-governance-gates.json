@@ -28,8 +28,8 @@
       "status": "pass"
     },
     {
-      "current": "1a82de12bf64eb368098ff2f2928311b8a6dbaec7dd2bd7180f1c93924797f9d",
-      "limit": "1a82de12bf64eb368098ff2f2928311b8a6dbaec7dd2bd7180f1c93924797f9d",
+      "current": "bc00959653a154d593438e42c504e25af2e6430ae04741d387b1ca249f97e15b",
+      "limit": "bc00959653a154d593438e42c504e25af2e6430ae04741d387b1ca249f97e15b",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -208,7 +208,7 @@
       "status": "pass"
     },
     {
-      "current": 19,
+      "current": 21,
       "limit": 21,
       "metric": "generated_at_age_days",
       "name": "observability_release_review_freshness",
@@ -220,8 +220,17 @@
       "current": 0,
       "limit": 0,
       "metric": "changed_metric_surface_count",
+      "name": "observability_touched_metric_inventory_freshness",
+      "remediation": "Refresh runtime cardinality inventory evidence before merging metric, dashboard, or alert-rule changes.",
+      "source_artifact": "reports/observability/runtime_cardinality_inventory.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "changed_metric_surface_count",
       "name": "observability_touched_metric_review_freshness",
-      "remediation": "Refresh live runtime cardinality review evidence before merging metric emitter or declaration changes.",
+      "remediation": "Refresh live runtime cardinality review evidence before merging metric, dashboard, or alert-rule changes.",
       "source_artifact": "reports/observability/runtime_cardinality_review.json",
       "status": "pass"
     },
@@ -235,7 +244,7 @@
       "status": "pass"
     },
     {
-      "current": "f986ed34d82f14ce61da758493be621f4007f0d6",
+      "current": "a8d669d61f51ca966b467ba8179acfdb484d34bd",
       "limit": "clean remote-main tree evidence",
       "metric": "remote_main_sha",
       "name": "remote_main_architecture_debt_baseline",
@@ -263,7 +272,7 @@
   },
   "status_counts": {
     "fail": 0,
-    "pass": 28,
+    "pass": 29,
     "warn": 0
   },
   "summary": {
@@ -271,8 +280,8 @@
     "architecture_quality_scorecard_interpretation": "satisfactory_system_refactoring_required",
     "fail_count": 0,
     "failing_gates": [],
-    "gate_count": 28,
-    "pass_count": 28,
+    "gate_count": 29,
+    "pass_count": 29,
     "release_gate_status": "passing",
     "warn_count": 0,
     "warning_gates": []

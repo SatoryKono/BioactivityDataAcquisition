@@ -150,10 +150,7 @@ def test_reproducibility_scoring_support_bounds_and_normalizes_values() -> None:
         supported_boundary_block_reason({"reason": ""})
         == "blocked_outside_supported_boundary"
     )
-    assert (
-        supported_boundary_block_reason(None)
-        == "blocked_outside_supported_boundary"
-    )
+    assert supported_boundary_block_reason(None) == "blocked_outside_supported_boundary"
 
 
 def test_base_summary_payload_sections_preserve_replay_and_snapshot_contract() -> None:
@@ -1231,6 +1228,22 @@ def test_build_diagnostics_summary_normalizes_removed_legacy_observe_policy() ->
         "legacy_observe_checkpoint_policy"
         not in (score["category_scores"]["checkpoint_safety"]["blockers"])
     )
+
+
+def test_build_diagnostics_summary_ignores_retired_top_level_checkpoint_policy_alias() -> (
+    None
+):
+    manifest = replace(
+        _make_manifest(),
+        launch_context={"resume": True},
+        runtime_config={"checkpoint_compatibility_policy": "observe"},
+    )
+
+    summary = build_diagnostics_summary(manifest, ())
+
+    resume_contract = summary["resume_contract"]
+    assert resume_contract["requested_checkpoint_compatibility_policy"] is None
+    assert resume_contract["applied_checkpoint_compatibility_policy"] == "hard_fail"
 
 
 def test_build_diagnostics_summary_coerces_observe_for_replay_ready_profile() -> None:

@@ -42,6 +42,7 @@ __all__ = [
     "_resolve_quarantine_record",
     "_resolve_silver_filter_error_code",
     "_show_quarantine_stats",
+    "_show_quarantine_stats_for_cli_options",
 ]
 
 
@@ -251,6 +252,36 @@ def _show_quarantine_stats(
         click.echo(json.dumps(stats, indent=2))
         return
     _render_stats_dashboard(stats, pipeline=pipeline, top=top, group_by=group_by)
+
+
+def _show_quarantine_stats_for_cli_options(
+    runtime_service: _QuarantineRuntimeService,
+    *,
+    pipeline: str,
+    output_json: bool,
+    error_code: str | None,
+    silver_filter_only: bool,
+    silver_filter_error_code: str,
+    top: int = 10,
+    group_by: str | None = None,
+    run_id: str | None = None,
+    run_manifest_service: RunManifestInspectionServiceProtocol | None = None,
+) -> None:
+    """Resolve shared CLI aliases before displaying quarantine statistics."""
+    _show_quarantine_stats(
+        runtime_service,
+        pipeline=pipeline,
+        output_json=output_json,
+        error_code=_resolve_silver_filter_error_code(
+            silver_filter_only=silver_filter_only,
+            error_code=error_code,
+            silver_filter_error_code=silver_filter_error_code,
+        ),
+        top=top,
+        group_by=group_by,
+        run_id=run_id,
+        run_manifest_service=run_manifest_service,
+    )
 
 
 def _replay_quarantine(

@@ -1,7 +1,7 @@
 version: 1
 policy_scope: config_compatibility_shapes
 review_owner: config-governance
-last_reviewed: "2026-05-12"
+last_reviewed: "2026-06-25"
 default_remove_after: "2026-09-30"
 
 policy:
@@ -159,4 +159,24 @@ retired_rejected_shapes:
       - configs/_schema/composite.json
     test_files:
       - tests/architecture/test_config_schema_legacy_status.py
+    risk: low
+
+  - id: runtime_config.retired_top_level_checkpoint_compatibility_policy
+    status: rejected
+    canonical_target: runtime_config.pipeline.control_plane.checkpoint_compatibility_policy
+    aliases:
+      - runtime_config.checkpoint_compatibility_policy
+    source_files:
+      - src/bioetl/application/services/control_plane/manifest/diagnostics/replay_invariants/persistence_policy.py
+      - src/bioetl/infrastructure/config/_pipeline_settings.py
+    test_files:
+      - tests/unit/application/services/control_plane/manifest/diagnostics/test_replay_invariant_persistence_profile.py
+      - tests/unit/application/services/test_run_manifest_diagnostics.py
+      - tests/architecture/test_checkpoint_compatibility_policy_surface.py
+    retired_on: "2026-06-25"
+    migration_evidence: >
+      Current config settings own checkpoint compatibility under
+      pipeline.control_plane.checkpoint_compatibility_policy. Manifest
+      diagnostics now ignore the retired top-level runtime_config alias while
+      preserving launch_context and canonical nested runtime_config paths.
     risk: low

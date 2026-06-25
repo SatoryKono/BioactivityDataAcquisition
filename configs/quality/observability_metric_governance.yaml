@@ -65,14 +65,20 @@ runtime_cardinality_review:
       - runtime_emitters
       - helper_backed_emitters
       - alias_emitters
+      - docs_mentions
+      - rules_mentions
       changed_path_trigger_static_paths:
       - configs/quality/observability_metric_inventory_allowlist.yaml
       - configs/quality/observability_metric_declarations.yaml
+      changed_path_trigger_prefixes:
+      - grafana/dashboards/
+      - grafana/prometheus-rules/
       rationale: >
-        Metric emitter and declaration changes must not merge behind stale or
-        degraded live cardinality evidence. Governance-only policy text may
-        evolve separately, but touched metric surfaces must see a fresh passed
-        release-grade review artifact in CI.
+        Metric emitter, declaration, dashboard, and alert rule changes must not
+        merge behind stale inventory or degraded live cardinality evidence.
+        Governance-only policy text may evolve separately, but touched metric
+        surfaces must see fresh static inventory and a passed release-grade
+        review artifact in CI.
   local_fallback_evidence:
     workflow: .github/workflows/tests.yml::governance-preflight
     artifact: reports/observability/runtime_cardinality_review_pr.json

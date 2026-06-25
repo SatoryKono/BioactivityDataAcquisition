@@ -20,6 +20,7 @@ import pytest
 
 from bioetl.domain.exceptions import SchemaEvolutionError
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from bioetl.infrastructure.storage.delta.schema_ops import delta_schema_to_pyarrow
 from tests.helpers.deterministic_ids import deterministic_batch_id, deterministic_run_id
 
 
@@ -261,7 +262,7 @@ class TestSchemaEvolutionEvolveMode:
         dt = DeltaTable(str(table_path))
         final_count = len(dt.to_pyarrow_table())
         assert final_count == 3  # 2 original + 1 new
-        assert "new_field" in dt.schema().to_pyarrow().names
+        assert "new_field" in delta_schema_to_pyarrow(dt.schema()).names
 
     async def test_schema_evolve_mode_logs_warning(
         self,

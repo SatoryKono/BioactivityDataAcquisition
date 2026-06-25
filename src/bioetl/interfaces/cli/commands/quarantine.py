@@ -25,6 +25,7 @@ from bioetl.interfaces.cli.commands.domains.quarantine.support import (
     _QuarantineRuntimeService,
     _QuarantineService,
     _resolve_silver_filter_error_code,
+    _show_quarantine_stats_for_cli_options,
 )
 
 SILVER_FILTER_ERROR_CODE = "FILTERED_OUT_SILVER"
@@ -164,20 +165,13 @@ def quarantine_stats(
     top: int,
 ) -> None:
     """Show quarantine statistics dashboard for a pipeline."""
-    from bioetl.interfaces.cli.commands.domains.quarantine.support import (
-        _show_quarantine_stats,
-    )
-
-    resolved_error_code = _resolve_silver_filter_error_code(
-        silver_filter_only=silver_filter_only,
-        error_code=error_code,
-        silver_filter_error_code=SILVER_FILTER_ERROR_CODE,
-    )
-    _show_quarantine_stats(
+    _show_quarantine_stats_for_cli_options(
         get_quarantine_runtime_service(pipeline),
         pipeline=pipeline,
         output_json=output_json,
-        error_code=resolved_error_code,
+        error_code=error_code,
+        silver_filter_only=silver_filter_only,
+        silver_filter_error_code=SILVER_FILTER_ERROR_CODE,
         top=top,
         group_by=group_by,
         run_id=run_id,
