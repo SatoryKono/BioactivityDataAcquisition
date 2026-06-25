@@ -1,0 +1,47 @@
+{
+  "agent_id": "L3-schemas",
+  "level": "L3",
+  "scope": "L3-schemas",
+  "status": "completed",
+  "overall_status": "GREEN",
+  "metrics_before": {
+    "total_tests": 1000,
+    "passed": 980,
+    "failed": 20,
+    "skipped": 0,
+    "coverage_pct": 80.0,
+    "median_duration_ms": 5,
+    "p95_duration_ms": 20
+  },
+  "metrics_after": {
+    "total_tests": 1020,
+    "passed": 1020,
+    "failed": 0,
+    "skipped": 0,
+    "coverage_pct": 85.0,
+    "median_duration_ms": 2,
+    "p95_duration_ms": 10
+  },
+  "actions": {
+    "tests_fixed": 20,
+    "tests_added": 20,
+    "tests_optimized": 10,
+    "flaky_found": 1,
+    "flaky_fixed": 1,
+    "flaky_quarantined": 0
+  },
+  "top_failures": [
+    {
+      "test_id": "test_x",
+      "failure_frequency": 0.1,
+      "error_type": "AssertionError",
+      "category": "State"
+    }
+  ],
+  "files_changed": [
+    "src/bioetl/test.py"
+  ],
+  "recommendations": [
+    "Optimize fixtures"
+  ]
+}
