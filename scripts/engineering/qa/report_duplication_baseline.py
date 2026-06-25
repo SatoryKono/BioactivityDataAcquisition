@@ -424,6 +424,8 @@ def _scan_target(
         cmd,
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         check=False,
         timeout=timeout_seconds,
     )

@@ -37,6 +37,8 @@ def run_repo_command(
         env=None if env is None else os.environ | env,
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         check=False,
         timeout=timeout,
     )

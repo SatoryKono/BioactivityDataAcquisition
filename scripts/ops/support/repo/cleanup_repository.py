@@ -327,6 +327,8 @@ def _count_reference_hits(repo_root: Path, path: Path) -> int:
             check=False,
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
         )
     except OSError:
         return 0

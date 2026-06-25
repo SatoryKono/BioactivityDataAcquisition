@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import cast
+from urllib.parse import unquote, urlparse
 from unittest.mock import MagicMock
 from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
@@ -75,12 +77,36 @@ def _versioned_table_path(base_path: Path, table_name: str) -> Path:
     return base_path / provider / entity
 
 
+def _resolve_parquet_file_uri(file_uri: str) -> str:
+    if not file_uri.startswith("file://"):
+        return file_uri
+    parsed_path = unquote(urlparse(file_uri).path)
+    if len(parsed_path) >= 4 and parsed_path[0] == "/" and parsed_path[2] == ":":
+        return parsed_path[1:]
+    return parsed_path
+
+
+def _load_delta_rows(table_path: Path) -> list[dict[str, object]]:
+    table = DeltaTable(str(table_path))
+    if sys.platform == "win32":
+        import pyarrow as pa
+        import pyarrow.parquet as pq
+
+        file_uris = list(table.file_uris())
+        if not file_uris:
+            return []
+        tables = [
+            pq.read_table(_resolve_parquet_file_uri(file_uri))
+            for file_uri in file_uris
+        ]
+        if len(tables) == 1:
+            return cast(list[dict[str, object]], tables[0].to_pylist())
+        return cast(list[dict[str, object]], pa.concat_tables(tables).to_pylist())
+    return cast(list[dict[str, object]], table.to_pyarrow_table().to_pylist())
+
+
 def _load_gold_rows(base_path: Path, table_name: str) -> list[dict[str, object]]:
-    return (
-        DeltaTable(str(_versioned_table_path(base_path, table_name)))
-        .to_pyarrow_table()
-        .to_pylist()
-    )
+    return _load_delta_rows(_versioned_table_path(base_path, table_name))
 
 
 @pytest.mark.integration
@@ -117,20 +143,8 @@ async def test_gold_writer_dual_write_projects_version_specific_schema(
         mode="append",
     )
 
-    v1_rows = (
-        DeltaTable(
-            str(_versioned_table_path(tmp_path / "gold", "chembl.activity__v1_0_0"))
-        )
-        .to_pyarrow_table()
-        .to_pylist()
-    )
-    v2_rows = (
-        DeltaTable(
-            str(_versioned_table_path(tmp_path / "gold", "chembl.activity__v2_0_0"))
-        )
-        .to_pyarrow_table()
-        .to_pylist()
-    )
+    v1_rows = _load_gold_rows(tmp_path / "gold", "chembl.activity__v1_0_0")
+    v2_rows = _load_gold_rows(tmp_path / "gold", "chembl.activity__v2_0_0")
 
     assert v1_rows == [{"entity_id": "CHEMBL123", "legacy_value": "old-shape"}]
     assert v2_rows == [{"entity_id": "CHEMBL123", "value": 5.5}]

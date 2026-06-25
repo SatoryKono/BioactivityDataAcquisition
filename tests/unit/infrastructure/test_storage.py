@@ -10,6 +10,7 @@ from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import UUID
 
+import pyarrow as pa
 import pytest
 import zstandard as zstd
 
@@ -514,9 +515,9 @@ class TestGoldWriter:
         call_args = mock_write_deltalake.call_args
         kwargs = call_args.kwargs
 
-        # data might be a RecordBatchReader
         data = kwargs.get("data")
         assert data is not None
+        assert isinstance(data, pa.Table)
 
         schema = data.schema
         column_names = schema.names

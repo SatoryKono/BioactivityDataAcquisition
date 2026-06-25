@@ -190,6 +190,8 @@ def _run_rg_reference_scan(
             input="\n".join(tokens) + "\n",
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             check=False,
         )
     except OSError:

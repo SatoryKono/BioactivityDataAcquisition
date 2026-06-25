@@ -510,7 +510,17 @@ def _collect_rows() -> list[dict[str, Any]]:
     return rows
 
 
-def build_payload() -> dict[str, Any]:
+def _existing_snapshot_date(path: Path) -> str | None:
+    if not path.exists():
+        return None
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        return None
+    snapshot_date = payload.get("snapshot_date")
+    return snapshot_date if isinstance(snapshot_date, str) else None
+
+
+def build_payload(*, snapshot_date: str | None = None) -> dict[str, Any]:
     rows = _collect_rows()
     covered_gold_enabled_count = sum(
         1 for row in rows if row["gold_enabled"] and row["parity_status"] == "covered"
@@ -524,7 +534,7 @@ def build_payload() -> dict[str, Any]:
         and row["constraint_completeness_status"] != "covered"
     ]
     return {
-        "snapshot_date": date.today().isoformat(),
+        "snapshot_date": snapshot_date or date.today().isoformat(),
         "row_count": len(rows),
         "gold_enabled_count": gold_enabled_count,
         "covered_gold_enabled_count": covered_gold_enabled_count,
@@ -628,9 +638,14 @@ def main(argv: list[str] | None = None) -> int:
         help="Fail when committed artifacts drift from generator output.",
     )
     args = parser.parse_args(argv)
+    snapshot_date = (
+        _existing_snapshot_date(args.json_out) if args.check else None
+    )
 
     if args.check:
-        expected = json.dumps(build_payload(), indent=2, sort_keys=True) + "\n"
+        expected = json.dumps(
+            build_payload(snapshot_date=snapshot_date), indent=2, sort_keys=True
+        ) + "\n"
         actual = args.json_out.read_text(encoding="utf-8")
         if actual != expected:
             print(

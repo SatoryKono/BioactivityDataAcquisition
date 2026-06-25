@@ -83,15 +83,11 @@ async def write_scd2_once(
             column_order,
         )
     except module.TableNotFoundError:
-        import pyarrow as pa
-
         arrow_data = writer._to_arrow_table(records, column_order=column_order)
         await writer._run_in_executor(
             lambda: module.write_deltalake(
                 table_or_uri=table_path,
-                data=pa.RecordBatchReader.from_batches(
-                    arrow_data.schema, arrow_data.to_batches()
-                ),
+                data=arrow_data,
                 mode="append",
                 partition_by=partition_cols,
             )

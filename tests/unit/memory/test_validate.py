@@ -135,7 +135,7 @@ def test_memory_scaffold_validation_skips_episodic_body_reads(
     assert validate_memory_scaffold(memory_root) == []
 
 
-def test_memory_scaffold_validation_uses_regular_note_reads(
+def test_memory_scaffold_validation_can_force_timeout_protected_note_reads(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -196,11 +196,15 @@ def test_memory_scaffold_validation_uses_regular_note_reads(
         "parse_markdown_note_metadata",
         tracking_parse_metadata,
     )
+    monkeypatch.setattr(
+        validation_module,
+        "_should_force_threaded_note_reads_for_validation",
+        lambda: True,
+    )
 
     assert validate_memory_scaffold(memory_root) == []
     assert observed_force_flags
-    # The default scaffold scan avoids spawning a timeout thread per note on Windows.
-    assert not any(observed_force_flags)
+    assert all(observed_force_flags)
 
 
 def test_memory_scaffold_validation_bounds_default_episodic_scan(
