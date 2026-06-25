@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+from pathlib import Path
 import subprocess
 import sys
 import textwrap
@@ -16,6 +18,43 @@ from bioetl.domain.behavior.merged_metadata_explainability import (
 from bioetl.domain.models.metadata import CompositeOutputExt
 
 pytestmark = pytest.mark.unit
+
+_REPO_ROOT = Path(__file__).resolve().parents[4]
+_SRC_ROOT = _REPO_ROOT / "src"
+_SUBPROCESS_SITE_PATHS = [
+    path
+    for path in sys.path
+    if "site-packages" in path or "dist-packages" in path
+]
+
+
+def _run_record_id_subprocess(code: str) -> str:
+    bootstrap = textwrap.dedent(
+        """
+        import sys
+        sys.path[:0] = {bootstrap_paths!r}
+        """
+    ).format(bootstrap_paths=[str(_SRC_ROOT), *_SUBPROCESS_SITE_PATHS])
+    env = {
+        key: value
+        for key, value in os.environ.items()
+        if key
+        not in {
+            "PYCHARM_HOSTED",
+            "PYTEST_ADDOPTS",
+            "PYTEST_CURRENT_TEST",
+        }
+    }
+    completed = subprocess.run(
+        [sys.executable, "-I", "-S", "-c", bootstrap + code],
+        check=True,
+        capture_output=True,
+        cwd=_REPO_ROOT,
+        env=env,
+        text=True,
+        timeout=15,
+    )
+    return completed.stdout.strip()
 
 
 def _metadata() -> CompositeOutputExt:
@@ -126,8 +165,8 @@ def test_record_id_fallback_is_stable_across_python_processes() -> None:
         """
     )
 
-    first = subprocess.check_output([sys.executable, "-c", code], text=True).strip()
-    second = subprocess.check_output([sys.executable, "-c", code], text=True).strip()
+    first = _run_record_id_subprocess(code)
+    second = _run_record_id_subprocess(code)
 
     assert first == second
     assert len(first) == 64

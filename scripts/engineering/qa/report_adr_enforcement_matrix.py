@@ -175,6 +175,8 @@ def _git_grep_reference_lines(repo_root: Path) -> list[tuple[str, str]] | None:
             check=False,
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
         )
     except OSError:
         return None
@@ -214,6 +216,8 @@ def _ripgrep_reference_lines(repo_root: Path) -> list[tuple[str, str]] | None:
             check=False,
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
         )
     except OSError:
         return None

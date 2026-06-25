@@ -254,11 +254,23 @@ def _collect_entity_rows() -> list[dict[str, Any]]:
     return rows
 
 
-def _render_markdown(rows: list[dict[str, str | bool]]) -> str:
+def _existing_snapshot_date(path: Path) -> str | None:
+    if not path.is_file():
+        return None
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        return None
+    snapshot_date = payload.get("snapshot_date")
+    return snapshot_date if isinstance(snapshot_date, str) and snapshot_date else None
+
+
+def _render_markdown(
+    rows: list[dict[str, str | bool]], *, snapshot_date: str
+) -> str:
     lines = [
         "# Pipeline Config Contract Ownership Map",
         "",
-        f"- snapshot_date: {date.today().isoformat()}",
+        f"- snapshot_date: {snapshot_date}",
         f"- row_count: {len(rows)}",
         "",
         "| pipeline_name | contract_ref | config_path | registry_status | "
@@ -279,7 +291,7 @@ def _render_markdown(rows: list[dict[str, str | bool]]) -> str:
     return "\n".join(lines)
 
 
-def build_payload() -> dict[str, Any]:
+def build_payload(*, snapshot_date: str) -> dict[str, Any]:
     rows = _collect_entity_rows()
     explicit_exclusions = [
         {
@@ -293,22 +305,25 @@ def build_payload() -> dict[str, Any]:
         if not row["gold_enabled"]
     ]
     return {
-        "snapshot_date": date.today().isoformat(),
+        "snapshot_date": snapshot_date,
         "row_count": len(rows),
         "explicit_exclusions": explicit_exclusions,
         "rows": rows,
     }
 
 
-def write_artifacts(*, json_out: Path, md_out: Path) -> None:
-    payload = build_payload()
+def write_artifacts(*, json_out: Path, md_out: Path, snapshot_date: str) -> None:
+    payload = build_payload(snapshot_date=snapshot_date)
     json_out.parent.mkdir(parents=True, exist_ok=True)
     md_out.parent.mkdir(parents=True, exist_ok=True)
     json_out.write_text(
         json.dumps(payload, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
-    md_out.write_text(_render_markdown(payload["rows"]), encoding="utf-8")
+    md_out.write_text(
+        _render_markdown(payload["rows"], snapshot_date=snapshot_date),
+        encoding="utf-8",
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -333,9 +348,15 @@ def main(argv: list[str] | None = None) -> int:
         help="Fail when committed artifacts drift from the generator output.",
     )
     args = parser.parse_args(argv)
+    snapshot_date = date.today().isoformat()
+    if args.check:
+        snapshot_date = _existing_snapshot_date(args.json_out) or snapshot_date
 
     if args.check:
-        expected = json.dumps(build_payload(), indent=2, sort_keys=True) + "\n"
+        expected = (
+            json.dumps(build_payload(snapshot_date=snapshot_date), indent=2, sort_keys=True)
+            + "\n"
+        )
         actual = args.json_out.read_text(encoding="utf-8")
         if actual != expected:
             print(
@@ -348,8 +369,12 @@ def main(argv: list[str] | None = None) -> int:
         print("[ok] pipeline-config-contract ownership map is up to date")
         return 0
 
-    write_artifacts(json_out=args.json_out, md_out=args.md_out)
-    payload = build_payload()
+    write_artifacts(
+        json_out=args.json_out,
+        md_out=args.md_out,
+        snapshot_date=snapshot_date,
+    )
+    payload = build_payload(snapshot_date=snapshot_date)
     print(
         "[pipeline-config-contract-ownership-map] "
         f"rows={payload['row_count']}; json={args.json_out}; md={args.md_out}"

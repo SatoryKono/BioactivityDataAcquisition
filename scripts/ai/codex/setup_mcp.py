@@ -299,6 +299,8 @@ def _run_codex_validation(workspace_root: Path) -> None:
         cwd=workspace_root,
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         check=False,
     )
     if result.returncode != 0:

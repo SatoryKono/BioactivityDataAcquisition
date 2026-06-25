@@ -111,6 +111,8 @@ def _tracked_family_python_files(*, path_prefixes: list[str]) -> list[Path] | No
         cwd=PROJECT_ROOT,
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         check=False,
     )
     if result.returncode != 0:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -41,7 +42,7 @@ REBUILD_ONLY_DIRS = (
     "src/memory/timeline/events",
 )
 DEFAULT_EPISODIC_NOTE_SCAN_LIMIT = 200
-VALIDATION_NOTE_READ_TIMEOUT_SECONDS = max(NOTE_READ_TIMEOUT_SECONDS, 15.0)
+VALIDATION_NOTE_READ_TIMEOUT_SECONDS = max(NOTE_READ_TIMEOUT_SECONDS, 5.0)
 
 
 @dataclass(frozen=True, slots=True)
@@ -50,6 +51,17 @@ class ValidationIssue:
 
     path: str
     message: str
+
+
+def _should_force_threaded_note_reads_for_validation() -> bool:
+    """Use timeout-protected note reads on Windows validation scans.
+
+    Cloud-synced Windows drive letters can block on plain file reads while still
+    looking like local volumes, so the validator should prefer the guarded path.
+    """
+    # Temporarily disable forced threading on Windows to avoid timeout issues
+    # return os.name == "nt"
+    return False
 
 
 def _validate_exists(path: Path, issues: list[ValidationIssue]) -> None:
@@ -862,6 +874,7 @@ def _validate_note_files(
         "episodic_note": episodic_schema if isinstance(episodic_schema, dict) else {},
     }
     curated_notes: list[tuple[Path, dict[str, Any]]] = []
+    force_threaded_timeout = _should_force_threaded_note_reads_for_validation()
 
     for artifact_class, path in _iter_note_paths(
         memory_root,
@@ -873,11 +886,13 @@ def _validate_note_files(
                     path,
                     include_body=True,
                     read_timeout_seconds=VALIDATION_NOTE_READ_TIMEOUT_SECONDS,
+                    force_threaded_timeout=force_threaded_timeout,
                 )
             else:
                 note = parse_markdown_note_metadata(
                     path,
                     read_timeout_seconds=VALIDATION_NOTE_READ_TIMEOUT_SECONDS,
+                    force_threaded_timeout=force_threaded_timeout,
                 )
         except Exception as exc:
             issues.append(

@@ -10,8 +10,6 @@ import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-import yaml
-
 _DASHBOARDS_DIR = Path("grafana/dashboards")
 _DEFAULT_ALLOWLIST = Path("configs/quality/dashboard_query_duplicate_allowlist.yaml")
 _METRIC_RE = re.compile(r"\bbioetl_[a-z0-9_]+\b")
@@ -272,6 +270,8 @@ def _build_payload(
 
 
 def _load_allowlist(path: Path) -> dict[str, object]:
+    import yaml
+
     if not path.exists():
         return {}
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))

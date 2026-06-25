@@ -217,6 +217,8 @@ def _git_changed_python_files(base_branch: str, prefix: str) -> list[str]:
         cwd=_project_root(),
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         check=False,
     )
     if result.returncode != 0:

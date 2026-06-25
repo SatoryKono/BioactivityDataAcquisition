@@ -97,13 +97,9 @@ def _write_prepared_simple_delta(
     prepared: _PreparedSimpleGoldWrite,
 ) -> None:
     """Execute one simple Gold Delta write attempt."""
-    import pyarrow as pa
-
     module.write_deltalake(
         table_or_uri=prepared.request.table_path,
-        data=pa.RecordBatchReader.from_batches(
-            prepared.arrow_data.schema, prepared.arrow_data.to_batches()
-        ),
+        data=prepared.arrow_data,
         mode=prepared.request.mode,
         partition_by=prepared.request.partition_cols,
         schema_mode=prepared.schema_mode,
