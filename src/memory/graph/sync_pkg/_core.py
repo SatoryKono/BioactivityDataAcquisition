@@ -2598,25 +2598,11 @@ def _git_cached_commit_ages(
     return {path: cache[path] for path in unique_paths if path in cache}
 
 
-def _git_chunk_commit_ages(
-    *,
-    git_executable: str,
-    root: Path,
-    chunk: list[str],
-    today: date,
-) -> dict[str, int | None]:
+def _run_git_history_subprocess(command: list[str]) -> subprocess.CompletedProcess[str]:
+    """Run Git history probes with compatibility fallbacks for test doubles."""
     try:
-        result = subprocess.run(
-            [
-                git_executable,
-                "-C",
-                str(root),
-                "log",
-                "--format=__TS__%ct",
-                "--name-only",
-                "--",
-                *chunk,
-            ],
+        return subprocess.run(
+            command,
             check=False,
             capture_output=True,
             text=True,
@@ -2624,23 +2610,30 @@ def _git_chunk_commit_ages(
             errors="replace",
         )
     except TypeError:
-        result = subprocess.run(
-            [
-                git_executable,
-                "-C",
-                str(root),
-                "log",
-                "--format=__TS__%ct",
-                "--name-only",
-                "--",
-                *chunk,
-            ],
-            False,
-            True,
-            True,
-            encoding="utf-8",
-            errors="replace",
-        )
+        # Some lightweight test doubles still implement the historical
+        # positional-only signature (cmd, check, capture_output, text).
+        return subprocess.run(command, False, True, True)
+
+
+def _git_chunk_commit_ages(
+    *,
+    git_executable: str,
+    root: Path,
+    chunk: list[str],
+    today: date,
+) -> dict[str, int | None]:
+    result = _run_git_history_subprocess(
+        [
+            git_executable,
+            "-C",
+            str(root),
+            "log",
+            "--format=__TS__%ct",
+            "--name-only",
+            "--",
+            *chunk,
+        ]
+    )
     chunk_results = dict.fromkeys(chunk)
     if result.returncode != 0:
         return chunk_results
@@ -2653,40 +2646,17 @@ def _git_chunk_tracked_paths(
     root: Path,
     chunk: list[str],
 ) -> list[str]:
-    try:
-        result = subprocess.run(
-            [
-                git_executable,
-                "-C",
-                str(root),
-                "ls-files",
-                "--cached",
-                "--",
-                *chunk,
-            ],
-            check=False,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-        )
-    except TypeError:
-        result = subprocess.run(
-            [
-                git_executable,
-                "-C",
-                str(root),
-                "ls-files",
-                "--cached",
-                "--",
-                *chunk,
-            ],
-            False,
-            True,
-            True,
-            encoding="utf-8",
-            errors="replace",
-        )
+    result = _run_git_history_subprocess(
+        [
+            git_executable,
+            "-C",
+            str(root),
+            "ls-files",
+            "--cached",
+            "--",
+            *chunk,
+        ]
+    )
     if result.returncode != 0:
         return []
     return [line.strip() for line in result.stdout.splitlines() if line.strip()]
