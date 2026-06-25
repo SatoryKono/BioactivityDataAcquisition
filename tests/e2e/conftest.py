@@ -201,9 +201,14 @@ async def _read_delta_records(table_path: Path) -> list[dict[str, Any]]:
             timeout=DELTA_READ_TIMEOUT,
         )
     except TimeoutError as exc:
+        delta_log_present = (table_path / "_delta_log").exists()
         raise TimeoutError(
             f"Delta table read timed out after {DELTA_READ_TIMEOUT}s at {table_path}. "
-            "This may indicate a corrupted Delta table or PyArrow scanner issue."
+            "This is a bounded local Delta-read timeout, not an empty-table "
+            "assertion. "
+            f"delta_log_present={delta_log_present}; "
+            f"prefer_active_parquet={_prefer_active_parquet_delta_reads()}. "
+            "Higher-level E2E helpers may recover via Bronze-backed fallback."
         ) from exc
 
 

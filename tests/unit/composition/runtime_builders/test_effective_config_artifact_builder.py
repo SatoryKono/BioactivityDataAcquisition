@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import Mock
 from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
@@ -28,6 +29,9 @@ from bioetl.composition.runtime_builders._manifest_publication_context_support i
 from bioetl.composition.runtime_builders.effective_config_artifact_builder import (
     create_and_persist_composite_effective_config_artifact,
     create_and_persist_effective_config_artifact,
+)
+from bioetl.composition.runtime_builders import (
+    effective_config_artifact_builder as effective_config_builder,
 )
 from bioetl.composition.runtime_builders.run_manifest_support import (
     RunManifestContractIdentity,
@@ -645,6 +649,77 @@ def test_create_and_persist_effective_config_artifact_forwards_required_profile(
     assert (
         "settings.pipeline.control_plane.required_persistence_profile"
         in settings_snapshot["materialized_surfaces"]
+    )
+
+
+def test_effective_config_artifact_persist_failure_logs_and_reraises(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    logger = SimpleNamespace(info=lambda *args, **kwargs: None, error=Mock())
+
+    artifact = SimpleNamespace(
+        artifact_id="artifact-1",
+        resolved_config_hash="resolved-hash",
+        effective_config_hash="effective-hash",
+        source_fingerprint="source-hash",
+        dq_contract_compatibility_hash="dq-hash",
+    )
+    service = SimpleNamespace(
+        create_effective_config_artifact=lambda **_kwargs: artifact,
+        serialize_artifact=lambda _artifact: '{"artifact_id": "artifact-1"}',
+    )
+
+    class _FailingStore:
+        def save(
+            self,
+            *,
+            artifact_id: str,
+            run_id: RunID,
+            payload: dict[str, object],
+        ) -> None:
+            del artifact_id, run_id, payload
+            raise OSError("disk full")
+
+    monkeypatch.setattr(
+        effective_config_builder,
+        "create_effective_config_service",
+        lambda: service,
+    )
+    monkeypatch.setattr(
+        effective_config_builder,
+        "create_effective_config_artifact_store",
+        lambda settings: _FailingStore(),
+    )
+    monkeypatch.setattr(
+        effective_config_builder,
+        "build_effective_config_source_refs",
+        lambda provider, entity: [],
+    )
+
+    with pytest.raises(OSError, match="disk full"):
+        effective_config_builder._create_and_persist_effective_config_artifact_payload(
+            pipeline_name="chembl_activity",
+            pipeline_kind="standard",
+            resolved_config={"pipeline": {"name": "chembl_activity"}},
+            runtime_overrides={},
+            provider="chembl",
+            entity="activity",
+            required_persistence_profile="replay_ready",
+            resolution_policy=None,
+            normalization_profile_ref=None,
+            normalization_profile_version=None,
+            normalization_profile_hash=None,
+            settings=Settings(data_dir=Path("data")),
+            logger=logger,
+            run_id=RunID(deterministic_run_uuid_from_callsite("effective-config-fail")),
+        )
+
+    logger.error.assert_called_once_with(
+        "effective_config_artifact_persist_failed",
+        artifact_id="artifact-1",
+        pipeline_name="chembl_activity",
+        error_type="OSError",
+        error_message="disk full",
     )
 
 

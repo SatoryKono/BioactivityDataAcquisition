@@ -2537,6 +2537,8 @@ def _git_last_commit_age_days(
         ],
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
     )
     timestamp = result.stdout.strip()
     if result.returncode != 0 or not timestamp.isdigit():
@@ -2618,6 +2620,8 @@ def _git_chunk_commit_ages(
             check=False,
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
         )
     except TypeError:
         result = subprocess.run(
@@ -2634,6 +2638,8 @@ def _git_chunk_commit_ages(
             False,
             True,
             True,
+            encoding="utf-8",
+            errors="replace",
         )
     chunk_results = dict.fromkeys(chunk)
     if result.returncode != 0:
@@ -2661,6 +2667,8 @@ def _git_chunk_tracked_paths(
             check=False,
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
         )
     except TypeError:
         result = subprocess.run(
@@ -2676,6 +2684,8 @@ def _git_chunk_tracked_paths(
             False,
             True,
             True,
+            encoding="utf-8",
+            errors="replace",
         )
     if result.returncode != 0:
         return []

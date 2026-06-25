@@ -84,6 +84,14 @@ shards:
       - --ignore=tests/architecture/test_docs_governance_workflow.py
       - --ignore=tests/architecture/test_quality_debt_scorecard.py
       - --ignore=tests/architecture/test_quality_burndown_priorities.py
+      - --ignore=tests/architecture/test_adr_enforcement_matrix.py
+      - --ignore=tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py
+      - --ignore=tests/architecture/test_cli_command_import_guards.py
+      - --ignore=tests/architecture/test_compatibility_freeze_guards.py
+      - --ignore=tests/architecture/test_config_discrepancy_metrics_ratchets.py
+      - --ignore=tests/architecture/test_config_discrepancy_report_drift.py
+      - --ignore=tests/architecture/test_config_root_governance.py
+      - --ignore=tests/architecture/test_config_surface_entity_residual_plateau.py
   - name: S7-crosscutting-architecture-a2
     wave: 1
     paths:
@@ -98,6 +106,13 @@ shards:
       - --ignore=tests/architecture/test_compatibility_facade_inventory.py
       - --ignore=tests/architecture/test_compatibility_importer_census_governance.py
       - --ignore=tests/architecture/test_contract_coverage_matrix_drift.py
+      - --ignore=tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py
+      - --ignore=tests/architecture/test_cli_command_import_guards.py
+      - --ignore=tests/architecture/test_compatibility_freeze_guards.py
+      - --ignore=tests/architecture/test_config_discrepancy_metrics_ratchets.py
+      - --ignore=tests/architecture/test_config_discrepancy_report_drift.py
+      - --ignore=tests/architecture/test_config_root_governance.py
+      - --ignore=tests/architecture/test_config_surface_entity_residual_plateau.py
   - name: S7-crosscutting-architecture-a3
     wave: 2
     paths:
@@ -111,6 +126,14 @@ shards:
       - --ignore=tests/architecture/test_docs_governance_workflow.py
       - --ignore=tests/architecture/test_docs_version_sync.py
       - --ignore=tests/architecture/test_documentation_sync.py
+      - --ignore=tests/architecture/test_adr_enforcement_matrix.py
+      - --ignore=tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py
+      - --ignore=tests/architecture/test_cli_command_import_guards.py
+      - --ignore=tests/architecture/test_compatibility_freeze_guards.py
+      - --ignore=tests/architecture/test_config_discrepancy_metrics_ratchets.py
+      - --ignore=tests/architecture/test_config_discrepancy_report_drift.py
+      - --ignore=tests/architecture/test_config_root_governance.py
+      - --ignore=tests/architecture/test_config_surface_entity_residual_plateau.py
   - name: S3-app-foundation
     wave: 2
     paths:
@@ -148,6 +171,14 @@ shards:
       - --ignore=tests/architecture/test_lint_terminology_script.py
       - --ignore=tests/architecture/test_quality_debt_scorecard.py
       - --ignore=tests/architecture/test_quality_burndown_priorities.py
+      - --ignore=tests/architecture/test_adr_enforcement_matrix.py
+      - --ignore=tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py
+      - --ignore=tests/architecture/test_cli_command_import_guards.py
+      - --ignore=tests/architecture/test_compatibility_freeze_guards.py
+      - --ignore=tests/architecture/test_config_discrepancy_metrics_ratchets.py
+      - --ignore=tests/architecture/test_config_discrepancy_report_drift.py
+      - --ignore=tests/architecture/test_config_root_governance.py
+      - --ignore=tests/architecture/test_config_surface_entity_residual_plateau.py
   - name: S5-infra-adapters
     wave: 3
     paths:
@@ -185,6 +216,14 @@ shards:
       - --ignore=tests/architecture/test_quality_debt_scorecard.py
       - --ignore=tests/architecture/test_quality_burndown_priorities.py
       - --ignore=tests/architecture/test_regression_metrics.py
+      - --ignore=tests/architecture/test_adr_enforcement_matrix.py
+      - --ignore=tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py
+      - --ignore=tests/architecture/test_cli_command_import_guards.py
+      - --ignore=tests/architecture/test_compatibility_freeze_guards.py
+      - --ignore=tests/architecture/test_config_discrepancy_metrics_ratchets.py
+      - --ignore=tests/architecture/test_config_discrepancy_report_drift.py
+      - --ignore=tests/architecture/test_config_root_governance.py
+      - --ignore=tests/architecture/test_config_surface_entity_residual_plateau.py
   - name: S7-crosscutting-architecture-guardrails
     wave: 2
     paths:
@@ -206,6 +245,14 @@ shards:
       - tests/architecture/test_quality_debt_scorecard.py
       - tests/architecture/test_quality_burndown_priorities.py
       - tests/architecture/test_regression_metrics.py
+      - tests/architecture/test_adr_enforcement_matrix.py
+      - tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py
+      - tests/architecture/test_cli_command_import_guards.py
+      - tests/architecture/test_compatibility_freeze_guards.py
+      - tests/architecture/test_config_discrepancy_metrics_ratchets.py
+      - tests/architecture/test_config_discrepancy_report_drift.py
+      - tests/architecture/test_config_root_governance.py
+      - tests/architecture/test_config_surface_entity_residual_plateau.py
       - tests/architecture/test_scripts_deprecation_backlog.py
       - tests/architecture/test_scripts_inventory_manifest.py
       - tests/architecture/test_scripts_lifecycle_registry.py
@@ -247,3 +294,11 @@ shards:
       - --ignore=tests/architecture/test_scripts_inventory_manifest.py
       - --ignore=tests/architecture/test_scripts_lifecycle_registry.py
       - --ignore=tests/architecture/test_test_structural_debt.py
+      - --ignore=tests/architecture/test_adr_enforcement_matrix.py
+      - --ignore=tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py
+      - --ignore=tests/architecture/test_cli_command_import_guards.py
+      - --ignore=tests/architecture/test_compatibility_freeze_guards.py
+      - --ignore=tests/architecture/test_config_discrepancy_metrics_ratchets.py
+      - --ignore=tests/architecture/test_config_discrepancy_report_drift.py
+      - --ignore=tests/architecture/test_config_root_governance.py
+      - --ignore=tests/architecture/test_config_surface_entity_residual_plateau.py

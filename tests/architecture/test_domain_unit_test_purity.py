@@ -33,6 +33,10 @@ DISALLOWED_RUNTIME_SEAMS: tuple[tuple[str, str], ...] = (
     ("datetime.now", "wall-clock time via datetime.now()"),
     ("datetime.utcnow", "wall-clock time via datetime.utcnow()"),
     ("time.time", "wall-clock time via time.time()"),
+    ("subprocess.run", "subprocess-backed process spawn"),
+    ("subprocess.check_call", "subprocess-backed process spawn"),
+    ("subprocess.check_output", "subprocess-backed process spawn"),
+    ("subprocess.Popen", "subprocess-backed process spawn"),
 )
 
 _SEAM_MESSAGES = dict(DISALLOWED_RUNTIME_SEAMS)
@@ -146,6 +150,10 @@ _ALLOWED_RUNTIME_SEAMS: dict[tuple[str, str], str] = {
         "tests/unit/domain/mapping/test_organism_classification.py",
         "path.open",
     ): "organism classification contract reads checked-in target.csv coverage fixture",
+    (
+        "tests/unit/domain/behavior/test_merged_metadata_explainability.py",
+        "subprocess.check_output",
+    ): "cross-process determinism contract validates stable fallback record IDs",
 }
 
 
@@ -218,7 +226,16 @@ def _import_runtime_seam(node: ast.AST) -> str | None:
 def _call_runtime_seam(node: ast.Call) -> str | None:
     target = _attribute_path(node.func)
     attr_name = node.func.attr if isinstance(node.func, ast.Attribute) else None
-    if target in {"open", "datetime.now", "datetime.utcnow", "time.time"}:
+    if target in {
+        "open",
+        "datetime.now",
+        "datetime.utcnow",
+        "time.time",
+        "subprocess.run",
+        "subprocess.check_call",
+        "subprocess.check_output",
+        "subprocess.Popen",
+    }:
         return target
     if attr_name == "open":
         return "path.open"

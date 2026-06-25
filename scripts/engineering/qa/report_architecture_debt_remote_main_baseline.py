@@ -61,6 +61,8 @@ def _run_git(repo_root: Path, args: list[str], *, check: bool = True) -> str:
         check=check,
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
     )
     return result.stdout.strip()
 
@@ -88,7 +90,7 @@ def _json_blob_summary(blob: bytes | None) -> dict[str, object]:
     if blob is None:
         return {"available": False}
     try:
-        payload = json.loads(blob.decode("utf-8"))
+        payload = json.loads(blob.decode("utf-8", errors="replace"))
     except json.JSONDecodeError:
         return {"available": True}
     if not isinstance(payload, dict):

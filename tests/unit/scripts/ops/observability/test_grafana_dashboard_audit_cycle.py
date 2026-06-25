@@ -23,7 +23,7 @@ from scripts.ops.observability.grafana import (
 )
 from tests.helpers import assert_router_python_command
 
-pytestmark = pytest.mark.repo_backed
+pytestmark = pytest.mark.unit
 
 
 def _backend_result(

@@ -116,6 +116,42 @@ def test_read_delta_records_prefers_active_parquet_reader_on_windows(
     }
 
 
+def test_read_delta_records_timeout_surfaces_harness_context(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    table_path = tmp_path / "silver" / "chembl_activity"
+    (table_path / "_delta_log").mkdir(parents=True)
+
+    async def _raise_timeout(_awaitable: object, *, timeout: int) -> object:
+        raise TimeoutError()
+
+    async def _exercise() -> None:
+        loop = asyncio.get_running_loop()
+
+        class _FakeLoop:
+            def run_in_executor(self, *_args: object) -> asyncio.Future[object]:
+                return loop.create_future()
+
+        monkeypatch.setattr(asyncio, "get_running_loop", lambda: _FakeLoop())
+        monkeypatch.setattr(asyncio, "wait_for", _raise_timeout)
+        monkeypatch.setattr(
+            e2e_conftest,
+            "_prefer_active_parquet_delta_reads",
+            lambda: False,
+        )
+
+        with pytest.raises(
+            TimeoutError,
+            match=(
+                "delta_log_present=True; prefer_active_parquet=False"
+            ),
+        ):
+            await e2e_conftest._read_delta_records(table_path)
+
+    asyncio.run(_exercise())
+
+
 @pytest.mark.parametrize(
     ("file_uri", "expected"),
     [
