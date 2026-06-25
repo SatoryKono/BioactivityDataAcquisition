@@ -235,7 +235,7 @@ DUPLICATION_CLUSTER_GOVERNANCE: tuple[tuple[str, dict[str, str]], ...] = (
         {
             "owner": "@bioetl-composite",
             "decision": "retain_shared_composite_policy",
-            "linked_issue": "#5561",
+            "linked_issue": "#5568",
             "review_date": "2026-09-30",
             "rationale": (
                 "Composite field-priority blocks intentionally share conflict "
@@ -248,7 +248,7 @@ DUPLICATION_CLUSTER_GOVERNANCE: tuple[tuple[str, dict[str, str]], ...] = (
         {
             "owner": "@bioetl-composite",
             "decision": "retain_shared_composite_policy",
-            "linked_issue": "#5561",
+            "linked_issue": "#5568",
             "review_date": "2026-09-30",
             "rationale": (
                 "Composite normalized-anchor policy is shared to keep join-key "
@@ -261,7 +261,7 @@ DUPLICATION_CLUSTER_GOVERNANCE: tuple[tuple[str, dict[str, str]], ...] = (
         {
             "owner": "@bioetl-lineage",
             "decision": "retain_shared_lineage_policy",
-            "linked_issue": "#5561",
+            "linked_issue": "#5568",
             "review_date": "2026-09-30",
             "rationale": (
                 "Provider lookup fields are duplicated intentionally while "
@@ -274,7 +274,7 @@ DUPLICATION_CLUSTER_GOVERNANCE: tuple[tuple[str, dict[str, str]], ...] = (
         {
             "owner": "@bioetl-composite",
             "decision": "retain_shared_composite_policy",
-            "linked_issue": "#5561",
+            "linked_issue": "#5568",
             "review_date": "2026-09-30",
             "rationale": (
                 "Composite field mappings stay colocated with each composite "
@@ -287,7 +287,7 @@ DUPLICATION_CLUSTER_GOVERNANCE: tuple[tuple[str, dict[str, str]], ...] = (
 DEFAULT_DUPLICATION_CLUSTER_GOVERNANCE: dict[str, str] = {
     "owner": "@bioetl-architecture",
     "decision": "review_required",
-    "linked_issue": "#5561",
+    "linked_issue": "#5568",
     "review_date": "2026-09-30",
     "rationale": (
         "Exact structured config duplication is measured and requires explicit "

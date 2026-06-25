@@ -175,6 +175,8 @@ def _git_tracked_source_paths(*, root: Path, base: Path) -> list[Path]:
             check=True,
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
         )
     except (OSError, subprocess.CalledProcessError):
         return []

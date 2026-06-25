@@ -140,6 +140,8 @@ def _tracked_memory_files(memory_root: Path) -> list[str]:
             check=True,
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
         )
     except (OSError, subprocess.CalledProcessError):
         return []

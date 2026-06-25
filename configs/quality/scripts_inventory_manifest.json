@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-23T18:30:06.475079+00:00",
+  "generated_at": "2026-06-24T03:16:24.466346+00:00",
   "summary": {
     "total_scripts": 439,
     "status_counts": {
@@ -4658,7 +4658,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 130,
+      "reference_count": 131,
       "references": [
         {
           "path": ".github/workflows/docs-kpi-weekly.yml",

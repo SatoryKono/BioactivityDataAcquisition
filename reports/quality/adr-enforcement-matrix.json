@@ -1181,6 +1181,7 @@
         "docs/04-reference/providers/chembl/publication.md",
         "docs/04-reference/providers/chembl/subcellular-fraction.md",
         "docs/04-reference/providers/chembl/target-component.md",
+        "docs/04-reference/providers/chembl/target-protein-classification.md",
         "docs/04-reference/providers/chembl/target.md",
         "docs/04-reference/providers/chembl/tissue.md",
         "docs/04-reference/providers/crossref/publication.md",

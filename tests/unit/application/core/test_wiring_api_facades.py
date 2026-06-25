@@ -41,8 +41,10 @@ def test_canonical_wiring_package_lazy_exports_owner_symbols() -> None:
 
     assert isinstance(wiring.PipelineRunner, type)
     assert isinstance(wiring.ActivityTransformer, type)
+    assert isinstance(wiring.TargetProteinClassificationTransformer, type)
     assert "PipelineRunner" in dir(wiring)
     assert "ActivityTransformer" in dir(wiring)
+    assert "TargetProteinClassificationTransformer" in wiring.__all__
 
     with pytest.raises(AttributeError, match="does_not_exist"):
         getattr(wiring, "does_not_exist")

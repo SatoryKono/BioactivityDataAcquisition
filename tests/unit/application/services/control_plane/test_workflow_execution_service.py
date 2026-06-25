@@ -13,6 +13,8 @@ from bioetl.application.services.control_plane import (
     WorkflowManifestService,
 )
 from bioetl.application.services.control_plane.workflow.execution_preparation_incremental import (
+    _apply_incremental_offset,
+    _next_incremental_start_offset,
     _offset_from_successful_state,
 )
 from bioetl.application.services.control_plane.workflow.execution_recording_payloads import (
@@ -353,6 +355,41 @@ def test_workflow_preparation_incremental_offset_uses_successful_state_only() ->
     assert _offset_from_successful_state(state) == 100
     assert _offset_from_successful_state(replace(state, status="failed")) is None
     assert _offset_from_successful_state(replace(state, last_limit=None)) is None
+
+
+@pytest.mark.unit
+def test_workflow_preparation_incremental_offset_rewrites_defaults_and_steps() -> None:
+    state_port = _InMemoryWorkflowStatePort()
+    state_port.save(
+        WorkflowExecutionState(
+            workflow_run_id=RunID(UUID("00000000-0000-0000-0000-000000000517")),
+            manifest_id="workflow-manifest-preparation-offset",
+            workflow_name="chembl_core",
+            execution_fingerprint="fingerprint-preparation-offset",
+            status="success",
+            started_at=FIXED_TEST_TIME,
+            updated_at=FIXED_TEST_TIME,
+            completed_at=FIXED_TEST_TIME,
+            selected_step_ids=("chembl_activity_ingest",),
+            steps=(),
+            completed_transform_fingerprints={},
+            last_start_offset=200,
+            last_limit=50,
+        )
+    )
+
+    updated = _apply_incremental_offset(
+        config=_build_config(),
+        workflow_state_port=state_port,
+    )
+
+    assert _next_incremental_start_offset(
+        workflow_state_port=state_port,
+        workflow_name="chembl_core",
+    ) == 250
+    assert updated.defaults.start_offset == 250
+    assert updated.steps[0].run_options.start_offset == 250
+    assert updated.steps[1].run_options.start_offset == 250
 
 
 @pytest.mark.asyncio

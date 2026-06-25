@@ -146,8 +146,16 @@ def test_subprocess_heavy_architecture_tests_stay_in_slow_governance_shard() -> 
     fast_shards = _alias_members(inventory, "S7-architecture-fast-boundary")
     slow_shards = _alias_members(inventory, "S7-architecture-slow-governance")
     slow_paths = {
+        "tests/architecture/test_adr_enforcement_matrix.py",
         "tests/architecture/test_antipatterns.py",
+        "tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py",
+        "tests/architecture/test_cli_command_import_guards.py",
         "tests/architecture/test_code_metrics.py",
+        "tests/architecture/test_compatibility_freeze_guards.py",
+        "tests/architecture/test_config_discrepancy_metrics_ratchets.py",
+        "tests/architecture/test_config_discrepancy_report_drift.py",
+        "tests/architecture/test_config_root_governance.py",
+        "tests/architecture/test_config_surface_entity_residual_plateau.py",
         "tests/architecture/test_contract_coverage_matrix_drift.py",
         "tests/architecture/test_layer_dependencies.py",
         "tests/architecture/test_lint_terminology_script.py",
