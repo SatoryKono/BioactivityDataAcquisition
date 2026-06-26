@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import time
 from types import SimpleNamespace
 
@@ -10,6 +9,7 @@ import pyarrow as pa
 import pytest
 
 from bioetl.domain.medallion import SilverWriteMode
+from bioetl.infrastructure.storage.silver import delta_write_execution as subject
 from bioetl.infrastructure.storage.silver.delta_request_models import (
     _DeltaWriteRequest,
 )
@@ -54,7 +54,7 @@ async def test_write_plain_delta_request_times_out_promptly_without_executor_joi
     )
 
     started = time.perf_counter()
-    with pytest.raises(TimeoutError, match="Delta write timed out after 0.01s"):
+    with pytest.raises(TimeoutError, match=r"Delta write timed out after 0\.01s"):
         await _write_plain_delta_request(
             load_module=lambda: module,
             request=request,
@@ -64,6 +64,49 @@ async def test_write_plain_delta_request_times_out_promptly_without_executor_joi
     elapsed = time.perf_counter() - started
 
     assert elapsed < 0.15
+
+
+@pytest.mark.asyncio
+async def test_write_plain_delta_request_can_use_process_isolation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Process isolation should bypass in-process delta-rs calls when enabled."""
+    request = _make_request()
+    calls: list[tuple[dict[str, object], pa.Table, float]] = []
+
+    def _fake_subprocess_write(
+        *,
+        kwargs: dict[str, object],
+        arrow_data: pa.Table,
+        timeout_seconds: float,
+    ) -> None:
+        calls.append((kwargs, arrow_data, timeout_seconds))
+
+    module = SimpleNamespace(
+        write_deltalake=lambda **_kwargs: (_ for _ in ()).throw(
+            AssertionError("in-process write must not run")
+        ),
+    )
+    monkeypatch.setattr(
+        subject,
+        "_run_plain_delta_write_subprocess",
+        _fake_subprocess_write,
+    )
+
+    await _write_plain_delta_request(
+        load_module=lambda: module,
+        request=request,
+        mode="append",
+        timeout_seconds=3.0,
+        process_isolation=True,
+    )
+
+    assert len(calls) == 1
+    kwargs, arrow_data, timeout_seconds = calls[0]
+    assert kwargs["table_or_uri"] == request.table_path
+    assert kwargs["mode"] == "append"
+    assert arrow_data is request.arrow_data
+    assert timeout_seconds == pytest.approx(3.0)
 
 
 @pytest.mark.asyncio

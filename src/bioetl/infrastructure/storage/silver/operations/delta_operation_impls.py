@@ -54,12 +54,14 @@ async def _write_delete_impl(
     request: _DeltaWriteRequest,
 ) -> None:
     """Write data in delete mode (overwrite table)."""
+    policy = _resolve_merge_policy(host)
     await _write_plain_delta_request(
         load_module=host._load_silver_writer_module,
         request=request,
         mode="overwrite",
         schema_mode="overwrite",
-        timeout_seconds=_resolve_merge_policy(host).execution_timeout_seconds,
+        timeout_seconds=policy.execution_timeout_seconds,
+        process_isolation=policy.plain_write_process_isolation,
     )
 
 
@@ -68,12 +70,14 @@ async def _write_append_impl(
     request: _DeltaWriteRequest,
 ) -> None:
     """Write data in append mode."""
+    policy = _resolve_merge_policy(host)
     await _write_plain_delta_request(
         load_module=host._load_silver_writer_module,
         request=request,
         mode="append",
         schema_mode=request.schema_mode,
-        timeout_seconds=_resolve_merge_policy(host).execution_timeout_seconds,
+        timeout_seconds=policy.execution_timeout_seconds,
+        process_isolation=policy.plain_write_process_isolation,
     )
 
 
@@ -82,12 +86,14 @@ async def _write_create_table_impl(
     request: _DeltaWriteRequest,
 ) -> None:
     """Create a missing Delta table for merge fallback without append semantics."""
+    policy = _resolve_merge_policy(host)
     await _write_plain_delta_request(
         load_module=host._load_silver_writer_module,
         request=request,
         mode="overwrite",
         schema_mode="overwrite",
-        timeout_seconds=_resolve_merge_policy(host).execution_timeout_seconds,
+        timeout_seconds=policy.execution_timeout_seconds,
+        process_isolation=policy.plain_write_process_isolation,
     )
 
 

@@ -102,9 +102,12 @@ def _should_prefer_python_scan(root: Path, *, os_name: str = os.name) -> bool:
     """Avoid external repo scanners for Windows processes on WSL-mounted paths."""
     if os_name != "nt":
         return False
-    # On Windows, prefer Python scan to avoid hangs on WSL-mounted filesystems
-    # and cross-filesystem performance issues
-    return True
+    normalized = root.as_posix().replace("\\", "/").lower()
+    # Windows drive checkouts should use rg/git grep. The Python fallback reads
+    # every source file and is too slow on cloud-synced worktrees.
+    return normalized.startswith("/mnt/") or normalized.startswith(
+        ("//wsl$/", "//wsl.localhost/")
+    )
 
 
 def _candidate_python_paths_via_rg(root: Path) -> tuple[Path, ...] | None:
@@ -440,9 +443,14 @@ def test_package_root_import_prefilter_ignores_submodule_imports() -> None:
 
 
 def test_windows_mnt_checkout_prefers_python_scan() -> None:
-    # On Windows, always prefer Python scan to avoid hangs on WSL-mounted filesystems
+    # Windows should prefer Python only for WSL-mounted paths; normal drive
+    # checkouts use rg/git grep to avoid slow full-tree reads.
     assert _should_prefer_python_scan(Path("/mnt/e/repo"), os_name="nt")
-    assert _should_prefer_python_scan(Path("E:/repo"), os_name="nt")
+    assert _should_prefer_python_scan(
+        Path("//wsl.localhost/Ubuntu/mnt/e/repo"),
+        os_name="nt",
+    )
+    assert not _should_prefer_python_scan(Path("E:/repo"), os_name="nt")
     assert not _should_prefer_python_scan(Path("/mnt/e/repo"), os_name="posix")
 
 

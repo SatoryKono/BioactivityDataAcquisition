@@ -36,9 +36,7 @@ DEAD_CODE_INVENTORY = ROOT / "reports" / "quality" / "dead-code-inventory.json"
 CONTRACT_DIAGNOSTICS = (
     ROOT / "reports" / "quality" / "contract-registry-diagnostics.json"
 )
-DQ_DIAGNOSTICS = (
-    ROOT / "reports" / "quality" / "contract-registry-dq-diagnostics.json"
-)
+DQ_DIAGNOSTICS = ROOT / "reports" / "quality" / "contract-registry-dq-diagnostics.json"
 
 EXPECTED_ISSUES = {5648, 5649, 5650, 5651, 5652, 5653, 5654}
 PUBLIC_EXPORT_FACADE_PATHS = {
@@ -239,7 +237,8 @@ def test_issue_5654_hotspot_warnings_are_reduced_without_budget_growth() -> None
     assert _gate(gates, "debt_budget_growth_policy")["status"] == "pass"
     assert hotspot_gate["status"] == "warn"
     assert hotspot_gate["current"] == 6
-    assert architecture["source_artifacts"]["hotspot_family_baseline"][
-        "budget_warnings"
-    ] == 6
+    assert (
+        architecture["source_artifacts"]["hotspot_family_baseline"]["budget_warnings"]
+        == 6
+    )
     assert architecture["integral_score"] >= 8.31

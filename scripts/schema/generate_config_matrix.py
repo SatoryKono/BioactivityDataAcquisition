@@ -288,16 +288,18 @@ def _family_parameter_taxonomy(configs: dict[str, dict[str, Any]]) -> dict[str, 
     }
 
 
-def build_config_parameter_taxonomy_payload() -> dict[str, Any]:
+def build_config_parameter_taxonomy_payload(
+    families: dict[str, dict[str, dict[str, Any]]] | None = None,
+) -> dict[str, Any]:
     """Return family-scoped config parameter ownership/taxonomy metadata."""
-    families = _collect_family_configs()
+    active_families = _collect_family_configs() if families is None else families
     return {
         "owner": CONFIG_PARAMETER_TAXONOMY_OWNER,
         "classification_mode": "derived_from_flattened_config_parameter_paths",
         "default_group": _DEFAULT_TAXONOMY_GROUP,
         "families": {
             family_name: _family_parameter_taxonomy(family_configs)
-            for family_name, family_configs in families.items()
+            for family_name, family_configs in active_families.items()
         },
     }
 
@@ -402,8 +404,19 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def _build_artifact_contents() -> tuple[str, str, int, int, int, int, int]:
-    """Build matrix/report contents without writing files."""
+def _build_artifact_state(
+) -> tuple[
+    str,
+    str,
+    int,
+    int,
+    int,
+    int,
+    int,
+    dict[str, dict[str, dict[str, Any]]],
+    dict[str, Any],
+]:
+    """Build matrix/report contents plus reused family/taxonomy state."""
     configs = _collect_configs()
     family_configs = _collect_family_configs()
     all_keys = sorted(
@@ -507,7 +520,7 @@ def _build_artifact_contents() -> tuple[str, str, int, int, int, int, int]:
             "",
         ]
     )
-    taxonomy_payload = build_config_parameter_taxonomy_payload()
+    taxonomy_payload = build_config_parameter_taxonomy_payload(family_configs)
     taxonomy_families = taxonomy_payload["families"]
     for family_name in sorted(taxonomy_families):
         family_taxonomy = taxonomy_families[family_name]
@@ -534,6 +547,32 @@ def _build_artifact_contents() -> tuple[str, str, int, int, int, int, int]:
         len(all_keys),
         len(configs),
         family_raw_count,
+        actionable_count,
+        sanctioned_count,
+        family_configs,
+        taxonomy_payload,
+    )
+
+
+def _build_artifact_contents() -> tuple[str, str, int, int, int, int, int]:
+    """Build matrix/report contents without writing files."""
+    (
+        matrix_content,
+        report_content,
+        parameter_count,
+        config_count,
+        partial_count,
+        actionable_count,
+        sanctioned_count,
+        _family_configs,
+        _parameter_taxonomy,
+    ) = _build_artifact_state()
+    return (
+        matrix_content,
+        report_content,
+        parameter_count,
+        config_count,
+        partial_count,
         actionable_count,
         sanctioned_count,
     )
@@ -569,20 +608,23 @@ def _live_baseline_metrics(
     config_count: int,
     unique_parameter_count: int,
     _cross_family_raw_inconsistent: int,
+    family_config_map: dict[str, dict[str, dict[str, Any]]] | None = None,
 ) -> dict[str, int]:
     """Return ratchet metrics; inconsistent count is family-scoped actionable sum."""
-    families = _collect_family_configs()
+    active_family_config_map = (
+        _collect_family_configs() if family_config_map is None else family_config_map
+    )
     family_actionable = sum(
-        _family_metrics(family_configs)["inconsistent_parameter_count"]
-        for family_configs in families.values()
+        _family_metrics(family_payload)["inconsistent_parameter_count"]
+        for family_payload in active_family_config_map.values()
     )
     family_sanctioned = sum(
-        _family_metrics(family_configs)["sanctioned_partial_parameter_count"]
-        for family_configs in families.values()
+        _family_metrics(family_payload)["sanctioned_partial_parameter_count"]
+        for family_payload in active_family_config_map.values()
     )
     family_raw = sum(
-        _family_metrics(family_configs)["raw_inconsistent_parameter_count"]
-        for family_configs in families.values()
+        _family_metrics(family_payload)["raw_inconsistent_parameter_count"]
+        for family_payload in active_family_config_map.values()
     )
     return {
         "config_count": config_count,
@@ -672,17 +714,19 @@ def main(argv: list[str] | None = None) -> int:
         partial_count,
         actionable_count,
         sanctioned_count,
-    ) = _build_artifact_contents()
+        family_configs,
+        parameter_taxonomy,
+    ) = _build_artifact_state()
     baseline_metrics = _live_baseline_metrics(
         config_count=config_count,
         unique_parameter_count=parameter_count,
         _cross_family_raw_inconsistent=partial_count,
+        family_config_map=family_configs,
     )
     family_payload = {
-        family_name: _family_metrics(family_configs)
-        for family_name, family_configs in _collect_family_configs().items()
+        family_name: _family_metrics(family_config)
+        for family_name, family_config in family_configs.items()
     }
-    parameter_taxonomy = build_config_parameter_taxonomy_payload()
     if args.check:
         ok = _artifact_matches(
             args.matrix_output,

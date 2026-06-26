@@ -7873,7 +7873,7 @@
       "missing_lines": 10,
       "module": "bioetl.composition.factories.pipeline.registry",
       "path": "src/bioetl/composition/factories/pipeline/registry.py",
-      "source_lines": 227
+      "source_lines": 230
     },
     {
       "coverage_percent": 100.0,
@@ -7893,7 +7893,7 @@
       "missing_lines": 0,
       "module": "bioetl.composition.factories.pipeline.registry_exports",
       "path": "src/bioetl/composition/factories/pipeline/registry_exports.py",
-      "source_lines": 67
+      "source_lines": 68
     },
     {
       "coverage_percent": 100.0,
@@ -8323,7 +8323,7 @@
       "missing_lines": 0,
       "module": "bioetl.composition.factories.storage.resilience",
       "path": "src/bioetl/composition/factories/storage/resilience.py",
-      "source_lines": 94
+      "source_lines": 95
     },
     {
       "coverage_percent": 100.0,
@@ -16973,7 +16973,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.config._retry_settings",
       "path": "src/bioetl/infrastructure/config/_retry_settings.py",
-      "source_lines": 51
+      "source_lines": 52
     },
     {
       "coverage_percent": 72.73,
@@ -19323,7 +19323,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.storage.delta.resilience",
       "path": "src/bioetl/infrastructure/storage/delta/resilience.py",
-      "source_lines": 212
+      "source_lines": 213
     },
     {
       "coverage_percent": 70.0,
@@ -19863,7 +19863,7 @@
       "missing_lines": 2,
       "module": "bioetl.infrastructure.storage.silver.delta_write_execution",
       "path": "src/bioetl/infrastructure/storage/silver/delta_write_execution.py",
-      "source_lines": 168
+      "source_lines": 256
     },
     {
       "coverage_percent": 76.71,
@@ -20033,7 +20033,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.storage.silver.operations.delta_operation_impls",
       "path": "src/bioetl/infrastructure/storage/silver/operations/delta_operation_impls.py",
-      "source_lines": 199
+      "source_lines": 205
     },
     {
       "coverage_percent": 100.0,
@@ -21898,7 +21898,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-06-22",
-  "source_tree_sha256": "eb875e65b36f475cfdb100d7844df4ea8f1b438699cc76a364d7883befcc529f",
+  "source_tree_sha256": "c960a783d11868dc7fa3eac28dbda5aecb4dea0d995b231771dc3766588d1ec3",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

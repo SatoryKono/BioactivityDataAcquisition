@@ -29,12 +29,8 @@ DEBT_GATES = ROOT / "reports" / "quality" / "debt-governance-gates.json"
 CONTRACT_DIAGNOSTICS = (
     ROOT / "reports" / "quality" / "contract-registry-diagnostics.json"
 )
-DQ_DIAGNOSTICS = (
-    ROOT / "reports" / "quality" / "contract-registry-dq-diagnostics.json"
-)
-CONFIG_DISCREPANCY = (
-    ROOT / "reports" / "quality" / "config-discrepancy-baseline.json"
-)
+DQ_DIAGNOSTICS = ROOT / "reports" / "quality" / "contract-registry-dq-diagnostics.json"
+CONFIG_DISCREPANCY = ROOT / "reports" / "quality" / "config-discrepancy-baseline.json"
 RUNTIME_CARDINALITY_REVIEW = (
     ROOT / "reports" / "observability" / "runtime_cardinality_review.json"
 )
@@ -46,7 +42,9 @@ UNUSED_OBSERVABILITY_DEBT = (
 )
 BRONZE_FIXTURE_GAPS = ROOT / "configs" / "base" / "bronze_fixture_gaps.yaml"
 TESTS_WORKFLOW = ROOT / ".github" / "workflows" / "tests.yml"
-CONTRACT_WORKFLOW = ROOT / ".github" / "workflows" / "contract-governance-fast-check.yml"
+CONTRACT_WORKFLOW = (
+    ROOT / ".github" / "workflows" / "contract-governance-fast-check.yml"
+)
 EXPECTED_ISSUES = {5651, 5652, 5653, 5655}
 PUBLIC_EXPORT_FACADE_PATHS = {
     "src/bioetl/composition/entrypoints.py",
@@ -95,8 +93,7 @@ def test_stream_b_closeout_artifact_is_complete_and_budget_safe() -> None:
     assert closeout["debt_budget_policy"] == "flat_or_decreasing_only"
     assert set(closeout["outcomes"]) == {str(issue) for issue in EXPECTED_ISSUES}
     assert all(
-        outcome["status"] == "closeable"
-        for outcome in closeout["outcomes"].values()
+        outcome["status"] == "closeable" for outcome in closeout["outcomes"].values()
     )
     assert closeout["outcomes"]["5652"]["outcome"] == "improved"
 
@@ -150,9 +147,7 @@ def test_issue_5651_retained_public_compatibility_surfaces_are_justified() -> No
     census = _load_json(COMPATIBILITY_CENSUS)
     summary = census["summary"]
     retained = census["retained_entrypoints"]
-    public_facades = [
-        entry for entry in retained if "public_export_count" in entry
-    ]
+    public_facades = [entry for entry in retained if "public_export_count" in entry]
 
     assert registry["transition_debt"] == []
     assert summary["retained_entrypoint_count"] == 12

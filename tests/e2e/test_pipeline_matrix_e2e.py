@@ -40,13 +40,14 @@ from .conftest import (
     create_test_context,
     is_external_healthcheck_playback_failure,
     run_pipeline_or_skip_transient,
+    _resolve_e2e_pipeline_matrix_execution_timeout_seconds,
 )
 
 pytestmark = pytest.mark.usefixtures("relaxed_dq_env")
 
 CASSETTE_ROOT = Path(__file__).parent.parent / "fixtures" / "vcr"
-PIPELINE_MATRIX_EXECUTION_TIMEOUT_SECONDS = float(
-    os.environ.get("BIOETL_E2E_PIPELINE_MATRIX_EXECUTION_TIMEOUT_SECONDS", "105")
+PIPELINE_MATRIX_EXECUTION_TIMEOUT_SECONDS = (
+    _resolve_e2e_pipeline_matrix_execution_timeout_seconds()
 )
 
 

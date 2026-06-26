@@ -8,10 +8,13 @@ import pytest
 
 from .common import *  # noqa: F403
 
-pytestmark = pytest.mark.skipif(
-    sys.platform.startswith("win"),
-    reason="Targeted apply and filter tests require full repo walk which is prohibitively slow on Windows",
-)
+
+@pytest.fixture(autouse=True)
+def _skip_targeted_apply_and_filters_on_windows() -> None:
+    if sys.platform.startswith("win"):
+        pytest.skip(
+            "Targeted apply and filter tests require full repo walk which is prohibitively slow on Windows"
+        )
 
 
 def test_normalization_evidence_statements_cover_registry_and_fallback_metrics() -> (

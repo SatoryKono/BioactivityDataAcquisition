@@ -50,6 +50,7 @@ class TestPipelineSettings:
             settings.silver_merge_timeout.e2e_execution_timeout_seconds
             == pytest.approx(90.0)
         )
+        assert settings.silver_merge_timeout.plain_write_process_isolation is False
         assert settings.control_plane.run_manifest_enabled is True
         assert settings.control_plane.run_ledger_enabled is True
         assert settings.control_plane.checkpoint_compatibility_policy == "hard_fail"
@@ -69,6 +70,7 @@ class TestPipelineSettings:
                 "profile": "e2e",
                 "execution_timeout_seconds": 60.0,
                 "e2e_execution_timeout_seconds": 120.0,
+                "plain_write_process_isolation": True,
                 "max_retries": 0,
             },
             control_plane={
@@ -95,6 +97,7 @@ class TestPipelineSettings:
             settings.silver_merge_timeout.e2e_execution_timeout_seconds
             == pytest.approx(120.0)
         )
+        assert settings.silver_merge_timeout.plain_write_process_isolation is True
         assert settings.silver_merge_timeout.max_retries == 0
         assert settings.control_plane.run_manifest_enabled is True
         assert settings.control_plane.run_ledger_enabled is False

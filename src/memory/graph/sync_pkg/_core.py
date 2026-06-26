@@ -12,11 +12,13 @@ import http.client
 import itertools
 import json
 import os
+import queue
 import re
 import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
@@ -50,6 +52,7 @@ DEFAULT_INGEST_WAVE = "repo_sync_v1"
 DEFAULT_MANAGED_BY = "neo4j_memory_sync"
 DEFAULT_MEMORY_MAPPING_PATH = "src/memory/graph/mappings.yaml"
 LEGACY_MEMORY_MAPPING_PATH = "configs/quality/neo4j_memory_mapping.yaml"
+ANALYSIS_SOURCE_READ_TIMEOUT_SECONDS = 2.0
 INIT_PY = "__init__.py"
 MAIN_PY = "__main__.py"
 GITHUB_DIR = ".github"
@@ -1800,10 +1803,44 @@ def _analysis_read_source_text(
     if relative_path not in text_cache:
         path = root / relative_path
         try:
-            text_cache[relative_path] = _read_text(path).casefold()
-        except OSError:
+            text_cache[relative_path] = _read_analysis_source_text(path).casefold()
+        except (OSError, TimeoutError):
             text_cache[relative_path] = ""
     return text_cache[relative_path]
+
+
+def _read_analysis_source_text(
+    path: Path,
+    *,
+    timeout_seconds: float = ANALYSIS_SOURCE_READ_TIMEOUT_SECONDS,
+    os_name: str = os.name,
+) -> str:
+    """Read optional source text for marker analysis without blocking Windows runs."""
+    if os_name != "nt":
+        return _read_text(path)
+
+    result: queue.Queue[tuple[str, str | BaseException]] = queue.Queue(maxsize=1)
+
+    def _read() -> None:
+        try:
+            result.put(("ok", _read_text(path)))
+        except BaseException as exc:  # pragma: no cover - defensive thread boundary
+            result.put(("error", exc))
+
+    thread = threading.Thread(
+        target=_read,
+        name=f"memory-analysis-read:{path.name}",
+        daemon=True,
+    )
+    thread.start()
+    thread.join(timeout_seconds)
+    if thread.is_alive():
+        raise TimeoutError(f"Timed out reading analysis source text: {path}")
+
+    status, payload = result.get_nowait()
+    if status == "error":
+        raise payload
+    return str(payload)
 
 
 def _analysis_family_for_source_path(

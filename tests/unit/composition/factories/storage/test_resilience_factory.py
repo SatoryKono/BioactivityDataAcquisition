@@ -12,7 +12,11 @@ from bioetl.composition.factories.storage.resilience import (
 )
 
 
-def _build_settings(*, profile: str = "default") -> SimpleNamespace:
+def _build_settings(
+    *,
+    profile: str = "default",
+    plain_write_process_isolation: bool = False,
+) -> SimpleNamespace:
     return SimpleNamespace(
         pipeline=SimpleNamespace(
             silver_resilience_enabled=True,
@@ -43,6 +47,7 @@ def _build_settings(*, profile: str = "default") -> SimpleNamespace:
                 base_delay_seconds=0.1,
                 max_delay_seconds=0.5,
                 jitter_seconds=0.0,
+                plain_write_process_isolation=plain_write_process_isolation,
             ),
         )
     )
@@ -74,3 +79,10 @@ def test_create_silver_merge_policy_resolves_profile_timeout(
     settings = _build_settings(profile=profile)
     policy = create_silver_merge_resilience_policy(settings)  # type: ignore[arg-type]
     assert policy.execution_timeout_seconds == expected_timeout
+
+
+@pytest.mark.unit
+def test_create_silver_merge_policy_preserves_plain_write_process_isolation() -> None:
+    settings = _build_settings(plain_write_process_isolation=True)
+    policy = create_silver_merge_resilience_policy(settings)  # type: ignore[arg-type]
+    assert policy.plain_write_process_isolation is True

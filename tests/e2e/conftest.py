@@ -22,7 +22,7 @@ import re
 import shutil
 import sys
 import tempfile
-from collections.abc import Callable, Generator
+from collections.abc import Callable, Generator, Mapping
 from contextlib import contextmanager
 from dataclasses import replace
 from functools import cache
@@ -73,6 +73,28 @@ def _resolve_e2e_merge_execution_timeout_seconds(
     if platform == "win32":
         return 180
     return 90
+
+
+def _resolve_e2e_pipeline_matrix_execution_timeout_seconds(
+    *,
+    platform: str = sys.platform,
+    env: Mapping[str, str] = os.environ,
+) -> float:
+    """Return the bounded per-pipeline matrix execution timeout."""
+    override = env.get("BIOETL_E2E_PIPELINE_MATRIX_EXECUTION_TIMEOUT_SECONDS")
+    if override is not None:
+        return float(override)
+    if platform == "win32":
+        return 240.0
+    return 105.0
+
+
+def _resolve_e2e_plain_write_process_isolation(
+    *,
+    platform: str = sys.platform,
+) -> bool:
+    """Return whether E2E should isolate plain Delta writes in a child process."""
+    return platform == "win32"
 
 
 # Default timeout for E2E tests (seconds).
@@ -356,6 +378,11 @@ def e2e_environment():
         "BIOETL_PIPELINE__SILVER_MERGE_TIMEOUT__E2E_EXECUTION_TIMEOUT_SECONDS",
         str(_resolve_e2e_merge_execution_timeout_seconds()),
     )
+    if _resolve_e2e_plain_write_process_isolation():
+        os.environ.setdefault(
+            "BIOETL_PIPELINE__SILVER_MERGE_TIMEOUT__PLAIN_WRITE_PROCESS_ISOLATION",
+            "true",
+        )
     # Prevent shutil.get_terminal_size hangs in CI/Test environments
     os.environ["COLUMNS"] = "80"
     os.environ["LINES"] = "24"
@@ -387,6 +414,7 @@ def e2e_environment():
     # Note: This import is session-scoped (once per E2E test session) to avoid timeout
     from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 
+    _clear_runtime_config_caches()
     register_all_pipelines()
 
     yield

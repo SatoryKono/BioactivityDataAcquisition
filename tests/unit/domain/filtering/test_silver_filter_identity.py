@@ -26,7 +26,9 @@ def test_build_silver_filter_compatibility_snapshot_is_manifest_stable() -> None
     }
 
 
-def test_normalize_silver_filter_compatibility_mode_preserves_historical_alias() -> None:
+def test_normalize_silver_filter_compatibility_mode_preserves_historical_alias() -> (
+    None
+):
     assert (
         normalize_silver_filter_compatibility_mode(
             HISTORICAL_SILVER_FILTER_COMPATIBILITY_MODE
@@ -38,5 +40,7 @@ def test_normalize_silver_filter_compatibility_mode_preserves_historical_alias()
 def test_normalize_silver_filter_compatibility_mode_rejects_retired_semantic_mode() -> (
     None
 ):
-    with pytest.raises(ValueError, match="Unsupported silver_filter_compatibility_mode"):
+    with pytest.raises(
+        ValueError, match="Unsupported silver_filter_compatibility_mode"
+    ):
         normalize_silver_filter_compatibility_mode("legacy_semantic_silver")
