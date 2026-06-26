@@ -4823,7 +4823,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.control_plane.manifest.diagnostics.ledger_processing",
       "path": "src/bioetl/application/services/control_plane/manifest/diagnostics/ledger_processing.py",
-      "source_lines": 250
+      "source_lines": 246
     },
     {
       "coverage_percent": 100.0,
@@ -21808,7 +21808,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-06-22",
-  "source_tree_sha256": "a22723b8578b35550c52d2934d44e970f41066b7c84640517f26dcaaeb0e3f76",
+  "source_tree_sha256": "a01cd5773302a5f54b963fdc895d031666742c308c656559fdd4ab7686a40d98",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
