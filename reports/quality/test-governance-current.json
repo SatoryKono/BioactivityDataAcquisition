@@ -1146,8 +1146,8 @@
     "refined_assertless_tests": 0,
     "root": ".",
     "top_duplicate_test_names": [],
-    "total_test_files": 1860,
-    "total_test_functions": 21201,
+    "total_test_files": 1866,
+    "total_test_functions": 21238,
     "uuid4_call_sites": 0
   }
 }

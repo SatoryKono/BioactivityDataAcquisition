@@ -253,6 +253,29 @@ def test_factories_package_lazy_exports_and_unknown_attributes(
         factories_getattr("missing_export")
 
 
+def test_services_factory_import_does_not_eagerly_load_storage_runtime(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    target_modules = (
+        "bioetl.composition.factories.services.factory",
+        "bioetl.composition.factories.storage",
+        "bioetl.composition.factories.storage.factory",
+        "bioetl.composition.factories.storage.bundle",
+        "bioetl.infrastructure.storage.silver_writer",
+    )
+    for module_name in target_modules:
+        monkeypatch.delitem(sys.modules, module_name, raising=False)
+
+    module = __import__(
+        "bioetl.composition.factories.services.factory",
+        fromlist=["BaseServicesFactory", "StorageFactory"],
+    )
+
+    assert hasattr(module, "BaseServicesFactory")
+    assert hasattr(module.StorageFactory, "create")
+    assert "bioetl.infrastructure.storage.silver_writer" not in sys.modules
+
+
 def test_cli_bootstrap_lazy_exports_and_unknown_attribute(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

@@ -119,6 +119,10 @@ log_test.txt
 !/reports/quality/config-compatibility-legacy-taxonomy-review.json
 !/reports/quality/tech-debt-issues-5253-5264-closeout.json
 !/reports/quality/tech-debt-issues-5581-5584-closeout.json
+!/reports/quality/tech-debt-issues-5626-5637-closeout.json
+!/reports/quality/tech-debt-issues-5639-5644-closeout.json
+!/reports/quality/tech-debt-issues-5642-5645-closeout.json
+!/reports/quality/tech-debt-issue-5647-closeout.json
 !/reports/quality/issue-5272-application-core-coverage-closeout.json
 !/reports/quality/issue-5376-coverage-tail-closeout.json
 !/reports/quality/total-tech-debt-audit-main-2026-06-16.md

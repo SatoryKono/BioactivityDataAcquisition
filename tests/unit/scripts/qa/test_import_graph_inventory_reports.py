@@ -74,6 +74,10 @@ def test_build_compatibility_importer_census_counts_retained_entrypoints_and_twi
         "from bioetl.application.core import helper\n",
     )
     _write(
+        tmp_path / "src/bioetl/application/services/use_health_api.py",
+        "import bioetl.composition.health_api\n",
+    )
+    _write(
         tmp_path / "tests/unit/test_cli_imports.py",
         "import bioetl.interfaces.cli.commands.run\n"
         "from bioetl.application.core import helper\n",
@@ -86,6 +90,7 @@ def test_build_compatibility_importer_census_counts_retained_entrypoints_and_twi
     payload = build_compatibility_importer_census(tmp_path)
 
     assert payload["summary"]["retained_entrypoint_count"] == 2
+    assert payload["summary"]["retained_public_entrypoint_burden"] == 1
     assert payload["summary"]["removed_compatibility_surface_count"] == len(
         REMOVED_COMPATIBILITY_SURFACES
     )
@@ -101,6 +106,7 @@ def test_build_compatibility_importer_census_counts_retained_entrypoints_and_twi
     assert public_export_row["duplicate_public_exports"] == []
     assert public_export_row["duplicate_lazy_export_keys"] == []
     assert public_export_row["resolution_conflicts"] == {}
+    assert public_export_row["src_importer_count"] == 1
     removed_rows = {
         row["module_name"]: row for row in payload["removed_compatibility_surfaces"]
     }

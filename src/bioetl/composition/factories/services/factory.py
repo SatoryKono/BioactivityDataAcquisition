@@ -25,6 +25,7 @@ from bioetl.composition.factories.services.callbacks import (
 from bioetl.composition.factories.services.common_service_wiring import (
     CommonServicePorts,
     CommonServicePortsRequest,
+    StorageFactory,
     assemble_pipeline_service,
     build_common_service_ports,
     resolve_tracer,
@@ -35,7 +36,6 @@ from bioetl.composition.factories.services.port_factories import (
     create_metrics,
     create_quarantine,
 )
-from bioetl.composition.factories.storage import StorageFactory
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:

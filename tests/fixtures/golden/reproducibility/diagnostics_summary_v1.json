@@ -400,7 +400,6 @@
         "blockers": [],
         "confidence": "high",
         "evidence": [
-          "legacy_config_hash_exposed_as_compatibility_alias",
           "resolved_config_hash_exposed",
           "effective_config_hash_exposed",
           "resolved_and_effective_hashes_exposed"
@@ -712,9 +711,7 @@
     },
     "effective_config": {
       "diff_policy": {
-        "config_hash_policy": "deprecated_legacy_alias_for_resolved_config_hash",
-        "legacy_config_hash_display_only": true,
-        "legacy_config_hash_replay_identity_anchor": false,
+        "config_hash_policy": "resolved_and_effective_hashes_only",
         "occurrence_fields": [
           "run_id",
           "manifest_id",
@@ -728,12 +725,8 @@
         "run_id": "00000000-0000-0000-0000-000000000901"
       },
       "semantic": {
-        "config_hash_compatibility_anchor": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "config_hash_legacy_alias_of": "resolved_config_hash",
         "effective_config_artifact_id": "eca-golden-001",
         "effective_config_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-        "legacy_config_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "legacy_config_hash_alias_of": "resolved_config_hash",
         "resolved_config_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         "source_fingerprint": "1750d384e3efab89c50eff0b4808a22adc1f4023c3f023e011cc50d41a2431a9"
       }
@@ -875,8 +868,6 @@
       "required_profile_satisfied": false
     },
     "semantic_identity": {
-      "config_hash_compatibility_anchor": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      "config_hash_legacy_alias_of": "resolved_config_hash",
       "effective_config_artifact_id": "eca-golden-001",
       "effective_config_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
       "execution_fingerprint": "fp-golden-001",
@@ -884,9 +875,6 @@
       "input_snapshot_ids": [
         "snapshot-golden-001"
       ],
-      "legacy_config_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      "legacy_config_hash_alias_of": "resolved_config_hash",
-      "legacy_config_hash_replay_identity_anchor": false,
       "resolved_config_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
       "snapshot_status": "full"
     }

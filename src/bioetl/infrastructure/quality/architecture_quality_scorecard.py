@@ -406,43 +406,39 @@ def _current_compatibility_debt_metrics(
     return metrics if isinstance(metrics, dict) else {}
 
 
-def build_architecture_quality_scorecard(
-    *,
-    repo_root: Path = PROJECT_ROOT,
+def _build_architecture_quality_metrics(
+    dependency_map: dict[str, Any],  # Any: JSON artifact can have any value type
+    coverage_inventory: dict[str, Any],  # Any: JSON artifact can have any value type
+    compatibility_census: dict[str, Any],  # Any: JSON artifact can have any value type
+    dead_code_inventory: dict[str, Any],  # Any: JSON artifact can have any value type
+    contract_diagnostics: dict[str, Any],  # Any: JSON artifact can have any value type
+    dq_diagnostics: dict[str, Any],  # Any: JSON artifact can have any value type
+    observability_inventory: dict[
+        str, Any  # Any: JSON artifact can have any value type
+    ],  # Any: JSON artifact can have any value type
+    duplication_baseline: dict[str, Any],  # Any: JSON artifact can have any value type
+    hotspot_baseline: dict[str, Any],  # Any: JSON artifact can have any value type
+    test_governance_report: dict[
+        str, Any  # Any: JSON artifact can have any value type
+    ],  # Any: JSON artifact can have any value type
+    adr_enforcement_matrix: dict[
+        str, Any  # Any: JSON artifact can have any value type
+    ],  # Any: JSON artifact can have any value type
 ) -> dict[str, object]:
-    """Build the deterministic architecture quality scorecard payload."""
-    repo_root = repo_root.resolve()
-    (
-        dependency_map,
-        coverage_inventory,
-        compatibility_census,
-        dead_code_inventory,
-        contract_diagnostics,
-        dq_diagnostics,
-        observability_inventory,
-        duplication_baseline,
-        hotspot_baseline,
-        test_governance_report,
-        adr_enforcement_matrix,
-        scorecard,
-    ) = _load_scorecard_inputs(repo_root)
-
     coverage_summary = coverage_inventory["summary"]
     status_counts = coverage_summary["status_counts"]
     compatibility_summary = compatibility_census["summary"]
     dead_code_summary = dead_code_inventory["summary"]
     duplication_summary = duplication_baseline["summary"]
     hotspot_summary = hotspot_baseline["summary"]
-    hotspot_family_coverage = coverage_summary["hotspot_family_coverage"]
     adr_summary = adr_enforcement_matrix["summary"]
     test_governance_summary = test_governance_report["report"]
-
-    metrics: dict[str, object] = {
+    return {
         "layer_violations": len(dependency_map.get("violations", [])),
         "source_module_count": coverage_summary["source_module_count"],
         "unmeasured_module_count": coverage_summary["unmeasured_module_count"],
         "uncovered_module_count": status_counts.get("uncovered", 0),
-        "hotspot_family_count": len(hotspot_family_coverage),
+        "hotspot_family_count": len(coverage_summary["hotspot_family_coverage"]),
         "hotspot_budget_warning_count": hotspot_summary["budget_warnings"],
         "total_duplicate_clusters": duplication_summary["total_duplicate_clusters"],
         "retained_entrypoint_count": compatibility_summary["retained_entrypoint_count"],
@@ -475,6 +471,54 @@ def build_architecture_quality_scorecard(
         "adr_enforcement_manual_exception_count": adr_summary["manual_exception_count"],
     }
 
+
+def _build_debt_budget_policy(scorecard: dict[str, Any]) -> dict[str, object]:
+    debt_budgets = scorecard.get("compatibility_debt_metrics", {})
+    return {
+        "budget_growth_allowed": False,
+        "compatibility_debt_metrics_source": (
+            "configs/quality/debt_scorecard.yaml#compatibility_debt_metrics"
+        ),
+        "current_compatibility_debt_metrics": _current_compatibility_debt_metrics(
+            debt_budgets
+        ),
+    }
+
+
+def build_architecture_quality_scorecard(
+    *,
+    repo_root: Path = PROJECT_ROOT,
+) -> dict[str, object]:
+    """Build the deterministic architecture quality scorecard payload."""
+    repo_root = repo_root.resolve()
+    (
+        dependency_map,
+        coverage_inventory,
+        compatibility_census,
+        dead_code_inventory,
+        contract_diagnostics,
+        dq_diagnostics,
+        observability_inventory,
+        duplication_baseline,
+        hotspot_baseline,
+        test_governance_report,
+        adr_enforcement_matrix,
+        scorecard,
+    ) = _load_scorecard_inputs(repo_root)
+
+    metrics = _build_architecture_quality_metrics(
+        dependency_map,
+        coverage_inventory,
+        compatibility_census,
+        dead_code_inventory,
+        contract_diagnostics,
+        dq_diagnostics,
+        observability_inventory,
+        duplication_baseline,
+        hotspot_baseline,
+        test_governance_report,
+        adr_enforcement_matrix,
+    )
     categories = _build_categories(metrics)
     integral_score = round(
         sum(float(category["weighted_score"]) for category in categories),
@@ -484,7 +528,6 @@ def build_architecture_quality_scorecard(
         sum(float(category["weight"]) for category in categories),
         2,
     )
-    debt_budgets = scorecard.get("compatibility_debt_metrics", {})
     source_artifacts = _build_source_artifacts(
         dependency_map,
         coverage_inventory,
@@ -508,15 +551,7 @@ def build_architecture_quality_scorecard(
         "interpretation": _interpretation(integral_score),
         "categories": categories,
         "metrics": metrics,
-        "debt_budget_policy": {
-            "budget_growth_allowed": False,
-            "compatibility_debt_metrics_source": (
-                "configs/quality/debt_scorecard.yaml#compatibility_debt_metrics"
-            ),
-            "current_compatibility_debt_metrics": _current_compatibility_debt_metrics(
-                debt_budgets
-            ),
-        },
+        "debt_budget_policy": _build_debt_budget_policy(scorecard),
     }
 
 
