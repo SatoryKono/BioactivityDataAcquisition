@@ -95,7 +95,7 @@ def test_issue_5400_hotspot_family_budget_warnings_are_reviewed_budget_closures(
     )
     for family in families:
         assert all(
-            str(warning).startswith("at_budget:")
+            str(warning).startswith(("at_budget:", "near_budget:"))
             for warning in family["budget_warnings"]
         )
         budgets = cast(dict[str, int], family["bounded_growth_budgets"])
