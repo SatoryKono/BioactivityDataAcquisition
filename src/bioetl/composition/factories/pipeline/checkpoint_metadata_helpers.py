@@ -15,7 +15,7 @@ from bioetl.domain.normalization import (
     compute_input_snapshot_identity_fingerprint,
 )
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
-from bioetl.infrastructure.config.silver_filter_migration import (
+from bioetl.domain.filtering.silver_filter_identity import (
     resolve_silver_filter_compatibility_mode,
 )
 

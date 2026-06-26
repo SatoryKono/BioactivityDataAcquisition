@@ -14,7 +14,13 @@ pytestmark = pytest.mark.architecture
 ROOT = Path(__file__).resolve().parents[2]
 CLOSEOUT = ROOT / "reports" / "quality" / "tech-debt-issue-5647-closeout.json"
 WIRING_HELPER = (
-    ROOT / "src" / "bioetl" / "application" / "core" / "wiring" / "_lazy_export_facade.py"
+    ROOT
+    / "src"
+    / "bioetl"
+    / "application"
+    / "core"
+    / "wiring"
+    / "_lazy_export_facade.py"
 )
 APPLICATION_SHARED_HELPER = (
     ROOT / "src" / "bioetl" / "application" / "core" / "wiring" / "lazy_export_hooks.py"
@@ -68,6 +74,8 @@ def test_issue_5647_lazy_export_helper_implementations_are_unified() -> None:
     assert "from bioetl.application.core.wiring.lazy_export_hooks import" in (
         control_plane_text
     )
-    assert "bioetl.application.core.wiring._lazy_export_facade" not in control_plane_text
+    assert (
+        "bioetl.application.core.wiring._lazy_export_facade" not in control_plane_text
+    )
     assert "install_lazy_export_facade(" in wiring_text
     assert "_install_lazy_export_facade(" in control_plane_text

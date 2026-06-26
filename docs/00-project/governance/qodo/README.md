@@ -33,6 +33,12 @@ conflict:
 
 - `.qodo/mcp.json` is a local MCP runtime configuration surface. It is not the
   repository's Qodo review-policy source of truth.
+- Refresh `.qodo/mcp.json` from the canonical generator with
+  `python scripts\ai\codex\setup_mcp.py --qodo-only` when only the local Qodo
+  Desktop MCP launch config needs to be updated.
+- On Windows, Qodo Desktop must be able to resolve both
+  `C:\Program Files\nodejs` and `%APPDATA%\npm` from the user `Path`, because
+  the generated `.qodo/mcp.json` launches multiple servers via `npx`.
 - Path-local supported files may be added later for narrower scope, but root
   files apply repository-wide by default.
 

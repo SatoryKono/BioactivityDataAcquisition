@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-26T12:01:05.492447+00:00",
+  "generated_at": "2026-06-26T16:23:32.581322+00:00",
   "summary": {
     "total_scripts": 439,
     "status_counts": {
@@ -6341,7 +6341,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
@@ -6354,6 +6354,12 @@
           "line": 95,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_contract_registry.py\","
+        },
+        {
+          "path": "tests/architecture/test_tech_debt_issues_5651_5655_closeout.py",
+          "line": 142,
+          "source_group": "tests",
+          "text": "assert \"validate_contract_registry.py\" in contract_workflow"
         }
       ]
     },
@@ -6377,7 +6383,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
@@ -6408,6 +6414,12 @@
           "line": 96,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_registry_dq_refs.py\","
+        },
+        {
+          "path": "tests/architecture/test_tech_debt_issues_5651_5655_closeout.py",
+          "line": 143,
+          "source_group": "tests",
+          "text": "assert \"validate_registry_dq_refs.py\" in contract_workflow"
         }
       ]
     },

@@ -2071,7 +2071,7 @@
       "symbol": "FORBIDDEN_SILVER_SEMANTIC_FILTER_KEYS",
       "path": "src/bioetl/infrastructure/config/silver_filter_migration.py",
       "occurrence_count": 2,
-      "first_line": 13,
+      "first_line": 6,
       "role": "Forbidden semantic Silver key set",
       "migration_relevance": "Defines semantic keys that fail validation when present under silver_filters.",
       "notes": ""
@@ -2082,7 +2082,7 @@
       "symbol": "validate_no_semantic_silver_filter_payload",
       "path": "src/bioetl/infrastructure/config/silver_filter_migration.py",
       "occurrence_count": 2,
-      "first_line": 18,
+      "first_line": 11,
       "role": "Fail-fast Silver semantic key guard",
       "migration_relevance": "Boundary hook that rejects semantic Silver keys before domain conversion.",
       "notes": ""

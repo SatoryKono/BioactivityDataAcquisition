@@ -21,7 +21,7 @@ from bioetl.composition.runtime_builders.config_access import resolve_configs_ro
 from bioetl.composition.runtime_builders._effective_config_secret_support import (
     build_secret_surface_inventory,
 )
-from bioetl.infrastructure.config.silver_filter_migration import (
+from bioetl.domain.filtering.silver_filter_identity import (
     build_silver_filter_compatibility_snapshot,
     resolve_silver_filter_compatibility_mode,
 )

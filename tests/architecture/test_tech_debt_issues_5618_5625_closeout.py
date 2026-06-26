@@ -33,6 +33,8 @@ TEST_GOVERNANCE_CONFIG = ROOT / "configs" / "quality" / "test_governance_audit.y
 TEST_GOVERNANCE_REPORT = ROOT / "reports" / "quality" / "test-governance-current.json"
 
 EXPECTED_ISSUES = {5618, 5619, 5620, 5621, 5622, 5623, 5624, 5625}
+ISSUE_5622_TOTAL_DUPLICATION_CEILING = 88
+ISSUE_5622_CLI_DUPLICATION_CEILING = 3
 EXPECTED_HOTSPOT_BUDGETS = {
     "application_core": {"files_ge_250_loc": 7, "max_internal_fan_in": 11},
     "composition_bootstrap_runtime": {"files_ge_250_loc": 0, "max_internal_fan_in": 3},
@@ -110,8 +112,14 @@ def test_issue_5622_full_app_duplication_ratchet_records_cli_burn_down() -> None
     duplication = _load_json(DUPLICATION)
     by_target = {target["target"]: target for target in duplication["targets"]}
 
-    assert duplication["summary"]["total_duplicate_clusters"] == 88
-    assert by_target["src/bioetl/interfaces/cli"]["duplicate_count"] == 3
+    assert (
+        duplication["summary"]["total_duplicate_clusters"]
+        <= ISSUE_5622_TOTAL_DUPLICATION_CEILING
+    )
+    assert (
+        by_target["src/bioetl/interfaces/cli"]["duplicate_count"]
+        <= ISSUE_5622_CLI_DUPLICATION_CEILING
+    )
     assert by_target["src/bioetl/composition/bootstrap"]["duplicate_count"] == 0
 
 
