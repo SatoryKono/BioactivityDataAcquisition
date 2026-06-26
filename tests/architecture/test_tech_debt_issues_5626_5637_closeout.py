@@ -73,13 +73,7 @@ PUBLIC_EXPORT_FACADES = {
     "src/bioetl/composition/maintenance_api.py",
     "src/bioetl/infrastructure/config/__init__.py",
 }
-SILVER_FILTER_IDENTITY_IMPORTERS = {
-    "src/bioetl/composition/bootstrap/runtime/assembly.py",
-    "src/bioetl/composition/factories/pipeline/checkpoint_metadata_helpers.py",
-    "src/bioetl/composition/runtime_builders/_effective_config_artifact_builder_support.py",
-    "src/bioetl/composition/runtime_builders/_inputs_resolution_support.py",
-    "src/bioetl/composition/runtime_builders/_run_manifest_creation_support_helpers.py",
-}
+SILVER_FILTER_IDENTITY_IMPORTERS: set[str] = set()
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -174,7 +168,7 @@ def test_issue_5629_cli_command_shell_duplication_is_below_opening_baseline() ->
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
 
-    assert by_target["src/bioetl/interfaces/cli"]["duplicate_count"] == 3
+    assert by_target["src/bioetl/interfaces/cli"]["duplicate_count"] == 2
     assert by_target["src/bioetl/interfaces/cli"]["duplicate_count"] < 6
 
 
@@ -182,7 +176,7 @@ def test_issue_5630_adapter_layer_duplication_is_below_opening_baseline() -> Non
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
 
-    assert by_target["src/bioetl/infrastructure/adapters"]["duplicate_count"] == 67
+    assert by_target["src/bioetl/infrastructure/adapters"]["duplicate_count"] == 63
     assert by_target["src/bioetl/infrastructure/adapters"]["duplicate_count"] < 72
 
 
@@ -192,7 +186,7 @@ def test_issue_5631_pipeline_transformer_duplication_is_below_opening_baseline()
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
 
-    assert by_target["src/bioetl/application/pipelines"]["duplicate_count"] == 18
+    assert by_target["src/bioetl/application/pipelines"]["duplicate_count"] == 17
     assert by_target["src/bioetl/application/pipelines"]["duplicate_count"] < 22
 
 
@@ -207,7 +201,7 @@ def test_issue_5632_hotspot_warning_count_and_budget_are_ratcheted_down() -> Non
     baseline_family = baseline_families["composition_bootstrap_runtime"]
     scorecard_family = scorecard_families["composition_bootstrap_runtime"]
 
-    assert baseline["summary"]["budget_warnings"] == 7
+    assert baseline["summary"]["budget_warnings"] == 6
     assert baseline["summary"]["budget_warnings"] < 9
     assert baseline_family["files_ge_250_loc"] == 0
     assert baseline_family["bounded_growth_budgets"]["files_ge_250_loc"] == 0
@@ -303,7 +297,7 @@ def test_issue_5637_silver_filter_identity_adapter_budget_is_ratcheted() -> None
     )
     actual = _src_importers("bioetl.infrastructure.config.silver_filter_migration")
 
-    assert row["max_src_importer_count"] == 5
+    assert row["max_src_importer_count"] == 0
     assert set(row["allowed_src_importers"]) == SILVER_FILTER_IDENTITY_IMPORTERS
     assert actual == SILVER_FILTER_IDENTITY_IMPORTERS
     assert len(actual) <= row["max_src_importer_count"]

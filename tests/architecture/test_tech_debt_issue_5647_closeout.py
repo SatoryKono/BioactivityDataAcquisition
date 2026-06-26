@@ -16,6 +16,9 @@ CLOSEOUT = ROOT / "reports" / "quality" / "tech-debt-issue-5647-closeout.json"
 WIRING_HELPER = (
     ROOT / "src" / "bioetl" / "application" / "core" / "wiring" / "_lazy_export_facade.py"
 )
+APPLICATION_SHARED_HELPER = (
+    ROOT / "src" / "bioetl" / "application" / "core" / "wiring" / "lazy_export_hooks.py"
+)
 CONTROL_PLANE_HELPER = (
     ROOT
     / "src"
@@ -48,16 +51,23 @@ def test_closeout_artifact_covers_issue_5647() -> None:
 
 def test_issue_5647_lazy_export_helper_implementations_are_unified() -> None:
     wiring_text = WIRING_HELPER.read_text(encoding="utf-8")
+    application_shared_text = APPLICATION_SHARED_HELPER.read_text(encoding="utf-8")
     control_plane_text = CONTROL_PLANE_HELPER.read_text(encoding="utf-8")
     shared_text = SHARED_HELPER.read_text(encoding="utf-8")
 
     assert "def install_lazy_exports(" in shared_text
     assert "from importlib import import_module" in shared_text
-    assert "from importlib import import_module" in wiring_text
+    assert "from importlib import import_module" in application_shared_text
+    assert "from importlib import import_module" not in wiring_text
     assert "from importlib import import_module" not in control_plane_text
     assert "from bioetl.composition.lazy_exports import" not in wiring_text
-    assert "from bioetl.application.core.wiring._lazy_export_facade import" in (
+    assert "from bioetl.composition.lazy_exports import" not in control_plane_text
+    assert "from bioetl.application.core.wiring.lazy_export_hooks import" in (
+        wiring_text
+    )
+    assert "from bioetl.application.core.wiring.lazy_export_hooks import" in (
         control_plane_text
     )
+    assert "bioetl.application.core.wiring._lazy_export_facade" not in control_plane_text
     assert "install_lazy_export_facade(" in wiring_text
     assert "_install_lazy_export_facade(" in control_plane_text

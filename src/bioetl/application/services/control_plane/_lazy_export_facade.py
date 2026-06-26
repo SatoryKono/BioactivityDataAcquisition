@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
-from bioetl.application.core.wiring._lazy_export_facade import (
+from bioetl.application.core.wiring.lazy_export_hooks import (
     install_lazy_export_facade as _install_lazy_export_facade,
 )
 

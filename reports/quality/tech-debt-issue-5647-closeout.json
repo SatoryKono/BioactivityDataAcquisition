@@ -4,9 +4,10 @@
   "issue": {
     "number": 5647,
     "status": "closed-ready",
-    "summary": "Lazy-export helper implementations are unified behind bioetl.application.core.wiring._lazy_export_facade while the control-plane compatibility path remains a thin adapter without a public/private twin wrapper.",
+    "summary": "Lazy-export helper implementations are unified behind bioetl.application.core.wiring.lazy_export_hooks, with thin private and control-plane adapters and no cross-owner private imports.",
     "evidence": [
       "src/bioetl/composition/lazy_exports.py",
+      "src/bioetl/application/core/wiring/lazy_export_hooks.py",
       "src/bioetl/application/core/wiring/_lazy_export_facade.py",
       "src/bioetl/application/services/control_plane/_lazy_export_facade.py",
       "tests/architecture/test_tech_debt_issue_5647_closeout.py",
