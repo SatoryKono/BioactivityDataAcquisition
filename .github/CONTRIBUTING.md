@@ -75,15 +75,20 @@ For the full local GitHub workflow, including worktrees, sync/rebase, PR creatio
 | **application**    | ✅     | ✅          | ❌          | ❌             | ❌         |
 | **composition**    | ✅     | ✅          | ✅          | ✅             | ❌         |
 | **infrastructure** | ✅     | ❌          | ❌          | ✅             | ❌         |
-| **interfaces**     | ✅     | ✅          | ✅          | ✅             | ✅         |
+| **interfaces**     | ✅     | ✅          | ✅          | ❌             | ✅         |
 
 ### Key Rules
 
 - **Dependency Injection**: Dependencies via constructor, not created inside classes
 - **Composition Root**: `src/bioetl/composition/bootstrap/` is the only place for wiring
-- **Async I/O**: Use `httpx` for HTTP, `run_in_executor` for blocking operations
+- **Adapter HTTP**: Provider/runtime HTTP goes through `UnifiedHTTPClient`; do not bypass it with direct client usage in adapters
+- **Blocking I/O**: Use `run_in_executor` for blocking operations
 - **Logging**: Use `structlog` with `run_id`, never `print()`
 - **Secrets**: Environment variables only (`BIOETL_{PROVIDER}_{KEY}`)
+
+Direct `interfaces -> infrastructure` imports are forbidden. If an interface
+needs concrete runtime behavior, route it through composition-owned entrypoints
+instead of importing infrastructure modules directly.
 
 ## Testing Requirements
 
