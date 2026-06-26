@@ -19,14 +19,14 @@ from bioetl.domain.filtering import (
     InputFilterConfig,
     SilverFilterConfig,
 )
+from bioetl.domain.filtering.silver_config import (
+    validate_no_semantic_silver_filter_payload,
+)
 from bioetl.domain.models.filter import ExtractionParams
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.base_config_loader import BaseConfigLoader
 from bioetl.infrastructure.config.entity_filter_metadata_registry import (
     apply_shared_filter_metadata,
-)
-from bioetl.infrastructure.config.silver_filter_migration import (
-    validate_no_semantic_silver_filter_payload,
 )
 from bioetl.infrastructure.schemas.filter_config import FilterConfigFile
 

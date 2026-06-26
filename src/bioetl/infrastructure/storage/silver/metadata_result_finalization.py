@@ -9,13 +9,15 @@ from datetime import timedelta
 from deltalake import DeltaTable
 
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
+from bioetl.infrastructure.storage.silver.finalization_models import (
+    _coerce_silver_write_finalization_preparation_request,
+    _SilverWriteFinalizationPreparationRequest,
+)
 from bioetl.infrastructure.storage.silver.metadata_operation_protocols import (
     _SilverWriteFinalizationHostProtocol,
 )
-from bioetl.infrastructure.storage.silver.metadata_request_models import (
-    _coerce_silver_write_finalization_preparation_request,
+from bioetl.infrastructure.storage.silver.prepared_operation_models import (
     _PreparedSilverWriteFinalizationContext,
-    _SilverWriteFinalizationPreparationRequest,
 )
 
 __all__ = [

@@ -273,7 +273,7 @@ class PipelineYamlConfig(BaseModel):
         """Reject semantic Silver rules before strict field validation."""
         if not isinstance(data, dict):
             return data
-        from bioetl.infrastructure.config.silver_filter_migration import (
+        from bioetl.domain.filtering.silver_config import (
             validate_no_semantic_silver_filter_payload,
         )
 

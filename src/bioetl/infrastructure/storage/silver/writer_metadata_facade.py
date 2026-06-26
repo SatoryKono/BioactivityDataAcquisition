@@ -29,9 +29,11 @@ from bioetl.infrastructure.storage.silver.metadata_operations import (
     _read_delta_version,
     _SilverMetadataWriteHostProtocol,
 )
-from bioetl.infrastructure.storage.silver.metadata_request_models import (
-    _PreparedSilverWriteFinalizationContext,
+from bioetl.infrastructure.storage.silver.metadata_write_models import (
     _SilverMetadataWriteRequest,
+)
+from bioetl.infrastructure.storage.silver.prepared_operation_models import (
+    _PreparedSilverWriteFinalizationContext,
 )
 
 if TYPE_CHECKING:

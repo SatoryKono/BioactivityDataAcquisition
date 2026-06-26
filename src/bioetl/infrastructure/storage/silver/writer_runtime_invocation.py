@@ -17,15 +17,15 @@ from bioetl.infrastructure.storage.silver.metadata_operations import (
     _prepare_silver_merged_metadata_write,
     _SilverMetadataWriteHostProtocol,
 )
-from bioetl.infrastructure.storage.silver.metadata_request_models import (
-    _build_silver_merged_metadata_write_request,
-)
 from bioetl.infrastructure.storage.silver.operations.validation_operations import (
     _prepare_silver_write_payload_impl,
     _SilverPayloadPreparationHostProtocol,
 )
 from bioetl.infrastructure.storage.silver.pipeline_helpers import (
     _SilverWriteInvocation,
+)
+from bioetl.infrastructure.storage.silver.prepared_operation_models import (
+    _build_silver_merged_metadata_write_request,
 )
 from bioetl.infrastructure.storage.silver.validation_operations import (
     _PreparedSilverWritePayload,

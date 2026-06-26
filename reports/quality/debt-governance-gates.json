@@ -28,8 +28,8 @@
       "status": "pass"
     },
     {
-      "current": "5ad1194c3670ee9877873d26e47c6c98f0e9187c146a41aea0c2bd3f139485da",
-      "limit": "5ad1194c3670ee9877873d26e47c6c98f0e9187c146a41aea0c2bd3f139485da",
+      "current": "a22723b8578b35550c52d2934d44e970f41066b7c84640517f26dcaaeb0e3f76",
+      "limit": "a22723b8578b35550c52d2934d44e970f41066b7c84640517f26dcaaeb0e3f76",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -55,13 +55,13 @@
       "status": "pass"
     },
     {
-      "current": 0,
+      "current": 8,
       "limit": 0,
       "metric": "budget_warnings",
       "name": "hotspot_family_baseline_budget_warnings",
       "remediation": "Review hotspot-family budget warnings before tightening ratchets.",
       "source_artifact": "reports/quality/hotspot-family-baseline.json",
-      "status": "pass"
+      "status": "warn"
     },
     {
       "current": 0,
@@ -208,7 +208,7 @@
       "status": "pass"
     },
     {
-      "current": 21,
+      "current": 0,
       "limit": 21,
       "metric": "generated_at_age_days",
       "name": "observability_release_review_freshness",
@@ -244,7 +244,7 @@
       "status": "pass"
     },
     {
-      "current": "550056c9328dd4e2f85f693088d615e1e367dcf6",
+      "current": "c868cde5ff404398d08d99a3dc8eeced5a862fbc",
       "limit": "clean remote-main tree evidence",
       "metric": "remote_main_sha",
       "name": "remote_main_architecture_debt_baseline",
@@ -267,13 +267,14 @@
   "stale_artifacts": {
     "adr_enforcement_matrix": false,
     "architecture_quality_scorecard": false,
+    "dq_contract_registry_diagnostics": false,
     "module_coverage_inventory": false,
     "remote_main_baseline": false
   },
   "status_counts": {
     "fail": 0,
-    "pass": 29,
-    "warn": 0
+    "pass": 28,
+    "warn": 1
   },
   "summary": {
     "architecture_quality_scorecard_integral_score": 7.98,
@@ -281,9 +282,11 @@
     "fail_count": 0,
     "failing_gates": [],
     "gate_count": 29,
-    "pass_count": 29,
-    "release_gate_status": "passing",
-    "warn_count": 0,
-    "warning_gates": []
+    "pass_count": 28,
+    "release_gate_status": "warning",
+    "warn_count": 1,
+    "warning_gates": [
+      "hotspot_family_baseline_budget_warnings"
+    ]
   }
 }
