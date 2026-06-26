@@ -33,6 +33,12 @@ _COMPLEXITY_LIMITS: Final[dict[str, int]] = {
     "application": 10,
     "infrastructure": 15,
 }
+_TASK_FAMILY_CATEGORIES: Final[dict[str, str]] = {
+    "compatibility_surface": "COMPATIBILITY_DEBT",
+    "duplication_cluster": "DUPLICATION",
+    "hotspot_family": "HOTSPOT_SIZE_COUPLING_DEBT",
+    "dead_code_review": "DEAD_CODE_REVIEW_DEBT",
+}
 
 
 def _project_root() -> Path:
@@ -111,6 +117,34 @@ def _default_limit(task: dict[str, object]) -> int | None:
     return None
 
 
+def _family_category(task_family: str) -> str | None:
+    return _TASK_FAMILY_CATEGORIES.get(task_family)
+
+
+def _within_limit_category(
+    *,
+    status: str,
+    current_value: object,
+    delta_to_limit: object,
+    default_limit: int | None,
+) -> str | None:
+    if status != "within_limit":
+        return None
+    if (
+        isinstance(current_value, int)
+        and default_limit is not None
+        and current_value <= default_limit
+    ):
+        return "STALE_EXEMPTION"
+    if not isinstance(delta_to_limit, int):
+        return None
+    if -5 <= delta_to_limit <= 0:
+        return "NEAR_LIMIT"
+    if delta_to_limit < -15:
+        return "SAFE_MARGIN"
+    return None
+
+
 def _classify_task(task: dict[str, object]) -> str:
     task_family = cast(str | None, task.get("task_family")) or ""
     status = cast(str | None, task.get("status")) or ""
@@ -119,30 +153,21 @@ def _classify_task(task: dict[str, object]) -> str:
     delta_to_limit = task.get("delta_to_limit")
     default_limit = _default_limit(task)
 
-    if task_family == "compatibility_surface":
-        return "COMPATIBILITY_DEBT"
-    if task_family == "duplication_cluster":
-        return "DUPLICATION"
-    if task_family == "hotspot_family":
-        return "HOTSPOT_SIZE_COUPLING_DEBT"
-    if task_family == "dead_code_review":
-        return "DEAD_CODE_REVIEW_DEBT"
+    family_category = _family_category(task_family)
+    if family_category is not None:
+        return family_category
     if status == "target_not_found":
         return "TARGET_NOT_FOUND"
     if registry == "god_object":
         return "GOD_OBJECT"
-    if (
-        status == "within_limit"
-        and isinstance(current_value, int)
-        and default_limit is not None
-        and current_value <= default_limit
-    ):
-        return "STALE_EXEMPTION"
-    if status == "within_limit" and isinstance(delta_to_limit, int):
-        if -5 <= delta_to_limit <= 0:
-            return "NEAR_LIMIT"
-        if delta_to_limit < -15:
-            return "SAFE_MARGIN"
+    limit_category = _within_limit_category(
+        status=status,
+        current_value=current_value,
+        delta_to_limit=delta_to_limit,
+        default_limit=default_limit,
+    )
+    if limit_category is not None:
+        return limit_category
     if registry in {"function_complexity", "domain_complexity"}:
         return "COMPLEXITY"
     return "REDUCE_TO_LIMIT"

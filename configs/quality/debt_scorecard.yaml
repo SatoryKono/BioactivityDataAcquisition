@@ -483,16 +483,16 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 180
-      total_loc: 22325
+      total_loc: 22324
       files_ge_250_loc: 7
-      helper_function_ratio: 0.355
+      helper_function_ratio: 0.357
       max_internal_fan_in: 11
       max_internal_fan_in_module: bioetl.application.core.batch_operation_errors
     trend:
       status: ratcheted_2026-06-26_application_core_live_budget_close
       next_action: 2026-06-26 closes the bounded-growth slack against the tracked
-        reviewed baseline artifact and live family census at 180 files, 22325
-        LOC, 7 files_ge_250_loc, helper_function_ratio 0.355, and
+        reviewed baseline artifact and live family census at 180 files, 22324
+        LOC, 7 files_ge_250_loc, helper_function_ratio 0.357, and
         max_internal_fan_in 11; bounded-growth budgets now match the live
         baseline at 7 files_ge_250_loc and max_internal_fan_in 11.
   - name: composition_bootstrap_runtime
@@ -595,19 +595,18 @@ hotspot_family_ratchets:
       max_internal_fan_in: 5
     metrics:
       duplication_clusters: 0
-      files: 44
-      total_loc: 6314
+      files: 45
+      total_loc: 6367
       files_ge_250_loc: 1
-      helper_function_ratio: 0.389
-      max_internal_fan_in: 6
-      max_internal_fan_in_module: bioetl.composition.runtime_builders._run_manifest_refs
+      helper_function_ratio: 0.382
+      max_internal_fan_in: 5
+      max_internal_fan_in_module: bioetl.composition.runtime_builders.config_access
     trend:
       status: ratcheted_2026-06-26_runtime_builders_large_file_burndown
       next_action: 2026-06-26 split run-manifest helper seams and retired one
         runtime-builder large-file warning, reducing the reviewed live baseline
-        to 44 files, 6314 LOC, and 1 file_ge_250_loc. The remaining pressure is
-        fan-in on _run_manifest_refs at 6 against budget 5; next wave must burn
-        that importer pressure down without raising budgets.
+        to 45 files, 6367 LOC, and 1 file_ge_250_loc while holding
+        max_internal_fan_in at the bounded budget of 5 on config_access.
 oversized_source_module_inventory:
   linked_issue: '#4679'
   split_on_touch: true

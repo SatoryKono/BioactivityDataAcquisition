@@ -94,15 +94,17 @@ def test_issue_5387_scorecard_coverage_evidence_matches_inventory() -> None:
 def test_issue_5388_compatibility_facade_counts_stay_within_ratchets() -> None:
     census = _load_json(COMPAT_CENSUS)
     debt_scorecard = _load_yaml(DEBT_SCORECARD)
-    metrics = debt_scorecard["compatibility_debt_metrics"]["metrics"]
+    metrics = debt_scorecard["sanctioned_public_entrypoint_governance"]["metrics"]
     summary = census["summary"]
 
-    assert summary["retained_entrypoint_count"] <= metrics[
-        "retained_public_entrypoint_burden"
-    ]["max_count"]
-    assert summary["retained_public_export_facade_count"] <= metrics[
-        "retained_public_export_facade_burden"
-    ]["max_count"]
+    assert (
+        summary["retained_entrypoint_count"]
+        == metrics["public_entrypoint_count"]["current_count"]
+    )
+    assert (
+        summary["retained_public_export_facade_count"]
+        == metrics["public_export_facade_count"]["current_count"]
+    )
     assert summary["removed_compatibility_surfaces_with_src_importers"] == 0
     assert summary["removed_compatibility_surfaces_still_present"] == 0
     assert summary["retained_public_export_facades_with_duplicate_exports"] == 0

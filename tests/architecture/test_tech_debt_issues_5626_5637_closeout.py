@@ -207,7 +207,7 @@ def test_issue_5632_hotspot_warning_count_and_budget_are_ratcheted_down() -> Non
     baseline_family = baseline_families["composition_bootstrap_runtime"]
     scorecard_family = scorecard_families["composition_bootstrap_runtime"]
 
-    assert baseline["summary"]["budget_warnings"] == 8
+    assert baseline["summary"]["budget_warnings"] == 7
     assert baseline["summary"]["budget_warnings"] < 9
     assert baseline_family["files_ge_250_loc"] == 0
     assert baseline_family["bounded_growth_budgets"]["files_ge_250_loc"] == 0

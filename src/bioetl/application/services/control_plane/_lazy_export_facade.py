@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from importlib import import_module
-from typing import TYPE_CHECKING
+from collections.abc import Mapping
 
-if TYPE_CHECKING:
-    from collections.abc import Mapping
+from bioetl.application.core.wiring._lazy_export_facade import (
+    install_lazy_export_facade as _install_lazy_export_facade,
+)
 
 
 def install_lazy_export_facade(
@@ -15,25 +15,7 @@ def install_lazy_export_facade(
     public_exports: Mapping[str, tuple[str, str]],
 ) -> None:
     """Install lazy export hooks for one control-plane facade module."""
-    export_names = list(public_exports)
-    namespace["__all__"] = export_names
-
-    def __getattr__(name: str) -> object:
-        try:
-            target_module_name, attr_name = public_exports[name]
-        except KeyError as exc:  # pragma: no cover - standard attribute path
-            raise AttributeError(
-                f"module {module_name!r} has no attribute {name!r}"
-            ) from exc
-        value = getattr(import_module(target_module_name), attr_name)
-        namespace[name] = value
-        return value
-
-    def __dir__() -> list[str]:
-        return sorted(set(namespace) | set(export_names))
-
-    namespace["__getattr__"] = __getattr__
-    namespace["__dir__"] = __dir__
+    _install_lazy_export_facade(namespace, module_name, public_exports)
 
 
 __all__ = ["install_lazy_export_facade"]

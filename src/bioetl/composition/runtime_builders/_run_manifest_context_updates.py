@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import TYPE_CHECKING
 
-from bioetl.composition.runtime_builders._run_manifest_refs import (
+from bioetl.composition.runtime_builders._run_manifest_identity_ref_values import (
     build_control_plane_identity_ref_values,
 )
 from bioetl.composition.runtime_builders.run_manifest_contract_identity import (

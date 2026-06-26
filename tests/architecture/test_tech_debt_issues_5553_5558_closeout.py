@@ -116,7 +116,7 @@ def test_issue_5555_hotspot_reviewed_baselines_capture_current_reductions() -> N
     runtime_row = _hotspot_row(hotspot, "composition_runtime_builders")
 
     assert application_row["files_ge_250_loc"] == 15
-    assert runtime_row["files"] == 43
+    assert runtime_row["files"] == 45
     assert runtime_row["max_internal_fan_in"] == 5
     assert (
         application_row["files_ge_250_loc"]

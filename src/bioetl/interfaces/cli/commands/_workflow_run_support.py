@@ -19,11 +19,11 @@ from bioetl.domain.control_plane.reproducibility_profiles import (
 )
 from bioetl.domain.types import RunID
 from bioetl.interfaces.cli.commands._workflow_support import (
+    WorkflowRunOptionsConfig,
     apply_cli_override_config,
     build_workflow_run_options_override_from_mapping,
     parse_only_steps,
     select_workflow_steps,
-    WorkflowRunOptionsConfig,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error
