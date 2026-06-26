@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import os
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -10,6 +9,10 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pyarrow as pa
+
+from bioetl.infrastructure.storage.silver.delta_write_execution import (
+    _await_blocking_deltalake_call,
+)
 
 if TYPE_CHECKING:
     from deltalake import DeltaTable as DeltaTableType
@@ -159,21 +162,18 @@ async def _merge_records_with_timeout(
 ) -> None:
     """Execute Delta merge with timeout handling and structured timeout telemetry."""
     merge_condition = _build_merge_condition(primary_keys)
-    loop = asyncio.get_running_loop()
-    merge_future = loop.run_in_executor(
-        None,
-        _build_merge_execute_callable(
-            dt=dt,
-            table_path=table_path,
-            records=records,
-            merge_condition=merge_condition,
-            merge_schema=merge_schema,
-        ),
+    merge_callable = _build_merge_execute_callable(
+        dt=dt,
+        table_path=table_path,
+        records=records,
+        merge_condition=merge_condition,
+        merge_schema=merge_schema,
     )
     try:
-        await asyncio.wait_for(
-            merge_future,
-            timeout=timeout_seconds,
+        await _await_blocking_deltalake_call(
+            operation_name="merge-execute",
+            call=merge_callable,
+            timeout_seconds=timeout_seconds,
         )
     except TimeoutError as exc:
         logger.warning(

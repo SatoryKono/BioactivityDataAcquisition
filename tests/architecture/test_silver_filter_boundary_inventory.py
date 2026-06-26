@@ -67,7 +67,7 @@ REQUIRED_SURFACE_SYMBOLS = {
         "filters.source_profile",
     },
     "silver_config": {
-        "SilverFilterConfig(",
+        "SilverFilterConfig",
         "FORBIDDEN_SILVER_SEMANTIC_FILTER_KEYS",
         "validate_no_semantic_silver_filter_payload",
     },

@@ -69,6 +69,10 @@ def test_closeout_artifact_covers_all_requested_issues() -> None:
 
 
 def test_issue_5387_scorecard_coverage_evidence_matches_inventory() -> None:
+    skip_if_module_coverage_inventory_is_dirty(
+        root=ROOT,
+        inventory_path=MODULE_COVERAGE,
+    )
     scorecard = _load_json(SCORECARD)
     inventory = _load_json(MODULE_COVERAGE)
     summary = inventory["summary"]

@@ -129,7 +129,7 @@ def _metric_value(metrics: dict[str, object], key: str) -> object:
 
 def _metric_int(metrics: dict[str, object], key: str) -> int:
     value = metrics.get(key, 0)
-    return int(value) if isinstance(value, int | float) else 0
+    return int(value) if isinstance(value, (int, float)) else 0
 
 
 def _clamp_score(value: float) -> float:
@@ -537,8 +537,8 @@ def write_architecture_quality_scorecard(
 
 __all__ = [
     "DEFAULT_OUTPUT",
-    "build_architecture_quality_scorecard",
     "_build_categories",
     "_score_category",
+    "build_architecture_quality_scorecard",
     "write_architecture_quality_scorecard",
 ]

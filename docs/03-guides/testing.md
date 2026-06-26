@@ -339,8 +339,12 @@ Supported policy slice for issue `#2598`:
   `tests/architecture/test_module_coverage_inventory.py`).
 - Architecture quality scorecard теперь является committed trend artifact:
   `reports/quality/architecture-quality-scorecard.json` агрегирует dependency
-  map, module coverage inventory, compatibility census, dead-code inventory и
+  map, module coverage inventory, compatibility census, dead-code inventory,
+  duplication baseline, hotspot-family baseline, test-governance inventory и
   contract diagnostics в 10-категорийную модель с суммой весов `1.00`.
+  Category scores вычисляются из live metrics, а не остаются fixed constants,
+  поэтому substantial duplication/hotspot/test-governance reductions должны
+  менять integral score после регенерации committed artifact.
   Artifact строится через
   `bioetl.infrastructure.quality.architecture_quality_scorecard` и проверяется
   `tests/architecture/test_architecture_quality_scorecard.py`; `quality_integral_gate`

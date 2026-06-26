@@ -497,7 +497,6 @@ class TestSilverWriterErrorHandling:
         self, valid_records, noop_logger
     ):
         """Test merge timeout is surfaced as DeltaTransactionError."""
-        import asyncio
         from unittest.mock import MagicMock, patch
 
         import pyarrow as pa
@@ -541,8 +540,8 @@ class TestSilverWriterErrorHandling:
                 delta_table_mock,
             ),
             patch(
-                "bioetl.infrastructure.storage.silver.delta_helpers.asyncio.wait_for",
-                side_effect=asyncio.TimeoutError,
+                "bioetl.infrastructure.storage.silver.delta_merge_helpers._await_blocking_deltalake_call",
+                side_effect=TimeoutError,
             ),
             patch(
                 "bioetl.infrastructure.storage.silver.merge_resilience_helpers.asyncio.sleep",
@@ -564,8 +563,6 @@ class TestSilverWriterErrorHandling:
         self, valid_records
     ) -> None:
         """Final merge timeout should emit final_reason telemetry."""
-        import asyncio
-
         import pyarrow as pa
         from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
@@ -627,8 +624,8 @@ class TestSilverWriterErrorHandling:
                 delta_table_mock,
             ),
             patch(
-                "bioetl.infrastructure.storage.silver.delta_helpers.asyncio.wait_for",
-                side_effect=asyncio.TimeoutError,
+                "bioetl.infrastructure.storage.silver.delta_merge_helpers._await_blocking_deltalake_call",
+                side_effect=TimeoutError,
             ),
         ):
             writer = SilverWriter(
