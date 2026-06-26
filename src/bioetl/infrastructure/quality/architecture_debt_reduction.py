@@ -9,13 +9,17 @@ from typing import Final, cast
 
 PLAN_SCHEMA_VERSION: Final[str] = "1.0"
 _CATEGORY_PRIORITY: Final[dict[str, int]] = {
-    "STALE_EXEMPTION": 1,
-    "GOD_OBJECT": 2,
-    "COMPLEXITY": 3,
-    "NEAR_LIMIT": 4,
-    "REDUCE_TO_LIMIT": 5,
-    "SAFE_MARGIN": 6,
-    "TARGET_NOT_FOUND": 7,
+    "COMPATIBILITY_DEBT": 1,
+    "DUPLICATION": 2,
+    "HOTSPOT_SIZE_COUPLING_DEBT": 3,
+    "DEAD_CODE_REVIEW_DEBT": 4,
+    "STALE_EXEMPTION": 5,
+    "GOD_OBJECT": 6,
+    "COMPLEXITY": 7,
+    "NEAR_LIMIT": 8,
+    "REDUCE_TO_LIMIT": 9,
+    "SAFE_MARGIN": 10,
+    "TARGET_NOT_FOUND": 11,
 }
 _FILE_LAYER_LIMITS: Final[dict[str, int]] = {
     "domain": 305,
@@ -108,12 +112,21 @@ def _default_limit(task: dict[str, object]) -> int | None:
 
 
 def _classify_task(task: dict[str, object]) -> str:
+    task_family = cast(str | None, task.get("task_family")) or ""
     status = cast(str | None, task.get("status")) or ""
     registry = cast(str | None, task.get("registry")) or ""
     current_value = task.get("current_value")
     delta_to_limit = task.get("delta_to_limit")
     default_limit = _default_limit(task)
 
+    if task_family == "compatibility_surface":
+        return "COMPATIBILITY_DEBT"
+    if task_family == "duplication_cluster":
+        return "DUPLICATION"
+    if task_family == "hotspot_family":
+        return "HOTSPOT_SIZE_COUPLING_DEBT"
+    if task_family == "dead_code_review":
+        return "DEAD_CODE_REVIEW_DEBT"
     if status == "target_not_found":
         return "TARGET_NOT_FOUND"
     if registry == "god_object":
@@ -136,6 +149,12 @@ def _classify_task(task: dict[str, object]) -> str:
 
 
 def _primary_executor(category: str) -> str:
+    if category == "COMPATIBILITY_DEBT":
+        return "py-config-bot"
+    if category in {"DUPLICATION", "HOTSPOT_SIZE_COUPLING_DEBT"}:
+        return "orchestrator"
+    if category == "DEAD_CODE_REVIEW_DEBT":
+        return "py-audit-bot"
     if category == "STALE_EXEMPTION":
         return "py-config-bot"
     if category == "TARGET_NOT_FOUND":
@@ -144,6 +163,12 @@ def _primary_executor(category: str) -> str:
 
 
 def _supporting_agents(category: str) -> list[str]:
+    if category == "COMPATIBILITY_DEBT":
+        return ["py-test-bot", "py-doc-bot", "py-audit-bot", "py-review-orchestrator"]
+    if category in {"DUPLICATION", "HOTSPOT_SIZE_COUPLING_DEBT"}:
+        return ["py-test-bot", "py-doc-bot", "py-config-bot", "py-audit-bot"]
+    if category == "DEAD_CODE_REVIEW_DEBT":
+        return ["py-test-bot", "py-doc-bot", "py-plan-bot"]
     if category == "SAFE_MARGIN":
         return ["py-audit-bot"]
     if category == "TARGET_NOT_FOUND":
@@ -158,6 +183,7 @@ def _supporting_agents(category: str) -> list[str]:
 
 def _requires_config_update(category: str) -> bool:
     return category in {
+        "COMPATIBILITY_DEBT",
         "STALE_EXEMPTION",
         "NEAR_LIMIT",
         "REDUCE_TO_LIMIT",
@@ -241,6 +267,10 @@ def build_architecture_debt_execution_plan(
         batches.append(_build_batch(category=current_category, tasks=current_tasks))
 
     actionable_categories = {
+        "COMPATIBILITY_DEBT",
+        "DUPLICATION",
+        "HOTSPOT_SIZE_COUPLING_DEBT",
+        "DEAD_CODE_REVIEW_DEBT",
         "STALE_EXEMPTION",
         "GOD_OBJECT",
         "COMPLEXITY",

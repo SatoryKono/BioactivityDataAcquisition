@@ -83,11 +83,6 @@ def _build_unified_reproducibility_diagnostics_semantic_identity(
     """Build semantic identity section of unified reproducibility diagnostics."""
     return {
         "execution_fingerprint": summary.get("execution_fingerprint"),
-        "legacy_config_hash": summary.get("config_hash"),
-        "legacy_config_hash_alias_of": "resolved_config_hash",
-        "legacy_config_hash_replay_identity_anchor": False,
-        "config_hash_compatibility_anchor": summary.get("config_hash"),
-        "config_hash_legacy_alias_of": "resolved_config_hash",
         "resolved_config_hash": summary.get("resolved_config_hash"),
         "effective_config_hash": summary.get("effective_config_hash"),
         "effective_config_artifact_id": summary.get("effective_config_artifact_id"),

@@ -12,14 +12,14 @@ __all__ = ["DEFAULT_FIELDS", "SEMANTICSCHOLAR_HEALTH_ERRORS", "SemanticScholarAd
 from dataclasses import KW_ONLY, dataclass, field
 from typing import TYPE_CHECKING
 
-from httpx import HTTPStatusError, RequestError
-
-from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.common import (
     ComposableFallbackDecorator,
     FallbackFetchOrchestrator,
     FallbackPolicyMixin,
+)
+from bioetl.infrastructure.adapters.common.error_bundles import (
+    COMMON_ADAPTER_HEALTH_ERRORS,
 )
 from bioetl.infrastructure.adapters.semanticscholar._client_fallback_policy import (
     _SemanticScholarFallbackPolicyMixin,
@@ -58,17 +58,7 @@ DEFAULT_FIELDS = (
     "openAccessPdf,tldr,fieldsOfStudy,publicationTypes,journal"
 )
 
-SEMANTICSCHOLAR_HEALTH_ERRORS = (
-    BioETLError,
-    NetworkError,
-    RequestError,
-    HTTPStatusError,
-    OSError,
-    ValueError,
-    TypeError,
-    RuntimeError,
-    Exception,
-)
+SEMANTICSCHOLAR_HEALTH_ERRORS = COMMON_ADAPTER_HEALTH_ERRORS
 
 
 def _create_default_semanticscholar_title_fallback_handler(

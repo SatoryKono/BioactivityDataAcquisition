@@ -2,7 +2,7 @@
 
 - mode: report-only
 - targets: 4
-- total_duplicate_clusters: 95
+- total_duplicate_clusters: 88
 
 > Interpretation note: this is a visibility baseline. `R0801` can over-report
 > around facades, export barrels, and compatibility shims, so use it as
@@ -10,27 +10,27 @@
 
 | Target | Duplicate clusters |
 | --- | ---: |
-| `src/bioetl/infrastructure/adapters` | 70 |
-| `src/bioetl/application/pipelines` | 20 |
+| `src/bioetl/infrastructure/adapters` | 67 |
+| `src/bioetl/application/pipelines` | 18 |
 | `src/bioetl/composition/bootstrap` | 0 |
-| `src/bioetl/interfaces/cli` | 5 |
+| `src/bioetl/interfaces/cli` | 3 |
 
 ## src/bioetl/infrastructure/adapters
 
-- duplicate clusters: 70
+- duplicate clusters: 67
 
 | Actionability category | Duplicate clusters |
 | --- | ---: |
-| `export_facade_or_package_barrel` | 54 |
-| `adapter_resilience_or_contract_template` | 16 |
+| `export_facade_or_package_barrel` | 56 |
+| `adapter_resilience_or_contract_template` | 11 |
 
 | Top recurring module pairs | Duplicate clusters |
 | --- | ---: |
 | `bioetl.infrastructure.adapters.crossref.client` <-> `bioetl.infrastructure.adapters.crossref.client_fetch_helpers` | 3 |
 | `bioetl.infrastructure.adapters.chembl.fetch_adapter_mixin` <-> `bioetl.infrastructure.adapters.common.fetch_resilience_template` | 2 |
 | `bioetl.infrastructure.adapters.chembl.fetch_resilience_mixin` <-> `bioetl.infrastructure.adapters.common.fetch_resilience_template` | 2 |
-| `bioetl.infrastructure.adapters.crossref.client` <-> `bioetl.infrastructure.adapters.openalex.client` | 2 |
 | `bioetl.infrastructure.adapters.decorators.circuit_breaker` <-> `bioetl.infrastructure.adapters.decorators.retry` | 2 |
+| `bioetl.infrastructure.adapters.openalex._filter_fetch_requests` <-> `bioetl.infrastructure.adapters.openalex.filter_fetch_adapter_mixin` | 2 |
 
 | Cluster path | Compared modules |
 | --- | --- |
@@ -38,32 +38,32 @@
 | `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.chembl._fetch_resilience_fallback`[58:81], `bioetl.infrastructure.adapters.chembl.fetch_paging_mixin`[36:50] |
 | `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.pubmed._fetch`[47:69], `bioetl.infrastructure.adapters.pubmed._search`[46:63] |
 | `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.health_check_contract`[12:22], `bioetl.infrastructure.adapters.uniprot.client`[54:64] |
-| `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.crossref.client`[75:87], `bioetl.infrastructure.adapters.semanticscholar.adapter`[61:93] |
 | `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.chembl.fetch_adapter_mixin`[57:66], `bioetl.infrastructure.adapters.chembl.fetch_resilience_mixin`[134:155] |
 | `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.chembl.models_common`[112:123], `bioetl.infrastructure.adapters.chembl.models_compound`[100:109] |
-| `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.crossref.fallback`[24:36], `bioetl.infrastructure.adapters.pubmed.fallback`[26:37] |
 | `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.pubmed._fetch`[33:44], `bioetl.infrastructure.adapters.pubmed._search`[32:43] |
 | `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.chembl.client`[245:254], `bioetl.infrastructure.adapters.pubchem.client_model_mixin`[88:97] |
-| `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.crossref.client`[75:83], `bioetl.infrastructure.adapters.openalex.client`[76:84] |
 | `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.crossref._batch_support`[53:61], `bioetl.infrastructure.adapters.pubchem.fetch_strategies`[53:75] |
+| `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.decorators.circuit_breaker`[155:175], `bioetl.infrastructure.adapters.decorators.retry`[138:146] |
+| `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.decorators.circuit_breaker`[177:185], `bioetl.infrastructure.adapters.decorators.retry`[198:209] |
+| `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.pubmed._fetch`[47:55], `bioetl.infrastructure.adapters.pubmed._health`[53:61] |
 
-- … truncated 58 additional clusters for brevity
+- … truncated 55 additional clusters for brevity
 
 ## src/bioetl/application/pipelines
 
-- duplicate clusters: 20
+- duplicate clusters: 18
 
 | Actionability category | Duplicate clusters |
 | --- | ---: |
-| `pipeline_transformer_contract_pattern` | 20 |
+| `pipeline_transformer_contract_pattern` | 18 |
 
 | Top recurring module pairs | Duplicate clusters |
 | --- | ---: |
-| `bioetl.application.pipelines.common.blocks` <-> `bioetl.application.pipelines.crossref.blocks` | 2 |
 | `bioetl.application.pipelines.uniprot.extractors._comment_facets_data` <-> `bioetl.application.pipelines.uniprot.transformer_business_data_mixin` | 2 |
 | `bioetl.application.pipelines.chembl.__init__` <-> `bioetl.application.pipelines.chembl.pipeline_types` | 1 |
 | `bioetl.application.pipelines.chembl._activity_transformer_maps` <-> `bioetl.application.pipelines.chembl.assay_parameters_transformer` | 1 |
 | `bioetl.application.pipelines.chembl.base_chembl_transformer` <-> `bioetl.application.pipelines.crossref.transformer` | 1 |
+| `bioetl.application.pipelines.crossref.__init__` <-> `bioetl.application.pipelines.crossref.extractors` | 1 |
 
 | Cluster path | Compared modules |
 | --- | --- |
@@ -80,7 +80,7 @@
 | `src/bioetl/application/pipelines/uniprot/extractors/__init__.py:1` | `bioetl.application.pipelines.chembl._activity_transformer_maps`[87:95], `bioetl.application.pipelines.chembl.assay_parameters_transformer`[35:43] |
 | `src/bioetl/application/pipelines/uniprot/extractors/__init__.py:1` | `bioetl.application.pipelines.pubmed._block_definitions_analytics`[48:55], `bioetl.application.pipelines.pubmed.transformer`[267:274] |
 
-- … truncated 8 additional clusters for brevity
+- … truncated 6 additional clusters for brevity
 
 ## src/bioetl/composition/bootstrap
 
@@ -89,25 +89,21 @@
 
 ## src/bioetl/interfaces/cli
 
-- duplicate clusters: 5
+- duplicate clusters: 3
 
 | Actionability category | Duplicate clusters |
 | --- | ---: |
-| `cli_command_contract_shell` | 5 |
+| `cli_command_contract_shell` | 3 |
 
 | Top recurring module pairs | Duplicate clusters |
 | --- | ---: |
-| `bioetl.interfaces.cli.commands._workflow_command_runtime` <-> `bioetl.interfaces.cli.commands.workflow` | 1 |
-| `bioetl.interfaces.cli.commands._workflow_support` <-> `bioetl.interfaces.cli.commands.workflow` | 1 |
 | `bioetl.interfaces.cli.commands.domains.composite.command_input` <-> `bioetl.interfaces.cli.commands.domains.composite.runtime` | 1 |
 | `bioetl.interfaces.cli.commands.domains.health.server_integration` <-> `bioetl.interfaces.cli.commands.vacuum` | 1 |
 | `bioetl.interfaces.cli.commands.domains.run_all.public_runtime` <-> `bioetl.interfaces.cli.commands.run` | 1 |
 
 | Cluster path | Compared modules |
 | --- | --- |
-| `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands._workflow_support`[101:122], `bioetl.interfaces.cli.commands.workflow`[297:318] |
 | `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands.domains.composite.command_input`[20:31], `bioetl.interfaces.cli.commands.domains.composite.runtime`[19:42] |
-| `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands._workflow_command_runtime`[100:110], `bioetl.interfaces.cli.commands.workflow`[327:337] |
 | `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands.domains.run_all.public_runtime`[169:176], `bioetl.interfaces.cli.commands.run`[284:291] |
 | `src/bioetl/interfaces/cli/commands/domains/shared/__init__.py:1` | `bioetl.interfaces.cli.commands.domains.health.server_integration`[118:123], `bioetl.interfaces.cli.commands.vacuum`[58:63] |
 
@@ -115,14 +111,14 @@
 
 | Target | Duplicate clusters | Dominant actionability | Low-risk share | Recommended first wave |
 | --- | ---: | --- | ---: | --- |
-| `src/bioetl/interfaces/cli` | 5 | `cli_command_contract_shell` | 1.00 | yes |
-| `src/bioetl/infrastructure/adapters` | 70 | `export_facade_or_package_barrel` | 0.77 | no |
-| `src/bioetl/application/pipelines` | 20 | `pipeline_transformer_contract_pattern` | 0.00 | no |
+| `src/bioetl/interfaces/cli` | 3 | `cli_command_contract_shell` | 1.00 | yes |
+| `src/bioetl/infrastructure/adapters` | 67 | `export_facade_or_package_barrel` | 0.84 | no |
+| `src/bioetl/application/pipelines` | 18 | `pipeline_transformer_contract_pattern` | 0.00 | no |
 | `src/bioetl/composition/bootstrap` | 0 | `n/a` | 0.00 | no |
 
 ## First Wave Selection
 
 - target: `src/bioetl/interfaces/cli`
-- duplicate_clusters: 5
+- duplicate_clusters: 3
 - dominant_actionability_category: `cli_command_contract_shell`
 - selection_rule: prefer low-risk actionability families with bounded cluster counts, then maximize duplicate reduction leverage

@@ -5,9 +5,6 @@ from __future__ import annotations
 from dataclasses import KW_ONLY, dataclass, field
 from typing import TYPE_CHECKING
 
-from httpx import HTTPStatusError, RequestError
-
-from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
@@ -15,6 +12,9 @@ from bioetl.infrastructure.adapters.common import (
     ComposableFallbackDecorator,
     FallbackFetchOrchestrator,
     FallbackPolicyMixin,
+)
+from bioetl.infrastructure.adapters.common.error_bundles import (
+    COMMON_ADAPTER_HEALTH_ERRORS,
 )
 from bioetl.infrastructure.adapters.crossref._client_fallback_policy import (
     _CrossRefFallbackPolicyMixin,
@@ -72,17 +72,7 @@ if TYPE_CHECKING:
 
 CROSSREF_API_BASE = "https://api.crossref.org"
 
-CROSSREF_HEALTH_ERRORS = (
-    BioETLError,
-    NetworkError,
-    RequestError,
-    HTTPStatusError,
-    OSError,
-    ValueError,
-    TypeError,
-    RuntimeError,
-    Exception,
-)
+CROSSREF_HEALTH_ERRORS = COMMON_ADAPTER_HEALTH_ERRORS
 
 
 @dataclass

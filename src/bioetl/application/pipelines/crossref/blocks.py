@@ -158,10 +158,12 @@ class _CrossRefAuthorBlock:
         )
 
 
-__all__ = [
-    "_CrossRefAuthorBlock",
-    "_CrossRefCoreBlock",
-    "_CrossRefDateBlock",
-    "_CrossRefJournalBlock",
-    "_CrossRefMetadataBlock",
-]
+_CROSSREF_BLOCK_TYPES = (
+    _CrossRefAuthorBlock,
+    _CrossRefCoreBlock,
+    _CrossRefDateBlock,
+    _CrossRefJournalBlock,
+    _CrossRefMetadataBlock,
+)
+
+__all__ = [block_type.__name__ for block_type in _CROSSREF_BLOCK_TYPES]

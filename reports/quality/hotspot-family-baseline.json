@@ -3,7 +3,7 @@
     "snapshot_date": "2026-06-01",
     "families": 5,
     "scorecard": "configs/quality/debt_scorecard.yaml",
-    "budget_warnings": 8
+    "budget_warnings": 7
   },
   "families": [
     {
@@ -42,9 +42,9 @@
       ],
       "duplication_clusters": 0,
       "files": 48,
-      "total_loc": 5908,
+      "total_loc": 5899,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.307,
+      "helper_function_ratio": 0.304,
       "max_internal_fan_in": 3,
       "max_internal_fan_in_module": "bioetl.composition.bootstrap.runtime.observability",
       "bounded_growth_budgets": {
@@ -114,19 +114,18 @@
         "src/bioetl/composition/runtime_builders/"
       ],
       "duplication_clusters": 0,
-      "files": 43,
-      "total_loc": 6320,
-      "files_ge_250_loc": 3,
-      "helper_function_ratio": 0.403,
-      "max_internal_fan_in": 5,
-      "max_internal_fan_in_module": "bioetl.composition.runtime_builders.run_manifest_contract_identity",
+      "files": 44,
+      "total_loc": 6314,
+      "files_ge_250_loc": 1,
+      "helper_function_ratio": 0.389,
+      "max_internal_fan_in": 6,
+      "max_internal_fan_in_module": "bioetl.composition.runtime_builders._run_manifest_refs",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 3,
         "max_internal_fan_in": 5
       },
       "budget_warnings": [
-        "at_budget:files_ge_250_loc=3/3",
-        "at_budget:max_internal_fan_in=5/5"
+        "at_budget:max_internal_fan_in=6/5"
       ]
     }
   ]

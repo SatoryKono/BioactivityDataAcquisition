@@ -335,20 +335,8 @@ def test_debt_scorecard_declares_compatibility_debt_kpis() -> None:
 
     expected_counts = {
         "transition_compat_count": len(transition_debt),
-        "retained_public_entrypoint_burden": len(retained_entrypoints),
         "sunset_compat_count": sunset_count,
         "expired_compat_count": expired_count,
-        "retained_public_export_facade_burden": int(
-            census_summary["retained_public_export_facade_count"]
-        ),
-        "retained_public_export_facade_conflict_count": (
-            int(census_summary["retained_public_export_facades_with_duplicate_exports"])
-            + int(
-                census_summary[
-                    "retained_public_export_facades_with_resolution_conflicts"
-                ]
-            )
-        ),
     }
     for metric_name, expected_count in expected_counts.items():
         metric = metrics.get(metric_name)
@@ -367,18 +355,8 @@ def test_debt_scorecard_declares_compatibility_debt_kpis() -> None:
             isinstance(metric.get("ratchet_policy"), str) and metric["ratchet_policy"]
         )
 
-    retained_burden_metric = metrics["retained_public_entrypoint_burden"]
-    assert retained_burden_metric.get("max_count") == len(retained_entrypoints)
-
     expired_metric = metrics["expired_compat_count"]
     assert expired_metric.get("max_count") == 0
-
-    export_facade_metric = metrics["retained_public_export_facade_burden"]
-    assert export_facade_metric.get("max_count") == int(
-        census_summary["retained_public_export_facade_count"]
-    )
-    export_conflict_metric = metrics["retained_public_export_facade_conflict_count"]
-    assert export_conflict_metric.get("max_count") == 0
 
 
 def test_debt_scorecard_declares_public_entrypoint_governance_kpis() -> None:
@@ -400,6 +378,9 @@ def test_debt_scorecard_declares_public_entrypoint_governance_kpis() -> None:
     assert isinstance(burn_down_plan, dict)
     plan_rows = burn_down_plan.get("rows")
     assert isinstance(plan_rows, list)
+    census_path = ROOT / "reports/quality/compatibility-importer-census.json"
+    census_payload = json.loads(census_path.read_text(encoding="utf-8"))
+    census_summary = census_payload["summary"]
 
     metrics = governance.get("metrics", {})
     assert isinstance(metrics, dict)
@@ -419,6 +400,17 @@ def test_debt_scorecard_declares_public_entrypoint_governance_kpis() -> None:
         "public_entrypoint_count": len(retained_entrypoints),
         "stable_public_api_count": stable_count,
         "narrow_first_party_callers_count": narrowing_count,
+        "public_export_facade_count": int(
+            census_summary["retained_public_export_facade_count"]
+        ),
+        "public_export_facade_conflict_count": (
+            int(census_summary["retained_public_export_facades_with_duplicate_exports"])
+            + int(
+                census_summary[
+                    "retained_public_export_facades_with_resolution_conflicts"
+                ]
+            )
+        ),
     }
     for metric_name, expected_count in expected_counts.items():
         metric = metrics.get(metric_name)

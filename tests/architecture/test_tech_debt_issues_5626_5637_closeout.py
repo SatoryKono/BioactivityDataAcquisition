@@ -174,7 +174,7 @@ def test_issue_5629_cli_command_shell_duplication_is_below_opening_baseline() ->
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
 
-    assert by_target["src/bioetl/interfaces/cli"]["duplicate_count"] == 5
+    assert by_target["src/bioetl/interfaces/cli"]["duplicate_count"] == 3
     assert by_target["src/bioetl/interfaces/cli"]["duplicate_count"] < 6
 
 
@@ -182,7 +182,7 @@ def test_issue_5630_adapter_layer_duplication_is_below_opening_baseline() -> Non
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
 
-    assert by_target["src/bioetl/infrastructure/adapters"]["duplicate_count"] == 70
+    assert by_target["src/bioetl/infrastructure/adapters"]["duplicate_count"] == 67
     assert by_target["src/bioetl/infrastructure/adapters"]["duplicate_count"] < 72
 
 
@@ -192,7 +192,7 @@ def test_issue_5631_pipeline_transformer_duplication_is_below_opening_baseline()
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
 
-    assert by_target["src/bioetl/application/pipelines"]["duplicate_count"] == 20
+    assert by_target["src/bioetl/application/pipelines"]["duplicate_count"] == 18
     assert by_target["src/bioetl/application/pipelines"]["duplicate_count"] < 22
 
 

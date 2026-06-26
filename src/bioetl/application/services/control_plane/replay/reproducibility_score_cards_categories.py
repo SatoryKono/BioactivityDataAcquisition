@@ -266,8 +266,6 @@ def score_layer_consistency(summary: JsonDict) -> ScoreCardRecord:
         "diagnostics.occurrence_only_diagnostics",
     ]
     score = 9
-    if summary.get("config_hash"):
-        evidence.append("legacy_config_hash_exposed_as_compatibility_alias")
     if summary.get("resolved_config_hash"):
         evidence.append("resolved_config_hash_exposed")
     if summary.get("effective_config_hash"):

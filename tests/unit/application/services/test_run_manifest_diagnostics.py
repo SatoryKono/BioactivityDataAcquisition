@@ -173,7 +173,7 @@ def test_base_summary_payload_sections_preserve_replay_and_snapshot_contract() -
     assert payload["planned_artifacts"] == []
 
 
-def test_effective_config_diagnostics_preserve_legacy_alias_contract() -> None:
+def test_effective_config_diagnostics_use_canonical_hash_fields_only() -> None:
     summary = {
         "config_hash": "legacy-hash",
         "effective_config_artifact_id": "eca-1",
@@ -189,14 +189,10 @@ def test_effective_config_diagnostics_preserve_legacy_alias_contract() -> None:
 
     assert payload == {
         "semantic": {
-            "legacy_config_hash": "legacy-hash",
-            "legacy_config_hash_alias_of": "resolved_config_hash",
             "effective_config_artifact_id": "eca-1",
             "resolved_config_hash": "resolved-hash",
             "effective_config_hash": "effective-hash",
             "source_fingerprint": "source-fingerprint",
-            "config_hash_compatibility_anchor": "legacy-hash",
-            "config_hash_legacy_alias_of": "resolved_config_hash",
         },
         "occurrence": {
             "run_id": "run-1",
@@ -206,9 +202,7 @@ def test_effective_config_diagnostics_preserve_legacy_alias_contract() -> None:
         "diff_policy": {
             "semantic_anchor": "effective_config_hash",
             "occurrence_fields": ["run_id", "manifest_id", "manifest_created_at"],
-            "config_hash_policy": "deprecated_legacy_alias_for_resolved_config_hash",
-            "legacy_config_hash_display_only": True,
-            "legacy_config_hash_replay_identity_anchor": False,
+            "config_hash_policy": "resolved_and_effective_hashes_only",
         },
     }
 
@@ -841,13 +835,12 @@ def _assert_provenance_only_policy(
         == manifest.execution_fingerprint
     )
     effective_config_diag = summary["reproducibility_diagnostics"]["effective_config"]
-    assert effective_config_diag["semantic"]["legacy_config_hash"] == _VALID_CONFIG_HASH
-    assert (
-        effective_config_diag["semantic"]["legacy_config_hash_alias_of"]
-        == "resolved_config_hash"
-    )
     assert effective_config_diag["semantic"]["effective_config_hash"] == (
         _VALID_EFFECTIVE_CONFIG_HASH
+    )
+    assert (
+        effective_config_diag["semantic"]["resolved_config_hash"]
+        == _VALID_RESOLVED_CONFIG_HASH
     )
     assert effective_config_diag["occurrence"]["run_id"] == str(manifest.run_id)
     assert effective_config_diag["diff_policy"]["occurrence_fields"] == [
@@ -856,13 +849,8 @@ def _assert_provenance_only_policy(
         "manifest_created_at",
     ]
     assert (
-        effective_config_diag["diff_policy"]["legacy_config_hash_display_only"] is True
-    )
-    assert (
-        effective_config_diag["diff_policy"][
-            "legacy_config_hash_replay_identity_anchor"
-        ]
-        is False
+        effective_config_diag["diff_policy"]["config_hash_policy"]
+        == "resolved_and_effective_hashes_only"
     )
 
 
