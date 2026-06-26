@@ -22,7 +22,6 @@ from bioetl.domain.types import RunID
 from bioetl.interfaces.cli.commands._workflow_support import (
     apply_cli_override_config,
     build_workflow_run_options_override_from_mapping,
-    build_workflow_run_options_override,
     parse_only_steps,
     select_workflow_steps,
     WorkflowRunOptionsConfig,
