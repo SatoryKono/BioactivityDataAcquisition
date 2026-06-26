@@ -8,6 +8,10 @@ from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
+from bioetl.application.pipelines.chembl.target_protein_classification_summary import (
+    _int_or_none,
+    _text_or_none,
+)
 from bioetl.domain.entities import TargetProteinClassification
 from bioetl.domain.types import JsonDict
 
@@ -154,28 +158,11 @@ def _classification_status(value: object) -> str:
 
 
 def _optional_int(value: object) -> int | None:
-    if value is None or isinstance(value, bool):
-        return None
-    if isinstance(value, int):
-        return value
-    if isinstance(value, float):
-        return int(value) if value.is_integer() else None
-    if isinstance(value, str):
-        stripped = value.strip()
-        if not stripped:
-            return None
-        try:
-            return int(stripped)
-        except ValueError:
-            return None
-    return None
+    return _int_or_none(value)
 
 
 def _optional_text(value: object) -> str | None:
-    if value is None:
-        return None
-    stripped = str(value).strip()
-    return stripped or None
+    return _text_or_none(value)
 
 
 def _optional_bool(value: object) -> bool | None:

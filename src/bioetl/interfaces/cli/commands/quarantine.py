@@ -25,7 +25,11 @@ from bioetl.interfaces.cli.commands.domains.quarantine.support import (
     _QuarantineRuntimeService,
     _QuarantineService,
     _resolve_silver_filter_error_code,
-    _show_quarantine_stats_for_cli_options,
+    _show_quarantine_stats_for_pipeline_cli_options,
+)
+from bioetl.interfaces.cli.commands.domains.shared.inspection_commands import (
+    add_quarantine_stats_options,
+    run_quarantine_stats_command,
 )
 
 SILVER_FILTER_ERROR_CODE = "FILTERED_OUT_SILVER"
@@ -121,40 +125,7 @@ def quarantine_inspect(
 
 
 @quarantine.command("stats")
-@click.option("--pipeline", required=True, help="Pipeline name")
-@click.option("--json", "output_json", is_flag=True, help="Output as JSON")
-@click.option("--error-code", help="Scope stats to one error code")
-@click.option(
-    "--run-id",
-    help="Scope stats to one pipeline run ID",
-)
-@click.option(
-    "--silver-filter-only",
-    is_flag=True,
-    help=SILVER_FILTER_ALIAS_HELP,
-)
-@click.option(
-    "--group-by",
-    type=click.Choice(
-        [
-            "reason-code",
-            "field",
-            "rule-type",
-            "operator",
-            "reason-code-field",
-            "reason-signature",
-        ],
-        case_sensitive=False,
-    ),
-    help="Focused Silver reject grouping for operator triage",
-)
-@click.option(
-    "--top",
-    type=int,
-    default=10,
-    show_default=True,
-    help="Maximum grouping entries to display",
-)
+@add_quarantine_stats_options(silver_filter_alias_help=SILVER_FILTER_ALIAS_HELP)
 def quarantine_stats(
     pipeline: str,
     output_json: bool,
@@ -165,17 +136,12 @@ def quarantine_stats(
     top: int,
 ) -> None:
     """Show quarantine statistics dashboard for a pipeline."""
-    _show_quarantine_stats_for_cli_options(
-        get_quarantine_runtime_service(pipeline),
-        pipeline=pipeline,
-        output_json=output_json,
-        error_code=error_code,
-        silver_filter_only=silver_filter_only,
+    run_quarantine_stats_command(
+        locals(),
+        show_stats_for_pipeline=_show_quarantine_stats_for_pipeline_cli_options,
+        get_runtime_service=get_quarantine_runtime_service,
+        get_manifest_service=get_run_manifest_service,
         silver_filter_error_code=SILVER_FILTER_ERROR_CODE,
-        top=top,
-        group_by=group_by,
-        run_id=run_id,
-        run_manifest_service=get_run_manifest_service() if run_id else None,
     )
 
 

@@ -12,10 +12,12 @@ from bioetl.domain.ports import MetadataCoordinatorPort, SilverMetadataInput
 from bioetl.domain.types import BronzeRecord
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
-from bioetl.infrastructure.storage.silver.metadata_request_models import (
-    _PreparedSilverWriteFinalizationContext,
+from bioetl.infrastructure.storage.silver.finalization_models import (
     _SilverWriteFinalizationPreparationRequest,
     _SilverWriteResultFinalizationRequest,
+)
+from bioetl.infrastructure.storage.silver.prepared_operation_models import (
+    _PreparedSilverWriteFinalizationContext,
 )
 
 __all__ = [

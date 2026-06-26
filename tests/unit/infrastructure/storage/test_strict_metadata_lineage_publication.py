@@ -24,9 +24,11 @@ from bioetl.infrastructure.storage.lineage_persistence import (
 from bioetl.infrastructure.storage.silver.metadata_operations import (
     _execute_prepared_silver_metadata_write_operation,
 )
-from bioetl.infrastructure.storage.silver.metadata_request_models import (
-    _PreparedSilverMetadataWriteOperation,
+from bioetl.infrastructure.storage.silver.metadata_write_models import (
     _SilverMetadataWriteRequest,
+)
+from bioetl.infrastructure.storage.silver.prepared_operation_models import (
+    _PreparedSilverMetadataWriteOperation,
 )
 from tests.unit.infrastructure.storage._lineage_fragment_helpers import (
     make_produced_artifact_fragment,
