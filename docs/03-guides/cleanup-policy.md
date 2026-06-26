@@ -289,8 +289,11 @@ Enforcement:
 - CI **MUST** run cleanup governance checks that block broad cleanup guidance
   from active docs/scripts and export deterministic cleanup classification
   evidence for review.
-- GitHub branch protection for `main` **MUST** require the `root-hygiene`
-  status check.
+- Target state: GitHub branch protection for `main` **SHOULD** require the
+  `root-hygiene` status check when repository rulesets are enabled.
+- Current-state enforcement is tracked in
+  `docs/00-project/governance/05-github-policy.md`; do not treat this cleanup
+  guide as live branch-protection evidence on its own.
 - Any intentional new root-level tracked file **MUST** be added to `.github/root-allowlist.txt` in the same PR with justification.
 
 ### 7.4. Scheduled Jobs (SHOULD)
